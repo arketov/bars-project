@@ -20,7 +20,7 @@ title: Компоненты bars — исполняемые файлы и кре
 
 ```text
 crates/
-├── bars-core/      индекс (SQLite, FTS5, sqlite-vec), нарезка, индексация, поиск, модели
+├── bars-core/      индекс (SQLite, FTS5, векторы), нарезка, индексация, поиск, модели
 ├── bars-protocol/  сообщения локального канала и клиент к воркеру
 ├── bars-app/       воркер, трей, окно (Tauri); собирается в `bars`
 ├── bars-mcp/       stdio-MCP; зависит только от bars-protocol

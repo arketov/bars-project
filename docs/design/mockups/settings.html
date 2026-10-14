@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bars — настройки</title>
+<link rel="stylesheet" href="theme.css">
+<script src="theme.js"></script>
+<style>
+  .back { margin: 0 14px 12px; display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 9px; color: var(--muted); font-weight: 600; font-size: 13px; }
+  .back:hover { background: var(--panel-2); color: var(--text); }
+  .nav { flex: 1; padding: 0 8px; }
+  .nav button { width: 100%; display: flex; align-items: center; gap: 10px; border: 0; background: none; text-align: left; padding: 9px 12px; border-radius: 9px; color: var(--muted); font-weight: 600; font-size: 13.5px; margin-bottom: 2px; }
+  .nav button:hover { background: var(--panel-2); color: var(--text); }
+  .nav button.on { background: var(--accent-soft); color: var(--accent-text); }
+  .nav button .badge { margin-left: auto; }
+
+  main { overflow-y: auto; min-height: 0; }
+  .page { max-width: 760px; margin: 0 auto; padding: 28px 32px 110px; }
+  .page h1 { font-size: 22px; margin: 0 0 4px; }
+  .page .lead { color: var(--muted); margin: 0 0 20px; }
+  .tab { display: none; } .tab.on { display: block; animation: rise .25s both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .group { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 16px; }
+  .ghead { padding: 14px 18px 12px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; }
+  .ghead h2 { font-size: 15px; margin: 0; flex: 1; }
+  .ghead p { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; font-weight: 400; }
+  .gbody { padding: 14px 18px; }
+  .field { display: grid; grid-template-columns: 1fr 200px; gap: 16px; align-items: center; padding: 9px 0; }
+  .field + .field { border-top: 1px dashed var(--line); }
+  .field .lbl b { display: block; font-weight: 600; font-size: 13.5px; }
+  .field .lbl small { display: block; color: var(--muted); font-size: 12px; }
+  .field .lbl code { font: 11.5px var(--mono); color: var(--faint); }
+  .inp { width: 100%; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--panel-2); outline: none; font-variant-numeric: tabular-nums; }
+  .inp:focus { border-color: var(--accent); background: var(--panel); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .inp.mono { font-family: var(--mono); font-size: 12.5px; }
+  .wide { grid-template-columns: 1fr; gap: 6px; }
+
+  .seg { display: flex; padding: 3px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; gap: 2px; margin-bottom: 14px; }
+  .seg button { flex: 1; border: 0; background: transparent; padding: 7px 8px; border-radius: 8px; color: var(--muted); font-weight: 600; font-size: 13px; }
+  .seg button.on { background: var(--panel); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .src { display: none; } .src.on { display: block; }
+
+  .model { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; margin-bottom: 8px; cursor: pointer; transition: border-color .15s, background .15s; }
+  .model:hover { border-color: var(--line-2); }
+  .model.on { border-color: var(--accent); background: var(--accent-soft); }
+  .radio { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--line-2); flex: none; display: grid; place-items: center; background: var(--panel); }
+  .model.on .radio { border-color: var(--accent); }
+  .model.on .radio::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .model .mn { flex: 1; min-width: 0; }
+  .model .mn b { display: block; font: 600 13px var(--mono); }
+  .model .mn small { color: var(--muted); font-size: 12px; }
+
+  .switch { width: 36px; height: 20px; border-radius: 20px; background: var(--line-2); border: 0; position: relative; padding: 0; flex: none; transition: background .15s; }
+  .switch::after { content: ""; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .15s; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+  .switch.on { background: var(--accent); }
+  .switch.on::after { transform: translateX(16px); }
+
+  .note { display: flex; gap: 10px; padding: 10px 12px; border-radius: 10px; font-size: 12.5px; margin-top: 10px; }
+  .note.warn { background: var(--mid-soft); color: var(--text); } .note.warn svg { color: var(--mid); flex: none; margin-top: 1px; }
+  .note[hidden] { display: none; }
+  .note.info { background: var(--panel-2); color: var(--muted); border: 1px solid var(--line); }
+
+  .range { display: grid; grid-template-columns: 1fr 64px; gap: 10px; align-items: center; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  .pair { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
+  .pair .inp { width: 70px; }
+
+  .client { display: grid; grid-template-columns: 40px 1fr auto; gap: 14px; align-items: center; padding: 14px 18px; }
+  .client + .client { border-top: 1px solid var(--line); }
+  .cicon { width: 40px; height: 40px; border-radius: 10px; background: var(--panel-2); border: 1px solid var(--line); display: grid; place-items: center; font-weight: 700; color: var(--muted); }
+  .client .cn b { font-size: 14px; }
+  .client .cn .badges { display: inline-flex; gap: 6px; margin-left: 8px; vertical-align: 1px; }
+  .client .cn small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .client .acts { display: flex; gap: 8px; }
+  .client .note { grid-column: 2 / 4; margin-top: 0; }
+  pre.instr { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--panel-2); border: 1px solid var(--line); font: 12px/1.55 var(--mono); white-space: pre-wrap; color: var(--text); }
+
+  .savebar { position: fixed; left: 300px; right: 0; bottom: 0; background: var(--panel); border-top: 1px solid var(--line); padding: 10px 32px; display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 12.5px; }
+  .themes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .theme { border: 1.5px solid var(--line); border-radius: 12px; padding: 10px; background: none; text-align: left; font-weight: 600; font-size: 13px; color: var(--text); }
+  .theme:hover { border-color: var(--line-2); }
+  .theme.on { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .theme .pv { height: 70px; border-radius: 8px; margin-bottom: 8px; display: grid; grid-template-columns: 30% 1fr; overflow: hidden; border: 1px solid rgba(0,0,0,.08); }
+  .pv i { display: block; } .pv i:last-child { display: flex; align-items: flex-end; padding: 6px; }
+  .pv b { width: 40%; height: 8px; border-radius: 4px; background: #d6336c; }
+  .pv.l i:first-child { background: #fff; } .pv.l i:last-child { background: #f5f4f6; }
+  .pv.d i:first-child { background: #1b181d; } .pv.d i:last-child { background: #131115; } .pv.d b { background: #f0568c; }
+  .pv.s { background: linear-gradient(135deg, #f5f4f6 50%, #131115 50%); display: flex; align-items: flex-end; padding: 6px; }
+  .savebar .grow { flex: 1; }
+</style>
+</head>
+<body class="has-savebar">
+<div class="app">
+  <aside>
+    <div class="brand"><div class="logo">b</div><div><b>bars</b><small>настройки приложения</small></div></div>
+    <a class="back" href="main.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>К поиску</a>
+    <div class="nav" id="nav">
+      <button data-tab="models" class="on">Модели</button>
+      <button data-tab="search">Поиск</button>
+      <button data-tab="chunks">Нарезка</button>
+      <button data-tab="clients">Клиенты <span class="badge warn">1</span></button>
+      <button data-tab="look">Оформление</button>
+    </div>
+    <div class="sfoot"><span class="mono">~/.bars/settings.toml</span></div>
+  </aside>
+
+  <main>
+    <div class="page">
+
+      <!-- ===== Модели ===== -->
+      <section class="tab on" id="tab-models">
+        <h1>Модели</h1>
+        <p class="lead">Чем bars превращает документы и запросы в векторы и как переоценивает кандидатов.</p>
+
+        <div class="group">
+          <div class="ghead"><div style="flex:1"><h2>Embed-модель</h2><p>Одна на все проекты. Индекс проекта строится этой моделью.</p></div></div>
+          <div class="gbody">
+            <div class="seg" data-seg="embed">
+              <button data-src="local" class="on">Встроенная</button>
+              <button data-src="remote">Удалённый провайдер</button>
+              <button data-src="url">Локальный адрес</button>
+            </div>
+            <div class="src on" data-for="embed" data-src="local">
+              <div class="model on"><span class="radio"></span><span class="mn"><b>BAAI/bge-m3</b><small>1024 измерения · ONNX · по умолчанию</small></span><span class="badge ok">скачана</span></div>
+              <div class="model"><span class="radio"></span><span class="mn"><b>Qwen/Qwen3-Embedding-0.6B</b><small>1024 измерения · candle</small></span><button class="ghost">Скачать</button></div>
+              <div class="model"><span class="radio"></span><span class="mn"><b>Qwen/Qwen3-Embedding-4B</b><small>2560 измерений · candle · медленно на CPU</small></span><button class="ghost">Скачать</button></div>
+              <div class="model"><span class="radio"></span><span class="mn"><b>Nomic Embed v2 MoE</b><small>768 измерений · candle</small></span><button class="ghost">Скачать</button></div>
+              <div class="note info">Модели скачиваются в <span class="mono">~/.bars/models</span>.</div>
+            </div>
+            <div class="src" data-for="embed" data-src="remote">
+              <div class="field"><div class="lbl"><b>Адрес API</b><small>OpenAI-совместимый endpoint</small></div><input class="inp mono" value="https://openrouter.ai/api/v1"></div>
+              <div class="field"><div class="lbl"><b>Модель</b></div><input class="inp mono" value="openai/text-embedding-3-large"></div>
+              <div class="field"><div class="lbl"><b>Ключ</b><small>Хранится в Credential Manager, запись <code>bars/openrouter</code></small></div><button class="ghost">Задать ключ…</button></div>
+              <div class="field"><div class="lbl"><b>Переменная окружения</b><small>Если задана — используется вместо ключа</small></div><input class="inp mono" placeholder="OPENROUTER_API_KEY"></div>
+            </div>
+            <div class="src" data-for="embed" data-src="url">
+              <div class="field"><div class="lbl"><b>Адрес</b><small>Локальный OpenAI-совместимый сервер</small></div><input class="inp mono" value="http://localhost:11434/v1"></div>
+              <div class="field"><div class="lbl"><b>Модель</b></div><input class="inp mono" value="bge-m3"></div>
+            </div>
+            <div class="note warn" id="reindex-note" hidden>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+              <span>После сохранения проекты, построенные другой моделью, потребуют переиндексации. Она начнётся только после вашего согласия; до него поиск по такому проекту не работает.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="ghead"><div style="flex:1"><h2>Rerank</h2><p>Переоценивает кандидатов после слияния. С ним результатов по умолчанию 3, без него — 5.</p></div><button class="switch on" id="rr"></button></div>
+          <div class="gbody" id="rrbody">
+            <div class="seg">
+              <button class="on">Встроенная</button><button>Удалённый провайдер</button><button>Локальный адрес</button>
+            </div>
+            <div class="model on"><span class="radio"></span><span class="mn"><b>BAAI/bge-reranker-v2-m3</b><small>ONNX · по умолчанию</small></span><span class="badge ok">скачана</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Поиск ===== -->
+      <section class="tab" id="tab-search">
+        <h1>Поиск</h1>
+        <p class="lead">Значения по умолчанию для всех проектов. Проект может переопределить их в <span class="mono">.bars/config.toml</span>, агент — в вызове.</p>
+
+        <div class="group">
+          <div class="ghead"><h2>Число результатов</h2></div>
+          <div class="gbody">
+            <div class="field"><div class="lbl"><b>Результатов с реранком</b></div><input class="inp" type="number" value="3"></div>
+            <div class="field"><div class="lbl"><b>Результатов без реранка</b></div><input class="inp" type="number" value="5"></div>
+            <div class="field"><div class="lbl"><b>Кандидатов на реранк</b><small>Из каждого поиска — полнотекстового и векторного</small></div><input class="inp" type="number" value="30"></div>
+            <div class="field"><div class="lbl"><b>Предел для агента</b><small>Больше агент запросить не может <code>max_results · max_candidates</code></small></div>
+              <div class="pair"><input class="inp" type="number" value="20"> · <input class="inp" type="number" value="100"></div></div>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="ghead"><div style="flex:1"><h2>Порог релевантности</h2><p>Результаты с оценкой ниже порога не попадают в выдачу — ни окну, ни агенту, ни CLI.</p></div></div>
+          <div class="gbody">
+            <div class="field"><div class="lbl"><b>С реранком</b><small>Оценка реранка <code>min_score_rerank</code></small></div>
+              <div class="range"><input type="range" min="0" max="100" value="30" data-out="o1"><input class="inp" id="o1" value="0,30"></div></div>
+            <div class="field"><div class="lbl"><b>Без реранка</b><small>Косинусная близость <code>min_score_vector</code></small></div>
+              <div class="range"><input type="range" min="0" max="100" value="45" data-out="o2"><input class="inp" id="o2" value="0,45"></div></div>
+            <div class="field"><div class="lbl"><b>Пределы для агента</b><small>Порог агента вне пределов прижимается к границе <code>agent_min_score</code></small></div>
+              <div class="pair">от <input class="inp" value="0,10"> до <input class="inp" value="0,80"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Нарезка ===== -->
+      <section class="tab" id="tab-chunks">
+        <h1>Нарезка</h1>
+        <p class="lead">Документы режутся по заголовкам. Раздел больше предела делится на несколько чанков с той же цепочкой заголовков.</p>
+        <div class="group">
+          <div class="ghead"><h2>Размер чанка</h2></div>
+          <div class="gbody">
+            <div class="field"><div class="lbl"><b>Минимум, знаков</b></div><input class="inp" type="number" value="250"></div>
+            <div class="field"><div class="lbl"><b>Максимум, знаков</b></div><input class="inp" type="number" value="6000"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Клиенты ===== -->
+      <section class="tab" id="tab-clients">
+        <h1>Клиенты</h1>
+        <p class="lead">Установка прописывает MCP-сервер <span class="mono">bars</span> и хук начала сессии. Чужие записи не трогаются, перед правкой файла рядом остаётся копия <span class="mono">.bars-backup</span>.</p>
+
+        <div class="group">
+          <div class="client">
+            <div class="cicon">CC</div>
+            <div class="cn"><b>Claude Code</b><span class="badges"><span class="badge ok">установлено</span></span>
+              <small class="mono">~/.claude.json · ~/.claude/settings.json</small></div>
+            <div class="acts"><button class="ghost">Переустановить</button><button class="ghost danger">Удалить</button></div>
+          </div>
+          <div class="client">
+            <div class="cicon">Cx</div>
+            <div class="cn"><b>Codex</b><span class="badges"><span class="badge warn">хук ждёт одобрения</span></span>
+              <small class="mono">~/.codex/config.toml · ~/.codex/hooks.json</small></div>
+            <div class="acts"><button class="ghost">Переустановить</button><button class="ghost danger">Удалить</button></div>
+            <div class="note warn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+              <span>Codex не запускает новый хук, пока его не одобрить: выполните <span class="mono">/hooks</span> в Codex. MCP уже работает.</span>
+            </div>
+          </div>
+          <div class="client">
+            <div class="cicon">+</div>
+            <div class="cn"><b>Другой MCP-клиент</b><small>Подключается вручную, без хука: проекты регистрируются в окне или через CLI.</small></div>
+            <div class="acts"><button class="ghost">Копировать конфиг</button></div>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="ghead"><div style="flex:1"><h2>Инструкция для агента</h2><p>Передайте агенту — он подключит bars сам.</p></div><button class="btn">Копировать</button></div>
+          <div class="gbody">
+<pre class="instr">bars установлен на этой машине.
+bars-mcp: C:\Program Files\bars\bars-mcp.exe
+bars-cli: C:\Program Files\bars\bars-cli.exe
+Подключи bars к своему клиенту:
+  bars-cli install --client claude-code
+Не передавай --accept-model-change: это согласие пользователя.</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Оформление ===== -->
+      <section class="tab" id="tab-look">
+        <h1>Оформление</h1>
+        <p class="lead">Тема окна. Применяется сразу.</p>
+        <div class="group"><div class="gbody">
+          <div class="themes">
+            <button class="theme" data-theme-set="system"><div class="pv s"><b style="width:40%;height:8px;border-radius:4px;background:#d6336c;display:block"></b></div>Как в системе</button>
+            <button class="theme" data-theme-set="light"><div class="pv l"><i></i><i><b></b></i></div>Светлая</button>
+            <button class="theme" data-theme-set="dark"><div class="pv d"><i></i><i><b></b></i></div>Тёмная</button>
+          </div>
+        </div></div>
+      </section>
+    </div>
+  </main>
+</div>
+<div class="savebar"><span class="grow">Изменения не сохранены</span><button class="ghost">Отменить</button><button class="btn">Сохранить</button></div>
+
+<script>
+"use strict";
+const $$ = (s) => document.querySelectorAll(s);
+$$("[data-theme-set]").forEach((b) => b.addEventListener("click", () => barsTheme.set(b.dataset.themeSet)));
+document.getElementById("nav").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-tab]");
+  if (!b) return;
+  $$("#nav button").forEach((x) => x.classList.toggle("on", x === b));
+  $$(".tab").forEach((t) => t.classList.toggle("on", t.id === "tab-" + b.dataset.tab));
+});
+$$(".seg").forEach((seg) => seg.addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  seg.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
+  if (seg.dataset.seg) {
+    $$(`.src[data-for="${seg.dataset.seg}"]`).forEach((s) => s.classList.toggle("on", s.dataset.src === b.dataset.src));
+    document.getElementById("reindex-note").hidden = b.dataset.src === "local" && document.querySelector(".src.on .model.on b")?.textContent === "BAAI/bge-m3";
+  }
+}));
+$$(".src .model").forEach((m) => m.addEventListener("click", () => {
+  m.parentElement.querySelectorAll(".model").forEach((x) => x.classList.toggle("on", x === m));
+  document.getElementById("reindex-note").hidden = m.querySelector("b").textContent === "BAAI/bge-m3";
+}));
+document.getElementById("rr").addEventListener("click", (e) => {
+  e.currentTarget.classList.toggle("on");
+  document.getElementById("rrbody").style.opacity = e.currentTarget.classList.contains("on") ? 1 : .45;
+});
+$$("input[type=range]").forEach((r) => r.addEventListener("input", () => {
+  document.getElementById(r.dataset.out).value = (r.value / 100).toFixed(2).replace(".", ",");
+}));
+if (location.hash) document.querySelector(`[data-tab="${location.hash.slice(1)}"]`)?.click?.();
+</script>
+</body>
+</html>
