@@ -14,9 +14,7 @@
 |---|---|
 | [MAIN_IDEA.md](MAIN_IDEA.md) | Главный документ: исходная формулировка, требования Т-1…Т-21, НФТ, набросок решения, уроки образца, критерии приёмки, журнал раундов |
 | [QUESTIONS.md](QUESTIONS.md) | Открытые вопросы проектирования, отсюда начинается брейншторм |
-| [docs/README.md](docs/README.md) | Как устроена документация: модули, метки, статусы, шаблоны |
-| [docs/architecture/overview.md](docs/architecture/overview.md) | Компоненты и потоки (черновик) |
-| [docs/vision/glossary.md](docs/vision/glossary.md) | Термины |
+| [docs/Index.md](docs/Index.md) | Документация продукта (пока пусто) |
 | [AGENTS.md](AGENTS.md) | Правила для агентов, которые работают в этом репозитории |
 | [TASKS.md](TASKS.md) | Личный бэклог автора |
 
