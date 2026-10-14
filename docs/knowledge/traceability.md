@@ -42,10 +42,9 @@ title: Трассировка требований bars — какой доку�
 | НФТ | Где описано |
 |---|---|
 | НФТ-1 | [indexing/chunking.md](../indexing/chunking.md), [indexing/updates.md](../indexing/updates.md), [storage/schema.md](../storage/schema.md) |
-| НФТ-2 | [architecture/vector-search.md](../architecture/vector-search.md); число подтверждается спайком |
+| НФТ-2 | [architecture/vector-search.md](../architecture/vector-search.md); подтверждено на Windows — [spike-search.md](spike-search.md) |
 | НФТ-3 | [architecture/components.md](../architecture/components.md), [architecture/worker.md](../architecture/worker.md) |
 
 ## Что ещё не описано
 
 - Окно: экраны, дерево с галочками (Т-14), настройки (Т-16), предупреждение Т-25, установка (Т-21). Делается отдельным проходом дизайна.
-- Значения порогов по умолчанию (Т-24): подбираются на корпусе `docs/` bars во время спайков.

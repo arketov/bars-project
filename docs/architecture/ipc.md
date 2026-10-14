@@ -31,7 +31,7 @@ JSON-RPC 2.0, одно сообщение на строку, сериализа�
 Клиент подключается к каналу. Если не получилось:
 
 1. запускает `bars --background` из той же папки, где лежит сам клиент, отвязанным от себя процессом, чтобы воркер пережил завершение клиента и сессии агента:
-   - Windows — флаги `DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP`, с попыткой `CREATE_BREAKAWAY_FROM_JOB`, если клиент работает внутри job object;
+   - Windows — флаги `DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP | CREATE_BREAKAWAY_FROM_JOB`; если job object клиента запрещает отвязку, повтор без `CREATE_BREAKAWAY_FROM_JOB`. Проверено с Claude Code: MCP-серверу отвязка разрешена, и воркер переживает конец сессии ([knowledge/spike-detach.md](../knowledge/spike-detach.md));
    - macOS — через LaunchServices: `open -b <bundle id> --args --background`;
 2. повторяет подключение с нарастающей паузой до 15 секунд;
 3. если за 15 секунд не подключился — возвращает ошибку с путём к логу воркера.

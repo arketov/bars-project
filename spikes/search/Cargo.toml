@@ -1,0 +1,21 @@
+[package]
+name = "spike-search"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Выбрасываемый спайк: сборка fastembed + rusqlite на Windows, скорость и качество поиска.
+# Собирать с CARGO_TARGET_DIR вне OneDrive, см. README.md.
+
+[dependencies]
+fastembed = { version = "=7.1.1", features = ["directml"] }
+rusqlite = { version = "0.40.2", features = ["bundled"] }
+rust-stemmers = "1.2.0"
+blake3 = "1.8"
+walkdir = "2"
+anyhow = "1"
+dirs = "7"
+ort = { version = "=2.0.0-rc.13", default-features = false, features = ["directml"] }
+
+[profile.release]
+debug = false

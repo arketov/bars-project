@@ -31,11 +31,11 @@ title: Стек bars — библиотеки, версии и почему он
 
 | Что | Крейт | Версия | Зачем |
 |---|---|---|---|
-| Встроенные embed и rerank | `fastembed` с фичами `qwen3`, `nomic-v2-moe` | 7.1.1 | Т-17; подробности — [models/local-models.md](../models/local-models.md) |
+| Встроенные embed и rerank | `fastembed` с фичами `qwen3`, `nomic-v2-moe`, `directml` | 7.1.1 | Т-17; подробности — [models/local-models.md](../models/local-models.md) |
 | ONNX Runtime | `ort` (через fastembed) | 2.0.0-rc.13 | статически вшивается в `bars` при сборке |
 | HTTP к внешним моделям | `reqwest` с фичей `json` | 0.13.5 | Т-17; rustls по умолчанию |
 
-ONNX Runtime скачивается при сборке с `cdn.pyke.io` и линкуется в `bars` статически: отдельной dll или dylib рядом с exe нет. Сборке нужен доступ к сети. Готовые сборки ONNX Runtime для x86-64 требуют процессор уровня x86-64-v3 (Intel Haswell, 2013, и новее).
+Сборка проверена на Windows спайком: 30 МБ exe, Rust 1.99, Visual Studio 2026 ([knowledge/spike-search.md](../knowledge/spike-search.md)). ONNX Runtime скачивается при сборке с `cdn.pyke.io` и линкуется в `bars` статически: отдельной dll или dylib рядом с exe нет. Сборке нужен доступ к сети. Готовые сборки ONNX Runtime для x86-64 требуют процессор уровня x86-64-v3 (Intel Haswell, 2013, и новее).
 
 ## Индекс bars
 
@@ -82,9 +82,4 @@ ONNX Runtime скачивается при сборке с `cdn.pyke.io` и ли
 
 ## Что проверяется на прототипе
 
-Выбор окончательный после спайков; риски и что делать, если проверка не прошла, — в [knowledge/stack-research.md](../knowledge/stack-research.md):
-
-- сборка `ort` и `rusqlite` на Windows MSVC и macOS, размер `bars`;
-- скорость перебора и FTS5 на 5 000 и 50 000 чанках (НФТ-2);
-- переживает ли воркер, запущенный из `bars-mcp`, конец сессии агента;
-- качество полнотекстового поиска по-русски со стеммингом.
+Проверено на Windows ([knowledge/spike-search.md](../knowledge/spike-search.md)): сборка, скорость поиска (НФТ-2), качество стемминга. Воркер, запущенный из `bars-mcp`, переживает конец сессии Claude Code ([knowledge/spike-detach.md](../knowledge/spike-detach.md)). Осталось: сборка и CoreML на macOS, Codex.
