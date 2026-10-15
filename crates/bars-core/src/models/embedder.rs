@@ -15,9 +15,26 @@ pub struct ModelFingerprint {
     pub doc_prefix: String,
 }
 
+impl ModelFingerprint {
+    /// Тот же ли это отпечаток. Размерность `0` значит «ещё не известна» (внешняя модель до первого
+    /// ответа провайдера) и сравнивается как любая: модель, источник и префикс решают сами.
+    pub fn matches(&self, other: &Self) -> bool {
+        self.source == other.source
+            && self.model == other.model
+            && self.doc_prefix == other.doc_prefix
+            && (self.dim == other.dim || self.dim == 0 || other.dim == 0)
+    }
+}
+
 /// Embed-модель. Одна модель считает один вызов за раз (`docs/architecture/worker.md`).
 pub trait Embedder {
     fn fingerprint(&self) -> &ModelFingerprint;
+
+    /// Узнаёт то, что отпечаток до первого обращения не знает: размерность внешней модели. Для
+    /// встроенных моделей ничего не делает. После вызова `fingerprint().dim` известна.
+    fn prepare(&mut self) -> Result<(), EmbedError> {
+        Ok(())
+    }
 
     /// Векторы для текстов, в том же порядке. Нормализует их индекс, а не модель.
     fn embed(&mut self, texts: &[&str]) -> Result<Vec<Vec<f32>>, EmbedError>;

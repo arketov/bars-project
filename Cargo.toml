@@ -15,12 +15,16 @@ bars-worker = { path = "crates/bars-worker" }
 
 anyhow = "1.0"
 blake3 = "1.8"
+candle-core = "0.11"
 clap = { version = "4.6", features = ["derive"] }
 dirs = "7.0"
 fastembed = { version = "=7.1.1", features = ["qwen3", "nomic-v2-moe"] }
 ort = { version = "=2.0.0-rc.13", default-features = false }
 notify = "8.2"
 notify-debouncer-full = "0.7"
+keyring-core = "1.0"
+windows-native-keyring-store = "1.1"
+apple-native-keyring-store = { version = "1.0", features = ["keychain"] }
 interprocess = { version = "2.4", features = ["tokio"] }
 rmcp = { version = "3.5", features = ["server", "transport-io", "macros"] }
 rusqlite = { version = "0.40.2", features = ["bundled"] }
@@ -31,6 +35,7 @@ toml_edit = "0.25"
 tauri = { version = "2.12", features = ["tray-icon"] }
 tauri-build = "2"
 tempfile = "3.20"
+ureq = { version = "3.4", features = ["json"] }
 thiserror = "2.0"
 toml = "1.1"
 widestring = "1.2"

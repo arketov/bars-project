@@ -4,10 +4,9 @@ use std::path::Path;
 
 use fastembed::{EmbeddingModel, TextEmbedding, TextInitOptions};
 
+use super::candle::CandleEmbedder;
+use super::catalog::{BGE_M3_ID, Backend, builtin_model};
 use super::embedder::{EmbedError, Embedder, ModelFingerprint};
-
-pub const BGE_M3_ID: &str = "BAAI/bge-m3";
-pub const BGE_M3_DIM: usize = 1024;
 
 /// Длина входа задаётся явно: fastembed по умолчанию молча режет до 512 токенов.
 const BGE_M3_MAX_LENGTH: usize = 8192;
@@ -33,12 +32,9 @@ pub enum Device {
 /// Отпечаток встроенной bge-m3. Известен без загрузки модели: воркер сверяет его с индексом
 /// до эмбеддинга (Т-25).
 pub fn bge_m3_fingerprint() -> ModelFingerprint {
-    ModelFingerprint {
-        source: "builtin".to_string(),
-        model: BGE_M3_ID.to_string(),
-        dim: BGE_M3_DIM,
-        doc_prefix: String::new(),
-    }
+    builtin_model(BGE_M3_ID)
+        .expect("bge-m3 есть в каталоге")
+        .fingerprint()
 }
 
 pub struct BuiltinEmbedder {
@@ -77,7 +73,7 @@ impl BuiltinEmbedder {
 }
 
 #[cfg(windows)]
-fn gpu_providers() -> Vec<fastembed::ExecutionProviderDispatch> {
+pub(super) fn gpu_providers() -> Vec<fastembed::ExecutionProviderDispatch> {
     vec![
         ort::ep::DirectML::default()
             .with_device_id(0)
@@ -87,7 +83,7 @@ fn gpu_providers() -> Vec<fastembed::ExecutionProviderDispatch> {
 }
 
 #[cfg(not(windows))]
-fn gpu_providers() -> Vec<fastembed::ExecutionProviderDispatch> {
+pub(super) fn gpu_providers() -> Vec<fastembed::ExecutionProviderDispatch> {
     Vec::new()
 }
 
@@ -132,5 +128,35 @@ impl Embedder for BuiltinEmbedder {
             result[index] = vector;
         }
         Ok(result)
+    }
+}
+
+/// Выставляет окружение процесса так, чтобы все встроенные модели лежали в `models_dir`:
+/// `FASTEMBED_CACHE_DIR` для candle-моделей и без `HF_HOME`, который в fastembed перекрывает
+/// папку кэша (`docs/features/models/local-models.md`, «Где лежат скачанные модели»).
+///
+/// Вызывается один раз при создании провайдера воркера, до запуска рабочих потоков.
+pub fn prepare_environment(models_dir: &Path) {
+    // SAFETY: воркер вызывает функцию при старте, пока другие потоки не читают окружение; на
+    // Windows изменение окружения процесса потокобезопасно.
+    unsafe {
+        std::env::set_var("FASTEMBED_CACHE_DIR", models_dir);
+        std::env::remove_var("HF_HOME");
+    }
+}
+
+/// Загружает встроенную embed-модель каталога.
+pub fn load_builtin_embedder(
+    id: &str,
+    models_dir: &Path,
+    accelerator: Accelerator,
+) -> Result<Box<dyn Embedder + Send>, EmbedError> {
+    let info = builtin_model(id)
+        .ok_or_else(|| EmbedError::Load(format!("модели `{id}` нет во встроенном каталоге")))?;
+    match info.backend {
+        Backend::Onnx => Ok(Box::new(BuiltinEmbedder::bge_m3(models_dir, accelerator)?)),
+        Backend::Qwen3 | Backend::NomicV2Moe => {
+            Ok(Box::new(CandleEmbedder::load(info, models_dir)?))
+        }
     }
 }

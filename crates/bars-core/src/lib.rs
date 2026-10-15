@@ -11,6 +11,7 @@ pub mod instruction;
 pub mod models;
 pub mod outline;
 pub mod search;
+pub mod secrets;
 pub mod settings;
 pub mod storage;
 

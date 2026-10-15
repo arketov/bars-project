@@ -33,7 +33,8 @@ title: Стек bars — библиотеки, версии и почему он
 |---|---|---|---|
 | Встроенные embed и rerank | `fastembed` с фичами `qwen3`, `nomic-v2-moe`, `directml` | 7.1.1 | Т-17; подробности — [features/models/local-models.md](../features/models/local-models.md) |
 | ONNX Runtime | `ort` (через fastembed) | 2.0.0-rc.13 | статически вшивается в `bars` при сборке |
-| HTTP к внешним моделям | `reqwest` с фичей `json` | 0.13.5 | Т-17; rustls по умолчанию |
+| HTTP к внешним моделям | `ureq` с фичей `json` | 3.4 | Т-17; блокирующий клиент под синхронные trait'ы `Embedder` и `Reranker`, rustls; уже есть в дереве зависимостей через fastembed (решение агента вместо `reqwest`, OQ-59) |
+| candle для Qwen3 и Nomic | `candle-core` | 0.11 | `Device` и `DType` для загрузчиков fastembed; версия та же, что у fastembed |
 
 Сборка проверена на Windows спайком: 30 МБ exe, Rust 1.99, Visual Studio 2026 ([knowledge/spike-search.md](../knowledge/spike-search.md)). ONNX Runtime скачивается при сборке с `cdn.pyke.io` и линкуется в `bars` статически: отдельной dll или dylib рядом с exe нет. Сборке нужен доступ к сети. Готовые сборки ONNX Runtime для x86-64 требуют процессор уровня x86-64-v3 (Intel Haswell, 2013, и новее).
 
@@ -68,7 +69,7 @@ title: Стек bars — библиотеки, версии и почему он
 | Windows: DACL канала и владелец сервера | `windows-sys` (`bars-worker` и `bars-protocol`, `cfg(windows)`) + `widestring` (`bars-worker`) | 0.61 / 1.2 | SDDL для `interprocess`, SID пользователя, сверка владельца процесса сервера (OQ-38); версия `windows-sys` совпадает с той, что тянет `interprocess` |
 | Протокол канала | `serde_json`, свой JSON-RPC 2.0 построчно | 1.0 | методов мало, подписки не нужны |
 | CLI | `clap` с фичей `derive` | 4.6 | `bars-cli`, Т-20 |
-| Ключи провайдеров | `keyring-core` + store-крейты Windows и Apple из семейства `keyring` 4.2 | 4.x | [secrets.md](secrets.md) |
+| Ключи провайдеров | `keyring-core` 1.0 + `windows-native-keyring-store` 1.1 и `apple-native-keyring-store` 1.0 (фича `keychain`) | 1.x | [secrets.md](secrets.md) |
 | Правка `config.toml` Codex | `toml_edit` | 0.25 | сохраняет комментарии и порядок (Т-21) |
 | Правка `~/.claude/settings.json` | `jsonc-parser` (CST) | 0.34 | сохраняет форматирование файла, который правят руками |
 | Правка `~/.claude.json` | `serde_json` с фичей `preserve_order` | 1.0 | файл машинный; важнее атомарная запись, чем отступы |

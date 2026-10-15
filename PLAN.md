@@ -103,9 +103,9 @@
 
 ### Срез 6. Модели сверх bge-m3
 
-- внешние embed и rerank по HTTP, ключи в хранилище ОС (`features/models/external-models.md`, `architecture/secrets.md`);
-- встроенный rerank;
-- Qwen3-Embedding 0.6B и 4B, Nomic Embed v2 MoE с предупреждениями о скорости и длине входа.
+- [x] внешние embed и rerank по HTTP — `bars-core/src/models/remote.rs` (`HttpEmbedder` на `/v1/embeddings`, `HttpReranker` на `/rerank` с запасным `/v1/rerank`, три повтора на 5xx и сеть, ключ вычищается из ошибок), `secrets.rs` (хранилище ОС через `keyring-core`, `api_key_env` перекрывает), проверка полей провайдера при чтении настроек (`settings/raw.rs`), сделано 15-10-2026. Размерность внешней модели узнаётся из первого ответа: отпечаток по настройкам с `dim = 0` сравнивается без размерности, `Embedder::prepare` узнаёт её перед записью в индекс. Тесты — на локальном фальшивом сервере (`models/testing.rs`, фича `test-support`), ключи реальных провайдеров не использовались. Решения агента — в `features/models/external-models.md`, `features/settings/settings.md`, `architecture/secrets.md`, OQ-59, OQ-61. Не сделано: поле ключа в окне и запись ключа через воркер (срез 5);
+- [x] встроенный rerank — `bge-reranker-v2-m3` через fastembed (`BuiltinReranker`, сигмоида логита, DirectML с запасным CPU), в воркере `Models::reranker`, поиск передаёт его при `rerank.enabled`; не загрузился или не ответил — выдача без реранка с причиной. Проверен на настоящей модели (`tests/builtin_models.rs`) и на трёх способах подключения в обработчике (`handler/tests/external_models.rs`);
+- [x] Qwen3-Embedding 0.6B и 4B, Nomic Embed v2 MoE — каталог `models/catalog.rs` (размерность, префиксы, длина входа, предупреждения для окна), `CandleEmbedder` на candle (только процессор, `f32`), `prepare_environment` выставляет `FASTEMBED_CACHE_DIR` и убирает `HF_HOME`. Смена `[embed]` ведёт в `reindex_required` без загрузки модели и без автозапуска (Т-25; тест `switching_the_embed_model_asks_for_reindex_and_does_not_start_it`). Qwen3 и Nomic на настоящих весах не проверены: загрузка (около 1–2 ГБ) была прервана, тесты `tests/builtin_models.rs` пропускаются без модели; Qwen3-4B на железе не проверена (OQ-60). Предупреждения показывает окно — срез 5.
 
 Приёмка: Т-16 и Т-17 (три способа подключения, переключение rerank).
 

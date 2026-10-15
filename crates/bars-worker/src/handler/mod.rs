@@ -13,6 +13,7 @@ use std::path::{Path, PathBuf};
 use bars_core::doc_path::resolve_doc_path;
 use bars_core::indexing::chunking::chunk_document;
 use bars_core::indexing::walk::read_utf8_path;
+use bars_core::models::Reranker;
 use bars_core::outline::{OutlineQuery, Under, outline};
 use bars_core::search::{SearchRequest, search};
 use bars_core::settings::Settings;
@@ -108,20 +109,21 @@ impl WorkerHandler {
             .map_err(worker_error)?
             .read_owned()
             .await;
-        let rerank_on = settings.rerank.enabled;
+        let mut reranker = settings
+            .rerank
+            .enabled
+            .then(|| self.worker.models().reranker(&settings));
         let response = tokio::task::spawn_blocking(move || {
             let _gate = gate;
             let index = Index::open(&index_path(&project), Journal::Wal)?;
-            // Встроенная rerank-модель — срез 6: пока выдача без реранка, причина — в ответе.
-            search(&index, &mut embedder, None, &settings.search, &request)
+            // Нет rerank-модели или она не отработала: выдача идёт без неё, причина — в ответе.
+            let reranker = reranker.as_mut().map(|model| model as &mut dyn Reranker);
+            search(&index, &mut embedder, reranker, &settings.search, &request)
         })
         .await
         .map_err(internal)?
         .map_err(search_error)?;
-        let mut rerank_error = response.rerank_error;
-        if rerank_on && rerank_error.is_none() {
-            rerank_error = Some("rerank-модель пока не поддерживается".to_string());
-        }
+        let rerank_error = response.rerank_error;
         Ok(SearchOutput {
             results: response.hits.into_iter().map(hit).collect(),
             applied: applied(response.applied),

@@ -106,7 +106,10 @@ pub fn update_index(
                 ReindexReason::SchemaOutdated,
             ));
         }
-        Compatibility::Fresh => index.write_fingerprint(&embedder.fingerprint().clone())?,
+        Compatibility::Fresh => {
+            embedder.prepare()?;
+            index.write_fingerprint(&embedder.fingerprint().clone())?;
+        }
         Compatibility::Compatible => {}
     }
     run_update(project_root, index, settings, embedder).map(UpdateOutcome::Updated)
@@ -163,6 +166,7 @@ fn build_new(
     embedder: &mut dyn Embedder,
 ) -> Result<UpdateReport, IndexingError> {
     let mut index = Index::open(new_path, Journal::Delete)?;
+    embedder.prepare()?;
     index.write_fingerprint(&embedder.fingerprint().clone())?;
     let report = run_update(project_root, &mut index, settings, embedder)?;
     index.close()?;
@@ -287,6 +291,7 @@ fn index_document(
         let texts: Vec<&str> = missing.iter().map(|(_, text)| *text).collect();
         let vectors = embedder.embed(&texts)?;
         check_vectors(&vectors, texts.len(), embedder.fingerprint().dim)?;
+        check_stored_dim(index, embedder.fingerprint().dim)?;
         vectors
     };
 
@@ -309,6 +314,21 @@ fn index_document(
     report.chunks_embedded += missing.len();
     report.chunks_reused += chunked.chunks.len() - missing.len();
     Ok(())
+}
+
+/// Размерность внешней модели узнаётся из ответа провайдера и могла смениться при той же модели:
+/// вектор другого размера в индексе портит косинусы.
+fn check_stored_dim(index: &Index, dim: usize) -> Result<(), IndexingError> {
+    match index.stored_fingerprint()? {
+        Some(stored) if stored.dim != 0 && dim != 0 && stored.dim != dim => {
+            Err(EmbedError::Dimension {
+                expected: stored.dim,
+                got: dim,
+            }
+            .into())
+        }
+        _ => Ok(()),
+    }
 }
 
 fn check_vectors(vectors: &[Vec<f32>], expected: usize, dim: usize) -> Result<(), EmbedError> {

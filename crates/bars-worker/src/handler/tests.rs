@@ -563,3 +563,5 @@ async fn search_with_the_real_bge_m3() {
         .unwrap();
     assert_eq!(found.results[0].path, "docs/worker.md");
 }
+
+mod external_models;

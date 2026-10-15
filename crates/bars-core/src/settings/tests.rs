@@ -98,7 +98,10 @@ fn user_file_overrides_only_the_keys_it_sets() {
 
 #[test]
 fn local_openai_source_is_read_from_its_kebab_name() {
-    let settings = user("[embed]\nsource = \"local-openai\"\n").value;
+    let settings = user(
+        "[embed]\nsource = \"local-openai\"\nmodel = \"nomic\"\nbase_url = \"http://localhost:8080\"\n",
+    )
+    .value;
     assert_eq!(settings.embed.source, ModelSource::LocalOpenai);
     assert_eq!(settings.embed.source.as_str(), "local-openai");
 }
@@ -346,4 +349,153 @@ fn an_unreadable_path_is_a_read_error() {
     fs::create_dir(user_settings_path(home.path())).unwrap();
     let error = UserSettings::load(home.path()).unwrap_err();
     assert!(matches!(error, SettingsError::Read { .. }), "{error}");
+}
+
+fn invalid_key(text: &str) -> String {
+    match user_err(text) {
+        SettingsError::Invalid { key, .. } => key,
+        other => panic!("{text}: {other}"),
+    }
+}
+
+#[test]
+fn embed_provider_fields_are_checked_on_read() {
+    for (text, key) in [
+        // Модель не из каталога.
+        (
+            "[embed]
+model = \"gpt-4\"
+",
+            "embed.model",
+        ),
+        // Источник без имени модели у провайдера: умолчание bge-m3 ему не подходит.
+        (
+            "[embed]
+source = \"local-openai\"
+base_url = \"http://localhost:1\"
+",
+            "embed.model",
+        ),
+        (
+            "[embed]
+source = \"local-openai\"
+model = \"m\"
+",
+            "embed.base_url",
+        ),
+        (
+            "[embed]
+source = \"local-openai\"
+model = \"m\"
+base_url = \"localhost:8080\"
+",
+            "embed.base_url",
+        ),
+        (
+            "[embed]
+source = \"local-openai\"
+model = \"m\"
+base_url = \"http://u:p@host\"
+",
+            "embed.base_url",
+        ),
+        // Удалённому провайдеру нужен ключ, локальному — нет.
+        (
+            "[embed]
+source = \"remote\"
+model = \"m\"
+base_url = \"https://api.example\"
+",
+            "embed.api_key_name",
+        ),
+        (
+            "[embed]
+api_key_name = \" \"
+",
+            "embed.api_key_name",
+        ),
+    ] {
+        assert_eq!(invalid_key(text), key, "{text}");
+    }
+}
+
+#[test]
+fn every_catalog_model_and_both_remote_kinds_are_accepted() {
+    for id in [
+        "BAAI/bge-m3",
+        "Qwen/Qwen3-Embedding-0.6B",
+        "Qwen/Qwen3-Embedding-4B",
+        "nomic-ai/nomic-embed-text-v2-moe",
+    ] {
+        let settings = user(&format!(
+            "[embed]
+model = \"{id}\"
+"
+        ))
+        .value;
+        assert_eq!(settings.embed.model, id);
+    }
+    let remote = user(
+        "[embed]
+source = \"remote\"
+model = \"text-embedding-3-small\"
+base_url = \"https://api.example/v1\"
+api_key_env = \"EXAMPLE_KEY\"
+",
+    )
+    .value;
+    assert_eq!(remote.embed.source, ModelSource::Remote);
+}
+
+#[test]
+fn rerank_provider_fields_are_checked_only_when_rerank_is_enabled() {
+    // Выключенный rerank с незаконченной таблицей не ошибка.
+    user(
+        "[rerank]
+source = \"remote\"
+",
+    );
+    for (text, key) in [
+        (
+            "[rerank]
+enabled = true
+model = \"other\"
+",
+            "rerank.model",
+        ),
+        (
+            "[rerank]
+enabled = true
+source = \"remote\"
+model = \"rerank-v3\"
+",
+            "rerank.base_url",
+        ),
+        (
+            "[rerank]
+enabled = true
+source = \"remote\"
+model = \"rerank-v3\"
+base_url = \"https://api.example\"
+",
+            "rerank.api_key_name",
+        ),
+    ] {
+        assert_eq!(invalid_key(text), key, "{text}");
+    }
+    let ok = user(
+        "[rerank]
+enabled = true
+",
+    )
+    .value;
+    assert!(ok.rerank.enabled);
+    user(
+        "[rerank]
+enabled = true
+source = \"local-openai\"
+model = \"bge\"
+base_url = \"http://localhost:8081\"
+",
+    );
 }

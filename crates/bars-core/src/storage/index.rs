@@ -277,7 +277,7 @@ impl Index {
         }
         Ok(match self.stored_fingerprint()? {
             None => Compatibility::Fresh,
-            Some(stored) if stored == *fingerprint => Compatibility::Compatible,
+            Some(stored) if stored.matches(fingerprint) => Compatibility::Compatible,
             Some(_) => Compatibility::ModelChanged,
         })
     }

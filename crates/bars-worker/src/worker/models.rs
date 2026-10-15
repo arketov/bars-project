@@ -1,4 +1,4 @@
-//! Модели в памяти воркера: ленивая загрузка, мьютекс на модель, пачки по 4 (`docs/architecture/worker.md`,
+//! Модели в памяти воркера: ленивая загрузка, мьютекс на модель, пачки (`docs/architecture/worker.md`,
 //! «Модели в памяти воркера»).
 //!
 //! Отпечаток модели известен по настройкам и без загрузки: проверка Т-25 не загружает модель.
@@ -8,63 +8,164 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
 use bars_core::models::{
-    Accelerator, BGE_M3_ID, BuiltinEmbedder, EmbedError, Embedder, ModelFingerprint,
-    bge_m3_fingerprint,
+    Accelerator, BGE_RERANKER_V2_M3_ID, BuiltinReranker, EmbedError, Embedder, HttpEmbedder,
+    HttpReranker, ModelFingerprint, RemoteTarget, RerankError, Reranker, builtin_model,
+    load_builtin_embedder, prepare_environment, remote_fingerprint,
 };
-use bars_core::settings::{ModelSource, Settings};
+use bars_core::secrets::{KeyRef, OsSecrets, SecretStore};
+use bars_core::settings::{EmbedSettings, ModelSource, RerankSettings, Settings};
 
 use super::lock;
 
-/// Сколько текстов модель считает за один захват мьютекса. Между пачками мьютекс свободен, и
-/// эмбеддинг поискового запроса ждёт не дольше одной пачки.
+/// Сколько текстов встроенная модель считает за один захват мьютекса. Между пачками мьютекс
+/// свободен, и эмбеддинг поискового запроса ждёт не дольше одной пачки.
 pub const BATCH_SIZE: usize = 4;
 
-/// Откуда воркер берёт embed-модель по настройкам.
+/// Откуда воркер берёт модели по настройкам.
 pub trait ModelProvider: Send + Sync {
-    /// Отпечаток модели из настроек, без загрузки.
+    /// Отпечаток embed-модели из настроек, без загрузки. У внешней модели размерность до первого
+    /// ответа провайдера неизвестна и равна нулю.
     fn fingerprint(&self, settings: &Settings) -> Result<ModelFingerprint, EmbedError>;
 
-    /// Загружает модель; вызывается при первом эмбеддинге.
+    /// Загружает embed-модель; вызывается при первом эмбеддинге.
     fn load(&self, settings: &Settings) -> Result<Box<dyn Embedder + Send>, EmbedError>;
-}
 
-/// Встроенные модели из `~/.bars/models`. Внешние провайдеры и остальные встроенные модели —
-/// срез 6.
-pub struct BuiltinProvider {
-    models_dir: PathBuf,
-}
-
-impl BuiltinProvider {
-    pub fn new(models_dir: PathBuf) -> Self {
-        Self { models_dir }
+    /// Сколько текстов уходит модели за один захват мьютекса.
+    fn batch_size(&self, _settings: &Settings) -> usize {
+        BATCH_SIZE
     }
 
-    fn check(settings: &Settings) -> Result<(), EmbedError> {
-        let embed = &settings.embed;
-        if embed.source == ModelSource::Builtin && embed.model == BGE_M3_ID {
-            Ok(())
-        } else {
-            Err(EmbedError::Load(format!(
-                "модель `{}` ({}) пока не поддерживается: доступна только встроенная {BGE_M3_ID}",
-                embed.model,
-                embed.source.as_str()
-            )))
+    /// Загружает rerank-модель; вызывается при первом реранке.
+    fn load_reranker(&self, _settings: &Settings) -> Result<Box<dyn Reranker + Send>, RerankError> {
+        Err(RerankError::Load(
+            "rerank-модель в этой сборке не подключена".into(),
+        ))
+    }
+}
+
+/// Модели по настройкам: встроенные из `~/.bars/models` и внешние по HTTP (Т-17). Ключи внешних
+/// провайдеров берутся из хранилища ОС.
+pub struct ConfiguredProvider {
+    models_dir: PathBuf,
+    secrets: Arc<dyn SecretStore>,
+}
+
+/// Прежнее имя: когда-то провайдер знал только встроенную bge-m3.
+pub type BuiltinProvider = ConfiguredProvider;
+
+impl ConfiguredProvider {
+    /// Папка моделей и хранилище ключей ОС. Выставляет окружение процесса для встроенных
+    /// моделей, поэтому вызывается при старте воркера, до рабочих потоков.
+    pub fn new(models_dir: PathBuf) -> Self {
+        Self::with_secrets(models_dir, Arc::new(OsSecrets::default()))
+    }
+
+    pub fn with_secrets(models_dir: PathBuf, secrets: Arc<dyn SecretStore>) -> Self {
+        prepare_environment(&models_dir);
+        Self {
+            models_dir,
+            secrets,
         }
     }
+
+    fn target(
+        &self,
+        source: ModelSource,
+        model: &str,
+        base_url: Option<&str>,
+        key_name: Option<&str>,
+        key_env: Option<&str>,
+    ) -> Result<RemoteTarget, String> {
+        let base_url = base_url
+            .ok_or_else(|| format!("для источника `{}` не задан `base_url`", source.as_str()))?;
+        Ok(RemoteTarget {
+            source: source.as_str(),
+            base_url: base_url.to_string(),
+            model: model.to_string(),
+            key: KeyRef {
+                name: key_name.map(str::to_string),
+                env: key_env.map(str::to_string),
+                store: Arc::clone(&self.secrets),
+            },
+        })
+    }
+
+    fn embed_target(&self, embed: &EmbedSettings) -> Result<RemoteTarget, EmbedError> {
+        self.target(
+            embed.source,
+            &embed.model,
+            embed.base_url.as_deref(),
+            embed.api_key_name.as_deref(),
+            embed.api_key_env.as_deref(),
+        )
+        .map_err(EmbedError::Load)
+    }
 }
 
-impl ModelProvider for BuiltinProvider {
+impl ModelProvider for ConfiguredProvider {
     fn fingerprint(&self, settings: &Settings) -> Result<ModelFingerprint, EmbedError> {
-        Self::check(settings)?;
-        Ok(bge_m3_fingerprint())
+        let embed = &settings.embed;
+        match embed.source {
+            ModelSource::Builtin => builtin_model(&embed.model)
+                .map(|model| model.fingerprint())
+                .ok_or_else(|| {
+                    EmbedError::Load(format!(
+                        "модели `{}` нет во встроенном каталоге",
+                        embed.model
+                    ))
+                }),
+            source => Ok(remote_fingerprint(source.as_str(), &embed.model)),
+        }
     }
 
     fn load(&self, settings: &Settings) -> Result<Box<dyn Embedder + Send>, EmbedError> {
-        Self::check(settings)?;
-        Ok(Box::new(BuiltinEmbedder::bge_m3(
-            &self.models_dir,
-            settings.accelerator,
-        )?))
+        let embed = &settings.embed;
+        match embed.source {
+            ModelSource::Builtin => {
+                load_builtin_embedder(&embed.model, &self.models_dir, settings.accelerator)
+            }
+            _ => Ok(Box::new(HttpEmbedder::new(
+                self.embed_target(embed)?,
+                embed.batch_size,
+            ))),
+        }
+    }
+
+    fn batch_size(&self, settings: &Settings) -> usize {
+        match settings.embed.source {
+            ModelSource::Builtin => BATCH_SIZE,
+            _ => settings.embed.batch_size,
+        }
+    }
+
+    fn load_reranker(&self, settings: &Settings) -> Result<Box<dyn Reranker + Send>, RerankError> {
+        let rerank = &settings.rerank;
+        match rerank.source {
+            ModelSource::Builtin => {
+                if rerank.model != BGE_RERANKER_V2_M3_ID {
+                    return Err(RerankError::Load(format!(
+                        "встроенный rerank один: {BGE_RERANKER_V2_M3_ID}, а не `{}`",
+                        rerank.model
+                    )));
+                }
+                Ok(Box::new(BuiltinReranker::bge_reranker_v2_m3(
+                    &self.models_dir,
+                    settings.accelerator,
+                )?))
+            }
+            source => {
+                let target = self
+                    .target(
+                        source,
+                        &rerank.model,
+                        rerank.base_url.as_deref(),
+                        rerank.api_key_name.as_deref(),
+                        rerank.api_key_env.as_deref(),
+                    )
+                    .map_err(RerankError::Load)?;
+                Ok(Box::new(HttpReranker::new(target)))
+            }
+        }
     }
 }
 
@@ -73,13 +174,23 @@ type Loader = Box<dyn Fn() -> Result<Box<dyn Embedder + Send>, EmbedError> + Sen
 /// Одна модель за мьютексом.
 pub struct ModelSlot {
     fingerprint: ModelFingerprint,
+    batch_size: usize,
     loader: Loader,
     model: Mutex<Option<Box<dyn Embedder + Send>>>,
 }
 
 impl ModelSlot {
+    /// Отпечаток по настройкам: у внешней модели размерность в нём может быть неизвестна.
     pub fn fingerprint(&self) -> &ModelFingerprint {
         &self.fingerprint
+    }
+
+    /// Лучший известный отпечаток: у загруженной внешней модели размерность уже из ответа.
+    fn known_fingerprint(&self) -> ModelFingerprint {
+        lock(&self.model).as_ref().map_or_else(
+            || self.fingerprint.clone(),
+            |model| model.fingerprint().clone(),
+        )
     }
 
     pub fn is_loaded(&self) -> bool {
@@ -104,17 +215,34 @@ impl ModelSlot {
 #[derive(Clone)]
 pub struct SharedEmbedder {
     slot: Arc<ModelSlot>,
+    /// Обновляется после каждого обращения к модели: размерность внешней модели узнаётся из ответа.
+    fingerprint: ModelFingerprint,
 }
 
 impl SharedEmbedder {
+    fn new(slot: Arc<ModelSlot>) -> Self {
+        let fingerprint = slot.known_fingerprint();
+        Self { slot, fingerprint }
+    }
+
     pub fn slot(&self) -> &Arc<ModelSlot> {
         &self.slot
+    }
+
+    fn refresh(&mut self) {
+        self.fingerprint = self.slot.known_fingerprint();
     }
 }
 
 impl Embedder for SharedEmbedder {
     fn fingerprint(&self) -> &ModelFingerprint {
-        &self.slot.fingerprint
+        &self.fingerprint
+    }
+
+    fn prepare(&mut self) -> Result<(), EmbedError> {
+        self.slot.with(|model| model.prepare())?;
+        self.refresh();
+        Ok(())
     }
 
     fn embed(&mut self, texts: &[&str]) -> Result<Vec<Vec<f32>>, EmbedError> {
@@ -124,7 +252,7 @@ impl Embedder for SharedEmbedder {
         let sorted: Vec<&str> = order.iter().map(|&index| texts[index]).collect();
 
         let mut vectors = Vec::with_capacity(texts.len());
-        for batch in sorted.chunks(BATCH_SIZE) {
+        for batch in sorted.chunks(self.slot.batch_size) {
             let part = self.slot.with(|model| model.embed(batch))?;
             if part.len() != batch.len() {
                 return Err(EmbedError::Count {
@@ -134,6 +262,7 @@ impl Embedder for SharedEmbedder {
             }
             vectors.extend(part);
         }
+        self.refresh();
 
         let mut result = vec![Vec::new(); texts.len()];
         for (vector, &index) in vectors.into_iter().zip(&order) {
@@ -143,21 +272,69 @@ impl Embedder for SharedEmbedder {
     }
 
     fn embed_query(&mut self, text: &str) -> Result<Vec<f32>, EmbedError> {
-        self.slot.with(|model| model.embed_query(text))
+        let vector = self.slot.with(|model| model.embed_query(text))?;
+        self.refresh();
+        Ok(vector)
     }
 }
 
-/// Какая модель сейчас в памяти.
+type RerankLoader = Box<dyn Fn() -> Result<Box<dyn Reranker + Send>, RerankError> + Send + Sync>;
+
+/// Одна rerank-модель за мьютексом.
+pub struct RerankSlot {
+    loader: RerankLoader,
+    model: Mutex<Option<Box<dyn Reranker + Send>>>,
+}
+
+impl RerankSlot {
+    pub fn is_loaded(&self) -> bool {
+        lock(&self.model).is_some()
+    }
+}
+
+/// Rerank-модель для поиска: грузится при первом реранке.
+#[derive(Clone)]
+pub struct SharedReranker {
+    slot: Arc<RerankSlot>,
+}
+
+impl SharedReranker {
+    pub fn slot(&self) -> &Arc<RerankSlot> {
+        &self.slot
+    }
+}
+
+impl Reranker for SharedReranker {
+    fn rerank(&mut self, query: &str, documents: &[&str]) -> Result<Vec<f32>, RerankError> {
+        let mut guard = lock(&self.slot.model);
+        if guard.is_none() {
+            *guard = Some((self.slot.loader)()?);
+        }
+        let model = guard.as_mut().expect("модель загружена строкой выше");
+        model.rerank(query, documents)
+    }
+}
+
+/// Какая embed-модель сейчас в памяти.
 struct Current {
     fingerprint: ModelFingerprint,
+    embed: EmbedSettings,
     accelerator: Accelerator,
     slot: Arc<ModelSlot>,
+}
+
+/// Какая rerank-модель сейчас в памяти.
+struct CurrentRerank {
+    rerank: RerankSettings,
+    accelerator: Accelerator,
+    slot: Arc<RerankSlot>,
 }
 
 /// Менеджер моделей воркера.
 pub struct Models {
     provider: Arc<dyn ModelProvider>,
     current: Mutex<Option<Current>>,
+    current_rerank: Mutex<Option<CurrentRerank>>,
 }
 
 impl Models {
@@ -165,6 +342,7 @@ impl Models {
         Self {
             provider,
             current: Mutex::new(None),
+            current_rerank: Mutex::new(None),
         }
     }
 
@@ -180,25 +358,52 @@ impl Models {
         let mut current = lock(&self.current);
         if let Some(existing) = current.as_ref()
             && existing.fingerprint == fingerprint
+            && existing.embed == settings.embed
             && existing.accelerator == settings.accelerator
         {
-            return Ok(SharedEmbedder {
-                slot: Arc::clone(&existing.slot),
-            });
+            return Ok(SharedEmbedder::new(Arc::clone(&existing.slot)));
         }
         let provider = Arc::clone(&self.provider);
         let owned = settings.clone();
         let slot = Arc::new(ModelSlot {
             fingerprint: fingerprint.clone(),
+            batch_size: self.provider.batch_size(settings).max(1),
             loader: Box::new(move || provider.load(&owned)),
             model: Mutex::new(None),
         });
         *current = Some(Current {
             fingerprint,
+            embed: settings.embed.clone(),
             accelerator: settings.accelerator,
             slot: Arc::clone(&slot),
         });
-        Ok(SharedEmbedder { slot })
+        Ok(SharedEmbedder::new(slot))
+    }
+
+    /// Rerank-модель по настройкам; загружается при первом реранке. Модель из прежних настроек
+    /// выгружается, как только её отпустят все, кто с ней работает.
+    pub fn reranker(&self, settings: &Settings) -> SharedReranker {
+        let mut current = lock(&self.current_rerank);
+        if let Some(existing) = current.as_ref()
+            && existing.rerank == settings.rerank
+            && existing.accelerator == settings.accelerator
+        {
+            return SharedReranker {
+                slot: Arc::clone(&existing.slot),
+            };
+        }
+        let provider = Arc::clone(&self.provider);
+        let owned = settings.clone();
+        let slot = Arc::new(RerankSlot {
+            loader: Box::new(move || provider.load_reranker(&owned)),
+            model: Mutex::new(None),
+        });
+        *current = Some(CurrentRerank {
+            rerank: settings.rerank.clone(),
+            accelerator: settings.accelerator,
+            slot: Arc::clone(&slot),
+        });
+        SharedReranker { slot }
     }
 }
 
@@ -215,6 +420,7 @@ pub mod fake {
         pub embed_calls: AtomicUsize,
         pub texts: AtomicUsize,
         pub max_batch: AtomicUsize,
+        pub rerank_loads: AtomicUsize,
     }
 
     pub struct FakeProvider {
@@ -226,11 +432,15 @@ pub mod fake {
 
     impl FakeProvider {
         pub fn new(model: &str) -> Arc<Self> {
-            Arc::new(Self {
+            Arc::new(Self::plain(model))
+        }
+
+        pub fn plain(model: &str) -> Self {
+            Self {
                 counters: Arc::new(Counters::default()),
                 model: Mutex::new(model.to_string()),
                 fail_load: false,
-            })
+            }
         }
 
         pub fn set_model(&self, model: &str) {
@@ -273,7 +483,38 @@ pub mod fake {
         }
     }
 
+    /// Оценивает документ по числу слов запроса в нём.
+    struct FakeReranker;
+
+    impl Reranker for FakeReranker {
+        fn rerank(&mut self, query: &str, documents: &[&str]) -> Result<Vec<f32>, RerankError> {
+            let words: Vec<String> = query.split_whitespace().map(str::to_lowercase).collect();
+            Ok(documents
+                .iter()
+                .map(|document| {
+                    let text = document.to_lowercase();
+                    let hits = words
+                        .iter()
+                        .filter(|word| text.contains(word.as_str()))
+                        .count();
+                    0.1 + 0.8 * hits as f32 / words.len().max(1) as f32
+                })
+                .collect())
+        }
+    }
+
     impl ModelProvider for FakeProvider {
+        fn load_reranker(
+            &self,
+            _settings: &Settings,
+        ) -> Result<Box<dyn Reranker + Send>, RerankError> {
+            if self.fail_load {
+                return Err(RerankError::Load("нет файлов модели".into()));
+            }
+            self.counters.rerank_loads.fetch_add(1, Ordering::SeqCst);
+            Ok(Box::new(FakeReranker))
+        }
+
         fn fingerprint(&self, _settings: &Settings) -> Result<ModelFingerprint, EmbedError> {
             Ok(fake_fingerprint(&lock(&self.model)))
         }
@@ -371,19 +612,106 @@ mod tests {
         assert_eq!(Arc::strong_count(first.slot()), 1);
     }
 
+    use bars_core::models::bge_m3_fingerprint;
+
+    fn provider() -> ConfiguredProvider {
+        ConfiguredProvider::with_secrets(
+            PathBuf::from("models-not-used"),
+            Arc::new(bars_core::secrets::MemorySecrets::default()),
+        )
+    }
+
     #[test]
-    fn builtin_provider_accepts_only_bge_m3_for_now() {
-        let provider = BuiltinProvider::new(PathBuf::from("models"));
+    fn provider_knows_every_builtin_model_and_its_fingerprint_without_loading() {
+        let provider = provider();
         assert_eq!(
             provider.fingerprint(&settings()).unwrap(),
             bge_m3_fingerprint()
         );
+        for model in bars_core::models::builtin_models() {
+            let mut chosen = settings();
+            chosen.embed.model = model.id.to_string();
+            assert_eq!(provider.fingerprint(&chosen).unwrap(), model.fingerprint());
+        }
 
-        let mut other = settings();
-        other.embed.model = "qwen3".into();
+        let mut unknown = settings();
+        unknown.embed.model = "qwen3".into();
         assert!(matches!(
-            provider.fingerprint(&other),
+            provider.fingerprint(&unknown),
             Err(EmbedError::Load(_))
+        ));
+    }
+
+    #[test]
+    fn external_models_get_a_fingerprint_with_unknown_dimension() {
+        let provider = provider();
+        let mut remote = settings();
+        remote.embed.source = ModelSource::Remote;
+        remote.embed.model = "text-embedding-3-small".into();
+        let fingerprint = provider.fingerprint(&remote).unwrap();
+        assert_eq!(fingerprint.source, "remote");
+        assert_eq!(fingerprint.dim, 0);
+        // Источник входит в отпечаток: тот же адрес как локальный — другая модель для Т-25.
+        remote.embed.source = ModelSource::LocalOpenai;
+        assert_eq!(
+            provider.fingerprint(&remote).unwrap().source,
+            "local-openai"
+        );
+    }
+
+    #[test]
+    fn external_embed_without_base_url_is_a_load_error() {
+        let mut remote = settings();
+        remote.embed.source = ModelSource::LocalOpenai;
+        remote.embed.model = "m".into();
+        let error = provider().load(&remote).err().expect("ошибка загрузки");
+        assert!(error.to_string().contains("base_url"), "{error}");
+    }
+
+    #[test]
+    fn batch_size_is_four_for_builtin_and_from_settings_for_external() {
+        let provider = provider();
+        assert_eq!(provider.batch_size(&settings()), BATCH_SIZE);
+        let mut remote = settings();
+        remote.embed.source = ModelSource::Remote;
+        remote.embed.batch_size = 17;
+        assert_eq!(provider.batch_size(&remote), 17);
+    }
+
+    #[test]
+    fn rerank_model_is_loaded_lazily_and_shared_until_settings_change() {
+        let provider = FakeProvider::new("m1");
+        let models = Models::new(provider.clone());
+        let mut reranker = models.reranker(&settings());
+        assert!(!reranker.slot().is_loaded());
+        assert_eq!(provider.counters.rerank_loads.load(Ordering::SeqCst), 0);
+
+        let scores = reranker
+            .rerank("борщ", &["рецепт борща", "очередь"])
+            .unwrap();
+        assert!(scores[0] > scores[1]);
+        reranker.rerank("борщ", &["x"]).unwrap();
+        assert_eq!(provider.counters.rerank_loads.load(Ordering::SeqCst), 1);
+
+        let again = models.reranker(&settings());
+        assert!(Arc::ptr_eq(reranker.slot(), again.slot()));
+        let mut changed = settings();
+        changed.rerank.model = "другой".into();
+        let other = models.reranker(&changed);
+        assert!(!Arc::ptr_eq(reranker.slot(), other.slot()));
+    }
+
+    #[test]
+    fn rerank_that_cannot_load_is_an_error_from_the_call() {
+        let provider = Arc::new(FakeProvider {
+            fail_load: true,
+            ..FakeProvider::plain("m1")
+        });
+        let models = Models::new(provider);
+        let mut reranker = models.reranker(&settings());
+        assert!(matches!(
+            reranker.rerank("q", &["d"]),
+            Err(RerankError::Load(_))
         ));
     }
 }

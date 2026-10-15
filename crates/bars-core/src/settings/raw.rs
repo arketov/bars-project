@@ -10,7 +10,7 @@ use super::{
     EmbedSettings, ModelSource, RerankSettings, SettingsError, SettingsWarning, UserSettings,
 };
 use crate::indexing::chunking::ChunkingParams;
-use crate::models::Accelerator;
+use crate::models::{Accelerator, BGE_RERANKER_V2_M3_ID, builtin_model, builtin_models};
 use crate::search::SearchSettings;
 
 /// Ключи, которых нет в схеме: имя и значение. Значение не нужно, но `flatten` требует тип.
@@ -230,6 +230,10 @@ impl UserFile {
     pub(super) fn validate(&self, file: &Path) -> Result<(), SettingsError> {
         if let Some(embed) = &self.embed {
             positive(file, "embed.batch_size", embed.batch_size)?;
+            embed.validate(file)?;
+        }
+        if let Some(rerank) = &self.rerank {
+            rerank.validate(file)?;
         }
         if let Some(search) = &self.search {
             search.validate(file)?;
@@ -309,7 +313,114 @@ impl ProjectFile {
     }
 }
 
+/// Поля провайдера, как они записаны в таблице (`docs/features/settings/settings.md`,
+/// «Как bars читает файлы настроек»).
+struct ProviderFields<'a> {
+    table: &'static str,
+    source: Option<ModelSource>,
+    model: Option<&'a str>,
+    base_url: Option<&'a str>,
+    api_key_name: Option<&'a str>,
+    api_key_env: Option<&'a str>,
+}
+
+impl ProviderFields<'_> {
+    fn validate(
+        &self,
+        file: &Path,
+        builtin_ok: impl Fn(&str) -> Result<(), String>,
+    ) -> Result<(), SettingsError> {
+        let key = |name: &str| format!("{}.{name}", self.table);
+        let invalid = |name: &str, reason: String| SettingsError::Invalid {
+            file: file.to_path_buf(),
+            key: key(name),
+            reason,
+        };
+        for (name, value) in [
+            ("model", self.model),
+            ("api_key_name", self.api_key_name),
+            ("api_key_env", self.api_key_env),
+        ] {
+            if value.is_some_and(|text| text.trim().is_empty()) {
+                return Err(invalid(name, "значение пустое".into()));
+            }
+        }
+        match self.source.unwrap_or(ModelSource::Builtin) {
+            ModelSource::Builtin => {
+                if let Some(model) = self.model {
+                    builtin_ok(model).map_err(|reason| invalid("model", reason))?;
+                }
+                Ok(())
+            }
+            source => {
+                if self.model.is_none() {
+                    return Err(invalid(
+                        "model",
+                        format!(
+                            "для источника `{}` нужно имя модели у провайдера",
+                            source.as_str()
+                        ),
+                    ));
+                }
+                let Some(base_url) = self.base_url else {
+                    return Err(invalid(
+                        "base_url",
+                        format!("для источника `{}` нужен адрес провайдера", source.as_str()),
+                    ));
+                };
+                check_base_url(base_url).map_err(|reason| invalid("base_url", reason))?;
+                if source == ModelSource::Remote
+                    && self.api_key_name.is_none()
+                    && self.api_key_env.is_none()
+                {
+                    return Err(invalid(
+                        "api_key_name",
+                        "удалённому провайдеру нужен ключ: `api_key_name` (запись в хранилище ОС) или `api_key_env` (переменная окружения)".into(),
+                    ));
+                }
+                Ok(())
+            }
+        }
+    }
+}
+
+/// Адрес провайдера: `http://` или `https://`, хост, без пробелов и без логина с паролем.
+fn check_base_url(url: &str) -> Result<(), String> {
+    let rest = url
+        .strip_prefix("https://")
+        .or_else(|| url.strip_prefix("http://"))
+        .ok_or("адрес должен начинаться с http:// или https://")?;
+    let authority = rest.split(['/', '?', '#']).next().unwrap_or_default();
+    if authority.is_empty() || url.chars().any(char::is_whitespace) {
+        return Err("в адресе нет хоста или есть пробелы".into());
+    }
+    if authority.contains('@') {
+        return Err("логин и пароль в адресе не поддерживаются: ключ задаётся отдельно".into());
+    }
+    Ok(())
+}
+
 impl EmbedTable {
+    fn validate(&self, file: &Path) -> Result<(), SettingsError> {
+        ProviderFields {
+            table: "embed",
+            source: self.source,
+            model: self.model.as_deref(),
+            base_url: self.base_url.as_deref(),
+            api_key_name: self.api_key_name.as_deref(),
+            api_key_env: self.api_key_env.as_deref(),
+        }
+        .validate(file, |model| {
+            builtin_model(model).map(|_| ()).ok_or_else(|| {
+                let ids: Vec<_> = builtin_models().iter().map(|m| m.id).collect();
+                format!(
+                    "`{model}` нет во встроенном каталоге; доступны: {}",
+                    ids.join(", ")
+                )
+            })
+        })
+    }
+
     fn apply(self, target: &mut EmbedSettings) {
         if let Some(value) = self.source {
             target.source = value;
@@ -327,6 +438,30 @@ impl EmbedTable {
 }
 
 impl RerankTable {
+    /// Выключенный rerank не проверяется: окно может сохранять таблицу по шагам.
+    fn validate(&self, file: &Path) -> Result<(), SettingsError> {
+        if self.enabled != Some(true) {
+            return Ok(());
+        }
+        ProviderFields {
+            table: "rerank",
+            source: self.source,
+            model: self.model.as_deref(),
+            base_url: self.base_url.as_deref(),
+            api_key_name: self.api_key_name.as_deref(),
+            api_key_env: self.api_key_env.as_deref(),
+        }
+        .validate(file, |model| {
+            if model == BGE_RERANKER_V2_M3_ID {
+                Ok(())
+            } else {
+                Err(format!(
+                    "встроенный rerank один: {BGE_RERANKER_V2_M3_ID}, а не `{model}`"
+                ))
+            }
+        })
+    }
+
     fn apply(self, target: &mut RerankSettings) {
         if let Some(value) = self.enabled {
             target.enabled = value;

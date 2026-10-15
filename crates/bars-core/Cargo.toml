@@ -7,17 +7,29 @@ publish.workspace = true
 
 [dependencies]
 blake3.workspace = true
+candle-core.workspace = true
 fastembed.workspace = true
+keyring-core.workspace = true
 rusqlite.workspace = true
 rust-stemmers.workspace = true
 serde.workspace = true
+serde_json.workspace = true
 thiserror.workspace = true
 toml.workspace = true
+ureq.workspace = true
+
+[features]
+# Фальшивый HTTP-сервер для тестов других крейтов.
+test-support = []
 
 # DirectML есть только на Windows (docs/features/models/local-models.md).
 [target.'cfg(windows)'.dependencies]
 fastembed = { workspace = true, features = ["directml"] }
+windows-native-keyring-store.workspace = true
 ort = { workspace = true, features = ["directml"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+apple-native-keyring-store.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true

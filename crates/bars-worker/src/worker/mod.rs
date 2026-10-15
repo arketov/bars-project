@@ -31,7 +31,10 @@ use tokio::runtime::Handle;
 use tokio::sync::{Notify, RwLock};
 use tokio::task::JoinHandle;
 
-pub use models::{BATCH_SIZE, BuiltinProvider, ModelProvider, ModelSlot, Models, SharedEmbedder};
+pub use models::{
+    BATCH_SIZE, BuiltinProvider, ConfiguredProvider, ModelProvider, ModelSlot, Models, RerankSlot,
+    SharedEmbedder, SharedReranker,
+};
 pub use queue::Priority;
 pub use registry::{Discovered, ProjectEntry, Registry, RegistryError, ResolveError};
 pub use timefmt::rfc3339;
