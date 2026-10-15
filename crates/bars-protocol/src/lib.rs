@@ -11,6 +11,7 @@ mod endpoint;
 mod error;
 mod framing;
 mod jsonrpc;
+mod launch;
 mod methods;
 mod server;
 mod session;
@@ -23,6 +24,9 @@ pub use endpoint::Endpoint;
 pub use error::*;
 pub use framing::{MAX_REQUEST_LINE, MAX_RESPONSE_LINE, read_line_limited, write_line};
 pub use jsonrpc::*;
+pub use launch::{
+    LAUNCH_DEADLINE, connect_or_launch, connect_or_launch_with, spawn_worker, worker_exe,
+};
 pub use methods::*;
 pub use server::{Handler, serve_connection};
 pub use session::Session;

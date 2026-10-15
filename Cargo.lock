@@ -252,6 +252,7 @@ dependencies = [
  "anyhow",
  "bars-core",
  "bars-protocol",
+ "dirs 7.0.0",
  "interprocess",
  "notify",
  "notify-debouncer-full",

@@ -1,0 +1,81 @@
+//! Перевод ошибок воркера и ядра в ошибки протокола (`docs/architecture/protocol.md`, «Ошибки»).
+
+use std::io;
+
+use bars_core::doc_path::DocPathError;
+use bars_core::indexing::walk::ReadError;
+use bars_core::models::EmbedError;
+use bars_core::outline::OutlineError;
+use bars_core::search::SearchError;
+use bars_protocol::{ErrorKind, INTERNAL_ERROR, RpcError};
+
+use crate::worker::{RegistryError, ResolveError, WorkerError};
+
+pub fn reindex_required() -> RpcError {
+    RpcError::bars(
+        ErrorKind::ReindexRequired,
+        "индекс построен другой моделью или старой схемой: нужна переиндексация, \
+         её запускает пользователь (bars-cli reindex --accept-model-change или кнопка в окне)",
+    )
+}
+
+pub fn worker_error(error: WorkerError) -> RpcError {
+    let text = error.to_string();
+    match error {
+        WorkerError::Resolve(ResolveError::NotFound(_)) | WorkerError::NotRegistered(_) => {
+            RpcError::bars(
+                ErrorKind::ProjectNotFound,
+                format!("{text}: bars-cli register <папка проекта>"),
+            )
+        }
+        WorkerError::Resolve(ResolveError::Ambiguous { .. })
+        | WorkerError::NotADirectory(_)
+        | WorkerError::Registry(RegistryError::NotAbsolute(_)) => {
+            RpcError::bars(ErrorKind::InvalidParams, text)
+        }
+        WorkerError::Unavailable(_) => RpcError::bars(ErrorKind::ProjectUnavailable, text),
+        WorkerError::ConsentRequired(_) => RpcError::bars(
+            ErrorKind::ReindexNeedsConsent,
+            format!(
+                "{text}; пользователь соглашается в окне или командой \
+                 bars-cli reindex --accept-model-change"
+            ),
+        ),
+        WorkerError::Registry(_) | WorkerError::Io(_) => RpcError::standard(INTERNAL_ERROR, text),
+    }
+}
+
+pub fn embed_error(error: EmbedError) -> RpcError {
+    RpcError::bars(ErrorKind::ProviderError, error.to_string())
+}
+
+pub fn search_error(error: SearchError) -> RpcError {
+    match error {
+        SearchError::InvalidParams(message) => RpcError::bars(ErrorKind::InvalidParams, message),
+        SearchError::ReindexRequired => reindex_required(),
+        SearchError::Embed(error) => embed_error(error),
+        other => RpcError::standard(INTERNAL_ERROR, other.to_string()),
+    }
+}
+
+pub fn doc_path_error(error: DocPathError) -> RpcError {
+    let kind = match error {
+        DocPathError::NotMarkdown(_) => ErrorKind::InvalidParams,
+        DocPathError::NotFound(_) => ErrorKind::FileNotFound,
+    };
+    RpcError::bars(kind, error.to_string())
+}
+
+pub fn read_error(error: ReadError) -> RpcError {
+    match error {
+        ReadError::Io(error) if error.kind() == io::ErrorKind::NotFound => {
+            RpcError::bars(ErrorKind::FileNotFound, error.to_string())
+        }
+        ReadError::Io(error) => RpcError::standard(INTERNAL_ERROR, error.to_string()),
+        ReadError::NotUtf8 => RpcError::bars(ErrorKind::InvalidParams, error.to_string()),
+    }
+}
+
+pub fn outline_error(error: OutlineError) -> RpcError {
+    RpcError::bars(ErrorKind::InvalidParams, error.to_string())
+}
