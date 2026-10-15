@@ -113,8 +113,15 @@ impl BuiltinModel {
 /// Скачаны ли файлы встроенной модели в `models_dir` (`~/.bars/models`, кэш hf-hub:
 /// `models--<организация>--<имя>/snapshots/<ревизия>/…`). Нужен окну для меток «скачана» и кнопки «Скачать»;
 /// целостность файлов не проверяется. Файлы снимка в кэше hf-hub могут быть символическими ссылками
-/// на `blobs/`, поэтому размер берётся у цели ссылки, а не у самой ссылки.
+/// на `blobs/`, поэтому размер берётся у цели ссылки, а не у самой ссылки. Встроенный rerank лежит
+/// в кэше под именем ONNX-экспорта `rozgo/bge-reranker-v2-m3`, а не под своим `id`
+/// (`docs/features/models/local-models.md`).
 pub fn is_downloaded(models_dir: &std::path::Path, id: &str) -> bool {
+    let repo = if id == super::BGE_RERANKER_V2_M3_ID {
+        "rozgo/bge-reranker-v2-m3"
+    } else {
+        id
+    };
     fn has_weights(dir: &std::path::Path, depth: usize) -> bool {
         let Ok(entries) = std::fs::read_dir(dir) else {
             return false;
@@ -132,7 +139,7 @@ pub fn is_downloaded(models_dir: &std::path::Path, id: &str) -> bool {
         })
     }
     let snapshots = models_dir
-        .join(format!("models--{}", id.replace('/', "--")))
+        .join(format!("models--{}", repo.replace('/', "--")))
         .join("snapshots");
     std::fs::read_dir(snapshots)
         .map(|entries| {
@@ -209,6 +216,18 @@ mod tests {
             !is_downloaded(dir.path(), BGE_M3_ID),
             "ссылка в пустоту — не скачана"
         );
+    }
+
+    #[test]
+    fn reranker_is_found_under_the_onnx_export_repo() {
+        let dir = tempfile::tempdir().unwrap();
+        assert!(!is_downloaded(dir.path(), super::super::BGE_RERANKER_V2_M3_ID));
+        let snapshot = dir
+            .path()
+            .join("models--rozgo--bge-reranker-v2-m3/snapshots/abc");
+        std::fs::create_dir_all(&snapshot).unwrap();
+        std::fs::write(snapshot.join("model.onnx"), "w").unwrap();
+        assert!(is_downloaded(dir.path(), super::super::BGE_RERANKER_V2_M3_ID));
     }
 
     #[test]
