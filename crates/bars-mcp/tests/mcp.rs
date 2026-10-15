@@ -431,9 +431,13 @@ async fn project_is_resolved_by_session_cwd_and_explicit_project_wins() {
                 json!({ "query": "бобров", "project": second.display().to_string() }),
             )
             .await;
-        let found: Value = serde_json::from_str(&found).unwrap();
-        if found["results"][0]["path"] == "docs/other.md" {
-            break;
+        // Пока второй проект не проиндексирован, воркер отвечает не JSON-ом, а
+        // текстом ошибки: это не провал, а повод подождать.
+        let parsed = serde_json::from_str::<Value>(&found);
+        if let Ok(parsed) = &parsed {
+            if parsed["results"][0]["path"] == "docs/other.md" {
+                break;
+            }
         }
         assert!(Instant::now() < deadline, "не нашли документ: {found}");
         tokio::time::sleep(Duration::from_millis(50)).await;
