@@ -90,7 +90,7 @@
 - [x] `BARS_INSTRUCTION.md` — `bars-core/assets/`, `instruction::sync` по хешу после каждой успешной проверки (Т-8);
 - [x] skills `bars-docs` и `bars-session-log` — `bars-worker/assets/skills/`, ставятся и удаляются вместе с установкой; Codex читает `~/.agents/skills`.
 
-Не сделано: проверка устаревших путей при старте воркера (`clients.md`); проверка на настоящих Claude Code и Codex (хук и skills руками не проверялись; Codex требует `/hooks`).
+Устаревшие пути в записях клиентов воркер замечает при старте (`clients::stale`), подсказка в stderr; предложение в окне — срез 5. Не сделано: проверка на настоящих Claude Code и Codex (хук и skills руками не проверялись; Codex требует `/hooks`).
 
 Приёмка: Т-6 (хук), Т-8, Т-20 (install), Т-21 (CLI и текстовая инструкция), Т-28.
 

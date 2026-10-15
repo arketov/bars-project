@@ -44,9 +44,32 @@ pub async fn serve(
         BindError::AlreadyRunning => ServeError::AlreadyRunning,
         other => ServeError::Bind(other),
     })?;
+    if let Some(env) = &config.install_env {
+        for client in crate::clients::stale(env) {
+            eprintln!(
+                "bars: записи в {} указывают на старые пути; переустановите: bars-cli install --client {}",
+                client_title(client),
+                client_arg(client)
+            );
+        }
+    }
     let worker = Worker::start(config, provider)?;
     let handler = Arc::new(WorkerHandler::new(worker.clone()));
     let result = run_server(listener, handler).await;
     worker.shutdown().await;
     result.map_err(ServeError::Accept)
+}
+
+fn client_title(client: bars_protocol::InstallClient) -> &'static str {
+    match client {
+        bars_protocol::InstallClient::ClaudeCode => "Claude Code",
+        bars_protocol::InstallClient::Codex => "Codex",
+    }
+}
+
+fn client_arg(client: bars_protocol::InstallClient) -> &'static str {
+    match client {
+        bars_protocol::InstallClient::ClaudeCode => "claude-code",
+        bars_protocol::InstallClient::Codex => "codex",
+    }
 }

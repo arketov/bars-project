@@ -144,6 +144,30 @@ pub fn install(env: &InstallEnv, client: InstallClient) -> Result<Installed> {
     })
 }
 
+/// Клиенты, в которых записи bars указывают не на текущие `bars-mcp` и `bars-cli`: приложение
+/// переехало или обновилось, нужна переустановка. Читает файлы и ничего не пишет; не
+/// установленный или нечитаемый клиент не считается устаревшим.
+pub fn stale(env: &InstallEnv) -> Vec<InstallClient> {
+    [InstallClient::ClaudeCode, InstallClient::Codex]
+        .into_iter()
+        .filter(|&client| is_stale(env, client).unwrap_or(false))
+        .collect()
+}
+
+fn is_stale(env: &InstallEnv, client: InstallClient) -> Result<bool> {
+    let layout = layout(env, client);
+    let mcp = match client {
+        InstallClient::ClaudeCode => json::mcp_command(&layout.mcp)?,
+        InstallClient::Codex => codex_toml::mcp_command(&layout.mcp)?,
+    };
+    let mcp_stale = mcp.is_some_and(|command| command != env.mcp_exe.display().to_string());
+    let hook = env.hook_command();
+    let hook_stale = json::hook_commands(&layout.hooks)?
+        .iter()
+        .any(|command| *command != hook);
+    Ok(mcp_stale || hook_stale)
+}
+
 /// Убирает из клиента записи и skills bars; чужие записи не трогает.
 pub fn uninstall(env: &InstallEnv, client: InstallClient) -> Result<Vec<PathBuf>> {
     let layout = layout(env, client);

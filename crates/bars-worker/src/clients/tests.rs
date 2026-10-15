@@ -216,3 +216,21 @@ fn unparsable_file_is_not_written() {
     ));
     assert_eq!(fs::read_to_string(&config).unwrap(), "[broken");
 }
+
+#[test]
+fn stale_reports_only_installed_clients_with_old_paths() {
+    let home = TempDir::new().unwrap();
+    let mut env = env(&home);
+    assert!(super::stale(&env).is_empty(), "ничего не установлено");
+    install(&env, InstallClient::ClaudeCode).unwrap();
+    install(&env, InstallClient::Codex).unwrap();
+    assert!(super::stale(&env).is_empty());
+
+    env.cli_exe = PathBuf::from("/new/bars-cli");
+    assert_eq!(
+        super::stale(&env),
+        [InstallClient::ClaudeCode, InstallClient::Codex]
+    );
+    install(&env, InstallClient::ClaudeCode).unwrap();
+    assert_eq!(super::stale(&env), [InstallClient::Codex]);
+}

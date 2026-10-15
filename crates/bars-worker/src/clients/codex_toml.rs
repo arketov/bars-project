@@ -70,3 +70,13 @@ pub fn uninstall_mcp(file: &Path) -> Result<bool> {
     }
     save(file, &before, &doc)
 }
+
+/// Команда `[mcp_servers.bars]`; `None` — записи нет.
+pub fn mcp_command(file: &Path) -> Result<Option<String>> {
+    Ok(load(file)?
+        .get("mcp_servers")
+        .and_then(|servers| servers.get("bars"))
+        .and_then(|bars| bars.get("command"))
+        .and_then(Item::as_str)
+        .map(str::to_string))
+}

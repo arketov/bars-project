@@ -176,3 +176,28 @@ pub fn uninstall_hook(file: &Path) -> Result<bool> {
     }
     save(file, &before, &after)
 }
+
+/// Команда `mcpServers.bars`; `None` — записи нет.
+pub fn mcp_command(file: &Path) -> Result<Option<String>> {
+    Ok(load(file)?
+        .pointer("/mcpServers/bars/command")
+        .and_then(Value::as_str)
+        .map(str::to_string))
+}
+
+/// Команды всех хуков bars в `hooks.SessionStart`.
+pub fn hook_commands(file: &Path) -> Result<Vec<String>> {
+    let value = load(file)?;
+    let groups = value
+        .pointer("/hooks/SessionStart")
+        .and_then(Value::as_array)
+        .map_or(&[][..], Vec::as_slice);
+    Ok(groups
+        .iter()
+        .filter_map(|group| group.get("hooks").and_then(Value::as_array))
+        .flatten()
+        .filter(|hook| is_bars_hook(hook))
+        .filter_map(|hook| hook.get("command").and_then(Value::as_str))
+        .map(str::to_string)
+        .collect())
+}
