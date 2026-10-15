@@ -28,6 +28,8 @@ struct Rpc<R, W> {
     reader: BufReader<R>,
     writer: W,
     next_id: u64,
+    /// Формат, который `tool` подставляет, если его нет в аргументах.
+    default_format: Option<&'static str>,
 }
 
 impl<R: tokio::io::AsyncRead + Unpin, W: tokio::io::AsyncWrite + Unpin> Rpc<R, W> {
@@ -36,6 +38,7 @@ impl<R: tokio::io::AsyncRead + Unpin, W: tokio::io::AsyncWrite + Unpin> Rpc<R, W
             reader: BufReader::new(reader),
             writer,
             next_id: 1,
+            default_format: Some("json"),
         }
     }
 
@@ -83,7 +86,10 @@ impl<R: tokio::io::AsyncRead + Unpin, W: tokio::io::AsyncWrite + Unpin> Rpc<R, W
     }
 
     /// Вызывает инструмент: `(is_error, текст)`.
-    async fn tool(&mut self, name: &str, arguments: Value) -> (bool, String) {
+    async fn tool(&mut self, name: &str, mut arguments: Value) -> (bool, String) {
+        if let (Some(format), Some(object)) = (self.default_format, arguments.as_object_mut()) {
+            object.entry("format").or_insert(json!(format));
+        }
         let response = self
             .request(
                 "tools/call",
@@ -189,7 +195,7 @@ impl Harness {
 async fn wait_status(mcp: &mut Pipe, what: &str, condition: impl Fn(&Value) -> bool) -> Value {
     let deadline = Instant::now() + Duration::from_secs(60);
     loop {
-        let (is_error, text) = mcp.tool("bars_status", json!({})).await;
+        let (is_error, text) = mcp.tool("bars_status", json!({ "format": "json" })).await;
         if !is_error {
             let status: Value = serde_json::from_str(&text).unwrap();
             if condition(&status) {
@@ -234,9 +240,9 @@ async fn initialize_and_tool_list_do_not_touch_the_worker() {
         [
             "bars_outline",
             "bars_projects",
+            "bars_rag_search",
             "bars_read",
             "bars_reindex",
-            "bars_search",
             "bars_status"
         ]
     );
@@ -290,7 +296,10 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
     );
 
     let (is_error, found) = mcp
-        .tool("bars_search", json!({ "query": "индексация документов" }))
+        .tool(
+            "bars_rag_search",
+            json!({ "query": "индексация документов" }),
+        )
         .await;
     assert!(!is_error, "{found}");
     let found: Value = serde_json::from_str(&found).unwrap();
@@ -300,7 +309,7 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
     // Сужение по модулю (Т-14) и ошибка параметра.
     let (is_error, narrowed) = mcp
         .tool(
-            "bars_search",
+            "bars_rag_search",
             json!({ "query": "протокола", "modules": ["api"], "limit": 1 }),
         )
         .await;
@@ -314,7 +323,10 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
             .all(|hit| hit["module"] == "api")
     );
     let (is_error, text) = mcp
-        .tool("bars_search", json!({ "query": "x", "modules": ["нет"] }))
+        .tool(
+            "bars_rag_search",
+            json!({ "query": "x", "modules": ["нет"] }),
+        )
         .await;
     assert!(is_error);
     assert!(text.contains("invalid_params"), "{text}");
@@ -322,25 +334,37 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
     let (is_error, outline) = mcp
         .tool(
             "bars_outline",
-            json!({ "path": "docs/guide.md", "levels": [2, 3] }),
+            json!({ "path": "docs/guide.md", "levels": [2, 3], "format": "txt" }),
         )
         .await;
     assert!(!is_error, "{outline}");
     assert_eq!(
         outline.lines().collect::<Vec<_>>(),
-        ["8 ## Индексация", "12 ### Слежение", "16 ## Поиск"]
+        [
+            "=== СТРУКТУРА docs/guide.md: заголовков 3 ===",
+            "8 ## Индексация",
+            "12 ### Слежение",
+            "16 ## Поиск",
+            "=== КОНЕЦ СТРУКТУРЫ ==="
+        ]
     );
     let (_, under) = mcp
         .tool(
             "bars_outline",
-            json!({ "path": "guide.md", "under": "Руководство/Индексация" }),
+            json!({ "path": "guide.md", "under": "Руководство/Индексация", "format": "txt" }),
         )
         .await;
-    assert_eq!(under, "12 ### Слежение");
+    assert!(under.contains("\n12 ### Слежение\n"), "{under}");
 
-    let (is_error, document) = mcp.tool("bars_read", json!({ "path": "guide.md" })).await;
+    let (is_error, document) = mcp
+        .tool("bars_read", json!({ "path": "guide.md", "format": "txt" }))
+        .await;
     assert!(!is_error, "{document}");
-    assert!(document.starts_with("Руководство\n\n"), "{document}");
+    assert!(
+        document.starts_with("=== ДОКУМЕНТ guide.md ===\ntitle: Руководство\n"),
+        "{document}"
+    );
+    assert!(document.ends_with("=== КОНЕЦ ДОКУМЕНТА ==="), "{document}");
     assert!(document.contains("Индексация документов идёт в очереди воркера."));
     let (is_error, text) = mcp.tool("bars_read", json!({ "path": "нет.md" })).await;
     assert!(is_error);
@@ -403,7 +427,7 @@ async fn project_is_resolved_by_session_cwd_and_explicit_project_wins() {
     loop {
         let (_, found) = mcp
             .tool(
-                "bars_search",
+                "bars_rag_search",
                 json!({ "query": "бобров", "project": second.display().to_string() }),
             )
             .await;
@@ -455,7 +479,9 @@ async fn agent_cannot_consent_to_reindex_after_model_change() {
     );
 
     // Поиск в этом состоянии тоже не работает, и тоже понятным ответом.
-    let (is_error, text) = mcp.tool("bars_search", json!({ "query": "поиск" })).await;
+    let (is_error, text) = mcp
+        .tool("bars_rag_search", json!({ "query": "поиск" }))
+        .await;
     assert!(is_error);
     assert!(text.contains("reindex_required"), "{text}");
 
@@ -497,6 +523,53 @@ async fn connection_to_the_worker_lives_across_calls() {
     let (is_error, _) = mcp.tool("bars_projects", json!({})).await;
     assert!(!is_error);
     assert_eq!(harness.launches.load(Ordering::SeqCst), 1);
+}
+
+/// Текст по умолчанию: блоки с явными границами; `format=json` — JSON ответа воркера.
+#[tokio::test(flavor = "multi_thread")]
+async fn default_format_is_text_with_explicit_delimiters() {
+    let harness = Harness::new("txt");
+    let root = harness.project("proj");
+    let mut mcp = harness.connect(harness.env(&root));
+    mcp.default_format = None;
+    mcp.initialize().await;
+    mcp.tool("bars_projects", json!({})).await;
+    harness.register(&root).await;
+    wait_status(&mut mcp, "первая индексация", indexed).await;
+
+    let (_, status) = mcp.tool("bars_status", json!({ "format": "txt" })).await;
+    assert!(status.starts_with("=== СОСТОЯНИЕ ИНДЕКСА ==="), "{status}");
+    assert!(status.contains("\nstate: ready\n"), "{status}");
+
+    let (_, projects) = mcp.tool("bars_projects", json!({})).await;
+    assert!(projects.starts_with("=== ПРОЕКТЫ: 1 ==="), "{projects}");
+    assert!(projects.contains("=== ПРОЕКТ 1 из 1 ==="), "{projects}");
+    assert!(projects.contains("api (1)"), "{projects}");
+
+    let (is_error, found) = mcp
+        .tool(
+            "bars_rag_search",
+            json!({ "query": "индексация документов" }),
+        )
+        .await;
+    assert!(!is_error, "{found}");
+    assert!(found.starts_with("=== ПОИСК: результатов"), "{found}");
+    assert!(found.contains("=== РЕЗУЛЬТАТ 1 из "), "{found}");
+    assert!(found.contains("\npath: docs/guide.md\n"), "{found}");
+    assert!(found.contains("\n--- текст ---\n"), "{found}");
+    assert!(found.contains("=== КОНЕЦ РЕЗУЛЬТАТА 1 ==="), "{found}");
+    assert!(found.ends_with("=== КОНЕЦ ПОИСКА ==="), "{found}");
+
+    let (_, as_json) = mcp
+        .tool(
+            "bars_rag_search",
+            json!({ "query": "индексация документов", "format": "json" }),
+        )
+        .await;
+    assert!(serde_json::from_str::<Value>(&as_json).is_ok(), "{as_json}");
+
+    let (_, reindex) = mcp.tool("bars_reindex", json!({})).await;
+    assert!(reindex.contains("accepted: true"), "{reindex}");
 }
 
 /// НФТ-3 и Т-2 на настоящем exe: `initialize` отвечает сразу, без воркера, и процесс выходит, когда

@@ -16,7 +16,7 @@ title: Команды bars-cli
 
 | Команда | Что делает | Соответствие |
 |---|---|---|
-| `bars-cli search <запрос> [--module M]… [--file F]… [--limit N] [--min-score S]` | поиск | `bars_search` |
+| `bars-cli search <запрос> [--module M]… [--file F]… [--limit N] [--min-score S]` | поиск | `bars_rag_search` |
 | `bars-cli outline <путь> [--levels 2,3] [--under "A/B" \| --under-line N]` | структура документа | `bars_outline` (Т-26) |
 | `bars-cli read <путь>` | документ целиком | `bars_read` |
 | `bars-cli projects` | проекты и модули | `bars_projects` |

@@ -8,6 +8,7 @@
 //! сбрасывается в `false`, а прокси его и не передаёт.
 
 mod instructions;
+mod render;
 
 use std::io;
 use std::path::{Path, PathBuf};
@@ -15,9 +16,9 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use bars_protocol::{
-    Client, ClientError, ClientKind, Endpoint, ErrorKind, Heading, LAUNCH_DEADLINE, Method,
-    OutlineParams, ProjectsParams, ReadParams, ReindexParams, SearchParams, StatusParams, Target,
-    connect_or_launch_with, number_lines, spawn_worker, worker_exe,
+    Client, ClientError, ClientKind, Endpoint, ErrorKind, LAUNCH_DEADLINE, Method, OutlineParams,
+    ProjectsParams, ReadParams, ReindexParams, SearchParams, StatusParams, Target,
+    connect_or_launch_with, spawn_worker, worker_exe,
 };
 use rmcp::handler::server::router::tool::ToolRouter;
 use rmcp::handler::server::wrapper::Parameters;
@@ -77,6 +78,23 @@ pub struct BarsMcp {
     tool_router: ToolRouter<Self>,
 }
 
+/// Вид ответа инструмента.
+#[derive(Debug, Clone, Copy, Default, Deserialize, Serialize, schemars::JsonSchema)]
+#[serde(rename_all = "lowercase")]
+pub enum Format {
+    /// Текст с явными границами блоков (по умолчанию).
+    #[default]
+    Txt,
+    /// JSON ответа воркера одной строкой.
+    Json,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema)]
+pub struct NoArgs {
+    /// Вид ответа: `txt` (по умолчанию) или `json`.
+    pub format: Option<Format>,
+}
+
 #[derive(Debug, Deserialize, Serialize, schemars::JsonSchema)]
 pub struct SearchArgs {
     /// Поисковый запрос своими словами.
@@ -95,12 +113,16 @@ pub struct SearchArgs {
     pub candidates: Option<u32>,
     /// Порог оценки результата, 0…1.
     pub min_score: Option<f32>,
+    /// Вид ответа: `txt` (по умолчанию) или `json`.
+    pub format: Option<Format>,
 }
 
 #[derive(Debug, Deserialize, Serialize, schemars::JsonSchema)]
 pub struct ProjectArgs {
     /// Проект: путь к корню или имя. Без него — проект сессии.
     pub project: Option<String>,
+    /// Вид ответа: `txt` (по умолчанию) или `json`.
+    pub format: Option<Format>,
 }
 
 #[derive(Debug, Deserialize, Serialize, schemars::JsonSchema)]
@@ -110,6 +132,8 @@ pub struct ReindexArgs {
     /// Полная переиндексация вместо проверки актуальности.
     #[serde(default)]
     pub full: bool,
+    /// Вид ответа: `txt` (по умолчанию) или `json`.
+    pub format: Option<Format>,
 }
 
 #[derive(Debug, Deserialize, Serialize, schemars::JsonSchema)]
@@ -118,6 +142,8 @@ pub struct ReadArgs {
     pub path: String,
     /// Проект: путь к корню или имя. Без него — проект сессии.
     pub project: Option<String>,
+    /// Вид ответа: `txt` (по умолчанию) или `json`.
+    pub format: Option<Format>,
 }
 
 #[derive(Debug, Deserialize, Serialize, schemars::JsonSchema)]
@@ -133,6 +159,8 @@ pub struct OutlineArgs {
     pub under: Option<String>,
     /// Только заголовки внутри заголовка на этой строке.
     pub under_line: Option<u32>,
+    /// Вид ответа: `txt` (по умолчанию) или `json`.
+    pub format: Option<Format>,
 }
 
 impl BarsMcp {
@@ -247,9 +275,16 @@ fn failure(error: &ClientError) -> CallToolResult {
     CallToolResult::error(vec![ContentBlock::text(message)])
 }
 
-fn finish<T>(result: Result<T, ClientError>, render: impl FnOnce(&T) -> String) -> CallToolResult {
+fn finish<T: Serialize>(
+    result: Result<T, ClientError>,
+    format: Option<Format>,
+    render: impl FnOnce(&T) -> String,
+) -> CallToolResult {
     match result {
-        Ok(output) => text(render(&output)),
+        Ok(output) => text(match format.unwrap_or_default() {
+            Format::Txt => render(&output),
+            Format::Json => json(&output),
+        }),
         Err(error) => failure(&error),
     }
 }
@@ -257,12 +292,12 @@ fn finish<T>(result: Result<T, ClientError>, render: impl FnOnce(&T) -> String) 
 #[tool_router]
 impl BarsMcp {
     #[tool(
-        name = "bars_search",
+        name = "bars_rag_search",
         description = "Поиск по документации проекта: гибридный (по смыслу и по словам). Возвращает \
                        фрагменты с путём, цепочкой заголовков, строками и оценкой. Параметры \
                        modules и files сужают область; без project ищет в проекте сессии."
     )]
-    async fn bars_search(&self, Parameters(args): Parameters<SearchArgs>) -> CallToolResult {
+    async fn bars_rag_search(&self, Parameters(args): Parameters<SearchArgs>) -> CallToolResult {
         let params = SearchParams {
             target: self.target(args.project),
             query: args.query,
@@ -272,7 +307,7 @@ impl BarsMcp {
             candidates: args.candidates,
             min_score: args.min_score,
         };
-        finish(self.call(&params).await, json)
+        finish(self.call(&params).await, args.format, render::search)
     }
 
     #[tool(
@@ -280,8 +315,12 @@ impl BarsMcp {
         description = "Зарегистрированные проекты: путь, корень документации, состояние и модули \
                        с числом документов."
     )]
-    async fn bars_projects(&self) -> CallToolResult {
-        finish(self.call(&ProjectsParams {}).await, json)
+    async fn bars_projects(&self, Parameters(args): Parameters<NoArgs>) -> CallToolResult {
+        finish(
+            self.call(&ProjectsParams {}).await,
+            args.format,
+            render::projects,
+        )
     }
 
     #[tool(
@@ -293,7 +332,7 @@ impl BarsMcp {
         let params = StatusParams {
             target: self.target(args.project),
         };
-        finish(self.call(&params).await, json)
+        finish(self.call(&params).await, args.format, render::status)
     }
 
     #[tool(
@@ -309,7 +348,7 @@ impl BarsMcp {
             // Согласие даёт человек (Т-25): прокси его не передаёт, а воркер от MCP всё равно сбросил бы.
             accept_model_change: false,
         };
-        finish(self.call(&params).await, json)
+        finish(self.call(&params).await, args.format, render::reindex)
     }
 
     #[tool(
@@ -322,8 +361,9 @@ impl BarsMcp {
             target: self.target(args.project),
             path: args.path,
         };
-        finish(self.call(&params).await, |output| {
-            format!("{}\n\n{}", output.title, number_lines(&output.text))
+        let path = params.path.clone();
+        finish(self.call(&params).await, args.format, |output| {
+            render::read(&path, output)
         })
     }
 
@@ -341,13 +381,9 @@ impl BarsMcp {
             under: args.under,
             under_line: args.under_line,
         };
-        finish(self.call(&params).await, |output| {
-            output
-                .headings
-                .iter()
-                .map(Heading::to_line)
-                .collect::<Vec<_>>()
-                .join("\n")
+        let path = params.path.clone();
+        finish(self.call(&params).await, args.format, |output| {
+            render::outline(&path, output)
         })
     }
 }
