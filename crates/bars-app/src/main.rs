@@ -4,6 +4,10 @@
 #[allow(dead_code, unused_imports)]
 mod ipc;
 
+// Обработчики протокола и CLI подключат воркер следующими карточками среза 2.
+#[allow(dead_code, unused_imports)]
+mod worker;
+
 fn main() -> anyhow::Result<()> {
     tauri::Builder::default().run(tauri::generate_context!())?;
     Ok(())

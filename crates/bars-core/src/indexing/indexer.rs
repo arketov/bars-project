@@ -123,6 +123,19 @@ pub fn rebuild_index(
     settings: &IndexSettings,
     embedder: &mut dyn Embedder,
 ) -> Result<UpdateReport, IndexingError> {
+    rebuild_index_with(project_root, index_path, settings, embedder, || ())
+}
+
+/// То же, что [`rebuild_index`], но перед подменой файла вызывает `before_swap`; возвращённое
+/// значение живёт до конца подмены. Воркер держит в нём закрытый на запись и чтение доступ к
+/// проекту (`docs/architecture/worker.md`): поиск не открывает файл, пока он заменяется.
+pub fn rebuild_index_with<G>(
+    project_root: &Path,
+    index_path: &Path,
+    settings: &IndexSettings,
+    embedder: &mut dyn Embedder,
+    before_swap: impl FnOnce() -> G,
+) -> Result<UpdateReport, IndexingError> {
     let new_path = with_suffix(index_path, ".new");
     let old_path = with_suffix(index_path, ".old");
     remove_index_files(&new_path)?;
@@ -131,6 +144,7 @@ pub fn rebuild_index(
     let built = build_new(project_root, &new_path, settings, embedder);
     match built {
         Ok(report) => {
+            let _guard = before_swap();
             swap(index_path, &new_path, &old_path)?;
             Ok(report)
         }

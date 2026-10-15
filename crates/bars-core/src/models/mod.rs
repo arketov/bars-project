@@ -5,6 +5,8 @@ mod builtin;
 mod embedder;
 mod reranker;
 
-pub use builtin::{Accelerator, BGE_M3_DIM, BGE_M3_ID, BuiltinEmbedder, Device};
+pub use builtin::{
+    Accelerator, BGE_M3_DIM, BGE_M3_ID, BuiltinEmbedder, Device, bge_m3_fingerprint,
+};
 pub use embedder::{EmbedError, Embedder, ModelFingerprint};
 pub use reranker::{BGE_RERANKER_V2_M3_ID, RerankError, Reranker};

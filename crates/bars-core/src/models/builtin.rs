@@ -30,6 +30,17 @@ pub enum Device {
     DirectMl,
 }
 
+/// Отпечаток встроенной bge-m3. Известен без загрузки модели: воркер сверяет его с индексом
+/// до эмбеддинга (Т-25).
+pub fn bge_m3_fingerprint() -> ModelFingerprint {
+    ModelFingerprint {
+        source: "builtin".to_string(),
+        model: BGE_M3_ID.to_string(),
+        dim: BGE_M3_DIM,
+        doc_prefix: String::new(),
+    }
+}
+
 pub struct BuiltinEmbedder {
     model: TextEmbedding,
     fingerprint: ModelFingerprint,
@@ -55,12 +66,7 @@ impl BuiltinEmbedder {
         };
         Ok(Self {
             model,
-            fingerprint: ModelFingerprint {
-                source: "builtin".to_string(),
-                model: BGE_M3_ID.to_string(),
-                dim: BGE_M3_DIM,
-                doc_prefix: String::new(),
-            },
+            fingerprint: bge_m3_fingerprint(),
             device,
         })
     }
