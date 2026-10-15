@@ -13,12 +13,13 @@ use bars_protocol::{
 };
 use tempfile::TempDir;
 
+use crate::clients::InstallEnv;
 use crate::serve::serve;
 use crate::worker::models::fake::FakeProvider;
 use crate::worker::{BuiltinProvider, ModelProvider, WorkerConfig};
 
 struct Harness {
-    _home: TempDir,
+    home: TempDir,
     projects: TempDir,
     endpoint: Endpoint,
 }
@@ -27,11 +28,17 @@ impl Harness {
     async fn start(name: &str, provider: Arc<dyn ModelProvider>) -> Self {
         let home = TempDir::new().unwrap();
         let endpoint = Endpoint::named(&format!("handler-{name}"));
-        let config = WorkerConfig::new(home.path().to_path_buf());
+        let mut config = WorkerConfig::new(home.path().to_path_buf());
+        // Клиенты живут во временной папке: настоящие ~/.claude и ~/.codex тесты не трогают.
+        config.install_env = Some(InstallEnv {
+            home: home.path().join("client-home"),
+            mcp_exe: PathBuf::from("/opt/bars/bars-mcp"),
+            cli_exe: PathBuf::from("/opt/bars/bars-cli"),
+        });
         let served = endpoint.clone();
         tokio::spawn(async move { serve(config, &served, provider).await });
         Self {
-            _home: home,
+            home,
             projects: TempDir::new().unwrap(),
             endpoint,
         }
@@ -433,16 +440,32 @@ async fn session_start_registers_a_project_with_docs() {
 }
 
 #[tokio::test]
-async fn install_is_not_implemented_yet() {
-    use bars_protocol::{InstallClient, InstallParams};
+async fn install_and_uninstall_work_through_the_channel() {
+    use bars_protocol::{InstallClient, InstallParams, UninstallParams};
     let harness = Harness::start("install", FakeProvider::new("m1")).await;
     let mut cli = harness.client(ClientKind::Cli).await;
-    let error = rpc(cli
+    let out = cli
         .call(&InstallParams {
             client: InstallClient::ClaudeCode,
         })
-        .await);
-    assert_eq!(error.code, bars_protocol::INTERNAL_ERROR);
+        .await
+        .unwrap();
+    assert!(!out.needs_hook_approval);
+    assert!(!out.changed_files.is_empty());
+    assert!(
+        harness
+            .home
+            .path()
+            .join("client-home/.claude.json")
+            .exists()
+    );
+    let out = cli
+        .call(&UninstallParams {
+            client: InstallClient::ClaudeCode,
+        })
+        .await
+        .unwrap();
+    assert!(!out.changed_files.is_empty());
 }
 
 #[tokio::test]

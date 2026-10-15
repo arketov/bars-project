@@ -1,6 +1,6 @@
 //! `bars-cli`: CLI для людей, хуков и агентов (Т-20). Тонкий клиент воркера: ядра в нём нет.
 
-use std::io::Write;
+use std::io::{Read, Write};
 use std::process::ExitCode;
 
 use bars_cli::{Cli, Env};
@@ -9,7 +9,15 @@ use clap::Parser;
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let env = match Env::current() {
-        Ok(env) => env,
+        Ok(mut env) => {
+            if matches!(cli.command, bars_cli::Command::Hook { .. }) {
+                let mut input = String::new();
+                if std::io::stdin().read_to_string(&mut input).is_ok() {
+                    env.hook_input = Some(input);
+                }
+            }
+            env
+        }
         Err(error) => {
             eprintln!("bars-cli: {error}");
             return ExitCode::from(bars_protocol::EXIT_FAILURE as u8);

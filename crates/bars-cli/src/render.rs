@@ -4,9 +4,9 @@
 use std::fmt::Write as _;
 
 use bars_protocol::{
-    AcceptedOutput, ClientError, ErrorKind, Heading, OutlineOutput, ProjectInfo, ProjectState,
-    ProjectsOutput, ReadOutput, RegisterOutput, ScoreKind, SearchOutput, StatusOutput,
-    UnregisterOutput, number_lines,
+    AcceptedOutput, ClientError, ErrorKind, Heading, InstallOutput, OutlineOutput, ProjectInfo,
+    ProjectState, ProjectsOutput, ReadOutput, RegisterOutput, ScoreKind, SearchOutput,
+    StatusOutput, UninstallOutput, UnregisterOutput, number_lines,
 };
 use serde_json::json;
 
@@ -172,6 +172,53 @@ pub fn unregister(output: &UnregisterOutput) -> String {
     } else {
         "Проект не был зарегистрирован.".to_string()
     }
+}
+
+pub fn install(output: &InstallOutput) -> String {
+    let mut text = if output.changed_files.is_empty() {
+        "bars уже установлен: файлы клиента не изменились.".to_string()
+    } else {
+        format!(
+            "bars установлен. Изменено:
+{}
+Копии чужих конфигов: <файл>.bars-backup.",
+            lines(&output.changed_files)
+        )
+    };
+    if output.needs_hook_approval {
+        text.push_str(
+            "
+Выполните в Codex команду /hooks и одобрите хук bars: без этого он не запустится (MCP уже работает).",
+        );
+    }
+    text.push_str(
+        "
+Перезапустите клиент, чтобы он подхватил MCP-сервер.",
+    );
+    text
+}
+
+pub fn uninstall(output: &UninstallOutput) -> String {
+    if output.changed_files.is_empty() {
+        "bars в клиенте не найден: ничего не изменено.".to_string()
+    } else {
+        format!(
+            "bars убран. Изменено:
+{}",
+            lines(&output.changed_files)
+        )
+    }
+}
+
+fn lines(files: &[String]) -> String {
+    files
+        .iter()
+        .map(|file| format!("  {file}"))
+        .collect::<Vec<_>>()
+        .join(
+            "
+",
+        )
 }
 
 /// Текст ошибки для stderr: человеку — строка, с `--json` — объект с кодом и видом ошибки.

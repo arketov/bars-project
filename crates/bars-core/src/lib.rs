@@ -7,6 +7,7 @@
 
 pub mod doc_path;
 pub mod indexing;
+pub mod instruction;
 pub mod models;
 pub mod outline;
 pub mod search;

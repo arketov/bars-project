@@ -26,7 +26,7 @@ title: Как соглашение о документации доходит д
 - `bars-docs` — как вести документацию: раскладка ([layout.md](layout.md)), оформление для индексации ([bars-instruction.md](bars-instruction.md)), ADR, жизненный цикл фичи.
 - `bars-session-log` — журнал сессии ([session-log.md](session-log.md)): когда и как писать `log.md`, как писать `handoff.md`, как начать с последнего handoff.
 
-Skills ставятся в пользовательскую папку клиента, а не в проект: bars не пишет в репозиторий ничего, кроме `.bars` и `BARS_INSTRUCTION.md` (Т-5, Т-8). Установка и удаление трогают только папки skills с именами bars. Путь к папке skills в Codex проверяется при реализации среза 4.
+Skills ставятся в пользовательскую папку клиента, а не в проект: bars не пишет в репозиторий ничего, кроме `.bars` и `BARS_INSTRUCTION.md` (Т-5, Т-8). Установка и удаление трогают только папки skills с именами bars. Папка skills: Claude Code — `~/.claude/skills`, Codex — `~/.agents/skills` ([clients.md](../clients/clients.md)). Тексты skills лежат в `bars-worker/assets/skills/` и зашиты в bars.
 
 ## BARS_INSTRUCTION.md
 

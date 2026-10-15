@@ -85,10 +85,12 @@
 
 ### Срез 4. Установка в клиенты и хук
 
-- `install` / `uninstall` для Claude Code и Codex с бэкапом и атомарной записью (`features/clients/clients.md`);
-- `bars-cli hook session-start` с поиском корня проекта;
-- `BARS_INSTRUCTION.md` с советом о раскладке и текстовая инструкция по установке;
-- skills `bars-docs` и `bars-session-log`: написать, ставить и удалять вместе с установкой; проверить, куда Codex ставит skills.
+- [x] `install` / `uninstall` для Claude Code и Codex — `bars-worker/src/clients/` (`mod.rs`, `json.rs`, `codex_toml.rs`, `fsx.rs`: копия `.bars-backup`, запись через временный файл и переименование, только записи `bars`, идемпотентность), обработчики в `handler/mod.rs`, пути — `WorkerConfig.install_env`; сделано 15-10-2026. 6 модульных тестов на временных копиях (чужие записи, порядок ключей, повторная установка, переезд путей, удаление, битые файлы) и тест обработчика по каналу; настоящие `~/.claude` и `~/.codex` тесты не трогают. Решения агента — в `features/clients/clients.md`, OQ-53 (`serde_json` вместо `jsonc-parser`), OQ-54 (skills Codex — `~/.agents/skills`);
+- [x] `bars-cli install`, `uninstall`, `install --print-instruction`, `hook session-start` — `bars-cli/src/` (`hook.rs`, `instruction.rs`, `render.rs`), 3 интеграционных теста (хук с корнем по git, install, print-instruction). Корень проекта по `cwd` ищет воркер (`session_start`), хук всегда выходит с кодом 0;
+- [x] `BARS_INSTRUCTION.md` — `bars-core/assets/`, `instruction::sync` по хешу после каждой успешной проверки (Т-8);
+- [x] skills `bars-docs` и `bars-session-log` — `bars-worker/assets/skills/`, ставятся и удаляются вместе с установкой; Codex читает `~/.agents/skills`.
+
+Не сделано: проверка устаревших путей при старте воркера (`clients.md`); проверка на настоящих Claude Code и Codex (хук и skills руками не проверялись; Codex требует `/hooks`).
 
 Приёмка: Т-6 (хук), Т-8, Т-20 (install), Т-21 (CLI и текстовая инструкция), Т-28.
 

@@ -23,6 +23,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError, Weak};
 use std::time::{Duration, SystemTime};
 
+use crate::clients::InstallEnv;
 use bars_core::indexing::indexer::UpdateReport;
 use bars_core::settings::{DEFAULT_DOCS_ROOT, Settings, project_config_path};
 use bars_protocol::ProjectState;
@@ -55,6 +56,8 @@ pub struct WorkerConfig {
     pub periodic_interval: Duration,
     /// Сколько события слежения копятся до пачки.
     pub debounce: Duration,
+    /// Куда `install` и `uninstall` пишут записи клиентов; `None` — пути не определились.
+    pub install_env: Option<InstallEnv>,
 }
 
 impl WorkerConfig {
@@ -63,6 +66,7 @@ impl WorkerConfig {
             bars_home,
             periodic_interval: PERIODIC_INTERVAL,
             debounce: DEBOUNCE,
+            install_env: InstallEnv::detect(),
         }
     }
 }
@@ -410,6 +414,11 @@ impl Worker {
     /// Менеджер моделей: embed-модель для эмбеддинга запроса поиска.
     pub fn models(&self) -> &Models {
         &self.inner.models
+    }
+
+    /// Пути установки в клиенты (`install`, `uninstall`).
+    pub fn install_env(&self) -> Option<&InstallEnv> {
+        self.inner.config.install_env.as_ref()
     }
 
     pub fn bars_home(&self) -> &Path {

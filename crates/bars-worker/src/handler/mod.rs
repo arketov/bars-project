@@ -19,13 +19,15 @@ use bars_core::settings::Settings;
 use bars_core::storage::{Index, Journal, index_path};
 use bars_protocol::{
     AcceptedOutput, AppliedParams, Call, ClientKind, ErrorKind, Heading, INTERNAL_ERROR,
-    ModelStatus, ModuleInfo, OutlineOutput, OutlineParams, ProjectInfo, ProjectState,
-    ProjectsOutput, ReadOutput, ReadParams, RegisterOutput, RegisterParams, ReindexParams,
-    RpcError, ScoreKind, SearchHit, SearchOutput, SearchParams, SessionStartParams, StatusOutput,
-    StatusParams, Target, UnregisterOutput, UnregisterParams, output_value,
+    InstallOutput, InstallParams, ModelStatus, ModuleInfo, OutlineOutput, OutlineParams,
+    ProjectInfo, ProjectState, ProjectsOutput, ReadOutput, ReadParams, RegisterOutput,
+    RegisterParams, ReindexParams, RpcError, ScoreKind, SearchHit, SearchOutput, SearchParams,
+    SessionStartParams, StatusOutput, StatusParams, Target, UninstallOutput, UninstallParams,
+    UnregisterOutput, UnregisterParams, output_value,
 };
 use serde_json::Value;
 
+use crate::clients::{self, InstallEnv};
 use crate::worker::{ProjectSnapshot, Worker, rfc3339};
 use errors::{doc_path_error, outline_error, read_error, search_error, worker_error};
 
@@ -293,6 +295,30 @@ impl WorkerHandler {
         Ok(AcceptedOutput { accepted: true })
     }
 
+    fn install_env(&self) -> Result<&InstallEnv, RpcError> {
+        self.worker.install_env().ok_or_else(|| {
+            RpcError::standard(
+                INTERNAL_ERROR,
+                "не удалось определить домашнюю папку или расположение exe bars",
+            )
+        })
+    }
+
+    fn install(&self, params: InstallParams) -> Result<InstallOutput, RpcError> {
+        let done = clients::install(self.install_env()?, params.client).map_err(internal)?;
+        Ok(InstallOutput {
+            changed_files: paths(done.changed_files),
+            needs_hook_approval: done.needs_hook_approval,
+        })
+    }
+
+    fn uninstall(&self, params: UninstallParams) -> Result<UninstallOutput, RpcError> {
+        let changed = clients::uninstall(self.install_env()?, params.client).map_err(internal)?;
+        Ok(UninstallOutput {
+            changed_files: paths(changed),
+        })
+    }
+
     pub async fn dispatch(&self, call: Call) -> Result<Value, RpcError> {
         match call {
             // `hello` обрабатывает цикл соединения.
@@ -309,11 +335,8 @@ impl WorkerHandler {
             Call::Register(params) => self.register(params).await.map(|out| output_value(&out)),
             Call::Unregister(params) => self.unregister(params).map(|out| output_value(&out)),
             Call::SessionStart(params) => self.session_start(params).map(|out| output_value(&out)),
-            // Установка в клиенты — срез 4 (`integrations/clients.md`).
-            Call::Install(_) | Call::Uninstall(_) => Err(RpcError::standard(
-                INTERNAL_ERROR,
-                "install и uninstall пока не реализованы",
-            )),
+            Call::Install(params) => self.install(params).map(|out| output_value(&out)),
+            Call::Uninstall(params) => self.uninstall(params).map(|out| output_value(&out)),
         }
     }
 }
@@ -326,6 +349,13 @@ impl bars_protocol::Handler for WorkerHandler {
 
 fn internal(error: impl std::fmt::Display) -> RpcError {
     RpcError::standard(INTERNAL_ERROR, error.to_string())
+}
+
+fn paths(files: Vec<PathBuf>) -> Vec<String> {
+    files
+        .into_iter()
+        .map(|file| file.display().to_string())
+        .collect()
 }
 
 fn to_u32(value: usize) -> u32 {

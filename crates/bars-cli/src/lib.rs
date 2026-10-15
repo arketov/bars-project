@@ -5,6 +5,8 @@
 //! (`main.rs`) только разбирает аргументы и вызывает [`run`]; тесты вызывают [`run`] со своим
 //! каналом и своим способом запуска воркера.
 
+mod hook;
+mod instruction;
 mod render;
 
 use std::io::{self, Write};
@@ -12,9 +14,10 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use bars_protocol::{
-    Client, ClientError, ClientKind, EXIT_FAILURE, Endpoint, LAUNCH_DEADLINE, Method,
-    OutlineParams, ProjectsParams, ReadParams, RegisterParams, ReindexParams, SearchParams,
-    StatusParams, Target, UnregisterParams, connect_or_launch_with, spawn_worker, worker_exe,
+    Client, ClientError, ClientKind, EXIT_FAILURE, Endpoint, InstallClient, InstallParams,
+    LAUNCH_DEADLINE, Method, OutlineParams, ProjectsParams, ReadParams, RegisterParams,
+    ReindexParams, SearchParams, StatusParams, Target, UninstallParams, UnregisterParams,
+    connect_or_launch_with, spawn_worker, worker_exe,
 };
 use clap::{Args, Parser, Subcommand};
 use serde::Serialize;
@@ -69,6 +72,51 @@ pub enum Command {
     },
     /// Снять проект с регистрации (файлы и индекс не удаляются).
     Unregister,
+    /// Подключить bars к клиенту: MCP-сервер, хук начала сессии и skills.
+    Install(InstallArgs),
+    /// Убрать bars из клиента: только записи и skills bars.
+    Uninstall {
+        /// Клиент, из которого убрать bars.
+        #[arg(long, value_enum)]
+        client: ClientArg,
+    },
+    /// Команды для хуков клиентов.
+    Hook {
+        #[command(subcommand)]
+        event: HookEvent,
+    },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum HookEvent {
+    /// Хук начала сессии: читает JSON клиента из stdin и ставит проект на проверку.
+    SessionStart,
+}
+
+/// Клиент, в который ставится bars.
+#[derive(Debug, Clone, Copy, clap::ValueEnum)]
+pub enum ClientArg {
+    ClaudeCode,
+    Codex,
+}
+
+impl From<ClientArg> for InstallClient {
+    fn from(client: ClientArg) -> Self {
+        match client {
+            ClientArg::ClaudeCode => Self::ClaudeCode,
+            ClientArg::Codex => Self::Codex,
+        }
+    }
+}
+
+#[derive(Debug, Args)]
+pub struct InstallArgs {
+    /// Клиент, в который поставить bars.
+    #[arg(long, value_enum, required_unless_present = "print_instruction")]
+    pub client: Option<ClientArg>,
+    /// Только напечатать текстовую инструкцию по установке для агента.
+    #[arg(long, conflicts_with = "client")]
+    pub print_instruction: bool,
 }
 
 #[derive(Debug, Args)]
@@ -124,6 +172,8 @@ pub struct Env {
     /// Рабочая папка клиента; по ней воркер находит проект (Т-15).
     pub cwd: PathBuf,
     pub launch: Launch,
+    /// Stdin хука: JSON, который клиент передал команде `hook`. Читает `main`.
+    pub hook_input: Option<String>,
 }
 
 impl Env {
@@ -133,6 +183,7 @@ impl Env {
             endpoint: Endpoint::current()?,
             cwd: std::env::current_dir()?,
             launch: Launch::Worker,
+            hook_input: None,
         })
     }
 }
@@ -141,6 +192,23 @@ impl Env {
 /// (ошибка запроса), `2` (воркер недоступен), `3` (нужна переиндексация).
 pub async fn run(cli: Cli, env: &Env, out: &mut dyn Write, err: &mut dyn Write) -> i32 {
     let json = cli.json;
+    if matches!(cli.command, Command::Hook { .. }) {
+        return hook::session_start(env, err).await;
+    }
+    if let Command::Install(InstallArgs {
+        print_instruction: true,
+        ..
+    }) = &cli.command
+    {
+        let text = instruction::text(std::env::current_exe().ok().as_deref());
+        return match writeln!(out, "{text}") {
+            Ok(()) => 0,
+            Err(error) => {
+                let _ = writeln!(err, "bars-cli: не удалось записать вывод: {error}");
+                EXIT_FAILURE
+            }
+        };
+    }
     match execute(cli, env, out).await {
         Ok(()) => 0,
         Err(Failure::Client(error)) => {
@@ -326,6 +394,32 @@ async fn execute(cli: Cli, env: &Env, out: &mut dyn Write) -> Result<(), Failure
                 render::register,
             )
         }
+        Command::Install(args) => {
+            let which = args
+                .client
+                .expect("клиент обязателен без --print-instruction");
+            let params = InstallParams {
+                client: which.into(),
+            };
+            emit(
+                out,
+                json,
+                &call(&mut client, &params).await?,
+                render::install,
+            )
+        }
+        Command::Uninstall { client: which } => {
+            let params = UninstallParams {
+                client: which.into(),
+            };
+            emit(
+                out,
+                json,
+                &call(&mut client, &params).await?,
+                render::uninstall,
+            )
+        }
+        Command::Hook { .. } => unreachable!("hook разобран в run"),
         Command::Unregister => {
             let params = UnregisterParams { target };
             emit(

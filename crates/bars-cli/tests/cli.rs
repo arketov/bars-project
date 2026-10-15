@@ -8,6 +8,7 @@ use std::time::{Duration, Instant};
 
 use bars_cli::{Cli, Env, Launch, run};
 use bars_protocol::Endpoint;
+use bars_worker::clients::InstallEnv;
 use bars_worker::serve::serve;
 use bars_worker::worker::WorkerConfig;
 use bars_worker::worker::models::fake::FakeProvider;
@@ -43,7 +44,13 @@ impl Harness {
                 Arc::clone(&provider),
             );
             Launch::With(Arc::new(move || {
-                let config = WorkerConfig::new(home.clone());
+                let mut config = WorkerConfig::new(home.clone());
+                // Настоящие ~/.claude и ~/.codex не трогаются: клиенты живут во временной папке.
+                config.install_env = Some(InstallEnv {
+                    home: home.join("client-home"),
+                    mcp_exe: PathBuf::from("/opt/bars/bars-mcp"),
+                    cli_exe: PathBuf::from("/opt/bars/bars-cli"),
+                });
                 let (endpoint, provider) = (endpoint.clone(), Arc::clone(&provider));
                 handle.spawn(async move { serve(config, &endpoint, provider).await });
                 Ok(())
@@ -53,6 +60,7 @@ impl Harness {
             endpoint,
             cwd: projects.path().to_path_buf(),
             launch,
+            hook_input: None,
         };
         Self {
             home,
@@ -265,6 +273,7 @@ async fn unreachable_worker_exits_with_two() {
     let env = Env {
         endpoint: Endpoint::named("cli-no-worker"),
         cwd: home.path().to_path_buf(),
+        hook_input: None,
         launch: Launch::With(Arc::new(|| {
             Err(std::io::Error::new(
                 std::io::ErrorKind::NotFound,
@@ -336,7 +345,9 @@ fn arguments_are_checked_before_the_worker_is_called() {
     assert!(parse(&["outline", "a.md", "--levels", "0"]).is_err());
     assert!(parse(&["outline", "a.md", "--levels", "7"]).is_err());
     assert!(parse(&["outline", "a.md", "--under", "A", "--under-line", "3"]).is_err());
-    assert!(parse(&["install", "--client", "codex"]).is_err());
+    assert!(parse(&["install"]).is_err());
+    assert!(parse(&["install", "--client", "other"]).is_err());
+    assert!(parse(&["install", "--client", "codex", "--print-instruction"]).is_err());
     let cli = parse(&[
         "search",
         "несколько",
@@ -349,4 +360,82 @@ fn arguments_are_checked_before_the_worker_is_called() {
     ])
     .unwrap();
     assert!(cli.json);
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn install_and_uninstall_edit_client_files_in_temp_home() {
+    let harness = Harness::new("install");
+    let env = harness.env.clone();
+    let client_home = harness.home.path().join("client-home");
+
+    let installed = bars(&env, &["--json", "install", "--client", "codex"]).await;
+    let value = json(&installed);
+    assert_eq!(value["needs_hook_approval"], true);
+    assert!(
+        value["changed_files"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|file| file.as_str().unwrap().ends_with("config.toml"))
+    );
+    let config = fs::read_to_string(client_home.join(".codex/config.toml")).unwrap();
+    assert!(config.contains("[mcp_servers.bars]"), "{config}");
+
+    let human = bars(&env, &["install", "--client", "codex"]).await;
+    assert_eq!(human.code, 0, "stderr: {}", human.err);
+    assert!(human.out.contains("уже установлен"), "{}", human.out);
+    assert!(human.out.contains("/hooks"), "{}", human.out);
+
+    let removed = json(&bars(&env, &["--json", "uninstall", "--client", "codex"]).await);
+    assert!(!removed["changed_files"].as_array().unwrap().is_empty());
+    let config = fs::read_to_string(client_home.join(".codex/config.toml")).unwrap();
+    assert!(!config.contains("bars"), "{config}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn print_instruction_needs_no_worker() {
+    let harness = Harness::new("instruction");
+    let out = bars(&harness.env, &["install", "--print-instruction"]).await;
+    assert_eq!(out.code, 0, "stderr: {}", out.err);
+    assert!(
+        out.out.contains("install --client claude-code"),
+        "{}",
+        out.out
+    );
+    assert!(out.out.contains("--accept-model-change"), "{}", out.out);
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn session_start_hook_registers_project_and_never_fails() {
+    let harness = Harness::new("hook");
+    let root = harness.project("hooked");
+    // Корень по git: сессия открыта в подпапке документации.
+    fs::create_dir(root.join(".git")).unwrap();
+    let mut env = harness.env_in(&root);
+    env.hook_input = Some(format!(
+        "{{\"cwd\": {}, \"source\": \"startup\"}}",
+        serde_json::to_string(&root.join("docs").display().to_string()).unwrap()
+    ));
+    let hook = bars(&env, &["hook", "session-start"]).await;
+    assert_eq!(hook.code, 0, "stderr: {}", hook.err);
+    assert!(hook.out.is_empty());
+    wait_status(&harness.env_in(&root), "индексация после хука", indexed).await;
+    let projects = json(&bars(&env, &["--json", "projects"]).await);
+    assert_eq!(projects["projects"].as_array().unwrap().len(), 1);
+    // BARS_INSTRUCTION.md появляется после проверки актуальности (Т-8).
+    assert!(root.join("docs/BARS_INSTRUCTION.md").exists());
+
+    // Мусор на входе: код выхода всё равно 0.
+    env.hook_input = Some("не json".into());
+    let bad = bars(&env, &["hook", "session-start"]).await;
+    assert_eq!(bad.code, 0);
+    assert!(bad.err.contains("bars-cli hook"), "{}", bad.err);
+
+    // Воркер недоступен — тоже 0.
+    let dead = Env {
+        launch: Launch::With(Arc::new(|| Ok(()))),
+        endpoint: Endpoint::named("cli-hook-dead"),
+        ..env
+    };
+    assert_eq!(bars(&dead, &["hook", "session-start"]).await.code, 0);
 }

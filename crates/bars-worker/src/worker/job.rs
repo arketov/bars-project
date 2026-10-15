@@ -95,6 +95,11 @@ pub fn run(env: &JobEnv<'_>, project: &Path, job: &Job) -> JobResult {
         ),
         None => check_project(env, project, &settings, &mut result),
     };
+    if matches!(outcome, Outcome::Updated(_)) {
+        // Т-8: инструкция сверяется после каждой успешной проверки. Сбой записи индексацию
+        // не ломает: файл поправится при следующей проверке.
+        let _ = bars_core::instruction::sync(project, &settings.docs_root);
+    }
     result.outcome = outcome;
     result
 }
