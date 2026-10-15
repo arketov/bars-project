@@ -1,4 +1,4 @@
-//! Индексация проекта: проверка актуальности и полная переиндексация (`docs/indexing/updates.md`,
+//! Индексация проекта: проверка актуальности и полная переиндексация (`docs/features/indexing/updates.md`,
 //! Т-9, Т-22, Т-25, НФТ-1).
 //!
 //! Функции работают с одним проектом и одним индексом. Очередь, слежение за файлами и состояния
@@ -17,7 +17,7 @@ use crate::storage::{
     Compatibility, DocumentRecord, Index, Journal, Layout, StorageError, StoredDocument,
 };
 
-/// Настройки, от которых зависит нарезка проекта (`docs/storage/settings.md`).
+/// Настройки, от которых зависит нарезка проекта (`docs/features/settings/settings.md`).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct IndexSettings {
     pub chunking: ChunkingParams,
@@ -89,7 +89,7 @@ pub enum IndexingError {
 
 /// Проверяет актуальность индекса и приводит его в соответствие с диском.
 ///
-/// Порядок и правила — `docs/indexing/updates.md`. Ошибка эмбеддинга прерывает проверку:
+/// Порядок и правила — `docs/features/indexing/updates.md`. Ошибка эмбеддинга прерывает проверку:
 /// записанные документы остаются, параметры нарезки в индексе не обновляются.
 pub fn update_index(
     project_root: &Path,

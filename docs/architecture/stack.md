@@ -31,7 +31,7 @@ title: Стек bars — библиотеки, версии и почему он
 
 | Что | Крейт | Версия | Зачем |
 |---|---|---|---|
-| Встроенные embed и rerank | `fastembed` с фичами `qwen3`, `nomic-v2-moe`, `directml` | 7.1.1 | Т-17; подробности — [models/local-models.md](../models/local-models.md) |
+| Встроенные embed и rerank | `fastembed` с фичами `qwen3`, `nomic-v2-moe`, `directml` | 7.1.1 | Т-17; подробности — [features/models/local-models.md](../features/models/local-models.md) |
 | ONNX Runtime | `ort` (через fastembed) | 2.0.0-rc.13 | статически вшивается в `bars` при сборке |
 | HTTP к внешним моделям | `reqwest` с фичей `json` | 0.13.5 | Т-17; rustls по умолчанию |
 
@@ -53,11 +53,11 @@ title: Стек bars — библиотеки, версии и почему он
 
 | Что | Крейт | Версия | Зачем |
 |---|---|---|---|
-| Разбор Markdown | свой построчный разбор | — | [indexing/chunking.md](../indexing/chunking.md); `pulldown-cmark` 0.13 — только в тестах как эталон |
+| Разбор Markdown | свой построчный разбор | — | [features/indexing/chunking.md](../features/indexing/chunking.md); `pulldown-cmark` 0.13 — только в тестах как эталон |
 | Frontmatter | `serde-saphyr` | 2.0 | `title` документа (Т-11); чистый Rust |
 | Слежение за файлами | `notify` + `notify-debouncer-full` | 8.2 / 0.7 | Т-10 |
 | Пути пользователя | `dirs` | 7.0 | `<домашняя папка>/.bars/` |
-| Чтение `settings.toml` и `.bars/config.toml` | `toml` + `serde` | 1.1 / 1.0 | [storage/settings.md](../storage/settings.md); только чтение, запись из окна — `toml_edit` ниже |
+| Чтение `settings.toml` и `.bars/config.toml` | `toml` + `serde` | 1.1 / 1.0 | [features/settings/settings.md](../features/settings/settings.md); только чтение, запись из окна — `toml_edit` ниже |
 
 ## Агенты и клиенты bars
 

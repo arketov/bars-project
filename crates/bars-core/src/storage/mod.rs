@@ -1,4 +1,4 @@
-//! Хранилище: индекс проекта в SQLite (`docs/storage/schema.md`, Т-5).
+//! Хранилище: индекс проекта в SQLite (`docs/architecture/schema.md`, Т-5).
 
 mod index;
 pub mod stem;

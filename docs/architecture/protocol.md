@@ -8,8 +8,8 @@ title: Протокол канала bars — методы, параметры, 
 
 ## Кто пользуется протоколом bars
 
-- **`bars-mcp`** превращает каждый MCP-инструмент в один вызов метода ([agent-tools/mcp-tools.md](../agent-tools/mcp-tools.md)).
-- **`bars-cli`** превращает каждую команду в один вызов метода ([agent-tools/cli.md](../agent-tools/cli.md)). Флаг `--json` печатает ответ метода как есть.
+- **`bars-mcp`** превращает каждый MCP-инструмент в один вызов метода ([features/agent-tools/mcp-tools.md](../features/agent-tools/mcp-tools.md)).
+- **`bars-cli`** превращает каждую команду в один вызов метода ([features/agent-tools/cli.md](../features/agent-tools/cli.md)). Флаг `--json` печатает ответ метода как есть.
 - **Окно** живёт в том же процессе, что и воркер, и канал не использует. Его команды Tauri вызывают те же обработчики, что и методы протокола, поэтому окно, MCP и CLI получают одинаковые ответы (Т-20).
 
 ## Формат сообщений канала
@@ -25,14 +25,14 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 - `cwd` — рабочая папка клиента. `bars-mcp` передаёт свою cwd, то есть папку сессии агента; `bars-cli` — папку, из которой его запустили;
 - `project` — необязательный явный проект: абсолютный путь к корню или имя проекта, если оно однозначно.
 
-Если `project` не задан, проект — ближайшая к `cwd` зарегистрированная папка вверх по дереву (Т-15). Не нашлось — ошибка `project_not_found`. Как проекты регистрируются и как называются — [projects.md](projects.md).
+Если `project` не задан, проект — ближайшая к `cwd` зарегистрированная папка вверх по дереву (Т-15). Не нашлось — ошибка `project_not_found`. Как проекты регистрируются и как называются — [projects.md](../features/projects/projects.md).
 
 ## Методы протокола bars
 
 | Метод | Параметры | Ответ | Кто вызывает |
 |---|---|---|---|
 | `hello` | `protocol`, `client` (`mcp` / `cli`), `client_version` | `protocol`, `worker_version` | все |
-| `search` | `cwd`, `project`, `query`, `modules`, `files`, `limit`, `candidates`, `min_score` | результаты и применённые параметры ([search/hybrid-search.md](../search/hybrid-search.md)) | MCP, CLI |
+| `search` | `cwd`, `project`, `query`, `modules`, `files`, `limit`, `candidates`, `min_score` | результаты и применённые параметры ([features/search/hybrid-search.md](../features/search/hybrid-search.md)) | MCP, CLI |
 | `outline` | `cwd`, `project`, `path`, `levels`, `under` (цепочка заголовков) или `under_line` | заголовки с номерами строк (Т-26) | MCP, CLI |
 | `read` | `cwd`, `project`, `path` | текст с номерами строк, `title` | MCP, CLI |
 | `projects` | — | проекты: путь, имя, корень документации, состояние, модули с числом документов | MCP, CLI |
@@ -54,7 +54,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 - `status` — поля из таблицы в [worker.md](worker.md) и `path` проекта; время — RFC 3339.
 - `projects` и `register` — описание проекта: путь, имя, корень документации, состояние, модули с числом документов.
 
-Установкой в клиенты занимается воркер, а не `bars-cli`: так у окна и CLI одна реализация (Т-21), а пути к `bars-mcp` и `bars-cli` воркер знает от своего exe ([integrations/clients.md](../integrations/clients.md)).
+Установкой в клиенты занимается воркер, а не `bars-cli`: так у окна и CLI одна реализация (Т-21), а пути к `bars-mcp` и `bars-cli` воркер знает от своего exe ([features/clients/clients.md](../features/clients/clients.md)).
 
 ## Что воркер реализует из методов протокола
 
@@ -72,7 +72,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 |---|---|---|
 | -32001 | `protocol_mismatch` | нет `hello` или чужая версия протокола |
 | -32002 | `project_not_found` | проект не найден по `cwd` или `project`; текст подсказывает `bars-cli register` |
-| -32003 | `project_unavailable` | папки проекта нет на диске ([projects.md](projects.md)) |
+| -32003 | `project_unavailable` | папки проекта нет на диске ([projects.md](../features/projects/projects.md)) |
 | -32004 | `reindex_required` | индекс построен другой моделью или старой схемой; поиск не работает до согласия пользователя (Т-25) |
 | -32005 | `reindex_needs_consent` | `reindex` по проекту в состоянии `reindex_required` без согласия пользователя (Т-25) |
 | -32006 | `file_not_found` | нет файла для `read` или `outline` |
@@ -84,7 +84,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 
 ## Согласие на переиндексацию после смены модели
 
-Переиндексацию проекта в состоянии `reindex_required` запускает только пользователь (Т-25): кнопкой в окне или командой `bars-cli reindex --accept-model-change`, которая передаёт `accept_model_change: true`. От `bars-mcp` воркер этот параметр не принимает: в вызове от MCP он сбрасывается в `false`, и агент получает `reindex_needs_consent`. Флаг CLI — согласие человека; текстовая инструкция по установке для агентов ([integrations/clients.md](../integrations/clients.md)) запрещает агенту передавать его самому.
+Переиндексацию проекта в состоянии `reindex_required` запускает только пользователь (Т-25): кнопкой в окне или командой `bars-cli reindex --accept-model-change`, которая передаёт `accept_model_change: true`. От `bars-mcp` воркер этот параметр не принимает: в вызове от MCP он сбрасывается в `false`, и агент получает `reindex_needs_consent`. Флаг CLI — согласие человека; текстовая инструкция по установке для агентов ([features/clients/clients.md](../features/clients/clients.md)) запрещает агенту передавать его самому.
 
 ## Порог агента вне пределов
 

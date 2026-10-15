@@ -1,11 +1,11 @@
-//! Что поиску нужно от rerank-модели (`docs/search/hybrid-search.md`, «Реранк кандидатов»).
+//! Что поиску нужно от rerank-модели (`docs/features/search/hybrid-search.md`, «Реранк кандидатов»).
 
 /// Встроенная rerank-модель по умолчанию (Т-17, OQ-22).
 pub const BGE_RERANKER_V2_M3_ID: &str = "BAAI/bge-reranker-v2-m3";
 
 /// Rerank-модель: оценивает, насколько каждый документ отвечает запросу.
 pub trait Reranker {
-    /// Оценки документов в том же порядке, каждая от 0 до 1 (`docs/storage/settings.md`): модель,
+    /// Оценки документов в том же порядке, каждая от 0 до 1 (`docs/features/settings/settings.md`): модель,
     /// которая отдаёт сырой логит, пропускает его через сигмоиду сама.
     fn rerank(&mut self, query: &str, documents: &[&str]) -> Result<Vec<f32>, RerankError>;
 }

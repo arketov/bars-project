@@ -1,4 +1,4 @@
-//! Индекс проекта: файл SQLite со схемой из `docs/storage/schema.md`.
+//! Индекс проекта: файл SQLite со схемой из `docs/architecture/schema.md`.
 //!
 //! Слой хранения не знает ни про обход файлов, ни про модель: он принимает готовые документы,
 //! чанки и векторы и записывает каждый документ одной транзакцией.
@@ -16,7 +16,7 @@ use crate::models::ModelFingerprint;
 /// Версия схемы, которую создаёт и читает эта версия bars.
 pub const SCHEMA_VERSION: u32 = 1;
 
-/// `<проект>/.bars/index.sqlite` (`docs/storage/files.md`).
+/// `<проект>/.bars/index.sqlite` (`docs/architecture/files.md`).
 pub fn index_path(project_root: &Path) -> PathBuf {
     project_root.join(".bars").join("index.sqlite")
 }

@@ -59,19 +59,19 @@ fn finds_identifiers_and_respects_the_module_filter() {
 
     // Т-12: точный идентификатор, которого нет в соседних документах, — первым без реранка.
     for (identifier, expected) in [
-        ("agent_min_score", "docs/storage/settings.md"),
-        ("model_doc_prefix", "docs/storage/schema.md"),
+        ("agent_min_score", "docs/features/settings/settings.md"),
+        ("model_doc_prefix", "docs/architecture/schema.md"),
     ] {
         let response = ask(&mut model, &query(identifier));
         assert_eq!(response.hits[0].path, expected, "{identifier}");
     }
 
     // Т-14: при отмеченном модуле результатов из других модулей нет.
-    let mut storage_only = query("порог релевантности результатов поиска");
-    storage_only.modules = vec!["storage".into()];
-    let response = ask(&mut model, &storage_only);
+    let mut features_only = query("порог релевантности результатов поиска");
+    features_only.modules = vec!["features".into()];
+    let response = ask(&mut model, &features_only);
     assert!(!response.hits.is_empty());
-    assert!(response.hits.iter().all(|hit| hit.module == "storage"));
+    assert!(response.hits.iter().all(|hit| hit.module == "features"));
 
     // Смысловой запрос без слов из документа находит нужный раздел среди первых пяти.
     let response = ask(&mut model, &query("как отсеять нерелевантные результаты"));
@@ -80,7 +80,7 @@ fn finds_identifiers_and_respects_the_module_filter() {
         top.iter().any(|path| {
             matches!(
                 *path,
-                "docs/storage/settings.md" | "docs/search/hybrid-search.md"
+                "docs/features/settings/settings.md" | "docs/features/search/hybrid-search.md"
             )
         }),
         "{top:?}"

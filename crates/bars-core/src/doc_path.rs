@@ -1,4 +1,4 @@
-//! Путь документа из запроса агента или CLI (`docs/agent-tools/mcp-tools.md`, Т-26, OQ-35).
+//! Путь документа из запроса агента или CLI (`docs/features/agent-tools/mcp-tools.md`, Т-26, OQ-35).
 //!
 //! Общий для `outline` и `read`: оба принимают один и тот же вид пути.
 

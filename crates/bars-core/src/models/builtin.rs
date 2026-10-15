@@ -1,4 +1,4 @@
-//! Встроенная bge-m3 через fastembed-rs (`docs/models/local-models.md`, Т-17).
+//! Встроенная bge-m3 через fastembed-rs (`docs/features/models/local-models.md`, Т-17).
 
 use std::path::Path;
 
@@ -15,7 +15,7 @@ const BGE_M3_MAX_LENGTH: usize = 8192;
 /// Меньшие пачки быстрее больших: меньше лишнего дополнения коротких текстов (`docs/knowledge/spike-search.md`).
 const BATCH_SIZE: usize = 4;
 
-/// Где считать встроенную модель (`[device]` в `docs/storage/settings.md`).
+/// Где считать встроенную модель (`[device]` в `docs/features/settings/settings.md`).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Accelerator {
     /// Видеокарта, если она есть, иначе процессор.
