@@ -1,0 +1,74 @@
+/* Общая тема мокапов bars: палитра «Малина» (OQ-29), базовые элементы.
+   Тема — data-mode (light | dark) на <html>, ставит theme.js по настройке «Оформление». */
+
+:root, [data-mode="light"] {
+  --bg: #f5f4f6; --panel: #ffffff; --panel-2: #f8f7f9; --line: #e5e2e7; --line-2: #d4d0d8;
+  --text: #1d1a20; --muted: #67616c; --faint: #a09aa6;
+  --accent: #d6336c; --accent-text: #b8245a; --accent-soft: #fde8ef; --on-accent: #ffffff;
+}
+[data-mode="dark"] {
+  --bg: #131115; --panel: #1b181d; --panel-2: #211d23; --line: #2c282f; --line-2: #3a353e;
+  --text: #ece8ee; --muted: #988f9d; --faint: #665e6b;
+  --accent: #f0568c; --accent-text: #ff7aa6; --accent-soft: #3a1a27; --on-accent: #2a0814;
+}
+
+/* Цвета оценки и состояний — общие для всех палитр */
+:root, [data-mode="light"] {
+  --good: #2b8a3e; --good-soft: #e6f4ea; --mid: #b7791f; --mid-soft: #fbf1dc;
+  --low: #7a7f86; --low-soft: #eceef0; --bad: #c92a2a; --bad-soft: #fdeaea;
+  --shadow: 0 1px 2px rgba(20,28,36,.05), 0 4px 16px rgba(20,28,36,.05);
+}
+[data-mode="dark"] {
+  --good: #4cc864; --good-soft: #18291d; --mid: #e8b130; --mid-soft: #2f2716;
+  --low: #8e959c; --low-soft: #24282b; --bad: #ff6b6b; --bad-soft: #33201f;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+}
+
+:root { --radius: 12px; --mono: "Cascadia Mono", "SF Mono", Consolas, monospace; }
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font: 14px/1.5 "Segoe UI Variable Text", "Segoe UI", -apple-system, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; overflow: hidden;
+  transition: background-color .2s, color .2s;
+}
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+::selection { background: var(--accent-soft); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 10px; border: 2px solid transparent; background-clip: content-box; }
+
+.app { display: grid; grid-template-columns: 300px 1fr; height: 100vh; }
+
+/* ---------- боковая панель ---------- */
+aside { background: var(--panel); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+.brand { padding: 18px 18px 12px; display: flex; align-items: center; gap: 10px; }
+.logo { width: 30px; height: 30px; border-radius: 9px; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font-weight: 800; font-size: 16px; letter-spacing: -.5px; }
+.brand b { font-size: 15px; }
+.brand small { display: block; color: var(--muted); font-size: 11.5px; margin-top: -2px; }
+.sfoot { border-top: 1px solid var(--line); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 12.5px; gap: 10px; }
+.link { border: 0; background: none; color: var(--accent-text); font-weight: 600; padding: 2px 0; }
+.link:hover { text-decoration: underline; }
+
+/* ---------- общие элементы ---------- */
+input[type=checkbox] { appearance: none; width: 16px; height: 16px; border: 1.5px solid var(--line-2); border-radius: 5px; background: var(--panel); display: grid; place-items: center; flex: none; margin: 1px 0 0; cursor: pointer; transition: .12s; }
+input[type=checkbox]:checked, input[type=checkbox]:indeterminate { background: var(--accent); border-color: var(--accent); }
+input[type=checkbox]:checked::after { content: ""; width: 8px; height: 4px; border-left: 2px solid var(--on-accent); border-bottom: 2px solid var(--on-accent); transform: rotate(-45deg) translate(1px,-1px); }
+input[type=checkbox]:indeterminate::after { content: ""; width: 8px; height: 2px; background: var(--on-accent); border-radius: 1px; }
+kbd { font: 11px/1 var(--mono); padding: 3px 5px; border: 1px solid var(--line-2); border-bottom-width: 2px; border-radius: 5px; color: var(--muted); background: var(--panel-2); }
+.btn { border: 0; background: var(--accent); color: var(--on-accent); font-weight: 600; padding: 8px 14px; border-radius: 9px; display: inline-flex; gap: 7px; align-items: center; transition: filter .15s; }
+.btn:hover { filter: brightness(1.08); }
+.ghost { border: 1px solid var(--line-2); background: transparent; padding: 7px 12px; border-radius: 9px; color: var(--muted); font-weight: 600; display: inline-flex; gap: 7px; align-items: center; }
+.ghost:hover { color: var(--text); border-color: var(--faint); }
+.ghost.danger:hover { color: var(--bad); border-color: var(--bad); }
+.dot { width: 8px; height: 8px; border-radius: 50%; flex: none; display: inline-block; }
+.dot.ok { background: var(--good); } .dot.busy { background: var(--accent); animation: pulse 1.2s infinite; } .dot.warn { background: var(--mid); } .dot.off { background: var(--faint); }
+@keyframes pulse { 50% { opacity: .35; } }
+.badge { font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 20px; background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.badge.acc { background: var(--accent-soft); border-color: transparent; color: var(--accent-text); }
+.badge.ok { background: var(--good-soft); border-color: transparent; color: var(--good); }
+.badge.warn { background: var(--mid-soft); border-color: transparent; color: var(--mid); }
+.mono { font-family: var(--mono); font-size: 12px; }

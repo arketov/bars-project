@@ -590,3 +590,43 @@ async fn shutdown_does_not_hang_on_a_paused_queue() {
         .await
         .expect("воркер на паузе должен завершаться");
 }
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn summary_follows_the_queue_and_the_model() {
+    let env = Env::new();
+    let project = env.project("alpha", &[("a.md", DOC)]);
+    let worker = env.start();
+    assert_eq!(worker.summary().health, Health::Idle);
+    assert_eq!(worker.summary().tooltip, "bars");
+
+    worker.pause();
+    worker.register(&project).unwrap();
+    let busy = worker.summary();
+    assert_eq!(busy.health, Health::Busy);
+    assert!(busy.indexing.unwrap().text.contains("alpha"));
+    assert!(busy.tooltip.contains("в очереди"));
+    assert_eq!(busy.projects, 1);
+
+    worker.resume();
+    idle(&worker).await;
+    assert_eq!(worker.summary().health, Health::Idle);
+
+    // Другая модель в настройках: проверка переводит проект в «нужна переиндексация».
+    env.provider.set_model("m2");
+    worker.check_all();
+    wait_until("нужна переиндексация", || {
+        state(&worker, &project) == ProjectState::ReindexRequired
+    })
+    .await;
+    let attention = worker.summary();
+    assert_eq!(attention.health, Health::Attention);
+    assert!(
+        attention
+            .attention
+            .unwrap()
+            .text
+            .contains("Нужна переиндексация: alpha")
+    );
+    assert!(attention.tooltip.contains("нужно внимание"));
+    worker.shutdown().await;
+}

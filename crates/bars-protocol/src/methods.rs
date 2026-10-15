@@ -460,6 +460,201 @@ pub struct TreeOutput {
     pub documents: Vec<TreeDocument>,
 }
 
+// --- методы окна: настройки, модели, ключи, клиенты, корень документации ---
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SettingsGetParams {}
+
+/// Таблица `[embed]` как её показывает и правит окно.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct EmbedDoc {
+    /// `builtin`, `remote` или `local-openai`.
+    pub source: String,
+    pub model: String,
+    #[serde(default)]
+    pub base_url: Option<String>,
+    #[serde(default)]
+    pub api_key_name: Option<String>,
+    #[serde(default)]
+    pub api_key_env: Option<String>,
+    pub batch_size: u32,
+}
+
+/// Таблица `[rerank]`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RerankDoc {
+    pub enabled: bool,
+    pub source: String,
+    pub model: String,
+    #[serde(default)]
+    pub base_url: Option<String>,
+    #[serde(default)]
+    pub api_key_name: Option<String>,
+    #[serde(default)]
+    pub api_key_env: Option<String>,
+}
+
+/// Таблица `[search]`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SearchDoc {
+    pub candidates: u32,
+    pub rerank_candidates: u32,
+    pub results: u32,
+    pub results_reranked: u32,
+    pub min_score_vector: f32,
+    pub min_score_rerank: f32,
+    pub agent_min_score: [f32; 2],
+    pub max_results: u32,
+    pub max_candidates: u32,
+    pub max_rerank_candidates: u32,
+}
+
+/// Таблица `[device]`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct DeviceDoc {
+    /// `auto` или `cpu`.
+    pub accelerator: String,
+}
+
+/// Таблица `[chunking]`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ChunkingDoc {
+    pub min_chars: u32,
+    pub max_chars: u32,
+}
+
+/// Настройки пользователя (`~/.bars/settings.toml`) целиком, с умолчаниями на месте пропущенного.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SettingsDoc {
+    pub embed: EmbedDoc,
+    pub rerank: RerankDoc,
+    pub search: SearchDoc,
+    pub device: DeviceDoc,
+    pub chunking: ChunkingDoc,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SettingsOutput {
+    /// Путь к `settings.toml`.
+    pub file: String,
+    pub settings: SettingsDoc,
+    /// Предупреждения чтения: неизвестные ключи.
+    pub warnings: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SettingsSaveParams {
+    pub settings: SettingsDoc,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SavedOutput {
+    pub saved: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ModelsInfoParams {}
+
+/// Встроенная модель каталога и состояние её файлов.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ModelInfo {
+    pub id: String,
+    /// Размерность вектора; у rerank-модели 0.
+    pub dim: u32,
+    /// `onnx` (процессор или видеокарта) или `candle` (процессор).
+    pub backend: String,
+    /// Предупреждения окна: скорость, память, длина входа.
+    pub warnings: Vec<String>,
+    pub downloaded: bool,
+    pub downloading: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ModelsInfoOutput {
+    pub embed: Vec<ModelInfo>,
+    pub rerank: Vec<ModelInfo>,
+    /// Папка моделей (`~/.bars/models`).
+    pub models_dir: String,
+}
+
+/// Скачивание встроенной модели в фоне; ход виден по `downloading` в `models_info`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ModelDownloadParams {
+    pub id: String,
+}
+
+/// Запись ключа провайдера в хранилище ОС. Значение никогда не попадает в лог и в `Debug`.
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SecretSetParams {
+    pub name: String,
+    pub value: String,
+}
+
+impl std::fmt::Debug for SecretSetParams {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("SecretSetParams")
+            .field("name", &self.name)
+            .field("value", &"<скрыто>")
+            .finish()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SecretStatusParams {
+    pub name: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SecretOutput {
+    /// Запись с таким именем есть в хранилище ОС. Сам ключ окну не отдаётся.
+    pub present: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ClientsStatusParams {}
+
+/// Состояние установки bars в клиент.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ClientStatus {
+    pub client: InstallClient,
+    /// В конфиге клиента есть MCP-запись bars.
+    pub installed: bool,
+    /// Записи указывают не на текущие `bars-mcp` и `bars-cli`: нужна переустановка.
+    pub stale: bool,
+    /// Файлы, которые bars правит у этого клиента.
+    pub files: Vec<String>,
+    /// Хук нужно одобрить в самом клиенте (Codex, `/hooks`).
+    pub needs_hook_approval: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ClientsStatusOutput {
+    pub clients: Vec<ClientStatus>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct InstructionParams {}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct InstructionOutput {
+    /// Текстовая инструкция по установке для агента (Т-21).
+    pub text: String,
+    /// Конфиг MCP-сервера для клиентов, которых bars не умеет ставить сам.
+    pub mcp_config: String,
+}
+
+/// Корень документации проекта: запись в `.bars/config.toml` и полная проверка.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SetDocsRootParams {
+    pub project: String,
+    /// Относительно корня проекта; `.` — сам корень.
+    pub docs_root: String,
+}
+
+/// Проверка всех проектов сейчас: пропавшие возвращаются в работу, если папка на месте.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CheckAllParams {}
+
 /// Кто может вызвать метод: все клиенты канала, только `bars-cli` или только окно.
 macro_rules! audience {
     (All) => {
@@ -553,6 +748,16 @@ methods! {
     IndexCancel: IndexCancelParams => CancelOutput, "index_cancel", Window;
     Activity: ActivityParams => ActivityOutput, "activity", Window;
     Tree: TreeParams => TreeOutput, "tree", Window;
+    SettingsGet: SettingsGetParams => SettingsOutput, "settings_get", Window;
+    SettingsSave: SettingsSaveParams => SavedOutput, "settings_save", Window;
+    ModelsInfo: ModelsInfoParams => ModelsInfoOutput, "models_info", Window;
+    ModelDownload: ModelDownloadParams => AcceptedOutput, "model_download", Window;
+    SecretSet: SecretSetParams => SecretOutput, "secret_set", Window;
+    SecretStatus: SecretStatusParams => SecretOutput, "secret_status", Window;
+    ClientsStatus: ClientsStatusParams => ClientsStatusOutput, "clients_status", Window;
+    Instruction: InstructionParams => InstructionOutput, "instruction", Window;
+    SetDocsRoot: SetDocsRootParams => AcceptedOutput, "set_docs_root", Window;
+    CheckAll: CheckAllParams => AcceptedOutput, "check_all", Window;
 }
 
 /// Ответ метода как JSON-значение.
@@ -610,7 +815,17 @@ mod tests {
         IndexResume(IndexResumeParams),
         IndexCancel(IndexCancelParams),
         Activity(ActivityParams),
-        Tree(TreeParams)
+        Tree(TreeParams),
+        SettingsGet(SettingsGetParams),
+        SettingsSave(SettingsSaveParams),
+        ModelsInfo(ModelsInfoParams),
+        ModelDownload(ModelDownloadParams),
+        SecretSet(SecretSetParams),
+        SecretStatus(SecretStatusParams),
+        ClientsStatus(ClientsStatusParams),
+        Instruction(InstructionParams),
+        SetDocsRoot(SetDocsRootParams),
+        CheckAll(CheckAllParams)
     );
 
     #[test]
@@ -681,6 +896,21 @@ mod tests {
             }),
             Call::from(ActivityParams {}),
             Call::from(TreeParams { target: target() }),
+            Call::from(SettingsGetParams {}),
+            Call::from(ModelsInfoParams {}),
+            Call::from(ModelDownloadParams { id: "m".into() }),
+            Call::from(SecretSetParams {
+                name: "n".into(),
+                value: "v".into(),
+            }),
+            Call::from(SecretStatusParams { name: "n".into() }),
+            Call::from(ClientsStatusParams {}),
+            Call::from(InstructionParams {}),
+            Call::from(SetDocsRootParams {
+                project: "p".into(),
+                docs_root: ".".into(),
+            }),
+            Call::from(CheckAllParams {}),
         ];
         for call in calls {
             assert!(call.window_only(), "{}", call.method());

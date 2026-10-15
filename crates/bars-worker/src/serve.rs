@@ -40,6 +40,17 @@ pub async fn serve(
     endpoint: &Endpoint,
     provider: Arc<dyn ModelProvider>,
 ) -> Result<(), ServeError> {
+    serve_with(config, endpoint, provider, |_| ()).await
+}
+
+/// То же, что [`serve`], но отдаёт обработчик, как только воркер поднят: окно вызывает его
+/// напрямую, без канала (Т-1, Т-20).
+pub async fn serve_with(
+    config: WorkerConfig,
+    endpoint: &Endpoint,
+    provider: Arc<dyn ModelProvider>,
+    ready: impl FnOnce(WorkerHandler),
+) -> Result<(), ServeError> {
     let listener = bind(endpoint).map_err(|error| match error {
         BindError::AlreadyRunning => ServeError::AlreadyRunning,
         other => ServeError::Bind(other),
@@ -55,6 +66,7 @@ pub async fn serve(
     }
     let worker = Worker::start(config, provider)?;
     let handler = Arc::new(WorkerHandler::new(worker.clone()));
+    ready(WorkerHandler::clone(&handler));
     let result = run_server(listener, handler).await;
     worker.shutdown().await;
     result.map_err(ServeError::Accept)

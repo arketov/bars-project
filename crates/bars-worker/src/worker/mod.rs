@@ -10,13 +10,14 @@ mod job;
 pub mod models;
 mod queue;
 mod registry;
+mod summary;
 mod timefmt;
 mod watcher;
 
 #[cfg(test)]
 mod tests;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
@@ -26,6 +27,7 @@ use std::time::{Duration, SystemTime};
 
 use crate::clients::InstallEnv;
 use bars_core::indexing::indexer::UpdateReport;
+use bars_core::secrets::{OsSecrets, SecretStore};
 use bars_core::settings::{DEFAULT_DOCS_ROOT, Settings, project_config_path};
 use bars_protocol::ProjectState;
 use tokio::runtime::Handle;
@@ -38,6 +40,7 @@ pub use models::{
 };
 pub use queue::Priority;
 pub use registry::{Discovered, ProjectEntry, Registry, RegistryError, ResolveError};
+pub use summary::{Health, Line, Summary};
 pub use timefmt::rfc3339;
 
 use control::{JobCell, JobObserver, Pause};
@@ -55,7 +58,7 @@ pub(crate) fn lock<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
     mutex.lock().unwrap_or_else(PoisonError::into_inner)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct WorkerConfig {
     /// `~/.bars`: настройки, реестр, модели.
     pub bars_home: PathBuf,
@@ -64,6 +67,19 @@ pub struct WorkerConfig {
     pub debounce: Duration,
     /// Куда `install` и `uninstall` пишут записи клиентов; `None` — пути не определились.
     pub install_env: Option<InstallEnv>,
+    /// Хранилище ключей провайдеров: сюда окно записывает ключ (`secret_set`).
+    pub secrets: Arc<dyn SecretStore>,
+}
+
+impl std::fmt::Debug for WorkerConfig {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("WorkerConfig")
+            .field("bars_home", &self.bars_home)
+            .field("periodic_interval", &self.periodic_interval)
+            .field("debounce", &self.debounce)
+            .field("install_env", &self.install_env)
+            .finish_non_exhaustive()
+    }
 }
 
 impl WorkerConfig {
@@ -73,6 +89,7 @@ impl WorkerConfig {
             periodic_interval: PERIODIC_INTERVAL,
             debounce: DEBOUNCE,
             install_env: InstallEnv::detect(),
+            secrets: Arc::new(OsSecrets::default()),
         }
     }
 }
@@ -210,6 +227,8 @@ struct Inner {
     pause: Arc<Pause>,
     /// Идущее задание: его ход и флаг остановки.
     current: Mutex<Option<Arc<JobCell>>>,
+    /// Модели, которые сейчас скачиваются по кнопке окна.
+    downloads: Mutex<HashSet<String>>,
 }
 
 /// Воркер. Копии указывают на одно и то же состояние.
@@ -241,6 +260,7 @@ impl Worker {
             tasks: Mutex::new(Vec::new()),
             pause: Arc::new(Pause::default()),
             current: Mutex::new(None),
+            downloads: Mutex::new(HashSet::new()),
         });
         let queue_task = tokio::spawn(Arc::clone(&inner).run_queue());
         let timer_task = tokio::spawn(Arc::clone(&inner).run_timer());
@@ -514,6 +534,30 @@ impl Worker {
         out
     }
 
+    /// Меняет корень документации проекта: запись в `.bars/config.toml`, слежение переезжает,
+    /// проект ставится на полную проверку (нарезка и корень в индексе записаны, воркер увидит
+    /// расхождение). Согласие не нужно: модель та же.
+    pub fn set_docs_root(&self, path: &Path, docs_root: &str) -> Result<(), WorkerError> {
+        let path = self.registered(path)?;
+        if !path.is_dir() {
+            return Err(WorkerError::Unavailable(path));
+        }
+        crate::settings_io::save_docs_root(&path, docs_root).map_err(|error| {
+            WorkerError::Io(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                error.to_string(),
+            ))
+        })?;
+        let old = lock(&self.inner.projects)
+            .get_mut(&path)
+            .and_then(|runtime| runtime.watcher.take());
+        // Слежение останавливается вне блокировки: его поток может ждать её.
+        drop(old);
+        self.inner.ensure_watching(&path);
+        self.inner.enqueue(&path, Job::check(Priority::Explicit));
+        Ok(())
+    }
+
     /// Ставит на проверку все проекты: то же, что делает часовой таймер. Пропавшие проекты
     /// становятся `unavailable`, вернувшиеся — снова в работу.
     pub fn check_all(&self) {
@@ -535,6 +579,46 @@ impl Worker {
     /// Менеджер моделей: embed-модель для эмбеддинга запроса поиска.
     pub fn models(&self) -> &Models {
         &self.inner.models
+    }
+
+    /// Хранилище ключей провайдеров.
+    pub fn secrets(&self) -> &Arc<dyn SecretStore> {
+        &self.inner.config.secrets
+    }
+
+    /// Папка моделей (`~/.bars/models`).
+    pub fn models_dir(&self) -> PathBuf {
+        self.inner.config.bars_home.join("models")
+    }
+
+    /// Модели, которые скачиваются прямо сейчас.
+    pub fn downloading(&self) -> HashSet<String> {
+        lock(&self.inner.downloads).clone()
+    }
+
+    /// Скачивает встроенную модель в фоне. `false`, если она уже скачивается. Загрузка идёт в
+    /// блокирующей задаче: окно узнаёт о конце по `models_info`.
+    pub fn start_download(&self, id: &str, reranker: bool) -> bool {
+        if !lock(&self.inner.downloads).insert(id.to_string()) {
+            return false;
+        }
+        let inner = Arc::clone(&self.inner);
+        let id = id.to_string();
+        let mut user = bars_core::settings::UserSettings::default();
+        if reranker {
+            user.rerank.model.clone_from(&id);
+        } else {
+            user.embed.model.clone_from(&id);
+        }
+        let settings = Settings::resolve(&user, &bars_core::settings::ProjectConfig::default());
+        self.inner.handle.spawn_blocking(move || {
+            // Ошибка скачивания видна по тому, что модель так и не стала `downloaded`; текст в лог.
+            if let Err(error) = inner.models.download(&settings, reranker) {
+                eprintln!("bars: не удалось скачать модель {id}: {error}");
+            }
+            lock(&inner.downloads).remove(&id);
+        });
+        true
     }
 
     /// Пути установки в клиенты (`install`, `uninstall`).

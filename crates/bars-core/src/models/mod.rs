@@ -20,7 +20,7 @@ pub use builtin_rerank::{BuiltinReranker, sigmoid};
 pub use candle::CandleEmbedder;
 pub use catalog::{
     BGE_M3_DIM, BGE_M3_ID, Backend, BuiltinModel, NOMIC_V2_MOE_ID, QWEN3_0_6B_ID, QWEN3_4B_ID,
-    QWEN3_QUERY_PREFIX, builtin_model, builtin_models,
+    QWEN3_QUERY_PREFIX, builtin_model, builtin_models, is_downloaded,
 };
 pub use embedder::{EmbedError, Embedder, ModelFingerprint};
 pub use remote::{HttpEmbedder, HttpReranker, RemoteTarget, remote_fingerprint};

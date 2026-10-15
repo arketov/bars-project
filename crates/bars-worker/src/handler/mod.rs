@@ -19,18 +19,22 @@ use bars_core::search::{SearchRequest, search};
 use bars_core::settings::Settings;
 use bars_core::storage::{Index, Journal, index_path};
 use bars_protocol::{
-    AcceptedOutput, ActivityOutput, AppliedParams, Call, CancelOutput, ClientKind, ErrorKind,
-    FileProblem, Heading, INTERNAL_ERROR, IndexCancelParams, InstallOutput, InstallParams,
-    JobKind as ProtocolJobKind, JobPriority, METHOD_NOT_FOUND, ModelStatus, ModuleInfo,
-    OutlineOutput, OutlineParams, PausedOutput, ProjectInfo, ProjectProblems, ProjectState,
-    ProjectsOutput, QueuedJob, ReadOutput, ReadParams, RegisterOutput, RegisterParams,
-    ReindexParams, RpcError, RunningJob, ScoreKind, SearchHit, SearchOutput, SearchParams,
-    SessionStartParams, StatusOutput, StatusParams, Target, TreeDocument, TreeOutput, TreeParams,
-    UninstallOutput, UninstallParams, UnregisterOutput, UnregisterParams, output_value,
+    AcceptedOutput, ActivityOutput, AppliedParams, Call, CancelOutput, CheckAllParams, ClientKind,
+    ClientStatus, ClientsStatusOutput, ErrorKind, FileProblem, Heading, INTERNAL_ERROR,
+    IndexCancelParams, InstallClient, InstallOutput, InstallParams, InstructionOutput,
+    JobKind as ProtocolJobKind, JobPriority, METHOD_NOT_FOUND, ModelDownloadParams, ModelInfo,
+    ModelStatus, ModelsInfoOutput, ModuleInfo, OutlineOutput, OutlineParams, PausedOutput,
+    ProjectInfo, ProjectProblems, ProjectState, ProjectsOutput, QueuedJob, ReadOutput, ReadParams,
+    RegisterOutput, RegisterParams, ReindexParams, RpcError, RunningJob, SavedOutput, ScoreKind,
+    SearchHit, SearchOutput, SearchParams, SecretOutput, SecretSetParams, SecretStatusParams,
+    SessionStartParams, SetDocsRootParams, SettingsOutput, SettingsSaveParams, StatusOutput,
+    StatusParams, Target, TreeDocument, TreeOutput, TreeParams, UninstallOutput, UninstallParams,
+    UnregisterOutput, UnregisterParams, output_value,
 };
 use serde_json::Value;
 
 use crate::clients::{self, InstallEnv};
+use crate::settings_io::{self, SaveError};
 use crate::worker::{JobKind, Priority, ProjectSnapshot, Worker, rfc3339};
 use errors::{doc_path_error, outline_error, read_error, search_error, worker_error};
 
@@ -43,6 +47,11 @@ pub struct WorkerHandler {
 impl WorkerHandler {
     pub fn new(worker: Worker) -> Self {
         Self { worker }
+    }
+
+    /// Воркер под обработчиком: окно останавливает его при выходе.
+    pub fn worker(&self) -> &Worker {
+        &self.worker
     }
 
     /// Проект вызова: явный `project` или ближайший к `cwd` зарегистрированный (Т-15).
@@ -435,6 +444,155 @@ impl WorkerHandler {
         })
     }
 
+    // --- методы окна: настройки, модели, ключи, клиенты ---
+
+    fn settings_get(&self) -> Result<SettingsOutput, RpcError> {
+        let loaded = bars_core::settings::UserSettings::load(self.worker.bars_home())
+            .map_err(|error| RpcError::standard(INTERNAL_ERROR, error.to_string()))?;
+        Ok(SettingsOutput {
+            file: bars_core::settings::user_settings_path(self.worker.bars_home())
+                .display()
+                .to_string(),
+            settings: settings_io::to_doc(&loaded.value),
+            warnings: loaded.warnings.iter().map(ToString::to_string).collect(),
+        })
+    }
+
+    /// Сохраняет настройки и ставит все проекты на проверку: проекты, чей индекс построен другой
+    /// моделью, перейдут в `reindex_required`, и окно покажет диалог согласия (Т-25). Эмбеддинг
+    /// при этом не запускается.
+    fn settings_save(&self, params: SettingsSaveParams) -> Result<SavedOutput, RpcError> {
+        settings_io::save_user_settings(self.worker.bars_home(), &params.settings)
+            .map_err(save_error)?;
+        self.worker.check_all();
+        Ok(SavedOutput { saved: true })
+    }
+
+    fn models_info(&self) -> ModelsInfoOutput {
+        let dir = self.worker.models_dir();
+        let downloading = self.worker.downloading();
+        let info = |id: &str, dim: usize, backend: &str, warnings: Vec<String>| ModelInfo {
+            id: id.to_string(),
+            dim: to_u32(dim),
+            backend: backend.to_string(),
+            warnings,
+            downloaded: bars_core::models::is_downloaded(&dir, id),
+            downloading: downloading.contains(id),
+        };
+        ModelsInfoOutput {
+            embed: bars_core::models::builtin_models()
+                .iter()
+                .map(|model| {
+                    let backend = match model.backend {
+                        bars_core::models::Backend::Onnx => "onnx",
+                        _ => "candle",
+                    };
+                    info(
+                        model.id,
+                        model.dim,
+                        backend,
+                        model.warnings.iter().map(ToString::to_string).collect(),
+                    )
+                })
+                .collect(),
+            rerank: vec![info(
+                bars_core::models::BGE_RERANKER_V2_M3_ID,
+                0,
+                "onnx",
+                Vec::new(),
+            )],
+            models_dir: dir.display().to_string(),
+        }
+    }
+
+    fn model_download(&self, params: ModelDownloadParams) -> Result<AcceptedOutput, RpcError> {
+        let reranker = params.id == bars_core::models::BGE_RERANKER_V2_M3_ID;
+        if !reranker && bars_core::models::builtin_model(&params.id).is_none() {
+            return Err(RpcError::bars(
+                ErrorKind::InvalidParams,
+                format!("модели `{}` нет во встроенном каталоге", params.id),
+            ));
+        }
+        self.worker.start_download(&params.id, reranker);
+        Ok(AcceptedOutput { accepted: true })
+    }
+
+    fn secret_set(&self, params: SecretSetParams) -> Result<SecretOutput, RpcError> {
+        let name = params.name.trim();
+        if name.is_empty() || params.value.is_empty() {
+            return Err(RpcError::bars(
+                ErrorKind::InvalidParams,
+                "нужны имя записи и ключ",
+            ));
+        }
+        self.worker
+            .secrets()
+            .set(name, &params.value)
+            .map_err(|error| RpcError::bars(ErrorKind::InvalidParams, error.to_string()))?;
+        Ok(SecretOutput { present: true })
+    }
+
+    fn secret_status(&self, params: SecretStatusParams) -> Result<SecretOutput, RpcError> {
+        let present = self
+            .worker
+            .secrets()
+            .get(&params.name)
+            .map_err(|error| RpcError::standard(INTERNAL_ERROR, error.to_string()))?
+            .is_some();
+        Ok(SecretOutput { present })
+    }
+
+    fn clients_status(&self) -> Result<ClientsStatusOutput, RpcError> {
+        let env = self.install_env()?;
+        let clients = [InstallClient::ClaudeCode, InstallClient::Codex]
+            .into_iter()
+            .map(|client| {
+                let state = clients::state(env, client);
+                ClientStatus {
+                    client,
+                    installed: state.installed,
+                    stale: state.stale,
+                    files: paths(state.files),
+                    // Одобрен ли хук в Codex, bars не знает: напоминание остаётся, пока установлено.
+                    needs_hook_approval: client == InstallClient::Codex && state.installed,
+                }
+            })
+            .collect();
+        Ok(ClientsStatusOutput { clients })
+    }
+
+    fn instruction(&self) -> Result<InstructionOutput, RpcError> {
+        let env = self.install_env()?;
+        let (cli, mcp) = (
+            env.cli_exe.display().to_string(),
+            env.mcp_exe.display().to_string(),
+        );
+        Ok(InstructionOutput {
+            text: bars_protocol::agent_install_text(&cli, &mcp),
+            mcp_config: bars_protocol::mcp_config_json(&mcp),
+        })
+    }
+
+    fn set_docs_root(&self, params: SetDocsRootParams) -> Result<AcceptedOutput, RpcError> {
+        let project = self.worker.resolve(&params.project).map_err(worker_error)?;
+        let root = params.docs_root.trim();
+        if root.is_empty() {
+            return Err(RpcError::bars(
+                ErrorKind::InvalidParams,
+                "корень документации не может быть пустым",
+            ));
+        }
+        self.worker
+            .set_docs_root(&project, root)
+            .map_err(worker_error)?;
+        Ok(AcceptedOutput { accepted: true })
+    }
+
+    fn check_all(&self) -> AcceptedOutput {
+        self.worker.check_all();
+        AcceptedOutput { accepted: true }
+    }
+
     pub async fn dispatch(&self, call: Call) -> Result<Value, RpcError> {
         match call {
             // `hello` обрабатывает цикл соединения.
@@ -458,6 +616,18 @@ impl WorkerHandler {
             Call::IndexCancel(params) => self.index_cancel(params).map(|out| output_value(&out)),
             Call::Activity(_) => Ok(output_value(&self.activity())),
             Call::Tree(params) => self.tree(params).await.map(|out| output_value(&out)),
+            Call::SettingsGet(_) => self.settings_get().map(|out| output_value(&out)),
+            Call::SettingsSave(params) => self.settings_save(params).map(|out| output_value(&out)),
+            Call::ModelsInfo(_) => Ok(output_value(&self.models_info())),
+            Call::ModelDownload(params) => {
+                self.model_download(params).map(|out| output_value(&out))
+            }
+            Call::SecretSet(params) => self.secret_set(params).map(|out| output_value(&out)),
+            Call::SecretStatus(params) => self.secret_status(params).map(|out| output_value(&out)),
+            Call::ClientsStatus(_) => self.clients_status().map(|out| output_value(&out)),
+            Call::Instruction(_) => self.instruction().map(|out| output_value(&out)),
+            Call::SetDocsRoot(params) => self.set_docs_root(params).map(|out| output_value(&out)),
+            Call::CheckAll(CheckAllParams {}) => Ok(output_value(&self.check_all())),
         }
     }
 }
@@ -477,6 +647,13 @@ impl bars_protocol::Handler for WorkerHandler {
 
 fn internal(error: impl std::fmt::Display) -> RpcError {
     RpcError::standard(INTERNAL_ERROR, error.to_string())
+}
+
+fn save_error(error: SaveError) -> RpcError {
+    match error {
+        SaveError::Invalid(message) => RpcError::bars(ErrorKind::InvalidParams, message),
+        other => RpcError::standard(INTERNAL_ERROR, other.to_string()),
+    }
 }
 
 fn job_kind(kind: JobKind) -> ProtocolJobKind {

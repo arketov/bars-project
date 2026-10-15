@@ -168,6 +168,32 @@ fn is_stale(env: &InstallEnv, client: InstallClient) -> Result<bool> {
     Ok(mcp_stale || hook_stale)
 }
 
+/// Состояние установки bars в клиенте: то, что показывает вкладка «Клиенты».
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ClientState {
+    /// В конфиге клиента есть MCP-запись bars.
+    pub installed: bool,
+    /// Записи указывают не на текущие `bars-mcp` и `bars-cli`.
+    pub stale: bool,
+    /// Файлы, которые bars правит у этого клиента.
+    pub files: Vec<PathBuf>,
+}
+
+/// Читает конфиги клиента и ничего не пишет. Файл, который не разбирается, даёт «не установлен»:
+/// установка в него закончится ошибкой с именем файла.
+pub fn state(env: &InstallEnv, client: InstallClient) -> ClientState {
+    let layout = layout(env, client);
+    let mcp = match client {
+        InstallClient::ClaudeCode => json::mcp_command(&layout.mcp),
+        InstallClient::Codex => codex_toml::mcp_command(&layout.mcp),
+    };
+    ClientState {
+        installed: matches!(mcp, Ok(Some(_))),
+        stale: is_stale(env, client).unwrap_or(false),
+        files: vec![layout.mcp, layout.hooks, layout.skills],
+    }
+}
+
 /// Убирает из клиента записи и skills bars; чужие записи не трогает.
 pub fn uninstall(env: &InstallEnv, client: InstallClient) -> Result<Vec<PathBuf>> {
     let layout = layout(env, client);

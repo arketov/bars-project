@@ -380,6 +380,22 @@ impl Models {
         Ok(SharedEmbedder::new(slot))
     }
 
+    /// Скачивает встроенную модель, загрузив её и сразу выпустив из рук: файлы остаются в кэше
+    /// (кнопка «Скачать» в настройках). Блокирующий вызов.
+    pub fn download(&self, settings: &Settings, reranker: bool) -> Result<(), String> {
+        if reranker {
+            self.provider
+                .load_reranker(settings)
+                .map(drop)
+                .map_err(|error| error.to_string())
+        } else {
+            self.provider
+                .load(settings)
+                .map(drop)
+                .map_err(|error| error.to_string())
+        }
+    }
+
     /// Rerank-модель по настройкам; загружается при первом реранке. Модель из прежних настроек
     /// выгружается, как только её отпустят все, кто с ней работает.
     pub fn reranker(&self, settings: &Settings) -> SharedReranker {

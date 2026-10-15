@@ -6,6 +6,7 @@ pub mod clients;
 pub mod handler;
 pub mod ipc;
 pub mod serve;
+pub mod settings_io;
 // Часть API воркера (ход индексации, выгрузка моделей, проверка очереди) нужна окну и тестам.
 #[allow(dead_code, unused_imports)]
 pub mod worker;

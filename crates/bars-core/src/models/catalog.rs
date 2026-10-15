@@ -110,6 +110,38 @@ impl BuiltinModel {
     }
 }
 
+/// Скачаны ли файлы встроенной модели в `models_dir` (`~/.bars/models`, кэш hf-hub:
+/// `models--<организация>--<имя>/snapshots/<ревизия>/…`). Нужен окну для меток «скачана» и кнопки «Скачать»;
+/// целостность файлов не проверяется.
+pub fn is_downloaded(models_dir: &std::path::Path, id: &str) -> bool {
+    fn has_weights(dir: &std::path::Path, depth: usize) -> bool {
+        let Ok(entries) = std::fs::read_dir(dir) else {
+            return false;
+        };
+        entries.flatten().any(|entry| {
+            let path = entry.path();
+            if path.is_dir() {
+                return depth > 0 && has_weights(&path, depth - 1);
+            }
+            let weights = path
+                .extension()
+                .and_then(|extension| extension.to_str())
+                .is_some_and(|extension| extension == "onnx" || extension == "safetensors");
+            weights && entry.metadata().is_ok_and(|meta| meta.len() > 0)
+        })
+    }
+    let snapshots = models_dir
+        .join(format!("models--{}", id.replace('/', "--")))
+        .join("snapshots");
+    std::fs::read_dir(snapshots)
+        .map(|entries| {
+            entries
+                .flatten()
+                .any(|snapshot| has_weights(&snapshot.path(), 2))
+        })
+        .unwrap_or(false)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -135,6 +167,22 @@ mod tests {
         let nomic = builtin_model(NOMIC_V2_MOE_ID).unwrap().fingerprint();
         assert_eq!(nomic.doc_prefix, "search_document: ");
         assert_eq!(nomic.source, "builtin");
+    }
+
+    #[test]
+    fn downloaded_means_weights_in_a_snapshot() {
+        let dir = tempfile::tempdir().unwrap();
+        assert!(!is_downloaded(dir.path(), BGE_M3_ID));
+        let snapshot = dir.path().join("models--BAAI--bge-m3/snapshots/abc/onnx");
+        std::fs::create_dir_all(&snapshot).unwrap();
+        std::fs::write(snapshot.join("config.json"), "{}").unwrap();
+        assert!(
+            !is_downloaded(dir.path(), BGE_M3_ID),
+            "без весов — не скачана"
+        );
+        std::fs::write(snapshot.join("model.onnx"), "w").unwrap();
+        assert!(is_downloaded(dir.path(), BGE_M3_ID));
+        assert!(!is_downloaded(dir.path(), QWEN3_0_6B_ID));
     }
 
     #[test]

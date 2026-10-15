@@ -1,41 +1,70 @@
-//! `bars`: воркер с окном и треем (Т-1). Окно и трей — срез 5; пока процесс держит канал и очередь.
+//! `bars`: воркер с окном и треем (Т-1). Окно и воркер — один процесс: окно вызывает обработчик
+//! методов напрямую, а `bars-mcp` и `bars-cli` приходят по каналу.
+
+mod commands;
+mod icons;
+mod tray;
+mod window;
 
 use std::sync::Arc;
 
 use bars_protocol::Endpoint;
 use bars_worker::serve::{self, ServeError};
 use bars_worker::worker::{BuiltinProvider, WorkerConfig};
-use tauri::RunEvent;
+use commands::Shared;
+use tauri::{Manager, RunEvent};
 
 fn main() -> anyhow::Result<()> {
-    // Без окна различия нет: `--background` — так запускают клиенты, и пользователю окно не нужно.
-    // Когда появится окно (срез 5), без флага оно открывается.
-    let _background = std::env::args().any(|arg| arg == "--background");
+    // `--background` — так запускают клиенты: окно скрыто, пока пользователь не откроет его из трея.
+    let background = std::env::args().any(|arg| arg == "--background");
     let home = serve::bars_home()?;
     let endpoint = Endpoint::current()?;
     let provider = Arc::new(BuiltinProvider::new(home.join("models")));
     let config = WorkerConfig::new(home);
 
     let app = tauri::Builder::default()
+        // Первым: второй запуск `bars` передаётся работающему и показывает его окно (Т-1).
+        .plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
+            if !args.iter().any(|arg| arg == "--background") {
+                window::navigate(app, "main", None);
+            }
+        }))
+        .plugin(tauri_plugin_dialog::init())
+        .manage(Shared::default())
+        .invoke_handler(tauri::generate_handler![
+            commands::bars_call,
+            commands::pick_folder,
+            commands::open_path,
+            commands::bars_dir,
+            commands::restart_app,
+        ])
         .setup(move |app| {
             let handle = app.handle().clone();
+            window::create(&handle, !background)?;
+            tray::build(&handle)?;
+            tray::spawn_status_loop(handle.clone());
+            let worker_handle = handle.clone();
             tauri::async_runtime::spawn(async move {
-                let code = match serve::serve(config, &endpoint, provider).await {
+                let ready = worker_handle.clone();
+                let result = serve::serve_with(config, &endpoint, provider, move |handler| {
+                    ready.state::<Shared>().set(handler);
+                })
+                .await;
+                let code = match result {
                     // Воркер уже работает: второй процесс уходит (Т-1).
-                    Err(ServeError::AlreadyRunning) => 0,
-                    Ok(()) => 0,
+                    Err(ServeError::AlreadyRunning) | Ok(()) => 0,
                     Err(error) => {
                         eprintln!("bars: {error}");
                         1
                     }
                 };
-                handle.exit(code);
+                worker_handle.exit(code);
             });
             Ok(())
         })
         .build(tauri::generate_context!())?;
     app.run(|_, event| {
-        // Без окон Tauri сам не завершается; выход — только по коду из `handle.exit`.
+        // Закрытое окно не завершает процесс: он живёт в трее. Выход — только по коду из `exit`.
         if let RunEvent::ExitRequested {
             api, code: None, ..
         } = event

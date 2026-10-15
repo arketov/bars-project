@@ -31,9 +31,26 @@ cargo build --workspace
 cargo test --workspace
 ```
 
+## Интерфейс окна: сборка и проверки
+
+Окно — Svelte 5 + TypeScript + Vite в `ui/` ([architecture/components.md](../architecture/components.md)). Нужен Node.js 20 или новее (проверено на 24).
+
+```bash
+cd ui
+npm install        # один раз
+npm run build      # ui/dist: его встраивает Tauri при сборке bars
+npm test           # vitest: логика дерева, форматирование, Markdown, настройки, согласие
+npm run check      # svelte-check: типы TypeScript и Svelte
+npm run dev        # просмотр в браузере на порту 1420: вместо воркера отвечает заглушка src/lib/mock.ts
+```
+
+`cargo build` и `clippy` не требуют `npm run build`: если `ui/dist/index.html` нет, сборочный скрипт `bars-app` кладёт туда заглушку «Интерфейс не собран». Настоящий интерфейс в `bars` попадает только после `npm run build` и пересборки `bars-app`.
+
+Заглушка воркера выбирает сцену параметром адреса: `?scene=empty|indexing|consent|missing|provider|worker-down`; без параметра — обычный проект с тремя результатами.
+
 ## Что собирается в срезе 0
 
-Все пять крейтов с реальными зависимостями из стека и заглушками вместо логики. Этим проверяются Т-3 (Rust, Tauri, fastembed-rs, без Python) и то, что тяжёлые зависимости линкуются вместе. `bars-app` собирает Tauri с пустой статической страницей `ui/index.html`; Svelte появится вместе с окном.
+Все пять крейтов с реальными зависимостями из стека и заглушками вместо логики. Этим проверяются Т-3 (Rust, Tauri, fastembed-rs, без Python) и то, что тяжёлые зависимости линкуются вместе. `bars-app` собирал Tauri с пустой статической страницей; окно на Svelte пришло в срезе 5.
 
 Фича `directml` у fastembed включается только на Windows (`cfg(windows)`), потому что на macOS её нет.
 
