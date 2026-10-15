@@ -112,7 +112,8 @@ impl BuiltinModel {
 
 /// Скачаны ли файлы встроенной модели в `models_dir` (`~/.bars/models`, кэш hf-hub:
 /// `models--<организация>--<имя>/snapshots/<ревизия>/…`). Нужен окну для меток «скачана» и кнопки «Скачать»;
-/// целостность файлов не проверяется.
+/// целостность файлов не проверяется. Файлы снимка в кэше hf-hub могут быть символическими ссылками
+/// на `blobs/`, поэтому размер берётся у цели ссылки, а не у самой ссылки.
 pub fn is_downloaded(models_dir: &std::path::Path, id: &str) -> bool {
     fn has_weights(dir: &std::path::Path, depth: usize) -> bool {
         let Ok(entries) = std::fs::read_dir(dir) else {
@@ -127,7 +128,7 @@ pub fn is_downloaded(models_dir: &std::path::Path, id: &str) -> bool {
                 .extension()
                 .and_then(|extension| extension.to_str())
                 .is_some_and(|extension| extension == "onnx" || extension == "safetensors");
-            weights && entry.metadata().is_ok_and(|meta| meta.len() > 0)
+            weights && std::fs::metadata(&path).is_ok_and(|meta| meta.len() > 0)
         })
     }
     let snapshots = models_dir
@@ -183,6 +184,31 @@ mod tests {
         std::fs::write(snapshot.join("model.onnx"), "w").unwrap();
         assert!(is_downloaded(dir.path(), BGE_M3_ID));
         assert!(!is_downloaded(dir.path(), QWEN3_0_6B_ID));
+    }
+
+    #[test]
+    fn weights_behind_a_symlink_count_as_downloaded() {
+        let dir = tempfile::tempdir().unwrap();
+        let model = dir.path().join("models--BAAI--bge-m3");
+        let snapshot = model.join("snapshots/abc");
+        std::fs::create_dir_all(&snapshot).unwrap();
+        std::fs::create_dir_all(model.join("blobs")).unwrap();
+        let blob = model.join("blobs/deadbeef");
+        std::fs::write(&blob, "weights").unwrap();
+        #[cfg(windows)]
+        let linked = std::os::windows::fs::symlink_file(&blob, snapshot.join("model.onnx"));
+        #[cfg(unix)]
+        let linked = std::os::unix::fs::symlink(&blob, snapshot.join("model.onnx"));
+        if linked.is_err() {
+            eprintln!("символические ссылки недоступны: проверка пропущена");
+            return;
+        }
+        assert!(is_downloaded(dir.path(), BGE_M3_ID));
+        std::fs::remove_file(&blob).unwrap();
+        assert!(
+            !is_downloaded(dir.path(), BGE_M3_ID),
+            "ссылка в пустоту — не скачана"
+        );
     }
 
     #[test]
