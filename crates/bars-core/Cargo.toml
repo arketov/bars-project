@@ -1,0 +1,23 @@
+[package]
+name = "bars-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+blake3.workspace = true
+fastembed.workspace = true
+rusqlite.workspace = true
+rust-stemmers.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+toml.workspace = true
+
+# DirectML есть только на Windows (docs/models/local-models.md).
+[target.'cfg(windows)'.dependencies]
+fastembed = { workspace = true, features = ["directml"] }
+ort = { workspace = true, features = ["directml"] }
+
+[dev-dependencies]
+tempfile.workspace = true

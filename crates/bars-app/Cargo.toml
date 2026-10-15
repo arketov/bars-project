@@ -1,0 +1,27 @@
+[package]
+name = "bars-app"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "bars"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+bars-core.workspace = true
+bars-protocol.workspace = true
+tauri.workspace = true
+tokio.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+interprocess.workspace = true
+widestring.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+windows-sys.workspace = true
+
+[build-dependencies]
+tauri-build.workspace = true
