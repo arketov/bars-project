@@ -17,6 +17,7 @@
     ["search", "Поиск"],
     ["chunks", "Нарезка"],
     ["clients", "Клиенты"],
+    ["system", "Запуск"],
     ["look", "Оформление"],
   ] as const;
   const SOURCES: [ModelSourceName, string][] = [
@@ -281,6 +282,26 @@
           </div>
           <div class="gbody"><pre class="instr">{settings.instruction?.text ?? "—"}</pre></div>
         </div>
+      {:else if tab === "system"}
+        <h1>Запуск</h1>
+        <p class="lead">bars живёт в трее и сам поднимается, когда его зовёт агент. Автозапуск нужен, чтобы индекс обновлялся и до первого обращения. Применяется сразу, без «Сохранить».</p>
+        <div class="group">
+          <div class="gbody">
+            {#if settings.autostart?.supported}
+              <label class="check">
+                <input type="checkbox" checked={settings.autostart.enabled} disabled={settings.busy === "autostart"} onchange={(e) => settings.setAutostart(e.currentTarget.checked)} />
+                <span><b>Запускать при входе в систему</b><small>bars стартует свёрнутым в трей, окно не открывается.</small></span>
+              </label>
+              {#if settings.autostart.stale}
+                <div class="note warn"><Icon name="warn" size={16} /><span>Запись автозапуска указывает на другое расположение bars (приложение переехало). При следующем запуске bars исправит её сам.</span></div>
+              {/if}
+            {:else if settings.autostart}
+              <small>Автозапуск на этой системе пока не поддерживается.</small>
+            {:else}
+              <small>Состояние автозапуска не прочитано.</small>
+            {/if}
+          </div>
+        </div>
       {:else if tab === "look"}
         <h1>Оформление</h1>
         <p class="lead">Тема окна. Применяется сразу, без «Сохранить».</p>
@@ -303,7 +324,7 @@
   </main>
 </div>
 
-{#if tab !== "look" && tab !== "clients"}
+{#if tab !== "look" && tab !== "clients" && tab !== "system"}
   <div class="savebar">
     <span class="grow">
       {#if hasErrors}Есть ошибки в значениях — исправьте их, чтобы сохранить{:else if settings.dirty}Изменения не сохранены{:else}Настройки сохранены в <span class="mono">{settings.file}</span>{/if}
@@ -338,6 +359,10 @@
   .ghead p { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; font-weight: 400; }
   .grow { flex: 1; }
   .gbody { padding: 14px 18px; }
+  .check { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
+  .check input { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--accent); }
+  .check b { display: block; font-size: 13.5px; }
+  .check small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
   .gbody.dim { opacity: .45; }
   .field { display: grid; grid-template-columns: 1fr 260px; gap: 16px; align-items: center; padding: 9px 0; }
   .field + .field { border-top: 1px dashed var(--line); }

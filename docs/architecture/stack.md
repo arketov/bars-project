@@ -25,7 +25,7 @@ title: Стек bars — библиотеки, версии и почему он
 
 Воркер не завершается при закрытии последнего окна: `RunEvent::ExitRequested` с `code == None` отменяется через `prevent_exit()`. На macOS у воркера нет иконки в Dock: `ActivationPolicy::Accessory`.
 
-`tauri-plugin-autostart` и `tauri-plugin-updater` подключаются, когда будут решены OQ-16 и OQ-17. `tauri-plugin-shell` не нужен: воркер сам никого не запускает. Логи пишет `tracing`, а не `tauri-plugin-log`, чтобы у воркера, `bars-mcp` и `bars-cli` был один механизм.
+`tauri-plugin-autostart` не нужен: автозапуск — свой небольшой модуль воркера, который пишет то же значение реестра, а воркер собирается без Tauri ([features/distribution/autostart.md](../features/distribution/autostart.md)). `tauri-plugin-updater` не нужен: обновление идёт запуском новой версии установщика, без подписанных релизов и сервера обновлений ([features/distribution/installer.md](../features/distribution/installer.md)). `tauri-plugin-shell` не нужен: воркер сам никого не запускает. Логи пишет `tracing`, а не `tauri-plugin-log`, чтобы у воркера, `bars-mcp` и `bars-cli` был один механизм.
 
 ## Модели bars
 
@@ -66,7 +66,7 @@ title: Стек bars — библиотеки, версии и почему он
 |---|---|---|---|
 | MCP-сервер | `rmcp` с фичами `server`, `transport-io`, `macros` | 3.5 | `bars-mcp`, Т-2, Т-19 |
 | Локальный канал | `interprocess` с фичей `tokio` | 2.4 | [ipc.md](ipc.md) |
-| Windows: DACL канала и владелец сервера | `windows-sys` (`bars-worker` и `bars-protocol`, `cfg(windows)`) + `widestring` (`bars-worker`) | 0.61 / 1.2 | SDDL для `interprocess`, SID пользователя, сверка владельца процесса сервера (OQ-38); версия `windows-sys` совпадает с той, что тянет `interprocess` |
+| Windows: DACL канала, владелец сервера, запись автозапуска в реестре | `windows-sys` (`bars-worker` и `bars-protocol`, `cfg(windows)`) + `widestring` (`bars-worker`) | 0.61 / 1.2 | SDDL для `interprocess`, SID пользователя, сверка владельца процесса сервера (OQ-38); версия `windows-sys` совпадает с той, что тянет `interprocess` |
 | Протокол канала | `serde_json`, свой JSON-RPC 2.0 построчно | 1.0 | методов мало, подписки не нужны |
 | CLI | `clap` с фичей `derive` | 4.6 | `bars-cli`, Т-20 |
 | Ключи провайдеров | `keyring-core` 1.0 + `windows-native-keyring-store` 1.1 и `apple-native-keyring-store` 1.0 (фича `keychain`) | 1.x | [secrets.md](secrets.md) |

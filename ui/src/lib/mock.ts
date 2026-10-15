@@ -13,6 +13,8 @@ import type {
 
 const scene = (): string => new URLSearchParams(window.location.search).get("scene") ?? "";
 
+const autostart = { on: false };
+
 const DOCS_BY_PROJECT: Record<string, TreeDocument[]> = {};
 
 function docs(root: string): TreeDocument[] {
@@ -257,6 +259,11 @@ export async function mockCall(method: string, params: Record<string, unknown>):
     case "secret_set":
       secrets.add(String(params.name));
       return { present: true };
+    case "autostart_get":
+      return { supported: true, enabled: autostart.on, stale: false };
+    case "autostart_set":
+      autostart.on = Boolean(params.enabled);
+      return { supported: true, enabled: autostart.on, stale: false };
     case "clients_status":
       return {
         clients: [

@@ -17,15 +17,22 @@ use tauri::{Manager, RunEvent};
 fn main() -> anyhow::Result<()> {
     // `--background` — так запускают клиенты: окно скрыто, пока пользователь не откроет его из трея.
     let background = std::env::args().any(|arg| arg == "--background");
+    // `--quit` — так установщик просит работающий `bars` выйти перед заменой файлов.
+    let quit = std::env::args().any(|arg| arg == "--quit");
     let home = serve::bars_home()?;
     let endpoint = Endpoint::current()?;
     let provider = Arc::new(BuiltinProvider::new(home.join("models")));
-    let config = WorkerConfig::new(home);
+    let mut config = WorkerConfig::new(home);
+    if let Ok(exe) = std::env::current_exe() {
+        config.autostart = bars_worker::autostart::for_exe(&exe);
+    }
 
     let app = tauri::Builder::default()
         // Первым: второй запуск `bars` передаётся работающему и показывает его окно (Т-1).
         .plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
-            if !args.iter().any(|arg| arg == "--background") {
+            if args.iter().any(|arg| arg == "--quit") {
+                tray::quit_app(app);
+            } else if !args.iter().any(|arg| arg == "--background") {
                 window::navigate(app, "main", None);
             }
         }))
@@ -40,6 +47,11 @@ fn main() -> anyhow::Result<()> {
         ])
         .setup(move |app| {
             let handle = app.handle().clone();
+            // Запущенного `bars` не было: просить выйти некого.
+            if quit {
+                handle.exit(0);
+                return Ok(());
+            }
             window::create(&handle, !background)?;
             tray::build(&handle)?;
             tray::spawn_status_loop(handle.clone());

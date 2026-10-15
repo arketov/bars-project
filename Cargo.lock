@@ -389,7 +389,7 @@ dependencies = [
 
 [[package]]
 name = "bars-app"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "bars-protocol",
@@ -405,7 +405,7 @@ dependencies = [
 
 [[package]]
 name = "bars-cli"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "bars-protocol",
@@ -419,7 +419,7 @@ dependencies = [
 
 [[package]]
 name = "bars-core"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "apple-native-keyring-store",
  "blake3",
@@ -440,7 +440,7 @@ dependencies = [
 
 [[package]]
 name = "bars-mcp"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "bars-protocol",
@@ -454,7 +454,7 @@ dependencies = [
 
 [[package]]
 name = "bars-protocol"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "dirs 7.0.0",
  "interprocess",
@@ -467,7 +467,7 @@ dependencies = [
 
 [[package]]
 name = "bars-worker"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "bars-core",
  "bars-protocol",

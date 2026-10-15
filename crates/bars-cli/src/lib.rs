@@ -14,10 +14,10 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use bars_protocol::{
-    Client, ClientError, ClientKind, EXIT_FAILURE, Endpoint, InstallClient, InstallParams,
-    LAUNCH_DEADLINE, Method, OutlineParams, ProjectsParams, ReadParams, RegisterParams,
-    ReindexParams, SearchParams, StatusParams, Target, UninstallParams, UnregisterParams,
-    connect_or_launch_with, spawn_worker, worker_exe,
+    AutostartGetParams, AutostartSetParams, Client, ClientError, ClientKind, EXIT_FAILURE,
+    Endpoint, InstallClient, InstallParams, LAUNCH_DEADLINE, Method, OutlineParams, ProjectsParams,
+    ReadParams, RegisterParams, ReindexParams, SearchParams, StatusParams, Target, UninstallParams,
+    UnregisterParams, connect_or_launch_with, spawn_worker, worker_exe,
 };
 use clap::{Args, Parser, Subcommand};
 use serde::Serialize;
@@ -80,6 +80,11 @@ pub enum Command {
         #[arg(long, value_enum)]
         client: ClientArg,
     },
+    /// Автозапуск bars при входе в систему: состояние, включить, выключить.
+    Autostart {
+        #[arg(value_enum, default_value = "status")]
+        action: AutostartAction,
+    },
     /// Команды для хуков клиентов.
     Hook {
         #[command(subcommand)]
@@ -91,6 +96,14 @@ pub enum Command {
 pub enum HookEvent {
     /// Хук начала сессии: читает JSON клиента из stdin и ставит проект на проверку.
     SessionStart,
+}
+
+/// Что сделать с автозапуском.
+#[derive(Debug, Clone, Copy, clap::ValueEnum)]
+pub enum AutostartAction {
+    Status,
+    On,
+    Off,
 }
 
 /// Клиент, в который ставится bars.
@@ -418,6 +431,18 @@ async fn execute(cli: Cli, env: &Env, out: &mut dyn Write) -> Result<(), Failure
                 &call(&mut client, &params).await?,
                 render::uninstall,
             )
+        }
+        Command::Autostart { action } => {
+            let output = match action {
+                AutostartAction::Status => call(&mut client, &AutostartGetParams {}).await?,
+                AutostartAction::On => {
+                    call(&mut client, &AutostartSetParams { enabled: true }).await?
+                }
+                AutostartAction::Off => {
+                    call(&mut client, &AutostartSetParams { enabled: false }).await?
+                }
+            };
+            emit(out, json, &output, render::autostart)
         }
         Command::Hook { .. } => unreachable!("hook разобран в run"),
         Command::Unregister => {

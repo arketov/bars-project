@@ -25,9 +25,15 @@ impl Endpoint {
     pub fn current() -> io::Result<Self> {
         if cfg!(windows) {
             let user = std::env::var("USERNAME").unwrap_or_default();
-            Ok(Self::named(&user))
+            // Подменённая домашняя папка — отдельный экземпляр bars со своим каналом.
+            Ok(match crate::home::home_override() {
+                Some(home) => {
+                    Self::named(&format!("{user}-{:08x}", fnv1a(&home.to_string_lossy())))
+                }
+                None => Self::named(&user),
+            })
         } else {
-            let home = dirs::home_dir().ok_or_else(|| {
+            let home = crate::home::user_home().ok_or_else(|| {
                 io::Error::new(io::ErrorKind::NotFound, "не найдена домашняя папка")
             })?;
             Ok(Self {
@@ -76,6 +82,13 @@ impl Endpoint {
             Kind::Path(path) => path.clone().to_fs_name::<GenericFilePath>(),
         }
     }
+}
+
+/// Короткий хеш строки для имени канала подменённой домашней папки.
+fn fnv1a(text: &str) -> u32 {
+    text.bytes().fold(0x811c_9dc5, |hash, byte| {
+        (hash ^ u32::from(byte)).wrapping_mul(0x0100_0193)
+    })
 }
 
 #[cfg(test)]

@@ -9,7 +9,7 @@ title: Документация bars
 ## Содержание
 
 - [MAIN_IDEA.md](MAIN_IDEA.md) — требования всего проекта: исходная формулировка, Т-N, НФТ, уроки образца, критерии приёмки, журнал раундов.
-- [features/](features/Index.md) — фичи bars: что умеет и как это работает.
+- [features/](features/Index.md) — фичи bars: что умеет и как это работает; поставка (установщик, автозапуск) — [features/distribution/](features/distribution/Index.md).
 - [architecture/](architecture/Index.md) — общее устройство: стек, процессы, канал, протокол, схема индекса.
 - [adr/](adr/Index.md) — принятые решения с обоснованием.
 - [knowledge/](knowledge/Index.md) — внутренняя база знаний: исследования, сравнения, замеры спайков.

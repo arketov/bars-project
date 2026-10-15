@@ -24,7 +24,7 @@ pub enum ServeError {
 
 /// `~/.bars`: настройки, реестр проектов, модели, логи.
 pub fn bars_home() -> std::io::Result<PathBuf> {
-    dirs::home_dir()
+    bars_protocol::user_home()
         .map(|home| home.join(".bars"))
         .ok_or_else(|| {
             std::io::Error::new(std::io::ErrorKind::NotFound, "не найдена домашняя папка")
@@ -63,6 +63,12 @@ pub async fn serve_with(
                 client_arg(client)
             );
         }
+    }
+    // Приложение обновилось или переехало: запись автозапуска должна указывать на текущий `bars`.
+    match crate::autostart::repair(config.autostart.as_ref()) {
+        Ok(true) => eprintln!("bars: запись автозапуска обновлена на текущий bars"),
+        Ok(false) => {}
+        Err(error) => eprintln!("bars: запись автозапуска не проверена: {error}"),
     }
     let worker = Worker::start(config, provider)?;
     let handler = Arc::new(WorkerHandler::new(worker.clone()));

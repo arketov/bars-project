@@ -3,7 +3,7 @@ resolver = "3"
 members = ["crates/*"]
 
 [workspace.package]
-version = "0.0.0"
+version = "0.1.0"
 edition = "2024"
 rust-version = "1.90"
 publish = false
@@ -42,5 +42,5 @@ ureq = { version = "3.4", features = ["json"] }
 thiserror = "2.0"
 toml = "1.1"
 widestring = "1.2"
-windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Security", "Win32_Security_Authorization", "Win32_System_Threading"] }
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Security", "Win32_Security_Authorization", "Win32_System_Registry", "Win32_System_Threading"] }
 tokio = { version = "1.53", features = ["rt-multi-thread", "macros", "io-util", "time", "net", "sync"] }

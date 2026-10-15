@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "publisher": "arketov",
+    "shortDescription": "Локальный RAG по Markdown-документации проектов",
+    "icon": ["icons/icon.png", "icons/icon.ico"],
+    "externalBin": ["binaries/bars-mcp", "binaries/bars-cli"],
+    "windows": {
+      "allowDowngrades": false,
+      "nsis": {
+        "installMode": "currentUser",
+        "installerHooks": "installer-hooks.nsh",
+        "languages": ["Russian"],
+        "displayLanguageSelector": false
+      }
+    }
+  }
+}

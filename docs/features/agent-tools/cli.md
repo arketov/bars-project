@@ -26,6 +26,7 @@ title: Команды bars-cli
 | `bars-cli unregister` | снять проект с регистрации ([features/projects/projects.md](../projects/projects.md)) | кнопка «Убрать из bars» в окне |
 | `bars-cli install --client claude-code\|codex` | подключить bars к клиенту (Т-21) | пункт «Установить» в окне |
 | `bars-cli uninstall --client claude-code\|codex` | убрать bars из клиента | пункт «Удалить» в окне |
+| `bars-cli autostart [status\|on\|off]` | автозапуск bars при входе в систему; без аргумента — состояние | галочка во вкладке «Запуск» ([distribution/autostart.md](../distribution/autostart.md)) |
 | `bars-cli hook session-start` | команда для хука начала сессии | — |
 
 ## Как bars-cli вызывает воркер

@@ -19,14 +19,15 @@ use bars_core::search::{SearchRequest, search};
 use bars_core::settings::Settings;
 use bars_core::storage::{Index, Journal, index_path};
 use bars_protocol::{
-    AcceptedOutput, ActivityOutput, AppliedParams, Call, CancelOutput, CheckAllParams, ClientKind,
-    ClientStatus, ClientsStatusOutput, ErrorKind, FileProblem, Heading, INTERNAL_ERROR,
-    IndexCancelParams, InstallClient, InstallOutput, InstallParams, InstructionOutput,
-    JobKind as ProtocolJobKind, JobPriority, METHOD_NOT_FOUND, ModelDownloadParams, ModelInfo,
-    ModelStatus, ModelsInfoOutput, ModuleInfo, OutlineOutput, OutlineParams, PausedOutput,
-    ProjectInfo, ProjectProblems, ProjectState, ProjectsOutput, QueuedJob, ReadOutput, ReadParams,
-    RegisterOutput, RegisterParams, ReindexParams, RpcError, RunningJob, SavedOutput, ScoreKind,
-    SearchHit, SearchOutput, SearchParams, SecretOutput, SecretSetParams, SecretStatusParams,
+    AcceptedOutput, ActivityOutput, AppliedParams, AutostartGetParams, AutostartOutput,
+    AutostartSetParams, Call, CancelOutput, CheckAllParams, ClientKind, ClientStatus,
+    ClientsStatusOutput, ErrorKind, FileProblem, Heading, INTERNAL_ERROR, IndexCancelParams,
+    InstallClient, InstallOutput, InstallParams, InstructionOutput, JobKind as ProtocolJobKind,
+    JobPriority, METHOD_NOT_FOUND, ModelDownloadParams, ModelInfo, ModelStatus, ModelsInfoOutput,
+    ModuleInfo, OutlineOutput, OutlineParams, PausedOutput, ProjectInfo, ProjectProblems,
+    ProjectState, ProjectsOutput, QueuedJob, ReadOutput, ReadParams, RegisterOutput,
+    RegisterParams, ReindexParams, RpcError, RunningJob, SavedOutput, ScoreKind, SearchHit,
+    SearchOutput, SearchParams, SecretOutput, SecretSetParams, SecretStatusParams,
     SessionStartParams, SetDocsRootParams, SettingsOutput, SettingsSaveParams, StatusOutput,
     StatusParams, Target, TreeDocument, TreeOutput, TreeParams, UninstallOutput, UninstallParams,
     UnregisterOutput, UnregisterParams, output_value,
@@ -593,6 +594,32 @@ impl WorkerHandler {
         AcceptedOutput { accepted: true }
     }
 
+    fn autostart_output(state: crate::autostart::AutostartState) -> AutostartOutput {
+        AutostartOutput {
+            supported: state.supported,
+            enabled: state.enabled,
+            stale: state.stale,
+            command: state.command,
+        }
+    }
+
+    fn autostart_get(&self) -> Result<AutostartOutput, RpcError> {
+        let state = self.worker.autostart().state().map_err(internal)?;
+        Ok(Self::autostart_output(state))
+    }
+
+    fn autostart_set(&self, params: AutostartSetParams) -> Result<AutostartOutput, RpcError> {
+        let autostart = self.worker.autostart();
+        if !autostart.state().map_err(internal)?.supported {
+            return Err(RpcError::bars(
+                ErrorKind::InvalidParams,
+                "автозапуск на этой ОС не поддерживается",
+            ));
+        }
+        let state = autostart.set(params.enabled).map_err(internal)?;
+        Ok(Self::autostart_output(state))
+    }
+
     pub async fn dispatch(&self, call: Call) -> Result<Value, RpcError> {
         match call {
             // `hello` обрабатывает цикл соединения.
@@ -628,6 +655,10 @@ impl WorkerHandler {
             Call::Instruction(_) => self.instruction().map(|out| output_value(&out)),
             Call::SetDocsRoot(params) => self.set_docs_root(params).map(|out| output_value(&out)),
             Call::CheckAll(CheckAllParams {}) => Ok(output_value(&self.check_all())),
+            Call::AutostartGet(AutostartGetParams {}) => {
+                self.autostart_get().map(|out| output_value(&out))
+            }
+            Call::AutostartSet(params) => self.autostart_set(params).map(|out| output_value(&out)),
         }
     }
 }

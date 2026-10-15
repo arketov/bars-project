@@ -23,3 +23,7 @@ desktop.ini
 
 # Tauri: generated schemas
 crates/bars-app/gen/
+
+# Установщик: sidecar-копии exe и сборка NSIS (scripts/build-installer.ps1)
+/crates/bars-app/binaries/
+/dist-installer/

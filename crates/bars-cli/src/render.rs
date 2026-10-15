@@ -4,8 +4,8 @@
 use std::fmt::Write as _;
 
 use bars_protocol::{
-    AcceptedOutput, ClientError, ErrorKind, Heading, InstallOutput, OutlineOutput, ProjectInfo,
-    ProjectState, ProjectsOutput, ReadOutput, RegisterOutput, ScoreKind, SearchOutput,
+    AcceptedOutput, AutostartOutput, ClientError, ErrorKind, Heading, InstallOutput, OutlineOutput,
+    ProjectInfo, ProjectState, ProjectsOutput, ReadOutput, RegisterOutput, ScoreKind, SearchOutput,
     StatusOutput, UninstallOutput, UnregisterOutput, number_lines,
 };
 use serde_json::json;
@@ -208,6 +208,24 @@ pub fn uninstall(output: &UninstallOutput) -> String {
             lines(&output.changed_files)
         )
     }
+}
+
+pub fn autostart(output: &AutostartOutput) -> String {
+    if !output.supported {
+        return "Автозапуск на этой ОС не поддерживается.".to_string();
+    }
+    let mut text = if output.enabled {
+        "Автозапуск включён: bars стартует при входе в систему.".to_string()
+    } else {
+        "Автозапуск выключен.".to_string()
+    };
+    if output.stale {
+        text.push_str(
+            "
+Запись указывает не на текущий bars: воркер исправит её при следующем запуске.",
+        );
+    }
+    text
 }
 
 fn lines(files: &[String]) -> String {

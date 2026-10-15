@@ -11,4 +11,5 @@ title: Внутренняя база знаний bars
 - [spike-search.md](spike-search.md) — спайк поиска на Windows: сборка, скорость (НФТ-2), качество стемминга и реранка, GPU и NPU, пороги.
 - [spike-detach.md](spike-detach.md) — спайк запуска воркера из MCP-прокси: переживает ли он конец сессии Claude Code.
 - [spike-ipc.md](spike-ipc.md) — спайк локального канала: DACL на Windows, занятое имя, тесты `bars-app`; что не проверено.
+- [installer.md](installer.md) — установщик Windows: NSIS или MSI, устройство шаблона Tauri, что проверено при обновлении на месте.
 - [traceability.md](traceability.md) — какой документ описывает каждое требование Т-N и НФТ.

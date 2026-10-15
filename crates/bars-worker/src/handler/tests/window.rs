@@ -4,14 +4,16 @@
 
 use bars_core::secrets::MemorySecrets;
 use bars_protocol::{
-    CheckAllParams, ClientsStatusOutput, ClientsStatusParams, InstallClient, InstallParams,
-    InstructionOutput, InstructionParams, ModelDownloadParams, ModelsInfoOutput, ModelsInfoParams,
-    SavedOutput, SecretOutput, SecretSetParams, SecretStatusParams, SetDocsRootParams,
-    SettingsGetParams, SettingsOutput, SettingsSaveParams,
+    AutostartGetParams, AutostartOutput, AutostartSetParams, CheckAllParams, ClientsStatusOutput,
+    ClientsStatusParams, InstallClient, InstallParams, InstructionOutput, InstructionParams,
+    ModelDownloadParams, ModelsInfoOutput, ModelsInfoParams, SavedOutput, SecretOutput,
+    SecretSetParams, SecretStatusParams, SetDocsRootParams, SettingsGetParams, SettingsOutput,
+    SettingsSaveParams,
 };
 use serde::de::DeserializeOwned;
 
 use super::*;
+use crate::autostart::MemoryAutostart;
 use crate::handler::WorkerHandler;
 use crate::worker::Worker;
 
@@ -34,6 +36,11 @@ impl Window {
             cli_exe: PathBuf::from("/opt/bars/bars-cli"),
         });
         config.secrets = Arc::new(MemorySecrets::default());
+        // Реестр Windows тесты не трогают: запись автозапуска в памяти.
+        config.autostart = Arc::new(MemoryAutostart::new(
+            "\"/opt/bars/bars\" --background",
+            None,
+        ));
         let worker = Worker::start(config, provider.clone()).unwrap();
         let handler = WorkerHandler::new(worker.clone());
         Self {
@@ -296,4 +303,47 @@ async fn another_docs_root_is_written_and_indexed() {
         .call::<bars_protocol::AcceptedOutput>(Call::CheckAll(CheckAllParams {}))
         .await;
     window.worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn autostart_is_off_by_default_and_toggles() {
+    let window = Window::new();
+    let state: AutostartOutput = window.call(Call::AutostartGet(AutostartGetParams {})).await;
+    assert!(state.supported && !state.enabled && !state.stale);
+
+    let on: AutostartOutput = window
+        .call(Call::AutostartSet(AutostartSetParams { enabled: true }))
+        .await;
+    assert!(on.enabled);
+    assert_eq!(
+        on.command.as_deref(),
+        Some("\"/opt/bars/bars\" --background")
+    );
+    let off: AutostartOutput = window
+        .call(Call::AutostartSet(AutostartSetParams { enabled: false }))
+        .await;
+    assert!(!off.enabled);
+    window.worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn autostart_set_is_refused_where_the_os_has_none() {
+    let home = TempDir::new().unwrap();
+    let config = WorkerConfig::new(home.path().to_path_buf());
+    let worker = Worker::start(config, FakeProvider::new("m1")).unwrap();
+    let handler = WorkerHandler::new(worker.clone());
+    let state: AutostartOutput = serde_json::from_value(
+        handler
+            .dispatch(Call::AutostartGet(AutostartGetParams {}))
+            .await
+            .unwrap(),
+    )
+    .unwrap();
+    assert!(!state.supported);
+    let error = handler
+        .dispatch(Call::AutostartSet(AutostartSetParams { enabled: true }))
+        .await
+        .unwrap_err();
+    assert_eq!(error.kind(), Some(ErrorKind::InvalidParams));
+    worker.shutdown().await;
 }

@@ -6,6 +6,7 @@ import { call } from "./api";
 import { clone, isDirty, needsReindex, parseFingerprint, validate } from "./settings-logic";
 import type {
   ClientsStatusOutput,
+  AutostartOutput,
   ClientStatus,
   InstallClientName,
   InstructionOutput,
@@ -26,6 +27,8 @@ class SettingsState {
   draft = $state<SettingsDoc | null>(null);
   models = $state<ModelsInfoOutput | null>(null);
   clients = $state<ClientStatus[]>([]);
+  /** Автозапуск при входе в систему: состояние ОС, а не settings.toml; `null` — не прочитано. */
+  autostart = $state<AutostartOutput | null>(null);
   instruction = $state<InstructionOutput | null>(null);
   /** Есть ли запись с этим именем в хранилище ОС. */
   secrets = $state<Record<string, boolean>>({});
@@ -57,7 +60,7 @@ class SettingsState {
     } catch (error) {
       this.loadError = error instanceof Error ? error.message : String(error);
     }
-    await Promise.all([this.loadModels(), this.loadClients(), this.loadSecrets()]);
+    await Promise.all([this.loadModels(), this.loadClients(), this.loadSecrets(), this.loadAutostart()]);
   }
 
   async loadModels(): Promise<void> {
@@ -78,6 +81,28 @@ class SettingsState {
       this.instruction = instruction;
     } catch {
       this.clients = [];
+    }
+  }
+
+  async loadAutostart(): Promise<void> {
+    try {
+      this.autostart = await call<AutostartOutput>("autostart_get");
+    } catch {
+      this.autostart = null;
+    }
+  }
+
+  /** Галочка «Запускать при входе в систему»: применяется сразу, без «Сохранить». */
+  async setAutostart(enabled: boolean): Promise<void> {
+    this.busy = "autostart";
+    try {
+      this.autostart = await call<AutostartOutput>("autostart_set", { enabled });
+      app.flash(enabled ? "bars будет запускаться при входе в систему" : "Автозапуск выключен");
+    } catch (error) {
+      app.flash(error instanceof Error ? error.message : String(error), true);
+      await this.loadAutostart();
+    } finally {
+      this.busy = null;
     }
   }
 

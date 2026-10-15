@@ -14,4 +14,5 @@ title: Фичи bars — оглавление
 - [agent-tools/](agent-tools/Index.md) — MCP-инструменты и команды `bars-cli`.
 - [clients/](clients/Index.md) — установка в Claude Code, Codex и другие MCP-клиенты.
 - [window/](window/Index.md) — окно и трей: экраны и HTML-мокапы.
+- [distribution/](distribution/Index.md) — поставка: установщик Windows с обновлением на месте, автозапуск при входе в систему.
 - [docs-convention/](docs-convention/Index.md) — соглашение о документации: раскладка `docs/`, журнал сессий, стартовая инструкция и skills.

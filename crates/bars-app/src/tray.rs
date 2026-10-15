@@ -78,7 +78,7 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
 }
 
 /// «Выход»: воркер дописывает текущий документ, закрывает индексы и процесс завершается.
-fn quit_app(app: &AppHandle) {
+pub fn quit_app(app: &AppHandle) {
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
         if let Some(handler) = app.state::<Shared>().get() {

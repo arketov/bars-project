@@ -10,6 +10,7 @@ mod client;
 mod endpoint;
 mod error;
 mod framing;
+mod home;
 mod instruction;
 mod jsonrpc;
 mod launch;
@@ -24,6 +25,7 @@ pub use client::{Client, ClientError};
 pub use endpoint::Endpoint;
 pub use error::*;
 pub use framing::{MAX_REQUEST_LINE, MAX_RESPONSE_LINE, read_line_limited, write_line};
+pub use home::{USER_HOME_VAR, home_override, user_home};
 pub use instruction::{agent_install_text, mcp_config_json};
 pub use jsonrpc::*;
 pub use launch::{

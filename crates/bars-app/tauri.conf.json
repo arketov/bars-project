@@ -1,7 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "bars",
-  "version": "0.0.0",
   "identifier": "io.github.arketov.bars",
   "build": {
     "frontendDist": "../../ui/dist"

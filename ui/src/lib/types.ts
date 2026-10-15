@@ -207,6 +207,13 @@ export interface ClientsStatusOutput {
   clients: ClientStatus[];
 }
 
+export interface AutostartOutput {
+  supported: boolean;
+  enabled: boolean;
+  stale: boolean;
+  command?: string;
+}
+
 export interface InstructionOutput {
   text: string;
   mcp_config: string;

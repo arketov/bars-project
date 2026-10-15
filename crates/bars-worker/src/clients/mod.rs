@@ -51,7 +51,7 @@ impl InstallEnv {
         let dir = exe.parent()?;
         let name = |base: &str| dir.join(format!("{base}{}", std::env::consts::EXE_SUFFIX));
         Some(Self {
-            home: dirs::home_dir()?,
+            home: bars_protocol::user_home()?,
             mcp_exe: name("bars-mcp"),
             cli_exe: name("bars-cli"),
         })

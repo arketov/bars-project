@@ -48,6 +48,10 @@ npm run dev        # просмотр в браузере на порту 1420: 
 
 Заглушка воркера выбирает сцену параметром адреса: `?scene=empty|indexing|consent|missing|provider|worker-down`; без параметра — обычный проект с тремя результатами.
 
+## Установщик Windows
+
+`pwsh scripts/build-installer.ps1` собирает NSIS-установщик; подробности, выбор формата и проверка — [features/distribution/installer.md](../features/distribution/installer.md), [installer.md](installer.md). Нужна сеть при первой сборке (Tauri скачивает NSIS). Для просмотра и проверок ставить `@tauri-apps/cli` отдельно не нужно: он в `devDependencies` пакета `ui/`.
+
 ## Что собирается в срезе 0
 
 Все пять крейтов с реальными зависимостями из стека и заглушками вместо логики. Этим проверяются Т-3 (Rust, Tauri, fastembed-rs, без Python) и то, что тяжёлые зависимости линкуются вместе. `bars-app` собирал Tauri с пустой статической страницей; окно на Svelte пришло в срезе 5.

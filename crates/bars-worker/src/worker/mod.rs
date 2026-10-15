@@ -25,6 +25,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError, Weak};
 use std::time::{Duration, SystemTime};
 
+use crate::autostart::{Autostart, NoAutostart};
 use crate::clients::InstallEnv;
 use bars_core::indexing::indexer::UpdateReport;
 use bars_core::secrets::{OsSecrets, SecretStore};
@@ -69,6 +70,9 @@ pub struct WorkerConfig {
     pub install_env: Option<InstallEnv>,
     /// Хранилище ключей провайдеров: сюда окно записывает ключ (`secret_set`).
     pub secrets: Arc<dyn SecretStore>,
+    /// Запись автозапуска при входе в систему. Заводской воркер её не трогает: подставляет
+    /// оболочка `bars` (`autostart::for_exe`), а тесты — подделку.
+    pub autostart: Arc<dyn Autostart>,
 }
 
 impl std::fmt::Debug for WorkerConfig {
@@ -90,6 +94,7 @@ impl WorkerConfig {
             debounce: DEBOUNCE,
             install_env: InstallEnv::detect(),
             secrets: Arc::new(OsSecrets::default()),
+            autostart: Arc::new(NoAutostart),
         }
     }
 }
@@ -582,6 +587,10 @@ impl Worker {
     }
 
     /// Хранилище ключей провайдеров.
+    pub fn autostart(&self) -> &Arc<dyn Autostart> {
+        &self.inner.config.autostart
+    }
+
     pub fn secrets(&self) -> &Arc<dyn SecretStore> {
         &self.inner.config.secrets
     }

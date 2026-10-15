@@ -655,6 +655,29 @@ pub struct SetDocsRootParams {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CheckAllParams {}
 
+/// Состояние автозапуска `bars` при входе в систему.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AutostartGetParams {}
+
+/// Включить или выключить автозапуск.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AutostartSetParams {
+    pub enabled: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AutostartOutput {
+    /// ОС и сборка умеют автозапуск; без этого галочки в окне нет.
+    pub supported: bool,
+    /// Запись есть, и ОС её не отключила.
+    pub enabled: bool,
+    /// Запись указывает не на текущий `bars`.
+    pub stale: bool,
+    /// Команда из записи.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub command: Option<String>,
+}
+
 /// Кто может вызвать метод: все клиенты канала, только `bars-cli` или только окно.
 macro_rules! audience {
     (All) => {
@@ -758,6 +781,8 @@ methods! {
     Instruction: InstructionParams => InstructionOutput, "instruction", Window;
     SetDocsRoot: SetDocsRootParams => AcceptedOutput, "set_docs_root", Window;
     CheckAll: CheckAllParams => AcceptedOutput, "check_all", Window;
+    AutostartGet: AutostartGetParams => AutostartOutput, "autostart_get", Cli;
+    AutostartSet: AutostartSetParams => AutostartOutput, "autostart_set", Cli;
 }
 
 /// Ответ метода как JSON-значение.
@@ -825,7 +850,9 @@ mod tests {
         ClientsStatus(ClientsStatusParams),
         Instruction(InstructionParams),
         SetDocsRoot(SetDocsRootParams),
-        CheckAll(CheckAllParams)
+        CheckAll(CheckAllParams),
+        AutostartGet(AutostartGetParams),
+        AutostartSet(AutostartSetParams)
     );
 
     #[test]
@@ -884,6 +911,8 @@ mod tests {
         });
         roundtrip(ActivityParams {});
         roundtrip(TreeParams { target: target() });
+        roundtrip(AutostartGetParams {});
+        roundtrip(AutostartSetParams { enabled: true });
     }
 
     #[test]
