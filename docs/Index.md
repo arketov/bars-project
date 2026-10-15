@@ -4,16 +4,13 @@ title: Документация bars
 
 # Документация bars
 
-Документация продукта: как bars устроен и как работает. Требования лежат в [MAIN_IDEA.md](../MAIN_IDEA.md).
+Требования, устройство и история разработки bars. Раскладка — по совету самого bars ([features/docs-convention/layout.md](features/docs-convention/layout.md)).
 
 ## Содержание
 
-- [architecture/](architecture/Index.md) — устройство bars: стек, компоненты, локальный канал, ключи, векторный поиск.
-- [models/](models/Index.md) — встроенные и внешние модели embed и rerank.
-- [indexing/](indexing/Index.md) — нарезка документов и обновление индекса.
-- [storage/](storage/Index.md) — файлы bars на диске и схема индекса.
-- [search/](search/Index.md) — гибридный поиск от запроса до выдачи.
-- [agent-tools/](agent-tools/Index.md) — MCP-инструменты и команды `bars-cli`.
-- [integrations/](integrations/Index.md) — подключение к агентским клиентам и `BARS_INSTRUCTION.md`.
-- [design/](design/Index.md) — дизайн окна: экраны и HTML-мокапы.
-- [knowledge/](knowledge/Index.md) — внутренняя база знаний: исследования, сравнения, замеры.
+- [MAIN_IDEA.md](MAIN_IDEA.md) — требования всего проекта: исходная формулировка, Т-N, НФТ, уроки образца, критерии приёмки, журнал раундов.
+- [features/](features/Index.md) — фичи bars: что умеет и как это работает.
+- [architecture/](architecture/Index.md) — общее устройство: стек, процессы, канал, протокол, схема индекса.
+- [adr/](adr/Index.md) — принятые решения с обоснованием.
+- [knowledge/](knowledge/Index.md) — внутренняя база знаний: исследования, сравнения, замеры спайков.
+- [chats/](chats/Index.md) — журнал сессий агентов: ход работы и передача дел.

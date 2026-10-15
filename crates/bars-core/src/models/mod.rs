@@ -1,5 +1,5 @@
 //! Модели: embed-модель за trait [`Embedder`], rerank-модель за trait [`Reranker`] и встроенная
-//! bge-m3 (`docs/models/local-models.md`).
+//! bge-m3 (`docs/features/models/local-models.md`).
 
 mod builtin;
 mod embedder;

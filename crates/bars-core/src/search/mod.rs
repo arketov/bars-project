@@ -1,5 +1,5 @@
 //! Поиск по индексу проекта: гибридный, со слиянием RRF, реранком и порогом
-//! (`docs/search/hybrid-search.md`).
+//! (`docs/features/search/hybrid-search.md`).
 
 mod hybrid;
 mod params;

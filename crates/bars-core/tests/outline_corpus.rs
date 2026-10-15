@@ -51,11 +51,20 @@ fn outline_lines_match_the_files_and_the_chunker() {
 #[test]
 fn t26_scenarios_on_a_real_document() {
     let project = project();
-    let path = resolve_doc_path(&project, Path::new("docs"), "agent-tools/mcp-tools.md")
-        .expect("путь от корня документации");
+    let path = resolve_doc_path(
+        &project,
+        Path::new("docs"),
+        "features/agent-tools/mcp-tools.md",
+    )
+    .expect("путь от корня документации");
     // Путь из выдачи поиска ведёт в тот же файл (OQ-35).
     assert_eq!(
-        resolve_doc_path(&project, Path::new("docs"), "docs/agent-tools/mcp-tools.md").unwrap(),
+        resolve_doc_path(
+            &project,
+            Path::new("docs"),
+            "docs/features/agent-tools/mcp-tools.md"
+        )
+        .unwrap(),
         path
     );
     let source = read_utf8_path(&path).unwrap();

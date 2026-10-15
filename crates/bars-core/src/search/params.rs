@@ -1,4 +1,4 @@
-//! Параметры поиска: настройки из `[search]` и вызов агента (`docs/storage/settings.md`, Т-18, Т-24).
+//! Параметры поиска: настройки из `[search]` и вызов агента (`docs/features/settings/settings.md`, Т-18, Т-24).
 
 /// Настройки поиска: таблица `[search]` из `settings.toml` и `.bars/config.toml`.
 #[derive(Debug, Clone, PartialEq)]

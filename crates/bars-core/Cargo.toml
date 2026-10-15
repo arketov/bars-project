@@ -14,7 +14,7 @@ serde.workspace = true
 thiserror.workspace = true
 toml.workspace = true
 
-# DirectML есть только на Windows (docs/models/local-models.md).
+# DirectML есть только на Windows (docs/features/models/local-models.md).
 [target.'cfg(windows)'.dependencies]
 fastembed = { workspace = true, features = ["directml"] }
 ort = { workspace = true, features = ["directml"] }

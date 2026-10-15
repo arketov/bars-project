@@ -49,7 +49,7 @@ fn embedder() -> Result<TextEmbedding> {
     Ok(m)
 }
 
-// ---------- нарезка (упрощённо по docs/indexing/chunking.md) ----------
+// ---------- нарезка (упрощённо по docs/features/indexing/chunking.md) ----------
 
 struct Section {
     level: usize,

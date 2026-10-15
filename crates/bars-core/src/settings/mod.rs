@@ -1,5 +1,5 @@
 //! Настройки bars: `~/.bars/settings.toml` и `.bars/config.toml` проекта
-//! (`docs/storage/settings.md`, `docs/storage/files.md`, Т-16, Т-18, Т-24).
+//! (`docs/features/settings/settings.md`, `docs/architecture/files.md`, Т-16, Т-18, Т-24).
 //!
 //! Значение берётся по первому найденному: `config.toml` проекта → `settings.toml` пользователя →
 //! заводское значение. Вызов агента накладывается поверх них в [`SearchSettings::resolve`].

@@ -1,5 +1,5 @@
 //! Таблицы файлов настроек, как они записаны: каждый ключ необязателен, лишние ключи собираются
-//! для предупреждения (`docs/storage/settings.md`, OQ-33).
+//! для предупреждения (`docs/features/settings/settings.md`, OQ-33).
 
 use std::collections::BTreeMap;
 use std::path::Path;

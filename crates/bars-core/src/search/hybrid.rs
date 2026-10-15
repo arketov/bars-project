@@ -1,5 +1,5 @@
 //! Гибридный поиск: полнотекстовый и векторный кандидаты, слияние RRF, реранк, порог
-//! (`docs/search/hybrid-search.md`, Т-12…Т-14, Т-18, Т-24, Т-25).
+//! (`docs/features/search/hybrid-search.md`, Т-12…Т-14, Т-18, Т-24, Т-25).
 
 use std::collections::{HashMap, HashSet};
 
