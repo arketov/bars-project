@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bars — пустые экраны</title>
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="states.css">
+<script src="theme.js"></script>
+<script src="states.js"></script>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="scenes">
+    <b>Сцена:</b>
+    <button data-scene="none">Нет проектов</button>
+    <button data-scene="nodocs">Проект без документации</button>
+    <button data-scene="building">Индекс ещё пуст</button>
+    <button data-scene="noresults">Нет результатов поиска</button>
+    <span class="sp"></span>
+    <span>Мокап: Т-5, Т-6, Т-24</span>
+  </div>
+</div>
+
+<script>
+"use strict";
+function scene(id, projects, foot, main) {
+  const el = document.createElement("div");
+  el.className = "app scene"; el.id = id;
+  el.innerHTML = sidebar(projects, foot) + `<main>${main}</main>`;
+  document.getElementById("stage").appendChild(el);
+}
+const ok = '<span class="dot ok"></span><span>Индекс актуален · обновлён 14:02</span>';
+
+scene("none", [], '<span class="dot off"></span><span>Проектов нет</span>',
+  `<div class="empty"><div class="art">${I.folder}</div>
+    <h1>Добавьте первый проект</h1>
+    <p>bars ищет по Markdown-документации проектов. Укажите папку проекта — bars найдёт в ней документацию, проиндексирует её и будет следить за правками.</p>
+    <div class="acts"><button class="btn">${I.plus}Добавить проект…</button></div>
+    <div style="margin-top:34px;padding-top:20px;border-top:1px solid var(--line)">
+      <p style="margin-bottom:8px">Проект появится и сам, когда вы начнёте сессию Claude Code или Codex в папке с документацией — если bars установлен в клиент.</p>
+      <button class="link" onclick="location.href='settings.html'">Установить bars в клиенты →</button>
+    </div></div>`);
+
+scene("nodocs",
+  [{ name: "notes-app", sub: "документации не найдено", dot: "warn", on: true }, { name: "bars-project", sub: "актуален · 214 документов", dot: "ok" }],
+  '<span class="dot warn"></span><span>notes-app · нет документов</span>',
+  `<div class="empty"><div class="art mid">${I.file}</div>
+    <h1>В проекте notes-app нет документации</h1>
+    <p>Корень документации — <span class="mono">docs/</span> — не содержит ни одного <span class="mono">.md</span>. Проект остаётся в списке, слежение включено: как только файлы появятся, bars проиндексирует их.</p>
+    <div class="code mono muted">~/Projects/notes-app/docs/ — папки нет</div>
+    <div class="acts"><button class="btn">Выбрать другую папку документации…</button><button class="ghost">Открыть папку проекта</button><button class="ghost danger">Убрать из bars</button></div>
+    <p class="faint" style="margin-top:14px;font-size:12.5px">Другая папка сохраняется в <span class="mono">.bars/config.toml</span> проекта (ключ корня документации); поддерживается и корень проекта, <span class="mono">.</span>.</p></div>`);
+
+scene("building",
+  [{ name: "tmc-region", sub: "первая индексация · 4 %", dot: "busy", on: true }, { name: "bars-project", sub: "актуален · 214 документов", dot: "ok" }],
+  '<span class="dot busy"></span><span>Индексация · tmc-region 4 %</span>',
+  `<div class="empty"><div class="art">${I.search}</div>
+    <h1>tmc-region индексируется впервые</h1>
+    <p>Пока в индексе ничего нет, поиск вернёт пустой результат. Дерево документов уже видно: оно читается с диска.</p>
+    <div style="max-width:360px;margin:0 auto 14px"><div class="bar stripe"><i style="width:4%"></i></div>
+      <div class="row muted" style="font-size:12.5px;margin-top:6px"><span>48 из 1 180 документов</span><span class="sp"></span><span>около 1 ч 35 мин</span></div></div>
+    <div class="acts"><button class="ghost" onclick="location.href='indexing.html'">Ход индексации</button></div>
+    <p class="faint" style="margin-top:14px;font-size:12.5px">Встроенной модели нужно скачаться при первом запуске — тогда прогресс сначала покажет скачивание.</p></div>`);
+
+scene("noresults",
+  [{ name: "bars-project", sub: "актуален · 214 документов", dot: "ok", on: true }],
+  ok,
+  `<div class="askbox"><div class="ask"><input value="как настроить автозапуск с системой"><button class="btn">Найти</button></div>
+     <div class="muted" style="font-size:12.5px;margin:8px 4px 0">Искать в: <b>Модули: Models, Search</b> · Результатов <b>3</b></div></div>
+   <div class="results"><div class="empty" style="padding-top:44px"><div class="art low">${I.search}</div>
+    <h1>Ничего не найдено</h1>
+    <p>Подходящие чанки есть, но их оценка ниже порога — <b>0,30</b> (rerank <span class="mono">bge-reranker-v2-m3</span>). Лучший кандидат получил 0,18.</p>
+    <ul>
+      <li><b>Снимите галочки с модулей</b> — сейчас поиск идёт только по двум из шести.</li>
+      <li>Переформулируйте запрос: назовите термин, как он записан в документах.</li>
+      <li>Понизьте порог для этого запроса — слабые результаты появятся с пометкой «слабо».</li>
+    </ul>
+    <div class="acts"><button class="btn">Искать по всему проекту</button><button class="ghost">Порог 0,15 для этого запроса</button></div>
+    <p class="faint" style="margin-top:14px;font-size:12.5px">Применено: 3 результата · порог 0,30 · реранк · 212 мс</p></div></div>`);
+
+initScenes("none");
+</script>
+</body>
+</html>

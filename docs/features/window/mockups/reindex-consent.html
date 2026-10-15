@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bars — согласие на переиндексацию</title>
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="states.css">
+<script src="theme.js"></script>
+<script src="states.js"></script>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="scenes">
+    <b>Сцена:</b>
+    <button data-scene="dlg">Диалог после смены модели</button>
+    <button data-scene="dlg-remote">Диалог: удалённый провайдер</button>
+    <button data-scene="later">Окно после «Позже»</button>
+    <span class="sp"></span>
+    <span>Мокап: Т-25, OQ-21</span>
+  </div>
+</div>
+
+<script>
+"use strict";
+const projects = [
+  { name: "bars-project", sub: "актуален · 214 документов", dot: "ok" },
+  { name: "tmc-region", sub: "нужна переиндексация", dot: "warn" },
+  { name: "tmc-sa", sub: "нужна переиндексация", dot: "warn", on: true },
+  { name: "old-landing", sub: "папка не найдена", dot: "off" },
+];
+const foot = '<span class="dot warn"></span><span>Нужна переиндексация: 2 проекта</span>';
+
+// Заголовок главного экрана: поле запроса недоступно, пока проект не переиндексирован
+const blockedMain = `
+  <div class="askbox"><div class="ask dis">
+    <input placeholder="Поиск по tmc-sa недоступен до переиндексации" disabled>
+    <button class="btn off" disabled>Найти</button></div></div>
+  <div class="results">
+    <div class="banner warn" style="margin-top:16px">
+      <span class="ic">${I.warn}</span>
+      <div class="bt"><b>Проект tmc-sa нужно переиндексировать</b>
+        <span>Сменилась embed-модель: индекс построен <span class="mono">BAAI/bge-m3</span>, в настройках — <span class="mono">Qwen/Qwen3-Embedding-0.6B</span>. Поиск по проекту не работает, пока вы не согласитесь на переиндексацию (Т-25). Агентам по этому проекту отвечает ошибка «нужна переиндексация».</span></div>
+      <div class="acts"><button class="btn sm" data-open="dlg">Переиндексировать…</button></div>
+    </div>
+    <p class="muted" style="font-size:12.5px">Дерево документов остаётся на месте: оно читается с диска и от модели не зависит. Поиск по другим проектам работает.</p>
+  </div>`;
+
+const rows = [
+  { id: "tmc-sa", chunks: 3100, docs: 412, min: 26 },
+  { id: "tmc-region", chunks: 12400, docs: 1180, min: 103 },
+];
+const fmt = (n) => n.toLocaleString("ru-RU").replace(/ /g, " ");
+const dur = (m) => (m >= 60 ? `около ${Math.floor(m / 60)} ч ${m % 60 ? (m % 60) + " мин" : ""}` : `около ${m} мин`);
+
+function dialog(id, remote) {
+  const to = remote ? "text-embedding-3-large <small style='font-weight:400'>· api.openai.com</small>" : "Qwen/Qwen3-Embedding-0.6B";
+  const toNote = remote ? "удалённый провайдер · 3072" : "встроенная · 1024";
+  return `
+  <div class="overlay on" id="ov-${id}"><div class="dialog" role="dialog" aria-modal="true">
+    <div class="dh"><div class="art">${I.warn}</div>
+      <div><h2>Сменилась embed-модель — нужна переиндексация</h2>
+        <p>Векторы старой модели нельзя сравнивать с векторами новой, поэтому индекс проектов придётся построить заново.</p></div></div>
+    <div class="db">
+      <div class="swap">
+        <div class="m"><small>Индекс построен</small><b>BAAI/bge-m3</b><small>встроенная · 1024</small></div>
+        ${I.arrow}
+        <div class="m new"><small>В настройках сейчас</small><b>${to}</b><small>${toNote}</small></div>
+      </div>
+
+      <table class="tbl" id="tbl-${id}">
+        <thead><tr><th></th><th>Проект</th><th class="n">Документов</th><th class="n">Чанков</th><th class="n">Время</th></tr></thead>
+        <tbody>${rows.map((r) => `
+          <tr><td><input type="checkbox" checked data-chunks="${r.chunks}" data-min="${r.min}" data-docs="${r.docs}"></td>
+              <td><b>${r.id}</b></td><td class="n">${fmt(r.docs)}</td><td class="n">${fmt(r.chunks)}</td>
+              <td class="n">${remote ? "зависит от провайдера" : dur(r.min)}</td></tr>`).join("")}</tbody>
+        <tfoot><tr><td></td><td><b>Выбрано</b></td><td class="n" id="sd-${id}"></td><td class="n" id="sc-${id}"></td><td class="n" id="st-${id}"></td></tr></tfoot>
+      </table>
+
+      <div class="note info">${I.info}<div>
+        <b>Что произойдёт.</b> Документы проекта эмбеддятся заново новой моделью в отдельный файл; старый индекс заменяется в самом конце. Пока идёт переиндексация, поиск по проекту не работает. Временно понадобится место под второй индекс. Переиндексацию можно остановить — тогда старый индекс останется, а проект так и будет ждать согласия.</div></div>
+      ${remote
+        ? `<div class="note warn">${I.warn}<div><b>Текст документов уйдёт внешнему провайдеру.</b> Все чанки отправятся на <span class="mono">api.openai.com</span>; время и стоимость определяет провайдер. Ключ берётся из хранилища ОС.</div></div>`
+        : `<div class="note info">${I.info}<div>Время — оценка по скорости модели; она уточняется после первых пачек (bge-m3 считает около 0,5 с на чанк). Модель нужно скачать — <b>1,2 ГБ</b>, это входит в ход индексации.</div></div>`}
+    </div>
+    <div class="df">
+      <button class="ghost" data-open="later" title="Настройки сохранены, проекты ждут согласия">Позже</button>
+      <button class="link" title="Вернуть в настройках BAAI/bge-m3 — индексы снова подходят, переиндексация не нужна">Вернуть прежнюю модель</button>
+      <span class="sp"></span>
+      <button class="btn" id="go-${id}">Переиндексировать</button>
+    </div>
+  </div></div>`;
+}
+
+function scene(id, side, main, extra = "") {
+  const el = document.createElement("div");
+  el.className = "app scene"; el.id = id;
+  el.innerHTML = sidebar(projects, foot) + `<main>${main}</main>` + extra;
+  document.getElementById("stage").appendChild(el);
+}
+
+scene("dlg", 0, blockedMain, dialog("dlg", false));
+scene("dlg-remote", 0, blockedMain, dialog("dlg-remote", true));
+scene("later", 0, blockedMain);
+
+// пересчёт итога по галочкам
+for (const id of ["dlg", "dlg-remote"]) {
+  const root = document.getElementById("ov-" + id);
+  const upd = () => {
+    const on = [...root.querySelectorAll("input[type=checkbox]:checked")];
+    const sum = (k) => on.reduce((a, c) => a + +c.dataset[k], 0);
+    root.querySelector("#sd-" + id).textContent = fmt(sum("docs"));
+    root.querySelector("#sc-" + id).textContent = fmt(sum("chunks"));
+    root.querySelector("#st-" + id).textContent = id === "dlg" ? (sum("min") ? dur(sum("min")) : "—") : "зависит от провайдера";
+    const go = root.querySelector("#go-" + id);
+    go.textContent = on.length ? `Переиндексировать (${on.length})` : "Переиндексировать";
+    go.disabled = !on.length; go.classList.toggle("off", !on.length);
+  };
+  root.addEventListener("change", upd); upd();
+}
+initScenes("dlg");
+</script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bars — ошибки</title>
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="states.css">
+<script src="theme.js"></script>
+<script src="states.js"></script>
+<style>
+  .code { font: 11.5px var(--mono); color: var(--faint); }
+  .card1 { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; margin-bottom: 12px; }
+  .card1 b { font-size: 14.5px; } .card1 .meta { color: var(--muted); font-size: 12px; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="scenes">
+    <b>Сцена:</b>
+    <button data-scene="worker">Воркер недоступен</button>
+    <button data-scene="model">Модель не скачана</button>
+    <button data-scene="provider">Провайдер недоступен</button>
+    <button data-scene="rerank">Rerank недоступен</button>
+    <button data-scene="gone">Проект пропал</button>
+    <button data-scene="reindex">Нужна переиндексация</button>
+    <span class="sp"></span>
+    <span>Мокап: коды протокола</span>
+  </div>
+</div>
+
+<script>
+"use strict";
+const projs = (on, over = {}) => [
+  Object.assign({ name: "bars-project", sub: "актуален · 214 документов", dot: "ok" }, on === 0 ? { on: true } : {}, over[0] || {}),
+  Object.assign({ name: "tmc-sa", sub: "актуален · 412 документов", dot: "ok" }, on === 1 ? { on: true } : {}, over[1] || {}),
+];
+const ok = '<span class="dot ok"></span><span>Индекс актуален · обновлён 14:02</span>';
+function scene(id, projects, foot, main) {
+  const el = document.createElement("div");
+  el.className = "app scene"; el.id = id;
+  el.innerHTML = sidebar(projects, foot) + `<main>${main}</main>`;
+  document.getElementById("stage").appendChild(el);
+}
+const ask = (v, dis) => `<div class="askbox"><div class="ask${dis ? " dis" : ""}"><input value="${v}" ${dis ? "disabled" : ""}><button class="btn${dis ? " off" : ""}" ${dis ? "disabled" : ""}>Найти</button></div></div>`;
+const banner = (cls, ic, t, s, acts = "") => `<div class="banner ${cls}"><span class="ic">${I[ic]}</span><div class="bt"><b>${t}</b><span>${s}</span></div><div class="acts">${acts}</div></div>`;
+
+// 1. Воркер недоступен
+scene("worker", projs(0, { 0: { dot: "bad", sub: "нет связи с воркером" }, 1: { dot: "off", sub: "состояние неизвестно" } }),
+  '<span class="dot bad"></span><span>Воркер не отвечает</span>',
+  `<div class="empty"><div class="art bad">${I.plug}</div>
+    <h1>Воркер bars не отвечает</h1>
+    <p>Окно потеряло связь со службой, которая держит индексы и модели. Поиск и список проектов временно недоступны. Индексы на диске целы: недописанный документ в них либо старый, либо новый.</p>
+    <div class="acts"><button class="btn">Перезапустить воркер</button><button class="ghost">Открыть лог</button><button class="ghost">Копировать подробности</button></div>
+    <p class="faint" style="margin-top:16px;font-size:12.5px">Подробности: <span class="code">воркер не ответил за 10 с · последнее событие 14:31:08 · лог ~/.bars/logs/bars-2026-10-15.log</span></p>
+    <p class="faint" style="font-size:12.5px">Агентам в это время отвечает <span class="code">bars-mcp</span>: «воркер недоступен, bars запустит его» (код выхода <span class="code">bars-cli</span> — 2).</p></div>`);
+
+// 2. Модель не скачана / не найдена
+scene("model", projs(0),
+  '<span class="dot warn"></span><span>Скачивается модель</span>',
+  `${ask("порог релевантности")}
+   <div class="results" style="padding-top:16px">
+    ${banner("acc", "info", "Скачивается embed-модель BAAI/bge-m3", "Поиск заработает, когда модель загрузится: она нужна, чтобы превратить запрос в вектор. Это однократно. Скачивание идёт в фоне, окно можно закрыть.",
+      '<button class="ghost sm">Отмена</button>')}
+    <div class="card"><div class="cb">
+      <div class="row" style="align-items:baseline"><b>model.onnx</b><span class="muted" style="font-size:12.5px">540 МБ из 1,2 ГБ</span><span class="sp"></span><span class="muted" style="font-size:12.5px">≈ 3 мин</span></div>
+      <div class="bar stripe" style="margin-top:8px"><i style="width:45%"></i></div></div></div>
+    <p class="muted" style="font-size:12.5px;margin-bottom:26px">Так выглядит ответ <span class="code">model_loading</span> с ходом загрузки.</p>
+
+    <div class="card"><div class="ch"><h2>Если скачать не удалось</h2><span class="badge bad">ошибка</span></div><div class="cb">
+      ${banner("bad", "err", "Не удалось скачать BAAI/bge-m3", "Нет связи с huggingface.co. Проверьте сеть и повторите; уже скачанная часть сохранена.", '<button class="btn sm">Повторить</button><button class="ghost sm">Выбрать другую модель</button>')}
+      ${banner("bad", "err", "Файлы модели не найдены или повреждены", "В <span class='mono'>~/.bars/models/</span> нет нужных файлов (или не сходится размер). Скачайте модель заново.", '<button class="btn sm">Скачать заново</button><button class="ghost sm">Открыть папку</button>')}
+    </div></div></div>`);
+
+// 3. Внешний провайдер недоступен (embed)
+scene("provider", projs(0, { 0: { dot: "warn", sub: "провайдер не отвечает" } }),
+  '<span class="dot warn"></span><span>Провайдер embed недоступен</span>',
+  `${ask("порог релевантности")}
+   <div class="results" style="padding-top:16px">
+    ${banner("bad", "err", "Embed-провайдер не ответил", "Запрос не удалось превратить в вектор, поэтому поиск не выполнен. <b>api.openai.com</b>: 401 — ключ не принят. Проверьте ключ в настройках, на вкладке «Модели».",
+      '<button class="btn sm" onclick="location.href=\'settings.html\'">Открыть настройки</button><button class="ghost sm">Повторить</button>')}
+    <div class="card"><div class="ch"><h2>Причины, которые показывает окно</h2></div><div class="cb" style="font-size:13px">
+      <dl class="kv" style="grid-template-columns:180px 1fr">
+        <dt>401 / 403</dt><dd>ключ не принят: проверить или заменить ключ</dd>
+        <dt>Ключ не найден в хранилище ОС</dt><dd>задать ключ заново на вкладке «Модели»</dd>
+        <dt>Нет сети, таймаут, 5xx</dt><dd>повторить позже; индексация при этом сама делает до трёх повторов</dd>
+        <dt>Локальный адрес не отвечает</dt><dd>запустить сервер модели или проверить адрес</dd>
+        <dt>Вход слишком длинный</dt><dd>уменьшить максимальный размер чанка — относится к индексации, см. «Ошибка файла»</dd>
+      </dl>
+      <p class="faint" style="margin:10px 0 0;font-size:12px">Текст ошибки приходит как <span class="code">provider_error</span> и никогда не содержит ключей.</p></div></div></div>`);
+
+// 4. Rerank недоступен — выдача есть, с пометкой
+scene("rerank", projs(0),
+  ok,
+  `${ask("как считается порог релевантности")}
+   <div class="results" style="padding-top:16px">
+    ${banner("warn", "warn", "Rerank не отработал — выдача без него", "Внешняя rerank-модель не ответила. Результаты ранжированы только гибридным поиском, оценка — по косинусу, порог для неё другой (0,45).", '<button class="ghost sm">Повторить с rerank</button>')}
+    <div class="card1"><b>Порог релевантности</b><div class="meta mono">features/search/hybrid-search.md:26 · Оценка · Порог</div>
+      <div class="row" style="margin-top:8px"><span class="badge ok">хорошо · 71 %</span><span class="badge">cosine</span></div></div>
+    <div class="card1"><b>Пределы порога агента</b><div class="meta mono">features/settings/settings.md:88 · Поиск</div>
+      <div class="row" style="margin-top:8px"><span class="badge warn">частично · 52 %</span><span class="badge">cosine</span></div></div></div>`);
+
+// 5. Пропавший проект
+scene("gone", [{ name: "bars-project", sub: "актуален · 214 документов", dot: "ok" }, { name: "old-landing", sub: "папка не найдена", dot: "off", on: true }],
+  '<span class="dot off"></span><span>old-landing недоступен</span>',
+  `<div class="empty"><div class="art low">${I.folder}</div>
+    <h1>Папка проекта old-landing не найдена</h1>
+    <p class="mono muted" style="margin:0 0 6px">D:\\Projects\\old-landing</p>
+    <p>Папка могла переехать, лежать на отключённом диске или в ещё не загруженной папке OneDrive. bars ничего не удаляет: проект остаётся в списке, индекс цел. Как только папка вернётся, при ближайшей проверке проект возобновится сам.</p>
+    <div class="acts"><button class="btn">Проверить сейчас</button><button class="ghost">Добавить проект на новом месте…</button><button class="ghost danger">Убрать из bars</button></div>
+    <p class="faint" style="margin-top:14px;font-size:12.5px">«Убрать» только снимает проект с регистрации; папка <span class="mono">.bars/</span> и файлы проекта остаются. Перенесённая папка с <span class="mono">.bars/</span> подхватывается как есть — без повторной индексации, если модель та же.</p>
+    <p class="faint" style="font-size:12.5px">Агентам по этому проекту отвечает ошибка <span class="code">project_unavailable</span>.</p></div>`);
+
+// 6. Нужна переиндексация
+scene("reindex", projs(1, { 1: { dot: "warn", sub: "нужна переиндексация" } }),
+  '<span class="dot warn"></span><span>tmc-sa · нужна переиндексация</span>',
+  `${ask("порог релевантности", true)}
+   <div class="results" style="padding-top:16px">
+    ${banner("warn", "warn", "Проект tmc-sa нужно переиндексировать", "Индекс построен моделью BAAI/bge-m3, а в настройках — Qwen/Qwen3-Embedding-0.6B. Поиск по проекту не работает, пока вы не согласитесь на переиндексацию. Агенты получают ошибку «нужна переиндексация» и не могут запустить её сами.",
+      '<button class="btn sm" onclick="location.href=\'reindex-consent.html\'">Переиндексировать…</button>')}
+    <p class="muted" style="font-size:12.5px">Вместо переиндексации можно вернуть прежнюю модель в настройках — индекс снова подойдёт. Подробный диалог согласия — <a class="link" href="reindex-consent.html">reindex-consent.html</a>.</p></div>`);
+
+initScenes("worker");
+</script>
+</body>
+</html>

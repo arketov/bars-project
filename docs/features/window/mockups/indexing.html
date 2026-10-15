@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bars — ход индексации</title>
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="states.css">
+<script src="theme.js"></script>
+<script src="states.js"></script>
+<style>
+  .big { font-size: 30px; font-weight: 700; letter-spacing: -.5px; font-variant-numeric: tabular-nums; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 14px 0; }
+  .stat { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
+  .stat small { display: block; color: var(--muted); font-size: 11.5px; }
+  .stat b { font-size: 15px; font-variant-numeric: tabular-nums; }
+  .q { display: flex; gap: 12px; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .q:last-child { border-bottom: 0; }
+  .q .n { width: 22px; height: 22px; border-radius: 50%; background: var(--panel-2); border: 1px solid var(--line); display: grid; place-items: center; font-size: 11.5px; font-weight: 700; color: var(--muted); flex: none; }
+  .q.now .n { background: var(--accent); border-color: transparent; color: var(--on-accent); }
+  .q .why { color: var(--muted); font-size: 12px; }
+  .errfile { padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  .errfile:last-child { border-bottom: 0; }
+  .errfile .t { display: flex; align-items: center; gap: 10px; }
+  .errfile .t .mono { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .errfile .m { color: var(--muted); font-size: 12.5px; margin: 3px 0 0 24px; }
+  .errfile .t svg { color: var(--bad); flex: none; }
+  .card1 { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; margin-bottom: 12px; }
+  .card1 b { font-size: 14.5px; } .card1 .meta { color: var(--muted); font-size: 12px; margin-top: 4px; }
+  .desk { background: linear-gradient(135deg, var(--bg), var(--panel-2)); min-height: 100%; position: relative; padding: 40px; }
+  .taskbar { position: absolute; left: 0; right: 0; bottom: 0; height: 44px; background: var(--panel); border-top: 1px solid var(--line-2); display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 0 16px; }
+  .trayicon { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; font-weight: 800; font-size: 13px; background: var(--accent); color: var(--on-accent); position: relative; }
+  .trayicon.idle { background: var(--low); } .trayicon.attn { background: var(--mid); }
+  .trayicon.busy { animation: pulse 1.2s infinite; }
+  .legend { display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; align-items: center; font-size: 13px; max-width: 520px; margin: 0 0 26px; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="scenes">
+    <b>Сцена:</b>
+    <button data-scene="full">Переиндексация после согласия</button>
+    <button data-scene="update">Обычное обновление</button>
+    <button data-scene="fileerr">Ошибка файла</button>
+    <button data-scene="tray">Трей</button>
+    <span class="sp"></span>
+    <span>Мокап: Т-1, Т-10, Т-19, Т-25</span>
+  </div>
+</div>
+
+<script>
+"use strict";
+function scene(id, projects, foot, main) {
+  const el = document.createElement("div");
+  el.className = "app scene"; el.id = id;
+  el.innerHTML = (projects ? sidebar(projects, foot) : "") + `<main>${main}</main>`;
+  if (!projects) el.style.gridTemplateColumns = "1fr";
+  document.getElementById("stage").appendChild(el);
+}
+const pbtn = '<button class="ghost sm" onclick="togglePause(this)">Приостановить</button>';
+
+const qFull = `
+  <div class="card"><div class="ch"><h2>Очередь индексации</h2><span class="badge">3 проекта</span></div>
+    <div>
+      <div class="q now"><span class="n">1</span><div style="flex:1"><b>tmc-sa</b><div class="why">полная переиндексация после смены модели · по согласию</div></div><span class="badge acc">идёт</span></div>
+      <div class="q"><span class="n">2</span><div style="flex:1"><b>tmc-region</b><div class="why">полная переиндексация после смены модели · по согласию</div></div><span class="badge">ждёт · ≈ 1 ч 43 мин</span></div>
+      <div class="q"><span class="n">3</span><div style="flex:1"><b>bars-project</b><div class="why">правки файлов · 3 документа</div></div><span class="badge">ждёт</span></div>
+    </div></div>
+  <p class="muted" style="font-size:12.5px">Очередь обрабатывает один проект за раз. Явная переиндексация и хук начала сессии идут раньше правок файлов и проверок при старте.</p>`;
+
+scene("full",
+  [
+    { name: "bars-project", sub: "ждёт · 3 документа", dot: "busy" },
+    { name: "tmc-region", sub: "ждёт переиндексации", dot: "busy" },
+    { name: "tmc-sa", sub: "переиндексация · 38 %", dot: "busy", on: true },
+    { name: "old-landing", sub: "папка не найдена", dot: "off" },
+  ],
+  '<span class="dot busy"></span><span>Индексация · tmc-sa 38 %</span>',
+  `<div class="page">
+    <h1>tmc-sa</h1><p class="lead">Полная переиндексация новой моделью <span class="mono">Qwen/Qwen3-Embedding-0.6B</span> — вы согласились 15 октября в 14:20.</p>
+    <div class="banner warn"><span class="ic">${I.warn}</span><div class="bt"><b>Поиск по tmc-sa пока не работает</b><span>Старый индекс заменится новым, когда переиндексация закончится. Поиск по другим проектам работает как обычно.</span></div></div>
+    <div class="card"><div class="ch"><h2 id="phase">Идёт индексация</h2><span class="badge acc" id="pstate">38 %</span></div>
+      <div class="cb">
+        <div class="row" style="align-items:baseline"><span class="big">157</span><span class="muted">из 412 документов</span><span class="sp"></span><span class="muted">осталось около 16 мин</span></div>
+        <div class="bar stripe" id="pbar" style="margin-top:10px"><i style="width:38%"></i></div>
+        <div class="stats">
+          <div class="stat"><small>Чанков обработано</small><b>1 180 из 3 100</b></div>
+          <div class="stat"><small>Скорость</small><b>2,0 чанка/с</b></div>
+          <div class="stat"><small>Устройство</small><b>DirectML (видеокарта)</b></div>
+        </div>
+        <dl class="kv">
+          <dt>Сейчас</dt><dd class="mono">features/agent-tools/mcp-tools.md</dd>
+          <dt>Ошибок в файлах</dt><dd><span class="badge ok">нет</span></dd>
+        </dl>
+        <div class="row" style="margin-top:14px">${pbtn}<button class="ghost sm danger">Остановить</button>
+          <span class="sp"></span><span class="faint" style="font-size:12px">Остановка оставляет старый индекс; проект продолжит ждать согласия.</span></div>
+      </div></div>
+    ${qFull}
+  </div>`);
+
+scene("update",
+  [
+    { name: "bars-project", sub: "индексация · 3 из 10", dot: "busy", on: true },
+    { name: "tmc-region", sub: "актуален · 1 180 документов", dot: "ok" },
+    { name: "tmc-sa", sub: "актуален · 412 документов", dot: "ok" },
+  ],
+  '<span class="dot busy"></span><span>Индексация · ждут 7 документов</span>',
+  `<div class="askbox"><div class="ask"><input value="как работает слежение за файлами"><button class="btn">Найти</button></div></div>
+   <div class="results">
+    <div class="banner acc" style="margin-top:16px"><span class="ic">${I.info}</span>
+      <div class="bt"><b>Идёт обновление индекса · ждут 7 документов</b><span>Поиск работает: он видит всё, что уже проиндексировано. Правки последних минут в выдаче могут не появиться.</span>
+        <div class="bar" style="margin-top:8px;max-width:360px"><i style="width:30%"></i></div></div>
+      <div class="acts"><button class="link" data-open="full">Подробнее</button></div></div>
+    <div class="card1"><b>Слежение за файлами воркера</b><div class="meta mono">architecture/worker.md:44 · Задачи внутри воркера bars</div>
+      <p class="muted" style="margin:8px 0 0;font-size:13px">«События копятся 500 мс и превращаются в задания очереди.»</p></div>
+    <p class="muted" style="font-size:12.5px">Обычное обновление — правки файлов, проверка при старте и часовая — не блокирует поиск (Т-10, Т-19). Блокирует только переиндексация после смены модели (Т-25).</p>
+   </div>`);
+
+scene("fileerr",
+  [
+    { name: "bars-project", sub: "индексация · есть ошибки", dot: "warn", on: true },
+    { name: "tmc-region", sub: "актуален · 1 180 документов", dot: "ok" },
+  ],
+  '<span class="dot warn"></span><span>Индексация · 2 файла с ошибкой</span>',
+  `<div class="page">
+    <h1>bars-project</h1><p class="lead">Индекс обновлён, кроме двух файлов: они остались в очереди с ошибкой.</p>
+    <div class="banner warn"><span class="ic">${I.warn}</span><div class="bt"><b>2 документа не проиндексированы</b><span>Всё остальное в индексе актуально и ищется. Уже проиндексированная версия этих файлов (если была) не тронута.</span></div>
+      <div class="acts"><button class="btn sm">Повторить</button></div></div>
+    <div class="card"><div class="ch"><h2>Файлы с ошибкой</h2><span class="badge bad">2</span></div>
+      <div class="errfile"><div class="t">${I.err.replace('width="18" height="18"', 'width="15" height="15"')}<span class="mono">docs/knowledge/spike-search.md</span><button class="ghost sm">Повторить</button></div>
+        <div class="m">Провайдер отклонил вход как слишком длинный (HTTP 400). Уменьшите «Максимальный размер чанка» в настройках на вкладке «Нарезка» или выберите другую модель.</div></div>
+      <div class="errfile"><div class="t">${I.err.replace('width="18" height="18"', 'width="15" height="15"')}<span class="mono">docs/features/window/mockups/…</span><button class="ghost sm">Повторить</button></div>
+        <div class="m">Файл не прочитан: доступ запрещён. Закройте программу, которая его держит, или проверьте права. Повтор — автоматически при следующей проверке.</div></div>
+    </div>
+    <div class="card"><div class="ch"><h2>Что делает bars сам</h2></div><div class="cb muted" style="font-size:13px">
+      При сетевой ошибке и ответе 5xx провайдера — до трёх повторов с паузой. Если не помогло, файл остаётся в очереди с этой ошибкой; следующая проверка (по правке файла или часовая) попробует снова. Текст последней ошибки без ключей виден здесь и в <span class="mono">bars-cli status</span> (<span class="mono">last_error</span>).</div></div>
+  </div>`);
+
+scene("tray", null, "",
+  `<div class="desk">
+    <div class="legend">
+      <div class="trayicon">b</div><div><b>Готов</b> — все проекты актуальны, окно закрыто, воркер ждёт.</div>
+      <div class="trayicon busy">b</div><div><b>Индексация</b> — мигает; всплывающая подсказка: «tmc-sa · 38 %, ждут 255 документов».</div>
+      <div class="trayicon attn">b</div><div><b>Нужно внимание</b> — нужна переиндексация (Т-25), ошибка файла или недоступен провайдер.</div>
+    </div>
+    <div class="tray">
+      <div class="ti"><b>Открыть bars</b></div>
+      <hr>
+      <div class="ti"><span class="dot busy"></span>Индексация: tmc-sa<small>38 %</small></div>
+      <div class="ti"><span class="dot warn"></span>Нужна переиндексация<small>tmc-region</small></div>
+      <hr>
+      <div class="ti">Проекты<small>4</small></div>
+      <div class="ti">Настройки</div>
+      <hr>
+      <div class="ti">Выход</div>
+    </div>
+    <p class="muted" style="max-width:520px;font-size:12.5px">Закрытие окна прячет его, воркер остаётся в трее (Т-1). Пункт «Выход» дописывает транзакцию текущего документа и завершает воркер. Двойной клик по иконке открывает окно. Пункты состояния открывают соответствующий проект в окне.</p>
+    <div class="taskbar"><span class="muted" style="font-size:12px">14:31</span><div class="trayicon busy" title="tmc-sa · 38 %">b</div></div>
+  </div>`);
+
+function togglePause(btn) {
+  const paused = btn.textContent === "Продолжить";
+  btn.textContent = paused ? "Приостановить" : "Продолжить";
+  const bar = document.getElementById("pbar"); bar.classList.toggle("stripe", paused);
+  document.getElementById("pstate").textContent = paused ? "38 %" : "пауза · 38 %";
+  document.getElementById("phase").textContent = paused ? "Идёт индексация" : "Приостановлено";
+}
+initScenes("full");
+</script>
+</body>
+</html>
