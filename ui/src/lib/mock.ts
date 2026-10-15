@@ -273,7 +273,7 @@ export async function mockCall(method: string, params: Record<string, unknown>):
       };
     case "instruction":
       return {
-        text: "Подключи bars к своему клиенту:\n  bars-cli install --client claude-code\nНе передавай --accept-model-change: это согласие пользователя.\n",
+        text: "Connect bars to your client:\n  bars-cli install --client claude-code\nNever pass --accept-model-change: it is the user's consent.\n",
         mcp_config: "{\n  \"mcpServers\": { \"bars\": { \"command\": \"bars-mcp\", \"args\": [] } }\n}",
       };
     case "install":

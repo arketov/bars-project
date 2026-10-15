@@ -4,25 +4,25 @@
 /// Текст для агента. `cli` и `mcp` — пути (или имена) `bars-cli` и `bars-mcp`.
 pub fn agent_install_text(cli: &str, mcp: &str) -> String {
     format!(
-        "Подключи bars (локальный поиск по Markdown-документации проектов) к своему клиенту.\n\
+        "Connect bars (local search over a project's Markdown documentation) to your client.\n\
          \n\
-         Файлы bars: bars-cli — {cli}; bars-mcp — {mcp}.\n\
+         bars files: bars-cli - {cli}; bars-mcp - {mcp}.\n\
          \n\
-         1. Выполни одну команду для своего клиента:\n\
+         1. Run one command for your client:\n\
          \x20  \"{cli}\" install --client claude-code\n\
          \x20  \"{cli}\" install --client codex\n\
-         \x20  Она пропишет MCP-сервер bars, хук начала сессии и skills bars; перед правкой чужих\n\
-         \x20  конфигов сделает копию `<файл>.bars-backup`.\n\
-         2. Если клиент — Codex, скажи пользователю выполнить в Codex команду /hooks и одобрить\n\
-         \x20  хук bars: без одобрения хук не запустится (MCP при этом уже работает).\n\
-         3. Перезапусти клиент, чтобы он подхватил MCP-сервер.\n\
+         \x20  It registers the bars MCP server, the session-start hook and the bars skills; before\n\
+         \x20  editing other configs it makes a copy named `<file>.bars-backup`.\n\
+         2. If the client is Codex, tell the user to run /hooks in Codex and approve the bars hook:\n\
+         \x20  without approval the hook does not run (the MCP server already works).\n\
+         3. Restart the client so it picks up the MCP server.\n\
          \n\
-         Другим MCP-клиентам (например, чату Claude Desktop) добавь вручную в конфиг MCP stdio-сервер\n\
-         с командой {mcp} и без аргументов. Хука у них нет: проект регистрируется командой\n\
-         \"{cli}\" register <папка проекта> или в окне bars.\n\
+         For other MCP clients (for example the Claude Desktop chat), add a stdio MCP server to the\n\
+         client's MCP config by hand: command {mcp}, no arguments. These clients have no hook, so\n\
+         register a project with \"{cli}\" register <project folder> or in the bars window.\n\
          \n\
-         Запрещено: самому передавать `bars-cli reindex --accept-model-change`. Это согласие\n\
-         пользователя на переиндексацию после смены модели; его даёт только человек.\n"
+         Forbidden: never pass `bars-cli reindex --accept-model-change` yourself. It is the user's\n\
+         consent to reindex after a model change; only a human gives it.\n"
     )
 }
 
@@ -42,8 +42,8 @@ mod tests {
     fn text_names_both_executables_and_forbids_consent() {
         let text = agent_install_text("/opt/bars/bars-cli", "/opt/bars/bars-mcp");
         assert!(text.contains("/opt/bars/bars-cli\" install --client codex"));
-        assert!(text.contains("с командой /opt/bars/bars-mcp"));
-        assert!(text.contains("Запрещено"));
+        assert!(text.contains("command /opt/bars/bars-mcp"));
+        assert!(text.contains("Forbidden: never pass"));
     }
 
     #[test]
