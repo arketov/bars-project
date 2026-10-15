@@ -8,7 +8,8 @@ use std::path::Path;
 use std::sync::Arc;
 
 use bars_core::indexing::indexer::{
-    ReindexReason, UpdateOutcome, UpdateReport, rebuild_index_with, update_index,
+    IndexObserver, IndexingError, ReindexReason, UpdateOutcome, UpdateReport,
+    rebuild_index_observed, update_index_observed,
 };
 use bars_core::models::ModelFingerprint;
 use bars_core::settings::Settings;
@@ -26,6 +27,8 @@ pub struct JobEnv<'a> {
     /// Доступ к проекту: поиск держит читающую сторону, подмена индекса берёт пишущую.
     pub gate: Arc<RwLock<()>>,
     pub handle: Handle,
+    /// Ход, пауза и остановка задания.
+    pub observer: &'a dyn IndexObserver,
 }
 
 #[derive(Debug)]
@@ -33,6 +36,8 @@ pub enum Outcome {
     Updated(UpdateReport),
     /// Индекс построен другой моделью или старой схемой; индекс не тронут (Т-25).
     ReindexRequired(ReindexReason),
+    /// Задание остановил пользователь: проект остаётся как был (OQ-55).
+    Cancelled,
     /// Папки проекта нет.
     Unavailable,
     /// Ошибка настроек, модели, индекса или диска; текст без ключей.
@@ -118,11 +123,12 @@ fn check_project(
         Ok(index) => index,
         Err(error) => return Outcome::Failed(error.to_string()),
     };
-    let updated = update_index(
+    let updated = update_index_observed(
         project,
         &mut index,
         &settings.index_settings(),
         &mut embedder,
+        env.observer,
     );
     result.index_model = index
         .stored_fingerprint()
@@ -136,6 +142,7 @@ fn check_project(
             Err(error) => Outcome::Failed(error.to_string()),
         },
         Ok(UpdateOutcome::ReindexRequired(reason)) => Outcome::ReindexRequired(reason),
+        Err(IndexingError::Cancelled) => Outcome::Cancelled,
         Err(error) => Outcome::Failed(error.to_string()),
     }
 }
@@ -181,11 +188,12 @@ fn rebuild_project(
     };
     let gate = Arc::clone(&env.gate);
     let handle = env.handle.clone();
-    let rebuilt = rebuild_index_with(
+    let rebuilt = rebuild_index_observed(
         project,
         &path,
         &settings.index_settings(),
         &mut embedder,
+        env.observer,
         // Новые поиски ждут, текущие дочитывают; доступ возвращается после подмены файла.
         move || handle.block_on(gate.write_owned()),
     );
@@ -194,6 +202,7 @@ fn rebuild_project(
             result.index_model = result.settings_model.clone();
             Outcome::Updated(report)
         }
+        Err(IndexingError::Cancelled) => Outcome::Cancelled,
         Err(error) => Outcome::Failed(error.to_string()),
     }
 }

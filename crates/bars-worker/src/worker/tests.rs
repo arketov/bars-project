@@ -512,3 +512,81 @@ async fn stale_rebuild_file_is_removed_at_start() {
     assert!(!stale.exists());
     worker.shutdown().await;
 }
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn pause_freezes_the_queue_until_resume() {
+    let env = Env::new();
+    let project = env.project("alpha", &[("a.md", DOC)]);
+    let worker = env.start();
+    worker.pause();
+    assert!(worker.is_paused());
+
+    worker.register(&project).unwrap();
+    tokio::time::sleep(Duration::from_millis(400)).await;
+    assert!(!worker.is_idle(), "на паузе проверка не берётся");
+    assert_eq!(worker.queued().len(), 1);
+    assert!(worker.progress().is_none());
+    assert_eq!(documents_or_zero(&project), 0);
+
+    worker.resume();
+    idle(&worker).await;
+    assert!(!worker.is_paused());
+    assert_eq!(documents(&project), 1);
+    assert!(worker.queued().is_empty());
+    worker.shutdown().await;
+}
+
+fn documents_or_zero(project: &Path) -> usize {
+    if index_path(project).exists() {
+        documents(project)
+    } else {
+        0
+    }
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn cancel_takes_a_waiting_project_off_the_queue() {
+    let env = Env::new();
+    let project = env.project("alpha", &[("a.md", DOC)]);
+    let worker = env.start();
+    worker.pause();
+    worker.register(&project).unwrap();
+
+    assert!(worker.cancel(&project).unwrap());
+    assert!(
+        !worker.cancel(&project).unwrap(),
+        "второй раз снимать нечего"
+    );
+    assert!(worker.queued().is_empty());
+    assert_eq!(state(&worker, &project), ProjectState::Ready);
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn queued_jobs_report_kind_and_priority() {
+    let env = Env::new();
+    let project = env.project("alpha", &[("a.md", DOC)]);
+    let worker = env.start();
+    worker.pause();
+    worker.register(&project).unwrap();
+
+    let queued = worker.queued();
+    assert_eq!(queued.len(), 1);
+    assert_eq!(queued[0].kind, JobKind::Check);
+    assert_eq!(queued[0].priority, Priority::Explicit);
+    worker.resume();
+    idle(&worker).await;
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn shutdown_does_not_hang_on_a_paused_queue() {
+    let env = Env::new();
+    let project = env.project("alpha", &[("a.md", DOC)]);
+    let worker = env.start();
+    worker.pause();
+    worker.register(&project).unwrap();
+    tokio::time::timeout(Duration::from_secs(10), worker.shutdown())
+        .await
+        .expect("воркер на паузе должен завершаться");
+}

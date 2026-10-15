@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 use std::time::UNIX_EPOCH;
 
 use super::chunking::{ChunkingParams, chunk_document};
-use super::walk::{DocFile, ReadError, WalkError, WalkProblem, read_utf8, walk_docs};
+use super::walk::{DocFile, ReadError, Walk, WalkError, WalkProblem, read_utf8, walk_docs};
 use crate::models::{EmbedError, Embedder};
 use crate::storage::{
     Compatibility, DocumentRecord, Index, Journal, Layout, StorageError, StoredDocument,
@@ -59,6 +59,27 @@ pub struct UpdateReport {
     pub problems: Vec<Problem>,
 }
 
+/// Наблюдатель за ходом индексации: воркер показывает по нему прогресс и ставит паузу и остановку
+/// (OQ-55). Методы вызываются из потока индексации; пауза — это блокировка в [`Self::should_stop`].
+pub trait IndexObserver {
+    /// Обход закончен: столько документов будет просмотрено.
+    fn begin(&self, _documents: usize) {}
+    /// Документ взят в работу.
+    fn file(&self, _path: &str) {}
+    /// Документ обработан: всего просмотрено документов и чанков (посчитанных и взятых из индекса).
+    fn progress(&self, _documents_done: usize, _chunks_done: usize) {}
+    /// Вызывается перед каждым документом. Может ждать, пока снята пауза. `true` — остановить
+    /// индексацию: уже записанные документы остаются, при полной переиндексации старый индекс цел.
+    fn should_stop(&self) -> bool {
+        false
+    }
+}
+
+/// Наблюдатель, который ничего не делает.
+pub struct NoObserver;
+
+impl IndexObserver for NoObserver {}
+
 /// Почему индекс нельзя обновлять без переиндексации (Т-25).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ReindexReason {
@@ -83,6 +104,9 @@ pub enum IndexingError {
     Embed(#[from] EmbedError),
     #[error("ошибка файла: {0}")]
     Io(#[from] io::Error),
+    /// Индексацию остановил пользователь (OQ-55).
+    #[error("индексация остановлена")]
+    Cancelled,
     #[error("не удалось подменить индекс, старый остался на месте: {0}")]
     Swap(io::Error),
 }
@@ -96,6 +120,17 @@ pub fn update_index(
     index: &mut Index,
     settings: &IndexSettings,
     embedder: &mut dyn Embedder,
+) -> Result<UpdateOutcome, IndexingError> {
+    update_index_observed(project_root, index, settings, embedder, &NoObserver)
+}
+
+/// То же, что [`update_index`], но с наблюдателем за ходом.
+pub fn update_index_observed(
+    project_root: &Path,
+    index: &mut Index,
+    settings: &IndexSettings,
+    embedder: &mut dyn Embedder,
+    observer: &dyn IndexObserver,
 ) -> Result<UpdateOutcome, IndexingError> {
     match index.compatibility(embedder.fingerprint())? {
         Compatibility::ModelChanged => {
@@ -112,7 +147,7 @@ pub fn update_index(
         }
         Compatibility::Compatible => {}
     }
-    run_update(project_root, index, settings, embedder).map(UpdateOutcome::Updated)
+    run_update(project_root, index, settings, embedder, observer).map(UpdateOutcome::Updated)
 }
 
 /// Строит индекс заново во временном файле рядом с `index_path` и подменяет им старый.
@@ -139,12 +174,32 @@ pub fn rebuild_index_with<G>(
     embedder: &mut dyn Embedder,
     before_swap: impl FnOnce() -> G,
 ) -> Result<UpdateReport, IndexingError> {
+    rebuild_index_observed(
+        project_root,
+        index_path,
+        settings,
+        embedder,
+        &NoObserver,
+        before_swap,
+    )
+}
+
+/// То же, что [`rebuild_index_with`], но с наблюдателем за ходом: остановка до подмены оставляет
+/// старый индекс на месте.
+pub fn rebuild_index_observed<G>(
+    project_root: &Path,
+    index_path: &Path,
+    settings: &IndexSettings,
+    embedder: &mut dyn Embedder,
+    observer: &dyn IndexObserver,
+    before_swap: impl FnOnce() -> G,
+) -> Result<UpdateReport, IndexingError> {
     let new_path = with_suffix(index_path, ".new");
     let old_path = with_suffix(index_path, ".old");
     remove_index_files(&new_path)?;
     remove_index_files(&old_path)?;
 
-    let built = build_new(project_root, &new_path, settings, embedder);
+    let built = build_new(project_root, &new_path, settings, embedder, observer);
     match built {
         Ok(report) => {
             let _guard = before_swap();
@@ -164,11 +219,12 @@ fn build_new(
     new_path: &Path,
     settings: &IndexSettings,
     embedder: &mut dyn Embedder,
+    observer: &dyn IndexObserver,
 ) -> Result<UpdateReport, IndexingError> {
     let mut index = Index::open(new_path, Journal::Delete)?;
     embedder.prepare()?;
     index.write_fingerprint(&embedder.fingerprint().clone())?;
-    let report = run_update(project_root, &mut index, settings, embedder)?;
+    let report = run_update(project_root, &mut index, settings, embedder, observer)?;
     index.close()?;
     Ok(report)
 }
@@ -178,6 +234,7 @@ fn run_update(
     index: &mut Index,
     settings: &IndexSettings,
     embedder: &mut dyn Embedder,
+    observer: &dyn IndexObserver,
 ) -> Result<UpdateReport, IndexingError> {
     let walk = walk_docs(project_root, Path::new(&settings.docs_root))?;
     let layout = settings.layout();
@@ -195,57 +252,87 @@ fn run_update(
         .map(|document| (document.path.clone(), document))
         .collect();
 
-    for file in &walk.files {
-        let known = stored.get(&file.path);
-        if let Some(document) = known
-            && !report.full_check
-            && same_stat(document, file)
-        {
-            report.unchanged += 1;
-            continue;
+    observer.begin(walk.files.len());
+    for (position, file) in walk.files.iter().enumerate() {
+        if observer.should_stop() {
+            return Err(IndexingError::Cancelled);
         }
+        observer.file(&file.path);
+        process_file(index, embedder, settings, file, &stored, &mut report)?;
+        observer.progress(position + 1, report.chunks_embedded + report.chunks_reused);
+    }
+    finish_update(index, &walk, &stored, &layout, &mut report)?;
+    Ok(report)
+}
 
-        let text = match read_utf8(file) {
-            Ok(text) => text,
-            Err(ReadError::NotUtf8) => {
-                // Файл больше не индексируется: в индексе его быть не должно.
-                if known.is_some() && index.delete_document(&file.path)? {
-                    report.removed += 1;
-                }
-                report.problems.push(Problem {
-                    path: file.path.clone(),
-                    reason: ReadError::NotUtf8.to_string(),
-                });
-                continue;
-            }
-            Err(error @ ReadError::Io(_)) => {
-                // Файл может быть занят: документ остаётся в индексе как был.
-                report.problems.push(Problem {
-                    path: file.path.clone(),
-                    reason: error.to_string(),
-                });
-                continue;
-            }
-        };
-
-        let hash = blake3::hash(text.as_bytes()).to_hex().to_string();
-        if let Some(document) = known
-            && !report.full_check
-            && document.hash == hash
-        {
-            index.touch_document(&file.path, file.size, modified_ns(file))?;
-            report.unchanged += 1;
-            continue;
-        }
-
-        index_document(index, embedder, settings, file, &text, &hash, &mut report)?;
-        if known.is_some() {
-            report.changed += 1;
-        } else {
-            report.added += 1;
-        }
+/// Приводит к виду индекса один файл обхода.
+fn process_file(
+    index: &mut Index,
+    embedder: &mut dyn Embedder,
+    settings: &IndexSettings,
+    file: &DocFile,
+    stored: &HashMap<String, StoredDocument>,
+    report: &mut UpdateReport,
+) -> Result<(), IndexingError> {
+    let known = stored.get(&file.path);
+    if let Some(document) = known
+        && !report.full_check
+        && same_stat(document, file)
+    {
+        report.unchanged += 1;
+        return Ok(());
     }
 
+    let text = match read_utf8(file) {
+        Ok(text) => text,
+        Err(ReadError::NotUtf8) => {
+            // Файл больше не индексируется: в индексе его быть не должно.
+            if known.is_some() && index.delete_document(&file.path)? {
+                report.removed += 1;
+            }
+            report.problems.push(Problem {
+                path: file.path.clone(),
+                reason: ReadError::NotUtf8.to_string(),
+            });
+            return Ok(());
+        }
+        Err(error @ ReadError::Io(_)) => {
+            // Файл может быть занят: документ остаётся в индексе как был.
+            report.problems.push(Problem {
+                path: file.path.clone(),
+                reason: error.to_string(),
+            });
+            return Ok(());
+        }
+    };
+
+    let hash = blake3::hash(text.as_bytes()).to_hex().to_string();
+    if let Some(document) = known
+        && !report.full_check
+        && document.hash == hash
+    {
+        index.touch_document(&file.path, file.size, modified_ns(file))?;
+        report.unchanged += 1;
+        return Ok(());
+    }
+
+    index_document(index, embedder, settings, file, &text, &hash, report)?;
+    if known.is_some() {
+        report.changed += 1;
+    } else {
+        report.added += 1;
+    }
+    Ok(())
+}
+
+/// Убирает из индекса пропавшие документы и записывает итог проверки.
+fn finish_update(
+    index: &mut Index,
+    walk: &Walk,
+    stored: &HashMap<String, StoredDocument>,
+    layout: &Layout,
+    report: &mut UpdateReport,
+) -> Result<(), IndexingError> {
     let on_disk: HashSet<&str> = walk.files.iter().map(|file| file.path.as_str()).collect();
     for path in stored.keys() {
         if !on_disk.contains(path.as_str())
@@ -258,10 +345,10 @@ fn run_update(
 
     index.remove_orphan_vectors()?;
     if report.full_check {
-        index.write_layout(&layout)?;
+        index.write_layout(layout)?;
     }
     index.touch_updated_at()?;
-    Ok(report)
+    Ok(())
 }
 
 /// Режет документ, добирает векторы только для чанков, которых нет в индексе, и записывает его.

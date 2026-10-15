@@ -5,6 +5,7 @@
 //! выбор проекта, `status`, `reindex`, `session_start`, доступ к проекту для поиска и модели.
 //! Поиск в очереди не стоит: он берёт [`Worker::gate`] на чтение и открывает индекс сам.
 
+mod control;
 mod job;
 pub mod models;
 mod queue;
@@ -39,6 +40,8 @@ pub use queue::Priority;
 pub use registry::{Discovered, ProjectEntry, Registry, RegistryError, ResolveError};
 pub use timefmt::rfc3339;
 
+use control::{JobCell, JobObserver, Pause};
+pub use control::{Kind as JobKind, Progress as JobProgress};
 use job::{JobEnv, Outcome};
 use queue::{Job, JobQueue};
 use registry::{has_markdown, normalize, project_name};
@@ -117,6 +120,24 @@ pub struct ProjectStatus {
     pub last_report: Option<UpdateReport>,
 }
 
+/// Проблемы проекта по итогам последней проверки.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ProjectIssues {
+    pub project: PathBuf,
+    /// Файл и причина.
+    pub files: Vec<(String, String)>,
+    pub last_error: Option<String>,
+}
+
+/// Ждущее задание для окна.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct QueuedJob {
+    pub project: PathBuf,
+    pub priority: Priority,
+    pub kind: JobKind,
+    pub files: usize,
+}
+
 /// Строка списка проектов.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ProjectSnapshot {
@@ -185,6 +206,10 @@ struct Inner {
     models: Models,
     handle: Handle,
     tasks: Mutex<Vec<JoinHandle<()>>>,
+    /// Пауза очереди (OQ-55).
+    pause: Arc<Pause>,
+    /// Идущее задание: его ход и флаг остановки.
+    current: Mutex<Option<Arc<JobCell>>>,
 }
 
 /// Воркер. Копии указывают на одно и то же состояние.
@@ -214,6 +239,8 @@ impl Worker {
             models: Models::new(provider),
             handle: Handle::current(),
             tasks: Mutex::new(Vec::new()),
+            pause: Arc::new(Pause::default()),
+            current: Mutex::new(None),
         });
         let queue_task = tokio::spawn(Arc::clone(&inner).run_queue());
         let timer_task = tokio::spawn(Arc::clone(&inner).run_timer());
@@ -227,6 +254,11 @@ impl Worker {
     /// Перестаёт брать задания, дожидается текущего, снимает слежение.
     pub async fn shutdown(&self) {
         self.inner.stop.store(true, Ordering::SeqCst);
+        // Задание на паузе иначе не закончится никогда: его останавливают, остальные дописываются.
+        if self.inner.pause.is_paused() {
+            self.inner.cancel_current();
+            self.inner.pause.set(false);
+        }
         self.inner.wake.notify_one();
         let tasks: Vec<_> = lock(&self.inner.tasks).drain(..).collect();
         // Первая — очередь: она дописывает текущее задание сама. Вторая — таймер, он ждёт часами.
@@ -396,6 +428,92 @@ impl Worker {
         Ok(())
     }
 
+    // --- пауза, остановка, ход ---
+
+    /// Приостанавливает очередь целиком: идущее задание замирает между документами, новые не
+    /// берутся (OQ-55).
+    pub fn pause(&self) {
+        self.inner.pause.set(true);
+    }
+
+    /// Снимает паузу.
+    pub fn resume(&self) {
+        self.inner.pause.set(false);
+        self.inner.wake.notify_one();
+    }
+
+    pub fn is_paused(&self) -> bool {
+        self.inner.pause.is_paused()
+    }
+
+    /// Останавливает индексацию проекта: идущее задание прерывается между документами, ждущее
+    /// снимается с очереди. Старый индекс остаётся, проект в `reindex_required` остаётся в нём
+    /// (OQ-55). `true`, если было что останавливать.
+    pub fn cancel(&self, path: &Path) -> Result<bool, WorkerError> {
+        let path = self.registered(path)?;
+        let running = {
+            let current = lock(&self.inner.current);
+            current
+                .as_ref()
+                .filter(|cell| cell.project == path)
+                .map(|cell| cell.cancel())
+                .is_some()
+        };
+        let queued = lock(&self.inner.queue).remove(&path);
+        Ok(running || queued)
+    }
+
+    /// Ход идущего задания.
+    pub fn progress(&self) -> Option<JobProgress> {
+        lock(&self.inner.current)
+            .as_ref()
+            .map(|cell| cell.progress())
+    }
+
+    /// Ждущие задания в порядке выполнения.
+    pub fn queued(&self) -> Vec<QueuedJob> {
+        lock(&self.inner.queue)
+            .snapshot()
+            .into_iter()
+            .map(|(project, job)| QueuedJob {
+                project,
+                priority: job.priority,
+                kind: JobKind::of(&job),
+                files: job.listed_files(),
+            })
+            .collect()
+    }
+
+    /// Проблемы проектов по итогам последней проверки: файлы с ошибками и `last_error`.
+    pub fn problems(&self) -> Vec<ProjectIssues> {
+        let projects = lock(&self.inner.projects);
+        let mut out: Vec<_> = projects
+            .iter()
+            .filter_map(|(path, runtime)| {
+                let files: Vec<(String, String)> = runtime
+                    .status
+                    .last_report
+                    .as_ref()
+                    .map(|report| {
+                        report
+                            .problems
+                            .iter()
+                            .map(|problem| (problem.path.clone(), problem.reason.clone()))
+                            .collect()
+                    })
+                    .unwrap_or_default();
+                let error = runtime.status.last_error.clone();
+                (!files.is_empty() || error.is_some()).then(|| ProjectIssues {
+                    project: path.clone(),
+                    files,
+                    last_error: error,
+                })
+            })
+            .collect();
+        out.sort_by(|a, b| a.project.cmp(&b.project));
+        out
+    }
+
     /// Ставит на проверку все проекты: то же, что делает часовой таймер. Пропавшие проекты
     /// становятся `unavailable`, вернувшиеся — снова в работу.
     pub fn check_all(&self) {
@@ -448,6 +566,12 @@ impl Inner {
             |_| DEFAULT_DOCS_ROOT.to_string(),
             |loaded| loaded.value.docs_root,
         )
+    }
+
+    fn cancel_current(&self) {
+        if let Some(cell) = lock(&self.current).as_ref() {
+            cell.cancel();
+        }
     }
 
     fn enqueue(&self, project: &Path, job: Job) {
@@ -553,6 +677,11 @@ impl Inner {
             if self.stop.load(Ordering::SeqCst) {
                 break;
             }
+            if self.pause.is_paused() {
+                // Пауза замораживает очередь целиком; `resume` и `shutdown` будят цикл.
+                self.wake.notified().await;
+                continue;
+            }
             let next = {
                 let mut queue = lock(&self.queue);
                 let next = queue.pop();
@@ -601,16 +730,21 @@ impl Inner {
 
         let worker = Arc::clone(self);
         let project = path.clone();
+        let cell = JobCell::new(&path, &job);
+        *lock(&self.current) = Some(Arc::clone(&cell));
+        let observer = JobObserver::new(Arc::clone(&self.pause), cell);
         let result = tokio::task::spawn_blocking(move || {
             let env = JobEnv {
                 bars_home: &worker.config.bars_home,
                 models: &worker.models,
                 gate,
                 handle: worker.handle.clone(),
+                observer: &observer,
             };
             job::run(&env, &project, &job)
         })
         .await;
+        *lock(&self.current) = None;
 
         let result = result.unwrap_or_else(|error| job::JobResult {
             outcome: Outcome::Failed(format!("внутренняя ошибка воркера: {error}")),
@@ -650,6 +784,14 @@ impl Inner {
                 Outcome::ReindexRequired(_) => {
                     status.state = ProjectState::ReindexRequired;
                     status.last_error = None;
+                }
+                Outcome::Cancelled => {
+                    // Остановка оставляет проект как был: старый индекс цел (OQ-55).
+                    status.state = if previous == ProjectState::ReindexRequired {
+                        ProjectState::ReindexRequired
+                    } else {
+                        ProjectState::Ready
+                    };
                 }
                 Outcome::Failed(message) => {
                     status.state = if previous == ProjectState::ReindexRequired {

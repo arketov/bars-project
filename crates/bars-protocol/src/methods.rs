@@ -20,6 +20,8 @@ pub trait Method: Serialize + DeserializeOwned {
     const NAME: &'static str;
     /// Доступен ли метод клиенту `bars-mcp`. Остальные методы — только для `bars-cli`.
     const FROM_MCP: bool;
+    /// Метод только для окна: по каналу его не вызывает никто, ни `bars-mcp`, ни `bars-cli`.
+    const WINDOW_ONLY: bool = false;
     type Output: Serialize + DeserializeOwned;
 
     /// Вызов с этими параметрами.
@@ -328,11 +330,155 @@ pub struct UninstallOutput {
     pub changed_files: Vec<String>,
 }
 
+// --- методы окна: index_pause, index_resume, index_cancel, activity, tree ---
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct IndexPauseParams {}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct IndexResumeParams {}
+
+/// Очередь индексации приостановлена целиком (OQ-55).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PausedOutput {
+    pub paused: bool,
+}
+
+/// Остановка индексации проекта: идущее задание прерывается, ждущее снимается с очереди.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct IndexCancelParams {
+    /// Абсолютный путь к корню проекта или однозначное имя.
+    pub project: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CancelOutput {
+    /// Задание было идущим или ждущим.
+    pub cancelled: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ActivityParams {}
+
+/// Что делает задание очереди.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum JobKind {
+    /// Полная переиндексация в новом файле с подменой.
+    Rebuild,
+    /// Проверка актуальности всего проекта.
+    Check,
+    /// Проверка перечисленных файлов (слежение).
+    Files,
+}
+
+/// Откуда пришло задание.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum JobPriority {
+    /// Явная переиндексация, хук, регистрация.
+    Explicit,
+    /// Слежение за файлами.
+    Watch,
+    /// Старт воркера и часовая проверка.
+    Periodic,
+}
+
+/// Идущее задание и его ход.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct RunningJob {
+    pub project: String,
+    pub name: String,
+    pub kind: JobKind,
+    pub priority: JobPriority,
+    /// Документов в обходе; 0, пока обход не закончился.
+    pub docs_total: u32,
+    pub docs_done: u32,
+    /// Чанков обработано: посчитано моделью или взято из индекса.
+    pub chunks_done: u32,
+    /// Чанков, обработанных за секунду с начала задания.
+    pub chunks_per_second: f32,
+    pub elapsed_seconds: u32,
+    /// Документ, который обрабатывается сейчас.
+    pub current_file: Option<String>,
+}
+
+/// Ждущее задание.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct QueuedJob {
+    pub project: String,
+    pub name: String,
+    pub kind: JobKind,
+    pub priority: JobPriority,
+    /// Для `files` — сколько документов названо.
+    pub files: u32,
+}
+
+/// Файл, который не удалось проиндексировать.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct FileProblem {
+    pub path: String,
+    pub reason: String,
+}
+
+/// Проблемы проекта по итогу последней проверки; проекты без проблем в список не попадают.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ProjectProblems {
+    pub project: String,
+    pub name: String,
+    pub files: Vec<FileProblem>,
+    pub last_error: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ActivityOutput {
+    pub paused: bool,
+    pub running: Option<RunningJob>,
+    pub queue: Vec<QueuedJob>,
+    pub problems: Vec<ProjectProblems>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct TreeParams {
+    #[serde(flatten)]
+    pub target: Target,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct TreeDocument {
+    /// Путь от корня проекта, как в выдаче поиска.
+    pub path: String,
+    pub module: String,
+    pub title: String,
+    pub chunks: u32,
+}
+
+/// Документы проекта из индекса: основа дерева с галочками (Т-14).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct TreeOutput {
+    pub docs_root: String,
+    pub documents: Vec<TreeDocument>,
+}
+
+/// Кто может вызвать метод: все клиенты канала, только `bars-cli` или только окно.
+macro_rules! audience {
+    (All) => {
+        (true, false)
+    };
+    (Cli) => {
+        (false, false)
+    };
+    (Window) => {
+        (false, true)
+    };
+}
+
 macro_rules! methods {
-    ($($variant:ident: $params:ty => $output:ty, $name:literal, $mcp:literal;)*) => {
+    ($($variant:ident: $params:ty => $output:ty, $name:literal, $audience:ident;)*) => {
         $(impl Method for $params {
             const NAME: &'static str = $name;
-            const FROM_MCP: bool = $mcp;
+            const FROM_MCP: bool = audience!($audience).0;
+            const WINDOW_ONLY: bool = audience!($audience).1;
             type Output = $output;
         })*
 
@@ -369,10 +515,20 @@ macro_rules! methods {
                 }
             }
 
-            /// Доступен ли вызов клиенту такого рода.
+            /// Доступен ли вызов клиенту канала такого рода. Методы окна по каналу закрыты всем.
             pub fn allowed_for(&self, client: ClientKind) -> bool {
                 match self {
-                    $(Call::$variant(_) => client == ClientKind::Cli || <$params as Method>::FROM_MCP,)*
+                    $(Call::$variant(_) => {
+                        !<$params as Method>::WINDOW_ONLY
+                            && (client == ClientKind::Cli || <$params as Method>::FROM_MCP)
+                    })*
+                }
+            }
+
+            /// Метод только для окна: окно вызывает обработчик напрямую, без канала.
+            pub fn window_only(&self) -> bool {
+                match self {
+                    $(Call::$variant(_) => <$params as Method>::WINDOW_ONLY,)*
                 }
             }
         }
@@ -380,18 +536,23 @@ macro_rules! methods {
 }
 
 methods! {
-    Hello: HelloParams => HelloOutput, "hello", true;
-    Search: SearchParams => SearchOutput, "search", true;
-    Outline: OutlineParams => OutlineOutput, "outline", true;
-    Read: ReadParams => ReadOutput, "read", true;
-    Projects: ProjectsParams => ProjectsOutput, "projects", true;
-    Status: StatusParams => StatusOutput, "status", true;
-    Reindex: ReindexParams => AcceptedOutput, "reindex", true;
-    Register: RegisterParams => RegisterOutput, "register", false;
-    Unregister: UnregisterParams => UnregisterOutput, "unregister", false;
-    SessionStart: SessionStartParams => AcceptedOutput, "session_start", false;
-    Install: InstallParams => InstallOutput, "install", false;
-    Uninstall: UninstallParams => UninstallOutput, "uninstall", false;
+    Hello: HelloParams => HelloOutput, "hello", All;
+    Search: SearchParams => SearchOutput, "search", All;
+    Outline: OutlineParams => OutlineOutput, "outline", All;
+    Read: ReadParams => ReadOutput, "read", All;
+    Projects: ProjectsParams => ProjectsOutput, "projects", All;
+    Status: StatusParams => StatusOutput, "status", All;
+    Reindex: ReindexParams => AcceptedOutput, "reindex", All;
+    Register: RegisterParams => RegisterOutput, "register", Cli;
+    Unregister: UnregisterParams => UnregisterOutput, "unregister", Cli;
+    SessionStart: SessionStartParams => AcceptedOutput, "session_start", Cli;
+    Install: InstallParams => InstallOutput, "install", Cli;
+    Uninstall: UninstallParams => UninstallOutput, "uninstall", Cli;
+    IndexPause: IndexPauseParams => PausedOutput, "index_pause", Window;
+    IndexResume: IndexResumeParams => PausedOutput, "index_resume", Window;
+    IndexCancel: IndexCancelParams => CancelOutput, "index_cancel", Window;
+    Activity: ActivityParams => ActivityOutput, "activity", Window;
+    Tree: TreeParams => TreeOutput, "tree", Window;
 }
 
 /// Ответ метода как JSON-значение.
@@ -444,7 +605,12 @@ mod tests {
         Unregister(UnregisterParams),
         SessionStart(SessionStartParams),
         Install(InstallParams),
-        Uninstall(UninstallParams)
+        Uninstall(UninstallParams),
+        IndexPause(IndexPauseParams),
+        IndexResume(IndexResumeParams),
+        IndexCancel(IndexCancelParams),
+        Activity(ActivityParams),
+        Tree(TreeParams)
     );
 
     #[test]
@@ -496,6 +662,32 @@ mod tests {
         roundtrip(UninstallParams {
             client: InstallClient::Codex,
         });
+        roundtrip(IndexPauseParams {});
+        roundtrip(IndexResumeParams {});
+        roundtrip(IndexCancelParams {
+            project: "bars".into(),
+        });
+        roundtrip(ActivityParams {});
+        roundtrip(TreeParams { target: target() });
+    }
+
+    #[test]
+    fn window_methods_are_closed_on_the_channel() {
+        let calls = [
+            Call::from(IndexPauseParams {}),
+            Call::from(IndexResumeParams {}),
+            Call::from(IndexCancelParams {
+                project: "p".into(),
+            }),
+            Call::from(ActivityParams {}),
+            Call::from(TreeParams { target: target() }),
+        ];
+        for call in calls {
+            assert!(call.window_only(), "{}", call.method());
+            assert!(!call.allowed_for(ClientKind::Mcp), "{}", call.method());
+            assert!(!call.allowed_for(ClientKind::Cli), "{}", call.method());
+        }
+        assert!(!Call::from(ProjectsParams {}).window_only());
     }
 
     #[test]

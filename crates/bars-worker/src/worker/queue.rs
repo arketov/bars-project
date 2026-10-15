@@ -150,6 +150,16 @@ impl JobQueue {
         self.entries.len() != before
     }
 
+    /// Все задания в порядке выполнения.
+    pub fn snapshot(&self) -> Vec<(PathBuf, Job)> {
+        let mut entries: Vec<&Entry> = self.entries.iter().collect();
+        entries.sort_by(|a, b| b.job.priority.cmp(&a.job.priority).then(a.seq.cmp(&b.seq)));
+        entries
+            .into_iter()
+            .map(|entry| (entry.project.clone(), entry.job.clone()))
+            .collect()
+    }
+
     pub fn get(&self, project: &Path) -> Option<&Job> {
         self.entries
             .iter()

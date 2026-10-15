@@ -7,9 +7,11 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use bars_protocol::{
-    Client, ClientError, ClientKind, Endpoint, ErrorKind, METHOD_NOT_FOUND, OutlineParams,
-    ProjectState, ProjectsParams, ReadParams, RegisterParams, ReindexParams, RpcError,
-    SearchParams, SessionStartParams, StatusOutput, StatusParams, Target, UnregisterParams,
+    ActivityOutput, ActivityParams, Call, CancelOutput, Client, ClientError, ClientKind, Endpoint,
+    ErrorKind, IndexCancelParams, IndexPauseParams, IndexResumeParams, JobKind, JobPriority,
+    METHOD_NOT_FOUND, OutlineParams, ProjectState, ProjectsParams, ReadParams, RegisterParams,
+    ReindexParams, RpcError, SearchParams, SessionStartParams, StatusOutput, StatusParams, Target,
+    TreeOutput, TreeParams, UnregisterParams,
 };
 use tempfile::TempDir;
 
@@ -562,6 +564,98 @@ async fn search_with_the_real_bge_m3() {
         .await
         .unwrap();
     assert_eq!(found.results[0].path, "docs/worker.md");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn window_methods_are_closed_on_the_channel() {
+    let harness = Harness::start("window-closed", FakeProvider::new("m1")).await;
+    let mut cli = harness.client(ClientKind::Cli).await;
+    let error = rpc(cli.call(&ActivityParams {}).await);
+    assert_eq!(error.code, METHOD_NOT_FOUND);
+    let error = rpc(cli.call(&IndexPauseParams {}).await);
+    assert_eq!(error.code, METHOD_NOT_FOUND);
+}
+
+/// Окно вызывает обработчик напрямую, без канала.
+#[tokio::test(flavor = "multi_thread")]
+async fn window_gets_activity_tree_and_pause_from_the_handler() {
+    let home = TempDir::new().unwrap();
+    let projects = TempDir::new().unwrap();
+    let root = projects.path().join("alpha");
+    fs::create_dir_all(root.join("docs/mod")).unwrap();
+    fs::write(root.join("docs/a.md"), "# Альфа\n\nТекст про индексацию.\n").unwrap();
+    fs::write(
+        root.join("docs/mod/b.md"),
+        "# Бета\n\nДругой текст про поиск.\n",
+    )
+    .unwrap();
+    let worker = crate::worker::Worker::start(
+        WorkerConfig::new(home.path().to_path_buf()),
+        FakeProvider::new("m1"),
+    )
+    .unwrap();
+    let handler = crate::handler::WorkerHandler::new(worker.clone());
+
+    let paused = handler
+        .dispatch(Call::IndexPause(IndexPauseParams {}))
+        .await
+        .unwrap();
+    assert_eq!(paused["paused"], true);
+    worker.register(&root).unwrap();
+    let activity: ActivityOutput = serde_json::from_value(
+        handler
+            .dispatch(Call::Activity(ActivityParams {}))
+            .await
+            .unwrap(),
+    )
+    .unwrap();
+    assert!(activity.paused);
+    assert!(activity.running.is_none());
+    assert_eq!(activity.queue.len(), 1);
+    assert_eq!(activity.queue[0].name, "alpha");
+    assert_eq!(activity.queue[0].kind, JobKind::Check);
+    assert_eq!(activity.queue[0].priority, JobPriority::Explicit);
+
+    handler
+        .dispatch(Call::IndexResume(IndexResumeParams {}))
+        .await
+        .unwrap();
+    let deadline = Instant::now() + Duration::from_secs(30);
+    while !worker.is_idle() {
+        assert!(Instant::now() < deadline, "очередь не опустела");
+        tokio::time::sleep(Duration::from_millis(25)).await;
+    }
+
+    let tree: TreeOutput = serde_json::from_value(
+        handler
+            .dispatch(Call::Tree(TreeParams {
+                target: target(&root),
+            }))
+            .await
+            .unwrap(),
+    )
+    .unwrap();
+    assert_eq!(tree.docs_root, "docs");
+    let paths: Vec<&str> = tree
+        .documents
+        .iter()
+        .map(|document| document.path.as_str())
+        .collect();
+    assert_eq!(paths, ["docs/a.md", "docs/mod/b.md"]);
+    assert_eq!(tree.documents[1].module, "mod");
+    assert!(tree.documents.iter().all(|document| document.chunks >= 1));
+
+    let cancelled: CancelOutput = serde_json::from_value(
+        handler
+            .dispatch(Call::IndexCancel(IndexCancelParams {
+                project: root.display().to_string(),
+            }))
+            .await
+            .unwrap(),
+    )
+    .unwrap();
+    assert!(!cancelled.cancelled);
+    worker.shutdown().await;
 }
 
 mod external_models;

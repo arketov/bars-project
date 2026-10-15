@@ -19,17 +19,19 @@ use bars_core::search::{SearchRequest, search};
 use bars_core::settings::Settings;
 use bars_core::storage::{Index, Journal, index_path};
 use bars_protocol::{
-    AcceptedOutput, AppliedParams, Call, ClientKind, ErrorKind, Heading, INTERNAL_ERROR,
-    InstallOutput, InstallParams, ModelStatus, ModuleInfo, OutlineOutput, OutlineParams,
-    ProjectInfo, ProjectState, ProjectsOutput, ReadOutput, ReadParams, RegisterOutput,
-    RegisterParams, ReindexParams, RpcError, ScoreKind, SearchHit, SearchOutput, SearchParams,
-    SessionStartParams, StatusOutput, StatusParams, Target, UninstallOutput, UninstallParams,
-    UnregisterOutput, UnregisterParams, output_value,
+    AcceptedOutput, ActivityOutput, AppliedParams, Call, CancelOutput, ClientKind, ErrorKind,
+    FileProblem, Heading, INTERNAL_ERROR, IndexCancelParams, InstallOutput, InstallParams,
+    JobKind as ProtocolJobKind, JobPriority, METHOD_NOT_FOUND, ModelStatus, ModuleInfo,
+    OutlineOutput, OutlineParams, PausedOutput, ProjectInfo, ProjectProblems, ProjectState,
+    ProjectsOutput, QueuedJob, ReadOutput, ReadParams, RegisterOutput, RegisterParams,
+    ReindexParams, RpcError, RunningJob, ScoreKind, SearchHit, SearchOutput, SearchParams,
+    SessionStartParams, StatusOutput, StatusParams, Target, TreeDocument, TreeOutput, TreeParams,
+    UninstallOutput, UninstallParams, UnregisterOutput, UnregisterParams, output_value,
 };
 use serde_json::Value;
 
 use crate::clients::{self, InstallEnv};
-use crate::worker::{ProjectSnapshot, Worker, rfc3339};
+use crate::worker::{JobKind, Priority, ProjectSnapshot, Worker, rfc3339};
 use errors::{doc_path_error, outline_error, read_error, search_error, worker_error};
 
 /// Выполняет вызовы канала на воркере.
@@ -321,6 +323,118 @@ impl WorkerHandler {
         })
     }
 
+    fn index_pause(&self) -> PausedOutput {
+        self.worker.pause();
+        PausedOutput { paused: true }
+    }
+
+    fn index_resume(&self) -> PausedOutput {
+        self.worker.resume();
+        PausedOutput { paused: false }
+    }
+
+    fn index_cancel(&self, params: IndexCancelParams) -> Result<CancelOutput, RpcError> {
+        let project = self.worker.resolve(&params.project).map_err(worker_error)?;
+        let cancelled = self.worker.cancel(&project).map_err(worker_error)?;
+        Ok(CancelOutput { cancelled })
+    }
+
+    /// Ход индексации, очередь и проблемы проектов: то, что показывают страница индексации и трей.
+    fn activity(&self) -> ActivityOutput {
+        let names: std::collections::HashMap<PathBuf, String> = self
+            .worker
+            .projects()
+            .into_iter()
+            .map(|snapshot| (snapshot.path, snapshot.name))
+            .collect();
+        let name_of = |path: &Path| names.get(path).cloned().unwrap_or_default();
+        ActivityOutput {
+            paused: self.worker.is_paused(),
+            running: self.worker.progress().map(|progress| RunningJob {
+                project: progress.project.display().to_string(),
+                name: name_of(&progress.project),
+                kind: job_kind(progress.kind),
+                priority: job_priority(progress.priority),
+                docs_total: to_u32(progress.docs_total),
+                docs_done: to_u32(progress.docs_done),
+                chunks_done: to_u32(progress.chunks_done),
+                chunks_per_second: progress.chunks_per_second,
+                elapsed_seconds: u32::try_from(progress.elapsed.as_secs()).unwrap_or(u32::MAX),
+                current_file: progress.current_file,
+            }),
+            queue: self
+                .worker
+                .queued()
+                .into_iter()
+                .map(|job| QueuedJob {
+                    project: job.project.display().to_string(),
+                    name: name_of(&job.project),
+                    kind: job_kind(job.kind),
+                    priority: job_priority(job.priority),
+                    files: to_u32(job.files),
+                })
+                .collect(),
+            problems: self
+                .worker
+                .problems()
+                .into_iter()
+                .map(|issues| ProjectProblems {
+                    project: issues.project.display().to_string(),
+                    name: name_of(&issues.project),
+                    files: issues
+                        .files
+                        .into_iter()
+                        .map(|(path, reason)| FileProblem { path, reason })
+                        .collect(),
+                    last_error: issues.last_error,
+                })
+                .collect(),
+        }
+    }
+
+    /// Документы проекта из индекса. Индекс читается без модели, поэтому дерево видно и в
+    /// состоянии `reindex_required` (Т-25).
+    async fn tree(&self, params: TreeParams) -> Result<TreeOutput, RpcError> {
+        let project = self.usable(&params.target)?;
+        let docs_root = self.settings(&project)?.docs_root;
+        let documents = if index_path(&project).exists() {
+            let gate = self
+                .worker
+                .gate(&project)
+                .map_err(worker_error)?
+                .read_owned()
+                .await;
+            tokio::task::spawn_blocking(move || {
+                let _gate = gate;
+                let index = Index::open(&index_path(&project), Journal::Wal)?;
+                let mut statement = index.conn().prepare(
+                    "SELECT d.path, d.module, d.title, \
+                            (SELECT count(*) FROM chunks c WHERE c.document_id = d.id) \
+                     FROM documents d ORDER BY d.path",
+                )?;
+                let rows = statement.query_map([], |row| {
+                    Ok(TreeDocument {
+                        path: row.get(0)?,
+                        module: row.get(1)?,
+                        title: row.get(2)?,
+                        chunks: row.get(3)?,
+                    })
+                })?;
+                rows.collect::<Result<Vec<_>, _>>()
+                    .map_err(bars_core::storage::StorageError::from)
+            })
+            .await
+            .map_err(internal)?
+            .map_err(internal)?
+        } else {
+            Vec::new()
+        };
+        Ok(TreeOutput {
+            docs_root,
+            documents,
+        })
+    }
+
     pub async fn dispatch(&self, call: Call) -> Result<Value, RpcError> {
         match call {
             // `hello` обрабатывает цикл соединения.
@@ -339,18 +453,46 @@ impl WorkerHandler {
             Call::SessionStart(params) => self.session_start(params).map(|out| output_value(&out)),
             Call::Install(params) => self.install(params).map(|out| output_value(&out)),
             Call::Uninstall(params) => self.uninstall(params).map(|out| output_value(&out)),
+            Call::IndexPause(_) => Ok(output_value(&self.index_pause())),
+            Call::IndexResume(_) => Ok(output_value(&self.index_resume())),
+            Call::IndexCancel(params) => self.index_cancel(params).map(|out| output_value(&out)),
+            Call::Activity(_) => Ok(output_value(&self.activity())),
+            Call::Tree(params) => self.tree(params).await.map(|out| output_value(&out)),
         }
     }
 }
 
 impl bars_protocol::Handler for WorkerHandler {
     async fn handle(&self, _client: ClientKind, call: Call) -> Result<Value, RpcError> {
+        // Сессия уже закрывает методы окна, но обработчик не полагается только на неё.
+        if call.window_only() {
+            return Err(RpcError::standard(
+                METHOD_NOT_FOUND,
+                format!("нет метода {}", call.method()),
+            ));
+        }
         self.dispatch(call).await
     }
 }
 
 fn internal(error: impl std::fmt::Display) -> RpcError {
     RpcError::standard(INTERNAL_ERROR, error.to_string())
+}
+
+fn job_kind(kind: JobKind) -> ProtocolJobKind {
+    match kind {
+        JobKind::Rebuild => ProtocolJobKind::Rebuild,
+        JobKind::Check => ProtocolJobKind::Check,
+        JobKind::Files => ProtocolJobKind::Files,
+    }
+}
+
+fn job_priority(priority: Priority) -> JobPriority {
+    match priority {
+        Priority::Explicit => JobPriority::Explicit,
+        Priority::Watch => JobPriority::Watch,
+        Priority::Periodic => JobPriority::Periodic,
+    }
 }
 
 fn paths(files: Vec<PathBuf>) -> Vec<String> {

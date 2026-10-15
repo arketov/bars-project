@@ -500,3 +500,87 @@ fn rebuild_without_an_existing_index_just_builds_one() {
     let index = Index::open(&path, Journal::Wal).unwrap();
     assert_eq!(index.document_count().unwrap(), 1);
 }
+
+/// Наблюдатель, который просит остановиться после `limit` документов и записывает ход.
+struct StopAfter {
+    limit: usize,
+    seen: std::cell::RefCell<Vec<String>>,
+    total: std::cell::Cell<usize>,
+    done: std::cell::Cell<usize>,
+}
+
+impl StopAfter {
+    fn new(limit: usize) -> Self {
+        Self {
+            limit,
+            seen: Default::default(),
+            total: Default::default(),
+            done: Default::default(),
+        }
+    }
+}
+
+impl IndexObserver for StopAfter {
+    fn begin(&self, documents: usize) {
+        self.total.set(documents);
+    }
+
+    fn file(&self, path: &str) {
+        self.seen.borrow_mut().push(path.to_string());
+    }
+
+    fn progress(&self, documents_done: usize, _chunks_done: usize) {
+        self.done.set(documents_done);
+    }
+
+    fn should_stop(&self) -> bool {
+        self.done.get() >= self.limit
+    }
+}
+
+#[test]
+fn observer_sees_every_document_and_can_stop_the_update() {
+    let dir = tempfile::tempdir().unwrap();
+    write(dir.path(), "docs/a.md", &doc("A", &["альфа"]));
+    write(dir.path(), "docs/b.md", &doc("B", &["бета"]));
+    write(dir.path(), "docs/c.md", &doc("C", &["гамма"]));
+    let mut index = Index::open(&index_path(dir.path()), Journal::Wal).unwrap();
+
+    let observer = StopAfter::new(2);
+    let error = update_index_observed(
+        dir.path(),
+        &mut index,
+        &settings(),
+        &mut FakeEmbedder::new("m"),
+        &observer,
+    )
+    .unwrap_err();
+
+    assert!(matches!(error, IndexingError::Cancelled));
+    assert_eq!(observer.total.get(), 3);
+    assert_eq!(observer.seen.borrow().len(), 2);
+    // Уже записанные документы остаются: остановка не откатывает проверку.
+    assert_eq!(index.document_count().unwrap(), 2);
+}
+
+#[test]
+fn cancelled_rebuild_keeps_the_old_index_and_leaves_no_new_file() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = built_project(dir.path());
+
+    let error = rebuild_index_observed(
+        dir.path(),
+        &path,
+        &settings(),
+        &mut FakeEmbedder::new("new"),
+        &StopAfter::new(1),
+        || (),
+    )
+    .unwrap_err();
+
+    assert!(matches!(error, IndexingError::Cancelled));
+    assert!(!with_suffix(&path, ".new").exists());
+    let index = Index::open(&path, Journal::Wal).unwrap();
+    assert_eq!(index.document_count().unwrap(), 2);
+    assert_eq!(index.stored_fingerprint().unwrap().unwrap().model, "old");
+}
