@@ -2,7 +2,8 @@
 
 import type { EmbedDoc, ModelSourceName, SettingsDoc } from "./types";
 
-export const clone = <T>(value: T): T => structuredClone(value);
+/** Глубокая копия настроек. Через JSON, а не `structuredClone`: тот не копирует прокси `$state` из Svelte. */
+export const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 
 /** Изменилось ли что-то относительно сохранённого. */
 export function isDirty(saved: SettingsDoc, draft: SettingsDoc): boolean {

@@ -42,6 +42,12 @@ describe("settings-logic", () => {
     expect(validate(DOC)).toEqual({});
   });
 
+  it("копия делается и с прокси, как у $state в Svelte", () => {
+    const proxied = new Proxy(DOC, {});
+    expect(() => structuredClone(proxied)).toThrow();
+    expect(clone(proxied)).toEqual(DOC);
+  });
+
   it("правка видна, возврат значения снимает её", () => {
     const draft = clone(DOC);
     expect(isDirty(DOC, draft)).toBe(false);
