@@ -65,7 +65,7 @@ title: Стек bars — библиотеки, версии и почему он
 |---|---|---|---|
 | MCP-сервер | `rmcp` с фичами `server`, `transport-io`, `macros` | 3.5 | `bars-mcp`, Т-2, Т-19 |
 | Локальный канал | `interprocess` с фичей `tokio` | 2.4 | [ipc.md](ipc.md) |
-| Windows: DACL канала и владелец сервера | `windows-sys` (`bars-app` и `bars-protocol`, `cfg(windows)`) + `widestring` (`bars-app`) | 0.61 / 1.2 | SDDL для `interprocess`, SID пользователя, сверка владельца процесса сервера (OQ-38); версия `windows-sys` совпадает с той, что тянет `interprocess` |
+| Windows: DACL канала и владелец сервера | `windows-sys` (`bars-worker` и `bars-protocol`, `cfg(windows)`) + `widestring` (`bars-worker`) | 0.61 / 1.2 | SDDL для `interprocess`, SID пользователя, сверка владельца процесса сервера (OQ-38); версия `windows-sys` совпадает с той, что тянет `interprocess` |
 | Протокол канала | `serde_json`, свой JSON-RPC 2.0 построчно | 1.0 | методов мало, подписки не нужны |
 | CLI | `clap` с фичей `derive` | 4.6 | `bars-cli`, Т-20 |
 | Ключи провайдеров | `keyring-core` + store-крейты Windows и Apple из семейства `keyring` 4.2 | 4.x | [secrets.md](secrets.md) |

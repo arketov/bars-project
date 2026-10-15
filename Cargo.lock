@@ -250,22 +250,10 @@ name = "bars-app"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bars-core",
  "bars-protocol",
- "dirs 7.0.0",
- "interprocess",
- "notify",
- "notify-debouncer-full",
- "serde",
- "serde_json",
+ "bars-worker",
  "tauri",
  "tauri-build",
- "tempfile",
- "thiserror 2.0.21",
- "tokio",
- "toml 1.1.8+spec-1.1.0",
- "widestring",
- "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -274,7 +262,12 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "bars-protocol",
+ "bars-worker",
  "clap",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
 ]
 
 [[package]]
@@ -312,6 +305,26 @@ dependencies = [
  "serde_json",
  "thiserror 2.0.21",
  "tokio",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "bars-worker"
+version = "0.0.0"
+dependencies = [
+ "bars-core",
+ "bars-protocol",
+ "dirs 7.0.0",
+ "interprocess",
+ "notify",
+ "notify-debouncer-full",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 2.0.21",
+ "tokio",
+ "toml 1.1.8+spec-1.1.0",
+ "widestring",
  "windows-sys 0.61.2",
 ]
 

@@ -1,19 +1,11 @@
 //! `bars`: воркер с окном и треем (Т-1). Окно и трей — срез 5; пока процесс держит канал и очередь.
 
-mod handler;
-mod ipc;
-mod serve;
-// Часть API воркера (ход индексации, выгрузка моделей, проверка очереди) нужна окну и тестам.
-#[allow(dead_code, unused_imports)]
-mod worker;
-
 use std::sync::Arc;
 
 use bars_protocol::Endpoint;
+use bars_worker::serve::{self, ServeError};
+use bars_worker::worker::{BuiltinProvider, WorkerConfig};
 use tauri::RunEvent;
-
-use serve::ServeError;
-use worker::{BuiltinProvider, WorkerConfig};
 
 fn main() -> anyhow::Result<()> {
     // Без окна различия нет: `--background` — так запускают клиенты, и пользователю окно не нужно.

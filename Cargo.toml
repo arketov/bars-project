@@ -11,6 +11,7 @@ publish = false
 [workspace.dependencies]
 bars-core = { path = "crates/bars-core" }
 bars-protocol = { path = "crates/bars-protocol" }
+bars-worker = { path = "crates/bars-worker" }
 
 anyhow = "1.0"
 blake3 = "1.8"

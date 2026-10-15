@@ -11,25 +11,9 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow.workspace = true
-bars-core.workspace = true
 bars-protocol.workspace = true
+bars-worker.workspace = true
 tauri.workspace = true
-tokio.workspace = true
-serde_json.workspace = true
-thiserror.workspace = true
-interprocess.workspace = true
-notify.workspace = true
-notify-debouncer-full.workspace = true
-serde.workspace = true
-toml.workspace = true
-widestring.workspace = true
-dirs.workspace = true
-
-[target.'cfg(windows)'.dependencies]
-windows-sys.workspace = true
-
-[dev-dependencies]
-tempfile.workspace = true
 
 [build-dependencies]
 tauri-build.workspace = true

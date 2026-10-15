@@ -6,7 +6,7 @@
 //! Поиск в очереди не стоит: он берёт [`Worker::gate`] на чтение и открывает индекс сам.
 
 mod job;
-pub(crate) mod models;
+pub mod models;
 mod queue;
 mod registry;
 mod timefmt;

@@ -202,8 +202,8 @@ impl Models {
     }
 }
 
-#[cfg(test)]
-pub(crate) mod fake {
+#[cfg(any(test, feature = "test-support"))]
+pub mod fake {
     //! Подделка модели для тестов воркера: считает вызовы и не требует файлов модели.
 
     use super::*;

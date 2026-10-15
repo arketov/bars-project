@@ -20,3 +20,6 @@ dist/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Tauri: generated schemas
+crates/bars-app/gen/
