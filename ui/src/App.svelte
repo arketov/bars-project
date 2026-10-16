@@ -2,6 +2,7 @@
   import { onDestroy, onMount } from "svelte";
   import { app } from "./lib/app.svelte";
   import { inTauri } from "./lib/api";
+  import ContextMenu from "./lib/ContextMenu.svelte";
   import ConsentDialog from "./lib/ConsentDialog.svelte";
   import EmptyProjects from "./lib/EmptyProjects.svelte";
   import IndexingPage from "./lib/IndexingPage.svelte";
@@ -68,6 +69,8 @@
 {/if}
 
 {#if app.consentOpen}<ConsentDialog />{/if}
+
+<ContextMenu />
 
 {#if app.toast}
   <div class="toast" class:bad={app.toast.bad} role="status">{app.toast.text}</div>
