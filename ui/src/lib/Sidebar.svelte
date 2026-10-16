@@ -23,23 +23,26 @@
     void app.select(path);
   }
 
-  function statusText(): string {
+  /** Строка состояния: заголовок и вторая строка (время обновления, ход). */
+  function statusText(): [string, string] {
     const status = app.status;
     const running = app.activity?.running;
-    if (!app.project) return "Нет проектов";
+    if (!app.project) return ["Нет проектов", ""];
     if (running && running.project === app.project.path) {
       const percent = app.progressOf(app.project.path);
-      return percent === null ? "Индексация · обход" : `Индексация · проект ${percent} %`;
+      return percent === null ? ["Индексация", "обход папки"] : ["Индексация", `проект ${percent} %`];
     }
-    if (app.project.state === "unavailable") return "Папка проекта не найдена";
-    if (app.project.state === "reindex_required") return "Нужна переиндексация";
-    if (app.waitingOf(app.project.path) > 0) return `Ждут ${app.waitingOf(app.project.path)} документов`;
+    if (app.project.state === "unavailable") return ["Папка проекта не найдена", ""];
+    if (app.project.state === "reindex_required") return ["Нужна переиндексация", ""];
+    if (app.waitingOf(app.project.path) > 0) return [`Ждут ${app.waitingOf(app.project.path)} документов`, "поиск работает по готовому"];
     if (status?.updated_at) {
       const time = new Date(status.updated_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
-      return `Индекс актуален · обновлён ${time}`;
+      return ["Индекс актуален", `обновлён ${time}`];
     }
-    return "Индекс актуален";
+    return ["Индекс актуален", ""];
   }
+
+  const status = $derived(statusText());
 
   const statusDot = $derived(
     !app.project
@@ -162,7 +165,10 @@
   <div class="sfoot">
     <div class="status">
       <span class="dot {statusDot}"></span>
-      <span>{statusText()}</span>
+      <span class="text">
+        <span class="line1">{status[0]}</span>
+        {#if status[1]}<span class="line2">{status[1]}</span>{/if}
+      </span>
     </div>
     <div class="tools">
       <button class="iconbtn" title="Светлая / тёмная тема" onclick={() => theme.toggle()}>
@@ -213,7 +219,9 @@
   .ladd { display: flex; align-items: center; gap: 8px; width: calc(100% - 16px); margin: 6px 8px 10px; border: 1px dashed var(--line-2); background: none; padding: 8px 10px; border-radius: 9px; color: var(--accent-text); font-weight: 600; font-size: 13px; }
   .ladd:hover { background: var(--panel-2); }
   .status { display: flex; align-items: center; gap: 8px; min-width: 0; }
-  .status span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .status .text { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
+  .status .line1 { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .status .line2 { font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tools { display: flex; gap: 2px; }
   .iconbtn { border: 1px solid transparent; background: none; color: var(--muted); padding: 5px; border-radius: 8px; display: grid; place-items: center; }
   .iconbtn:hover { background: var(--panel-2); border-color: var(--line); color: var(--text); }
