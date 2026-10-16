@@ -6,7 +6,9 @@
 
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 
 use bars_core::models::{
     Accelerator, BGE_RERANKER_V2_M3_ID, BuiltinReranker, EmbedError, Embedder, HttpEmbedder,
@@ -22,6 +24,11 @@ use super::lock;
 /// свободен, и эмбеддинг поискового запроса ждёт не дольше одной пачки.
 pub const BATCH_SIZE: usize = 4;
 
+/// Предел пачки встроенной модели по объёму: число текстов, умноженное на длину самого длинного
+/// в пачке (в символах). Время пачки растёт быстрее длины: четыре чанка по 3 500 символов
+/// считаются около 8 с, и запрос ждал бы столько же. Один текст длиннее предела идёт один.
+pub const BATCH_CHARS: usize = 3_000;
+
 /// Откуда воркер берёт модели по настройкам.
 pub trait ModelProvider: Send + Sync {
     /// Отпечаток embed-модели из настроек, без загрузки. У внешней модели размерность до первого
@@ -34,6 +41,12 @@ pub trait ModelProvider: Send + Sync {
     /// Сколько текстов уходит модели за один захват мьютекса.
     fn batch_size(&self, _settings: &Settings) -> usize {
         BATCH_SIZE
+    }
+
+    /// Предел пачки по объёму в символах (`BATCH_CHARS`); `None` — пачки считаются только по числу
+    /// текстов (внешние модели: запрос по сети, паддинга у них нет).
+    fn batch_chars(&self, _settings: &Settings) -> Option<usize> {
+        None
     }
 
     /// Загружает rerank-модель; вызывается при первом реранке.
@@ -148,6 +161,10 @@ impl ModelProvider for ConfiguredProvider {
             ModelSource::Builtin => BATCH_SIZE,
             _ => settings.embed.batch_size,
         }
+    }
+
+    fn batch_chars(&self, settings: &Settings) -> Option<usize> {
+        (settings.embed.source == ModelSource::Builtin).then_some(BATCH_CHARS)
     }
 
     fn background_load(&self, settings: &Settings, reranker: bool) -> bool {
@@ -276,9 +293,16 @@ type Loader = Box<dyn Fn() -> Result<Box<dyn Embedder + Send>, EmbedError> + Sen
 pub struct ModelSlot {
     fingerprint: ModelFingerprint,
     batch_size: usize,
+    batch_chars: Option<usize>,
     loader: Loader,
     model: Mutex<Option<Box<dyn Embedder + Send>>>,
+    /// Сколько запросов поиска ждут модель. Пока их больше нуля, индексация не берёт мьютекс:
+    /// он не честный, и без этого пачки индексации идут подряд, а запрос не доходит до модели.
+    waiting_queries: AtomicUsize,
 }
+
+/// Как часто индексация проверяет, что запросов поиска у модели не осталось.
+const QUERY_RECHECK: Duration = Duration::from_millis(2);
 
 impl ModelSlot {
     /// Отпечаток по настройкам: у внешней модели размерность в нём может быть неизвестна.
@@ -297,12 +321,42 @@ impl ModelSlot {
         peek(&self.model, |_| ()).is_some()
     }
 
-    /// Выполняет `f` с исключительным доступом к модели, загрузив её, если надо.
+    /// Выполняет `f` с исключительным доступом к модели, загрузив её, если надо. Уступает
+    /// модель запросам поиска: пока они ждут, не берёт мьютекс.
     fn with<R>(
         &self,
         f: impl FnOnce(&mut (dyn Embedder + Send)) -> Result<R, EmbedError>,
     ) -> Result<R, EmbedError> {
+        while self.waiting_queries.load(Ordering::SeqCst) > 0 {
+            std::thread::sleep(QUERY_RECHECK);
+        }
+        self.run(f)
+    }
+
+    /// То же для запроса поиска: встаёт в очередь перед пачками индексации.
+    fn with_priority<R>(
+        &self,
+        f: impl FnOnce(&mut (dyn Embedder + Send)) -> Result<R, EmbedError>,
+    ) -> Result<R, EmbedError> {
+        self.waiting_queries.fetch_add(1, Ordering::SeqCst);
         let mut guard = lock(&self.model);
+        self.waiting_queries.fetch_sub(1, Ordering::SeqCst);
+        self.load_and_run(&mut guard, f)
+    }
+
+    fn run<R>(
+        &self,
+        f: impl FnOnce(&mut (dyn Embedder + Send)) -> Result<R, EmbedError>,
+    ) -> Result<R, EmbedError> {
+        let mut guard = lock(&self.model);
+        self.load_and_run(&mut guard, f)
+    }
+
+    fn load_and_run<R>(
+        &self,
+        guard: &mut Option<Box<dyn Embedder + Send>>,
+        f: impl FnOnce(&mut (dyn Embedder + Send)) -> Result<R, EmbedError>,
+    ) -> Result<R, EmbedError> {
         if guard.is_none() {
             *guard = Some((self.loader)()?);
         }
@@ -352,7 +406,7 @@ impl Embedder for SharedEmbedder {
         let sorted: Vec<&str> = order.iter().map(|&index| texts[index]).collect();
 
         let mut vectors = Vec::with_capacity(texts.len());
-        for batch in sorted.chunks(self.slot.batch_size) {
+        for batch in split_batches(&sorted, self.slot.batch_size, self.slot.batch_chars) {
             let part = self.slot.with(|model| model.embed(batch))?;
             if part.len() != batch.len() {
                 return Err(EmbedError::Count {
@@ -372,10 +426,34 @@ impl Embedder for SharedEmbedder {
     }
 
     fn embed_query(&mut self, text: &str) -> Result<Vec<f32>, EmbedError> {
-        let vector = self.slot.with(|model| model.embed_query(text))?;
+        let vector = self.slot.with_priority(|model| model.embed_query(text))?;
         self.refresh();
         Ok(vector)
     }
+}
+
+/// Режет тексты, отсортированные по длине, на пачки: не больше `size` текстов и, если задан
+/// `chars`, не больше `chars` символов с учётом дополнения до самого длинного текста пачки.
+fn split_batches<'a>(
+    sorted: &'a [&'a str],
+    size: usize,
+    chars: Option<usize>,
+) -> Vec<&'a [&'a str]> {
+    let mut batches = Vec::new();
+    let mut start = 0;
+    while start < sorted.len() {
+        let mut end = start + 1;
+        while end < sorted.len() && end - start < size {
+            let longest = sorted[end].chars().count();
+            if chars.is_some_and(|limit| (end - start + 1) * longest > limit) {
+                break;
+            }
+            end += 1;
+        }
+        batches.push(&sorted[start..end]);
+        start = end;
+    }
+    batches
 }
 
 type RerankLoader = Box<dyn Fn() -> Result<Box<dyn Reranker + Send>, RerankError> + Send + Sync>;
@@ -487,8 +565,10 @@ impl Models {
         let slot = Arc::new(ModelSlot {
             fingerprint: fingerprint.clone(),
             batch_size: self.provider.batch_size(settings).max(1),
+            batch_chars: self.provider.batch_chars(settings),
             loader: Box::new(move || loads.run_keyed(key.as_deref(), || provider.load(&owned))),
             model: Mutex::new(None),
+            waiting_queries: AtomicUsize::new(0),
         });
         *current = Some(Current {
             fingerprint,
@@ -810,6 +890,60 @@ mod tests {
         let query = other.embed_query("запрос").unwrap();
         assert_eq!(query[0], 6.0);
         assert_eq!(provider.counters.loads.load(Ordering::SeqCst), 1);
+    }
+
+    #[test]
+    fn batches_are_cut_by_count_and_by_padded_size() {
+        let short = "a".repeat(100);
+        let mid = "b".repeat(1_000);
+        let long = "c".repeat(4_000);
+        let texts = [
+            short.as_str(),
+            short.as_str(),
+            mid.as_str(),
+            mid.as_str(),
+            mid.as_str(),
+            long.as_str(),
+            long.as_str(),
+        ];
+        let sizes = |chars| {
+            split_batches(&texts, 4, chars)
+                .iter()
+                .map(|batch| batch.len())
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(sizes(None), [4, 3]);
+        // Три текста с самым длинным в 1 000 символов дают ровно 3 000; четвёртый уже не помещается.
+        assert_eq!(sizes(Some(BATCH_CHARS)), [3, 2, 1, 1]);
+    }
+
+    #[test]
+    fn indexing_batches_yield_to_a_waiting_query() {
+        let provider = FakeProvider::new("m1");
+        let models = Models::new(provider.clone());
+        let mut indexer = models.embedder(&settings()).unwrap();
+        let slot = Arc::clone(indexer.slot());
+        indexer.prepare().unwrap();
+
+        // Запрос ждёт модель, занятую «пачкой»: индексация следующую пачку не берёт.
+        let guard = lock(&slot.model);
+        let mut query = indexer.clone();
+        let asking = std::thread::spawn(move || query.embed_query("запрос").unwrap());
+        wait_until(|| slot.waiting_queries.load(Ordering::SeqCst) == 1);
+        let index_slot = Arc::clone(&slot);
+        let indexing = std::thread::spawn(move || {
+            let mut embedder = SharedEmbedder::new(index_slot);
+            embedder
+                .embed(&["a", "b", "c", "d", "e", "f", "g", "h"])
+                .unwrap();
+        });
+        std::thread::sleep(std::time::Duration::from_millis(100));
+        assert_eq!(provider.counters.embed_calls.load(Ordering::SeqCst), 0);
+        drop(guard);
+
+        assert_eq!(asking.join().unwrap()[0], 6.0);
+        indexing.join().unwrap();
+        assert_eq!(provider.counters.texts.load(Ordering::SeqCst), 9);
     }
 
     #[test]
