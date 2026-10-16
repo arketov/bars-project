@@ -13,4 +13,5 @@ title: Внутренняя база знаний bars
 - [spike-detach.md](spike-detach.md) — спайк запуска воркера из MCP-прокси: переживает ли он конец сессии Claude Code.
 - [spike-ipc.md](spike-ipc.md) — спайк локального канала: DACL на Windows, занятое имя, тесты `bars-app`; что не проверено.
 - [installer.md](installer.md) — установщик Windows: NSIS или MSI, устройство шаблона Tauri, что проверено при обновлении на месте.
+- [claude-code-serena.md](claude-code-serena.md) — Serena и bars в Claude Code (ISS-08): какие инструменты Serena включены, хуки, почему агент их обходит, output style для десктопа.
 - [traceability.md](traceability.md) — какой документ описывает каждое требование Т-N и НФТ.
