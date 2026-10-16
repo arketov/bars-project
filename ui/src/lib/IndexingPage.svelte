@@ -158,7 +158,16 @@
       {/if}
 
       {#if !running && !queued && !files.length && !problems?.last_error}
-        <div class="panel"><div class="cb muted">Сейчас ничего не индексируется. {documents(app.documentsOf(project))} в индексе.</div></div>
+        <div class="panel">
+          <div class="cb">
+            <div class="hrow">
+              <span class="muted">Сейчас ничего не индексируется. {documents(app.documentsOf(project))} в индексе.</span>
+              <span class="sp"></span>
+              <button class="btn sm" onclick={() => app.reindexCheck(project.path)}>Проверить сейчас</button>
+            </div>
+            <p class="muted small none">bars сверяет документы с индексом сам: по правке файла и каждые 15 минут. Кнопка запускает проверку этого проекта немедленно.</p>
+          </div>
+        </div>
       {/if}
 
       <button class="link back" onclick={() => (app.view = "main")}>← К поиску</button>

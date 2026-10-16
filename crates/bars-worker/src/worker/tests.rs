@@ -224,6 +224,68 @@ async fn hourly_check_finds_changes_the_watcher_missed() {
     worker.shutdown().await;
 }
 
+/// ISS-06: агент переложил сотни файлов разом; индекс должен догнать их без часовой проверки.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn hundreds_of_files_at_once_reach_the_index() {
+    let env = Env::new();
+    let project = env.project("bulk", &[("a.md", DOC)]);
+    let mut config = env.config();
+    config.tail_delay = Duration::from_millis(300);
+    let worker = Worker::start(config, env.provider.clone()).unwrap();
+    worker.register(&project).unwrap();
+    idle(&worker).await;
+
+    const FILES: usize = 400;
+    for number in 0..FILES {
+        let folder = project.join("docs").join(format!("module-{}", number % 20));
+        fs::create_dir_all(&folder).unwrap();
+        fs::write(folder.join(format!("doc-{number}.md")), DOC).unwrap();
+    }
+    wait_until("все файлы в индексе", || {
+        worker.is_idle() && documents(&project) == FILES + 1
+    })
+    .await;
+    worker.shutdown().await;
+}
+
+/// ISS-06: слежение, которое замолчало, перезапускается: часовая проверка нашла файл,
+/// а событий не было, значит, дальше правки должны снова доходить сами.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn deaf_watcher_is_restarted_by_the_periodic_check() {
+    let env = Env::new();
+    let project = env.project("deaf", &[("a.md", DOC)]);
+    let mut config = env.config();
+    config.tail_delay = Duration::from_millis(150);
+    let worker = Worker::start(config, env.provider.clone()).unwrap();
+    let path = worker.register(&project).unwrap().path;
+    idle(&worker).await;
+    assert_eq!(documents(&project), 1);
+
+    // Слежение «оглохло»: оно живо, но событий не передаёт.
+    let deaf =
+        ProjectWatcher::start(&project, "docs", Duration::from_millis(100), Arc::new(|_| {}))
+            .unwrap();
+    let old = lock(&worker.inner.projects)
+        .get_mut(&path)
+        .and_then(|runtime| runtime.watcher.replace(deaf));
+    drop(old);
+    assert!(worker.status(&path).unwrap().watching);
+
+    fs::write(project.join("docs/b.md"), DOC).unwrap();
+    worker.check_all();
+    wait_until("часовая проверка нашла b.md", || {
+        worker.is_idle() && documents(&project) == 2
+    })
+    .await;
+
+    fs::write(project.join("docs/c.md"), DOC).unwrap();
+    wait_until("слежение снова видит правки", || {
+        worker.is_idle() && documents(&project) == 3
+    })
+    .await;
+    worker.shutdown().await;
+}
+
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn model_change_requires_reindex_and_waits_for_consent() {
     let env = Env::new();

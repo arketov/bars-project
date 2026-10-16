@@ -24,6 +24,9 @@ pub enum WatchEvent {
     Files(Vec<PathBuf>),
     /// `notify` сообщил об ошибке: события могли потеряться, проект надо проверить целиком.
     Failed(String),
+    /// Система сообщила, что события потеряны (флаг `Rescan`), или пришло событие без путей:
+    /// что изменилось, неизвестно, проект надо проверить целиком.
+    Rescan,
 }
 
 pub type Sink = Arc<dyn Fn(WatchEvent) + Send + Sync>;
@@ -48,9 +51,19 @@ impl ProjectWatcher {
                 None,
                 move |result: DebounceEventResult| match result {
                     Ok(events) => {
-                        let mut paths: Vec<PathBuf> = events
+                        let events: Vec<_> = events
                             .into_iter()
                             .filter(|event| !matches!(event.event.kind, EventKind::Access(_)))
+                            .collect();
+                        // Событие без путей или с флагом `Rescan` не говорит, что изменилось.
+                        if events
+                            .iter()
+                            .any(|event| event.event.need_rescan() || event.event.paths.is_empty())
+                        {
+                            sink(WatchEvent::Rescan);
+                        }
+                        let mut paths: Vec<PathBuf> = events
+                            .into_iter()
                             .flat_map(|event| event.event.paths.clone())
                             .filter(|path| is_relevant(&filter_dir, path))
                             .collect();
@@ -197,6 +210,54 @@ mod tests {
             rx.recv_timeout(Duration::from_millis(600)),
             Ok(WatchEvent::Files(_))
         )
+    }
+
+    /// ISS-06: сотни файлов разом (агент переложил документацию). Каждый файл либо назван в
+    /// пачках событий, либо слежение сказало, что события потеряны: тогда воркер проверит проект.
+    #[test]
+    fn hundreds_of_files_at_once_are_seen_or_reported_lost() {
+        let project = TempDir::new().unwrap();
+        let docs = project.path().join("docs");
+        fs::create_dir_all(&docs).unwrap();
+        let (tx, rx) = mpsc::channel();
+        let sink: Sink = Arc::new(move |event| {
+            let _ = tx.send(event);
+        });
+        let _watcher =
+            ProjectWatcher::start(project.path(), "docs", Duration::from_millis(100), sink)
+                .unwrap();
+
+        const FILES: usize = 600;
+        for number in 0..FILES {
+            let folder = docs.join(format!("module-{}", number % 20));
+            fs::create_dir_all(&folder).unwrap();
+            fs::write(folder.join(format!("doc-{number}.md")), "# Документ\n").unwrap();
+        }
+
+        let mut seen = std::collections::BTreeSet::new();
+        let mut lost = false;
+        let deadline = std::time::Instant::now() + Duration::from_secs(10);
+        while seen.len() < FILES && !lost {
+            let Some(left) = deadline.checked_duration_since(std::time::Instant::now()) else {
+                break;
+            };
+            match rx.recv_timeout(left) {
+                Ok(WatchEvent::Files(paths)) => {
+                    seen.extend(
+                        paths
+                            .into_iter()
+                            .filter(|path| path.extension().is_some_and(|e| e == "md")),
+                    );
+                }
+                Ok(WatchEvent::Rescan | WatchEvent::Failed(_)) => lost = true,
+                Err(_) => break,
+            }
+        }
+        assert!(
+            lost || seen.len() == FILES,
+            "увидели {} из {FILES} файлов и не получили сообщения о потере событий",
+            seen.len()
+        );
     }
 
     #[test]

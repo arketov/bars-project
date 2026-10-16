@@ -51,8 +51,13 @@ use queue::{Job, JobQueue};
 use registry::{has_markdown, normalize, project_name};
 use watcher::{DEBOUNCE, ProjectWatcher, Sink, WatchEvent};
 
-/// Как часто воркер проверяет все проекты (Т-10).
-pub const PERIODIC_INTERVAL: Duration = Duration::from_secs(3600);
+/// Как часто воркер проверяет все проекты (Т-10). Слежение за файлами может молчать, поэтому
+/// проверка не должна быть редкой: на неизменном проекте она дешёвая, эмбеддинг не запускается.
+pub const PERIODIC_INTERVAL: Duration = Duration::from_secs(15 * 60);
+
+/// Через сколько после пачки событий проект проверяется целиком: ловит хвост, который
+/// `notify` потерял при переполнении буфера (ISS-06).
+pub const TAIL_DELAY: Duration = Duration::from_secs(5);
 
 /// Мьютекс, переживающий панику другого потока: состояние воркера не должно умирать от неё.
 pub(crate) fn lock<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
@@ -66,6 +71,8 @@ pub struct WorkerConfig {
     pub periodic_interval: Duration,
     /// Сколько события слежения копятся до пачки.
     pub debounce: Duration,
+    /// Через сколько после пачки событий проект проверяется целиком ([`TAIL_DELAY`]).
+    pub tail_delay: Duration,
     /// Куда `install` и `uninstall` пишут записи клиентов; `None` — пути не определились.
     pub install_env: Option<InstallEnv>,
     /// Хранилище ключей провайдеров: сюда окно записывает ключ (`secret_set`).
@@ -92,6 +99,7 @@ impl WorkerConfig {
             bars_home,
             periodic_interval: PERIODIC_INTERVAL,
             debounce: DEBOUNCE,
+            tail_delay: TAIL_DELAY,
             install_env: InstallEnv::detect(),
             secrets: Arc::new(OsSecrets::default()),
             autostart: Arc::new(NoAutostart),
@@ -195,6 +203,11 @@ struct Runtime {
     watcher: Option<ProjectWatcher>,
     /// `notify` сообщил об ошибке или папка пропадала: слежение надо поднять заново.
     watch_failed: bool,
+    /// Сколько сообщений слежения пришло с начала последней полной проверки. Проверка нашла
+    /// изменения, а сообщений не было — слежение молчит, его надо перезапустить.
+    watch_events: u32,
+    /// Проверка «хвоста» уже назначена, новую не ставим.
+    tail_armed: bool,
     gate: Arc<RwLock<()>>,
 }
 
@@ -211,6 +224,8 @@ impl Runtime {
             },
             watcher: None,
             watch_failed: false,
+            watch_events: 0,
+            tail_armed: false,
             gate: Arc::new(RwLock::new(())),
         }
     }
@@ -738,6 +753,9 @@ impl Inner {
             }
             return;
         }
+        if let Some(runtime) = lock(&self.projects).get_mut(project) {
+            runtime.watch_events = runtime.watch_events.saturating_add(1);
+        }
         match event {
             WatchEvent::Files(files) => self.enqueue(project, Job::files(Priority::Watch, files)),
             WatchEvent::Failed(message) => {
@@ -748,7 +766,76 @@ impl Inner {
                 // События могли потеряться: проверка целиком.
                 self.enqueue(project, Job::check(Priority::Watch));
             }
+            WatchEvent::Rescan => self.enqueue(project, Job::check(Priority::Watch)),
         }
+        // Хвост пачки мог потеряться: проверка целиком через несколько секунд.
+        self.arm_tail(project);
+    }
+
+    /// Назначает полную проверку проекта через `tail_delay` (ISS-06): на Windows `notify` теряет
+    /// события при переполнении буфера, а о потере не сообщает. Пока проверка назначена, новых
+    /// не ставится. Заодно поднимает слежение, если оно сломалось: отсюда, не из потока `notify`.
+    fn arm_tail(self: &Arc<Self>, project: &Path) {
+        {
+            let mut projects = lock(&self.projects);
+            let Some(runtime) = projects.get_mut(project) else {
+                return;
+            };
+            if runtime.tail_armed {
+                return;
+            }
+            runtime.tail_armed = true;
+        }
+        let weak: Weak<Inner> = Arc::downgrade(self);
+        let project = project.to_path_buf();
+        let delay = self.config.tail_delay;
+        self.handle.spawn(async move {
+            tokio::time::sleep(delay).await;
+            let Some(inner) = weak.upgrade() else {
+                return;
+            };
+            if inner.stop.load(Ordering::SeqCst) {
+                return;
+            }
+            if let Some(runtime) = lock(&inner.projects).get_mut(&project) {
+                runtime.tail_armed = false;
+            }
+            if !project.is_dir() {
+                return;
+            }
+            let restart = Arc::clone(&inner);
+            let path = project.clone();
+            let _ = tokio::task::spawn_blocking(move || restart.ensure_watching(&path)).await;
+            inner.enqueue(&project, Job::check(Priority::Watch));
+        });
+    }
+
+    /// Итог полной проверки: нашла изменения, а слежение молчало. Значит, события потерялись:
+    /// проверяем ещё раз, пока не будет тихо. Если это была часовая проверка, слежение,
+    /// скорее всего, умерло молча, и его перезапускают.
+    fn after_full_check(self: &Arc<Self>, path: &Path, periodic: bool) {
+        let silent = {
+            let mut projects = lock(&self.projects);
+            let Some(runtime) = projects.get_mut(path) else {
+                return;
+            };
+            let silent = runtime.watch_events == 0;
+            if silent && periodic && runtime.watcher.is_some() {
+                runtime.watch_failed = true;
+            }
+            silent
+        };
+        if !silent {
+            return;
+        }
+        if periodic {
+            eprintln!(
+                "bars: проверка нашла изменения в {}, а слежение молчало: перезапускаю слежение",
+                path.display()
+            );
+            self.ensure_watching(path);
+        }
+        self.arm_tail(path);
     }
 
     /// Папки проекта нет: проект `unavailable`, с очереди он снимается. Возвращает слежение,
@@ -808,6 +895,8 @@ impl Inner {
     }
 
     async fn process(self: &Arc<Self>, path: PathBuf, job: Job) {
+        let full_check = job.rebuild.is_none() && job.scope == queue::Scope::Full;
+        let periodic = job.priority == Priority::Periodic;
         let (gate, previous) = {
             let mut projects = lock(&self.projects);
             let Some(runtime) = projects.get_mut(&path) else {
@@ -819,6 +908,9 @@ impl Inner {
             }
             if previous != ProjectState::ReindexRequired {
                 runtime.status.state = ProjectState::Indexing;
+            }
+            if full_check {
+                runtime.watch_events = 0;
             }
             (Arc::clone(&runtime.gate), previous)
         };
@@ -846,7 +938,17 @@ impl Inner {
             index_model: None,
             settings_model: None,
         });
+        let found_changes = full_check
+            && matches!(
+                &result.outcome,
+                Outcome::Updated(report)
+                    if report.added + report.removed > 0
+                        || (!report.full_check && report.changed > 0)
+            );
         self.apply(&path, previous, result);
+        if found_changes {
+            self.after_full_check(&path, periodic);
+        }
     }
 
     fn apply(&self, path: &Path, previous: ProjectState, result: job::JobResult) {
