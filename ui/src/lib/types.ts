@@ -124,6 +124,7 @@ export class BarsError extends Error {
     message: string,
     readonly kind: string | null = null,
     readonly code: number = -32603,
+    readonly data: { percent?: number } | null = null,
   ) {
     super(message);
   }

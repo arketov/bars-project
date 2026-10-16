@@ -9,7 +9,7 @@ export const inTauri = (): boolean => typeof window !== "undefined" && "__TAURI_
 interface RpcErrorShape {
   code?: number;
   message?: string;
-  data?: { kind?: string } | null;
+  data?: { kind?: string; percent?: number } | null;
 }
 
 export function toBarsError(raw: unknown): BarsError {
@@ -17,7 +17,7 @@ export function toBarsError(raw: unknown): BarsError {
   if (typeof raw === "string") return new BarsError(raw);
   if (raw && typeof raw === "object") {
     const rpc = raw as RpcErrorShape;
-    return new BarsError(rpc.message ?? "неизвестная ошибка", rpc.data?.kind ?? null, rpc.code ?? -32603);
+    return new BarsError(rpc.message ?? "неизвестная ошибка", rpc.data?.kind ?? null, rpc.code ?? -32603, rpc.data ?? null);
   }
   return new BarsError(String(raw));
 }

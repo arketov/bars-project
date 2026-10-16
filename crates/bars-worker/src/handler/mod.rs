@@ -36,7 +36,7 @@ use serde_json::Value;
 
 use crate::clients::{self, InstallEnv};
 use crate::settings_io::{self, SaveError};
-use crate::worker::{JobKind, Priority, ProjectSnapshot, Worker, rfc3339};
+use crate::worker::{JobKind, Priority, ProjectSnapshot, Readiness, Worker, rfc3339};
 use errors::{doc_path_error, outline_error, read_error, search_error, worker_error};
 
 /// Выполняет вызовы канала на воркере.
@@ -99,6 +99,19 @@ impl WorkerHandler {
             return Err(errors::reindex_required());
         }
         let settings = self.settings(&project)?;
+        // Скачивание и загрузка встроенной модели поиск не ждёт: он сразу отвечает `model_loading`.
+        match self
+            .worker
+            .models()
+            .embed_readiness(&settings)
+            .map_err(errors::embed_error)?
+        {
+            Readiness::Ready => {}
+            Readiness::Loading { percent } => return Err(errors::model_loading(percent)),
+            Readiness::Failed(message) => {
+                return Err(RpcError::bars(ErrorKind::ProviderError, message));
+            }
+        }
         let mut embedder = self
             .worker
             .models()
@@ -121,10 +134,20 @@ impl WorkerHandler {
             .map_err(worker_error)?
             .read_owned()
             .await;
-        let mut reranker = settings
-            .rerank
-            .enabled
-            .then(|| self.worker.models().reranker(&settings));
+        // Rerank-модель, пока она скачивается или грузится, поиск тоже не ждёт: выдача идёт без неё.
+        let mut skipped_rerank = None;
+        let mut reranker = None;
+        if settings.rerank.enabled {
+            match self.worker.models().rerank_readiness(&settings) {
+                Readiness::Ready => reranker = Some(self.worker.models().reranker(&settings)),
+                Readiness::Loading { percent } => {
+                    skipped_rerank = Some(format!(
+                        "rerank-модель ещё скачивается или грузится ({percent} %): выдача без rerank"
+                    ));
+                }
+                Readiness::Failed(message) => skipped_rerank = Some(message),
+            }
+        }
         let response = tokio::task::spawn_blocking(move || {
             let _gate = gate;
             let index = Index::open(&index_path(&project), Journal::Wal)?;
@@ -135,7 +158,7 @@ impl WorkerHandler {
         .await
         .map_err(internal)?
         .map_err(search_error)?;
-        let rerank_error = response.rerank_error;
+        let rerank_error = response.rerank_error.or(skipped_rerank);
         Ok(SearchOutput {
             results: response.hits.into_iter().map(hit).collect(),
             applied: applied(response.applied),

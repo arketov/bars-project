@@ -567,6 +567,44 @@ async fn search_with_the_real_bge_m3() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn search_answers_model_loading_while_the_model_loads_and_works_after() {
+    let provider = Arc::new(FakeProvider {
+        background: true,
+        load_delay: std::time::Duration::from_millis(600),
+        ..FakeProvider::plain("m1")
+    });
+    let harness = Harness::start("loading", provider).await;
+    let mut cli = harness.client(ClientKind::Cli).await;
+    let root = harness.project(
+        "slow",
+        &[(
+            "a.md",
+            "# Борщ
+
+Свёкла и капуста.
+",
+        )],
+    );
+    cli.call(&RegisterParams {
+        path: root.display().to_string(),
+    })
+    .await
+    .unwrap();
+
+    // Индексация держит загрузку модели: поиск не ждёт её, а сразу отвечает `model_loading`.
+    let started = Instant::now();
+    let error = rpc(cli.call(&search(&root, "борщ")).await);
+    assert_eq!(error.kind(), Some(ErrorKind::ModelLoading));
+    assert!(started.elapsed() < Duration::from_millis(500));
+    let data = error.data.expect("data с ходом загрузки");
+    assert!(data["percent"].is_u64(), "{data}");
+
+    wait_status(&mut cli, &root, "индексация после загрузки", indexed).await;
+    let found = cli.call(&search(&root, "борщ")).await.unwrap();
+    assert_eq!(found.results[0].path, "docs/a.md");
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn window_methods_are_closed_on_the_channel() {
     let harness = Harness::start("window-closed", FakeProvider::new("m1")).await;
     let mut cli = harness.client(ClientKind::Cli).await;

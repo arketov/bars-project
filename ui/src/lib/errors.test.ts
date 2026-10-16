@@ -30,4 +30,13 @@ describe("errors", () => {
     expect(screenFor(error, "builtin").kind).toBe("model-files");
     expect(screenFor(new BarsError("странно", "invalid_params"), "remote").kind).toBe("other");
   });
+
+  it("model_loading показывает ход скачивания и не считается ошибкой", () => {
+    const loading = screenFor(new BarsError("грузится", "model_loading", -32009, { percent: 42 }), "builtin");
+    expect(loading.kind).toBe("loading");
+    expect(loading.title).toBe("Модель грузится, 42 %");
+    expect(screenFor(new BarsError("грузится", "model_loading", -32009, { percent: 100 }), "builtin").title).toBe(
+      "Модель загружается в память",
+    );
+  });
 });

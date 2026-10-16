@@ -3,6 +3,7 @@
 import type { BarsError } from "./types";
 
 export type ErrorScreen =
+  | { kind: "loading"; title: string; hint: string }
   | { kind: "provider"; title: string; hint: string }
   | { kind: "model-files"; title: string; hint: string }
   | { kind: "model-download"; title: string; hint: string }
@@ -49,7 +50,15 @@ export function explainBuiltin(message: string): { kind: "model-download" | "mod
 
 /** Экран для ошибки поиска. `source` — откуда берётся embed-модель проекта. */
 export function screenFor(error: BarsError, source: ReturnType<typeof sourceOf>): ErrorScreen {
-  if (error.kind === "provider_error" || error.kind === "model_loading") {
+  if (error.kind === "model_loading") {
+    const percent = error.data?.percent;
+    return {
+      kind: "loading",
+      title: percent !== undefined && percent < 100 ? `Модель грузится, ${percent} %` : "Модель загружается в память",
+      hint: "Окно повторит поиск само. Окно можно закрыть: скачивание идёт в фоне.",
+    };
+  }
+  if (error.kind === "provider_error") {
     if (source === "builtin") {
       const builtin = explainBuiltin(error.message);
       return {

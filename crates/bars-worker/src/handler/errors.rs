@@ -45,6 +45,18 @@ pub fn worker_error(error: WorkerError) -> RpcError {
     }
 }
 
+/// Встроенная модель скачивается или грузится: ход скачивания в `data.percent`.
+pub fn model_loading(percent: u8) -> RpcError {
+    let message = if percent >= 100 {
+        "модель загружается в память: повторите поиск через несколько секунд".to_string()
+    } else {
+        format!("модель скачивается, {percent} %: повторите поиск позже")
+    };
+    let mut extra = serde_json::Map::new();
+    extra.insert("percent".to_string(), percent.into());
+    RpcError::bars_with(ErrorKind::ModelLoading, message, extra)
+}
+
 pub fn embed_error(error: EmbedError) -> RpcError {
     RpcError::bars(ErrorKind::ProviderError, error.to_string())
 }

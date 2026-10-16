@@ -4,13 +4,14 @@
 //! Отпечаток модели известен по настройкам и без загрузки: проверка Т-25 не загружает модель.
 //! Сама модель грузится при первом эмбеддинге и остаётся в памяти, пока настройки не сменят её.
 
+use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
 use bars_core::models::{
     Accelerator, BGE_RERANKER_V2_M3_ID, BuiltinReranker, EmbedError, Embedder, HttpEmbedder,
     HttpReranker, ModelFingerprint, RemoteTarget, RerankError, Reranker, builtin_model,
-    load_builtin_embedder, prepare_environment, remote_fingerprint,
+    download_percent, load_builtin_embedder, prepare_environment, remote_fingerprint,
 };
 use bars_core::secrets::{KeyRef, OsSecrets, SecretStore};
 use bars_core::settings::{EmbedSettings, ModelSource, RerankSettings, Settings};
@@ -40,6 +41,17 @@ pub trait ModelProvider: Send + Sync {
         Err(RerankError::Load(
             "rerank-модель в этой сборке не подключена".into(),
         ))
+    }
+
+    /// Грузится ли модель долго (скачивание, чтение весов): тогда поиск не ждёт загрузку, а
+    /// запускает её в фоне и отвечает `model_loading`. У внешних моделей загрузки нет.
+    fn background_load(&self, _settings: &Settings, _reranker: bool) -> bool {
+        false
+    }
+
+    /// Ход скачивания встроенной модели в процентах; `None`, если провайдер его не знает.
+    fn download_percent(&self, _id: &str) -> Option<u8> {
+        None
     }
 }
 
@@ -138,6 +150,19 @@ impl ModelProvider for ConfiguredProvider {
         }
     }
 
+    fn background_load(&self, settings: &Settings, reranker: bool) -> bool {
+        let source = if reranker {
+            settings.rerank.source
+        } else {
+            settings.embed.source
+        };
+        source == ModelSource::Builtin
+    }
+
+    fn download_percent(&self, id: &str) -> Option<u8> {
+        download_percent(&self.models_dir, id)
+    }
+
     fn load_reranker(&self, settings: &Settings) -> Result<Box<dyn Reranker + Send>, RerankError> {
         let rerank = &settings.rerank;
         match rerank.source {
@@ -169,6 +194,82 @@ impl ModelProvider for ConfiguredProvider {
     }
 }
 
+/// Смотрит на загруженную модель, не дожидаясь замка: занятый мьютекс значит, что модель сейчас
+/// грузится или считает, и «загруженной» для вызывающего она не видна.
+fn peek<M, R>(slot: &Mutex<Option<M>>, f: impl FnOnce(&M) -> R) -> Option<R> {
+    match slot.try_lock() {
+        Ok(guard) => guard.as_ref().map(f),
+        Err(std::sync::TryLockError::Poisoned(poisoned)) => poisoned.into_inner().as_ref().map(f),
+        Err(std::sync::TryLockError::WouldBlock) => None,
+    }
+}
+
+/// Один замок на скачивание и загрузку встроенных моделей, перечень того, что грузится сейчас,
+/// и ошибки фоновых загрузок. Две загрузки не идут вместе: вторая находит файлы первой в кэше и
+/// не качает их заново (`docs/features/models/local-models.md`, «Один замок на скачивание и загрузку»).
+#[derive(Default)]
+struct Loads {
+    gate: Mutex<()>,
+    active: Mutex<HashSet<String>>,
+    failed: Mutex<HashMap<String, String>>,
+}
+
+/// Снимает модель с перечня «грузится» при выходе, в том числе при панике загрузчика.
+struct ActiveGuard<'a> {
+    loads: &'a Loads,
+    id: &'a str,
+}
+
+impl Drop for ActiveGuard<'_> {
+    fn drop(&mut self) {
+        lock(&self.loads.active).remove(self.id);
+    }
+}
+
+impl Loads {
+    /// Выполняет загрузку модели `id` под общим замком. Модель числится загружаемой и пока ждёт
+    /// замок: поиск отвечает `model_loading`, а не стоит в очереди.
+    fn run<T>(&self, id: &str, load: impl FnOnce() -> T) -> T {
+        lock(&self.active).insert(id.to_string());
+        let _active = ActiveGuard { loads: self, id };
+        let _gate = lock(&self.gate);
+        load()
+    }
+
+    /// То же для модели, у которой может не быть ключа: внешним моделям замок не нужен.
+    fn run_keyed<T>(&self, id: Option<&str>, load: impl FnOnce() -> T) -> T {
+        match id {
+            Some(id) => self.run(id, load),
+            None => load(),
+        }
+    }
+
+    fn is_active(&self, id: &str) -> bool {
+        lock(&self.active).contains(id)
+    }
+
+    fn fail(&self, id: &str, message: String) {
+        lock(&self.failed).insert(id.to_string(), message);
+    }
+
+    /// Ошибка последней фоновой загрузки; отдаётся один раз, после неё поиск пробует снова.
+    fn take_failure(&self, id: &str) -> Option<String> {
+        lock(&self.failed).remove(id)
+    }
+}
+
+/// Готовность встроенной модели к поиску.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Readiness {
+    Ready,
+    /// Модель скачивается или грузится; ход скачивания в процентах, 100 — файлы на месте.
+    Loading {
+        percent: u8,
+    },
+    /// Фоновая загрузка не удалась.
+    Failed(String),
+}
+
 type Loader = Box<dyn Fn() -> Result<Box<dyn Embedder + Send>, EmbedError> + Send + Sync>;
 
 /// Одна модель за мьютексом.
@@ -187,14 +288,13 @@ impl ModelSlot {
 
     /// Лучший известный отпечаток: у загруженной внешней модели размерность уже из ответа.
     fn known_fingerprint(&self) -> ModelFingerprint {
-        lock(&self.model).as_ref().map_or_else(
-            || self.fingerprint.clone(),
-            |model| model.fingerprint().clone(),
-        )
+        peek(&self.model, |model| model.fingerprint().clone())
+            .unwrap_or_else(|| self.fingerprint.clone())
     }
 
+    /// Загружена ли модель. Не ждёт: пока модель грузится, мьютекс занят загрузкой, и ответ «нет».
     pub fn is_loaded(&self) -> bool {
-        lock(&self.model).is_some()
+        peek(&self.model, |_| ()).is_some()
     }
 
     /// Выполняет `f` с исключительным доступом к модели, загрузив её, если надо.
@@ -287,8 +387,9 @@ pub struct RerankSlot {
 }
 
 impl RerankSlot {
+    /// Загружена ли модель; не ждёт, пока она грузится.
     pub fn is_loaded(&self) -> bool {
-        lock(&self.model).is_some()
+        peek(&self.model, |_| ()).is_some()
     }
 }
 
@@ -304,12 +405,21 @@ impl SharedReranker {
     }
 }
 
-impl Reranker for SharedReranker {
-    fn rerank(&mut self, query: &str, documents: &[&str]) -> Result<Vec<f32>, RerankError> {
+impl SharedReranker {
+    /// Загружает модель, если она ещё не загружена.
+    fn prepare(&self) -> Result<(), RerankError> {
         let mut guard = lock(&self.slot.model);
         if guard.is_none() {
             *guard = Some((self.slot.loader)()?);
         }
+        Ok(())
+    }
+}
+
+impl Reranker for SharedReranker {
+    fn rerank(&mut self, query: &str, documents: &[&str]) -> Result<Vec<f32>, RerankError> {
+        self.prepare()?;
+        let mut guard = lock(&self.slot.model);
         let model = guard.as_mut().expect("модель загружена строкой выше");
         model.rerank(query, documents)
     }
@@ -335,6 +445,12 @@ pub struct Models {
     provider: Arc<dyn ModelProvider>,
     current: Mutex<Option<Current>>,
     current_rerank: Mutex<Option<CurrentRerank>>,
+    loads: Arc<Loads>,
+}
+
+/// Ключ замка загрузки: встроенная модель по `id`, у внешней ключа нет.
+fn load_key(source: ModelSource, model: &str) -> Option<String> {
+    (source == ModelSource::Builtin).then(|| model.to_string())
 }
 
 impl Models {
@@ -343,6 +459,7 @@ impl Models {
             provider,
             current: Mutex::new(None),
             current_rerank: Mutex::new(None),
+            loads: Arc::default(),
         }
     }
 
@@ -364,11 +481,13 @@ impl Models {
             return Ok(SharedEmbedder::new(Arc::clone(&existing.slot)));
         }
         let provider = Arc::clone(&self.provider);
+        let loads = Arc::clone(&self.loads);
+        let key = load_key(settings.embed.source, &settings.embed.model);
         let owned = settings.clone();
         let slot = Arc::new(ModelSlot {
             fingerprint: fingerprint.clone(),
             batch_size: self.provider.batch_size(settings).max(1),
-            loader: Box::new(move || provider.load(&owned)),
+            loader: Box::new(move || loads.run_keyed(key.as_deref(), || provider.load(&owned))),
             model: Mutex::new(None),
         });
         *current = Some(Current {
@@ -381,18 +500,85 @@ impl Models {
     }
 
     /// Скачивает встроенную модель, загрузив её и сразу выпустив из рук: файлы остаются в кэше
-    /// (кнопка «Скачать» в настройках). Блокирующий вызов.
+    /// (кнопка «Скачать» в настройках). Идёт под тем же замком, что загрузка для поиска и индексации.
+    /// Блокирующий вызов; ошибка достаётся и следующему поиску по этой модели.
     pub fn download(&self, settings: &Settings, reranker: bool) -> Result<(), String> {
-        if reranker {
-            self.provider
-                .load_reranker(settings)
-                .map(drop)
-                .map_err(|error| error.to_string())
+        let id = if reranker {
+            &settings.rerank.model
         } else {
-            self.provider
-                .load(settings)
-                .map(drop)
-                .map_err(|error| error.to_string())
+            &settings.embed.model
+        };
+        let result = self.loads.run(id, || {
+            if reranker {
+                self.provider
+                    .load_reranker(settings)
+                    .map(drop)
+                    .map_err(|error| error.to_string())
+            } else {
+                self.provider
+                    .load(settings)
+                    .map(drop)
+                    .map_err(|error| error.to_string())
+            }
+        });
+        match &result {
+            Ok(()) => drop(self.loads.take_failure(id)),
+            Err(message) => self.loads.fail(id, message.clone()),
+        }
+        result
+    }
+
+    /// Встроенные модели, которые скачиваются или грузятся сейчас.
+    pub fn loading_ids(&self) -> HashSet<String> {
+        lock(&self.loads.active).clone()
+    }
+
+    /// Готова ли embed-модель к поиску. Если загрузка долгая (`background_load`) и модель не
+    /// загружена, запускает её в фоне и сообщает ход: поиск не ждёт скачивание.
+    pub fn embed_readiness(&self, settings: &Settings) -> Result<Readiness, EmbedError> {
+        let mut embedder = self.embedder(settings)?;
+        if !self.provider.background_load(settings, false) || embedder.slot().is_loaded() {
+            return Ok(Readiness::Ready);
+        }
+        let id = settings.embed.model.clone();
+        if let Some(message) = self.loads.take_failure(&id) {
+            return Ok(Readiness::Failed(message));
+        }
+        if !self.loads.is_active(&id) {
+            let loads = Arc::clone(&self.loads);
+            let failed_id = id.clone();
+            std::thread::spawn(move || {
+                if let Err(error) = embedder.prepare() {
+                    loads.fail(&failed_id, error.to_string());
+                }
+            });
+        }
+        Ok(Readiness::Loading {
+            percent: self.provider.download_percent(&id).unwrap_or(0),
+        })
+    }
+
+    /// То же для rerank-модели: пока она скачивается или грузится, поиск идёт без rerank.
+    pub fn rerank_readiness(&self, settings: &Settings) -> Readiness {
+        let reranker = self.reranker(settings);
+        if !self.provider.background_load(settings, true) || reranker.slot().is_loaded() {
+            return Readiness::Ready;
+        }
+        let id = settings.rerank.model.clone();
+        if let Some(message) = self.loads.take_failure(&id) {
+            return Readiness::Failed(message);
+        }
+        if !self.loads.is_active(&id) {
+            let loads = Arc::clone(&self.loads);
+            let failed_id = id.clone();
+            std::thread::spawn(move || {
+                if let Err(error) = reranker.prepare() {
+                    loads.fail(&failed_id, error.to_string());
+                }
+            });
+        }
+        Readiness::Loading {
+            percent: self.provider.download_percent(&id).unwrap_or(0),
         }
     }
 
@@ -409,9 +595,13 @@ impl Models {
             };
         }
         let provider = Arc::clone(&self.provider);
+        let loads = Arc::clone(&self.loads);
+        let key = load_key(settings.rerank.source, &settings.rerank.model);
         let owned = settings.clone();
         let slot = Arc::new(RerankSlot {
-            loader: Box::new(move || provider.load_reranker(&owned)),
+            loader: Box::new(move || {
+                loads.run_keyed(key.as_deref(), || provider.load_reranker(&owned))
+            }),
             model: Mutex::new(None),
         });
         *current = Some(CurrentRerank {
@@ -444,6 +634,10 @@ pub mod fake {
         /// Имя «модели»: меняется в тестах, чтобы отпечаток сменился.
         pub model: Mutex<String>,
         pub fail_load: bool,
+        /// Грузится «долго»: поиск запускает загрузку в фоне (`ModelProvider::background_load`).
+        pub background: bool,
+        /// Сколько «грузится» модель.
+        pub load_delay: std::time::Duration,
     }
 
     impl FakeProvider {
@@ -456,6 +650,8 @@ pub mod fake {
                 counters: Arc::new(Counters::default()),
                 model: Mutex::new(model.to_string()),
                 fail_load: false,
+                background: false,
+                load_delay: std::time::Duration::ZERO,
             }
         }
 
@@ -520,6 +716,10 @@ pub mod fake {
     }
 
     impl ModelProvider for FakeProvider {
+        fn background_load(&self, _settings: &Settings, _reranker: bool) -> bool {
+            self.background
+        }
+
         fn load_reranker(
             &self,
             _settings: &Settings,
@@ -527,6 +727,7 @@ pub mod fake {
             if self.fail_load {
                 return Err(RerankError::Load("нет файлов модели".into()));
             }
+            std::thread::sleep(self.load_delay);
             self.counters.rerank_loads.fetch_add(1, Ordering::SeqCst);
             Ok(Box::new(FakeReranker))
         }
@@ -539,6 +740,7 @@ pub mod fake {
             if self.fail_load {
                 return Err(EmbedError::Load("нет файлов модели".into()));
             }
+            std::thread::sleep(self.load_delay);
             self.counters.loads.fetch_add(1, Ordering::SeqCst);
             Ok(Box::new(FakeEmbedder {
                 fingerprint: fake_fingerprint(&lock(&self.model)),
@@ -626,6 +828,101 @@ mod tests {
         // Старая модель живёт, пока её держит первый; у менеджера её больше нет.
         drop(again);
         assert_eq!(Arc::strong_count(first.slot()), 1);
+    }
+
+    fn background_provider(delay_ms: u64) -> Arc<FakeProvider> {
+        Arc::new(FakeProvider {
+            background: true,
+            load_delay: std::time::Duration::from_millis(delay_ms),
+            ..FakeProvider::plain("m1")
+        })
+    }
+
+    fn wait_until(mut done: impl FnMut() -> bool) {
+        for _ in 0..200 {
+            if done() {
+                return;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(25));
+        }
+        panic!("не дождались");
+    }
+
+    #[test]
+    fn search_does_not_wait_for_a_model_that_is_loading() {
+        let provider = background_provider(300);
+        let models = Models::new(provider.clone());
+
+        let started = std::time::Instant::now();
+        assert_eq!(
+            models.embed_readiness(&settings()).unwrap(),
+            Readiness::Loading { percent: 0 }
+        );
+        assert!(started.elapsed() < std::time::Duration::from_millis(250));
+        wait_until(|| models.loading_ids().contains("BAAI/bge-m3"));
+        // Второй поиск не запускает вторую загрузку и тоже отвечает сразу.
+        assert!(matches!(
+            models.embed_readiness(&settings()).unwrap(),
+            Readiness::Loading { .. }
+        ));
+
+        wait_until(|| models.embed_readiness(&settings()).unwrap() == Readiness::Ready);
+        assert_eq!(provider.counters.loads.load(Ordering::SeqCst), 1);
+        assert!(models.loading_ids().is_empty());
+    }
+
+    #[test]
+    fn download_and_search_load_share_one_lock_and_one_load_at_a_time() {
+        let provider = background_provider(200);
+        let models = Arc::new(Models::new(provider.clone()));
+        let downloader = {
+            let models = Arc::clone(&models);
+            std::thread::spawn(move || models.download(&settings(), false))
+        };
+        wait_until(|| models.loading_ids().contains("BAAI/bge-m3"));
+
+        let started = std::time::Instant::now();
+        assert!(matches!(
+            models.embed_readiness(&settings()).unwrap(),
+            Readiness::Loading { .. }
+        ));
+        assert!(started.elapsed() < std::time::Duration::from_millis(150));
+
+        downloader.join().unwrap().unwrap();
+        wait_until(|| models.embed_readiness(&settings()).unwrap() == Readiness::Ready);
+        assert_eq!(provider.counters.loads.load(Ordering::SeqCst), 2);
+    }
+
+    #[test]
+    fn failed_background_load_is_reported_to_the_next_search() {
+        let provider = Arc::new(FakeProvider {
+            background: true,
+            fail_load: true,
+            ..FakeProvider::plain("m1")
+        });
+        let models = Models::new(provider);
+        assert!(matches!(
+            models.embed_readiness(&settings()).unwrap(),
+            Readiness::Loading { .. }
+        ));
+        wait_until(|| {
+            matches!(
+                models.embed_readiness(&settings()).unwrap(),
+                Readiness::Failed(_)
+            )
+        });
+    }
+
+    #[test]
+    fn rerank_loads_in_the_background_too() {
+        let provider = background_provider(100);
+        let models = Models::new(provider.clone());
+        assert!(matches!(
+            models.rerank_readiness(&settings()),
+            Readiness::Loading { .. }
+        ));
+        wait_until(|| models.rerank_readiness(&settings()) == Readiness::Ready);
+        assert_eq!(provider.counters.rerank_loads.load(Ordering::SeqCst), 1);
     }
 
     use bars_core::models::bge_m3_fingerprint;

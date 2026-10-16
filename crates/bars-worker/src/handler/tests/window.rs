@@ -147,9 +147,19 @@ async fn models_info_reports_downloaded_files_and_download_starts() {
     let snapshot = window
         .home
         .path()
-        .join("models/models--BAAI--bge-m3/snapshots/rev/onnx");
-    fs::create_dir_all(&snapshot).unwrap();
-    fs::write(snapshot.join("model.onnx"), "w").unwrap();
+        .join("models/models--BAAI--bge-m3/snapshots/rev");
+    fs::create_dir_all(snapshot.join("onnx")).unwrap();
+    for file in [
+        "config.json",
+        "special_tokens_map.json",
+        "tokenizer.json",
+        "tokenizer_config.json",
+        "onnx/model.onnx",
+        "onnx/model.onnx_data",
+        "onnx/Constant_7_attr__value",
+    ] {
+        fs::write(snapshot.join(file), "w").unwrap();
+    }
 
     let info: ModelsInfoOutput = window.call(Call::ModelsInfo(ModelsInfoParams {})).await;
     assert_eq!(info.embed.len(), 4);

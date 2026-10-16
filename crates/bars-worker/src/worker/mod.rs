@@ -36,8 +36,8 @@ use tokio::sync::{Notify, RwLock};
 use tokio::task::JoinHandle;
 
 pub use models::{
-    BATCH_SIZE, BuiltinProvider, ConfiguredProvider, ModelProvider, ModelSlot, Models, RerankSlot,
-    SharedEmbedder, SharedReranker,
+    BATCH_SIZE, BuiltinProvider, ConfiguredProvider, ModelProvider, ModelSlot, Models, Readiness,
+    RerankSlot, SharedEmbedder, SharedReranker,
 };
 pub use queue::Priority;
 pub use registry::{Discovered, ProjectEntry, Registry, RegistryError, ResolveError};
@@ -600,9 +600,11 @@ impl Worker {
         self.inner.config.bars_home.join("models")
     }
 
-    /// Модели, которые скачиваются прямо сейчас.
+    /// Модели, которые скачиваются или грузятся прямо сейчас: по кнопке «Скачать» и для поиска.
     pub fn downloading(&self) -> HashSet<String> {
-        lock(&self.inner.downloads).clone()
+        let mut ids = lock(&self.inner.downloads).clone();
+        ids.extend(self.inner.models.loading_ids());
+        ids
     }
 
     /// Скачивает встроенную модель в фоне. `false`, если она уже скачивается. Загрузка идёт в

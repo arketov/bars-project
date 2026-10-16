@@ -225,10 +225,19 @@ class App {
     } catch (error) {
       this.results = null;
       this.searchError = error instanceof BarsError ? error : new BarsError(String(error));
+      if (this.searchError.kind === "model_loading") this.retrySearchLater(project.path, query);
     } finally {
       this.elapsedMs = Math.round(performance.now() - started);
       this.searching = false;
     }
+  }
+
+  /** Пока воркер отвечает `model_loading`, тот же поиск повторяется раз в две секунды (error-states.md). */
+  private retrySearchLater(path: string, query: string): void {
+    setTimeout(() => {
+      const same = this.project?.path === path && this.query.trim() === query;
+      if (same && !this.searching && this.searchError?.kind === "model_loading") void this.search();
+    }, 2000);
   }
 
   /**

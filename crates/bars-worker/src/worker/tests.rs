@@ -467,9 +467,8 @@ async fn broken_settings_leave_an_error_and_do_not_stop_the_worker() {
 async fn model_that_cannot_load_is_an_error_not_a_crash() {
     let env = Env::new();
     let provider = Arc::new(FakeProvider {
-        counters: Default::default(),
-        model: std::sync::Mutex::new("m1".into()),
         fail_load: true,
+        ..FakeProvider::plain("m1")
     });
     let project = env.project("alpha", &[("a.md", DOC)]);
     let worker = Worker::start(env.config(), provider).unwrap();

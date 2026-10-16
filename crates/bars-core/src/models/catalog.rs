@@ -110,44 +110,148 @@ impl BuiltinModel {
     }
 }
 
-/// Скачаны ли файлы встроенной модели в `models_dir` (`~/.bars/models`, кэш hf-hub:
-/// `models--<организация>--<имя>/snapshots/<ревизия>/…`). Нужен окну для меток «скачана» и кнопки «Скачать»;
-/// целостность файлов не проверяется. Файлы снимка в кэше hf-hub могут быть символическими ссылками
-/// на `blobs/`, поэтому размер берётся у цели ссылки, а не у самой ссылки. Встроенный rerank лежит
-/// в кэше под именем ONNX-экспорта `rozgo/bge-reranker-v2-m3`, а не под своим `id`
-/// (`docs/features/models/local-models.md`).
-pub fn is_downloaded(models_dir: &std::path::Path, id: &str) -> bool {
-    let repo = if id == super::BGE_RERANKER_V2_M3_ID {
-        "rozgo/bge-reranker-v2-m3"
-    } else {
-        id
+/// Какие файлы нужны модели и сколько они весят: по ним модель считается скачанной и считается
+/// ход скачивания.
+struct Layout {
+    /// Репозиторий в кэше hf-hub. Встроенный rerank лежит под именем ONNX-экспорта
+    /// `rozgo/bge-reranker-v2-m3`, а не под своим `id`.
+    repo: &'static str,
+    /// Файлы снимка, которые должны лежать целиком.
+    files: &'static [&'static str],
+    /// Веса — `safetensors`: один файл или шарды по `model.safetensors.index.json`.
+    safetensors: bool,
+    /// Ожидаемый размер всех файлов, байт; приблизительный.
+    size_bytes: u64,
+}
+
+const TOKENIZER_FILES: [&str; 3] = [
+    "special_tokens_map.json",
+    "tokenizer.json",
+    "tokenizer_config.json",
+];
+
+const BGE_M3_FILES: &[&str] = &[
+    "config.json",
+    TOKENIZER_FILES[0],
+    TOKENIZER_FILES[1],
+    TOKENIZER_FILES[2],
+    "onnx/model.onnx",
+    "onnx/model.onnx_data",
+    "onnx/Constant_7_attr__value",
+];
+
+const RERANKER_FILES: &[&str] = &[
+    "config.json",
+    TOKENIZER_FILES[0],
+    TOKENIZER_FILES[1],
+    TOKENIZER_FILES[2],
+    "model.onnx",
+    "model.onnx.data",
+];
+
+const CANDLE_FILES: &[&str] = &["config.json", "tokenizer.json"];
+
+fn layout(id: &str) -> Option<Layout> {
+    let candle = |repo: &'static str, size_bytes: u64| Layout {
+        repo,
+        files: CANDLE_FILES,
+        safetensors: true,
+        size_bytes,
     };
-    fn has_weights(dir: &std::path::Path, depth: usize) -> bool {
-        let Ok(entries) = std::fs::read_dir(dir) else {
-            return false;
-        };
-        entries.flatten().any(|entry| {
-            let path = entry.path();
-            if path.is_dir() {
-                return depth > 0 && has_weights(&path, depth - 1);
-            }
-            let weights = path
-                .extension()
-                .and_then(|extension| extension.to_str())
-                .is_some_and(|extension| extension == "onnx" || extension == "safetensors");
-            weights && std::fs::metadata(&path).is_ok_and(|meta| meta.len() > 0)
-        })
+    Some(match id {
+        BGE_M3_ID => Layout {
+            repo: BGE_M3_ID,
+            files: BGE_M3_FILES,
+            safetensors: false,
+            size_bytes: 2_284_711_286,
+        },
+        super::BGE_RERANKER_V2_M3_ID => Layout {
+            repo: "rozgo/bge-reranker-v2-m3",
+            files: RERANKER_FILES,
+            safetensors: false,
+            size_bytes: 2_288_282_930,
+        },
+        QWEN3_0_6B_ID => candle(QWEN3_0_6B_ID, 1_200_000_000),
+        QWEN3_4B_ID => candle(QWEN3_4B_ID, 8_050_000_000),
+        NOMIC_V2_MOE_ID => candle(NOMIC_V2_MOE_ID, 960_000_000),
+        _ => return None,
+    })
+}
+
+fn model_dir(models_dir: &std::path::Path, layout: &Layout) -> std::path::PathBuf {
+    models_dir.join(format!("models--{}", layout.repo.replace('/', "--")))
+}
+
+/// Файл есть и не пуст. Файлы снимка в кэше hf-hub могут быть символическими ссылками на `blobs/`,
+/// поэтому размер берётся у цели ссылки, а не у самой ссылки.
+fn is_present(path: &std::path::Path) -> bool {
+    std::fs::metadata(path).is_ok_and(|meta| meta.is_file() && meta.len() > 0)
+}
+
+/// Все ли файлы с весами `safetensors` в снимке: либо `model.safetensors`, либо все шарды из
+/// `model.safetensors.index.json`.
+fn safetensors_ready(snapshot: &std::path::Path) -> bool {
+    if is_present(&snapshot.join("model.safetensors")) {
+        return true;
     }
-    let snapshots = models_dir
-        .join(format!("models--{}", repo.replace('/', "--")))
-        .join("snapshots");
-    std::fs::read_dir(snapshots)
+    let Ok(index) = std::fs::read(snapshot.join("model.safetensors.index.json")) else {
+        return false;
+    };
+    let Ok(index) = serde_json::from_slice::<serde_json::Value>(&index) else {
+        return false;
+    };
+    let Some(map) = index["weight_map"].as_object() else {
+        return false;
+    };
+    !map.is_empty()
+        && map
+            .values()
+            .filter_map(|shard| shard.as_str())
+            .all(|shard| is_present(&snapshot.join(shard)))
+}
+
+/// Скачаны ли все файлы встроенной модели в `models_dir` (`~/.bars/models`, кэш hf-hub:
+/// `models--<организация>--<имя>/snapshots/<ревизия>/…`). Нужен окну для меток «скачана» и кнопки
+/// «Скачать» и воркеру, чтобы знать, что поиск не начнёт скачивание. Проверяется наличие и
+/// непустота каждого файла каталога; содержимое не проверяется (`docs/features/models/local-models.md`,
+/// «Когда модель считается скачанной»).
+pub fn is_downloaded(models_dir: &std::path::Path, id: &str) -> bool {
+    let Some(layout) = layout(id) else {
+        return false;
+    };
+    let Ok(snapshots) = std::fs::read_dir(model_dir(models_dir, &layout).join("snapshots")) else {
+        return false;
+    };
+    snapshots.flatten().any(|snapshot| {
+        let snapshot = snapshot.path();
+        layout
+            .files
+            .iter()
+            .all(|file| is_present(&snapshot.join(file)))
+            && (!layout.safetensors || safetensors_ready(&snapshot))
+    })
+}
+
+/// Ход скачивания модели в процентах: размер файлов в `blobs/` кэша (вместе с недокачанными
+/// `.incomplete`) к ожидаемому размеру. Пока файлы не все на месте, не больше 99; у скачанной — 100.
+/// Неизвестная модель — `None`.
+pub fn download_percent(models_dir: &std::path::Path, id: &str) -> Option<u8> {
+    let layout = layout(id)?;
+    if is_downloaded(models_dir, id) {
+        return Some(100);
+    }
+    let have: u64 = std::fs::read_dir(model_dir(models_dir, &layout).join("blobs"))
         .map(|entries| {
             entries
                 .flatten()
-                .any(|snapshot| has_weights(&snapshot.path(), 2))
+                .filter_map(|entry| entry.metadata().ok())
+                .filter(|meta| meta.is_file())
+                .map(|meta| meta.len())
+                .sum()
         })
-        .unwrap_or(false)
+        .unwrap_or(0);
+    let percent = (u128::from(have) * 100 / u128::from(layout.size_bytes.max(1))).min(99);
+    Some(percent as u8)
 }
 
 #[cfg(test)]
@@ -177,20 +281,37 @@ mod tests {
         assert_eq!(nomic.source, "builtin");
     }
 
+    /// Кладёт в снимок все файлы модели, кроме `skip`.
+    fn write_files(snapshot: &std::path::Path, id: &str, skip: &[&str]) {
+        for file in layout(id).unwrap().files {
+            if skip.contains(file) {
+                continue;
+            }
+            let path = snapshot.join(file);
+            std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+            std::fs::write(path, "w").unwrap();
+        }
+    }
+
     #[test]
-    fn downloaded_means_weights_in_a_snapshot() {
+    fn downloaded_means_every_file_of_the_model_is_in_a_snapshot() {
         let dir = tempfile::tempdir().unwrap();
         assert!(!is_downloaded(dir.path(), BGE_M3_ID));
-        let snapshot = dir.path().join("models--BAAI--bge-m3/snapshots/abc/onnx");
-        std::fs::create_dir_all(&snapshot).unwrap();
-        std::fs::write(snapshot.join("config.json"), "{}").unwrap();
+        let snapshot = dir.path().join("models--BAAI--bge-m3/snapshots/abc");
+        write_files(&snapshot, BGE_M3_ID, &["onnx/model.onnx_data"]);
         assert!(
             !is_downloaded(dir.path(), BGE_M3_ID),
-            "без весов — не скачана"
+            "малый model.onnx есть, а model.onnx_data ещё нет — не скачана"
         );
-        std::fs::write(snapshot.join("model.onnx"), "w").unwrap();
+        std::fs::write(snapshot.join("onnx/model.onnx_data"), "").unwrap();
+        assert!(
+            !is_downloaded(dir.path(), BGE_M3_ID),
+            "пустой файл не считается"
+        );
+        std::fs::write(snapshot.join("onnx/model.onnx_data"), "w").unwrap();
         assert!(is_downloaded(dir.path(), BGE_M3_ID));
         assert!(!is_downloaded(dir.path(), QWEN3_0_6B_ID));
+        assert!(!is_downloaded(dir.path(), "нет такой"));
     }
 
     #[test]
@@ -198,14 +319,15 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let model = dir.path().join("models--BAAI--bge-m3");
         let snapshot = model.join("snapshots/abc");
-        std::fs::create_dir_all(&snapshot).unwrap();
+        write_files(&snapshot, BGE_M3_ID, &["onnx/model.onnx_data"]);
         std::fs::create_dir_all(model.join("blobs")).unwrap();
         let blob = model.join("blobs/deadbeef");
         std::fs::write(&blob, "weights").unwrap();
+        let link = snapshot.join("onnx/model.onnx_data");
         #[cfg(windows)]
-        let linked = std::os::windows::fs::symlink_file(&blob, snapshot.join("model.onnx"));
+        let linked = std::os::windows::fs::symlink_file(&blob, &link);
         #[cfg(unix)]
-        let linked = std::os::unix::fs::symlink(&blob, snapshot.join("model.onnx"));
+        let linked = std::os::unix::fs::symlink(&blob, &link);
         if linked.is_err() {
             eprintln!("символические ссылки недоступны: проверка пропущена");
             return;
@@ -221,13 +343,64 @@ mod tests {
     #[test]
     fn reranker_is_found_under_the_onnx_export_repo() {
         let dir = tempfile::tempdir().unwrap();
-        assert!(!is_downloaded(dir.path(), super::super::BGE_RERANKER_V2_M3_ID));
+        let id = super::super::BGE_RERANKER_V2_M3_ID;
+        assert!(!is_downloaded(dir.path(), id));
         let snapshot = dir
             .path()
             .join("models--rozgo--bge-reranker-v2-m3/snapshots/abc");
-        std::fs::create_dir_all(&snapshot).unwrap();
-        std::fs::write(snapshot.join("model.onnx"), "w").unwrap();
-        assert!(is_downloaded(dir.path(), super::super::BGE_RERANKER_V2_M3_ID));
+        write_files(&snapshot, id, &["model.onnx.data"]);
+        assert!(!is_downloaded(dir.path(), id));
+        std::fs::write(snapshot.join("model.onnx.data"), "w").unwrap();
+        assert!(is_downloaded(dir.path(), id));
+    }
+
+    #[test]
+    fn candle_model_needs_single_weights_or_every_shard() {
+        let dir = tempfile::tempdir().unwrap();
+        let snapshot = dir
+            .path()
+            .join("models--Qwen--Qwen3-Embedding-4B/snapshots/abc");
+        write_files(&snapshot, QWEN3_4B_ID, &[]);
+        assert!(!is_downloaded(dir.path(), QWEN3_4B_ID), "весов нет");
+
+        std::fs::write(
+            snapshot.join("model.safetensors.index.json"),
+            r#"{"weight_map":{"a":"model-1.safetensors","b":"model-2.safetensors"}}"#,
+        )
+        .unwrap();
+        std::fs::write(snapshot.join("model-1.safetensors"), "w").unwrap();
+        assert!(!is_downloaded(dir.path(), QWEN3_4B_ID), "второго шарда нет");
+        std::fs::write(snapshot.join("model-2.safetensors"), "w").unwrap();
+        assert!(is_downloaded(dir.path(), QWEN3_4B_ID));
+
+        let single = dir
+            .path()
+            .join("models--Qwen--Qwen3-Embedding-0.6B/snapshots/abc");
+        write_files(&single, QWEN3_0_6B_ID, &[]);
+        assert!(!is_downloaded(dir.path(), QWEN3_0_6B_ID));
+        std::fs::write(single.join("model.safetensors"), "w").unwrap();
+        assert!(is_downloaded(dir.path(), QWEN3_0_6B_ID));
+    }
+
+    #[test]
+    fn download_percent_follows_blob_sizes_and_stops_short_of_100_until_done() {
+        let dir = tempfile::tempdir().unwrap();
+        assert_eq!(download_percent(dir.path(), BGE_M3_ID), Some(0));
+        assert_eq!(download_percent(dir.path(), "нет такой"), None);
+
+        let model = dir.path().join("models--BAAI--bge-m3");
+        std::fs::create_dir_all(model.join("blobs")).unwrap();
+        let half = layout(BGE_M3_ID).unwrap().size_bytes / 2;
+        let file = std::fs::File::create(model.join("blobs/x.incomplete")).unwrap();
+        file.set_len(half).unwrap();
+        assert_eq!(download_percent(dir.path(), BGE_M3_ID), Some(50));
+
+        file.set_len(layout(BGE_M3_ID).unwrap().size_bytes * 2)
+            .unwrap();
+        assert_eq!(download_percent(dir.path(), BGE_M3_ID), Some(99));
+
+        write_files(&model.join("snapshots/abc"), BGE_M3_ID, &[]);
+        assert_eq!(download_percent(dir.path(), BGE_M3_ID), Some(100));
     }
 
     #[test]
