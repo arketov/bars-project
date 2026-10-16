@@ -9,6 +9,7 @@ import {
   percentOf,
   plural,
   remainingSeconds,
+  singleLine,
   stateDot,
 } from "./format";
 
@@ -54,5 +55,14 @@ describe("format", () => {
     expect(stateDot("indexing", 0, null, 0).text).toBe("индексация · ждёт");
     expect(stateDot("reindex_required", 0, null, 0).cls).toBe("warn");
     expect(stateDot("unavailable", 0, null, 0).cls).toBe("off");
+  });
+});
+
+describe("singleLine", () => {
+  it("заменяет переносы пробелами", () => {
+    expect(singleLine("как\nсчитается\r\n порог")).toBe("как считается порог");
+  });
+  it("не трогает однострочный текст", () => {
+    expect(singleLine("порог  релевантности")).toBe("порог  релевантности");
   });
 });

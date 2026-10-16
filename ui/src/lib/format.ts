@@ -114,3 +114,8 @@ export function stateDot(
       return { cls: "off", text: "папка не найдена" };
   }
 }
+
+/** Запрос в одну строку: переносы (любые) становятся пробелами. */
+export function singleLine(text: string): string {
+  return text.replace(/\s*[\r\n]+\s*/g, " ");
+}

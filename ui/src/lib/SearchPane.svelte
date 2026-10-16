@@ -1,7 +1,7 @@
 <script lang="ts">
   import { app } from "./app.svelte";
   import Banner from "./Banner.svelte";
-  import { decimal, documents, moduleLabel, plural } from "./format";
+  import { decimal, documents, moduleLabel, plural, singleLine } from "./format";
   import Icon from "./Icon.svelte";
   import ResultCard from "./ResultCard.svelte";
   import SearchError from "./SearchError.svelte";
@@ -27,9 +27,17 @@
   }
 
   function onKey(event: KeyboardEvent) {
-    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
-      event.preventDefault();
-      void app.search();
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    if (!event.isComposing && !blocked && !app.searching && app.query.trim()) void app.search();
+  }
+
+  function onInput(event: Event) {
+    const field = event.currentTarget as HTMLTextAreaElement;
+    const clean = singleLine(field.value);
+    if (clean !== field.value) {
+      field.value = clean;
+      app.query = clean;
     }
   }
 
@@ -45,6 +53,7 @@
         disabled={blocked}
         bind:value={app.query}
         onkeydown={onKey}
+        oninput={onInput}
       ></textarea>
       <div class="askbar">
         <div class="scope">
@@ -67,7 +76,7 @@
         </div>
         {#if !app.viewer}
           <span class="sep"></span>
-          <span class="kbdhint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd></span>
+          <span class="kbdhint"><kbd>Enter</kbd></span>
         {/if}
         <button class="btn go" disabled={blocked || app.searching || !app.query.trim()} onclick={() => app.search()}>
           Найти <Icon name="arrow-right" size={15} width={2.4} />
