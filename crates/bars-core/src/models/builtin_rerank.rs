@@ -4,8 +4,13 @@ use std::path::Path;
 
 use fastembed::{RerankInitOptions, RerankerModel, TextRerank};
 
-use super::builtin::{Accelerator, gpu_providers};
-use super::reranker::{RerankError, Reranker};
+use super::builtin::{Accelerator, Device, gpu_providers};
+use super::catalog::model_files_report;
+use super::reranker::{BGE_RERANKER_V2_M3_ID, RerankError, Reranker};
+
+/// Наибольший логит ниже этого значения даёт оценку меньше 0,03%: у рабочей модели на запросе
+/// с подходящим чанком он заметно выше.
+const SUSPICIOUS_MAX_LOGIT: f32 = -8.0;
 
 /// Вход «запрос + чанк» ограничен 512 токенами: на прототипе 30 пар по 1024 токена занимали
 /// 15–29 с (`docs/knowledge/spike-search.md`).
@@ -16,6 +21,7 @@ const BATCH_SIZE: usize = 4;
 
 pub struct BuiltinReranker {
     model: TextRerank,
+    device: Device,
 }
 
 impl BuiltinReranker {
@@ -25,12 +31,46 @@ impl BuiltinReranker {
         models_dir: &Path,
         accelerator: Accelerator,
     ) -> Result<Self, RerankError> {
-        let model = match accelerator {
-            Accelerator::Cpu => load(models_dir, false)?,
-            Accelerator::Auto => load(models_dir, true).or_else(|_| load(models_dir, false))?,
+        let (model, device) = match accelerator {
+            Accelerator::Cpu => (load(models_dir, false)?, Device::Cpu),
+            Accelerator::Auto => match load(models_dir, true) {
+                Ok(model) => (model, Device::DirectMl),
+                Err(error) => {
+                    eprintln!("rerank: видеокарта не запустилась ({error}), считаю на процессоре");
+                    (load(models_dir, false)?, Device::Cpu)
+                }
+            },
         };
-        Ok(Self { model })
+        eprintln!(
+            "rerank: загружен на {device:?}; файлы модели: {}",
+            files_report(models_dir)
+        );
+        Ok(Self { model, device })
     }
+
+    pub fn device(&self) -> Device {
+        self.device
+    }
+}
+
+fn files_report(models_dir: &Path) -> String {
+    model_files_report(models_dir, BGE_RERANKER_V2_M3_ID)
+        .unwrap_or_else(|| "не найдены в кэше".to_string())
+}
+
+/// Строка для лога по сырым логитам: пределы и пометка, если модель, похоже, выдаёт мусор.
+fn logits_report(device: Device, logits: &[f32]) -> String {
+    let min = logits.iter().copied().fold(f32::INFINITY, f32::min);
+    let max = logits.iter().copied().fold(f32::NEG_INFINITY, f32::max);
+    let flag = if max < SUSPICIOUS_MAX_LOGIT || !max.is_finite() {
+        "; подозрительно: все оценки около нуля"
+    } else {
+        ""
+    };
+    format!(
+        "rerank: {device:?}, пар {}, логит от {min:.3} до {max:.3}{flag}",
+        logits.len()
+    )
 }
 
 fn load(models_dir: &Path, gpu: bool) -> Result<TextRerank, RerankError> {
@@ -68,6 +108,8 @@ impl Reranker for BuiltinReranker {
                 got: results.len(),
             });
         }
+        let logits: Vec<f32> = results.iter().map(|result| result.score).collect();
+        eprintln!("{}", logits_report(self.device, &logits));
         let mut scores = vec![0.0; documents.len()];
         for result in results {
             scores[result.index] = sigmoid(result.score);
@@ -87,5 +129,14 @@ mod tests {
         assert!(sigmoid(-10.0) < 0.001);
         assert!(sigmoid(-1000.0) >= 0.0);
         assert!(sigmoid(1000.0) <= 1.0);
+    }
+
+    #[test]
+    fn logits_report_flags_a_model_that_scores_everything_near_zero() {
+        let healthy = logits_report(Device::Cpu, &[-3.0, 2.5, 0.1]);
+        assert!(healthy.contains("пар 3") && !healthy.contains("подозрительно"));
+        let broken = logits_report(Device::DirectMl, &[-12.0, -9.5]);
+        assert!(broken.contains("DirectMl") && broken.contains("подозрительно"));
+        assert!(logits_report(Device::Cpu, &[f32::NAN]).contains("подозрительно"));
     }
 }

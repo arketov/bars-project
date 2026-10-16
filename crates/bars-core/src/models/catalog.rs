@@ -254,6 +254,29 @@ pub fn download_percent(models_dir: &std::path::Path, id: &str) -> Option<u8> {
     Some(percent as u8)
 }
 
+/// Файлы последнего снимка модели с размерами для лога: `model.onnx 1.2 МБ; model.onnx.data нет`.
+/// Нужна диагностике, когда модель отвечает странно (ISS-03): видно неполные и отсутствующие файлы.
+/// Модели нет в каталоге или в кэше нет снимка — `None`.
+pub fn model_files_report(models_dir: &std::path::Path, id: &str) -> Option<String> {
+    let layout = layout(id)?;
+    let snapshot = std::fs::read_dir(model_dir(models_dir, &layout).join("snapshots"))
+        .ok()?
+        .flatten()
+        .map(|entry| entry.path())
+        .next()?;
+    let parts: Vec<String> = layout
+        .files
+        .iter()
+        .map(|file| match std::fs::metadata(snapshot.join(file)) {
+            Ok(meta) if meta.is_file() => {
+                format!("{file} {:.1} МБ", meta.len() as f64 / 1_048_576.0)
+            }
+            _ => format!("{file} нет"),
+        })
+        .collect();
+    Some(parts.join("; "))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -352,6 +375,21 @@ mod tests {
         assert!(!is_downloaded(dir.path(), id));
         std::fs::write(snapshot.join("model.onnx.data"), "w").unwrap();
         assert!(is_downloaded(dir.path(), id));
+    }
+
+    #[test]
+    fn files_report_names_missing_files_and_sizes() {
+        let dir = tempfile::tempdir().unwrap();
+        let id = super::super::BGE_RERANKER_V2_M3_ID;
+        assert_eq!(model_files_report(dir.path(), id), None);
+        let snapshot = dir
+            .path()
+            .join("models--rozgo--bge-reranker-v2-m3/snapshots/abc");
+        write_files(&snapshot, id, &["model.onnx.data"]);
+        let report = model_files_report(dir.path(), id).unwrap();
+        assert!(report.contains("model.onnx 0.0 МБ"));
+        assert!(report.contains("model.onnx.data нет"));
+        assert_eq!(model_files_report(dir.path(), "нет такой"), None);
     }
 
     #[test]
