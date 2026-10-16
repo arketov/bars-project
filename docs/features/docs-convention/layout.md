@@ -42,4 +42,4 @@ docs/
 
 ## Оформление файлов
 
-То же, что в `BARS_INSTRUCTION.md` ([bars-instruction.md](bars-instruction.md)): `title` во frontmatter, ATX-заголовки, разделы, понятные сами по себе. В каждой папке, кроме папок сессий в `chats/`, — `Index.md` с оглавлением.
+То же, что в `BARS_INSTRUCTION.md` ([bars-instruction.md](bars-instruction.md)): `title` во frontmatter, ATX-заголовки, разделы, понятные сами по себе. В каждой папке, кроме папок сессий в `chats/`, — `Index.md` с оглавлением; регистр имени не важен (`index.md` тоже годится).
