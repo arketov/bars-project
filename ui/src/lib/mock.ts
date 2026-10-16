@@ -140,7 +140,7 @@ let savedSettings: SettingsDoc = {
   embed: { source: "builtin", model: "BAAI/bge-m3", base_url: null, api_key_name: null, api_key_env: null, batch_size: 32 },
   rerank: { enabled: false, source: "builtin", model: "BAAI/bge-reranker-v2-m3", base_url: null, api_key_name: null, api_key_env: null },
   search: {
-    candidates: 30, rerank_candidates: 5, results: 5, results_reranked: 3, min_score_vector: 0, min_score_rerank: 0.1,
+    candidates: 30, rerank_candidates: 15, results: 5, results_reranked: 3, min_score_vector: 0, min_score_rerank: 0.1,
     agent_min_score: [0, 1], max_results: 20, max_candidates: 100, max_rerank_candidates: 50,
   },
   device: { accelerator: "auto" },
@@ -229,7 +229,7 @@ export async function mockCall(method: string, params: Record<string, unknown>):
       const found = query.includes("нет") ? [] : HITS.slice(0, limit);
       return {
         results: found,
-        applied: { results: limit, candidates: 30, rerank_candidates: 5, min_score: 0.3, score_kind: "rerank", clamped: false },
+        applied: { results: limit, candidates: 30, rerank_candidates: 15, min_score: 0.3, score_kind: "rerank", clamped: false },
         indexing: scene() === "indexing",
         pending: scene() === "indexing" ? 118 : 0,
       };
