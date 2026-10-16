@@ -1,40 +1,40 @@
 ---
 name: bars-session-log
-description: Как вести журнал сессии в docs/chats — log.md по поводу и handoff.md в конце, и как начать с последнего handoff. Используй в начале и в конце сессии и при неочевидной находке или смене плана.
+description: How to keep the session journal in docs/chats: log.md for a reason and handoff.md at the end, and how to start from the latest handoff. Use at the start and end of a session and on a non-obvious finding or a change of plan.
 ---
 
-# Журнал сессии
+# Session journal
 
-Каждая сессия, с которой говорит пользователь, ведёт папку `docs/chats/<YYYY-MM-DD>-<тема>/`. Тема — 2–4 слова латиницей через дефис. Субагенты журнал не ведут: их итог попадает в журнал главной сессии.
+Every session the user talks to keeps a folder `docs/chats/<YYYY-MM-DD>-<topic>/`. The topic is 2–4 words in Latin letters joined by hyphens. Subagents keep no journal: their result goes to the journal of the main session.
 
-## Начало сессии
+## Start of a session
 
-Найди в `docs/chats/` последний `handoff.md` по своей теме (через bars или по именам папок) и прочитай только его. `log.md` открывай, только когда нужна подробная история.
+Find the latest `handoff.md` on your topic in `docs/chats/` (through bars or by folder names) and read only it. Open `log.md` only when you need the detailed history.
 
-## log.md — по поводу
+## log.md — only for a reason
 
-Пиши, когда:
+Write when:
 
-- нашёл неочевидное, что влияет на дальнейшую работу;
-- подход не сработал: что пробовали и почему отказались;
-- план меняется;
-- идёшь на рискованный шаг: удаление, миграция, переписывание многих файлов.
+- you found something non-obvious that affects further work;
+- an approach did not work: what was tried and why it was abandoned;
+- the plan changes;
+- you are about to take a risky step: deletion, migration, rewriting many files.
 
-Не пиши обычный ход работы, код, вывод команд и то, что видно в диффе.
+Do not write the ordinary course of work, code, command output or what the diff shows.
 
-Экономия токенов:
+Saving tokens:
 
-- запись — не больше трёх строк;
-- дописывай в конец файла без чтения, например командой `>>`;
-- решение с обоснованием — в `adr/`, долгоживущее знание — в `knowledge/`, в журнале только строка со ссылкой.
+- an entry is at most three lines;
+- append to the end of the file without reading it, for example with `>>`;
+- a decision with reasons goes to `adr/`, a durable finding to `knowledge/`; the journal keeps one line with a link.
 
-## handoff.md — в конце сессии
+## handoff.md — at the end of a session
 
-Пиши в конце, а в долгой сессии ещё и на крупных вехах. Не длиннее экрана. Разделы:
+Write it at the end, and on large milestones of a long session. Not longer than a screen. Sections:
 
-- **Сделано** — что готово и где лежит (файлы, коммиты).
-- **Не сделано** — что осталось из задачи.
-- **Сложности** — что не получилось, на что ушло время, что сломано.
-- **Дальше** — с чего начать следующей сессии.
+- **Done** — what is ready and where it lies (files, commits).
+- **Not done** — what is left of the task.
+- **Difficulties** — what failed, what took the time, what is broken.
+- **Next** — where the next session starts.
 
-В журнал не попадают ключи, токены, пароли и личные данные, даже в выводе команд.
+No keys, tokens, passwords or personal data in the journal, even in command output.

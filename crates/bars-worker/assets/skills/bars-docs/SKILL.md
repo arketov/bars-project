@@ -1,30 +1,33 @@
 ---
 name: bars-docs
-description: Как вести документацию проекта, который индексирует bars: раскладка docs, оформление файлов, ADR, жизненный цикл фичи. Используй, когда создаёшь, переносишь или правишь документы в docs/.
+description: How to keep the documentation of a project indexed by bars: docs layout, file format, ADRs, feature lifecycle, Index.md files. Use when you create, move or edit documents in docs/.
 ---
 
-# Документация под bars
+# Documentation for bars
 
-bars режет Markdown по заголовкам и ищет по разделам, поэтому оформление влияет на качество поиска. Полный текст правил лежит в `BARS_INSTRUCTION.md` в корне документации проекта.
+bars splits Markdown by headings and searches by section, so the shape of a document affects search quality. The full rules are in `BARS_INSTRUCTION.md` in the documentation root; read it before a larger change. Write documents in the language the project uses.
 
-## Оформление файла
+## File format
 
-- `title` во frontmatter каждого файла.
-- Только ATX-заголовки `#`…`######`.
-- Раздел понятен сам по себе: без «см. выше», предмет назван в заголовке.
-- Разделы средней длины: огромные режутся, крошечные склеиваются.
-- Документ описывает текущее состояние. Устарело — правь или удаляй, не дописывай поправки в конец.
-- Секретов (ключи, токены, пароли) в документации нет.
+- `title` in the frontmatter of every file, descriptive; one `#` heading equal to it.
+- ATX headings only (`#`…`######`).
+- A section stands on its own: no «see above»; the subject is named in the heading.
+- Medium-sized sections: huge ones are cut, tiny ones are glued.
+- One topic — one file. Do not copy: link to the place that owns the fact.
+- State the status at the top of a topic file: what is verified and how, what is not.
+- A document describes the current state. When it is outdated, edit or delete it; never append corrections.
+- Relative links; moving a file means fixing every link to it.
+- No secrets (keys, tokens, passwords).
 
-## Раскладка docs (совет)
+## Layout (advice)
 
-- `Index.md` — оглавление; такой файл лежит в каждой папке, кроме папок сессий; регистр имени не важен.
-- Модуль — подпапка первого уровня. Темы одной области — в один модуль.
-- `knowledge/` — исследования, замеры, соглашения по коду; пиши, когда находка пригодится дальше одной сессии.
-- `adr/` — одно решение в файле `NNNN-<тема>.md`: статус, дата, контекст, решение, последствия, отклонённые варианты. ADR не переписывают: новое решение — новый ADR, у старого меняется статус.
-- `features/<name>/` — фича глазами пользователя: `Index.md` объясняет её и ведёт на остальное, `requirements.md` — требования, `plan.md` — пока фичу делают, затем сокращай или удаляй.
-- `chats/` — журнал сессий (см. skill `bars-session-log`).
+- `Index.md` in every folder except session folders: back-link to the parent and a table «file — when to read» listing every file and subfolder. Change it in the same change as the files.
+- Module — a first-level subfolder; documents of one area go into one module.
+- `knowledge/` — research, measurements, code conventions; write when a finding outlives the session. Snapshot research gets a date in its name.
+- `adr/` — one decision per file `NNNN-<topic>.md`: status, date, context, decision (a person's words verbatim, with the date), consequences, rejected alternatives, «Where applied». An ADR is never rewritten: a new decision is a new ADR, the old one changes only its status. Topic documents link to the ADR instead of repeating it.
+- `features/<name>/` — a feature as the user sees it: `Index.md` explains it and leads on, `requirements.md` holds requirements, `plan.md` lives while the feature is built, then shrink or delete it.
+- `chats/` — session journal (skill `bars-session-log`).
 
-## Перед правкой
+## Before editing
 
-Сначала поищи в документации через bars (`bars_search`), чтобы не дублировать существующий документ. Сначала меняется документ, потом код.
+Search the documentation with bars first (`bars_rag_search`) so you do not duplicate an existing document. Change the document first, then the code.
