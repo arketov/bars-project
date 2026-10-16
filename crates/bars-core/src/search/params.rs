@@ -26,7 +26,7 @@ impl Default for SearchSettings {
     fn default() -> Self {
         Self {
             candidates: 30,
-            rerank_candidates: 15,
+            rerank_candidates: 5,
             results: 5,
             results_reranked: 3,
             min_score_vector: 0.0,

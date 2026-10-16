@@ -245,7 +245,7 @@ fn main() {
         );
     }
     by_cos.print("без rerank, по cos");
-    for k in [3usize, 5, 8, 10] {
+    for k in [3usize, 5, 8, 10, 15] {
         let mut st = Stats::default();
         for (query, suffix) in CASES {
             let request = SearchRequest {
@@ -264,6 +264,37 @@ fn main() {
             );
         }
         st.print(&format!("rerank GPU, K={k}"));
+    }
+
+    // Порог оценки rerank: сколько ответов остаётся и не теряется ли верный документ.
+    println!();
+    let mut reranked: Vec<(Option<usize>, Vec<f32>)> = Vec::new();
+    for (query, suffix) in CASES {
+        let request = SearchRequest {
+            query: query.to_string(),
+            ..Default::default()
+        };
+        let r = search(&index, &mut embedder, Some(&mut gpu), &settings, &request).unwrap();
+        let paths: Vec<String> = r.hits.iter().map(|h| h.path.clone()).collect();
+        reranked.push((
+            hit_rank(&paths, suffix),
+            r.hits.iter().map(|h| h.score).collect(),
+        ));
+    }
+    for t in [0.0f32, 0.01, 0.05, 0.1, 0.2, 0.3, 0.5] {
+        let kept = reranked
+            .iter()
+            .filter(|(rank, scores)| rank.is_some_and(|r| scores[r] >= t))
+            .count();
+        let total: usize = reranked
+            .iter()
+            .map(|(_, scores)| scores.iter().filter(|&&s| s >= t).count())
+            .sum();
+        println!(
+            "порог rerank {t:<5} верный документ сохранён {kept}/{}  в среднем результатов {:.1}",
+            CASES.len(),
+            total as f64 / CASES.len() as f64
+        );
     }
     let _ = Path::new("");
 }
