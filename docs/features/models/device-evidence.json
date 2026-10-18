@@ -36,7 +36,8 @@
     "ui_build": "passed",
     "clippy_lib_tests": "passed",
     "full_corpus_test": "stopped intentionally; no acceptance claim",
-    "visual_ui": "controls inspected before Save; Save mock defect fixed and regression passed; CUA disconnected before repeat"
+    "visual_ui": "controls inspected before Save; Save mock defect fixed and regression passed; CUA disconnected before repeat",
+    "native_app_check": "cargo check -p bars-app --locked: passed"
   },
   "sessions": [
     {
@@ -363,5 +364,6 @@
       ],
       "source_result_sha256": "6ef07baa4334f1ba822051256e11285e24781f34fcf8d6e3b088eeb2cc216502"
     }
-  ]
+  ],
+  "implementation_commit": "327bfbd"
 }
