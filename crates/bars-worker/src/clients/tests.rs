@@ -219,18 +219,24 @@ fn unparsable_file_is_not_written() {
 
 #[test]
 fn stale_reports_only_installed_clients_with_old_paths() {
+    let stale = |env: &InstallEnv| {
+        [InstallClient::ClaudeCode, InstallClient::Codex]
+            .into_iter()
+            .filter(|&client| super::state(env, client).stale)
+            .collect::<Vec<_>>()
+    };
     let home = TempDir::new().unwrap();
     let mut env = env(&home);
-    assert!(super::stale(&env).is_empty(), "ничего не установлено");
+    assert!(stale(&env).is_empty(), "ничего не установлено");
     install(&env, InstallClient::ClaudeCode).unwrap();
     install(&env, InstallClient::Codex).unwrap();
-    assert!(super::stale(&env).is_empty());
+    assert!(stale(&env).is_empty());
 
     env.cli_exe = PathBuf::from("/new/bars-cli");
     assert_eq!(
-        super::stale(&env),
+        stale(&env),
         [InstallClient::ClaudeCode, InstallClient::Codex]
     );
     install(&env, InstallClient::ClaudeCode).unwrap();
-    assert_eq!(super::stale(&env), [InstallClient::Codex]);
+    assert_eq!(stale(&env), [InstallClient::Codex]);
 }

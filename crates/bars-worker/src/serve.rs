@@ -9,6 +9,9 @@ use crate::handler::WorkerHandler;
 use crate::ipc::{BindError, bind, run_server};
 use crate::worker::{ModelProvider, Worker, WorkerConfig, WorkerError};
 
+#[cfg(test)]
+mod tests;
+
 #[derive(Debug, thiserror::Error)]
 pub enum ServeError {
     /// Имя канала занято: воркер уже работает, новый не нужен (Т-1).
@@ -55,15 +58,6 @@ pub async fn serve_with(
         BindError::AlreadyRunning => ServeError::AlreadyRunning,
         other => ServeError::Bind(other),
     })?;
-    if let Some(env) = &config.install_env {
-        for client in crate::clients::stale(env) {
-            eprintln!(
-                "bars: записи в {} указывают на старые пути; переустановите: bars-cli install --client {}",
-                client_title(client),
-                client_arg(client)
-            );
-        }
-    }
     // Приложение обновилось или переехало: запись автозапуска должна указывать на текущий `bars`.
     match crate::autostart::repair(config.autostart.as_ref()) {
         Ok(true) => eprintln!("bars: запись автозапуска обновлена на текущий bars"),
@@ -73,21 +67,8 @@ pub async fn serve_with(
     let worker = Worker::start(config, provider)?;
     let handler = Arc::new(WorkerHandler::new(worker.clone()));
     ready(WorkerHandler::clone(&handler));
+    worker.refresh_clients();
     let result = run_server(listener, handler).await;
     worker.shutdown().await;
     result.map_err(ServeError::Accept)
-}
-
-fn client_title(client: bars_protocol::InstallClient) -> &'static str {
-    match client {
-        bars_protocol::InstallClient::ClaudeCode => "Claude Code",
-        bars_protocol::InstallClient::Codex => "Codex",
-    }
-}
-
-fn client_arg(client: bars_protocol::InstallClient) -> &'static str {
-    match client {
-        bars_protocol::InstallClient::ClaudeCode => "claude-code",
-        bars_protocol::InstallClient::Codex => "codex",
-    }
 }

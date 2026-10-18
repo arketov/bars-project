@@ -291,6 +291,22 @@ impl Worker {
         Ok(Self { inner })
     }
 
+    /// Регистрирует проход в жизненном цикле воркера: выход из трея тоже ждёт его.
+    pub(crate) fn refresh_clients(&self) {
+        let Some(env) = self.install_env().cloned() else {
+            return;
+        };
+        let mut tasks = lock(&self.inner.tasks);
+        if self.inner.stop.load(Ordering::SeqCst) {
+            return;
+        }
+        tasks.push(tokio::task::spawn_blocking(move || {
+            for outcome in crate::clients::refresh(&env) {
+                crate::clients::report(outcome.client, "обновлено", &outcome.result);
+            }
+        }));
+    }
+
     /// Перестаёт брать задания, дожидается текущего, снимает слежение.
     pub async fn shutdown(&self) {
         self.inner.stop.store(true, Ordering::SeqCst);

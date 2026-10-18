@@ -8,7 +8,10 @@
 mod codex_toml;
 mod fsx;
 mod json;
+mod refresh;
 
+#[cfg(test)]
+mod refresh_tests;
 #[cfg(test)]
 mod tests;
 
@@ -17,6 +20,8 @@ use std::path::{Path, PathBuf};
 use bars_protocol::InstallClient;
 
 use fsx::{remove_dir, write_atomic};
+pub use refresh::{RefreshResult, refresh};
+pub(crate) use refresh::{lock, report};
 
 /// Имена skills bars: их ставит и убирает установка (Т-28).
 const SKILLS: [(&str, &str); 2] = [
@@ -69,10 +74,19 @@ pub struct Installed {
     pub changed_files: Vec<PathBuf>,
     /// Хук нужно одобрить в самом клиенте (Codex, команда `/hooks`).
     pub needs_hook_approval: bool,
+    pub hook_changed: bool,
 }
 
 #[derive(Debug, thiserror::Error)]
 pub enum ClientsError {
+    #[error("{file}: конкурентная правка, обновление отложено до следующего запуска")]
+    Conflict { file: PathBuf },
+    #[error("{source}")]
+    Partial {
+        done: Installed,
+        #[source]
+        source: Box<ClientsError>,
+    },
     /// Файл клиента не разбирается: bars ничего не пишет.
     #[error("{file} не разбирается ({message}): bars его не менял")]
     Parse { file: PathBuf, message: String },
@@ -117,41 +131,53 @@ fn layout(env: &InstallEnv, client: InstallClient) -> Layout {
 
 /// Подключает bars к клиенту: MCP-сервер, хук и skills.
 pub fn install(env: &InstallEnv, client: InstallClient) -> Result<Installed> {
-    let layout = layout(env, client);
-    let mut changed = Vec::new();
-    let mcp_changed = match client {
-        InstallClient::ClaudeCode => json::install_mcp(&layout.mcp, &env.mcp_exe)?,
-        InstallClient::Codex => codex_toml::install_mcp(&layout.mcp, &env.mcp_exe)?,
-    };
-    if mcp_changed {
-        changed.push(layout.mcp.clone());
-    }
-    if json::install_hook(&layout.hooks, &env.hook_command())? {
-        changed.push(layout.hooks.clone());
-    }
-    for (name, text) in SKILLS {
-        let file = layout.skills.join(name).join("SKILL.md");
-        if fsx::read_text(&file)?.as_deref() != Some(text) {
-            write_atomic(&file, text, false)?;
-            changed.push(file);
-        }
-    }
-    Ok(Installed {
-        changed_files: changed,
-        // Codex не запускает новый или изменённый хук без одобрения; был ли он одобрен раньше,
-        // bars не знает, поэтому напоминает при каждой установке.
-        needs_hook_approval: client == InstallClient::Codex,
-    })
+    let _guard = lock();
+    install_locked(env, client)
 }
 
-/// Клиенты, в которых записи bars указывают не на текущие `bars-mcp` и `bars-cli`: приложение
-/// переехало или обновилось, нужна переустановка. Читает файлы и ничего не пишет; не
-/// установленный или нечитаемый клиент не считается устаревшим.
-pub fn stale(env: &InstallEnv) -> Vec<InstallClient> {
-    [InstallClient::ClaudeCode, InstallClient::Codex]
-        .into_iter()
-        .filter(|&client| is_stale(env, client).unwrap_or(false))
-        .collect()
+fn install_locked(env: &InstallEnv, client: InstallClient) -> Result<Installed> {
+    let layout = layout(env, client);
+    let mut done = Installed {
+        changed_files: Vec::new(),
+        needs_hook_approval: false,
+        hook_changed: false,
+    };
+    let result = (|| {
+        // Полный разбор обоих конфигов до первой записи.
+        match client {
+            InstallClient::ClaudeCode => json::validate_mcp(&layout.mcp, &env.mcp_exe)?,
+            InstallClient::Codex => codex_toml::validate_mcp(&layout.mcp, &env.mcp_exe)?,
+        }
+        json::validate_hook(&layout.hooks, &env.hook_command())?;
+        let mcp_changed = match client {
+            InstallClient::ClaudeCode => json::install_mcp(&layout.mcp, &env.mcp_exe)?,
+            InstallClient::Codex => codex_toml::install_mcp(&layout.mcp, &env.mcp_exe)?,
+        };
+        if mcp_changed {
+            done.changed_files.push(layout.mcp.clone());
+        }
+        done.hook_changed = json::install_hook(&layout.hooks, &env.hook_command())?;
+        done.needs_hook_approval = client == InstallClient::Codex && done.hook_changed;
+        if done.hook_changed {
+            done.changed_files.push(layout.hooks.clone());
+        }
+        for (name, text) in SKILLS {
+            let file = layout.skills.join(name).join("SKILL.md");
+            if fsx::read_text(&file)?.as_deref() != Some(text) {
+                write_atomic(&file, text, false)?;
+                done.changed_files.push(file);
+            }
+        }
+        Ok(())
+    })();
+    match result {
+        Ok(()) => Ok(done),
+        Err(error) if done.changed_files.is_empty() => Err(error),
+        Err(error) => Err(ClientsError::Partial {
+            done,
+            source: Box::new(error),
+        }),
+    }
 }
 
 fn is_stale(env: &InstallEnv, client: InstallClient) -> Result<bool> {
@@ -196,23 +222,52 @@ pub fn state(env: &InstallEnv, client: InstallClient) -> ClientState {
 
 /// Убирает из клиента записи и skills bars; чужие записи не трогает.
 pub fn uninstall(env: &InstallEnv, client: InstallClient) -> Result<Vec<PathBuf>> {
+    let _guard = lock();
+    uninstall_locked(env, client)
+}
+
+fn uninstall_locked(env: &InstallEnv, client: InstallClient) -> Result<Vec<PathBuf>> {
     let layout = layout(env, client);
-    let mut changed = Vec::new();
-    let mcp_changed = match client {
-        InstallClient::ClaudeCode => json::uninstall_mcp(&layout.mcp)?,
-        InstallClient::Codex => codex_toml::uninstall_mcp(&layout.mcp)?,
+    let mut done = Installed {
+        changed_files: Vec::new(),
+        hook_changed: false,
+        needs_hook_approval: false,
     };
-    if mcp_changed {
-        changed.push(layout.mcp.clone());
-    }
-    if json::uninstall_hook(&layout.hooks)? {
-        changed.push(layout.hooks.clone());
-    }
-    for (name, _) in SKILLS {
-        let dir = layout.skills.join(name);
-        if remove_dir(&dir)? {
-            changed.push(dir);
+    let result = (|| {
+        // Не удалять MCP перед обнаружением неразбираемого hooks-файла.
+        match client {
+            InstallClient::ClaudeCode => {
+                json::has_mcp(&layout.mcp)?;
+            }
+            InstallClient::Codex => {
+                codex_toml::has_mcp(&layout.mcp)?;
+            }
         }
+        json::hook_commands(&layout.hooks)?;
+        let mcp_changed = match client {
+            InstallClient::ClaudeCode => json::uninstall_mcp(&layout.mcp)?,
+            InstallClient::Codex => codex_toml::uninstall_mcp(&layout.mcp)?,
+        };
+        if mcp_changed {
+            done.changed_files.push(layout.mcp.clone());
+        }
+        if json::uninstall_hook(&layout.hooks)? {
+            done.changed_files.push(layout.hooks.clone());
+        }
+        for (name, _) in SKILLS {
+            let dir = layout.skills.join(name);
+            if remove_dir(&dir)? {
+                done.changed_files.push(dir);
+            }
+        }
+        Ok(())
+    })();
+    match result {
+        Ok(()) => Ok(done.changed_files),
+        Err(error) if done.changed_files.is_empty() => Err(error),
+        Err(error) => Err(ClientsError::Partial {
+            done,
+            source: Box::new(error),
+        }),
     }
-    Ok(changed)
 }

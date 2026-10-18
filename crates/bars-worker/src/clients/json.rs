@@ -1,14 +1,8 @@
-//! Правка JSON-файлов клиентов: `~/.claude.json` (MCP), `settings.json` и `hooks.json` (хук).
-//!
-//! Файл читается прямо перед записью, порядок ключей сохраняется (`serde_json` с
-//! `preserve_order`). JSON с комментариями не разбирается и не меняется.
-
-use std::path::Path;
-
-use serde_json::{Map, Value, json};
-
-use super::fsx::{read_text, write_atomic};
+//! Правки JSON-конфигов: только записи bars, повторное чтение при конфликте.
+use super::fsx::{read_text, update_text};
 use super::{ClientsError, HOOK_MATCHER, Result};
+use serde_json::{Map, Value, json};
+use std::path::Path;
 
 fn parse_error(file: &Path, message: impl ToString) -> ClientsError {
     ClientsError::Parse {
@@ -16,35 +10,34 @@ fn parse_error(file: &Path, message: impl ToString) -> ClientsError {
         message: message.to_string(),
     }
 }
-
-/// Корневой объект файла; пустой или отсутствующий файл — пустой объект.
-fn load(file: &Path) -> Result<Value> {
-    let Some(text) = read_text(file)? else {
-        return Ok(Value::Object(Map::new()));
-    };
+fn parse(file: &Path, text: Option<&str>) -> Result<Value> {
+    let text = text.unwrap_or_default();
     if text.trim().is_empty() {
-        return Ok(Value::Object(Map::new()));
+        return Ok(json!({}));
     }
-    let value: Value = serde_json::from_str(&text).map_err(|error| parse_error(file, error))?;
-    if value.is_object() {
-        Ok(value)
-    } else {
-        Err(parse_error(file, "ожидался объект JSON"))
+    let value: Value = serde_json::from_str(text).map_err(|e| parse_error(file, e))?;
+    if !value.is_object() {
+        return Err(parse_error(file, "ожидался объект JSON"));
     }
+    Ok(value)
 }
-
-/// Пишет файл, если значение изменилось. `true` — записан.
-fn save(file: &Path, before: &Value, after: &Value) -> Result<bool> {
-    if before == after {
-        return Ok(false);
-    }
-    let mut text = serde_json::to_string_pretty(after).expect("JSON сериализуется");
-    text.push('\n');
-    write_atomic(file, &text, true)?;
-    Ok(true)
+fn load(file: &Path) -> Result<Value> {
+    parse(file, read_text(file)?.as_deref())
 }
-
-/// Вложенный объект по ключу; отсутствующий создаётся, не объект — ошибка.
+fn update(file: &Path, edit: impl Fn(&mut Value) -> Result<()>) -> Result<bool> {
+    update_text(file, |text| {
+        let before = parse(file, text)?;
+        let mut after = before.clone();
+        edit(&mut after)?;
+        if before == after {
+            return Ok(None);
+        }
+        Ok(Some(format!(
+            "{}\n",
+            serde_json::to_string_pretty(&after).expect("JSON")
+        )))
+    })
+}
 fn object_at<'a>(
     file: &Path,
     parent: &'a mut Map<String, Value>,
@@ -52,152 +45,140 @@ fn object_at<'a>(
 ) -> Result<&'a mut Map<String, Value>> {
     parent
         .entry(key)
-        .or_insert_with(|| Value::Object(Map::new()))
+        .or_insert_with(|| json!({}))
         .as_object_mut()
         .ok_or_else(|| parse_error(file, format!("«{key}» должен быть объектом")))
 }
-
-fn root_mut<'a>(file: &Path, value: &'a mut Value) -> Result<&'a mut Map<String, Value>> {
-    value
+fn root_mut(value: &mut Value) -> &mut Map<String, Value> {
+    value.as_object_mut().expect("parse проверил объект")
+}
+fn set_mcp(file: &Path, root: &mut Value, exe: &Path) -> Result<()> {
+    let servers = object_at(file, root_mut(root), "mcpServers")?;
+    let entry = servers.entry("bars").or_insert_with(|| json!({}));
+    let entry = entry
         .as_object_mut()
-        .ok_or_else(|| parse_error(file, "ожидался объект JSON"))
+        .ok_or_else(|| parse_error(file, "«mcpServers.bars» должен быть объектом"))?;
+    entry.insert("type".into(), json!("stdio"));
+    entry.insert("command".into(), json!(exe.display().to_string()));
+    entry.insert("args".into(), json!([]));
+    entry.entry("env").or_insert_with(|| json!({}));
+    Ok(())
 }
-
-/// Запись `mcpServers.bars` в `~/.claude.json`.
-pub fn install_mcp(file: &Path, mcp_exe: &Path) -> Result<bool> {
-    let before = load(file)?;
-    let mut after = before.clone();
-    let servers = object_at(file, root_mut(file, &mut after)?, "mcpServers")?;
-    let command = Value::String(mcp_exe.display().to_string());
-    match servers.get_mut("bars").and_then(Value::as_object_mut) {
-        Some(entry) => {
-            entry.insert("type".into(), json!("stdio"));
-            entry.insert("command".into(), command);
-            entry.insert("args".into(), json!([]));
-        }
-        None => {
-            servers.insert(
-                "bars".into(),
-                json!({ "type": "stdio", "command": command, "args": [], "env": {} }),
-            );
-        }
+pub fn validate_mcp(file: &Path, exe: &Path) -> Result<()> {
+    set_mcp(file, &mut load(file)?, exe)
+}
+pub fn has_mcp(file: &Path) -> Result<bool> {
+    let root = load(file)?;
+    match root.get("mcpServers") {
+        None => Ok(false),
+        Some(servers) => servers
+            .as_object()
+            .map(|m| m.contains_key("bars"))
+            .ok_or_else(|| parse_error(file, "«mcpServers» должен быть объектом")),
     }
-    save(file, &before, &after)
 }
-
+pub fn install_mcp(file: &Path, exe: &Path) -> Result<bool> {
+    update(file, |root| set_mcp(file, root, exe))
+}
 pub fn uninstall_mcp(file: &Path) -> Result<bool> {
-    let before = load(file)?;
-    let mut after = before.clone();
-    if let Some(servers) = after.get_mut("mcpServers").and_then(Value::as_object_mut) {
-        servers.shift_remove("bars");
-    }
-    save(file, &before, &after)
+    update(file, |root| {
+        if let Some(servers) = root.get_mut("mcpServers").and_then(Value::as_object_mut) {
+            servers.shift_remove("bars");
+        }
+        Ok(())
+    })
 }
-
-/// Хук bars: команда с `bars-cli` и `hook session-start`.
 fn is_bars_hook(hook: &Value) -> bool {
     hook.get("command")
         .and_then(Value::as_str)
-        .is_some_and(|command| {
-            command.contains("bars-cli") && command.contains("hook session-start")
-        })
+        .is_some_and(|c| c.contains("bars-cli") && c.contains("hook session-start"))
 }
-
-/// Группы `hooks.SessionStart`; отсутствующие создаются.
 fn session_start<'a>(file: &Path, root: &'a mut Value) -> Result<&'a mut Vec<Value>> {
-    let hooks = object_at(file, root_mut(file, root)?, "hooks")?;
-    hooks
+    let hooks = object_at(file, root_mut(root), "hooks")?;
+    let groups = hooks
         .entry("SessionStart")
-        .or_insert_with(|| Value::Array(Vec::new()))
+        .or_insert_with(|| json!([]))
         .as_array_mut()
-        .ok_or_else(|| parse_error(file, "«SessionStart» должен быть массивом"))
+        .ok_or_else(|| parse_error(file, "«SessionStart» должен быть массивом"))?;
+    for group in groups.iter() {
+        if !group.is_object() || !group.get("hooks").is_some_and(Value::is_array) {
+            return Err(parse_error(
+                file,
+                "группа SessionStart должна содержать массив hooks",
+            ));
+        }
+    }
+    Ok(groups)
 }
-
-/// Хук начала сессии в `hooks.SessionStart`: обновляет команду своей записи или добавляет группу.
+fn set_hook(file: &Path, root: &mut Value, command: &str) -> Result<()> {
+    let groups = session_start(file, root)?;
+    let canonical =
+        json!({"matcher": HOOK_MATCHER, "hooks": [{"type":"command", "command":command}]});
+    let count = groups
+        .iter()
+        .flat_map(|g| g["hooks"].as_array().expect("проверено"))
+        .filter(|h| is_bars_hook(h))
+        .count();
+    // Не переставлять канонический хук: иначе сбрасывается одобрение Codex.
+    if count == 1 && groups.contains(&canonical) {
+        return Ok(());
+    }
+    groups.retain_mut(|group| {
+        let hooks = group["hooks"].as_array_mut().expect("проверено");
+        let had = hooks.len();
+        hooks.retain(|h| !is_bars_hook(h));
+        !(had > 0 && hooks.is_empty())
+    });
+    groups.push(canonical);
+    Ok(())
+}
+pub fn validate_hook(file: &Path, command: &str) -> Result<()> {
+    set_hook(file, &mut load(file)?, command)
+}
 pub fn install_hook(file: &Path, command: &str) -> Result<bool> {
-    let before = load(file)?;
-    let mut after = before.clone();
-    let groups = session_start(file, &mut after)?;
-    let mut found = false;
-    for group in groups.iter_mut() {
-        let Some(hooks) = group.get_mut("hooks").and_then(Value::as_array_mut) else {
-            continue;
-        };
-        let only_bars = hooks.len() == 1;
-        let mut hit = false;
-        for hook in hooks.iter_mut().filter(|hook| is_bars_hook(hook)) {
-            if let Some(entry) = hook.as_object_mut() {
-                entry.insert("command".into(), json!(command));
-                hit = true;
-            }
-        }
-        if hit {
-            found = true;
-            if only_bars && let Some(group) = group.as_object_mut() {
-                group.insert("matcher".into(), json!(HOOK_MATCHER));
-            }
-        }
-    }
-    if !found {
-        groups.push(json!({
-            "matcher": HOOK_MATCHER,
-            "hooks": [{ "type": "command", "command": command }],
-        }));
-    }
-    save(file, &before, &after)
+    update(file, |root| set_hook(file, root, command))
 }
-
-/// Убирает хуки bars; опустевшие группы и пустые `SessionStart` и `hooks` исчезают.
 pub fn uninstall_hook(file: &Path) -> Result<bool> {
-    let before = load(file)?;
-    let mut after = before.clone();
-    let Some(hooks) = after.get_mut("hooks").and_then(Value::as_object_mut) else {
-        return Ok(false);
-    };
-    if let Some(groups) = hooks.get_mut("SessionStart").and_then(Value::as_array_mut) {
-        groups.retain_mut(|group| {
-            let Some(list) = group.get_mut("hooks").and_then(Value::as_array_mut) else {
-                return true;
-            };
-            let had = list.len();
-            list.retain(|hook| !is_bars_hook(hook));
-            // Группа, где остались чужие хуки или не было хуков bars, остаётся.
-            !(list.is_empty() && had > 0)
-        });
-        if groups.is_empty() {
-            hooks.shift_remove("SessionStart");
+    update(file, |root| {
+        let Some(hooks) = root.get_mut("hooks").and_then(Value::as_object_mut) else {
+            return Ok(());
+        };
+        if let Some(groups) = hooks.get_mut("SessionStart").and_then(Value::as_array_mut) {
+            groups.retain_mut(|group| {
+                let Some(list) = group.get_mut("hooks").and_then(Value::as_array_mut) else {
+                    return true;
+                };
+                let had = list.len();
+                list.retain(|hook| !is_bars_hook(hook));
+                !(list.is_empty() && had > 0)
+            });
+            if groups.is_empty() {
+                hooks.shift_remove("SessionStart");
+            }
         }
-    }
-    if hooks.is_empty() {
-        after
-            .as_object_mut()
-            .expect("корень — объект")
-            .shift_remove("hooks");
-    }
-    save(file, &before, &after)
+        if hooks.is_empty() {
+            root_mut(root).shift_remove("hooks");
+        }
+        Ok(())
+    })
 }
-
-/// Команда `mcpServers.bars`; `None` — записи нет.
 pub fn mcp_command(file: &Path) -> Result<Option<String>> {
     Ok(load(file)?
         .pointer("/mcpServers/bars/command")
         .and_then(Value::as_str)
         .map(str::to_string))
 }
-
-/// Команды всех хуков bars в `hooks.SessionStart`.
 pub fn hook_commands(file: &Path) -> Result<Vec<String>> {
-    let value = load(file)?;
-    let groups = value
-        .pointer("/hooks/SessionStart")
-        .and_then(Value::as_array)
-        .map_or(&[][..], Vec::as_slice);
+    let mut value = load(file)?;
+    if value.get("hooks").is_none() {
+        return Ok(Vec::new());
+    }
+    let groups = session_start(file, &mut value)?;
     Ok(groups
         .iter()
-        .filter_map(|group| group.get("hooks").and_then(Value::as_array))
-        .flatten()
-        .filter(|hook| is_bars_hook(hook))
-        .filter_map(|hook| hook.get("command").and_then(Value::as_str))
+        .flat_map(|g| g["hooks"].as_array().expect("проверено"))
+        .filter(|h| is_bars_hook(h))
+        .filter_map(|h| h["command"].as_str())
         .map(str::to_string)
         .collect())
 }

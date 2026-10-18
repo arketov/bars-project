@@ -5,7 +5,7 @@ use std::path::Path;
 
 use toml_edit::{Array, DocumentMut, Item, Table, value};
 
-use super::fsx::{read_text, write_atomic};
+use super::fsx::{read_text, update_text};
 use super::{ClientsError, Result};
 
 fn parse_error(file: &Path, message: impl ToString) -> ClientsError {
@@ -19,21 +19,23 @@ fn load(file: &Path) -> Result<DocumentMut> {
     read_text(file)?
         .unwrap_or_default()
         .parse::<DocumentMut>()
-        .map_err(|error| parse_error(file, error))
+        .map_err(|error| parse_error(file, error.message()))
 }
 
-fn save(file: &Path, before: &str, doc: &DocumentMut) -> Result<bool> {
-    let text = doc.to_string();
-    if text == before {
-        return Ok(false);
-    }
-    write_atomic(file, &text, true)?;
-    Ok(true)
+fn update(file: &Path, edit: impl Fn(&mut DocumentMut) -> Result<()>) -> Result<bool> {
+    update_text(file, |text| {
+        let mut doc = text
+            .unwrap_or_default()
+            .parse::<DocumentMut>()
+            .map_err(|error| parse_error(file, error.message()))?;
+        let before = doc.to_string();
+        edit(&mut doc)?;
+        let after = doc.to_string();
+        Ok((after != before).then_some(after))
+    })
 }
 
-pub fn install_mcp(file: &Path, mcp_exe: &Path) -> Result<bool> {
-    let mut doc = load(file)?;
-    let before = doc.to_string();
+fn set_mcp(file: &Path, doc: &mut DocumentMut, mcp_exe: &Path) -> Result<()> {
     let servers = doc
         .entry("mcp_servers")
         .or_insert_with(|| {
@@ -59,16 +61,35 @@ pub fn install_mcp(file: &Path, mcp_exe: &Path) -> Result<bool> {
     {
         bars["args"] = value(Array::new());
     }
-    save(file, &before, &doc)
+    Ok(())
+}
+
+pub fn validate_mcp(file: &Path, exe: &Path) -> Result<()> {
+    set_mcp(file, &mut load(file)?, exe)
+}
+
+pub fn has_mcp(file: &Path) -> Result<bool> {
+    let doc = load(file)?;
+    match doc.get("mcp_servers") {
+        None => Ok(false),
+        Some(servers) => servers
+            .as_table_like()
+            .map(|table| table.contains_key("bars"))
+            .ok_or_else(|| parse_error(file, "«mcp_servers» должен быть таблицей")),
+    }
+}
+
+pub fn install_mcp(file: &Path, exe: &Path) -> Result<bool> {
+    update(file, |doc| set_mcp(file, doc, exe))
 }
 
 pub fn uninstall_mcp(file: &Path) -> Result<bool> {
-    let mut doc = load(file)?;
-    let before = doc.to_string();
-    if let Some(servers) = doc.get_mut("mcp_servers").and_then(Item::as_table_mut) {
-        servers.remove("bars");
-    }
-    save(file, &before, &doc)
+    update(file, |doc| {
+        if let Some(servers) = doc.get_mut("mcp_servers").and_then(Item::as_table_mut) {
+            servers.remove("bars");
+        }
+        Ok(())
+    })
 }
 
 /// Команда `[mcp_servers.bars]`; `None` — записи нет.

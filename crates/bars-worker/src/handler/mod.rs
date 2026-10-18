@@ -341,16 +341,38 @@ impl WorkerHandler {
         })
     }
 
-    fn install(&self, params: InstallParams) -> Result<InstallOutput, RpcError> {
-        let done = clients::install(self.install_env()?, params.client).map_err(internal)?;
+    async fn install(&self, params: InstallParams) -> Result<InstallOutput, RpcError> {
+        let env = self.install_env()?.clone();
+        let done = tokio::task::spawn_blocking(move || {
+            let result = clients::install(&env, params.client).map(Some);
+            clients::report(params.client, "установлено", &result);
+            result.map(|done| done.expect("install вернул результат"))
+        })
+        .await
+        .map_err(internal)?
+        .map_err(internal)?;
         Ok(InstallOutput {
             changed_files: paths(done.changed_files),
             needs_hook_approval: done.needs_hook_approval,
         })
     }
 
-    fn uninstall(&self, params: UninstallParams) -> Result<UninstallOutput, RpcError> {
-        let changed = clients::uninstall(self.install_env()?, params.client).map_err(internal)?;
+    async fn uninstall(&self, params: UninstallParams) -> Result<UninstallOutput, RpcError> {
+        let env = self.install_env()?.clone();
+        let changed = tokio::task::spawn_blocking(move || {
+            let result = clients::uninstall(&env, params.client).map(|changed_files| {
+                Some(clients::Installed {
+                    changed_files,
+                    hook_changed: false,
+                    needs_hook_approval: false,
+                })
+            });
+            clients::report(params.client, "удалено", &result);
+            result.map(|done| done.expect("uninstall вернул результат").changed_files)
+        })
+        .await
+        .map_err(internal)?
+        .map_err(internal)?;
         Ok(UninstallOutput {
             changed_files: paths(changed),
         })
@@ -659,8 +681,8 @@ impl WorkerHandler {
             Call::Register(params) => self.register(params).await.map(|out| output_value(&out)),
             Call::Unregister(params) => self.unregister(params).map(|out| output_value(&out)),
             Call::SessionStart(params) => self.session_start(params).map(|out| output_value(&out)),
-            Call::Install(params) => self.install(params).map(|out| output_value(&out)),
-            Call::Uninstall(params) => self.uninstall(params).map(|out| output_value(&out)),
+            Call::Install(params) => self.install(params).await.map(|out| output_value(&out)),
+            Call::Uninstall(params) => self.uninstall(params).await.map(|out| output_value(&out)),
             Call::IndexPause(_) => Ok(output_value(&self.index_pause())),
             Call::IndexResume(_) => Ok(output_value(&self.index_resume())),
             Call::IndexCancel(params) => self.index_cancel(params).map(|out| output_value(&out)),

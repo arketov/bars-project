@@ -384,7 +384,16 @@ async fn install_and_uninstall_edit_client_files_in_temp_home() {
     let human = bars(&env, &["install", "--client", "codex"]).await;
     assert_eq!(human.code, 0, "stderr: {}", human.err);
     assert!(human.out.contains("уже установлен"), "{}", human.out);
-    assert!(human.out.contains("/hooks"), "{}", human.out);
+    assert!(!human.out.contains("/hooks"), "{}", human.out);
+
+    let hooks_file = client_home.join(".codex/hooks.json");
+    let hooks = fs::read_to_string(&hooks_file)
+        .unwrap()
+        .replace("startup|resume", "startup");
+    fs::write(&hooks_file, hooks).unwrap();
+    let changed_hook = bars(&env, &["install", "--client", "codex"]).await;
+    assert_eq!(changed_hook.code, 0, "{}", changed_hook.err);
+    assert!(changed_hook.out.contains("/hooks"), "{}", changed_hook.out);
 
     let removed = json(&bars(&env, &["--json", "uninstall", "--client", "codex"]).await);
     assert!(!removed["changed_files"].as_array().unwrap().is_empty());
