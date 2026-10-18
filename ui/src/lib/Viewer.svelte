@@ -7,7 +7,7 @@
   const doc = $derived(app.viewer);
   const html = $derived(
     doc && !doc.missing
-      ? renderDocument(doc.text, { first: doc.hit.first_line, last: doc.hit.last_line })
+      ? renderDocument(doc.text, doc.hit.first_line > 0 ? { first: doc.hit.first_line, last: doc.hit.last_line } : undefined)
       : "",
   );
   let body: HTMLElement | undefined = $state();

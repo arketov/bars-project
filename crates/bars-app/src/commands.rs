@@ -65,6 +65,65 @@ pub fn open_path(path: String) -> Result<(), String> {
     tauri_plugin_opener::open_path(path, None::<&str>).map_err(|error| error.to_string())
 }
 
+/// Редакторы из фиксированного каталога; путь исполняемого файла окно не задаёт.
+#[tauri::command]
+pub fn document_editors() -> Value {
+    Value::Array(
+        crate::documents::editors()
+            .into_iter()
+            .map(|editor| serde_json::json!({ "id": editor.id, "label": editor.label }))
+            .collect(),
+    )
+}
+
+/// Действия только с документом текущего индекса зарегистрированного проекта.
+#[tauri::command]
+pub async fn document_action(
+    state: State<'_, Shared>,
+    project: String,
+    path: String,
+    action: String,
+    editor: Option<String>,
+) -> Result<String, String> {
+    let handler = state.get().ok_or("воркер ещё запускается")?;
+    let root = handler
+        .worker()
+        .resolve(&project)
+        .map_err(|e| e.to_string())?;
+    let tree = handler
+        .dispatch(Call::Tree(bars_protocol::TreeParams {
+            target: bars_protocol::Target {
+                cwd: project.clone(),
+                project: Some(project),
+            },
+        }))
+        .await
+        .map_err(|e| e.message)?;
+    let tree: bars_protocol::TreeOutput =
+        serde_json::from_value(tree).map_err(|e| e.to_string())?;
+    if !tree.documents.iter().any(|document| document.path == path) {
+        return Err("документ отсутствует в индексе проекта; обновите дерево или выдачу".into());
+    }
+    let absolute = crate::documents::indexed_path(&root, &path)?;
+    if action == "check" {
+        handler
+            .worker()
+            .check_files(&root, vec![absolute.clone()])
+            .map_err(|e| e.to_string())?;
+    } else {
+        let file = absolute.clone();
+        tauri::async_runtime::spawn_blocking(move || match action.as_str() {
+            "path" => Ok(()),
+            "open" => crate::documents::open(&file, editor.as_deref().unwrap_or("default")),
+            "reveal" => tauri_plugin_opener::reveal_item_in_dir(&file).map_err(|e| e.to_string()),
+            _ => Err("неизвестное действие документа".into()),
+        })
+        .await
+        .map_err(|e| e.to_string())??;
+    }
+    Ok(absolute.display().to_string())
+}
+
 /// Домашняя папка bars (`~/.bars`).
 #[tauri::command]
 pub fn bars_dir() -> Result<String, String> {

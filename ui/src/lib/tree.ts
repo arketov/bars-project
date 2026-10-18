@@ -14,6 +14,8 @@ export interface TreeNode {
   kind: "module" | "dir" | "file";
   chunks: number;
   children: TreeNode[];
+  /** Исходный путь индекса от корня проекта; только у файла. */
+  documentPath?: string;
 }
 
 export type CheckState = "all" | "some" | "none";
@@ -62,6 +64,7 @@ export function buildTree(documents: TreeDocument[], docsRoot: string): TreeNode
           kind: isFile ? "file" : "dir",
           chunks: 0,
           children: [],
+          ...(isFile ? { documentPath: document.path } : {}),
         };
         node.children.push(child);
       }

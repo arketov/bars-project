@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="ru"><meta charset="utf-8"><title>bars — документ и меню</title>
+<link rel="stylesheet" href="theme.css">
+<style>body{padding:40px;font:14px system-ui;background:var(--bg,#f7f5f6);color:var(--text,#30282e)}main{display:flex;gap:35px}.tree,.viewer,.menu{background:var(--panel,white);border:1px solid #ddd;border-radius:10px;padding:16px}.tree{width:230px}.viewer{width:450px}.menu{width:230px;box-shadow:0 10px 30px #0002}button{display:block;border:0;background:transparent;padding:9px;width:100%;text-align:left;color:inherit}button:hover{background:#f9e2ed}aside{display:flex;align-items:start;gap:5px}small{color:#777}.row{display:flex;align-items:center}.row button{color:#b6306b}.sub{margin-top:35px}</style>
+<h1>Документ из дерева · Этап 18</h1><p>Имя открывает документ. Галочка задаёт область поиска. Справа — меню правого клика и подменю редакторов.</p>
+<main><section class="tree"><b>Документы</b><p>▾ features</p><div class="row"><input type="checkbox"><button onclick="document.querySelector('.viewer').hidden=false">projects.md</button></div><div class="row"><input type="checkbox"><button>search.md</button></div></section>
+<section class="viewer"><small>docs/features/projects.md · В редакторе · Закрыть</small><h2>Проекты bars</h2><p>Полный документ без поискового запроса и без подсветки найденного раздела.</p></section>
+<aside><section class="menu"><button>Открыть</button><button onclick="document.querySelector('.sub').hidden=!document.querySelector('.sub').hidden">Открыть в … ▸</button><button>Открыть в Проводнике</button><button>Скопировать путь</button><button>Проверить индекс</button><hr><button>Копировать</button></section><section class="menu sub"><button>Программа по умолчанию</button><button>VS Code</button><button>Блокнот</button><button>Notepad++</button></section></aside></main>
+</html>

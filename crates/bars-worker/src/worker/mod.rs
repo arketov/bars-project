@@ -494,6 +494,20 @@ impl Worker {
 
     // --- пауза, остановка, ход ---
 
+    /// Явная проверка файлов из меню документа; смену модели не подтверждает.
+    pub fn check_files(&self, path: &Path, files: Vec<PathBuf>) -> Result<(), WorkerError> {
+        let path = self.registered(path)?;
+        match self.status(&path)?.state {
+            ProjectState::Unavailable => return Err(WorkerError::Unavailable(path)),
+            ProjectState::ReindexRequired => return Err(WorkerError::ConsentRequired(path)),
+            _ => {}
+        }
+        if !files.is_empty() {
+            self.inner.enqueue(&path, Job::files(Priority::Explicit, files));
+        }
+        Ok(())
+    }
+
     /// Приостанавливает очередь целиком: идущее задание замирает между документами, новые не
     /// берутся (OQ-55).
     pub fn pause(&self) {

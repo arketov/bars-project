@@ -1,10 +1,27 @@
 /** Логика контекстного меню окна (ISS-07): какие пункты показать и как их выполнить. */
 
-export type MenuAction = "copy" | "paste" | "selectAll";
+export type MenuAction = "copy" | "paste" | "selectAll" | "open" | "editors" | "editor" | "reveal" | "path" | "check";
 
 export interface MenuItem {
   action: MenuAction;
   label: string;
+  editor?: string;
+}
+
+/** Ближайшая строка файла либо карточка результата; папки собственного меню не имеют. */
+export function documentAt(target: EventTarget | null): { path: string; line: number } | null {
+  const element = target instanceof Element ? target.closest<HTMLElement>("[data-document-path]") : null;
+  return element?.dataset.documentPath ? { path: element.dataset.documentPath, line: Number(element.dataset.documentLine ?? 0) } : null;
+}
+
+export function documentItems(): MenuItem[] {
+  return [
+    { action: "open", label: "Открыть" },
+    { action: "editors", label: "Открыть в …" },
+    { action: "reveal", label: /Mac/.test(navigator.platform) ? "Открыть в Finder" : "Открыть в Проводнике" },
+    { action: "path", label: "Скопировать путь" },
+    { action: "check", label: "Проверить индекс" },
+  ];
 }
 
 const NON_TEXT_INPUTS = new Set(["checkbox", "radio", "button", "submit", "reset", "range", "color", "file", "image"]);

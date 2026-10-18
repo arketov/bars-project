@@ -15,10 +15,13 @@ title: Дизайн окна bars
 - [empty-states.md](empty-states.md) — пустые экраны: нет проектов, нет документации, нет результатов.
 - [error-states.md](error-states.md) — ошибки: воркер, модель, провайдер, пропавший проект, переиндексация.
 
+- [document-actions.md](document-actions.md) — этап 18: чтение из дерева, меню, редакторы, очередь проверки файла и приёмка.
+
 ## Мокапы
 
 Открываются двойным кликом: внешних загрузок нет, стили и скрипты лежат рядом отдельными файлами. Мокапы состояний переключают сцены кнопками вверху страницы.
 
+- [mockups/document-menu.html](mockups/document-menu.html) — документ из дерева и меню с подменю редакторов.
 - [mockups/main.html](mockups/main.html) — главный экран.
 - [mockups/settings.html](mockups/settings.html) — экран настроек.
 - [mockups/device-settings.html](mockups/device-settings.html) — проект этапа 17: отдельные устройства моделей, фактическое исполнение и ошибки индексации; восемь сцен.

@@ -54,6 +54,55 @@ impl Env {
 
 const DOC: &str = "# Заголовок\n\nТекст раздела про индексацию.\n";
 
+#[tokio::test(flavor = "multi_thread")]
+async fn document_menu_check_queues_explicit_file_and_updates_index() {
+    let env = Env::new();
+    let project = env.project("проект с пробелами", &[("Тема.md", DOC)]);
+    let mut config = env.config();
+    config.install_env = None;
+    let worker = Worker::start(config, env.provider.clone()).unwrap();
+    worker.register(&project).unwrap();
+    idle(&worker).await;
+    worker.pause();
+    let file = project.join("docs/Тема.md");
+    fs::write(&file, "---\ntitle: Новый заголовок\n---\n\n# Новый заголовок\n\nИзменённое содержимое документа.\n").unwrap();
+    worker.check_files(&project, vec![file]).unwrap();
+    let queue = worker.queued();
+    assert_eq!(queue.len(), 1);
+    assert_eq!(queue[0].kind, JobKind::Files);
+    assert_eq!(queue[0].priority, Priority::Explicit);
+    assert_eq!(queue[0].files, 1);
+    worker.resume();
+    idle(&worker).await;
+    let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
+    let title: String = index
+        .conn()
+        .query_row("SELECT title FROM documents", [], |row| row.get(0))
+        .unwrap();
+    assert_eq!(title, "Новый заголовок");
+    drop(index);
+    fs::remove_file(project.join("docs/Тема.md")).unwrap();
+    worker
+        .check_files(&project, vec![project.join("docs/Тема.md")])
+        .unwrap();
+    idle(&worker).await;
+    assert_eq!(documents(&project), 0);
+    env.provider.set_model("m2");
+    worker
+        .check_files(&project, vec![project.join("docs/Тема.md")])
+        .unwrap();
+    idle(&worker).await;
+    assert_eq!(
+        worker.status(&project).unwrap().state,
+        ProjectState::ReindexRequired
+    );
+    assert!(matches!(
+        worker.check_files(&project, vec![project.join("docs/Тема.md")]),
+        Err(WorkerError::ConsentRequired(_))
+    ));
+    worker.shutdown().await;
+}
+
 async fn wait_until(what: &str, mut condition: impl FnMut() -> bool) {
     let deadline = Instant::now() + Duration::from_secs(20);
     while !condition() {

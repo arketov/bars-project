@@ -2,6 +2,7 @@
 //! методов напрямую, а `bars-mcp` и `bars-cli` приходят по каналу.
 
 mod commands;
+mod documents;
 mod icons;
 mod tray;
 mod window;
@@ -42,6 +43,8 @@ fn main() -> anyhow::Result<()> {
             commands::bars_call,
             commands::pick_folder,
             commands::open_path,
+            commands::document_action,
+            commands::document_editors,
             commands::bars_dir,
             commands::restart_app,
         ])

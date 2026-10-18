@@ -22,7 +22,7 @@
   }
 </script>
 
-<div class="card" class:open class:shown>
+<div class="card" class:open class:shown data-document-path={hit.path} data-document-line={hit.first_line}>
   <div
     class="chead"
     role="button"

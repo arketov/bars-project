@@ -67,6 +67,21 @@ export async function copyText(text: string): Promise<void> {
   await navigator.clipboard.writeText(text);
 }
 
+export interface DocumentEditor { id: string; label: string }
+
+export async function documentEditors(): Promise<DocumentEditor[]> {
+  if (!inTauri()) return [{ id: "code", label: "VS Code (макет)" }, { id: "notepad", label: "Блокнот (макет)" }];
+  return (await shell<DocumentEditor[]>("document_editors")) ?? [];
+}
+
+export async function documentAction(project: string, path: string, action: "path" | "open" | "reveal" | "check", editor?: string): Promise<string> {
+  if (!inTauri()) {
+    if (action !== "path") throw new Error("Действие ОС/очереди доступно в приложении bars; браузер показывает макет");
+    return joinPath(project, path);
+  }
+  return (await shell<string>("document_action", { project, path, action, editor: editor ?? null }))!;
+}
+
 /** Абсолютный путь файла проекта для «В редакторе». */
 export function joinPath(root: string, relative: string): string {
   const sep = root.includes("\\") ? "\\" : "/";

@@ -19,12 +19,14 @@ import {
 export type View = "main" | "settings" | "indexing";
 
 export interface ViewedDocument {
-  hit: SearchHit;
+  hit: DocumentReference;
   title: string;
   text: string;
   /** Документ пропал между выдачей и открытием. */
   missing: boolean;
 }
+
+export type DocumentReference = Pick<SearchHit, "path" | "title" | "first_line" | "last_line">;
 
 const PROJECT_KEY = "bars-project";
 const POLL_MS = 1000;
@@ -76,6 +78,7 @@ class App {
   #timer: ReturnType<typeof setInterval> | null = null;
   #tick = 0;
   #failures = 0;
+  #reading = 0;
 
   get project(): ProjectInfo | null {
     return this.projects.find((project) => project.path === this.current) ?? null;
@@ -186,7 +189,7 @@ class App {
     this.filter = "";
     this.results = null;
     this.searchError = null;
-    this.viewer = null;
+    this.closeViewer();
     this.minScore = null;
     this.status = null;
     await this.loadTree();
@@ -273,13 +276,18 @@ class App {
     this.minScore = null;
   }
 
-  async openDocument(hit: SearchHit): Promise<void> {
+  async openDocument(hit: DocumentReference): Promise<void> {
     const project = this.project;
     if (!project) return;
+    const reading = ++this.#reading;
+    this.view = "main";
     try {
-      const output = await call<ReadOutput>("read", { cwd: project.path, project: project.path, path: hit.path });
+      // Путь индекса уже от корня проекта: исключаем docs/docs/x.md при совпадении имён.
+      const output = await call<ReadOutput>("read", { cwd: project.path, project: project.path, path: `./${hit.path}` });
+      if (reading !== this.#reading || this.current !== project.path) return;
       this.viewer = { hit, title: output.title, text: output.text, missing: false };
     } catch (error) {
+      if (reading !== this.#reading || this.current !== project.path) return;
       if (error instanceof BarsError && error.kind === "file_not_found") {
         this.viewer = { hit, title: hit.title, text: "", missing: true };
       } else {
@@ -289,6 +297,7 @@ class App {
   }
 
   closeViewer(): void {
+    this.#reading++;
     this.viewer = null;
   }
 

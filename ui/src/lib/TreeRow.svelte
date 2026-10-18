@@ -14,7 +14,7 @@
 </script>
 
 <div class="node {node.kind}" class:open>
-  <div class="row">
+  <div class="row" data-document-path={node.documentPath}>
     {#if isDir}
       <button class="caret" aria-label={open ? "Свернуть" : "Развернуть"} onclick={() => (opened = !opened)}>
         <Icon name="chevron-right" size={10} width={2} />
@@ -22,16 +22,20 @@
     {:else}
       <span class="spacer"></span>
     {/if}
-    <label {title}>
+    <label {title} class:directory={isDir}>
       <input
         type="checkbox"
+        aria-label={title}
         checked={check === "all"}
         indeterminate={check === "some"}
         onchange={(event) => app.toggleNode(node.path, event.currentTarget.checked)}
       />
-      <span class="nm">{node.label}</span>
-      <span class="ct">{node.chunks}</span>
+      {#if isDir}<span class="nm">{node.label}</span>{/if}
     </label>
+    {#if !isDir && node.documentPath}
+      <button class="nm filename" title={node.documentPath} onclick={() => app.openDocument({ path: node.documentPath!, title: node.label, first_line: 0, last_line: 0 })}>{node.label}</button>
+    {/if}
+    <span class="ct">{node.chunks}</span>
   </div>
   {#if isDir && open}
     <div class="kids">
@@ -47,7 +51,10 @@
   .row:hover { background: var(--panel-2); }
   .caret { width: 18px; height: 18px; border: 0; background: none; display: grid; place-items: center; color: var(--muted); transition: transform .15s; padding: 0; flex: none; }
   .open > .row .caret { transform: rotate(90deg); }
-  label { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; cursor: pointer; }
+  label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  label.directory { flex: 1; min-width: 0; }
+  .filename { border: 0; background: none; text-align: left; color: inherit; padding: 0; cursor: pointer; }
+  .filename:hover { color: var(--accent-text); }
   .nm { flex: 1; font-size: 13px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .module > .row .nm { font-weight: 600; }
   .dir > .row .nm { color: var(--muted); font-weight: 600; }
