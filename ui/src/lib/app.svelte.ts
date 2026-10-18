@@ -240,6 +240,7 @@ class App {
       // Выбор не запомнится — окно откроется на первом проекте.
     }
     this.selected = new Set();
+    this.tree = [];
     this.filter = "";
     this.results = null;
     this.searchedQuery = "";
