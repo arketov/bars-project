@@ -293,5 +293,10 @@
         "clamped": false
       }
     }
-  ]
+  ],
+  "initial_profile_side_effect": "Initial unisolated Cargo/MCP runs were exposed to ISS-12; process-level fixture isolation did not cover library tests. Current disk MCP and SessionStart paths verified restored by the parallel fix.",
+  "isolated_cargo": {
+    "profile_unchanged": true,
+    "cargo_steps": 3
+  }
 }
