@@ -6,6 +6,9 @@
 /// Заголовок списка подзаголовков в конце чанка родительского раздела.
 const OTHER_HEADERS: &str = "other headers:";
 
+/// Суффикс части раздела, у которой есть продолжение; вне лимита исходного текста.
+const TRUNCATED: &str = " ...(truncated)";
+
 /// Разделитель между блоками текста чанка: пустая строка.
 const BLANK: &str = "\n\n";
 
@@ -423,6 +426,8 @@ struct Draft {
     children: Vec<(usize, String)>,
     /// Чанк получился склейкой нескольких разделов: списка подзаголовков у него нет.
     merged: bool,
+    /// У раздела остались следующие части после этого чанка.
+    continued: bool,
 }
 
 /// Заголовок раздела и его текст как они лежат в склеенном чанке.
@@ -457,6 +462,9 @@ impl Draft {
 
     fn into_chunk(self, ordinal: usize, path: &str) -> Chunk {
         let mut text = self.body;
+        if self.continued {
+            text.push_str(TRUNCATED);
+        }
         if !self.children.is_empty() {
             if !text.is_empty() {
                 text.push('\n');
@@ -521,6 +529,7 @@ fn assemble(sections: &[Section], min: usize, max: usize) -> Vec<Draft> {
                     Vec::new()
                 },
                 merged: false,
+                continued: !is_last,
             };
             if count == 1 && draft.len() < min {
                 pending = Some(draft);
@@ -685,7 +694,7 @@ mod tests {
             .filter(|c| c.heading_chain == "А")
             .collect();
         assert_eq!(parent.len(), 2);
-        assert_eq!(parent[0].text, format!("{paragraph}\n\n{paragraph}"));
+        assert_eq!(parent[0].text, format!("{paragraph}\n\n{paragraph}{TRUNCATED}"));
         assert_eq!((parent[0].first_line, parent[0].last_line), (1, 4));
         assert_eq!((parent[1].first_line, parent[1].last_line), (6, 6));
         assert!(parent[1].text.ends_with("other headers:\n## Б"));
@@ -703,8 +712,27 @@ mod tests {
     fn long_line_is_cut_by_characters() {
         let source = format!("# А\n{}\n", "я".repeat(25));
         let doc = chunk(&source, 1, 10);
-        let lengths: Vec<usize> = doc.chunks.iter().map(|c| char_len(&c.text)).collect();
-        assert_eq!(lengths, [10, 10, 5]);
+        let texts: Vec<&str> = doc.chunks.iter().map(|c| c.text.as_str()).collect();
+        assert_eq!(
+            texts,
+            ["яяяяяяяяяя ...(truncated)", "яяяяяяяяяя ...(truncated)", "яяяяя"]
+        );
+        let restored: String = texts
+            .iter()
+            .map(|text| text.strip_suffix(TRUNCATED).unwrap_or(text))
+            .collect();
+        assert_eq!(restored, "я".repeat(25));
+        assert!(doc.chunks[0].embed_text.ends_with(&doc.chunks[0].text));
+        assert!(doc.chunks.iter().all(|c| c.last_line == 2));
+    }
+
+    #[test]
+    fn section_at_limit_and_last_piece_have_no_truncation_marker() {
+        let whole = chunk("# А\nяяяя\n", 1, 4);
+        assert_eq!(whole.chunks[0].text, "яяяя");
+        let split = chunk("# А\nяяяяяяяя\n", 1, 4);
+        assert_eq!(split.chunks[0].text, "яяяя ...(truncated)");
+        assert_eq!(split.chunks[1].text, "яяяя");
     }
 
     #[test]

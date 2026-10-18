@@ -58,6 +58,7 @@ fn check(params: ChunkingParams) {
             );
 
             let body = chunk.text.split(OTHER_HEADERS).next().unwrap_or("");
+            let body = body.strip_suffix(" ...(truncated)").unwrap_or(body);
             assert!(
                 body.chars().count() <= params.max_chars,
                 "{at}: {} символов при максимуме {}",
