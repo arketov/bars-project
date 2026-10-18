@@ -3,6 +3,9 @@
 
 mod commands;
 mod documents;
+mod folders;
+#[cfg(test)]
+mod folder_tests;
 mod icons;
 mod tray;
 mod window;
@@ -46,9 +49,16 @@ fn main() -> anyhow::Result<()> {
             commands::open_path,
             commands::document_action,
             commands::document_editors,
+            commands::folder_target,
+            commands::folder_action,
             commands::bars_dir,
             commands::worker_logs,
             commands::mcp_statistics,
+            commands::mcp_history,
+            commands::mcp_history_control,
+            commands::mcp_history_options,
+            commands::mcp_history_legacy,
+            commands::mcp_history_diagnostics,
             commands::restart_app,
         ])
         .setup(move |app| {
@@ -61,7 +71,10 @@ fn main() -> anyhow::Result<()> {
             if bars_worker::logging::init(&home).is_err() {
                 eprintln!("bars: файловый журнал недоступен");
             }
-            log::info!("Приложение bars запущено, версия {}", env!("CARGO_PKG_VERSION"));
+            log::info!(
+                "Приложение bars запущено, версия {}",
+                env!("CARGO_PKG_VERSION")
+            );
             window::create(&handle, !background)?;
             tray::build(&handle)?;
             tray::spawn_status_loop(handle.clone());

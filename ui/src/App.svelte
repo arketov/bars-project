@@ -12,6 +12,7 @@
   import SearchPane from "./lib/SearchPane.svelte";
   import SettingsPage from "./lib/SettingsPage.svelte";
   import Sidebar from "./lib/Sidebar.svelte";
+  import MainNavigation from "./lib/MainNavigation.svelte";
   import { theme } from "./lib/theme.svelte";
   import Viewer from "./lib/Viewer.svelte";
   import WorkerDown from "./lib/WorkerDown.svelte";
@@ -48,8 +49,11 @@
 {#if app.view === "settings"}
   <SettingsPage />
 {:else}
-  <div class="app" class:viewing>
+  <div class="app">
     <Sidebar />
+    <section class="work-area" aria-label="Рабочая область">
+    <MainNavigation />
+    <div class="work-body" class:viewing>
     {#if app.workerDown}
       <WorkerDown message={app.workerDown} />
     {:else if app.projectsLoaded && app.projects.length === 0}
@@ -60,12 +64,22 @@
       <Missing {project} />
     {:else if app.view === "indexing"}
       <IndexingPage />
+    {:else if app.view === 'graph'}
+      {#await import('./lib/GraphPage.svelte')}
+        <main role="status">Загрузка графа…</main>
+      {:then graph}
+        <graph.default />
+      {:catch error}
+        <main role="alert">Не удалось загрузить граф: {String(error)}</main>
+      {/await}
     {:else if noDocs}
       <NoDocs {project} />
     {:else}
       <SearchPane />
       {#if viewing}<Viewer />{/if}
     {/if}
+    </div>
+    </section>
   </div>
 {/if}
 
@@ -79,7 +93,9 @@
 {/if}
 
 <style>
-  .app.viewing { grid-template-columns: 300px minmax(420px, 1fr) minmax(440px, 1.1fr); }
+  .work-area { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .work-body { display: grid; grid-template-columns: minmax(0, 1fr); flex: 1; min-width: 0; min-height: 0; }
+  .work-body.viewing { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
   main { min-height: 0; }
   .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 9px 16px; border-radius: 10px; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,.25); z-index: 80; max-width: 80vw; }
   .toast.bad { background: var(--bad); color: #fff; }

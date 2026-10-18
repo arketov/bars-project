@@ -1,0 +1,8 @@
+{
+  "queries": 100,
+  "dimensions": 1024,
+  "components": 102400,
+  "different": 0,
+  "maxAbsoluteDifference": 0,
+  "scope": "query singleton comparison only; document batches and fresh index not covered"
+}

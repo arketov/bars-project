@@ -24,7 +24,11 @@ Update existing documents before creating duplicates. Current behaviour and feat
 
 ## Start of a session
 
-Find the latest `handoff.md` on your topic in `docs/chats/` (through bars or by folder names) and read only it. Open `log.md` only when you need the detailed history.
+Identify the task subject before looking for its history; resolve a stage number through the known project plan/register first. Find the latest `handoff.md` on that topic in `docs/chats/`. If the path is known, call `bars_read` directly, or `bars_outline` for headings; no preliminary search is required. Open `log.md` only when you need detailed history.
+
+If the handoff is unknown, search session history, for example `bars_rag_search({query:"Последние результаты проверки устройств моделей",modules:["chats"]})`. Use the project's actual first-level module name; discover it with `bars_projects` when needed. For cross-cutting current contracts, use a broader scope instead of restricting every query to history.
+
+`files` is for already selected indexed sources, not guessed names. Example after discovering the two paths: `bars_rag_search({query:"Какие ограничения остались после проверки моделей?",files:["chats/2026-10-18-models/handoff.md","features/models/requirements.md"]})`. These illustrative paths are relative to the documentation root, without `docs/` when that root is `docs`; disk existence does not imply index membership. For a whole known handoff, prefer read. After an empty answer, verify topic, project and scope; do not infer that no prior work exists or reindex automatically.
 
 ## log.md — only for a reason
 

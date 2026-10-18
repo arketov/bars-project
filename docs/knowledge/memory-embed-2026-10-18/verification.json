@@ -1,0 +1,23 @@
+{
+  "utc": "2026-10-18T13:56:49.0105261Z",
+  "sources": [
+    {
+      "file": "scripts/analyze-embed-retrieval.mjs",
+      "sha256": "47DD7ABCC16D4D9FAEBA60122F592B77AA618882079D2D4CB5062ADBDCE7996B"
+    },
+    {
+      "file": "spikes/memory/score-selection.rs",
+      "sha256": "3C16F834C68E646E1A97437D84628BDC5AD1EEFFD41D75276928D512630D5CF4"
+    },
+    {
+      "file": "crates/bars-core/src/search/vector_top.rs",
+      "sha256": "758F093DEE548A81FB543BE4E720D1202EA495516631815167E294ADD2BE89E5"
+    }
+  ],
+  "score_binary_sha256": "D79ED6862374208A9122A8737A0C52C0C597DF16DE91C96CD0C7E677980BCC49",
+  "core_tests_passed": 200,
+  "worker_tests_passed": 170,
+  "search_tests_passed": 33,
+  "clippy_core_worker_exit": 0,
+  "microbenchmark_timing_controlled": false
+}

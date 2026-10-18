@@ -1,0 +1,263 @@
+{
+  "date": "2026-10-18",
+  "kind": "qualitative probes; no benchmark or GraphRAG comparison",
+  "scope": "current Markdown documents from rg inventory; explicit allowlist; excludes chats, BARS_INSTRUCTION and three graph research files",
+  "files": [
+    "project-status.md",
+    "overview.md",
+    "MAIN_IDEA.md",
+    "knowledge/traceability.md",
+    "knowledge/stack-research.md",
+    "knowledge/spike-search.md",
+    "knowledge/spike-ipc.md",
+    "knowledge/spike-detach.md",
+    "knowledge/search-quality-results.md",
+    "knowledge/search-quality-benchmark.md",
+    "knowledge/search-during-indexing.md",
+    "knowledge/quality-2026-10-18/Index.md",
+    "knowledge/memory-usage.md",
+    "knowledge/memory-results.md",
+    "knowledge/memory-fp16-results.md",
+    "knowledge/claude-code-serena.md",
+    "knowledge/build.md",
+    "Index.md",
+    "getting-started.md",
+    "knowledge/memory-fp16-2026-10-18/Index.md",
+    "backlog/issues.md",
+    "backlog/Index.md",
+    "backlog/ideas.md",
+    "knowledge/directml-performance.md",
+    "knowledge/development-ideas.md",
+    "knowledge/development-ideas-verification.md",
+    "knowledge/Index.md",
+    "knowledge/installer.md",
+    "knowledge/inference-speed.md",
+    "knowledge/inference-libraries.md",
+    "knowledge/inference-devices.md",
+    "knowledge/local-documentation-tools.md",
+    "knowledge/local-documentation-tools-audit.md",
+    "adr/Index.md",
+    "adr/0001-docs-by-features.md",
+    "knowledge/inference-2026-10-18/Index.md",
+    "features/Index.md",
+    "architecture/worker.md",
+    "architecture/vector-search.md",
+    "architecture/stack.md",
+    "architecture/secrets.md",
+    "architecture/schema.md",
+    "architecture/protocol.md",
+    "architecture/ipc.md",
+    "architecture/Index.md",
+    "architecture/files.md",
+    "architecture/components.md",
+    "features/clients/verification.md",
+    "features/clients/plan.md",
+    "features/clients/Index.md",
+    "features/clients/clients.md",
+    "features/docs-convention/verification.md",
+    "features/docs-convention/session-log.md",
+    "features/docs-convention/plan.md",
+    "features/docs-convention/layout.md",
+    "features/docs-convention/Index.md",
+    "features/docs-convention/delivery.md",
+    "features/docs-convention/bars-instruction.md",
+    "features/distribution/installer.md",
+    "features/distribution/Index.md",
+    "features/distribution/autostart.md",
+    "knowledge/memory-2026-10-18/Index.md",
+    "features/projects/projects.md",
+    "features/projects/Index.md",
+    "features/projects/deletion.md",
+    "features/window/settings-window.md",
+    "features/window/reindex-consent.md",
+    "features/window/project-menu.md",
+    "features/window/palette.md",
+    "features/window/notifications.md",
+    "features/agent-tools/mcp-tools.md",
+    "features/agent-tools/Index.md",
+    "features/agent-tools/cli.md",
+    "features/window/Index.md",
+    "features/window/implementation.md",
+    "features/window/error-states.md",
+    "features/window/empty-states.md",
+    "features/window/document-actions.md",
+    "features/window/logs.md",
+    "features/window/indexing-progress.md",
+    "features/window/main-window.md",
+    "features/window/mcp-statistics.md",
+    "features/search/plan.md",
+    "features/settings/settings.md",
+    "features/search/Index.md",
+    "features/settings/Index.md",
+    "features/search/hybrid-search.md",
+    "features/indexing/updates.md",
+    "features/indexing/Index.md",
+    "features/indexing/chunking.md",
+    "features/models/memory-reduction.md",
+    "features/models/memory-plan.md",
+    "features/models/local-models.md",
+    "features/models/inference-plan.md",
+    "features/models/Index.md",
+    "features/models/gguf-plan.md",
+    "features/models/external-models.md",
+    "features/models/device-verification.md",
+    "features/models/device-plan.md",
+    "features/window/mockups/Index.md"
+  ],
+  "probes": [
+    {
+      "scenario": "S1",
+      "query": "Меняем правила согласия на переиндексацию. Какие описания и проверки нужно пересмотреть?",
+      "response": {
+        "results": [
+          {
+            "path": "docs/features/window/reindex-consent.md",
+            "module": "features",
+            "title": "Диалог согласия на переиндексацию в окне bars (Т-25)",
+            "heading_chain": "Диалог согласия на переиндексацию/Что показывает диалог согласия",
+            "first_line": 15,
+            "last_line": 31,
+            "text": "- **Модели.** Слева «Индекс построен» (модель, источник, размерность), справа «В настройках сейчас» — выделена цветом акцента.\n- **Таблица проектов** в состоянии `reindex_required`: галочка, имя, число документов, число чанков, оценка времени. Все отмечены; итог по выбранным — внизу таблицы. Согласие даётся по проектам: можно переиндексировать один сейчас, остальные позже (решение агента, OQ-56).\n- **Что произойдёт.** Индекс строится заново в отдельном файле, старый заменяется в конце; пока идёт переиндексация, поиск по проекту не работает; временно нужно место под второй индекс.\n- **Скачивание модели.** Для встроенной нескачанной модели — размер, он входит в ход индексации.\n- **Удалённый провайдер.** Предупреждение красным значком и текстом: текст всех чанков уйдёт провайдеру; время и стоимость определяет он; вместо времени — «зависит от провайдера» (OQ-58).\n\nКнопки:\n\n| Кнопка | Действие |\n|---|---|\n| «Переиндексировать (N)» | согласие по отмеченным проектам: окно вызывает `reindex` с `accept_model_change`; кнопка недоступна, если ничего не отмечено |\n| «Позже» | закрывает диалог; настройки уже сохранены, проекты остаются в `reindex_required`, поиск по ним не работает (Т-25) |\n| «Вернуть прежнюю модель» | возвращает в настройках модель индекса: отпечатки снова совпадают, переиндексация не нужна (решение агента, OQ-56) |\n\nСогласие не снимается закрытием окна: состояние хранит воркер, а не окно.",
+            "score": 0.26095408,
+            "score_kind": "rerank"
+          },
+          {
+            "path": "docs/architecture/worker.md",
+            "module": "architecture",
+            "title": "Воркер bars — запуск, задачи внутри процесса, очередь, завершение",
+            "heading_chain": "Воркер bars/Реализация очереди и состояния воркера",
+            "first_line": 69,
+            "last_line": 81,
+            "text": "Решение агента, 15-10-2026; код — `crates/bars-worker/src/worker/`.\n\n- **Задание на проект.** Очередь хранит не больше одного задания на проект: повторное сливается с ожидающим, место в очереди сохраняется. При слиянии больший приоритет побеждает, полная проверка поглощает список файлов, переиндексация поглощает проверку, согласие хотя бы одного задания сохраняется. Приоритеты: явная переиндексация, хук и регистрация → слежение → старт и периодическая проверка.\n- **Список файлов.** Задание «только перечисленные файлы» выполняет ту же проверку по размеру и времени, что и полная; список нужен слиянию и счётчику `pending` (OQ-44).\n- **Индекс на время задания.** Задание открывает индекс в режиме WAL и закрывает в конце. Постоянных соединений записи у воркера нет, поэтому перед подменой файла закрывать нечего.\n- **Доступ к проекту.** У каждого проекта есть замок «читатели — писатель». Поиск держит его на чтение, пока открывает индекс. Полная переиндексация строит `index.sqlite.new` без замка и берёт его на запись только на подмену файла: новые поиски ждут, текущие дочитывают.\n- **Модель.** Отпечаток модели берётся из настроек и не требует загрузки: проверка Т-25 модель не загружает. Сама модель загружается при первом эмбеддинге и лежит за мьютексом, который берётся на пачку из 4 текстов. Смена модели в настройках заменяет её при ближайшем задании; старая выгружается, когда её отпустят все, кто с ней работает.\n- **Т-25.** Проверка, увидевшая другой отпечаток, переводит проект в `reindex_required` и ничего не пишет. Состояние не меняют ни слежение, ни периодическая проверка, ни хук. `reindex` в этом состоянии без согласия возвращает `reindex_needs_consent` при любом `full`; с согласием строит индекс заново новой моделью. Полная переиндексация без согласия по проекту, чей индекс построен другой моделью, тоже не заменяет индекс.\n- **Слежение.** Слежение запускает `notify-debouncer-full` (500 мс) по корню документации. Фильтр отбрасывает не `.md`, папки с точки и `BARS_INSTRUCTION.md` в корне документации; путь без расширения проходит, потому что это может быть папка. Ошибка `notify` или пропавшая папка проекта ставят `watching: false`; слежение поднимается заново проверкой, назначенной через 5 секунд после сообщения, или периодической (раз в 15 минут). Потерянные события ловятся проверкой целиком через 5 секунд после каждой пачки, событием `Rescan` и перезапуском слежения, которое молчало при находках периодической проверки ([features/indexing/updates.md](../features/indexing/updates.md)). Нет корня документации — слежения нет, а проверка кончается ошибкой в `last_error`.\n- **Настройки.** Настройки читаются заново при каждом задании: правка `settings.toml` или `config.toml` руками подхватывается со следующей проверкой. Отдельного слежения за этими файлами пока нет.\n- **Завершение.** `shutdown` не берёт новых заданий, дожидается текущего и снимает слежение.",
+            "score": 0.100172214,
+            "score_kind": "rerank"
+          }
+        ],
+        "applied": {
+          "results": 5,
+          "candidates": 30,
+          "rerank_candidates": 30,
+          "min_score": 0.1,
+          "score_kind": "rerank",
+          "clamped": false
+        },
+        "indexing": false,
+        "pending": 0
+      }
+    },
+    {
+      "scenario": "S3",
+      "query": "Собери контекст для изменения выбора устройства rerank: поведение, решения, ограничения и проверки",
+      "response": {
+        "results": [
+          {
+            "path": "docs/knowledge/inference-devices.md",
+            "module": "knowledge",
+            "title": "Инференс на CPU, GPU и NPU",
+            "heading_chain": "Инференс на CPU, GPU и NPU/Выбор устройства зависит от нагрузки",
+            "first_line": 9,
+            "last_line": 20,
+            "text": "| Устройство | Когда имеет смысл проверить | Основные издержки |\n|---|---|---|\n| CPU | Одиночный короткий запрос, универсальный baseline | Пропускная способность памяти, конкуренция пулов, ISA и число потоков |\n| Встроенная GPU | Индексация и пачки rerank без отдельной VRAM | Общие с CPU память и тепловой бюджет; очереди, синхронизация, размещение буферов |\n| Дискретная GPU | Большие матричные вычисления и устойчивый поток пачек | Передача данных, VRAM весов и активаций, запуск kernels, зависимости runtime |\n| NPU | Поддерживаемый граф для длительной фоновой работы с целью снизить энергопотребление | Компиляция, ограничения форм/операторов/precision, зависимость от поколения и драйвера |\n\nCPU не обязан проигрывать GPU на коротком запросе, NPU не обязан выигрывать по задержке. TOPS разных устройств без одинаковых precision, sparsity и модели не позволяют предсказать время bars. Windows ML отдельно описывает NPU как путь для энергоэффективной длительной работы, GPU — для throughput, CPU — как универсальный вариант. [Microsoft: Windows ML](https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview).\n\nВывод для bars: embed_query, фоновую индексацию и rerank нужно оценивать раздельно. Размещение embed и rerank на разных устройствах — возможный опыт, но действующая настройка `[device]` общая; исследование не добавляет новых переключателей.",
+            "score": 0.18082882,
+            "score_kind": "rerank"
+          },
+          {
+            "path": "docs/features/models/device-verification.md",
+            "module": "features",
+            "title": "Этап 17 — проверка устройств моделей и ошибок индексации",
+            "heading_chain": "Этап 17 — проверка устройств моделей и ошибок индексации/Аппаратные сессии настоящего воркера",
+            "first_line": 34,
+            "last_line": 47,
+            "text": "Стенд — `crates/bars-worker/examples/verify_devices.rs`: отдельные каталоги home/fixture в `spikes/stage17/`, `Worker` и штатные обработчики SettingsGet/Save, ModelsInfo, Search. Канал MCP здесь не используется; MCP проверен отдельно. Веса берутся из существующего кэша без скачивания; пользовательские настройки, проекты и установленное приложение не менялись. Каталог моделей DTO смотрит в изолированный home, провайдер явно получает общий кэш: его downloaded-флаги не используются как доказательство загрузки.\n\nОбе сессии выполнены последовательно на i7-11700KF / RTX 3090, драйвер 32.0.16.1692. Устройство — EP сессии, не профиль размещения всех операторов.\n\n| Стартовый выбор | Подтверждено после загрузки | Проверка изменения через Save |\n|---|---|---|\n| embed Auto, rerank CPU | embed DirectML, rerank CPU | rerank переведён в Auto → DirectML; устройство embed сохранено |\n| embed CPU, rerank Auto | embed CPU, rerank DirectML | rerank переведён в CPU; устройство embed сохранено |\n\nВ каждой сессии: два документа проиндексированы; поиск и повторный поиск дали две оценки rerank без fallback; Settings Save/Get сохранил выбор. После смены только rerank его runtime стал unloaded, embed сохранил устройство; следующий поиск успешно загрузил новый rerank, отпечаток индекса остался совместимым. JSON содержит результаты до и после Save. Первый исследовательский запуск стенда преждевременно принял fallback при загрузке за готовность; он не засчитан. Финальный стенд требует `score_kind=rerank` и отсутствие `rerank_error`.\n\nВоспроизведение: собрать `cargo build -p bars-worker --example verify_devices --locked`, затем запустить `target/debug/examples/verify_devices.exe <новый-home> <кэш-моделей> auto cpu` и аналогично `cpu auto`. Home должен быть новым; путь к кэшу указан явно. Источники, параметры и бинарник сверять с манифестом, тяжёлые сессии выполнять последовательно.",
+            "score": 0.15393034,
+            "score_kind": "rerank"
+          },
+          {
+            "path": "docs/backlog/ideas.md",
+            "module": "backlog",
+            "title": "Пожелания автора",
+            "heading_chain": "Пожелания автора",
+            "first_line": 5,
+            "last_line": 16,
+            "text": "Идеи и пожелания автора к bars. Отметка `[x]` ставится, когда пожелание выполнено; рядом пишется коммит.\n\n## IDEA-01: Embed и rerank на разных устройствах\n- [x] Сделано\n- Источник: автор, 16-10-2026\n\nВыбирать устройство для каждой модели отдельно: одну можно посадить на GPU, вторую на CPU.\n\nРеализовано 18-10-2026: отдельные настройки, миграция старого ключа, сведения о сессиях и ошибки индексации. Проверки — [device-verification.md](../features/models/device-verification.md), доказательства — [device-evidence.json](../features/models/device-evidence.json). Коммит: `327bfbd`.",
+            "score": 0.12754393,
+            "score_kind": "rerank"
+          },
+          {
+            "path": "docs/features/models/device-plan.md",
+            "module": "features",
+            "title": "Этап 17 — раздельные устройства моделей и устойчивость индексации",
+            "heading_chain": "Этап 17 — раздельные устройства моделей и устойчивость индексации/План реализации и проверки",
+            "first_line": 98,
+            "last_line": 113,
+            "text": "| Шаг | Изменения | Доказательство завершения |\n|---|---|---|\n| 17.1 Настройки | Поля embed/rerank, raw-миграция, SettingsDoc, settings_io, UI types/mocks | Тесты auto/auto, auto/cpu, cpu/auto, cpu/cpu; старый CPU остаётся CPU/CPU; новые ключи перекрывают старый по отдельности; round-trip и комментарии |\n| 17.2 Слоты и сведения | Независимая инвалидизация, общий снимок исполнения, модели ONNX/candle/HTTP, runtime DTO | Fake-provider считает загрузки: смена rerank не грузит embed и наоборот; активный старый запрос заканчивается; старый loader не меняет новый снимок; polling не блокируется на Run |\n| 17.3 Ошибки индексации | Типы ошибок, один бюджет повторов, observer событий, серия отказов, partial report, защита layout/swap | Детерминированные fake-clock/fake-embedder и loopback HTTP; точные попытки, счётчики, неизменность старого документа и файла индекса |\n| 17.4 Окно | Мокап → независимые переключатели, фактическое устройство, ошибки и разные итоги | `needsReindex=false` при смене только устройства; тесты форматирования состояний; UI-проверка сцен и Save/reopen |\n| 17.5 Интеграция | Обновить канонические settings/local-models/external-models/updates/protocol/worker и документы окна | Тесты core/worker/protocol/UI, clippy, UI check/build; процессный стенд изолирован от рабочего bars |\n| 17.6 Приёмка | Реальные модели и смешанный выбор, затем фиксация результата | Сохранённые конфигурации, устройства, stderr/JSON, скриншоты, число вызовов и статусы; IDEA-01 и этап отметить лишь после доказательства |\n\nМатрица регрессии индексатора: единичный отказ с успехом на попытках 2 и 4; четыре отказа → пропуск; плохой/хороший/плохой документ сбрасывает серию; плохой/неизменённый/плохой/плохой достигает порога; 401 без повтора; 429 с четырьмя запросами; отмена в backoff; ошибка на последней пачке многочанкового документа; отсутствие частичной записи; сохранение ошибок после abort/cancel; следующий проход повторяет файл с прежним stat; неполная смена layout; запрет swap при первой/сменённой/той же модели, в том числе ошибка последнего документа. Существующие тесты UTF-8, обхода и смены fingerprint остаются регрессией.\n\nПроцессные сессии: отдельный `BARS_USER_HOME` внутри разрешённого стенда проекта, временный тестовый проект и текущий Rust fake-provider; установленный профиль не править. Для настоящих моделей использовать существующий кэш только для чтения либо явный изолированный кэш; тяжёлые запуски последовательно, с учётом соседних опытов этапов 11/13. Проверить auto/cpu и cpu/auto через фактический worker-путь: загрузка, индексация, поиск с rerank, Save и повтор. Устройство не доказывать одним TOML или mock JSON. CPU-fallback воспроизводить детерминированной ошибкой загрузчика; аппаратную недоступность GPU не имитировать изменением драйвера.\n\nTauri single-instance не изолируется одним BARS_USER_HOME: отдельная UI-сборка с уникальным identifier либо согласованная проверка обновлённого приложения. До UI-приёмки старый установленный bars не считать новой реализацией. Работа macOS и причина ISS-03 на другой машине остаются отдельно непроверенными.",
+            "score": 0.11221036,
+            "score_kind": "rerank"
+          }
+        ],
+        "applied": {
+          "results": 5,
+          "candidates": 30,
+          "rerank_candidates": 30,
+          "min_score": 0.1,
+          "score_kind": "rerank",
+          "clamped": false
+        },
+        "indexing": false,
+        "pending": 0
+      }
+    },
+    {
+      "scenario": "S6",
+      "query": "Какие направления оптимизации локальных моделей исследованы в проекте?",
+      "response": {
+        "results": [
+          {
+            "path": "docs/knowledge/inference-speed.md",
+            "module": "knowledge",
+            "title": "Ускорение инференса bars",
+            "heading_chain": "Ускорение инференса bars",
+            "first_line": 5,
+            "last_line": 11,
+            "text": "Результаты 18-10-2026: FP16 rerank + batch16 на DirectML ускорил полный поиск в 1,6–1,7 раза без обнаруженных потерь на 138 вопросах; проверен настоящий worker, конкуренция и поиск при индексации. [Доказательства](inference-2026-10-18/Index.md). Закреплённый FP16 loader реализован в продуктовом коде; установленное приложение в этой сессии не обновляется. Требования — Т-3, Т-17, НФТ-2; продуктовый контракт — [встроенные модели](../features/models/local-models.md).\n\nСвязанные исследования: [CPU, GPU и NPU](inference-devices.md), [DirectML](directml-performance.md), [библиотеки](inference-libraries.md). Исторические числа — [спайк поиска](spike-search.md), конкуренция за модель — [поиск при индексации](search-during-indexing.md).\n\nПроверка локального fastembed 7.1.1, архитектура стенда и воспроизведение — [проект этапа 11](../features/models/inference-plan.md). Level3 и сортировка embed уже включены; повторное включение не является ускорением. Автор 18-10-2026 поручил перейти от широкой сетки к внедрению и допускает полезные микрооптимизации; дополнительные ABBA/binding/cache не являются условием применения уже проверенного результата.\nother headers:\n## Полный поиск и качество FP16 rerank\n## Настоящий worker, очередь и общая память\n## Отобранные и отклонённые оптимизации\n## Embed и индексация: полезный кандидат, отдельная приёмка\n## Переносимость и границы вывода\n## Продуктовое внедрение и приёмка\n## Исторические замеры до этапа 11\n## Профилирование до оптимизаций\n## CPU: потоки и конкуренция\n## Формы входа, паддинг и пачки\n## Оптимизация графа и кэш\n## FP16, BF16, INT8 и INT4\n## Rerank: уменьшать работу с проверкой качества\n## Протокол воспроизведения замеров\n## Порядок проверки для bars",
+            "score": 0.31510335,
+            "score_kind": "rerank"
+          },
+          {
+            "path": "docs/features/models/Index.md",
+            "module": "features",
+            "title": "Модели bars — оглавление",
+            "heading_chain": "Модели",
+            "first_line": 5,
+            "last_line": 17,
+            "text": "Откуда bars берёт векторы и оценки реранка.\n\n- [local-models.md](local-models.md) — встроенные модели через fastembed-rs: каталог (ONNX и candle), встроенный rerank, префиксы, папка моделей, отпечаток модели.\n- [external-models.md](external-models.md) — удалённый провайдер и локальный OpenAI-совместимый адрес: адреса и форматы запросов, размерность, ключи, ошибки.\n- [memory-plan.md](memory-plan.md) — этап 13: фазовые замеры памяти, спайк выгрузки rerank, буферы и критерии принятия оптимизаций.\n- [memory-reduction.md](memory-reduction.md) — проект снижения памяти: приоритет FP16 rerank, затем lifecycle и embed, контракты артефактов и проверки.\n- [inference-plan.md](inference-plan.md) — этап 11: методика измерений, результаты отбора, контракт внедрения FP16 rerank и границы приёмки.\n- [device-plan.md](device-plan.md) — этап 17: отдельные устройства embed/rerank, сведения об исполнении, повторы документов, защита полной переиндексации и план приёмки.\n- [device-verification.md](device-verification.md) — результаты этапа 17: регрессии, реальные CPU/DirectML-сессии, Save/Get и границы UI-проверки.\n- [device-evidence.json](device-evidence.json) — устройства, выдача до и после Save, хеши исходников и бинарника этапа 17.\n- [gguf-plan.md](gguf-plan.md) — этап 22: контракт встроенного llama.cpp, спайк и критерии приёмки.",
+            "score": 0.21717146,
+            "score_kind": "rerank"
+          }
+        ],
+        "applied": {
+          "results": 5,
+          "candidates": 30,
+          "rerank_candidates": 30,
+          "min_score": 0.1,
+          "score_kind": "rerank",
+          "clamped": false
+        },
+        "indexing": false,
+        "pending": 0
+      }
+    }
+  ],
+  "corpus_frozen": false,
+  "comparison_with_graphrag": false,
+  "initial_unfiltered_attempt": {
+    "finding": "all three queries ranked the newly written research scenario first; not usable as independent baseline",
+    "excluded_on_repeat": [
+      "chats/**",
+      "BARS_INSTRUCTION.md (not indexed)",
+      "knowledge/graph-integration-2026-10-18.md",
+      "knowledge/graph-knowledge-retrieval.md",
+      "knowledge/graph-and-relations.md"
+    ]
+  }
+}

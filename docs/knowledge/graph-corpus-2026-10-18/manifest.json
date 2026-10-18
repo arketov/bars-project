@@ -1,0 +1,1036 @@
+{
+  "kind": "development-observation",
+  "independent_holdout": false,
+  "method": "explicit-markdown-v4",
+  "snapshot": "c28a21a0ff55e867a29ecee8565222d9bcbb71c4c6cad28728a9df4f9148db7f",
+  "embedding": {
+    "bars_version": "0.1.0",
+    "chunk_max_chars": "6000",
+    "chunk_min_chars": "250",
+    "docs_root": "docs",
+    "model_dim": "1024",
+    "model_doc_prefix": "",
+    "model_id": "BAAI/bge-m3",
+    "model_source": "builtin",
+    "schema_version": "1",
+    "stem_version": "1",
+    "updated_at": "1792342524"
+  },
+  "vectors_recomputed": false,
+  "files": {
+    "dataset.json": {
+      "sha256": "35df38dfb5e76c0d00b0578e13dc7627cc714997333fc5700afc4563b9c8e572",
+      "bytes": 7440278
+    },
+    "measurement.json": {
+      "sha256": "41456c350d382db6f93fe027407c25f4067e54d3d091bf06bef06261171d1d7e",
+      "bytes": 32260
+    },
+    "process.json": {
+      "sha256": "5c472d24359986a01678a3b0d58b0080e8637b4903cd4a48ec594da9e4024e59",
+      "bytes": 6759
+    }
+  },
+  "sources": [
+    {
+      "path": "Index.md",
+      "hash": "2f6eb99475bcca4390792fec898ad086788b0e885bb467327bff2b03829c1901",
+      "reference": {
+        "kind": "document",
+        "id": "c7cf309cef31fbb3e10b90fbd7ec5839526676e10fa5c206ece048ecb8f59eb4",
+        "revision": "2f6eb99475bcca4390792fec898ad086788b0e885bb467327bff2b03829c1901"
+      }
+    },
+    {
+      "path": "adr/0001-docs-by-features.md",
+      "hash": "b67558d5af84f5a1832d08307c616692b564f71276fc363e0b73d868017c9071",
+      "reference": {
+        "kind": "document",
+        "id": "5acb0f3730aea31f20a24ab6e7533c6d817356e83d4c2948fd2cb0b75cfa796d",
+        "revision": "b67558d5af84f5a1832d08307c616692b564f71276fc363e0b73d868017c9071"
+      }
+    },
+    {
+      "path": "adr/0002-qwen-gguf.md",
+      "hash": "e793c9f3298cc266caabf841dd099333cf0c1d7221ad4e81c613fe64d5de2a58",
+      "reference": {
+        "kind": "document",
+        "id": "be6c25845618a4a136ba95e6aea3d672e48bb2664954e0babdda3d96936f6b33",
+        "revision": "e793c9f3298cc266caabf841dd099333cf0c1d7221ad4e81c613fe64d5de2a58"
+      }
+    },
+    {
+      "path": "adr/Index.md",
+      "hash": "6d7ccdfd71a48cc873a7bca18fb5eb0f25b1887396fe422a4903de9babd2e0f2",
+      "reference": {
+        "kind": "document",
+        "id": "ff630dd5d9deb43f3df1b23956ed81b1409b8ecd36325bbd95798126a353a8ee",
+        "revision": "6d7ccdfd71a48cc873a7bca18fb5eb0f25b1887396fe422a4903de9babd2e0f2"
+      }
+    },
+    {
+      "path": "architecture/Index.md",
+      "hash": "376cb68261d1e7821c2a2ca69a3a526b8cddd722773aef038f84815582bb6403",
+      "reference": {
+        "kind": "document",
+        "id": "e1740f2d370a04203a3d92fd6304ccf1e0f17ccfc0029d540a7531b7a14ecc8a",
+        "revision": "376cb68261d1e7821c2a2ca69a3a526b8cddd722773aef038f84815582bb6403"
+      }
+    },
+    {
+      "path": "architecture/components.md",
+      "hash": "d7c5f5018bfd7b8842f3421bc860ba7657ad23e67efd02f79d878f863efaa72e",
+      "reference": {
+        "kind": "document",
+        "id": "775f35a8a1cb2f342dcd737b64c3f8ee37e6dd181373af9dee2923bcb6b06fe1",
+        "revision": "d7c5f5018bfd7b8842f3421bc860ba7657ad23e67efd02f79d878f863efaa72e"
+      }
+    },
+    {
+      "path": "architecture/files.md",
+      "hash": "7f9a6146012aaaba56d685adf8d2a4d4b458d8d89b484a537409a7e5e61a71aa",
+      "reference": {
+        "kind": "document",
+        "id": "342fe1a6c6524cb9cb84fd72400c7c72bd782137434b5484141ea1b405e3bc81",
+        "revision": "7f9a6146012aaaba56d685adf8d2a4d4b458d8d89b484a537409a7e5e61a71aa"
+      }
+    },
+    {
+      "path": "architecture/ipc.md",
+      "hash": "c06a5a3ad4d010dc512bb9e0ef296c9f320f356e750dacd5ddd8c0352446b4e0",
+      "reference": {
+        "kind": "document",
+        "id": "3b20350df1c40a3379893b24ce2d75f3b7fe754f1924493c49fd1ebe47761922",
+        "revision": "c06a5a3ad4d010dc512bb9e0ef296c9f320f356e750dacd5ddd8c0352446b4e0"
+      }
+    },
+    {
+      "path": "architecture/protocol.md",
+      "hash": "46e4eab73b4841f9e400cc693c8939f8577baf62f87a6b620cba71c9d3724482",
+      "reference": {
+        "kind": "document",
+        "id": "fd7c1edb77fa7f80f548667b93b8c5541674dd1c97a8b9fad06c55159b9bc5ff",
+        "revision": "46e4eab73b4841f9e400cc693c8939f8577baf62f87a6b620cba71c9d3724482"
+      }
+    },
+    {
+      "path": "architecture/schema.md",
+      "hash": "bd9bbc5595508824afa5d6a83328e0df6007e64cd7d459172ce8cc4b926074c6",
+      "reference": {
+        "kind": "document",
+        "id": "b600a916512ae627417d56f9253443ea39bfe9ef26489fea23f3a77c089609a9",
+        "revision": "bd9bbc5595508824afa5d6a83328e0df6007e64cd7d459172ce8cc4b926074c6"
+      }
+    },
+    {
+      "path": "architecture/secrets.md",
+      "hash": "480e6bc7bbec2a312786b9011e144c67e453438d7fbdfa0653e29ebe2d7eb8c0",
+      "reference": {
+        "kind": "document",
+        "id": "e7b5a1623a61c87095e6ba0b6c96dd081f4ffd5e8d3bd718f71fdf2e2663f2f2",
+        "revision": "480e6bc7bbec2a312786b9011e144c67e453438d7fbdfa0653e29ebe2d7eb8c0"
+      }
+    },
+    {
+      "path": "architecture/stack.md",
+      "hash": "325edc8b069382b1eb64a208dfc88ea73c3029644b71e19de9e0bd11670e9bad",
+      "reference": {
+        "kind": "document",
+        "id": "3cb3b756628fb93f897b5fda12314397cd1f484598a5369a03f5b5b3bd47e431",
+        "revision": "325edc8b069382b1eb64a208dfc88ea73c3029644b71e19de9e0bd11670e9bad"
+      }
+    },
+    {
+      "path": "architecture/vector-search.md",
+      "hash": "00f09befae2941a9f4a97d9b501418df46ece2f906b15ec5173e9ca3262a4f00",
+      "reference": {
+        "kind": "document",
+        "id": "653ce3eaec90affec9469f77d8cc74d4258c0604e36c22d2a016059a72f467ca",
+        "revision": "00f09befae2941a9f4a97d9b501418df46ece2f906b15ec5173e9ca3262a4f00"
+      }
+    },
+    {
+      "path": "architecture/worker.md",
+      "hash": "89cb0b65a9df4c31d12c6104753a5d8b19f761bfb630e06222a34f59994f8470",
+      "reference": {
+        "kind": "document",
+        "id": "4a8ebda525a034055e9b40e0281f19cbec9ca92757464822fb297095f5f73422",
+        "revision": "89cb0b65a9df4c31d12c6104753a5d8b19f761bfb630e06222a34f59994f8470"
+      }
+    },
+    {
+      "path": "backlog/Index.md",
+      "hash": "20a5fe6a7da66cc3ee48027ec2ba21e58e7221403f69b77f97967ad053491c72",
+      "reference": {
+        "kind": "document",
+        "id": "1556f39fde4d4780311071f061aa3cbd2631c602047b25023f37320233bf0767",
+        "revision": "20a5fe6a7da66cc3ee48027ec2ba21e58e7221403f69b77f97967ad053491c72"
+      }
+    },
+    {
+      "path": "backlog/ideas.md",
+      "hash": "922305932e280296912df359ec63e3b77cc3aeb556daa79cda05fa147863d293",
+      "reference": {
+        "kind": "document",
+        "id": "505da6e376731f2bf70fd5221e2c003028f950a8396ab6ab88082a2fa1acf562",
+        "revision": "922305932e280296912df359ec63e3b77cc3aeb556daa79cda05fa147863d293"
+      }
+    },
+    {
+      "path": "backlog/issues.md",
+      "hash": "a7891be25a9ebd40cec05c8d312fdcda91ea7e566a3a9c381c9a8f19e4818d5a",
+      "reference": {
+        "kind": "document",
+        "id": "0b0610c40ea2d0cd2cef698193c48c20d562c167996dd3abab636aad4d0af9f0",
+        "revision": "a7891be25a9ebd40cec05c8d312fdcda91ea7e566a3a9c381c9a8f19e4818d5a"
+      }
+    },
+    {
+      "path": "features/Index.md",
+      "hash": "99b78aade79f95b3871ead9c07e6d3d29c05df67eb8529b64dcd147a0f68ff79",
+      "reference": {
+        "kind": "document",
+        "id": "66fe23f5f24cf86a105fc8e1d2696979bdc7a607d115fe568a549ad6aa81b7d6",
+        "revision": "99b78aade79f95b3871ead9c07e6d3d29c05df67eb8529b64dcd147a0f68ff79"
+      }
+    },
+    {
+      "path": "features/agent-tools/Index.md",
+      "hash": "d07ee4c7510bf6ae91eeaaadea40e5763bdc793711633f93a7c1982f49602620",
+      "reference": {
+        "kind": "document",
+        "id": "84ed4f1d8c8c23321845e8cd1929f0e9017aea327d6f778b29179710559b95c3",
+        "revision": "d07ee4c7510bf6ae91eeaaadea40e5763bdc793711633f93a7c1982f49602620"
+      }
+    },
+    {
+      "path": "features/agent-tools/cli.md",
+      "hash": "303ff2554b7c4a50a2eb5de57bec864b1cacfe24c9f5a5b7b4e65bbc18f66e9d",
+      "reference": {
+        "kind": "document",
+        "id": "5cd1d0a89a6c163b9141d8af811cf8af3ddedb693d694754ebab44eac6aa6993",
+        "revision": "303ff2554b7c4a50a2eb5de57bec864b1cacfe24c9f5a5b7b4e65bbc18f66e9d"
+      }
+    },
+    {
+      "path": "features/agent-tools/mcp-tools.md",
+      "hash": "c031585f4555a221d979b038c9ca397a1b4b95b04053f31139d522910e20b9cf",
+      "reference": {
+        "kind": "document",
+        "id": "542c264d5c93fbae70fe7cdf71dd2dde1b31a4456ad746c2cc36ae30ce38c6ca",
+        "revision": "c031585f4555a221d979b038c9ca397a1b4b95b04053f31139d522910e20b9cf"
+      }
+    },
+    {
+      "path": "features/clients/Index.md",
+      "hash": "bacfb1eb74c7af6c3f4d7fc55b393cd7b90d71029e89e9acabf9c123acb1212c",
+      "reference": {
+        "kind": "document",
+        "id": "8ad955c581e13aedd94f6c043d709cacab5a6191e121a3dbb9d66479836d7936",
+        "revision": "bacfb1eb74c7af6c3f4d7fc55b393cd7b90d71029e89e9acabf9c123acb1212c"
+      }
+    },
+    {
+      "path": "features/clients/clients.md",
+      "hash": "a5fbecad242830ec7d3c7403445cd7c099cb01578aa69e54e8da6de777e7bd43",
+      "reference": {
+        "kind": "document",
+        "id": "9803c88d464517f2c3db0bfb118b42ea36b4cbfae5d11d1fea181a420aaaff32",
+        "revision": "a5fbecad242830ec7d3c7403445cd7c099cb01578aa69e54e8da6de777e7bd43"
+      }
+    },
+    {
+      "path": "features/clients/plan.md",
+      "hash": "9e25e48d0e4341d039985a1d6cd2ae46d21d5c57bcedcf1f86c81f3ac3b324b3",
+      "reference": {
+        "kind": "document",
+        "id": "36861806051a86e5a2de439b3d45d7c41bc0d0e973cac6c23eddb2e0f66debc9",
+        "revision": "9e25e48d0e4341d039985a1d6cd2ae46d21d5c57bcedcf1f86c81f3ac3b324b3"
+      }
+    },
+    {
+      "path": "features/clients/verification.md",
+      "hash": "1cdb00b6dfd594904f7202d25f6bda894528da328c3dd348666d69a909fe88fc",
+      "reference": {
+        "kind": "document",
+        "id": "9bf6b57791b5fece0dbae4ac6a286eaeba570ad6a08b4f2d9b76278d14e376a8",
+        "revision": "1cdb00b6dfd594904f7202d25f6bda894528da328c3dd348666d69a909fe88fc"
+      }
+    },
+    {
+      "path": "features/distribution/Index.md",
+      "hash": "80e880b4896ea196665552d434509e263d0c3f0f4fd304eb6ad65d8540ccf1b4",
+      "reference": {
+        "kind": "document",
+        "id": "68f0e088859d1af176510c413d79e81f1684b5d1fb5533c01396f3910ad12de7",
+        "revision": "80e880b4896ea196665552d434509e263d0c3f0f4fd304eb6ad65d8540ccf1b4"
+      }
+    },
+    {
+      "path": "features/distribution/autostart.md",
+      "hash": "559963018ac01f800a2b1684c2d77eb19881ffb300b393b63f623de8d393d40a",
+      "reference": {
+        "kind": "document",
+        "id": "0d0c7b3d88774b3b452ae477c23596fb22428dbbe7f1b66a3a2aa33be8ad53ae",
+        "revision": "559963018ac01f800a2b1684c2d77eb19881ffb300b393b63f623de8d393d40a"
+      }
+    },
+    {
+      "path": "features/distribution/installer.md",
+      "hash": "99dbedd40bb75797824c4e72fd95e89b1b1d332c6e8e1c8e6465c9d70a4ef7b6",
+      "reference": {
+        "kind": "document",
+        "id": "bf905b32c1b48a2195d771bd4a1801aff1cd89cdb8fd2a23fe011a1420fb749d",
+        "revision": "99dbedd40bb75797824c4e72fd95e89b1b1d332c6e8e1c8e6465c9d70a4ef7b6"
+      }
+    },
+    {
+      "path": "features/docs-convention/Index.md",
+      "hash": "f00b817690e1513c22c7c0f66d42fa26c339ade059b9a5e0ad73b812f12cda55",
+      "reference": {
+        "kind": "document",
+        "id": "65386eff6552b98d7ac6bebc81ef75e0cff90a879f416a656c205d0e2c8c6c92",
+        "revision": "f00b817690e1513c22c7c0f66d42fa26c339ade059b9a5e0ad73b812f12cda55"
+      }
+    },
+    {
+      "path": "features/docs-convention/bars-instruction.md",
+      "hash": "8ac8188567fc6c5aba87dd7bd22b713a575b5366b9812326c30b509d8818f007",
+      "reference": {
+        "kind": "document",
+        "id": "ff669c6cfce4c7db024beced70660ffaeda8b605712b59afd8c63089119523bb",
+        "revision": "8ac8188567fc6c5aba87dd7bd22b713a575b5366b9812326c30b509d8818f007"
+      }
+    },
+    {
+      "path": "features/docs-convention/delivery.md",
+      "hash": "955a8bb767f3d2e1cae30c4684605a5ec4591bc661d9dc0914c8b8b2e44baabc",
+      "reference": {
+        "kind": "document",
+        "id": "10cfbb9b6e99e98ff76e82be30b0e303b3cac5857073c38aa4c8c917b91f605a",
+        "revision": "955a8bb767f3d2e1cae30c4684605a5ec4591bc661d9dc0914c8b8b2e44baabc"
+      }
+    },
+    {
+      "path": "features/docs-convention/layout.md",
+      "hash": "7740e43d1a0f76d411781e366c999abf84f4d43914505625a9e78d872e328ea0",
+      "reference": {
+        "kind": "document",
+        "id": "a471908d6edf5d0b4cb92dcfe5e099dff621f30e5c014f1703eedc1dfeefc6f7",
+        "revision": "7740e43d1a0f76d411781e366c999abf84f4d43914505625a9e78d872e328ea0"
+      }
+    },
+    {
+      "path": "features/docs-convention/plan.md",
+      "hash": "599f0ddbf365d18c303309ebd543c898f72a97c2e753ae12ea45ffa95b06cf7a",
+      "reference": {
+        "kind": "document",
+        "id": "ce5154e9dd494bd4a336917d4903aa65686e313a8927dd07d9192c4226783b0b",
+        "revision": "599f0ddbf365d18c303309ebd543c898f72a97c2e753ae12ea45ffa95b06cf7a"
+      }
+    },
+    {
+      "path": "features/docs-convention/session-log.md",
+      "hash": "cb3de334b9b9341cd3f615546a55b0e8cc56ab6f79235456a5ae4a2935b1aee1",
+      "reference": {
+        "kind": "document",
+        "id": "f949f481599d5bdcd7b3a8872f614584a00a6829545103e644ddbd8e82434d0d",
+        "revision": "cb3de334b9b9341cd3f615546a55b0e8cc56ab6f79235456a5ae4a2935b1aee1"
+      }
+    },
+    {
+      "path": "features/docs-convention/verification.md",
+      "hash": "6fc5cf9b9e149d3594f57a9c3ead33edc6a6f0f2f7d3279b6994310a3a2e7246",
+      "reference": {
+        "kind": "document",
+        "id": "ea528519e5f34e402299aa05c66cce8a77f15b445ce072963c0612d7b75ded87",
+        "revision": "6fc5cf9b9e149d3594f57a9c3ead33edc6a6f0f2f7d3279b6994310a3a2e7246"
+      }
+    },
+    {
+      "path": "features/indexing/Index.md",
+      "hash": "4b98d98ade81ba68be183be853d1ed864e5b31be5987dc6c1bb7b9feb0af919e",
+      "reference": {
+        "kind": "document",
+        "id": "b23f7141b23712ad1ce79519509d31823d3799aac03c214ee201eec7fd6600d9",
+        "revision": "4b98d98ade81ba68be183be853d1ed864e5b31be5987dc6c1bb7b9feb0af919e"
+      }
+    },
+    {
+      "path": "features/indexing/chunking.md",
+      "hash": "029214b8f3074278fda75fe76528230153732883ad3266d0695f04dbe09a113c",
+      "reference": {
+        "kind": "document",
+        "id": "cf9bea894d572d40655d38485dea12ce7461d30d44795dc0908ffd7eac4880fd",
+        "revision": "029214b8f3074278fda75fe76528230153732883ad3266d0695f04dbe09a113c"
+      }
+    },
+    {
+      "path": "features/indexing/updates.md",
+      "hash": "735873144776df0b5dba275c1d131890fd1f1f4924e341b05a3c61f8c245dd66",
+      "reference": {
+        "kind": "document",
+        "id": "640bf8ab36734328146ac0c916282304bb32ac53a06af4a81cff63a9843974bb",
+        "revision": "735873144776df0b5dba275c1d131890fd1f1f4924e341b05a3c61f8c245dd66"
+      }
+    },
+    {
+      "path": "features/models/Index.md",
+      "hash": "1ec22c9e1a6693c5602036d116f579ffa1e47a49a786b819e6ccc7ce6ba9ebcd",
+      "reference": {
+        "kind": "document",
+        "id": "fbd53fc93cc7868132f3b2a8dda5effdfd403d121581c1592487aaa083f9f21d",
+        "revision": "1ec22c9e1a6693c5602036d116f579ffa1e47a49a786b819e6ccc7ce6ba9ebcd"
+      }
+    },
+    {
+      "path": "features/models/device-plan.md",
+      "hash": "77495ceb177a4524aacd991869086e92a456733e1f6adaf0d27a88468d6127ba",
+      "reference": {
+        "kind": "document",
+        "id": "6c7a10498d6c8d373929b9dad20dc62281d850daa8583270d1c57e9af7dbad72",
+        "revision": "77495ceb177a4524aacd991869086e92a456733e1f6adaf0d27a88468d6127ba"
+      }
+    },
+    {
+      "path": "features/models/device-verification.md",
+      "hash": "2f4f61cc3dc7b4fa2aa73515db3d2ab259b39101cdc601f866639182fcdaa40b",
+      "reference": {
+        "kind": "document",
+        "id": "6ea61a8f305e66cb4705125e11685c4bb527cea3c16e106920cc9c3f28917c1b",
+        "revision": "2f4f61cc3dc7b4fa2aa73515db3d2ab259b39101cdc601f866639182fcdaa40b"
+      }
+    },
+    {
+      "path": "features/models/external-models.md",
+      "hash": "5aead7faa97ddd71fba80ea0f4446eca9ade0a73478c7340bd656214be67b6cb",
+      "reference": {
+        "kind": "document",
+        "id": "16173a4e6debe42b554c622498ac7c68c8a3094deffb82e0ea8bd3f5ce327e02",
+        "revision": "5aead7faa97ddd71fba80ea0f4446eca9ade0a73478c7340bd656214be67b6cb"
+      }
+    },
+    {
+      "path": "features/models/gguf-plan.md",
+      "hash": "81a1410394798a50e9c7fbb8be80698b8428e1ef05c3eda1682963553224ade6",
+      "reference": {
+        "kind": "document",
+        "id": "3543634f8e27b7f449be0ab4502b48c1960809c38b9e5e6da727c5e89c57a704",
+        "revision": "81a1410394798a50e9c7fbb8be80698b8428e1ef05c3eda1682963553224ade6"
+      }
+    },
+    {
+      "path": "features/models/inference-plan.md",
+      "hash": "f37eeda3aa9131e1ace2035033bbe7140ddc58a009e8b684b0728a0d946073e1",
+      "reference": {
+        "kind": "document",
+        "id": "2b39f3dbf3fd40f9f61961eb0405809a829d59d504a74d526ed440f9ad8a7b62",
+        "revision": "f37eeda3aa9131e1ace2035033bbe7140ddc58a009e8b684b0728a0d946073e1"
+      }
+    },
+    {
+      "path": "features/models/local-models.md",
+      "hash": "e195f9d49caf033545d1f9dc69cb1978de464d9afb6dbdef66acea07b5d6a360",
+      "reference": {
+        "kind": "document",
+        "id": "49782234bbb10d6fe00f24ef1963450c25cbcc892d3f98451773fa44455cfc93",
+        "revision": "e195f9d49caf033545d1f9dc69cb1978de464d9afb6dbdef66acea07b5d6a360"
+      }
+    },
+    {
+      "path": "features/models/memory-plan.md",
+      "hash": "43d77b1039f32a5345b4c30ea20ebfda0019ff154e7cce2e1b884a3feea9d51f",
+      "reference": {
+        "kind": "document",
+        "id": "62a6cb38462c6e395aef92e6c3a17ceabdbdcd0f71f5ba0bb1caa43d47c6ecaf",
+        "revision": "43d77b1039f32a5345b4c30ea20ebfda0019ff154e7cce2e1b884a3feea9d51f"
+      }
+    },
+    {
+      "path": "features/models/memory-reduction.md",
+      "hash": "6e333ffef36a6047f98d7e049ba3c378e079b20df1720cb513b32634136f2478",
+      "reference": {
+        "kind": "document",
+        "id": "41273c055bfaa7e6cc71b2a20928ddc3b27bd73943e6ed6d541282d40b9b214c",
+        "revision": "6e333ffef36a6047f98d7e049ba3c378e079b20df1720cb513b32634136f2478"
+      }
+    },
+    {
+      "path": "features/projects/Index.md",
+      "hash": "553892be7d72e99afbc5e0f43bdfe42c98a9887e12e062d20cd6c3608eee859a",
+      "reference": {
+        "kind": "document",
+        "id": "2488da276d085ba2edebf1dd24f80367a30cec78b7750c3a0ee2a4f087f90909",
+        "revision": "553892be7d72e99afbc5e0f43bdfe42c98a9887e12e062d20cd6c3608eee859a"
+      }
+    },
+    {
+      "path": "features/projects/deletion.md",
+      "hash": "1e31ea597507ce178cba9261545098c32e21757366f8caddf5880b2cbaf749f5",
+      "reference": {
+        "kind": "document",
+        "id": "c4cb3d255003f620cb55062154a84bba5516fd0a63cef9b2bdfae0bf361750e0",
+        "revision": "1e31ea597507ce178cba9261545098c32e21757366f8caddf5880b2cbaf749f5"
+      }
+    },
+    {
+      "path": "features/projects/projects.md",
+      "hash": "1349c576d1f4202586bb7c1614cd275e74e316aa4abb69d1fc1fa2ff12db12da",
+      "reference": {
+        "kind": "document",
+        "id": "5f4a3488b50decbb4d011c4e240af163f74755de7401f659bb761eb332ce1f4a",
+        "revision": "1349c576d1f4202586bb7c1614cd275e74e316aa4abb69d1fc1fa2ff12db12da"
+      }
+    },
+    {
+      "path": "features/search/Index.md",
+      "hash": "33254c070b93ae2369cd9e305458a8eeb3ec6c637cd03bb7db7f7cf7c73b0134",
+      "reference": {
+        "kind": "document",
+        "id": "b4cc1e31537547f4a4e868770728f4d050318752c33b56ead03a69d8d8e3dde2",
+        "revision": "33254c070b93ae2369cd9e305458a8eeb3ec6c637cd03bb7db7f7cf7c73b0134"
+      }
+    },
+    {
+      "path": "features/search/hybrid-search.md",
+      "hash": "af5f0aa3e7eed4bd63d0409636f569a1129975239f78cef765a75caddd1475b0",
+      "reference": {
+        "kind": "document",
+        "id": "d8bedf9cba8ad0bfe9b24a7910d93f977e85c6e391ed83dd6eb234fd4684762b",
+        "revision": "af5f0aa3e7eed4bd63d0409636f569a1129975239f78cef765a75caddd1475b0"
+      }
+    },
+    {
+      "path": "features/search/maintenance-tools.md",
+      "hash": "d8cc58768fb194c0061e42317a565dc95fc0a7fc81d6e99592c24df15ad0ae28",
+      "reference": {
+        "kind": "document",
+        "id": "2247e5859c5a9ded60f950afa6db41573d59a48c4d3dabda38d67516fd099378",
+        "revision": "d8cc58768fb194c0061e42317a565dc95fc0a7fc81d6e99592c24df15ad0ae28"
+      }
+    },
+    {
+      "path": "features/search/plan.md",
+      "hash": "f8dabff67f15855178591bea0a50f74f22b9bafde1e1bea2146750a684e0a748",
+      "reference": {
+        "kind": "document",
+        "id": "8ac816058276e97fca5159388d2763a9bdaa146cc220d021965c02426881d835",
+        "revision": "f8dabff67f15855178591bea0a50f74f22b9bafde1e1bea2146750a684e0a748"
+      }
+    },
+    {
+      "path": "features/settings/Index.md",
+      "hash": "13c6ca916d159d9e26cd5941628fa06309576a67e290fc11c7a22b96faba7a06",
+      "reference": {
+        "kind": "document",
+        "id": "2ea167d00af356b07c6b1f59944f3d5e3aa14741f3ed9e1abe77883cd500d882",
+        "revision": "13c6ca916d159d9e26cd5941628fa06309576a67e290fc11c7a22b96faba7a06"
+      }
+    },
+    {
+      "path": "features/settings/settings.md",
+      "hash": "338cbe99579af79681dba00a3c02334185ced75c8e0227a8771d2aacf0b9d9f9",
+      "reference": {
+        "kind": "document",
+        "id": "65f968be27aadba71646cb4eaddde902eae4dd40c4b8daca8cceceea5bedcf21",
+        "revision": "338cbe99579af79681dba00a3c02334185ced75c8e0227a8771d2aacf0b9d9f9"
+      }
+    },
+    {
+      "path": "features/window/Index.md",
+      "hash": "123a33406b8b621da2d8feb5cfe9402ac71d8d1ba33f0b32fb156c3759a4141c",
+      "reference": {
+        "kind": "document",
+        "id": "0f613daf73ce8c2fa2db1630fd47eb4e5af656b475a4d8e3e67e4eb6cd0fe3f2",
+        "revision": "123a33406b8b621da2d8feb5cfe9402ac71d8d1ba33f0b32fb156c3759a4141c"
+      }
+    },
+    {
+      "path": "features/window/document-actions.md",
+      "hash": "79b9b3b938b1a445156a1373d1027fad0e5b0663856c13e927c5212168be1cc3",
+      "reference": {
+        "kind": "document",
+        "id": "ab43909af5bb5b26b97fe45a08e703a01e25eeecd3857eb7448723c1346ad0fb",
+        "revision": "79b9b3b938b1a445156a1373d1027fad0e5b0663856c13e927c5212168be1cc3"
+      }
+    },
+    {
+      "path": "features/window/empty-states.md",
+      "hash": "efcd22760d93233045f91fa20b6e2749dc39a2b90af408017d2ee84a93aa61b8",
+      "reference": {
+        "kind": "document",
+        "id": "6eafb02d5b116c16d29cebec72c3fdf6faec0d2c662f6f4c4dd7e7a80ca0f306",
+        "revision": "efcd22760d93233045f91fa20b6e2749dc39a2b90af408017d2ee84a93aa61b8"
+      }
+    },
+    {
+      "path": "features/window/error-states.md",
+      "hash": "5bf0bf9870513e3a2565bc6e6668c974f87b6716e79231a00b5cbeb4667e782d",
+      "reference": {
+        "kind": "document",
+        "id": "577343d2f68c8bb2ee2c0353c3afd9c91b2fd62d2aff5e0148b48c530d4a482b",
+        "revision": "5bf0bf9870513e3a2565bc6e6668c974f87b6716e79231a00b5cbeb4667e782d"
+      }
+    },
+    {
+      "path": "features/window/implementation.md",
+      "hash": "890120fdef834da386906cc7937b9010e40a95066724236938bf4de18821b442",
+      "reference": {
+        "kind": "document",
+        "id": "d9473cd6fd83df695edb25e5d6682f0ea64d9dbe14f411146cf0bcab1a434ac7",
+        "revision": "890120fdef834da386906cc7937b9010e40a95066724236938bf4de18821b442"
+      }
+    },
+    {
+      "path": "features/window/indexing-progress.md",
+      "hash": "a8dd912456506c18f8934c5312b5d82c5a132d8a6451e146fe7be0f23b5835d9",
+      "reference": {
+        "kind": "document",
+        "id": "f9283847b960e4e6b3af4b160ed6c5b6ede4e4c5603675b48561c1b0fba0ee1a",
+        "revision": "a8dd912456506c18f8934c5312b5d82c5a132d8a6451e146fe7be0f23b5835d9"
+      }
+    },
+    {
+      "path": "features/window/logs.md",
+      "hash": "9ce194af82a48acca98ccadad9b6fd59f1483840d4e60c746dad6f89d1464e9e",
+      "reference": {
+        "kind": "document",
+        "id": "110b5d5dc0ac7fa7029b75152832ce4afc5bd43f7fc05d0f5ee81c171173ae82",
+        "revision": "9ce194af82a48acca98ccadad9b6fd59f1483840d4e60c746dad6f89d1464e9e"
+      }
+    },
+    {
+      "path": "features/window/main-window.md",
+      "hash": "e002e55ed3f70d7d8bd56a12f706d6b6682adaed5ae5b029afa94edffa05b54e",
+      "reference": {
+        "kind": "document",
+        "id": "e03346167ec111a91683a0c06ed83d5ee105693f06b6fdc16d5cc8c82b785110",
+        "revision": "e002e55ed3f70d7d8bd56a12f706d6b6682adaed5ae5b029afa94edffa05b54e"
+      }
+    },
+    {
+      "path": "features/window/mcp-statistics.md",
+      "hash": "b4cdd43f422fc42186abb6de90ab3ef2b65e014583955c0376cbb371cae49bda",
+      "reference": {
+        "kind": "document",
+        "id": "0350a0f52936095c7358ad0a661705af91a7c3c943864683f5841fb81acc6c00",
+        "revision": "b4cdd43f422fc42186abb6de90ab3ef2b65e014583955c0376cbb371cae49bda"
+      }
+    },
+    {
+      "path": "features/window/mockups/Index.md",
+      "hash": "4f6e74b4f891aab16671826481946d990ff47412cbcfd43647cdca6903ceeced",
+      "reference": {
+        "kind": "document",
+        "id": "439e6e83448bb8d9983c79de2553caeead27ace138ef5c20a3171db267c89dc0",
+        "revision": "4f6e74b4f891aab16671826481946d990ff47412cbcfd43647cdca6903ceeced"
+      }
+    },
+    {
+      "path": "features/window/notifications.md",
+      "hash": "4476c0b57a0578ad664c5a7d9d8ccea309af6c2887e07a3cd76ac72436e61610",
+      "reference": {
+        "kind": "document",
+        "id": "4c5894594b50d94168eebe4e68b430357dc506d274e8516073ee7949e3228dd0",
+        "revision": "4476c0b57a0578ad664c5a7d9d8ccea309af6c2887e07a3cd76ac72436e61610"
+      }
+    },
+    {
+      "path": "features/window/palette.md",
+      "hash": "4cb4edc7385a0e97afa735bb5c9c86e5db283d78fe080c03fdbaeb9d1aa8782c",
+      "reference": {
+        "kind": "document",
+        "id": "b40cb1a14d380da3d2ee0cf8edfd6c9a544b1d2848e42078b55757099161bdc6",
+        "revision": "4cb4edc7385a0e97afa735bb5c9c86e5db283d78fe080c03fdbaeb9d1aa8782c"
+      }
+    },
+    {
+      "path": "features/window/project-menu.md",
+      "hash": "e36f696b9abd008f6c2ccb3efe47a33ec45c1d16a9cccfa5323dc87eeac5b28d",
+      "reference": {
+        "kind": "document",
+        "id": "4d63d88e713d95d1e8510c4d4e1f0c5840dc017cc225da817625a4ad6de7475b",
+        "revision": "e36f696b9abd008f6c2ccb3efe47a33ec45c1d16a9cccfa5323dc87eeac5b28d"
+      }
+    },
+    {
+      "path": "features/window/refinement-design.md",
+      "hash": "354fb57892aad62a7e353803da9fe20d94ce1270a3186b6e1e7edd61cae355cb",
+      "reference": {
+        "kind": "document",
+        "id": "108226bd3127b14a8653d0ef48b092e3622210ccb70e38e56f828df26b91a15f",
+        "revision": "354fb57892aad62a7e353803da9fe20d94ce1270a3186b6e1e7edd61cae355cb"
+      }
+    },
+    {
+      "path": "features/window/refinement-plan.md",
+      "hash": "ac7c88b35ff80615672327f0de8151e7115e82080fb739b8a2763744f738dafe",
+      "reference": {
+        "kind": "document",
+        "id": "70e5db7f8d05926421aee0a12fb4e8ef0de1bc85ef795fc39958d396999fd3e6",
+        "revision": "ac7c88b35ff80615672327f0de8151e7115e82080fb739b8a2763744f738dafe"
+      }
+    },
+    {
+      "path": "features/window/reindex-consent.md",
+      "hash": "3558c93fd8496eda5c8d45670baa83b1158c1f1a9778027c6de672085f7f51fd",
+      "reference": {
+        "kind": "document",
+        "id": "baa3006bc6216c88feb53efd984557e6ea14ebc73a58f41448321c0355c425b4",
+        "revision": "3558c93fd8496eda5c8d45670baa83b1158c1f1a9778027c6de672085f7f51fd"
+      }
+    },
+    {
+      "path": "features/window/settings-window.md",
+      "hash": "2b8fabd0104c1bc78ac8bca6e56c5dfd8f4e7e48655235a92ee1265bf302a364",
+      "reference": {
+        "kind": "document",
+        "id": "373a41d8e2ad3ca5f8adc3a5c2eb7472ef0557aa8aaa6200a9ff66d85d32eb3f",
+        "revision": "2b8fabd0104c1bc78ac8bca6e56c5dfd8f4e7e48655235a92ee1265bf302a364"
+      }
+    },
+    {
+      "path": "getting-started.md",
+      "hash": "f9e95fb5de6596669797db5f05cb74e9ebc1d8f9ee8d63c375c2e1d80a096a74",
+      "reference": {
+        "kind": "document",
+        "id": "4ff71e3bac7f4caa1b8c869d9a4aae6d9d1b5a94d888a72e7db08892494fa938",
+        "revision": "f9e95fb5de6596669797db5f05cb74e9ebc1d8f9ee8d63c375c2e1d80a096a74"
+      }
+    },
+    {
+      "path": "knowledge/build.md",
+      "hash": "fda974295618bb3c6de2364a6dd5e33a6439df80b6d5062e0e62c0e7d740f627",
+      "reference": {
+        "kind": "document",
+        "id": "3db0c6d299fe35c5b5d5591f2d30122aa25d747554888e85ffe13e103cd90ea1",
+        "revision": "fda974295618bb3c6de2364a6dd5e33a6439df80b6d5062e0e62c0e7d740f627"
+      }
+    },
+    {
+      "path": "knowledge/claude-code-serena.md",
+      "hash": "5fc938a9da823b28e0c641096ef0c54ecec434f4679cc92dcbe6017c82ba6fd2",
+      "reference": {
+        "kind": "document",
+        "id": "f0563a69a02a45d50b80f1aeb68e3e3887e5521d87a611e9079bff37559a5f18",
+        "revision": "5fc938a9da823b28e0c641096ef0c54ecec434f4679cc92dcbe6017c82ba6fd2"
+      }
+    },
+    {
+      "path": "knowledge/development-ideas-verification.md",
+      "hash": "d21eaa60742ec4d906c7088195ed5adda59b90183b8a4de7881c6c5e08852688",
+      "reference": {
+        "kind": "document",
+        "id": "81586ac3ebd60f02561ffca3d7edf774f4b5da6dfcce674f8eba0c3c0180ef8e",
+        "revision": "d21eaa60742ec4d906c7088195ed5adda59b90183b8a4de7881c6c5e08852688"
+      }
+    },
+    {
+      "path": "knowledge/development-ideas.md",
+      "hash": "b88bb0c3eb8a14ee26607157140d748ea0e1b9450adbcd81ce6485e10068ffdd",
+      "reference": {
+        "kind": "document",
+        "id": "cc631b8c7fec556b49c6e12d4d674dc5ccb9d11f5ad11e2e9080535e80e72b05",
+        "revision": "b88bb0c3eb8a14ee26607157140d748ea0e1b9450adbcd81ce6485e10068ffdd"
+      }
+    },
+    {
+      "path": "knowledge/directml-performance.md",
+      "hash": "40c5e3694043e1aa4211b88dba63c69760c17caf8273ebaf2b765bae124bbf7d",
+      "reference": {
+        "kind": "document",
+        "id": "d824b45ebb7c05bce6806cebc6185ecc196f1ef77929c4abcd5e2b20f4b0ed10",
+        "revision": "40c5e3694043e1aa4211b88dba63c69760c17caf8273ebaf2b765bae124bbf7d"
+      }
+    },
+    {
+      "path": "knowledge/gguf-models.md",
+      "hash": "df3fc53a672999c970e6738546d89dc08e70438d5c1e0114e4aa2bb454a83488",
+      "reference": {
+        "kind": "document",
+        "id": "cf2404f4e01d3b9517992bde1b8fc6e48693084f0774ac967b24951e99f88ff4",
+        "revision": "df3fc53a672999c970e6738546d89dc08e70438d5c1e0114e4aa2bb454a83488"
+      }
+    },
+    {
+      "path": "knowledge/inference-devices.md",
+      "hash": "476fb02487a85a1004277954afb46ff929e8afc2c89cb8375295b240d78831dc",
+      "reference": {
+        "kind": "document",
+        "id": "527d304574b8f5e552c971e68a12bce603cf13f1743c1f90aaa4d45c49636143",
+        "revision": "476fb02487a85a1004277954afb46ff929e8afc2c89cb8375295b240d78831dc"
+      }
+    },
+    {
+      "path": "knowledge/inference-libraries.md",
+      "hash": "7c3d7ff9a0a120918c1e3b043d9907457f1fe162b04afe4bbdc6c6d8f4aeffc7",
+      "reference": {
+        "kind": "document",
+        "id": "a7073699d96bbaeb99dbf5684aaf3e6f6a978bc270e77291f031dd59c2ab5d6c",
+        "revision": "7c3d7ff9a0a120918c1e3b043d9907457f1fe162b04afe4bbdc6c6d8f4aeffc7"
+      }
+    },
+    {
+      "path": "knowledge/inference-speed.md",
+      "hash": "f9c7e558ed8b10a3bac9d5b158be99d03c074d742fc17fb1ea96e82a6403dac3",
+      "reference": {
+        "kind": "document",
+        "id": "275c7eb74c58e029146bbe90e3e3e0f7eb5fd1d359c361ea7b4bc378f8c2493a",
+        "revision": "f9c7e558ed8b10a3bac9d5b158be99d03c074d742fc17fb1ea96e82a6403dac3"
+      }
+    },
+    {
+      "path": "knowledge/installer.md",
+      "hash": "7ddff79c362f5749bb35416e93abbd0ac7fa371e3aa18f861ad99e5d82b0cd61",
+      "reference": {
+        "kind": "document",
+        "id": "6a7727b807e430f0361ee0d0dda90303e2b4904ca4526a0ff5ab8102a7db51fd",
+        "revision": "7ddff79c362f5749bb35416e93abbd0ac7fa371e3aa18f861ad99e5d82b0cd61"
+      }
+    },
+    {
+      "path": "knowledge/memory-2026-10-18/Index.md",
+      "hash": "1b22cab9cafc62e63894f3769164052d888a47f8a22439720db7c5edbbc654ae",
+      "reference": {
+        "kind": "document",
+        "id": "f9d400ac9f4071c3309e11471df58a436cf16b7523693f306f92f0ed1befbf3a",
+        "revision": "1b22cab9cafc62e63894f3769164052d888a47f8a22439720db7c5edbbc654ae"
+      }
+    },
+    {
+      "path": "knowledge/memory-fp16-results.md",
+      "hash": "59ab44945cf45da4cc928bed3885b8c4509029bddf67a34340945c8b6c6165cf",
+      "reference": {
+        "kind": "document",
+        "id": "2dbcc4c6a69f789a6757348335519ff6d551fb99c59dd2580413544a403eec81",
+        "revision": "59ab44945cf45da4cc928bed3885b8c4509029bddf67a34340945c8b6c6165cf"
+      }
+    },
+    {
+      "path": "knowledge/memory-results.md",
+      "hash": "5595bcdc2d5d10ecfbc10fb6f5cf31315adc7e5d0b3164f5688163b26d79b99e",
+      "reference": {
+        "kind": "document",
+        "id": "f23cf099919fb29c1452155363f54871087abda0d511d1a77657ccea5643cbe8",
+        "revision": "5595bcdc2d5d10ecfbc10fb6f5cf31315adc7e5d0b3164f5688163b26d79b99e"
+      }
+    },
+    {
+      "path": "knowledge/memory-usage.md",
+      "hash": "e258d1775778adf0b48278143e703b890e4078a71148b4a6c07e3c400f87c116",
+      "reference": {
+        "kind": "document",
+        "id": "1cbd03dbe3068aa4b4e05adc6d3f6623c6a503b009df8e869b47c12e1dd21070",
+        "revision": "e258d1775778adf0b48278143e703b890e4078a71148b4a6c07e3c400f87c116"
+      }
+    },
+    {
+      "path": "knowledge/quality-2026-10-18/Index.md",
+      "hash": "46b1dde924dc853eeab05ab5b52cae75e5d4a884fe5f5b3b3250a0b120d95014",
+      "reference": {
+        "kind": "document",
+        "id": "81073682f12449cd7576f43d5054062c4089c67c79263dcfb0f8a508bc8cb547",
+        "revision": "46b1dde924dc853eeab05ab5b52cae75e5d4a884fe5f5b3b3250a0b120d95014"
+      }
+    },
+    {
+      "path": "knowledge/search-during-indexing.md",
+      "hash": "c70bd644f5b79dac4c705e6192f83bc09858e2732742f830573418471de0c54c",
+      "reference": {
+        "kind": "document",
+        "id": "06fd8f6cdaf73a549d5053998bbe9ebba83379b0918e9b72322787ebbeddab59",
+        "revision": "c70bd644f5b79dac4c705e6192f83bc09858e2732742f830573418471de0c54c"
+      }
+    },
+    {
+      "path": "knowledge/search-quality-benchmark.md",
+      "hash": "59ff2f79139e634dc8500231aea9d336ad663661ad845ac131ffc873ae9cb287",
+      "reference": {
+        "kind": "document",
+        "id": "f278c344083752235ce4507c82cc76ade0dbf30f1c8b7be4c17eab9f4237077e",
+        "revision": "59ff2f79139e634dc8500231aea9d336ad663661ad845ac131ffc873ae9cb287"
+      }
+    },
+    {
+      "path": "knowledge/search-quality-results.md",
+      "hash": "fb0ee6ba5d909a518679380b40b53af96112049c7e3ffa052882077a2362dcb4",
+      "reference": {
+        "kind": "document",
+        "id": "e01cd1e171e394e1bf85b70dc02a2629d12239aea5a10fe5344250183c72d3bb",
+        "revision": "fb0ee6ba5d909a518679380b40b53af96112049c7e3ffa052882077a2362dcb4"
+      }
+    },
+    {
+      "path": "knowledge/spike-detach.md",
+      "hash": "628eaa49a83d88fbf5f5d925eb2c883155d76911945df05ac187ff45ff70018e",
+      "reference": {
+        "kind": "document",
+        "id": "443036a34e1cfe8aeabef9128e8d3d8ebcb063ef84510c1ce5d657d6fa20d907",
+        "revision": "628eaa49a83d88fbf5f5d925eb2c883155d76911945df05ac187ff45ff70018e"
+      }
+    },
+    {
+      "path": "knowledge/spike-ipc.md",
+      "hash": "6939a5a0d01ac6f3103c8efe1281b006cfd0300592a052ac8075e59151ad33de",
+      "reference": {
+        "kind": "document",
+        "id": "94e232995dbdffbe88822c7e9d0f1d2b081e6fd9e3b91bd12e72f587e865e60e",
+        "revision": "6939a5a0d01ac6f3103c8efe1281b006cfd0300592a052ac8075e59151ad33de"
+      }
+    },
+    {
+      "path": "knowledge/spike-search.md",
+      "hash": "12e8c597628d4a094673bd4b14206f0d7ae7398fc2f680fc1ad7ce3a957064a5",
+      "reference": {
+        "kind": "document",
+        "id": "541490b7d6f5e9a32bbb251f31553b3e102d57f4597336b44b1c72cdfb8b01db",
+        "revision": "12e8c597628d4a094673bd4b14206f0d7ae7398fc2f680fc1ad7ce3a957064a5"
+      }
+    },
+    {
+      "path": "knowledge/stack-research.md",
+      "hash": "1f0a7ac67d3173e4f8a4c1b8f2d5a078e19847e582cc4c5683174bb7e3b05491",
+      "reference": {
+        "kind": "document",
+        "id": "84525e5cfaf99495d0e9d6155f099ddfb8395d68da0677a5c6aa9330fc2977ed",
+        "revision": "1f0a7ac67d3173e4f8a4c1b8f2d5a078e19847e582cc4c5683174bb7e3b05491"
+      }
+    },
+    {
+      "path": "knowledge/traceability.md",
+      "hash": "4d3fba99e366962d066313043e610e34a7bb48d408b3bb997eae81d252b8f846",
+      "reference": {
+        "kind": "document",
+        "id": "812e4790b1d9281263f9d85030a1056cb9bc286d147ab97c0e461c17bb9a5f44",
+        "revision": "4d3fba99e366962d066313043e610e34a7bb48d408b3bb997eae81d252b8f846"
+      }
+    },
+    {
+      "path": "overview.md",
+      "hash": "abd4fc35496cc427dc63fc4002582945f8b2eae3fb5e0669dd83335ec4e7a724",
+      "reference": {
+        "kind": "document",
+        "id": "d02d67999a5cc1f421f04015cb0c4f538bd23877050d7d72d02fab32ca17dc32",
+        "revision": "abd4fc35496cc427dc63fc4002582945f8b2eae3fb5e0669dd83335ec4e7a724"
+      }
+    },
+    {
+      "path": "project-status.md",
+      "hash": "2f0361e4dd50188bb95a7eb24b513a08bc7d45f334c5fa9ed752a6daa42504b1",
+      "reference": {
+        "kind": "document",
+        "id": "290eb4d95c1ca8db205ecc8e7e96e3480b5d855e1294fca3f81de7d3cef3433b",
+        "revision": "2f0361e4dd50188bb95a7eb24b513a08bc7d45f334c5fa9ed752a6daa42504b1"
+      }
+    }
+  ],
+  "exclusions": {
+    "docs/MAIN_IDEA.md": "нарезка/prefix не совпадает",
+    "docs/chats/2026-10-15-docs-convention/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-15-docs-convention/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-16-bars-instruction/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-16-bars-instruction/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-16-idea06-measurements/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-16-iss01-model-loading/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-16-iss01-model-loading/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-16-iss03-rerank-diag/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-16-iss06-watcher/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-16-iss09-search-vs-index/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-16-plan-review/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-16-plan-review/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-16-window-small-fixes/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-agent-tool-usage/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-agent-tool-usage/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-chunk-truncation/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-client-profile-isolation/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-client-profile-isolation/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-clients-auto-update/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-clients-auto-update/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-development-ideas/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-development-ideas/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-device-design/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-device-design/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-docs-layout-design/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-docs-layout-design/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-document-actions/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-document-actions/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-documentation-tools/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-documentation-tools/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-gguf-models/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-gguf-models/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-graphrag-integration/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-graphrag-integration/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-idea06-benchmark/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-idea06-benchmark/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-inference-design/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-inference-design/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-inference-research/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-inference-research/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-installer-path/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-mcp-analysis-30/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-mcp-analysis-30/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-mcp-analysis-30/verification.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-mcp-history-29/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-mcp-history-29/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-mcp-history-29/verification.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-mcp-statistics/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-mcp-statistics/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-mcp-transport/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-memory-consolidation/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-memory-consolidation/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-memory-research/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-memory-research/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-notification-center/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-notification-center/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-notifications-28/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-notifications-28/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-notifications-28/verification.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-output-language/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-project-context-menu/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-project-deletion/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-project-deletion/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-project-docs/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-project-docs/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-russian-interface/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-russian-interface/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-search-score-order/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-search-score-order/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-similar-duplicates/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-similar-duplicates/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-stage17-implementation/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-stage17-implementation/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-stage26-contracts/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-stage26-contracts/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-stage33-implementation/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-stage33-implementation/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-window-design-27/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-window-design-27/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-window-design-27/verification.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-window-refinement/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-window-refinement/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-worker-logs/handoff.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/2026-10-18-worker-logs/log.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/chats/Index.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/features/graphrag/Index.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/features/graphrag/embedding-probe.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/features/graphrag/implementation.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/features/graphrag/plan.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/features/graphrag/requirements.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/features/graphrag/tools.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/features/graphrag/window.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/knowledge/Index.md": "нарезка/prefix не совпадает",
+    "docs/knowledge/agent-tool-usage-2026-10-18.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/knowledge/agent-tool-usage-2026-10-18/Index.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/knowledge/graph-and-relations.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/knowledge/graph-embedding-2026-10-18.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/knowledge/graph-embedding-2026-10-18/Index.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/knowledge/graph-integration-2026-10-18.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/knowledge/graph-knowledge-retrieval.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/knowledge/graph-renderer-2026-10-18/Index.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/knowledge/inference-2026-10-18/Index.md": "нарезка/prefix не совпадает",
+    "docs/knowledge/local-documentation-tools-audit.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/knowledge/local-documentation-tools.md": "исследование/журнал, исключён из независимой оценки",
+    "docs/knowledge/memory-embed-2026-10-18/Index.md": "нарезка/prefix не совпадает",
+    "docs/knowledge/memory-fp16-2026-10-18/Index.md": "нарезка/prefix не совпадает"
+  }
+}

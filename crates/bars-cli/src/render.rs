@@ -151,6 +151,7 @@ pub fn status(output: &StatusOutput) -> String {
         "Последняя ошибка: {}",
         output.last_error.as_deref().unwrap_or("нет")
     );
+    if let Some(graph)=&output.graph{let _=write!(text,"\nГраф: {}; источников: {}; задание: {}",graph.state.label(),graph.source_count,graph.active_job.as_deref().unwrap_or("нет"));}
     text
 }
 

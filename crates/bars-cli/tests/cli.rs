@@ -29,6 +29,23 @@ struct Outcome {
     err: String,
 }
 
+#[tokio::test(flavor="multi_thread")]
+async fn graph_cli_operations_and_search_modes_match_worker_json() {
+    let harness=Harness::new("graph-cli");let root=harness.project("graph");
+    fs::write(root.join("docs/requirements.md"),"# Требования\n\nТ-1 зависит от Т-2.\n\nТ-2 зависит от Т-3.").unwrap();
+    let env=Env{cwd:root.clone(),..harness.env.clone()};
+    let registered=bars(&env,&["--json","register",root.to_str().unwrap()]).await;assert_eq!(registered.code,0,"{}",registered.err);
+    let deadline=Instant::now()+Duration::from_secs(30);
+    loop{let status=bars(&env,&["--json","graph","status"]).await;if status.code==0&&serde_json::from_str::<Value>(&status.out).unwrap()["state"]=="partial"{break;}assert!(Instant::now()<deadline,"{}",status.out);tokio::time::sleep(Duration::from_millis(30)).await;}
+    let graph=bars(&env,&["--json","graph","show","--view","mixed"]).await;assert_eq!(graph.code,0,"{}",graph.err);let out:Value=serde_json::from_str(&graph.out).unwrap();
+    let reference=out["nodes"].as_array().unwrap().iter().find(|n|n["label"]=="Т-3").unwrap()["reference"].to_string();
+    for args in [vec!["--json","relations","Т-1"],vec!["--json","paths","--from","Т-1","--to","Т-3"],vec!["--json","impact","--root",&reference],vec!["--json","context","Т-1 зависит"],vec!["--json","explore","--whole-scope"]]{let result=bars(&env,&args).await;assert_eq!(result.code,0,"{args:?}: {}",result.err);let out:Value=serde_json::from_str(&result.out).unwrap();assert!(!out["items"].as_array().unwrap().is_empty(),"{args:?}: {}",result.out);}
+    for mode in ["hybrid","mix","graph"]{let result=bars(&env,&["--json","search","Т-1 зависит","--mode",mode]).await;assert_eq!(result.code,0,"{}",result.err);assert_eq!(serde_json::from_str::<Value>(&result.out).unwrap()["requested_mode"],mode);}
+    let result=bars(&env,&["--json","search","Т-1 зависит","--mode","mix","--no-related"]).await;
+    assert_eq!(result.code,0,"{}",result.err);let out:Value=serde_json::from_str(&result.out).unwrap();
+    assert_eq!(out["applied_mode"],"hybrid");assert!(out["related"].is_null());
+}
+
 impl Harness {
     /// Воркер ещё не запущен: его запустит первая же команда через `Launch`.
     fn new(name: &str) -> Self {

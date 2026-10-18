@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { ModelRuntime, ModelSourceName } from "./types";
-  let { value = $bindable(), source, cpuOnly = false, runtime, role }: {
-    value: "auto" | "cpu"; source: ModelSourceName; cpuOnly?: boolean;
+  let { value = $bindable(), source, cpuOnly = false, gpuOnly = false, runtime, role }: {
+    value: "auto" | "cpu"; source: ModelSourceName; cpuOnly?: boolean; gpuOnly?: boolean;
     runtime?: ModelRuntime; role: string;
   } = $props();
   const states: Record<NonNullable<ModelRuntime>["state"], string> = {
@@ -14,6 +14,9 @@
     <p>Устройством управляет провайдер · устройство сервера неизвестно</p>
   {:else if cpuOnly}
     <p>Только CPU · этот движок модели не поддерживает GPU</p>
+  {:else if gpuOnly}
+    <button class:on={value === "auto"} aria-pressed={value === "auto"} onclick={() => value = "auto"}>DirectML</button>
+    <p>FP16 требует DirectML. Для CPU выберите обычную bge-m3; потребуется переиндексация.</p>
   {:else}
     <div class="choices">
       <button class:on={value === "auto"} aria-pressed={value === "auto"} onclick={() => value = "auto"}>GPU, если доступен</button>
@@ -23,7 +26,7 @@
   {/if}
   {#if runtime}
     <p class="runtime">Текущая конфигурация: {runtime.model} · {states[runtime.state]}
-      {#if runtime.actual} · <b>{runtime.actual === "directml" ? "DirectML" : "CPU"}</b>{/if}
+      {#if runtime.actual} · <b>{({directml:"DirectML",vulkan:"Vulkan",metal:"Metal",cpu:"CPU"} as Record<string,string>)[runtime.actual] ?? runtime.actual}</b>{/if}
       {#if runtime.precision} · {runtime.precision.toUpperCase()}{/if}
     </p>
     {#if runtime.fallback_reason}<p class="fallback">GPU недоступен; используется CPU. {runtime.fallback_reason}</p>{/if}

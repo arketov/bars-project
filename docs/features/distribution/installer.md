@@ -62,15 +62,19 @@ title: Установщик bars для Windows — состав, обновле
 
 ## Как собрать установщик
 
+`scripts/build-installer.ps1` и вызываемый им `scripts/prepare-vulkan-runtime.ps1` сохраняются в UTF-8 с BOM: Windows PowerShell 5.1 иначе читает кириллицу как ANSI, и разбор скрипта может завершиться `ParserError`. Поддерживается также PowerShell 7 (`pwsh`).
+
 Если текущий PowerShell не видит Rust в PATH, скрипт добавляет стандартный каталог `CARGO_HOME/bin` (по умолчанию `%USERPROFILE%\.cargo\bin`) только в окружение своего процесса. До сборки проверяются `rustc`, `cargo`, `node` и `npm`; отсутствие инструмента даёт понятное сообщение.
 
 ```powershell
 pwsh scripts/build-installer.ps1 [-OutDir <папка>]
 ```
 
-Нужны: Rust из `rust-toolchain.toml`, Node.js и сеть (Tauri скачивает NSIS и плагин `nsis_tauri_utils` один раз). Скрипт собирает интерфейс (`npm ci`, `npm run build` в `ui/`), `bars-cli` и `bars-mcp` в release, кладёт их как sidecar-файлы в `crates/bars-app/binaries/` (в `.gitignore`), запускает `tauri build --bundles nsis` с `crates/bars-app/tauri.bundle.conf.json` и копирует `bars_<версия>_x64-setup.exe` в `-OutDir` (по умолчанию `dist-installer/`, в `.gitignore`). Версия установщика берётся из `version` в корневом `Cargo.toml`: её поднимают перед сборкой новой версии. Конфиг упаковки лежит отдельно от `tauri.conf.json`, чтобы обычные `cargo build` и `clippy` не требовали готовых sidecar-файлов. Хуки — `crates/bars-app/installer-hooks.nsh`.
+Нужны: Rust из `rust-toolchain.toml`, Node.js, MSVC 17.14+, CMake/Ninja, Vulkan SDK (`VULKAN_SDK`) и сеть (Tauri скачивает NSIS и плагин `nsis_tauri_utils` один раз). Скрипт собирает интерфейс (`npm ci`, `npm run build` в `ui/`), `bars-cli` и `bars-mcp` в release, кладёт их как sidecar-файлы в `crates/bars-app/binaries/` (в `.gitignore`), запускает `tauri build --bundles nsis` с `crates/bars-app/tauri.bundle.conf.json` и копирует `bars_<версия>_x64-setup.exe` в `-OutDir` (по умолчанию `dist-installer/`, в `.gitignore`). Версия установщика берётся из `version` в корневом `Cargo.toml`: её поднимают перед сборкой новой версии. Конфиг упаковки лежит отдельно от `tauri.conf.json`, чтобы обычные `cargo build` и `clippy` не требовали готовых sidecar-файлов. Хуки — `crates/bars-app/installer-hooks.nsh`.
 
 Установщики и артефакты сборки в репозиторий не коммитятся. Сборки для macOS (`.dmg`, нотаризация) нет: Mac в проекте пока нет; раздел и автозапуск через LaunchAgent появятся вместе с ним.
+
+Для GGUF скрипт выбирает последний MSVC через vswhere/Developer Shell, Ninja и последовательный вложенный CMake; при незаданном CARGO_TARGET_DIR использует короткий путь <системный диск>/bars-build. prepare-vulkan-runtime.ps1 скачивает закреплённый LunarG VulkanRT 1.4.363.0 Components, проверяет SHA-256 архива и Authenticode DLL, добавляет x64 `vulkan-1.dll` и лицензию в ресурсы установщика. Системный Vulkan runtime не устанавливается и не заменяется; готовому приложению SDK не нужен. Без драйвера Vulkan модель использует CPU fallback. Полный NSIS из текущей рабочей копии собран 18-10-2026; проверены PE-заголовок и совпадение SHA-256 копии в dist-installer. Установка этой сборки и работа на машине без Vulkan-драйвера не проверялись.
 
 ## Как проверить установщик на копиях
 

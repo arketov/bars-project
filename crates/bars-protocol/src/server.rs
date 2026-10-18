@@ -15,6 +15,15 @@ use crate::session::Session;
 
 /// Выполняет вызовы, которые пережили проверку сессии. `hello` обрабатывает сам цикл соединения.
 pub trait Handler: Send + Sync + 'static {
+    fn handle_observed(
+        &self,
+        session: &str,
+        client: ClientKind,
+        call: Call,
+        _context: Option<Value>,
+    ) -> impl Future<Output = Result<Value, RpcError>> + Send {
+        self.handle_session(session, client, call)
+    }
     /// Контекст одного соединения; реализация по умолчанию не собирает статистику.
     fn handle_session(
         &self,
@@ -89,7 +98,11 @@ where
             ),
             Ok(call) => {
                 let client = session.client().expect("после hello клиент известен");
-                match handler.handle_session(&connection_id, client, call).await {
+                let context = request.params.as_ref().and_then(|p| p.get("_mcp")).cloned();
+                match handler
+                    .handle_observed(&connection_id, client, call, context)
+                    .await
+                {
                     Ok(result) => Response::ok(id, result),
                     Err(error) => Response::err(Some(id), error),
                 }
@@ -195,5 +208,49 @@ mod tests {
         drop(writer);
         drop(reader);
         task.await.unwrap().unwrap();
+    }
+
+    #[tokio::test]
+    async fn original_context_survives_but_never_breaks_request_size() {
+        struct Observed(std::sync::Mutex<Vec<Option<Value>>>);
+        impl Handler for Observed {
+            async fn handle_observed(
+                &self,
+                _: &str,
+                client: ClientKind,
+                call: Call,
+                context: Option<Value>,
+            ) -> Result<Value, RpcError> {
+                self.0.lock().unwrap().push(context);
+                self.handle(client, call).await
+            }
+            async fn handle(&self, _: ClientKind, _: Call) -> Result<Value, RpcError> {
+                Ok(json!({"title":"t","text":""}))
+            }
+        }
+        let handler = Arc::new(Observed(std::sync::Mutex::new(Vec::new())));
+        let (client, server) = duplex(1 << 16);
+        let h = handler.clone();
+        tokio::spawn(serve_connection(server, h));
+        let mut client = crate::Client::over(client, ClientKind::Mcp).await.unwrap();
+        let mut params = crate::ReadParams {
+            target: crate::Target {
+                cwd: "/p".into(),
+                project: None,
+            },
+            path: "a.md".into(),
+        };
+        client
+            .call_observed(&params, Some(&json!({"path":"a.md","format":null})))
+            .await
+            .unwrap();
+        params.path = "a".repeat(MAX_REQUEST_LINE - 1024);
+        client
+            .call_observed(&params, Some(&json!({"path":params.path})))
+            .await
+            .unwrap();
+        let observations = handler.0.lock().unwrap();
+        assert_eq!(observations[0], Some(json!({"path":"a.md","format":null})));
+        assert!(observations[1].is_none());
     }
 }

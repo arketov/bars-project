@@ -1,0 +1,596 @@
+{
+  "date": "2026-10-18",
+  "kind": "Exploratory current-index comparisons; not historical replay or a representative benchmark",
+  "method": {
+    "project": "bars-project",
+    "limit": 4,
+    "candidates": 30,
+    "min_score": 0.1,
+    "format": "json",
+    "rerank": "enabled as applied by installed worker",
+    "comparison": "query and explicit parameters fixed; only scope changes",
+    "indexBoundary": "updated_at and ready state checked before and after each final triplet; concurrent changes with unchanged marker cannot be ruled out"
+  },
+  "comparisons": [
+    {
+      "id": "P1-stage17",
+      "query": "Этап 17 отдельные устройства embed rerank повторы документов OQ-80",
+      "indexBefore": {
+        "path": "C:\\Users\\arketov\\Desktop\\bars-project",
+        "state": "ready",
+        "updated_at": "2026-10-18T14:19:05Z",
+        "pending": 0,
+        "model": {
+          "index": "builtin:BAAI/bge-m3",
+          "settings": "builtin:BAAI/bge-m3"
+        },
+        "last_error": null,
+        "watching": true
+      },
+      "indexAfter": {
+        "path": "C:\\Users\\arketov\\Desktop\\bars-project",
+        "state": "ready",
+        "updated_at": "2026-10-18T14:19:05Z",
+        "pending": 0,
+        "model": {
+          "index": "builtin:BAAI/bge-m3",
+          "settings": "builtin:BAAI/bge-m3"
+        },
+        "last_error": null,
+        "watching": true
+      },
+      "runs": [
+        {
+          "scope": "all",
+          "args": {
+            "project": "bars-project",
+            "query": "Этап 17 отдельные устройства embed rerank повторы документов OQ-80",
+            "limit": 4,
+            "format": "json"
+          },
+          "applied": {
+            "results": 4,
+            "candidates": 30,
+            "rerank_candidates": 30,
+            "min_score": 0.1,
+            "score_kind": "rerank",
+            "clamped": false
+          },
+          "results": [
+            {
+              "path": "docs/features/models/device-plan.md",
+              "heading": "Этап 17 — раздельные устройства моделей и устойчивость индексации/Результат для пользователя",
+              "lines": [
+                9,
+                13
+              ],
+              "score": 0.9815244,
+              "excerpt": "Основание — [IDEA-01](../../backlog/ideas.md#idea-01-embed-и-rerank-на-разных-устройствах), OQ-62 и OQ-80 в [реестре вопросов](../../../QUESTIONS.md), Т-3, Т-16, Т-17, Т-25 и НФТ-1. Человек оставляет embed на GPU и переводит rerank на CPU независимо; окно сообщает выбранную полит"
+            },
+            {
+              "path": "docs/features/models/device-verification.md",
+              "heading": "Этап 17 — проверка устройств моделей и ошибок индексации/Проверенный продуктовый результат",
+              "lines": [
+                11,
+                16
+              ],
+              "score": 0.97702265,
+              "excerpt": "- `embed.accelerator` и `rerank.accelerator` независимы. Старый общий ключ читается без потери CPU-выбора и переносится при Save. Неиспользуемое устройство HTTP-провайдера не заменяет его слот.\n- `models_info.runtime` сообщает состояния unloaded/loading/ready/failed, устройство с"
+            },
+            {
+              "path": "docs/features/models/device-plan.md",
+              "heading": "Этап 17 — раздельные устройства моделей и устойчивость индексации/Целостность индекса и повторная проверка",
+              "lines": [
+                80,
+                88
+              ],
+              "score": 0.97354424,
+              "excerpt": "Обычное обновление: прежние chunks, векторы, hash, stat неудачного документа остаются нетронутыми; у нового документа запись не появляется. При следующей проверке он снова требует embed. Счётчики added/changed/chunks увеличиваются только после успешной транзакции. Пропавшие на ди"
+            },
+            {
+              "path": "docs/chats/2026-10-18-device-design/handoff.md",
+              "heading": "Передача сессии — проект этапа 17",
+              "lines": [
+                5,
+                13
+              ],
+              "score": 0.93593454,
+              "excerpt": "## Сделано\n- Требования, IDEA-01, ISS-03, OQ-62, прошлые handoff диагностики и исследования инференса изучены. Serena активирована, Rust LSP проверен реальными символами Device/run_update/index_document и ссылками Accelerator.\n- После замечания автора выполнены `bars-cli status` "
+            }
+          ]
+        },
+        {
+          "scope": "features",
+          "args": {
+            "project": "bars-project",
+            "query": "Этап 17 отдельные устройства embed rerank повторы документов OQ-80",
+            "limit": 4,
+            "format": "json",
+            "modules": [
+              "features"
+            ]
+          },
+          "applied": {
+            "results": 4,
+            "candidates": 30,
+            "rerank_candidates": 30,
+            "min_score": 0.1,
+            "score_kind": "rerank",
+            "clamped": false
+          },
+          "results": [
+            {
+              "path": "docs/features/models/device-plan.md",
+              "heading": "Этап 17 — раздельные устройства моделей и устойчивость индексации/Результат для пользователя",
+              "lines": [
+                9,
+                13
+              ],
+              "score": 0.9815244,
+              "excerpt": "Основание — [IDEA-01](../../backlog/ideas.md#idea-01-embed-и-rerank-на-разных-устройствах), OQ-62 и OQ-80 в [реестре вопросов](../../../QUESTIONS.md), Т-3, Т-16, Т-17, Т-25 и НФТ-1. Человек оставляет embed на GPU и переводит rerank на CPU независимо; окно сообщает выбранную полит"
+            },
+            {
+              "path": "docs/features/models/device-verification.md",
+              "heading": "Этап 17 — проверка устройств моделей и ошибок индексации/Проверенный продуктовый результат",
+              "lines": [
+                11,
+                16
+              ],
+              "score": 0.97702265,
+              "excerpt": "- `embed.accelerator` и `rerank.accelerator` независимы. Старый общий ключ читается без потери CPU-выбора и переносится при Save. Неиспользуемое устройство HTTP-провайдера не заменяет его слот.\n- `models_info.runtime` сообщает состояния unloaded/loading/ready/failed, устройство с"
+            },
+            {
+              "path": "docs/features/models/device-plan.md",
+              "heading": "Этап 17 — раздельные устройства моделей и устойчивость индексации/Целостность индекса и повторная проверка",
+              "lines": [
+                80,
+                88
+              ],
+              "score": 0.97354424,
+              "excerpt": "Обычное обновление: прежние chunks, векторы, hash, stat неудачного документа остаются нетронутыми; у нового документа запись не появляется. При следующей проверке он снова требует embed. Счётчики added/changed/chunks увеличиваются только после успешной транзакции. Пропавшие на ди"
+            },
+            {
+              "path": "docs/features/models/device-plan.md",
+              "heading": "Этап 17 — раздельные устройства моделей и устойчивость индексации/Ошибка документа и бюджет повторов",
+              "lines": [
+                65,
+                78
+              ],
+              "score": 0.92563426,
+              "excerpt": "Согласованная политика: первая попытка плюс **три повтора** документа, паузы 1/2/4 с; предел **три последовательно неудачных документа с вызовом embed**. Это внутренние константы с инъекцией ожидания для тестов, без новых пользовательских настроек. Окно выводит «attempt 2/4».\n\nЕд"
+            }
+          ]
+        },
+        {
+          "scope": "device-file",
+          "args": {
+            "project": "bars-project",
+            "query": "Этап 17 отдельные устройства embed rerank повторы документов OQ-80",
+            "limit": 4,
+            "format": "json",
+            "files": [
+              "features/models/device-plan.md"
+            ]
+          },
+          "applied": {
+            "results": 4,
+            "candidates": 30,
+            "rerank_candidates": 30,
+            "min_score": 0.1,
+            "score_kind": "rerank",
+            "clamped": false
+          },
+          "results": [
+            {
+              "path": "docs/features/models/device-plan.md",
+              "heading": "Этап 17 — раздельные устройства моделей и устойчивость индексации/Результат для пользователя",
+              "lines": [
+                9,
+                13
+              ],
+              "score": 0.9815244,
+              "excerpt": "Основание — [IDEA-01](../../backlog/ideas.md#idea-01-embed-и-rerank-на-разных-устройствах), OQ-62 и OQ-80 в [реестре вопросов](../../../QUESTIONS.md), Т-3, Т-16, Т-17, Т-25 и НФТ-1. Человек оставляет embed на GPU и переводит rerank на CPU независимо; окно сообщает выбранную полит"
+            },
+            {
+              "path": "docs/features/models/device-plan.md",
+              "heading": "Этап 17 — раздельные устройства моделей и устойчивость индексации/Целостность индекса и повторная проверка",
+              "lines": [
+                80,
+                88
+              ],
+              "score": 0.97354424,
+              "excerpt": "Обычное обновление: прежние chunks, векторы, hash, stat неудачного документа остаются нетронутыми; у нового документа запись не появляется. При следующей проверке он снова требует embed. Счётчики added/changed/chunks увеличиваются только после успешной транзакции. Пропавшие на ди"
+            },
+            {
+              "path": "docs/features/models/device-plan.md",
+              "heading": "Этап 17 — раздельные устройства моделей и устойчивость индексации/Ошибка документа и бюджет повторов",
+              "lines": [
+                65,
+                78
+              ],
+              "score": 0.92563426,
+              "excerpt": "Согласованная политика: первая попытка плюс **три повтора** документа, паузы 1/2/4 с; предел **три последовательно неудачных документа с вызовом embed**. Это внутренние константы с инъекцией ожидания для тестов, без новых пользовательских настроек. Окно выводит «attempt 2/4».\n\nЕд"
+            },
+            {
+              "path": "docs/features/models/device-plan.md",
+              "heading": "Этап 17 — раздельные устройства моделей и устойчивость индексации/Устройство загруженной модели: общий контракт",
+              "lines": [
+                55,
+                63
+              ],
+              "score": 0.91789335,
+              "excerpt": "Добавить в общий интерфейс embed/rerank снимок исполнения: источник, backend, фактическое устройство сессии и безопасная причина fallback. ONNX отдаёт CPU/DirectML, candle — CPU, HTTP — `external` без догадок о железе сервера. Значение DirectML означает выбранный EP сессии; это н"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P2-installer",
+      "query": "сборка установщика Rust cargo PATH",
+      "indexBefore": {
+        "path": "C:\\Users\\arketov\\Desktop\\bars-project",
+        "state": "ready",
+        "updated_at": "2026-10-18T14:17:05Z",
+        "pending": 0,
+        "model": {
+          "index": "builtin:BAAI/bge-m3",
+          "settings": "builtin:BAAI/bge-m3"
+        },
+        "last_error": null,
+        "watching": true
+      },
+      "indexAfter": {
+        "path": "C:\\Users\\arketov\\Desktop\\bars-project",
+        "state": "ready",
+        "updated_at": "2026-10-18T14:17:05Z",
+        "pending": 0,
+        "model": {
+          "index": "builtin:BAAI/bge-m3",
+          "settings": "builtin:BAAI/bge-m3"
+        },
+        "last_error": null,
+        "watching": true
+      },
+      "runs": [
+        {
+          "scope": "all",
+          "args": {
+            "project": "bars-project",
+            "query": "сборка установщика Rust cargo PATH",
+            "limit": 4,
+            "format": "json"
+          },
+          "applied": {
+            "results": 4,
+            "candidates": 30,
+            "rerank_candidates": 30,
+            "min_score": 0.1,
+            "score_kind": "rerank",
+            "clamped": false
+          },
+          "results": [
+            {
+              "path": "docs/features/distribution/installer.md",
+              "heading": "Установщик bars для Windows/Как собрать установщик",
+              "lines": [
+                63,
+                73
+              ],
+              "score": 0.93868846,
+              "excerpt": "Если текущий PowerShell не видит Rust в PATH, скрипт добавляет стандартный каталог `CARGO_HOME/bin` (по умолчанию `%USERPROFILE%\\.cargo\\bin`) только в окружение своего процесса. До сборки проверяются `rustc`, `cargo`, `node` и `npm`; отсутствие инструмента даёт понятное сообщение"
+            },
+            {
+              "path": "docs/chats/2026-10-18-installer-path/handoff.md",
+              "heading": "Исправление поиска Rust при сборке установщика",
+              "lines": [
+                5,
+                17
+              ],
+              "score": 0.80730873,
+              "excerpt": "## Сделано\nСкрипт подхватывает CARGO_HOME/bin, проверяет инструменты и код возврата rustc; toolchain определяется из корня проекта. Документация и changelog обновлены.\n\n## Не сделано\nПолная сборка установщика не запускалась.\n\n## Сложности\nRust 1.99 установлен, но bin отсутствовал"
+            },
+            {
+              "path": "docs/knowledge/build.md",
+              "heading": "Сборка bars",
+              "lines": [
+                5,
+                13
+              ],
+              "score": 0.24598956,
+              "excerpt": "Как собирается Cargo workspace bars ([architecture/components.md](../architecture/components.md)) и какие проверки гоняются перед коммитом. Версии крейтов — [architecture/stack.md](../architecture/stack.md).\n\n## Требования к машине разработчика bars\n- Rust `1.99.0`: версия закреп"
+            },
+            {
+              "path": "docs/chats/2026-10-18-idea06-benchmark/handoff.md",
+              "heading": "IDEA-06 — результаты и умолчания/Сложности",
+              "lines": [
+                15,
+                22
+              ],
+              "score": 0.14792407,
+              "excerpt": "- Установлены Rust 1.99 и отдельный MSVC 14.44 в `C:/BuildTools`; старый MSVC 14.39 не линковал ONNX Runtime. Cargo запускался в Developer PowerShell, target — `%LOCALAPPDATA%/bars/target`.\n- Serena после установки rust-analyzer и повторной инициализации возвращает кэшированную о"
+            }
+          ]
+        },
+        {
+          "scope": "features",
+          "args": {
+            "project": "bars-project",
+            "query": "сборка установщика Rust cargo PATH",
+            "limit": 4,
+            "format": "json",
+            "modules": [
+              "features"
+            ]
+          },
+          "applied": {
+            "results": 4,
+            "candidates": 30,
+            "rerank_candidates": 30,
+            "min_score": 0.1,
+            "score_kind": "rerank",
+            "clamped": false
+          },
+          "results": [
+            {
+              "path": "docs/features/distribution/installer.md",
+              "heading": "Установщик bars для Windows/Как собрать установщик",
+              "lines": [
+                63,
+                73
+              ],
+              "score": 0.93868846,
+              "excerpt": "Если текущий PowerShell не видит Rust в PATH, скрипт добавляет стандартный каталог `CARGO_HOME/bin` (по умолчанию `%USERPROFILE%\\.cargo\\bin`) только в окружение своего процесса. До сборки проверяются `rustc`, `cargo`, `node` и `npm`; отсутствие инструмента даёт понятное сообщение"
+            }
+          ]
+        },
+        {
+          "scope": "installer-file",
+          "args": {
+            "project": "bars-project",
+            "query": "сборка установщика Rust cargo PATH",
+            "limit": 4,
+            "format": "json",
+            "files": [
+              "features/distribution/installer.md"
+            ]
+          },
+          "applied": {
+            "results": 4,
+            "candidates": 30,
+            "rerank_candidates": 30,
+            "min_score": 0.1,
+            "score_kind": "rerank",
+            "clamped": false
+          },
+          "results": [
+            {
+              "path": "docs/features/distribution/installer.md",
+              "heading": "Установщик bars для Windows/Как собрать установщик",
+              "lines": [
+                63,
+                73
+              ],
+              "score": 0.93868846,
+              "excerpt": "Если текущий PowerShell не видит Rust в PATH, скрипт добавляет стандартный каталог `CARGO_HOME/bin` (по умолчанию `%USERPROFILE%\\.cargo\\bin`) только в окружение своего процесса. До сборки проверяются `rustc`, `cargo`, `node` и `npm`; отсутствие инструмента даёт понятное сообщение"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P3-models",
+      "query": "встроенный rerank выбор устройства точность FP16 каталог загрузка",
+      "indexBefore": {
+        "path": "C:\\Users\\arketov\\Desktop\\bars-project",
+        "state": "ready",
+        "updated_at": "2026-10-18T14:17:05Z",
+        "pending": 0,
+        "model": {
+          "index": "builtin:BAAI/bge-m3",
+          "settings": "builtin:BAAI/bge-m3"
+        },
+        "last_error": null,
+        "watching": true
+      },
+      "indexAfter": {
+        "path": "C:\\Users\\arketov\\Desktop\\bars-project",
+        "state": "ready",
+        "updated_at": "2026-10-18T14:17:05Z",
+        "pending": 0,
+        "model": {
+          "index": "builtin:BAAI/bge-m3",
+          "settings": "builtin:BAAI/bge-m3"
+        },
+        "last_error": null,
+        "watching": true
+      },
+      "runs": [
+        {
+          "scope": "all",
+          "args": {
+            "project": "bars-project",
+            "query": "встроенный rerank выбор устройства точность FP16 каталог загрузка",
+            "limit": 4,
+            "format": "json"
+          },
+          "applied": {
+            "results": 4,
+            "candidates": 30,
+            "rerank_candidates": 30,
+            "min_score": 0.1,
+            "score_kind": "rerank",
+            "clamped": false
+          },
+          "results": [
+            {
+              "path": "docs/features/settings/settings.md",
+              "heading": "Настройки bars/Устройство для встроенных моделей в settings.toml",
+              "lines": [
+                57,
+                69
+              ],
+              "score": 0.9430336,
+              "excerpt": "Независимый ключ `accelerator` в `[embed]` и `[rerank]`:\n\nДля встроенного rerank DirectML выбирает FP16, CPU — FP32; INT8 не включён из-за обнаруженных потерь при текущем пороге. Tokenizer остаётся на CPU. Выбор precision и ограниченное уменьшение GPU-пачки при нехватке памяти оп"
+            },
+            {
+              "path": "docs/features/models/memory-reduction.md",
+              "heading": "Снижение памяти моделей bars/Контракт артефактов и загрузки P0",
+              "lines": [
+                35,
+                43
+              ],
+              "score": 0.91625965,
+              "excerpt": "Не использовать пути из `spikes/` в продукте и не выбирать веса по случайному наличию файла. Общий `ModelLoadPlan` для конструктора, Download, is_downloaded, прогресса и runtime-информации:\n\n1. Логическая модель, фактический backend/precision, неизменяемая revision, список файлов"
+            },
+            {
+              "path": "docs/features/models/Index.md",
+              "heading": "Модели",
+              "lines": [
+                5,
+                17
+              ],
+              "score": 0.8774768,
+              "excerpt": "Откуда bars берёт векторы и оценки реранка.\n\n- [local-models.md](local-models.md) — встроенные модели через fastembed-rs: каталог (ONNX и candle), встроенный rerank, префиксы, папка моделей, отпечаток модели.\n- [external-models.md](external-models.md) — удалённый провайдер и лока"
+            },
+            {
+              "path": "docs/features/models/memory-plan.md",
+              "heading": "Этап 13 — память моделей, индексации и окна/Внедрение снижения памяти по поручению автора",
+              "lines": [
+                9,
+                15
+              ],
+              "score": 0.876423,
+              "excerpt": "Автор 18-10-2026 потребовал сначала анализ критичных расходов и скорости, затем проект решения, после него реализацию; реализация разрешена отдельным сообщением. FP16 rerank внедрён этапом 11, здесь добавлены проверенная готовность кэша и безопасный lifecycle. Рабочая политика — "
+            }
+          ]
+        },
+        {
+          "scope": "features",
+          "args": {
+            "project": "bars-project",
+            "query": "встроенный rerank выбор устройства точность FP16 каталог загрузка",
+            "limit": 4,
+            "format": "json",
+            "modules": [
+              "features"
+            ]
+          },
+          "applied": {
+            "results": 4,
+            "candidates": 30,
+            "rerank_candidates": 30,
+            "min_score": 0.1,
+            "score_kind": "rerank",
+            "clamped": false
+          },
+          "results": [
+            {
+              "path": "docs/features/settings/settings.md",
+              "heading": "Настройки bars/Устройство для встроенных моделей в settings.toml",
+              "lines": [
+                57,
+                69
+              ],
+              "score": 0.9430336,
+              "excerpt": "Независимый ключ `accelerator` в `[embed]` и `[rerank]`:\n\nДля встроенного rerank DirectML выбирает FP16, CPU — FP32; INT8 не включён из-за обнаруженных потерь при текущем пороге. Tokenizer остаётся на CPU. Выбор precision и ограниченное уменьшение GPU-пачки при нехватке памяти оп"
+            },
+            {
+              "path": "docs/features/models/memory-reduction.md",
+              "heading": "Снижение памяти моделей bars/Контракт артефактов и загрузки P0",
+              "lines": [
+                35,
+                43
+              ],
+              "score": 0.91625965,
+              "excerpt": "Не использовать пути из `spikes/` в продукте и не выбирать веса по случайному наличию файла. Общий `ModelLoadPlan` для конструктора, Download, is_downloaded, прогресса и runtime-информации:\n\n1. Логическая модель, фактический backend/precision, неизменяемая revision, список файлов"
+            },
+            {
+              "path": "docs/features/models/Index.md",
+              "heading": "Модели",
+              "lines": [
+                5,
+                17
+              ],
+              "score": 0.8774768,
+              "excerpt": "Откуда bars берёт векторы и оценки реранка.\n\n- [local-models.md](local-models.md) — встроенные модели через fastembed-rs: каталог (ONNX и candle), встроенный rerank, префиксы, папка моделей, отпечаток модели.\n- [external-models.md](external-models.md) — удалённый провайдер и лока"
+            },
+            {
+              "path": "docs/features/models/memory-plan.md",
+              "heading": "Этап 13 — память моделей, индексации и окна/Внедрение снижения памяти по поручению автора",
+              "lines": [
+                9,
+                15
+              ],
+              "score": 0.876423,
+              "excerpt": "Автор 18-10-2026 потребовал сначала анализ критичных расходов и скорости, затем проект решения, после него реализацию; реализация разрешена отдельным сообщением. FP16 rerank внедрён этапом 11, здесь добавлены проверенная готовность кэша и безопасный lifecycle. Рабочая политика — "
+            }
+          ]
+        },
+        {
+          "scope": "two-files",
+          "args": {
+            "project": "bars-project",
+            "query": "встроенный rerank выбор устройства точность FP16 каталог загрузка",
+            "limit": 4,
+            "format": "json",
+            "files": [
+              "features/models/local-models.md",
+              "features/models/inference-plan.md"
+            ]
+          },
+          "applied": {
+            "results": 4,
+            "candidates": 30,
+            "rerank_candidates": 30,
+            "min_score": 0.1,
+            "score_kind": "rerank",
+            "clamped": false
+          },
+          "results": [
+            {
+              "path": "docs/features/models/local-models.md",
+              "heading": "Встроенные модели bars/Когда модель считается скачанной",
+              "lines": [
+                79,
+                88
+              ],
+              "score": 0.80700475,
+              "excerpt": "Каталог моделей (`bars-core/src/models/catalog.rs`) знает полный список файлов каждой встроенной модели; модель скачана, когда в одном снимке кэша лежат все эти файлы и ни один не пуст. Одного `model.onnx` мало: у bge-m3 малый граф готов раньше большого файла весов `model.onnx_da"
+            },
+            {
+              "path": "docs/features/models/local-models.md",
+              "heading": "Встроенные модели bars/Встроенная rerank-модель",
+              "lines": [
+                32,
+                34
+              ],
+              "score": 0.7572562,
+              "excerpt": "`BAAI/bge-reranker-v2-m3` (`TextRerank`, ONNX Runtime) — логическая встроенная rerank-модель (Т-17). DirectML использует закреплённый FP16-экспорт `onnx-community/bge-reranker-v2-m3-ONNX@6f5ff65298512715a1e669753bc754d2bc8f367b`, `onnx/model_fp16.onnx` (1 136 209 678 байт); token"
+            },
+            {
+              "path": "docs/features/models/local-models.md",
+              "heading": "Встроенные модели bars/Когда модели освобождают память",
+              "lines": [
+                73,
+                77
+              ],
+              "score": 0.6683393,
+              "excerpt": "Встроенный rerank освобождается после 5 минут простоя, embed — после 15 минут. Отсчёт начинается после завершения работы; опрос окна его не продлевает. Worker проверяет свободные сессии каждые 10 секунд, а сохранение настроек будит проверку сразу. Отключение rerank освобождает ег"
+            },
+            {
+              "path": "docs/features/models/local-models.md",
+              "heading": "Встроенные модели bars/Оценка встроенного реранка",
+              "lines": [
+                61,
+                63
+              ],
+              "score": 0.6057407,
+              "excerpt": "`TextRerank` в fastembed возвращает сырой логит модели и сортирует результаты по убыванию. bars восстанавливает порядок документов и применяет сигмоиду: оценка от 0 до 1 (`BuiltinReranker`). Неконечные логиты, повторные или неверные индексы отклоняются. DirectML FP16 считает пары"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

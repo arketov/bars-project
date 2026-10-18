@@ -33,6 +33,9 @@ const runs=dirs.map(dir=>{
       falseNonemptyCount:negative.reduce((n,r)=>n+metric(r.hits,0,threshold).falseNonempty,0)});
   }
   const monitor=read(`${dir}.monitor.json`);
+  assert.equal(monitor.exit_code,0,'process failed; completed rows alone are not acceptance');
+  assert(!monitor.quality_rejected,'quality-rejected run');
+  assert(!fs.existsSync(path.join(dir,'invalidated.json')),'invalidated run');
   return {dir,config,n:rows.length,median:quantile(rows.map(r=>r.seconds),.5),p95:quantile(rows.map(r=>r.seconds),.95),
     embedMedian:quantile(rows.map(r=>r.embed),.5),rerankMedian:quantile(rows.map(r=>r.rerank),.5),otherMedian:quantile(rows.map(r=>r.other),.5),
     timingValid:monitor.exit_code===0&&!monitor.timing_contaminated,session:read(path.join(dir,'session.json')),quality,rows};
@@ -52,7 +55,7 @@ const result=runs.map(run=>{
     }
   }
   const {rows,...summary}=run;
-  return {...summary,baseline:baseline.config.name,medianSpeedup:baseline.median/run.median,losses,
+  return {...summary,baseline:baseline.config.name,medianSpeedup:baseline.timingValid&&run.timingValid?baseline.median/run.median:null,losses,
     changedCandidateQueries:[...new Set(rows.filter(r=>r.candidate_delta).map(r=>r.id))]};
 });
 fs.writeFileSync(out,JSON.stringify({kind:'full-retrieval',data,runs:result},null,2));

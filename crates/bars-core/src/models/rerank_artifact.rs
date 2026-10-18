@@ -157,16 +157,7 @@ pub fn reranker_download_percent(dir: &Path, accelerator: Accelerator) -> u8 {
 }
 
 fn verify(path: &Path, expected: &str) -> Result<(), RerankError> {
-    let mut hash = blake3::Hasher::new();
-    let mut file = fs::File::open(path).map_err(|e| RerankError::Load(e.to_string()))?;
-    std::io::copy(&mut file, &mut hash).map_err(|e| RerankError::Load(e.to_string()))?;
-    if hash.finalize().to_hex().as_str() != expected {
-        return Err(RerankError::Load(format!(
-            "BLAKE3 не совпал: {}",
-            path.display()
-        )));
-    }
-    Ok(())
+    super::artifact::verify(path, expected).map_err(RerankError::Load)
 }
 
 pub(super) fn fp16(dir: &Path) -> Result<(PathBuf, fastembed::TokenizerFiles), RerankError> {

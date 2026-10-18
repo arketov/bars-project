@@ -6,6 +6,15 @@ publish = false
 
 [workspace]
 
+[[bin]]
+name = "spike-gguf"
+path = "src/main.rs"
+
+[[bin]]
+name = "spike-gguf-vulkan"
+path = "src/main.rs"
+required-features = ["vulkan"]
+
 [features]
 vulkan = ["llama-cpp-2/vulkan"]
 

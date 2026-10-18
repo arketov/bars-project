@@ -1,0 +1,48 @@
+{
+  "executable": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\memory\\bin\\core-profile-v1-inference.exe",
+  "at": "2026-10-18T14:58:46.1157062Z",
+  "sources": [
+    {
+      "file": "Cargo.lock",
+      "sha256": "F2FFE29EC2F9F07642B0835D28C0D9936C51D45F54F5156B495D0B2B3CAF7788"
+    },
+    {
+      "file": "crates/bars-core/examples/inference/mod.rs",
+      "sha256": "01FBF222F06C8689C59DC2404B79F039CDF834F080E8646558819952487F4D8C"
+    },
+    {
+      "file": "crates/bars-core/examples/bench_memory.rs",
+      "sha256": "EEC1D58A790802616D647E53220820E9434A274A19A57ADB8775493A9C12521C"
+    },
+    {
+      "file": "crates/bars-core/src/models/builtin.rs",
+      "sha256": "C7E6669583DE0964A86C6D5BD3C9B954148B28A3F8C00F700C77B9B941F41B52"
+    },
+    {
+      "file": "crates/bars-core/src/models/embed_artifact.rs",
+      "sha256": "97E1B50AC5FA014A6A07CCD56E9460EA5706A50F74BE4B218BB125A22BBA53BD"
+    },
+    {
+      "file": "crates/bars-core/src/models/artifact.rs",
+      "sha256": "9A32FB4317EF2F47C23B91B190122F2C818C13C4BF45F5670020D11C2C157386"
+    },
+    {
+      "file": "crates/bars-core/src/models/catalog.rs",
+      "sha256": "FF680D70D56BCB7F08ADBED59839B999BE3374FA21B98A5766B94697DB1D9384"
+    },
+    {
+      "file": "crates/bars-core/src/models/mod.rs",
+      "sha256": "92274F7A5A15E64A0B5C8573AB58631F14977A9AEB26C19988F3FC5BA337A191"
+    },
+    {
+      "file": "crates/bars-core/src/search/hybrid.rs",
+      "sha256": "D0BDDC02D410578E33367ED9EB4CF7A6588EF4F484F0887BD3AC69955E591CBA"
+    },
+    {
+      "file": "crates/bars-core/src/search/vector_top.rs",
+      "sha256": "758F093DEE548A81FB543BE4E720D1202EA495516631815167E294ADD2BE89E5"
+    }
+  ],
+  "sha256": "D5F0C90F89D6738F139D7525CC77D494CA342E3F60DD2E27ED1BF053DCCFD6F5",
+  "blake3": "ec12221f0dfd823ba0c219933cb4e283f8d7eb0fd13effcfafca3996fa743c46"
+}

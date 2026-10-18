@@ -8,7 +8,8 @@ mod standalone;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     use bars_core::{
         models::{
-            Accelerator, BGE_M3_ID, is_downloaded, reranker_files_present, reranker_is_downloaded,
+            Accelerator, BGE_M3_FP16_ID, BGE_M3_ID, is_downloaded, reranker_files_present,
+            reranker_is_downloaded,
         },
         settings::{Settings, UserSettings},
     };
@@ -17,21 +18,34 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     use standalone::windows::{Log, Monitor};
     use std::{fs, path::Path, sync::Arc, time::Duration};
     let args: Vec<_> = std::env::args().skip(1).collect();
-    if !(args.len() == 5 || (args.len() == 6 && args[5] == "--expect-cpu-fallback"))
+    if args.len() < 5
+        || args.len() > 7
+        || !args[5..]
+            .iter()
+            .all(|a| matches!(a.as_str(), "--expect-cpu-fallback" | "--fp16-embed"))
         || !matches!(args[0].as_str(), "rerank" | "bounded")
         || !matches!(args[1].as_str(), "cpu" | "auto")
     {
-        return Err("bench_worker_memory <rerank|bounded> <cpu|auto> <cache> <fixture> <new-jsonl> [--expect-cpu-fallback]".into());
+        return Err("bench_worker_memory <rerank|bounded> <cpu|auto> <cache> <fixture> <new-jsonl> [--expect-cpu-fallback] [--fp16-embed]".into());
     }
     let with_embed = args[0] == "bounded";
-    let expect_fallback = args.len() == 6;
+    let expect_fallback = args.iter().any(|a| a == "--expect-cpu-fallback");
+    let fp16_embed = args.iter().any(|a| a == "--fp16-embed");
+    if fp16_embed && (!with_embed || args[1] != "auto" || expect_fallback) {
+        return Err("FP16 embed acceptance requires bounded auto without CPU fallback".into());
+    }
+    let embed_id = if fp16_embed {
+        BGE_M3_FP16_ID
+    } else {
+        BGE_M3_ID
+    };
     let accelerator = if args[1] == "cpu" {
         Accelerator::Cpu
     } else {
         Accelerator::Auto
     };
     let cache = Path::new(&args[2]);
-    if (with_embed && !is_downloaded(cache, BGE_M3_ID))
+    if (with_embed && !is_downloaded(cache, embed_id))
         || !reranker_files_present(cache, accelerator)
         || !reranker_is_downloaded(cache, Accelerator::Cpu)
     {
@@ -52,7 +66,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     fs::create_dir_all(home.parent().unwrap())?;
     fs::create_dir(&home)?;
     let settings_text = format!(
-        "[embed]\naccelerator = \"{}\"\n[rerank]\nenabled = true\naccelerator = \"{}\"\n",
+        "[embed]\nmodel = \"{embed_id}\"\naccelerator = \"{}\"\n[rerank]\nenabled = true\naccelerator = \"{}\"\n",
         args[1], args[1]
     );
     fs::write(home.join("settings.toml"), &settings_text)?;
@@ -68,7 +82,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         rerank: Duration::from_secs(3),
         check_interval: Duration::from_millis(100),
     };
-    log.emit("config", "startup", json!({"mode":args[0], "accelerator":args[1], "loader":"production-worker", "expect_cpu_fallback":expect_fallback, "fixture_blake3":blake3::hash(&fs::read(&args[3])?).to_hex().to_string(), "interval_ms":100,
+    log.emit("config", "startup", json!({"mode":args[0], "accelerator":args[1], "embed_model":embed_id,"loader":"production-worker", "expect_cpu_fallback":expect_fallback, "fixture_blake3":blake3::hash(&fs::read(&args[3])?).to_hex().to_string(), "interval_ms":100,
         "startup_min_commit_gib":if with_embed {8} else {6}, "rerank_ttl_seconds":3, "embed_ttl_seconds":config.model_idle.embed.as_secs(), "check_interval_ms":100}));
     let monitor = Monitor::start(log.clone());
     let runtime = tokio::runtime::Builder::new_multi_thread()
@@ -147,10 +161,17 @@ async fn exercise(
     if let Some(embed) = embed.as_mut() {
         let start = Instant::now();
         embed.prepare()?;
+        let actual = worker.model_runtime().ok_or("missing embed runtime")?.embed;
+        if settings.embed.model == bars_core::models::BGE_M3_FP16_ID
+            && (actual.actual.as_deref() != Some("directml")
+                || actual.precision.as_deref() != Some("fp16"))
+        {
+            return Err("FP16 embed runtime differs from selected profile".into());
+        }
         log.emit(
             "timing",
             "embed_load",
-            json!({"ms":start.elapsed().as_secs_f64()*1000.0}),
+            json!({"ms":start.elapsed().as_secs_f64()*1000.0,"runtime":actual}),
         );
         let _ = embed.embed_query(&fixture.query)?;
         log.reserve(6)?;

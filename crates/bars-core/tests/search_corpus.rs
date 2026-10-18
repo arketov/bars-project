@@ -10,19 +10,42 @@ use std::path::Path;
 use std::time::Instant;
 
 use bars_core::indexing::chunking::ChunkingParams;
-use bars_core::indexing::indexer::{IndexSettings, UpdateOutcome, update_index};
-use bars_core::models::{Accelerator, BuiltinEmbedder};
+use bars_core::indexing::indexer::{
+    IndexObserver, IndexSettings, UpdateOutcome, update_index_observed,
+};
+use bars_core::models::{
+    Accelerator, BuiltinEmbedder, Device, EmbedError, Embedder, ModelFingerprint,
+};
 use bars_core::search::{SearchRequest, SearchSettings, search};
 use bars_core::storage::{Index, Journal};
 use common::cached_models_dir;
 
 #[test]
+#[ignore = "полная переиндексация: отдельный GPU-прогон с --ignored --nocapture"]
 fn finds_identifiers_and_respects_the_module_filter() {
     let Some(models) = cached_models_dir() else {
         eprintln!("пропущено: bge-m3 нет в ~/.bars/models");
         return;
     };
-    let mut model = BuiltinEmbedder::bge_m3(&models, Accelerator::Cpu).unwrap();
+    let cpu = std::env::var("BARS_CORPUS_TEST_DEVICE").as_deref() == Ok("cpu");
+    let inner = BuiltinEmbedder::bge_m3(
+        &models,
+        if cpu {
+            Accelerator::Cpu
+        } else {
+            Accelerator::Auto
+        },
+    )
+    .unwrap();
+    assert!(
+        cpu || inner.device() == Device::DirectMl,
+        "GPU недоступен; полный корпус на CPU автоматически не запускается"
+    );
+    eprintln!(
+        "устройство: {:?}; пачка: 1; бюджет индексации: 60 с",
+        inner.device()
+    );
+    let mut model = CorpusEmbedder(inner);
     let project = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
     let dir = tempfile::tempdir().unwrap();
     let mut index = Index::open(&dir.path().join("index.sqlite"), Journal::Wal).unwrap();
@@ -30,7 +53,14 @@ fn finds_identifiers_and_respects_the_module_filter() {
         chunking: ChunkingParams::default(),
         docs_root: "docs".into(),
     };
-    let outcome = update_index(&project, &mut index, &settings, &mut model).unwrap();
+    let outcome = update_index_observed(
+        &project,
+        &mut index,
+        &settings,
+        &mut model,
+        &CorpusBudget(Instant::now()),
+    )
+    .expect("корпус не завершён: ошибка или исчерпан бюджет 60 с");
     let UpdateOutcome::Updated(report) = outcome else {
         panic!("{outcome:?}");
     };
@@ -41,7 +71,7 @@ fn finds_identifiers_and_respects_the_module_filter() {
         index.chunk_count().unwrap()
     );
 
-    let ask = |model: &mut BuiltinEmbedder, request: &SearchRequest| {
+    let ask = |model: &mut CorpusEmbedder, request: &SearchRequest| {
         let started = Instant::now();
         let response = search(&index, model, None, &SearchSettings::default(), request).unwrap();
         eprintln!(
@@ -85,4 +115,28 @@ fn finds_identifiers_and_respects_the_module_filter() {
         }),
         "{top:?}"
     );
+}
+
+// Тест не должен занимать все CPU или запускать большие GPU-пачки без отдельного решения.
+struct CorpusEmbedder(BuiltinEmbedder);
+impl Embedder for CorpusEmbedder {
+    fn fingerprint(&self) -> &ModelFingerprint {
+        self.0.fingerprint()
+    }
+    fn embed(&mut self, texts: &[&str]) -> Result<Vec<Vec<f32>>, EmbedError> {
+        let mut result = Vec::with_capacity(texts.len());
+        for text in texts {
+            result.extend(self.0.embed(&[*text])?);
+        }
+        Ok(result)
+    }
+    fn embed_query(&mut self, text: &str) -> Result<Vec<f32>, EmbedError> {
+        self.0.embed_query(text)
+    }
+}
+struct CorpusBudget(Instant);
+impl IndexObserver for CorpusBudget {
+    fn should_stop(&self) -> bool {
+        self.0.elapsed() >= std::time::Duration::from_secs(60)
+    }
 }

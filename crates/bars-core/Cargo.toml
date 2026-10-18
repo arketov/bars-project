@@ -6,11 +6,15 @@ rust-version.workspace = true
 publish.workspace = true
 
 [dependencies]
+bars-graph = { workspace = true, features = ["storage"] }
 log.workspace = true
 blake3.workspace = true
 candle-core.workspace = true
 fastembed.workspace = true
 hf-hub.workspace = true
+llama-cpp-2.workspace = true
+self_cell.workspace = true
+sha2.workspace = true
 keyring-core.workspace = true
 rusqlite.workspace = true
 rust-stemmers.workspace = true
@@ -26,12 +30,18 @@ test-support = []
 
 # DirectML есть только на Windows (docs/features/models/local-models.md).
 [target.'cfg(windows)'.dependencies]
+llama-cpp-2 = { workspace = true, features = ["vulkan"] }
 fastembed = { workspace = true, features = ["directml"] }
 windows-native-keyring-store.workspace = true
 ort = { workspace = true, features = ["directml"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
+llama-cpp-2 = { workspace = true, features = ["metal"] }
 apple-native-keyring-store.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true
+
+[[example]]
+name = "verify_gguf"
+path = "../../spikes/gguf/src/main.rs"

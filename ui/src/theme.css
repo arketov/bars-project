@@ -41,7 +41,10 @@ a { color: inherit; text-decoration: none; }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 10px; border: 2px solid transparent; background-clip: content-box; }
 
-.app { display: grid; grid-template-columns: 300px 1fr; height: 100vh; }
+.app { display: grid; grid-template-columns: 300px minmax(0, 1fr); height: 100vh; }
+@media (max-width: 760px) {
+  .app { grid-template-columns: 220px minmax(0, 1fr); }
+}
 
 /* ---------- боковая панель ---------- */
 aside { background: var(--panel); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }

@@ -1,0 +1,98 @@
+---
+title: Embed precision и ограниченное хранение оценок — 18-10-2026
+---
+
+# Embed precision и ограниченное хранение оценок — 18-10-2026
+
+[← База знаний](../Index.md). Статус: экспериментальный FP16 retrieval завершён на 100 вопросах, INT8 отклонён по контрпримеру. Приёмка нового ядрового FP16-профиля продолжается; эксперимент не заменяет её. Рабочий bars не закрывался. [Проект снижения](../../features/models/memory-reduction.md).
+
+## Качество embed без новых модельных сессий
+
+Четыре замороженных индекса по 946 чанков и по 10 сохранённых запросов; 16 сочетаний FP32 DirectML / FP16 DirectML / INT8 CPU / FP32 CPU. Восемь положительных и два отрицательных вопроса. Разметка как в core-бенче: путь и наличие gold evidence в тексте чанка. Только vector top-15, без FTS/RRF/rerank и порога. Проверены одинаковые ids, тексты/пути чанков, вопросы/разметка и конечность векторов. Float32 dot, одинаковая нормализация запроса. Отрицательные вопросы не оцениваются как false positives: порога здесь нет.
+
+FP32 и FP16 во всех смешанных сочетаниях сохраняют Recall@15 и Hit@3 = 7/8. INT8-индекс с INT8-запросом повышает Recall@15 до 8/8, но Hit@3 уменьшается до 6/8; с FP32/FP16-запросом Recall@15 остаётся 7/8. Это аргумент продолжить полную проверку INT8 и отдельно проверить смешанный CPU fallback, а не принять или отвергнуть вариант по десяти вопросам. На рабочий индекс вывод не переносится; fingerprint не подменяется в продукте.
+
+## Хранение оценок точного поиска
+
+`score-selection.rs`: отдельные процессы старого полного HashMap+sort и нового heap top-30 с удержанием оценок 60 дополнительных текстовых id. Три прохода в каждом процессе. Входы — детерминированные готовые оценки; SQLite, чтение BLOB, dot product и inference исключены. Это измерение меньшей статьи, не объяснение гигабайтов моделей. Native GetProcessMemoryInfo, lifetime peak commit.
+
+| Чанков | Старый peak | Новый peak | Сохраняется оценок | Сырые медианы old/new |
+|---:|---:|---:|---:|---:|
+| 50 000 | 3,38 МиБ | 0,68 МиБ | 50 000 → 90 | 2,48 / 0,58 мс |
+| 500 000 | 33,05 МиБ | 0,68 МиБ | 500 000 → 90 | 45,44 / 6,40 мс |
+
+Все выбранные id совпали. Дополнительно unit-тест сравнивает полный порядок/float bits на 10 004 оценках с ties, ±0, NaN/Inf, K=0/1/15/30/больше N и разным входным порядком. Интеграционный тест сравнивает новый SQLite-перебор с прежним decode+dot и проверяет сохранение текстовых кандидатов/ошибку размерности; 33 проверки поиска прошли. Времена синтетики не считаются чистым замером скорости продукта: работали bars и сборка, репрезентативности для реального запроса нет.
+
+## Полный retrieval FP16 и отказ INT8
+
+Первый одновременный FP16-процесс остановлен внешним guard на 63 из 100 вопросов. Все завершённые строки отдельно проверены primary guard: новых потерь top1/Hit@3/MRR10 при порогах 0/0,1 нет. Полный процесс не принят; его время и память не используются как успешный результат. Сырые строки и monitor сохранены в gzip.
+
+Последовательный режим quality сохраняет query-векторы, освобождает embed, затем создаёт rerank; native memory monitor проверяет RAM/commit каждые 100 мс. Для INT8 требуется ≥4 ГиБ commit, для FP16 ≥6; при <512 МиБ RAM или <1 ГиБ commit процесс прекращается. Два первых ожидания INT8 не получили стартовый запас; последующие процессы стартовали при достаточном резерве. По указанию автора работающий bars не закрывается.
+
+FP16 завершил все 100 вопросов с exit0. Относительно текущего FP32 embed + FP16 rerank (`product3-overdrive`) нет новых потерь top1, Hit@3, MRR@10, NDCG@10 и трёх документных метрик при порогах 0/0,1; нет роста falseNonempty. Сохраняются уже существовавшие ошибки baseline. Lifetime peak последовательного процесса 3374 МиБ; после выгрузки embed 315 МиБ. Это не совместный пик двух моделей и не продуктовая задержка: query заранее вычислены, работал bars, качество/время явно разделены.
+
+INT8 вычислил все 100 query-векторов, но guard остановил retrieval после семи ответов: od-001 при пороге 0 теряет правильный раздел из top-10, MRR@10 0,125 → 0. Повторная сверка с текущим `product3-overdrive` подтверждает потерю. Lifetime peak остановленного процесса 2344 МиБ — диагностическое наблюдение, не успешная приёмка. Это отдельное основание отказа INT8 embed, независимо от прежнего отказа INT8 rerank. Другие методы квантизации этим опытом не оценены.
+
+Новый ядровой загрузчик использует отдельный fingerprint precision+revision, закреплённые пять файлов и проверенную отметку кэша. Windows-профиль FP16 добавлен отдельно от заводской FP32 bge-m3; CPU fallback запрещён для FP16, переход требует явного выбора обычной bge-m3 и переиндексации.
+
+Ядровой query-путь завершил 100 вопросов без новых потерь всех выбранных метрик при порогах 0/0,1. Фактический runtime DirectML/FP16 и revision записаны в session; все 102 400 компонентов query-векторов точно совпали с прототипом. Lifetime peak последовательного процесса 3294 МиБ. Документные векторы взяты из прежнего экспериментального FP16-индекса с адаптированным fingerprint только в копии: это не новая индексация ядровым загрузчиком. Два preflight длинной индексации (120/180 с) не получили RAM ≥8 ГиБ / commit ≥9 ГиБ, модели не запускались. Совместная память и продуктовая latency этим не приняты.
+
+Проверка всех пяти уже скачанных pinned-файлов настоящим artifact-only API, BLAKE3 и создание отметки завершились с ready=true и lifetime peak 3,52 МиБ. В отдельной собственной копии изменён config.json: BLAKE3 отклонён, ready=false, peak 3,56 МиБ. Общие веса не изменялись. Это приёмка пути проверки/кэша без ONNX; холодное сетевое скачивание этим не измеряется.
+
+## Файлы
+
+- [vector-screen.json](vector-screen.json) — 16 комбинаций, строки ответов, метрики и SHA256 исходных query/index/cases.
+- [scores-full-50000.jsonl](scores-full-50000.jsonl) — старый сбор 50 тысяч оценок.
+- [scores-bounded-50000.jsonl](scores-bounded-50000.jsonl) — ограниченный сбор 50 тысяч оценок.
+- [scores-full-500000.jsonl](scores-full-500000.jsonl) — старый сбор 500 тысяч оценок.
+- [scores-bounded-500000.jsonl](scores-bounded-500000.jsonl) — ограниченный сбор 500 тысяч оценок.
+- [fp16-full-invalidated.rows.jsonl.gz](fp16-full-invalidated.rows.jsonl.gz) — 63 завершённых ответа, полный прогон не принят.
+- [fp16-full-invalidated.session.json.gz](fp16-full-invalidated.session.json.gz) — параметры/хеш бинарника остановленного процесса.
+- [fp16-full-invalidated.monitor.json.gz](fp16-full-invalidated.monitor.json.gz) — монитор остановленного одновременного FP16-процесса.
+- [build-staged.json](build-staged.json) — хеши release-стенда и источников; отдельная архивная копия hybrid до эквивалентной clippy-правки.
+- [verification.json](verification.json) — проверки core/worker/clippy и хеши синтетики.
+- [fp16-full-invalidated.json.gz](fp16-full-invalidated.json.gz) — причина отклонения полного процесса.
+- [partial-primary-check.json](partial-primary-check.json) — проверка 63 завершённых строк без признания полного прогона.
+- [preflight-status.json](preflight-status.json) — отказ стартового резерва и состояние системной памяти.
+- [fp16-full-summary.json](fp16-full-summary.json) — сравнение прототипа с прежним FP32-rerank baseline; не текущий продуктовый baseline.
+- [fp16-vs-current-summary.json](fp16-vs-current-summary.json) — все 100 FP16 ответов против текущего FP16-rerank baseline; speedup не вычисляется при загрязнённом времени.
+- [int8-vs-current-rejected.json](int8-vs-current-rejected.json) — подтверждённая потеря od-001 относительно текущего baseline.
+- [staged-evidence.json](staged-evidence.json) — источники, SHA-256, число ответов, exit и фазовая память двух процессов.
+- [build-core-v1.json](build-core-v1.json) — хеш нового ядрового release-стенда и источников на момент копирования бинарника.
+- [core-v1-sources.json.gz](core-v1-sources.json.gz) — соответствующие исходники ядрового стенда; SHA-256 сверены с build-core-v1.json.
+- [core-query-vs-current-summary.json](core-query-vs-current-summary.json) — 100 ответов ядрового query-пути против текущего baseline.
+- [core-query-vector-comparison.json](core-query-vector-comparison.json) — точное совпадение query-векторов прототипа и ядрового загрузчика; не document batches.
+- [core-query-evidence.json](core-query-evidence.json) — SHA-256, lifetime peak и ограничения query/cache-процессов.
+- [core-preflight-status.json](core-preflight-status.json) — два отказа запаса для длинной индексации; моделей не запускали.
+- [build-pair-v2.json](build-pair-v2.json) — хеши собранных core/worker стендов с новым FP16-профилем и текущих источников.
+- [core-pair-preflight-run.json.gz](core-pair-preflight-run.json.gz) — параметры попытки парного worker-замера; модели не запускались.
+- [core-pair-preflight.jsonl.gz](core-pair-preflight.jsonl.gz) — 90 с ожидания резерва 4 ГиБ RAM / 8 ГиБ commit и отсутствия сборок.
+- [core-query.rows.jsonl.gz](core-query.rows.jsonl.gz) — 100 ответов ядрового FP16 query-пути.
+- [core-query.session.json.gz](core-query.session.json.gz) — фактические device/precision/revision и хеш бинарника.
+- [core-query.config.json.gz](core-query.config.json.gz) — конфигурация ядрового query retrieval.
+- [core-query.complete.json.gz](core-query.complete.json.gz) — завершение ядрового query-прохода.
+- [core-query.native-memory.jsonl.gz](core-query.native-memory.jsonl.gz) — нативные сэмплы последовательного ядрового процесса.
+- [core-query.query-vectors.json.gz](core-query.query-vectors.json.gz) — все 100 query-векторов нового загрузчика.
+- [core-query.monitor.json.gz](core-query.monitor.json.gz) — внешний монитор, время не принимается как product latency.
+- [core-download.native-memory.jsonl.gz](core-download.native-memory.jsonl.gz) — настоящая проверка готового кэша без ONNX-сессии.
+- [core-download-corrupt.native-memory.jsonl.gz](core-download-corrupt.native-memory.jsonl.gz) — отказ повреждённого config по BLAKE3 без ONNX.
+- [fp16-staged.rows.jsonl.gz](fp16-staged.rows.jsonl.gz) — 100 ответов FP16-прототипа.
+- [fp16-staged.session.json.gz](fp16-staged.session.json.gz) — исполняемый файл и параметры сессии FP16.
+- [fp16-staged.config.json.gz](fp16-staged.config.json.gz) — конфигурация FP16 retrieval.
+- [fp16-staged.native-memory.jsonl.gz](fp16-staged.native-memory.jsonl.gz) — нативные сэмплы/маркеры FP16.
+- [fp16-staged.query-vectors.json.gz](fp16-staged.query-vectors.json.gz) — сохранённые FP16 query-векторы.
+- [fp16-staged.complete.json.gz](fp16-staged.complete.json.gz) — маркер завершения FP16.
+- [fp16-staged.monitor.json.gz](fp16-staged.monitor.json.gz) — внешний монитор FP16, загрязнение времени.
+- [int8-rejected.rows.jsonl.gz](int8-rejected.rows.jsonl.gz) — семь ответов INT8 до остановки.
+- [int8-rejected.session.json.gz](int8-rejected.session.json.gz) — бинарник и параметры сессии INT8.
+- [int8-rejected.config.json.gz](int8-rejected.config.json.gz) — конфигурация остановленного INT8 retrieval.
+- [int8-rejected.native-memory.jsonl.gz](int8-rejected.native-memory.jsonl.gz) — нативная память остановленного INT8.
+- [int8-rejected.query-vectors.json.gz](int8-rejected.query-vectors.json.gz) — все 100 INT8 query-векторов.
+- [int8-rejected.rejected.json.gz](int8-rejected.rejected.json.gz) — исходный контрпример quality guard.
+- [int8-rejected.monitor.json.gz](int8-rejected.monitor.json.gz) — внешний монитор и отказ качества INT8.
+
+- [verification-core.json](verification-core.json) — 219 core / 177 worker / 10 UI, сборка, ручная проверка и незавершённый clippy.
+- [core-worker-tests.log.gz](core-worker-tests.log.gz) — полный финальный lib-прогон.
+- [pair-build.log.gz](pair-build.log.gz) — успешная совместная сборка core/worker стендов.
+- [device-picker-tests.log.gz](device-picker-tests.log.gz) — десять тестов выбора устройства.
+- [ui-check.log.gz](ui-check.log.gz) — Svelte check без ошибок/предупреждений.

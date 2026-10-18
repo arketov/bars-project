@@ -23,8 +23,10 @@ SHELL_READ = re.compile(
 )
 
 DOCS_MSG = (
-    "Документацию проекта сначала ищи через bars: bars_rag_search (запрос своими "
-    "словами), затем bars_outline и bars_read. Схемы bars отложены — загрузи их: "
+    "Сначала определи предмет задачи по известному плану/реестру. Документ известен — "
+    "bars_read или bars_outline сразу; неизвестный контекст — bars_rag_search с "
+    "предметным вопросом и подходящей областью. modules:[\"backlog\"] — пожелания, "
+    "files — выбранные индексируемые пути от docs-root, без префикса корня. Схемы bars отложены — загрузи их: "
     "ToolSearch query \"select:mcp__bars__bars_rag_search,mcp__bars__bars_outline,"
     "mcp__bars__bars_read\". После первого вызова bars Read разрешён."
 )

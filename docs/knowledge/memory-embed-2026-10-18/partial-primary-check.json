@@ -1,0 +1,6 @@
+{
+  "completed_rows": 63,
+  "primary_guard_exit": 0,
+  "full_run_accepted": false,
+  "reason": "Run invalidated under memory pressure; this checks completed prefix only"
+}

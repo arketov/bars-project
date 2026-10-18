@@ -2,6 +2,7 @@
 // Всё, что знает воркер, спрашивается у него; окно хранит только выбор пользователя.
 
 import { call, joinPath, openPath, pickFolder } from "./api";
+import type { GraphReply,GraphSearchOutput,RetrievalMode } from './graph';
 import { documentsIn } from "./format";
 import { NotificationCenter, type Notice } from "./notifications";
 import { buildTree, searchScope, toggle, type SearchScope, type TreeNode } from "./tree";
@@ -9,6 +10,7 @@ import {
   BarsError,
   type ActivityOutput,
   type ModelsInfoOutput,
+  type OperationEventsOutput,
   type ProjectInfo,
   type ProjectsOutput,
   type ReadOutput,
@@ -18,7 +20,7 @@ import {
   type TreeOutput,
 } from "./types";
 
-export type View = "main" | "settings" | "indexing";
+export type View = "main" | "settings" | "indexing" | "graph";
 
 export interface ViewedDocument {
   hit: DocumentReference;
@@ -60,6 +62,10 @@ class App {
   filter = $state("");
 
   query = $state("");
+  retrievalMode = $state<RetrievalMode>('hybrid');
+  includeRelated = $state(true);
+  graphSearch = $state<GraphSearchOutput|null>(null);
+  graphPreview = $state<GraphReply|null>(null);
   /** Число результатов на этот запрос; `null` — по умолчанию из настроек. */
   count = $state<number | null>(null);
   defaultCount = $state(5);
@@ -86,19 +92,44 @@ class App {
   #notifications = new NotificationCenter();
   #refreshing = false;
   #modelsPending: Promise<void> | null = null;
+  #actionAttempt = 0;
+  #selectionVersion = 0;
+  notificationError = $state<string | null>(null);
+  notificationHistoryWarning = $state<string | null>(null);
 
-  readNotifications(): void { this.#notifications.read(); this.publishNotifications(); }
+  readNotifications(id?: string, version?: string): void { this.#notifications.read(id, version); this.publishNotifications(); }
+  notificationVersion(id: string): string | undefined { return this.#notifications.version(id); }
+  async retryNotification(item: Notice): Promise<void> {
+    try {
+      await call("operation_retry", { epoch: item.epoch, id: item.operation?.id });
+      this.flash("Повтор принят в очередь");
+      await this.refresh(true);
+    } catch (error) { this.flash(error instanceof Error ? error.message : String(error), true); }
+  }
+  async visitNotification(item: Notice): Promise<void> {
+    const selectionVersion = this.#selectionVersion;
+    const epoch = this.#epoch;
+    try {
+      const output = await call<OperationEventsOutput>("operation_events", { epoch: item.epoch, after: Math.max(0, (item.operation?.sequence ?? 1) - 1) });
+      const op = [...output.active, ...output.completed].find(op => op.id === item.operation?.id);
+      if (output.epoch !== item.epoch || !op?.target_available) throw new Error("Прежняя цель недоступна: регистрация или настройки изменились либо история истекла");
+      if (selectionVersion !== this.#selectionVersion || epoch !== this.#epoch) throw new Error("Выбор проекта изменился; прежний переход отменён");
+      if (item.project) {
+        await this.select(item.project);
+        if (this.current !== item.project) throw new Error("Выбран другой проект; переход отменён");
+        this.openIndexing();
+      } else this.openSettings("models");
+    } catch (error) { this.flash(error instanceof Error ? error.message : String(error), true); }
+  }
   clearNotifications(): void { this.#notifications.clear(); this.publishNotifications(); }
-  observeModels(models: ModelsInfoOutput): void { this.#notifications.models(models); this.publishNotifications(); }
   loadModels(): Promise<void> {
     if (this.#modelsPending) return this.#modelsPending;
     this.#modelsPending = call<ModelsInfoOutput>("models_info").then(models => {
       this.models = models;
-      this.observeModels(models);
     }).finally(() => { this.#modelsPending = null; });
     return this.#modelsPending;
   }
-  private publishNotifications(): void { this.notifications = this.#notifications.items.map(n => ({ ...n })); }
+  private publishNotifications(): void { this.notifications = this.#notifications.items.map(n => ({ ...n })); this.notificationHistoryWarning = this.#notifications.historyWarning; }
 
   #timer: ReturnType<typeof setInterval> | null = null;
   #tick = 0;
@@ -144,8 +175,7 @@ class App {
 
   flash(text: string, bad = false): void {
     if (bad) {
-      this.#notifications.resolve(`action:${text}`);
-      this.#notifications.error(`action:${text}`, "Ошибка действия", text);
+      this.#notifications.error(`action:${++this.#actionAttempt}`, "Ошибка действия", text);
       this.publishNotifications();
     }
     this.toast = { text, bad };
@@ -165,7 +195,14 @@ class App {
       const changed = JSON.stringify(activity.running?.project) !== JSON.stringify(this.activity?.running?.project)
         || activity.queue.length !== (this.activity?.queue.length ?? 0);
       this.activity = activity;
-      this.#notifications.activity(activity);
+      try {
+        const events = await call<OperationEventsOutput>("operation_events", { epoch: this.#notifications.epoch, after: this.#notifications.cursor });
+        if (epoch !== this.#epoch) return;
+        this.#notifications.events(events);
+        this.notificationError = null;
+      } catch {
+        this.notificationError = "Не удалось получить события. Сохранён последний снимок; исход операций пока неизвестен.";
+      }
       // Отдельный сбой каталога не означает остановку загрузок или всего воркера.
       try { await this.loadModels(); } catch { /* Сохраняем последний снимок. */ }
       this.publishNotifications();
@@ -180,7 +217,8 @@ class App {
       // Одна осечка — не повод пугать пользователя.
       if (this.#failures >= 2) this.workerDown = error instanceof Error ? error.message : String(error);
       if (this.workerDown) {
-        this.#notifications.error("worker", "Воркер недоступен", this.workerDown);
+        this.notificationError = "Нет связи с воркером · сохранён последний снимок";
+        this.#notifications.disconnected(this.workerDown);
         this.publishNotifications();
       }
     } finally {
@@ -230,6 +268,8 @@ class App {
   }
 
   async select(path: string | null): Promise<void> {
+    this.graphSearch=null;this.graphPreview=null;
+    this.#selectionVersion++;
     this.#searchId++;
     this.searching = false;
     this.current = path;
@@ -271,27 +311,32 @@ class App {
     const started = performance.now();
     try {
       const { modules, files } = this.scope;
-      const output = await call<SearchOutput>("search", {
+      const mode=this.retrievalMode;
+      const output = await call<SearchOutput|GraphSearchOutput>(mode==='hybrid'?"search":"graph_search", {
         cwd: project.path,
         project: project.path,
         query,
         modules,
         files,
+        ...(mode==='hybrid'?{}:{mode}),
+        ...(mode==='mix'?{include_related:this.includeRelated}:{}),
         ...(this.count === null ? {} : { limit: this.count }),
         ...(this.minScore === null ? {} : { min_score: this.minScore }),
       });
       if (searchId !== this.#searchId || this.current !== project.path) return;
       this.results = output;
+      this.graphSearch='requested_mode' in output?output as GraphSearchOutput:null;
       this.#notifications.resolve(`search:${project.path}`);
       if (output.rerank_error) this.#notifications.error(`rerank:${project.path}`, `Ошибка rerank · ${project.name}`, "Поиск выполнен без rerank. Проверьте модель и подключение.", "models");
       else this.#notifications.resolve(`rerank:${project.path}`);
       this.publishNotifications();
       this.searchedQuery = query;
-      const emptyInfo = output.results.length === 0 ? await this.diagnoseEmpty(project.path, modules, files) : null;
+      const emptyInfo = output.results.length === 0&&mode!=='graph' ? await this.diagnoseEmpty(project.path, modules, files) : null;
       if (searchId === this.#searchId && this.current === project.path) this.emptyInfo = emptyInfo;
     } catch (error) {
       if (searchId !== this.#searchId || this.current !== project.path) return;
       this.results = null;
+      this.graphSearch = null;
       this.searchError = error instanceof BarsError ? error : new BarsError(String(error));
       if (this.searchError.kind !== "model_loading") {
         this.#notifications.error(`search:${project.path}`, `Ошибка поиска · ${project.name}`, this.searchError.message);

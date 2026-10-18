@@ -1,0 +1,38 @@
+//! Снимок до Parameters: missing, null и явное значение остаются различимыми.
+use rmcp::handler::server::{common::FromContextPart, tool::ToolCallContext};
+use serde_json::Value;
+
+pub struct Original(pub Value);
+impl<S> FromContextPart<ToolCallContext<'_, S>> for Original {
+    fn from_context_part(context: &mut ToolCallContext<S>) -> Result<Self, rmcp::ErrorData> {
+        let allowed: &[&str] = match context.name.as_ref() {
+            "bars_rag_search" => &[
+                "format",
+                "project",
+                "query",
+                "modules",
+                "files",
+                "limit",
+                "candidates",
+                "min_score",
+                "mode",
+            ],
+            "bars_read" => &["format", "project", "path"],
+            "bars_outline" => &["format", "project", "path", "levels", "under", "under_line"],
+            "bars_status" => &["format", "project"],
+            "bars_reindex" => &["format", "project", "full"],
+            _ => &["format"],
+        };
+        let fields = context
+            .arguments
+            .as_ref()
+            .map(|o| {
+                o.iter()
+                    .filter(|(k, _)| allowed.contains(&k.as_str()))
+                    .map(|(k, v)| (k.clone(), v.clone()))
+                    .collect()
+            })
+            .unwrap_or_default();
+        Ok(Self(Value::Object(fields)))
+    }
+}

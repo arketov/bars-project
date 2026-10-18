@@ -49,6 +49,9 @@ impl Pause {
 
 /// Что делает идущее задание: вид, ход и флаг остановки.
 pub struct JobCell {
+    pub operation_id: u64,
+    paused: AtomicBool,
+    total_known: AtomicBool,
     report: Mutex<bars_core::indexing::indexer::UpdateReport>,
     execution: Mutex<bars_core::models::ExecutionInfo>,
     attempt: AtomicUsize,
@@ -103,6 +106,9 @@ impl JobCell {
     }
     pub fn new(project: &Path, job: &Job) -> Arc<Self> {
         Arc::new(Self {
+            operation_id: job.operation_id,
+            paused: AtomicBool::new(false),
+            total_known: AtomicBool::new(false),
             report: Mutex::default(),
             execution: Mutex::default(),
             attempt: AtomicUsize::new(0),
@@ -120,6 +126,16 @@ impl JobCell {
 
     pub fn cancel(&self) {
         self.cancel.store(true, Ordering::SeqCst);
+    }
+
+    pub fn cancel_requested(&self) -> bool {
+        self.cancel.load(Ordering::SeqCst)
+    }
+    pub fn paused(&self) -> bool {
+        self.paused.load(Ordering::SeqCst)
+    }
+    pub fn total_known(&self) -> bool {
+        self.total_known.load(Ordering::SeqCst)
     }
 
     pub fn progress(&self) -> Progress {
@@ -170,6 +186,7 @@ impl IndexObserver for JobObserver {
     }
     fn begin(&self, documents: usize) {
         self.cell.total.store(documents, Ordering::SeqCst);
+        self.cell.total_known.store(true, Ordering::SeqCst);
     }
 
     fn file(&self, path: &str) {
@@ -184,9 +201,14 @@ impl IndexObserver for JobObserver {
     fn should_stop(&self) -> bool {
         loop {
             if self.cell.cancel.load(Ordering::SeqCst) {
+                self.cell.paused.store(false, Ordering::SeqCst);
                 return true;
             }
+            self.cell
+                .paused
+                .store(self.pause.is_paused(), Ordering::SeqCst);
             if self.pause.wait(PAUSE_POLL) {
+                self.cell.paused.store(false, Ordering::SeqCst);
                 return self.cell.cancel.load(Ordering::SeqCst);
             }
         }

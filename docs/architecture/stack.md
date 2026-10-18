@@ -31,12 +31,14 @@ title: Стек bars — библиотеки, версии и почему он
 
 | Что | Крейт | Версия | Зачем |
 |---|---|---|---|
-| Встроенные embed и rerank | `fastembed` с фичами `qwen3`, `nomic-v2-moe`, `directml` | 7.1.1 | Т-17; подробности — [features/models/local-models.md](../features/models/local-models.md) |
+| Встроенные ONNX embed/rerank и Nomic | `fastembed` с фичами `nomic-v2-moe`, Windows `directml` | 7.1.1 | Т-17; Qwen использует llama.cpp по ADR-0002, подробности — [features/models/local-models.md](../features/models/local-models.md) |
 | ONNX Runtime | `ort` (через fastembed) | 2.0.0-rc.13 | статически вшивается в `bars` при сборке |
 | HTTP к внешним моделям | `ureq` с фичей `json` | 3.4 | Т-17; блокирующий клиент под синхронные trait'ы `Embedder` и `Reranker`, rustls; уже есть в дереве зависимостей через fastembed (решение агента вместо `reqwest`, OQ-59) |
-| candle для Qwen3 и Nomic | `candle-core` | 0.11 | `Device` и `DType` для загрузчиков fastembed; версия та же, что у fastembed |
+| candle для Nomic | `candle-core` | 0.11 | `Device` и `DType` для загрузчиков fastembed; версия та же, что у fastembed |
 
 Сборка проверена на Windows спайком: 30 МБ exe, Rust 1.99, Visual Studio 2026 ([knowledge/spike-search.md](../knowledge/spike-search.md)). ONNX Runtime скачивается при сборке с `cdn.pyke.io` и линкуется в `bars` статически: отдельной dll или dylib рядом с exe нет. Сборке нужен доступ к сети. Готовые сборки ONNX Runtime для x86-64 требуют процессор уровня x86-64-v3 (Intel Haswell, 2013, и новее).
+
+Qwen GGUF Q4_K_M использует закреплённый llama-cpp-2 0.1.160 / llama.cpp по [ADR-0002](../adr/0002-qwen-gguf.md); владение контекстом — self_cell 1.3.0, SHA-256 — sha2 0.10. На Windows backend Vulkan, на macOS Metal (не проверена); CPU fallback с теми же весами. Сборка Windows: Vulkan SDK, Ninja, MSVC 17.14+, короткий target. Подписанный Vulkan loader с лицензией включается в установщик; SDK у пользователя не требуется.
 
 ## Индекс bars
 

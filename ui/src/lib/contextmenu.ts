@@ -22,7 +22,21 @@ export function projectItems(): MenuItem[] {
   ];
 }
 
-/** Ближайшая строка файла либо карточка результата; папки собственного меню не имеют. */
+export function folderAt(target: EventTarget | null): { path: string; kind: string; element: HTMLElement } | null {
+  const element = target instanceof Element ? target.closest<HTMLElement>("[data-folder-path]") : null;
+  return element ? { path: element.dataset.folderPath!, kind: element.dataset.folderKind ?? "Папка", element } : null;
+}
+
+export function folderItems(state: string, missing = false): MenuItem[] {
+  const reason = state === "unavailable" ? "Проект недоступен" : state === "reindex_required" ? "Нужно согласие на смену модели" : "Проверяется весь проект";
+  return [
+    { action: "reveal", label: /Mac/.test(navigator.platform) ? "Открыть в Finder" : "Открыть в Проводнике", disabled: missing, hint: missing ? "Папка не найдена" : undefined },
+    { action: "path", label: "Скопировать путь", hint: missing ? "Папка отсутствует; последний путь" : undefined },
+    { action: "checkProject", label: "Проверить индекс проекта", disabled: state === "unavailable" || state === "reindex_required", hint: reason },
+  ];
+}
+
+/** Ближайшая строка файла либо карточка результата. */
 export function documentAt(target: EventTarget | null): { path: string; line: number } | null {
   const element = target instanceof Element ? target.closest<HTMLElement>("[data-document-path]") : null;
   return element?.dataset.documentPath ? { path: element.dataset.documentPath, line: Number(element.dataset.documentLine ?? 0) } : null;

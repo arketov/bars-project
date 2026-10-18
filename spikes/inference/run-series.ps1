@@ -32,7 +32,7 @@ $Data=(Resolve-Path $Data).Path
 $Models=(Resolve-Path $Models).Path
 $minimumCommit=if($Mode -eq 'run'){9GB}else{12GB}
 if($MinimumCommitGiB){
-    $floor=if($Mode -eq 'quality'){6}else{9}
+    $floor=if($Mode -eq 'quality'){4}else{9}
     if($MinimumCommitGiB -lt $floor){throw "MinimumCommitGiB must retain at least $floor GiB"}
     $minimumCommit=$MinimumCommitGiB*1GB
 }

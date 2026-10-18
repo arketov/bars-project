@@ -2,7 +2,18 @@
 
 This file is placed in the documentation root by bars, a local search tool over Markdown. It is addressed to the models (and people) who write documents. bars overwrites it with every new version, so edits made here are not kept. Project-specific rules belong in the project's own `AGENTS.md` / `CLAUDE.md`.
 
-Write documents and search queries in the user's language; follow the project's explicit language rules. Do not translate them into English because these agent instructions are in English. Only agent instruction documents use English. Preserve identifiers, API names and original source quotations. This file only fixes the structure.
+Write documents and search queries in the user's language; follow the project's explicit language rules. Do not translate them into English because these agent instructions are in English. Only agent instruction documents use English. Preserve identifiers, API names and original source quotations. This file covers source navigation and document structure.
+
+## Choose the subject, operation and scope
+
+Identify the subject and information needed before calling a tool. Resolve a stage number or task label through the known project plan or register first; do not turn generic task wording into a query such as "stage N requirements errors user wishes".
+
+- Known document: call `bars_read` directly for its text, or `bars_outline` for headings. No preliminary search is required. These tools read Markdown from disk and accept documentation-root or project-root paths; an unindexed plan can still be read.
+- Unknown context: call `bars_rag_search` with a concrete question in the user's language. Start project-wide when relevant knowledge may span requirements, features, architecture, research and decisions.
+- `modules` selects existing first-level folders under the configured documentation root, not arbitrary nested topics. Use `bars_projects` if the names are unknown. For a project with a backlog module: `bars_rag_search({query:"Какие пожелания есть к обновлению индекса?",modules:["backlog"]})`. For session history: `bars_rag_search({query:"Последние результаты проверки устройств моделей",modules:["chats"]})`.
+- `files` selects already chosen indexed documents, including a set across modules. Example: `bars_rag_search({query:"Как выбирается устройство rerank?",files:["features/models/local-models.md","features/settings/settings.md"]})`. Use actual known paths relative to the documentation root; when that root is `docs`, do not prefix them with `docs/`. A path accepted by read/outline or a file existing on disk is not proof it is valid for the index filter. Do not guess a file list when gathering full context.
+
+The examples assume the suggested layout; use the target project's actual modules and documents. Filters are optional, not a quota. After an empty result, check the subject, project and scope, then reformulate or read a known primary source. Zero results do not prove that a requirement is absent and do not justify reindexing. Check result text as well as its heading; a chunk may contain adjacent sections.
 
 ## How bars reads documents
 

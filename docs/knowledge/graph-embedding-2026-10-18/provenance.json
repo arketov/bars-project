@@ -1,0 +1,50 @@
+{
+  "recorded_at": "2026-10-18T14:30:39.460Z",
+  "head": "048614f56eb08b15df18f0c8747604bd18df3af1",
+  "dirty_checkout": true,
+  "source_sha256": {
+    "crates/bars-core/src/graph/mod.rs": "4fcd76f6e096808c194546eed330bf0c94edaba70d95b4ab67a7cd520b7a6288",
+    "crates/bars-core/src/graph/similarity.rs": "f3ae419d21eb801cdaa32b750c1c0149caac5e1e5d7082012a13abb394e20b7d",
+    "spikes/graph/knn.rs": "72878965cab709dbaeab06f2ab9a77ea216d8688972f29b646ef31cdb429c444",
+    "scripts/graph-embedding-probe.mjs": "38cea68b4d7586591a6cb35cab3415aff398040c523cbd627e7f1fb42ac6afbf",
+    "scripts/graph-embedding-probe.test.mjs": "cc0dc7dbb1e8de980f504de50c94cecf1ba1568ba8fca518498c3775511d1221"
+  },
+  "driver_sha256": "5230c47c542ec6acf28ce58cbb1e2df52ff7b69b7f43e2dc39d772d3c7743823",
+  "rustc": "1.99.0 (b940084d7 2026-09-28)",
+  "node": "v24.16.0",
+  "cpu": "Intel Core i7-11700KF",
+  "platform": "win32",
+  "arch": "x64",
+  "commands": [
+    "rustc --edition=2024 --test crates/bars-core/src/graph/similarity.rs -o target/stage33-probe/similarity-tests.exe",
+    "rustc --edition=2024 -O -D warnings spikes/graph/knn.rs -o target/stage33-probe/knn.exe",
+    "node --test scripts/graph-embedding-probe.test.mjs",
+    "node scripts/graph-embedding-probe.mjs export . target/stage33-probe/corpus-1",
+    "knn.exe vectors.bin <k=3|5|10> <threshold=0|0.5|0.7> 1000000",
+    "node scripts/graph-embedding-probe.mjs analyze <snapshot-dir> <baselines.json> <knn.json> [...]"
+  ],
+  "tests": {
+    "rust_kernel": 7,
+    "node_harness": 4
+  },
+  "integrated_cargo_test": {
+    "passed": true,
+    "command": "cargo test --release -p bars-core --lib graph:: --locked --offline",
+    "passed_tests": 7,
+    "filtered_out": 207,
+    "environment": {
+      "vs": "17.14.42",
+      "generator": "Ninja",
+      "build_parallel_level": 1,
+      "target_dir": "C:/bg22",
+      "vulkan_sdk": "C:/Users/arketov/AppData/Local/bars-spikes/VulkanSDK/1.4.363.0"
+    },
+    "initial_failure": "llama-cpp-sys-2 build: VULKAN_SDK NotPresent; pre-existing GGUF dependencies, not a graph extraction model"
+  },
+  "limits": [
+    "No independent holdout or gold labels.",
+    "Only graph construction time; not request latency, p95, or resource acceptance.",
+    "No extraction model added.",
+    "No S1-S8 acceptance or finished stage 33."
+  ]
+}

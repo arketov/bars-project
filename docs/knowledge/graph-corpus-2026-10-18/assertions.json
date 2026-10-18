@@ -1,0 +1,674 @@
+[
+  {
+    "id": "2e5faabaf51c55ef4c1fcd6c7608d618fafabb0e6f5aff4ffd163530a251469e",
+    "subject": "У модели fastembed метод `embed",
+    "predicate": "requires",
+    "polarity": "positive",
+    "object": "исключительного доступа (`&mut self`): одна модель считает один вызов за раз",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "e924b9471383731d188880b652ee2762c4ec809aba0bb5ee39f4996be867ad98",
+        "document": {
+          "kind": "document",
+          "id": "4a8ebda525a034055e9b40e0281f19cbec9ca92757464822fb297095f5f73422",
+          "revision": "89cb0b65a9df4c31d12c6104753a5d8b19f761bfb630e06222a34f59994f8470"
+        },
+        "span": {
+          "start": 5213,
+          "end": 5403,
+          "first_line": 52,
+          "last_line": 52
+        },
+        "quote": "У модели fastembed метод `embed` требует исключительного доступа (`&mut self`): одна модель считает один вызов за раз.",
+        "source_hash": "89cb0b65a9df4c31d12c6104753a5d8b19f761bfb630e06222a34f59994f8470",
+        "method": "explicit-markdown-v4",
+        "path": "architecture/worker.md"
+      }
+    ]
+  },
+  {
+    "id": "d8cb135c41a8307537a28faccd3cb0217dc5780632f035d6b7b5b6174686419b",
+    "subject": "реализованное меню проекта",
+    "predicate": "supersedes",
+    "polarity": "negative",
+    "object": "меню папки дерева",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "25de0bf7b0cdf9507d4251ff67544d668f8564c9fab6684bca51ddefad46dbcd",
+        "document": {
+          "kind": "document",
+          "id": "0b0610c40ea2d0cd2cef698193c48c20d562c167996dd3abab636aad4d0af9f0",
+          "revision": "a7891be25a9ebd40cec05c8d312fdcda91ea7e566a3a9c381c9a8f19e4818d5a"
+        },
+        "span": {
+          "start": 5226,
+          "end": 5333,
+          "first_line": 38,
+          "last_line": 38
+        },
+        "quote": " реализованное меню проекта не заменяет меню папки дерева.",
+        "source_hash": "a7891be25a9ebd40cec05c8d312fdcda91ea7e566a3a9c381c9a8f19e4818d5a",
+        "method": "explicit-markdown-v4",
+        "path": "backlog/issues.md"
+      }
+    ]
+  },
+  {
+    "id": "ac6066fbc99786d44a4ff28ce2da1b8d1554ae68840a08304ab3e439bbdf23be",
+    "subject": "Без драйвера Vulkan модель",
+    "predicate": "uses",
+    "polarity": "positive",
+    "object": "CPU fallback",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "b7c1c78d96f006c530a6814976dc2b18b10ee6a443ffc16bbdf7bf51fa79a273",
+        "document": {
+          "kind": "document",
+          "id": "bf905b32c1b48a2195d771bd4a1801aff1cd89cdb8fd2a23fe011a1420fb749d",
+          "revision": "99dbedd40bb75797824c4e72fd95e89b1b1d332c6e8e1c8e6465c9d70a4ef7b6"
+        },
+        "span": {
+          "start": 12377,
+          "end": 12456,
+          "first_line": 75,
+          "last_line": 75
+        },
+        "quote": " Без драйвера Vulkan модель использует CPU fallback.",
+        "source_hash": "99dbedd40bb75797824c4e72fd95e89b1b1d332c6e8e1c8e6465c9d70a4ef7b6",
+        "method": "explicit-markdown-v4",
+        "path": "features/distribution/installer.md"
+      }
+    ]
+  },
+  {
+    "id": "d0d011f0991bca4bb57aa000197a1ff74deae9b55ca7be6ca7e4f794a736d5c3",
+    "subject": "универсальная добавка «требования ошибки пожелания пользователя",
+    "predicate": "supersedes",
+    "polarity": "negative",
+    "object": "предмет запроса",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "d784d92c276cea8af33e67b24403db440e4825dc65931aeeeaa98c45992e8c61",
+        "document": {
+          "kind": "document",
+          "id": "10cfbb9b6e99e98ff76e82be30b0e303b3cac5857073c38aa4c8c917b91f605a",
+          "revision": "955a8bb767f3d2e1cae30c4684605a5ec4591bc661d9dc0914c8b8b2e44baabc"
+        },
+        "span": {
+          "start": 2625,
+          "end": 2802,
+          "first_line": 24,
+          "last_line": 24
+        },
+        "quote": " универсальная добавка «требования ошибки пожелания пользователя» не заменяет предмет запроса.",
+        "source_hash": "955a8bb767f3d2e1cae30c4684605a5ec4591bc661d9dc0914c8b8b2e44baabc",
+        "method": "explicit-markdown-v4",
+        "path": "features/docs-convention/delivery.md"
+      }
+    ]
+  },
+  {
+    "id": "d517e56092f82a1c6330c76b43b21831a6692f305d13dd4f34cc72223a841ce0",
+    "subject": "Старый индекс",
+    "predicate": "requires",
+    "polarity": "positive",
+    "object": "согласия, bge не переиндексируется",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "bfa8a8c28fbcaca01bff53efd5966738f71e0915745b5c134e6b03c81edaa406",
+        "document": {
+          "kind": "document",
+          "id": "3543634f8e27b7f449be0ab4502b48c1960809c38b9e5e6da727c5e89c57a704",
+          "revision": "81a1410394798a50e9c7fbb8be80698b8428e1ef05c3eda1682963553224ade6"
+        },
+        "span": {
+          "start": 3974,
+          "end": 4078,
+          "first_line": 25,
+          "last_line": 25
+        },
+        "quote": " Старый индекс требует согласия, bge не переиндексируется.",
+        "source_hash": "81a1410394798a50e9c7fbb8be80698b8428e1ef05c3eda1682963553224ade6",
+        "method": "explicit-markdown-v4",
+        "path": "features/models/gguf-plan.md"
+      }
+    ]
+  },
+  {
+    "id": "134273cf6e470d8135ea11beac623fea6e49bfee8ec6ff1bdc68a23a9bd0e229",
+    "subject": "CPU-вариант",
+    "predicate": "requires",
+    "polarity": "negative",
+    "object": "скачивания FP16",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "5cf8300000d684bda8404d9bb40cd6889897d67fa51c0149b7c4edf0c6964f72",
+        "document": {
+          "kind": "document",
+          "id": "2b39f3dbf3fd40f9f61961eb0405809a829d59d504a74d526ed440f9ad8a7b62",
+          "revision": "f37eeda3aa9131e1ace2035033bbe7140ddc58a009e8b684b0728a0d946073e1"
+        },
+        "span": {
+          "start": 19028,
+          "end": 19094,
+          "first_line": 77,
+          "last_line": 77
+        },
+        "quote": " CPU-вариант не требует скачивания FP16.",
+        "source_hash": "f37eeda3aa9131e1ace2035033bbe7140ddc58a009e8b684b0728a0d946073e1",
+        "method": "explicit-markdown-v4",
+        "path": "features/models/inference-plan.md"
+      }
+    ]
+  },
+  {
+    "id": "515ac26d9b6e267f0ebf23e9acd241a06853a182f5cf45b28f63a8f476f128f1",
+    "subject": "повторное открытие неизменённого проверенного кэша",
+    "predicate": "uses",
+    "polarity": "positive",
+    "object": "отметку",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "71f03bae1da8146641383e1dcd466141867348e9f12b226e6bd168dd3a3b16eb",
+        "document": {
+          "kind": "document",
+          "id": "49782234bbb10d6fe00f24ef1963450c25cbcc892d3f98451773fa44455cfc93",
+          "revision": "e195f9d49caf033545d1f9dc69cb1978de464d9afb6dbdef66acea07b5d6a360"
+        },
+        "span": {
+          "start": 14384,
+          "end": 14518,
+          "first_line": 84,
+          "last_line": 84
+        },
+        "quote": " повторное открытие неизменённого проверенного кэша использует отметку.",
+        "source_hash": "e195f9d49caf033545d1f9dc69cb1978de464d9afb6dbdef66acea07b5d6a360",
+        "method": "explicit-markdown-v4",
+        "path": "features/models/local-models.md"
+      }
+    ]
+  },
+  {
+    "id": "7b3aec918d5b08ed3112d3bf3cabae21f1172e38d68e6abaeef3482bbb5ef932",
+    "subject": "Порядок исследовательских опытов ниже",
+    "predicate": "supersedes",
+    "polarity": "negative",
+    "object": "этот порядок продуктовых изменений",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "3ee4083f0dd832f507716f6deb8458f2e7020822c24921a276103ac8d78a4b35",
+        "document": {
+          "kind": "document",
+          "id": "62a6cb38462c6e395aef92e6c3a17ceabdbdcd0f71f5ba0bb1caa43d47c6ecaf",
+          "revision": "43d77b1039f32a5345b4c30ea20ebfda0019ff154e7cce2e1b884a3feea9d51f"
+        },
+        "span": {
+          "start": 3306,
+          "end": 3467,
+          "first_line": 15,
+          "last_line": 15
+        },
+        "quote": " Порядок исследовательских опытов ниже не заменяет этот порядок продуктовых изменений.",
+        "source_hash": "43d77b1039f32a5345b4c30ea20ebfda0019ff154e7cce2e1b884a3feea9d51f",
+        "method": "explicit-markdown-v4",
+        "path": "features/models/memory-plan.md"
+      }
+    ]
+  },
+  {
+    "id": "342825cce6b50286888c9f926b5debcc4e141f734017ef44115e3dbd4c6b3f2b",
+    "subject": "смена профиля",
+    "predicate": "uses",
+    "polarity": "positive",
+    "object": "штатное согласие Т-25 с сохранением рабочего старого индекса до завершения",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "a5be49f785ea26b5a8118fdbc4036896c83499e7ce6c31327d400c0a2833bf13",
+        "document": {
+          "kind": "document",
+          "id": "41273c055bfaa7e6cc71b2a20928ddc3b27bd73943e6ed6d541282d40b9b214c",
+          "revision": "6e333ffef36a6047f98d7e049ba3c378e079b20df1720cb513b32634136f2478"
+        },
+        "span": {
+          "start": 11650,
+          "end": 11835,
+          "first_line": 51,
+          "last_line": 51
+        },
+        "quote": " смена профиля использует штатное согласие Т-25 с сохранением рабочего старого индекса до завершения.",
+        "source_hash": "6e333ffef36a6047f98d7e049ba3c378e079b20df1720cb513b32634136f2478",
+        "method": "explicit-markdown-v4",
+        "path": "features/models/memory-reduction.md"
+      }
+    ]
+  },
+  {
+    "id": "b4a1080952e841694c0a8a0a66c2381d23d22ba3535f9ad73f770d5a6b7c65f6",
+    "subject": "Бэкенд заново",
+    "predicate": "verifies",
+    "polarity": "positive",
+    "object": "цель перед действием",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "6a9f510065b9060bcb726b96f8b0e3148f7e6c4fd286e69910e0490ab9930025",
+        "document": {
+          "kind": "document",
+          "id": "ab43909af5bb5b26b97fe45a08e703a01e25eeecd3857eb7448723c1346ad0fb",
+          "revision": "79b9b3b938b1a445156a1373d1027fad0e5b0663856c13e927c5212168be1cc3"
+        },
+        "span": {
+          "start": 10886,
+          "end": 10971,
+          "first_line": 49,
+          "last_line": 49
+        },
+        "quote": " Бэкенд заново проверяет цель перед действием.",
+        "source_hash": "79b9b3b938b1a445156a1373d1027fad0e5b0663856c13e927c5212168be1cc3",
+        "method": "explicit-markdown-v4",
+        "path": "features/window/document-actions.md"
+      }
+    ]
+  },
+  {
+    "id": "e382197367bcb791147917ddd8915464a719b9e0cdc713d353ced25bffd692c5",
+    "subject": "Копирование существующей папки",
+    "predicate": "uses",
+    "polarity": "positive",
+    "object": "тот же проверенный путь",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "19ccc19a8cbf137e696c3c0bfabadfb8d2d2eb8d73b6eb284be41ce688c2ccb8",
+        "document": {
+          "kind": "document",
+          "id": "ab43909af5bb5b26b97fe45a08e703a01e25eeecd3857eb7448723c1346ad0fb",
+          "revision": "79b9b3b938b1a445156a1373d1027fad0e5b0663856c13e927c5212168be1cc3"
+        },
+        "span": {
+          "start": 19367,
+          "end": 19492,
+          "first_line": 81,
+          "last_line": 81
+        },
+        "quote": " Копирование существующей папки использует тот же проверенный путь.",
+        "source_hash": "79b9b3b938b1a445156a1373d1027fad0e5b0663856c13e927c5212168be1cc3",
+        "method": "explicit-markdown-v4",
+        "path": "features/window/document-actions.md"
+      }
+    ]
+  },
+  {
+    "id": "1ace772c8c4df921f6f64c78e422e6eb2d8393a603907bde23df2ce4f6ed624f",
+    "subject": "отказ учёта",
+    "predicate": "supersedes",
+    "polarity": "negative",
+    "object": "результат инструмента",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "dded7cf2d22f4ae1bea1e71213dc3dba114d975f20115ed4cf619d5b25847123",
+        "document": {
+          "kind": "document",
+          "id": "0350a0f52936095c7358ad0a661705af91a7c3c943864683f5841fb81acc6c00",
+          "revision": "b4cdd43f422fc42186abb6de90ab3ef2b65e014583955c0376cbb371cae49bda"
+        },
+        "span": {
+          "start": 12990,
+          "end": 13077,
+          "first_line": 73,
+          "last_line": 73
+        },
+        "quote": " отказ учёта не заменяет результат инструмента.",
+        "source_hash": "b4cdd43f422fc42186abb6de90ab3ef2b65e014583955c0376cbb371cae49bda",
+        "method": "explicit-markdown-v4",
+        "path": "features/window/mcp-statistics.md"
+      }
+    ]
+  },
+  {
+    "id": "d10bdb445b5e3356797d8c28aaeff98947151ca8f296f9c86e35ee6483166af3",
+    "subject": "Смена проекта",
+    "predicate": "verifies",
+    "polarity": "positive",
+    "object": "совместимость выбранной сессии отдельным запросом за тот же период",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "cefe32bad09a0432134e9b989fcfb523230fed4a5a181f30baffda3d8512dff6",
+        "document": {
+          "kind": "document",
+          "id": "0350a0f52936095c7358ad0a661705af91a7c3c943864683f5841fb81acc6c00",
+          "revision": "b4cdd43f422fc42186abb6de90ab3ef2b65e014583955c0376cbb371cae49bda"
+        },
+        "span": {
+          "start": 18606,
+          "end": 18777,
+          "first_line": 97,
+          "last_line": 97
+        },
+        "quote": " Смена проекта проверяет совместимость выбранной сессии отдельным запросом за тот же период.",
+        "source_hash": "b4cdd43f422fc42186abb6de90ab3ef2b65e014583955c0376cbb371cae49bda",
+        "method": "explicit-markdown-v4",
+        "path": "features/window/mcp-statistics.md"
+      }
+    ]
+  },
+  {
+    "id": "3b65c926368c28a15b54b8536fb04ee3b0ce519d3e0abce8120861fe5c66f965",
+    "subject": "Проверка браузерного экрана",
+    "predicate": "supersedes",
+    "polarity": "negative",
+    "object": "нативную приёмку этапа 32",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "f00c65e16215550bfacd410d5ef74b8701b9126234457a3decfdf6986d776f6f",
+        "document": {
+          "kind": "document",
+          "id": "0350a0f52936095c7358ad0a661705af91a7c3c943864683f5841fb81acc6c00",
+          "revision": "b4cdd43f422fc42186abb6de90ab3ef2b65e014583955c0376cbb371cae49bda"
+        },
+        "span": {
+          "start": 19327,
+          "end": 19449,
+          "first_line": 99,
+          "last_line": 99
+        },
+        "quote": " Проверка браузерного экрана не заменяет нативную приёмку этапа 32.",
+        "source_hash": "b4cdd43f422fc42186abb6de90ab3ef2b65e014583955c0376cbb371cae49bda",
+        "method": "explicit-markdown-v4",
+        "path": "features/window/mcp-statistics.md"
+      }
+    ]
+  },
+  {
+    "id": "1e66566d5c6966d52f7b9d649aeebf6b349da324175a3f2a130f1f43c03a1dc7",
+    "subject": "текущий экран индексации",
+    "predicate": "supersedes",
+    "polarity": "negative",
+    "object": "этот отчёт",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "e98c35c8d5ccbedb98057448df0d0743929063b1fca6a436707e46b3e71ee0f1",
+        "document": {
+          "kind": "document",
+          "id": "4c5894594b50d94168eebe4e68b430357dc506d274e8516073ee7949e3228dd0",
+          "revision": "4476c0b57a0578ad664c5a7d9d8ccea309af6c2887e07a3cd76ac72436e61610"
+        },
+        "span": {
+          "start": 19676,
+          "end": 19766,
+          "first_line": 83,
+          "last_line": 83
+        },
+        "quote": " текущий экран индексации не заменяет этот отчёт.",
+        "source_hash": "4476c0b57a0578ad664c5a7d9d8ccea309af6c2887e07a3cd76ac72436e61610",
+        "method": "explicit-markdown-v4",
+        "path": "features/window/notifications.md"
+      }
+    ]
+  },
+  {
+    "id": "f11ba34ba86ec62b79dad78bfcde15c4438092e991aaed206df05d57f2cc41b0",
+    "subject": "Снятие регистрации `unregister",
+    "predicate": "supersedes",
+    "polarity": "negative",
+    "object": "полное удаление",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "b3729f89ba32504b3042a94a300c9b6a6fcc9f0e9ce093b8be795ad40fceb5a7",
+        "document": {
+          "kind": "document",
+          "id": "4d63d88e713d95d1e8510c4d4e1f0c5840dc017cc225da817625a4ad6de7475b",
+          "revision": "e36f696b9abd008f6c2ccb3efe47a33ec45c1d16a9cccfa5323dc87eeac5b28d"
+        },
+        "span": {
+          "start": 1827,
+          "end": 1929,
+          "first_line": 13,
+          "last_line": 13
+        },
+        "quote": " Снятие регистрации `unregister` не заменяет полное удаление.",
+        "source_hash": "e36f696b9abd008f6c2ccb3efe47a33ec45c1d16a9cccfa5323dc87eeac5b28d",
+        "method": "explicit-markdown-v4",
+        "path": "features/window/project-menu.md"
+      }
+    ]
+  },
+  {
+    "id": "818e4a987e56d7d33093431f8a53447209845afcd44fd8897a5b56eb1f611421",
+    "subject": "появление нового итога снова",
+    "predicate": "requires",
+    "polarity": "positive",
+    "object": "внимания",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "fff72d05242295892d6821756d5277ec43afd1d7b291129819c88c8b0b433d55",
+        "document": {
+          "kind": "document",
+          "id": "108226bd3127b14a8653d0ef48b092e3622210ccb70e38e56f828df26b91a15f",
+          "revision": "354fb57892aad62a7e353803da9fe20d94ce1270a3186b6e1e7edd61cae355cb"
+        },
+        "span": {
+          "start": 4200,
+          "end": 4287,
+          "first_line": 17,
+          "last_line": 17
+        },
+        "quote": " появление нового итога снова требует внимания.",
+        "source_hash": "354fb57892aad62a7e353803da9fe20d94ce1270a3186b6e1e7edd61cae355cb",
+        "method": "explicit-markdown-v4",
+        "path": "features/window/refinement-design.md"
+      }
+    ]
+  },
+  {
+    "id": "1e36885edfc8e738e393c0e3de6680bc6cea0c0bb39731bb6b41bb7530a31339",
+    "subject": "Браузерная фикстура",
+    "predicate": "supersedes",
+    "polarity": "negative",
+    "object": "нативную приёмку этапа 32",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "d89399ea0b1cc22f490d50e52607737df4c866f6c4cc5eab385654064145371a",
+        "document": {
+          "kind": "document",
+          "id": "70e5db7f8d05926421aee0a12fb4e8ef0de1bc85ef795fc39958d396999fd3e6",
+          "revision": "ac7c88b35ff80615672327f0de8151e7115e82080fb739b8a2763744f738dafe"
+        },
+        "span": {
+          "start": 11700,
+          "end": 11807,
+          "first_line": 49,
+          "last_line": 49
+        },
+        "quote": " Браузерная фикстура не заменяет нативную приёмку этапа 32.",
+        "source_hash": "ac7c88b35ff80615672327f0de8151e7115e82080fb739b8a2763744f738dafe",
+        "method": "explicit-markdown-v4",
+        "path": "features/window/refinement-plan.md"
+      }
+    ]
+  },
+  {
+    "id": "fbd2f5d31e610597d9735d6b3762cb6cf7211c829df2a17ba0ee26395410a2d9",
+    "subject": "Для выбора DirectML `bars-core` на Windows",
+    "predicate": "depends_on",
+    "polarity": "positive",
+    "object": "крейта `ort` напрямую, с той же версией `=2.0.0-rc.13`, что у fastembed",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "b5b3a1aca0fb6c10eaf48a34e54315753e0f2778eac998fc7b058a6e7ba77142",
+        "document": {
+          "kind": "document",
+          "id": "3db0c6d299fe35c5b5d5591f2d30122aa25d747554888e85ffe13e103cd90ea1",
+          "revision": "fda974295618bb3c6de2364a6dd5e33a6439df80b6d5062e0e62c0e7d740f627"
+        },
+        "span": {
+          "start": 5993,
+          "end": 6170,
+          "first_line": 67,
+          "last_line": 67
+        },
+        "quote": "Для выбора DirectML `bars-core` на Windows зависит от крейта `ort` напрямую, с той же версией `=2.0.0-rc.13`, что у fastembed.",
+        "source_hash": "fda974295618bb3c6de2364a6dd5e33a6439df80b6d5062e0e62c0e7d740f627",
+        "method": "explicit-markdown-v4",
+        "path": "knowledge/build.md"
+      }
+    ]
+  },
+  {
+    "id": "a1245f3abf764ed07aa4f4cec5bd71345277c6b2be52ee9c5ad329b5dda82b55",
+    "subject": "upstream-документация",
+    "predicate": "supersedes",
+    "polarity": "negative",
+    "object": "проверку версии runtime внутри bars",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "7d64a4dfec9bec99aaa967d8556f67280d28c73701d127f0719207bad4f55ef3",
+        "document": {
+          "kind": "document",
+          "id": "d824b45ebb7c05bce6806cebc6185ecc196f1ef77929c4abcd5e2b20f4b0ed10",
+          "revision": "40c5e3694043e1aa4211b88dba63c69760c17caf8273ebaf2b765bae124bbf7d"
+        },
+        "span": {
+          "start": 10565,
+          "end": 10678,
+          "first_line": 58,
+          "last_line": 58
+        },
+        "quote": " upstream-документация не заменяет проверку версии runtime внутри bars.",
+        "source_hash": "40c5e3694043e1aa4211b88dba63c69760c17caf8273ebaf2b765bae124bbf7d",
+        "method": "explicit-markdown-v4",
+        "path": "knowledge/directml-performance.md"
+      }
+    ]
+  },
+  {
+    "id": "2722a47b18e315f1fb2c4401e37fd53dbd43318fad499549093835685de86920",
+    "subject": "Loader перед открытием снова",
+    "predicate": "verifies",
+    "polarity": "positive",
+    "object": "содержимое",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "3f043f60e64c24b29ac8abd9ffd60310a9cc636e7d65d68fa266a87c37f82658",
+        "document": {
+          "kind": "document",
+          "id": "275c7eb74c58e029146bbe90e3e3e0f7eb5fd1d359c361ea7b4bc378f8c2493a",
+          "revision": "f9c7e558ed8b10a3bac9d5b158be99d03c074d742fc17fb1ea96e82a6403dac3"
+        },
+        "span": {
+          "start": 14654,
+          "end": 14743,
+          "first_line": 81,
+          "last_line": 81
+        },
+        "quote": " Loader перед открытием снова проверяет содержимое.",
+        "source_hash": "f9c7e558ed8b10a3bac9d5b158be99d03c074d742fc17fb1ea96e82a6403dac3",
+        "method": "explicit-markdown-v4",
+        "path": "knowledge/inference-speed.md"
+      }
+    ]
+  },
+  {
+    "id": "1fb70cbc15eb08accccafe6417ab03f088afedbd876c65cbb6ae51b7a0b9ba67",
+    "subject": "Таблица",
+    "predicate": "uses",
+    "polarity": "positive",
+    "object": "плато спустя 2 с после этого состояния",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "ed10e9117c6664321074e11c7785ea3521abe3722df291890858e5ad4ee21ef6",
+        "document": {
+          "kind": "document",
+          "id": "2dbcc4c6a69f789a6757348335519ff6d551fb99c59dd2580413544a403eec81",
+          "revision": "59ab44945cf45da4cc928bed3885b8c4509029bddf67a34340945c8b6c6165cf"
+        },
+        "span": {
+          "start": 3433,
+          "end": 3540,
+          "first_line": 27,
+          "last_line": 27
+        },
+        "quote": " Таблица использует плато спустя 2 с после этого состояния.",
+        "source_hash": "59ab44945cf45da4cc928bed3885b8c4509029bddf67a34340945c8b6c6165cf",
+        "method": "explicit-markdown-v4",
+        "path": "knowledge/memory-fp16-results.md"
+      }
+    ]
+  },
+  {
+    "id": "9094726c2230dd37374679ec125bd11f7f0d3fdea5dc041957158cf8ad0315c4",
+    "subject": "Продуктовый loader всегда",
+    "predicate": "verifies",
+    "polarity": "positive",
+    "object": "содержимое перед открытием",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "5e3ca7c9ff6f7d0a8d0cc405941e52364cc8aed36ea1220b2d7a2392b1e0ce22",
+        "document": {
+          "kind": "document",
+          "id": "2dbcc4c6a69f789a6757348335519ff6d551fb99c59dd2580413544a403eec81",
+          "revision": "59ab44945cf45da4cc928bed3885b8c4509029bddf67a34340945c8b6c6165cf"
+        },
+        "span": {
+          "start": 6167,
+          "end": 6281,
+          "first_line": 37,
+          "last_line": 37
+        },
+        "quote": " Продуктовый loader всегда проверяет содержимое перед открытием.",
+        "source_hash": "59ab44945cf45da4cc928bed3885b8c4509029bddf67a34340945c8b6c6165cf",
+        "method": "explicit-markdown-v4",
+        "path": "knowledge/memory-fp16-results.md"
+      }
+    ]
+  },
+  {
+    "id": "8040f5bbcd1b59041e2e095547ca405829b66f241142d49e07dd2d4d70a6bfa1",
+    "subject": "Первое скачивание",
+    "predicate": "requires",
+    "polarity": "positive",
+    "object": "сети",
+    "qualifiers": {},
+    "evidence": [
+      {
+        "id": "5031d2552b555589cd0b5fd503b1f4db782175abb2c54440a14f2f2de2b7a647",
+        "document": {
+          "kind": "document",
+          "id": "d02d67999a5cc1f421f04015cb0c4f538bd23877050d7d72d02fab32ca17dc32",
+          "revision": "abd4fc35496cc427dc63fc4002582945f8b2eae3fb5e0669dd83335ec4e7a724"
+        },
+        "span": {
+          "start": 5104,
+          "end": 5163,
+          "first_line": 41,
+          "last_line": 41
+        },
+        "quote": " Первое скачивание требует сети.",
+        "source_hash": "abd4fc35496cc427dc63fc4002582945f8b2eae3fb5e0669dd83335ec4e7a724",
+        "method": "explicit-markdown-v4",
+        "path": "overview.md"
+      }
+    ]
+  }
+]

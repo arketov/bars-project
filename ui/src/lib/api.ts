@@ -4,11 +4,28 @@
 
 import { BarsError } from "./types";
 import type { McpStatistic } from "./mcp-statistics";
+import type { HistoryFilter, HistoryPage, HistoryDiagnostics, HistoryOptions } from "./mcp-history";
 
-export async function mcpStatistics(): Promise<McpStatistic[]> {
-  if (!inTauri()) return [];
-  const { invoke } = await import("@tauri-apps/api/core");
-  return invoke<McpStatistic[]>("mcp_statistics");
+export async function mcpHistoryOptions(filter: HistoryFilter, projectQuery: string, sessionQuery: string): Promise<HistoryOptions> {
+  if (!inTauri()) throw new Error("Подсказки доступны в приложении bars");
+  return (await shell<HistoryOptions>("mcp_history_options", { filter, projectQuery, sessionQuery }))!;
+}
+
+export async function mcpHistory(filter: HistoryFilter): Promise<HistoryPage> {
+  if (!inTauri()) throw new Error("История MCP доступна в приложении bars; браузер не читает установленный профиль");
+  return (await shell<HistoryPage>("mcp_history", { filter }))!;
+}
+export async function mcpHistoryControl(enabled?: boolean, clearConfirmed = false): Promise<void> {
+  if (!inTauri()) throw new Error("Управление историей доступно в приложении bars");
+  await shell("mcp_history_control", { enabled: enabled ?? null, clearConfirmed });
+}
+export async function mcpHistoryLegacy(): Promise<McpStatistic[]> {
+  if (!inTauri()) throw new Error("Прежние агрегаты доступны в приложении bars");
+  return (await shell<McpStatistic[]>("mcp_history_legacy"))!;
+}
+export async function mcpHistoryDiagnostics(): Promise<HistoryDiagnostics> {
+  if (!inTauri()) throw new Error("Диагностика доступна в приложении bars");
+  return (await shell<HistoryDiagnostics>("mcp_history_diagnostics"))!;
 }
 
 export const inTauri = (): boolean => typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -93,6 +110,16 @@ export async function copyText(text: string): Promise<void> {
 }
 
 export interface DocumentEditor { id: string; label: string }
+
+export interface FolderTarget { id: string; absolute: string; missing: boolean }
+export async function folderTarget(project: string, docsRoot: string, path: string): Promise<FolderTarget> {
+  if (!inTauri()) return { id: "mock", absolute: joinPath(project, docsRoot === "." ? path : docsRoot + (path === "." ? "" : "/" + path)), missing: false };
+  return (await shell<FolderTarget>("folder_target", { project, docsRoot, path }))!;
+}
+export async function folderAction(id: string, action: "open" | "path" | "check"): Promise<{ absolute: string; missing: boolean; operation_id: string | null }> {
+  if (!inTauri()) throw new Error("Действие папки доступно в приложении bars; браузер показывает макет");
+  return (await shell<{ absolute: string; missing: boolean; operation_id: string | null }>("folder_action", { id, action }))!;
+}
 
 export async function documentEditors(): Promise<DocumentEditor[]> {
   if (!inTauri()) return [{ id: "code", label: "VS Code (макет)" }, { id: "notepad", label: "Блокнот (макет)" }];

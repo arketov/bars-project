@@ -1,0 +1,100 @@
+{
+  "utc": "2026-10-18T13:49:32.7087102Z",
+  "head": "604f3376f0392ec4d8ee9d19cd5b8b8c6ad9c58a",
+  "binary_sha256": "24AD0757612E2C0DA118A1663BCC126CE3BB694E5FDD5B3958DB69C19FCCEBB1",
+  "sources": [
+    {
+      "file": "Cargo.toml",
+      "sha256": "8F54745425605F044D95AC8FB1C234055D199528AC6DFD2EAF2627B515A9DD75"
+    },
+    {
+      "file": "Cargo.lock",
+      "sha256": "E87B2AF545C760E9CA01C8B5467E05DF66D07088456369003582CB23EB4505DE"
+    },
+    {
+      "file": "crates/bars-core/Cargo.toml",
+      "sha256": "A27FAB837F317C1FECE09BC81FB8FB9089F54C65AB86F7AC3B920A73C8BBC738"
+    },
+    {
+      "file": "crates/bars-core/examples/bench_inference.rs",
+      "sha256": "32472835928535F8FB00CC2A12F2AAD2D78209396A82F943F1C176F1EC7B6A19"
+    },
+    {
+      "file": "crates/bars-core/examples/inference/mod.rs",
+      "sha256": "17524220588836CFFD1E44C89888197AF08DF0AE3A9A8678DD60C57F014B3BE6"
+    },
+    {
+      "file": "crates/bars-core/examples/bench_memory.rs",
+      "sha256": "AC15E39BC7BE8A0CA41A028912BF4E28FCFB5DEDA148948A2EAEB26CE8980698"
+    },
+    {
+      "file": "crates/bars-core/examples/quality/mod.rs",
+      "sha256": "826E204384E63648E3DB21A80B0DB82BCF0E5C1284E9069CAA9FB290FA9CA194"
+    },
+    {
+      "file": "crates/bars-core/src/models/builtin_rerank.rs",
+      "sha256": "A47CF5F3B40412495E332816A411A7524F3531522202231E2EE4AC31965352D6"
+    },
+    {
+      "file": "crates/bars-core/src/models/builtin.rs",
+      "sha256": "C0873FDB92864A617324DBA424FC9CC19BA975FBB646D007BBE2153BEC6E98DC"
+    },
+    {
+      "file": "crates/bars-core/src/models/candle.rs",
+      "sha256": "8387632FEAAEF2CD3E590C8A0D50A959C2F4B41FF0FF79FB55B669CD7EF72B4D"
+    },
+    {
+      "file": "crates/bars-core/src/models/catalog.rs",
+      "sha256": "C4A385D2495C5B8E560E5990511B899011CF2C33112EEAA78A187D25930BD2EB"
+    },
+    {
+      "file": "crates/bars-core/src/models/embedder.rs",
+      "sha256": "A2A7D85E89F59492C2F16DB09499DDABCB70C78BBB63CD427EE49B430E71C9D3"
+    },
+    {
+      "file": "crates/bars-core/src/models/execution.rs",
+      "sha256": "2BD01FF9C52466EDB9BCBA48577CD26FE6418BB7FE02D072C577FA7CD674CA0F"
+    },
+    {
+      "file": "crates/bars-core/src/models/mod.rs",
+      "sha256": "D980314EF62AF130C1076F80B72A071F5E5FAFD4D2D09FDA29FCA5A72E63494D"
+    },
+    {
+      "file": "crates/bars-core/src/models/remote.rs",
+      "sha256": "7415F8DED6A00E74EA3B75F096ED7903E7AE561BEB2A28A573997032ADEF7F97"
+    },
+    {
+      "file": "crates/bars-core/src/models/rerank_artifact.rs",
+      "sha256": "6B3A1D50CF606CE0B01FA8FAFF94E33C25C0A48A8C38748FF940E0087FD31911"
+    },
+    {
+      "file": "crates/bars-core/src/models/reranker.rs",
+      "sha256": "484F5BEC5B3876DEA8C2C8E900417CEF1053581CDFC63999ED2083B9DD5FA5A5"
+    },
+    {
+      "file": "crates/bars-core/src/models/testing.rs",
+      "sha256": "134558A03FC3D99B9DF540EF9EF8FBE57487808440D57040E6D7818A41A046E8"
+    },
+    {
+      "file": "crates/bars-core/src/search/hybrid.rs",
+      "sha256": "BB2D0284CD6765D0B6BD6FC43E60E17FB283CB23C96D15B1B7C74C5C3E812CE3"
+    },
+    {
+      "file": "crates/bars-core/src/search/mod.rs",
+      "sha256": "89855E0F3BFC2A2213D06D6E4EF4777E9D64644942430AC359B7D5FEF67A9BB7"
+    },
+    {
+      "file": "crates/bars-core/src/search/params.rs",
+      "sha256": "41587E33B036D4B17AA681D927EABD76171595A0AA5963AD256F37E091BD02C8"
+    },
+    {
+      "file": "crates/bars-core/src/search/vector_top.rs",
+      "sha256": "758F093DEE548A81FB543BE4E720D1202EA495516631815167E294ADD2BE89E5"
+    },
+    {
+      "file": "crates/bars-core/src/search/hybrid/tests.rs",
+      "sha256": "977AADF1D718E076248E9FED2039835E61DB443B8533FAA53FA03DB856DDCFDD"
+    }
+  ],
+  "note": "Source snapshot before the equivalent clippy as_chunks change; archived hybrid source in spikes/memory/provenance/hybrid-embed-quality-v1.rs"
+}

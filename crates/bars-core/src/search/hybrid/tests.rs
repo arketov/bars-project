@@ -153,6 +153,46 @@ fn paths(response: &SearchResponse) -> Vec<&str> {
 }
 
 #[test]
+fn graph_expansion_precedes_rerank_and_keeps_scope_and_threshold() {
+    let (_dir,index,mut embedder)=project();
+    let root:i64=index.conn().query_row("SELECT c.id FROM chunks c JOIN documents d ON d.id=c.document_id WHERE d.path='docs/root.md'",[],|r|r.get(0)).unwrap();
+    let mut expand=|_:&Index,_:&[i64],_:usize|Ok(vec![root]);
+    let mut r=request("векторы");r.candidates=Some(1);r.rerank_candidates=Some(10);r.results=Some(1);r.min_score=Some(0.1);
+    let out=search_expanded(&index,&mut embedder,Some(&mut KeywordReranker),&SearchSettings::default(),&r,Some(&mut expand)).unwrap();
+    assert_eq!(out.hits.len(),1);assert_eq!(out.hits[0].path,"docs/root.md");assert_eq!(out.hits[0].score,0.9);
+    r.min_score=Some(0.95);assert!(search_expanded(&index,&mut embedder,Some(&mut KeywordReranker),&SearchSettings::default(),&r,Some(&mut expand)).unwrap().hits.is_empty());
+    r.min_score=Some(0.1);r.modules=vec!["models".into()];
+    assert!(search_expanded(&index,&mut embedder,Some(&mut KeywordReranker),&SearchSettings::default(),&r,Some(&mut expand)).unwrap().hits.is_empty());
+}
+
+#[test]
+fn graph_context_reuses_one_query_embedding_and_respects_role_scope() {
+    use crate::graph::*;
+    struct CountQuery<'a>{inner:&'a mut BagEmbedder,calls:usize}
+    impl Embedder for CountQuery<'_>{
+        fn fingerprint(&self)->&ModelFingerprint{self.inner.fingerprint()}
+        fn embed(&mut self,texts:&[&str])->Result<Vec<Vec<f32>>,EmbedError>{self.inner.embed(texts)}
+        fn embed_query(&mut self,text:&str)->Result<Vec<f32>,EmbedError>{self.calls+=1;self.inner.embed_query(text)}
+    }
+    let(dir,mut index,mut embedder)=project();
+    write(dir.path(),"docs/models/embed.md","# Ограничения модели\n\nEmbed-модель считает векторы для чанков поиска.\n");
+    update_index(dir.path(),&mut index,&IndexSettings{chunking:ChunkingParams::default(),docs_root:"docs".into()},&mut embedder).unwrap();
+    build_index_graph(dir.path(),&mut index,||false).unwrap();let data=store::load(index.conn()).unwrap();
+    let request=GraphRequest{operation:Operation::Context,query:Some("модель векторы".into()),scope:Scope{modules:vec!["models".into()],files:vec![]},budgets:Budgets{max_nodes:Some(2000),timeout_ms:Some(5000),..Default::default()},..Default::default()};
+    let mut counted=CountQuery{inner:&mut embedder,calls:0};
+    let(scores,limited)=context::evidence_scores(&index,&data,&mut counted,&SearchSettings::default(),&request).unwrap();
+    assert_eq!(counted.calls,1);assert!(!limited);assert!(!scores.is_empty());
+    for case in 0..3 {
+        let mut invalid=request.clone();
+        match case { 0=>invalid.query=Some(" ".into()), 1=>invalid.scope.modules=vec!["missing".into()], _=>invalid.limit=Some(0) }
+        assert!(context::evidence_scores(&index,&data,&mut counted,&SearchSettings::default(),&invalid).is_err());
+    }
+    assert_eq!(counted.calls,1,"неверный вход не запускает query embedding");
+    let out=query::execute_ranked(&data,&request,&scores,std::time::Duration::ZERO,||false).unwrap();assert!(!out.items.is_empty());assert!(out.sources.iter().all(|s|s.module=="models"));
+    let readonly=Index::open_read_only(&dir.path().join("index.sqlite")).unwrap();assert!(readonly.conn().execute("DELETE FROM documents",[]).is_err());
+}
+
+#[test]
 fn bounded_cosines_match_full_scan_and_keep_text_candidates() {
     let (_dir, index, _) = project();
     let query = vec![0.125_f32; DIM];

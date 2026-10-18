@@ -48,6 +48,12 @@
   const hasErrors = $derived(Object.keys(errors).length > 0);
   const tab = $derived(app.settingsTab);
 
+  function selectEmbedModel(id: string) {
+    if (!draft) return;
+    draft.embed.model = id;
+    if (id === "BAAI/bge-m3:fp16") draft.embed.accelerator = "auto";
+  }
+
   function setSource(kind: "embed" | "rerank", source: ModelSourceName) {
     if (!draft || !settings.saved) return;
     const cfg: EmbedDoc | RerankDoc = draft[kind];
@@ -70,7 +76,7 @@
   function modelNote(model: ModelInfo): string {
     const parts = [];
     if (model.dim) parts.push(`${model.dim} измерений`);
-    parts.push(model.backend === "onnx" ? "ONNX" : "candle");
+    parts.push(model.backend === "onnx" ? "ONNX" : model.backend === "gguf" ? "GGUF Q4_K_M · llama.cpp" : "candle");
     return parts.join(" · ");
   }
 
@@ -108,7 +114,7 @@
   </aside>
 
   <main>
-    <div class="page">
+    <div class="page" class:analysis={tab === "mcp-statistics"}>
       {#if settings.loadError}
         <div class="banner bad"><span class="ic"><Icon name="error" size={18} width={2} /></span><div class="bt"><b>Настройки не прочитаны</b><span>{settings.loadError}</span></div></div>
       {/if}
@@ -140,8 +146,8 @@
                   role="radio"
                   aria-checked={draft.embed.model === model.id}
                   tabindex="0"
-                  onclick={() => (draft.embed.model = model.id)}
-                  onkeydown={(event) => (event.key === "Enter" || event.key === " ") && (draft.embed.model = model.id)}
+                  onclick={() => selectEmbedModel(model.id)}
+                  onkeydown={(event) => (event.key === "Enter" || event.key === " ") && selectEmbedModel(model.id)}
                 >
                   <span class="radio"></span>
                   <span class="mn">
@@ -203,7 +209,7 @@
           <div class="ghead"><h2>Устройства моделей</h2></div>
           <div class="gbody">
             <h3>Embed</h3>
-            <DevicePicker bind:value={draft.embed.accelerator} source={draft.embed.source} role="Embed" cpuOnly={settings.models?.embed.find(m => m.id === draft?.embed.model)?.backend === "candle"} runtime={settings.models?.runtime?.embed} />
+            <DevicePicker bind:value={draft.embed.accelerator} source={draft.embed.source} role="Embed" cpuOnly={settings.models?.embed.find(m => m.id === draft?.embed.model)?.backend === "candle"} gpuOnly={draft.embed.model === "BAAI/bge-m3:fp16"} runtime={settings.models?.runtime?.embed} />
             <h3>Rerank</h3>
             <DevicePicker bind:value={draft.rerank.accelerator} source={draft.rerank.source} role="Rerank" runtime={settings.models?.runtime?.rerank} />
           </div>
@@ -363,6 +369,7 @@
   .file { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   main { overflow-y: auto; min-height: 0; }
   .page { max-width: 760px; margin: 0 auto; padding: 28px 32px 110px; }
+  .page.analysis { max-width: 1400px; }
   .page h1 { font-size: 22px; margin: 0 0 4px; }
   .lead { color: var(--muted); margin: 0 0 20px; }
   .group { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 16px; }

@@ -1,14 +1,17 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
   import { app } from "./app.svelte";
-  import { call, copyText, documentAction, documentEditors, type DocumentEditor } from "./api";
-  import { documentAt, documentItems, itemsFor, place, projectAt, projectItems, run, textField, type MenuItem } from "./contextmenu";
+  import { call, copyText, documentAction, documentEditors, folderTarget, folderAction, type FolderTarget, type DocumentEditor } from "./api";
+  import { documentAt, documentItems, folderAt, folderItems, itemsFor, place, projectAt, projectItems, run, textField, type MenuItem } from "./contextmenu";
 
   let items = $state<MenuItem[]>([]);
   let target: EventTarget | null = null;
   let at = $state({ left: 0, top: 0 });
   let box = $state<HTMLDivElement>();
   let document: { project: string; path: string; line: number } | null = null;
+  let folder = $state<(FolderTarget & { project: string; docsRoot: string; kind: string }) | null>(null);
+  let pendingFolder = $state<{ project: string; docsRoot: string } | null>(null);
+  let returnFocus: HTMLElement | null = null;
   let project = $state<string | null>(null);
   let openedCurrent: string | null = null;
   let editors = $state<DocumentEditor[]>([]);
@@ -18,14 +21,20 @@
 
   $effect(() => {
     const current = app.current;
+    if (pendingFolder && (current !== pendingFolder.project || app.docsRoot !== pendingFolder.docsRoot)) close();
     if (document && current !== document.project) close();
+    if (folder && (current !== folder.project || app.docsRoot !== folder.docsRoot || !app.projects.some(p => p.path === folder?.project))) close();
     if (project && (current !== openedCurrent || !app.projects.some(p => p.path === project))) close();
   });
 
-  function close() {
+  function close(restoreFocus = false) {
+    if (restoreFocus && returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
     items = [];
     target = null;
     document = null;
+    folder = null;
+    pendingFolder = null;
+    returnFocus = null;
     project = null;
     submenu = false;
     generation++;
@@ -40,14 +49,33 @@
     // Стандартное меню webview выключено всегда: своё — только там, где есть что показать.
     event.preventDefault();
     close();
+    const version = generation;
+    const current = app.current, docsRoot = app.docsRoot;
     const found = itemsFor(event.target);
-    const path = !textField(event.target) && projectAt(event.target);
+    const nearest = event.target instanceof Element ? event.target.closest("[data-document-path], [data-folder-path], [data-project-path]") : null;
+    const directory = !textField(event.target) && nearest?.hasAttribute("data-folder-path") && folderAt(event.target);
+    if (directory && current) {
+      // Контекст ОС закрепляет бэкенд; запоздавшая проверка не воскрешает меню.
+      returnFocus = directory.element;
+      pendingFolder = { project: current, docsRoot };
+      try {
+        const pinned = await folderTarget(current, docsRoot, directory.path);
+        if (generation !== version || app.current !== current || app.docsRoot !== docsRoot) return;
+        pendingFolder = null;
+        folder = { ...pinned, project: current, docsRoot, kind: directory.kind };
+        found.unshift(...folderItems(app.project?.state ?? "unavailable", pinned.missing));
+      } catch (error) {
+        if (generation === version && app.current === current) { close(); app.flash(String(error), true); }
+        return;
+      }
+    }
+    const path = !folder && !textField(event.target) && nearest?.hasAttribute("data-project-path") && projectAt(event.target);
     if (path && app.projects.some(p => p.path === path)) {
       project = path;
       openedCurrent = app.current;
       found.unshift(...projectItems());
     }
-    const file = !project && !textField(event.target) && documentAt(event.target);
+    const file = !folder && !project && !textField(event.target) && documentAt(event.target);
     if (file && app.current) {
       document = { ...file, project: app.current };
       found.unshift(...documentItems());
@@ -58,6 +86,7 @@
     items = found;
     origin = { x: event.clientX, y: event.clientY };
     await position();
+    if (version !== generation) return;
     box?.querySelector<HTMLButtonElement>("button:not(:disabled)")?.focus({ preventScroll: true });
   }
 
@@ -79,10 +108,16 @@
     if (item.action === "editors") { await showEditors(); return; }
     const where = target;
     const file = document;
+    const directory = folder;
     const projectPath = project;
-    close();
+    close(true);
     try {
-      if (projectPath && item.action === "deleteProject") {
+      if (directory && ["reveal", "path", "checkProject"].includes(item.action)) {
+        const action = item.action === "reveal" ? "open" : item.action === "checkProject" ? "check" : "path";
+        const result = await folderAction(directory.id, action);
+        if (action === "path") { await copyText(result.absolute); app.flash(result.missing ? "Путь скопирован; папка отсутствует" : "Путь скопирован"); }
+        if (action === "check") app.flash(`Проверка проекта в очереди · №${result.operation_id}`);
+      } else if (projectPath && item.action === "deleteProject") {
         app.requestDeleteProject(projectPath);
       } else if (projectPath && item.action === "checkProject") {
         if (!app.projects.some(p => p.path === projectPath)) return;
@@ -103,13 +138,15 @@
         const problem = await run(item.action, where);
         if (problem) app.flash(problem, true);
       }
-    } catch (error) { app.flash(error instanceof Error ? error.message : String(error), true); }
+    } catch (error) { app.flash(`${directory ? `${directory.kind}: ${directory.absolute} — ` : ""}${error instanceof Error ? error.message : String(error)}`, true); }
   }
 
   function navigate(event: KeyboardEvent) {
+    if (event.key === "Escape" && returnFocus) { close(true); return; }
+    if (event.key === "Tab" && returnFocus && !items.length) { close(); return; }
     if ((event.shiftKey && event.key === "F10") || event.key === "ContextMenu") {
       const element = globalThis.document.activeElement;
-      if (element instanceof HTMLElement && projectAt(element)) {
+      if (element instanceof HTMLElement && (projectAt(element) || folderAt(element) || documentAt(element))) {
         event.preventDefault();
         const rect = element.getBoundingClientRect();
         element.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: rect.left, clientY: rect.bottom }));
@@ -117,7 +154,7 @@
       }
     }
     if (!items.length || !box) return;
-    if (event.key === "Escape" || event.key === "Tab") { close(); return; }
+    if (event.key === "Escape" || event.key === "Tab") { close(event.key === "Escape"); return; }
     if (event.key === "ArrowRight") { event.preventDefault(); void showEditors(); return; }
     if (event.key === "ArrowLeft" && submenu) {
       event.preventDefault(); submenu = false;
@@ -140,20 +177,24 @@
     };
     addEventListener("contextmenu", open);
     addEventListener("keydown", onKey);
-    addEventListener("blur", close);
-    addEventListener("resize", close);
+    const dismiss = () => close();
+    addEventListener("blur", dismiss);
+    addEventListener("resize", dismiss);
     addEventListener("scroll", onScroll, true);
     return () => {
       removeEventListener("contextmenu", open);
       removeEventListener("keydown", onKey);
-      removeEventListener("blur", close);
-      removeEventListener("resize", close);
+      removeEventListener("blur", dismiss);
+      removeEventListener("resize", dismiss);
       removeEventListener("scroll", onScroll, true);
     };
   });
 </script>
 
-<svelte:window onmousedown={(event) => box && (!(event.target instanceof Node) || !box.contains(event.target)) && close()} />
+<svelte:window onmousedown={(event) => {
+  if (!(event.target instanceof Node)) return close();
+  if (box ? !box.contains(event.target) : returnFocus && !returnFocus.contains(event.target)) close();
+}} />
 
 {#if items.length}
   <div
@@ -165,6 +206,7 @@
     onmousedown={(event) => event.preventDefault()}
   >
     <div class="primary" role="menu" aria-label="Действия">
+      {#if folder}<div class="folder-heading"><b>{folder.kind}</b><small>{folder.absolute}</small></div>{/if}
       {#each items as item (item.action)}
         <button role="menuitem" disabled={item.disabled} aria-haspopup={item.action === "editors" ? "menu" : undefined} aria-expanded={item.action === "editors" ? submenu : undefined} onclick={() => pick(item)}>{item.label}{item.action === "editors" ? " ▸" : ""}{#if item.hint}<small>{item.hint}</small>{/if}</button>
       {/each}
@@ -182,6 +224,8 @@
 <style>
   .cmenu { position: fixed; z-index: 90; display: flex; max-width: calc(100vw - 8px); max-height: calc(100vh - 8px); overflow: auto; background: var(--panel); border: 1px solid var(--line-2); border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.2); padding: 5px; }
   .primary { min-width: 215px; }
+  .folder-heading { padding: 7px 10px; max-width: 310px; border-bottom: 1px solid var(--line); font-size: 12px; }
+  .folder-heading small { display: block; overflow-wrap: anywhere; color: var(--muted); font-size: 11px; user-select: text; }
   .sub { min-width: 210px; border-left: 1px solid var(--line); margin-left: 4px; padding-left: 4px; }
   @media (max-width: 480px) { .cmenu { flex-direction: column; } .sub { border-left: 0; border-top: 1px solid var(--line); margin: 4px 0 0; padding: 4px 0 0; } }
   .cmenu button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 7px 10px; border-radius: 7px; font-size: 13px; color: var(--text); }

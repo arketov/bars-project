@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-18",
+  "stage_complete": false,
+  "checkpoint_stopped_by_owner": true,
+  "new_models_added": false,
+  "installed_application_restarted": false,
+  "checks": [
+    {"name": "bars-graph", "kind": "deterministic_source_query_storage", "source_tests": 4, "acceptance_tests": 19, "storage_tests": 5, "passed": true},
+    {"name": "bars-core graph", "kind": "library_fixtures_no_real_inference", "tests": 13, "passed": true},
+    {"name": "bars-worker graph", "kind": "real_ipc_temporary_projects_fake_model", "tests": 4, "passed": true},
+    {"name": "bars-cli", "kind": "real_proxy_temporary_worker_fake_model", "tests": 9, "passed": true},
+    {"name": "bars-mcp", "kind": "real_proxy_temporary_worker_fake_model", "integration_tests": 12, "unit_tests": 2, "passed": true},
+    {"name": "ui", "kind": "whole_current_checkout_includes_parallel_work", "tests": 136, "passed": true},
+    {"name": "svelte-check", "errors": 0, "warnings": 0, "passed": true},
+    {"name": "vite production build", "passed": true},
+    {"name": "bars-app release offline cargo check", "passed": true},
+    {"name": "Svelte Cytoscape component", "kind": "headless_recorded_rust_dto_fixtures", "checks": 28, "passed": true},
+    {"name": "installed bars CLI status", "state": "ready", "pending": 0, "last_error": null, "watching": true},
+    {"name": "bars_rag_search documentation audit", "passed": false, "error": "Transport closed", "fallback": "direct local documentation reads and rg"},
+    {"name": "search_corpus", "run": false, "reason": "Owner stopped slow CPU run; test now opt-in with GPU guard. No new heavy run."}
+  ],
+  "not_accepted": ["independent real-corpus gold and holdout", "matched hybrid baselines", "semantic S1-S8 quality", "complete target contract", "native Tauri UI", "macOS", "incremental resource acceptance"]
+}

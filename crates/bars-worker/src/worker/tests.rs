@@ -15,6 +15,9 @@ use super::registry::Registry;
 use super::*;
 
 mod deletion;
+mod folders;
+mod operations;
+mod graph;
 
 struct Env {
     home: TempDir,

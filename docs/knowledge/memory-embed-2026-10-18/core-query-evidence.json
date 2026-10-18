@@ -1,0 +1,60 @@
+{
+  "scope": "core FP16 query path on prototype document vectors with adapted identity; fresh core indexing is a separate gate",
+  "timingValid": false,
+  "files": [
+    {
+      "source": "spikes/memory/runs/core-query-quality-overdrive-v1/production/rows.jsonl",
+      "target": "core-query.rows.jsonl.gz",
+      "sha256": "dfc90d8afd4afd039155c71a2a8de8b6d274bed13cd3b70656681e6c5e4a7cac"
+    },
+    {
+      "source": "spikes/memory/runs/core-query-quality-overdrive-v1/production/config.json",
+      "target": "core-query.config.json.gz",
+      "sha256": "f2cc30217b041bccce3afacf4411f5d16bbc8b478843699703f9aaec50ddd263"
+    },
+    {
+      "source": "spikes/memory/runs/core-query-quality-overdrive-v1/production/session.json",
+      "target": "core-query.session.json.gz",
+      "sha256": "140f228277f79b98124a455ea095a765078102a02fec6250c39e1faf57f0d350"
+    },
+    {
+      "source": "spikes/memory/runs/core-query-quality-overdrive-v1/production/complete.json",
+      "target": "core-query.complete.json.gz",
+      "sha256": "e5a6b984059724b047c7ff8b62956fa782cc57954660d1664614111b4e32c08c"
+    },
+    {
+      "source": "spikes/memory/runs/core-query-quality-overdrive-v1/production/native-memory.jsonl",
+      "target": "core-query.native-memory.jsonl.gz",
+      "sha256": "65c4409b1b693f261ed3c8be1d3810a3a4213b8fdbc0664bc4d41f25a181fb93"
+    },
+    {
+      "source": "spikes/memory/runs/core-query-quality-overdrive-v1/production/query-vectors.json",
+      "target": "core-query.query-vectors.json.gz",
+      "sha256": "d208874b78ff92471146f93d22a2d04cd4281b26cd16defd9467fe67b6714b20"
+    },
+    {
+      "source": "spikes/memory/runs/core-query-quality-overdrive-v1/production.monitor.json",
+      "target": "core-query.monitor.json.gz",
+      "sha256": "8e672467b6748027e883d91e3a6288791a647fa8ae0f13495f930ae97749676a"
+    }
+  ],
+  "lifetimePeakMiB": 3293.5625,
+  "artifactOnly": {
+    "scope": "all cached pinned files; BLAKE3 verification and ready marker, no ONNX; not a network download",
+    "sha256": "49fc4bb4c4b519e465017286b7a007fb76baa9f53d867b3198cb303746039f2a",
+    "lifetimePeakMiB": 3.5234375,
+    "end": {
+      "ok": true,
+      "ready": true
+    }
+  },
+  "corruptCache": {
+    "scope": "own copied tokenizer config changed, immutable weights hardlinked; no user cache writes",
+    "result": {
+      "ok": false,
+      "ready": false
+    },
+    "reason": "config.json BLAKE3 mismatch; no ONNX session created",
+    "lifetimePeakMiB": 3.5625
+  }
+}

@@ -159,9 +159,30 @@ impl Client {
 
     /// Вызывает метод и ждёт ответ.
     pub async fn call<M: Method>(&mut self, params: &M) -> Result<M::Output, ClientError> {
+        self.call_observed(params, None).await
+    }
+
+    /// Исходный MCP-вход; worker сохраняет только разрешённые поля.
+    pub async fn call_observed<M: Method>(
+        &mut self,
+        params: &M,
+        context: Option<&serde_json::Value>,
+    ) -> Result<M::Output, ClientError> {
         let id = Id::Number(self.next_id);
         self.next_id += 1;
-        write_line(&mut self.writer, &encode_line(&params.request(id.clone()))).await?;
+        let mut request = params.request(id.clone());
+        if let (Some(context), Some(serde_json::Value::Object(fields))) =
+            (context, request.params.as_mut())
+        {
+            fields.insert("_mcp".into(), context.clone());
+        }
+        // Наблюдение не превращает допустимый большой вызов в ошибку framing.
+        if encode_line(&request).len() > crate::MAX_REQUEST_LINE
+            && let Some(serde_json::Value::Object(fields)) = request.params.as_mut()
+        {
+            fields.remove("_mcp");
+        }
+        write_line(&mut self.writer, &encode_line(&request)).await?;
         let line = read_line_limited(&mut self.reader, MAX_RESPONSE_LINE)
             .await?
             .ok_or_else(|| io::Error::from(io::ErrorKind::UnexpectedEof))?;

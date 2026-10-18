@@ -8,6 +8,8 @@
 mod hook;
 mod instruction;
 mod render;
+mod graph;
+pub use graph::{GraphArgs,GraphAction};
 
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
@@ -43,6 +45,18 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Command {
+    /// Найти явные отношения с доказательствами.
+    Relations(GraphArgs),
+    /// Найти ограниченные пути между объектами.
+    Paths(GraphArgs),
+    /// Документированное влияние изменения roots.
+    Impact(GraphArgs),
+    /// Собрать источники задачи по ролям.
+    Context(GraphArgs),
+    /// Тематический обзор и аудит.
+    Explore(GraphArgs),
+    /// Просмотр и управление графом проекта.
+    Graph { #[command(subcommand)] action:GraphAction },
     /// Поиск по документации проекта.
     Search(SearchArgs),
     /// Структура документа: заголовки с номерами строк.
@@ -134,6 +148,15 @@ pub struct InstallArgs {
 
 #[derive(Debug, Args)]
 pub struct SearchArgs {
+    /// Явный hybrid/mix/graph; без флага прежняя форма ответа.
+    #[arg(long,value_parser=["hybrid","mix","graph"])]
+    pub mode:Option<String>,
+    /// В mix: отключить связанные пакеты и расширение кандидатов.
+    #[arg(long, requires = "mode")]
+    pub no_related: bool,
+    /// В mix: ограничить размер пакета оснований в байтах.
+    #[arg(long, requires = "mode", value_parser = clap::value_parser!(u32).range(1..))]
+    pub related_budget: Option<u32>,
     /// Поисковый запрос.
     #[arg(required = true, num_args = 1..)]
     pub query: Vec<String>,
@@ -326,7 +349,14 @@ async fn execute(cli: Cli, env: &Env, out: &mut dyn Write) -> Result<(), Failure
     };
     let mut client = connect(env).await?;
     match cli.command {
+        Command::Relations(args)=>graph::query(&mut client,target,json,out,args,bars_protocol::graph_types::Operation::Relations).await,
+        Command::Paths(args)=>graph::query(&mut client,target,json,out,args,bars_protocol::graph_types::Operation::Paths).await,
+        Command::Impact(args)=>graph::query(&mut client,target,json,out,args,bars_protocol::graph_types::Operation::Impact).await,
+        Command::Context(args)=>graph::query(&mut client,target,json,out,args,bars_protocol::graph_types::Operation::Context).await,
+        Command::Explore(args)=>graph::query(&mut client,target,json,out,args,bars_protocol::graph_types::Operation::Explore).await,
+        Command::Graph{action}=>graph::action(&mut client,target,json,out,action).await,
         Command::Search(args) => {
+            let mode=args.mode;
             let params = SearchParams {
                 target,
                 query: args.query.join(" "),
@@ -336,6 +366,11 @@ async fn execute(cli: Cli, env: &Env, out: &mut dyn Write) -> Result<(), Failure
                 candidates: args.candidates,
                 min_score: args.min_score,
             };
+            if let Some(mode)=mode {
+                let mode=serde_json::from_value(serde_json::Value::String(mode)).expect("clap проверил режим");
+                let result=call(&mut client,&bars_protocol::GraphSearchParams{search:params,mode,graph_budgets:Default::default(),include_related:!args.no_related,related_budget:args.related_budget}).await?;
+                return emit(out,json,&result,|r|serde_json::to_string_pretty(r).expect("DTO сериализуется"));
+            }
             emit(
                 out,
                 json,

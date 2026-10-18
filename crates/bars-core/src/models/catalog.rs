@@ -7,8 +7,8 @@ use super::embedder::ModelFingerprint;
 pub enum Backend {
     /// ONNX Runtime через fastembed (процессор или видеокарта).
     Onnx,
-    /// candle, фича fastembed `qwen3`; только процессор.
-    Qwen3,
+    /// GGUF Q4_K_M через встроенный llama.cpp.
+    Gguf,
     /// candle, фича fastembed `nomic-v2-moe`; только процессор.
     NomicV2Moe,
 }
@@ -16,7 +16,7 @@ pub enum Backend {
 /// Одна встроенная embed-модель.
 #[derive(Debug, Clone, Copy)]
 pub struct BuiltinModel {
-    /// Идентификатор: он же в `embed.model` и в отпечатке.
+    /// Идентификатор в `embed.model`; отпечаток также закрепляет представление модели.
     pub id: &'static str,
     pub dim: usize,
     /// Префикс, который bars добавляет к тексту документа; входит в отпечаток.
@@ -31,6 +31,7 @@ pub struct BuiltinModel {
 }
 
 pub const BGE_M3_ID: &str = "BAAI/bge-m3";
+pub const BGE_M3_FP16_ID: &str = "BAAI/bge-m3:fp16";
 pub const BGE_M3_DIM: usize = 1024;
 pub const QWEN3_0_6B_ID: &str = "Qwen/Qwen3-Embedding-0.6B";
 pub const QWEN3_4B_ID: &str = "Qwen/Qwen3-Embedding-4B";
@@ -40,7 +41,7 @@ pub const NOMIC_V2_MOE_ID: &str = "nomic-ai/nomic-embed-text-v2-moe";
 pub const QWEN3_QUERY_PREFIX: &str =
     "Instruct: Given a search query, retrieve relevant passages from documentation\nQuery: ";
 
-const QWEN3_SPEED: &str = "считается на процессоре через candle и заметно медленнее bge-m3";
+const QWEN3_SPEED: &str = "GGUF Q4_K_M через llama.cpp; GPU при доступном Vulkan/Metal, иначе CPU; после прежнего candle-индекса нужна переиндексация";
 const NOMIC_INPUT: &str = "длина входа 512 токенов: чанк длиннее примерно 1500 символов попадает в вектор не целиком; уменьшите `chunking.max_chars`";
 
 const CATALOG: &[BuiltinModel] = &[
@@ -53,14 +54,29 @@ const CATALOG: &[BuiltinModel] = &[
         backend: Backend::Onnx,
         warnings: &[],
     },
+    #[cfg(windows)]
+    BuiltinModel {
+        id: BGE_M3_FP16_ID,
+        dim: BGE_M3_DIM,
+        doc_prefix: "",
+        query_prefix: "",
+        max_length: 8192,
+        backend: Backend::Onnx,
+        warnings: &[
+            "FP16: только DirectML; при недоступной GPU выберите обычную bge-m3; нужна переиндексация",
+        ],
+    },
     BuiltinModel {
         id: QWEN3_0_6B_ID,
         dim: 1024,
         doc_prefix: "",
         query_prefix: QWEN3_QUERY_PREFIX,
         max_length: 8192,
-        backend: Backend::Qwen3,
-        warnings: &[QWEN3_SPEED],
+        backend: Backend::Gguf,
+        warnings: &[
+            QWEN3_SPEED,
+            "0,6B: сторонняя GGUF-конверсия enacimie, закреплённая ревизией и SHA-256",
+        ],
     },
     BuiltinModel {
         id: QWEN3_4B_ID,
@@ -68,10 +84,10 @@ const CATALOG: &[BuiltinModel] = &[
         doc_prefix: "",
         query_prefix: QWEN3_QUERY_PREFIX,
         max_length: 8192,
-        backend: Backend::Qwen3,
+        backend: Backend::Gguf,
         warnings: &[
             QWEN3_SPEED,
-            "модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ: на CPU первая индексация проекта идёт часами",
+            "4B: около 2,5 ГБ на диске; память контекста и вычислений добавляется к весам, CPU может работать медленно",
         ],
     },
     BuiltinModel {
@@ -101,6 +117,12 @@ pub fn builtin_model(id: &str) -> Option<&'static BuiltinModel> {
 impl BuiltinModel {
     /// Отпечаток известен без загрузки модели: воркер сверяет его с индексом до эмбеддинга (Т-25).
     pub fn fingerprint(&self) -> ModelFingerprint {
+        if self.id == BGE_M3_FP16_ID {
+            return super::bge_m3_fp16_fingerprint();
+        }
+        if self.backend == Backend::Gguf {
+            return super::gguf::fingerprint(self);
+        }
         ModelFingerprint {
             source: "builtin".to_string(),
             model: self.id.to_string(),
@@ -171,8 +193,6 @@ fn layout(id: &str) -> Option<Layout> {
             safetensors: false,
             size_bytes: 2_288_282_930,
         },
-        QWEN3_0_6B_ID => candle(QWEN3_0_6B_ID, 1_200_000_000),
-        QWEN3_4B_ID => candle(QWEN3_4B_ID, 8_050_000_000),
         NOMIC_V2_MOE_ID => candle(NOMIC_V2_MOE_ID, 960_000_000),
         _ => return None,
     })
@@ -186,6 +206,32 @@ fn model_dir(models_dir: &std::path::Path, layout: &Layout) -> std::path::PathBu
 /// поэтому размер берётся у цели ссылки, а не у самой ссылки.
 fn is_present(path: &std::path::Path) -> bool {
     std::fs::metadata(path).is_ok_and(|meta| meta.is_file() && meta.len() > 0)
+}
+
+/// Получает файлы ONNX-каталога без создания сессии и чтения весов целиком в память.
+pub fn download_onnx_artifacts(models_dir: &std::path::Path, id: &str) -> Result<(), String> {
+    if id == BGE_M3_FP16_ID {
+        return super::embed_artifact::ensure(models_dir, super::embed_artifact::Profile::Fp16)
+            .map(|_| ())
+            .map_err(|e| e.to_string());
+    }
+    let info = layout(id)
+        .filter(|l| !l.safetensors)
+        .ok_or_else(|| format!("для модели `{id}` нет ONNX-списка файлов"))?;
+    let api = hf_hub::api::sync::ApiBuilder::from_cache(hf_hub::Cache::new(models_dir.into()))
+        .with_token(None)
+        .with_progress(false)
+        .with_retries(3)
+        .build()
+        .map_err(|e| e.to_string())?;
+    let repo = api.repo(hf_hub::Repo::model(info.repo.into()));
+    for file in info.files {
+        let path = repo.get(file).map_err(|e| e.to_string())?;
+        if !is_present(&path) {
+            return Err(format!("файл модели пуст или отсутствует: {file}"));
+        }
+    }
+    Ok(())
 }
 
 /// Все ли файлы с весами `safetensors` в снимке: либо `model.safetensors`, либо все шарды из
@@ -216,6 +262,15 @@ fn safetensors_ready(snapshot: &std::path::Path) -> bool {
 /// непустота каждого файла каталога; содержимое не проверяется (`docs/features/models/local-models.md`,
 /// «Когда модель считается скачанной»).
 pub fn is_downloaded(models_dir: &std::path::Path, id: &str) -> bool {
+    if id == BGE_M3_FP16_ID {
+        return super::embed_artifact::is_downloaded(
+            models_dir,
+            super::embed_artifact::Profile::Fp16,
+        );
+    }
+    if super::gguf_artifact::artifact(id).is_some() {
+        return super::gguf_artifact::is_downloaded(models_dir, id);
+    }
     let Some(layout) = layout(id) else {
         return false;
     };
@@ -236,6 +291,15 @@ pub fn is_downloaded(models_dir: &std::path::Path, id: &str) -> bool {
 /// `.incomplete`) к ожидаемому размеру. Пока файлы не все на месте, не больше 99; у скачанной — 100.
 /// Неизвестная модель — `None`.
 pub fn download_percent(models_dir: &std::path::Path, id: &str) -> Option<u8> {
+    if id == BGE_M3_FP16_ID {
+        return Some(super::embed_artifact::percent(
+            models_dir,
+            super::embed_artifact::Profile::Fp16,
+        ));
+    }
+    if super::gguf_artifact::artifact(id).is_some() {
+        return super::gguf_artifact::percent(models_dir, id);
+    }
     let layout = layout(id)?;
     if is_downloaded(models_dir, id) {
         return Some(100);
@@ -282,12 +346,38 @@ mod tests {
     use super::*;
 
     #[test]
-    fn catalog_has_the_four_models_and_bge_m3_comes_first() {
+    fn cached_download_gets_artifacts_without_parsing_an_onnx_session() {
+        let dir = tempfile::tempdir().unwrap();
+        let cached =
+            hf_hub::Cache::new(dir.path().into()).repo(hf_hub::Repo::model(BGE_M3_ID.into()));
+        cached.create_ref("fixture").unwrap();
+        for file in BGE_M3_FILES {
+            let path = cached.pointer_path("fixture").join(file);
+            std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+            std::fs::write(path, "not an ONNX model").unwrap();
+            assert!(cached.get(file).is_some());
+        }
+        download_onnx_artifacts(dir.path(), BGE_M3_ID).unwrap();
+        assert!(is_downloaded(dir.path(), BGE_M3_ID));
+        assert!(download_onnx_artifacts(dir.path(), QWEN3_4B_ID).is_err());
+        assert!(download_onnx_artifacts(dir.path(), "unknown").is_err());
+    }
+
+    #[test]
+    fn catalog_has_expected_models_and_fp32_bge_m3_comes_first() {
         let ids: Vec<_> = builtin_models().iter().map(|model| model.id).collect();
-        assert_eq!(
-            ids,
-            [BGE_M3_ID, QWEN3_0_6B_ID, QWEN3_4B_ID, NOMIC_V2_MOE_ID]
-        );
+        let expected = if cfg!(windows) {
+            vec![
+                BGE_M3_ID,
+                BGE_M3_FP16_ID,
+                QWEN3_0_6B_ID,
+                QWEN3_4B_ID,
+                NOMIC_V2_MOE_ID,
+            ]
+        } else {
+            vec![BGE_M3_ID, QWEN3_0_6B_ID, QWEN3_4B_ID, NOMIC_V2_MOE_ID]
+        };
+        assert_eq!(ids, expected);
         assert!(builtin_model("нет такой").is_none());
     }
 
@@ -397,9 +487,9 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let snapshot = dir
             .path()
-            .join("models--Qwen--Qwen3-Embedding-4B/snapshots/abc");
-        write_files(&snapshot, QWEN3_4B_ID, &[]);
-        assert!(!is_downloaded(dir.path(), QWEN3_4B_ID), "весов нет");
+            .join("models--nomic-ai--nomic-embed-text-v2-moe/snapshots/abc");
+        write_files(&snapshot, NOMIC_V2_MOE_ID, &[]);
+        assert!(!is_downloaded(dir.path(), NOMIC_V2_MOE_ID), "весов нет");
 
         std::fs::write(
             snapshot.join("model.safetensors.index.json"),
@@ -407,17 +497,21 @@ mod tests {
         )
         .unwrap();
         std::fs::write(snapshot.join("model-1.safetensors"), "w").unwrap();
-        assert!(!is_downloaded(dir.path(), QWEN3_4B_ID), "второго шарда нет");
+        assert!(
+            !is_downloaded(dir.path(), NOMIC_V2_MOE_ID),
+            "второго шарда нет"
+        );
         std::fs::write(snapshot.join("model-2.safetensors"), "w").unwrap();
-        assert!(is_downloaded(dir.path(), QWEN3_4B_ID));
+        assert!(is_downloaded(dir.path(), NOMIC_V2_MOE_ID));
 
-        let single = dir
+        let dir2 = tempfile::tempdir().unwrap();
+        let single = dir2
             .path()
-            .join("models--Qwen--Qwen3-Embedding-0.6B/snapshots/abc");
-        write_files(&single, QWEN3_0_6B_ID, &[]);
-        assert!(!is_downloaded(dir.path(), QWEN3_0_6B_ID));
+            .join("models--nomic-ai--nomic-embed-text-v2-moe/snapshots/abc");
+        write_files(&single, NOMIC_V2_MOE_ID, &[]);
+        assert!(!is_downloaded(dir2.path(), NOMIC_V2_MOE_ID));
         std::fs::write(single.join("model.safetensors"), "w").unwrap();
-        assert!(is_downloaded(dir.path(), QWEN3_0_6B_ID));
+        assert!(is_downloaded(dir2.path(), NOMIC_V2_MOE_ID));
     }
 
     #[test]

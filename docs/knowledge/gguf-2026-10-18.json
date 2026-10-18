@@ -1,0 +1,1262 @@
+{
+  "schemaVersion": 1,
+  "quality_complete": true,
+  "timing_status": "preliminary; installed bars and parallel builds/tests active; no quiet-window claim",
+  "corpus": {
+    "documents": 176,
+    "chunks": 946
+  },
+  "runs": [
+    {
+      "run": "gguf-prod06-corpus",
+      "cases_blake3": "00708396a6cb872f6427d08df983d8776d5f491ada467a052602b20b07cac513",
+      "binary_blake3": "768d3bfdb840000c8d7ce64835b08eb504b0e1183c5202249aaa8a55d0908f55",
+      "load_seconds": 0.8259833,
+      "index_seconds": 54.1327134,
+      "resumed_index": true,
+      "report": "UpdateReport { aborted: false, rebuild_not_applied: false, added: 155, changed: 21, unchanged: 0, removed: 0, chunks_embedded: 866, chunks_reused: 80, full_check: true, problems: [] }",
+      "scores": {
+        "tune": {
+          "n": 48,
+          "hit1": 23,
+          "hit3": 37,
+          "hit10": 44,
+          "mrr10": 0.642906746031746,
+          "median": 0.0631491,
+          "p95": 0.0778191,
+          "ranks": [
+            {
+              "id": "od-001",
+              "rank": 0
+            },
+            {
+              "id": "od-002",
+              "rank": 2
+            },
+            {
+              "id": "od-003",
+              "rank": 3
+            },
+            {
+              "id": "od-004",
+              "rank": 1
+            },
+            {
+              "id": "od-005",
+              "rank": 1
+            },
+            {
+              "id": "od-006",
+              "rank": 2
+            },
+            {
+              "id": "od-007",
+              "rank": 2
+            },
+            {
+              "id": "od-008",
+              "rank": 1
+            },
+            {
+              "id": "od-009",
+              "rank": 1
+            },
+            {
+              "id": "od-010",
+              "rank": 2
+            },
+            {
+              "id": "od-011",
+              "rank": 1
+            },
+            {
+              "id": "od-012",
+              "rank": 7
+            },
+            {
+              "id": "od-013",
+              "rank": 2
+            },
+            {
+              "id": "od-014",
+              "rank": 2
+            },
+            {
+              "id": "od-015",
+              "rank": 13
+            },
+            {
+              "id": "od-016",
+              "rank": 0
+            },
+            {
+              "id": "od-017",
+              "rank": 6
+            },
+            {
+              "id": "od-018",
+              "rank": 0
+            },
+            {
+              "id": "od-019",
+              "rank": 1
+            },
+            {
+              "id": "od-020",
+              "rank": 2
+            },
+            {
+              "id": "od-021",
+              "rank": 1
+            },
+            {
+              "id": "od-022",
+              "rank": 1
+            },
+            {
+              "id": "od-023",
+              "rank": 1
+            },
+            {
+              "id": "od-024",
+              "rank": 1
+            },
+            {
+              "id": "od-025",
+              "rank": 2
+            },
+            {
+              "id": "od-026",
+              "rank": 1
+            },
+            {
+              "id": "od-027",
+              "rank": 1
+            },
+            {
+              "id": "od-028",
+              "rank": 4
+            },
+            {
+              "id": "od-029",
+              "rank": 1
+            },
+            {
+              "id": "od-030",
+              "rank": 2
+            },
+            {
+              "id": "od-031",
+              "rank": 1
+            },
+            {
+              "id": "od-032",
+              "rank": 1
+            },
+            {
+              "id": "od-033",
+              "rank": 2
+            },
+            {
+              "id": "od-034",
+              "rank": 6
+            },
+            {
+              "id": "od-035",
+              "rank": 10
+            },
+            {
+              "id": "od-036",
+              "rank": 2
+            },
+            {
+              "id": "od-037",
+              "rank": 1
+            },
+            {
+              "id": "od-038",
+              "rank": 1
+            },
+            {
+              "id": "od-039",
+              "rank": 1
+            },
+            {
+              "id": "od-040",
+              "rank": 1
+            },
+            {
+              "id": "od-041",
+              "rank": 6
+            },
+            {
+              "id": "od-042",
+              "rank": 5
+            },
+            {
+              "id": "od-043",
+              "rank": 1
+            },
+            {
+              "id": "od-044",
+              "rank": 1
+            },
+            {
+              "id": "od-045",
+              "rank": 2
+            },
+            {
+              "id": "od-046",
+              "rank": 1
+            },
+            {
+              "id": "od-047",
+              "rank": 1
+            },
+            {
+              "id": "od-048",
+              "rank": 3
+            }
+          ]
+        },
+        "test": {
+          "n": 32,
+          "hit1": 18,
+          "hit3": 26,
+          "hit10": 29,
+          "mrr10": 0.6890625,
+          "median": 0.0648362,
+          "p95": 0.0821902,
+          "ranks": [
+            {
+              "id": "od-049",
+              "rank": 2
+            },
+            {
+              "id": "od-050",
+              "rank": 1
+            },
+            {
+              "id": "od-051",
+              "rank": 10
+            },
+            {
+              "id": "od-052",
+              "rank": 4
+            },
+            {
+              "id": "od-053",
+              "rank": 2
+            },
+            {
+              "id": "od-054",
+              "rank": 2
+            },
+            {
+              "id": "od-055",
+              "rank": 5
+            },
+            {
+              "id": "od-056",
+              "rank": 1
+            },
+            {
+              "id": "od-057",
+              "rank": 3
+            },
+            {
+              "id": "od-058",
+              "rank": 0
+            },
+            {
+              "id": "od-059",
+              "rank": 1
+            },
+            {
+              "id": "od-060",
+              "rank": 1
+            },
+            {
+              "id": "od-061",
+              "rank": 1
+            },
+            {
+              "id": "od-062",
+              "rank": 1
+            },
+            {
+              "id": "od-063",
+              "rank": 1
+            },
+            {
+              "id": "od-064",
+              "rank": 1
+            },
+            {
+              "id": "od-065",
+              "rank": 1
+            },
+            {
+              "id": "od-066",
+              "rank": 3
+            },
+            {
+              "id": "od-067",
+              "rank": 1
+            },
+            {
+              "id": "od-068",
+              "rank": 1
+            },
+            {
+              "id": "od-069",
+              "rank": 1
+            },
+            {
+              "id": "od-070",
+              "rank": 1
+            },
+            {
+              "id": "od-071",
+              "rank": 0
+            },
+            {
+              "id": "od-072",
+              "rank": 0
+            },
+            {
+              "id": "od-073",
+              "rank": 2
+            },
+            {
+              "id": "od-074",
+              "rank": 3
+            },
+            {
+              "id": "od-075",
+              "rank": 1
+            },
+            {
+              "id": "od-076",
+              "rank": 1
+            },
+            {
+              "id": "od-077",
+              "rank": 2
+            },
+            {
+              "id": "od-078",
+              "rank": 1
+            },
+            {
+              "id": "od-079",
+              "rank": 1
+            },
+            {
+              "id": "od-080",
+              "rank": 1
+            }
+          ]
+        }
+      },
+      "sampled_peak_private": 3302883328,
+      "sampled_peak_working": 2090913792,
+      "offload_lines": [
+        "load_tensors: offloaded 29/29 layers to GPU"
+      ],
+      "cpu_compute_seen": false,
+      "row_count": 300
+    },
+    {
+      "run": "gguf-prod4b-corpus",
+      "cases_blake3": "00708396a6cb872f6427d08df983d8776d5f491ada467a052602b20b07cac513",
+      "binary_blake3": "768d3bfdb840000c8d7ce64835b08eb504b0e1183c5202249aaa8a55d0908f55",
+      "load_seconds": 2.2156054,
+      "index_seconds": 114.1394914,
+      "resumed_index": false,
+      "report": "UpdateReport { aborted: false, rebuild_not_applied: false, added: 176, changed: 0, unchanged: 0, removed: 0, chunks_embedded: 946, chunks_reused: 0, full_check: true, problems: [] }",
+      "scores": {
+        "tune": {
+          "n": 48,
+          "hit1": 26,
+          "hit3": 37,
+          "hit10": 45,
+          "mrr10": 0.6814732142857145,
+          "median": 0.1179997,
+          "p95": 0.1325845,
+          "ranks": [
+            {
+              "id": "od-001",
+              "rank": 5
+            },
+            {
+              "id": "od-002",
+              "rank": 1
+            },
+            {
+              "id": "od-003",
+              "rank": 1
+            },
+            {
+              "id": "od-004",
+              "rank": 1
+            },
+            {
+              "id": "od-005",
+              "rank": 1
+            },
+            {
+              "id": "od-006",
+              "rank": 10
+            },
+            {
+              "id": "od-007",
+              "rank": 1
+            },
+            {
+              "id": "od-008",
+              "rank": 1
+            },
+            {
+              "id": "od-009",
+              "rank": 1
+            },
+            {
+              "id": "od-010",
+              "rank": 2
+            },
+            {
+              "id": "od-011",
+              "rank": 1
+            },
+            {
+              "id": "od-012",
+              "rank": 2
+            },
+            {
+              "id": "od-013",
+              "rank": 2
+            },
+            {
+              "id": "od-014",
+              "rank": 2
+            },
+            {
+              "id": "od-015",
+              "rank": 27
+            },
+            {
+              "id": "od-016",
+              "rank": 0
+            },
+            {
+              "id": "od-017",
+              "rank": 6
+            },
+            {
+              "id": "od-018",
+              "rank": 8
+            },
+            {
+              "id": "od-019",
+              "rank": 1
+            },
+            {
+              "id": "od-020",
+              "rank": 2
+            },
+            {
+              "id": "od-021",
+              "rank": 1
+            },
+            {
+              "id": "od-022",
+              "rank": 1
+            },
+            {
+              "id": "od-023",
+              "rank": 1
+            },
+            {
+              "id": "od-024",
+              "rank": 1
+            },
+            {
+              "id": "od-025",
+              "rank": 2
+            },
+            {
+              "id": "od-026",
+              "rank": 1
+            },
+            {
+              "id": "od-027",
+              "rank": 1
+            },
+            {
+              "id": "od-028",
+              "rank": 1
+            },
+            {
+              "id": "od-029",
+              "rank": 1
+            },
+            {
+              "id": "od-030",
+              "rank": 2
+            },
+            {
+              "id": "od-031",
+              "rank": 1
+            },
+            {
+              "id": "od-032",
+              "rank": 1
+            },
+            {
+              "id": "od-033",
+              "rank": 2
+            },
+            {
+              "id": "od-034",
+              "rank": 20
+            },
+            {
+              "id": "od-035",
+              "rank": 7
+            },
+            {
+              "id": "od-036",
+              "rank": 1
+            },
+            {
+              "id": "od-037",
+              "rank": 1
+            },
+            {
+              "id": "od-038",
+              "rank": 1
+            },
+            {
+              "id": "od-039",
+              "rank": 2
+            },
+            {
+              "id": "od-040",
+              "rank": 2
+            },
+            {
+              "id": "od-041",
+              "rank": 6
+            },
+            {
+              "id": "od-042",
+              "rank": 6
+            },
+            {
+              "id": "od-043",
+              "rank": 1
+            },
+            {
+              "id": "od-044",
+              "rank": 1
+            },
+            {
+              "id": "od-045",
+              "rank": 2
+            },
+            {
+              "id": "od-046",
+              "rank": 1
+            },
+            {
+              "id": "od-047",
+              "rank": 1
+            },
+            {
+              "id": "od-048",
+              "rank": 7
+            }
+          ]
+        },
+        "test": {
+          "n": 32,
+          "hit1": 17,
+          "hit3": 25,
+          "hit10": 29,
+          "mrr10": 0.6711309523809524,
+          "median": 0.1167843,
+          "p95": 0.1371509,
+          "ranks": [
+            {
+              "id": "od-049",
+              "rank": 1
+            },
+            {
+              "id": "od-050",
+              "rank": 1
+            },
+            {
+              "id": "od-051",
+              "rank": 6
+            },
+            {
+              "id": "od-052",
+              "rank": 4
+            },
+            {
+              "id": "od-053",
+              "rank": 2
+            },
+            {
+              "id": "od-054",
+              "rank": 2
+            },
+            {
+              "id": "od-055",
+              "rank": 7
+            },
+            {
+              "id": "od-056",
+              "rank": 1
+            },
+            {
+              "id": "od-057",
+              "rank": 2
+            },
+            {
+              "id": "od-058",
+              "rank": 0
+            },
+            {
+              "id": "od-059",
+              "rank": 1
+            },
+            {
+              "id": "od-060",
+              "rank": 2
+            },
+            {
+              "id": "od-061",
+              "rank": 1
+            },
+            {
+              "id": "od-062",
+              "rank": 1
+            },
+            {
+              "id": "od-063",
+              "rank": 2
+            },
+            {
+              "id": "od-064",
+              "rank": 1
+            },
+            {
+              "id": "od-065",
+              "rank": 1
+            },
+            {
+              "id": "od-066",
+              "rank": 3
+            },
+            {
+              "id": "od-067",
+              "rank": 1
+            },
+            {
+              "id": "od-068",
+              "rank": 1
+            },
+            {
+              "id": "od-069",
+              "rank": 2
+            },
+            {
+              "id": "od-070",
+              "rank": 1
+            },
+            {
+              "id": "od-071",
+              "rank": 0
+            },
+            {
+              "id": "od-072",
+              "rank": 0
+            },
+            {
+              "id": "od-073",
+              "rank": 1
+            },
+            {
+              "id": "od-074",
+              "rank": 4
+            },
+            {
+              "id": "od-075",
+              "rank": 1
+            },
+            {
+              "id": "od-076",
+              "rank": 1
+            },
+            {
+              "id": "od-077",
+              "rank": 3
+            },
+            {
+              "id": "od-078",
+              "rank": 1
+            },
+            {
+              "id": "od-079",
+              "rank": 1
+            },
+            {
+              "id": "od-080",
+              "rank": 1
+            }
+          ]
+        }
+      },
+      "sampled_peak_private": 6116257792,
+      "sampled_peak_working": 4371050496,
+      "offload_lines": [
+        "load_tensors: offloaded 37/37 layers to GPU"
+      ],
+      "cpu_compute_seen": false,
+      "row_count": 300
+    },
+    {
+      "run": "gguf-bge-corpus",
+      "cases_blake3": "00708396a6cb872f6427d08df983d8776d5f491ada467a052602b20b07cac513",
+      "binary_blake3": "768d3bfdb840000c8d7ce64835b08eb504b0e1183c5202249aaa8a55d0908f55",
+      "load_seconds": 16.8524173,
+      "index_seconds": 57.8908139,
+      "resumed_index": false,
+      "report": "UpdateReport { aborted: false, rebuild_not_applied: false, added: 176, changed: 0, unchanged: 0, removed: 0, chunks_embedded: 946, chunks_reused: 0, full_check: true, problems: [] }",
+      "scores": {
+        "tune": {
+          "n": 48,
+          "hit1": 26,
+          "hit3": 35,
+          "hit10": 44,
+          "mrr10": 0.6600033068783068,
+          "median": 0.134024,
+          "p95": 0.2000199,
+          "ranks": [
+            {
+              "id": "od-001",
+              "rank": 11
+            },
+            {
+              "id": "od-002",
+              "rank": 1
+            },
+            {
+              "id": "od-003",
+              "rank": 4
+            },
+            {
+              "id": "od-004",
+              "rank": 1
+            },
+            {
+              "id": "od-005",
+              "rank": 1
+            },
+            {
+              "id": "od-006",
+              "rank": 3
+            },
+            {
+              "id": "od-007",
+              "rank": 6
+            },
+            {
+              "id": "od-008",
+              "rank": 1
+            },
+            {
+              "id": "od-009",
+              "rank": 1
+            },
+            {
+              "id": "od-010",
+              "rank": 1
+            },
+            {
+              "id": "od-011",
+              "rank": 1
+            },
+            {
+              "id": "od-012",
+              "rank": 1
+            },
+            {
+              "id": "od-013",
+              "rank": 4
+            },
+            {
+              "id": "od-014",
+              "rank": 2
+            },
+            {
+              "id": "od-015",
+              "rank": 11
+            },
+            {
+              "id": "od-016",
+              "rank": 0
+            },
+            {
+              "id": "od-017",
+              "rank": 4
+            },
+            {
+              "id": "od-018",
+              "rank": 9
+            },
+            {
+              "id": "od-019",
+              "rank": 1
+            },
+            {
+              "id": "od-020",
+              "rank": 3
+            },
+            {
+              "id": "od-021",
+              "rank": 1
+            },
+            {
+              "id": "od-022",
+              "rank": 1
+            },
+            {
+              "id": "od-023",
+              "rank": 1
+            },
+            {
+              "id": "od-024",
+              "rank": 1
+            },
+            {
+              "id": "od-025",
+              "rank": 1
+            },
+            {
+              "id": "od-026",
+              "rank": 1
+            },
+            {
+              "id": "od-027",
+              "rank": 1
+            },
+            {
+              "id": "od-028",
+              "rank": 3
+            },
+            {
+              "id": "od-029",
+              "rank": 1
+            },
+            {
+              "id": "od-030",
+              "rank": 2
+            },
+            {
+              "id": "od-031",
+              "rank": 1
+            },
+            {
+              "id": "od-032",
+              "rank": 1
+            },
+            {
+              "id": "od-033",
+              "rank": 2
+            },
+            {
+              "id": "od-034",
+              "rank": 7
+            },
+            {
+              "id": "od-035",
+              "rank": 21
+            },
+            {
+              "id": "od-036",
+              "rank": 2
+            },
+            {
+              "id": "od-037",
+              "rank": 1
+            },
+            {
+              "id": "od-038",
+              "rank": 1
+            },
+            {
+              "id": "od-039",
+              "rank": 1
+            },
+            {
+              "id": "od-040",
+              "rank": 1
+            },
+            {
+              "id": "od-041",
+              "rank": 7
+            },
+            {
+              "id": "od-042",
+              "rank": 6
+            },
+            {
+              "id": "od-043",
+              "rank": 1
+            },
+            {
+              "id": "od-044",
+              "rank": 1
+            },
+            {
+              "id": "od-045",
+              "rank": 2
+            },
+            {
+              "id": "od-046",
+              "rank": 1
+            },
+            {
+              "id": "od-047",
+              "rank": 2
+            },
+            {
+              "id": "od-048",
+              "rank": 5
+            }
+          ]
+        },
+        "test": {
+          "n": 32,
+          "hit1": 18,
+          "hit3": 26,
+          "hit10": 29,
+          "mrr10": 0.6987847222222222,
+          "median": 0.1371914,
+          "p95": 0.1892822,
+          "ranks": [
+            {
+              "id": "od-049",
+              "rank": 1
+            },
+            {
+              "id": "od-050",
+              "rank": 1
+            },
+            {
+              "id": "od-051",
+              "rank": 6
+            },
+            {
+              "id": "od-052",
+              "rank": 4
+            },
+            {
+              "id": "od-053",
+              "rank": 3
+            },
+            {
+              "id": "od-054",
+              "rank": 2
+            },
+            {
+              "id": "od-055",
+              "rank": 11
+            },
+            {
+              "id": "od-056",
+              "rank": 1
+            },
+            {
+              "id": "od-057",
+              "rank": 2
+            },
+            {
+              "id": "od-058",
+              "rank": 9
+            },
+            {
+              "id": "od-059",
+              "rank": 1
+            },
+            {
+              "id": "od-060",
+              "rank": 2
+            },
+            {
+              "id": "od-061",
+              "rank": 1
+            },
+            {
+              "id": "od-062",
+              "rank": 1
+            },
+            {
+              "id": "od-063",
+              "rank": 2
+            },
+            {
+              "id": "od-064",
+              "rank": 1
+            },
+            {
+              "id": "od-065",
+              "rank": 1
+            },
+            {
+              "id": "od-066",
+              "rank": 2
+            },
+            {
+              "id": "od-067",
+              "rank": 1
+            },
+            {
+              "id": "od-068",
+              "rank": 1
+            },
+            {
+              "id": "od-069",
+              "rank": 2
+            },
+            {
+              "id": "od-070",
+              "rank": 1
+            },
+            {
+              "id": "od-071",
+              "rank": 0
+            },
+            {
+              "id": "od-072",
+              "rank": 0
+            },
+            {
+              "id": "od-073",
+              "rank": 1
+            },
+            {
+              "id": "od-074",
+              "rank": 2
+            },
+            {
+              "id": "od-075",
+              "rank": 1
+            },
+            {
+              "id": "od-076",
+              "rank": 1
+            },
+            {
+              "id": "od-077",
+              "rank": 1
+            },
+            {
+              "id": "od-078",
+              "rank": 1
+            },
+            {
+              "id": "od-079",
+              "rank": 1
+            },
+            {
+              "id": "od-080",
+              "rank": 1
+            }
+          ]
+        }
+      },
+      "sampled_peak_private": 7539789824,
+      "sampled_peak_working": 2247188480,
+      "offload_lines": [],
+      "cpu_compute_seen": false,
+      "row_count": 300
+    }
+  ],
+  "probes": {
+    "cpu_gpu": [
+      {
+        "name": "06-gpu",
+        "rows": [
+          {
+            "actual": "vulkan",
+            "backend": "llama.cpp",
+            "dim": 1024,
+            "seconds": 2.8018203,
+            "fingerprint": "Qwen/Qwen3-Embedding-0.6B@gguf-q4_k_m-55f34b46f29e2316",
+            "fallback": null
+          },
+          {
+            "actual": "vulkan",
+            "backend": "llama.cpp",
+            "dim": 1024,
+            "seconds": 1.2581096999999999,
+            "fingerprint": "Qwen/Qwen3-Embedding-0.6B@gguf-q4_k_m-55f34b46f29e2316",
+            "fallback": null
+          },
+          {
+            "actual": "vulkan",
+            "backend": "llama.cpp",
+            "dim": 1024,
+            "seconds": 0.0282791,
+            "fingerprint": "Qwen/Qwen3-Embedding-0.6B@gguf-q4_k_m-55f34b46f29e2316",
+            "fallback": null
+          },
+          {
+            "actual": "vulkan",
+            "backend": "llama.cpp",
+            "dim": 1024,
+            "seconds": 0.2426229,
+            "fingerprint": "Qwen/Qwen3-Embedding-0.6B@gguf-q4_k_m-55f34b46f29e2316",
+            "fallback": null
+          },
+          {
+            "actual": "vulkan",
+            "backend": "llama.cpp",
+            "dim": 1024,
+            "seconds": 14.7906026,
+            "fingerprint": "Qwen/Qwen3-Embedding-0.6B@gguf-q4_k_m-55f34b46f29e2316",
+            "fallback": null
+          }
+        ]
+      },
+      {
+        "name": "06-cpu",
+        "rows": [
+          {
+            "actual": "cpu",
+            "backend": "llama.cpp",
+            "dim": 1024,
+            "seconds": 0.2871919,
+            "fingerprint": "Qwen/Qwen3-Embedding-0.6B@gguf-q4_k_m-55f34b46f29e2316",
+            "fallback": null
+          },
+          {
+            "actual": "cpu",
+            "backend": "llama.cpp",
+            "dim": 1024,
+            "seconds": 0.0728075,
+            "fingerprint": "Qwen/Qwen3-Embedding-0.6B@gguf-q4_k_m-55f34b46f29e2316",
+            "fallback": null
+          },
+          {
+            "actual": "cpu",
+            "backend": "llama.cpp",
+            "dim": 1024,
+            "seconds": 0.0986725,
+            "fingerprint": "Qwen/Qwen3-Embedding-0.6B@gguf-q4_k_m-55f34b46f29e2316",
+            "fallback": null
+          },
+          {
+            "actual": "cpu",
+            "backend": "llama.cpp",
+            "dim": 1024,
+            "seconds": 0.0141853,
+            "fingerprint": "Qwen/Qwen3-Embedding-0.6B@gguf-q4_k_m-55f34b46f29e2316",
+            "fallback": null
+          },
+          {
+            "actual": "cpu",
+            "backend": "llama.cpp",
+            "dim": 1024,
+            "seconds": 0.9274211,
+            "fingerprint": "Qwen/Qwen3-Embedding-0.6B@gguf-q4_k_m-55f34b46f29e2316",
+            "fallback": null
+          }
+        ]
+      },
+      {
+        "name": "4b-gpu",
+        "rows": [
+          {
+            "actual": "vulkan",
+            "backend": "llama.cpp",
+            "dim": 2560,
+            "seconds": 0.1184947,
+            "fingerprint": "Qwen/Qwen3-Embedding-4B@gguf-q4_k_m-4ea06f44bb1a3be5",
+            "fallback": null
+          },
+          {
+            "actual": "vulkan",
+            "backend": "llama.cpp",
+            "dim": 2560,
+            "seconds": 0.7619037,
+            "fingerprint": "Qwen/Qwen3-Embedding-4B@gguf-q4_k_m-4ea06f44bb1a3be5",
+            "fallback": null
+          },
+          {
+            "actual": "vulkan",
+            "backend": "llama.cpp",
+            "dim": 2560,
+            "seconds": 0.0199275,
+            "fingerprint": "Qwen/Qwen3-Embedding-4B@gguf-q4_k_m-4ea06f44bb1a3be5",
+            "fallback": null
+          },
+          {
+            "actual": "vulkan",
+            "backend": "llama.cpp",
+            "dim": 2560,
+            "seconds": 0.2225109,
+            "fingerprint": "Qwen/Qwen3-Embedding-4B@gguf-q4_k_m-4ea06f44bb1a3be5",
+            "fallback": null
+          },
+          {
+            "actual": "vulkan",
+            "backend": "llama.cpp",
+            "dim": 2560,
+            "seconds": 1.1255823,
+            "fingerprint": "Qwen/Qwen3-Embedding-4B@gguf-q4_k_m-4ea06f44bb1a3be5",
+            "fallback": null
+          }
+        ]
+      },
+      {
+        "name": "4b-cpu",
+        "rows": [
+          {
+            "actual": "cpu",
+            "backend": "llama.cpp",
+            "dim": 2560,
+            "seconds": 0.7249334,
+            "fingerprint": "Qwen/Qwen3-Embedding-4B@gguf-q4_k_m-4ea06f44bb1a3be5",
+            "fallback": null
+          },
+          {
+            "actual": "cpu",
+            "backend": "llama.cpp",
+            "dim": 2560,
+            "seconds": 0.2018707,
+            "fingerprint": "Qwen/Qwen3-Embedding-4B@gguf-q4_k_m-4ea06f44bb1a3be5",
+            "fallback": null
+          }
+        ]
+      }
+    ],
+    "coexist": {
+      "qwen_actual": "vulkan",
+      "dim": 1024,
+      "max_delta": 0,
+      "ort_line": "ORT coexist: ExecutionInfo { backend: \"onnx\", actual: Some(\"directml\"), fallback_reason: None, precision: Some(\"fp16\"), revision: Some(\"6f5ff65298512715a1e669753bc754d2bc8f367b\") }; scores=[0.87810534, 1.6701422e-5]"
+    },
+    "forced_auto_fallback": {
+      "gpu_hidden_in_child_only": true,
+      "execution_line": "Error: \"Vulkan не подтверждён: ExecutionInfo { backend: \\\"llama.cpp\\\", actual: Some(\\\"cpu\\\"), fallback_reason: Some(\\\"модель не загрузилась: Vulkan/Metal-устройство недоступно\\\"), precision: Some(\\\"q4_k_m\\\"), revision: Some(\\\"51fe2a65af23d8cfd3c9c1d89846cf9073f8902b\\\") }\"",
+      "cpu_compute_buffer": true,
+      "harness_exit": 1,
+      "harness_exit_reason": "expected GPU assertion rejects successful CPU fallback"
+    }
+  }
+}

@@ -7,6 +7,16 @@ description: "Create, edit or move project documentation."
 
 bars splits Markdown by headings and searches by section, so the shape of a document affects search quality. The full rules are in `BARS_INSTRUCTION.md` in the documentation root; read it before a larger change. Write documents and search queries in the user's language, following explicit project language rules. English is only for agent instruction documents; it does not set the language of generated documents, queries or UI.
 
+## Choose the subject and sources
+
+Identify the task subject first. Resolve a stage number through the known project plan/register. For a known document use `bars_read` directly; use `bars_outline` for headings. A preliminary search is not required, including for an unindexed Markdown plan read from disk.
+
+For unknown context, search with a concrete question in the user's language. A cross-cutting task may need project-wide search. `modules` selects actual first-level documentation folders, discovered with `bars_projects` when needed, not nested topics. Examples: `bars_rag_search({query:"Какие пожелания есть к обновлению индекса?",modules:["backlog"]})`; `bars_rag_search({query:"Последние результаты проверки устройств моделей",modules:["chats"]})`.
+
+Use `files` for already selected indexed sources: `bars_rag_search({query:"Как выбирается устройство rerank?",files:["features/models/local-models.md","features/settings/settings.md"]})`. Paths are relative to the documentation root; omit `docs/` when that root is `docs`. Read/outline accepts broader disk paths; do not copy them blindly into `files` or infer index membership from disk existence. Examples assume the suggested layout; use known paths in the target project. An early guessed file list may exclude the direct answer.
+
+After zero results, check the subject, project and filters, then reformulate or read a known primary source. Do not infer that a requirement is absent or reindex because of an empty answer. Filtering is optional; choose it for the information needed.
+
 ## File format
 
 - `title` in the frontmatter of every file, descriptive; one `#` heading equal to it.
@@ -63,4 +73,4 @@ For a mixed task, link the bug register, research, feature description and accep
 
 ## Before editing
 
-Search the documentation with bars first (`bars_rag_search`) so you do not duplicate an existing document. Change the document first, then the code.
+Use bars to check existing sources before editing: read/outline a known document directly, or search unknown context with an appropriate scope. Change the document first, then the code.

@@ -1070,7 +1070,8 @@
           ]
         }
       ],
-      "losses": []
+      "recall15_losses": [],
+      "hit3_losses": []
     },
     {
       "index": "embed-dml-b4",
@@ -2090,7 +2091,8 @@
           ]
         }
       ],
-      "losses": []
+      "recall15_losses": [],
+      "hit3_losses": []
     },
     {
       "index": "embed-dml-b4",
@@ -3110,7 +3112,8 @@
           ]
         }
       ],
-      "losses": []
+      "recall15_losses": [],
+      "hit3_losses": []
     },
     {
       "index": "embed-dml-b4",
@@ -4130,7 +4133,8 @@
           ]
         }
       ],
-      "losses": []
+      "recall15_losses": [],
+      "hit3_losses": []
     },
     {
       "index": "embed-fp16-dml-b8",
@@ -5150,7 +5154,8 @@
           ]
         }
       ],
-      "losses": []
+      "recall15_losses": [],
+      "hit3_losses": []
     },
     {
       "index": "embed-fp16-dml-b8",
@@ -6170,7 +6175,8 @@
           ]
         }
       ],
-      "losses": []
+      "recall15_losses": [],
+      "hit3_losses": []
     },
     {
       "index": "embed-fp16-dml-b8",
@@ -7190,7 +7196,8 @@
           ]
         }
       ],
-      "losses": []
+      "recall15_losses": [],
+      "hit3_losses": []
     },
     {
       "index": "embed-fp16-dml-b8",
@@ -8210,7 +8217,8 @@
           ]
         }
       ],
-      "losses": []
+      "recall15_losses": [],
+      "hit3_losses": []
     },
     {
       "index": "embed-int8-cpu16-b1",
@@ -9230,7 +9238,10 @@
           ]
         }
       ],
-      "losses": []
+      "recall15_losses": [],
+      "hit3_losses": [
+        "od-001"
+      ]
     },
     {
       "index": "embed-int8-cpu16-b1",
@@ -10250,7 +10261,10 @@
           ]
         }
       ],
-      "losses": []
+      "recall15_losses": [],
+      "hit3_losses": [
+        "od-001"
+      ]
     },
     {
       "index": "embed-int8-cpu16-b1",
@@ -11272,7 +11286,10 @@
           ]
         }
       ],
-      "losses": []
+      "recall15_losses": [],
+      "hit3_losses": [
+        "od-001"
+      ]
     },
     {
       "index": "embed-int8-cpu16-b1",
@@ -12292,7 +12309,10 @@
           ]
         }
       ],
-      "losses": []
+      "recall15_losses": [],
+      "hit3_losses": [
+        "od-001"
+      ]
     },
     {
       "index": "embed-cpu16-b4",
@@ -13312,7 +13332,8 @@
           ]
         }
       ],
-      "losses": []
+      "recall15_losses": [],
+      "hit3_losses": []
     },
     {
       "index": "embed-cpu16-b4",
@@ -14332,7 +14353,8 @@
           ]
         }
       ],
-      "losses": []
+      "recall15_losses": [],
+      "hit3_losses": []
     },
     {
       "index": "embed-cpu16-b4",
@@ -15352,7 +15374,8 @@
           ]
         }
       ],
-      "losses": []
+      "recall15_losses": [],
+      "hit3_losses": []
     },
     {
       "index": "embed-cpu16-b4",
@@ -16372,7 +16395,8 @@
           ]
         }
       ],
-      "losses": []
+      "recall15_losses": [],
+      "hit3_losses": []
     }
   ]
 }

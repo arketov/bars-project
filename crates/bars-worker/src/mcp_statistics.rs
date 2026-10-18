@@ -1,5 +1,7 @@
 //! IDEA-05: ограниченные дневные агрегаты, без содержимого вызовов.
-use rusqlite::{Connection, params};
+use rusqlite::Connection;
+#[cfg(test)]
+use rusqlite::params;
 use serde::Serialize;
 use std::path::Path;
 
@@ -44,6 +46,7 @@ fn prune(db: &Connection, time: i64, limit: i64) -> rusqlite::Result<()> {
     Ok(())
 }
 
+#[cfg(test)]
 pub fn record(home: &Path, row: &Row) -> rusqlite::Result<()> {
     let mut db = open(home)?;
     let tx = db.transaction()?;
@@ -67,6 +70,32 @@ pub fn record(home: &Path, row: &Row) -> rusqlite::Result<()> {
 }
 
 pub fn snapshot(home: &Path) -> rusqlite::Result<Vec<Row>> {
+    let db = open(home)?;
+    let v2: bool = db.query_row(
+        "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE name='attempts')",
+        [],
+        |r| r.get(0),
+    )?;
+    if !v2 {
+        return legacy_snapshot(home);
+    }
+    let mut stmt=db.prepare("SELECT session,project,tool,COUNT(*),SUM(outcome='error'),SUM(COALESCE(json_extract(data,'$.duration_ms'),0)),MIN(started),MAX(started) FROM attempts WHERE started>=?1 AND outcome IN ('success','error') GROUP BY session,project,tool ORDER BY MAX(started) DESC,session,project,tool")?;
+    stmt.query_map([now() - 7 * 86400], |r| {
+        Ok(Row {
+            session: r.get(0)?,
+            project: r.get(1)?,
+            tool: r.get(2)?,
+            calls: r.get(3)?,
+            errors: r.get(4)?,
+            total_ms: r.get(5)?,
+            first: r.get(6)?,
+            last: r.get(7)?,
+        })
+    })?
+    .collect()
+}
+
+pub fn legacy_snapshot(home: &Path) -> rusqlite::Result<Vec<Row>> {
     let mut db = open(home)?;
     let tx = db.transaction()?;
     prune(&tx, now(), ROW_LIMIT)?;

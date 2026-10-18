@@ -103,6 +103,19 @@ pub trait ModelProvider: Send + Sync {
     fn download_percent(&self, _id: &str, _settings: &Settings) -> Option<u8> {
         None
     }
+
+    /// Получает файлы; провайдер без отдельного artifact API использует свой loader.
+    fn download(&self, settings: &Settings, reranker: bool) -> Result<(), String> {
+        download_with_loader(self, settings, reranker)
+    }
+}
+
+fn download_with_loader<P: ModelProvider + ?Sized>(provider: &P, settings: &Settings, reranker: bool) -> Result<(), String> {
+    if reranker {
+        provider.load_reranker(settings).map(drop).map_err(|e| e.to_string())
+    } else {
+        provider.load(settings).map(drop).map_err(|e| e.to_string())
+    }
 }
 
 /// Модели по настройкам: встроенные из `~/.bars/models` и внешние по HTTP (Т-17). Ключи внешних
@@ -165,6 +178,20 @@ impl ConfiguredProvider {
 }
 
 impl ModelProvider for ConfiguredProvider {
+    fn download(&self, settings: &Settings, reranker: bool) -> Result<(), String> {
+        if !reranker && settings.embed.source == ModelSource::Builtin
+            && builtin_model(&settings.embed.model).is_some_and(|m| m.backend == bars_core::models::Backend::Gguf)
+        {
+            return bars_core::models::download_gguf_artifact(&self.models_dir, &settings.embed.model);
+        }
+        if !reranker && settings.embed.source == ModelSource::Builtin
+            && builtin_model(&settings.embed.model).is_some_and(|m| m.backend == bars_core::models::Backend::Onnx)
+        {
+            return bars_core::models::download_onnx_artifacts(&self.models_dir, &settings.embed.model);
+        }
+        download_with_loader(self, settings, reranker)
+    }
+
     fn fingerprint(&self, settings: &Settings) -> Result<ModelFingerprint, EmbedError> {
         let embed = &settings.embed;
         match embed.source {
@@ -462,7 +489,7 @@ impl Embedder for SharedEmbedder {
     }
 
     fn prepare(&mut self) -> Result<(), EmbedError> {
-        self.slot.with(|model| model.prepare())?;
+        self.slot.with(|_| Ok(()))?;
         self.refresh();
         Ok(())
     }
@@ -615,6 +642,7 @@ struct CurrentRerank {
 
 /// Менеджер моделей воркера.
 pub struct Models {
+    pub(super) operations: Arc<Mutex<super::operations::Journal>>,
     provider: Arc<dyn ModelProvider>,
     current: Mutex<Option<Current>>,
     current_rerank: Mutex<Option<CurrentRerank>>,
@@ -627,6 +655,19 @@ fn load_key(source: ModelSource, model: &str) -> Option<String> {
 }
 
 impl Models {
+    pub(super) fn retry_preparation(&self, settings: &Settings, reranker: bool) -> Result<(), String> {
+        let id = if reranker { &settings.rerank.model } else { &settings.embed.model };
+        drop(self.loads.take_failure(id));
+        let state = if reranker { self.rerank_readiness(settings) } else { self.embed_readiness(settings).map_err(|_| "Не удалось подготовить модель".to_string())? };
+        match state {
+            Readiness::Loading { .. } => Ok(()),
+            Readiness::Ready => Err("Модель уже готова; повтор не требуется".into()),
+            Readiness::Failed(_) => Err("Не удалось начать подготовку; проверьте настройки модели".into()),
+        }
+    }
+    pub(super) fn operation_percent(&self, settings: &Settings, reranker: bool) -> Option<u8> {
+        self.provider.download_percent(if reranker { &settings.rerank.model } else { &settings.embed.model }, settings)
+    }
     /// Убирает владение текущими слотами; выполняющиеся запросы сохраняют свои Arc.
     pub(super) fn clear(&self) {
         let embed = lock(&self.current).take();
@@ -718,6 +759,7 @@ impl Models {
     }
     pub fn new(provider: Arc<dyn ModelProvider>) -> Self {
         Self {
+            operations: Arc::default(),
             provider,
             current: Mutex::new(None),
             current_rerank: Mutex::new(None),
@@ -728,6 +770,14 @@ impl Models {
     /// Отпечаток модели из настроек; модель не загружается.
     pub fn fingerprint(&self, settings: &Settings) -> Result<ModelFingerprint, EmbedError> {
         self.provider.fingerprint(settings)
+    }
+
+    /// Графовый контекст не запускает загрузку/скачивание и не вызывает внешний provider.
+    pub fn resident_local_embedder(&self,settings:&Settings)->Option<SharedEmbedder>{
+        if settings.embed.source!=ModelSource::Builtin{return None;}
+        let current=lock(&self.current);
+        let current=current.as_ref().filter(|m|same_embed(&m.embed,&settings.embed)&&m.slot.is_loaded())?;
+        Some(SharedEmbedder::new(Arc::clone(&current.slot)))
     }
 
     /// Embed-модель по настройкам. Модель из прежних настроек выгружается, как только её
@@ -745,11 +795,22 @@ impl Models {
         let loads = Arc::clone(&self.loads);
         let key = load_key(settings.embed.source, &settings.embed.model);
         let owned = settings.clone();
+        let operations = Arc::clone(&self.operations);
         let slot = Arc::new(ModelSlot {
             fingerprint: fingerprint.clone(),
             batch_size: self.provider.batch_size(settings).max(1),
             batch_chars: self.provider.batch_chars(settings),
-            loader: Box::new(move || loads.run_keyed(key.as_deref(), || provider.load(&owned))),
+            loader: Box::new(move || {
+                let id = begin_model(&operations, &owned, false, "prepare");
+                let _attempt = ModelAttempt(Arc::clone(&operations), id);
+                let result = loads.run_keyed(key.as_deref(), || {
+                    lock(&operations).edit(id, |op| op.state = "running".into());
+                    provider.load(&owned).and_then(|mut model| { model.prepare()?; Ok(model) })
+                });
+                match &result { Ok(_) => drop(loads.take_failure(&owned.embed.model)), Err(error) => loads.fail(&owned.embed.model, error.to_string()) }
+                finish_model(&operations, id, result.is_ok());
+                result
+            }),
             model: Mutex::new(Resident::default()),
             waiting_queries: AtomicUsize::new(0),
             runtime: Mutex::new(SlotRuntime::default()),
@@ -764,27 +825,21 @@ impl Models {
         Ok(SharedEmbedder::new(slot))
     }
 
-    /// Скачивает встроенную модель, загрузив её и сразу выпустив из рук: файлы остаются в кэше
-    /// (кнопка «Скачать» в настройках). Идёт под тем же замком, что загрузка для поиска и индексации.
+    /// Скачивает файлы встроенной модели (кнопка «Скачать»), под общим load-gate.
     /// Блокирующий вызов; ошибка достаётся и следующему поиску по этой модели.
     pub fn download(&self, settings: &Settings, reranker: bool) -> Result<(), String> {
+        self.download_operation(settings, reranker, None)
+    }
+
+    pub(super) fn download_operation(&self, settings: &Settings, reranker: bool, operation: Option<u64>) -> Result<(), String> {
         let id = if reranker {
             &settings.rerank.model
         } else {
             &settings.embed.model
         };
         let result = self.loads.run(id, || {
-            if reranker {
-                self.provider
-                    .load_reranker(settings)
-                    .map(drop)
-                    .map_err(|error| error.to_string())
-            } else {
-                self.provider
-                    .load(settings)
-                    .map(drop)
-                    .map_err(|error| error.to_string())
-            }
+            if let Some(operation) = operation { lock(&self.operations).edit(operation, |op| op.state = "running".into()); }
+            self.provider.download(settings, reranker)
         });
         match &result {
             Ok(()) => drop(self.loads.take_failure(id)),
@@ -810,12 +865,8 @@ impl Models {
             return Ok(Readiness::Failed(message));
         }
         if !self.loads.is_active(&id) {
-            let loads = Arc::clone(&self.loads);
-            let failed_id = id.clone();
             std::thread::spawn(move || {
-                if let Err(error) = embedder.prepare() {
-                    loads.fail(&failed_id, error.to_string());
-                }
+                let _ = embedder.prepare();
             });
         }
         Ok(Readiness::Loading {
@@ -834,12 +885,8 @@ impl Models {
             return Readiness::Failed(message);
         }
         if !self.loads.is_active(&id) {
-            let loads = Arc::clone(&self.loads);
-            let failed_id = id.clone();
             std::thread::spawn(move || {
-                if let Err(error) = reranker.prepare() {
-                    loads.fail(&failed_id, error.to_string());
-                }
+                let _ = reranker.prepare();
             });
         }
         Readiness::Loading {
@@ -862,9 +909,18 @@ impl Models {
         let loads = Arc::clone(&self.loads);
         let key = load_key(settings.rerank.source, &settings.rerank.model);
         let owned = settings.clone();
+        let operations = Arc::clone(&self.operations);
         let slot = Arc::new(RerankSlot {
             loader: Box::new(move || {
-                loads.run_keyed(key.as_deref(), || provider.load_reranker(&owned))
+                let id = begin_model(&operations, &owned, true, "prepare");
+                let _attempt = ModelAttempt(Arc::clone(&operations), id);
+                let result = loads.run_keyed(key.as_deref(), || {
+                    lock(&operations).edit(id, |op| op.state = "running".into());
+                    provider.load_reranker(&owned)
+                });
+                match &result { Ok(_) => drop(loads.take_failure(&owned.rerank.model)), Err(error) => loads.fail(&owned.rerank.model, error.to_string()) }
+                finish_model(&operations, id, result.is_ok());
+                result
             }),
             runtime: Mutex::new(SlotRuntime::default()),
             model: Mutex::new(Resident::default()),
@@ -877,6 +933,23 @@ impl Models {
         drop(retired);
         SharedReranker { slot }
     }
+}
+
+pub(super) fn begin_model(journal: &Mutex<super::operations::Journal>, settings: &Settings, reranker: bool, kind: &str) -> u64 {
+    let (model, source, accelerator) = if reranker { (&settings.rerank.model, settings.rerank.source, settings.rerank.accelerator) } else { (&settings.embed.model, settings.embed.source, settings.embed.accelerator) };
+    let mut journal = lock(journal);
+    let id = journal.begin(kind, "explicit", None, 0, Some(model.clone()), Some(format!("{} · {:?}", source.as_str(), accelerator)), reranker, super::operations::model_key(settings, reranker));
+    journal.model_settings.insert(id, settings.clone());
+    id
+}
+
+pub(super) fn finish_model(journal: &Mutex<super::operations::Journal>, id: u64, success: bool) {
+    lock(journal).finish(id, if success { "success" } else { "error" }, None, (!success).then(|| "Не удалось подготовить модель. Проверьте подключение и настройки моделей.".into()));
+}
+
+pub(super) struct ModelAttempt(pub Arc<Mutex<super::operations::Journal>>, pub u64);
+impl Drop for ModelAttempt {
+    fn drop(&mut self) { finish_model(&self.0, self.1, false); }
 }
 
 #[cfg(any(test, feature = "test-support"))]
@@ -1021,6 +1094,24 @@ mod tests {
     use super::fake::FakeProvider;
     use super::*;
     use std::sync::atomic::Ordering;
+
+    #[test]
+    fn download_uses_artifact_api_without_creating_an_inference_session() {
+        struct FilesOnly;
+        impl ModelProvider for FilesOnly {
+            fn fingerprint(&self, _: &Settings) -> Result<ModelFingerprint, EmbedError> {
+                Ok(bars_core::models::bge_m3_fingerprint())
+            }
+            fn load(&self, _: &Settings) -> Result<Box<dyn Embedder + Send>, EmbedError> {
+                panic!("artifact download must not create a model")
+            }
+            fn download(&self, _: &Settings, _: bool) -> Result<(), String> { Ok(()) }
+        }
+        let models = Models::new(Arc::new(FilesOnly));
+        models.download(&settings(), false).unwrap();
+        assert!(!models.embedder(&settings()).unwrap().slot().is_loaded());
+        assert!(models.loading_ids().is_empty());
+    }
 
     fn settings() -> Settings {
         Settings::resolve(&Default::default(), &Default::default())

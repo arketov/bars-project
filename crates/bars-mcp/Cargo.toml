@@ -16,6 +16,7 @@ path = "src/main.rs"
 # НФТ-3: прокси не тянет bars-core и bars-worker — ни индекс, ни модели ему не нужны.
 # Тест `proxy_has_no_heavy_dependencies` следит, чтобы они не попали в [dependencies].
 [dependencies]
+bars-graph = { workspace = true, features = ["schema"] }
 anyhow.workspace = true
 bars-protocol.workspace = true
 rmcp.workspace = true

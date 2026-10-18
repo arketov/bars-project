@@ -1,0 +1,10 @@
+{
+  "attempts": 200,
+  "begin_finish_p50_us": 28938,
+  "begin_finish_p95_us": 37596,
+  "payload_bytes": 87492,
+  "sqlite_bytes": 151552,
+  "lost": 0,
+  "observed_on": "2026-10-18",
+  "configuration": "Windows NTFS; Rust 1.99.0; release; temporary home; two SQLite commits per attempt; synthetic short search metadata; no model or IPC time"
+}

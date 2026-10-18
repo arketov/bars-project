@@ -28,10 +28,16 @@ pub enum ErrorKind {
     InvalidParams,
     ProviderError,
     ModelLoading,
+    GraphNotReady,
+    GraphCapabilityUnavailable,
+    StaleRef,
+    SnapshotExpired,
+    CursorMismatch,
+    Cancelled,
 }
 
 impl ErrorKind {
-    pub const ALL: [ErrorKind; 9] = [
+    pub const ALL: [ErrorKind; 15] = [
         ErrorKind::ProtocolMismatch,
         ErrorKind::ProjectNotFound,
         ErrorKind::ProjectUnavailable,
@@ -41,6 +47,12 @@ impl ErrorKind {
         ErrorKind::InvalidParams,
         ErrorKind::ProviderError,
         ErrorKind::ModelLoading,
+        ErrorKind::GraphNotReady,
+        ErrorKind::GraphCapabilityUnavailable,
+        ErrorKind::StaleRef,
+        ErrorKind::SnapshotExpired,
+        ErrorKind::CursorMismatch,
+        ErrorKind::Cancelled,
     ];
 
     pub fn code(self) -> i32 {
@@ -54,6 +66,12 @@ impl ErrorKind {
             ErrorKind::InvalidParams => -32007,
             ErrorKind::ProviderError => -32008,
             ErrorKind::ModelLoading => -32009,
+            ErrorKind::GraphNotReady => -32010,
+            ErrorKind::GraphCapabilityUnavailable => -32011,
+            ErrorKind::StaleRef => -32012,
+            ErrorKind::SnapshotExpired => -32013,
+            ErrorKind::CursorMismatch => -32014,
+            ErrorKind::Cancelled => -32015,
         }
     }
 
@@ -69,6 +87,12 @@ impl ErrorKind {
             ErrorKind::InvalidParams => "invalid_params",
             ErrorKind::ProviderError => "provider_error",
             ErrorKind::ModelLoading => "model_loading",
+            ErrorKind::GraphNotReady => "graph_not_ready",
+            ErrorKind::GraphCapabilityUnavailable => "graph_capability_unavailable",
+            ErrorKind::StaleRef => "stale_ref",
+            ErrorKind::SnapshotExpired => "snapshot_expired",
+            ErrorKind::CursorMismatch => "cursor_mismatch",
+            ErrorKind::Cancelled => "cancelled",
         }
     }
 
@@ -153,6 +177,12 @@ mod tests {
             (-32007, "invalid_params"),
             (-32008, "provider_error"),
             (-32009, "model_loading"),
+            (-32010, "graph_not_ready"),
+            (-32011, "graph_capability_unavailable"),
+            (-32012, "stale_ref"),
+            (-32013, "snapshot_expired"),
+            (-32014, "cursor_mismatch"),
+            (-32015, "cancelled"),
         ];
         for (kind, (code, name)) in ErrorKind::ALL.into_iter().zip(expected) {
             assert_eq!((kind.code(), kind.name()), (code, name));

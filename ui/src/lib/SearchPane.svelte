@@ -5,6 +5,7 @@
   import Icon from "./Icon.svelte";
   import ResultCard from "./ResultCard.svelte";
   import SearchError from "./SearchError.svelte";
+  import GraphSearchBundle from './GraphSearchBundle.svelte';
   import { touchedModules } from "./tree";
 
   const project = $derived(app.project);
@@ -65,6 +66,11 @@
             Искать во <b>всём проекте</b>
           {/if}
         </div>
+        <div class="search-options">
+        <label class="retrieval-mode">
+          <span>Поиск</span>
+          <span class="mode-control"><select aria-label="Режим поиска" disabled={blocked || app.searching} bind:value={app.retrievalMode}><option value="hybrid">Обычный</option><option value="mix">Со связями</option><option value="graph">Отношения и пути</option></select><Icon name="chevron-down" size={12} /></span>
+        </label>
         <div class="count" title="Сколько результатов вернуть. По умолчанию — из настроек">
           Результатов
           <span class="stepper">
@@ -74,6 +80,7 @@
             <button class="link reset" onclick={() => (app.count = null)}>по умолчанию</button>
           {/if}
         </div>
+        </div>
         {#if !app.viewer}
           <span class="sep"></span>
           <span class="kbdhint"><kbd>Enter</kbd></span>
@@ -82,6 +89,7 @@
           Найти <Icon name="arrow-right" size={15} width={2.4} />
         </button>
       </div>
+      {#if app.retrievalMode === 'mix'}<label class="related-option"><input type="checkbox" bind:checked={app.includeRelated} />Добавлять связанные источники</label>{/if}
     </div>
   </div>
 
@@ -110,6 +118,12 @@
         {#if app.searchError}
           <SearchError error={app.searchError} />
         {:else if results}
+          {#if app.graphSearch}
+            <div class="graph-search-info" role="status">Запрошен {app.graphSearch.requested_mode}; применён {app.graphSearch.applied_mode}.{#if app.graphSearch.fallback_reason}<p>Причина: {app.graphSearch.fallback_reason}</p>{/if}</div>
+            {#each [app.graphSearch.related,app.graphSearch.graph_results].filter(Boolean) as graph}
+              {#if graph}<GraphSearchBundle {graph} related={graph === app.graphSearch.related} />{/if}
+            {/each}
+          {/if}
           {#if results.rerank_error}
             <Banner
               kind="warn"
@@ -136,6 +150,12 @@
             {#each results.results as hit, index (hit.path + ":" + hit.first_line)}
               <ResultCard {hit} rank={index + 1} startOpen={index === 0} />
             {/each}
+          {:else if app.graphSearch?.applied_mode === 'graph'}
+            {#if app.graphSearch.graph_results?.resolution === 'ambiguous'}
+              <p>Имя неоднозначно. Выберите объект и источник в графе.</p>
+            {:else if !app.graphSearch.graph_results?.items.length}
+              <p>Связи в выбранной области и пределах не найдены. Смысловой слой частичный; отсутствие связи не доказано.</p>
+            {/if}
           {:else if results.indexing && project && app.documentsOf(project) === 0}
             <div class="empty">
               <div class="art"><Icon name="search" size={30} width={2} /></div>
@@ -191,14 +211,22 @@
 
 <style>
   main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
-  .top { padding: 22px 32px 14px; }
+  .top { padding: 12px 32px 14px; }
   .ask { max-width: 920px; margin: 0 auto; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); padding: 12px 12px 10px 16px; transition: border-color .15s, box-shadow .15s; }
   .ask:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow); }
   .ask.dis { opacity: .6; }
   textarea { width: 100%; border: 0; outline: none; background: transparent; resize: none; font-size: 16px; line-height: 1.5; min-height: 26px; display: block; }
   textarea::placeholder { color: var(--faint); }
-  .askbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 6px; }
-  .scope { flex: 1 1 180px; color: var(--muted); font-size: 12.5px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .askbar { display: flex; flex-wrap: nowrap; align-items: center; gap: 10px; margin-top: 6px; overflow-x: auto; padding: 2px 0; }
+  .askbar > :not(.scope) { flex-shrink: 0; }
+  .scope { flex: 1 0 80px; color: var(--muted); font-size: 12.5px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .search-options { display: flex; flex-wrap: nowrap; align-items: center; gap: 12px; }
+  .retrieval-mode { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12.5px; }
+  .mode-control { position: relative; display: flex; align-items: center; }
+  .mode-control :global(svg) { position: absolute; right: 8px; pointer-events: none; }
+  .mode-control select { appearance: none; background: var(--panel-2); color: var(--text); border: 1px solid var(--line-2); border-radius: 8px; padding: 3px 26px 3px 9px; max-width: 100%; cursor: pointer; }
+  .mode-control select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .related-option { display: flex; align-items: center; gap: 7px; margin-top: 10px; color: var(--muted); font-size: 12.5px; }
   .scope b { color: var(--text); font-weight: 600; }
   .kbdhint { color: var(--faint); font-size: 12px; white-space: nowrap; }
   .go { padding: 9px 18px; border-radius: 10px; }
@@ -219,4 +247,8 @@
   .start { padding: 40px 0; text-align: center; }
   .empty.none { padding-top: 44px; }
   .applied { margin-top: 14px; font-size: 12.5px; }
+  @media (max-width: 760px) {
+    .top { padding: 16px 12px 12px; }
+    .results { padding: 4px 12px 64px; }
+  }
 </style>

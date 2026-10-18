@@ -8,6 +8,8 @@ title: Команды bars-cli
 
 ## Общие правила bars-cli
 
+GraphRAG: `relations`, `paths`, `impact`, `context`, `explore`, `graph show/status/build/cancel`; чтение использует общий DTO, `--input` — GraphRequest JSON с переопределением явными флагами. Примеры: `paths --from Т-1 --to Т-3`, `context "устройство индекса" --task-profile investigation`, `explore --whole-scope`. `graph build` не переиндексирует embeddings; accepted/job ID не означает завершения, отмена подтверждается статусом. Search: `--mode hybrid|mix|graph`, в mix — `--no-related` и `--related-budget N`. Без mode прежний поиск/ответ. Точные поля/открытая приёмка — [GraphRAG v1](../graphrag/tools.md#фактический-контракт-v1).
+
 - Проект по умолчанию — ближайшая к текущей папке зарегистрированная папка; `--project <путь>` задаёт его явно.
 - Вывод по умолчанию — для человека; `--json` — тот же ответ, что у MCP-инструмента.
 - Код выхода: `0` — успех, `1` — ошибка в запросе, `2` — воркер недоступен, `3` — нужна переиндексация (Т-25). Соответствие ошибкам канала — [architecture/protocol.md](../../architecture/protocol.md).

@@ -1,0 +1,12 @@
+{
+  "utc": "2026-10-18T13:56:48.9494885Z",
+  "available_bytes": 10494390272,
+  "free_commit_bytes": 2172522496,
+  "bars_pid": 9928,
+  "bars_closed_by_this_session": false,
+  "staged_int8_attempts": 2,
+  "staged_int8_started": false,
+  "staged_int8_min_commit_gib": 4,
+  "staged_fp16_min_commit_gib": 6,
+  "reason": "Two preflight timeouts; no stable start reserve; first simultaneous FP16 run separately invalidated under pressure"
+}

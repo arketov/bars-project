@@ -246,6 +246,8 @@ pub struct StatusOutput {
     pub last_error: Option<String>,
     /// Работает ли слежение за файлами.
     pub watching: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub graph: Option<crate::GraphStatus>,
 }
 
 // --- reindex ---
@@ -804,6 +806,13 @@ macro_rules! methods {
 }
 
 methods! {
+    GraphSearch: crate::GraphSearchParams => crate::GraphSearchOutput, "graph_search", All;
+    GraphQuery: crate::GraphQueryParams => crate::GraphReply, "graph_query", All;
+    GraphStatus: crate::GraphStatusParams => crate::GraphStatus, "graph_status", All;
+    GraphBuild: crate::GraphBuildParams => crate::GraphAcceptedOutput, "graph_build", Cli;
+    GraphCancel: crate::GraphCancelParams => CancelOutput, "graph_cancel", Cli;
+    OperationEvents: crate::OperationEventsParams => crate::OperationEventsOutput, "operation_events", Window;
+    OperationRetry: crate::OperationRetryParams => AcceptedOutput, "operation_retry", Window;
     Hello: HelloParams => HelloOutput, "hello", All;
     Search: SearchParams => SearchOutput, "search", All;
     Outline: OutlineParams => OutlineOutput, "outline", All;

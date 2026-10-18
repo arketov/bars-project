@@ -5,8 +5,10 @@ import { BarsError } from "./types";
 import { clone } from "./settings-logic";
 import type {
   ActivityOutput,
+  Operation,
   ProjectInfo,
   SearchHit,
+  SearchOutput,
   SettingsDoc,
   StatusOutput,
   TreeDocument,
@@ -52,6 +54,11 @@ const projects = (): ProjectInfo[] => {
   switch (scene()) {
     case "empty":
       return [];
+    case "notifications":
+      return [
+        { path: "C:\\work\\bars-project", name: "bars-project", docs_root: "docs", state: "indexing", modules },
+        { path: "C:\\work\\ai-mutiplayer-bots", name: "ai-mutiplayer-bots", docs_root: "docs", state: "ready", modules },
+      ];
     case "consent":
       return [
         { path: "C:\\work\\bars-project", name: "bars-project", docs_root: "docs", state: "reindex_required", modules },
@@ -198,6 +205,17 @@ function status(path: string): StatusOutput {
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function mockCall(method: string, params: Record<string, unknown>): Promise<unknown> {
+  if(['graph_query','graph_status','graph_build','graph_cancel'].includes(method))return (await import('./mock-graph')).graphFixture(method,params);
+  if(method==='graph_search'){
+    const mode=String(params.mode??'hybrid'),graph=(await import('./mock-graph')).graphFixture('graph_query',{request:{operation:mode==='graph'?'relations':'paths',view:'mixed'}});
+    const search=await mockCall('search',params) as SearchOutput;
+    const disabled=mode==='mix'&&params.include_related===false;
+    return {...search,results:mode==='graph'?[]:search.results,requested_mode:mode,applied_mode:disabled?'hybrid':mode,fallback_reason:disabled?'Связи отключены: include_related=false':null,related:mode==='mix'&&!disabled?graph:null,graph_results:mode==='graph'?graph:null};
+  }
+  if(method==='read'){
+    const source=(await import('./mock-graph')).fixtureSource(String(params.path??''));
+    if(source)return {title:'Источник GraphRAG (фикстура)',text:source};
+  }
   if (scene() === "worker-down") throw new BarsError("нет связи с воркером", null, -32603);
   switch (method) {
     case "projects":
@@ -210,6 +228,17 @@ export async function mockCall(method: string, params: Record<string, unknown>):
     }
     case "activity":
       return activity();
+    case "operation_events": {
+      const base: Operation = { id: 1, sequence: 0, kind: "check", source: "explicit", project: "C:\\work\\ai-mutiplayer-bots", generation: 1, model: null, variant: null, reranker: false, state: "running", started_at: new Date(Date.now() - 120000).toISOString(), finished_at: null, docs_done: 38, docs_total: 92, percent: null, report: null, error: null, target_available: true };
+      if (scene() !== "notifications") return { epoch: "browser-fixture", cursor: 0, gap: false, active: [], completed: [] };
+      const completed: Operation[] = params.epoch ? [
+        { ...base, id: 3, sequence: 1, state: "success", finished_at: new Date().toISOString(), report: { added: 2, changed: 4, removed: 0, unchanged: 86, problems: 0, index_applied: true } },
+        { ...base, id: 4, sequence: 2, kind: "rebuild", state: "partial", finished_at: new Date().toISOString(), report: { added: 0, changed: 0, removed: 0, unchanged: 0, problems: 2, index_applied: false }, error: "Не обработаны 2 документа. Проверьте ошибки и повторите." },
+      ].filter(op => op.sequence > Number(params.after ?? 0)) : [];
+      return { epoch: "browser-fixture", cursor: params.epoch ? 2 : 0, gap: false, active: [base, { ...base, id: 2, project: "C:\\work\\bars-project", state: paused ? "queue_paused" : "queued", docs_total: null }, { ...base, id: 5, kind: "prepare", project: null, model: "BAAI/bge-m3", variant: "builtin · auto", docs_total: null, percent: 100 }], completed };
+    }
+    case "operation_retry":
+      return { accepted: true };
     case "index_pause":
       paused = true;
       return { paused };
@@ -251,8 +280,8 @@ export async function mockCall(method: string, params: Record<string, unknown>):
         runtime: null,
         embed: [
           { id: "BAAI/bge-m3", dim: 1024, backend: "onnx", warnings: [], downloaded: scene() !== "notifications", downloading: scene() === "notifications", download_percent: scene() === "notifications" ? 42 : 100 },
-          { id: "Qwen/Qwen3-Embedding-0.6B", dim: 1024, backend: "candle", warnings: ["считается на процессоре через candle и заметно медленнее bge-m3"], downloaded: false, downloading: false },
-          { id: "Qwen/Qwen3-Embedding-4B", dim: 2560, backend: "candle", warnings: ["модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ"], downloaded: false, downloading: false },
+          { id: "Qwen/Qwen3-Embedding-0.6B", dim: 1024, backend: "gguf", warnings: ["GGUF Q4_K_M; GPU при доступном Vulkan/Metal, иначе CPU; сторонняя конверсия enacimie"], downloaded: false, downloading: false },
+          { id: "Qwen/Qwen3-Embedding-4B", dim: 2560, backend: "gguf", warnings: ["GGUF Q4_K_M, около 2,5 ГБ на диске; память контекста добавляется к весам"], downloaded: false, downloading: false },
           { id: "nomic-ai/nomic-embed-text-v2-moe", dim: 768, backend: "candle", warnings: [], downloaded: false, downloading: false },
         ],
         rerank: [{ id: "BAAI/bge-reranker-v2-m3", dim: 0, backend: "onnx", warnings: [], downloaded: true, downloading: false }],

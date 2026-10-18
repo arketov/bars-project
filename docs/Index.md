@@ -14,9 +14,11 @@ bars — локальный поиск по Markdown-документации п
 | Как установить, добавить проект, найти документ, подключить агента | [Первый запуск](getting-started.md) |
 | Что реализовано, что ещё не проверено | [Состояние проекта](project-status.md) |
 | Как ищет, что означает оценка | [Гибридный поиск](features/search/hybrid-search.md) |
+| Как спроектировано внедрение GraphRAG, новых инструментов и графа | [ТЗ и план GraphRAG](features/graphrag/Index.md), пока без реализации |
 | Почему изменения ещё не видны | [Обновление индекса](features/indexing/updates.md) |
 | Какие команды и инструменты доступны | [CLI и MCP](features/agent-tools/Index.md) |
 | Где данные и настройки | [Файлы bars](architecture/files.md), [настройки](features/settings/settings.md) |
+| Какие MCP-вызовы сохраняются, как долго и что готово для их анализа | [История MCP: данные, хранение и API окна](features/window/mcp-statistics.md) |
 | Как писать Markdown для индексации | [Соглашение о документации](features/docs-convention/Index.md), [инструкция bars](BARS_INSTRUCTION.md) |
 
 ## Источники правды документации bars

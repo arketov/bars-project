@@ -6,6 +6,7 @@
 //! документа ([`doc_path`]). Остальное — каркас.
 
 pub mod doc_path;
+pub mod graph;
 pub mod indexing;
 pub mod instruction;
 pub mod models;

@@ -1,13 +1,12 @@
-//! Qwen3-Embedding и Nomic Embed v2 MoE через candle (`docs/features/models/local-models.md`).
+//! Nomic Embed v2 MoE через candle (`docs/features/models/local-models.md`, ADR-0002).
 //!
 //! Считаются только на процессоре: видеокарта (DirectML) есть лишь у ONNX-моделей. Веса в `f32` —
-//! так модели проверены в самом fastembed; Qwen3-Embedding-4B поэтому занимает около 16 ГБ памяти
-//! (решение агента, OQ-59).
+//! так модель проверена в fastembed.
 
 use std::path::Path;
 
 use candle_core::{DType, Device};
-use fastembed::{NomicV2MoeTextEmbedding, Qwen3TextEmbedding};
+use fastembed::NomicV2MoeTextEmbedding;
 
 use super::catalog::{Backend, BuiltinModel};
 use super::embedder::{EmbedError, Embedder, ModelFingerprint};
@@ -15,13 +14,8 @@ use super::embedder::{EmbedError, Embedder, ModelFingerprint};
 /// Меньшие пачки быстрее: меньше лишнего дополнения коротких текстов.
 const BATCH_SIZE: usize = 4;
 
-enum Inner {
-    Qwen3(Qwen3TextEmbedding),
-    NomicV2Moe(NomicV2MoeTextEmbedding),
-}
-
 pub struct CandleEmbedder {
-    inner: Inner,
+    inner: NomicV2MoeTextEmbedding,
     info: &'static BuiltinModel,
     fingerprint: ModelFingerprint,
 }
@@ -35,17 +29,13 @@ impl CandleEmbedder {
         let device = Device::Cpu;
         let load_error = |error: candle_core::Error| EmbedError::Load(error.to_string());
         let inner = match info.backend {
-            Backend::Qwen3 => Inner::Qwen3(
-                Qwen3TextEmbedding::from_hf(info.id, &device, DType::F32, info.max_length)
-                    .map_err(load_error)?,
-            ),
-            Backend::NomicV2Moe => Inner::NomicV2Moe(
+            Backend::NomicV2Moe => {
                 NomicV2MoeTextEmbedding::from_hf(info.id, &device, DType::F32, info.max_length)
-                    .map_err(load_error)?,
-            ),
-            Backend::Onnx => {
+                    .map_err(load_error)?
+            }
+            Backend::Onnx | Backend::Gguf => {
                 return Err(EmbedError::Load(format!(
-                    "{} считается через ONNX, а не candle",
+                    "{} не считается через candle",
                     info.id
                 )));
             }
@@ -58,10 +48,7 @@ impl CandleEmbedder {
     }
 
     fn run(&self, texts: &[String]) -> Result<Vec<Vec<f32>>, EmbedError> {
-        let result = match &self.inner {
-            Inner::Qwen3(model) => model.embed(texts),
-            Inner::NomicV2Moe(model) => model.embed(texts),
-        };
+        let result = self.inner.embed(texts);
         result.map_err(|error| EmbedError::Embed(error.to_string()))
     }
 

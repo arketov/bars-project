@@ -7,6 +7,10 @@
     "shortDescription": "Локальный RAG по Markdown-документации проектов",
     "icon": ["icons/icon.png", "icons/icon.ico"],
     "externalBin": ["binaries/bars-mcp", "binaries/bars-cli"],
+    "resources": {
+      "binaries/vulkan-1.dll": "vulkan-1.dll",
+      "binaries/VulkanRT-License.txt": "VulkanRT-License.txt"
+    },
     "windows": {
       "allowDowngrades": false,
       "nsis": {

@@ -1,0 +1,37 @@
+{
+  "coreTests": 219,
+  "workerTests": 177,
+  "devicePickerTests": 10,
+  "svelteCheck": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "releaseBuild": "core and worker examples passed",
+  "manualReview": "completed; no remaining accepted findings in owned changes",
+  "clippy": {
+    "status": "not completed",
+    "reason": "cancelled own waiting process tree before compilation; shared target occupied by parallel build"
+  },
+  "files": [
+    {
+      "source": "spikes/memory/runs/final-core-worker-tests.log",
+      "target": "core-worker-tests.log.gz",
+      "sha256": "37b0356283946af62fc49abc6c0afc7c93be67417e5960a2ebccce789c825d5c"
+    },
+    {
+      "source": "spikes/memory/runs/pair-memory-build-v2.log",
+      "target": "pair-build.log.gz",
+      "sha256": "bcb69cba50788863b65e524cded6ad8e39b531f699d5b995cf8aa354520422c6"
+    },
+    {
+      "source": "spikes/memory/runs/fp16-ui-tests.log",
+      "target": "device-picker-tests.log.gz",
+      "sha256": "c54ce7581d1d0f8aa0adc91d02fdf6aa62721ea49d186ebe4fc3dc648d8b4667"
+    },
+    {
+      "source": "spikes/memory/runs/fp16-ui-check.log",
+      "target": "ui-check.log.gz",
+      "sha256": "2b48cbf1c5d42d81d7be472c6e73d6de2cee17a4998b9c21d37c26a6fe45a9f4"
+    }
+  ]
+}

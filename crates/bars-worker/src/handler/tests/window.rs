@@ -18,6 +18,29 @@ use crate::handler::WorkerHandler;
 use crate::worker::Worker;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn operation_events_window_dispatch_keeps_short_terminal_outcome_and_retry() {
+    use bars_protocol::{OperationEventsOutput, OperationEventsParams, OperationRetryParams, AcceptedOutput};
+    let env = Window::new();
+    let call = Call::OperationEvents(OperationEventsParams::default());
+    assert!(call.window_only()); assert!(!call.allowed_for(ClientKind::Mcp)); assert!(!call.allowed_for(ClientKind::Cli));
+    let initial: OperationEventsOutput = env.call(call).await;
+    let project = env.project("короткая операция", "docs");
+    env.worker.pause(); env.worker.register(&project).unwrap();
+    let params = OperationEventsParams { epoch: Some(initial.epoch.clone()), after: Some(initial.cursor) };
+    let queued: OperationEventsOutput = env.call(Call::OperationEvents(params.clone())).await;
+    assert_eq!(queued.active.len(), 1);
+    env.worker.cancel(&project).unwrap();
+    let cancelled: OperationEventsOutput = env.call(Call::OperationEvents(params.clone())).await;
+    assert_eq!(cancelled.completed[0].state, "cancelled");
+    let retried: AcceptedOutput = env.call(Call::OperationRetry(OperationRetryParams { epoch: initial.epoch, id: cancelled.completed[0].id })).await;
+    assert!(retried.accepted);
+    env.worker.resume(); env.idle().await;
+    let result: OperationEventsOutput = env.call(Call::OperationEvents(params)).await;
+    assert!(result.completed.iter().any(|op| op.project.is_some() && op.state == "success" && op.report.as_ref().unwrap().index_applied));
+    env.worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn project_deletion_requires_confirmation_and_is_window_only() {
     use bars_protocol::ProjectDeleteParams;
     let env = Window::new();
@@ -218,7 +241,7 @@ async fn models_info_reports_downloaded_files_and_download_starts() {
     }
 
     let info: ModelsInfoOutput = window.call(Call::ModelsInfo(ModelsInfoParams {})).await;
-    assert_eq!(info.embed.len(), 4);
+    assert_eq!(info.embed.len(), bars_core::models::builtin_models().len());
     let bge = &info.embed[0];
     assert_eq!(bge.id, "BAAI/bge-m3");
     assert!(bge.downloaded && !bge.downloading);
@@ -230,7 +253,7 @@ async fn models_info_reports_downloaded_files_and_download_starts() {
         .iter()
         .find(|m| m.id.contains("Qwen3-Embedding-0.6B"))
         .unwrap();
-    assert!(!qwen.downloaded && qwen.backend == "candle" && !qwen.warnings.is_empty());
+    assert!(!qwen.downloaded && qwen.backend == "gguf" && !qwen.warnings.is_empty());
     assert_eq!(qwen.download_percent, Some(0));
     assert_eq!(info.rerank[0].id, "BAAI/bge-reranker-v2-m3");
 

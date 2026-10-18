@@ -2,26 +2,33 @@
 title: Передача сессии — этап 13, снижение памяти
 ---
 
-# Этап 13 — снижение памяти
+# Передача сессии — этап 13, снижение памяти
 
 ## Сделано
 
-- Исходные семь FP32 процессов: `knowledge/memory-results.md`. Масштаб 8,46 ГиБ объяснён двумя сессиями; точный allocator-состав старого процесса неизвестен.
-- FP16 loader общей сессии этапа 11; здесь verified marker кэша, runtime precision/revision, безопасный lifecycle 300/900 с, shutdown ждёт cleanup. Core 197, protocol 51, worker 146 тестов, client isolation, clippy, UI DevicePicker/check прошли до последующих параллельных изменений.
-- `knowledge/memory-fp16-results.md`: четыре полных процесса. Resumed download с проверкой BLAKE3, corrupt-config CPU fallback с точным совпадением CPU baseline, два настоящих worker TTL процесса. Пара удерживает 5,54–5,56 ГиБ вместо 6,87; peak 5,73–5,84. После обеих моделей 225–230 МиБ; reload+inference 3,26–3,34 с. Все 15 оценок после reload совпали.
-- Стенды, provenance v6/v3, сырые ряды/хеши/summary в `knowledge/memory-fp16-2026-10-18/`. Прерванные процессы отклонены. Main, чужие изменения сохранены; собственных commit/push нет.
+- Предыдущая приёмка FP16 rerank/TTL: knowledge/memory-fp16-results.md; worker-пара 6,87 → 5,54–5,56 ГиБ, после drop обеих 225–230 МиБ.
+- Уменьшены менее крупные статьи: top-C/оценки текстовых кандидатов вместо O(N), BLOB без двух Vec; скачивание bge-m3 без создания сессии. Предыдущие проверки 200 core / 170 worker / clippy сохранены отдельно.
+- Реализован Windows-профиль BAAI/bge-m3:fp16: pinned Xenova revision/BLAKE3, artifact-only download, атомарная отметка кэша, fingerprint precision+revision. DirectML обязателен; CPU fallback запрещён для отдельного FP16-профиля. Прежняя FP32 bge-m3/default/CPU fallback сохранены. UI выбирает DirectML и предупреждает о переиндексации Т-25.
+- Прототип FP16 и новый ядровой query loader: по 100 вопросов, новых потерь всех выбранных метрик при 0/0,1 нет относительно product3-overdrive. Все 102400 query-компонентов совпали. Документные векторы пока экспериментальные; адаптация fingerprint в собственной копии НЕ считается свежей индексацией. INT8 embed отклонён по od-001: MRR@10 0,125→0, независимо от отказа INT8 rerank.
+- Настоящая проверка cached FP16-артефактов без ONNX: peak 3,52 МиБ; изменённый config отклонён BLAKE3/ready=false. Это не холодное сетевое скачивание. Raw gzip, SHA256, бинарники/исходники и ограничения: knowledge/memory-embed-2026-10-18/Index.md.
+- Совместная release-сборка core/worker стендов прошла; финально 219 core + 177 worker lib, 10 DevicePicker, Svelte check 0/0. Ручная проверка выполнена. Новый clippy не завершён: общий build-lock занят, свой ожидающий процесс остановлен до запуска компилятора. Нельзя выдавать прежний clippy за проверку нового FP16-кода.
 
 ## Не сделано
 
-- Третий полный парный повтор, отдельный baseline окна, FP16 embed с индексом/fingerprint/fallback, allocator и Mac/ноутбук. Этап 13 открыт. Установленный exe этой сессией не обновлялся.
+- Свежая полная индексация ядровым FP16-профилем; retrieval bars/holdout на новых индексах; настоящий парный FP16 embed/rerank peak/TTL, чистая скорость. Два index preflight 120/180 с и worker preflight 90 с не дали старт. Исходные core indexing процессы обходят padded-оболочку worker; их память не подменяет worker-пик.
+- Отдельный baseline окна, allocator tuning, Mac/ноутбук. Этап 13 открыт. Приложение не устанавливалось/не обновлялось. Собственных commit/push нет; чужие main/dirty изменения сохранены.
 
 ## Сложности
 
-- Commit колеблется из-за чужой нагрузки. Успешные два worker процесса без пересечений с компиляцией. Третий не стартовал; один предыдущий процесс остановился перед reload. Не снижать дальше пороги ради завершения серии.
-- Параллельные сессии меняют общие файлы, включая логирование. Повторная сборка стендов успешна; итоговый обзор текущего общего дерева и повтор релевантных тестов ещё нужны.
+- Общий target C:/bg22 многократно пересобирался при параллельных GGUF/graph изменениях. Vulkan SDK уже установлен в %LOCALAPPDATA%/bars-spikes/VulkanSDK/1.4.363.0; helper среды spikes/memory/runs/build-env.ps1, CMAKE_BUILD_PARALLEL_LEVEL=1. Промежуточный build попал между добавлением graph-модуля и зависимости; повтор прошёл, чужой код не откатывался.
+- Свободный commit колебался примерно 3,4–8 ГиБ; модельные резервы не снижались. После жалобы автора прекращены дополнительные циклы проверок. Финальные lib-тесты прошли; зависший в очереди clippy остановлен только в собственном дереве.
 
 ## Дальше
 
-- **bars уже снова запущен с 18:10:40, PID 47872, тот же установленный exe, отвечает.** Автор разрешал временно закрыть и вернуть. Исходный PID 20184 штатно завершён через --quit. Новых модельных процессов поверх bars не запускать. Все owned-сессии замеров завершены; процессов bench нет.
-- Сначала запас памяти. Когда будет отдельное окно — третий worker bounded (RAM ≥4, старт commit ≥8; лучше ≥9; перед длинным embed ≥6, rerank/reload ≥5; emergency 512 МиБ/1 ГиБ). Повторно закрывать приложение без нужды не требуется.
-- Далее P1: отдельный FP16 embed индекс; готовый эксперимент `spikes/inference/runs/index-validation/embed-fp16-dml-b8/full-data`, полный retrieval ещё не проверен. Fingerprint/CPU fallback решить по данным, не смешивать векторы и не менять рабочий индекс без Т-25. Весовой cache `spikes/inference/data/product-models`; свои cache/profile внутри `spikes/memory/`, игнорируются Git.
+- Последнее указание автора: работающий bars НЕ закрывать. PID 9928 не трогали; профиль/настройки/рабочие индексы не меняли. Собственных модельных/компиляционных процессов больше нет.
+- Сначала запас памяти. Native startup: FP16 quality commit6/RAM4; core index runner commit9/RAM8; worker pair commit8/RAM4, дальше фазовые reserve6/5. Emergency RAM512MiB/commit1GiB. Не повторять пустые ожидания без изменения ресурса.
+- Замороженные бинарники spikes/memory/bin/core-v1/{bench_inference,bench_memory,bench_worker_memory}.exe с vulkan-1.dll. Кэш spikes/memory/embed-profiles/core-v1/models, config core-fp16.json рядом. Runner нормализует ModelsPath, MemoryOnly разрешает фоновые сборки с сохранением резервов и явной непригодностью времени; его новый режим ещё не запускался.
+- Новый index: spikes/inference/run-series.ps1, Mode index, Data spikes/inference/data/overdrive, config core-fp16.json, новый OutputRoot. Затем quality на full-data; reference ТОЛЬКО spikes/inference/runs/product3-overdrive/production/rows.jsonl (старый full-overdrive — прежний FP32 rerank).
+- Worker-пара: scripts/run-memory-spike.ps1, bench_worker_memory.exe, Devices auto, Modes bounded, Fp16Embed; собственная папка evidence с копией knowledge/memory-2026-10-18/fixture.json. build-pair-v2.json проверяет SHA256. До измеренного результата память пары не обещать.
+
+Документация синхронизирована после итогового запроса автора: memory-usage/results, memory-plan/reduction, local-models, settings, оглавления, OQ-79 и текущие оставшиеся шаги. Новых модельных запусков/сборок в документационной правке нет.

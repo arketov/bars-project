@@ -1,4 +1,4 @@
-<#
+﻿<#
   Собирает установщик Windows (NSIS) для bars: bars.exe, bars-mcp.exe и bars-cli.exe в одном
   установщике. Описание: docs/features/distribution/installer.md.
 
@@ -24,6 +24,25 @@ foreach ($tool in 'rustc', 'cargo', 'node', 'npm') {
     if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) {
         throw "Не найден $tool. Для сборки нужны Rust (rustup) и Node.js с npm. Установите недостающий инструмент и повторите запуск."
     }
+}
+
+# Вложенный shader generator llama.cpp на MSVC требует последовательной сборки
+# и коротких путей; пользователь может явно задать свой короткий target.
+if (-not $env:VULKAN_SDK -or -not (Test-Path -LiteralPath (Join-Path $env:VULKAN_SDK 'Bin/glslc.exe'))) {
+    throw 'Для встроенного Qwen GGUF нужен Vulkan SDK. Установите SDK LunarG и задайте VULKAN_SDK перед сборкой.'
+}
+$env:CMAKE_BUILD_PARALLEL_LEVEL = '1'
+$env:CMAKE_GENERATOR = 'Ninja'
+# Последний MSVC нужен готовым библиотекам ORT; старый 17.9 даёт __std_* link errors.
+$vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
+$vsPath = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+if (-not $vsPath) { throw 'Не найден MSVC 17.14 или новее' }
+$devShell = Join-Path $vsPath 'Common7/Tools/Launch-VsDevShell.ps1'
+& $devShell -Arch amd64 -HostArch amd64 -SkipAutomaticLocation
+$ninja = Join-Path $vsPath 'Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja'
+$env:PATH = "$ninja$([IO.Path]::PathSeparator)$env:PATH"
+if (-not $env:CARGO_TARGET_DIR) {
+    $env:CARGO_TARGET_DIR = "$env:SystemDrive\bars-build"
 }
 
 Push-Location $root
@@ -53,6 +72,7 @@ try {
 $target = if ($env:CARGO_TARGET_DIR) { $env:CARGO_TARGET_DIR } else { Join-Path $root 'target' }
 $bin = Join-Path $app 'binaries'
 New-Item -ItemType Directory -Force $bin | Out-Null
+& (Join-Path $PSScriptRoot 'prepare-vulkan-runtime.ps1') -Destination $bin
 foreach ($name in 'bars-mcp', 'bars-cli') {
     # Tauri ждёт sidecar под именем <имя>-<triple>.exe и кладёт его в установщик без суффикса.
     Copy-Item (Join-Path $target "release\$name.exe") (Join-Path $bin "$name-$triple.exe") -Force

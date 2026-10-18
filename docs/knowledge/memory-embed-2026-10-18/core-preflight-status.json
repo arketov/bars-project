@@ -1,0 +1,43 @@
+{
+  "currentRamGiB": 5.33203125,
+  "at": "2026-10-18T15:08:18.2711628Z",
+  "requiredCommitGiB": 9,
+  "requiredRamGiB": 8,
+  "bars": [
+    {
+      "Id": 9928
+    }
+  ],
+  "index": [
+    {
+      "waitSeconds": 120,
+      "output": "spikes/memory/runs/core-index-overdrive-v1",
+      "result": "preflight-timeout-no-model-started"
+    },
+    {
+      "waitSeconds": 180,
+      "output": "spikes/memory/runs/core-index-overdrive-v2",
+      "result": "preflight-timeout-no-model-started"
+    }
+  ],
+  "currentCommitGiB": 4.903205871582031,
+  "workerPair": {
+    "result": "preflight-timeout-no-model-started",
+    "waitSeconds": 90,
+    "minimumCommitGiB": 8,
+    "minimumRamGiB": 4,
+    "foreignBuildsAlsoBlockedQuietStart": true,
+    "files": [
+      {
+        "source": "spikes/memory/runs/core-pair-worker-v1/run-20261018T151253782Z.json",
+        "target": "core-pair-preflight-run.json.gz",
+        "sha256": "6f38dd35f9a732f87a63545c6e49fb0baa7a66adab56dde2cc225a6c7081243b"
+      },
+      {
+        "source": "spikes/memory/runs/core-pair-worker-v1/preflight-20261018T151253782Z.jsonl",
+        "target": "core-pair-preflight.jsonl.gz",
+        "sha256": "6b57068d0fc5dcf00e3508891069a6ed462831fb592581837f216ab7d265dee3"
+      }
+    ]
+  }
+}

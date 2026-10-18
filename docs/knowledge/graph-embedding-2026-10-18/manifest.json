@@ -1,0 +1,732 @@
+{
+  "format": 1,
+  "created_at": "2026-10-18T14:22:19.379Z",
+  "meta": {
+    "docs_root": "docs",
+    "model_dim": "1024",
+    "model_doc_prefix": "",
+    "model_id": "BAAI/bge-m3",
+    "model_source": "builtin",
+    "schema_version": "1"
+  },
+  "counts": {
+    "documents": 104,
+    "chunks": 569,
+    "dimension": 1024
+  },
+  "excluded_documents": [
+    "docs/chats/2026-10-15-docs-convention/handoff.md",
+    "docs/chats/2026-10-15-docs-convention/log.md",
+    "docs/chats/2026-10-16-bars-instruction/handoff.md",
+    "docs/chats/2026-10-16-bars-instruction/log.md",
+    "docs/chats/2026-10-16-idea06-measurements/handoff.md",
+    "docs/chats/2026-10-16-iss01-model-loading/handoff.md",
+    "docs/chats/2026-10-16-iss01-model-loading/log.md",
+    "docs/chats/2026-10-16-iss03-rerank-diag/handoff.md",
+    "docs/chats/2026-10-16-iss06-watcher/handoff.md",
+    "docs/chats/2026-10-16-iss09-search-vs-index/handoff.md",
+    "docs/chats/2026-10-16-plan-review/handoff.md",
+    "docs/chats/2026-10-16-plan-review/log.md",
+    "docs/chats/2026-10-16-window-small-fixes/handoff.md",
+    "docs/chats/2026-10-18-agent-tool-usage/handoff.md",
+    "docs/chats/2026-10-18-agent-tool-usage/log.md",
+    "docs/chats/2026-10-18-client-profile-isolation/handoff.md",
+    "docs/chats/2026-10-18-client-profile-isolation/log.md",
+    "docs/chats/2026-10-18-clients-auto-update/handoff.md",
+    "docs/chats/2026-10-18-clients-auto-update/log.md",
+    "docs/chats/2026-10-18-development-ideas/handoff.md",
+    "docs/chats/2026-10-18-development-ideas/log.md",
+    "docs/chats/2026-10-18-device-design/handoff.md",
+    "docs/chats/2026-10-18-device-design/log.md",
+    "docs/chats/2026-10-18-docs-layout-design/handoff.md",
+    "docs/chats/2026-10-18-docs-layout-design/log.md",
+    "docs/chats/2026-10-18-document-actions/handoff.md",
+    "docs/chats/2026-10-18-document-actions/log.md",
+    "docs/chats/2026-10-18-documentation-tools/handoff.md",
+    "docs/chats/2026-10-18-documentation-tools/log.md",
+    "docs/chats/2026-10-18-gguf-models/log.md",
+    "docs/chats/2026-10-18-graphrag-integration/handoff.md",
+    "docs/chats/2026-10-18-graphrag-integration/log.md",
+    "docs/chats/2026-10-18-idea06-benchmark/handoff.md",
+    "docs/chats/2026-10-18-idea06-benchmark/log.md",
+    "docs/chats/2026-10-18-inference-design/handoff.md",
+    "docs/chats/2026-10-18-inference-design/log.md",
+    "docs/chats/2026-10-18-inference-research/handoff.md",
+    "docs/chats/2026-10-18-inference-research/log.md",
+    "docs/chats/2026-10-18-installer-path/handoff.md",
+    "docs/chats/2026-10-18-mcp-statistics/handoff.md",
+    "docs/chats/2026-10-18-mcp-statistics/log.md",
+    "docs/chats/2026-10-18-mcp-transport/handoff.md",
+    "docs/chats/2026-10-18-memory-consolidation/handoff.md",
+    "docs/chats/2026-10-18-memory-consolidation/log.md",
+    "docs/chats/2026-10-18-memory-research/handoff.md",
+    "docs/chats/2026-10-18-memory-research/log.md",
+    "docs/chats/2026-10-18-notification-center/handoff.md",
+    "docs/chats/2026-10-18-notification-center/log.md",
+    "docs/chats/2026-10-18-output-language/handoff.md",
+    "docs/chats/2026-10-18-project-context-menu/handoff.md",
+    "docs/chats/2026-10-18-project-deletion/handoff.md",
+    "docs/chats/2026-10-18-project-deletion/log.md",
+    "docs/chats/2026-10-18-project-docs/handoff.md",
+    "docs/chats/2026-10-18-project-docs/log.md",
+    "docs/chats/2026-10-18-russian-interface/handoff.md",
+    "docs/chats/2026-10-18-russian-interface/log.md",
+    "docs/chats/2026-10-18-search-score-order/handoff.md",
+    "docs/chats/2026-10-18-search-score-order/log.md",
+    "docs/chats/2026-10-18-similar-duplicates/handoff.md",
+    "docs/chats/2026-10-18-similar-duplicates/log.md",
+    "docs/chats/2026-10-18-stage17-implementation/handoff.md",
+    "docs/chats/2026-10-18-stage17-implementation/log.md",
+    "docs/chats/2026-10-18-stage26-contracts/handoff.md",
+    "docs/chats/2026-10-18-stage26-contracts/log.md",
+    "docs/chats/2026-10-18-stage33-implementation/log.md",
+    "docs/chats/2026-10-18-window-refinement/handoff.md",
+    "docs/chats/2026-10-18-window-refinement/log.md",
+    "docs/chats/2026-10-18-worker-logs/handoff.md",
+    "docs/chats/2026-10-18-worker-logs/log.md",
+    "docs/chats/Index.md",
+    "docs/features/graphrag/Index.md",
+    "docs/features/graphrag/embedding-probe.md",
+    "docs/features/graphrag/plan.md",
+    "docs/features/graphrag/requirements.md",
+    "docs/features/graphrag/tools.md",
+    "docs/knowledge/agent-tool-usage-2026-10-18.md",
+    "docs/knowledge/agent-tool-usage-2026-10-18/Index.md",
+    "docs/knowledge/graph-and-relations.md",
+    "docs/knowledge/graph-integration-2026-10-18.md",
+    "docs/knowledge/graph-knowledge-retrieval.md",
+    "docs/knowledge/local-documentation-tools-audit.md",
+    "docs/knowledge/local-documentation-tools.md"
+  ],
+  "files": [
+    "Index.md",
+    "MAIN_IDEA.md",
+    "adr/0001-docs-by-features.md",
+    "adr/0002-qwen-gguf.md",
+    "adr/Index.md",
+    "architecture/Index.md",
+    "architecture/components.md",
+    "architecture/files.md",
+    "architecture/ipc.md",
+    "architecture/protocol.md",
+    "architecture/schema.md",
+    "architecture/secrets.md",
+    "architecture/stack.md",
+    "architecture/vector-search.md",
+    "architecture/worker.md",
+    "backlog/Index.md",
+    "backlog/ideas.md",
+    "backlog/issues.md",
+    "features/Index.md",
+    "features/agent-tools/Index.md",
+    "features/agent-tools/cli.md",
+    "features/agent-tools/mcp-tools.md",
+    "features/clients/Index.md",
+    "features/clients/clients.md",
+    "features/clients/plan.md",
+    "features/clients/verification.md",
+    "features/distribution/Index.md",
+    "features/distribution/autostart.md",
+    "features/distribution/installer.md",
+    "features/docs-convention/Index.md",
+    "features/docs-convention/bars-instruction.md",
+    "features/docs-convention/delivery.md",
+    "features/docs-convention/layout.md",
+    "features/docs-convention/plan.md",
+    "features/docs-convention/session-log.md",
+    "features/docs-convention/verification.md",
+    "features/indexing/Index.md",
+    "features/indexing/chunking.md",
+    "features/indexing/updates.md",
+    "features/models/Index.md",
+    "features/models/device-plan.md",
+    "features/models/device-verification.md",
+    "features/models/external-models.md",
+    "features/models/gguf-plan.md",
+    "features/models/inference-plan.md",
+    "features/models/local-models.md",
+    "features/models/memory-plan.md",
+    "features/models/memory-reduction.md",
+    "features/projects/Index.md",
+    "features/projects/deletion.md",
+    "features/projects/projects.md",
+    "features/search/Index.md",
+    "features/search/hybrid-search.md",
+    "features/search/maintenance-tools.md",
+    "features/search/plan.md",
+    "features/settings/Index.md",
+    "features/settings/settings.md",
+    "features/window/Index.md",
+    "features/window/document-actions.md",
+    "features/window/empty-states.md",
+    "features/window/error-states.md",
+    "features/window/implementation.md",
+    "features/window/indexing-progress.md",
+    "features/window/logs.md",
+    "features/window/main-window.md",
+    "features/window/mcp-statistics.md",
+    "features/window/mockups/Index.md",
+    "features/window/notifications.md",
+    "features/window/palette.md",
+    "features/window/project-menu.md",
+    "features/window/refinement-design.md",
+    "features/window/refinement-plan.md",
+    "features/window/reindex-consent.md",
+    "features/window/settings-window.md",
+    "getting-started.md",
+    "knowledge/Index.md",
+    "knowledge/build.md",
+    "knowledge/claude-code-serena.md",
+    "knowledge/development-ideas-verification.md",
+    "knowledge/development-ideas.md",
+    "knowledge/directml-performance.md",
+    "knowledge/gguf-models.md",
+    "knowledge/inference-2026-10-18/Index.md",
+    "knowledge/inference-devices.md",
+    "knowledge/inference-libraries.md",
+    "knowledge/inference-speed.md",
+    "knowledge/installer.md",
+    "knowledge/memory-2026-10-18/Index.md",
+    "knowledge/memory-embed-2026-10-18/Index.md",
+    "knowledge/memory-fp16-2026-10-18/Index.md",
+    "knowledge/memory-fp16-results.md",
+    "knowledge/memory-results.md",
+    "knowledge/memory-usage.md",
+    "knowledge/quality-2026-10-18/Index.md",
+    "knowledge/search-during-indexing.md",
+    "knowledge/search-quality-benchmark.md",
+    "knowledge/search-quality-results.md",
+    "knowledge/spike-detach.md",
+    "knowledge/spike-ipc.md",
+    "knowledge/spike-search.md",
+    "knowledge/stack-research.md",
+    "knowledge/traceability.md",
+    "overview.md",
+    "project-status.md"
+  ],
+  "documents": [
+    {
+      "path": "docs/Index.md",
+      "hash": "e497a6a511caca2acdc6250e7c92edb7de1d65990bd93922c6a40a2558e01e54",
+      "module": "."
+    },
+    {
+      "path": "docs/MAIN_IDEA.md",
+      "hash": "61256e402263509930f19d994d11c35ae100a0ef912e8bcd543f5963888ba53c",
+      "module": "."
+    },
+    {
+      "path": "docs/adr/0001-docs-by-features.md",
+      "hash": "b67558d5af84f5a1832d08307c616692b564f71276fc363e0b73d868017c9071",
+      "module": "adr"
+    },
+    {
+      "path": "docs/adr/0002-qwen-gguf.md",
+      "hash": "e793c9f3298cc266caabf841dd099333cf0c1d7221ad4e81c613fe64d5de2a58",
+      "module": "adr"
+    },
+    {
+      "path": "docs/adr/Index.md",
+      "hash": "6d7ccdfd71a48cc873a7bca18fb5eb0f25b1887396fe422a4903de9babd2e0f2",
+      "module": "adr"
+    },
+    {
+      "path": "docs/architecture/Index.md",
+      "hash": "98585ec7dc14769a630a434b6755252cabcfff685f271f8e63f0c3c3ca92f634",
+      "module": "architecture"
+    },
+    {
+      "path": "docs/architecture/components.md",
+      "hash": "d7c5f5018bfd7b8842f3421bc860ba7657ad23e67efd02f79d878f863efaa72e",
+      "module": "architecture"
+    },
+    {
+      "path": "docs/architecture/files.md",
+      "hash": "83fc027efa91250fd54034fddc296958e9b8d1782f235b96574c25b59747bd71",
+      "module": "architecture"
+    },
+    {
+      "path": "docs/architecture/ipc.md",
+      "hash": "c06a5a3ad4d010dc512bb9e0ef296c9f320f356e750dacd5ddd8c0352446b4e0",
+      "module": "architecture"
+    },
+    {
+      "path": "docs/architecture/protocol.md",
+      "hash": "0f16fde53176368fbb3812e54d57c52573228b2d72d5df4b2071db0aa0462dd3",
+      "module": "architecture"
+    },
+    {
+      "path": "docs/architecture/schema.md",
+      "hash": "bd9bbc5595508824afa5d6a83328e0df6007e64cd7d459172ce8cc4b926074c6",
+      "module": "architecture"
+    },
+    {
+      "path": "docs/architecture/secrets.md",
+      "hash": "480e6bc7bbec2a312786b9011e144c67e453438d7fbdfa0653e29ebe2d7eb8c0",
+      "module": "architecture"
+    },
+    {
+      "path": "docs/architecture/stack.md",
+      "hash": "53473d8ef5af66fbbce1440a22ed451d4377ce154a1a94c78cf4252f3c66b259",
+      "module": "architecture"
+    },
+    {
+      "path": "docs/architecture/vector-search.md",
+      "hash": "00f09befae2941a9f4a97d9b501418df46ece2f906b15ec5173e9ca3262a4f00",
+      "module": "architecture"
+    },
+    {
+      "path": "docs/architecture/worker.md",
+      "hash": "4c87af02eeaeda0abd46ed8a4b821ef3f270b8f22484b033f3921e73408c1cba",
+      "module": "architecture"
+    },
+    {
+      "path": "docs/backlog/Index.md",
+      "hash": "20a5fe6a7da66cc3ee48027ec2ba21e58e7221403f69b77f97967ad053491c72",
+      "module": "backlog"
+    },
+    {
+      "path": "docs/backlog/ideas.md",
+      "hash": "54aa0b303e1329d1f67558f0949e91578b1d75fa6aacc1cc92bda4f7ced631b0",
+      "module": "backlog"
+    },
+    {
+      "path": "docs/backlog/issues.md",
+      "hash": "09da4766f620527a4aae49411f9a3de817db0bd22d58aeecb79e76e8909c531a",
+      "module": "backlog"
+    },
+    {
+      "path": "docs/features/Index.md",
+      "hash": "99b78aade79f95b3871ead9c07e6d3d29c05df67eb8529b64dcd147a0f68ff79",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/agent-tools/Index.md",
+      "hash": "1a5aa178ead6c0d3e052d5ad6408428271102614c0cf4bdfb6f33112507b80b3",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/agent-tools/cli.md",
+      "hash": "303ff2554b7c4a50a2eb5de57bec864b1cacfe24c9f5a5b7b4e65bbc18f66e9d",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/agent-tools/mcp-tools.md",
+      "hash": "0bc1387a328fe1b0500dabbff4d775736d191ea8d203b81c96cf21ed7abb977d",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/clients/Index.md",
+      "hash": "bacfb1eb74c7af6c3f4d7fc55b393cd7b90d71029e89e9acabf9c123acb1212c",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/clients/clients.md",
+      "hash": "a5fbecad242830ec7d3c7403445cd7c099cb01578aa69e54e8da6de777e7bd43",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/clients/plan.md",
+      "hash": "9e25e48d0e4341d039985a1d6cd2ae46d21d5c57bcedcf1f86c81f3ac3b324b3",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/clients/verification.md",
+      "hash": "1cdb00b6dfd594904f7202d25f6bda894528da328c3dd348666d69a909fe88fc",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/distribution/Index.md",
+      "hash": "80e880b4896ea196665552d434509e263d0c3f0f4fd304eb6ad65d8540ccf1b4",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/distribution/autostart.md",
+      "hash": "559963018ac01f800a2b1684c2d77eb19881ffb300b393b63f623de8d393d40a",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/distribution/installer.md",
+      "hash": "6985da116666bc2593821b97d919078f80ea125fd7c367b4a3505432cb094edc",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/docs-convention/Index.md",
+      "hash": "f00b817690e1513c22c7c0f66d42fa26c339ade059b9a5e0ad73b812f12cda55",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/docs-convention/bars-instruction.md",
+      "hash": "6a35fda4940cabb074f1c5e25ea416f14bb59604b0963fb5efe93a82b275cc86",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/docs-convention/delivery.md",
+      "hash": "3d9c3c91c5384d78159ebfd7f8c59ace363786c2f715652740881d634e3cd0e9",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/docs-convention/layout.md",
+      "hash": "7740e43d1a0f76d411781e366c999abf84f4d43914505625a9e78d872e328ea0",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/docs-convention/plan.md",
+      "hash": "599f0ddbf365d18c303309ebd543c898f72a97c2e753ae12ea45ffa95b06cf7a",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/docs-convention/session-log.md",
+      "hash": "cb3de334b9b9341cd3f615546a55b0e8cc56ab6f79235456a5ae4a2935b1aee1",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/docs-convention/verification.md",
+      "hash": "072dd34c0bea5d931426ad7acf35b757bcf241685ae86f363f23178ec225de47",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/indexing/Index.md",
+      "hash": "4b98d98ade81ba68be183be853d1ed864e5b31be5987dc6c1bb7b9feb0af919e",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/indexing/chunking.md",
+      "hash": "442f919449443324cdc2a17f8be59915fc4d9e9c23dd495a28c97fbeef904dc8",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/indexing/updates.md",
+      "hash": "735873144776df0b5dba275c1d131890fd1f1f4924e341b05a3c61f8c245dd66",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/models/Index.md",
+      "hash": "98c7d42fe613df1880b3643671436576696a9db575049e7f5d9abc5f16404930",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/models/device-plan.md",
+      "hash": "77495ceb177a4524aacd991869086e92a456733e1f6adaf0d27a88468d6127ba",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/models/device-verification.md",
+      "hash": "2f4f61cc3dc7b4fa2aa73515db3d2ab259b39101cdc601f866639182fcdaa40b",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/models/external-models.md",
+      "hash": "5aead7faa97ddd71fba80ea0f4446eca9ade0a73478c7340bd656214be67b6cb",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/models/gguf-plan.md",
+      "hash": "a3569374267121430ecda66c2d80c4b10ac14d1e64142da7c529e613510288e9",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/models/inference-plan.md",
+      "hash": "f37eeda3aa9131e1ace2035033bbe7140ddc58a009e8b684b0728a0d946073e1",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/models/local-models.md",
+      "hash": "b55ff27a1d805263de4916fad43e40eeed2d11dd3707cb726cd0d4183bb98152",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/models/memory-plan.md",
+      "hash": "89514913b18d0a35bef39a203fc0044cd1c8380deb29ca52ddf7177af8664f35",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/models/memory-reduction.md",
+      "hash": "c0a00bf352235c29f8963c8d2452e7eb497b059c3c2b63258aa1ed9a0999da34",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/projects/Index.md",
+      "hash": "553892be7d72e99afbc5e0f43bdfe42c98a9887e12e062d20cd6c3608eee859a",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/projects/deletion.md",
+      "hash": "1e31ea597507ce178cba9261545098c32e21757366f8caddf5880b2cbaf749f5",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/projects/projects.md",
+      "hash": "1349c576d1f4202586bb7c1614cd275e74e316aa4abb69d1fc1fa2ff12db12da",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/search/Index.md",
+      "hash": "33254c070b93ae2369cd9e305458a8eeb3ec6c637cd03bb7db7f7cf7c73b0134",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/search/hybrid-search.md",
+      "hash": "af5f0aa3e7eed4bd63d0409636f569a1129975239f78cef765a75caddd1475b0",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/search/maintenance-tools.md",
+      "hash": "d8cc58768fb194c0061e42317a565dc95fc0a7fc81d6e99592c24df15ad0ae28",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/search/plan.md",
+      "hash": "f8dabff67f15855178591bea0a50f74f22b9bafde1e1bea2146750a684e0a748",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/settings/Index.md",
+      "hash": "13c6ca916d159d9e26cd5941628fa06309576a67e290fc11c7a22b96faba7a06",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/settings/settings.md",
+      "hash": "35c1008458015aa53e54e9dea295a7e5cd32b06b62fd8e3a2e87444421457492",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/window/Index.md",
+      "hash": "eb213ff2eb38da2301bdb9c21dc51c74f29f50d5691c6d507524a5b05135a10c",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/window/document-actions.md",
+      "hash": "b6f67511438ab27d70672a4a9d5f81a2cd26d905350dbc4728c27d8b71a51cbe",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/window/empty-states.md",
+      "hash": "efcd22760d93233045f91fa20b6e2749dc39a2b90af408017d2ee84a93aa61b8",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/window/error-states.md",
+      "hash": "5bf0bf9870513e3a2565bc6e6668c974f87b6716e79231a00b5cbeb4667e782d",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/window/implementation.md",
+      "hash": "890120fdef834da386906cc7937b9010e40a95066724236938bf4de18821b442",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/window/indexing-progress.md",
+      "hash": "a8dd912456506c18f8934c5312b5d82c5a132d8a6451e146fe7be0f23b5835d9",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/window/logs.md",
+      "hash": "9ce194af82a48acca98ccadad9b6fd59f1483840d4e60c746dad6f89d1464e9e",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/window/main-window.md",
+      "hash": "e002e55ed3f70d7d8bd56a12f706d6b6682adaed5ae5b029afa94edffa05b54e",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/window/mcp-statistics.md",
+      "hash": "bafe45b7a1a852c9667fdea8e7488659a15d8948a2a2fe0a02206c3f1cec5ebb",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/window/mockups/Index.md",
+      "hash": "86640c55dce1a66f4da9286a6a9a70416482bfc86a85fe15a299bd8e1e426487",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/window/notifications.md",
+      "hash": "79533b0d2d440b869ad993f103e9d275bde823c1591a5adc76be2d2418b6e4ac",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/window/palette.md",
+      "hash": "4cb4edc7385a0e97afa735bb5c9c86e5db283d78fe080c03fdbaeb9d1aa8782c",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/window/project-menu.md",
+      "hash": "e36f696b9abd008f6c2ccb3efe47a33ec45c1d16a9cccfa5323dc87eeac5b28d",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/window/refinement-design.md",
+      "hash": "54291b5208b4e39a5d1213b8370bb0c23e46f4156350b8f41b6626873ec91526",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/window/refinement-plan.md",
+      "hash": "343ada856f6663326bcc4ecf17ad5b70bb5f33f24d2a48e79612d09b6a970bb2",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/window/reindex-consent.md",
+      "hash": "3558c93fd8496eda5c8d45670baa83b1158c1f1a9778027c6de672085f7f51fd",
+      "module": "features"
+    },
+    {
+      "path": "docs/features/window/settings-window.md",
+      "hash": "48f9fe99e14e9b9069c96c5541f7c155844128fd141497c3d259982c5bce6712",
+      "module": "features"
+    },
+    {
+      "path": "docs/getting-started.md",
+      "hash": "f9e95fb5de6596669797db5f05cb74e9ebc1d8f9ee8d63c375c2e1d80a096a74",
+      "module": "."
+    },
+    {
+      "path": "docs/knowledge/Index.md",
+      "hash": "0f4c542c45ed7d9265e912af82c2c92164ad24c977b0bca8373b48ef4802f60c",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/build.md",
+      "hash": "1ca4e6d405624d646c03526bd681015b47ccf0f2b77f088d656ece0ba4dd8462",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/claude-code-serena.md",
+      "hash": "5fc938a9da823b28e0c641096ef0c54ecec434f4679cc92dcbe6017c82ba6fd2",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/development-ideas-verification.md",
+      "hash": "d21eaa60742ec4d906c7088195ed5adda59b90183b8a4de7881c6c5e08852688",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/development-ideas.md",
+      "hash": "b88bb0c3eb8a14ee26607157140d748ea0e1b9450adbcd81ce6485e10068ffdd",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/directml-performance.md",
+      "hash": "40c5e3694043e1aa4211b88dba63c69760c17caf8273ebaf2b765bae124bbf7d",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/gguf-models.md",
+      "hash": "a686c1218636245c5ddc0f2c0692f3fc34995ace0d861659fe214207e39f4296",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/inference-2026-10-18/Index.md",
+      "hash": "5ee461b2fe895486e350ba3bf1075f95d3b52a2857631fd9df83391a01f2ea00",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/inference-devices.md",
+      "hash": "476fb02487a85a1004277954afb46ff929e8afc2c89cb8375295b240d78831dc",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/inference-libraries.md",
+      "hash": "7c3d7ff9a0a120918c1e3b043d9907457f1fe162b04afe4bbdc6c6d8f4aeffc7",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/inference-speed.md",
+      "hash": "f9c7e558ed8b10a3bac9d5b158be99d03c074d742fc17fb1ea96e82a6403dac3",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/installer.md",
+      "hash": "7ddff79c362f5749bb35416e93abbd0ac7fa371e3aa18f861ad99e5d82b0cd61",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/memory-2026-10-18/Index.md",
+      "hash": "1b22cab9cafc62e63894f3769164052d888a47f8a22439720db7c5edbbc654ae",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/memory-embed-2026-10-18/Index.md",
+      "hash": "bfb6c7d751bde71670158db01129d878e7e481406032f56a5ee1b0800cbdb5e3",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/memory-fp16-2026-10-18/Index.md",
+      "hash": "81a07c85e857f9fe940a919e5f6d675105be5c12336dea0a0f98d7bd6a23df39",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/memory-fp16-results.md",
+      "hash": "59ab44945cf45da4cc928bed3885b8c4509029bddf67a34340945c8b6c6165cf",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/memory-results.md",
+      "hash": "c8819627d2c8e6c0ce71c2632159c52959c66858d89b0a50b44f6eb053315aeb",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/memory-usage.md",
+      "hash": "a7c006b42b51098ab05d08cf10161e97218ddb6472db8dc9255ad36f58456704",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/quality-2026-10-18/Index.md",
+      "hash": "46b1dde924dc853eeab05ab5b52cae75e5d4a884fe5f5b3b3250a0b120d95014",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/search-during-indexing.md",
+      "hash": "c70bd644f5b79dac4c705e6192f83bc09858e2732742f830573418471de0c54c",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/search-quality-benchmark.md",
+      "hash": "59ff2f79139e634dc8500231aea9d336ad663661ad845ac131ffc873ae9cb287",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/search-quality-results.md",
+      "hash": "fb0ee6ba5d909a518679380b40b53af96112049c7e3ffa052882077a2362dcb4",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/spike-detach.md",
+      "hash": "628eaa49a83d88fbf5f5d925eb2c883155d76911945df05ac187ff45ff70018e",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/spike-ipc.md",
+      "hash": "6939a5a0d01ac6f3103c8efe1281b006cfd0300592a052ac8075e59151ad33de",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/spike-search.md",
+      "hash": "12e8c597628d4a094673bd4b14206f0d7ae7398fc2f680fc1ad7ce3a957064a5",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/stack-research.md",
+      "hash": "1f0a7ac67d3173e4f8a4c1b8f2d5a078e19847e582cc4c5683174bb7e3b05491",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/knowledge/traceability.md",
+      "hash": "4d3fba99e366962d066313043e610e34a7bb48d408b3bb997eae81d252b8f846",
+      "module": "knowledge"
+    },
+    {
+      "path": "docs/overview.md",
+      "hash": "84ff6f6f166e15651ec9ff13cc497c08a94c30711c48b136d6f62e9dfc87f779",
+      "module": "."
+    },
+    {
+      "path": "docs/project-status.md",
+      "hash": "816f559d2182757871c7a3ad0ff770bd492ae55c46730fd16d0593b1d44ed273",
+      "module": "."
+    }
+  ],
+  "snapshot_sha256": "0da91100780d2c0b55536ee3ffc2ef833b0f83474301e2853a2e83219b69e4d5",
+  "vectors_sha256": "eede6973f88d23636a73dd9672ee2276d010c9243e7184a719b4978f02813403",
+  "limits": "Development feasibility probe; no independent holdout or extraction acceptance."
+}

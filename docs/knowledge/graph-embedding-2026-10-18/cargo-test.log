@@ -1,0 +1,15 @@
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Finished `release` profile [optimized] target(s) in 10.45s
+     Running unittests src\lib.rs (C:\bg22\release\deps\bars_core-5d354add99373a9d.exe)
+
+running 7 tests
+test graph::similarity::tests::cancellation_discards_unfinished_row ... ok
+test graph::similarity::tests::filter_before_knn_prevents_hidden_nodes_from_consuming_top_k ... ok
+test graph::similarity::tests::invalid_vectors_and_parameters_are_rejected ... ok
+test graph::similarity::tests::normalized_cosine_order_sign_and_no_self_edge ... ok
+test graph::similarity::tests::threshold_empty_singleton_and_extreme_finite_values ... ok
+test graph::similarity::tests::ties_and_partial_coverage_are_independent_of_input_order ... ok
+test graph::similarity::tests::heap_top_k_matches_full_sort ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 207 filtered out; finished in 0.00s
+

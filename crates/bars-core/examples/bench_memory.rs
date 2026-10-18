@@ -189,11 +189,15 @@ pub(crate) mod windows {
     }
     pub fn run() -> Result<()> {
         let args: Vec<String> = std::env::args().skip(1).collect();
-        if !(args.len() == 5 || (args.len() == 6 && args[5] == "--allow-download"))
+        if args.len() < 5
+            || args.len() > 7
+            || !args[5..]
+                .iter()
+                .all(|a| matches!(a.as_str(), "--allow-download" | "--fp16-embed"))
             || !matches!(args[0].as_str(), "embed" | "rerank" | "both" | "bounded")
             || !matches!(args[1].as_str(), "cpu" | "auto")
         {
-            return Err("bench_memory <embed|rerank|both|bounded> <cpu|auto> <models> <fixture.json> <new-output.jsonl> [--allow-download]".into());
+            return Err("bench_memory <embed|rerank|both|bounded> <cpu|auto> <models> <fixture.json> <new-output.jsonl> [--allow-download] [--fp16-embed]".into());
         }
         // The fixture is frozen by the runner, and no settings/index/client files are opened.
         let fixture: Fixture = serde_json::from_slice(&std::fs::read(&args[3])?)?;
@@ -201,7 +205,11 @@ pub(crate) mod windows {
             return Err("fixture must contain 15 documents".into());
         }
         let cache = Path::new(&args[2]);
-        let allow_download = args.len() == 6;
+        let allow_download = args.iter().any(|a| a == "--allow-download");
+        let fp16_embed = args.iter().any(|a| a == "--fp16-embed");
+        if fp16_embed && (args[1] != "auto" || args[0] == "rerank") {
+            return Err("--fp16-embed requires auto and an embed mode".into());
+        }
         bars_core::models::prepare_environment(cache);
         let accelerator = if args[1] == "cpu" {
             Accelerator::Cpu
@@ -210,7 +218,14 @@ pub(crate) mod windows {
         };
         if !allow_download
             && args[0] != "rerank"
-            && !bars_core::models::is_downloaded(cache, bars_core::models::BGE_M3_ID)
+            && !bars_core::models::is_downloaded(
+                cache,
+                if fp16_embed {
+                    bars_core::models::BGE_M3_FP16_ID
+                } else {
+                    bars_core::models::BGE_M3_ID
+                },
+            )
         {
             return Err("embed model is not fully cached, refusing download".into());
         }
@@ -231,7 +246,7 @@ pub(crate) mod windows {
         let log = Log::create(Path::new(&args[4]))?;
         log.reserve(if args[0] == "rerank" { 6 } else { 8 })?;
         log.emit("config", "startup", json!({"mode":args[0], "accelerator":args[1], "fixture_blake3":blake3::hash(&std::fs::read(&args[3])?).to_hex().to_string(), "interval_ms":100,
-            "loader":"production", "startup_min_commit_gib":if args[0] == "rerank" {6} else {8}, "download_allowed":allow_download, "gpu_rerank_profile":"fp16-b16", "cpu_rerank_profile":"fp32-b4"}));
+            "loader":"production", "embed_profile":if fp16_embed {"fp16"} else {"fp32"}, "startup_min_commit_gib":if args[0] == "rerank" {6} else {8}, "download_allowed":allow_download, "gpu_rerank_profile":"fp16-b16", "cpu_rerank_profile":"fp32-b4"}));
         let monitor = Monitor::start(log.clone());
         let result = exercise(&args, &fixture, &log);
         let sampled = monitor.stop();
@@ -257,8 +272,13 @@ pub(crate) mod windows {
             log.preflight()?;
             log.emit("marker", "embed_load_begin", json!(null));
             let started = Instant::now();
-            let mut model = BuiltinEmbedder::bge_m3(models, accelerator)?;
-            log.emit("timing", "embed_load", json!({"ms":started.elapsed().as_secs_f64()*1000.0,"device":format!("{:?}",model.device())}));
+            let mut model = if args.iter().any(|a| a == "--fp16-embed") {
+                BuiltinEmbedder::bge_m3_fp16(models, accelerator)?
+            } else {
+                BuiltinEmbedder::bge_m3(models, accelerator)?
+            };
+            let runtime = model.execution();
+            log.emit("timing", "embed_load", json!({"ms":started.elapsed().as_secs_f64()*1000.0,"device":format!("{:?}",model.device()),"precision":runtime.precision,"revision":runtime.revision}));
             log.plateau("embed_loaded");
             for n in 0..3 {
                 let started = Instant::now();
@@ -298,6 +318,11 @@ pub(crate) mod windows {
             log.emit("marker", "rerank_load_begin", json!(null));
             let started = Instant::now();
             let mut rerank = BuiltinReranker::bge_reranker_v2_m3(models, accelerator)?;
+            if args.iter().any(|a| a == "--fp16-embed")
+                && rerank.device() != bars_core::models::Device::DirectMl
+            {
+                return Err("FP16 pair requires actual DirectML rerank".into());
+            }
             log.emit("timing", "rerank_load", json!({"ms":started.elapsed().as_secs_f64()*1000.0,"device":format!("{:?}",rerank.device())}));
             log.plateau("rerank_loaded");
             let mut reference = Vec::new();

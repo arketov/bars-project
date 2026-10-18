@@ -14,7 +14,8 @@
 </script>
 
 <div class="node {node.kind}" class:open>
-  <div class="row" data-document-path={node.documentPath}>
+  <!-- svelte-ignore a11y_no_noninteractive_tabindex: строка получает фокус для ContextMenu/Shift+F10. -->
+  <div class="row" data-document-path={node.documentPath} data-folder-path={isDir ? node.path : undefined} data-folder-kind={node.path === "." ? "Корневые документы" : node.kind === "module" ? "Модуль" : "Папка"} tabindex={isDir ? 0 : undefined} role={isDir ? "group" : undefined} aria-label={isDir ? title : undefined}>
     {#if isDir}
       <button class="caret" aria-label={open ? "Свернуть" : "Развернуть"} onclick={() => (opened = !opened)}>
         <Icon name="chevron-right" size={10} width={2} />
@@ -30,7 +31,7 @@
         indeterminate={check === "some"}
         onchange={(event) => app.toggleNode(node.path, event.currentTarget.checked)}
       />
-      {#if isDir}<span class="nm">{node.label}</span>{/if}
+      {#if isDir}<Icon name="folder" size={14} /><span class="nm">{node.path === "." ? "Корневые документы" : node.label}</span>{/if}
     </label>
     {#if !isDir && node.documentPath}
       <button class="nm filename" title={node.documentPath} onclick={() => app.openDocument({ path: node.documentPath!, title: node.label, first_line: 0, last_line: 0 })}>{node.label}</button>
@@ -49,6 +50,7 @@
 <style>
   .row { display: flex; align-items: center; gap: 4px; padding: 4px 6px; border-radius: 8px; user-select: none; }
   .row:hover { background: var(--panel-2); }
+  .row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
   .caret { width: 18px; height: 18px; border: 0; background: none; display: grid; place-items: center; color: var(--muted); transition: transform .15s; padding: 0; flex: none; }
   .open > .row .caret { transform: rotate(90deg); }
   label { display: flex; align-items: center; gap: 8px; cursor: pointer; }

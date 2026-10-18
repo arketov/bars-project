@@ -66,6 +66,15 @@ pub fn search(
     settings: &SearchSettings,
     request: &SearchRequest,
 ) -> Result<SearchResponse, SearchError> {
+    search_expanded(index, embedder, reranker, settings, request, None)
+}
+
+/// Внутреннее расширение до rerank/top-K; оценки и область проверяет тот же поисковый путь.
+pub type CandidateExpansion<'a> = dyn FnMut(&Index, &[i64], usize) -> Result<Vec<i64>, SearchError> + 'a;
+pub fn search_expanded(
+    index: &Index, embedder: &mut dyn Embedder, reranker: Option<&mut dyn Reranker>,
+    settings: &SearchSettings, request: &SearchRequest, mut expansion: Option<&mut CandidateExpansion<'_>>,
+) -> Result<SearchResponse, SearchError> {
     let match_query = fts_query(&request.query)
         .ok_or_else(|| SearchError::InvalidParams("в запросе нет ни одного слова".to_string()))?;
     if matches!(
@@ -102,9 +111,22 @@ pub fn search(
         Some(identifiers) => scope.text_candidates(index, identifiers, candidates)?,
         None => Vec::new(),
     };
-    let cosines = scope.cosines(index, &query_vector, candidates, &text_ids, &exact_ids)?;
+    let mut cosines = scope.cosines(index, &query_vector, candidates, &text_ids, &exact_ids)?;
     let vector_ids = top_by_score(&cosines, candidates);
-    let fused = exact_first(&exact_ids, fuse(&text_ids, &vector_ids));
+    let mut fused = exact_first(&exact_ids, fuse(&text_ids, &vector_ids));
+    if let Some(expansion) = expansion.as_mut().filter(|_|!fused.is_empty()) {
+        let additional = expansion(index, &fused, candidates)?.into_iter().take(candidates).collect::<Vec<_>>();
+        // Принудительно посчитать cosine добавленных кандидатов, сохранив исходный scope.
+        let scores=scope.cosines(index,&query_vector,0,&additional,&[])?;
+        let additional=additional.into_iter().filter(|id|scores.contains_key(id)).collect::<Vec<_>>();
+        cosines.extend(scores);
+        let original=fused.clone();let mut seen=HashSet::new();fused.clear();
+        // Чередование до окончательного rerank; исходные точные identifiers остаются первыми.
+        for i in 0..original.len().max(additional.len()) {
+            for id in [original.get(i),additional.get(i)].into_iter().flatten(){if seen.insert(*id){fused.push(*id);}}
+        }
+        fused=exact_first(&exact_ids,fused);
+    }
 
     let mut rerank_error = None;
     if let Some(reranker) = reranker {
@@ -499,8 +521,8 @@ impl Scope {
                     got: dim,
                 });
             }
-            let dot: f32 = blob.chunks_exact(4).zip(query_vector)
-                .map(|(bytes, b)| f32::from_le_bytes(bytes.try_into().unwrap()) * b).sum();
+            let dot: f32 = blob.as_chunks::<4>().0.iter().zip(query_vector)
+                .map(|(bytes, b)| f32::from_le_bytes(*bytes) * b).sum();
             scores.push(id, dot);
         }
         Ok(scores.finish())

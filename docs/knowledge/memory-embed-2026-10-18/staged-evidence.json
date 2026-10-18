@@ -1,0 +1,129 @@
+{
+  "scope": "prototype retrieval quality; not product latency or simultaneous-model memory",
+  "runs": [
+    {
+      "name": "fp16-staged",
+      "accepted": true,
+      "rows": 100,
+      "exitCode": 0,
+      "timingValid": false,
+      "lifetimePeakMiB": 3374.09765625,
+      "markers": [
+        {
+          "kind": "config",
+          "phase": "quality",
+          "privateMiB": 6.60546875,
+          "lifetimePeakMiB": 9.9296875
+        },
+        {
+          "kind": "marker",
+          "phase": "queries_saved_embed_dropped",
+          "privateMiB": 314.60546875,
+          "lifetimePeakMiB": 3374.09765625
+        },
+        {
+          "kind": "end",
+          "phase": "quality_end",
+          "privateMiB": 357.421875,
+          "lifetimePeakMiB": 3374.09765625
+        }
+      ],
+      "files": [
+        {
+          "source": "spikes/memory/runs/embed-fp16-staged-r2/production/rows.jsonl",
+          "target": "fp16-staged.rows.jsonl.gz",
+          "sha256": "e3ad93ec3cf5c6849df1f8ca73317ca1ef4f2f999d731ca64367fe70f1366eba"
+        },
+        {
+          "source": "spikes/memory/runs/embed-fp16-staged-r2/production/session.json",
+          "target": "fp16-staged.session.json.gz",
+          "sha256": "b4fe25a9e8127ff279517ea4742d4c992c91f4aa9273575710c8d51a48f29660"
+        },
+        {
+          "source": "spikes/memory/runs/embed-fp16-staged-r2/production/config.json",
+          "target": "fp16-staged.config.json.gz",
+          "sha256": "f2cc30217b041bccce3afacf4411f5d16bbc8b478843699703f9aaec50ddd263"
+        },
+        {
+          "source": "spikes/memory/runs/embed-fp16-staged-r2/production/native-memory.jsonl",
+          "target": "fp16-staged.native-memory.jsonl.gz",
+          "sha256": "8962bc5641739ad9c59c8367247cd6f83bbba7bfa4a8c4e68a45f19930e944a0"
+        },
+        {
+          "source": "spikes/memory/runs/embed-fp16-staged-r2/production/query-vectors.json",
+          "target": "fp16-staged.query-vectors.json.gz",
+          "sha256": "d208874b78ff92471146f93d22a2d04cd4281b26cd16defd9467fe67b6714b20"
+        },
+        {
+          "source": "spikes/memory/runs/embed-fp16-staged-r2/production/complete.json",
+          "target": "fp16-staged.complete.json.gz",
+          "sha256": "51ee15df530801ebfa0838281fa5ec00dec62dc5a07ba5a57766eeb1d47cb87d"
+        },
+        {
+          "source": "spikes/memory/runs/embed-fp16-staged-r2/production.monitor.json",
+          "target": "fp16-staged.monitor.json.gz",
+          "sha256": "b66a30aa9f75d245c02fc221a1cf1580b51779837ff310a60c3de9e621670663"
+        }
+      ]
+    },
+    {
+      "name": "int8-rejected",
+      "accepted": false,
+      "rows": 7,
+      "exitCode": -1,
+      "timingValid": false,
+      "lifetimePeakMiB": 2343.765625,
+      "markers": [
+        {
+          "kind": "config",
+          "phase": "quality",
+          "privateMiB": 6.61328125,
+          "lifetimePeakMiB": 9.94140625
+        },
+        {
+          "kind": "marker",
+          "phase": "queries_saved_embed_dropped",
+          "privateMiB": 28.22265625,
+          "lifetimePeakMiB": 1636.84765625
+        }
+      ],
+      "files": [
+        {
+          "source": "spikes/memory/runs/embed-int8-staged-r3/production/rows.jsonl",
+          "target": "int8-rejected.rows.jsonl.gz",
+          "sha256": "4a2a573a44365805f7c2a5fc5006ebcca540c6134e239530178a4168cbee82f8"
+        },
+        {
+          "source": "spikes/memory/runs/embed-int8-staged-r3/production/session.json",
+          "target": "int8-rejected.session.json.gz",
+          "sha256": "fdf1aa2036f5d9ef5837e12a9956de15e37fede1bc8f5de3e9cc20a8442b99f1"
+        },
+        {
+          "source": "spikes/memory/runs/embed-int8-staged-r3/production/config.json",
+          "target": "int8-rejected.config.json.gz",
+          "sha256": "f2cc30217b041bccce3afacf4411f5d16bbc8b478843699703f9aaec50ddd263"
+        },
+        {
+          "source": "spikes/memory/runs/embed-int8-staged-r3/production/native-memory.jsonl",
+          "target": "int8-rejected.native-memory.jsonl.gz",
+          "sha256": "49aecb8f062fbe4aac43fe1177011663fdca970b0cb732e10ff1da9051e1d521"
+        },
+        {
+          "source": "spikes/memory/runs/embed-int8-staged-r3/production/query-vectors.json",
+          "target": "int8-rejected.query-vectors.json.gz",
+          "sha256": "9668296cf2e582201f7bc5b325e41c43ac4f4b349a9c944ca162c118051a1936"
+        },
+        {
+          "source": "spikes/memory/runs/embed-int8-staged-r3/production/rejected.json",
+          "target": "int8-rejected.rejected.json.gz",
+          "sha256": "8a3eb1e8aee95be1baef44c1eb939a91cf622aaccfaa4d968441aeb254ec9f55"
+        },
+        {
+          "source": "spikes/memory/runs/embed-int8-staged-r3/production.monitor.json",
+          "target": "int8-rejected.monitor.json.gz",
+          "sha256": "5363121ff8ffc112fdbb8e47ca8b022527c213327baf1dc3033a95683c921d22"
+        }
+      ]
+    }
+  ]
+}

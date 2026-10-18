@@ -19,6 +19,7 @@ use crate::clients::InstallEnv;
 use crate::serve::serve;
 use crate::worker::models::fake::FakeProvider;
 use crate::worker::{BuiltinProvider, ModelProvider, WorkerConfig};
+mod history;
 
 struct Harness {
     home: TempDir,
@@ -737,6 +738,15 @@ async fn window_gets_activity_tree_and_pause_from_the_handler() {
     assert_eq!(activity.queue[0].kind, JobKind::Check);
     assert_eq!(activity.queue[0].priority, JobPriority::Explicit);
 
+    let cancelled: CancelOutput = serde_json::from_value(
+        handler.dispatch(Call::IndexCancel(IndexCancelParams {
+            project: root.display().to_string(),
+        })).await.unwrap(),
+    ).unwrap();
+    assert!(cancelled.cancelled);
+    assert!(worker.queued().is_empty());
+    worker.register(&root).unwrap();
+
     handler
         .dispatch(Call::IndexResume(IndexResumeParams {}))
         .await
@@ -766,18 +776,10 @@ async fn window_gets_activity_tree_and_pause_from_the_handler() {
     assert_eq!(tree.documents[1].module, "mod");
     assert!(tree.documents.iter().all(|document| document.chunks >= 1));
 
-    let cancelled: CancelOutput = serde_json::from_value(
-        handler
-            .dispatch(Call::IndexCancel(IndexCancelParams {
-                project: root.display().to_string(),
-            }))
-            .await
-            .unwrap(),
-    )
-    .unwrap();
-    assert!(!cancelled.cancelled);
+    // После resume слежение вправе поставить новое задание между idle и чтением дерева.
     worker.shutdown().await;
 }
 
 mod external_models;
 mod window;
+mod graph;

@@ -126,6 +126,10 @@
     </label>
 
     <div class="tree">
+      <!-- svelte-ignore a11y_no_noninteractive_tabindex: отдельная цель клавиатурного меню, без действия по Enter. -->
+      <div class="docs-root" role="group" tabindex="0" aria-label="Корень документации" data-folder-path="." data-folder-kind="Корень документации" title={app.docsRoot}>
+        <Icon name="folder" size={14} /><span><b>Корень документации</b><small>{app.docsRoot}</small></span>
+      </div>
       {#each shown as node (node.path)}
         <TreeRow {node} forceOpen={app.filter.trim() !== ""} />
       {/each}
@@ -189,6 +193,12 @@
 </aside>
 
 <style>
+  .docs-root { display: flex; align-items: center; gap: 8px; padding: 7px 8px; margin-bottom: 5px; border-bottom: 1px solid var(--line); border-radius: 7px; color: var(--muted); }
+  .docs-root:hover { background: var(--panel-2); }
+  .docs-root:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .docs-root span { min-width: 0; }
+  .docs-root b { font-size: 12px; }
+  .docs-root small { display: block; font-size: 11px; overflow-wrap: anywhere; }
   aside { background: var(--panel); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
   .brand { padding: 18px 18px 12px; display: flex; align-items: center; gap: 10px; }
   .logo { width: 30px; height: 30px; border-radius: 9px; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font-weight: 800; font-size: 16px; letter-spacing: -.5px; }

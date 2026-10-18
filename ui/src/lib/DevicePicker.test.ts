@@ -7,6 +7,14 @@ const components: ReturnType<typeof mount>[] = [];
 afterEach(() => components.splice(0).forEach(component => void unmount(component)));
 const runtime: ModelRuntime = { model: "bge", source: "builtin", requested: "auto", state: "ready", backend: "onnx", actual: "cpu", fallback_reason: "GPU session unavailable" };
 
+it("FP16 offers DirectML and explains the CPU reindex boundary", () => {
+  const target = document.createElement("div");
+  components.push(mount(DevicePicker, {target, props:{role:"Embed", value:"auto", source:"builtin", gpuOnly:true}}));
+  flushSync();
+  expect([...target.querySelectorAll("button")].map(b => b.textContent)).toEqual(["DirectML"]);
+  expect(target.textContent).toContain("потребуется переиндексация");
+});
+
 it("shows fallback independently of the requested preference", () => {
   const target = document.createElement("div");
   components.push(mount(DevicePicker, {target, props:{role:"Embed", value:"auto", source:"builtin", runtime}}));
@@ -25,6 +33,16 @@ it("shows precision reported by the actual session", () => {
   flushSync();
   expect(target.textContent).toContain("DirectML");
   expect(target.textContent).toContain("FP16");
+  expect(target.querySelector(".fallback")).toBeNull();
+});
+
+it.each(["vulkan", "metal"])("shows actual %s GGUF device", (actual) => {
+  const target = document.createElement("div");
+  components.push(mount(DevicePicker, {target, props:{role:"Embed", value:"auto", source:"builtin",
+    runtime:{...runtime, backend:"llama.cpp", actual, precision:"q4_k_m", fallback_reason:null}}}));
+  flushSync();
+  expect(target.textContent).toContain(actual === "vulkan" ? "Vulkan" : "Metal");
+  expect(target.textContent).toContain("Q4_K_M");
   expect(target.querySelector(".fallback")).toBeNull();
 });
 

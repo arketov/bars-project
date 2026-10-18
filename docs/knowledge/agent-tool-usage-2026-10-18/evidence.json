@@ -1,0 +1,6248 @@
+{
+  "cutoff": "2026-10-18T13:45:00Z",
+  "scope": "Local Codex and Claude JSONL; syntactic call sites, not runtime invocation totals",
+  "manifest": [
+    {
+      "file": ".codex/sessions/2025/08/29/rollout-2025-08-29T20-40-51-475ddc8c-6cbf-4bfb-a541-614c87741945.jsonl",
+      "bytes": 20945,
+      "sha256": "7bdc82f8c40e10f802def9ad410b68f94856bd7ff8207c64fa23549281fbc27a",
+      "lines": 26
+    },
+    {
+      "file": ".codex/sessions/2026/10/11/rollout-2026-10-11T18-47-19-01a12b37-cd88-73e3-bd09-5fc385b13578.jsonl",
+      "bytes": 30648171,
+      "sha256": "2b582eff9e20e6e9e823436254b4de52551f6d02a71a0648b043b50bcca4ce2e",
+      "lines": 11585
+    },
+    {
+      "file": ".codex/sessions/2026/10/11/rollout-2026-10-11T18-52-56-01a12b3c-f104-73f0-9a0b-6f4590b38e92.jsonl",
+      "bytes": 11987400,
+      "sha256": "559bf71bed866275d7dfd7c6cf1643e0fe36c4b212a694e055234b70f756b6bb",
+      "lines": 4576
+    },
+    {
+      "file": ".codex/sessions/2026/10/11/rollout-2026-10-11T18-53-13-01a12b3d-34a9-71e1-9586-6050d63ce44b.jsonl",
+      "bytes": 9399314,
+      "sha256": "b6dcbbb6aa6dbc490a0f1b96e0ad594b9be6417dae20ce7aa73cd2a9abfdc1a4",
+      "lines": 3469
+    },
+    {
+      "file": ".codex/sessions/2026/10/11/rollout-2026-10-11T18-53-28-01a12b3d-6da3-75a2-8a81-dd415eb838d8.jsonl",
+      "bytes": 11864969,
+      "sha256": "15ada7d6bcb25e134e50d94cf5384b0ea33814b235dcd00a6397d54ef5d7b5ac",
+      "lines": 3680
+    },
+    {
+      "file": ".codex/sessions/2026/10/11/rollout-2026-10-11T19-06-10-01a12b49-0d71-7353-91d4-0d0ca04bf2b7.jsonl",
+      "bytes": 1211449,
+      "sha256": "5ab080dcfb042c6fc3cec1c63dfb0925b6eb24b65069bed27c9913d7f743eea7",
+      "lines": 192
+    },
+    {
+      "file": ".codex/sessions/2026/10/11/rollout-2026-10-11T19-20-30-01a12b56-2d95-7742-a3b1-94d59dbcc9a4.jsonl",
+      "bytes": 1228953,
+      "sha256": "5490da159b0264a10ce793929906c5b813f7fc3e8694a02750354d0cc508f3af",
+      "lines": 166
+    },
+    {
+      "file": ".codex/sessions/2026/10/11/rollout-2026-10-11T19-30-21-01a12b5f-3133-7403-8732-94db244293d4.jsonl",
+      "bytes": 1404230,
+      "sha256": "6e48c88ab09055b30ae86c92c436b67adb33f826511d5d86c17ae2ddb8634d4a",
+      "lines": 193
+    },
+    {
+      "file": ".codex/sessions/2026/10/11/rollout-2026-10-11T19-45-44-01a12b6d-46be-7b00-93bd-270a0549c85a.jsonl",
+      "bytes": 1757029,
+      "sha256": "9c40cf7519ccf97d63de854a020023a85c4d4e0e14d8eca4e7d663ca81c6facb",
+      "lines": 288
+    },
+    {
+      "file": ".codex/sessions/2026/10/11/rollout-2026-10-11T19-58-12-01a12b78-b009-78a3-bcf4-5bd3d0c9740b.jsonl",
+      "bytes": 1563256,
+      "sha256": "70cb500b82fd173bb9174fab285cd464fbbce9540aab9232a22f7efe581f9457",
+      "lines": 303
+    },
+    {
+      "file": ".codex/sessions/2026/10/13/rollout-2026-10-13T13-02-33-01a13448-dfbc-7450-bac3-e7b47df0eb19.jsonl",
+      "bytes": 8443447,
+      "sha256": "d6aed58dd7fa3ef6584b12e3e6cc5b3726d62f7a5065213b6adaf88888d4f3cd",
+      "lines": 240
+    },
+    {
+      "file": ".codex/sessions/2026/10/13/rollout-2026-10-13T13-03-26-01a13449-aee1-7e73-9a31-92b843b5cea8.jsonl",
+      "bytes": 3188305,
+      "sha256": "cf5bfac62d8dc28c357b2a6df1ff70a21c1311524db1a5644e6790a96453a6c0",
+      "lines": 1146
+    },
+    {
+      "file": ".codex/sessions/2026/10/13/rollout-2026-10-13T13-05-09-01a1344b-4059-7bc2-b52c-08a06182cb63.jsonl",
+      "bytes": 746779,
+      "sha256": "5dc04f667558c5cd1295fbc2744fa9783966bbf75605ce7fc0ff2898262a2fc9",
+      "lines": 251
+    },
+    {
+      "file": ".codex/sessions/2026/10/13/rollout-2026-10-13T13-12-19-01a13451-d11a-7230-af6f-c64b1dc87a6b.jsonl",
+      "bytes": 4066129,
+      "sha256": "26b9f1b956cbc71a04320cc8c8fa311951798b9c2f3870916788ea0ff102b32d",
+      "lines": 1433
+    },
+    {
+      "file": ".codex/sessions/2026/10/13/rollout-2026-10-13T13-18-42-01a13457-a769-7311-81a6-ea18762ecb45.jsonl",
+      "bytes": 3564286,
+      "sha256": "1a3fd262ae5c747b3139af8a97c9f8f1ddd3140f94b4766dd0f88409e7895004",
+      "lines": 1232
+    },
+    {
+      "file": ".codex/sessions/2026/10/13/rollout-2026-10-13T16-06-54-01a134f1-a641-7782-b292-af54a0416c4e.jsonl",
+      "bytes": 218261,
+      "sha256": "4403d3c7f28564fd13a0717c9d8bac05da7746854856b3c6f9784fb4394e4cd8",
+      "lines": 60
+    },
+    {
+      "file": ".codex/sessions/2026/10/13/rollout-2026-10-13T16-09-01-01a134f3-9850-7b03-9669-46a859ef755a.jsonl",
+      "bytes": 6839932,
+      "sha256": "9adc588282a4c411bc902d9eb380d7f2314b1dc2a0b1302d189d6a6585a12569",
+      "lines": 1949
+    },
+    {
+      "file": ".codex/sessions/2026/10/13/rollout-2026-10-13T18-15-44-01a13567-9b0f-7f13-ba6a-86c45ec2385f.jsonl",
+      "bytes": 2599031,
+      "sha256": "763726e850124e2fe4fc405b1dae4ff0207f67812f537fca815d1e613a84cbc9",
+      "lines": 659
+    },
+    {
+      "file": ".codex/sessions/2026/10/13/rollout-2026-10-13T18-16-02-01a13567-e1d9-7de2-b798-c3a14ed88526.jsonl",
+      "bytes": 2828303,
+      "sha256": "20eec0e1752c0bb64402bb70b0b1b327a9f681a8ec93fb95731ca158659a22d9",
+      "lines": 751
+    },
+    {
+      "file": ".codex/sessions/2026/10/13/rollout-2026-10-13T18-16-21-01a13568-28e7-7822-bdb5-a5414eb5752f.jsonl",
+      "bytes": 1384584,
+      "sha256": "c9fcb139654993c325546066c00131285a6fd4e91235605ec943f059e834fb76",
+      "lines": 256
+    },
+    {
+      "file": ".codex/sessions/2026/10/13/rollout-2026-10-13T18-55-13-01a1358b-befb-77c0-82c5-81efa21e4ad6.jsonl",
+      "bytes": 2316593,
+      "sha256": "24e6fcf326c91b12804d24c0f47cd30f6789d35959be049a1aa2d4cffeec2d9e",
+      "lines": 528
+    },
+    {
+      "file": ".codex/sessions/2026/10/13/rollout-2026-10-13T18-55-39-01a1358c-2417-7092-88b3-50f54523de1f.jsonl",
+      "bytes": 18232925,
+      "sha256": "4d621097661611353d3ff2a022c9aa1b95caebfd0314ac89f75665e6c6cea91c",
+      "lines": 6294
+    },
+    {
+      "file": ".codex/sessions/2026/10/13/rollout-2026-10-13T18-56-07-01a1358c-92d2-77c3-8d73-02a35fac23c3.jsonl",
+      "bytes": 1100170,
+      "sha256": "114923d6610db6c535719850baf7a803ace152975dfc63d259f39292f0215d28",
+      "lines": 188
+    },
+    {
+      "file": ".codex/sessions/2026/10/13/rollout-2026-10-13T23-20-55-01a1367f-0333-7700-9655-4924bf8b0ee7.jsonl",
+      "bytes": 648526,
+      "sha256": "fecf45d4e00a6e10b71591040a26c31405aa650de7401316dd0ec150ad2f2544",
+      "lines": 98
+    },
+    {
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T13-24-08-01a13ea9-5a88-7b22-89fa-0d4b771db5a1.jsonl",
+      "bytes": 2029650,
+      "sha256": "4f5e7eacf3d0d3a9e1370be80472abe10f5c0dd3f77ff47756977ffb3087fa52",
+      "lines": 1014
+    },
+    {
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T13-24-27-01a13ea9-a43a-7a52-b397-e96ec1cad489.jsonl",
+      "bytes": 2148308,
+      "sha256": "f1eb718b0bfb296030688db0afdc2f103e4051e6ec1b2278c7528b8c4dc68627",
+      "lines": 779
+    },
+    {
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T15-47-00-01a13f2c-24a3-7d62-9f0e-e747fd5752b0.jsonl",
+      "bytes": 7221824,
+      "sha256": "b9edb246ded48d71cb96721a0edcf99a5217f8847653901c68d8b6ba2b9c2c6e",
+      "lines": 2579
+    },
+    {
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T15-48-41-01a13f2d-b10a-7b72-b671-27e7b2d7a65f.jsonl",
+      "bytes": 9489812,
+      "sha256": "90ecb2ab8eddff21b66f20474481f171bf08e7c9f808fedcf5634b0d9d135a10",
+      "lines": 3087
+    },
+    {
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T15-49-23-01a13f2e-54ff-7393-b05d-26510d2fd105.jsonl",
+      "bytes": 233605,
+      "sha256": "d7d35f20a3300d1e3ee531fdc53380d8b8ac45249b09cc23d6776ff12764531a",
+      "lines": 41
+    },
+    {
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T17-08-26-01a13f76-b4b1-7372-9918-9398b0c1d272.jsonl",
+      "bytes": 779894,
+      "sha256": "c44fd0f58c8facbfae47f18cb8f0d6f0334c089e9f3aeafab9fd789461a3ba53",
+      "lines": 94
+    },
+    {
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T17-11-39-01a13f76-b4b1-7372-9918-9398b0c1d272_01a13f79-a636-7653-9244-d9de08d5ea61.jsonl",
+      "bytes": 8746012,
+      "sha256": "61c642272e84c4dc4a6d81a18865868d80863eb4f680504a85fe81d70e64589c",
+      "lines": 2202
+    },
+    {
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T21-07-47-01a14051-d513-7bf2-a64e-764f8c26bd4d.jsonl",
+      "bytes": 1186538,
+      "sha256": "34c4887cabf8a2431bbbd5d40d46bc5cabc851622869038468701b4b940ba376",
+      "lines": 375
+    },
+    {
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T21-07-59-01a14052-06b0-7ac1-aa5d-95f18cfacba6.jsonl",
+      "bytes": 251161,
+      "sha256": "3e01e16d7246e69c08d80cadbb4dd4700a6662e31e5947bea07e9bb9bf0f614a",
+      "lines": 43
+    },
+    {
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T22-43-30-01a140a9-7844-77b3-ba3c-fc9953407079.jsonl",
+      "bytes": 11627300,
+      "sha256": "e102970366c1c448f18b912f54d11d0b20966c762ff7198092053406f449d1c6",
+      "lines": 3156
+    },
+    {
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-02-52-01a140bb-3155-79c0-b61a-9f2e747d0add.jsonl",
+      "bytes": 6905532,
+      "sha256": "bc88d28bc7bb854788a3d1099d62f93abf30686f10b371662ce1c88c8243bf75",
+      "lines": 2306
+    },
+    {
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-24-21-01a140ce-dedb-7c93-9ed6-4205e63d97ed.jsonl",
+      "bytes": 2192672,
+      "sha256": "5ba3d4b6aaca03dbab7830d89e2758d06df3f7ca67e4be12bb0ca8d78676bd73",
+      "lines": 576
+    },
+    {
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-25-46-01a140d0-28bb-7d52-80d1-70b514199405.jsonl",
+      "bytes": 3761597,
+      "sha256": "673a43426e1c0225c59fc1a53553ff27d1ae3d6b90a03de5ea31cab9761bdfd5",
+      "lines": 796
+    },
+    {
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-29-17-01a140d3-6363-70c2-9dd8-12a7666781fa.jsonl",
+      "bytes": 2784308,
+      "sha256": "0d771309a5ac0cc722105805694f696309c9e090d1638d5599c0ea8ed9f77906",
+      "lines": 842
+    },
+    {
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-52-32-01a140e8-ad40-77f1-9a07-7052963a12d4.jsonl",
+      "bytes": 4247672,
+      "sha256": "6f2e135bfd8d598433d7ef5465f7859ca49041bfecb4c395e9578a50e0b76913",
+      "lines": 1064
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-15-13-01a14da6-66c5-7762-93a7-2aeb347be8f4.jsonl",
+      "bytes": 5508289,
+      "sha256": "3aedbdf4f04244e1ea9fc2b72f9d5f8ae44e26a8b799ad09a98b9e892d82470d",
+      "lines": 1449
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-20-51-01a14dab-906f-73a3-aff0-3eb83cb20c7d.jsonl",
+      "bytes": 1041586,
+      "sha256": "3a86f1f0b80f805c9c46f436832ac373d1097a811ed6b03a0d5192d269e65fd6",
+      "lines": 136
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-40-41-01a14dbd-af6a-7d40-8479-df8e12504e43.jsonl",
+      "bytes": 9795278,
+      "sha256": "616dcdacb5956486a233809528b0c7202b6b8879b21249337ef3a05e186f3641",
+      "lines": 2415
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-44-53-01a14dc1-8e3e-7260-83ec-53fda8e26ed6.jsonl",
+      "bytes": 2057190,
+      "sha256": "d4e18c12ee31dfe60e34c4a2e55c41d29b5a353c95694805cb885d71572d1b20",
+      "lines": 343
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-45-41-01a14dc2-4b36-73f1-86e8-9b8f3377e7d7.jsonl",
+      "bytes": 2330460,
+      "sha256": "523813dd174e6c9b47c00063e39251d0faeac6989e0194b58b8c65248f310dbf",
+      "lines": 345
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-47-26-01a14dc3-e777-7a43-aaf9-21d1f52e78c4.jsonl",
+      "bytes": 1188896,
+      "sha256": "5aea556b1e34c2e056d68a4aff7b4d378dfc291239fc7930b5426027dbb53ab5",
+      "lines": 192
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-49-17-01a14dc5-974c-7a70-9660-450d80cefb8f.jsonl",
+      "bytes": 2744569,
+      "sha256": "774bc42c0f4ad2355d464bc17161a0e73fd4fa98ccd99e7ae993523a1aff3633",
+      "lines": 849
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-49-30-01a14dc5-c883-7ca0-87d2-863a4def30f7.jsonl",
+      "bytes": 668351,
+      "sha256": "f10f057b23a637c5f133712c8f42c064015396b315aa949b9d5f9d474b642793",
+      "lines": 121
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-49-31-01a14dc5-cf04-7fa2-abf5-f5180ff0102d.jsonl",
+      "bytes": 4986994,
+      "sha256": "97131bd4df9cfd252158ef5efabf89238ca51e6fea9069a2a43be77875c3de8d",
+      "lines": 1356
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-50-45-01a14dc6-eba7-7e62-873d-bf08a1062054.jsonl",
+      "bytes": 158558,
+      "sha256": "a037b4c1afa350ba348eede67dcbccb0c94596d27da5a254f475436a346a2f2c",
+      "lines": 30
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-51-20-01a14dc7-7647-7ca0-9693-1aa4cb21736f.jsonl",
+      "bytes": 482446,
+      "sha256": "e1b27f26f2a5ff74be64ad653e60a2b1600bc825325b6c5052b750e60e702f00",
+      "lines": 140
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-58-16-01a14dcd-d1ce-7e80-9ad1-8ca300136deb.jsonl",
+      "bytes": 11937173,
+      "sha256": "35b8f3aa82f4785e321386b17f940077e1e468a6f4347f972548253ad19e81d2",
+      "lines": 2647
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-58-54-01a14dce-64e6-7c23-a61f-e45e518a670d.jsonl",
+      "bytes": 1620147,
+      "sha256": "c2526316316c7118bf33031711f60c8b00c13d288a93bf33208a9d54a473cffc",
+      "lines": 588
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-09-50-01a14dd8-6767-7832-9792-e186bdd52483.jsonl",
+      "bytes": 9192544,
+      "sha256": "0b1d11b1e7b10560787b719ad68078875f634e50a59a4bc53dd1ed4af642559f",
+      "lines": 2631
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-12-52-01a14ddb-2f4c-74e3-9a27-c852a809a36b.jsonl",
+      "bytes": 1119724,
+      "sha256": "1f45f09c5e873b33733a2f5a7a5b3c113006f9b1f311273e0eefae297665ed9f",
+      "lines": 403
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-18-41-01a14de0-82c2-7390-857d-56715ee5e765.jsonl",
+      "bytes": 274990,
+      "sha256": "b38e7c192199fbb41b713bbaed74a8c0f30f1ca26dc1d81892b6342b6eafc8a8",
+      "lines": 41
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-26-09-01a14de7-56e7-7042-814d-d6e6fb00aa04.jsonl",
+      "bytes": 1281204,
+      "sha256": "dc861f79e02466695efa6c3ad5ed23a48e1c22569dc81fefe50e2958e803dc01",
+      "lines": 324
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-30-47-01a14deb-946e-7370-9a56-eb28be984d38.jsonl",
+      "bytes": 2984539,
+      "sha256": "8631e28421cc7b3b4b2100dab5291851cc69a9f1ae1a0a3bee23c31b416022f7",
+      "lines": 446
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-37-19-01a14df1-9087-7191-ab2b-112fe986b0e9.jsonl",
+      "bytes": 11290632,
+      "sha256": "7f86a60234efa15f355bf8fd498720e8f34478e9f565612197d4447ced748bf2",
+      "lines": 3798
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-38-05-01a14df2-440a-7df3-a918-ba7e35d59d4c.jsonl",
+      "bytes": 11781681,
+      "sha256": "66e12a94ea684acfca1ce56ea9d40b9a5c9a2b74e066b255e6bfb7b6ab80a12b",
+      "lines": 3500
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-38-35-01a14df2-b9cb-7962-83a2-a281a67f3217.jsonl",
+      "bytes": 2308237,
+      "sha256": "673a87747923ffd07c21cf9c031caa8c5bed64e137101f107b3e47da5cb31c38",
+      "lines": 611
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-53-33-01a14e00-6c88-7c60-94bd-e08828d95cb0.jsonl",
+      "bytes": 6770753,
+      "sha256": "7c6f59fe889707b2a191d1b9ea74ce28a2867c61181d2f090aa8cdb817ea002f",
+      "lines": 1828
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T14-22-01-01a14e51-6dd5-7bb0-9e8b-97dfbbdfeecb.jsonl",
+      "bytes": 2928988,
+      "sha256": "3f2691873e65b7cde82b8b9b63ae7383bf500d22e69d3c3b512061ac0454123d",
+      "lines": 815
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T14-22-10-01a14e51-8f7f-7422-95cf-8895d9fbd1bd.jsonl",
+      "bytes": 4482482,
+      "sha256": "bd9b6b3066a1faca95c71d9ebff5eff827948d1e23d14fafea1c6b472b34f890",
+      "lines": 1073
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T14-23-11-01a14e52-7ce3-7dd3-8ad2-440f9538cc39.jsonl",
+      "bytes": 3971948,
+      "sha256": "9d7b57f769bdfd8c89afab4c6a2e3ce8169f3b39d9db9a86bd438c8d116d9020",
+      "lines": 1443
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T14-23-34-01a14e52-d989-73d2-ac7d-67ed8d310e44.jsonl",
+      "bytes": 1618173,
+      "sha256": "eb640a64b56535029a03236758c182ea09f8f8048e2bafc42a1e60cebfb7d88e",
+      "lines": 273
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T14-25-10-01a14e54-4f40-76f1-8f5e-fdf244983e61.jsonl",
+      "bytes": 624685,
+      "sha256": "ebd9fabc3bfc4c0e633700d807366f0d92175ff54b1687b514cc68fa3abd34e8",
+      "lines": 160
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T14-57-09-01a14e71-97a1-7cd0-a4ed-755000ac5a02.jsonl",
+      "bytes": 1365754,
+      "sha256": "8e2cc81cac6f6069cc2c4afc80d245bc224802aaeccd6fdd61b0fdeaa26e7e73",
+      "lines": 356
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T16-29-08-01a14ec5-cbc4-7393-98ce-1062acd2116e.jsonl",
+      "bytes": 525714,
+      "sha256": "43de6e0ae941685e7a3866ff18ebe2452d5ac052a32fc29bb130599198ffc37e",
+      "lines": 66
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-20-23-01a14ef4-b98b-7312-a158-0a1514b1407f.jsonl",
+      "bytes": 5890192,
+      "sha256": "80d622324b5f41066138da6991a8973564c770df793766a7ececa5b3a85d1732",
+      "lines": 1733
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-21-12-01a14ef5-7893-7740-a6b3-1d8685a89add.jsonl",
+      "bytes": 415836,
+      "sha256": "9e38c74ec41b6eff3d9699aa1e4ede4140ffd0e9c289f8ae50ad1245092e1fc7",
+      "lines": 58
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-25-04-01a14ef9-0454-7c21-9edc-b85555ba7c60.jsonl",
+      "bytes": 2259897,
+      "sha256": "bf04bb9ae88616ed10ca96db19b591d1651d4af701590b660db9e35094daeb38",
+      "lines": 378
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-35-54-01a14f02-ed8d-7481-8b85-193c512edae8.jsonl",
+      "bytes": 2496479,
+      "sha256": "2986f103a02856b32876c1380330152262cbb0dbb336b40622b7e20907ba0e6e",
+      "lines": 395
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-50-09-01a14f0f-f832-75a2-bacf-f92274eee9ad.jsonl",
+      "bytes": 1971968,
+      "sha256": "b7d1143b4d8ab616df782bed99dd8805eba168b4ec6765d9c3334709ccdbd1f5",
+      "lines": 348
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-50-14-01a14f10-0c0c-7170-a706-7ac71a4b02e9.jsonl",
+      "bytes": 2729192,
+      "sha256": "9255e712646a14fee9904d58d0d5f439ce0fbdd5a272b432b592dfaa7852a325",
+      "lines": 395
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-11-28-01a14f23-7c1f-7731-ac5c-aa66ad1ad3bf.jsonl",
+      "bytes": 2692124,
+      "sha256": "1fce462493fc4d11ccba846448b6bca1e8d2e78ea6833a9301225179522f9ac9",
+      "lines": 364
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-14-24-01a14f26-2d93-7921-b9f0-1e998e6e1459.jsonl",
+      "bytes": 2506239,
+      "sha256": "0e2432457a5ed232f3f03c65e1bbe043e39cd0af3f10f7c2883d0c7c0e011248",
+      "lines": 445
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-14-43-01a14f26-7533-7d00-81d6-a592dc996674.jsonl",
+      "bytes": 1496267,
+      "sha256": "08a7c6b383f279cd67ece45a76c239c20cbd3b723ff9373316f694993765a5e0",
+      "lines": 191
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-14-54-01a14f26-a2e6-7482-a88c-4dc13fe9b7ba.jsonl",
+      "bytes": 2574285,
+      "sha256": "acf56d464dbe4836c9bd3574f3b92b854cc0e8bf7f6d3d22a08544877e953ee4",
+      "lines": 452
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-15-17-01a14f26-fe08-7da2-9ccd-e45364e070f3.jsonl",
+      "bytes": 2615247,
+      "sha256": "8814b3b22927c624a7cff83619bc2c76d40879e822f5e84a85c95219c4230c1d",
+      "lines": 868
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-23-12-01a14f2e-390b-74c1-bbce-390f87c83e57.jsonl",
+      "bytes": 450870,
+      "sha256": "a16419c4c8ebbbb248a25fcc69404b1ec2b9ad93db5c9a9edbd65f00459134e4",
+      "lines": 54
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-37-18-01a14f3b-2607-71a2-81ef-639aa05954d8.jsonl",
+      "bytes": 984161,
+      "sha256": "f462e8eef31a83d577b9f1e75570b18f22ebee4b421517b61dbafa689dbd6437",
+      "lines": 106
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-42-11-01a14f3f-9e10-7f03-b132-8f4ad3127d7a.jsonl",
+      "bytes": 1730302,
+      "sha256": "786fa90aa78e5c11fafab2f893fcf8a4cc23af654b21aa4a226eaf9b13016ffb",
+      "lines": 330
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-43-28-01a14f40-c979-70e0-9f06-db22ff55cc18.jsonl",
+      "bytes": 1695380,
+      "sha256": "04eb195bb535d447425bfff3d328f4b31cc2c609a350928c749d5b99035476bc",
+      "lines": 301
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-46-42-01a14f43-be01-7ff3-9395-a5ed1f7a9cf7.jsonl",
+      "bytes": 1295385,
+      "sha256": "45db04515d820a5466ce8a2effd573c1d66e28828d04f18dd7afd1af75755589",
+      "lines": 146
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-46-58-01a14f43-ff13-7e91-91f6-2199fab16481.jsonl",
+      "bytes": 1109261,
+      "sha256": "8d550dfc60be2fa105d0c5c2e473922127241063b8a4dd340773709de095d767",
+      "lines": 110
+    },
+    {
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-47-54-01a14f44-d6e2-7643-9caf-ac16d3929256.jsonl",
+      "bytes": 1359333,
+      "sha256": "57328d39e7fec433ab21fa600b2af7a3d9b526fc1b8dddbe57be7eba9e572bf8",
+      "lines": 215
+    },
+    {
+      "file": ".claude/projects/C--Users-arketov-Desktop/47bd9137-36e4-4172-bba9-798cb267139b.jsonl",
+      "bytes": 88173,
+      "sha256": "7545535ffc7a71cd498c3d5ebaa14f29315adfc25437cac74d46e6b2fbdf5057",
+      "lines": 27
+    },
+    {
+      "file": ".claude/projects/C--Users-arketov-Desktop/6f12bcce-f9a8-4471-9331-d84e3e3c1fe8.jsonl",
+      "bytes": 270248,
+      "sha256": "d29ad906ec6e51135cb1622c494f52e88908d79f6f54c45dbe362829f47c36d2",
+      "lines": 92
+    },
+    {
+      "file": ".claude/projects/C--Users-arketov-Desktop/bf92435f-8801-436e-9331-01ce1b5c7526.jsonl",
+      "bytes": 297409,
+      "sha256": "228d7e1d38ae3c8d7428c3ccec8d6fd8c32da979f6305b1afb0d160122dd62a5",
+      "lines": 95
+    },
+    {
+      "file": ".claude/projects/C--Users-arketov-Desktop/fc04dcd3-fb10-4f21-83d3-2a1cbf3f4126/subagents/agent-a00a32111f54d016d.jsonl",
+      "bytes": 265445,
+      "sha256": "7c5b27a75cc5427b526dfcaf4a686a3d88cf44e96855e4f904c0f653b3c1ff3f",
+      "lines": 57
+    },
+    {
+      "file": ".claude/projects/C--Users-arketov-Desktop/fc04dcd3-fb10-4f21-83d3-2a1cbf3f4126/subagents/agent-a4b3142f5f53ec6b4.jsonl",
+      "bytes": 193404,
+      "sha256": "92b27ca85a59dca4c3ef51cd88310582a977ca4e7b00bfceec648ef9d1176433",
+      "lines": 29
+    },
+    {
+      "file": ".claude/projects/C--Users-arketov-Desktop/fc04dcd3-fb10-4f21-83d3-2a1cbf3f4126/subagents/agent-a584cb1e2c123f06f.jsonl",
+      "bytes": 216700,
+      "sha256": "dfbacf7f44a2f0a94c6e83027e690f2c0893422434ec594ca95091562484f92f",
+      "lines": 82
+    },
+    {
+      "file": ".claude/projects/C--Users-arketov-Desktop/fc04dcd3-fb10-4f21-83d3-2a1cbf3f4126/subagents/agent-a7a3280c67ab9b2fd.jsonl",
+      "bytes": 181931,
+      "sha256": "2cb35f37dc7c9a64422268e261ba40401b2db43daa7106d1674e9d48be37d058",
+      "lines": 54
+    },
+    {
+      "file": ".claude/projects/C--Users-arketov-Desktop/fc04dcd3-fb10-4f21-83d3-2a1cbf3f4126/subagents/agent-aafe4db1470cca749.jsonl",
+      "bytes": 162730,
+      "sha256": "8880d0da200806ad330b3bbbda6161da3ed603f6d434929e891b2731ebf290a3",
+      "lines": 44
+    },
+    {
+      "file": ".claude/projects/C--Users-arketov-Desktop/fc04dcd3-fb10-4f21-83d3-2a1cbf3f4126/subagents/agent-abc2231afa2d9aee5.jsonl",
+      "bytes": 416503,
+      "sha256": "ebb26972bfeeb2c82f83a78ecf5c610f9e27b7dcf73682419aae8e35b33fc02d",
+      "lines": 95
+    },
+    {
+      "file": ".claude/projects/C--Users-arketov-Desktop/fc04dcd3-fb10-4f21-83d3-2a1cbf3f4126/subagents/agent-ac5da8880750d7669.jsonl",
+      "bytes": 148001,
+      "sha256": "e0ca7eecec153c58a884a8853d5410b68aa207663ea26b3e9df40ea9f7ec01fe",
+      "lines": 38
+    },
+    {
+      "file": ".claude/projects/C--Users-arketov-Desktop/fc04dcd3-fb10-4f21-83d3-2a1cbf3f4126.jsonl",
+      "bytes": 690099,
+      "sha256": "877d731e96c953d881f76fbd5c926a5f7bbdb3023f6c10b050b26e08f77491de",
+      "lines": 311
+    }
+  ],
+  "summary": {
+    "files": 97,
+    "malformed": 0,
+    "claudeBarsCalls": 0,
+    "groups": 190,
+    "sites": 301,
+    "sessions": 45,
+    "duplicateCallIds": 0,
+    "staticSites": 269,
+    "dynamicSites": 32,
+    "sitesByTool": {
+      "bars_rag_search": 149,
+      "bars_status": 63,
+      "bars_read": 52,
+      "bars_projects": 25,
+      "bars_outline": 11,
+      "bars_reindex": 1
+    },
+    "staticSearchSites": 134,
+    "searchKeys": {
+      "query": 134,
+      "limit": 129,
+      "project": 112,
+      "files": 20,
+      "modules": 5,
+      "format": 4,
+      "min_score": 3
+    },
+    "limits": {
+      "1": 5,
+      "2": 11,
+      "3": 27,
+      "4": 22,
+      "5": 18,
+      "6": 21,
+      "7": 8,
+      "8": 14,
+      "10": 2,
+      "12": 1,
+      "default": 5
+    },
+    "formats": {
+      "default": 130,
+      "json": 4
+    },
+    "broad": 109,
+    "noCyrillic": 19,
+    "groupsWithTruncation": 97,
+    "groupsWithoutRecognizedResponse": 11,
+    "observedTextSearches": 116,
+    "emptySearches": 11,
+    "topChats": 15,
+    "rerankFallbacks": 9,
+    "errors": {
+      "model_loading": 6,
+      "transport_closed": 5,
+      "project_not_found": 4,
+      "invalid_params": 4
+    }
+  },
+  "errors": [
+    {
+      "group": 63,
+      "kind": "project_not_found",
+      "message": "Ошибка bars (project_not_found): проект `$HOME/Desktop/cyberProject` не зарегистрирован: bars-cli register <папка проекта>"
+    },
+    {
+      "group": 70,
+      "kind": "model_loading",
+      "message": "Ошибка bars (model_loading): модель загружается в память: повторите поиск через несколько секунд\nМодель ещё загружается: повторите вызов позже."
+    },
+    {
+      "group": 72,
+      "kind": "transport_closed",
+      "message": "tool call error: tool call failed for `bars/bars_status`\n\nCaused by:\n    Transport closed"
+    },
+    {
+      "group": 72,
+      "kind": "transport_closed",
+      "message": "tool call error: tool call failed for `bars/bars_rag_search`\n\nCaused by:\n    Transport closed"
+    },
+    {
+      "group": 88,
+      "kind": "invalid_params",
+      "message": "Ошибка bars (invalid_params): неизвестный файл `../PLAN.md`"
+    },
+    {
+      "group": 107,
+      "kind": "model_loading",
+      "message": "Ошибка bars (model_loading): модель загружается в память: повторите поиск через несколько секунд\nМодель ещё загружается: повторите вызов позже."
+    },
+    {
+      "group": 107,
+      "kind": "model_loading",
+      "message": "Ошибка bars (model_loading): модель загружается в память: повторите поиск через несколько секунд\nМодель ещё загружается: повторите вызов позже."
+    },
+    {
+      "group": 110,
+      "kind": "invalid_params",
+      "message": "Ошибка bars (invalid_params): неизвестный файл `docs/knowledge-base/runtime/motion-tasks.md`"
+    },
+    {
+      "group": 130,
+      "kind": "transport_closed",
+      "message": "tool call error: tool call failed for `bars/bars_rag_search`\n\nCaused by:\n    Transport closed"
+    },
+    {
+      "group": 132,
+      "kind": "project_not_found",
+      "message": "Ошибка bars (project_not_found): проект `$HOME\\Desktop\\cyberProject` не зарегистрирован: bars-cli register <папка проекта>"
+    },
+    {
+      "group": 132,
+      "kind": "project_not_found",
+      "message": "Ошибка bars (project_not_found): проект `$HOME\\Desktop\\cyberProject` не зарегистрирован: bars-cli register <папка проекта>"
+    },
+    {
+      "group": 133,
+      "kind": "project_not_found",
+      "message": "Ошибка bars (project_not_found): проект `$HOME\\Desktop\\cyberProject` не зарегистрирован: bars-cli register <папка проекта>"
+    },
+    {
+      "group": 137,
+      "kind": "model_loading",
+      "message": "Ошибка bars (model_loading): модель загружается в память: повторите поиск через несколько секунд\nМодель ещё загружается: повторите вызов позже."
+    },
+    {
+      "group": 137,
+      "kind": "model_loading",
+      "message": "Ошибка bars (model_loading): модель загружается в память: повторите поиск через несколько секунд\nМодель ещё загружается: повторите вызов позже."
+    },
+    {
+      "group": 137,
+      "kind": "model_loading",
+      "message": "Ошибка bars (model_loading): модель загружается в память: повторите поиск через несколько секунд\nМодель ещё загружается: повторите вызов позже."
+    },
+    {
+      "group": 139,
+      "kind": "invalid_params",
+      "message": "Ошибка bars (invalid_params): неизвестный файл `issue.md`"
+    },
+    {
+      "group": 154,
+      "kind": "transport_closed",
+      "message": "tool call error: tool call failed for `bars/bars_status`\n\nCaused by:\n    Transport closed"
+    },
+    {
+      "group": 154,
+      "kind": "transport_closed",
+      "message": "tool call error: tool call failed for `bars/bars_rag_search`\n\nCaused by:\n    Transport closed"
+    },
+    {
+      "group": 169,
+      "kind": "invalid_params",
+      "message": "Ошибка bars (invalid_params): неизвестный файл `BARS_INSTRUCTION.md`"
+    }
+  ],
+  "searches": [
+    {
+      "group": 0,
+      "count": 4,
+      "topPath": "docs/knowledge-base/app/wpf-runtime.md",
+      "minScore": "0 (cosine)"
+    },
+    {
+      "group": 1,
+      "count": 2,
+      "topPath": "docs/ISSUES.md",
+      "minScore": "0 (cosine)"
+    },
+    {
+      "group": 7,
+      "count": 3,
+      "topPath": "docs/knowledge-base/app/in-game-control.md",
+      "minScore": "0 (cosine)"
+    },
+    {
+      "group": 8,
+      "count": 4,
+      "topPath": "docs/knowledge-base/research/pit-service-stage10-2026-10-15.md",
+      "minScore": "0.24 (cosine)"
+    },
+    {
+      "group": 11,
+      "count": 8,
+      "topPath": "docs/chats/2026-10-15-solo-police-human/handoff.md",
+      "minScore": "0.24 (cosine)"
+    },
+    {
+      "group": 13,
+      "count": 5,
+      "topPath": "docs/chats/2026-10-15-solo-police-human/handoff.md"
+    },
+    {
+      "group": 14,
+      "count": 5,
+      "topPath": "docs/chats/2026-10-15-solo-police-human/log.md"
+    },
+    {
+      "group": 16,
+      "count": 3,
+      "topPath": "docs/knowledge-base/research/dynamic-trajectory-control-2026-10-16.md",
+      "minScore": "0.24 (cosine)"
+    },
+    {
+      "group": 17,
+      "count": 3,
+      "topPath": "docs/knowledge-base/native/ai-driving-pipeline.md",
+      "minScore": "0.24 (cosine)"
+    },
+    {
+      "group": 19,
+      "count": 2,
+      "topPath": "docs/ISSUES.md",
+      "minScore": "0.24 (cosine)"
+    },
+    {
+      "group": 20,
+      "count": 8,
+      "topPath": "docs/knowledge-base/research/pit-entry-options-2026-10-13.md",
+      "minScore": "0.24 (cosine)"
+    },
+    {
+      "group": 24,
+      "count": 5,
+      "topPath": "docs/knowledge-base/native/native-pit-return.md"
+    },
+    {
+      "group": 25,
+      "count": 3,
+      "topPath": "docs/knowledge-base/research/pit-entry-options-2026-10-13.md",
+      "minScore": "0.24 (cosine)"
+    },
+    {
+      "group": 27,
+      "count": 3,
+      "topPath": "docs/knowledge-base/research/online-lua-controller.md",
+      "minScore": "0.24 (cosine)"
+    },
+    {
+      "group": 28,
+      "count": 5,
+      "topPath": "docs/knowledge-base/research/index.md"
+    },
+    {
+      "group": 29,
+      "count": 5,
+      "topPath": "docs/knowledge-base/research/pit-entry-stage8-2026-10-15.md",
+      "minScore": "0.24 (cosine)"
+    },
+    {
+      "group": 31,
+      "count": 7,
+      "topPath": "docs/knowledge-base/research/pit-entry-stage8-2026-10-15.md"
+    },
+    {
+      "group": 35,
+      "count": 4,
+      "topPath": "docs/chats/2026-10-15-stage9-design/handoff.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 36,
+      "count": 3,
+      "topPath": "docs/knowledge-base/research/pit-entry-own-box.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 37,
+      "count": 3,
+      "topPath": "docs/plan_research.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 38,
+      "count": 3,
+      "topPath": "docs/knowledge-base/research/runtime-ai-splines.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 39,
+      "count": 6,
+      "topPath": "docs/knowledge-base/native/runtime-ai-bindings.md",
+      "minScore": "0.24 (cosine)"
+    },
+    {
+      "group": 40,
+      "count": 5,
+      "topPath": "docs/knowledge-base/research/control-surface-2026-10-11.md",
+      "minScore": "0.24 (cosine)"
+    },
+    {
+      "group": 41,
+      "count": 4,
+      "topPath": "docs/knowledge-base/native/runtime-ai-bindings.md",
+      "minScore": "0.24 (cosine)"
+    },
+    {
+      "group": 42,
+      "count": 3,
+      "topPath": "docs/knowledge-base/native/native-pit-return.md",
+      "minScore": "0.24 (cosine)"
+    },
+    {
+      "group": 44,
+      "count": 4,
+      "topPath": "docs/knowledge-base/native/police-aggression.md",
+      "minScore": "0.24 (cosine)"
+    },
+    {
+      "group": 46,
+      "count": 8,
+      "topPath": "docs/knowledge-base/research/pit-entry-stage8-2026-10-15.md"
+    },
+    {
+      "group": 51,
+      "count": 12,
+      "topPath": "docs/knowledge-base/research/runtime-ai-splines.md"
+    },
+    {
+      "group": 53,
+      "count": 6,
+      "topPath": "docs/knowledge-base/research/runtime-ai-splines.md",
+      "minScore": "0.24 (cosine)"
+    },
+    {
+      "group": 54,
+      "count": 5,
+      "topPath": "docs/chats/2026-10-16-ai-driving-binaries/log.md",
+      "minScore": "0.24 (cosine)"
+    },
+    {
+      "group": 56,
+      "count": 5,
+      "topPath": "docs/knowledge/spike-search.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 58,
+      "count": 3,
+      "topPath": "docs/knowledge/spike-search.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 59,
+      "count": 4,
+      "topPath": "docs/knowledge-base/research/pit-service-stage10-2026-10-15.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 62,
+      "count": 3,
+      "topPath": "docs/knowledge-base/app/in-game-control.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 64,
+      "count": 0,
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 64,
+      "count": 1,
+      "topPath": "docs/PLAN.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 65,
+      "count": 3,
+      "topPath": "docs/knowledge-base/research/pit-service-stage10-2026-10-15.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 66,
+      "count": 5,
+      "topPath": "docs/features/PIT_SERVICE.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 67,
+      "count": 0,
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 69,
+      "count": 6,
+      "topPath": "docs/adr/0019-component-service-policy.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 71,
+      "count": 2,
+      "topPath": "docs/features/SCENARIO_SERVICE_CONTINUATION.md",
+      "minScore": "0.24 (cosine)",
+      "rerankError": "rerank-модель ещё скачивается или грузится (100 %): выдача без rerank"
+    },
+    {
+      "group": 73,
+      "count": 0,
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 74,
+      "count": 1,
+      "topPath": "docs/MAIN_IDEA.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 75,
+      "count": 5,
+      "topPath": "docs/MAIN_IDEA.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 78,
+      "count": 2,
+      "topPath": "docs/overview.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 79,
+      "count": 3,
+      "topPath": "docs/overview.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 80,
+      "count": 2,
+      "topPath": "docs/getting-started.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 80,
+      "count": 2,
+      "topPath": "docs/project-status.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 83,
+      "count": 6,
+      "topPath": "docs/plan_research.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 85,
+      "count": 3,
+      "topPath": "docs/features/PIT_SERVICE.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 87,
+      "count": 3,
+      "topPath": "docs/knowledge-base/research/fuel-lap-estimation-q002-2026-10-18.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 89,
+      "count": 0,
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 91,
+      "count": 5,
+      "topPath": "docs/plan_research.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 93,
+      "count": 3,
+      "topPath": "docs/plan_research.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 94,
+      "count": 4,
+      "topPath": "docs/chats/2026-10-06-research-journal/log.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 95,
+      "count": 4,
+      "topPath": "docs/knowledge-base/research/component-damage-q003-2026-10-18.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 96,
+      "count": 8,
+      "topPath": "docs/knowledge-base/research/police-live-diagnostics-2026-10-16.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 97,
+      "count": 8,
+      "topPath": "docs/knowledge-base/research/police-live-diagnostics-2026-10-16.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 100,
+      "count": 4,
+      "topPath": "docs/chats/2026-10-07-advanced-control/log.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 103,
+      "count": 5,
+      "topPath": "docs/chats/2026-10-18-pit-speed-linear/handoff.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 104,
+      "count": 4,
+      "topPath": "docs/knowledge-base/runtime/runtime-resilience.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 105,
+      "count": 3,
+      "topPath": "docs/chats/2026-10-18-trajectory-audit/handoff.md",
+      "minScore": "0.24 (cosine)",
+      "rerankError": "rerank-модель ещё скачивается или грузится (0 %): выдача без rerank"
+    },
+    {
+      "group": 106,
+      "count": 3,
+      "topPath": "docs/knowledge-base/runtime/launch-service.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 108,
+      "count": 4,
+      "topPath": "docs/features/MOTION_TOOLKIT.md",
+      "minScore": "0.24 (cosine)",
+      "rerankError": "rerank-модель ещё скачивается или грузится (100 %): выдача без rerank"
+    },
+    {
+      "group": 108,
+      "count": 4,
+      "topPath": "docs/knowledge-base/research/join-cancellation-q010-2026-10-18.md",
+      "minScore": "0.24 (cosine)",
+      "rerankError": "rerank-модель ещё скачивается или грузится (100 %): выдача без rerank"
+    },
+    {
+      "group": 111,
+      "count": 2,
+      "topPath": "docs/knowledge-base/runtime/motion-tasks.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 112,
+      "count": 5,
+      "topPath": "docs/plan_research.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 114,
+      "count": 3,
+      "topPath": "docs/knowledge-base/research/pit-service-stage10-2026-10-15.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 118,
+      "count": 2,
+      "topPath": "docs/knowledge-base/research/control-surface-2026-10-11.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 120,
+      "count": 4,
+      "topPath": "docs/knowledge-base/research/physics-godmode-2026-10-18.md",
+      "minScore": "0.24 (cosine)",
+      "rerankError": "rerank-модель ещё скачивается или грузится (0 %): выдача без rerank"
+    },
+    {
+      "group": 121,
+      "count": 6,
+      "topPath": "docs/knowledge-base/research/physics-godmode-2026-10-18.md",
+      "minScore": "0.24 (cosine)",
+      "rerankError": "rerank-модель ещё скачивается или грузится (0 %): выдача без rerank"
+    },
+    {
+      "group": 122,
+      "count": 4,
+      "topPath": "docs/knowledge-base/native/collision-reactive-behavior.md",
+      "minScore": "0.24 (cosine)",
+      "rerankError": "rerank-модель ещё скачивается или грузится (0 %): выдача без rerank"
+    },
+    {
+      "group": 124,
+      "count": 2,
+      "topPath": "docs/plan_research.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 125,
+      "count": 5,
+      "topPath": "docs/issue.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 126,
+      "count": 4,
+      "topPath": "docs/knowledge/inference-speed.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 127,
+      "count": 3,
+      "topPath": "docs/features/models/local-models.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 128,
+      "count": 5,
+      "topPath": "docs/architecture/worker.md"
+    },
+    {
+      "group": 129,
+      "count": 3,
+      "topPath": "docs/features/models/local-models.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 131,
+      "count": 4,
+      "topPath": "docs/user_ideas.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 135,
+      "count": 6,
+      "topPath": "docs/features/docs-convention/plan.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 135,
+      "count": 3,
+      "topPath": "docs/features/docs-convention/layout.md"
+    },
+    {
+      "group": 136,
+      "count": 1,
+      "topPath": "docs/backlog/ideas.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 141,
+      "count": 1,
+      "topPath": "docs/backlog/issues.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 142,
+      "count": 4,
+      "topPath": "docs/features/models/device-plan.md"
+    },
+    {
+      "group": 143,
+      "count": 3,
+      "topPath": "docs/features/models/device-plan.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 146,
+      "count": 2,
+      "topPath": "docs/knowledge-base/research/damage-driving-threshold-q005-2026-10-18.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 149,
+      "count": 1,
+      "topPath": "docs/chats/2026-10-06-research-journal/log.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 151,
+      "count": 8,
+      "topPath": "docs/chats/2026-10-18-stage11-pit-service/q008-brief.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 152,
+      "count": 5,
+      "topPath": "docs/knowledge-base/research/pit-service-stage10-2026-10-15.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 155,
+      "count": 4,
+      "topPath": "docs/chats/2026-10-18-native-pit-q008/handoff.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 156,
+      "count": 4,
+      "topPath": "docs/knowledge-base/research/physics-godmode-2026-10-18.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 157,
+      "count": 1,
+      "topPath": "docs/features/distribution/installer.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 158,
+      "count": 4,
+      "topPath": "docs/chats/2026-10-18-output-language/handoff.md",
+      "minScore": "0.24 (cosine)",
+      "rerankError": "rerank-модель ещё скачивается или грузится (0 %): выдача без rerank"
+    },
+    {
+      "group": 159,
+      "count": 6,
+      "topPath": "docs/backlog/ideas.md",
+      "minScore": "0.24 (cosine)",
+      "rerankError": "rerank-модель ещё скачивается или грузится (0 %): выдача без rerank"
+    },
+    {
+      "group": 160,
+      "count": 0,
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 161,
+      "count": 0,
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 162,
+      "count": 8,
+      "topPath": "docs/architecture/worker.md",
+      "minScore": "0 (rerank)"
+    },
+    {
+      "group": 164,
+      "count": 4,
+      "topPath": "docs/backlog/ideas.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 165,
+      "count": 5,
+      "topPath": "docs/knowledge/graph-and-relations.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 166,
+      "count": 4,
+      "topPath": "docs/knowledge/graph-integration-2026-10-18.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 171,
+      "count": 8,
+      "topPath": "docs/backlog/ideas.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 172,
+      "count": 0,
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 174,
+      "count": 0,
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 175,
+      "count": 0,
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 176,
+      "count": 6,
+      "topPath": "docs/chats/2026-10-16-plan-review/handoff.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 177,
+      "count": 3,
+      "topPath": "docs/chats/2026-10-18-stage17-implementation/log.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 179,
+      "count": 8,
+      "topPath": "docs/features/window/Index.md",
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 180,
+      "count": 0,
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 181,
+      "count": 6,
+      "topPath": "docs/PLAN.md",
+      "minScore": "0 (rerank)"
+    },
+    {
+      "group": 182,
+      "count": 9,
+      "topPath": "docs/PLAN.md"
+    },
+    {
+      "group": 183,
+      "count": 4,
+      "topPath": "docs/knowledge-base/native/native-pit-return.md",
+      "minScore": "0 (rerank)"
+    },
+    {
+      "group": 185,
+      "count": 3,
+      "topPath": "docs/knowledge-base/research/server-lap-accounting-2026-10-11.md",
+      "minScore": "0 (rerank)"
+    },
+    {
+      "group": 186,
+      "count": 0,
+      "minScore": "0.1 (rerank)"
+    },
+    {
+      "group": 187,
+      "count": 10,
+      "topPath": "docs/PLAN.md"
+    },
+    {
+      "group": 188,
+      "count": 7,
+      "topPath": "docs/PLAN.md"
+    },
+    {
+      "group": 189,
+      "count": 1,
+      "topPath": "docs/knowledge-base/research/stock-udp-ports.md",
+      "minScore": "0.1 (rerank)"
+    }
+  ],
+  "groups": [
+    {
+      "group": 0,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T15-48-41-01a13f2d-b10a-7b72-b671-27e7b2d7a65f.jsonl",
+      "line": 2620,
+      "waitLines": [],
+      "session": "01a13f2d-b10a-7b72-b671-27e7b2d7a65f",
+      "time": "2026-10-15T17:14:13.015Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 4
+        }
+      ],
+      "truncated": false,
+      "responseCount": 2
+    },
+    {
+      "group": 1,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T15-48-41-01a13f2d-b10a-7b72-b671-27e7b2d7a65f.jsonl",
+      "line": 2830,
+      "waitLines": [
+        2844
+      ],
+      "session": "01a13f2d-b10a-7b72-b671-27e7b2d7a65f",
+      "time": "2026-10-15T17:20:55.055Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "files",
+            "limit"
+          ],
+          "limit": 2,
+          "files": [
+            "ISSUES.md"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 2,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T17-11-39-01a13f76-b4b1-7372-9918-9398b0c1d272_01a13f79-a636-7653-9244-d9de08d5ea61.jsonl",
+      "line": 810,
+      "waitLines": [
+        818,
+        824,
+        832,
+        838,
+        844,
+        850,
+        856,
+        862,
+        868,
+        876
+      ],
+      "session": "01a13f76-b4b1-7372-9918-9398b0c1d272",
+      "time": "2026-10-15T16:21:45.668Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 3
+        }
+      ],
+      "truncated": false,
+      "responseCount": 0
+    },
+    {
+      "group": 3,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T17-11-39-01a13f76-b4b1-7372-9918-9398b0c1d272_01a13f79-a636-7653-9244-d9de08d5ea61.jsonl",
+      "line": 942,
+      "waitLines": [],
+      "session": "01a13f76-b4b1-7372-9918-9398b0c1d272",
+      "time": "2026-10-15T16:29:37.650Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 4,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T17-11-39-01a13f76-b4b1-7372-9918-9398b0c1d272_01a13f79-a636-7653-9244-d9de08d5ea61.jsonl",
+      "line": 950,
+      "waitLines": [
+        959,
+        965,
+        973
+      ],
+      "session": "01a13f76-b4b1-7372-9918-9398b0c1d272",
+      "time": "2026-10-15T16:29:48.466Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 2
+        }
+      ],
+      "truncated": false,
+      "responseCount": 0
+    },
+    {
+      "group": 5,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T17-11-39-01a13f76-b4b1-7372-9918-9398b0c1d272_01a13f79-a636-7653-9244-d9de08d5ea61.jsonl",
+      "line": 1524,
+      "waitLines": [],
+      "session": "01a13f76-b4b1-7372-9918-9398b0c1d272",
+      "time": "2026-10-15T16:55:21.175Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 6,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T17-11-39-01a13f76-b4b1-7372-9918-9398b0c1d272_01a13f79-a636-7653-9244-d9de08d5ea61.jsonl",
+      "line": 1737,
+      "waitLines": [],
+      "session": "01a13f76-b4b1-7372-9918-9398b0c1d272",
+      "time": "2026-10-15T17:03:36.480Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 7,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T17-11-39-01a13f76-b4b1-7372-9918-9398b0c1d272_01a13f79-a636-7653-9244-d9de08d5ea61.jsonl",
+      "line": 1743,
+      "waitLines": [],
+      "session": "01a13f76-b4b1-7372-9918-9398b0c1d272",
+      "time": "2026-10-15T17:03:45.003Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 3
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 8,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T17-11-39-01a13f76-b4b1-7372-9918-9398b0c1d272_01a13f79-a636-7653-9244-d9de08d5ea61.jsonl",
+      "line": 1789,
+      "waitLines": [],
+      "session": "01a13f76-b4b1-7372-9918-9398b0c1d272",
+      "time": "2026-10-15T19:04:21.046Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 4
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 9,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T21-07-59-01a14052-06b0-7ac1-aa5d-95f18cfacba6.jsonl",
+      "line": 31,
+      "waitLines": [],
+      "session": "01a14052-06b0-7ac1-aa5d-95f18cfacba6",
+      "time": "2026-10-15T16:08:32.969Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 10,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T22-43-30-01a140a9-7844-77b3-ba3c-fc9953407079.jsonl",
+      "line": 21,
+      "waitLines": [],
+      "session": "01a140a9-7844-77b3-ba3c-fc9953407079",
+      "time": "2026-10-15T17:45:17.717Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 11,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T22-43-30-01a140a9-7844-77b3-ba3c-fc9953407079.jsonl",
+      "line": 28,
+      "waitLines": [],
+      "session": "01a140a9-7844-77b3-ba3c-fc9953407079",
+      "time": "2026-10-15T17:45:24.870Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 8
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 12,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T22-43-30-01a140a9-7844-77b3-ba3c-fc9953407079.jsonl",
+      "line": 40,
+      "waitLines": [],
+      "session": "01a140a9-7844-77b3-ba3c-fc9953407079",
+      "time": "2026-10-15T17:45:35.883Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 13,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T22-43-30-01a140a9-7844-77b3-ba3c-fc9953407079.jsonl",
+      "line": 1723,
+      "waitLines": [],
+      "session": "01a140a9-7844-77b3-ba3c-fc9953407079",
+      "time": "2026-10-15T18:51:58.891Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "project"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 14,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T22-43-30-01a140a9-7844-77b3-ba3c-fc9953407079.jsonl",
+      "line": 2775,
+      "waitLines": [],
+      "session": "01a140a9-7844-77b3-ba3c-fc9953407079",
+      "time": "2026-10-15T19:45:57.723Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 5
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 15,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T22-43-30-01a140a9-7844-77b3-ba3c-fc9953407079.jsonl",
+      "line": 2785,
+      "waitLines": [],
+      "session": "01a140a9-7844-77b3-ba3c-fc9953407079",
+      "time": "2026-10-15T19:46:05.106Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 16,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T22-43-30-01a140a9-7844-77b3-ba3c-fc9953407079.jsonl",
+      "line": 2868,
+      "waitLines": [],
+      "session": "01a140a9-7844-77b3-ba3c-fc9953407079",
+      "time": "2026-10-15T19:47:58.167Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "files",
+            "limit"
+          ],
+          "limit": 3,
+          "files": [
+            "knowledge-base/research/dynamic-trajectory-control-2026-10-16.md"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 17,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T22-43-30-01a140a9-7844-77b3-ba3c-fc9953407079.jsonl",
+      "line": 2893,
+      "waitLines": [],
+      "session": "01a140a9-7844-77b3-ba3c-fc9953407079",
+      "time": "2026-10-15T19:48:23.553Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "files",
+            "limit"
+          ],
+          "limit": 3,
+          "files": [
+            "knowledge-base/native/ai-driving-pipeline.md",
+            "knowledge-base/research/pace-calibration-2026-10-11.md"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 18,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T22-43-30-01a140a9-7844-77b3-ba3c-fc9953407079.jsonl",
+      "line": 2949,
+      "waitLines": [],
+      "session": "01a140a9-7844-77b3-ba3c-fc9953407079",
+      "time": "2026-10-15T19:51:42.177Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 0
+    },
+    {
+      "group": 19,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T22-43-30-01a140a9-7844-77b3-ba3c-fc9953407079.jsonl",
+      "line": 2999,
+      "waitLines": [],
+      "session": "01a140a9-7844-77b3-ba3c-fc9953407079",
+      "time": "2026-10-15T19:53:22.063Z",
+      "tools": [
+        {
+          "tool": "bars_outline",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path",
+            "levels"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "files",
+            "limit"
+          ],
+          "limit": 2,
+          "files": [
+            "ISSUES.md"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 20,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-02-52-01a140bb-3155-79c0-b61a-9f2e747d0add.jsonl",
+      "line": 26,
+      "waitLines": [],
+      "session": "01a140bb-3155-79c0-b61a-9f2e747d0add",
+      "time": "2026-10-15T18:03:30.737Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        },
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 8
+        }
+      ],
+      "truncated": false,
+      "responseCount": 3
+    },
+    {
+      "group": 21,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-02-52-01a140bb-3155-79c0-b61a-9f2e747d0add.jsonl",
+      "line": 37,
+      "waitLines": [],
+      "session": "01a140bb-3155-79c0-b61a-9f2e747d0add",
+      "time": "2026-10-15T18:03:36.697Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 22,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-02-52-01a140bb-3155-79c0-b61a-9f2e747d0add.jsonl",
+      "line": 48,
+      "waitLines": [],
+      "session": "01a140bb-3155-79c0-b61a-9f2e747d0add",
+      "time": "2026-10-15T18:03:43.812Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_outline",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 2
+    },
+    {
+      "group": 23,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-02-52-01a140bb-3155-79c0-b61a-9f2e747d0add.jsonl",
+      "line": 56,
+      "waitLines": [],
+      "session": "01a140bb-3155-79c0-b61a-9f2e747d0add",
+      "time": "2026-10-15T18:03:49.989Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": false
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 24,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-02-52-01a140bb-3155-79c0-b61a-9f2e747d0add.jsonl",
+      "line": 67,
+      "waitLines": [],
+      "session": "01a140bb-3155-79c0-b61a-9f2e747d0add",
+      "time": "2026-10-15T18:03:55.192Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 5
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 25,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-02-52-01a140bb-3155-79c0-b61a-9f2e747d0add.jsonl",
+      "line": 85,
+      "waitLines": [],
+      "session": "01a140bb-3155-79c0-b61a-9f2e747d0add",
+      "time": "2026-10-15T18:04:12.960Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 3
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 26,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-02-52-01a140bb-3155-79c0-b61a-9f2e747d0add.jsonl",
+      "line": 804,
+      "waitLines": [],
+      "session": "01a140bb-3155-79c0-b61a-9f2e747d0add",
+      "time": "2026-10-15T18:30:17.639Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 27,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-02-52-01a140bb-3155-79c0-b61a-9f2e747d0add.jsonl",
+      "line": 1199,
+      "waitLines": [],
+      "session": "01a140bb-3155-79c0-b61a-9f2e747d0add",
+      "time": "2026-10-15T18:52:01.269Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 3
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 28,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-02-52-01a140bb-3155-79c0-b61a-9f2e747d0add.jsonl",
+      "line": 1333,
+      "waitLines": [],
+      "session": "01a140bb-3155-79c0-b61a-9f2e747d0add",
+      "time": "2026-10-15T18:57:11.407Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 29,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-02-52-01a140bb-3155-79c0-b61a-9f2e747d0add.jsonl",
+      "line": 1818,
+      "waitLines": [],
+      "session": "01a140bb-3155-79c0-b61a-9f2e747d0add",
+      "time": "2026-10-15T19:08:55.192Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 30,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-24-21-01a140ce-dedb-7c93-9ed6-4205e63d97ed.jsonl",
+      "line": 21,
+      "waitLines": [],
+      "session": "01a140ce-dedb-7c93-9ed6-4205e63d97ed",
+      "time": "2026-10-15T18:24:55.369Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 31,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-24-21-01a140ce-dedb-7c93-9ed6-4205e63d97ed.jsonl",
+      "line": 32,
+      "waitLines": [],
+      "session": "01a140ce-dedb-7c93-9ed6-4205e63d97ed",
+      "time": "2026-10-15T18:25:02.789Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 7
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 32,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-24-21-01a140ce-dedb-7c93-9ed6-4205e63d97ed.jsonl",
+      "line": 40,
+      "waitLines": [],
+      "session": "01a140ce-dedb-7c93-9ed6-4205e63d97ed",
+      "time": "2026-10-15T18:25:09.403Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 33,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-24-21-01a140ce-dedb-7c93-9ed6-4205e63d97ed.jsonl",
+      "line": 56,
+      "waitLines": [],
+      "session": "01a140ce-dedb-7c93-9ed6-4205e63d97ed",
+      "time": "2026-10-15T18:25:23.248Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "files",
+            "limit"
+          ],
+          "limit": 5,
+          "files": [
+            "knowledge-base/native/native-pit-return.md",
+            "knowledge-base/native/control-semantics.md"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 0
+    },
+    {
+      "group": 34,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-24-21-01a140ce-dedb-7c93-9ed6-4205e63d97ed.jsonl",
+      "line": 65,
+      "waitLines": [],
+      "session": "01a140ce-dedb-7c93-9ed6-4205e63d97ed",
+      "time": "2026-10-15T18:25:31.379Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_outline",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 35,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-24-21-01a140ce-dedb-7c93-9ed6-4205e63d97ed.jsonl",
+      "line": 163,
+      "waitLines": [],
+      "session": "01a140ce-dedb-7c93-9ed6-4205e63d97ed",
+      "time": "2026-10-18T06:19:06.926Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 4
+        }
+      ],
+      "truncated": false,
+      "responseCount": 2
+    },
+    {
+      "group": 36,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-24-21-01a140ce-dedb-7c93-9ed6-4205e63d97ed.jsonl",
+      "line": 173,
+      "waitLines": [],
+      "session": "01a140ce-dedb-7c93-9ed6-4205e63d97ed",
+      "time": "2026-10-18T06:19:18.322Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "files",
+            "limit"
+          ],
+          "limit": 3,
+          "files": [
+            "knowledge-base/research/pit-entry-own-box.md"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 37,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-24-21-01a140ce-dedb-7c93-9ed6-4205e63d97ed.jsonl",
+      "line": 225,
+      "waitLines": [],
+      "session": "01a140ce-dedb-7c93-9ed6-4205e63d97ed",
+      "time": "2026-10-18T06:20:51.021Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "files",
+            "limit"
+          ],
+          "limit": 3,
+          "files": [
+            "knowledge-base/native/pit-drive-into-box.md",
+            "plan_research.md"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 38,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-24-21-01a140ce-dedb-7c93-9ed6-4205e63d97ed.jsonl",
+      "line": 450,
+      "waitLines": [],
+      "session": "01a140ce-dedb-7c93-9ed6-4205e63d97ed",
+      "time": "2026-10-18T06:32:49.796Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 3
+        }
+      ],
+      "truncated": false,
+      "responseCount": 2
+    },
+    {
+      "group": 39,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-25-46-01a140d0-28bb-7d52-80d1-70b514199405.jsonl",
+      "line": 21,
+      "waitLines": [],
+      "session": "01a140d0-28bb-7d52-80d1-70b514199405",
+      "time": "2026-10-15T18:26:54.417Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        },
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        }
+      ],
+      "truncated": true,
+      "responseCount": 3
+    },
+    {
+      "group": 40,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-25-46-01a140d0-28bb-7d52-80d1-70b514199405.jsonl",
+      "line": 34,
+      "waitLines": [],
+      "session": "01a140d0-28bb-7d52-80d1-70b514199405",
+      "time": "2026-10-15T18:27:04.428Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 5
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 41,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-25-46-01a140d0-28bb-7d52-80d1-70b514199405.jsonl",
+      "line": 97,
+      "waitLines": [],
+      "session": "01a140d0-28bb-7d52-80d1-70b514199405",
+      "time": "2026-10-15T18:28:29.221Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 4
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 42,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-25-46-01a140d0-28bb-7d52-80d1-70b514199405.jsonl",
+      "line": 270,
+      "waitLines": [],
+      "session": "01a140d0-28bb-7d52-80d1-70b514199405",
+      "time": "2026-10-15T18:33:47.623Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 3
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 43,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-25-46-01a140d0-28bb-7d52-80d1-70b514199405.jsonl",
+      "line": 382,
+      "waitLines": [],
+      "session": "01a140d0-28bb-7d52-80d1-70b514199405",
+      "time": "2026-10-15T18:41:20.983Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 44,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-25-46-01a140d0-28bb-7d52-80d1-70b514199405.jsonl",
+      "line": 391,
+      "waitLines": [],
+      "session": "01a140d0-28bb-7d52-80d1-70b514199405",
+      "time": "2026-10-15T18:41:32.575Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 4
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 45,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-29-17-01a140d3-6363-70c2-9dd8-12a7666781fa.jsonl",
+      "line": 21,
+      "waitLines": [],
+      "session": "01a140d3-6363-70c2-9dd8-12a7666781fa",
+      "time": "2026-10-15T18:29:45.640Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        },
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 2
+    },
+    {
+      "group": 46,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-29-17-01a140d3-6363-70c2-9dd8-12a7666781fa.jsonl",
+      "line": 33,
+      "waitLines": [],
+      "session": "01a140d3-6363-70c2-9dd8-12a7666781fa",
+      "time": "2026-10-15T18:29:55.676Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 8
+        },
+        {
+          "tool": "bars_outline",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 3
+    },
+    {
+      "group": 47,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-29-17-01a140d3-6363-70c2-9dd8-12a7666781fa.jsonl",
+      "line": 41,
+      "waitLines": [],
+      "session": "01a140d3-6363-70c2-9dd8-12a7666781fa",
+      "time": "2026-10-15T18:30:03.505Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 7
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 48,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-29-17-01a140d3-6363-70c2-9dd8-12a7666781fa.jsonl",
+      "line": 51,
+      "waitLines": [],
+      "session": "01a140d3-6363-70c2-9dd8-12a7666781fa",
+      "time": "2026-10-15T18:30:10.175Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 5
+        }
+      ],
+      "truncated": true,
+      "responseCount": 0
+    },
+    {
+      "group": 49,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-29-17-01a140d3-6363-70c2-9dd8-12a7666781fa.jsonl",
+      "line": 67,
+      "waitLines": [],
+      "session": "01a140d3-6363-70c2-9dd8-12a7666781fa",
+      "time": "2026-10-15T18:30:21.783Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 50,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-52-32-01a140e8-ad40-77f1-9a07-7052963a12d4.jsonl",
+      "line": 21,
+      "waitLines": [],
+      "session": "01a140e8-ad40-77f1-9a07-7052963a12d4",
+      "time": "2026-10-15T18:54:24.290Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 51,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-52-32-01a140e8-ad40-77f1-9a07-7052963a12d4.jsonl",
+      "line": 32,
+      "waitLines": [],
+      "session": "01a140e8-ad40-77f1-9a07-7052963a12d4",
+      "time": "2026-10-15T18:54:33.647Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 12
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 52,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-52-32-01a140e8-ad40-77f1-9a07-7052963a12d4.jsonl",
+      "line": 44,
+      "waitLines": [],
+      "session": "01a140e8-ad40-77f1-9a07-7052963a12d4",
+      "time": "2026-10-15T18:54:40.713Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": false
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 53,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-52-32-01a140e8-ad40-77f1-9a07-7052963a12d4.jsonl",
+      "line": 73,
+      "waitLines": [],
+      "session": "01a140e8-ad40-77f1-9a07-7052963a12d4",
+      "time": "2026-10-15T18:55:06.849Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 54,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-52-32-01a140e8-ad40-77f1-9a07-7052963a12d4.jsonl",
+      "line": 369,
+      "waitLines": [],
+      "session": "01a140e8-ad40-77f1-9a07-7052963a12d4",
+      "time": "2026-10-15T19:09:37.429Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 5
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 55,
+      "file": ".codex/sessions/2026/10/15/rollout-2026-10-15T23-52-32-01a140e8-ad40-77f1-9a07-7052963a12d4.jsonl",
+      "line": 558,
+      "waitLines": [],
+      "session": "01a140e8-ad40-77f1-9a07-7052963a12d4",
+      "time": "2026-10-15T19:18:25.539Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 56,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-15-13-01a14da6-66c5-7762-93a7-2aeb347be8f4.jsonl",
+      "line": 34,
+      "waitLines": [],
+      "session": "01a14da6-66c5-7762-93a7-2aeb347be8f4",
+      "time": "2026-10-18T06:16:02.468Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "limit"
+          ],
+          "limit": 5
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 57,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-15-13-01a14da6-66c5-7762-93a7-2aeb347be8f4.jsonl",
+      "line": 398,
+      "waitLines": [],
+      "session": "01a14da6-66c5-7762-93a7-2aeb347be8f4",
+      "time": "2026-10-18T06:33:04.139Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "format"
+          ],
+          "format": "json"
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 58,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-20-51-01a14dab-906f-73a3-aff0-3eb83cb20c7d.jsonl",
+      "line": 26,
+      "waitLines": [],
+      "session": "01a14dab-906f-73a3-aff0-3eb83cb20c7d",
+      "time": "2026-10-18T06:22:44.886Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 59,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-40-41-01a14dbd-af6a-7d40-8479-df8e12504e43.jsonl",
+      "line": 24,
+      "waitLines": [],
+      "session": "01a14dbd-af6a-7d40-8479-df8e12504e43",
+      "time": "2026-10-18T06:41:26.700Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        },
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 10
+        }
+      ],
+      "truncated": true,
+      "responseCount": 3
+    },
+    {
+      "group": 60,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-40-41-01a14dbd-af6a-7d40-8479-df8e12504e43.jsonl",
+      "line": 37,
+      "waitLines": [],
+      "session": "01a14dbd-af6a-7d40-8479-df8e12504e43",
+      "time": "2026-10-18T06:41:35.276Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 61,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-40-41-01a14dbd-af6a-7d40-8479-df8e12504e43.jsonl",
+      "line": 47,
+      "waitLines": [],
+      "session": "01a14dbd-af6a-7d40-8479-df8e12504e43",
+      "time": "2026-10-18T06:41:42.450Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        }
+      ],
+      "truncated": true,
+      "responseCount": 0
+    },
+    {
+      "group": 62,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-40-41-01a14dbd-af6a-7d40-8479-df8e12504e43.jsonl",
+      "line": 57,
+      "waitLines": [],
+      "session": "01a14dbd-af6a-7d40-8479-df8e12504e43",
+      "time": "2026-10-18T06:41:49.686Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 3
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 63,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-40-41-01a14dbd-af6a-7d40-8479-df8e12504e43.jsonl",
+      "line": 105,
+      "waitLines": [],
+      "session": "01a14dbd-af6a-7d40-8479-df8e12504e43",
+      "time": "2026-10-18T06:42:45.042Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 3
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 64,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-40-41-01a14dbd-af6a-7d40-8479-df8e12504e43.jsonl",
+      "line": 147,
+      "waitLines": [],
+      "session": "01a14dbd-af6a-7d40-8479-df8e12504e43",
+      "time": "2026-10-18T06:44:22.058Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        }
+      ],
+      "truncated": false,
+      "responseCount": 2
+    },
+    {
+      "group": 65,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-40-41-01a14dbd-af6a-7d40-8479-df8e12504e43.jsonl",
+      "line": 156,
+      "waitLines": [],
+      "session": "01a14dbd-af6a-7d40-8479-df8e12504e43",
+      "time": "2026-10-18T06:44:31.395Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 3
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 66,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-40-41-01a14dbd-af6a-7d40-8479-df8e12504e43.jsonl",
+      "line": 270,
+      "waitLines": [],
+      "session": "01a14dbd-af6a-7d40-8479-df8e12504e43",
+      "time": "2026-10-18T07:26:09.113Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 5
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 67,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-40-41-01a14dbd-af6a-7d40-8479-df8e12504e43.jsonl",
+      "line": 604,
+      "waitLines": [],
+      "session": "01a14dbd-af6a-7d40-8479-df8e12504e43",
+      "time": "2026-10-18T07:37:08.485Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 3
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 68,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-40-41-01a14dbd-af6a-7d40-8479-df8e12504e43.jsonl",
+      "line": 1380,
+      "waitLines": [],
+      "session": "01a14dbd-af6a-7d40-8479-df8e12504e43",
+      "time": "2026-10-18T09:50:42.846Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 69,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-40-41-01a14dbd-af6a-7d40-8479-df8e12504e43.jsonl",
+      "line": 1392,
+      "waitLines": [
+        1403,
+        1414,
+        1429
+      ],
+      "session": "01a14dbd-af6a-7d40-8479-df8e12504e43",
+      "time": "2026-10-18T09:50:51.050Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 70,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-40-41-01a14dbd-af6a-7d40-8479-df8e12504e43.jsonl",
+      "line": 1460,
+      "waitLines": [],
+      "session": "01a14dbd-af6a-7d40-8479-df8e12504e43",
+      "time": "2026-10-18T11:14:43.769Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 4
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 71,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-40-41-01a14dbd-af6a-7d40-8479-df8e12504e43.jsonl",
+      "line": 1498,
+      "waitLines": [],
+      "session": "01a14dbd-af6a-7d40-8479-df8e12504e43",
+      "time": "2026-10-18T11:15:29.825Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 2
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 72,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-40-41-01a14dbd-af6a-7d40-8479-df8e12504e43.jsonl",
+      "line": 2377,
+      "waitLines": [],
+      "session": "01a14dbd-af6a-7d40-8479-df8e12504e43",
+      "time": "2026-10-18T13:28:05.192Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        }
+      ],
+      "truncated": false,
+      "responseCount": 3
+    },
+    {
+      "group": 73,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-44-53-01a14dc1-8e3e-7260-83ec-53fda8e26ed6.jsonl",
+      "line": 26,
+      "waitLines": [],
+      "session": "01a14dc1-8e3e-7260-83ec-53fda8e26ed6",
+      "time": "2026-10-18T06:45:53.279Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "limit",
+            "project"
+          ],
+          "limit": 5
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 74,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-45-41-01a14dc2-4b36-73f1-86e8-9b8f3377e7d7.jsonl",
+      "line": 28,
+      "waitLines": [],
+      "session": "01a14dc2-4b36-73f1-86e8-9b8f3377e7d7",
+      "time": "2026-10-18T06:46:44.069Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 7
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 75,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-47-26-01a14dc3-e777-7a43-aaf9-21d1f52e78c4.jsonl",
+      "line": 36,
+      "waitLines": [],
+      "session": "01a14dc3-e777-7a43-aaf9-21d1f52e78c4",
+      "time": "2026-10-18T06:48:52.721Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "limit"
+          ],
+          "limit": 5
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 76,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-47-26-01a14dc3-e777-7a43-aaf9-21d1f52e78c4.jsonl",
+      "line": 120,
+      "waitLines": [],
+      "session": "01a14dc3-e777-7a43-aaf9-21d1f52e78c4",
+      "time": "2026-10-18T06:51:12.511Z",
+      "tools": [
+        {
+          "tool": "bars_reindex",
+          "literalArguments": true,
+          "keys": [
+            "full"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 77,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-47-26-01a14dc3-e777-7a43-aaf9-21d1f52e78c4.jsonl",
+      "line": 130,
+      "waitLines": [],
+      "session": "01a14dc3-e777-7a43-aaf9-21d1f52e78c4",
+      "time": "2026-10-18T06:51:19.459Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": []
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 78,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-47-26-01a14dc3-e777-7a43-aaf9-21d1f52e78c4.jsonl",
+      "line": 138,
+      "waitLines": [],
+      "session": "01a14dc3-e777-7a43-aaf9-21d1f52e78c4",
+      "time": "2026-10-18T06:51:27.483Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "files",
+            "limit"
+          ],
+          "limit": 2,
+          "files": [
+            "overview.md"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 79,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-47-26-01a14dc3-e777-7a43-aaf9-21d1f52e78c4.jsonl",
+      "line": 147,
+      "waitLines": [],
+      "session": "01a14dc3-e777-7a43-aaf9-21d1f52e78c4",
+      "time": "2026-10-18T06:51:41.409Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "limit"
+          ],
+          "limit": 3
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 80,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-47-26-01a14dc3-e777-7a43-aaf9-21d1f52e78c4.jsonl",
+      "line": 170,
+      "waitLines": [],
+      "session": "01a14dc3-e777-7a43-aaf9-21d1f52e78c4",
+      "time": "2026-10-18T06:52:19.156Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "limit"
+          ],
+          "limit": 2
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "limit"
+          ],
+          "limit": 2
+        }
+      ],
+      "truncated": false,
+      "responseCount": 2
+    },
+    {
+      "group": 81,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-47-26-01a14dc3-e777-7a43-aaf9-21d1f52e78c4.jsonl",
+      "line": 181,
+      "waitLines": [],
+      "session": "01a14dc3-e777-7a43-aaf9-21d1f52e78c4",
+      "time": "2026-10-18T06:52:37.836Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": []
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 82,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-49-17-01a14dc5-974c-7a70-9660-450d80cefb8f.jsonl",
+      "line": 22,
+      "waitLines": [],
+      "session": "01a14dc5-974c-7a70-9660-450d80cefb8f",
+      "time": "2026-10-18T06:49:29.845Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 8
+        }
+      ],
+      "truncated": false,
+      "responseCount": 0
+    },
+    {
+      "group": 83,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-49-17-01a14dc5-974c-7a70-9660-450d80cefb8f.jsonl",
+      "line": 29,
+      "waitLines": [],
+      "session": "01a14dc5-974c-7a70-9660-450d80cefb8f",
+      "time": "2026-10-18T06:49:35.990Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        }
+      ],
+      "truncated": false,
+      "responseCount": 2
+    },
+    {
+      "group": 84,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-49-17-01a14dc5-974c-7a70-9660-450d80cefb8f.jsonl",
+      "line": 71,
+      "waitLines": [],
+      "session": "01a14dc5-974c-7a70-9660-450d80cefb8f",
+      "time": "2026-10-18T06:50:37.541Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": false
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 85,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-49-17-01a14dc5-974c-7a70-9660-450d80cefb8f.jsonl",
+      "line": 519,
+      "waitLines": [],
+      "session": "01a14dc5-974c-7a70-9660-450d80cefb8f",
+      "time": "2026-10-18T07:07:24.062Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 3
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 86,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-49-17-01a14dc5-974c-7a70-9660-450d80cefb8f.jsonl",
+      "line": 526,
+      "waitLines": [],
+      "session": "01a14dc5-974c-7a70-9660-450d80cefb8f",
+      "time": "2026-10-18T07:07:32.883Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 87,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-49-17-01a14dc5-974c-7a70-9660-450d80cefb8f.jsonl",
+      "line": 736,
+      "waitLines": [],
+      "session": "01a14dc5-974c-7a70-9660-450d80cefb8f",
+      "time": "2026-10-18T07:18:38.732Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 3
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 88,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-49-30-01a14dc5-c883-7ca0-87d2-863a4def30f7.jsonl",
+      "line": 54,
+      "waitLines": [],
+      "session": "01a14dc5-c883-7ca0-87d2-863a4def30f7",
+      "time": "2026-10-18T06:50:44.386Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "files",
+            "limit"
+          ],
+          "limit": 5,
+          "files": [
+            "issue.md",
+            "../PLAN.md",
+            "features/search/hybrid-search.md"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 89,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-49-30-01a14dc5-c883-7ca0-87d2-863a4def30f7.jsonl",
+      "line": 61,
+      "waitLines": [],
+      "session": "01a14dc5-c883-7ca0-87d2-863a4def30f7",
+      "time": "2026-10-18T06:50:51.082Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "files",
+            "limit"
+          ],
+          "limit": 5,
+          "files": [
+            "issue.md"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 90,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-49-31-01a14dc5-cf04-7fa2-abf5-f5180ff0102d.jsonl",
+      "line": 22,
+      "waitLines": [
+        30,
+        38,
+        44,
+        50,
+        57
+      ],
+      "session": "01a14dc5-cf04-7fa2-abf5-f5180ff0102d",
+      "time": "2026-10-18T06:49:55.923Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 91,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-49-31-01a14dc5-cf04-7fa2-abf5-f5180ff0102d.jsonl",
+      "line": 59,
+      "waitLines": [],
+      "session": "01a14dc5-cf04-7fa2-abf5-f5180ff0102d",
+      "time": "2026-10-18T06:50:54.070Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 92,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-49-31-01a14dc5-cf04-7fa2-abf5-f5180ff0102d.jsonl",
+      "line": 74,
+      "waitLines": [],
+      "session": "01a14dc5-cf04-7fa2-abf5-f5180ff0102d",
+      "time": "2026-10-18T06:51:11.238Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": false
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 93,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-49-31-01a14dc5-cf04-7fa2-abf5-f5180ff0102d.jsonl",
+      "line": 88,
+      "waitLines": [],
+      "session": "01a14dc5-cf04-7fa2-abf5-f5180ff0102d",
+      "time": "2026-10-18T06:51:23.804Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 94,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-49-31-01a14dc5-cf04-7fa2-abf5-f5180ff0102d.jsonl",
+      "line": 760,
+      "waitLines": [],
+      "session": "01a14dc5-cf04-7fa2-abf5-f5180ff0102d",
+      "time": "2026-10-18T07:21:22.854Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 4
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 95,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-49-31-01a14dc5-cf04-7fa2-abf5-f5180ff0102d.jsonl",
+      "line": 985,
+      "waitLines": [],
+      "session": "01a14dc5-cf04-7fa2-abf5-f5180ff0102d",
+      "time": "2026-10-18T07:35:16.787Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 4
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 96,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-58-16-01a14dcd-d1ce-7e80-9ad1-8ca300136deb.jsonl",
+      "line": 25,
+      "waitLines": [],
+      "session": "01a14dcd-d1ce-7e80-9ad1-8ca300136deb",
+      "time": "2026-10-18T06:58:34.579Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        },
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 8
+        }
+      ],
+      "truncated": true,
+      "responseCount": 3
+    },
+    {
+      "group": 97,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-58-16-01a14dcd-d1ce-7e80-9ad1-8ca300136deb.jsonl",
+      "line": 36,
+      "waitLines": [],
+      "session": "01a14dcd-d1ce-7e80-9ad1-8ca300136deb",
+      "time": "2026-10-18T06:59:10.802Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": false
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": false
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 98,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-58-16-01a14dcd-d1ce-7e80-9ad1-8ca300136deb.jsonl",
+      "line": 49,
+      "waitLines": [],
+      "session": "01a14dcd-d1ce-7e80-9ad1-8ca300136deb",
+      "time": "2026-10-18T06:59:25.930Z",
+      "tools": [
+        {
+          "tool": "bars_outline",
+          "literalArguments": false
+        }
+      ],
+      "truncated": false,
+      "responseCount": 5
+    },
+    {
+      "group": 99,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-58-16-01a14dcd-d1ce-7e80-9ad1-8ca300136deb.jsonl",
+      "line": 59,
+      "waitLines": [],
+      "session": "01a14dcd-d1ce-7e80-9ad1-8ca300136deb",
+      "time": "2026-10-18T06:59:42.488Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": false
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 100,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-58-16-01a14dcd-d1ce-7e80-9ad1-8ca300136deb.jsonl",
+      "line": 134,
+      "waitLines": [],
+      "session": "01a14dcd-d1ce-7e80-9ad1-8ca300136deb",
+      "time": "2026-10-18T07:01:15.276Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 4
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 101,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-58-16-01a14dcd-d1ce-7e80-9ad1-8ca300136deb.jsonl",
+      "line": 311,
+      "waitLines": [],
+      "session": "01a14dcd-d1ce-7e80-9ad1-8ca300136deb",
+      "time": "2026-10-18T07:12:33.075Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 102,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-58-16-01a14dcd-d1ce-7e80-9ad1-8ca300136deb.jsonl",
+      "line": 349,
+      "waitLines": [],
+      "session": "01a14dcd-d1ce-7e80-9ad1-8ca300136deb",
+      "time": "2026-10-18T07:14:26.979Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 4
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 103,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-58-16-01a14dcd-d1ce-7e80-9ad1-8ca300136deb.jsonl",
+      "line": 760,
+      "waitLines": [],
+      "session": "01a14dcd-d1ce-7e80-9ad1-8ca300136deb",
+      "time": "2026-10-18T07:36:33.210Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 5
+        }
+      ],
+      "truncated": false,
+      "responseCount": 2
+    },
+    {
+      "group": 104,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-58-16-01a14dcd-d1ce-7e80-9ad1-8ca300136deb.jsonl",
+      "line": 1158,
+      "waitLines": [],
+      "session": "01a14dcd-d1ce-7e80-9ad1-8ca300136deb",
+      "time": "2026-10-18T08:51:46.163Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 4
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 105,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-58-16-01a14dcd-d1ce-7e80-9ad1-8ca300136deb.jsonl",
+      "line": 1366,
+      "waitLines": [],
+      "session": "01a14dcd-d1ce-7e80-9ad1-8ca300136deb",
+      "time": "2026-10-18T12:36:49.430Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 3
+        }
+      ],
+      "truncated": false,
+      "responseCount": 2
+    },
+    {
+      "group": 106,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-58-16-01a14dcd-d1ce-7e80-9ad1-8ca300136deb.jsonl",
+      "line": 1784,
+      "waitLines": [],
+      "session": "01a14dcd-d1ce-7e80-9ad1-8ca300136deb",
+      "time": "2026-10-18T12:52:49.622Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 3
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 107,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-58-16-01a14dcd-d1ce-7e80-9ad1-8ca300136deb.jsonl",
+      "line": 2233,
+      "waitLines": [],
+      "session": "01a14dcd-d1ce-7e80-9ad1-8ca300136deb",
+      "time": "2026-10-18T13:10:40.367Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 5
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 5
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 108,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-58-16-01a14dcd-d1ce-7e80-9ad1-8ca300136deb.jsonl",
+      "line": 2242,
+      "waitLines": [],
+      "session": "01a14dcd-d1ce-7e80-9ad1-8ca300136deb",
+      "time": "2026-10-18T13:11:03.063Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": false
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": false
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": false
+        },
+        {
+          "tool": "bars_outline",
+          "literalArguments": false
+        },
+        {
+          "tool": "bars_outline",
+          "literalArguments": false
+        }
+      ],
+      "truncated": true,
+      "responseCount": 4
+    },
+    {
+      "group": 109,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-58-16-01a14dcd-d1ce-7e80-9ad1-8ca300136deb.jsonl",
+      "line": 2254,
+      "waitLines": [],
+      "session": "01a14dcd-d1ce-7e80-9ad1-8ca300136deb",
+      "time": "2026-10-18T13:11:09.570Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": false
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 110,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-58-16-01a14dcd-d1ce-7e80-9ad1-8ca300136deb.jsonl",
+      "line": 2340,
+      "waitLines": [],
+      "session": "01a14dcd-d1ce-7e80-9ad1-8ca300136deb",
+      "time": "2026-10-18T13:17:18.944Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": false
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": false
+        }
+      ],
+      "truncated": false,
+      "responseCount": 2
+    },
+    {
+      "group": 111,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-58-16-01a14dcd-d1ce-7e80-9ad1-8ca300136deb.jsonl",
+      "line": 2349,
+      "waitLines": [],
+      "session": "01a14dcd-d1ce-7e80-9ad1-8ca300136deb",
+      "time": "2026-10-18T13:17:25.966Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "files",
+            "limit"
+          ],
+          "limit": 2,
+          "files": [
+            "knowledge-base/runtime/motion-tasks.md"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 112,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T11-58-16-01a14dcd-d1ce-7e80-9ad1-8ca300136deb.jsonl",
+      "line": 2389,
+      "waitLines": [],
+      "session": "01a14dcd-d1ce-7e80-9ad1-8ca300136deb",
+      "time": "2026-10-18T13:28:00.072Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": false
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": false
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 113,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-09-50-01a14dd8-6767-7832-9792-e186bdd52483.jsonl",
+      "line": 25,
+      "waitLines": [],
+      "session": "01a14dd8-6767-7832-9792-e186bdd52483",
+      "time": "2026-10-18T07:12:49.969Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        },
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 8
+        }
+      ],
+      "truncated": true,
+      "responseCount": 0
+    },
+    {
+      "group": 114,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-09-50-01a14dd8-6767-7832-9792-e186bdd52483.jsonl",
+      "line": 39,
+      "waitLines": [],
+      "session": "01a14dd8-6767-7832-9792-e186bdd52483",
+      "time": "2026-10-18T07:13:11.143Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        },
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 7
+        }
+      ],
+      "truncated": false,
+      "responseCount": 3
+    },
+    {
+      "group": 115,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-09-50-01a14dd8-6767-7832-9792-e186bdd52483.jsonl",
+      "line": 51,
+      "waitLines": [
+        65
+      ],
+      "session": "01a14dd8-6767-7832-9792-e186bdd52483",
+      "time": "2026-10-18T07:13:33.829Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 7
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 116,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-09-50-01a14dd8-6767-7832-9792-e186bdd52483.jsonl",
+      "line": 74,
+      "waitLines": [],
+      "session": "01a14dd8-6767-7832-9792-e186bdd52483",
+      "time": "2026-10-18T07:14:22.600Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 5
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 117,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-09-50-01a14dd8-6767-7832-9792-e186bdd52483.jsonl",
+      "line": 582,
+      "waitLines": [],
+      "session": "01a14dd8-6767-7832-9792-e186bdd52483",
+      "time": "2026-10-18T07:38:04.511Z",
+      "tools": [
+        {
+          "tool": "bars_outline",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path",
+            "levels"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 118,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-09-50-01a14dd8-6767-7832-9792-e186bdd52483.jsonl",
+      "line": 625,
+      "waitLines": [],
+      "session": "01a14dd8-6767-7832-9792-e186bdd52483",
+      "time": "2026-10-18T07:39:53.149Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 3
+    },
+    {
+      "group": 119,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-09-50-01a14dd8-6767-7832-9792-e186bdd52483.jsonl",
+      "line": 1776,
+      "waitLines": [],
+      "session": "01a14dd8-6767-7832-9792-e186bdd52483",
+      "time": "2026-10-18T12:37:02.639Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 120,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-09-50-01a14dd8-6767-7832-9792-e186bdd52483.jsonl",
+      "line": 1784,
+      "waitLines": [],
+      "session": "01a14dd8-6767-7832-9792-e186bdd52483",
+      "time": "2026-10-18T12:37:22.414Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 4
+        }
+      ],
+      "truncated": false,
+      "responseCount": 2
+    },
+    {
+      "group": 121,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-09-50-01a14dd8-6767-7832-9792-e186bdd52483.jsonl",
+      "line": 1896,
+      "waitLines": [],
+      "session": "01a14dd8-6767-7832-9792-e186bdd52483",
+      "time": "2026-10-18T12:45:07.193Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 122,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-09-50-01a14dd8-6767-7832-9792-e186bdd52483.jsonl",
+      "line": 1917,
+      "waitLines": [],
+      "session": "01a14dd8-6767-7832-9792-e186bdd52483",
+      "time": "2026-10-18T12:45:54.151Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 4
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 123,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-09-50-01a14dd8-6767-7832-9792-e186bdd52483.jsonl",
+      "line": 1925,
+      "waitLines": [],
+      "session": "01a14dd8-6767-7832-9792-e186bdd52483",
+      "time": "2026-10-18T12:46:22.757Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path",
+            "start_line",
+            "end_line"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 124,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-09-50-01a14dd8-6767-7832-9792-e186bdd52483.jsonl",
+      "line": 2533,
+      "waitLines": [],
+      "session": "01a14dd8-6767-7832-9792-e186bdd52483",
+      "time": "2026-10-18T13:19:15.792Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "files",
+            "limit"
+          ],
+          "limit": 2,
+          "files": [
+            "plan_research.md"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 125,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-30-47-01a14deb-946e-7370-9a56-eb28be984d38.jsonl",
+      "line": 42,
+      "waitLines": [],
+      "session": "01a14deb-946e-7370-9a56-eb28be984d38",
+      "time": "2026-10-18T07:31:13.072Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "limit"
+          ],
+          "limit": 5
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 126,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-37-19-01a14df1-9087-7191-ab2b-112fe986b0e9.jsonl",
+      "line": 32,
+      "waitLines": [],
+      "session": "01a14df1-9087-7191-ab2b-112fe986b0e9",
+      "time": "2026-10-18T07:37:57.624Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "limit"
+          ],
+          "limit": 4
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 127,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-37-19-01a14df1-9087-7191-ab2b-112fe986b0e9.jsonl",
+      "line": 3100,
+      "waitLines": [],
+      "session": "01a14df1-9087-7191-ab2b-112fe986b0e9",
+      "time": "2026-10-18T11:42:28.948Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "files",
+            "limit"
+          ],
+          "limit": 3,
+          "files": [
+            "features/models/local-models.md",
+            "features/models/inference-plan.md"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 128,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-38-05-01a14df2-440a-7df3-a918-ba7e35d59d4c.jsonl",
+      "line": 33,
+      "waitLines": [],
+      "session": "01a14df2-440a-7df3-a918-ba7e35d59d4c",
+      "time": "2026-10-18T07:38:28.020Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "project",
+            "limit"
+          ],
+          "limit": 7
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 129,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-38-05-01a14df2-440a-7df3-a918-ba7e35d59d4c.jsonl",
+      "line": 1263,
+      "waitLines": [],
+      "session": "01a14df2-440a-7df3-a918-ba7e35d59d4c",
+      "time": "2026-10-18T11:55:27.514Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "project",
+            "limit"
+          ],
+          "limit": 3
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 130,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-38-05-01a14df2-440a-7df3-a918-ba7e35d59d4c.jsonl",
+      "line": 2945,
+      "waitLines": [],
+      "session": "01a14df2-440a-7df3-a918-ba7e35d59d4c",
+      "time": "2026-10-18T13:14:07.375Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "project",
+            "modules",
+            "limit"
+          ],
+          "limit": 5,
+          "modules": [
+            "features",
+            "knowledge"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 131,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-38-35-01a14df2-b9cb-7962-83a2-a281a67f3217.jsonl",
+      "line": 43,
+      "waitLines": [],
+      "session": "01a14df2-b9cb-7962-83a2-a281a67f3217",
+      "time": "2026-10-18T07:39:22.804Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "project",
+            "limit"
+          ],
+          "limit": 4
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 132,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-53-33-01a14e00-6c88-7c60-94bd-e08828d95cb0.jsonl",
+      "line": 44,
+      "waitLines": [],
+      "session": "01a14e00-6c88-7c60-94bd-e08828d95cb0",
+      "time": "2026-10-18T07:55:15.675Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        },
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 3
+        }
+      ],
+      "truncated": true,
+      "responseCount": 3
+    },
+    {
+      "group": 133,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-53-33-01a14e00-6c88-7c60-94bd-e08828d95cb0.jsonl",
+      "line": 484,
+      "waitLines": [],
+      "session": "01a14e00-6c88-7c60-94bd-e08828d95cb0",
+      "time": "2026-10-18T08:11:07.192Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 134,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T12-53-33-01a14e00-6c88-7c60-94bd-e08828d95cb0.jsonl",
+      "line": 634,
+      "waitLines": [],
+      "session": "01a14e00-6c88-7c60-94bd-e08828d95cb0",
+      "time": "2026-10-18T08:18:05.583Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 135,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T14-22-01-01a14e51-6dd5-7bb0-9e8b-97dfbbdfeecb.jsonl",
+      "line": 214,
+      "waitLines": [],
+      "session": "01a14e51-6dd5-7bb0-9e8b-97dfbbdfeecb",
+      "time": "2026-10-18T09:44:29.677Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "files",
+            "limit"
+          ],
+          "limit": 6,
+          "files": [
+            "features/docs-convention/plan.md"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "files",
+            "limit"
+          ],
+          "limit": 3,
+          "files": [
+            "features/docs-convention/layout.md"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 136,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T14-22-01-01a14e51-6dd5-7bb0-9e8b-97dfbbdfeecb.jsonl",
+      "line": 336,
+      "waitLines": [],
+      "session": "01a14e51-6dd5-7bb0-9e8b-97dfbbdfeecb",
+      "time": "2026-10-18T09:50:18.534Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "modules",
+            "limit"
+          ],
+          "limit": 1,
+          "modules": [
+            "backlog"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 137,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T14-22-01-01a14e51-6dd5-7bb0-9e8b-97dfbbdfeecb.jsonl",
+      "line": 398,
+      "waitLines": [
+        413
+      ],
+      "session": "01a14e51-6dd5-7bb0-9e8b-97dfbbdfeecb",
+      "time": "2026-10-18T09:53:21.195Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": false
+        }
+      ],
+      "truncated": false,
+      "responseCount": 6
+    },
+    {
+      "group": 138,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T14-22-01-01a14e51-6dd5-7bb0-9e8b-97dfbbdfeecb.jsonl",
+      "line": 498,
+      "waitLines": [],
+      "session": "01a14e51-6dd5-7bb0-9e8b-97dfbbdfeecb",
+      "time": "2026-10-18T09:57:32.499Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": false
+        }
+      ],
+      "truncated": false,
+      "responseCount": 0
+    },
+    {
+      "group": 139,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T14-22-01-01a14e51-6dd5-7bb0-9e8b-97dfbbdfeecb.jsonl",
+      "line": 607,
+      "waitLines": [],
+      "session": "01a14e51-6dd5-7bb0-9e8b-97dfbbdfeecb",
+      "time": "2026-10-18T10:03:41.928Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "format"
+          ],
+          "format": "json"
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "modules",
+            "limit",
+            "format"
+          ],
+          "limit": 1,
+          "format": "json",
+          "modules": [
+            "backlog"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "files",
+            "limit",
+            "format"
+          ],
+          "limit": 2,
+          "format": "json",
+          "files": [
+            "issue.md",
+            "user_ideas.md"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 3
+    },
+    {
+      "group": 140,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T14-22-01-01a14e51-6dd5-7bb0-9e8b-97dfbbdfeecb.jsonl",
+      "line": 705,
+      "waitLines": [],
+      "session": "01a14e51-6dd5-7bb0-9e8b-97dfbbdfeecb",
+      "time": "2026-10-18T10:09:13.346Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "files",
+            "limit",
+            "format"
+          ],
+          "limit": 1,
+          "format": "json",
+          "files": [
+            "backlog/ideas.md"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 141,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T14-22-01-01a14e51-6dd5-7bb0-9e8b-97dfbbdfeecb.jsonl",
+      "line": 717,
+      "waitLines": [],
+      "session": "01a14e51-6dd5-7bb0-9e8b-97dfbbdfeecb",
+      "time": "2026-10-18T10:09:45.700Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "files",
+            "limit"
+          ],
+          "limit": 1,
+          "files": [
+            "backlog/issues.md"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 142,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T14-22-10-01a14e51-8f7f-7422-95cf-8895d9fbd1bd.jsonl",
+      "line": 269,
+      "waitLines": [],
+      "session": "01a14e51-8f7f-7422-95cf-8895d9fbd1bd",
+      "time": "2026-10-18T09:44:19.826Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "limit",
+            "modules"
+          ],
+          "limit": 4,
+          "modules": [
+            "features"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 143,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T14-22-10-01a14e51-8f7f-7422-95cf-8895d9fbd1bd.jsonl",
+      "line": 789,
+      "waitLines": [],
+      "session": "01a14e51-8f7f-7422-95cf-8895d9fbd1bd",
+      "time": "2026-10-18T10:08:26.651Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "modules",
+            "limit"
+          ],
+          "limit": 3,
+          "modules": [
+            "features",
+            "architecture"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 144,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T14-23-11-01a14e52-7ce3-7dd3-8ad2-440f9538cc39.jsonl",
+      "line": 442,
+      "waitLines": [],
+      "session": "01a14e52-7ce3-7dd3-8ad2-440f9538cc39",
+      "time": "2026-10-18T09:52:47.901Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "format"
+          ],
+          "format": "json"
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit",
+            "format"
+          ],
+          "limit": 3,
+          "format": "json"
+        }
+      ],
+      "truncated": false,
+      "responseCount": 2
+    },
+    {
+      "group": 145,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T14-23-11-01a14e52-7ce3-7dd3-8ad2-440f9538cc39.jsonl",
+      "line": 513,
+      "waitLines": [],
+      "session": "01a14e52-7ce3-7dd3-8ad2-440f9538cc39",
+      "time": "2026-10-18T09:56:07.380Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_outline",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 3
+    },
+    {
+      "group": 146,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T14-23-11-01a14e52-7ce3-7dd3-8ad2-440f9538cc39.jsonl",
+      "line": 691,
+      "waitLines": [],
+      "session": "01a14e52-7ce3-7dd3-8ad2-440f9538cc39",
+      "time": "2026-10-18T10:07:17.863Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "format"
+          ],
+          "format": "json"
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "files",
+            "limit"
+          ],
+          "limit": 2,
+          "files": [
+            "knowledge-base/research/damage-driving-threshold-q005-2026-10-18.md"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 3
+    },
+    {
+      "group": 147,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T14-25-10-01a14e54-4f40-76f1-8f5e-fdf244983e61.jsonl",
+      "line": 151,
+      "waitLines": [],
+      "session": "01a14e54-4f40-76f1-8f5e-fdf244983e61",
+      "time": "2026-10-18T09:43:09.601Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": []
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 148,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T16-29-08-01a14ec5-cbc4-7393-98ce-1062acd2116e.jsonl",
+      "line": 24,
+      "waitLines": [],
+      "session": "01a14ec5-cbc4-7393-98ce-1062acd2116e",
+      "time": "2026-10-18T11:30:03.517Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 149,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T16-29-08-01a14ec5-cbc4-7393-98ce-1062acd2116e.jsonl",
+      "line": 34,
+      "waitLines": [],
+      "session": "01a14ec5-cbc4-7393-98ce-1062acd2116e",
+      "time": "2026-10-18T11:30:09.381Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 4
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 150,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-20-23-01a14ef4-b98b-7312-a158-0a1514b1407f.jsonl",
+      "line": 24,
+      "waitLines": [],
+      "session": "01a14ef4-b98b-7312-a158-0a1514b1407f",
+      "time": "2026-10-18T12:20:36.911Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        },
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 151,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-20-23-01a14ef4-b98b-7312-a158-0a1514b1407f.jsonl",
+      "line": 31,
+      "waitLines": [],
+      "session": "01a14ef4-b98b-7312-a158-0a1514b1407f",
+      "time": "2026-10-18T12:20:41.605Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 8
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 152,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-20-23-01a14ef4-b98b-7312-a158-0a1514b1407f.jsonl",
+      "line": 41,
+      "waitLines": [],
+      "session": "01a14ef4-b98b-7312-a158-0a1514b1407f",
+      "time": "2026-10-18T12:20:52.088Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": false
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": false
+        }
+      ],
+      "truncated": true,
+      "responseCount": 4
+    },
+    {
+      "group": 153,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-20-23-01a14ef4-b98b-7312-a158-0a1514b1407f.jsonl",
+      "line": 61,
+      "waitLines": [],
+      "session": "01a14ef4-b98b-7312-a158-0a1514b1407f",
+      "time": "2026-10-18T12:21:05.870Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 154,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-20-23-01a14ef4-b98b-7312-a158-0a1514b1407f.jsonl",
+      "line": 1198,
+      "waitLines": [],
+      "session": "01a14ef4-b98b-7312-a158-0a1514b1407f",
+      "time": "2026-10-18T13:22:35.336Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 8
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 155,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-20-23-01a14ef4-b98b-7312-a158-0a1514b1407f.jsonl",
+      "line": 1361,
+      "waitLines": [],
+      "session": "01a14ef4-b98b-7312-a158-0a1514b1407f",
+      "time": "2026-10-18T13:33:26.456Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 4
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 156,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-20-23-01a14ef4-b98b-7312-a158-0a1514b1407f.jsonl",
+      "line": 1416,
+      "waitLines": [],
+      "session": "01a14ef4-b98b-7312-a158-0a1514b1407f",
+      "time": "2026-10-18T13:35:09.988Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 4
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 157,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-21-12-01a14ef5-7893-7740-a6b3-1d8685a89add.jsonl",
+      "line": 35,
+      "waitLines": [],
+      "session": "01a14ef5-7893-7740-a6b3-1d8685a89add",
+      "time": "2026-10-18T12:21:40.021Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "files",
+            "limit"
+          ],
+          "limit": 1,
+          "files": [
+            "features/distribution/installer.md"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 158,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-25-04-01a14ef9-0454-7c21-9edc-b85555ba7c60.jsonl",
+      "line": 66,
+      "waitLines": [],
+      "session": "01a14ef9-0454-7c21-9edc-b85555ba7c60",
+      "time": "2026-10-18T12:27:26.624Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "project",
+            "limit"
+          ],
+          "limit": 4
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 159,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-35-54-01a14f02-ed8d-7481-8b85-193c512edae8.jsonl",
+      "line": 35,
+      "waitLines": [],
+      "session": "01a14f02-ed8d-7481-8b85-193c512edae8",
+      "time": "2026-10-18T12:36:30.096Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 160,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-50-09-01a14f0f-f832-75a2-bacf-f92274eee9ad.jsonl",
+      "line": 28,
+      "waitLines": [],
+      "session": "01a14f0f-f832-75a2-bacf-f92274eee9ad",
+      "time": "2026-10-18T12:50:25.594Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 8
+        }
+      ],
+      "truncated": false,
+      "responseCount": 2
+    },
+    {
+      "group": 161,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-50-09-01a14f0f-f832-75a2-bacf-f92274eee9ad.jsonl",
+      "line": 35,
+      "waitLines": [],
+      "session": "01a14f0f-f832-75a2-bacf-f92274eee9ad",
+      "time": "2026-10-18T12:50:30.569Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 162,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-50-09-01a14f0f-f832-75a2-bacf-f92274eee9ad.jsonl",
+      "line": 41,
+      "waitLines": [],
+      "session": "01a14f0f-f832-75a2-bacf-f92274eee9ad",
+      "time": "2026-10-18T12:50:36.403Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit",
+            "min_score"
+          ],
+          "limit": 8,
+          "min_score": 0
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 163,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-50-14-01a14f10-0c0c-7170-a706-7ac71a4b02e9.jsonl",
+      "line": 24,
+      "waitLines": [],
+      "session": "01a14f10-0c0c-7170-a706-7ac71a4b02e9",
+      "time": "2026-10-18T12:50:32.458Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 164,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T17-50-14-01a14f10-0c0c-7170-a706-7ac71a4b02e9.jsonl",
+      "line": 30,
+      "waitLines": [],
+      "session": "01a14f10-0c0c-7170-a706-7ac71a4b02e9",
+      "time": "2026-10-18T12:50:38.889Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 165,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-11-28-01a14f23-7c1f-7731-ac5c-aa66ad1ad3bf.jsonl",
+      "line": 33,
+      "waitLines": [],
+      "session": "01a14f23-7c1f-7731-ac5c-aa66ad1ad3bf",
+      "time": "2026-10-18T13:13:16.457Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "project"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 166,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-11-28-01a14f23-7c1f-7731-ac5c-aa66ad1ad3bf.jsonl",
+      "line": 164,
+      "waitLines": [],
+      "session": "01a14f23-7c1f-7731-ac5c-aa66ad1ad3bf",
+      "time": "2026-10-18T13:24:43.424Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "project",
+            "limit"
+          ],
+          "limit": 4
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 167,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-11-28-01a14f23-7c1f-7731-ac5c-aa66ad1ad3bf.jsonl",
+      "line": 192,
+      "waitLines": [],
+      "session": "01a14f23-7c1f-7731-ac5c-aa66ad1ad3bf",
+      "time": "2026-10-18T13:28:29.129Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": false
+        }
+      ],
+      "truncated": false,
+      "responseCount": 3
+    },
+    {
+      "group": 168,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-11-28-01a14f23-7c1f-7731-ac5c-aa66ad1ad3bf.jsonl",
+      "line": 203,
+      "waitLines": [],
+      "session": "01a14f23-7c1f-7731-ac5c-aa66ad1ad3bf",
+      "time": "2026-10-18T13:29:13.041Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": false
+        }
+      ],
+      "truncated": false,
+      "responseCount": 0
+    },
+    {
+      "group": 169,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-11-28-01a14f23-7c1f-7731-ac5c-aa66ad1ad3bf.jsonl",
+      "line": 227,
+      "waitLines": [],
+      "session": "01a14f23-7c1f-7731-ac5c-aa66ad1ad3bf",
+      "time": "2026-10-18T13:33:56.738Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": false
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 170,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-11-28-01a14f23-7c1f-7731-ac5c-aa66ad1ad3bf.jsonl",
+      "line": 235,
+      "waitLines": [],
+      "session": "01a14f23-7c1f-7731-ac5c-aa66ad1ad3bf",
+      "time": "2026-10-18T13:34:03.852Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": false
+        }
+      ],
+      "truncated": false,
+      "responseCount": 0
+    },
+    {
+      "group": 171,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-14-24-01a14f26-2d93-7921-b9f0-1e998e6e1459.jsonl",
+      "line": 24,
+      "waitLines": [],
+      "session": "01a14f26-2d93-7921-b9f0-1e998e6e1459",
+      "time": "2026-10-18T13:14:59.801Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        },
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 8
+        }
+      ],
+      "truncated": true,
+      "responseCount": 3
+    },
+    {
+      "group": 172,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-14-43-01a14f26-7533-7d00-81d6-a592dc996674.jsonl",
+      "line": 25,
+      "waitLines": [],
+      "session": "01a14f26-7533-7d00-81d6-a592dc996674",
+      "time": "2026-10-18T13:15:15.238Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        }
+      ],
+      "truncated": false,
+      "responseCount": 2
+    },
+    {
+      "group": 173,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-14-43-01a14f26-7533-7d00-81d6-a592dc996674.jsonl",
+      "line": 32,
+      "waitLines": [],
+      "session": "01a14f26-7533-7d00-81d6-a592dc996674",
+      "time": "2026-10-18T13:15:19.806Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 174,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-14-43-01a14f26-7533-7d00-81d6-a592dc996674.jsonl",
+      "line": 42,
+      "waitLines": [],
+      "session": "01a14f26-7533-7d00-81d6-a592dc996674",
+      "time": "2026-10-18T13:15:26.762Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 175,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-14-54-01a14f26-a2e6-7482-a88c-4dc13fe9b7ba.jsonl",
+      "line": 31,
+      "waitLines": [],
+      "session": "01a14f26-a2e6-7482-a88c-4dc13fe9b7ba",
+      "time": "2026-10-18T13:15:13.871Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "project"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 176,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-15-17-01a14f26-fe08-7da2-9ccd-e45364e070f3.jsonl",
+      "line": 29,
+      "waitLines": [],
+      "session": "01a14f26-fe08-7da2-9ccd-e45364e070f3",
+      "time": "2026-10-18T13:15:41.302Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        },
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        }
+      ],
+      "truncated": false,
+      "responseCount": 3
+    },
+    {
+      "group": 177,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-23-12-01a14f2e-390b-74c1-bbce-390f87c83e57.jsonl",
+      "line": 26,
+      "waitLines": [],
+      "session": "01a14f2e-390b-74c1-bbce-390f87c83e57",
+      "time": "2026-10-18T13:23:27.143Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 3
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 178,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-23-12-01a14f2e-390b-74c1-bbce-390f87c83e57.jsonl",
+      "line": 36,
+      "waitLines": [],
+      "session": "01a14f2e-390b-74c1-bbce-390f87c83e57",
+      "time": "2026-10-18T13:23:37.578Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 179,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-37-18-01a14f3b-2607-71a2-81ef-639aa05954d8.jsonl",
+      "line": 33,
+      "waitLines": [],
+      "session": "01a14f3b-2607-71a2-81ef-639aa05954d8",
+      "time": "2026-10-18T13:41:50.814Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        },
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 8
+        }
+      ],
+      "truncated": true,
+      "responseCount": 3
+    },
+    {
+      "group": 180,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-42-11-01a14f3f-9e10-7f03-b132-8f4ad3127d7a.jsonl",
+      "line": 24,
+      "waitLines": [],
+      "session": "01a14f3f-9e10-7f03-b132-8f4ad3127d7a",
+      "time": "2026-10-18T13:42:44.517Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        },
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 8
+        }
+      ],
+      "truncated": false,
+      "responseCount": 3
+    },
+    {
+      "group": 181,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-42-11-01a14f3f-9e10-7f03-b132-8f4ad3127d7a.jsonl",
+      "line": 36,
+      "waitLines": [],
+      "session": "01a14f3f-9e10-7f03-b132-8f4ad3127d7a",
+      "time": "2026-10-18T13:42:52.022Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": false
+        },
+        {
+          "tool": "bars_outline",
+          "literalArguments": false
+        }
+      ],
+      "truncated": false,
+      "responseCount": 2
+    },
+    {
+      "group": 182,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-42-11-01a14f3f-9e10-7f03-b132-8f4ad3127d7a.jsonl",
+      "line": 45,
+      "waitLines": [],
+      "session": "01a14f3f-9e10-7f03-b132-8f4ad3127d7a",
+      "time": "2026-10-18T13:42:59.372Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": false
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": false
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 183,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-42-11-01a14f3f-9e10-7f03-b132-8f4ad3127d7a.jsonl",
+      "line": 61,
+      "waitLines": [],
+      "session": "01a14f3f-9e10-7f03-b132-8f4ad3127d7a",
+      "time": "2026-10-18T13:43:11.078Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit",
+            "min_score"
+          ],
+          "limit": 4,
+          "min_score": 0
+        }
+      ],
+      "truncated": false,
+      "responseCount": 1
+    },
+    {
+      "group": 184,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-42-11-01a14f3f-9e10-7f03-b132-8f4ad3127d7a.jsonl",
+      "line": 69,
+      "waitLines": [],
+      "session": "01a14f3f-9e10-7f03-b132-8f4ad3127d7a",
+      "time": "2026-10-18T13:43:17.359Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": false
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": false
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 185,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-42-11-01a14f3f-9e10-7f03-b132-8f4ad3127d7a.jsonl",
+      "line": 145,
+      "waitLines": [],
+      "session": "01a14f3f-9e10-7f03-b132-8f4ad3127d7a",
+      "time": "2026-10-18T13:44:49.783Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit",
+            "min_score"
+          ],
+          "limit": 3,
+          "min_score": 0
+        }
+      ],
+      "truncated": true,
+      "responseCount": 1
+    },
+    {
+      "group": 186,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-43-28-01a14f40-c979-70e0-9f06-db22ff55cc18.jsonl",
+      "line": 29,
+      "waitLines": [],
+      "session": "01a14f40-c979-70e0-9f06-db22ff55cc18",
+      "time": "2026-10-18T13:43:46.747Z",
+      "tools": [
+        {
+          "tool": "bars_projects",
+          "literalArguments": true,
+          "keys": []
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "query",
+            "project",
+            "limit"
+          ],
+          "limit": 8
+        }
+      ],
+      "truncated": false,
+      "responseCount": 2
+    },
+    {
+      "group": 187,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-43-28-01a14f40-c979-70e0-9f06-db22ff55cc18.jsonl",
+      "line": 37,
+      "waitLines": [],
+      "session": "01a14f40-c979-70e0-9f06-db22ff55cc18",
+      "time": "2026-10-18T13:43:55.288Z",
+      "tools": [
+        {
+          "tool": "bars_status",
+          "literalArguments": true,
+          "keys": [
+            "project"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 10
+        },
+        {
+          "tool": "bars_outline",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 3
+    },
+    {
+      "group": 188,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-43-28-01a14f40-c979-70e0-9f06-db22ff55cc18.jsonl",
+      "line": 49,
+      "waitLines": [],
+      "session": "01a14f40-c979-70e0-9f06-db22ff55cc18",
+      "time": "2026-10-18T13:44:04.984Z",
+      "tools": [
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 7
+        },
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 7
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 2
+    },
+    {
+      "group": 189,
+      "file": ".codex/sessions/2026/10/18/rollout-2026-10-18T18-43-28-01a14f40-c979-70e0-9f06-db22ff55cc18.jsonl",
+      "line": 69,
+      "waitLines": [],
+      "session": "01a14f40-c979-70e0-9f06-db22ff55cc18",
+      "time": "2026-10-18T13:44:25.664Z",
+      "tools": [
+        {
+          "tool": "bars_rag_search",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "query",
+            "limit"
+          ],
+          "limit": 6
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        },
+        {
+          "tool": "bars_read",
+          "literalArguments": true,
+          "keys": [
+            "project",
+            "path"
+          ]
+        }
+      ],
+      "truncated": true,
+      "responseCount": 3
+    }
+  ]
+}

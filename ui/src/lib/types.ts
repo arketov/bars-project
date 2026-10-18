@@ -124,6 +124,23 @@ export interface ActivityOutput {
   problems: ProjectProblems[];
 }
 
+export interface OperationReport {
+  added: number; changed: number; removed: number; unchanged: number;
+  problems: number; index_applied: boolean;
+  problem_paths?: string[];
+}
+export interface Operation {
+  id: number; sequence: number; kind: string; source: string;
+  project: string | null; generation: number; model: string | null; variant: string | null;
+  reranker: boolean; state: string; started_at: string; finished_at: string | null;
+  docs_done: number | null; docs_total: number | null; percent: number | null;
+  queue_position?: number | null;
+  report: OperationReport | null; error: string | null; target_available: boolean;
+}
+export interface OperationEventsOutput {
+  epoch: string; cursor: number; gap: boolean; active: Operation[]; completed: Operation[];
+}
+
 /** Ошибка воркера: то же `kind`, что видит агент (docs/features/window/error-states.md). */
 export class BarsError extends Error {
   constructor(
@@ -189,7 +206,7 @@ export interface SettingsOutput {
 export interface ModelInfo {
   id: string;
   dim: number;
-  backend: "onnx" | "candle";
+  backend: "onnx" | "candle" | "gguf";
   warnings: string[];
   downloaded: boolean;
   downloading: boolean;

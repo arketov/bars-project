@@ -1,0 +1,119 @@
+{
+  "fixture": true,
+  "headless": true,
+  "checks": [
+    {
+      "name": "настоящий компонент строит карту",
+      "passed": true
+    },
+    {
+      "name": "вид sections",
+      "passed": true
+    },
+    {
+      "name": "вид chunks",
+      "passed": true
+    },
+    {
+      "name": "вид entities",
+      "passed": true
+    },
+    {
+      "name": "вид mixed",
+      "passed": true
+    },
+    {
+      "name": "вид documents",
+      "passed": true
+    },
+    {
+      "name": "выбор объекта открывает инспектор",
+      "passed": true
+    },
+    {
+      "name": "pin",
+      "passed": true
+    },
+    {
+      "name": "unpin",
+      "passed": true
+    },
+    {
+      "name": "операция Связи",
+      "passed": true
+    },
+    {
+      "name": "операция Путь",
+      "passed": true
+    },
+    {
+      "name": "операция Влияние",
+      "passed": true
+    },
+    {
+      "name": "операция Контекст",
+      "passed": true
+    },
+    {
+      "name": "операция Обзор",
+      "passed": true
+    },
+    {
+      "name": "тематические группы",
+      "passed": true
+    },
+    {
+      "name": "quote снимка",
+      "passed": true
+    },
+    {
+      "name": "Escape закрывает источник",
+      "passed": true
+    },
+    {
+      "name": "геометрия light 1440",
+      "passed": true
+    },
+    {
+      "name": "геометрия light 760",
+      "passed": true
+    },
+    {
+      "name": "геометрия dark 1440",
+      "passed": true
+    },
+    {
+      "name": "геометрия dark 760",
+      "passed": true
+    },
+    {
+      "name": "renderer уничтожен",
+      "passed": true
+    },
+    {
+      "name": "поиск mix",
+      "passed": true
+    },
+    {
+      "name": "поиск graph",
+      "passed": true
+    },
+    {
+      "name": "graph не объясняет отсутствие scored chunks порогом",
+      "passed": true
+    },
+    {
+      "name": "основание отношения доступно прямо в поиске",
+      "passed": true
+    },
+    {
+      "name": "выключение связей убирает пакеты",
+      "passed": true
+    },
+    {
+      "name": "без runtime ошибок",
+      "passed": true
+    }
+  ],
+  "errors": []
+}

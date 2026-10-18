@@ -23,7 +23,7 @@ $results = 0..($count-1) | ForEach-Object -Parallel {
     $part
 } -ThrottleLimit 4
 if (@($results).Count -ne $count) { throw 'Не все части готовы' }
-$stream = [IO.File]::CreateNew($dest)
+$stream = [IO.FileStream]::new($dest, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write)
 try {
     foreach ($i in 0..($count-1)) {
         $inputPart = [IO.File]::OpenRead((Join-Path $parts "$i"))

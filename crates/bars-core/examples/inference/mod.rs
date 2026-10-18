@@ -1,5 +1,7 @@
 //! Изолированные опыты этапа 11: docs/features/models/inference-plan.md.
 #![allow(dead_code)]
+#[path = "../bench_memory.rs"]
+mod native_memory;
 #[path = "../quality/mod.rs"]
 mod quality;
 
@@ -474,10 +476,19 @@ struct SavedQueries {
     vectors: std::collections::HashMap<String, Vec<f32>>,
 }
 impl Embedder for SavedQueries {
-    fn fingerprint(&self) -> &ModelFingerprint { &self.fingerprint }
+    fn fingerprint(&self) -> &ModelFingerprint {
+        &self.fingerprint
+    }
     fn embed(&mut self, texts: &[&str]) -> std::result::Result<Vec<Vec<f32>>, EmbedError> {
-        texts.iter().map(|text| self.vectors.get(*text).cloned()
-            .ok_or_else(|| EmbedError::Embed("запрос отсутствует в quality-кэше".into()))).collect()
+        texts
+            .iter()
+            .map(|text| {
+                self.vectors
+                    .get(*text)
+                    .cloned()
+                    .ok_or_else(|| EmbedError::Embed("запрос отсутствует в quality-кэше".into()))
+            })
+            .collect()
     }
 }
 struct TimedEmbedder {
@@ -485,7 +496,9 @@ struct TimedEmbedder {
     seconds: f64,
 }
 impl Embedder for TimedEmbedder {
-    fn fingerprint(&self) -> &ModelFingerprint { self.inner.fingerprint() }
+    fn fingerprint(&self) -> &ModelFingerprint {
+        self.inner.fingerprint()
+    }
     fn embed(&mut self, texts: &[&str]) -> std::result::Result<Vec<Vec<f32>>, EmbedError> {
         let start = Instant::now();
         let result = self.inner.embed(texts);
@@ -505,6 +518,22 @@ impl Reranker for TimedReranker {
         let result = self.inner.rerank(q, docs);
         self.seconds = start.elapsed().as_secs_f64();
         result
+    }
+}
+
+fn load_embedding_profile(
+    models: &Path,
+    cfg: Config,
+    profile: Option<&str>,
+) -> Result<Box<dyn Embedder>> {
+    match profile {
+        Some("fp16") if cfg.device == "directml" => Ok(Box::new(BuiltinEmbedder::bge_m3_fp16(
+            models,
+            Accelerator::Auto,
+        )?)),
+        Some("int8") if cfg.device == "cpu" => Ok(Box::new(BuiltinEmbedder::bge_m3_int8(models)?)),
+        Some(_) => Err("unknown builtin embedding profile or incompatible device".into()),
+        None => Ok(Box::new(ExperimentalEmbedder::load(models, cfg)?)),
     }
 }
 
@@ -543,26 +572,61 @@ fn full(data: &Path, models: &Path, config: &Path, out: &Path, staged_quality: b
             embedding_dynamic: false,
         }
     };
+    let builtin_profile = manifest
+        .get("builtin_embedding_profile")
+        .and_then(|v| v.as_str());
+    let int8 = builtin_profile == Some("int8")
+        || (builtin_profile.is_none() && embed_cfg.embedding_dynamic);
+    let memory_log = if staged_quality {
+        let log = native_memory::windows::Log::create(&out.join("native-memory.jsonl"))?;
+        log.reserve(if int8 { 4 } else { 6 })?;
+        log.emit("config", "quality", json!({"staged":true,"dynamic_int8":int8,"builtin_profile":builtin_profile,"startup_commit_gib":if int8 {4}else{6}}));
+        Some(log)
+    } else {
+        None
+    };
+    let memory_monitor = memory_log
+        .as_ref()
+        .map(|log| native_memory::windows::Monitor::start(log.clone()));
     let load = Instant::now();
-    let mut embed = ExperimentalEmbedder::load(models, embed_cfg)?;
+    let mut embed = load_embedding_profile(models, embed_cfg, builtin_profile)?;
+    let embed_execution = embed.execution();
     // Quality-only: don't retain two model sessions just to judge saved query vectors.
     let embed: Box<dyn Embedder> = if staged_quality {
         let fingerprint = embed.fingerprint().clone();
         let mut vectors = std::collections::HashMap::new();
         let mut saved = Vec::new();
-        for input in inputs.iter().filter(|c| cfg.ids.is_empty() || cfg.ids.contains(&c.id)) {
+        for input in inputs
+            .iter()
+            .filter(|c| cfg.ids.is_empty() || cfg.ids.contains(&c.id))
+        {
             let vector = embed.embed_query(&input.query)?;
             saved.push(json!({"id":input.id,"vector":vector}));
             vectors.insert(input.query.clone(), vector);
         }
         fs::write(out.join("query-vectors.json"), serde_json::to_vec(&saved)?)?;
         drop(embed);
-        Box::new(SavedQueries { fingerprint, vectors })
-    } else { Box::new(embed) };
-    let mut embed = TimedEmbedder { inner: embed, seconds: 0. };
+        Box::new(SavedQueries {
+            fingerprint,
+            vectors,
+        })
+    } else {
+        embed
+    };
+    if let Some(log) = &memory_log {
+        log.emit("marker", "queries_saved_embed_dropped", json!(null));
+        log.reserve(4)?;
+    }
+    let mut embed = TimedEmbedder {
+        inner: embed,
+        seconds: 0.,
+    };
     let (rr, rr_device): (Box<dyn Reranker>, String) = if cfg.name == "production" {
         let model =
             bars_core::models::BuiltinReranker::bge_reranker_v2_m3(models, Accelerator::Auto)?;
+        if model.device() != bars_core::models::Device::DirectMl {
+            return Err("unexpected CPU fallback in GPU quality comparison".into());
+        }
         let device = format!("{:?}", model.device());
         (Box::new(model), device)
     } else {
@@ -605,7 +669,9 @@ fn full(data: &Path, models: &Path, config: &Path, out: &Path, staged_quality: b
     fs::write(
         out.join("session.json"),
         serde_json::to_vec_pretty(
-            &json!({"load":load,"first_run":warm.elapsed().as_secs_f64(),"rerank_device":rr_device,"staged_quality":staged_quality,"inputs_blake3":file_digest(&data.join("inputs.json"))?,"binary_blake3":file_digest(&std::env::current_exe()?)?}),
+            &json!({"load":load,"first_run":warm.elapsed().as_secs_f64(),"rerank_device":rr_device,"staged_quality":staged_quality,"builtin_embedding_profile":builtin_profile,
+                "embedding_runtime":{"actual":embed_execution.actual,"precision":embed_execution.precision,"revision":embed_execution.revision,"fallback_reason":embed_execution.fallback_reason},
+                "inputs_blake3":file_digest(&data.join("inputs.json"))?,"binary_blake3":file_digest(&std::env::current_exe()?)?}),
         )?,
     )?;
     let mut rows = OpenOptions::new()
@@ -656,6 +722,14 @@ fn full(data: &Path, models: &Path, config: &Path, out: &Path, staged_quality: b
         out.join("complete.json"),
         serde_json::to_vec_pretty(&json!({"rows_blake3":file_digest(&out.join("rows.jsonl"))?}))?,
     )?;
+    drop(timed_rr);
+    drop(embed);
+    if let Some(monitor) = memory_monitor {
+        monitor.stop()?;
+    }
+    if let Some(log) = memory_log {
+        log.emit("end", "quality_end", json!({"ok":true}));
+    }
     Ok(())
 }
 
@@ -795,10 +869,24 @@ fn index_bench(data: &Path, models: &Path, config: &Path, out: &Path) -> Result<
     verify_snapshot(source)?;
     let project = out.join("project");
     copy_documents(&source.join("project/docs"), &project.join("docs"))?;
+    let builtin_profile = cfg.name.strip_prefix("core-");
+    let native = native_memory::windows::Log::create(&out.join("native-memory.jsonl"))?;
+    native.reserve(8)?;
+    native.emit(
+        "config",
+        "index",
+        json!({"builtin_profile":builtin_profile,"config":cfg}),
+    );
+    let monitor = native_memory::windows::Monitor::start(native.clone());
     let load = Instant::now();
-    let mut model = ExperimentalEmbedder::load(models, cfg.clone())?;
+    let mut model = load_embedding_profile(models, cfg.clone(), builtin_profile)?;
     let load = load.elapsed().as_secs_f64();
     model.embed_query("прогрев встроенной модели")?;
+    let execution = model.execution();
+    let fp = model.fingerprint();
+    let identity = json!({"backend":execution.backend,"actual":execution.actual,"precision":execution.precision,"revision":execution.revision,
+        "fingerprint":{"source":fp.source,"model":fp.model,"dim":fp.dim,"doc_prefix":fp.doc_prefix}});
+    native.emit("marker", "index_model_loaded", identity.clone());
     let mut index = Index::open(&out.join("index.sqlite"), Journal::Delete)?;
     let settings = IndexSettings {
         chunking: ChunkingParams::default(),
@@ -821,7 +909,7 @@ fn index_bench(data: &Path, models: &Path, config: &Path, out: &Path) -> Result<
             )?;
         }
         let start = Instant::now();
-        let outcome = update_index(&project, &mut index, &settings, &mut model)?;
+        let outcome = update_index(&project, &mut index, &settings, &mut *model)?;
         let seconds = start.elapsed().as_secs_f64();
         let UpdateOutcome::Updated(report) = outcome else {
             return Err("unexpected model/layout incompatibility".into());
@@ -846,6 +934,9 @@ fn index_bench(data: &Path, models: &Path, config: &Path, out: &Path) -> Result<
             let mut frozen_manifest = manifest.clone();
             frozen_manifest["index_blake3"] = json!(file_digest(&frozen.join("index.sqlite"))?);
             frozen_manifest["embedding_config"] = serde_json::to_value(&cfg)?;
+            if let Some(profile) = builtin_profile {
+                frozen_manifest["builtin_embedding_profile"] = json!(profile);
+            }
             fs::write(
                 frozen.join("manifest.json"),
                 serde_json::to_vec_pretty(&frozen_manifest)?,
@@ -860,15 +951,32 @@ fn index_bench(data: &Path, models: &Path, config: &Path, out: &Path) -> Result<
     fs::write(
         out.join("complete.json"),
         serde_json::to_vec_pretty(
-            &json!({"config":cfg,"source_manifest":manifest,"load":load,"rows":rows,"index_blake3":file_digest(&out.join("index.sqlite"))?}),
+            &json!({"config":cfg,"source_manifest":manifest,"load":load,"rows":rows,"identity":identity,"index_blake3":file_digest(&out.join("index.sqlite"))?}),
         )?,
     )?;
+    drop(model);
+    monitor.stop()?;
+    native.emit("end", "index_end", json!({"ok":true}));
     Ok(())
 }
 
 pub fn main() -> Result<()> {
     let a: Vec<_> = std::env::args().skip(1).collect();
     match a.first().map(String::as_str) {
+        Some("download-embed-fp16") if a.len()==3=>{
+            let native = native_memory::windows::Log::create(Path::new(&a[2]))?;
+            native.reserve(4)?;
+            native.emit("config", "artifact_only", json!({"model":bars_core::models::BGE_M3_FP16_ID,"binary_blake3":file_digest(&std::env::current_exe()?)?}));
+            let monitor = native_memory::windows::Monitor::start(native.clone());
+            let result = bars_core::models::download_onnx_artifacts(Path::new(&a[1]), bars_core::models::BGE_M3_FP16_ID);
+            monitor.stop()?;
+            native.emit("end", "artifact_only", json!({"ok":result.is_ok(),"ready":bars_core::models::is_downloaded(Path::new(&a[1]), bars_core::models::BGE_M3_FP16_ID)}));
+            result.map_err(Into::into)
+        },
+        Some("embed-fingerprint") if a.len()==2=>{
+            let fp=match a[1].as_str(){"fp16"=>bars_core::models::bge_m3_fp16_fingerprint(),"int8"=>bars_core::models::bge_m3_int8_fingerprint(),_=>return Err("unknown precision".into())};
+            println!("{}",json!({"source":fp.source,"model":fp.model,"dim":fp.dim,"doc_prefix":fp.doc_prefix}));Ok(())
+        },
         Some("digest") if a.len()==2=>{println!("{}",file_digest(Path::new(&a[1]))?);Ok(())},
         Some("verify") if a.len()==2=>verify_snapshot(Path::new(&a[1])),
         Some("prepare") if a.len()==5=>prepare(Path::new(&a[1]),Path::new(&a[2]),Path::new(&a[3]),Path::new(&a[4])),

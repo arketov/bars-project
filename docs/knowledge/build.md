@@ -4,12 +4,18 @@ title: Сборка bars — как собрать, проверить и что
 
 # Сборка bars
 
+## Тяжёлый тест поискового корпуса
+
+`search_corpus` переэмбеддит всю текущую документацию. По наблюдению автора 18-10-2026 жёсткий CPU-прогон слишком долго блокировал процессор и был остановлен; это не ошибка корректности поиска. Тест теперь opt-in: `cargo test --release -p bars-core --test search_corpus -- --ignored --nocapture`. По умолчанию требует фактический DirectML, без тихого продолжения на CPU; пачка 1, кооперативный бюджет индексации 60 с между документами. На CPU — только отдельный явный `BARS_CORPUS_TEST_DEVICE=cpu`. Новые веса не скачиваются. Подготовленный GPU-путь ещё требует отдельного прогона; остановленный CPU-прогон не считать успешной приёмкой.
+
+Для GraphRAG на готовом индексе сначала использовать сохранённые embeddings (`graph_acceptance`); этот замер не требует полной переиндексации и не заменяет отложенную регрессию модели.
+
 Как собирается Cargo workspace bars ([architecture/components.md](../architecture/components.md)) и какие проверки гоняются перед коммитом. Версии крейтов — [architecture/stack.md](../architecture/stack.md).
 
 ## Требования к машине разработчика bars
 
 - Rust `1.99.0`: версия закреплена в `rust-toolchain.toml` вместе с компонентами `rustfmt` и `clippy`. Нижняя граница стека — 1.90 ([architecture/stack.md](../architecture/stack.md)); точный пин нужен, чтобы сборка не менялась от обновления stable.
-- Windows: MSVC не старше 17.14. macOS: Xcode Command Line Tools.
+- Windows: MSVC 17.14+, CMake/Ninja и Vulkan SDK (`VULKAN_SDK`). Для нативной GGUF-сборки использовать Developer PowerShell последнего MSVC, `CMAKE_GENERATOR=Ninja`, `CMAKE_BUILD_PARALLEL_LEVEL=1`, короткий `CARGO_TARGET_DIR` (например, `C:/bars-build`). MSBuild с вложенным shader generator нестабилен на чистом каталоге. macOS: Xcode Command Line Tools; Metal не проверен.
 - Сеть: `ort` скачивает ONNX Runtime с `cdn.pyke.io` при первой сборке `bars-core`.
 
 ## Каталог сборки вне OneDrive
@@ -17,7 +23,7 @@ title: Сборка bars — как собрать, проверить и что
 Репозиторий лежит в OneDrive, а каталог `target/` с ONNX Runtime и Tauri занимает гигабайты. Поэтому `CARGO_TARGET_DIR` задаётся вне репозитория:
 
 ```bash
-export CARGO_TARGET_DIR="$LOCALAPPDATA/bars/target"
+export CARGO_TARGET_DIR="C:/bars-build"
 ```
 
 Путь в репозиторий не записывается: он у каждого свой.

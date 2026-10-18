@@ -35,7 +35,7 @@ impl Worker {
                 watcher,
             )
         };
-        lock(&self.inner.queue).remove(&path);
+        self.inner.cancel_queued(&path);
         if let Some(cell) = lock(&self.inner.current)
             .as_ref()
             .filter(|cell| cell.project == path)
@@ -61,7 +61,7 @@ impl Worker {
         match result {
             Ok(_) => {
                 lock(&self.inner.projects).remove(&path);
-                lock(&self.inner.queue).remove(&path);
+                self.inner.cancel_queued(&path);
                 Ok(path)
             }
             Err(error) => {

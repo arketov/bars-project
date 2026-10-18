@@ -1,66 +1,77 @@
 import { expect, it } from "vitest";
-import { NotificationCenter } from "./notifications";
-import type { ActivityOutput, ModelsInfoOutput, RunningJob } from "./types";
+import { NotificationCenter, operationText } from "./notifications";
+import type { Operation, OperationEventsOutput } from "./types";
 
-const models = (downloading: boolean, percent: number, downloaded = false, error: string | null = null): ModelsInfoOutput => ({
-  runtime: null, models_dir: "test", rerank: [],
-  embed: [{ id: "bge", dim: 1024, backend: "onnx", warnings: [], downloading, downloaded, download_percent: percent, download_error: error }],
-});
-const job: RunningJob = { project: "a", name: "Альфа", kind: "check", priority: "explicit", docs_done: 2, docs_total: 10, chunks_done: 3, chunks_per_second: 1, elapsed_seconds: 2, current_file: null, embed_device: null, attempt: 1 };
-const activity = (running: RunningJob | null = null): ActivityOutput => ({ running, paused: false, queue: [], problems: [] });
+const op = (patch: Partial<Operation> = {}): Operation => ({ id: 1, sequence: 0, kind: "check", source: "explicit", project: "a", generation: 1, model: null, variant: null, reranker: false, state: "running", started_at: "2026-10-18T10:00:00Z", finished_at: null, docs_done: 2, docs_total: 10, percent: null, report: null, error: null, target_available: true, ...patch });
+const events = (active: Operation[] = [], completed: Operation[] = [], cursor = 0, epoch = "worker-1"): OperationEventsOutput => ({ epoch, cursor, gap: false, active, completed });
+const report = { added: 1, changed: 2, removed: 3, unchanged: 4, problems: 0, index_applied: true };
+const finished = (patch: Partial<Operation> = {}) => op({ sequence: 1, state: "success", finished_at: "2026-10-18T10:00:03Z", report, ...patch });
 
-it("updates one model card, preserving read state until completion", () => {
-  const center = new NotificationCenter();
-  center.models(models(true, 42)); center.read(); center.models(models(true, 64));
-  expect(center.items).toHaveLength(1);
-  expect(center.items[0]).toMatchObject({ percent: 64, active: true, unread: false });
-  center.models(models(true, 100, true));
-  expect(center.items[0].text).toContain("подготовка");
-  center.models(models(false, 100, true));
-  expect(center.items[0]).toMatchObject({ active: false, bad: false, unread: true });
-  center.read(); center.models(models(false, 100, true));
-  expect(center.items[0].unread).toBe(false);
+it("updates one card without reordering or unread progress; completion requires attention", () => {
+  const c = new NotificationCenter(); c.events(events([op()])); c.read();
+  c.events(events([op({ docs_done: 4 })]));
+  expect(c.items).toHaveLength(1); expect(c.items[0]).toMatchObject({ percent: 40, unread: false });
+  c.events(events([], [finished()], 1));
+  expect(c.items[0]).toMatchObject({ active: false, unread: true });
+  expect(c.items[0].text).toContain("добавлено 1, изменено 2, удалено 3");
 });
 
-it("does not report success for incomplete downloads or errors with cached weights", () => {
-  const center = new NotificationCenter();
-  center.models(models(true, 42)); center.models(models(false, 42));
-  expect(center.items[0].bad).toBe(true);
-  center.models(models(true, 100, true)); center.models(models(false, 100, true, "Сбой"));
-  expect(center.items[0]).toMatchObject({ bad: true, text: "Сбой", active: false });
+it("receives an operation entirely between polls and does not resurrect cleared outcomes", () => {
+  const c = new NotificationCenter(); c.events(events()); c.events(events([], [finished()], 1));
+  expect(c.items).toHaveLength(1); c.clear(); c.events(events([], [finished()], 1));
+  expect(c.items).toHaveLength(0);
+  c.events(events([], [finished({ id: 2, sequence: 2 })], 2)); expect(c.items).toHaveLength(1);
 });
 
-it("keeps active work on clear and suppresses unchanged cleared errors", () => {
-  const center = new NotificationCenter();
-  center.models(models(true, 30)); center.error("failure", "Ошибка", "Текст");
-  center.clear(); center.error("failure", "Ошибка", "Текст");
-  expect(center.items).toHaveLength(1);
-  expect(center.items[0].active).toBe(true);
-  center.error("failure", "Ошибка", "Другой текст");
-  expect(center.items).toHaveLength(2);
+it("never infers success from disappearance, disconnect or new epoch; recovers same epoch", () => {
+  const c = new NotificationCenter(); c.events(events([op()])); c.disconnected("Нет связи");
+  expect(c.items[0].active).toBe(true); expect(c.connectionError).toBe("Нет связи");
+  c.events(events([], [finished()], 1)); expect(c.items[0].unknown).toBeUndefined(); expect(c.connectionError).toBeNull();
+  c.events(events([op({ id: 2 })], [], 1)); c.events(events([], [], 0, "worker-2"));
+  expect(c.items.find(n => n.id === "worker-1:2")?.unknown).toBe(true);
+  c.clear(); expect(c.items).toHaveLength(1);
 });
 
-it("tracks queue, pause, problems and recurrence without claiming success on cancel", () => {
-  const center = new NotificationCenter();
-  center.activity({ ...activity(job), queue: [{ project: "b", name: "Бета", kind: "check", priority: "explicit", files: 5 }] });
-  expect(center.items.filter(n => n.active)).toHaveLength(2);
-  center.read(); center.activity({ ...activity(job), paused: true });
-  expect(center.items.find(n => n.project === "a")?.text).toContain("Пауза");
-  center.activity(activity());
-  expect(center.items.some(n => n.active)).toBe(false);
-  expect(center.items.some(n => /успеш/i.test(n.title))).toBe(false);
-  const failed = { ...activity(), problems: [{ project: "a", name: "Альфа", files: [], last_error: "Ошибка файла", rebuild_not_applied: true }] };
-  center.activity(failed); center.read(); center.activity(failed);
-  expect(center.items.find(n => n.id === "index-error:a")?.unread).toBe(false);
-  center.clear(); center.activity(failed);
-  expect(center.items).toHaveLength(0);
-  center.activity(activity()); center.activity(failed);
-  expect(center.items[0].unread).toBe(true);
+it("keeps distinct projects and retries; empty background checks stay silent", () => {
+  const c = new NotificationCenter(); c.events(events([op(), op({ id: 2, project: "b" })])); c.read();
+  c.events(events([op({ id: 2, project: "b" })], [finished({ state: "cancelled" })], 1));
+  c.events(events([op({ id: 3 }), op({ id: 2, project: "b" })], [], 1));
+  expect(c.items[0].active).toBe(true); expect(c.items.at(-1)?.active).toBe(false);
+  expect(c.items).toHaveLength(3); expect(c.items.find(n => n.id === "worker-1:1")?.operation?.project).toBe("a");
+  c.events(events([], [finished({ id: 4, sequence: 2, source: "periodic", report: { ...report, added: 0, changed: 0, removed: 0 } })], 2));
+  expect(c.items.some(n => n.id === "worker-1:4")).toBe(false);
 });
 
-it("bounds completed history without evicting active operations", () => {
-  const center = new NotificationCenter(); center.models(models(true, 1));
-  for (let i = 0; i < 150; i++) center.error(`error:${i}`, "Ошибка", `${i}`);
-  expect(center.items).toHaveLength(101);
-  expect(center.items.some(n => n.active)).toBe(true);
+it("distinguishes confirmed pause, request, stop, partial result, unapplied rebuild and model readiness", () => {
+  for (const [state, text] of [["pause_requested", "Пауза запрошена"], ["paused", "На паузе"], ["stop_requested", "Остановка запрошена"]]) expect(operationText(op({ state }))).toContain(text);
+  expect(operationText(finished({ state: "partial", report: { ...report, problems: 2 } }))).toContain("с ошибками: 2");
+  expect(operationText(finished({ state: "partial", report: { ...report, index_applied: false } }))).toContain("не применена");
+  expect(operationText(finished({ kind: "download", report: null }))).toBe("Файлы модели проверены и готовы");
+  expect(operationText(finished({ kind: "prepare", report: null }))).toBe("Модель готова");
+  expect(operationText(op({ kind: "prepare", percent: 100 }))).toContain("подготовка модели");
+  expect(operationText(finished({ state: "error", report: null, error: "Сбой подготовки" }))).toBe("Сбой подготовки");
+});
+
+it("versioned reading does not consume a later result; clearing retains active work", () => {
+  const c = new NotificationCenter(); c.events(events([op()])); const version = c.version(c.items[0].id);
+  c.events(events([], [finished()], 1)); c.read(c.items[0].id, version);
+  expect(c.items[0].unread).toBe(true); c.read(c.items[0].id, c.version(c.items[0].id)); expect(c.items[0].unread).toBe(false);
+  c.events(events([op({ id: 2 })], [], 1)); c.clear(); expect(c.items).toHaveLength(1); expect(c.items[0].active).toBe(true);
+});
+
+it("bounds completed history without evicting active or unknown operations; deduplicates cleared action error", () => {
+  const c = new NotificationCenter(); c.events(events([op()]));
+  for (let i = 0; i < 150; i++) c.error(`error:${i}`, "Ошибка", `${i}`);
+  expect(c.items).toHaveLength(101); c.clear(); c.error("error:149", "Ошибка", "149"); expect(c.items).toHaveLength(1);
+});
+
+it("deduplicates an unresolved background problem, and requires attention after recovery", () => {
+  const c = new NotificationCenter(); c.events(events());
+  c.events(events([], [finished({ state: "error", source: "periodic", report: null, error: "Недоступно" })], 1)); c.read();
+  c.events(events([], [finished({ id: 2, sequence: 2, state: "error", source: "periodic", report: null, error: "Недоступно" })], 2));
+  expect(c.items).toHaveLength(1); expect(c.items[0].unread).toBe(false);
+  c.clear(); c.events(events([], [finished({ id: 3, sequence: 3, state: "error", source: "periodic", report: null, error: "Недоступно" })], 3)); expect(c.items).toHaveLength(0);
+  c.events(events([], [finished({ id: 4, sequence: 4, source: "periodic" })], 4));
+  c.events(events([], [finished({ id: 5, sequence: 5, state: "error", source: "periodic", report: null, error: "Недоступно" })], 5));
+  expect(c.items.some(n => n.bad && n.unread)).toBe(true);
 });

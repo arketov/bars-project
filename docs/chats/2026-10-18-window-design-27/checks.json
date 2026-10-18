@@ -1,0 +1,268 @@
+[
+  {
+    "label": "Повтор: новая попытка и прежний итог",
+    "result": "passed"
+  },
+  {
+    "label": "Очистка сохраняет активную попытку",
+    "result": "passed"
+  },
+  {
+    "label": "Потеря связи не успех",
+    "result": "passed"
+  },
+  {
+    "label": "Связь: подтверждённый итог",
+    "result": "passed"
+  },
+  {
+    "label": "100 процентов файлов не готовность",
+    "result": "passed"
+  },
+  {
+    "label": "Уведомления: transitions",
+    "result": "passed"
+  },
+  {
+    "label": "Уведомления: special",
+    "result": "passed"
+  },
+  {
+    "label": "Уведомления: removed",
+    "result": "passed"
+  },
+  {
+    "label": "Уведомления: short",
+    "result": "passed"
+  },
+  {
+    "label": "Уведомления: empty",
+    "result": "passed"
+  },
+  {
+    "label": "Закрытие возвращает фокус",
+    "result": "passed"
+  },
+  {
+    "label": "Новый итог требует внимания",
+    "result": "passed"
+  },
+  {
+    "label": "Показанное событие прочитано",
+    "result": "passed"
+  },
+  {
+    "label": "Пусто после очистки",
+    "result": "passed"
+  },
+  {
+    "label": "Подробности без JSON",
+    "result": "passed"
+  },
+  {
+    "label": "Ноль — успешный ответ",
+    "result": "passed"
+  },
+  {
+    "label": "Закрытие MCP возвращает фокус строке",
+    "result": "passed"
+  },
+  {
+    "label": "Безопасная ошибка MCP",
+    "result": "passed"
+  },
+  {
+    "label": "Очередь не завершённая индексация",
+    "result": "passed"
+  },
+  {
+    "label": "Успех с fallback",
+    "result": "passed"
+  },
+  {
+    "label": "Узкое окно: возврат к списку",
+    "result": "passed"
+  },
+  {
+    "label": "Все фильтры совместно: одна ошибка",
+    "result": "passed"
+  },
+  {
+    "label": "Пустая выборка отличается от ошибки чтения",
+    "result": "passed"
+  },
+  {
+    "label": "Сброс фильтров",
+    "result": "passed"
+  },
+  {
+    "label": "MCP: partial",
+    "result": "passed"
+  },
+  {
+    "label": "MCP: disabled",
+    "result": "passed"
+  },
+  {
+    "label": "MCP: expired",
+    "result": "passed"
+  },
+  {
+    "label": "MCP: legacy",
+    "result": "passed"
+  },
+  {
+    "label": "MCP: loading",
+    "result": "passed"
+  },
+  {
+    "label": "MCP: empty",
+    "result": "passed"
+  },
+  {
+    "label": "MCP: error",
+    "result": "passed"
+  },
+  {
+    "label": "Повтор чтения восстанавливает список",
+    "result": "passed"
+  },
+  {
+    "label": "Большая история, все 240",
+    "result": "passed"
+  },
+  {
+    "label": "Вторая страница без дубля границы",
+    "result": "passed"
+  },
+  {
+    "label": "Скрытые поля",
+    "result": "passed"
+  },
+  {
+    "label": "Усечение явно помечено",
+    "result": "passed"
+  },
+  {
+    "label": "Политика и управление",
+    "result": "passed"
+  },
+  {
+    "label": "Отключение записи оставляет историю",
+    "result": "passed"
+  },
+  {
+    "label": "Подтверждение очистки содержит область",
+    "result": "passed"
+  },
+  {
+    "label": "Очистка макета",
+    "result": "passed"
+  },
+  {
+    "label": "Папка: проверяется проект, итог неизвестен",
+    "result": "passed"
+  },
+  {
+    "label": "Клавиатурное меню папки",
+    "result": "passed"
+  },
+  {
+    "label": "Меню: root",
+    "result": "passed"
+  },
+  {
+    "label": "Меню: module",
+    "result": "passed"
+  },
+  {
+    "label": "Меню: rootgroup",
+    "result": "passed"
+  },
+  {
+    "label": "Меню: dot",
+    "result": "passed"
+  },
+  {
+    "label": "Меню: nested",
+    "result": "passed"
+  },
+  {
+    "label": "Меню: empty-root",
+    "result": "passed"
+  },
+  {
+    "label": "Меню: unavailable",
+    "result": "passed"
+  },
+  {
+    "label": "Меню: consent",
+    "result": "passed"
+  },
+  {
+    "label": "Меню: missing",
+    "result": "passed"
+  },
+  {
+    "label": "Ошибка буфера не успех",
+    "result": "passed"
+  },
+  {
+    "label": "Ошибка запуска не успех",
+    "result": "passed"
+  },
+  {
+    "label": "Подменю файла с клавиатуры",
+    "result": "passed"
+  },
+  {
+    "label": "Правый клик по галочке сохраняет выбор",
+    "result": "passed"
+  },
+  {
+    "label": "Меню у края после исправления",
+    "result": "passed"
+  },
+  {
+    "label": "Меню в пределах узкого окна",
+    "result": "passed",
+    "bounds": {
+      "height": 281,
+      "inside": true,
+      "width": 300
+    }
+  },
+  {
+    "label": "Совместимая сессия сохраняется",
+    "result": "passed"
+  },
+  {
+    "label": "Несовместимая сессия сброшена с объяснением",
+    "result": "passed"
+  },
+  {
+    "label": "Усечение с фактическими размерами",
+    "result": "passed"
+  },
+  {
+    "label": "Длинный текст раскрывается",
+    "result": "passed"
+  },
+  {
+    "label": "MCP 760 px: нет горизонтального переполнения",
+    "result": "passed",
+    "layout": {
+      "overflow": false,
+      "scrollWidth": 538,
+      "width": 538
+    }
+  },
+  {
+    "label": "Невидимые карточки остаются непрочитанными",
+    "result": "passed"
+  },
+  {
+    "label": "Прочитать все включает скрытые",
+    "result": "passed"
+  }
+]

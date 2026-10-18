@@ -2,12 +2,23 @@
 //! модели каталога и внешние по HTTP (`docs/features/models/local-models.md`,
 //! `docs/features/models/external-models.md`).
 
+mod artifact;
 mod builtin;
 mod builtin_rerank;
 mod candle;
 mod catalog;
+mod embed_artifact;
 mod embedder;
 mod execution;
+mod gguf;
+mod gguf_artifact;
+pub use gguf::GgufEmbedder;
+/// Скачивает и проверяет GGUF без создания модели и её KV-cache.
+pub fn download_gguf_artifact(dir: &std::path::Path, id: &str) -> Result<(), String> {
+    gguf_artifact::ensure(dir, id)
+        .map(|_| ())
+        .map_err(|e| e.to_string())
+}
 pub use execution::ExecutionInfo;
 mod remote;
 mod rerank_artifact;
@@ -16,16 +27,19 @@ mod reranker;
 pub mod testing;
 
 pub use builtin::{
-    Accelerator, BuiltinEmbedder, Device, bge_m3_fingerprint, load_builtin_embedder,
-    prepare_environment,
+    Accelerator, BuiltinEmbedder, Device, bge_m3_fingerprint, bge_m3_fp16_fingerprint,
+    bge_m3_int8_fingerprint, load_builtin_embedder, prepare_environment,
 };
 pub use builtin_rerank::{BuiltinReranker, sigmoid};
 pub use candle::CandleEmbedder;
 pub use catalog::{
-    BGE_M3_DIM, BGE_M3_ID, Backend, BuiltinModel, NOMIC_V2_MOE_ID, QWEN3_0_6B_ID, QWEN3_4B_ID,
-    QWEN3_QUERY_PREFIX, builtin_model, builtin_models, download_percent, is_downloaded,
+    BGE_M3_DIM, BGE_M3_FP16_ID, BGE_M3_ID, Backend, BuiltinModel, NOMIC_V2_MOE_ID, QWEN3_0_6B_ID,
+    QWEN3_4B_ID, QWEN3_QUERY_PREFIX, builtin_model, builtin_models, download_onnx_artifacts,
+    download_percent, is_downloaded,
 };
 pub use embedder::{EmbedError, Embedder, ModelFingerprint};
 pub use remote::{HttpEmbedder, HttpReranker, RemoteTarget, remote_fingerprint};
-pub use rerank_artifact::{reranker_download_percent, reranker_files_present, reranker_is_downloaded};
+pub use rerank_artifact::{
+    reranker_download_percent, reranker_files_present, reranker_is_downloaded,
+};
 pub use reranker::{BGE_RERANKER_V2_M3_ID, RerankError, Reranker};

@@ -35,6 +35,7 @@ pub struct Rebuild {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Job {
+    pub operation_id: u64,
     pub priority: Priority,
     pub scope: Scope,
     /// Если задано, вместо проверки актуальности строится новый индекс.
@@ -44,6 +45,7 @@ pub struct Job {
 impl Job {
     pub fn check(priority: Priority) -> Self {
         Self {
+            operation_id: 0,
             priority,
             scope: Scope::Full,
             rebuild: None,
@@ -52,6 +54,7 @@ impl Job {
 
     pub fn files(priority: Priority, files: impl IntoIterator<Item = PathBuf>) -> Self {
         Self {
+            operation_id: 0,
             priority,
             scope: Scope::Files(files.into_iter().collect()),
             rebuild: None,
@@ -60,6 +63,7 @@ impl Job {
 
     pub fn rebuild(accepted: bool) -> Self {
         Self {
+            operation_id: 0,
             priority: Priority::Explicit,
             scope: Scope::Full,
             rebuild: Some(Rebuild { accepted }),

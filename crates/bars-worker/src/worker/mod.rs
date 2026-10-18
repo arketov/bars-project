@@ -7,8 +7,10 @@
 
 mod control;
 mod deletion;
+mod graph;
 mod job;
 mod model_lifecycle;
+mod operations;
 pub mod models;
 mod queue;
 mod registry;
@@ -208,6 +210,8 @@ struct RuntimeStatus {
 }
 
 struct Runtime {
+    generation: u64,
+    folder_revision: u64,
     deleting: bool,
     job_gate: Arc<tokio::sync::Mutex<()>>,
     status: RuntimeStatus,
@@ -225,6 +229,8 @@ struct Runtime {
 impl Runtime {
     fn new() -> Self {
         Self {
+            generation: operations::generation(),
+            folder_revision: 0,
             deleting: false,
             job_gate: Arc::new(tokio::sync::Mutex::new(())),
             status: RuntimeStatus {
@@ -265,6 +271,12 @@ struct Inner {
     /// Модели, которые сейчас скачиваются по кнопке окна.
     downloads: Mutex<HashSet<String>>,
     download_errors: Mutex<HashMap<String, String>>,
+    graph_jobs: Mutex<HashMap<PathBuf,graph::GraphJob>>,
+}
+
+struct DownloadCleanup { inner: Arc<Inner>, id: String }
+impl Drop for DownloadCleanup {
+    fn drop(&mut self) { lock(&self.inner.downloads).remove(&self.id); }
 }
 
 /// Воркер. Копии указывают на одно и то же состояние.
@@ -307,6 +319,7 @@ impl Worker {
             current: Mutex::new(None),
             downloads: Mutex::new(HashSet::new()),
             download_errors: Mutex::new(HashMap::new()),
+            graph_jobs: Mutex::new(HashMap::new()),
         });
         let queue_task = tokio::spawn(Arc::clone(&inner).run_queue());
         let timer_task = tokio::spawn(Arc::clone(&inner).run_timer());
@@ -398,7 +411,7 @@ impl Worker {
         let path = self.resolve(selector)?;
         lock(&self.inner.registry).remove(&path)?;
         let runtime = lock(&self.inner.projects).remove(&path);
-        lock(&self.inner.queue).remove(&path);
+        self.inner.cancel_queued(&path);
         // Слежение останавливается вне блокировок: поток `notify` может ждать их.
         drop(runtime);
         Ok(path)
@@ -414,6 +427,20 @@ impl Worker {
         lock(&self.inner.registry)
             .project_for_cwd(cwd)
             .map(|entry| entry.path.clone())
+    }
+
+    /// Привязка меню папки: новая регистрация или смена docs_root инвалидирует цель.
+    pub fn folder_identity(&self, path: &Path) -> Result<String, WorkerError> {
+        let path = self.registered(path)?;
+        let projects = lock(&self.inner.projects);
+        let runtime = projects.get(&path).filter(|r| !r.deleting)
+            .ok_or_else(|| WorkerError::NotRegistered(path.clone()))?;
+        Ok(format!("{}:{}:{}", runtime.generation, runtime.folder_revision, self.inner.docs_root_of(&path)))
+    }
+
+    /// Короткое действие окна не должно пересечь удаление/смену настроек проекта.
+    pub async fn folder_action_guard(&self) -> tokio::sync::OwnedRwLockWriteGuard<()> {
+        Arc::clone(&self.inner.requests).write_owned().await
     }
 
     /// Все проекты реестра с состоянием, в порядке регистрации.
@@ -498,6 +525,11 @@ impl Worker {
         full: bool,
         accept_model_change: bool,
     ) -> Result<(), WorkerError> {
+        self.reindex_receipt(path,full,accept_model_change).map(|_|())
+    }
+
+    /// Проверка с ID принятой/объединённой операции для уведомления окна.
+    pub fn reindex_receipt(&self, path: &Path, full: bool, accept_model_change: bool) -> Result<(u64,bool,JobKind),WorkerError> {
         let path = self.registered(path)?;
         let state = lock(&self.inner.projects)
             .get(&path)
@@ -515,8 +547,8 @@ impl Worker {
         } else {
             Job::check(Priority::Explicit)
         };
-        self.inner.enqueue(&path, job);
-        Ok(())
+        let projects=lock(&self.inner.projects);
+        self.inner.enqueue_receipt(&path,job,&projects).ok_or(WorkerError::NotRegistered(path))
     }
 
     // --- пауза, остановка, ход ---
@@ -564,7 +596,7 @@ impl Worker {
                 .map(|cell| cell.cancel())
                 .is_some()
         };
-        let queued = lock(&self.inner.queue).remove(&path);
+        let queued = self.inner.cancel_queued(&path);
         Ok(running || queued)
     }
 
@@ -644,7 +676,10 @@ impl Worker {
         })?;
         let old = lock(&self.inner.projects)
             .get_mut(&path)
-            .and_then(|runtime| runtime.watcher.take());
+            .and_then(|runtime| {
+                runtime.folder_revision += 1;
+                runtime.watcher.take()
+            });
         // Слежение останавливается вне блокировки: его поток может ждать её.
         drop(old);
         self.inner.ensure_watching(&path);
@@ -720,9 +755,13 @@ impl Worker {
             user.embed.model.clone_from(&id);
         }
         let settings = Settings::resolve(&user, &bars_core::settings::ProjectConfig::default());
+        let operation = models::begin_model(&self.inner.models.operations, &settings, reranker, "download");
         self.inner.handle.spawn_blocking(move || {
+            let _attempt = models::ModelAttempt(Arc::clone(&inner.models.operations), operation);
+            let _download = DownloadCleanup { inner: Arc::clone(&inner), id: id.clone() };
             log::info!("Начато скачивание модели {id}");
-            if inner.models.download(&settings, reranker).is_err() {
+            let success = inner.models.download_operation(&settings, reranker, Some(operation)).is_ok();
+            if !success {
                 log::error!("Не удалось скачать модель {id}; подробности — в состоянии модели");
                 // В UI не передаём произвольный ответ провайдера, URL или токены.
                 lock(&inner.download_errors).insert(
@@ -733,6 +772,7 @@ impl Worker {
                 log::info!("Скачивание модели {id} завершено");
             }
             lock(&inner.downloads).remove(&id);
+            models::finish_model(&inner.models.operations, operation, success);
         });
         true
     }
@@ -774,13 +814,43 @@ impl Inner {
         }
     }
 
+    fn cancel_queued(&self, path: &Path) -> bool {
+        let mut queue = lock(&self.queue);
+        let id = queue.get(path).map(|job| job.operation_id);
+        let removed = queue.remove(path);
+        if let Some(id) = id { lock(&self.models.operations).finish(id, "cancelled", None, None); }
+        removed
+    }
+
     fn enqueue(&self, project: &Path, job: Job) {
         let projects = lock(&self.projects);
+        self.enqueue_for(project, job, &projects);
+    }
+
+    fn enqueue_for(&self, project: &Path, job: Job, projects: &HashMap<PathBuf, Runtime>) {
+        self.enqueue_receipt(project,job,projects);
+    }
+
+    fn enqueue_receipt(&self, project: &Path, mut job: Job, projects: &HashMap<PathBuf, Runtime>) -> Option<(u64,bool,JobKind)> {
         if !projects.get(project).is_some_and(|runtime| !runtime.deleting) {
-            return;
+            return None;
         }
-        lock(&self.queue).push(project, job);
+        let mut queue = lock(&self.queue);
+        let mut journal = lock(&self.models.operations);
+        let was_merged=queue.get(project).is_some();
+        job.operation_id = queue.get(project).map(|job| job.operation_id).unwrap_or_else(|| {
+            let settings = Settings::load(&self.config.bars_home, project).ok().map(|s| s.value);
+            journal.begin("check", "explicit", Some(project.display().to_string()), projects[project].generation, None, None, false, settings.as_ref().map(operations::settings_key).unwrap_or(0))
+        });
+        let id = job.operation_id;
+        queue.push(project, job);
+        let merged = queue.get(project).expect("задание поставлено");
+        journal.edit(id, |op| {
+            op.kind = match JobKind::of(merged) { JobKind::Rebuild => "rebuild", JobKind::Check => "check", JobKind::Files => "files" }.into();
+            op.source = match merged.priority { Priority::Explicit => "explicit", Priority::Watch => "watch", Priority::Periodic => "periodic" }.into();
+        });
         self.wake.notify_one();
+        Some((id,was_merged,JobKind::of(merged)))
     }
 
     /// Вводит проект в работу: папка на месте, слежение запущено, проверка в очереди. Папки нет —
@@ -966,7 +1036,7 @@ impl Inner {
             runtime.watch_failed = true;
             runtime.watcher.take()
         };
-        lock(&self.queue).remove(path);
+        self.cancel_queued(path);
         watcher
     }
 
@@ -1011,6 +1081,9 @@ impl Inner {
     }
 
     async fn process(self: &Arc<Self>, path: PathBuf, job: Job) {
+        let operation_id = job.operation_id;
+        let _pending = operations::PendingResult(Arc::clone(&self.models.operations), operation_id);
+        let rebuild = job.rebuild.is_some();
         let Some(job_gate) = lock(&self.projects).get(&path).map(|r| Arc::clone(&r.job_gate)) else {
             return;
         };
@@ -1042,7 +1115,8 @@ impl Inner {
 
         let worker = Arc::clone(self);
         let project = path.clone();
-        let observer = JobObserver::new(Arc::clone(&self.pause), cell);
+        lock(&self.models.operations).edit(operation_id, |op| op.state = "running".into());
+        let observer = JobObserver::new(Arc::clone(&self.pause), Arc::clone(&cell));
         log::info!("Начата индексация: {}", path.display());
         let result = tokio::task::spawn_blocking(move || {
             let env = JobEnv {
@@ -1055,7 +1129,6 @@ impl Inner {
             job::run(&env, &project, &job)
         })
         .await;
-        *lock(&self.current) = None;
 
         let result = result.unwrap_or_else(|error| job::JobResult {
             outcome: Outcome::Failed(format!("внутренняя ошибка воркера: {error}")),
@@ -1089,19 +1162,27 @@ impl Inner {
             Outcome::Cancelled => log::info!("Индексация отменена: {}", path.display()),
             Outcome::ReindexRequired(_) => log::info!("Нужна переиндексация: {}", path.display()),
         }
-        self.apply(&path, previous, result);
+        let outcome = result.outcome.clone();
+        // Публикация итога только после применения состояния проекта.
+        self.apply(&path, previous, &job_gate, result);
+        let mut journal = lock(&self.models.operations);
+        journal.edit(operation_id, |op| { let p = cell.progress(); op.docs_done = Some(p.docs_done); op.docs_total = cell.total_known().then_some(p.docs_total); });
+        journal.index_result(operation_id, &outcome, rebuild);
+        drop(journal);
+        *lock(&self.current) = None;
         if found_changes {
             self.after_full_check(&path, periodic);
         }
     }
 
-    fn apply(&self, path: &Path, previous: ProjectState, result: job::JobResult) {
+    fn apply(&self, path: &Path, previous: ProjectState, generation_gate: &Arc<tokio::sync::Mutex<()>>, result: job::JobResult) {
         let mut stopped = None;
         {
             let mut projects = lock(&self.projects);
             let Some(runtime) = projects.get_mut(path) else {
                 return;
             };
+            if !Arc::ptr_eq(&runtime.job_gate, generation_gate) { return; }
             let status = &mut runtime.status;
             if let Some(model) = result.index_model {
                 status.model_index = Some(model);

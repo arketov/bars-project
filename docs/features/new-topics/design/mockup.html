@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Новые темы — макет фичи bars</title>
+<style>
+:root{color-scheme:dark;--bg:#131115;--panel:#1b181d;--panel2:#211d23;--line:#2c282f;--text:#ece8ee;--muted:#988f9d;--accent:#f0568c;--soft:#3a1a27;font:14px/1.5 system-ui,sans-serif;color:var(--text);background:var(--bg)}
+*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer;color:inherit;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:7px 11px}button:hover{border-color:var(--muted)}button:disabled{opacity:.5;cursor:wait}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}input,select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:8px 10px}input{min-width:0}.primary{background:var(--accent);color:#210c14;border-color:var(--accent);font-weight:600}.quiet{background:transparent}.danger{color:#ff929f}.muted{color:var(--muted)}.small{font-size:12px}svg{width:19px;height:19px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.demo{min-height:44px;display:flex;gap:12px;align-items:center;padding:7px 18px;border-bottom:1px solid var(--line);color:var(--muted);font-size:12px}.demo strong{color:var(--text)}.demo select{padding:3px 7px}.demo button{margin-left:auto;padding:3px 9px}.shell{display:grid;grid-template-columns:260px minmax(320px,420px) minmax(350px,1fr);min-height:calc(100vh - 45px)}aside{background:var(--panel);border-right:1px solid var(--line);padding:20px 15px;display:flex;flex-direction:column}.project{font-weight:650;font-size:15px;margin:0 8px 2px}.path{margin:0 8px 22px}.filter{width:100%;margin-bottom:12px}.tree{display:grid;gap:2px}.tree-row{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;border-radius:5px;height:31px;padding:4px 8px;font-size:13px}.tree-row.selected{background:var(--soft);color:#ff8db4}.tree-row .num{margin-left:auto;color:var(--muted);font-size:11px}.chevron{font-size:18px;color:var(--muted);width:12px}.box{width:14px;height:14px;border:1px solid #3a353e;border-radius:4px}.tree-label{font-weight:600}.tree-row:not(button){cursor:default}.tree-row svg{margin-left:16px}.side-footer{margin-top:auto;padding:30px 8px 0;color:var(--muted);font-size:12px}.dot{display:inline-block;width:6px;height:6px;background:#76b493;border-radius:50%;margin-right:6px}
+main{border-right:1px solid var(--line);padding:24px 18px}h1{font-size:22px;line-height:1.2;margin:0 0 7px;font-weight:650}h2{font-size:19px;line-height:1.4;margin:10px 0}h3{font-size:13px;margin:23px 0 9px}p{margin:7px 0 14px}.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:18px 0}.tabs{display:flex;gap:4px;margin:21px 0 14px}.tabs button{font-size:12px;padding:5px 8px;background:transparent}.tabs button[aria-pressed=true]{background:var(--soft);color:#ff8db4;border-color:#6c3046}.find{width:100%;margin-bottom:10px}.topic{display:block;width:100%;text-align:left;border:1px solid transparent;background:transparent;padding:14px 12px;margin:4px 0;border-radius:8px}.topic[aria-pressed=true]{border-color:#6c3046;background:#271c24}.topic-title{display:block;font-size:14px;font-weight:600;margin-bottom:8px}.meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:12px}.tag{font-size:11px;border:1px solid var(--line);padding:2px 7px;border-radius:20px;display:inline-block}.tag.found{color:#8dc7a8;border-color:#305342}.tag.open{color:#edb77d;border-color:#61472e}.tag.resolved{color:var(--muted)}.banner{padding:11px 13px;border:1px solid #5b4834;background:#2a221c;border-radius:7px;font-size:12px;margin:14px 0}.empty{padding:40px 12px;color:var(--muted);text-align:center}.empty strong{display:block;color:var(--text);margin-bottom:8px}.list-bottom{margin-top:25px;padding-top:14px;border-top:1px solid var(--line)}.list-bottom summary{color:var(--muted);cursor:pointer;font-size:12px}.list-bottom label{display:flex;gap:7px;margin:15px 0 7px;font-size:12px}
+.detail{padding:28px 30px;max-width:790px}.detail .eyebrow{text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-size:10px}.reason{color:var(--muted);font-size:13px;margin:12px 0 20px}.actions{display:flex;gap:8px;flex-wrap:wrap}.variant{padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;margin:8px 0}.variant p{font-size:13px;margin:0 0 6px}.check{border-top:1px solid var(--line);margin-top:23px;padding-top:19px}.check h3{margin-top:0}.source{padding:13px 14px;border:1px solid #354b3d;border-radius:8px;background:#17221b;margin:11px 0}.source strong{display:block;font-size:13px}.source code{font-size:11px;color:#8dc7a8;overflow-wrap:anywhere}.source button{margin-top:10px;font-size:12px}.decision{margin-top:17px}.notice{color:var(--muted);font-size:12px;margin-top:10px}.result-empty{padding:15px;background:var(--panel2);border:1px solid var(--line);border-radius:8px}.skeleton{height:55px;background:var(--panel2);border-radius:8px;margin-top:15px;animation:pulse 1s infinite alternate}@keyframes pulse{to{opacity:.4}}dialog{color:var(--text);background:var(--panel);border:1px solid #4a414f;border-radius:12px;max-width:440px;padding:25px}dialog::backdrop{background:#0009}dialog .actions{justify-content:flex-end;margin-top:20px}.hidden{display:none!important}@media(max-width:1050px){.shell{grid-template-columns:220px 1fr}.detail{grid-column:2;border-top:1px solid var(--line);max-width:none}aside{grid-row:1/3}main{border-right:0}}@media(max-width:620px){.shell{display:block}aside{padding:12px}.side-footer,.path,.filter,.tree-row:not(button){display:none}main,.detail{padding:20px}.demo{flex-wrap:wrap}}@media(prefers-reduced-motion:reduce){.skeleton{animation:none}}
+</style>
+</head>
+<body>
+<div class="demo"><strong>Макет фичи · IDEA-14</strong><span>Демонстрационные данные. Проверка имитируется.</span><label>Состояние <select id="demo-state"><option value="normal">Обычный список</option><option value="empty">Пустой список</option><option value="error">Ошибка чтения</option></select></label><button id="reset">Сбросить макет</button></div>
+<div class="shell">
+<aside aria-label="Проект и дерево документов">
+<div class="project">ai-mutiplayer-bots <span class="muted">⌄</span></div><div class="path muted small">Документация проекта</div>
+<input class="filter" aria-label="Фильтр документов" placeholder="Фильтр документов" id="tree-filter">
+<nav class="tree" aria-label="Документы">
+<button class="tree-row selected" id="new-topics" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3H6a2 2 0 0 0-2 2v15a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1v-8M8 11h4M8 15h7M8 18h4M18 2l1.2 3.8L23 7l-3.8 1.2L18 12l-1.2-3.8L13 7l3.8-1.2Z"/></svg><span class="tree-label">Новые темы</span><span class="num" id="active-count">2</span></button>
+<div class="tree-row document-row"><span class="chevron">›</span><span class="box"></span><span class="tree-label">(корень)</span><span class="num">96</span></div>
+<div class="tree-row document-row"><span class="chevron">›</span><span class="box"></span><span class="tree-label">Adr</span><span class="num">29</span></div>
+<div class="tree-row document-row"><span class="chevron">›</span><span class="box"></span><span class="tree-label">Audits</span><span class="num">135</span></div>
+<div class="tree-row document-row"><span class="chevron">›</span><span class="box"></span><span class="tree-label">Chats</span><span class="num">226</span></div>
+<div class="tree-row document-row"><span class="chevron">›</span><span class="box"></span><span class="tree-label">Features</span><span class="num">37</span></div>
+<div class="tree-row document-row"><span class="chevron">›</span><span class="box"></span><span class="tree-label">Knowledge base</span><span class="num">723</span></div>
+</nav><div class="side-footer"><span class="dot"></span>Индекс актуален<br>Обновлён сегодня, 18:42</div>
+</aside>
+<main>
+<h1>Новые темы</h1><p class="muted small">Вопросы, для которых не нашлись материалы.<br>Собраны из поиска окна и MCP.</p>
+<div class="toolbar"><button id="check-all">Проверить все</button><span id="batch-progress" class="muted small" aria-live="polite"></span></div>
+<div id="collection-banner" class="banner hidden">Сбор новых тем выключен. Сохранённые темы доступны.</div>
+<div class="tabs" role="group" aria-label="Статус темы"><button data-filter="active" aria-pressed="true">Активные</button><button data-filter="materials_found" aria-pressed="false">Есть материалы</button><button data-filter="resolved" aria-pressed="false">Закрытые</button></div>
+<input class="find" id="find" placeholder="Найти тему" aria-label="Найти тему">
+<div id="topics" aria-live="polite"></div>
+<details class="list-bottom"><summary>Управление списком</summary><label><input id="collect" type="checkbox" checked> Собирать новые темы этого проекта</label><p class="muted small">Хранение: .bars/new-topics.sqlite3</p><button id="clear" class="quiet danger">Очистить список…</button></details>
+</main>
+<section class="detail" id="detail" aria-label="Карточка темы" aria-live="polite"></section>
+</div>
+<dialog id="confirm"><h2 id="confirm-title">Удалить тему?</h2><p id="confirm-text" class="muted"></p><div class="actions"><button id="cancel" autofocus>Отмена</button><button id="confirm-delete" class="danger">Удалить</button></div></dialog>
+<dialog id="source-dialog"><h2>Предпросмотр материала</h2><p>Это демонстрационная карточка источника. В приложении здесь открывается актуальный документ проекта с подсветкой строк.</p><button id="close-source">Закрыть</button></dialog>
+<script>
+const initial=[
+ {id:1,title:'Как восстановить изношенные шины бота?',status:'open',count:4,last:'18 минут назад',sources:'MCP · Окно',reason:'Поиск ничего не вернул по всему проекту',variants:['Как восстановить изношенные шины бота?','Можно ли вернуть боту новые шины без переподключения?'],scope:'Весь проект',results:[],checked:false,next:[{title:'Сервис автомобиля — замена шин',path:'docs/features/car-service/tyres.md',lines:'42–61'}]},
+ {id:2,title:'Как отменить маршрут после смены роли?',status:'materials_found',count:2,last:'1 час назад',sources:'MCP',reason:'Не найдено в выбранной области',variants:['Как отменить маршрут после смены роли?'],scope:'Модуль features',results:[{title:'Жизненный цикл маршрута',path:'docs/features/routes/lifecycle.md',lines:'18–39'}],checked:true,next:[{title:'Жизненный цикл маршрута',path:'docs/features/routes/lifecycle.md',lines:'18–39'}]},
+ {id:3,title:'Где задаётся лимит числа ботов?',status:'resolved',count:1,last:'Вчера',sources:'Окно',reason:'Пользователь отметил недостаток знаний',variants:['Где задаётся лимит числа ботов?'],scope:'Весь проект',results:[],checked:true,next:[]}
+];
+let topics=structuredClone(initial),selected=1,filter='active',generation=0,pendingDelete=null,checking=new Set(),batch=false;
+const $=id=>document.getElementById(id);
+const statusText={open:'Новая тема',materials_found:'Есть материалы',resolved:'Закрыта'};
+function element(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
+function action(text,fn,cls=''){const b=element('button',cls,text);b.addEventListener('click',fn);return b;}
+function visible(){const q=$('find').value.toLocaleLowerCase('ru');return topics.filter(t=>(filter==='active'?t.status!=='resolved':t.status===filter)&&t.title.toLocaleLowerCase('ru').includes(q));}
+function render(){
+ const mode=$('demo-state').value,items=mode==='normal'?visible():[];
+ $('active-count').textContent=mode==='error'?'—':mode==='empty'?'0':String(topics.filter(t=>t.status!=='resolved').length);
+ $('topics').replaceChildren();
+ document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.filter===filter)));
+ $('collection-banner').classList.toggle('hidden',$('collect').checked);
+ $('check-all').disabled=batch||mode!=='normal'||!topics.some(t=>t.status!=='resolved');
+ if(mode==='error'){
+  const empty=element('div','empty');empty.append(element('strong','','Не удалось прочитать список'),element('p','','Ошибка доступа к локальному хранилищу.'),action('Повторить',()=>{$('demo-state').value='normal';render();}));$('topics').append(empty);
+ }else if(!items.length){const empty=element('div','empty');empty.append(element('strong','',mode==='empty'||!topics.length?'Новых тем пока нет':'Нет тем по выбранному фильтру'),element('p','','Здесь появятся вопросы, для которых не нашлись материалы.'));$('topics').append(empty);}
+ for(const t of items){
+  const row=action('',()=>{selected=t.id;render();},'topic');row.setAttribute('aria-pressed',String(t.id===selected));
+  row.append(element('span','topic-title',t.title));const meta=element('span','meta');meta.append(element('span',`tag ${t.status==='materials_found'?'found':t.status}`,checking.has(t.id)?'Проверяем…':statusText[t.status]),element('span','',`${t.count} обращ. · ${t.sources}`),element('span','',t.last));row.append(meta);$('topics').append(row);
+ }
+ if(!items.some(t=>t.id===selected))selected=items[0]?.id??null;
+ // Состояние выбора могло измениться после фильтрации.
+ document.querySelectorAll('.topic').forEach((row,i)=>row.setAttribute('aria-pressed',String(items[i]?.id===selected)));
+ renderDetail(mode==='normal'?topics.find(t=>t.id===selected):null);
+}
+function renderDetail(t){
+ const d=$('detail');d.replaceChildren();if(!t){d.append(element('p','muted','Выберите тему в списке.'));return;}
+ d.append(element('div','eyebrow','Вопрос к документации'),element('h2','',t.title),element('span',`tag ${t.status==='materials_found'?'found':t.status}`,statusText[t.status]),element('p','reason',t.reason));
+ const actions=element('div','actions');const check=action('Проверить знания',()=>checkTopic(t.id),'primary');check.disabled=checking.has(t.id);actions.append(check,action('Удалить…',()=>askDelete(t.id),'quiet danger'));d.append(actions);
+ d.append(element('h3','',`Формулировки · ${t.variants.length}`));for(const v of t.variants){const box=element('div','variant');box.append(element('p','',v),element('span','muted small',t.scope));d.append(box);}
+ const result=element('div','check');result.append(element('h3','','Проверка знаний'));
+ if(checking.has(t.id)){result.append(element('p','muted','Ищем материалы по сохранённым формулировкам…'),element('div','skeleton'));}
+ else if(!t.checked){result.append(element('p','muted small','Ещё не проверяли после последнего обращения. Добавили документацию — проверьте тему снова.'));}
+ else if(t.results.length){
+  result.append(element('p','muted small',`Проверено сегодня · ${t.checkScope||'исходная область'} · демонстрационный итог`));
+  for(const r of t.results){const src=element('div','source');src.append(element('strong','',r.title),element('code','',`${r.path}:${r.lines}`),element('p','muted small','Найден материал для проверки. Достаточность определяете вы.'),action('Открыть документ',()=>$('source-dialog').showModal()));result.append(src);}
+  result.append(element('p','notice',`Проверены все формулировки (${t.variants.length}/${t.variants.length}). Совпадения сами по себе не закрывают тему.`));
+  const decisions=element('div','actions decision');decisions.append(action('Знаний достаточно',()=>{t.status='resolved';render();},'primary'),action('Всё ещё не хватает',()=>{t.status='open';render();}));result.append(decisions);
+ }else{result.append(element('div','result-empty','Материалы не найдены при этой проверке.'),element('p','notice','Тема остаётся в списке. Вы можете дополнить документацию и проверить снова.'));}
+ result.append(action('Проверить по всему проекту',()=>checkTopic(t.id,true),'quiet'));d.append(result);
+}
+async function checkTopic(id,whole=false){
+ const t=topics.find(t=>t.id===id);if(!t||checking.has(id))return;
+ const epoch=generation;checking.add(id);render();await new Promise(resolve=>setTimeout(resolve,650));checking.delete(id);
+ if(epoch!==generation||!topics.includes(t)){render();return;}
+ t.results=structuredClone(t.next);t.checked=true;t.checkScope=whole?'весь проект (явное расширение)':'исходная область';t.status=t.results.length?'materials_found':'open';render();
+}
+function askDelete(id){pendingDelete=id;$('confirm-title').textContent=id===null?'Очистить список?':'Удалить тему?';$('confirm-text').textContent=id===null?`Будут удалены все темы (${topics.length}) проекта ai-mutiplayer-bots. Сбор новых тем продолжится, если включён.`:'Тема и сохранённые варианты будут удалены. Новый запрос может добавить её снова.';$('confirm').showModal();}
+$('confirm-delete').addEventListener('click',()=>{generation++;topics=pendingDelete===null?[]:topics.filter(t=>t.id!==pendingDelete);$('confirm').close();render();});
+$('cancel').addEventListener('click',()=>$('confirm').close());$('close-source').addEventListener('click',()=>$('source-dialog').close());
+$('clear').addEventListener('click',()=>askDelete(null));$('collect').addEventListener('change',render);$('find').addEventListener('input',render);$('demo-state').addEventListener('change',render);
+document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;render();}));
+$('new-topics').addEventListener('click',()=>{$('find').focus();});
+$('tree-filter').addEventListener('input',()=>{const q=$('tree-filter').value.toLowerCase();document.querySelectorAll('.document-row').forEach(r=>r.classList.toggle('hidden',!r.textContent.toLowerCase().includes(q)));});
+$('check-all').addEventListener('click',async()=>{batch=true;const ids=topics.filter(t=>t.status!=='resolved').map(t=>t.id),epoch=generation;for(let i=0;i<ids.length;i++){if(epoch!==generation)break;$('batch-progress').textContent=`${i+1} из ${ids.length}`;await checkTopic(ids[i]);}batch=false;$('batch-progress').textContent='';render();});
+$('reset').addEventListener('click',()=>{generation++;topics=structuredClone(initial);selected=1;filter='active';$('find').value='';$('collect').checked=true;$('demo-state').value='normal';render();});
+render();
+</script>
+</body>
+</html>

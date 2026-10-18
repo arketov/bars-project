@@ -4,6 +4,8 @@
 //! `bars-protocol`; сюда доходят уже проверенные вызовы. Окно вызывает те же методы без канала (Т-20).
 
 mod errors;
+mod history;
+mod graph;
 
 #[cfg(test)]
 mod tests;
@@ -43,11 +45,14 @@ use errors::{doc_path_error, outline_error, read_error, search_error, worker_err
 #[derive(Clone)]
 pub struct WorkerHandler {
     worker: Worker,
+    history: crate::mcp_history::History,
 }
 
 impl WorkerHandler {
     pub fn new(worker: Worker) -> Self {
-        Self { worker }
+        let history=crate::mcp_history::History::new(worker.bars_home().to_path_buf());
+        history.start_maintenance();
+        Self { worker, history }
     }
 
     /// Воркер под обработчиком: окно останавливает его при выходе.
@@ -57,10 +62,9 @@ impl WorkerHandler {
 
     /// Проект вызова: явный `project` или ближайший к `cwd` зарегистрированный (Т-15).
     fn resolve(&self, target: &Target) -> Result<PathBuf, RpcError> {
-        if let Some(selector) = &target.project {
-            return self.worker.resolve(selector).map_err(worker_error);
-        }
-        self.worker
+        let path=if let Some(selector) = &target.project {
+            self.worker.resolve(selector).map_err(worker_error)?
+        }else{self.worker
             .project_for_cwd(Path::new(&target.cwd))
             .ok_or_else(|| {
                 RpcError::bars(
@@ -70,7 +74,10 @@ impl WorkerHandler {
                         target.cwd
                     ),
                 )
-            })
+            })?};
+        history::applied_field("resolved_project",serde_json::json!(path.display().to_string()));
+        history::applied_field("resolved_project_name",serde_json::json!(self.worker.projects().into_iter().find(|p|p.path==path).map(|p|p.name)));
+        Ok(path)
     }
 
     /// Проект вызова, папка которого на месте.
@@ -93,12 +100,18 @@ impl WorkerHandler {
     }
 
     async fn search(&self, params: SearchParams) -> Result<SearchOutput, RpcError> {
+        self.search_with_graph(params,None).await.map(|(output,_,_)|output)
+    }
+
+    async fn search_with_graph(&self, params: SearchParams, graph_budgets:Option<bars_core::graph::Budgets>)
+        -> Result<(SearchOutput,Option<bars_protocol::GraphReply>,Option<String>), RpcError> {
         let project = self.usable(&params.target)?;
         let status = self.worker.status(&project).map_err(worker_error)?;
         if status.state == ProjectState::ReindexRequired {
             return Err(errors::reindex_required());
         }
         let settings = self.settings(&project)?;
+        history::applied_field("models",serde_json::json!({"embed":settings.embed.model,"rerank":settings.rerank.model,"rerank_requested":settings.rerank.enabled}));
         // Скачивание и загрузка встроенной модели поиск не ждёт: он сразу отвечает `model_loading`.
         match self
             .worker
@@ -141,11 +154,15 @@ impl WorkerHandler {
             match self.worker.models().rerank_readiness(&settings) {
                 Readiness::Ready => reranker = Some(self.worker.models().reranker(&settings)),
                 Readiness::Loading { percent } => {
+                    history::applied_field("rerank_fallback_reason",serde_json::json!("model_loading"));
                     skipped_rerank = Some(format!(
                         "rerank-модель ещё скачивается или грузится ({percent} %): выдача без rerank"
                     ));
                 }
-                Readiness::Failed(message) => skipped_rerank = Some(message),
+                Readiness::Failed(message) => {
+                    history::applied_field("rerank_fallback_reason",serde_json::json!("model_unavailable"));
+                    skipped_rerank = Some(message);
+                },
             }
         }
         let response = tokio::task::spawn_blocking(move || {
@@ -153,19 +170,36 @@ impl WorkerHandler {
             let index = Index::open(&index_path(&project), Journal::Wal)?;
             // Нет rerank-модели или она не отработала: выдача идёт без неё, причина — в ответе.
             let reranker = reranker.as_mut().map(|model| model as &mut dyn Reranker);
-            search(&index, &mut embedder, reranker, &settings.search, &request)
+            let mut related=None;let mut fallback=None;
+            let result=if let Some(budgets)=graph_budgets {
+                match bars_core::graph::store::load(index.conn()) {
+                    Ok(data)=>{
+                        let mut expand=|index:&Index,seeds:&[i64],limit:usize| {
+                            let(ids,reply)=bars_core::graph::retrieval::expand(index,&data,&request,seeds,limit,budgets.clone())?;
+                            related=Some(reply);Ok(ids)
+                        };
+                        bars_core::search::search_expanded(&index,&mut embedder,reranker,&settings.search,&request,Some(&mut expand))
+                    },
+                    Err(error)=>{fallback=Some(error.to_string());search(&index,&mut embedder,reranker,&settings.search,&request)},
+                }
+            }else{search(&index,&mut embedder,reranker,&settings.search,&request)};
+            result.map(|result|(result,related,fallback))
         })
         .await
         .map_err(internal)?
         .map_err(search_error)?;
+        let (response,related,fallback)=response;
+        if response.rerank_error.is_some() {
+            history::applied_field("rerank_fallback_reason",serde_json::json!("rerank_execution_failed"));
+        }
         let rerank_error = response.rerank_error.or(skipped_rerank);
-        Ok(SearchOutput {
+        Ok((SearchOutput {
             results: response.hits.into_iter().map(hit).collect(),
             applied: applied(response.applied),
             indexing: status.state == ProjectState::Indexing || status.queued,
             pending: to_u32(status.pending),
             rerank_error,
-        })
+        },related,fallback))
     }
 
     /// Документ по пути из вызова: текст и корень проекта для заголовка.
@@ -174,6 +208,8 @@ impl WorkerHandler {
         let settings = self.settings(&project)?;
         let file = resolve_doc_path(&project, Path::new(&settings.docs_root), path)
             .map_err(doc_path_error)?;
+        history::applied_field("path",serde_json::json!(file.display().to_string()));
+        history::applied_field("range",serde_json::json!("whole_document"));
         let text = read_utf8_path(&file).map_err(read_error)?;
         Ok((text, settings))
     }
@@ -200,6 +236,9 @@ impl WorkerHandler {
             under,
         };
         let headings = outline(&text, &query).map_err(outline_error)?;
+        if let Some(anchor)=history::outline_anchor(&text,&query) {
+            history::applied_field("anchor",anchor);
+        }
         Ok(OutlineOutput {
             headings: headings
                 .into_iter()
@@ -285,14 +324,18 @@ impl WorkerHandler {
             },
             last_error: status.last_error,
             watching: status.watching,
+            graph: None,
         })
     }
 
     fn reindex(&self, params: ReindexParams) -> Result<AcceptedOutput, RpcError> {
         let project = self.resolve(&params.target)?;
-        self.worker
-            .reindex(&project, params.full, params.accept_model_change)
+        let (id,merged,kind)=self.worker
+            .reindex_receipt(&project, params.full, params.accept_model_change)
             .map_err(worker_error)?;
+        history::applied_field("operation_id",serde_json::json!(id));
+        history::applied_field("merged",serde_json::json!(merged));
+        history::applied_field("job_kind",serde_json::json!(match kind {JobKind::Rebuild=>"rebuild",JobKind::Check=>"check",JobKind::Files=>"files"}));
         Ok(AcceptedOutput { accepted: true })
     }
 
@@ -565,6 +608,7 @@ impl WorkerHandler {
                 .map(|model| {
                     let backend = match model.backend {
                         bars_core::models::Backend::Onnx => "onnx",
+                        bars_core::models::Backend::Gguf => "gguf",
                         _ => "candle",
                     };
                     info(
@@ -707,9 +751,20 @@ impl WorkerHandler {
             self.worker.delete_project(&params.project).await.map_err(worker_error)?;
             return Ok(output_value(&UnregisterOutput { removed: true }));
         }
+        if let Call::GraphBuild(params)=call {
+            // Задание само удерживает owned request guard до конца. Повторный read
+            // под этим guard мог бы зависнуть за ожидающим writer удаления проекта.
+            let project=self.resolve(&params.target)?;
+            return self.worker.graph_build(&project).await.map(|out|output_value(&out)).map_err(graph::graph_error);
+        }
         // Удаление ждёт запросы, уже открывшие индекс или настройки; новые ждут очистки.
         let _request = self.worker.request_guard().await;
         match call {
+            Call::GraphSearch(params)=>self.graph_search(params).await.map(|out|output_value(&out)),
+            Call::GraphQuery(params)=>self.graph_query(params).await.map(|out|output_value(&out)),
+            Call::GraphStatus(params)=>self.graph_status(params).await.map(|out|output_value(&out)),
+            Call::GraphBuild(_)=>unreachable!(),
+            Call::GraphCancel(params)=>{let project=self.resolve(&params.target)?;self.worker.graph_cancel(&project,&params.job_id).map(|cancelled|output_value(&CancelOutput{cancelled})).map_err(graph::graph_error)},
             Call::ProjectDelete(_) => unreachable!(),
             // `hello` обрабатывает цикл соединения.
             Call::Hello(_) => Err(RpcError::standard(
@@ -729,7 +784,10 @@ impl WorkerHandler {
             Call::Outline(params) => self.outline(params).map(|out| output_value(&out)),
             Call::Read(params) => self.read(params).map(|out| output_value(&out)),
             Call::Projects(_) => self.projects().await.map(|out| output_value(&out)),
-            Call::Status(params) => self.status(params).map(|out| output_value(&out)),
+            Call::Status(params) => {
+                let graph = self.graph_status(bars_protocol::GraphStatusParams { target: params.target.clone() }).await?;
+                let mut out = self.status(params)?; out.graph = Some(graph); Ok(output_value(&out))
+            },
             Call::Reindex(params) => self.reindex(params).map(|out| output_value(&out)),
             Call::Register(params) => self.register(params).await.map(|out| output_value(&out)),
             Call::Unregister(params) => self.unregister(params).map(|out| output_value(&out)),
@@ -740,6 +798,8 @@ impl WorkerHandler {
             Call::IndexResume(_) => Ok(output_value(&self.index_resume())),
             Call::IndexCancel(params) => self.index_cancel(params).map(|out| output_value(&out)),
             Call::Activity(_) => Ok(output_value(&self.activity())),
+            Call::OperationEvents(params) => Ok(output_value(&self.worker.operation_events(&params))),
+            Call::OperationRetry(params) => self.worker.retry_operation(&params).map(|()| output_value(&AcceptedOutput { accepted: true })).map_err(worker_error),
             Call::Tree(params) => self.tree(params).await.map(|out| output_value(&out)),
             Call::SettingsGet(_) => self.settings_get().map(|out| output_value(&out)),
             Call::SettingsSave(params) => self.settings_save(params).map(|out| output_value(&out)),
@@ -762,72 +822,16 @@ impl WorkerHandler {
 }
 
 impl bars_protocol::Handler for WorkerHandler {
-    async fn handle_session(
-        &self,
-        session: &str,
-        client: ClientKind,
-        call: Call,
-    ) -> Result<Value, RpcError> {
-        if client != ClientKind::Mcp {
-            return self.handle(client, call).await;
-        }
-        let target = match &call {
-            Call::Search(p) => Some(&p.target),
-            Call::Read(p) => Some(&p.target),
-            Call::Outline(p) => Some(&p.target),
-            Call::Status(p) => Some(&p.target),
-            Call::Reindex(p) => Some(&p.target),
-            Call::Projects(_) => None,
-            _ => return self.handle(client, call).await,
-        };
-        let project = target
-            .and_then(|t| self.resolve(t).ok())
-            .map(|p| p.to_string_lossy().into_owned())
-            .unwrap_or_default();
-        let tool = match &call {
-            Call::Search(_) => "bars_rag_search",
-            Call::Read(_) => "bars_read",
-            Call::Outline(_) => "bars_outline",
-            Call::Status(_) => "bars_status",
-            Call::Reindex(_) => "bars_reindex",
-            _ => "bars_projects",
-        }
-        .to_string();
-        let start = std::time::Instant::now();
-        let result = self.handle(client, call).await;
-        let time = crate::mcp_statistics::now();
-        let row = crate::mcp_statistics::Row {
-            session: session.into(),
-            project,
-            tool,
-            calls: 1,
-            errors: i64::from(result.is_err()),
-            total_ms: start.elapsed().as_millis().min(i64::MAX as u128) as i64,
-            first: time,
-            last: time,
-        };
-        let home = self.worker.bars_home().to_path_buf();
-        if !matches!(
-            tokio::task::spawn_blocking(move || crate::mcp_statistics::record(&home, &row)).await,
-            Ok(Ok(()))
-        ) {
-            log::warn!("Статистика MCP не записана: проверьте доступ к хранилищу");
-        }
-        result
+    async fn handle_observed(&self, session: &str, client: ClientKind, call: Call, context: Option<Value>) -> Result<Value,RpcError> {
+        self.observed(session,client,call,context).await
     }
-
-    async fn handle(&self, _client: ClientKind, call: Call) -> Result<Value, RpcError> {
-        // Сессия уже закрывает методы окна, но обработчик не полагается только на неё.
-        if call.window_only() {
-            return Err(RpcError::standard(
-                METHOD_NOT_FOUND,
-                format!("нет метода {}", call.method()),
-            ));
-        }
-        self.dispatch(call).await
+    async fn handle_session(&self, session: &str, client: ClientKind, call: Call) -> Result<Value,RpcError> {
+        self.observed(session,client,call,None).await
+    }
+    async fn handle(&self, _client: ClientKind, call: Call) -> Result<Value,RpcError> {
+        self.handle_plain(_client,call).await
     }
 }
-
 fn internal(error: impl std::fmt::Display) -> RpcError {
     RpcError::standard(INTERNAL_ERROR, error.to_string())
 }

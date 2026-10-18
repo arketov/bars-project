@@ -10,6 +10,8 @@ param(
     [ValidateRange(6,128)][int]$MinCommitGiB = 8,
     [switch]$AllowDownload,
     [switch]$ExpectCpuFallback,
+    [switch]$Fp16Embed,
+    [switch]$MemoryOnly,
     [ValidatePattern('^[a-z0-9-]+$')][string]$Scenario = 'cached',
     [string]$BuildMetadataPath,
     [string]$SourcePath = 'crates/bars-core/examples/bench_memory.rs',
@@ -17,12 +19,14 @@ param(
     [ValidateRange(0,3600)][int]$WaitSeconds = 120
 )
 $ErrorActionPreference = 'Stop'
+if ($Fp16Embed -and ($Devices -contains 'cpu' -or $Modes -contains 'rerank')) { throw 'Fp16Embed requires auto and embed/both/bounded modes' }
+$ModelsPath = [IO.Path]::GetFullPath($ModelsPath)
 $bench = (Resolve-Path -LiteralPath $BenchPath).Path
 $evidence = (Resolve-Path -LiteralPath $EvidencePath).Path
 $fixture = Join-Path $evidence 'fixture.json'
 $invocation = [DateTime]::UtcNow.ToString('yyyyMMddTHHmmssfffZ')
 $preflightLog = Join-Path $evidence "preflight-$invocation.jsonl"
-$sources = @('Cargo.lock','crates/bars-core/examples/bench_memory.rs','crates/bars-core/src/models/builtin.rs','crates/bars-core/src/models/execution.rs','crates/bars-core/src/models/builtin_rerank.rs','crates/bars-core/src/models/rerank_artifact.rs','crates/bars-worker/src/worker/models.rs','crates/bars-worker/src/worker/models/resident.rs','crates/bars-worker/src/worker/model_lifecycle.rs','crates/bars-worker/src/worker/mod.rs') | ForEach-Object {
+$sources = @('Cargo.lock','crates/bars-core/examples/bench_memory.rs','crates/bars-core/src/models/builtin.rs','crates/bars-core/src/models/catalog.rs','crates/bars-core/src/models/artifact.rs','crates/bars-core/src/models/embed_artifact.rs','crates/bars-core/src/models/execution.rs','crates/bars-core/src/models/builtin_rerank.rs','crates/bars-core/src/models/rerank_artifact.rs','crates/bars-worker/src/worker/models.rs','crates/bars-worker/src/worker/models/resident.rs','crates/bars-worker/src/worker/model_lifecycle.rs','crates/bars-worker/src/worker/mod.rs') | ForEach-Object {
     [ordered]@{file=$_;sha256=(Get-FileHash -LiteralPath $_).Hash}
 }
 $benchHash=(Get-FileHash -LiteralPath $bench).Hash
@@ -34,7 +38,7 @@ if ($BuildMetadataPath) {
     $sourceHash=$build.source_sha256
     $buildSources=$build.sources
 }
-[ordered]@{utc=[DateTime]::UtcNow.ToString('o');scenario=$Scenario;bench_sha256=$benchHash;source_sha256=$sourceHash;fixture_sha256=(Get-FileHash -LiteralPath $fixture).Hash;sources=$buildSources;current_sources=$sources;devices=$Devices;modes=$Modes;repeats=$Repeat;download_allowed=[bool]$AllowDownload} |
+[ordered]@{utc=[DateTime]::UtcNow.ToString('o');scenario=$Scenario;bench_sha256=$benchHash;source_sha256=$sourceHash;fixture_sha256=(Get-FileHash -LiteralPath $fixture).Hash;sources=$buildSources;current_sources=$sources;devices=$Devices;modes=$Modes;repeats=$Repeat;download_allowed=[bool]$AllowDownload;fp16_embed=[bool]$Fp16Embed;memory_only=[bool]$MemoryOnly;bars_running=@(Get-Process bars -ErrorAction SilentlyContinue | Select-Object Id);timing_valid=$false} |
     ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $evidence "run-$invocation.json") -Encoding utf8
 foreach ($device in $Devices) {
     foreach ($mode in $Modes) {
@@ -45,7 +49,7 @@ foreach ($device in $Devices) {
                 $memory = Get-CimInstance Win32_PerfFormattedData_PerfOS_Memory
                 $freeCommit = [long]$memory.CommitLimit - [long]$memory.CommittedBytes
                 $foreign = @(Get-Process cargo,rustc,bench_inference,bench_worker_inference,bench_memory,bench_worker_memory -ErrorAction SilentlyContinue | Select-Object ProcessName,Id)
-                $ready = [long]$memory.AvailableBytes -ge ($MinRamGiB * 1GB) -and $freeCommit -ge ($MinCommitGiB * 1GB) -and $foreign.Count -eq 0
+                $ready = [long]$memory.AvailableBytes -ge ($MinRamGiB * 1GB) -and $freeCommit -ge ($MinCommitGiB * 1GB) -and ($MemoryOnly -or $foreign.Count -eq 0)
                 [ordered]@{utc=[DateTime]::UtcNow.ToString('o');mode=$mode;device=$device;round=$round;available_bytes=$memory.AvailableBytes;free_commit_bytes=$freeCommit;min_ram_gib=$MinRamGiB;min_commit_gib=$MinCommitGiB;foreign=$foreign;ready=$ready} |
                     ConvertTo-Json -Compress | Add-Content -LiteralPath $preflightLog -Encoding utf8
                 if ($ready) { $readyCount++ } else { $readyCount = 0 }
@@ -63,6 +67,7 @@ foreach ($device in $Devices) {
             $arguments = @($mode,$device,$ModelsPath,$fixture,$output) | ForEach-Object { '"' + $_ + '"' }
             if ($AllowDownload) { $arguments += '--allow-download' }
             if ($ExpectCpuFallback) { $arguments += '--expect-cpu-fallback' }
+            if ($Fp16Embed) { $arguments += '--fp16-embed' }
             $child = Start-Process -FilePath $bench -ArgumentList $arguments -WindowStyle Hidden -RedirectStandardError $stderr -PassThru
             $runStart = [DateTime]::UtcNow
             $timedOut = $false

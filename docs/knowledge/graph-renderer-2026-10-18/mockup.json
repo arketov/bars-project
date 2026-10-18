@@ -1,0 +1,164 @@
+{
+  "environment": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/128.0.0.0 Safari/537.36",
+  "headless": true,
+  "fixture": true,
+  "results": [
+    {
+      "name": "документы",
+      "passed": true
+    },
+    {
+      "name": "пустой scope",
+      "passed": true
+    },
+    {
+      "name": "вид sections",
+      "passed": true
+    },
+    {
+      "name": "вид chunks",
+      "passed": true
+    },
+    {
+      "name": "вид entities",
+      "passed": true
+    },
+    {
+      "name": "вид mixed",
+      "passed": true
+    },
+    {
+      "name": "операция relations",
+      "passed": true
+    },
+    {
+      "name": "операция paths",
+      "passed": true
+    },
+    {
+      "name": "операция impact",
+      "passed": true
+    },
+    {
+      "name": "операция context",
+      "passed": true
+    },
+    {
+      "name": "операция explore",
+      "passed": true
+    },
+    {
+      "name": "операция audit",
+      "passed": true
+    },
+    {
+      "name": "путь от выбранного объекта",
+      "passed": true
+    },
+    {
+      "name": "диалог исходника",
+      "passed": true
+    },
+    {
+      "name": "Escape закрывает исходник",
+      "passed": true
+    },
+    {
+      "name": "задание принято",
+      "passed": true
+    },
+    {
+      "name": "задание отменено",
+      "passed": true
+    },
+    {
+      "name": "повторный запуск",
+      "passed": true
+    },
+    {
+      "name": "состояние partial",
+      "passed": true
+    },
+    {
+      "name": "состояние not_built",
+      "passed": true
+    },
+    {
+      "name": "состояние cancelled",
+      "passed": true
+    },
+    {
+      "name": "состояние stale",
+      "passed": true
+    },
+    {
+      "name": "состояние error",
+      "passed": true
+    },
+    {
+      "name": "состояние empty",
+      "passed": true
+    },
+    {
+      "name": "состояние ambiguous",
+      "passed": true
+    },
+    {
+      "name": "состояние conflict",
+      "passed": true
+    },
+    {
+      "name": "состояние hub",
+      "passed": true
+    },
+    {
+      "name": "250 настоящих узлов фикстуры",
+      "passed": true
+    },
+    {
+      "name": "состояние long",
+      "passed": true
+    },
+    {
+      "name": "состояние renderer",
+      "passed": true
+    },
+    {
+      "name": "список при отказе renderer",
+      "passed": true
+    },
+    {
+      "name": "клавиатурный выбор",
+      "passed": true
+    },
+    {
+      "name": "SVG скрыт в режиме списка",
+      "passed": true
+    },
+    {
+      "name": "карта видна без списка",
+      "passed": true
+    },
+    {
+      "name": "light 1440: без горизонтального переполнения",
+      "passed": true
+    },
+    {
+      "name": "light 760: без горизонтального переполнения",
+      "passed": true
+    },
+    {
+      "name": "dark 1440: без горизонтального переполнения",
+      "passed": true
+    },
+    {
+      "name": "dark 760: без горизонтального переполнения",
+      "passed": true
+    },
+    {
+      "name": "без ошибок JavaScript",
+      "passed": true
+    }
+  ],
+  "errors": []
+}

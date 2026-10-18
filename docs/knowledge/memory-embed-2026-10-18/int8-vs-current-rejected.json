@@ -1,0 +1,34 @@
+{
+  "status": "rejected-primary-quality",
+  "id": "od-001",
+  "threshold": 0,
+  "lost": [
+    "mrr10"
+  ],
+  "secondaryLost": [
+    "ndcg10"
+  ],
+  "before": {
+    "top1": 0,
+    "hit3": 0,
+    "mrr10": 0.125,
+    "ndcg10": 0.31546487678572877,
+    "docTop1": 0,
+    "docHit3": 0,
+    "docMrr10": 0.2,
+    "falseNonempty": 1
+  },
+  "after": {
+    "top1": 0,
+    "hit3": 0,
+    "mrr10": 0,
+    "ndcg10": 0,
+    "docTop1": 0,
+    "docHit3": 0,
+    "docMrr10": 0.25,
+    "falseNonempty": 1
+  },
+  "completedObservations": 7,
+  "referenceSha256": "14de9ff4e135f93e8caf0f4aba7b6b63477282fad3e36700ba9cb729865a16d2",
+  "limitation": "counterexample only; not complete quality metrics or clean timing"
+}

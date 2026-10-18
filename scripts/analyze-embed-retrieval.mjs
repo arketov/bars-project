@@ -65,7 +65,10 @@ for(const index of variants) for(const query of variants) {
     recall15:average('recall15'),hit3:average('hit3'),hit15:average('hit15'),rows});
 }
 const baseline=results[0];
-for(const r of results) r.losses= r.rows.filter(row=>row.gold_count&&row.recall15<baseline.rows.find(b=>b.id===row.id).recall15).map(row=>row.id);
+for(const r of results) {
+  r.recall15_losses=r.rows.filter(row=>row.gold_count&&row.recall15<baseline.rows.find(b=>b.id===row.id).recall15).map(row=>row.id);
+  r.hit3_losses=r.rows.filter(row=>row.gold_count&&row.hit3<baseline.rows.find(b=>b.id===row.id).hit3).map(row=>row.id);
+}
 const report={schema:1,method:'vector-only; saved 10 queries and 946 frozen chunks; float32 dot; all 16 index/query precision combinations; not full hybrid/rerank or acceptance',sources,results};
 fs.writeFileSync(output,JSON.stringify(report,null,2)+'\n',{flag:'wx'});
 for(const {rows,...r} of results) console.log(JSON.stringify(r));
