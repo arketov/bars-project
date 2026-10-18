@@ -1,0 +1,52 @@
+{
+  "purpose": "provider sanity, not a CPU quality sweep",
+  "pairs": [
+    {
+      "id": "od-001",
+      "commonPairs": 15,
+      "maxAbs": 0.00014240750000000038,
+      "meanAbs": 0.000022024973333333292,
+      "sameLeader": true,
+      "cpuTop": 0.011140325,
+      "directmlTop": 0.0109979175,
+      "cpuTotal": 8.5787317,
+      "directmlTotal": 0.596373
+    },
+    {
+      "id": "od-003",
+      "commonPairs": 15,
+      "maxAbs": 0.00001697220000000015,
+      "meanAbs": 0.0000027753036000000075,
+      "sameLeader": true,
+      "cpuTop": 0.0025387951,
+      "directmlTop": 0.0025305287,
+      "cpuTotal": 7.7406035,
+      "directmlTotal": 0.6717708
+    },
+    {
+      "id": "od-015",
+      "commonPairs": 15,
+      "maxAbs": 0.0025370799999999694,
+      "meanAbs": 0.0008783603599999972,
+      "sameLeader": true,
+      "cpuTop": 0.4457577,
+      "directmlTop": 0.44322062,
+      "cpuTotal": 6.7634113,
+      "directmlTotal": 0.6709005
+    },
+    {
+      "id": "od-023",
+      "commonPairs": 15,
+      "maxAbs": 0.0021967999999999988,
+      "meanAbs": 0.00014785382866666657,
+      "sameLeader": true,
+      "cpuTop": 0.8348232,
+      "directmlTop": 0.8326264,
+      "cpuTotal": 6.7619093,
+      "directmlTotal": 0.5894677
+    }
+  ],
+  "maxAbs": 0.0025370799999999694,
+  "meanAbs": 0.00026275361639999925,
+  "passed": true
+}

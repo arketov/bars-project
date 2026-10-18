@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-18",
+  "status": "frozen_before_test_cpu_sanity_passed",
+  "dataset_sha256": "8d966917556299d5dc9b711cfd053c3921467ef6c70204e1ced0ac9fb5cd1e0f",
+  "train_first_sha256": "9f1784d52c2ea37fbf9c3f0328522bf1bf0415fcc5d4ddc0a374e2fcb786f21d",
+  "selected": {
+    "candidates": 30,
+    "rerank_candidates": 15,
+    "rerank_enabled": false,
+    "min_score_vector": 0,
+    "min_score_rerank": 0.1,
+    "order_without_rerank": "existing RRF + exact identifiers"
+  },
+  "reasons": {
+    "depth": "K8 coverage 43/48 < K15 46/48; K30 improves Hit3 40/48 to 41/48 at median 0.672 to 1.197 s; one query insufficient for global increase",
+    "candidates": "C50 K15 Hit3 39/48 vs C30 40/48; no reason to increase",
+    "order": "RRF top1 26/48, MRR .660 vs cosine 23/48, .581",
+    "rerank_enabled": "threshold .1 K15 Hit3 33/48 vs no rerank 35/48; quality/speed tradeoff does not support enabling globally",
+    "threshold": "rerank .1 rejects 11/12 negatives while losing 7 positive top3 answers; .3 rejects one more negative but loses 12; zero retains all negatives; cosine .4 ties zero, .6 loses 20 answers"
+  },
+  "heldout_protocol": {
+    "split": "test",
+    "candidates": [
+      30
+    ],
+    "depths": [
+      15
+    ],
+    "repeats": 3,
+    "accelerator": "auto",
+    "changes_after_test": "no retuning; report validation limitations"
+  },
+  "cpu_sanity": "compare od-001, od-003, od-015, od-023 at C30 K15 on CPU; hardware mismatch invalidates model evidence",
+  "cpu_reference": "cpu-reference.json"
+}

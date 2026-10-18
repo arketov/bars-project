@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-18",
+  "cpu": {
+    "name": "11th Gen Intel(R) Core(TM) i7-11700KF @ 3.60GHz",
+    "physical_cores": 8,
+    "logical_processors": 16
+  },
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 3090",
+    "vram_mib": 24576,
+    "driver": "616.92",
+    "source": "nvidia-smi; confirmed by owner"
+  },
+  "ram_gib": 32,
+  "os": {
+    "caption": "Майкрософт Windows 11 Pro",
+    "version": "10.0.26300",
+    "build": "26300"
+  },
+  "runtime": {
+    "rust": "1.99.0",
+    "msvc": "14.44.35207",
+    "fastembed": "7.1.1",
+    "ort": "2.0.0-rc.13",
+    "embed": "BAAI/bge-m3",
+    "rerank": "BAAI/bge-reranker-v2-m3",
+    "main_sessions": "DirectML",
+    "reference_session": "CPU",
+    "onnx_runtime": "ORT Build Info: git-branch=rel-1.28.0, git-commit-id=da9b5e3, fp8-kv-cache=1, build type=Release",
+    "embed_max_tokens": 8192,
+    "rerank_max_tokens": 512,
+    "model_batch_size": 4
+  },
+  "background": [
+    "installed bars worker remained running",
+    "Build Tools installation overlapped the first training repeat; no indexing of the benchmark snapshot during searches"
+  ]
+}

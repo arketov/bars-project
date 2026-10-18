@@ -1,0 +1,590 @@
+{
+  "checks": [
+    {
+      "corpus": "overdrive",
+      "anchors": 90,
+      "all_present": true,
+      "ambiguous": [],
+      "results": [
+        {
+          "id": "od-001",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-002",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-003",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-004",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-005",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-006",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-007",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-008",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-009",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-010",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-011",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-012",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-013",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-014",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-015",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-016",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-017",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-018",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-019",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-020",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-021",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-022",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-023",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-024",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-025",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-026",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-027",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-028",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-029",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-030",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-031",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-032",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-033",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-034",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-035",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-036",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-037",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-038",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-039",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-040",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-041",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-042",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-043",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-043",
+          "gold": 1,
+          "matches": 1
+        },
+        {
+          "id": "od-044",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-044",
+          "gold": 1,
+          "matches": 1
+        },
+        {
+          "id": "od-045",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-045",
+          "gold": 1,
+          "matches": 1
+        },
+        {
+          "id": "od-046",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-046",
+          "gold": 1,
+          "matches": 1
+        },
+        {
+          "id": "od-047",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-047",
+          "gold": 1,
+          "matches": 1
+        },
+        {
+          "id": "od-048",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-048",
+          "gold": 1,
+          "matches": 1
+        },
+        {
+          "id": "od-049",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-050",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-051",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-052",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-053",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-054",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-055",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-056",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-057",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-058",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-059",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-060",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-061",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-062",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-063",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-064",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-065",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-066",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-067",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-068",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-069",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-070",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-071",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-072",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-073",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-074",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-075",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-076",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-077",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-077",
+          "gold": 1,
+          "matches": 1
+        },
+        {
+          "id": "od-078",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-078",
+          "gold": 1,
+          "matches": 1
+        },
+        {
+          "id": "od-079",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-079",
+          "gold": 1,
+          "matches": 1
+        },
+        {
+          "id": "od-080",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "od-080",
+          "gold": 1,
+          "matches": 1
+        }
+      ]
+    },
+    {
+      "corpus": "bars",
+      "anchors": 24,
+      "all_present": true,
+      "ambiguous": [],
+      "results": [
+        {
+          "id": "bars-01",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-02",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-03",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-04",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-05",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-06",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-07",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-08",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-09",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-10",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-11",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-12",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-13",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-14",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-15",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-16",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-17",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-18",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-19",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-20",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-21",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-22",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-23",
+          "gold": 0,
+          "matches": 1
+        },
+        {
+          "id": "bars-24",
+          "gold": 0,
+          "matches": 1
+        }
+      ]
+    }
+  ]
+}

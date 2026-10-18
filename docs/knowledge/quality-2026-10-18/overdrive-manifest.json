@@ -1,0 +1,900 @@
+{
+  "source": "C:\\Users\\arketov\\Desktop\\cyberProject\\ai-mutiplayer-bots",
+  "files": [
+    {
+      "path": "docs/BARS_INSTRUCTION.md",
+      "blake3": "491c13dcb77f8c5be1d5dda3d4a3627443728c1c6eee1d466f8671f9fbfbd507",
+      "bytes": 9696
+    },
+    {
+      "path": "docs/CHANGELOG.md",
+      "blake3": "a16cf849b7dd8f96f83ce74ebdfd822167b6e239b695e456dca9f81a9d84bc56",
+      "bytes": 39367
+    },
+    {
+      "path": "docs/ISSUES.md",
+      "blake3": "eaf3ce6e640adb80302af7a45a4a471c348e9511ba9ca27cca5aa2f029904dad",
+      "bytes": 38396
+    },
+    {
+      "path": "docs/PLAN.md",
+      "blake3": "62690a66f1ebf9ef6a535930b7b27c616a4f296e2fd9b582ee4e4ee7bc09677c",
+      "bytes": 74731
+    },
+    {
+      "path": "docs/README.md",
+      "blake3": "2d03314eea6d1ab913ebf00af9b0e9a5131760ee0fe3f4f856732206ab157d6e",
+      "bytes": 39132
+    },
+    {
+      "path": "docs/adr/0001-stock-dll-loader.md",
+      "blake3": "e31491c4517ce954182ceeb4e2aac062cb29cb4457f2383b16313396082edc11",
+      "bytes": 541
+    },
+    {
+      "path": "docs/adr/0002-server-unchanged.md",
+      "blake3": "54ce877ad6b463bc6fdbd224d08d728e1b63ba63fb014712391e251f7c5f36a3",
+      "bytes": 696
+    },
+    {
+      "path": "docs/adr/0003-manual-pit-instant.md",
+      "blake3": "20749044e6ac372964b9758aab123459b9764dce1561306e31de45a6717b6637",
+      "bytes": 585
+    },
+    {
+      "path": "docs/adr/0004-seat-reserve.md",
+      "blake3": "c20179f3ef4c837c2598dbbc405c71fa5f9e0ac603e64f4b6e9b72811de5bddf",
+      "bytes": 755
+    },
+    {
+      "path": "docs/adr/0005-scenario-pit-instant.md",
+      "blake3": "f5f982cbfbf03fbeff668001deb49cb504adf7bcd9eb1f571aad814a60acf450",
+      "bytes": 682
+    },
+    {
+      "path": "docs/adr/0006-drive-into-box-in-more.md",
+      "blake3": "b3e4cc8ab44c259d7d7f32dbeb50a4f9addd377984da877bd50767db19738305",
+      "bytes": 765
+    },
+    {
+      "path": "docs/adr/0007-stuck-bot-return.md",
+      "blake3": "8f3aec134f81c91d7ffc808778096950d13416c65bd4729633ea8b2f297dca0e",
+      "bytes": 1412
+    },
+    {
+      "path": "docs/adr/0008-user-command-cancels-auto-drive.md",
+      "blake3": "2ff42aabed1262ae73aa30359742255594ab0a0ba884e2dcd542943267b7420e",
+      "bytes": 921
+    },
+    {
+      "path": "docs/adr/0009-single-server-state-store.md",
+      "blake3": "6ad778d3762ecf7efe9abc9b8e1b653d42ef524924f0e87df70fcc8c257d9d0b",
+      "bytes": 606
+    },
+    {
+      "path": "docs/adr/0010-prune-stale-passwords.md",
+      "blake3": "330c1226868b9ffbc687758cdf3603e7badd5c8d244cb031ce0424d6d5349d68",
+      "bytes": 569
+    },
+    {
+      "path": "docs/adr/0011-join-diagnostics-debug-only.md",
+      "blake3": "f4d4ed4c56f9bfec7dc885f77ce295cf53b14191bf2fcb53fc2ce0569ec007f8",
+      "bytes": 598
+    },
+    {
+      "path": "docs/adr/0012-tyres-match-by-name.md",
+      "blake3": "52d949041cbeb14809b5d8ddda95c4d49e130c014ec88ea7ddb645c2e7f3d458",
+      "bytes": 676
+    },
+    {
+      "path": "docs/adr/0013-in-game-panel-csp-lua.md",
+      "blake3": "09662e9074df41b01ea6ebc7023e54ea5aacec91d84d42d369911f971df9c72c",
+      "bytes": 1388
+    },
+    {
+      "path": "docs/adr/0014-police-ignores-only-target.md",
+      "blake3": "d50f5acf14dad603376713dc337ec8f636137773bc83c53dc890db8a8de78c46",
+      "bytes": 761
+    },
+    {
+      "path": "docs/adr/0015-group-police-paused.md",
+      "blake3": "ab20fb1a35e8bf714eaa0fb32198f484f71e120db8230c7584ba049684d30364",
+      "bytes": 868
+    },
+    {
+      "path": "docs/adr/0016-linear-pit-speed.md",
+      "blake3": "323edaedba9c9d5d236362b091c2094f8b6ef1749a4256d0b5895b554aacfee4",
+      "bytes": 1384
+    },
+    {
+      "path": "docs/adr/index.md",
+      "blake3": "9455587de80db3867c2e5469281c1d25c3acc0b6358d84f08c0db655ac95de16",
+      "bytes": 3152
+    },
+    {
+      "path": "docs/audits/ARCHITECTURE_AUDIT_2026-10-09.md",
+      "blake3": "b00282e0146c3142c46368017572cb3ddf7a1f4bdab59c3dd2fb88f53fd47c0a",
+      "bytes": 53182
+    },
+    {
+      "path": "docs/audits/UX_AUDIT_2026-10-09.md",
+      "blake3": "293e2e72d22ebc170010875e1d343dd6589a0fc158fe4ec42d8c9f08b7476cc8",
+      "bytes": 80606
+    },
+    {
+      "path": "docs/chats/2026-10-06-original-research/handoff.md",
+      "blake3": "11442fbf93e36616f87ef1e7f2a1f983613bd8c13a20e096580513a965c44535",
+      "bytes": 1031
+    },
+    {
+      "path": "docs/chats/2026-10-06-original-research/log.md",
+      "blake3": "d72b4023753a9fb9d4d6c05c05ba1202ff845100b39c07ef52ec6fcdc6e5aa8a",
+      "bytes": 17027
+    },
+    {
+      "path": "docs/chats/2026-10-06-research-journal/handoff.md",
+      "blake3": "5360af6731e8fdf91f0786dc8a4e44001c40cf06476597426c7889e3bc391513",
+      "bytes": 1353
+    },
+    {
+      "path": "docs/chats/2026-10-06-research-journal/log.md",
+      "blake3": "2df13a049a8eef83b57defbfcb2db293609b50bd817c82c53c40b530c0f067b7",
+      "bytes": 26164
+    },
+    {
+      "path": "docs/chats/2026-10-07-advanced-control/handoff.md",
+      "blake3": "528d81412c31ff04ce98388d0b0e3600d198bc980e6f6814f2423c8b43d90351",
+      "bytes": 1018
+    },
+    {
+      "path": "docs/chats/2026-10-07-advanced-control/log.md",
+      "blake3": "08b71fa5522fcf5f62580ef501984f6f9a5a4809c2b1eb537392420a028cd771",
+      "bytes": 9057
+    },
+    {
+      "path": "docs/chats/2026-10-07-early-status/handoff.md",
+      "blake3": "113b1b2c02fc5cf836611b5b7285bc304a158c8d8b10ee995efb0e3fb5f88e29",
+      "bytes": 1348
+    },
+    {
+      "path": "docs/chats/2026-10-07-early-status/log.md",
+      "blake3": "89a6754ac80f7000d68f306f911997cff3066b1441d96d7b3566728c75595c33",
+      "bytes": 5009
+    },
+    {
+      "path": "docs/chats/2026-10-07-laps-pits-live/handoff.md",
+      "blake3": "6d7e6fa385e4b2eb1d1b32af1a00964b801ac1d7afb3b79c47d802198c0dad95",
+      "bytes": 1109
+    },
+    {
+      "path": "docs/chats/2026-10-07-laps-pits-live/log.md",
+      "blake3": "7913bc279093e0e408dd3bbaf4ed9293bbc275a2e033a4ac441d6d34a26869cc",
+      "bytes": 5979
+    },
+    {
+      "path": "docs/chats/2026-10-07-multibot-live/handoff.md",
+      "blake3": "ce7f5106d0ec2d37c3aa763b75143f8306fc8918694e35d47a693b880523b49e",
+      "bytes": 1255
+    },
+    {
+      "path": "docs/chats/2026-10-07-multibot-live/log.md",
+      "blake3": "cddddddadc4937d3043a6ca92b27e0accf463d5e9a73d4568556f8f3473d104d",
+      "bytes": 9790
+    },
+    {
+      "path": "docs/chats/2026-10-07-native-ai-live/handoff.md",
+      "blake3": "561e2e2e4bc89703fb0c5dbcbae0eb7bc4ecca0046c0be1bda93e41a05f5cfcb",
+      "bytes": 1257
+    },
+    {
+      "path": "docs/chats/2026-10-07-native-ai-live/log.md",
+      "blake3": "49276c02ae4d12fb9d43098ec937112c7efedf11788376fc642909bc20852b69",
+      "bytes": 12093
+    },
+    {
+      "path": "docs/chats/2026-10-07-python-controller/handoff.md",
+      "blake3": "3c5529a6fe3582b18e72ecf0ee582d5827f7a0dba2aec2760c766f82b15ece45",
+      "bytes": 1018
+    },
+    {
+      "path": "docs/chats/2026-10-07-python-controller/log.md",
+      "blake3": "d77d5ff5273e80772efe518c160fade325761a0f6f8d48f3afdda3008a324966",
+      "bytes": 7241
+    },
+    {
+      "path": "docs/chats/2026-10-07-python-owned-process/handoff.md",
+      "blake3": "772e85875545c9316131441c462dd8679832cf6aedbbe9c9b392bfd9157cdddb",
+      "bytes": 1583
+    },
+    {
+      "path": "docs/chats/2026-10-07-python-owned-process/log.md",
+      "blake3": "1ae6bf429b23ab5dac593524b9767fcd727a17044afdadd8211953ee60c37a37",
+      "bytes": 4086
+    },
+    {
+      "path": "docs/chats/2026-10-07-runtime-controls/handoff.md",
+      "blake3": "27bb56e29b9198bbfea9ee78c6c4a48a2c26cefe801a925a2a6fd9b24b5e6369",
+      "bytes": 1205
+    },
+    {
+      "path": "docs/chats/2026-10-07-runtime-controls/log.md",
+      "blake3": "8c3e5b4c50891869ce503a4b513a82b17d4ea967f90f1df91beead5dda2a6275",
+      "bytes": 8718
+    },
+    {
+      "path": "docs/chats/2026-10-07-sources-next-steps/handoff.md",
+      "blake3": "050cef85011953a0da9bc338b948a8c5f4190f6fd1fdce5fcd9557a5ad222389",
+      "bytes": 841
+    },
+    {
+      "path": "docs/chats/2026-10-07-sources-next-steps/log.md",
+      "blake3": "d57d3c8a0309079541381bbd7594ff6528999947c53ef51183c5a1dc0f41201b",
+      "bytes": 3377
+    },
+    {
+      "path": "docs/chats/2026-10-13-cars-tyres/handoff.md",
+      "blake3": "6ea024ce555ca2ddcf977c0ef7a277b6b8ce650b3d547320ae24c727ba07ad33",
+      "bytes": 1708
+    },
+    {
+      "path": "docs/chats/2026-10-13-cars-tyres/log.md",
+      "blake3": "fcd6db3d03ec4aa60584b4afaf60e9d256e1fe09d91fab327eab935f4fc7634d",
+      "bytes": 14703
+    },
+    {
+      "path": "docs/chats/2026-10-13-launch-single-owner/handoff.md",
+      "blake3": "3d171e970094382c375d53c87cc68db1fb06644927e762e003170a94768e0e42",
+      "bytes": 1365
+    },
+    {
+      "path": "docs/chats/2026-10-13-launch-single-owner/log.md",
+      "blake3": "f812572cfddafd209327986fb5e948bd725030928c001e095a5fe25ffe358044",
+      "bytes": 11131
+    },
+    {
+      "path": "docs/chats/2026-10-13-player-modes/handoff.md",
+      "blake3": "3864f97e766f8aaea69908ca989c67f7e044736faf18ab3de194b279abbc24d5",
+      "bytes": 1743
+    },
+    {
+      "path": "docs/chats/2026-10-13-player-modes/log.md",
+      "blake3": "f0960b2ed06be520dc367d0be057b455046ad9764b528f6b22abffae9c1ebaee",
+      "bytes": 15674
+    },
+    {
+      "path": "docs/chats/2026-10-13-player-modes-continuation/handoff.md",
+      "blake3": "56e10c1b748bfeeac03e9e181d10f810362e45b8145527dc80d0e0775c70dd91",
+      "bytes": 1879
+    },
+    {
+      "path": "docs/chats/2026-10-13-player-modes-continuation/log.md",
+      "blake3": "ece1d1fee8cd24f69067fef51c47faf7385c2097b0d1207efd3e995ed1676488",
+      "bytes": 21625
+    },
+    {
+      "path": "docs/chats/2026-10-13-player-modes-revised/handoff.md",
+      "blake3": "8b83676df9dcad0809af65061c3742c0c501764634e422e29a9da34f58e33d1a",
+      "bytes": 1572
+    },
+    {
+      "path": "docs/chats/2026-10-13-player-modes-revised/log.md",
+      "blake3": "211b1b7d6277ac283de48718b79bbc0907e439de50a3f401e63be94cb62ff4b6",
+      "bytes": 10466
+    },
+    {
+      "path": "docs/chats/2026-10-13-quick-improvements/handoff.md",
+      "blake3": "5cdd024224b3b00a4d86d01f3df0351da0bdd9a6de3a7589336c659e6acf7fa5",
+      "bytes": 1471
+    },
+    {
+      "path": "docs/chats/2026-10-13-quick-improvements/log.md",
+      "blake3": "11b2f66318ebfdd94dc613d4aa6ef7c9e748005cfdc6e0bb6796e0fabc264c75",
+      "bytes": 4974
+    },
+    {
+      "path": "docs/chats/2026-10-13-race-states-checkpoint/handoff.md",
+      "blake3": "5200d7779748110df14f5550161b04291c7efafff9c64e55ed9b9d0c61b95169",
+      "bytes": 1923
+    },
+    {
+      "path": "docs/chats/2026-10-13-race-states-checkpoint/log.md",
+      "blake3": "cedc8051fa6bb5fdf2dd74b9af47c6591497b8a1b711094c517701822adf6c89",
+      "bytes": 15895
+    },
+    {
+      "path": "docs/chats/2026-10-13-race-states-window/handoff.md",
+      "blake3": "1f2ecd6198e598afb8fb0fa847f6c7d440a9879707d051950369336c273c0e48",
+      "bytes": 1538
+    },
+    {
+      "path": "docs/chats/2026-10-13-race-states-window/log.md",
+      "blake3": "b18e98b3d4ea32aa324bf7ea839215a6ddedf4ed32fd7236119d0e8fcd61bbab",
+      "bytes": 6420
+    },
+    {
+      "path": "docs/chats/2026-10-15-panel-window/handoff.md",
+      "blake3": "99a77434064580d5e79687c360fe37c24df34504750476b9dbe2b13257de89b0",
+      "bytes": 1765
+    },
+    {
+      "path": "docs/chats/2026-10-15-panel-window/log.md",
+      "blake3": "e80b9d30d7298498eeb45328fc4b498c1338715c2e11b48c81344451a817c498",
+      "bytes": 1437
+    },
+    {
+      "path": "docs/chats/2026-10-15-pit-entry-research/handoff.md",
+      "blake3": "0b7210d8cc1674cfe79de805e66bfd71b3796b1eaffd801ad0686899f0fef80d",
+      "bytes": 2965
+    },
+    {
+      "path": "docs/chats/2026-10-15-pit-entry-research/log.md",
+      "blake3": "141a118d4ab929d76c97409a9693ee58248a518dc20cfd8e0a25fa57624bdac3",
+      "bytes": 4001
+    },
+    {
+      "path": "docs/chats/2026-10-15-pit-service-research/handoff.md",
+      "blake3": "3ca90e3f454b1b929d09c8e9d46c09b29eed6f563b5625d02943e0952f0fe74c",
+      "bytes": 4051
+    },
+    {
+      "path": "docs/chats/2026-10-15-pit-service-research/log.md",
+      "blake3": "46736c638aaef902bd52c4f5dbaef077434dd899370590238c0feadc645aab04",
+      "bytes": 1493
+    },
+    {
+      "path": "docs/chats/2026-10-15-police-target-filter/handoff.md",
+      "blake3": "40b13435b486d4e0dc4e3229db230737f97969635d51ece0315272f451a93cfe",
+      "bytes": 2812
+    },
+    {
+      "path": "docs/chats/2026-10-15-police-target-filter/log.md",
+      "blake3": "121b4060f9521fe841a8e3c25607d757aca69b398ab3fd82a8a8b59d8071ad53",
+      "bytes": 980
+    },
+    {
+      "path": "docs/chats/2026-10-15-selected-ai-awareness/handoff.md",
+      "blake3": "39b37fa3b2e9e05bdf896ed1f57fd756c65b306009ddaabedabe3f352cf3ad04",
+      "bytes": 1758
+    },
+    {
+      "path": "docs/chats/2026-10-15-selected-ai-awareness/log.md",
+      "blake3": "56e5c5f5e8f9c69f87a1b886767e95b037a647c4afbd77429017559fad450f64",
+      "bytes": 710
+    },
+    {
+      "path": "docs/chats/2026-10-15-solo-police-human/handoff.md",
+      "blake3": "964b2f84e3ccaa32ef079b4fbc4a941144554c7a85041fc5d1beb208cab549d7",
+      "bytes": 4634
+    },
+    {
+      "path": "docs/chats/2026-10-15-solo-police-human/log.md",
+      "blake3": "5f9a75d4fad9cf4691ac84e13f1eb04a83f22aade6daf7d2bd330a00535ea746",
+      "bytes": 18169
+    },
+    {
+      "path": "docs/chats/2026-10-15-stage9-design/handoff.md",
+      "blake3": "a75bd08064f04ec1616687859c5cae126459a25c370cb6c4e0debacef21ac5a1",
+      "bytes": 9300
+    },
+    {
+      "path": "docs/chats/2026-10-16-ai-driving-binaries/handoff.md",
+      "blake3": "6fdd40dc3fdf4b1ec476749b8757fcabdb9156fffc414388a7a18b7d6463f120",
+      "bytes": 3473
+    },
+    {
+      "path": "docs/chats/2026-10-16-ai-driving-binaries/log.md",
+      "blake3": "ce219baefc804776b47c9090721abed73c6fa350d88176c814f04ae80304510e",
+      "bytes": 2334
+    },
+    {
+      "path": "docs/chats/2026-10-16-docs-cleanup/handoff.md",
+      "blake3": "c7558347a08f9ad3189a0613b02c00ca9f6e860d3eb5b6b4c5dcf7d9cad9e511",
+      "bytes": 2789
+    },
+    {
+      "path": "docs/chats/2026-10-16-panel-pit-service/handoff.md",
+      "blake3": "106db3b4d17709149e38fb6fb58238a845ee24f929c8c11567577b70aa27544b",
+      "bytes": 2188
+    },
+    {
+      "path": "docs/chats/2026-10-16-panel-pit-service/log.md",
+      "blake3": "31709f7ac8aa9d435beef7646093478d353dd5baa98d3b51b018a91cba3bf968",
+      "bytes": 1207
+    },
+    {
+      "path": "docs/chats/2026-10-18-pit-speed-linear/handoff.md",
+      "blake3": "55544738da0bec38dcad8bf92f5658fe197b0feb29e0da5b348ace3faab96db2",
+      "bytes": 2433
+    },
+    {
+      "path": "docs/features/GROUP_POLICE.md",
+      "blake3": "dcb24560720ee2876face19f6320a91c889e9a803bc05560dc65d5aaecb5fc65",
+      "bytes": 4847
+    },
+    {
+      "path": "docs/features/IN_GAME_CONTROL.md",
+      "blake3": "c157c33ced9da0f2decec80d8e9b27f1a33cef42ef7a093026071c55ee7d2dd7",
+      "bytes": 2654
+    },
+    {
+      "path": "docs/features/index.md",
+      "blake3": "96b3b730c840fd243e4a3904c5faae68219f1c24a8d99cf237505526279bb043",
+      "bytes": 710
+    },
+    {
+      "path": "docs/index.md",
+      "blake3": "857e07e7974dda5371e0cac9b2c5dcc986950422e3dd61f4411a97863cb2cac3",
+      "bytes": 6100
+    },
+    {
+      "path": "docs/knowledge-base/app/application-cycle.md",
+      "blake3": "ab9170faf4870ab313e5e96765662ce391036269ae39737b2791c0e85222bbb5",
+      "bytes": 6235
+    },
+    {
+      "path": "docs/knowledge-base/app/car-selection.md",
+      "blake3": "31343f7e28adc21ad63ef22a2fccce2d555874bcbb04de8368bca4a1851f59e2",
+      "bytes": 10327
+    },
+    {
+      "path": "docs/knowledge-base/app/in-game-control.md",
+      "blake3": "81621f5bf29a3a03819d5fbda2ad359028f1337b4a088f63e9dcb1ab144dd470",
+      "bytes": 13152
+    },
+    {
+      "path": "docs/knowledge-base/app/index.md",
+      "blake3": "c064eab1a2874f6061c353aef21a36236b9913b9fa5845ad1b0a561d263788d4",
+      "bytes": 4339
+    },
+    {
+      "path": "docs/knowledge-base/app/join-diagnostics.md",
+      "blake3": "3a502378b25ec539785d3d50b829cadbe9d671e20f3a3aaf86e7e8c9fea817b9",
+      "bytes": 9448
+    },
+    {
+      "path": "docs/knowledge-base/app/new-composition.md",
+      "blake3": "26ef8075495cc626319b19313cf59ad4cbce34ab8dfebcae2bdfb25bfdea43b4",
+      "bytes": 3439
+    },
+    {
+      "path": "docs/knowledge-base/app/portable-package.md",
+      "blake3": "fe2bc56d89c6e9b4fd388c1fb4c37feffe034c7fbdf2e255aeeba33cf6c8a133",
+      "bytes": 5579
+    },
+    {
+      "path": "docs/knowledge-base/app/profiles-folder-switch.md",
+      "blake3": "457912910fc64a7ab4f358607166ac31b13f746e6bfdd22c02f5234e41700731",
+      "bytes": 5483
+    },
+    {
+      "path": "docs/knowledge-base/app/run-panel-and-editor.md",
+      "blake3": "930ec25993b2c31645d9be95aaeaf641b20063b774b2576d6e8640abc4f7880e",
+      "bytes": 12098
+    },
+    {
+      "path": "docs/knowledge-base/app/server-passwords.md",
+      "blake3": "6e62e7354b2191a1dfa91fff4376ed1914d43f9aed028ed87af9c4fc91f84a83",
+      "bytes": 7967
+    },
+    {
+      "path": "docs/knowledge-base/app/server-players.md",
+      "blake3": "ef895d98dc66086e3a9fe4a283bba7a4041fe937e3a7fdebe60645d33ba594b9",
+      "bytes": 5342
+    },
+    {
+      "path": "docs/knowledge-base/app/server-window.md",
+      "blake3": "9987a977e148d1fac8ed80ce381d7dce007611ac6698f820c3403d6620bb013f",
+      "bytes": 4711
+    },
+    {
+      "path": "docs/knowledge-base/app/settings-page.md",
+      "blake3": "5ba05678b7e086c1b5539472b4f61673b132ecf5361c6bd07bd8cda05c326606",
+      "bytes": 8964
+    },
+    {
+      "path": "docs/knowledge-base/app/startup-and-lan.md",
+      "blake3": "1256da910c57e108aa6d2d69595a5dba95e5285ee741eaf2ca8c4489bc1ce034",
+      "bytes": 6871
+    },
+    {
+      "path": "docs/knowledge-base/app/unexpected-errors.md",
+      "blake3": "4e40cef7ff26519770e890d062e22a850de9a11ae8287afb89485d4a3440c300",
+      "bytes": 4238
+    },
+    {
+      "path": "docs/knowledge-base/app/window-confirmations.md",
+      "blake3": "1c882c24e24cbbf671b13e6ab3292b25c1cab7b5713278511d7d8a9eadab17da",
+      "bytes": 7445
+    },
+    {
+      "path": "docs/knowledge-base/app/window-events-and-journal.md",
+      "blake3": "35c7ce86cea4526a3d7a0159db9a6580435277ebb9b64b37f26fbaddb493ff3b",
+      "bytes": 6760
+    },
+    {
+      "path": "docs/knowledge-base/environment/environment-and-server.md",
+      "blake3": "52cc3e2fed84670cb035116f5874008434d8bb37b4eb3bf975747f9cce1f32a7",
+      "bytes": 3668
+    },
+    {
+      "path": "docs/knowledge-base/environment/game-folder-preparation.md",
+      "blake3": "36fef70c9d108680039094110244e6cc45ead8c3196375a512b193044c1be00c",
+      "bytes": 7959
+    },
+    {
+      "path": "docs/knowledge-base/environment/headless-and-profiles.md",
+      "blake3": "41b99ede01303018fdbca84d32a0c4a0480ff7e65e0c4af1c3478ccd8a62e480",
+      "bytes": 9222
+    },
+    {
+      "path": "docs/knowledge-base/environment/index.md",
+      "blake3": "d3eda6b739d96dd5dd981b3b1233d2e3fe57065c30745b181af9ac984ee7a135",
+      "bytes": 2045
+    },
+    {
+      "path": "docs/knowledge-base/environment/native-cache-and-lotus.md",
+      "blake3": "8370f8e1295e542d798aafdc742e766b7cc7bf25578a5aec4ebc85b0a867d599",
+      "bytes": 8057
+    },
+    {
+      "path": "docs/knowledge-base/environment/private-copy-binaries.md",
+      "blake3": "28bd01a6367e0ae7511f75dbe308fd11fb30be31f4ac388091aac7c997d59eda",
+      "bytes": 12931
+    },
+    {
+      "path": "docs/knowledge-base/environment/shared-resources.md",
+      "blake3": "4cf9e13f36b4f26c461489ce0d967e89f29d4c20ec00a052718c234cc854cf5b",
+      "bytes": 7002
+    },
+    {
+      "path": "docs/knowledge-base/evidence/police-live-2026-10-16/index.md",
+      "blake3": "81f4ed6c5e78805c0c8aa171b79a7575949659942a0a1a7eb29fc6937ca85ae6",
+      "bytes": 3110
+    },
+    {
+      "path": "docs/knowledge-base/index.md",
+      "blake3": "6775848c093d841a4767906b9ab3d2fb92104b798f859c0fa07127be45dca950",
+      "bytes": 11479
+    },
+    {
+      "path": "docs/knowledge-base/native/ai-driving-pipeline.md",
+      "blake3": "83d127c2837450410dd9f68affbe812c41bad350513e0e1fe759e8a76e3abd66",
+      "bytes": 18333
+    },
+    {
+      "path": "docs/knowledge-base/native/approach-player.md",
+      "blake3": "e312277a4aa86e8d11399a19ea44ac1b30408ec607cded4af4ee1e6378695043",
+      "bytes": 9836
+    },
+    {
+      "path": "docs/knowledge-base/native/bot-return-policy.md",
+      "blake3": "abfa6c813c6e2ba92e798502ce7645bb8e1e2a29171fff718d333eb600c8d46e",
+      "bytes": 13557
+    },
+    {
+      "path": "docs/knowledge-base/native/collision-reactive-behavior.md",
+      "blake3": "eedbd1d4d68d8c5a3c91503e11df9f8b67bdea6a839329b903cedfc406e39f4a",
+      "bytes": 6524
+    },
+    {
+      "path": "docs/knowledge-base/native/group-police.md",
+      "blake3": "cedfb0b9b70f03678881cffeae740d3fbb7195c1e31f084d3ef738100a2d80b4",
+      "bytes": 10507
+    },
+    {
+      "path": "docs/knowledge-base/native/index.md",
+      "blake3": "8943457ce4a3464748adb1272c193a62fa72bbe078e88a440f090cf62cbf6348",
+      "bytes": 6234
+    },
+    {
+      "path": "docs/knowledge-base/native/memory-startup-configuration.md",
+      "blake3": "ae4d5ee804783b94472f2200802e368d7c1f91d31237d4c384db9df6965b7ff6",
+      "bytes": 9779
+    },
+    {
+      "path": "docs/knowledge-base/native/native-admission.md",
+      "blake3": "d8d1bf8c4a57ee041c67049bbe63677e5b0bfa6c3eb09475ae3ed8be9de041a3",
+      "bytes": 6102
+    },
+    {
+      "path": "docs/knowledge-base/native/native-control-contract.md",
+      "blake3": "3f41fa88b70973ef96dcf1fcbbc6e9e2af0e811b070c35043e62137e15ff3a7e",
+      "bytes": 9442
+    },
+    {
+      "path": "docs/knowledge-base/native/native-game-adapter.md",
+      "blake3": "6ae7ec377870de2dddc028b8a16db26922a57bdc218508b82da8110c9365055a",
+      "bytes": 4101
+    },
+    {
+      "path": "docs/knowledge-base/native/native-health-recovery.md",
+      "blake3": "9dcc289effd468820268a44ed6de509ef13f072b9c58afa6cc6c581843cae651",
+      "bytes": 8790
+    },
+    {
+      "path": "docs/knowledge-base/native/native-pit-lap-session.md",
+      "blake3": "3c0cc0683c6f7dd54a15f84be3a28b811cc705e4d74fede5e4469a2bca4046a8",
+      "bytes": 10469
+    },
+    {
+      "path": "docs/knowledge-base/native/native-pit-return.md",
+      "blake3": "59670ef0a6cac50176ccad22c380c152030d6cadb1d328a27fa947f8c734a76a",
+      "bytes": 5561
+    },
+    {
+      "path": "docs/knowledge-base/native/native-plugin-loader.md",
+      "blake3": "1c46d09d87d443f9270a291cb8eaa6f19498b339f78c4177269dc05e34d9a364",
+      "bytes": 3955
+    },
+    {
+      "path": "docs/knowledge-base/native/native-scenarios.md",
+      "blake3": "afe6a080218c64dabf43596fdae492a29ca3482e3a20ec5deffe62eabd73dbf6",
+      "bytes": 6883
+    },
+    {
+      "path": "docs/knowledge-base/native/pit-drive-into-box.md",
+      "blake3": "c0b9373172f9c8dbcf61c207fb721dbc60d01a531cf08907e33beb54c703269e",
+      "bytes": 7390
+    },
+    {
+      "path": "docs/knowledge-base/native/pit-teleport.md",
+      "blake3": "7aa361f203a4febe806f7d9d80eb05237340324c351fa83153f43b81d01818c1",
+      "bytes": 6867
+    },
+    {
+      "path": "docs/knowledge-base/native/player-modes-control.md",
+      "blake3": "1ae601ab157bd62aff250bc63ff1d679ced139da6fa5318a9311b50b41af513e",
+      "bytes": 10816
+    },
+    {
+      "path": "docs/knowledge-base/native/player-modes-evidence.md",
+      "blake3": "b0351c4b85737843836ce99d0ac9a06d328400706956e398ffec384a1dc0e570",
+      "bytes": 8404
+    },
+    {
+      "path": "docs/knowledge-base/native/player-modes.md",
+      "blake3": "2b0179a384fa466d5e2b51c4f513e2b1b49ff9519dd859e27b4efd4aea9c6f45",
+      "bytes": 10577
+    },
+    {
+      "path": "docs/knowledge-base/native/police-aggression.md",
+      "blake3": "85127a72d1ec700a2b92dee2b2c64c2e9dcb2a94002991385c9b02f18e773492",
+      "bytes": 8163
+    },
+    {
+      "path": "docs/knowledge-base/native/police-solo.md",
+      "blake3": "03a031a99c7ab25301b7f88e86d95f47c11e32cd6c732bd7a9ba9787d880e96f",
+      "bytes": 10467
+    },
+    {
+      "path": "docs/knowledge-base/native/police-target-filter.md",
+      "blake3": "85e313a56dca30526a8e85753af79158f668ce3b4ed5a9ad4ebe08eed864d961",
+      "bytes": 8109
+    },
+    {
+      "path": "docs/knowledge-base/native/runtime-ai-bindings.md",
+      "blake3": "275a80bde5fb383f2b82b188c5f2dc2a87996c4dc9c78fa4f20c816f4bf18756",
+      "bytes": 13839
+    },
+    {
+      "path": "docs/knowledge-base/native/runtime-ai-spline.md",
+      "blake3": "830af1cf207f7bf0dee64420afcec1bd6dac68d2c2f69cea7819d179b5e47033",
+      "bytes": 10535
+    },
+    {
+      "path": "docs/knowledge-base/native/selected-opponent-awareness.md",
+      "blake3": "fc9d7c6f388c820bf555b84326889e28b74e9b48745ed8b6b3974dbe349c6f54",
+      "bytes": 12755
+    },
+    {
+      "path": "docs/knowledge-base/research/approach-formation-evidence-2026-10-11.md",
+      "blake3": "6d32df19d8f62238791eef28cd6fc4ce625a6e981c323a29d723cfe2b9d571e2",
+      "bytes": 15872
+    },
+    {
+      "path": "docs/knowledge-base/research/control-surface-2026-10-11.md",
+      "blake3": "44a5fb82112313ad468cf828ed83416a4daf96ad51e13ceeb0d056688065f213",
+      "bytes": 12318
+    },
+    {
+      "path": "docs/knowledge-base/research/csp-control-api.md",
+      "blake3": "a0ce4282ca0c80b1c6bbc0cf7355d7691604293c88d5fe3af11aed91ced7b6ba",
+      "bytes": 4479
+    },
+    {
+      "path": "docs/knowledge-base/research/csp-lua-input-setters.md",
+      "blake3": "4c6be1863fd035f04a67237774a9bed7ff87221a5c629aaa0acc42a2201223f3",
+      "bytes": 7292
+    },
+    {
+      "path": "docs/knowledge-base/research/direct-input-contract-2026-10-11.md",
+      "blake3": "981998fc957b6ca591ed1ea01fec07b76f8063ed2d9983f5c9c610d3b10a7a60",
+      "bytes": 11526
+    },
+    {
+      "path": "docs/knowledge-base/research/dynamic-trajectory-control-2026-10-16.md",
+      "blake3": "d81e8b15a1cc33480233f422460a581fae3a9ab94def302c2c0931e748f384a2",
+      "bytes": 16626
+    },
+    {
+      "path": "docs/knowledge-base/research/follow-controller-boundaries-2026-10-11.md",
+      "blake3": "b8387d1f68921aa59f0ff84ee6987568d25da21135d1d93795a4d0d5458b0af4",
+      "bytes": 14768
+    },
+    {
+      "path": "docs/knowledge-base/research/in-game-control-2026-10-13.md",
+      "blake3": "85ef4a3f2e83c64becd483b0f5c296a14ced528646b388bfd62ad658c3adb88f",
+      "bytes": 10553
+    },
+    {
+      "path": "docs/knowledge-base/research/index.md",
+      "blake3": "53c4472c2165c2ca8db9e7e4a926a4ca107e9caf7910177c377525d2a507d2ed",
+      "bytes": 6938
+    },
+    {
+      "path": "docs/knowledge-base/research/lap-validity-autopilot-2026-10-11.md",
+      "blake3": "f96da8512da65390bea08135f0c019ec6b4a8aa732bf8ac572e43ca29df52773",
+      "bytes": 11705
+    },
+    {
+      "path": "docs/knowledge-base/research/long-stop-resume-2026-10-11.md",
+      "blake3": "ec935c192be19aeb2471905257a0b9c7ebad5b61697301fdecdcc97f75d4aa3a",
+      "bytes": 11888
+    },
+    {
+      "path": "docs/knowledge-base/research/mechanical-health-boundaries-2026-10-11.md",
+      "blake3": "bb0689854b291c167985dfbb0bb483d1d6cc6f8b69f2b57cf08600c1c1f04a32",
+      "bytes": 12276
+    },
+    {
+      "path": "docs/knowledge-base/research/online-lua-controller.md",
+      "blake3": "74763cb4a23919b15ab00476c873b4a9413fb25adb96df04620cc54eca7b9758",
+      "bytes": 4727
+    },
+    {
+      "path": "docs/knowledge-base/research/overtake-feasibility-2026-10-11.md",
+      "blake3": "066010823b40ed039a61705e7fe614d27bcce2343a548af849bd0972424f1f55",
+      "bytes": 11735
+    },
+    {
+      "path": "docs/knowledge-base/research/pace-calibration-2026-10-11.md",
+      "blake3": "d1a9a45c188640b6a6b261f0d485e1a3248056097ab78fe2574e4fd0022d8be0",
+      "bytes": 10188
+    },
+    {
+      "path": "docs/knowledge-base/research/pit-entry-own-box.md",
+      "blake3": "fbe64f7774710262b60a009a333bb6e76477f408d144903f0190d9595fff65d7",
+      "bytes": 13164
+    },
+    {
+      "path": "docs/knowledge-base/research/pit-service-stage10-2026-10-15.md",
+      "blake3": "21a22f7af89ac0d3307ae824bc160bb7ed10368c743b1547a2d953ba800df44a",
+      "bytes": 21467
+    },
+    {
+      "path": "docs/knowledge-base/research/police-live-diagnostics-2026-10-16.md",
+      "blake3": "81ab4b7eb881b32528d15463edfa8e1dcae46186e85762245c417b47eee82e13",
+      "bytes": 17242
+    },
+    {
+      "path": "docs/knowledge-base/research/runtime-ai-splines.md",
+      "blake3": "3806b0c29a9e300777b1296048b45a9642c11b2d0841ad670966b1b94f2454f7",
+      "bytes": 8458
+    },
+    {
+      "path": "docs/knowledge-base/research/scale-capacity-2026-10-11.md",
+      "blake3": "978a59227597cd787b6fdd1edc639c98d6f133ee69bb781ef9fd897b0efc7dca",
+      "bytes": 11311
+    },
+    {
+      "path": "docs/knowledge-base/research/scenario-composition-2026-10-11.md",
+      "blake3": "36f2e2b53d6b71e51b3aba72c6e064e1e6c33e9e81eb628590563c95cdd93b29",
+      "bytes": 11231
+    },
+    {
+      "path": "docs/knowledge-base/research/server-lap-accounting-2026-10-11.md",
+      "blake3": "ac17ea37a03146f372c7941771e7709421b4109bee77cba8eab2c6f9ccdf24a9",
+      "bytes": 9980
+    },
+    {
+      "path": "docs/knowledge-base/research/session-transition-evidence-2026-10-11.md",
+      "blake3": "9d5d8b68e59d3a81c7ff772d99e0cc154096452692d7cb645ec2e031f681ccbc",
+      "bytes": 9636
+    },
+    {
+      "path": "docs/knowledge-base/research/stock-udp-ports.md",
+      "blake3": "a446872fd888562f6e1f4c079b4dfb84942e95535969a6ce9d4fc74b42c69086",
+      "bytes": 6750
+    },
+    {
+      "path": "docs/knowledge-base/runtime/admission-release-fence.md",
+      "blake3": "d866ad837d07908c991e1419f3d6aab16d6c2045e528ba7796ac00d606a3749a",
+      "bytes": 3432
+    },
+    {
+      "path": "docs/knowledge-base/runtime/driving-paths.md",
+      "blake3": "ef533469eb40498a1389d7b1f74c2967d52beaf3927ed1e5455912dd0e245ad7",
+      "bytes": 13469
+    },
+    {
+      "path": "docs/knowledge-base/runtime/index.md",
+      "blake3": "07108c5a1d0f6e79bf4b53511132446b0c1cceaf2a7d07f02f68f8552eda2063",
+      "bytes": 3766
+    },
+    {
+      "path": "docs/knowledge-base/runtime/launch-service.md",
+      "blake3": "4afe26f0fac200446674ee8fe6321532663cf75d6fe23acbd5861e3230ee181e",
+      "bytes": 15791
+    },
+    {
+      "path": "docs/knowledge-base/runtime/managed-lifecycle.md",
+      "blake3": "22b67f95562b88d57f4ecf71ce3a604fd12126a97fa6beba848ad6a969ed03ee",
+      "bytes": 22604
+    },
+    {
+      "path": "docs/knowledge-base/runtime/result-codes.md",
+      "blake3": "5fcb33787847e9d3a9bf29764410850d4930b4c179db0340dad177885e1a3b96",
+      "bytes": 10088
+    },
+    {
+      "path": "docs/knowledge-base/runtime/route-search.md",
+      "blake3": "1ba2dfde3633965f28c3bde1ba347b64a9b1236ff9406542dea8d68a95677e35",
+      "bytes": 10629
+    },
+    {
+      "path": "docs/knowledge-base/runtime/runtime-latency.md",
+      "blake3": "4093d7fdf8ce1f523d85a5b7bce2fabf2c3860e43894b30f00dbda8453abe2a6",
+      "bytes": 6161
+    },
+    {
+      "path": "docs/knowledge-base/runtime/runtime-load.md",
+      "blake3": "74f678038f1838b55f8bcdee55ef8dcb8c0a98ae5a509bf40b867119af9af1c2",
+      "bytes": 9541
+    },
+    {
+      "path": "docs/knowledge-base/runtime/runtime-resilience.md",
+      "blake3": "b6e6e31c0c49e348cb3d333683f56c56763950957ad6d11bf9165ee0944c7257",
+      "bytes": 6427
+    },
+    {
+      "path": "docs/knowledge-base/runtime/runtime-storage.md",
+      "blake3": "685a5672f504b91b1a9ecac91c3865d00ac593dde54d6e990295501ec28528bd",
+      "bytes": 7015
+    },
+    {
+      "path": "docs/knowledge-base/runtime/server-occupancy.md",
+      "blake3": "d04c6d17b6e24cb53331b5c02d29a0c084106281d50048edf7d602a1305ea73d",
+      "bytes": 6738
+    },
+    {
+      "path": "docs/knowledge-base/runtime/server-state.md",
+      "blake3": "62dbd386df6818dd38c91b35bbe26607264368a879d27c6e7d3774a1f68a1da8",
+      "bytes": 7864
+    },
+    {
+      "path": "docs/knowledge-base/runtime/session-runtime.md",
+      "blake3": "7738864ab64cc8d9cfc4d5f0c3bd2968016fb2cbef56713bd9623d28dcab3edc",
+      "bytes": 8067
+    },
+    {
+      "path": "docs/plan_research.md",
+      "blake3": "ce161d65b237dea75b907ec6b4c25a9ddf3c896267ac774681e8c451ef9b3960",
+      "bytes": 7005
+    },
+    {
+      "path": "docs/user_ideas.md",
+      "blake3": "211117c10d27cb143dffd1a414abc235856925aad1afa705322df82b838612a8",
+      "bytes": 14187
+    }
+  ],
+  "documents": 176,
+  "chunks": 946,
+  "vectors": 946,
+  "embed": "ModelFingerprint { source: \"builtin\", model: \"BAAI/bge-m3\", dim: 1024, doc_prefix: \"\" }",
+  "device": "DirectMl",
+  "layout": "Some(Layout { chunking: ChunkingParams { min_chars: 250, max_chars: 6000 }, docs_root: \"docs\" })",
+  "model_load_secs": 2.8302582,
+  "index_seconds": 1.6405993000000003,
+  "update": "UpdateReport { added: 0, changed: 0, unchanged: 176, removed: 0, chunks_embedded: 0, chunks_reused: 0, full_check: false, problems: [] }",
+  "index_blake3": "0c96f95eed4d46dd3b2334b3b18c435c62cb1e1a5b5fa71f16234ecfaed74840"
+}

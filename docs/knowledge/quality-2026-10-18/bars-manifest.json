@@ -1,0 +1,535 @@
+{
+  "source": "C:\\Users\\arketov\\Desktop\\bars-project",
+  "files": [
+    {
+      "path": "docs/BARS_INSTRUCTION.md",
+      "blake3": "491c13dcb77f8c5be1d5dda3d4a3627443728c1c6eee1d466f8671f9fbfbd507",
+      "bytes": 9696
+    },
+    {
+      "path": "docs/Index.md",
+      "blake3": "7711d76f373fb15d74fe7d305da979e1ae2742f2906690022638bda02f598ed7",
+      "bytes": 4366
+    },
+    {
+      "path": "docs/MAIN_IDEA.md",
+      "blake3": "64a46a6f3ad7393b72834f307537fed4883fdfd4f04701c8538629219812b843",
+      "bytes": 52801
+    },
+    {
+      "path": "docs/adr/0001-docs-by-features.md",
+      "blake3": "b67558d5af84f5a1832d08307c616692b564f71276fc363e0b73d868017c9071",
+      "bytes": 3443
+    },
+    {
+      "path": "docs/adr/Index.md",
+      "blake3": "9be775a3910b08d92e76fc8bf00ddd98016891445e5106bf0c3f2b468dcc72d3",
+      "bytes": 461
+    },
+    {
+      "path": "docs/architecture/Index.md",
+      "blake3": "98585ec7dc14769a630a434b6755252cabcfff685f271f8e63f0c3c3ca92f634",
+      "bytes": 1571
+    },
+    {
+      "path": "docs/architecture/components.md",
+      "blake3": "d7c5f5018bfd7b8842f3421bc860ba7657ad23e67efd02f79d878f863efaa72e",
+      "bytes": 5078
+    },
+    {
+      "path": "docs/architecture/files.md",
+      "blake3": "107c9c7691c93315651b4525058248248c59c7b3fbc19b214ca31fe5563e29b3",
+      "bytes": 3363
+    },
+    {
+      "path": "docs/architecture/ipc.md",
+      "blake3": "c06a5a3ad4d010dc512bb9e0ef296c9f320f356e750dacd5ddd8c0352446b4e0",
+      "bytes": 9779
+    },
+    {
+      "path": "docs/architecture/protocol.md",
+      "blake3": "65701149ef9161a10080eb7a395944c888f745e269d1248efce3ca322a118d64",
+      "bytes": 16563
+    },
+    {
+      "path": "docs/architecture/schema.md",
+      "blake3": "bd9bbc5595508824afa5d6a83328e0df6007e64cd7d459172ce8cc4b926074c6",
+      "bytes": 7057
+    },
+    {
+      "path": "docs/architecture/secrets.md",
+      "blake3": "480e6bc7bbec2a312786b9011e144c67e453438d7fbdfa0653e29ebe2d7eb8c0",
+      "bytes": 3394
+    },
+    {
+      "path": "docs/architecture/stack.md",
+      "blake3": "561b6ac3ae5dd17f4bb245f71f37612cee98000760e0c6b8bcd92aaaca0b0fd8",
+      "bytes": 9039
+    },
+    {
+      "path": "docs/architecture/vector-search.md",
+      "blake3": "9a49e4367af9118c7d4ec6fa14808056a96b5c0ec1b74ce0a133798672e81714",
+      "bytes": 4164
+    },
+    {
+      "path": "docs/architecture/worker.md",
+      "blake3": "246ff21e0bb74d13365016283636219e9c6bf1ebdb3a330ed2c748f9c259ec3f",
+      "bytes": 25531
+    },
+    {
+      "path": "docs/chats/2026-10-15-docs-convention/handoff.md",
+      "blake3": "3b78a29fcc4b073dc1353163a2c7ee48d18c90cb78c8d4e515892222aff9a229",
+      "bytes": 2273
+    },
+    {
+      "path": "docs/chats/2026-10-15-docs-convention/log.md",
+      "blake3": "c7b2e31cb7a5c1974b5e2ea22770963cbf8cee6b3f8d615e4089ad0f48e9cf2a",
+      "bytes": 1430
+    },
+    {
+      "path": "docs/chats/2026-10-16-bars-instruction/handoff.md",
+      "blake3": "1c5bf5ccf873418dc919f352bd0283dcd5e0d0dd92e6e731ded1dde3c09d537c",
+      "bytes": 1546
+    },
+    {
+      "path": "docs/chats/2026-10-16-bars-instruction/log.md",
+      "blake3": "a0553e2a4439395e8dff49bad2d30b1c443708c3121a79233b566cccdbab9335",
+      "bytes": 332
+    },
+    {
+      "path": "docs/chats/2026-10-16-idea06-measurements/handoff.md",
+      "blake3": "5973257e75b0814ea8caa34ad9fd11e4bbafcce1b7149b266d1290d7721e1bad",
+      "bytes": 2397
+    },
+    {
+      "path": "docs/chats/2026-10-16-iss01-model-loading/handoff.md",
+      "blake3": "a15513e8a8e938894b0fb6090288fa6d69fbc84de12c9ae93229cc1d456fe474",
+      "bytes": 2058
+    },
+    {
+      "path": "docs/chats/2026-10-16-iss01-model-loading/log.md",
+      "blake3": "5beeec757128812a041daee92a927883bf273bbaee1fdc8ab5b41a6395be9a1f",
+      "bytes": 599
+    },
+    {
+      "path": "docs/chats/2026-10-16-iss03-rerank-diag/handoff.md",
+      "blake3": "1f84c716e0ccc3c6c4ef3ac5a5fd34e8fdaafed54272c72367e3b62b219bdd3f",
+      "bytes": 1113
+    },
+    {
+      "path": "docs/chats/2026-10-16-iss06-watcher/handoff.md",
+      "blake3": "65941d6a116f1bc6d6d81577eb4bd8e2d92900f394eeedefca6942ea29ab4c70",
+      "bytes": 2367
+    },
+    {
+      "path": "docs/chats/2026-10-16-iss09-search-vs-index/handoff.md",
+      "blake3": "c856ff854d2c069f2be2d0a6acef0cca7bddccef7ed31254e56aabc4c8688417",
+      "bytes": 2193
+    },
+    {
+      "path": "docs/chats/2026-10-16-plan-review/handoff.md",
+      "blake3": "402850e471e83aec41ed936184d3f2e71d3a80b93ae914be374300ac24d6fe18",
+      "bytes": 2838
+    },
+    {
+      "path": "docs/chats/2026-10-16-plan-review/log.md",
+      "blake3": "da68a8b7bc755cf7538273249dfe5e19e9fc51c46059c94bbb35435a5abdc66b",
+      "bytes": 1305
+    },
+    {
+      "path": "docs/chats/2026-10-16-window-small-fixes/handoff.md",
+      "blake3": "f2d0531567ccd1ff6bcaf296dc1a92f5f69dc365d8217d19e02f429b3bf33aab",
+      "bytes": 2335
+    },
+    {
+      "path": "docs/chats/2026-10-18-development-ideas/handoff.md",
+      "blake3": "d004614faaf50a6826e908ded758526fbf56680ab88b47b4c1ea85dd9c4fa9e2",
+      "bytes": 3032
+    },
+    {
+      "path": "docs/chats/2026-10-18-development-ideas/log.md",
+      "blake3": "42397d662cbc12d51ef191ebc67bc7a588496002819d8939ad028c78bc560380",
+      "bytes": 1252
+    },
+    {
+      "path": "docs/chats/2026-10-18-documentation-tools/handoff.md",
+      "blake3": "f00596987093076e7a245ba7e8f5e3c39d5e23dcc76b1424f363e11c25da39c9",
+      "bytes": 3712
+    },
+    {
+      "path": "docs/chats/2026-10-18-documentation-tools/log.md",
+      "blake3": "0e21d14d457bd82bbebc73af6b3310dfef83e71b1302b102450345fff44bbad6",
+      "bytes": 1295
+    },
+    {
+      "path": "docs/chats/2026-10-18-idea06-benchmark/handoff.md",
+      "blake3": "37db5a456be3674346b554f1679bd86602d3eb2a525d3966110d413bc082f813",
+      "bytes": 3814
+    },
+    {
+      "path": "docs/chats/2026-10-18-idea06-benchmark/log.md",
+      "blake3": "6508065ae53a9136a0e89058b56d1e8b971520aab34814908169a128a2ff1c8c",
+      "bytes": 585
+    },
+    {
+      "path": "docs/chats/2026-10-18-inference-research/handoff.md",
+      "blake3": "6d1b0c218d94f1a95845fcc3902df2e8740be80d371a92eae28b6d6c4b5d923b",
+      "bytes": 2089
+    },
+    {
+      "path": "docs/chats/2026-10-18-inference-research/log.md",
+      "blake3": "426fdbbe777b51314e87e501c6dd7bca920131156055d6e0f5530c44f6cdeeb5",
+      "bytes": 523
+    },
+    {
+      "path": "docs/chats/2026-10-18-memory-consolidation/handoff.md",
+      "blake3": "e67b4df9af660535d3d7c2ea6e750cfa2c209c840ad781b6fc35f104cff013fe",
+      "bytes": 897
+    },
+    {
+      "path": "docs/chats/2026-10-18-memory-consolidation/log.md",
+      "blake3": "cd88927f50899d4779851dd15479ec966874b2cfe769321b4b98e7ca607a9e95",
+      "bytes": 250
+    },
+    {
+      "path": "docs/chats/2026-10-18-output-language/handoff.md",
+      "blake3": "c9704accd9876a6d1299237473498ab63c046257c8ae0ece37d8e1a7a6d693e6",
+      "bytes": 780
+    },
+    {
+      "path": "docs/chats/2026-10-18-project-docs/handoff.md",
+      "blake3": "0fa505d4077860ce4a3f643f8cb61145d3fbefd7e42a5fe360db3c03f9543140",
+      "bytes": 2665
+    },
+    {
+      "path": "docs/chats/2026-10-18-project-docs/log.md",
+      "blake3": "472f89d1aed0294c29b885dd5012cb1128172f5d1364c00d62db68392e87a811",
+      "bytes": 683
+    },
+    {
+      "path": "docs/chats/Index.md",
+      "blake3": "e7868c216ee4cba081a505d66d85aa4f65e9d3dd219c0fc9baf22a295b53ac9b",
+      "bytes": 669
+    },
+    {
+      "path": "docs/features/Index.md",
+      "blake3": "2e7a7c0e27644c0d440c5832b9af94f32fa45661705ed3d00659e2463837600a",
+      "bytes": 1590
+    },
+    {
+      "path": "docs/features/agent-tools/Index.md",
+      "blake3": "1a5aa178ead6c0d3e052d5ad6408428271102614c0cf4bdfb6f33112507b80b3",
+      "bytes": 618
+    },
+    {
+      "path": "docs/features/agent-tools/cli.md",
+      "blake3": "303ff2554b7c4a50a2eb5de57bec864b1cacfe24c9f5a5b7b4e65bbc18f66e9d",
+      "bytes": 8540
+    },
+    {
+      "path": "docs/features/agent-tools/mcp-tools.md",
+      "blake3": "0bc1387a328fe1b0500dabbff4d775736d191ea8d203b81c96cf21ed7abb977d",
+      "bytes": 8820
+    },
+    {
+      "path": "docs/features/clients/Index.md",
+      "blake3": "ba509de31a7cde40e4d0a440e3e76acef46c6beedc9816ac8d332b68274ba2f2",
+      "bytes": 581
+    },
+    {
+      "path": "docs/features/clients/clients.md",
+      "blake3": "8e887f5fa467650ad3bc2c5a6412c4c13c9a25c2e5a1f15e7ce422137d9b35b1",
+      "bytes": 8596
+    },
+    {
+      "path": "docs/features/distribution/Index.md",
+      "blake3": "80e880b4896ea196665552d434509e263d0c3f0f4fd304eb6ad65d8540ccf1b4",
+      "bytes": 1171
+    },
+    {
+      "path": "docs/features/distribution/autostart.md",
+      "blake3": "559963018ac01f800a2b1684c2d77eb19881ffb300b393b63f623de8d393d40a",
+      "bytes": 5512
+    },
+    {
+      "path": "docs/features/distribution/installer.md",
+      "blake3": "b877c21995dcce4a1a758c42e1d401088f8489305260aa45720921b9a910c884",
+      "bytes": 12399
+    },
+    {
+      "path": "docs/features/docs-convention/Index.md",
+      "blake3": "db604bc7dd14d7cc85e25562c2fd16e33a4f4f29f4726f30927f09b86917eee3",
+      "bytes": 1766
+    },
+    {
+      "path": "docs/features/docs-convention/bars-instruction.md",
+      "blake3": "141b4f7bddef07db41ca23335612befdbe4093f66b22a38d9b749b6710b0e37e",
+      "bytes": 3447
+    },
+    {
+      "path": "docs/features/docs-convention/delivery.md",
+      "blake3": "e42ccce945b3939a3d6ef25813fd98f4858d864b621a4db558323feb3c83a768",
+      "bytes": 3521
+    },
+    {
+      "path": "docs/features/docs-convention/layout.md",
+      "blake3": "d858af2dc20d3a18b668bc80f4359bba69f47661d78c30befbbb6508060f0d86",
+      "bytes": 4008
+    },
+    {
+      "path": "docs/features/docs-convention/session-log.md",
+      "blake3": "cb3de334b9b9341cd3f615546a55b0e8cc56ab6f79235456a5ae4a2935b1aee1",
+      "bytes": 3153
+    },
+    {
+      "path": "docs/features/indexing/Index.md",
+      "blake3": "4b98d98ade81ba68be183be853d1ed864e5b31be5987dc6c1bb7b9feb0af919e",
+      "bytes": 581
+    },
+    {
+      "path": "docs/features/indexing/chunking.md",
+      "blake3": "442f919449443324cdc2a17f8be59915fc4d9e9c23dd495a28c97fbeef904dc8",
+      "bytes": 9288
+    },
+    {
+      "path": "docs/features/indexing/updates.md",
+      "blake3": "8aeb3ff0d028b58aff33847d53ff66f095875a7f080cc5843e4257c19ec0dcd2",
+      "bytes": 11713
+    },
+    {
+      "path": "docs/features/models/Index.md",
+      "blake3": "065254b80f2ce0ae71b0db5f9f863d04533a2363174adb3a5f5e5704480e65e6",
+      "bytes": 640
+    },
+    {
+      "path": "docs/features/models/external-models.md",
+      "blake3": "1e2417f247ad297a0ad259c883439e31ce92f6b9145d6d354e1a7ef5fff66fce",
+      "bytes": 5569
+    },
+    {
+      "path": "docs/features/models/local-models.md",
+      "blake3": "7a5f2006ca5d2986c29f6622a554f923e3af3250298e4a73f5af06a0bf9063d3",
+      "bytes": 15570
+    },
+    {
+      "path": "docs/features/projects/Index.md",
+      "blake3": "ce1d6a1ba64992b848eb50a4921a2004980f98862690efcda009a1c2088c69b0",
+      "bytes": 425
+    },
+    {
+      "path": "docs/features/projects/projects.md",
+      "blake3": "3dafcf246b423cbe99e3d912181981f526f510079268fbadaed9be190b4b8e36",
+      "bytes": 6140
+    },
+    {
+      "path": "docs/features/search/Index.md",
+      "blake3": "250108359e05abbabfa0e0b5ae076c8b9407981da6be927fc452f83f968ce021",
+      "bytes": 380
+    },
+    {
+      "path": "docs/features/search/hybrid-search.md",
+      "blake3": "46bd64c2b334b77585547ff185a049e353ffaba1b97a730fc9473a8e438ac54f",
+      "bytes": 8081
+    },
+    {
+      "path": "docs/features/settings/Index.md",
+      "blake3": "13c6ca916d159d9e26cd5941628fa06309576a67e290fc11c7a22b96faba7a06",
+      "bytes": 497
+    },
+    {
+      "path": "docs/features/settings/settings.md",
+      "blake3": "6e2817d5162254a07d54217f53a46b6de41f110b446b8237279514fe2cafe88b",
+      "bytes": 13376
+    },
+    {
+      "path": "docs/features/window/Index.md",
+      "blake3": "62842e94983b9c2a34c2e6153c7da6bf766e2a0b14a27c7bb2012b553c5d81b7",
+      "bytes": 3118
+    },
+    {
+      "path": "docs/features/window/empty-states.md",
+      "blake3": "efcd22760d93233045f91fa20b6e2749dc39a2b90af408017d2ee84a93aa61b8",
+      "bytes": 4559
+    },
+    {
+      "path": "docs/features/window/error-states.md",
+      "blake3": "c3088b19d6a4f4289733380043606dd6df8d76f71f6091500340cb390efda4d9",
+      "bytes": 8188
+    },
+    {
+      "path": "docs/features/window/implementation.md",
+      "blake3": "ca938363e5e60319adda8cb57dea1bae0a6400fd023ebec2d65ba974c6063a78",
+      "bytes": 10095
+    },
+    {
+      "path": "docs/features/window/indexing-progress.md",
+      "blake3": "cc8a59019db33b79e7926c59480cdf1aa8b7f85e4f85b4c40b3fdbbf4e422d6d",
+      "bytes": 6894
+    },
+    {
+      "path": "docs/features/window/main-window.md",
+      "blake3": "a7adc6fcc251aecac92f853acb54f705d982330fc347a66f1a296298efe0937b",
+      "bytes": 8681
+    },
+    {
+      "path": "docs/features/window/palette.md",
+      "blake3": "985df6576be1763179c984866e3a8d216b6842489b02e9232452ff492212f8e0",
+      "bytes": 2515
+    },
+    {
+      "path": "docs/features/window/reindex-consent.md",
+      "blake3": "3558c93fd8496eda5c8d45670baa83b1158c1f1a9778027c6de672085f7f51fd",
+      "bytes": 5671
+    },
+    {
+      "path": "docs/features/window/settings-window.md",
+      "blake3": "44c7e230fc1a41cfd49dd1a87a80784e8ed456fa9ac04eaa95608576f5e9548d",
+      "bytes": 5841
+    },
+    {
+      "path": "docs/getting-started.md",
+      "blake3": "96c19da96fa3b18fd4e1a4aef7b33a57b36f9e54e002b39e6fdf9e0e0b26dbb4",
+      "bytes": 7054
+    },
+    {
+      "path": "docs/issue.md",
+      "blake3": "43c133afb178b08808e1964b977f11f96f27fcd24e66c84c283e4f729ca73503",
+      "bytes": 7666
+    },
+    {
+      "path": "docs/knowledge/Index.md",
+      "blake3": "e943d874d4c21874b3742242bd9d02c98a19fff69a780bf3fda4ff242feae396",
+      "bytes": 4972
+    },
+    {
+      "path": "docs/knowledge/build.md",
+      "blake3": "1ca4e6d405624d646c03526bd681015b47ccf0f2b77f088d656ece0ba4dd8462",
+      "bytes": 6129
+    },
+    {
+      "path": "docs/knowledge/claude-code-serena.md",
+      "blake3": "5fc938a9da823b28e0c641096ef0c54ecec434f4679cc92dcbe6017c82ba6fd2",
+      "bytes": 7868
+    },
+    {
+      "path": "docs/knowledge/development-ideas-verification.md",
+      "blake3": "d21eaa60742ec4d906c7088195ed5adda59b90183b8a4de7881c6c5e08852688",
+      "bytes": 16876
+    },
+    {
+      "path": "docs/knowledge/development-ideas.md",
+      "blake3": "1f53e4d94d775c0d16d1f09771792f3c284c2a8df3e5d84bcee8691668f2a5bc",
+      "bytes": 35131
+    },
+    {
+      "path": "docs/knowledge/directml-performance.md",
+      "blake3": "3b8ac83c1c4189fdae953a1649d2305fc3c7e1e1bcdfef6c92cc3de168b3f14a",
+      "bytes": 10607
+    },
+    {
+      "path": "docs/knowledge/graph-and-relations.md",
+      "blake3": "187e2d5dbcf8572ccaabc72adb34e5a52305a4e1fb1791936707a05f4e579137",
+      "bytes": 32145
+    },
+    {
+      "path": "docs/knowledge/graph-knowledge-retrieval.md",
+      "blake3": "f8ed5b02998fd18f69ecba231afea9f52dcffd172d572319833c8e0a7716a1e0",
+      "bytes": 40577
+    },
+    {
+      "path": "docs/knowledge/inference-devices.md",
+      "blake3": "e033a8b6cb5ffb847068eaeb532a3257146b0bd110fd451862a00d5b885d5f9f",
+      "bytes": 11415
+    },
+    {
+      "path": "docs/knowledge/inference-libraries.md",
+      "blake3": "0af9385517d431e66ff3ac13715aca528bbe0dd981501e4459013ab534d294ca",
+      "bytes": 12434
+    },
+    {
+      "path": "docs/knowledge/inference-speed.md",
+      "blake3": "526ff3a2efb7805fbfca75bb223001fa7d6b8d6f721a8e8fdd877a96db6d7f0d",
+      "bytes": 15753
+    },
+    {
+      "path": "docs/knowledge/installer.md",
+      "blake3": "7ddff79c362f5749bb35416e93abbd0ac7fa371e3aa18f861ad99e5d82b0cd61",
+      "bytes": 12931
+    },
+    {
+      "path": "docs/knowledge/local-documentation-tools-audit.md",
+      "blake3": "b69d55367306761011434ca88af6c347b3e072d6263b05630853b63e93cad67c",
+      "bytes": 30165
+    },
+    {
+      "path": "docs/knowledge/local-documentation-tools.md",
+      "blake3": "660bad92087adcc1f440c40ca1dae291a4fa79bb07ecc32500045553e8545cb5",
+      "bytes": 48966
+    },
+    {
+      "path": "docs/knowledge/quality-2026-10-18/Index.md",
+      "blake3": "2a5a9bf1da994fb51a9a5f1255d8e2be312027c21ce405b5b484bd8f672cc48f",
+      "bytes": 683
+    },
+    {
+      "path": "docs/knowledge/search-during-indexing.md",
+      "blake3": "c70bd644f5b79dac4c705e6192f83bc09858e2732742f830573418471de0c54c",
+      "bytes": 3968
+    },
+    {
+      "path": "docs/knowledge/search-quality-benchmark.md",
+      "blake3": "a002c832c5ee194bee7d40a1f1ac453eebae6bab1dd1425cecf080c799d83bf1",
+      "bytes": 13332
+    },
+    {
+      "path": "docs/knowledge/spike-detach.md",
+      "blake3": "628eaa49a83d88fbf5f5d925eb2c883155d76911945df05ac187ff45ff70018e",
+      "bytes": 2860
+    },
+    {
+      "path": "docs/knowledge/spike-ipc.md",
+      "blake3": "6939a5a0d01ac6f3103c8efe1281b006cfd0300592a052ac8075e59151ad33de",
+      "bytes": 2960
+    },
+    {
+      "path": "docs/knowledge/spike-search.md",
+      "blake3": "a2295d1b8f1bce0dddde1fac1149a70a1db5e21767eaf8c99ba49069f6d5659b",
+      "bytes": 15498
+    },
+    {
+      "path": "docs/knowledge/stack-research.md",
+      "blake3": "1f0a7ac67d3173e4f8a4c1b8f2d5a078e19847e582cc4c5683174bb7e3b05491",
+      "bytes": 13455
+    },
+    {
+      "path": "docs/knowledge/traceability.md",
+      "blake3": "4d3fba99e366962d066313043e610e34a7bb48d408b3bb997eae81d252b8f846",
+      "bytes": 5842
+    },
+    {
+      "path": "docs/overview.md",
+      "blake3": "84ff6f6f166e15651ec9ff13cc497c08a94c30711c48b136d6f62e9dfc87f779",
+      "bytes": 6368
+    },
+    {
+      "path": "docs/project-status.md",
+      "blake3": "276beac78fa0710f202284ebd3b6d74c02ce3a3f4af598ece26ff9ac2b130357",
+      "bytes": 5670
+    },
+    {
+      "path": "docs/user_ideas.md",
+      "blake3": "12ca01c879c99e33766ff979c47adf1a1c894aeeccb11745e5970cb820f06771",
+      "bytes": 6468
+    }
+  ],
+  "documents": 103,
+  "chunks": 482,
+  "vectors": 482,
+  "embed": "ModelFingerprint { source: \"builtin\", model: \"BAAI/bge-m3\", dim: 1024, doc_prefix: \"\" }",
+  "device": "DirectMl",
+  "layout": "Some(Layout { chunking: ChunkingParams { min_chars: 250, max_chars: 6000 }, docs_root: \"docs\" })",
+  "model_load_secs": 3.0295849,
+  "index_seconds": 1.0214921000000001,
+  "update": "UpdateReport { added: 0, changed: 0, unchanged: 103, removed: 0, chunks_embedded: 0, chunks_reused: 0, full_check: false, problems: [] }",
+  "index_blake3": "84746c8c3f7ebb87b6c7327b29daf468c3fbdd78d886cae9b9ec26e74241c4d2"
+}

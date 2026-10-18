@@ -142,6 +142,41 @@ pub fn search(
     })
 }
 
+/// Диагностика первого этапа для бенча IDEA-06: FTS, векторы, слияние.
+/// Использует те же операции, что `search`, до порогов и отсечения результатов.
+#[doc(hidden)]
+pub fn candidate_trace(
+    index: &Index,
+    query_vector: &[f32],
+    request: &SearchRequest,
+    candidates: usize,
+) -> Result<[Vec<SearchHit>; 3], SearchError> {
+    let query = fts_query(&request.query)
+        .ok_or_else(|| SearchError::InvalidParams("в запросе нет ни одного слова".into()))?;
+    let scope = Scope::build(index, request)?;
+    let mut vector = query_vector.to_vec();
+    normalize(&mut vector);
+    let cosines = scope.cosines(index, &vector)?;
+    let text = scope.text_candidates(index, &query.all, candidates)?;
+    let exact = match query.identifiers {
+        Some(ref identifiers) => scope.text_candidates(index, identifiers, candidates)?,
+        None => Vec::new(),
+    };
+    let vector = top_by_score(&cosines, candidates);
+    let fused = exact_first(&exact, fuse(&text, &vector));
+    let mut lists = [
+        load_hits(index, &text)?,
+        load_hits(index, &vector)?,
+        load_hits(index, &fused)?,
+    ];
+    for hits in &mut lists {
+        for hit in hits {
+            hit.score = cosine_of(&cosines, hit.chunk_id);
+        }
+    }
+    Ok(lists)
+}
+
 /// Запросы к FTS5 по одному запросу пользователя.
 #[derive(Debug, PartialEq, Eq)]
 struct FtsQuery {

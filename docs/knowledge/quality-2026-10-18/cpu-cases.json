@@ -1,0 +1,58 @@
+[
+  {
+    "id": "od-001",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Кто решает, в какой раскраске окажется машина после подключения?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/car-selection.md",
+        "heading": "Окно выбирает модель, скин назначает сервер",
+        "evidence": "С 08.10.2026 окно выбирает только модель машины, без отдельного скина и значков ливрей; слоты сгруппированы по",
+        "reason": "Скин назначается сервером; окно выбирает модель."
+      }
+    ]
+  },
+  {
+    "id": "od-003",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Продолжается ли анимация миниатюр в свёрнутом окне?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/car-selection.md",
+        "heading": "Кэши картинок и таймер галереи",
+        "evidence": "WPF копирует пиксели в frozen BitmapSource без удержания потока. Общие кэши: до 8 галерей и 128 одиночных карт",
+        "reason": "Свёрнутые и скрытые строки освобождают галереи и не анимируются."
+      }
+    ]
+  },
+  {
+    "id": "od-015",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Как выяснить, из какого пути управления произошёл перенос машины в бокс?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/native-pit-return.md",
+        "heading": "Маска источников телепорта pit_teleport_sources",
+        "evidence": "`pit_teleport_sources` — маска источников, чей `OD_REQUEST_PIT` телепортирует: сейчас `PIT_RETURN_MANUAL | PIT",
+        "reason": "Битовая маска различает источники запроса телепорта."
+      }
+    ]
+  },
+  {
+    "id": "od-023",
+    "split": "tune",
+    "category": "identifier",
+    "query": "Как ConfirmationPlan.For определяет кнопки подтверждения?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/window-confirmations.md",
+        "heading": "Один механизм подтверждений",
+        "evidence": "Без ответа «да» ничего не происходит. Вопрос — `ConfirmationRequest(вид, сколько ботов будет отключено, есть л",
+        "reason": "ConfirmationPlan задаёт тексты и кнопки по виду запроса; Escape означает отмену."
+      }
+    ]
+  }
+]

@@ -1,0 +1,25 @@
+{
+  "device": "DirectMl",
+  "onnx_runtime": "ORT Build Info: git-branch=rel-1.28.0, git-commit-id=da9b5e3, fp8-kv-cache=1, build type=Release",
+  "checked": [
+    {
+      "path": "docs/CHANGELOG.md",
+      "embed_hash": "aa9308a78cb433232a60856f1e070bca996c3b509869df45e1658dfdbdcdc0dd",
+      "cosine": 1.0000001192092896,
+      "max_abs": 1.0989606380462646e-7
+    },
+    {
+      "path": "docs/knowledge-base/environment/headless-and-profiles.md",
+      "embed_hash": "9cbfba89e155917f63e710d0f154bbc5322c80be8836e663009866799ee2cf10",
+      "cosine": 0.9999998211860657,
+      "max_abs": 9.96515154838562e-8
+    },
+    {
+      "path": "docs/user_ideas.md",
+      "embed_hash": "28923241d6aae995ede2f470839fbf1a47e8921fb15120ebd42df3a68f7beadd",
+      "cosine": 1.0,
+      "max_abs": 0.0
+    }
+  ],
+  "passed": true
+}

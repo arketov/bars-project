@@ -1,0 +1,1322 @@
+[
+  {
+    "id": "od-001",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Кто решает, в какой раскраске окажется машина после подключения?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/car-selection.md",
+        "heading": "Окно выбирает модель, скин назначает сервер",
+        "evidence": "С 08.10.2026 окно выбирает только модель машины, без отдельного скина и значков ливрей; слоты сгруппированы по",
+        "reason": "Скин назначается сервером; окно выбирает модель."
+      }
+    ]
+  },
+  {
+    "id": "od-002",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Почему у бота меняются фотографии автомобиля, хотя выбор машины остаётся прежним?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/car-selection.md",
+        "heading": "Картинка машины слева от имени",
+        "evidence": "Картинка остаётся слева от имени (уточнение владельца R-33). Контейнер 64×38 DIP, отступ 4 DIP, `Stretch=Unifo",
+        "reason": "Для выбора без скина показывается галерея локальных скинов, без бронирования."
+      }
+    ]
+  },
+  {
+    "id": "od-003",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Продолжается ли анимация миниатюр в свёрнутом окне?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/car-selection.md",
+        "heading": "Кэши картинок и таймер галереи",
+        "evidence": "WPF копирует пиксели в frozen BitmapSource без удержания потока. Общие кэши: до 8 галерей и 128 одиночных карт",
+        "reason": "Свёрнутые и скрытые строки освобождают галереи и не анимируются."
+      }
+    ]
+  },
+  {
+    "id": "od-004",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Что происходит при выборе каталога составов с отдельным испорченным файлом?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/profiles-folder-switch.md",
+        "heading": "Шаг 1: проверка папки до вопроса",
+        "evidence": "Уже открытая папка — «менять нечего» (`SameFolder`). Не существует, не читается или не загружается (пробное чт",
+        "reason": "Отдельный повреждённый профиль даёт запись журнала, а не отказ всей папке."
+      }
+    ]
+  },
+  {
+    "id": "od-005",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Останется ли старый каталог рабочим, если новый путь не удалось сохранить?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/profiles-folder-switch.md",
+        "heading": "Шаг 4: запоминание папки в настройках",
+        "evidence": "Папка и выбор модели пишутся в настройки (`CommitProfilesFolderAsync`) раньше, чем окно получает модель. Не за",
+        "reason": "При неудаче сохранения пути новая модель закрывается, старая остаётся."
+      }
+    ]
+  },
+  {
+    "id": "od-006",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Будут ли боты отключены, если сохранение перед выходом завершилось ошибкой?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/window-confirmations.md",
+        "heading": "Уход со страницы: PrepareToLeaveAsync",
+        "evidence": "`Workbench.PrepareToLeaveAsync(kind, unappliedDraft, applyDraft)` — единый вход перед закрытием окна, сменой п",
+        "reason": "Отключение выполняется только после успешного применения и сохранения."
+      }
+    ]
+  },
+  {
+    "id": "od-007",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Как исключено новое подключение между отключением ботов и загрузкой другого состава?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/window-confirmations.md",
+        "heading": "Открытие другого состава при подключённых ботах",
+        "evidence": "`Workbench.OpenCompositionAsync(chosen, unappliedDraft, dropDraft)`: один вопрос, затем одно отключение всех, ",
+        "reason": "Busy удерживается с подтверждения до загрузки состава."
+      }
+    ]
+  },
+  {
+    "id": "od-008",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Сохраняет ли резервная копия профиля право на хранение старого пароля?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/server-passwords.md",
+        "heading": "Устаревшие пароли не хранятся",
+        "evidence": "Неактуальные пароли не хранятся ([ADR-0010](../../adr/0010-prune-stale-passwords.md)). Blob устарел, когда на ",
+        "reason": "Файлы bak не считаются ссылками на сохранённый пароль."
+      }
+    ]
+  },
+  {
+    "id": "od-009",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Можно ли молча подключиться без пароля, если защищённый пароль перестал читаться?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/server-passwords.md",
+        "heading": "Очистка недоступного сохранённого пароля",
+        "evidence": "«Выбрать» не пропускает недоступный сохранённый пароль: его вводят заново или очищают кнопкой «Очистить». «Очи",
+        "reason": "Недоступную ссылку явно очищают или заменяют; пустое поле не означает пустой пароль."
+      }
+    ]
+  },
+  {
+    "id": "od-010",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Сколько максимум нужно ждать повторного входа после падения предыдущего клиента?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/runtime/admission-release-fence.md",
+        "heading": "Когда забор снимается",
+        "evidence": "- сразу, если сервер явно отказал (ответы 59/60/65/66/69/110/111): место не выделялось;",
+        "reason": "Забор снимается по доказательству или максимум через 60 секунд."
+      }
+    ]
+  },
+  {
+    "id": "od-011",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Как вычисляется количество мест для ботов с учётом людей и резерва?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/runtime/server-occupancy.md",
+        "heading": "Резерв мест для людей",
+        "evidence": "Резерв считается от общей ёмкости, люди на сервере его занимают ([ADR-0004](../../adr/0004-seat-reserve.md)).",
+        "reason": "Из ёмкости вычитаются максимум резерва и людей, затем свои боты."
+      }
+    ]
+  },
+  {
+    "id": "od-012",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Одинаково ли выбирается направление прибытия для сопровождения и атаки игрока?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/runtime/route-search.md",
+        "heading": "Направление прибытия по режимам",
+        "evidence": "- ApproachAndStop: по умолчанию ±90° — подтверждено владельцем.",
+        "reason": "У режимов различаются допустимые направления прибытия к цели."
+      }
+    ]
+  },
+  {
+    "id": "od-013",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Как построение пути учитывает другие машины на трассе?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/runtime/route-search.md",
+        "heading": "Препятствия и трафик при поиске",
+        "evidence": "Препятствия проверяются при расширении поиска: связный слой поверхности, полосы колёс, полный корпус. Динамиче",
+        "reason": "Расширение поиска проверяет поверхность, колёса, корпус и динамические препятствия."
+      }
+    ]
+  },
+  {
+    "id": "od-014",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Что произойдёт с движущимся ботом, когда менеджер перестанет посылать сигнал жизни?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/native-control-contract.md",
+        "heading": "Аренда управления 10 с",
+        "evidence": "Менеджер пишет `lease.heartbeat_qpc` (свой QPC) в контрольный MMF при каждом `ControllerChannel.Heartbeat`. Ег",
+        "reason": "После десяти секунд без действительного heartbeat бот переходит в Hold."
+      }
+    ]
+  },
+  {
+    "id": "od-015",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Как выяснить, из какого пути управления произошёл перенос машины в бокс?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/native-pit-return.md",
+        "heading": "Маска источников телепорта pit_teleport_sources",
+        "evidence": "`pit_teleport_sources` — маска источников, чей `OD_REQUEST_PIT` телепортирует: сейчас `PIT_RETURN_MANUAL | PIT",
+        "reason": "Битовая маска различает источники запроса телепорта."
+      }
+    ]
+  },
+  {
+    "id": "od-016",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Почему повторное подключение того же игрока не должно возобновлять старую полицейскую операцию?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/police-target-filter.md",
+        "heading": "Цель фильтра и срок его действия",
+        "evidence": "Единственный владелец фильтра — существующая Police operation. Native берёт опубликованный `approach_tick` ros",
+        "reason": "Проверяются epoch, generation, server ID и connection generation; старая операция не оживает."
+      }
+    ]
+  },
+  {
+    "id": "od-017",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Почему идентичная копия игры теряет привязки функций из кэша?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/environment/native-cache-and-lotus.md",
+        "heading": "Ключ кэша: имя EXE и его дата",
+        "evidence": "Ключ: format version 2 + basename EXE с расширением + max(CreationTime, LastWriteTime) в Unix-секундах. Полный",
+        "reason": "Ключ зависит от имени EXE и max времени создания и записи, не полного пути."
+      }
+    ]
+  },
+  {
+    "id": "od-018",
+    "split": "tune",
+    "category": "semantic",
+    "query": "Как избежать конфликта штатной общей памяти при нескольких клиентах?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/environment/shared-resources.md",
+        "heading": "Отключение stock writer shared memory",
+        "evidence": "Flag `0x203B087` (по умолчанию false), condition `0xA473B0`, условная регистрация `0x21C092`, группа SharedMem",
+        "reason": "Отключён штатный writer общего канала, чтобы клиенты не перезаписывали его."
+      }
+    ]
+  },
+  {
+    "id": "od-019",
+    "split": "tune",
+    "category": "identifier",
+    "query": "Какие ограничения размера и пути проверяет AcContentCatalog.ReadCar?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/car-selection.md",
+        "heading": "Каталог контента AcContentCatalog",
+        "evidence": "`Windows.Launching.AcContentCatalog.ReadCar(root, carId)` / `ReadSkin(root, carId, skinId)` — общий сервис pre",
+        "reason": "Общий каталог ограничивает размер метаданных и изображений, запрещает traversal и reparse."
+      }
+    ]
+  },
+  {
+    "id": "od-020",
+    "split": "tune",
+    "category": "identifier",
+    "query": "Откуда BotNames получает имена для новых строк?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/car-selection.md",
+        "heading": "Имена новых ботов",
+        "evidence": "`BotNames` — словарь из 24 имён, применяется в «Добавить ботов» и создании состава; повторения допустимы. «Доб",
+        "reason": "BotNames содержит 24 имени; добавляются ровно показанные имена, повтор допустим."
+      }
+    ]
+  },
+  {
+    "id": "od-021",
+    "split": "tune",
+    "category": "identifier",
+    "query": "Когда возвращается Shell.ProfilesFolder.Why.Switching?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/profiles-folder-switch.md",
+        "heading": "Шаг 2: вопрос, отключение ботов и занятость модели",
+        "evidence": "`PrepareToLeaveCoreAsync(…, holdBusy: true)` ([уход со страницы](window-confirmations.md#уход-со-страницы-prep",
+        "reason": "Часть настроек отказывает при переключении, поскольку новая модель уже взяла старые значения."
+      }
+    ]
+  },
+  {
+    "id": "od-022",
+    "split": "tune",
+    "category": "identifier",
+    "query": "Что означает ссылка local-dpapi в ServerProfile.PasswordRef?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/server-passwords.md",
+        "heading": "Хранилище паролей ServerPasswordStore",
+        "evidence": "`ServerPasswordStore` хранит отдельные неизменяемые DPAPI blobs в `server-passwords` рядом с `settings.json`; ",
+        "reason": "PasswordRef содержит ссылку UUID на DPAPI blob текущего пользователя."
+      }
+    ]
+  },
+  {
+    "id": "od-023",
+    "split": "tune",
+    "category": "identifier",
+    "query": "Как ConfirmationPlan.For определяет кнопки подтверждения?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/window-confirmations.md",
+        "heading": "Один механизм подтверждений",
+        "evidence": "Без ответа «да» ничего не происходит. Вопрос — `ConfirmationRequest(вид, сколько ботов будет отключено, есть л",
+        "reason": "ConfirmationPlan задаёт тексты и кнопки по виду запроса; Escape означает отмену."
+      }
+    ]
+  },
+  {
+    "id": "od-024",
+    "split": "tune",
+    "category": "identifier",
+    "query": "Почему забор повторного входа использует MemberId, а не только InstanceId?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/runtime/admission-release-fence.md",
+        "heading": "Ключ и содержимое записи забора",
+        "evidence": "Ключ — `MemberId` бота (без состава — `InstanceId`): перезагрузка состава меняет `InstanceId`, забор остаётся.",
+        "reason": "MemberId переживает перезагрузку состава, InstanceId может измениться."
+      }
+    ]
+  },
+  {
+    "id": "od-025",
+    "split": "tune",
+    "category": "identifier",
+    "query": "Как устроен алгоритм RouteSearch?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/runtime/route-search.md",
+        "heading": "Алгоритм поиска маршрута",
+        "evidence": "A* в непрерывных позах с дискретизацией только таблицы посещений. Состояние: X/Y/Z, направление и кривизна. Рё",
+        "reason": "A-star работает с непрерывными позами и дискретной таблицей посещений."
+      }
+    ]
+  },
+  {
+    "id": "od-026",
+    "split": "tune",
+    "category": "identifier",
+    "query": "Какие heartbeat_qpc не продлевают OD_LEASE_TIMEOUT_SECONDS?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/native-control-contract.md",
+        "heading": "Аренда управления 10 с",
+        "evidence": "Менеджер пишет `lease.heartbeat_qpc` (свой QPC) в контрольный MMF при каждом `ControllerChannel.Heartbeat`. Ег",
+        "reason": "Нулевой, отрицательный и будущий heartbeat не продлевает аренду."
+      }
+    ]
+  },
+  {
+    "id": "od-027",
+    "split": "tune",
+    "category": "identifier",
+    "query": "Где в Runtime AI ABI4 находится target_connection?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/police-target-filter.md",
+        "heading": "Runtime AI ABI4 и managed-интеграция",
+        "evidence": "Регион 480 байт, major 4. Scalar request/snapshot и lease сохранили прежние offsets (первые 304 байта). Operat",
+        "reason": "Описание ABI4 задаёт offsets target_server_id и target_connection."
+      }
+    ]
+  },
+  {
+    "id": "od-028",
+    "split": "tune",
+    "category": "identifier",
+    "query": "Какие действия выполняет place_in_own_box?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/native-pit-return.md",
+        "heading": "Общий перенос в бокс place_in_own_box",
+        "evidence": "Матрица своего бокса `Car+0x3a90` читается и проверяется до любой записи (конечные числа, единичное направлени",
+        "reason": "Перенос проверяет матрицу своего бокса до записей и использует общий путь."
+      }
+    ]
+  },
+  {
+    "id": "od-029",
+    "split": "tune",
+    "category": "identifier",
+    "query": "Когда CspCacheIdentity.Align отказывается менять дату EXE?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/environment/native-cache-and-lotus.md",
+        "heading": "Выравнивание даты acs.exe при подготовке папки",
+        "evidence": "`CspCacheIdentity.Align` вызывается в каждой подготовке («Проверить и подготовить») после записи файлов и до к",
+        "reason": "Align не меняет файл при отсутствующем кэше, совпадении дат и недостоверной метке."
+      }
+    ]
+  },
+  {
+    "id": "od-030",
+    "split": "tune",
+    "category": "identifier",
+    "query": "Как проверяется маркер ac0sam587274 в выбранном контенте?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/environment/shared-resources.md",
+        "heading": "Проверка выбранного контента на защищённые KN5",
+        "evidence": "Для stock BMW 1M, 1M S3, Huracan Performante, Brands Hatch и driver assets: 42 обычных KN5, footer отсутствует",
+        "reason": "Отдельная проверка контента ищет footer защищённых KN5; локальные обычные файлы проверены."
+      }
+    ]
+  },
+  {
+    "id": "od-031",
+    "split": "tune",
+    "category": "disambiguation",
+    "query": "Выбор единственной свободной модели в первой строке — серверная бронь или только распределение окна?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/car-selection.md",
+        "heading": "Места строк до Join",
+        "evidence": "`Workbench.PlanRowPlaces` (`Workbench.Launching.cs`) считает места строк тем же распределением, что и план зап",
+        "reason": "Планирование мест в окне не является серверной бронью."
+      }
+    ]
+  },
+  {
+    "id": "od-032",
+    "split": "tune",
+    "category": "disambiguation",
+    "query": "Как откатывается выбор папки, если окно не приняло уже открытую модель?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/profiles-folder-switch.md",
+        "heading": "Шаг 5: показ новой модели окну",
+        "evidence": "`show(next)` отдаёт окну новую модель (`DataContext`, выбор строк сбрасывается); если окно её не приняло, папк",
+        "reason": "При отказе show папка возвращается прежней; поздняя ошибка относится к новой модели."
+      }
+    ]
+  },
+  {
+    "id": "od-033",
+    "split": "tune",
+    "category": "disambiguation",
+    "query": "Чем неудача повторного подключения отличается от неудачной очистки при отключении?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/window-confirmations.md",
+        "heading": "«Отключить», «Переподключить» и отказ сохранения",
+        "evidence": "- «Отключить» на панели спрашивает до вызова сервиса; «Отмена» ничего не меняет. Итог отключения в строке сост",
+        "reason": "Переподключённых успешно ботов не считают неудачно очищенными."
+      }
+    ]
+  },
+  {
+    "id": "od-034",
+    "split": "tune",
+    "category": "disambiguation",
+    "query": "Создаётся ли продуктовый race.ini ради передачи пароля в игру?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/server-passwords.md",
+        "heading": "Где пароль вводится, сохраняется и читается",
+        "evidence": "Поле пароля — только в окне «Сервер» ([окно «Сервер»](server-window.md)). Сохранение — «Выбрать» (`ChooseServe",
+        "reason": "Пароль передаётся штатному memory bootstrap; продуктовый race.ini не создаётся."
+      }
+    ]
+  },
+  {
+    "id": "od-035",
+    "split": "tune",
+    "category": "disambiguation",
+    "query": "Доказано ли тестами время освобождения серверного места после убийства клиента?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/runtime/admission-release-fence.md",
+        "heading": "Что подтвердит только живой сервер",
+        "evidence": "- когда сервер освобождает место убитого клиента — от этого зависит скорость снятия забора по доказательству.",
+        "reason": "Освобождение места убитого клиента требует живого сервера."
+      }
+    ]
+  },
+  {
+    "id": "od-036",
+    "split": "tune",
+    "category": "disambiguation",
+    "query": "Подтвердило ли чтение пустого ростера передачу кириллического имени подключённого игрока?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/runtime/server-occupancy.md",
+        "heading": "Ростер живого сервера и имя бота",
+        "evidence": "Один `GET /JSON%7C-1` к серверу владельца 10.10.2026: строки содержат `DriverName, DriverNation, DriverTeam, I",
+        "reason": "Пустой сервер не подтвердил заполнение кириллических имён подключённых игроков."
+      }
+    ]
+  },
+  {
+    "id": "od-037",
+    "split": "tune",
+    "category": "disambiguation",
+    "query": "Каково последнее игровое состояние поиска маршрута и какая диагностика ещё открыта?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/runtime/route-search.md",
+        "heading": "Последний игровой результат и открытая диагностика",
+        "evidence": "Последний прогон `player-modes-ea58f6a1…`: после Applied бот 1 подъезда остановился примерно в 17 м от места, ",
+        "reason": "Раздел отделяет последний игровой результат маршрута от открытой диагностики."
+      }
+    ]
+  },
+  {
+    "id": "od-038",
+    "split": "tune",
+    "category": "disambiguation",
+    "query": "Доказывают ли фикстуры фильтра цели работу мостов внутри реальной CSP?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/police-target-filter.md",
+        "heading": "Проверки и что осталось проверить в игре",
+        "evidence": "Фикстуры: цель и третья машина на двух проходах, чужой AI, повторное подключение, замена тела, disconnect/leas",
+        "reason": "Мосты, контакт, третья машина и отмена требуют проверки в игре."
+      }
+    ]
+  },
+  {
+    "id": "od-039",
+    "split": "tune",
+    "category": "disambiguation",
+    "query": "Когда обычный и реактивный бот получают свой профиль при первом удержании?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/native-control-contract.md",
+        "heading": "Первое удержание после входа",
+        "evidence": "Управляемая сторона (`BotStartScheduler`) отправляет первым Hold с seq 1 и считает вход подтверждённым, когда ",
+        "reason": "Первое удержание обычного и реактивного бота проверяет применение профиля."
+      }
+    ]
+  },
+  {
+    "id": "od-040",
+    "split": "tune",
+    "category": "disambiguation",
+    "query": "Достаточно ли принятой команды телепорта для подтверждения прибытия в пит?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/native-pit-return.md",
+        "heading": "Подтверждение прибытия в бокс",
+        "evidence": "`OD_IN_PIT` — штатная процедура `in_own_pit` (`Car::isInPits`, радиус 3 м). Для заезда своим ходом подтвержден",
+        "reason": "Принятие запроса не заменяет подтверждения фактического прибытия в бокс."
+      }
+    ]
+  },
+  {
+    "id": "od-041",
+    "split": "tune",
+    "category": "disambiguation",
+    "query": "Что происходит с цифровой подписью при изменении DLL частной копии?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/environment/shared-resources.md",
+        "heading": "Подпись изменённой DLL",
+        "evidence": "Изменение байтов меняет digest подписанного файла. Authenticode validator 0x13F8930 через 0x13F87D0 вызывается",
+        "reason": "Модификация меняет статус подписи DLL; это описано отдельно от поведения AI."
+      }
+    ]
+  },
+  {
+    "id": "od-042",
+    "split": "tune",
+    "category": "disambiguation",
+    "query": "Подтверждает ли проверка стартового gate после исправления кэша физическую езду AI?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/environment/native-cache-and-lotus.md",
+        "heading": "Доказательство под отладчиком на копии 06–07.10",
+        "evidence": "Оба процесса остановлены в gate и завершены до окна",
+        "reason": "Процессы в проверке gate остановлены до окна, физическая езда не проверялась."
+      }
+    ]
+  },
+  {
+    "id": "od-043",
+    "split": "tune",
+    "category": "multi",
+    "query": "Где описана приоритетность точной пары машины и скина при распределении дефицитных мест?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/car-selection.md",
+        "heading": "Планировщик: точные пары и диагностика по строке",
+        "evidence": "Planner использует свежий INFO/roster и точные свободные пары машина/скин. Явный скин имеет приоритет при недо",
+        "reason": "Приоритет точной пары описан в планировщике и распределении мест строк."
+      },
+      {
+        "path": "docs/knowledge-base/app/car-selection.md",
+        "heading": "Места строк до Join",
+        "evidence": "`Workbench.PlanRowPlaces` (`Workbench.Launching.cs`) считает места строк тем же распределением, что и план зап",
+        "reason": "Приоритет точной пары описан в планировщике и распределении мест строк."
+      }
+    ]
+  },
+  {
+    "id": "od-044",
+    "split": "tune",
+    "category": "multi",
+    "query": "Какие шаги обеспечивают согласованность настроек и новой модели при смене папки?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/profiles-folder-switch.md",
+        "heading": "Шаг 3: запись настроек и открытие новой модели",
+        "evidence": "Переключение берёт `settingsSaveGate` и держит до конца: записи старой модели доканчиваются, поздние ждут. Нов",
+        "reason": "Гейт записи и фиксация пути предшествуют показу новой модели."
+      },
+      {
+        "path": "docs/knowledge-base/app/profiles-folder-switch.md",
+        "heading": "Шаг 4: запоминание папки в настройках",
+        "evidence": "Папка и выбор модели пишутся в настройки (`CommitProfilesFolderAsync`) раньше, чем окно получает модель. Не за",
+        "reason": "Гейт записи и фиксация пути предшествуют показу новой модели."
+      }
+    ]
+  },
+  {
+    "id": "od-045",
+    "split": "tune",
+    "category": "multi",
+    "query": "Где задано правило, что уже присутствующие люди занимают резерв мест?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/runtime/server-occupancy.md",
+        "heading": "Резерв мест для людей",
+        "evidence": "Резерв считается от общей ёмкости, люди на сервере его занимают ([ADR-0004](../../adr/0004-seat-reserve.md)).",
+        "reason": "Один и тот же контракт резерва дан формулой и дословным решением владельца."
+      },
+      {
+        "path": "docs/adr/0004-seat-reserve.md",
+        "heading": "Решение владельца",
+        "evidence": "«один человек из 18 слотов",
+        "reason": "Один и тот же контракт резерва дан формулой и дословным решением владельца."
+      }
+    ]
+  },
+  {
+    "id": "od-046",
+    "split": "tune",
+    "category": "multi",
+    "query": "Как менеджер продлевает аренду команд и что делает истечение срока?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/native-control-contract.md",
+        "heading": "Аренда управления 10 с",
+        "evidence": "Менеджер пишет `lease.heartbeat_qpc` (свой QPC) в контрольный MMF при каждом `ControllerChannel.Heartbeat`. Ег",
+        "reason": "Продление монитором и истечение аренды описаны в двух слоях."
+      },
+      {
+        "path": "docs/knowledge-base/runtime/managed-lifecycle.md",
+        "heading": "Монитор бота",
+        "evidence": "[BotRuntime.Monitor.cs](../../../src/Overdrive.Bots.Core/BotRuntime.Monitor.cs). Один цикл на бота от создания",
+        "reason": "Продление монитором и истечение аренды описаны в двух слоях."
+      }
+    ]
+  },
+  {
+    "id": "od-047",
+    "split": "tune",
+    "category": "multi",
+    "query": "Какие поля метаданных исполняемого файла входят в идентичность кэша CSP?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/environment/native-cache-and-lotus.md",
+        "heading": "Ключ кэша: имя EXE и его дата",
+        "evidence": "Ключ: format version 2 + basename EXE с расширением + max(CreationTime, LastWriteTime) в Unix-секундах. Полный",
+        "reason": "Имя и дата EXE перечислены в контракте ключа и формуле метки."
+      },
+      {
+        "path": "docs/knowledge-base/environment/native-cache-and-lotus.md",
+        "heading": "Формула метки кэша в DWrite.dll",
+        "evidence": "Разбор `dwrite.dll` SHA-256 `6546FDF7…` (dumpbin, без запуска):",
+        "reason": "Имя и дата EXE перечислены в контракте ключа и формуле метки."
+      }
+    ]
+  },
+  {
+    "id": "od-048",
+    "split": "tune",
+    "category": "multi",
+    "query": "Какие признаки личности выбранного игрока нужны фильтру полицейской цели?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/police-target-filter.md",
+        "heading": "Цель фильтра и срок его действия",
+        "evidence": "Единственный владелец фильтра — существующая Police operation. Native берёт опубликованный `approach_tick` ros",
+        "reason": "Фильтр использует идентичность игрока и guarded membership вместо индекса массива."
+      },
+      {
+        "path": "docs/knowledge-base/native/selected-opponent-awareness.md",
+        "heading": "Онлайн: сопоставление серверного игрока с машиной-кандидатом",
+        "evidence": "CSP регистрирует два wrapper под именем `AIDriver::stepCarsAwareness2`: `0x12178C0` и `0x1217D50` (регистрации",
+        "reason": "Фильтр использует идентичность игрока и guarded membership вместо индекса массива."
+      }
+    ]
+  },
+  {
+    "id": "od-049",
+    "split": "test",
+    "category": "semantic",
+    "query": "Оставит ли отменённый диалог нового состава сохранённый сервер или файл пароля?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/new-composition.md",
+        "heading": "Сервер для создаваемого состава",
+        "evidence": "Сервер, выбранный в окне «Сервер», открытом из «Нового состава», попадает только в создаваемый состав. «Выбрат",
+        "reason": "Выбор нового сервера остаётся в pendingServer до создания; отмена ничего не записывает."
+      }
+    ]
+  },
+  {
+    "id": "od-050",
+    "split": "test",
+    "category": "semantic",
+    "query": "Как список участников избегает сокрытия человека с тем же именем, что у бота?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/server-players.md",
+        "heading": "Исключение своих ботов из списка",
+        "evidence": "Собственные машины наблюдателей исключаются по native ServerId, остальные свои боты — по однозначному имени из",
+        "reason": "Неоднозначные имена сохраняются в выдаче, чтобы не скрыть человека."
+      }
+    ]
+  },
+  {
+    "id": "od-051",
+    "split": "test",
+    "category": "semantic",
+    "query": "Что видит пользователь при потере свежего игрового списка, если боты ещё подключены?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/server-players.md",
+        "heading": "Что показывает вкладка и когда HTTP",
+        "evidence": "Имя, модель и координаты X/Z. Имена и положения — из игры; модель — из HTTP только при единственном совпадении",
+        "reason": "Нет свежей публикации при ботах — недоступность; HTTP применяется без работающих ботов."
+      }
+    ]
+  },
+  {
+    "id": "od-052",
+    "split": "test",
+    "category": "semantic",
+    "query": "Где пользователь найдёт причину аварийного завершения приложения?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/unexpected-errors.md",
+        "heading": "Файл причины падения в crash",
+        "evidence": "Процесс всё же падает (`AppDomain.UnhandledException`, фатальный тип, сбой старта): файл `crash\\crash-<время>-",
+        "reason": "Фатальная ошибка сохраняется в файл crash с временем."
+      }
+    ]
+  },
+  {
+    "id": "od-053",
+    "split": "test",
+    "category": "semantic",
+    "query": "Почему подключение не выполняет подготовку игровых файлов заново?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/runtime/launch-service.md",
+        "heading": "Однократная работа на Join: факты подготовленной папки",
+        "evidence": "- `PreparedGameFacts` создаётся в `NativeBotRuntimeConnector.PrepareAsync` один раз на Join и передаётся каждо",
+        "reason": "PreparedGameFacts читается один раз на Join; подготовка заново не производится."
+      }
+    ]
+  },
+  {
+    "id": "od-054",
+    "split": "test",
+    "category": "semantic",
+    "query": "Может ли простое чтение состояния бота продлить управление или отправить команду?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/runtime/managed-lifecycle.md",
+        "heading": "Чтение состояния без побочных эффектов",
+        "evidence": "`Read` (в том числе подъезд — `Read(...).Approach`), `Find`, `Bots` возвращают последнее опубликованное монито",
+        "reason": "Read, Find и Bots возвращают последнее опубликованное состояние без команд."
+      }
+    ]
+  },
+  {
+    "id": "od-055",
+    "split": "test",
+    "category": "semantic",
+    "query": "Что происходит с прежней ещё не исполненной командой при приходе новой?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/runtime/managed-lifecycle.md",
+        "heading": "Команды: последняя побеждает",
+        "evidence": "[BotRuntime.Commands.cs](../../../src/Overdrive.Bots.Core/BotRuntime.Commands.cs). Одна преамбула Prepare/Take",
+        "reason": "Новая команда замещает предыдущую по общей преамбуле Prepare/Take."
+      }
+    ]
+  },
+  {
+    "id": "od-056",
+    "split": "test",
+    "category": "semantic",
+    "query": "Как запуск из памяти защищается от случайного чтения личного гоночного конфига?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/memory-startup-configuration.md",
+        "heading": "Защита от чтения чужого race.ini",
+        "evidence": "`MemoryRacePayload.ResolveRead` отвергает любое чтение `race.ini` или имени виртуального race вне cfg этого за",
+        "reason": "ResolveRead отвергает race.ini вне cfg своего запуска."
+      }
+    ]
+  },
+  {
+    "id": "od-057",
+    "split": "test",
+    "category": "semantic",
+    "query": "Как подтверждается восстановление обычной агрессии после отмены полицейского режима?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/police-aggression.md",
+        "heading": "Завершение владения и подтверждение восстановления",
+        "evidence": "Restore, ручная команда, lease/deadline, recovery, смена epoch и AI и потеря наблюдений завершают владение; re",
+        "reason": "Отмена завершает владение; проверяется свежий readback восстановления normal."
+      }
+    ]
+  },
+  {
+    "id": "od-058",
+    "split": "test",
+    "category": "semantic",
+    "query": "Почему загрузки новой геометрии недостаточно для правильного следования по изменённой линии?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/runtime-ai-spline.md",
+        "heading": "Прогресс AI по изменённой линии",
+        "evidence": "AI+0x348 повторял stock Car+0x3ad0, хотя проекция на custom line отличалась: AI выбирал точку около 10 м позад",
+        "reason": "Прогресс штатной линии не совпадает с проекцией custom; нужна отдельная привязка."
+      }
+    ]
+  },
+  {
+    "id": "od-059",
+    "split": "test",
+    "category": "semantic",
+    "query": "Что должно быть проверено до первого изменения при удалении модификации игры?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/environment/game-folder-preparation.md",
+        "heading": "«Деинсталляция модификации»",
+        "evidence": "`NativeGamePreparation.Uninstall` (решение владельца 10.10.2026): без запущенных клиентов из этой папки, под т",
+        "reason": "Перед первой записью проверяются квитанция, шесть файлов, происхождение и резервные копии."
+      }
+    ]
+  },
+  {
+    "id": "od-060",
+    "split": "test",
+    "category": "semantic",
+    "query": "Означает ли минимальная графика ботов полное отсутствие рендера?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/environment/headless-and-profiles.md",
+        "heading": "Минимальная графика ботов",
+        "evidence": "Bot launches override their private `video.ini`: windowed 320x200, 1000 ms frame cap (1 FPS), no post-processi",
+        "reason": "Режим 320x200 и 1 FPS минимизирует рендер, но не доказывает его отсутствие."
+      }
+    ]
+  },
+  {
+    "id": "od-061",
+    "split": "test",
+    "category": "identifier",
+    "query": "В каких условиях Workbench.CanCreateComposition запрещает создание состава?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/new-composition.md",
+        "heading": "Запрет при подключённых ботах",
+        "evidence": "«Новый состав» заперт, пока подключены боты или идёт операция (`Workbench.CanCreateComposition`): кнопка выклю",
+        "reason": "Новый состав запрещён при ботах и операции; сервис также отказывает."
+      }
+    ]
+  },
+  {
+    "id": "od-062",
+    "split": "test",
+    "category": "identifier",
+    "query": "Сколько запусков выбирает BotRuntime.ReadServerPlayers и как объединяет их публикации?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/server-players.md",
+        "heading": "Чтение игроков через наблюдателей runtime",
+        "evidence": "Раз в секунду `Workbench.Players` запускает фоновое чтение `BotRuntime.ReadServerPlayers` для выбранного серве",
+        "reason": "Выбираются максимум два наблюдателя, берётся одна самая свежая публикация."
+      }
+    ]
+  },
+  {
+    "id": "od-063",
+    "split": "test",
+    "category": "identifier",
+    "query": "Как BotLaunchService обрабатывает второй Join во время первого?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/runtime/launch-service.md",
+        "heading": "Отмена Join, второй Join, «Отключить», «Переподключить»",
+        "evidence": "- **Отмена Join** (решение №1, «а»): `JoinOperation.Cancel()` / `BotLaunchService.CancelJoins()` (окно — `Work",
+        "reason": "Отмена, второй Join и отключение обрабатываются одним владельцем запуска."
+      }
+    ]
+  },
+  {
+    "id": "od-064",
+    "split": "test",
+    "category": "identifier",
+    "query": "Какой компонент владеет единственным реестром BotRuntime?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/runtime/managed-lifecycle.md",
+        "heading": "Реестр ботов BotRuntime",
+        "evidence": "`BotRuntime` — единственный реестр ботов: одна запись на `InstanceId` от `JoinAsync` до успешной очистки ([Bot",
+        "reason": "Единственный реестр принадлежит BotRuntime, запись живёт до успешной очистки."
+      }
+    ]
+  },
+  {
+    "id": "od-065",
+    "split": "test",
+    "category": "identifier",
+    "query": "Как ConfigurationReads связан с StartupParametersInjected и готовностью запуска?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/memory-startup-configuration.md",
+        "heading": "Счётчики чтений и готовность запуска",
+        "evidence": "`ConfigurationReads` считается после возврата каждого перехваченного парсера. `StartupParametersInjected` и `S",
+        "reason": "Счётчики чтений растут после перехваченных парсеров и отделены от физического результата."
+      }
+    ]
+  },
+  {
+    "id": "od-066",
+    "split": "test",
+    "category": "identifier",
+    "query": "Как устроено поколение запроса RuntimeSplineChannel?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/runtime-ai-spline.md",
+        "heading": "Канал runtime-spline",
+        "evidence": "`Local\\Overdrive.Bots.{RunId:N}.runtime-spline`, magic `0x534c444f`, major 2, размер 744: header 64; request 5",
+        "reason": "Runtime-spline имеет собственный канал, поколение запроса и layout."
+      }
+    ]
+  },
+  {
+    "id": "od-067",
+    "split": "test",
+    "category": "identifier",
+    "query": "Как обычное значение агрессии сохраняется под override Police?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/police-aggression.md",
+        "heading": "Владение агрессией в операции Police",
+        "evidence": "Police держит фактическую агрессию 1.0 независимо от временных команд скорости, торможения и линии. Обычная аг",
+        "reason": "Actual равен 100 процентам; normal хранится отдельно и может изменяться."
+      }
+    ]
+  },
+  {
+    "id": "od-068",
+    "split": "test",
+    "category": "identifier",
+    "query": "Какие поля происхождения обязательны в installation.json схемы 2?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/environment/game-folder-preparation.md",
+        "heading": "Квитанция подготовки installation.json",
+        "evidence": "`.overdrive-bots\\installation.json` (схема 2, `NativeGamePreparation.ReceiptSchema`) по каждому из шести файло",
+        "reason": "Схема 2 требует OriginalSha256 или AddedByPreparation для каждого файла."
+      }
+    ]
+  },
+  {
+    "id": "od-069",
+    "split": "test",
+    "category": "disambiguation",
+    "query": "Отключает ли подтверждение замены состава ботов при создании нового состава?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/new-composition.md",
+        "heading": "Запрет при подключённых ботах",
+        "evidence": "«Новый состав» заперт, пока подключены боты или идёт операция (`Workbench.CanCreateComposition`): кнопка выклю",
+        "reason": "ReplaceComposition при создании нового состава никогда не отключает ботов."
+      }
+    ]
+  },
+  {
+    "id": "od-070",
+    "split": "test",
+    "category": "disambiguation",
+    "query": "Почему списки двух игровых наблюдателей нельзя объединить в один?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/app/server-players.md",
+        "heading": "Чтение игроков через наблюдателей runtime",
+        "evidence": "Раз в секунду `Workbench.Players` запускает фоновое чтение `BotRuntime.ReadServerPlayers` для выбранного серве",
+        "reason": "Поколения соединений локальны наблюдателю, слияние могло бы воскресить вышедшего игрока."
+      }
+    ]
+  },
+  {
+    "id": "od-071",
+    "split": "test",
+    "category": "disambiguation",
+    "query": "Какие свойства запуска нельзя подтвердить одними проверками прикладного слоя?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/runtime/launch-service.md",
+        "heading": "Что подтвердит только игра или сервер",
+        "evidence": "- темп входа ботов с чтением сервера перед каждым и забором при «Переподключить»;",
+        "reason": "Темп входа и реальное освобождение места подтверждает игра или сервер."
+      }
+    ]
+  },
+  {
+    "id": "od-072",
+    "split": "test",
+    "category": "disambiguation",
+    "query": "Какие ограничения доказательств сохраняются у управляемого жизненного цикла?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/runtime/managed-lifecycle.md",
+        "heading": "Что подтвердит только игра",
+        "evidence": "- продление аренд подъезда монитором при настоящем маршруте;",
+        "reason": "Продление аренды и поведение на настоящем маршруте остаются живыми проверками."
+      }
+    ]
+  },
+  {
+    "id": "od-073",
+    "split": "test",
+    "category": "disambiguation",
+    "query": "Что именно показала живая проверка запуска без INI 11 октября?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/memory-startup-configuration.md",
+        "heading": "Живая проверка на AC 11.10.2026",
+        "evidence": "- [Один клиент](../../../experiments/evidence/memory-configuration-5808619cb58e488f9b27d19e600f8adc/result.jso",
+        "reason": "Раздел содержит доказательства одного и двух клиентов и границы memory-only запуска."
+      }
+    ]
+  },
+  {
+    "id": "od-074",
+    "split": "test",
+    "category": "disambiguation",
+    "query": "Какие физические проверки смены AI-линии уже выполнены и что осталось?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/runtime-ai-spline.md",
+        "heading": "Физические проверки AI-линии",
+        "evidence": "- `spline-lifecycle-9a755dbe…` (15.10): no-op Restore с физическим readback, 12 замен на ходу, отмена Loading ",
+        "reason": "Перечислены физические readback и замены линии, отдельно от статических привязок."
+      }
+    ]
+  },
+  {
+    "id": "od-075",
+    "split": "test",
+    "category": "disambiguation",
+    "query": "Отказывает ли сам продукт папке Steam, или запрет менять основную игру относится к агентам?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/environment/game-folder-preparation.md",
+        "heading": "Какую папку можно подготовить",
+        "evidence": "Пользователь указывает папку с игрой, приложение готовит её само (решение владельца 10.10.2026): отказа для ус",
+        "reason": "Продукт допускает папку Steam; запрет основной установки относится к агентам."
+      }
+    ]
+  },
+  {
+    "id": "od-076",
+    "split": "test",
+    "category": "disambiguation",
+    "query": "Чем продуктовая подготовка headless отличается от исторических ручных патчей?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/environment/headless-and-profiles.md",
+        "heading": "Что пишет продуктовая подготовка папки игры",
+        "evidence": "`NativeGamePreparation.PlanConfigurationChanges` пишет только `HEADLESS_MODE`, `mumble_plugin.ini` (`[BASIC] E",
+        "reason": "Продуктовый PlanConfigurationChanges пишет ограниченный набор настроек, без старых ручных патчей."
+      }
+    ]
+  },
+  {
+    "id": "od-077",
+    "split": "test",
+    "category": "multi",
+    "query": "Через какой общий сервис окно подключает ботов?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/runtime/launch-service.md",
+        "heading": "Один путь «Подключить» — BotLaunchService",
+        "evidence": "`Core/Launching/BotLaunchService.cs`. Окно (`Workbench.Runtime.cs`) и нагрузочный стенд (`tools/Overdrive.Bots",
+        "reason": "Команды окна и панели проходят общий BotLaunchService."
+      },
+      {
+        "path": "docs/knowledge-base/app/in-game-control.md",
+        "heading": "Команды панели и общий сервис",
+        "evidence": "`BotControlService` вызывает существующий `BotRuntime` через общую `BotCommandQueue`; WPF и Lua используют одн",
+        "reason": "Команды окна и панели проходят общий BotLaunchService."
+      }
+    ]
+  },
+  {
+    "id": "od-078",
+    "split": "test",
+    "category": "multi",
+    "query": "Как собранные приложением стартовые настройки попадают внутрь игры без файлов?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/memory-startup-configuration.md",
+        "heading": "Маршрут передачи cfg в процесс",
+        "evidence": "[AcNativeProcess.cs](../../../src/Overdrive.Bots.Windows/AcNativeProcess.cs) передаёт тексты в [AcExperimentPr",
+        "reason": "Настройки собирает приложение и передаёт через memory payload перехваченным читателям."
+      },
+      {
+        "path": "docs/knowledge-base/native/memory-startup-configuration.md",
+        "heading": "Что приложение собирает само",
+        "evidence": "Решение владельца (PLAN, этап 3.3): программа собирает конфигурацию сама и передаёт в память; исходный `cfg/ra",
+        "reason": "Настройки собирает приложение и передаёт через memory payload перехваченным читателям."
+      }
+    ]
+  },
+  {
+    "id": "od-079",
+    "split": "test",
+    "category": "multi",
+    "query": "Почему Join должен читать квитанцию, а не повторять подготовку?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/environment/game-folder-preparation.md",
+        "heading": "Квитанция подготовки installation.json",
+        "evidence": "`.overdrive-bots\\installation.json` (схема 2, `NativeGamePreparation.ReceiptSchema`) по каждому из шести файло",
+        "reason": "Квитанция и прикладной цикл согласованы: Join читает подготовку."
+      },
+      {
+        "path": "docs/knowledge-base/app/application-cycle.md",
+        "heading": "Join читает подготовку, а не повторяет её",
+        "evidence": "Join читает и проверяет существующую квитанцию подготовки, сверяет поставляемую DLL; запись подготовки не повт",
+        "reason": "Квитанция и прикладной цикл согласованы: Join читает подготовку."
+      }
+    ]
+  },
+  {
+    "id": "od-080",
+    "split": "test",
+    "category": "multi",
+    "query": "Какое значение агрессии требуется во время Police и откуда принято это решение?",
+    "gold": [
+      {
+        "path": "docs/knowledge-base/native/police-aggression.md",
+        "heading": "Что установлено про агрессию Police",
+        "evidence": "| Временная агрессия 100% | Независимое владение операции",
+        "reason": "Агрессия Police 100 процентов зафиксирована контрактом и таблицей доказательств."
+      },
+      {
+        "path": "docs/knowledge-base/native/police-aggression.md",
+        "heading": "Владение агрессией в операции Police",
+        "evidence": "Police держит фактическую агрессию 1.0 независимо от временных команд скорости, торможения и линии. Обычная аг",
+        "reason": "Агрессия Police 100 процентов зафиксирована контрактом и таблицей доказательств."
+      }
+    ]
+  },
+  {
+    "id": "od-081",
+    "split": "tune",
+    "category": "negative",
+    "query": "Какой точный рекорд круга поставил владелец проекта в Monza 17 октября 2026 года?",
+    "gold": []
+  },
+  {
+    "id": "od-082",
+    "split": "tune",
+    "category": "negative",
+    "query": "Как называется переменная окружения для отправки телеметрии в Kafka в этом проекте?",
+    "gold": []
+  },
+  {
+    "id": "od-083",
+    "split": "tune",
+    "category": "negative",
+    "query": "Какой порт PostgreSQL использует облачный сервер хранения составов?",
+    "gold": []
+  },
+  {
+    "id": "od-084",
+    "split": "tune",
+    "category": "negative",
+    "query": "Какой лимит платного тарифа для одновременного запуска ботов?",
+    "gold": []
+  },
+  {
+    "id": "od-085",
+    "split": "tune",
+    "category": "negative",
+    "query": "Как настроить автоматическое обновление приложения через AppImage в Ubuntu?",
+    "gold": []
+  },
+  {
+    "id": "od-086",
+    "split": "tune",
+    "category": "negative",
+    "query": "Какой сертификат TLS установлен на публичном API OVERDRIVE BOTS?",
+    "gold": []
+  },
+  {
+    "id": "od-087",
+    "split": "tune",
+    "category": "negative",
+    "query": "Какова температура масла BMW в последнем личном заезде владельца вчера?",
+    "gold": []
+  },
+  {
+    "id": "od-088",
+    "split": "tune",
+    "category": "negative",
+    "query": "Какой токен OAuth требуется для авторизации через Discord в менеджере?",
+    "gold": []
+  },
+  {
+    "id": "od-089",
+    "split": "tune",
+    "category": "negative",
+    "query": "Какой код активации лицензии нужно ввести в магазине приложения?",
+    "gold": []
+  },
+  {
+    "id": "od-090",
+    "split": "tune",
+    "category": "negative",
+    "query": "Какой топливный бак был установлен на личной машине пользователя в последней гонке?",
+    "gold": []
+  },
+  {
+    "id": "od-091",
+    "split": "tune",
+    "category": "negative",
+    "query": "Какой IP-адрес у выделенного публичного сервера проекта на 18 октября?",
+    "gold": []
+  },
+  {
+    "id": "od-092",
+    "split": "tune",
+    "category": "negative",
+    "query": "Какой пароль от Wi-Fi владельца используется для подключения к серверу?",
+    "gold": []
+  },
+  {
+    "id": "od-093",
+    "split": "test",
+    "category": "negative",
+    "query": "Как включается синхронизация составов с iCloud в версии для iPhone?",
+    "gold": []
+  },
+  {
+    "id": "od-094",
+    "split": "test",
+    "category": "negative",
+    "query": "Где приведён протокол WebSocket для VR-пульта управления этим менеджером?",
+    "gold": []
+  },
+  {
+    "id": "od-095",
+    "split": "test",
+    "category": "negative",
+    "query": "Какой процент комиссии берёт проект при покупке платных пресетов?",
+    "gold": []
+  },
+  {
+    "id": "od-096",
+    "split": "test",
+    "category": "negative",
+    "query": "Какое точное время пит-стопа показал владелец в Spa в ночь на 18 октября?",
+    "gold": []
+  },
+  {
+    "id": "od-097",
+    "split": "test",
+    "category": "negative",
+    "query": "Какой тариф AWS S3 выбран для резервных копий телеметрии проекта?",
+    "gold": []
+  },
+  {
+    "id": "od-098",
+    "split": "test",
+    "category": "negative",
+    "query": "Какая таблица MySQL хранит сессии пользователей веб-кабинета?",
+    "gold": []
+  },
+  {
+    "id": "od-099",
+    "split": "test",
+    "category": "negative",
+    "query": "Как настроить управление ботами голосом через Alexa в этом продукте?",
+    "gold": []
+  },
+  {
+    "id": "od-100",
+    "split": "test",
+    "category": "negative",
+    "query": "Каков серийный номер руля пользователя, подключённого сегодня?",
+    "gold": []
+  }
+]
