@@ -31,7 +31,7 @@ fn factory_values_match_the_settings_doc() {
     assert!(!defaults.rerank.enabled);
     assert_eq!(defaults.rerank.source, ModelSource::Builtin);
     assert_eq!(defaults.rerank.model, "BAAI/bge-reranker-v2-m3");
-    assert_eq!(defaults.accelerator, Accelerator::Auto);
+    assert_eq!(defaults.embed.accelerator, Accelerator::Auto);
     assert_eq!(
         (defaults.chunking.min_chars, defaults.chunking.max_chars),
         (250, 6000)
@@ -47,6 +47,42 @@ fn empty_files_give_the_factory_values() {
     let settings = Settings::resolve(&loaded.value, &project("").value);
     assert_eq!(settings.docs_root, "docs");
     assert_eq!(settings.chunking, ChunkingParams::default());
+}
+
+#[test]
+fn independent_devices_migrate_without_overriding_explicit_preferences() {
+    for (embed, rerank) in [
+        ("auto", "auto"),
+        ("auto", "cpu"),
+        ("cpu", "auto"),
+        ("cpu", "cpu"),
+    ] {
+        let loaded = user(&format!(
+            "[embed]\naccelerator = '{embed}'\n[rerank]\naccelerator = '{rerank}'\n"
+        ));
+        assert_eq!(
+            loaded.value.embed.accelerator,
+            if embed == "cpu" {
+                Accelerator::Cpu
+            } else {
+                Accelerator::Auto
+            }
+        );
+        assert_eq!(
+            loaded.value.rerank.accelerator,
+            if rerank == "cpu" {
+                Accelerator::Cpu
+            } else {
+                Accelerator::Auto
+            }
+        );
+    }
+    let loaded = user("[device]\naccelerator='cpu'\n[embed]\naccelerator='auto'\n");
+    assert_eq!(loaded.value.embed.accelerator, Accelerator::Auto);
+    assert_eq!(loaded.value.rerank.accelerator, Accelerator::Cpu);
+    assert!(loaded.warnings.iter().any(|w| w.key.contains("legacy")));
+    assert!(UserSettings::parse("[embed]\naccelerator='gpu'", Path::new(USER)).is_err());
+    assert!(UserSettings::parse("[rerank]\naccelerator='gpu'", Path::new(USER)).is_err());
 }
 
 #[test]
@@ -91,7 +127,7 @@ fn user_file_overrides_only_the_keys_it_sets() {
     assert_eq!(settings.search.min_score_rerank, 0.25);
     assert_eq!(settings.search.agent_min_score, (0.2, 0.8));
     assert_eq!(settings.search.results_reranked, 3);
-    assert_eq!(settings.accelerator, Accelerator::Cpu);
+    assert_eq!(settings.embed.accelerator, Accelerator::Cpu);
     assert_eq!(settings.chunking.min_chars, 250);
     assert_eq!(settings.chunking.max_chars, 4000);
 }
@@ -145,7 +181,7 @@ fn project_does_not_change_models_or_device() {
     let settings = Settings::resolve(&user, &loaded.value);
     assert!(settings.rerank.enabled);
     assert_eq!(settings.embed.model, "BAAI/bge-m3");
-    assert_eq!(settings.accelerator, Accelerator::Cpu);
+    assert_eq!(settings.embed.accelerator, Accelerator::Cpu);
     let keys: Vec<_> = loaded.warnings.iter().map(|w| w.key.as_str()).collect();
     assert_eq!(keys, ["embed", "rerank"]);
 }

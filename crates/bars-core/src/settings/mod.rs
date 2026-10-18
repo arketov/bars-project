@@ -69,6 +69,7 @@ pub struct EmbedSettings {
     pub source: ModelSource,
     /// Для `builtin` — модель из каталога; для остальных — имя модели у провайдера.
     pub model: String,
+    pub accelerator: Accelerator,
     pub base_url: Option<String>,
     /// Имя записи в хранилище ОС (`docs/architecture/secrets.md`).
     pub api_key_name: Option<String>,
@@ -82,6 +83,7 @@ impl Default for EmbedSettings {
     fn default() -> Self {
         Self {
             source: ModelSource::Builtin,
+            accelerator: Accelerator::Auto,
             model: BGE_M3_ID.to_string(),
             base_url: None,
             api_key_name: None,
@@ -98,6 +100,7 @@ pub struct RerankSettings {
     pub enabled: bool,
     pub source: ModelSource,
     pub model: String,
+    pub accelerator: Accelerator,
     pub base_url: Option<String>,
     pub api_key_name: Option<String>,
     pub api_key_env: Option<String>,
@@ -108,6 +111,7 @@ impl Default for RerankSettings {
         Self {
             enabled: false,
             source: ModelSource::Builtin,
+            accelerator: Accelerator::Auto,
             model: BGE_RERANKER_V2_M3_ID.to_string(),
             base_url: None,
             api_key_name: None,
@@ -117,26 +121,12 @@ impl Default for RerankSettings {
 }
 
 /// Настройки пользователя: всё содержимое `settings.toml` с умолчаниями на месте пропущенного.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct UserSettings {
     pub embed: EmbedSettings,
     pub rerank: RerankSettings,
     pub search: SearchSettings,
-    /// Где считать встроенные модели (`[device]`).
-    pub accelerator: Accelerator,
     pub chunking: ChunkingParams,
-}
-
-impl Default for UserSettings {
-    fn default() -> Self {
-        Self {
-            embed: EmbedSettings::default(),
-            rerank: RerankSettings::default(),
-            search: SearchSettings::default(),
-            accelerator: Accelerator::Auto,
-            chunking: ChunkingParams::default(),
-        }
-    }
 }
 
 /// Настройки проекта: только то, что `.bars/config.toml` может перекрыть (Т-5, Т-7).
@@ -153,7 +143,6 @@ pub struct Settings {
     pub embed: EmbedSettings,
     pub rerank: RerankSettings,
     pub search: SearchSettings,
-    pub accelerator: Accelerator,
     pub chunking: ChunkingParams,
     /// Корень документации относительно корня проекта (Т-7).
     pub docs_root: String,
@@ -182,7 +171,6 @@ impl Settings {
             embed: user.embed.clone(),
             rerank: user.rerank.clone(),
             search,
-            accelerator: user.accelerator,
             chunking,
             docs_root: project
                 .docs_root

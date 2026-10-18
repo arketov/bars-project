@@ -22,6 +22,7 @@ const BATCH_SIZE: usize = 4;
 pub struct BuiltinReranker {
     model: TextRerank,
     device: Device,
+    fallback_reason: Option<String>,
 }
 
 impl BuiltinReranker {
@@ -31,21 +32,17 @@ impl BuiltinReranker {
         models_dir: &Path,
         accelerator: Accelerator,
     ) -> Result<Self, RerankError> {
-        let (model, device) = match accelerator {
-            Accelerator::Cpu => (load(models_dir, false)?, Device::Cpu),
-            Accelerator::Auto => match load(models_dir, true) {
-                Ok(model) => (model, Device::DirectMl),
-                Err(error) => {
-                    eprintln!("rerank: видеокарта не запустилась ({error}), считаю на процессоре");
-                    (load(models_dir, false)?, Device::Cpu)
-                }
-            },
-        };
+        let (model, device, fallback_reason) =
+            super::execution::load_session(accelerator, |gpu| load(models_dir, gpu))?;
         eprintln!(
             "rerank: загружен на {device:?}; файлы модели: {}",
             files_report(models_dir)
         );
-        Ok(Self { model, device })
+        Ok(Self {
+            model,
+            device,
+            fallback_reason,
+        })
     }
 
     pub fn device(&self) -> Device {
@@ -93,6 +90,16 @@ pub fn sigmoid(logit: f32) -> f32 {
 }
 
 impl Reranker for BuiltinReranker {
+    fn execution(&self) -> super::ExecutionInfo {
+        super::ExecutionInfo {
+            backend: "onnx",
+            actual: Some(match self.device {
+                Device::Cpu => "cpu",
+                Device::DirectMl => "directml",
+            }),
+            fallback_reason: self.fallback_reason.clone(),
+        }
+    }
     fn rerank(&mut self, query: &str, documents: &[&str]) -> Result<Vec<f32>, RerankError> {
         if documents.is_empty() {
             return Ok(Vec::new());

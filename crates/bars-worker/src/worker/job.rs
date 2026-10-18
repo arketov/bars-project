@@ -33,6 +33,11 @@ pub struct JobEnv<'a> {
 
 #[derive(Debug)]
 pub enum Outcome {
+    Interrupted {
+        report: UpdateReport,
+        message: String,
+        cancelled: bool,
+    },
     Updated(UpdateReport),
     /// Индекс построен другой моделью или старой схемой; индекс не тронут (Т-25).
     ReindexRequired(ReindexReason),
@@ -143,7 +148,7 @@ fn check_project(
         },
         Ok(UpdateOutcome::ReindexRequired(reason)) => Outcome::ReindexRequired(reason),
         Err(IndexingError::Cancelled) => Outcome::Cancelled,
-        Err(error) => Outcome::Failed(error.to_string()),
+        Err(error) => indexing_failure(error),
     }
 }
 
@@ -203,6 +208,22 @@ fn rebuild_project(
             Outcome::Updated(report)
         }
         Err(IndexingError::Cancelled) => Outcome::Cancelled,
-        Err(error) => Outcome::Failed(error.to_string()),
+        Err(error) => indexing_failure(error),
+    }
+}
+
+fn indexing_failure(error: IndexingError) -> Outcome {
+    match error {
+        IndexingError::Partial { report, source } => Outcome::Interrupted {
+            report: *report,
+            message: source.to_string(),
+            cancelled: matches!(*source, IndexingError::Cancelled),
+        },
+        IndexingError::Incomplete(report) => Outcome::Interrupted {
+            report: *report,
+            message: "Full rebuild not applied: documents failed to embed".into(),
+            cancelled: false,
+        },
+        error => Outcome::Failed(error.to_string()),
     }
 }

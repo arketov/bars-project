@@ -387,6 +387,8 @@ pub enum JobPriority {
 /// Идущее задание и его ход.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct RunningJob {
+    pub embed_device: Option<String>,
+    pub attempt: u32,
     pub project: String,
     pub name: String,
     pub kind: JobKind,
@@ -417,6 +419,9 @@ pub struct QueuedJob {
 /// Файл, который не удалось проиндексировать.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct FileProblem {
+    pub stage: String,
+    pub attempts: u32,
+    pub previous_version: bool,
     pub path: String,
     pub reason: String,
 }
@@ -424,6 +429,7 @@ pub struct FileProblem {
 /// Проблемы проекта по итогу последней проверки; проекты без проблем в список не попадают.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProjectProblems {
+    pub rebuild_not_applied: bool,
     pub project: String,
     pub name: String,
     pub files: Vec<FileProblem>,
@@ -466,8 +472,25 @@ pub struct TreeOutput {
 pub struct SettingsGetParams {}
 
 /// Таблица `[embed]` как её показывает и правит окно.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum AcceleratorDoc {
+    Auto,
+    Cpu,
+}
+
+impl AcceleratorDoc {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Auto => "auto",
+            Self::Cpu => "cpu",
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EmbedDoc {
+    pub accelerator: AcceleratorDoc,
     /// `builtin`, `remote` или `local-openai`.
     pub source: String,
     pub model: String,
@@ -483,6 +506,7 @@ pub struct EmbedDoc {
 /// Таблица `[rerank]`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RerankDoc {
+    pub accelerator: AcceleratorDoc,
     pub enabled: bool,
     pub source: String,
     pub model: String,
@@ -509,13 +533,6 @@ pub struct SearchDoc {
     pub max_rerank_candidates: u32,
 }
 
-/// Таблица `[device]`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct DeviceDoc {
-    /// `auto` или `cpu`.
-    pub accelerator: String,
-}
-
 /// Таблица `[chunking]`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ChunkingDoc {
@@ -529,7 +546,6 @@ pub struct SettingsDoc {
     pub embed: EmbedDoc,
     pub rerank: RerankDoc,
     pub search: SearchDoc,
-    pub device: DeviceDoc,
     pub chunking: ChunkingDoc,
 }
 
@@ -571,10 +587,28 @@ pub struct ModelInfo {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ModelsInfoOutput {
+    pub runtime: Option<ModelsRuntime>,
     pub embed: Vec<ModelInfo>,
     pub rerank: Vec<ModelInfo>,
     /// Папка моделей (`~/.bars/models`).
     pub models_dir: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ModelRuntime {
+    pub model: String,
+    pub source: String,
+    pub requested: String,
+    pub state: String,
+    pub backend: String,
+    pub actual: Option<String>,
+    pub fallback_reason: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ModelsRuntime {
+    pub embed: ModelRuntime,
+    pub rerank: ModelRuntime,
 }
 
 /// Скачивание встроенной модели в фоне; ход виден по `downloading` в `models_info`.

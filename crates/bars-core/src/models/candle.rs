@@ -92,6 +92,13 @@ impl CandleEmbedder {
 }
 
 impl Embedder for CandleEmbedder {
+    fn execution(&self) -> super::ExecutionInfo {
+        super::ExecutionInfo {
+            backend: "candle",
+            actual: Some("cpu"),
+            fallback_reason: None,
+        }
+    }
     fn fingerprint(&self) -> &ModelFingerprint {
         &self.fingerprint
     }

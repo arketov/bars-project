@@ -49,6 +49,9 @@ impl Pause {
 
 /// Что делает идущее задание: вид, ход и флаг остановки.
 pub struct JobCell {
+    report: Mutex<bars_core::indexing::indexer::UpdateReport>,
+    execution: Mutex<bars_core::models::ExecutionInfo>,
+    attempt: AtomicUsize,
     pub project: PathBuf,
     pub priority: Priority,
     pub kind: Kind,
@@ -81,6 +84,8 @@ impl Kind {
 /// Ход идущего задания на момент опроса.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Progress {
+    pub embed_device: Option<String>,
+    pub attempt: usize,
     pub project: PathBuf,
     pub priority: Priority,
     pub kind: Kind,
@@ -93,8 +98,14 @@ pub struct Progress {
 }
 
 impl JobCell {
+    pub fn report_snapshot(&self) -> bars_core::indexing::indexer::UpdateReport {
+        lock(&self.report).clone()
+    }
     pub fn new(project: &Path, job: &Job) -> Arc<Self> {
         Arc::new(Self {
+            report: Mutex::default(),
+            execution: Mutex::default(),
+            attempt: AtomicUsize::new(0),
             project: project.to_path_buf(),
             priority: job.priority,
             kind: Kind::of(job),
@@ -116,6 +127,8 @@ impl JobCell {
         let chunks = self.chunks.load(Ordering::SeqCst);
         let seconds = elapsed.as_secs_f32();
         Progress {
+            embed_device: lock(&self.execution).actual.map(str::to_string),
+            attempt: self.attempt.load(Ordering::SeqCst),
             project: self.project.clone(),
             priority: self.priority,
             kind: self.kind,
@@ -146,6 +159,15 @@ impl JobObserver {
 }
 
 impl IndexObserver for JobObserver {
+    fn execution(&self, info: bars_core::models::ExecutionInfo) {
+        *lock(&self.cell.execution) = info;
+    }
+    fn report(&self, report: &bars_core::indexing::indexer::UpdateReport) {
+        *lock(&self.cell.report) = report.clone();
+    }
+    fn attempt(&self, attempt: usize) {
+        self.cell.attempt.store(attempt, Ordering::SeqCst);
+    }
     fn begin(&self, documents: usize) {
         self.cell.total.store(documents, Ordering::SeqCst);
     }

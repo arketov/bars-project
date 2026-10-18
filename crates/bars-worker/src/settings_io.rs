@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 
 use bars_core::models::Accelerator;
 use bars_core::settings::{ProjectConfig, UserSettings, project_config_path, user_settings_path};
-use bars_protocol::{ChunkingDoc, DeviceDoc, EmbedDoc, RerankDoc, SearchDoc, SettingsDoc};
+use bars_protocol::{ChunkingDoc, EmbedDoc, RerankDoc, SearchDoc, SettingsDoc};
 use toml_edit::{DocumentMut, Item, Table, value};
 
 #[derive(Debug, thiserror::Error)]
@@ -35,10 +35,10 @@ pub enum SaveError {
     },
 }
 
-fn accelerator_name(accelerator: Accelerator) -> &'static str {
+fn accelerator_name(accelerator: Accelerator) -> bars_protocol::AcceleratorDoc {
     match accelerator {
-        Accelerator::Auto => "auto",
-        Accelerator::Cpu => "cpu",
+        Accelerator::Auto => bars_protocol::AcceleratorDoc::Auto,
+        Accelerator::Cpu => bars_protocol::AcceleratorDoc::Cpu,
     }
 }
 
@@ -53,6 +53,7 @@ pub fn to_doc(user: &UserSettings) -> SettingsDoc {
     let search = &user.search;
     SettingsDoc {
         embed: EmbedDoc {
+            accelerator: accelerator_name(embed.accelerator),
             source: embed.source.as_str().to_string(),
             model: embed.model.clone(),
             base_url: embed.base_url.clone(),
@@ -61,6 +62,7 @@ pub fn to_doc(user: &UserSettings) -> SettingsDoc {
             batch_size: count(embed.batch_size),
         },
         rerank: RerankDoc {
+            accelerator: accelerator_name(rerank.accelerator),
             enabled: rerank.enabled,
             source: rerank.source.as_str().to_string(),
             model: rerank.model.clone(),
@@ -79,9 +81,6 @@ pub fn to_doc(user: &UserSettings) -> SettingsDoc {
             max_results: count(search.max_results),
             max_candidates: count(search.max_candidates),
             max_rerank_candidates: count(search.max_rerank_candidates),
-        },
-        device: DeviceDoc {
-            accelerator: accelerator_name(user.accelerator).to_string(),
         },
         chunking: ChunkingDoc {
             min_chars: count(user.chunking.min_chars),
@@ -297,12 +296,26 @@ pub fn save_user_settings(bars_home: &Path, settings: &SettingsDoc) -> Result<bo
         was.max_rerank_candidates,
     );
 
-    set_text(
-        table(&mut doc, "device"),
-        "accelerator",
-        &settings.device.accelerator,
-        &old.device.accelerator,
-    );
+    // Materialize both values before removing the legacy shared preference.
+    let migrate = doc
+        .get("device")
+        .and_then(Item::as_table)
+        .is_some_and(|table| table.contains_key("accelerator"));
+    for (role, preference, previous) in [
+        ("embed", &settings.embed.accelerator, &old.embed.accelerator),
+        (
+            "rerank",
+            &settings.rerank.accelerator,
+            &old.rerank.accelerator,
+        ),
+    ] {
+        if migrate || preference != previous {
+            table(&mut doc, role).insert("accelerator", value(preference.as_str()));
+        }
+    }
+    if let Some(device) = doc.get_mut("device").and_then(Item::as_table_mut) {
+        device.remove("accelerator");
+    }
 
     let chunking = table(&mut doc, "chunking");
     set_count(
@@ -353,6 +366,24 @@ pub fn save_docs_root(project: &Path, docs_root: &str) -> Result<(), SaveError> 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn shared_device_is_migrated_once_without_losing_other_keys() {
+        let home = home();
+        let file = user_settings_path(home.path());
+        fs::write(&file, "# user choice\n[device]\naccelerator = 'cpu'\nother = 7\n[embed]\naccelerator = 'auto'\n").unwrap();
+        let doc = current(home.path());
+        assert_eq!(doc.embed.accelerator.as_str(), "auto");
+        assert_eq!(doc.rerank.accelerator.as_str(), "cpu");
+        save_user_settings(home.path(), &doc).unwrap();
+        let saved = fs::read_to_string(&file).unwrap();
+        assert!(saved.contains("# user choice"));
+        assert!(saved.contains("other = 7"));
+        let parsed: toml::Value = toml::from_str(&saved).unwrap();
+        assert!(parsed["device"].get("accelerator").is_none());
+        assert_eq!(parsed["rerank"]["accelerator"].as_str(), Some("cpu"));
+        assert!(!save_user_settings(home.path(), &doc).unwrap());
+    }
 
     fn home() -> tempfile::TempDir {
         tempfile::tempdir().unwrap()

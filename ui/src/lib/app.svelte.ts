@@ -327,6 +327,15 @@ class App {
     }
   }
 
+  async retryRebuild(path: string): Promise<void> {
+    const project = this.projects.find(p => p.path === path);
+    if (project?.state === "reindex_required") { this.consentOpen = true; return; }
+    try {
+      await call("reindex", { cwd: path, project: path, full: true });
+      await this.refresh(true);
+    } catch (error) { this.flash(error instanceof Error ? error.message : String(error), true); }
+  }
+
   /** Пауза и продолжение очереди индексации (OQ-55). */
   async togglePause(): Promise<void> {
     try {

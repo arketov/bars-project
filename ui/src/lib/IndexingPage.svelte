@@ -44,6 +44,8 @@
           Идёт проверка проекта: bars сверяет документы с индексом.
         {:else if queued}
           Проект ждёт своей очереди.
+        {:else if problems?.last_error}
+          {problems.last_error}
         {:else if files.length}
           Индекс обновлён, кроме {files.length} {files.length === 1 ? "файла" : "файлов"}: они остались с ошибкой.
         {:else}
@@ -76,10 +78,11 @@
             <div class="stats">
               <div class="stat"><small>Чанков обработано</small><b>{running.chunks_done}</b></div>
               <div class="stat"><small>Скорость</small><b>{decimal(running.chunks_per_second, 1)} чанка/с</b></div>
-              <div class="stat"><small>Устройство</small><b>—</b></div>
+              <div class="stat"><small>Embed device · current job</small><b>{running.embed_device === "directml" ? "DirectML" : running.embed_device === "cpu" ? "CPU" : "Not known yet"}</b></div>
             </div>
             <dl class="kv">
               <dt>Сейчас</dt><dd class="mono">{running.current_file ?? "—"}</dd>
+              {#if running.attempt > 0}<dt>Embedding attempt</dt><dd>{running.attempt}/4</dd>{/if}
               <dt>Ошибок в файлах</dt>
               <dd>{#if files.length}<span class="badge bad">{files.length}</span>{:else}<span class="badge ok">нет</span>{/if}</dd>
             </dl>
@@ -111,8 +114,8 @@
       {/if}
 
       {#if files.length}
-        <Banner kind="warn" title="{files.length} {files.length === 1 ? 'документ не проиндексирован' : 'документов не проиндексированы'}" text="Всё остальное в индексе актуально и ищется. Уже проиндексированная версия этих файлов (если была) не тронута.">
-          <button class="btn sm" onclick={() => app.reindexCheck(project.path)}>Повторить</button>
+        <Banner kind="warn" title="{files.length} document errors" text={problems?.rebuild_not_applied ? "Full rebuild not applied. The old index was kept. Fix the cause, then reindex." : problems?.last_error ? "The check stopped. Earlier document updates were kept; remaining documents still need checking." : "Update completed with document errors. Previous versions of failed documents were kept, if present."}>
+          <button class="btn sm" onclick={() => problems?.rebuild_not_applied ? app.retryRebuild(project.path) : app.reindexCheck(project.path)}>Retry</button>
         </Banner>
         <div class="panel">
           <div class="ch"><h2>Файлы с ошибкой</h2><span class="badge bad">{files.length}</span></div>
@@ -121,6 +124,7 @@
               <div class="errfile">
                 <div class="t"><Icon name="error" size={15} width={2} /><span class="mono">{file.path}</span></div>
                 <div class="m">{file.reason}. {advice(file.reason)}</div>
+                {#if file.stage === "embedding"}<div class="m">Embedding · {file.attempts} attempts · {file.previous_version ? "previous version kept" : "not indexed"}</div>{/if}
               </div>
             {/each}
           </div>
@@ -135,7 +139,7 @@
 
       {#if problems?.last_error}
         <Banner kind="bad" title="Последняя ошибка индексации" text={problems.last_error}>
-          <button class="btn sm" onclick={() => app.reindexCheck(project.path)}>Повторить</button>
+          <button class="btn sm" onclick={() => problems?.rebuild_not_applied ? app.retryRebuild(project.path) : app.reindexCheck(project.path)}>Retry</button>
         </Banner>
       {/if}
 

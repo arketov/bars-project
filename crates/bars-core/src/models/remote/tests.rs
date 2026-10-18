@@ -132,12 +132,56 @@ fn server_errors_are_retried_three_times_then_reported() {
     let server = FakeServer::start(|_| Response::status(503, "перегрузка"));
     let mut embedder =
         HttpEmbedder::new(target(&server, "remote", false), 8).with_retry_pause(Duration::ZERO);
-    let error = embedder.embed(&["a"]).unwrap_err().to_string();
+    let error = embedder.embed_query("a").unwrap_err().to_string();
     assert!(
         error.contains("503") && error.contains("перегрузка"),
         "{error}"
     );
     assert_eq!(server.requests().len(), 4, "первая попытка и три повтора");
+}
+
+#[test]
+fn document_embedding_does_not_multiply_the_indexer_retry_budget() {
+    use crate::indexing::indexer::{
+        IndexObserver, IndexSettings, UpdateOutcome, update_index_observed,
+    };
+    struct NoWait;
+    impl IndexObserver for NoWait {
+        fn wait_retry(&self, _: Duration) -> bool {
+            false
+        }
+    }
+    for status in [429, 503, 401] {
+        let server = FakeServer::start(move |_| Response::status(status, "injected"));
+        let mut embedder = HttpEmbedder::new(target(&server, "local-openai", false), 8);
+        // Known dimension: the test counts only document requests, not the preparation probe.
+        embedder.fingerprint.dim = 2;
+        let dir = tempfile::tempdir().unwrap();
+        std::fs::create_dir(dir.path().join("docs")).unwrap();
+        std::fs::write(dir.path().join("docs/a.md"), "# A\n\nText").unwrap();
+        let mut index = crate::storage::Index::open(
+            &crate::storage::index_path(dir.path()),
+            crate::storage::Journal::Wal,
+        )
+        .unwrap();
+        let UpdateOutcome::Updated(report) = update_index_observed(
+            dir.path(),
+            &mut index,
+            &IndexSettings {
+                chunking: Default::default(),
+                docs_root: "docs".into(),
+            },
+            &mut embedder,
+            &NoWait,
+        )
+        .unwrap() else {
+            panic!()
+        };
+        let attempts = if status == 401 { 1 } else { 4 };
+        assert_eq!(server.requests().len(), attempts);
+        assert_eq!(report.problems[0].attempts, attempts);
+        assert_eq!(index.document_count().unwrap(), 0);
+    }
 }
 
 #[test]
@@ -153,7 +197,7 @@ fn a_transient_failure_that_clears_up_is_not_an_error() {
     });
     let mut embedder =
         HttpEmbedder::new(target(&server, "remote", false), 8).with_retry_pause(Duration::ZERO);
-    assert_eq!(embedder.embed(&["a"]).unwrap(), vec![vec![1.0, 2.0]]);
+    assert_eq!(embedder.embed_query("a").unwrap(), vec![1.0, 2.0]);
     assert_eq!(calls.load(Ordering::SeqCst), 3);
 }
 

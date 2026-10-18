@@ -42,6 +42,7 @@ pub(super) struct ProjectFile {
 struct EmbedTable {
     source: Option<ModelSource>,
     model: Option<String>,
+    accelerator: Option<AcceleratorName>,
     base_url: Option<String>,
     api_key_name: Option<String>,
     api_key_env: Option<String>,
@@ -55,6 +56,7 @@ struct RerankTable {
     enabled: Option<bool>,
     source: Option<ModelSource>,
     model: Option<String>,
+    accelerator: Option<AcceleratorName>,
     base_url: Option<String>,
     api_key_name: Option<String>,
     api_key_env: Option<String>,
@@ -74,6 +76,15 @@ struct DeviceTable {
 enum AcceleratorName {
     Auto,
     Cpu,
+}
+
+impl From<AcceleratorName> for Accelerator {
+    fn from(value: AcceleratorName) -> Self {
+        match value {
+            AcceleratorName::Auto => Self::Auto,
+            AcceleratorName::Cpu => Self::Cpu,
+        }
+    }
 }
 
 /// Таблица `[search]`: в `settings.toml` и в `.bars/config.toml` ключи одни и те же.
@@ -246,6 +257,10 @@ impl UserFile {
 
     pub(super) fn into_settings(self) -> UserSettings {
         let mut settings = UserSettings::default();
+        if let Some(device) = self.device.and_then(|d| d.accelerator) {
+            settings.embed.accelerator = device.into();
+            settings.rerank.accelerator = device.into();
+        }
         if let Some(embed) = self.embed {
             embed.apply(&mut settings.embed);
         }
@@ -254,12 +269,6 @@ impl UserFile {
         }
         if let Some(search) = &self.search {
             search.apply(&mut settings.search);
-        }
-        if let Some(accelerator) = self.device.and_then(|device| device.accelerator) {
-            settings.accelerator = match accelerator {
-                AcceleratorName::Auto => Accelerator::Auto,
-                AcceleratorName::Cpu => Accelerator::Cpu,
-            };
         }
         if let Some(chunking) = &self.chunking {
             chunking.apply(&mut settings.chunking);
@@ -277,6 +286,13 @@ impl UserFile {
             note_unknown(&rerank.unknown, "rerank", file, &mut warnings);
         }
         if let Some(device) = &self.device {
+            if device.accelerator.is_some() {
+                warnings.push(SettingsWarning {
+                    file: file.to_path_buf(),
+                    key: "device.accelerator (legacy; save to migrate to embed/rerank.accelerator)"
+                        .into(),
+                });
+            }
             note_unknown(&device.unknown, "device", file, &mut warnings);
         }
         if let Some(search) = &self.search {
@@ -422,6 +438,9 @@ impl EmbedTable {
     }
 
     fn apply(self, target: &mut EmbedSettings) {
+        if let Some(value) = self.accelerator {
+            target.accelerator = value.into();
+        }
         if let Some(value) = self.source {
             target.source = value;
         }
@@ -465,6 +484,9 @@ impl RerankTable {
     fn apply(self, target: &mut RerankSettings) {
         if let Some(value) = self.enabled {
             target.enabled = value;
+        }
+        if let Some(value) = self.accelerator {
+            target.accelerator = value.into();
         }
         if let Some(value) = self.source {
             target.source = value;

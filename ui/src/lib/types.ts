@@ -79,6 +79,8 @@ export interface TreeOutput {
 }
 
 export interface RunningJob {
+  embed_device: string | null;
+  attempt: number;
   project: string;
   name: string;
   kind: JobKind;
@@ -100,11 +102,15 @@ export interface QueuedJob {
 }
 
 export interface FileProblem {
+  stage: string;
+  attempts: number;
+  previous_version: boolean;
   path: string;
   reason: string;
 }
 
 export interface ProjectProblems {
+  rebuild_not_applied: boolean;
   project: string;
   name: string;
   files: FileProblem[];
@@ -135,6 +141,7 @@ export class BarsError extends Error {
 export type ModelSourceName = "builtin" | "remote" | "local-openai";
 
 export interface EmbedDoc {
+  accelerator: "auto" | "cpu";
   source: ModelSourceName;
   model: string;
   base_url: string | null;
@@ -144,6 +151,7 @@ export interface EmbedDoc {
 }
 
 export interface RerankDoc {
+  accelerator: "auto" | "cpu";
   enabled: boolean;
   source: ModelSourceName;
   model: string;
@@ -169,7 +177,6 @@ export interface SettingsDoc {
   embed: EmbedDoc;
   rerank: RerankDoc;
   search: SearchDoc;
-  device: { accelerator: "auto" | "cpu" };
   chunking: { min_chars: number; max_chars: number };
 }
 
@@ -189,9 +196,20 @@ export interface ModelInfo {
 }
 
 export interface ModelsInfoOutput {
+  runtime: { embed: ModelRuntime; rerank: ModelRuntime } | null;
   embed: ModelInfo[];
   rerank: ModelInfo[];
   models_dir: string;
+}
+
+export interface ModelRuntime {
+  model: string;
+  source: string;
+  requested: "auto" | "cpu";
+  state: "unloaded" | "loading" | "ready" | "failed";
+  backend: string;
+  actual: string | null;
+  fallback_reason: string | null;
 }
 
 export type InstallClientName = "claude-code" | "codex";

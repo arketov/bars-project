@@ -7,6 +7,8 @@ mod builtin_rerank;
 mod candle;
 mod catalog;
 mod embedder;
+mod execution;
+pub use execution::ExecutionInfo;
 mod remote;
 mod reranker;
 #[cfg(any(test, feature = "test-support"))]

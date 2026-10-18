@@ -21,6 +21,7 @@ title: Дизайн окна bars
 
 - [mockups/main.html](mockups/main.html) — главный экран.
 - [mockups/settings.html](mockups/settings.html) — экран настроек.
+- [mockups/device-settings.html](mockups/device-settings.html) — проект этапа 17: отдельные устройства моделей, фактическое исполнение и ошибки индексации; восемь сцен.
 - [mockups/theme.css](mockups/theme.css) — палитра и общие элементы.
 - [mockups/theme.js](mockups/theme.js) — тема окна: как в системе, светлая, тёмная.
 - [mockups/reindex-consent.html](mockups/reindex-consent.html) — диалог согласия на переиндексацию: встроенная модель, удалённый провайдер, окно после «Позже».

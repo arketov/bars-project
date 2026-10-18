@@ -1,6 +1,6 @@
 // Подписи окна: имена для людей, оценка результата, числа и время по-русски.
 
-import type { JobKind, JobPriority, ProjectInfo, ProjectState, ScoreKind } from "./types";
+import type { JobKind, JobPriority, ProjectInfo, ProjectState, ProjectProblems, ScoreKind } from "./types";
 
 /** `hybrid-search.md` → «Hybrid search»; служебные имена вроде «(корень)» не трогаем. */
 export function humanName(name: string): string {
@@ -89,7 +89,14 @@ export interface DotInfo {
 }
 
 /** Точка проекта и подпись в списке (main-window.md). */
-export function projectDot(project: ProjectInfo, progressPercent: number | null, waiting: number): DotInfo {
+export function problemStatus(problem: ProjectProblems): string {
+  if (problem.rebuild_not_applied) return "Full rebuild not applied";
+  if (problem.last_error) return "Index check stopped";
+  return "Index updated with document errors";
+}
+
+export function projectDot(project: ProjectInfo, progressPercent: number | null, waiting: number, problem?: ProjectProblems): DotInfo {
+  if (problem && project.state === "ready") return { cls: "warn", text: problemStatus(problem) };
   return stateDot(project.state, documentsIn(project), progressPercent, waiting);
 }
 

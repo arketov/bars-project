@@ -94,7 +94,9 @@ async fn registered_project_is_indexed_and_watched() {
     assert_eq!(status.last_error, None);
     assert_eq!(status.model_index, status.model_settings);
     assert_eq!(status.model_index.as_deref(), Some("builtin:m1"));
-    assert_eq!(status.last_report.unwrap().added, 2);
+    // A watcher follow-up can already replace the initial report with an unchanged check.
+    let report = status.last_report.unwrap();
+    assert_eq!(report.added + report.changed + report.unchanged, 2);
     assert_eq!(documents(&project), 2);
     assert!(project.join(".bars/config.toml").is_file());
     assert_eq!(
@@ -262,9 +264,13 @@ async fn deaf_watcher_is_restarted_by_the_periodic_check() {
     assert_eq!(documents(&project), 1);
 
     // Слежение «оглохло»: оно живо, но событий не передаёт.
-    let deaf =
-        ProjectWatcher::start(&project, "docs", Duration::from_millis(100), Arc::new(|_| {}))
-            .unwrap();
+    let deaf = ProjectWatcher::start(
+        &project,
+        "docs",
+        Duration::from_millis(100),
+        Arc::new(|_| {}),
+    )
+    .unwrap();
     let old = lock(&worker.inner.projects)
         .get_mut(&path)
         .and_then(|runtime| runtime.watcher.replace(deaf));
@@ -279,9 +285,10 @@ async fn deaf_watcher_is_restarted_by_the_periodic_check() {
     .await;
 
     fs::write(project.join("docs/c.md"), DOC).unwrap();
-    wait_until("слежение снова видит правки", || {
-        worker.is_idle() && documents(&project) == 3
-    })
+    wait_until(
+        "слежение снова видит правки",
+        || worker.is_idle() && documents(&project) == 3,
+    )
     .await;
     worker.shutdown().await;
 }

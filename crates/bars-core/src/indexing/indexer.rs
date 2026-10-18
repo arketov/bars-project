@@ -35,8 +35,11 @@ impl IndexSettings {
 }
 
 /// Файл или папка, которые не удалось обойти или прочитать.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Problem {
+    pub stage: &'static str,
+    pub attempts: usize,
+    pub previous_version: bool,
     /// Путь от корня проекта.
     pub path: String,
     pub reason: String,
@@ -45,6 +48,8 @@ pub struct Problem {
 /// Итог проверки проекта.
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct UpdateReport {
+    pub aborted: bool,
+    pub rebuild_not_applied: bool,
     pub added: usize,
     /// Документы, которые пересобраны: содержимое изменилось или шла полная проверка.
     pub changed: usize,
@@ -62,6 +67,22 @@ pub struct UpdateReport {
 /// Наблюдатель за ходом индексации: воркер показывает по нему прогресс и ставит паузу и остановку
 /// (OQ-55). Методы вызываются из потока индексации; пауза — это блокировка в [`Self::should_stop`].
 pub trait IndexObserver {
+    fn execution(&self, _info: crate::models::ExecutionInfo) {}
+    fn report(&self, _report: &UpdateReport) {}
+    fn attempt(&self, _attempt: usize) {}
+    fn wait_retry(&self, delay: std::time::Duration) -> bool {
+        let until = std::time::Instant::now() + delay;
+        loop {
+            if self.should_stop() {
+                return true;
+            }
+            let remaining = until.saturating_duration_since(std::time::Instant::now());
+            if remaining.is_zero() {
+                return false;
+            }
+            std::thread::sleep(remaining.min(std::time::Duration::from_millis(50)));
+        }
+    }
     /// Обход закончен: столько документов будет просмотрено.
     fn begin(&self, _documents: usize) {}
     /// Документ взят в работу.
@@ -96,6 +117,17 @@ pub enum UpdateOutcome {
 
 #[derive(Debug, thiserror::Error)]
 pub enum IndexingError {
+    #[error("{error}")]
+    DocumentFailed { error: EmbedError, attempts: usize },
+    #[error("{source}")]
+    Partial {
+        report: Box<UpdateReport>,
+        source: Box<IndexingError>,
+    },
+    #[error("Full rebuild not applied: documents failed to embed")]
+    Incomplete(Box<UpdateReport>),
+    #[error("Stopped after 3 consecutive documents failed to embed")]
+    ConsecutiveFailures,
     #[error(transparent)]
     Storage(#[from] StorageError),
     #[error(transparent)]
@@ -201,12 +233,20 @@ pub fn rebuild_index_observed<G>(
 
     let built = build_new(project_root, &new_path, settings, embedder, observer);
     match built {
+        Ok(mut report) if report.problems.iter().any(|p| p.stage == "embedding") => {
+            report.rebuild_not_applied = true;
+            let _ = remove_index_files(&new_path);
+            Err(IndexingError::Incomplete(Box::new(report)))
+        }
         Ok(report) => {
             let _guard = before_swap();
             swap(index_path, &new_path, &old_path)?;
             Ok(report)
         }
-        Err(error) => {
+        Err(mut error) => {
+            if let IndexingError::Partial { report, .. } = &mut error {
+                report.rebuild_not_applied = true;
+            }
             // Остаток неудачной сборки не нужен; ошибку чистки скрываем за исходной ошибкой.
             let _ = remove_index_files(&new_path);
             Err(error)
@@ -253,16 +293,60 @@ fn run_update(
         .collect();
 
     observer.begin(walk.files.len());
-    for (position, file) in walk.files.iter().enumerate() {
-        if observer.should_stop() {
-            return Err(IndexingError::Cancelled);
+    observer.execution(embedder.execution());
+    let mut consecutive = 0;
+    let result = (|| {
+        for (position, file) in walk.files.iter().enumerate() {
+            if observer.should_stop() {
+                return Err(IndexingError::Cancelled);
+            }
+            observer.file(&file.path);
+            observer.attempt(0);
+            let before = report.chunks_embedded;
+            let outcome = process_file(
+                index,
+                embedder,
+                settings,
+                file,
+                &stored,
+                &mut report,
+                observer,
+            );
+            observer.execution(embedder.execution());
+            match outcome {
+                Err(IndexingError::DocumentFailed { error, attempts }) => {
+                    report.problems.push(Problem {
+                        path: file.path.clone(),
+                        reason: error.to_string(),
+                        stage: "embedding",
+                        attempts,
+                        previous_version: stored.contains_key(&file.path),
+                    });
+                    consecutive += 1;
+                }
+                Err(error) => return Err(error),
+                Ok(()) if report.chunks_embedded > before => consecutive = 0,
+                Ok(()) => {}
+            }
+            observer.progress(position + 1, report.chunks_embedded + report.chunks_reused);
+            observer.report(&report);
+            if consecutive >= 3 {
+                return Err(IndexingError::ConsecutiveFailures);
+            }
         }
-        observer.file(&file.path);
-        process_file(index, embedder, settings, file, &stored, &mut report)?;
-        observer.progress(position + 1, report.chunks_embedded + report.chunks_reused);
+        finish_update(index, &walk, &stored, &layout, &mut report)
+    })();
+    match result {
+        Ok(()) => Ok(report),
+        Err(source) => {
+            report.aborted = true;
+            observer.report(&report);
+            Err(IndexingError::Partial {
+                report: Box::new(report),
+                source: Box::new(source),
+            })
+        }
     }
-    finish_update(index, &walk, &stored, &layout, &mut report)?;
-    Ok(report)
 }
 
 /// Приводит к виду индекса один файл обхода.
@@ -273,6 +357,7 @@ fn process_file(
     file: &DocFile,
     stored: &HashMap<String, StoredDocument>,
     report: &mut UpdateReport,
+    observer: &dyn IndexObserver,
 ) -> Result<(), IndexingError> {
     let known = stored.get(&file.path);
     if let Some(document) = known
@@ -293,6 +378,7 @@ fn process_file(
             report.problems.push(Problem {
                 path: file.path.clone(),
                 reason: ReadError::NotUtf8.to_string(),
+                ..Problem::default()
             });
             return Ok(());
         }
@@ -301,6 +387,7 @@ fn process_file(
             report.problems.push(Problem {
                 path: file.path.clone(),
                 reason: error.to_string(),
+                ..Problem::default()
             });
             return Ok(());
         }
@@ -316,7 +403,9 @@ fn process_file(
         return Ok(());
     }
 
-    index_document(index, embedder, settings, file, &text, &hash, report)?;
+    index_document(
+        index, embedder, settings, file, &text, &hash, report, observer,
+    )?;
     if known.is_some() {
         report.changed += 1;
     } else {
@@ -344,7 +433,7 @@ fn finish_update(
     }
 
     index.remove_orphan_vectors()?;
-    if report.full_check {
+    if report.full_check && !report.problems.iter().any(|p| p.stage == "embedding") {
         index.write_layout(layout)?;
     }
     index.touch_updated_at()?;
@@ -352,6 +441,7 @@ fn finish_update(
 }
 
 /// Режет документ, добирает векторы только для чанков, которых нет в индексе, и записывает его.
+#[allow(clippy::too_many_arguments)]
 fn index_document(
     index: &mut Index,
     embedder: &mut dyn Embedder,
@@ -360,6 +450,7 @@ fn index_document(
     text: &str,
     hash: &str,
     report: &mut UpdateReport,
+    observer: &dyn IndexObserver,
 ) -> Result<(), IndexingError> {
     let chunked = chunk_document(&file.path, text, &settings.chunking);
 
@@ -376,7 +467,7 @@ fn index_document(
         Vec::new()
     } else {
         let texts: Vec<&str> = missing.iter().map(|(_, text)| *text).collect();
-        let vectors = embedder.embed(&texts)?;
+        let vectors = embed_with_retries(embedder, &texts, observer)?;
         check_vectors(&vectors, texts.len(), embedder.fingerprint().dim)?;
         check_stored_dim(index, embedder.fingerprint().dim)?;
         vectors
@@ -401,6 +492,34 @@ fn index_document(
     report.chunks_embedded += missing.len();
     report.chunks_reused += chunked.chunks.len() - missing.len();
     Ok(())
+}
+
+fn embed_with_retries(
+    embedder: &mut dyn Embedder,
+    texts: &[&str],
+    observer: &dyn IndexObserver,
+) -> Result<Vec<Vec<f32>>, IndexingError> {
+    for attempt in 1..=4 {
+        if observer.should_stop() {
+            return Err(IndexingError::Cancelled);
+        }
+        observer.attempt(attempt);
+        match embedder.embed(texts) {
+            Err(EmbedError::Embed(_)) if attempt < 4 => {
+                if observer.wait_retry(std::time::Duration::from_secs(1 << (attempt - 1))) {
+                    return Err(IndexingError::Cancelled);
+                }
+            }
+            Err(error @ (EmbedError::Embed(_) | EmbedError::Rejected(_))) => {
+                return Err(IndexingError::DocumentFailed {
+                    error,
+                    attempts: attempt,
+                });
+            }
+            result => return result.map_err(IndexingError::from),
+        }
+    }
+    unreachable!("last attempt always returns")
 }
 
 /// Размерность внешней модели узнаётся из ответа провайдера и могла смениться при той же модели:
@@ -438,6 +557,7 @@ fn problem_from_walk(problem: &WalkProblem) -> Problem {
     Problem {
         path: problem.path.clone(),
         reason: problem.reason.clone(),
+        ..Problem::default()
     }
 }
 

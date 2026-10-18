@@ -6,6 +6,283 @@ use crate::storage::index_path;
 
 const DIM: usize = 4;
 
+fn cause(error: &IndexingError) -> &IndexingError {
+    match error {
+        IndexingError::Partial { source, .. } => cause(source),
+        other => other,
+    }
+}
+
+#[derive(Default)]
+struct FastObserver {
+    reports: std::cell::RefCell<Vec<UpdateReport>>,
+    delays: std::cell::RefCell<Vec<u64>>,
+    cancel_wait: bool,
+}
+impl IndexObserver for FastObserver {
+    fn wait_retry(&self, delay: Duration) -> bool {
+        self.delays.borrow_mut().push(delay.as_secs());
+        self.cancel_wait
+    }
+    fn report(&self, report: &UpdateReport) {
+        self.reports.borrow_mut().push(report.clone());
+    }
+}
+
+struct Failing {
+    model: FakeEmbedder,
+    calls: usize,
+    transient_left: usize,
+    bad_paths: bool,
+    rejected: bool,
+}
+impl Failing {
+    fn new() -> Self {
+        Self {
+            model: FakeEmbedder::new("m"),
+            calls: 0,
+            transient_left: 0,
+            bad_paths: false,
+            rejected: false,
+        }
+    }
+}
+impl Embedder for Failing {
+    fn fingerprint(&self) -> &ModelFingerprint {
+        self.model.fingerprint()
+    }
+    fn embed(&mut self, texts: &[&str]) -> Result<Vec<Vec<f32>>, EmbedError> {
+        self.calls += 1;
+        if self.transient_left > 0
+            || (self.bad_paths && texts.iter().any(|text| text.contains("bad")))
+        {
+            self.transient_left = self.transient_left.saturating_sub(1);
+            return Err(if self.rejected {
+                EmbedError::Rejected("413".into())
+            } else {
+                EmbedError::Embed("temporary".into())
+            });
+        }
+        self.model.embed(texts)
+    }
+}
+
+#[test]
+fn stage17_retries_once_and_three_times_with_one_budget() {
+    for failures in [1, 3] {
+        let dir = tempfile::tempdir().unwrap();
+        write(dir.path(), "docs/a.md", &doc("A", &["alpha"]));
+        let mut index = open(dir.path());
+        let mut model = Failing::new();
+        model.transient_left = failures;
+        let observer = FastObserver::default();
+        update_index_observed(dir.path(), &mut index, &settings(), &mut model, &observer).unwrap();
+        assert_eq!(model.calls, failures + 1);
+        assert_eq!(
+            *observer.delays.borrow(),
+            if failures == 1 {
+                vec![1]
+            } else {
+                vec![1, 2, 4]
+            }
+        );
+        assert_eq!(index.document_count().unwrap(), 1);
+    }
+}
+
+#[test]
+fn stage17_skips_bad_document_preserves_version_and_retries_next_check() {
+    let dir = tempfile::tempdir().unwrap();
+    write(dir.path(), "docs/bad.md", &doc("Old", &["before"]));
+    let mut index = open(dir.path());
+    let mut model = Failing::new();
+    update_index(dir.path(), &mut index, &settings(), &mut model).unwrap();
+    let before = index.documents().unwrap()[0].clone();
+    write(dir.path(), "docs/bad.md", &doc("Changed", &["different"]));
+    write(dir.path(), "docs/z.md", &doc("Good", &["after"]));
+    model.bad_paths = true;
+    let calls = model.calls;
+    let outcome = update_index_observed(
+        dir.path(),
+        &mut index,
+        &settings(),
+        &mut model,
+        &FastObserver::default(),
+    )
+    .unwrap();
+    let UpdateOutcome::Updated(report) = outcome else {
+        panic!()
+    };
+    assert_eq!(model.calls - calls, 5);
+    assert_eq!(report.problems[0].attempts, 4);
+    assert!(report.problems[0].previous_version);
+    assert_eq!(
+        index
+            .documents()
+            .unwrap()
+            .iter()
+            .find(|d| d.path == "docs/bad.md")
+            .unwrap()
+            .hash,
+        before.hash
+    );
+    model.bad_paths = false;
+    let UpdateOutcome::Updated(report) =
+        update_index(dir.path(), &mut index, &settings(), &mut model).unwrap()
+    else {
+        panic!()
+    };
+    assert_eq!(report.changed, 1);
+    assert!(report.problems.is_empty());
+}
+
+#[test]
+fn stage17_series_stops_with_report_and_cancellation_keeps_report() {
+    let dir = tempfile::tempdir().unwrap();
+    for name in ["bad1", "bad2", "bad3", "z"] {
+        write(
+            dir.path(),
+            &format!("docs/{name}.md"),
+            &doc(name, &["text"]),
+        );
+    }
+    let mut index = open(dir.path());
+    let mut model = Failing::new();
+    model.bad_paths = true;
+    let observer = FastObserver::default();
+    let error = update_index_observed(dir.path(), &mut index, &settings(), &mut model, &observer)
+        .unwrap_err();
+    let IndexingError::Partial { report, source } = error else {
+        panic!()
+    };
+    assert!(matches!(*source, IndexingError::ConsecutiveFailures));
+    assert!(report.aborted);
+    assert_eq!(report.problems.len(), 3);
+    assert_eq!(model.calls, 12);
+    assert_eq!(index.document_count().unwrap(), 0);
+    let observer = FastObserver {
+        cancel_wait: true,
+        ..Default::default()
+    };
+    let error = update_index_observed(dir.path(), &mut index, &settings(), &mut model, &observer)
+        .unwrap_err();
+    assert!(matches!(cause(&error), IndexingError::Cancelled));
+}
+
+#[test]
+fn stage17_rejected_document_is_not_retried_and_layout_is_not_advanced() {
+    let dir = tempfile::tempdir().unwrap();
+    write(dir.path(), "docs/bad.md", &doc("Bad", &["text"]));
+    let mut index = open(dir.path());
+    let mut model = Failing::new();
+    model.bad_paths = true;
+    model.rejected = true;
+    let UpdateOutcome::Updated(report) = update_index_observed(
+        dir.path(),
+        &mut index,
+        &settings(),
+        &mut model,
+        &FastObserver::default(),
+    )
+    .unwrap() else {
+        panic!()
+    };
+    assert_eq!(report.problems[0].attempts, 1);
+    assert_eq!(model.calls, 1);
+    assert_eq!(index.stored_layout().unwrap(), None);
+}
+
+#[test]
+fn stage17_incomplete_rebuild_never_swaps_even_with_last_document_failure() {
+    let dir = tempfile::tempdir().unwrap();
+    write(dir.path(), "docs/a.md", &doc("Original", &["old"]));
+    let path = index_path(dir.path());
+    let mut initial = FakeEmbedder::new("old");
+    rebuild_index(dir.path(), &path, &settings(), &mut initial).unwrap();
+    let original = fs::read(&path).unwrap();
+    write(dir.path(), "docs/zbad.md", &doc("Bad", &["new"]));
+    let mut model = Failing::new();
+    model.bad_paths = true;
+    let error = rebuild_index_observed(
+        dir.path(),
+        &path,
+        &settings(),
+        &mut model,
+        &FastObserver::default(),
+        || panic!("swap must not run"),
+    )
+    .unwrap_err();
+    let IndexingError::Incomplete(report) = error else {
+        panic!()
+    };
+    assert!(report.rebuild_not_applied);
+    assert_eq!(report.added, 1);
+    assert_eq!(fs::read(&path).unwrap(), original);
+    assert!(!with_suffix(&path, ".new").exists());
+}
+
+#[test]
+fn stage17_success_resets_series_but_unchanged_files_do_not() {
+    let dir = tempfile::tempdir().unwrap();
+    for name in ["a_bad", "b_good", "c_bad", "d_bad", "z"] {
+        write(
+            dir.path(),
+            &format!("docs/{name}.md"),
+            &doc(name, &["text"]),
+        );
+    }
+    let mut model = Failing::new();
+    model.bad_paths = true;
+    let mut index = open(dir.path());
+    let UpdateOutcome::Updated(report) = update_index_observed(
+        dir.path(),
+        &mut index,
+        &settings(),
+        &mut model,
+        &FastObserver::default(),
+    )
+    .unwrap() else {
+        panic!()
+    };
+    assert_eq!(report.problems.len(), 3);
+    assert_eq!(report.added, 2);
+    // b_good is now unchanged; it no longer demonstrates provider recovery.
+    let error = update_index_observed(
+        dir.path(),
+        &mut index,
+        &settings(),
+        &mut model,
+        &FastObserver::default(),
+    )
+    .unwrap_err();
+    assert!(matches!(cause(&error), IndexingError::ConsecutiveFailures));
+}
+
+#[test]
+fn stage17_partial_layout_change_does_not_mark_failed_file_as_current() {
+    let dir = tempfile::tempdir().unwrap();
+    write(dir.path(), "docs/bad.md", &doc("Old", &["one", "two"]));
+    let mut index = open(dir.path());
+    let mut model = Failing::new();
+    update_index(dir.path(), &mut index, &settings(), &mut model).unwrap();
+    let before = index.stored_layout().unwrap();
+    let mut changed = settings();
+    changed.chunking.max_chars = 300;
+    model.bad_paths = true;
+    let UpdateOutcome::Updated(report) = update_index_observed(
+        dir.path(),
+        &mut index,
+        &changed,
+        &mut model,
+        &FastObserver::default(),
+    )
+    .unwrap() else {
+        panic!()
+    };
+    assert!(!report.problems.is_empty());
+    assert_eq!(index.stored_layout().unwrap(), before);
+}
+
 /// Детерминированная подделка модели: вектор из хеша текста, счётчики вызовов.
 struct FakeEmbedder {
     fingerprint: ModelFingerprint,
@@ -377,19 +654,20 @@ fn embedding_failure_keeps_written_documents_and_resumes_later() {
     let mut model = FakeEmbedder::new("m");
     model.fail_on_call = Some(2); // a.md записан, на b.md модель падает
 
-    let error = update_index(dir.path(), &mut index, &settings(), &mut model).unwrap_err();
-
-    assert!(matches!(error, IndexingError::Embed(EmbedError::Embed(_))));
-    assert_eq!(paths(&index), ["docs/a.md"]);
-    assert_eq!(index.stored_layout().unwrap(), None);
+    let report = update_index(dir.path(), &mut index, &settings(), &mut model).unwrap();
+    assert!(matches!(report, UpdateOutcome::Updated(_)));
+    assert_eq!(paths(&index), ["docs/a.md", "docs/b.md"]);
+    assert_eq!(
+        model.calls, 3,
+        "transient failure recovered on the next attempt"
+    );
 
     model.fail_on_call = None;
     let report = updated(dir.path(), &mut index, &mut model);
 
-    assert!(report.full_check);
-    assert_eq!((report.added, report.changed), (1, 1));
-    assert_eq!(report.chunks_embedded, chunk_count_of("docs/b.md", &b));
-    assert_eq!(report.chunks_reused, chunk_count_of("docs/a.md", &a));
+    assert!(!report.full_check);
+    assert_eq!(report.unchanged, 2);
+    assert_eq!(report.chunks_embedded, 0);
 }
 
 #[test]
@@ -403,7 +681,7 @@ fn wrong_vector_dimension_is_an_error_and_writes_nothing() {
     let error = update_index(dir.path(), &mut index, &settings(), &mut model).unwrap_err();
 
     assert!(matches!(
-        error,
+        cause(&error),
         IndexingError::Embed(EmbedError::Dimension { expected: DIM, .. })
     ));
     assert_eq!(index.document_count().unwrap(), 0);
@@ -478,11 +756,11 @@ fn failed_rebuild_keeps_the_old_index_intact() {
     let dir = tempfile::tempdir().unwrap();
     let path = built_project(dir.path());
     let mut model = FakeEmbedder::new("new");
-    model.fail_on_call = Some(2);
+    model.returned_dim = DIM + 1;
 
     let error = rebuild_index(dir.path(), &path, &settings(), &mut model).unwrap_err();
 
-    assert!(matches!(error, IndexingError::Embed(_)));
+    assert!(matches!(cause(&error), IndexingError::Embed(_)));
     assert!(!with_suffix(&path, ".new").exists());
     let index = Index::open(&path, Journal::Wal).unwrap();
     assert_eq!(index.document_count().unwrap(), 2);
@@ -556,7 +834,7 @@ fn observer_sees_every_document_and_can_stop_the_update() {
     )
     .unwrap_err();
 
-    assert!(matches!(error, IndexingError::Cancelled));
+    assert!(matches!(cause(&error), IndexingError::Cancelled));
     assert_eq!(observer.total.get(), 3);
     assert_eq!(observer.seen.borrow().len(), 2);
     // Уже записанные документы остаются: остановка не откатывает проверку.
@@ -578,7 +856,7 @@ fn cancelled_rebuild_keeps_the_old_index_and_leaves_no_new_file() {
     )
     .unwrap_err();
 
-    assert!(matches!(error, IndexingError::Cancelled));
+    assert!(matches!(cause(&error), IndexingError::Cancelled));
     assert!(!with_suffix(&path, ".new").exists());
     let index = Index::open(&path, Journal::Wal).unwrap();
     assert_eq!(index.document_count().unwrap(), 2);

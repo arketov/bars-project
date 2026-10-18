@@ -207,7 +207,15 @@ async fn register_search_outline_read_scenario() {
     let projects_json = json(&bars(&env, &["--json", "projects"]).await);
     assert_eq!(projects_json["projects"][0]["name"], "proj");
 
-    let status = bars(&env, &["status"]).await;
+    // A watcher follow-up may overlap the status request after the initial indexing.
+    let deadline = Instant::now() + Duration::from_secs(10);
+    let status = loop {
+        let status = bars(&env, &["status"]).await;
+        if status.out.contains("Состояние: готов") || Instant::now() >= deadline {
+            break status;
+        }
+        tokio::time::sleep(Duration::from_millis(30)).await;
+    };
     assert!(status.out.contains("Состояние: готов"), "{}", status.out);
 
     // Свой проект можно задать явно и из другой папки.

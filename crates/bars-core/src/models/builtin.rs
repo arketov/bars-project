@@ -41,6 +41,7 @@ pub struct BuiltinEmbedder {
     model: TextEmbedding,
     fingerprint: ModelFingerprint,
     device: Device,
+    fallback_reason: Option<String>,
 }
 
 impl BuiltinEmbedder {
@@ -53,17 +54,13 @@ impl BuiltinEmbedder {
     /// получилось, говорит [`BuiltinEmbedder::device`], воркер пишет это в лог. CoreML на macOS не
     /// проверен, поэтому там `Auto` — процессор.
     pub fn bge_m3(models_dir: &Path, accelerator: Accelerator) -> Result<Self, EmbedError> {
-        let (model, device) = match accelerator {
-            Accelerator::Cpu => (load(models_dir, false)?, Device::Cpu),
-            Accelerator::Auto => match load(models_dir, true) {
-                Ok(model) => (model, Device::DirectMl),
-                Err(_) => (load(models_dir, false)?, Device::Cpu),
-            },
-        };
+        let (model, device, fallback_reason) =
+            super::execution::load_session(accelerator, |gpu| load(models_dir, gpu))?;
         Ok(Self {
             model,
             fingerprint: bge_m3_fingerprint(),
             device,
+            fallback_reason,
         })
     }
 
@@ -102,6 +99,16 @@ fn load(models_dir: &Path, gpu: bool) -> Result<TextEmbedding, EmbedError> {
 }
 
 impl Embedder for BuiltinEmbedder {
+    fn execution(&self) -> super::ExecutionInfo {
+        super::ExecutionInfo {
+            backend: "onnx",
+            actual: Some(match self.device {
+                Device::Cpu => "cpu",
+                Device::DirectMl => "directml",
+            }),
+            fallback_reason: self.fallback_reason.clone(),
+        }
+    }
     fn fingerprint(&self) -> &ModelFingerprint {
         &self.fingerprint
     }

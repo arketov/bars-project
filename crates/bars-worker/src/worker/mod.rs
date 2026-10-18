@@ -153,9 +153,10 @@ pub struct ProjectStatus {
 /// Проблемы проекта по итогам последней проверки.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ProjectIssues {
+    pub rebuild_not_applied: bool,
     pub project: PathBuf,
     /// Файл и причина.
-    pub files: Vec<(String, String)>,
+    pub files: Vec<bars_core::indexing::indexer::Problem>,
     pub last_error: Option<String>,
 }
 
@@ -258,6 +259,13 @@ pub struct Worker {
 }
 
 impl Worker {
+    pub fn model_runtime(&self) -> Option<bars_protocol::ModelsRuntime> {
+        let user = bars_core::settings::UserSettings::load(self.bars_home())
+            .ok()?
+            .value;
+        let settings = bars_core::settings::Settings::resolve(&user, &Default::default());
+        self.inner.models.runtime(&settings)
+    }
     /// Читает реестр, запускает очередь и часовой таймер, ставит все проекты на проверку при
     /// старте (Т-10). Вызывается внутри среды tokio. Битый `projects.toml` — ошибка: реестр
     /// не заменяется пустым.
@@ -546,20 +554,28 @@ impl Worker {
         let mut out: Vec<_> = projects
             .iter()
             .filter_map(|(path, runtime)| {
-                let files: Vec<(String, String)> = runtime
+                let mut files = runtime
                     .status
                     .last_report
                     .as_ref()
-                    .map(|report| {
-                        report
-                            .problems
-                            .iter()
-                            .map(|problem| (problem.path.clone(), problem.reason.clone()))
-                            .collect()
-                    })
+                    .map(|report| report.problems.clone())
                     .unwrap_or_default();
+                if let Some(current) = lock(&self.inner.current)
+                    .as_ref()
+                    .filter(|cell| cell.project == *path)
+                {
+                    for problem in current.report_snapshot().problems {
+                        files.retain(|old| old.path != problem.path);
+                        files.push(problem);
+                    }
+                }
                 let error = runtime.status.last_error.clone();
                 (!files.is_empty() || error.is_some()).then(|| ProjectIssues {
+                    rebuild_not_applied: runtime
+                        .status
+                        .last_report
+                        .as_ref()
+                        .is_some_and(|r| r.rebuild_not_applied),
                     project: path.clone(),
                     files,
                     last_error: error,
@@ -982,6 +998,19 @@ impl Inner {
                 status.model_settings = Some(model);
             }
             match result.outcome {
+                Outcome::Interrupted {
+                    report,
+                    message,
+                    cancelled,
+                } => {
+                    status.state = if previous == ProjectState::ReindexRequired {
+                        ProjectState::ReindexRequired
+                    } else {
+                        ProjectState::Ready
+                    };
+                    status.last_report = Some(report);
+                    status.last_error = if cancelled { None } else { Some(message) };
+                }
                 Outcome::Unavailable => {
                     status.state = ProjectState::Unavailable;
                     runtime.watch_failed = true;

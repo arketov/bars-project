@@ -123,8 +123,10 @@ fn post_with_retries(
     body: &Value,
     retries: u32,
     pause: Duration,
-) -> Result<String, String> {
-    let key = key.resolve().map_err(|error| error.to_string())?;
+) -> Result<String, EmbedError> {
+    let key = key
+        .resolve()
+        .map_err(|error| EmbedError::Load(error.to_string()))?;
     let mut wait = pause;
     let mut attempt = 0;
     loop {
@@ -136,8 +138,10 @@ fn post_with_retries(
             Err(failure) => failure,
         };
         match failure {
-            Failure::Fatal(message) => return Err(message),
-            Failure::Transient(message) if attempt >= retries => return Err(message),
+            Failure::Fatal(message) => return Err(EmbedError::Rejected(message)),
+            Failure::Transient(message) if attempt >= retries => {
+                return Err(EmbedError::Embed(message));
+            }
             Failure::Transient(_) => {
                 attempt += 1;
                 std::thread::sleep(wait);
@@ -186,17 +190,16 @@ impl HttpEmbedder {
         self
     }
 
-    fn request(&self, batch: &[&str]) -> Result<Vec<Vec<f32>>, EmbedError> {
+    fn request(&self, batch: &[&str], retries: u32) -> Result<Vec<Vec<f32>>, EmbedError> {
         let body = json!({ "model": self.target.model, "input": batch });
         let text = post_with_retries(
             &self.agent,
             &self.url,
             &self.target.key,
             &body,
-            RETRIES,
+            retries,
             self.pause,
-        )
-        .map_err(EmbedError::Embed)?;
+        )?;
         let vectors = parse_embeddings(&text).map_err(EmbedError::Embed)?;
         if vectors.len() != batch.len() {
             return Err(EmbedError::Count {
@@ -237,13 +240,33 @@ fn parse_embeddings(text: &str) -> Result<Vec<Vec<f32>>, String> {
 }
 
 impl Embedder for HttpEmbedder {
+    fn execution(&self) -> super::ExecutionInfo {
+        super::ExecutionInfo {
+            backend: "external",
+            ..Default::default()
+        }
+    }
+    fn embed_query(&mut self, text: &str) -> Result<Vec<f32>, EmbedError> {
+        let mut vectors = self.request(&[text], RETRIES)?;
+        let vector = vectors.remove(0);
+        if self.fingerprint.dim == 0 {
+            self.fingerprint.dim = vector.len();
+        }
+        if vector.len() != self.fingerprint.dim {
+            return Err(EmbedError::Dimension {
+                expected: self.fingerprint.dim,
+                got: vector.len(),
+            });
+        }
+        Ok(vector)
+    }
     fn fingerprint(&self) -> &ModelFingerprint {
         &self.fingerprint
     }
 
     fn prepare(&mut self) -> Result<(), EmbedError> {
         if self.fingerprint.dim == 0 {
-            self.embed(&["bars"])?;
+            self.embed_query("bars")?;
         }
         Ok(())
     }
@@ -251,7 +274,7 @@ impl Embedder for HttpEmbedder {
     fn embed(&mut self, texts: &[&str]) -> Result<Vec<Vec<f32>>, EmbedError> {
         let mut result = Vec::with_capacity(texts.len());
         for batch in texts.chunks(self.batch_size) {
-            result.extend(self.request(batch)?);
+            result.extend(self.request(batch, 0)?);
         }
         if let Some(first) = result.first() {
             if self.fingerprint.dim == 0 {
@@ -321,6 +344,12 @@ impl HttpReranker {
 }
 
 impl Reranker for HttpReranker {
+    fn execution(&self) -> super::ExecutionInfo {
+        super::ExecutionInfo {
+            backend: "external",
+            ..Default::default()
+        }
+    }
     fn rerank(&mut self, query: &str, documents: &[&str]) -> Result<Vec<f32>, RerankError> {
         if documents.is_empty() {
             return Ok(Vec::new());

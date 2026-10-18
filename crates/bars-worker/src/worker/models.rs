@@ -20,6 +20,37 @@ use bars_core::settings::{EmbedSettings, ModelSource, RerankSettings, Settings};
 
 use super::lock;
 
+#[derive(Clone)]
+struct SlotRuntime {
+    state: &'static str,
+    execution: bars_core::models::ExecutionInfo,
+}
+
+impl Default for SlotRuntime {
+    fn default() -> Self {
+        Self {
+            state: "unloaded",
+            execution: Default::default(),
+        }
+    }
+}
+
+fn same_embed(a: &EmbedSettings, b: &EmbedSettings) -> bool {
+    let mut a = a.clone();
+    if a.source != ModelSource::Builtin {
+        a.accelerator = b.accelerator;
+    }
+    a == *b
+}
+
+fn same_rerank(a: &RerankSettings, b: &RerankSettings) -> bool {
+    let mut a = a.clone();
+    if a.source != ModelSource::Builtin {
+        a.accelerator = b.accelerator;
+    }
+    a == *b
+}
+
 /// Сколько текстов встроенная модель считает за один захват мьютекса. Между пачками мьютекс
 /// свободен, и эмбеддинг поискового запроса ждёт не дольше одной пачки.
 pub const BATCH_SIZE: usize = 4;
@@ -147,7 +178,7 @@ impl ModelProvider for ConfiguredProvider {
         let embed = &settings.embed;
         match embed.source {
             ModelSource::Builtin => {
-                load_builtin_embedder(&embed.model, &self.models_dir, settings.accelerator)
+                load_builtin_embedder(&embed.model, &self.models_dir, settings.embed.accelerator)
             }
             _ => Ok(Box::new(HttpEmbedder::new(
                 self.embed_target(embed)?,
@@ -192,7 +223,7 @@ impl ModelProvider for ConfiguredProvider {
                 }
                 Ok(Box::new(BuiltinReranker::bge_reranker_v2_m3(
                     &self.models_dir,
-                    settings.accelerator,
+                    settings.rerank.accelerator,
                 )?))
             }
             source => {
@@ -299,6 +330,7 @@ pub struct ModelSlot {
     /// Сколько запросов поиска ждут модель. Пока их больше нуля, индексация не берёт мьютекс:
     /// он не честный, и без этого пачки индексации идут подряд, а запрос не доходит до модели.
     waiting_queries: AtomicUsize,
+    runtime: Mutex<SlotRuntime>,
 }
 
 /// Как часто индексация проверяет, что запросов поиска у модели не осталось.
@@ -358,7 +390,23 @@ impl ModelSlot {
         f: impl FnOnce(&mut (dyn Embedder + Send)) -> Result<R, EmbedError>,
     ) -> Result<R, EmbedError> {
         if guard.is_none() {
-            *guard = Some((self.loader)()?);
+            *lock(&self.runtime) = SlotRuntime {
+                state: "loading",
+                ..SlotRuntime::default()
+            };
+            match (self.loader)() {
+                Ok(model) => {
+                    *lock(&self.runtime) = SlotRuntime {
+                        state: "ready",
+                        execution: model.execution(),
+                    };
+                    *guard = Some(model);
+                }
+                Err(error) => {
+                    lock(&self.runtime).state = "failed";
+                    return Err(error);
+                }
+            }
         }
         let model = guard.as_mut().expect("модель загружена строкой выше");
         f(model.as_mut())
@@ -389,6 +437,9 @@ impl SharedEmbedder {
 }
 
 impl Embedder for SharedEmbedder {
+    fn execution(&self) -> bars_core::models::ExecutionInfo {
+        lock(&self.slot.runtime).execution.clone()
+    }
     fn fingerprint(&self) -> &ModelFingerprint {
         &self.fingerprint
     }
@@ -462,6 +513,7 @@ type RerankLoader = Box<dyn Fn() -> Result<Box<dyn Reranker + Send>, RerankError
 pub struct RerankSlot {
     loader: RerankLoader,
     model: Mutex<Option<Box<dyn Reranker + Send>>>,
+    runtime: Mutex<SlotRuntime>,
 }
 
 impl RerankSlot {
@@ -488,13 +540,29 @@ impl SharedReranker {
     fn prepare(&self) -> Result<(), RerankError> {
         let mut guard = lock(&self.slot.model);
         if guard.is_none() {
-            *guard = Some((self.slot.loader)()?);
+            lock(&self.slot.runtime).state = "loading";
+            match (self.slot.loader)() {
+                Ok(model) => {
+                    *lock(&self.slot.runtime) = SlotRuntime {
+                        state: "ready",
+                        execution: model.execution(),
+                    };
+                    *guard = Some(model);
+                }
+                Err(error) => {
+                    lock(&self.slot.runtime).state = "failed";
+                    return Err(error);
+                }
+            }
         }
         Ok(())
     }
 }
 
 impl Reranker for SharedReranker {
+    fn execution(&self) -> bars_core::models::ExecutionInfo {
+        lock(&self.slot.runtime).execution.clone()
+    }
     fn rerank(&mut self, query: &str, documents: &[&str]) -> Result<Vec<f32>, RerankError> {
         self.prepare()?;
         let mut guard = lock(&self.slot.model);
@@ -507,14 +575,12 @@ impl Reranker for SharedReranker {
 struct Current {
     fingerprint: ModelFingerprint,
     embed: EmbedSettings,
-    accelerator: Accelerator,
     slot: Arc<ModelSlot>,
 }
 
 /// Какая rerank-модель сейчас в памяти.
 struct CurrentRerank {
     rerank: RerankSettings,
-    accelerator: Accelerator,
     slot: Arc<RerankSlot>,
 }
 
@@ -532,6 +598,43 @@ fn load_key(source: ModelSource, model: &str) -> Option<String> {
 }
 
 impl Models {
+    pub fn runtime(&self, settings: &Settings) -> Option<bars_protocol::ModelsRuntime> {
+        let embed = self.embedder(settings).ok()?;
+        let rerank = self.reranker(settings);
+        let snapshot = |model: &str,
+                        source: ModelSource,
+                        requested: Accelerator,
+                        slot: &Mutex<SlotRuntime>| {
+            let state = lock(slot).clone();
+            bars_protocol::ModelRuntime {
+                model: model.into(),
+                source: source.as_str().into(),
+                requested: match requested {
+                    Accelerator::Auto => "auto",
+                    Accelerator::Cpu => "cpu",
+                }
+                .into(),
+                state: state.state.into(),
+                backend: state.execution.backend.into(),
+                actual: state.execution.actual.map(str::to_string),
+                fallback_reason: state.execution.fallback_reason,
+            }
+        };
+        Some(bars_protocol::ModelsRuntime {
+            embed: snapshot(
+                &settings.embed.model,
+                settings.embed.source,
+                settings.embed.accelerator,
+                &embed.slot.runtime,
+            ),
+            rerank: snapshot(
+                &settings.rerank.model,
+                settings.rerank.source,
+                settings.rerank.accelerator,
+                &rerank.slot.runtime,
+            ),
+        })
+    }
     pub fn new(provider: Arc<dyn ModelProvider>) -> Self {
         Self {
             provider,
@@ -553,8 +656,7 @@ impl Models {
         let mut current = lock(&self.current);
         if let Some(existing) = current.as_ref()
             && existing.fingerprint == fingerprint
-            && existing.embed == settings.embed
-            && existing.accelerator == settings.accelerator
+            && same_embed(&existing.embed, &settings.embed)
         {
             return Ok(SharedEmbedder::new(Arc::clone(&existing.slot)));
         }
@@ -569,11 +671,11 @@ impl Models {
             loader: Box::new(move || loads.run_keyed(key.as_deref(), || provider.load(&owned))),
             model: Mutex::new(None),
             waiting_queries: AtomicUsize::new(0),
+            runtime: Mutex::new(SlotRuntime::default()),
         });
         *current = Some(Current {
             fingerprint,
             embed: settings.embed.clone(),
-            accelerator: settings.accelerator,
             slot: Arc::clone(&slot),
         });
         Ok(SharedEmbedder::new(slot))
@@ -667,8 +769,7 @@ impl Models {
     pub fn reranker(&self, settings: &Settings) -> SharedReranker {
         let mut current = lock(&self.current_rerank);
         if let Some(existing) = current.as_ref()
-            && existing.rerank == settings.rerank
-            && existing.accelerator == settings.accelerator
+            && same_rerank(&existing.rerank, &settings.rerank)
         {
             return SharedReranker {
                 slot: Arc::clone(&existing.slot),
@@ -682,11 +783,11 @@ impl Models {
             loader: Box::new(move || {
                 loads.run_keyed(key.as_deref(), || provider.load_reranker(&owned))
             }),
+            runtime: Mutex::new(SlotRuntime::default()),
             model: Mutex::new(None),
         });
         *current = Some(CurrentRerank {
             rerank: settings.rerank.clone(),
-            accelerator: settings.accelerator,
             slot: Arc::clone(&slot),
         });
         SharedReranker { slot }
@@ -838,6 +939,80 @@ mod tests {
 
     fn settings() -> Settings {
         Settings::resolve(&Default::default(), &Default::default())
+    }
+
+    #[test]
+    fn stage17_devices_replace_only_their_own_slots_and_keep_active_readers() {
+        let provider = FakeProvider::new("m1");
+        let models = Models::new(provider.clone());
+        let mut config = settings();
+        let mut embed = models.embedder(&config).unwrap();
+        let mut rerank = models.reranker(&config);
+        embed.embed_query("before").unwrap();
+        rerank.rerank("q", &["d"]).unwrap();
+        let old_embed = embed.slot().clone();
+        let old_rerank = rerank.slot().clone();
+        config.rerank.accelerator = Accelerator::Cpu;
+        let unchanged = models.embedder(&config).unwrap();
+        assert!(Arc::ptr_eq(&old_embed, unchanged.slot()));
+        let mut changed = models.reranker(&config);
+        assert!(!Arc::ptr_eq(&old_rerank, changed.slot()));
+        changed.rerank("q", &["d"]).unwrap();
+        assert_eq!(provider.counters.loads.load(Ordering::SeqCst), 1);
+        assert_eq!(provider.counters.rerank_loads.load(Ordering::SeqCst), 2);
+        config.embed.accelerator = Accelerator::Cpu;
+        let mut new_embed = models.embedder(&config).unwrap();
+        assert!(!Arc::ptr_eq(&old_embed, new_embed.slot()));
+        assert!(Arc::ptr_eq(changed.slot(), models.reranker(&config).slot()));
+        new_embed.embed_query("after").unwrap();
+        embed.embed_query("old reader still works").unwrap();
+        assert_eq!(provider.counters.loads.load(Ordering::SeqCst), 2);
+        let _busy = lock(&new_embed.slot.model);
+        let started = std::time::Instant::now();
+        let runtime = models.runtime(&config).unwrap();
+        assert_eq!(runtime.embed.state, "ready");
+        assert!(started.elapsed() < Duration::from_millis(100));
+    }
+
+    #[test]
+    fn stage17_external_device_preference_does_not_replace_a_slot() {
+        let models = Models::new(FakeProvider::new("m1"));
+        let mut config = settings();
+        config.embed.source = ModelSource::LocalOpenai;
+        config.rerank.source = ModelSource::Remote;
+        let embed = models.embedder(&config).unwrap();
+        let rerank = models.reranker(&config);
+        config.embed.accelerator = Accelerator::Cpu;
+        config.rerank.accelerator = Accelerator::Cpu;
+        assert!(Arc::ptr_eq(
+            embed.slot(),
+            models.embedder(&config).unwrap().slot()
+        ));
+        assert!(Arc::ptr_eq(rerank.slot(), models.reranker(&config).slot()));
+    }
+
+    #[test]
+    fn stage17_old_loader_cannot_publish_into_a_new_slot() {
+        let provider = Arc::new(FakeProvider {
+            load_delay: Duration::from_millis(100),
+            ..FakeProvider::plain("m1")
+        });
+        let models = Models::new(provider);
+        let mut config = settings();
+        let mut old = models.embedder(&config).unwrap();
+        let slot = old.slot().clone();
+        let loading = std::thread::spawn(move || old.prepare().unwrap());
+        let deadline = std::time::Instant::now() + Duration::from_secs(5);
+        while lock(&slot.runtime).state != "loading" {
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::yield_now();
+        }
+        config.embed.accelerator = Accelerator::Cpu;
+        let mut new = models.embedder(&config).unwrap();
+        loading.join().unwrap();
+        assert_eq!(models.runtime(&config).unwrap().embed.state, "unloaded");
+        new.prepare().unwrap();
+        assert_eq!(models.runtime(&config).unwrap().embed.state, "ready");
     }
 
     #[test]

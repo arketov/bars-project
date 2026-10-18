@@ -1,0 +1,367 @@
+{
+  "date": "2026-10-18",
+  "scope": "Stage 17 isolated real worker and window handlers; UI DOM tests separately",
+  "git_base": "7417755d74d0bc7edb6b8aa3da2d05265350bca8",
+  "checkout": "shared dirty checkout; independent profile-isolation work also present",
+  "hardware": {
+    "cpu": "i7-11700KF",
+    "gpu": "RTX 3090",
+    "driver": "32.0.16.1692"
+  },
+  "binary_sha256": "f69646c8dc633802584f0921ab55dacc168510d99fe194242684819ffeac55ff",
+  "source_sha256": {
+    "crates/bars-core/src/indexing/indexer.rs": "2f3ba30aa31055b3a3d9b41ccbf68636ae1015981b62daf13283f7611aff6bcd",
+    "crates/bars-core/src/models/builtin.rs": "74edadf5f8dcb8fdcad90842c8f425e1bab0fe3004ac4e62a0d816bb7d395dda",
+    "crates/bars-core/src/models/builtin_rerank.rs": "96203ff7898bb94e6f2777255c5fb1c1edd2d55c1ec61df93293b24518612c82",
+    "crates/bars-core/src/models/execution.rs": "038a9ccd182da8be5d7b7d2d9eb4d836ac3f3e8ddf6e6f15221118b71ad3fee0",
+    "crates/bars-core/src/models/remote.rs": "7415f8ded6a00e74ea3b75f096ed7903e7ae561beb2a28a573997032adef7f97",
+    "crates/bars-core/src/settings/mod.rs": "72da753b7b1649512318ca43d427cf092bc157f94dedb899cac51d593f25e03a",
+    "crates/bars-core/src/settings/raw.rs": "99f5478d940fff46176215d2db832e40de42de96850bb3650a3918576cd81046",
+    "crates/bars-protocol/src/methods.rs": "836da5878e84685645ed4286a9f6e962fcc29a7aba1c0057581638952434ede6",
+    "crates/bars-worker/src/settings_io.rs": "3e04863e36a250f7a30436cdebdf09c06d5662fbad55951324dea63645daa9b5",
+    "crates/bars-worker/src/worker/models.rs": "f87074939a86952b6b465fa2df30ec45502baadcafbce3aced0f7c3e3f723cf8",
+    "crates/bars-worker/src/worker/control.rs": "ddfdea95c0f8325572b1ebf0b683423352f56c6ac0ab983c2899f0e0a1560333",
+    "crates/bars-worker/src/worker/job.rs": "b67334149c13e3022ad5148e3c316e1099c178dba80955cc96218e9422f2fd42",
+    "crates/bars-worker/src/worker/mod.rs": "f77f38c156f059dd1d4b3c1862b7a693b86fd04ca49acb31bded1d520aff3d8f",
+    "crates/bars-worker/examples/verify_devices.rs": "3b039d962a57ebc3b6ea0ee648dc1fc5f472ab490a2716093f6aefef34272a78"
+  },
+  "checks": {
+    "core": 193,
+    "protocol": 50,
+    "worker": 132,
+    "cli": 8,
+    "mcp": 9,
+    "ui": 55,
+    "ui_check": "0 errors / 0 warnings",
+    "ui_build": "passed",
+    "clippy_lib_tests": "passed",
+    "full_corpus_test": "stopped intentionally; no acceptance claim",
+    "visual_ui": "controls inspected before Save; Save mock defect fixed and regression passed; CUA disconnected before repeat"
+  },
+  "sessions": [
+    {
+      "name": "auto-cpu-final",
+      "requested": [
+        "auto",
+        "cpu"
+      ],
+      "initial_runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "cpu",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "cpu",
+          "fallback_reason": null
+        }
+      },
+      "search": {
+        "results": [
+          {
+            "path": "docs/search.md",
+            "module": ".",
+            "title": "Search",
+            "heading_chain": "Search",
+            "first_line": 4,
+            "last_line": 6,
+            "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+            "score": 0.5548151731491089,
+            "score_kind": "rerank"
+          },
+          {
+            "path": "docs/other.md",
+            "module": ".",
+            "title": "Theme",
+            "heading_chain": "Theme",
+            "first_line": 4,
+            "last_line": 6,
+            "text": "The application supports light and dark themes.",
+            "score": 0.00001619452996237669,
+            "score_kind": "rerank"
+          }
+        ],
+        "applied": {
+          "results": 3,
+          "candidates": 30,
+          "rerank_candidates": 15,
+          "min_score": 0,
+          "score_kind": "rerank",
+          "clamped": false
+        },
+        "indexing": false,
+        "pending": 0
+      },
+      "repeat": {
+        "results": [
+          {
+            "path": "docs/search.md",
+            "module": ".",
+            "title": "Search",
+            "heading_chain": "Search",
+            "first_line": 4,
+            "last_line": 6,
+            "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+            "score": 0.5548151731491089,
+            "score_kind": "rerank"
+          },
+          {
+            "path": "docs/other.md",
+            "module": ".",
+            "title": "Theme",
+            "heading_chain": "Theme",
+            "first_line": 4,
+            "last_line": 6,
+            "text": "The application supports light and dark themes.",
+            "score": 0.00001619452996237669,
+            "score_kind": "rerank"
+          }
+        ],
+        "applied": {
+          "results": 3,
+          "candidates": 30,
+          "rerank_candidates": 15,
+          "min_score": 0,
+          "score_kind": "rerank",
+          "clamped": false
+        },
+        "indexing": true,
+        "pending": 0
+      },
+      "after_device_change": {
+        "runtime": {
+          "embed": {
+            "model": "BAAI/bge-m3",
+            "source": "builtin",
+            "requested": "auto",
+            "state": "ready",
+            "backend": "onnx",
+            "actual": "directml",
+            "fallback_reason": null
+          },
+          "rerank": {
+            "model": "BAAI/bge-reranker-v2-m3",
+            "source": "builtin",
+            "requested": "auto",
+            "state": "ready",
+            "backend": "onnx",
+            "actual": "directml",
+            "fallback_reason": null
+          }
+        },
+        "search": {
+          "results": [
+            {
+              "path": "docs/search.md",
+              "module": ".",
+              "title": "Search",
+              "heading_chain": "Search",
+              "first_line": 4,
+              "last_line": 6,
+              "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+              "score": 0.5522528290748596,
+              "score_kind": "rerank"
+            },
+            {
+              "path": "docs/other.md",
+              "module": ".",
+              "title": "Theme",
+              "heading_chain": "Theme",
+              "first_line": 4,
+              "last_line": 6,
+              "text": "The application supports light and dark themes.",
+              "score": 0.00001619260001461953,
+              "score_kind": "rerank"
+            }
+          ],
+          "applied": {
+            "results": 3,
+            "candidates": 30,
+            "rerank_candidates": 15,
+            "min_score": 0,
+            "score_kind": "rerank",
+            "clamped": false
+          },
+          "indexing": false,
+          "pending": 0
+        }
+      },
+      "job_devices": [
+        null,
+        "directml"
+      ],
+      "source_result_sha256": "db505884bfffadf4fda747e2298718a5300c90ced90957b45882d7b09fce5611"
+    },
+    {
+      "name": "cpu-auto-final",
+      "requested": [
+        "cpu",
+        "auto"
+      ],
+      "initial_runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "cpu",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "cpu",
+          "fallback_reason": null
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null
+        }
+      },
+      "search": {
+        "results": [
+          {
+            "path": "docs/search.md",
+            "module": ".",
+            "title": "Search",
+            "heading_chain": "Search",
+            "first_line": 4,
+            "last_line": 6,
+            "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+            "score": 0.5522528290748596,
+            "score_kind": "rerank"
+          },
+          {
+            "path": "docs/other.md",
+            "module": ".",
+            "title": "Theme",
+            "heading_chain": "Theme",
+            "first_line": 4,
+            "last_line": 6,
+            "text": "The application supports light and dark themes.",
+            "score": 0.00001619260001461953,
+            "score_kind": "rerank"
+          }
+        ],
+        "applied": {
+          "results": 3,
+          "candidates": 30,
+          "rerank_candidates": 15,
+          "min_score": 0,
+          "score_kind": "rerank",
+          "clamped": false
+        },
+        "indexing": true,
+        "pending": 0
+      },
+      "repeat": {
+        "results": [
+          {
+            "path": "docs/search.md",
+            "module": ".",
+            "title": "Search",
+            "heading_chain": "Search",
+            "first_line": 4,
+            "last_line": 6,
+            "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+            "score": 0.5522528290748596,
+            "score_kind": "rerank"
+          },
+          {
+            "path": "docs/other.md",
+            "module": ".",
+            "title": "Theme",
+            "heading_chain": "Theme",
+            "first_line": 4,
+            "last_line": 6,
+            "text": "The application supports light and dark themes.",
+            "score": 0.00001619260001461953,
+            "score_kind": "rerank"
+          }
+        ],
+        "applied": {
+          "results": 3,
+          "candidates": 30,
+          "rerank_candidates": 15,
+          "min_score": 0,
+          "score_kind": "rerank",
+          "clamped": false
+        },
+        "indexing": true,
+        "pending": 0
+      },
+      "after_device_change": {
+        "runtime": {
+          "embed": {
+            "model": "BAAI/bge-m3",
+            "source": "builtin",
+            "requested": "cpu",
+            "state": "ready",
+            "backend": "onnx",
+            "actual": "cpu",
+            "fallback_reason": null
+          },
+          "rerank": {
+            "model": "BAAI/bge-reranker-v2-m3",
+            "source": "builtin",
+            "requested": "cpu",
+            "state": "ready",
+            "backend": "onnx",
+            "actual": "cpu",
+            "fallback_reason": null
+          }
+        },
+        "search": {
+          "results": [
+            {
+              "path": "docs/search.md",
+              "module": ".",
+              "title": "Search",
+              "heading_chain": "Search",
+              "first_line": 4,
+              "last_line": 6,
+              "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+              "score": 0.5548151731491089,
+              "score_kind": "rerank"
+            },
+            {
+              "path": "docs/other.md",
+              "module": ".",
+              "title": "Theme",
+              "heading_chain": "Theme",
+              "first_line": 4,
+              "last_line": 6,
+              "text": "The application supports light and dark themes.",
+              "score": 0.00001619452996237669,
+              "score_kind": "rerank"
+            }
+          ],
+          "applied": {
+            "results": 3,
+            "candidates": 30,
+            "rerank_candidates": 15,
+            "min_score": 0,
+            "score_kind": "rerank",
+            "clamped": false
+          },
+          "indexing": false,
+          "pending": 0
+        }
+      },
+      "job_devices": [
+        null,
+        "cpu"
+      ],
+      "source_result_sha256": "6ef07baa4334f1ba822051256e11285e24781f34fcf8d6e3b088eeb2cc216502"
+    }
+  ]
+}

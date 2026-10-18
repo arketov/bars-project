@@ -12,8 +12,9 @@ import {
 import type { SettingsDoc } from "./types";
 
 const DOC: SettingsDoc = {
-  embed: { source: "builtin", model: "BAAI/bge-m3", base_url: null, api_key_name: null, api_key_env: null, batch_size: 32 },
+  embed: { accelerator: "auto", source: "builtin", model: "BAAI/bge-m3", base_url: null, api_key_name: null, api_key_env: null, batch_size: 32 },
   rerank: {
+    accelerator: "auto",
     enabled: false,
     source: "builtin",
     model: "BAAI/bge-reranker-v2-m3",
@@ -33,11 +34,18 @@ const DOC: SettingsDoc = {
     max_candidates: 100,
     max_rerank_candidates: 50,
   },
-  device: { accelerator: "auto" },
   chunking: { min_chars: 250, max_chars: 6000 },
 };
 
 describe("settings-logic", () => {
+  it("independent device preferences do not change index identity", () => {
+    const draft = clone(DOC);
+    draft.embed.accelerator = "cpu";
+    expect(needsReindex(DOC, draft)).toBe(false);
+    draft.rerank.accelerator = "cpu";
+    expect(needsReindex(DOC, draft)).toBe(false);
+    expect(isDirty(DOC, draft)).toBe(true);
+  });
   it("заводские значения проходят проверку", () => {
     expect(validate(DOC)).toEqual({});
   });

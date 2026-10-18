@@ -406,6 +406,8 @@ impl WorkerHandler {
         ActivityOutput {
             paused: self.worker.is_paused(),
             running: self.worker.progress().map(|progress| RunningJob {
+                embed_device: progress.embed_device,
+                attempt: to_u32(progress.attempt),
                 project: progress.project.display().to_string(),
                 name: name_of(&progress.project),
                 kind: job_kind(progress.kind),
@@ -434,12 +436,19 @@ impl WorkerHandler {
                 .problems()
                 .into_iter()
                 .map(|issues| ProjectProblems {
+                    rebuild_not_applied: issues.rebuild_not_applied,
                     project: issues.project.display().to_string(),
                     name: name_of(&issues.project),
                     files: issues
                         .files
                         .into_iter()
-                        .map(|(path, reason)| FileProblem { path, reason })
+                        .map(|problem| FileProblem {
+                            path: problem.path,
+                            reason: problem.reason,
+                            stage: problem.stage.into(),
+                            attempts: to_u32(problem.attempts),
+                            previous_version: problem.previous_version,
+                        })
                         .collect(),
                     last_error: issues.last_error,
                 })
@@ -526,6 +535,7 @@ impl WorkerHandler {
             downloading: downloading.contains(id),
         };
         ModelsInfoOutput {
+            runtime: self.worker.model_runtime(),
             embed: bars_core::models::builtin_models()
                 .iter()
                 .map(|model| {

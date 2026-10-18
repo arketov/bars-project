@@ -1,6 +1,6 @@
 <script lang="ts">
   import { app } from "./app.svelte";
-  import { projectDot } from "./format";
+  import { projectDot, problemStatus } from "./format";
   import Icon from "./Icon.svelte";
   import { theme } from "./theme.svelte";
   import { filterTree, touchedModules } from "./tree";
@@ -12,7 +12,7 @@
   const touched = $derived(touchedModules(app.tree, app.selected));
   const dot = $derived(
     app.project
-      ? projectDot(app.project, app.progressOf(app.project.path), app.waitingOf(app.project.path))
+      ? projectDot(app.project, app.progressOf(app.project.path), app.waitingOf(app.project.path), app.activity?.problems.find(p => p.project === app.project?.path))
       : null,
   );
   const hasTree = $derived(!!app.project && app.project.state !== "unavailable");
@@ -35,6 +35,8 @@
     if (app.project.state === "unavailable") return ["Папка проекта не найдена", ""];
     if (app.project.state === "reindex_required") return ["Нужна переиндексация", ""];
     if (app.waitingOf(app.project.path) > 0) return [`Ждут ${app.waitingOf(app.project.path)} документов`, "поиск работает по готовому"];
+    const problem = app.activity?.problems.find(p => p.project === app.project?.path);
+    if (problem) return [problemStatus(problem), "See indexing details"];
     if (status?.updated_at) {
       const time = new Date(status.updated_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
       return ["Индекс актуален", `обновлён ${time}`];
@@ -87,7 +89,7 @@
     {#if menuOpen}
       <div class="projmenu" role="menu" tabindex="-1" onclick={(event) => event.stopPropagation()} onkeydown={() => {}}>
         {#each app.projects as project (project.path)}
-          {@const d = projectDot(project, app.progressOf(project.path), app.waitingOf(project.path))}
+          {@const d = projectDot(project, app.progressOf(project.path), app.waitingOf(project.path), app.activity?.problems.find(p => p.project === project.path))}
           <div
             class="pitem"
             class:on={project.path === app.current}
@@ -143,7 +145,7 @@
     <div class="plist">
       <div class="plabel">Проекты</div>
       {#each app.projects as project (project.path)}
-        {@const d = projectDot(project, app.progressOf(project.path), app.waitingOf(project.path))}
+        {@const d = projectDot(project, app.progressOf(project.path), app.waitingOf(project.path), app.activity?.problems.find(p => p.project === project.path))}
         <div
           class="litem"
           class:on={project.path === app.current}

@@ -28,6 +28,9 @@ impl ModelFingerprint {
 
 /// Embed-модель. Одна модель считает один вызов за раз (`docs/architecture/worker.md`).
 pub trait Embedder {
+    fn execution(&self) -> super::ExecutionInfo {
+        super::ExecutionInfo::default()
+    }
     fn fingerprint(&self) -> &ModelFingerprint;
 
     /// Узнаёт то, что отпечаток до первого обращения не знает: размерность внешней модели. Для
@@ -57,6 +60,8 @@ pub trait Embedder {
 pub enum EmbedError {
     #[error("модель не загрузилась: {0}")]
     Load(String),
+    #[error("provider rejected document: {0}")]
+    Rejected(String),
     #[error("эмбеддинг не удался: {0}")]
     Embed(String),
     #[error("модель вернула {got} векторов на {expected} текстов")]

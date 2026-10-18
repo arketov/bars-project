@@ -2,6 +2,7 @@
 // Сцена выбирается параметром адреса: `?scene=empty|indexing|consent|worker-down|provider|missing|cosine|rerank-failed`.
 
 import { BarsError } from "./types";
+import { clone } from "./settings-logic";
 import type {
   ActivityOutput,
   ProjectInfo,
@@ -137,13 +138,12 @@ title: Гибридный поиск
 let paused = false;
 const secrets = new Set<string>();
 let savedSettings: SettingsDoc = {
-  embed: { source: "builtin", model: "BAAI/bge-m3", base_url: null, api_key_name: null, api_key_env: null, batch_size: 32 },
-  rerank: { enabled: false, source: "builtin", model: "BAAI/bge-reranker-v2-m3", base_url: null, api_key_name: null, api_key_env: null },
+  embed: { accelerator: "auto", source: "builtin", model: "BAAI/bge-m3", base_url: null, api_key_name: null, api_key_env: null, batch_size: 32 },
+  rerank: { accelerator: "cpu", enabled: false, source: "builtin", model: "BAAI/bge-reranker-v2-m3", base_url: null, api_key_name: null, api_key_env: null },
   search: {
     candidates: 30, rerank_candidates: 15, results: 5, results_reranked: 3, min_score_vector: 0, min_score_rerank: 0.1,
     agent_min_score: [0, 1], max_results: 20, max_candidates: 100, max_rerank_candidates: 50,
   },
-  device: { accelerator: "auto" },
   chunking: { min_chars: 250, max_chars: 6000 },
 };
 
@@ -155,6 +155,7 @@ function activity(): ActivityOutput {
   return {
     paused,
     running: {
+      embed_device: "directml", attempt: 1,
       project: "C:\\work\\bars-project",
       name: "bars-project",
       kind: scene() === "consent" ? "rebuild" : "check",
@@ -173,7 +174,8 @@ function activity(): ActivityOutput {
       {
         project: "C:\\work\\bars-project",
         name: "bars-project",
-        files: [{ path: "docs/knowledge/spikes/ort-build.md", reason: "файл не UTF-8" }],
+        rebuild_not_applied: false,
+        files: [{ path: "docs/knowledge/spikes/ort-build.md", reason: "файл не UTF-8", stage: "", attempts: 0, previous_version: false }],
         last_error: null,
       },
     ],
@@ -240,12 +242,13 @@ export async function mockCall(method: string, params: Record<string, unknown>):
     case "read":
       return { title: "Гибридный поиск", text: DOC_TEXT };
     case "settings_get":
-      return { file: "C:\\Users\\me\\.bars\\settings.toml", settings: structuredClone(savedSettings), warnings: [] };
+      return { file: "C:\\Users\\me\\.bars\\settings.toml", settings: clone(savedSettings), warnings: [] };
     case "settings_save":
-      savedSettings = structuredClone(params.settings as SettingsDoc);
+      savedSettings = clone(params.settings as SettingsDoc);
       return { saved: true };
     case "models_info":
       return {
+        runtime: null,
         embed: [
           { id: "BAAI/bge-m3", dim: 1024, backend: "onnx", warnings: [], downloaded: true, downloading: false },
           { id: "Qwen/Qwen3-Embedding-0.6B", dim: 1024, backend: "candle", warnings: ["считается на процессоре через candle и заметно медленнее bge-m3"], downloaded: false, downloading: false },

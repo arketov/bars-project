@@ -11,9 +11,16 @@ import {
   remainingSeconds,
   singleLine,
   stateDot,
+  problemStatus,
 } from "./format";
 
 describe("format", () => {
+  it("does not label partial or aborted indexing as current", () => {
+    const problem = {project:"p", name:"p", files:[], last_error:null, rebuild_not_applied:false};
+    expect(problemStatus(problem)).toBe("Index updated with document errors");
+    expect(problemStatus({...problem, last_error:"failed"})).toBe("Index check stopped");
+    expect(problemStatus({...problem, rebuild_not_applied:true})).toBe("Full rebuild not applied");
+  });
   it("имена для людей", () => {
     expect(humanName("hybrid-search.md")).toBe("Hybrid search");
     expect(humanName("agent-tools")).toBe("Agent tools");

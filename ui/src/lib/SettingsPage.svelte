@@ -4,13 +4,18 @@
   import { copyText } from "./api";
   import Icon from "./Icon.svelte";
   import ProviderFields from "./ProviderFields.svelte";
+  import DevicePicker from "./DevicePicker.svelte";
   import ScoreInput from "./ScoreInput.svelte";
   import { settings } from "./settings.svelte";
   import { clone } from "./settings-logic";
   import { theme, type ThemePref } from "./theme.svelte";
   import type { EmbedDoc, InstallClientName, ModelInfo, ModelSourceName, RerankDoc } from "./types";
 
-  onMount(() => void settings.load());
+  onMount(() => {
+    void settings.load();
+    const timer = setInterval(() => void settings.loadModels(), 2000);
+    return () => clearInterval(timer);
+  });
 
   const TABS = [
     ["models", "Модели"],
@@ -188,12 +193,12 @@
         </div>
 
         <div class="group">
-          <div class="ghead"><div class="grow"><h2>Устройство</h2><p>Где считают встроенные модели. Смена устройства переиндексации не требует.</p></div></div>
+          <div class="ghead"><h2>Model devices</h2></div>
           <div class="gbody">
-            <div class="seg">
-              <button class:on={draft.device.accelerator === "auto"} onclick={() => (draft.device.accelerator = "auto")}>Видеокарта, если есть</button>
-              <button class:on={draft.device.accelerator === "cpu"} onclick={() => (draft.device.accelerator = "cpu")}>Только процессор</button>
-            </div>
+            <h3>Embed</h3>
+            <DevicePicker bind:value={draft.embed.accelerator} source={draft.embed.source} role="Embed" cpuOnly={settings.models?.embed.find(m => m.id === draft?.embed.model)?.backend === "candle"} runtime={settings.models?.runtime?.embed} />
+            <h3>Rerank</h3>
+            <DevicePicker bind:value={draft.rerank.accelerator} source={draft.rerank.source} role="Rerank" runtime={settings.models?.runtime?.rerank} />
           </div>
         </div>
       {:else if draft && tab === "search"}
