@@ -122,10 +122,17 @@
           {#if results.results.length}
             <div class="meta">
               <span><b>{results.results.length}</b> {resultsWord(results.results.length)}</span>
-              <span>{results.applied.score_kind === "rerank" ? "реранк" : "без реранка"}</span>
+              <span>{results.applied.score_kind === "rerank" ? "Order: rerank score" : "Order: hybrid"}</span>
               <span>порог <b>{decimal(results.applied.min_score)}</b></span>
               <span>{app.elapsedMs} мс</span>
             </div>
+            <p class="score-help muted">
+              {#if results.applied.score_kind === "cosine"}
+                Bars show cosine similarity, not probability of a correct answer. Hybrid order also considers word matches and exact identifiers; similarity may increase down the list.
+              {:else}
+                Bars show rerank model scores, not probability of a correct answer.
+              {/if}
+            </p>
             {#each results.results as hit, index (hit.path + ":" + hit.first_line)}
               <ResultCard {hit} rank={index + 1} startOpen={index === 0} />
             {/each}
@@ -154,7 +161,7 @@
                 {/if}
                 <li>Переформулируйте запрос: назовите термин, как он записан в документах.</li>
                 {#if app.emptyInfo?.lowest != null}
-                  <li>Понизьте порог для этого запроса — слабые результаты появятся с пометкой «слабо».</li>
+                  <li>Понизьте порог для этого запроса — появятся результаты с меньшей оценкой.</li>
                 {/if}
               </ul>
               <div class="acts">
@@ -197,6 +204,7 @@
   .go { padding: 9px 18px; border-radius: 10px; }
   .results { flex: 1; overflow-y: auto; padding: 4px 32px 80px; min-height: 0; }
   .wrap { max-width: 920px; margin: 0 auto; }
+  .score-help { font-size: 12px; line-height: 1.5; margin: -6px 2px 14px; }
   .meta { color: var(--muted); font-size: 12.5px; margin: 6px 2px 14px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
   .meta b { color: var(--text); font-weight: 600; }
   .count { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12.5px; white-space: nowrap; }

@@ -1,5 +1,5 @@
 // Заглушка воркера для просмотра интерфейса в браузере (`npm run dev`) и для проверок без Tauri.
-// Сцена выбирается параметром адреса: `?scene=empty|indexing|consent|worker-down|provider|missing`.
+// Сцена выбирается параметром адреса: `?scene=empty|indexing|consent|worker-down|provider|missing|cosine|rerank-failed`.
 
 import { BarsError } from "./types";
 import type {
@@ -226,10 +226,13 @@ export async function mockCall(method: string, params: Record<string, unknown>):
       if (scene() === "provider") throw new BarsError("провайдер https://api.example.com не ответил: 401", "provider_error", -32008);
       const query = String(params.query ?? "").toLowerCase();
       const limit = Number(params.limit ?? 3);
-      const found = query.includes("нет") ? [] : HITS.slice(0, limit);
+      const cosine = scene() === "cosine" || scene() === "rerank-failed";
+      const hits = cosine ? HITS.map((hit, i) => ({ ...hit, score: [0.63, 0.60, 0.62][i], score_kind: "cosine" as const })) : HITS;
+      const found = query.includes("нет") ? [] : hits.slice(0, limit);
       return {
         results: found,
-        applied: { results: limit, candidates: 30, rerank_candidates: 15, min_score: 0.3, score_kind: "rerank", clamped: false },
+        applied: { results: limit, candidates: 30, rerank_candidates: 15, min_score: cosine ? 0 : 0.3, score_kind: cosine ? "cosine" : "rerank", clamped: false },
+        rerank_error: scene() === "rerank-failed" ? "Test fixture: rerank unavailable" : null,
         indexing: scene() === "indexing",
         pending: scene() === "indexing" ? 118 : 0,
       };

@@ -11,7 +11,7 @@
   // Раскрытость — выбор пользователя; пока он не трогал карточку, первая раскрыта (main-window.md).
   let toggled = $state<boolean | null>(null);
   const open = $derived(toggled ?? startOpen);
-  const f = $derived(fit(hit.score));
+  const f = $derived(fit(hit.score, hit.score_kind));
   const shown = $derived(app.viewer?.hit.path === hit.path && app.viewer.hit.first_line === hit.first_line);
   const crumbs = $derived(hit.heading_chain.split("/").join(" / "));
   const title = $derived(hit.heading_chain.split("/").pop() || hit.title);
@@ -37,10 +37,10 @@
       <div class="badges"><span class="badge acc">{moduleLabel(hit.module)}</span><span class="badge">{hit.title}</span></div>
       {#if !open}<div class="snippet">{plainText(hit.text)}</div>{/if}
     </div>
-    <div class="fit {f.cls}">
+    <div class="fit {f.cls}" title={f.explanation}>
       <div class="pct">{f.percent}<small>%</small></div>
       <div class="flabel">{f.label}</div>
-      <div class="sbar"><i style="width:{f.percent}%"></i></div>
+      <div class="sbar" role="meter" aria-label={f.label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={f.percent}><i style="width:{f.percent}%"></i></div>
     </div>
     <div class="chev"><Icon name="chevron-down" size={16} /></div>
   </div>
@@ -78,6 +78,7 @@
   .f-good .pct, .f-good .flabel { color: var(--good); } .f-good .sbar i { background: var(--good); }
   .f-mid .pct, .f-mid .flabel { color: var(--mid); } .f-mid .sbar i { background: var(--mid); }
   .f-low .pct, .f-low .flabel { color: var(--low); } .f-low .sbar i { background: var(--low); }
+  .f-cosine .pct, .f-cosine .flabel { color: var(--accent-text); } .f-cosine .sbar i { background: var(--accent); }
   .chev { color: var(--faint); transition: transform .2s; display: grid; place-items: center; }
   .open .chev { transform: rotate(180deg); }
   .cin { padding: 4px 20px 18px 60px; }

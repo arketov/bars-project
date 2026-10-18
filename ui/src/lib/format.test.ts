@@ -21,11 +21,24 @@ describe("format", () => {
     expect(moduleLabel(".")).toBe("(корень)");
   });
 
-  it("оценка: цвет и метка по порогам", () => {
-    expect(fit(0.87)).toEqual({ cls: "f-good", label: "хорошо подходит", percent: 87 });
-    expect(fit(0.6).cls).toBe("f-mid");
-    expect(fit(0.18).cls).toBe("f-low");
-    expect(fit(1.4).percent).toBe(100);
+  it("косинус сохраняет реальное значение без обещания правильности", () => {
+    const bars = [0.63, 0.60, 0.62].map(score => fit(score, "cosine"));
+    expect(bars.map(bar => bar.percent)).toEqual([63, 60, 62]);
+    for (const bar of bars) {
+      expect(bar.cls).toBe("f-cosine");
+      expect(bar.label).toBe("Cosine similarity");
+      expect(bar.explanation).toContain("similarity may increase down the list");
+    }
+  });
+
+  it("вид оценки меняется при возврате без rerank", () => {
+    expect(fit(0.87, "rerank")).toMatchObject({ cls: "f-good", label: "Rerank score", percent: 87 });
+    expect(fit(0.6, "rerank").cls).toBe("f-mid");
+    expect(fit(0.18, "rerank").cls).toBe("f-low");
+    expect(fit(0.18, "cosine").label).toBe("Cosine similarity");
+    expect(fit(0.18, "rerank").explanation).toContain("not probability");
+    expect(fit(1.4, "cosine").percent).toBe(100);
+    expect(fit(-0.2, "cosine").percent).toBe(0);
   });
 
   it("склонения и числа", () => {

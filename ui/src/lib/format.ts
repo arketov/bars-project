@@ -14,14 +14,20 @@ export function moduleLabel(module: string): string {
   return module === "." ? "(корень)" : humanName(module);
 }
 
-export type Fit = { cls: "f-good" | "f-mid" | "f-low"; label: string; percent: number };
+export type Fit = { cls: "f-good" | "f-mid" | "f-low" | "f-cosine"; label: string; percent: number; explanation: string };
 
-/** Цвет и словесная метка оценки: не зависят от палитры (palette.md). */
-export function fit(score: number): Fit {
+/** Полоска показывает оценку модели, а не вероятность правильного ответа (OQ-77). */
+export function fit(score: number, kind: ScoreKind): Fit {
   const percent = Math.round(Math.max(0, Math.min(1, score)) * 100);
-  if (score >= 0.75) return { cls: "f-good", label: "хорошо подходит", percent };
-  if (score >= 0.5) return { cls: "f-mid", label: "частично", percent };
-  return { cls: "f-low", label: "слабо", percent };
+  if (kind === "cosine") return {
+    cls: "f-cosine", label: "Cosine similarity", percent,
+    explanation: "Semantic similarity, not probability of a correct answer. Hybrid order also considers word matches and exact identifiers; similarity may increase down the list.",
+  };
+  return {
+    cls: score >= 0.75 ? "f-good" : score >= 0.5 ? "f-mid" : "f-low",
+    label: "Rerank score", percent,
+    explanation: "Rerank model score, not probability of a correct answer. Results are ordered by this score.",
+  };
 }
 
 /** 0.18 → «0,18». */
