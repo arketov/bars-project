@@ -36,7 +36,7 @@ bars splits each Markdown file into sections by headings and indexes every secti
 
 ## Layout of the documentation
 
-This is advice, not a rule: bars indexes any structure. The layout below is what works well in practice.
+This is advice, not a rule: bars indexes any structure. Read the project's own rules and existing layout first; they take priority. Update an existing document on the topic before creating another. Do not create empty folders or placeholder documents. Paths below are relative to the configured documentation root, which need not be named `docs`.
 
 ```text
 docs/
@@ -45,7 +45,11 @@ docs/
     Index.md
     <topic>.md
   knowledge/                    development knowledge: research, measurements, code conventions
+  architecture/                 structure shared by several features
   adr/                          decisions, one file NNNN-<topic>.md
+  backlog/                      bugs and owner ideas
+    issues.md
+    ideas.md
   features/<name>/              a feature as the user sees it
     Index.md
     requirements.md
@@ -54,6 +58,39 @@ docs/
     log.md
     handoff.md
 ```
+
+### Choose a document: requirements, features, research and decisions
+
+| Document kind | Recommended location | What to write and example |
+|---|---|---|
+| Project requirements | The project's existing main requirements document | Accepted requirements, stable IDs and acceptance criteria. Keep its existing name; feature documents reference IDs instead of copying requirements. Example: MAIN_IDEA.md in bars. |
+| Feature requirements | `features/<name>/requirements.md` | User-visible behaviour, constraints, acceptance checks and links to project requirements; separate owner decisions from proposals. Example: expected behaviour when deleting a project. |
+| Feature description | `features/<name>/<topic>.md` | Current behaviour, inputs, outputs, errors and verification status. Example: `features/search/hybrid-search.md`. |
+| Feature plan | `features/<name>/plan.md` | Remaining steps, dependencies and checks; shrink or remove when finished. Example: instruction delivery steps. |
+| Shared architecture | `architecture/<topic>.md` | Responsibilities, relationships, data and contracts shared by features. Example: `architecture/worker.md`. |
+| Accepted decision and rationale | `adr/NNNN-<topic>.md` | Status, date, context, decision, consequences, rejected alternatives, Where applied; quote the owner's decision with its date. Example: the owner selected a storage design. An agent proposal is not an accepted decision. |
+| Research, comparison or measurement | `knowledge/<topic>.md` | Question, method, sources/evidence, findings, limits, next discriminating experiment. Date snapshot filenames, e.g. `search-2026-10-18.md`. A measurement does not establish implementation. |
+
+Feature-only requirements belong in the feature's `requirements.md`; the main requirements document owns project-wide rules. Do not expand the main document with feature-only details unless the owner or project rules explicitly ask for that. Link to shared requirement IDs instead.
+
+### Where to record bugs and owner ideas
+
+Use the project's existing registers when provided; otherwise `backlog/` is the recommended location. Preserve existing IDs and authorship.
+
+| Document kind | Recommended location | What to write and example |
+|---|---|---|
+| Bug | `backlog/issues.md` | Stable ID, source/date, symptom, known reproduction steps, expected/actual behaviour, status, fix and verification links. Example: search fails for a known input. Do not invent a cause or missing steps. |
+| Owner idea | `backlog/ideas.md` | Stable ID, source/date, owner's need, status, links to design and delivery. Example: a new search button. An idea is not yet an accepted requirement or decision. |
+
+### Where to record session events, handoffs and indexes
+
+| Document kind | Recommended location | What to write and example |
+|---|---|---|
+| Session event | `chats/<YYYY-MM-DD>-<topic>/log.md` | At most three lines for a finding, failed approach, changed plan or risky step; append without rereading. Example: why an experiment changed. |
+| Session handoff | `chats/<YYYY-MM-DD>-<topic>/handoff.md` | Done, Not done, Difficulties, Next; at most a screen. Example: the check the next session should run. |
+| Folder index | That folder's `Index.md` | Parent link and each file/subfolder with when to read it; update together with contents. Individual session folders are exempt. |
+
+A mixed task can produce linked documents: bug in the register, measured cause in knowledge, accepted behaviour in the feature, architectural rationale in an ADR. Keep one source for each fact. Session history stays in the journal; current product behaviour stays in the feature. Unaccepted proposals remain labelled proposals in research or plans.
 
 ### Modules
 

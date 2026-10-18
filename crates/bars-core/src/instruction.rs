@@ -53,6 +53,28 @@ mod tests {
     }
 
     #[test]
+    fn custom_root_sync_preserves_the_projects_layout() {
+        let project = tempfile::tempdir().unwrap();
+        let root = project.path().join("manual");
+        fs::create_dir_all(root.join("existing-notes")).unwrap();
+        let source = root.join("existing-notes/bugs.md");
+        fs::write(&source, "# Project bugs\n\nKeep this location.\n").unwrap();
+        let original = fs::read(&source).unwrap();
+
+        assert!(sync(project.path(), "manual").unwrap());
+        assert_eq!(fs::read(&source).unwrap(), original);
+        assert!(!project.path().join("docs").exists());
+        for suggested in ["backlog", "features", "adr", "chats"] {
+            assert!(!root.join(suggested).exists());
+        }
+        assert_eq!(
+            fs::read_to_string(root.join(INSTRUCTION_FILE)).unwrap(),
+            INSTRUCTION_TEXT
+        );
+        assert!(!sync(project.path(), "manual").unwrap());
+    }
+
+    #[test]
     fn missing_docs_root_is_not_created() {
         let project = tempfile::tempdir().unwrap();
         assert!(!sync(project.path(), "docs").unwrap());

@@ -122,7 +122,11 @@ try {
     Write-Fixture (Join-Path $fixtureHome '.claude/settings.json') $oldHook
     Write-Fixture (Join-Path $fixtureHome '.codex/config.toml') "# foreign comment`n[mcp_servers.other]`ncommand = 'other'`n[mcp_servers.bars]`ncommand = 'old/bars-mcp'`n"
     Write-Fixture (Join-Path $fixtureHome '.codex/hooks.json') $oldHook
-    Write-Fixture (Join-Path $fixtureHome '.agents/skills/bars-docs/SKILL.md') 'user edit'
+    foreach ($base in @('.agents/skills','.claude/skills')) {
+        foreach ($skill in @('bars-docs','bars-session-log')) {
+            Write-Fixture (Join-Path $fixtureHome "$base/$skill/SKILL.md") 'old skill text'
+        }
+    }
     Write-Fixture (Join-Path $fixtureHome '.agents/skills/foreign/SKILL.md') 'foreign'
     $active = Start-Session '01-update'
     Wait-Until { $path = Join-Path $fixtureHome '.agents/skills/bars-session-log/SKILL.md'; Test-Path -LiteralPath $path }

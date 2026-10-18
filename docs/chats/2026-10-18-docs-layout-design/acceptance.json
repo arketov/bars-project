@@ -1,0 +1,297 @@
+{
+  "date": "2026-10-18",
+  "platform": "Windows",
+  "client": "codex-cli 0.163.0-alpha.10.2",
+  "model": "CLI default; exact identifier not reported in JSONL",
+  "hashes": {
+    "instruction": "9c41436ae1c9400b5945c386657a0a89726f0a7012609c75d755f3cdc869d172",
+    "bars_docs": "3eda86c4b7719cccb672f7e4a1d0c2f9ab81d179be9b88581a10957b7272e958",
+    "bars_session_log": "321126855e0c6914376073ef26a311b3632718c4fb2bb4c50b2d379b8c03aa14"
+  },
+  "tests": {
+    "core": 3,
+    "worker_clients": 15,
+    "mcp": 9
+  },
+  "client_refresh": {
+    "codex_config_read": true,
+    "mcp_stdio": true,
+    "sessions": 6,
+    "passed": true,
+    "skills_junction": true
+  },
+  "delivery": {
+    "layout_preserved": true,
+    "instruction_repaired": true,
+    "custom_root": "manual",
+    "fake_models": true,
+    "noop_mtime": true,
+    "passed": true
+  },
+  "ai_sessions": [
+    {
+      "mode": "instruction",
+      "scenario": "standard",
+      "code": 0,
+      "seconds": 90.776,
+      "instruction_sha256": "9c41436ae1c9400b5945c386657a0a89726f0a7012609c75d755f3cdc869d172",
+      "checks": {
+        "bug": true,
+        "idea": true,
+        "research": true,
+        "decision": true,
+        "requirements": true,
+        "current": true,
+        "log": true,
+        "handoff": true,
+        "one_source": true
+      },
+      "files": [
+        "AGENTS.md",
+        "docs/adr/0001-metadata-storage.md",
+        "docs/adr/Index.md",
+        "docs/architecture/Index.md",
+        "docs/architecture/storage.md",
+        "docs/backlog/ideas.md",
+        "docs/backlog/Index.md",
+        "docs/backlog/issues.md",
+        "docs/BARS_INSTRUCTION.md",
+        "docs/chats/2026-10-18-docs-records/handoff.md",
+        "docs/chats/2026-10-18-docs-records/log.md",
+        "docs/chats/Index.md",
+        "docs/features/export/Index.md",
+        "docs/features/export/requirements.md",
+        "docs/features/Index.md",
+        "docs/Index.md",
+        "docs/knowledge/Index.md",
+        "docs/knowledge/search-2026-10-18.md",
+        "SPEC.md"
+      ],
+      "passed": true
+    },
+    {
+      "mode": "instruction",
+      "scenario": "override",
+      "code": 0,
+      "seconds": 48.559,
+      "instruction_sha256": "9c41436ae1c9400b5945c386657a0a89726f0a7012609c75d755f3cdc869d172",
+      "checks": {
+        "bug": true,
+        "research": true,
+        "handoff": true,
+        "priority": true
+      },
+      "files": [
+        "AGENTS.md",
+        "manual/BARS_INSTRUCTION.md",
+        "manual/Index.md",
+        "manual/next.md",
+        "manual/perf.md",
+        "manual/tickets.md",
+        "SPEC.md"
+      ],
+      "passed": true
+    },
+    {
+      "mode": "skills",
+      "scenario": "standard",
+      "code": 0,
+      "seconds": 81.943,
+      "instruction_sha256": "9c41436ae1c9400b5945c386657a0a89726f0a7012609c75d755f3cdc869d172",
+      "checks": {
+        "bug": true,
+        "idea": true,
+        "research": true,
+        "decision": true,
+        "requirements": true,
+        "current": true,
+        "log": true,
+        "handoff": true,
+        "one_source": true
+      },
+      "files": [
+        "AGENTS.md",
+        "docs/adr/0001-metadata-storage.md",
+        "docs/adr/Index.md",
+        "docs/architecture/Index.md",
+        "docs/architecture/storage.md",
+        "docs/backlog/ideas.md",
+        "docs/backlog/Index.md",
+        "docs/backlog/issues.md",
+        "docs/chats/2026-10-18-docs-records/handoff.md",
+        "docs/chats/2026-10-18-docs-records/log.md",
+        "docs/chats/Index.md",
+        "docs/features/export/Index.md",
+        "docs/features/export/requirements.md",
+        "docs/features/Index.md",
+        "docs/Index.md",
+        "docs/knowledge/Index.md",
+        "docs/knowledge/search-2026-10-18.md",
+        "SPEC.md"
+      ],
+      "passed": true
+    },
+    {
+      "mode": "skills",
+      "scenario": "override",
+      "code": 0,
+      "seconds": 44.115,
+      "instruction_sha256": "9c41436ae1c9400b5945c386657a0a89726f0a7012609c75d755f3cdc869d172",
+      "checks": {
+        "bug": true,
+        "research": true,
+        "handoff": true,
+        "priority": true
+      },
+      "files": [
+        "AGENTS.md",
+        "manual/Index.md",
+        "manual/next.md",
+        "manual/perf.md",
+        "manual/tickets.md",
+        "SPEC.md"
+      ],
+      "passed": true
+    }
+  ],
+  "rag": [
+    {
+      "kind": "requirements",
+      "paths": [
+        {
+          "path": "docs/features/docs-convention/layout.md",
+          "heading": "Рекомендуемая раскладка docs — база знаний, решения, фичи, журнал сессий/Выбор документа: вид, папка и содержание",
+          "score": 0.9672318
+        },
+        {
+          "path": "docs/features/docs-convention/layout.md",
+          "heading": "Рекомендуемая раскладка docs — база знаний, решения, фичи, журнал сессий",
+          "score": 0.21850291
+        }
+      ],
+      "applied": {
+        "results": 2,
+        "candidates": 30,
+        "rerank_candidates": 30,
+        "min_score": 0.1,
+        "score_kind": "rerank",
+        "clamped": false
+      }
+    },
+    {
+      "kind": "architecture",
+      "paths": [
+        {
+          "path": "docs/features/docs-convention/layout.md",
+          "heading": "Рекомендуемая раскладка docs — база знаний, решения, фичи, журнал сессий/Выбор документа: вид, папка и содержание",
+          "score": 0.75747234
+        },
+        {
+          "path": "docs/features/docs-convention/layout.md",
+          "heading": "Рекомендуемая раскладка docs — база знаний, решения, фичи, журнал сессий/Фичи features",
+          "score": 0.52539575
+        }
+      ],
+      "applied": {
+        "results": 2,
+        "candidates": 30,
+        "rerank_candidates": 30,
+        "min_score": 0.1,
+        "score_kind": "rerank",
+        "clamped": false
+      }
+    },
+    {
+      "kind": "decision",
+      "paths": [
+        {
+          "path": "docs/features/docs-convention/layout.md",
+          "heading": "Рекомендуемая раскладка docs — база знаний, решения, фичи, журнал сессий/База знаний knowledge",
+          "score": 0.4158326
+        },
+        {
+          "path": "docs/features/docs-convention/layout.md",
+          "heading": "Рекомендуемая раскладка docs — база знаний, решения, фичи, журнал сессий/Как выбирать место при смешанной задаче",
+          "score": 0.22501709
+        }
+      ],
+      "applied": {
+        "results": 2,
+        "candidates": 30,
+        "rerank_candidates": 30,
+        "min_score": 0.1,
+        "score_kind": "rerank",
+        "clamped": false
+      }
+    },
+    {
+      "kind": "research",
+      "paths": [
+        {
+          "path": "docs/features/docs-convention/layout.md",
+          "heading": "Рекомендуемая раскладка docs — база знаний, решения, фичи, журнал сессий/Где записывать баги и пожелания автора",
+          "score": 0.5287275
+        },
+        {
+          "path": "docs/features/docs-convention/layout.md",
+          "heading": "Рекомендуемая раскладка docs — база знаний, решения, фичи, журнал сессий/Выбор документа: вид, папка и содержание",
+          "score": 0.48837626
+        }
+      ],
+      "applied": {
+        "results": 2,
+        "candidates": 30,
+        "rerank_candidates": 30,
+        "min_score": 0.24,
+        "score_kind": "cosine",
+        "clamped": false
+      }
+    },
+    {
+      "kind": "backlog",
+      "paths": [
+        {
+          "path": "docs/features/docs-convention/layout.md",
+          "heading": "Рекомендуемая раскладка docs — база знаний, решения, фичи, журнал сессий/Где записывать баги и пожелания автора",
+          "score": 0.7179681
+        },
+        {
+          "path": "docs/features/docs-convention/layout.md",
+          "heading": "Рекомендуемая раскладка docs — база знаний, решения, фичи, журнал сессий",
+          "score": 0.59117216
+        }
+      ],
+      "applied": {
+        "results": 2,
+        "candidates": 30,
+        "rerank_candidates": 30,
+        "min_score": 0.24,
+        "score_kind": "cosine",
+        "clamped": false
+      }
+    },
+    {
+      "kind": "session",
+      "paths": [
+        {
+          "path": "docs/features/docs-convention/layout.md",
+          "heading": "Рекомендуемая раскладка docs — база знаний, решения, фичи, журнал сессий/Куда писать журнал сессии и оглавления",
+          "score": 0.6012756
+        },
+        {
+          "path": "docs/features/docs-convention/layout.md",
+          "heading": "Рекомендуемая раскладка docs — база знаний, решения, фичи, журнал сессий/Где записывать баги и пожелания автора",
+          "score": 0.56968784
+        }
+      ],
+      "applied": {
+        "results": 2,
+        "candidates": 30,
+        "rerank_candidates": 30,
+        "min_score": 0.24,
+        "score_kind": "cosine",
+        "clamped": false
+      }
+    }
+  ]
+}

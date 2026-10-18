@@ -1,11 +1,24 @@
 ---
 name: bars-session-log
-description: How to keep the session journal in docs/chats: log.md for a reason and handoff.md at the end, and how to start from the latest handoff. Use at the start and end of a session and on a non-obvious finding or a change of plan.
+description: "Start, maintain or finish a project session journal."
 ---
 
 # Session journal
 
-Every session the user talks to keeps a folder `docs/chats/<YYYY-MM-DD>-<topic>/`. The topic is 2–4 words in Latin letters joined by hyphens. Subagents keep no journal: their result goes to the journal of the main session.
+Follow the project's own rules and locations first. Otherwise, use `chats/<YYYY-MM-DD>-<topic>/` under its configured documentation root (not necessarily `docs/`). The layout is advice; bars accepts other structures. The topic is 2–4 words in Latin letters joined by hyphens. Each session the user talks to has its own folder; subagents keep no journal: their result goes to the main session's journal. Do not create placeholders or empty folders.
+
+## Choose the right record
+
+| Content | Recommended location | Example and writing rule |
+|---|---|---|
+| Session event | Session `log.md` | Failed experiment or changed approach; at most three lines, append without rereading. |
+| Session handoff | Session `handoff.md` | Done, Not done, Difficulties, Next; at most a screen. |
+| Enduring research or measurement | `knowledge/<topic>.md` | Method, evidence, findings and limits; a journal entry links to it. A measurement is not a shipped change. |
+| Accepted rationale | `adr/NNNN-<topic>.md` | Owner-selected architecture, dated decision and consequences; a proposal is not an accepted ADR. |
+| Bug | `backlog/issues.md` | ID, source/date, symptom, known steps, expected/actual, status, verification; do not invent a cause. A log entry is not the bug's only record. |
+| Owner idea | `backlog/ideas.md` | ID, source/date, need, status and design links; not an accepted requirement. |
+
+Update existing documents before creating duplicates. Current behaviour and feature requirements belong in `features/<name>/`; shared structure belongs in `architecture/`. See `bars-docs` for the full document-kind table, format and Index.md rules. Link records instead of copying their text. Update the owning folder's index when adding a topic; individual session folders need no Index.md.
 
 ## Start of a session
 

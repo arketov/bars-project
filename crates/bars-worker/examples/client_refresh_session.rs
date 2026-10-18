@@ -2,12 +2,16 @@
 //! Запускать только с BARS_USER_HOME; остановка — файл stop в этой папке.
 use bars_protocol::Endpoint;
 use bars_worker::serve::{bars_home, serve_with};
-use bars_worker::worker::{BuiltinProvider, WorkerConfig};
+use bars_worker::worker::{BuiltinProvider, ModelProvider, WorkerConfig};
 use std::sync::Arc;
 use std::time::Duration;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    #[cfg(not(feature = "test-support"))]
+    if std::env::var("BARS_TEST_FAKE_MODELS").as_deref() == Ok("1") {
+        return Err("BARS_TEST_FAKE_MODELS требует сборку --features test-support".into());
+    }
     let home = std::env::var_os("BARS_USER_HOME")
         .filter(|s| !s.is_empty())
         .ok_or("client_refresh_session требует BARS_USER_HOME")?;
@@ -29,7 +33,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         env.cli_exe = bin.join(format!("bars-cli{}", std::env::consts::EXE_SUFFIX));
     }
     let endpoint = Endpoint::current()?;
-    let provider = Arc::new(BuiltinProvider::new(home.join(".bars/models")));
+    let provider: Arc<dyn ModelProvider> =
+        Arc::new(BuiltinProvider::new(home.join(".bars/models")));
+    // Для проверки доставки документации инференс заменяется только в test-support сборке.
+    #[cfg(feature = "test-support")]
+    let provider: Arc<dyn ModelProvider> =
+        if std::env::var("BARS_TEST_FAKE_MODELS").as_deref() == Ok("1") {
+            bars_worker::worker::models::fake::FakeProvider::new("docs-fixture")
+        } else {
+            provider
+        };
     let (ready, receive) = tokio::sync::oneshot::channel();
     let mut server = tokio::spawn(async move {
         serve_with(config, &endpoint, provider, |handler| {

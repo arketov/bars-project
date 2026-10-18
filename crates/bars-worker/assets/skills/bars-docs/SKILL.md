@@ -1,6 +1,6 @@
 ---
 name: bars-docs
-description: How to keep the documentation of a project indexed by bars: docs layout, file format, ADRs, feature lifecycle, Index.md files. Use when you create, move or edit documents in docs/.
+description: "Create, edit or move project documentation."
 ---
 
 # Documentation for bars
@@ -20,6 +20,39 @@ bars splits Markdown by headings and searches by section, so the shape of a docu
 - No secrets (keys, tokens, passwords).
 
 ## Layout (advice)
+
+Project rules and existing locations take priority. Paths below are relative to the configured documentation root, not necessarily `docs/`. Search for the existing document on the topic first. Create a new document only for a new topic; no empty folders or placeholders.
+
+### Requirements, features, research and decisions
+
+| Document kind | Recommended location | Content and example |
+|---|---|---|
+| Project requirements | Existing main requirements document | Accepted requirements, stable IDs, acceptance criteria; keep the project's name and location. Example: MAIN_IDEA.md in bars. Reference IDs from features, do not duplicate requirements. |
+| Feature requirements | `features/<name>/requirements.md` | User behaviour, constraints, acceptance checks, links to project requirements. Example: deleting a project. Distinguish owner decisions from proposals. |
+| Feature description | `features/<name>/<topic>.md` | Current behaviour, inputs, results, errors, verification status. Example: `features/search/hybrid-search.md`. |
+| Feature plan | `features/<name>/plan.md` | Remaining steps, dependencies, checks; shrink or remove after delivery. Example: instruction delivery steps. |
+| Shared architecture | `architecture/<topic>.md` | Shared responsibilities, relationships, data and contracts. Example: `architecture/worker.md`. |
+| Accepted decision | `adr/NNNN-<topic>.md` | Status, date, context, decision, consequences, rejected options, Where applied; quote owner decisions with their dates. Example: owner-selected storage. Do not promote agent proposals to accepted decisions. |
+| Research or measurement | `knowledge/<topic>.md` | Question, method, sources/evidence, findings, limits, next experiment. Date snapshots, e.g. `search-2026-10-18.md`; measurement is not implementation. |
+
+Feature-only requirements stay in the feature's `requirements.md`, not in the main project-wide requirements document, unless the owner or project rules explicitly request otherwise. Link shared requirement IDs instead of expanding or duplicating the main document.
+
+### Bugs and owner ideas
+
+| Document kind | Recommended location | Content and example |
+|---|---|---|
+| Bug | `backlog/issues.md` | Stable ID, source/date, symptom, known steps, expected/actual, status, fix and verification links. Example: a failed search. Do not invent a cause or missing steps. |
+| Owner idea | `backlog/ideas.md` | Stable ID, source/date, owner's need, status, design and delivery links. Example: a requested button. An idea is not an accepted requirement or decision. |
+
+### Session records and indexes
+
+| Document kind | Recommended location | Content and example |
+|---|---|---|
+| Session event | `chats/<YYYY-MM-DD>-<topic>/log.md` | Finding, failed approach, plan change or risky step; at most three lines appended without rereading. Example: why an experiment changed. |
+| Handoff | `chats/<YYYY-MM-DD>-<topic>/handoff.md` | Done, Not done, Difficulties, Next; at most a screen. Example: where the next session starts. |
+| Index | The folder's `Index.md` | Parent link and every file/subfolder with when to read it; update together with contents. Individual session folders are exempt. |
+
+For a mixed task, link the bug register, research, feature description and accepted ADR; do not copy the same fact among them. The journal records session history, not the only copy of a bug or enduring knowledge. Unaccepted proposals remain labelled in research or plans.
 
 - `Index.md` in every folder except session folders: back-link to the parent and a table «file — when to read» listing every file and subfolder. Change it in the same change as the files.
 - Module — a first-level subfolder; documents of one area go into one module.
