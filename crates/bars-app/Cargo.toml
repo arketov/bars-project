@@ -10,6 +10,7 @@ name = "bars"
 path = "src/main.rs"
 
 [dependencies]
+log.workspace = true
 anyhow.workspace = true
 bars-protocol.workspace = true
 bars-worker.workspace = true
@@ -22,3 +23,6 @@ tokio.workspace = true
 
 [build-dependencies]
 tauri-build.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

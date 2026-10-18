@@ -17,9 +17,9 @@ import {
 describe("format", () => {
   it("does not label partial or aborted indexing as current", () => {
     const problem = {project:"p", name:"p", files:[], last_error:null, rebuild_not_applied:false};
-    expect(problemStatus(problem)).toBe("Index updated with document errors");
-    expect(problemStatus({...problem, last_error:"failed"})).toBe("Index check stopped");
-    expect(problemStatus({...problem, rebuild_not_applied:true})).toBe("Full rebuild not applied");
+    expect(problemStatus(problem)).toBe("Индекс обновлён с ошибками в документах");
+    expect(problemStatus({...problem, last_error:"failed"})).toBe("Проверка индекса остановлена");
+    expect(problemStatus({...problem, rebuild_not_applied:true})).toBe("Полная переиндексация не применена");
   });
   it("имена для людей", () => {
     expect(humanName("hybrid-search.md")).toBe("Hybrid search");
@@ -33,17 +33,17 @@ describe("format", () => {
     expect(bars.map(bar => bar.percent)).toEqual([63, 60, 62]);
     for (const bar of bars) {
       expect(bar.cls).toBe("f-cosine");
-      expect(bar.label).toBe("Cosine similarity");
-      expect(bar.explanation).toContain("similarity may increase down the list");
+      expect(bar.label).toBe("Косинусная близость");
+      expect(bar.explanation).toContain("близость может возрастать вниз по списку");
     }
   });
 
   it("вид оценки меняется при возврате без rerank", () => {
-    expect(fit(0.87, "rerank")).toMatchObject({ cls: "f-good", label: "Rerank score", percent: 87 });
+    expect(fit(0.87, "rerank")).toMatchObject({ cls: "f-good", label: "Оценка rerank", percent: 87 });
     expect(fit(0.6, "rerank").cls).toBe("f-mid");
     expect(fit(0.18, "rerank").cls).toBe("f-low");
-    expect(fit(0.18, "cosine").label).toBe("Cosine similarity");
-    expect(fit(0.18, "rerank").explanation).toContain("not probability");
+    expect(fit(0.18, "cosine").label).toBe("Косинусная близость");
+    expect(fit(0.18, "rerank").explanation).toContain("а не вероятность правильного ответа");
     expect(fit(1.4, "cosine").percent).toBe(100);
     expect(fit(-0.2, "cosine").percent).toBe(0);
   });

@@ -1,0 +1,11 @@
+{
+  "utc": "2026-10-18T08:55:01.2544299Z",
+  "installed_pid": 42368,
+  "installed_start_utc": "2026-10-18T07:54:28.0579853Z",
+  "installed_exe_sha256": "9695CEB2B11D0A1CEA096D959F73184F6C757D65588D7DD8C34626121731B406",
+  "private_bytes": 7922470912,
+  "working_set_bytes": 194203648,
+  "region_private_committed_bytes": 7853703168.0,
+  "current_available_bytes": 18086850560,
+  "current_commit_headroom_bytes": 39688949760
+}

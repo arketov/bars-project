@@ -10,6 +10,7 @@ publish.workspace = true
 test-support = []
 
 [dependencies]
+log.workspace = true
 bars-core.workspace = true
 bars-protocol.workspace = true
 tokio.workspace = true
@@ -19,6 +20,7 @@ interprocess.workspace = true
 notify.workspace = true
 notify-debouncer-full.workspace = true
 serde.workspace = true
+rusqlite.workspace = true
 toml.workspace = true
 toml_edit.workspace = true
 widestring.workspace = true
@@ -30,3 +32,8 @@ windows-sys.workspace = true
 [dev-dependencies]
 bars-core = { workspace = true, features = ["test-support"] }
 tempfile.workspace = true
+
+[target.'cfg(windows)'.dev-dependencies]
+blake3.workspace = true
+fastembed.workspace = true
+ort = { workspace = true, features = ["directml"] }

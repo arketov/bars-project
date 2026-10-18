@@ -15,6 +15,16 @@ use crate::session::Session;
 
 /// Выполняет вызовы, которые пережили проверку сессии. `hello` обрабатывает сам цикл соединения.
 pub trait Handler: Send + Sync + 'static {
+    /// Контекст одного соединения; реализация по умолчанию не собирает статистику.
+    fn handle_session(
+        &self,
+        _session: &str,
+        client: ClientKind,
+        call: Call,
+    ) -> impl Future<Output = Result<Value, RpcError>> + Send {
+        self.handle(client, call)
+    }
+
     fn handle(
         &self,
         client: ClientKind,
@@ -35,6 +45,16 @@ where
     let (read_half, mut writer) = tokio::io::split(stream);
     let mut reader = BufReader::new(read_half);
     let mut session = Session::new();
+    static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+    let connection_id = format!(
+        "{}-{}-{}",
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_nanos(),
+        std::process::id(),
+        NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
+    );
     loop {
         let line = match read_line_limited(&mut reader, MAX_REQUEST_LINE).await {
             Ok(Some(line)) => line,
@@ -69,7 +89,7 @@ where
             ),
             Ok(call) => {
                 let client = session.client().expect("после hello клиент известен");
-                match handler.handle(client, call).await {
+                match handler.handle_session(&connection_id, client, call).await {
                     Ok(result) => Response::ok(id, result),
                     Err(error) => Response::err(Some(id), error),
                 }

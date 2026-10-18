@@ -153,6 +153,35 @@ fn paths(response: &SearchResponse) -> Vec<&str> {
 }
 
 #[test]
+fn bounded_cosines_match_full_scan_and_keep_text_candidates() {
+    let (_dir, index, _) = project();
+    let query = vec![0.125_f32; DIM];
+    let scope = Scope::build(&index, &request("поиск")).unwrap();
+    let mut statement = index.conn().prepare(
+        "SELECT c.id, v.vector FROM chunks c JOIN vectors v ON v.embed_hash=c.embed_hash"
+    ).unwrap();
+    let full: HashMap<i64, f32> = statement.query_map([], |row| {
+        let id = row.get(0)?;
+        let blob: Vec<u8> = row.get(1)?;
+        let vector = crate::storage::decode_vector(&blob);
+        Ok((id, vector.iter().zip(&query).map(|(a,b)| a*b).sum()))
+    }).unwrap().collect::<Result<_,_>>().unwrap();
+    let mut ids: Vec<_> = full.keys().copied().collect();
+    ids.sort();
+    for k in [0, 1, 2, 100] {
+        let text: Vec<_> = ids.iter().take(k).copied().collect();
+        let exact: Vec<_> = ids.iter().rev().take(k).copied().collect();
+        let bounded = scope.cosines(&index, &query, k, &text, &exact).unwrap();
+        assert!(bounded.len() <= 3*k);
+        assert_eq!(top_by_score(&bounded,k), top_by_score(&full,k));
+        for (id,score) in &bounded { assert_eq!(score.to_bits(), full[id].to_bits()); }
+        for id in text.iter().chain(&exact) { assert_eq!(bounded[id].to_bits(), full[id].to_bits()); }
+    }
+    assert!(matches!(scope.cosines(&index, &query[..DIM-1], 1, &[], &[]),
+        Err(SearchError::VectorSize { expected, got }) if expected == DIM-1 && got == DIM));
+}
+
+#[test]
 fn exact_identifier_is_found_first() {
     let (_dir, index, mut embedder) = project();
 

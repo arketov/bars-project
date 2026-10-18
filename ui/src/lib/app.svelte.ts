@@ -3,10 +3,12 @@
 
 import { call, joinPath, openPath, pickFolder } from "./api";
 import { documentsIn } from "./format";
+import { NotificationCenter, type Notice } from "./notifications";
 import { buildTree, searchScope, toggle, type SearchScope, type TreeNode } from "./tree";
 import {
   BarsError,
   type ActivityOutput,
+  type ModelsInfoOutput,
   type ProjectInfo,
   type ProjectsOutput,
   type ReadOutput,
@@ -72,8 +74,31 @@ class App {
   emptyInfo = $state<{ best: number | null; lowest: number | null } | null>(null);
   viewer = $state<ViewedDocument | null>(null);
   consentOpen = $state(false);
+  deletingProject = $state<ProjectInfo | null>(null);
+  deleteBusy = $state(false);
+  deleteError = $state<string | null>(null);
+  #epoch = 0;
+  #searchId = 0;
   /** Сообщение внизу окна: результат действия или ошибка. */
   toast = $state<{ text: string; bad: boolean } | null>(null);
+  notifications = $state<Notice[]>([]);
+  models = $state<ModelsInfoOutput | null>(null);
+  #notifications = new NotificationCenter();
+  #refreshing = false;
+  #modelsPending: Promise<void> | null = null;
+
+  readNotifications(): void { this.#notifications.read(); this.publishNotifications(); }
+  clearNotifications(): void { this.#notifications.clear(); this.publishNotifications(); }
+  observeModels(models: ModelsInfoOutput): void { this.#notifications.models(models); this.publishNotifications(); }
+  loadModels(): Promise<void> {
+    if (this.#modelsPending) return this.#modelsPending;
+    this.#modelsPending = call<ModelsInfoOutput>("models_info").then(models => {
+      this.models = models;
+      this.observeModels(models);
+    }).finally(() => { this.#modelsPending = null; });
+    return this.#modelsPending;
+  }
+  private publishNotifications(): void { this.notifications = this.#notifications.items.map(n => ({ ...n })); }
 
   #timer: ReturnType<typeof setInterval> | null = null;
   #tick = 0;
@@ -118,6 +143,11 @@ class App {
   }
 
   flash(text: string, bad = false): void {
+    if (bad) {
+      this.#notifications.resolve(`action:${text}`);
+      this.#notifications.error(`action:${text}`, "Ошибка действия", text);
+      this.publishNotifications();
+    }
     this.toast = { text, bad };
     setTimeout(() => {
       if (this.toast?.text === text) this.toast = null;
@@ -125,25 +155,43 @@ class App {
   }
 
   async refresh(force: boolean): Promise<void> {
+    if (this.#refreshing) return;
+    this.#refreshing = true;
     this.#tick += 1;
+    const epoch = this.#epoch;
     try {
       const activity = await call<ActivityOutput>("activity");
+      if (epoch !== this.#epoch) return;
       const changed = JSON.stringify(activity.running?.project) !== JSON.stringify(this.activity?.running?.project)
         || activity.queue.length !== (this.activity?.queue.length ?? 0);
       this.activity = activity;
+      this.#notifications.activity(activity);
+      // Отдельный сбой каталога не означает остановку загрузок или всего воркера.
+      try { await this.loadModels(); } catch { /* Сохраняем последний снимок. */ }
+      this.publishNotifications();
       this.#failures = 0;
       this.workerDown = null;
+      this.#notifications.resolve("worker");
       if (force || changed || this.#tick % PROJECTS_EVERY === 0) await this.loadProjects();
       if (this.current) await this.loadStatus();
     } catch (error) {
+      if (epoch !== this.#epoch) return;
       this.#failures += 1;
       // Одна осечка — не повод пугать пользователя.
       if (this.#failures >= 2) this.workerDown = error instanceof Error ? error.message : String(error);
+      if (this.workerDown) {
+        this.#notifications.error("worker", "Воркер недоступен", this.workerDown);
+        this.publishNotifications();
+      }
+    } finally {
+      this.#refreshing = false;
     }
   }
 
   async loadProjects(): Promise<void> {
+    const epoch = this.#epoch;
     const { projects } = await call<ProjectsOutput>("projects");
+    if (epoch !== this.#epoch) return;
     this.projects = projects;
     this.projectsLoaded = true;
     if (!projects.some((project) => project.path === this.current)) {
@@ -156,10 +204,12 @@ class App {
 
   async loadStatus(): Promise<void> {
     if (!this.current) return;
+    const path = this.current, epoch = this.#epoch;
     try {
-      this.status = await call<StatusOutput>("status", { cwd: this.current, project: this.current });
+      const status = await call<StatusOutput>("status", { cwd: path, project: path });
+      if (path === this.current && epoch === this.#epoch) this.status = status;
     } catch {
-      this.status = null;
+      if (path === this.current && epoch === this.#epoch) this.status = null;
     }
   }
 
@@ -168,16 +218,20 @@ class App {
       this.tree = [];
       return;
     }
+    const path = this.current, epoch = this.#epoch;
     try {
-      const output = await call<TreeOutput>("tree", { cwd: this.current, project: this.current });
+      const output = await call<TreeOutput>("tree", { cwd: path, project: path });
+      if (path !== this.current || epoch !== this.#epoch) return;
       this.docsRoot = output.docs_root;
       this.tree = buildTree(output.documents, output.docs_root);
     } catch {
-      this.tree = [];
+      if (path === this.current && epoch === this.#epoch) this.tree = [];
     }
   }
 
   async select(path: string | null): Promise<void> {
+    this.#searchId++;
+    this.searching = false;
     this.current = path;
     try {
       if (path) localStorage.setItem(PROJECT_KEY, path);
@@ -188,6 +242,8 @@ class App {
     this.selected = new Set();
     this.filter = "";
     this.results = null;
+    this.searchedQuery = "";
+    this.emptyInfo = null;
     this.searchError = null;
     this.closeViewer();
     this.minScore = null;
@@ -208,6 +264,7 @@ class App {
     const project = this.project;
     const query = this.query.trim();
     if (!project || !query) return;
+    const searchId = ++this.#searchId;
     this.searching = true;
     this.searchError = null;
     const started = performance.now();
@@ -222,16 +279,29 @@ class App {
         ...(this.count === null ? {} : { limit: this.count }),
         ...(this.minScore === null ? {} : { min_score: this.minScore }),
       });
+      if (searchId !== this.#searchId || this.current !== project.path) return;
       this.results = output;
+      this.#notifications.resolve(`search:${project.path}`);
+      if (output.rerank_error) this.#notifications.error(`rerank:${project.path}`, `Ошибка rerank · ${project.name}`, "Поиск выполнен без rerank. Проверьте модель и подключение.", "models");
+      else this.#notifications.resolve(`rerank:${project.path}`);
+      this.publishNotifications();
       this.searchedQuery = query;
-      this.emptyInfo = output.results.length === 0 ? await this.diagnoseEmpty(project.path, modules, files) : null;
+      const emptyInfo = output.results.length === 0 ? await this.diagnoseEmpty(project.path, modules, files) : null;
+      if (searchId === this.#searchId && this.current === project.path) this.emptyInfo = emptyInfo;
     } catch (error) {
+      if (searchId !== this.#searchId || this.current !== project.path) return;
       this.results = null;
       this.searchError = error instanceof BarsError ? error : new BarsError(String(error));
+      if (this.searchError.kind !== "model_loading") {
+        this.#notifications.error(`search:${project.path}`, `Ошибка поиска · ${project.name}`, this.searchError.message);
+        this.publishNotifications();
+      }
       if (this.searchError.kind === "model_loading") this.retrySearchLater(project.path, query);
     } finally {
-      this.elapsedMs = Math.round(performance.now() - started);
-      this.searching = false;
+      if (searchId === this.#searchId) {
+        this.elapsedMs = Math.round(performance.now() - started);
+        this.searching = false;
+      }
     }
   }
 
@@ -325,6 +395,53 @@ class App {
     } catch (error) {
       this.flash(error instanceof Error ? error.message : String(error), true);
     }
+  }
+
+  requestDeleteProject(path: string): void {
+    if (this.deleteBusy) return;
+    const project = this.projects.find(p => p.path === path);
+    if (!project) return;
+    this.deleteError = null;
+    this.deletingProject = { ...project };
+  }
+
+  cancelDeletion(): void {
+    if (this.deleteBusy) return;
+    this.deletingProject = null;
+    this.deleteError = null;
+  }
+
+  async confirmDeletion(): Promise<void> {
+    const project = this.deletingProject;
+    if (!project || this.deleteBusy) return;
+    this.deleteBusy = true;
+    this.deleteError = null;
+    try {
+      await call("project_delete", { project: project.path, confirmed: true });
+    } catch (error) {
+      this.deleteError = error instanceof Error ? error.message : String(error);
+      this.deleteBusy = false;
+      return;
+    }
+    this.#epoch++;
+    this.projects = this.projects.filter(p => p.path !== project.path);
+    this.#notifications.forgetProject(project.path);
+    this.publishNotifications();
+    if (this.activity) this.activity = {
+      ...this.activity,
+      running: this.activity.running?.project === project.path ? null : this.activity.running,
+      queue: this.activity.queue.filter(j => j.project !== project.path),
+      problems: this.activity.problems.filter(p => p.project !== project.path),
+    };
+    this.deletingProject = null;
+    this.deleteBusy = false;
+    if (this.current === project.path) {
+      this.query = "";
+      this.view = "main";
+      this.consentOpen = false;
+      await this.select(this.projects[0]?.path ?? null);
+    }
+    this.flash(`Проект «${project.name}» удалён из bars`);
   }
 
   async reindexCheck(path: string): Promise<void> {

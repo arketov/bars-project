@@ -28,10 +28,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .parent()
         .ok_or("нет папки bin")?
         .to_path_buf();
-    if let Some(env) = &mut config.install_env {
-        env.mcp_exe = bin.join(format!("bars-mcp{}", std::env::consts::EXE_SUFFIX));
-        env.cli_exe = bin.join(format!("bars-cli{}", std::env::consts::EXE_SUFFIX));
-    }
+    config.install_env = Some(bars_worker::clients::InstallEnv {
+        home: home.clone(),
+        mcp_exe: bin.join(format!("bars-mcp{}", std::env::consts::EXE_SUFFIX)),
+        cli_exe: bin.join(format!("bars-cli{}", std::env::consts::EXE_SUFFIX)),
+    });
     let endpoint = Endpoint::current()?;
     let provider: Arc<dyn ModelProvider> =
         Arc::new(BuiltinProvider::new(home.join(".bars/models")));

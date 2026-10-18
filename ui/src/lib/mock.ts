@@ -148,7 +148,7 @@ let savedSettings: SettingsDoc = {
 };
 
 function activity(): ActivityOutput {
-  if (scene() !== "indexing" && scene() !== "consent") {
+  if (scene() !== "indexing" && scene() !== "consent" && scene() !== "notifications") {
     return { paused: false, running: null, queue: [], problems: [] };
   }
   const t = Math.floor(Date.now() / 1000) % 100;
@@ -250,7 +250,7 @@ export async function mockCall(method: string, params: Record<string, unknown>):
       return {
         runtime: null,
         embed: [
-          { id: "BAAI/bge-m3", dim: 1024, backend: "onnx", warnings: [], downloaded: true, downloading: false },
+          { id: "BAAI/bge-m3", dim: 1024, backend: "onnx", warnings: [], downloaded: scene() !== "notifications", downloading: scene() === "notifications", download_percent: scene() === "notifications" ? 42 : 100 },
           { id: "Qwen/Qwen3-Embedding-0.6B", dim: 1024, backend: "candle", warnings: ["считается на процессоре через candle и заметно медленнее bge-m3"], downloaded: false, downloading: false },
           { id: "Qwen/Qwen3-Embedding-4B", dim: 2560, backend: "candle", warnings: ["модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ"], downloaded: false, downloading: false },
           { id: "nomic-ai/nomic-embed-text-v2-moe", dim: 768, backend: "candle", warnings: [], downloaded: false, downloading: false },

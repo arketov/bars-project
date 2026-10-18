@@ -1,0 +1,6 @@
+{"utc":"2026-10-18T13:06:05.3780801Z","mode":"bounded","device":"auto","round":1,"available_bytes":16267644928,"free_commit_bytes":10254835712,"min_ram_gib":4,"min_commit_gib":8,"foreign":[],"ready":true}
+{"utc":"2026-10-18T13:06:07.6633084Z","mode":"bounded","device":"auto","round":1,"available_bytes":16286728192,"free_commit_bytes":10226536448,"min_ram_gib":4,"min_commit_gib":8,"foreign":[],"ready":true}
+{"utc":"2026-10-18T13:06:09.9456405Z","mode":"bounded","device":"auto","round":1,"available_bytes":15953096704,"free_commit_bytes":9920385024,"min_ram_gib":4,"min_commit_gib":8,"foreign":[],"ready":true}
+{"utc":"2026-10-18T13:06:40.2906633Z","mode":"bounded","device":"auto","round":2,"available_bytes":14479605760,"free_commit_bytes":9558401024,"min_ram_gib":4,"min_commit_gib":8,"foreign":[],"ready":true}
+{"utc":"2026-10-18T13:06:42.5746601Z","mode":"bounded","device":"auto","round":2,"available_bytes":14403629056,"free_commit_bytes":9362391040,"min_ram_gib":4,"min_commit_gib":8,"foreign":[],"ready":true}
+{"utc":"2026-10-18T13:06:44.8578249Z","mode":"bounded","device":"auto","round":2,"available_bytes":14416404480,"free_commit_bytes":9380442112,"min_ram_gib":4,"min_commit_gib":8,"foreign":[],"ready":true}

@@ -1,0 +1,80 @@
+[
+  {
+    "target": "..\\..\\blobs\\e6eda1c72da8f9dc30fdd9b69c73d35af3b7a7ad",
+    "sha256": "26159E7AD065073448460117EB24B7A4572F6F4E78EADFF65DC0A11C052449FA",
+    "link": "SymbolicLink",
+    "path": "C:\\Users\\arketov\\.bars\\models\\models--BAAI--bge-m3\\snapshots\\5617a9f61b028005a4858fdac845db406aefb181\\config.json"
+  },
+  {
+    "target": "..\\..\\blobs\\b1879d702821e753ffe4245048eee415d54a9385",
+    "sha256": "8C785ABEBEA9AE3257B61681B4E6FD8365CEAFDE980C21970D001E834CF10835",
+    "link": "SymbolicLink",
+    "path": "C:\\Users\\arketov\\.bars\\models\\models--BAAI--bge-m3\\snapshots\\5617a9f61b028005a4858fdac845db406aefb181\\special_tokens_map.json"
+  },
+  {
+    "target": "..\\..\\blobs\\dc69ac559dcba2694012009aaa108c614541789a",
+    "sha256": "A62B2B6784F990259FDDEF5F16388693A8043BE4F69179E6A5257EEB3F9ABAC4",
+    "link": "SymbolicLink",
+    "path": "C:\\Users\\arketov\\.bars\\models\\models--BAAI--bge-m3\\snapshots\\5617a9f61b028005a4858fdac845db406aefb181\\tokenizer_config.json"
+  },
+  {
+    "target": "..\\..\\blobs\\21106b6d7dab2952c1d496fb21d5dc9db75c28ed361a05f5020bbba27810dd08",
+    "sha256": "21106B6D7DAB2952C1D496FB21D5DC9DB75C28ED361A05F5020BBBA27810DD08",
+    "link": "SymbolicLink",
+    "path": "C:\\Users\\arketov\\.bars\\models\\models--BAAI--bge-m3\\snapshots\\5617a9f61b028005a4858fdac845db406aefb181\\tokenizer.json"
+  },
+  {
+    "target": "..\\..\\..\\blobs\\3cdc05e5f550d8bd136f28efcea0ad5e6b4169c8",
+    "sha256": "CDF16F72C5D07B36484056E601ED9687F78477E5D85CEE85A34F2406B7FB5906",
+    "link": "SymbolicLink",
+    "path": "C:\\Users\\arketov\\.bars\\models\\models--BAAI--bge-m3\\snapshots\\5617a9f61b028005a4858fdac845db406aefb181\\onnx\\Constant_7_attr__value"
+  },
+  {
+    "target": "..\\..\\..\\blobs\\f84251230831afb359ab26d9fd37d5936d4d9bb5d1d5410e66442f630f24435b",
+    "sha256": "F84251230831AFB359AB26D9FD37D5936D4D9BB5D1D5410E66442F630F24435B",
+    "link": "SymbolicLink",
+    "path": "C:\\Users\\arketov\\.bars\\models\\models--BAAI--bge-m3\\snapshots\\5617a9f61b028005a4858fdac845db406aefb181\\onnx\\model.onnx"
+  },
+  {
+    "target": "..\\..\\..\\blobs\\1eebfb28493f67bba03ce0ef64bfdc7fc5a3bd9d7493f818bb1d78cd798416b4",
+    "sha256": "1EEBFB28493F67BBA03CE0EF64BFDC7FC5A3BD9D7493F818BB1D78CD798416B4",
+    "link": "SymbolicLink",
+    "path": "C:\\Users\\arketov\\.bars\\models\\models--BAAI--bge-m3\\snapshots\\5617a9f61b028005a4858fdac845db406aefb181\\onnx\\model.onnx_data"
+  },
+  {
+    "target": "..\\..\\blobs\\001ea7ea4e342cda3a615c6792962118f9ce8481",
+    "sha256": "835FE05211A0D1535B5CD2ACCB6D788AD142BDC507F8A8BD7287727915D9D61F",
+    "link": "SymbolicLink",
+    "path": "C:\\Users\\arketov\\.bars\\models\\models--rozgo--bge-reranker-v2-m3\\snapshots\\fbd57b17b4db111a9d16813bb08b4c804fac18e9\\config.json"
+  },
+  {
+    "target": "..\\..\\blobs\\3af844cd2de818a95d2b5de5893a336836312c8ade03f53b286ac6beae080321",
+    "sha256": "3AF844CD2DE818A95D2B5DE5893A336836312C8ADE03F53B286AC6BEAE080321",
+    "link": "SymbolicLink",
+    "path": "C:\\Users\\arketov\\.bars\\models\\models--rozgo--bge-reranker-v2-m3\\snapshots\\fbd57b17b4db111a9d16813bb08b4c804fac18e9\\model.onnx"
+  },
+  {
+    "target": "..\\..\\blobs\\84b66c787b9b98977a16d5c993a3959210a214c98fc3466da263c949c2068945",
+    "sha256": "84B66C787B9B98977A16D5C993A3959210A214C98FC3466DA263C949C2068945",
+    "link": "SymbolicLink",
+    "path": "C:\\Users\\arketov\\.bars\\models\\models--rozgo--bge-reranker-v2-m3\\snapshots\\fbd57b17b4db111a9d16813bb08b4c804fac18e9\\model.onnx.data"
+  },
+  {
+    "target": "..\\..\\blobs\\b1879d702821e753ffe4245048eee415d54a9385",
+    "sha256": "8C785ABEBEA9AE3257B61681B4E6FD8365CEAFDE980C21970D001E834CF10835",
+    "link": "SymbolicLink",
+    "path": "C:\\Users\\arketov\\.bars\\models\\models--rozgo--bge-reranker-v2-m3\\snapshots\\fbd57b17b4db111a9d16813bb08b4c804fac18e9\\special_tokens_map.json"
+  },
+  {
+    "target": "..\\..\\blobs\\328a00a9a560aadcf2a3064f917517359eb3cc26",
+    "sha256": "7E4C1CC848840AECCDD763458C18DD525EB0F795C992E00EBE9C28554E7DB2D4",
+    "link": "SymbolicLink",
+    "path": "C:\\Users\\arketov\\.bars\\models\\models--rozgo--bge-reranker-v2-m3\\snapshots\\fbd57b17b4db111a9d16813bb08b4c804fac18e9\\tokenizer_config.json"
+  },
+  {
+    "target": "..\\..\\blobs\\8bf8afbfd11306bd872018c53bfdf2e160a56f8edbcf49933324404791c148d3",
+    "sha256": "8BF8AFBFD11306BD872018C53BFDF2E160A56F8EDBCF49933324404791C148D3",
+    "link": "SymbolicLink",
+    "path": "C:\\Users\\arketov\\.bars\\models\\models--rozgo--bge-reranker-v2-m3\\snapshots\\fbd57b17b4db111a9d16813bb08b4c804fac18e9\\tokenizer.json"
+  }
+]

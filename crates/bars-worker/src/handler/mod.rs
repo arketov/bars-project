@@ -519,6 +519,7 @@ impl WorkerHandler {
     fn settings_save(&self, params: SettingsSaveParams) -> Result<SavedOutput, RpcError> {
         settings_io::save_user_settings(self.worker.bars_home(), &params.settings)
             .map_err(save_error)?;
+        self.worker.refresh_model_lifecycle();
         self.worker.check_all();
         Ok(SavedOutput { saved: true })
     }
@@ -526,16 +527,39 @@ impl WorkerHandler {
     fn models_info(&self) -> ModelsInfoOutput {
         let dir = self.worker.models_dir();
         let downloading = self.worker.downloading();
+        let download_errors = self.worker.download_errors();
+        let runtime = self.worker.model_runtime();
+        let rerank_accelerator = if runtime
+            .as_ref()
+            .is_some_and(|r| r.rerank.actual.as_deref() == Some("cpu"))
+        {
+            bars_core::models::Accelerator::Cpu
+        } else {
+            bars_core::settings::UserSettings::load(self.worker.bars_home())
+                .ok()
+                .map(|s| s.value.rerank.accelerator)
+                .unwrap_or(bars_core::models::Accelerator::Auto)
+        };
         let info = |id: &str, dim: usize, backend: &str, warnings: Vec<String>| ModelInfo {
             id: id.to_string(),
             dim: to_u32(dim),
             backend: backend.to_string(),
             warnings,
-            downloaded: bars_core::models::is_downloaded(&dir, id),
+            downloaded: if id == bars_core::models::BGE_RERANKER_V2_M3_ID {
+                bars_core::models::reranker_is_downloaded(&dir, rerank_accelerator)
+            } else {
+                bars_core::models::is_downloaded(&dir, id)
+            },
             downloading: downloading.contains(id),
+            download_percent: if id == bars_core::models::BGE_RERANKER_V2_M3_ID {
+                Some(bars_core::models::reranker_download_percent(&dir, rerank_accelerator))
+            } else {
+                bars_core::models::download_percent(&dir, id)
+            },
+            download_error: download_errors.get(id).cloned(),
         };
         ModelsInfoOutput {
-            runtime: self.worker.model_runtime(),
+            runtime,
             embed: bars_core::models::builtin_models()
                 .iter()
                 .map(|model| {
@@ -676,13 +700,32 @@ impl WorkerHandler {
     }
 
     pub async fn dispatch(&self, call: Call) -> Result<Value, RpcError> {
+        if let Call::ProjectDelete(params) = call {
+            if !params.confirmed || !Path::new(&params.project).is_absolute() {
+                return Err(RpcError::bars(ErrorKind::InvalidParams, "удаление требует точного пути и явного подтверждения"));
+            }
+            self.worker.delete_project(&params.project).await.map_err(worker_error)?;
+            return Ok(output_value(&UnregisterOutput { removed: true }));
+        }
+        // Удаление ждёт запросы, уже открывшие индекс или настройки; новые ждут очистки.
+        let _request = self.worker.request_guard().await;
         match call {
+            Call::ProjectDelete(_) => unreachable!(),
             // `hello` обрабатывает цикл соединения.
             Call::Hello(_) => Err(RpcError::standard(
                 INTERNAL_ERROR,
                 "hello не доходит до обработчика",
             )),
-            Call::Search(params) => self.search(params).await.map(|out| output_value(&out)),
+            Call::Search(params) => {
+                let start = std::time::Instant::now();
+                let result = self.search(params).await;
+                match &result {
+                    Ok(out) if out.rerank_error.is_some() => log::warn!("Поиск выполнен без rerank; подробности — в ответе поиска"),
+                    Ok(out) => log::debug!("Поиск завершён: {} результатов, {} мс", out.results.len(), start.elapsed().as_millis()),
+                    Err(error) => log::warn!("Поиск не выполнен: код {}; подробности — в ответе поиска", error.code),
+                }
+                result.map(|out| output_value(&out))
+            },
             Call::Outline(params) => self.outline(params).map(|out| output_value(&out)),
             Call::Read(params) => self.read(params).map(|out| output_value(&out)),
             Call::Projects(_) => self.projects().await.map(|out| output_value(&out)),
@@ -719,6 +762,60 @@ impl WorkerHandler {
 }
 
 impl bars_protocol::Handler for WorkerHandler {
+    async fn handle_session(
+        &self,
+        session: &str,
+        client: ClientKind,
+        call: Call,
+    ) -> Result<Value, RpcError> {
+        if client != ClientKind::Mcp {
+            return self.handle(client, call).await;
+        }
+        let target = match &call {
+            Call::Search(p) => Some(&p.target),
+            Call::Read(p) => Some(&p.target),
+            Call::Outline(p) => Some(&p.target),
+            Call::Status(p) => Some(&p.target),
+            Call::Reindex(p) => Some(&p.target),
+            Call::Projects(_) => None,
+            _ => return self.handle(client, call).await,
+        };
+        let project = target
+            .and_then(|t| self.resolve(t).ok())
+            .map(|p| p.to_string_lossy().into_owned())
+            .unwrap_or_default();
+        let tool = match &call {
+            Call::Search(_) => "bars_rag_search",
+            Call::Read(_) => "bars_read",
+            Call::Outline(_) => "bars_outline",
+            Call::Status(_) => "bars_status",
+            Call::Reindex(_) => "bars_reindex",
+            _ => "bars_projects",
+        }
+        .to_string();
+        let start = std::time::Instant::now();
+        let result = self.handle(client, call).await;
+        let time = crate::mcp_statistics::now();
+        let row = crate::mcp_statistics::Row {
+            session: session.into(),
+            project,
+            tool,
+            calls: 1,
+            errors: i64::from(result.is_err()),
+            total_ms: start.elapsed().as_millis().min(i64::MAX as u128) as i64,
+            first: time,
+            last: time,
+        };
+        let home = self.worker.bars_home().to_path_buf();
+        if !matches!(
+            tokio::task::spawn_blocking(move || crate::mcp_statistics::record(&home, &row)).await,
+            Ok(Ok(()))
+        ) {
+            log::warn!("Статистика MCP не записана: проверьте доступ к хранилищу");
+        }
+        result
+    }
+
     async fn handle(&self, _client: ClientKind, call: Call) -> Result<Value, RpcError> {
         // Сессия уже закрывает методы окна, но обработчик не полагается только на неё.
         if call.window_only() {

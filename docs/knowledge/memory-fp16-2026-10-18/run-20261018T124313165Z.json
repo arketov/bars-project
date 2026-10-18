@@ -1,0 +1,71 @@
+{
+  "utc": "2026-10-18T12:43:13.2357511Z",
+  "scenario": "resumed-download-final",
+  "bench_sha256": "B41F8BEC8D2AF7C17E4FC385EA54F293EFA9EF7EFDB86CC8BBDF0226D342C3ED",
+  "source_sha256": "08775E9C34AB39E3AE3BD538450E319C4BF6B71C34132F2AFEF896CF3EFE7939",
+  "fixture_sha256": "BD504519F9A25A4CA26F0E42AF7F551C496B54352DADB5475E8D4D71C55DAFB4",
+  "sources": [
+    {
+      "file": "Cargo.lock",
+      "sha256": "1CB00C2B34271633DC78857817A5D8815E3F89E2DE309DA6A6F486C80C301799"
+    },
+    {
+      "file": "crates/bars-core/src/models/builtin_rerank.rs",
+      "sha256": "F4A73D0AD32928A83FF989B8A4BF0DEB9166062FA041FF42CBA4A0A5C49E11E7"
+    },
+    {
+      "file": "crates/bars-core/src/models/rerank_artifact.rs",
+      "sha256": "548A369A34BA7200E2E220FB1A2FE47FB0406BA88212E4A297ACA9ECBD25E2F0"
+    }
+  ],
+  "current_sources": [
+    {
+      "file": "Cargo.lock",
+      "sha256": "1CB00C2B34271633DC78857817A5D8815E3F89E2DE309DA6A6F486C80C301799"
+    },
+    {
+      "file": "crates/bars-core/examples/bench_memory.rs",
+      "sha256": "0A8492E39AA3D2D95583A2D452B0C064F069675C1D3A9CF81A231997F4FE4DD4"
+    },
+    {
+      "file": "crates/bars-core/src/models/builtin.rs",
+      "sha256": "ED4B2FFF27B510ACA2B0FFF9E0B8575AE537F4372141754C210B36D639CFE5E8"
+    },
+    {
+      "file": "crates/bars-core/src/models/execution.rs",
+      "sha256": "86B6BAA21914F2050639B21214D11217722C5249C44EF709FE7887D2D13CE4C9"
+    },
+    {
+      "file": "crates/bars-core/src/models/builtin_rerank.rs",
+      "sha256": "2589F4A91008441DA2C33E9776BEC650FB38D9DC6D15ED2CE1AC962BCB11B229"
+    },
+    {
+      "file": "crates/bars-core/src/models/rerank_artifact.rs",
+      "sha256": "6B3A1D50CF606CE0B01FA8FAFF94E33C25C0A48A8C38748FF940E0087FD31911"
+    },
+    {
+      "file": "crates/bars-worker/src/worker/models.rs",
+      "sha256": "A544DB86AE9AA8C2A1C61D26C620463BCBC99FFDA01A12AB7FA9F2787B3275EA"
+    },
+    {
+      "file": "crates/bars-worker/src/worker/models/resident.rs",
+      "sha256": "3698BF65767D1A3520F722F2DD7DE03630AB68A193286EACC24BCC04E833687A"
+    },
+    {
+      "file": "crates/bars-worker/src/worker/model_lifecycle.rs",
+      "sha256": "7C87A512C1FCB263375501A8D6FA6D57010D848FDA1767B0C42A289D7D941303"
+    },
+    {
+      "file": "crates/bars-worker/src/worker/mod.rs",
+      "sha256": "8C0FB540FC07D0907575DC093256DC1BFD204040AF2C1B5F3ECDB4984FE348D4"
+    }
+  ],
+  "devices": [
+    "auto"
+  ],
+  "modes": [
+    "rerank"
+  ],
+  "repeats": 1,
+  "download_allowed": true
+}

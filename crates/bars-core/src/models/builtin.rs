@@ -56,6 +56,7 @@ impl BuiltinEmbedder {
     pub fn bge_m3(models_dir: &Path, accelerator: Accelerator) -> Result<Self, EmbedError> {
         let (model, device, fallback_reason) =
             super::execution::load_session(accelerator, |gpu| load(models_dir, gpu))?;
+        log::info!("embed: bge-m3 загружен на {device:?}");
         Ok(Self {
             model,
             fingerprint: bge_m3_fingerprint(),
@@ -107,6 +108,8 @@ impl Embedder for BuiltinEmbedder {
                 Device::DirectMl => "directml",
             }),
             fallback_reason: self.fallback_reason.clone(),
+            precision: Some("fp32"),
+            revision: None,
         }
     }
     fn fingerprint(&self) -> &ModelFingerprint {

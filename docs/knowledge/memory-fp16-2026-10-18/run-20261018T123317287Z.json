@@ -1,0 +1,43 @@
+{
+  "utc": "2026-10-18T12:33:17.5039192Z",
+  "scenario": "resumed-download",
+  "bench_sha256": "B41F8BEC8D2AF7C17E4FC385EA54F293EFA9EF7EFDB86CC8BBDF0226D342C3ED",
+  "source_sha256": "08775E9C34AB39E3AE3BD538450E319C4BF6B71C34132F2AFEF896CF3EFE7939",
+  "fixture_sha256": "BD504519F9A25A4CA26F0E42AF7F551C496B54352DADB5475E8D4D71C55DAFB4",
+  "sources": [
+    {
+      "file": "Cargo.lock",
+      "sha256": "1CB00C2B34271633DC78857817A5D8815E3F89E2DE309DA6A6F486C80C301799"
+    },
+    {
+      "file": "crates/bars-core/src/models/builtin_rerank.rs",
+      "sha256": "F4A73D0AD32928A83FF989B8A4BF0DEB9166062FA041FF42CBA4A0A5C49E11E7"
+    },
+    {
+      "file": "crates/bars-core/src/models/rerank_artifact.rs",
+      "sha256": "548A369A34BA7200E2E220FB1A2FE47FB0406BA88212E4A297ACA9ECBD25E2F0"
+    }
+  ],
+  "current_sources": [
+    {
+      "file": "Cargo.lock",
+      "sha256": "1CB00C2B34271633DC78857817A5D8815E3F89E2DE309DA6A6F486C80C301799"
+    },
+    {
+      "file": "crates/bars-core/src/models/builtin_rerank.rs",
+      "sha256": "2589F4A91008441DA2C33E9776BEC650FB38D9DC6D15ED2CE1AC962BCB11B229"
+    },
+    {
+      "file": "crates/bars-core/src/models/rerank_artifact.rs",
+      "sha256": "6B3A1D50CF606CE0B01FA8FAFF94E33C25C0A48A8C38748FF940E0087FD31911"
+    }
+  ],
+  "devices": [
+    "auto"
+  ],
+  "modes": [
+    "rerank"
+  ],
+  "repeats": 1,
+  "download_allowed": true
+}

@@ -60,11 +60,12 @@ pub async fn serve_with(
     })?;
     // Приложение обновилось или переехало: запись автозапуска должна указывать на текущий `bars`.
     match crate::autostart::repair(config.autostart.as_ref()) {
-        Ok(true) => eprintln!("bars: запись автозапуска обновлена на текущий bars"),
+        Ok(true) => log::info!("Запись автозапуска обновлена на текущий bars"),
         Ok(false) => {}
-        Err(error) => eprintln!("bars: запись автозапуска не проверена: {error}"),
+        Err(_) => log::warn!("Запись автозапуска не проверена"),
     }
     let worker = Worker::start(config, provider)?;
+    log::info!("Воркер готов принимать вызовы");
     let handler = Arc::new(WorkerHandler::new(worker.clone()));
     ready(WorkerHandler::clone(&handler));
     worker.refresh_clients();

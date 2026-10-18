@@ -10,6 +10,7 @@ mod embedder;
 mod execution;
 pub use execution::ExecutionInfo;
 mod remote;
+mod rerank_artifact;
 mod reranker;
 #[cfg(any(test, feature = "test-support"))]
 pub mod testing;
@@ -26,4 +27,5 @@ pub use catalog::{
 };
 pub use embedder::{EmbedError, Embedder, ModelFingerprint};
 pub use remote::{HttpEmbedder, HttpReranker, RemoteTarget, remote_fingerprint};
+pub use rerank_artifact::{reranker_download_percent, reranker_files_present, reranker_is_downloaded};
 pub use reranker::{BGE_RERANKER_V2_M3_ID, RerankError, Reranker};

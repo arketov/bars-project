@@ -1,0 +1,6 @@
+{
+  "pid": 47672,
+  "exit_code": 1,
+  "timed_out": false,
+  "cause": "unknown; runner observed exit 1 without native end or stderr; partial file preserved"
+}

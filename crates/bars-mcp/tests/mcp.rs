@@ -160,6 +160,10 @@ impl Harness {
             launch: Launch::With(Arc::new(move || {
                 launches.fetch_add(1, Ordering::SeqCst);
                 let config = WorkerConfig::new(home.clone());
+                assert!(
+                    config.install_env.is_none(),
+                    "MCP tests must not access client profiles"
+                );
                 let (endpoint, provider) = (endpoint.clone(), Arc::clone(&provider));
                 handle.spawn(async move { serve(config, &endpoint, provider).await });
                 Ok(())
@@ -394,6 +398,11 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
         .await;
     assert!(is_error);
     assert!(text.contains("project_not_found"), "{text}");
+    let rows = bars_worker::mcp_statistics::snapshot(harness.home.path()).unwrap();
+    let tools: std::collections::BTreeSet<_> = rows.iter().map(|r| r.tool.as_str()).collect();
+    assert_eq!(tools, ["bars_outline", "bars_projects", "bars_rag_search", "bars_read", "bars_reindex", "bars_status"].into_iter().collect());
+    assert_eq!(rows.iter().map(|r| r.session.as_str()).collect::<std::collections::HashSet<_>>().len(), 1);
+    assert!(rows.iter().any(|r| r.errors > 0));
 }
 
 #[tokio::test(flavor = "multi_thread")]
@@ -527,6 +536,10 @@ async fn connection_to_the_worker_lives_across_calls() {
     let (is_error, _) = mcp.tool("bars_projects", json!({})).await;
     assert!(!is_error);
     assert_eq!(harness.launches.load(Ordering::SeqCst), 1);
+    let rows = bars_worker::mcp_statistics::snapshot(harness.home.path()).unwrap();
+    assert_eq!(rows.len(), 1);
+    assert_eq!((rows[0].calls, rows[0].errors), (2, 0));
+    assert_eq!(rows[0].tool, "bars_projects");
 }
 
 /// Текст по умолчанию: блоки с явными границами; `format=json` — JSON ответа воркера.

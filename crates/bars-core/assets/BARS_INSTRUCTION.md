@@ -2,7 +2,7 @@
 
 This file is placed in the documentation root by bars, a local search tool over Markdown. It is addressed to the models (and people) who write documents. bars overwrites it with every new version, so edits made here are not kept. Project-specific rules belong in the project's own `AGENTS.md` / `CLAUDE.md`.
 
-Write documents in the language the project uses. This file only fixes the structure.
+Write documents and search queries in the user's language; follow the project's explicit language rules. Do not translate them into English because these agent instructions are in English. Only agent instruction documents use English. Preserve identifiers, API names and original source quotations. This file only fixes the structure.
 
 ## How bars reads documents
 

@@ -1,0 +1,800 @@
+{
+  "binarySha256": "e3e6f08fe9eea150d3d7034d229e79bae6f43954cc9bae56a3ff7335b9a4df8c",
+  "runs": [
+    {
+      "name": "production",
+      "complete": {
+        "config": {
+          "name": "production",
+          "device": "directml",
+          "threads": 16,
+          "batch": 4,
+          "sorted": false,
+          "max_length": 512,
+          "repeats": 1,
+          "ids": [],
+          "spinning": null,
+          "model_path": null,
+          "tokenizer_dir": null,
+          "fixed_padding": false
+        },
+        "serial": 8,
+        "concurrent": 6,
+        "during_index": 8,
+        "owned_endpoint": "inference-owned-50784"
+      },
+      "monitor": {
+        "exit_code": 0,
+        "name": "production",
+        "quality_only": false,
+        "timing_contaminated": false,
+        "pid": 50784,
+        "samples": [
+          {
+            "available_ram": 22243442688,
+            "gpu": [],
+            "private_bytes": 22904832,
+            "other": [],
+            "cpu_seconds": 0.234375,
+            "commit_headroom": 26750803968,
+            "peak_working_set": 40714240,
+            "working_set": 40714240,
+            "adapter_csv": "46, 465, 810, P5, 41.09, 1714",
+            "at": "2026-10-18T11:09:18.0976618Z"
+          },
+          {
+            "available_ram": 20260585472,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 1586659328,
+                "SharedUsage": 1122832384,
+                "TotalCommitted": 2709491712
+              }
+            ],
+            "private_bytes": 2811756544,
+            "other": [],
+            "cpu_seconds": 1.296875,
+            "commit_headroom": 23737856000,
+            "peak_working_set": 2026643456,
+            "working_set": 2026643456,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:09:19.4206981Z"
+          },
+          {
+            "available_ram": 22000173056,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 2302361600,
+                "SharedUsage": 27463680,
+                "TotalCommitted": 2329825280
+              }
+            ],
+            "private_bytes": 2505682944,
+            "other": [],
+            "cpu_seconds": 2.546875,
+            "commit_headroom": 24024305664,
+            "peak_working_set": 2246885376,
+            "working_set": 187940864,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:09:20.7397435Z"
+          },
+          {
+            "available_ram": 21614297088,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 2319147008,
+                "SharedUsage": 33083392,
+                "TotalCommitted": 2352230400
+              }
+            ],
+            "private_bytes": 2894364672,
+            "other": [],
+            "cpu_seconds": 3.921875,
+            "commit_headroom": 23677374464,
+            "peak_working_set": 2246885376,
+            "working_set": 592543744,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:09:22.0533041Z"
+          },
+          {
+            "available_ram": 20509097984,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 4668391424,
+                "SharedUsage": 1148264448,
+                "TotalCommitted": 5816655872
+              }
+            ],
+            "private_bytes": 6397616128,
+            "other": [],
+            "cpu_seconds": 4.96875,
+            "commit_headroom": 20321681408,
+            "peak_working_set": 2246885376,
+            "working_set": 1716682752,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:09:23.3597770Z"
+          },
+          {
+            "available_ram": 21163409408,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 4684849152,
+                "SharedUsage": 52895744,
+                "TotalCommitted": 4737744896
+              }
+            ],
+            "private_bytes": 5676843008,
+            "other": [],
+            "cpu_seconds": 6.25,
+            "commit_headroom": 20921450496,
+            "peak_working_set": 2741678080,
+            "working_set": 926969856,
+            "adapter_csv": "48, 840, 810, P5, 76.47, 6184",
+            "at": "2026-10-18T11:09:24.7077715Z"
+          },
+          {
+            "available_ram": 21287141376,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 5587955712,
+                "SharedUsage": 58400768,
+                "TotalCommitted": 5646356480
+              }
+            ],
+            "private_bytes": 6591610880,
+            "other": [],
+            "cpu_seconds": 6.71875,
+            "commit_headroom": 20132057088,
+            "peak_working_set": 2741678080,
+            "working_set": 959782912,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:09:26.0007109Z"
+          },
+          {
+            "available_ram": 21294481408,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 5589008384,
+                "SharedUsage": 58400768,
+                "TotalCommitted": 5647409152
+              }
+            ],
+            "private_bytes": 6593036288,
+            "other": [],
+            "cpu_seconds": 7.109375,
+            "commit_headroom": 20145680384,
+            "peak_working_set": 2741678080,
+            "working_set": 960229376,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:09:27.3113214Z"
+          },
+          {
+            "available_ram": 21291335680,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 5589008384,
+                "SharedUsage": 58400768,
+                "TotalCommitted": 5647409152
+              }
+            ],
+            "private_bytes": 6594510848,
+            "other": [],
+            "cpu_seconds": 7.5625,
+            "commit_headroom": 20161159168,
+            "peak_working_set": 2741678080,
+            "working_set": 961159168,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:09:28.6070626Z"
+          },
+          {
+            "available_ram": 21271412736,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 5769363456,
+                "SharedUsage": 58400768,
+                "TotalCommitted": 5827764224
+              }
+            ],
+            "private_bytes": 6777253888,
+            "other": [],
+            "cpu_seconds": 8.140625,
+            "commit_headroom": 19932606464,
+            "peak_working_set": 2741678080,
+            "working_set": 962772992,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:09:29.8887006Z"
+          },
+          {
+            "available_ram": 21266169856,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 5769363456,
+                "SharedUsage": 58400768,
+                "TotalCommitted": 5827764224
+              }
+            ],
+            "private_bytes": 6777794560,
+            "other": [],
+            "cpu_seconds": 8.5625,
+            "commit_headroom": 19925094400,
+            "peak_working_set": 2741678080,
+            "working_set": 964018176,
+            "adapter_csv": "62, 1830, 9751, P0, 306.80, 7144",
+            "at": "2026-10-18T11:09:31.2295551Z"
+          },
+          {
+            "available_ram": 21225275392,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 5769363456,
+                "SharedUsage": 58400768,
+                "TotalCommitted": 5827764224
+              }
+            ],
+            "private_bytes": 6779969536,
+            "other": [],
+            "cpu_seconds": 9.046875,
+            "commit_headroom": 19881472000,
+            "peak_working_set": 2741678080,
+            "working_set": 966168576,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:09:32.5254187Z"
+          },
+          {
+            "available_ram": 21214789632,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 5771464704,
+                "SharedUsage": 58400768,
+                "TotalCommitted": 5829865472
+              }
+            ],
+            "private_bytes": 6787207168,
+            "other": [],
+            "cpu_seconds": 9.703125,
+            "commit_headroom": 19874099200,
+            "peak_working_set": 2741678080,
+            "working_set": 972066816,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:09:33.8286329Z"
+          },
+          {
+            "available_ram": 21208498176,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 5771464704,
+                "SharedUsage": 58400768,
+                "TotalCommitted": 5829865472
+              }
+            ],
+            "private_bytes": 6788825088,
+            "other": [],
+            "cpu_seconds": 10.015625,
+            "commit_headroom": 19867017216,
+            "peak_working_set": 2741678080,
+            "working_set": 972136448,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:09:35.1227071Z"
+          },
+          {
+            "available_ram": 21202206720,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 6258286592,
+                "SharedUsage": 65740800,
+                "TotalCommitted": 6324027392
+              }
+            ],
+            "private_bytes": 7292674048,
+            "other": [],
+            "cpu_seconds": 10.515625,
+            "commit_headroom": 19367395328,
+            "peak_working_set": 2741678080,
+            "working_set": 982126592,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:09:36.4066379Z"
+          },
+          {
+            "available_ram": 21196963840,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 6795161600,
+                "SharedUsage": 65740800,
+                "TotalCommitted": 6860902400
+              }
+            ],
+            "private_bytes": 7824904192,
+            "other": [],
+            "cpu_seconds": 11.265625,
+            "commit_headroom": 18821812224,
+            "peak_working_set": 2741678080,
+            "working_set": 982241280,
+            "adapter_csv": "64, 1815, 9751, P0, 312.22, 8117",
+            "at": "2026-10-18T11:09:37.7494605Z"
+          },
+          {
+            "available_ram": 21218983936,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 6801453056,
+                "SharedUsage": 65740800,
+                "TotalCommitted": 6867193856
+              }
+            ],
+            "private_bytes": 7839371264,
+            "other": [],
+            "cpu_seconds": 12.046875,
+            "commit_headroom": 18835279872,
+            "peak_working_set": 2741678080,
+            "working_set": 983384064,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:09:39.0605384Z"
+          },
+          {
+            "available_ram": 21217935360,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 6801453056,
+                "SharedUsage": 65740800,
+                "TotalCommitted": 6867193856
+              }
+            ],
+            "private_bytes": 7836778496,
+            "other": [],
+            "cpu_seconds": 12.8125,
+            "commit_headroom": 18857000960,
+            "peak_working_set": 2741678080,
+            "working_set": 985501696,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:09:40.3523483Z"
+          },
+          {
+            "available_ram": 21234712576,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 6868561920,
+                "SharedUsage": 65740800,
+                "TotalCommitted": 6934302720
+              }
+            ],
+            "private_bytes": 7904481280,
+            "other": [],
+            "cpu_seconds": 13.703125,
+            "commit_headroom": 18766753792,
+            "peak_working_set": 2741678080,
+            "working_set": 986300416,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:09:41.6378430Z"
+          },
+          {
+            "available_ram": 21213741056,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 6868561920,
+                "SharedUsage": 65740800,
+                "TotalCommitted": 6934302720
+              }
+            ],
+            "private_bytes": 7904411648,
+            "other": [],
+            "cpu_seconds": 14.4375,
+            "commit_headroom": 18746445824,
+            "peak_working_set": 2741678080,
+            "working_set": 985251840,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:09:42.9355453Z"
+          },
+          {
+            "available_ram": 21212692480,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 6868561920,
+                "SharedUsage": 65740800,
+                "TotalCommitted": 6934302720
+              }
+            ],
+            "private_bytes": 7901114368,
+            "other": [],
+            "cpu_seconds": 14.984375,
+            "commit_headroom": 18740011008,
+            "peak_working_set": 2741678080,
+            "working_set": 985714688,
+            "adapter_csv": "65, 1725, 9751, P0, 315.80, 8185",
+            "at": "2026-10-18T11:09:44.2942168Z"
+          },
+          {
+            "available_ram": 21596471296,
+            "gpu": [
+              {
+                "Name": "pid_50784_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 3476783104,
+                "SharedUsage": 40292352,
+                "TotalCommitted": 3517075456
+              }
+            ],
+            "private_bytes": 3998261248,
+            "other": [],
+            "cpu_seconds": 15.625,
+            "commit_headroom": 22566768640,
+            "peak_working_set": 2741678080,
+            "working_set": 530280448,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:09:45.5874253Z"
+          }
+        ],
+        "started": "2026-10-18T11:09:17.7154787Z"
+      },
+      "originalRowsSha256": "c48843ed160ec9d8da22518d6051fc998dedc68bd2f9543dab93a2723c0fff26"
+    },
+    {
+      "name": "final-fp16-b16",
+      "complete": {
+        "config": {
+          "name": "final-fp16-b16",
+          "device": "directml",
+          "threads": 16,
+          "batch": 16,
+          "sorted": false,
+          "max_length": 512,
+          "repeats": 1,
+          "ids": [],
+          "spinning": null,
+          "model_path": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\inference\\data\\models\\ranged-model_fp16.onnx",
+          "tokenizer_dir": "C:\\Users\\arketov\\.bars\\models\\models--rozgo--bge-reranker-v2-m3\\snapshots\\fbd57b17b4db111a9d16813bb08b4c804fac18e9",
+          "fixed_padding": false
+        },
+        "serial": 8,
+        "concurrent": 6,
+        "during_index": 8,
+        "owned_endpoint": "inference-owned-38764"
+      },
+      "monitor": {
+        "exit_code": 0,
+        "name": "final-fp16-b16",
+        "quality_only": false,
+        "timing_contaminated": false,
+        "pid": 38764,
+        "samples": [
+          {
+            "available_ram": 22157459456,
+            "gpu": [],
+            "private_bytes": 22917120,
+            "other": [],
+            "cpu_seconds": 0.265625,
+            "commit_headroom": 26638225408,
+            "peak_working_set": 39464960,
+            "working_set": 39464960,
+            "adapter_csv": "46, 435, 810, P5, 41.94, 1629",
+            "at": "2026-10-18T11:10:08.1051602Z"
+          },
+          {
+            "available_ram": 21973958656,
+            "gpu": [
+              {
+                "Name": "pid_38764_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 1106739200,
+                "SharedUsage": 83103744,
+                "TotalCommitted": 1189842944
+              }
+            ],
+            "private_bytes": 1302769664,
+            "other": [],
+            "cpu_seconds": 1.421875,
+            "commit_headroom": 25299976192,
+            "peak_working_set": 206135296,
+            "working_set": 173412352,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:10:09.4079450Z"
+          },
+          {
+            "available_ram": 21916286976,
+            "gpu": [
+              {
+                "Name": "pid_38764_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 2302361600,
+                "SharedUsage": 27463680,
+                "TotalCommitted": 2329825280
+              }
+            ],
+            "private_bytes": 2528563200,
+            "other": [],
+            "cpu_seconds": 2.578125,
+            "commit_headroom": 24003559424,
+            "peak_working_set": 2221694976,
+            "working_set": 218042368,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:10:10.7180490Z"
+          },
+          {
+            "available_ram": 21333278720,
+            "gpu": [
+              {
+                "Name": "pid_38764_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 2400448512,
+                "SharedUsage": 51453952,
+                "TotalCommitted": 2451902464
+              }
+            ],
+            "private_bytes": 3413524480,
+            "other": [],
+            "cpu_seconds": 3.875,
+            "commit_headroom": 23315779584,
+            "peak_working_set": 2221694976,
+            "working_set": 873058304,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:10:12.0331555Z"
+          },
+          {
+            "available_ram": 20088619008,
+            "gpu": [
+              {
+                "Name": "pid_38764_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 2400514048,
+                "SharedUsage": 51453952,
+                "TotalCommitted": 2451968000
+              }
+            ],
+            "private_bytes": 4704489472,
+            "other": [],
+            "cpu_seconds": 4.78125,
+            "commit_headroom": 21816320000,
+            "peak_working_set": 2221694976,
+            "working_set": 2153689088,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:10:13.3541458Z"
+          },
+          {
+            "available_ram": 21364736000,
+            "gpu": [
+              {
+                "Name": "pid_38764_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 3538075648,
+                "SharedUsage": 54730752,
+                "TotalCommitted": 3592806400
+              }
+            ],
+            "private_bytes": 4192665600,
+            "other": [],
+            "cpu_seconds": 5.703125,
+            "commit_headroom": 22282473472,
+            "peak_working_set": 2287943680,
+            "working_set": 653914112,
+            "adapter_csv": "46, 1110, 5001, P3, 52.18, 5009",
+            "at": "2026-10-18T11:10:14.7136377Z"
+          },
+          {
+            "available_ram": 20994588672,
+            "gpu": [
+              {
+                "Name": "pid_38764_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 4136779776,
+                "SharedUsage": 60628992,
+                "TotalCommitted": 4197408768
+              }
+            ],
+            "private_bytes": 5313617920,
+            "other": [],
+            "cpu_seconds": 6.953125,
+            "commit_headroom": 21364166656,
+            "peak_working_set": 2287943680,
+            "working_set": 1175199744,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:10:16.0044854Z"
+          },
+          {
+            "available_ram": 21104689152,
+            "gpu": [
+              {
+                "Name": "pid_38764_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 4138889216,
+                "SharedUsage": 61677568,
+                "TotalCommitted": 4200566784
+              }
+            ],
+            "private_bytes": 5272932352,
+            "other": [],
+            "cpu_seconds": 7.796875,
+            "commit_headroom": 21444038656,
+            "peak_working_set": 2287943680,
+            "working_set": 1116418048,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:10:17.2903469Z"
+          },
+          {
+            "available_ram": 21188575232,
+            "gpu": [
+              {
+                "Name": "pid_38764_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 4138889216,
+                "SharedUsage": 61677568,
+                "TotalCommitted": 4200566784
+              }
+            ],
+            "private_bytes": 5130481664,
+            "other": [],
+            "cpu_seconds": 8.578125,
+            "commit_headroom": 21547626496,
+            "peak_working_set": 2287943680,
+            "working_set": 988975104,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:10:18.6049704Z"
+          },
+          {
+            "available_ram": 20992491520,
+            "gpu": [
+              {
+                "Name": "pid_38764_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 4138889216,
+                "SharedUsage": 61677568,
+                "TotalCommitted": 4200566784
+              }
+            ],
+            "private_bytes": 5314482176,
+            "other": [],
+            "cpu_seconds": 9.484375,
+            "commit_headroom": 21332766720,
+            "peak_working_set": 2287943680,
+            "working_set": 1167319040,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:10:19.8975174Z"
+          },
+          {
+            "available_ram": 20965228544,
+            "gpu": [
+              {
+                "Name": "pid_38764_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 4138889216,
+                "SharedUsage": 61677568,
+                "TotalCommitted": 4200566784
+              }
+            ],
+            "private_bytes": 5346988032,
+            "other": [],
+            "cpu_seconds": 10.578125,
+            "commit_headroom": 21306961920,
+            "peak_working_set": 2287943680,
+            "working_set": 1201909760,
+            "adapter_csv": "55, 1965, 9751, P0, 236.30, 5579",
+            "at": "2026-10-18T11:10:21.2417586Z"
+          },
+          {
+            "available_ram": 20940062720,
+            "gpu": [
+              {
+                "Name": "pid_38764_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 4256329728,
+                "SharedUsage": 61677568,
+                "TotalCommitted": 4318007296
+              }
+            ],
+            "private_bytes": 5476245504,
+            "other": [],
+            "cpu_seconds": 11.203125,
+            "commit_headroom": 21179625472,
+            "peak_working_set": 2287943680,
+            "working_set": 1213075456,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:10:22.5346082Z"
+          },
+          {
+            "available_ram": 20916994048,
+            "gpu": [
+              {
+                "Name": "pid_38764_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 5162582016,
+                "SharedUsage": 69017600,
+                "TotalCommitted": 5231599616
+              }
+            ],
+            "private_bytes": 6404644864,
+            "other": [],
+            "cpu_seconds": 12.078125,
+            "commit_headroom": 20245331968,
+            "peak_working_set": 2287943680,
+            "working_set": 1227407360,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:10:23.8525403Z"
+          },
+          {
+            "available_ram": 20933771264,
+            "gpu": [
+              {
+                "Name": "pid_38764_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 5168873472,
+                "SharedUsage": 69017600,
+                "TotalCommitted": 5237891072
+              }
+            ],
+            "private_bytes": 6413828096,
+            "other": [],
+            "cpu_seconds": 13.046875,
+            "commit_headroom": 20250091520,
+            "peak_working_set": 2287943680,
+            "working_set": 1227255808,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:10:25.1540448Z"
+          },
+          {
+            "available_ram": 20923285504,
+            "gpu": [
+              {
+                "Name": "pid_38764_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 5168873472,
+                "SharedUsage": 69017600,
+                "TotalCommitted": 5237891072
+              }
+            ],
+            "private_bytes": 6412845056,
+            "other": [],
+            "cpu_seconds": 13.9375,
+            "commit_headroom": 20228046848,
+            "peak_working_set": 2287943680,
+            "working_set": 1235001344,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:10:26.4655141Z"
+          },
+          {
+            "available_ram": 20947402752,
+            "gpu": [
+              {
+                "Name": "pid_38764_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 5235982336,
+                "SharedUsage": 69017600,
+                "TotalCommitted": 5304999936
+              }
+            ],
+            "private_bytes": 6445240320,
+            "other": [],
+            "cpu_seconds": 15.03125,
+            "commit_headroom": 20223795200,
+            "peak_working_set": 2287943680,
+            "working_set": 1197686784,
+            "adapter_csv": "60, 1935, 9751, P0, 275.00, 6621",
+            "at": "2026-10-18T11:10:27.8123676Z"
+          },
+          {
+            "available_ram": 21432893440,
+            "gpu": [
+              {
+                "Name": "pid_38764_luid_0x00000000_0x00010519_phys_0",
+                "DedicatedUsage": 4195758080,
+                "SharedUsage": 69017600,
+                "TotalCommitted": 4264775680
+              }
+            ],
+            "private_bytes": 4934090752,
+            "other": [],
+            "cpu_seconds": 15.6875,
+            "commit_headroom": 21752147968,
+            "peak_working_set": 2287943680,
+            "working_set": 763645952,
+            "adapter_csv": null,
+            "at": "2026-10-18T11:10:29.1238707Z"
+          }
+        ],
+        "started": "2026-10-18T11:10:07.7623518Z"
+      },
+      "originalRowsSha256": "8dd1a85b3cce9f9e91052bc4afb871ca2ba04af127b375b2ed2a386543eb7603"
+    }
+  ]
+}

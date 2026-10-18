@@ -2,7 +2,7 @@
 
 use std::path::Path;
 
-use fastembed::{RerankInitOptions, RerankerModel, TextRerank};
+use fastembed::{RerankInitOptions, RerankerModel, TextRerank, UserDefinedRerankingModel};
 
 use super::builtin::{Accelerator, Device, gpu_providers};
 use super::catalog::model_files_report;
@@ -17,12 +17,14 @@ const SUSPICIOUS_MAX_LOGIT: f32 = -8.0;
 const MAX_LENGTH: usize = 512;
 
 /// Пар за один проход модели.
-const BATCH_SIZE: usize = 4;
+const CPU_BATCH_SIZE: usize = 4;
+const GPU_BATCH_SIZE: usize = 16;
 
 pub struct BuiltinReranker {
     model: TextRerank,
     device: Device,
     fallback_reason: Option<String>,
+    batch_size: usize,
 }
 
 impl BuiltinReranker {
@@ -34,14 +36,33 @@ impl BuiltinReranker {
     ) -> Result<Self, RerankError> {
         let (model, device, fallback_reason) =
             super::execution::load_session(accelerator, |gpu| load(models_dir, gpu))?;
-        eprintln!(
-            "rerank: загружен на {device:?}; файлы модели: {}",
-            files_report(models_dir)
+        log::info!(
+            "rerank: загружен на {device:?}; precision={}; batch={}; файлы модели: {}",
+            if device == Device::DirectMl {
+                "fp16"
+            } else {
+                "fp32"
+            },
+            if device == Device::DirectMl {
+                GPU_BATCH_SIZE
+            } else {
+                CPU_BATCH_SIZE
+            },
+            if device == Device::DirectMl {
+                "pinned onnx-community FP16 (BLAKE3 verified)".into()
+            } else {
+                files_report(models_dir)
+            }
         );
         Ok(Self {
             model,
             device,
             fallback_reason,
+            batch_size: if device == Device::DirectMl {
+                GPU_BATCH_SIZE
+            } else {
+                CPU_BATCH_SIZE
+            },
         })
     }
 
@@ -75,13 +96,53 @@ fn load(models_dir: &Path, gpu: bool) -> Result<TextRerank, RerankError> {
     if gpu && providers.is_empty() {
         return Err(RerankError::Load("видеокарта недоступна на этой ОС".into()));
     }
+    // Проверяем регистрацию EP до скачивания GPU-весов на машине без рабочей GPU.
+    #[cfg(windows)]
+    if gpu {
+        let _probe = ort::session::Session::builder()
+            .map_err(|e| RerankError::Load(e.to_string()))?
+            .with_memory_pattern(false)
+            .map_err(|e| RerankError::Load(e.to_string()))?
+            .with_execution_providers(gpu_providers())
+            .map_err(|e| RerankError::Load(e.to_string()))?;
+    }
     let mut options = RerankInitOptions::new(RerankerModel::BGERerankerV2M3)
         .with_cache_dir(models_dir.to_path_buf())
         .with_max_length(MAX_LENGTH);
     if gpu {
         options = options.with_execution_providers(providers);
+        let (path, tokenizer) = super::rerank_artifact::fp16(models_dir)?;
+        return TextRerank::try_new_from_user_defined(
+            UserDefinedRerankingModel::new(path, tokenizer),
+            options.into(),
+        )
+        .map_err(|error| RerankError::Load(error.to_string()));
     }
     TextRerank::try_new(options).map_err(|error| RerankError::Load(error.to_string()))
+}
+
+// Ошибки графа/драйвера не маскируем повтором. Уменьшаем только пачку при нехватке памяти.
+fn smaller_batch(device: Device, current: usize, message: &str) -> Option<usize> {
+    let message = message.to_ascii_lowercase();
+    let allocation = [
+        "out of memory",
+        "outofmemory",
+        "e_outofmemory",
+        "0x8007000e",
+        "failed to allocate",
+        "bad allocation",
+        "not enough memory",
+    ]
+    .iter()
+    .any(|s| message.contains(s));
+    if device != Device::DirectMl || !allocation {
+        return None;
+    }
+    match current {
+        5.. => Some(4),
+        2..=4 => Some(1),
+        _ => None,
+    }
 }
 
 /// Логит модели → оценка от 0 до 1 (`docs/features/settings/settings.md`).
@@ -98,6 +159,12 @@ impl Reranker for BuiltinReranker {
                 Device::DirectMl => "directml",
             }),
             fallback_reason: self.fallback_reason.clone(),
+            precision: Some(if self.device == Device::DirectMl {
+                "fp16"
+            } else {
+                "fp32"
+            }),
+            revision: (self.device == Device::DirectMl).then_some(super::rerank_artifact::REVISION),
         }
     }
     fn rerank(&mut self, query: &str, documents: &[&str]) -> Result<Vec<f32>, RerankError> {
@@ -105,10 +172,25 @@ impl Reranker for BuiltinReranker {
             return Ok(Vec::new());
         }
         // fastembed возвращает результаты по убыванию оценки; `index` — место документа во входе.
-        let results = self
-            .model
-            .rerank(query, documents, false, Some(BATCH_SIZE))
-            .map_err(|error| RerankError::Rerank(error.to_string()))?;
+        let results = loop {
+            match self
+                .model
+                .rerank(query, documents, false, Some(self.batch_size))
+            {
+                Ok(results) => break results,
+                Err(error) => {
+                    let message = error.to_string();
+                    let Some(batch) = smaller_batch(self.device, self.batch_size, &message) else {
+                        return Err(RerankError::Rerank(message));
+                    };
+                    log::warn!(
+                        "rerank: не хватило памяти GPU; batch {} -> {batch}",
+                        self.batch_size
+                    );
+                    self.batch_size = batch;
+                }
+            }
+        };
         if results.len() != documents.len() {
             return Err(RerankError::Count {
                 expected: documents.len(),
@@ -116,9 +198,20 @@ impl Reranker for BuiltinReranker {
             });
         }
         let logits: Vec<f32> = results.iter().map(|result| result.score).collect();
-        eprintln!("{}", logits_report(self.device, &logits));
+        if logits.iter().copied().reduce(f32::max).is_some_and(|max| max < -8.0) {
+            log::warn!("{}", logits_report(self.device, &logits));
+        } else {
+            log::debug!("{}", logits_report(self.device, &logits));
+        }
         let mut scores = vec![0.0; documents.len()];
+        let mut seen = vec![false; documents.len()];
         for result in results {
+            if result.index >= scores.len() || seen[result.index] || !result.score.is_finite() {
+                return Err(RerankError::Rerank(
+                    "модель вернула неверные индексы или нечисловой логит".into(),
+                ));
+            }
+            seen[result.index] = true;
             scores[result.index] = sigmoid(result.score);
         }
         Ok(scores)
@@ -128,6 +221,32 @@ impl Reranker for BuiltinReranker {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn allocation_backoff_is_bounded_and_gpu_only() {
+        assert_eq!(
+            smaller_batch(Device::DirectMl, 16, "E_OUTOFMEMORY"),
+            Some(4)
+        );
+        assert_eq!(
+            smaller_batch(Device::DirectMl, 16, "HRESULT: 0x8007000E"),
+            Some(4)
+        );
+        assert_eq!(
+            smaller_batch(Device::DirectMl, 16, "HRESULT: 0x887A0005"),
+            None
+        );
+        assert_eq!(
+            smaller_batch(Device::DirectMl, 4, "Failed to allocate buffer"),
+            Some(1)
+        );
+        assert_eq!(smaller_batch(Device::DirectMl, 1, "out of memory"), None);
+        assert_eq!(smaller_batch(Device::Cpu, 4, "out of memory"), None);
+        assert_eq!(
+            smaller_batch(Device::DirectMl, 16, "unsupported operator"),
+            None
+        );
+    }
 
     #[test]
     fn sigmoid_maps_logits_into_the_unit_range() {

@@ -1,0 +1,1773 @@
+{
+  "pid": 45616,
+  "samples": [
+    {
+      "other": [],
+      "peak_working_set": 2723840,
+      "working_set": 2723840,
+      "at": "2026-10-18T09:16:43.3697872Z",
+      "private_bytes": 1011712
+    },
+    {
+      "other": [],
+      "peak_working_set": 956391424,
+      "working_set": 956391424,
+      "at": "2026-10-18T09:16:44.3960853Z",
+      "private_bytes": 933924864
+    },
+    {
+      "other": [],
+      "peak_working_set": 1775464448,
+      "working_set": 1750126592,
+      "at": "2026-10-18T09:16:45.4112620Z",
+      "private_bytes": 1753051136
+    },
+    {
+      "other": [],
+      "peak_working_set": 1924255744,
+      "working_set": 1924255744,
+      "at": "2026-10-18T09:16:46.4382308Z",
+      "private_bytes": 1931821056
+    },
+    {
+      "other": [],
+      "peak_working_set": 1924886528,
+      "working_set": 1924886528,
+      "at": "2026-10-18T09:16:47.4807677Z",
+      "private_bytes": 1931821056
+    },
+    {
+      "other": [],
+      "peak_working_set": 2007662592,
+      "working_set": 2007662592,
+      "at": "2026-10-18T09:16:48.5044351Z",
+      "private_bytes": 2070540288
+    },
+    {
+      "other": [],
+      "peak_working_set": 2007662592,
+      "working_set": 2007662592,
+      "at": "2026-10-18T09:16:49.5503222Z",
+      "private_bytes": 2070540288
+    },
+    {
+      "other": [],
+      "peak_working_set": 2009350144,
+      "working_set": 2009350144,
+      "at": "2026-10-18T09:16:50.6007436Z",
+      "private_bytes": 2070609920
+    },
+    {
+      "other": [],
+      "peak_working_set": 2009350144,
+      "working_set": 2009350144,
+      "at": "2026-10-18T09:16:51.6367009Z",
+      "private_bytes": 2070609920
+    },
+    {
+      "other": [],
+      "peak_working_set": 2009350144,
+      "working_set": 2009350144,
+      "at": "2026-10-18T09:16:52.6763175Z",
+      "private_bytes": 2070609920
+    },
+    {
+      "other": [],
+      "peak_working_set": 2013265920,
+      "working_set": 2013265920,
+      "at": "2026-10-18T09:16:53.7235051Z",
+      "private_bytes": 2070614016
+    },
+    {
+      "other": [],
+      "peak_working_set": 2013278208,
+      "working_set": 1891872768,
+      "at": "2026-10-18T09:16:54.7511156Z",
+      "private_bytes": 1955610624
+    },
+    {
+      "other": [],
+      "peak_working_set": 2014093312,
+      "working_set": 2014093312,
+      "at": "2026-10-18T09:16:55.7893337Z",
+      "private_bytes": 2078093312
+    },
+    {
+      "other": [],
+      "peak_working_set": 2014093312,
+      "working_set": 2014093312,
+      "at": "2026-10-18T09:16:56.8347417Z",
+      "private_bytes": 2078093312
+    },
+    {
+      "other": [],
+      "peak_working_set": 2014449664,
+      "working_set": 2014449664,
+      "at": "2026-10-18T09:16:57.8980553Z",
+      "private_bytes": 2078130176
+    },
+    {
+      "other": [],
+      "peak_working_set": 2014449664,
+      "working_set": 2014449664,
+      "at": "2026-10-18T09:16:58.9521301Z",
+      "private_bytes": 2078130176
+    },
+    {
+      "other": [],
+      "peak_working_set": 2014728192,
+      "working_set": 2014728192,
+      "at": "2026-10-18T09:16:59.9877810Z",
+      "private_bytes": 2078138368
+    },
+    {
+      "other": [],
+      "peak_working_set": 2014728192,
+      "working_set": 2014728192,
+      "at": "2026-10-18T09:17:01.0125247Z",
+      "private_bytes": 2078138368
+    },
+    {
+      "other": [],
+      "peak_working_set": 2014728192,
+      "working_set": 2014728192,
+      "at": "2026-10-18T09:17:02.0386710Z",
+      "private_bytes": 2078138368
+    },
+    {
+      "other": [],
+      "peak_working_set": 2014793728,
+      "working_set": 2014793728,
+      "at": "2026-10-18T09:17:03.0627429Z",
+      "private_bytes": 2078138368
+    },
+    {
+      "other": [],
+      "peak_working_set": 2020417536,
+      "working_set": 2020417536,
+      "at": "2026-10-18T09:17:04.0927612Z",
+      "private_bytes": 2087190528
+    },
+    {
+      "other": [],
+      "peak_working_set": 2020417536,
+      "working_set": 2020417536,
+      "at": "2026-10-18T09:17:05.1406122Z",
+      "private_bytes": 2087190528
+    },
+    {
+      "other": [],
+      "peak_working_set": 2021556224,
+      "working_set": 2021556224,
+      "at": "2026-10-18T09:17:06.1808303Z",
+      "private_bytes": 2087190528
+    },
+    {
+      "other": [],
+      "peak_working_set": 2021556224,
+      "working_set": 2021556224,
+      "at": "2026-10-18T09:17:07.2115153Z",
+      "private_bytes": 2087190528
+    },
+    {
+      "other": [],
+      "peak_working_set": 2022694912,
+      "working_set": 2022694912,
+      "at": "2026-10-18T09:17:08.2615571Z",
+      "private_bytes": 2087194624
+    },
+    {
+      "other": [],
+      "peak_working_set": 2022694912,
+      "working_set": 2022694912,
+      "at": "2026-10-18T09:17:09.2886794Z",
+      "private_bytes": 2087194624
+    },
+    {
+      "other": [],
+      "peak_working_set": 2024108032,
+      "working_set": 2024108032,
+      "at": "2026-10-18T09:17:10.3250641Z",
+      "private_bytes": 2087215104
+    },
+    {
+      "other": [],
+      "peak_working_set": 2024108032,
+      "working_set": 2024108032,
+      "at": "2026-10-18T09:17:11.3528166Z",
+      "private_bytes": 2087215104
+    },
+    {
+      "other": [],
+      "peak_working_set": 2027368448,
+      "working_set": 2027368448,
+      "at": "2026-10-18T09:17:12.3910710Z",
+      "private_bytes": 2091552768
+    },
+    {
+      "other": [],
+      "peak_working_set": 2027384832,
+      "working_set": 2027384832,
+      "at": "2026-10-18T09:17:13.4409309Z",
+      "private_bytes": 2091581440
+    },
+    {
+      "other": [],
+      "peak_working_set": 2028392448,
+      "working_set": 2028392448,
+      "at": "2026-10-18T09:17:14.4734633Z",
+      "private_bytes": 2091630592
+    },
+    {
+      "other": [],
+      "peak_working_set": 2028392448,
+      "working_set": 2028392448,
+      "at": "2026-10-18T09:17:15.5232963Z",
+      "private_bytes": 2091630592
+    },
+    {
+      "other": [],
+      "peak_working_set": 2028392448,
+      "working_set": 2028392448,
+      "at": "2026-10-18T09:17:16.5672822Z",
+      "private_bytes": 2091630592
+    },
+    {
+      "other": [],
+      "peak_working_set": 2029375488,
+      "working_set": 2029375488,
+      "at": "2026-10-18T09:17:17.5987424Z",
+      "private_bytes": 2091638784
+    },
+    {
+      "other": [],
+      "peak_working_set": 2029375488,
+      "working_set": 2029375488,
+      "at": "2026-10-18T09:17:18.6475367Z",
+      "private_bytes": 2091638784
+    },
+    {
+      "other": [],
+      "peak_working_set": 2030411776,
+      "working_set": 2030411776,
+      "at": "2026-10-18T09:17:19.7019541Z",
+      "private_bytes": 2091638784
+    },
+    {
+      "other": [],
+      "peak_working_set": 2030411776,
+      "working_set": 2030411776,
+      "at": "2026-10-18T09:17:20.7583264Z",
+      "private_bytes": 2091638784
+    },
+    {
+      "other": [],
+      "peak_working_set": 2035671040,
+      "working_set": 2035671040,
+      "at": "2026-10-18T09:17:21.7903375Z",
+      "private_bytes": 2095235072
+    },
+    {
+      "other": [],
+      "peak_working_set": 2035671040,
+      "working_set": 2035671040,
+      "at": "2026-10-18T09:17:22.8437551Z",
+      "private_bytes": 2095235072
+    },
+    {
+      "other": [],
+      "peak_working_set": 2036199424,
+      "working_set": 2036199424,
+      "at": "2026-10-18T09:17:23.8969409Z",
+      "private_bytes": 2095235072
+    },
+    {
+      "other": [],
+      "peak_working_set": 2036260864,
+      "working_set": 2036260864,
+      "at": "2026-10-18T09:17:24.9494258Z",
+      "private_bytes": 2095276032
+    },
+    {
+      "other": [],
+      "peak_working_set": 2036932608,
+      "working_set": 2036932608,
+      "at": "2026-10-18T09:17:26.0006597Z",
+      "private_bytes": 2095276032
+    },
+    {
+      "other": [],
+      "peak_working_set": 2036932608,
+      "working_set": 2036932608,
+      "at": "2026-10-18T09:17:27.0684529Z",
+      "private_bytes": 2095276032
+    },
+    {
+      "other": [],
+      "peak_working_set": 2037202944,
+      "working_set": 2037202944,
+      "at": "2026-10-18T09:17:28.1059192Z",
+      "private_bytes": 2095280128
+    },
+    {
+      "other": [],
+      "peak_working_set": 2037202944,
+      "working_set": 2037202944,
+      "at": "2026-10-18T09:17:29.1518290Z",
+      "private_bytes": 2095280128
+    },
+    {
+      "other": [],
+      "peak_working_set": 2039037952,
+      "working_set": 2039037952,
+      "at": "2026-10-18T09:17:30.1737535Z",
+      "private_bytes": 2086633472
+    },
+    {
+      "other": [],
+      "peak_working_set": 2039037952,
+      "working_set": 2039037952,
+      "at": "2026-10-18T09:17:31.2007010Z",
+      "private_bytes": 2086633472
+    },
+    {
+      "other": [],
+      "peak_working_set": 2040164352,
+      "working_set": 2040164352,
+      "at": "2026-10-18T09:17:32.2535043Z",
+      "private_bytes": 2086936576
+    },
+    {
+      "other": [],
+      "peak_working_set": 2040164352,
+      "working_set": 2040164352,
+      "at": "2026-10-18T09:17:33.2785825Z",
+      "private_bytes": 2086936576
+    },
+    {
+      "other": [],
+      "peak_working_set": 2040524800,
+      "working_set": 2040524800,
+      "at": "2026-10-18T09:17:34.3154780Z",
+      "private_bytes": 2086961152
+    },
+    {
+      "other": [],
+      "peak_working_set": 2040524800,
+      "working_set": 2040524800,
+      "at": "2026-10-18T09:17:35.3436932Z",
+      "private_bytes": 2086961152
+    },
+    {
+      "other": [],
+      "peak_working_set": 2041053184,
+      "working_set": 2041053184,
+      "at": "2026-10-18T09:17:36.4108964Z",
+      "private_bytes": 2086961152
+    },
+    {
+      "other": [],
+      "peak_working_set": 2041053184,
+      "working_set": 2041053184,
+      "at": "2026-10-18T09:17:37.4474115Z",
+      "private_bytes": 2086961152
+    },
+    {
+      "other": [],
+      "peak_working_set": 2044530688,
+      "working_set": 2044530688,
+      "at": "2026-10-18T09:17:38.4831163Z",
+      "private_bytes": 2091565056
+    },
+    {
+      "other": [],
+      "peak_working_set": 2044895232,
+      "working_set": 2044895232,
+      "at": "2026-10-18T09:17:39.5230647Z",
+      "private_bytes": 2091606016
+    },
+    {
+      "other": [],
+      "peak_working_set": 2044895232,
+      "working_set": 2044895232,
+      "at": "2026-10-18T09:17:40.5537497Z",
+      "private_bytes": 2091606016
+    },
+    {
+      "other": [],
+      "peak_working_set": 2045464576,
+      "working_set": 2045464576,
+      "at": "2026-10-18T09:17:41.5748792Z",
+      "private_bytes": 2091606016
+    },
+    {
+      "other": [],
+      "peak_working_set": 2045464576,
+      "working_set": 2045464576,
+      "at": "2026-10-18T09:17:42.6086976Z",
+      "private_bytes": 2091606016
+    },
+    {
+      "other": [],
+      "peak_working_set": 2045759488,
+      "working_set": 2045759488,
+      "at": "2026-10-18T09:17:43.6550025Z",
+      "private_bytes": 2091532288
+    },
+    {
+      "other": [],
+      "peak_working_set": 2045759488,
+      "working_set": 2045759488,
+      "at": "2026-10-18T09:17:44.7031095Z",
+      "private_bytes": 2091532288
+    },
+    {
+      "other": [],
+      "peak_working_set": 2045759488,
+      "working_set": 1934602240,
+      "at": "2026-10-18T09:17:45.7545039Z",
+      "private_bytes": 1974448128
+    },
+    {
+      "other": [],
+      "peak_working_set": 2047598592,
+      "working_set": 2047598592,
+      "at": "2026-10-18T09:17:46.7918381Z",
+      "private_bytes": 2095353856
+    },
+    {
+      "other": [],
+      "peak_working_set": 2047598592,
+      "working_set": 2047598592,
+      "at": "2026-10-18T09:17:47.8532423Z",
+      "private_bytes": 2095353856
+    },
+    {
+      "other": [],
+      "peak_working_set": 2047844352,
+      "working_set": 2047844352,
+      "at": "2026-10-18T09:17:48.8835286Z",
+      "private_bytes": 2095357952
+    },
+    {
+      "other": [],
+      "peak_working_set": 2047844352,
+      "working_set": 2047844352,
+      "at": "2026-10-18T09:17:49.9218912Z",
+      "private_bytes": 2095357952
+    },
+    {
+      "other": [],
+      "peak_working_set": 2048339968,
+      "working_set": 2048339968,
+      "at": "2026-10-18T09:17:50.9743092Z",
+      "private_bytes": 2095751168
+    },
+    {
+      "other": [],
+      "peak_working_set": 2048339968,
+      "working_set": 2048339968,
+      "at": "2026-10-18T09:17:52.0116767Z",
+      "private_bytes": 2095751168
+    },
+    {
+      "other": [],
+      "peak_working_set": 2048339968,
+      "working_set": 2048339968,
+      "at": "2026-10-18T09:17:53.0730011Z",
+      "private_bytes": 2095751168
+    },
+    {
+      "other": [],
+      "peak_working_set": 2048688128,
+      "working_set": 2048688128,
+      "at": "2026-10-18T09:17:54.1240373Z",
+      "private_bytes": 2095755264
+    },
+    {
+      "other": [],
+      "peak_working_set": 2048688128,
+      "working_set": 2048688128,
+      "at": "2026-10-18T09:17:55.1788537Z",
+      "private_bytes": 2095755264
+    },
+    {
+      "other": [],
+      "peak_working_set": 2052272128,
+      "working_set": 2052272128,
+      "at": "2026-10-18T09:17:56.2253455Z",
+      "private_bytes": 2099052544
+    },
+    {
+      "other": [],
+      "peak_working_set": 2052464640,
+      "working_set": 2052464640,
+      "at": "2026-10-18T09:17:57.2555051Z",
+      "private_bytes": 2099101696
+    },
+    {
+      "other": [],
+      "peak_working_set": 2052464640,
+      "working_set": 2052464640,
+      "at": "2026-10-18T09:17:58.2952541Z",
+      "private_bytes": 2099101696
+    },
+    {
+      "other": [],
+      "peak_working_set": 2053128192,
+      "working_set": 2053128192,
+      "at": "2026-10-18T09:17:59.3676829Z",
+      "private_bytes": 2099191808
+    },
+    {
+      "other": [],
+      "peak_working_set": 2053128192,
+      "working_set": 2053128192,
+      "at": "2026-10-18T09:18:00.4193071Z",
+      "private_bytes": 2099191808
+    },
+    {
+      "other": [],
+      "peak_working_set": 2053128192,
+      "working_set": 2053128192,
+      "at": "2026-10-18T09:18:01.4536601Z",
+      "private_bytes": 2099191808
+    },
+    {
+      "other": [],
+      "peak_working_set": 2053763072,
+      "working_set": 2053763072,
+      "at": "2026-10-18T09:18:02.4886910Z",
+      "private_bytes": 2099204096
+    },
+    {
+      "other": [],
+      "peak_working_set": 2053763072,
+      "working_set": 2036457472,
+      "at": "2026-10-18T09:18:03.5151688Z",
+      "private_bytes": 2082852864
+    },
+    {
+      "other": [],
+      "peak_working_set": 2053763072,
+      "working_set": 2050154496,
+      "at": "2026-10-18T09:18:04.5663175Z",
+      "private_bytes": 2096291840
+    },
+    {
+      "other": [],
+      "peak_working_set": 2053763072,
+      "working_set": 2050154496,
+      "at": "2026-10-18T09:18:05.5983988Z",
+      "private_bytes": 2096291840
+    },
+    {
+      "other": [],
+      "peak_working_set": 2053763072,
+      "working_set": 2051026944,
+      "at": "2026-10-18T09:18:06.6448122Z",
+      "private_bytes": 2096402432
+    },
+    {
+      "other": [],
+      "peak_working_set": 2053763072,
+      "working_set": 2051026944,
+      "at": "2026-10-18T09:18:07.7026651Z",
+      "private_bytes": 2096402432
+    },
+    {
+      "other": [],
+      "peak_working_set": 2053763072,
+      "working_set": 2051670016,
+      "at": "2026-10-18T09:18:08.7623742Z",
+      "private_bytes": 2096435200
+    },
+    {
+      "other": [],
+      "peak_working_set": 2053763072,
+      "working_set": 2051670016,
+      "at": "2026-10-18T09:18:09.8095357Z",
+      "private_bytes": 2096435200
+    },
+    {
+      "other": [],
+      "peak_working_set": 2053763072,
+      "working_set": 2051670016,
+      "at": "2026-10-18T09:18:10.8591179Z",
+      "private_bytes": 2096435200
+    },
+    {
+      "other": [],
+      "peak_working_set": 2053763072,
+      "working_set": 2052096000,
+      "at": "2026-10-18T09:18:11.9041763Z",
+      "private_bytes": 2096709632
+    },
+    {
+      "other": [],
+      "peak_working_set": 2053763072,
+      "working_set": 2052096000,
+      "at": "2026-10-18T09:18:12.9452117Z",
+      "private_bytes": 2096709632
+    },
+    {
+      "other": [],
+      "peak_working_set": 2060980224,
+      "working_set": 2060980224,
+      "at": "2026-10-18T09:18:13.9987881Z",
+      "private_bytes": 2106662912
+    },
+    {
+      "other": [],
+      "peak_working_set": 2060980224,
+      "working_set": 2060980224,
+      "at": "2026-10-18T09:18:15.0869914Z",
+      "private_bytes": 2106662912
+    },
+    {
+      "other": [],
+      "peak_working_set": 2061750272,
+      "working_set": 2061750272,
+      "at": "2026-10-18T09:18:16.1578945Z",
+      "private_bytes": 2106953728
+    },
+    {
+      "other": [],
+      "peak_working_set": 2061750272,
+      "working_set": 2061750272,
+      "at": "2026-10-18T09:18:17.2101399Z",
+      "private_bytes": 2106953728
+    },
+    {
+      "other": [],
+      "peak_working_set": 2062344192,
+      "working_set": 2062344192,
+      "at": "2026-10-18T09:18:18.2468052Z",
+      "private_bytes": 2106957824
+    },
+    {
+      "other": [],
+      "peak_working_set": 2062344192,
+      "working_set": 2062344192,
+      "at": "2026-10-18T09:18:19.2781021Z",
+      "private_bytes": 2106957824
+    },
+    {
+      "other": [],
+      "peak_working_set": 2062344192,
+      "working_set": 2062344192,
+      "at": "2026-10-18T09:18:20.3243049Z",
+      "private_bytes": 2106957824
+    },
+    {
+      "other": [],
+      "peak_working_set": 2062774272,
+      "working_set": 2062774272,
+      "at": "2026-10-18T09:18:21.3641581Z",
+      "private_bytes": 2106990592
+    },
+    {
+      "other": [],
+      "peak_working_set": 2066128896,
+      "working_set": 2066128896,
+      "at": "2026-10-18T09:18:22.3907381Z",
+      "private_bytes": 2110976000
+    },
+    {
+      "other": [],
+      "peak_working_set": 2066128896,
+      "working_set": 2066128896,
+      "at": "2026-10-18T09:18:23.4274366Z",
+      "private_bytes": 2110976000
+    },
+    {
+      "other": [],
+      "peak_working_set": 2066128896,
+      "working_set": 2066128896,
+      "at": "2026-10-18T09:18:24.4631933Z",
+      "private_bytes": 2110976000
+    },
+    {
+      "other": [],
+      "peak_working_set": 2066231296,
+      "working_set": 2066231296,
+      "at": "2026-10-18T09:18:25.5034659Z",
+      "private_bytes": 2111283200
+    },
+    {
+      "other": [],
+      "peak_working_set": 2066317312,
+      "working_set": 2066317312,
+      "at": "2026-10-18T09:18:26.5418295Z",
+      "private_bytes": 2111295488
+    },
+    {
+      "other": [],
+      "peak_working_set": 2066317312,
+      "working_set": 2066317312,
+      "at": "2026-10-18T09:18:27.5930183Z",
+      "private_bytes": 2111295488
+    },
+    {
+      "other": [],
+      "peak_working_set": 2066370560,
+      "working_set": 2066370560,
+      "at": "2026-10-18T09:18:28.6467374Z",
+      "private_bytes": 2111299584
+    },
+    {
+      "other": [],
+      "peak_working_set": 2066370560,
+      "working_set": 2066370560,
+      "at": "2026-10-18T09:18:29.6884070Z",
+      "private_bytes": 2111299584
+    },
+    {
+      "other": [],
+      "peak_working_set": 2067804160,
+      "working_set": 2067804160,
+      "at": "2026-10-18T09:18:30.7250728Z",
+      "private_bytes": 2112077824
+    },
+    {
+      "other": [],
+      "peak_working_set": 2067804160,
+      "working_set": 2067804160,
+      "at": "2026-10-18T09:18:31.7702140Z",
+      "private_bytes": 2112077824
+    },
+    {
+      "other": [],
+      "peak_working_set": 2068021248,
+      "working_set": 2068021248,
+      "at": "2026-10-18T09:18:32.8350187Z",
+      "private_bytes": 2112147456
+    },
+    {
+      "other": [],
+      "peak_working_set": 2068021248,
+      "working_set": 2068021248,
+      "at": "2026-10-18T09:18:33.8949081Z",
+      "private_bytes": 2112147456
+    },
+    {
+      "other": [],
+      "peak_working_set": 2068332544,
+      "working_set": 2068332544,
+      "at": "2026-10-18T09:18:34.9323101Z",
+      "private_bytes": 2112299008
+    },
+    {
+      "other": [],
+      "peak_working_set": 2068332544,
+      "working_set": 2068332544,
+      "at": "2026-10-18T09:18:35.9761181Z",
+      "private_bytes": 2112299008
+    },
+    {
+      "other": [],
+      "peak_working_set": 2068332544,
+      "working_set": 2068332544,
+      "at": "2026-10-18T09:18:37.0169200Z",
+      "private_bytes": 2112299008
+    },
+    {
+      "other": [],
+      "peak_working_set": 2068652032,
+      "working_set": 2068652032,
+      "at": "2026-10-18T09:18:38.0834274Z",
+      "private_bytes": 2112299008
+    },
+    {
+      "other": [],
+      "peak_working_set": 2068652032,
+      "working_set": 2024497152,
+      "at": "2026-10-18T09:18:39.1157083Z",
+      "private_bytes": 2070163456
+    },
+    {
+      "other": [],
+      "peak_working_set": 2068652032,
+      "working_set": 2068639744,
+      "at": "2026-10-18T09:18:40.1490604Z",
+      "private_bytes": 2112126976
+    },
+    {
+      "other": [],
+      "peak_working_set": 2068746240,
+      "working_set": 2068746240,
+      "at": "2026-10-18T09:18:41.1994859Z",
+      "private_bytes": 2112176128
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069000192,
+      "working_set": 2069000192,
+      "at": "2026-10-18T09:18:42.2507138Z",
+      "private_bytes": 2112225280
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069000192,
+      "working_set": 2069000192,
+      "at": "2026-10-18T09:18:43.3013820Z",
+      "private_bytes": 2112225280
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2069073920,
+      "at": "2026-10-18T09:18:44.3749110Z",
+      "private_bytes": 2112249856
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2069073920,
+      "at": "2026-10-18T09:18:45.4046990Z",
+      "private_bytes": 2112249856
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2065809408,
+      "at": "2026-10-18T09:18:46.4357228Z",
+      "private_bytes": 2110619648
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2065809408,
+      "at": "2026-10-18T09:18:47.4739209Z",
+      "private_bytes": 2110619648
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2065870848,
+      "at": "2026-10-18T09:18:48.5212842Z",
+      "private_bytes": 2110713856
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2065870848,
+      "at": "2026-10-18T09:18:49.6004842Z",
+      "private_bytes": 2110713856
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2065870848,
+      "at": "2026-10-18T09:18:50.6600444Z",
+      "private_bytes": 2110713856
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2066108416,
+      "at": "2026-10-18T09:18:51.6981292Z",
+      "private_bytes": 2111152128
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2066108416,
+      "at": "2026-10-18T09:18:52.7524804Z",
+      "private_bytes": 2111152128
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2066206720,
+      "at": "2026-10-18T09:18:53.7920436Z",
+      "private_bytes": 2111152128
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2066206720,
+      "at": "2026-10-18T09:18:54.8264188Z",
+      "private_bytes": 2111152128
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2064392192,
+      "at": "2026-10-18T09:18:55.8814921Z",
+      "private_bytes": 2109878272
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2064658432,
+      "at": "2026-10-18T09:18:56.9334402Z",
+      "private_bytes": 2110226432
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2064670720,
+      "at": "2026-10-18T09:18:57.9636909Z",
+      "private_bytes": 2110164992
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2064961536,
+      "at": "2026-10-18T09:18:59.0112057Z",
+      "private_bytes": 2110394368
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2064961536,
+      "at": "2026-10-18T09:19:00.0526994Z",
+      "private_bytes": 2110394368
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2065117184,
+      "at": "2026-10-18T09:19:01.1157907Z",
+      "private_bytes": 2110652416
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2065117184,
+      "at": "2026-10-18T09:19:02.1667638Z",
+      "private_bytes": 2110652416
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2069061632,
+      "at": "2026-10-18T09:19:03.2034513Z",
+      "private_bytes": 2116009984
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069073920,
+      "working_set": 2069061632,
+      "at": "2026-10-18T09:19:04.2496557Z",
+      "private_bytes": 2116009984
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069209088,
+      "working_set": 2069209088,
+      "at": "2026-10-18T09:19:05.2830059Z",
+      "private_bytes": 2116337664
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069209088,
+      "working_set": 2069209088,
+      "at": "2026-10-18T09:19:06.3245391Z",
+      "private_bytes": 2116337664
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069315584,
+      "working_set": 2069315584,
+      "at": "2026-10-18T09:19:07.3740757Z",
+      "private_bytes": 2116349952
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069315584,
+      "working_set": 2069315584,
+      "at": "2026-10-18T09:19:08.4120382Z",
+      "private_bytes": 2116349952
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069331968,
+      "working_set": 2069331968,
+      "at": "2026-10-18T09:19:09.4406416Z",
+      "private_bytes": 2116378624
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069331968,
+      "working_set": 2069331968,
+      "at": "2026-10-18T09:19:10.4770662Z",
+      "private_bytes": 2116378624
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069331968,
+      "working_set": 2068901888,
+      "at": "2026-10-18T09:19:11.5063666Z",
+      "private_bytes": 2116227072
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069331968,
+      "working_set": 2068901888,
+      "at": "2026-10-18T09:19:12.5474248Z",
+      "private_bytes": 2116227072
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069331968,
+      "working_set": 2069012480,
+      "at": "2026-10-18T09:19:13.5739898Z",
+      "private_bytes": 2116501504
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069331968,
+      "working_set": 2069065728,
+      "at": "2026-10-18T09:19:14.5977924Z",
+      "private_bytes": 2116513792
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069331968,
+      "working_set": 2069065728,
+      "at": "2026-10-18T09:19:15.6481292Z",
+      "private_bytes": 2116513792
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069331968,
+      "working_set": 2069127168,
+      "at": "2026-10-18T09:19:16.6975291Z",
+      "private_bytes": 2116567040
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069331968,
+      "working_set": 2069127168,
+      "at": "2026-10-18T09:19:17.7414422Z",
+      "private_bytes": 2116567040
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069966848,
+      "working_set": 2069966848,
+      "at": "2026-10-18T09:19:18.7662794Z",
+      "private_bytes": 2118070272
+    },
+    {
+      "other": [],
+      "peak_working_set": 2069966848,
+      "working_set": 2069966848,
+      "at": "2026-10-18T09:19:19.8065745Z",
+      "private_bytes": 2118070272
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070122496,
+      "working_set": 2070122496,
+      "at": "2026-10-18T09:19:20.8662231Z",
+      "private_bytes": 2118094848
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070122496,
+      "working_set": 2070122496,
+      "at": "2026-10-18T09:19:21.9120062Z",
+      "private_bytes": 2118094848
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070122496,
+      "working_set": 2070122496,
+      "at": "2026-10-18T09:19:22.9497894Z",
+      "private_bytes": 2118094848
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070282240,
+      "working_set": 2070282240,
+      "at": "2026-10-18T09:19:23.9949335Z",
+      "private_bytes": 2118094848
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070282240,
+      "working_set": 2070282240,
+      "at": "2026-10-18T09:19:25.0461195Z",
+      "private_bytes": 2118094848
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070507520,
+      "working_set": 2070507520,
+      "at": "2026-10-18T09:19:26.1071255Z",
+      "private_bytes": 2118094848
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070507520,
+      "working_set": 2070507520,
+      "at": "2026-10-18T09:19:27.1324907Z",
+      "private_bytes": 2118094848
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070507520,
+      "working_set": 2067529728,
+      "at": "2026-10-18T09:19:28.1637514Z",
+      "private_bytes": 2118676480
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070507520,
+      "working_set": 2067529728,
+      "at": "2026-10-18T09:19:29.2164018Z",
+      "private_bytes": 2118676480
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070507520,
+      "working_set": 2067849216,
+      "at": "2026-10-18T09:19:30.2587182Z",
+      "private_bytes": 2119032832
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070507520,
+      "working_set": 2067849216,
+      "at": "2026-10-18T09:19:31.3266989Z",
+      "private_bytes": 2119032832
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070507520,
+      "working_set": 2067910656,
+      "at": "2026-10-18T09:19:32.3716870Z",
+      "private_bytes": 2119364608
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070507520,
+      "working_set": 2067910656,
+      "at": "2026-10-18T09:19:33.4310843Z",
+      "private_bytes": 2119364608
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070507520,
+      "working_set": 2068082688,
+      "at": "2026-10-18T09:19:34.4771420Z",
+      "private_bytes": 2119688192
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070507520,
+      "working_set": 2068082688,
+      "at": "2026-10-18T09:19:35.4998175Z",
+      "private_bytes": 2119688192
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070507520,
+      "working_set": 2067251200,
+      "at": "2026-10-18T09:19:36.5420808Z",
+      "private_bytes": 2116980736
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070507520,
+      "working_set": 2067251200,
+      "at": "2026-10-18T09:19:37.5891513Z",
+      "private_bytes": 2116980736
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070507520,
+      "working_set": 2067582976,
+      "at": "2026-10-18T09:19:38.6126354Z",
+      "private_bytes": 2117513216
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070507520,
+      "working_set": 2067582976,
+      "at": "2026-10-18T09:19:39.6608142Z",
+      "private_bytes": 2117513216
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070507520,
+      "working_set": 2067660800,
+      "at": "2026-10-18T09:19:40.7060675Z",
+      "private_bytes": 2117541888
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070507520,
+      "working_set": 2067660800,
+      "at": "2026-10-18T09:19:41.7433452Z",
+      "private_bytes": 2117541888
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070507520,
+      "working_set": 2067722240,
+      "at": "2026-10-18T09:19:42.7702364Z",
+      "private_bytes": 2117554176
+    },
+    {
+      "other": [],
+      "peak_working_set": 2070507520,
+      "working_set": 2067722240,
+      "at": "2026-10-18T09:19:43.8226011Z",
+      "private_bytes": 2117554176
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073141248,
+      "working_set": 2073141248,
+      "at": "2026-10-18T09:19:44.8732795Z",
+      "private_bytes": 2122162176
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073141248,
+      "working_set": 2073141248,
+      "at": "2026-10-18T09:19:45.9159787Z",
+      "private_bytes": 2122162176
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073169920,
+      "working_set": 2073169920,
+      "at": "2026-10-18T09:19:46.9599324Z",
+      "private_bytes": 2122424320
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073169920,
+      "working_set": 2073169920,
+      "at": "2026-10-18T09:19:47.9929617Z",
+      "private_bytes": 2122424320
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073194496,
+      "working_set": 2073194496,
+      "at": "2026-10-18T09:19:49.0293375Z",
+      "private_bytes": 2122424320
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073194496,
+      "working_set": 2073194496,
+      "at": "2026-10-18T09:19:50.0741236Z",
+      "private_bytes": 2122424320
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2073198592,
+      "at": "2026-10-18T09:19:51.1033552Z",
+      "private_bytes": 2122424320
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2073198592,
+      "at": "2026-10-18T09:19:52.1489056Z",
+      "private_bytes": 2122424320
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2071744512,
+      "at": "2026-10-18T09:19:53.1876883Z",
+      "private_bytes": 2122194944
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2071744512,
+      "at": "2026-10-18T09:19:54.2288967Z",
+      "private_bytes": 2122194944
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2072215552,
+      "at": "2026-10-18T09:19:55.2740788Z",
+      "private_bytes": 2122555392
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2072215552,
+      "at": "2026-10-18T09:19:56.3142101Z",
+      "private_bytes": 2122555392
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2072289280,
+      "at": "2026-10-18T09:19:57.3611899Z",
+      "private_bytes": 2122625024
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2072289280,
+      "at": "2026-10-18T09:19:58.4109278Z",
+      "private_bytes": 2122625024
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2072727552,
+      "at": "2026-10-18T09:19:59.4411765Z",
+      "private_bytes": 2123067392
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2072727552,
+      "at": "2026-10-18T09:20:00.4749251Z",
+      "private_bytes": 2123067392
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2071191552,
+      "at": "2026-10-18T09:20:01.5140419Z",
+      "private_bytes": 2124324864
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2071191552,
+      "at": "2026-10-18T09:20:02.5688595Z",
+      "private_bytes": 2124324864
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2071318528,
+      "at": "2026-10-18T09:20:03.6193565Z",
+      "private_bytes": 2124394496
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2071318528,
+      "at": "2026-10-18T09:20:04.6818385Z",
+      "private_bytes": 2124394496
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2071318528,
+      "at": "2026-10-18T09:20:05.7096866Z",
+      "private_bytes": 2124394496
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2071396352,
+      "at": "2026-10-18T09:20:06.7449569Z",
+      "private_bytes": 2124398592
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2071396352,
+      "at": "2026-10-18T09:20:07.7904124Z",
+      "private_bytes": 2124398592
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2071429120,
+      "at": "2026-10-18T09:20:08.8243473Z",
+      "private_bytes": 2124398592
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2071429120,
+      "at": "2026-10-18T09:20:09.8651217Z",
+      "private_bytes": 2124398592
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2069594112,
+      "at": "2026-10-18T09:20:10.9182766Z",
+      "private_bytes": 2120691712
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2069594112,
+      "at": "2026-10-18T09:20:11.9624758Z",
+      "private_bytes": 2120691712
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2069594112,
+      "at": "2026-10-18T09:20:13.0002531Z",
+      "private_bytes": 2120691712
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2069626880,
+      "at": "2026-10-18T09:20:14.0359416Z",
+      "private_bytes": 2120716288
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2069626880,
+      "at": "2026-10-18T09:20:15.0605208Z",
+      "private_bytes": 2120716288
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2069626880,
+      "at": "2026-10-18T09:20:16.0950056Z",
+      "private_bytes": 2120716288
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2069671936,
+      "at": "2026-10-18T09:20:17.1277306Z",
+      "private_bytes": 2120716288
+    },
+    {
+      "other": [],
+      "peak_working_set": 2073198592,
+      "working_set": 2069884928,
+      "at": "2026-10-18T09:20:18.1526610Z",
+      "private_bytes": 2120994816
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075205632,
+      "working_set": 2075205632,
+      "at": "2026-10-18T09:20:19.1889141Z",
+      "private_bytes": 2125729792
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075410432,
+      "working_set": 2075410432,
+      "at": "2026-10-18T09:20:20.2162642Z",
+      "private_bytes": 2125762560
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075410432,
+      "working_set": 2075410432,
+      "at": "2026-10-18T09:20:21.2703970Z",
+      "private_bytes": 2125762560
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075410432,
+      "working_set": 2075410432,
+      "at": "2026-10-18T09:20:22.3230760Z",
+      "private_bytes": 2125762560
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075504640,
+      "working_set": 2075504640,
+      "at": "2026-10-18T09:20:23.3506786Z",
+      "private_bytes": 2125770752
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075504640,
+      "working_set": 2075504640,
+      "at": "2026-10-18T09:20:24.3837662Z",
+      "private_bytes": 2125770752
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2075549696,
+      "at": "2026-10-18T09:20:25.4203742Z",
+      "private_bytes": 2125770752
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2050240512,
+      "at": "2026-10-18T09:20:26.4514172Z",
+      "private_bytes": 2100727808
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2066644992,
+      "at": "2026-10-18T09:20:27.4792098Z",
+      "private_bytes": 2118504448
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2066796544,
+      "at": "2026-10-18T09:20:28.5120399Z",
+      "private_bytes": 2118594560
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2067017728,
+      "at": "2026-10-18T09:20:29.5531168Z",
+      "private_bytes": 2118766592
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2067017728,
+      "at": "2026-10-18T09:20:30.5920263Z",
+      "private_bytes": 2118766592
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2067017728,
+      "at": "2026-10-18T09:20:31.6222797Z",
+      "private_bytes": 2118766592
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2067116032,
+      "at": "2026-10-18T09:20:32.6558264Z",
+      "private_bytes": 2118930432
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2068578304,
+      "at": "2026-10-18T09:20:33.6885916Z",
+      "private_bytes": 2122158080
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2073800704,
+      "at": "2026-10-18T09:20:34.7126344Z",
+      "private_bytes": 2123907072
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2073812992,
+      "at": "2026-10-18T09:20:35.7521371Z",
+      "private_bytes": 2123911168
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2073812992,
+      "at": "2026-10-18T09:20:36.8045509Z",
+      "private_bytes": 2123911168
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2073874432,
+      "at": "2026-10-18T09:20:37.8541208Z",
+      "private_bytes": 2123919360
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2073874432,
+      "at": "2026-10-18T09:20:38.8988002Z",
+      "private_bytes": 2123919360
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2073874432,
+      "at": "2026-10-18T09:20:39.9513707Z",
+      "private_bytes": 2123919360
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2073976832,
+      "at": "2026-10-18T09:20:41.0012713Z",
+      "private_bytes": 2123919360
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2073743360,
+      "at": "2026-10-18T09:20:42.0387707Z",
+      "private_bytes": 2123112448
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2073755648,
+      "at": "2026-10-18T09:20:43.0812705Z",
+      "private_bytes": 2123112448
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2073755648,
+      "at": "2026-10-18T09:20:44.1169373Z",
+      "private_bytes": 2123112448
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2073837568,
+      "at": "2026-10-18T09:20:45.1417628Z",
+      "private_bytes": 2123112448
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2073837568,
+      "at": "2026-10-18T09:20:46.1667515Z",
+      "private_bytes": 2123112448
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2073849856,
+      "at": "2026-10-18T09:20:47.1903649Z",
+      "private_bytes": 2123112448
+    },
+    {
+      "other": [],
+      "peak_working_set": 2075549696,
+      "working_set": 2073849856,
+      "at": "2026-10-18T09:20:48.2154662Z",
+      "private_bytes": 2123112448
+    },
+    {
+      "other": [],
+      "peak_working_set": 2078113792,
+      "working_set": 2078113792,
+      "at": "2026-10-18T09:20:49.2510716Z",
+      "private_bytes": 2126417920
+    },
+    {
+      "other": [],
+      "peak_working_set": 2078113792,
+      "working_set": 2078113792,
+      "at": "2026-10-18T09:20:50.2818520Z",
+      "private_bytes": 2126417920
+    },
+    {
+      "other": [],
+      "peak_working_set": 2078158848,
+      "working_set": 2078158848,
+      "at": "2026-10-18T09:20:51.3129309Z",
+      "private_bytes": 2126417920
+    },
+    {
+      "other": [],
+      "peak_working_set": 2078158848,
+      "working_set": 2078158848,
+      "at": "2026-10-18T09:20:52.3620353Z",
+      "private_bytes": 2126417920
+    },
+    {
+      "other": [],
+      "peak_working_set": 2078289920,
+      "working_set": 2078289920,
+      "at": "2026-10-18T09:20:53.4085516Z",
+      "private_bytes": 2126757888
+    },
+    {
+      "other": [],
+      "peak_working_set": 2078289920,
+      "working_set": 2078289920,
+      "at": "2026-10-18T09:20:54.4417012Z",
+      "private_bytes": 2126757888
+    },
+    {
+      "other": [],
+      "peak_working_set": 2078322688,
+      "working_set": 2078322688,
+      "at": "2026-10-18T09:20:55.4768110Z",
+      "private_bytes": 2126757888
+    },
+    {
+      "other": [],
+      "peak_working_set": 2078322688,
+      "working_set": 2078322688,
+      "at": "2026-10-18T09:20:56.5120232Z",
+      "private_bytes": 2126757888
+    },
+    {
+      "other": [],
+      "peak_working_set": 2078322688,
+      "working_set": 2077626368,
+      "at": "2026-10-18T09:20:57.5631211Z",
+      "private_bytes": 2125504512
+    },
+    {
+      "other": [],
+      "peak_working_set": 2078322688,
+      "working_set": 2077626368,
+      "at": "2026-10-18T09:20:58.5847603Z",
+      "private_bytes": 2125504512
+    },
+    {
+      "other": [],
+      "peak_working_set": 2078322688,
+      "working_set": 2077626368,
+      "at": "2026-10-18T09:20:59.6228163Z",
+      "private_bytes": 2125504512
+    },
+    {
+      "other": [],
+      "peak_working_set": 2078322688,
+      "working_set": 2077626368,
+      "at": "2026-10-18T09:21:00.6589180Z",
+      "private_bytes": 2125504512
+    },
+    {
+      "other": [],
+      "peak_working_set": 2078322688,
+      "working_set": 2077626368,
+      "at": "2026-10-18T09:21:01.6968638Z",
+      "private_bytes": 2125504512
+    },
+    {
+      "other": [],
+      "peak_working_set": 2078322688,
+      "working_set": 2077626368,
+      "at": "2026-10-18T09:21:02.7430907Z",
+      "private_bytes": 2125504512
+    },
+    {
+      "other": [],
+      "peak_working_set": 2078322688,
+      "working_set": 2077626368,
+      "at": "2026-10-18T09:21:03.8224664Z",
+      "private_bytes": 2125504512
+    },
+    {
+      "other": [],
+      "peak_working_set": 2078322688,
+      "working_set": 572493824,
+      "at": "2026-10-18T09:21:04.8503073Z",
+      "private_bytes": 625258496
+    }
+  ],
+  "started": "2026-10-18T09:16:43.3594241Z",
+  "name": "cpu-t16-b4",
+  "timing_contaminated": false,
+  "exit_code": 0
+}

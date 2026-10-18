@@ -1,0 +1,13 @@
+{
+  "source": {
+    "files": [
+      "onnx/model_fp16.onnx",
+      "onnx/model_quantized.onnx"
+    ],
+    "downloadedAt": "2026-10-18T08:48:56.4564969Z",
+    "revision": "6f5ff65298512715a1e669753bc754d2bc8f367b",
+    "repository": "onnx-community/bge-reranker-v2-m3-ONNX"
+  },
+  "bytes": 570727094,
+  "sha256": "912fc1215c2dbff6499700534bd8d31253af01573861abbfc43afd1fab6cce5d"
+}

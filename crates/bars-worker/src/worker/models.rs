@@ -8,7 +8,10 @@ use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
+use std::time::{Duration, Instant};
+
+mod resident;
+use resident::{Resident, take_idle};
 
 use bars_core::models::{
     Accelerator, BGE_RERANKER_V2_M3_ID, BuiltinReranker, EmbedError, Embedder, HttpEmbedder,
@@ -45,6 +48,9 @@ fn same_embed(a: &EmbedSettings, b: &EmbedSettings) -> bool {
 
 fn same_rerank(a: &RerankSettings, b: &RerankSettings) -> bool {
     let mut a = a.clone();
+    // enabled управляет lifecycle, а не форматом сессии. Опрос нового состояния
+    // после выключения не должен синхронно запускать дорогой drop.
+    a.enabled = b.enabled;
     if a.source != ModelSource::Builtin {
         a.accelerator = b.accelerator;
     }
@@ -94,7 +100,7 @@ pub trait ModelProvider: Send + Sync {
     }
 
     /// Ход скачивания встроенной модели в процентах; `None`, если провайдер его не знает.
-    fn download_percent(&self, _id: &str) -> Option<u8> {
+    fn download_percent(&self, _id: &str, _settings: &Settings) -> Option<u8> {
         None
     }
 }
@@ -207,8 +213,15 @@ impl ModelProvider for ConfiguredProvider {
         source == ModelSource::Builtin
     }
 
-    fn download_percent(&self, id: &str) -> Option<u8> {
-        download_percent(&self.models_dir, id)
+    fn download_percent(&self, id: &str, settings: &Settings) -> Option<u8> {
+        if id == BGE_RERANKER_V2_M3_ID {
+            Some(bars_core::models::reranker_download_percent(
+                &self.models_dir,
+                settings.rerank.accelerator,
+            ))
+        } else {
+            download_percent(&self.models_dir, id)
+        }
     }
 
     fn load_reranker(&self, settings: &Settings) -> Result<Box<dyn Reranker + Send>, RerankError> {
@@ -244,10 +257,12 @@ impl ModelProvider for ConfiguredProvider {
 
 /// Смотрит на загруженную модель, не дожидаясь замка: занятый мьютекс значит, что модель сейчас
 /// грузится или считает, и «загруженной» для вызывающего она не видна.
-fn peek<M, R>(slot: &Mutex<Option<M>>, f: impl FnOnce(&M) -> R) -> Option<R> {
+fn peek<M, R>(slot: &Mutex<Resident<M>>, f: impl FnOnce(&M) -> R) -> Option<R> {
     match slot.try_lock() {
-        Ok(guard) => guard.as_ref().map(f),
-        Err(std::sync::TryLockError::Poisoned(poisoned)) => poisoned.into_inner().as_ref().map(f),
+        Ok(guard) => guard.model.as_ref().map(f),
+        Err(std::sync::TryLockError::Poisoned(poisoned)) => {
+            poisoned.into_inner().model.as_ref().map(f)
+        }
         Err(std::sync::TryLockError::WouldBlock) => None,
     }
 }
@@ -326,7 +341,7 @@ pub struct ModelSlot {
     batch_size: usize,
     batch_chars: Option<usize>,
     loader: Loader,
-    model: Mutex<Option<Box<dyn Embedder + Send>>>,
+    model: Mutex<Resident<Box<dyn Embedder + Send>>>,
     /// Сколько запросов поиска ждут модель. Пока их больше нуля, индексация не берёт мьютекс:
     /// он не честный, и без этого пачки индексации идут подряд, а запрос не доходит до модели.
     waiting_queries: AtomicUsize,
@@ -386,10 +401,10 @@ impl ModelSlot {
 
     fn load_and_run<R>(
         &self,
-        guard: &mut Option<Box<dyn Embedder + Send>>,
+        guard: &mut Resident<Box<dyn Embedder + Send>>,
         f: impl FnOnce(&mut (dyn Embedder + Send)) -> Result<R, EmbedError>,
     ) -> Result<R, EmbedError> {
-        if guard.is_none() {
+        if guard.model.is_none() {
             *lock(&self.runtime) = SlotRuntime {
                 state: "loading",
                 ..SlotRuntime::default()
@@ -400,7 +415,7 @@ impl ModelSlot {
                         state: "ready",
                         execution: model.execution(),
                     };
-                    *guard = Some(model);
+                    guard.model = Some(model);
                 }
                 Err(error) => {
                     lock(&self.runtime).state = "failed";
@@ -408,8 +423,10 @@ impl ModelSlot {
                 }
             }
         }
-        let model = guard.as_mut().expect("модель загружена строкой выше");
-        f(model.as_mut())
+        let model = guard.model.as_mut().expect("модель загружена строкой выше");
+        let result = f(model.as_mut());
+        guard.last_used = Instant::now();
+        result
     }
 }
 
@@ -512,7 +529,7 @@ type RerankLoader = Box<dyn Fn() -> Result<Box<dyn Reranker + Send>, RerankError
 /// Одна rerank-модель за мьютексом.
 pub struct RerankSlot {
     loader: RerankLoader,
-    model: Mutex<Option<Box<dyn Reranker + Send>>>,
+    model: Mutex<Resident<Box<dyn Reranker + Send>>>,
     runtime: Mutex<SlotRuntime>,
 }
 
@@ -538,8 +555,17 @@ impl SharedReranker {
 impl SharedReranker {
     /// Загружает модель, если она ещё не загружена.
     fn prepare(&self) -> Result<(), RerankError> {
+        self.with(|_| Ok(()))
+    }
+
+    // Загрузка и использование непрерывно держат model-lock: reaper не может
+    // забрать модель между prepare и inference.
+    fn with<R>(
+        &self,
+        f: impl FnOnce(&mut (dyn Reranker + Send)) -> Result<R, RerankError>,
+    ) -> Result<R, RerankError> {
         let mut guard = lock(&self.slot.model);
-        if guard.is_none() {
+        if guard.model.is_none() {
             lock(&self.slot.runtime).state = "loading";
             match (self.slot.loader)() {
                 Ok(model) => {
@@ -547,7 +573,7 @@ impl SharedReranker {
                         state: "ready",
                         execution: model.execution(),
                     };
-                    *guard = Some(model);
+                    guard.model = Some(model);
                 }
                 Err(error) => {
                     lock(&self.slot.runtime).state = "failed";
@@ -555,7 +581,13 @@ impl SharedReranker {
                 }
             }
         }
-        Ok(())
+        let result = f(guard
+            .model
+            .as_mut()
+            .expect("модель загружена строкой выше")
+            .as_mut());
+        guard.last_used = Instant::now();
+        result
     }
 }
 
@@ -564,10 +596,7 @@ impl Reranker for SharedReranker {
         lock(&self.slot.runtime).execution.clone()
     }
     fn rerank(&mut self, query: &str, documents: &[&str]) -> Result<Vec<f32>, RerankError> {
-        self.prepare()?;
-        let mut guard = lock(&self.slot.model);
-        let model = guard.as_mut().expect("модель загружена строкой выше");
-        model.rerank(query, documents)
+        self.with(|model| model.rerank(query, documents))
     }
 }
 
@@ -598,6 +627,56 @@ fn load_key(source: ModelSource, model: &str) -> Option<String> {
 }
 
 impl Models {
+    /// Убирает владение текущими слотами; выполняющиеся запросы сохраняют свои Arc.
+    pub(super) fn clear(&self) {
+        let embed = lock(&self.current).take();
+        let rerank = lock(&self.current_rerank).take();
+        drop(embed);
+        drop(rerank);
+    }
+
+    /// Освобождает только свободные встроенные сессии. Старые Arc и HTTP не затрагивает.
+    /// Блокирующий drop вызывается вне замков менеджера и модели.
+    pub fn release_idle(&self, rerank_enabled: bool, embed_idle: Duration, rerank_idle: Duration) {
+        // Не накладываем создание новой сессии на дорогой drop старой. Уже идущую
+        // загрузку не ждём; готовые модели продолжают inference без этого gate.
+        let _retirement_gate = match self.loads.gate.try_lock() {
+            Ok(guard) => guard,
+            Err(std::sync::TryLockError::Poisoned(error)) => error.into_inner(),
+            Err(std::sync::TryLockError::WouldBlock) => return,
+        };
+        let embed = lock(&self.current)
+            .as_ref()
+            .filter(|current| current.embed.source == ModelSource::Builtin)
+            .map(|current| Arc::clone(&current.slot));
+        let rerank = lock(&self.current_rerank)
+            .as_ref()
+            .filter(|current| current.rerank.source == ModelSource::Builtin)
+            .map(|current| Arc::clone(&current.slot));
+        let now = Instant::now();
+        if let Some(slot) = embed {
+            let retired = take_idle(&slot.model, now, embed_idle, || {
+                *lock(&slot.runtime) = SlotRuntime::default();
+            });
+            let released = retired.is_some();
+            drop(retired);
+            if released { log::info!("Неиспользуемая embed-модель выгружена"); }
+        }
+        if let Some(slot) = rerank {
+            let ttl = if rerank_enabled {
+                rerank_idle
+            } else {
+                Duration::ZERO
+            };
+            let retired = take_idle(&slot.model, now, ttl, || {
+                *lock(&slot.runtime) = SlotRuntime::default();
+            });
+            let released = retired.is_some();
+            drop(retired);
+            if released { log::info!("Неиспользуемая rerank-модель выгружена"); }
+        }
+    }
+
     pub fn runtime(&self, settings: &Settings) -> Option<bars_protocol::ModelsRuntime> {
         let embed = self.embedder(settings).ok()?;
         let rerank = self.reranker(settings);
@@ -618,6 +697,8 @@ impl Models {
                 backend: state.execution.backend.into(),
                 actual: state.execution.actual.map(str::to_string),
                 fallback_reason: state.execution.fallback_reason,
+                precision: state.execution.precision.map(str::to_string),
+                revision: state.execution.revision.map(str::to_string),
             }
         };
         Some(bars_protocol::ModelsRuntime {
@@ -669,15 +750,17 @@ impl Models {
             batch_size: self.provider.batch_size(settings).max(1),
             batch_chars: self.provider.batch_chars(settings),
             loader: Box::new(move || loads.run_keyed(key.as_deref(), || provider.load(&owned))),
-            model: Mutex::new(None),
+            model: Mutex::new(Resident::default()),
             waiting_queries: AtomicUsize::new(0),
             runtime: Mutex::new(SlotRuntime::default()),
         });
-        *current = Some(Current {
+        let retired = current.replace(Current {
             fingerprint,
             embed: settings.embed.clone(),
             slot: Arc::clone(&slot),
         });
+        drop(current);
+        drop(retired);
         Ok(SharedEmbedder::new(slot))
     }
 
@@ -736,7 +819,7 @@ impl Models {
             });
         }
         Ok(Readiness::Loading {
-            percent: self.provider.download_percent(&id).unwrap_or(0),
+            percent: self.provider.download_percent(&id, settings).unwrap_or(0),
         })
     }
 
@@ -760,7 +843,7 @@ impl Models {
             });
         }
         Readiness::Loading {
-            percent: self.provider.download_percent(&id).unwrap_or(0),
+            percent: self.provider.download_percent(&id, settings).unwrap_or(0),
         }
     }
 
@@ -784,12 +867,14 @@ impl Models {
                 loads.run_keyed(key.as_deref(), || provider.load_reranker(&owned))
             }),
             runtime: Mutex::new(SlotRuntime::default()),
-            model: Mutex::new(None),
+            model: Mutex::new(Resident::default()),
         });
-        *current = Some(CurrentRerank {
+        let retired = current.replace(CurrentRerank {
             rerank: settings.rerank.clone(),
             slot: Arc::clone(&slot),
         });
+        drop(current);
+        drop(retired);
         SharedReranker { slot }
     }
 }
@@ -939,6 +1024,169 @@ mod tests {
 
     fn settings() -> Settings {
         Settings::resolve(&Default::default(), &Default::default())
+    }
+
+    #[test]
+    fn idle_sessions_reload_with_same_results_and_runtime_resets() {
+        let provider = FakeProvider::new("m1");
+        let models = Models::new(provider.clone());
+        let config = settings();
+        let mut embed = models.embedder(&config).unwrap();
+        let mut rerank = models.reranker(&config);
+        let vector = embed.embed_query("борщ").unwrap();
+        let scores = rerank.rerank("борщ", &["борщ", "очередь"]).unwrap();
+        models.release_idle(true, Duration::ZERO, Duration::ZERO);
+        assert!(!embed.slot().is_loaded());
+        assert!(!rerank.slot().is_loaded());
+        let runtime = models.runtime(&config).unwrap();
+        assert_eq!(runtime.embed.state, "unloaded");
+        assert_eq!(runtime.rerank.state, "unloaded");
+        assert_eq!(embed.embed_query("борщ").unwrap(), vector);
+        assert_eq!(rerank.rerank("борщ", &["борщ", "очередь"]).unwrap(), scores);
+        assert_eq!(provider.counters.loads.load(Ordering::SeqCst), 2);
+        assert_eq!(provider.counters.rerank_loads.load(Ordering::SeqCst), 2);
+    }
+
+    #[test]
+    fn disabled_rerank_waits_for_busy_slot_and_keeps_embed() {
+        let models = Models::new(FakeProvider::new("m1"));
+        let mut embed = models.embedder(&settings()).unwrap();
+        let rerank = models.reranker(&settings());
+        embed.prepare().unwrap();
+        rerank.prepare().unwrap();
+        let busy = lock(&rerank.slot.model);
+        models.release_idle(false, Duration::MAX, Duration::MAX);
+        assert!(busy.model.is_some());
+        drop(busy);
+        models.release_idle(false, Duration::MAX, Duration::MAX);
+        assert!(embed.slot().is_loaded());
+        assert!(!rerank.slot().is_loaded());
+    }
+
+    #[test]
+    fn enabled_toggle_keeps_the_slot_for_background_retirement() {
+        let models = Models::new(FakeProvider::new("m1"));
+        let mut settings = settings();
+        settings.rerank.enabled = true;
+        let old = models.reranker(&settings);
+        old.prepare().unwrap();
+        settings.rerank.enabled = false;
+        let disabled = models.reranker(&settings);
+        assert!(Arc::ptr_eq(old.slot(), disabled.slot()));
+        assert!(disabled.slot().is_loaded());
+        models.release_idle(false, Duration::MAX, Duration::MAX);
+        assert!(!disabled.slot().is_loaded());
+    }
+
+    #[test]
+    fn reaper_does_not_overlap_an_existing_load() {
+        let models = Models::new(FakeProvider::new("m1"));
+        let rerank = models.reranker(&settings());
+        rerank.prepare().unwrap();
+        let loading = lock(&models.loads.gate);
+        models.release_idle(false, Duration::ZERO, Duration::ZERO);
+        assert!(rerank.slot.is_loaded());
+        drop(loading);
+        models.release_idle(false, Duration::ZERO, Duration::ZERO);
+        assert!(!rerank.slot.is_loaded());
+    }
+
+    #[test]
+    fn status_does_not_refresh_idle_but_inference_completion_does() {
+        let models = Models::new(FakeProvider::new("m1"));
+        let mut rerank = models.reranker(&settings());
+        rerank.prepare().unwrap();
+        let old = Instant::now() - Duration::from_secs(60);
+        lock(&rerank.slot.model).last_used = old;
+        models.runtime(&settings());
+        assert_eq!(lock(&rerank.slot.model).last_used, old);
+        rerank.rerank("q", &["d"]).unwrap();
+        assert!(lock(&rerank.slot.model).last_used > old);
+        models.release_idle(true, Duration::MAX, Duration::from_secs(30));
+        assert!(rerank.slot().is_loaded());
+        lock(&rerank.slot.model).last_used = old;
+        models.release_idle(true, Duration::MAX, Duration::from_secs(30));
+        assert!(!rerank.slot().is_loaded());
+    }
+
+    #[test]
+    fn reaper_leaves_old_readers_and_remote_models_alone() {
+        let models = Models::new(FakeProvider::new("m1"));
+        let old = models.reranker(&settings());
+        old.prepare().unwrap();
+        let mut changed = settings();
+        changed.rerank.source = ModelSource::Remote;
+        let new = models.reranker(&changed);
+        new.prepare().unwrap();
+        models.release_idle(false, Duration::ZERO, Duration::ZERO);
+        assert!(old.slot().is_loaded());
+        assert!(new.slot().is_loaded());
+        assert!(!Arc::ptr_eq(old.slot(), new.slot()));
+    }
+
+    #[test]
+    fn concurrent_queries_after_eviction_load_once() {
+        let provider = FakeProvider::new("m1");
+        let models = Models::new(provider.clone());
+        let rerank = models.reranker(&settings());
+        rerank.prepare().unwrap();
+        models.release_idle(true, Duration::ZERO, Duration::ZERO);
+        let start = Arc::new(std::sync::Barrier::new(3));
+        let threads: Vec<_> = (0..2)
+            .map(|_| {
+                let mut rerank = rerank.clone();
+                let start = start.clone();
+                std::thread::spawn(move || {
+                    start.wait();
+                    rerank.rerank("борщ", &["борщ", "очередь"]).unwrap()
+                })
+            })
+            .collect();
+        start.wait();
+        let scores: Vec<_> = threads
+            .into_iter()
+            .map(|thread| thread.join().unwrap())
+            .collect();
+        assert_eq!(scores[0], scores[1]);
+        assert_eq!(provider.counters.rerank_loads.load(Ordering::SeqCst), 2);
+    }
+
+    #[test]
+    fn failed_reload_keeps_slot_empty_and_can_be_retried() {
+        struct ZeroReranker;
+        impl Reranker for ZeroReranker {
+            fn rerank(&mut self, _: &str, documents: &[&str]) -> Result<Vec<f32>, RerankError> {
+                Ok(vec![0.0; documents.len()])
+            }
+        }
+        let loads = Arc::new(AtomicUsize::new(0));
+        let counter = loads.clone();
+        let mut rerank = SharedReranker {
+            slot: Arc::new(RerankSlot {
+                loader: Box::new(move || {
+                    if counter.fetch_add(1, Ordering::SeqCst) == 1 {
+                        Err(RerankError::Load("injected reload failure".into()))
+                    } else {
+                        Ok(Box::new(ZeroReranker))
+                    }
+                }),
+                model: Mutex::new(Resident::default()),
+                runtime: Mutex::new(SlotRuntime::default()),
+            }),
+        };
+        rerank.prepare().unwrap();
+        drop(take_idle(
+            &rerank.slot.model,
+            Instant::now(),
+            Duration::ZERO,
+            || {},
+        ));
+        assert!(rerank.rerank("q", &["d"]).is_err());
+        assert!(!rerank.slot.is_loaded());
+        assert_eq!(lock(&rerank.slot.runtime).state, "failed");
+        assert_eq!(rerank.rerank("q", &["d"]).unwrap(), vec![0.0]);
+        assert_eq!(lock(&rerank.slot.runtime).state, "ready");
+        assert_eq!(loads.load(Ordering::SeqCst), 3);
     }
 
     #[test]

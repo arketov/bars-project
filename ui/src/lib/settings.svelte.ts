@@ -25,7 +25,7 @@ class SettingsState {
   warnings = $state<string[]>([]);
   saved = $state<SettingsDoc | null>(null);
   draft = $state<SettingsDoc | null>(null);
-  models = $state<ModelsInfoOutput | null>(null);
+  get models(): ModelsInfoOutput | null { return app.models; }
   clients = $state<ClientStatus[]>([]);
   /** Автозапуск при входе в систему: состояние ОС, а не settings.toml; `null` — не прочитано. */
   autostart = $state<AutostartOutput | null>(null);
@@ -65,9 +65,9 @@ class SettingsState {
 
   async loadModels(): Promise<void> {
     try {
-      this.models = await call<ModelsInfoOutput>("models_info");
+      await app.loadModels();
     } catch {
-      this.models = null;
+      // Последний успешный снимок остаётся общим с центром уведомлений.
     }
   }
 
@@ -191,10 +191,12 @@ class SettingsState {
         await wait(1500);
         await this.loadModels();
         const all = [...(this.models?.embed ?? []), ...(this.models?.rerank ?? [])];
-        if (!all.some((model) => model.downloading)) break;
+        if (!all.find(model => model.id === id)?.downloading) break;
       }
       const model = [...(this.models?.embed ?? []), ...(this.models?.rerank ?? [])].find((m) => m.id === id);
-      app.flash(model?.downloaded ? `Модель ${id} скачана` : `Не удалось скачать ${id}: подробности в логе`, !model?.downloaded);
+      if (model?.downloading) return;
+      const failed = !model?.downloaded || !!model.download_error;
+      app.flash(failed ? model?.download_error || `Не удалось скачать ${id}. Проверьте подключение и повторите.` : `Модель ${id} скачана`, failed);
     } catch (error) {
       app.flash(error instanceof Error ? error.message : String(error), true);
     }

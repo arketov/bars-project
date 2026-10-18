@@ -19,7 +19,7 @@ title: Исследование стека bars — сравнения, откл
 
 - `BGERerankerV2M3` скачивает сторонний ONNX-экспорт `rozgo/bge-reranker-v2-m3`, а не репозиторий BAAI.
 - Переменная `HF_HOME` перекрывает и `FASTEMBED_CACHE_DIR`, и `with_cache_dir()`. Поэтому воркер должен сам задавать папку моделей и не зависеть от окружения пользователя.
-- Своей фичи CoreML у fastembed нет. CoreML и DirectML уже вшиты в готовые сборки ONNX Runtime и включаются регистрацией execution provider (OQ-27).
+- Своей фичи CoreML у fastembed нет. Доступность CoreML/DirectML определяется целевой платформой и сборкой ONNX Runtime; регистрация EP сама по себе не добавляет отсутствующую библиотеку и не доказывает размещение всей модели на ускорителе (OQ-27).
 
 Источники: https://crates.io/api/v1/crates/fastembed, https://github.com/Anush008/fastembed-rs/releases, https://docs.rs/fastembed/7.1.1/fastembed/
 
@@ -28,6 +28,8 @@ title: Исследование стека bars — сравнения, откл
 По умолчанию `ort` при сборке скачивает статически линкуемый ONNX Runtime с `cdn.pyke.io`. Альтернатива — `load-dynamic`: dll или dylib рядом с exe, путь задаётся через `ORT_DYLIB_PATH`.
 
 Выбрана статическая линковка: один файл и никаких поисков dll на машине пользователя.
+
+Актуальное исследование ускорителей и альтернатив на 18-10-2026 — [inference-libraries.md](inference-libraries.md): в частности, Windows ML и отдельный OpenVINO Plugin EP. Это кандидаты; статическая линковка и зависимости bars этим обзором не меняются. Методы оптимизации действующего пути — [inference-speed.md](inference-speed.md).
 
 Цена этого выбора:
 

@@ -1,0 +1,151 @@
+{
+  "config": {
+    "name": "dml-b4",
+    "device": "directml",
+    "threads": 16,
+    "batch": 4,
+    "sorted": false,
+    "max_length": 512,
+    "repeats": 3,
+    "ids": [
+      "od-031",
+      "od-032",
+      "od-019",
+      "od-020",
+      "od-043",
+      "od-044",
+      "od-081",
+      "od-082",
+      "od-001",
+      "od-002"
+    ],
+    "spinning": null,
+    "model_path": null,
+    "tokenizer_dir": null
+  },
+  "load": 1.7706517000000002,
+  "profileRows": 12,
+  "providers": {
+    "DmlExecutionProvider": {
+      "events": 3420,
+      "microseconds": 2605392
+    },
+    "CPUExecutionProvider": {
+      "events": 60,
+      "microseconds": 6977
+    }
+  },
+  "operators": [
+    {
+      "name": "DmlExecutionProvider/LayerNormalization",
+      "events": 588,
+      "microseconds": 1417068
+    },
+    {
+      "name": "DmlExecutionProvider/Attention",
+      "events": 288,
+      "microseconds": 354990
+    },
+    {
+      "name": "DmlExecutionProvider/Gemm",
+      "events": 12,
+      "microseconds": 211033
+    },
+    {
+      "name": "DmlExecutionProvider/Cast",
+      "events": 36,
+      "microseconds": 131561
+    },
+    {
+      "name": "DmlExecutionProvider/Add",
+      "events": 1188,
+      "microseconds": 109303
+    },
+    {
+      "name": "DmlExecutionProvider/MatMul",
+      "events": 864,
+      "microseconds": 104522
+    },
+    {
+      "name": "DmlExecutionProvider/DmlFusedGemm",
+      "events": 12,
+      "microseconds": 83585
+    },
+    {
+      "name": "DmlExecutionProvider/ReduceSum",
+      "events": 12,
+      "microseconds": 77104
+    },
+    {
+      "name": "DmlExecutionProvider/FastGelu",
+      "events": 288,
+      "microseconds": 32438
+    },
+    {
+      "name": "DmlExecutionProvider/CumSum",
+      "events": 12,
+      "microseconds": 20717
+    },
+    {
+      "name": "DmlExecutionProvider/Gather",
+      "events": 48,
+      "microseconds": 16426
+    },
+    {
+      "name": "DmlExecutionProvider/Slice",
+      "events": 12,
+      "microseconds": 15932
+    },
+    {
+      "name": "DmlExecutionProvider/Expand",
+      "events": 12,
+      "microseconds": 9352
+    },
+    {
+      "name": "DmlExecutionProvider/Equal",
+      "events": 12,
+      "microseconds": 7725
+    },
+    {
+      "name": "DmlExecutionProvider/Mul",
+      "events": 12,
+      "microseconds": 7337
+    },
+    {
+      "name": "DmlExecutionProvider/Not",
+      "events": 12,
+      "microseconds": 4675
+    },
+    {
+      "name": "CPUExecutionProvider/Equal",
+      "events": 12,
+      "microseconds": 3761
+    },
+    {
+      "name": "DmlExecutionProvider/Shape",
+      "events": 12,
+      "microseconds": 1624
+    },
+    {
+      "name": "CPUExecutionProvider/Unsqueeze",
+      "events": 12,
+      "microseconds": 1281
+    },
+    {
+      "name": "CPUExecutionProvider/Where",
+      "events": 12,
+      "microseconds": 840
+    },
+    {
+      "name": "CPUExecutionProvider/Gather",
+      "events": 12,
+      "microseconds": 833
+    },
+    {
+      "name": "CPUExecutionProvider/Reshape",
+      "events": 12,
+      "microseconds": 262
+    }
+  ],
+  "scope": "diagnostic trace; event durations are not uninstrumented benchmark latency or GPU hardware counters"
+}

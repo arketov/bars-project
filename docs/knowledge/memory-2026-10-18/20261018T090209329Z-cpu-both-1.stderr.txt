@@ -1,0 +1,6 @@
+rerank: загружен на Cpu; файлы модели: config.json 0.0 МБ; special_tokens_map.json 0.0 МБ; tokenizer.json 16.3 МБ; tokenizer_config.json 0.0 МБ; model.onnx 0.1 МБ; model.onnx.data 2165.9 МБ
+rerank: Cpu, пар 15, логит от -3.436 до 4.277
+rerank: Cpu, пар 15, логит от -3.436 до 4.277
+rerank: Cpu, пар 15, логит от -3.436 до 4.277
+rerank: загружен на Cpu; файлы модели: config.json 0.0 МБ; special_tokens_map.json 0.0 МБ; tokenizer.json 16.3 МБ; tokenizer_config.json 0.0 МБ; model.onnx 0.1 МБ; model.onnx.data 2165.9 МБ
+rerank: Cpu, пар 15, логит от -3.436 до 4.277

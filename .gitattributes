@@ -19,3 +19,4 @@
 # Frozen benchmark inputs/evidence: preserve bytes covered by checksums.
 /crates/bars-core/examples/quality/*.json -text !eol whitespace=cr-at-eol
 /docs/knowledge/quality-2026-10-18/* -text !eol whitespace=cr-at-eol
+/docs/knowledge/inference-2026-10-18/* -text !eol whitespace=cr-at-eol

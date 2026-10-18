@@ -4,6 +4,7 @@
   import { inTauri } from "./lib/api";
   import ContextMenu from "./lib/ContextMenu.svelte";
   import ConsentDialog from "./lib/ConsentDialog.svelte";
+  import DeleteProjectDialog from "./lib/DeleteProjectDialog.svelte";
   import EmptyProjects from "./lib/EmptyProjects.svelte";
   import IndexingPage from "./lib/IndexingPage.svelte";
   import Missing from "./lib/Missing.svelte";
@@ -69,6 +70,7 @@
 {/if}
 
 {#if app.consentOpen}<ConsentDialog />{/if}
+{#if app.deletingProject}<DeleteProjectDialog />{/if}
 
 <ContextMenu />
 

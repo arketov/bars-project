@@ -5,7 +5,7 @@ description: "Create, edit or move project documentation."
 
 # Documentation for bars
 
-bars splits Markdown by headings and searches by section, so the shape of a document affects search quality. The full rules are in `BARS_INSTRUCTION.md` in the documentation root; read it before a larger change. Write documents in the language the project uses.
+bars splits Markdown by headings and searches by section, so the shape of a document affects search quality. The full rules are in `BARS_INSTRUCTION.md` in the documentation root; read it before a larger change. Write documents and search queries in the user's language, following explicit project language rules. English is only for agent instruction documents; it does not set the language of generated documents, queries or UI.
 
 ## File format
 

@@ -1,0 +1,1939 @@
+[
+  {
+    "search": {
+      "results": [
+        {
+          "path": "docs/search.md",
+          "module": ".",
+          "title": "Search",
+          "heading_chain": "Search",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+          "score": 0.6369683742523193,
+          "score_kind": "cosine"
+        },
+        {
+          "path": "docs/other.md",
+          "module": ".",
+          "title": "Theme",
+          "heading_chain": "Theme",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "The application supports light and dark themes.",
+          "score": 0.3685511350631714,
+          "score_kind": "cosine"
+        }
+      ],
+      "applied": {
+        "results": 5,
+        "candidates": 30,
+        "rerank_candidates": 15,
+        "min_score": 0.0,
+        "score_kind": "cosine",
+        "clamped": false
+      },
+      "indexing": false,
+      "pending": 0,
+      "rerank_error": "rerank-модель ещё скачивается или грузится (100 %): выдача без rerank"
+    },
+    "runtime": {
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "cpu",
+          "state": "loading",
+          "backend": "",
+          "actual": null,
+          "fallback_reason": null
+        }
+      },
+      "embed": [
+        {
+          "id": "BAAI/bge-m3",
+          "dim": 1024,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-0.6B",
+          "dim": 1024,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-4B",
+          "dim": 2560,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3",
+            "модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ: на CPU первая индексация проекта идёт часами"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "nomic-ai/nomic-embed-text-v2-moe",
+          "dim": 768,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и медленнее bge-m3",
+            "длина входа 512 токенов: чанк длиннее примерно 1500 символов попадает в вектор не целиком; уменьшите `chunking.max_chars`"
+          ],
+          "downloaded": false,
+          "downloading": false
+        }
+      ],
+      "rerank": [
+        {
+          "id": "BAAI/bge-reranker-v2-m3",
+          "dim": 0,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": true
+        }
+      ],
+      "models_dir": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\stage17\\auto-cpu-final\\models"
+    }
+  },
+  {
+    "search": {
+      "results": [
+        {
+          "path": "docs/search.md",
+          "module": ".",
+          "title": "Search",
+          "heading_chain": "Search",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+          "score": 0.6369683742523193,
+          "score_kind": "cosine"
+        },
+        {
+          "path": "docs/other.md",
+          "module": ".",
+          "title": "Theme",
+          "heading_chain": "Theme",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "The application supports light and dark themes.",
+          "score": 0.3685511350631714,
+          "score_kind": "cosine"
+        }
+      ],
+      "applied": {
+        "results": 5,
+        "candidates": 30,
+        "rerank_candidates": 15,
+        "min_score": 0.0,
+        "score_kind": "cosine",
+        "clamped": false
+      },
+      "indexing": false,
+      "pending": 0,
+      "rerank_error": "rerank-модель ещё скачивается или грузится (100 %): выдача без rerank"
+    },
+    "runtime": {
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "cpu",
+          "state": "loading",
+          "backend": "",
+          "actual": null,
+          "fallback_reason": null
+        }
+      },
+      "embed": [
+        {
+          "id": "BAAI/bge-m3",
+          "dim": 1024,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-0.6B",
+          "dim": 1024,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-4B",
+          "dim": 2560,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3",
+            "модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ: на CPU первая индексация проекта идёт часами"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "nomic-ai/nomic-embed-text-v2-moe",
+          "dim": 768,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и медленнее bge-m3",
+            "длина входа 512 токенов: чанк длиннее примерно 1500 символов попадает в вектор не целиком; уменьшите `chunking.max_chars`"
+          ],
+          "downloaded": false,
+          "downloading": false
+        }
+      ],
+      "rerank": [
+        {
+          "id": "BAAI/bge-reranker-v2-m3",
+          "dim": 0,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": true
+        }
+      ],
+      "models_dir": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\stage17\\auto-cpu-final\\models"
+    }
+  },
+  {
+    "search": {
+      "results": [
+        {
+          "path": "docs/search.md",
+          "module": ".",
+          "title": "Search",
+          "heading_chain": "Search",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+          "score": 0.6369683742523193,
+          "score_kind": "cosine"
+        },
+        {
+          "path": "docs/other.md",
+          "module": ".",
+          "title": "Theme",
+          "heading_chain": "Theme",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "The application supports light and dark themes.",
+          "score": 0.3685511350631714,
+          "score_kind": "cosine"
+        }
+      ],
+      "applied": {
+        "results": 5,
+        "candidates": 30,
+        "rerank_candidates": 15,
+        "min_score": 0.0,
+        "score_kind": "cosine",
+        "clamped": false
+      },
+      "indexing": false,
+      "pending": 0,
+      "rerank_error": "rerank-модель ещё скачивается или грузится (100 %): выдача без rerank"
+    },
+    "runtime": {
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "cpu",
+          "state": "loading",
+          "backend": "",
+          "actual": null,
+          "fallback_reason": null
+        }
+      },
+      "embed": [
+        {
+          "id": "BAAI/bge-m3",
+          "dim": 1024,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-0.6B",
+          "dim": 1024,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-4B",
+          "dim": 2560,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3",
+            "модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ: на CPU первая индексация проекта идёт часами"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "nomic-ai/nomic-embed-text-v2-moe",
+          "dim": 768,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и медленнее bge-m3",
+            "длина входа 512 токенов: чанк длиннее примерно 1500 символов попадает в вектор не целиком; уменьшите `chunking.max_chars`"
+          ],
+          "downloaded": false,
+          "downloading": false
+        }
+      ],
+      "rerank": [
+        {
+          "id": "BAAI/bge-reranker-v2-m3",
+          "dim": 0,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": true
+        }
+      ],
+      "models_dir": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\stage17\\auto-cpu-final\\models"
+    }
+  },
+  {
+    "search": {
+      "results": [
+        {
+          "path": "docs/search.md",
+          "module": ".",
+          "title": "Search",
+          "heading_chain": "Search",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+          "score": 0.6369683742523193,
+          "score_kind": "cosine"
+        },
+        {
+          "path": "docs/other.md",
+          "module": ".",
+          "title": "Theme",
+          "heading_chain": "Theme",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "The application supports light and dark themes.",
+          "score": 0.3685511350631714,
+          "score_kind": "cosine"
+        }
+      ],
+      "applied": {
+        "results": 5,
+        "candidates": 30,
+        "rerank_candidates": 15,
+        "min_score": 0.0,
+        "score_kind": "cosine",
+        "clamped": false
+      },
+      "indexing": false,
+      "pending": 0,
+      "rerank_error": "rerank-модель ещё скачивается или грузится (100 %): выдача без rerank"
+    },
+    "runtime": {
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "cpu",
+          "state": "loading",
+          "backend": "",
+          "actual": null,
+          "fallback_reason": null
+        }
+      },
+      "embed": [
+        {
+          "id": "BAAI/bge-m3",
+          "dim": 1024,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-0.6B",
+          "dim": 1024,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-4B",
+          "dim": 2560,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3",
+            "модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ: на CPU первая индексация проекта идёт часами"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "nomic-ai/nomic-embed-text-v2-moe",
+          "dim": 768,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и медленнее bge-m3",
+            "длина входа 512 токенов: чанк длиннее примерно 1500 символов попадает в вектор не целиком; уменьшите `chunking.max_chars`"
+          ],
+          "downloaded": false,
+          "downloading": false
+        }
+      ],
+      "rerank": [
+        {
+          "id": "BAAI/bge-reranker-v2-m3",
+          "dim": 0,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": true
+        }
+      ],
+      "models_dir": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\stage17\\auto-cpu-final\\models"
+    }
+  },
+  {
+    "search": {
+      "results": [
+        {
+          "path": "docs/search.md",
+          "module": ".",
+          "title": "Search",
+          "heading_chain": "Search",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+          "score": 0.6369683742523193,
+          "score_kind": "cosine"
+        },
+        {
+          "path": "docs/other.md",
+          "module": ".",
+          "title": "Theme",
+          "heading_chain": "Theme",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "The application supports light and dark themes.",
+          "score": 0.3685511350631714,
+          "score_kind": "cosine"
+        }
+      ],
+      "applied": {
+        "results": 5,
+        "candidates": 30,
+        "rerank_candidates": 15,
+        "min_score": 0.0,
+        "score_kind": "cosine",
+        "clamped": false
+      },
+      "indexing": false,
+      "pending": 0,
+      "rerank_error": "rerank-модель ещё скачивается или грузится (100 %): выдача без rerank"
+    },
+    "runtime": {
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "cpu",
+          "state": "loading",
+          "backend": "",
+          "actual": null,
+          "fallback_reason": null
+        }
+      },
+      "embed": [
+        {
+          "id": "BAAI/bge-m3",
+          "dim": 1024,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-0.6B",
+          "dim": 1024,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-4B",
+          "dim": 2560,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3",
+            "модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ: на CPU первая индексация проекта идёт часами"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "nomic-ai/nomic-embed-text-v2-moe",
+          "dim": 768,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и медленнее bge-m3",
+            "длина входа 512 токенов: чанк длиннее примерно 1500 символов попадает в вектор не целиком; уменьшите `chunking.max_chars`"
+          ],
+          "downloaded": false,
+          "downloading": false
+        }
+      ],
+      "rerank": [
+        {
+          "id": "BAAI/bge-reranker-v2-m3",
+          "dim": 0,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": true
+        }
+      ],
+      "models_dir": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\stage17\\auto-cpu-final\\models"
+    }
+  },
+  {
+    "search": {
+      "results": [
+        {
+          "path": "docs/search.md",
+          "module": ".",
+          "title": "Search",
+          "heading_chain": "Search",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+          "score": 0.6369683742523193,
+          "score_kind": "cosine"
+        },
+        {
+          "path": "docs/other.md",
+          "module": ".",
+          "title": "Theme",
+          "heading_chain": "Theme",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "The application supports light and dark themes.",
+          "score": 0.3685511350631714,
+          "score_kind": "cosine"
+        }
+      ],
+      "applied": {
+        "results": 5,
+        "candidates": 30,
+        "rerank_candidates": 15,
+        "min_score": 0.0,
+        "score_kind": "cosine",
+        "clamped": false
+      },
+      "indexing": false,
+      "pending": 0,
+      "rerank_error": "rerank-модель ещё скачивается или грузится (100 %): выдача без rerank"
+    },
+    "runtime": {
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "cpu",
+          "state": "loading",
+          "backend": "",
+          "actual": null,
+          "fallback_reason": null
+        }
+      },
+      "embed": [
+        {
+          "id": "BAAI/bge-m3",
+          "dim": 1024,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-0.6B",
+          "dim": 1024,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-4B",
+          "dim": 2560,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3",
+            "модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ: на CPU первая индексация проекта идёт часами"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "nomic-ai/nomic-embed-text-v2-moe",
+          "dim": 768,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и медленнее bge-m3",
+            "длина входа 512 токенов: чанк длиннее примерно 1500 символов попадает в вектор не целиком; уменьшите `chunking.max_chars`"
+          ],
+          "downloaded": false,
+          "downloading": false
+        }
+      ],
+      "rerank": [
+        {
+          "id": "BAAI/bge-reranker-v2-m3",
+          "dim": 0,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": true
+        }
+      ],
+      "models_dir": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\stage17\\auto-cpu-final\\models"
+    }
+  },
+  {
+    "search": {
+      "results": [
+        {
+          "path": "docs/search.md",
+          "module": ".",
+          "title": "Search",
+          "heading_chain": "Search",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+          "score": 0.6369683742523193,
+          "score_kind": "cosine"
+        },
+        {
+          "path": "docs/other.md",
+          "module": ".",
+          "title": "Theme",
+          "heading_chain": "Theme",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "The application supports light and dark themes.",
+          "score": 0.3685511350631714,
+          "score_kind": "cosine"
+        }
+      ],
+      "applied": {
+        "results": 5,
+        "candidates": 30,
+        "rerank_candidates": 15,
+        "min_score": 0.0,
+        "score_kind": "cosine",
+        "clamped": false
+      },
+      "indexing": false,
+      "pending": 0,
+      "rerank_error": "rerank-модель ещё скачивается или грузится (100 %): выдача без rerank"
+    },
+    "runtime": {
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "cpu",
+          "state": "loading",
+          "backend": "",
+          "actual": null,
+          "fallback_reason": null
+        }
+      },
+      "embed": [
+        {
+          "id": "BAAI/bge-m3",
+          "dim": 1024,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-0.6B",
+          "dim": 1024,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-4B",
+          "dim": 2560,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3",
+            "модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ: на CPU первая индексация проекта идёт часами"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "nomic-ai/nomic-embed-text-v2-moe",
+          "dim": 768,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и медленнее bge-m3",
+            "длина входа 512 токенов: чанк длиннее примерно 1500 символов попадает в вектор не целиком; уменьшите `chunking.max_chars`"
+          ],
+          "downloaded": false,
+          "downloading": false
+        }
+      ],
+      "rerank": [
+        {
+          "id": "BAAI/bge-reranker-v2-m3",
+          "dim": 0,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": true
+        }
+      ],
+      "models_dir": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\stage17\\auto-cpu-final\\models"
+    }
+  },
+  {
+    "search": {
+      "results": [
+        {
+          "path": "docs/search.md",
+          "module": ".",
+          "title": "Search",
+          "heading_chain": "Search",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+          "score": 0.6369683742523193,
+          "score_kind": "cosine"
+        },
+        {
+          "path": "docs/other.md",
+          "module": ".",
+          "title": "Theme",
+          "heading_chain": "Theme",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "The application supports light and dark themes.",
+          "score": 0.3685511350631714,
+          "score_kind": "cosine"
+        }
+      ],
+      "applied": {
+        "results": 5,
+        "candidates": 30,
+        "rerank_candidates": 15,
+        "min_score": 0.0,
+        "score_kind": "cosine",
+        "clamped": false
+      },
+      "indexing": false,
+      "pending": 0,
+      "rerank_error": "rerank-модель ещё скачивается или грузится (100 %): выдача без rerank"
+    },
+    "runtime": {
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "cpu",
+          "state": "loading",
+          "backend": "",
+          "actual": null,
+          "fallback_reason": null
+        }
+      },
+      "embed": [
+        {
+          "id": "BAAI/bge-m3",
+          "dim": 1024,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-0.6B",
+          "dim": 1024,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-4B",
+          "dim": 2560,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3",
+            "модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ: на CPU первая индексация проекта идёт часами"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "nomic-ai/nomic-embed-text-v2-moe",
+          "dim": 768,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и медленнее bge-m3",
+            "длина входа 512 токенов: чанк длиннее примерно 1500 символов попадает в вектор не целиком; уменьшите `chunking.max_chars`"
+          ],
+          "downloaded": false,
+          "downloading": false
+        }
+      ],
+      "rerank": [
+        {
+          "id": "BAAI/bge-reranker-v2-m3",
+          "dim": 0,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": true
+        }
+      ],
+      "models_dir": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\stage17\\auto-cpu-final\\models"
+    }
+  },
+  {
+    "search": {
+      "results": [
+        {
+          "path": "docs/search.md",
+          "module": ".",
+          "title": "Search",
+          "heading_chain": "Search",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+          "score": 0.6369683742523193,
+          "score_kind": "cosine"
+        },
+        {
+          "path": "docs/other.md",
+          "module": ".",
+          "title": "Theme",
+          "heading_chain": "Theme",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "The application supports light and dark themes.",
+          "score": 0.3685511350631714,
+          "score_kind": "cosine"
+        }
+      ],
+      "applied": {
+        "results": 5,
+        "candidates": 30,
+        "rerank_candidates": 15,
+        "min_score": 0.0,
+        "score_kind": "cosine",
+        "clamped": false
+      },
+      "indexing": false,
+      "pending": 0,
+      "rerank_error": "rerank-модель ещё скачивается или грузится (100 %): выдача без rerank"
+    },
+    "runtime": {
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "cpu",
+          "state": "loading",
+          "backend": "",
+          "actual": null,
+          "fallback_reason": null
+        }
+      },
+      "embed": [
+        {
+          "id": "BAAI/bge-m3",
+          "dim": 1024,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-0.6B",
+          "dim": 1024,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-4B",
+          "dim": 2560,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3",
+            "модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ: на CPU первая индексация проекта идёт часами"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "nomic-ai/nomic-embed-text-v2-moe",
+          "dim": 768,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и медленнее bge-m3",
+            "длина входа 512 токенов: чанк длиннее примерно 1500 символов попадает в вектор не целиком; уменьшите `chunking.max_chars`"
+          ],
+          "downloaded": false,
+          "downloading": false
+        }
+      ],
+      "rerank": [
+        {
+          "id": "BAAI/bge-reranker-v2-m3",
+          "dim": 0,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": true
+        }
+      ],
+      "models_dir": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\stage17\\auto-cpu-final\\models"
+    }
+  },
+  {
+    "search": {
+      "results": [
+        {
+          "path": "docs/search.md",
+          "module": ".",
+          "title": "Search",
+          "heading_chain": "Search",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+          "score": 0.6369683742523193,
+          "score_kind": "cosine"
+        },
+        {
+          "path": "docs/other.md",
+          "module": ".",
+          "title": "Theme",
+          "heading_chain": "Theme",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "The application supports light and dark themes.",
+          "score": 0.3685511350631714,
+          "score_kind": "cosine"
+        }
+      ],
+      "applied": {
+        "results": 5,
+        "candidates": 30,
+        "rerank_candidates": 15,
+        "min_score": 0.0,
+        "score_kind": "cosine",
+        "clamped": false
+      },
+      "indexing": false,
+      "pending": 0,
+      "rerank_error": "rerank-модель ещё скачивается или грузится (100 %): выдача без rerank"
+    },
+    "runtime": {
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "cpu",
+          "state": "loading",
+          "backend": "",
+          "actual": null,
+          "fallback_reason": null
+        }
+      },
+      "embed": [
+        {
+          "id": "BAAI/bge-m3",
+          "dim": 1024,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-0.6B",
+          "dim": 1024,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-4B",
+          "dim": 2560,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3",
+            "модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ: на CPU первая индексация проекта идёт часами"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "nomic-ai/nomic-embed-text-v2-moe",
+          "dim": 768,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и медленнее bge-m3",
+            "длина входа 512 токенов: чанк длиннее примерно 1500 символов попадает в вектор не целиком; уменьшите `chunking.max_chars`"
+          ],
+          "downloaded": false,
+          "downloading": false
+        }
+      ],
+      "rerank": [
+        {
+          "id": "BAAI/bge-reranker-v2-m3",
+          "dim": 0,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": true
+        }
+      ],
+      "models_dir": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\stage17\\auto-cpu-final\\models"
+    }
+  },
+  {
+    "search": {
+      "results": [
+        {
+          "path": "docs/search.md",
+          "module": ".",
+          "title": "Search",
+          "heading_chain": "Search",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+          "score": 0.6369683742523193,
+          "score_kind": "cosine"
+        },
+        {
+          "path": "docs/other.md",
+          "module": ".",
+          "title": "Theme",
+          "heading_chain": "Theme",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "The application supports light and dark themes.",
+          "score": 0.3685511350631714,
+          "score_kind": "cosine"
+        }
+      ],
+      "applied": {
+        "results": 5,
+        "candidates": 30,
+        "rerank_candidates": 15,
+        "min_score": 0.0,
+        "score_kind": "cosine",
+        "clamped": false
+      },
+      "indexing": false,
+      "pending": 0,
+      "rerank_error": "rerank-модель ещё скачивается или грузится (100 %): выдача без rerank"
+    },
+    "runtime": {
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "cpu",
+          "state": "loading",
+          "backend": "",
+          "actual": null,
+          "fallback_reason": null
+        }
+      },
+      "embed": [
+        {
+          "id": "BAAI/bge-m3",
+          "dim": 1024,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-0.6B",
+          "dim": 1024,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-4B",
+          "dim": 2560,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3",
+            "модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ: на CPU первая индексация проекта идёт часами"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "nomic-ai/nomic-embed-text-v2-moe",
+          "dim": 768,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и медленнее bge-m3",
+            "длина входа 512 токенов: чанк длиннее примерно 1500 символов попадает в вектор не целиком; уменьшите `chunking.max_chars`"
+          ],
+          "downloaded": false,
+          "downloading": false
+        }
+      ],
+      "rerank": [
+        {
+          "id": "BAAI/bge-reranker-v2-m3",
+          "dim": 0,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": true
+        }
+      ],
+      "models_dir": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\stage17\\auto-cpu-final\\models"
+    }
+  },
+  {
+    "search": {
+      "results": [
+        {
+          "path": "docs/search.md",
+          "module": ".",
+          "title": "Search",
+          "heading_chain": "Search",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+          "score": 0.6369683742523193,
+          "score_kind": "cosine"
+        },
+        {
+          "path": "docs/other.md",
+          "module": ".",
+          "title": "Theme",
+          "heading_chain": "Theme",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "The application supports light and dark themes.",
+          "score": 0.3685511350631714,
+          "score_kind": "cosine"
+        }
+      ],
+      "applied": {
+        "results": 5,
+        "candidates": 30,
+        "rerank_candidates": 15,
+        "min_score": 0.0,
+        "score_kind": "cosine",
+        "clamped": false
+      },
+      "indexing": false,
+      "pending": 0,
+      "rerank_error": "rerank-модель ещё скачивается или грузится (100 %): выдача без rerank"
+    },
+    "runtime": {
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "cpu",
+          "state": "loading",
+          "backend": "",
+          "actual": null,
+          "fallback_reason": null
+        }
+      },
+      "embed": [
+        {
+          "id": "BAAI/bge-m3",
+          "dim": 1024,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-0.6B",
+          "dim": 1024,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-4B",
+          "dim": 2560,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3",
+            "модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ: на CPU первая индексация проекта идёт часами"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "nomic-ai/nomic-embed-text-v2-moe",
+          "dim": 768,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и медленнее bge-m3",
+            "длина входа 512 токенов: чанк длиннее примерно 1500 символов попадает в вектор не целиком; уменьшите `chunking.max_chars`"
+          ],
+          "downloaded": false,
+          "downloading": false
+        }
+      ],
+      "rerank": [
+        {
+          "id": "BAAI/bge-reranker-v2-m3",
+          "dim": 0,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": true
+        }
+      ],
+      "models_dir": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\stage17\\auto-cpu-final\\models"
+    }
+  },
+  {
+    "search": {
+      "results": [
+        {
+          "path": "docs/search.md",
+          "module": ".",
+          "title": "Search",
+          "heading_chain": "Search",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+          "score": 0.6369683742523193,
+          "score_kind": "cosine"
+        },
+        {
+          "path": "docs/other.md",
+          "module": ".",
+          "title": "Theme",
+          "heading_chain": "Theme",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "The application supports light and dark themes.",
+          "score": 0.3685511350631714,
+          "score_kind": "cosine"
+        }
+      ],
+      "applied": {
+        "results": 5,
+        "candidates": 30,
+        "rerank_candidates": 15,
+        "min_score": 0.0,
+        "score_kind": "cosine",
+        "clamped": false
+      },
+      "indexing": false,
+      "pending": 0,
+      "rerank_error": "rerank-модель ещё скачивается или грузится (100 %): выдача без rerank"
+    },
+    "runtime": {
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "cpu",
+          "state": "loading",
+          "backend": "",
+          "actual": null,
+          "fallback_reason": null
+        }
+      },
+      "embed": [
+        {
+          "id": "BAAI/bge-m3",
+          "dim": 1024,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-0.6B",
+          "dim": 1024,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-4B",
+          "dim": 2560,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3",
+            "модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ: на CPU первая индексация проекта идёт часами"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "nomic-ai/nomic-embed-text-v2-moe",
+          "dim": 768,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и медленнее bge-m3",
+            "длина входа 512 токенов: чанк длиннее примерно 1500 символов попадает в вектор не целиком; уменьшите `chunking.max_chars`"
+          ],
+          "downloaded": false,
+          "downloading": false
+        }
+      ],
+      "rerank": [
+        {
+          "id": "BAAI/bge-reranker-v2-m3",
+          "dim": 0,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": true
+        }
+      ],
+      "models_dir": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\stage17\\auto-cpu-final\\models"
+    }
+  },
+  {
+    "search": {
+      "results": [
+        {
+          "path": "docs/search.md",
+          "module": ".",
+          "title": "Search",
+          "heading_chain": "Search",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+          "score": 0.6369683742523193,
+          "score_kind": "cosine"
+        },
+        {
+          "path": "docs/other.md",
+          "module": ".",
+          "title": "Theme",
+          "heading_chain": "Theme",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "The application supports light and dark themes.",
+          "score": 0.3685511350631714,
+          "score_kind": "cosine"
+        }
+      ],
+      "applied": {
+        "results": 5,
+        "candidates": 30,
+        "rerank_candidates": 15,
+        "min_score": 0.0,
+        "score_kind": "cosine",
+        "clamped": false
+      },
+      "indexing": false,
+      "pending": 0,
+      "rerank_error": "rerank-модель ещё скачивается или грузится (100 %): выдача без rerank"
+    },
+    "runtime": {
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "cpu",
+          "state": "loading",
+          "backend": "",
+          "actual": null,
+          "fallback_reason": null
+        }
+      },
+      "embed": [
+        {
+          "id": "BAAI/bge-m3",
+          "dim": 1024,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-0.6B",
+          "dim": 1024,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-4B",
+          "dim": 2560,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3",
+            "модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ: на CPU первая индексация проекта идёт часами"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "nomic-ai/nomic-embed-text-v2-moe",
+          "dim": 768,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и медленнее bge-m3",
+            "длина входа 512 токенов: чанк длиннее примерно 1500 символов попадает в вектор не целиком; уменьшите `chunking.max_chars`"
+          ],
+          "downloaded": false,
+          "downloading": false
+        }
+      ],
+      "rerank": [
+        {
+          "id": "BAAI/bge-reranker-v2-m3",
+          "dim": 0,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": true
+        }
+      ],
+      "models_dir": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\stage17\\auto-cpu-final\\models"
+    }
+  },
+  {
+    "search": {
+      "results": [
+        {
+          "path": "docs/search.md",
+          "module": ".",
+          "title": "Search",
+          "heading_chain": "Search",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+          "score": 0.6369683742523193,
+          "score_kind": "cosine"
+        },
+        {
+          "path": "docs/other.md",
+          "module": ".",
+          "title": "Theme",
+          "heading_chain": "Theme",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "The application supports light and dark themes.",
+          "score": 0.3685511350631714,
+          "score_kind": "cosine"
+        }
+      ],
+      "applied": {
+        "results": 5,
+        "candidates": 30,
+        "rerank_candidates": 15,
+        "min_score": 0.0,
+        "score_kind": "cosine",
+        "clamped": false
+      },
+      "indexing": false,
+      "pending": 0,
+      "rerank_error": "rerank-модель ещё скачивается или грузится (100 %): выдача без rerank"
+    },
+    "runtime": {
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "cpu",
+          "state": "loading",
+          "backend": "",
+          "actual": null,
+          "fallback_reason": null
+        }
+      },
+      "embed": [
+        {
+          "id": "BAAI/bge-m3",
+          "dim": 1024,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-0.6B",
+          "dim": 1024,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-4B",
+          "dim": 2560,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3",
+            "модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ: на CPU первая индексация проекта идёт часами"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "nomic-ai/nomic-embed-text-v2-moe",
+          "dim": 768,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и медленнее bge-m3",
+            "длина входа 512 токенов: чанк длиннее примерно 1500 символов попадает в вектор не целиком; уменьшите `chunking.max_chars`"
+          ],
+          "downloaded": false,
+          "downloading": false
+        }
+      ],
+      "rerank": [
+        {
+          "id": "BAAI/bge-reranker-v2-m3",
+          "dim": 0,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": true
+        }
+      ],
+      "models_dir": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\stage17\\auto-cpu-final\\models"
+    }
+  },
+  {
+    "search": {
+      "results": [
+        {
+          "path": "docs/search.md",
+          "module": ".",
+          "title": "Search",
+          "heading_chain": "Search",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+          "score": 0.6369683742523193,
+          "score_kind": "cosine"
+        },
+        {
+          "path": "docs/other.md",
+          "module": ".",
+          "title": "Theme",
+          "heading_chain": "Theme",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "The application supports light and dark themes.",
+          "score": 0.3685511350631714,
+          "score_kind": "cosine"
+        }
+      ],
+      "applied": {
+        "results": 5,
+        "candidates": 30,
+        "rerank_candidates": 15,
+        "min_score": 0.0,
+        "score_kind": "cosine",
+        "clamped": false
+      },
+      "indexing": false,
+      "pending": 0,
+      "rerank_error": "rerank-модель ещё скачивается или грузится (100 %): выдача без rerank"
+    },
+    "runtime": {
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "cpu",
+          "state": "loading",
+          "backend": "",
+          "actual": null,
+          "fallback_reason": null
+        }
+      },
+      "embed": [
+        {
+          "id": "BAAI/bge-m3",
+          "dim": 1024,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-0.6B",
+          "dim": 1024,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-4B",
+          "dim": 2560,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3",
+            "модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ: на CPU первая индексация проекта идёт часами"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "nomic-ai/nomic-embed-text-v2-moe",
+          "dim": 768,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и медленнее bge-m3",
+            "длина входа 512 токенов: чанк длиннее примерно 1500 символов попадает в вектор не целиком; уменьшите `chunking.max_chars`"
+          ],
+          "downloaded": false,
+          "downloading": false
+        }
+      ],
+      "rerank": [
+        {
+          "id": "BAAI/bge-reranker-v2-m3",
+          "dim": 0,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": true
+        }
+      ],
+      "models_dir": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\stage17\\auto-cpu-final\\models"
+    }
+  },
+  {
+    "search": {
+      "results": [
+        {
+          "path": "docs/search.md",
+          "module": ".",
+          "title": "Search",
+          "heading_chain": "Search",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "Bars combines semantic vector search with lexical full text search. Rerank scores candidate documents.",
+          "score": 0.5548151731491089,
+          "score_kind": "rerank"
+        },
+        {
+          "path": "docs/other.md",
+          "module": ".",
+          "title": "Theme",
+          "heading_chain": "Theme",
+          "first_line": 4,
+          "last_line": 6,
+          "text": "The application supports light and dark themes.",
+          "score": 0.00001619452996237669,
+          "score_kind": "rerank"
+        }
+      ],
+      "applied": {
+        "results": 3,
+        "candidates": 30,
+        "rerank_candidates": 15,
+        "min_score": 0.0,
+        "score_kind": "rerank",
+        "clamped": false
+      },
+      "indexing": false,
+      "pending": 0
+    },
+    "runtime": {
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "cpu",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "cpu",
+          "fallback_reason": null
+        }
+      },
+      "embed": [
+        {
+          "id": "BAAI/bge-m3",
+          "dim": 1024,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-0.6B",
+          "dim": 1024,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "Qwen/Qwen3-Embedding-4B",
+          "dim": 2560,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и заметно медленнее bge-m3",
+            "модель весит около 8 ГБ на диске и держит в памяти около 16 ГБ: на CPU первая индексация проекта идёт часами"
+          ],
+          "downloaded": false,
+          "downloading": false
+        },
+        {
+          "id": "nomic-ai/nomic-embed-text-v2-moe",
+          "dim": 768,
+          "backend": "candle",
+          "warnings": [
+            "считается на процессоре через candle и медленнее bge-m3",
+            "длина входа 512 токенов: чанк длиннее примерно 1500 символов попадает в вектор не целиком; уменьшите `chunking.max_chars`"
+          ],
+          "downloaded": false,
+          "downloading": false
+        }
+      ],
+      "rerank": [
+        {
+          "id": "BAAI/bge-reranker-v2-m3",
+          "dim": 0,
+          "backend": "onnx",
+          "warnings": [],
+          "downloaded": false,
+          "downloading": false
+        }
+      ],
+      "models_dir": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\stage17\\auto-cpu-final\\models"
+    }
+  }
+]

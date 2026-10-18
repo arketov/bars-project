@@ -291,6 +291,12 @@ pub struct UnregisterOutput {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ProjectDeleteParams {
+    pub project: String,
+    pub confirmed: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SessionStartParams {
     pub cwd: String,
     /// Откуда началась сессия: `startup`, `resume`, `clear` и так далее — как сообщил клиент.
@@ -583,6 +589,12 @@ pub struct ModelInfo {
     pub warnings: Vec<String>,
     pub downloaded: bool,
     pub downloading: bool,
+    /// Ход файлов модели; 100 при downloading означает подготовку сессии.
+    #[serde(default)]
+    pub download_percent: Option<u8>,
+    /// Безопасное сообщение последней ошибки ручного скачивания.
+    #[serde(default)]
+    pub download_error: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -603,6 +615,10 @@ pub struct ModelRuntime {
     pub backend: String,
     pub actual: Option<String>,
     pub fallback_reason: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub precision: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub revision: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -797,6 +813,7 @@ methods! {
     Reindex: ReindexParams => AcceptedOutput, "reindex", All;
     Register: RegisterParams => RegisterOutput, "register", Cli;
     Unregister: UnregisterParams => UnregisterOutput, "unregister", Cli;
+    ProjectDelete: ProjectDeleteParams => UnregisterOutput, "project_delete", Window;
     SessionStart: SessionStartParams => AcceptedOutput, "session_start", Cli;
     Install: InstallParams => InstallOutput, "install", Cli;
     Uninstall: UninstallParams => UninstallOutput, "uninstall", Cli;
@@ -828,6 +845,18 @@ pub fn output_value<T: Serialize>(output: &T) -> Value {
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[test]
+    fn project_delete_requires_confirmation_in_params_and_is_window_only() {
+        let request = Request::new(Id::Number(1), "project_delete", json!({"project": "C:/проект", "confirmed": true}));
+        let call = Call::from_request(&request).unwrap();
+        assert_eq!(call, Call::ProjectDelete(ProjectDeleteParams { project: "C:/проект".into(), confirmed: true }));
+        assert!(call.window_only());
+        assert!(!call.allowed_for(ClientKind::Cli));
+        assert!(!call.allowed_for(ClientKind::Mcp));
+        let missing = Request::new(Id::Number(2), "project_delete", json!({"project": "C:/проект"}));
+        assert!(Call::from_request(&missing).is_err());
+    }
 
     fn target() -> Target {
         Target {
@@ -1126,6 +1155,25 @@ mod tests {
         assert!(value.get("rerank_error").is_none());
         let back: SearchOutput = serde_json::from_value(value).unwrap();
         assert_eq!(back, output);
+    }
+
+    #[test]
+    fn model_runtime_carries_optional_precision_and_revision() {
+        let old = json!({"model":"bge", "source":"builtin", "requested":"auto", "state":"ready", "backend":"onnx", "actual":"cpu", "fallback_reason":null});
+        let mut runtime: ModelRuntime = serde_json::from_value(old.clone()).unwrap();
+        assert_eq!(runtime.precision, None);
+        assert_eq!(runtime.revision, None);
+        assert_eq!(serde_json::to_value(&runtime).unwrap(), old);
+        runtime.actual = Some("directml".into());
+        runtime.precision = Some("fp16".into());
+        runtime.revision = Some("pinned-revision".into());
+        let value = serde_json::to_value(&runtime).unwrap();
+        assert_eq!(value["precision"], "fp16");
+        assert_eq!(value["revision"], "pinned-revision");
+        assert_eq!(
+            serde_json::from_value::<ModelRuntime>(value).unwrap(),
+            runtime
+        );
     }
 
     #[test]

@@ -59,13 +59,13 @@ pub(crate) fn report(client: InstallClient, action: &str, result: &Result<Option
     };
     if let Some(done) = done {
         for file in &done.changed_files {
-            eprintln!("bars: {title}: {action}: {}", file.display());
+            log::info!("{title}: {action}: {}", file.display());
         }
         if done.needs_hook_approval {
-            eprintln!("bars: одобрите хук в Codex командой `/hooks`");
+            log::warn!("Одобрите хук в Codex командой `/hooks`");
         }
     }
-    if let Err(error) = result {
-        eprintln!("bars: {title}: ошибка ({action}): {error}");
+    if result.is_err() {
+        log::error!("{title}: ошибка ({action}); проверьте настройки интеграции");
     }
 }

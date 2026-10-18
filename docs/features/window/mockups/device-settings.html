@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>bars — model devices · stage 17 draft</title>
+  <title>bars — устройства моделей · проект этапа 17</title>
   <link rel="stylesheet" href="theme.css">
   <style>
     body { overflow:auto; height:auto; }
@@ -27,66 +27,66 @@
 <body>
 <main>
   <div class="toolbar">
-    <span class="draft">bars · Stage 17 design draft</span>
-    <button id="theme" type="button">Dark theme</button>
+    <span class="draft">bars · проект интерфейса этапа 17</span>
+    <button id="theme" type="button">Тёмная тема</button>
   </div>
-  <h1>Models</h1>
-  <p class="muted">Choose a device for each built-in model. Changing devices does not require reindexing.</p>
-  <label for="scene">Preview state </label>
+  <h1>Модели</h1>
+  <p class="muted">Выберите устройство для каждой встроенной модели. Смена устройства не требует переиндексации.</p>
+  <label for="scene">Состояние для просмотра </label>
   <select id="scene">
-    <option value="mixed">GPU embed + CPU rerank</option>
-    <option value="loading">Model loading</option>
-    <option value="fallback">GPU unavailable · CPU fallback</option>
-    <option value="external">External embed provider</option>
-    <option value="candle">CPU-only embed model</option>
-    <option value="file">One document failed · continuing</option>
-    <option value="series">Consecutive failures · stopped</option>
-    <option value="rebuild">Rebuild with errors · not applied</option>
+    <option value="mixed">Embed на GPU + rerank на CPU</option>
+    <option value="loading">Загрузка модели</option>
+    <option value="fallback">GPU недоступен · переход на CPU</option>
+    <option value="external">Внешний провайдер embed</option>
+    <option value="candle">Embed-модель только на CPU</option>
+    <option value="file">Ошибка одного документа · работа продолжается</option>
+    <option value="series">Ошибки подряд · остановлено</option>
+    <option value="rebuild">Переиндексация с ошибками · не применена</option>
   </select>
   <section class="card" aria-labelledby="embed-title">
     <div class="row"><h2 id="embed-title">Embed</h2><code id="embed-model">BAAI/bge-m3</code></div>
-    <div class="choices" id="embed-choices" aria-label="Embed device">
-      <button type="button" data-role="embed" data-value="auto" aria-pressed="true">GPU if available</button>
-      <button type="button" data-role="embed" data-value="cpu" aria-pressed="false">CPU only</button>
+    <div class="choices" id="embed-choices" aria-label="Устройство embed">
+      <button type="button" data-role="embed" data-value="auto" aria-pressed="true">GPU, если доступен</button>
+      <button type="button" data-role="embed" data-value="cpu" aria-pressed="false">Только CPU</button>
     </div>
-    <p class="muted" id="embed-policy">Saved preference: GPU if available</p>
-    <div class="runtime">Current session: <strong id="embed-runtime">DirectML</strong></div>
-    <div class="warning" id="fallback" hidden>GPU session could not be loaded. Embed is running on CPU.</div>
+    <p class="muted" id="embed-policy">Сохранённый выбор: GPU, если доступен</p>
+    <div class="runtime">Текущая сессия: <strong id="embed-runtime">DirectML</strong></div>
+    <div class="warning" id="fallback" hidden>Не удалось загрузить сессию на GPU. Embed работает на CPU.</div>
   </section>
   <section class="card" aria-labelledby="rerank-title">
-    <div class="row"><h2 id="rerank-title">Rerank · enabled</h2><code>BAAI/bge-reranker-v2-m3</code></div>
-    <div class="choices" aria-label="Rerank device">
-      <button type="button" data-role="rerank" data-value="auto" aria-pressed="false">GPU if available</button>
-      <button type="button" data-role="rerank" data-value="cpu" aria-pressed="true">CPU only</button>
+    <div class="row"><h2 id="rerank-title">Rerank · включён</h2><code>BAAI/bge-reranker-v2-m3</code></div>
+    <div class="choices" aria-label="Устройство rerank">
+      <button type="button" data-role="rerank" data-value="auto" aria-pressed="false">GPU, если доступен</button>
+      <button type="button" data-role="rerank" data-value="cpu" aria-pressed="true">Только CPU</button>
     </div>
-    <p class="muted" id="rerank-policy">Saved preference: CPU only</p>
-    <div class="runtime">Current session: <strong id="rerank-runtime">CPU</strong></div>
+    <p class="muted" id="rerank-policy">Сохранённый выбор: Только CPU</p>
+    <div class="runtime">Текущая сессия: <strong id="rerank-runtime">CPU</strong></div>
   </section>
-  <p class="row"><span id="save-status" role="status">Preferences saved</span><button type="button" id="save" class="primary">Save preferences</button></p>
+  <p class="row"><span id="save-status" role="status">Настройки сохранены</span><button type="button" id="save" class="primary">Сохранить настройки</button></p>
   <section class="card" aria-labelledby="progress-title">
-    <div class="row"><h2 id="progress-title">Updating project index</h2><span id="count">12 / 30 documents</span></div>
-    <p class="muted" id="progress-note">Search is available. The current job keeps its original device until it finishes.</p>
-    <progress id="progress" value="12" max="30" aria-label="Documents processed"></progress>
+    <div class="row"><h2 id="progress-title">Обновление индекса проекта</h2><span id="count">12 / 30 документов</span></div>
+    <p class="muted" id="progress-note">Поиск доступен. Текущее задание завершится на прежнем устройстве.</p>
+    <progress id="progress" value="12" max="30" aria-label="Документов обработано"></progress>
     <div class="stats">
-      <div class="stat"><small>Chunks processed</small><strong>48</strong></div>
-      <div class="stat"><small>Speed</small><strong>2.1 chunks/s</strong></div>
-      <div class="stat"><small>Embed device · current job</small><strong id="job-device">DirectML</strong></div>
+      <div class="stat"><small>Чанков обработано</small><strong>48</strong></div>
+      <div class="stat"><small>Скорость</small><strong>2,1 чанка/с</strong></div>
+      <div class="stat"><small>Устройство embed · текущее задание</small><strong id="job-device">DirectML</strong></div>
     </div>
-    <p id="current-file">Current file: <code>docs/features/search.md</code></p>
+    <p id="current-file">Текущий файл: <code>docs/features/search.md</code></p>
     <div id="problems" hidden>
-      <h2>Document errors</h2>
-      <ul><li><code>docs/features/large.md</code> · embedding failed after 4 attempts. Previous indexed version kept.</li></ul>
+      <h2>Ошибки документов</h2>
+      <ul><li><code>docs/features/large.md</code> · ошибка векторизации после 4 попыток. Предыдущая версия в индексе сохранена.</li></ul>
       <p class="warning" id="outcome"></p>
     </div>
-    <button id="retry" type="button" hidden>Reindex…</button>
+    <button id="retry" type="button" hidden>Переиндексировать…</button>
   </section>
-  <p class="muted">Preview only. No model calls, file changes or indexing commands.</p>
+  <p class="muted">Только макет. Без вызовов моделей, изменения файлов и команд индексации.</p>
 </main>
 <script>
   const byId = id => document.getElementById(id);
   const saved = { embed: 'auto', rerank: 'cpu' };
   const draft = { ...saved };
-  const preference = value => value === 'auto' ? 'GPU if available' : 'CPU only';
+  const preference = value => value === 'auto' ? 'GPU, если доступен' : 'Только CPU';
   function choices() {
     document.querySelectorAll('[data-role]').forEach(button => {
       button.setAttribute('aria-pressed', String(draft[button.dataset.role] === button.dataset.value));
@@ -95,53 +95,53 @@
   document.querySelectorAll('[data-role]').forEach(button => button.addEventListener('click', () => {
     draft[button.dataset.role] = button.dataset.value;
     choices();
-    byId('save-status').textContent = 'Unsaved preferences · current sessions unchanged';
+    byId('save-status').textContent = 'Настройки не сохранены · текущие сессии без изменений';
   }));
   byId('save').addEventListener('click', () => {
     Object.assign(saved, draft);
-    byId('embed-policy').textContent = `Saved preference: ${preference(saved.embed)}`;
-    byId('rerank-policy').textContent = `Saved preference: ${preference(saved.rerank)}`;
+    byId('embed-policy').textContent = `Сохранённый выбор: ${preference(saved.embed)}`;
+    byId('rerank-policy').textContent = `Сохранённый выбор: ${preference(saved.rerank)}`;
     const scene = byId('scene').value;
-    byId('embed-runtime').textContent = scene === 'external' ? 'External · server device unknown' : 'Not loaded · next request uses saved preference';
-    byId('rerank-runtime').textContent = 'Not loaded · next rerank uses saved preference';
-    byId('save-status').textContent = 'Preferences saved · no reindexing needed';
+    byId('embed-runtime').textContent = scene === 'external' ? 'Внешний провайдер · устройство сервера неизвестно' : 'Не загружена · следующий запрос использует сохранённый выбор';
+    byId('rerank-runtime').textContent = 'Не загружена · следующий rerank использует сохранённый выбор';
+    byId('save-status').textContent = 'Настройки сохранены · переиндексация не требуется';
   });
   byId('theme').addEventListener('click', () => {
     const dark = document.documentElement.dataset.mode !== 'dark';
     document.documentElement.dataset.mode = dark ? 'dark' : 'light';
-    byId('theme').textContent = dark ? 'Light theme' : 'Dark theme';
+    byId('theme').textContent = dark ? 'Светлая тема' : 'Тёмная тема';
   });
   byId('scene').addEventListener('change', () => {
     const scene = byId('scene').value;
     Object.assign(saved, { embed: 'auto', rerank: 'cpu' });
     Object.assign(draft, saved); choices();
-    byId('save-status').textContent = 'Preferences saved';
-    byId('embed-model').textContent = scene === 'external' ? 'External provider' : scene === 'candle' ? 'Qwen3-Embedding-0.6B' : 'BAAI/bge-m3';
+    byId('save-status').textContent = 'Настройки сохранены';
+    byId('embed-model').textContent = scene === 'external' ? 'Внешний провайдер' : scene === 'candle' ? 'Qwen3-Embedding-0.6B' : 'BAAI/bge-m3';
     byId('embed-choices').hidden = ['external', 'candle'].includes(scene);
     byId('embed-choices').style.display = ['external', 'candle'].includes(scene) ? 'none' : '';
-    byId('embed-policy').textContent = scene === 'external' ? 'Device is managed by the server' : scene === 'candle' ? 'CPU only · this backend does not support GPU' : 'Saved preference: GPU if available';
-    byId('rerank-policy').textContent = 'Saved preference: CPU only';
-    byId('embed-runtime').textContent = scene === 'loading' ? 'Loading… · device not known yet' : scene === 'external' ? 'External · server device unknown' : ['fallback', 'candle'].includes(scene) ? 'CPU' : 'DirectML';
-    byId('rerank-runtime').textContent = scene === 'loading' ? 'Not loaded' : 'CPU';
-    byId('job-device').textContent = scene === 'loading' ? 'Loading…' : scene === 'external' ? 'External' : ['fallback', 'candle'].includes(scene) ? 'CPU' : 'DirectML';
+    byId('embed-policy').textContent = scene === 'external' ? 'Устройством управляет сервер' : scene === 'candle' ? 'Только CPU · этот движок не поддерживает GPU' : 'Сохранённый выбор: GPU, если доступен';
+    byId('rerank-policy').textContent = 'Сохранённый выбор: Только CPU';
+    byId('embed-runtime').textContent = scene === 'loading' ? 'Загружается… · устройство пока неизвестно' : scene === 'external' ? 'Внешний провайдер · устройство сервера неизвестно' : ['fallback', 'candle'].includes(scene) ? 'CPU' : 'DirectML';
+    byId('rerank-runtime').textContent = scene === 'loading' ? 'Не загружена' : 'CPU';
+    byId('job-device').textContent = scene === 'loading' ? 'Загружается…' : scene === 'external' ? 'Внешний провайдер' : ['fallback', 'candle'].includes(scene) ? 'CPU' : 'DirectML';
     byId('fallback').hidden = scene !== 'fallback';
     const error = ['file', 'series', 'rebuild'].includes(scene);
     byId('problems').hidden = !error;
     byId('retry').hidden = scene !== 'rebuild';
-    byId('progress-title').textContent = scene === 'series' ? 'Index update stopped' : scene === 'rebuild' ? 'Rebuild not applied' : 'Updating project index';
-    byId('count').textContent = scene === 'rebuild' ? '30 / 30 documents checked' : '12 / 30 documents';
+    byId('progress-title').textContent = scene === 'series' ? 'Обновление индекса остановлено' : scene === 'rebuild' ? 'Переиндексация не применена' : 'Обновление индекса проекта';
+    byId('count').textContent = scene === 'rebuild' ? '30 / 30 документов проверено' : '12 / 30 документов';
     byId('progress').value = scene === 'rebuild' ? 30 : 12;
     byId('current-file').hidden = ['series', 'rebuild'].includes(scene);
-    byId('progress-note').textContent = scene === 'rebuild' ? 'Embedding model changed. Search remains unavailable until a successful full rebuild.' : 'Search is available. The current job keeps its original device until it finishes.';
-    byId('outcome').textContent = scene === 'series' ? 'Stopped after 3 consecutive documents failed to embed. Earlier updates and the error report are preserved.' : scene === 'rebuild' ? 'Some documents could not be embedded. The old index was not replaced. Fix the cause, then reindex.' : 'Continuing with other documents. Failed documents will be retried at the next check.';
+    byId('progress-note').textContent = scene === 'rebuild' ? 'Embed-модель изменилась. Поиск недоступен до успешной полной переиндексации.' : 'Поиск доступен. Текущее задание завершится на прежнем устройстве.';
+    byId('outcome').textContent = scene === 'series' ? 'Остановлено после ошибок векторизации 3 документов подряд. Предыдущие обновления и отчёт об ошибках сохранены.' : scene === 'rebuild' ? 'Не удалось векторизовать некоторые документы. Старый индекс не заменён. Устраните причину и повторите переиндексацию.' : 'Обработка других документов продолжается. Документы с ошибками будут обработаны повторно при следующей проверке.';
     const paths = scene === 'series' ? ['large.md', 'api.md', 'design.md'] : ['large.md'];
     document.querySelector('#problems ul').replaceChildren(...paths.map(path => {
       const item = document.createElement('li');
-      item.textContent = `docs/features/${path} · embedding failed after 4 attempts. ` + (scene === 'rebuild' ? 'Not included in the new index; the old index was kept.' : 'Previous indexed version kept.');
+      item.textContent = `docs/features/${path} · ошибка векторизации после 4 попыток. ` + (scene === 'rebuild' ? 'Не включён в новый индекс; старый индекс сохранён.' : 'Предыдущая версия в индексе сохранена.');
       return item;
     }));
   });
-  byId('retry').addEventListener('click', () => { byId('outcome').textContent = 'Preview: opens the existing reindex consent flow. No indexing started.'; });
+  byId('retry').addEventListener('click', () => { byId('outcome').textContent = 'Макет: открывается существующий диалог согласия на переиндексацию. Индексация не запущена.'; });
 </script>
 </body>
 </html>

@@ -25,7 +25,7 @@ title: Стек bars — библиотеки, версии и почему он
 
 Воркер не завершается при закрытии последнего окна: `RunEvent::ExitRequested` с `code == None` отменяется через `prevent_exit()`. На macOS у воркера нет иконки в Dock: `ActivationPolicy::Accessory`.
 
-`tauri-plugin-autostart` не нужен: автозапуск — свой небольшой модуль воркера, который пишет то же значение реестра, а воркер собирается без Tauri ([features/distribution/autostart.md](../features/distribution/autostart.md)). `tauri-plugin-updater` не нужен: обновление идёт запуском новой версии установщика, без подписанных релизов и сервера обновлений ([features/distribution/installer.md](../features/distribution/installer.md)). `tauri-plugin-shell` не нужен: воркер сам никого не запускает. Логи пишет `tracing`, а не `tauri-plugin-log`, чтобы у воркера, `bars-mcp` и `bars-cli` был один механизм.
+`tauri-plugin-autostart` не нужен: автозапуск — свой небольшой модуль воркера, который пишет то же значение реестра, а воркер собирается без Tauri ([features/distribution/autostart.md](../features/distribution/autostart.md)). `tauri-plugin-updater` не нужен: обновление идёт запуском новой версии установщика, без подписанных релизов и сервера обновлений ([features/distribution/installer.md](../features/distribution/installer.md)). `tauri-plugin-shell` не нужен: воркер сам никого не запускает. Файловая диагностика использует фасад `log` 0.4 и writer с ограничением размера и ротацией ([worker.md](worker.md), [контракт логов](../features/window/logs.md)); сторонние модули отфильтрованы.
 
 ## Модели bars
 
@@ -78,10 +78,9 @@ title: Стек bars — библиотеки, версии и почему он
 
 | Что | Крейт | Версия |
 |---|---|---|
-| Логи | `tracing`, `tracing-subscriber`, `tracing-appender` | 0.1 / 0.3 / 0.2 |
 | Ошибки | `thiserror` в библиотеках, `anyhow` в exe | 2.0 / 1.0 |
 
-`tracing-appender` пишет файл на день и хранит последние 14 файлов (`max_log_files`).
+Файловый журнал с уровнями и ротацией реализован через `log` и writer воркера; контракт и границы — [logs.md](../features/window/logs.md).
 
 ## Что проверяется на прототипе
 

@@ -62,6 +62,8 @@ title: Установщик bars для Windows — состав, обновле
 
 ## Как собрать установщик
 
+Если текущий PowerShell не видит Rust в PATH, скрипт добавляет стандартный каталог `CARGO_HOME/bin` (по умолчанию `%USERPROFILE%\.cargo\bin`) только в окружение своего процесса. До сборки проверяются `rustc`, `cargo`, `node` и `npm`; отсутствие инструмента даёт понятное сообщение.
+
 ```powershell
 pwsh scripts/build-installer.ps1 [-OutDir <папка>]
 ```

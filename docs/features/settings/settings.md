@@ -4,7 +4,7 @@ title: Настройки bars — ключи settings.toml и config.toml, зн
 
 # Настройки bars
 
-Какие настройки есть у bars, где они лежат и что делает их изменение (Т-16, Т-18, Т-24). Где лежат файлы и в каком порядке берутся значения — [files.md](../../architecture/files.md). Окно правит эти же файлы через воркер (методы `settings_get` и `settings_save`, [architecture/protocol.md](../../architecture/protocol.md); как именно воркер пишет файл — [architecture/worker.md](../../architecture/worker.md)), ручная правка тоже допустима: воркер её замечает. Окно пишет в `settings.toml` только пользовательские ключи; `.bars/config.toml` оно правит единственным ключом `docs_root` («Выбрать другую папку документации…»). Тема окна ключом настроек не является: она хранится в самом окне ([features/window/implementation.md](../window/implementation.md)). Автозапуск при входе в систему тоже не ключ: это запись в ОС, её читает и пишет воркер ([features/distribution/autostart.md](../distribution/autostart.md)).
+Какие настройки есть у bars, где они лежат и что делает их изменение (Т-16, Т-18, Т-24). Где лежат файлы и в каком порядке берутся значения — [files.md](../../architecture/files.md). Окно правит эти же файлы через воркер (методы `settings_get` и `settings_save`, [architecture/protocol.md](../../architecture/protocol.md); как именно воркер пишет файл — [architecture/worker.md](../../architecture/worker.md)). Ручная правка допустима: значения перечитываются при обработке заданий и запросов, отдельного слежения за файлами настроек нет. Окно пишет в `settings.toml` только пользовательские ключи; `.bars/config.toml` оно правит единственным ключом `docs_root` («Выбрать другую папку документации…»). Тема окна ключом настроек не является: она хранится в самом окне ([features/window/implementation.md](../window/implementation.md)). Автозапуск при входе в систему тоже не ключ: это запись в ОС, её читает и пишет воркер ([features/distribution/autostart.md](../distribution/autostart.md)).
 
 ## Embed-модель в settings.toml
 
@@ -57,6 +57,8 @@ title: Настройки bars — ключи settings.toml и config.toml, зн
 ## Устройство для встроенных моделей в settings.toml
 
 Независимый ключ `accelerator` в `[embed]` и `[rerank]`:
+
+Для встроенного rerank DirectML выбирает FP16, CPU — FP32; INT8 не включён из-за обнаруженных потерь при текущем пороге. Tokenizer остаётся на CPU. Выбор precision и ограниченное уменьшение GPU-пачки при нехватке памяти описаны в [моделях](../models/local-models.md); отдельного пользовательского ключа precision нет.
 
 | Ключ | По умолчанию | Значение |
 |---|---|---|

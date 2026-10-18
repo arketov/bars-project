@@ -1,0 +1,10 @@
+{
+  "threads": 16,
+  "sorted": false,
+  "ids": [],
+  "batch": 16,
+  "repeats": 1,
+  "device": "directml",
+  "name": "final-fp32-b16",
+  "max_length": 512
+}

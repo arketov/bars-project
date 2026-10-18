@@ -1,0 +1,29 @@
+{
+  "captured": "2026-10-18T09:10:52.0028460Z",
+  "cpu": [
+    {
+      "Name": "11th Gen Intel(R) Core(TM) i7-11700KF @ 3.60GHz",
+      "NumberOfCores": 8,
+      "NumberOfLogicalProcessors": 16
+    }
+  ],
+  "os": {
+    "Caption": "Майкрософт Windows 11 Pro",
+    "Version": "10.0.26300",
+    "BuildNumber": "26300",
+    "TotalVisibleMemorySize": 33439780,
+    "FreePhysicalMemory": 5371176
+  },
+  "gpu": "NVIDIA GeForce RTX 3090, 616.92, 24576 MiB, 9051 MiB, 28 %",
+  "running": [
+    {
+      "Id": 42368,
+      "ProcessName": "bars",
+      "CPU": 48.78125
+    }
+  ],
+  "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+  "fastembed_archive_sha256": "CA64ADA7D0AD74737F45609542930CD5813FCB453B3F72ECB4255D8BD6FE4604",
+  "fastembed_src_diff": [],
+  "scope": "fixed stage9 snapshots; no live project/settings mutations"
+}

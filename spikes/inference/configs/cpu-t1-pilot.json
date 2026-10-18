@@ -1,0 +1,14 @@
+{
+  "threads": 1,
+  "sorted": false,
+  "ids": [
+    "od-019",
+    "od-031",
+    "od-043"
+  ],
+  "batch": 4,
+  "repeats": 1,
+  "device": "cpu",
+  "name": "cpu-t1-pilot",
+  "max_length": 512
+}

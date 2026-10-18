@@ -3,9 +3,10 @@
   type Name =
     | "chevron-down" | "chevron-right" | "plus" | "search" | "moon" | "gear" | "arrow-right"
     | "external" | "close" | "doc" | "copy" | "back" | "folder" | "warn" | "info" | "error"
-    | "pause" | "play" | "stop" | "check" | "refresh";
+    | "pause" | "play" | "stop" | "check" | "refresh" | "bell";
 
   const PATHS: Record<Name, string> = {
+    bell: "M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4",
     "chevron-down": "m7 10 5 5 5-5",
     "chevron-right": "M3 1l4 4-4 4",
     plus: "M12 5v14M5 12h14",

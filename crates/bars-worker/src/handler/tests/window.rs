@@ -17,6 +17,27 @@ use crate::autostart::MemoryAutostart;
 use crate::handler::WorkerHandler;
 use crate::worker::Worker;
 
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn project_deletion_requires_confirmation_and_is_window_only() {
+    use bars_protocol::ProjectDeleteParams;
+    let env = Window::new();
+    let project = env.project("delete", "docs");
+    env.worker.register(&project).unwrap();
+    env.idle().await;
+    let params = ProjectDeleteParams { project: project.display().to_string(), confirmed: false };
+    assert!(Call::ProjectDelete(params.clone()).window_only());
+    assert!(!Call::ProjectDelete(params.clone()).allowed_for(ClientKind::Mcp));
+    assert!(!Call::ProjectDelete(params.clone()).allowed_for(ClientKind::Cli));
+    let error = env.error(Call::ProjectDelete(params.clone())).await;
+    assert_eq!(error.kind(), Some(ErrorKind::InvalidParams));
+    assert!(project.join(".bars/index.sqlite").is_file());
+    let output: bars_protocol::UnregisterOutput = env.call(Call::ProjectDelete(ProjectDeleteParams { confirmed: true, ..params })).await;
+    assert!(output.removed);
+    assert!(!project.join(".bars").exists());
+    assert!(project.join("docs/a.md").is_file());
+    env.worker.shutdown().await;
+}
+
 struct Window {
     home: TempDir,
     projects: TempDir,
@@ -142,6 +163,41 @@ async fn saving_settings_puts_projects_with_another_model_into_reindex_required(
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn reranker_download_marker_follows_selected_precision() {
+    let window = Window::new();
+    let snapshot = window
+        .home
+        .path()
+        .join("models/models--rozgo--bge-reranker-v2-m3/snapshots/cpu");
+    fs::create_dir_all(&snapshot).unwrap();
+    for file in [
+        "config.json",
+        "tokenizer.json",
+        "tokenizer_config.json",
+        "special_tokens_map.json",
+        "model.onnx",
+        "model.onnx.data",
+    ] {
+        fs::write(snapshot.join(file), "w").unwrap();
+    }
+    let auto: ModelsInfoOutput = window.call(Call::ModelsInfo(ModelsInfoParams {})).await;
+    if cfg!(windows) {
+        assert!(
+            !auto.rerank[0].downloaded,
+            "FP32-кэш не является готовым FP16"
+        );
+    }
+    fs::write(
+        window.home.path().join("settings.toml"),
+        "[rerank]\naccelerator='cpu'\n",
+    )
+    .unwrap();
+    let cpu: ModelsInfoOutput = window.call(Call::ModelsInfo(ModelsInfoParams {})).await;
+    assert!(cpu.rerank[0].downloaded, "CPU не требует GPU-весов");
+    window.worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn models_info_reports_downloaded_files_and_download_starts() {
     let window = Window::new();
     let snapshot = window
@@ -166,6 +222,8 @@ async fn models_info_reports_downloaded_files_and_download_starts() {
     let bge = &info.embed[0];
     assert_eq!(bge.id, "BAAI/bge-m3");
     assert!(bge.downloaded && !bge.downloading);
+    assert_eq!(bge.download_percent, Some(100));
+    assert_eq!(bge.download_error, None);
     assert_eq!((bge.dim, bge.backend.as_str()), (1024, "onnx"));
     let qwen = info
         .embed
@@ -173,6 +231,7 @@ async fn models_info_reports_downloaded_files_and_download_starts() {
         .find(|m| m.id.contains("Qwen3-Embedding-0.6B"))
         .unwrap();
     assert!(!qwen.downloaded && qwen.backend == "candle" && !qwen.warnings.is_empty());
+    assert_eq!(qwen.download_percent, Some(0));
     assert_eq!(info.rerank[0].id, "BAAI/bge-reranker-v2-m3");
 
     let unknown = window

@@ -1,0 +1,67 @@
+[
+  {
+    "file": "models--BAAI--bge-m3/snapshots/5617a9f61b028005a4858fdac845db406aefb181/config.json",
+    "bytes": 687,
+    "sha256": "26159E7AD065073448460117EB24B7A4572F6F4E78EADFF65DC0A11C052449FA"
+  },
+  {
+    "file": "models--BAAI--bge-m3/snapshots/5617a9f61b028005a4858fdac845db406aefb181/special_tokens_map.json",
+    "bytes": 964,
+    "sha256": "8C785ABEBEA9AE3257B61681B4E6FD8365CEAFDE980C21970D001E834CF10835"
+  },
+  {
+    "file": "models--BAAI--bge-m3/snapshots/5617a9f61b028005a4858fdac845db406aefb181/tokenizer_config.json",
+    "bytes": 444,
+    "sha256": "A62B2B6784F990259FDDEF5F16388693A8043BE4F69179E6A5257EEB3F9ABAC4"
+  },
+  {
+    "file": "models--BAAI--bge-m3/snapshots/5617a9f61b028005a4858fdac845db406aefb181/tokenizer.json",
+    "bytes": 17098108,
+    "sha256": "21106B6D7DAB2952C1D496FB21D5DC9DB75C28ED361A05F5020BBBA27810DD08"
+  },
+  {
+    "file": "models--BAAI--bge-m3/snapshots/5617a9f61b028005a4858fdac845db406aefb181/onnx/Constant_7_attr__value",
+    "bytes": 65552,
+    "sha256": "CDF16F72C5D07B36484056E601ED9687F78477E5D85CEE85A34F2406B7FB5906"
+  },
+  {
+    "file": "models--BAAI--bge-m3/snapshots/5617a9f61b028005a4858fdac845db406aefb181/onnx/model.onnx",
+    "bytes": 724923,
+    "sha256": "F84251230831AFB359AB26D9FD37D5936D4D9BB5D1D5410E66442F630F24435B"
+  },
+  {
+    "file": "models--BAAI--bge-m3/snapshots/5617a9f61b028005a4858fdac845db406aefb181/onnx/model.onnx_data",
+    "bytes": 2266820608,
+    "sha256": "1EEBFB28493F67BBA03CE0EF64BFDC7FC5A3BD9D7493F818BB1D78CD798416B4"
+  },
+  {
+    "file": "models--rozgo--bge-reranker-v2-m3/snapshots/fbd57b17b4db111a9d16813bb08b4c804fac18e9/config.json",
+    "bytes": 758,
+    "sha256": "835FE05211A0D1535B5CD2ACCB6D788AD142BDC507F8A8BD7287727915D9D61F"
+  },
+  {
+    "file": "models--rozgo--bge-reranker-v2-m3/snapshots/fbd57b17b4db111a9d16813bb08b4c804fac18e9/model.onnx",
+    "bytes": 108479,
+    "sha256": "3AF844CD2DE818A95D2B5DE5893A336836312C8ADE03F53B286AC6BEAE080321"
+  },
+  {
+    "file": "models--rozgo--bge-reranker-v2-m3/snapshots/fbd57b17b4db111a9d16813bb08b4c804fac18e9/model.onnx.data",
+    "bytes": 2271088656,
+    "sha256": "84B66C787B9B98977A16D5C993A3959210A214C98FC3466DA263C949C2068945"
+  },
+  {
+    "file": "models--rozgo--bge-reranker-v2-m3/snapshots/fbd57b17b4db111a9d16813bb08b4c804fac18e9/special_tokens_map.json",
+    "bytes": 964,
+    "sha256": "8C785ABEBEA9AE3257B61681B4E6FD8365CEAFDE980C21970D001E834CF10835"
+  },
+  {
+    "file": "models--rozgo--bge-reranker-v2-m3/snapshots/fbd57b17b4db111a9d16813bb08b4c804fac18e9/tokenizer_config.json",
+    "bytes": 1173,
+    "sha256": "7E4C1CC848840AECCDD763458C18DD525EB0F795C992E00EBE9C28554E7DB2D4"
+  },
+  {
+    "file": "models--rozgo--bge-reranker-v2-m3/snapshots/fbd57b17b4db111a9d16813bb08b4c804fac18e9/tokenizer.json",
+    "bytes": 17082900,
+    "sha256": "8BF8AFBFD11306BD872018C53BFDF2E160A56F8EDBCF49933324404791C148D3"
+  }
+]

@@ -5,6 +5,8 @@ description: "Start, maintain or finish a project session journal."
 
 # Session journal
 
+Write session records and search queries in the user's language, following explicit project language rules. These agent instructions are in English; session logs and handoffs are user documents, not agent instructions.
+
 Follow the project's own rules and locations first. Otherwise, use `chats/<YYYY-MM-DD>-<topic>/` under its configured documentation root (not necessarily `docs/`). The layout is advice; bars accepts other structures. The topic is 2–4 words in Latin letters joined by hyphens. Each session the user talks to has its own folder; subagents keep no journal: their result goes to the main session's journal. Do not create placeholders or empty folders.
 
 ## Choose the right record

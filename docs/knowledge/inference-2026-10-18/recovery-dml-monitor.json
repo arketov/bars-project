@@ -1,0 +1,485 @@
+{
+  "samples": [
+    {
+      "working_set": 41152512,
+      "private_bytes": 22855680,
+      "cpu_seconds": 0.21875,
+      "commit_headroom": 20502155264,
+      "available_ram": 17427333120,
+      "other": [],
+      "at": "2026-10-18T09:50:20.3606634Z",
+      "peak_working_set": 41152512
+    },
+    {
+      "working_set": 1191141376,
+      "private_bytes": 2254229504,
+      "cpu_seconds": 0.375,
+      "commit_headroom": 18228211712,
+      "available_ram": 16281239552,
+      "other": [],
+      "at": "2026-10-18T09:50:21.6467630Z",
+      "peak_working_set": 1191141376
+    },
+    {
+      "working_set": 1428119552,
+      "private_bytes": 2254229504,
+      "cpu_seconds": 0.4375,
+      "commit_headroom": 18223235072,
+      "available_ram": 16033775616,
+      "other": [],
+      "at": "2026-10-18T09:50:22.9223744Z",
+      "peak_working_set": 1428119552
+    },
+    {
+      "working_set": 1646223360,
+      "private_bytes": 2254229504,
+      "cpu_seconds": 0.5625,
+      "commit_headroom": 18223742976,
+      "available_ram": 15814623232,
+      "other": [],
+      "at": "2026-10-18T09:50:24.1995258Z",
+      "peak_working_set": 1646223360
+    },
+    {
+      "working_set": 1903124480,
+      "private_bytes": 2254229504,
+      "cpu_seconds": 0.671875,
+      "commit_headroom": 18234568704,
+      "available_ram": 15568207872,
+      "other": [],
+      "at": "2026-10-18T09:50:25.4760618Z",
+      "peak_working_set": 1903124480
+    },
+    {
+      "working_set": 1658023936,
+      "private_bytes": 2254229504,
+      "cpu_seconds": 0.84375,
+      "commit_headroom": 18239979520,
+      "available_ram": 15675162624,
+      "other": [],
+      "at": "2026-10-18T09:50:26.7505845Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 1158242304,
+      "private_bytes": 2392489984,
+      "cpu_seconds": 1.03125,
+      "commit_headroom": 18097295360,
+      "available_ram": 16322134016,
+      "other": [],
+      "at": "2026-10-18T09:50:28.0268815Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 1143963648,
+      "private_bytes": 2656546816,
+      "cpu_seconds": 1.171875,
+      "commit_headroom": 16850743296,
+      "available_ram": 16079912960,
+      "other": [],
+      "at": "2026-10-18T09:50:29.3105807Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 1146220544,
+      "private_bytes": 2902413312,
+      "cpu_seconds": 1.421875,
+      "commit_headroom": 15272681472,
+      "available_ram": 15506341888,
+      "other": [],
+      "at": "2026-10-18T09:50:30.6114968Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 1153417216,
+      "private_bytes": 3037061120,
+      "cpu_seconds": 1.53125,
+      "commit_headroom": 14308601856,
+      "available_ram": 14717812736,
+      "other": [],
+      "at": "2026-10-18T09:50:31.9110473Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 1150676992,
+      "private_bytes": 3198414848,
+      "cpu_seconds": 1.71875,
+      "commit_headroom": 14049804288,
+      "available_ram": 14616100864,
+      "other": [],
+      "at": "2026-10-18T09:50:33.2165819Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 1150574592,
+      "private_bytes": 3278716928,
+      "cpu_seconds": 1.84375,
+      "commit_headroom": 13487824896,
+      "available_ram": 14272167936,
+      "other": [],
+      "at": "2026-10-18T09:50:34.5142923Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 184565760,
+      "private_bytes": 2495291392,
+      "cpu_seconds": 2.140625,
+      "commit_headroom": 15559761920,
+      "available_ram": 15706619904,
+      "other": [],
+      "at": "2026-10-18T09:50:35.8159713Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 795418624,
+      "private_bytes": 3659878400,
+      "cpu_seconds": 3.390625,
+      "commit_headroom": 14243942400,
+      "available_ram": 15034482688,
+      "other": [],
+      "at": "2026-10-18T09:50:37.1043226Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 806207488,
+      "private_bytes": 4086571008,
+      "cpu_seconds": 3.828125,
+      "commit_headroom": 13687173120,
+      "available_ram": 14886633472,
+      "other": [],
+      "at": "2026-10-18T09:50:38.3939873Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 810221568,
+      "private_bytes": 4092006400,
+      "cpu_seconds": 4.5625,
+      "commit_headroom": 12514893824,
+      "available_ram": 14454620160,
+      "other": [],
+      "at": "2026-10-18T09:50:39.7092170Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 784998400,
+      "private_bytes": 4071624704,
+      "cpu_seconds": 5.140625,
+      "commit_headroom": 12371955712,
+      "available_ram": 14274265088,
+      "other": [],
+      "at": "2026-10-18T09:50:41.0060301Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 611041280,
+      "private_bytes": 4023848960,
+      "cpu_seconds": 5.796875,
+      "commit_headroom": 13940342784,
+      "available_ram": 15112077312,
+      "other": [],
+      "at": "2026-10-18T09:50:42.2850767Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 812113920,
+      "private_bytes": 4239585280,
+      "cpu_seconds": 6.53125,
+      "commit_headroom": 13555761152,
+      "available_ram": 14691598336,
+      "other": [],
+      "at": "2026-10-18T09:50:43.5574500Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 815980544,
+      "private_bytes": 4243910656,
+      "cpu_seconds": 7.0625,
+      "commit_headroom": 13405581312,
+      "available_ram": 14601420800,
+      "other": [],
+      "at": "2026-10-18T09:50:44.8394745Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 635654144,
+      "private_bytes": 4040994816,
+      "cpu_seconds": 7.546875,
+      "commit_headroom": 13558165504,
+      "available_ram": 14749270016,
+      "other": [],
+      "at": "2026-10-18T09:50:46.1431093Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 814415872,
+      "private_bytes": 4225536000,
+      "cpu_seconds": 8.21875,
+      "commit_headroom": 13197918208,
+      "available_ram": 14427357184,
+      "other": [],
+      "at": "2026-10-18T09:50:47.4155668Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 699924480,
+      "private_bytes": 4109406208,
+      "cpu_seconds": 8.78125,
+      "commit_headroom": 13816147968,
+      "available_ram": 15069085696,
+      "other": [],
+      "at": "2026-10-18T09:50:48.6972550Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 817172480,
+      "private_bytes": 4228182016,
+      "cpu_seconds": 9.28125,
+      "commit_headroom": 13688672256,
+      "available_ram": 14965276672,
+      "other": [],
+      "at": "2026-10-18T09:50:49.9794513Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 709853184,
+      "private_bytes": 4117946368,
+      "cpu_seconds": 9.828125,
+      "commit_headroom": 13773414400,
+      "available_ram": 15021899776,
+      "other": [],
+      "at": "2026-10-18T09:50:51.2809766Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 825700352,
+      "private_bytes": 4240592896,
+      "cpu_seconds": 10.46875,
+      "commit_headroom": 13905895424,
+      "available_ram": 15119417344,
+      "other": [],
+      "at": "2026-10-18T09:50:52.5595422Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 690675712,
+      "private_bytes": 4096532480,
+      "cpu_seconds": 11.03125,
+      "commit_headroom": 11897384960,
+      "available_ram": 14897119232,
+      "other": [
+        "rustc",
+        "rustc"
+      ],
+      "at": "2026-10-18T09:50:53.8400376Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 710672384,
+      "private_bytes": 4119957504,
+      "cpu_seconds": 11.328125,
+      "commit_headroom": 12034002944,
+      "available_ram": 14524874752,
+      "other": [
+        "rustc",
+        "rustc"
+      ],
+      "at": "2026-10-18T09:50:55.1161829Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 796925952,
+      "private_bytes": 4213428224,
+      "cpu_seconds": 11.875,
+      "commit_headroom": 5822922752,
+      "available_ram": 14027849728,
+      "other": [
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc"
+      ],
+      "at": "2026-10-18T09:50:56.4049343Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 736489472,
+      "private_bytes": 4157394944,
+      "cpu_seconds": 12.390625,
+      "commit_headroom": 10393436160,
+      "available_ram": 11294212096,
+      "other": [
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc"
+      ],
+      "at": "2026-10-18T09:50:57.7063151Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 828313600,
+      "private_bytes": 4245405696,
+      "cpu_seconds": 12.921875,
+      "commit_headroom": 7836172288,
+      "available_ram": 8803844096,
+      "other": [
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc"
+      ],
+      "at": "2026-10-18T09:50:59.0033168Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 741732352,
+      "private_bytes": 4153196544,
+      "cpu_seconds": 13.265625,
+      "commit_headroom": 7512403968,
+      "available_ram": 8507097088,
+      "other": [
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc"
+      ],
+      "at": "2026-10-18T09:51:00.2860189Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 830078976,
+      "private_bytes": 4249251840,
+      "cpu_seconds": 13.65625,
+      "commit_headroom": 7034691584,
+      "available_ram": 8182038528,
+      "other": [
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc"
+      ],
+      "at": "2026-10-18T09:51:01.5763184Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 831442944,
+      "private_bytes": 4250206208,
+      "cpu_seconds": 14.078125,
+      "commit_headroom": 6520893440,
+      "available_ram": 7745830912,
+      "other": [
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc"
+      ],
+      "at": "2026-10-18T09:51:02.8599482Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 806133760,
+      "private_bytes": 4224868352,
+      "cpu_seconds": 14.296875,
+      "commit_headroom": 6419693568,
+      "available_ram": 7581204480,
+      "other": [
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc"
+      ],
+      "at": "2026-10-18T09:51:04.1484024Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 832303104,
+      "private_bytes": 4250779648,
+      "cpu_seconds": 14.953125,
+      "commit_headroom": 6608998400,
+      "available_ram": 7708082176,
+      "other": [
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc"
+      ],
+      "at": "2026-10-18T09:51:05.4301702Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 832249856,
+      "private_bytes": 4250984448,
+      "cpu_seconds": 15.625,
+      "commit_headroom": 6728327168,
+      "available_ram": 7723810816,
+      "other": [
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc"
+      ],
+      "at": "2026-10-18T09:51:06.7192557Z",
+      "peak_working_set": 2166910976
+    },
+    {
+      "working_set": 827936768,
+      "private_bytes": 4247724032,
+      "cpu_seconds": 16.296875,
+      "commit_headroom": 6163501056,
+      "available_ram": 7083130880,
+      "other": [
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc",
+        "rustc"
+      ],
+      "at": "2026-10-18T09:51:08.0025690Z",
+      "peak_working_set": 2166910976
+    }
+  ],
+  "name": "dml-b4",
+  "pid": 25660,
+  "timing_contaminated": true,
+  "started": "2026-10-18T09:50:20.0396094Z",
+  "exit_code": 0
+}

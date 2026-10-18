@@ -1,0 +1,3 @@
+{"utc":"2026-10-18T12:12:22.9084871Z","mode":"rerank","device":"auto","round":1,"available_bytes":20899856384,"free_commit_bytes":15992242176,"min_ram_gib":4,"min_commit_gib":8,"foreign":[],"ready":true}
+{"utc":"2026-10-18T12:12:25.1986366Z","mode":"rerank","device":"auto","round":1,"available_bytes":20914429952,"free_commit_bytes":15997485056,"min_ram_gib":4,"min_commit_gib":8,"foreign":[],"ready":true}
+{"utc":"2026-10-18T12:12:27.4856585Z","mode":"rerank","device":"auto","round":1,"available_bytes":20914663424,"free_commit_bytes":16004333568,"min_ram_gib":4,"min_commit_gib":8,"foreign":[],"ready":true}

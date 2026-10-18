@@ -1,0 +1,8 @@
+model: GPU unavailable (rerank-модель не загрузилась: BLAKE3 не совпал: <models>\models--rozgo--bge-reranker-v2-m3\snapshots\gpu-bad\config.json); using CPU
+rerank: загружен на Cpu; precision=fp32; batch=4; файлы модели: config.json 0.0 МБ; special_tokens_map.json 0.0 МБ; tokenizer.json 16.3 МБ; tokenizer_config.json 0.0 МБ; model.onnx 0.1 МБ; model.onnx.data 2165.9 МБ
+rerank: Cpu, пар 15, логит от -3.436 до 4.277
+rerank: Cpu, пар 15, логит от -3.436 до 4.277
+rerank: Cpu, пар 15, логит от -3.436 до 4.277
+model: GPU unavailable (rerank-модель не загрузилась: BLAKE3 не совпал: <models>\models--rozgo--bge-reranker-v2-m3\snapshots\gpu-bad\config.json); using CPU
+rerank: загружен на Cpu; precision=fp32; batch=4; файлы модели: config.json 0.0 МБ; special_tokens_map.json 0.0 МБ; tokenizer.json 16.3 МБ; tokenizer_config.json 0.0 МБ; model.onnx 0.1 МБ; model.onnx.data 2165.9 МБ
+rerank: Cpu, пар 15, логит от -3.436 до 4.277

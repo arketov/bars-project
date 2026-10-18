@@ -193,6 +193,8 @@ export interface ModelInfo {
   warnings: string[];
   downloaded: boolean;
   downloading: boolean;
+  download_percent?: number | null;
+  download_error?: string | null;
 }
 
 export interface ModelsInfoOutput {
@@ -210,6 +212,8 @@ export interface ModelRuntime {
   backend: string;
   actual: string | null;
   fallback_reason: string | null;
+  precision?: string;
+  revision?: string;
 }
 
 export type InstallClientName = "claude-code" | "codex";

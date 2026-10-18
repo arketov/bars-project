@@ -1,0 +1,23 @@
+{
+  "threads": 16,
+  "sorted": false,
+  "ids": [
+    "od-031",
+    "od-032",
+    "od-019",
+    "od-020",
+    "od-043",
+    "od-044",
+    "od-081",
+    "od-082",
+    "od-001",
+    "od-002"
+  ],
+  "batch": 16,
+  "repeats": 3,
+  "device": "directml",
+  "name": "fp16-dml-b16",
+  "max_length": 512,
+  "model_path": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\inference\\data\\models\\ranged-model_fp16.onnx",
+  "tokenizer_dir": "C:\\Users\\arketov\\.bars\\models\\models--rozgo--bge-reranker-v2-m3\\snapshots\\fbd57b17b4db111a9d16813bb08b4c804fac18e9"
+}

@@ -11,8 +11,29 @@ $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $app = Join-Path $root 'crates\bars-app'
 
-$triple = (& rustc -vV | Select-String '^host: (.+)$').Matches[0].Groups[1].Value
-if (-not $triple) { throw 'не удалось определить целевую платформу rustc' }
+# Открытый до установки Rust терминал может ещё не знать каталог rustup.
+if (-not (Get-Command rustc -CommandType Application -ErrorAction SilentlyContinue) -or
+    -not (Get-Command cargo -CommandType Application -ErrorAction SilentlyContinue)) {
+    $cargoHome = if ($env:CARGO_HOME) { $env:CARGO_HOME } else { Join-Path $env:USERPROFILE '.cargo' }
+    $cargoBin = Join-Path $cargoHome 'bin'
+    if (Test-Path -LiteralPath $cargoBin -PathType Container) {
+        $env:PATH = "$cargoBin$([IO.Path]::PathSeparator)$env:PATH"
+    }
+}
+foreach ($tool in 'rustc', 'cargo', 'node', 'npm') {
+    if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) {
+        throw "Не найден $tool. Для сборки нужны Rust (rustup) и Node.js с npm. Установите недостающий инструмент и повторите запуск."
+    }
+}
+
+Push-Location $root
+try {
+    $rustInfo = & rustc -vV
+    if ($LASTEXITCODE) { throw 'rustc -vV не прошёл; проверьте toolchain из rust-toolchain.toml' }
+    $hostMatch = $rustInfo | Select-String '^host: (.+)$' | Select-Object -First 1
+    if (-not $hostMatch) { throw 'не удалось определить целевую платформу rustc' }
+    $triple = $hostMatch.Matches[0].Groups[1].Value
+} finally { Pop-Location }
 
 Push-Location (Join-Path $root 'ui')
 try {

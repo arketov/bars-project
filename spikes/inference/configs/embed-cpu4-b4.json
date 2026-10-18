@@ -1,0 +1,21 @@
+{
+  "threads": 4,
+  "sorted": true,
+  "ids": [
+    "od-031",
+    "od-032",
+    "od-019",
+    "od-020",
+    "od-043",
+    "od-044",
+    "od-081",
+    "od-082",
+    "od-001",
+    "od-002"
+  ],
+  "batch": 4,
+  "repeats": 1,
+  "device": "cpu",
+  "name": "embed-cpu4-b4",
+  "max_length": 8192
+}

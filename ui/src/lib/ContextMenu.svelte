@@ -1,14 +1,16 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
   import { app } from "./app.svelte";
-  import { copyText, documentAction, documentEditors, type DocumentEditor } from "./api";
-  import { documentAt, documentItems, itemsFor, place, run, textField, type MenuItem } from "./contextmenu";
+  import { call, copyText, documentAction, documentEditors, type DocumentEditor } from "./api";
+  import { documentAt, documentItems, itemsFor, place, projectAt, projectItems, run, textField, type MenuItem } from "./contextmenu";
 
   let items = $state<MenuItem[]>([]);
   let target: EventTarget | null = null;
   let at = $state({ left: 0, top: 0 });
   let box = $state<HTMLDivElement>();
   let document: { project: string; path: string; line: number } | null = null;
+  let project = $state<string | null>(null);
+  let openedCurrent: string | null = null;
   let editors = $state<DocumentEditor[]>([]);
   let submenu = $state(false);
   let generation = 0;
@@ -17,12 +19,14 @@
   $effect(() => {
     const current = app.current;
     if (document && current !== document.project) close();
+    if (project && (current !== openedCurrent || !app.projects.some(p => p.path === project))) close();
   });
 
   function close() {
     items = [];
     target = null;
     document = null;
+    project = null;
     submenu = false;
     generation++;
   }
@@ -37,7 +41,13 @@
     event.preventDefault();
     close();
     const found = itemsFor(event.target);
-    const file = !textField(event.target) && documentAt(event.target);
+    const path = !textField(event.target) && projectAt(event.target);
+    if (path && app.projects.some(p => p.path === path)) {
+      project = path;
+      openedCurrent = app.current;
+      found.unshift(...projectItems());
+    }
+    const file = !project && !textField(event.target) && documentAt(event.target);
     if (file && app.current) {
       document = { ...file, project: app.current };
       found.unshift(...documentItems());
@@ -48,7 +58,7 @@
     items = found;
     origin = { x: event.clientX, y: event.clientY };
     await position();
-    box?.querySelector<HTMLButtonElement>("button")?.focus({ preventScroll: true });
+    box?.querySelector<HTMLButtonElement>("button:not(:disabled)")?.focus({ preventScroll: true });
   }
 
   async function showEditors() {
@@ -65,12 +75,20 @@
   }
 
   async function pick(item: MenuItem) {
+    if (item.disabled) return;
     if (item.action === "editors") { await showEditors(); return; }
     const where = target;
     const file = document;
+    const projectPath = project;
     close();
     try {
-      if (file && ["open", "editor", "reveal", "path", "check"].includes(item.action)) {
+      if (projectPath && item.action === "deleteProject") {
+        app.requestDeleteProject(projectPath);
+      } else if (projectPath && item.action === "checkProject") {
+        if (!app.projects.some(p => p.path === projectPath)) return;
+        await call("reindex", { cwd: projectPath, project: projectPath });
+        app.flash("Проверка проекта поставлена в очередь");
+      } else if (file && ["open", "editor", "reveal", "path", "check"].includes(item.action)) {
         if (app.current !== file.project) return;
         if (item.action === "open") {
           const hit = app.results?.results.find(hit => hit.path === file.path && hit.first_line === file.line);
@@ -89,6 +107,15 @@
   }
 
   function navigate(event: KeyboardEvent) {
+    if ((event.shiftKey && event.key === "F10") || event.key === "ContextMenu") {
+      const element = globalThis.document.activeElement;
+      if (element instanceof HTMLElement && projectAt(element)) {
+        event.preventDefault();
+        const rect = element.getBoundingClientRect();
+        element.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: rect.left, clientY: rect.bottom }));
+        return;
+      }
+    }
     if (!items.length || !box) return;
     if (event.key === "Escape" || event.key === "Tab") { close(); return; }
     if (event.key === "ArrowRight") { event.preventDefault(); void showEditors(); return; }
@@ -99,7 +126,7 @@
     }
     if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
-    const buttons = Array.from(box.querySelectorAll<HTMLButtonElement>(submenu ? ".sub button" : ".primary button"));
+    const buttons = Array.from(box.querySelectorAll<HTMLButtonElement>(submenu ? ".sub button:not(:disabled)" : ".primary button:not(:disabled)"));
     const index = buttons.indexOf(globalThis.document.activeElement as HTMLButtonElement);
     const next = event.key === "Home" ? 0 : event.key === "End" ? buttons.length - 1
       : (index + (event.key === "ArrowUp" ? -1 : 1) + buttons.length) % buttons.length;
@@ -126,7 +153,7 @@
   });
 </script>
 
-<svelte:window onmousedown={(event) => box && !box.contains(event.target as Node) && close()} />
+<svelte:window onmousedown={(event) => box && (!(event.target instanceof Node) || !box.contains(event.target)) && close()} />
 
 {#if items.length}
   <div
@@ -139,7 +166,7 @@
   >
     <div class="primary" role="menu" aria-label="Действия">
       {#each items as item (item.action)}
-        <button role="menuitem" aria-haspopup={item.action === "editors" ? "menu" : undefined} aria-expanded={item.action === "editors" ? submenu : undefined} onclick={() => pick(item)}>{item.label}{item.action === "editors" ? " ▸" : ""}</button>
+        <button role="menuitem" disabled={item.disabled} aria-haspopup={item.action === "editors" ? "menu" : undefined} aria-expanded={item.action === "editors" ? submenu : undefined} onclick={() => pick(item)}>{item.label}{item.action === "editors" ? " ▸" : ""}{#if item.hint}<small>{item.hint}</small>{/if}</button>
       {/each}
     </div>
     {#if submenu}
@@ -159,4 +186,6 @@
   @media (max-width: 480px) { .cmenu { flex-direction: column; } .sub { border-left: 0; border-top: 1px solid var(--line); margin: 4px 0 0; padding: 4px 0 0; } }
   .cmenu button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 7px 10px; border-radius: 7px; font-size: 13px; color: var(--text); }
   .cmenu button:hover, .cmenu button:focus-visible { background: var(--accent-soft); color: var(--accent-text); }
+  .cmenu button:disabled { color: var(--muted); cursor: default; background: none; }
+  .cmenu small { display: block; font-size: 11px; color: var(--muted); }
 </style>

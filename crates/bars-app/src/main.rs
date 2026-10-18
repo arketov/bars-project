@@ -23,7 +23,8 @@ fn main() -> anyhow::Result<()> {
     let home = serve::bars_home()?;
     let endpoint = Endpoint::current()?;
     let provider = Arc::new(BuiltinProvider::new(home.join("models")));
-    let mut config = WorkerConfig::new(home);
+    let mut config = WorkerConfig::new(home.clone());
+    config.install_env = bars_worker::clients::InstallEnv::detect();
     if let Ok(exe) = std::env::current_exe() {
         config.autostart = bars_worker::autostart::for_exe(&exe);
     }
@@ -46,6 +47,8 @@ fn main() -> anyhow::Result<()> {
             commands::document_action,
             commands::document_editors,
             commands::bars_dir,
+            commands::worker_logs,
+            commands::mcp_statistics,
             commands::restart_app,
         ])
         .setup(move |app| {
@@ -55,6 +58,10 @@ fn main() -> anyhow::Result<()> {
                 handle.exit(0);
                 return Ok(());
             }
+            if bars_worker::logging::init(&home).is_err() {
+                eprintln!("bars: файловый журнал недоступен");
+            }
+            log::info!("Приложение bars запущено, версия {}", env!("CARGO_PKG_VERSION"));
             window::create(&handle, !background)?;
             tray::build(&handle)?;
             tray::spawn_status_loop(handle.clone());
@@ -68,8 +75,9 @@ fn main() -> anyhow::Result<()> {
                 let code = match result {
                     // Воркер уже работает: второй процесс уходит (Т-1).
                     Err(ServeError::AlreadyRunning) | Ok(()) => 0,
-                    Err(error) => {
-                        eprintln!("bars: {error}");
+                    Err(_) => {
+                        log::error!("Не удалось запустить или обслуживать воркер");
+                        eprintln!("bars: воркер завершился с ошибкой");
                         1
                     }
                 };

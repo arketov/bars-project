@@ -1,0 +1,21 @@
+{
+  "fastembed": "7.1.1, local registry sources (includes parallel inference work)",
+  "files": [
+    {
+      "file": "src/common.rs",
+      "sha256": "1CDB88C188A894E64BBF7A6D6BA9A5B1722AFBFE828EDC295DD187E10AC17A7E"
+    },
+    {
+      "file": "src/init.rs",
+      "sha256": "14FA5ED25EA7C586DB30C08F71851232733CBA6048AF1E9DEE10974F3AFBE571"
+    },
+    {
+      "file": "src/text_embedding/impl.rs",
+      "sha256": "1E19D600821AD5DFE95F7E636FB0F08D04145280D1493EBDBD1569D07EE4940C"
+    },
+    {
+      "file": "src/reranking/impl.rs",
+      "sha256": "EEE6D2C1968EF8DDA588437D4CB57877259E23E3BCA0B4600ADE4DC956F276E5"
+    }
+  ]
+}

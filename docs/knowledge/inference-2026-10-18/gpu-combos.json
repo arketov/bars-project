@@ -1,0 +1,500 @@
+{
+  "inputSha256": "435f46fdcf21bfc12e7a52081e1fc7c335962557575b4c095f65fd23c4f0d346",
+  "runs": [
+    {
+      "dir": "spikes/inference/runs/quiet-combos/dml-b4",
+      "config": {
+        "name": "dml-b4",
+        "device": "directml",
+        "threads": 16,
+        "batch": 4,
+        "sorted": false,
+        "max_length": 512,
+        "repeats": 3,
+        "ids": [
+          "od-031",
+          "od-032",
+          "od-019",
+          "od-020",
+          "od-043",
+          "od-044",
+          "od-081",
+          "od-082",
+          "od-001",
+          "od-002"
+        ],
+        "spinning": null,
+        "model_path": null,
+        "tokenizer_dir": null,
+        "fixed_padding": false
+      },
+      "manifest": {
+        "source": "C:\\Users\\arketov\\AppData\\Local/bars/bench-quality/overdrive-2026-10-18-v2",
+        "candidatesSource": "frozen stage9 fused rows; C30 first15",
+        "cases_blake3": "00708396a6cb872f6427d08df983d8776d5f491ada467a052602b20b07cac513",
+        "inputs_blake3": "f786af0916e6a7bda1eef981c3ab90af8fbc17094f73efc3893eccade116d58e",
+        "index_blake3": "0c96f95eed4d46dd3b2334b3b18c435c62cb1e1a5b5fa71f16234ecfaed74840",
+        "archives": [
+          {
+            "path": "docs/knowledge/quality-2026-10-18/train-rows.jsonl.gz",
+            "blake3": "c8284fa442cdc76ef8fc7553197dd30728f159b20f0833c5fed9893342e509cf"
+          },
+          {
+            "path": "docs/knowledge/quality-2026-10-18/test-rows.jsonl.gz",
+            "blake3": "0f24df6864ac4c697409dd3903cf79dd3e2bcee81c7d1ea33741cc1894aaa8b3"
+          }
+        ],
+        "count": 100
+      },
+      "quality": [
+        {
+          "threshold": 0,
+          "positive": 8,
+          "negative": 2,
+          "top1": 0.875,
+          "hit3": 0.875,
+          "mrr10": 0.890625,
+          "ndcg10": 0.9043982082417396,
+          "docTop1": 0.875,
+          "docHit3": 0.875,
+          "docMrr10": 0.9,
+          "falseNonemptyCount": 2
+        },
+        {
+          "threshold": 0.1,
+          "positive": 8,
+          "negative": 2,
+          "top1": 0.875,
+          "hit3": 0.875,
+          "mrr10": 0.875,
+          "ndcg10": 0.8649650986435234,
+          "docTop1": 0.875,
+          "docHit3": 0.875,
+          "docMrr10": 0.875,
+          "falseNonemptyCount": 1
+        }
+      ],
+      "median": 0.7883982,
+      "p95": 0.8705037,
+      "n": 30,
+      "steady": {
+        "n": 20,
+        "median": 0.7534078,
+        "p95": 0.819171
+      },
+      "paddingRatio": 1.3123249734395277,
+      "session": {
+        "load": 2.7942552000000003,
+        "first_run": 1.2368687999999999,
+        "device": "directml",
+        "registration_failure_fatal": true
+      },
+      "timingValid": true,
+      "memory": {
+        "peakWorkingSet": 2166657024,
+        "sampledPeakPrivate": 4263641088
+      },
+      "baseline": "dml-b4",
+      "medianSpeedup": 1,
+      "pairedMedianSpeedup": 1,
+      "maxLogitDelta": 0,
+      "losses": []
+    },
+    {
+      "dir": "spikes/inference/runs/quiet-combos/fp16-dml-b16",
+      "config": {
+        "name": "fp16-dml-b16",
+        "device": "directml",
+        "threads": 16,
+        "batch": 16,
+        "sorted": false,
+        "max_length": 512,
+        "repeats": 3,
+        "ids": [
+          "od-031",
+          "od-032",
+          "od-019",
+          "od-020",
+          "od-043",
+          "od-044",
+          "od-081",
+          "od-082",
+          "od-001",
+          "od-002"
+        ],
+        "spinning": null,
+        "model_path": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\inference\\data\\models\\ranged-model_fp16.onnx",
+        "tokenizer_dir": "C:\\Users\\arketov\\.bars\\models\\models--rozgo--bge-reranker-v2-m3\\snapshots\\fbd57b17b4db111a9d16813bb08b4c804fac18e9",
+        "fixed_padding": false
+      },
+      "manifest": {
+        "source": "C:\\Users\\arketov\\AppData\\Local/bars/bench-quality/overdrive-2026-10-18-v2",
+        "candidatesSource": "frozen stage9 fused rows; C30 first15",
+        "cases_blake3": "00708396a6cb872f6427d08df983d8776d5f491ada467a052602b20b07cac513",
+        "inputs_blake3": "f786af0916e6a7bda1eef981c3ab90af8fbc17094f73efc3893eccade116d58e",
+        "index_blake3": "0c96f95eed4d46dd3b2334b3b18c435c62cb1e1a5b5fa71f16234ecfaed74840",
+        "archives": [
+          {
+            "path": "docs/knowledge/quality-2026-10-18/train-rows.jsonl.gz",
+            "blake3": "c8284fa442cdc76ef8fc7553197dd30728f159b20f0833c5fed9893342e509cf"
+          },
+          {
+            "path": "docs/knowledge/quality-2026-10-18/test-rows.jsonl.gz",
+            "blake3": "0f24df6864ac4c697409dd3903cf79dd3e2bcee81c7d1ea33741cc1894aaa8b3"
+          }
+        ],
+        "count": 100
+      },
+      "quality": [
+        {
+          "threshold": 0,
+          "positive": 8,
+          "negative": 2,
+          "top1": 0.875,
+          "hit3": 0.875,
+          "mrr10": 0.890625,
+          "ndcg10": 0.9043982082417396,
+          "docTop1": 0.875,
+          "docHit3": 0.875,
+          "docMrr10": 0.9,
+          "falseNonemptyCount": 2
+        },
+        {
+          "threshold": 0.1,
+          "positive": 8,
+          "negative": 2,
+          "top1": 0.875,
+          "hit3": 0.875,
+          "mrr10": 0.875,
+          "ndcg10": 0.8649650986435234,
+          "docTop1": 0.875,
+          "docHit3": 0.875,
+          "docMrr10": 0.875,
+          "falseNonemptyCount": 1
+        }
+      ],
+      "median": 0.3540961,
+      "p95": 0.3754579,
+      "n": 30,
+      "steady": {
+        "n": 20,
+        "median": 0.3492585,
+        "p95": 0.358745
+      },
+      "paddingRatio": 1.4513653251842957,
+      "session": {
+        "load": 4.3152762,
+        "first_run": 1.0029269,
+        "device": "directml",
+        "registration_failure_fatal": true
+      },
+      "timingValid": true,
+      "memory": {
+        "peakWorkingSet": 1767243776,
+        "sampledPeakPrivate": 2716475392
+      },
+      "baseline": "dml-b4",
+      "medianSpeedup": 2.226509131278204,
+      "pairedMedianSpeedup": 2.1571638199213474,
+      "maxLogitDelta": 0.028966426849365234,
+      "losses": []
+    },
+    {
+      "dir": "spikes/inference/runs/quiet-combos/dml-b4-fixed",
+      "config": {
+        "name": "dml-b4-fixed",
+        "device": "directml",
+        "threads": 16,
+        "batch": 4,
+        "sorted": false,
+        "max_length": 512,
+        "repeats": 3,
+        "ids": [
+          "od-031",
+          "od-032",
+          "od-019",
+          "od-020",
+          "od-043",
+          "od-044",
+          "od-081",
+          "od-082",
+          "od-001",
+          "od-002"
+        ],
+        "spinning": null,
+        "model_path": null,
+        "tokenizer_dir": null,
+        "fixed_padding": true
+      },
+      "manifest": {
+        "source": "C:\\Users\\arketov\\AppData\\Local/bars/bench-quality/overdrive-2026-10-18-v2",
+        "candidatesSource": "frozen stage9 fused rows; C30 first15",
+        "cases_blake3": "00708396a6cb872f6427d08df983d8776d5f491ada467a052602b20b07cac513",
+        "inputs_blake3": "f786af0916e6a7bda1eef981c3ab90af8fbc17094f73efc3893eccade116d58e",
+        "index_blake3": "0c96f95eed4d46dd3b2334b3b18c435c62cb1e1a5b5fa71f16234ecfaed74840",
+        "archives": [
+          {
+            "path": "docs/knowledge/quality-2026-10-18/train-rows.jsonl.gz",
+            "blake3": "c8284fa442cdc76ef8fc7553197dd30728f159b20f0833c5fed9893342e509cf"
+          },
+          {
+            "path": "docs/knowledge/quality-2026-10-18/test-rows.jsonl.gz",
+            "blake3": "0f24df6864ac4c697409dd3903cf79dd3e2bcee81c7d1ea33741cc1894aaa8b3"
+          }
+        ],
+        "count": 100
+      },
+      "quality": [
+        {
+          "threshold": 0,
+          "positive": 8,
+          "negative": 2,
+          "top1": 0.875,
+          "hit3": 0.875,
+          "mrr10": 0.890625,
+          "ndcg10": 0.9043982082417396,
+          "docTop1": 0.875,
+          "docHit3": 0.875,
+          "docMrr10": 0.9,
+          "falseNonemptyCount": 2
+        },
+        {
+          "threshold": 0.1,
+          "positive": 8,
+          "negative": 2,
+          "top1": 0.875,
+          "hit3": 0.875,
+          "mrr10": 0.875,
+          "ndcg10": 0.8649650986435234,
+          "docTop1": 0.875,
+          "docHit3": 0.875,
+          "docMrr10": 0.875,
+          "falseNonemptyCount": 1
+        }
+      ],
+      "median": 0.733656,
+      "p95": 0.7661042,
+      "n": 30,
+      "steady": {
+        "n": 20,
+        "median": 0.7287498,
+        "p95": 0.7508634
+      },
+      "paddingRatio": 1.4513653251842957,
+      "session": {
+        "load": 2.5898225999999998,
+        "first_run": 1.0786446,
+        "device": "directml",
+        "registration_failure_fatal": true
+      },
+      "timingValid": true,
+      "memory": {
+        "peakWorkingSet": 2267398144,
+        "sampledPeakPrivate": 4105572352
+      },
+      "baseline": "dml-b4",
+      "medianSpeedup": 1.0746156236710394,
+      "pairedMedianSpeedup": 1.027640291429986,
+      "maxLogitDelta": 0,
+      "losses": []
+    },
+    {
+      "dir": "spikes/inference/runs/quiet-combos/fp16-dml-b4-fixed",
+      "config": {
+        "name": "fp16-dml-b4-fixed",
+        "device": "directml",
+        "threads": 16,
+        "batch": 4,
+        "sorted": false,
+        "max_length": 512,
+        "repeats": 3,
+        "ids": [
+          "od-031",
+          "od-032",
+          "od-019",
+          "od-020",
+          "od-043",
+          "od-044",
+          "od-081",
+          "od-082",
+          "od-001",
+          "od-002"
+        ],
+        "spinning": null,
+        "model_path": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\inference\\data\\models\\ranged-model_fp16.onnx",
+        "tokenizer_dir": "C:\\Users\\arketov\\.bars\\models\\models--rozgo--bge-reranker-v2-m3\\snapshots\\fbd57b17b4db111a9d16813bb08b4c804fac18e9",
+        "fixed_padding": true
+      },
+      "manifest": {
+        "source": "C:\\Users\\arketov\\AppData\\Local/bars/bench-quality/overdrive-2026-10-18-v2",
+        "candidatesSource": "frozen stage9 fused rows; C30 first15",
+        "cases_blake3": "00708396a6cb872f6427d08df983d8776d5f491ada467a052602b20b07cac513",
+        "inputs_blake3": "f786af0916e6a7bda1eef981c3ab90af8fbc17094f73efc3893eccade116d58e",
+        "index_blake3": "0c96f95eed4d46dd3b2334b3b18c435c62cb1e1a5b5fa71f16234ecfaed74840",
+        "archives": [
+          {
+            "path": "docs/knowledge/quality-2026-10-18/train-rows.jsonl.gz",
+            "blake3": "c8284fa442cdc76ef8fc7553197dd30728f159b20f0833c5fed9893342e509cf"
+          },
+          {
+            "path": "docs/knowledge/quality-2026-10-18/test-rows.jsonl.gz",
+            "blake3": "0f24df6864ac4c697409dd3903cf79dd3e2bcee81c7d1ea33741cc1894aaa8b3"
+          }
+        ],
+        "count": 100
+      },
+      "quality": [
+        {
+          "threshold": 0,
+          "positive": 8,
+          "negative": 2,
+          "top1": 0.875,
+          "hit3": 0.875,
+          "mrr10": 0.890625,
+          "ndcg10": 0.9043982082417396,
+          "docTop1": 0.875,
+          "docHit3": 0.875,
+          "docMrr10": 0.9,
+          "falseNonemptyCount": 2
+        },
+        {
+          "threshold": 0.1,
+          "positive": 8,
+          "negative": 2,
+          "top1": 0.875,
+          "hit3": 0.875,
+          "mrr10": 0.875,
+          "ndcg10": 0.8649650986435234,
+          "docTop1": 0.875,
+          "docHit3": 0.875,
+          "docMrr10": 0.875,
+          "falseNonemptyCount": 1
+        }
+      ],
+      "median": 0.4254175,
+      "p95": 0.4587943,
+      "n": 30,
+      "steady": {
+        "n": 20,
+        "median": 0.4227685,
+        "p95": 0.4344716
+      },
+      "paddingRatio": 1.4513653251842957,
+      "session": {
+        "load": 4.0727986,
+        "first_run": 1.0098975,
+        "device": "directml",
+        "registration_failure_fatal": true
+      },
+      "timingValid": true,
+      "memory": {
+        "peakWorkingSet": 1767256064,
+        "sampledPeakPrivate": 2259095552
+      },
+      "baseline": "dml-b4",
+      "medianSpeedup": 1.8532340583074276,
+      "pairedMedianSpeedup": 1.756178963366309,
+      "maxLogitDelta": 0.028966426849365234,
+      "losses": []
+    },
+    {
+      "dir": "spikes/inference/runs/quiet-combos/fp16-dml-b16-fixed",
+      "config": {
+        "name": "fp16-dml-b16-fixed",
+        "device": "directml",
+        "threads": 16,
+        "batch": 16,
+        "sorted": false,
+        "max_length": 512,
+        "repeats": 3,
+        "ids": [
+          "od-031",
+          "od-032",
+          "od-019",
+          "od-020",
+          "od-043",
+          "od-044",
+          "od-081",
+          "od-082",
+          "od-001",
+          "od-002"
+        ],
+        "spinning": null,
+        "model_path": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\inference\\data\\models\\ranged-model_fp16.onnx",
+        "tokenizer_dir": "C:\\Users\\arketov\\.bars\\models\\models--rozgo--bge-reranker-v2-m3\\snapshots\\fbd57b17b4db111a9d16813bb08b4c804fac18e9",
+        "fixed_padding": true
+      },
+      "manifest": {
+        "source": "C:\\Users\\arketov\\AppData\\Local/bars/bench-quality/overdrive-2026-10-18-v2",
+        "candidatesSource": "frozen stage9 fused rows; C30 first15",
+        "cases_blake3": "00708396a6cb872f6427d08df983d8776d5f491ada467a052602b20b07cac513",
+        "inputs_blake3": "f786af0916e6a7bda1eef981c3ab90af8fbc17094f73efc3893eccade116d58e",
+        "index_blake3": "0c96f95eed4d46dd3b2334b3b18c435c62cb1e1a5b5fa71f16234ecfaed74840",
+        "archives": [
+          {
+            "path": "docs/knowledge/quality-2026-10-18/train-rows.jsonl.gz",
+            "blake3": "c8284fa442cdc76ef8fc7553197dd30728f159b20f0833c5fed9893342e509cf"
+          },
+          {
+            "path": "docs/knowledge/quality-2026-10-18/test-rows.jsonl.gz",
+            "blake3": "0f24df6864ac4c697409dd3903cf79dd3e2bcee81c7d1ea33741cc1894aaa8b3"
+          }
+        ],
+        "count": 100
+      },
+      "quality": [
+        {
+          "threshold": 0,
+          "positive": 8,
+          "negative": 2,
+          "top1": 0.875,
+          "hit3": 0.875,
+          "mrr10": 0.890625,
+          "ndcg10": 0.9043982082417396,
+          "docTop1": 0.875,
+          "docHit3": 0.875,
+          "docMrr10": 0.9,
+          "falseNonemptyCount": 2
+        },
+        {
+          "threshold": 0.1,
+          "positive": 8,
+          "negative": 2,
+          "top1": 0.875,
+          "hit3": 0.875,
+          "mrr10": 0.875,
+          "ndcg10": 0.8649650986435234,
+          "docTop1": 0.875,
+          "docHit3": 0.875,
+          "docMrr10": 0.875,
+          "falseNonemptyCount": 1
+        }
+      ],
+      "median": 0.3451082,
+      "p95": 0.3720943,
+      "n": 30,
+      "steady": {
+        "n": 20,
+        "median": 0.3451082,
+        "p95": 0.347933
+      },
+      "paddingRatio": 1.4513653251842957,
+      "session": {
+        "load": 3.1428426,
+        "first_run": 0.8733726,
+        "device": "directml",
+        "registration_failure_fatal": true
+      },
+      "timingValid": true,
+      "memory": {
+        "peakWorkingSet": 1767227392,
+        "sampledPeakPrivate": 2705784832
+      },
+      "baseline": "dml-b4",
+      "medianSpeedup": 2.2844957030867423,
+      "pairedMedianSpeedup": 2.2123723889043605,
+      "maxLogitDelta": 0.028966426849365234,
+      "losses": []
+    }
+  ]
+}

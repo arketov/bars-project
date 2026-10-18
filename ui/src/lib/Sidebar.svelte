@@ -5,6 +5,7 @@
   import { theme } from "./theme.svelte";
   import { filterTree, touchedModules } from "./tree";
   import TreeRow from "./TreeRow.svelte";
+  import Notifications from "./Notifications.svelte";
 
   let menuOpen = $state(false);
 
@@ -36,7 +37,7 @@
     if (app.project.state === "reindex_required") return ["Нужна переиндексация", ""];
     if (app.waitingOf(app.project.path) > 0) return [`Ждут ${app.waitingOf(app.project.path)} документов`, "поиск работает по готовому"];
     const problem = app.activity?.problems.find(p => p.project === app.project?.path);
-    if (problem) return [problemStatus(problem), "See indexing details"];
+    if (problem) return [problemStatus(problem), "Подробнее — в ходе индексации"];
     if (status?.updated_at) {
       const time = new Date(status.updated_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
       return ["Индекс актуален", `обновлён ${time}`];
@@ -72,6 +73,7 @@
   <div class="projwrap" class:open={menuOpen}>
     <button
       class="proj"
+      data-project-path={app.project?.path}
       onclick={(event) => {
         event.stopPropagation();
         menuOpen = !menuOpen;
@@ -92,6 +94,7 @@
           {@const d = projectDot(project, app.progressOf(project.path), app.waitingOf(project.path), app.activity?.problems.find(p => p.project === project.path))}
           <div
             class="pitem"
+            data-project-path={project.path}
             class:on={project.path === app.current}
             role="menuitem"
             tabindex="0"
@@ -148,6 +151,7 @@
         {@const d = projectDot(project, app.progressOf(project.path), app.waitingOf(project.path), app.activity?.problems.find(p => p.project === project.path))}
         <div
           class="litem"
+          data-project-path={project.path}
           class:on={project.path === app.current}
           role="button"
           tabindex="0"
@@ -173,6 +177,7 @@
       </span>
     </div>
     <div class="tools">
+      <Notifications />
       <button class="iconbtn" title="Светлая / тёмная тема" onclick={() => theme.toggle()}>
         <Icon name="moon" size={17} width={2} />
       </button>

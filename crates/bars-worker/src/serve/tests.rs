@@ -5,6 +5,31 @@ use std::time::Duration;
 use tempfile::TempDir;
 
 #[tokio::test]
+async fn default_worker_does_not_enable_client_profile_writes() {
+    let home = TempDir::new().unwrap();
+    let config = WorkerConfig::new(home.path().join(".bars"));
+    // Проверка до serve: старая версия не должна успеть записать настоящий профиль.
+    assert!(config.install_env.is_none());
+    let endpoint = Endpoint::named("default-worker-no-client-profile");
+    let (ready, receive) = tokio::sync::oneshot::channel();
+    let server = tokio::spawn(async move {
+        serve_with(config, &endpoint, FakeProvider::new("m1"), |handler| {
+            let _ = ready.send(handler);
+        })
+        .await
+    });
+    let handler = tokio::time::timeout(Duration::from_secs(5), receive)
+        .await
+        .unwrap()
+        .unwrap();
+    assert!(handler.worker().install_env().is_none());
+    // shutdown дожидается фоновых задач, включая проход обновления клиентов, если он был.
+    handler.worker().shutdown().await;
+    server.abort();
+    let _ = server.await;
+}
+
+#[tokio::test]
 #[allow(clippy::await_holding_lock)] // Барьер намеренно удерживает фоновую запись во время IPC.
 async fn blocked_refresh_does_not_delay_ipc_and_shutdown_waits_for_it() {
     let home = TempDir::new().unwrap();

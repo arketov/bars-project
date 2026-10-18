@@ -4,6 +4,8 @@ pub struct ExecutionInfo {
     pub backend: &'static str,
     pub actual: Option<&'static str>,
     pub fallback_reason: Option<String>,
+    pub precision: Option<&'static str>,
+    pub revision: Option<&'static str>,
 }
 
 pub(super) fn load_session<T, E: std::fmt::Display>(
@@ -16,7 +18,7 @@ pub(super) fn load_session<T, E: std::fmt::Display>(
             Ok(model) => Ok((model, super::Device::DirectMl, None)),
             Err(error) => {
                 let reason = error.to_string();
-                eprintln!("model: GPU unavailable ({reason}); using CPU");
+                log::warn!("Модель: GPU недоступен; используется CPU");
                 Ok((load(false)?, super::Device::Cpu, Some(reason)))
             }
         },

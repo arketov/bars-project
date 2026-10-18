@@ -1,0 +1,485 @@
+{
+  "schema": 1,
+  "root_pid": 28388,
+  "root_started_utc": "2026-10-18T06:12:53.2551020Z",
+  "root_exe_sha256": "9695CEB2B11D0A1CEA096D959F73184F6C757D65588D7DD8C34626121731B406",
+  "root_file_version": "0.1.0",
+  "requested_interval_ms": 1000,
+  "note": "Sequential non-atomic samples; interval excludes collection time. WS sum includes shared pages. Peaks predate sampling. Paging counters are system-wide.",
+  "rows": [
+    {
+      "utc": "2026-10-18T07:40:21.0927018Z",
+      "collection_ms": 12357.0134,
+      "phase": "passive-existing-process",
+      "processes": [
+        {
+          "pid": 28388,
+          "name": "bars",
+          "working_set_bytes": 215830528,
+          "private_bytes": 9087721472,
+          "peak_working_set_bytes": 2789175296
+        },
+        {
+          "pid": 10932,
+          "name": "conhost",
+          "working_set_bytes": 12288,
+          "private_bytes": 1490944,
+          "peak_working_set_bytes": 10534912
+        },
+        {
+          "pid": 11320,
+          "name": "msedgewebview2",
+          "working_set_bytes": 31776768,
+          "private_bytes": 41959424,
+          "peak_working_set_bytes": 152997888
+        },
+        {
+          "pid": 5456,
+          "name": "msedgewebview2",
+          "working_set_bytes": 946176,
+          "private_bytes": 2977792,
+          "peak_working_set_bytes": 21053440
+        },
+        {
+          "pid": 24180,
+          "name": "msedgewebview2",
+          "working_set_bytes": 35303424,
+          "private_bytes": 91500544,
+          "peak_working_set_bytes": 111390720
+        },
+        {
+          "pid": 24848,
+          "name": "msedgewebview2",
+          "working_set_bytes": 6930432,
+          "private_bytes": 11489280,
+          "peak_working_set_bytes": 44187648
+        },
+        {
+          "pid": 27980,
+          "name": "msedgewebview2",
+          "working_set_bytes": 1015808,
+          "private_bytes": 8585216,
+          "peak_working_set_bytes": 20664320
+        },
+        {
+          "pid": 7828,
+          "name": "msedgewebview2",
+          "working_set_bytes": 75952128,
+          "private_bytes": 59023360,
+          "peak_working_set_bytes": 120201216
+        }
+      ],
+      "system": {
+        "physical_total_bytes": 34242334720,
+        "available_bytes": 645603328,
+        "committed_bytes": 118147506176,
+        "commit_limit_bytes": 119765164032,
+        "pages_input_per_sec": 11621,
+        "pages_output_per_sec": 0,
+        "page_reads_per_sec": 3669,
+        "pagefiles": [
+          {
+            "allocated_mib": 81560,
+            "used_mib": 12747,
+            "peak_used_mib": 12759
+          }
+        ]
+      }
+    },
+    {
+      "utc": "2026-10-18T07:40:34.4950693Z",
+      "collection_ms": 1859.7635,
+      "phase": "passive-existing-process",
+      "processes": [
+        {
+          "pid": 28388,
+          "name": "bars",
+          "working_set_bytes": 214458368,
+          "private_bytes": 9087721472,
+          "peak_working_set_bytes": 2789175296
+        },
+        {
+          "pid": 10932,
+          "name": "conhost",
+          "working_set_bytes": 12288,
+          "private_bytes": 1490944,
+          "peak_working_set_bytes": 10534912
+        },
+        {
+          "pid": 11320,
+          "name": "msedgewebview2",
+          "working_set_bytes": 31805440,
+          "private_bytes": 41959424,
+          "peak_working_set_bytes": 152997888
+        },
+        {
+          "pid": 5456,
+          "name": "msedgewebview2",
+          "working_set_bytes": 946176,
+          "private_bytes": 2977792,
+          "peak_working_set_bytes": 21053440
+        },
+        {
+          "pid": 24180,
+          "name": "msedgewebview2",
+          "working_set_bytes": 29097984,
+          "private_bytes": 85479424,
+          "peak_working_set_bytes": 111390720
+        },
+        {
+          "pid": 24848,
+          "name": "msedgewebview2",
+          "working_set_bytes": 6930432,
+          "private_bytes": 11489280,
+          "peak_working_set_bytes": 44187648
+        },
+        {
+          "pid": 27980,
+          "name": "msedgewebview2",
+          "working_set_bytes": 1015808,
+          "private_bytes": 8585216,
+          "peak_working_set_bytes": 20664320
+        },
+        {
+          "pid": 7828,
+          "name": "msedgewebview2",
+          "working_set_bytes": 66985984,
+          "private_bytes": 59830272,
+          "peak_working_set_bytes": 120201216
+        }
+      ],
+      "system": {
+        "physical_total_bytes": 34242334720,
+        "available_bytes": 493101056,
+        "committed_bytes": 118391775232,
+        "commit_limit_bytes": 119765164032,
+        "pages_input_per_sec": 41039,
+        "pages_output_per_sec": 0,
+        "page_reads_per_sec": 5336,
+        "pagefiles": [
+          {
+            "allocated_mib": 81560,
+            "used_mib": 12739,
+            "peak_used_mib": 12759
+          }
+        ]
+      }
+    },
+    {
+      "utc": "2026-10-18T07:40:37.3635486Z",
+      "collection_ms": 2527.0566,
+      "phase": "passive-existing-process",
+      "processes": [
+        {
+          "pid": 28388,
+          "name": "bars",
+          "working_set_bytes": 214458368,
+          "private_bytes": 9087721472,
+          "peak_working_set_bytes": 2789175296
+        },
+        {
+          "pid": 10932,
+          "name": "conhost",
+          "working_set_bytes": 12288,
+          "private_bytes": 1490944,
+          "peak_working_set_bytes": 10534912
+        },
+        {
+          "pid": 11320,
+          "name": "msedgewebview2",
+          "working_set_bytes": 31805440,
+          "private_bytes": 41959424,
+          "peak_working_set_bytes": 152997888
+        },
+        {
+          "pid": 5456,
+          "name": "msedgewebview2",
+          "working_set_bytes": 946176,
+          "private_bytes": 2977792,
+          "peak_working_set_bytes": 21053440
+        },
+        {
+          "pid": 24180,
+          "name": "msedgewebview2",
+          "working_set_bytes": 26042368,
+          "private_bytes": 83976192,
+          "peak_working_set_bytes": 111390720
+        },
+        {
+          "pid": 24848,
+          "name": "msedgewebview2",
+          "working_set_bytes": 6844416,
+          "private_bytes": 11399168,
+          "peak_working_set_bytes": 44187648
+        },
+        {
+          "pid": 27980,
+          "name": "msedgewebview2",
+          "working_set_bytes": 1015808,
+          "private_bytes": 8585216,
+          "peak_working_set_bytes": 20664320
+        },
+        {
+          "pid": 7828,
+          "name": "msedgewebview2",
+          "working_set_bytes": 67026944,
+          "private_bytes": 59867136,
+          "peak_working_set_bytes": 120201216
+        }
+      ],
+      "system": {
+        "physical_total_bytes": 34242334720,
+        "available_bytes": 199065600,
+        "committed_bytes": 118628380672,
+        "commit_limit_bytes": 119765164032,
+        "pages_input_per_sec": 21248,
+        "pages_output_per_sec": 0,
+        "page_reads_per_sec": 4880,
+        "pagefiles": [
+          {
+            "allocated_mib": 81560,
+            "used_mib": 12723,
+            "peak_used_mib": 12759
+          }
+        ]
+      }
+    },
+    {
+      "utc": "2026-10-18T07:40:40.8968791Z",
+      "collection_ms": 1934.6974,
+      "phase": "passive-existing-process",
+      "processes": [
+        {
+          "pid": 28388,
+          "name": "bars",
+          "working_set_bytes": 212094976,
+          "private_bytes": 9087770624,
+          "peak_working_set_bytes": 2789175296
+        },
+        {
+          "pid": 10932,
+          "name": "conhost",
+          "working_set_bytes": 12288,
+          "private_bytes": 1490944,
+          "peak_working_set_bytes": 10534912
+        },
+        {
+          "pid": 11320,
+          "name": "msedgewebview2",
+          "working_set_bytes": 31805440,
+          "private_bytes": 41959424,
+          "peak_working_set_bytes": 152997888
+        },
+        {
+          "pid": 5456,
+          "name": "msedgewebview2",
+          "working_set_bytes": 946176,
+          "private_bytes": 2977792,
+          "peak_working_set_bytes": 21053440
+        },
+        {
+          "pid": 24180,
+          "name": "msedgewebview2",
+          "working_set_bytes": 23789568,
+          "private_bytes": 83976192,
+          "peak_working_set_bytes": 111390720
+        },
+        {
+          "pid": 24848,
+          "name": "msedgewebview2",
+          "working_set_bytes": 6844416,
+          "private_bytes": 11399168,
+          "peak_working_set_bytes": 44187648
+        },
+        {
+          "pid": 27980,
+          "name": "msedgewebview2",
+          "working_set_bytes": 1015808,
+          "private_bytes": 8585216,
+          "peak_working_set_bytes": 20664320
+        },
+        {
+          "pid": 7828,
+          "name": "msedgewebview2",
+          "working_set_bytes": 61112320,
+          "private_bytes": 59924480,
+          "peak_working_set_bytes": 120201216
+        }
+      ],
+      "system": {
+        "physical_total_bytes": 34242334720,
+        "available_bytes": 205438976,
+        "committed_bytes": 118936305664,
+        "commit_limit_bytes": 119765164032,
+        "pages_input_per_sec": 42570,
+        "pages_output_per_sec": 0,
+        "page_reads_per_sec": 5185,
+        "pagefiles": [
+          {
+            "allocated_mib": 81560,
+            "used_mib": 12715,
+            "peak_used_mib": 12759
+          }
+        ]
+      }
+    },
+    {
+      "utc": "2026-10-18T07:40:43.8347700Z",
+      "collection_ms": 1933.9538,
+      "phase": "passive-existing-process",
+      "processes": [
+        {
+          "pid": 28388,
+          "name": "bars",
+          "working_set_bytes": 212631552,
+          "private_bytes": 9087778816,
+          "peak_working_set_bytes": 2789175296
+        },
+        {
+          "pid": 10932,
+          "name": "conhost",
+          "working_set_bytes": 12288,
+          "private_bytes": 1490944,
+          "peak_working_set_bytes": 10534912
+        },
+        {
+          "pid": 11320,
+          "name": "msedgewebview2",
+          "working_set_bytes": 31805440,
+          "private_bytes": 41959424,
+          "peak_working_set_bytes": 152997888
+        },
+        {
+          "pid": 5456,
+          "name": "msedgewebview2",
+          "working_set_bytes": 946176,
+          "private_bytes": 2977792,
+          "peak_working_set_bytes": 21053440
+        },
+        {
+          "pid": 24180,
+          "name": "msedgewebview2",
+          "working_set_bytes": 23789568,
+          "private_bytes": 83976192,
+          "peak_working_set_bytes": 111390720
+        },
+        {
+          "pid": 24848,
+          "name": "msedgewebview2",
+          "working_set_bytes": 6844416,
+          "private_bytes": 11399168,
+          "peak_working_set_bytes": 44187648
+        },
+        {
+          "pid": 27980,
+          "name": "msedgewebview2",
+          "working_set_bytes": 1015808,
+          "private_bytes": 8585216,
+          "peak_working_set_bytes": 20664320
+        },
+        {
+          "pid": 7828,
+          "name": "msedgewebview2",
+          "working_set_bytes": 61140992,
+          "private_bytes": 59748352,
+          "peak_working_set_bytes": 120201216
+        }
+      ],
+      "system": {
+        "physical_total_bytes": 34242334720,
+        "available_bytes": 203157504,
+        "committed_bytes": 118822596608,
+        "commit_limit_bytes": 119765164032,
+        "pages_input_per_sec": 12966,
+        "pages_output_per_sec": 0,
+        "page_reads_per_sec": 4419,
+        "pagefiles": [
+          {
+            "allocated_mib": 81560,
+            "used_mib": 12675,
+            "peak_used_mib": 12759
+          }
+        ]
+      }
+    },
+    {
+      "utc": "2026-10-18T07:40:46.7710407Z",
+      "collection_ms": 2345.1867,
+      "phase": "passive-existing-process",
+      "processes": [
+        {
+          "pid": 28388,
+          "name": "bars",
+          "working_set_bytes": 212570112,
+          "private_bytes": 9087778816,
+          "peak_working_set_bytes": 2789175296
+        },
+        {
+          "pid": 10932,
+          "name": "conhost",
+          "working_set_bytes": 12288,
+          "private_bytes": 1490944,
+          "peak_working_set_bytes": 10534912
+        },
+        {
+          "pid": 11320,
+          "name": "msedgewebview2",
+          "working_set_bytes": 31805440,
+          "private_bytes": 41959424,
+          "peak_working_set_bytes": 152997888
+        },
+        {
+          "pid": 5456,
+          "name": "msedgewebview2",
+          "working_set_bytes": 946176,
+          "private_bytes": 2977792,
+          "peak_working_set_bytes": 21053440
+        },
+        {
+          "pid": 24180,
+          "name": "msedgewebview2",
+          "working_set_bytes": 23420928,
+          "private_bytes": 83976192,
+          "peak_working_set_bytes": 111390720
+        },
+        {
+          "pid": 24848,
+          "name": "msedgewebview2",
+          "working_set_bytes": 6844416,
+          "private_bytes": 11399168,
+          "peak_working_set_bytes": 44187648
+        },
+        {
+          "pid": 27980,
+          "name": "msedgewebview2",
+          "working_set_bytes": 1015808,
+          "private_bytes": 8585216,
+          "peak_working_set_bytes": 20664320
+        },
+        {
+          "pid": 7828,
+          "name": "msedgewebview2",
+          "working_set_bytes": 61157376,
+          "private_bytes": 60067840,
+          "peak_working_set_bytes": 120201216
+        }
+      ],
+      "system": {
+        "physical_total_bytes": 34242334720,
+        "available_bytes": 77066240,
+        "committed_bytes": 120693985280,
+        "commit_limit_bytes": 120846295040,
+        "pages_input_per_sec": 24800,
+        "pages_output_per_sec": 0,
+        "page_reads_per_sec": 4760,
+        "pagefiles": [
+          {
+            "allocated_mib": 83622,
+            "used_mib": 12670,
+            "peak_used_mib": 12759
+          }
+        ]
+      }
+    }
+  ]
+}

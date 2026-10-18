@@ -1,0 +1,24 @@
+{
+  "threads": 16,
+  "sorted": true,
+  "ids": [
+    "od-031",
+    "od-032",
+    "od-019",
+    "od-020",
+    "od-043",
+    "od-044",
+    "od-081",
+    "od-082",
+    "od-001",
+    "od-002"
+  ],
+  "batch": 8,
+  "repeats": 1,
+  "device": "directml",
+  "name": "embed-fp16-dml-b8",
+  "max_length": 8192,
+  "model_path": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\inference\\data\\embed-models\\ranged-model_fp16.onnx",
+  "tokenizer_dir": "C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\inference\\data\\embed-models",
+  "embedding_dynamic": false
+}

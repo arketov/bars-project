@@ -1,0 +1,5 @@
+{
+  "at": "2026-10-18T09:31:44.8327428Z",
+  "status": "invalidated",
+  "reason": "System memory pressure; monitor failed with Insufficient memory, global commit reached its limit. Do not interpret this pilot as a clean CPU-thread speed comparison."
+}

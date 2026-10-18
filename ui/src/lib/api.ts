@@ -3,6 +3,13 @@
 // в браузере) вызовы отвечает заглушка из `mock.ts`.
 
 import { BarsError } from "./types";
+import type { McpStatistic } from "./mcp-statistics";
+
+export async function mcpStatistics(): Promise<McpStatistic[]> {
+  if (!inTauri()) return [];
+  const { invoke } = await import("@tauri-apps/api/core");
+  return invoke<McpStatistic[]>("mcp_statistics");
+}
 
 export const inTauri = (): boolean => typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -61,6 +68,24 @@ export async function restartApp(): Promise<void> {
 /** Домашняя папка bars (`~/.bars`): настройки, модели, логи. */
 export async function barsDir(): Promise<string | null> {
   return shell<string>("bars_dir");
+}
+
+export type LogLevel = "debug" | "info" | "warn" | "error";
+export interface LogEntry { time: string; pid: number; level: LogLevel; target: string; message: string }
+export interface LogSnapshot { directory: string; entries: LogEntry[]; skipped: number; total: number; write_error: boolean }
+
+export async function workerLogs(level: LogLevel): Promise<LogSnapshot> {
+  if (!inTauri()) {
+    // Явная фикстура: просмотр в браузере не читает журнал установленного bars.
+    const entries: LogEntry[] = [
+      { time: "2026-10-18T12:20:03Z", pid: 1234, level: "error", target: "bars_worker", message: "Индексация завершилась ошибкой; подробности — в отчёте задания." },
+      { time: "2026-10-18T12:20:02Z", pid: 1234, level: "warn", target: "bars_core::models", message: "rerank: подозрительные логиты; max ниже −8." },
+      { time: "2026-10-18T12:20:01Z", pid: 1234, level: "info", target: "bars_worker", message: "Воркер готов принимать вызовы." },
+    ];
+    const order: LogLevel[] = ["debug", "info", "warn", "error"];
+    return { directory: "~/.bars/logs (макет)", entries: entries.filter(entry => order.indexOf(entry.level) >= order.indexOf(level)), skipped: 0, total: entries.length, write_error: false };
+  }
+  return (await shell<LogSnapshot>("worker_logs", { level }))!;
 }
 
 export async function copyText(text: string): Promise<void> {

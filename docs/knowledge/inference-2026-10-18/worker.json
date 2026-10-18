@@ -1,0 +1,69 @@
+{
+  "kind": "real-worker-ipc",
+  "limitation": "8 serial, 2/4 concurrent and 8 index-overlap requests per variant; not a general latency SLA",
+  "runs": [
+    {
+      "name": "production",
+      "n": 22,
+      "timingValid": true,
+      "modes": [
+        {
+          "mode": "serial",
+          "n": 8,
+          "median": 0.6921798,
+          "max": 0.8242755
+        },
+        {
+          "mode": "concurrent-2",
+          "n": 2,
+          "median": 0.7939583,
+          "max": 1.3432941999999999
+        },
+        {
+          "mode": "concurrent-4",
+          "n": 4,
+          "median": 1.2358663,
+          "max": 2.4903763
+        },
+        {
+          "mode": "during-index",
+          "n": 8,
+          "median": 1.0750677,
+          "max": 1.2637596
+        }
+      ]
+    },
+    {
+      "name": "final-fp16-b16",
+      "n": 22,
+      "timingValid": true,
+      "modes": [
+        {
+          "mode": "serial",
+          "n": 8,
+          "median": 0.469661,
+          "max": 0.5003781
+        },
+        {
+          "mode": "concurrent-2",
+          "n": 2,
+          "median": 0.4564899,
+          "max": 0.7802612
+        },
+        {
+          "mode": "concurrent-4",
+          "n": 4,
+          "median": 0.7723498,
+          "max": 1.4000466
+        },
+        {
+          "mode": "during-index",
+          "n": 8,
+          "median": 0.5772469,
+          "max": 0.7333712
+        }
+      ]
+    }
+  ],
+  "losses": []
+}

@@ -1,0 +1,523 @@
+{
+  "method": "Offline subset simulation from frozen Stage9 C30 K15 scores; batching numerical changes and latency unmeasured",
+  "questions": 100,
+  "inputSha256": "435f46fdcf21bfc12e7a52081e1fc7c335962557575b4c095f65fd23c4f0d346",
+  "variants": [
+    {
+      "spec": {
+        "k": 3
+      },
+      "meanPairs": 3,
+      "positive": 80,
+      "qualityAtZero": {
+        "top1": 0.6625,
+        "hit3": 0.7625,
+        "mrr10": 0.7104166666666667
+      },
+      "negativeFalse": {
+        "0": 20,
+        "0.1": 1
+      },
+      "losses": [
+        {
+          "id": "od-001",
+          "threshold": 0,
+          "metrics": [
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-003",
+          "threshold": 0,
+          "metrics": [
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-007",
+          "threshold": 0,
+          "metrics": [
+            "top1",
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-007",
+          "threshold": 0.1,
+          "metrics": [
+            "top1",
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-013",
+          "threshold": 0,
+          "metrics": [
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-015",
+          "threshold": 0,
+          "metrics": [
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-015",
+          "threshold": 0.1,
+          "metrics": [
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-017",
+          "threshold": 0,
+          "metrics": [
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-034",
+          "threshold": 0,
+          "metrics": [
+            "top1",
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-034",
+          "threshold": 0.1,
+          "metrics": [
+            "top1",
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-041",
+          "threshold": 0,
+          "metrics": [
+            "top1",
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-042",
+          "threshold": 0,
+          "metrics": [
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-048",
+          "threshold": 0,
+          "metrics": [
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-048",
+          "threshold": 0.1,
+          "metrics": [
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-051",
+          "threshold": 0,
+          "metrics": [
+            "top1",
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-051",
+          "threshold": 0.1,
+          "metrics": [
+            "top1",
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-052",
+          "threshold": 0,
+          "metrics": [
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-055",
+          "threshold": 0,
+          "metrics": [
+            "top1",
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-058",
+          "threshold": 0,
+          "metrics": [
+            "mrr10"
+          ]
+        }
+      ]
+    },
+    {
+      "spec": {
+        "k": 5
+      },
+      "meanPairs": 5,
+      "positive": 80,
+      "qualityAtZero": {
+        "top1": 0.625,
+        "hit3": 0.8,
+        "mrr10": 0.7125000000000001
+      },
+      "negativeFalse": {
+        "0": 20,
+        "0.1": 1
+      },
+      "losses": [
+        {
+          "id": "od-001",
+          "threshold": 0,
+          "metrics": [
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-007",
+          "threshold": 0,
+          "metrics": [
+            "top1",
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-007",
+          "threshold": 0.1,
+          "metrics": [
+            "top1",
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-015",
+          "threshold": 0,
+          "metrics": [
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-015",
+          "threshold": 0.1,
+          "metrics": [
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-034",
+          "threshold": 0,
+          "metrics": [
+            "top1",
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-034",
+          "threshold": 0.1,
+          "metrics": [
+            "top1",
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-041",
+          "threshold": 0,
+          "metrics": [
+            "top1",
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-042",
+          "threshold": 0,
+          "metrics": [
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-051",
+          "threshold": 0,
+          "metrics": [
+            "top1",
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-051",
+          "threshold": 0.1,
+          "metrics": [
+            "top1",
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-055",
+          "threshold": 0,
+          "metrics": [
+            "top1",
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-058",
+          "threshold": 0,
+          "metrics": [
+            "mrr10"
+          ]
+        }
+      ]
+    },
+    {
+      "spec": {
+        "k": 8
+      },
+      "meanPairs": 8,
+      "positive": 80,
+      "qualityAtZero": {
+        "top1": 0.65,
+        "hit3": 0.825,
+        "mrr10": 0.743125
+      },
+      "negativeFalse": {
+        "0": 20,
+        "0.1": 1
+      },
+      "losses": [
+        {
+          "id": "od-001",
+          "threshold": 0,
+          "metrics": [
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-015",
+          "threshold": 0,
+          "metrics": [
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-015",
+          "threshold": 0.1,
+          "metrics": [
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-055",
+          "threshold": 0,
+          "metrics": [
+            "top1",
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-058",
+          "threshold": 0,
+          "metrics": [
+            "mrr10"
+          ]
+        }
+      ]
+    },
+    {
+      "spec": {
+        "k": 10
+      },
+      "meanPairs": 10,
+      "positive": 80,
+      "qualityAtZero": {
+        "top1": 0.65,
+        "hit3": 0.8125,
+        "mrr10": 0.7449305555555555
+      },
+      "negativeFalse": {
+        "0": 20,
+        "0.1": 1
+      },
+      "losses": [
+        {
+          "id": "od-001",
+          "threshold": 0,
+          "metrics": [
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-015",
+          "threshold": 0,
+          "metrics": [
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-015",
+          "threshold": 0.1,
+          "metrics": [
+            "hit3",
+            "mrr10"
+          ]
+        },
+        {
+          "id": "od-055",
+          "threshold": 0,
+          "metrics": [
+            "top1",
+            "hit3",
+            "mrr10"
+          ]
+        }
+      ]
+    },
+    {
+      "spec": {
+        "k": 15
+      },
+      "meanPairs": 15,
+      "positive": 80,
+      "qualityAtZero": {
+        "top1": 0.65,
+        "hit3": 0.8375,
+        "mrr10": 0.7527728174603175
+      },
+      "negativeFalse": {
+        "0": 20,
+        "0.1": 1
+      },
+      "losses": []
+    },
+    {
+      "spec": {
+        "cutoff": 0.1
+      },
+      "meanPairs": 15,
+      "positive": 80,
+      "qualityAtZero": {
+        "top1": 0.65,
+        "hit3": 0.8375,
+        "mrr10": 0.7527728174603175
+      },
+      "negativeFalse": {
+        "0": 20,
+        "0.1": 1
+      },
+      "losses": []
+    },
+    {
+      "spec": {
+        "cutoff": 0.2
+      },
+      "meanPairs": 15,
+      "positive": 80,
+      "qualityAtZero": {
+        "top1": 0.65,
+        "hit3": 0.8375,
+        "mrr10": 0.7527728174603175
+      },
+      "negativeFalse": {
+        "0": 20,
+        "0.1": 1
+      },
+      "losses": []
+    },
+    {
+      "spec": {
+        "cutoff": 0.3
+      },
+      "meanPairs": 14.99,
+      "positive": 80,
+      "qualityAtZero": {
+        "top1": 0.65,
+        "hit3": 0.8375,
+        "mrr10": 0.7527728174603175
+      },
+      "negativeFalse": {
+        "0": 20,
+        "0.1": 1
+      },
+      "losses": []
+    },
+    {
+      "spec": {
+        "cutoff": 0.4
+      },
+      "meanPairs": 14.37,
+      "positive": 80,
+      "qualityAtZero": {
+        "top1": 0.65,
+        "hit3": 0.8375,
+        "mrr10": 0.7529960317460318
+      },
+      "negativeFalse": {
+        "0": 20,
+        "0.1": 1
+      },
+      "losses": []
+    },
+    {
+      "spec": {
+        "cutoff": 0.5
+      },
+      "meanPairs": 9.85,
+      "positive": 80,
+      "qualityAtZero": {
+        "top1": 0.675,
+        "hit3": 0.85,
+        "mrr10": 0.7678769841269842
+      },
+      "negativeFalse": {
+        "0": 18,
+        "0.1": 1
+      },
+      "losses": [
+        {
+          "id": "od-003",
+          "threshold": 0,
+          "metrics": [
+            "hit3",
+            "mrr10"
+          ]
+        }
+      ]
+    }
+  ]
+}

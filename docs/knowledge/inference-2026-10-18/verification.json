@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-18",
+  "tests": [
+    {
+      "command": "cargo test -p bars-core --lib --quiet",
+      "passed": 197,
+      "failed": 0,
+      "logSha256": "f3b5cf326b74be2def43046fcda6f551e208050a5fd2ea4f16b05b490fc188d9"
+    },
+    {
+      "command": "cargo test -p bars-worker --lib --quiet",
+      "passed": 142,
+      "failed": 0,
+      "logSha256": "8357bc84b4a80b933c4be6bd95d0d26c8ed25843508e9173d6656f6ba2529aea"
+    },
+    {
+      "command": "cargo test -p bars-core --test builtin_models builtin_rerank_scores_are_probabilities_in_input_order -- --nocapture",
+      "passed": 1,
+      "failed": 0,
+      "logSha256": "29c52efc7500f620523ca82e8abceb60887b69fa81a80421a1a9d7317694c03c"
+    }
+  ],
+  "review": "Manual review: pinned artifacts, GPU/CPU cache and fallback, bounded allocation backoff, unchanged K/length/threshold, output order/finite checks; parallel source drift retained explicitly",
+  "notAccepted": [
+    "fresh whole-artifact network download",
+    "small-VRAM physical backoff",
+    "laptop/ISS-03",
+    "natural 5000-chunk corpus",
+    "FP16 embedding retrieval",
+    "later lifecycle edits from other session"
+  ]
+}

@@ -1,0 +1,3 @@
+{"utc":"2026-10-18T08:58:34.7777587Z","mode":"rerank","device":"cpu","round":1,"available_bytes":17514856448,"free_commit_bytes":37161549824,"ready":true}
+{"utc":"2026-10-18T08:58:37.1726929Z","mode":"rerank","device":"cpu","round":1,"available_bytes":17318023168,"free_commit_bytes":36886646784,"ready":true}
+{"utc":"2026-10-18T08:58:39.4633899Z","mode":"rerank","device":"cpu","round":1,"available_bytes":16935350272,"free_commit_bytes":36511961088,"ready":true}

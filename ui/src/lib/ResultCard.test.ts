@@ -26,13 +26,13 @@ describe("ResultCard score bars", () => {
     const meters = Array.from(host.querySelectorAll('[role="meter"]'));
     expect(meters.map(m => m.getAttribute("aria-valuenow"))).toEqual(["63", "60", "62"]);
     expect(meters.map(m => (m.firstElementChild as HTMLElement).style.width)).toEqual(["63%", "60%", "62%"]);
-    expect(meters.every(m => m.getAttribute("aria-label") === "Cosine similarity")).toBe(true);
+    expect(meters.every(m => m.getAttribute("aria-label") === "Косинусная близость")).toBe(true);
     expect(host.textContent).not.toMatch(/частично|хорошо подходит|слабо/);
-    expect(host.querySelector(".fit")?.getAttribute("title")).toContain("similarity may increase");
+    expect(host.querySelector(".fit")?.getAttribute("title")).toContain("близость может возрастать");
   });
 
   it("labels rerank and its cosine fallback by the actual hit kind", () => {
-    for (const [kind, label] of [["rerank", "Rerank score"], ["cosine", "Cosine similarity"]] as const) {
+    for (const [kind, label] of [["rerank", "Оценка rerank"], ["cosine", "Косинусная близость"]] as const) {
       const host = document.createElement("div");
       show(host, 0.18, kind, 1);
       expect(host.querySelector('[role="meter"]')?.getAttribute("aria-label")).toBe(label);

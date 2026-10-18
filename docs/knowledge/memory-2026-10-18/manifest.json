@@ -1,0 +1,21 @@
+{
+  "utc": "2026-10-18T08:45:51.6513429Z",
+  "git_head": "5169c5e9124e0b50a84002d07c7d2a18742acf16",
+  "os": {
+    "Caption": "Майкрософт Windows 11 Pro",
+    "Version": "10.0.26300",
+    "TotalVisibleMemorySize": 33439780
+  },
+  "cpu": {
+    "Name": "11th Gen Intel(R) Core(TM) i7-11700KF @ 3.60GHz",
+    "NumberOfCores": 8,
+    "NumberOfLogicalProcessors": 16
+  },
+  "gpu": {
+    "Name": "NVIDIA GeForce RTX 3090",
+    "DriverVersion": "32.0.16.1692"
+  },
+  "fixture_sha256": "BD504519F9A25A4CA26F0E42AF7F551C496B54352DADB5475E8D4D71C55DAFB4",
+  "lock_sha256": "1E32FDFB5E07809284300B36FDF7B93FE29F68A119B9C5C55F739F822E2130FA",
+  "hf_home_exported": false
+}

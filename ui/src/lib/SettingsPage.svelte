@@ -3,9 +3,12 @@
   import { app } from "./app.svelte";
   import { copyText } from "./api";
   import Icon from "./Icon.svelte";
+  import Notifications from "./Notifications.svelte";
   import ProviderFields from "./ProviderFields.svelte";
   import DevicePicker from "./DevicePicker.svelte";
   import ScoreInput from "./ScoreInput.svelte";
+  import LogsPage from "./LogsPage.svelte";
+  import McpStatisticsPage from "./McpStatisticsPage.svelte";
   import { settings } from "./settings.svelte";
   import { clone } from "./settings-logic";
   import { theme, type ThemePref } from "./theme.svelte";
@@ -13,8 +16,6 @@
 
   onMount(() => {
     void settings.load();
-    const timer = setInterval(() => void settings.loadModels(), 2000);
-    return () => clearInterval(timer);
   });
 
   const TABS = [
@@ -24,6 +25,8 @@
     ["clients", "Клиенты"],
     ["system", "Запуск"],
     ["look", "Оформление"],
+    ["logs", "Логи"],
+    ["mcp-statistics", "Статистика MCP"],
   ] as const;
   const SOURCES: [ModelSourceName, string][] = [
     ["builtin", "Встроенная"],
@@ -101,7 +104,7 @@
         </button>
       {/each}
     </div>
-    <div class="sfoot"><span class="mono file">{settings.file || "~/.bars/settings.toml"}</span></div>
+    <div class="sfoot"><span class="mono file">{settings.file || "~/.bars/settings.toml"}</span><Notifications /></div>
   </aside>
 
   <main>
@@ -113,7 +116,11 @@
         <div class="note warn"><Icon name="warn" size={16} /><span>{warning}</span></div>
       {/each}
 
-      {#if draft && tab === "models"}
+      {#if tab === "mcp-statistics"}
+        <McpStatisticsPage />
+      {:else if tab === "logs"}
+        <LogsPage />
+      {:else if draft && tab === "models"}
         <h1>Модели</h1>
         <p class="lead">Чем bars превращает документы и запросы в векторы и как переоценивает кандидатов.</p>
 
@@ -193,7 +200,7 @@
         </div>
 
         <div class="group">
-          <div class="ghead"><h2>Model devices</h2></div>
+          <div class="ghead"><h2>Устройства моделей</h2></div>
           <div class="gbody">
             <h3>Embed</h3>
             <DevicePicker bind:value={draft.embed.accelerator} source={draft.embed.source} role="Embed" cpuOnly={settings.models?.embed.find(m => m.id === draft?.embed.model)?.backend === "candle"} runtime={settings.models?.runtime?.embed} />
@@ -329,7 +336,7 @@
   </main>
 </div>
 
-{#if tab !== "look" && tab !== "clients" && tab !== "system"}
+{#if tab !== "look" && tab !== "clients" && tab !== "system" && tab !== "logs"}
   <div class="savebar">
     <span class="grow">
       {#if hasErrors}Есть ошибки в значениях — исправьте их, чтобы сохранить{:else if settings.dirty}Изменения не сохранены{:else}Настройки сохранены в <span class="mono">{settings.file}</span>{/if}

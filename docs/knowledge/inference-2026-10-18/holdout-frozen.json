@@ -1,0 +1,7 @@
+{
+  "scope": "small additional holdout; same corpus, overlapping product topics; created before precision/length variant scores; not broad independent human validation",
+  "negative": 4,
+  "positive": 10,
+  "frozen_at": "2026-10-18T09:16:55.0549771Z",
+  "sha256": "1FD37FAAEC33D24CBC476811418A899C41DECB99D07D2D960A4A4C60834730D0"
+}

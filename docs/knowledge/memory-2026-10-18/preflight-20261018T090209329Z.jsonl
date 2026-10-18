@@ -1,0 +1,6 @@
+{"utc":"2026-10-18T09:02:09.7230202Z","mode":"both","device":"cpu","round":1,"available_bytes":15568007168,"free_commit_bytes":32997232640,"ready":true}
+{"utc":"2026-10-18T09:02:12.0025986Z","mode":"both","device":"cpu","round":1,"available_bytes":15593992192,"free_commit_bytes":33000165376,"ready":true}
+{"utc":"2026-10-18T09:02:14.2750100Z","mode":"both","device":"cpu","round":1,"available_bytes":15256231936,"free_commit_bytes":32667402240,"ready":true}
+{"utc":"2026-10-18T09:03:26.4514173Z","mode":"both","device":"auto","round":1,"available_bytes":13767147520,"free_commit_bytes":31926915072,"ready":true}
+{"utc":"2026-10-18T09:03:28.7438314Z","mode":"both","device":"auto","round":1,"available_bytes":13778194432,"free_commit_bytes":31939928064,"ready":true}
+{"utc":"2026-10-18T09:03:31.0230334Z","mode":"both","device":"auto","round":1,"available_bytes":13761536000,"free_commit_bytes":31904681984,"ready":true}

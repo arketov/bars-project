@@ -1,11 +1,25 @@
 /** Логика контекстного меню окна (ISS-07): какие пункты показать и как их выполнить. */
 
-export type MenuAction = "copy" | "paste" | "selectAll" | "open" | "editors" | "editor" | "reveal" | "path" | "check";
+export type MenuAction = "copy" | "paste" | "selectAll" | "open" | "editors" | "editor" | "reveal" | "path" | "check" | "deleteProject" | "checkProject";
 
 export interface MenuItem {
   action: MenuAction;
   label: string;
   editor?: string;
+  disabled?: boolean;
+  hint?: string;
+}
+
+export function projectAt(target: EventTarget | null): string | null {
+  const element = target instanceof Element ? target.closest<HTMLElement>("[data-project-path]") : null;
+  return element?.dataset.projectPath || null;
+}
+
+export function projectItems(): MenuItem[] {
+  return [
+    { action: "deleteProject", label: "Удалить проект" },
+    { action: "checkProject", label: "Проверить индекс" },
+  ];
 }
 
 /** Ближайшая строка файла либо карточка результата; папки собственного меню не имеют. */

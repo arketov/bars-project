@@ -1,0 +1,6 @@
+rerank: загружен на DirectMl; файлы модели: config.json 0.0 МБ; special_tokens_map.json 0.0 МБ; tokenizer.json 16.3 МБ; tokenizer_config.json 0.0 МБ; model.onnx 0.1 МБ; model.onnx.data 2165.9 МБ
+rerank: DirectMl, пар 15, логит от -3.428 до 4.264
+rerank: DirectMl, пар 15, логит от -3.428 до 4.264
+rerank: DirectMl, пар 15, логит от -3.428 до 4.264
+rerank: загружен на DirectMl; файлы модели: config.json 0.0 МБ; special_tokens_map.json 0.0 МБ; tokenizer.json 16.3 МБ; tokenizer_config.json 0.0 МБ; model.onnx 0.1 МБ; model.onnx.data 2165.9 МБ
+rerank: DirectMl, пар 15, логит от -3.428 до 4.264

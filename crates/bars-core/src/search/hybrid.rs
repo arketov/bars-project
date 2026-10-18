@@ -9,7 +9,8 @@ use rusqlite::types::Value;
 use super::params::{AppliedParams, ScoreKind, SearchRequest, SearchSettings};
 use crate::models::{EmbedError, Embedder, RerankError, Reranker};
 use crate::storage::stem::TextStemmer;
-use crate::storage::{Compatibility, Index, StorageError, decode_vector};
+use crate::storage::{Compatibility, Index, StorageError};
+use super::vector_top::VectorTop;
 
 /// Константа Reciprocal Rank Fusion: оценка кандидата — сумма `1 / (RRF_K + место)` по спискам.
 const RRF_K: f32 = 60.0;
@@ -101,7 +102,7 @@ pub fn search(
         Some(identifiers) => scope.text_candidates(index, identifiers, candidates)?,
         None => Vec::new(),
     };
-    let cosines = scope.cosines(index, &query_vector)?;
+    let cosines = scope.cosines(index, &query_vector, candidates, &text_ids, &exact_ids)?;
     let vector_ids = top_by_score(&cosines, candidates);
     let fused = exact_first(&exact_ids, fuse(&text_ids, &vector_ids));
 
@@ -156,12 +157,12 @@ pub fn candidate_trace(
     let scope = Scope::build(index, request)?;
     let mut vector = query_vector.to_vec();
     normalize(&mut vector);
-    let cosines = scope.cosines(index, &vector)?;
     let text = scope.text_candidates(index, &query.all, candidates)?;
     let exact = match query.identifiers {
         Some(ref identifiers) => scope.text_candidates(index, identifiers, candidates)?,
         None => Vec::new(),
     };
+    let cosines = scope.cosines(index, &vector, candidates, &text, &exact)?;
     let vector = top_by_score(&cosines, candidates);
     let fused = exact_first(&exact, fuse(&text, &vector));
     let mut lists = [
@@ -469,6 +470,9 @@ impl Scope {
         &self,
         index: &Index,
         query_vector: &[f32],
+        candidates: usize,
+        text: &[i64],
+        exact: &[i64],
     ) -> Result<HashMap<i64, f32>, SearchError> {
         let sql = format!(
             "SELECT c.id, v.vector
@@ -480,21 +484,26 @@ impl Scope {
         );
         let mut statement = index.conn().prepare(&sql)?;
         let mut rows = statement.query(params_from_iter(&self.params))?;
-        let mut scores = HashMap::new();
+        let mut scores = VectorTop::new(candidates, text.iter().chain(exact).copied());
         while let Some(row) = rows.next()? {
             let id: i64 = row.get(0)?;
-            let blob: Vec<u8> = row.get(1)?;
-            let vector = decode_vector(&blob);
-            if vector.len() != query_vector.len() {
+            let value = row.get_ref(1)?;
+            let blob = match value {
+                rusqlite::types::ValueRef::Blob(blob) => blob,
+                other => return Err(rusqlite::Error::InvalidColumnType(1, "vector".into(), other.data_type()).into()),
+            };
+            let dim = blob.len() / size_of::<f32>();
+            if dim != query_vector.len() {
                 return Err(SearchError::VectorSize {
                     expected: query_vector.len(),
-                    got: vector.len(),
+                    got: dim,
                 });
             }
-            let dot: f32 = vector.iter().zip(query_vector).map(|(a, b)| a * b).sum();
-            scores.insert(id, dot);
+            let dot: f32 = blob.chunks_exact(4).zip(query_vector)
+                .map(|(bytes, b)| f32::from_le_bytes(bytes.try_into().unwrap()) * b).sum();
+            scores.push(id, dot);
         }
-        Ok(scores)
+        Ok(scores.finish())
     }
 }
 

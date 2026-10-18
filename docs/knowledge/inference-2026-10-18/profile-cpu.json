@@ -1,0 +1,137 @@
+{
+  "config": {
+    "name": "cpu-t16-b4",
+    "device": "cpu",
+    "threads": 16,
+    "batch": 4,
+    "sorted": false,
+    "max_length": 512,
+    "repeats": 3,
+    "ids": [
+      "od-031",
+      "od-032",
+      "od-019",
+      "od-020",
+      "od-043",
+      "od-044",
+      "od-081",
+      "od-082",
+      "od-001",
+      "od-002"
+    ],
+    "spinning": null,
+    "model_path": null,
+    "tokenizer_dir": null
+  },
+  "load": 4.0322136,
+  "profileRows": 12,
+  "providers": {
+    "CPUExecutionProvider": {
+      "events": 3480,
+      "microseconds": 58230031
+    }
+  },
+  "operators": [
+    {
+      "name": "CPUExecutionProvider/MatMul",
+      "events": 864,
+      "microseconds": 32792232
+    },
+    {
+      "name": "CPUExecutionProvider/Attention",
+      "events": 288,
+      "microseconds": 19282391
+    },
+    {
+      "name": "CPUExecutionProvider/FastGelu",
+      "events": 288,
+      "microseconds": 2438679
+    },
+    {
+      "name": "CPUExecutionProvider/Add",
+      "events": 1188,
+      "microseconds": 1569567
+    },
+    {
+      "name": "CPUExecutionProvider/LayerNormalization",
+      "events": 588,
+      "microseconds": 1482819
+    },
+    {
+      "name": "CPUExecutionProvider/Gather",
+      "events": 60,
+      "microseconds": 633973
+    },
+    {
+      "name": "CPUExecutionProvider/Cast",
+      "events": 36,
+      "microseconds": 6059
+    },
+    {
+      "name": "CPUExecutionProvider/Equal",
+      "events": 24,
+      "microseconds": 5471
+    },
+    {
+      "name": "CPUExecutionProvider/ReduceSum",
+      "events": 12,
+      "microseconds": 4576
+    },
+    {
+      "name": "CPUExecutionProvider/FusedGemm",
+      "events": 12,
+      "microseconds": 3873
+    },
+    {
+      "name": "CPUExecutionProvider/Slice",
+      "events": 12,
+      "microseconds": 3261
+    },
+    {
+      "name": "CPUExecutionProvider/Unsqueeze",
+      "events": 12,
+      "microseconds": 1323
+    },
+    {
+      "name": "CPUExecutionProvider/Where",
+      "events": 12,
+      "microseconds": 1000
+    },
+    {
+      "name": "CPUExecutionProvider/Expand",
+      "events": 12,
+      "microseconds": 972
+    },
+    {
+      "name": "CPUExecutionProvider/Not",
+      "events": 12,
+      "microseconds": 911
+    },
+    {
+      "name": "CPUExecutionProvider/CumSum",
+      "events": 12,
+      "microseconds": 789
+    },
+    {
+      "name": "CPUExecutionProvider/Gemm",
+      "events": 12,
+      "microseconds": 685
+    },
+    {
+      "name": "CPUExecutionProvider/Shape",
+      "events": 12,
+      "microseconds": 545
+    },
+    {
+      "name": "CPUExecutionProvider/Reshape",
+      "events": 12,
+      "microseconds": 460
+    },
+    {
+      "name": "CPUExecutionProvider/Mul",
+      "events": 12,
+      "microseconds": 445
+    }
+  ],
+  "scope": "diagnostic trace; event durations are not uninstrumented benchmark latency or GPU hardware counters"
+}

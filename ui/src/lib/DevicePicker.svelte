@@ -4,25 +4,29 @@
     value: "auto" | "cpu"; source: ModelSourceName; cpuOnly?: boolean;
     runtime?: ModelRuntime; role: string;
   } = $props();
+  const states: Record<NonNullable<ModelRuntime>["state"], string> = {
+    unloaded: "не загружена", loading: "загружается", ready: "готова", failed: "ошибка загрузки",
+  };
 </script>
 
-<section aria-label={`${role} device`}>
+<section aria-label={`Устройство ${role}`}>
   {#if source !== "builtin"}
-    <p>Device managed by the provider · server device unknown</p>
+    <p>Устройством управляет провайдер · устройство сервера неизвестно</p>
   {:else if cpuOnly}
-    <p>CPU only · this model backend does not support GPU</p>
+    <p>Только CPU · этот движок модели не поддерживает GPU</p>
   {:else}
     <div class="choices">
-      <button class:on={value === "auto"} aria-pressed={value === "auto"} onclick={() => value = "auto"}>GPU if available</button>
-      <button class:on={value === "cpu"} aria-pressed={value === "cpu"} onclick={() => value = "cpu"}>CPU only</button>
+      <button class:on={value === "auto"} aria-pressed={value === "auto"} onclick={() => value = "auto"}>GPU, если доступен</button>
+      <button class:on={value === "cpu"} aria-pressed={value === "cpu"} onclick={() => value = "cpu"}>Только CPU</button>
     </div>
-    <small>Changing the device does not require reindexing. Applies after Save.</small>
+    <small>Смена устройства не требует переиндексации. Применяется после «Сохранить».</small>
   {/if}
   {#if runtime}
-    <p class="runtime">Current configuration: {runtime.model} · {runtime.state}
+    <p class="runtime">Текущая конфигурация: {runtime.model} · {states[runtime.state]}
       {#if runtime.actual} · <b>{runtime.actual === "directml" ? "DirectML" : "CPU"}</b>{/if}
+      {#if runtime.precision} · {runtime.precision.toUpperCase()}{/if}
     </p>
-    {#if runtime.fallback_reason}<p class="fallback">GPU unavailable; using CPU. {runtime.fallback_reason}</p>{/if}
+    {#if runtime.fallback_reason}<p class="fallback">GPU недоступен; используется CPU. {runtime.fallback_reason}</p>{/if}
   {/if}
 </section>
 

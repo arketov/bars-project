@@ -14,6 +14,8 @@ use super::models::fake::FakeProvider;
 use super::registry::Registry;
 use super::*;
 
+mod deletion;
+
 struct Env {
     home: TempDir,
     projects: TempDir,
@@ -53,6 +55,61 @@ impl Env {
 }
 
 const DOC: &str = "# Заголовок\n\nТекст раздела про индексацию.\n";
+
+#[tokio::test(flavor = "multi_thread")]
+async fn notification_download_failure_is_retained_and_cleared_on_retry() {
+    let env = Env::new();
+    struct FailedDownload;
+    impl ModelProvider for FailedDownload {
+        fn fingerprint(
+            &self,
+            settings: &Settings,
+        ) -> Result<bars_core::models::ModelFingerprint, bars_core::models::EmbedError> {
+            FakeProvider::new("m1").fingerprint(settings)
+        }
+        fn load(
+            &self,
+            settings: &Settings,
+        ) -> Result<Box<dyn bars_core::models::Embedder + Send>, bars_core::models::EmbedError>
+        {
+            assert_eq!(
+                settings.embed.source,
+                bars_core::settings::ModelSource::Builtin
+            );
+            assert_eq!(
+                settings.embed.accelerator,
+                bars_core::models::Accelerator::Cpu
+            );
+            std::thread::sleep(Duration::from_millis(150));
+            Err(bars_core::models::EmbedError::Load(
+                "backend test failure".into(),
+            ))
+        }
+    }
+    fs::write(env.home.path().join("settings.toml"), "[embed]\nsource='remote'\naccelerator='cpu'\nmodel='test'\nbase_url='https://example.invalid/v1'\napi_key_name='test'\n").unwrap();
+    bars_core::settings::UserSettings::load(env.home.path()).unwrap();
+    let worker = Worker::start(env.config(), Arc::new(FailedDownload)).unwrap();
+    assert!(worker.start_download("BAAI/bge-m3", false));
+    assert!(!worker.start_download("BAAI/bge-m3", false));
+    wait_until("ошибка скачивания", || {
+        worker.downloading().is_empty()
+    })
+    .await;
+    let errors = worker.download_errors();
+    assert!(errors["BAAI/bge-m3"].contains("Проверьте подключение"));
+    assert_eq!(
+        worker.download_errors(),
+        errors,
+        "опрос не поглощает ошибку"
+    );
+    assert!(worker.start_download("BAAI/bge-m3", false));
+    assert!(worker.download_errors().is_empty());
+    wait_until("повтор скачивания", || {
+        worker.downloading().is_empty()
+    })
+    .await;
+    worker.shutdown().await;
+}
 
 #[tokio::test(flavor = "multi_thread")]
 async fn document_menu_check_queues_explicit_file_and_updates_index() {

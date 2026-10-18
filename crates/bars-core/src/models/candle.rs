@@ -97,6 +97,8 @@ impl Embedder for CandleEmbedder {
             backend: "candle",
             actual: Some("cpu"),
             fallback_reason: None,
+            precision: Some("fp32"),
+            revision: None,
         }
     }
     fn fingerprint(&self) -> &ModelFingerprint {

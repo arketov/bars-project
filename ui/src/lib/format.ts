@@ -20,13 +20,13 @@ export type Fit = { cls: "f-good" | "f-mid" | "f-low" | "f-cosine"; label: strin
 export function fit(score: number, kind: ScoreKind): Fit {
   const percent = Math.round(Math.max(0, Math.min(1, score)) * 100);
   if (kind === "cosine") return {
-    cls: "f-cosine", label: "Cosine similarity", percent,
-    explanation: "Semantic similarity, not probability of a correct answer. Hybrid order also considers word matches and exact identifiers; similarity may increase down the list.",
+    cls: "f-cosine", label: "Косинусная близость", percent,
+    explanation: "Смысловая близость, а не вероятность правильного ответа. Гибридный порядок учитывает также совпадения слов и точные идентификаторы; близость может возрастать вниз по списку.",
   };
   return {
     cls: score >= 0.75 ? "f-good" : score >= 0.5 ? "f-mid" : "f-low",
-    label: "Rerank score", percent,
-    explanation: "Rerank model score, not probability of a correct answer. Results are ordered by this score.",
+    label: "Оценка rerank", percent,
+    explanation: "Оценка модели rerank, а не вероятность правильного ответа. Результаты упорядочены по этой оценке.",
   };
 }
 
@@ -90,9 +90,9 @@ export interface DotInfo {
 
 /** Точка проекта и подпись в списке (main-window.md). */
 export function problemStatus(problem: ProjectProblems): string {
-  if (problem.rebuild_not_applied) return "Full rebuild not applied";
-  if (problem.last_error) return "Index check stopped";
-  return "Index updated with document errors";
+  if (problem.rebuild_not_applied) return "Полная переиндексация не применена";
+  if (problem.last_error) return "Проверка индекса остановлена";
+  return "Индекс обновлён с ошибками в документах";
 }
 
 export function projectDot(project: ProjectInfo, progressPercent: number | null, waiting: number, problem?: ProjectProblems): DotInfo {

@@ -6,9 +6,11 @@ rust-version.workspace = true
 publish.workspace = true
 
 [dependencies]
+log.workspace = true
 blake3.workspace = true
 candle-core.workspace = true
 fastembed.workspace = true
+hf-hub.workspace = true
 keyring-core.workspace = true
 rusqlite.workspace = true
 rust-stemmers.workspace = true

@@ -122,15 +122,15 @@
           {#if results.results.length}
             <div class="meta">
               <span><b>{results.results.length}</b> {resultsWord(results.results.length)}</span>
-              <span>{results.applied.score_kind === "rerank" ? "Order: rerank score" : "Order: hybrid"}</span>
+              <span>{results.applied.score_kind === "rerank" ? "Порядок: по оценке rerank" : "Порядок: гибридный"}</span>
               <span>порог <b>{decimal(results.applied.min_score)}</b></span>
               <span>{app.elapsedMs} мс</span>
             </div>
             <p class="score-help muted">
               {#if results.applied.score_kind === "cosine"}
-                Bars show cosine similarity, not probability of a correct answer. Hybrid order also considers word matches and exact identifiers; similarity may increase down the list.
+                Полоски показывают косинусную близость, а не вероятность правильного ответа. Гибридный порядок учитывает также совпадения слов и точные идентификаторы; близость может возрастать вниз по списку.
               {:else}
-                Bars show rerank model scores, not probability of a correct answer.
+                Полоски показывают оценки модели rerank, а не вероятность правильного ответа.
               {/if}
             </p>
             {#each results.results as hit, index (hit.path + ":" + hit.first_line)}

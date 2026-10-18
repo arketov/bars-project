@@ -1,0 +1,205 @@
+{
+  "pid": 93104,
+  "samples": [
+    {
+      "other": [],
+      "peak_working_set": 2723840,
+      "working_set": 2723840,
+      "at": "2026-10-18T09:15:53.8544005Z",
+      "private_bytes": 1007616
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 1584848896,
+      "at": "2026-10-18T09:15:54.8860987Z",
+      "private_bytes": 2271948800
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 165642240,
+      "at": "2026-10-18T09:15:55.9029661Z",
+      "private_bytes": 2481983488
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 795160576,
+      "at": "2026-10-18T09:15:56.9238310Z",
+      "private_bytes": 3728793600
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 801288192,
+      "at": "2026-10-18T09:15:57.9469672Z",
+      "private_bytes": 4082786304
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 809144320,
+      "at": "2026-10-18T09:15:58.9597840Z",
+      "private_bytes": 4089937920
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 811024384,
+      "at": "2026-10-18T09:15:59.9797631Z",
+      "private_bytes": 4094623744
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 748171264,
+      "at": "2026-10-18T09:16:00.9997222Z",
+      "private_bytes": 4162805760
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 689291264,
+      "at": "2026-10-18T09:16:02.0189716Z",
+      "private_bytes": 4111020032
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 812666880,
+      "at": "2026-10-18T09:16:03.0355274Z",
+      "private_bytes": 4231507968
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 813830144,
+      "at": "2026-10-18T09:16:04.0602394Z",
+      "private_bytes": 4233539584
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 814358528,
+      "at": "2026-10-18T09:16:05.0772495Z",
+      "private_bytes": 4233138176
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 812294144,
+      "at": "2026-10-18T09:16:06.0989030Z",
+      "private_bytes": 4222509056
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 814923776,
+      "at": "2026-10-18T09:16:07.1187470Z",
+      "private_bytes": 4224811008
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 816918528,
+      "at": "2026-10-18T09:16:08.1382622Z",
+      "private_bytes": 4226822144
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 713064448,
+      "at": "2026-10-18T09:16:09.1539403Z",
+      "private_bytes": 4122611712
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 815759360,
+      "at": "2026-10-18T09:16:10.1695558Z",
+      "private_bytes": 4226007040
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 816152576,
+      "at": "2026-10-18T09:16:11.1876581Z",
+      "private_bytes": 4226502656
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 816418816,
+      "at": "2026-10-18T09:16:12.2020030Z",
+      "private_bytes": 4226953216
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 720867328,
+      "at": "2026-10-18T09:16:13.2206187Z",
+      "private_bytes": 4139085824
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 824205312,
+      "at": "2026-10-18T09:16:14.2391120Z",
+      "private_bytes": 4245549056
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 828305408,
+      "at": "2026-10-18T09:16:15.2580982Z",
+      "private_bytes": 4249600000
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 710623232,
+      "at": "2026-10-18T09:16:16.2772483Z",
+      "private_bytes": 4126412800
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 828813312,
+      "at": "2026-10-18T09:16:17.2953537Z",
+      "private_bytes": 4251242496
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 830496768,
+      "at": "2026-10-18T09:16:18.3180868Z",
+      "private_bytes": 4252184576
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 803131392,
+      "at": "2026-10-18T09:16:19.3424449Z",
+      "private_bytes": 4226846720
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 830705664,
+      "at": "2026-10-18T09:16:20.3637568Z",
+      "private_bytes": 4251136000
+    },
+    {
+      "other": [],
+      "peak_working_set": 2184044544,
+      "working_set": 831737856,
+      "at": "2026-10-18T09:16:21.3819434Z",
+      "private_bytes": 4254576640
+    }
+  ],
+  "started": "2026-10-18T09:15:53.8290609Z",
+  "name": "dml-b4",
+  "timing_contaminated": false,
+  "exit_code": 0
+}

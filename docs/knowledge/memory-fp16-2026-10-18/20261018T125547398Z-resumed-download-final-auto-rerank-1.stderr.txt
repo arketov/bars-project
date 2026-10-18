@@ -1,0 +1,6 @@
+rerank: загружен на DirectMl; precision=fp16; batch=16; файлы модели: pinned onnx-community FP16 (BLAKE3 verified)
+rerank: DirectMl, пар 15, логит от -3.469 до 4.262
+rerank: DirectMl, пар 15, логит от -3.469 до 4.262
+rerank: DirectMl, пар 15, логит от -3.469 до 4.262
+rerank: загружен на DirectMl; precision=fp16; batch=16; файлы модели: pinned onnx-community FP16 (BLAKE3 verified)
+rerank: DirectMl, пар 15, логит от -3.469 до 4.262

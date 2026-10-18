@@ -1,0 +1,21 @@
+{
+  "threads": 16,
+  "sorted": false,
+  "ids": [
+    "od-031",
+    "od-032",
+    "od-019",
+    "od-020",
+    "od-043",
+    "od-044",
+    "od-081",
+    "od-082",
+    "od-001",
+    "od-002"
+  ],
+  "batch": 16,
+  "repeats": 3,
+  "device": "directml",
+  "name": "dml-b16",
+  "max_length": 512
+}

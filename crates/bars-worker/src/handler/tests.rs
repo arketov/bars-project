@@ -26,6 +26,89 @@ struct Harness {
     endpoint: Endpoint,
 }
 
+#[tokio::test]
+async fn mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion() {
+    let harness = Harness::start("mcp-statistics", FakeProvider::new("m1")).await;
+    let root = harness.project("stats", &[("guide.md", "# Руководство\n")]);
+    let mut cli = harness.client(ClientKind::Cli).await;
+    cli.call(&RegisterParams {
+        path: root.display().to_string(),
+    })
+    .await
+    .unwrap();
+    cli.call(&ProjectsParams {}).await.unwrap();
+    assert!(
+        crate::mcp_statistics::snapshot(harness.home.path())
+            .unwrap()
+            .is_empty()
+    );
+    let mut a = harness.client(ClientKind::Mcp).await;
+    a.call(&ReadParams {
+        target: target(&root),
+        path: "guide.md".into(),
+    })
+    .await
+    .unwrap();
+    let explicit = Target {
+        cwd: "unrelated".into(),
+        project: Some(root.display().to_string()),
+    };
+    a.call(&ReadParams {
+        target: explicit.clone(),
+        path: "absent.md".into(),
+    })
+    .await
+    .unwrap_err();
+    a.call(&StatusParams {
+        target: Target {
+            cwd: "unrelated".into(),
+            project: None,
+        },
+    })
+    .await
+    .unwrap_err();
+    a.call(&ProjectsParams {}).await.unwrap();
+    let mut b = harness.client(ClientKind::Mcp).await;
+    b.call(&ReadParams {
+        target: explicit,
+        path: "guide.md".into(),
+    })
+    .await
+    .unwrap();
+    let rows = crate::mcp_statistics::snapshot(harness.home.path()).unwrap();
+    assert_eq!(rows.iter().map(|r| r.calls).sum::<i64>(), 5);
+    assert_eq!(rows.iter().map(|r| r.errors).sum::<i64>(), 2);
+    assert_eq!(
+        rows.iter()
+            .map(|r| r.session.as_str())
+            .collect::<std::collections::HashSet<_>>()
+            .len(),
+        2
+    );
+    let reads: Vec<_> = rows.iter().filter(|r| r.tool == "bars_read").collect();
+    assert_eq!(reads.len(), 2);
+    assert!(
+        reads
+            .iter()
+            .all(|r| r.project == root.display().to_string())
+    );
+    assert!(reads.iter().any(|r| r.calls == 2 && r.errors == 1));
+    assert!(
+        rows.iter()
+            .any(|r| r.tool == "bars_status" && r.project.is_empty() && r.errors == 1)
+    );
+    let json = serde_json::to_string(&rows).unwrap();
+    assert!(
+        !json.contains("guide.md") && !json.contains("absent.md") && !json.contains("Руководство")
+    );
+    let path = harness.home.path().join("mcp-statistics.sqlite3");
+    // Занятый writer воспроизводит отказ записи без изменения файла пользователя.
+    let db = rusqlite::Connection::open(path).unwrap();
+    db.execute_batch("BEGIN IMMEDIATE").unwrap();
+    b.call(&ProjectsParams {}).await.unwrap();
+    db.execute_batch("ROLLBACK").unwrap();
+}
+
 impl Harness {
     async fn start(name: &str, provider: Arc<dyn ModelProvider>) -> Self {
         let home = TempDir::new().unwrap();

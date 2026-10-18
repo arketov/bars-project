@@ -1,0 +1,6 @@
+{
+  "schema": 1,
+  "scenario": "valid FP16 weights, invalid pinned tokenizer config; production Auto must report CPU fallback",
+  "cpu_config_sha256": "835FE05211A0D1535B5CD2ACCB6D788AD142BDC507F8A8BD7287727915D9D61F",
+  "corrupt_config_sha256": "44136FA355B3678A1146AD16F7E8649E94FB4FC21FE77E8310C060F61CAAFF8A"
+}

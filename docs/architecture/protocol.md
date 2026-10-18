@@ -74,7 +74,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 |---|---|---|
 | `settings_get` | — | `file`, `settings` (пять таблиц `settings.toml` с умолчаниями на месте пропущенного: `embed`, `rerank`, `search`, `device`, `chunking`) и `warnings` (неизвестные ключи) |
 | `settings_save` | `settings` | `saved: true`. Воркер правит файл на месте (комментарии и порядок ключей сохраняются, пишутся только изменённые ключи), проверяет результат тем же разбором, что при чтении, и пишет атомарно; не прошедшие проверку значения — `invalid_params`, файл не тронут. Потом ставит все проекты на проверку: проекты с другой моделью индекса переходят в `reindex_required`, эмбеддинг не запускается (Т-25) |
-| `models_info` | — | встроенные embed-модели каталога и rerank-модель: размерность, бэкенд (`onnx` или `candle`), предупреждения, `downloaded`, `downloading`; папка моделей; `runtime.embed` и `runtime.rerank` с model/source/requested/state/backend/actual/fallback_reason, без загрузки модели и ожидания инференса |
+| `models_info` | — | встроенные embed-модели каталога и rerank-модель: размерность, бэкенд (`onnx` или `candle`), предупреждения, `downloaded`, `downloading`, `download_percent` (0…100 или null), `download_error` (безопасная ошибка ручного скачивания или null); папка моделей; `runtime.embed` и `runtime.rerank` с model/source/requested/state/backend/actual/fallback_reason и необязательными precision/revision фактической сессии, без загрузки модели и ожидания инференса |
 | `model_download` | `id` | `accepted: true`; модель грузится в фоне, о конце окно узнаёт по `downloading` в `models_info` |
 | `secret_set` | `name`, `value` | `present: true`; ключ уходит в хранилище ОС ([secrets.md](secrets.md)); значение не попадает ни в лог, ни в `Debug` |
 | `secret_status` | `name` | `present`: есть ли запись; сам ключ окну не отдаётся |
@@ -82,6 +82,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | `instruction` | — | `text` — та же текстовая инструкция для агента, что печатает `bars-cli install --print-instruction`, и `mcp_config` — конфиг MCP-сервера для клиентов, которых bars сам не ставит |
 | `set_docs_root` | `project`, `docs_root` | `accepted: true`; запись `docs_root` в `.bars/config.toml`, слежение переезжает, проект ставится на полную проверку |
 | `check_all` | — | `accepted: true`; проверка всех проектов сейчас («Проверить сейчас» у пропавшего проекта) |
+| `project_delete` | абсолютный `project`, обязательный `confirmed: true` | `removed: true` после остановки заданий и очистки; без подтверждения — `invalid_params`. Только окно; [границы и ошибки](../features/projects/deletion.md) |
 
 Автозапуск — состояние ОС, а не настройка ([features/distribution/autostart.md](../features/distribution/autostart.md)); методы доступны окну и `bars-cli`, но не `bars-mcp` (аудитория `Cli`), решение агента, срез 7:
 

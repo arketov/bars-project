@@ -6,7 +6,9 @@
 //! Поиск в очереди не стоит: он берёт [`Worker::gate`] на чтение и открывает индекс сам.
 
 mod control;
+mod deletion;
 mod job;
+mod model_lifecycle;
 pub mod models;
 mod queue;
 mod registry;
@@ -35,6 +37,7 @@ use tokio::runtime::Handle;
 use tokio::sync::{Notify, RwLock};
 use tokio::task::JoinHandle;
 
+pub use model_lifecycle::ModelIdlePolicy;
 pub use models::{
     BATCH_SIZE, BuiltinProvider, ConfiguredProvider, ModelProvider, ModelSlot, Models, Readiness,
     RerankSlot, SharedEmbedder, SharedReranker,
@@ -69,11 +72,14 @@ pub struct WorkerConfig {
     /// `~/.bars`: настройки, реестр, модели.
     pub bars_home: PathBuf,
     pub periodic_interval: Duration,
+    /// Политика выгрузки встроенных сессий; не меняет индекс и настройки поиска.
+    pub model_idle: ModelIdlePolicy,
     /// Сколько события слежения копятся до пачки.
     pub debounce: Duration,
     /// Через сколько после пачки событий проект проверяется целиком ([`TAIL_DELAY`]).
     pub tail_delay: Duration,
-    /// Куда `install` и `uninstall` пишут записи клиентов; `None` — пути не определились.
+    /// Куда установка и автообновление пишут записи клиентов; `None` — запись отключена.
+    /// Приложение включает явно; тесты передают временный профиль.
     pub install_env: Option<InstallEnv>,
     /// Хранилище ключей провайдеров: сюда окно записывает ключ (`secret_set`).
     pub secrets: Arc<dyn SecretStore>,
@@ -87,6 +93,7 @@ impl std::fmt::Debug for WorkerConfig {
         f.debug_struct("WorkerConfig")
             .field("bars_home", &self.bars_home)
             .field("periodic_interval", &self.periodic_interval)
+            .field("model_idle", &self.model_idle)
             .field("debounce", &self.debounce)
             .field("install_env", &self.install_env)
             .finish_non_exhaustive()
@@ -98,9 +105,10 @@ impl WorkerConfig {
         Self {
             bars_home,
             periodic_interval: PERIODIC_INTERVAL,
+            model_idle: ModelIdlePolicy::default(),
             debounce: DEBOUNCE,
             tail_delay: TAIL_DELAY,
-            install_env: InstallEnv::detect(),
+            install_env: None,
             secrets: Arc::new(OsSecrets::default()),
             autostart: Arc::new(NoAutostart),
         }
@@ -200,6 +208,8 @@ struct RuntimeStatus {
 }
 
 struct Runtime {
+    deleting: bool,
+    job_gate: Arc<tokio::sync::Mutex<()>>,
     status: RuntimeStatus,
     watcher: Option<ProjectWatcher>,
     /// `notify` сообщил об ошибке или папка пропадала: слежение надо поднять заново.
@@ -215,6 +225,8 @@ struct Runtime {
 impl Runtime {
     fn new() -> Self {
         Self {
+            deleting: false,
+            job_gate: Arc::new(tokio::sync::Mutex::new(())),
             status: RuntimeStatus {
                 state: ProjectState::Ready,
                 updated_at: None,
@@ -233,6 +245,7 @@ impl Runtime {
 }
 
 struct Inner {
+    requests: Arc<RwLock<()>>,
     config: WorkerConfig,
     registry: Mutex<Registry>,
     projects: Mutex<HashMap<PathBuf, Runtime>>,
@@ -244,12 +257,14 @@ struct Inner {
     models: Models,
     handle: Handle,
     tasks: Mutex<Vec<JoinHandle<()>>>,
+    model_wake: Notify,
     /// Пауза очереди (OQ-55).
     pause: Arc<Pause>,
     /// Идущее задание: его ход и флаг остановки.
     current: Mutex<Option<Arc<JobCell>>>,
     /// Модели, которые сейчас скачиваются по кнопке окна.
     downloads: Mutex<HashSet<String>>,
+    download_errors: Mutex<HashMap<String, String>>,
 }
 
 /// Воркер. Копии указывают на одно и то же состояние.
@@ -276,6 +291,7 @@ impl Worker {
         let registry = Registry::load(&config.bars_home)?;
         let paths = registry.paths();
         let inner = Arc::new(Inner {
+            requests: Arc::new(RwLock::new(())),
             config,
             registry: Mutex::new(registry),
             projects: Mutex::new(HashMap::new()),
@@ -286,13 +302,16 @@ impl Worker {
             models: Models::new(provider),
             handle: Handle::current(),
             tasks: Mutex::new(Vec::new()),
+            model_wake: Notify::new(),
             pause: Arc::new(Pause::default()),
             current: Mutex::new(None),
             downloads: Mutex::new(HashSet::new()),
+            download_errors: Mutex::new(HashMap::new()),
         });
         let queue_task = tokio::spawn(Arc::clone(&inner).run_queue());
         let timer_task = tokio::spawn(Arc::clone(&inner).run_timer());
-        lock(&inner.tasks).extend([queue_task, timer_task]);
+        let model_task = tokio::spawn(Arc::clone(&inner).run_model_maintenance());
+        lock(&inner.tasks).extend([queue_task, timer_task, model_task]);
         for path in paths {
             inner.activate(&path, Priority::Periodic);
         }
@@ -318,6 +337,7 @@ impl Worker {
     /// Перестаёт брать задания, дожидается текущего, снимает слежение.
     pub async fn shutdown(&self) {
         self.inner.stop.store(true, Ordering::SeqCst);
+        self.inner.model_wake.notify_one();
         // Задание на паузе иначе не закончится никогда: его останавливают, остальные дописываются.
         if self.inner.pause.is_paused() {
             self.inner.cancel_current();
@@ -337,6 +357,11 @@ impl Worker {
             .filter_map(|runtime| runtime.watcher.take())
             .collect();
         drop(watchers);
+        let inner = Arc::clone(&self.inner);
+        if tokio::task::spawn_blocking(move || inner.models.clear()).await.is_err() {
+            log::error!("Не удалось выгрузить модели при завершении");
+        }
+        log::info!("Воркер остановлен");
     }
 
     // --- реестр ---
@@ -345,6 +370,7 @@ impl Worker {
     /// если его нет, запускает слежение и ставит проект на проверку. Повторная регистрация
     /// ставит на проверку ещё раз.
     pub fn register(&self, path: &Path) -> Result<Registered, WorkerError> {
+        let _request = self.inner.requests.try_read().map_err(|_| io::Error::other("идёт удаление проекта; повторите регистрацию позже"))?;
         let path = normalize(path)?;
         if !path.is_dir() {
             return Err(WorkerError::NotADirectory(path));
@@ -368,6 +394,7 @@ impl Worker {
     /// Снимает проект с регистрации: убирает из `projects.toml`, останавливает слежение, снимает
     /// с очереди. `.bars/` и документы проекта остаются (Т-5).
     pub fn unregister(&self, selector: &str) -> Result<PathBuf, WorkerError> {
+        let _request = self.inner.requests.try_read().map_err(|_| io::Error::other("идёт удаление проекта; повторите снятие регистрации позже"))?;
         let path = self.resolve(selector)?;
         lock(&self.inner.registry).remove(&path)?;
         let runtime = lock(&self.inner.projects).remove(&path);
@@ -604,6 +631,7 @@ impl Worker {
     /// проект ставится на полную проверку (нарезка и корень в индексе записаны, воркер увидит
     /// расхождение). Согласие не нужно: модель та же.
     pub fn set_docs_root(&self, path: &Path, docs_root: &str) -> Result<(), WorkerError> {
+        let _request = self.inner.requests.try_read().map_err(|_| io::Error::other("идёт удаление проекта; повторите изменение настроек позже"))?;
         let path = self.registered(path)?;
         if !path.is_dir() {
             return Err(WorkerError::Unavailable(path));
@@ -668,25 +696,41 @@ impl Worker {
         ids
     }
 
+    pub fn download_errors(&self) -> HashMap<String, String> {
+        lock(&self.inner.download_errors).clone()
+    }
+
     /// Скачивает встроенную модель в фоне. `false`, если она уже скачивается. Загрузка идёт в
     /// блокирующей задаче: окно узнаёт о конце по `models_info`.
     pub fn start_download(&self, id: &str, reranker: bool) -> bool {
         if !lock(&self.inner.downloads).insert(id.to_string()) {
             return false;
         }
+        lock(&self.inner.download_errors).remove(id);
         let inner = Arc::clone(&self.inner);
         let id = id.to_string();
-        let mut user = bars_core::settings::UserSettings::default();
+        let mut user = bars_core::settings::UserSettings::load(self.bars_home())
+            .map(|s| s.value)
+            .unwrap_or_default();
         if reranker {
+            user.rerank.source = bars_core::settings::ModelSource::Builtin;
             user.rerank.model.clone_from(&id);
         } else {
+            user.embed.source = bars_core::settings::ModelSource::Builtin;
             user.embed.model.clone_from(&id);
         }
         let settings = Settings::resolve(&user, &bars_core::settings::ProjectConfig::default());
         self.inner.handle.spawn_blocking(move || {
-            // Ошибка скачивания видна по тому, что модель так и не стала `downloaded`; текст в лог.
-            if let Err(error) = inner.models.download(&settings, reranker) {
-                eprintln!("bars: не удалось скачать модель {id}: {error}");
+            log::info!("Начато скачивание модели {id}");
+            if inner.models.download(&settings, reranker).is_err() {
+                log::error!("Не удалось скачать модель {id}; подробности — в состоянии модели");
+                // В UI не передаём произвольный ответ провайдера, URL или токены.
+                lock(&inner.download_errors).insert(
+                    id.clone(),
+                    "Не удалось скачать модель. Проверьте подключение и повторите в настройках моделей.".into(),
+                );
+            } else {
+                log::info!("Скачивание модели {id} завершено");
             }
             lock(&inner.downloads).remove(&id);
         });
@@ -731,6 +775,10 @@ impl Inner {
     }
 
     fn enqueue(&self, project: &Path, job: Job) {
+        let projects = lock(&self.projects);
+        if !projects.get(project).is_some_and(|runtime| !runtime.deleting) {
+            return;
+        }
         lock(&self.queue).push(project, job);
         self.wake.notify_one();
     }
@@ -738,6 +786,13 @@ impl Inner {
     /// Вводит проект в работу: папка на месте, слежение запущено, проверка в очереди. Папки нет —
     /// проект `unavailable`.
     fn activate(self: &Arc<Self>, path: &Path, priority: Priority) {
+        let registry = lock(&self.registry);
+        if !registry.contains(path) {
+            return;
+        }
+        if lock(&self.projects).get(path).is_some_and(|runtime| runtime.deleting) {
+            return;
+        }
         if !path.is_dir() {
             self.mark_unavailable(path);
             return;
@@ -752,6 +807,7 @@ impl Inner {
                 runtime.status.state = ProjectState::Ready;
             }
         }
+        drop(registry);
         self.ensure_watching(path);
         self.enqueue(path, Job::check(priority));
     }
@@ -765,12 +821,13 @@ impl Inner {
 
     /// Поднимает слежение, если его нет или оно сломалось.
     fn ensure_watching(self: &Arc<Self>, path: &Path) {
-        let needed = lock(&self.projects)
+        let generation = lock(&self.projects)
             .get(path)
-            .is_some_and(|runtime| runtime.watcher.is_none() || runtime.watch_failed);
-        if !needed {
+            .filter(|runtime| !runtime.deleting && (runtime.watcher.is_none() || runtime.watch_failed))
+            .map(|runtime| Arc::clone(&runtime.job_gate));
+        let Some(generation) = generation else {
             return;
-        }
+        };
         let weak: Weak<Inner> = Arc::downgrade(self);
         let key = path.to_path_buf();
         let sink: Sink = Arc::new(move |event| {
@@ -778,18 +835,28 @@ impl Inner {
                 inner.on_watch_event(&key, event);
             }
         });
-        let started =
+        let mut started =
             ProjectWatcher::start(path, &self.docs_root_of(path), self.config.debounce, sink).ok();
-        let replaced = lock(&self.projects).get_mut(path).map(|runtime| {
-            runtime.watch_failed = started.is_none();
-            std::mem::replace(&mut runtime.watcher, started)
-        });
+        if started.is_none() {
+            log::warn!("Не удалось запустить слежение за документацией: {}", path.display());
+        }
+        let replaced = {
+            let mut projects = lock(&self.projects);
+            projects.get_mut(path).filter(|runtime| !runtime.deleting && Arc::ptr_eq(&runtime.job_gate, &generation)).and_then(|runtime| {
+                runtime.watch_failed = started.is_none();
+                std::mem::replace(&mut runtime.watcher, started.take())
+            })
+        };
         // Прежнее слежение останавливается вне блокировки: его поток может ждать её.
         drop(replaced);
+        drop(started);
     }
 
     /// Вызывается в потоке `notify`: останавливать слежение отсюда нельзя.
     fn on_watch_event(self: &Arc<Self>, project: &Path, event: WatchEvent) {
+        if !lock(&self.projects).get(project).is_some_and(|runtime| !runtime.deleting) {
+            return;
+        }
         if self.stop.load(Ordering::SeqCst) {
             return;
         }
@@ -822,16 +889,17 @@ impl Inner {
     /// события при переполнении буфера, а о потере не сообщает. Пока проверка назначена, новых
     /// не ставится. Заодно поднимает слежение, если оно сломалось: отсюда, не из потока `notify`.
     fn arm_tail(self: &Arc<Self>, project: &Path) {
-        {
+        let generation = {
             let mut projects = lock(&self.projects);
             let Some(runtime) = projects.get_mut(project) else {
                 return;
             };
-            if runtime.tail_armed {
+            if runtime.tail_armed || runtime.deleting {
                 return;
             }
             runtime.tail_armed = true;
-        }
+            Arc::clone(&runtime.job_gate)
+        };
         let weak: Weak<Inner> = Arc::downgrade(self);
         let project = project.to_path_buf();
         let delay = self.config.tail_delay;
@@ -843,8 +911,10 @@ impl Inner {
             if inner.stop.load(Ordering::SeqCst) {
                 return;
             }
-            if let Some(runtime) = lock(&inner.projects).get_mut(&project) {
+            if let Some(runtime) = lock(&inner.projects).get_mut(&project).filter(|r| !r.deleting && Arc::ptr_eq(&r.job_gate, &generation)) {
                 runtime.tail_armed = false;
+            } else {
+                return;
             }
             if !project.is_dir() {
                 return;
@@ -875,7 +945,7 @@ impl Inner {
             return;
         }
         if periodic {
-            eprintln!(
+            log::warn!(
                 "bars: проверка нашла изменения в {}, а слежение молчало: перезапускаю слежение",
                 path.display()
             );
@@ -941,13 +1011,21 @@ impl Inner {
     }
 
     async fn process(self: &Arc<Self>, path: PathBuf, job: Job) {
+        let Some(job_gate) = lock(&self.projects).get(&path).map(|r| Arc::clone(&r.job_gate)) else {
+            return;
+        };
+        let _job = Arc::clone(&job_gate).lock_owned().await;
         let full_check = job.rebuild.is_none() && job.scope == queue::Scope::Full;
         let periodic = job.priority == Priority::Periodic;
+        let cell = JobCell::new(&path, &job);
         let (gate, previous) = {
             let mut projects = lock(&self.projects);
             let Some(runtime) = projects.get_mut(&path) else {
                 return;
             };
+            if runtime.deleting || !Arc::ptr_eq(&runtime.job_gate, &job_gate) {
+                return;
+            }
             let previous = runtime.status.state;
             if previous == ProjectState::Unavailable {
                 return;
@@ -958,14 +1036,14 @@ impl Inner {
             if full_check {
                 runtime.watch_events = 0;
             }
+            *lock(&self.current) = Some(Arc::clone(&cell));
             (Arc::clone(&runtime.gate), previous)
         };
 
         let worker = Arc::clone(self);
         let project = path.clone();
-        let cell = JobCell::new(&path, &job);
-        *lock(&self.current) = Some(Arc::clone(&cell));
         let observer = JobObserver::new(Arc::clone(&self.pause), cell);
+        log::info!("Начата индексация: {}", path.display());
         let result = tokio::task::spawn_blocking(move || {
             let env = JobEnv {
                 bars_home: &worker.config.bars_home,
@@ -991,6 +1069,26 @@ impl Inner {
                     if report.added + report.removed > 0
                         || (!report.full_check && report.changed > 0)
             );
+        let report = match &result.outcome {
+            Outcome::Updated(report) | Outcome::Interrupted { report, .. } => Some(report),
+            _ => None,
+        };
+        if let Some(report) = report {
+            for problem in &report.problems {
+                // reason может содержать ответ внешнего провайдера. Пишем только метаданные.
+                log::warn!("Проблема индексации: проект {}, файл {}, этап {}, попыток {}, прежняя версия {}",
+                    path.display(), problem.path, problem.stage, problem.attempts, problem.previous_version);
+            }
+        }
+        match &result.outcome {
+            Outcome::Failed(_) => log::error!("Индексация завершилась ошибкой: {}; подробности — в отчёте задания", path.display()),
+            Outcome::Interrupted { .. } => log::warn!("Индексация прервана: {}; подробности — в отчёте задания", path.display()),
+            Outcome::Updated(report) if !report.problems.is_empty() => log::warn!("Индексация завершена с проблемами: {}; файлов с ошибками: {}", path.display(), report.problems.len()),
+            Outcome::Updated(report) => log::info!("Индексация завершена: {}; добавлено {}, изменено {}, удалено {}", path.display(), report.added, report.changed, report.removed),
+            Outcome::Unavailable => log::warn!("Папка проекта недоступна: {}", path.display()),
+            Outcome::Cancelled => log::info!("Индексация отменена: {}", path.display()),
+            Outcome::ReindexRequired(_) => log::info!("Нужна переиндексация: {}", path.display()),
+        }
         self.apply(&path, previous, result);
         if found_changes {
             self.after_full_check(&path, periodic);
