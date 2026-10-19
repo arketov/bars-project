@@ -8,7 +8,7 @@ title: Исследование использования инструмент�
 
 [Исследование](../../knowledge/agent-tool-usage-2026-10-18.md) переработано по уточнению автора: 14 цепочек «задача → вызов → выдача → следующий шаг», все найденные modules-выражения, полезные/ошибочные files и три текущие сравнительные пробы. chain-review.json содержит исходные строки и проверенные SHA-префиксы 13 транскриптов; scope-probes.json — args и выдачу. OQ-92 закрыт результатом исследования, API не менялся.
 
-По отдельному поручению обновлены источники BARS_INSTRUCTION, оба skill, MCP initialize/описания/схемы и подсказка Claude-хука. Check/build MCP, rustfmt, YAML, реальные stdio initialize и tools/list прошли; инструкция 1865 знаков. [Проверки](../../features/docs-convention/verification.md#проверка-выбора-операции-и-области--18-10-2026), evidence — target/agent-routing-verification.
+По отдельному поручению обновлены источники BARS_INSTRUCTION, оба skill, MCP initialize/описания/схемы и подсказка Claude-хука. Check/build MCP, rustfmt, YAML, реальные stdio initialize и tools/list прошли; инструкция 1865 знаков. [Проверки](../2026-10-18-docs-layout-design/verification.md#проверка-выбора-операции-и-области--18-10-2026), evidence — target/agent-routing-verification.
 
 ## Не сделано
 

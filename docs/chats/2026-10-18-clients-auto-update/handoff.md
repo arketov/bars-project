@@ -6,7 +6,7 @@ title: Передача — реализация автообновления и
 
 ## Сделано
 
-- Реализация и воспроизводимая приёмка — коммит `5f981c8`; [контракт](../../features/clients/clients.md), [результаты](../../features/clients/verification.md), [итог этапа](../../features/clients/plan.md).
+- Реализация и воспроизводимая приёмка — коммит `5f981c8`; [контракт](../../features/clients/clients.md), [результаты](verification.md), [итог этапа](plan.md).
 - Фоновый проход после ready, OQ-78 (MCP или хук), общий install, нормализация хуков и skills, замок с uninstall, ожидание завершения при выходе, отчёт частичных успехов, конфликты внешней записи и напоминание Codex только при изменении хука.
 - Worker 127/127, protocol 50/50, CLI 8/8, MCP 9/9. Заключительные 15 клиентских регрессий, clippy all-targets, rustfmt, PowerShell parser и ссылки/whitespace прошли.
 - `./scripts/test-client-refresh.ps1`: шесть отдельных запусков production serve_with на BARS_USER_HOME. Последние артефакты — `target/client-refresh-f417973f38da42fe884e52370e9b13d6/`; summary.json passed=true. Настоящие CLI и stdio-MCP, чтение Codex config.toml, skills через junction, no-op, uninstall/restart, ошибка одного клиента и чистый профиль проверены. Дочерние процессы завершены.

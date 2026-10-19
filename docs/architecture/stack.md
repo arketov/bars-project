@@ -12,7 +12,7 @@ title: Стек bars — библиотеки, версии и почему он
 - **Windows:** MSVC из Visual Studio 2022 не старше 17.14 — более старые не линкуют ONNX Runtime из `ort`.
 - **macOS:** Xcode Command Line Tools; сборки arm64 и x86_64.
 - **Node.js** LTS — только для сборки интерфейса окна.
-- C-компилятор нужен в любом случае: SQLite (`rusqlite` bundled), `blake3` и `aws-lc-rs` в `reqwest` собираются из C.
+- C-компилятор нужен в любом случае: SQLite (`rusqlite` bundled), `blake3` и часть зависимостей Tauri собираются из C.
 
 ## Процесс, окно и трей bars
 
@@ -21,6 +21,8 @@ title: Стек bars — библиотеки, версии и почему он
 | Окно и трей | `tauri` с фичей `tray-icon` | 2.12 | Т-1, Т-3 |
 | Один экземпляр воркера | `tauri-plugin-single-instance` | 2.5 | второй запуск `bars` показывает окно работающего (Т-1) |
 | Интерфейс окна | `svelte` + `vite` + TypeScript | 5.57 / 8.3 | без SvelteKit; проект создаётся `create-vite` (шаблон `svelte-ts`) и `tauri init` |
+| Карта графа в окне | `cytoscape` | 3.34.4 | просмотр графа документов; выбор после сравнения с Sigma — [renderer-проверка](../knowledge/graph-renderer-2026-10-18/Index.md#выбор-renderer-для-p3) |
+| Системные диалоги и открытие | `tauri-plugin-dialog`, `tauri-plugin-opener` | 2 | диалоги ОС и открытие файлов/ссылок из окна |
 | Async-рантайм | `tokio` | 1.53 | воркер, клиенты канала |
 
 Воркер не завершается при закрытии последнего окна: `RunEvent::ExitRequested` с `code == None` отменяется через `prevent_exit()`. На macOS у воркера нет иконки в Dock: `ActivationPolicy::Accessory`.
@@ -56,8 +58,10 @@ Qwen GGUF Q4_K_M использует закреплённый llama-cpp-2 0.1.1
 
 | Что | Крейт | Версия | Зачем |
 |---|---|---|---|
-| Разбор Markdown | свой построчный разбор | — | [features/indexing/chunking.md](../features/indexing/chunking.md); `pulldown-cmark` 0.13 — только в тестах как эталон |
-| Frontmatter | `serde-saphyr` | 2.0 | `title` документа (Т-11); чистый Rust |
+| Разбор Markdown | свой построчный разбор | — | [features/indexing/chunking.md](../features/indexing/chunking.md): нарезка на чанки |
+| Ссылки и исходные диапазоны Markdown | `pulldown-cmark` (в `bars-graph`, без HTML-рендерера) | 0.13.4 | граф документов ([graph.md](graph.md)); в нарезку чанков не входит |
+| Клиентская схема входа графа | `schemars` (опционально, фича `schema` у `bars-graph`) | 1.2.3 | JSON-схема входа инструментов `bars-mcp` |
+| Frontmatter | свой разбор (`split_frontmatter` в нарезке) | — | `title` документа (Т-11); YAML-библиотека не подключена |
 | Слежение за файлами | `notify` + `notify-debouncer-full` | 8.2 / 0.7 | Т-10 |
 | Пути пользователя | `dirs` | 7.0 | `<домашняя папка>/.bars/` |
 | Чтение `settings.toml` и `.bars/config.toml` | `toml` + `serde` | 1.1 / 1.0 | [features/settings/settings.md](../features/settings/settings.md); только чтение, запись из окна — `toml_edit` ниже |
@@ -73,8 +77,7 @@ Qwen GGUF Q4_K_M использует закреплённый llama-cpp-2 0.1.1
 | CLI | `clap` с фичей `derive` | 4.6 | `bars-cli`, Т-20 |
 | Ключи провайдеров | `keyring-core` 1.0 + `windows-native-keyring-store` 1.1 и `apple-native-keyring-store` 1.0 (фича `keychain`) | 1.x | [secrets.md](secrets.md) |
 | Правка `config.toml` Codex | `toml_edit` | 0.25 | сохраняет комментарии и порядок (Т-21) |
-| Правка `~/.claude/settings.json` | `jsonc-parser` (CST) | 0.34 | сохраняет форматирование файла, который правят руками |
-| Правка `~/.claude.json` | `serde_json` с фичей `preserve_order` | 1.0 | файл машинный; важнее атомарная запись, чем отступы |
+| Правка `~/.claude/settings.json` и `~/.claude.json` | `serde_json` с фичей `preserve_order` | 1.0 | порядок ключей сохраняется, комментарии в `settings.json` нет; файлы клиентов правятся атомарной записью (`bars-worker/src/clients`) |
 
 ## Общие крейты bars
 

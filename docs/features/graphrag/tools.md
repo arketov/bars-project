@@ -4,7 +4,7 @@ title: Контракты инструментов GraphRAG для bars
 
 # Контракты инструментов GraphRAG для bars
 
-Статус на 18-10-2026: шесть операций реализованы в общем worker handler, MCP/CLI и компоненте окна. Фактическая схема v1 описана ниже; оставшийся проект целевого контракта явно отделён. Реализация не означает завершённую приёмку [GR-03](requirements.md#gr-03-новые-инструменты-и-единое-выполнение). `schema_version` относится к GraphRAG DTO, не к версии существующей SQLite-схемы.
+Контракты шести операций GraphRAG и расширений поиска и статуса: реализованная схема v1 и целевой контракт полного состава. Статус фичи — [Index.md](Index.md#статус); приёмка по [GR-03](requirements.md#gr-03-новые-инструменты-и-единое-выполнение) не завершена. `schema_version` относится к GraphRAG DTO, не к версии существующей SQLite-схемы ([architecture/graph.md](../../architecture/graph.md#таблицы-графа-в-sqlite)).
 
 ## Фактический контракт v1
 
@@ -19,7 +19,7 @@ Worker: `graph_query` принимает `{cwd?, project?, request: GraphRequest
 | explore | Ровно один `topic`/`whole_scope=true`; `analysis=topics\|connectivity\|coverage\|conflict_candidates`, `grouping=communities\|modules` |
 | graph | `view=documents\|sections\|chunks\|entities\|mixed`, `local`, `roots`, `include_paths`, `predicates`, `direction`; depth задаётся `budgets.max_depth` |
 
-Общие входы: `scope`, `budgets`, `limit`, `snapshot`, `cursor`. Фактические численные пределы — в [устройстве реализации](implementation.md#начальные-пределы-выполнения); это инженерные ограничения, ресурсная приёмка ещё открыта. Endpoint/ObjectRef устаревшей ревизии не заменяется поиском похожего объекта.
+Общие входы: `scope`, `budgets`, `limit`, `snapshot`, `cursor`. Фактические численные пределы — в [правилах реализации](implementation.md#начальные-пределы-выполнения); это инженерные ограничения, ресурсная приёмка ещё открыта. Endpoint/ObjectRef устаревшей ревизии не заменяется поиском похожего объекта.
 
 Ответ: нормализованные `nodes`, `sources`, `assertions`, `evidence`; элементы `items` имеют дискриминатор `type`. У узла/источника поле называется `reference`, у основания — `span`, точный `quote` и extractor version. Дополнительно: `operation`, `schema_version=1`, `scope`, `snapshot`, `generations`, `layer_state/layer_states`, `coverage`, `requested/applied`, `applied_limit`, `clamped`, `truncated/limit_reasons`, `next_cursor`, `warnings`, `method`, `elapsed_ms`, `resolution/candidates`, `missing_roles`, `budget_mode`, `used_bytes`. Смысловой слой остаётся partial: полнота неизвестна. Отсутствие связи не доказывает отсутствие зависимости/проверки.
 

@@ -13,9 +13,9 @@ title: Пожелания автора
 
 Автор указал эти возможности как очевидное направление интеллектуальных инструментов документации, которое предыдущий обзор пропустил. Исходная формулировка: «grah и grah rag и отдельный поиск связей».
 
-Исследование — [knowledge/graph-knowledge-retrieval.md](../knowledge/graph-knowledge-retrieval.md): граф знаний и типизированные отношения, самостоятельный поиск связей/путей, варианты GraphRAG и локального извлечения. Состав реализации и конкретные модели/хранилище ещё не выбраны; исследование не означает выполнение пожелания.
+Исследование — [knowledge/graph-research.md](../knowledge/graph-research.md): граф знаний и типизированные отношения, самостоятельный поиск связей/путей, варианты GraphRAG и локального извлечения. Состав реализации и конкретные модели/хранилище ещё не выбраны; исследование не означает выполнение пожелания.
 
-Уточнение автора 18-10-2026: исследовать внедрение GraphRAG, зависимости чанков/документов, новые инструменты; нужен просмотр графа «как в обсидиане» по чанкам и документам. [Исследование внедрения](../knowledge/graph-integration-2026-10-18.md): польза и восемь сценариев → шесть инструментов → изменения поиска → графический просмотр → техническое устройство. Подготовлены [ТЗ, контракты инструментов и этапы P0–P8](../features/graphrag/Index.md); все S1–S8 сохранены. Автор поручил этап 33: автоматически и локально, один проект, только чтение/evidence, сначала существующие embeddings/явные связи (OQ-85…87/91). [Первый опыт без новой модели](../knowledge/graph-embedding-2026-10-18.md) выполнен; полноценный baseline/holdout, внедрение и приёмка остаются открытыми. IDEA-11 не закрыта.
+Уточнение автора 18-10-2026: исследовать внедрение GraphRAG, зависимости чанков/документов, новые инструменты; нужен просмотр графа «как в обсидиане» по чанкам и документам. Исследование пользы, сценариев и подходов — в том же документе. Подготовлены [ТЗ, контракты инструментов и этапы P0–P8](../features/graphrag/Index.md); все S1–S8 сохранены. Автор поручил этап 33: автоматически и локально, один проект, только чтение/evidence, сначала существующие embeddings/явные связи (OQ-85…87/91). [Первый опыт без новой модели](../knowledge/graph-embedding-2026-10-18.md) выполнен; полноценный baseline/holdout, внедрение и приёмка остаются открытыми. IDEA-11 не закрыта.
 
 ## IDEA-12: Похожие чанки по ID
 
@@ -51,13 +51,13 @@ title: Пожелания автора
 
 | ID | Пожелание | Где описано |
 |---|---|---|
-| IDEA-01 | Embed и rerank на разных устройствах | [device-verification.md](../features/models/device-verification.md), `327bfbd` |
+| IDEA-01 | Embed и rerank на разных устройствах | [device-verification.md](../chats/2026-10-18-stage17-implementation/device-verification.md), `327bfbd` |
 | IDEA-02 | Чтение документов целиком в приложении | [document-actions.md](../features/window/document-actions.md), `5cb6cd7` |
 | IDEA-03 | Раздел «Логи» в настройках | [logs.md](../features/window/logs.md) |
 | IDEA-04 | Сервис уведомлений и колокольчик | [notifications.md](../features/window/notifications.md) |
 | IDEA-05 | Статистика вызовов инструментов | [mcp-statistics.md](../features/window/mcp-statistics.md) |
-| IDEA-06 | Замеры моделей с rerank и без, настройка умолчаний | [search-quality-results.md](../knowledge/search-quality-results.md), `3ba2fa5` |
+| IDEA-06 | Замеры моделей с rerank и без, настройка умолчаний | [search-quality.md](../knowledge/search-quality.md), `3ba2fa5` |
 | IDEA-07 | Кнопка ручной проверки индексов | [updates.md](../features/indexing/updates.md) |
-| IDEA-08 | Раскладка docs для агента | [verification.md](../features/docs-convention/verification.md), `b802a1a` |
+| IDEA-08 | Раскладка docs для агента | [verification.md](../chats/2026-10-18-docs-layout-design/verification.md), `b802a1a` |
 | IDEA-09 | Меню документа по правому клику | [document-actions.md](../features/window/document-actions.md), `5cb6cd7` |
-| IDEA-10 | Обновление skills и хуков в клиентах | [verification.md](../features/clients/verification.md), `5f981c8` |
+| IDEA-10 | Обновление skills и хуков в клиентах | [verification.md](../chats/2026-10-18-clients-auto-update/verification.md), `5f981c8` |

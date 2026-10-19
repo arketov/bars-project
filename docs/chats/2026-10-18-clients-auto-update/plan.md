@@ -4,7 +4,7 @@ title: IDEA-10 — итог автообновления интеграций к
 
 # Автообновление интеграций Claude Code и Codex
 
-Реализовано 18-10-2026. Основание — IDEA-10, OQ-75/78, Т-21 и Т-28. Текущий контракт и ограничения — [clients.md](clients.md); результаты — [verification.md](verification.md).
+Реализовано 18-10-2026. Основание — IDEA-10, OQ-75/78, Т-21 и Т-28. Текущий контракт и ограничения — [clients.md](../../features/clients/clients.md); результаты — [verification.md](verification.md).
 
 ## Сделано по IDEA-10
 

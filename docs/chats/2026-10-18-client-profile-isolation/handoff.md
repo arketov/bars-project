@@ -9,7 +9,7 @@ title: Передача — изоляция клиентского профил
 - ISS-12: `WorkerConfig::new` по умолчанию без install_env; приложение включает detect явно, пример client_refresh_session явно использует BARS_USER_HOME. MCP fixture проверяет запрет до запуска.
 - Восстановлены пути Codex MCP и SessionStart на установленный bars; прочие записи сохранены.
 - Регрессия конструктора; повторный guard `scripts/test-client-profile-isolation.ps1`: worker 132/132, CLI 8/8, MCP 9/9. SHA-256, mtime и наличие конфигов, backup и skills настоящего профиля совпали до/после тестов.
-- Шесть процессных сессий установки passed; приложение cargo check passed. Подробности — [verification.md](../../features/clients/verification.md). Изменённые участки просмотрены вручную, ссылки, PowerShell parser и whitespace проверены.
+- Шесть процессных сессий установки passed; приложение cargo check passed. Подробности — [verification.md](../2026-10-18-clients-auto-update/verification.md). Изменённые участки просмотрены вручную, ссылки, PowerShell parser и whitespace проверены.
 
 ## Не сделано
 

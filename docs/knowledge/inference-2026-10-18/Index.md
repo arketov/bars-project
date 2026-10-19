@@ -49,4 +49,4 @@ title: Доказательства этапа 11
 - [product-acceptance.json.gz](product-acceptance.json.gz) — приёмка продуктового FP16 loader: 138 core и 22 IPC-ответа, метрики/fallback, хеши исходников/бинарников и мониторы; timing quality-only исключён из чистой оценки скорости.
 - [product-rows.jsonl.gz](product-rows.jsonl.gz) — 160 продуктовых ответов и метрики; тела документов IPC заменены SHA256.
 
-Полные входы, тяжёлые профили и скачанные модели остаются в исключённых из Git каталогах `spikes/inference/`. Методика — [проект измерений](../../features/models/inference-plan.md); трактовка — [исследование скорости](../inference-speed.md).
+Полные входы, тяжёлые профили и скачанные модели остаются в исключённых из Git каталогах `spikes/inference/`. Методика — [проект измерений](../../chats/2026-10-18-inference-design/stage11-plan.md); трактовка — [исследование скорости](../inference-speed.md).

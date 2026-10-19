@@ -35,7 +35,7 @@ bars — локальный поиск по Markdown-документации п
 - [BARS_INSTRUCTION.md](BARS_INSTRUCTION.md) — генерируемая bars инструкция по оформлению; в поисковый индекс не входит.
 - [MAIN_IDEA.md](MAIN_IDEA.md) — требования всего проекта: исходная формулировка, Т-N, НФТ, уроки образца, критерии приёмки, журнал раундов.
 - [features/](features/Index.md) — фичи bars: что умеет и как это работает; поставка (установщик, автозапуск) — [features/distribution/](features/distribution/Index.md).
-- [architecture/](architecture/Index.md) — общее устройство: стек, процессы, канал, протокол, схема индекса.
+- [architecture/](architecture/Index.md) — общее устройство: стек, процессы, канал, протокол, схема индекса, граф.
 - [adr/](adr/Index.md) — принятые решения с обоснованием.
 - [knowledge/](knowledge/Index.md) — внутренняя база знаний: исследования, сравнения, замеры спайков.
 - [chats/](chats/Index.md) — журнал сессий агентов: ход работы и передача дел.

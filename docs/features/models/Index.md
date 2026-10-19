@@ -4,14 +4,12 @@ title: Модели bars — оглавление
 
 # Модели
 
-Откуда bars берёт векторы и оценки реранка.
+[← Фичи bars](../Index.md). Откуда bars берёт векторы и оценки реранка.
 
-- [local-models.md](local-models.md) — встроенные модели: ONNX, GGUF Q4_K_M и candle/Nomic, rerank, префиксы, кэш и отпечаток модели.
-- [external-models.md](external-models.md) — удалённый провайдер и локальный OpenAI-совместимый адрес: адреса и форматы запросов, размерность, ключи, ошибки.
-- [memory-plan.md](memory-plan.md) — этап 13: фазовые замеры памяти, спайк выгрузки rerank, буферы и критерии принятия оптимизаций.
-- [memory-reduction.md](memory-reduction.md) — снижение памяти: реализованные FP16 rerank/lifecycle/embed, отказ INT8 embed, контракты кэша и оставшаяся приёмка.
-- [inference-plan.md](inference-plan.md) — этап 11: методика измерений, результаты отбора, контракт внедрения FP16 rerank и границы приёмки.
-- [device-plan.md](device-plan.md) — этап 17: отдельные устройства embed/rerank, сведения об исполнении, повторы документов, защита полной переиндексации и план приёмки.
-- [device-verification.md](device-verification.md) — результаты этапа 17: регрессии, реальные CPU/DirectML-сессии, Save/Get и границы UI-проверки.
-- [device-evidence.json](device-evidence.json) — устройства, выдача до и после Save, хеши исходников и бинарника этапа 17.
-- [gguf-plan.md](gguf-plan.md) — этап 22: контракт встроенного llama.cpp, спайк и критерии приёмки.
+| Файл | Когда читать |
+|---|---|
+| [local-models.md](local-models.md) | Встроенные модели: каталог (bge-m3 FP32/FP16, Qwen GGUF, Nomic), rerank и его precision, префиксы и длина входа, кэш и «скачано», выгрузка по простою, отпечаток модели, устройства, приёмка FP16 rerank |
+| [external-models.md](external-models.md) | Удалённый провайдер и локальный OpenAI-совместимый адрес: адреса и форматы запросов, размерность, ключи, ошибки и повторы |
+| [memory-plan.md](memory-plan.md) | Снижение памяти (этап открыт): что уже сделано, что осталось принять, критерии и ограничения стенда |
+
+Замеры, методика и исследования по моделям лежат в [базе знаний](../../knowledge/Index.md): [скорость инференса](../../knowledge/inference-speed.md), [память](../../knowledge/memory.md), [устройства и библиотеки](../../knowledge/inference-devices.md), [GGUF](../../knowledge/gguf-models.md). Отчёты завершённых этапов 11, 17 и 22 — в журналах сессий [inference-design](../../chats/2026-10-18-inference-design/stage11-plan.md), [device-design](../../chats/2026-10-18-device-design/stage17-plan.md), [gguf-models](../../chats/2026-10-18-gguf-models/stage22-plan.md).

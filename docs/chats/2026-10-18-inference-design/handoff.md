@@ -6,7 +6,7 @@ title: Передача сессии — этап 11 завершён
 
 ## Сделано
 
-Исследование и FP16 rerank в продуктовом коде завершены 18-10-2026. Итог: [скорость и ограничения](../../knowledge/inference-speed.md), [доказательства](../../knowledge/inference-2026-10-18/Index.md), [контракт внедрения](../../features/models/inference-plan.md). Полный поиск ускорился в 1,6–1,7× без обнаруженных потерь на 138 вопросах; worker private peak 7,36→6,00 ГиБ. Исследовательский IPC — 44 ответа; отдельная приёмка нового loader — 138 core + 22 IPC без потерь/fallback. FP16 DirectML, CPU FP32, tokenizer CPU, GPU batch16→4→1 только при allocation error; pinned weights/tokenizer, BLAKE3 и атомарный manifest кэша. INT8/усечение/MiniLM не приняты из-за потерь.
+Исследование и FP16 rerank в продуктовом коде завершены 18-10-2026. Итог: [скорость и ограничения](../../knowledge/inference-speed.md), [доказательства](../../knowledge/inference-2026-10-18/Index.md), [контракт внедрения](stage11-plan.md). Полный поиск ускорился в 1,6–1,7× без обнаруженных потерь на 138 вопросах; worker private peak 7,36→6,00 ГиБ. Исследовательский IPC — 44 ответа; отдельная приёмка нового loader — 138 core + 22 IPC без потерь/fallback. FP16 DirectML, CPU FP32, tokenizer CPU, GPU batch16→4→1 только при allocation error; pinned weights/tokenizer, BLAKE3 и атомарный manifest кэша. INT8/усечение/MiniLM не приняты из-за потерь.
 
 Финальные проверки: 197 core, 142 worker, реальный CPU FP32. Стенды release собраны. Полная/неизменённая/инкрементальная индексация четырёх вариантов завершена; чистые GPU 57,34→35,81 с. Полные тексты/SQLite другого проекта и веса остаются в ignored data/runs. Установленный bars не обновлялся, коммит/push этой работы не выполнялись; параллельные правки сохранены.
 

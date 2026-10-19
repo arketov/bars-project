@@ -51,7 +51,7 @@
 
 ## Этап: оперативная память и файл подкачки
 
-Внедрены FP16 rerank, профиль `bge-m3:fp16`, выгрузка моделей по простою, порционный точный поиск. Исследования — [memory-results.md](docs/knowledge/memory-results.md), проект — [memory-plan.md](docs/features/models/memory-plan.md).
+Внедрены FP16 rerank, профиль `bge-m3:fp16`, выгрузка моделей по простою, порционный точный поиск. Исследования — [memory.md](docs/knowledge/memory.md), проект — [memory-plan.md](docs/features/models/memory-plan.md).
 
 9. Исследование: полная индексация новым FP16 embed; bars и holdout на новых индексах; парный пик FP16 embed + rerank, третий повтор прежней пары; baseline памяти окна; индексатор и allocator.
 10. Реализация: меры снижения памяти по выводам шага 9; в документации — чего ждать от файла подкачки на машинах с разным объёмом памяти (bars настройки системы не меняет).

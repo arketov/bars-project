@@ -30,6 +30,6 @@ Nomic v2 MoE сохраняется на candle: Т-17 требует досту
 
 ## Где применяется
 
-- [Контракт и критерии GGUF](../features/models/gguf-plan.md).
+- [Контракт и критерии GGUF](../chats/2026-10-18-gguf-models/stage22-plan.md).
 - [Встроенные модели](../features/models/local-models.md).
 - [Исследование и доказательства](../knowledge/gguf-models.md).

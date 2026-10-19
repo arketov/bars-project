@@ -4,12 +4,6 @@ title: Сборка bars — как собрать, проверить и что
 
 # Сборка bars
 
-## Тяжёлый тест поискового корпуса
-
-`search_corpus` переэмбеддит всю текущую документацию. По наблюдению автора 18-10-2026 жёсткий CPU-прогон слишком долго блокировал процессор и был остановлен; это не ошибка корректности поиска. Тест теперь opt-in: `cargo test --release -p bars-core --test search_corpus -- --ignored --nocapture`. По умолчанию требует фактический DirectML, без тихого продолжения на CPU; пачка 1, кооперативный бюджет индексации 60 с между документами. На CPU — только отдельный явный `BARS_CORPUS_TEST_DEVICE=cpu`. Новые веса не скачиваются. Подготовленный GPU-путь ещё требует отдельного прогона; остановленный CPU-прогон не считать успешной приёмкой.
-
-Для GraphRAG на готовом индексе сначала использовать сохранённые embeddings (`graph_acceptance`); этот замер не требует полной переиндексации и не заменяет отложенную регрессию модели.
-
 Как собирается Cargo workspace bars ([architecture/components.md](../architecture/components.md)) и какие проверки гоняются перед коммитом. Версии крейтов — [architecture/stack.md](../architecture/stack.md).
 
 ## Требования к машине разработчика bars
@@ -54,13 +48,19 @@ npm run dev        # просмотр в браузере на порту 1420: 
 
 Заглушка воркера выбирает сцену параметром адреса: `?scene=empty|indexing|consent|missing|provider|worker-down`; без параметра — обычный проект с тремя результатами.
 
+## Тяжёлый тест поискового корпуса
+
+`search_corpus` переэмбеддит всю текущую документацию. По наблюдению автора 18-10-2026 жёсткий CPU-прогон слишком долго блокировал процессор и был остановлен; это не ошибка корректности поиска. Тест запускается только явно (`#[ignore]`): `cargo test --release -p bars-core --test search_corpus -- --ignored --nocapture`. По умолчанию требует фактический DirectML, без тихого продолжения на CPU; пачка 1, кооперативный бюджет индексации 60 с между документами. На CPU — только отдельный явный `BARS_CORPUS_TEST_DEVICE=cpu`. Новые веса не скачиваются. Остановленный CPU-прогон не считать успешной приёмкой.
+
+Для GraphRAG на готовом индексе используются сохранённые embeddings ([опыт на готовых embeddings](graph-embedding-2026-10-18.md), `scripts/graph-embedding-probe.mjs`): замер не требует полной переиндексации и не заменяет регрессию модели.
+
 ## Установщик Windows
 
 `pwsh scripts/build-installer.ps1` собирает NSIS-установщик; подробности, выбор формата и проверка — [features/distribution/installer.md](../features/distribution/installer.md), [installer.md](installer.md). Нужна сеть при первой сборке (Tauri скачивает NSIS). Для просмотра и проверок ставить `@tauri-apps/cli` отдельно не нужно: он в `devDependencies` пакета `ui/`.
 
-## Что собирается в срезе 0
+## Состав сборки и особенности зависимостей
 
-Все пять крейтов с реальными зависимостями из стека и заглушками вместо логики. Этим проверяются Т-3 (Rust, Tauri, fastembed-rs, без Python) и то, что тяжёлые зависимости линкуются вместе. `bars-app` собирал Tauri с пустой статической страницей; окно на Svelte пришло в срезе 5.
+Cargo workspace из семи крейтов (`crates/*`: `bars-app`, `bars-cli`, `bars-core`, `bars-graph`, `bars-mcp`, `bars-protocol`, `bars-worker`); их роли — [architecture/components.md](../architecture/components.md). Сборка вместе проверяет Т-3: Rust, Tauri, fastembed-rs и встроенный llama.cpp линкуются в одном workspace, Python нет.
 
 Фича `directml` у fastembed включается только на Windows (`cfg(windows)`), потому что на macOS её нет.
 

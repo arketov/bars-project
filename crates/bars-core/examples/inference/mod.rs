@@ -1,4 +1,4 @@
-//! Изолированные опыты этапа 11: docs/features/models/inference-plan.md.
+//! Изолированные опыты этапа 11: docs/chats/2026-10-18-inference-design/stage11-plan.md.
 #![allow(dead_code)]
 #[path = "../bench_memory.rs"]
 mod native_memory;

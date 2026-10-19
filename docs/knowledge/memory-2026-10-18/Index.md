@@ -4,7 +4,7 @@ title: Доказательства замеров памяти bars 18-10-2026
 
 # Доказательства замеров памяти
 
-Методика — [memory-usage.md](../memory-usage.md), результаты — [memory-results.md](../memory-results.md).
+Методика и результаты — [memory.md](../memory.md).
 
 - [20261018T085832957Z-cpu-rerank-1.jsonl](20261018T085832957Z-cpu-rerank-1.jsonl) — 100-мс ряд, фазовые маркеры, время и оценки конфигурации.
 - [20261018T085832957Z-cpu-rerank-1.stderr.txt](20261018T085832957Z-cpu-rerank-1.stderr.txt) — устройство и диагностический stderr опыта.

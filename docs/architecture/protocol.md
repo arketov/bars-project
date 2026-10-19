@@ -8,8 +8,6 @@ title: Протокол канала bars — методы, параметры, 
 
 ## Кто пользуется протоколом bars
 
-GraphRAG добавляет `graph_query`, `graph_search`, `graph_status` для всех клиентов и `graph_build/graph_cancel` для CLI/окна. GraphRequest/GraphReply принадлежат общему `bars-graph` и реэкспортируются `bars-protocol`; MCP не зависит от SQLite/модельного runtime. Старый SearchParams/SearchOutput сохранён, расширенный ответ включается отдельным методом. [Фактическая схема v1 и границы приёмки](../features/graphrag/tools.md#фактический-контракт-v1).
-
 - **`bars-mcp`** превращает каждый MCP-инструмент в один вызов метода ([features/agent-tools/mcp-tools.md](../features/agent-tools/mcp-tools.md)).
 - **`bars-cli`** превращает каждую команду в один вызов метода ([features/agent-tools/cli.md](../features/agent-tools/cli.md)). Флаг `--json` печатает ответ метода как есть.
 - **Окно** живёт в том же процессе, что и воркер, и канал не использует. Его команды Tauri вызывают те же обработчики, что и методы протокола, поэтому окно, MCP и CLI получают одинаковые ответы (Т-20).
@@ -51,8 +49,15 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | `register` | `path` | проект после регистрации | CLI |
 | `unregister` | `cwd`, `project` | `removed: true` | CLI |
 | `session_start` | `cwd`, `source` | `accepted: true`; ответ сразу, проверка идёт в очереди | CLI (хук) |
+| `graph_query` | `cwd`, `project`, `request` (`GraphRequest`: `operation`, `scope`, `budgets`, `limit`, `snapshot`, `cursor` и поля операции) | `GraphReply` — узлы, источники, утверждения, evidence, покрытие, усечение | MCP, CLI |
+| `graph_search` | параметры `search` плюс `mode` (`hybrid`/`mix`/`graph`), `graph_budgets`, `include_related`, `related_budget` | ответ `search` плюс `requested_mode`, `applied_mode`, `fallback_reason`, `related`, `graph_results` | MCP, CLI |
+| `graph_status` | `cwd`, `project` | состояние слоя графа: состояние, снимок, активное задание, число источников, ошибка, версия метода | MCP, CLI |
+| `graph_build` | `cwd`, `project` | `accepted: true` и `job_id`; ход виден в `graph_status` | CLI |
+| `graph_cancel` | `cwd`, `project`, `job_id` | `cancelled`: задание остановлено или уже не активно | CLI |
 | `install` | `client` (`claude-code` / `codex`) | какие файлы изменены, нужно ли одобрить хук в Codex | CLI |
 | `uninstall` | `client` | какие файлы изменены | CLI |
+
+`graph_query` и `graph_search` — общие для клиентов; MCP выставляет шесть read-only инструментов графа поверх `graph_query`, операцию выбирает имя инструмента. Записи графа (`graph_build`, `graph_cancel`) доступны CLI и окну, MCP их не получает. DTO `GraphRequest`/`GraphReply` принадлежат `bars-graph` и реэкспортируются из `bars-protocol`; их версия (`schema_version`, сейчас 1) не связана с версией протокола. Без `mode` прежний `search` и его форма ответа не меняются. Поля, контракт операций и пределы — [tools.md](../features/graphrag/tools.md#фактический-контракт-v1), устройство слоя — [graph.md](graph.md).
 
 Методы, у которых в колонке «Кто вызывает» нет MCP, для `bars-mcp` не существуют: воркер отвечает на них `-32601`. Первым вызовом на соединении должен быть `hello`; до него любой метод, даже неизвестный, получает `protocol_mismatch`.
 
@@ -135,6 +140,12 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | -32007 | `invalid_params` | параметр вне допустимого: неизвестный модуль, `limit` меньше 1 |
 | -32008 | `provider_error` | внешняя модель не ответила; текст без ключей ([secrets.md](secrets.md)) |
 | -32009 | `model_loading` | встроенная модель ещё скачивается или загружается; в `data.percent` — ход скачивания в процентах, 100 — файлы на месте, модель грузится в память |
+| -32010 | `graph_not_ready` | нужный слой графа не построен или отстаёт; в `mix` вместо ошибки идёт возврат к `hybrid` с причиной |
+| -32011 | `graph_capability_unavailable` | запрошенная возможность графа не поддержана (например `change_description` у `impact`, `roots` у `context`) |
+| -32012 | `stale_ref` | ref или endpoint устаревшей ревизии; похожий объект не подбирается |
+| -32013 | `snapshot_expired` | снимок прежнего поколения больше недоступен; запрос нужно повторить |
+| -32014 | `cursor_mismatch` | курсор не соответствует снимку, области или параметрам запроса |
+| -32015 | `cancelled` | операция отменена; это не ответ «совпадений нет» |
 
 Коды выхода `bars-cli` по ошибкам: `reindex_required` и `reindex_needs_consent` — `3`, недоступный воркер — `2`, остальные — `1`.
 
