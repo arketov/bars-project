@@ -4,6 +4,8 @@
 import { call, joinPath, openPath, pickFolder } from "./api";
 import type { GraphReply,GraphSearchOutput,RetrievalMode } from './graph';
 import { documentsIn } from "./format";
+import { NewTopicsStore } from "./new-topics.svelte";
+import { newRequestId } from "./new-topics";
 import { NotificationCenter, type Notice } from "./notifications";
 import { buildTree, searchScope, toggle, type SearchScope, type TreeNode } from "./tree";
 import {
@@ -79,6 +81,14 @@ class App {
   /** Что нашлось ниже порога: лучшая оценка и самый низкий порог, который можно задать (empty-states.md). */
   emptyInfo = $state<{ best: number | null; lowest: number | null } | null>(null);
   viewer = $state<ViewedDocument | null>(null);
+  /** «Новые темы» текущего проекта: счётчик строки дерева и экран. */
+  topics = new NewTopicsStore((text, bad) => this.flash(text, bad));
+  /** «Новые темы» открыты в правой панели, как файл: вместо просмотра документа. */
+  topicsOpen = $state(false);
+  /** Контекст отображённой выдачи для ручной отметки «Не хватило знаний» (NT-02): не поле ввода, а то, что искали. */
+  displayed = $state<{ requestId: string; query: string; modules: string[]; files: string[] } | null>(null);
+  /** ID обращения, которое пользователь уже отметил; повторная отметка идемпотентна и не нужна. */
+  markedRequest = $state<string | null>(null);
   consentOpen = $state(false);
   deletingProject = $state<ProjectInfo | null>(null);
   deleteBusy = $state(false);
@@ -211,6 +221,7 @@ class App {
       this.#notifications.resolve("worker");
       if (force || changed || this.#tick % PROJECTS_EVERY === 0) await this.loadProjects();
       if (this.current) await this.loadStatus();
+      this.syncTopics(force);
     } catch (error) {
       if (epoch !== this.#epoch) return;
       this.#failures += 1;
@@ -238,6 +249,13 @@ class App {
     } else if (this.tree.length === 0 && this.current) {
       await this.loadTree();
     }
+  }
+
+  /** Привязывает «Новые темы» к выбранному проекту и раз в несколько тиков обновляет счётчик строки дерева. */
+  private syncTopics(force: boolean): void {
+    this.topics.bind(this.current);
+    if (!this.current || this.project?.state === "unavailable") return;
+    if (force || this.#tick % PROJECTS_EVERY === 0) void this.topics.load(true);
   }
 
   async loadStatus(): Promise<void> {
@@ -286,9 +304,14 @@ class App {
     this.searchedQuery = "";
     this.emptyInfo = null;
     this.searchError = null;
+    this.displayed = null;
+    this.markedRequest = null;
     this.closeViewer();
+    this.topicsOpen = false;
     this.minScore = null;
     this.status = null;
+    this.topics.bind(path);
+    if (path) void this.topics.load(true);
     await this.loadTree();
     if (path) await this.loadStatus();
   }
@@ -306,6 +329,7 @@ class App {
     const query = this.query.trim();
     if (!project || !query) return;
     const searchId = ++this.#searchId;
+    const requestId = newRequestId();
     this.searching = true;
     this.searchError = null;
     const started = performance.now();
@@ -322,9 +346,13 @@ class App {
         ...(mode==='mix'?{include_related:this.includeRelated}:{}),
         ...(this.count === null ? {} : { limit: this.count }),
         ...(this.minScore === null ? {} : { min_score: this.minScore }),
+        // Служебное поле окна: ID отображаемого обращения. Воркер считает по нему спрос на тему, ручная отметка опирается на него же.
+        _window: { request_id: requestId },
       });
       if (searchId !== this.#searchId || this.current !== project.path) return;
       this.results = output;
+      this.displayed = { requestId, query, modules, files };
+      this.markedRequest = null;
       this.graphSearch='requested_mode' in output?output as GraphSearchOutput:null;
       this.#notifications.resolve(`search:${project.path}`);
       if (output.rerank_error) this.#notifications.error(`rerank:${project.path}`, `Ошибка rerank · ${project.name}`, "Поиск выполнен без rerank. Проверьте модель и подключение.", "models");
@@ -336,6 +364,7 @@ class App {
     } catch (error) {
       if (searchId !== this.#searchId || this.current !== project.path) return;
       this.results = null;
+      this.displayed = null;
       this.graphSearch = null;
       this.searchError = error instanceof BarsError ? error : new BarsError(String(error));
       if (this.searchError.kind !== "model_loading") {
@@ -394,11 +423,33 @@ class App {
     this.minScore = null;
   }
 
+  /** «Не хватило знаний»: тема по отображённой выдаче (NT-02). Повторная отметка того же обращения идемпотентна. */
+  async markMissing(): Promise<void> {
+    const displayed = this.displayed;
+    if (!displayed || this.markedRequest === displayed.requestId) return;
+    const created = await this.topics.markMissing(displayed);
+    if (created === null) return;
+    this.markedRequest = displayed.requestId;
+    this.flash(created ? "Тема добавлена в «Новые темы»" : "Такая тема уже есть в «Новых темах»");
+  }
+
+  /** Нажатие на строку «Новые темы»: открывается в панели просмотра, не меняя область поиска и запрос. */
+  openTopics(): void {
+    this.view = "main";
+    this.closeViewer();
+    this.topicsOpen = true;
+  }
+
+  closeTopics(): void {
+    this.topicsOpen = false;
+  }
+
   async openDocument(hit: DocumentReference): Promise<void> {
     const project = this.project;
     if (!project) return;
     const reading = ++this.#reading;
     this.view = "main";
+    this.topicsOpen = false;
     try {
       // Путь индекса уже от корня проекта: исключаем docs/docs/x.md при совпадении имён.
       const output = await call<ReadOutput>("read", { cwd: project.path, project: project.path, path: `./${hit.path}` });

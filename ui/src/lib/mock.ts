@@ -3,6 +3,7 @@
 
 import { BarsError } from "./types";
 import { clone } from "./settings-logic";
+import type { TopicCheck, TopicDetail, TopicHit, TopicStatus } from "./new-topics";
 import type {
   ActivityOutput,
   Operation,
@@ -142,6 +143,84 @@ title: Гибридный поиск
 Каждый результат: путь, модуль, \`title\` документа, цепочка заголовков, строки, текст чанка и оценка.
 `;
 
+// «Новые темы»: состояние живёт, пока открыта страница; сцена `topics-empty|topics-error|topics-off` меняет исходное.
+const NOW = Math.floor(Date.now() / 1000);
+const TOPIC_HIT: TopicHit = { path: "docs/features/routes/lifecycle.md", title: "Жизненный цикл маршрута", heading_chain: "Жизненный цикл маршрута/Отмена", first_line: 18, last_line: 39, score: 0.81, score_kind: "rerank" };
+let topicsState: { enabled: boolean; generation: number; next: number; topics: TopicDetail[] } | null = null;
+function topicStore() {
+  if (topicsState) return topicsState;
+  const base = { resolved_at: null, variants: 1, reasons: ["empty_result"], checks: [] as TopicCheck[] };
+  const empty = scene() === "topics-empty";
+  topicsState = {
+    enabled: scene() !== "topics-off", generation: 1, next: 4,
+    topics: empty ? [] : [
+      { ...base, id: 1, revision: 1, title: "Как восстановить изношенные шины бота?", status: "open", first_seen: NOW - 86400, last_seen: NOW - 1080, observations: 4, sources: ["window", "mcp"], variants: 2, variants_list: [{ id: 11, text: "Как восстановить изношенные шины бота?", scope: "project" }, { id: 12, text: "Можно ли вернуть боту новые шины без переподключения?", scope: "m=features;f=" }] },
+      { ...base, id: 2, revision: 3, title: "Как отменить маршрут после смены роли?", status: "materials_found", first_seen: NOW - 7200, last_seen: NOW - 3600, observations: 2, sources: ["mcp"], variants_list: [{ id: 21, text: "Как отменить маршрут после смены роли?", scope: "m=features;f=" }], checks: [{ id: 5, topic_revision: 3, at: NOW - 3000, expanded: false, model: "builtin:BAAI/bge-m3", params: '{"min_score":0.3,"results":5}', conclusive: true, results: [{ variant_id: 21, scope: "m=features;f=", outcome: "found", hits: [TOPIC_HIT] }] }] },
+      { ...base, id: 3, revision: 2, title: "Где задаётся лимит числа ботов?", status: "resolved", resolved_at: NOW - 43200, first_seen: NOW - 172800, last_seen: NOW - 100000, observations: 1, sources: ["window"], reasons: ["manual_missing"], variants_list: [{ id: 31, text: "Где задаётся лимит числа ботов?", scope: "project" }] },
+    ],
+  };
+  return topicsState;
+}
+const topicSummary = (t: TopicDetail) => { const { variants_list: _v, checks: _c, ...summary } = t; return summary; };
+function topicFor(params: Record<string, unknown>, expected = true): TopicDetail {
+  const topic = topicStore().topics.find((item) => item.id === Number(params.id));
+  if (!topic || (expected && Number(params.revision) !== topic.revision)) throw new BarsError("тема изменилась или удалена: обновите список", "stale_ref", -32012);
+  return topic;
+}
+async function topicsCall(method: string, params: Record<string, unknown>): Promise<unknown> {
+  if (scene() === "topics-error" && method === "new_topics_list") throw new BarsError("не удалось открыть хранилище тем: доступ запрещён", null, -32603);
+  const store = topicStore();
+  switch (method) {
+    case "new_topics_list":
+      return { enabled: store.enabled, generation: store.generation, topics: store.topics.map(topicSummary), store_path: `${String(params.project)}\.bars\new-topics.sqlite3`, losses: scene() === "topics-loss" ? 3 : 0, loss_reason: scene() === "topics-loss" ? "очередь записи переполнена" : null };
+    case "new_topics_get":
+      return clone(topicFor(params, false));
+    case "new_topics_mark_missing": {
+      if (!store.enabled) throw new BarsError("сбор выключен", "invalid_params", -32007);
+      const text = String(params.query);
+      const same = store.topics.find((t) => t.variants_list.some((v) => v.text === text));
+      if (same) return { topic_id: same.id, created: false };
+      const id = store.next++;
+      store.topics.push({ id, revision: 1, title: text, status: "open", first_seen: NOW, last_seen: NOW, resolved_at: null, observations: 1, sources: ["window"], reasons: ["manual_missing"], variants: 1, variants_list: [{ id: id * 10, text, scope: "project" }], checks: [] });
+      return { topic_id: id, created: true };
+    }
+    case "new_topics_check": {
+      await delay(700);
+      const topic = topicFor(params);
+      const found = topic.id !== 1 || Boolean(params.expand);
+      const check: TopicCheck = { id: topic.checks.length + 100, topic_revision: topic.revision, at: Math.floor(Date.now() / 1000), expanded: Boolean(params.expand), model: "builtin:BAAI/bge-m3", params: '{"min_score":0.3,"results":5}', conclusive: true, results: topic.variants_list.map((v) => ({ variant_id: v.id, scope: params.expand ? "project" : v.scope, outcome: found ? "found" : "empty", hits: found ? [TOPIC_HIT] : [] })) };
+      topic.checks = [check, ...topic.checks].slice(0, 2);
+      if (found && topic.status === "open") { topic.status = "materials_found"; topic.revision += 1; }
+      return clone(topic);
+    }
+    case "new_topics_set_status": {
+      const topic = topicFor(params);
+      topic.status = String(params.status) as TopicStatus;
+      topic.resolved_at = topic.status === "resolved" ? Math.floor(Date.now() / 1000) : topic.resolved_at;
+      return { revision: ++topic.revision };
+    }
+    case "new_topics_rename": {
+      const topic = topicFor(params);
+      topic.title = String(params.title);
+      return { revision: ++topic.revision };
+    }
+    case "new_topics_delete": {
+      const topic = topicFor(params);
+      store.topics = store.topics.filter((t) => t !== topic);
+      return { accepted: true };
+    }
+    case "new_topics_clear":
+      if (params.confirmed !== true) throw new BarsError("нужно подтверждение", "invalid_params", -32007);
+      store.topics = [];
+      return { generation: ++store.generation };
+    case "new_topics_settings":
+      store.enabled = Boolean(params.enabled);
+      return { enabled: store.enabled, generation: ++store.generation };
+    default:
+      throw new BarsError(`заглушка не знает метод ${method}`, null, -32601);
+  }
+}
+
 let paused = false;
 const secrets = new Set<string>();
 let savedSettings: SettingsDoc = {
@@ -216,6 +295,7 @@ export async function mockCall(method: string, params: Record<string, unknown>):
     const source=(await import('./mock-graph')).fixtureSource(String(params.path??''));
     if(source)return {title:'Источник GraphRAG (фикстура)',text:source};
   }
+  if (method.startsWith("new_topics_")) return topicsCall(method, params);
   if (scene() === "worker-down") throw new BarsError("нет связи с воркером", null, -32603);
   switch (method) {
     case "projects":

@@ -8,6 +8,7 @@
   import EmptyProjects from "./lib/EmptyProjects.svelte";
   import IndexingPage from "./lib/IndexingPage.svelte";
   import Missing from "./lib/Missing.svelte";
+  import NewTopicsPage from "./lib/NewTopicsPage.svelte";
   import NoDocs from "./lib/NoDocs.svelte";
   import SearchPane from "./lib/SearchPane.svelte";
   import SettingsPage from "./lib/SettingsPage.svelte";
@@ -43,7 +44,7 @@
   const noDocs = $derived(
     !!project && project.state === "ready" && app.documentsOf(project) === 0 && !busy && app.tree.length === 0,
   );
-  const viewing = $derived(app.view === "main" && !!app.viewer);
+  const viewing = $derived(app.view === "main" && (!!app.viewer || app.topicsOpen));
 </script>
 
 {#if app.view === "settings"}
@@ -72,11 +73,9 @@
       {:catch error}
         <main role="alert">Не удалось загрузить граф: {String(error)}</main>
       {/await}
-    {:else if noDocs}
-      <NoDocs {project} />
     {:else}
-      <SearchPane />
-      {#if viewing}<Viewer />{/if}
+      {#if noDocs}<NoDocs {project} />{:else}<SearchPane />{/if}
+      {#if app.topicsOpen}<NewTopicsPage />{:else if viewing}<Viewer />{/if}
     {/if}
     </div>
     </section>

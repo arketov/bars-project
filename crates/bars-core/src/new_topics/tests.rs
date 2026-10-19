@@ -617,6 +617,9 @@ fn a_check_with_materials_moves_an_open_topic_and_keeps_two_checks() {
         after.checks.iter().map(|c| c.at).collect::<Vec<_>>(),
         vec![12, 11]
     );
+    // Переход сделала сама проверка: она относится к новой ревизии; прежняя осталась со своей.
+    assert_eq!(after.checks[0].topic_revision, after.revision);
+    assert_eq!(after.checks[1].topic_revision, topic.revision);
 }
 
 #[test]

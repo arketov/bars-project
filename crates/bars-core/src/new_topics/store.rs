@@ -816,12 +816,14 @@ impl TopicStore {
         let tx = self
             .db
             .transaction_with_behavior(TransactionBehavior::Immediate)?;
-        let status: Option<String> = tx
-            .query_row("SELECT status FROM topics WHERE id=?1", [topic], |r| {
-                r.get(0)
-            })
+        let current: Option<(String, i64)> = tx
+            .query_row(
+                "SELECT status, revision FROM topics WHERE id=?1",
+                [topic],
+                |r| Ok((r.get(0)?, r.get(1)?)),
+            )
             .optional()?;
-        let Some(status) = status else {
+        let Some((status, revision)) = current else {
             return Ok(None);
         };
         tx.execute(
@@ -877,6 +879,14 @@ impl TopicStore {
                 "UPDATE topics SET status='materials_found', revision=revision+1 WHERE id=?1",
                 [topic],
             )?;
+            // Переход сделала сама проверка: пока тему не меняли другие, проверка относится к новой
+            // ревизии и не считается устаревшей (устаревает только от чужого изменения).
+            if revision == check.topic_revision {
+                tx.execute(
+                    "UPDATE checks SET topic_revision=?1 WHERE id=?2",
+                    params![revision + 1, check_id],
+                )?;
+            }
         }
         tx.commit()?;
         Ok(self.get(topic)?.and_then(|t| t.checks.into_iter().next()))

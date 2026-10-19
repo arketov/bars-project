@@ -43,7 +43,7 @@ use serde_json::Value;
 
 use crate::clients::{self, InstallEnv};
 use crate::settings_io::{self, SaveError};
-use crate::worker::{JobKind, Priority, ProjectSnapshot, Readiness, Worker, rfc3339};
+use crate::worker::{JobKind, Priority, ProjectSnapshot, Readiness, Worker, index_token, rfc3339};
 use errors::{doc_path_error, outline_error, read_error, search_error, worker_error};
 
 /// Выполняет вызовы канала на воркере.
@@ -422,7 +422,7 @@ impl WorkerHandler {
                     source,
                     reason: bars_core::new_topics::Reason::EmptyResult,
                     params: serde_json::to_string(&output.applied).unwrap_or_default(),
-                    index_stamp: status.updated_at.map(rfc3339),
+                    index_stamp: status.updated_at.map(index_token),
                     vector: query_vector.map(|vector| (space, vector)),
                     at: crate::mcp_history::now(),
                 },

@@ -3,6 +3,7 @@
   import { projectDot, problemStatus } from "./format";
   import Icon from "./Icon.svelte";
   import { theme } from "./theme.svelte";
+  import { badgeText } from "./new-topics";
   import { filterTree, touchedModules } from "./tree";
   import TreeRow from "./TreeRow.svelte";
   import Notifications from "./Notifications.svelte";
@@ -122,10 +123,22 @@
   {#if hasTree}
     <label class="filter">
       <Icon name="search" size={14} width={2.4} />
-      <input placeholder="Фильтр модулей и файлов" autocomplete="off" bind:value={app.filter} />
+      <input placeholder="Фильтр документов" autocomplete="off" bind:value={app.filter} />
     </label>
 
     <div class="tree">
+      <button
+        class="topics-row"
+        class:on={app.topicsOpen}
+        aria-current={app.topicsOpen ? "true" : undefined}
+        aria-label={app.topics.count === null ? "Новые темы" : `Новые темы: активных ${app.topics.count}`}
+        title="Вопросы, для которых не нашлись материалы"
+        onclick={() => app.openTopics()}
+      >
+        <Icon name="new-topics" size={15} width={1.7} />
+        <span class="nm">Новые темы</span>
+        <span class="ct" class:zero={app.topics.count === 0}>{badgeText(app.topics.count)}</span>
+      </button>
       <!-- svelte-ignore a11y_no_noninteractive_tabindex: отдельная цель клавиатурного меню, без действия по Enter. -->
       <div class="docs-root" role="group" tabindex="0" aria-label="Корень документации" data-folder-path="." data-folder-kind="Корень документации" title={app.docsRoot}>
         <Icon name="folder" size={14} /><span><b>Корень документации</b><small>{app.docsRoot}</small></span>
@@ -193,6 +206,15 @@
 </aside>
 
 <style>
+  .topics-row { display: flex; align-items: center; gap: 8px; width: 100%; padding: 5px 8px 5px 24px; margin-bottom: 4px; border: 0; border-radius: 8px; background: none; color: inherit; text-align: left; font-size: 13px; }
+  .topics-row:hover { background: var(--panel-2); }
+  .topics-row.on { background: var(--accent-soft); color: var(--accent-text); }
+  .topics-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .topics-row :global(svg) { flex: none; color: var(--muted); }
+  .topics-row.on :global(svg) { color: var(--accent-text); }
+  .topics-row .nm { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .topics-row .ct { color: var(--faint); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+  .topics-row .ct:not(.zero) { color: var(--accent-text); font-weight: 600; }
   .docs-root { display: flex; align-items: center; gap: 8px; padding: 7px 8px; margin-bottom: 5px; border-bottom: 1px solid var(--line); border-radius: 7px; color: var(--muted); }
   .docs-root:hover { background: var(--panel-2); }
   .docs-root:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }

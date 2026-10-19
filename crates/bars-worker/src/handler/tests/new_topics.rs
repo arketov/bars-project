@@ -428,7 +428,9 @@ async fn check_finds_materials_without_adding_demand_and_keeps_the_user_decision
     assert!(!check.results[0].hits.is_empty());
     assert!(check.conclusive && !check.expanded);
     assert_eq!(checked.topic.status, "materials_found");
-    assert_eq!(check.topic_revision, before.topic.revision);
+    // Переход в «Есть материалы» сделала сама проверка: она относится к новой ревизии и не устаревшая.
+    assert_eq!(check.topic_revision, checked.topic.revision);
+    assert_eq!(checked.topic.revision, before.topic.revision + 1);
 
     // Проверка не спрос: наблюдений по-прежнему одно.
     Env::settle().await;

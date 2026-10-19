@@ -47,7 +47,7 @@ pub use models::{
 pub use queue::Priority;
 pub use registry::{Discovered, ProjectEntry, Registry, RegistryError, ResolveError};
 pub use summary::{Health, Line, Summary};
-pub use timefmt::rfc3339;
+pub use timefmt::{index_token, rfc3339};
 
 use control::{JobCell, JobObserver, Pause};
 pub use control::{Kind as JobKind, Progress as JobProgress};

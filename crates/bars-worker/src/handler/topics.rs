@@ -20,7 +20,7 @@ use bars_protocol::{
 
 use super::{WorkerHandler, topic_scope};
 use crate::new_topics::{CONTEXT, Origin, Purpose, SearchContext, describe};
-use crate::worker::rfc3339;
+use crate::worker::index_token;
 
 /// Самое длинное название темы, которое можно задать вручную.
 const MAX_TITLE: usize = 300;
@@ -142,7 +142,7 @@ impl WorkerHandler {
         self.worker
             .status(project)
             .ok()
-            .and_then(|status| status.updated_at.map(rfc3339))
+            .and_then(|status| status.updated_at.map(index_token))
     }
 
     pub(super) async fn new_topics_list(

@@ -139,6 +139,15 @@
               <span>{results.applied.score_kind === "rerank" ? "Порядок: по оценке rerank" : "Порядок: гибридный"}</span>
               <span>порог <b>{decimal(results.applied.min_score)}</b></span>
               <span>{app.elapsedMs} мс</span>
+              {#if app.displayed}
+                <span class="missing">
+                  {#if app.markedRequest === app.displayed.requestId}
+                    <span class="marked" role="status"><Icon name="check" size={12} width={2.4} />Добавлено в «Новые темы»</span>
+                  {:else}
+                    <button class="link" title="Ответа в этих фрагментах нет: запомнить вопрос в «Новых темах»" onclick={() => app.markMissing()}>Не хватило знаний</button>
+                  {/if}
+                </span>
+              {/if}
             </div>
             <p class="score-help muted">
               {#if results.applied.score_kind === "cosine"}
@@ -235,6 +244,9 @@
   .score-help { font-size: 12px; line-height: 1.5; margin: -6px 2px 14px; }
   .meta { color: var(--muted); font-size: 12.5px; margin: 6px 2px 14px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
   .meta b { color: var(--text); font-weight: 600; }
+  .missing { margin-left: auto; }
+  .marked { display: inline-flex; align-items: center; gap: 5px; color: var(--good); }
+  .missing .link { font-size: 12.5px; }
   .count { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12.5px; white-space: nowrap; }
   .stepper { display: flex; align-items: center; border: 1px solid var(--line-2); border-radius: 8px; background: var(--panel-2); }
   .stepper button { border: 0; background: none; width: 24px; height: 26px; color: var(--muted); font-size: 15px; line-height: 1; padding: 0; }

@@ -3,9 +3,11 @@
   type Name =
     | "chevron-down" | "chevron-right" | "plus" | "search" | "moon" | "gear" | "arrow-right"
     | "external" | "close" | "doc" | "copy" | "back" | "folder" | "warn" | "info" | "error"
-    | "pause" | "play" | "stop" | "check" | "refresh" | "bell";
+    | "pause" | "play" | "stop" | "check" | "refresh" | "bell" | "new-topics" | "more";
 
   const PATHS: Record<Name, string> = {
+    "new-topics": "M13 3H6a2 2 0 0 0-2 2v15a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1v-8M8 11h4M8 15h7M8 18h4M18 2l1.2 3.8L23 7l-3.8 1.2L18 12l-1.2-3.8L13 7l3.8-1.2Z",
+    more: "M5 12h.01M12 12h.01M19 12h.01",
     bell: "M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4",
     "chevron-down": "m7 10 5 5 5-5",
     "chevron-right": "M3 1l4 4-4 4",
