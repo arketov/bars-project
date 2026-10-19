@@ -26,10 +26,26 @@ foreach ($tool in 'rustc', 'cargo', 'node', 'npm') {
     }
 }
 
+# Терминал, открытый до установки SDK, не видит VULKAN_SDK: берём его из пользовательских и системных
+# переменных, затем из самой новой папки C:\VulkanSDK.
+if (-not $env:VULKAN_SDK -or -not (Test-Path -LiteralPath (Join-Path $env:VULKAN_SDK 'Bin/glslc.exe'))) {
+    $candidates = @(
+        [Environment]::GetEnvironmentVariable('VULKAN_SDK', 'User'),
+        [Environment]::GetEnvironmentVariable('VULKAN_SDK', 'Machine')
+    )
+    $candidates += Get-ChildItem -LiteralPath (Join-Path $env:SystemDrive 'VulkanSDK') -Directory -ErrorAction SilentlyContinue |
+        Sort-Object { try { [version]$_.Name } catch { [version]'0.0' } } -Descending | ForEach-Object FullName
+    foreach ($candidate in $candidates) {
+        if ($candidate -and (Test-Path -LiteralPath (Join-Path $candidate 'Bin/glslc.exe'))) {
+            $env:VULKAN_SDK = $candidate
+            break
+        }
+    }
+}
 # Вложенный shader generator llama.cpp на MSVC требует последовательной сборки
 # и коротких путей; пользователь может явно задать свой короткий target.
 if (-not $env:VULKAN_SDK -or -not (Test-Path -LiteralPath (Join-Path $env:VULKAN_SDK 'Bin/glslc.exe'))) {
-    throw 'Для встроенного Qwen GGUF нужен Vulkan SDK. Установите SDK LunarG и задайте VULKAN_SDK перед сборкой.'
+    throw 'Для встроенного Qwen GGUF нужен Vulkan SDK. Установите SDK LunarG (папка C:\VulkanSDK\<версия> находится сама) или задайте VULKAN_SDK перед сборкой.'
 }
 $env:CMAKE_BUILD_PARALLEL_LEVEL = '1'
 $env:CMAKE_GENERATOR = 'Ninja'
