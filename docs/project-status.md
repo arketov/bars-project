@@ -39,4 +39,4 @@ macOS предусмотрена требованиями, но сборка, Co
 
 ## Как читать документацию bars о текущем состоянии
 
-[overview.md](overview.md) объясняет назначение, [getting-started.md](getting-started.md) — начало работы, [features/](features/Index.md) и [architecture/](architecture/Index.md) — текущие интерфейсы и устройство. [MAIN_IDEA.md](MAIN_IDEA.md) хранит требования; его раздел «Решение» ведёт к архитектурным документам. [adr/](adr/Index.md) хранит решения, [knowledge/](knowledge/Index.md) — исследования и замеры, [chats/](chats/Index.md) — историю сессий. Исследование и старый handoff не заменяют описание текущей реализации.
+[overview.md](overview.md) объясняет назначение, [manual/](manual/Index.md) — руководство пользователя простым языком, [features/](features/Index.md) и [architecture/](architecture/Index.md) — текущие интерфейсы и устройство. [MAIN_IDEA.md](MAIN_IDEA.md) хранит требования; его раздел «Решение» ведёт к архитектурным документам. [adr/](adr/Index.md) хранит решения, [knowledge/](knowledge/Index.md) — исследования и замеры, [chats/](chats/Index.md) — историю сессий. Исследование и старый handoff не заменяют описание текущей реализации.
