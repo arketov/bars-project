@@ -64,6 +64,9 @@ pub struct SearchResponse {
     pub applied: AppliedParams,
     /// Причина, по которой rerank включён, но выдача вернулась без него.
     pub rerank_error: Option<String>,
+    /// Нормализованный вектор запроса, если он вычислялся (при пустом корпусе — `None`). Внутренний
+    /// сигнал для воркера («Новые темы»), в публичную выдачу не попадает.
+    pub query_vector: Option<Vec<f32>>,
 }
 
 /// Ищет в индексе одного проекта. Реранк идёт, если передан `reranker`; если он не отработал,
@@ -105,6 +108,7 @@ pub fn search_expanded(
             hits: Vec::new(),
             applied: planned,
             rerank_error: None,
+            query_vector: None,
         });
     }
 
@@ -162,6 +166,7 @@ pub fn search_expanded(
                     hits: threshold_and_cut(hits, &planned),
                     applied: planned,
                     rerank_error: None,
+                    query_vector: Some(query_vector),
                 });
             }
             Err(error) => rerank_error = Some(error.to_string()),
@@ -188,6 +193,7 @@ pub fn search_expanded(
         hits,
         applied,
         rerank_error,
+        query_vector: Some(query_vector),
     })
 }
 

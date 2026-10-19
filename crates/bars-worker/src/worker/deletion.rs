@@ -118,6 +118,10 @@ fn remove_working_files(project: &Path, home: &Path) -> io::Result<()> {
         directory.join("config.toml"),
         directory.join("config.toml.bars-tmp"),
     ];
+    // Рабочая БД «Новых тем» и её sidecar-файлы (NT-09).
+    for sidecar in ["", "-wal", "-shm", "-journal"] {
+        files.push(directory.join(format!("new-topics.sqlite3{sidecar}")));
+    }
     for suffix in ["", ".new", ".old"] {
         for sidecar in ["", "-wal", "-shm", "-journal"] {
             files.push(directory.join(format!("index.sqlite{suffix}{sidecar}")));

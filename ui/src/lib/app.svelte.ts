@@ -373,6 +373,8 @@ class App {
         files,
         limit: 1,
         min_score: 0,
+        // Служебное поле окна: диагностика объясняет пустую выдачу и спроса на тему не создаёт (NT-03).
+        _window: { purpose: "diagnostic" },
       });
       return { best: probe.results[0]?.score ?? null, lowest: probe.applied.min_score };
     } catch {

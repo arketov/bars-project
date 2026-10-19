@@ -153,7 +153,19 @@ impl WorkerHandler {
                 format!("нет метода {}", call.method()),
             ));
         }
-        self.dispatch(call).await
+        // Вызов пришёл по каналу: окно ходит в `dispatch` напрямую, значит это агент или CLI.
+        let origin = match _client {
+            ClientKind::Mcp => crate::new_topics::Origin::Mcp,
+            ClientKind::Cli => crate::new_topics::Origin::Cli,
+        };
+        let context = crate::new_topics::SearchContext {
+            origin,
+            request_id: Some(self.topics.next_request_id(origin)),
+            ..Default::default()
+        };
+        crate::new_topics::CONTEXT
+            .scope(context, self.dispatch(call))
+            .await
     }
     pub fn mcp_history(&self) -> History {
         self.history.clone()

@@ -50,13 +50,34 @@ use errors::{doc_path_error, outline_error, read_error, search_error, worker_err
 pub struct WorkerHandler {
     worker: Worker,
     history: crate::mcp_history::History,
+    topics: crate::new_topics::Collector,
 }
 
 impl WorkerHandler {
     pub fn new(worker: Worker) -> Self {
         let history = crate::mcp_history::History::new(worker.bars_home().to_path_buf());
         history.start_maintenance();
-        Self { worker, history }
+        Self {
+            worker,
+            history,
+            topics: crate::new_topics::Collector::new(),
+        }
+    }
+
+    /// Сбор «Новых тем»: окно управляет им через внутренний API.
+    pub fn topics(&self) -> &crate::new_topics::Collector {
+        &self.topics
+    }
+
+    /// Вызов окна с внутренним контекстом (назначение, ID обращения). Контекст не часть протокола.
+    pub async fn dispatch_with_context(
+        &self,
+        call: Call,
+        context: crate::new_topics::SearchContext,
+    ) -> Result<Value, RpcError> {
+        crate::new_topics::CONTEXT
+            .scope(context, self.dispatch(call))
+            .await
     }
 
     /// Воркер под обработчиком: окно останавливает его при выходе.
@@ -256,6 +277,34 @@ impl WorkerHandler {
             rerank_candidates: None,
             min_score: params.min_score,
         };
+        // «Новые темы»: допуск и область определяются до поиска, чтобы очистка списка во время
+        // поиска отклонила запоздавшее наблюдение. Диагностика и CLI спроса не создают.
+        let context = crate::new_topics::current_context();
+        let collecting = context.purpose == crate::new_topics::Purpose::Request
+            && matches!(
+                context.origin,
+                crate::new_topics::Origin::Window | crate::new_topics::Origin::Mcp
+            );
+        let generation = if collecting {
+            self.topics.admit(&project).await
+        } else {
+            None
+        };
+        let topic_source = generation.map(|generation| {
+            (
+                generation,
+                context
+                    .request_id
+                    .clone()
+                    .unwrap_or_else(|| self.topics.next_request_id(context.origin)),
+                bars_core::new_topics::EmbeddingSpace::from_fingerprint(
+                    &bars_core::models::Embedder::fingerprint(&embedder).clone(),
+                ),
+                request.query.clone(),
+                topic_scope(&request.modules, &request.files),
+                project.clone(),
+            )
+        });
         // Замок держится на всё время поиска: подмена индекса при полной переиндексации ждёт,
         // пока поиски дочитают (`worker.md`, «Индекс проекта в воркере»).
         let gate = self
@@ -332,25 +381,53 @@ impl WorkerHandler {
         .await
         .map_err(internal)?
         .map_err(search_error)?;
-        let (response, related, fallback) = response;
+        let (mut response, related, fallback) = response;
         if response.rerank_error.is_some() {
             history::applied_field(
                 "rerank_fallback_reason",
                 serde_json::json!("rerank_execution_failed"),
             );
         }
+        let query_vector = response.query_vector.take();
         let rerank_error = response.rerank_error.or(skipped_rerank);
-        Ok((
-            SearchOutput {
-                results: response.hits.into_iter().map(hit).collect(),
-                applied: applied(response.applied),
-                indexing: status.state == ProjectState::Indexing || status.queued,
-                pending: to_u32(status.pending),
-                rerank_error,
-            },
-            related,
-            fallback,
-        ))
+        let output = SearchOutput {
+            results: response.hits.into_iter().map(hit).collect(),
+            applied: applied(response.applied),
+            indexing: status.state == ProjectState::Indexing || status.queued,
+            pending: to_u32(status.pending),
+            rerank_error,
+        };
+        // Только успешный поиск с нулём результатов при готовом индексе без известной ошибки обновления
+        // (NT-02): индексация, очередь и техническая ошибка пробелом не считаются.
+        if let Some((generation, event_id, space, text, scope, project)) = topic_source
+            && output.results.is_empty()
+            && related.is_none()
+            && status.state == ProjectState::Ready
+            && !status.queued
+            && status.pending == 0
+            && status.last_error.is_none()
+        {
+            let source = match context.origin {
+                crate::new_topics::Origin::Mcp => bars_core::new_topics::Source::Mcp,
+                _ => bars_core::new_topics::Source::Window,
+            };
+            self.topics.submit(
+                project,
+                bars_core::new_topics::Observation {
+                    event_id,
+                    generation,
+                    text,
+                    scope,
+                    source,
+                    reason: bars_core::new_topics::Reason::EmptyResult,
+                    params: serde_json::to_string(&output.applied).unwrap_or_default(),
+                    index_stamp: status.updated_at.map(rfc3339),
+                    vector: query_vector.map(|vector| (space, vector)),
+                    at: crate::mcp_history::now(),
+                },
+            );
+        }
+        Ok((output, related, fallback))
     }
 
     /// Документ по пути из вызова: текст и корень проекта для заголовка.
@@ -913,10 +990,12 @@ impl WorkerHandler {
                     "удаление требует точного пути и явного подтверждения",
                 ));
             }
-            self.worker
-                .delete_project(&params.project)
-                .await
-                .map_err(worker_error)?;
+            // БД новых тем закрывается до удаления файлов и не открывается заново, пока оно идёт.
+            let project_path = PathBuf::from(&params.project);
+            self.topics.begin_delete(&project_path);
+            let deleted = self.worker.delete_project(&params.project).await;
+            self.topics.end_delete(&project_path);
+            deleted.map_err(worker_error)?;
             return Ok(output_value(&UnregisterOutput { removed: true }));
         }
         if let Call::GraphBuild(params) = call {
@@ -1055,6 +1134,21 @@ impl bars_protocol::Handler for WorkerHandler {
 }
 fn internal(error: impl std::fmt::Display) -> RpcError {
     RpcError::standard(INTERNAL_ERROR, error.to_string())
+}
+
+/// Каноническая область обращения для «Новых тем»: `project` без фильтров либо отсортированные
+/// модули и файлы. Запрос в области не становится запросом ко всему проекту.
+fn topic_scope(modules: &[String], files: &[String]) -> String {
+    if modules.is_empty() && files.is_empty() {
+        return "project".to_string();
+    }
+    let canonical = |items: &[String]| {
+        let mut items = items.to_vec();
+        items.sort();
+        items.dedup();
+        items.join(",")
+    };
+    format!("m={};f={}", canonical(modules), canonical(files))
 }
 
 fn save_error(error: SaveError) -> RpcError {

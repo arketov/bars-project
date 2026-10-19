@@ -36,11 +36,13 @@ impl Shared {
 pub async fn bars_call(
     state: State<'_, Shared>,
     method: String,
-    params: Value,
+    mut params: Value,
 ) -> Result<Value, RpcError> {
     let handler = state
         .get()
         .ok_or_else(|| RpcError::standard(INTERNAL_ERROR, "воркер ещё запускается"))?;
+    // Служебное поле `_window` (назначение поиска, ID обращения) в протокол не попадает.
+    let context = bars_worker::new_topics::SearchContext::take_from(&mut params);
     let request = Request::new(Id::Number(0), &method, params);
     let call = Call::from_request(&request)?;
     let tree_binding = if let Call::Tree(params) = &call {
@@ -64,7 +66,7 @@ pub async fn bars_call(
     } else {
         None
     };
-    let result = handler.dispatch(call).await;
+    let result = handler.dispatch_with_context(call, context).await;
     if let (Some((root, identity)), Ok(output)) = (tree_binding, &result)
         && handler.worker().folder_identity(&root).ok().as_ref() == Some(&identity)
         && let Ok(tree) = serde_json::from_value::<bars_protocol::TreeOutput>(output.clone())

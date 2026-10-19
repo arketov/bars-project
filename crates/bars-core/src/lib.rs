@@ -10,6 +10,7 @@ pub mod graph;
 pub mod indexing;
 pub mod instruction;
 pub mod models;
+pub mod new_topics;
 pub mod outline;
 pub mod search;
 pub mod secrets;
