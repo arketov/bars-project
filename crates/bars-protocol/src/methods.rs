@@ -509,6 +509,8 @@ pub struct EmbedDoc {
     #[serde(default)]
     pub api_key_env: Option<String>,
     pub batch_size: u32,
+    /// Минут простоя до выгрузки встроенной модели, `0` — не выгружать.
+    pub unload_after_minutes: u32,
 }
 
 /// Таблица `[rerank]`.
@@ -524,6 +526,8 @@ pub struct RerankDoc {
     pub api_key_name: Option<String>,
     #[serde(default)]
     pub api_key_env: Option<String>,
+    /// Минут простоя до выгрузки встроенной модели, `0` — не выгружать.
+    pub unload_after_minutes: u32,
 }
 
 /// Таблица `[search]`.

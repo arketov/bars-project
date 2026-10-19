@@ -9,7 +9,7 @@ title: Сборка bars — как собрать, проверить и что
 ## Требования к машине разработчика bars
 
 - Rust `1.99.0`: версия закреплена в `rust-toolchain.toml` вместе с компонентами `rustfmt` и `clippy`. Нижняя граница стека — 1.90 ([architecture/stack.md](../architecture/stack.md)); точный пин нужен, чтобы сборка не менялась от обновления stable.
-- Windows: MSVC 17.14+, CMake/Ninja и Vulkan SDK (`VULKAN_SDK`). Для нативной GGUF-сборки использовать Developer PowerShell последнего MSVC, `CMAKE_GENERATOR=Ninja`, `CMAKE_BUILD_PARALLEL_LEVEL=1`, короткий `CARGO_TARGET_DIR` (например, `C:/bars-build`). MSBuild с вложенным shader generator нестабилен на чистом каталоге. macOS: Xcode Command Line Tools; Metal не проверен.
+- Windows: MSVC 17.14+, CMake/Ninja, Vulkan SDK (`VULKAN_SDK`) и LLVM для bindgen в `llama-cpp-sys-2` (`LIBCLANG_PATH`, например `C:\Program Files\LLVM\bin`). Всё ставится через winget: `LLVM.LLVM`, `Kitware.CMake`, `Ninja-build.Ninja`, `KhronosGroup.VulkanSDK`. Для нативной GGUF-сборки использовать Developer PowerShell последнего MSVC, `CMAKE_GENERATOR=Ninja`, `CMAKE_BUILD_PARALLEL_LEVEL=1`, короткий `CARGO_TARGET_DIR` (например, `C:/bars-build`). MSBuild с вложенным shader generator нестабилен на чистом каталоге. macOS: Xcode Command Line Tools; Metal не проверен.
 - Сеть: `ort` скачивает ONNX Runtime с `cdn.pyke.io` при первой сборке `bars-core`.
 
 ## Каталог сборки вне OneDrive

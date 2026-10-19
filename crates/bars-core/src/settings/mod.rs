@@ -120,11 +120,29 @@ impl Default for RerankSettings {
     }
 }
 
+/// Сколько минут простоя до выгрузки встроенной embed-модели по умолчанию.
+pub const DEFAULT_EMBED_UNLOAD_MINUTES: u32 = 15;
+/// То же для rerank-модели.
+pub const DEFAULT_RERANK_UNLOAD_MINUTES: u32 = 5;
+/// Наибольший срок выгрузки, минут (неделя); «никогда» — это `0`.
+pub const MAX_UNLOAD_MINUTES: u32 = 10_080;
+
+/// Ключи `unload_after_minutes` из `[embed]` и `[rerank]`: через сколько минут простоя воркер
+/// выгружает встроенную модель, `0` — не выгружать (ISS-18). `None` — ключа в файле нет, срок
+/// задаёт воркер. Лежит отдельно от [`EmbedSettings`] и [`RerankSettings`]: срок не входит в
+/// описание модели, и его смена не должна перезагружать её.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct ModelUnload {
+    pub embed_minutes: Option<u32>,
+    pub rerank_minutes: Option<u32>,
+}
+
 /// Настройки пользователя: всё содержимое `settings.toml` с умолчаниями на месте пропущенного.
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct UserSettings {
     pub embed: EmbedSettings,
     pub rerank: RerankSettings,
+    pub unload: ModelUnload,
     pub search: SearchSettings,
     pub chunking: ChunkingParams,
 }

@@ -145,8 +145,8 @@ title: Гибридный поиск
 let paused = false;
 const secrets = new Set<string>();
 let savedSettings: SettingsDoc = {
-  embed: { accelerator: "auto", source: "builtin", model: "BAAI/bge-m3", base_url: null, api_key_name: null, api_key_env: null, batch_size: 32 },
-  rerank: { accelerator: "cpu", enabled: false, source: "builtin", model: "BAAI/bge-reranker-v2-m3", base_url: null, api_key_name: null, api_key_env: null },
+  embed: { accelerator: "auto", source: "builtin", model: "BAAI/bge-m3", base_url: null, api_key_name: null, api_key_env: null, batch_size: 32, unload_after_minutes: 15 },
+  rerank: { accelerator: "cpu", enabled: false, source: "builtin", model: "BAAI/bge-reranker-v2-m3", base_url: null, api_key_name: null, api_key_env: null, unload_after_minutes: 5 },
   search: {
     candidates: 30, rerank_candidates: 15, results: 5, results_reranked: 3, min_score_vector: 0, min_score_rerank: 0.1,
     agent_min_score: [0, 1], max_results: 20, max_candidates: 100, max_rerank_candidates: 50,

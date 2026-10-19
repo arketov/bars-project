@@ -12,7 +12,7 @@ import {
 import type { SettingsDoc } from "./types";
 
 const DOC: SettingsDoc = {
-  embed: { accelerator: "auto", source: "builtin", model: "BAAI/bge-m3", base_url: null, api_key_name: null, api_key_env: null, batch_size: 32 },
+  embed: { accelerator: "auto", source: "builtin", model: "BAAI/bge-m3", base_url: null, api_key_name: null, api_key_env: null, batch_size: 32, unload_after_minutes: 15 },
   rerank: {
     accelerator: "auto",
     enabled: false,
@@ -21,6 +21,7 @@ const DOC: SettingsDoc = {
     base_url: null,
     api_key_name: null,
     api_key_env: null,
+    unload_after_minutes: 5,
   },
   search: {
     candidates: 30,
@@ -48,6 +49,19 @@ describe("settings-logic", () => {
   });
   it("заводские значения проходят проверку", () => {
     expect(validate(DOC)).toEqual({});
+  });
+
+  it("срок выгрузки: 0 — можно, дробное, отрицательное и больше недели — нет", () => {
+    const draft = clone(DOC);
+    draft.embed.unload_after_minutes = 0;
+    draft.rerank.unload_after_minutes = 10_080;
+    expect(validate(draft)).toEqual({});
+    expect(needsReindex(DOC, draft)).toBe(false);
+    for (const bad of [-1, 1.5, 10_081, Number.NaN]) {
+      draft.embed.unload_after_minutes = bad;
+      draft.rerank.unload_after_minutes = bad;
+      expect(Object.keys(validate(draft)).sort()).toEqual(["embed.unload_after_minutes", "rerank.unload_after_minutes"]);
+    }
   });
 
   it("копия делается и с прокси, как у $state в Svelte", () => {

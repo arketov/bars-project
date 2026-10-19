@@ -294,6 +294,17 @@ fn peek<M, R>(slot: &Mutex<Resident<M>>, f: impl FnOnce(&M) -> R) -> Option<R> {
     }
 }
 
+/// Загружена ли модель слота, не дожидаясь замка. Занятый мьютекс сам по себе ничего не значит:
+/// модель либо грузится, либо уже считает пачку индексации или чужой запрос. Различает их
+/// состояние слота, которое меняется под тем же мьютексом (ISS-18).
+fn loaded<M>(slot: &Mutex<Resident<M>>, runtime: &Mutex<SlotRuntime>) -> bool {
+    match slot.try_lock() {
+        Ok(guard) => guard.model.is_some(),
+        Err(std::sync::TryLockError::Poisoned(poisoned)) => poisoned.into_inner().model.is_some(),
+        Err(std::sync::TryLockError::WouldBlock) => lock(runtime).state == "ready",
+    }
+}
+
 /// Один замок на скачивание и загрузку встроенных моделей, перечень того, что грузится сейчас,
 /// и ошибки фоновых загрузок. Две загрузки не идут вместе: вторая находит файлы первой в кэше и
 /// не качает их заново (`docs/features/models/local-models.md`, «Один замок на скачивание и загрузку»).
@@ -390,9 +401,9 @@ impl ModelSlot {
             .unwrap_or_else(|| self.fingerprint.clone())
     }
 
-    /// Загружена ли модель. Не ждёт: пока модель грузится, мьютекс занят загрузкой, и ответ «нет».
+    /// Загружена ли модель. Не ждёт: пока модель грузится, ответ «нет»; пока считает — «да».
     pub fn is_loaded(&self) -> bool {
-        peek(&self.model, |_| ()).is_some()
+        loaded(&self.model, &self.runtime)
     }
 
     /// Выполняет `f` с исключительным доступом к модели, загрузив её, если надо. Уступает
@@ -561,9 +572,9 @@ pub struct RerankSlot {
 }
 
 impl RerankSlot {
-    /// Загружена ли модель; не ждёт, пока она грузится.
+    /// Загружена ли модель; не ждёт, пока она грузится, и не путает занятость с загрузкой.
     pub fn is_loaded(&self) -> bool {
-        peek(&self.model, |_| ()).is_some()
+        loaded(&self.model, &self.runtime)
     }
 }
 
@@ -1517,6 +1528,27 @@ mod tests {
         wait_until(|| models.embed_readiness(&settings()).unwrap() == Readiness::Ready);
         assert_eq!(provider.counters.loads.load(Ordering::SeqCst), 1);
         assert!(models.loading_ids().is_empty());
+    }
+
+    #[test]
+    fn a_loaded_model_busy_with_a_batch_is_ready_not_loading() {
+        // ISS-18: индексация держит загруженную модель на пачке — поиск видит готовую модель
+        // и встаёт в очередь перед следующей пачкой, а не отвечает `model_loading`.
+        let provider = background_provider(0);
+        let models = Models::new(provider.clone());
+        let mut embedder = models.embedder(&settings()).unwrap();
+        embedder.prepare().unwrap();
+        let reranker = models.reranker(&settings());
+        reranker.prepare().unwrap();
+
+        let embed_batch = lock(&embedder.slot().model);
+        let rerank_call = lock(&reranker.slot().model);
+        assert_eq!(models.embed_readiness(&settings()).unwrap(), Readiness::Ready);
+        assert_eq!(models.rerank_readiness(&settings()), Readiness::Ready);
+        drop(embed_batch);
+        drop(rerank_call);
+        assert_eq!(provider.counters.loads.load(Ordering::SeqCst), 1);
+        assert_eq!(provider.counters.rerank_loads.load(Ordering::SeqCst), 1);
     }
 
     #[test]

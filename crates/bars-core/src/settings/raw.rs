@@ -7,7 +7,8 @@ use std::path::Path;
 use serde::Deserialize;
 
 use super::{
-    EmbedSettings, ModelSource, RerankSettings, SettingsError, SettingsWarning, UserSettings,
+    EmbedSettings, MAX_UNLOAD_MINUTES, ModelSource, RerankSettings, SettingsError, SettingsWarning,
+    UserSettings,
 };
 use crate::indexing::chunking::ChunkingParams;
 use crate::models::{Accelerator, BGE_RERANKER_V2_M3_ID, builtin_model, builtin_models};
@@ -47,6 +48,7 @@ struct EmbedTable {
     api_key_name: Option<String>,
     api_key_env: Option<String>,
     batch_size: Option<usize>,
+    unload_after_minutes: Option<u32>,
     #[serde(flatten)]
     unknown: Unknown,
 }
@@ -60,6 +62,7 @@ struct RerankTable {
     base_url: Option<String>,
     api_key_name: Option<String>,
     api_key_env: Option<String>,
+    unload_after_minutes: Option<u32>,
     #[serde(flatten)]
     unknown: Unknown,
 }
@@ -129,6 +132,18 @@ fn invalid(file: &Path, key: &str, reason: &str) -> SettingsError {
         file: file.to_path_buf(),
         key: key.to_string(),
         reason: reason.to_string(),
+    }
+}
+
+/// Срок выгрузки: `0` — «никогда», больше недели — опечатка, а не намерение.
+fn unload_minutes(file: &Path, key: &str, value: Option<u32>) -> Result<(), SettingsError> {
+    match value {
+        Some(minutes) if minutes > MAX_UNLOAD_MINUTES => Err(invalid(
+            file,
+            key,
+            "больше 10080 минут (неделя); чтобы не выгружать модель, укажите 0",
+        )),
+        _ => Ok(()),
     }
 }
 
@@ -241,9 +256,12 @@ impl UserFile {
     pub(super) fn validate(&self, file: &Path) -> Result<(), SettingsError> {
         if let Some(embed) = &self.embed {
             positive(file, "embed.batch_size", embed.batch_size)?;
+            unload_minutes(file, "embed.unload_after_minutes", embed.unload_after_minutes)?;
             embed.validate(file)?;
         }
         if let Some(rerank) = &self.rerank {
+            // Срок проверяется и у выключенного rerank: его validate смотрит только включённый.
+            unload_minutes(file, "rerank.unload_after_minutes", rerank.unload_after_minutes)?;
             rerank.validate(file)?;
         }
         if let Some(search) = &self.search {
@@ -261,6 +279,8 @@ impl UserFile {
             settings.embed.accelerator = device.into();
             settings.rerank.accelerator = device.into();
         }
+        settings.unload.embed_minutes = self.embed.as_ref().and_then(|t| t.unload_after_minutes);
+        settings.unload.rerank_minutes = self.rerank.as_ref().and_then(|t| t.unload_after_minutes);
         if let Some(embed) = self.embed {
             embed.apply(&mut settings.embed);
         }

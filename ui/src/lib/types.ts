@@ -165,6 +165,8 @@ export interface EmbedDoc {
   api_key_name: string | null;
   api_key_env: string | null;
   batch_size: number;
+  /** Минут простоя до выгрузки встроенной модели, 0 — не выгружать. */
+  unload_after_minutes: number;
 }
 
 export interface RerankDoc {
@@ -175,6 +177,8 @@ export interface RerankDoc {
   base_url: string | null;
   api_key_name: string | null;
   api_key_env: string | null;
+  /** Минут простоя до выгрузки встроенной модели, 0 — не выгружать. */
+  unload_after_minutes: number;
 }
 
 export interface SearchDoc {

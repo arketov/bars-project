@@ -187,6 +187,38 @@ fn project_does_not_change_models_or_device() {
 }
 
 #[test]
+fn unload_minutes_are_read_per_model_and_kept_out_of_model_settings() {
+    assert_eq!(user("").value.unload, ModelUnload::default());
+    let loaded = user("[embed]\nunload_after_minutes = 0\n[rerank]\nunload_after_minutes = 60\n");
+    assert!(loaded.warnings.is_empty());
+    assert_eq!(
+        loaded.value.unload,
+        ModelUnload { embed_minutes: Some(0), rerank_minutes: Some(60) }
+    );
+    // Срок не часть описания модели: слот модели по нему не пересоздаётся.
+    assert_eq!(loaded.value.embed, EmbedSettings::default());
+    assert_eq!(loaded.value.rerank, RerankSettings::default());
+}
+
+#[test]
+fn unload_minutes_over_a_week_are_invalid_even_for_disabled_rerank() {
+    assert_eq!(
+        invalid_key("[embed]\nunload_after_minutes = 10081\n"),
+        "embed.unload_after_minutes"
+    );
+    assert_eq!(
+        invalid_key("[rerank]\nenabled = false\nunload_after_minutes = 99999\n"),
+        "rerank.unload_after_minutes"
+    );
+    assert!(matches!(
+        user_err("[embed]\nunload_after_minutes = -1\n"),
+        SettingsError::Parse { .. }
+    ));
+    let week = user("[embed]\nunload_after_minutes = 10080\n").value;
+    assert_eq!(week.unload.embed_minutes, Some(MAX_UNLOAD_MINUTES));
+}
+
+#[test]
 fn unknown_keys_are_warned_about_and_ignored() {
     let loaded = user(
         r#"

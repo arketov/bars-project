@@ -9,7 +9,7 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::{Duration, Instant};
 
-use bars_mcp::{BarsMcp, CALL_TIMEOUT, Env, INSTRUCTIONS, Launch};
+use bars_mcp::{BarsMcp, CALL_TIMEOUT, Env, INSTRUCTIONS, Launch, MODEL_WAIT};
 use bars_protocol::{Client, ClientKind, Endpoint, RegisterParams};
 use bars_worker::serve::serve;
 use bars_worker::worker::WorkerConfig;
@@ -169,6 +169,7 @@ impl Harness {
                 Ok(())
             })),
             call_timeout: CALL_TIMEOUT,
+            model_wait: MODEL_WAIT,
         }
     }
 

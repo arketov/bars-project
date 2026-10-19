@@ -20,6 +20,23 @@ impl Default for ModelIdlePolicy {
     }
 }
 
+impl ModelIdlePolicy {
+    /// Сроки с учётом `unload_after_minutes` из настроек: `0` — не выгружать, незаданный ключ —
+    /// срок политики.
+    pub fn with_settings(self, unload: bars_core::settings::ModelUnload) -> Self {
+        let pick = |minutes: Option<u32>, fallback: Duration| match minutes {
+            Some(0) => Duration::MAX,
+            Some(minutes) => Duration::from_secs(u64::from(minutes) * 60),
+            None => fallback,
+        };
+        Self {
+            embed: pick(unload.embed_minutes, self.embed),
+            rerank: pick(unload.rerank_minutes, self.rerank),
+            check_interval: self.check_interval,
+        }
+    }
+}
+
 impl Worker {
     pub(crate) fn refresh_model_lifecycle(&self) {
         self.inner.model_wake.notify_one();
@@ -43,12 +60,16 @@ impl Inner {
             let inner = Arc::clone(&self);
             // Await is intentional: shutdown joins this task, including an in-flight drop.
             if tokio::task::spawn_blocking(move || {
-                let enabled = bars_core::settings::UserSettings::load(&inner.config.bars_home)
-                    .map(|settings| settings.value.rerank.enabled)
-                    .unwrap_or(true);
-                inner
-                    .models
-                    .release_idle(enabled, policy.embed, policy.rerank);
+                // Битый файл настроек — прежняя политика, rerank считается включённым.
+                let (enabled, idle) =
+                    match bars_core::settings::UserSettings::load(&inner.config.bars_home) {
+                        Ok(settings) => (
+                            settings.value.rerank.enabled,
+                            policy.with_settings(settings.value.unload),
+                        ),
+                        Err(_) => (true, policy),
+                    };
+                inner.models.release_idle(enabled, idle.embed, idle.rerank);
             })
             .await.is_err()
             {
@@ -105,6 +126,53 @@ mod tests {
         assert_eq!(rerank.rerank("q", &["q", "d"]).unwrap(), scores);
         assert_eq!(provider.counters.loads.load(Ordering::SeqCst), 2);
         assert_eq!(provider.counters.rerank_loads.load(Ordering::SeqCst), 2);
+        worker.shutdown().await;
+    }
+
+    #[test]
+    fn settings_minutes_override_the_policy_and_zero_means_never() {
+        use bars_core::settings::ModelUnload;
+        let policy = ModelIdlePolicy::default();
+        let same = policy.with_settings(ModelUnload::default());
+        assert_eq!((same.embed, same.rerank), (policy.embed, policy.rerank));
+        let set = policy.with_settings(ModelUnload {
+            embed_minutes: Some(0),
+            rerank_minutes: Some(30),
+        });
+        assert_eq!(set.embed, Duration::MAX);
+        assert_eq!(set.rerank, Duration::from_secs(1800));
+        assert_eq!(set.check_interval, policy.check_interval);
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn unload_after_zero_minutes_keeps_the_model_loaded() {
+        let home = tempfile::tempdir().unwrap();
+        std::fs::write(
+            home.path().join("settings.toml"),
+            "[embed]\nunload_after_minutes = 0\n",
+        )
+        .unwrap();
+        let mut config = WorkerConfig::new(home.path().into());
+        config.model_idle = ModelIdlePolicy {
+            embed: Duration::from_millis(20),
+            rerank: Duration::from_millis(20),
+            check_interval: Duration::from_millis(5),
+        };
+        let worker = Worker::start(config, FakeProvider::new("m1")).unwrap();
+        let settings = Settings::resolve(&UserSettings::default(), &Default::default());
+        let mut embed = worker.inner.models.embedder(&settings).unwrap();
+        embed.prepare().unwrap();
+        tokio::time::sleep(Duration::from_millis(150)).await;
+        assert!(embed.slot().is_loaded(), "0 минут — модель не выгружается");
+
+        std::fs::write(
+            home.path().join("settings.toml"),
+            "[embed]\nunload_after_minutes = 15\n",
+        )
+        .unwrap();
+        worker.refresh_model_lifecycle();
+        tokio::time::sleep(Duration::from_millis(100)).await;
+        assert!(embed.slot().is_loaded(), "15 минут ещё не прошли");
         worker.shutdown().await;
     }
 

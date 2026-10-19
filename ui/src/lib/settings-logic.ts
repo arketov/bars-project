@@ -32,6 +32,9 @@ export function parseFingerprint(
   return { source, model: fingerprint.slice(index + 1) };
 }
 
+/** Наибольший срок выгрузки модели, минут (неделя), как у воркера (settings.md). */
+export const MAX_UNLOAD_MINUTES = 10_080;
+
 const isHttpUrl = (text: string) => /^https?:\/\/[^\s/@]+(:\d+)?(\/\S*)?$/i.test(text.trim());
 
 /** Ошибки значений по тем же правилам, что у воркера при чтении (settings.md); пусто — можно сохранять. */
@@ -53,6 +56,14 @@ export function validate(doc: SettingsDoc): Record<string, string> {
     }
   }
   positive("embed.batch_size", embed.batch_size, "Пачка");
+  for (const [key, value] of [
+    ["embed.unload_after_minutes", embed.unload_after_minutes],
+    ["rerank.unload_after_minutes", doc.rerank.unload_after_minutes],
+  ] as const) {
+    if (!Number.isInteger(value) || value < 0 || value > MAX_UNLOAD_MINUTES) {
+      errors[key] = `Целое число от 0 до ${MAX_UNLOAD_MINUTES}; 0 — не выгружать`;
+    }
+  }
   const rerank = doc.rerank;
   if (rerank.enabled && rerank.source !== "builtin") {
     if (!rerank.model.trim()) errors["rerank.model"] = "Укажите модель провайдера";

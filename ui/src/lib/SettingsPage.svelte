@@ -10,7 +10,7 @@
   import LogsPage from "./LogsPage.svelte";
   import McpStatisticsPage from "./McpStatisticsPage.svelte";
   import { settings } from "./settings.svelte";
-  import { clone } from "./settings-logic";
+  import { clone, MAX_UNLOAD_MINUTES } from "./settings-logic";
   import { theme, type ThemePref } from "./theme.svelte";
   import type { EmbedDoc, InstallClientName, ModelInfo, ModelSourceName, RerankDoc } from "./types";
 
@@ -212,6 +212,15 @@
             <DevicePicker bind:value={draft.embed.accelerator} source={draft.embed.source} role="Embed" cpuOnly={settings.models?.embed.find(m => m.id === draft?.embed.model)?.backend === "candle"} gpuOnly={draft.embed.model === "BAAI/bge-m3:fp16"} runtime={settings.models?.runtime?.embed} />
             <h3>Rerank</h3>
             <DevicePicker bind:value={draft.rerank.accelerator} source={draft.rerank.source} role="Rerank" runtime={settings.models?.runtime?.rerank} />
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="ghead"><div class="grow"><h2>Выгрузка из памяти</h2><p>Простаивающая встроенная модель выгружается, следующий запрос загрузит её заново за несколько секунд.</p></div></div>
+          <div class="gbody">
+            <div class="field"><div class="lbl"><b>Embed, минут простоя</b><small><code>embed.unload_after_minutes</code></small></div><div><input class="inp" type="number" min="0" max={MAX_UNLOAD_MINUTES} aria-label="Embed, минут простоя до выгрузки" bind:value={draft.embed.unload_after_minutes} />{#if errors["embed.unload_after_minutes"]}<small class="err">{errors["embed.unload_after_minutes"]}</small>{/if}</div></div>
+            <div class="field"><div class="lbl"><b>Rerank, минут простоя</b><small><code>rerank.unload_after_minutes</code></small></div><div><input class="inp" type="number" min="0" max={MAX_UNLOAD_MINUTES} aria-label="Rerank, минут простоя до выгрузки" bind:value={draft.rerank.unload_after_minutes} />{#if errors["rerank.unload_after_minutes"]}<small class="err">{errors["rerank.unload_after_minutes"]}</small>{/if}</div></div>
+            <div class="note info"><Icon name="info" size={16} /><span>0 — не выгружать: первый поиск после перерыва не ждёт загрузки, но модель всё время занимает память.</span></div>
           </div>
         </div>
       {:else if draft && tab === "search"}

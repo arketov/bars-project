@@ -10,7 +10,10 @@ use std::io;
 use std::path::{Path, PathBuf};
 
 use bars_core::models::Accelerator;
-use bars_core::settings::{ProjectConfig, UserSettings, project_config_path, user_settings_path};
+use bars_core::settings::{
+    DEFAULT_EMBED_UNLOAD_MINUTES, DEFAULT_RERANK_UNLOAD_MINUTES, ProjectConfig, UserSettings,
+    project_config_path, user_settings_path,
+};
 use bars_protocol::{ChunkingDoc, EmbedDoc, RerankDoc, SearchDoc, SettingsDoc};
 use toml_edit::{DocumentMut, Item, Table, value};
 
@@ -60,6 +63,10 @@ pub fn to_doc(user: &UserSettings) -> SettingsDoc {
             api_key_name: embed.api_key_name.clone(),
             api_key_env: embed.api_key_env.clone(),
             batch_size: count(embed.batch_size),
+            unload_after_minutes: user
+                .unload
+                .embed_minutes
+                .unwrap_or(DEFAULT_EMBED_UNLOAD_MINUTES),
         },
         rerank: RerankDoc {
             accelerator: accelerator_name(rerank.accelerator),
@@ -69,6 +76,10 @@ pub fn to_doc(user: &UserSettings) -> SettingsDoc {
             base_url: rerank.base_url.clone(),
             api_key_name: rerank.api_key_name.clone(),
             api_key_env: rerank.api_key_env.clone(),
+            unload_after_minutes: user
+                .unload
+                .rerank_minutes
+                .unwrap_or(DEFAULT_RERANK_UNLOAD_MINUTES),
         },
         search: SearchDoc {
             candidates: count(search.candidates),
@@ -214,6 +225,12 @@ pub fn save_user_settings(bars_home: &Path, settings: &SettingsDoc) -> Result<bo
         settings.embed.batch_size,
         old.embed.batch_size,
     );
+    set_count(
+        embed,
+        "unload_after_minutes",
+        settings.embed.unload_after_minutes,
+        old.embed.unload_after_minutes,
+    );
 
     let rerank = table(&mut doc, "rerank");
     set_flag(
@@ -246,6 +263,12 @@ pub fn save_user_settings(bars_home: &Path, settings: &SettingsDoc) -> Result<bo
         "api_key_env",
         &settings.rerank.api_key_env,
         &old.rerank.api_key_env,
+    );
+    set_count(
+        rerank,
+        "unload_after_minutes",
+        settings.rerank.unload_after_minutes,
+        old.rerank.unload_after_minutes,
     );
 
     let (new, was) = (&settings.search, &old.search);
@@ -471,6 +494,30 @@ mod tests {
 
         let mut doc = current(home.path());
         doc.search.candidates = 0;
+        assert!(matches!(
+            save_user_settings(home.path(), &doc).unwrap_err(),
+            SaveError::Invalid(_)
+        ));
+    }
+
+    #[test]
+    fn unload_minutes_are_written_per_model_and_checked() {
+        let home = home();
+        let mut doc = current(home.path());
+        assert_eq!(doc.embed.unload_after_minutes, 15);
+        assert_eq!(doc.rerank.unload_after_minutes, 5);
+        doc.embed.unload_after_minutes = 0;
+        doc.rerank.unload_after_minutes = 30;
+        assert!(save_user_settings(home.path(), &doc).unwrap());
+        let parsed: toml::Value =
+            toml::from_str(&fs::read_to_string(user_settings_path(home.path())).unwrap()).unwrap();
+        assert_eq!(parsed["embed"]["unload_after_minutes"].as_integer(), Some(0));
+        assert_eq!(parsed["rerank"]["unload_after_minutes"].as_integer(), Some(30));
+        let again = current(home.path());
+        assert_eq!(again.embed.unload_after_minutes, 0);
+        assert_eq!(again.rerank.unload_after_minutes, 30);
+
+        doc.embed.unload_after_minutes = 20_000;
         assert!(matches!(
             save_user_settings(home.path(), &doc).unwrap_err(),
             SaveError::Invalid(_)

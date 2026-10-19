@@ -35,6 +35,13 @@ pub use instructions::INSTRUCTIONS;
 /// Сколько прокси ждёт ответа воркера на один вызов. Первый поиск может ждать загрузки модели.
 pub const CALL_TIMEOUT: Duration = Duration::from_secs(120);
 
+/// Сколько прокси сам повторяет вызов, пока воркер отвечает `model_loading`: агенту нечем ждать,
+/// а загрузка уже скачанной модели в память обычно занимает секунды (ISS-18).
+pub const MODEL_WAIT: Duration = Duration::from_secs(60);
+
+/// Пауза между повторами при `model_loading`.
+const MODEL_POLL: Duration = Duration::from_secs(1);
+
 /// Способ запустить воркер, когда к каналу не подключиться.
 #[derive(Clone)]
 pub enum Launch {
@@ -52,6 +59,8 @@ pub struct Env {
     pub cwd: PathBuf,
     pub launch: Launch,
     pub call_timeout: Duration,
+    /// Сколько повторять вызов, пока модель загружается ([`MODEL_WAIT`]).
+    pub model_wait: Duration,
 }
 
 impl Env {
@@ -62,6 +71,7 @@ impl Env {
             cwd: std::env::current_dir()?,
             launch: Launch::Worker,
             call_timeout: CALL_TIMEOUT,
+            model_wait: MODEL_WAIT,
         })
     }
 }
@@ -228,7 +238,13 @@ impl BarsMcp {
     async fn call<M: Method>(&self, params: &M) -> Result<M::Output, ClientError> {
         self.call_observed(params, None).await
     }
+    /// Пока модель загружается, вызов повторяется до `model_wait`: агент получает ответ, а не
+    /// совет повторить позже.
     async fn call_observed<M: Method>(&self, params: &M, context: Option<&Value>) -> Result<M::Output, ClientError> {
+        wait_for_model(self.env.model_wait, MODEL_POLL, || self.call_once(params, context)).await
+    }
+
+    async fn call_once<M: Method>(&self, params: &M, context: Option<&Value>) -> Result<M::Output, ClientError> {
         let mut slot = self.client.lock().await;
         for attempt in 0..2 {
             if slot.is_none() {
@@ -254,6 +270,27 @@ impl BarsMcp {
             }
         }
         unreachable!("вторая попытка возвращает результат")
+    }
+}
+
+/// Повторяет `call`, пока воркер отвечает `model_loading` и не вышло время `wait`; последний ответ
+/// возвращается как есть.
+async fn wait_for_model<T, F, Fut>(wait: Duration, poll: Duration, mut call: F) -> Result<T, ClientError>
+where
+    F: FnMut() -> Fut,
+    Fut: std::future::Future<Output = Result<T, ClientError>>,
+{
+    let deadline = tokio::time::Instant::now() + wait;
+    loop {
+        match call().await {
+            Err(ClientError::Rpc(rpc))
+                if rpc.kind() == Some(ErrorKind::ModelLoading)
+                    && tokio::time::Instant::now() + poll <= deadline =>
+            {
+                tokio::time::sleep(poll).await;
+            }
+            other => return other,
+        }
     }
 }
 
@@ -295,9 +332,10 @@ fn failure(error: &ClientError) -> CallToolResult {
                  нужно согласие пользователя. Сообщите ему и не повторяйте вызов; он подтвердит \
                  в окне bars или командой `bars-cli reindex --accept-model-change`.",
             ),
-            Some(ErrorKind::ModelLoading) => {
-                message.push_str("\nМодель ещё загружается: повторите вызов позже.")
-            }
+            Some(ErrorKind::ModelLoading) => message.push_str(
+                "\nМодель не загрузилась за время ожидания вызова: скорее всего, она ещё \
+                 скачивается. Повторите вызов позже.",
+            ),
             _ => {}
         },
         ClientError::Unavailable(_) => message
@@ -442,5 +480,54 @@ impl ServerHandler for BarsMcp {
     fn get_info(&self) -> ServerConfig {
         ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
             .with_instructions(INSTRUCTIONS)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use bars_protocol::RpcError;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    fn loading() -> ClientError {
+        ClientError::Rpc(RpcError::bars(ErrorKind::ModelLoading, "модель загружается в память"))
+    }
+
+    #[tokio::test]
+    async fn model_loading_is_retried_until_the_model_answers() {
+        let calls = AtomicUsize::new(0);
+        let result = wait_for_model(Duration::from_secs(5), Duration::from_millis(10), || async {
+            match calls.fetch_add(1, Ordering::SeqCst) {
+                0 | 1 => Err(loading()),
+                _ => Ok(42),
+            }
+        })
+        .await;
+        assert_eq!(result.unwrap(), 42);
+        assert_eq!(calls.load(Ordering::SeqCst), 3);
+    }
+
+    #[tokio::test]
+    async fn model_loading_past_the_wait_is_returned_to_the_agent() {
+        let calls = AtomicUsize::new(0);
+        let result: Result<(), _> = wait_for_model(Duration::from_millis(50), Duration::from_millis(20), || async {
+            calls.fetch_add(1, Ordering::SeqCst);
+            Err(loading())
+        })
+        .await;
+        assert!(matches!(result, Err(ClientError::Rpc(rpc)) if rpc.kind() == Some(ErrorKind::ModelLoading)));
+        assert!((2..=3).contains(&calls.load(Ordering::SeqCst)));
+    }
+
+    #[tokio::test]
+    async fn other_errors_are_not_retried() {
+        let calls = AtomicUsize::new(0);
+        let result: Result<(), _> = wait_for_model(Duration::from_secs(5), Duration::from_millis(10), || async {
+            calls.fetch_add(1, Ordering::SeqCst);
+            Err(ClientError::Rpc(RpcError::bars(ErrorKind::ProviderError, "нет файлов")))
+        })
+        .await;
+        assert!(result.is_err());
+        assert_eq!(calls.load(Ordering::SeqCst), 1);
     }
 }
