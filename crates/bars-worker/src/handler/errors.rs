@@ -65,6 +65,9 @@ pub fn search_error(error: SearchError) -> RpcError {
     match error {
         SearchError::InvalidParams(message) => RpcError::bars(ErrorKind::InvalidParams, message),
         SearchError::ReindexRequired => reindex_required(),
+        chunk @ SearchError::ChunkNotFound(_) => {
+            RpcError::bars(ErrorKind::ChunkNotFound, chunk.to_string())
+        }
         SearchError::Embed(error) => embed_error(error),
         other => RpcError::standard(INTERNAL_ERROR, other.to_string()),
     }

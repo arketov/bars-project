@@ -16,8 +16,8 @@ use super::*;
 
 mod deletion;
 mod folders;
-mod operations;
 mod graph;
+mod operations;
 
 struct Env {
     home: TempDir,

@@ -41,6 +41,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 |---|---|---|---|
 | `hello` | `protocol`, `client` (`mcp` / `cli`), `client_version` | `protocol`, `worker_version` | все |
 | `search` | `cwd`, `project`, `query`, `modules`, `files`, `limit`, `candidates`, `min_score` | результаты и применённые параметры ([features/search/hybrid-search.md](../features/search/hybrid-search.md)) | MCP, CLI |
+| `similar` | `cwd`, `project`, `chunk_id`, `modules`, `limit` | исходный чанк, ближайшие чанки с косинусной близостью и применённый `limit` ([features/search/maintenance-tools.md](../features/search/maintenance-tools.md)); неизвестный или устаревший ID — `chunk_not_found` | MCP, CLI |
 | `outline` | `cwd`, `project`, `path`, `levels`, `under` (цепочка заголовков) или `under_line` | заголовки с номерами строк (Т-26) | MCP, CLI |
 | `read` | `cwd`, `project`, `path` | исходный `text` и `title`; номера строк добавляет клиент | MCP, CLI |
 | `projects` | — | проекты: путь, имя, корень документации, состояние, модули с числом документов | MCP, CLI |
@@ -146,6 +147,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | -32013 | `snapshot_expired` | снимок прежнего поколения больше недоступен; запрос нужно повторить |
 | -32014 | `cursor_mismatch` | курсор не соответствует снимку, области или параметрам запроса |
 | -32015 | `cancelled` | операция отменена; это не ответ «совпадений нет» |
+| -32016 | `chunk_not_found` | ID чанка для `similar` неизвестен или устарел после обновления документа; чанк нужно найти поиском заново |
 
 Коды выхода `bars-cli` по ошибкам: `reindex_required` и `reindex_needs_consent` — `3`, недоступный воркер — `2`, остальные — `1`.
 

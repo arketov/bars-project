@@ -23,12 +23,12 @@ mod text;
 #[cfg(windows)]
 pub mod winsid;
 
+pub use bars_graph as graph_types;
 pub use client::{Client, ClientError};
 pub use endpoint::Endpoint;
 pub use error::*;
-pub use graph::*;
-pub use bars_graph as graph_types;
 pub use framing::{MAX_REQUEST_LINE, MAX_RESPONSE_LINE, read_line_limited, write_line};
+pub use graph::*;
 pub use home::{USER_HOME_VAR, home_override, user_home};
 pub use instruction::{agent_install_text, mcp_config_json};
 pub use jsonrpc::*;

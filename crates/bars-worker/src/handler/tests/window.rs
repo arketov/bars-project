@@ -19,24 +19,40 @@ use crate::worker::Worker;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn operation_events_window_dispatch_keeps_short_terminal_outcome_and_retry() {
-    use bars_protocol::{OperationEventsOutput, OperationEventsParams, OperationRetryParams, AcceptedOutput};
+    use bars_protocol::{
+        AcceptedOutput, OperationEventsOutput, OperationEventsParams, OperationRetryParams,
+    };
     let env = Window::new();
     let call = Call::OperationEvents(OperationEventsParams::default());
-    assert!(call.window_only()); assert!(!call.allowed_for(ClientKind::Mcp)); assert!(!call.allowed_for(ClientKind::Cli));
+    assert!(call.window_only());
+    assert!(!call.allowed_for(ClientKind::Mcp));
+    assert!(!call.allowed_for(ClientKind::Cli));
     let initial: OperationEventsOutput = env.call(call).await;
     let project = env.project("короткая операция", "docs");
-    env.worker.pause(); env.worker.register(&project).unwrap();
-    let params = OperationEventsParams { epoch: Some(initial.epoch.clone()), after: Some(initial.cursor) };
+    env.worker.pause();
+    env.worker.register(&project).unwrap();
+    let params = OperationEventsParams {
+        epoch: Some(initial.epoch.clone()),
+        after: Some(initial.cursor),
+    };
     let queued: OperationEventsOutput = env.call(Call::OperationEvents(params.clone())).await;
     assert_eq!(queued.active.len(), 1);
     env.worker.cancel(&project).unwrap();
     let cancelled: OperationEventsOutput = env.call(Call::OperationEvents(params.clone())).await;
     assert_eq!(cancelled.completed[0].state, "cancelled");
-    let retried: AcceptedOutput = env.call(Call::OperationRetry(OperationRetryParams { epoch: initial.epoch, id: cancelled.completed[0].id })).await;
+    let retried: AcceptedOutput = env
+        .call(Call::OperationRetry(OperationRetryParams {
+            epoch: initial.epoch,
+            id: cancelled.completed[0].id,
+        }))
+        .await;
     assert!(retried.accepted);
-    env.worker.resume(); env.idle().await;
+    env.worker.resume();
+    env.idle().await;
     let result: OperationEventsOutput = env.call(Call::OperationEvents(params)).await;
-    assert!(result.completed.iter().any(|op| op.project.is_some() && op.state == "success" && op.report.as_ref().unwrap().index_applied));
+    assert!(result.completed.iter().any(|op| op.project.is_some()
+        && op.state == "success"
+        && op.report.as_ref().unwrap().index_applied));
     env.worker.shutdown().await;
 }
 
@@ -47,14 +63,22 @@ async fn project_deletion_requires_confirmation_and_is_window_only() {
     let project = env.project("delete", "docs");
     env.worker.register(&project).unwrap();
     env.idle().await;
-    let params = ProjectDeleteParams { project: project.display().to_string(), confirmed: false };
+    let params = ProjectDeleteParams {
+        project: project.display().to_string(),
+        confirmed: false,
+    };
     assert!(Call::ProjectDelete(params.clone()).window_only());
     assert!(!Call::ProjectDelete(params.clone()).allowed_for(ClientKind::Mcp));
     assert!(!Call::ProjectDelete(params.clone()).allowed_for(ClientKind::Cli));
     let error = env.error(Call::ProjectDelete(params.clone())).await;
     assert_eq!(error.kind(), Some(ErrorKind::InvalidParams));
     assert!(project.join(".bars/index.sqlite").is_file());
-    let output: bars_protocol::UnregisterOutput = env.call(Call::ProjectDelete(ProjectDeleteParams { confirmed: true, ..params })).await;
+    let output: bars_protocol::UnregisterOutput = env
+        .call(Call::ProjectDelete(ProjectDeleteParams {
+            confirmed: true,
+            ..params
+        }))
+        .await;
     assert!(output.removed);
     assert!(!project.join(".bars").exists());
     assert!(project.join("docs/a.md").is_file());

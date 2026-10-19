@@ -87,6 +87,10 @@ pub enum ScoreKind {
 /// Один результат поиска (Т-13).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SearchHit {
+    /// Непрозрачный ID чанка для `similar`; действует, пока не изменился документ чанка
+    /// (`docs/features/search/maintenance-tools.md`).
+    #[serde(default)]
+    pub chunk_id: String,
     /// Путь документа от корня проекта.
     pub path: String,
     pub module: String,
@@ -123,6 +127,34 @@ pub struct SearchOutput {
     /// Причина, по которой rerank включён, но выдача вернулась без него.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub rerank_error: Option<String>,
+}
+
+// --- similar ---
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SimilarParams {
+    #[serde(flatten)]
+    pub target: Target,
+    /// ID чанка из выдачи поиска.
+    pub chunk_id: String,
+    /// Модули (корневой — `.`), из которых брать похожие; пусто — весь проект.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub modules: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub limit: Option<u32>,
+}
+
+/// Похожие чанки: оценка каждого — косинусная близость к исходному чанку.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SimilarOutput {
+    /// Исходный чанк (его текст и положение), результаты без него.
+    pub source: SearchHit,
+    pub results: Vec<SearchHit>,
+    /// Сколько результатов запрошено после ограничения пределом.
+    pub limit: u32,
+    pub clamped: bool,
+    pub indexing: bool,
+    pub pending: u32,
 }
 
 // --- outline ---
@@ -819,6 +851,7 @@ methods! {
     OperationRetry: crate::OperationRetryParams => AcceptedOutput, "operation_retry", Window;
     Hello: HelloParams => HelloOutput, "hello", All;
     Search: SearchParams => SearchOutput, "search", All;
+    Similar: SimilarParams => SimilarOutput, "similar", All;
     Outline: OutlineParams => OutlineOutput, "outline", All;
     Read: ReadParams => ReadOutput, "read", All;
     Projects: ProjectsParams => ProjectsOutput, "projects", All;
@@ -861,13 +894,27 @@ mod tests {
 
     #[test]
     fn project_delete_requires_confirmation_in_params_and_is_window_only() {
-        let request = Request::new(Id::Number(1), "project_delete", json!({"project": "C:/проект", "confirmed": true}));
+        let request = Request::new(
+            Id::Number(1),
+            "project_delete",
+            json!({"project": "C:/проект", "confirmed": true}),
+        );
         let call = Call::from_request(&request).unwrap();
-        assert_eq!(call, Call::ProjectDelete(ProjectDeleteParams { project: "C:/проект".into(), confirmed: true }));
+        assert_eq!(
+            call,
+            Call::ProjectDelete(ProjectDeleteParams {
+                project: "C:/проект".into(),
+                confirmed: true
+            })
+        );
         assert!(call.window_only());
         assert!(!call.allowed_for(ClientKind::Cli));
         assert!(!call.allowed_for(ClientKind::Mcp));
-        let missing = Request::new(Id::Number(2), "project_delete", json!({"project": "C:/проект"}));
+        let missing = Request::new(
+            Id::Number(2),
+            "project_delete",
+            json!({"project": "C:/проект"}),
+        );
         assert!(Call::from_request(&missing).is_err());
     }
 
@@ -902,6 +949,7 @@ mod tests {
     from_params!(
         Hello(HelloParams),
         Search(SearchParams),
+        Similar(SimilarParams),
         Outline(OutlineParams),
         Read(ReadParams),
         Projects(ProjectsParams),
@@ -1089,7 +1137,7 @@ mod tests {
     #[test]
     fn only_the_documented_methods_are_open_to_mcp() {
         let mcp_methods = [
-            "hello", "search", "outline", "read", "projects", "status", "reindex",
+            "hello", "search", "similar", "outline", "read", "projects", "status", "reindex",
         ];
         let calls = [
             Call::from(HelloParams {
@@ -1110,6 +1158,12 @@ mod tests {
                 client: InstallClient::Codex,
             }),
             Call::from(ProjectsParams {}),
+            Call::from(SimilarParams {
+                target: target(),
+                chunk_id: "1-00000000".into(),
+                modules: Vec::new(),
+                limit: None,
+            }),
             Call::from(ReindexParams {
                 target: target(),
                 full: false,
@@ -1141,6 +1195,7 @@ mod tests {
     fn search_output_roundtrips() {
         let output = SearchOutput {
             results: vec![SearchHit {
+                chunk_id: "7-0a1b2c3d".into(),
                 path: "docs/a.md".into(),
                 module: ".".into(),
                 title: "A".into(),

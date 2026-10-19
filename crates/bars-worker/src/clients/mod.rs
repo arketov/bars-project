@@ -8,6 +8,7 @@
 mod codex_toml;
 mod fsx;
 mod json;
+mod project_gate;
 mod refresh;
 
 #[cfg(test)]
@@ -20,8 +21,9 @@ use std::path::{Path, PathBuf};
 use bars_protocol::InstallClient;
 
 use fsx::{remove_dir, write_atomic};
+pub use project_gate::{GateProject, sync as sync_project_gates};
 pub use refresh::{RefreshResult, refresh};
-pub(crate) use refresh::{lock, report};
+pub(crate) use refresh::{lock, report, report_gates};
 
 /// Имена skills bars: их ставит и убирает установка (Т-28).
 const SKILLS: [(&str, &str); 2] = [
@@ -37,6 +39,9 @@ const SKILLS: [(&str, &str); 2] = [
 
 /// События хука, на которые срабатывает bars.
 pub(crate) const HOOK_MATCHER: &str = "startup|resume";
+
+/// Инструменты, перед которыми срабатывает гейт чтения документации.
+pub(crate) const GATE_MATCHER: &str = "Read|Grep|Glob|Bash|PowerShell|mcp__bars__.*";
 
 /// Откуда брать файлы клиентов и куда указывают записи bars.
 #[derive(Debug, Clone)]
@@ -65,6 +70,14 @@ impl InstallEnv {
     /// Команда хука: `"<bars-cli>" hook session-start`.
     pub fn hook_command(&self) -> String {
         format!("\"{}\" hook session-start", self.cli_exe.display())
+    }
+
+    /// Команда гейта проекта: `"<bars-cli>" hook pre-tool-use --docs-root "<папка>"`.
+    pub fn gate_command(&self, docs_root: &str) -> String {
+        format!(
+            "\"{}\" hook pre-tool-use --docs-root \"{docs_root}\"",
+            self.cli_exe.display()
+        )
     }
 }
 
@@ -253,6 +266,9 @@ fn uninstall_locked(env: &InstallEnv, client: InstallClient) -> Result<Vec<PathB
         }
         if json::uninstall_hook(&layout.hooks)? {
             done.changed_files.push(layout.hooks.clone());
+        }
+        if client == InstallClient::ClaudeCode {
+            done.changed_files.extend(project_gate::remove_all(env));
         }
         for (name, _) in SKILLS {
             let dir = layout.skills.join(name);

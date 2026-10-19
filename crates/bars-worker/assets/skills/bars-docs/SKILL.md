@@ -1,11 +1,42 @@
 ---
 name: bars-docs
-description: "Create, edit or move project documentation."
+description: "Use bars tools to search and read project documentation; create, edit or move documentation."
 ---
 
 # Documentation for bars
 
 bars splits Markdown by headings and searches by section, so the shape of a document affects search quality. The full rules are in `BARS_INSTRUCTION.md` in the documentation root; read it before a larger change. Write documents and search queries in the user's language, following explicit project language rules. English is only for agent instruction documents; it does not set the language of generated documents, queries or UI.
+
+## bars tools: what each one is for
+
+All tools take an optional `project` (default: the project of the session folder) and `format` (`txt` default, `json`). All are read-only except `bars_reindex`, which only refreshes the index.
+
+| Tool | Use it when | Key inputs | Notes |
+|---|---|---|---|
+| `bars_read` | The document is known (plan, register, contract, a path from a search hit). | `path` | Whole `.md` with line numbers; reads from disk, also files outside the index. |
+| `bars_outline` | You need the structure of a known document or one part of it before reading. | `path`, `levels`, `under` / `under_line` | Headings with line numbers; cheaper than `bars_read` for long files. |
+| `bars_rag_search` | The context is unknown: «where is X described», requirements, decisions, past sessions. | `query`, `modules`, `files`, `limit`, `mode` | Ask a concrete question in the user's language. `mode=mix` adds related sources from the graph, `mode=graph` returns relations; without `mode` the plain hybrid search runs. Each hit has an `id`. |
+| `bars_get_similar` | Before adding text: does a description already exist? Before editing: which other sections say the same? | `chunk_id` from a search hit, `modules`, `limit` | Closeness is not duplication; read both sections. An ID goes stale when its document changes (`chunk_not_found`): search again. |
+| `bars_projects` | You do not know project names or module names. | none | Registered projects, documentation roots, first-level modules with document counts. |
+| `bars_status` | Results look empty or incomplete; check the index before blaming the query. | `project` | Last update, indexing in progress, pending documents, model, `reindex_required`, last error. While indexing, results are incomplete. |
+| `bars_reindex` | The status says the index is stale or a document was changed outside the editor and is missing from results. | `project`, `full` | Returns at once; watch `bars_status`. After a model change it fails with `reindex_needs_consent`: tell the user and do not retry. |
+| `bars_relations` | What does X depend on, use, implement, verify or supersede? Exact statements with evidence. | `query` or `entity_ref`, `predicates`, `direction`, `polarity` | Ambiguous names return candidates, not a guess. |
+| `bars_paths` | How are two things connected? | `from`, `to`, `path_kind`, `max_hops` | A shortest path is a link, not a causal explanation. No path is not proof of no link. |
+| `bars_impact` | I am changing X: which documents describe, depend on or verify it? | `roots` (object refs from other graph results) | Result means «re-check these descriptions», not «something is broken». Hyperlinks are not dependencies. |
+| `bars_context` | Collect sources for a task grouped by role: requirement, decision, behavior, architecture, constraint, verification. | `query`, `task_profile` (implementation / investigation / decision), `roles`, `token_budget` | Returns primary sources, not an answer; read `missing_roles`. |
+| `bars_explore` | Overview of a topic or an audit: topics, isolated documents and broken links, gaps, conflict candidates. | `topic` or `whole_scope=true`, `analysis` (topics / connectivity / coverage / conflict_candidates) | Conflict candidates are candidates, not verdicts. Structural defects and semantic gaps are reported apart. |
+| `bars_graph` | Look at a subgraph of documents, sections, chunks or entities. | `view`, `local` + `roots`, `include_paths` | Local mode needs roots; there is no unbounded dump. |
+
+### Choosing a tool
+
+1. Know the document → `bars_read` (or `bars_outline` first for a long one). No search needed, even for an unindexed plan.
+2. Do not know where the answer lives → `bars_rag_search` with a subject question. Narrow with `modules` (first-level folders from `bars_projects`: `backlog` for wishes, `chats` for session results) or `files` (already chosen indexed documents, paths from the documentation root). A cross-layer task needs no filter.
+3. Need related material around a hit → `bars_get_similar` for same-topic text, `bars_relations` / `bars_paths` for explicit links, `bars_context` for a role-grouped bundle for a task.
+4. About to change something → `bars_impact` on the object, then `bars_get_similar` on the section you will edit.
+5. Reviewing the documentation as a whole → `bars_explore`, then `bars_graph` to inspect a finding.
+6. Zero or odd results → check subject, project and filters, then `bars_status`; reformulate or read the primary source. An empty answer does not prove a requirement is absent, and is not a reason to reindex.
+
+Graph tools read a prebuilt graph; the semantic layer is incomplete, so a missing relation proves nothing. Check `partial`, `coverage` and `evidence` in every answer, and treat similarity as a hint, never as a dependency. Graph results need the graph to be built; on `graph_not_ready` fall back to `bars_rag_search`.
 
 ## Choose the subject and sources
 

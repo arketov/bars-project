@@ -1,0 +1,41 @@
+[
+  {
+    "N": 569,
+    "shingleMs": 27,
+    "indexAndCountMs": 23,
+    "filterMs": 0,
+    "totalMs": 50,
+    "candidatePairs": 2,
+    "distinctPairsCounted": 1792,
+    "shingleTotal": 82648
+  },
+  {
+    "N": 5000,
+    "shingleMs": 247,
+    "indexAndCountMs": 229,
+    "filterMs": 1,
+    "totalMs": 478,
+    "candidatePairs": 13629,
+    "distinctPairsCounted": 41954,
+    "shingleTotal": 728116
+  },
+  {
+    "N": 20000,
+    "shingleMs": 1128,
+    "indexAndCountMs": 1380,
+    "filterMs": 11,
+    "totalMs": 2519,
+    "candidatePairs": 37531,
+    "distinctPairsCounted": 338697,
+    "shingleTotal": 2925695
+  },
+  {
+    "vectorAllPairs": {
+      "N": 569,
+      "pairs": 161596,
+      "ms": 183,
+      "extrapolated5000Ms": 14189,
+      "extrapolated20000Ms": 227064
+    }
+  }
+]

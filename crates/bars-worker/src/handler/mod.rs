@@ -4,8 +4,8 @@
 //! `bars-protocol`; сюда доходят уже проверенные вызовы. Окно вызывает те же методы без канала (Т-20).
 
 mod errors;
-mod history;
 mod graph;
+mod history;
 
 #[cfg(test)]
 mod tests;
@@ -17,7 +17,7 @@ use bars_core::indexing::chunking::chunk_document;
 use bars_core::indexing::walk::read_utf8_path;
 use bars_core::models::Reranker;
 use bars_core::outline::{OutlineQuery, Under, outline};
-use bars_core::search::{SearchRequest, search};
+use bars_core::search::{SearchRequest, SimilarRequest, search, similar};
 use bars_core::settings::Settings;
 use bars_core::storage::{Index, Journal, index_path};
 use bars_protocol::{
@@ -30,9 +30,9 @@ use bars_protocol::{
     ProjectState, ProjectsOutput, QueuedJob, ReadOutput, ReadParams, RegisterOutput,
     RegisterParams, ReindexParams, RpcError, RunningJob, SavedOutput, ScoreKind, SearchHit,
     SearchOutput, SearchParams, SecretOutput, SecretSetParams, SecretStatusParams,
-    SessionStartParams, SetDocsRootParams, SettingsOutput, SettingsSaveParams, StatusOutput,
-    StatusParams, Target, TreeDocument, TreeOutput, TreeParams, UninstallOutput, UninstallParams,
-    UnregisterOutput, UnregisterParams, output_value,
+    SessionStartParams, SetDocsRootParams, SettingsOutput, SettingsSaveParams, SimilarOutput,
+    SimilarParams, StatusOutput, StatusParams, Target, TreeDocument, TreeOutput, TreeParams,
+    UninstallOutput, UninstallParams, UnregisterOutput, UnregisterParams, output_value,
 };
 use serde_json::Value;
 
@@ -50,7 +50,7 @@ pub struct WorkerHandler {
 
 impl WorkerHandler {
     pub fn new(worker: Worker) -> Self {
-        let history=crate::mcp_history::History::new(worker.bars_home().to_path_buf());
+        let history = crate::mcp_history::History::new(worker.bars_home().to_path_buf());
         history.start_maintenance();
         Self { worker, history }
     }
@@ -62,9 +62,10 @@ impl WorkerHandler {
 
     /// Проект вызова: явный `project` или ближайший к `cwd` зарегистрированный (Т-15).
     fn resolve(&self, target: &Target) -> Result<PathBuf, RpcError> {
-        let path=if let Some(selector) = &target.project {
+        let path = if let Some(selector) = &target.project {
             self.worker.resolve(selector).map_err(worker_error)?
-        }else{self.worker
+        } else {
+            self.worker
             .project_for_cwd(Path::new(&target.cwd))
             .ok_or_else(|| {
                 RpcError::bars(
@@ -74,9 +75,22 @@ impl WorkerHandler {
                         target.cwd
                     ),
                 )
-            })?};
-        history::applied_field("resolved_project",serde_json::json!(path.display().to_string()));
-        history::applied_field("resolved_project_name",serde_json::json!(self.worker.projects().into_iter().find(|p|p.path==path).map(|p|p.name)));
+            })?
+        };
+        history::applied_field(
+            "resolved_project",
+            serde_json::json!(path.display().to_string()),
+        );
+        history::applied_field(
+            "resolved_project_name",
+            serde_json::json!(
+                self.worker
+                    .projects()
+                    .into_iter()
+                    .find(|p| p.path == path)
+                    .map(|p| p.name)
+            ),
+        );
         Ok(path)
     }
 
@@ -99,19 +113,72 @@ impl WorkerHandler {
             .map_err(|error| RpcError::standard(INTERNAL_ERROR, error.to_string()))
     }
 
-    async fn search(&self, params: SearchParams) -> Result<SearchOutput, RpcError> {
-        self.search_with_graph(params,None).await.map(|(output,_,_)|output)
-    }
-
-    async fn search_with_graph(&self, params: SearchParams, graph_budgets:Option<bars_core::graph::Budgets>)
-        -> Result<(SearchOutput,Option<bars_protocol::GraphReply>,Option<String>), RpcError> {
+    /// Чанки, близкие к чанку из выдачи поиска, по готовым векторам: модели не нужны.
+    async fn similar(&self, params: SimilarParams) -> Result<SimilarOutput, RpcError> {
         let project = self.usable(&params.target)?;
         let status = self.worker.status(&project).map_err(worker_error)?;
         if status.state == ProjectState::ReindexRequired {
             return Err(errors::reindex_required());
         }
         let settings = self.settings(&project)?;
-        history::applied_field("models",serde_json::json!({"embed":settings.embed.model,"rerank":settings.rerank.model,"rerank_requested":settings.rerank.enabled}));
+        let search_settings = settings.search.clone();
+        let request = SimilarRequest {
+            id: params.chunk_id,
+            modules: params.modules,
+            results: params.limit.map(|value| value as usize),
+        };
+        let gate = self
+            .worker
+            .gate(&project)
+            .map_err(worker_error)?
+            .read_owned()
+            .await;
+        let response = tokio::task::spawn_blocking(move || {
+            let _gate = gate;
+            let index = Index::open(&index_path(&project), Journal::Wal)?;
+            similar(&index, &search_settings, &request)
+        })
+        .await
+        .map_err(internal)?
+        .map_err(search_error)?;
+        Ok(SimilarOutput {
+            source: hit(response.source),
+            results: response.hits.into_iter().map(hit).collect(),
+            limit: to_u32(response.results),
+            clamped: response.clamped,
+            indexing: status.state == ProjectState::Indexing || status.queued,
+            pending: to_u32(status.pending),
+        })
+    }
+
+    async fn search(&self, params: SearchParams) -> Result<SearchOutput, RpcError> {
+        self.search_with_graph(params, None)
+            .await
+            .map(|(output, _, _)| output)
+    }
+
+    async fn search_with_graph(
+        &self,
+        params: SearchParams,
+        graph_budgets: Option<bars_core::graph::Budgets>,
+    ) -> Result<
+        (
+            SearchOutput,
+            Option<bars_protocol::GraphReply>,
+            Option<String>,
+        ),
+        RpcError,
+    > {
+        let project = self.usable(&params.target)?;
+        let status = self.worker.status(&project).map_err(worker_error)?;
+        if status.state == ProjectState::ReindexRequired {
+            return Err(errors::reindex_required());
+        }
+        let settings = self.settings(&project)?;
+        history::applied_field(
+            "models",
+            serde_json::json!({"embed":settings.embed.model,"rerank":settings.rerank.model,"rerank_requested":settings.rerank.enabled}),
+        );
         // Скачивание и загрузка встроенной модели поиск не ждёт: он сразу отвечает `model_loading`.
         match self
             .worker
@@ -154,15 +221,21 @@ impl WorkerHandler {
             match self.worker.models().rerank_readiness(&settings) {
                 Readiness::Ready => reranker = Some(self.worker.models().reranker(&settings)),
                 Readiness::Loading { percent } => {
-                    history::applied_field("rerank_fallback_reason",serde_json::json!("model_loading"));
+                    history::applied_field(
+                        "rerank_fallback_reason",
+                        serde_json::json!("model_loading"),
+                    );
                     skipped_rerank = Some(format!(
                         "rerank-модель ещё скачивается или грузится ({percent} %): выдача без rerank"
                     ));
                 }
                 Readiness::Failed(message) => {
-                    history::applied_field("rerank_fallback_reason",serde_json::json!("model_unavailable"));
+                    history::applied_field(
+                        "rerank_fallback_reason",
+                        serde_json::json!("model_unavailable"),
+                    );
                     skipped_rerank = Some(message);
-                },
+                }
             }
         }
         let response = tokio::task::spawn_blocking(move || {
@@ -170,36 +243,64 @@ impl WorkerHandler {
             let index = Index::open(&index_path(&project), Journal::Wal)?;
             // Нет rerank-модели или она не отработала: выдача идёт без неё, причина — в ответе.
             let reranker = reranker.as_mut().map(|model| model as &mut dyn Reranker);
-            let mut related=None;let mut fallback=None;
-            let result=if let Some(budgets)=graph_budgets {
+            let mut related = None;
+            let mut fallback = None;
+            let result = if let Some(budgets) = graph_budgets {
                 match bars_core::graph::store::load(index.conn()) {
-                    Ok(data)=>{
-                        let mut expand=|index:&Index,seeds:&[i64],limit:usize| {
-                            let(ids,reply)=bars_core::graph::retrieval::expand(index,&data,&request,seeds,limit,budgets.clone())?;
-                            related=Some(reply);Ok(ids)
+                    Ok(data) => {
+                        let mut expand = |index: &Index, seeds: &[i64], limit: usize| {
+                            let (ids, reply) = bars_core::graph::retrieval::expand(
+                                index,
+                                &data,
+                                &request,
+                                seeds,
+                                limit,
+                                budgets.clone(),
+                            )?;
+                            related = Some(reply);
+                            Ok(ids)
                         };
-                        bars_core::search::search_expanded(&index,&mut embedder,reranker,&settings.search,&request,Some(&mut expand))
-                    },
-                    Err(error)=>{fallback=Some(error.to_string());search(&index,&mut embedder,reranker,&settings.search,&request)},
+                        bars_core::search::search_expanded(
+                            &index,
+                            &mut embedder,
+                            reranker,
+                            &settings.search,
+                            &request,
+                            Some(&mut expand),
+                        )
+                    }
+                    Err(error) => {
+                        fallback = Some(error.to_string());
+                        search(&index, &mut embedder, reranker, &settings.search, &request)
+                    }
                 }
-            }else{search(&index,&mut embedder,reranker,&settings.search,&request)};
-            result.map(|result|(result,related,fallback))
+            } else {
+                search(&index, &mut embedder, reranker, &settings.search, &request)
+            };
+            result.map(|result| (result, related, fallback))
         })
         .await
         .map_err(internal)?
         .map_err(search_error)?;
-        let (response,related,fallback)=response;
+        let (response, related, fallback) = response;
         if response.rerank_error.is_some() {
-            history::applied_field("rerank_fallback_reason",serde_json::json!("rerank_execution_failed"));
+            history::applied_field(
+                "rerank_fallback_reason",
+                serde_json::json!("rerank_execution_failed"),
+            );
         }
         let rerank_error = response.rerank_error.or(skipped_rerank);
-        Ok((SearchOutput {
-            results: response.hits.into_iter().map(hit).collect(),
-            applied: applied(response.applied),
-            indexing: status.state == ProjectState::Indexing || status.queued,
-            pending: to_u32(status.pending),
-            rerank_error,
-        },related,fallback))
+        Ok((
+            SearchOutput {
+                results: response.hits.into_iter().map(hit).collect(),
+                applied: applied(response.applied),
+                indexing: status.state == ProjectState::Indexing || status.queued,
+                pending: to_u32(status.pending),
+                rerank_error,
+            },
+            related,
+            fallback,
+        ))
     }
 
     /// Документ по пути из вызова: текст и корень проекта для заголовка.
@@ -208,8 +309,8 @@ impl WorkerHandler {
         let settings = self.settings(&project)?;
         let file = resolve_doc_path(&project, Path::new(&settings.docs_root), path)
             .map_err(doc_path_error)?;
-        history::applied_field("path",serde_json::json!(file.display().to_string()));
-        history::applied_field("range",serde_json::json!("whole_document"));
+        history::applied_field("path", serde_json::json!(file.display().to_string()));
+        history::applied_field("range", serde_json::json!("whole_document"));
         let text = read_utf8_path(&file).map_err(read_error)?;
         Ok((text, settings))
     }
@@ -236,8 +337,8 @@ impl WorkerHandler {
             under,
         };
         let headings = outline(&text, &query).map_err(outline_error)?;
-        if let Some(anchor)=history::outline_anchor(&text,&query) {
-            history::applied_field("anchor",anchor);
+        if let Some(anchor) = history::outline_anchor(&text, &query) {
+            history::applied_field("anchor", anchor);
         }
         Ok(OutlineOutput {
             headings: headings
@@ -330,12 +431,20 @@ impl WorkerHandler {
 
     fn reindex(&self, params: ReindexParams) -> Result<AcceptedOutput, RpcError> {
         let project = self.resolve(&params.target)?;
-        let (id,merged,kind)=self.worker
+        let (id, merged, kind) = self
+            .worker
             .reindex_receipt(&project, params.full, params.accept_model_change)
             .map_err(worker_error)?;
-        history::applied_field("operation_id",serde_json::json!(id));
-        history::applied_field("merged",serde_json::json!(merged));
-        history::applied_field("job_kind",serde_json::json!(match kind {JobKind::Rebuild=>"rebuild",JobKind::Check=>"check",JobKind::Files=>"files"}));
+        history::applied_field("operation_id", serde_json::json!(id));
+        history::applied_field("merged", serde_json::json!(merged));
+        history::applied_field(
+            "job_kind",
+            serde_json::json!(match kind {
+                JobKind::Rebuild => "rebuild",
+                JobKind::Check => "check",
+                JobKind::Files => "files",
+            }),
+        );
         Ok(AcceptedOutput { accepted: true })
     }
 
@@ -595,7 +704,10 @@ impl WorkerHandler {
             },
             downloading: downloading.contains(id),
             download_percent: if id == bars_core::models::BGE_RERANKER_V2_M3_ID {
-                Some(bars_core::models::reranker_download_percent(&dir, rerank_accelerator))
+                Some(bars_core::models::reranker_download_percent(
+                    &dir,
+                    rerank_accelerator,
+                ))
             } else {
                 bars_core::models::download_percent(&dir, id)
             },
@@ -746,25 +858,50 @@ impl WorkerHandler {
     pub async fn dispatch(&self, call: Call) -> Result<Value, RpcError> {
         if let Call::ProjectDelete(params) = call {
             if !params.confirmed || !Path::new(&params.project).is_absolute() {
-                return Err(RpcError::bars(ErrorKind::InvalidParams, "удаление требует точного пути и явного подтверждения"));
+                return Err(RpcError::bars(
+                    ErrorKind::InvalidParams,
+                    "удаление требует точного пути и явного подтверждения",
+                ));
             }
-            self.worker.delete_project(&params.project).await.map_err(worker_error)?;
+            self.worker
+                .delete_project(&params.project)
+                .await
+                .map_err(worker_error)?;
             return Ok(output_value(&UnregisterOutput { removed: true }));
         }
-        if let Call::GraphBuild(params)=call {
+        if let Call::GraphBuild(params) = call {
             // Задание само удерживает owned request guard до конца. Повторный read
             // под этим guard мог бы зависнуть за ожидающим writer удаления проекта.
-            let project=self.resolve(&params.target)?;
-            return self.worker.graph_build(&project).await.map(|out|output_value(&out)).map_err(graph::graph_error);
+            let project = self.resolve(&params.target)?;
+            return self
+                .worker
+                .graph_build(&project)
+                .await
+                .map(|out| output_value(&out))
+                .map_err(graph::graph_error);
         }
         // Удаление ждёт запросы, уже открывшие индекс или настройки; новые ждут очистки.
         let _request = self.worker.request_guard().await;
         match call {
-            Call::GraphSearch(params)=>self.graph_search(params).await.map(|out|output_value(&out)),
-            Call::GraphQuery(params)=>self.graph_query(params).await.map(|out|output_value(&out)),
-            Call::GraphStatus(params)=>self.graph_status(params).await.map(|out|output_value(&out)),
-            Call::GraphBuild(_)=>unreachable!(),
-            Call::GraphCancel(params)=>{let project=self.resolve(&params.target)?;self.worker.graph_cancel(&project,&params.job_id).map(|cancelled|output_value(&CancelOutput{cancelled})).map_err(graph::graph_error)},
+            Call::GraphSearch(params) => self
+                .graph_search(params)
+                .await
+                .map(|out| output_value(&out)),
+            Call::GraphQuery(params) => {
+                self.graph_query(params).await.map(|out| output_value(&out))
+            }
+            Call::GraphStatus(params) => self
+                .graph_status(params)
+                .await
+                .map(|out| output_value(&out)),
+            Call::GraphBuild(_) => unreachable!(),
+            Call::GraphCancel(params) => {
+                let project = self.resolve(&params.target)?;
+                self.worker
+                    .graph_cancel(&project, &params.job_id)
+                    .map(|cancelled| output_value(&CancelOutput { cancelled }))
+                    .map_err(graph::graph_error)
+            }
             Call::ProjectDelete(_) => unreachable!(),
             // `hello` обрабатывает цикл соединения.
             Call::Hello(_) => Err(RpcError::standard(
@@ -775,19 +912,35 @@ impl WorkerHandler {
                 let start = std::time::Instant::now();
                 let result = self.search(params).await;
                 match &result {
-                    Ok(out) if out.rerank_error.is_some() => log::warn!("Поиск выполнен без rerank; подробности — в ответе поиска"),
-                    Ok(out) => log::debug!("Поиск завершён: {} результатов, {} мс", out.results.len(), start.elapsed().as_millis()),
-                    Err(error) => log::warn!("Поиск не выполнен: код {}; подробности — в ответе поиска", error.code),
+                    Ok(out) if out.rerank_error.is_some() => {
+                        log::warn!("Поиск выполнен без rerank; подробности — в ответе поиска")
+                    }
+                    Ok(out) => log::debug!(
+                        "Поиск завершён: {} результатов, {} мс",
+                        out.results.len(),
+                        start.elapsed().as_millis()
+                    ),
+                    Err(error) => log::warn!(
+                        "Поиск не выполнен: код {}; подробности — в ответе поиска",
+                        error.code
+                    ),
                 }
                 result.map(|out| output_value(&out))
-            },
+            }
+            Call::Similar(params) => self.similar(params).await.map(|out| output_value(&out)),
             Call::Outline(params) => self.outline(params).map(|out| output_value(&out)),
             Call::Read(params) => self.read(params).map(|out| output_value(&out)),
             Call::Projects(_) => self.projects().await.map(|out| output_value(&out)),
             Call::Status(params) => {
-                let graph = self.graph_status(bars_protocol::GraphStatusParams { target: params.target.clone() }).await?;
-                let mut out = self.status(params)?; out.graph = Some(graph); Ok(output_value(&out))
-            },
+                let graph = self
+                    .graph_status(bars_protocol::GraphStatusParams {
+                        target: params.target.clone(),
+                    })
+                    .await?;
+                let mut out = self.status(params)?;
+                out.graph = Some(graph);
+                Ok(output_value(&out))
+            }
             Call::Reindex(params) => self.reindex(params).map(|out| output_value(&out)),
             Call::Register(params) => self.register(params).await.map(|out| output_value(&out)),
             Call::Unregister(params) => self.unregister(params).map(|out| output_value(&out)),
@@ -798,8 +951,14 @@ impl WorkerHandler {
             Call::IndexResume(_) => Ok(output_value(&self.index_resume())),
             Call::IndexCancel(params) => self.index_cancel(params).map(|out| output_value(&out)),
             Call::Activity(_) => Ok(output_value(&self.activity())),
-            Call::OperationEvents(params) => Ok(output_value(&self.worker.operation_events(&params))),
-            Call::OperationRetry(params) => self.worker.retry_operation(&params).map(|()| output_value(&AcceptedOutput { accepted: true })).map_err(worker_error),
+            Call::OperationEvents(params) => {
+                Ok(output_value(&self.worker.operation_events(&params)))
+            }
+            Call::OperationRetry(params) => self
+                .worker
+                .retry_operation(&params)
+                .map(|()| output_value(&AcceptedOutput { accepted: true }))
+                .map_err(worker_error),
             Call::Tree(params) => self.tree(params).await.map(|out| output_value(&out)),
             Call::SettingsGet(_) => self.settings_get().map(|out| output_value(&out)),
             Call::SettingsSave(params) => self.settings_save(params).map(|out| output_value(&out)),
@@ -822,14 +981,25 @@ impl WorkerHandler {
 }
 
 impl bars_protocol::Handler for WorkerHandler {
-    async fn handle_observed(&self, session: &str, client: ClientKind, call: Call, context: Option<Value>) -> Result<Value,RpcError> {
-        self.observed(session,client,call,context).await
+    async fn handle_observed(
+        &self,
+        session: &str,
+        client: ClientKind,
+        call: Call,
+        context: Option<Value>,
+    ) -> Result<Value, RpcError> {
+        self.observed(session, client, call, context).await
     }
-    async fn handle_session(&self, session: &str, client: ClientKind, call: Call) -> Result<Value,RpcError> {
-        self.observed(session,client,call,None).await
+    async fn handle_session(
+        &self,
+        session: &str,
+        client: ClientKind,
+        call: Call,
+    ) -> Result<Value, RpcError> {
+        self.observed(session, client, call, None).await
     }
-    async fn handle(&self, _client: ClientKind, call: Call) -> Result<Value,RpcError> {
-        self.handle_plain(_client,call).await
+    async fn handle(&self, _client: ClientKind, call: Call) -> Result<Value, RpcError> {
+        self.handle_plain(_client, call).await
     }
 }
 fn internal(error: impl std::fmt::Display) -> RpcError {
@@ -879,6 +1049,7 @@ fn score_kind(kind: bars_core::search::ScoreKind) -> ScoreKind {
 
 fn hit(hit: bars_core::search::SearchHit) -> SearchHit {
     SearchHit {
+        chunk_id: hit.public_id,
         path: hit.path,
         module: hit.module,
         title: hit.title,

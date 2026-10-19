@@ -131,10 +131,7 @@ fn context_budget_trims_extra_proofs_before_dropping_roles() {
             .iter()
             .find(|source| source.meta.reference == proof.document)
             .unwrap();
-        assert_eq!(
-            &source.text[proof.span.start..proof.span.end],
-            proof.quote
-        );
+        assert_eq!(&source.text[proof.span.start..proof.span.end], proof.quote);
     }
 }
 fn reference(data: &Dataset, label: &str) -> ObjectRef {

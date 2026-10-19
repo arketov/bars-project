@@ -9,12 +9,30 @@ use std::io::Write;
 use bars_protocol::SessionStartParams;
 use serde::Deserialize;
 
-use crate::{Env, connect};
+use crate::{Env, connect, gate};
 
 #[derive(Debug, Default, Deserialize)]
 struct HookInput {
     cwd: Option<String>,
     source: Option<String>,
+}
+
+/// Хук перед вызовом инструмента: отказ уходит в stdout JSON-ом, выход всегда `0`.
+pub fn pre_tool_use(env: &Env, docs_root: &str, out: &mut dyn Write, err: &mut dyn Write) -> i32 {
+    let input: gate::GateInput = match env.hook_input.as_deref().map(str::trim) {
+        None | Some("") => return 0,
+        Some(text) => match serde_json::from_str(text) {
+            Ok(input) => input,
+            Err(error) => {
+                let _ = writeln!(err, "bars-cli hook: hook input is not valid JSON: {error}");
+                return 0;
+            }
+        },
+    };
+    if let Some(reason) = gate::decide(&input, docs_root, &std::env::temp_dir()) {
+        let _ = writeln!(out, "{}", gate::deny_output(reason));
+    }
+    0
 }
 
 pub async fn session_start(env: &Env, err: &mut dyn Write) -> i32 {
@@ -28,7 +46,7 @@ async fn try_session_start(env: &Env) -> Result<(), String> {
     let input: HookInput = match env.hook_input.as_deref().map(str::trim) {
         None | Some("") => HookInput::default(),
         Some(text) => serde_json::from_str(text)
-            .map_err(|error| format!("вход хука не разобран как JSON: {error}"))?,
+            .map_err(|error| format!("hook input is not valid JSON: {error}"))?,
     };
     let params = SessionStartParams {
         cwd: input.cwd.unwrap_or_else(|| env.cwd.display().to_string()),

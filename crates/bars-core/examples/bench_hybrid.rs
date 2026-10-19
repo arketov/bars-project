@@ -35,7 +35,11 @@ fn main() {
     let mut total = 0;
     for file in files {
         let source = std::fs::read_to_string(&file).unwrap();
-        let chunked = chunk_document(&file.display().to_string(), &source, &ChunkingParams::default());
+        let chunked = chunk_document(
+            &file.display().to_string(),
+            &source,
+            &ChunkingParams::default(),
+        );
         let texts: Vec<String> = chunked.chunks.into_iter().map(|c| c.embed_text).collect();
         if texts.is_empty() {
             continue;
@@ -47,7 +51,10 @@ fn main() {
         }
     }
     let chars: usize = docs.iter().flatten().map(|t| t.chars().count()).sum();
-    eprintln!("документов {}, чанков {total}, символов {chars}", docs.len());
+    eprintln!(
+        "документов {}, чанков {total}, символов {chars}",
+        docs.len()
+    );
 
     let workers: Vec<Accelerator> = match mode.as_str() {
         "gpu" => vec![Accelerator::Auto],
@@ -95,5 +102,8 @@ fn main() {
     for (device, d, c) in &results {
         println!("  {device:?}: документов {d}, чанков {c}");
     }
-    println!("{mode}: {total} чанков за {secs:.1} с = {:.2} чанка/с", total as f64 / secs);
+    println!(
+        "{mode}: {total} чанков за {secs:.1} с = {:.2} чанка/с",
+        total as f64 / secs
+    );
 }

@@ -10,8 +10,8 @@ mod deletion;
 mod graph;
 mod job;
 mod model_lifecycle;
-mod operations;
 pub mod models;
+mod operations;
 mod queue;
 mod registry;
 mod summary;
@@ -271,12 +271,17 @@ struct Inner {
     /// Модели, которые сейчас скачиваются по кнопке окна.
     downloads: Mutex<HashSet<String>>,
     download_errors: Mutex<HashMap<String, String>>,
-    graph_jobs: Mutex<HashMap<PathBuf,graph::GraphJob>>,
+    graph_jobs: Mutex<HashMap<PathBuf, graph::GraphJob>>,
 }
 
-struct DownloadCleanup { inner: Arc<Inner>, id: String }
+struct DownloadCleanup {
+    inner: Arc<Inner>,
+    id: String,
+}
 impl Drop for DownloadCleanup {
-    fn drop(&mut self) { lock(&self.inner.downloads).remove(&self.id); }
+    fn drop(&mut self) {
+        lock(&self.inner.downloads).remove(&self.id);
+    }
 }
 
 /// Воркер. Копии указывают на одно и то же состояние.
@@ -340,11 +345,39 @@ impl Worker {
         if self.inner.stop.load(Ordering::SeqCst) {
             return;
         }
+        let projects = self.gate_projects(None);
         tasks.push(tokio::task::spawn_blocking(move || {
             for outcome in crate::clients::refresh(&env) {
                 crate::clients::report(outcome.client, "обновлено", &outcome.result);
             }
+            crate::clients::report_gates(&crate::clients::sync_project_gates(&env, &projects));
         }));
+    }
+
+    /// Ставит гейт чтения документации в проект (или во все проекты), которые знает Claude Code.
+    pub(crate) fn sync_project_gates(&self, only: Option<&Path>) {
+        let Some(env) = self.install_env().cloned() else {
+            return;
+        };
+        let projects = self.gate_projects(only);
+        let mut tasks = lock(&self.inner.tasks);
+        if projects.is_empty() || self.inner.stop.load(Ordering::SeqCst) {
+            return;
+        }
+        tasks.push(tokio::task::spawn_blocking(move || {
+            crate::clients::report_gates(&crate::clients::sync_project_gates(&env, &projects));
+        }));
+    }
+
+    fn gate_projects(&self, only: Option<&Path>) -> Vec<crate::clients::GateProject> {
+        self.projects()
+            .into_iter()
+            .filter(|snapshot| only.is_none_or(|path| snapshot.path == path))
+            .map(|snapshot| crate::clients::GateProject {
+                path: snapshot.path,
+                docs_root: snapshot.docs_root,
+            })
+            .collect()
     }
 
     /// Перестаёт брать задания, дожидается текущего, снимает слежение.
@@ -371,7 +404,10 @@ impl Worker {
             .collect();
         drop(watchers);
         let inner = Arc::clone(&self.inner);
-        if tokio::task::spawn_blocking(move || inner.models.clear()).await.is_err() {
+        if tokio::task::spawn_blocking(move || inner.models.clear())
+            .await
+            .is_err()
+        {
             log::error!("Не удалось выгрузить модели при завершении");
         }
         log::info!("Воркер остановлен");
@@ -383,7 +419,10 @@ impl Worker {
     /// если его нет, запускает слежение и ставит проект на проверку. Повторная регистрация
     /// ставит на проверку ещё раз.
     pub fn register(&self, path: &Path) -> Result<Registered, WorkerError> {
-        let _request = self.inner.requests.try_read().map_err(|_| io::Error::other("идёт удаление проекта; повторите регистрацию позже"))?;
+        let _request =
+            self.inner.requests.try_read().map_err(|_| {
+                io::Error::other("идёт удаление проекта; повторите регистрацию позже")
+            })?;
         let path = normalize(path)?;
         if !path.is_dir() {
             return Err(WorkerError::NotADirectory(path));
@@ -407,7 +446,9 @@ impl Worker {
     /// Снимает проект с регистрации: убирает из `projects.toml`, останавливает слежение, снимает
     /// с очереди. `.bars/` и документы проекта остаются (Т-5).
     pub fn unregister(&self, selector: &str) -> Result<PathBuf, WorkerError> {
-        let _request = self.inner.requests.try_read().map_err(|_| io::Error::other("идёт удаление проекта; повторите снятие регистрации позже"))?;
+        let _request = self.inner.requests.try_read().map_err(|_| {
+            io::Error::other("идёт удаление проекта; повторите снятие регистрации позже")
+        })?;
         let path = self.resolve(selector)?;
         lock(&self.inner.registry).remove(&path)?;
         let runtime = lock(&self.inner.projects).remove(&path);
@@ -433,9 +474,16 @@ impl Worker {
     pub fn folder_identity(&self, path: &Path) -> Result<String, WorkerError> {
         let path = self.registered(path)?;
         let projects = lock(&self.inner.projects);
-        let runtime = projects.get(&path).filter(|r| !r.deleting)
+        let runtime = projects
+            .get(&path)
+            .filter(|r| !r.deleting)
             .ok_or_else(|| WorkerError::NotRegistered(path.clone()))?;
-        Ok(format!("{}:{}:{}", runtime.generation, runtime.folder_revision, self.inner.docs_root_of(&path)))
+        Ok(format!(
+            "{}:{}:{}",
+            runtime.generation,
+            runtime.folder_revision,
+            self.inner.docs_root_of(&path)
+        ))
     }
 
     /// Короткое действие окна не должно пересечь удаление/смену настроек проекта.
@@ -479,6 +527,7 @@ impl Worker {
         let discovered = lock(&self.inner.registry).discover_root(&cwd);
         if discovered.registered {
             self.inner.activate(&discovered.root, Priority::Explicit);
+            self.sync_project_gates(Some(&discovered.root));
             return Ok(Some(discovered.root));
         }
         if !discovered.root.is_dir()
@@ -486,7 +535,9 @@ impl Worker {
         {
             return Ok(None);
         }
-        Ok(Some(self.register(&discovered.root)?.path))
+        let root = self.register(&discovered.root)?.path;
+        self.sync_project_gates(Some(&root));
+        Ok(Some(root))
     }
 
     // --- состояние и переиндексация ---
@@ -525,11 +576,17 @@ impl Worker {
         full: bool,
         accept_model_change: bool,
     ) -> Result<(), WorkerError> {
-        self.reindex_receipt(path,full,accept_model_change).map(|_|())
+        self.reindex_receipt(path, full, accept_model_change)
+            .map(|_| ())
     }
 
     /// Проверка с ID принятой/объединённой операции для уведомления окна.
-    pub fn reindex_receipt(&self, path: &Path, full: bool, accept_model_change: bool) -> Result<(u64,bool,JobKind),WorkerError> {
+    pub fn reindex_receipt(
+        &self,
+        path: &Path,
+        full: bool,
+        accept_model_change: bool,
+    ) -> Result<(u64, bool, JobKind), WorkerError> {
         let path = self.registered(path)?;
         let state = lock(&self.inner.projects)
             .get(&path)
@@ -547,8 +604,10 @@ impl Worker {
         } else {
             Job::check(Priority::Explicit)
         };
-        let projects=lock(&self.inner.projects);
-        self.inner.enqueue_receipt(&path,job,&projects).ok_or(WorkerError::NotRegistered(path))
+        let projects = lock(&self.inner.projects);
+        self.inner
+            .enqueue_receipt(&path, job, &projects)
+            .ok_or(WorkerError::NotRegistered(path))
     }
 
     // --- пауза, остановка, ход ---
@@ -562,7 +621,8 @@ impl Worker {
             _ => {}
         }
         if !files.is_empty() {
-            self.inner.enqueue(&path, Job::files(Priority::Explicit, files));
+            self.inner
+                .enqueue(&path, Job::files(Priority::Explicit, files));
         }
         Ok(())
     }
@@ -663,7 +723,9 @@ impl Worker {
     /// проект ставится на полную проверку (нарезка и корень в индексе записаны, воркер увидит
     /// расхождение). Согласие не нужно: модель та же.
     pub fn set_docs_root(&self, path: &Path, docs_root: &str) -> Result<(), WorkerError> {
-        let _request = self.inner.requests.try_read().map_err(|_| io::Error::other("идёт удаление проекта; повторите изменение настроек позже"))?;
+        let _request = self.inner.requests.try_read().map_err(|_| {
+            io::Error::other("идёт удаление проекта; повторите изменение настроек позже")
+        })?;
         let path = self.registered(path)?;
         if !path.is_dir() {
             return Err(WorkerError::Unavailable(path));
@@ -755,7 +817,12 @@ impl Worker {
             user.embed.model.clone_from(&id);
         }
         let settings = Settings::resolve(&user, &bars_core::settings::ProjectConfig::default());
-        let operation = models::begin_model(&self.inner.models.operations, &settings, reranker, "download");
+        let operation = models::begin_model(
+            &self.inner.models.operations,
+            &settings,
+            reranker,
+            "download",
+        );
         self.inner.handle.spawn_blocking(move || {
             let _attempt = models::ModelAttempt(Arc::clone(&inner.models.operations), operation);
             let _download = DownloadCleanup { inner: Arc::clone(&inner), id: id.clone() };
@@ -818,7 +885,9 @@ impl Inner {
         let mut queue = lock(&self.queue);
         let id = queue.get(path).map(|job| job.operation_id);
         let removed = queue.remove(path);
-        if let Some(id) = id { lock(&self.models.operations).finish(id, "cancelled", None, None); }
+        if let Some(id) = id {
+            lock(&self.models.operations).finish(id, "cancelled", None, None);
+        }
         removed
     }
 
@@ -828,29 +897,61 @@ impl Inner {
     }
 
     fn enqueue_for(&self, project: &Path, job: Job, projects: &HashMap<PathBuf, Runtime>) {
-        self.enqueue_receipt(project,job,projects);
+        self.enqueue_receipt(project, job, projects);
     }
 
-    fn enqueue_receipt(&self, project: &Path, mut job: Job, projects: &HashMap<PathBuf, Runtime>) -> Option<(u64,bool,JobKind)> {
-        if !projects.get(project).is_some_and(|runtime| !runtime.deleting) {
+    fn enqueue_receipt(
+        &self,
+        project: &Path,
+        mut job: Job,
+        projects: &HashMap<PathBuf, Runtime>,
+    ) -> Option<(u64, bool, JobKind)> {
+        if !projects
+            .get(project)
+            .is_some_and(|runtime| !runtime.deleting)
+        {
             return None;
         }
         let mut queue = lock(&self.queue);
         let mut journal = lock(&self.models.operations);
-        let was_merged=queue.get(project).is_some();
-        job.operation_id = queue.get(project).map(|job| job.operation_id).unwrap_or_else(|| {
-            let settings = Settings::load(&self.config.bars_home, project).ok().map(|s| s.value);
-            journal.begin("check", "explicit", Some(project.display().to_string()), projects[project].generation, None, None, false, settings.as_ref().map(operations::settings_key).unwrap_or(0))
-        });
+        let was_merged = queue.get(project).is_some();
+        job.operation_id = queue
+            .get(project)
+            .map(|job| job.operation_id)
+            .unwrap_or_else(|| {
+                let settings = Settings::load(&self.config.bars_home, project)
+                    .ok()
+                    .map(|s| s.value);
+                journal.begin(
+                    "check",
+                    "explicit",
+                    Some(project.display().to_string()),
+                    projects[project].generation,
+                    None,
+                    None,
+                    false,
+                    settings.as_ref().map(operations::settings_key).unwrap_or(0),
+                )
+            });
         let id = job.operation_id;
         queue.push(project, job);
         let merged = queue.get(project).expect("задание поставлено");
         journal.edit(id, |op| {
-            op.kind = match JobKind::of(merged) { JobKind::Rebuild => "rebuild", JobKind::Check => "check", JobKind::Files => "files" }.into();
-            op.source = match merged.priority { Priority::Explicit => "explicit", Priority::Watch => "watch", Priority::Periodic => "periodic" }.into();
+            op.kind = match JobKind::of(merged) {
+                JobKind::Rebuild => "rebuild",
+                JobKind::Check => "check",
+                JobKind::Files => "files",
+            }
+            .into();
+            op.source = match merged.priority {
+                Priority::Explicit => "explicit",
+                Priority::Watch => "watch",
+                Priority::Periodic => "periodic",
+            }
+            .into();
         });
         self.wake.notify_one();
-        Some((id,was_merged,JobKind::of(merged)))
+        Some((id, was_merged, JobKind::of(merged)))
     }
 
     /// Вводит проект в работу: папка на месте, слежение запущено, проверка в очереди. Папки нет —
@@ -860,7 +961,10 @@ impl Inner {
         if !registry.contains(path) {
             return;
         }
-        if lock(&self.projects).get(path).is_some_and(|runtime| runtime.deleting) {
+        if lock(&self.projects)
+            .get(path)
+            .is_some_and(|runtime| runtime.deleting)
+        {
             return;
         }
         if !path.is_dir() {
@@ -893,7 +997,9 @@ impl Inner {
     fn ensure_watching(self: &Arc<Self>, path: &Path) {
         let generation = lock(&self.projects)
             .get(path)
-            .filter(|runtime| !runtime.deleting && (runtime.watcher.is_none() || runtime.watch_failed))
+            .filter(|runtime| {
+                !runtime.deleting && (runtime.watcher.is_none() || runtime.watch_failed)
+            })
             .map(|runtime| Arc::clone(&runtime.job_gate));
         let Some(generation) = generation else {
             return;
@@ -908,14 +1014,20 @@ impl Inner {
         let mut started =
             ProjectWatcher::start(path, &self.docs_root_of(path), self.config.debounce, sink).ok();
         if started.is_none() {
-            log::warn!("Не удалось запустить слежение за документацией: {}", path.display());
+            log::warn!(
+                "Не удалось запустить слежение за документацией: {}",
+                path.display()
+            );
         }
         let replaced = {
             let mut projects = lock(&self.projects);
-            projects.get_mut(path).filter(|runtime| !runtime.deleting && Arc::ptr_eq(&runtime.job_gate, &generation)).and_then(|runtime| {
-                runtime.watch_failed = started.is_none();
-                std::mem::replace(&mut runtime.watcher, started.take())
-            })
+            projects
+                .get_mut(path)
+                .filter(|runtime| !runtime.deleting && Arc::ptr_eq(&runtime.job_gate, &generation))
+                .and_then(|runtime| {
+                    runtime.watch_failed = started.is_none();
+                    std::mem::replace(&mut runtime.watcher, started.take())
+                })
         };
         // Прежнее слежение останавливается вне блокировки: его поток может ждать её.
         drop(replaced);
@@ -924,7 +1036,10 @@ impl Inner {
 
     /// Вызывается в потоке `notify`: останавливать слежение отсюда нельзя.
     fn on_watch_event(self: &Arc<Self>, project: &Path, event: WatchEvent) {
-        if !lock(&self.projects).get(project).is_some_and(|runtime| !runtime.deleting) {
+        if !lock(&self.projects)
+            .get(project)
+            .is_some_and(|runtime| !runtime.deleting)
+        {
             return;
         }
         if self.stop.load(Ordering::SeqCst) {
@@ -981,7 +1096,10 @@ impl Inner {
             if inner.stop.load(Ordering::SeqCst) {
                 return;
             }
-            if let Some(runtime) = lock(&inner.projects).get_mut(&project).filter(|r| !r.deleting && Arc::ptr_eq(&r.job_gate, &generation)) {
+            if let Some(runtime) = lock(&inner.projects)
+                .get_mut(&project)
+                .filter(|r| !r.deleting && Arc::ptr_eq(&r.job_gate, &generation))
+            {
                 runtime.tail_armed = false;
             } else {
                 return;
@@ -1084,7 +1202,10 @@ impl Inner {
         let operation_id = job.operation_id;
         let _pending = operations::PendingResult(Arc::clone(&self.models.operations), operation_id);
         let rebuild = job.rebuild.is_some();
-        let Some(job_gate) = lock(&self.projects).get(&path).map(|r| Arc::clone(&r.job_gate)) else {
+        let Some(job_gate) = lock(&self.projects)
+            .get(&path)
+            .map(|r| Arc::clone(&r.job_gate))
+        else {
             return;
         };
         let _job = Arc::clone(&job_gate).lock_owned().await;
@@ -1149,15 +1270,37 @@ impl Inner {
         if let Some(report) = report {
             for problem in &report.problems {
                 // reason может содержать ответ внешнего провайдера. Пишем только метаданные.
-                log::warn!("Проблема индексации: проект {}, файл {}, этап {}, попыток {}, прежняя версия {}",
-                    path.display(), problem.path, problem.stage, problem.attempts, problem.previous_version);
+                log::warn!(
+                    "Проблема индексации: проект {}, файл {}, этап {}, попыток {}, прежняя версия {}",
+                    path.display(),
+                    problem.path,
+                    problem.stage,
+                    problem.attempts,
+                    problem.previous_version
+                );
             }
         }
         match &result.outcome {
-            Outcome::Failed(_) => log::error!("Индексация завершилась ошибкой: {}; подробности — в отчёте задания", path.display()),
-            Outcome::Interrupted { .. } => log::warn!("Индексация прервана: {}; подробности — в отчёте задания", path.display()),
-            Outcome::Updated(report) if !report.problems.is_empty() => log::warn!("Индексация завершена с проблемами: {}; файлов с ошибками: {}", path.display(), report.problems.len()),
-            Outcome::Updated(report) => log::info!("Индексация завершена: {}; добавлено {}, изменено {}, удалено {}", path.display(), report.added, report.changed, report.removed),
+            Outcome::Failed(_) => log::error!(
+                "Индексация завершилась ошибкой: {}; подробности — в отчёте задания",
+                path.display()
+            ),
+            Outcome::Interrupted { .. } => log::warn!(
+                "Индексация прервана: {}; подробности — в отчёте задания",
+                path.display()
+            ),
+            Outcome::Updated(report) if !report.problems.is_empty() => log::warn!(
+                "Индексация завершена с проблемами: {}; файлов с ошибками: {}",
+                path.display(),
+                report.problems.len()
+            ),
+            Outcome::Updated(report) => log::info!(
+                "Индексация завершена: {}; добавлено {}, изменено {}, удалено {}",
+                path.display(),
+                report.added,
+                report.changed,
+                report.removed
+            ),
             Outcome::Unavailable => log::warn!("Папка проекта недоступна: {}", path.display()),
             Outcome::Cancelled => log::info!("Индексация отменена: {}", path.display()),
             Outcome::ReindexRequired(_) => log::info!("Нужна переиндексация: {}", path.display()),
@@ -1166,7 +1309,11 @@ impl Inner {
         // Публикация итога только после применения состояния проекта.
         self.apply(&path, previous, &job_gate, result);
         let mut journal = lock(&self.models.operations);
-        journal.edit(operation_id, |op| { let p = cell.progress(); op.docs_done = Some(p.docs_done); op.docs_total = cell.total_known().then_some(p.docs_total); });
+        journal.edit(operation_id, |op| {
+            let p = cell.progress();
+            op.docs_done = Some(p.docs_done);
+            op.docs_total = cell.total_known().then_some(p.docs_total);
+        });
         journal.index_result(operation_id, &outcome, rebuild);
         drop(journal);
         *lock(&self.current) = None;
@@ -1175,14 +1322,22 @@ impl Inner {
         }
     }
 
-    fn apply(&self, path: &Path, previous: ProjectState, generation_gate: &Arc<tokio::sync::Mutex<()>>, result: job::JobResult) {
+    fn apply(
+        &self,
+        path: &Path,
+        previous: ProjectState,
+        generation_gate: &Arc<tokio::sync::Mutex<()>>,
+        result: job::JobResult,
+    ) {
         let mut stopped = None;
         {
             let mut projects = lock(&self.projects);
             let Some(runtime) = projects.get_mut(path) else {
                 return;
             };
-            if !Arc::ptr_eq(&runtime.job_gate, generation_gate) { return; }
+            if !Arc::ptr_eq(&runtime.job_gate, generation_gate) {
+                return;
+            }
             let status = &mut runtime.status;
             if let Some(model) = result.index_model {
                 status.model_index = Some(model);

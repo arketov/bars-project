@@ -68,7 +68,11 @@ pub struct MappedDocument {
     pub source_spans: Vec<Vec<std::ops::Range<usize>>>,
 }
 
-pub fn chunk_document_with_spans(path: &str, source: &str, params: &ChunkingParams) -> MappedDocument {
+pub fn chunk_document_with_spans(
+    path: &str,
+    source: &str,
+    params: &ChunkingParams,
+) -> MappedDocument {
     let max = params.max_chars.max(1);
     let min = params.min_chars.min(max);
 
@@ -87,29 +91,54 @@ pub fn chunk_document_with_spans(path: &str, source: &str, params: &ChunkingPara
         .into_iter()
         .enumerate()
         .map(|(ordinal, draft)| {
-            let mut ranges=draft.source_spans.clone();ranges.sort_by_key(|r|r.start);
-            let mut merged:Vec<std::ops::Range<usize>>=Vec::new();
+            let mut ranges = draft.source_spans.clone();
+            ranges.sort_by_key(|r| r.start);
+            let mut merged: Vec<std::ops::Range<usize>> = Vec::new();
             for range in ranges {
-                let range=range.start-base..range.end-base;
-                if let Some(last)=merged.last_mut()
-                    && (range.start<=last.end || normalized[last.end..range.start].trim().is_empty()) {
-                    last.end=last.end.max(range.end);continue;
+                let range = range.start - base..range.end - base;
+                if let Some(last) = merged.last_mut()
+                    && (range.start <= last.end
+                        || normalized[last.end..range.start].trim().is_empty())
+                {
+                    last.end = last.end.max(range.end);
+                    continue;
                 }
                 merged.push(range);
             }
-            source_spans.push(merged.into_iter().map(|r| offsets[r.start]..offsets[r.end]).collect());
-            draft.into_chunk(ordinal,path)
+            source_spans.push(
+                merged
+                    .into_iter()
+                    .map(|r| offsets[r.start]..offsets[r.end])
+                    .collect(),
+            );
+            draft.into_chunk(ordinal, path)
         })
         .collect();
-    MappedDocument { document: ChunkedDocument { title, chunks }, source_spans }
+    MappedDocument {
+        document: ChunkedDocument { title, chunks },
+        source_spans,
+    }
 }
 
-fn original_offsets(source:&str)->Vec<usize> {
-    let bytes=source.as_bytes();let mut at=if source.starts_with('\u{feff}') {3}else{0};let mut map=Vec::new();
-    while at<bytes.len() {map.push(at);at+=if bytes[at]==b'\r'&&bytes.get(at+1)==Some(&b'\n'){2}else{1};}
-    map.push(bytes.len());map
+fn original_offsets(source: &str) -> Vec<usize> {
+    let bytes = source.as_bytes();
+    let mut at = if source.starts_with('\u{feff}') { 3 } else { 0 };
+    let mut map = Vec::new();
+    while at < bytes.len() {
+        map.push(at);
+        at += if bytes[at] == b'\r' && bytes.get(at + 1) == Some(&b'\n') {
+            2
+        } else {
+            1
+        };
+    }
+    map.push(bytes.len());
+    map
 }
-fn source_range(text:&str)->std::ops::Range<usize> {let start=text.as_ptr() as usize;start..start+text.len()}
+fn source_range(text: &str) -> std::ops::Range<usize> {
+    let start = text.as_ptr() as usize;
+    start..start + text.len()
+}
 
 /// Отбрасывает BOM и приводит `CRLF` и `CR` к `LF`.
 pub(crate) fn normalize(source: &str) -> String {
@@ -339,7 +368,11 @@ fn char_len(text: &str) -> usize {
 fn split_section(section: &Section, max: usize) -> Vec<Piece> {
     let Some(&(last_line, _)) = section.body.last() else {
         return vec![Piece {
-            source_spans: section.heading_source.map(source_range).into_iter().collect(),
+            source_spans: section
+                .heading_source
+                .map(source_range)
+                .into_iter()
+                .collect(),
             first_line: section.first_line,
             last_line: section.first_line,
             text: String::new(),
@@ -348,7 +381,13 @@ fn split_section(section: &Section, max: usize) -> Vec<Piece> {
     let whole = join_lines(&section.body);
     if char_len(&whole) <= max {
         return vec![Piece {
-            source_spans: section.heading_source.into_iter().chain(section.body.iter().map(|(_,line)|*line)).filter(|line|!line.is_empty()).map(source_range).collect(),
+            source_spans: section
+                .heading_source
+                .into_iter()
+                .chain(section.body.iter().map(|(_, line)| *line))
+                .filter(|line| !line.is_empty())
+                .map(source_range)
+                .collect(),
             first_line: section.first_line,
             last_line,
             text: whole,
@@ -357,7 +396,9 @@ fn split_section(section: &Section, max: usize) -> Vec<Piece> {
     let mut pieces = pack(atoms(&section.body, max), max);
     if let Some(first) = pieces.first_mut() {
         first.first_line = section.first_line;
-        if let Some(heading)=section.heading_source { first.source_spans.insert(0,source_range(heading)); }
+        if let Some(heading) = section.heading_source {
+            first.source_spans.insert(0, source_range(heading));
+        }
     }
     pieces
 }
@@ -397,7 +438,11 @@ fn atoms(body: &[(usize, &str)], max: usize) -> Vec<Atom> {
         let text = join_lines(&unit);
         if char_len(&text) <= max {
             atoms.push(Atom {
-                source_spans: unit.iter().filter(|(_,line)|!line.is_empty()).map(|(_,line)|source_range(line)).collect(),
+                source_spans: unit
+                    .iter()
+                    .filter(|(_, line)| !line.is_empty())
+                    .map(|(_, line)| source_range(line))
+                    .collect(),
                 first_line,
                 last_line,
                 text,
@@ -407,17 +452,18 @@ fn atoms(body: &[(usize, &str)], max: usize) -> Vec<Atom> {
         }
         for (position, &(line_no, line)) in unit.iter().enumerate() {
             let chars: Vec<char> = line.chars().collect();
-            let mut source_offset=0;
+            let mut source_offset = 0;
             for (part, segment) in chars.chunks(max).enumerate() {
                 let separator = match (position, part) {
                     (0, 0) => BLANK,
                     (_, 0) => "\n",
                     _ => "",
                 };
-                let segment_text:String=segment.iter().collect();
-                let start=line.as_ptr() as usize+source_offset;source_offset+=segment_text.len();
+                let segment_text: String = segment.iter().collect();
+                let start = line.as_ptr() as usize + source_offset;
+                source_offset += segment_text.len();
                 atoms.push(Atom {
-                    source_spans: vec![start..start+segment_text.len()],
+                    source_spans: vec![start..start + segment_text.len()],
                     first_line: line_no,
                     last_line: line_no,
                     text: segment_text,
@@ -658,33 +704,52 @@ mod tests {
 
     #[test]
     fn graph_source_spans_preserve_original_bom_crlf_and_unicode_splits() {
-        let source="\u{feff}# Тема\r\nАБВГДЕЖЗИКЛМНОП\r\n";
-        let mapped=chunk_document_with_spans("docs/a.md",source,&params(1,4));
-        assert!(mapped.document.chunks.len()>2);
+        let source = "\u{feff}# Тема\r\nАБВГДЕЖЗИКЛМНОП\r\n";
+        let mapped = chunk_document_with_spans("docs/a.md", source, &params(1, 4));
+        assert!(mapped.document.chunks.len() > 2);
         for ranges in &mapped.source_spans {
-            for range in ranges {assert!(source.get(range.clone()).is_some());assert!(range.start>=3);}
+            for range in ranges {
+                assert!(source.get(range.clone()).is_some());
+                assert!(range.start >= 3);
+            }
         }
-        assert_eq!(mapped.source_spans[0][0].start,3);
-        let body=source.find("АБ").unwrap();
-        assert!(mapped.source_spans.iter().flatten().any(|r|r.start==body+4*2));
+        assert_eq!(mapped.source_spans[0][0].start, 3);
+        let body = source.find("АБ").unwrap();
+        assert!(
+            mapped
+                .source_spans
+                .iter()
+                .flatten()
+                .any(|r| r.start == body + 4 * 2)
+        );
     }
 
     #[test]
     fn graph_spans_exclude_padding_from_previous_section() {
-        let source=format!("# A\n{}\n# B\nz\n# C\n{}", "a".repeat(90),"c".repeat(90));
-        let mapped=chunk_document_with_spans("docs/a.md",&source,&params(25,30));
-        let index=mapped.document.chunks.iter().position(|c|c.first_line==3).unwrap();
+        let source = format!("# A\n{}\n# B\nz\n# C\n{}", "a".repeat(90), "c".repeat(90));
+        let mapped = chunk_document_with_spans("docs/a.md", &source, &params(25, 30));
+        let index = mapped
+            .document
+            .chunks
+            .iter()
+            .position(|c| c.first_line == 3)
+            .unwrap();
         assert!(mapped.document.chunks[index].text.contains('a'));
-        assert!(mapped.source_spans[index].iter().all(|r|r.start>=source.find("# B").unwrap()));
+        assert!(
+            mapped.source_spans[index]
+                .iter()
+                .all(|r| r.start >= source.find("# B").unwrap())
+        );
     }
 
     #[test]
     fn graph_spans_do_not_claim_generated_other_headers_as_own_content() {
-        let source="# Parent\nParent body long enough.\n## Child\nChild body long enough.";
-        let mapped=chunk_document_with_spans("docs/a.md",source,&params(1,100));
-        let parent=&mapped.document.chunks[0];assert!(parent.text.contains("other headers:"));
-        let child=source.find("## Child").unwrap();
-        assert!(mapped.source_spans[0].iter().all(|r|r.end<=child));
+        let source = "# Parent\nParent body long enough.\n## Child\nChild body long enough.";
+        let mapped = chunk_document_with_spans("docs/a.md", source, &params(1, 100));
+        let parent = &mapped.document.chunks[0];
+        assert!(parent.text.contains("other headers:"));
+        let child = source.find("## Child").unwrap();
+        assert!(mapped.source_spans[0].iter().all(|r| r.end <= child));
     }
 
     fn params(min: usize, max: usize) -> ChunkingParams {
@@ -776,7 +841,10 @@ mod tests {
             .filter(|c| c.heading_chain == "А")
             .collect();
         assert_eq!(parent.len(), 2);
-        assert_eq!(parent[0].text, format!("{paragraph}\n\n{paragraph}{TRUNCATED}"));
+        assert_eq!(
+            parent[0].text,
+            format!("{paragraph}\n\n{paragraph}{TRUNCATED}")
+        );
         assert_eq!((parent[0].first_line, parent[0].last_line), (1, 4));
         assert_eq!((parent[1].first_line, parent[1].last_line), (6, 6));
         assert!(parent[1].text.ends_with("other headers:\n## Б"));
@@ -797,7 +865,11 @@ mod tests {
         let texts: Vec<&str> = doc.chunks.iter().map(|c| c.text.as_str()).collect();
         assert_eq!(
             texts,
-            ["яяяяяяяяяя ...(truncated)", "яяяяяяяяяя ...(truncated)", "яяяяя"]
+            [
+                "яяяяяяяяяя ...(truncated)",
+                "яяяяяяяяяя ...(truncated)",
+                "яяяяя"
+            ]
         );
         let restored: String = texts
             .iter()

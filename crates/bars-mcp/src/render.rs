@@ -5,7 +5,7 @@ use std::fmt::Write as _;
 
 use bars_protocol::{
     AcceptedOutput, Heading, OutlineOutput, ProjectInfo, ProjectState, ProjectsOutput, ReadOutput,
-    ScoreKind, SearchOutput, StatusOutput, number_lines,
+    ScoreKind, SearchHit, SearchOutput, SimilarOutput, StatusOutput, number_lines,
 };
 
 fn score_kind(kind: ScoreKind) -> &'static str {
@@ -24,26 +24,33 @@ fn state_name(state: ProjectState) -> &'static str {
     }
 }
 
+/// Один результат: общий вид у поиска и у похожих чанков.
+fn result_block(text: &mut String, n: usize, total: usize, hit: &SearchHit) {
+    let _ = writeln!(text, "=== RESULT {n} of {total} ===");
+    if !hit.chunk_id.is_empty() {
+        let _ = writeln!(text, "id: {}", hit.chunk_id);
+    }
+    let _ = writeln!(text, "path: {}", hit.path);
+    let _ = writeln!(text, "lines: {}-{}", hit.first_line, hit.last_line);
+    let _ = writeln!(text, "module: {}", hit.module);
+    let _ = writeln!(text, "title: {}", hit.title);
+    let _ = writeln!(text, "heading: {}", hit.heading_chain);
+    let _ = writeln!(
+        text,
+        "score: {:.3} ({})",
+        hit.score,
+        score_kind(hit.score_kind)
+    );
+    let _ = writeln!(text, "--- text ---");
+    let _ = writeln!(text, "{}", hit.text.trim_end());
+    let _ = writeln!(text, "=== END RESULT {n} ===");
+}
+
 pub fn search(output: &SearchOutput) -> String {
     let total = output.results.len();
     let mut text = format!("=== SEARCH: results {total} ===\n");
     for (index, hit) in output.results.iter().enumerate() {
-        let n = index + 1;
-        let _ = writeln!(text, "=== RESULT {n} of {total} ===");
-        let _ = writeln!(text, "path: {}", hit.path);
-        let _ = writeln!(text, "lines: {}-{}", hit.first_line, hit.last_line);
-        let _ = writeln!(text, "module: {}", hit.module);
-        let _ = writeln!(text, "title: {}", hit.title);
-        let _ = writeln!(text, "heading: {}", hit.heading_chain);
-        let _ = writeln!(
-            text,
-            "score: {:.3} ({})",
-            hit.score,
-            score_kind(hit.score_kind)
-        );
-        let _ = writeln!(text, "--- text ---");
-        let _ = writeln!(text, "{}", hit.text.trim_end());
-        let _ = writeln!(text, "=== END RESULT {n} ===");
+        result_block(&mut text, index + 1, total, hit);
     }
     let applied = &output.applied;
     let _ = writeln!(text, "=== APPLIED PARAMETERS ===");
@@ -65,6 +72,39 @@ pub fn search(output: &SearchOutput) -> String {
         let _ = writeln!(text, "Indexing in progress: results may be incomplete.");
     }
     text.push_str("=== END SEARCH ===");
+    text
+}
+
+pub fn similar(output: &SimilarOutput) -> String {
+    let total = output.results.len();
+    let source = &output.source;
+    let mut text = format!(
+        "=== SIMILAR: results {total} ===
+"
+    );
+    let _ = writeln!(text, "=== SOURCE ===");
+    let _ = writeln!(text, "id: {}", source.chunk_id);
+    let _ = writeln!(text, "path: {}", source.path);
+    let _ = writeln!(text, "lines: {}-{}", source.first_line, source.last_line);
+    let _ = writeln!(text, "module: {}", source.module);
+    let _ = writeln!(text, "heading: {}", source.heading_chain);
+    let _ = writeln!(text, "=== END SOURCE ===");
+    for (index, hit) in output.results.iter().enumerate() {
+        result_block(&mut text, index + 1, total, hit);
+    }
+    let _ = writeln!(text, "=== APPLIED PARAMETERS ===");
+    let _ = writeln!(text, "results: {}", output.limit);
+    let _ = writeln!(
+        text,
+        "score: cosine similarity to the source chunk; closeness does not prove duplication"
+    );
+    let _ = writeln!(text, "clamped: {}", output.clamped);
+    let _ = writeln!(text, "indexing: {}", output.indexing);
+    let _ = writeln!(text, "pending: {}", output.pending);
+    if output.indexing {
+        let _ = writeln!(text, "Indexing in progress: results may be incomplete.");
+    }
+    text.push_str("=== END SIMILAR ===");
     text
 }
 

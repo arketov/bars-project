@@ -7,10 +7,10 @@ use rusqlite::params_from_iter;
 use rusqlite::types::Value;
 
 use super::params::{AppliedParams, ScoreKind, SearchRequest, SearchSettings};
+use super::vector_top::VectorTop;
 use crate::models::{EmbedError, Embedder, RerankError, Reranker};
 use crate::storage::stem::TextStemmer;
 use crate::storage::{Compatibility, Index, StorageError};
-use super::vector_top::VectorTop;
 
 /// Константа Reciprocal Rank Fusion: оценка кандидата — сумма `1 / (RRF_K + место)` по спискам.
 const RRF_K: f32 = 60.0;
@@ -29,6 +29,13 @@ pub enum SearchError {
     Storage(#[from] StorageError),
     #[error("ошибка SQLite: {0}")]
     Sqlite(#[from] rusqlite::Error),
+    /// ID чанка неизвестен или устарел после обновления документа (`chunk_not_found`).
+    #[error(
+        "ID чанка `{0}` неизвестен или устарел после обновления индекса; найди чанк поиском заново"
+    )]
+    ChunkNotFound(String),
+    #[error("у чанка `{0}` нет вектора в индексе: индекс повреждён, нужна переиндексация")]
+    MissingVector(String),
     #[error("вектор в индексе длиной {got}, а у запроса {expected}")]
     VectorSize { expected: usize, got: usize },
 }
@@ -37,6 +44,8 @@ pub enum SearchError {
 #[derive(Debug, Clone, PartialEq)]
 pub struct SearchHit {
     pub chunk_id: i64,
+    /// Непрозрачный ID чанка для `get_similar`; действует, пока не изменился документ чанка.
+    pub public_id: String,
     /// Путь документа от корня проекта.
     pub path: String,
     pub module: String,
@@ -70,10 +79,15 @@ pub fn search(
 }
 
 /// Внутреннее расширение до rerank/top-K; оценки и область проверяет тот же поисковый путь.
-pub type CandidateExpansion<'a> = dyn FnMut(&Index, &[i64], usize) -> Result<Vec<i64>, SearchError> + 'a;
+pub type CandidateExpansion<'a> =
+    dyn FnMut(&Index, &[i64], usize) -> Result<Vec<i64>, SearchError> + 'a;
 pub fn search_expanded(
-    index: &Index, embedder: &mut dyn Embedder, reranker: Option<&mut dyn Reranker>,
-    settings: &SearchSettings, request: &SearchRequest, mut expansion: Option<&mut CandidateExpansion<'_>>,
+    index: &Index,
+    embedder: &mut dyn Embedder,
+    reranker: Option<&mut dyn Reranker>,
+    settings: &SearchSettings,
+    request: &SearchRequest,
+    mut expansion: Option<&mut CandidateExpansion<'_>>,
 ) -> Result<SearchResponse, SearchError> {
     let match_query = fts_query(&request.query)
         .ok_or_else(|| SearchError::InvalidParams("в запросе нет ни одного слова".to_string()))?;
@@ -114,18 +128,30 @@ pub fn search_expanded(
     let mut cosines = scope.cosines(index, &query_vector, candidates, &text_ids, &exact_ids)?;
     let vector_ids = top_by_score(&cosines, candidates);
     let mut fused = exact_first(&exact_ids, fuse(&text_ids, &vector_ids));
-    if let Some(expansion) = expansion.as_mut().filter(|_|!fused.is_empty()) {
-        let additional = expansion(index, &fused, candidates)?.into_iter().take(candidates).collect::<Vec<_>>();
+    if let Some(expansion) = expansion.as_mut().filter(|_| !fused.is_empty()) {
+        let additional = expansion(index, &fused, candidates)?
+            .into_iter()
+            .take(candidates)
+            .collect::<Vec<_>>();
         // Принудительно посчитать cosine добавленных кандидатов, сохранив исходный scope.
-        let scores=scope.cosines(index,&query_vector,0,&additional,&[])?;
-        let additional=additional.into_iter().filter(|id|scores.contains_key(id)).collect::<Vec<_>>();
+        let scores = scope.cosines(index, &query_vector, 0, &additional, &[])?;
+        let additional = additional
+            .into_iter()
+            .filter(|id| scores.contains_key(id))
+            .collect::<Vec<_>>();
         cosines.extend(scores);
-        let original=fused.clone();let mut seen=HashSet::new();fused.clear();
+        let original = fused.clone();
+        let mut seen = HashSet::new();
+        fused.clear();
         // Чередование до окончательного rerank; исходные точные identifiers остаются первыми.
         for i in 0..original.len().max(additional.len()) {
-            for id in [original.get(i),additional.get(i)].into_iter().flatten(){if seen.insert(*id){fused.push(*id);}}
+            for id in [original.get(i), additional.get(i)].into_iter().flatten() {
+                if seen.insert(*id) {
+                    fused.push(*id);
+                }
+            }
         }
-        fused=exact_first(&exact_ids,fused);
+        fused = exact_first(&exact_ids, fused);
     }
 
     let mut rerank_error = None;
@@ -279,7 +305,7 @@ fn cosine_of(cosines: &HashMap<i64, f32>, id: i64) -> f32 {
 }
 
 /// Первые `limit` чанков по убыванию оценки; при равенстве — по номеру, чтобы порядок был устойчив.
-fn top_by_score(scores: &HashMap<i64, f32>, limit: usize) -> Vec<i64> {
+pub(super) fn top_by_score(scores: &HashMap<i64, f32>, limit: usize) -> Vec<i64> {
     let mut all: Vec<(i64, f32)> = scores.iter().map(|(id, score)| (*id, *score)).collect();
     all.sort_by(|a, b| b.1.total_cmp(&a.1).then(a.0.cmp(&b.0)));
     all.into_iter().take(limit).map(|(id, _)| id).collect()
@@ -358,17 +384,29 @@ fn threshold_and_cut(hits: Vec<SearchHit>, applied: &AppliedParams) -> Vec<Searc
 }
 
 /// Чанки с документами; порядок — как в `ids`. Оценку проставляет вызывающий.
-fn load_hits(index: &Index, ids: &[i64]) -> Result<Vec<SearchHit>, SearchError> {
+pub(super) fn load_hits(index: &Index, ids: &[i64]) -> Result<Vec<SearchHit>, SearchError> {
     let mut statement = index.conn().prepare_cached(
-        "SELECT d.path, d.module, d.title, c.heading_chain, c.first_line, c.last_line, c.text
+        "SELECT d.path, d.module, d.title, c.heading_chain, c.first_line, c.last_line, c.text,
+                d.hash, c.ordinal, c.embed_hash
          FROM chunks c JOIN documents d ON d.id = c.document_id WHERE c.id = ?1",
     )?;
     let mut hits = Vec::with_capacity(ids.len());
     for &id in ids {
         let hit = statement.query_row([id], |row| {
+            let path: String = row.get(0)?;
+            let document_hash: String = row.get(7)?;
+            let ordinal: i64 = row.get(8)?;
+            let embed_hash: String = row.get(9)?;
             Ok(SearchHit {
                 chunk_id: id,
-                path: row.get(0)?,
+                public_id: super::similar::public_id(
+                    id,
+                    &document_hash,
+                    &path,
+                    ordinal,
+                    &embed_hash,
+                ),
+                path,
                 module: row.get(1)?,
                 title: row.get(2)?,
                 heading_chain: row.get(3)?,
@@ -385,7 +423,7 @@ fn load_hits(index: &Index, ids: &[i64]) -> Result<Vec<SearchHit>, SearchError> 
 }
 
 /// Отбор по модулям и файлам (Т-14): условие для SQL и его параметры.
-struct Scope {
+pub(super) struct Scope {
     clause: String,
     params: Vec<Value>,
 }
@@ -393,7 +431,7 @@ struct Scope {
 impl Scope {
     /// Строит отбор и проверяет, что каждый модуль и файл есть в индексе. Модули и файлы
     /// объединяются; пустой отбор — весь проект.
-    fn build(index: &Index, request: &SearchRequest) -> Result<Self, SearchError> {
+    pub(super) fn build(index: &Index, request: &SearchRequest) -> Result<Self, SearchError> {
         let mut parts = Vec::new();
         let mut params = Vec::new();
 
@@ -488,7 +526,7 @@ impl Scope {
 
     /// Косинусная близость запроса ко всем чанкам области: точный перебор. Векторы в индексе и
     /// вектор запроса нормализованы, поэтому близость — скалярное произведение.
-    fn cosines(
+    pub(super) fn cosines(
         &self,
         index: &Index,
         query_vector: &[f32],
@@ -512,7 +550,14 @@ impl Scope {
             let value = row.get_ref(1)?;
             let blob = match value {
                 rusqlite::types::ValueRef::Blob(blob) => blob,
-                other => return Err(rusqlite::Error::InvalidColumnType(1, "vector".into(), other.data_type()).into()),
+                other => {
+                    return Err(rusqlite::Error::InvalidColumnType(
+                        1,
+                        "vector".into(),
+                        other.data_type(),
+                    )
+                    .into());
+                }
             };
             let dim = blob.len() / size_of::<f32>();
             if dim != query_vector.len() {
@@ -521,8 +566,13 @@ impl Scope {
                     got: dim,
                 });
             }
-            let dot: f32 = blob.as_chunks::<4>().0.iter().zip(query_vector)
-                .map(|(bytes, b)| f32::from_le_bytes(*bytes) * b).sum();
+            let dot: f32 = blob
+                .as_chunks::<4>()
+                .0
+                .iter()
+                .zip(query_vector)
+                .map(|(bytes, b)| f32::from_le_bytes(*bytes) * b)
+                .sum();
             scores.push(id, dot);
         }
         Ok(scores.finish())

@@ -7,8 +7,8 @@ pub mod clients;
 pub mod handler;
 pub mod ipc;
 pub mod logging;
-pub mod mcp_statistics;
 pub mod mcp_history;
+pub mod mcp_statistics;
 pub mod serve;
 pub mod settings_io;
 // Часть API воркера (ход индексации, выгрузка моделей, проверка очереди) нужна окну и тестам.

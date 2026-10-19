@@ -19,6 +19,7 @@ GraphRAG: `relations`, `paths`, `impact`, `context`, `explore`, `graph show/stat
 | Команда | Что делает | Соответствие |
 |---|---|---|
 | `bars-cli search <запрос> [--module M]… [--file F]… [--limit N] [--min-score S]` | поиск | `bars_rag_search` |
+| `bars-cli similar <ID чанка> [--module M]… [--limit N]` | похожие чанки по ID из выдачи поиска | `bars_get_similar` |
 | `bars-cli outline <путь> [--levels 2,3] [--under "A/B" \| --under-line N]` | структура документа | `bars_outline` (Т-26) |
 | `bars-cli read <путь>` | документ целиком | `bars_read` |
 | `bars-cli projects` | проекты и модули | `bars_projects` |
@@ -30,6 +31,7 @@ GraphRAG: `relations`, `paths`, `impact`, `context`, `explore`, `graph show/stat
 | `bars-cli uninstall --client claude-code\|codex` | убрать bars из клиента | пункт «Удалить» в окне |
 | `bars-cli autostart [status\|on\|off]` | автозапуск bars при входе в систему; без аргумента — состояние | галочка во вкладке «Запуск» ([distribution/autostart.md](../distribution/autostart.md)) |
 | `bars-cli hook session-start` | команда для хука начала сессии | — |
+| `bars-cli hook pre-tool-use [--docs-root <папка>]` | команда для хука перед вызовом инструмента: гейт чтения документации | — |
 
 ## Как bars-cli вызывает воркер
 
@@ -47,6 +49,15 @@ GraphRAG: `relations`, `paths`, `impact`, `context`, `explore`, `graph show/stat
 ## Хук начала сессии
 
 `bars-cli hook session-start` читает из stdin JSON, который передаёт клиент, и берёт из него рабочую папку сессии — поле `cwd`; у Claude Code и Codex формат входа одинаковый. Затем находит корень проекта, регистрирует его, если он ещё не зарегистрирован и в нём есть документация ([features/projects/projects.md](../projects/projects.md)), и ставит проект в очередь проверки актуальности (Т-6, Т-10). Если `cwd` нет во входе, берётся текущая папка, если нет `source` — `startup`. Корень ищет и регистрирует воркер (метод `session_start`, [projects.md](../projects/projects.md)), а не CLI. Команда не ждёт индексации и завершается сразу, чтобы не задерживать старт сессии. Ошибки она пишет в лог воркера и всегда выходит с кодом `0`: сбой bars не должен ломать сессию агента.
+
+## Хук перед вызовом инструмента
+
+Решение агента, 19-10-2026 (OQ-99). `bars-cli hook pre-tool-use` читает из stdin JSON Claude Code (`tool_name`, `tool_input`, `session_id`) и до первого вызова bars в сессии отклоняет чтение документации; запись хука в проект ставит bars сам ([clients.md](../clients/clients.md#гейт-чтения-документации)). К воркеру команда не обращается: папка документации приходит флагом `--docs-root` (по умолчанию `docs`).
+
+- **Что считается чтением документации.** `Read` файла `.md` в папке документации; `Grep` и `Glob` по этой папке или с маской `*.md`; в `Bash` и `PowerShell` — звено конвейера, которое начинается с `cat`, `head`, `tail`, `grep`, `rg`, `sed`, `awk`, `Get-Content`, `Select-String` или `type` и называет такой файл. Журнал сессий `chats/` не считается: он вне поиска. `| head` в конце команды и путь в тексте коммита чтением не считаются.
+- **Что снимает блок.** Любой вызов инструмента с префиксом `mcp__bars__`. Отметка — файл `bars-gate-<session_id>.flag` во временной папке; блок не возвращается до конца сессии.
+- **Ответ.** Отказ — JSON `hookSpecificOutput` с `permissionDecision: "deny"` и причиной в stdout; пропуск — пустой вывод. Выход всегда `0`: сбой гейта не должен ломать сессию. Непонятный вход пишет причину в stderr и пропускает вызов.
+- **Язык.** Причина отказа и сообщения хуков написаны по-английски: их читает агент. Ответы воркера, которые хук `session-start` пересылает в stderr, остаются на языке воркера.
 
 ## Установка и удаление
 

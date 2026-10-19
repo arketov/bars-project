@@ -23,22 +23,23 @@ SHELL_READ = re.compile(
 )
 
 DOCS_MSG = (
-    "Сначала определи предмет задачи по известному плану/реестру. Документ известен — "
-    "bars_read или bars_outline сразу; неизвестный контекст — bars_rag_search с "
-    "предметным вопросом и подходящей областью. modules:[\"backlog\"] — пожелания, "
-    "files — выбранные индексируемые пути от docs-root, без префикса корня. Схемы bars отложены — загрузи их: "
-    "ToolSearch query \"select:mcp__bars__bars_rag_search,mcp__bars__bars_outline,"
-    "mcp__bars__bars_read\". После первого вызова bars Read разрешён."
+    "Identify the task subject first, using the known plan/register. For a known "
+    "document call bars_read or bars_outline directly; for unknown context call "
+    "bars_rag_search with a concrete question and a suitable scope. modules:[\"backlog\"] "
+    "- wishes; files - chosen indexed paths relative to the docs root, without the root "
+    "prefix. The bars tool schemas are deferred: load them with ToolSearch query "
+    "\"select:mcp__bars__bars_rag_search,mcp__bars__bars_outline,"
+    "mcp__bars__bars_read\". After the first bars call Read is allowed."
 )
 CODE_MSG = (
-    "Код проекта сначала изучай через semble и serena: mcp__semble__search (где "
-    "реализовано, запрос по-английски), затем serena get_symbols_overview / "
-    "find_symbol. Схемы отложены — загрузи их через ToolSearch "
+    "Explore the project code through semble and serena first: mcp__semble__search "
+    "(where it is implemented, query in English), then serena get_symbols_overview / "
+    "find_symbol. The schemas are deferred: load them with ToolSearch "
     "\"select:mcp__semble__search,mcp__serena__get_symbols_overview,"
-    "mcp__serena__find_symbol,mcp__serena__activate_project\". Serena в этом "
-    "проекте активируется сама (--project-from-cwd); читать мануал: "
-    "mcp__serena__initial_instructions. После первого вызова semble или serena "
-    "Read разрешён."
+    "mcp__serena__find_symbol,mcp__serena__activate_project\". Serena activates itself "
+    "in this project (--project-from-cwd); read its manual with "
+    "mcp__serena__initial_instructions. After the first semble or serena call Read "
+    "is allowed."
 )
 
 

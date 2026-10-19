@@ -1,0 +1,389 @@
+{
+  "near": [
+    {
+      "th": 0.4,
+      "tp": 25,
+      "of": 25,
+      "fpByTruth": {
+        "partial": 2,
+        "contained": 1,
+        "boiler": 15,
+        "template-pair": 12
+      }
+    },
+    {
+      "th": 0.5,
+      "tp": 25,
+      "of": 25,
+      "fpByTruth": {
+        "partial": 1,
+        "boiler": 15,
+        "template-pair": 6
+      }
+    },
+    {
+      "th": 0.55,
+      "tp": 25,
+      "of": 25,
+      "fpByTruth": {
+        "boiler": 15
+      }
+    },
+    {
+      "th": 0.6,
+      "tp": 25,
+      "of": 25,
+      "fpByTruth": {
+        "boiler": 15
+      }
+    },
+    {
+      "th": 0.65,
+      "tp": 24,
+      "of": 25,
+      "fpByTruth": {
+        "boiler": 15
+      }
+    },
+    {
+      "th": 0.7,
+      "tp": 23,
+      "of": 25,
+      "fpByTruth": {
+        "boiler": 15
+      }
+    },
+    {
+      "th": 0.8,
+      "tp": 20,
+      "of": 25,
+      "fpByTruth": {
+        "boiler": 15
+      }
+    }
+  ],
+  "contained": [
+    {
+      "th": 0.9,
+      "tp": 3,
+      "of": 3,
+      "other": {
+        "template-pair": 48
+      }
+    },
+    {
+      "th": 0.95,
+      "tp": 3,
+      "of": 3,
+      "other": {
+        "template-pair": 48
+      }
+    }
+  ],
+  "partial": [
+    {
+      "th": 0.2,
+      "tpPartialContained": 8,
+      "of": 8,
+      "other": {
+        "template-pair": 76
+      }
+    },
+    {
+      "th": 0.25,
+      "tpPartialContained": 8,
+      "of": 8,
+      "other": {
+        "template-pair": 76
+      }
+    },
+    {
+      "th": 0.3,
+      "tpPartialContained": 8,
+      "of": 8,
+      "other": {
+        "template-pair": 76
+      }
+    },
+    {
+      "th": 0.4,
+      "tpPartialContained": 7,
+      "of": 8,
+      "other": {
+        "template-pair": 62
+      }
+    },
+    {
+      "th": 0.5,
+      "tpPartialContained": 7,
+      "of": 8,
+      "other": {
+        "template-pair": 55
+      }
+    }
+  ],
+  "semantic": [
+    {
+      "cosTh": 0.75,
+      "c3Th": 0,
+      "paraphraseTP": 7,
+      "of": 7,
+      "benchFP": 14,
+      "realCorpusPairs": 84
+    },
+    {
+      "cosTh": 0.75,
+      "c3Th": 0.05,
+      "paraphraseTP": 7,
+      "of": 7,
+      "benchFP": 3,
+      "realCorpusPairs": 33
+    },
+    {
+      "cosTh": 0.75,
+      "c3Th": 0.08,
+      "paraphraseTP": 7,
+      "of": 7,
+      "benchFP": 3,
+      "realCorpusPairs": 24
+    },
+    {
+      "cosTh": 0.75,
+      "c3Th": 0.1,
+      "paraphraseTP": 7,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 19
+    },
+    {
+      "cosTh": 0.75,
+      "c3Th": 0.15,
+      "paraphraseTP": 7,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 14
+    },
+    {
+      "cosTh": 0.8,
+      "c3Th": 0,
+      "paraphraseTP": 6,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 77
+    },
+    {
+      "cosTh": 0.8,
+      "c3Th": 0.05,
+      "paraphraseTP": 6,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 26
+    },
+    {
+      "cosTh": 0.8,
+      "c3Th": 0.08,
+      "paraphraseTP": 6,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 17
+    },
+    {
+      "cosTh": 0.8,
+      "c3Th": 0.1,
+      "paraphraseTP": 6,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 12
+    },
+    {
+      "cosTh": 0.8,
+      "c3Th": 0.15,
+      "paraphraseTP": 6,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 9
+    },
+    {
+      "cosTh": 0.85,
+      "c3Th": 0,
+      "paraphraseTP": 5,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 73
+    },
+    {
+      "cosTh": 0.85,
+      "c3Th": 0.05,
+      "paraphraseTP": 5,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 22
+    },
+    {
+      "cosTh": 0.85,
+      "c3Th": 0.08,
+      "paraphraseTP": 5,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 13
+    },
+    {
+      "cosTh": 0.85,
+      "c3Th": 0.1,
+      "paraphraseTP": 5,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 8
+    },
+    {
+      "cosTh": 0.85,
+      "c3Th": 0.15,
+      "paraphraseTP": 5,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 5
+    },
+    {
+      "cosTh": 0.88,
+      "c3Th": 0,
+      "paraphraseTP": 1,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 14
+    },
+    {
+      "cosTh": 0.88,
+      "c3Th": 0.05,
+      "paraphraseTP": 1,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 6
+    },
+    {
+      "cosTh": 0.88,
+      "c3Th": 0.08,
+      "paraphraseTP": 1,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 4
+    },
+    {
+      "cosTh": 0.88,
+      "c3Th": 0.1,
+      "paraphraseTP": 1,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 3
+    },
+    {
+      "cosTh": 0.88,
+      "c3Th": 0.15,
+      "paraphraseTP": 1,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 3
+    },
+    {
+      "cosTh": 0.9,
+      "c3Th": 0,
+      "paraphraseTP": 1,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 2
+    },
+    {
+      "cosTh": 0.9,
+      "c3Th": 0.05,
+      "paraphraseTP": 1,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 1
+    },
+    {
+      "cosTh": 0.9,
+      "c3Th": 0.08,
+      "paraphraseTP": 1,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 1
+    },
+    {
+      "cosTh": 0.9,
+      "c3Th": 0.1,
+      "paraphraseTP": 1,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 1
+    },
+    {
+      "cosTh": 0.9,
+      "c3Th": 0.15,
+      "paraphraseTP": 1,
+      "of": 7,
+      "benchFP": 1,
+      "realCorpusPairs": 1
+    }
+  ],
+  "template": {
+    "dfCap": 4,
+    "c5AfterSuppression": {
+      "template-pair": {
+        "n": 76,
+        "min": 0,
+        "p50": 0,
+        "p95": 0,
+        "max": 0.04477611940298507
+      },
+      "boiler": {
+        "n": 15,
+        "min": 0,
+        "p50": 0,
+        "p95": 0,
+        "max": 0
+      }
+    },
+    "c5BeforeSuppression": {
+      "template-pair": {
+        "n": 76,
+        "min": 0.3202614379084967,
+        "p50": 1,
+        "p95": 1,
+        "max": 1
+      },
+      "boiler": {
+        "n": 15,
+        "min": 1,
+        "p50": 1,
+        "p95": 1,
+        "max": 1
+      }
+    }
+  },
+  "diffFlags": {
+    "exact": {
+      "n": 5,
+      "numDiff": 0,
+      "negDiff": 0
+    },
+    "format": {
+      "n": 5,
+      "numDiff": 0,
+      "negDiff": 0
+    },
+    "near": {
+      "n": 5,
+      "numDiff": 0,
+      "negDiff": 0
+    },
+    "number": {
+      "n": 5,
+      "numDiff": 5,
+      "negDiff": 0
+    },
+    "negation": {
+      "n": 5,
+      "numDiff": 0,
+      "negDiff": 5
+    }
+  }
+}

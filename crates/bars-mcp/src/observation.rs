@@ -17,6 +17,7 @@ impl<S> FromContextPart<ToolCallContext<'_, S>> for Original {
                 "min_score",
                 "mode",
             ],
+            "bars_get_similar" => &["format", "project", "chunk_id", "modules", "limit"],
             "bars_read" => &["format", "project", "path"],
             "bars_outline" => &["format", "project", "path", "levels", "under", "under_line"],
             "bars_status" => &["format", "project"],

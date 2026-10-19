@@ -5,11 +5,12 @@
 //! (`main.rs`) только разбирает аргументы и вызывает [`run`]; тесты вызывают [`run`] со своим
 //! каналом и своим способом запуска воркера.
 
+mod gate;
+mod graph;
 mod hook;
 mod instruction;
 mod render;
-mod graph;
-pub use graph::{GraphArgs,GraphAction};
+pub use graph::{GraphAction, GraphArgs};
 
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
@@ -18,8 +19,8 @@ use std::sync::Arc;
 use bars_protocol::{
     AutostartGetParams, AutostartSetParams, Client, ClientError, ClientKind, EXIT_FAILURE,
     Endpoint, InstallClient, InstallParams, LAUNCH_DEADLINE, Method, OutlineParams, ProjectsParams,
-    ReadParams, RegisterParams, ReindexParams, SearchParams, StatusParams, Target, UninstallParams,
-    UnregisterParams, connect_or_launch_with, spawn_worker, worker_exe,
+    ReadParams, RegisterParams, ReindexParams, SearchParams, SimilarParams, StatusParams, Target,
+    UninstallParams, UnregisterParams, connect_or_launch_with, spawn_worker, worker_exe,
 };
 use clap::{Args, Parser, Subcommand};
 use serde::Serialize;
@@ -56,9 +57,14 @@ pub enum Command {
     /// Тематический обзор и аудит.
     Explore(GraphArgs),
     /// Просмотр и управление графом проекта.
-    Graph { #[command(subcommand)] action:GraphAction },
+    Graph {
+        #[command(subcommand)]
+        action: GraphAction,
+    },
     /// Поиск по документации проекта.
     Search(SearchArgs),
+    /// Похожие чанки по ID чанка из выдачи поиска.
+    Similar(SimilarArgs),
     /// Структура документа: заголовки с номерами строк.
     Outline(OutlineArgs),
     /// Документ целиком, с номерами строк.
@@ -110,6 +116,12 @@ pub enum Command {
 pub enum HookEvent {
     /// Хук начала сессии: читает JSON клиента из stdin и ставит проект на проверку.
     SessionStart,
+    /// Хук перед вызовом инструмента: до первого вызова bars отклоняет чтение документации.
+    PreToolUse {
+        /// Папка документации проекта относительно его корня.
+        #[arg(long, default_value = "docs")]
+        docs_root: String,
+    },
 }
 
 /// Что сделать с автозапуском.
@@ -150,7 +162,7 @@ pub struct InstallArgs {
 pub struct SearchArgs {
     /// Явный hybrid/mix/graph; без флага прежняя форма ответа.
     #[arg(long,value_parser=["hybrid","mix","graph"])]
-    pub mode:Option<String>,
+    pub mode: Option<String>,
     /// В mix: отключить связанные пакеты и расширение кандидатов.
     #[arg(long, requires = "mode")]
     pub no_related: bool,
@@ -175,6 +187,18 @@ pub struct SearchArgs {
     /// Порог оценки результата.
     #[arg(long)]
     pub min_score: Option<f32>,
+}
+
+#[derive(Debug, Args)]
+pub struct SimilarArgs {
+    /// ID чанка из выдачи поиска (`id`), например `1842-9f3a1c07`.
+    pub chunk_id: String,
+    /// Брать кандидатов только из этого модуля; `.` — корневой. Можно повторять.
+    #[arg(long = "module", value_name = "МОДУЛЬ")]
+    pub modules: Vec<String>,
+    /// Сколько похожих чанков вернуть.
+    #[arg(long)]
+    pub limit: Option<u32>,
 }
 
 #[derive(Debug, Args)]
@@ -228,8 +252,11 @@ impl Env {
 /// (ошибка запроса), `2` (воркер недоступен), `3` (нужна переиндексация).
 pub async fn run(cli: Cli, env: &Env, out: &mut dyn Write, err: &mut dyn Write) -> i32 {
     let json = cli.json;
-    if matches!(cli.command, Command::Hook { .. }) {
-        return hook::session_start(env, err).await;
+    if let Command::Hook { event } = &cli.command {
+        return match event {
+            HookEvent::SessionStart => hook::session_start(env, err).await,
+            HookEvent::PreToolUse { docs_root } => hook::pre_tool_use(env, docs_root, out, err),
+        };
     }
     if let Command::Install(InstallArgs {
         print_instruction: true,
@@ -349,14 +376,64 @@ async fn execute(cli: Cli, env: &Env, out: &mut dyn Write) -> Result<(), Failure
     };
     let mut client = connect(env).await?;
     match cli.command {
-        Command::Relations(args)=>graph::query(&mut client,target,json,out,args,bars_protocol::graph_types::Operation::Relations).await,
-        Command::Paths(args)=>graph::query(&mut client,target,json,out,args,bars_protocol::graph_types::Operation::Paths).await,
-        Command::Impact(args)=>graph::query(&mut client,target,json,out,args,bars_protocol::graph_types::Operation::Impact).await,
-        Command::Context(args)=>graph::query(&mut client,target,json,out,args,bars_protocol::graph_types::Operation::Context).await,
-        Command::Explore(args)=>graph::query(&mut client,target,json,out,args,bars_protocol::graph_types::Operation::Explore).await,
-        Command::Graph{action}=>graph::action(&mut client,target,json,out,action).await,
+        Command::Relations(args) => {
+            graph::query(
+                &mut client,
+                target,
+                json,
+                out,
+                args,
+                bars_protocol::graph_types::Operation::Relations,
+            )
+            .await
+        }
+        Command::Paths(args) => {
+            graph::query(
+                &mut client,
+                target,
+                json,
+                out,
+                args,
+                bars_protocol::graph_types::Operation::Paths,
+            )
+            .await
+        }
+        Command::Impact(args) => {
+            graph::query(
+                &mut client,
+                target,
+                json,
+                out,
+                args,
+                bars_protocol::graph_types::Operation::Impact,
+            )
+            .await
+        }
+        Command::Context(args) => {
+            graph::query(
+                &mut client,
+                target,
+                json,
+                out,
+                args,
+                bars_protocol::graph_types::Operation::Context,
+            )
+            .await
+        }
+        Command::Explore(args) => {
+            graph::query(
+                &mut client,
+                target,
+                json,
+                out,
+                args,
+                bars_protocol::graph_types::Operation::Explore,
+            )
+            .await
+        }
+        Command::Graph { action } => graph::action(&mut client, target, json, out, action).await,
         Command::Search(args) => {
-            let mode=args.mode;
+            let mode = args.mode;
             let params = SearchParams {
                 target,
                 query: args.query.join(" "),
@@ -366,16 +443,43 @@ async fn execute(cli: Cli, env: &Env, out: &mut dyn Write) -> Result<(), Failure
                 candidates: args.candidates,
                 min_score: args.min_score,
             };
-            if let Some(mode)=mode {
-                let mode=serde_json::from_value(serde_json::Value::String(mode)).expect("clap проверил режим");
-                let result=call(&mut client,&bars_protocol::GraphSearchParams{search:params,mode,graph_budgets:Default::default(),include_related:!args.no_related,related_budget:args.related_budget}).await?;
-                return emit(out,json,&result,|r|serde_json::to_string_pretty(r).expect("DTO сериализуется"));
+            if let Some(mode) = mode {
+                let mode = serde_json::from_value(serde_json::Value::String(mode))
+                    .expect("clap проверил режим");
+                let result = call(
+                    &mut client,
+                    &bars_protocol::GraphSearchParams {
+                        search: params,
+                        mode,
+                        graph_budgets: Default::default(),
+                        include_related: !args.no_related,
+                        related_budget: args.related_budget,
+                    },
+                )
+                .await?;
+                return emit(out, json, &result, |r| {
+                    serde_json::to_string_pretty(r).expect("DTO сериализуется")
+                });
             }
             emit(
                 out,
                 json,
                 &call(&mut client, &params).await?,
                 render::search,
+            )
+        }
+        Command::Similar(args) => {
+            let params = SimilarParams {
+                target,
+                chunk_id: args.chunk_id,
+                modules: args.modules,
+                limit: args.limit,
+            };
+            emit(
+                out,
+                json,
+                &call(&mut client, &params).await?,
+                render::similar,
             )
         }
         Command::Outline(args) => {

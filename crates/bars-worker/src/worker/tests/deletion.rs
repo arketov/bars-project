@@ -199,16 +199,25 @@ async fn deletion_finishes_when_the_calling_task_disconnects() {
         tokio::spawn(async move { worker.delete_project("disconnect").await })
     };
     tokio::time::timeout(Duration::from_secs(5), async {
-        while !lock(&worker.inner.projects).get(&project).is_some_and(|r| r.deleting) {
+        while !lock(&worker.inner.projects)
+            .get(&project)
+            .is_some_and(|r| r.deleting)
+        {
             tokio::task::yield_now().await;
         }
-    }).await.unwrap();
+    })
+    .await
+    .unwrap();
     caller.abort();
     let _ = caller.await;
     drop(reader);
     tokio::time::timeout(Duration::from_secs(5), async {
-        while worker.resolve("disconnect").is_ok() { tokio::task::yield_now().await; }
-    }).await.unwrap();
+        while worker.resolve("disconnect").is_ok() {
+            tokio::task::yield_now().await;
+        }
+    })
+    .await
+    .unwrap();
     assert!(!project.join(".bars").exists());
     worker.shutdown().await;
 }

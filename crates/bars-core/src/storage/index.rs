@@ -89,9 +89,12 @@ pub struct Index {
 
 impl Index {
     /// Чтение готового индекса без миграций, смены журнала и создания файлов.
-    pub fn open_read_only(path:&Path)->Result<Self,StorageError>{
-        let conn=Connection::open_with_flags(path,rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)?;
-        Ok(Self{conn,stemmer:TextStemmer::new()})
+    pub fn open_read_only(path: &Path) -> Result<Self, StorageError> {
+        let conn = Connection::open_with_flags(path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)?;
+        Ok(Self {
+            conn,
+            stemmer: TextStemmer::new(),
+        })
     }
     /// Открывает индекс; если файла нет, создаёт его вместе с папкой.
     pub fn open(path: &Path, journal: Journal) -> Result<Self, StorageError> {
@@ -121,7 +124,9 @@ impl Index {
     }
 
     /// Соединение для транзакционной публикации дополнительных слоёв индекса.
-    pub fn conn_mut(&mut self) -> &mut Connection { &mut self.conn }
+    pub fn conn_mut(&mut self) -> &mut Connection {
+        &mut self.conn
+    }
 
     /// Закрывает соединение. Нужно перед подменой файла индекса.
     pub fn close(self) -> Result<(), StorageError> {

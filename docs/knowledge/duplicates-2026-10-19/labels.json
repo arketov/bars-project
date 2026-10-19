@@ -1,0 +1,623 @@
+{
+  "boiler": "Ограничения проверки. Результат получен на одной машине разработчика и не проверялся на других устройствах. Это повод для повторной проверки, а не доказанный дефект. Перед исправлением воспроизведите замер на своей машине и сохраните сырые данные рядом с выводом. Если числа расходятся с этим описанием более чем на десять процентов, запишите расхождение в журнал сессии.",
+  "labels": [
+    {
+      "file": "orig/o00.md",
+      "group": "g0",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/MAIN_IDEA.md"
+    },
+    {
+      "file": "orig/o01.md",
+      "group": "g1",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/adr/0001-docs-by-features.md"
+    },
+    {
+      "file": "orig/o02.md",
+      "group": "g2",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/adr/0002-qwen-gguf.md"
+    },
+    {
+      "file": "orig/o03.md",
+      "group": "g3",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/architecture/ipc.md"
+    },
+    {
+      "file": "orig/o04.md",
+      "group": "g4",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/architecture/protocol.md"
+    },
+    {
+      "file": "orig/o05.md",
+      "group": "g5",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/architecture/schema.md"
+    },
+    {
+      "file": "orig/o06.md",
+      "group": "g6",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/architecture/secrets.md"
+    },
+    {
+      "file": "orig/o07.md",
+      "group": "g7",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/architecture/stack.md"
+    },
+    {
+      "file": "orig/o08.md",
+      "group": "g8",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/architecture/vector-search.md"
+    },
+    {
+      "file": "orig/o09.md",
+      "group": "g9",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/architecture/worker.md"
+    },
+    {
+      "file": "orig/o10.md",
+      "group": "g10",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/backlog/issues.md"
+    },
+    {
+      "file": "orig/o11.md",
+      "group": "g11",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/agent-tools/cli.md"
+    },
+    {
+      "file": "orig/o12.md",
+      "group": "g12",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/agent-tools/mcp-tools.md"
+    },
+    {
+      "file": "orig/o13.md",
+      "group": "g13",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/clients/plan.md"
+    },
+    {
+      "file": "orig/o14.md",
+      "group": "g14",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/clients/verification.md"
+    },
+    {
+      "file": "orig/o15.md",
+      "group": "g15",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/distribution/autostart.md"
+    },
+    {
+      "file": "orig/o16.md",
+      "group": "g16",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/distribution/installer.md"
+    },
+    {
+      "file": "orig/o17.md",
+      "group": "g17",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/docs-convention/bars-instruction.md"
+    },
+    {
+      "file": "orig/o18.md",
+      "group": "g18",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/docs-convention/delivery.md"
+    },
+    {
+      "file": "orig/o19.md",
+      "group": "g19",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/docs-convention/plan.md"
+    },
+    {
+      "file": "orig/o20.md",
+      "group": "g20",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/docs-convention/verification.md"
+    },
+    {
+      "file": "orig/o21.md",
+      "group": "g21",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/indexing/chunking.md"
+    },
+    {
+      "file": "orig/o22.md",
+      "group": "g22",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/indexing/updates.md"
+    },
+    {
+      "file": "orig/o23.md",
+      "group": "g23",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/models/device-plan.md"
+    },
+    {
+      "file": "orig/o24.md",
+      "group": "g24",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/models/device-verification.md"
+    },
+    {
+      "file": "orig/o25.md",
+      "group": "g25",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/models/external-models.md"
+    },
+    {
+      "file": "orig/o26.md",
+      "group": "g26",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/models/gguf-plan.md"
+    },
+    {
+      "file": "orig/o27.md",
+      "group": "g27",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/models/inference-plan.md"
+    },
+    {
+      "file": "orig/o28.md",
+      "group": "g28",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/models/local-models.md"
+    },
+    {
+      "file": "orig/o29.md",
+      "group": "g29",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/models/memory-plan.md"
+    },
+    {
+      "file": "orig/o30.md",
+      "group": "g30",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/models/memory-reduction.md"
+    },
+    {
+      "file": "orig/o31.md",
+      "group": "g31",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/projects/deletion.md"
+    },
+    {
+      "file": "orig/o32.md",
+      "group": "g32",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/projects/projects.md"
+    },
+    {
+      "file": "orig/o33.md",
+      "group": "g33",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/search/Index.md"
+    },
+    {
+      "file": "orig/o34.md",
+      "group": "g34",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/search/hybrid-search.md"
+    },
+    {
+      "file": "orig/o35.md",
+      "group": "g35",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/search/maintenance-tools.md"
+    },
+    {
+      "file": "orig/o36.md",
+      "group": "g36",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/search/plan.md"
+    },
+    {
+      "file": "orig/o37.md",
+      "group": "g37",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/window/document-actions.md"
+    },
+    {
+      "file": "orig/o38.md",
+      "group": "g38",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/window/empty-states.md"
+    },
+    {
+      "file": "orig/o39.md",
+      "group": "g39",
+      "role": "orig",
+      "cls": "orig",
+      "src": "docs/features/window/error-states.md"
+    },
+    {
+      "file": "var/exact-00.md",
+      "group": "g0",
+      "role": "copy",
+      "cls": "exact"
+    },
+    {
+      "file": "var/exact-02.md",
+      "group": "g2",
+      "role": "copy",
+      "cls": "exact"
+    },
+    {
+      "file": "var/exact-03.md",
+      "group": "g3",
+      "role": "copy",
+      "cls": "exact"
+    },
+    {
+      "file": "var/exact-04.md",
+      "group": "g4",
+      "role": "copy",
+      "cls": "exact"
+    },
+    {
+      "file": "var/exact-05.md",
+      "group": "g5",
+      "role": "copy",
+      "cls": "exact"
+    },
+    {
+      "file": "var/format-07.md",
+      "group": "g7",
+      "role": "copy",
+      "cls": "format"
+    },
+    {
+      "file": "var/format-08.md",
+      "group": "g8",
+      "role": "copy",
+      "cls": "format"
+    },
+    {
+      "file": "var/format-09.md",
+      "group": "g9",
+      "role": "copy",
+      "cls": "format"
+    },
+    {
+      "file": "var/format-10.md",
+      "group": "g10",
+      "role": "copy",
+      "cls": "format"
+    },
+    {
+      "file": "var/format-12.md",
+      "group": "g12",
+      "role": "copy",
+      "cls": "format"
+    },
+    {
+      "file": "var/partial-13.md",
+      "group": "g13",
+      "role": "copy",
+      "cls": "partial"
+    },
+    {
+      "file": "var/partial-14.md",
+      "group": "g14",
+      "role": "copy",
+      "cls": "partial"
+    },
+    {
+      "file": "var/partial-15.md",
+      "group": "g15",
+      "role": "copy",
+      "cls": "partial"
+    },
+    {
+      "file": "var/partial-17.md",
+      "group": "g17",
+      "role": "copy",
+      "cls": "partial"
+    },
+    {
+      "file": "var/partial-18.md",
+      "group": "g18",
+      "role": "copy",
+      "cls": "partial"
+    },
+    {
+      "file": "var/near-19.md",
+      "group": "g19",
+      "role": "copy",
+      "cls": "near"
+    },
+    {
+      "file": "var/near-20.md",
+      "group": "g20",
+      "role": "copy",
+      "cls": "near"
+    },
+    {
+      "file": "var/near-21.md",
+      "group": "g21",
+      "role": "copy",
+      "cls": "near"
+    },
+    {
+      "file": "var/near-22.md",
+      "group": "g22",
+      "role": "copy",
+      "cls": "near"
+    },
+    {
+      "file": "var/near-23.md",
+      "group": "g23",
+      "role": "copy",
+      "cls": "near"
+    },
+    {
+      "file": "var/number-24.md",
+      "group": "g24",
+      "role": "copy",
+      "cls": "number"
+    },
+    {
+      "file": "var/number-25.md",
+      "group": "g25",
+      "role": "copy",
+      "cls": "number"
+    },
+    {
+      "file": "var/number-27.md",
+      "group": "g27",
+      "role": "copy",
+      "cls": "number"
+    },
+    {
+      "file": "var/number-28.md",
+      "group": "g28",
+      "role": "copy",
+      "cls": "number"
+    },
+    {
+      "file": "var/number-29.md",
+      "group": "g29",
+      "role": "copy",
+      "cls": "number"
+    },
+    {
+      "file": "var/negation-30.md",
+      "group": "g30",
+      "role": "copy",
+      "cls": "negation"
+    },
+    {
+      "file": "var/negation-32.md",
+      "group": "g32",
+      "role": "copy",
+      "cls": "negation"
+    },
+    {
+      "file": "var/negation-33.md",
+      "group": "g33",
+      "role": "copy",
+      "cls": "negation"
+    },
+    {
+      "file": "var/negation-34.md",
+      "group": "g34",
+      "role": "copy",
+      "cls": "negation"
+    },
+    {
+      "file": "var/negation-35.md",
+      "group": "g35",
+      "role": "copy",
+      "cls": "negation"
+    },
+    {
+      "file": "var/paraphrase-01.md",
+      "group": "g1",
+      "role": "copy",
+      "cls": "paraphrase"
+    },
+    {
+      "file": "var/paraphrase-06.md",
+      "group": "g6",
+      "role": "copy",
+      "cls": "paraphrase"
+    },
+    {
+      "file": "var/paraphrase-11.md",
+      "group": "g11",
+      "role": "copy",
+      "cls": "paraphrase"
+    },
+    {
+      "file": "var/paraphrase-16.md",
+      "group": "g16",
+      "role": "copy",
+      "cls": "paraphrase"
+    },
+    {
+      "file": "var/paraphrase-26.md",
+      "group": "g26",
+      "role": "copy",
+      "cls": "paraphrase"
+    },
+    {
+      "file": "var/paraphrase-31.md",
+      "group": "g31",
+      "role": "copy",
+      "cls": "paraphrase"
+    },
+    {
+      "file": "var/paraphrase-36.md",
+      "group": "g36",
+      "role": "copy",
+      "cls": "paraphrase"
+    },
+    {
+      "file": "var/contained-37.md",
+      "group": "g37",
+      "role": "copy",
+      "cls": "contained"
+    },
+    {
+      "file": "var/contained-38.md",
+      "group": "g38",
+      "role": "copy",
+      "cls": "contained"
+    },
+    {
+      "file": "var/contained-39.md",
+      "group": "g39",
+      "role": "copy",
+      "cls": "contained"
+    },
+    {
+      "file": "var/template-body-0.md",
+      "group": "tb0",
+      "role": "template-body",
+      "cls": "template-body",
+      "template": "T"
+    },
+    {
+      "file": "var/template-body-1.md",
+      "group": "tb1",
+      "role": "template-body",
+      "cls": "template-body",
+      "template": "T"
+    },
+    {
+      "file": "var/template-body-2.md",
+      "group": "tb2",
+      "role": "template-body",
+      "cls": "template-body",
+      "template": "T"
+    },
+    {
+      "file": "var/template-body-3.md",
+      "group": "tb3",
+      "role": "template-body",
+      "cls": "template-body",
+      "template": "T"
+    },
+    {
+      "file": "var/template-body-4.md",
+      "group": "tb4",
+      "role": "template-body",
+      "cls": "template-body",
+      "template": "T"
+    },
+    {
+      "file": "var/template-body-5.md",
+      "group": "tb5",
+      "role": "template-body",
+      "cls": "template-body",
+      "template": "T"
+    },
+    {
+      "file": "var/template-body-6.md",
+      "group": "tb6",
+      "role": "template-body",
+      "cls": "template-body",
+      "template": "T"
+    },
+    {
+      "file": "var/template-body-7.md",
+      "group": "tb7",
+      "role": "template-body",
+      "cls": "template-body",
+      "template": "T"
+    },
+    {
+      "file": "var/boiler-0.md",
+      "group": "boiler",
+      "role": "boiler",
+      "cls": "boiler",
+      "template": "B"
+    },
+    {
+      "file": "var/boiler-1.md",
+      "group": "boiler",
+      "role": "boiler",
+      "cls": "boiler",
+      "template": "B"
+    },
+    {
+      "file": "var/boiler-2.md",
+      "group": "boiler",
+      "role": "boiler",
+      "cls": "boiler",
+      "template": "B"
+    },
+    {
+      "file": "var/boiler-3.md",
+      "group": "boiler",
+      "role": "boiler",
+      "cls": "boiler",
+      "template": "B"
+    },
+    {
+      "file": "var/boiler-4.md",
+      "group": "boiler",
+      "role": "boiler",
+      "cls": "boiler",
+      "template": "B"
+    },
+    {
+      "file": "var/boiler-5.md",
+      "group": "boiler",
+      "role": "boiler",
+      "cls": "boiler",
+      "template": "B"
+    }
+  ]
+}

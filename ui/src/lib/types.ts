@@ -33,6 +33,8 @@ export interface StatusOutput {
 }
 
 export interface SearchHit {
+  /** ID чанка для `get_similar`; окно его не показывает. */
+  chunk_id?: string;
   path: string;
   module: string;
   title: string;

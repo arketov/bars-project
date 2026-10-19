@@ -5,8 +5,8 @@ use std::fmt::Write as _;
 
 use bars_protocol::{
     AcceptedOutput, AutostartOutput, ClientError, ErrorKind, Heading, InstallOutput, OutlineOutput,
-    ProjectInfo, ProjectState, ProjectsOutput, ReadOutput, RegisterOutput, ScoreKind, SearchOutput,
-    StatusOutput, UninstallOutput, UnregisterOutput, number_lines,
+    ProjectInfo, ProjectState, ProjectsOutput, ReadOutput, RegisterOutput, ScoreKind, SearchHit,
+    SearchOutput, SimilarOutput, StatusOutput, UninstallOutput, UnregisterOutput, number_lines,
 };
 use serde_json::json;
 
@@ -17,25 +17,76 @@ fn score_kind(kind: ScoreKind) -> &'static str {
     }
 }
 
+/// Один результат: общий вид у поиска и у похожих чанков.
+fn hit_lines(text: &mut String, number: usize, hit: &SearchHit) {
+    let _ = writeln!(
+        text,
+        "{}. {}:{}-{}  [{}]  {} {:.3}",
+        number,
+        hit.path,
+        hit.first_line,
+        hit.last_line,
+        hit.module,
+        score_kind(hit.score_kind),
+        hit.score
+    );
+    if !hit.chunk_id.is_empty() {
+        let _ = writeln!(text, "   id: {}", hit.chunk_id);
+    }
+    let _ = writeln!(text, "   {} — {}", hit.title, hit.heading_chain);
+    let _ = writeln!(
+        text,
+        "{}
+",
+        hit.text.trim_end()
+    );
+}
+
+pub fn similar(output: &SimilarOutput) -> String {
+    let source = &output.source;
+    let mut text = format!(
+        "Похожие на {} ({}:{}-{}, {}):
+
+",
+        source.chunk_id, source.path, source.first_line, source.last_line, source.heading_chain
+    );
+    if output.results.is_empty() {
+        text.push_str(
+            "Похожих чанков нет.
+",
+        );
+    }
+    for (index, hit) in output.results.iter().enumerate() {
+        hit_lines(&mut text, index + 1, hit);
+    }
+    let _ = write!(
+        text,
+        "Применено: результатов {}{}. Оценка — косинусная близость к исходному чанку; близость не доказывает дублирование.",
+        output.limit,
+        if output.clamped {
+            "; значение прижато к пределу"
+        } else {
+            ""
+        }
+    );
+    if output.indexing {
+        let _ = write!(
+            text,
+            "
+Идёт индексация: выдача может быть неполной, в очереди документов: {}.",
+            output.pending
+        );
+    }
+    text
+}
+
 pub fn search(output: &SearchOutput) -> String {
     let mut text = String::new();
     if output.results.is_empty() {
         text.push_str("Ничего не найдено.\n");
     }
     for (index, hit) in output.results.iter().enumerate() {
-        let _ = writeln!(
-            text,
-            "{}. {}:{}-{}  [{}]  {} {:.3}",
-            index + 1,
-            hit.path,
-            hit.first_line,
-            hit.last_line,
-            hit.module,
-            score_kind(hit.score_kind),
-            hit.score
-        );
-        let _ = writeln!(text, "   {} — {}", hit.title, hit.heading_chain);
-        let _ = writeln!(text, "{}\n", hit.text.trim_end());
+        hit_lines(&mut text, index + 1, hit);
     }
     let applied = &output.applied;
     let _ = write!(
@@ -151,7 +202,15 @@ pub fn status(output: &StatusOutput) -> String {
         "Последняя ошибка: {}",
         output.last_error.as_deref().unwrap_or("нет")
     );
-    if let Some(graph)=&output.graph{let _=write!(text,"\nГраф: {}; источников: {}; задание: {}",graph.state.label(),graph.source_count,graph.active_job.as_deref().unwrap_or("нет"));}
+    if let Some(graph) = &output.graph {
+        let _ = write!(
+            text,
+            "\nГраф: {}; источников: {}; задание: {}",
+            graph.state.label(),
+            graph.source_count,
+            graph.active_job.as_deref().unwrap_or("нет")
+        );
+    }
     text
 }
 

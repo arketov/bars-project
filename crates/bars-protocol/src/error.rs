@@ -34,10 +34,11 @@ pub enum ErrorKind {
     SnapshotExpired,
     CursorMismatch,
     Cancelled,
+    ChunkNotFound,
 }
 
 impl ErrorKind {
-    pub const ALL: [ErrorKind; 15] = [
+    pub const ALL: [ErrorKind; 16] = [
         ErrorKind::ProtocolMismatch,
         ErrorKind::ProjectNotFound,
         ErrorKind::ProjectUnavailable,
@@ -53,6 +54,7 @@ impl ErrorKind {
         ErrorKind::SnapshotExpired,
         ErrorKind::CursorMismatch,
         ErrorKind::Cancelled,
+        ErrorKind::ChunkNotFound,
     ];
 
     pub fn code(self) -> i32 {
@@ -72,6 +74,7 @@ impl ErrorKind {
             ErrorKind::SnapshotExpired => -32013,
             ErrorKind::CursorMismatch => -32014,
             ErrorKind::Cancelled => -32015,
+            ErrorKind::ChunkNotFound => -32016,
         }
     }
 
@@ -93,6 +96,7 @@ impl ErrorKind {
             ErrorKind::SnapshotExpired => "snapshot_expired",
             ErrorKind::CursorMismatch => "cursor_mismatch",
             ErrorKind::Cancelled => "cancelled",
+            ErrorKind::ChunkNotFound => "chunk_not_found",
         }
     }
 
@@ -183,6 +187,7 @@ mod tests {
             (-32013, "snapshot_expired"),
             (-32014, "cursor_mismatch"),
             (-32015, "cancelled"),
+            (-32016, "chunk_not_found"),
         ];
         for (kind, (code, name)) in ErrorKind::ALL.into_iter().zip(expected) {
             assert_eq!((kind.code(), kind.name()), (code, name));

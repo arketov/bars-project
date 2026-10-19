@@ -198,7 +198,12 @@ impl Reranker for BuiltinReranker {
             });
         }
         let logits: Vec<f32> = results.iter().map(|result| result.score).collect();
-        if logits.iter().copied().reduce(f32::max).is_some_and(|max| max < -8.0) {
+        if logits
+            .iter()
+            .copied()
+            .reduce(f32::max)
+            .is_some_and(|max| max < -8.0)
+        {
             log::warn!("{}", logits_report(self.device, &logits));
         } else {
             log::debug!("{}", logits_report(self.device, &logits));

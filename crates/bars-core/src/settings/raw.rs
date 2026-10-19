@@ -256,12 +256,20 @@ impl UserFile {
     pub(super) fn validate(&self, file: &Path) -> Result<(), SettingsError> {
         if let Some(embed) = &self.embed {
             positive(file, "embed.batch_size", embed.batch_size)?;
-            unload_minutes(file, "embed.unload_after_minutes", embed.unload_after_minutes)?;
+            unload_minutes(
+                file,
+                "embed.unload_after_minutes",
+                embed.unload_after_minutes,
+            )?;
             embed.validate(file)?;
         }
         if let Some(rerank) = &self.rerank {
             // Срок проверяется и у выключенного rerank: его validate смотрит только включённый.
-            unload_minutes(file, "rerank.unload_after_minutes", rerank.unload_after_minutes)?;
+            unload_minutes(
+                file,
+                "rerank.unload_after_minutes",
+                rerank.unload_after_minutes,
+            )?;
             rerank.validate(file)?;
         }
         if let Some(search) = &self.search {

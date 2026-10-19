@@ -7,10 +7,10 @@
 //! Права MCP на стороне воркера задаёт `bars_protocol::Session`: `accept_model_change` от MCP
 //! сбрасывается в `false`, а прокси его и не передаёт.
 
-mod instructions;
-mod render;
 mod graph;
+mod instructions;
 mod observation;
+mod render;
 
 use std::io;
 use std::path::{Path, PathBuf};
@@ -19,7 +19,7 @@ use std::time::Duration;
 
 use bars_protocol::{
     Client, ClientError, ClientKind, Endpoint, ErrorKind, LAUNCH_DEADLINE, Method, OutlineParams,
-    ProjectsParams, ReadParams, ReindexParams, SearchParams, StatusParams, Target,
+    ProjectsParams, ReadParams, ReindexParams, SearchParams, SimilarParams, StatusParams, Target,
     connect_or_launch_with, spawn_worker, worker_exe,
 };
 use rmcp::handler::server::router::tool::ToolRouter;
@@ -112,7 +112,8 @@ pub struct NoArgs {
 pub struct SearchArgs {
     /// Явный hybrid/mix/graph. Без поля — прежний поиск и прежняя форма ответа.
     pub mode: Option<bars_graph::RetrievalMode>,
-    #[serde(default)] pub graph_budgets: bars_graph::Budgets,
+    #[serde(default)]
+    pub graph_budgets: bars_graph::Budgets,
     /// В mix: отключить расширение и пакеты оснований; без поля включено.
     pub include_related: Option<bool>,
     /// В mix: предел байт пакета оснований, не увеличивает graph_budgets.max_bytes.
@@ -133,6 +134,21 @@ pub struct SearchArgs {
     pub candidates: Option<u32>,
     /// Порог оценки результата, 0…1.
     pub min_score: Option<f32>,
+    /// Вид ответа: `txt` (по умолчанию) или `json`.
+    pub format: Option<Format>,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema)]
+pub struct SimilarArgs {
+    /// ID чанка (поле `id` результата bars_rag_search или bars_get_similar); действует, пока не изменился документ чанка.
+    pub chunk_id: String,
+    /// Проект: путь к корню или имя. Без него — проект сессии.
+    pub project: Option<String>,
+    /// Существующие папки первого уровня docs-root; `.` — корневой. Ограничивает область кандидатов, исходный чанк может быть в другом модуле. Без поля — весь проект.
+    #[serde(default)]
+    pub modules: Vec<String>,
+    /// Сколько похожих чанков вернуть.
+    pub limit: Option<u32>,
     /// Вид ответа: `txt` (по умолчанию) или `json`.
     pub format: Option<Format>,
 }
@@ -185,29 +201,63 @@ pub struct OutlineArgs {
 
 #[tool_router(router=graph_tool_router)]
 impl BarsMcp {
-    #[tool(name="bars_relations",description="Явные отношения с исходными доказательствами. Ровно один query/entity_ref; отрицания и условия сохраняются. Неоднозначное имя возвращает кандидатов. Только чтение готового графа.")]
-    async fn bars_relations(&self,Parameters(args):Parameters<graph::GraphArgs>)->CallToolResult {self.graph_call(args,bars_graph::Operation::Relations).await}
+    #[tool(
+        name = "bars_relations",
+        description = "Явные отношения с исходными доказательствами. Ровно один query/entity_ref; отрицания и условия сохраняются. Неоднозначное имя возвращает кандидатов. Только чтение готового графа."
+    )]
+    async fn bars_relations(
+        &self,
+        Parameters(args): Parameters<graph::GraphArgs>,
+    ) -> CallToolResult {
+        self.graph_call(args, bars_graph::Operation::Relations)
+            .await
+    }
 
-    #[tool(name="bars_paths",description="Ограниченные пути между from/to: ObjectRef либо label/kind/namespace. По умолчанию смысловые рёбра; structural/mixed выбираются явно. Evidence каждого шага, partial и scope; без построения графа.")]
-    async fn bars_paths(&self,Parameters(args):Parameters<graph::GraphArgs>)->CallToolResult {self.graph_call(args,bars_graph::Operation::Paths).await}
+    #[tool(
+        name = "bars_paths",
+        description = "Ограниченные пути между from/to: ObjectRef либо label/kind/namespace. По умолчанию смысловые рёбра; structural/mixed выбираются явно. Evidence каждого шага, partial и scope; без построения графа."
+    )]
+    async fn bars_paths(&self, Parameters(args): Parameters<graph::GraphArgs>) -> CallToolResult {
+        self.graph_call(args, bars_graph::Operation::Paths).await
+    }
 
-    #[tool(name="bars_impact",description="Документированное влияние изменения roots: обратные зависимости и полные пути с evidence. Гиперссылки не означают зависимости, результат не доказывает дефект кода. Только чтение.")]
-    async fn bars_impact(&self,Parameters(args):Parameters<graph::GraphArgs>)->CallToolResult {self.graph_call(args,bars_graph::Operation::Impact).await}
+    #[tool(
+        name = "bars_impact",
+        description = "Документированное влияние изменения roots: обратные зависимости и полные пути с evidence. Гиперссылки не означают зависимости, результат не доказывает дефект кода. Только чтение."
+    )]
+    async fn bars_impact(&self, Parameters(args): Parameters<graph::GraphArgs>) -> CallToolResult {
+        self.graph_call(args, bars_graph::Operation::Impact).await
+    }
 
-    #[tool(name="bars_context",description="Контекст query по ролям requirement/decision/behavior/architecture/constraint/verification. Первичные источники, общий byte/token budget, missing_roles. Без генерации ответа и скрытого обогащения.")]
-    async fn bars_context(&self,Parameters(args):Parameters<graph::GraphArgs>)->CallToolResult {self.graph_call(args,bars_graph::Operation::Context).await}
+    #[tool(
+        name = "bars_context",
+        description = "Контекст query по ролям requirement/decision/behavior/architecture/constraint/verification. Первичные источники, общий byte/token budget, missing_roles. Без генерации ответа и скрытого обогащения."
+    )]
+    async fn bars_context(&self, Parameters(args): Parameters<graph::GraphArgs>) -> CallToolResult {
+        self.graph_call(args, bars_graph::Operation::Context).await
+    }
 
-    #[tool(name="bars_explore",description="Обзор темы topic либо whole_scope=true: topics/connectivity/coverage/conflict_candidates. Структурные дефекты отдельно от кандидатов смысловых пробелов; неполнота extraction видна. Только чтение.")]
-    async fn bars_explore(&self,Parameters(args):Parameters<graph::GraphArgs>)->CallToolResult {self.graph_call(args,bars_graph::Operation::Explore).await}
+    #[tool(
+        name = "bars_explore",
+        description = "Обзор темы topic либо whole_scope=true: topics/connectivity/coverage/conflict_candidates. Структурные дефекты отдельно от кандидатов смысловых пробелов; неполнота extraction видна. Только чтение."
+    )]
+    async fn bars_explore(&self, Parameters(args): Parameters<graph::GraphArgs>) -> CallToolResult {
+        self.graph_call(args, bars_graph::Operation::Explore).await
+    }
 
-    #[tool(name="bars_graph",description="Общий/локальный граф documents/sections/chunks/entities/mixed. Local требует roots; depth ограничен budgets.max_depth. Связи типизированы, поколения и scope фиксированы; курсор только того же запроса. Граф не строится вызовом чтения.")]
-    async fn bars_graph(&self,Parameters(args):Parameters<graph::GraphArgs>)->CallToolResult {self.graph_call(args,bars_graph::Operation::Graph).await}
+    #[tool(
+        name = "bars_graph",
+        description = "Общий/локальный граф documents/sections/chunks/entities/mixed. Local требует roots; depth ограничен budgets.max_depth. Связи типизированы, поколения и scope фиксированы; курсор только того же запроса. Граф не строится вызовом чтения."
+    )]
+    async fn bars_graph(&self, Parameters(args): Parameters<graph::GraphArgs>) -> CallToolResult {
+        self.graph_call(args, bars_graph::Operation::Graph).await
+    }
 
     pub fn new(env: Env) -> Self {
         Self {
             env,
             client: Arc::new(Mutex::new(None)),
-            tool_router: Self::tool_router()+Self::graph_tool_router(),
+            tool_router: Self::tool_router() + Self::graph_tool_router(),
         }
     }
 
@@ -240,18 +290,31 @@ impl BarsMcp {
     }
     /// Пока модель загружается, вызов повторяется до `model_wait`: агент получает ответ, а не
     /// совет повторить позже.
-    async fn call_observed<M: Method>(&self, params: &M, context: Option<&Value>) -> Result<M::Output, ClientError> {
-        wait_for_model(self.env.model_wait, MODEL_POLL, || self.call_once(params, context)).await
+    async fn call_observed<M: Method>(
+        &self,
+        params: &M,
+        context: Option<&Value>,
+    ) -> Result<M::Output, ClientError> {
+        wait_for_model(self.env.model_wait, MODEL_POLL, || {
+            self.call_once(params, context)
+        })
+        .await
     }
 
-    async fn call_once<M: Method>(&self, params: &M, context: Option<&Value>) -> Result<M::Output, ClientError> {
+    async fn call_once<M: Method>(
+        &self,
+        params: &M,
+        context: Option<&Value>,
+    ) -> Result<M::Output, ClientError> {
         let mut slot = self.client.lock().await;
         for attempt in 0..2 {
             if slot.is_none() {
                 *slot = Some(self.connect().await?);
             }
             let client = slot.as_mut().expect("соединение открыто выше");
-            match tokio::time::timeout(self.env.call_timeout, client.call_observed(params, context)).await {
+            match tokio::time::timeout(self.env.call_timeout, client.call_observed(params, context))
+                .await
+            {
                 Ok(Ok(output)) => return Ok(output),
                 Ok(Err(error @ (ClientError::Io(_) | ClientError::BadReply(_)))) => {
                     *slot = None;
@@ -275,7 +338,11 @@ impl BarsMcp {
 
 /// Повторяет `call`, пока воркер отвечает `model_loading` и не вышло время `wait`; последний ответ
 /// возвращается как есть.
-async fn wait_for_model<T, F, Fut>(wait: Duration, poll: Duration, mut call: F) -> Result<T, ClientError>
+async fn wait_for_model<T, F, Fut>(
+    wait: Duration,
+    poll: Duration,
+    mut call: F,
+) -> Result<T, ClientError>
 where
     F: FnMut() -> Fut,
     Fut: std::future::Future<Output = Result<T, ClientError>>,
@@ -372,12 +439,21 @@ impl BarsMcp {
                        сверки устройства rerank; пути от docs-root. Не угадывать список файлов; \
                        межслойную задачу можно искать без фильтров. Без project — проект сессии."
     )]
-    async fn bars_rag_search(&self, original: observation::Original, Parameters(args): Parameters<SearchArgs>) -> CallToolResult {
-        if args.mode.is_none() && (args.include_related.is_some() || args.related_budget.is_some()) {
-            return CallToolResult::error(vec![ContentBlock::text("include_related/related_budget требуют mode=mix")]);
+    async fn bars_rag_search(
+        &self,
+        original: observation::Original,
+        Parameters(args): Parameters<SearchArgs>,
+    ) -> CallToolResult {
+        if args.mode.is_none() && (args.include_related.is_some() || args.related_budget.is_some())
+        {
+            return CallToolResult::error(vec![ContentBlock::text(
+                "include_related/related_budget требуют mode=mix",
+            )]);
         }
-        let mode=args.mode;let graph_budgets=args.graph_budgets;
-        let include_related=args.include_related.unwrap_or(true);let related_budget=args.related_budget;
+        let mode = args.mode;
+        let graph_budgets = args.graph_budgets;
+        let include_related = args.include_related.unwrap_or(true);
+        let related_budget = args.related_budget;
         let params = SearchParams {
             target: self.target(args.project),
             query: args.query,
@@ -387,9 +463,51 @@ impl BarsMcp {
             candidates: args.candidates,
             min_score: args.min_score,
         };
-        if let Some(mode)=mode {
-            finish(self.call_observed(&bars_protocol::GraphSearchParams{search:params,mode,graph_budgets,include_related,related_budget}, Some(&original.0)).await,args.format,|out|format!("=== GRAPH SEARCH ===\n{}\n=== END SEARCH ===",json(out)))
-        }else{finish(self.call_observed(&params, Some(&original.0)).await, args.format, render::search)}
+        if let Some(mode) = mode {
+            finish(
+                self.call_observed(
+                    &bars_protocol::GraphSearchParams {
+                        search: params,
+                        mode,
+                        graph_budgets,
+                        include_related,
+                        related_budget,
+                    },
+                    Some(&original.0),
+                )
+                .await,
+                args.format,
+                |out| format!("=== GRAPH SEARCH ===\n{}\n=== END SEARCH ===", json(out)),
+            )
+        } else {
+            finish(
+                self.call_observed(&params, Some(&original.0)).await,
+                args.format,
+                render::search,
+            )
+        }
+    }
+
+    #[tool(
+        name = "bars_get_similar",
+        description = "Похожие чанки по ID чанка из выдачи bars_rag_search (поле id): перед правкой —                        найти похожие описания и разделы для проверки, перед добавлением текста —                        существующее описание. Возвращает ближайшие чанки выбранной области (modules),                        исключая исходный; оценка — косинусная близость к исходному чанку. Близость не                        доказывает дублирование, согласие или зависимость документов: читай найденное.                        ID действует, пока не изменился документ чанка; при chunk_not_found найди чанк                        поиском заново. Без project — проект сессии."
+    )]
+    async fn bars_get_similar(
+        &self,
+        original: observation::Original,
+        Parameters(args): Parameters<SimilarArgs>,
+    ) -> CallToolResult {
+        let params = SimilarParams {
+            target: self.target(args.project),
+            chunk_id: args.chunk_id,
+            modules: args.modules,
+            limit: args.limit,
+        };
+        finish(
+            self.call_observed(&params, Some(&original.0)).await,
+            args.format,
+            render::similar,
+        )
     }
 
     #[tool(
@@ -398,9 +516,14 @@ impl BarsMcp {
                        модули первого уровня с числом документов. Используй для выбора project и \
                        modules, когда их имена неизвестны; вложенная папка не отдельный модуль."
     )]
-    async fn bars_projects(&self, original: observation::Original, Parameters(args): Parameters<NoArgs>) -> CallToolResult {
+    async fn bars_projects(
+        &self,
+        original: observation::Original,
+        Parameters(args): Parameters<NoArgs>,
+    ) -> CallToolResult {
         finish(
-            self.call_observed(&ProjectsParams {}, Some(&original.0)).await,
+            self.call_observed(&ProjectsParams {}, Some(&original.0))
+                .await,
             args.format,
             render::projects,
         )
@@ -411,11 +534,19 @@ impl BarsMcp {
         description = "Состояние индекса проекта: когда обновлён, идёт ли индексация, сколько \
                        документов ждёт, модель индекса, нужна ли переиндексация, последняя ошибка."
     )]
-    async fn bars_status(&self, original: observation::Original, Parameters(args): Parameters<ProjectArgs>) -> CallToolResult {
+    async fn bars_status(
+        &self,
+        original: observation::Original,
+        Parameters(args): Parameters<ProjectArgs>,
+    ) -> CallToolResult {
         let params = StatusParams {
             target: self.target(args.project),
         };
-        finish(self.call_observed(&params, Some(&original.0)).await, args.format, render::status)
+        finish(
+            self.call_observed(&params, Some(&original.0)).await,
+            args.format,
+            render::status,
+        )
     }
 
     #[tool(
@@ -424,14 +555,22 @@ impl BarsMcp {
                        Возвращается сразу, ход виден в bars_status. После смены модели переиндексацию \
                        запускает только пользователь: инструмент ответит ошибкой reindex_needs_consent."
     )]
-    async fn bars_reindex(&self, original: observation::Original, Parameters(args): Parameters<ReindexArgs>) -> CallToolResult {
+    async fn bars_reindex(
+        &self,
+        original: observation::Original,
+        Parameters(args): Parameters<ReindexArgs>,
+    ) -> CallToolResult {
         let params = ReindexParams {
             target: self.target(args.project),
             full: args.full,
             // Согласие даёт человек (Т-25): прокси его не передаёт, а воркер от MCP всё равно сбросил бы.
             accept_model_change: false,
         };
-        finish(self.call_observed(&params, Some(&original.0)).await, args.format, render::reindex)
+        finish(
+            self.call_observed(&params, Some(&original.0)).await,
+            args.format,
+            render::reindex,
+        )
     }
 
     #[tool(
@@ -441,15 +580,21 @@ impl BarsMcp {
                        определить предмет этапа. Читает с диска, включая файлы вне индекса; path — \
                        от корня документации или проекта (как в выдаче). Для заголовков — bars_outline."
     )]
-    async fn bars_read(&self, original: observation::Original, Parameters(args): Parameters<ReadArgs>) -> CallToolResult {
+    async fn bars_read(
+        &self,
+        original: observation::Original,
+        Parameters(args): Parameters<ReadArgs>,
+    ) -> CallToolResult {
         let params = ReadParams {
             target: self.target(args.project),
             path: args.path,
         };
         let path = params.path.clone();
-        finish(self.call_observed(&params, Some(&original.0)).await, args.format, |output| {
-            render::read(&path, output)
-        })
+        finish(
+            self.call_observed(&params, Some(&original.0)).await,
+            args.format,
+            |output| render::read(&path, output),
+        )
     }
 
     #[tool(
@@ -460,7 +605,11 @@ impl BarsMcp {
                        levels фильтрует уровни, under (цепочка заголовков) или under_line — только \
                        вложенные в заголовок. Для полного текста — bars_read."
     )]
-    async fn bars_outline(&self, original: observation::Original, Parameters(args): Parameters<OutlineArgs>) -> CallToolResult {
+    async fn bars_outline(
+        &self,
+        original: observation::Original,
+        Parameters(args): Parameters<OutlineArgs>,
+    ) -> CallToolResult {
         let params = OutlineParams {
             target: self.target(args.project),
             path: args.path,
@@ -469,9 +618,11 @@ impl BarsMcp {
             under_line: args.under_line,
         };
         let path = params.path.clone();
-        finish(self.call_observed(&params, Some(&original.0)).await, args.format, |output| {
-            render::outline(&path, output)
-        })
+        finish(
+            self.call_observed(&params, Some(&original.0)).await,
+            args.format,
+            |output| render::outline(&path, output),
+        )
     }
 }
 
@@ -490,18 +641,25 @@ mod tests {
     use std::sync::atomic::{AtomicUsize, Ordering};
 
     fn loading() -> ClientError {
-        ClientError::Rpc(RpcError::bars(ErrorKind::ModelLoading, "модель загружается в память"))
+        ClientError::Rpc(RpcError::bars(
+            ErrorKind::ModelLoading,
+            "модель загружается в память",
+        ))
     }
 
     #[tokio::test]
     async fn model_loading_is_retried_until_the_model_answers() {
         let calls = AtomicUsize::new(0);
-        let result = wait_for_model(Duration::from_secs(5), Duration::from_millis(10), || async {
-            match calls.fetch_add(1, Ordering::SeqCst) {
-                0 | 1 => Err(loading()),
-                _ => Ok(42),
-            }
-        })
+        let result = wait_for_model(
+            Duration::from_secs(5),
+            Duration::from_millis(10),
+            || async {
+                match calls.fetch_add(1, Ordering::SeqCst) {
+                    0 | 1 => Err(loading()),
+                    _ => Ok(42),
+                }
+            },
+        )
         .await;
         assert_eq!(result.unwrap(), 42);
         assert_eq!(calls.load(Ordering::SeqCst), 3);
@@ -510,22 +668,35 @@ mod tests {
     #[tokio::test]
     async fn model_loading_past_the_wait_is_returned_to_the_agent() {
         let calls = AtomicUsize::new(0);
-        let result: Result<(), _> = wait_for_model(Duration::from_millis(50), Duration::from_millis(20), || async {
-            calls.fetch_add(1, Ordering::SeqCst);
-            Err(loading())
-        })
+        let result: Result<(), _> = wait_for_model(
+            Duration::from_millis(50),
+            Duration::from_millis(20),
+            || async {
+                calls.fetch_add(1, Ordering::SeqCst);
+                Err(loading())
+            },
+        )
         .await;
-        assert!(matches!(result, Err(ClientError::Rpc(rpc)) if rpc.kind() == Some(ErrorKind::ModelLoading)));
+        assert!(
+            matches!(result, Err(ClientError::Rpc(rpc)) if rpc.kind() == Some(ErrorKind::ModelLoading))
+        );
         assert!((2..=3).contains(&calls.load(Ordering::SeqCst)));
     }
 
     #[tokio::test]
     async fn other_errors_are_not_retried() {
         let calls = AtomicUsize::new(0);
-        let result: Result<(), _> = wait_for_model(Duration::from_secs(5), Duration::from_millis(10), || async {
-            calls.fetch_add(1, Ordering::SeqCst);
-            Err(ClientError::Rpc(RpcError::bars(ErrorKind::ProviderError, "нет файлов")))
-        })
+        let result: Result<(), _> = wait_for_model(
+            Duration::from_secs(5),
+            Duration::from_millis(10),
+            || async {
+                calls.fetch_add(1, Ordering::SeqCst);
+                Err(ClientError::Rpc(RpcError::bars(
+                    ErrorKind::ProviderError,
+                    "нет файлов",
+                )))
+            },
+        )
         .await;
         assert!(result.is_err());
         assert_eq!(calls.load(Ordering::SeqCst), 1);

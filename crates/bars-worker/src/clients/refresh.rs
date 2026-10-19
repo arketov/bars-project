@@ -47,6 +47,19 @@ fn present(env: &InstallEnv, client: InstallClient) -> Result<bool> {
     Ok(mcp || hook)
 }
 
+/// Отчёт о гейтах проектов: каждый изменённый файл и ошибка; содержимое не печатается.
+pub(crate) fn report_gates(results: &[Result<Option<PathBuf>>]) {
+    for result in results {
+        match result {
+            Ok(Some(file)) => log::info!("Гейт чтения документации: {}", file.display()),
+            Ok(None) => {}
+            Err(_) => {
+                log::error!("Гейт чтения документации: ошибка; проверьте файл настроек проекта")
+            }
+        }
+    }
+}
+
 pub(crate) fn report(client: InstallClient, action: &str, result: &Result<Option<Installed>>) {
     let title = match client {
         InstallClient::ClaudeCode => "Claude Code",

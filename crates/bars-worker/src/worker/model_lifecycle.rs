@@ -71,7 +71,8 @@ impl Inner {
                     };
                 inner.models.release_idle(enabled, idle.embed, idle.rerank);
             })
-            .await.is_err()
+            .await
+            .is_err()
             {
                 log::error!("Не удалось очистить неиспользуемые модели");
             }

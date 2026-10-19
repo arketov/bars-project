@@ -110,9 +110,16 @@ pub trait ModelProvider: Send + Sync {
     }
 }
 
-fn download_with_loader<P: ModelProvider + ?Sized>(provider: &P, settings: &Settings, reranker: bool) -> Result<(), String> {
+fn download_with_loader<P: ModelProvider + ?Sized>(
+    provider: &P,
+    settings: &Settings,
+    reranker: bool,
+) -> Result<(), String> {
     if reranker {
-        provider.load_reranker(settings).map(drop).map_err(|e| e.to_string())
+        provider
+            .load_reranker(settings)
+            .map(drop)
+            .map_err(|e| e.to_string())
     } else {
         provider.load(settings).map(drop).map_err(|e| e.to_string())
     }
@@ -179,15 +186,25 @@ impl ConfiguredProvider {
 
 impl ModelProvider for ConfiguredProvider {
     fn download(&self, settings: &Settings, reranker: bool) -> Result<(), String> {
-        if !reranker && settings.embed.source == ModelSource::Builtin
-            && builtin_model(&settings.embed.model).is_some_and(|m| m.backend == bars_core::models::Backend::Gguf)
+        if !reranker
+            && settings.embed.source == ModelSource::Builtin
+            && builtin_model(&settings.embed.model)
+                .is_some_and(|m| m.backend == bars_core::models::Backend::Gguf)
         {
-            return bars_core::models::download_gguf_artifact(&self.models_dir, &settings.embed.model);
+            return bars_core::models::download_gguf_artifact(
+                &self.models_dir,
+                &settings.embed.model,
+            );
         }
-        if !reranker && settings.embed.source == ModelSource::Builtin
-            && builtin_model(&settings.embed.model).is_some_and(|m| m.backend == bars_core::models::Backend::Onnx)
+        if !reranker
+            && settings.embed.source == ModelSource::Builtin
+            && builtin_model(&settings.embed.model)
+                .is_some_and(|m| m.backend == bars_core::models::Backend::Onnx)
         {
-            return bars_core::models::download_onnx_artifacts(&self.models_dir, &settings.embed.model);
+            return bars_core::models::download_onnx_artifacts(
+                &self.models_dir,
+                &settings.embed.model,
+            );
         }
         download_with_loader(self, settings, reranker)
     }
@@ -666,18 +683,40 @@ fn load_key(source: ModelSource, model: &str) -> Option<String> {
 }
 
 impl Models {
-    pub(super) fn retry_preparation(&self, settings: &Settings, reranker: bool) -> Result<(), String> {
-        let id = if reranker { &settings.rerank.model } else { &settings.embed.model };
+    pub(super) fn retry_preparation(
+        &self,
+        settings: &Settings,
+        reranker: bool,
+    ) -> Result<(), String> {
+        let id = if reranker {
+            &settings.rerank.model
+        } else {
+            &settings.embed.model
+        };
         drop(self.loads.take_failure(id));
-        let state = if reranker { self.rerank_readiness(settings) } else { self.embed_readiness(settings).map_err(|_| "Не удалось подготовить модель".to_string())? };
+        let state = if reranker {
+            self.rerank_readiness(settings)
+        } else {
+            self.embed_readiness(settings)
+                .map_err(|_| "Не удалось подготовить модель".to_string())?
+        };
         match state {
             Readiness::Loading { .. } => Ok(()),
             Readiness::Ready => Err("Модель уже готова; повтор не требуется".into()),
-            Readiness::Failed(_) => Err("Не удалось начать подготовку; проверьте настройки модели".into()),
+            Readiness::Failed(_) => {
+                Err("Не удалось начать подготовку; проверьте настройки модели".into())
+            }
         }
     }
     pub(super) fn operation_percent(&self, settings: &Settings, reranker: bool) -> Option<u8> {
-        self.provider.download_percent(if reranker { &settings.rerank.model } else { &settings.embed.model }, settings)
+        self.provider.download_percent(
+            if reranker {
+                &settings.rerank.model
+            } else {
+                &settings.embed.model
+            },
+            settings,
+        )
     }
     /// Убирает владение текущими слотами; выполняющиеся запросы сохраняют свои Arc.
     pub(super) fn clear(&self) {
@@ -712,7 +751,9 @@ impl Models {
             });
             let released = retired.is_some();
             drop(retired);
-            if released { log::info!("Неиспользуемая embed-модель выгружена"); }
+            if released {
+                log::info!("Неиспользуемая embed-модель выгружена");
+            }
         }
         if let Some(slot) = rerank {
             let ttl = if rerank_enabled {
@@ -725,7 +766,9 @@ impl Models {
             });
             let released = retired.is_some();
             drop(retired);
-            if released { log::info!("Неиспользуемая rerank-модель выгружена"); }
+            if released {
+                log::info!("Неиспользуемая rerank-модель выгружена");
+            }
         }
     }
 
@@ -784,10 +827,14 @@ impl Models {
     }
 
     /// Графовый контекст не запускает загрузку/скачивание и не вызывает внешний provider.
-    pub fn resident_local_embedder(&self,settings:&Settings)->Option<SharedEmbedder>{
-        if settings.embed.source!=ModelSource::Builtin{return None;}
-        let current=lock(&self.current);
-        let current=current.as_ref().filter(|m|same_embed(&m.embed,&settings.embed)&&m.slot.is_loaded())?;
+    pub fn resident_local_embedder(&self, settings: &Settings) -> Option<SharedEmbedder> {
+        if settings.embed.source != ModelSource::Builtin {
+            return None;
+        }
+        let current = lock(&self.current);
+        let current = current
+            .as_ref()
+            .filter(|m| same_embed(&m.embed, &settings.embed) && m.slot.is_loaded())?;
         Some(SharedEmbedder::new(Arc::clone(&current.slot)))
     }
 
@@ -816,9 +863,15 @@ impl Models {
                 let _attempt = ModelAttempt(Arc::clone(&operations), id);
                 let result = loads.run_keyed(key.as_deref(), || {
                     lock(&operations).edit(id, |op| op.state = "running".into());
-                    provider.load(&owned).and_then(|mut model| { model.prepare()?; Ok(model) })
+                    provider.load(&owned).and_then(|mut model| {
+                        model.prepare()?;
+                        Ok(model)
+                    })
                 });
-                match &result { Ok(_) => drop(loads.take_failure(&owned.embed.model)), Err(error) => loads.fail(&owned.embed.model, error.to_string()) }
+                match &result {
+                    Ok(_) => drop(loads.take_failure(&owned.embed.model)),
+                    Err(error) => loads.fail(&owned.embed.model, error.to_string()),
+                }
                 finish_model(&operations, id, result.is_ok());
                 result
             }),
@@ -842,14 +895,21 @@ impl Models {
         self.download_operation(settings, reranker, None)
     }
 
-    pub(super) fn download_operation(&self, settings: &Settings, reranker: bool, operation: Option<u64>) -> Result<(), String> {
+    pub(super) fn download_operation(
+        &self,
+        settings: &Settings,
+        reranker: bool,
+        operation: Option<u64>,
+    ) -> Result<(), String> {
         let id = if reranker {
             &settings.rerank.model
         } else {
             &settings.embed.model
         };
         let result = self.loads.run(id, || {
-            if let Some(operation) = operation { lock(&self.operations).edit(operation, |op| op.state = "running".into()); }
+            if let Some(operation) = operation {
+                lock(&self.operations).edit(operation, |op| op.state = "running".into());
+            }
             self.provider.download(settings, reranker)
         });
         match &result {
@@ -929,7 +989,10 @@ impl Models {
                     lock(&operations).edit(id, |op| op.state = "running".into());
                     provider.load_reranker(&owned)
                 });
-                match &result { Ok(_) => drop(loads.take_failure(&owned.rerank.model)), Err(error) => loads.fail(&owned.rerank.model, error.to_string()) }
+                match &result {
+                    Ok(_) => drop(loads.take_failure(&owned.rerank.model)),
+                    Err(error) => loads.fail(&owned.rerank.model, error.to_string()),
+                }
                 finish_model(&operations, id, result.is_ok());
                 result
             }),
@@ -946,21 +1009,56 @@ impl Models {
     }
 }
 
-pub(super) fn begin_model(journal: &Mutex<super::operations::Journal>, settings: &Settings, reranker: bool, kind: &str) -> u64 {
-    let (model, source, accelerator) = if reranker { (&settings.rerank.model, settings.rerank.source, settings.rerank.accelerator) } else { (&settings.embed.model, settings.embed.source, settings.embed.accelerator) };
+pub(super) fn begin_model(
+    journal: &Mutex<super::operations::Journal>,
+    settings: &Settings,
+    reranker: bool,
+    kind: &str,
+) -> u64 {
+    let (model, source, accelerator) = if reranker {
+        (
+            &settings.rerank.model,
+            settings.rerank.source,
+            settings.rerank.accelerator,
+        )
+    } else {
+        (
+            &settings.embed.model,
+            settings.embed.source,
+            settings.embed.accelerator,
+        )
+    };
     let mut journal = lock(journal);
-    let id = journal.begin(kind, "explicit", None, 0, Some(model.clone()), Some(format!("{} · {:?}", source.as_str(), accelerator)), reranker, super::operations::model_key(settings, reranker));
+    let id = journal.begin(
+        kind,
+        "explicit",
+        None,
+        0,
+        Some(model.clone()),
+        Some(format!("{} · {:?}", source.as_str(), accelerator)),
+        reranker,
+        super::operations::model_key(settings, reranker),
+    );
     journal.model_settings.insert(id, settings.clone());
     id
 }
 
 pub(super) fn finish_model(journal: &Mutex<super::operations::Journal>, id: u64, success: bool) {
-    lock(journal).finish(id, if success { "success" } else { "error" }, None, (!success).then(|| "Не удалось подготовить модель. Проверьте подключение и настройки моделей.".into()));
+    lock(journal).finish(
+        id,
+        if success { "success" } else { "error" },
+        None,
+        (!success).then(|| {
+            "Не удалось подготовить модель. Проверьте подключение и настройки моделей.".into()
+        }),
+    );
 }
 
 pub(super) struct ModelAttempt(pub Arc<Mutex<super::operations::Journal>>, pub u64);
 impl Drop for ModelAttempt {
-    fn drop(&mut self) { finish_model(&self.0, self.1, false); }
+    fn drop(&mut self) {
+        finish_model(&self.0, self.1, false);
+    }
 }
 
 #[cfg(any(test, feature = "test-support"))]
@@ -1116,7 +1214,9 @@ mod tests {
             fn load(&self, _: &Settings) -> Result<Box<dyn Embedder + Send>, EmbedError> {
                 panic!("artifact download must not create a model")
             }
-            fn download(&self, _: &Settings, _: bool) -> Result<(), String> { Ok(()) }
+            fn download(&self, _: &Settings, _: bool) -> Result<(), String> {
+                Ok(())
+            }
         }
         let models = Models::new(Arc::new(FilesOnly));
         models.download(&settings(), false).unwrap();
@@ -1543,7 +1643,10 @@ mod tests {
 
         let embed_batch = lock(&embedder.slot().model);
         let rerank_call = lock(&reranker.slot().model);
-        assert_eq!(models.embed_readiness(&settings()).unwrap(), Readiness::Ready);
+        assert_eq!(
+            models.embed_readiness(&settings()).unwrap(),
+            Readiness::Ready
+        );
         assert_eq!(models.rerank_readiness(&settings()), Readiness::Ready);
         drop(embed_batch);
         drop(rerank_call);

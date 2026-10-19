@@ -511,8 +511,14 @@ mod tests {
         assert!(save_user_settings(home.path(), &doc).unwrap());
         let parsed: toml::Value =
             toml::from_str(&fs::read_to_string(user_settings_path(home.path())).unwrap()).unwrap();
-        assert_eq!(parsed["embed"]["unload_after_minutes"].as_integer(), Some(0));
-        assert_eq!(parsed["rerank"]["unload_after_minutes"].as_integer(), Some(30));
+        assert_eq!(
+            parsed["embed"]["unload_after_minutes"].as_integer(),
+            Some(0)
+        );
+        assert_eq!(
+            parsed["rerank"]["unload_after_minutes"].as_integer(),
+            Some(30)
+        );
         let again = current(home.path());
         assert_eq!(again.embed.unload_after_minutes, 0);
         assert_eq!(again.rerank.unload_after_minutes, 30);

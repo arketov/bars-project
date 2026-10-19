@@ -193,7 +193,10 @@ fn unload_minutes_are_read_per_model_and_kept_out_of_model_settings() {
     assert!(loaded.warnings.is_empty());
     assert_eq!(
         loaded.value.unload,
-        ModelUnload { embed_minutes: Some(0), rerank_minutes: Some(60) }
+        ModelUnload {
+            embed_minutes: Some(0),
+            rerank_minutes: Some(60)
+        }
     );
     // Срок не часть описания модели: слот модели по нему не пересоздаётся.
     assert_eq!(loaded.value.embed, EmbedSettings::default());

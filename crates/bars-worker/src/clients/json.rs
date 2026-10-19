@@ -1,6 +1,6 @@
 //! Правки JSON-конфигов: только записи bars, повторное чтение при конфликте.
 use super::fsx::{read_text, update_text};
-use super::{ClientsError, HOOK_MATCHER, Result};
+use super::{ClientsError, GATE_MATCHER, HOOK_MATCHER, Result};
 use serde_json::{Map, Value, json};
 use std::path::Path;
 
@@ -93,31 +93,46 @@ fn is_bars_hook(hook: &Value) -> bool {
         .and_then(Value::as_str)
         .is_some_and(|c| c.contains("bars-cli") && c.contains("hook session-start"))
 }
-fn session_start<'a>(file: &Path, root: &'a mut Value) -> Result<&'a mut Vec<Value>> {
+fn is_bars_gate(hook: &Value) -> bool {
+    hook.get("command")
+        .and_then(Value::as_str)
+        .is_some_and(|c| c.contains("bars-cli") && c.contains("hook pre-tool-use"))
+}
+fn event_groups<'a>(file: &Path, root: &'a mut Value, event: &str) -> Result<&'a mut Vec<Value>> {
     let hooks = object_at(file, root_mut(root), "hooks")?;
     let groups = hooks
-        .entry("SessionStart")
+        .entry(event)
         .or_insert_with(|| json!([]))
         .as_array_mut()
-        .ok_or_else(|| parse_error(file, "«SessionStart» должен быть массивом"))?;
+        .ok_or_else(|| parse_error(file, format!("«{event}» должен быть массивом")))?;
     for group in groups.iter() {
         if !group.is_object() || !group.get("hooks").is_some_and(Value::is_array) {
             return Err(parse_error(
                 file,
-                "группа SessionStart должна содержать массив hooks",
+                format!("группа {event} должна содержать массив hooks"),
             ));
         }
     }
     Ok(groups)
 }
-fn set_hook(file: &Path, root: &mut Value, command: &str) -> Result<()> {
-    let groups = session_start(file, root)?;
-    let canonical =
-        json!({"matcher": HOOK_MATCHER, "hooks": [{"type":"command", "command":command}]});
+fn session_start<'a>(file: &Path, root: &'a mut Value) -> Result<&'a mut Vec<Value>> {
+    event_groups(file, root, "SessionStart")
+}
+/// Ставит одну каноническую группу хука bars в событие; свои дубли сводит к ней.
+fn set_group(
+    file: &Path,
+    root: &mut Value,
+    event: &str,
+    matcher: &str,
+    command: &str,
+    is_ours: fn(&Value) -> bool,
+) -> Result<()> {
+    let groups = event_groups(file, root, event)?;
+    let canonical = json!({"matcher": matcher, "hooks": [{"type":"command", "command":command}]});
     let count = groups
         .iter()
         .flat_map(|g| g["hooks"].as_array().expect("проверено"))
-        .filter(|h| is_bars_hook(h))
+        .filter(|h| is_ours(h))
         .count();
     // Не переставлять канонический хук: иначе сбрасывается одобрение Codex.
     if count == 1 && groups.contains(&canonical) {
@@ -126,11 +141,43 @@ fn set_hook(file: &Path, root: &mut Value, command: &str) -> Result<()> {
     groups.retain_mut(|group| {
         let hooks = group["hooks"].as_array_mut().expect("проверено");
         let had = hooks.len();
-        hooks.retain(|h| !is_bars_hook(h));
+        hooks.retain(|h| !is_ours(h));
         !(had > 0 && hooks.is_empty())
     });
     groups.push(canonical);
     Ok(())
+}
+/// Убирает записи bars из события и опустевшие контейнеры.
+fn remove_group(root: &mut Value, event: &str, is_ours: fn(&Value) -> bool) {
+    let Some(hooks) = root.get_mut("hooks").and_then(Value::as_object_mut) else {
+        return;
+    };
+    if let Some(groups) = hooks.get_mut(event).and_then(Value::as_array_mut) {
+        groups.retain_mut(|group| {
+            let Some(list) = group.get_mut("hooks").and_then(Value::as_array_mut) else {
+                return true;
+            };
+            let had = list.len();
+            list.retain(|hook| !is_ours(hook));
+            !(list.is_empty() && had > 0)
+        });
+        if groups.is_empty() {
+            hooks.shift_remove(event);
+        }
+    }
+    if hooks.is_empty() {
+        root_mut(root).shift_remove("hooks");
+    }
+}
+fn set_hook(file: &Path, root: &mut Value, command: &str) -> Result<()> {
+    set_group(
+        file,
+        root,
+        "SessionStart",
+        HOOK_MATCHER,
+        command,
+        is_bars_hook,
+    )
 }
 pub fn validate_hook(file: &Path, command: &str) -> Result<()> {
     set_hook(file, &mut load(file)?, command)
@@ -140,27 +187,36 @@ pub fn install_hook(file: &Path, command: &str) -> Result<bool> {
 }
 pub fn uninstall_hook(file: &Path) -> Result<bool> {
     update(file, |root| {
-        let Some(hooks) = root.get_mut("hooks").and_then(Value::as_object_mut) else {
-            return Ok(());
-        };
-        if let Some(groups) = hooks.get_mut("SessionStart").and_then(Value::as_array_mut) {
-            groups.retain_mut(|group| {
-                let Some(list) = group.get_mut("hooks").and_then(Value::as_array_mut) else {
-                    return true;
-                };
-                let had = list.len();
-                list.retain(|hook| !is_bars_hook(hook));
-                !(list.is_empty() && had > 0)
-            });
-            if groups.is_empty() {
-                hooks.shift_remove("SessionStart");
-            }
-        }
-        if hooks.is_empty() {
-            root_mut(root).shift_remove("hooks");
-        }
+        remove_group(root, "SessionStart", is_bars_hook);
         Ok(())
     })
+}
+/// Гейт чтения документации в файле настроек проекта: группа `PreToolUse`.
+pub fn install_gate(file: &Path, command: &str) -> Result<bool> {
+    update(file, |root| {
+        set_group(
+            file,
+            root,
+            "PreToolUse",
+            GATE_MATCHER,
+            command,
+            is_bars_gate,
+        )
+    })
+}
+pub fn uninstall_gate(file: &Path) -> Result<bool> {
+    update(file, |root| {
+        remove_group(root, "PreToolUse", is_bars_gate);
+        Ok(())
+    })
+}
+/// Проекты, которые знает Claude Code: ключи `projects` в `~/.claude.json`.
+pub fn claude_projects(file: &Path) -> Result<Vec<String>> {
+    Ok(load(file)?
+        .get("projects")
+        .and_then(Value::as_object)
+        .map(|projects| projects.keys().cloned().collect())
+        .unwrap_or_default())
 }
 pub fn mcp_command(file: &Path) -> Result<Option<String>> {
     Ok(load(file)?

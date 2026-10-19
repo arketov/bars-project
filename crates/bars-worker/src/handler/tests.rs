@@ -10,8 +10,8 @@ use bars_protocol::{
     ActivityOutput, ActivityParams, Call, CancelOutput, Client, ClientError, ClientKind, Endpoint,
     ErrorKind, IndexCancelParams, IndexPauseParams, IndexResumeParams, JobKind, JobPriority,
     METHOD_NOT_FOUND, OutlineParams, ProjectState, ProjectsParams, ReadParams, RegisterParams,
-    ReindexParams, RpcError, SearchParams, SessionStartParams, StatusOutput, StatusParams, Target,
-    TreeOutput, TreeParams, UnregisterParams,
+    ReindexParams, RpcError, SearchParams, SessionStartParams, SimilarParams, StatusOutput,
+    StatusParams, Target, TreeOutput, TreeParams, UnregisterParams,
 };
 use tempfile::TempDir;
 
@@ -337,6 +337,54 @@ async fn cli_works_with_a_project_end_to_end() {
     );
     // Файлы проекта остаются (Т-5).
     assert!(root.join("docs").join("guide.md").exists());
+}
+
+#[tokio::test]
+async fn similar_chunks_work_by_id_through_the_channel_for_cli_and_mcp() {
+    let harness = Harness::start("similar", FakeProvider::new("m1")).await;
+    let mut cli = harness.client(ClientKind::Cli).await;
+    let root = ready_project(&harness, &mut cli).await;
+    let found = cli.call(&search(&root, "индексация")).await.unwrap();
+    let first = &found.results[0];
+    assert!(!first.chunk_id.is_empty());
+
+    let similar = |chunk_id: &str| SimilarParams {
+        target: target(&root),
+        chunk_id: chunk_id.into(),
+        modules: vec![],
+        limit: Some(2),
+    };
+    let mut mcp = harness.client(ClientKind::Mcp).await;
+    for client in [&mut cli, &mut mcp] {
+        let out = client.call(&similar(&first.chunk_id)).await.unwrap();
+        assert_eq!(out.source.chunk_id, first.chunk_id);
+        assert_eq!(out.source.path, first.path);
+        assert_eq!(out.limit, 2);
+        assert!(!out.results.is_empty() && out.results.len() <= 2);
+        assert!(out.results.iter().all(|hit| hit.chunk_id != first.chunk_id));
+        assert!(out.results.iter().all(|hit| !hit.chunk_id.is_empty()));
+    }
+
+    let narrowed = cli
+        .call(&SimilarParams {
+            modules: vec!["api".into()],
+            ..similar(&first.chunk_id)
+        })
+        .await
+        .unwrap();
+    assert!(narrowed.results.iter().all(|hit| hit.module == "api"));
+
+    let unknown = rpc(cli.call(&similar("99999-00000000")).await);
+    assert_eq!(unknown.kind(), Some(ErrorKind::ChunkNotFound));
+    let malformed = rpc(cli.call(&similar("не-id")).await);
+    assert_eq!(malformed.kind(), Some(ErrorKind::InvalidParams));
+    let module = rpc(cli
+        .call(&SimilarParams {
+            modules: vec!["нет-такого".into()],
+            ..similar(&first.chunk_id)
+        })
+        .await);
+    assert_eq!(module.kind(), Some(ErrorKind::InvalidParams));
 }
 
 #[tokio::test]
@@ -739,10 +787,14 @@ async fn window_gets_activity_tree_and_pause_from_the_handler() {
     assert_eq!(activity.queue[0].priority, JobPriority::Explicit);
 
     let cancelled: CancelOutput = serde_json::from_value(
-        handler.dispatch(Call::IndexCancel(IndexCancelParams {
-            project: root.display().to_string(),
-        })).await.unwrap(),
-    ).unwrap();
+        handler
+            .dispatch(Call::IndexCancel(IndexCancelParams {
+                project: root.display().to_string(),
+            }))
+            .await
+            .unwrap(),
+    )
+    .unwrap();
     assert!(cancelled.cancelled);
     assert!(worker.queued().is_empty());
     worker.register(&root).unwrap();
@@ -781,5 +833,5 @@ async fn window_gets_activity_tree_and_pause_from_the_handler() {
 }
 
 mod external_models;
-mod window;
 mod graph;
+mod window;

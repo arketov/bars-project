@@ -156,6 +156,7 @@ mod tests {
         };
         let h = SearchHit {
             chunk_id: 1,
+            public_id: "1-00000000".into(),
             path: "a.md".into(),
             module: ".".into(),
             title: "a".into(),

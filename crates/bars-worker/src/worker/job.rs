@@ -112,7 +112,9 @@ pub fn run(env: &JobEnv<'_>, project: &Path, job: &Job) -> JobResult {
         // Граф строится из опубликованных текстов/векторов, без второй модели.
         // Его ошибка не отменяет успешное обновление обычного поиска.
         if let Ok(mut index) = Index::open(&index_path(project), Journal::Wal)
-            && let Err(error) = bars_core::graph::build_index_graph(project, &mut index, || env.observer.should_stop())
+            && let Err(error) = bars_core::graph::build_index_graph(project, &mut index, || {
+                env.observer.should_stop()
+            })
         {
             log::warn!("Граф проекта не обновлён: {error}");
         }

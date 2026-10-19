@@ -3,9 +3,9 @@
 
 mod commands;
 mod documents;
-mod folders;
 #[cfg(test)]
 mod folder_tests;
+mod folders;
 mod icons;
 mod tray;
 mod window;

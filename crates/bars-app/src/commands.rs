@@ -44,14 +44,32 @@ pub async fn bars_call(
     let request = Request::new(Id::Number(0), &method, params);
     let call = Call::from_request(&request)?;
     let tree_binding = if let Call::Tree(params) = &call {
-        handler.worker().resolve(params.target.project.as_deref().unwrap_or(&params.target.cwd)).ok()
-            .and_then(|root| handler.worker().folder_identity(&root).ok().map(|identity| (root, identity)))
-    } else { None };
+        handler
+            .worker()
+            .resolve(
+                params
+                    .target
+                    .project
+                    .as_deref()
+                    .unwrap_or(&params.target.cwd),
+            )
+            .ok()
+            .and_then(|root| {
+                handler
+                    .worker()
+                    .folder_identity(&root)
+                    .ok()
+                    .map(|identity| (root, identity))
+            })
+    } else {
+        None
+    };
     let result = handler.dispatch(call).await;
     if let (Some((root, identity)), Ok(output)) = (tree_binding, &result)
         && handler.worker().folder_identity(&root).ok().as_ref() == Some(&identity)
-        && let Ok(tree) = serde_json::from_value::<bars_protocol::TreeOutput>(output.clone()) {
-            state.folders.remember(root, identity, tree);
+        && let Ok(tree) = serde_json::from_value::<bars_protocol::TreeOutput>(output.clone())
+    {
+        state.folders.remember(root, identity, tree);
     }
     result
 }

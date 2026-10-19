@@ -1,0 +1,3 @@
+19-10-2026: ID чанка = номер строки chunks.id + контроль (BLAKE3 от hash документа, пути, ordinal, embed_hash); голый rowid отвергнут: SQLite без AUTOINCREMENT отдаёт освободившийся номер новому чанку, ID молча указал бы на чужой текст. Автор оставил детали ID реализации (handoff 2026-10-18-similar-duplicates), поэтому OQ не заводил.
+19-10-2026: сборка из Git Bash падает на llama-cpp (MSBuild, нет Ninja/MSVC в среде); рабочий путь — Developer Shell + CMAKE_GENERATOR=Ninja + CARGO_TARGET_DIR=C:/bars-build + VULKAN_SDK=C:\VulkanSDK\1.4.363.0, cargo test --release (см. knowledge/build.md).
+19-10-2026: тест повторного использования rowid подтвердил: после правки последнего документа новый чанк получает тот же номер, контроль в ID делает старый ID chunk_not_found.
