@@ -110,6 +110,22 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | `check_all` | — | `accepted: true`; проверка всех проектов сейчас («Проверить сейчас» у пропавшего проекта) |
 | `project_delete` | абсолютный `project`, обязательный `confirmed: true` | `removed: true` после остановки заданий и очистки; без подтверждения — `invalid_params`. Только окно; [границы и ошибки](../features/projects/deletion.md) |
 
+## Методы новых тем (только окно)
+
+Все девять методов — аудитория `Window`; проект — абсолютный путь зарегистрированного проекта, относительный даёт `invalid_params`. Изменяющие методы принимают ожидаемую `revision` темы: несовпадение или удалённая тема — `stale_ref`, запись не происходит. Устройство и исходы — [новые темы](../features/new-topics/design.md#внутренний-api-окна).
+
+| Метод | Параметры | Ответ |
+|---|---|---|
+| `new_topics_list` | `project` | `enabled`, `generation`, `topics` (ID, ревизия, название, статус, даты, число обращений, источники, основания, число вариантов), `store_path`, `losses`, `loss_reason`; проект без `.bars` даёт пустой список, повреждённая или более новая БД — ошибку |
+| `new_topics_get` | `project`, `id` | та же строка, `variants_list` (текст, область) и до двух проверок: исходы по вариантам, причины неполноты, метки индекса, найденные фрагменты, `conclusive` |
+| `new_topics_mark_missing` | `project`, `request_id`, `query`, `modules`, `files` | `topic_id`, `created`; повтор того же `request_id` идемпотентен; выключенный сбор — `invalid_params` |
+| `new_topics_check` | `project`, `id`, `revision`, `expand` | карточка темы после проверки; спроса не создаёт |
+| `new_topics_set_status` | `project`, `id`, `revision`, `status` (`resolved` или `open`) | новая `revision` |
+| `new_topics_rename` | `project`, `id`, `revision`, `title` (1–300 знаков) | новая `revision` |
+| `new_topics_delete` | `project`, `id`, `revision` | `accepted: true` |
+| `new_topics_clear` | `project`, обязательный `confirmed: true` | `generation` |
+| `new_topics_settings` | `project`, `enabled` | `enabled`, `generation` |
+
 Автозапуск — состояние ОС, а не настройка ([features/distribution/autostart.md](../features/distribution/autostart.md)); методы доступны окну и `bars-cli`, но не `bars-mcp` (аудитория `Cli`), решение агента, срез 7:
 
 | Метод | Параметры | Ответ |

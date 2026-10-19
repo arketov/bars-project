@@ -12,7 +12,10 @@ pub const MAX_TOPICS: usize = 2000;
 /// Предел вариантов формулировки одной темы; дальше наблюдения считаются на теме без нового варианта.
 pub const MAX_VARIANTS_PER_TOPIC: usize = 50;
 
-const SCHEMA_VERSION: i64 = 1;
+const SCHEMA_VERSION: i64 = 2;
+
+/// Сколько последних проверок темы хранится: последняя и предыдущая (`design.md`, «Данные и хранение»).
+const KEPT_CHECKS: i64 = 2;
 
 /// `<проект>/.bars/new-topics.sqlite3`, отдельно от заменяемого `index.sqlite` (NT-09).
 pub fn store_path(project_root: &Path) -> PathBuf {
@@ -144,8 +147,13 @@ pub enum Match {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Recorded {
-    Created { topic_id: i64 },
-    Merged { topic_id: i64, by: Match },
+    Created {
+        topic_id: i64,
+    },
+    Merged {
+        topic_id: i64,
+        by: Match,
+    },
     /// Тот же `event_id` уже учтён.
     Duplicate,
     /// Сбор выключен.
@@ -172,7 +180,105 @@ pub struct TopicRow {
     pub resolved_at: Option<i64>,
     /// Число уникальных самостоятельных наблюдений, не вариантов.
     pub observations: i64,
+    /// Источники наблюдений: `window`, `mcp`.
+    pub sources: Vec<String>,
+    /// Основания наблюдений: `empty_result`, `manual_missing`.
+    pub reasons: Vec<String>,
     pub variants: Vec<VariantRow>,
+    /// Последняя и предыдущая проверки, новые первыми; заполняется только `get`.
+    pub checks: Vec<CheckRow>,
+}
+
+/// Итог проверки одного варианта темы.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum VariantOutcome {
+    /// Поиск нашёл материалы.
+    Found,
+    /// Поиск полностью и успешно вернул ноль результатов.
+    Empty,
+    /// Проверка не дала вывода: индексация, ошибка, область исчезла.
+    Incomplete,
+}
+
+impl VariantOutcome {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Found => "found",
+            Self::Empty => "empty",
+            Self::Incomplete => "incomplete",
+        }
+    }
+
+    fn parse(value: &str) -> Self {
+        match value {
+            "found" => Self::Found,
+            "empty" => Self::Empty,
+            _ => Self::Incomplete,
+        }
+    }
+}
+
+/// Результат проверки одного варианта до записи.
+#[derive(Debug, Clone)]
+pub struct NewCheckResult {
+    pub variant_id: i64,
+    /// Область, по которой реально искали: исходная или `project` при явном расширении.
+    pub scope: String,
+    pub outcome: VariantOutcome,
+    /// Причина неполноты: `indexing`, `model_loading`, `reindex_required`, `scope_missing`, `error`.
+    pub reason: Option<String>,
+    pub index_stamp: Option<String>,
+    /// Найденные фрагменты, JSON: путь, заголовок, строки, оценка; без текста документа.
+    pub hits: String,
+}
+
+/// Проверка темы до записи.
+#[derive(Debug, Clone)]
+pub struct NewCheck {
+    /// Ревизия темы в момент начала проверки.
+    pub topic_revision: i64,
+    pub at: i64,
+    /// Явное расширение на весь проект.
+    pub expanded: bool,
+    pub model: String,
+    /// Применённые параметры поиска, JSON.
+    pub params: String,
+    pub results: Vec<NewCheckResult>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CheckResultRow {
+    pub variant_id: i64,
+    pub scope: String,
+    pub outcome: VariantOutcome,
+    pub reason: Option<String>,
+    pub index_stamp: Option<String>,
+    pub hits: String,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CheckRow {
+    pub id: i64,
+    pub topic_revision: i64,
+    pub at: i64,
+    pub expanded: bool,
+    pub model: String,
+    pub params: String,
+    pub results: Vec<CheckResultRow>,
+}
+
+/// Исход операции над темой с ожидаемой ревизией.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Change {
+    Updated {
+        revision: i64,
+    },
+    /// Темы нет: её удалили или очистили список. ID не переиспользуются.
+    NotFound,
+    /// Тема изменилась после того, как пользователь её увидел; ничего не записано.
+    Conflict {
+        current: i64,
+    },
 }
 
 pub struct TopicStore {
@@ -237,7 +343,21 @@ impl TopicStore {
                     at INTEGER NOT NULL, source TEXT NOT NULL, reason TEXT NOT NULL,
                     params TEXT NOT NULL, index_stamp TEXT);
                  CREATE INDEX IF NOT EXISTS observations_topic ON observations(topic_id);
-                 PRAGMA user_version=1;",
+                 CREATE TABLE IF NOT EXISTS checks (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    topic_id INTEGER NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+                    topic_revision INTEGER NOT NULL, at INTEGER NOT NULL,
+                    expanded INTEGER NOT NULL, model TEXT NOT NULL, params TEXT NOT NULL);
+                 CREATE INDEX IF NOT EXISTS checks_topic ON checks(topic_id, id);
+                 CREATE TABLE IF NOT EXISTS check_results (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    check_id INTEGER NOT NULL REFERENCES checks(id) ON DELETE CASCADE,
+                    variant_id INTEGER NOT NULL REFERENCES variants(id) ON DELETE CASCADE,
+                    scope TEXT NOT NULL,
+                    outcome TEXT NOT NULL CHECK(outcome IN ('found','empty','incomplete')),
+                    reason TEXT, index_stamp TEXT, hits TEXT NOT NULL);
+                 CREATE INDEX IF NOT EXISTS check_results_check ON check_results(check_id);
+                 PRAGMA user_version=2;",
             )?;
             tx.commit()?;
         }
@@ -246,11 +366,11 @@ impl TopicStore {
 
     /// Поколение списка и включён ли сбор.
     pub fn settings(&self) -> Result<(i64, bool), StoreError> {
-        Ok(self.db.query_row(
-            "SELECT generation, enabled FROM meta WHERE id=1",
-            [],
-            |r| Ok((r.get(0)?, r.get::<_, i64>(1)? != 0)),
-        )?)
+        Ok(self
+            .db
+            .query_row("SELECT generation, enabled FROM meta WHERE id=1", [], |r| {
+                Ok((r.get(0)?, r.get::<_, i64>(1)? != 0))
+            })?)
     }
 
     /// Включает или выключает сбор. Смена меняет поколение: не завершённые наблюдения не добавляются.
@@ -258,11 +378,10 @@ impl TopicStore {
         let tx = self
             .db
             .transaction_with_behavior(TransactionBehavior::Immediate)?;
-        let (generation, current): (i64, i64) = tx.query_row(
-            "SELECT generation, enabled FROM meta WHERE id=1",
-            [],
-            |r| Ok((r.get(0)?, r.get(1)?)),
-        )?;
+        let (generation, current): (i64, i64) =
+            tx.query_row("SELECT generation, enabled FROM meta WHERE id=1", [], |r| {
+                Ok((r.get(0)?, r.get(1)?))
+            })?;
         let next = if (current != 0) == enabled {
             generation
         } else {
@@ -281,9 +400,13 @@ impl TopicStore {
         let tx = self
             .db
             .transaction_with_behavior(TransactionBehavior::Immediate)?;
-        tx.execute_batch("DELETE FROM observations; DELETE FROM variants; DELETE FROM topics;")?;
+        tx.execute_batch(
+            "DELETE FROM observations; DELETE FROM check_results; DELETE FROM checks;
+             DELETE FROM variants; DELETE FROM topics;",
+        )?;
         tx.execute("UPDATE meta SET generation=generation+1 WHERE id=1", [])?;
-        let generation = tx.query_row("SELECT generation FROM meta WHERE id=1", [], |r| r.get(0))?;
+        let generation =
+            tx.query_row("SELECT generation FROM meta WHERE id=1", [], |r| r.get(0))?;
         tx.commit()?;
         Ok(generation)
     }
@@ -313,11 +436,10 @@ impl TopicStore {
         let tx = self
             .db
             .transaction_with_behavior(TransactionBehavior::Immediate)?;
-        let (generation, enabled): (i64, i64) = tx.query_row(
-            "SELECT generation, enabled FROM meta WHERE id=1",
-            [],
-            |r| Ok((r.get(0)?, r.get(1)?)),
-        )?;
+        let (generation, enabled): (i64, i64) =
+            tx.query_row("SELECT generation, enabled FROM meta WHERE id=1", [], |r| {
+                Ok((r.get(0)?, r.get(1)?))
+            })?;
         if enabled == 0 {
             return Ok(Recorded::Disabled);
         }
@@ -371,7 +493,14 @@ impl TopicStore {
                         }
                     }
                 };
-                (topic, variant, Recorded::Merged { topic_id: topic, by })
+                (
+                    topic,
+                    variant,
+                    Recorded::Merged {
+                        topic_id: topic,
+                        by,
+                    },
+                )
             }
             None => {
                 let topics: i64 = tx.query_row("SELECT count(*) FROM topics", [], |r| r.get(0))?;
@@ -479,15 +608,47 @@ impl TopicStore {
         Ok(best.map(|(topic, _)| topic))
     }
 
-    /// Темы от свежих к старым: по последнему обращению.
+    /// Темы от свежих к старым: по последнему обращению. Проверки не читаются (см. `get`).
     pub fn list(&self) -> Result<Vec<TopicRow>, StoreError> {
+        self.load(None)
+    }
+
+    /// Тема, к которой привязано наблюдение с этим `event_id`.
+    pub fn topic_of_event(&self, event_id: &str) -> Result<Option<i64>, StoreError> {
+        Ok(self
+            .db
+            .query_row(
+                "SELECT topic_id FROM observations WHERE event_id=?1",
+                [event_id],
+                |r| r.get(0),
+            )
+            .optional()?)
+    }
+
+    /// Одна тема с последней и предыдущей проверками; `None`, если её нет.
+    pub fn get(&self, id: i64) -> Result<Option<TopicRow>, StoreError> {
+        let Some(mut topic) = self.load(Some(id))?.pop() else {
+            return Ok(None);
+        };
+        topic.checks = self.checks(id)?;
+        Ok(Some(topic))
+    }
+
+    fn load(&self, only: Option<i64>) -> Result<Vec<TopicRow>, StoreError> {
         let mut statement = self.db.prepare(
             "SELECT t.id, t.revision, t.title, t.status, t.first_seen, t.last_seen, t.resolved_at,
-                    (SELECT count(*) FROM observations o WHERE o.topic_id=t.id)
-             FROM topics t ORDER BY t.last_seen DESC, t.id DESC",
+                    (SELECT count(*) FROM observations o WHERE o.topic_id=t.id),
+                    (SELECT group_concat(DISTINCT o.source) FROM observations o WHERE o.topic_id=t.id),
+                    (SELECT group_concat(DISTINCT o.reason) FROM observations o WHERE o.topic_id=t.id)
+             FROM topics t WHERE (?1 IS NULL OR t.id=?1) ORDER BY t.last_seen DESC, t.id DESC",
         )?;
+        let split = |value: Option<String>| -> Vec<String> {
+            value
+                .map(|v| v.split(',').map(str::to_owned).collect())
+                .unwrap_or_default()
+        };
         let mut topics = statement
-            .query_map([], |r| {
+            .query_map([only], |r| {
                 Ok(TopicRow {
                     id: r.get(0)?,
                     revision: r.get(1)?,
@@ -497,14 +658,17 @@ impl TopicStore {
                     last_seen: r.get(5)?,
                     resolved_at: r.get(6)?,
                     observations: r.get(7)?,
+                    sources: split(r.get(8)?),
+                    reasons: split(r.get(9)?),
                     variants: Vec::new(),
+                    checks: Vec::new(),
                 })
             })?
             .collect::<Result<Vec<_>, _>>()?;
-        let mut variants = self
-            .db
-            .prepare("SELECT id, topic_id, text, scope FROM variants ORDER BY id")?;
-        let rows = variants.query_map([], |r| {
+        let mut variants = self.db.prepare(
+            "SELECT id, topic_id, text, scope FROM variants WHERE (?1 IS NULL OR topic_id=?1) ORDER BY id",
+        )?;
+        let rows = variants.query_map([only], |r| {
             Ok((
                 r.get::<_, i64>(1)?,
                 VariantRow {
@@ -521,5 +685,200 @@ impl TopicStore {
             }
         }
         Ok(topics)
+    }
+
+    /// Последняя и предыдущая проверки темы, новые первыми.
+    fn checks(&self, topic: i64) -> Result<Vec<CheckRow>, StoreError> {
+        let mut statement = self.db.prepare(
+            "SELECT id, topic_revision, at, expanded, model, params FROM checks
+             WHERE topic_id=?1 ORDER BY id DESC LIMIT ?2",
+        )?;
+        let mut checks = statement
+            .query_map(params![topic, KEPT_CHECKS], |r| {
+                Ok(CheckRow {
+                    id: r.get(0)?,
+                    topic_revision: r.get(1)?,
+                    at: r.get(2)?,
+                    expanded: r.get::<_, i64>(3)? != 0,
+                    model: r.get(4)?,
+                    params: r.get(5)?,
+                    results: Vec::new(),
+                })
+            })?
+            .collect::<Result<Vec<_>, _>>()?;
+        let mut results = self.db.prepare(
+            "SELECT variant_id, scope, outcome, reason, index_stamp, hits FROM check_results
+             WHERE check_id=?1 ORDER BY id",
+        )?;
+        for check in &mut checks {
+            check.results = results
+                .query_map([check.id], |r| {
+                    Ok(CheckResultRow {
+                        variant_id: r.get(0)?,
+                        scope: r.get(1)?,
+                        outcome: VariantOutcome::parse(&r.get::<_, String>(2)?),
+                        reason: r.get(3)?,
+                        index_stamp: r.get(4)?,
+                        hits: r.get(5)?,
+                    })
+                })?
+                .collect::<Result<Vec<_>, _>>()?;
+        }
+        Ok(checks)
+    }
+
+    /// Текущая ревизия темы и статус под транзакцией; `Err(Change)` — тема исчезла или изменилась.
+    fn expect_revision(
+        tx: &rusqlite::Transaction<'_>,
+        id: i64,
+        revision: i64,
+    ) -> Result<Result<String, Change>, StoreError> {
+        let current: Option<(i64, String)> = tx
+            .query_row(
+                "SELECT revision, status FROM topics WHERE id=?1",
+                [id],
+                |r| Ok((r.get(0)?, r.get(1)?)),
+            )
+            .optional()?;
+        Ok(match current {
+            None => Err(Change::NotFound),
+            Some((current, _)) if current != revision => Err(Change::Conflict { current }),
+            Some((_, status)) => Ok(status),
+        })
+    }
+
+    /// Решение пользователя: «Знаний достаточно» (`Resolved`) или «Всё ещё не хватает» (`Open`).
+    /// Материалы последней проверки не стираются. Дата решения сохраняется при закрытии.
+    pub fn set_status(
+        &mut self,
+        id: i64,
+        revision: i64,
+        status: TopicStatus,
+        at: i64,
+    ) -> Result<Change, StoreError> {
+        let tx = self
+            .db
+            .transaction_with_behavior(TransactionBehavior::Immediate)?;
+        if let Err(change) = Self::expect_revision(&tx, id, revision)? {
+            return Ok(change);
+        }
+        tx.execute(
+            "UPDATE topics SET status=?2, revision=revision+1,
+             resolved_at=CASE WHEN ?2='resolved' THEN ?3 ELSE resolved_at END WHERE id=?1",
+            params![id, status.as_str(), at],
+        )?;
+        tx.commit()?;
+        Ok(Change::Updated {
+            revision: revision + 1,
+        })
+    }
+
+    /// Переименование заголовка; исходные формулировки вариантов не меняются.
+    pub fn rename(&mut self, id: i64, revision: i64, title: &str) -> Result<Change, StoreError> {
+        let tx = self
+            .db
+            .transaction_with_behavior(TransactionBehavior::Immediate)?;
+        if let Err(change) = Self::expect_revision(&tx, id, revision)? {
+            return Ok(change);
+        }
+        tx.execute(
+            "UPDATE topics SET title=?2, revision=revision+1 WHERE id=?1",
+            params![id, title],
+        )?;
+        tx.commit()?;
+        Ok(Change::Updated {
+            revision: revision + 1,
+        })
+    }
+
+    /// Удаляет тему, если она не менялась с момента, когда пользователь её видел.
+    pub fn delete_checked(&mut self, id: i64, revision: i64) -> Result<Change, StoreError> {
+        let tx = self
+            .db
+            .transaction_with_behavior(TransactionBehavior::Immediate)?;
+        if let Err(change) = Self::expect_revision(&tx, id, revision)? {
+            return Ok(change);
+        }
+        tx.execute("DELETE FROM topics WHERE id=?1", [id])?;
+        tx.commit()?;
+        Ok(Change::Updated { revision })
+    }
+
+    /// Записывает проверку темы; прежних сохраняется последняя и новая. Тема, которой уже нет, не
+    /// восстанавливается: `None`. Если хоть один вариант нашёл материалы, открытая тема получает статус
+    /// «Есть материалы»; закрытую решение пользователя не трогает. Пустой или неполный результат
+    /// статус не меняет.
+    pub fn record_check(
+        &mut self,
+        topic: i64,
+        check: &NewCheck,
+    ) -> Result<Option<CheckRow>, StoreError> {
+        let tx = self
+            .db
+            .transaction_with_behavior(TransactionBehavior::Immediate)?;
+        let status: Option<String> = tx
+            .query_row("SELECT status FROM topics WHERE id=?1", [topic], |r| {
+                r.get(0)
+            })
+            .optional()?;
+        let Some(status) = status else {
+            return Ok(None);
+        };
+        tx.execute(
+            "INSERT INTO checks(topic_id, topic_revision, at, expanded, model, params)
+             VALUES(?1,?2,?3,?4,?5,?6)",
+            params![
+                topic,
+                check.topic_revision,
+                check.at,
+                i64::from(check.expanded),
+                check.model,
+                check.params
+            ],
+        )?;
+        let check_id = tx.last_insert_rowid();
+        for result in &check.results {
+            // Вариант могли убрать разъединением или лимитом; результат без варианта не пишем.
+            let exists: Option<i64> = tx
+                .query_row(
+                    "SELECT 1 FROM variants WHERE id=?1 AND topic_id=?2",
+                    params![result.variant_id, topic],
+                    |r| r.get(0),
+                )
+                .optional()?;
+            if exists.is_none() {
+                continue;
+            }
+            tx.execute(
+                "INSERT INTO check_results(check_id, variant_id, scope, outcome, reason, index_stamp, hits)
+                 VALUES(?1,?2,?3,?4,?5,?6,?7)",
+                params![
+                    check_id,
+                    result.variant_id,
+                    result.scope,
+                    result.outcome.as_str(),
+                    result.reason,
+                    result.index_stamp,
+                    result.hits
+                ],
+            )?;
+        }
+        tx.execute(
+            "DELETE FROM checks WHERE topic_id=?1 AND id NOT IN
+             (SELECT id FROM checks WHERE topic_id=?1 ORDER BY id DESC LIMIT ?2)",
+            params![topic, KEPT_CHECKS],
+        )?;
+        let found = check
+            .results
+            .iter()
+            .any(|r| r.outcome == VariantOutcome::Found);
+        if found && status == "open" {
+            tx.execute(
+                "UPDATE topics SET status='materials_found', revision=revision+1 WHERE id=?1",
+                [topic],
+            )?;
+        }
+        tx.commit()?;
+        Ok(self.get(topic)?.and_then(|t| t.checks.into_iter().next()))
     }
 }

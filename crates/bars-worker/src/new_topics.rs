@@ -10,7 +10,8 @@ use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
 use std::sync::{Arc, Mutex};
 
 use bars_core::new_topics::{
-    Observation, Recorded, StoreError, TopicRow, TopicStore, store_path,
+    Change, CheckRow, NewCheck, Observation, Recorded, StoreError, TopicRow, TopicStatus,
+    TopicStore, store_path,
 };
 use serde_json::Value;
 
@@ -129,7 +130,7 @@ fn with_store<T>(
 }
 
 /// Тип ошибки без текстов запросов: пути и сообщения SQLite не содержат вопросов, но коротко.
-fn describe(error: &StoreError) -> String {
+pub(crate) fn describe(error: &StoreError) -> String {
     match error {
         StoreError::LimitReached(limit) => format!("достигнут предел {limit} тем"),
         StoreError::NewerSchema(version) => format!("схема БД новее поддерживаемой ({version})"),
@@ -337,6 +338,87 @@ impl Collector {
 
     pub async fn list(&self, project: &Path) -> Result<Vec<TopicRow>, StoreError> {
         self.blocking(project, |store| store.list()).await
+    }
+
+    /// Тема с вариантами и последними проверками.
+    pub async fn get(&self, project: &Path, id: i64) -> Result<Option<TopicRow>, StoreError> {
+        self.blocking(project, move |store| store.get(id)).await
+    }
+
+    pub async fn topic_of_event(
+        &self,
+        project: &Path,
+        event_id: String,
+    ) -> Result<Option<i64>, StoreError> {
+        self.blocking(project, move |store| store.topic_of_event(&event_id))
+            .await
+    }
+
+    /// Поколение и включённость сбора по БД (не по кэшу допуска).
+    pub async fn settings(&self, project: &Path) -> Result<(i64, bool), StoreError> {
+        self.blocking(project, |store| store.settings()).await
+    }
+
+    pub async fn set_status(
+        &self,
+        project: &Path,
+        id: i64,
+        revision: i64,
+        status: TopicStatus,
+        at: i64,
+    ) -> Result<Change, StoreError> {
+        self.blocking(project, move |store| {
+            store.set_status(id, revision, status, at)
+        })
+        .await
+    }
+
+    pub async fn rename(
+        &self,
+        project: &Path,
+        id: i64,
+        revision: i64,
+        title: String,
+    ) -> Result<Change, StoreError> {
+        self.blocking(project, move |store| store.rename(id, revision, &title))
+            .await
+    }
+
+    pub async fn delete_checked(
+        &self,
+        project: &Path,
+        id: i64,
+        revision: i64,
+    ) -> Result<Change, StoreError> {
+        self.blocking(project, move |store| store.delete_checked(id, revision))
+            .await
+    }
+
+    /// Записывает проверку; `None`, если темы уже нет (поздняя проверка её не воскрешает).
+    pub async fn record_check(
+        &self,
+        project: &Path,
+        topic: i64,
+        check: NewCheck,
+    ) -> Result<Option<CheckRow>, StoreError> {
+        self.blocking(project, move |store| store.record_check(topic, &check))
+            .await
+    }
+
+    /// Ручная отметка пользователя: запись идёт сразу и возвращает исход, а не через очередь поиска.
+    /// Поколение берётся в той же транзакции; при выключенном сборе — `Recorded::Disabled`.
+    pub async fn mark_missing(
+        &self,
+        project: &Path,
+        mut observation: Observation,
+    ) -> Result<Recorded, StoreError> {
+        let recorded = self
+            .blocking(project, move |store| {
+                observation.generation = store.settings()?.0;
+                store.record(&observation)
+            })
+            .await?;
+        Ok(recorded)
     }
 
     /// Перед удалением проекта: закрывает соединение и запрещает новые записи, чтобы БД не осталась

@@ -6,6 +6,7 @@
 mod errors;
 mod graph;
 mod history;
+mod topics;
 
 #[cfg(test)]
 mod tests;
@@ -1102,6 +1103,42 @@ impl WorkerHandler {
             Call::Instruction(_) => self.instruction().map(|out| output_value(&out)),
             Call::SetDocsRoot(params) => self.set_docs_root(params).map(|out| output_value(&out)),
             Call::CheckAll(CheckAllParams {}) => Ok(output_value(&self.check_all())),
+            Call::NewTopicsList(params) => self
+                .new_topics_list(params)
+                .await
+                .map(|out| output_value(&out)),
+            Call::NewTopicsGet(params) => self
+                .new_topics_get(params)
+                .await
+                .map(|out| output_value(&out)),
+            Call::NewTopicsMarkMissing(params) => self
+                .new_topics_mark_missing(params)
+                .await
+                .map(|out| output_value(&out)),
+            Call::NewTopicsCheck(params) => self
+                .new_topics_check(params)
+                .await
+                .map(|out| output_value(&out)),
+            Call::NewTopicsSetStatus(params) => self
+                .new_topics_set_status(params)
+                .await
+                .map(|out| output_value(&out)),
+            Call::NewTopicsRename(params) => self
+                .new_topics_rename(params)
+                .await
+                .map(|out| output_value(&out)),
+            Call::NewTopicsDelete(params) => self
+                .new_topics_delete(params)
+                .await
+                .map(|out| output_value(&out)),
+            Call::NewTopicsClear(params) => self
+                .new_topics_clear(params)
+                .await
+                .map(|out| output_value(&out)),
+            Call::NewTopicsSettings(params) => self
+                .new_topics_settings(params)
+                .await
+                .map(|out| output_value(&out)),
             Call::AutostartGet(AutostartGetParams {}) => {
                 self.autostart_get().map(|out| output_value(&out))
             }

@@ -11,6 +11,7 @@ mod tests;
 
 pub use guard::{differs, is_special, normalize_question};
 pub use store::{
-    EmbeddingSpace, MAX_TOPICS, MAX_VARIANTS_PER_TOPIC, Match, Observation, Reason, Recorded,
-    Source, StoreError, TopicRow, TopicStatus, TopicStore, VariantRow, store_path,
+    Change, CheckResultRow, CheckRow, EmbeddingSpace, MAX_TOPICS, MAX_VARIANTS_PER_TOPIC, Match,
+    NewCheck, NewCheckResult, Observation, Reason, Recorded, Source, StoreError, TopicRow,
+    TopicStatus, TopicStore, VariantOutcome, VariantRow, store_path,
 };

@@ -981,6 +981,15 @@ methods! {
     Instruction: InstructionParams => InstructionOutput, "instruction", Window;
     SetDocsRoot: SetDocsRootParams => AcceptedOutput, "set_docs_root", Window;
     CheckAll: CheckAllParams => AcceptedOutput, "check_all", Window;
+    NewTopicsList: crate::NewTopicsListParams => crate::NewTopicsListOutput, "new_topics_list", Window;
+    NewTopicsGet: crate::NewTopicsGetParams => crate::NewTopicDetail, "new_topics_get", Window;
+    NewTopicsMarkMissing: crate::NewTopicsMarkMissingParams => crate::NewTopicsMarkMissingOutput, "new_topics_mark_missing", Window;
+    NewTopicsCheck: crate::NewTopicsCheckParams => crate::NewTopicDetail, "new_topics_check", Window;
+    NewTopicsSetStatus: crate::NewTopicsSetStatusParams => crate::NewTopicsChangedOutput, "new_topics_set_status", Window;
+    NewTopicsRename: crate::NewTopicsRenameParams => crate::NewTopicsChangedOutput, "new_topics_rename", Window;
+    NewTopicsDelete: crate::NewTopicsDeleteParams => AcceptedOutput, "new_topics_delete", Window;
+    NewTopicsClear: crate::NewTopicsClearParams => crate::NewTopicsGenerationOutput, "new_topics_clear", Window;
+    NewTopicsSettings: crate::NewTopicsSettingsParams => crate::NewTopicsSettingsOutput, "new_topics_settings", Window;
     AutostartGet: AutostartGetParams => AutostartOutput, "autostart_get", Cli;
     AutostartSet: AutostartSetParams => AutostartOutput, "autostart_set", Cli;
 }

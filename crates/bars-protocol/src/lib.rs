@@ -16,6 +16,7 @@ mod instruction;
 mod jsonrpc;
 mod launch;
 mod methods;
+mod new_topics;
 mod operations;
 mod server;
 mod session;
@@ -36,6 +37,7 @@ pub use launch::{
     LAUNCH_DEADLINE, connect_or_launch, connect_or_launch_with, spawn_worker, worker_exe,
 };
 pub use methods::*;
+pub use new_topics::*;
 pub use operations::*;
 pub use server::{Handler, serve_connection};
 pub use session::Session;
