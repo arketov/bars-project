@@ -6,7 +6,7 @@ title: Уведомления и колокольчик bars
 
 [Дизайн этапа 27](refinement-design.md#панель-уведомлений-содержание-и-состояния) и связанный HTML задают панель. Этап 28 реализован в рабочей копии: журнал операций worker и Svelte-панель.
 
-Статус 18-10-2026: 177 worker, 101 UI, 52 protocol passed; UI check/build и строгий worker clippy без зависимостей успешны. [Проверка этапа 28, снимки и ограничения общего clippy](../../chats/2026-10-18-notifications-28/verification.md). Основания: [пожелание автора](../../backlog/ideas.md#idea-04-сервис-уведомлений-и-колокольчик), Т-1, Т-20, НФТ-4. Макет: [notifications.html](mockups/notifications.html).
+Статус 18-10-2026: 177 worker, 101 UI, 52 protocol passed; UI check/build и строгий worker clippy без зависимостей успешны. [Проверка этапа 28, снимки и ограничения общего clippy](../../chats/2026-10-18-notifications-28/verification.md). Основания: [пожелание автора](../../backlog/ideas.md#закрытые-пожелания), Т-1, Т-20, НФТ-4. Макет: [notifications.html](mockups/notifications.html).
 
 ISS-13 остаётся открытым до общей приёмки настоящего окна на этапе 32. Реализация и браузерные фикстуры не заменяют Tauri/IPC и настоящее скачивание; установленный bars не обновляется.
 
