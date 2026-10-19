@@ -17,6 +17,7 @@ title: Состояние bars — реализованные возможнос
 | Окно | Проекты, поиск, просмотр выдачи, настройки, трей | [window/](features/window/Index.md) |
 | История MCP | Отдельные попытки, параметры/итоги, семь дней хранения, миграция и API выборки/управления; состояние экрана и приёмки — в документе фичи | [mcp-statistics.md](features/window/mcp-statistics.md) |
 | GraphRAG, этап 33 | Частичная реализация: готовые embeddings/source evidence, шесть операций MCP/CLI/worker, hybrid/mix/graph и компонент Cytoscape. Полная S1–S8/native-приёмка не выполнена; работа остановлена по просьбе автора на проверенном срезе | [graphrag/](features/graphrag/Index.md) |
+| База знаний | Требования Т-29…Т-42 зафиксированы 19-10-2026: редактор, ссылки, `index.md` папки, файлы в дереве, аудиты, очередь документов. Кода нет; следующий шаг — проектирование | [knowledge-base/](features/knowledge-base/Index.md) |
 | Поставка Windows | NSIS-установщик, обновление установленной версии, управление автозапуском | [distribution/](features/distribution/Index.md) |
 
 Наличие реализации не означает завершение всех ручных проверок. Источники требований — [MAIN_IDEA.md](MAIN_IDEA.md); открытые дефекты — [issues.md](backlog/issues.md), пожелания — [ideas.md](backlog/ideas.md).
