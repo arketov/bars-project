@@ -526,6 +526,8 @@ pub fn requested(tool: &str, source: &Value) -> Value {
             "candidates",
             "min_score",
         ],
+        "bars_get_duplicates" => &["format", "project", "modules", "limit"],
+        "bars_get_similar" => &["format", "project", "chunk_id", "modules", "limit"],
         "bars_read" => &["format", "project", "path"],
         "bars_outline" => &["format", "project", "path", "levels", "under", "under_line"],
         "bars_status" => &["format", "project"],

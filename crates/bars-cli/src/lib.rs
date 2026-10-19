@@ -17,10 +17,11 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use bars_protocol::{
-    AutostartGetParams, AutostartSetParams, Client, ClientError, ClientKind, EXIT_FAILURE,
-    Endpoint, InstallClient, InstallParams, LAUNCH_DEADLINE, Method, OutlineParams, ProjectsParams,
-    ReadParams, RegisterParams, ReindexParams, SearchParams, SimilarParams, StatusParams, Target,
-    UninstallParams, UnregisterParams, connect_or_launch_with, spawn_worker, worker_exe,
+    AutostartGetParams, AutostartSetParams, Client, ClientError, ClientKind, DuplicatesParams,
+    EXIT_FAILURE, Endpoint, InstallClient, InstallParams, LAUNCH_DEADLINE, Method, OutlineParams,
+    ProjectsParams, ReadParams, RegisterParams, ReindexParams, SearchParams, SimilarParams,
+    StatusParams, Target, UninstallParams, UnregisterParams, connect_or_launch_with, spawn_worker,
+    worker_exe,
 };
 use clap::{Args, Parser, Subcommand};
 use serde::Serialize;
@@ -65,6 +66,8 @@ pub enum Command {
     Search(SearchArgs),
     /// Похожие чанки по ID чанка из выдачи поиска.
     Similar(SimilarArgs),
+    /// Аудит дублей проекта: точные, близкие, частичные и смысловые повторы.
+    Duplicates(DuplicatesArgs),
     /// Структура документа: заголовки с номерами строк.
     Outline(OutlineArgs),
     /// Документ целиком, с номерами строк.
@@ -197,6 +200,16 @@ pub struct SimilarArgs {
     #[arg(long = "module", value_name = "МОДУЛЬ")]
     pub modules: Vec<String>,
     /// Сколько похожих чанков вернуть.
+    #[arg(long)]
+    pub limit: Option<u32>,
+}
+
+#[derive(Debug, Args)]
+pub struct DuplicatesArgs {
+    /// Проверять только этот модуль; `.` — корневой. Можно повторять.
+    #[arg(long = "module", value_name = "МОДУЛЬ")]
+    pub modules: Vec<String>,
+    /// Сколько записей вернуть.
     #[arg(long)]
     pub limit: Option<u32>,
 }
@@ -480,6 +493,19 @@ async fn execute(cli: Cli, env: &Env, out: &mut dyn Write) -> Result<(), Failure
                 json,
                 &call(&mut client, &params).await?,
                 render::similar,
+            )
+        }
+        Command::Duplicates(args) => {
+            let params = DuplicatesParams {
+                target,
+                modules: args.modules,
+                limit: args.limit,
+            };
+            emit(
+                out,
+                json,
+                &call(&mut client, &params).await?,
+                render::duplicates,
             )
         }
         Command::Outline(args) => {

@@ -20,6 +20,7 @@ GraphRAG: `relations`, `paths`, `impact`, `context`, `explore`, `graph show/stat
 |---|---|---|
 | `bars-cli search <запрос> [--module M]… [--file F]… [--limit N] [--min-score S]` | поиск | `bars_rag_search` |
 | `bars-cli similar <ID чанка> [--module M]… [--limit N]` | похожие чанки по ID из выдачи поиска | `bars_get_similar` |
+| `bars-cli duplicates [--module M]… [--limit N]` | аудит дублей проекта: точные, близкие, частичные и смысловые повторы | `bars_get_duplicates` |
 | `bars-cli outline <путь> [--levels 2,3] [--under "A/B" \| --under-line N]` | структура документа | `bars_outline` (Т-26) |
 | `bars-cli read <путь>` | документ целиком | `bars_read` |
 | `bars-cli projects` | проекты и модули | `bars_projects` |

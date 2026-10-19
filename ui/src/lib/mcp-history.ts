@@ -66,7 +66,7 @@ const labels: Record<string, string> = {
   watching: "Слежение за файлами", model: "Модель", accepted: "Принято в очередь", rerank_candidates: "Кандидатов rerank", clamped: "Значения ограничены", details: "Подробности",
   state: "Состояние", updated_at: "Обновлено", index_model: "Модель индекса",
   settings_model: "Модель настроек", has_problem: "Есть проблема", operation_id: "ID задания",
-  merged: "Объединено с заданием", job_kind: "Тип задания", anchor: "Найденный раздел", mode: "Режим",
+  merged: "Объединено с заданием", chunk_id: "ID чанка", source_chunk: "Исходный чанк", job_kind: "Тип задания", anchor: "Найденный раздел", mode: "Режим",
 };
 export function parameters(a: Attempt) {
   const requested = a.requested ?? {};

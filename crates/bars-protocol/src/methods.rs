@@ -157,6 +157,108 @@ pub struct SimilarOutput {
     pub pending: u32,
 }
 
+// --- duplicates ---
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct DuplicatesParams {
+    #[serde(flatten)]
+    pub target: Target,
+    /// Модули (корневой — `.`); пусто — весь проект.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub modules: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub limit: Option<u32>,
+}
+
+/// Вид повтора: точный, близкая копия, раздел внутри другого, частичная копия, смысловой повтор.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DuplicateKind {
+    Exact,
+    Near,
+    Contained,
+    Partial,
+    Semantic,
+}
+
+/// Чанк, входящий в повтор.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct DuplicateChunk {
+    pub chunk_id: String,
+    pub path: String,
+    pub module: String,
+    pub heading_chain: String,
+    pub first_line: u32,
+    pub last_line: u32,
+}
+
+/// Замена слов между двумя копиями; пустая строка — слов с этой стороны нет.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct DuplicateChange {
+    pub first: String,
+    pub second: String,
+}
+
+/// Различия двух разделов: изменённые слова, числа и слова отрицания сохраняются в сравнении.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct DuplicateDifferences {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub changes: Vec<DuplicateChange>,
+    /// Различий больше, чем показано, или текст слишком длинный для сравнения.
+    #[serde(default)]
+    pub changes_truncated: bool,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub numbers_only_first: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub numbers_only_second: Vec<String>,
+    /// Сколько слов отрицания («не», «нет», «без»…) в первом и во втором разделе.
+    pub negations_first: u32,
+    pub negations_second: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct DuplicateItem {
+    pub kind: DuplicateKind,
+    /// Две и больше записи; у пары — две.
+    pub chunks: Vec<DuplicateChunk>,
+    /// Мера совпадения: у точных 1; у близких — Жаккар общих окон из пяти слов; у содержащихся и
+    /// частичных — доля общих окон меньшего раздела; у смысловых — косинус.
+    pub score: f32,
+    /// Самые длинные совпавшие отрывки текста.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub shared: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub differences: Option<DuplicateDifferences>,
+    /// Одинаковый блок в четырёх и больше разделах: скорее шаблон, чем случайная копия.
+    #[serde(default)]
+    pub repeated_block: bool,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct DuplicateCounts {
+    pub exact: u32,
+    pub near: u32,
+    pub contained: u32,
+    pub partial: u32,
+    pub semantic: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct DuplicatesOutput {
+    pub results: Vec<DuplicateItem>,
+    /// Сколько найдено по видам до ограничения числа записей.
+    pub counts: DuplicateCounts,
+    pub total: u32,
+    /// Применённое число записей.
+    pub limit: u32,
+    pub clamped: bool,
+    pub chunks_checked: u32,
+    /// Короткие разделы не сравнивались.
+    pub chunks_skipped_short: u32,
+    pub indexing: bool,
+    pub pending: u32,
+}
+
 // --- outline ---
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -852,6 +954,7 @@ methods! {
     Hello: HelloParams => HelloOutput, "hello", All;
     Search: SearchParams => SearchOutput, "search", All;
     Similar: SimilarParams => SimilarOutput, "similar", All;
+    Duplicates: DuplicatesParams => DuplicatesOutput, "duplicates", All;
     Outline: OutlineParams => OutlineOutput, "outline", All;
     Read: ReadParams => ReadOutput, "read", All;
     Projects: ProjectsParams => ProjectsOutput, "projects", All;
@@ -950,6 +1053,7 @@ mod tests {
         Hello(HelloParams),
         Search(SearchParams),
         Similar(SimilarParams),
+        Duplicates(DuplicatesParams),
         Outline(OutlineParams),
         Read(ReadParams),
         Projects(ProjectsParams),
@@ -1137,7 +1241,15 @@ mod tests {
     #[test]
     fn only_the_documented_methods_are_open_to_mcp() {
         let mcp_methods = [
-            "hello", "search", "similar", "outline", "read", "projects", "status", "reindex",
+            "hello",
+            "search",
+            "similar",
+            "duplicates",
+            "outline",
+            "read",
+            "projects",
+            "status",
+            "reindex",
         ];
         let calls = [
             Call::from(HelloParams {
@@ -1161,6 +1273,11 @@ mod tests {
             Call::from(SimilarParams {
                 target: target(),
                 chunk_id: "1-00000000".into(),
+                modules: Vec::new(),
+                limit: None,
+            }),
+            Call::from(DuplicatesParams {
+                target: target(),
                 modules: Vec::new(),
                 limit: None,
             }),

@@ -17,22 +17,26 @@ use bars_core::indexing::chunking::chunk_document;
 use bars_core::indexing::walk::read_utf8_path;
 use bars_core::models::Reranker;
 use bars_core::outline::{OutlineQuery, Under, outline};
-use bars_core::search::{SearchRequest, SimilarRequest, search, similar};
+use bars_core::search::{
+    DuplicatesRequest, SearchRequest, SimilarRequest, duplicates, search, similar,
+};
 use bars_core::settings::Settings;
 use bars_core::storage::{Index, Journal, index_path};
 use bars_protocol::{
     AcceptedOutput, ActivityOutput, AppliedParams, AutostartGetParams, AutostartOutput,
     AutostartSetParams, Call, CancelOutput, CheckAllParams, ClientKind, ClientStatus,
-    ClientsStatusOutput, ErrorKind, FileProblem, Heading, INTERNAL_ERROR, IndexCancelParams,
-    InstallClient, InstallOutput, InstallParams, InstructionOutput, JobKind as ProtocolJobKind,
-    JobPriority, METHOD_NOT_FOUND, ModelDownloadParams, ModelInfo, ModelStatus, ModelsInfoOutput,
-    ModuleInfo, OutlineOutput, OutlineParams, PausedOutput, ProjectInfo, ProjectProblems,
-    ProjectState, ProjectsOutput, QueuedJob, ReadOutput, ReadParams, RegisterOutput,
-    RegisterParams, ReindexParams, RpcError, RunningJob, SavedOutput, ScoreKind, SearchHit,
-    SearchOutput, SearchParams, SecretOutput, SecretSetParams, SecretStatusParams,
-    SessionStartParams, SetDocsRootParams, SettingsOutput, SettingsSaveParams, SimilarOutput,
-    SimilarParams, StatusOutput, StatusParams, Target, TreeDocument, TreeOutput, TreeParams,
-    UninstallOutput, UninstallParams, UnregisterOutput, UnregisterParams, output_value,
+    ClientsStatusOutput, DuplicateChange, DuplicateChunk, DuplicateCounts, DuplicateDifferences,
+    DuplicateItem, DuplicateKind, DuplicatesOutput, DuplicatesParams, ErrorKind, FileProblem,
+    Heading, INTERNAL_ERROR, IndexCancelParams, InstallClient, InstallOutput, InstallParams,
+    InstructionOutput, JobKind as ProtocolJobKind, JobPriority, METHOD_NOT_FOUND,
+    ModelDownloadParams, ModelInfo, ModelStatus, ModelsInfoOutput, ModuleInfo, OutlineOutput,
+    OutlineParams, PausedOutput, ProjectInfo, ProjectProblems, ProjectState, ProjectsOutput,
+    QueuedJob, ReadOutput, ReadParams, RegisterOutput, RegisterParams, ReindexParams, RpcError,
+    RunningJob, SavedOutput, ScoreKind, SearchHit, SearchOutput, SearchParams, SecretOutput,
+    SecretSetParams, SecretStatusParams, SessionStartParams, SetDocsRootParams, SettingsOutput,
+    SettingsSaveParams, SimilarOutput, SimilarParams, StatusOutput, StatusParams, Target,
+    TreeDocument, TreeOutput, TreeParams, UninstallOutput, UninstallParams, UnregisterOutput,
+    UnregisterParams, output_value,
 };
 use serde_json::Value;
 
@@ -146,6 +150,52 @@ impl WorkerHandler {
             results: response.hits.into_iter().map(hit).collect(),
             limit: to_u32(response.results),
             clamped: response.clamped,
+            indexing: status.state == ProjectState::Indexing || status.queued,
+            pending: to_u32(status.pending),
+        })
+    }
+
+    /// Повторы в области проекта по готовым текстам и векторам индекса: модели не нужны.
+    async fn duplicates(&self, params: DuplicatesParams) -> Result<DuplicatesOutput, RpcError> {
+        let project = self.usable(&params.target)?;
+        let status = self.worker.status(&project).map_err(worker_error)?;
+        if status.state == ProjectState::ReindexRequired {
+            return Err(errors::reindex_required());
+        }
+        let settings = self.settings(&project)?;
+        let search_settings = settings.search.clone();
+        let request = DuplicatesRequest {
+            modules: params.modules,
+            results: params.limit.map(|value| value as usize),
+        };
+        let gate = self
+            .worker
+            .gate(&project)
+            .map_err(worker_error)?
+            .read_owned()
+            .await;
+        let response = tokio::task::spawn_blocking(move || {
+            let _gate = gate;
+            let index = Index::open(&index_path(&project), Journal::Wal)?;
+            duplicates(&index, &search_settings, &request)
+        })
+        .await
+        .map_err(internal)?
+        .map_err(search_error)?;
+        Ok(DuplicatesOutput {
+            results: response.items.into_iter().map(duplicate_item).collect(),
+            counts: DuplicateCounts {
+                exact: to_u32(response.counts.exact),
+                near: to_u32(response.counts.near),
+                contained: to_u32(response.counts.contained),
+                partial: to_u32(response.counts.partial),
+                semantic: to_u32(response.counts.semantic),
+            },
+            total: to_u32(response.total),
+            limit: to_u32(response.results),
+            clamped: response.clamped,
+            chunks_checked: to_u32(response.chunks_checked),
+            chunks_skipped_short: to_u32(response.chunks_skipped_short),
             indexing: status.state == ProjectState::Indexing || status.queued,
             pending: to_u32(status.pending),
         })
@@ -928,6 +978,7 @@ impl WorkerHandler {
                 result.map(|out| output_value(&out))
             }
             Call::Similar(params) => self.similar(params).await.map(|out| output_value(&out)),
+            Call::Duplicates(params) => self.duplicates(params).await.map(|out| output_value(&out)),
             Call::Outline(params) => self.outline(params).map(|out| output_value(&out)),
             Call::Read(params) => self.read(params).map(|out| output_value(&out)),
             Call::Projects(_) => self.projects().await.map(|out| output_value(&out)),
@@ -1059,6 +1110,50 @@ fn hit(hit: bars_core::search::SearchHit) -> SearchHit {
         text: hit.text,
         score: hit.score,
         score_kind: score_kind(hit.score_kind),
+    }
+}
+
+fn duplicate_item(item: bars_core::search::DuplicateItem) -> DuplicateItem {
+    use bars_core::search::DuplicateKind as Core;
+    let differences = item.differences.map(|differences| DuplicateDifferences {
+        changes: differences
+            .changes
+            .into_iter()
+            .map(|change| DuplicateChange {
+                first: change.first,
+                second: change.second,
+            })
+            .collect(),
+        changes_truncated: differences.changes_truncated,
+        numbers_only_first: differences.numbers_only_first,
+        numbers_only_second: differences.numbers_only_second,
+        negations_first: to_u32(differences.negations.0),
+        negations_second: to_u32(differences.negations.1),
+    });
+    DuplicateItem {
+        kind: match item.kind {
+            Core::Exact => DuplicateKind::Exact,
+            Core::Near => DuplicateKind::Near,
+            Core::Contained => DuplicateKind::Contained,
+            Core::Partial => DuplicateKind::Partial,
+            Core::Semantic => DuplicateKind::Semantic,
+        },
+        chunks: item
+            .chunks
+            .into_iter()
+            .map(|chunk| DuplicateChunk {
+                chunk_id: chunk.public_id,
+                path: chunk.path,
+                module: chunk.module,
+                heading_chain: chunk.heading_chain,
+                first_line: to_u32(chunk.first_line),
+                last_line: to_u32(chunk.last_line),
+            })
+            .collect(),
+        score: item.score,
+        shared: item.shared,
+        differences,
+        repeated_block: item.repeated_block,
     }
 }
 

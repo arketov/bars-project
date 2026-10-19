@@ -7,11 +7,12 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use bars_protocol::{
-    ActivityOutput, ActivityParams, Call, CancelOutput, Client, ClientError, ClientKind, Endpoint,
-    ErrorKind, IndexCancelParams, IndexPauseParams, IndexResumeParams, JobKind, JobPriority,
-    METHOD_NOT_FOUND, OutlineParams, ProjectState, ProjectsParams, ReadParams, RegisterParams,
-    ReindexParams, RpcError, SearchParams, SessionStartParams, SimilarParams, StatusOutput,
-    StatusParams, Target, TreeOutput, TreeParams, UnregisterParams,
+    ActivityOutput, ActivityParams, Call, CancelOutput, Client, ClientError, ClientKind,
+    DuplicateKind, DuplicatesParams, Endpoint, ErrorKind, IndexCancelParams, IndexPauseParams,
+    IndexResumeParams, JobKind, JobPriority, METHOD_NOT_FOUND, OutlineParams, ProjectState,
+    ProjectsParams, ReadParams, RegisterParams, ReindexParams, RpcError, SearchParams,
+    SessionStartParams, SimilarParams, StatusOutput, StatusParams, Target, TreeOutput, TreeParams,
+    UnregisterParams,
 };
 use tempfile::TempDir;
 
@@ -385,6 +386,55 @@ async fn similar_chunks_work_by_id_through_the_channel_for_cli_and_mcp() {
         })
         .await);
     assert_eq!(module.kind(), Some(ErrorKind::InvalidParams));
+}
+
+#[tokio::test]
+async fn duplicates_are_audited_through_the_channel_for_cli_and_mcp() {
+    let harness = Harness::start("duplicates", FakeProvider::new("m1")).await;
+    let mut cli = harness.client(ClientKind::Cli).await;
+    let text = "Таймаут запроса к воркеру равен десяти секундам и не меняется между запусками; \
+                значение хранится в настройках проекта и читается при каждом обращении клиента. \
+                Изменение значения требует перезапуска воркера, а проверка показывает его рядом с остальными параметрами окна.";
+    let root = harness.project(
+        "dups",
+        &[
+            ("a/one.md", &format!("# Один\n\n{text}\n")),
+            ("b/two.md", &format!("# Два\n\n{}\n", text.replace("десяти", "тридцати"))),
+            ("c/other.md", "# Другое\n\nСовсем другой раздел про нарезку документов на чанки по заголовкам первого и второго уровня в проекте.\n"),
+        ],
+    );
+    cli.call(&RegisterParams {
+        path: root.display().to_string(),
+    })
+    .await
+    .unwrap();
+    wait_status(&mut cli, &root, "первая индексация", indexed).await;
+
+    let audit = |modules: Vec<String>| DuplicatesParams {
+        target: target(&root),
+        modules,
+        limit: None,
+    };
+    let mut mcp = harness.client(ClientKind::Mcp).await;
+    for client in [&mut cli, &mut mcp] {
+        let out = client.call(&audit(vec![])).await.unwrap();
+        assert_eq!(out.results.len(), 1, "{out:?}");
+        let item = &out.results[0];
+        assert_eq!(item.kind, DuplicateKind::Near);
+        assert_eq!(item.chunks.len(), 2);
+        assert!(item.chunks.iter().all(|chunk| !chunk.chunk_id.is_empty()));
+        let differences = item.differences.as_ref().unwrap();
+        assert_eq!(differences.changes[0].first, "десяти");
+        assert_eq!(differences.changes[0].second, "тридцати");
+        assert_eq!(out.counts.near, 1);
+        assert_eq!(out.total, 1);
+        assert_eq!(out.chunks_checked, 3);
+    }
+
+    let narrowed = cli.call(&audit(vec!["a".into()])).await.unwrap();
+    assert!(narrowed.results.is_empty());
+    let unknown = rpc(cli.call(&audit(vec!["нет-такого".into()])).await);
+    assert_eq!(unknown.kind(), Some(ErrorKind::InvalidParams));
 }
 
 #[tokio::test]

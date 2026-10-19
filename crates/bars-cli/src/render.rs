@@ -4,9 +4,10 @@
 use std::fmt::Write as _;
 
 use bars_protocol::{
-    AcceptedOutput, AutostartOutput, ClientError, ErrorKind, Heading, InstallOutput, OutlineOutput,
-    ProjectInfo, ProjectState, ProjectsOutput, ReadOutput, RegisterOutput, ScoreKind, SearchHit,
-    SearchOutput, SimilarOutput, StatusOutput, UninstallOutput, UnregisterOutput, number_lines,
+    AcceptedOutput, AutostartOutput, ClientError, DuplicateKind, DuplicatesOutput, ErrorKind,
+    Heading, InstallOutput, OutlineOutput, ProjectInfo, ProjectState, ProjectsOutput, ReadOutput,
+    RegisterOutput, ScoreKind, SearchHit, SearchOutput, SimilarOutput, StatusOutput,
+    UninstallOutput, UnregisterOutput, number_lines,
 };
 use serde_json::json;
 
@@ -74,6 +75,118 @@ pub fn similar(output: &SimilarOutput) -> String {
             text,
             "
 Идёт индексация: выдача может быть неполной, в очереди документов: {}.",
+            output.pending
+        );
+    }
+    text
+}
+
+fn duplicate_kind(kind: DuplicateKind) -> &'static str {
+    match kind {
+        DuplicateKind::Exact => "точный повтор",
+        DuplicateKind::Near => "близкая копия",
+        DuplicateKind::Contained => "раздел внутри другого",
+        DuplicateKind::Partial => "частичная копия",
+        DuplicateKind::Semantic => "смысловое сходство (повод проверить)",
+    }
+}
+
+pub fn duplicates(output: &DuplicatesOutput) -> String {
+    let mut text = String::new();
+    if output.results.is_empty() {
+        text.push_str("Повторов не найдено.\n");
+    }
+    for (index, item) in output.results.iter().enumerate() {
+        let _ = writeln!(
+            text,
+            "{}. {} ({:.2}){}",
+            index + 1,
+            duplicate_kind(item.kind),
+            item.score,
+            if item.repeated_block {
+                format!(
+                    ": один текст в {} разделах, скорее шаблон",
+                    item.chunks.len()
+                )
+            } else {
+                String::new()
+            }
+        );
+        for chunk in &item.chunks {
+            let _ = writeln!(
+                text,
+                "   {}:{}-{} [{}] {} (id {})",
+                chunk.path,
+                chunk.first_line,
+                chunk.last_line,
+                chunk.module,
+                chunk.heading_chain,
+                chunk.chunk_id
+            );
+        }
+        for fragment in &item.shared {
+            let _ = writeln!(text, "   общее: {fragment}");
+        }
+        if let Some(differences) = &item.differences {
+            for change in &differences.changes {
+                let _ = writeln!(
+                    text,
+                    "   заменено: «{}» → «{}»",
+                    change.first, change.second
+                );
+            }
+            if differences.changes_truncated {
+                let _ = writeln!(
+                    text,
+                    "   различий больше, чем показано, или текст слишком длинный"
+                );
+            }
+            if !differences.numbers_only_first.is_empty() {
+                let _ = writeln!(
+                    text,
+                    "   числа только в первом: {}",
+                    differences.numbers_only_first.join(", ")
+                );
+            }
+            if !differences.numbers_only_second.is_empty() {
+                let _ = writeln!(
+                    text,
+                    "   числа только во втором: {}",
+                    differences.numbers_only_second.join(", ")
+                );
+            }
+            if differences.negations_first != differences.negations_second {
+                let _ = writeln!(
+                    text,
+                    "   слов отрицания: в первом {}, во втором {}",
+                    differences.negations_first, differences.negations_second
+                );
+            }
+        }
+        text.push('\n');
+    }
+    let _ = write!(
+        text,
+        "Найдено: точных {}, близких {}, внутри другого {}, частичных {}, смысловых {}; показано {} из {}{}. Проверено разделов: {}, коротких пропущено: {}. Смысловое сходство и копия с изменённым числом или отрицанием не доказывают противоречие: прочитай оба раздела.",
+        output.counts.exact,
+        output.counts.near,
+        output.counts.contained,
+        output.counts.partial,
+        output.counts.semantic,
+        output.results.len(),
+        output.total,
+        if output.clamped {
+            "; значение прижато к пределу"
+        } else {
+            ""
+        },
+        output.chunks_checked,
+        output.chunks_skipped_short
+    );
+    if output.indexing {
+        let _ = write!(
+            text,
+            "\nИдёт индексация: выдача может быть неполной, в очереди документов: {}.",
             output.pending
         );
     }

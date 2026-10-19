@@ -20,7 +20,7 @@
   let projectHints = $state<string[]>([]), sessionHints = $state<string[]>([]);
   let optionsNote = $state("");
   let optionsVersion = 0, optionsTimer: ReturnType<typeof setTimeout>;
-  const tools = ["bars_rag_search", "bars_read", "bars_outline", "bars_projects", "bars_status", "bars_reindex", "bars_relations", "bars_paths", "bars_impact", "bars_context", "bars_explore", "bars_graph"];
+  const tools = ["bars_rag_search", "bars_read", "bars_outline", "bars_get_similar", "bars_projects", "bars_status", "bars_reindex", "bars_relations", "bars_paths", "bars_impact", "bars_context", "bars_explore", "bars_graph"];
   const activeFilters = $derived(period !== "day" || project !== "" || noProject || session !== "" || tool !== "" || outcome !== "");
   const diag = $derived(page ?? diagnostics);
   function hints(records: Attempt[]) {

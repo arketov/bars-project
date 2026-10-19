@@ -4,8 +4,9 @@
 use std::fmt::Write as _;
 
 use bars_protocol::{
-    AcceptedOutput, Heading, OutlineOutput, ProjectInfo, ProjectState, ProjectsOutput, ReadOutput,
-    ScoreKind, SearchHit, SearchOutput, SimilarOutput, StatusOutput, number_lines,
+    AcceptedOutput, DuplicateKind, DuplicatesOutput, Heading, OutlineOutput, ProjectInfo,
+    ProjectState, ProjectsOutput, ReadOutput, ScoreKind, SearchHit, SearchOutput, SimilarOutput,
+    StatusOutput, number_lines,
 };
 
 fn score_kind(kind: ScoreKind) -> &'static str {
@@ -105,6 +106,111 @@ pub fn similar(output: &SimilarOutput) -> String {
         let _ = writeln!(text, "Indexing in progress: results may be incomplete.");
     }
     text.push_str("=== END SIMILAR ===");
+    text
+}
+
+fn duplicate_kind(kind: DuplicateKind) -> &'static str {
+    match kind {
+        DuplicateKind::Exact => "exact",
+        DuplicateKind::Near => "near",
+        DuplicateKind::Contained => "contained",
+        DuplicateKind::Partial => "partial",
+        DuplicateKind::Semantic => "semantic",
+    }
+}
+
+pub fn duplicates(output: &DuplicatesOutput) -> String {
+    let shown = output.results.len();
+    let mut text = format!("=== DUPLICATES: items {shown} of {} ===\n", output.total);
+    for (index, item) in output.results.iter().enumerate() {
+        let _ = writeln!(text, "=== ITEM {} of {shown} ===", index + 1);
+        let _ = writeln!(text, "kind: {}", duplicate_kind(item.kind));
+        let _ = writeln!(text, "score: {:.3}", item.score);
+        if item.repeated_block {
+            let _ = writeln!(
+                text,
+                "repeated_block: true (identical text in {} sections: probably a template)",
+                item.chunks.len()
+            );
+        }
+        for (number, chunk) in item.chunks.iter().enumerate() {
+            let _ = writeln!(text, "=== CHUNK {} ===", number + 1);
+            let _ = writeln!(text, "id: {}", chunk.chunk_id);
+            let _ = writeln!(text, "path: {}", chunk.path);
+            let _ = writeln!(text, "lines: {}-{}", chunk.first_line, chunk.last_line);
+            let _ = writeln!(text, "module: {}", chunk.module);
+            let _ = writeln!(text, "heading: {}", chunk.heading_chain);
+            let _ = writeln!(text, "=== END CHUNK ===");
+        }
+        for fragment in &item.shared {
+            let _ = writeln!(text, "shared: {fragment}");
+        }
+        if let Some(differences) = &item.differences {
+            for change in &differences.changes {
+                let _ = writeln!(
+                    text,
+                    "changed: \"{}\" -> \"{}\"",
+                    change.first, change.second
+                );
+            }
+            if differences.changes_truncated {
+                let _ = writeln!(
+                    text,
+                    "changed: more differences than shown (or text too long to compare)"
+                );
+            }
+            if !differences.numbers_only_first.is_empty() {
+                let _ = writeln!(
+                    text,
+                    "numbers only in chunk 1: {}",
+                    differences.numbers_only_first.join(", ")
+                );
+            }
+            if !differences.numbers_only_second.is_empty() {
+                let _ = writeln!(
+                    text,
+                    "numbers only in chunk 2: {}",
+                    differences.numbers_only_second.join(", ")
+                );
+            }
+            if differences.negations_first != differences.negations_second {
+                let _ = writeln!(
+                    text,
+                    "negation words: chunk 1 has {}, chunk 2 has {}",
+                    differences.negations_first, differences.negations_second
+                );
+            }
+        }
+        let _ = writeln!(text, "=== END ITEM ===");
+    }
+    let _ = writeln!(text, "=== APPLIED PARAMETERS ===");
+    let _ = writeln!(text, "results: {}", output.limit);
+    let _ = writeln!(
+        text,
+        "found: exact {}, near {}, contained {}, partial {}, semantic {}",
+        output.counts.exact,
+        output.counts.near,
+        output.counts.contained,
+        output.counts.partial,
+        output.counts.semantic
+    );
+    let _ = writeln!(
+        text,
+        "score: exact 1; near Jaccard of shared 5-word windows; contained/partial share of the smaller chunk; semantic cosine. Semantic items are only a hint to read both chunks; a copy with changed numbers or negation is not proof of a contradiction."
+    );
+    let _ = writeln!(text, "clamped: {}", output.clamped);
+    let _ = writeln!(text, "chunks_checked: {}", output.chunks_checked);
+    let _ = writeln!(
+        text,
+        "chunks_skipped_short: {}",
+        output.chunks_skipped_short
+    );
+    let _ = writeln!(text, "indexing: {}", output.indexing);
+    let _ = writeln!(text, "pending: {}", output.pending);
+    if output.indexing {
+        let _ = writeln!(text, "Indexing in progress: results may be incomplete.");
+    }
+    text.push_str("=== END DUPLICATES ===");
     text
 }
 

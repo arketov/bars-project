@@ -28,7 +28,11 @@ impl Embedder for TopicEmbedder {
                     if word.is_empty() {
                         continue;
                     }
-                    let weight = if word == "темаа" || word == "темаб" { 400.0 } else { 1.0 };
+                    let weight = if word == "темаа" || word == "темаб" {
+                        400.0
+                    } else {
+                        1.0
+                    };
                     let bucket = if word == "темаа" {
                         0
                     } else if word == "темаб" {
@@ -89,7 +93,12 @@ fn prose(seed: &str, words: usize) -> String {
 }
 
 fn audit(index: &Index) -> DuplicatesResponse {
-    duplicates(index, &SearchSettings::default(), &DuplicatesRequest::default()).unwrap()
+    duplicates(
+        index,
+        &SearchSettings::default(),
+        &DuplicatesRequest::default(),
+    )
+    .unwrap()
 }
 
 fn base() -> String {
@@ -105,7 +114,10 @@ fn exact_copies_ignore_case_spacing_and_markup() {
     let text = base();
     let (_dir, index) = project(&[
         ("a/one.md", text.clone()),
-        ("b/two.md", format!("**{}**", text.to_uppercase().replace(' ', "  "))),
+        (
+            "b/two.md",
+            format!("**{}**", text.to_uppercase().replace(' ', "  ")),
+        ),
         ("c/other.md", prose("гамма", 40)),
     ]);
     let response = audit(&index);
@@ -123,7 +135,9 @@ fn exact_copies_ignore_case_spacing_and_markup() {
 #[test]
 fn identical_block_in_four_sections_is_a_repeated_block_group() {
     let text = base();
-    let files: Vec<(String, String)> = (0..4).map(|n| (format!("m/f{n}.md"), text.clone())).collect();
+    let files: Vec<(String, String)> = (0..4)
+        .map(|n| (format!("m/f{n}.md"), text.clone()))
+        .collect();
     let refs: Vec<(&str, String)> = files.iter().map(|(p, t)| (p.as_str(), t.clone())).collect();
     let (_dir, index) = project(&refs);
     let response = audit(&index);
@@ -149,7 +163,10 @@ fn changed_number_is_a_near_copy_that_shows_the_number() {
     assert_eq!(differences.numbers_only_second, ["30"]);
     assert_eq!(
         differences.changes,
-        [Change { first: "10".into(), second: "30".into() }]
+        [Change {
+            first: "10".into(),
+            second: "30".into()
+        }]
     );
     assert!(!item.shared.is_empty());
 }
@@ -159,7 +176,10 @@ fn dropped_negation_is_a_near_copy_that_shows_the_word() {
     let text = base();
     let (_dir, index) = project(&[
         ("a/one.md", text.clone()),
-        ("b/two.md", text.replace(" и не повторяется", " и повторяется")),
+        (
+            "b/two.md",
+            text.replace(" и не повторяется", " и повторяется"),
+        ),
     ]);
     let response = audit(&index);
     assert_eq!(response.items.len(), 1, "{response:?}");
@@ -167,7 +187,10 @@ fn dropped_negation_is_a_near_copy_that_shows_the_word() {
     assert_eq!(differences.negations, (1, 0));
     assert_eq!(
         differences.changes,
-        [Change { first: "не".into(), second: String::new() }]
+        [Change {
+            first: "не".into(),
+            second: String::new()
+        }]
     );
 }
 
@@ -199,7 +222,12 @@ fn a_section_inside_a_bigger_one_is_contained() {
 fn shared_template_does_not_make_different_sections_duplicates() {
     let template = prose("шаблон", 40);
     let files: Vec<(String, String)> = (0..5)
-        .map(|n| (format!("m/t{n}.md"), format!("{template} {}", prose(&format!("тело{}", letters(n)), 40))))
+        .map(|n| {
+            (
+                format!("m/t{n}.md"),
+                format!("{template} {}", prose(&format!("тело{}", letters(n)), 40)),
+            )
+        })
         .collect();
     let refs: Vec<(&str, String)> = files.iter().map(|(p, t)| (p.as_str(), t.clone())).collect();
     let (_dir, index) = project(&refs);
@@ -212,17 +240,33 @@ fn shared_template_does_not_make_different_sections_duplicates() {
 fn semantic_candidate_needs_both_meaning_and_some_shared_words() {
     let phrase = "порядок работы сервиса задан отдельным решением владельца проекта сегодня";
     let (_dir, index) = project(&[
-        ("a/one.md", format!("темаа {} {phrase} {}", prose("ро", 20), prose("сигма", 20))),
-        ("b/two.md", format!("темаа {} {phrase} {}", prose("тау", 20), prose("фи", 20))),
-        ("c/three.md", format!("темаб {} {phrase} {}", prose("хи", 20), prose("пси", 20))),
-        ("d/four.md", format!("темаа {} {}", prose("омега", 20), prose("ню", 20))),
+        (
+            "a/one.md",
+            format!("темаа {} {phrase} {}", prose("ро", 20), prose("сигма", 20)),
+        ),
+        (
+            "b/two.md",
+            format!("темаа {} {phrase} {}", prose("тау", 20), prose("фи", 20)),
+        ),
+        (
+            "c/three.md",
+            format!("темаб {} {phrase} {}", prose("хи", 20), prose("пси", 20)),
+        ),
+        (
+            "d/four.md",
+            format!("темаа {} {}", prose("омега", 20), prose("ню", 20)),
+        ),
     ]);
     let response = audit(&index);
     assert_eq!(response.items.len(), 1, "{response:?}");
     let item = &response.items[0];
     assert_eq!(item.kind, DuplicateKind::Semantic);
     assert!(item.score >= 0.8);
-    let paths: Vec<&str> = item.chunks.iter().map(|chunk| chunk.path.as_str()).collect();
+    let paths: Vec<&str> = item
+        .chunks
+        .iter()
+        .map(|chunk| chunk.path.as_str())
+        .collect();
     assert_eq!(paths, ["docs/a/one.md", "docs/b/two.md"]);
     assert!(item.shared.is_empty());
 }
@@ -281,7 +325,10 @@ fn exact_goes_first_then_by_strength_and_limit_is_clamped() {
     let one = duplicates(
         &index,
         &SearchSettings::default(),
-        &DuplicatesRequest { results: Some(1), ..DuplicatesRequest::default() },
+        &DuplicatesRequest {
+            results: Some(1),
+            ..DuplicatesRequest::default()
+        },
     )
     .unwrap();
     assert_eq!(one.items.len(), 1);
@@ -291,7 +338,10 @@ fn exact_goes_first_then_by_strength_and_limit_is_clamped() {
     let huge = duplicates(
         &index,
         &SearchSettings::default(),
-        &DuplicatesRequest { results: Some(100_000), ..DuplicatesRequest::default() },
+        &DuplicatesRequest {
+            results: Some(100_000),
+            ..DuplicatesRequest::default()
+        },
     )
     .unwrap();
     assert!(huge.clamped);

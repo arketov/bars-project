@@ -8,8 +8,8 @@ mod similar;
 mod vector_top;
 
 pub use duplicates::{
-    Change, DuplicateChunk, DuplicateCounts, DuplicateItem, DuplicateKind, Differences, DuplicatesRequest,
-    DuplicatesResponse, duplicates,
+    Change, Differences, DuplicateChunk, DuplicateCounts, DuplicateItem, DuplicateKind,
+    DuplicatesRequest, DuplicatesResponse, duplicates,
 };
 pub use hybrid::{
     SearchError, SearchHit, SearchResponse, candidate_trace, search, search_expanded,

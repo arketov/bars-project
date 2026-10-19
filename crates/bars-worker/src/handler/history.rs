@@ -35,6 +35,7 @@ impl WorkerHandler {
                 output_value(p),
             ),
             Call::Search(p) => ("bars_rag_search", Some(&p.target), output_value(p)),
+            Call::Similar(p) => ("bars_get_similar", Some(&p.target), output_value(p)),
             Call::Read(p) => ("bars_read", Some(&p.target), output_value(p)),
             Call::Outline(p) => ("bars_outline", Some(&p.target), output_value(p)),
             Call::Status(p) => ("bars_status", Some(&p.target), output_value(p)),
@@ -94,6 +95,9 @@ impl WorkerHandler {
             Call::Search(p) => {
                 scope["modules"] = json!(p.modules);
                 scope["files"] = json!(p.files);
+            }
+            Call::Similar(p) => {
+                scope["modules"] = json!(p.modules);
             }
             Call::Outline(p) => {
                 scope["levels"] = if p.levels.is_empty() {
@@ -209,6 +213,19 @@ fn complete_attempt(
                         json!({"count":out["results"].as_array().map(Vec::len),"unit":"fragments","warning":out.get("rerank_error").is_some()})
                     }
                 }
+                "bars_get_similar" => {
+                    for k in ["limit", "clamped", "indexing", "pending"] {
+                        applied[k] = out[k].clone();
+                    }
+                    applied["source_chunk"] = out["source"]["chunk_id"].clone();
+                    applied["score_kind"] = json!("cosine");
+                    applied["sources"] = json!({"limit": match input.get("limit").filter(|v| !v.is_null()) {
+                        None => "default",
+                        Some(v) if *v == out["limit"] => "explicit",
+                        _ => "clamped",
+                    }});
+                    json!({"count":out["results"].as_array().map(Vec::len),"unit":"fragments","warning":false})
+                }
                 "bars_read" => {
                     json!({"count":out["text"].as_str().map(|s|s.lines().count()),"unit":"lines"})
                 }
@@ -254,6 +271,7 @@ fn safe_error(kind: Option<ErrorKind>) -> &'static str {
         Some(ErrorKind::InvalidParams) => "Недопустимые параметры вызова",
         Some(ErrorKind::ProviderError) => "Ошибка модели или провайдера",
         Some(ErrorKind::ModelLoading) => "Модель ещё не готова",
+        Some(ErrorKind::ChunkNotFound) => "Чанк не найден или устарел",
         Some(ErrorKind::ReindexRequired) => "Требуется переиндексация",
         Some(ErrorKind::ReindexNeedsConsent) => "Требуется согласие на переиндексацию",
         _ => "Вызов не выполнен; подробности определяются кодом ошибки",

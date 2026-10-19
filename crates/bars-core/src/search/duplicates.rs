@@ -39,7 +39,16 @@ const MAX_FRAGMENT_CHARS: usize = 300;
 const MAX_DIFF_WORDS: usize = 2500;
 
 const NEGATIONS: [&str; 10] = [
-    "не", "нет", "нельзя", "ни", "без", "запрещено", "нигде", "никогда", "отсутствует", "отклонен",
+    "не",
+    "нет",
+    "нельзя",
+    "ни",
+    "без",
+    "запрещено",
+    "нигде",
+    "никогда",
+    "отсутствует",
+    "отклонен",
 ];
 
 #[derive(Debug, Clone, Default, PartialEq)]
@@ -458,7 +467,10 @@ fn shared_fragments(first: &Item, second: &Item) -> Vec<String> {
         .collect();
     let mut runs: Vec<(usize, usize)> = Vec::new(); // (начало в первом, длина в окнах)
     let mut previous: Option<(usize, usize)> = None; // (позиция в первом, во втором)
-    for (position, hash) in shingle_hashes(&first.words, SHINGLE).into_iter().enumerate() {
+    for (position, hash) in shingle_hashes(&first.words, SHINGLE)
+        .into_iter()
+        .enumerate()
+    {
         match right.get(&hash) {
             Some(&other) => {
                 let continues = previous == Some((position.wrapping_sub(1), other.wrapping_sub(1)));
@@ -517,10 +529,16 @@ pub fn duplicates(
     // Точные группы: совпадает весь нормализованный текст.
     let mut by_text: HashMap<String, Vec<usize>> = HashMap::new();
     for (position, item) in items.iter().enumerate() {
-        by_text.entry(item.words.join(" ")).or_default().push(position);
+        by_text
+            .entry(item.words.join(" "))
+            .or_default()
+            .push(position);
     }
     let mut group_of: HashMap<usize, usize> = HashMap::new();
-    let mut exact_groups: Vec<Vec<usize>> = by_text.into_values().filter(|group| group.len() > 1).collect();
+    let mut exact_groups: Vec<Vec<usize>> = by_text
+        .into_values()
+        .filter(|group| group.len() > 1)
+        .collect();
     exact_groups.sort_by(|left, right| right.len().cmp(&left.len()).then(left[0].cmp(&right[0])));
     for (number, group) in exact_groups.iter().enumerate() {
         for &position in group {
@@ -562,7 +580,12 @@ pub fn duplicates(
             continue;
         };
         lexical.insert((first, second));
-        pairs.push(Pair { kind, first, second, score });
+        pairs.push(Pair {
+            kind,
+            first,
+            second,
+            score,
+        });
     }
 
     // Смысловые кандидаты: есть словесное зацепление, но не копия.
@@ -573,7 +596,11 @@ pub fn duplicates(
             *loose_frequency.entry(hash).or_insert(0) += 1;
         }
     }
-    let loose_counts = shared_counts(&loose, |hash| loose_frequency[&hash] >= TEMPLATE_DF, LOOSE_DF_CAP);
+    let loose_counts = shared_counts(
+        &loose,
+        |hash| loose_frequency[&hash] >= TEMPLATE_DF,
+        LOOSE_DF_CAP,
+    );
     let mut vectors: HashMap<String, Option<Vec<f32>>> = HashMap::new();
     for (&(first, second), &shared) in &loose_counts {
         if lexical.contains(&(first, second)) || same_group(first, second) {
@@ -584,7 +611,8 @@ pub fn duplicates(
             continue;
         }
         let strict_shared = counts.get(&(first, second)).copied().unwrap_or(0);
-        let strict_share = strict_shared as f32 / items[first].s5.len().min(items[second].s5.len()) as f32;
+        let strict_share =
+            strict_shared as f32 / items[first].s5.len().min(items[second].s5.len()) as f32;
         if strict_share >= PARTIAL_SHARE {
             continue;
         }
@@ -605,7 +633,12 @@ pub fn duplicates(
         }
         let score = cosine(&a, &b);
         if score >= SEMANTIC_COSINE {
-            pairs.push(Pair { kind: DuplicateKind::Semantic, first, second, score });
+            pairs.push(Pair {
+                kind: DuplicateKind::Semantic,
+                first,
+                second,
+                score,
+            });
         }
     }
 
@@ -643,7 +676,10 @@ pub fn duplicates(
         let first = &items[group[0]];
         out.push(DuplicateItem {
             kind: DuplicateKind::Exact,
-            chunks: group.iter().map(|&position| items[position].chunk()).collect(),
+            chunks: group
+                .iter()
+                .map(|&position| items[position].chunk())
+                .collect(),
             score: 1.0,
             shared: vec![shared_text(first)],
             differences: None,
@@ -657,7 +693,11 @@ pub fn duplicates(
             kind: pair.kind,
             chunks: vec![first.chunk(), second.chunk()],
             score: pair.score,
-            shared: if lexical_kind { shared_fragments(first, second) } else { Vec::new() },
+            shared: if lexical_kind {
+                shared_fragments(first, second)
+            } else {
+                Vec::new()
+            },
             differences: Some(differences(first, second, pair.kind == DuplicateKind::Near)),
             repeated_block: false,
         });

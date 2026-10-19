@@ -18,9 +18,9 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use bars_protocol::{
-    Client, ClientError, ClientKind, Endpoint, ErrorKind, LAUNCH_DEADLINE, Method, OutlineParams,
-    ProjectsParams, ReadParams, ReindexParams, SearchParams, SimilarParams, StatusParams, Target,
-    connect_or_launch_with, spawn_worker, worker_exe,
+    Client, ClientError, ClientKind, DuplicatesParams, Endpoint, ErrorKind, LAUNCH_DEADLINE,
+    Method, OutlineParams, ProjectsParams, ReadParams, ReindexParams, SearchParams, SimilarParams,
+    StatusParams, Target, connect_or_launch_with, spawn_worker, worker_exe,
 };
 use rmcp::handler::server::router::tool::ToolRouter;
 use rmcp::handler::server::wrapper::Parameters;
@@ -148,6 +148,19 @@ pub struct SimilarArgs {
     #[serde(default)]
     pub modules: Vec<String>,
     /// Сколько похожих чанков вернуть.
+    pub limit: Option<u32>,
+    /// Вид ответа: `txt` (по умолчанию) или `json`.
+    pub format: Option<Format>,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema)]
+pub struct DuplicatesArgs {
+    /// Проект: путь к корню или имя. Обязателен: аудит читает весь проект.
+    pub project: String,
+    /// Существующие папки первого уровня docs-root; `.` — корневой. Без поля — весь проект.
+    #[serde(default)]
+    pub modules: Vec<String>,
+    /// Сколько записей вернуть.
     pub limit: Option<u32>,
     /// Вид ответа: `txt` (по умолчанию) или `json`.
     pub format: Option<Format>,
@@ -507,6 +520,27 @@ impl BarsMcp {
             self.call_observed(&params, Some(&original.0)).await,
             args.format,
             render::similar,
+        )
+    }
+
+    #[tool(
+        name = "bars_get_duplicates",
+        description = "Аудит дублей проекта: повторяющиеся и разошедшиеся описания, чтобы выбрать основной источник и заменить повторы ссылками. Без исходного чанка; project обязателен, modules ограничивает область. Виды: exact — одинаковый текст; near — почти одинаковые копии (с различиями слов, чисел и отрицаний); contained — один раздел внутри другого; partial — скопирована заметная часть; semantic — близки по смыслу, только повод прочитать оба. Наиболее явные первыми; одинаковый блок в четырёх и больше разделах помечен repeated_block (скорее шаблон). Ничего не удаляет и не объединяет. Короткие разделы (меньше 15 слов) не сравниваются."
+    )]
+    async fn bars_get_duplicates(
+        &self,
+        original: observation::Original,
+        Parameters(args): Parameters<DuplicatesArgs>,
+    ) -> CallToolResult {
+        let params = DuplicatesParams {
+            target: self.target(Some(args.project)),
+            modules: args.modules,
+            limit: args.limit,
+        };
+        finish(
+            self.call_observed(&params, Some(&original.0)).await,
+            args.format,
+            render::duplicates,
         )
     }
 
