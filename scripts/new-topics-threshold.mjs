@@ -93,15 +93,22 @@ function features(text) {
   return { special, numbers: numbers.sort().join(","), negations, lower };
 }
 const sameSet = (a, b) => a.size === b.size && [...a].every((x) => b.has(x));
-// true — проверка видит смысловое отличие и запрещает автоматическое слияние.
-export function guardDiffers(textA, textB) {
+// Компоненты проверки: id — идентификаторы и цифры; numw — числительные словами (только если они есть
+// в обоих текстах); ant — короткий список противоположностей; neg — чётность отрицаний.
+export const PARTS_ALL = ["id", "numw", "ant", "neg"];
+// Правило включения (задано до просмотра test): компонент входит, если на dev ловит больше ловушек, чем
+// блокирует настоящих перефразов. neg: ловит 3 дополнительных ловушки ценой 5 перефразов — не входит.
+export let DEFAULT_PARTS = ["id", "numw", "ant"];
+export function setDefaultParts(parts) { DEFAULT_PARTS = parts; }
+// Непустой массив — проверка видит смысловое отличие и запрещает автоматическое слияние.
+export function guardDiffers(textA, textB, parts = DEFAULT_PARTS) {
   const a = features(textA), b = features(textB);
   const why = [];
   // у перефраза идентификатор может исчезнуть только вместе с вопросом: пустое множество не сравниваем
-  if ((a.special.size || b.special.size) && !sameSet(a.special, b.special)) why.push("identifier");
-  if (a.numbers !== b.numbers) why.push("number");
-  if ((a.negations & 1) !== (b.negations & 1)) why.push("negation");
-  for (const [x, y] of ANTONYMS) {
+  if (parts.includes("id") && (a.special.size || b.special.size) && !sameSet(a.special, b.special)) why.push("identifier");
+  if (parts.includes("numw") && a.numbers && b.numbers && a.numbers !== b.numbers) why.push("number");
+  if (parts.includes("neg") && (a.negations & 1) !== (b.negations & 1)) why.push("negation");
+  if (parts.includes("ant")) for (const [x, y] of ANTONYMS) {
     const ax = a.lower.some((t) => x.test(t)), ay = a.lower.some((t) => y.test(t));
     const bx = b.lower.some((t) => x.test(t)), by = b.lower.some((t) => y.test(t));
     if ((ax && !ay && by && !bx) || (ay && !ax && bx && !by)) why.push("antonym");
@@ -116,14 +123,17 @@ const round = (x, d = 4) => x === null || x === undefined ? null : Math.round(x 
 function mulberry32(seed) { return () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 
 function pairsOf(items, guards, vectors, relabel) {
-  const guardKey = new Map(guards.map((g) => [`${Math.min(g.a, g.b)}-${Math.max(g.a, g.b)}`, g]));
+  // Пара групп из guards: любая пара текстов этих двух групп — тоже «ловушка» (перефраз исходного вопроса
+  // тоже не должен слиться с его подправленной копией).
+  const guardGroups = new Map();
+  for (const g of guards) { const a = items[g.a].group, b = items[g.b].group; guardGroups.set(`${a}|${b}`, g); guardGroups.set(`${b}|${a}`, g); }
   const forced = new Set((relabel?.same ?? []).map(([a, b]) => `${Math.min(a, b)}-${Math.max(a, b)}`));
   const out = [];
   for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) {
     if (items[i].split !== items[j].split) continue;
     const key = `${i}-${j}`;
     const cos = dot(vectors[i], vectors[j]);
-    const guard = guardKey.get(key);
+    const guard = guardGroups.get(`${items[i].group}|${items[j].group}`);
     let label, category;
     if (guard) { label = "different"; category = `guard:${guard.kind}`; }
     else if (items[i].group === items[j].group || forced.has(key)) { label = "same"; category = items[j].kind === "keywords" || items[i].kind === "keywords" ? "same:keywords" : "same:paraphrase"; }
@@ -136,26 +146,27 @@ function pairsOf(items, guards, vectors, relabel) {
 function curve(pairs, split, thresholds, items) {
   const rows = [];
   for (const t of thresholds) {
-    let same = 0, merged = 0, ordinary = 0, ordinaryMerged = 0, guard = 0, guardMerged = 0, guardMergedAfterCheck = 0, sameBlocked = 0;
+    const escapes = {}; let same = 0, merged = 0, ordinary = 0, ordinaryMerged = 0, guard = 0, guardMerged = 0, guardMergedAfterCheck = 0, sameBlocked = 0;
     for (const p of pairs) {
       if (p.split !== split) continue;
       const over = p.cos >= t;
       if (p.label === "same") { same++; if (over) { merged++; if (guardDiffers(items[p.i].text, items[p.j].text).length) sameBlocked++; } }
       else if (p.category === "different:ordinary") { ordinary++; if (over) ordinaryMerged++; }
-      else { guard++; if (over) { guardMerged++; if (!guardDiffers(items[p.i].text, items[p.j].text).length) guardMergedAfterCheck++; } }
+      else { guard++; if (over) { guardMerged++; if (!guardDiffers(items[p.i].text, items[p.j].text).length) { guardMergedAfterCheck++; const k = p.category.slice(6); escapes[k] = (escapes[k] ?? 0) + 1; } } }
     }
-    rows.push({ threshold: round(t, 2), same, mergedSame: merged, recall: round(merged / same), sameBlockedByCheck: sameBlocked, recallWithChecks: round((merged - sameBlocked) / same), ordinary, falseMerges: ordinaryMerged, guard, guardMerged, guardMergedAfterCheck });
+    rows.push({ threshold: round(t, 2), same, mergedSame: merged, recall: round(merged / same), sameBlockedByCheck: sameBlocked, recallWithChecks: round((merged - sameBlocked) / same), ordinary, falseMerges: ordinaryMerged, guard, guardMerged, guardMergedAfterCheck, escapes });
   }
   return rows;
 }
 
+export function wilson(k, n, z = 1.96) { if (!n) return null; const p = k / n, d = 1 + z * z / n, c = p + z * z / (2 * n), m = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)); return [round((c - m) / d, 3), round((c + m) / d, 3)]; }
 function stats(pairs, split, category) {
   const v = pairs.filter((p) => p.split === split && (typeof category === "string" ? p.category === category : category(p))).map((p) => p.cos).sort((a, b) => a - b);
   return { n: v.length, min: round(v[0]), p05: round(quantile(v, 0.05)), p50: round(quantile(v, 0.5)), p95: round(quantile(v, 0.95)), p99: round(quantile(v, 0.99)), max: round(v[v.length - 1]) };
 }
 
 // Жадное объединение с устойчивым представителем против цепочки (single-link).
-function clustering(items, vectors, split, threshold, seed, mode) {
+function clustering(items, vectors, split, threshold, seed, mode, withChecks) {
   const order = items.filter((i) => i.split === split).map((i) => i.index);
   const rnd = mulberry32(seed);
   for (let k = order.length - 1; k > 0; k--) { const r = Math.floor(rnd() * (k + 1)); [order[k], order[r]] = [order[r], order[k]]; }
@@ -164,6 +175,7 @@ function clustering(items, vectors, split, threshold, seed, mode) {
     let best = null, bestCos = -1;
     for (const c of clusters) {
       const s = mode === "single-link" ? Math.max(...c.members.map((m) => dot(vectors[idx], vectors[m]))) : dot(vectors[idx], vectors[c.rep]);
+      if (withChecks && c.members.some((m) => guardDiffers(items[idx].text, items[m].text).length)) continue;
       if (s >= threshold && s > bestCos) { best = c; bestCos = s; }
     }
     if (best) best.members.push(idx); else clusters.push({ rep: idx, members: [idx] });
@@ -223,13 +235,15 @@ function analyze(dir, modes, relabelFile) {
     const margin = Math.max(0.02, round(2 * Math.max(...loaded.map((x) => report.modes[x.mode].noiseVsFirst.maxAbs)), 2));
     const chosen = round(Math.ceil(devMax * 100) / 100 + margin, 2);
     entry.selection = { rule: "ceil(max dev cos ordinary-different, 0.01) + max(0.02, 2 * max noise)", devMaxDifferent: round(devMax), margin, chosen };
+    const tp = curve(pairs, "dev", [chosen], items)[0], tq = curve(pairs, "test", [chosen], items)[0];
+    entry.pooledAtChosen = { same: tp.same + tq.same, merged: tp.mergedSame + tq.mergedSame, recallWilson95: wilson(tp.mergedSame + tq.mergedSame, tp.same + tq.same), ordinaryPairs: tp.ordinary + tq.ordinary, falseMerges: tp.falseMerges + tq.falseMerges, falseMergeRateUpper95: round(3 / (tp.ordinary + tq.ordinary), 5) };
     entry.atChosen = { dev: curve(pairs, "dev", [chosen], items)[0], test: curve(pairs, "test", [chosen], items)[0] };
     entry.clustering = {};
-    for (const mode of ["representative", "single-link"]) {
+    for (const mode of ["representative", "single-link", "representative+checks", "single-link+checks"]) {
       entry.clustering[mode] = {};
       for (const split of ["dev", "test"]) {
         const rows = [];
-        for (let seed = 1; seed <= 20; seed++) rows.push(clustering(items, m.vectors, split, chosen, seed, mode));
+        for (let seed = 1; seed <= 20; seed++) rows.push(clustering(items, m.vectors, split, chosen, seed, mode.replace("+checks", ""), mode.endsWith("+checks")));
         entry.clustering[mode][split] = { seeds: 20, maxFalseJoins: Math.max(...rows.map((r) => r.falseJoins)), meanFalseJoins: round(rows.reduce((s, r) => s + r.falseJoins, 0) / rows.length, 2), maxGroupsSplit: Math.max(...rows.map((r) => r.groupsSplit)), meanGroupsSplit: round(rows.reduce((s, r) => s + r.groupsSplit, 0) / rows.length, 2), clusters: rows[0].clusters, groups: new Set(items.filter((i) => i.split === split).map((i) => i.group)).size };
       }
     }
@@ -239,8 +253,37 @@ function analyze(dir, modes, relabelFile) {
   console.log(JSON.stringify({ modes: Object.fromEntries(Object.entries(report.modes).map(([k, v]) => [k, { noise: v.noiseVsFirst, counts: v.counts, stats: v.stats, selection: v.selection, atChosen: v.atChosen, clustering: v.clustering }])) }, null, 1));
 }
 
+function checks(dir) {
+  const { items, guards } = JSON.parse(fs.readFileSync(path.join(dir, "items.json"), "utf8"));
+  console.log("Перефразы, которые проверка сочла разными:");
+  for (const v of items.filter((i) => i.role === "variant")) {
+    const o = items.find((i) => i.group === v.group && i.role === "orig");
+    const why = guardDiffers(o.text, v.text);
+    if (why.length) console.log(` [${why}] ${o.text} | ${v.text}`);
+  }
+  console.log("Ловушки, которые проверка пропустила:");
+  for (const g of guards) if (!guardDiffers(items[g.a].text, items[g.b].text).length) console.log(` ${g.id} ${g.kind}: ${items[g.a].text} | ${items[g.b].text}`);
+}
+
+function components(dir) {
+  const { items, guards } = JSON.parse(fs.readFileSync(path.join(dir, "items.json"), "utf8"));
+  const sets = [["id"], ["id", "numw"], ["id", "numw", "ant"], ["id", "numw", "ant", "neg"], ["neg"], ["ant"], ["numw"]];
+  const rows = [];
+  for (const split of ["dev", "test"]) for (const parts of sets) {
+    const para = items.filter((i) => i.role === "variant" && i.split === split);
+    const blocked = para.filter((v) => guardDiffers(items.find((i) => i.group === v.group && i.role === "orig").text, v.text, parts).length).length;
+    const gs = guards.filter((g) => g.split === split);
+    const caught = {};
+    for (const g of gs) { caught[g.kind] ??= [0, 0]; caught[g.kind][1]++; if (guardDiffers(items[g.a].text, items[g.b].text, parts).length) caught[g.kind][0]++; }
+    rows.push({ split, parts: parts.join("+"), paraphrasesBlocked: `${blocked}/${para.length}`, guardsCaught: Object.entries(caught).map(([k, [c, n]]) => `${k} ${c}/${n}`).join(", ") });
+  }
+  console.table(rows);
+}
+
 const [cmd, dir, modes, ...rest] = process.argv.slice(2);
 if (cmd === "prepare") prepare(dir);
+else if (cmd === "checks") checks(dir);
+else if (cmd === "components") components(dir);
 else if (cmd === "analyze") {
   const i = rest.indexOf("--relabel");
   analyze(dir, modes.split(","), i >= 0 ? rest[i + 1] : null);

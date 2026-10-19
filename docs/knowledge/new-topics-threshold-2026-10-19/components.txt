@@ -1,0 +1,18 @@
+┌─────────┬────────┬───────────────────┬────────────────────┬────────────────────────────────────────────────────────┐
+│ (index) │ split  │ parts             │ paraphrasesBlocked │ guardsCaught                                           │
+├─────────┼────────┼───────────────────┼────────────────────┼────────────────────────────────────────────────────────┤
+│ 0       │ 'dev'  │ 'id'              │ '0/36'             │ 'negation 0/7, number 4/5, identifier 6/6'             │
+│ 1       │ 'dev'  │ 'id+numw'         │ '0/36'             │ 'negation 0/7, number 5/5, identifier 6/6'             │
+│ 2       │ 'dev'  │ 'id+numw+ant'     │ '0/36'             │ 'negation 3/7, number 5/5, identifier 6/6'             │
+│ 3       │ 'dev'  │ 'id+numw+ant+neg' │ '5/36'             │ 'negation 6/7, number 5/5, identifier 6/6'             │
+│ 4       │ 'dev'  │ 'neg'             │ '5/36'             │ 'negation 3/7, number 0/5, identifier 0/6'             │
+│ 5       │ 'dev'  │ 'ant'             │ '0/36'             │ 'negation 3/7, number 0/5, identifier 0/6'             │
+│ 6       │ 'dev'  │ 'numw'            │ '0/36'             │ 'negation 0/7, number 1/5, identifier 0/6'             │
+│ 7       │ 'test' │ 'id'              │ '0/32'             │ 'negation 0/4, entity 1/1, number 3/4, identifier 4/4' │
+│ 8       │ 'test' │ 'id+numw'         │ '1/32'             │ 'negation 0/4, entity 1/1, number 4/4, identifier 4/4' │
+│ 9       │ 'test' │ 'id+numw+ant'     │ '1/32'             │ 'negation 1/4, entity 1/1, number 4/4, identifier 4/4' │
+│ 10      │ 'test' │ 'id+numw+ant+neg' │ '4/32'             │ 'negation 2/4, entity 1/1, number 4/4, identifier 4/4' │
+│ 11      │ 'test' │ 'neg'             │ '4/32'             │ 'negation 1/4, entity 0/1, number 0/4, identifier 0/4' │
+│ 12      │ 'test' │ 'ant'             │ '0/32'             │ 'negation 1/4, entity 0/1, number 0/4, identifier 0/4' │
+│ 13      │ 'test' │ 'numw'            │ '1/32'             │ 'negation 0/4, entity 0/1, number 1/4, identifier 0/4' │
+└─────────┴────────┴───────────────────┴────────────────────┴────────────────────────────────────────────────────────┘
