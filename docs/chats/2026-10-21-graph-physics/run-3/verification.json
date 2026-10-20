@@ -1,0 +1,14 @@
+{
+  "success": true,
+  "physics": 36,
+  "render": 72,
+  "projections": 4,
+  "captures": 8,
+  "snapshotHashesVerified": true,
+  "danglingEndpoints": 0,
+  "mainThreadHeartbeat": true,
+  "lateAfterStop": 0,
+  "remainingCanvas": 0,
+  "sourceTest": "node --test export.test.mjs",
+  "limits": "Research only; no product/native, memory leak, physical interaction or semantic-quality acceptance"
+}

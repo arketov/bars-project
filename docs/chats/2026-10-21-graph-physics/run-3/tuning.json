@@ -1,0 +1,25 @@
+{
+  "method": "One additional d3 setting, 120 ticks; exploratory, not compared as original benchmark or product defaults",
+  "results": [
+    {
+      "graph": "bars-project/documents",
+      "elapsedMs": 123.19999999552965,
+      "finite": true
+    },
+    {
+      "graph": "bars-project/documents-chunks",
+      "elapsedMs": 735.3999999985099,
+      "finite": true
+    },
+    {
+      "graph": "overdrive-bots/documents",
+      "elapsedMs": 209.30000000447035,
+      "finite": true
+    },
+    {
+      "graph": "overdrive-bots/documents-chunks",
+      "elapsedMs": 1423.7999999970198,
+      "finite": true
+    }
+  ]
+}

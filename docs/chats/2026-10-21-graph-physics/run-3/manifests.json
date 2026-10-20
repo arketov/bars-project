@@ -1,0 +1,3232 @@
+[
+  {
+    "name": "bars-project",
+    "capturedAt": "2026-10-20T19:45:24.442Z",
+    "kinds": {
+      "section": 1528,
+      "chunk": 1264,
+      "document": 301,
+      "entity": 102
+    },
+    "rawEdges": 10641,
+    "meta": [
+      {
+        "key": "active_job",
+        "value": ""
+      },
+      {
+        "key": "error",
+        "value": ""
+      },
+      {
+        "key": "method",
+        "value": "explicit-markdown-v4"
+      },
+      {
+        "key": "schema_version",
+        "value": "1"
+      },
+      {
+        "key": "snapshot",
+        "value": "8994d8c96672c11329bf33c5a43822fbaa5ff0d9792cdf95f29894762075232c"
+      },
+      {
+        "key": "state",
+        "value": "partial"
+      }
+    ],
+    "sources": [
+      {
+        "path": "docs/Index.md",
+        "revision": "d1eb84a1b5584dd33c31e74bd3ae0ee2ac79208b0ba13880929ef0e78af3ad17"
+      },
+      {
+        "path": "docs/MAIN_IDEA.md",
+        "revision": "4f673f7f295135b02905482c595bc4571cef8bc8b7c2fa1df18707041ac986ba"
+      },
+      {
+        "path": "docs/adr/0001-docs-by-features.md",
+        "revision": "b67558d5af84f5a1832d08307c616692b564f71276fc363e0b73d868017c9071"
+      },
+      {
+        "path": "docs/adr/0002-qwen-gguf.md",
+        "revision": "59f101ddf1bfb976f405e7ea310accde7bce02bba62c7ff6e333ad2129d6827d"
+      },
+      {
+        "path": "docs/adr/0003-window-docking.md",
+        "revision": "2b1d28595a929005f06acffa7d82775efc3dcefd97766c3a8ef2c627567e1f83"
+      },
+      {
+        "path": "docs/adr/Index.md",
+        "revision": "068e66092e7d23dc411a15cbabf1e97afbb8a20d359c1d6aeb97d0d70b418fcb"
+      },
+      {
+        "path": "docs/architecture/Index.md",
+        "revision": "5a520f9acf2fb44c7f9cef42dbb2424fdcdcf8392a11db9b289e982c222111d8"
+      },
+      {
+        "path": "docs/architecture/components.md",
+        "revision": "33c828b3cff4d474ad7f2d593dd24e2fd6d26e648087aa256afd274d393f893b"
+      },
+      {
+        "path": "docs/architecture/files.md",
+        "revision": "82d552a9c8fac67f585480b339621219e35e02a997229fe4e772815eba1aa9aa"
+      },
+      {
+        "path": "docs/architecture/graph.md",
+        "revision": "49c6c1864bbb5c7463a8d1f146623af0d7dd352a51f9ad8b75e24157dc52c1fd"
+      },
+      {
+        "path": "docs/architecture/ipc.md",
+        "revision": "c06a5a3ad4d010dc512bb9e0ef296c9f320f356e750dacd5ddd8c0352446b4e0"
+      },
+      {
+        "path": "docs/architecture/protocol.md",
+        "revision": "8b6744e83edb1b09e175584f451ba95ecf699373f4c8c64ac04d16b67f7750bf"
+      },
+      {
+        "path": "docs/architecture/schema.md",
+        "revision": "e9260886511fdd96c7c2ee5832fef362ce5635b4ce2200994f564283e866b19f"
+      },
+      {
+        "path": "docs/architecture/secrets.md",
+        "revision": "480e6bc7bbec2a312786b9011e144c67e453438d7fbdfa0653e29ebe2d7eb8c0"
+      },
+      {
+        "path": "docs/architecture/stack.md",
+        "revision": "e9ff46803ac1b62111c56ec7c7244c0b31582fa3482f26870c91f9102e70691d"
+      },
+      {
+        "path": "docs/architecture/vector-search.md",
+        "revision": "6b4bddcbcb10848bf2ca303418b5bd099c6a365d5a350def5db4657f95bd4af2"
+      },
+      {
+        "path": "docs/architecture/worker.md",
+        "revision": "ab2267a10360b2f9faab32e4ed3022c4dea3c1eee746c44ea2b524360a29639c"
+      },
+      {
+        "path": "docs/backlog/Index.md",
+        "revision": "67694346079e91fe784f84a407001642381aa9e40896ba81ad603f8069e56935"
+      },
+      {
+        "path": "docs/backlog/ideas.md",
+        "revision": "4cc874ec5aaf62d7b852fd0577d4c916c9d4fe0ba9f5f338f0385c83c54b1d2c"
+      },
+      {
+        "path": "docs/backlog/issues.md",
+        "revision": "8121352b24d2f727a71bf877ec481c34ca66b8758e4e56c1fd4dcb9e1f5f9e86"
+      },
+      {
+        "path": "docs/chats/2026-10-15-docs-convention/handoff.md",
+        "revision": "3b78a29fcc4b073dc1353163a2c7ee48d18c90cb78c8d4e515892222aff9a229"
+      },
+      {
+        "path": "docs/chats/2026-10-15-docs-convention/log.md",
+        "revision": "c7b2e31cb7a5c1974b5e2ea22770963cbf8cee6b3f8d615e4089ad0f48e9cf2a"
+      },
+      {
+        "path": "docs/chats/2026-10-16-bars-instruction/handoff.md",
+        "revision": "1c5bf5ccf873418dc919f352bd0283dcd5e0d0dd92e6e731ded1dde3c09d537c"
+      },
+      {
+        "path": "docs/chats/2026-10-16-bars-instruction/log.md",
+        "revision": "a0553e2a4439395e8dff49bad2d30b1c443708c3121a79233b566cccdbab9335"
+      },
+      {
+        "path": "docs/chats/2026-10-16-idea06-measurements/handoff.md",
+        "revision": "5973257e75b0814ea8caa34ad9fd11e4bbafcce1b7149b266d1290d7721e1bad"
+      },
+      {
+        "path": "docs/chats/2026-10-16-iss01-model-loading/handoff.md",
+        "revision": "a15513e8a8e938894b0fb6090288fa6d69fbc84de12c9ae93229cc1d456fe474"
+      },
+      {
+        "path": "docs/chats/2026-10-16-iss01-model-loading/log.md",
+        "revision": "5beeec757128812a041daee92a927883bf273bbaee1fdc8ab5b41a6395be9a1f"
+      },
+      {
+        "path": "docs/chats/2026-10-16-iss06-watcher/handoff.md",
+        "revision": "65941d6a116f1bc6d6d81577eb4bd8e2d92900f394eeedefca6942ea29ab4c70"
+      },
+      {
+        "path": "docs/chats/2026-10-16-iss09-search-vs-index/handoff.md",
+        "revision": "ae4e24baba5e7a024ee4799af56b71d88d0bce0c081adbe4ad0ac44512e5e6ce"
+      },
+      {
+        "path": "docs/chats/2026-10-16-plan-review/handoff.md",
+        "revision": "402850e471e83aec41ed936184d3f2e71d3a80b93ae914be374300ac24d6fe18"
+      },
+      {
+        "path": "docs/chats/2026-10-16-plan-review/log.md",
+        "revision": "e29a3d45813d6010ea190ef2ef218534a972dd649064862e5385af01b7281780"
+      },
+      {
+        "path": "docs/chats/2026-10-16-window-small-fixes/handoff.md",
+        "revision": "f2d0531567ccd1ff6bcaf296dc1a92f5f69dc365d8217d19e02f429b3bf33aab"
+      },
+      {
+        "path": "docs/chats/2026-10-18-agent-tool-usage/handoff.md",
+        "revision": "85a53e8f7e87dc1490a68295922fec68caf1e1219df42cbc2dc4678e6a8dc9a4"
+      },
+      {
+        "path": "docs/chats/2026-10-18-agent-tool-usage/log.md",
+        "revision": "1c14d3022d94c2f7cb9e2d6516e1c57d347a8cec33b7045283c64c6a141a3a56"
+      },
+      {
+        "path": "docs/chats/2026-10-18-chunk-truncation/handoff.md",
+        "revision": "abfeac111b94d06d785fc04194dfd364ff40044bccf3a2fc5013849255f2605d"
+      },
+      {
+        "path": "docs/chats/2026-10-18-client-profile-isolation/handoff.md",
+        "revision": "d1cbdbe1247fe929ae9654b9abb1fef43fc9cf1a244ad403d6f737039b4d950c"
+      },
+      {
+        "path": "docs/chats/2026-10-18-client-profile-isolation/log.md",
+        "revision": "cbb0f8f1caa5835af0010a05d09e63a0548aad1e68a628ccfdfced2c243b6828"
+      },
+      {
+        "path": "docs/chats/2026-10-18-clients-auto-update/handoff.md",
+        "revision": "46bb18f22b7571581b4dac32fff7eb0b6506b4e0382e67b08e0e923b98a94999"
+      },
+      {
+        "path": "docs/chats/2026-10-18-clients-auto-update/log.md",
+        "revision": "f43456e48e7783499cbe7b458b0f1c4a81df18daafa60f51b3d0e7a51eafdad3"
+      },
+      {
+        "path": "docs/chats/2026-10-18-clients-auto-update/plan.md",
+        "revision": "111f60b6dbc8043a9f23aa51a950e7fee377eda239f0cd53c3991e56e4d3286e"
+      },
+      {
+        "path": "docs/chats/2026-10-18-clients-auto-update/verification.md",
+        "revision": "c920487efd782eab888282d32f48ccb429a6aa7aa6531ba0d171c285ed78a7d7"
+      },
+      {
+        "path": "docs/chats/2026-10-18-development-ideas/handoff.md",
+        "revision": "7e6d7868714d4c8eef8dc5ad621702dcf8849509ac7414cc5d54a3b5be7ff1bc"
+      },
+      {
+        "path": "docs/chats/2026-10-18-development-ideas/log.md",
+        "revision": "a435424ce476a243a0ebf1a1f7ccfe9ecfda53e75faa743b34201ff6ea812eab"
+      },
+      {
+        "path": "docs/chats/2026-10-18-device-design/handoff.md",
+        "revision": "2ef1652c31d5315d7f207bdefa9ab40db1ba05e704f44f3e1dae1f87f202f5e9"
+      },
+      {
+        "path": "docs/chats/2026-10-18-device-design/log.md",
+        "revision": "34fb3708c05f0b8c71b163b6cd847a6c7a57b64063ac8af84b143d906d47f6de"
+      },
+      {
+        "path": "docs/chats/2026-10-18-device-design/stage17-plan.md",
+        "revision": "a428bcd55ee472b0d97b6a60f253ea1ed67a90f2dcdf8cc2ea8827f299bc17e9"
+      },
+      {
+        "path": "docs/chats/2026-10-18-docs-layout-design/handoff.md",
+        "revision": "9c3ed6c5f392357325eb1e88ab8ea9d4ef28c07ad5f90c097690cc0db303618a"
+      },
+      {
+        "path": "docs/chats/2026-10-18-docs-layout-design/log.md",
+        "revision": "ac57b288b72e81578e684ebb58d741ba42730223f1643b9ec2935d549fdb8bd0"
+      },
+      {
+        "path": "docs/chats/2026-10-18-docs-layout-design/plan.md",
+        "revision": "7955d2f8f9e4aa892664e15970a6caa9f7847d6addc5c4722207c91bfb36b77d"
+      },
+      {
+        "path": "docs/chats/2026-10-18-docs-layout-design/verification.md",
+        "revision": "29f6ad85780e59a43e552b4b46a79b453674d2f498f0804124352f806a0a8ba2"
+      },
+      {
+        "path": "docs/chats/2026-10-18-document-actions/handoff.md",
+        "revision": "57378390867b6d65ad6c7a408c6920bda0c7c2e9e6982eaebbb90a80f55cc555"
+      },
+      {
+        "path": "docs/chats/2026-10-18-document-actions/log.md",
+        "revision": "33b2e6af4a8a184d2f207ad047dc05314121ec354eb701d0aa90e2d87126f419"
+      },
+      {
+        "path": "docs/chats/2026-10-18-documentation-tools/handoff.md",
+        "revision": "1f63a93a43f20169c77007c5f291f31e7f6bbd101f9ebc543424e8f55a4db362"
+      },
+      {
+        "path": "docs/chats/2026-10-18-documentation-tools/log.md",
+        "revision": "d5694f161178a7f3b29a1bfdab6fb91741f2517a6b0d70e9de1dad02affe5fbe"
+      },
+      {
+        "path": "docs/chats/2026-10-18-folder-menu-31/handoff.md",
+        "revision": "8dd38489260e0b4c2aa4e4bf9489fcd4ccc1ff43b904cea7d9ee4cb814a81c31"
+      },
+      {
+        "path": "docs/chats/2026-10-18-folder-menu-31/log.md",
+        "revision": "3b54a19c2702b8bd3af6690f03095e3cf1eb8b76e1f64aa8000a08ce1ac2b02d"
+      },
+      {
+        "path": "docs/chats/2026-10-18-folder-menu-31/verification.md",
+        "revision": "f2bc92c848e1eb530143bd305a7407a6bb1e7a8eccdb53f753316dcda35243e6"
+      },
+      {
+        "path": "docs/chats/2026-10-18-gguf-models/handoff.md",
+        "revision": "e69a342879868920bd2730d82e9c75374e11bec5482aa8938eba9da02a144811"
+      },
+      {
+        "path": "docs/chats/2026-10-18-gguf-models/log.md",
+        "revision": "4f23d1a512a181f22e8b587e79e87dc25966b0ff14bed23db5e1a4c0017da665"
+      },
+      {
+        "path": "docs/chats/2026-10-18-gguf-models/stage22-plan.md",
+        "revision": "81a1410394798a50e9c7fbb8be80698b8428e1ef05c3eda1682963553224ade6"
+      },
+      {
+        "path": "docs/chats/2026-10-18-graphrag-integration/handoff.md",
+        "revision": "6dcdae2e171439d9fafee140442485c52ea321e828b600798064e74540561d43"
+      },
+      {
+        "path": "docs/chats/2026-10-18-graphrag-integration/log.md",
+        "revision": "6a3757775b160baaffff5f13a76c6aa66dc267665babd7d5222718bbe185aee3"
+      },
+      {
+        "path": "docs/chats/2026-10-18-idea06-benchmark/handoff.md",
+        "revision": "acda9ad2006b8ee947412cd7ce2eb1c2d1076fac4c4d0b73929c339b6cd1dea2"
+      },
+      {
+        "path": "docs/chats/2026-10-18-idea06-benchmark/log.md",
+        "revision": "b4797cee80d4ea2c1a893a45d095305c398605e86787aa28cf8ea706cb3089f4"
+      },
+      {
+        "path": "docs/chats/2026-10-18-inference-design/handoff.md",
+        "revision": "036e1a70070c80efb362677ec56edc135ec4a36293980ae8ce03dab1f5294dde"
+      },
+      {
+        "path": "docs/chats/2026-10-18-inference-design/log.md",
+        "revision": "33385449142d42fcf069a51395027db3ef2c2bc4f54e016ee3765c0b330a4e39"
+      },
+      {
+        "path": "docs/chats/2026-10-18-inference-design/stage11-plan.md",
+        "revision": "f172639a2e7b5f615fff21b3f8febd2200863486f5d671e5b136c7c3e2d8897e"
+      },
+      {
+        "path": "docs/chats/2026-10-18-inference-research/handoff.md",
+        "revision": "6d1b0c218d94f1a95845fcc3902df2e8740be80d371a92eae28b6d6c4b5d923b"
+      },
+      {
+        "path": "docs/chats/2026-10-18-inference-research/log.md",
+        "revision": "426fdbbe777b51314e87e501c6dd7bca920131156055d6e0f5530c44f6cdeeb5"
+      },
+      {
+        "path": "docs/chats/2026-10-18-installer-encoding/handoff.md",
+        "revision": "0fe9db15954b05e646560b6050cb003c9d23841de276614a16092c384b7c9443"
+      },
+      {
+        "path": "docs/chats/2026-10-18-installer-path/handoff.md",
+        "revision": "99d796a3d6eeb457fe173dedcfed6ecdacbd2a754a2934927dda6831db27e717"
+      },
+      {
+        "path": "docs/chats/2026-10-18-knowledge-gaps/handoff.md",
+        "revision": "3d54b8f294b441df78a8f1f7dc5c143fc0358c548e1eac96bc8a6f7af29aebdd"
+      },
+      {
+        "path": "docs/chats/2026-10-18-knowledge-gaps/log.md",
+        "revision": "8d7b4e191456a30bd0da1cf7777a28d55503b50f524d0d5d1aa8cc5989a756ba"
+      },
+      {
+        "path": "docs/chats/2026-10-18-mcp-analysis-30/handoff.md",
+        "revision": "6022418894791b1346aaac2ffb77d451056a4dc89d5512daefbd09f2083cca08"
+      },
+      {
+        "path": "docs/chats/2026-10-18-mcp-analysis-30/log.md",
+        "revision": "0180c584b1095345b07a8f03d7db807dbea4ca9450822d4b972d28e00258ed25"
+      },
+      {
+        "path": "docs/chats/2026-10-18-mcp-analysis-30/verification.md",
+        "revision": "f7c41b123c77475c85b8862c09a962adbf4c5af512f3d5c8caef9967b52d834c"
+      },
+      {
+        "path": "docs/chats/2026-10-18-mcp-format-language/handoff.md",
+        "revision": "2329697b71964a5390ffe5f697d6175fca14e7a3c1eed26547aa62841f7893b5"
+      },
+      {
+        "path": "docs/chats/2026-10-18-mcp-history-29/handoff.md",
+        "revision": "1c4c7d940bbac0ed52218106b782860efeea2ec556d3263ada0856d6eca598c7"
+      },
+      {
+        "path": "docs/chats/2026-10-18-mcp-history-29/log.md",
+        "revision": "216cc78a52365bdb1f9c3f144931b4e65cae4836f5bb50418512fdbfce4ad23c"
+      },
+      {
+        "path": "docs/chats/2026-10-18-mcp-history-29/verification.md",
+        "revision": "807ab16743a3e140137e434dc3db3735b75d56b1932bca46df5000bd7e90228c"
+      },
+      {
+        "path": "docs/chats/2026-10-18-mcp-statistics/handoff.md",
+        "revision": "cea902900b236c8c93405cd21bbfb942e3429db335450c63ba052496f593773f"
+      },
+      {
+        "path": "docs/chats/2026-10-18-mcp-statistics/log.md",
+        "revision": "498f8a552f9b446b3f128ed4ccb3f9f4fb2ff9ac0f74401516dba925483ade9d"
+      },
+      {
+        "path": "docs/chats/2026-10-18-mcp-transport/handoff.md",
+        "revision": "4855a0678bd9b3b1e6ec87def6e4cc61b4464793d9280e09278836af5b0d395c"
+      },
+      {
+        "path": "docs/chats/2026-10-18-memory-consolidation/handoff.md",
+        "revision": "e67b4df9af660535d3d7c2ea6e750cfa2c209c840ad781b6fc35f104cff013fe"
+      },
+      {
+        "path": "docs/chats/2026-10-18-memory-consolidation/log.md",
+        "revision": "cd88927f50899d4779851dd15479ec966874b2cfe769321b4b98e7ca607a9e95"
+      },
+      {
+        "path": "docs/chats/2026-10-18-memory-research/handoff.md",
+        "revision": "662d304075e6a260c06ad8d0fdeb5b2bd8aa025fa38a832cabdecbf8222663d4"
+      },
+      {
+        "path": "docs/chats/2026-10-18-memory-research/log.md",
+        "revision": "d0fb1e725c6e4f9d17c5ab7dfc7fcfacfff57f4052b03a4c0d505c752df5c931"
+      },
+      {
+        "path": "docs/chats/2026-10-18-notification-center/handoff.md",
+        "revision": "2004400ae7b366967c08c028580f5e5ad042e958bfbc1f954ad3fb354d889b92"
+      },
+      {
+        "path": "docs/chats/2026-10-18-notification-center/log.md",
+        "revision": "c9dcc139ae668351144f9bb2a374f896e52f4eac1a75dfc0490887e203de5262"
+      },
+      {
+        "path": "docs/chats/2026-10-18-notifications-28/handoff.md",
+        "revision": "5aeb709308b88dbabe9b8873a247b52b60660567de7dcaf69e3981a730f7cac4"
+      },
+      {
+        "path": "docs/chats/2026-10-18-notifications-28/log.md",
+        "revision": "0834bb80cea56a524e7c955442c814208e514ec8dd3f1806d84dd676fa34513d"
+      },
+      {
+        "path": "docs/chats/2026-10-18-notifications-28/verification.md",
+        "revision": "b1abc2488de23152a17d5a156241819a3e7889be24846c9330aebee0f6a713c3"
+      },
+      {
+        "path": "docs/chats/2026-10-18-output-language/handoff.md",
+        "revision": "e775256928c365aa0d110be23300355c1c482eb2242be2149f8ee655ed91b51c"
+      },
+      {
+        "path": "docs/chats/2026-10-18-project-context-menu/handoff.md",
+        "revision": "7880d2928d1a9f05589fee4bf101cadfff8d3236552dc2816a661e086d02be91"
+      },
+      {
+        "path": "docs/chats/2026-10-18-project-deletion/handoff.md",
+        "revision": "ee9d504fb8407f17ecc871d5230533742a807698a6298e75ebf7d989474918aa"
+      },
+      {
+        "path": "docs/chats/2026-10-18-project-deletion/log.md",
+        "revision": "2f904bfcb9319958e9e42bb12ede3cb26c2618d4e07405c2b0db80fa723c2349"
+      },
+      {
+        "path": "docs/chats/2026-10-18-project-docs/handoff.md",
+        "revision": "0fa505d4077860ce4a3f643f8cb61145d3fbefd7e42a5fe360db3c03f9543140"
+      },
+      {
+        "path": "docs/chats/2026-10-18-project-docs/log.md",
+        "revision": "472f89d1aed0294c29b885dd5012cb1128172f5d1364c00d62db68392e87a811"
+      },
+      {
+        "path": "docs/chats/2026-10-18-russian-interface/handoff.md",
+        "revision": "afaf31d79b5065e533943da3eaa3a65da3bf9555c5fd1c90dc2101aa29f3afb2"
+      },
+      {
+        "path": "docs/chats/2026-10-18-russian-interface/log.md",
+        "revision": "d02e874741b1ceaa79503a1afb679c659adbea20f76f935ad79971e0cb05dff8"
+      },
+      {
+        "path": "docs/chats/2026-10-18-search-layout/handoff.md",
+        "revision": "9592bf165eef3a5adaa07ea796cdf57dc7a47fc2bb96433c943bc465057e03fc"
+      },
+      {
+        "path": "docs/chats/2026-10-18-search-score-order/handoff.md",
+        "revision": "5cffb4be6f0f597c8e9c50e83b4391672a6124aa640727af038240b8712d5fc1"
+      },
+      {
+        "path": "docs/chats/2026-10-18-search-score-order/log.md",
+        "revision": "89437a29b1d51d9258b43e1590ed53e858b951f9bd41f4b71a627ba066ed185a"
+      },
+      {
+        "path": "docs/chats/2026-10-18-search-score-order/plan.md",
+        "revision": "3f923fca99740b42860c6cb83496c384f64199cc27a2f5029f58ecec5f779c20"
+      },
+      {
+        "path": "docs/chats/2026-10-18-similar-duplicates/handoff.md",
+        "revision": "a3ede19a6560dcc090a4f6cd497582c396135d6ee9163d9da7f27f3161636832"
+      },
+      {
+        "path": "docs/chats/2026-10-18-similar-duplicates/log.md",
+        "revision": "56185dbba061a9c27ac0a2b01f801e4d8941fb49b86990c801b9358b65b3d78b"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage17-implementation/device-verification.md",
+        "revision": "1df31717156365d63a92ed688cf04adc5ecd0b5176a4867f4ffc46e9182b5d0f"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage17-implementation/handoff.md",
+        "revision": "4f14e56fc1c45b38a4fdba8117f27ba8150daba6df38c38c4a80ff55cc9ee1c2"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage17-implementation/log.md",
+        "revision": "9275b78edaf83e3b9a8824b4da09c4dc7a4ef849f017c4651fa989f4edfa5fd3"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage26-contracts/handoff.md",
+        "revision": "8497a11a5ec799ca37671845eafcaac48d02fb56b1d81e40a569e2ea2c82c9f9"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage26-contracts/log.md",
+        "revision": "06252e1a97bae12040a6134d70b30ffcd192178ee2a4c5113720460ff6ea8d00"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage33-implementation/handoff.md",
+        "revision": "3a35b8e32ba36e0cda0e7aa30aa004cc13a6f126bed75c7aaa95d81393a65e26"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage33-implementation/log.md",
+        "revision": "13e09f7817e4a02d4374a6d214bf18e0733fbc6069786451a8495b167a0c13e6"
+      },
+      {
+        "path": "docs/chats/2026-10-18-window-design-27/handoff.md",
+        "revision": "0b12cc001a471aef28c34a6a0726e1272504ca63df5ddda5b644492fcd644c3c"
+      },
+      {
+        "path": "docs/chats/2026-10-18-window-design-27/log.md",
+        "revision": "efac6344662202abd4cc5625e2567a552d5497c6ca720345cf5b2501146efae1"
+      },
+      {
+        "path": "docs/chats/2026-10-18-window-design-27/verification.md",
+        "revision": "56d459bae3e98890343b32e76b29feec70394d2c9d8e231f5bf813c05ca94a42"
+      },
+      {
+        "path": "docs/chats/2026-10-18-window-refinement/handoff.md",
+        "revision": "7395032a9e9a80d15b3e93d2204684abd89b7d0d75c2f9cdcbca7c42a9329db7"
+      },
+      {
+        "path": "docs/chats/2026-10-18-window-refinement/log.md",
+        "revision": "fbbe1535f319ecec7f7075d47c0f7037194fd636dd8a24ec92160a88aca8be89"
+      },
+      {
+        "path": "docs/chats/2026-10-18-worker-logs/handoff.md",
+        "revision": "adc46f136fdd22c75fa117b4d3e28f37fe79224baa42f7971ee22c742fdbb946"
+      },
+      {
+        "path": "docs/chats/2026-10-18-worker-logs/log.md",
+        "revision": "0f2d14e0a9bc71ef847d24706f3a18f28b96508646678219fc6f8fd8a801b403"
+      },
+      {
+        "path": "docs/chats/2026-10-19-chunk-id-design/handoff.md",
+        "revision": "a216e2d5c2d9b78a1e66b4ada9ed8070f626bb9511386fe29b41ae97443d7ea5"
+      },
+      {
+        "path": "docs/chats/2026-10-19-chunk-id-design/log.md",
+        "revision": "ffaf49bffc59efcbd448bd7bc287dcd39906f91e68e3b8a07ef2a4b1e23362a1"
+      },
+      {
+        "path": "docs/chats/2026-10-19-docs-audit/handoff.md",
+        "revision": "62eae5ab2473b258a4726d23a0ca9380edb2413a2e65fd940700e69dbb5fa64b"
+      },
+      {
+        "path": "docs/chats/2026-10-19-duplicates-research/handoff.md",
+        "revision": "64fc9192b4b736ac6e4c7b3912b2c6c3c63df52e49676ac49a4a06e8f086e21d"
+      },
+      {
+        "path": "docs/chats/2026-10-19-duplicates-research/log.md",
+        "revision": "be715b0e0f597536d16183ef67de1763d2eb3a805d78d49346d11aed1b970c27"
+      },
+      {
+        "path": "docs/chats/2026-10-19-iss18-model-loading/handoff.md",
+        "revision": "a46bf3e3e341d96e7815b4c698cd51122e0b0158aab8b9e5fc8f3bac2713eebc"
+      },
+      {
+        "path": "docs/chats/2026-10-19-iss18-model-loading/log.md",
+        "revision": "0e7ab1b8dac87c311594076f07f44fd604e376afad49be412aa1a897d6b8e5f1"
+      },
+      {
+        "path": "docs/chats/2026-10-19-knowledge-base/handoff.md",
+        "revision": "429a9c4712cac006b3825e6b1204dda1a43a319a1aea705f90a06ae345d6a4ba"
+      },
+      {
+        "path": "docs/chats/2026-10-19-knowledge-base/log.md",
+        "revision": "244bfea310aaff4a07cb90b72445e69c493be5da982ee81629559d8642a11069"
+      },
+      {
+        "path": "docs/chats/2026-10-19-new-topics-api/handoff.md",
+        "revision": "d32cab2c7e4072706661d347caf96b19b3b33cdd823a14d2e090ca15b1ee4aba"
+      },
+      {
+        "path": "docs/chats/2026-10-19-new-topics-api/log.md",
+        "revision": "71eb0ae6c77766a3ea5a1225b3dacdcac88d86becb811812b8ce4be7fae3a760"
+      },
+      {
+        "path": "docs/chats/2026-10-19-new-topics-collect/handoff.md",
+        "revision": "154b2d70cb3690781afa1393f503813ac2fdeade50410766989e94f7cd4f7221"
+      },
+      {
+        "path": "docs/chats/2026-10-19-new-topics-collect/log.md",
+        "revision": "8598482437679517169297ff98580f842b99f75e34a936752bbcaa7669e3189c"
+      },
+      {
+        "path": "docs/chats/2026-10-19-new-topics-threshold/handoff.md",
+        "revision": "de3df4a2d115c713678888493f86ff6b183dfbead86c6d9a2dbeed32401b0552"
+      },
+      {
+        "path": "docs/chats/2026-10-19-new-topics-threshold/log.md",
+        "revision": "7e5165146f250240c99eb84b620f19c8774a8fd532fca997be8b73e28d1c01c0"
+      },
+      {
+        "path": "docs/chats/2026-10-19-new-topics-ui/handoff.md",
+        "revision": "c1f3de9e6cc9f4fe84f0f5d0e68b84ce442eacd13bdff77ca74fdcd9ecd01e89"
+      },
+      {
+        "path": "docs/chats/2026-10-19-new-topics-ui/log.md",
+        "revision": "6a69304be197cb8109b853693a0a08c7ccd35baab7708e29cfa6743308ef5ef2"
+      },
+      {
+        "path": "docs/chats/2026-10-19-plan-backlog-cleanup/handoff.md",
+        "revision": "536f6fabd65d5390a62a8360a4dff9f770547ffd47fc4c805df9a36ee94d0214"
+      },
+      {
+        "path": "docs/chats/2026-10-19-user-manual/handoff.md",
+        "revision": "2c00e0ffb22f99e139684aab1412cf080cddd65491963f2d76f70d9f89da7383"
+      },
+      {
+        "path": "docs/chats/2026-10-19-user-manual/log.md",
+        "revision": "531d62ec09aac3fde2a521895fdbca92ed5f2b445e407aa68079c885b3a627bf"
+      },
+      {
+        "path": "docs/chats/2026-10-20-decisions-storage/handoff.md",
+        "revision": "e5bdbe47f09f7f37221c8c3f418aa42e64183e57ad1e4c386eb304e4cc3931a0"
+      },
+      {
+        "path": "docs/chats/2026-10-20-global-search-design/handoff.md",
+        "revision": "b8a3a393ebb81db45e0262372ac7969706ed0aecbf23fb6b08ddfe795cfec5c8"
+      },
+      {
+        "path": "docs/chats/2026-10-20-global-search-design/log.md",
+        "revision": "8f1ccb7f76a4aa0746c806f7b69dcf33d5fd4cc7cf91a2a7d71433a84ed3d1f6"
+      },
+      {
+        "path": "docs/chats/2026-10-20-global-search-implementation/handoff.md",
+        "revision": "72d7e2b856642fc738f74874159774baab0c36b2296f2199c476c81a57451a86"
+      },
+      {
+        "path": "docs/chats/2026-10-20-global-search-implementation/log.md",
+        "revision": "f48affe0de5abbdd7bd0029c2beae5563f7404f76167fba334a2b15139cd08a7"
+      },
+      {
+        "path": "docs/chats/2026-10-20-graph-quality/handoff.md",
+        "revision": "78f1d25dddecf90ad62b80c7b9248c914451a85211a2fb9f1381b4f1871e293a"
+      },
+      {
+        "path": "docs/chats/2026-10-20-graph-quality/log.md",
+        "revision": "b3fea1fcfdb6c204b70197202a5faa6f72dac7ab2fd43d246359c40b94341965"
+      },
+      {
+        "path": "docs/chats/2026-10-20-indexing-details/handoff.md",
+        "revision": "8bbc3378cb3a4dcfba2ece6ce8a0bbd456313e1caa44f8469084c414303e2e1e"
+      },
+      {
+        "path": "docs/chats/2026-10-20-indexing-details/log.md",
+        "revision": "93d73634cb0e90e95fb1e39b341069ccd5b3aeaa41604e7a9e18c6bb2f66aa74"
+      },
+      {
+        "path": "docs/chats/2026-10-20-indexing-memory/handoff.md",
+        "revision": "6db59ceff7cb576adc86ccd7835dc2fd8f9e7c514ff79a2697254ea7a086e785"
+      },
+      {
+        "path": "docs/chats/2026-10-20-indexing-memory/log.md",
+        "revision": "5f5eeadd240129e13962969596399aa5df3638239b7ec1e7e60935aee7621665"
+      },
+      {
+        "path": "docs/chats/2026-10-20-indexing-responsiveness/handoff.md",
+        "revision": "386a10319778851b6148a5d460ba4ec0337272e610ae9eafdc25c83612778e5b"
+      },
+      {
+        "path": "docs/chats/2026-10-20-indexing-responsiveness/log.md",
+        "revision": "80e8413f6d709c0b775c144bef5abe36c09e4eb9041d8fcb09832f2ce63cf3f1"
+      },
+      {
+        "path": "docs/chats/2026-10-20-indexing-responsiveness/verification.md",
+        "revision": "d9f8fb8a1d66e128992c95cb2392a9771165c950c8f1e9b8f6d72ccd2971465d"
+      },
+      {
+        "path": "docs/chats/2026-10-20-keyboard-design/handoff.md",
+        "revision": "d81e1cd712d7a103d20117770c7b5220e11a62c2cdf44d008c62498ea63106b7"
+      },
+      {
+        "path": "docs/chats/2026-10-20-keyboard-design/log.md",
+        "revision": "93aa678ebe04f45ad04e666ed1621c84813fd1f2890a0b4e946656ceec3ee813"
+      },
+      {
+        "path": "docs/chats/2026-10-20-memory-acceptance/handoff.md",
+        "revision": "1164c6ca3165f7e0141286f1768cc3a30176e75b1becd8eb089775135772008d"
+      },
+      {
+        "path": "docs/chats/2026-10-20-memory-acceptance/log.md",
+        "revision": "53a4c2b34574f5b3e7fd7c35d1c540f2b9a8932853d3dda225c6e12415f2f8ca"
+      },
+      {
+        "path": "docs/chats/2026-10-20-new-topics-grouping/handoff.md",
+        "revision": "fea7f25d9b0f3b115bd0e615884c627768fea46794b1c6e30f9528a3f37045d5"
+      },
+      {
+        "path": "docs/chats/2026-10-20-new-topics-grouping/log.md",
+        "revision": "d96ccf5a6acf512fd5651284b179663646259cbe5a91125465b49baa4e938f94"
+      },
+      {
+        "path": "docs/chats/2026-10-20-plan-usability/handoff.md",
+        "revision": "b8ae20331f39604e5a3a451bc0ab100ec5ccbf5e22c2f15d1b995846abf56da7"
+      },
+      {
+        "path": "docs/chats/2026-10-20-plan-usability/log.md",
+        "revision": "027d265e5cac56736fc54eb11287c9af96fc3dc8fa3e17b9d66fad6934a5c31f"
+      },
+      {
+        "path": "docs/chats/2026-10-20-plan-usability/plan-before.md",
+        "revision": "88feda1949afd5f5c6579e786140b94841ed00df8c2dffe7d43471151324d676"
+      },
+      {
+        "path": "docs/chats/2026-10-20-topics-context-menu/handoff.md",
+        "revision": "bc2710c116215717b90bd44c86e4cff89a356d2dc32cff7ba20e5efe88c94ad2"
+      },
+      {
+        "path": "docs/chats/2026-10-20-update-installer/handoff.md",
+        "revision": "b7881efc519388c75f93720df187588f2b8913ba2b7901bafcf24ecf49cfd46e"
+      },
+      {
+        "path": "docs/chats/2026-10-20-update-installer/log.md",
+        "revision": "efda9556eb4661b923a636e2cda80b75b1dffb87af9d51089e8e4954d433e46a"
+      },
+      {
+        "path": "docs/chats/2026-10-20-window-docking/handoff.md",
+        "revision": "169c8e6b4bfaaa303a36bb50f46169a14d7108ca496f7a00b18e7850f2817e08"
+      },
+      {
+        "path": "docs/chats/2026-10-20-window-docking/log.md",
+        "revision": "d3c48213aecbfdee10a28fae0db08a31d7c3eb0b5ead2e47d65e77730f0dd1af"
+      },
+      {
+        "path": "docs/chats/2026-10-20-window-foundation/handoff.md",
+        "revision": "b873985c9dd597764d76612e084f700508b6f0f93d3b839be6df6e9b5a41f89e"
+      },
+      {
+        "path": "docs/chats/2026-10-20-window-foundation/log.md",
+        "revision": "84eff46dc14e6a303e03d321334b82a03df35df54f4ae1cf3fbbd963a943f541"
+      },
+      {
+        "path": "docs/chats/2026-10-20-workspace-density/handoff.md",
+        "revision": "3fadf554857fa2eba62e5addb1b1d59028a0ad638027b4a0f83ffecc6989a738"
+      },
+      {
+        "path": "docs/chats/2026-10-20-workspace-density/log.md",
+        "revision": "c6787ed05f130fa21a952a45a386e756e5ea9df866e45dcc117cd7acfe982843"
+      },
+      {
+        "path": "docs/chats/2026-10-20-workspace-design/handoff.md",
+        "revision": "5a2532452e1d102e6eea39b176ad071cf0ea7c1a7741a4efa790a74ff43bc532"
+      },
+      {
+        "path": "docs/chats/2026-10-20-workspace-design/log.md",
+        "revision": "720d319005bfd51da0a4f7f273f247fedd8aed8426084f9cedd210fae9a7e5c2"
+      },
+      {
+        "path": "docs/chats/2026-10-20-workspace-implementation/handoff.md",
+        "revision": "964f5e3cbf17b4ce467daa0be48ef52e8201d88db5c373e70d7b16731a487efc"
+      },
+      {
+        "path": "docs/chats/2026-10-20-workspace-implementation/log.md",
+        "revision": "50039ff10b15606532aac5755360b40630435438bc78bcc8d293eb4b6a2c652c"
+      },
+      {
+        "path": "docs/chats/2026-10-21-graph-physics/log.md",
+        "revision": "9324bc39b56edb08e32d0e48aabf4b079d5514a6a5dc37454fdb93ae17e2805d"
+      },
+      {
+        "path": "docs/chats/2026-10-21-keyboard-implementation/handoff.md",
+        "revision": "d70172b28e2e0434fe321ac8e1df5e878a47a6979f91046fbc6b4d76fdc9207c"
+      },
+      {
+        "path": "docs/chats/2026-10-21-keyboard-implementation/log.md",
+        "revision": "2d123a9e208a3f176f6840afce62db0e50ced7c812f1476de99e27cc4fb2880d"
+      },
+      {
+        "path": "docs/chats/Index.md",
+        "revision": "e7868c216ee4cba081a505d66d85aa4f65e9d3dd219c0fc9baf22a295b53ac9b"
+      },
+      {
+        "path": "docs/features/Index.md",
+        "revision": "8dabfa3cd04b25897f4da25e962057e10c898665c37d2fba880c801c4c8c2be2"
+      },
+      {
+        "path": "docs/features/agent-tools/Index.md",
+        "revision": "72ee6ea8e739297405b908a103d267c7dcab2b69fa600b7ab4de9468bd1b26fc"
+      },
+      {
+        "path": "docs/features/agent-tools/cli.md",
+        "revision": "e8c153944c7e85a442c5e7a620ef50d4031a3c0c8e809bbce0e6796353e101f9"
+      },
+      {
+        "path": "docs/features/agent-tools/mcp-tools.md",
+        "revision": "f38214111fb3f5392d32cab444a4b33c9e83910b4b8f5431549e88b5016949a5"
+      },
+      {
+        "path": "docs/features/clients/Index.md",
+        "revision": "99cb45542a1ce39d4255072cc7332d5761595571b206aaadef75edd02d4c2725"
+      },
+      {
+        "path": "docs/features/clients/clients.md",
+        "revision": "949f072505a33493ee0707a58dfb4768d5e6094e7154e527cc87b0396abdc82d"
+      },
+      {
+        "path": "docs/features/distribution/Index.md",
+        "revision": "87ed31b06f39cd33329565c2d77165d467b3c5994e41ed804a7870254c3344e6"
+      },
+      {
+        "path": "docs/features/distribution/autostart.md",
+        "revision": "559963018ac01f800a2b1684c2d77eb19881ffb300b393b63f623de8d393d40a"
+      },
+      {
+        "path": "docs/features/distribution/installer.md",
+        "revision": "b8fae7617e44597389a90f8e97efa2e89fb265b5717a75a5d8a1afd971643910"
+      },
+      {
+        "path": "docs/features/docs-convention/Index.md",
+        "revision": "a575fc080943b9363cc4d1f240fd262a1322cd9622b05c7b2efcbd9328dfbd13"
+      },
+      {
+        "path": "docs/features/docs-convention/bars-instruction.md",
+        "revision": "8ac8188567fc6c5aba87dd7bd22b713a575b5366b9812326c30b509d8818f007"
+      },
+      {
+        "path": "docs/features/docs-convention/delivery.md",
+        "revision": "24021269519dff4c5b8a4b1a7014d9a811ed2f8178ecc72d05cc62e1735f9f93"
+      },
+      {
+        "path": "docs/features/docs-convention/layout.md",
+        "revision": "b5699e8d846315ed225f483a6fa78f7e38f988781a5844df04276176d235fd8c"
+      },
+      {
+        "path": "docs/features/docs-convention/session-log.md",
+        "revision": "cb3de334b9b9341cd3f615546a55b0e8cc56ab6f79235456a5ae4a2935b1aee1"
+      },
+      {
+        "path": "docs/features/graphrag/Index.md",
+        "revision": "5132c7f7d6919a3526f9374032ab42699eed80dd5cb23287ad5940a9ae67d4fb"
+      },
+      {
+        "path": "docs/features/graphrag/implementation.md",
+        "revision": "71651ad3c91881c67dda01e627ec63d440c51bf25f778772ed7e0ff759b3c244"
+      },
+      {
+        "path": "docs/features/graphrag/plan.md",
+        "revision": "4d929e78519dcdfc429c8d363c35345863007e7052cbedcbbd312f0043145450"
+      },
+      {
+        "path": "docs/features/graphrag/requirements.md",
+        "revision": "8d6678273df585f3f38822deb3675b965212a7c3dc35538a179c2681b1d68f3e"
+      },
+      {
+        "path": "docs/features/graphrag/tools.md",
+        "revision": "eee4c2977dc44364c26dedc7a6314f1aa0bb96fb963cc751b3472ea6de3a550f"
+      },
+      {
+        "path": "docs/features/graphrag/window.md",
+        "revision": "ee5b00e5ae7e450ff5aac81b0bd4574d16c2ef101ecab5c5f577c6274afb03c7"
+      },
+      {
+        "path": "docs/features/indexing/Index.md",
+        "revision": "4b9c2ac51702399d999f999292343294eb09110cf74ffc44188631e0240430a8"
+      },
+      {
+        "path": "docs/features/indexing/chunking.md",
+        "revision": "029214b8f3074278fda75fe76528230153732883ad3266d0695f04dbe09a113c"
+      },
+      {
+        "path": "docs/features/indexing/updates.md",
+        "revision": "375d88d3646271b17ea31e38b07ebbfd651044336b3079b18177ed022b420513"
+      },
+      {
+        "path": "docs/features/knowledge-base/Index.md",
+        "revision": "95153648aace814e617c914bd1f1c361205eb8edc7ea88b2e4b007f377064c7d"
+      },
+      {
+        "path": "docs/features/knowledge-base/requirements.md",
+        "revision": "35dbccfb160a7b2be021af85002f80ed0fb9f2d61697c5fbdcfeaf045c6120b9"
+      },
+      {
+        "path": "docs/features/models/Index.md",
+        "revision": "82afa9b459b46bb76779bfdb7bbc493da5506f08f74021900371913c52862274"
+      },
+      {
+        "path": "docs/features/models/external-models.md",
+        "revision": "5aead7faa97ddd71fba80ea0f4446eca9ade0a73478c7340bd656214be67b6cb"
+      },
+      {
+        "path": "docs/features/models/local-models.md",
+        "revision": "1194959bb27541688e2fd34d669dd678b6457c835edb44687cfc060179593a46"
+      },
+      {
+        "path": "docs/features/models/memory-plan.md",
+        "revision": "e03f25e85a498738cd3d80b148a9f449100d4878883b22f6712f88cf370ab2af"
+      },
+      {
+        "path": "docs/features/new-topics/Index.md",
+        "revision": "e557e23de199b2106bf99deb61f375a54ddcaa4c360cbc3ef4cc9bcb74ee70ff"
+      },
+      {
+        "path": "docs/features/new-topics/design.md",
+        "revision": "9c83ac327dac695d840805f22bf0a16b47489f1f839a3b05b96fe9ccc480ba02"
+      },
+      {
+        "path": "docs/features/new-topics/design/Index.md",
+        "revision": "221aa7baa67b20d895f06b64234046e11eef4cdf31e743257836d1fcd4564219"
+      },
+      {
+        "path": "docs/features/new-topics/plan.md",
+        "revision": "c8260698ec342d2f0206268bdfe3854400b0e76ddef336278aa3219be68c43a8"
+      },
+      {
+        "path": "docs/features/new-topics/requirements.md",
+        "revision": "63c518f86a42160fdf7f20a28178e8cb0c16446896e87698b1b5afe28b43f874"
+      },
+      {
+        "path": "docs/features/projects/Index.md",
+        "revision": "f25e073bdf95c97760da024a694f3cf86a150e4b4f88107ed56ab1d49cc3e2e8"
+      },
+      {
+        "path": "docs/features/projects/deletion.md",
+        "revision": "dcdd4b09624b7eb402b294c3bbf8e115cf92e05d4f14ae2aeceeb5b5ee350e78"
+      },
+      {
+        "path": "docs/features/projects/projects.md",
+        "revision": "1349c576d1f4202586bb7c1614cd275e74e316aa4abb69d1fc1fa2ff12db12da"
+      },
+      {
+        "path": "docs/features/search/Index.md",
+        "revision": "03276797303936b110463461368132b7c4202ec1bfef38c04f2cf460ca4e2b31"
+      },
+      {
+        "path": "docs/features/search/hybrid-search.md",
+        "revision": "a065a3da7993f3f4361833e744c28f12052d31f5e9d1e8ec4678a02063f495ce"
+      },
+      {
+        "path": "docs/features/search/maintenance-tools.md",
+        "revision": "4fcc34e0f98561c8273926b968568809c1ad868a92770d1a60281846da329a62"
+      },
+      {
+        "path": "docs/features/settings/Index.md",
+        "revision": "c5ee295319c819502b5e6d82fe54e81297fadea23727d8486dc591e7349784e6"
+      },
+      {
+        "path": "docs/features/settings/settings.md",
+        "revision": "b3d602e2355709c2a949745fe3bb0a7110485a11d43b3f1fba95d16213d21b2f"
+      },
+      {
+        "path": "docs/features/window/Index.md",
+        "revision": "8b9ca9549b91491804c5e22560c0969a11085915e0e04a62b9042fb92b83f775"
+      },
+      {
+        "path": "docs/features/window/document-actions.md",
+        "revision": "1187c9ace6ac5efdb6aabe50e6d965a29d779a99d0489feec76327d6f7c1a6ed"
+      },
+      {
+        "path": "docs/features/window/empty-states.md",
+        "revision": "efcd22760d93233045f91fa20b6e2749dc39a2b90af408017d2ee84a93aa61b8"
+      },
+      {
+        "path": "docs/features/window/error-states.md",
+        "revision": "5bf0bf9870513e3a2565bc6e6668c974f87b6716e79231a00b5cbeb4667e782d"
+      },
+      {
+        "path": "docs/features/window/global-search-design.md",
+        "revision": "0ab1df934b9f1a1b6f7b7f748bdc8ed825e5e98cd4981b245bdfd5364dccfa7f"
+      },
+      {
+        "path": "docs/features/window/implementation.md",
+        "revision": "edba56014baec20f0362b985160ba29c754bec40d256d02f6df7868d51510e5e"
+      },
+      {
+        "path": "docs/features/window/indexing-progress.md",
+        "revision": "1fe7d2a044154223a96c25c40ea1c7639835b8e532196d009e67636e8eafb2a0"
+      },
+      {
+        "path": "docs/features/window/keyboard-design.md",
+        "revision": "c7862823d4a866d28029d936864747021390653481c7f7fe62c6409b4d57e08b"
+      },
+      {
+        "path": "docs/features/window/logs.md",
+        "revision": "adf74b064a7cd90817014911fe9f1f015af08e1fe013450082915bad6c336f95"
+      },
+      {
+        "path": "docs/features/window/main-window.md",
+        "revision": "247067da8f045158ed1f67c20733dfc226882e92607a1e71ac4cc6a77de8d02c"
+      },
+      {
+        "path": "docs/features/window/mcp-statistics.md",
+        "revision": "e4b2dd9af47d4663f5dc9360d40a2af5a5a284835c8c332f0a19d61d1fd57258"
+      },
+      {
+        "path": "docs/features/window/mockups/Index.md",
+        "revision": "ba774c5400276bc5eff3bf1f04d9c5357860a22e8dd855bb5663444a9b85ce2d"
+      },
+      {
+        "path": "docs/features/window/notifications.md",
+        "revision": "03b357ebc9e8b225e130abfd5e9a5705de4e8a43cfec91c3a14fe20bf25585c9"
+      },
+      {
+        "path": "docs/features/window/palette.md",
+        "revision": "4cb4edc7385a0e97afa735bb5c9c86e5db283d78fe080c03fdbaeb9d1aa8782c"
+      },
+      {
+        "path": "docs/features/window/project-menu.md",
+        "revision": "e36f696b9abd008f6c2ccb3efe47a33ec45c1d16a9cccfa5323dc87eeac5b28d"
+      },
+      {
+        "path": "docs/features/window/refinement-design.md",
+        "revision": "be17e227d6a80402d55d13ae6b8463ab52989e3632a1bcfca1c244ad4f83bc5f"
+      },
+      {
+        "path": "docs/features/window/refinement-plan.md",
+        "revision": "270a770cfb6a6090d21dbd77629a6907660dfb5d69a16c317664c126adc628bf"
+      },
+      {
+        "path": "docs/features/window/reindex-consent.md",
+        "revision": "3558c93fd8496eda5c8d45670baa83b1158c1f1a9778027c6de672085f7f51fd"
+      },
+      {
+        "path": "docs/features/window/requirements.md",
+        "revision": "1c31e93c00e52b06f923444eb010179d62c2b37c815cc9f4609036e453640319"
+      },
+      {
+        "path": "docs/features/window/settings-window.md",
+        "revision": "9922aadd3f653ead8ec9cac605f7daa3c8ddeecc5325cb2f401d9e0ec8bb77fb"
+      },
+      {
+        "path": "docs/features/window/workspace-decisions.md",
+        "revision": "9067414dcd1647a11e80a80929683c77a68b081c881961681c05bc90143196ab"
+      },
+      {
+        "path": "docs/features/window/workspace-design.md",
+        "revision": "71d33d229d3770dd884a80804ab6504f8ec20ba857781845cebf00b37daea5ec"
+      },
+      {
+        "path": "docs/features/window/workspace-plan.md",
+        "revision": "67195872b0076883b8c6cf432ef475cad984ca0f0f645f0a58c5829103a8ace3"
+      },
+      {
+        "path": "docs/knowledge/Index.md",
+        "revision": "bbe8ecf02711c7f26e7ddcb8140c143dca1ec2e6d331736ec0aa45e8d228447c"
+      },
+      {
+        "path": "docs/knowledge/agent-tool-usage-2026-10-18.md",
+        "revision": "834e63ec73123e01cd243fb6bffcfec81fb8974f8ad3c82b67cce1539fb29e27"
+      },
+      {
+        "path": "docs/knowledge/agent-tool-usage-2026-10-18/Index.md",
+        "revision": "b7f56d31ff916714a18f0be53652a9d043e9789b67fe5870ded181f1b167d91a"
+      },
+      {
+        "path": "docs/knowledge/build.md",
+        "revision": "569f323deaddc1dbfe37608f2d017e0eeaad3ca16913223a22e1b3412c09c95d"
+      },
+      {
+        "path": "docs/knowledge/development-ideas.md",
+        "revision": "27376c52d93ddc3585f36fd5494ced9d50e3cd9ab6cd331b42c08d60d8ced228"
+      },
+      {
+        "path": "docs/knowledge/duplicates-2026-10-19/Index.md",
+        "revision": "af8fb0cb79165aee2eab4c89e19b1861dbbf804aaa4efa5df1c2c7034464ee0f"
+      },
+      {
+        "path": "docs/knowledge/duplicates-2026-10-19/analysis/Index.md",
+        "revision": "628c11d9cfebf4336420511155672602f9f93e38cf691d18b38bbe9a6804588d"
+      },
+      {
+        "path": "docs/knowledge/duplicates-2026-10-19/bench/Index.md",
+        "revision": "e9cf93e0c6b25cc07c0e6e60a1ad1202219d21cb1c7c6e1371928b6d11c94cf2"
+      },
+      {
+        "path": "docs/knowledge/duplicates.md",
+        "revision": "f91465e46c611238daab1236db007d35967d3ca65185e51f5aa4f665b37aa3e6"
+      },
+      {
+        "path": "docs/knowledge/gguf-2026-10-18/Index.md",
+        "revision": "886b0f0e8ce29e6627328cf4af2e495d065abec61d7d2efbdea5d3a0c287b169"
+      },
+      {
+        "path": "docs/knowledge/gguf-models.md",
+        "revision": "621f79bf2b37e7034e4276234b4f05c489985bb6446b34cb05627fc108bf8a50"
+      },
+      {
+        "path": "docs/knowledge/graph-corpus-2026-10-18/Index.md",
+        "revision": "55a3e70f5357701577f98a47cf2d2b9553edbc03deeb1854c37cd15d45b96431"
+      },
+      {
+        "path": "docs/knowledge/graph-embedding-2026-10-18.md",
+        "revision": "2b0bcf8b0aedd1f24d2183c0512f6c2b6c2ff27b8a35a82dd83a0f1163efd68e"
+      },
+      {
+        "path": "docs/knowledge/graph-embedding-2026-10-18/Index.md",
+        "revision": "5d9da093a08fe33c6cbc5d3dc42334623fbc8f0ac61b7d03f1ec92b99c101af2"
+      },
+      {
+        "path": "docs/knowledge/graph-quality-2026-10-20/Index.md",
+        "revision": "0884195a8f5f43a071316eb556e0de6c174ac5cfa822ed831dfb80c7d82e2250"
+      },
+      {
+        "path": "docs/knowledge/graph-render.md",
+        "revision": "3f175ca1a40dbf29987b260cb405179f209d51bf276b1355da51e8fe55fff8d1"
+      },
+      {
+        "path": "docs/knowledge/graph-renderer-2026-10-18/Index.md",
+        "revision": "835199a4aac9d8a2c52b375b2f414e690c42d059f1d1fc70229b3b6d663073a4"
+      },
+      {
+        "path": "docs/knowledge/graph-research.md",
+        "revision": "50dd9039f1844208c04cf336cd9583dbb0aad5049d172e706b6360aaf949cd9a"
+      },
+      {
+        "path": "docs/knowledge/graph-search-probes-2026-10-18/Index.md",
+        "revision": "7147f805df71ca74d540bc04c17c5adabb1ce0a8ff52b1b879a35777b9cff5ff"
+      },
+      {
+        "path": "docs/knowledge/inference-2026-10-18/Index.md",
+        "revision": "f6460a3833b795810757448904dcca36e7c3ac96d71678ef4b074b67408c261a"
+      },
+      {
+        "path": "docs/knowledge/inference-devices.md",
+        "revision": "bfe9fd4929c9056d821ed3a17d568884bc679b717fb82fb3feacdcbc3bbf582f"
+      },
+      {
+        "path": "docs/knowledge/inference-speed.md",
+        "revision": "6208956eacc040b1b1d8a9be83fd3a5ad2b21b30dbd7f1efd22ac838b8864de3"
+      },
+      {
+        "path": "docs/knowledge/installer.md",
+        "revision": "a65a8a2ae2073d8300d69cab9797210526166041a112391d27fcb176c7848405"
+      },
+      {
+        "path": "docs/knowledge/local-documentation-tools.md",
+        "revision": "df45870309f9912055a7834952d11affaf28e9484bb89a3aa28025b22779405c"
+      },
+      {
+        "path": "docs/knowledge/memory-2026-10-18/Index.md",
+        "revision": "06fa9496d01d85796cbbcee5f28125d8977e687c9473f90a1b25c41fb1a9f0bc"
+      },
+      {
+        "path": "docs/knowledge/memory-acceptance-2026-10-20/Index.md",
+        "revision": "0877efe71c6a1149ee2e479d060648261faa1959bf1127a88050718e83b64f22"
+      },
+      {
+        "path": "docs/knowledge/memory-embed-2026-10-18/Index.md",
+        "revision": "b3e107adf77055f806f1def1a56595d7775af6f7d2cdefd945dfd83b0f35baf3"
+      },
+      {
+        "path": "docs/knowledge/memory-fp16-2026-10-18/Index.md",
+        "revision": "a37a71611e10edbb4956277dc1413a8e9f4c425c47851665c39f5dc94a028bc8"
+      },
+      {
+        "path": "docs/knowledge/memory.md",
+        "revision": "a109418631cca39ee3b4f3a4cbf91bced76cee40b181950ea6885621327a8c53"
+      },
+      {
+        "path": "docs/knowledge/new-topics-threshold-2026-10-19.md",
+        "revision": "6fd9b8385f1456ab7644f2f3634c2aad75bd8a9c89b9541a6d1266901aeda115"
+      },
+      {
+        "path": "docs/knowledge/new-topics-threshold-2026-10-19/Index.md",
+        "revision": "4d7f3d2d909f53b73d460698886b805b17e540dc225a7b6b9c8eee2498d3ded6"
+      },
+      {
+        "path": "docs/knowledge/quality-2026-10-18/Index.md",
+        "revision": "46b1dde924dc853eeab05ab5b52cae75e5d4a884fe5f5b3b3250a0b120d95014"
+      },
+      {
+        "path": "docs/knowledge/search-during-indexing.md",
+        "revision": "f2e8d97e11ca44ae951294538c6db87b3c4e7f489d2007ea496eda14dfff21a0"
+      },
+      {
+        "path": "docs/knowledge/search-quality.md",
+        "revision": "b21d3e93fd2b8b20c6ad38d08945410d7518725846ab4385c6a89a6cbdff52ea"
+      },
+      {
+        "path": "docs/knowledge/spike-detach.md",
+        "revision": "628eaa49a83d88fbf5f5d925eb2c883155d76911945df05ac187ff45ff70018e"
+      },
+      {
+        "path": "docs/knowledge/spike-ipc.md",
+        "revision": "6939a5a0d01ac6f3103c8efe1281b006cfd0300592a052ac8075e59151ad33de"
+      },
+      {
+        "path": "docs/knowledge/spike-search.md",
+        "revision": "5dd5cd6d627ac12cee505ce7a5e39d2b071a3fbf7e9f3cbb5e0724bd4d584226"
+      },
+      {
+        "path": "docs/knowledge/stack-research.md",
+        "revision": "63b49342bce13fff1673b3fd02992fee79f92dc4abc4b527f5fa69cfff202233"
+      },
+      {
+        "path": "docs/knowledge/traceability.md",
+        "revision": "bc6c742867b8589faa6735a2483f1ef899acef188839af007f973b580e44de09"
+      },
+      {
+        "path": "docs/knowledge/window-docking.md",
+        "revision": "bdbd21b60c97975331538eb93f3c48811ee0af3b071be2fb16cae22fd0a94b87"
+      },
+      {
+        "path": "docs/manual/Index.md",
+        "revision": "45f28f15097bafac003fc62f7e4051fd9b6a71ecab0b9093eaf4fc7366d96999"
+      },
+      {
+        "path": "docs/manual/activity.md",
+        "revision": "a373f6e32e642e8ff80c0b78b45b33615ebd93cba7eb4b687eff769d750e3de8"
+      },
+      {
+        "path": "docs/manual/agents.md",
+        "revision": "50f91cfb99203c952a3620e9b3ae4063a291b15fe16c34b022f96388ca307cb3"
+      },
+      {
+        "path": "docs/manual/graph.md",
+        "revision": "8a17832a7959565ae6a7fd70fb90efd3aef0bc01fb07ff69b226ce80cc38fb59"
+      },
+      {
+        "path": "docs/manual/how-it-works.md",
+        "revision": "950a3dd50fc5a2966f97fbf026b87dbe0e5b12b33fe96d5c724afc8f11ad976b"
+      },
+      {
+        "path": "docs/manual/install.md",
+        "revision": "bacae3e8e50ee142d7891c5db062384f2e036be8cb9a547b8d1a1b652160bb8f"
+      },
+      {
+        "path": "docs/manual/models.md",
+        "revision": "46598fe1cd539952923480f3e14fd5265f3f9325baa06aece049cb70e6673f0d"
+      },
+      {
+        "path": "docs/manual/new-topics.md",
+        "revision": "c5528146cc67ffe58ab0c3e65c8b77e5387b1a56f65f4c1888787c9319e2d475"
+      },
+      {
+        "path": "docs/manual/projects.md",
+        "revision": "0cb801fd53042ac6408ea3482fcbb42a5ba2cf11ca07dec6710f5e3bcbea258d"
+      },
+      {
+        "path": "docs/manual/search.md",
+        "revision": "3d32ef1da713d5415c8065c681ad501f8337d11f970410883e53b5291eac0a30"
+      },
+      {
+        "path": "docs/manual/settings.md",
+        "revision": "ba5039ef3b917c14693083c76edafb7b26358a91f4e8a13d3450f7bc2770a7c7"
+      },
+      {
+        "path": "docs/manual/terminal.md",
+        "revision": "e12d2704c181dda61a8f97576f2000a191796ff1707d7a6270d8f1b859ddc6cc"
+      },
+      {
+        "path": "docs/manual/troubleshooting.md",
+        "revision": "31b8f80488c1aa0a31642f27742e67fdaa00a31c2509a2ad5417b2df3d0ea3d8"
+      },
+      {
+        "path": "docs/manual/writing-docs.md",
+        "revision": "ea5a10756117beecd98174974a90cce1236cb463c3b452aa1774b86859a5fe97"
+      },
+      {
+        "path": "docs/overview.md",
+        "revision": "e7e4970aaff831b69cfef0b0af8c3ac136621d893768dc4c9bc33fa0aee2358e"
+      },
+      {
+        "path": "docs/project-status.md",
+        "revision": "41e7fc5af26bec6c6409c8fb2f16048dce8ff119293e793982a90600f207cee3"
+      }
+    ],
+    "sourceFingerprint": "9dd7bfb5c0becc047828c1e7d83a015a12c976b9997def79d0b95ed54696b0e8",
+    "graphFingerprint": "8fcddceca357ec824e2de8cb0522bf9310ab95e8a79d63d34dc325a5cbd47b01",
+    "views": [
+      {
+        "name": "bars-project/documents",
+        "nodes": 301,
+        "edges": 1958,
+        "sha256": "c261da2fb11a2bab81cfb7e4092e66dead9637dbb35ffb87cd1ba7992165c871"
+      },
+      {
+        "name": "bars-project/documents-chunks",
+        "nodes": 1565,
+        "edges": 5389,
+        "sha256": "67673ca95b747173481d3b408e1d2c92a62e03a2625ce305d4b83cfe4c6c25d4"
+      }
+    ]
+  },
+  {
+    "name": "overdrive-bots",
+    "capturedAt": "2026-10-20T19:45:24.569Z",
+    "kinds": {
+      "chunk": 2303,
+      "section": 2647,
+      "document": 479,
+      "entity": 263
+    },
+    "rawEdges": 14954,
+    "meta": [
+      {
+        "key": "active_job",
+        "value": ""
+      },
+      {
+        "key": "error",
+        "value": ""
+      },
+      {
+        "key": "method",
+        "value": "explicit-markdown-v4"
+      },
+      {
+        "key": "schema_version",
+        "value": "1"
+      },
+      {
+        "key": "snapshot",
+        "value": "3a4e5efd16228ce6a63fd5878788d56912b14eaf562be50d88fb82387ed1b014"
+      },
+      {
+        "key": "state",
+        "value": "partial"
+      }
+    ],
+    "sources": [
+      {
+        "path": "docs/CHANGELOG.md",
+        "revision": "f6ced676cc7edbae7f1bf483d846766615c15c3349cbe888e82076f1fe37bf56"
+      },
+      {
+        "path": "docs/PLAN.md",
+        "revision": "7d08511ff5b97cb39ee68468ee68b07364c98b4bcb2f0ab6e5012f06feb81746"
+      },
+      {
+        "path": "docs/README.md",
+        "revision": "d87bba47cfbc848ff0b16ceec0de0c0f8143e96eaa09c17d6d27ee50ec217a6f"
+      },
+      {
+        "path": "docs/adr/0001-stock-dll-loader.md",
+        "revision": "c6bf311592ca450c7cb687a7f1ddbe92337ca9eab7602bc34c58f01a2e88a772"
+      },
+      {
+        "path": "docs/adr/0002-server-unchanged.md",
+        "revision": "ff4a9be9b6865a3f29a388ea9db98a6a93ed35477ec7aef84b9d5346e5b3feb1"
+      },
+      {
+        "path": "docs/adr/0003-manual-pit-instant.md",
+        "revision": "94f420fb4705553ee6be679cd3ddf8a11c3dd63ee4d7385d2939fd6aee340661"
+      },
+      {
+        "path": "docs/adr/0004-seat-reserve.md",
+        "revision": "91b0f4df9aee18cb3b0682be91a43d860f7df83a3326c5fcf6baf533f5cc8542"
+      },
+      {
+        "path": "docs/adr/0005-scenario-pit-instant.md",
+        "revision": "65d8608586b2f815bdc52cbf3c87ccabdcb9343e3877a848a7ad7ee90a83d870"
+      },
+      {
+        "path": "docs/adr/0006-drive-into-box-in-more.md",
+        "revision": "501476f601aa1e2ffa80685ee02147e75750fb84465fbfa5b76f14af1a38e62a"
+      },
+      {
+        "path": "docs/adr/0007-stuck-bot-return.md",
+        "revision": "cf65f5bf612706dd455063d2793ae9723d43dcd2011929e262499dbd71b1ab50"
+      },
+      {
+        "path": "docs/adr/0008-user-command-cancels-auto-drive.md",
+        "revision": "1316ab5ce171afc95e8ed18adaad2442c44b15ecd2b4e48b85dd7bf60109bdc5"
+      },
+      {
+        "path": "docs/adr/0009-single-server-state-store.md",
+        "revision": "7bb1c14b72e923365091a5da2e3647a2e89006b30322bbc258f6029ce96f4f4b"
+      },
+      {
+        "path": "docs/adr/0010-prune-stale-passwords.md",
+        "revision": "0b247f80bd6e427a555af0d2391611e56ea7bb327c29ac04f710ba4aa9fb3269"
+      },
+      {
+        "path": "docs/adr/0011-join-diagnostics-debug-only.md",
+        "revision": "91a95e8dcca3093e178511e4ac045f33ba8f78bbeab9e0cb46879689b5a03abf"
+      },
+      {
+        "path": "docs/adr/0012-tyres-match-by-name.md",
+        "revision": "52d949041cbeb14809b5d8ddda95c4d49e130c014ec88ea7ddb645c2e7f3d458"
+      },
+      {
+        "path": "docs/adr/0013-in-game-panel-csp-lua.md",
+        "revision": "40b39cc6d3927da9aa6ea0053e341a28def96a65ea9eb0aa48668317131b5f9c"
+      },
+      {
+        "path": "docs/adr/0014-police-ignores-only-target.md",
+        "revision": "5213899e9d4ddf3ca6847d495ffe06bc665c2b30a873dbe1797f4af2fabbbe41"
+      },
+      {
+        "path": "docs/adr/0015-group-police-paused.md",
+        "revision": "b2279df3d74300af80afed7d95fc09f577b28bff55f1ae7c8302576f2eab8f8f"
+      },
+      {
+        "path": "docs/adr/0016-linear-pit-speed.md",
+        "revision": "5cf95f92fbb77bc5b702c881acbce2809748d1c5be3c468002faf5e890ad50af"
+      },
+      {
+        "path": "docs/adr/0017-self-service-fuel-laps.md",
+        "revision": "acea067ce5521af1a2c2fcee957534eb0dce59993ba0626ad5a5cf537c234727"
+      },
+      {
+        "path": "docs/adr/0018-startup-fuel-model-300m.md",
+        "revision": "4fb0f293be1500e37bc449c22de8bed90988c8c9f05327d7d61a4586fb4b622b"
+      },
+      {
+        "path": "docs/adr/0019-component-service-policy.md",
+        "revision": "a4a14ccd6cbde0a5517498a3cabfa4a5cac04bffa02eac2370d8d1ff887556a2"
+      },
+      {
+        "path": "docs/adr/0020-service-continuation-and-modes.md",
+        "revision": "c5a7880371d60659b9086987b6873fbc008b7b60cefd70557762b408aee38bb2"
+      },
+      {
+        "path": "docs/adr/0021-native-scenario-checkpoint.md",
+        "revision": "7a5d41fa3952e31dcd26ef06fe31a3307f54661e4f067d1b88af45924dd6e080"
+      },
+      {
+        "path": "docs/adr/0022-native-penalty-source.md",
+        "revision": "43e15956a1f828368d3cdd79594854d6fa40a21a19cef9caa8e7f6ab01b9a1ca"
+      },
+      {
+        "path": "docs/adr/0023-adaptive-preset-policy.md",
+        "revision": "2e92473866b68ed48586976a3c0972a36a469e8c6f36e1cac5ed268dd4ba6a70"
+      },
+      {
+        "path": "docs/adr/0024-random-formation.md",
+        "revision": "d7fc213af76fbdba170ee194d5cac00bb17abe5a01693f9cadb125758d351ce1"
+      },
+      {
+        "path": "docs/adr/0025-per-bot-native-service.md",
+        "revision": "d257da9b7c6033f671ed24271a206bacf454fbe61f08686dd25a71f06a491009"
+      },
+      {
+        "path": "docs/adr/0026-any-wheel-tyre-service.md",
+        "revision": "544232db6d3d44b3aa04b134680af41a3bc8c2a2e2b47e5ee0f70a29ca4553ae"
+      },
+      {
+        "path": "docs/adr/0027-owner-decisions-before-13-10-2026.md",
+        "revision": "e71a419c811ddc9c25380181981741fac1e22168e7293b2699d1d23213a6e7d4"
+      },
+      {
+        "path": "docs/adr/0028-two-game-builds.md",
+        "revision": "902c0f2d0e2c85ed6df08072f379a72a6134864a18abadaa2115f0de466598ed"
+      },
+      {
+        "path": "docs/adr/0029-owned-ai-return-policy.md",
+        "revision": "1003063ad193b5ebffa394dac2715676a160f87114b5aa8b5a92826be0f06d89"
+      },
+      {
+        "path": "docs/adr/0030-owned-window-no-activation.md",
+        "revision": "e2b750fbb5e1895a94a4ae3ffc4de66bda8948c00ff90a5f91118edaae79e38f"
+      },
+      {
+        "path": "docs/adr/0031-repair-command-everywhere.md",
+        "revision": "79954241de53a347ad1af56715018045d828f75113252f751ff4e64bc7f93602"
+      },
+      {
+        "path": "docs/adr/0032-instant-service-default.md",
+        "revision": "cc5c4705039632ce6b38890e0058855309c0ef3230e12be9f28a4223c9199adc"
+      },
+      {
+        "path": "docs/adr/0033-player-formation-and-coordinate-teleport.md",
+        "revision": "37c13e15f64d5018b39c2200f6e44ae7bdaec4b8e8601079d7b1f49d1ddf2f55"
+      },
+      {
+        "path": "docs/adr/0034-panel-binding-server-alias.md",
+        "revision": "c3b5124505624e26f1b7211a9157f62960894bea1db2b55900437fa6afe967dd"
+      },
+      {
+        "path": "docs/adr/0035-car-change-from-editor.md",
+        "revision": "d4e991d6b88c4305e3965441b713fb29b97983cd13437262a15c317c7adeb3d2"
+      },
+      {
+        "path": "docs/adr/0036-multi-server-single-runtime.md",
+        "revision": "98642caadce9b98617aa7c8d80ed5ed6fe6c6f6908c87ea73837857f06b86bf6"
+      },
+      {
+        "path": "docs/adr/0037-spline-ownership-refusal.md",
+        "revision": "c35a619a5a1543f7edc579665fbe3282ebb1faaccce280ccf8ca6b5b37a69183"
+      },
+      {
+        "path": "docs/adr/index.md",
+        "revision": "84b6131911ec90e9d3dc900303ba4d09ea7432751ef1746e31b18e949b502201"
+      },
+      {
+        "path": "docs/architecture/app/application-cycle.md",
+        "revision": "60ab5a20c05866b0888779e52cfcf300153fba5bbbfe6cd562f8a3c0000cc5a4"
+      },
+      {
+        "path": "docs/architecture/app/in-game-control.md",
+        "revision": "e60c801c106d9aa5ca4a5aff1df9a1adbde25aa594d911a161d6eccf3957af9d"
+      },
+      {
+        "path": "docs/architecture/app/index.md",
+        "revision": "61ae4b983ddc0ed7bdece4c93db0f38f566c8b394e0ee220b33db53b2b32fb2b"
+      },
+      {
+        "path": "docs/architecture/app/run-panel-wiring.md",
+        "revision": "eb62380ec865fad42d542aaee3bfa001d1ec1d412766a8b94ffb92dd60fe4e86"
+      },
+      {
+        "path": "docs/architecture/app/runtime-sampling.md",
+        "revision": "8597156be5d3abe0a094560c583385e5617d18c516e81cb174660a0aab1139b5"
+      },
+      {
+        "path": "docs/architecture/app/self-service.md",
+        "revision": "e301c44acf5958d8195182f19fec89708c5ea952c0e0a9312543da5157eefd2e"
+      },
+      {
+        "path": "docs/architecture/app/startup-and-lan.md",
+        "revision": "9f450f09bb5940154aca7f671937e9e22290e289e5588407f60ac7cb100a6d52"
+      },
+      {
+        "path": "docs/architecture/environment/acs-builds.md",
+        "revision": "562b9364e22d13d10947685c6eef56e938354f16ecee37889cbc5c7ece2a8ea0"
+      },
+      {
+        "path": "docs/architecture/environment/environment-and-server.md",
+        "revision": "692c24b055767830047bf9665b7f590cab906f5dfac9a337da4debf605f0c94c"
+      },
+      {
+        "path": "docs/architecture/environment/game-folder-preparation.md",
+        "revision": "4c557fa10de2f14f299dfd335134bdd8a69b38d8533ee82d5658eaedd52fff90"
+      },
+      {
+        "path": "docs/architecture/environment/headless-and-profiles.md",
+        "revision": "995d7bf73ab9782f1ef8fc6bd2b85f825ab6d4b632cebb5d6d9af011be8c2842"
+      },
+      {
+        "path": "docs/architecture/environment/index.md",
+        "revision": "5b8eb1157451247f35c8db794424d177bc0b6dc138cf49ae878321f935126c6d"
+      },
+      {
+        "path": "docs/architecture/environment/native-cache-and-lotus.md",
+        "revision": "d8367cb846484c11709f0af31aae9101a33116dd5b8e443d55d15f5408c21ffa"
+      },
+      {
+        "path": "docs/architecture/environment/private-copy-binaries.md",
+        "revision": "d8c4eeab5c8394f088d6358505bd0044431130c812ff9553b2ced9620cc36f20"
+      },
+      {
+        "path": "docs/architecture/environment/shared-resources.md",
+        "revision": "4cf9e13f36b4f26c461489ce0d967e89f29d4c20ec00a052718c234cc854cf5b"
+      },
+      {
+        "path": "docs/architecture/index.md",
+        "revision": "91663f8984c094ea1fbc4176535c6919663e382704ae1288d85cc13c076c8b14"
+      },
+      {
+        "path": "docs/architecture/native/ai-behavior-controls.md",
+        "revision": "ac5dfc37fd57a8f1e7cb0bdef6193ba3313b5ce7c5a3c56ed5888df546f74a89"
+      },
+      {
+        "path": "docs/architecture/native/ai-driving-pipeline.md",
+        "revision": "6eee58dcbc59a9380f720f4f01a6a647e339ee2b87fdbd418426891d67976ada"
+      },
+      {
+        "path": "docs/architecture/native/approach-player.md",
+        "revision": "2625bfd7bbc271eedcb26cdd29239620fa4fcea17cf40c14cd2109d4fe09a002"
+      },
+      {
+        "path": "docs/architecture/native/bot-return-policy.md",
+        "revision": "d07f15fcc3cec6d6be755404a986e597023e13d2cb739cfc122cb1ee99c82593"
+      },
+      {
+        "path": "docs/architecture/native/collision-reactive-behavior.md",
+        "revision": "ff02198eaddc82d427c4077b74284c073ef835ad0935df12d20b59b6b08fe485"
+      },
+      {
+        "path": "docs/architecture/native/csp-control-surface.md",
+        "revision": "2a27b635dd5ea1e377c68d59996077284a7a2b032af060c1c472da74dc8d95ba"
+      },
+      {
+        "path": "docs/architecture/native/csp-handshake-features.md",
+        "revision": "68ff2174a783422a8c330d4000568259d38e7139a5da433beae3615eba45ad6f"
+      },
+      {
+        "path": "docs/architecture/native/group-police.md",
+        "revision": "838c7fa0dd701cb40a6e012b76a80ae28933594f561bd5691876990238d0c265"
+      },
+      {
+        "path": "docs/architecture/native/index.md",
+        "revision": "37ab6d1ac758bce24b6b86e6f228d72dd43a13deff81a531ccb582458e6780a6"
+      },
+      {
+        "path": "docs/architecture/native/memory-startup-configuration.md",
+        "revision": "f10bf162f9bedd508b721720e771dfae61f0d465a8161641c361a9f5aa1e56d4"
+      },
+      {
+        "path": "docs/architecture/native/native-admission.md",
+        "revision": "fa3e5a96b44f7da0d22406bed829f97095bd74ce11beecf184dcac55dfd39092"
+      },
+      {
+        "path": "docs/architecture/native/native-control-contract.md",
+        "revision": "0b10fd8355c8ec68382a6466d0763f8470c27b964aa6554da472843fa1967234"
+      },
+      {
+        "path": "docs/architecture/native/native-game-adapter.md",
+        "revision": "9cde25aaba7ebdc65bf8cfd0e4358b6885e9e4d4f5aa102b2e572fdc02ccf0bc"
+      },
+      {
+        "path": "docs/architecture/native/native-health-recovery.md",
+        "revision": "5a3536eaca0d57654ca2c15223ab0e796b9ba1ebd1d02f7b4986be797d873487"
+      },
+      {
+        "path": "docs/architecture/native/native-pit-lap-session.md",
+        "revision": "99bb173a234afdf78a3acea892e998d2e288812ebce27bf5a5c93bb518401523"
+      },
+      {
+        "path": "docs/architecture/native/native-pit-return.md",
+        "revision": "7979b5104a9885742d1f55bc5d15363cc0a70bc70f55006b3aad56e941fa2b40"
+      },
+      {
+        "path": "docs/architecture/native/native-plugin-loader.md",
+        "revision": "086e3fafec48a25e5bc8d52961a73723bfc8c9fd80116586e2fd9441f2994de8"
+      },
+      {
+        "path": "docs/architecture/native/native-scenarios.md",
+        "revision": "e98e503f167e94b7871549112e512e0ca63d750ab8a2a527f032e6513b423e16"
+      },
+      {
+        "path": "docs/architecture/native/penalty-observation.md",
+        "revision": "5b77716e86e7daa7eea0f4ca16ca0c8264d3351cbf9dbc101bf3d5ff6dbbb7d8"
+      },
+      {
+        "path": "docs/architecture/native/physics-state-control.md",
+        "revision": "2264ebbe1ed44305243aa936806693bc8fa61d68e3a2179c489b17e444e62cac"
+      },
+      {
+        "path": "docs/architecture/native/pit-drive-into-box.md",
+        "revision": "4b75d550ad6749c684c64a9d547fa36e0a55cf40350979ba2a65de450fc36f32"
+      },
+      {
+        "path": "docs/architecture/native/pit-service.md",
+        "revision": "62b32152b11297e6ebc49f908ec0a19ba78dae627d963ae04e3e15dbc49c1021"
+      },
+      {
+        "path": "docs/architecture/native/pit-teleport.md",
+        "revision": "e46d33925f3acfe1bc810038fdd1ae92768306062f069f82d44ad65949325ff5"
+      },
+      {
+        "path": "docs/architecture/native/player-modes-control.md",
+        "revision": "d01cca00a9c2e5c203826afeef7411659273cccf973bf74e1acb22bd5c48fcbf"
+      },
+      {
+        "path": "docs/architecture/native/player-modes.md",
+        "revision": "0cc5562953823dd6794ae1c389cc2af0a8df49d718b61d25c8417ccf575ca2e6"
+      },
+      {
+        "path": "docs/architecture/native/police-aggression.md",
+        "revision": "e52e71690a12392a7b3ddcc78b67f995f59b971a178015a7cbaf27b2512e9de7"
+      },
+      {
+        "path": "docs/architecture/native/police-solo.md",
+        "revision": "77b70abc3a366d56175bef3e7f51ad28f3087cf71c254f1d5e5760ed24f46b3a"
+      },
+      {
+        "path": "docs/architecture/native/police-target-filter.md",
+        "revision": "85e313a56dca30526a8e85753af79158f668ce3b4ed5a9ad4ebe08eed864d961"
+      },
+      {
+        "path": "docs/architecture/native/runtime-ai-bindings.md",
+        "revision": "81e9ac70d85777091b8827cc2cefd917323737c102c4f1eca125ae5ba3d671e3"
+      },
+      {
+        "path": "docs/architecture/native/runtime-ai-spline.md",
+        "revision": "2e41f821c0fa5942b90d5bc0319fb134f26bad76c3d593afe563349849522ac6"
+      },
+      {
+        "path": "docs/architecture/native/scenario-service-continuation.md",
+        "revision": "8ebc4c8bec7988621003a38c3896fc0a401995e419c484450b8d2f56dd50d0b3"
+      },
+      {
+        "path": "docs/architecture/native/selected-opponent-awareness.md",
+        "revision": "ee8331ef6749f8c6f0f70ce928985bf70c85b4e04245fb95a798017f8c0bfe3e"
+      },
+      {
+        "path": "docs/architecture/native/track-placement.md",
+        "revision": "06c92dd04641b48898250f09a60150f408a2977c8d67d3ffa407356abf7a8ba4"
+      },
+      {
+        "path": "docs/architecture/native/vehicle-systems-control.md",
+        "revision": "5ce158e021031a7e40196c2fdbaa28ed1340e29316d3774489a756ac5f7888f1"
+      },
+      {
+        "path": "docs/architecture/runtime/admission-release-fence.md",
+        "revision": "eb647fff3c3ece61a29fe15ac61ef6d8a7f419625d47573af87bcdfd81736960"
+      },
+      {
+        "path": "docs/architecture/runtime/configured-game-identity.md",
+        "revision": "0484efa33afd3b4c65ea8b1163cac0a685890bcfb166fd87ebeea10d17f764db"
+      },
+      {
+        "path": "docs/architecture/runtime/driving-paths.md",
+        "revision": "2164018f51050b0008f275088668d9e5bc1ed62f4927d4e8db11bd90b5dd2204"
+      },
+      {
+        "path": "docs/architecture/runtime/index.md",
+        "revision": "70eedc4e57ecf074bedcef87f6a45cdc7ff5e98f5b9e0d63b1afd6e94b8fa6f5"
+      },
+      {
+        "path": "docs/architecture/runtime/launch-service.md",
+        "revision": "e9354c227aa28f20f6ad430614808f9e88b3314a063430b83265f931f34e73fe"
+      },
+      {
+        "path": "docs/architecture/runtime/managed-lifecycle.md",
+        "revision": "87f02835c04c21f3599920fe59197911f0278dcb8d7696e7fe30e044c191efef"
+      },
+      {
+        "path": "docs/architecture/runtime/motion-planning.md",
+        "revision": "6bc76c544f8b603c722d6fcc916bbc262c3b50559c8b0780eeb197e98ed0c7df"
+      },
+      {
+        "path": "docs/architecture/runtime/motion-tasks.md",
+        "revision": "2cab9d9de955c1e0436c65ffdd36d30a72e794fa2d05ab563759fef67d2c943d"
+      },
+      {
+        "path": "docs/architecture/runtime/multi-server-boundaries.md",
+        "revision": "272b3c1545519c3783a6d40e42549510c572275d4eb3c0f287f6eda5e6b99e4b"
+      },
+      {
+        "path": "docs/architecture/runtime/race-order.md",
+        "revision": "7a634366c61840ed64fe04a32d5a142ba92ef56883b6963a8aeb0d90af17afdb"
+      },
+      {
+        "path": "docs/architecture/runtime/random-formation.md",
+        "revision": "e26ceef73601ecebc773da323e43643161bd4208da6da1d28eebbe09cb40841a"
+      },
+      {
+        "path": "docs/architecture/runtime/result-codes.md",
+        "revision": "f4fd17f09e9c7647b21a3eacabbf350e0bcb97cb4e3889800b7f59eda8e95ff2"
+      },
+      {
+        "path": "docs/architecture/runtime/route-search.md",
+        "revision": "0031ffe12af9b414c875cacc8e78f6b224095676d56b00c8f7cc78baebad2103"
+      },
+      {
+        "path": "docs/architecture/runtime/runtime-latency.md",
+        "revision": "061f2186ac171dfa190c0d347df2bf50177799a2a1a6e8ba9baf8ede66d791c0"
+      },
+      {
+        "path": "docs/architecture/runtime/runtime-load.md",
+        "revision": "2f17b003d27fa6c2e5da15c9031b31e8f50b32ef73570684858c5f4e35414043"
+      },
+      {
+        "path": "docs/architecture/runtime/runtime-resilience.md",
+        "revision": "7e9cdaf71174f0ac69e3226dc404c407643efacf6e8ba6592e0a746229a6b587"
+      },
+      {
+        "path": "docs/architecture/runtime/runtime-storage.md",
+        "revision": "057e62d846ec03bec1894c64effc77191c944839673b76fa882d16b0e51b264f"
+      },
+      {
+        "path": "docs/architecture/runtime/server-occupancy.md",
+        "revision": "248de4f89a0f0eb5268f8afdeada972d17c13bbeb846a8e961b42b8f3d9cfa0e"
+      },
+      {
+        "path": "docs/architecture/runtime/server-state.md",
+        "revision": "d46464443c446d60b70882b7c3936064f1a148b2f155822796ae874e87388fac"
+      },
+      {
+        "path": "docs/architecture/runtime/session-runtime.md",
+        "revision": "f3a1ffbc823fbca06e2dd30f54fb9938413b72e9ee55688eb631631908d421f1"
+      },
+      {
+        "path": "docs/backlog/ideas.md",
+        "revision": "5d2f2aeac4f1621280a7ea009ca5e099f462a6bf303b12687d4d1af707e70ff2"
+      },
+      {
+        "path": "docs/backlog/index.md",
+        "revision": "1b4a1ef7f8e1717bf7ce51d7269400dfa62399011fb3b21f98f273e64a7069ba"
+      },
+      {
+        "path": "docs/backlog/issues.md",
+        "revision": "475bdddaadbde59ee881e46a6bc7209c12b0d98481692814aa5e22894f74b911"
+      },
+      {
+        "path": "docs/backlog/research-queue.md",
+        "revision": "9be7443eabddb6286c7dc00e0a4f1f5742d595fe06f8234abb31d85b7bfd3db6"
+      },
+      {
+        "path": "docs/chats/2026-10-06-original-research/handoff.md",
+        "revision": "11442fbf93e36616f87ef1e7f2a1f983613bd8c13a20e096580513a965c44535"
+      },
+      {
+        "path": "docs/chats/2026-10-06-original-research/log.md",
+        "revision": "5aba54d8f8d8a02d108cca20cc2c89babf304c7c3885add4c5a80245be793cb9"
+      },
+      {
+        "path": "docs/chats/2026-10-06-research-journal/handoff.md",
+        "revision": "596f061c3d1ff2b0e8ef1c2d87b14cf471eac2cedf6858c93fbd1c38a55cb8e2"
+      },
+      {
+        "path": "docs/chats/2026-10-06-research-journal/log.md",
+        "revision": "f62b5b405b80054ec6f35fc7d1a2907bf058d4db2a6c2e2e860434f073a804b3"
+      },
+      {
+        "path": "docs/chats/2026-10-07-advanced-control/csp-control-api.md",
+        "revision": "05a0a6673e2736fbe316c9f853ecb42c2c139527ab752175f3582e702d87ce78"
+      },
+      {
+        "path": "docs/chats/2026-10-07-advanced-control/csp-lua-input-setters.md",
+        "revision": "be0c7c2546c5553d91f7e229e94cddc7cd9d062bed3cecd77344b2f5b2f3cd82"
+      },
+      {
+        "path": "docs/chats/2026-10-07-advanced-control/handoff.md",
+        "revision": "27c6a32a5ca71edfd119cc562fd962dde9f82d8b35d549f878f17c9bc7a26b41"
+      },
+      {
+        "path": "docs/chats/2026-10-07-advanced-control/log.md",
+        "revision": "f9158135cc8aa13b40a1a9be81680895ea325d376f96aa2163e52cbae1a92e1b"
+      },
+      {
+        "path": "docs/chats/2026-10-07-early-status/handoff.md",
+        "revision": "e73952b94cfc257492c211af4f429bef5e8b16428f1d2a84f7426bc6767e4bbe"
+      },
+      {
+        "path": "docs/chats/2026-10-07-early-status/log.md",
+        "revision": "063f08f477008ae954b5aa9b3a2c6fef86135f8c13c5d1ce4deab4aada4072f1"
+      },
+      {
+        "path": "docs/chats/2026-10-07-laps-pits-live/handoff.md",
+        "revision": "5756f96d19710449e77edb446b543b5c203a8d6258569d5cc5eb057ccfc149ab"
+      },
+      {
+        "path": "docs/chats/2026-10-07-laps-pits-live/log.md",
+        "revision": "9b8c1e18c5976c9de675f4ba4f5dd334a2bee314e946708180a44774a3001dac"
+      },
+      {
+        "path": "docs/chats/2026-10-07-multibot-live/handoff.md",
+        "revision": "637ba84663d664f32b10ec6c3354e4acdfd1aa2de02a5d80e4f30bf2a8cf6ad4"
+      },
+      {
+        "path": "docs/chats/2026-10-07-multibot-live/log.md",
+        "revision": "dd8c3bccf62da4b2b34056d3b3e7432328dca97b6d3f5d0c0457718b8e7afe31"
+      },
+      {
+        "path": "docs/chats/2026-10-07-multibot-live/stock-udp-ports.md",
+        "revision": "d427df7d6b2f2dba2b269da77d7b704971143f9cbb78255735293109a31cb540"
+      },
+      {
+        "path": "docs/chats/2026-10-07-native-ai-live/handoff.md",
+        "revision": "64b84c292bf8f11019814461fa3fd38ac278b1e98bb8228d41d470747ad91471"
+      },
+      {
+        "path": "docs/chats/2026-10-07-native-ai-live/log.md",
+        "revision": "5118eff5e646e92649443d88f24f2708913c6337f9c0b77242c24a9a3d3d2eae"
+      },
+      {
+        "path": "docs/chats/2026-10-07-python-controller/handoff.md",
+        "revision": "3c5529a6fe3582b18e72ecf0ee582d5827f7a0dba2aec2760c766f82b15ece45"
+      },
+      {
+        "path": "docs/chats/2026-10-07-python-controller/log.md",
+        "revision": "4c778b85a936329b6f3363136ec9b60e0b56d358bcbd849b4b43d6db1331e51b"
+      },
+      {
+        "path": "docs/chats/2026-10-07-python-owned-process/handoff.md",
+        "revision": "19c2915a98196b82a29d0d8bddf804bb8b97cd5c8ca5f01c4a9764e17ca4c5cc"
+      },
+      {
+        "path": "docs/chats/2026-10-07-python-owned-process/log.md",
+        "revision": "a1f5517439b217e38ba78d25dd0d5883d72c09cdb4dfd2da1000b213c81b4a56"
+      },
+      {
+        "path": "docs/chats/2026-10-07-runtime-controls/handoff.md",
+        "revision": "624ed20b5102b85b3105c9a7b30303d9dc7a25437ed1cad172d1dc70ddde37dd"
+      },
+      {
+        "path": "docs/chats/2026-10-07-runtime-controls/log.md",
+        "revision": "2cd11986e6138086bf21c650100e852e7a6d0b4d5709020bcbc8e60825639a82"
+      },
+      {
+        "path": "docs/chats/2026-10-07-sources-next-steps/handoff.md",
+        "revision": "050cef85011953a0da9bc338b948a8c5f4190f6fd1fdce5fcd9557a5ad222389"
+      },
+      {
+        "path": "docs/chats/2026-10-07-sources-next-steps/log.md",
+        "revision": "f98f530f377c9b528204f31b450b598c26673082d83f6a0fe34b8c42abef9bb8"
+      },
+      {
+        "path": "docs/chats/2026-10-07-sources-next-steps/online-lua-controller.md",
+        "revision": "af668df45511de4544334ae9699892763672369a1d6e8b4f3a4a9c0e0344a2bc"
+      },
+      {
+        "path": "docs/chats/2026-10-11-control-surface/control-surface-2026-10-11.md",
+        "revision": "0c593e52d7101ccc3ad2c7a5f044efbb2b5fa2296652bb2f17949a5e2eeb496f"
+      },
+      {
+        "path": "docs/chats/2026-10-11-direct-scenarios-overtake/direct-input-contract-2026-10-11.md",
+        "revision": "6900d70a64377c07a64aa39de1a4c207f4d392439ffcac1682176116f709a781"
+      },
+      {
+        "path": "docs/chats/2026-10-11-direct-scenarios-overtake/overtake-feasibility-2026-10-11.md",
+        "revision": "78718f96f3b7cb35508b833aea4678f25ff759fc0b7beecb86cbce681a398160"
+      },
+      {
+        "path": "docs/chats/2026-10-11-direct-scenarios-overtake/scenario-composition-2026-10-11.md",
+        "revision": "505a35ac60e7d498c79c211348c93948c778197f2d966caa3f304930fb1cb6aa"
+      },
+      {
+        "path": "docs/chats/2026-10-11-follow-approach-research/approach-formation-evidence-2026-10-11.md",
+        "revision": "1331dd88a8b50d6cebcf53867e811aca2db31b27a3ac2698c54a988b3b72b906"
+      },
+      {
+        "path": "docs/chats/2026-10-11-follow-approach-research/follow-controller-boundaries-2026-10-11.md",
+        "revision": "308c3743eca752b641e2f6d91b58eae7f83fff28a318fc94a11365728777dade"
+      },
+      {
+        "path": "docs/chats/2026-10-11-long-stop-resume/long-stop-resume-2026-10-11.md",
+        "revision": "498c3ea31e9daa9a6eb2abcca3920ce3754f9aefd87267d46918132765c60321"
+      },
+      {
+        "path": "docs/chats/2026-10-11-mechanical-health/mechanical-health-boundaries-2026-10-11.md",
+        "revision": "ef1f259c2cbf8be6f8355f1783e6d9a3bf9967a653f25b0b77369d5c15a3906f"
+      },
+      {
+        "path": "docs/chats/2026-10-11-scale-pace-health/pace-calibration-2026-10-11.md",
+        "revision": "3241d37295d8c3d38b215bcc0519f3d74f37040e7360134905bd556edc470425"
+      },
+      {
+        "path": "docs/chats/2026-10-11-scale-pace-health/scale-capacity-2026-10-11.md",
+        "revision": "4bd3f637c9e6d6f89461f22839ccb952fab83928564a9fc56240ef5fa6736d19"
+      },
+      {
+        "path": "docs/chats/2026-10-11-server-laps-sessions/lap-validity-autopilot-2026-10-11.md",
+        "revision": "bd7fda67ea34c8bfdd3a5237a973ad516af87f42a55888131504536661b229f3"
+      },
+      {
+        "path": "docs/chats/2026-10-11-server-laps-sessions/server-lap-accounting-2026-10-11.md",
+        "revision": "ef80d3391cd05f24a4e1500643623ddf354369dcec15c7ed6ddd0807285bf08b"
+      },
+      {
+        "path": "docs/chats/2026-10-11-server-laps-sessions/session-transition-evidence-2026-10-11.md",
+        "revision": "858fffb5d95f5810096b1f0bb95b61084d31651061734fa7554219a6ebeca06a"
+      },
+      {
+        "path": "docs/chats/2026-10-13-cars-tyres/handoff.md",
+        "revision": "6ea024ce555ca2ddcf977c0ef7a277b6b8ce650b3d547320ae24c727ba07ad33"
+      },
+      {
+        "path": "docs/chats/2026-10-13-cars-tyres/log.md",
+        "revision": "fb33c5af28bdec4d23c978cadb849307f4910d62cfc7565b1c6a6bfea7d314c2"
+      },
+      {
+        "path": "docs/chats/2026-10-13-launch-single-owner/handoff.md",
+        "revision": "3d171e970094382c375d53c87cc68db1fb06644927e762e003170a94768e0e42"
+      },
+      {
+        "path": "docs/chats/2026-10-13-launch-single-owner/log.md",
+        "revision": "626a4530dce63b8d41a6b4145adf1a3510e9ec7cea9d0d8c0951da1a66010a52"
+      },
+      {
+        "path": "docs/chats/2026-10-13-player-modes-continuation/handoff.md",
+        "revision": "ff8b5aa87c56e7af01862ff5fd2646161d898332bb8733912c96ce38cc51a17a"
+      },
+      {
+        "path": "docs/chats/2026-10-13-player-modes-continuation/log.md",
+        "revision": "370dadb9a854ab2c57ebc55fddad8f260851d9cf66c6288d5950afa603c43cf5"
+      },
+      {
+        "path": "docs/chats/2026-10-13-player-modes-revised/handoff.md",
+        "revision": "8b83676df9dcad0809af65061c3742c0c501764634e422e29a9da34f58e33d1a"
+      },
+      {
+        "path": "docs/chats/2026-10-13-player-modes-revised/log.md",
+        "revision": "76a803ac0856aa719e9b1ea1ac65eb0b8c0e4e42cac3756f6b10f03a4ee9272a"
+      },
+      {
+        "path": "docs/chats/2026-10-13-player-modes/handoff.md",
+        "revision": "3864f97e766f8aaea69908ca989c67f7e044736faf18ab3de194b279abbc24d5"
+      },
+      {
+        "path": "docs/chats/2026-10-13-player-modes/log.md",
+        "revision": "4f6d152d1f38a2290805b35efa64ccb1f3bc5f0f9d03b2527617dc86462addb1"
+      },
+      {
+        "path": "docs/chats/2026-10-13-quick-improvements/handoff.md",
+        "revision": "ee06d4573e2f470690e0682ca023a2c82150b238cdbd1e9709ec5e66f18c4b40"
+      },
+      {
+        "path": "docs/chats/2026-10-13-quick-improvements/log.md",
+        "revision": "11b2f66318ebfdd94dc613d4aa6ef7c9e748005cfdc6e0bb6796e0fabc264c75"
+      },
+      {
+        "path": "docs/chats/2026-10-13-race-states-checkpoint/handoff.md",
+        "revision": "5200d7779748110df14f5550161b04291c7efafff9c64e55ed9b9d0c61b95169"
+      },
+      {
+        "path": "docs/chats/2026-10-13-race-states-checkpoint/log.md",
+        "revision": "583be76e92454b464ffc50dbc028923da9e1618e808052cdaac1d459ad02021d"
+      },
+      {
+        "path": "docs/chats/2026-10-13-race-states-window/handoff.md",
+        "revision": "1f2ecd6198e598afb8fb0fa847f6c7d440a9879707d051950369336c273c0e48"
+      },
+      {
+        "path": "docs/chats/2026-10-13-race-states-window/log.md",
+        "revision": "3ace5c789e7afe542535c0cf14e450f9c75b604c1e7770729a01edbf6bb238e3"
+      },
+      {
+        "path": "docs/chats/2026-10-15-panel-window/handoff.md",
+        "revision": "99a77434064580d5e79687c360fe37c24df34504750476b9dbe2b13257de89b0"
+      },
+      {
+        "path": "docs/chats/2026-10-15-panel-window/in-game-control-2026-10-13.md",
+        "revision": "a54edf72e48542c003d1c441de414eb54b1e23a52080243d6c8470ae4876ddc5"
+      },
+      {
+        "path": "docs/chats/2026-10-15-panel-window/log.md",
+        "revision": "353c8dc1f8d29265809ff3b933b6ad86e6d636080b8be6f77b9e119cf8a18d66"
+      },
+      {
+        "path": "docs/chats/2026-10-15-pit-entry-research/handoff.md",
+        "revision": "f487e4ecfa3cce7b209c7f357c5739ddac3c68e56e6dae84c8c3981d83231f15"
+      },
+      {
+        "path": "docs/chats/2026-10-15-pit-entry-research/log.md",
+        "revision": "643b5a48c29e69f01efbb402a6c532bcdf097a52ddfa14500722dc2a87133fd1"
+      },
+      {
+        "path": "docs/chats/2026-10-15-pit-entry-research/pit-entry-own-box.md",
+        "revision": "9a3e702a42a32b5e069bc1a706ac9bda36f31343901087d437c7d47a63cea272"
+      },
+      {
+        "path": "docs/chats/2026-10-15-pit-service-research/handoff.md",
+        "revision": "7a4ecd5f3755f996c4ac9c13652cd941aed3e7b629174a8da7d520ba3eaa8155"
+      },
+      {
+        "path": "docs/chats/2026-10-15-pit-service-research/log.md",
+        "revision": "46736c638aaef902bd52c4f5dbaef077434dd899370590238c0feadc645aab04"
+      },
+      {
+        "path": "docs/chats/2026-10-15-pit-service-research/pit-service-stage10-2026-10-15.md",
+        "revision": "e10b04b045e8a6511486a0ad653b0840539499e6253e073eea748488a6b3c161"
+      },
+      {
+        "path": "docs/chats/2026-10-15-police-target-filter/handoff.md",
+        "revision": "31a91e01d7c74767aa0b312be92c3ea5a3dca311051b8628771f4bdc1713d7b9"
+      },
+      {
+        "path": "docs/chats/2026-10-15-police-target-filter/log.md",
+        "revision": "89508deb364a2f250ff27a69452476b883d655f1c9a6553a0991e5ad87986062"
+      },
+      {
+        "path": "docs/chats/2026-10-15-selected-ai-awareness/handoff.md",
+        "revision": "ff151071e7118dc17a3481a7b78ddfac167f9c0e89c5ce95b36e6bff26187026"
+      },
+      {
+        "path": "docs/chats/2026-10-15-selected-ai-awareness/log.md",
+        "revision": "b5e7a3f6d5e7b1a786496f3751a231d93dc9ef52ab6af7a888f8a87b0cde32c4"
+      },
+      {
+        "path": "docs/chats/2026-10-15-solo-police-human/handoff.md",
+        "revision": "b83fe34d0fb75b51bd673a7038aa113aadafce5b58fa7b2e6be5337e59e65b44"
+      },
+      {
+        "path": "docs/chats/2026-10-15-solo-police-human/log.md",
+        "revision": "ab1b75f760e41a23e1aff1fb417e73193dc08532bfd8e429d21d940623dbad86"
+      },
+      {
+        "path": "docs/chats/2026-10-15-solo-police-human/police-live-diagnostics-2026-10-16.md",
+        "revision": "bae41cde91afcca55162d2c6a951f0ee440d259837d08de2d6f4adf390bcfb2e"
+      },
+      {
+        "path": "docs/chats/2026-10-15-stage9-design/handoff.md",
+        "revision": "a75bd08064f04ec1616687859c5cae126459a25c370cb6c4e0debacef21ac5a1"
+      },
+      {
+        "path": "docs/chats/2026-10-16-ai-driving-binaries/dynamic-trajectory-control-2026-10-16.md",
+        "revision": "4389fdef1af82bac346a3f51b63768db2943e96c1636c74f59cba7daca035559"
+      },
+      {
+        "path": "docs/chats/2026-10-16-ai-driving-binaries/handoff.md",
+        "revision": "9ada920e04c1883e49087c2878498168a5af93f473c9cf9fcf67ebd0c342f59b"
+      },
+      {
+        "path": "docs/chats/2026-10-16-ai-driving-binaries/log.md",
+        "revision": "ce219baefc804776b47c9090721abed73c6fa350d88176c814f04ae80304510e"
+      },
+      {
+        "path": "docs/chats/2026-10-16-docs-cleanup/handoff.md",
+        "revision": "c7558347a08f9ad3189a0613b02c00ca9f6e860d3eb5b6b4c5dcf7d9cad9e511"
+      },
+      {
+        "path": "docs/chats/2026-10-16-panel-pit-service/handoff.md",
+        "revision": "106db3b4d17709149e38fb6fb58238a845ee24f929c8c11567577b70aa27544b"
+      },
+      {
+        "path": "docs/chats/2026-10-16-panel-pit-service/log.md",
+        "revision": "31709f7ac8aa9d435beef7646093478d353dd5baa98d3b51b018a91cba3bf968"
+      },
+      {
+        "path": "docs/chats/2026-10-18-component-damage-q003/component-damage-q003-2026-10-18.md",
+        "revision": "ddf15283853b60bd2191fb769a378169c3a2f51d544fc149598d99570c1cec60"
+      },
+      {
+        "path": "docs/chats/2026-10-18-component-damage-q003/handoff.md",
+        "revision": "ac9f8f3d346d3656b04e92ee72bb681b4878ef535793840417d66314e302c1ba"
+      },
+      {
+        "path": "docs/chats/2026-10-18-component-damage-q003/log.md",
+        "revision": "6d29fa5558d0bdf90c7cfaa0ed77d95c68ea339470d46bd13ad132427c064233"
+      },
+      {
+        "path": "docs/chats/2026-10-18-damage-driving-q005/damage-driving-threshold-q005-2026-10-18.md",
+        "revision": "1543d2496640a4472573c71d9cbadda6eab2051bde62ff8beb5f53dd33017e86"
+      },
+      {
+        "path": "docs/chats/2026-10-18-damage-driving-q005/handoff.md",
+        "revision": "416211bfe1954feec8f9a8263c26ec422e6968e1d75c18ced688e691dd824305"
+      },
+      {
+        "path": "docs/chats/2026-10-18-damage-driving-q005/log.md",
+        "revision": "32f69fe2d37ad2acda1a3797114ecef990fcb93409af83d43c2925445c5a4530"
+      },
+      {
+        "path": "docs/chats/2026-10-18-fuel-lap-q002/fuel-lap-estimation-q002-2026-10-18.md",
+        "revision": "2907f39d1cd8b46e5d923934b3ab1b91e33777e2edd1915485439a9647f46602"
+      },
+      {
+        "path": "docs/chats/2026-10-18-fuel-lap-q002/handoff.md",
+        "revision": "df52e51c3916d69be7dc8c931467df57cffc8054606b750e5f3323a659a99483"
+      },
+      {
+        "path": "docs/chats/2026-10-18-fuel-lap-q002/log.md",
+        "revision": "157029f3b8d3f069fd0a6714391bb62654b7950fcacf66a86b775953d386c682"
+      },
+      {
+        "path": "docs/chats/2026-10-18-headless-window-focus/handoff.md",
+        "revision": "03dfb0bae62b489a5c607441474fa439257281de6c31f08767a6ce995db5cdca"
+      },
+      {
+        "path": "docs/chats/2026-10-18-headless-window-focus/headless-window-focus-2026-10-18.md",
+        "revision": "2495222505c0f6a912b2eb41160acd38bd6e32367e838ae95803977fc8823a5d"
+      },
+      {
+        "path": "docs/chats/2026-10-18-multi-server-plan/handoff.md",
+        "revision": "4cafebe33fd1bbdb48bbb5c949a7c9bbd035ae12e9bb952492c699381d5b147d"
+      },
+      {
+        "path": "docs/chats/2026-10-18-native-pit-q008/handoff.md",
+        "revision": "68d1b37054f7005ee00a481a3dac4336a326b73ed1f19cfa7fe6d9af8264945f"
+      },
+      {
+        "path": "docs/chats/2026-10-18-native-pit-q008/log.md",
+        "revision": "1d55fbf7a0c37a18b6ec52923330b1fbbf0b6fb6a63a22ac45cf0a10b701191f"
+      },
+      {
+        "path": "docs/chats/2026-10-18-native-pit-q008/native-pit-service-q008-2026-10-18.md",
+        "revision": "f0a992dd27ee8f41f6787eda5a68055099614e34c1818e8dfb161c2a40141878"
+      },
+      {
+        "path": "docs/chats/2026-10-18-physics-godmode/collision-invulnerability-2026-10-18.md",
+        "revision": "ffd744b0d3088e6acf3f9438c9651dd75b0bd1aaa4bb919ab6c1250ade595d61"
+      },
+      {
+        "path": "docs/chats/2026-10-18-physics-godmode/handoff.md",
+        "revision": "7aa513fd4cfc1aca52a2f683471d4bd27a7a94a641d2e9580bb65ad174254283"
+      },
+      {
+        "path": "docs/chats/2026-10-18-physics-godmode/log.md",
+        "revision": "9a9361b4bf0844d6de5639c9372e775e14991432005c7a337473950bad59609b"
+      },
+      {
+        "path": "docs/chats/2026-10-18-physics-godmode/physics-godmode-2026-10-18.md",
+        "revision": "53ae68b982539ee7c368c7fc973bed1730ab36cc06a359b1bb08421fc0d12762"
+      },
+      {
+        "path": "docs/chats/2026-10-18-pit-speed-linear/handoff.md",
+        "revision": "93046807d498f00f84fd3b4bf94f66d6b7a76df6384d506a38a7a2f4c67c0347"
+      },
+      {
+        "path": "docs/chats/2026-10-18-q013-online-penalty/handoff.md",
+        "revision": "bce996eb6101c1fae2b297e253a6f4da7559e53b282bb73f084ebbdec80449c6"
+      },
+      {
+        "path": "docs/chats/2026-10-18-q013-online-penalty/log.md",
+        "revision": "1733705876830c890bac08829698bb597e3c5faef353087bf52f42c8206bb92a"
+      },
+      {
+        "path": "docs/chats/2026-10-18-q013-online-penalty/q013-online-penalty-2026-10-18.md",
+        "revision": "d590df07e1a47e73ea0b1b6577eed5b574913bf3638ebda810700919eff65849"
+      },
+      {
+        "path": "docs/chats/2026-10-18-resource-handles-q006/handoff.md",
+        "revision": "0527187370c16a82f3fdc02f5cdd21d6c8b8aca8b15f4490ecde137d74d7730e"
+      },
+      {
+        "path": "docs/chats/2026-10-18-resource-handles-q006/join-cancellation-q010-2026-10-18.md",
+        "revision": "b2e90566eaee25659ec44e0f139f32cb8eade7f5df1cb8ed6fc68b46cdea6066"
+      },
+      {
+        "path": "docs/chats/2026-10-18-resource-handles-q006/log.md",
+        "revision": "4ae48008858a655367f0785c43b2391137bb13895322a9ba297d04725ade84a9"
+      },
+      {
+        "path": "docs/chats/2026-10-18-resource-handles-q006/motion-observation-q009-2026-10-18.md",
+        "revision": "b836952074f77f8e3658d3a8307ac1257e7cadba6d4effc7cb52bcb18399e80c"
+      },
+      {
+        "path": "docs/chats/2026-10-18-resource-handles-q006/resource-handles-q006-2026-10-18.md",
+        "revision": "3606b90fe7f6938efbb0ada8e170d8e317d792f21d15a8d3707c035c7343e957"
+      },
+      {
+        "path": "docs/chats/2026-10-18-scenario-service-q004/handoff.md",
+        "revision": "f40f5c5032678a533896f0c0b1dca8a1dcc30013fe5d41c6a7f5082767707402"
+      },
+      {
+        "path": "docs/chats/2026-10-18-service-quiescence-q026/handoff.md",
+        "revision": "13f7bea320b94f4f7bc7abb1567e257e9a274c41d40c420fa8a9d46af6884ef1"
+      },
+      {
+        "path": "docs/chats/2026-10-18-service-quiescence-q026/service-quiescence-q026-2026-10-18.md",
+        "revision": "bd833b86e905fcfe2ade516d7f7be2f67e73701ab69e2e12d8d350c6f1d9deb3"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage11-pit-service/handoff.md",
+        "revision": "ec96c1ca790cc80ea9f84677d9dc138b8e31b01eb7609dca32721d3c3daedf97"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage11-pit-service/log.md",
+        "revision": "2b276c95943ebdec98cec74cfbdb09d5bcd38fe05e94ca5a6077ed126ea25261"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage11-pit-service/q008-brief.md",
+        "revision": "528d33731b7c3d49481b21c6dd523caead6ed0817b06a10c5c951d5c2a8f84bb"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage11-pit-service/q021-brief.md",
+        "revision": "891221e2510de1ac7592b8b9e21d9b75b4a34b5eca87a4cabe7385c25a926c67"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage11-pit-service/q026-brief.md",
+        "revision": "d89587bfbb9e68a003cb66f59d4476b8434eed64e1779d8c7bcfe1939358fdcc"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage11-service-integration/handoff.md",
+        "revision": "5d897bd831ce7847cad19ef78428ce7592e546143681c638b38c7bee07f7d15d"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage12-teleport/teleport-stage12-2026-10-18.md",
+        "revision": "fc91f228d6325fdc4c0cf3a991dd325bb1f2d0d705864521a44c4ed74621d37b"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage13-formation/formation-content-q024-2026-10-18.md",
+        "revision": "6c20981e35b693d4f5d7aea104c8b7e17a44f66ff5a4c50b433cff4410125675"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage13-formation/handoff.md",
+        "revision": "e043f1691ff1e322117e01de464e3e9f984220cd6726811be22e3ebafda907ca"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage13-formation/motion-gate-q017-2026-10-18.md",
+        "revision": "b4dc2d9d11d461ebd82174b0dd0172632c3e81a6abf2175cc75a9da6b92b6ebb"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage13-formation/research-brief-q024.md",
+        "revision": "8612a5b17f6665bf27a15bf09d92e21bb61f2159b869a0fb3afbc94e3572ec2d"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage13-formation/research-brief.md",
+        "revision": "62e36611704332bc35cb8e2edc9d8d97c2c4b5dba33459345235afedea8f34a4"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage14-pace/handoff.md",
+        "revision": "e6cb33189681e6c728e26b41cb56dd95f4e6c6bedac50b1c5a4fa4396612e741"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage14-pace/log.md",
+        "revision": "1499075e0184c5abf5cac665dd9b2ca44b22c15dd0c2dc46202d5836b806e42b"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage14-pace/pace-race-order-stage14-2026-10-18.md",
+        "revision": "e45f75fe168f3ccf58136531d28cdd8c1348852e0e1ddc271178216cae49749e"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage15-adaptive/adaptive-ceiling-q019-2026-10-18.md",
+        "revision": "308b28d4889ede26e74bb8845fe06da88be285ba72a6146d3435cf2dc3c73a0f"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage15-adaptive/contact-state-q028-2026-10-18.md",
+        "revision": "b61f8f82aac6b729ec852b85345b2ca40a06173017cd4fbc23ccbd535d1ae13c"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage15-adaptive/handoff.md",
+        "revision": "082ea82428a4e62abd21806a32e996c429dbdb107867c423dc98d870dc6caaea"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage15-adaptive/log.md",
+        "revision": "436b803b265039c5ab0498e14a1332e826865de5c1c0d499f2cc59c83b59f7de"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage15-adaptive/q016-client-race-order-2026-10-18.md",
+        "revision": "958910659d28f30173fada1cd337d8cb4f8fe056d5436e91086a2fbd7b79331e"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage15-adaptive/wpf-http-host-q029-2026-10-18.md",
+        "revision": "4e3e4f23601fdc43b89b811c391c4f01f831b1b6dd68ca4673cddfb6c509af23"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage16-controls/ai-controls-stage16-2026-10-18.md",
+        "revision": "b3365f435343f71d953101f5759384eabe5e302357e729f3f2313a882d152de4"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage17-spline/handoff.md",
+        "revision": "910ad7fb4155ddf9280d18b59dba87cfbe539afe79e88e04f53aeb11c6056f15"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage17-spline/log.md",
+        "revision": "84a17de6afd170f8ce72d9e6a0a1f7f25f66d9ab4dfa542e44404889e334febb"
+      },
+      {
+        "path": "docs/chats/2026-10-18-stage17-spline/runtime-ai-splines.md",
+        "revision": "db5a9ab7bca435c6d3cff20701d8b243869b807c4bd6f3dfc6c0f370f8ec2267"
+      },
+      {
+        "path": "docs/chats/2026-10-18-state-mutation/handoff.md",
+        "revision": "e102350a7cc605afe341ae20acf6dcf145f1613130357d3adbd8d173bc005ff8"
+      },
+      {
+        "path": "docs/chats/2026-10-18-state-mutation/log.md",
+        "revision": "48373b56c205aca65de3b58d4bc4d0a8c8b86229a36f3ba12d0f95c1e98406b3"
+      },
+      {
+        "path": "docs/chats/2026-10-18-state-mutation/state-mutation-2026-10-18.md",
+        "revision": "da816e4b73b1325e2d8b99cd24a58fc23aa351d19572813a3a6a22255ecc0db5"
+      },
+      {
+        "path": "docs/chats/2026-10-18-trajectory-audit/handoff.md",
+        "revision": "74f604e2917f0f1c9a726cb75ae194a4de340449c36201ea93ce36467f6571bc"
+      },
+      {
+        "path": "docs/chats/2026-10-18-trajectory-audit/log.md",
+        "revision": "9fa080d11d54fa3f78f9a4ccfb0add91a8d76110550006c119071d5b4d3e2ae8"
+      },
+      {
+        "path": "docs/chats/2026-10-18-trajectory-audit/trajectory-audit-2026-10-18.md",
+        "revision": "8ad7ca9b469ccc2ff44455c56450c1e53ce0d9081c37f9819c5d4be3e41fd620"
+      },
+      {
+        "path": "docs/chats/2026-10-18-trajectory-audit/trajectory-toolkit-proposal-2026-10-18.md",
+        "revision": "660e531a842ab8a989d0c1c6aca92a38d52153a5709638a6d0a63ace779e01d8"
+      },
+      {
+        "path": "docs/chats/2026-10-18-tyre-indicator-q021/handoff.md",
+        "revision": "d2231db9bbabf9961313d413b209d6d83d23bb6c2687debc924336f30054717c"
+      },
+      {
+        "path": "docs/chats/2026-10-18-tyre-indicator-q021/tyre-indicator-q021-2026-10-18.md",
+        "revision": "b31beca1ddc10db6a666186708241fa372f11e4575dd8edcb724cd30bc3dd861"
+      },
+      {
+        "path": "docs/chats/2026-10-19-csp-handshake-features/csp-handshake-features-2026-10-19.md",
+        "revision": "7cb6b051fb4b3ecc40c124725553f05b6faab72f551fde5312f141099d969cd4"
+      },
+      {
+        "path": "docs/chats/2026-10-19-csp-handshake-features/handoff.md",
+        "revision": "65c09eeb9b18b8c361141cdfb536f8805c57b844f320b1d5b439cba8649ce86b"
+      },
+      {
+        "path": "docs/chats/2026-10-19-plan-cleanup/handoff.md",
+        "revision": "5ed729537e86b7b2097dda8c03787a71eca603a1702d3010992f9800703a9dda"
+      },
+      {
+        "path": "docs/chats/2026-10-19-q024-fix-and-build/handoff.md",
+        "revision": "4bd86e1717a4369049d16ec4c7543cabb660db4c299de88cbb5c904402534af2"
+      },
+      {
+        "path": "docs/chats/2026-10-19-q024-fix-and-build/log.md",
+        "revision": "24aef9e3210e7a8bc228f1ca13faaeb4aebbe99724648ba402cd50583bea4500"
+      },
+      {
+        "path": "docs/chats/2026-10-20-adaptive-311/handoff.md",
+        "revision": "4e9eac66ab6ee1be2a74385117a3210978fdd517da1e687b3e3c0140f7ea5656"
+      },
+      {
+        "path": "docs/chats/2026-10-20-adaptive-311/log.md",
+        "revision": "7c42987d79d41afb888bc888a27120febf2c8b6a9258c1256b3bd0011a6b945c"
+      },
+      {
+        "path": "docs/chats/2026-10-20-adaptive-311/research.md",
+        "revision": "4de429f3e88bd5c4c4ccf55ea2e2c3c6c9307c5fbff80a937529bf92c6180e30"
+      },
+      {
+        "path": "docs/chats/2026-10-20-adaptive-place/handoff.md",
+        "revision": "f874dc8bb4fcf07924f26b02d83b0915b9f50b0c91769e2ca2aac649d8d5c393"
+      },
+      {
+        "path": "docs/chats/2026-10-20-adaptive-place/log.md",
+        "revision": "6b4ba61ad4297582138821299cbc964ceee5e7b22fc967bdc1a959c2be24abe1"
+      },
+      {
+        "path": "docs/chats/2026-10-20-admission-q047/handoff.md",
+        "revision": "9fc6b6f20bd77dc4c577104fe38c3dbb966874dbb54fa472bfaa230f9dd2b963"
+      },
+      {
+        "path": "docs/chats/2026-10-20-admission-q047/log.md",
+        "revision": "3c2df0c751b2d1bdea4205a359c817ca816cd7bbbe138b4757ea83037173a2cb"
+      },
+      {
+        "path": "docs/chats/2026-10-20-admission-q047/research.md",
+        "revision": "36590b41298f72784d6545e7a49566d875c455853934f1aaa4f88c8fe0c30094"
+      },
+      {
+        "path": "docs/chats/2026-10-20-ai-controls-81/handoff.md",
+        "revision": "ff8826eb98bc72d7ebd8a11c990db9860009de26143b630cd94977014c43373b"
+      },
+      {
+        "path": "docs/chats/2026-10-20-ai-controls-81/log.md",
+        "revision": "6e9ad9fdc0e981223b6338244a8521997adf85e48ff5a4a33c23e7a563fcb259"
+      },
+      {
+        "path": "docs/chats/2026-10-20-ai-controls-81/research.md",
+        "revision": "9668e84d449cf0d14d944678a616ee05cb7bd3f0802a170faa1d62fdb417c50c"
+      },
+      {
+        "path": "docs/chats/2026-10-20-ai-epoch-q045/handoff.md",
+        "revision": "801650ce3264963029ec6720478afccfc31b83e553925d1a00b1eb5e7ef80936"
+      },
+      {
+        "path": "docs/chats/2026-10-20-ai-epoch-q045/log.md",
+        "revision": "ab24e31a27ae1986ce9202c0ddc54ac60dc326051f0a3ed9c10b941e5a6023fd"
+      },
+      {
+        "path": "docs/chats/2026-10-20-ai-epoch-q045/research.md",
+        "revision": "cc2326870d91891b3b350e8ddec57f40176d2f2788842bb59304ccbb266ba326"
+      },
+      {
+        "path": "docs/chats/2026-10-20-car-change-241/handoff.md",
+        "revision": "f4e5265dac80e84d8ebaddefe473e83c5ae05c13822a7424c4f4eeea47ff0b60"
+      },
+      {
+        "path": "docs/chats/2026-10-20-car-change-241/log.md",
+        "revision": "d78d1cf9f518f93bdcb698d6f5aed156fc8f3072e587d2763f7e8602551de11b"
+      },
+      {
+        "path": "docs/chats/2026-10-20-caution-431/handoff.md",
+        "revision": "8ca61a19ca7fbf4923daa540fd6ab79d5935367de0361346a3ddea6a9dd89cb5"
+      },
+      {
+        "path": "docs/chats/2026-10-20-caution-431/log.md",
+        "revision": "7544c0bb2d60f82867944218150d93bdb68fd39db304a14287a116d8263ba0a2"
+      },
+      {
+        "path": "docs/chats/2026-10-20-caution-431/research.md",
+        "revision": "44bfe83104e8a91dee1f174c59f7e64bdefc9df3c4c2960982a798a06729f099"
+      },
+      {
+        "path": "docs/chats/2026-10-20-current-tyres/handoff.md",
+        "revision": "616362a9b4c31c084bc26f6a7ccc95fa1a6ef92f14c5d20c33f9355d4118beb1"
+      },
+      {
+        "path": "docs/chats/2026-10-20-current-tyres/log.md",
+        "revision": "8308fe6aa46e2b6c4f5e1584be8391f0b048a546ae876a3a876a9269df5c0ac3"
+      },
+      {
+        "path": "docs/chats/2026-10-20-damage-light/handoff.md",
+        "revision": "0a3c38de5cd75dd5bc075bc7cf84f72f33b2828f7210a330c0f837592462ba3f"
+      },
+      {
+        "path": "docs/chats/2026-10-20-damage-light/log.md",
+        "revision": "c83ce8941b6c6bd288993ecaa4b8c297b458b00d939e45f5adec45edf909d227"
+      },
+      {
+        "path": "docs/chats/2026-10-20-damage-light/research.md",
+        "revision": "74ffca085ecd3efd726427749b06e0bed9a00a537620d2eae0ac439f5800fa9e"
+      },
+      {
+        "path": "docs/chats/2026-10-20-fast-lane-cache/analysis.md",
+        "revision": "eea2a3c31db0404f1925930882b84cc86a59c2af5e2a6c27c7f991922ac04bea"
+      },
+      {
+        "path": "docs/chats/2026-10-20-fast-lane-cache/handoff.md",
+        "revision": "29150d6c5ce02129518c3f97ff6723d6c410bac14b10fb16a036c35e883b05bf"
+      },
+      {
+        "path": "docs/chats/2026-10-20-fast-lane-cache/log.md",
+        "revision": "ba8c8359a147f58aa1c4874e43c47a145993788db922ff653dc94bb1f6bbdbc3"
+      },
+      {
+        "path": "docs/chats/2026-10-20-follow-331/handoff.md",
+        "revision": "5f796f7c0a9e4e6257c801f348a104cbff87c550a262b7d7e985d0c4c57c616a"
+      },
+      {
+        "path": "docs/chats/2026-10-20-follow-331/log.md",
+        "revision": "bb3acdff2aaa2782553ef00420f222755dcb0f344b89103452d3de212abf4c5e"
+      },
+      {
+        "path": "docs/chats/2026-10-20-follow-331/research.md",
+        "revision": "bd4e909d9c1660991f56950aa222f1e4fd944128b014ccec7fe9f0452325f367"
+      },
+      {
+        "path": "docs/chats/2026-10-20-headless-choice/handoff.md",
+        "revision": "9bb54b2969e0b7fb6e041abacc9fc433679dcf2bc48e95376ad4ca26b98d124b"
+      },
+      {
+        "path": "docs/chats/2026-10-20-headless-choice/log.md",
+        "revision": "0c22c7b200caf2c8e3e3c40c9c5600dd8b3d9941712168429a2f91bae2c0f4c5"
+      },
+      {
+        "path": "docs/chats/2026-10-20-headless-focus/handoff.md",
+        "revision": "b290aee32ff7dcd65146ee13aca848f0f0a9ab12b20eb6371d5077614d1f0011"
+      },
+      {
+        "path": "docs/chats/2026-10-20-headless-focus/headless-focus-2026-10-20.md",
+        "revision": "90f0d50c66c3d3dc09ebb451d453171cefed216ccc3419744e289257722d03ea"
+      },
+      {
+        "path": "docs/chats/2026-10-20-headless-focus/log.md",
+        "revision": "130b341a40544b97a211b6bc632fa300d35d1fbf12aeec182fa63b1106320492"
+      },
+      {
+        "path": "docs/chats/2026-10-20-health-q058/handoff.md",
+        "revision": "b13379883b6cfb8c2686bedd1555ee5620a7925922b5f1e5ed6ad5b3d012cea1"
+      },
+      {
+        "path": "docs/chats/2026-10-20-health-q058/log.md",
+        "revision": "57c9bb5b617a1f3c6c30910562a05012c8ade2babfc64e26e1e4dfad275b70b4"
+      },
+      {
+        "path": "docs/chats/2026-10-20-health-q058/research.md",
+        "revision": "0a2b919a476687c5c0ebc291263f3f926855355cc57a6ac8aba3913d165334bf"
+      },
+      {
+        "path": "docs/chats/2026-10-20-identity-q037/handoff.md",
+        "revision": "e10207f7837bf910b37416ca595b355ec668ac16a8b910162198dc0a1a4755d4"
+      },
+      {
+        "path": "docs/chats/2026-10-20-identity-q037/log.md",
+        "revision": "4efbfaf5722e902e97328ea194f4db8018bc94ad6dd90aa7483ad62c5c9e1406"
+      },
+      {
+        "path": "docs/chats/2026-10-20-identity-q037/research.md",
+        "revision": "f46cb579c4bc15e7d62cdf6b159f8e899a3cd13b1375f5883d7d2c2b228948a1"
+      },
+      {
+        "path": "docs/chats/2026-10-20-instant-service-default/handoff.md",
+        "revision": "d65d6165caf11734753b0a44bbfb81340e0dafe3f12cb937f74f7180dd9d73c4"
+      },
+      {
+        "path": "docs/chats/2026-10-20-instant-service-default/log.md",
+        "revision": "f18ceef3952172079840ca92452a69ab34cad5a325392dc9dca51f8880762c57"
+      },
+      {
+        "path": "docs/chats/2026-10-20-issues-refresh/handoff.md",
+        "revision": "95c50beb71c593da70e0feba997a6afde770ad023b29a06b19831040cf8cd04d"
+      },
+      {
+        "path": "docs/chats/2026-10-20-issues-refresh/log.md",
+        "revision": "94fe47a243ec299e270407d107b807fa97082a9c64e17afa6e169a3fd1685209"
+      },
+      {
+        "path": "docs/chats/2026-10-20-journal-disclosure/handoff.md",
+        "revision": "0c396d2817cc01106a1932eb133dee38722b10412ced97cf910b92fd392bedff"
+      },
+      {
+        "path": "docs/chats/2026-10-20-journal-disclosure/log.md",
+        "revision": "db7e2ceb19fa6675eab845083b934d0f4dc1d24fb1c7ab6a1a33c77973ead305"
+      },
+      {
+        "path": "docs/chats/2026-10-20-motion-q022/handoff.md",
+        "revision": "52547edcbf4c980734f2b7d7e449dc6e768b54d4ac7f0c737a63c8724a5ab26c"
+      },
+      {
+        "path": "docs/chats/2026-10-20-motion-q022/log.md",
+        "revision": "a49ff582c21cf7557a69c6ff03c113f5ad001a5c0f359ac41ce01bd20b4a25df"
+      },
+      {
+        "path": "docs/chats/2026-10-20-motion-q022/motion-q022.md",
+        "revision": "abd2c1adf7118505f5295fdae9371eae400552dec82e6754ddb7da86f1e03701"
+      },
+      {
+        "path": "docs/chats/2026-10-20-onepixel-graphics/handoff.md",
+        "revision": "2d5abcd18c8668c5b855279a606b0de406ce27f6e11dffc9ddfa658451e552ce"
+      },
+      {
+        "path": "docs/chats/2026-10-20-onepixel-graphics/log.md",
+        "revision": "9a6000f51b85445f024c5fc753afb8ac17b0bfb710ee8ab2d0795f7d791adc6d"
+      },
+      {
+        "path": "docs/chats/2026-10-20-pace-q046/handoff.md",
+        "revision": "09353f8ca64c46f553b2c0f92430ca1595f91fd0744a51a264af1efc1ad515eb"
+      },
+      {
+        "path": "docs/chats/2026-10-20-pace-q046/log.md",
+        "revision": "d5547e4a1aae6de67ada4822bdfc2f63fff063e2847f27befe5b0365830e30ff"
+      },
+      {
+        "path": "docs/chats/2026-10-20-pace-q046/research.md",
+        "revision": "a6abf70511965873715fb2020b7ffdd8bee656870e82c8362316cba51736d5ca"
+      },
+      {
+        "path": "docs/chats/2026-10-20-pair-roster-q023/handoff.md",
+        "revision": "a62e10830a6813ef66c2f55cbdd85e65b36a8220cb736352bd175ec9ab39655a"
+      },
+      {
+        "path": "docs/chats/2026-10-20-pair-roster-q023/log.md",
+        "revision": "e1f35d7fe41517860f46558b0d562874cf9a27c0c7694c910d8b7439aab4182c"
+      },
+      {
+        "path": "docs/chats/2026-10-20-pair-roster-q023/research.md",
+        "revision": "e413d65a4307bbebf58040ab87a9e710e8ee9a5148d0b20d14679cf7d56b90dd"
+      },
+      {
+        "path": "docs/chats/2026-10-20-panel-binding-151/handoff.md",
+        "revision": "0d1e64ed7f9841a73600587bcf79fc82b100bd6c6f05b7047dbe44e384562838"
+      },
+      {
+        "path": "docs/chats/2026-10-20-panel-binding-151/log.md",
+        "revision": "e0b3fde930a19c9fa4d79af5d504e115346c8d6e071db9e2fb99eb0c369f9198"
+      },
+      {
+        "path": "docs/chats/2026-10-20-panel-server-alias/handoff.md",
+        "revision": "f1ea1b35830369da38868f8e90f9a951bb65fe07879f51e022955bc2c5ac7a83"
+      },
+      {
+        "path": "docs/chats/2026-10-20-panel-server-alias/log.md",
+        "revision": "10621fc5a831f63a8a7d1be281229673f5cf07a5d7a5ec6bac4fbb489d4cf9ca"
+      },
+      {
+        "path": "docs/chats/2026-10-20-performance-audit/handoff.md",
+        "revision": "c05e224c86b764ade3080f0e91b8ce1eb09daf35352268ece2fb29b1aef4aaae"
+      },
+      {
+        "path": "docs/chats/2026-10-20-performance-audit/log.md",
+        "revision": "8578b236a5e23d034a969899e824ae44fd92f0eb769cff1f5e71b4bd66e7b682"
+      },
+      {
+        "path": "docs/chats/2026-10-20-pit-journal-audit/handoff.md",
+        "revision": "ae7469cd855a4327befc28b00d4a1cb2590d814459db94c2c7b656d613cbf70c"
+      },
+      {
+        "path": "docs/chats/2026-10-20-pit-journal-audit/journal-coverage.md",
+        "revision": "45dc029e57ba52bd6e5dda4157ba34620073ab5c738e8637e2d716a67973dfec"
+      },
+      {
+        "path": "docs/chats/2026-10-20-pit-journal-audit/log.md",
+        "revision": "91db8a26a07a9a42c6421f1879c8185185977ce0905ff010a1638e9a0ad871af"
+      },
+      {
+        "path": "docs/chats/2026-10-20-pit-return-regression/handoff.md",
+        "revision": "debdb348a65dc4975e584b7bf78f04ee947c532e73d794d9fb0151236ff95a5e"
+      },
+      {
+        "path": "docs/chats/2026-10-20-pit-return-regression/log.md",
+        "revision": "6b1fda81244261657b60f758c4c685628079b8f065b41ca4e4316e0a435138e4"
+      },
+      {
+        "path": "docs/chats/2026-10-20-pit-return-regression/research.md",
+        "revision": "63d2485a2f271b48b3d840ba9bff3a41e198509f935e4cc9d5566a7a0794f37b"
+      },
+      {
+        "path": "docs/chats/2026-10-20-plan-reformat/handoff.md",
+        "revision": "697adccfc5f792b0ceebbab3c54b59b862e9182c01a743d11fc471a00ff39634"
+      },
+      {
+        "path": "docs/chats/2026-10-20-plan-reformat/log.md",
+        "revision": "8fdeb0f0e2712c3393fc4efdb1f9202174598f8f04188e182fe0bdba6959b589"
+      },
+      {
+        "path": "docs/chats/2026-10-20-player-formation/handoff.md",
+        "revision": "44fad496ffebac18c86b505820accfdc4a4a28c1934c49156c130e6d563c1aa6"
+      },
+      {
+        "path": "docs/chats/2026-10-20-player-formation/log.md",
+        "revision": "1f84d304aea57e77db0d0526d080e4622445420bca6f4a61192b770baa9e59d3"
+      },
+      {
+        "path": "docs/chats/2026-10-20-player-rows/handoff.md",
+        "revision": "dc973c681ac15b339415d30cbeed0f6e0bf8f1fddf168a78a2fb2ae5c3681a45"
+      },
+      {
+        "path": "docs/chats/2026-10-20-player-rows/log.md",
+        "revision": "754d544163b715b95f4bedc46df4d27297cbce5ebeaff4b3719116b56954d671"
+      },
+      {
+        "path": "docs/chats/2026-10-20-position-damage-contract/handoff.md",
+        "revision": "3d6870193fcb9515f789622b435e69b36d8c1cfa0856c40a2d54202c3aca40d8"
+      },
+      {
+        "path": "docs/chats/2026-10-20-position-damage-contract/log.md",
+        "revision": "97713b019ad8e8715a5f612f0b866aed733394dc8ce144c01b17d338a7e19dff"
+      },
+      {
+        "path": "docs/chats/2026-10-20-preparation-errors/handoff.md",
+        "revision": "d0a25144faa5022e99bd4c3f012b45de8f443bb2ce8cc8dc46e9f2b8e2edfb7a"
+      },
+      {
+        "path": "docs/chats/2026-10-20-preparation-errors/log.md",
+        "revision": "0bf86a3cd4e4012c2d9b34a2d5f18645127c2ce30e8ac31d98662d92b5544526"
+      },
+      {
+        "path": "docs/chats/2026-10-20-repair-command/handoff.md",
+        "revision": "5cf30d9d2309b979f73882ed237c1008682ad323a0b4078cceb84766b8f6b653"
+      },
+      {
+        "path": "docs/chats/2026-10-20-repair-command/log.md",
+        "revision": "77f719406c1a2f9e82a7ada2436008670c3026ea529fe844d62494673b8587b2"
+      },
+      {
+        "path": "docs/chats/2026-10-20-return-policy-implementation/handoff.md",
+        "revision": "938faba3a53db1509f63c934f655c99b62b169bcb8cc19c309d018b303dbef17"
+      },
+      {
+        "path": "docs/chats/2026-10-20-return-policy-implementation/log.md",
+        "revision": "55566108f054e9fe73af233bc8c0df2b355a4895b5d1a59edd96922f8dda3382"
+      },
+      {
+        "path": "docs/chats/2026-10-20-return-research/handoff.md",
+        "revision": "20e1fa40c4155d8249ba5a9b236e659e8b0d073dd170c4d99ef871e7f7731adc"
+      },
+      {
+        "path": "docs/chats/2026-10-20-return-research/log.md",
+        "revision": "d15d3e59d822e01064ea6c76bd3e8c3258802f0efc69631f63dadfa17643529f"
+      },
+      {
+        "path": "docs/chats/2026-10-20-return-research/return-research.md",
+        "revision": "50e7afe4d426ebc56bd156ba2a4ded6ca606309419c65dd6798c2dc2e286ea1d"
+      },
+      {
+        "path": "docs/chats/2026-10-20-route-geometry-cache/handoff.md",
+        "revision": "d42f5a56fa67a3de9bbcb1186b983d510dec8eca9e462a08205e5998c2815e48"
+      },
+      {
+        "path": "docs/chats/2026-10-20-route-geometry-cache/log.md",
+        "revision": "4ec6e0975a619f3f91a009c1f95373c5a9b3e10037a7b3c3068882453d590d30"
+      },
+      {
+        "path": "docs/chats/2026-10-20-route-scheduler/handoff.md",
+        "revision": "94338c4a08d47f4c27d20c52019c262a8a41b7ebaffa22b5650ebbcf256856d3"
+      },
+      {
+        "path": "docs/chats/2026-10-20-route-scheduler/log.md",
+        "revision": "d08df3218d0014db0eb2e434ef42524cc4d62ab99f43403688d6979a81222d51"
+      },
+      {
+        "path": "docs/chats/2026-10-20-runtime-audit-design/handoff.md",
+        "revision": "7406b575ceb13aad5cb6e97e8ee52f7e7a92c72f051a53f14d201bf8de3e11f8"
+      },
+      {
+        "path": "docs/chats/2026-10-20-runtime-audit-design/log.md",
+        "revision": "d711e689cd266691a952981d488a03284ff543716eeebc05f2226d20c347da55"
+      },
+      {
+        "path": "docs/chats/2026-10-20-server-age-fix/handoff.md",
+        "revision": "bf528510235428f7990e0e4559aadf8047dd5d828465670578ce068e46f07f44"
+      },
+      {
+        "path": "docs/chats/2026-10-20-server-age-fix/log.md",
+        "revision": "5a841dd059d47c584df4643c729f802ba488a219e47b931f302bc08f87d301b4"
+      },
+      {
+        "path": "docs/chats/2026-10-20-server-age-research/handoff.md",
+        "revision": "b7b98dce3e05c2b645b499a95ba92d30199d9758f1e9c7731730f200c88f1938"
+      },
+      {
+        "path": "docs/chats/2026-10-20-server-age-research/log.md",
+        "revision": "811a76e68d4183182fef868e375e78c23c70f366985f3d8633674326c6d3317e"
+      },
+      {
+        "path": "docs/chats/2026-10-20-server-age-research/server-age-2026-10-20.md",
+        "revision": "95cd0c590fcc6868fc75136bfffa4ab21b726ecbf7fcd8fb7833003d63c37d24"
+      },
+      {
+        "path": "docs/chats/2026-10-20-service-plan-audit/handoff.md",
+        "revision": "6a816642969d1b010535428a2246f63c87c81a692b709165303558abd94d8e33"
+      },
+      {
+        "path": "docs/chats/2026-10-20-service-plan-audit/log.md",
+        "revision": "06ed570df107a23b9c7b6536d509d67c886fded53771955809756d0661cb600a"
+      },
+      {
+        "path": "docs/chats/2026-10-20-spline-q042/handoff.md",
+        "revision": "5aacf76beb65ccb1fc6211c1ecd8b5ab57591c2bf3d743058c6bd1914f0f9a59"
+      },
+      {
+        "path": "docs/chats/2026-10-20-spline-q042/log.md",
+        "revision": "a8ab1b4622d9e36751506e2f4e8665240f2d20e1c9510f1d5b559ac2fd15b836"
+      },
+      {
+        "path": "docs/chats/2026-10-20-window-guard-review/handoff.md",
+        "revision": "7db49246d5c3d247e284696c2d532b1523492b38ce637b9dfde551ef2dc9db54"
+      },
+      {
+        "path": "docs/chats/2026-10-20-window-guard-review/log.md",
+        "revision": "7f380abc7b0995658aab2b669389a8eb236406f6efe6e35a6a7e2ae04c953977"
+      },
+      {
+        "path": "docs/chats/2026-10-20-window-guard-review/research.md",
+        "revision": "263508f748f14eb5dddaf43101efc401770f82a834e587b09481ff1be5da1306"
+      },
+      {
+        "path": "docs/chats/2026-10-20-window-q044/guard-live.md",
+        "revision": "a91efaf497091cf472a3617d3bdec176755d2a8935f7bf1f0c18d1935f7335e3"
+      },
+      {
+        "path": "docs/chats/2026-10-20-window-q044/guard-offline.md",
+        "revision": "84ea7d080a96546fbc423d92d5d267bd1a601f553304b17351ddc31fb38eb09f"
+      },
+      {
+        "path": "docs/chats/2026-10-20-window-q044/handoff.md",
+        "revision": "1135731d663446fa52273cb222c40d8dab3c000f3bce8b1459a22408536dce76"
+      },
+      {
+        "path": "docs/chats/2026-10-20-window-q044/log.md",
+        "revision": "8d06b5fe68addcc7e6fe8cc55439e4d2d0a40bf51ae2b29b658cbfa30bc0bc22"
+      },
+      {
+        "path": "docs/chats/2026-10-20-window-q044/research.md",
+        "revision": "f23c515362ae26facc71086a31b6772f7338a94fbd421a48430cc5a7110dea6a"
+      },
+      {
+        "path": "docs/chats/2026-10-20-wpf-pit-failure/handoff.md",
+        "revision": "720c2e3c7948e4ad4e762a57cec7a6d21792e4981c2bdd9ba3c42a78fe815341"
+      },
+      {
+        "path": "docs/chats/2026-10-20-wpf-pit-failure/log.md",
+        "revision": "49f0c330b917d374c2d97be3696f2713d9b1ad33c0a0a4369cd1b37e6574e9b8"
+      },
+      {
+        "path": "docs/chats/2026-10-20-wpf-pit-failure/research.md",
+        "revision": "3519cb26cd0bd58a928674cfbe32489ed778f31be5ac864e6661276d5a1fe16d"
+      },
+      {
+        "path": "docs/chats/2026-10-21-follow-332/handoff.md",
+        "revision": "6c9daab6150c2ef209c854d2058b7e7b4e87e70dd99b7d4e8b78e89b86b9780e"
+      },
+      {
+        "path": "docs/chats/2026-10-21-follow-332/log.md",
+        "revision": "b02271a8a8b3d3d57420e5f33aecc4135ae6f74687b0dd3110b9ce0f0bfbb35c"
+      },
+      {
+        "path": "docs/chats/2026-10-21-follow-q060/handoff.md",
+        "revision": "dedf68a5e4974c249a75294843a55f67ab7008ee837fff5e59f3cb652c06fffd"
+      },
+      {
+        "path": "docs/chats/2026-10-21-follow-q060/log.md",
+        "revision": "5a7a27dbcadc5fb69e11feed30ec3fa21d52484e6be4e4597b446a503f0d110b"
+      },
+      {
+        "path": "docs/chats/2026-10-21-follow-q060/research.md",
+        "revision": "a814fdc3c4700ca7a79090e8758d188a6116c0204f081ae17f48858488ccedba"
+      },
+      {
+        "path": "docs/chats/2026-10-21-fuel-nan/handoff.md",
+        "revision": "00e258225fc097ac7d854a2d76ed4751c8ef22d9b3a80d7e9352838c33835537"
+      },
+      {
+        "path": "docs/chats/2026-10-21-fuel-nan/log.md",
+        "revision": "a7e08a4fd52bf21c0fff872c7bd08f850d47dc05301c1140473b12ac3d0e3a4e"
+      },
+      {
+        "path": "docs/chats/2026-10-21-fuel-nan/research.md",
+        "revision": "85d8a5bae8d871978c0ba153f513a5fc7d29473a40f6ab2d5cbd160e9ba46f98"
+      },
+      {
+        "path": "docs/chats/2026-10-21-gearbox-q030/log.md",
+        "revision": "41a9ba67187988f07721fba5d01a09a7c82458c5183ee27acd4a4f81a2e64557"
+      },
+      {
+        "path": "docs/chats/2026-10-21-gearbox-q030/research.md",
+        "revision": "dd2e6007c537c2cfd3c9ac4889ab993af80461256d14603b1a743be16fa21870"
+      },
+      {
+        "path": "docs/chats/2026-10-21-health-witness/handoff.md",
+        "revision": "6d2a4a40d9c29ed7ec5228e949669cb011919ee258aba39d3794526ec6a1f19b"
+      },
+      {
+        "path": "docs/chats/2026-10-21-health-witness/log.md",
+        "revision": "1413518f5b674578868dc49f0ef6df038cd9bb3e3be459fe679acac0fc211773"
+      },
+      {
+        "path": "docs/chats/2026-10-21-health-witness/research.md",
+        "revision": "599c8ffdc1b071aaa92c93df94a027485da7a8852ea7b74d9cc53e787994ea54"
+      },
+      {
+        "path": "docs/chats/2026-10-21-multi-server/handoff.md",
+        "revision": "34709877b83292f5cec1c4212d4f35256f14b852a421cbbee38141ea8ed98b2a"
+      },
+      {
+        "path": "docs/chats/2026-10-21-multi-server/log.md",
+        "revision": "1f1d3d47ca3cea69062bc61bd8235b33dcb9b826109cadd7785916bb9782621c"
+      },
+      {
+        "path": "docs/chats/2026-10-21-multi-server/research.md",
+        "revision": "96e6272031efcf8c47c5bd390cda4154d63cec6983a11cdc6b39b3d6b6858016"
+      },
+      {
+        "path": "docs/chats/2026-10-21-spline-q025/handoff.md",
+        "revision": "89b0b4d41bf6bacd1acfa5ca26d2016ff37f96e57ff86007463cab51fcbf765c"
+      },
+      {
+        "path": "docs/chats/2026-10-21-spline-q025/log.md",
+        "revision": "abfbceb9a99affe72c0ab285bd4b98689ab107509d7c9dfd84a6df7f754a48e6"
+      },
+      {
+        "path": "docs/chats/2026-10-21-spline-q025/research.md",
+        "revision": "1706d68840c03e1d7ae6b0b80ca1fd5e8973b3c4e4f5bbd94389bd958b4ea3fa"
+      },
+      {
+        "path": "docs/chats/index.md",
+        "revision": "bd914cbc0e9e36647d2ef644f6469a151c7dcabf027a0416f030005b17b12a29"
+      },
+      {
+        "path": "docs/features/algorithmic-commands/formation/index.md",
+        "revision": "415991ceaa72c7929dec165f3b52da5cc5cbcc06794898a5dd3aa5ff7aab0372"
+      },
+      {
+        "path": "docs/features/algorithmic-commands/formation/requirements.md",
+        "revision": "005b5585fd81d9c78a80c66415f4eada42f6a9356e30f57e28e1b3b9e04c1c40"
+      },
+      {
+        "path": "docs/features/algorithmic-commands/index.md",
+        "revision": "adaf59eb2d9cd25f7df514e7c1dacfc57ae7889d27db6a0bdf6a4680f1c00086"
+      },
+      {
+        "path": "docs/features/algorithmic-commands/motion-toolkit/index.md",
+        "revision": "b2d110c33c444584cacf2c5b2ac64c4f64fe6d8431d8b3ad3d79e08f679297cf"
+      },
+      {
+        "path": "docs/features/algorithmic-commands/motion-toolkit/requirements.md",
+        "revision": "dc77a7d3a42a8f0d726d2b484cb1f04b1f5614ce12519901814a443d0d96d7fd"
+      },
+      {
+        "path": "docs/features/algorithmic-commands/player-following/approach-and-follow.md",
+        "revision": "bfd96482a8cd8bc5a68acbb6e9f599ad51af523a610a39ecf6b1fa0aa6b975a4"
+      },
+      {
+        "path": "docs/features/algorithmic-commands/player-following/group-police.md",
+        "revision": "c16215666151645fff70449b0409abae6a9418e674476b0932cff3650aeca231"
+      },
+      {
+        "path": "docs/features/algorithmic-commands/player-following/index.md",
+        "revision": "c0efa8a6f1025a1b3a00fc3a629e8add53c7f03771382fe558f08ead4d5bb073"
+      },
+      {
+        "path": "docs/features/algorithmic-commands/player-following/police.md",
+        "revision": "ff441240487275e58ce6992911d346915739920ec910a9f09426b016033768d2"
+      },
+      {
+        "path": "docs/features/algorithmic-commands/player-following/requirements.md",
+        "revision": "6c62cde5798b9e069b3115680e1af566dbbcec98790328487f59abea8636ea6a"
+      },
+      {
+        "path": "docs/features/algorithmic-commands/spline-ownership-design.md",
+        "revision": "13308974d13c523c9ffae6052b9c8728d36306feb95ecf94e80cf0ac28d05c44"
+      },
+      {
+        "path": "docs/features/bot-launch/index.md",
+        "revision": "15a11c1e3937281b42f3bb2252c75800ef5fa6ace9048ecf10b6ba677b873aa3"
+      },
+      {
+        "path": "docs/features/bot-launch/requirements.md",
+        "revision": "1bc4a8ffe5d563c6cfb008ffd7f7472a6489c7882c730c4da4470b5df8a3390b"
+      },
+      {
+        "path": "docs/features/bot-types/adaptive/index.md",
+        "revision": "60bcbc0278fa1407e18a9fd9e30c9aee60a56caefacfce99549e581829c73ccd"
+      },
+      {
+        "path": "docs/features/bot-types/adaptive/requirements.md",
+        "revision": "0b82f808df39e885658784891d2036e4832e4be793bee1e34dc0b40d5a374f48"
+      },
+      {
+        "path": "docs/features/bot-types/index.md",
+        "revision": "50da0e20669732b3614f56d2ddaf6ca0fa40c43aa6ba08b4d8123ddcdce84150"
+      },
+      {
+        "path": "docs/features/bot-types/reactive/index.md",
+        "revision": "7ab2225a4484a63b67b39e543bb7d0494e6f42375607fff044c4532ec8bfd186"
+      },
+      {
+        "path": "docs/features/bot-types/reactive/requirements.md",
+        "revision": "1f43eb295c7421f5139dc959e6b3fc9121607962d5e1875f1e1326b4e6e2010e"
+      },
+      {
+        "path": "docs/features/car-selection/index.md",
+        "revision": "1c8b3736fa335790b3f9943927670365e5b8478cab3087b4adfd07ec529aeb89"
+      },
+      {
+        "path": "docs/features/car-selection/requirements.md",
+        "revision": "3538d6e2f9e29334bdc857bcced38e87505eee98115b8d833379027a7aecf612"
+      },
+      {
+        "path": "docs/features/compositions/editor-and-presets.md",
+        "revision": "952893c603c0314dddd916808af9756f6775b1419ed2b1f7b76ba8a3692071f4"
+      },
+      {
+        "path": "docs/features/compositions/index.md",
+        "revision": "4d72a8c251f21dca251e6ed8998ac57944016a8ebfd742b14689f1ac821319a8"
+      },
+      {
+        "path": "docs/features/compositions/new-composition.md",
+        "revision": "3ce35875c953cf7e912d59d2dc1c594b543e5a9405f8b7b5623762fd029775c0"
+      },
+      {
+        "path": "docs/features/compositions/profiles-folder-switch.md",
+        "revision": "f559e9f63bbc6fe815b7cfa545f4d710b6e3c3d22b9809fc8791114c6a52ffa0"
+      },
+      {
+        "path": "docs/features/compositions/requirements.md",
+        "revision": "1113f8ea7daa7371085e29ad38bf84f7b1dcf82f86ecc7df9d3076a016ca48d2"
+      },
+      {
+        "path": "docs/features/diagnostics-and-journal/confirmations.md",
+        "revision": "ca93c292b92ec230ef28352241cc501b541ee0e5aac3af49dbf5a3dece060c90"
+      },
+      {
+        "path": "docs/features/diagnostics-and-journal/index.md",
+        "revision": "8f6ea7207df34156a1fb6286235123068b1bc4b82c3a5d2e79fdff665d7dff4c"
+      },
+      {
+        "path": "docs/features/diagnostics-and-journal/join-diagnostics.md",
+        "revision": "e19d968024a3f44ed9f06c78e5855608a0e5d1fb7eb318ac68e093b1fbc2821a"
+      },
+      {
+        "path": "docs/features/diagnostics-and-journal/journal-and-events.md",
+        "revision": "e32af7929e0f427e0d3b05e00e3eb694fb0d8fb1f5ba15703990970ea077b928"
+      },
+      {
+        "path": "docs/features/diagnostics-and-journal/requirements.md",
+        "revision": "4beeb77597da73adf4b751451720211a3a1d3ec1e4b80dd8a15369945672243e"
+      },
+      {
+        "path": "docs/features/diagnostics-and-journal/runtime-audit-plan.md",
+        "revision": "2d25d7694b8b4dc40cb906ea25281e2cb216e9bcfd33be35d0a6d133c1c3b962"
+      },
+      {
+        "path": "docs/features/diagnostics-and-journal/unexpected-errors.md",
+        "revision": "00d771e3959170ce8a363ea2239c3cd4f30966f4b8ea41c5d5ba3a02f6efe860"
+      },
+      {
+        "path": "docs/features/in-game-panel/index.md",
+        "revision": "869639060c06ffbc8e0f1d3d3e3c89d4805a0f66ee96d260f977ca7fb7903db2"
+      },
+      {
+        "path": "docs/features/in-game-panel/requirements.md",
+        "revision": "1422c7d3adbf4ed550678af241f11644f679e82aa63322e14d7833291313949a"
+      },
+      {
+        "path": "docs/features/index.md",
+        "revision": "45b846dcd03f45dd3dae31dcefd5e823f34d2b0d50d51a14a113bbb707bbd084"
+      },
+      {
+        "path": "docs/features/pits-and-service/auto-return.md",
+        "revision": "07fff2f8fdf23a9bf07076354a0d1e15b210e9bc741eb666a8d3f1d869700969"
+      },
+      {
+        "path": "docs/features/pits-and-service/drive-into-box.md",
+        "revision": "c5154608f1e1d2665fc93c50bce83e88fc9e09bc1cdf23c07c03751121bbe4ba"
+      },
+      {
+        "path": "docs/features/pits-and-service/index.md",
+        "revision": "6da94661afcab4e2362dc7ed075d0cce3138e82325c1920dd0f0440b0ef97563"
+      },
+      {
+        "path": "docs/features/pits-and-service/instant-pit.md",
+        "revision": "f1ff11a0c324babad2f5133e402208b559b92c25b81f595e7d2689a2634fab38"
+      },
+      {
+        "path": "docs/features/pits-and-service/requirements.md",
+        "revision": "4c8b6d04623dab2fd5b232171fe3d638d8139222b59956b42639f445181176e2"
+      },
+      {
+        "path": "docs/features/pits-and-service/self-service.md",
+        "revision": "a4a27061545ffea174278da8b4a1f6341d26ea7a07be9e71f5c9fc283088b8d3"
+      },
+      {
+        "path": "docs/features/portable-package/index.md",
+        "revision": "c488e0feed063bed6d24fc1580f26c8bd9a40c2e267489354363ee02edd79046"
+      },
+      {
+        "path": "docs/features/portable-package/requirements.md",
+        "revision": "bc43b4d0507377a3f78c7a97cb605feccb4eba953efe106644c349c9bb5b38a4"
+      },
+      {
+        "path": "docs/features/run-panel/index.md",
+        "revision": "85726ffb1a6821c1a7cd5ee3b16afd99b2127928868afac0a44553791a325870"
+      },
+      {
+        "path": "docs/features/run-panel/requirements.md",
+        "revision": "4ebeea5cb0cc1e7c52473e81e7d5829b085101a38aff0a383c1294933eeec656"
+      },
+      {
+        "path": "docs/features/scenarios/index.md",
+        "revision": "f8abdb3a93177440cffcfb9e9b4dc3e31c9ca1643a6690b978a2fad5fb269cb4"
+      },
+      {
+        "path": "docs/features/scenarios/requirements.md",
+        "revision": "aea76e9bdf1f9406bc3404a8565b925f66cccf34cfc26dbee6f78b830e8637fd"
+      },
+      {
+        "path": "docs/features/server-connection/index.md",
+        "revision": "259a27e0d8dbe39c71debcee3b3c9434bf3096c7ab6f75482fddb7e6bd4facb8"
+      },
+      {
+        "path": "docs/features/server-connection/multi-server.md",
+        "revision": "1ffdf92d0a2ab5fa24ec034cf9394b53f04b6cbcf8d0ecb33a7c04b6fa8d8a7d"
+      },
+      {
+        "path": "docs/features/server-connection/passwords.md",
+        "revision": "b0b8789e61f75789f94e92f3a9ab3a2083a15415b3d6e66bb4ede67f49db7521"
+      },
+      {
+        "path": "docs/features/server-connection/players.md",
+        "revision": "4bc9d6758747271acc4b5ebc51d2350346ee252531f20097976b4859bdd2f0a4"
+      },
+      {
+        "path": "docs/features/server-connection/requirements.md",
+        "revision": "53ccc4892420e97ea4164279c28a88696cc9665e514c4c65024abac93637991c"
+      },
+      {
+        "path": "docs/features/server-connection/seats-and-reserve.md",
+        "revision": "2566f0c8da4007ae749c470dac322888501f4ed3407ec659e83f4020206447d9"
+      },
+      {
+        "path": "docs/features/settings-and-game-setup/index.md",
+        "revision": "f5697033f3dfa4532cf96ff0ee091d27e1cbbc0871eb887541e39ca7fa79519a"
+      },
+      {
+        "path": "docs/features/settings-and-game-setup/requirements.md",
+        "revision": "3a7be9986078faffb0fcdd8332d50b81b0b95150f7c8fe1b5cdd244d57e48b34"
+      },
+      {
+        "path": "docs/features/settings-and-game-setup/settings-page.md",
+        "revision": "59ff80e02890bc88c79263650f70c09d248e268d2edbc678fa86f9f7b75b59c5"
+      },
+      {
+        "path": "docs/index.md",
+        "revision": "6437b5db6a527b705a53b62c24e7888ae1e2a13d663c255096a4f5f87af4f551"
+      },
+      {
+        "path": "docs/knowledge/ARCHITECTURE_AUDIT_2026-10-09.md",
+        "revision": "023a34cf3d35bebf52956477613e048be76ba51838673e68d1453bef8a1fc9f1"
+      },
+      {
+        "path": "docs/knowledge/UX_AUDIT_2026-10-09.md",
+        "revision": "ffb9f5ccc89b19f43701a6b04be09e1416204470c4a734298ca5b97edbd5335e"
+      },
+      {
+        "path": "docs/knowledge/index.md",
+        "revision": "1000594b50802a54606c746a41c69dbcf92ddb538d685407b7f458c6d580ba4b"
+      },
+      {
+        "path": "docs/knowledge/performance-audit-2026-10-20.md",
+        "revision": "1f9a55c059479659f99a1678cd996b1685456377bea62a623f3af574ff576791"
+      },
+      {
+        "path": "docs/knowledge/player-modes-runs.md",
+        "revision": "39f778c091754459a9d1b9354da8143a0c51cc65789f0f96e869118c31156da6"
+      },
+      {
+        "path": "docs/knowledge/self-service-physical-checks-2026-10-18.md",
+        "revision": "5d25e49e1ae6a80296ac115423d9974a257984e12186a5c01ac59dc468e8ef44"
+      },
+      {
+        "path": "docs/manual/bot-types.md",
+        "revision": "44a7826150675418ea44e7663f1c4056b375da6d52f9d5ff2acb27ba3dd4ba83"
+      },
+      {
+        "path": "docs/manual/compositions-and-presets.md",
+        "revision": "6b70d10971324e83d4482aaaf13025ae898bd3c579fc0d57ba92f3eb3e2a37be"
+      },
+      {
+        "path": "docs/manual/getting-started.md",
+        "revision": "221d6caadd2da69cefa9192e5a2944887069ec23a796d6bc0810a918c9e924f3"
+      },
+      {
+        "path": "docs/manual/how-bots-work.md",
+        "revision": "52eaf5806ee31db2e917dd4036a46297bbe0573236083bd959e90f7e7c727aa3"
+      },
+      {
+        "path": "docs/manual/how-control-works.md",
+        "revision": "21bd1a0d141414c3f437c980f5f9152e175c221235cec513178faf10ca993af7"
+      },
+      {
+        "path": "docs/manual/how-game-is-prepared.md",
+        "revision": "2f151e92e60f0678a24f72ff3b523e811e8c8a82d5db1b15573474b6b986a8e1"
+      },
+      {
+        "path": "docs/manual/how-in-game-panel-works.md",
+        "revision": "1ad97bddd03d8844287bd5ba561d621f2c3b318c478c994798d4f6c7dbb5c2a7"
+      },
+      {
+        "path": "docs/manual/how-joining-works.md",
+        "revision": "16273f6ba74a764291840495af8034c8d0f6505b1e30282a84a14ea1589aa835"
+      },
+      {
+        "path": "docs/manual/how-pits-and-damage-work.md",
+        "revision": "73642bb98ca70dd466f1d124bee0e6300d47cf1696343125191ab2f9c1b607f5"
+      },
+      {
+        "path": "docs/manual/how-player-modes-work.md",
+        "revision": "bdfdb32b5aadebe7a59dd0fb1ae99e535735263cee877c0247eafc658192349d"
+      },
+      {
+        "path": "docs/manual/how-sessions-and-order-work.md",
+        "revision": "4ca38639d6a19707ffd97e81e94eff878a7f0a6ad475adbd5ccc63f2e0431470"
+      },
+      {
+        "path": "docs/manual/in-game-panel.md",
+        "revision": "b63d680ece69b0194e234bb785dd7d525f27bbc4f4b2e76ae059da4d2dbb0741"
+      },
+      {
+        "path": "docs/manual/index.md",
+        "revision": "68a192db3bd17d0a184e447482107b1a1284f63990ae8a236add21c66fd63dd6"
+      },
+      {
+        "path": "docs/manual/journal-and-troubleshooting.md",
+        "revision": "ad5f2353956768da44b0ed4dcc1fdac60ca5140cad532a749b7acd47aafff2a8"
+      },
+      {
+        "path": "docs/manual/limits-and-load.md",
+        "revision": "2243c028108534b665d75b93760ea2162df126f6e88713d52f3226fcf3787686"
+      },
+      {
+        "path": "docs/manual/pits-and-service.md",
+        "revision": "d1d8d5d32a162d0e89409eaaef63ddcf72cf8578e2a262d6429dd6dc33b1d7d7"
+      },
+      {
+        "path": "docs/manual/player-modes.md",
+        "revision": "94b8a89491ba49dc4ea3cf3563324c1cb34b4360b3e68775fda097cea17eb7ac"
+      },
+      {
+        "path": "docs/manual/race-commands.md",
+        "revision": "4a5e145bbfeee08e35d08b385a898dc6f0ccbcfb6a825d14f843dba85c249202"
+      },
+      {
+        "path": "docs/manual/server.md",
+        "revision": "e6b7e1af3db784d89dd4c40b22f082195f81701b120c1df10d57937539f32d1a"
+      },
+      {
+        "path": "docs/manual/settings.md",
+        "revision": "fd4a2f9d315ba54aeba2bacb23aa3c5db0cc16ffc043d90c0f31e1486814984a"
+      }
+    ],
+    "sourceFingerprint": "97f0f5708129e958db60585682bb2bb7d7ed376b3e9b773c4715234115b4e7c3",
+    "graphFingerprint": "d2b262f322e9c64620d2dab2cbfbf9827a5ce39ba2a0a8f94e1d043659eb7a7d",
+    "views": [
+      {
+        "name": "overdrive-bots/documents",
+        "nodes": 479,
+        "edges": 2638,
+        "sha256": "faebd9803486eb8859b14c1383042bdbe1ce9da2da8985a5fb294eafd8372d0d"
+      },
+      {
+        "name": "overdrive-bots/documents-chunks",
+        "nodes": 2782,
+        "edges": 6367,
+        "sha256": "d041398ef0425dba46e2b03053d339680cc52a554a0231a565e00069f9bee15f"
+      }
+    ]
+  }
+]

@@ -212,6 +212,8 @@ Query-to-triple для входа в граф описан в [HippoRAG 2, §3.3
 
 Кандидаты: [Cytoscape.js](https://js.cytoscape.org/) (MIT, compound nodes, события, layouts), [Sigma.js](https://github.com/jacomyal/sigma.js) + [Graphology](https://github.com/graphology/graphology) (WebGL-renderer и отдельная модель; compound UX и инспектор — продуктовая работа), собственный SVG/Canvas (hit-testing, layout, доступность и масштабирование — свой объём). Опыт на одинаковых данных (250/1000/2000 узлов) и выбор Cytoscape 3.34.4 с ограниченной раскладкой — в [renderer-проверке](graph-renderer-2026-10-18/Index.md#выбор-renderer-для-p3). Sigma быстрее на больших картах, Cytoscape предсказуемее при первом открытии малого ограниченного графа. Библиотека поставляется с приложением, не по CDN.
 
+Для нового физического графа Т-46/Т-47 выполнено отдельное [исследование физики и отрисовки 21-10-2026](graph-render.md) на снимках bars-project и overdrive-bots; [ADR-0004](../adr/0004-graph-physics-renderer.md) предлагает d3-force/worker/Canvas2D. Прежний выбор Cytoscape для P3 остаётся описанием существующего компонента, а не выбором технологии новой реализации.
+
 ## Как проверить, что граф помогает
 
 Обычный бенч «первый релевантный чанк» недостаточен. Нужен отдельный корпус задач:

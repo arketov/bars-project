@@ -1,0 +1,14 @@
+{
+  "name": "bars-graph-physics-research",
+  "private": true,
+  "type": "module",
+  "scripts": { "measure": "node measure.mjs" },
+  "dependencies": {
+    "cytoscape": "3.34.4",
+    "d3-force": "3.0.0",
+    "graphology": "0.26.0",
+    "graphology-layout-forceatlas2": "0.10.1",
+    "sigma": "4.0.3",
+    "vite": "8.3.4"
+  }
+}
