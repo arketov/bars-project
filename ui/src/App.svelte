@@ -55,7 +55,9 @@
     <section class="work-area" aria-label="Рабочая область">
     <MainNavigation />
     <div class="work-body" class:viewing>
-    {#if app.workerDown}
+    {#if app.view === "indexing" && project}
+      <IndexingPage />
+    {:else if app.workerDown}
       <WorkerDown message={app.workerDown} />
     {:else if app.projectsLoaded && app.projects.length === 0}
       <EmptyProjects />
@@ -63,8 +65,6 @@
       <main></main>
     {:else if project.state === "unavailable"}
       <Missing {project} />
-    {:else if app.view === "indexing"}
-      <IndexingPage />
     {:else if app.view === 'graph'}
       {#await import('./lib/GraphPage.svelte')}
         <main role="status">Загрузка графа…</main>

@@ -13,6 +13,7 @@ import {
   type ActivityOutput,
   type ModelsInfoOutput,
   type OperationEventsOutput,
+  type Operation,
   type ProjectInfo,
   type ProjectsOutput,
   type ReadOutput,
@@ -106,6 +107,38 @@ class App {
   #selectionVersion = 0;
   notificationError = $state<string | null>(null);
   notificationHistoryWarning = $state<string | null>(null);
+  indexingHistory = $state<OperationEventsOutput | null>(null);
+  indexingHistoryError = $state<string | null>(null);
+  indexingHistoryLoading = $state(false);
+  #indexingPending: Promise<void> | null = null;
+
+  latestIndexingResult(path: string): Operation | null {
+    return this.indexingHistory?.completed.filter(op => op.project === path && op.target_available)
+      .sort((a, b) => b.sequence - a.sequence)[0] ?? null;
+  }
+
+  private loadIndexingHistory(): Promise<void> {
+    if (this.#indexingPending) return this.#indexingPending;
+    this.#indexingPending = this.readIndexingHistory().finally(() => { this.#indexingPending = null; });
+    return this.#indexingPending;
+  }
+
+  private async readIndexingHistory(): Promise<void> {
+    this.indexingHistoryLoading = true;
+    try {
+      let epoch = this.indexingHistory?.epoch ?? this.#notifications.epoch;
+      if (!epoch) epoch = (await call<OperationEventsOutput>("operation_events")).epoch;
+      let output = await call<OperationEventsOutput>("operation_events", { epoch, after: 0 });
+      // Перезапуск worker: повторяем чтение уже с новой эпохой, без старых итогов.
+      if (output.epoch !== epoch) output = await call<OperationEventsOutput>("operation_events", { epoch: output.epoch, after: 0 });
+      this.indexingHistory = output;
+      this.indexingHistoryError = null;
+    } catch (error) {
+      this.indexingHistoryError = error instanceof Error ? error.message : String(error);
+    } finally {
+      this.indexingHistoryLoading = false;
+    }
+  }
 
   readNotifications(id?: string, version?: string): void { this.#notifications.read(id, version); this.publishNotifications(); }
   notificationVersion(id: string): string | undefined { return this.#notifications.version(id); }
@@ -125,8 +158,7 @@ class App {
       if (output.epoch !== item.epoch || !op?.target_available) throw new Error("Прежняя цель недоступна: регистрация или настройки изменились либо история истекла");
       if (selectionVersion !== this.#selectionVersion || epoch !== this.#epoch) throw new Error("Выбор проекта изменился; прежний переход отменён");
       if (item.project) {
-        await this.select(item.project);
-        if (this.current !== item.project) throw new Error("Выбран другой проект; переход отменён");
+        if (this.current !== item.project) void this.select(item.project);
         this.openIndexing();
       } else this.openSettings("models");
     } catch (error) { this.flash(error instanceof Error ? error.message : String(error), true); }
@@ -209,6 +241,8 @@ class App {
         const events = await call<OperationEventsOutput>("operation_events", { epoch: this.#notifications.epoch, after: this.#notifications.cursor });
         if (epoch !== this.#epoch) return;
         this.#notifications.events(events);
+        if (this.view === "indexing" && (this.indexingHistoryError || events.epoch !== this.indexingHistory?.epoch
+          || events.completed.some(op => op.project === this.current))) void this.loadIndexingHistory();
         this.notificationError = null;
       } catch {
         this.notificationError = "Не удалось получить события. Сохранён последний снимок; исход операций пока неизвестен.";
@@ -644,6 +678,7 @@ class App {
 
   openIndexing(): void {
     this.view = "indexing";
+    void this.loadIndexingHistory();
   }
 
   openSettings(tab = "models"): void {

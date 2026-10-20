@@ -1,8 +1,9 @@
 <script lang="ts">
   import { app } from "./app.svelte";
   import Banner from "./Banner.svelte";
-  import { decimal, documents, duration, jobReason, percentOf, remainingSeconds } from "./format";
+  import { decimal, documents, duration, jobReason, percentOf, plural, remainingSeconds } from "./format";
   import Icon from "./Icon.svelte";
+  import { operationText } from "./notifications";
 
   const project = $derived(app.project);
   const activity = $derived(app.activity);
@@ -18,6 +19,8 @@
     ...(activity?.queue ?? []).map((job) => ({ ...job, running: false })),
   ]);
   const files = $derived(problems?.files ?? []);
+  const last = $derived(project ? app.latestIndexingResult(project.path) : null);
+  const resultState: Record<string, string> = { success: "Готово", partial: "Частичный итог", error: "Ошибка", cancelled: "Отменено" };
 
   /** Что сделать с ошибкой файла: подсказки из indexing-progress.md. */
   function advice(reason: string): string {
@@ -37,6 +40,7 @@
   {#if project}
     <div class="page">
       <h1>{project.name}</h1>
+      {#if app.workerDown}<Banner kind="warn" title="Нет связи с воркером" text="{app.workerDown}. Сохранён последний снимок хода индексации; данные могут быть устаревшими." />{/if}
       <p class="lead">
         {#if rebuilding}
           Полная переиндексация по вашему согласию: индекс строится заново в отдельном файле.
@@ -49,7 +53,7 @@
         {:else if files.length}
           Индекс обновлён, кроме {files.length} {files.length === 1 ? "файла" : "файлов"}: они остались с ошибкой.
         {:else}
-          Индексация не идёт: индекс актуален.
+          Сейчас нет задания индексации. Итог последнего прохода показан отдельно.
         {/if}
       </p>
 
@@ -113,6 +117,35 @@
         </div>
       {/if}
 
+      {#if !running && !queued}
+        <div class="panel">
+          <div class="ch"><h2>Последний проход</h2>{#if last}<span class="badge" class:bad={last.state === "error"} class:warn={last.state === "partial" || last.state === "cancelled"}>{resultState[last.state] ?? "Исход неизвестен"}</span>{/if}</div>
+          <div class="cb">
+            {#if app.indexingHistoryError}
+              <p role="alert">Не удалось обновить итог: {app.indexingHistoryError}. Сохранён последний снимок.</p>
+              <button class="ghost sm" onclick={() => app.openIndexing()}>Повторить чтение</button>
+            {:else if app.indexingHistoryLoading}
+              <p role="status">Получаем итог последнего прохода…</p>
+            {/if}
+            {#if last}
+              <p>{operationText(last)}</p>
+              <dl class="kv">
+                <dt>Начало</dt><dd>{new Date(last.started_at).toLocaleString("ru-RU")}</dd>
+                <dt>Окончание</dt><dd>{last.finished_at ? new Date(last.finished_at).toLocaleString("ru-RU") : "Подтверждённого итога нет"}</dd>
+                {#if last.report}
+                  <dt>Документы</dt><dd>Добавлено {last.report.added} · изменено {last.report.changed} · удалено {last.report.removed} · без изменений {last.report.unchanged} · ошибок {last.report.problems}</dd>
+                  <dt>Индекс</dt><dd>{last.kind === "scan" ? "Проверка файлов не изменяет индекс" : last.report.index_applied ? "Результат применён" : "Сохранён прежний индекс"}</dd>
+                {/if}
+              </dl>
+              {#if last.error}<p>{last.error}</p>{/if}
+              {#if last.report?.problem_paths?.length}<ul>{#each last.report.problem_paths as path}<li class="mono">{path}</li>{/each}</ul>{/if}
+            {:else if !app.indexingHistoryLoading}
+              <p>Подтверждённый итог недоступен: проход ещё не выполнялся, worker перезапущен или история вытеснена. Актуальность индекса по отсутствию задания не определяется.</p>
+            {/if}
+          </div>
+        </div>
+      {/if}
+
       {#if files.length}
         <Banner kind="warn" title="Ошибок в документах: {files.length}" text={problems?.rebuild_not_applied ? "Полная переиндексация не применена. Старый индекс сохранён. Устраните причину и повторите переиндексацию." : problems?.last_error ? "Проверка остановлена. Предыдущие обновления документов сохранены; оставшиеся документы ещё нужно проверить." : "Обновление завершено с ошибками в документах. Предыдущие версии документов с ошибками сохранены, если они были в индексе."}>
           <button class="btn sm" onclick={() => problems?.rebuild_not_applied ? app.retryRebuild(project.path) : app.reindexCheck(project.path)}>Повторить</button>
@@ -145,9 +178,9 @@
 
       {#if rows.length}
         <div class="panel">
-          <div class="ch"><h2>Очередь индексации</h2><span class="badge">{rows.length} {rows.length === 1 ? "проект" : "проекта"}</span></div>
+          <div class="ch"><h2>Очередь индексации</h2><span class="badge">{rows.length} {plural(rows.length, ["задание", "задания", "заданий"])}</span></div>
           <div>
-            {#each rows as row, index (row.project)}
+            {#each rows as row, index (`${row.running ? "running" : "queued"}:${row.project}`)}
               <div class="q" class:now={row.running}>
                 <span class="n">{index + 1}</span>
                 <div class="grow"><b>{row.name}</b><div class="why">{jobReason(row.kind, row.priority, row.files)}</div></div>
