@@ -27,3 +27,6 @@ crates/bars-app/gen/
 # Установщик: sidecar-копии exe и сборка NSIS (scripts/build-installer.ps1)
 /crates/bars-app/binaries/
 /dist-installer/
+
+# Временные копии корпусов; доказательства хранятся в docs/knowledge/.
+/spikes/memory/acceptance-2026-10-20/

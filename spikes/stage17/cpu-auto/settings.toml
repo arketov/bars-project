@@ -1,5 +1,0 @@
-[embed]
-accelerator='cpu'
-[rerank]
-enabled=true
-accelerator='auto'

@@ -1,0 +1,8 @@
+    Finished `release` profile [optimized] target(s) in 0.42s
+     Running unittests src\lib.rs (C:/bars-build\release\deps\bars_worker-7b1b3763a4e245a1.exe)
+
+running 1 test
+test handler::tests::concurrency::full_rebuild_keeps_status_window_controls_and_full_ipc_search_responsive ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 226 filtered out; finished in 2.75s
+

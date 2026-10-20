@@ -1,0 +1,37 @@
+{
+  "unchanged": false,
+  "files": [
+    {
+      "file": ".codex/config.toml",
+      "exists": true,
+      "sha256": "308119C8EAA3BBB7B9C0C01AE6C9A37FC60B02448D317C48C6A368E6FE7BFFC4",
+      "bytes": 6966,
+      "modified_utc": "2026-10-20T10:50:26.6685616Z"
+    },
+    {
+      "file": ".codex/hooks.json",
+      "exists": true,
+      "sha256": "CF23F9C61A69588C4C1324A2BC62D46B5D25ABAEB20E2B1890CC33F284B942E8",
+      "bytes": 289,
+      "modified_utc": "2026-10-18T10:00:20.8509989Z"
+    },
+    {
+      "file": ".claude/settings.json",
+      "exists": false
+    },
+    {
+      "file": ".claude.json",
+      "exists": true,
+      "sha256": "A27FA209E8B2BC18092457BEEA362F0BBE20EC9F776203729CB6AC240C6AD0F1",
+      "bytes": 48456,
+      "modified_utc": "2026-09-29T16:09:18.0026714Z"
+    },
+    {
+      "file": ".bars/settings.toml",
+      "exists": true,
+      "sha256": "04623F80B610D8D9BDCA7D4CD3873023B55B9BE343FC0212A99FAAACB485DEBA",
+      "bytes": 226,
+      "modified_utc": "2026-10-18T17:56:25.0056940Z"
+    }
+  ]
+}

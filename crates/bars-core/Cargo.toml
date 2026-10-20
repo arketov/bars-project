@@ -41,7 +41,3 @@ apple-native-keyring-store.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true
-
-[[example]]
-name = "verify_gguf"
-path = "../../spikes/gguf/src/main.rs"

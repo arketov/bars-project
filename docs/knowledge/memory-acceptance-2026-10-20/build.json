@@ -1,0 +1,60 @@
+{
+  "git_head": "39bf11ecd621dca89999ccdf4ce733c80c988d55",
+  "sources": [
+    {
+      "file": "Cargo.lock",
+      "sha256": "8811C9204940CA233AC888296920D7BD396A1C98D2CF9DAB4F498EFBA294DE59"
+    },
+    {
+      "file": "crates/bars-core/examples/inference/mod.rs",
+      "sha256": "4D7B3889D9EB8F926317BAE2F306F3800E56F281D2FABFFFE870E329FD69FEB4"
+    },
+    {
+      "file": "crates/bars-core/examples/bench_index_memory.rs",
+      "sha256": "9760679F9EE4F7D602C0D09E3A562976FDB2443794B21AD63B6882A95C7AEDE4"
+    },
+    {
+      "file": "crates/bars-core/examples/bench_memory.rs",
+      "sha256": "EEC1D58A790802616D647E53220820E9434A274A19A57ADB8775493A9C12521C"
+    },
+    {
+      "file": "crates/bars-core/src/models/builtin.rs",
+      "sha256": "C7E6669583DE0964A86C6D5BD3C9B954148B28A3F8C00F700C77B9B941F41B52"
+    },
+    {
+      "file": "crates/bars-core/src/models/embed_artifact.rs",
+      "sha256": "97E1B50AC5FA014A6A07CCD56E9460EA5706A50F74BE4B218BB125A22BBA53BD"
+    },
+    {
+      "file": "crates/bars-core/src/indexing/indexer.rs",
+      "sha256": "FFEC07A0C79839EF3FC03CDC96AF46530BB3EE7FC7329C0117D588489ADA3975"
+    },
+    {
+      "file": "crates/bars-worker/examples/bench_worker_memory.rs",
+      "sha256": "1A835FD0A0503819B5B2F7AB137E2311CA726B05DF9CD647B10CE53B7B1FBA3E"
+    },
+    {
+      "file": "crates/bars-worker/src/worker/models.rs",
+      "sha256": "A5C48107D0564484215A359EB7C96D8BC808EB595283CC6FAFDDBDA64A9E17F0"
+    }
+  ],
+  "binaries": [
+    {
+      "file": "bars-window.exe",
+      "sha256": "F358C1F23511C2B5DB4DE581D456382BA7DFB156B0C388C4B0634964FCA5B46D"
+    },
+    {
+      "file": "bench_index_memory.exe",
+      "sha256": "7AA34BE07ECBBB8279B3CD3A635ABA5B5BFEB2E4EFC4930D3DFB23EF812FDC32"
+    },
+    {
+      "file": "bench_inference.exe",
+      "sha256": "92D9C66DA66AFDC4B5129AB1F07B70C6DB989E7642627C198E45A5D183587EC4"
+    },
+    {
+      "file": "bench_worker_memory.exe",
+      "sha256": "1D8DF5F5353139411EB1936FF4F377CBB9B67A31073360B46E07E2FBC8E90C7E"
+    }
+  ],
+  "at": "2026-10-20T09:15:13.8911349Z"
+}

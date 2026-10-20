@@ -1,0 +1,951 @@
+{
+  "note": "Completed experiment is not an accepted optimization. Timings overlap other workloads. Baseline/startup=8GiB; latest fixed-fixture standalone=7GiB; hard guard=1GiB. See memory.md.",
+  "runs": [
+    {
+      "file": "arena-auto-2.jsonl",
+      "completed": false,
+      "ending": "abort",
+      "detail": {
+        "min_ram_gib": 4,
+        "min_commit_gib": 8
+      },
+      "peak_private_bytes": 3686400,
+      "lifetime_peak_commit_bytes": 3801088,
+      "phases": [],
+      "sha256": "1056ba1f1ba73863da37839c6e6e828c8ed95a283774f594e6d8af13d825bbcc"
+    },
+    {
+      "file": "arena-auto-3.jsonl",
+      "completed": true,
+      "ending": "end",
+      "detail": {
+        "ok": true,
+        "error": null
+      },
+      "peak_private_bytes": 5204205568,
+      "lifetime_peak_commit_bytes": 5204271104,
+      "phases": [
+        {
+          "phase": "baseline",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 3829760,
+            "working_set_bytes": 11968512,
+            "lifetime_peak_working_set_bytes": 11968512,
+            "lifetime_peak_commit_bytes": 3829760,
+            "system_available_bytes": 15602434048,
+            "system_committed_bytes": 43164127232,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        },
+        {
+          "phase": "load",
+          "kind": "timing",
+          "memory": {
+            "private_bytes": 2755395584,
+            "working_set_bytes": 425836544,
+            "lifetime_peak_working_set_bytes": 2206896128,
+            "lifetime_peak_commit_bytes": 3495833600,
+            "system_available_bytes": 15164272640,
+            "system_committed_bytes": 45987274752,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": {
+            "ms": 2945,
+            "arena": "arena",
+            "device": "auto"
+          }
+        },
+        {
+          "phase": "loaded",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 2755395584,
+            "working_set_bytes": 425828352,
+            "lifetime_peak_working_set_bytes": 2206896128,
+            "lifetime_peak_commit_bytes": 3495833600,
+            "system_available_bytes": 15077511168,
+            "system_committed_bytes": 46150746112,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        },
+        {
+          "phase": "documents",
+          "kind": "timing",
+          "memory": {
+            "private_bytes": 5195329536,
+            "working_set_bytes": 615641088,
+            "lifetime_peak_working_set_bytes": 2206896128,
+            "lifetime_peak_commit_bytes": 5204271104,
+            "system_available_bytes": 14744080384,
+            "system_committed_bytes": 48750747648,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": {
+            "round": 0,
+            "ms": 3857,
+            "count": 15
+          }
+        },
+        {
+          "phase": "documents_done",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 5195329536,
+            "working_set_bytes": 615641088,
+            "lifetime_peak_working_set_bytes": 2206896128,
+            "lifetime_peak_commit_bytes": 5204271104,
+            "system_available_bytes": 16739901440,
+            "system_committed_bytes": 47352991744,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        },
+        {
+          "phase": "documents",
+          "kind": "timing",
+          "memory": {
+            "private_bytes": 5186928640,
+            "working_set_bytes": 607604736,
+            "lifetime_peak_working_set_bytes": 2206896128,
+            "lifetime_peak_commit_bytes": 5204271104,
+            "system_available_bytes": 16714932224,
+            "system_committed_bytes": 47355363328,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": {
+            "round": 1,
+            "ms": 3330,
+            "count": 15
+          }
+        },
+        {
+          "phase": "documents_done",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 5186928640,
+            "working_set_bytes": 607604736,
+            "lifetime_peak_working_set_bytes": 2206896128,
+            "lifetime_peak_commit_bytes": 5204271104,
+            "system_available_bytes": 16715890688,
+            "system_committed_bytes": 47354048512,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        },
+        {
+          "phase": "query",
+          "kind": "timing",
+          "memory": {
+            "private_bytes": 5190651904,
+            "working_set_bytes": 612921344,
+            "lifetime_peak_working_set_bytes": 2206896128,
+            "lifetime_peak_commit_bytes": 5204271104,
+            "system_available_bytes": 16715587584,
+            "system_committed_bytes": 47396343808,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": {
+            "ms": 229
+          }
+        },
+        {
+          "phase": "query_done",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 5190651904,
+            "working_set_bytes": 612921344,
+            "lifetime_peak_working_set_bytes": 2206896128,
+            "lifetime_peak_commit_bytes": 5204271104,
+            "system_available_bytes": 16678907904,
+            "system_committed_bytes": 47392530432,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        },
+        {
+          "phase": "dropped",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 224817152,
+            "working_set_bytes": 143118336,
+            "lifetime_peak_working_set_bytes": 2206896128,
+            "lifetime_peak_commit_bytes": 5204271104,
+            "system_available_bytes": 17118867456,
+            "system_committed_bytes": 42441744384,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        }
+      ],
+      "sha256": "b9d297d3daedbaa0b25450227c1fd3762f2de93d4ded5d954854b10d1174b62c"
+    },
+    {
+      "file": "arena-auto.jsonl",
+      "completed": false,
+      "ending": "abort",
+      "detail": {
+        "min_ram_gib": 4,
+        "min_commit_gib": 8
+      },
+      "peak_private_bytes": 3719168,
+      "lifetime_peak_commit_bytes": 3833856,
+      "phases": [],
+      "sha256": "7e10129d80ecb36fe8865c3d535e5c96931b5697fb3f7f0e280d7ff1379e503f"
+    },
+    {
+      "file": "device-weights-auto-2.jsonl",
+      "completed": true,
+      "ending": "end",
+      "detail": {
+        "ok": true,
+        "error": null
+      },
+      "peak_private_bytes": 5178695680,
+      "lifetime_peak_commit_bytes": 5178744832,
+      "phases": [
+        {
+          "phase": "baseline",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 3821568,
+            "working_set_bytes": 11956224,
+            "lifetime_peak_working_set_bytes": 11956224,
+            "lifetime_peak_commit_bytes": 3821568,
+            "system_available_bytes": 15190724608,
+            "system_committed_bytes": 44584005632,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        },
+        {
+          "phase": "load",
+          "kind": "timing",
+          "memory": {
+            "private_bytes": 2723782656,
+            "working_set_bytes": 401395712,
+            "lifetime_peak_working_set_bytes": 2197229568,
+            "lifetime_peak_commit_bytes": 3491110912,
+            "system_available_bytes": 14634635264,
+            "system_committed_bytes": 47652741120,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": {
+            "ms": 2888,
+            "arena": "device-weights",
+            "device": "auto"
+          }
+        },
+        {
+          "phase": "loaded",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 2723782656,
+            "working_set_bytes": 401395712,
+            "lifetime_peak_working_set_bytes": 2197229568,
+            "lifetime_peak_commit_bytes": 3491110912,
+            "system_available_bytes": 14601916416,
+            "system_committed_bytes": 47697838080,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        },
+        {
+          "phase": "documents",
+          "kind": "timing",
+          "memory": {
+            "private_bytes": 5169594368,
+            "working_set_bytes": 588869632,
+            "lifetime_peak_working_set_bytes": 2197229568,
+            "lifetime_peak_commit_bytes": 5178314752,
+            "system_available_bytes": 14540062720,
+            "system_committed_bytes": 49874640896,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": {
+            "round": 0,
+            "ms": 3734,
+            "count": 15
+          }
+        },
+        {
+          "phase": "documents_done",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 5169594368,
+            "working_set_bytes": 588869632,
+            "lifetime_peak_working_set_bytes": 2197229568,
+            "lifetime_peak_commit_bytes": 5178314752,
+            "system_available_bytes": 14862966784,
+            "system_committed_bytes": 49932460032,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        },
+        {
+          "phase": "documents",
+          "kind": "timing",
+          "memory": {
+            "private_bytes": 5161590784,
+            "working_set_bytes": 580919296,
+            "lifetime_peak_working_set_bytes": 2197229568,
+            "lifetime_peak_commit_bytes": 5178744832,
+            "system_available_bytes": 14700548096,
+            "system_committed_bytes": 50142294016,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": {
+            "round": 1,
+            "ms": 3228,
+            "count": 15
+          }
+        },
+        {
+          "phase": "documents_done",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 5161590784,
+            "working_set_bytes": 580919296,
+            "lifetime_peak_working_set_bytes": 2197229568,
+            "lifetime_peak_commit_bytes": 5178744832,
+            "system_available_bytes": 14485671936,
+            "system_committed_bytes": 50279858176,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        },
+        {
+          "phase": "query",
+          "kind": "timing",
+          "memory": {
+            "private_bytes": 5167980544,
+            "working_set_bytes": 584581120,
+            "lifetime_peak_working_set_bytes": 2197229568,
+            "lifetime_peak_commit_bytes": 5178744832,
+            "system_available_bytes": 14484140032,
+            "system_committed_bytes": 50286305280,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": {
+            "ms": 117
+          }
+        },
+        {
+          "phase": "query_done",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 5167980544,
+            "working_set_bytes": 584581120,
+            "lifetime_peak_working_set_bytes": 2197229568,
+            "lifetime_peak_commit_bytes": 5178744832,
+            "system_available_bytes": 14486757376,
+            "system_committed_bytes": 50326958080,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        },
+        {
+          "phase": "dropped",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 219664384,
+            "working_set_bytes": 141910016,
+            "lifetime_peak_working_set_bytes": 2197229568,
+            "lifetime_peak_commit_bytes": 5178744832,
+            "system_available_bytes": 14851145728,
+            "system_committed_bytes": 45414682624,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        }
+      ],
+      "sha256": "f1a9c5544a784bb5c00081e2010d827d6cada2690acfa93de20d97eab529468e"
+    },
+    {
+      "file": "device-weights-auto.jsonl",
+      "completed": false,
+      "ending": "abort",
+      "detail": {
+        "min_ram_gib": 4,
+        "min_commit_gib": 8
+      },
+      "peak_private_bytes": 3670016,
+      "lifetime_peak_commit_bytes": 3788800,
+      "phases": [],
+      "sha256": "77f70c33f6c2b43dceadfd411db8fb5ce05672fa153a07bd60416f790806a0f7"
+    },
+    {
+      "file": "dml-no-arena.jsonl",
+      "completed": false,
+      "ending": "abort",
+      "detail": "RAM <512 MiB or commit headroom <1 GiB",
+      "peak_private_bytes": 11736809472,
+      "lifetime_peak_commit_bytes": 11736809472,
+      "phases": [
+        {
+          "phase": "baseline",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 2416640,
+            "working_set_bytes": 9555968,
+            "lifetime_peak_working_set_bytes": 9555968,
+            "lifetime_peak_commit_bytes": 2424832,
+            "system_available_bytes": 12763258880,
+            "system_committed_bytes": 46473084928,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        },
+        {
+          "phase": "loaded",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 2432036864,
+            "working_set_bytes": 117100544,
+            "lifetime_peak_working_set_bytes": 2252996608,
+            "lifetime_peak_commit_bytes": 3546361856,
+            "system_available_bytes": 13922693120,
+            "system_committed_bytes": 48139415552,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        },
+        {
+          "phase": "run",
+          "kind": "timing",
+          "memory": {
+            "private_bytes": 2655944704,
+            "working_set_bytes": 290172928,
+            "lifetime_peak_working_set_bytes": 2252996608,
+            "lifetime_peak_commit_bytes": 3546361856,
+            "system_available_bytes": 13728190464,
+            "system_committed_bytes": 48376737792,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": {
+            "round": 0,
+            "len": 32,
+            "ms": 440,
+            "output_hash": "555bb78b319f3d762a866b281d4f272efd115c0af49c40f01ad00d4fcc9cad7c"
+          }
+        },
+        {
+          "phase": "run_done",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 2655944704,
+            "working_set_bytes": 290172928,
+            "lifetime_peak_working_set_bytes": 2252996608,
+            "lifetime_peak_commit_bytes": 3546361856,
+            "system_available_bytes": 13410594816,
+            "system_committed_bytes": 49388204032,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        },
+        {
+          "phase": "run",
+          "kind": "timing",
+          "memory": {
+            "private_bytes": 2734075904,
+            "working_set_bytes": 300326912,
+            "lifetime_peak_working_set_bytes": 2252996608,
+            "lifetime_peak_commit_bytes": 3546361856,
+            "system_available_bytes": 13367017472,
+            "system_committed_bytes": 49528258560,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": {
+            "round": 0,
+            "len": 512,
+            "ms": 402,
+            "output_hash": "ff149f844511fb21cad9c177b0cf1a0420da49d2ea158c74b51d68e1944f8124"
+          }
+        },
+        {
+          "phase": "run_done",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 2731970560,
+            "working_set_bytes": 298225664,
+            "lifetime_peak_working_set_bytes": 2252996608,
+            "lifetime_peak_commit_bytes": 3546361856,
+            "system_available_bytes": 13656969216,
+            "system_committed_bytes": 48492613632,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        }
+      ],
+      "sha256": "60e2db1c62068a6ffacbad247d76ea35bb522b2eb688caeb8b95590c0f00e27b"
+    },
+    {
+      "file": "no-arena-auto-2.jsonl",
+      "completed": false,
+      "ending": "end",
+      "detail": {
+        "ok": false,
+        "error": "insufficient headroom"
+      },
+      "peak_private_bytes": 4924284928,
+      "lifetime_peak_commit_bytes": 4924284928,
+      "phases": [
+        {
+          "phase": "baseline",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 3821568,
+            "working_set_bytes": 11948032,
+            "lifetime_peak_working_set_bytes": 11948032,
+            "lifetime_peak_commit_bytes": 3821568,
+            "system_available_bytes": 16478392320,
+            "system_committed_bytes": 45626228736,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        },
+        {
+          "phase": "load",
+          "kind": "timing",
+          "memory": {
+            "private_bytes": 2742616064,
+            "working_set_bytes": 420667392,
+            "lifetime_peak_working_set_bytes": 2197426176,
+            "lifetime_peak_commit_bytes": 3487780864,
+            "system_available_bytes": 16172986368,
+            "system_committed_bytes": 48239575040,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": {
+            "ms": 2670,
+            "arena": "no-arena",
+            "device": "auto"
+          }
+        },
+        {
+          "phase": "loaded",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 2742616064,
+            "working_set_bytes": 420667392,
+            "lifetime_peak_working_set_bytes": 2197426176,
+            "lifetime_peak_commit_bytes": 3487780864,
+            "system_available_bytes": 15988817920,
+            "system_committed_bytes": 48609640448,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        }
+      ],
+      "sha256": "076cfb3735823da3dd0edc177f2217f320b81d01ffec1806327584d0db224a2a"
+    },
+    {
+      "file": "no-arena-auto-3.jsonl",
+      "completed": false,
+      "ending": "end",
+      "detail": {
+        "ok": false,
+        "error": "insufficient headroom"
+      },
+      "peak_private_bytes": 5199003648,
+      "lifetime_peak_commit_bytes": 5199028224,
+      "phases": [
+        {
+          "phase": "baseline",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 3833856,
+            "working_set_bytes": 11956224,
+            "lifetime_peak_working_set_bytes": 11956224,
+            "lifetime_peak_commit_bytes": 3833856,
+            "system_available_bytes": 16190210048,
+            "system_committed_bytes": 46388752384,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        },
+        {
+          "phase": "load",
+          "kind": "timing",
+          "memory": {
+            "private_bytes": 2757103616,
+            "working_set_bytes": 417284096,
+            "lifetime_peak_working_set_bytes": 2197405696,
+            "lifetime_peak_commit_bytes": 3501166592,
+            "system_available_bytes": 15668453376,
+            "system_committed_bytes": 49075552256,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": {
+            "ms": 3288,
+            "arena": "no-arena",
+            "device": "auto"
+          }
+        },
+        {
+          "phase": "loaded",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 2757103616,
+            "working_set_bytes": 417284096,
+            "lifetime_peak_working_set_bytes": 2197405696,
+            "lifetime_peak_commit_bytes": 3501166592,
+            "system_available_bytes": 15614234624,
+            "system_committed_bytes": 49119203328,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        }
+      ],
+      "sha256": "24fb292e7d78793d3acbb1f5c3254968cc16a2ff46a33ef2289695d317ef7033"
+    },
+    {
+      "file": "no-arena-auto-4.jsonl",
+      "completed": false,
+      "ending": "abort",
+      "detail": {
+        "min_ram_gib": 4,
+        "min_commit_gib": 7
+      },
+      "peak_private_bytes": 3674112,
+      "lifetime_peak_commit_bytes": 3792896,
+      "phases": [],
+      "sha256": "8cbbf82830f4b27f42e6b59ff66b2fce78021d01c36d426506979c635929e2da"
+    },
+    {
+      "file": "no-arena-auto.jsonl",
+      "completed": false,
+      "ending": "end",
+      "detail": {
+        "ok": false,
+        "error": "insufficient headroom"
+      },
+      "peak_private_bytes": 5182636032,
+      "lifetime_peak_commit_bytes": 5182681088,
+      "phases": [
+        {
+          "phase": "baseline",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 3833856,
+            "working_set_bytes": 11968512,
+            "lifetime_peak_working_set_bytes": 11968512,
+            "lifetime_peak_commit_bytes": 3846144,
+            "system_available_bytes": 17198104576,
+            "system_committed_bytes": 42267107328,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        },
+        {
+          "phase": "load",
+          "kind": "timing",
+          "memory": {
+            "private_bytes": 2746712064,
+            "working_set_bytes": 417067008,
+            "lifetime_peak_working_set_bytes": 2197352448,
+            "lifetime_peak_commit_bytes": 3492515840,
+            "system_available_bytes": 15553007616,
+            "system_committed_bytes": 48573632512,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": {
+            "ms": 2874,
+            "arena": "no-arena",
+            "device": "auto"
+          }
+        },
+        {
+          "phase": "loaded",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 2746712064,
+            "working_set_bytes": 417067008,
+            "lifetime_peak_working_set_bytes": 2197352448,
+            "lifetime_peak_commit_bytes": 3492515840,
+            "system_available_bytes": 16135200768,
+            "system_committed_bytes": 48298962944,
+            "system_commit_limit_bytes": 56264040448
+          },
+          "detail": null
+        }
+      ],
+      "sha256": "cbca7c11373ab37191abceb34ee8e607ab17affbffa6ba65867be1e3388fb643"
+    },
+    {
+      "file": "no-fusion-auto.jsonl",
+      "completed": true,
+      "ending": "end",
+      "detail": {
+        "ok": true,
+        "error": null
+      },
+      "peak_private_bytes": 5198016512,
+      "lifetime_peak_commit_bytes": 5198073856,
+      "phases": [
+        {
+          "phase": "baseline",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 3825664,
+            "working_set_bytes": 11952128,
+            "lifetime_peak_working_set_bytes": 11952128,
+            "lifetime_peak_commit_bytes": 3825664,
+            "system_available_bytes": 15118929920,
+            "system_committed_bytes": 49444134912,
+            "system_commit_limit_bytes": 57326944256
+          },
+          "detail": null
+        },
+        {
+          "phase": "load",
+          "kind": "timing",
+          "memory": {
+            "private_bytes": 2741829632,
+            "working_set_bytes": 420470784,
+            "lifetime_peak_working_set_bytes": 2198220800,
+            "lifetime_peak_commit_bytes": 3487019008,
+            "system_available_bytes": 14518501376,
+            "system_committed_bytes": 52343382016,
+            "system_commit_limit_bytes": 57326944256
+          },
+          "detail": {
+            "ms": 3023,
+            "arena": "no-fusion",
+            "device": "auto"
+          }
+        },
+        {
+          "phase": "loaded",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 2741829632,
+            "working_set_bytes": 420470784,
+            "lifetime_peak_working_set_bytes": 2198220800,
+            "lifetime_peak_commit_bytes": 3487019008,
+            "system_available_bytes": 14592401408,
+            "system_committed_bytes": 52309991424,
+            "system_commit_limit_bytes": 57326944256
+          },
+          "detail": null
+        },
+        {
+          "phase": "documents",
+          "kind": "timing",
+          "memory": {
+            "private_bytes": 5188374528,
+            "working_set_bytes": 605937664,
+            "lifetime_peak_working_set_bytes": 2198220800,
+            "lifetime_peak_commit_bytes": 5197316096,
+            "system_available_bytes": 14620774400,
+            "system_committed_bytes": 54511300608,
+            "system_commit_limit_bytes": 57326944256
+          },
+          "detail": {
+            "round": 0,
+            "ms": 3772,
+            "count": 15
+          }
+        },
+        {
+          "phase": "documents_done",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 5188374528,
+            "working_set_bytes": 605937664,
+            "lifetime_peak_working_set_bytes": 2198220800,
+            "lifetime_peak_commit_bytes": 5197316096,
+            "system_available_bytes": 14640680960,
+            "system_committed_bytes": 54509600768,
+            "system_commit_limit_bytes": 57326944256
+          },
+          "detail": null
+        },
+        {
+          "phase": "documents",
+          "kind": "timing",
+          "memory": {
+            "private_bytes": 5180850176,
+            "working_set_bytes": 597950464,
+            "lifetime_peak_working_set_bytes": 2198220800,
+            "lifetime_peak_commit_bytes": 5198073856,
+            "system_available_bytes": 14746382336,
+            "system_committed_bytes": 54155444224,
+            "system_commit_limit_bytes": 57326944256
+          },
+          "detail": {
+            "round": 1,
+            "ms": 3316,
+            "count": 15
+          }
+        },
+        {
+          "phase": "documents_done",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 5180850176,
+            "working_set_bytes": 597950464,
+            "lifetime_peak_working_set_bytes": 2198220800,
+            "lifetime_peak_commit_bytes": 5198073856,
+            "system_available_bytes": 14722699264,
+            "system_committed_bytes": 54188724224,
+            "system_commit_limit_bytes": 57326944256
+          },
+          "detail": null
+        },
+        {
+          "phase": "query",
+          "kind": "timing",
+          "memory": {
+            "private_bytes": 5187579904,
+            "working_set_bytes": 601837568,
+            "lifetime_peak_working_set_bytes": 2198220800,
+            "lifetime_peak_commit_bytes": 5198073856,
+            "system_available_bytes": 14709231616,
+            "system_committed_bytes": 54213566464,
+            "system_commit_limit_bytes": 57326944256
+          },
+          "detail": {
+            "ms": 114
+          }
+        },
+        {
+          "phase": "query_done",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 5187579904,
+            "working_set_bytes": 601837568,
+            "lifetime_peak_working_set_bytes": 2198220800,
+            "lifetime_peak_commit_bytes": 5198073856,
+            "system_available_bytes": 14751076352,
+            "system_committed_bytes": 54164213760,
+            "system_commit_limit_bytes": 57326944256
+          },
+          "detail": null
+        },
+        {
+          "phase": "dropped",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 230322176,
+            "working_set_bytes": 143532032,
+            "lifetime_peak_working_set_bytes": 2198220800,
+            "lifetime_peak_commit_bytes": 5198073856,
+            "system_available_bytes": 15182987264,
+            "system_committed_bytes": 49192001536,
+            "system_commit_limit_bytes": 57326944256
+          },
+          "detail": null
+        }
+      ],
+      "sha256": "ed122799edfde4c39548de4bd3279194fd8e17e5587ea1add449f167571ba4b8"
+    },
+    {
+      "file": "no-prepack-auto-2.jsonl",
+      "completed": false,
+      "ending": "end",
+      "detail": {
+        "ok": false,
+        "error": "insufficient headroom"
+      },
+      "peak_private_bytes": 5184200704,
+      "lifetime_peak_commit_bytes": 5184221184,
+      "phases": [
+        {
+          "phase": "baseline",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 3907584,
+            "working_set_bytes": 12013568,
+            "lifetime_peak_working_set_bytes": 12013568,
+            "lifetime_peak_commit_bytes": 3919872,
+            "system_available_bytes": 14711013376,
+            "system_committed_bytes": 49063522304,
+            "system_commit_limit_bytes": 57326944256
+          },
+          "detail": null
+        },
+        {
+          "phase": "load",
+          "kind": "timing",
+          "memory": {
+            "private_bytes": 2738552832,
+            "working_set_bytes": 417398784,
+            "lifetime_peak_working_set_bytes": 2217799680,
+            "lifetime_peak_commit_bytes": 3506839552,
+            "system_available_bytes": 13692981248,
+            "system_committed_bytes": 52379078656,
+            "system_commit_limit_bytes": 57326944256
+          },
+          "detail": {
+            "ms": 10399,
+            "arena": "no-prepack",
+            "device": "auto"
+          }
+        },
+        {
+          "phase": "loaded",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 2738552832,
+            "working_set_bytes": 417398784,
+            "lifetime_peak_working_set_bytes": 2217799680,
+            "lifetime_peak_commit_bytes": 3506839552,
+            "system_available_bytes": 13392384000,
+            "system_committed_bytes": 52915113984,
+            "system_commit_limit_bytes": 57326944256
+          },
+          "detail": null
+        },
+        {
+          "phase": "documents",
+          "kind": "timing",
+          "memory": {
+            "private_bytes": 5175324672,
+            "working_set_bytes": 599420928,
+            "lifetime_peak_working_set_bytes": 2217799680,
+            "lifetime_peak_commit_bytes": 5184221184,
+            "system_available_bytes": 13681922048,
+            "system_committed_bytes": 54918279168,
+            "system_commit_limit_bytes": 57326944256
+          },
+          "detail": {
+            "round": 0,
+            "ms": 7093,
+            "count": 15
+          }
+        },
+        {
+          "phase": "documents_done",
+          "kind": "plateau_end",
+          "memory": {
+            "private_bytes": 5175324672,
+            "working_set_bytes": 599420928,
+            "lifetime_peak_working_set_bytes": 2217799680,
+            "lifetime_peak_commit_bytes": 5184221184,
+            "system_available_bytes": 13474529280,
+            "system_committed_bytes": 54982483968,
+            "system_commit_limit_bytes": 57326944256
+          },
+          "detail": null
+        }
+      ],
+      "sha256": "d8f42f04e021f9ae73761e39154d9ca371902c452c41199957fe3f4e4a0404f5"
+    },
+    {
+      "file": "no-prepack-auto.jsonl",
+      "completed": false,
+      "ending": "abort",
+      "detail": {
+        "min_ram_gib": 4,
+        "min_commit_gib": 8
+      },
+      "peak_private_bytes": 3731456,
+      "lifetime_peak_commit_bytes": 3850240,
+      "phases": [],
+      "sha256": "efd947480c240ab4751deab98a8da21efe31046ad6fc49877c4cf5d4a3b8283d"
+    }
+  ]
+}

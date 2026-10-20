@@ -1,0 +1,143 @@
+{
+  "utc": "2026-10-20T08:59:54.2450061Z",
+  "scenario": "previous-pair-third",
+  "bench_sha256": "84F9D6A009B8AF339065AA7680E38D506F9BD7CAA3E876C2B8BBC98D2244F27A",
+  "source_sha256": "1A835FD0A0503819B5B2F7AB137E2311CA726B05DF9CD647B10CE53B7B1FBA3E",
+  "fixture_sha256": "BD504519F9A25A4CA26F0E42AF7F551C496B54352DADB5475E8D4D71C55DAFB4",
+  "sources": [
+    {
+      "sha256": "56917152F8E32F0EC13665EE5FCBE11E8A373B4AC64928EDA8C475E873E6A248",
+      "file": "Cargo.toml"
+    },
+    {
+      "sha256": "D2D632AA7C25005382FF90BAEC82B5F8D6C32ACB136BD6295106DE4021A9DF51",
+      "file": "Cargo.lock"
+    },
+    {
+      "sha256": "68B743AEEAD4C2891AF14E99F02198DC3A6B6D52359F96E904D02246EE7C2A6E",
+      "file": "crates/bars-core/Cargo.toml"
+    },
+    {
+      "sha256": "5DF4E9C60F61123F8F69E32C0E21AE90EBACB075DFF30355BF4B08855CDC8B40",
+      "file": "crates/bars-worker/Cargo.toml"
+    },
+    {
+      "sha256": "EEC1D58A790802616D647E53220820E9434A274A19A57ADB8775493A9C12521C",
+      "file": "crates/bars-core/examples/bench_memory.rs"
+    },
+    {
+      "sha256": "1A835FD0A0503819B5B2F7AB137E2311CA726B05DF9CD647B10CE53B7B1FBA3E",
+      "file": "crates/bars-worker/examples/bench_worker_memory.rs"
+    },
+    {
+      "sha256": "C7E6669583DE0964A86C6D5BD3C9B954148B28A3F8C00F700C77B9B941F41B52",
+      "file": "crates/bars-core/src/models/builtin.rs"
+    },
+    {
+      "sha256": "FF680D70D56BCB7F08ADBED59839B999BE3374FA21B98A5766B94697DB1D9384",
+      "file": "crates/bars-core/src/models/catalog.rs"
+    },
+    {
+      "sha256": "2BD01FF9C52466EDB9BCBA48577CD26FE6418BB7FE02D072C577FA7CD674CA0F",
+      "file": "crates/bars-core/src/models/execution.rs"
+    },
+    {
+      "sha256": "9A32FB4317EF2F47C23B91B190122F2C818C13C4BF45F5670020D11C2C157386",
+      "file": "crates/bars-core/src/models/artifact.rs"
+    },
+    {
+      "sha256": "97E1B50AC5FA014A6A07CCD56E9460EA5706A50F74BE4B218BB125A22BBA53BD",
+      "file": "crates/bars-core/src/models/embed_artifact.rs"
+    },
+    {
+      "sha256": "A47CF5F3B40412495E332816A411A7524F3531522202231E2EE4AC31965352D6",
+      "file": "crates/bars-core/src/models/builtin_rerank.rs"
+    },
+    {
+      "sha256": "308FC9805ADD13BB11FD56B8355C7C7CCF4D7780DE63E7B378CB7D2AAB7EDA76",
+      "file": "crates/bars-core/src/models/rerank_artifact.rs"
+    },
+    {
+      "sha256": "12E9835F3B65F6CD0E484C7FA8B04D7741F98E15AD8B4ECDBB292FA0DC61B744",
+      "file": "crates/bars-worker/src/worker/models.rs"
+    },
+    {
+      "sha256": "3698BF65767D1A3520F722F2DD7DE03630AB68A193286EACC24BCC04E833687A",
+      "file": "crates/bars-worker/src/worker/models/resident.rs"
+    },
+    {
+      "sha256": "C6E0B9B752D437AA578B3D5C6FE8FBD22785C2C1E64340D11028EF753E8721AC",
+      "file": "crates/bars-worker/src/worker/model_lifecycle.rs"
+    }
+  ],
+  "current_sources": [
+    {
+      "file": "Cargo.lock",
+      "sha256": "8811C9204940CA233AC888296920D7BD396A1C98D2CF9DAB4F498EFBA294DE59"
+    },
+    {
+      "file": "crates/bars-core/examples/bench_memory.rs",
+      "sha256": "EEC1D58A790802616D647E53220820E9434A274A19A57ADB8775493A9C12521C"
+    },
+    {
+      "file": "crates/bars-core/src/models/builtin.rs",
+      "sha256": "C7E6669583DE0964A86C6D5BD3C9B954148B28A3F8C00F700C77B9B941F41B52"
+    },
+    {
+      "file": "crates/bars-core/src/models/catalog.rs",
+      "sha256": "FF680D70D56BCB7F08ADBED59839B999BE3374FA21B98A5766B94697DB1D9384"
+    },
+    {
+      "file": "crates/bars-core/src/models/artifact.rs",
+      "sha256": "9A32FB4317EF2F47C23B91B190122F2C818C13C4BF45F5670020D11C2C157386"
+    },
+    {
+      "file": "crates/bars-core/src/models/embed_artifact.rs",
+      "sha256": "97E1B50AC5FA014A6A07CCD56E9460EA5706A50F74BE4B218BB125A22BBA53BD"
+    },
+    {
+      "file": "crates/bars-core/src/models/execution.rs",
+      "sha256": "2BD01FF9C52466EDB9BCBA48577CD26FE6418BB7FE02D072C577FA7CD674CA0F"
+    },
+    {
+      "file": "crates/bars-core/src/models/builtin_rerank.rs",
+      "sha256": "16F8B3ED0B7F2C1AD877C997D6E9C0CF0CF935C94EF657A219CCFDA833F0EDCA"
+    },
+    {
+      "file": "crates/bars-core/src/models/rerank_artifact.rs",
+      "sha256": "308FC9805ADD13BB11FD56B8355C7C7CCF4D7780DE63E7B378CB7D2AAB7EDA76"
+    },
+    {
+      "file": "crates/bars-worker/src/worker/models.rs",
+      "sha256": "A5C48107D0564484215A359EB7C96D8BC808EB595283CC6FAFDDBDA64A9E17F0"
+    },
+    {
+      "file": "crates/bars-worker/src/worker/models/resident.rs",
+      "sha256": "3698BF65767D1A3520F722F2DD7DE03630AB68A193286EACC24BCC04E833687A"
+    },
+    {
+      "file": "crates/bars-worker/src/worker/model_lifecycle.rs",
+      "sha256": "23B9710439D7C8497A3A4D72E61D08538FB716F11880723ADBAA0AE1C1364DBF"
+    },
+    {
+      "file": "crates/bars-worker/src/worker/mod.rs",
+      "sha256": "261AEBA9ABB5DB5A2D8C4B49ACF5EB58DC27A240A4C4FE168D3E527B92A96B9D"
+    }
+  ],
+  "devices": [
+    "auto"
+  ],
+  "modes": [
+    "bounded"
+  ],
+  "repeats": 1,
+  "download_allowed": false,
+  "fp16_embed": false,
+  "memory_only": true,
+  "bars_running": [
+    {
+      "Id": 30500
+    }
+  ],
+  "timing_valid": false
+}

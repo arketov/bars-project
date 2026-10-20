@@ -1,0 +1,4 @@
+Полный cargo test -p bars-core --lib new_topics::tests не выполнен.
+Первая попытка: VULKAN_SDK не задан.
+Повтор с SDK/MSVC/Ninja: отсутствует путь .fingerprint/candle-core; вложенный CMake Vulkan shader generator — C1083/Invalid argument при создании объекта по длинному пути.
+Вместо полной сборки выполнены 23 теста настоящего исходного модуля через отдельный Cargo harness: tests-isolated.txt.

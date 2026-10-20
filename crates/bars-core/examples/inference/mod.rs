@@ -853,7 +853,34 @@ fn copy_documents(source: &Path, dest: &Path) -> Result<()> {
     Ok(())
 }
 
-fn index_bench(data: &Path, models: &Path, config: &Path, out: &Path) -> Result<()> {
+struct SerialDocuments(Box<dyn Embedder>);
+impl Embedder for SerialDocuments {
+    fn fingerprint(&self) -> &ModelFingerprint {
+        self.0.fingerprint()
+    }
+    fn execution(&self) -> bars_core::models::ExecutionInfo {
+        self.0.execution()
+    }
+    fn embed(&mut self, texts: &[&str]) -> std::result::Result<Vec<Vec<f32>>, EmbedError> {
+        let mut vectors = Vec::with_capacity(texts.len());
+        for text in texts {
+            let one = self.0.embed(&[*text])?;
+            if one.len() != 1 {
+                return Err(EmbedError::Count {
+                    expected: 1,
+                    got: one.len(),
+                });
+            }
+            vectors.extend(one);
+        }
+        Ok(vectors)
+    }
+    fn embed_query(&mut self, text: &str) -> std::result::Result<Vec<f32>, EmbedError> {
+        self.0.embed_query(text)
+    }
+}
+
+fn index_bench(data: &Path, models: &Path, config: &Path, out: &Path, serial: bool) -> Result<()> {
     use bars_core::indexing::{
         chunking::ChunkingParams,
         indexer::{IndexSettings, UpdateOutcome, update_index},
@@ -870,16 +897,22 @@ fn index_bench(data: &Path, models: &Path, config: &Path, out: &Path) -> Result<
     let project = out.join("project");
     copy_documents(&source.join("project/docs"), &project.join("docs"))?;
     let builtin_profile = cfg.name.strip_prefix("core-");
+    if serial && builtin_profile != Some("fp16") {
+        return Err("serial memory experiment requires builtin FP16".into());
+    }
     let native = native_memory::windows::Log::create(&out.join("native-memory.jsonl"))?;
-    native.reserve(8)?;
+    native.reserve(if serial { 5 } else { 8 })?;
     native.emit(
         "config",
         "index",
-        json!({"builtin_profile":builtin_profile,"config":cfg}),
+        json!({"builtin_profile":builtin_profile,"config":cfg,"serial_documents":serial}),
     );
     let monitor = native_memory::windows::Monitor::start(native.clone());
     let load = Instant::now();
     let mut model = load_embedding_profile(models, cfg.clone(), builtin_profile)?;
+    if serial {
+        model = Box::new(SerialDocuments(model));
+    }
     let load = load.elapsed().as_secs_f64();
     model.embed_query("прогрев встроенной модели")?;
     let execution = model.execution();
@@ -951,7 +984,7 @@ fn index_bench(data: &Path, models: &Path, config: &Path, out: &Path) -> Result<
     fs::write(
         out.join("complete.json"),
         serde_json::to_vec_pretty(
-            &json!({"config":cfg,"source_manifest":manifest,"load":load,"rows":rows,"identity":identity,"index_blake3":file_digest(&out.join("index.sqlite"))?}),
+            &json!({"config":cfg,"serial_documents":serial,"source_manifest":manifest,"load":load,"rows":rows,"identity":identity,"index_blake3":file_digest(&out.join("index.sqlite"))?}),
         )?,
     )?;
     drop(model);
@@ -965,7 +998,7 @@ pub fn main() -> Result<()> {
     match a.first().map(String::as_str) {
         Some("download-embed-fp16") if a.len()==3=>{
             let native = native_memory::windows::Log::create(Path::new(&a[2]))?;
-            native.reserve(4)?;
+            native.reserve(2)?;
             native.emit("config", "artifact_only", json!({"model":bars_core::models::BGE_M3_FP16_ID,"binary_blake3":file_digest(&std::env::current_exe()?)?}));
             let monitor = native_memory::windows::Monitor::start(native.clone());
             let result = bars_core::models::download_onnx_artifacts(Path::new(&a[1]), bars_core::models::BGE_M3_FP16_ID);
@@ -985,7 +1018,8 @@ pub fn main() -> Result<()> {
         Some("binding") if a.len()==6=>binding_bench(Path::new(&a[1]),Path::new(&a[2]),Path::new(&a[3]),Path::new(&a[4]),Path::new(&a[5])),
         Some("full") if a.len()==5=>full(Path::new(&a[1]),Path::new(&a[2]),Path::new(&a[3]),Path::new(&a[4]),false),
         Some("quality") if a.len()==5=>full(Path::new(&a[1]),Path::new(&a[2]),Path::new(&a[3]),Path::new(&a[4]),true),
-        Some("index") if a.len()==5=>index_bench(Path::new(&a[1]),Path::new(&a[2]),Path::new(&a[3]),Path::new(&a[4])),
+        Some("index") if a.len()==5=>index_bench(Path::new(&a[1]),Path::new(&a[2]),Path::new(&a[3]),Path::new(&a[4]),false),
+        Some("index-serial") if a.len()==5=>index_bench(Path::new(&a[1]),Path::new(&a[2]),Path::new(&a[3]),Path::new(&a[4]),true),
         Some("embed") if a.len()==5=>embed_bench(Path::new(&a[1]),Path::new(&a[2]),Path::new(&a[3]),Path::new(&a[4])),
         Some("scale") if a.len()==5=>scale(Path::new(&a[1]),Path::new(&a[2]),Path::new(&a[3]),Path::new(&a[4])),
         _=>Err("prepare <snapshot> <cases> <models> <new-data-dir> | run <data> <models> <config> <new-output-dir>".into())
@@ -1240,6 +1274,39 @@ fn profile(data: &Path, models: &Path, config: &Path, onnx: &Path, out: &Path) -
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn serial_documents_preserve_full_text_order_and_query_path() {
+        struct Probe {
+            fp: ModelFingerprint,
+        }
+        impl Embedder for Probe {
+            fn fingerprint(&self) -> &ModelFingerprint {
+                &self.fp
+            }
+            fn embed(&mut self, texts: &[&str]) -> std::result::Result<Vec<Vec<f32>>, EmbedError> {
+                assert_eq!(texts.len(), 1);
+                Ok(vec![vec![texts[0].chars().count() as f32]])
+            }
+            fn embed_query(&mut self, _: &str) -> std::result::Result<Vec<f32>, EmbedError> {
+                Ok(vec![-1.0])
+            }
+        }
+        let fp = ModelFingerprint {
+            source: "test".into(),
+            model: "serial".into(),
+            dim: 1,
+            doc_prefix: "prefix".into(),
+        };
+        let mut model = SerialDocuments(Box::new(Probe { fp: fp.clone() }));
+        let long = "текст ".repeat(3000);
+        assert_eq!(model.fingerprint(), &fp);
+        assert_eq!(
+            model.embed(&[&long, "я", ""]).unwrap(),
+            vec![vec![18000.0], vec![1.0], vec![0.0]]
+        );
+        assert!(model.embed(&[]).unwrap().is_empty());
+        assert_eq!(model.embed_query("запрос").unwrap(), vec![-1.0]);
+    }
     #[test]
     fn permutation_keeps_equal_lengths_and_restores_original_indices() {
         let order = order_for_lengths(&[10, 2, 10, 1], true);

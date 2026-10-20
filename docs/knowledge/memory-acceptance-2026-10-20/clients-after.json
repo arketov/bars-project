@@ -1,0 +1,26 @@
+[
+  {
+    "exists": true,
+    "file": ".codex/config.toml",
+    "hash": "D7EDA698111E33BB3925845148D60BDC7B3F22E478AA6B9884D3502FE588E6A3",
+    "mtime": "2026-10-20T07:39:15.4055860Z"
+  },
+  {
+    "exists": true,
+    "file": ".codex/hooks.json",
+    "hash": "CF23F9C61A69588C4C1324A2BC62D46B5D25ABAEB20E2B1890CC33F284B942E8",
+    "mtime": "2026-10-18T10:00:20.8509989Z"
+  },
+  {
+    "exists": true,
+    "file": ".claude.json",
+    "hash": "A27FA209E8B2BC18092457BEEA362F0BBE20EC9F776203729CB6AC240C6AD0F1",
+    "mtime": "2026-09-29T16:09:18.0026714Z"
+  },
+  {
+    "exists": false,
+    "file": ".claude/settings.json",
+    "hash": null,
+    "mtime": null
+  }
+]

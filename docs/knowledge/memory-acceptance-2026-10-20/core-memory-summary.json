@@ -1,0 +1,31 @@
+{
+  "timing_valid": false,
+  "serial_index": true,
+  "staged_quality": true,
+  "phases": [
+    {
+      "file": "index-bars-core-fp16-native-memory.jsonl.gz",
+      "lifetime_peak_commit_mib": 3351.2734375,
+      "end_private_mib": 364.78125,
+      "end_is_two_second_plateau": false
+    },
+    {
+      "file": "quality-bars-production-native-memory.jsonl.gz",
+      "lifetime_peak_commit_mib": 3366.90625,
+      "end_private_mib": 361.3203125,
+      "end_is_two_second_plateau": false
+    },
+    {
+      "file": "index-overdrive-core-fp16-native-memory.jsonl.gz",
+      "lifetime_peak_commit_mib": 3361.79296875,
+      "end_private_mib": 356.37890625,
+      "end_is_two_second_plateau": false
+    },
+    {
+      "file": "quality-overdrive-production-native-memory.jsonl.gz",
+      "lifetime_peak_commit_mib": 3358.73046875,
+      "end_private_mib": 367.640625,
+      "end_is_two_second_plateau": false
+    }
+  ]
+}

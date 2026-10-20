@@ -1,0 +1,32 @@
+[
+  {
+    "corpus": "bars",
+    "summary": {
+      "documents": 103,
+      "chunks": 482,
+      "vectors": 482,
+      "max_document_embed_bytes": 56426,
+      "max_document_vector_bytes": 94208,
+      "report": "UpdateReport { aborted: false, rebuild_not_applied: false, added: 103, changed: 0, unchanged: 0, removed: 0, chunks_embedded: 482, chunks_reused: 0, full_check: true, problems: [] }"
+    },
+    "baseline_bytes": 3354624,
+    "lifetime_peak_commit_bytes": 8118272.0,
+    "after_drop_bytes": 4841472,
+    "sampled_peak_private_bytes": 8118272.0
+  },
+  {
+    "corpus": "overdrive",
+    "summary": {
+      "documents": 176,
+      "chunks": 946,
+      "vectors": 946,
+      "max_document_embed_bytes": 89703,
+      "max_document_vector_bytes": 274432,
+      "report": "UpdateReport { aborted: false, rebuild_not_applied: false, added: 176, changed: 0, unchanged: 0, removed: 0, chunks_embedded: 946, chunks_reused: 0, full_check: true, problems: [] }"
+    },
+    "baseline_bytes": 3305472,
+    "lifetime_peak_commit_bytes": 8708096.0,
+    "after_drop_bytes": 5353472,
+    "sampled_peak_private_bytes": 7970816.0
+  }
+]

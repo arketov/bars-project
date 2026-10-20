@@ -9,9 +9,9 @@
 </nav>
 
 <style>
-  nav { display: flex; align-items: center; gap: 18px; padding: 8px 32px 0; }
+  nav { display: flex; align-items: center; gap: 12px; padding: 8px 16px 0; }
   button { padding: 0; border: 0; background: transparent; color: var(--muted); font-size: 12px; font-style: italic; }
   button:hover, button.active { color: var(--accent-text); }
   button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
-  @media (max-width: 760px) { nav { padding: 8px 12px 0; } }
+  @media (max-width: 760px) { nav { padding: 8px 8px 0; } }
 </style>

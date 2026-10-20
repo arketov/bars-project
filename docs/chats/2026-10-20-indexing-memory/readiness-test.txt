@@ -1,0 +1,20 @@
+   Compiling tokenizers v0.22.2
+   Compiling ureq v3.4.2
+   Compiling bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+   Compiling tokenizers v0.23.2
+   Compiling llama-cpp-2 v0.1.160
+   Compiling hf-hub v0.5.0
+   Compiling bars-protocol v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-protocol)
+   Compiling candle-core v0.11.0
+   Compiling candle-nn v0.11.0
+   Compiling fastembed v7.1.1
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Finished `release` profile [optimized] target(s) in 1m 18s
+     Running unittests src\lib.rs (C:/bars-build\release\deps\bars_worker-7b1b3763a4e245a1.exe)
+
+running 1 test
+test worker::models::tests::a_loaded_model_busy_with_a_batch_is_ready_not_loading ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 226 filtered out; finished in 0.00s
+

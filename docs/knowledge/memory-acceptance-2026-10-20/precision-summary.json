@@ -1,0 +1,6658 @@
+{
+  "kind": "fresh-fp16-index-quality",
+  "timing_valid": false,
+  "reference": "archived product FP32 embed + FP16 rerank",
+  "candidate_delta_is_stage9_comparison": false,
+  "metric_roundoff_tolerance": 1e-12,
+  "accepted": true,
+  "results": [
+    {
+      "dataset": "bars",
+      "questions": 24,
+      "fresh_index_chunks": 482,
+      "losses": [],
+      "scores": [
+        {
+          "id": "bars-01",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-01",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-02",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.16666666666666666,
+            "ndcg10": 0.3562071871080222,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.16666666666666666,
+            "ndcg10": 0.3562071871080222,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-02",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.16666666666666666,
+            "ndcg10": 0.3562071871080222,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.16666666666666666,
+            "ndcg10": 0.3562071871080222,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-03",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-03",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-04",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-04",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-05",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-05",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-06",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-06",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-07",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-07",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-08",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-08",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-09",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.1,
+            "ndcg10": 0.2890648263178879,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.1,
+            "ndcg10": 0.2890648263178879,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-09",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.1,
+            "ndcg10": 0.2890648263178879,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.1,
+            "ndcg10": 0.2890648263178879,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-10",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-10",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-11",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.125,
+            "ndcg10": 0.31546487678572877,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.125,
+            "ndcg10": 0.31546487678572877,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-11",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.125,
+            "ndcg10": 0.31546487678572877,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.125,
+            "ndcg10": 0.31546487678572877,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-12",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.16666666666666666,
+            "ndcg10": 0.3562071871080222,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.16666666666666666,
+            "ndcg10": 0.3562071871080222,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-12",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.16666666666666666,
+            "ndcg10": 0.3562071871080222,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.16666666666666666,
+            "ndcg10": 0.3562071871080222,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-13",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-13",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-14",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-14",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-15",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-15",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-16",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-16",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-17",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.3333333333333333,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.3333333333333333,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-17",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.3333333333333333,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.3333333333333333,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-18",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.16666666666666666,
+            "ndcg10": 0.3562071871080222,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.16666666666666666,
+            "ndcg10": 0.3562071871080222,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-18",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.16666666666666666,
+            "ndcg10": 0.3562071871080222,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.16666666666666666,
+            "ndcg10": 0.3562071871080222,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-19",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-19",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-20",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-20",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-21",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-21",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-22",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-22",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-23",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.125,
+            "ndcg10": 0.31546487678572877,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.125,
+            "ndcg10": 0.31546487678572877,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-23",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-24",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.1,
+            "ndcg10": 0.2890648263178879,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.1,
+            "ndcg10": 0.2890648263178879,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "bars-24",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        }
+      ]
+    },
+    {
+      "dataset": "overdrive",
+      "questions": 100,
+      "fresh_index_chunks": 946,
+      "losses": [],
+      "scores": [
+        {
+          "id": "od-001",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.125,
+            "ndcg10": 0.31546487678572877,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0.2,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.125,
+            "ndcg10": 0.31546487678572877,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0.2,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-001",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-002",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-002",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-003",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-003",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-004",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-004",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-005",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-005",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-006",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-006",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-007",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-007",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-008",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-008",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-009",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-009",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-010",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-010",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-011",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-011",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-012",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-012",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-013",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.14285714285714285,
+            "ndcg10": 0.3333333333333333,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0.14285714285714285,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.16666666666666666,
+            "ndcg10": 0.3562071871080222,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0.16666666666666666,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-013",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-014",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.3333333333333333,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.3333333333333333,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-014",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-015",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-015",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-016",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-016",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-017",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.16666666666666666,
+            "ndcg10": 0.3562071871080222,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.16666666666666666,
+            "ndcg10": 0.3562071871080222,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-017",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-018",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-018",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-019",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-019",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-020",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-020",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-021",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-021",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-022",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-022",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-023",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-023",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-024",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-024",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-025",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-025",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-026",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-026",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-027",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-027",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-028",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-028",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-029",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-029",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-030",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-030",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-031",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-031",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-032",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-032",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-033",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-033",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-034",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-034",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-035",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-035",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-036",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-036",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-037",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-037",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-038",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-038",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-039",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-039",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-040",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-040",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-041",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-041",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-042",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.2,
+            "ndcg10": 0.38685280723454163,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0.2,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.2,
+            "ndcg10": 0.38685280723454163,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0.2,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-042",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-043",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-043",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-044",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 0.9197207891481876,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 0.9197207891481876,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-044",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 0.9197207891481876,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 0.9197207891481876,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-045",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6934264036172708,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6934264036172708,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-045",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6934264036172708,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6934264036172708,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-046",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-046",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-047",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 0.6131471927654584,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 0.6131471927654584,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-047",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 0.6131471927654584,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 0.6131471927654584,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-048",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.14285714285714285,
+            "ndcg10": 0.20438239758848611,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.14285714285714285,
+            "ndcg10": 0.20438239758848611,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-048",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.14285714285714285,
+            "ndcg10": 0.20438239758848611,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.14285714285714285,
+            "ndcg10": 0.20438239758848611,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-049",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-049",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-050",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-050",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-051",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-051",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-052",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-052",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-053",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-053",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-054",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-054",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-055",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-055",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-056",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-056",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-057",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-057",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-058",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.1111111111111111,
+            "ndcg10": 0.3010299956639812,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0.1111111111111111,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.1111111111111111,
+            "ndcg10": 0.3010299956639812,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0.1111111111111111,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-058",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-059",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-059",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-060",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.25,
+            "ndcg10": 0.43067655807339306,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.25,
+            "ndcg10": 0.43067655807339306,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-060",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-061",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-061",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-062",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-062",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-063",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-063",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-064",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-064",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-065",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-065",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-066",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-066",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-067",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-067",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-068",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-068",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-069",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-069",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.5,
+            "ndcg10": 0.6309297535714575,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.5,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-070",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-070",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-071",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-071",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-072",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.3333333333333333,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.3333333333333333,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-072",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-073",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-073",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-074",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-074",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-075",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-075",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-076",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-076",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-077",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.25,
+            "ndcg10": 0.48247555939075504,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.25,
+            "ndcg10": 0.48247555939075504,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-077",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.25,
+            "ndcg10": 0.48247555939075504,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0.25,
+            "ndcg10": 0.48247555939075504,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-078",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 0.6131471927654584,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 0.6131471927654584,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-078",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-079",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-079",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-080",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 0.8772153153380493,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 0.8772153153380493,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-080",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 0.8772153153380493,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 0.8772153153380493,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-081",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-081",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-082",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-082",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-083",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-083",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-084",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-084",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-085",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-085",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-086",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-086",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-087",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-087",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-088",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-088",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-089",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-089",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-090",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-090",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-091",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-091",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-092",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-092",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-093",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-093",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-094",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-094",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-095",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-095",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-096",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-096",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-097",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-097",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-098",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-098",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-099",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-099",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "od-100",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "od-100",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        }
+      ]
+    },
+    {
+      "dataset": "holdout",
+      "questions": 14,
+      "fresh_index_chunks": 946,
+      "losses": [],
+      "scores": [
+        {
+          "id": "ih-001",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-001",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-002",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-002",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-003",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.3333333333333333,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 1,
+            "mrr10": 0.3333333333333333,
+            "ndcg10": 0.5,
+            "docTop1": 0,
+            "docHit3": 1,
+            "docMrr10": 0.3333333333333333,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-003",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-004",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-004",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-005",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0.25,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0.25,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-005",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "ih-006",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-006",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-007",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-007",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-008",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-008",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-009",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-009",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-010",
+          "threshold": 0,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-010",
+          "threshold": 0.1,
+          "before": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 1,
+            "hit3": 1,
+            "mrr10": 1,
+            "ndcg10": 1,
+            "docTop1": 1,
+            "docHit3": 1,
+            "docMrr10": 1,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-011",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-011",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-012",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-012",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        },
+        {
+          "id": "ih-013",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-013",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-014",
+          "threshold": 0,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 1
+          }
+        },
+        {
+          "id": "ih-014",
+          "threshold": 0.1,
+          "before": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          },
+          "after": {
+            "top1": 0,
+            "hit3": 0,
+            "mrr10": 0,
+            "ndcg10": 0,
+            "docTop1": 0,
+            "docHit3": 0,
+            "docMrr10": 0,
+            "falseNonempty": 0
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "checks": [
+    "complete evidence accepted",
+    "failed index exit rejected",
+    "missing question rejected"
+  ],
+  "ok": true
+}

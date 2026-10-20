@@ -1,0 +1,7 @@
+{
+  "legacy_exit_unverified": true,
+  "new_missing_sidecar_rejected": true,
+  "completed_process_accepted": true,
+  "nonzero_exit_rejected": true,
+  "memory_only_timing_rejected": true
+}

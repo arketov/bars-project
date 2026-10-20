@@ -1,0 +1,9 @@
+{
+  "temporary_root_removed": true,
+  "phase": "both-fp16-worker-pair",
+  "ok": false,
+  "shared_model_copies": 0,
+  "fp16_download_bytes": 1151078704.0,
+  "at": "2026-10-20T10:18:36.8768743Z",
+  "error": "No quiet window with sufficient headroom for bounded/auto; no new model started."
+}

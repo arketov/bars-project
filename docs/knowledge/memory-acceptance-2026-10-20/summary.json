@@ -1,0 +1,467 @@
+{
+  "schema": 1,
+  "runs": [
+    {
+      "file": "20261020T090035448Z-previous-pair-third-auto-bounded-1.jsonl",
+      "sha256": "75a24f02333cb63ba420a0a99eaec9801ddb1c0d86f100bb518355ba443fc94d",
+      "config": {
+        "mode": "bounded",
+        "accelerator": "auto",
+        "embed_model": "BAAI/bge-m3",
+        "loader": "production-worker",
+        "expect_cpu_fallback": false,
+        "fixture_blake3": "762c6bdd6fbb67f1cc5d69bc6134d5457cd5fa3a04691e3b5760cbb205f5c02e",
+        "interval_ms": 100,
+        "startup_min_commit_gib": 8,
+        "rerank_ttl_seconds": 3,
+        "embed_ttl_seconds": 20,
+        "check_interval_ms": 100
+      },
+      "pid": 34992,
+      "process_exit_verified": true,
+      "samples": 311,
+      "wall_ms": 31385.6316,
+      "max_sample_gap_ms": 101.80479999999989,
+      "sampled_peak_private_bytes": 6263160832,
+      "lifetime_peak_commit_bytes": 6267215872,
+      "min_system_available_bytes": 12868284416,
+      "min_system_free_commit_bytes": 5165850624,
+      "rerank_released_bytes": 1938436096,
+      "max_score_delta": 0,
+      "warm_score_span": 0,
+      "phases": {
+        "baseline": {
+          "private_bytes": 4067328,
+          "working_set_bytes": 14045184,
+          "lifetime_peak_working_set_bytes": 14045184,
+          "lifetime_peak_commit_bytes": 4087808,
+          "system_available_bytes": 15028465664,
+          "system_committed_bytes": 45148729344,
+          "system_commit_limit_bytes": 56264040448
+        },
+        "embed_batch_retained": {
+          "private_bytes": 3804274688,
+          "working_set_bytes": 593072128,
+          "lifetime_peak_working_set_bytes": 2213126144,
+          "lifetime_peak_commit_bytes": 3811655680,
+          "system_available_bytes": 14704865280,
+          "system_committed_bytes": 48332587008,
+          "system_commit_limit_bytes": 56264040448
+        },
+        "rerank_retained": {
+          "private_bytes": 5956517888,
+          "working_set_bytes": 980062208,
+          "lifetime_peak_working_set_bytes": 2308378624,
+          "lifetime_peak_commit_bytes": 6107590656,
+          "system_available_bytes": 14526255104,
+          "system_committed_bytes": 50379567104,
+          "system_commit_limit_bytes": 56264040448
+        },
+        "rerank_dropped": {
+          "private_bytes": 4018081792,
+          "working_set_bytes": 655912960,
+          "lifetime_peak_working_set_bytes": 2308378624,
+          "lifetime_peak_commit_bytes": 6107590656,
+          "system_available_bytes": 14812905472,
+          "system_committed_bytes": 48470753280,
+          "system_commit_limit_bytes": 56264040448
+        },
+        "rerank_second_drop": {
+          "private_bytes": 240975872,
+          "working_set_bytes": 152588288,
+          "lifetime_peak_working_set_bytes": 2341048320,
+          "lifetime_peak_commit_bytes": 6267215872,
+          "system_available_bytes": 15309983744,
+          "system_committed_bytes": 45964529664,
+          "system_commit_limit_bytes": 56264040448
+        },
+        "all_models_dropped": {
+          "private_bytes": 240975872,
+          "working_set_bytes": 152588288,
+          "lifetime_peak_working_set_bytes": 2341048320,
+          "lifetime_peak_commit_bytes": 6267215872,
+          "system_available_bytes": 15000023040,
+          "system_committed_bytes": 46279692288,
+          "system_commit_limit_bytes": 56264040448
+        },
+        "worker_shutdown": {
+          "private_bytes": 149716992,
+          "working_set_bytes": 152629248,
+          "lifetime_peak_working_set_bytes": 2341048320,
+          "lifetime_peak_commit_bytes": 6267215872,
+          "system_available_bytes": 14789406720,
+          "system_committed_bytes": 46500528128,
+          "system_commit_limit_bytes": 56264040448
+        }
+      },
+      "timings": [
+        {
+          "phase": "embed_load",
+          "ms": 2747.3476,
+          "runtime": {
+            "model": "BAAI/bge-m3",
+            "source": "builtin",
+            "requested": "auto",
+            "state": "ready",
+            "backend": "onnx",
+            "actual": "directml",
+            "fallback_reason": null,
+            "precision": "fp32"
+          }
+        },
+        {
+          "phase": "embed_batch4",
+          "ms": 1029.0135
+        },
+        {
+          "phase": "rerank_load",
+          "ms": 7806.2989,
+          "runtime": {
+            "model": "BAAI/bge-reranker-v2-m3",
+            "source": "builtin",
+            "requested": "auto",
+            "state": "ready",
+            "backend": "onnx",
+            "actual": "directml",
+            "fallback_reason": null,
+            "precision": "fp16",
+            "revision": "6f5ff65298512715a1e669753bc754d2bc8f367b"
+          }
+        },
+        {
+          "phase": "rerank",
+          "n": 0,
+          "ms": 584.5132,
+          "scores": [
+            0.9860979318618774,
+            0.6313670873641968,
+            0.2510963976383209,
+            0.9150528311729431,
+            0.42131370306015015,
+            0.0768222063779831,
+            0.6766199469566345,
+            0.1388116478919983,
+            0.9528381824493408,
+            0.030214587226510048,
+            0.1256006509065628,
+            0.03302355110645294,
+            0.963230550289154,
+            0.10521054267883301,
+            0.502738893032074
+          ]
+        },
+        {
+          "phase": "rerank",
+          "n": 1,
+          "ms": 178.1273,
+          "scores": [
+            0.9860979318618774,
+            0.6313670873641968,
+            0.2510963976383209,
+            0.9150528311729431,
+            0.42131370306015015,
+            0.0768222063779831,
+            0.6766199469566345,
+            0.1388116478919983,
+            0.9528381824493408,
+            0.030214587226510048,
+            0.1256006509065628,
+            0.03302355110645294,
+            0.963230550289154,
+            0.10521054267883301,
+            0.502738893032074
+          ]
+        },
+        {
+          "phase": "rerank",
+          "n": 2,
+          "ms": 165.4199,
+          "scores": [
+            0.9860979318618774,
+            0.6313670873641968,
+            0.2510963976383209,
+            0.9150528311729431,
+            0.42131370306015015,
+            0.0768222063779831,
+            0.6766199469566345,
+            0.1388116478919983,
+            0.9528381824493408,
+            0.030214587226510048,
+            0.1256006509065628,
+            0.03302355110645294,
+            0.963230550289154,
+            0.10521054267883301,
+            0.502738893032074
+          ]
+        },
+        {
+          "phase": "rerank_after_reload",
+          "ms": 3458.7707,
+          "scores": [
+            0.9860979318618774,
+            0.6313670873641968,
+            0.2510963976383209,
+            0.9150528311729431,
+            0.42131370306015015,
+            0.0768222063779831,
+            0.6766199469566345,
+            0.1388116478919983,
+            0.9528381824493408,
+            0.030214587226510048,
+            0.1256006509065628,
+            0.03302355110645294,
+            0.963230550289154,
+            0.10521054267883301,
+            0.502738893032074
+          ],
+          "max_score_delta": 0,
+          "includes_load": true
+        },
+        {
+          "phase": "disable_rerank",
+          "ms": 33.5873
+        }
+      ],
+      "external_monitor": {
+        "samples": 60,
+        "gpu_samples": 55,
+        "timing_valid": false,
+        "peak_dedicated_bytes": 4960006144,
+        "peak_shared_bytes": 1144741888,
+        "sha256": "3135e321f7b10da7c044ad9847bb1702ec969e004218c7ece85d31dde98b1446"
+      }
+    },
+    {
+      "file": "pair-20261020T101422059Z-both-fp16-auto-bounded-1.jsonl.gz",
+      "sha256": "4452a5daf349ee18669296a89dae77af0d10f55d38aa24228fbf1290ef851d82",
+      "config": {
+        "mode": "bounded",
+        "accelerator": "auto",
+        "embed_model": "BAAI/bge-m3:fp16",
+        "loader": "production-worker",
+        "expect_cpu_fallback": false,
+        "fixture_blake3": "762c6bdd6fbb67f1cc5d69bc6134d5457cd5fa3a04691e3b5760cbb205f5c02e",
+        "interval_ms": 100,
+        "startup_min_commit_gib": 8,
+        "rerank_ttl_seconds": 3,
+        "embed_ttl_seconds": 20,
+        "check_interval_ms": 100
+      },
+      "pid": 40108,
+      "process_exit_verified": true,
+      "samples": 298,
+      "wall_ms": 30090.9695,
+      "max_sample_gap_ms": 103.70449999999983,
+      "sampled_peak_private_bytes": 4787609600,
+      "lifetime_peak_commit_bytes": 4793487360,
+      "min_system_available_bytes": 9613758464,
+      "min_system_free_commit_bytes": 3659599872,
+      "rerank_released_bytes": 1932365824,
+      "max_score_delta": 0,
+      "warm_score_span": 0,
+      "phases": {
+        "baseline": {
+          "private_bytes": 4079616,
+          "working_set_bytes": 14057472,
+          "lifetime_peak_working_set_bytes": 14057472,
+          "lifetime_peak_commit_bytes": 4096000,
+          "system_available_bytes": 12175695872,
+          "system_committed_bytes": 52285825024,
+          "system_commit_limit_bytes": 61112840192
+        },
+        "embed_batch_retained": {
+          "private_bytes": 2281074688,
+          "working_set_bytes": 636395520,
+          "lifetime_peak_working_set_bytes": 2900307968,
+          "lifetime_peak_commit_bytes": 3530006528,
+          "system_available_bytes": 11818188800,
+          "system_committed_bytes": 54372319232,
+          "system_commit_limit_bytes": 61112840192
+        },
+        "rerank_retained": {
+          "private_bytes": 4425125888,
+          "working_set_bytes": 1003810816,
+          "lifetime_peak_working_set_bytes": 2900307968,
+          "lifetime_peak_commit_bytes": 4721668096,
+          "system_available_bytes": 11501191168,
+          "system_committed_bytes": 56493465600,
+          "system_commit_limit_bytes": 61112840192
+        },
+        "rerank_dropped": {
+          "private_bytes": 2492760064,
+          "working_set_bytes": 700502016,
+          "lifetime_peak_working_set_bytes": 2900307968,
+          "lifetime_peak_commit_bytes": 4721668096,
+          "system_available_bytes": 11801808896,
+          "system_committed_bytes": 54543220736,
+          "system_commit_limit_bytes": 61112840192
+        },
+        "rerank_second_drop": {
+          "private_bytes": 2510659584,
+          "working_set_bytes": 702132224,
+          "lifetime_peak_working_set_bytes": 2900307968,
+          "lifetime_peak_commit_bytes": 4793487360,
+          "system_available_bytes": 10985549824,
+          "system_committed_bytes": 57265709056,
+          "system_commit_limit_bytes": 61112840192
+        },
+        "all_models_dropped": {
+          "private_bytes": 391192576,
+          "working_set_bytes": 158904320,
+          "lifetime_peak_working_set_bytes": 2900307968,
+          "lifetime_peak_commit_bytes": 4793487360,
+          "system_available_bytes": 11494670336,
+          "system_committed_bytes": 54463172608,
+          "system_commit_limit_bytes": 61112840192
+        },
+        "worker_shutdown": {
+          "private_bytes": 175763456,
+          "working_set_bytes": 158953472,
+          "lifetime_peak_working_set_bytes": 2900307968,
+          "lifetime_peak_commit_bytes": 4793487360,
+          "system_available_bytes": 11536515072,
+          "system_committed_bytes": 54173360128,
+          "system_commit_limit_bytes": 61112840192
+        }
+      },
+      "timings": [
+        {
+          "phase": "embed_load",
+          "ms": 2875.1042,
+          "runtime": {
+            "model": "BAAI/bge-m3:fp16",
+            "source": "builtin",
+            "requested": "auto",
+            "state": "ready",
+            "backend": "onnx",
+            "actual": "directml",
+            "fallback_reason": null,
+            "precision": "fp16",
+            "revision": "4de13258303883538bd53b696b452bf8099f0858"
+          }
+        },
+        {
+          "phase": "embed_batch4",
+          "ms": 758.2889
+        },
+        {
+          "phase": "rerank_load",
+          "ms": 2761.8158,
+          "runtime": {
+            "model": "BAAI/bge-reranker-v2-m3",
+            "source": "builtin",
+            "requested": "auto",
+            "state": "ready",
+            "backend": "onnx",
+            "actual": "directml",
+            "fallback_reason": null,
+            "precision": "fp16",
+            "revision": "6f5ff65298512715a1e669753bc754d2bc8f367b"
+          }
+        },
+        {
+          "phase": "rerank",
+          "n": 0,
+          "ms": 508.54010000000005,
+          "scores": [
+            0.9860979318618774,
+            0.6313670873641968,
+            0.2510963976383209,
+            0.9150528311729431,
+            0.42131370306015015,
+            0.0768222063779831,
+            0.6766199469566345,
+            0.1388116478919983,
+            0.9528381824493408,
+            0.030214587226510048,
+            0.1256006509065628,
+            0.03302355110645294,
+            0.963230550289154,
+            0.10521054267883301,
+            0.502738893032074
+          ]
+        },
+        {
+          "phase": "rerank",
+          "n": 1,
+          "ms": 178.9903,
+          "scores": [
+            0.9860979318618774,
+            0.6313670873641968,
+            0.2510963976383209,
+            0.9150528311729431,
+            0.42131370306015015,
+            0.0768222063779831,
+            0.6766199469566345,
+            0.1388116478919983,
+            0.9528381824493408,
+            0.030214587226510048,
+            0.1256006509065628,
+            0.03302355110645294,
+            0.963230550289154,
+            0.10521054267883301,
+            0.502738893032074
+          ]
+        },
+        {
+          "phase": "rerank",
+          "n": 2,
+          "ms": 181.7711,
+          "scores": [
+            0.9860979318618774,
+            0.6313670873641968,
+            0.2510963976383209,
+            0.9150528311729431,
+            0.42131370306015015,
+            0.0768222063779831,
+            0.6766199469566345,
+            0.1388116478919983,
+            0.9528381824493408,
+            0.030214587226510048,
+            0.1256006509065628,
+            0.03302355110645294,
+            0.963230550289154,
+            0.10521054267883301,
+            0.502738893032074
+          ]
+        },
+        {
+          "phase": "rerank_after_reload",
+          "ms": 2917.9019999999996,
+          "scores": [
+            0.9860979318618774,
+            0.6313670873641968,
+            0.2510963976383209,
+            0.9150528311729431,
+            0.42131370306015015,
+            0.0768222063779831,
+            0.6766199469566345,
+            0.1388116478919983,
+            0.9528381824493408,
+            0.030214587226510048,
+            0.1256006509065628,
+            0.03302355110645294,
+            0.963230550289154,
+            0.10521054267883301,
+            0.502738893032074
+          ],
+          "max_score_delta": 0,
+          "includes_load": true
+        },
+        {
+          "phase": "disable_rerank",
+          "ms": 61.011
+        }
+      ],
+      "external_monitor": {
+        "samples": 58,
+        "gpu_samples": 53,
+        "timing_valid": false,
+        "peak_dedicated_bytes": 3412791296,
+        "peak_shared_bytes": 679370752,
+        "sha256": "dc3b2dffcaa0cb59d33011357456eb9b8c580aff2205bf479893052e5fa4d6b3"
+      }
+    }
+  ],
+  "rejected_runs": []
+}

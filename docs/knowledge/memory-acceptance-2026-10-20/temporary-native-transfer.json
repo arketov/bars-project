@@ -1,0 +1,9 @@
+{
+  "phase": "download-one-fp16-artifact",
+  "error": "Native artifact download failed: -1",
+  "fp16_download_bytes": 277330480.0,
+  "ok": false,
+  "at": "2026-10-20T09:53:46.3748674Z",
+  "temporary_root_removed": true,
+  "shared_model_copies": 0
+}

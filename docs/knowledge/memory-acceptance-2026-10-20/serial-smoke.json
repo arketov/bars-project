@@ -1,0 +1,6 @@
+{
+  "exit_code": 1,
+  "case": "index-serial rejects FP32 before model creation",
+  "native_log_exists": false,
+  "passed": true
+}

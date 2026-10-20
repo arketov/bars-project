@@ -1,6 +1,0 @@
-rerank: загружен на DirectMl; файлы модели: config.json 0.0 МБ; special_tokens_map.json 0.0 МБ; tokenizer.json 16.3 МБ; tokenizer_config.json 0.0 МБ; model.onnx 0.1 МБ; model.onnx.data 2165.9 МБ
-rerank: DirectMl, пар 2, логит от -11.031 до 0.210
-rerank: DirectMl, пар 2, логит от -11.031 до 0.210
-rerank: загружен на Cpu; файлы модели: config.json 0.0 МБ; special_tokens_map.json 0.0 МБ; tokenizer.json 16.3 МБ; tokenizer_config.json 0.0 МБ; model.onnx 0.1 МБ; model.onnx.data 2165.9 МБ
-rerank: Cpu, пар 2, логит от -11.031 до 0.220
-{"home":"C:\\Users\\arketov\\Desktop\\bars-project\\spikes\\stage17\\cpu-auto-final","runtime":{"embed":{"model":"BAAI/bge-m3","source":"builtin","requested":"cpu","state":"ready","backend":"onnx","actual":"cpu","fallback_reason":null},"rerank":{"model":"BAAI/bge-reranker-v2-m3","source":"builtin","requested":"auto","state":"ready","backend":"onnx","actual":"directml","fallback_reason":null}},"results":2,"saved":true}

@@ -109,11 +109,12 @@ impl EmbeddingSpace {
         }
     }
 
-    /// Порог косинуса вопрос–вопрос, измеренный для этого пространства. Для неизмеренного — `None`:
+    /// Порог косинуса вопрос–вопрос: для bge-m3 автор выбрал 0,68 (20-10-2026, NT-04).
+    /// Для неизмеренного пространства — `None`:
     /// семантического автослияния нет, остаётся точное совпадение (NT-04).
     pub fn merge_threshold(&self) -> Option<f32> {
         let model = self.key.split('|').nth(1)?.to_lowercase();
-        model.contains("bge-m3").then_some(0.79)
+        model.contains("bge-m3").then_some(0.68)
     }
 }
 

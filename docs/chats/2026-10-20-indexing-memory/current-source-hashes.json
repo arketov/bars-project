@@ -1,0 +1,18 @@
+[
+  {
+    "path": "Cargo.lock",
+    "sha256": "8811c9204940ca233ac888296920d7bd396a1c98d2cf9dab4f498efba294de59"
+  },
+  {
+    "path": "crates/bars-core/examples/probe_embed_arena.rs",
+    "sha256": "254e5f03d9bbe76e2e2ad7b1597d382b9ab71c25d339e663446922586300795b"
+  },
+  {
+    "path": "crates/bars-core/examples/probe_dml_arena.rs",
+    "sha256": "e83a1e8657f80d59990e683e16e2407f6a40e68c391f16adb311ee4d4d5c233d"
+  },
+  {
+    "path": "docs/knowledge/memory-2026-10-18/fixture.json",
+    "sha256": "bd504519f9a25a4ca26f0e42af7f551c496b54352dadb5475e8d4d71c55dafb4"
+  }
+]

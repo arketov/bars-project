@@ -1,0 +1,25 @@
+{
+  "command": "cargo test --release -p bars-core -p bars-worker -p bars-graph -p bars-protocol --lib -- --test-threads=4",
+  "summaries": [],
+  "failure": "",
+  "focused_rerun": {
+    "exit_code": 0,
+    "passed": 1,
+    "duration_seconds": 2.5
+  },
+  "worker_serial_rerun": "worker-tests-serial.txt",
+  "ui": {
+    "check_errors": 0,
+    "check_warnings": 0,
+    "passed": 188,
+    "test_files": 27
+  },
+  "scripts": {
+    "javascript_syntax": "passed",
+    "powershell_parser": "passed",
+    "precision_revalidation": {
+      "questions": 138,
+      "new_losses": 0
+    }
+  }
+}

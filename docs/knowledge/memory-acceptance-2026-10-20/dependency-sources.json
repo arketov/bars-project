@@ -1,0 +1,30 @@
+[
+  {
+    "sha256": "1CDB88C188A894E64BBF7A6D6BA9A5B1722AFBFE828EDC295DD187E10AC17A7E",
+    "file": "fastembed-7.1.1/src/common.rs"
+  },
+  {
+    "sha256": "88104148AE5D14F018A0F19F46974DE9147559F645FB249ABD597855C823ADF7",
+    "file": "fastembed-7.1.1/src/text_embedding/init.rs"
+  },
+  {
+    "sha256": "1E19D600821AD5DFE95F7E636FB0F08D04145280D1493EBDBD1569D07EE4940C",
+    "file": "fastembed-7.1.1/src/text_embedding/impl.rs"
+  },
+  {
+    "sha256": "7CB1A86F4F15F2D567DEF07A4400ECC0F4B80E3733C0C2E30DAC596594316459",
+    "file": "fastembed-7.1.1/src/reranking/init.rs"
+  },
+  {
+    "sha256": "EEE6D2C1968EF8DDA588437D4CB57877259E23E3BCA0B4600ADE4DC956F276E5",
+    "file": "fastembed-7.1.1/src/reranking/impl.rs"
+  },
+  {
+    "sha256": "D37D55A08B4198C12D754DE451FFE8330A25585D380FEDF9EC5A8F4F88AF4A0E",
+    "file": "ort-2.0.0-rc.13/src/session/run_options.rs"
+  },
+  {
+    "sha256": "4E6BF018962BEBB2876F99C0CE6C5CC5AB6B1470E137778D265E8F953629CAE5",
+    "file": "ort-2.0.0-rc.13/src/session/builder/impl_options.rs"
+  }
+]

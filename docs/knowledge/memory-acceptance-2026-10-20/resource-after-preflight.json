@@ -1,0 +1,9 @@
+{
+  "committed_bytes": 57040400384,
+  "disk_free": 29486522368,
+  "available_bytes": 11187347456,
+  "at": "2026-10-20T09:21:16.2807409Z",
+  "limit_bytes": 59503366144,
+  "free_commit_bytes": 2462965760,
+  "note": "snapshot after refused FP16 preflight; model process did not start"
+}

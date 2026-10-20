@@ -159,6 +159,55 @@ fn close_vectors_merge_only_in_a_measured_space_and_without_lexical_difference()
 }
 
 #[test]
+fn bge_threshold_merges_owner_case_and_includes_boundary_for_both_profiles() {
+    for model in ["BAAI/bge-m3", "BAAI/bge-m3@fp16:revision"] {
+        let space = EmbeddingSpace {
+            key: format!("builtin|{model}|3||l2"),
+        };
+        for (cosine, should_merge) in [
+            (0.6799_f32, false),
+            (0.68, true),
+            (0.6801, true),
+            (0.7104555, true),
+        ] {
+            let (_dir, mut s) = store();
+            let original = with_vector(
+                obs(
+                    "1",
+                    "Аудит журналов возврата в боксы и предыдущей попытки входа результаты сессий",
+                ),
+                space.clone(),
+                [1.0, 0.0, 0.0],
+            );
+            s.record(&original).unwrap();
+            let short = with_vector(
+                obs("2", "журналы возврата боксы"),
+                space.clone(),
+                [cosine, (1.0 - cosine * cosine).sqrt(), 0.0],
+            );
+            let outcome = s.record(&short).unwrap();
+            assert_eq!(
+                matches!(
+                    outcome,
+                    Recorded::Merged {
+                        by: Match::Semantic,
+                        ..
+                    }
+                ),
+                should_merge,
+                "{model}, cosine={cosine}: {outcome:?}"
+            );
+            let topics = s.list().unwrap();
+            assert_eq!(topics.len(), if should_merge { 1 } else { 2 });
+            if should_merge {
+                assert_eq!(topics[0].observations, 2);
+                assert_eq!(topics[0].variants.len(), 2);
+            }
+        }
+    }
+}
+
+#[test]
 fn unmeasured_space_never_merges_semantically() {
     let (_dir, mut s) = store();
     s.record(&with_vector(

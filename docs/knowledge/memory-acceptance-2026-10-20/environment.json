@@ -1,0 +1,18 @@
+{
+  "os": "Майкрософт Windows 11 Pro",
+  "window_identifier": "io.github.arketov.bars.memory20261020",
+  "precision_protocol": "same frozen sources and questions; no product timing under background load",
+  "gpu": [
+    {
+      "Name": "NVIDIA GeForce RTX 3090",
+      "DriverVersion": "32.0.16.1692"
+    }
+  ],
+  "physical_bytes": 34242334720,
+  "build": "26300",
+  "cpu": {
+    "Name": "11th Gen Intel(R) Core(TM) i7-11700KF @ 3.60GHz",
+    "NumberOfCores": 8,
+    "NumberOfLogicalProcessors": 16
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "models_downloaded": false,
+  "binary_sha256": "F358C1F23511C2B5DB4DE581D456382BA7DFB156B0C388C4B0634964FCA5B46D",
+  "ui_index_sha256": "46B8F832461A09AE13104DA6E8D8DED4E03FA12D2314E13CFFECA83B73B98092",
+  "installed_after": [
+    {
+      "Id": 38216,
+      "StartTime": "2026-10-20T14:04:08.8378643+05:00",
+      "Path": "C:\\Users\\arketov\\AppData\\Local\\bars\\bars.exe"
+    }
+  ],
+  "installed_before": [
+    {
+      "Id": 38216,
+      "StartTime": "2026-10-20T14:04:08.8378643+05:00",
+      "Path": "C:\\Users\\arketov\\AppData\\Local\\bars\\bars.exe"
+    }
+  ],
+  "identifier": "io.github.arketov.bars.memory20261020"
+}

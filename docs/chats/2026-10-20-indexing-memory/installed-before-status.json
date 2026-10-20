@@ -1,0 +1,20 @@
+{
+  "path": "C:\\Users\\arketov\\Desktop\\bars-project",
+  "state": "indexing",
+  "updated_at": "2026-10-20T08:54:43Z",
+  "pending": 0,
+  "model": {
+    "index": "builtin:BAAI/bge-m3",
+    "settings": "builtin:BAAI/bge-m3"
+  },
+  "last_error": null,
+  "watching": true,
+  "graph": {
+    "state": "partial",
+    "snapshot": "acc8747736e49c4b200e0122cf9f282c37011eaca1b272c5b7a68c883ded8cb6",
+    "active_job": null,
+    "source_count": 263,
+    "error": null,
+    "method": "explicit-markdown-v4"
+  }
+}

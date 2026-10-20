@@ -1,0 +1,12 @@
+    Finished `release` profile [optimized] target(s) in 0.53s
+     Running unittests examples\bench_inference.rs (C:/bg22\release\examples\bench_inference-6e07b75794228681.exe)
+
+running 5 tests
+test inference::tests::permutation_keeps_equal_lengths_and_restores_original_indices ... ok
+test inference::tests::invalid_experiments_are_rejected ... ok
+test inference::quality::tests::wrong_section_of_correct_file ... ok
+test inference::tests::serial_documents_preserve_full_text_order_and_query_path ... ok
+test inference::quality::tests::missing_or_changed_gold ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

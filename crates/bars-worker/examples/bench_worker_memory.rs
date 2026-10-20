@@ -60,9 +60,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let output = Path::new(&args[4]);
     let log = Log::create(output)?;
     log.reserve(if with_embed { 8 } else { 6 })?;
-    let home = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../spikes/memory/worker-profiles")
-        .join(output.file_stem().unwrap());
+    let home = output
+        .parent()
+        .ok_or("output needs parent directory")?
+        .join(format!(
+            "worker-profile-{}",
+            output.file_stem().unwrap().to_string_lossy()
+        ));
     fs::create_dir_all(home.parent().unwrap())?;
     fs::create_dir(&home)?;
     let settings_text = format!(

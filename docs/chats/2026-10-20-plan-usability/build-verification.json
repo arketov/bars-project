@@ -1,0 +1,43 @@
+{
+  "built_at_utc": "2026-10-20T10:46:10.5708693Z",
+  "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/build-installer.ps1 -OutDir dist",
+  "exit_code": 0,
+  "artifacts": [
+    {
+      "file": "bars_0.1.0_x64-setup.exe",
+      "bytes": 19808548,
+      "sha256": "499BD372691ECB854035E53D3BE606D3F69143FA5F60301A760ED8600DEC59DC",
+      "pe_machine": "0x014C"
+    },
+    {
+      "file": "bars-cli.exe",
+      "bytes": 3564544,
+      "sha256": "254872AE2B41EAD221BDD9108E10B81CD4A97584443295624E63CCDD6DBA1E3F",
+      "pe_machine": "0x8664"
+    },
+    {
+      "file": "bars-mcp.exe",
+      "bytes": 5286912,
+      "sha256": "6548A222401F1CF12ACFDC5ED5D35294814DDD1CCDDF3D73BBDFB641ED3AFCAB",
+      "pe_machine": "0x8664"
+    },
+    {
+      "file": "bars.exe",
+      "bytes": 98634240,
+      "sha256": "95D113E66DA4B7C1A918DD4BDEC0D4879306D8677EEC0074C7EF3E9E8F57CFDE",
+      "pe_machine": "0x8664"
+    },
+    {
+      "file": "vulkan-1.dll",
+      "bytes": 1729464,
+      "sha256": "E1FCFC9489BEEFA6A6D9D11D6C7517F6A2B7F16E0D3FB8F4103BEE0210F314A3",
+      "pe_machine": null
+    },
+    {
+      "file": "VulkanRT-License.txt",
+      "bytes": 4008,
+      "sha256": "404DEB98DABF3E54BF9070D59676B31D69A3DA2F9F6E56BDF09AD315C04C718C",
+      "pe_machine": null
+    }
+  ]
+}
