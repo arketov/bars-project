@@ -1,0 +1,145 @@
+{
+  "created_at": "2026-10-20T09:29:43.444Z",
+  "files": [
+    {
+      "file": "freeze.json.gz",
+      "bytes": 51323,
+      "compressed_bytes": 10568,
+      "sha256": "f020a2fa1fd7d3cf5c11da4de861cc9184f6feaf572b192d36a0dfedab375c8a",
+      "gzip_sha256": "640ad26f384745e52d90238909f2a59c5c0d920334f13069109e5ea0d30f31aa"
+    },
+    {
+      "file": "corpus.json.gz",
+      "bytes": 40161,
+      "compressed_bytes": 10977,
+      "sha256": "7e77de2f1791d45d2d3894ad48a21300ac0775c4a4293c9194cd61f62c5e0229",
+      "gzip_sha256": "d0331b2f22e8f05b55114ffd7d9863ed6dc6fbeefd92be2788785f2da00dc478"
+    },
+    {
+      "file": "dataset.json.gz",
+      "bytes": 6382134,
+      "compressed_bytes": 1999335,
+      "sha256": "9bad403127ce18e8bdbeb414700989435885f43f46fedf13156b8e51dd7cf423",
+      "gzip_sha256": "eceb076a0e84766458926e6e6e0a8d7f637ff4ba7de6327fab8a7519f83007a8"
+    },
+    {
+      "file": "index.sqlite.gz",
+      "bytes": 20295680,
+      "compressed_bytes": 6793449,
+      "sha256": "a18e2e2a7b58dfa73b7602a102ed0579d927c53d121abb29d05eeda9c6f7ddf5",
+      "gzip_sha256": "469fee560324bb3efacf646e5b44647dab08b1e7fae854b91e5ae86e5a7c4206"
+    },
+    {
+      "file": "query-vectors.json.gz",
+      "bytes": 462711,
+      "compressed_bytes": 179114,
+      "sha256": "6bf1cad923567fbbd4366cde2cbda59147fc85037eb93889404257ba5572689b",
+      "gzip_sha256": "4393722c678a3722e7d15acf03c3040090a9a12efa36a8f05affd1b9a89482c0"
+    },
+    {
+      "file": "query-model.json.gz",
+      "bytes": 264,
+      "compressed_bytes": 229,
+      "sha256": "6b5cfbbd7e34536f658ca3ec81d189364cd793d39f3bd36763a5d50c9d85e36a",
+      "gzip_sha256": "0d91e7c4e3b4bba9a2faa53a16c942663f5a2424bf3e203981efe952e3d760d1"
+    },
+    {
+      "file": "results.json.gz",
+      "bytes": 9160590,
+      "compressed_bytes": 1815730,
+      "sha256": "e2ef1144c11fd697e63d45e01db6d251df43c322b6f179a2cffbdef8107a38a3",
+      "gzip_sha256": "2b55fd19bed3f26aefae6ec8feada1344f4c19fb6dc1ee8405ad01a7f7503e0b"
+    },
+    {
+      "file": "gold.json",
+      "bytes": 36177,
+      "sha256": "6962c4a7a91bb149300ac778efa842dd707129f15198868b5119d6ecb5699ab4"
+    },
+    {
+      "file": "gold-matched.json",
+      "bytes": 39954,
+      "sha256": "abc706e3ba6aec611bbeb72f6fbaa5f0d7b773eede5e1ed3be542044915766e5"
+    },
+    {
+      "file": "review.json",
+      "bytes": 95423,
+      "sha256": "b6bb7f1e2742a9b2e10c521818e6da0aa229c7590a7b85dea41b9e8b31b41e35"
+    },
+    {
+      "file": "analysis.json.gz",
+      "bytes": 2414243,
+      "compressed_bytes": 349085,
+      "sha256": "703448dd64dcfea63982653d3be37f575cf01f4cdf56412453b204fd5d3fd6ff",
+      "gzip_sha256": "26133a61e00a73a91ebaa80031124ca0de2ff0ac0e9a743369db248d301a5ac8"
+    }
+  ],
+  "code": [
+    {
+      "file": "crates/bars-core/examples/graph_quality.rs",
+      "sha256": "0d1deab4452017f943635fa0d1ba683dbc7770c7cbe83b6190729e97d079e3d8"
+    },
+    {
+      "file": "crates/bars-graph/src/source.rs",
+      "sha256": "02210e82e6094da3adab8511e89fedba27c8707a4151bc796dbe4b466abd1487"
+    },
+    {
+      "file": "crates/bars-graph/src/query.rs",
+      "sha256": "9067e3c1095bebb6b076179110e6a387a35119c56de7eb3a881bcd904d976c80"
+    },
+    {
+      "file": "crates/bars-core/src/graph/build.rs",
+      "sha256": "95dbfa1c36b948a3f9ed9b0be4d74afbd2672ed34a48c06079e0e0fa51250fa2"
+    },
+    {
+      "file": "crates/bars-core/src/graph/retrieval.rs",
+      "sha256": "b4c5c2a18091fcd02560a42fc78d18147fa7f298e9e1f42686c5faf3ac6dbbae"
+    },
+    {
+      "file": "crates/bars-core/src/graph/context.rs",
+      "sha256": "944da0ded4f5138fd31e5991a5f5b6e696c6bdf28175dd733cb7c0bd00d95f26"
+    },
+    {
+      "file": "crates/bars-core/src/search/hybrid.rs",
+      "sha256": "51e413d15630cf5fff7ceecc8f22bd037a3ddcc16d1ffeffe3bc7eddb0a7a8b6"
+    },
+    {
+      "file": "scripts/graph-quality-freeze.mjs",
+      "sha256": "08a149b7a5852885167ff06a12c6f5ea239df949f1a89b403bff1926b253b1f5"
+    },
+    {
+      "file": "scripts/graph-quality-gold.mjs",
+      "sha256": "a6bcd5b0044d2285943aaf9006e3eed41710406864cfcec3e4d080bb44c864be"
+    },
+    {
+      "file": "scripts/graph-quality-analyze.mjs",
+      "sha256": "1c2502d401b4951c12f6a0f9f5d4bee28c3cb8f437e627bdaaa4ff3e9b1a39f3"
+    },
+    {
+      "file": "scripts/graph-quality-review.mjs",
+      "sha256": "6a1c3caff6f8c2e2a51df72168441b9015d6c36c1566cd15ef21238f53aec7db"
+    },
+    {
+      "file": "scripts/graph-quality-analyze.test.mjs",
+      "sha256": "513413d72b03f36a876b83aa2983189b037d8670e1cca93ca71d14a6d78cfcd9"
+    }
+  ],
+  "executable_sha256": "6024af6e05f51cd22cd47a030256d409eebd1311756c4946c3b7ce240a954a61",
+  "replay": {
+    "cases": 36,
+    "model_directory_absent": true,
+    "identical_packets_and_summaries": true,
+    "compacted_index_identical": true
+  },
+  "limits": {
+    "single_annotator": true,
+    "previously_seen_corpus": true,
+    "rerank": false,
+    "byte_budget": 16384,
+    "latency_excludes_query_embedding": true,
+    "variant_order_fixed": true,
+    "quiet_machine": false,
+    "not_native_tauri": true
+  },
+  "archive_compaction": "VACUUM after graph publication; removed free pages containing excluded old graph rows",
+  "returned_proofs_strictly_validated": true
+}

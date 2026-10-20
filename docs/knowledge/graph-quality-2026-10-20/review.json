@@ -1,0 +1,2059 @@
+{
+  "reviewer": "single agent manual census; unresolved is not accepted as correct",
+  "semantics": {
+    "entities": 42,
+    "assertions": 21,
+    "with_conditions": 0,
+    "cross_file_semantic_edges": 0,
+    "two_step_semantic_chains": 0,
+    "roles": {
+      "requirement": 115,
+      "verification": 19,
+      "architecture": 147,
+      "constraint": 7,
+      "decision": 24,
+      "behavior": 2
+    },
+    "verdict_counts": {
+      "supported": 8,
+      "unresolved": 9,
+      "error": 4
+    },
+    "literal_tuple_precision_lower": 0.38095238095238093,
+    "literal_tuple_precision_upper": 0.8095238095238095
+  },
+  "assertions": [
+    {
+      "id": "1974fd657fc8417d0ebf061b650aa0c9b87ffff21bb8a781276d972492e058eb",
+      "from": "942a905bd315f9aa1e7b3523afaebb6a464e93140ddd0bc55d18aba6da6bf503",
+      "to": "7bf151231e151e3aefbed873a2708ecf855842214544e3a998bffcad81fbf84d",
+      "predicate": "supersedes",
+      "polarity": "negative",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "e2a412be1090c230333fd28ee1771447534d1f0288952e4c468d19e3c161c9af"
+      ],
+      "subject": "меню проекта",
+      "object": "меню папки дерева",
+      "verdict": "supported",
+      "reason": "Отрицание замены меню передано буквально.",
+      "proof": [
+        {
+          "path": "backlog/issues.md",
+          "quote": " меню проекта не заменяет меню папки дерева.",
+          "span": {
+            "start": 9949,
+            "end": 10029,
+            "first_line": 51,
+            "last_line": 51
+          }
+        }
+      ]
+    },
+    {
+      "id": "1be094fc463123b429e1d9ddca5b1815a55eca93658259d6dfd92851ed925cb3",
+      "from": "816521c14428905aff51f706ec838973735ec9daf42d33d885f07727583726ac",
+      "to": "cbadf59a85b2617194feeb9c166894e0a1ccf492333fffecab9eddf95a90cf2d",
+      "predicate": "verifies",
+      "polarity": "positive",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "a70c41aed02ce874c550238ffe25e107068b9b63f34bb0b1d9411715e651cf75"
+      ],
+      "subject": "Бэкенд заново",
+      "object": "цель перед действием",
+      "verdict": "unresolved",
+      "reason": "Наречие заново включено в subject; цель не разрешена в объект.",
+      "proof": [
+        {
+          "path": "features/window/document-actions.md",
+          "quote": " Бэкенд заново проверяет цель перед действием.",
+          "span": {
+            "start": 10993,
+            "end": 11078,
+            "first_line": 49,
+            "last_line": 49
+          }
+        }
+      ]
+    },
+    {
+      "id": "28b8951bbf09361d72ff485a6acd879317777ce6a6ba1ccdb44c740cbfeaeffb",
+      "from": "12453fe55c2e5fd7c3e91ccd7d1105939e4ef499d7ef2184ed667423c570caea",
+      "to": "2cec7bad330bd9535a00305b44f1c755f9dd9e973da2e6436cc3b1b07039af1e",
+      "predicate": "requires",
+      "polarity": "positive",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "e4deb722eacf569284c9607c9ba4c16c315670e20ec1387e92736a483b12dba2"
+      ],
+      "subject": "не",
+      "object": "отдельного фонового сервиса",
+      "verdict": "error",
+      "reason": "Subject=не и positive требует: потерян действующий субъект и отрицание.",
+      "proof": [
+        {
+          "path": "features/new-topics/design.md",
+          "quote": " не требует отдельного фонового сервиса.",
+          "span": {
+            "start": 3805,
+            "end": 3879,
+            "first_line": 19,
+            "last_line": 19
+          }
+        }
+      ]
+    },
+    {
+      "id": "47f6c1ceca53b17e81f76e4bf95a5fef8464d4033817e1fb0867a0c24e584a7b",
+      "from": "0e63f36c7291e0954d3f07f738ef3fb5ce3e2c87f176ad717e60d52a539d3eb4",
+      "to": "1a5494e9c17ffd5f376746db02d463ddee2bbd193f5d647ae6d6e0c0fd13f1a2",
+      "predicate": "supersedes",
+      "polarity": "positive",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "2e308f28e1014a10ee601aad0328a044d6ba3ea342d21727bed91ba27688a6d0"
+      ],
+      "subject": "Новый результат",
+      "object": "документ в той же колонке",
+      "verdict": "unresolved",
+      "reason": "Новый результат и документ в той же колонке требуют разрешения контекста.",
+      "proof": [
+        {
+          "path": "manual/search.md",
+          "quote": " Новый результат заменяет документ в той же колонке.",
+          "span": {
+            "start": 10497,
+            "end": 10592,
+            "first_line": 98,
+            "last_line": 98
+          }
+        }
+      ]
+    },
+    {
+      "id": "518f08793224376a9e80b43672ceb008c1af0e341f90034d88c5d06b1c5af3be",
+      "from": "45fda6f80bf0bd60645e978092c08b1e7b2efad26b0761526ce9019f0fe81219",
+      "to": "f75513079a392856279317f3cf20b2c7f94ba0f6c748ca2489921cb386814ea5",
+      "predicate": "supersedes",
+      "polarity": "negative",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "d1307e3afe8c866d6898d992272ce4381d969ff7ab4320491e88bb9ead7edeb9"
+      ],
+      "subject": "отказ учёта",
+      "object": "результат инструмента",
+      "verdict": "supported",
+      "reason": "Отказ учёта не заменяет результат инструмента; отрицание сохранено.",
+      "proof": [
+        {
+          "path": "features/window/mcp-statistics.md",
+          "quote": " отказ учёта не заменяет результат инструмента.",
+          "span": {
+            "start": 13604,
+            "end": 13691,
+            "first_line": 74,
+            "last_line": 74
+          }
+        }
+      ]
+    },
+    {
+      "id": "65afe50bda49f0aa963aab085d81f9f7976b180faf557eae5d759e19e863b47c",
+      "from": "dcf0a812c450de422ea2f390af4cd2a12bf34b6b57103e57075b30c457d36275",
+      "to": "876d66e33693e75deeb91d3027a9219c3c9f9cf8cda5b2dcae0b0016d95e1ec5",
+      "predicate": "uses",
+      "polarity": "positive",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "e0ab9508d48bbc6a5e1b72e1bab038b8d34c4c5a24d5219fc5cba6888150a08c"
+      ],
+      "subject": "Без драйвера Vulkan модель",
+      "object": "CPU fallback",
+      "verdict": "error",
+      "reason": "Без драйвера Vulkan поглощено subject; условие отсутствует в qualifiers.",
+      "proof": [
+        {
+          "path": "features/distribution/installer.md",
+          "quote": " Без драйвера Vulkan модель использует CPU fallback.",
+          "span": {
+            "start": 13143,
+            "end": 13222,
+            "first_line": 77,
+            "last_line": 77
+          }
+        }
+      ]
+    },
+    {
+      "id": "759ae14c50b235f99626273d9b2955df02fbb2118f1ebce8589dc5c95a45f844",
+      "from": "7d07a00bbcda3d50b7d1889a3427090a4ef14e11dad9709b722a2f6238ae1525",
+      "to": "3f4995fa5d7fbda56e04853747cd86dd5382c5d642b8345f468242a64d974184",
+      "predicate": "supersedes",
+      "polarity": "positive",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "7d102ddb3f0eb6c639b94b417d86f1504b782625775782fee512ca8cd4de2f8e"
+      ],
+      "subject": "новая правка",
+      "object": "ждущую запись того же документа",
+      "verdict": "supported",
+      "reason": "Новая правка заменяет ждущую запись того же документа; явное правило очереди.",
+      "proof": [
+        {
+          "path": "MAIN_IDEA.md",
+          "quote": " новая правка заменяет ждущую запись того же документа.",
+          "span": {
+            "start": 16002,
+            "end": 16103,
+            "first_line": 109,
+            "last_line": 109
+          }
+        }
+      ]
+    },
+    {
+      "id": "7eced28768951806bd8b80a7feb292f7803d089cf71f6da30593b4c631ef59d0",
+      "from": "a74277489e39e136b80acf0824589ace238bfeb4538e5281c793d54b4577393f",
+      "to": "e2f201832dd2d4dafc3f6bc93de8278fda416eedf5d2260cf7dbc7632857b262",
+      "predicate": "uses",
+      "polarity": "positive",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "de1bfc0fe718fa27042fa4c3c709dbd124919d8e25d76a4d28a93a7b8f6a63e4"
+      ],
+      "subject": "bars",
+      "object": "две модели",
+      "verdict": "supported",
+      "reason": "Буквальный факт bars использует две модели; типы моделей не извлечены.",
+      "proof": [
+        {
+          "path": "manual/models.md",
+          "quote": "bars использует две модели:\n",
+          "span": {
+            "start": 741,
+            "end": 788,
+            "first_line": 11,
+            "last_line": 11
+          }
+        }
+      ]
+    },
+    {
+      "id": "8bd4161167fb62e409de9752d73be856c820f3b98e4c32afd5b14ba1d9ffc69e",
+      "from": "07050c420a901bfc458da6aa21b6e94da43d17301aac7629304f01b112262993",
+      "to": "47b4e4bb6132c7303c3e71faf7a9b26455b0d1ac3b7c72ba884eed488b6ee539",
+      "predicate": "supersedes",
+      "polarity": "negative",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "a12a3e79477d98cb4d2fdedd8b58e0972875eb65505a45a625b623471860a372"
+      ],
+      "subject": "текущий экран индексации",
+      "object": "этот отчёт",
+      "verdict": "unresolved",
+      "reason": "Этот отчёт не разрешён в именованную сущность.",
+      "proof": [
+        {
+          "path": "features/window/notifications.md",
+          "quote": " текущий экран индексации не заменяет этот отчёт.",
+          "span": {
+            "start": 21980,
+            "end": 22070,
+            "first_line": 87,
+            "last_line": 87
+          }
+        }
+      ]
+    },
+    {
+      "id": "8d9a070be691dd7f38ee52c708ff457981b50ebe91aefb6f25c773e45a7d3a5e",
+      "from": "6754b27c557c05f17cdf357e1175c2b6dddd8fb6fed1573cb0ae64e8ab2082c6",
+      "to": "185964710ee66b506f48c33d8b2a9811d8c3dac4eb9f88b31271d72738a83a0f",
+      "predicate": "supersedes",
+      "polarity": "negative",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "f75b9f53c077e527284f48cd8a451a91a95596767aecc2281422cfd54537d151"
+      ],
+      "subject": "Снятие регистрации `unregister",
+      "object": "полное удаление",
+      "verdict": "error",
+      "reason": "Обрезан закрывающий backtick в имени unregister; итоговый участник не является корректным исходным идентификатором.",
+      "proof": [
+        {
+          "path": "features/window/project-menu.md",
+          "quote": " Снятие регистрации `unregister` не заменяет полное удаление.",
+          "span": {
+            "start": 1827,
+            "end": 1929,
+            "first_line": 13,
+            "last_line": 13
+          }
+        }
+      ]
+    },
+    {
+      "id": "8f51428af3d3dd14a7d890ea149f0247cde5fcad57e9d73a3d9ffb9132db5fca",
+      "from": "86ca13a56a038f1febd9d8169151357cde7440367c8cdac2bb22529504afe2b3",
+      "to": "01f77034c107f9199192896b06669e5fbea9debfd699bc0dcbe94f3c6e41ff8f",
+      "predicate": "supersedes",
+      "polarity": "negative",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "b59cd7df5930a05f59828d08f02dc9267d4354dc505753428ee96c8c2bb2354d"
+      ],
+      "subject": "Проверка браузерного экрана",
+      "object": "нативную приёмку этапа 32",
+      "verdict": "supported",
+      "reason": "Отрицание замены нативной приёмки этапа 32 сохранено.",
+      "proof": [
+        {
+          "path": "features/window/mcp-statistics.md",
+          "quote": " Проверка браузерного экрана не заменяет нативную приёмку этапа 32.",
+          "span": {
+            "start": 19941,
+            "end": 20063,
+            "first_line": 100,
+            "last_line": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "903fe4a4b6b387e0a9008508bab01d76166cc2b0783b14d3e24c0a130c786683",
+      "from": "a9058f5b4b46e0b8999ce4804ebcf6d6d302185d28d7b9c8fca10954e3e65b26",
+      "to": "8bbb421aaf063e1b8fdf8a5dcefaa26264d6859862889cc856c1409aab38cb14",
+      "predicate": "uses",
+      "polarity": "positive",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "63bec888673129cabd3e08a664cc0a2d1ccfa2482ee63d7d66e771c44968b9a9"
+      ],
+      "subject": "Копирование существующей папки",
+      "object": "тот же проверенный путь",
+      "verdict": "unresolved",
+      "reason": "Тот же проверенный путь не разрешён в явный объект.",
+      "proof": [
+        {
+          "path": "features/window/document-actions.md",
+          "quote": " Копирование существующей папки использует тот же проверенный путь.",
+          "span": {
+            "start": 19233,
+            "end": 19358,
+            "first_line": 80,
+            "last_line": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "9b9cf9309584e7846a4608abb9ae2fcfd0462b456d564cdeddf71917b12f8f95",
+      "from": "371a6532ed19ac35d84b5d5d898001551f95228f87bdc05ac885b7ecf49f60f3",
+      "to": "daec720a6e5cae10dc52fa02d2862634b4b514f40a3140765ce8277fc7021fd8",
+      "predicate": "requires",
+      "polarity": "positive",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "dde6ccb6b1c9218decfcd90b804ed02567b58b55b15ee8c7e134c28e0b2796e2"
+      ],
+      "subject": "появление нового итога снова",
+      "object": "внимания",
+      "verdict": "unresolved",
+      "reason": "Наречие снова включено в subject, внимания не именованный объект.",
+      "proof": [
+        {
+          "path": "features/window/refinement-design.md",
+          "quote": " появление нового итога снова требует внимания.",
+          "span": {
+            "start": 4200,
+            "end": 4287,
+            "first_line": 17,
+            "last_line": 17
+          }
+        }
+      ]
+    },
+    {
+      "id": "9cfae635559231bca962b4a78a25cf9906a33706b5256cacd4b655d8d866fb22",
+      "from": "e4c308ac41aa901a64ab4a649bf6fc8bfcbd0926446af22866b7ffb250980942",
+      "to": "116d701c9e789a0f8769365b5243454a0a3495e71415a70fe9edb0a8d845af98",
+      "predicate": "uses",
+      "polarity": "positive",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "f3ee38892524e8e4ea88f5e685da72631b3dae05fd873c22de511cdfac016d31"
+      ],
+      "subject": "MCP",
+      "object": "ID конкретной допущенной попытки вместе с epoch соединения/worker",
+      "verdict": "supported",
+      "reason": "MCP использует ID допущенной попытки и epoch; буквальное утверждение.",
+      "proof": [
+        {
+          "path": "features/new-topics/design.md",
+          "quote": " MCP использует ID конкретной допущенной попытки вместе с epoch соединения/worker.",
+          "span": {
+            "start": 11510,
+            "end": 11646,
+            "first_line": 61,
+            "last_line": 61
+          }
+        }
+      ]
+    },
+    {
+      "id": "a3d15933f51ee35564185fded21c5b58ff07d08808279043beb499c0cac12ff0",
+      "from": "516ac917749b11904f707e4dc0fa10c6203855573b671492581dff0f86c5d05a",
+      "to": "dac4ebe541cbbf09975c2a092917f50869faa16e9fab2bf601fe2882dac64b9d",
+      "predicate": "requires",
+      "polarity": "negative",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "761653829a068372b1704fe87c1b53128ce9f18de8af30ba057fce16f24c5d9d"
+      ],
+      "subject": "Сбор",
+      "object": "открытого окна",
+      "verdict": "supported",
+      "reason": "Сбор не требует открытого окна; отрицание сохранено, subject локален документу.",
+      "proof": [
+        {
+          "path": "features/new-topics/requirements.md",
+          "quote": " Сбор не требует открытого окна.",
+          "span": {
+            "start": 2674,
+            "end": 2732,
+            "first_line": 19,
+            "last_line": 19
+          }
+        }
+      ]
+    },
+    {
+      "id": "a89bfe72df3db5bb8145431100065a1eb3ea3ea83bad8dedf6d4cf0d212f7eea",
+      "from": "85ab0a336f4e5727f830729ff26504d76d7b674386eac52201352cec75cc42a2",
+      "to": "205d224b41842d0ffed4b2fc86d0df2240936dca83ec75ca3c5e5231ce851524",
+      "predicate": "supersedes",
+      "polarity": "negative",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "145870a8463c56fb4357b5345cde45101860834e9cca918fd0432ff015564d6f"
+      ],
+      "subject": "универсальная добавка «требования ошибки пожелания пользователя",
+      "object": "предмет запроса",
+      "verdict": "unresolved",
+      "reason": "В названии subject потеряна парная кавычка; устойчивое имя не подтверждено.",
+      "proof": [
+        {
+          "path": "features/docs-convention/delivery.md",
+          "quote": " универсальная добавка «требования ошибки пожелания пользователя» не заменяет предмет запроса.",
+          "span": {
+            "start": 2625,
+            "end": 2802,
+            "first_line": 24,
+            "last_line": 24
+          }
+        }
+      ]
+    },
+    {
+      "id": "aaea7d0f7780ec7f0977cce04abb8af10506ee6a116e0cc78c6764f87a733e89",
+      "from": "9af7eeab931f1c22b7c723296a3b5e57d39ac17ea5e697a01caefec0bfdf8b71",
+      "to": "fcd9512592c69c092019102eb20fb0b8955f7ec8891304d89a8d4091eaaa896e",
+      "predicate": "requires",
+      "polarity": "positive",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "b37b3c2db7b520b6fe50caa9db75e4d1a2217b38c922a3aa1236c73077683e8a"
+      ],
+      "subject": "У модели fastembed метод `embed",
+      "object": "исключительного доступа (`&mut self`): одна модель считает один вызов за раз",
+      "verdict": "error",
+      "reason": "Обрезан закрывающий backtick метода embed; object включает соседнее пояснение после двоеточия.",
+      "proof": [
+        {
+          "path": "architecture/worker.md",
+          "quote": "У модели fastembed метод `embed` требует исключительного доступа (`&mut self`): одна модель считает один вызов за раз.",
+          "span": {
+            "start": 8261,
+            "end": 8451,
+            "first_line": 58,
+            "last_line": 58
+          }
+        }
+      ]
+    },
+    {
+      "id": "b4440de50656b31223ed17b5b24b9bf02080e154a36bbc1c7e3a4fa674878e70",
+      "from": "9d555df90e227eb6d7d2527d14167aee432ba5765af98e24545af25c15a3cb5d",
+      "to": "d99568ae391c9847a2f1f88afcb0d229a7b88eb433e635bf4de25d7e549b1dbc",
+      "predicate": "uses",
+      "polarity": "positive",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "10fc67c5f9830ebdb991409b9a43497275f5ba44f5eaff09d11812350190bfc5"
+      ],
+      "subject": "чтение",
+      "object": "общий DTO, `--input` — GraphRequest JSON с переопределением явными флагами",
+      "verdict": "unresolved",
+      "reason": "В object поглощено отдельное пояснение --input; чтение не разрешено в компонент.",
+      "proof": [
+        {
+          "path": "features/agent-tools/cli.md",
+          "quote": " чтение использует общий DTO, `--input` — GraphRequest JSON с переопределением явными флагами.",
+          "span": {
+            "start": 516,
+            "end": 663,
+            "first_line": 11,
+            "last_line": 11
+          }
+        }
+      ]
+    },
+    {
+      "id": "bb59639d1bc9e941ef6ec5bc025206426e13a783795fdb372590561d6bd250f2",
+      "from": "35e97565390ed53aedfc9e535744e1646d4e7632a503053c2cdc9c23100e22a0",
+      "to": "b90007b3e386eafc8b3808c72197acf09eb086f71ab92e38717dc07900cc1abc",
+      "predicate": "uses",
+      "polarity": "positive",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "9f2674dd5b69d2458c2efcb1c7527dfb0d012afe9ab92aaa96d7754defc1fbd6"
+      ],
+      "subject": "повторное открытие неизменённого проверенного кэша",
+      "object": "отметку",
+      "verdict": "unresolved",
+      "reason": "Отметка требует разрешения к типу проверенного кэша.",
+      "proof": [
+        {
+          "path": "features/models/local-models.md",
+          "quote": " повторное открытие неизменённого проверенного кэша использует отметку.",
+          "span": {
+            "start": 14735,
+            "end": 14869,
+            "first_line": 84,
+            "last_line": 84
+          }
+        }
+      ]
+    },
+    {
+      "id": "bca3ca5dfb75b6067fe1a8e1aed12203febf955ffe979129b69d3e014f03ac65",
+      "from": "50f257fcb520416c0ed3eb4c8969ae7d858c5675cc1ac708a3991f2088631859",
+      "to": "787fdb90cd9b79fe0a41ac61afba6f806ea67b44dd3c5e7202d33110f3cd5cf9",
+      "predicate": "requires",
+      "polarity": "positive",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "152c42b53ae9da3aca00d76581ead79fe39a994d6a44f4988c31fe74537335ad"
+      ],
+      "subject": "Первое скачивание",
+      "object": "сети",
+      "verdict": "supported",
+      "reason": "Первое скачивание требует сети; буквальная зависимость.",
+      "proof": [
+        {
+          "path": "overview.md",
+          "quote": " Первое скачивание требует сети.",
+          "span": {
+            "start": 6835,
+            "end": 6894,
+            "first_line": 47,
+            "last_line": 47
+          }
+        }
+      ]
+    },
+    {
+      "id": "d96b4402b27b2fb1e966bdad892eea2c48f334327b95e6cc96cd323e97f342de",
+      "from": "0a957a2feab2e7371de8a3dcb3075393a19857762f2aabfa34b3fdefe1da675e",
+      "to": "96175884c1ef853b4a3301901eace22ca62fa3fc06a8107b3813c02cec4c6b1d",
+      "predicate": "verifies",
+      "polarity": "positive",
+      "qualifiers": {},
+      "origin": "explicit_rule",
+      "evidence": [
+        "9fb3068c14a864e240ead45bea8e0c9315a195e11c19e2065025e87a35d121ac"
+      ],
+      "subject": "Смена проекта",
+      "object": "совместимость выбранной сессии отдельным запросом за тот же период",
+      "verdict": "unresolved",
+      "reason": "Способ и период проверки поглощены object; квалификаторы не отделены.",
+      "proof": [
+        {
+          "path": "features/window/mcp-statistics.md",
+          "quote": " Смена проекта проверяет совместимость выбранной сессии отдельным запросом за тот же период.",
+          "span": {
+            "start": 19220,
+            "end": 19391,
+            "first_line": 98,
+            "last_line": 98
+          }
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source": "0e85577a52503b11be0625310d7ca10a0a9f3f5c2ecd062747deefcac3c88f24",
+      "evidence": "a83c84e82ca5c89c465cbc95da4b351677ba45a0931bf8e1b92369bed5517b43",
+      "target": "architecture/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "MAIN_IDEA.md",
+      "resolved_target": "architecture/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "d8e11692435ccd3881fc16e60ef266f8f96fc8e063659e31081274d70599fff9",
+      "evidence": "8e45118c65a3b8c20fd881d00f3d177c649bc1e714440684d385f15c8ce1276e",
+      "target": "../features/docs-convention/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "adr/0001-docs-by-features.md",
+      "resolved_target": "features/docs-convention/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "a6b77450fd332d9cb9d50ec9606aa62a0934a2430d68250c4977922a70267121",
+      "evidence": "3a1ba6d6dc066a610df798444271641a2c72f24d3dc2fd1f1fffd54e4d2b1a82",
+      "target": "../knowledge/gguf-models.md",
+      "reason": "target_not_indexed",
+      "source_path": "adr/0002-qwen-gguf.md",
+      "resolved_target": "knowledge/gguf-models.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "5d3331e992a79ab8821ea44896b649602dfd6f6d9ce9d88223fbff7cd2cad485",
+      "evidence": "908acf9a14d6e937a3816d9318ba314c658199674d8ef9ecc63fa2013b5e58c8",
+      "target": "../chats/2026-10-18-gguf-models/stage22-plan.md",
+      "reason": "target_not_indexed",
+      "source_path": "adr/0002-qwen-gguf.md",
+      "resolved_target": "chats/2026-10-18-gguf-models/stage22-plan.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "5d3331e992a79ab8821ea44896b649602dfd6f6d9ce9d88223fbff7cd2cad485",
+      "evidence": "965fdd7a50d65cd6e046dd282b7dac4ef75abbad6c47998d398c7477e1796fec",
+      "target": "../knowledge/gguf-models.md",
+      "reason": "target_not_indexed",
+      "source_path": "adr/0002-qwen-gguf.md",
+      "resolved_target": "knowledge/gguf-models.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "82c80ae7eeb238ff9213d5cf288d5d3e21258b08f8f46f443d0209ba6b32fd18",
+      "evidence": "5fb9ee8fdba8cecaf343e8042627bf6dd0ee36f66e1c986fd93bd300afcdd114",
+      "target": "graph.md",
+      "reason": "target_not_indexed",
+      "source_path": "architecture/components.md",
+      "resolved_target": "architecture/graph.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "af202706a65afeaf1ab7406b21ac86ab821818f700757a788c73ced0d7af5f4e",
+      "evidence": "b5e5e1f903fde995b87871887283a8c84086ec80b3692e4ec77b60d0c7f3ef3c",
+      "target": "../features/new-topics/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "architecture/files.md",
+      "resolved_target": "features/new-topics/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "f4d67640e65f073136b9fca8136af07eb353402548f3c5b4fdae597d5e3b0426",
+      "evidence": "c916f9d353bc1209fca198d57b34e6d48fada473977167586f634d69c4395dd8",
+      "target": "../knowledge/spike-detach.md",
+      "reason": "target_not_indexed",
+      "source_path": "architecture/ipc.md",
+      "resolved_target": "knowledge/spike-detach.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "9e6c507fcc2f37b6fac6183e7b509bc346417a25be340ba38723af9e659e3797",
+      "evidence": "47396b26865f6c5d632ae659759221dd8bcc83216acce30bf230825855aac8a6",
+      "target": "../features/graphrag/tools.md#фактический-контракт-v1",
+      "reason": "target_not_indexed",
+      "source_path": "architecture/protocol.md",
+      "resolved_target": "features/graphrag/tools.md",
+      "anchor": "фактический-контракт-v1",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "9e6c507fcc2f37b6fac6183e7b509bc346417a25be340ba38723af9e659e3797",
+      "evidence": "c891f82054c077c718a7b59ecb07755b7f26168e5c99e53bcbb9bc17ccfa50c7",
+      "target": "graph.md",
+      "reason": "target_not_indexed",
+      "source_path": "architecture/protocol.md",
+      "resolved_target": "architecture/graph.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "e656ac718a68457b99394c9391530a0796f3e7362f8d853d79bc7eeb155f8390",
+      "evidence": "788feac638fe21b3dabeea0a5375054482cf5f4eca34739e681c839c6bcebb39",
+      "target": "graph.md#таблицы-графа-в-sqlite",
+      "reason": "target_not_indexed",
+      "source_path": "architecture/schema.md",
+      "resolved_target": "architecture/graph.md",
+      "anchor": "таблицы-графа-в-sqlite",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "3978b36a44758731bc430a68561bd7e4176631608395f8f1a57d9479ad775957",
+      "evidence": "52b81e705c28df8a128ca48480f51331b98ceb32de313e1d966874df63140191",
+      "target": "../knowledge/stack-research.md",
+      "reason": "target_not_indexed",
+      "source_path": "architecture/stack.md",
+      "resolved_target": "knowledge/stack-research.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "ede69214ab2d085a377375fae924681d12a271b5645c6476e2afad31ae66bf4d",
+      "evidence": "cc7c57dcddf5a525c42c92f41891bb3d522429b6621998090f441a3930763f6e",
+      "target": "../knowledge/graph-renderer-2026-10-18/Index.md#выбор-renderer-для-p3",
+      "reason": "target_not_indexed",
+      "source_path": "architecture/stack.md",
+      "resolved_target": "knowledge/graph-renderer-2026-10-18/Index.md",
+      "anchor": "выбор-renderer-для-p3",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "bc5e8d38042bf3d6d74cd55e8f881f79226db9688df96ceb5ca77b57f2411827",
+      "evidence": "a68d3f0dc35e960cc7ab357ca1687be6ed2a11f52910fce519749f17b257c6bd",
+      "target": "../knowledge/spike-search.md",
+      "reason": "target_not_indexed",
+      "source_path": "architecture/stack.md",
+      "resolved_target": "knowledge/spike-search.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "17023ce29fac15c0a39f5fdbef0aa5325660a26be356898de09bbaf7ed2fd397",
+      "evidence": "a88e50e0429233f96066c0e990becc8c9d4a499b9654df0d60958276f4de0644",
+      "target": "graph.md",
+      "reason": "target_not_indexed",
+      "source_path": "architecture/stack.md",
+      "resolved_target": "architecture/graph.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "6a4f57b44113f1f88445dffb2e66e19ea35935b241073294a5497d3ad8b9ffef",
+      "evidence": "598361547f5532cafdfa1bcbdf99fe9777e2fc51a7702b02804f863e6140e347",
+      "target": "../knowledge/spike-search.md",
+      "reason": "target_not_indexed",
+      "source_path": "architecture/stack.md",
+      "resolved_target": "knowledge/spike-search.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "6a4f57b44113f1f88445dffb2e66e19ea35935b241073294a5497d3ad8b9ffef",
+      "evidence": "d33bf085e1d09eb1024b8996d33878c8cd917d9e7842790c0c10188685dcfdc6",
+      "target": "../knowledge/spike-detach.md",
+      "reason": "target_not_indexed",
+      "source_path": "architecture/stack.md",
+      "resolved_target": "knowledge/spike-detach.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "363dc975f20d45f216312698f59f6646f38211ea81386899ca56cce56294437b",
+      "evidence": "f4a95cfd656dbdbd60a70d9a800bb89e79b6b2228754b4a824238a1c68106e2f",
+      "target": "../knowledge/stack-research.md",
+      "reason": "target_not_indexed",
+      "source_path": "architecture/vector-search.md",
+      "resolved_target": "knowledge/stack-research.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "9499843c01cf00aa85c186425244f5e547baaf3d3fb64e954814fda137664ae5",
+      "evidence": "34c8253971e7c1ce1b9e18f0baa505de5e5297dfe454655f7d6a28ae94305730",
+      "target": "../knowledge/spike-search.md",
+      "reason": "target_not_indexed",
+      "source_path": "architecture/vector-search.md",
+      "resolved_target": "knowledge/spike-search.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "2e725e847196445ef82b1ec09492fd1a81dda0eab1e2883d2a7a776341ab45f0",
+      "evidence": "9863caa7e868c55ea062ffa849b6b2e91f0b79578a083d278212723b7cea75e6",
+      "target": "../knowledge/memory-embed-2026-10-18/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "architecture/vector-search.md",
+      "resolved_target": "knowledge/memory-embed-2026-10-18/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "2e725e847196445ef82b1ec09492fd1a81dda0eab1e2883d2a7a776341ab45f0",
+      "evidence": "67a724daf2a672b1f45addae981da9fe4805c44736ae56018689db06d22fe915",
+      "target": "../knowledge/memory.md",
+      "reason": "target_not_indexed",
+      "source_path": "architecture/vector-search.md",
+      "resolved_target": "knowledge/memory.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "62b45bc08149d35a24a507a3c03342568c44bd7b7de8babe96ac4375cdd7c47e",
+      "evidence": "a4d7e126ed687dceb774f88fbe2dd0d2e87a3d57ace6046de816888fd0708da7",
+      "target": "../knowledge/search-during-indexing.md",
+      "reason": "target_not_indexed",
+      "source_path": "architecture/worker.md",
+      "resolved_target": "knowledge/search-during-indexing.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "8ca2eff36372618fd235960e3e03787bfe5dabc0a6a318757b0d0105d6fe14d7",
+      "evidence": "230fff55d846c2e896b5840905665e04abefee9f179e5df57adb36e548b2e95c",
+      "target": "../knowledge/graph-research.md",
+      "reason": "target_not_indexed",
+      "source_path": "backlog/ideas.md",
+      "resolved_target": "knowledge/graph-research.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "8ca2eff36372618fd235960e3e03787bfe5dabc0a6a318757b0d0105d6fe14d7",
+      "evidence": "8705c79f9f89cd02cd8732a563e84358f63613823e200fec105c4aa4ca6bbfea",
+      "target": "../features/graphrag/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "backlog/ideas.md",
+      "resolved_target": "features/graphrag/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "8ca2eff36372618fd235960e3e03787bfe5dabc0a6a318757b0d0105d6fe14d7",
+      "evidence": "1b7dbdb9d9b09051bf62dd25201f9762762695ed6788c4ea061eaef46bf3875c",
+      "target": "../knowledge/graph-embedding-2026-10-18.md",
+      "reason": "target_not_indexed",
+      "source_path": "backlog/ideas.md",
+      "resolved_target": "knowledge/graph-embedding-2026-10-18.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "4209b23ee7b3e40584240a0ef4b262336229098363a37653a0c52167ad45b27a",
+      "evidence": "02e14f33847c40cbfeae9f36f13ed4d0eb2683e116dde021aad9195e77b72ea8",
+      "target": "../knowledge/duplicates.md",
+      "reason": "target_not_indexed",
+      "source_path": "backlog/ideas.md",
+      "resolved_target": "knowledge/duplicates.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "1825baae1b1bd54a803ac741e04eaf48bdffac89a8f879ecf1d77e3ea84a78e8",
+      "evidence": "4e75652b791b0377af479f300421ac693d56a432d5a74aaf4ecfb544702a40fe",
+      "target": "../features/knowledge-base/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "backlog/ideas.md",
+      "resolved_target": "features/knowledge-base/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "18e5321cc03c650eca1ddb4805507701f76d59b8abfb7216a929b204ef9383f9",
+      "evidence": "a6d7f49c7602c77482486659284242cc124eb73ddb20193f0788ef5dfca74a05",
+      "target": "../features/new-topics/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "backlog/ideas.md",
+      "resolved_target": "features/new-topics/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "697ac5f5f9e37cfd5e7b0923b747abd4ff03a28c077993416c713cd6cca4a5d4",
+      "evidence": "aa1d96578f9df902987ac973454b0d23d28d93e5d7ae2c21c597eba53a2f6050",
+      "target": "../chats/2026-10-18-stage17-implementation/device-verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "backlog/ideas.md",
+      "resolved_target": "chats/2026-10-18-stage17-implementation/device-verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "697ac5f5f9e37cfd5e7b0923b747abd4ff03a28c077993416c713cd6cca4a5d4",
+      "evidence": "71a346ae7c14ccac08e785e46bbea7b10753a59745e514537915fef4929ea0b9",
+      "target": "../knowledge/search-quality.md",
+      "reason": "target_not_indexed",
+      "source_path": "backlog/ideas.md",
+      "resolved_target": "knowledge/search-quality.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "697ac5f5f9e37cfd5e7b0923b747abd4ff03a28c077993416c713cd6cca4a5d4",
+      "evidence": "f0703202bf2eb9ecbd5f135fb69da00685c53b68a4b4d38aee35278abf4fb586",
+      "target": "../chats/2026-10-18-docs-layout-design/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "backlog/ideas.md",
+      "resolved_target": "chats/2026-10-18-docs-layout-design/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "697ac5f5f9e37cfd5e7b0923b747abd4ff03a28c077993416c713cd6cca4a5d4",
+      "evidence": "d53a2e82c379a6251160abe0c2f0c0c4954d8cc857e7ae3f4e0bc81ef31e23be",
+      "target": "../chats/2026-10-18-clients-auto-update/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "backlog/ideas.md",
+      "resolved_target": "chats/2026-10-18-clients-auto-update/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "7c18c3d7c532462457305fe254e8e24982206dae16a71bb26e5d4bab58658acb",
+      "evidence": "d5652850fd46105ac96139494b033f9aacc14fe1ae306ca9dca2d135205bb3d9",
+      "target": "../chats/2026-10-19-user-manual/log.md",
+      "reason": "target_not_indexed",
+      "source_path": "backlog/issues.md",
+      "resolved_target": "chats/2026-10-19-user-manual/log.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "7c18c3d7c532462457305fe254e8e24982206dae16a71bb26e5d4bab58658acb",
+      "evidence": "442c51ab5fdcaff1b3d787bf797a19d682b59be37cce17a966bb38713d24bd29",
+      "target": "../chats/2026-10-19-iss18-model-loading/log.md",
+      "reason": "target_not_indexed",
+      "source_path": "backlog/issues.md",
+      "resolved_target": "chats/2026-10-19-iss18-model-loading/log.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "7c18c3d7c532462457305fe254e8e24982206dae16a71bb26e5d4bab58658acb",
+      "evidence": "f44b830b8ae01d7ae117d3fd798e6c9c295a5316eb0d4c63a0ed4466c4ed67f8",
+      "target": "../knowledge/search-during-indexing.md#полный-поиск-и-управление-20-10-2026",
+      "reason": "target_not_indexed",
+      "source_path": "backlog/issues.md",
+      "resolved_target": "knowledge/search-during-indexing.md",
+      "anchor": "полный-поиск-и-управление-20-10-2026",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "7c18c3d7c532462457305fe254e8e24982206dae16a71bb26e5d4bab58658acb",
+      "evidence": "b13364758f249e1423bb54513f9d72d1916ab95dd60a6134d1886b1c3ee2a37e",
+      "target": "../knowledge/search-during-indexing.md",
+      "reason": "target_not_indexed",
+      "source_path": "backlog/issues.md",
+      "resolved_target": "knowledge/search-during-indexing.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "925d98645d5db12fc945c413bd1998004adc1d464c1d593d52643ca5f57031ff",
+      "evidence": "320574cbed23f1df54ef26a46f0fa3ec4b231ea5611ffb9366e92a42762dc099",
+      "target": "../chats/2026-10-18-notifications-28/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "backlog/issues.md",
+      "resolved_target": "chats/2026-10-18-notifications-28/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "bc8b56691cd106bb835d5e7e5b4023f3e88322c6cee372fbb3399908fac46f4b",
+      "evidence": "da6fbfc56096900055e8948df9bc9550eab1d02ebcce24a494d99c72a1657d09",
+      "target": "../features/window/mcp-statistics.md#контракт-этапа-26-матрица-шести-mcp-инструментов",
+      "reason": "anchor_missing",
+      "source_path": "backlog/issues.md",
+      "resolved_target": "features/window/mcp-statistics.md",
+      "anchor": "контракт-этапа-26-матрица-шести-mcp-инструментов",
+      "classification": "selected_target_anchor_or_parser_review"
+    },
+    {
+      "source": "bc8b56691cd106bb835d5e7e5b4023f3e88322c6cee372fbb3399908fac46f4b",
+      "evidence": "8cb2c9988a95ae2516e954d357183d6fe6b10a84acf6803c43a5b3e642f6b884",
+      "target": "../chats/2026-10-18-mcp-history-29/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "backlog/issues.md",
+      "resolved_target": "chats/2026-10-18-mcp-history-29/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "bc8b56691cd106bb835d5e7e5b4023f3e88322c6cee372fbb3399908fac46f4b",
+      "evidence": "1ce219cada6142eb894b4b3952dfe0b7f911ee427747d63172e3904a0e99c5e5",
+      "target": "../chats/2026-10-18-mcp-analysis-30/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "backlog/issues.md",
+      "resolved_target": "chats/2026-10-18-mcp-analysis-30/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "6fcfd82e1d32923fbc4af2b407301933c9952aa3d639b324f2099fc22217e147",
+      "evidence": "d1467f521f0e7a07ace8afdc5d405a458a4a518029ed06101b15bc4a806dbaad",
+      "target": "../chats/2026-10-18-folder-menu-31/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "backlog/issues.md",
+      "resolved_target": "chats/2026-10-18-folder-menu-31/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "037bf03a8ee8d9ce117872d4ee07242fd9a49dbc67cf1c506bc2d41deee98ad2",
+      "evidence": "27614b1ac14b2a9d337387b9065231a689868c0c9111824052fbf373a4ab39ca",
+      "target": "../graphrag/tools.md#фактический-контракт-v1",
+      "reason": "target_not_indexed",
+      "source_path": "features/agent-tools/cli.md",
+      "resolved_target": "features/graphrag/tools.md",
+      "anchor": "фактический-контракт-v1",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "f6ef7585f0e913e65fbd8d04d773e747e97f5f325e1ce375c67a36a05d556813",
+      "evidence": "a36360a81a00deb67f233b1a150d0c5467d813bd93d0665da49c0408055c33d3",
+      "target": "../graphrag/tools.md#фактический-контракт-v1",
+      "reason": "target_not_indexed",
+      "source_path": "features/agent-tools/mcp-tools.md",
+      "resolved_target": "features/graphrag/tools.md",
+      "anchor": "фактический-контракт-v1",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "a0cbbb2d078687554c5f54febfa4b5d43c10718643cd62f3da8621c86e35a834",
+      "evidence": "b44b8cc8887803a4ed48a035fba66643f358610acccf451e0b7aa532297165e7",
+      "target": "../graphrag/tools.md#фактический-контракт-v1",
+      "reason": "target_not_indexed",
+      "source_path": "features/agent-tools/mcp-tools.md",
+      "resolved_target": "features/graphrag/tools.md",
+      "anchor": "фактический-контракт-v1",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "5f8bf23a0b6d558bcbcc501dac03ed725dbe2763377d916eb235652bfc2b548a",
+      "evidence": "90863ebb63d1405cafe5fda0b574a650f7402ce0ec47338ff3feb58983d51170",
+      "target": "../../chats/2026-10-18-clients-auto-update/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/clients/clients.md",
+      "resolved_target": "chats/2026-10-18-clients-auto-update/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "b1d60534462db29294aa3ac0907f9fcde916a6103aea34a86daf0de7f57b5b94",
+      "evidence": "224c6fcac4ce1af237a4dbb56848a91a18708f30540302b61a5e494ce018a3ec",
+      "target": "../../knowledge/installer.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/distribution/installer.md",
+      "resolved_target": "knowledge/installer.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "f83fb671edd5f65aa7768531ff94b5bc7ca9e009b51322e8d557286c1848e586",
+      "evidence": "52bd8195e16253def834ab74604d47efff5b3845775d0baa8cd312681d433592",
+      "target": "../../knowledge/installer.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/distribution/installer.md",
+      "resolved_target": "knowledge/installer.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "e28e7526ea69fc47c1f6c9ca48ddd9dd51f8f39807cfbc263927291864c6d470",
+      "evidence": "7482210e9d76ebd29b1802eee3dd18ea4eaa520e7997dce30c1e09bf3f13f3a3",
+      "target": "../../knowledge/agent-tool-usage-2026-10-18.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/docs-convention/delivery.md",
+      "resolved_target": "knowledge/agent-tool-usage-2026-10-18.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "388e45628c1cf29b12b6bf447de8b5ef11a64dcb119f35cda806a86ed0af3d4a",
+      "evidence": "75a2735383373b4720572243e30c2027ea936da44eeddf73383e4f2338ff7956",
+      "target": "../../chats/2026-10-18-docs-layout-design/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/docs-convention/delivery.md",
+      "resolved_target": "chats/2026-10-18-docs-layout-design/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "a424348f6dc1ad65d5722fba99d06c71123c23434e0a8783524553b1f3c5380b",
+      "evidence": "eb65cdc74356593c69120c3482221e87fa2ed2b1295adedc44351efaa031c2b0",
+      "target": "../../knowledge/search-during-indexing.md#полный-поиск-и-управление-20-10-2026",
+      "reason": "target_not_indexed",
+      "source_path": "features/indexing/updates.md",
+      "resolved_target": "knowledge/search-during-indexing.md",
+      "anchor": "полный-поиск-и-управление-20-10-2026",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "9aab34a9762c1714a32db5d5a025cd8d80bf84551604af5093d1014568485d44",
+      "evidence": "788b476d8413d87a778d5009534d3218840a12f013e480003d46e635de47b0d3",
+      "target": "../../knowledge/gguf-models.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/models/local-models.md",
+      "resolved_target": "knowledge/gguf-models.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "bf13d2c75d01374770232d552c69386c8f47ce3aea7f57dfd565dac2f2ac5ba4",
+      "evidence": "0fc6896198f9110abb80f8889b57f7055ad7a1bf1f987b31003a8a8e83226440",
+      "target": "../../knowledge/memory-embed-2026-10-18/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/models/local-models.md",
+      "resolved_target": "knowledge/memory-embed-2026-10-18/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "fefefca38254e99ab0536378ccd83c8892c95c4cf508926c17a7cf05b8b336ce",
+      "evidence": "25ae02dc33f794d74b07835da5800a03b3321cf0b83539593c04a8abe6d2b677",
+      "target": "../../knowledge/gguf-models.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/models/local-models.md",
+      "resolved_target": "knowledge/gguf-models.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "92516fe6515bf8f1d69374ca67826e06d0f26b50c212132c35d554b2a397b114",
+      "evidence": "f519adc51143f94aa24646b3144711c6161505b1391f6cc5f342550959368f77",
+      "target": "../../knowledge/inference-speed.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/models/local-models.md",
+      "resolved_target": "knowledge/inference-speed.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "b7936b069bae067b12ae37929e92e269708cf0e35865d1652d4879a491ef892e",
+      "evidence": "7cf4fe722a029c7dd1b805d46425b11dbe9260a2e6cfbcaed9d47dd097f03e5d",
+      "target": "../../knowledge/memory.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/models/local-models.md",
+      "resolved_target": "knowledge/memory.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "91db7dce3966490314ae053eb010cfab261acf9277edb241c1659d56c3addb7f",
+      "evidence": "7c73de26ec65262386900d8f156594a2394a46de56f47eeeb5d4d1ac7b4cb5b0",
+      "target": "../../knowledge/inference-2026-10-18/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/models/local-models.md",
+      "resolved_target": "knowledge/inference-2026-10-18/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "91db7dce3966490314ae053eb010cfab261acf9277edb241c1659d56c3addb7f",
+      "evidence": "4f55b22fa69d08ba68d08e30775ffb5c677d0726ee39a54580b4ac69e1872c57",
+      "target": "../../knowledge/inference-speed.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/models/local-models.md",
+      "resolved_target": "knowledge/inference-speed.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "91db7dce3966490314ae053eb010cfab261acf9277edb241c1659d56c3addb7f",
+      "evidence": "4c21c5252f7a415e92c5ba3a288a0099ded14de8083ae9589f4c91c3b1dca754",
+      "target": "../../knowledge/memory.md#embed-fp16-и-int8",
+      "reason": "target_not_indexed",
+      "source_path": "features/models/local-models.md",
+      "resolved_target": "knowledge/memory.md",
+      "anchor": "embed-fp16-и-int8",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "ec3f91ca6ce6eb256b1ba2ddf66c3d0ad2d8f6144b48bfb21adebe24b768b563",
+      "evidence": "17d474cf91c5f1c20adab06a1018844b6b4f8671f9c866f4601f1296711d8ef0",
+      "target": "../../knowledge/inference-devices.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/models/local-models.md",
+      "resolved_target": "knowledge/inference-devices.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "463702924442b60a81dbf2dfdab15177309645ba79c8c7c355a5c2f84455fed7",
+      "evidence": "2bb6c4beafa9a0a4618d1c53e34dba3f559fe99a9c636dd64285dff795cb5314",
+      "target": "../../knowledge/inference-speed.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/models/local-models.md",
+      "resolved_target": "knowledge/inference-speed.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "463702924442b60a81dbf2dfdab15177309645ba79c8c7c355a5c2f84455fed7",
+      "evidence": "d97049d3f461c64cab39fd69485eae02a5ecf05c47ec01eeeb7c157e3992747a",
+      "target": "../../knowledge/spike-search.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/models/local-models.md",
+      "resolved_target": "knowledge/spike-search.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "f1348945432d748742001253aaa6919ee0f0e50015a1a8a13e643b852e83ba6a",
+      "evidence": "afd9c72a450228f3283e05cd8bd372e952a1af4816cad37c9824522a326b8d38",
+      "target": "../../knowledge/memory.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/models/memory-plan.md",
+      "resolved_target": "knowledge/memory.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "401e1dacb95f8484ffb090a0c252a13bb78cf14175f939279ab9c63d378e4166",
+      "evidence": "4eaa9ae26b76fa780cc92d8dbfb6ca43c7ac36ba410c2e2aa25c9bcbbfae7f9b",
+      "target": "../../knowledge/memory.md#изоляция-стенда-и-воспроизведение",
+      "reason": "target_not_indexed",
+      "source_path": "features/models/memory-plan.md",
+      "resolved_target": "knowledge/memory.md",
+      "anchor": "изоляция-стенда-и-воспроизведение",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "79a39fd18818928e2aa2d436a41af15e72e7b904c463b02c3da3adf9922ea519",
+      "evidence": "a7c6f993ed6ca72ffdaf360482c52329bd27f0e17db3f22d93abbfe16a5d07f3",
+      "target": "../../knowledge/search-quality.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/models/memory-plan.md",
+      "resolved_target": "knowledge/search-quality.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "be620594b8a91177ecd32b0a07bcd20271474caae23b51e4a330e33984bb003f",
+      "evidence": "25a8f21112f5c3230d1326e2da843e20c56dfde4505e4e8f7d887733b0041654",
+      "target": "../../knowledge/memory.md#fp16-rerank-и-выгрузка-по-простою-приёмка-настоящим-worker",
+      "reason": "target_not_indexed",
+      "source_path": "features/models/memory-plan.md",
+      "resolved_target": "knowledge/memory.md",
+      "anchor": "fp16-rerank-и-выгрузка-по-простою-приёмка-настоящим-worker",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "d8b46ef5fdd73db8bd7ad2f359094376f7691a7ee4ad485f493d216a730a796e",
+      "evidence": "639f072b86668c9f87c4613ec34989bde720be9a6c7a0717653b916c92d6a9c3",
+      "target": "design/mockup.html",
+      "reason": "target_not_indexed",
+      "source_path": "features/new-topics/design.md",
+      "resolved_target": "features/new-topics/design/mockup.html",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "7db9b23d72a5abb90e0404d5a452fa0ad948a7ab78a28628fd1c764b2816c5a3",
+      "evidence": "f8280f4816a3f4ec6f6ef752332287ebda86c672af99b0cac90050b06eac5754",
+      "target": "../../knowledge/new-topics-threshold-2026-10-19.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/new-topics/design.md",
+      "resolved_target": "knowledge/new-topics-threshold-2026-10-19.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "2f06fdfca044b6af545a96a24ad0fd8deaac486f92869acdecddfab06c51d38c",
+      "evidence": "17d206c750663a48e801e48b5a235f225f561c3f8e5c47f2f92e91219b66c506",
+      "target": "../../knowledge/new-topics-threshold-2026-10-19.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/new-topics/plan.md",
+      "resolved_target": "knowledge/new-topics-threshold-2026-10-19.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "a4ae9f1bbe7692898fa3682f2fd60afffe379b7e6cbc6b42700d8ccdb99f78aa",
+      "evidence": "362af27162ff112647a273c0f5d44ce93be4ddbcb5a213d1baf749816bac9893",
+      "target": "../../knowledge/new-topics-threshold-2026-10-19.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/new-topics/requirements.md",
+      "resolved_target": "knowledge/new-topics-threshold-2026-10-19.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "4a5368c0fde3bb138b861dbefd8d45cf2e8da51d23c904eed4fad3f41dfe79e3",
+      "evidence": "c3f828669827d88f35c3a4d07dbe0af245aeb58524b253087f3cf7fbd71c35b3",
+      "target": "../window/mockups/delete-project.html",
+      "reason": "target_not_indexed",
+      "source_path": "features/projects/deletion.md",
+      "resolved_target": "features/window/mockups/delete-project.html",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "4ebed06f3e147c8c19fe36f5eb2da34df594b39a0836ae4c56b1c49b0274771b",
+      "evidence": "2491096e1eec409af3dfe8f30321f749ffc7b943d9bf1cfab7d95dd976f44111",
+      "target": "../../chats/2026-10-18-project-deletion/dialog.png",
+      "reason": "target_not_indexed",
+      "source_path": "features/projects/deletion.md",
+      "resolved_target": "chats/2026-10-18-project-deletion/dialog.png",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "84c0152b492953a32ecbb7e4b482abcf984d85470ad6408dffc5fbee6328b3ac",
+      "evidence": "5f934896e767328db28b3a910bbdec4c5adf45d5064bade8c22c5fc0206a8f84",
+      "target": "../../knowledge/spike-search.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/search/hybrid-search.md",
+      "resolved_target": "knowledge/spike-search.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "314be821a5acdf437c1100a9d0a65db2696636928f16b49174c75a790dad5a13",
+      "evidence": "a792c50776015b2bd2b0dd5abc28d188f254dd409713a4f7ad4cd23d7a760e52",
+      "target": "../../knowledge/search-quality.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/search/hybrid-search.md",
+      "resolved_target": "knowledge/search-quality.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "314be821a5acdf437c1100a9d0a65db2696636928f16b49174c75a790dad5a13",
+      "evidence": "865b7ed775bbc3e05f82951eae35f544a4341925138ce488fd08206bd61fe350",
+      "target": "../../../QUESTIONS.md",
+      "reason": "outside_docs_root",
+      "source_path": "features/search/hybrid-search.md",
+      "resolved_target": "../QUESTIONS.md",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "eef0a1c54c2724abf514da5c22f3b4ff4ec5e4ceb54c327f8342243cb5da6624",
+      "evidence": "0c48f4af4015a9985ff72f24075c2d1969ccbb7b1f1e2f78fe605eba06d41598",
+      "target": "../../knowledge/duplicates.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/search/maintenance-tools.md",
+      "resolved_target": "knowledge/duplicates.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "3615484f879e242ee2bb8ce17e97169055e72d4474a3df9048520012ce4e9a95",
+      "evidence": "e49cca09dc9509b69ab2f7edfe1eb7958b2f8894b84ea6a44e7b8baefab55661",
+      "target": "../../chats/2026-10-18-similar-duplicates/handoff.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/search/maintenance-tools.md",
+      "resolved_target": "chats/2026-10-18-similar-duplicates/handoff.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "3615484f879e242ee2bb8ce17e97169055e72d4474a3df9048520012ce4e9a95",
+      "evidence": "c7c2b3c6e83b494fd583961cd37ba8925c19087328d30ab39374c78e17bc969c",
+      "target": "../../architecture/graph.md#идентичность-диапазоны-и-снимок",
+      "reason": "target_not_indexed",
+      "source_path": "features/search/maintenance-tools.md",
+      "resolved_target": "architecture/graph.md",
+      "anchor": "идентичность-диапазоны-и-снимок",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "e54f2e9fb521389d4f630690421d66b2e2f686f426cb1dcf63b2db6d13e118f0",
+      "evidence": "4604da664f734756d1a0b9cf223c2d650e606ac77b9a0338255439f2c885dd32",
+      "target": "../../knowledge/duplicates.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/search/maintenance-tools.md",
+      "resolved_target": "knowledge/duplicates.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "79b4bf0d6f96c76b4847d1a781769adbb39318076d45e5bb3679b80562be6cb2",
+      "evidence": "6e46bd78a99484a52f6359232fbad4b038f8d74404c6461b8cefe4558f9515de",
+      "target": "../../knowledge/local-documentation-tools.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/search/maintenance-tools.md",
+      "resolved_target": "knowledge/local-documentation-tools.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "79b4bf0d6f96c76b4847d1a781769adbb39318076d45e5bb3679b80562be6cb2",
+      "evidence": "3437a57297220445baec864ebb221ecf2ac36ae28b084c1b154d6d14a8e62774",
+      "target": "../../knowledge/duplicates.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/search/maintenance-tools.md",
+      "resolved_target": "knowledge/duplicates.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "67e2cbdd0037d9b2c6ae7c458e5dfd85d78735ec5d2aaa2ec3be38a628ac43bd",
+      "evidence": "988f52935ebe2dfa73fc4253c62f7e3d151e24c91c803ae13e003d1da39ecbb2",
+      "target": "../../knowledge/search-quality.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/settings/settings.md",
+      "resolved_target": "knowledge/search-quality.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "3f49fbd6cb23d05d93520e3e3edf9c8af3f0f97ae75160b5f4ecdb75c97c3ee3",
+      "evidence": "675fdf6f0164cd731204e0e6526a8ff743abd39d60876a004f13e9a3f522ab5e",
+      "target": "../../knowledge/search-quality.md#отложенная-часть-и-пороги",
+      "reason": "target_not_indexed",
+      "source_path": "features/settings/settings.md",
+      "resolved_target": "knowledge/search-quality.md",
+      "anchor": "отложенная-часть-и-пороги",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "7c4b3bcd51d29571ac0c11d865ca0be5c6bb29935857f1dda0c298680572f3a3",
+      "evidence": "3a3ac52d3837bcd7352dc9dd0b6122c938d284484aaab37c07eabaa23d33b527",
+      "target": "../../knowledge/memory-embed-2026-10-18/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/settings/settings.md",
+      "resolved_target": "knowledge/memory-embed-2026-10-18/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "5a969d7e7030843998af07e527eb1624448fb63ff53340b4cd5a52a4c09aa779",
+      "evidence": "8a5d6f7bb79dc5796ad3e33f889b24b7639303b571500edf7b3c675d4155c888",
+      "target": "../../chats/2026-10-18-folder-menu-31/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/document-actions.md",
+      "resolved_target": "chats/2026-10-18-folder-menu-31/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "5a969d7e7030843998af07e527eb1624448fb63ff53340b4cd5a52a4c09aa779",
+      "evidence": "725f81720dc63b4756884e8eb287abe4eca0c9fe9daee423e6570db82e212714",
+      "target": "mockups/document-menu.html",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/document-actions.md",
+      "resolved_target": "features/window/mockups/document-menu.html",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "c31ece021328e9a3ba8cfdb4575d1ec374f0c15a27b3b6611769ab22c550d0f7",
+      "evidence": "e38b2d4ba7385c98abfd87890951356cff3960c41c6357ccd51cb535295fa2ce",
+      "target": "../../chats/2026-10-18-document-actions/tree-menu.png",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/document-actions.md",
+      "resolved_target": "chats/2026-10-18-document-actions/tree-menu.png",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "ec32b5d7558e14aa90543dfa1648d8dcdc6e32e5f846a1f11883589cf5d9b448",
+      "evidence": "105f29018b9993fefc7f9bd9f25f09f735b36420640ef439fcda225bebf52ef0",
+      "target": "mockups/empty.html",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/empty-states.md",
+      "resolved_target": "features/window/mockups/empty.html",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "12346a275963bbf1c72aa09b70b19521e871ea0abb2c3fae647eed94ea677b5a",
+      "evidence": "15f86f9415164166c65e1196543fe055f0955d4f5875f0e4a416c50e9f0d78f3",
+      "target": "mockups/errors.html",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/error-states.md",
+      "resolved_target": "features/window/mockups/errors.html",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "81cd642339963c01b16866e0447a2f7f6b6c2b1da62d389396d4c1698635ca43",
+      "evidence": "c4529a2f2c6f623b1952823be3f89cb13eda7dc2855270e411476182dcf50bca",
+      "target": "Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/implementation.md",
+      "resolved_target": "features/window/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "6a6addb0a2529e9bc768f2700a1294959fa788d1c89a4815797eed0e07d87334",
+      "evidence": "de7038f608ce8c7b5077c00541214aeffbc0ab84ede31b7ec4d0bc014aae12d2",
+      "target": "../../knowledge/build.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/implementation.md",
+      "resolved_target": "knowledge/build.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "82323ac5340a25dcc3d3b2f74c8f96780a564d1b74a1c8384d77b953175a3023",
+      "evidence": "1b1ef3338bdb9b7d5342e6dd59e9409c603005a575f11faa1599b6a3e3c5b0af",
+      "target": "mockups/indexing.html",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/indexing-progress.md",
+      "resolved_target": "features/window/mockups/indexing.html",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "6381b00e0d727449b3e885c5eaca05d23974547ede32277c1fcef1015d6ad51c",
+      "evidence": "57c246b8e295a9b2a2311df24c523da23561f4a7176f406a04f9de47d4096fca",
+      "target": "mockups/logs.html",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/logs.md",
+      "resolved_target": "features/window/mockups/logs.html",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "ee6bc5679055cdb9827e276887c7e137ffe5c308f910c6d23e2514e019d4e9cd",
+      "evidence": "68a30c57a9e0b7204be4bfcd3aed362c6e6e962dc6c9da28ca9cc0d47623db3c",
+      "target": "../../chats/2026-10-18-worker-logs/logs-error.png",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/logs.md",
+      "resolved_target": "chats/2026-10-18-worker-logs/logs-error.png",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "3ef32e93cde8dabb52de73b017a7ed67d45a4690dd8c626a5af3cd938d0375f9",
+      "evidence": "21cbcd84e2675931b20a9d435b335d0d62002b84eb0a3d046c16d7f8fa861646",
+      "target": "mockups/main.html",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/main-window.md",
+      "resolved_target": "features/window/mockups/main.html",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "d5a6b9efa49c4c37648feaf9eeecf73559d71aa8eb6317d840b5bbdff6d56eb0",
+      "evidence": "b665d4227142bbe01aa07accd1aeb254b8c1be24c15130cca65d9646730d52e0",
+      "target": "../../chats/2026-10-18-mcp-history-29/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/mcp-statistics.md",
+      "resolved_target": "chats/2026-10-18-mcp-history-29/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "d5a6b9efa49c4c37648feaf9eeecf73559d71aa8eb6317d840b5bbdff6d56eb0",
+      "evidence": "3970767a7175b08b96bfa6c6f0ea3de7ae8010a4018eecba3134c58e25aa3793",
+      "target": "../../chats/2026-10-18-mcp-analysis-30/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/mcp-statistics.md",
+      "resolved_target": "chats/2026-10-18-mcp-analysis-30/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "3c1ec1f927b3b46937f90ccde9f5b0a8b1a277c9343d5faa9c534a947b813e7b",
+      "evidence": "3c19ea71630c67df431da96ecd331f5c16961dd80799178d3e3087acc252742f",
+      "target": "../../chats/2026-10-18-mcp-history-29/verification.md#измерение-задержки-и-размера-истории",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/mcp-statistics.md",
+      "resolved_target": "chats/2026-10-18-mcp-history-29/verification.md",
+      "anchor": "измерение-задержки-и-размера-истории",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "af2d2e628a373aecfa7cb729b5317d5c5ea3dbd355729fce23c9eab93b823439",
+      "evidence": "71164f311396fc46f00da2e51e192fd85a6f1f133536af5d0371143c3615b69b",
+      "target": "../../chats/2026-10-18-mcp-analysis-30/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/mcp-statistics.md",
+      "resolved_target": "chats/2026-10-18-mcp-analysis-30/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "af2d2e628a373aecfa7cb729b5317d5c5ea3dbd355729fce23c9eab93b823439",
+      "evidence": "638efdd141f4f21be4d21e5058b82bc6754a3308663d9cf9e1b63295bd9dc802",
+      "target": "../../chats/2026-10-18-mcp-history-29/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/mcp-statistics.md",
+      "resolved_target": "chats/2026-10-18-mcp-history-29/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "f64505b84c01455d277bb3fccc86be4ec5ea9db28980e4c08a307eeceadd75f4",
+      "evidence": "bda9f970713203b520cc998d56fd1039457c91f91d169cf853021efca83d21bb",
+      "target": "../../chats/2026-10-20-indexing-details/handoff.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/notifications.md",
+      "resolved_target": "chats/2026-10-20-indexing-details/handoff.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "f64505b84c01455d277bb3fccc86be4ec5ea9db28980e4c08a307eeceadd75f4",
+      "evidence": "bad1fa2040974b3230e716cd807f095142028e971feb8fbde106420e1fe0c07a",
+      "target": "../../chats/2026-10-18-notifications-28/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/notifications.md",
+      "resolved_target": "chats/2026-10-18-notifications-28/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "f64505b84c01455d277bb3fccc86be4ec5ea9db28980e4c08a307eeceadd75f4",
+      "evidence": "ec097368c4f5181d801ebf0ebd0ecbdcfb0cf1ed4792e71383c3fbf2c75d8acf",
+      "target": "mockups/notifications.html",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/notifications.md",
+      "resolved_target": "features/window/mockups/notifications.html",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "e389318b805c9163416489f24258ab139b5649a544f89538ad64ab4cdecfaf83",
+      "evidence": "f2320f0968f0ef9e09911147f374068a16715bb07de0c7e8186c06129a48bbd9",
+      "target": "mockups/theme.css",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/palette.md",
+      "resolved_target": "features/window/mockups/theme.css",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "a2a2741fd8d1a990db22711dcd32a10c2772e4de1fe9ab57f838c77462d70e6a",
+      "evidence": "035c1192ba5c9474b9b66508799da94022cad88df53d142c90e9b3bd4d34b3e9",
+      "target": "mockups/project-menu.html",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/project-menu.md",
+      "resolved_target": "features/window/mockups/project-menu.html",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "a2a2741fd8d1a990db22711dcd32a10c2772e4de1fe9ab57f838c77462d70e6a",
+      "evidence": "9ddc1c8e0183a6d0a6864a9d2d63f3899ee05d275619b1bfdb31aaa3d9322605",
+      "target": "mockups/delete-project.html",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/project-menu.md",
+      "resolved_target": "features/window/mockups/delete-project.html",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "c652d3de9dc4bf8f28a8feea7b8decd74cafa5e23f79f3a3f8d3f8599b5dd39d",
+      "evidence": "fab9249a549eb35bd1aabf441c3537839ab716cefddc22e88337d360397af297",
+      "target": "../../chats/2026-10-18-project-context-menu/project-menu.png",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/project-menu.md",
+      "resolved_target": "chats/2026-10-18-project-context-menu/project-menu.png",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "88a41cb97b04ba342343d2ca2dc63b1134abf8324254ff1a1c9e47e5ff765f24",
+      "evidence": "9fe5bbb64a1fdccc8a94f5a706bab79273a556f1e4b476c00ff1ea4f55b5dec6",
+      "target": "mockups/notifications.html",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/refinement-design.md",
+      "resolved_target": "features/window/mockups/notifications.html",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "825be3329df7ef6e30d4b363c6b5aef7d33610b32a4165df7e840ec0d8ca63da",
+      "evidence": "5dc84b4a9931389f8c0f6dd29b31acf7667266f6c60a326af4b3f9aab7a65b65",
+      "target": "../../../ui/preview/mcp-history.html",
+      "reason": "outside_docs_root",
+      "source_path": "features/window/refinement-design.md",
+      "resolved_target": "../ui/preview/mcp-history.html",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "825be3329df7ef6e30d4b363c6b5aef7d33610b32a4165df7e840ec0d8ca63da",
+      "evidence": "e772db2f758909df34a718dc2968f1c9dee173ad991011b430bf4b9956fa3e80",
+      "target": "../../chats/2026-10-18-mcp-analysis-30/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/refinement-design.md",
+      "resolved_target": "chats/2026-10-18-mcp-analysis-30/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "825be3329df7ef6e30d4b363c6b5aef7d33610b32a4165df7e840ec0d8ca63da",
+      "evidence": "d379ee717b4deb7bd19f7bab4e6bc48e9441e94114bad2c5647dad75e81c0cea",
+      "target": "mockups/mcp-statistics.html",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/refinement-design.md",
+      "resolved_target": "features/window/mockups/mcp-statistics.html",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "3b68d458e40cc86a846bdc4c48fb061bace977a4bf960147fa6a8a56c3b1b82b",
+      "evidence": "c52837db11ba3766a6eee7873effc2e6dc95decc35dd2dd93c1c757a3c006774",
+      "target": "mockups/document-menu.html",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/refinement-design.md",
+      "resolved_target": "features/window/mockups/document-menu.html",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "a99f48b63f685798faa0e4a06e70dcbe05968f84375297ce32e69c859fe642df",
+      "evidence": "a4e0cffd7a903ddc709e4bd3848f8b70cdf1f08787acc6da60c7aaf171140bef",
+      "target": "../../chats/2026-10-18-window-design-27/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/refinement-design.md",
+      "resolved_target": "chats/2026-10-18-window-design-27/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "a2273bd0841f36335a7c5ed6ffbafb4f69c57746f871b591deb8d1db38ca18c6",
+      "evidence": "41b554297bf15c42b6cf6422442e827eaa743c82e4a2f8a94e388a83df3587ad",
+      "target": "../../chats/2026-10-18-notifications-28/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/refinement-plan.md",
+      "resolved_target": "chats/2026-10-18-notifications-28/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "a2273bd0841f36335a7c5ed6ffbafb4f69c57746f871b591deb8d1db38ca18c6",
+      "evidence": "dd00e1dd4c71ddb0f661e25054e8ed842c3ea011506fbbd1da99ee3bc30fcb94",
+      "target": "../../chats/2026-10-18-mcp-history-29/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/refinement-plan.md",
+      "resolved_target": "chats/2026-10-18-mcp-history-29/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "a2273bd0841f36335a7c5ed6ffbafb4f69c57746f871b591deb8d1db38ca18c6",
+      "evidence": "d6a91969db94037c933da7265eb373864cc691025fb1d95c8f066ea5369a4a37",
+      "target": "../../chats/2026-10-18-mcp-analysis-30/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/refinement-plan.md",
+      "resolved_target": "chats/2026-10-18-mcp-analysis-30/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "a2273bd0841f36335a7c5ed6ffbafb4f69c57746f871b591deb8d1db38ca18c6",
+      "evidence": "48e105ed5e4ae2e975ec175816524fe41a2a3add83e7d3f597dd6ffb1ea54d1e",
+      "target": "../../chats/2026-10-18-folder-menu-31/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/refinement-plan.md",
+      "resolved_target": "chats/2026-10-18-folder-menu-31/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "a2273bd0841f36335a7c5ed6ffbafb4f69c57746f871b591deb8d1db38ca18c6",
+      "evidence": "ff53389b9a847a191e636d9400f98d5ec31386fbcf59e02e69d052a1e276b236",
+      "target": "../../chats/2026-10-18-window-design-27/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/refinement-plan.md",
+      "resolved_target": "chats/2026-10-18-window-design-27/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "7156dfcf123ddcc61e79346ab56d9f61066c92f9724322d89a54ad43744e253a",
+      "evidence": "0efd82d5932b687fe3e78b33be65a8cbd17cbca44579512626171f28ebf5f1af",
+      "target": "mockups/reindex-consent.html",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/reindex-consent.md",
+      "resolved_target": "features/window/mockups/reindex-consent.html",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "058cec3bb254495b1c698ca0d1f3c6e594ff583aba719c6f1fa9b8e208374665",
+      "evidence": "a9541897da683c58dae22138147f696a6965d2d3ade584b0be9e7f8634d3016a",
+      "target": "mockups/settings.html",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/settings-window.md",
+      "resolved_target": "features/window/mockups/settings.html",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "39a8f5d61b5eee5e15ae349a3bc8d05b58f7c6fcebed9dbcf8cb93b65f566c7e",
+      "evidence": "38b617ef1c9b9721e67a0d7d0e6312dc7f634384eee6928d549652e718a7ff49",
+      "target": "mockups/device-settings.html",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/settings-window.md",
+      "resolved_target": "features/window/mockups/device-settings.html",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "336013ae663f2c5cd3b4526200ab6aa57187c35a8615d6765d9eb8e5170c7e83",
+      "evidence": "46daef8095a57449189696e6eb38042a476ec93708eda153d41c646bfdc349c5",
+      "target": "mockups/settings.html",
+      "reason": "target_not_indexed",
+      "source_path": "features/window/settings-window.md",
+      "resolved_target": "features/window/mockups/settings.html",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "d5205e99b632c0772fe3f22df469904a9cd20ae7dfc604c569cc42b5b5d629d8",
+      "evidence": "87decb2bbd8abc08200611365c7129e43ace1cb2f035300e3dd292759efd947d",
+      "target": "graph.md",
+      "reason": "target_not_indexed",
+      "source_path": "manual/agents.md",
+      "resolved_target": "manual/graph.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "0846ef99dc1f20af1c135c11ced9a6c6b0ee6d5217f879c74aa4e045238577cb",
+      "evidence": "d95df1e134a1f15c753a5cf321c0370b8397fef2679138d8c41b1f297e705c9d",
+      "target": "Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "manual/new-topics.md",
+      "resolved_target": "manual/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "0846ef99dc1f20af1c135c11ced9a6c6b0ee6d5217f879c74aa4e045238577cb",
+      "evidence": "d7ce1f2967e5a6e4d7ff52f48f5e9ce8dba47ddc91b0b1243c2c17d0cd829bda",
+      "target": "../features/new-topics/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "manual/new-topics.md",
+      "resolved_target": "features/new-topics/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "9a74f9c0996b144e43875aeed71a22d283a20108132f3e9e9162eef60144a1be",
+      "evidence": "89dcc7a704cc9bada5f0f5da48f4bc539c8744cfc10f74794986c7a61bb60e84",
+      "target": "../../QUESTIONS.md",
+      "reason": "outside_docs_root",
+      "source_path": "manual/new-topics.md",
+      "resolved_target": "../QUESTIONS.md",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "9a74f9c0996b144e43875aeed71a22d283a20108132f3e9e9162eef60144a1be",
+      "evidence": "b54ee2309da7074290ece9d87237142a3cffd188e28066934d3eec84466f7d99",
+      "target": "../../QUESTIONS.md",
+      "reason": "outside_docs_root",
+      "source_path": "manual/new-topics.md",
+      "resolved_target": "../QUESTIONS.md",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "cc016daaf48065b453b658f5d0a2ba5a13571bdd8696b73a9468cae385fc710e",
+      "evidence": "1eb723586a947f56fcfe3d3c2fe99ec913d5f1a05270d68ce3951ae66d5dbfb6",
+      "target": "graph.md",
+      "reason": "target_not_indexed",
+      "source_path": "manual/search.md",
+      "resolved_target": "manual/graph.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "e661fe1b9e8113d9be784190a1a0126b2002660ace3d392c670d8c0c764c5314",
+      "evidence": "29f6d304459b38cce02cc5c20bfa6bf6e2100c856deb49ba229b1e7a2236a858",
+      "target": "graph.md",
+      "reason": "target_not_indexed",
+      "source_path": "manual/search.md",
+      "resolved_target": "manual/graph.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "895a202150c016cfefed234cf385b24b130ed657ccb05a304fb94fee6884d5a6",
+      "evidence": "2330136c8e66381a46fac7b9e17c26071effb7991df26e71e734a19821acda13",
+      "target": "graph.md",
+      "reason": "target_not_indexed",
+      "source_path": "manual/terminal.md",
+      "resolved_target": "manual/graph.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "91d333f296c029b10a64fe83ed670ba9c9fc74e1336f10bbe309194759d3f686",
+      "evidence": "63087b6083f9de3869c8fe713e42ad57d0e8fbcca326bc5c006a165c4f878e0e",
+      "target": "graph.md",
+      "reason": "target_not_indexed",
+      "source_path": "manual/troubleshooting.md",
+      "resolved_target": "manual/graph.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "26c3fd3c396214aff0c340303119c8a3cf3eb0fd1d14482bc36bc925f70797fa",
+      "evidence": "4801bea73b9673356ba444b0db65f3b5b5ebe4061be7f372e5aaa7b2d9ca880e",
+      "target": "../chats/2026-10-20-indexing-details/handoff.md",
+      "reason": "target_not_indexed",
+      "source_path": "manual/troubleshooting.md",
+      "resolved_target": "chats/2026-10-20-indexing-details/handoff.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "dc1c9aca2e11c1c3baca2b0b8f18b6fb6965d56005d3da57160aaa1ed6153930",
+      "evidence": "1c87667d4e2066330ac372693b3a5d8c30a5ca48c50c5c8681aaf1f285d3df47",
+      "target": "../BARS_INSTRUCTION.md",
+      "reason": "target_not_indexed",
+      "source_path": "manual/writing-docs.md",
+      "resolved_target": "BARS_INSTRUCTION.md",
+      "classification": "not_indexed_in_original_snapshot"
+    },
+    {
+      "source": "dc1c9aca2e11c1c3baca2b0b8f18b6fb6965d56005d3da57160aaa1ed6153930",
+      "evidence": "4ebbc7af28cb587c2e5a1c73cfaa1fe335ce59542aceea46741de5d219468716",
+      "target": "../features/docs-convention/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "manual/writing-docs.md",
+      "resolved_target": "features/docs-convention/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "2621df7c5603f45c1a8390842a461186a0968a7445287b12091cbf6bd1219da8",
+      "evidence": "6bfaf7362301b183b2888e34461a6789133a004e6d8591af523c6515d1884a39",
+      "target": "graph.md",
+      "reason": "target_not_indexed",
+      "source_path": "manual/writing-docs.md",
+      "resolved_target": "manual/graph.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "b3536a95b18ecb0e42d2a0b6577e4fb4138e323d646ef3a50f56f4455f17d22e",
+      "evidence": "5c693d92e07571aec915b3d1197e5a5bfae2bd6cd65a99daf2ff59b249c0b5c1",
+      "target": "features/knowledge-base/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "overview.md",
+      "resolved_target": "features/knowledge-base/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "19660efe10d3e154bd6db1d8c436cbf9bf0e91ad23f724a70daf5301996bfdf7",
+      "evidence": "9ca44c2dd8263a6f27deec6b425074053074f2d317ea0507a85f105ad43d59b5",
+      "target": "features/docs-convention/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "overview.md",
+      "resolved_target": "features/docs-convention/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "50eae41d771d77614c7392f6e958577b6d82b524c94cd87afefd6aeb3443c744",
+      "evidence": "ef82e6a7f18efbce588462639dc4b89d72c26a335237ef1d4c28b6f243cd916b",
+      "target": "features/graphrag/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "overview.md",
+      "resolved_target": "features/graphrag/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "81b4087ef81393d25784b2508e0e648eca78ca347cac2882eba737933e253d00",
+      "evidence": "8a05eeb150cc407f6b4517e43f17ecf64ef96b1059332555b58c0868d84cb3e0",
+      "target": "features/models/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "overview.md",
+      "resolved_target": "features/models/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "12fffda52e2834115eea31537c17148ebfc89196eae82151899848714cc9331d",
+      "evidence": "9629b358a4d79b3d9d84cd2c511646c8f70c3afccf83b0d14106610db2087db9",
+      "target": "manual/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "overview.md",
+      "resolved_target": "manual/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "12fffda52e2834115eea31537c17148ebfc89196eae82151899848714cc9331d",
+      "evidence": "c9e5559608b1d642dba322943bff80593be0cc9e98a0c0a3cfa7ef8c035dd28e",
+      "target": "Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "overview.md",
+      "resolved_target": "Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "4de4ed1aa509a2f37cc0dff65e819c1cd3e95c5ec85b5d4fb697093cb275f005",
+      "evidence": "a788e3fc88047040518df3d3ecc24c927d8ccd510c5d6ea5032d8f7f15933329",
+      "target": "features/indexing/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "project-status.md",
+      "resolved_target": "features/indexing/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "4de4ed1aa509a2f37cc0dff65e819c1cd3e95c5ec85b5d4fb697093cb275f005",
+      "evidence": "08299a7430268aefe41911ce4f79a355aaa1ccc4bf11edfd2b5f420ec1453bb1",
+      "target": "features/search/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "project-status.md",
+      "resolved_target": "features/search/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "4de4ed1aa509a2f37cc0dff65e819c1cd3e95c5ec85b5d4fb697093cb275f005",
+      "evidence": "d6b2d32bc05bd3fcbc609f4b2d7118525ece261214047964ab7a25276e5af6b3",
+      "target": "features/agent-tools/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "project-status.md",
+      "resolved_target": "features/agent-tools/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "4de4ed1aa509a2f37cc0dff65e819c1cd3e95c5ec85b5d4fb697093cb275f005",
+      "evidence": "3494890e4e1c1de426493d7c5555d55bed712ab7d9e9ac4562783a3e20d8fa27",
+      "target": "features/clients/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "project-status.md",
+      "resolved_target": "features/clients/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "4de4ed1aa509a2f37cc0dff65e819c1cd3e95c5ec85b5d4fb697093cb275f005",
+      "evidence": "18b35e91ada59557d428462c64b5a006ab6b1cd5d2b1dbfce452546e54f5196f",
+      "target": "features/models/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "project-status.md",
+      "resolved_target": "features/models/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "4de4ed1aa509a2f37cc0dff65e819c1cd3e95c5ec85b5d4fb697093cb275f005",
+      "evidence": "73954257e2beeafd205c45ab4be59e793bfc1630b604e770d1a36d4ef10d5cd2",
+      "target": "features/window/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "project-status.md",
+      "resolved_target": "features/window/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "4de4ed1aa509a2f37cc0dff65e819c1cd3e95c5ec85b5d4fb697093cb275f005",
+      "evidence": "a5fe199341fb43c3ff108b438eccc11d6af85f32b6db73f1ef539cde3ca41204",
+      "target": "features/graphrag/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "project-status.md",
+      "resolved_target": "features/graphrag/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "4de4ed1aa509a2f37cc0dff65e819c1cd3e95c5ec85b5d4fb697093cb275f005",
+      "evidence": "6dc36010cc13a75dccbd7396157b0fb98bd579826a6cd767ec03e7b3db0dee86",
+      "target": "features/knowledge-base/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "project-status.md",
+      "resolved_target": "features/knowledge-base/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "4de4ed1aa509a2f37cc0dff65e819c1cd3e95c5ec85b5d4fb697093cb275f005",
+      "evidence": "398ea1315be6873ef12a78418c7721382a6628c73b63b15c7e136604867865ce",
+      "target": "features/distribution/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "project-status.md",
+      "resolved_target": "features/distribution/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "d7391fc4afd99cbfffe45539152ac57bcc1ab98068313c9ac781376b813a459e",
+      "evidence": "f40045a687d18eddeef283e8cf754c36124203e17e3e2473b4f709963706c76f",
+      "target": "knowledge/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "project-status.md",
+      "resolved_target": "knowledge/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "dfe06c16bc9fe7f5beafd32a0599af7b24a59bb8c9bd137252cbb12014bb3d15",
+      "evidence": "3b1e8f3a84297b1171a9bb9758e131d139f63652bdcb7e4eee6085eaef0ef30f",
+      "target": "chats/2026-10-18-mcp-history-29/verification.md",
+      "reason": "target_not_indexed",
+      "source_path": "project-status.md",
+      "resolved_target": "chats/2026-10-18-mcp-history-29/verification.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "dfe06c16bc9fe7f5beafd32a0599af7b24a59bb8c9bd137252cbb12014bb3d15",
+      "evidence": "79bf19f02a2d76ae82705f09caa6bbe4da6f04162877e56a533bd3c3290a75d5",
+      "target": "knowledge/search-during-indexing.md",
+      "reason": "target_not_indexed",
+      "source_path": "project-status.md",
+      "resolved_target": "knowledge/search-during-indexing.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "f8c0f14c94d06540091a15cd548801e38aac8bfc45af593b415f1d5c160edb71",
+      "evidence": "252ab2f6509b19a8fd48db2d37099fac11f0642780341e2bdc3c6cfb36e25bcc",
+      "target": "manual/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "project-status.md",
+      "resolved_target": "manual/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "f8c0f14c94d06540091a15cd548801e38aac8bfc45af593b415f1d5c160edb71",
+      "evidence": "0ccebfb6150f82a281eac245865ca1c11a03e885e6b42c5b5c9e1b92ea01ace7",
+      "target": "features/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "project-status.md",
+      "resolved_target": "features/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "f8c0f14c94d06540091a15cd548801e38aac8bfc45af593b415f1d5c160edb71",
+      "evidence": "0966a445f45b1e1640054a76440c1b44febce86226145843ff3f23de4e461e15",
+      "target": "architecture/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "project-status.md",
+      "resolved_target": "architecture/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "f8c0f14c94d06540091a15cd548801e38aac8bfc45af593b415f1d5c160edb71",
+      "evidence": "013507d14d64e37b238341af204b189865fcb15d0ac2ec47689896a96611875f",
+      "target": "adr/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "project-status.md",
+      "resolved_target": "adr/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "f8c0f14c94d06540091a15cd548801e38aac8bfc45af593b415f1d5c160edb71",
+      "evidence": "1add357c1e4ba5caca650168208e1e2eccea5f72f6486ad1f8af36926cb7b46e",
+      "target": "knowledge/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "project-status.md",
+      "resolved_target": "knowledge/Index.md",
+      "classification": "excluded_from_snapshot"
+    },
+    {
+      "source": "f8c0f14c94d06540091a15cd548801e38aac8bfc45af593b415f1d5c160edb71",
+      "evidence": "f4a4e6d8ef3dab43a4aba1b9f22d050d4433dc795c3f8fc1bb4bd1c4c517f605",
+      "target": "chats/Index.md",
+      "reason": "target_not_indexed",
+      "source_path": "project-status.md",
+      "resolved_target": "chats/Index.md",
+      "classification": "excluded_from_snapshot"
+    }
+  ],
+  "link_classes": {
+    "excluded_from_snapshot": 129,
+    "selected_target_anchor_or_parser_review": 1,
+    "not_indexed_in_original_snapshot": 28
+  }
+}

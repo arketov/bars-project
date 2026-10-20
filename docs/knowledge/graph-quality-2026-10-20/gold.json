@@ -1,0 +1,1106 @@
+{
+  "format": 1,
+  "created_at": "2026-10-20T08:58:05.737Z",
+  "budget_bytes": 16384,
+  "reviewer": "single agent; annotations before current outputs; not independent human review",
+  "cases": [
+    {
+      "id": "dev-S1-positive",
+      "split": "dev",
+      "scenario": "S1",
+      "kind": "positive",
+      "query": "Какие описания затронет изменение нарезки чанков?",
+      "request": {
+        "operation": "impact",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/indexing/updates.md",
+          "needle": "Если параметры нарезки или `docs_root`",
+          "start": 11886,
+          "end": 11947,
+          "role": "behavior",
+          "first_line": 66,
+          "sha256": "4bd86b14c9f054ae050f503fbebe40e2fbf6a758909c41c4ecd09191baa432d9"
+        },
+        {
+          "path": "features/indexing/chunking.md",
+          "needle": "Префикс документа модели",
+          "start": 9028,
+          "end": 9074,
+          "role": "behavior",
+          "first_line": 69,
+          "sha256": "06ab7c7a31213ff6faa07d0671d1832214a1b9b99ed8155cda7eb895d285d0e4"
+        }
+      ],
+      "root_paths": [
+        "features/indexing/chunking.md"
+      ],
+      "expectation": "Документированная зависимость индексатора и embeddings от нарезки; ссылки сами по себе не зависимости."
+    },
+    {
+      "id": "dev-S1-negative",
+      "split": "dev",
+      "scenario": "S1",
+      "kind": "negative",
+      "query": "Меняет ли нарезка чанков модель rerank?",
+      "request": {
+        "operation": "impact",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/indexing/updates.md",
+          "needle": "Согласие пользователя не нужно: модель не менялась",
+          "start": 12460,
+          "end": 12553,
+          "role": "constraint",
+          "first_line": 66,
+          "sha256": "4bd86b14c9f054ae050f503fbebe40e2fbf6a758909c41c4ecd09191baa432d9"
+        }
+      ],
+      "root_paths": [
+        "features/indexing/chunking.md"
+      ],
+      "forbidden": "Нельзя выводить смену rerank из ссылки на модель."
+    },
+    {
+      "id": "holdout-S1-positive",
+      "split": "holdout",
+      "scenario": "S1",
+      "kind": "positive",
+      "query": "Что затрагивает полное удаление проекта?",
+      "request": {
+        "operation": "impact",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/projects/deletion.md",
+          "needle": "БД «Новых тем» `new-topics.sqlite3`",
+          "start": 928,
+          "end": 975,
+          "role": "behavior",
+          "first_line": 11,
+          "sha256": "20715ee17453868c663e6dd54f0e67f0cf2d8095c783a0dd6a81d0214f8087c2"
+        },
+        {
+          "path": "features/new-topics/requirements.md",
+          "needle": "A13",
+          "start": 16707,
+          "end": 16710,
+          "role": "verification",
+          "first_line": 73,
+          "sha256": "f97bc4ed55af53845c7da1260079648ebd1d11258f8f57b1a90932f54db38186"
+        }
+      ],
+      "root_paths": [
+        "features/projects/deletion.md"
+      ],
+      "expectation": "Удаление данных проекта затрагивает хранилище новых тем и приёмку A13."
+    },
+    {
+      "id": "holdout-S1-conditional",
+      "split": "holdout",
+      "scenario": "S1",
+      "kind": "conditional",
+      "query": "Удалит ли снятие регистрации документы проекта?",
+      "request": {
+        "operation": "impact",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/projects/projects.md",
+          "needle": "это файлы пользователя",
+          "start": 5803,
+          "end": 5845,
+          "role": "constraint",
+          "first_line": 55,
+          "sha256": "f92e8d554edb2ca0f9290d7b5c10ca118990c1a70d84b82218ec9b2fe5c0dcc4"
+        },
+        {
+          "path": "features/projects/deletion.md",
+          "needle": "Markdown-документация и `BARS_INSTRUCTION.md` сохраняются побайтно",
+          "start": 1758,
+          "end": 1856,
+          "role": "constraint",
+          "first_line": 13,
+          "sha256": "20715ee17453868c663e6dd54f0e67f0cf2d8095c783a0dd6a81d0214f8087c2"
+        }
+      ],
+      "root_paths": [
+        "features/projects/projects.md"
+      ],
+      "forbidden": "unregister не получает разрушительную семантику project_delete."
+    },
+    {
+      "id": "dev-S2-positive",
+      "split": "dev",
+      "scenario": "S2",
+      "kind": "positive",
+      "query": "Как bge-m3 связано с fastembed и ORT?",
+      "request": {
+        "operation": "paths",
+        "from": {
+          "label": "bge-m3",
+          "kind": "entity"
+        },
+        "to": {
+          "label": "fastembed",
+          "kind": "entity"
+        },
+        "path_kind": "semantic",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "adr/0002-qwen-gguf.md",
+          "needle": "bge-m3 остаётся умолчанием на fastembed/ORT",
+          "start": 1372,
+          "end": 1435,
+          "role": "behavior",
+          "first_line": 15,
+          "sha256": "511ba917892f8504503af3c323f4cd039950ae354c4f2a6008fe7b14aedacf6e"
+        }
+      ],
+      "facts": [
+        {
+          "subject": "bge-m3",
+          "predicate": "uses",
+          "object": "fastembed/ORT",
+          "polarity": "positive"
+        }
+      ]
+    },
+    {
+      "id": "dev-S2-negative",
+      "split": "dev",
+      "scenario": "S2",
+      "kind": "negative",
+      "query": "Есть ли у Nomic подтверждённая зависимость от Vulkan?",
+      "request": {
+        "operation": "paths",
+        "from": {
+          "label": "Nomic",
+          "kind": "entity"
+        },
+        "to": {
+          "label": "Vulkan",
+          "kind": "entity"
+        },
+        "path_kind": "semantic",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/models/local-models.md",
+          "needle": "только CPU",
+          "start": 2359,
+          "end": 2375,
+          "role": "constraint",
+          "first_line": 19,
+          "sha256": "9715cdc75fbf32c528cfbb52845de3ea5b24a9d99018b01e8105c1011246f9a8"
+        }
+      ],
+      "expected_path": false
+    },
+    {
+      "id": "holdout-S2-positive",
+      "split": "holdout",
+      "scenario": "S2",
+      "kind": "positive",
+      "query": "Как внешний провайдер получает ключ из настроек?",
+      "request": {
+        "operation": "paths",
+        "from": {
+          "label": "api_key_name",
+          "kind": "entity"
+        },
+        "to": {
+          "label": "хранилище ОС",
+          "kind": "entity"
+        },
+        "path_kind": "semantic",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "architecture/secrets.md",
+          "needle": "пользователь — `api_key_name` из настроек",
+          "start": 1072,
+          "end": 1137,
+          "role": "architecture",
+          "first_line": 20,
+          "sha256": "8acfaa232537dc64ee4ba3af3437993399e78ce54db92ee3954e546489222bba"
+        },
+        {
+          "path": "features/models/external-models.md",
+          "needle": "Ключ уходит заголовком `Authorization: Bearer <ключ>`",
+          "start": 1584,
+          "end": 1661,
+          "role": "behavior",
+          "first_line": 23,
+          "sha256": "bb3fdd815b2ecc2b7f9aafb81f27d44ebe78681fd63858df75dd86bb9e6c7d21"
+        }
+      ],
+      "expectation": "Цепочка: имя записи → хранилище ОС → Authorization; каждый переход требует собственного основания."
+    },
+    {
+      "id": "holdout-S2-conditional",
+      "split": "holdout",
+      "scenario": "S2",
+      "kind": "conditional",
+      "query": "Когда ключ окружения заменяет ключ из хранилища?",
+      "request": {
+        "operation": "relations",
+        "query": "api_key_env",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "architecture/secrets.md",
+          "needle": "Если переменная задана, её значение используется вместо ключа из хранилища ОС",
+          "start": 2422,
+          "end": 2565,
+          "role": "constraint",
+          "first_line": 26,
+          "sha256": "8acfaa232537dc64ee4ba3af3437993399e78ce54db92ee3954e546489222bba"
+        }
+      ],
+      "facts": [
+        {
+          "subject": "api_key_env",
+          "predicate": "supersedes",
+          "object": "ключ из хранилища ОС",
+          "polarity": "positive",
+          "condition": "переменная задана"
+        }
+      ]
+    },
+    {
+      "id": "dev-S3-positive",
+      "split": "dev",
+      "scenario": "S3",
+      "kind": "positive",
+      "query": "Собери основания перехода Qwen на GGUF",
+      "request": {
+        "operation": "context",
+        "query": "Qwen GGUF",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "adr/0002-qwen-gguf.md",
+          "needle": "Автор выбрал встроенный llama.cpp и Q4_K_M",
+          "start": 409,
+          "end": 473,
+          "role": "decision",
+          "first_line": 11,
+          "sha256": "511ba917892f8504503af3c323f4cd039950ae354c4f2a6008fe7b14aedacf6e"
+        },
+        {
+          "path": "features/models/local-models.md",
+          "needle": "Контекст создаётся лениво",
+          "start": 4055,
+          "end": 4103,
+          "role": "behavior",
+          "first_line": 29,
+          "sha256": "9715cdc75fbf32c528cfbb52845de3ea5b24a9d99018b01e8105c1011246f9a8"
+        },
+        {
+          "path": "adr/0002-qwen-gguf.md",
+          "needle": "macOS/Metal и другие GPU требуют отдельной приёмки",
+          "start": 3825,
+          "end": 3905,
+          "role": "constraint",
+          "first_line": 25,
+          "sha256": "511ba917892f8504503af3c323f4cd039950ae354c4f2a6008fe7b14aedacf6e"
+        }
+      ]
+    },
+    {
+      "id": "dev-S3-negative",
+      "split": "dev",
+      "scenario": "S3",
+      "kind": "negative",
+      "query": "Есть ли подтверждённая полная приёмка Qwen 4B?",
+      "request": {
+        "operation": "context",
+        "query": "Qwen 4B приёмка",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "adr/0002-qwen-gguf.md",
+          "needle": "полное качество и 4B ещё принимаются",
+          "start": 750,
+          "end": 815,
+          "role": "constraint",
+          "first_line": 11,
+          "sha256": "511ba917892f8504503af3c323f4cd039950ae354c4f2a6008fe7b14aedacf6e"
+        }
+      ],
+      "forbidden": "Успешная сборка не является полной приёмкой."
+    },
+    {
+      "id": "holdout-S3-positive",
+      "split": "holdout",
+      "scenario": "S3",
+      "kind": "positive",
+      "query": "Собери правила безопасной установки bars в клиент",
+      "request": {
+        "operation": "context",
+        "query": "установка клиент профиль",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/clients/clients.md",
+          "needle": "`install_env` по умолчанию `None`",
+          "start": 3251,
+          "end": 3295,
+          "role": "constraint",
+          "first_line": 40,
+          "sha256": "e518aa7b78f014a15832ca69d9825be0a2072439e9786fd60e905e82029cda30"
+        },
+        {
+          "path": "features/clients/clients.md",
+          "needle": "Перед правкой bars сохраняет копию файла",
+          "start": 3839,
+          "end": 3910,
+          "role": "behavior",
+          "first_line": 41,
+          "sha256": "e518aa7b78f014a15832ca69d9825be0a2072439e9786fd60e905e82029cda30"
+        },
+        {
+          "path": "architecture/secrets.md",
+          "needle": "сам ключ — никогда",
+          "start": 604,
+          "end": 638,
+          "role": "constraint",
+          "first_line": 16,
+          "sha256": "8acfaa232537dc64ee4ba3af3437993399e78ce54db92ee3954e546489222bba"
+        }
+      ]
+    },
+    {
+      "id": "holdout-S3-conditional",
+      "split": "holdout",
+      "scenario": "S3",
+      "kind": "conditional",
+      "query": "Что доступно до одобрения хука Codex?",
+      "request": {
+        "operation": "context",
+        "query": "Codex одобрение хука MCP",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/clients/clients.md",
+          "needle": "Пока хук не одобрен, MCP работает",
+          "start": 2153,
+          "end": 2210,
+          "role": "behavior",
+          "first_line": 30,
+          "sha256": "e518aa7b78f014a15832ca69d9825be0a2072439e9786fd60e905e82029cda30"
+        },
+        {
+          "path": "features/clients/clients.md",
+          "needle": "одобрение привязано к хешу записи",
+          "start": 1823,
+          "end": 1885,
+          "role": "constraint",
+          "first_line": 30,
+          "sha256": "e518aa7b78f014a15832ca69d9825be0a2072439e9786fd60e905e82029cda30"
+        }
+      ]
+    },
+    {
+      "id": "dev-S4-positive",
+      "split": "dev",
+      "scenario": "S4",
+      "kind": "positive",
+      "query": "Нужна ли переиндексация при изменении docs_root?",
+      "request": {
+        "operation": "relations",
+        "query": "Согласие",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/indexing/updates.md",
+          "needle": "Согласие пользователя не нужно: модель не менялась",
+          "start": 12460,
+          "end": 12553,
+          "role": "constraint",
+          "first_line": 66,
+          "sha256": "4bd86b14c9f054ae050f503fbebe40e2fbf6a758909c41c4ecd09191baa432d9"
+        }
+      ],
+      "facts": [
+        {
+          "subject": "изменение docs_root",
+          "predicate": "requires",
+          "object": "согласие пользователя",
+          "polarity": "negative",
+          "condition": "модель не менялась"
+        }
+      ]
+    },
+    {
+      "id": "dev-S4-negative",
+      "split": "dev",
+      "scenario": "S4",
+      "kind": "negative",
+      "query": "Может ли агент MCP дать согласие на смену модели?",
+      "request": {
+        "operation": "relations",
+        "query": "агент",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/window/reindex-consent.md",
+          "needle": "агент через MCP согласие дать не может",
+          "start": 1481,
+          "end": 1548,
+          "role": "constraint",
+          "first_line": 13,
+          "sha256": "e676f5396d7948cff4cd40e9730a8b133c03ff50941a1b17c12fe34aba6dd311"
+        }
+      ],
+      "facts": [
+        {
+          "subject": "агент MCP",
+          "predicate": "uses",
+          "object": "согласие на смену модели",
+          "polarity": "negative"
+        }
+      ]
+    },
+    {
+      "id": "holdout-S4-positive",
+      "split": "holdout",
+      "scenario": "S4",
+      "kind": "positive",
+      "query": "Требуется ли ключ для локального адреса модели?",
+      "request": {
+        "operation": "relations",
+        "query": "ключ",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/models/external-models.md",
+          "needle": "Для локального адреса ключ не нужен",
+          "start": 3458,
+          "end": 3523,
+          "role": "constraint",
+          "first_line": 32,
+          "sha256": "bb3fdd815b2ecc2b7f9aafb81f27d44ebe78681fd63858df75dd86bb9e6c7d21"
+        }
+      ],
+      "facts": [
+        {
+          "subject": "локальный адрес",
+          "predicate": "requires",
+          "object": "ключ",
+          "polarity": "negative"
+        }
+      ]
+    },
+    {
+      "id": "holdout-S4-conditional",
+      "split": "holdout",
+      "scenario": "S4",
+      "kind": "conditional",
+      "query": "Какой адрес rerank пробуется после 404?",
+      "request": {
+        "operation": "relations",
+        "query": "Rerank",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/models/external-models.md",
+          "needle": "при ответе 404 — `<base_url>/v1/rerank`",
+          "start": 1445,
+          "end": 1495,
+          "role": "constraint",
+          "first_line": 22,
+          "sha256": "bb3fdd815b2ecc2b7f9aafb81f27d44ebe78681fd63858df75dd86bb9e6c7d21"
+        }
+      ],
+      "facts": [
+        {
+          "subject": "rerank",
+          "predicate": "uses",
+          "object": "/v1/rerank",
+          "polarity": "positive",
+          "condition": "ответ 404"
+        }
+      ]
+    },
+    {
+      "id": "dev-S5-positive",
+      "split": "dev",
+      "scenario": "S5",
+      "kind": "positive",
+      "query": "Почему встроенный Qwen переведён с candle на llama.cpp?",
+      "request": {
+        "operation": "context",
+        "query": "Qwen candle llama.cpp решение",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "adr/0002-qwen-gguf.md",
+          "needle": "Candle загружает Qwen в FP32 на CPU",
+          "start": 304,
+          "end": 351,
+          "role": "decision",
+          "first_line": 11,
+          "sha256": "511ba917892f8504503af3c323f4cd039950ae354c4f2a6008fe7b14aedacf6e"
+        },
+        {
+          "path": "adr/0002-qwen-gguf.md",
+          "needle": "Старый candle-путь Qwen удаляется при внедрении",
+          "start": 2481,
+          "end": 2559,
+          "role": "decision",
+          "first_line": 19,
+          "sha256": "511ba917892f8504503af3c323f4cd039950ae354c4f2a6008fe7b14aedacf6e"
+        }
+      ],
+      "decision_status": "accepted architecture, product acceptance open"
+    },
+    {
+      "id": "dev-S5-negative",
+      "split": "dev",
+      "scenario": "S5",
+      "kind": "negative",
+      "query": "Был ли выбран отдельный llama-server для встроенного Qwen?",
+      "request": {
+        "operation": "context",
+        "query": "llama-server встроенный Qwen решение",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "adr/0002-qwen-gguf.md",
+          "needle": "Отдельный llama-server — не соответствует решению",
+          "start": 3957,
+          "end": 4039,
+          "role": "decision",
+          "first_line": 29,
+          "sha256": "511ba917892f8504503af3c323f4cd039950ae354c4f2a6008fe7b14aedacf6e"
+        }
+      ],
+      "forbidden": "Отклонённый вариант нельзя возвращать как текущее решение."
+    },
+    {
+      "id": "holdout-S5-positive",
+      "split": "holdout",
+      "scenario": "S5",
+      "kind": "positive",
+      "query": "Почему документация bars разложена по фичам?",
+      "request": {
+        "operation": "context",
+        "query": "документация по фичам решение",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "adr/0001-docs-by-features.md",
+          "needle": "Автору так неудобно",
+          "start": 497,
+          "end": 533,
+          "role": "decision",
+          "first_line": 13,
+          "sha256": "940db385338cd4dadb2437a5c57f271e110500593b0b013899cd3bcfa5b6216f"
+        },
+        {
+          "path": "adr/0001-docs-by-features.md",
+          "needle": "Фичи — `docs/features/<name>/`",
+          "start": 1064,
+          "end": 1100,
+          "role": "decision",
+          "first_line": 17,
+          "sha256": "940db385338cd4dadb2437a5c57f271e110500593b0b013899cd3bcfa5b6216f"
+        }
+      ],
+      "decision_status": "принято"
+    },
+    {
+      "id": "holdout-S5-conditional",
+      "split": "holdout",
+      "scenario": "S5",
+      "kind": "conditional",
+      "query": "Закрывается ли новая тема автоматически после появления документа?",
+      "request": {
+        "operation": "context",
+        "query": "новая тема закрытие решение пользователя",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/new-topics/requirements.md",
+          "needle": "закрытие только по действию пользователя",
+          "start": 15352,
+          "end": 15428,
+          "role": "verification",
+          "first_line": 67,
+          "sha256": "f97bc4ed55af53845c7da1260079648ebd1d11258f8f57b1a90932f54db38186"
+        }
+      ],
+      "forbidden": "Наличие документа не является решением пользователя о закрытии."
+    },
+    {
+      "id": "dev-S6-positive",
+      "split": "dev",
+      "scenario": "S6",
+      "kind": "positive",
+      "query": "Какие ограничения моделей и индексации документированы?",
+      "request": {
+        "operation": "explore",
+        "topic": "модел",
+        "analysis": "topics",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/models/local-models.md",
+          "needle": "Длина входа",
+          "start": 6989,
+          "end": 7010,
+          "role": "constraint",
+          "first_line": 49,
+          "sha256": "9715cdc75fbf32c528cfbb52845de3ea5b24a9d99018b01e8105c1011246f9a8"
+        },
+        {
+          "path": "features/indexing/updates.md",
+          "needle": "Полная переиндексация",
+          "start": 12880,
+          "end": 12921,
+          "role": "behavior",
+          "first_line": 68,
+          "sha256": "4bd86b14c9f054ae050f503fbebe40e2fbf6a758909c41c4ecd09191baa432d9"
+        },
+        {
+          "path": "features/search/hybrid-search.md",
+          "needle": "Реранк кандидатов",
+          "start": 6211,
+          "end": 6244,
+          "role": "behavior",
+          "first_line": 29,
+          "sha256": "f5053247be01ce046c90cadac7c83a28bb9e50188d0fd1672861512c612d97c1"
+        }
+      ]
+    },
+    {
+      "id": "dev-S6-negative",
+      "split": "dev",
+      "scenario": "S6",
+      "kind": "negative",
+      "query": "Документирована ли отдельная тема обучения собственной модели?",
+      "request": {
+        "operation": "explore",
+        "topic": "обучение собственной модели",
+        "analysis": "topics",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [],
+      "expected_empty": true
+    },
+    {
+      "id": "holdout-S6-positive",
+      "split": "holdout",
+      "scenario": "S6",
+      "kind": "positive",
+      "query": "Какие направления жизненного цикла проектов и интеграций описаны?",
+      "request": {
+        "operation": "explore",
+        "whole_scope": true,
+        "analysis": "topics",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/projects/projects.md",
+          "needle": "Полное удаление данных проекта",
+          "start": 6144,
+          "end": 6201,
+          "role": "behavior",
+          "first_line": 59,
+          "sha256": "f92e8d554edb2ca0f9290d7b5c10ca118990c1a70d84b82218ec9b2fe5c0dcc4"
+        },
+        {
+          "path": "features/clients/clients.md",
+          "needle": "Как bars правит чужие конфиги",
+          "start": 3042,
+          "end": 3092,
+          "role": "behavior",
+          "first_line": 38,
+          "sha256": "e518aa7b78f014a15832ca69d9825be0a2072439e9786fd60e905e82029cda30"
+        },
+        {
+          "path": "features/new-topics/requirements.md",
+          "needle": "Управление",
+          "start": 12868,
+          "end": 12888,
+          "role": "requirement",
+          "first_line": 55,
+          "sha256": "f97bc4ed55af53845c7da1260079648ebd1d11258f8f57b1a90932f54db38186"
+        }
+      ]
+    },
+    {
+      "id": "holdout-S6-conditional",
+      "split": "holdout",
+      "scenario": "S6",
+      "kind": "conditional",
+      "query": "Какие ограничения внешних провайдеров описаны?",
+      "request": {
+        "operation": "explore",
+        "topic": "провайдер",
+        "analysis": "topics",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/models/external-models.md",
+          "needle": "Размерность внешней модели",
+          "start": 2160,
+          "end": 2210,
+          "role": "behavior",
+          "first_line": 26,
+          "sha256": "bb3fdd815b2ecc2b7f9aafb81f27d44ebe78681fd63858df75dd86bb9e6c7d21"
+        },
+        {
+          "path": "architecture/secrets.md",
+          "needle": "Переопределение ключа через окружение",
+          "start": 2206,
+          "end": 2277,
+          "role": "behavior",
+          "first_line": 24,
+          "sha256": "8acfaa232537dc64ee4ba3af3437993399e78ce54db92ee3954e546489222bba"
+        }
+      ]
+    },
+    {
+      "id": "dev-S7-positive",
+      "split": "dev",
+      "scenario": "S7",
+      "kind": "positive",
+      "query": "Как размер чанков влияет на совместимость поиска после смены параметров?",
+      "request": {
+        "operation": "paths",
+        "from": {
+          "label": "параметры нарезки",
+          "kind": "entity"
+        },
+        "to": {
+          "label": "отпечаток модели",
+          "kind": "entity"
+        },
+        "path_kind": "semantic",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/indexing/updates.md",
+          "needle": "векторы чанков, текст которых не изменился, берутся из индекса по хешу",
+          "start": 12319,
+          "end": 12447,
+          "role": "behavior",
+          "first_line": 66,
+          "sha256": "4bd86b14c9f054ae050f503fbebe40e2fbf6a758909c41c4ecd09191baa432d9"
+        },
+        {
+          "path": "features/models/local-models.md",
+          "needle": "Префикс документа входит в отпечаток модели",
+          "start": 6769,
+          "end": 6850,
+          "role": "behavior",
+          "first_line": 47,
+          "sha256": "9715cdc75fbf32c528cfbb52845de3ea5b24a9d99018b01e8105c1011246f9a8"
+        }
+      ]
+    },
+    {
+      "id": "dev-S7-negative",
+      "split": "dev",
+      "scenario": "S7",
+      "kind": "negative",
+      "query": "Доказывает ли высокий косинус истинность результата?",
+      "request": {
+        "operation": "relations",
+        "query": "оценка",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/search/hybrid-search.md",
+          "needle": "Это не вероятность правильного ответа",
+          "start": 8575,
+          "end": 8645,
+          "role": "constraint",
+          "first_line": 42,
+          "sha256": "f5053247be01ce046c90cadac7c83a28bb9e50188d0fd1672861512c612d97c1"
+        }
+      ],
+      "forbidden": "Косинус не доказывает предикат зависимости."
+    },
+    {
+      "id": "holdout-S7-positive",
+      "split": "holdout",
+      "scenario": "S7",
+      "kind": "positive",
+      "query": "Как одобрение хука связано с регистрацией проекта и доступом MCP?",
+      "request": {
+        "operation": "paths",
+        "from": {
+          "label": "хук",
+          "kind": "entity"
+        },
+        "to": {
+          "label": "MCP",
+          "kind": "entity"
+        },
+        "path_kind": "semantic",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/clients/clients.md",
+          "needle": "Пока хук не одобрен, MCP работает, а проект регистрируется окном или CLI",
+          "start": 2153,
+          "end": 2278,
+          "role": "behavior",
+          "first_line": 30,
+          "sha256": "e518aa7b78f014a15832ca69d9825be0a2072439e9786fd60e905e82029cda30"
+        },
+        {
+          "path": "features/projects/projects.md",
+          "needle": "Т-6",
+          "start": 356,
+          "end": 360,
+          "role": "requirement",
+          "first_line": 7,
+          "sha256": "f92e8d554edb2ca0f9290d7b5c10ca118990c1a70d84b82218ec9b2fe5c0dcc4"
+        }
+      ]
+    },
+    {
+      "id": "holdout-S7-conditional",
+      "split": "holdout",
+      "scenario": "S7",
+      "kind": "conditional",
+      "query": "Почему неподдерживаемая размерность ответа останавливает поиск?",
+      "request": {
+        "operation": "relations",
+        "query": "размерность",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/models/external-models.md",
+          "needle": "индексация и поиск останавливаются ошибкой о размерности",
+          "start": 3059,
+          "end": 3165,
+          "role": "constraint",
+          "first_line": 28,
+          "sha256": "bb3fdd815b2ecc2b7f9aafb81f27d44ebe78681fd63858df75dd86bb9e6c7d21"
+        }
+      ],
+      "expectation": "Условие — тот же адрес вернул вектор другого размера; не переносить на неизвестную размерность 0."
+    },
+    {
+      "id": "dev-S8-positive",
+      "split": "dev",
+      "scenario": "S8",
+      "kind": "positive",
+      "query": "Есть ли противоречивые описания доступности поиска при перестройке?",
+      "request": {
+        "operation": "explore",
+        "whole_scope": true,
+        "analysis": "conflict_candidates",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/window/reindex-consent.md",
+          "needle": "пока идёт переиндексация, поиск по проекту не работает",
+          "start": 2532,
+          "end": 2632,
+          "role": "behavior",
+          "first_line": 19,
+          "sha256": "e676f5396d7948cff4cd40e9730a8b133c03ff50941a1b17c12fe34aba6dd311"
+        },
+        {
+          "path": "features/indexing/updates.md",
+          "needle": "Полный поиск с SQLite/rerank",
+          "start": 12923,
+          "end": 12963,
+          "role": "verification",
+          "first_line": 70,
+          "sha256": "4bd86b14c9f054ae050f503fbebe40e2fbf6a758909c41c4ecd09191baa432d9"
+        }
+      ],
+      "expectation": "Кандидат расхождения, требуется различить смену модели и полную перестройку прежней моделью."
+    },
+    {
+      "id": "dev-S8-negative",
+      "split": "dev",
+      "scenario": "S8",
+      "kind": "negative",
+      "query": "Можно ли считать отсутствие извлечённой проверки доказанным отсутствием тестов?",
+      "request": {
+        "operation": "explore",
+        "whole_scope": true,
+        "analysis": "coverage",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [],
+      "expected_semantic_partial": true
+    },
+    {
+      "id": "holdout-S8-positive",
+      "split": "holdout",
+      "scenario": "S8",
+      "kind": "positive",
+      "query": "Какие ссылки проекта не разрешаются в выбранном снимке?",
+      "request": {
+        "operation": "explore",
+        "whole_scope": true,
+        "analysis": "connectivity",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [],
+      "audit": "Каждый broken-link проверить по frozen sources и списку исключений; отсутствующий в снимке файл не объявлять отсутствующим в репозитории."
+    },
+    {
+      "id": "holdout-S8-conditional",
+      "split": "holdout",
+      "scenario": "S8",
+      "kind": "conditional",
+      "query": "Как отличить описанную проверку установки от нативной приёмки?",
+      "request": {
+        "operation": "explore",
+        "topic": "установка",
+        "analysis": "coverage",
+        "budgets": {
+          "max_bytes": 262144
+        },
+        "limit": 50
+      },
+      "evidence": [
+        {
+          "path": "features/clients/clients.md",
+          "needle": "Как проверяется и что не подтверждено",
+          "start": 548,
+          "end": 617,
+          "role": "verification",
+          "first_line": 7,
+          "sha256": "e518aa7b78f014a15832ca69d9825be0a2072439e9786fd60e905e82029cda30"
+        }
+      ],
+      "expected_semantic_partial": true
+    }
+  ]
+}
