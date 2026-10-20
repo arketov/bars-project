@@ -192,7 +192,7 @@ it("«Проверить все» показывает N из M и позвол�
   expect(gates).toHaveLength(1);
 });
 
-it("первая строка дерева «Новые темы» стоит выше корня документации, не зависит от фильтра документов и открывает экран", async () => {
+it("первая строка дерева «Новые темы» стоит выше всех папок, не зависит от фильтра документов и открывает экран", async () => {
   app.view = "main";
   app.topicsOpen = false;
   app.tree = [];
@@ -202,8 +202,8 @@ it("первая строка дерева «Новые темы» стоит в
   await app.topics.load(true);
   await settle();
   const row = host.querySelector<HTMLButtonElement>(".topics-row")!;
-  const docsRoot = host.querySelector(".docs-root")!;
-  expect(row.compareDocumentPosition(docsRoot) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  // Строка первая в дереве: выше всех папок и корневых документов.
+  expect(host.querySelector(".tree")!.firstElementChild).toBe(row);
   expect(row.querySelector("input[type=checkbox]")).toBeNull();
   expect(row.getAttribute("aria-label")).toBe("Новые темы: активных 2");
   app.filter = "нет такого документа";

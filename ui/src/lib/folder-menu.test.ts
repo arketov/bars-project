@@ -52,12 +52,19 @@ describe("Меню папок этапа 31", () => {
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); flushSync();
     expect(document.activeElement).toBe(row); expect(document.querySelector(".cmenu")).toBeNull();
   });
-  it.each(["docs", "manual/docs", "."])("корень %s доступен при пустом индексе и не имеет галочки", async docsRoot => {
-    app.docsRoot = docsRoot; app.tree = [];
+  it.each(["docs", "manual/docs", "."])("меню корня docs_root %s открывает группа «Корневые документы»; отдельной строки корня нет", async docsRoot => {
+    app.docsRoot = docsRoot;
+    app.tree = buildTree([{ path: docsRoot === "." ? "Index.md" : `${docsRoot}/Index.md`, module: ".", title: "Index", chunks: 2 }], docsRoot);
     const el = host(); mounted.push(mount(Sidebar, { target: el })); flushSync();
-    const root = el.querySelector<HTMLElement>("[data-folder-path]")!;
-    expect(root.querySelector("input")).toBeNull(); await open(root);
+    expect(el.querySelector(".docs-root")).toBeNull();
+    const group = el.querySelector<HTMLElement>('[data-folder-path="."]')!;
+    expect(group.dataset.folderKind).toBe("Корневые документы"); await open(group);
     expect(api.folderTarget).toHaveBeenCalledWith(project.path, docsRoot, ".");
+  });
+  it("пустой индекс: в дереве нет ни одной цели меню папки", () => {
+    app.tree = [];
+    const el = host(); mounted.push(mount(Sidebar, { target: el })); flushSync();
+    expect(el.querySelector("[data-folder-path]")).toBeNull();
   });
   it("копирует подтверждённый путь; проверяет весь закреплённый проект с ID очереди", async () => {
     const el = host(); el.innerHTML = '<div data-folder-path="." data-folder-kind="Корневые документы"></div>';
