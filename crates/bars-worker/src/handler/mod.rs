@@ -559,17 +559,26 @@ impl WorkerHandler {
 
     fn reindex(&self, params: ReindexParams) -> Result<AcceptedOutput, RpcError> {
         let project = self.resolve(&params.target)?;
-        let (id, merged, kind) = self
-            .worker
-            .reindex_receipt(&project, params.full, params.accept_model_change)
-            .map_err(worker_error)?;
+        let rebuild = params.full || params.accept_model_change;
+        let (id, merged, kind) = if rebuild {
+            self.worker
+                .reindex_receipt(&project, params.full, params.accept_model_change)
+        } else {
+            self.worker.scan_receipt(&project)
+        }
+        .map_err(worker_error)?;
         history::applied_field("operation_id", serde_json::json!(id));
         history::applied_field("merged", serde_json::json!(merged));
         history::applied_field(
             "job_kind",
             serde_json::json!(match kind {
                 JobKind::Rebuild => "rebuild",
-                JobKind::Check => "check",
+                JobKind::Check =>
+                    if rebuild {
+                        "check"
+                    } else {
+                        "scan"
+                    },
                 JobKind::Files => "files",
             }),
         );

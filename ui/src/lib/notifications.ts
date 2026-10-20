@@ -9,6 +9,13 @@ export interface Notice {
 export function operationText(op: Operation): string {
   const r = op.report;
   if (op.finished_at) {
+    if (op.kind === "scan" && r) {
+      const changes = r.added + r.changed + r.removed;
+      const errors = r.problems ? ` · ошибок: ${r.problems}` : "";
+      return changes || r.problems
+        ? `Проверка завершена · найдено: новых ${r.added}, изменённых ${r.changed}, удалённых ${r.removed}${errors} · обновление в очереди`
+        : `Проверка завершена · различий не найдено · проверено ${r.unchanged} документов`;
+    }
     if (r && !r.index_applied) return `${op.state === "cancelled" ? "Отменено · " : ""}Переиндексация не применена; сохранён прежний индекс`;
     if (op.state === "cancelled") return `Отменено${op.docs_total !== null ? ` · обработано ${op.docs_done ?? 0} из ${op.docs_total} документов` : ""}${r?.index_applied ? " · изменения до остановки применены" : ""}`;
     if (op.state === "error") return op.error ?? "Ошибка операции";
@@ -89,7 +96,7 @@ export class NotificationCenter {
       const previous = this.items.find(n => n.id === id);
       const silent = op.source !== "explicit" && op.state === "success" && op.report && op.report.added + op.report.changed + op.report.removed === 0 && !op.report.problems;
       if (silent) { this.items = this.items.filter(n => n.id !== id); continue; }
-      const names: Record<string, string> = { check: "Проверка индекса", files: "Проверка изменений", rebuild: "Переиндексация", download: "Скачивание модели", prepare: "Подготовка модели" };
+      const names: Record<string, string> = { scan: "Проверка файлов", check: "Проверка индекса", files: "Проверка изменений", rebuild: "Переиндексация", download: "Скачивание модели", prepare: "Подготовка модели" };
       const percent = terminal ? null : op.percent ?? (op.docs_total ? Math.min(100, Math.round((op.docs_done ?? 0) / op.docs_total * 100)) : null);
       const signature = id === problemId ? `${op.state}:${op.error}:${JSON.stringify(op.report)}` : terminal ? `${op.sequence}:${op.state}` : "active";
       this.put({ id, title: names[op.kind] ?? "Операция", text: operationText(op), active: !terminal, bad, percent, operation: op, epoch: output.epoch, project: op.project ?? undefined, target: op.project ? "indexing" : "models", updatedAt: this.signatures.get(id) === signature ? previous?.updatedAt : terminal ? op.finished_at! : previous?.updatedAt ?? op.started_at }, signature, terminal || op.source === "explicit" && !first);

@@ -376,6 +376,11 @@ impl Worker {
                 }
                 _ => {}
             }
+            if op.kind == "scan" {
+                drop(projects);
+                self.scan_receipt(&path)?;
+                return Ok(());
+            }
             let job = if op.kind == "rebuild" {
                 super::queue::Job::rebuild(false)
             } else {

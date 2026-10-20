@@ -14,6 +14,7 @@ pub mod models;
 mod operations;
 mod queue;
 mod registry;
+mod scan;
 mod summary;
 mod timefmt;
 mod watcher;
@@ -272,6 +273,7 @@ struct Inner {
     downloads: Mutex<HashSet<String>>,
     download_errors: Mutex<HashMap<String, String>>,
     graph_jobs: Mutex<HashMap<PathBuf, graph::GraphJob>>,
+    scans: Mutex<HashMap<PathBuf, scan::ScanJob>>,
 }
 
 struct DownloadCleanup {
@@ -325,6 +327,7 @@ impl Worker {
             downloads: Mutex::new(HashSet::new()),
             download_errors: Mutex::new(HashMap::new()),
             graph_jobs: Mutex::new(HashMap::new()),
+            scans: Mutex::new(HashMap::new()),
         });
         let queue_task = tokio::spawn(Arc::clone(&inner).run_queue());
         let timer_task = tokio::spawn(Arc::clone(&inner).run_timer());
@@ -453,6 +456,7 @@ impl Worker {
         lock(&self.inner.registry).remove(&path)?;
         let runtime = lock(&self.inner.projects).remove(&path);
         self.inner.cancel_queued(&path);
+        self.inner.cancel_scan(&path);
         // Слежение останавливается вне блокировок: поток `notify` может ждать их.
         drop(runtime);
         Ok(path)
@@ -504,9 +508,18 @@ impl Worker {
         entries
             .into_iter()
             .map(|(entry, duplicate_name)| {
-                let state = lock(&self.inner.projects)
-                    .get(&entry.path)
-                    .map_or(ProjectState::Unavailable, |runtime| runtime.status.state);
+                let state = lock(&self.inner.projects).get(&entry.path).map_or(
+                    ProjectState::Unavailable,
+                    |runtime| {
+                        if runtime.status.state == ProjectState::Ready
+                            && lock(&self.inner.scans).contains_key(&entry.path)
+                        {
+                            ProjectState::Indexing
+                        } else {
+                            runtime.status.state
+                        }
+                    },
+                );
                 ProjectSnapshot {
                     name: project_name(&entry.path),
                     duplicate_name,
@@ -552,8 +565,13 @@ impl Worker {
         let queue = lock(&self.inner.queue);
         let queued = queue.get(&path);
         let status = &runtime.status;
+        let scanning = lock(&self.inner.scans).contains_key(&path);
         Ok(ProjectStatus {
-            state: status.state,
+            state: if scanning && status.state == ProjectState::Ready {
+                ProjectState::Indexing
+            } else {
+                status.state
+            },
             updated_at: status.updated_at,
             pending: queued.map_or(0, Job::listed_files),
             queued: queued.is_some(),
@@ -648,6 +666,8 @@ impl Worker {
     /// (OQ-55). `true`, если было что останавливать.
     pub fn cancel(&self, path: &Path) -> Result<bool, WorkerError> {
         let path = self.registered(path)?;
+        // Публикация scan и постановка обновления используют тот же projects-lock.
+        let _projects = lock(&self.inner.projects);
         let running = {
             let current = lock(&self.inner.current);
             current
@@ -656,8 +676,9 @@ impl Worker {
                 .map(|cell| cell.cancel())
                 .is_some()
         };
+        let scanning = self.inner.cancel_scan(&path);
         let queued = self.inner.cancel_queued(&path);
-        Ok(running || queued)
+        Ok(running || queued || scanning)
     }
 
     /// Ход идущего задания.
@@ -856,7 +877,9 @@ impl Worker {
     /// Очередь пуста и ничего не выполняется.
     pub fn is_idle(&self) -> bool {
         let queue = lock(&self.inner.queue);
-        queue.is_empty() && !self.inner.busy.load(Ordering::SeqCst)
+        queue.is_empty()
+            && !self.inner.busy.load(Ordering::SeqCst)
+            && lock(&self.inner.scans).is_empty()
     }
 
     fn registered(&self, path: &Path) -> Result<PathBuf, WorkerError> {

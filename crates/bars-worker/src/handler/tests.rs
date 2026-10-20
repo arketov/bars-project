@@ -883,6 +883,7 @@ async fn window_gets_activity_tree_and_pause_from_the_handler() {
 }
 
 mod external_models;
+mod concurrency;
 mod graph;
 mod new_topics;
 mod window;

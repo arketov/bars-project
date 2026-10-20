@@ -36,6 +36,7 @@ impl Worker {
             )
         };
         self.inner.cancel_queued(&path);
+        self.inner.cancel_scan(&path);
         if let Some(cell) = lock(&self.inner.current)
             .as_ref()
             .filter(|cell| cell.project == path)

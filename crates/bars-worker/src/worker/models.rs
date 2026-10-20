@@ -450,8 +450,15 @@ impl ModelSlot {
         &self,
         f: impl FnOnce(&mut (dyn Embedder + Send)) -> Result<R, EmbedError>,
     ) -> Result<R, EmbedError> {
-        let mut guard = lock(&self.model);
-        self.load_and_run(&mut guard, f)
+        loop {
+            let mut guard = lock(&self.model);
+            // Запрос мог прийти, пока эта пачка уже ждала замок (ISS-16).
+            if self.waiting_queries.load(Ordering::SeqCst) == 0 {
+                return self.load_and_run(&mut guard, f);
+            }
+            drop(guard);
+            std::thread::sleep(QUERY_RECHECK);
+        }
     }
 
     fn load_and_run<R>(
@@ -1569,6 +1576,34 @@ mod tests {
         assert_eq!(asking.join().unwrap()[0], 6.0);
         indexing.join().unwrap();
         assert_eq!(provider.counters.texts.load(Ordering::SeqCst), 9);
+    }
+
+    #[test]
+    fn a_batch_already_waiting_for_the_lock_rechecks_query_priority() {
+        let models = Models::new(FakeProvider::new("m1"));
+        let mut indexer = models.embedder(&settings()).unwrap();
+        indexer.prepare().unwrap();
+        let slot = Arc::clone(indexer.slot());
+        // with() уже проверил очередь; run() всё ещё должен её проверить под замком.
+        slot.waiting_queries.store(1, Ordering::SeqCst);
+        let batch_slot = Arc::clone(&slot);
+        let (tx, rx) = std::sync::mpsc::channel();
+        let batch = std::thread::spawn(move || {
+            batch_slot
+                .run(|_| {
+                    tx.send(()).unwrap();
+                    Ok(())
+                })
+                .unwrap();
+        });
+        let admitted = rx.recv_timeout(Duration::from_millis(100));
+        slot.waiting_queries.store(0, Ordering::SeqCst);
+        batch.join().unwrap();
+        assert!(
+            matches!(admitted, Err(std::sync::mpsc::RecvTimeoutError::Timeout)),
+            "пачка обошла ожидающий запрос"
+        );
+        rx.recv_timeout(Duration::from_secs(1)).unwrap();
     }
 
     #[test]

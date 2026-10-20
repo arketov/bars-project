@@ -2,6 +2,14 @@ import { expect, it } from "vitest";
 import { NotificationCenter, operationText } from "./notifications";
 import type { Operation, OperationEventsOutput } from "./types";
 
+it("shows a scan as discovered differences, not an applied index or failed rebuild", () => {
+  const result = operationText(finished({ kind: "scan", report: { ...report, index_applied: false } }));
+  expect(result).toContain("Проверка завершена");
+  expect(result).toContain("обновление в очереди");
+  expect(result).not.toContain("не применена");
+  expect(operationText(finished({ kind: "scan", report: { ...report, added: 0, changed: 0, removed: 0, index_applied: false } }))).toContain("различий не найдено");
+});
+
 const op = (patch: Partial<Operation> = {}): Operation => ({ id: 1, sequence: 0, kind: "check", source: "explicit", project: "a", generation: 1, model: null, variant: null, reranker: false, state: "running", started_at: "2026-10-18T10:00:00Z", finished_at: null, docs_done: 2, docs_total: 10, percent: null, report: null, error: null, target_available: true, ...patch });
 const events = (active: Operation[] = [], completed: Operation[] = [], cursor = 0, epoch = "worker-1"): OperationEventsOutput => ({ epoch, cursor, gap: false, active, completed });
 const report = { added: 1, changed: 2, removed: 3, unchanged: 4, problems: 0, index_applied: true };

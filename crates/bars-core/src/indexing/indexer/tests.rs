@@ -6,6 +6,84 @@ use crate::storage::index_path;
 
 const DIM: usize = 4;
 
+#[test]
+fn a_scan_snapshot_survives_closing_and_replacing_the_index_file() {
+    let dir = tempfile::tempdir().unwrap();
+    write(dir.path(), "docs/a.md", "# Документ\n");
+    let mut index = open(dir.path());
+    updated(dir.path(), &mut index, &mut FakeEmbedder::new("m"));
+    let snapshot = ScanSnapshot::read(Some(&index)).unwrap();
+    index.close().unwrap();
+    let path = index_path(dir.path());
+    std::fs::rename(&path, path.with_extension("snapshot")).unwrap();
+    write(dir.path(), "docs/b.md", "# Новый\n");
+    let report = scan_index(dir.path(), &snapshot, &settings(), &FastObserver::default()).unwrap();
+    assert_eq!((report.added, report.unchanged), (1, 1));
+    assert!(
+        !path.exists(),
+        "проверка диска не должна заново открывать или создавать индекс"
+    );
+}
+
+#[test]
+fn scan_reports_differences_without_writing_or_creating_an_index() {
+    let dir = tempfile::tempdir().unwrap();
+    write(dir.path(), "docs/a.md", "# Старый\n\nТекст\n");
+    write(dir.path(), "docs/b.md", "# Удаляемый\n");
+    let mut index = open(dir.path());
+    updated(dir.path(), &mut index, &mut FakeEmbedder::new("m"));
+    let before = index.documents().unwrap();
+    write(
+        dir.path(),
+        "docs/a.md",
+        "# Новый\n\nСодержимое изменено и стало длиннее\n",
+    );
+    std::fs::remove_file(dir.path().join("docs/b.md")).unwrap();
+    write(dir.path(), "docs/c.md", "# Добавленный\n");
+    let reader = Index::open_read_only(&index_path(dir.path())).unwrap();
+    let report = scan_index(
+        dir.path(),
+        &ScanSnapshot::read(Some(&reader)).unwrap(),
+        &settings(),
+        &FastObserver::default(),
+    )
+    .unwrap();
+    assert_eq!((report.added, report.changed, report.removed), (1, 1, 1));
+    assert_eq!(report.chunks_embedded, 0);
+    assert_eq!(index.documents().unwrap(), before);
+    let absent = tempfile::tempdir().unwrap();
+    write(absent.path(), "docs/a.md", "# Документ\n");
+    let report = scan_index(
+        absent.path(),
+        &ScanSnapshot::read(None).unwrap(),
+        &settings(),
+        &FastObserver::default(),
+    )
+    .unwrap();
+    assert_eq!(report.added, 1);
+    assert!(!index_path(absent.path()).exists());
+}
+
+#[test]
+fn scan_reports_unreadable_text_without_deleting_the_published_document() {
+    let dir = tempfile::tempdir().unwrap();
+    write(dir.path(), "docs/a.md", "# Документ\n");
+    let mut index = open(dir.path());
+    updated(dir.path(), &mut index, &mut FakeEmbedder::new("m"));
+    std::fs::write(dir.path().join("docs/a.md"), [0xff, 0xff]).unwrap();
+    let reader = Index::open_read_only(&index_path(dir.path())).unwrap();
+    let report = scan_index(
+        dir.path(),
+        &ScanSnapshot::read(Some(&reader)).unwrap(),
+        &settings(),
+        &FastObserver::default(),
+    )
+    .unwrap();
+    assert_eq!(report.problems.len(), 1);
+    assert_eq!(report.removed, 0);
+    assert_eq!(index.document_count().unwrap(), 1);
+}
+
 fn cause(error: &IndexingError) -> &IndexingError {
     match error {
         IndexingError::Partial { source, .. } => cause(source),

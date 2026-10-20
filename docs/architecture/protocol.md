@@ -47,7 +47,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | `read` | `cwd`, `project`, `path` | исходный `text` и `title`; номера строк добавляет клиент | MCP, CLI |
 | `projects` | — | проекты: путь, имя, корень документации, состояние, модули с числом документов | MCP, CLI |
 | `status` | `cwd`, `project` | состояние индекса проекта ([worker.md](worker.md)) | MCP, CLI |
-| `reindex` | `cwd`, `project`, `full`, `accept_model_change` | `accepted: true`; ход виден в `status` | MCP, CLI |
+| `reindex` | `cwd`, `project`, `full`, `accept_model_change` | `accepted: true`; без `full` и подтверждения смены модели — независимый `scan` файлов и отдельная очередь обновления; ход виден в `status`, итог проверки в операциях окна | MCP, CLI |
 | `register` | `path` | проект после регистрации | CLI |
 | `unregister` | `cwd`, `project` | `removed: true` | CLI |
 | `session_start` | `cwd`, `source` | `accepted: true`; ответ сразу, проверка идёт в очереди | CLI (хук) |

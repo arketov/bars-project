@@ -29,7 +29,7 @@ pub struct OperationReport {
 pub struct Operation {
     pub id: u64,
     pub sequence: u64,
-    /// check, files, rebuild, download, prepare.
+    /// scan (только проверка файлов), check, files, rebuild, download, prepare.
     pub kind: String,
     pub source: String,
     pub project: Option<String>,

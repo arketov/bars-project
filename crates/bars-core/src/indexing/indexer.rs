@@ -585,6 +585,88 @@ fn is_covered_by_problem(path: &str, problems: &[WalkProblem]) -> bool {
     })
 }
 
+/// Только метаданные: после копирования снимка SQLite и замок проекта больше не нужны.
+pub struct ScanSnapshot {
+    stored: HashMap<String, StoredDocument>,
+    layout: Option<Layout>,
+}
+impl ScanSnapshot {
+    pub fn read(index: Option<&Index>) -> Result<Self, StorageError> {
+        let _snapshot = index
+            .map(|i| i.conn().unchecked_transaction())
+            .transpose()
+            .map_err(StorageError::from)?;
+        let stored: HashMap<_, _> = index
+            .map(Index::documents)
+            .transpose()?
+            .unwrap_or_default()
+            .into_iter()
+            .map(|d| (d.path.clone(), d))
+            .collect();
+        let layout = index.map(Index::stored_layout).transpose()?.flatten();
+        Ok(Self { stored, layout })
+    }
+}
+
+/// Независимая проверка диска по снимку метаданных, без модели, SQLite и записей.
+/// Счётчики описывают найденные различия, а не применённые изменения (OQ-105).
+pub fn scan_index(
+    project: &Path,
+    snapshot: &ScanSnapshot,
+    settings: &IndexSettings,
+    observer: &dyn IndexObserver,
+) -> Result<UpdateReport, IndexingError> {
+    let stored = &snapshot.stored;
+    let full_check = snapshot.layout.as_ref() != Some(&settings.layout());
+    if observer.should_stop() {
+        return Err(IndexingError::Cancelled);
+    }
+    let walk = walk_docs(project, Path::new(&settings.docs_root))?;
+    let mut report = UpdateReport {
+        full_check,
+        ..Default::default()
+    };
+    report
+        .problems
+        .extend(walk.problems.iter().map(problem_from_walk));
+    observer.begin(walk.files.len());
+    let mut seen = HashSet::new();
+    for (position, file) in walk.files.iter().enumerate() {
+        if observer.should_stop() {
+            return Err(IndexingError::Cancelled);
+        }
+        seen.insert(file.path.as_str());
+        let known = stored.get(&file.path);
+        if !full_check && known.is_some_and(|d| same_stat(d, file)) {
+            report.unchanged += 1;
+        } else {
+            match read_utf8(file) {
+                Ok(text) => match known {
+                    None => report.added += 1,
+                    Some(d)
+                        if !full_check
+                            && d.hash == blake3::hash(text.as_bytes()).to_hex().as_str() =>
+                    {
+                        report.unchanged += 1
+                    }
+                    Some(_) => report.changed += 1,
+                },
+                Err(error) => report.problems.push(Problem {
+                    path: file.path.clone(),
+                    reason: error.to_string(),
+                    ..Default::default()
+                }),
+            }
+        }
+        observer.progress(position + 1, 0);
+    }
+    report.removed = stored
+        .keys()
+        .filter(|p| !seen.contains(p.as_str()) && !is_covered_by_problem(p, &walk.problems))
+        .count();
+    Ok(report)
+}
+
 fn with_suffix(path: &Path, suffix: &str) -> PathBuf {
     let mut name = path.file_name().unwrap_or_default().to_os_string();
     name.push(suffix);

@@ -1,0 +1,9 @@
+runtime=Some(ModelsRuntime { embed: ModelRuntime { model: "BAAI/bge-m3", source: "builtin", requested: "auto", state: "ready", backend: "onnx", actual: Some("directml"), fallback_reason: None, precision: Some("fp32"), revision: None }, rerank: ModelRuntime { model: "BAAI/bge-reranker-v2-m3", source: "builtin", requested: "auto", state: "ready", backend: "onnx", actual: Some("directml"), fallback_reason: None, precision: Some("fp16"), revision: Some("6f5ff65298512715a1e669753bc754d2bc8f367b") } })
+idle_search_ms=122 hits=3 score=Rerank error=None
+status_ms=35 state=Indexing
+activity_ms=0
+operation_events_ms=0
+check_accepted_ms=0 queued=false
+check_completed_ms=2 state=success report=Some(OperationReport { added: 1, changed: 0, removed: 0, unchanged: 24, problems: 0, problem_paths: [], index_applied: false }) running_after=Some(Rebuild)
+ipc_search_ms=189 hits=3 indexing=true score=Rerank error=None running_after=Some(Rebuild)
+window_search_ms=144 hits=3 indexing=true score=Rerank error=None running_after=Some(Rebuild)
