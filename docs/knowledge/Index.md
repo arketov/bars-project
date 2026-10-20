@@ -35,7 +35,7 @@ title: Внутренняя база знаний bars
 |---|---|
 | [inference-speed.md](inference-speed.md) | Скорость инференса: FP16 rerank против FP32, worker и конкуренция, отклонённые методы, протокол замеров |
 | [inference-2026-10-18/](inference-2026-10-18/Index.md) | Сырые данные этапа 11: GPU/CPU-сетки, полный retrieval, worker, индексация |
-| [inference-devices.md](inference-devices.md) | CPU, GPU и NPU, ограничения DirectML, диагностика ISS-03, кандидаты EP и библиотек |
+| [inference-devices.md](inference-devices.md) | CPU, GPU и NPU, ограничения DirectML, диагностика неверных оценок rerank, кандидаты EP и библиотек |
 | [gguf-models.md](gguf-models.md) | Qwen3 GGUF и llama.cpp: качество против bge-m3, память, сборка Windows/Vulkan |
 | [gguf-2026-10-18/](gguf-2026-10-18/Index.md) | Сырые данные этапа 22: сводка и строки измерений |
 | [memory.md](memory.md) | Память bars: метрики, причины пиков, FP16 rerank и выгрузка, FP16/INT8 embed, подкачка |
@@ -67,4 +67,3 @@ title: Внутренняя база знаний bars
 | [local-documentation-tools.md](local-documentation-tools.md) | 14 идей быстрых локальных инструментов документации, сравнение с аналогами, источники |
 | [agent-tool-usage-2026-10-18.md](agent-tool-usage-2026-10-18.md) | Как агенты вызывают bars и как выбирать область поиска |
 | [agent-tool-usage-2026-10-18/](agent-tool-usage-2026-10-18/Index.md) | Сырые частоты, ручные оценки и пробы фильтров |
-| [claude-code-serena.md](claude-code-serena.md) | ISS-08: Serena, хуки и output style в Claude Code |

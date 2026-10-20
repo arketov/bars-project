@@ -319,7 +319,7 @@ pub fn download_percent(models_dir: &std::path::Path, id: &str) -> Option<u8> {
 }
 
 /// Файлы последнего снимка модели с размерами для лога: `model.onnx 1.2 МБ; model.onnx.data нет`.
-/// Нужна диагностике, когда модель отвечает странно (ISS-03): видно неполные и отсутствующие файлы.
+/// Нужна диагностике, когда модель отвечает странно: видно неполные и отсутствующие файлы.
 /// Модели нет в каталоге или в кэше нет снимка — `None`.
 pub fn model_files_report(models_dir: &std::path::Path, id: &str) -> Option<String> {
     let layout = layout(id)?;
