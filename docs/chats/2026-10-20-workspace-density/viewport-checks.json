@@ -1,0 +1,56 @@
+[
+  {
+    "overflow": false,
+    "query": "рабочая область",
+    "rightHasHit": true,
+    "rightVisible": true,
+    "searchHeight": 82.59375,
+    "theme": "light",
+    "width": 1440
+  },
+  {
+    "overflow": false,
+    "query": "рабочая область",
+    "rightHasHit": true,
+    "rightVisible": true,
+    "searchHeight": 82.59375,
+    "theme": "dark",
+    "width": 1440
+  },
+  {
+    "overflow": false,
+    "query": "рабочая область",
+    "rightHasHit": true,
+    "rightVisible": true,
+    "searchHeight": 82.59375,
+    "theme": "light",
+    "width": 1024
+  },
+  {
+    "overflow": false,
+    "query": "рабочая область",
+    "rightHasHit": true,
+    "rightVisible": true,
+    "searchHeight": 82.59375,
+    "theme": "dark",
+    "width": 1024
+  },
+  {
+    "overflow": false,
+    "query": "рабочая область",
+    "rightHasHit": true,
+    "rightVisible": true,
+    "searchHeight": 82.59375,
+    "theme": "light",
+    "width": 760
+  },
+  {
+    "overflow": false,
+    "query": "рабочая область",
+    "rightHasHit": true,
+    "rightVisible": true,
+    "searchHeight": 82.59375,
+    "theme": "dark",
+    "width": 760
+  }
+]

@@ -2,7 +2,8 @@
   import { onMount, tick } from "svelte";
   import { app } from "./app.svelte";
   import { call, copyText, documentAction, documentEditors, folderTarget, folderAction, type FolderTarget, type DocumentEditor } from "./api";
-  import { documentAt, documentItems, folderAt, folderItems, itemsFor, place, projectAt, projectItems, run, textField, type MenuItem } from "./contextmenu";
+  import { documentAt, documentItems, folderAt, folderItems, itemsFor, place, projectAt, projectItems, run, textField, topicAt, type MenuItem } from "./contextmenu";
+  import type { TopicDetail } from "./new-topics";
 
   let items = $state<MenuItem[]>([]);
   let target: EventTarget | null = null;
@@ -13,14 +14,21 @@
   let pendingFolder = $state<{ project: string; docsRoot: string } | null>(null);
   let returnFocus: HTMLElement | null = null;
   let project = $state<string | null>(null);
+  let topic = $state<{ project: string; id: number } | null>(null);
   let openedCurrent: string | null = null;
   let editors = $state<DocumentEditor[]>([]);
   let submenu = $state(false);
   let generation = 0;
   let origin = { x: 0, y: 0 };
+  // Меню внутри showModal должно принадлежать тому же верхнему слою WebView.
+  function modalHost(node: HTMLElement) {
+    const dialog = globalThis.document.querySelector('dialog[open]');
+    if (dialog) dialog.append(node);
+  }
 
   $effect(() => {
     const current = app.current;
+    if (topic && (current !== topic.project || !app.topicsOpen || !app.topics.topics.some(t => t.id === topic?.id))) close();
     if (pendingFolder && (current !== pendingFolder.project || app.docsRoot !== pendingFolder.docsRoot)) close();
     if (document && current !== document.project) close();
     if (folder && (current !== folder.project || app.docsRoot !== folder.docsRoot || !app.projects.some(p => p.path === folder?.project))) close();
@@ -36,6 +44,7 @@
     pendingFolder = null;
     returnFocus = null;
     project = null;
+    topic = null;
     submenu = false;
     generation++;
   }
@@ -52,6 +61,14 @@
     const version = generation;
     const current = app.current, docsRoot = app.docsRoot;
     const found = itemsFor(event.target);
+    const row = topicAt(event.target);
+    if (row && current && app.topicsOpen && app.topics.topics.some(t => t.id === row.id)) {
+      topic = { project: current, id: row.id };
+      returnFocus = row.element;
+      found.splice(0, found.length,
+        { action: "copyTopic", label: "Скопировать" },
+        { action: "closeTopic", label: "Закрыть", disabled: app.topics.busy });
+    }
     const nearest = event.target instanceof Element ? event.target.closest("[data-document-path], [data-folder-path], [data-project-path]") : null;
     const directory = !textField(event.target) && nearest?.hasAttribute("data-folder-path") && folderAt(event.target);
     if (directory && current) {
@@ -110,9 +127,23 @@
     const file = document;
     const directory = folder;
     const projectPath = project;
+    const selectedTopic = topic;
     close(true);
     try {
-      if (directory && ["reveal", "path", "checkProject"].includes(item.action)) {
+      if (selectedTopic) {
+        if (app.current !== selectedTopic.project || !app.topicsOpen) return;
+        if (item.action === "copyTopic") {
+          const detail = await call<TopicDetail>("new_topics_get", { project: selectedTopic.project, id: selectedTopic.id });
+          // Название можно переименовать: копируем сохранённый запрос, а не заголовок строки.
+          if (app.current !== selectedTopic.project || !app.topicsOpen) return;
+          const query = detail.variants_list[0]?.text;
+          if (query === undefined) throw new Error("Исходный запрос темы не найден");
+          await copyText(query);
+          app.flash("Запрос скопирован");
+        } else if (item.action === "closeTopic" && !app.topics.busy) {
+          if (await app.topics.remove(selectedTopic.id)) app.flash("Тема закрыта и удалена");
+        }
+      } else if (directory && ["reveal", "path", "checkProject"].includes(item.action)) {
         const action = item.action === "reveal" ? "open" : item.action === "checkProject" ? "check" : "path";
         const result = await folderAction(directory.id, action);
         if (action === "path") { await copyText(result.absolute); app.flash(result.missing ? "Путь скопирован; папка отсутствует" : "Путь скопирован"); }
@@ -142,11 +173,11 @@
   }
 
   function navigate(event: KeyboardEvent) {
-    if (event.key === "Escape" && returnFocus) { close(true); return; }
+    if (event.key === "Escape" && (returnFocus || items.length)) { event.preventDefault(); close(true); return; }
     if (event.key === "Tab" && returnFocus && !items.length) { close(); return; }
     if ((event.shiftKey && event.key === "F10") || event.key === "ContextMenu") {
       const element = globalThis.document.activeElement;
-      if (element instanceof HTMLElement && (projectAt(element) || folderAt(element) || documentAt(element))) {
+      if (element instanceof HTMLElement && (projectAt(element) || folderAt(element) || documentAt(element) || topicAt(element))) {
         event.preventDefault();
         const rect = element.getBoundingClientRect();
         element.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: rect.left, clientY: rect.bottom }));
@@ -180,12 +211,14 @@
     const dismiss = () => close();
     addEventListener("blur", dismiss);
     addEventListener("resize", dismiss);
+    addEventListener("close", dismiss, true);
     addEventListener("scroll", onScroll, true);
     return () => {
       removeEventListener("contextmenu", open);
       removeEventListener("keydown", onKey);
       removeEventListener("blur", dismiss);
       removeEventListener("resize", dismiss);
+      removeEventListener("close", dismiss, true);
       removeEventListener("scroll", onScroll, true);
     };
   });
@@ -199,6 +232,7 @@
 {#if items.length}
   <div
     class="cmenu"
+    use:modalHost
     bind:this={box}
     role="presentation"
     tabindex="-1"
@@ -206,7 +240,6 @@
     onmousedown={(event) => event.preventDefault()}
   >
     <div class="primary" role="menu" aria-label="Действия">
-      {#if folder}<div class="folder-heading"><b>{folder.kind}</b><small>{folder.absolute}</small></div>{/if}
       {#each items as item (item.action)}
         <button role="menuitem" disabled={item.disabled} aria-haspopup={item.action === "editors" ? "menu" : undefined} aria-expanded={item.action === "editors" ? submenu : undefined} onclick={() => pick(item)}>{item.label}{item.action === "editors" ? " ▸" : ""}{#if item.hint}<small>{item.hint}</small>{/if}</button>
       {/each}
@@ -223,12 +256,10 @@
 
 <style>
   .cmenu { position: fixed; z-index: 90; display: flex; max-width: calc(100vw - 8px); max-height: calc(100vh - 8px); overflow: auto; background: var(--panel); border: 1px solid var(--line-2); border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.2); padding: 5px; }
-  .primary { min-width: 215px; }
-  .folder-heading { padding: 7px 10px; max-width: 310px; border-bottom: 1px solid var(--line); font-size: 12px; }
-  .folder-heading small { display: block; overflow-wrap: anywhere; color: var(--muted); font-size: 11px; user-select: text; }
-  .sub { min-width: 210px; border-left: 1px solid var(--line); margin-left: 4px; padding-left: 4px; }
+  .primary { min-width: 180px; }
+  .sub { min-width: 180px; border-left: 1px solid var(--line); margin-left: 4px; padding-left: 4px; }
   @media (max-width: 480px) { .cmenu { flex-direction: column; } .sub { border-left: 0; border-top: 1px solid var(--line); margin: 4px 0 0; padding: 4px 0 0; } }
-  .cmenu button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 7px 10px; border-radius: 7px; font-size: 13px; color: var(--text); }
+  .cmenu button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 4px 8px; border-radius: 5px; font-size: 12px; color: var(--text); }
   .cmenu button:hover, .cmenu button:focus-visible { background: var(--accent-soft); color: var(--accent-text); }
   .cmenu button:disabled { color: var(--muted); cursor: default; background: none; }
   .cmenu small { display: block; font-size: 11px; color: var(--muted); }

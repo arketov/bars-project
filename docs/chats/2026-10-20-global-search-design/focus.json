@@ -1,0 +1,122 @@
+[
+  {
+    "id": "mode",
+    "inDialog": true
+  },
+  {
+    "id": "minus",
+    "inDialog": true
+  },
+  {
+    "id": "plus",
+    "inDialog": true
+  },
+  {
+    "id": "find",
+    "inDialog": true
+  },
+  {
+    "id": "BUTTON",
+    "inDialog": true
+  },
+  {
+    "id": "SUMMARY",
+    "inDialog": true
+  },
+  {
+    "id": "BUTTON",
+    "inDialog": true
+  },
+  {
+    "id": "BUTTON",
+    "inDialog": true
+  },
+  {
+    "id": "BUTTON",
+    "inDialog": true
+  },
+  {
+    "id": "SUMMARY",
+    "inDialog": true
+  },
+  {
+    "id": "SUMMARY",
+    "inDialog": true
+  },
+  {
+    "id": "close-search",
+    "inDialog": true
+  },
+  {
+    "id": "tree-filter",
+    "inDialog": true
+  },
+  {
+    "id": "reset-scope",
+    "inDialog": true
+  },
+  {
+    "id": "INPUT",
+    "inDialog": true
+  },
+  {
+    "id": "INPUT",
+    "inDialog": true
+  },
+  {
+    "id": "BUTTON",
+    "inDialog": true
+  },
+  {
+    "id": "INPUT",
+    "inDialog": true
+  },
+  {
+    "id": "BUTTON",
+    "inDialog": true
+  },
+  {
+    "id": "INPUT",
+    "inDialog": true
+  },
+  {
+    "id": "INPUT",
+    "inDialog": true
+  },
+  {
+    "id": "BUTTON",
+    "inDialog": true
+  },
+  {
+    "id": "query",
+    "inDialog": true
+  },
+  {
+    "id": "mode",
+    "inDialog": true
+  },
+  {
+    "id": "minus",
+    "inDialog": true
+  },
+  {
+    "id": "plus",
+    "inDialog": true
+  },
+  {
+    "id": "find",
+    "inDialog": true
+  },
+  {
+    "id": "BUTTON",
+    "inDialog": true
+  },
+  {
+    "id": "SUMMARY",
+    "inDialog": true
+  },
+  {
+    "id": "BUTTON",
+    "inDialog": true
+  }
+]

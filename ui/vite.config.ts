@@ -9,5 +9,5 @@ export default defineConfig(({ mode }) => ({
   ...(mode === "test" ? { resolve: { conditions: ["browser"] } } : {}),
   server: { port: 1420, strictPort: true },
   build: { target: "es2022", outDir: "dist", emptyOutDir: true },
-  test: { environment: "jsdom", include: ["src/**/*.test.ts"] },
+  test: { environment: "jsdom", include: ["src/**/*.test.ts"], setupFiles: ["src/test-setup.ts"] },
 }));

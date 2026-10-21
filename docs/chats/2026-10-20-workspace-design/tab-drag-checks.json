@@ -1,0 +1,27 @@
+{
+  "realPointerGestures": true,
+  "mainToRight": true,
+  "rightToMain": {
+    "centerStayed": true,
+    "draftRetained": true,
+    "dragClean": true,
+    "mainHasDocument": true,
+    "modeRetained": true,
+    "outlineHidden": true,
+    "rightHasDocument": false
+  },
+  "reordered": [
+    "search",
+    "graph",
+    "doc:features/search/hybrid-search.md",
+    "doc:features/window/requirements.md"
+  ],
+  "invalidDropRetainsTab": true,
+  "outline": {
+    "insideEditor": true,
+    "hideShow": true,
+    "sourceHeadingNavigation": true,
+    "renderHeadingNavigation": true,
+    "dark760NoOverflow": true
+  }
+}

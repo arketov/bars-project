@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { commandAdapter } from './command-adapters';
+  import { copyText, openPath } from './api';
   import { workerLogs, type LogLevel, type LogSnapshot } from "./api";
 
   let level = $state<LogLevel>("info");
@@ -32,7 +34,11 @@
   onMount(() => { void refresh(); return () => { request++; }; });
 </script>
 
-<section aria-label="Логи воркера">
+<section aria-label="Логи воркера" use:commandAdapter={{
+  'logs.refresh': { run: refresh, reason: () => loading ? 'Журнал загружается' : undefined },
+  'logs.copy': { run: async () => { await copyText(data!.entries.map(e => `${e.time} ${e.level} ${e.message}`).join('\n')); }, reason: () => data ? undefined : 'Журнал ещё не прочитан' },
+  'logs.reveal': { run: async () => { await openPath(data!.directory); }, reason: () => data ? undefined : 'Папка журнала ещё неизвестна' }
+}}>
   <h1>Логи</h1>
   <p class="lead">События воркера. Последние 500 записей выбранного уровня, новые сверху.</p>
   <p class="path">{data?.directory ?? "~/.bars/logs"} · текущий файл и 3 архива по 2 МиБ</p>

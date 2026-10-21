@@ -1,5 +1,7 @@
 <script lang="ts">
   import { app } from "./app.svelte";
+  import { commandAdapter } from './command-adapters';
+  let root: HTMLElement;
   import Banner from "./Banner.svelte";
   import { decimal, documents, duration, jobReason, percentOf, plural, remainingSeconds } from "./format";
   import Icon from "./Icon.svelte";
@@ -36,7 +38,7 @@
   }
 </script>
 
-<main>
+<main bind:this={root} use:commandAdapter={{ 'indexing.details': { run: () => { const heading=root.querySelector<HTMLElement>('.panel h2'); if(heading) {heading.tabIndex=-1;heading.focus();heading.scrollIntoView?.({block:'nearest'});} }, reason: () => project ? undefined : 'Проект не выбран' } }}>
   {#if project}
     <div class="page">
       <h1>{project.name}</h1>

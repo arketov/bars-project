@@ -9,13 +9,15 @@
   import ScoreInput from "./ScoreInput.svelte";
   import LogsPage from "./LogsPage.svelte";
   import McpStatisticsPage from "./McpStatisticsPage.svelte";
+  import KeybindingsPage from "./KeybindingsPage.svelte";
   import { settings } from "./settings.svelte";
   import { clone, MAX_UNLOAD_MINUTES } from "./settings-logic";
   import { theme, type ThemePref } from "./theme.svelte";
   import type { EmbedDoc, InstallClientName, ModelInfo, ModelSourceName, RerankDoc } from "./types";
 
+  let { embedded = false }: { embedded?: boolean } = $props();
   onMount(() => {
-    void settings.load();
+    if (!settings.draft) void settings.load();
   });
 
   const TABS = [
@@ -25,6 +27,7 @@
     ["clients", "Клиенты"],
     ["system", "Запуск"],
     ["look", "Оформление"],
+    ["keybindings", "Сочетания клавиш"],
     ["logs", "Логи"],
     ["mcp-statistics", "Статистика MCP"],
   ] as const;
@@ -46,7 +49,9 @@
   const draft = $derived(settings.draft);
   const errors = $derived(settings.errors);
   const hasErrors = $derived(Object.keys(errors).length > 0);
-  const tab = $derived(app.settingsTab);
+  let localTab = $state("models");
+  $effect(() => { const requested = app.settingsTab; if (requested !== "logs" && requested !== "mcp-statistics") localTab = requested; });
+  const tab = $derived(embedded ? localTab : app.settingsTab);
 
   function selectEmbedModel(id: string) {
     if (!draft) return;
@@ -95,16 +100,16 @@
   }
 </script>
 
-<div class="app has-savebar">
+<div class="app has-savebar" class:embedded>
   <aside>
     <div class="brand">
       <div class="logo">b</div>
       <div><b>bars</b><small>настройки приложения</small></div>
     </div>
-    <button class="back" onclick={() => (app.view = "main")}><Icon name="back" size={15} />К поиску</button>
+    <button class="back" onclick={() => app.openSearch()}><Icon name="back" size={15} />К поиску</button>
     <div class="nav">
-      {#each TABS as [id, title] (id)}
-        <button class:on={tab === id} onclick={() => (app.settingsTab = id)}>
+      {#each TABS.filter(([id]) => !embedded || (id !== "logs" && id !== "mcp-statistics")) as [id, title] (id)}
+        <button class:on={tab === id} onclick={() => { if (embedded) localTab = id; else app.settingsTab = id; }}>
           {title}
           {#if id === "clients" && settings.clientsNeedAction > 0}<span class="badge warn">{settings.clientsNeedAction}</span>{/if}
         </button>
@@ -122,7 +127,9 @@
         <div class="note warn"><Icon name="warn" size={16} /><span>{warning}</span></div>
       {/each}
 
-      {#if tab === "mcp-statistics"}
+      {#if tab === "keybindings"}
+        <KeybindingsPage />
+      {:else if tab === "mcp-statistics"}
         <McpStatisticsPage />
       {:else if tab === "logs"}
         <LogsPage />
@@ -352,16 +359,22 @@
 </div>
 
 {#if tab !== "look" && tab !== "clients" && tab !== "system" && tab !== "logs"}
-  <div class="savebar">
+  {#if tab !== "keybindings"}<div class="savebar" class:embedded>
     <span class="grow">
       {#if hasErrors}Есть ошибки в значениях — исправьте их, чтобы сохранить{:else if settings.dirty}Изменения не сохранены{:else}Настройки сохранены в <span class="mono">{settings.file}</span>{/if}
     </span>
     <button class="ghost" disabled={!settings.dirty} onclick={() => settings.reset()}>Отменить</button>
     <button class="btn" disabled={!settings.dirty || hasErrors || settings.saving} onclick={() => settings.save()}>{settings.saving ? "Сохраняю…" : "Сохранить"}</button>
-  </div>
+</div>{/if}
 {/if}
 
 <style>
+  .app.embedded { height: 100%; grid-template-columns: 140px minmax(0, 1fr); padding-bottom: 64px; }
+  .embedded .brand { padding: 8px; } .embedded .brand small { display: none; }
+  .embedded .page { padding: 12px; } .embedded .nav button { font-size: 12px; padding: 5px 8px; }
+  .embedded .field { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .embedded .field > div { min-width: 0; } .embedded .seg { display: flex; flex-wrap: wrap; }
+  .savebar.embedded { position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 12px; flex-wrap: wrap; font-size: 12px; }
   .app { display: grid; grid-template-columns: 300px 1fr; height: 100vh; }
   aside { background: var(--panel); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
   .brand { padding: 18px 18px 12px; display: flex; align-items: center; gap: 10px; }

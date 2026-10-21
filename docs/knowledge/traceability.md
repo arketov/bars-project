@@ -1,53 +1,95 @@
 ---
-title: Трассировка требований bars — какой документ описывает каждое Т-N
+title: Трассировка требований bars — документы и этапы
 ---
 
-# Трассировка требований bars
+# Трассировка требований bars — документы и этапы
 
-Для каждого требования из MAIN_IDEA.md — документы `docs/`, где описано, как bars его выполняет. Таблица нужна, чтобы при проектировании и реализации ни одно требование не потерялось. Сверено 19-10-2026 с [MAIN_IDEA.md](../MAIN_IDEA.md) и текущей раскладкой `docs/`: перечислены все Т-1…Т-28 и НФТ-1…НФТ-4. Правка требований делается только в MAIN_IDEA.md; при новом документе о требовании строка обновляется здесь.
+Сверено 20-10-2026: все Т-1…Т-47 и НФТ-1…НФТ-6 из [MAIN_IDEA.md](../MAIN_IDEA.md), все GR-01…GR-12 из [ТЗ GraphRAG](../features/graphrag/requirements.md) сопоставлены с этапами работ. Рамка Т-43…Т-47 и поправка GR-05 согласованы с уточнениями автора OQ-109/OQ-111; Т-40 дополнен отдельными окнами с редактором. Таблица связывает источники, не копирует требования и не утверждает готовность реализации.
 
-## Требования Т-1…Т-28
+Номера обозначают этап и шаги внутри него. «Контроль» — сохранение уже существующего поведения при изменениях, а не поручение переписать модуль. У каждого требования указан владеющий этап, дополнительные шаги — интеграция/измерение. Приёмка входит в реализацию соответствующего среза; прежний код и фикстуры не заменяют проверку результата. Платформенное исключение Т-4 остаётся явным.
 
-| Т-N | О чём | Где описано |
+## Требования Т-1…Т-47
+
+| ID | Владеющий этап; дополнительные шаги | Документы и вид работы |
 |---|---|---|
-| Т-1 | один воркер, трей | [architecture/worker.md](../architecture/worker.md), [architecture/components.md](../architecture/components.md), [features/window/implementation.md](../features/window/implementation.md) |
-| Т-2 | stdio-прокси, запуск воркера | [architecture/ipc.md](../architecture/ipc.md) |
-| Т-3 | Rust, Tauri, fastembed-rs, встроенный llama.cpp | [architecture/stack.md](../architecture/stack.md), [ADR-0002](../adr/0002-qwen-gguf.md) |
-| Т-4 | Windows и macOS | [architecture/stack.md](../architecture/stack.md), [features/distribution/Index.md](../features/distribution/Index.md); реализована Windows, macOS не проверена |
-| Т-5 | `.bars` проекта | [architecture/files.md](../architecture/files.md), [architecture/schema.md](../architecture/schema.md) |
-| Т-6 | три пути регистрации | [features/projects/projects.md](../features/projects/projects.md), [features/agent-tools/cli.md](../features/agent-tools/cli.md), [features/window/main-window.md](../features/window/main-window.md) |
-| Т-7 | корень документации, модули | [features/indexing/updates.md](../features/indexing/updates.md), [features/settings/settings.md](../features/settings/settings.md) |
-| Т-8 | `BARS_INSTRUCTION.md`, совет о раскладке | [features/docs-convention/bars-instruction.md](../features/docs-convention/bars-instruction.md), [features/docs-convention/layout.md](../features/docs-convention/layout.md) |
-| Т-9 | инкрементальная индексация | [features/indexing/updates.md](../features/indexing/updates.md) |
-| Т-10 | четыре способа найти изменения | [features/indexing/updates.md](../features/indexing/updates.md), [architecture/worker.md](../architecture/worker.md) |
-| Т-11 | `title` из frontmatter | [features/indexing/chunking.md](../features/indexing/chunking.md) |
-| Т-12 | гибридный поиск | [features/search/hybrid-search.md](../features/search/hybrid-search.md) |
-| Т-13 | состав результата | [features/search/hybrid-search.md](../features/search/hybrid-search.md) |
-| Т-14 | выбор модулей и файлов | [features/search/hybrid-search.md](../features/search/hybrid-search.md); дерево с галочками — [features/window/main-window.md](../features/window/main-window.md) |
-| Т-15 | проект сессии по cwd | [architecture/protocol.md](../architecture/protocol.md), [features/projects/projects.md](../features/projects/projects.md) |
-| Т-16 | настройки моделей и чисел | [features/settings/settings.md](../features/settings/settings.md), [features/window/settings-window.md](../features/window/settings-window.md) |
-| Т-17 | три способа подключить модель | [features/models/local-models.md](../features/models/local-models.md), [features/models/external-models.md](../features/models/external-models.md) |
-| Т-18 | значения по умолчанию, переопределение агентом | [features/settings/settings.md](../features/settings/settings.md), [features/search/hybrid-search.md](../features/search/hybrid-search.md) |
-| Т-19 | инструменты агента | [features/agent-tools/mcp-tools.md](../features/agent-tools/mcp-tools.md) |
-| Т-20 | CLI | [features/agent-tools/cli.md](../features/agent-tools/cli.md), [architecture/protocol.md](../architecture/protocol.md) |
-| Т-21 | установка в клиенты | [features/clients/clients.md](../features/clients/clients.md), [features/window/settings-window.md](../features/window/settings-window.md) |
-| Т-22 | удалённые документы | [features/indexing/updates.md](../features/indexing/updates.md) |
-| Т-23 | нарезка | [features/indexing/chunking.md](../features/indexing/chunking.md), [features/models/local-models.md](../features/models/local-models.md) (длина входа) |
-| Т-24 | порог релевантности | [features/search/hybrid-search.md](../features/search/hybrid-search.md), [features/settings/settings.md](../features/settings/settings.md) |
-| Т-25 | смена модели и согласие | [features/models/local-models.md](../features/models/local-models.md), [features/window/reindex-consent.md](../features/window/reindex-consent.md), [architecture/protocol.md](../architecture/protocol.md) |
-| Т-26 | структура документа | [features/agent-tools/mcp-tools.md](../features/agent-tools/mcp-tools.md), [features/agent-tools/cli.md](../features/agent-tools/cli.md) |
-| Т-27 | стартовая инструкция MCP | [features/docs-convention/delivery.md](../features/docs-convention/delivery.md) |
-| Т-28 | skills bars | [features/docs-convention/delivery.md](../features/docs-convention/delivery.md) |
+| Т-1 | 1.1 → 1.1.4 | [worker](../architecture/worker.md), [компоненты](../architecture/components.md), [окно](../features/window/implementation.md): контроль одного процесса и трея |
+| Т-2 | 4.4 → 4.4.2 | [IPC](../architecture/ipc.md): контроль запуска через прокси |
+| Т-3 | 1.1 → 1.1.2; 2.1.1, 3.1.2, 4.2.2 | [Стек](../architecture/stack.md), [ADR-0002](../adr/0002-qwen-gguf.md): ограничение выбора библиотек/runtime |
+| Т-4 | 1.1 → 1.1.4; 4.4.2 | [Стек](../architecture/stack.md), [дистрибуция](../features/distribution/Index.md): Windows; macOS отложена до доступного Mac, требование не выполнено полностью |
+| Т-5 | 3.1 → 3.1.1; 3.3.2, 3.9.1 | [Файлы](../architecture/files.md), [схема](../architecture/schema.md): хранение и контроль границ проекта |
+| Т-6 | 3.3 → 3.3.2; 4.4.2 | [Проекты](../features/projects/projects.md), [CLI](../features/agent-tools/cli.md): новый сценарий создания, контроль трёх способов регистрации |
+| Т-7 | 3.3 → 3.3.1; 3.2.1 | [Актуальность](../features/indexing/updates.md), [настройки](../features/settings/settings.md): дерево/обход при заданном корне |
+| Т-8 | 4.4 → 4.4.2; 3.3.2 | [Инструкция](../features/docs-convention/bars-instruction.md), [раскладка](../features/docs-convention/layout.md): доставка и контроль обновления |
+| Т-9 | 3.2 → 3.2.1 | [Актуальность](../features/indexing/updates.md): очередь не ломает инкрементальность |
+| Т-10 | 3.2 → 3.2.1, 3.2.2 | [Актуальность](../features/indexing/updates.md), [worker](../architecture/worker.md): контроль всех триггеров и обоснование периода проверки |
+| Т-11 | 3.3 → 3.3.1; 3.4.1 | [Нарезка](../features/indexing/chunking.md): контроль заголовка в дереве, редакторе и выдаче |
+| Т-12 | 1.2 → 1.2.2; 3.6.2, 4.1.5 | [Поиск](../features/search/hybrid-search.md): общий путь поиска, контроль hybrid |
+| Т-13 | 1.2 → 1.2.2; 3.6.2 | [Поиск](../features/search/hybrid-search.md): контроль состава карточек |
+| Т-14 | 1.2 → 1.2.2; 3.3.1, 3.6.2 | [Поиск](../features/search/hybrid-search.md), [окно](../features/window/main-window.md): одна область обоих входов |
+| Т-15 | 4.4 → 4.4.2 | [Протокол](../architecture/protocol.md), [проекты](../features/projects/projects.md): контроль cwd и явного проекта |
+| Т-16 | 1.1 → 1.1.4; 4.3.3 | [Настройки](../features/settings/settings.md), [экран](../features/window/settings-window.md): перенос без потери полей/сохранения |
+| Т-17 | 4.2 → 4.2.2; 1.1.4 | [Локальные модели](../features/models/local-models.md), [провайдеры](../features/models/external-models.md): реальная загрузка и контроль способов подключения |
+| Т-18 | 4.3 → 4.3.3; 4.4.2 | [Настройки](../features/settings/settings.md), [поиск](../features/search/hybrid-search.md): умолчания и контроль переопределений |
+| Т-19 | 4.4 → 4.4.2; 3.7.1 | [MCP](../features/agent-tools/mcp-tools.md): контроль инструментов и доступность в окне |
+| Т-20 | 4.4 → 4.4.2; 4.1.7 | [CLI](../features/agent-tools/cli.md), [протокол](../architecture/protocol.md): контроль эквивалентности клиентов |
+| Т-21 | 4.4 → 4.4.2 | [Клиенты](../features/clients/clients.md), [настройки](../features/window/settings-window.md): реальная установка по отдельному согласованию |
+| Т-22 | 3.2 → 3.2.1; 3.3.1 | [Актуальность](../features/indexing/updates.md): контроль удаления/очереди |
+| Т-23 | 3.2 → 3.2.1; 4.2.2 | [Нарезка](../features/indexing/chunking.md), [длина входа](../features/models/local-models.md): контроль чанков и повторного embed |
+| Т-24 | 1.2 → 1.2.2; 4.1.5, 4.3.3 | [Поиск](../features/search/hybrid-search.md), [настройки](../features/settings/settings.md): порог и пределы обоих входов |
+| Т-25 | 4.2 → 4.2.2; 1.1.4 | [Модели](../features/models/local-models.md), [согласие](../features/window/reindex-consent.md), [протокол](../architecture/protocol.md): приёмка смены модели и контроль диалога |
+| Т-26 | 3.7 → 3.7.1; 4.4.2 | [MCP](../features/agent-tools/mcp-tools.md), [CLI](../features/agent-tools/cli.md): структура документа в окне и контроль чтения с диска |
+| Т-27 | 4.4 → 4.4.2 | [Доставка](../features/docs-convention/delivery.md): стартовая инструкция |
+| Т-28 | 4.4 → 4.4.2 | [Доставка](../features/docs-convention/delivery.md): skills и удаление только записей bars |
+| Т-29 | 3.4 → 3.4.1; 3.1.2, 1.3.2 | [База знаний](../features/knowledge-base/requirements.md): редактор, конфликты и помощники |
+| Т-30 | 3.5 → 3.5.2; 3.1.1 | [База знаний](../features/knowledge-base/requirements.md): выбор ссылки |
+| Т-31 | 3.5 → 3.5.1, 3.5.2; 3.1.1 | [База знаний](../features/knowledge-base/requirements.md): индекс/обновление ссылок |
+| Т-32 | 3.3 → 3.3.1; 3.1.1 | [База знаний](../features/knowledge-base/requirements.md): файл папки |
+| Т-33 | 3.3 → 3.3.1; 3.1.1 | [База знаний](../features/knowledge-base/requirements.md): дерево с диска и операции |
+| Т-34 | 3.3 → 3.3.1; 1.2.2 | [База знаний](../features/knowledge-base/requirements.md), [проект окна](../features/window/requirements.md): галочки при активном поиске |
+| Т-35 | 3.3 → 3.3.2; 3.1.1 | [База знаний](../features/knowledge-base/requirements.md): создание проекта |
+| Т-36 | 3.8 → 3.8.3; 3.8.1, 3.8.2 | [База знаний](../features/knowledge-base/requirements.md), [новые темы](../features/new-topics/requirements.md): аудиты и очередь |
+| Т-37 | 3.7 → 3.7.1; 4.4.1, 4.4.2 | [База знаний](../features/knowledge-base/requirements.md), [MCP](../features/agent-tools/mcp-tools.md): таблица соответствия и реальные действия |
+| Т-38 | 3.9 → 3.9.1; 2.1.5 | [База знаний](../features/knowledge-base/requirements.md): цвета/иконки во всех представлениях |
+| Т-39 | 3.6 → 3.6.1, 3.6.2; 3.1.1 | [База знаний](../features/knowledge-base/requirements.md), [поиск](../features/search/hybrid-search.md): два раздела выдачи |
+| Т-40 | 3.4 → 3.4.2; 1.1.2, 1.1.4, 1.3.2 | [База знаний](../features/knowledge-base/requirements.md), [проект окна](../features/window/requirements.md): вкладки и отдельные окна с редактором через контекстное меню; общее сохранение/конфликты |
+| Т-41 | 3.2 → 3.2.1, 3.2.2 | [База знаний](../features/knowledge-base/requirements.md): пауза embed |
+| Т-42 | 3.2 → 3.2.1; 3.1.1 | [База знаний](../features/knowledge-base/requirements.md), [актуальность](../features/indexing/updates.md): очередь документов и приоритет поиска |
+| Т-43 | 1.1 → 1.1.1…1.1.4 | [Проект окна](../features/window/requirements.md): проект раунда 17, OQ-109 |
+| Т-44 | 1.2 → 1.2.1, 1.2.2; 1.1.4 | [Проект окна](../features/window/requirements.md): проект раунда 17, OQ-109 |
+| Т-45 | 1.3 → 1.3.1, 1.3.2 | [Проект окна](../features/window/requirements.md): проект раунда 17, OQ-109 |
+| Т-46 | 2.1 → 2.1.1…2.1.5; 1.1.4, 2.3.2 | [GR-05](../features/graphrag/requirements.md#gr-05-графический-просмотр-и-пользовательские-действия): рамка раунда 17, состав видов уточнён раундом 20; OQ-110 закрыт отказом от четвёртого вида |
+| Т-47 | 2.2 → 2.2.1…2.2.3; 1.2.2 | [Проект окна](../features/window/requirements.md), [GR-05](../features/graphrag/requirements.md#gr-05-графический-просмотр-и-пользовательские-действия): проект раунда 17, OQ-109 |
 
 ## Нефункциональные требования
 
-| НФТ | Где описано |
-|---|---|
-| НФТ-1 | [features/indexing/chunking.md](../features/indexing/chunking.md), [features/indexing/updates.md](../features/indexing/updates.md), [architecture/schema.md](../architecture/schema.md) |
-| НФТ-2 | [architecture/vector-search.md](../architecture/vector-search.md); подтверждено на Windows — [spike-search.md](spike-search.md); качество FP16 на естественных 5000 чанков не закрыто |
-| НФТ-3 | [architecture/components.md](../architecture/components.md), [architecture/worker.md](../architecture/worker.md) |
-| НФТ-4 | [features/window/Index.md](../features/window/Index.md) (язык интерфейса), [features/agent-tools/mcp-tools.md](../features/agent-tools/mcp-tools.md) (оформление ответов MCP), [features/docs-convention/bars-instruction.md](../features/docs-convention/bars-instruction.md) (язык инструкций) |
+| ID | Владеющий этап; дополнительные шаги | Документы и границы |
+|---|---|---|
+| НФТ-1 | 3.2 → 3.2.1 | [Нарезка](../features/indexing/chunking.md), [актуальность](../features/indexing/updates.md), [схема](../architecture/schema.md): контроль переиспользования |
+| НФТ-2 | 4.3 → 4.3.2, 4.3.3 | [Векторный поиск](../architecture/vector-search.md), [проба](spike-search.md): прежняя проверка Windows не закрывает естественные 5000 чанков и все модели |
+| НФТ-3 | 4.4 → 4.4.2; 4.2.2 | [Компоненты](../architecture/components.md), [worker](../architecture/worker.md): контроль лёгкого прокси |
+| НФТ-4 | 1.1 → 1.1.3, 1.1.4; 1.2.2, 1.3.2, 2.3.2, 3.4.1, 4.4.2 | [Окно](../features/window/Index.md), [MCP](../features/agent-tools/mcp-tools.md), [инструкция](../features/docs-convention/bars-instruction.md): язык проверяется в каждом пользовательском срезе |
+| НФТ-5 | 3.4 → 3.4.1; 3.4.2 | [База знаний](../features/knowledge-base/requirements.md): сохранение при закрытии вкладки/панели/окна |
+| НФТ-6 | 3.6 → 3.6.1, 3.6.2 | [База знаний](../features/knowledge-base/requirements.md): реальный p95 поиска с диска |
+
+## Требования GR-01…GR-12
+
+Источник всех строк — [ТЗ GraphRAG](../features/graphrag/requirements.md); действующие и целевые контракты различаются в [tools.md](../features/graphrag/tools.md). Внутренние обозначения P0–P8 сохраняются в документах фичи как зависимости.
+
+| ID | Владеющий этап; дополнительные шаги | Что покрывают шаги |
+|---|---|---|
+| GR-01 | 4.1 → 4.1.1…4.1.7; 2.3.2 | Все S1–S8, данные и действия окна; критерии каждой S-группы |
+| GR-02 | 4.1 → 4.1.1, 4.1.2; 2.1.3 | Объекты, словарь, evidence; отдельная проекция пользовательских рёбер |
+| GR-03 | 4.1 → 4.1.1, 4.1.4…4.1.7; 3.7.1, 4.4.2 | Шесть операций и единое выполнение MCP/CLI/окна |
+| GR-04 | 4.1 → 4.1.5, 4.1.7; 2.2.1, 2.2.3 | hybrid/mix/graph и бюджет evidence; вид запроса не меняет ранжирование |
+| GR-05 | 2.3 → 2.3.1, 2.3.2; 1.1.4, 2.1.1…2.1.5, 2.2.1…2.2.3 | Полная замена дизайна по проекту OQ-109, физика и вид запроса; все прежние действия/состояния сохранены |
+| GR-06 | 4.1 → 4.1.3; 2.3.2 | Ревизии, обновление, снимки, курсоры, усечение |
+| GR-07 | 4.1 → 4.1.1, 4.1.4…4.1.6; 2.2.1, 2.3.2 | Scope всех узлов/шагов/evidence, источник и неразрешённые ссылки |
+| GR-08 | 4.1 → 4.1.3; 2.3.2 | Слои, прогресс, ошибки, остановка/продолжение; контроль локальности |
+| GR-09 | 4.1 → 4.1.1, 4.1.7; 2.1.1, 2.2.1 | Численные бюджеты/ресурсы, tokenizer; пределы графа и физики |
+| GR-10 | 4.1 → 4.1.7; 4.1.2…4.1.6 | Новый holdout, качество отдельно по S1–S8, baseline и затраты |
+| GR-11 | 2.3 → 2.3.2; 1.1.4, 2.1.5, 2.2.3, 4.1.7 | Фикстуры отдельно от Tauri и установленной сборки, паритет клиентов, темы/клавиатура/reduced motion |
+| GR-12 | 4.1 → 4.1.7; завершение 2.1, 2.2, 2.3 и 4.4.2 | Совокупная проверка полного состава; пока зависимости не выполнены, фича открыта |
 
 ## Что вне Т-N
 
-Фичи, которых нет в требованиях всего проекта: GraphRAG — [features/graphrag/Index.md](../features/graphrag/Index.md); «Новые темы» — [features/new-topics/Index.md](../features/new-topics/Index.md) (по OQ-67 в MAIN_IDEA не добавлялись). Закрытые пожелания и проблемы — [backlog/](../backlog/Index.md).
+GraphRAG имеет собственные GR-01…GR-12, а проект раунда 17 добавляет общепродуктовые Т-46/Т-47. «Новые темы» дополнительно входят в Т-36; частный контракт NT остаётся в [фиче](../features/new-topics/Index.md). Пожелания и проблемы — [backlog/](../backlog/Index.md); охват этапов не означает закрытия их записей.

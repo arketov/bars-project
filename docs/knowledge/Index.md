@@ -12,6 +12,7 @@ title: Внутренняя база знаний bars
 
 | Файл | Когда читать |
 |---|---|
+| [window-docking.md](window-docking.md) | Сравнение docking, Svelte/WebView2-проба и отдельное окно с общим воркером; рекомендация ADR-0003 |
 | [graph-render.md](graph-render.md) | Obsidian, физика и отрисовка на двух проектах, рекомендация d3-force/worker/Canvas2D и границы опыта |
 | [graph-quality-2026-10-20/](graph-quality-2026-10-20/Index.md) | Независимая разметка S1–S8, holdout и сравнение GraphRAG с hybrid на замороженном корпусе |
 | [build.md](build.md) | Собрать проект, прогнать проверки перед коммитом и тесты со встроенной моделью |
@@ -19,7 +20,7 @@ title: Внутренняя база знаний bars
 | [spike-detach.md](spike-detach.md) | Переживает ли воркер, запущенный из `bars-mcp`, конец сессии агента |
 | [spike-ipc.md](spike-ipc.md) | Как проверены DACL и занятое имя локального канала на Windows |
 | [installer.md](installer.md) | Почему NSIS, что пришлось обойти в шаблоне Tauri и что проверено руками |
-| [traceability.md](traceability.md) | Какой документ описывает конкретное Т-N или НФТ |
+| [traceability.md](traceability.md) | Документы и этапы для всех Т-N, НФТ и GR; проект раунда 17 и границы приёмки |
 
 ## Качество и скорость поиска
 

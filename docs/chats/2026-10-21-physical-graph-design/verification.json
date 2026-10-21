@@ -1,0 +1,44 @@
+{
+  "inputSha256": "e7d7d18f2f981d5a6e6903fbb9cd3df23fd329143a6c39edba7b07e7e6f1b9bd",
+  "scope": "design formulas and saved partial graph inventory; no vectors, extraction quality, product UI or native acceptance",
+  "checks": {
+    "monotonicCases": 50,
+    "groupSizes": [
+      1,
+      2,
+      50,
+      500
+    ],
+    "coverageAndCentroid": "passed"
+  },
+  "inventory": [
+    {
+      "name": "bars-project",
+      "state": "partial",
+      "documents": 305,
+      "chunks": 1279,
+      "allNodes": 1584,
+      "directedDocumentLinkPairs": 1085,
+      "reciprocalDocumentPairs": 202,
+      "repeatedLinkPairs": 132,
+      "undirectedChunkSimilarityPairs": 3236,
+      "ownerPairsWithLinksAndChunkSimilarity": 359,
+      "defaultNodeLimitFitsDocuments": true,
+      "maxNodeLimitFitsAll": true
+    },
+    {
+      "name": "overdrive-bots",
+      "state": "partial",
+      "documents": 481,
+      "chunks": 2315,
+      "allNodes": 2796,
+      "directedDocumentLinkPairs": 2579,
+      "reciprocalDocumentPairs": 557,
+      "repeatedLinkPairs": 274,
+      "undirectedChunkSimilarityPairs": 2039,
+      "ownerPairsWithLinksAndChunkSimilarity": 357,
+      "defaultNodeLimitFitsDocuments": true,
+      "maxNodeLimitFitsAll": false
+    }
+  ]
+}

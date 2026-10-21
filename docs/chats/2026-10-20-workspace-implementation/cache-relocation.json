@@ -1,0 +1,696 @@
+{
+  "old": "C:/bars-build",
+  "target": "C:\\Users\\arketov\\Desktop\\bars-project\\target",
+  "changed": [
+    {
+      "file": "ahash-521082b465475a17\\root-output",
+      "bytes": 54,
+      "backup": "ahash-521082b465475a17\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "anyhow-69ca2a164eafce13\\root-output",
+      "bytes": 55,
+      "backup": "anyhow-69ca2a164eafce13\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "anyhow-773ea677d814e735\\root-output",
+      "bytes": 55,
+      "backup": "anyhow-773ea677d814e735\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "av-scenechange-74e1dcf7d90fc63c\\root-output",
+      "bytes": 63,
+      "backup": "av-scenechange-74e1dcf7d90fc63c\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "bars-app-2f0ee36e302f888b\\output",
+      "bytes": 1641,
+      "backup": "bars-app-2f0ee36e302f888b\\output.bars-before-relocation"
+    },
+    {
+      "file": "bars-app-2f0ee36e302f888b\\root-output",
+      "bytes": 57,
+      "backup": "bars-app-2f0ee36e302f888b\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "bars-app-42e1d17135f5bb94\\output",
+      "bytes": 1855,
+      "backup": "bars-app-42e1d17135f5bb94\\output.bars-before-relocation"
+    },
+    {
+      "file": "bars-app-42e1d17135f5bb94\\root-output",
+      "bytes": 57,
+      "backup": "bars-app-42e1d17135f5bb94\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "bindgen-053f4a00947a9051\\root-output",
+      "bytes": 56,
+      "backup": "bindgen-053f4a00947a9051\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "blake3-3079747b4f58918f\\output",
+      "bytes": 60540,
+      "backup": "blake3-3079747b4f58918f\\output.bars-before-relocation"
+    },
+    {
+      "file": "blake3-3079747b4f58918f\\root-output",
+      "bytes": 55,
+      "backup": "blake3-3079747b4f58918f\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "blake3-61bc58b630d76e91\\output",
+      "bytes": 60579,
+      "backup": "blake3-61bc58b630d76e91\\output.bars-before-relocation"
+    },
+    {
+      "file": "blake3-61bc58b630d76e91\\root-output",
+      "bytes": 55,
+      "backup": "blake3-61bc58b630d76e91\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "camino-23a76d0c11a057d5\\root-output",
+      "bytes": 55,
+      "backup": "camino-23a76d0c11a057d5\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "clang-sys-d43ed42bf441c3b7\\root-output",
+      "bytes": 58,
+      "backup": "clang-sys-d43ed42bf441c3b7\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "cookie-49e0c1dc056eef38\\root-output",
+      "bytes": 55,
+      "backup": "cookie-49e0c1dc056eef38\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "crc32fast-13b46356c9e41dae\\root-output",
+      "bytes": 58,
+      "backup": "crc32fast-13b46356c9e41dae\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "crc32fast-cf10dfda75f46d45\\root-output",
+      "bytes": 58,
+      "backup": "crc32fast-cf10dfda75f46d45\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "crossbeam-deque-176fa0bfc07d1be8\\root-output",
+      "bytes": 64,
+      "backup": "crossbeam-deque-176fa0bfc07d1be8\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "crossbeam-epoch-14d10191c812aa97\\root-output",
+      "bytes": 64,
+      "backup": "crossbeam-epoch-14d10191c812aa97\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "crossbeam-utils-7fa54d48fcb54514\\root-output",
+      "bytes": 64,
+      "backup": "crossbeam-utils-7fa54d48fcb54514\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "encoding_rs-d9b17f6c2bd39384\\root-output",
+      "bytes": 60,
+      "backup": "encoding_rs-d9b17f6c2bd39384\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "erased-serde-2bb8eb7c516cf17c\\root-output",
+      "bytes": 61,
+      "backup": "erased-serde-2bb8eb7c516cf17c\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "erased-serde-8010bc33cd97c808\\root-output",
+      "bytes": 61,
+      "backup": "erased-serde-8010bc33cd97c808\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "esaxx-rs-d79154ad65cc2b95\\root-output",
+      "bytes": 57,
+      "backup": "esaxx-rs-d79154ad65cc2b95\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "generic-array-383a747ef68cb48f\\root-output",
+      "bytes": 62,
+      "backup": "generic-array-383a747ef68cb48f\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "generic-array-428ab26df1ade9af\\root-output",
+      "bytes": 62,
+      "backup": "generic-array-428ab26df1ade9af\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "getrandom-04f41045a519c8bc\\root-output",
+      "bytes": 58,
+      "backup": "getrandom-04f41045a519c8bc\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "getrandom-9e49a93c011acdda\\root-output",
+      "bytes": 58,
+      "backup": "getrandom-9e49a93c011acdda\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "getrandom-a8b37d1701f9125a\\root-output",
+      "bytes": 58,
+      "backup": "getrandom-a8b37d1701f9125a\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "httparse-9d006e75fb0a24cf\\root-output",
+      "bytes": 57,
+      "backup": "httparse-9d006e75fb0a24cf\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "httparse-af3efcd5dfcb263a\\root-output",
+      "bytes": 57,
+      "backup": "httparse-af3efcd5dfcb263a\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "icu_normalizer_data-49099251d7b8cc94\\root-output",
+      "bytes": 68,
+      "backup": "icu_normalizer_data-49099251d7b8cc94\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "icu_normalizer_data-a9b6ae38464a5b36\\root-output",
+      "bytes": 68,
+      "backup": "icu_normalizer_data-a9b6ae38464a5b36\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "icu_properties_data-a965ddd942f7b013\\root-output",
+      "bytes": 68,
+      "backup": "icu_properties_data-a965ddd942f7b013\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "icu_properties_data-e26cdc5714374f5d\\root-output",
+      "bytes": 68,
+      "backup": "icu_properties_data-e26cdc5714374f5d\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "indexmap-e7c284664cab6628\\root-output",
+      "bytes": 57,
+      "backup": "indexmap-e7c284664cab6628\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "libc-d29640a8ce35c588\\root-output",
+      "bytes": 53,
+      "backup": "libc-d29640a8ce35c588\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "libc-f93651a72c02be26\\root-output",
+      "bytes": 53,
+      "backup": "libc-f93651a72c02be26\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "libm-cc961845d53dc60b\\root-output",
+      "bytes": 53,
+      "backup": "libm-cc961845d53dc60b\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "libsqlite3-sys-fe441953f76b1f48\\output",
+      "bytes": 23179,
+      "backup": "libsqlite3-sys-fe441953f76b1f48\\output.bars-before-relocation"
+    },
+    {
+      "file": "libsqlite3-sys-fe441953f76b1f48\\root-output",
+      "bytes": 63,
+      "backup": "libsqlite3-sys-fe441953f76b1f48\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "llama-cpp-sys-2-7fff79d2fb776092\\output",
+      "bytes": 3355941,
+      "backup": "llama-cpp-sys-2-7fff79d2fb776092\\output.bars-before-relocation"
+    },
+    {
+      "file": "llama-cpp-sys-2-7fff79d2fb776092\\root-output",
+      "bytes": 64,
+      "backup": "llama-cpp-sys-2-7fff79d2fb776092\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "matrixmultiply-d65c50582a0d909a\\root-output",
+      "bytes": 63,
+      "backup": "matrixmultiply-d65c50582a0d909a\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "muda-bed14a6ba37803dd\\root-output",
+      "bytes": 53,
+      "backup": "muda-bed14a6ba37803dd\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "native-tls-6f972d0a2ac18ded\\root-output",
+      "bytes": 59,
+      "backup": "native-tls-6f972d0a2ac18ded\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "native-tls-983d244aa1b45b53\\root-output",
+      "bytes": 59,
+      "backup": "native-tls-983d244aa1b45b53\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "num-traits-5882d76a0709d250\\root-output",
+      "bytes": 59,
+      "backup": "num-traits-5882d76a0709d250\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "num-traits-ce2a9eb43ea45d61\\root-output",
+      "bytes": 59,
+      "backup": "num-traits-ce2a9eb43ea45d61\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "onig_sys-31dba7b40e717e15\\output",
+      "bytes": 35086,
+      "backup": "onig_sys-31dba7b40e717e15\\output.bars-before-relocation"
+    },
+    {
+      "file": "onig_sys-31dba7b40e717e15\\root-output",
+      "bytes": 57,
+      "backup": "onig_sys-31dba7b40e717e15\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "ort-sys-ea9280f0d58d8d0a\\root-output",
+      "bytes": 56,
+      "backup": "ort-sys-ea9280f0d58d8d0a\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "parking_lot_core-4d252d715360bf7b\\root-output",
+      "bytes": 65,
+      "backup": "parking_lot_core-4d252d715360bf7b\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "parking_lot_core-c6a070be30a9e264\\root-output",
+      "bytes": 65,
+      "backup": "parking_lot_core-c6a070be30a9e264\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "paste-74f82589b0e3e7f7\\root-output",
+      "bytes": 54,
+      "backup": "paste-74f82589b0e3e7f7\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "portable-atomic-f0a4f92ce8e1888e\\root-output",
+      "bytes": 64,
+      "backup": "portable-atomic-f0a4f92ce8e1888e\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "prettyplease-b11f82465396fb7f\\root-output",
+      "bytes": 61,
+      "backup": "prettyplease-b11f82465396fb7f\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "proc-macro2-9a4a1a7776df80c0\\root-output",
+      "bytes": 60,
+      "backup": "proc-macro2-9a4a1a7776df80c0\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "proc-macro2-a07096a8d4206894\\root-output",
+      "bytes": 60,
+      "backup": "proc-macro2-a07096a8d4206894\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "pulldown-cmark-1e2d58aed15f479b\\root-output",
+      "bytes": 63,
+      "backup": "pulldown-cmark-1e2d58aed15f479b\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "pulp-8ba3df68e5b956a7\\root-output",
+      "bytes": 53,
+      "backup": "pulp-8ba3df68e5b956a7\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "quote-efc3d5c8ae774656\\root-output",
+      "bytes": 54,
+      "backup": "quote-efc3d5c8ae774656\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "rav1e-df36628b3932c417\\root-output",
+      "bytes": 54,
+      "backup": "rav1e-df36628b3932c417\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "rayon-core-9b08b04efef9300a\\root-output",
+      "bytes": 59,
+      "backup": "rayon-core-9b08b04efef9300a\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "ref-cast-91c5d9b1aa330088\\root-output",
+      "bytes": 57,
+      "backup": "ref-cast-91c5d9b1aa330088\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "rfd-a35f3879d06aabb8\\root-output",
+      "bytes": 52,
+      "backup": "rfd-a35f3879d06aabb8\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "ring-32514382da6fbe9f\\output",
+      "bytes": 17864,
+      "backup": "ring-32514382da6fbe9f\\output.bars-before-relocation"
+    },
+    {
+      "file": "ring-32514382da6fbe9f\\root-output",
+      "bytes": 53,
+      "backup": "ring-32514382da6fbe9f\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "rmcp-002773fbcc1468ef\\root-output",
+      "bytes": 53,
+      "backup": "rmcp-002773fbcc1468ef\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "rustls-1c50e651117272e4\\root-output",
+      "bytes": 55,
+      "backup": "rustls-1c50e651117272e4\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "rustversion-edd81b014b8c55eb\\root-output",
+      "bytes": 60,
+      "backup": "rustversion-edd81b014b8c55eb\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "schemars-b2db883dbc354668\\root-output",
+      "bytes": 57,
+      "backup": "schemars-b2db883dbc354668\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "selectors-05786cd39ad1c580\\root-output",
+      "bytes": 58,
+      "backup": "selectors-05786cd39ad1c580\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "serde_core-18ec8e99e6c2cb09\\root-output",
+      "bytes": 59,
+      "backup": "serde_core-18ec8e99e6c2cb09\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "serde_core-309f5040da836d60\\root-output",
+      "bytes": 59,
+      "backup": "serde_core-309f5040da836d60\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "serde_core-bf55e48f37f37391\\root-output",
+      "bytes": 59,
+      "backup": "serde_core-bf55e48f37f37391\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "serde_json-3b102b86eced8785\\root-output",
+      "bytes": 59,
+      "backup": "serde_json-3b102b86eced8785\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "serde_json-a432068f2b763b6d\\root-output",
+      "bytes": 59,
+      "backup": "serde_json-a432068f2b763b6d\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "serde_json-c079c36315ff7907\\root-output",
+      "bytes": 59,
+      "backup": "serde_json-c079c36315ff7907\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "serde_json-dc4d88bcaf127e8c\\root-output",
+      "bytes": 59,
+      "backup": "serde_json-dc4d88bcaf127e8c\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "serde-0cfe5bc09de82b3f\\root-output",
+      "bytes": 54,
+      "backup": "serde-0cfe5bc09de82b3f\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "serde-88befde30a7f1484\\root-output",
+      "bytes": 54,
+      "backup": "serde-88befde30a7f1484\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "tauri-35d1d021c090a14f\\output",
+      "bytes": 1815,
+      "backup": "tauri-35d1d021c090a14f\\output.bars-before-relocation"
+    },
+    {
+      "file": "tauri-35d1d021c090a14f\\root-output",
+      "bytes": 54,
+      "backup": "tauri-35d1d021c090a14f\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "tauri-35d1d021c090a14f\\out\\tauri-core-app-permission-files",
+      "bytes": 2239,
+      "backup": "tauri-35d1d021c090a14f\\out\\tauri-core-app-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-35d1d021c090a14f\\out\\tauri-core-event-permission-files",
+      "bytes": 628,
+      "backup": "tauri-35d1d021c090a14f\\out\\tauri-core-event-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-35d1d021c090a14f\\out\\tauri-core-image-permission-files",
+      "bytes": 754,
+      "backup": "tauri-35d1d021c090a14f\\out\\tauri-core-image-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-35d1d021c090a14f\\out\\tauri-core-menu-permission-files",
+      "bytes": 2987,
+      "backup": "tauri-35d1d021c090a14f\\out\\tauri-core-menu-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-35d1d021c090a14f\\out\\tauri-core-path-permission-files",
+      "bytes": 1148,
+      "backup": "tauri-35d1d021c090a14f\\out\\tauri-core-path-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-35d1d021c090a14f\\out\\tauri-core-permission-files",
+      "bytes": 97,
+      "backup": "tauri-35d1d021c090a14f\\out\\tauri-core-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-35d1d021c090a14f\\out\\tauri-core-resources-permission-files",
+      "bytes": 253,
+      "backup": "tauri-35d1d021c090a14f\\out\\tauri-core-resources-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-35d1d021c090a14f\\out\\tauri-core-tray-permission-files",
+      "bytes": 1718,
+      "backup": "tauri-35d1d021c090a14f\\out\\tauri-core-tray-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-35d1d021c090a14f\\out\\tauri-core-webview-permission-files",
+      "bytes": 2631,
+      "backup": "tauri-35d1d021c090a14f\\out\\tauri-core-webview-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-35d1d021c090a14f\\out\\tauri-core-window-permission-files",
+      "bytes": 10832,
+      "backup": "tauri-35d1d021c090a14f\\out\\tauri-core-window-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-e1a086b772f96c4e\\output",
+      "bytes": 1828,
+      "backup": "tauri-e1a086b772f96c4e\\output.bars-before-relocation"
+    },
+    {
+      "file": "tauri-e1a086b772f96c4e\\root-output",
+      "bytes": 54,
+      "backup": "tauri-e1a086b772f96c4e\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "tauri-e1a086b772f96c4e\\out\\tauri-core-app-permission-files",
+      "bytes": 2239,
+      "backup": "tauri-e1a086b772f96c4e\\out\\tauri-core-app-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-e1a086b772f96c4e\\out\\tauri-core-event-permission-files",
+      "bytes": 628,
+      "backup": "tauri-e1a086b772f96c4e\\out\\tauri-core-event-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-e1a086b772f96c4e\\out\\tauri-core-image-permission-files",
+      "bytes": 754,
+      "backup": "tauri-e1a086b772f96c4e\\out\\tauri-core-image-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-e1a086b772f96c4e\\out\\tauri-core-menu-permission-files",
+      "bytes": 2987,
+      "backup": "tauri-e1a086b772f96c4e\\out\\tauri-core-menu-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-e1a086b772f96c4e\\out\\tauri-core-path-permission-files",
+      "bytes": 1148,
+      "backup": "tauri-e1a086b772f96c4e\\out\\tauri-core-path-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-e1a086b772f96c4e\\out\\tauri-core-permission-files",
+      "bytes": 97,
+      "backup": "tauri-e1a086b772f96c4e\\out\\tauri-core-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-e1a086b772f96c4e\\out\\tauri-core-resources-permission-files",
+      "bytes": 253,
+      "backup": "tauri-e1a086b772f96c4e\\out\\tauri-core-resources-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-e1a086b772f96c4e\\out\\tauri-core-tray-permission-files",
+      "bytes": 1718,
+      "backup": "tauri-e1a086b772f96c4e\\out\\tauri-core-tray-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-e1a086b772f96c4e\\out\\tauri-core-webview-permission-files",
+      "bytes": 2631,
+      "backup": "tauri-e1a086b772f96c4e\\out\\tauri-core-webview-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-e1a086b772f96c4e\\out\\tauri-core-window-permission-files",
+      "bytes": 10832,
+      "backup": "tauri-e1a086b772f96c4e\\out\\tauri-core-window-permission-files.bars-before-relocation"
+    },
+    {
+      "file": "tauri-plugin-dialog-b6e9c615f106a893\\output",
+      "bytes": 453,
+      "backup": "tauri-plugin-dialog-b6e9c615f106a893\\output.bars-before-relocation"
+    },
+    {
+      "file": "tauri-plugin-dialog-b6e9c615f106a893\\root-output",
+      "bytes": 68,
+      "backup": "tauri-plugin-dialog-b6e9c615f106a893\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "tauri-plugin-dialog-deaeb518cebc50a2\\output",
+      "bytes": 453,
+      "backup": "tauri-plugin-dialog-deaeb518cebc50a2\\output.bars-before-relocation"
+    },
+    {
+      "file": "tauri-plugin-dialog-deaeb518cebc50a2\\root-output",
+      "bytes": 68,
+      "backup": "tauri-plugin-dialog-deaeb518cebc50a2\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "tauri-plugin-fs-354231696ad7a156\\output",
+      "bytes": 1244,
+      "backup": "tauri-plugin-fs-354231696ad7a156\\output.bars-before-relocation"
+    },
+    {
+      "file": "tauri-plugin-fs-354231696ad7a156\\root-output",
+      "bytes": 64,
+      "backup": "tauri-plugin-fs-354231696ad7a156\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "tauri-plugin-fs-811cee93f1aab11a\\output",
+      "bytes": 1244,
+      "backup": "tauri-plugin-fs-811cee93f1aab11a\\output.bars-before-relocation"
+    },
+    {
+      "file": "tauri-plugin-fs-811cee93f1aab11a\\root-output",
+      "bytes": 64,
+      "backup": "tauri-plugin-fs-811cee93f1aab11a\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "tauri-plugin-opener-01614fa53edf78c6\\output",
+      "bytes": 664,
+      "backup": "tauri-plugin-opener-01614fa53edf78c6\\output.bars-before-relocation"
+    },
+    {
+      "file": "tauri-plugin-opener-01614fa53edf78c6\\root-output",
+      "bytes": 68,
+      "backup": "tauri-plugin-opener-01614fa53edf78c6\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "tauri-plugin-opener-567612f1aae67c21\\output",
+      "bytes": 664,
+      "backup": "tauri-plugin-opener-567612f1aae67c21\\output.bars-before-relocation"
+    },
+    {
+      "file": "tauri-plugin-opener-567612f1aae67c21\\root-output",
+      "bytes": 68,
+      "backup": "tauri-plugin-opener-567612f1aae67c21\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "tauri-runtime-8d3d396e94a236b4\\root-output",
+      "bytes": 62,
+      "backup": "tauri-runtime-8d3d396e94a236b4\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "tauri-runtime-wry-56a682a206c2e8a8\\root-output",
+      "bytes": 66,
+      "backup": "tauri-runtime-wry-56a682a206c2e8a8\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "thiserror-5a8957f8614b8b88\\root-output",
+      "bytes": 58,
+      "backup": "thiserror-5a8957f8614b8b88\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "thiserror-6ae76044cbeb788a\\root-output",
+      "bytes": 58,
+      "backup": "thiserror-6ae76044cbeb788a\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "tray-icon-1ebf85ad3057ad55\\root-output",
+      "bytes": 58,
+      "backup": "tray-icon-1ebf85ad3057ad55\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "typeid-5c2844349068670d\\root-output",
+      "bytes": 55,
+      "backup": "typeid-5c2844349068670d\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "typeid-d938b47492e9d1f5\\root-output",
+      "bytes": 55,
+      "backup": "typeid-d938b47492e9d1f5\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "vswhom-sys-9ad09897220d67a8\\output",
+      "bytes": 29794,
+      "backup": "vswhom-sys-9ad09897220d67a8\\output.bars-before-relocation"
+    },
+    {
+      "file": "vswhom-sys-9ad09897220d67a8\\root-output",
+      "bytes": 59,
+      "backup": "vswhom-sys-9ad09897220d67a8\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "web_atoms-ed9e7f4951dcfb37\\root-output",
+      "bytes": 58,
+      "backup": "web_atoms-ed9e7f4951dcfb37\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "webview2-com-sys-321c3b7a64f69e68\\output",
+      "bytes": 131,
+      "backup": "webview2-com-sys-321c3b7a64f69e68\\output.bars-before-relocation"
+    },
+    {
+      "file": "webview2-com-sys-321c3b7a64f69e68\\root-output",
+      "bytes": 65,
+      "backup": "webview2-com-sys-321c3b7a64f69e68\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "winapi-a8558d9cd4bad50d\\root-output",
+      "bytes": 55,
+      "backup": "winapi-a8558d9cd4bad50d\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "winapi-cb81e52fef6862ef\\root-output",
+      "bytes": 55,
+      "backup": "winapi-cb81e52fef6862ef\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "windows_x86_64_msvc-61794d74397bed49\\root-output",
+      "bytes": 68,
+      "backup": "windows_x86_64_msvc-61794d74397bed49\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "wry-c9cae3b819730994\\root-output",
+      "bytes": 52,
+      "backup": "wry-c9cae3b819730994\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "zerocopy-c7c6141347f87d8f\\root-output",
+      "bytes": 57,
+      "backup": "zerocopy-c7c6141347f87d8f\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "zmij-6472a0d5bbafc060\\root-output",
+      "bytes": 53,
+      "backup": "zmij-6472a0d5bbafc060\\root-output.bars-before-relocation"
+    },
+    {
+      "file": "zmij-78209cb0c7f5b0e5\\root-output",
+      "bytes": 53,
+      "backup": "zmij-78209cb0c7f5b0e5\\root-output.bars-before-relocation"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "success": true,
+  "childClosed": true,
+  "result": {
+    "worker": {
+      "project": "C:\\Users\\arketov\\AppData\\Local\\Temp\\bars-docking-run-dd059a5da54845eaae4e7da90e82c434\\fixture-S7YGfL\\Проект",
+      "pid": 24840,
+      "title": "Тема"
+    },
+    "afterClose": {
+      "project": "C:\\Users\\arketov\\AppData\\Local\\Temp\\bars-docking-run-dd059a5da54845eaae4e7da90e82c434\\fixture-S7YGfL\\Проект",
+      "pid": 24840,
+      "title": "Тема"
+    },
+    "childResult": {
+      "worker": {
+        "project": "C:\\Users\\arketov\\AppData\\Local\\Temp\\bars-docking-run-dd059a5da54845eaae4e7da90e82c434\\fixture-S7YGfL\\Проект",
+        "pid": 24840,
+        "title": "Тема"
+      },
+      "read": true,
+      "rendered": true
+    },
+    "panels": 6,
+    "initialGroups": 5,
+    "movePreservesDOM": true,
+    "roundTrip": true,
+    "corruptRecovery": true,
+    "keyboard": true,
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0"
+  }
+}

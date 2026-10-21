@@ -5,7 +5,7 @@
   Использование:  pwsh scripts/build-installer.ps1 [-OutDir <папка>]
   Готовый установщик копируется в OutDir (по умолчанию dist-installer/, он в .gitignore).
 #>
-param([string]$OutDir = (Join-Path $PSScriptRoot '..\dist-installer'))
+param([string]$OutDir = (Join-Path $PSScriptRoot '..\dist-installer'), [switch]$SkipNpmCi)
 
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
@@ -27,13 +27,14 @@ foreach ($tool in 'rustc', 'cargo', 'node', 'npm') {
 }
 
 # Терминал, открытый до установки SDK, не видит VULKAN_SDK: берём его из пользовательских и системных
-# переменных, затем из самой новой папки C:\VulkanSDK.
+# переменных, затем из самой новой папки C:\tools\VulkanSDK.
 if (-not $env:VULKAN_SDK -or -not (Test-Path -LiteralPath (Join-Path $env:VULKAN_SDK 'Bin/glslc.exe'))) {
     $candidates = @(
         [Environment]::GetEnvironmentVariable('VULKAN_SDK', 'User'),
         [Environment]::GetEnvironmentVariable('VULKAN_SDK', 'Machine')
     )
-    $candidates += Get-ChildItem -LiteralPath (Join-Path $env:SystemDrive 'VulkanSDK') -Directory -ErrorAction SilentlyContinue |
+    $sdkRoots = @((Join-Path $env:SystemDrive 'tools/VulkanSDK'), (Join-Path $env:SystemDrive 'VulkanSDK'))
+    $candidates += Get-ChildItem -LiteralPath $sdkRoots -Directory -ErrorAction SilentlyContinue |
         Sort-Object { try { [version]$_.Name } catch { [version]'0.0' } } -Descending | ForEach-Object FullName
     foreach ($candidate in $candidates) {
         if ($candidate -and (Test-Path -LiteralPath (Join-Path $candidate 'Bin/glslc.exe'))) {
@@ -45,7 +46,7 @@ if (-not $env:VULKAN_SDK -or -not (Test-Path -LiteralPath (Join-Path $env:VULKAN
 # Вложенный shader generator llama.cpp на MSVC требует последовательной сборки
 # и коротких путей; пользователь может явно задать свой короткий target.
 if (-not $env:VULKAN_SDK -or -not (Test-Path -LiteralPath (Join-Path $env:VULKAN_SDK 'Bin/glslc.exe'))) {
-    throw 'Для встроенного Qwen GGUF нужен Vulkan SDK. Установите SDK LunarG (папка C:\VulkanSDK\<версия> находится сама) или задайте VULKAN_SDK перед сборкой.'
+    throw 'Для встроенного Qwen GGUF нужен Vulkan SDK. Установите SDK LunarG (папка C:\tools\VulkanSDK\<версия> находится сама) или задайте VULKAN_SDK перед сборкой.'
 }
 $env:CMAKE_BUILD_PARALLEL_LEVEL = '1'
 $env:CMAKE_GENERATOR = 'Ninja'
@@ -55,10 +56,12 @@ $vsPath = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Comp
 if (-not $vsPath) { throw 'Не найден MSVC 17.14 или новее' }
 $devShell = Join-Path $vsPath 'Common7/Tools/Launch-VsDevShell.ps1'
 & $devShell -Arch amd64 -HostArch amd64 -SkipAutomaticLocation
+# Кэш CMake может ссылаться на прежний каталог SDK; LIB нужен и при линковке без пересборки C++.
+$env:LIB = (Join-Path $env:VULKAN_SDK 'Lib') + ';' + $env:LIB
 $ninja = Join-Path $vsPath 'Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja'
 $env:PATH = "$ninja$([IO.Path]::PathSeparator)$env:PATH"
 if (-not $env:CARGO_TARGET_DIR) {
-    $env:CARGO_TARGET_DIR = "$env:SystemDrive\bars-build"
+    $env:CARGO_TARGET_DIR = Join-Path $root 'target'
 }
 
 Push-Location $root
@@ -72,8 +75,14 @@ try {
 
 Push-Location (Join-Path $root 'ui')
 try {
-    npm ci
-    if ($LASTEXITCODE) { throw 'npm ci не прошёл' }
+    if ($SkipNpmCi) {
+        # Активный Vite удерживает native binding на Windows; готовые зависимости не удаляем.
+        npm ls --depth=0
+        if ($LASTEXITCODE) { throw 'Готовые npm-зависимости неполны; восстановите их перед сборкой' }
+    } else {
+        npm ci
+        if ($LASTEXITCODE) { throw 'npm ci не прошёл' }
+    }
     npm run build
     if ($LASTEXITCODE) { throw 'npm run build не прошёл' }
 } finally { Pop-Location }

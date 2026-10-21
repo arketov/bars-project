@@ -3,6 +3,7 @@
     import { app } from "./app.svelte";
     import { call, inTauri } from "./api";
     import { GraphRenderer } from "./graph-renderer";
+    import Icon from "./Icon.svelte";
     import {
         kindLabels,
         operationLabels,
@@ -467,19 +468,19 @@
         <section class="graph-map" aria-label="Карта и список объектов">
             <div class="graph-map-tools">
                 <button
-                    class="ghost"
                     aria-label="Уменьшить масштаб"
-                    onclick={() => renderer?.zoom(0.8)}>−</button
+                    title="Уменьшить масштаб"
+                    onclick={() => renderer?.zoom(0.8)}><Icon name="minus" size={15} width={1.8} /></button
                 ><button
-                    class="ghost"
                     aria-label="Увеличить масштаб"
-                    onclick={() => renderer?.zoom(1.25)}>+</button
-                ><button class="ghost" onclick={() => renderer?.fit()}
-                    >Вписать</button
-                ><button class="ghost" onclick={() => renderer?.layout()}
-                    >Расположить</button
-                ><button class="ghost" onclick={() => renderer?.stop()}
-                    >Остановить раскладку</button
+                    title="Увеличить масштаб"
+                    onclick={() => renderer?.zoom(1.25)}><Icon name="plus" size={15} width={1.8} /></button
+                ><span class="tool-separator"></span><button aria-label="Вписать" title="Вписать граф в панель" onclick={() => renderer?.fit()}
+                    ><Icon name="fit" size={15} width={1.8} /></button
+                ><button aria-label="Расположить" title="Расположить узлы" onclick={() => renderer?.layout()}
+                    ><Icon name="layout" size={15} width={1.8} /></button
+                ><button aria-label="Остановить раскладку" title="Остановить раскладку" onclick={() => renderer?.stop()}
+                    ><Icon name="stop" size={13} width={1.8} /></button
                 >
             </div>
             <div
@@ -848,14 +849,30 @@
     .graph-map-tools {
         position: relative;
         z-index: 1;
-        padding: 8px;
+        padding: 2px;
         display: flex;
-        flex-wrap: wrap;
-        gap: 4px;
+        align-items: center;
+        gap: 1px;
+        width: max-content;
+        margin: 4px;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        background: var(--panel);
     }
     .graph-map-tools button {
-        font-size: 11px;
+        display: grid;
+        place-items: center;
+        width: 20px;
+        height: 20px;
+        padding: 0;
+        border: 0;
+        border-radius: 4px;
+        background: transparent;
+        color: var(--muted);
     }
+    .graph-map-tools button:hover { background: var(--accent-soft); color: var(--accent-text); }
+    .graph-map-tools button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+    .tool-separator { width: 1px; height: 12px; background: var(--line); margin: 0 2px; }
     .graph-legend {
         position: absolute;
         bottom: 10px;

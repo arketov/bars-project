@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-21",
+  "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/build-installer.ps1 -SkipNpmCi",
+  "installed": false,
+  "artifacts": [
+    {
+      "path": "C:\\Users\\arketov\\Desktop\\bars-project\\dist-installer\\bars_0.1.0_x64-setup.exe",
+      "modifiedUtc": "2026-10-20T19:32:24.7753040Z",
+      "bytes": 19933331,
+      "sha256": "DCE46DE0042E9EB2A593513CC83AD9A37D5129A925660960E2023D72BE01F513",
+      "mz": true,
+      "pe": true
+    },
+    {
+      "path": "C:\\Users\\arketov\\Desktop\\bars-project\\target\\release\\bars.exe",
+      "modifiedUtc": "2026-10-20T19:32:24.9973062Z",
+      "bytes": 98836480,
+      "sha256": "E472E5521D842CAC04BCB485762DD5C55676A1178E3D07F44284626A62FC0CF5",
+      "mz": true,
+      "pe": true
+    }
+  ]
+}

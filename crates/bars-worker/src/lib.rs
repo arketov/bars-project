@@ -6,6 +6,7 @@ pub mod autostart;
 pub mod clients;
 pub mod handler;
 pub mod ipc;
+pub mod keybindings;
 pub mod logging;
 pub mod mcp_history;
 pub mod mcp_statistics;

@@ -11,6 +11,37 @@ use serde_json::Value;
 use tauri::{AppHandle, State};
 use tauri_plugin_dialog::DialogExt;
 
+#[tauri::command]
+pub fn keybindings_get(state: State<'_, Shared>) -> Result<Value, String> {
+    let handler = state.get().ok_or("Воркер ещё запускается")?;
+    serde_json::to_value(handler.keybindings.get(handler.worker().bars_home())?)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn keybindings_save(
+    app: AppHandle,
+    state: State<'_, Shared>,
+    platform: String,
+    bindings: Value,
+    expected_revision: u64,
+    recovery: Option<String>,
+) -> Result<Value, String> {
+    use tauri::Emitter;
+    let handler = state.get().ok_or("Воркер ещё запускается")?;
+    let bindings = serde_json::from_value(bindings).map_err(|e| e.to_string())?;
+    let snapshot = handler.keybindings.save(
+        handler.worker().bars_home(),
+        &platform,
+        bindings,
+        expected_revision,
+        recovery.as_deref(),
+    )?;
+    let value = serde_json::to_value(snapshot).map_err(|e| e.to_string())?;
+    let _ = app.emit("bars://keybindings", &value);
+    Ok(value)
+}
+
 /// Обработчик воркера: появляется, когда воркер поднят, и до того окну отвечает «запускается».
 #[derive(Default)]
 pub struct Shared {

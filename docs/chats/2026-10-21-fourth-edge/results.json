@@ -1,0 +1,369 @@
+{
+  "snapshotSha256": "e7d7d18f2f981d5a6e6903fbb9cd3df23fd329143a6c39edba7b07e7e6f1b9bd",
+  "method": "read-only existing graph; inventory, not extraction precision or UI acceptance",
+  "results": [
+    {
+      "name": "bars-project",
+      "capturedAt": "2026-10-21T06:42:04.233Z",
+      "meta": [
+        {
+          "key": "active_job",
+          "value": ""
+        },
+        {
+          "key": "error",
+          "value": ""
+        },
+        {
+          "key": "method",
+          "value": "explicit-markdown-v4"
+        },
+        {
+          "key": "schema_version",
+          "value": "1"
+        },
+        {
+          "key": "snapshot",
+          "value": "7367a2661db28ec799cff550f3d0d0e4556769f8fd26c7bc74fbee7797ef2e12"
+        },
+        {
+          "key": "state",
+          "value": "partial"
+        }
+      ],
+      "sources": 305,
+      "kinds": {
+        "section": 1546,
+        "chunk": 1279,
+        "document": 305,
+        "entity": 104
+      },
+      "predicates": {
+        "contains": 2825,
+        "covers": 1556,
+        "depends_on": 3,
+        "implements": 1,
+        "links_to": 1255,
+        "mentions": 104,
+        "next_chunk": 974,
+        "requires": 17,
+        "similar_to": 3910,
+        "supersedes": 13,
+        "uses": 12,
+        "verifies": 6
+      },
+      "ownership": {
+        "rawEdges": 1279,
+        "uniquePairs": 1279,
+        "chunks": 1279,
+        "completeOwnership": true,
+        "wrongOwner": 0
+      },
+      "directDocumentPairs": 883,
+      "commonTargets": {
+        "generated": 4910,
+        "pairs": 3229,
+        "alreadyDirect": 568,
+        "maxSupport": 16,
+        "samples": [
+          {
+            "documents": [
+              "Документация bars",
+              "Состояние bars — реализованные возможности и открытые проверки"
+            ],
+            "via": [
+              "GraphRAG в bars — техническое задание и внедрение",
+              "MAIN_IDEA — требования bars",
+              "Известные проблемы bars",
+              "Настройки bars — ключи settings.toml и config.toml, значения по умолчанию",
+              "Фичи bars — оглавление"
+            ],
+            "support": 16
+          },
+          {
+            "documents": [
+              "Рабочая область bars — проект панелей, поиска и управления",
+              "Дизайн окна bars"
+            ],
+            "via": [
+              "Экран настроек bars — модели, поиск, клиенты и статистика MCP",
+              "Логи bars — хранение и просмотр",
+              "Исследование docking и отдельных окон bars",
+              "Документ из дерева и меню документа",
+              "Макет каркаса рабочей области bars"
+            ],
+            "support": 15
+          },
+          {
+            "documents": [
+              "GraphRAG в bars — техническое задание и внедрение",
+              "Исследование GraphRAG — граф знаний, поиск связей и выбор подхода для bars"
+            ],
+            "via": [
+              "Реализация GraphRAG — область, поиск, контекст и пределы",
+              "Техническое задание GraphRAG для bars",
+              "MAIN_IDEA — требования bars",
+              "GraphRAG на существующих embeddings — первый опыт",
+              "Физика и отрисовка постоянного графа bars"
+            ],
+            "support": 14
+          },
+          {
+            "documents": [
+              "Документация bars",
+              "Что такое bars — назначение и возможности проекта"
+            ],
+            "via": [
+              "GraphRAG в bars — техническое задание и внедрение",
+              "Файлы bars на диске — папка проекта и папка пользователя",
+              "MAIN_IDEA — требования bars",
+              "Настройки bars — ключи settings.toml и config.toml, значения по умолчанию",
+              "Обновление индекса bars — обнаружение изменений и инкрементальная индексация"
+            ],
+            "support": 11
+          }
+        ],
+        "largestHub": 24
+      },
+      "sharedEntities": {
+        "generated": 0,
+        "pairs": 0,
+        "alreadyDirect": 0,
+        "maxSupport": 0,
+        "samples": [],
+        "crossFileEntities": 0
+      },
+      "semantic": {
+        "edges": 52,
+        "crossFile": 0,
+        "samples": [
+          {
+            "subject": "изменение после просмотра holdout",
+            "predicate": "requires",
+            "object": "нового набора/раунда оценки",
+            "polarity": "positive",
+            "qualifiers": {},
+            "origin": "explicit_rule",
+            "evidence": [
+              "c93326cd40b86962d0fda7e12ff73704f52e726c59cd05d65b010c36a7f7dd0a"
+            ]
+          },
+          {
+            "subject": "текущий экран индексации",
+            "predicate": "supersedes",
+            "object": "этот отчёт",
+            "polarity": "negative",
+            "qualifiers": {},
+            "origin": "explicit_rule",
+            "evidence": [
+              "f6215271feb13fc58a4dd37c0db8513beef028ba0fd6e615f60307c0c5286b0c"
+            ]
+          },
+          {
+            "subject": "Снятие регистрации `unregister",
+            "predicate": "supersedes",
+            "object": "полное удаление",
+            "polarity": "negative",
+            "qualifiers": {},
+            "origin": "explicit_rule",
+            "evidence": [
+              "8478fef8a19d28769ee78805107605f88d176b972fd3288468b9124c279782a7"
+            ]
+          },
+          {
+            "subject": "Сбор",
+            "predicate": "requires",
+            "object": "открытого окна",
+            "polarity": "negative",
+            "qualifiers": {},
+            "origin": "explicit_rule",
+            "evidence": [
+              "63e1317f476ce3df7be967dd4748282072a298ecbbae28b9ef720eda03cb8420"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "overdrive-bots",
+      "capturedAt": "2026-10-21T06:42:04.301Z",
+      "meta": [
+        {
+          "key": "active_job",
+          "value": ""
+        },
+        {
+          "key": "error",
+          "value": ""
+        },
+        {
+          "key": "method",
+          "value": "explicit-markdown-v4"
+        },
+        {
+          "key": "schema_version",
+          "value": "1"
+        },
+        {
+          "key": "snapshot",
+          "value": "ff8aa6806a44a076a1f397912e0849611eece6105298e429fd6057b21c80375b"
+        },
+        {
+          "key": "state",
+          "value": "partial"
+        }
+      ],
+      "sources": 481,
+      "kinds": {
+        "chunk": 2315,
+        "section": 2658,
+        "document": 481,
+        "entity": 267
+      },
+      "predicates": {
+        "contains": 4973,
+        "covers": 2669,
+        "depends_on": 4,
+        "links_to": 2966,
+        "mentions": 268,
+        "next_chunk": 1834,
+        "requires": 52,
+        "similar_to": 2160,
+        "supersedes": 23,
+        "uses": 43,
+        "verifies": 12
+      },
+      "ownership": {
+        "rawEdges": 2315,
+        "uniquePairs": 2315,
+        "chunks": 2315,
+        "completeOwnership": true,
+        "wrongOwner": 0
+      },
+      "directDocumentPairs": 2022,
+      "commonTargets": {
+        "generated": 20304,
+        "pairs": 15296,
+        "alreadyDirect": 1421,
+        "maxSupport": 41,
+        "samples": [
+          {
+            "documents": [
+              "Очередь исследований и проектировок: что остановлено до результата",
+              "Журналы сессий OVERDRIVE BOTS: ход работы, исследования и итоги по датам"
+            ],
+            "via": [
+              "Фичи OVERDRIVE BOTS: что получает пользователь и в каком состоянии приёмка",
+              "Этап14: темп AI и источник порядка машин",
+              "Этап11: интегрированный сервис, физические границы и Q030",
+              "Заезд в свой бокс своим ходом: причина ударов, штатный перенос назад, профиль скорости, игровые результаты",
+              "Q-013: перезапуск сервера и временная ошибка источника штрафов"
+            ],
+            "support": 41
+          },
+          {
+            "documents": [
+              "overdrive-bots — список проблем и требований",
+              "Очередь исследований и проектировок: что остановлено до результата"
+            ],
+            "via": [
+              "Этап14: темп AI и источник порядка машин",
+              "Две сборки acs.exe AC 1.16.3: age 20 и age 47 (SteamStub), таблица адресов и инструмент сопоставления",
+              "ADR-0022: штрафы из состояния игры без кадрового CSP-снимка",
+              "Пит-обслуживание AC/CSP: выбор работ, native-вызовы, таймер, readback и отмена",
+              "Построение группы позади игрока"
+            ],
+            "support": 30
+          },
+          {
+            "documents": [
+              "OVERDRIVE BOTS — план работ",
+              "Очередь исследований и проектировок: что остановлено до результата"
+            ],
+            "via": [
+              "Пит-обслуживание AC/CSP: выбор работ, native-вызовы, таймер, readback и отмена",
+              "Сложность, агрессия и ошибки ИИ: механизмы, пределы и управление",
+              "overdrive-bots — список проблем и требований",
+              "Пункт 1.4.1: ошибки подготовки игры — результат и остаток",
+              "Индивидуальная AI-линия бота: загрузчик CSP, канал runtime-spline, прогресс и боковая ошибка по custom-линии, файл .ai"
+            ],
+            "support": 21
+          },
+          {
+            "documents": [
+              "OVERDRIVE BOTS — план работ",
+              "overdrive-bots — список проблем и требований"
+            ],
+            "via": [
+              "Очередь исследований и проектировок: что остановлено до результата",
+              "Пит-обслуживание AC/CSP: выбор работ, native-вызовы, таймер, readback и отмена",
+              "Порядок машин и отставание: доступные источники и границы точности",
+              "Режимы игрока «Подъехать», Follow и Police: владение операцией, граница обгона",
+              "Выбор машины ботов: только модель, места строк до Join, каталог контента, картинка у имени"
+            ],
+            "support": 18
+          }
+        ],
+        "largestHub": 102
+      },
+      "sharedEntities": {
+        "generated": 0,
+        "pairs": 0,
+        "alreadyDirect": 0,
+        "maxSupport": 0,
+        "samples": [],
+        "crossFileEntities": 0
+      },
+      "semantic": {
+        "edges": 134,
+        "crossFile": 0,
+        "samples": [
+          {
+            "subject": "подтверждение поведения",
+            "predicate": "requires",
+            "object": "последующих физических кадров",
+            "polarity": "positive",
+            "qualifiers": {},
+            "origin": "explicit_rule",
+            "evidence": [
+              "a28bfb16ad6c0b28b41851400f09ef45f338b8d69ebd960777959c460d5ba75e"
+            ]
+          },
+          {
+            "subject": "Синтетическая проверка",
+            "predicate": "supersedes",
+            "object": "игровой readback ненулевого наказания",
+            "polarity": "negative",
+            "qualifiers": {},
+            "origin": "explicit_rule",
+            "evidence": [
+              "a4d6cdaf437d6947bc35e79bfa53e7b46010a89a185274bae62d50a00c10e089"
+            ]
+          },
+          {
+            "subject": "restoration",
+            "predicate": "requires",
+            "object": "FilterStatus.Off",
+            "polarity": "positive",
+            "qualifiers": {},
+            "origin": "explicit_rule",
+            "evidence": [
+              "4b1da13846d450b519d4c1adf6a74133e4d9c937f4afe795729a3e2a019b4685"
+            ]
+          },
+          {
+            "subject": "этот исходный аудит",
+            "predicate": "supersedes",
+            "object": "статус продукта",
+            "polarity": "negative",
+            "qualifiers": {},
+            "origin": "explicit_rule",
+            "evidence": [
+              "e85d49ce3e4a983c27988b266dc8b636dc2e2d9285326ce5bffccf069bf51c60"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

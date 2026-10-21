@@ -45,6 +45,8 @@ fn main() -> anyhow::Result<()> {
         .manage(Shared::default())
         .invoke_handler(tauri::generate_handler![
             commands::bars_call,
+            commands::keybindings_get,
+            commands::keybindings_save,
             commands::pick_folder,
             commands::open_path,
             commands::document_action,

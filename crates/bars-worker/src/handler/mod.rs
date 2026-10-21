@@ -49,6 +49,7 @@ use errors::{doc_path_error, outline_error, read_error, search_error, worker_err
 /// Выполняет вызовы канала на воркере.
 #[derive(Clone)]
 pub struct WorkerHandler {
+    pub keybindings: crate::keybindings::Store,
     worker: Worker,
     history: crate::mcp_history::History,
     topics: crate::new_topics::Collector,
@@ -59,6 +60,7 @@ impl WorkerHandler {
         let history = crate::mcp_history::History::new(worker.bars_home().to_path_buf());
         history.start_maintenance();
         Self {
+            keybindings: crate::keybindings::Store::default(),
             worker,
             history,
             topics: crate::new_topics::Collector::new(),

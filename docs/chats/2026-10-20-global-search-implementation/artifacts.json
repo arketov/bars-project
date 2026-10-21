@@ -1,0 +1,10 @@
+{
+  "path": "C:\\Users\\arketov\\Desktop\\bars-project\\dist-installer\\bars_0.1.0_x64-setup.exe",
+  "bytes": 19896463,
+  "modified_local": "2026-10-20 23:35:18",
+  "sha256": "DA73CDC610A8F27645BE9B9293F98F3D4A061247D765CE17BDF2D750D9224919",
+  "mz": "MZ",
+  "pe": "PE\u0000\u0000",
+  "ui_sha256": "7989187167E02AE04F9471CE9A33E8D1A4B0226E07D5EFC89DA69AE5F33877ED",
+  "native_pass": true
+}

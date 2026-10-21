@@ -1,0 +1,13 @@
+{
+  "productName": "bars docking probe",
+  "identifier": "io.github.arketov.bars.docking-probe",
+  "build": { "frontendDist": "../../../ui/docking-dist" },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src ipc: http://ipc.localhost",
+      "capabilities": [{ "identifier": "probe", "windows": ["probe", "probe-doc"], "permissions": ["core:default"] }]
+    }
+  },
+  "bundle": { "active": false }
+}

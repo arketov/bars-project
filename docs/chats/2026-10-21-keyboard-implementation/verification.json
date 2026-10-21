@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-21",
+  "uiTests": 224,
+  "uiCheck": "0 errors, 0 warnings",
+  "storageTests": 3,
+  "storageTestRunner": "rustc --edition 2024 --test crates/bars-worker/src/keybindings.rs, existing target/release/deps",
+  "webview": true,
+  "browserAccelerators": "readback false, shared release helper",
+  "themes": [
+    "dark",
+    "light"
+  ],
+  "widths": [
+    1440,
+    1024,
+    760
+  ],
+  "rustfmt": "passed for touched Rust files",
+  "diffCheck": "passed",
+  "manualReview": "completed; active group target, stale target, IME, layers, revisions, write failure reviewed",
+  "fullCargoTest": "blocked: C1083 at nested Vulkan shader-generator path",
+  "installed": false,
+  "physicalKeyboard": false,
+  "macos": false
+}

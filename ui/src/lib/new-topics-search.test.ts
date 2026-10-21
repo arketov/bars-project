@@ -20,12 +20,46 @@ beforeEach(() => {
   app.topics.bind(project.path);
   app.tree = [];
   app.selected = new Set();
+  app.retrievalMode = 'hybrid'; app.count = null; app.minScore = null;
   invoke.mockImplementation(async (method) => {
     if (method === "search") return found;
     if (method === "new_topics_mark_missing") return { topic_id: 1, created: true };
     if (method === "new_topics_list") return listAnswer;
     throw new Error(`unexpected ${method}`);
   });
+});
+
+it("поздний поиск не заменяет новый; снимок сохраняет отправленные параметры", async () => {
+  const requests: ((value: unknown) => void)[] = [];
+  invoke.mockImplementation(() => new Promise(done => requests.push(done)));
+  app.query = 'первый'; const first = app.search();
+  app.query = 'второй'; app.count = 7; const second = app.search();
+  app.query = 'черновик'; app.count = 11;
+  requests[1](found); await second;
+  expect(app.displayed).toMatchObject({ query: 'второй', limit: 7, project: project.path, mode: 'hybrid' });
+  const id = app.displayed!.requestId;
+  requests[0]({ ...found, results: [] }); await first;
+  expect(app.displayed!.requestId).toBe(id); expect(app.results!.results).toHaveLength(1);
+});
+
+it("новый поиск убирает старую выдачу; смена проекта отклоняет поздний ответ", async () => {
+  app.query = 'первый'; await app.search();
+  let resolve!: (value: unknown) => void;
+  invoke.mockImplementation(() => new Promise(done => resolve = done));
+  const pending = app.search();
+  expect(app.results).toBeNull(); expect(app.displayed).toBeNull(); expect(app.searching).toBe(true);
+  await app.select(null);
+  resolve(found); await pending;
+  expect(app.results).toBeNull(); expect(app.displayed).toBeNull(); expect(app.searching).toBe(false);
+});
+
+it("диагностика пустого ответа использует завершённый запрос, не изменённое поле", async () => {
+  let resolve!: (value: unknown) => void;
+  invoke.mockImplementationOnce(() => new Promise(done => resolve = done));
+  app.query = 'исходный'; const pending = app.search();
+  app.query = 'изменённый'; resolve({ ...found, results: [] }); await pending;
+  const diagnostic = invoke.mock.calls.find(([, args]) => (args as { _window?: { purpose?: string } })?._window?.purpose === 'diagnostic');
+  expect(diagnostic?.[1]).toMatchObject({ query: 'исходный' });
 });
 afterEach(() => {
   app.topics.bind(null);

@@ -28,7 +28,7 @@
   }
 
   function onKey(event: KeyboardEvent) {
-    if (event.key !== "Enter") return;
+    if (event.key !== "Enter" || event.isComposing || event.keyCode === 229) return;
     event.preventDefault();
     if (!event.isComposing && !blocked && !app.searching && app.query.trim()) void app.search();
   }
@@ -49,7 +49,9 @@
   <div class="top">
     <div class="ask" class:dis={blocked}>
       <textarea
+        aria-label="Поисковый запрос"
         rows="1"
+        wrap="off"
         placeholder="Что найти в документации — например, «как считается порог релевантности»"
         disabled={blocked}
         bind:value={app.query}
@@ -95,6 +97,7 @@
 
   <div class="results">
     <div class="wrap">
+      {#if app.searching}<p role="status">Ищем…</p>{/if}
       {#if blocked && project}
         <Banner
           kind="warn"
@@ -220,13 +223,13 @@
 
 <style>
   main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
-  .top { padding: 12px 32px 14px; }
+  .top { padding: 8px 12px; width: 100%; max-width: 664px; margin: 0 auto; }
   .ask { max-width: 920px; margin: 0 auto; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); padding: 12px 12px 10px 16px; transition: border-color .15s, box-shadow .15s; }
   .ask:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow); }
   .ask.dis { opacity: .6; }
-  textarea { width: 100%; border: 0; outline: none; background: transparent; resize: none; font-size: 16px; line-height: 1.5; min-height: 26px; display: block; }
+  textarea { width: 100%; border: 0; outline: none; background: transparent; resize: none; overflow: hidden; font-size: 16px; line-height: 1.5; min-height: 26px; display: block; }
   textarea::placeholder { color: var(--faint); }
-  .askbar { display: flex; flex-wrap: nowrap; align-items: center; gap: 10px; margin-top: 6px; overflow-x: auto; padding: 2px 0; }
+  .askbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; padding: 2px 0; }
   .askbar > :not(.scope) { flex-shrink: 0; }
   .scope { flex: 1 0 80px; color: var(--muted); font-size: 12.5px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .search-options { display: flex; flex-wrap: nowrap; align-items: center; gap: 12px; }
@@ -239,8 +242,8 @@
   .scope b { color: var(--text); font-weight: 600; }
   .kbdhint { color: var(--faint); font-size: 12px; white-space: nowrap; }
   .go { padding: 9px 18px; border-radius: 10px; }
-  .results { flex: 1; overflow-y: auto; padding: 4px 32px 80px; min-height: 0; }
-  .wrap { max-width: 920px; margin: 0 auto; }
+  .results { flex: 1; overflow-y: auto; padding: 4px 12px 60px; min-height: 0; }
+  .wrap { max-width: 640px; margin: 0 auto; }
   .score-help { font-size: 12px; line-height: 1.5; margin: -6px 2px 14px; }
   .meta { color: var(--muted); font-size: 12.5px; margin: 6px 2px 14px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
   .meta b { color: var(--text); font-weight: 600; }

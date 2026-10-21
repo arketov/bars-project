@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { tick } from 'svelte';
+  import { commandAdapter } from './command-adapters';
+  import { copyText } from './api';
   import { onMount } from "svelte";
   import { app } from "./app.svelte";
   import Banner from "./Banner.svelte";
@@ -214,7 +217,7 @@
         </div>
       {:else}
         {#each store.visible as topic (topic.id)}
-          <button class="topic" aria-pressed={store.selectedId === topic.id} onclick={() => pick(topic)}>
+          <button class="topic" data-new-topic-id={topic.id} aria-pressed={store.selectedId === topic.id} onclick={() => pick(topic)}>
             <span class="ttitle">{topic.title}</span>
             <span class="meta">
               <span class="tag {topic.status}">{store.checking.has(topic.id) ? "Проверяем…" : STATUS_LABEL[topic.status]}</span>
@@ -240,7 +243,11 @@
     </details>
   </div>
 
-  <div class="pane card" aria-label="Карточка темы">
+  <div class="pane card" aria-label="Карточка темы" use:commandAdapter={{
+    'topics.copyQuery': { identity: () => detail?.id, run: async () => { await copyText(detail!.variants_list[0]?.text ?? detail!.title); }, reason: () => detail ? undefined : 'Тема не выбрана' },
+    'topics.rename': { identity: () => detail?.id, run: async () => { startRename(); await tick(); document.querySelector<HTMLElement>('[aria-label="Название темы"]')?.focus(); }, reason: () => detail && !store.busy ? undefined : 'Тема не выбрана или занята' },
+    'topics.delete': { identity: () => detail?.id, run: () => { confirm = 'delete'; }, reason: () => detail && !store.busy ? undefined : 'Тема не выбрана или занята' }
+  }}>
     <button class="back ghost sm" onclick={() => (cardOpen = false)}><Icon name="back" size={13} />К списку</button>
     {#if store.selectedId === null}
       <p class="muted placeholder">Выберите тему в списке.</p>

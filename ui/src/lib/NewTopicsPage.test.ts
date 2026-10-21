@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { flushSync, mount, unmount, type Component } from "svelte";
 import NewTopicsPage from "./NewTopicsPage.svelte";
+import ContextMenu from "./ContextMenu.svelte";
 import Sidebar from "./Sidebar.svelte";
 import { app } from "./app.svelte";
-import { call } from "./api";
+import { call, copyText } from "./api";
 import type { TopicDetail, TopicSummary, TopicsList } from "./new-topics";
 import { BarsError } from "./types";
 
@@ -217,6 +218,96 @@ it("первая строка дерева «Новые темы» стоит в
   expect(app.selected).toBe(selectedBefore);
   expect(host.querySelector(".topics-row")?.getAttribute("aria-current")).toBe("true");
   app.filter = "";
+});
+
+it("меню темы копирует исходный запрос, а не переименованный заголовок или выделение", async () => {
+  const original = "Как настроить поиск?\nПолная исходная формулировка";
+  const fallback = invoke.getMockImplementation()!;
+  invoke.mockImplementation(async (method, params) => method === "new_topics_get"
+    ? { ...detailOf(topics[0]), variants_list: [{ id: 10, text: original, scope: "project" }] }
+    : fallback(method, params));
+  const host = show(NewTopicsPage);
+  const menu = show(ContextMenu);
+  await settle();
+  const row = host.querySelector('[data-new-topic-id="1"]')!;
+  row.querySelector(".ttitle")!.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
+  await settle();
+  expect([...menu.querySelectorAll('[role="menuitem"]')].map(b => b.textContent?.trim())).toEqual(["Скопировать", "Закрыть"]);
+  button(menu, "Скопировать")!.click();
+  await settle();
+  expect(copyText).toHaveBeenCalledWith(original);
+  expect(app.topics.selectedId).toBeNull();
+  expect(invoke).not.toHaveBeenCalledWith("new_topics_delete", expect.anything());
+});
+
+it("Закрыть удаляет именно тему под правой кнопкой без выбора и подтверждения", async () => {
+  const host = show(NewTopicsPage);
+  const menu = show(ContextMenu);
+  await settle();
+  await app.topics.select(2);
+  const row = host.querySelector('[data-new-topic-id="1"]')!;
+  row.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
+  await settle();
+  button(menu, "Закрыть")!.click();
+  await settle();
+  expect(invoke).toHaveBeenCalledWith("new_topics_delete", { project: project.path, id: 1, revision: 1 });
+  expect(host.querySelector('[data-new-topic-id="1"]')).toBeNull();
+  expect(app.topics.selectedId).toBe(2);
+  expect(host.querySelector("dialog[open]")).toBeNull();
+});
+
+it("ошибка удаления сохраняет тему; смена проекта закрывает меню", async () => {
+  const fallback = invoke.getMockImplementation()!;
+  invoke.mockImplementation(async (method, params) => {
+    if (method === "new_topics_delete") throw new BarsError("Нет доступа");
+    return fallback(method, params);
+  });
+  const host = show(NewTopicsPage);
+  const menu = show(ContextMenu);
+  await settle();
+  const row = host.querySelector('[data-new-topic-id="1"]')!;
+  row.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
+  await settle();
+  button(menu, "Закрыть")!.click();
+  await settle();
+  expect(host.querySelector('[data-new-topic-id="1"]')).not.toBeNull();
+  row.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
+  await settle();
+  app.current = null;
+  flushSync();
+  expect(menu.querySelector('[role="menu"]')).toBeNull();
+});
+
+it("Shift+F10 открывает меню; ошибка буфера не удаляет тему", async () => {
+  vi.mocked(copyText).mockRejectedValueOnce(new Error("Буфер недоступен"));
+  const host = show(NewTopicsPage);
+  const menu = show(ContextMenu);
+  await settle();
+  const row = host.querySelector<HTMLButtonElement>('[data-new-topic-id="1"]')!;
+  row.focus();
+  row.dispatchEvent(new KeyboardEvent("keydown", { key: "F10", shiftKey: true, bubbles: true, cancelable: true }));
+  await settle();
+  expect(document.activeElement?.textContent?.trim()).toBe("Скопировать");
+  button(menu, "Скопировать")!.click();
+  await settle();
+  expect(host.querySelector('[data-new-topic-id="1"]')).not.toBeNull();
+  expect(invoke).not.toHaveBeenCalledWith("new_topics_delete", expect.anything());
+});
+
+it("ответ удаления из старого проекта не сбрасывает выбранную тему нового проекта", async () => {
+  const fallback = invoke.getMockImplementation()!;
+  let finish!: (value: unknown) => void;
+  invoke.mockImplementation(async (method, params) => method === "new_topics_delete"
+    ? new Promise(resolve => { finish = resolve; }) : fallback(method, params));
+  await app.topics.load();
+  const pending = app.topics.remove(1);
+  app.topics.bind("C:/другой");
+  await app.topics.load();
+  await app.topics.select(1);
+  finish({ accepted: true });
+  expect(await pending).toBe(false);
+  expect(app.topics.selectedId).toBe(1);
+  expect(app.topics.detail?.id).toBe(1);
 });
 
 it("счётчик строки при ошибке чтения — прочерк, а не ноль", async () => {

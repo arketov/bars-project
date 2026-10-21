@@ -21,6 +21,11 @@ tauri-plugin-single-instance.workspace = true
 serde_json.workspace = true
 tokio.workspace = true
 
+[target.'cfg(windows)'.dependencies]
+# Те же версии, что у Tauri/Wry; дополнительных runtime-библиотек нет.
+webview2-com = "=0.39.1"
+windows-core = "=0.62.2"
+
 [build-dependencies]
 tauri-build.workspace = true
 

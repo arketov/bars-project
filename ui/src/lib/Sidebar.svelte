@@ -1,12 +1,10 @@
 <script lang="ts">
   import { app } from "./app.svelte";
-  import { projectDot, problemStatus } from "./format";
+  import { projectDot } from "./format";
   import Icon from "./Icon.svelte";
-  import { theme } from "./theme.svelte";
   import { badgeText } from "./new-topics";
   import { filterTree, touchedModules } from "./tree";
   import TreeRow from "./TreeRow.svelte";
-  import Notifications from "./Notifications.svelte";
 
   let menuOpen = $state(false);
 
@@ -21,56 +19,15 @@
 
   function pick(path: string) {
     menuOpen = false;
-    app.view = "main";
+    app.openSearch();
     void app.select(path);
   }
 
-  /** Строка состояния: заголовок и вторая строка (время обновления, ход). */
-  function statusText(): [string, string] {
-    const status = app.status;
-    const running = app.activity?.running;
-    if (!app.project) return ["Нет проектов", ""];
-    if (running && running.project === app.project.path) {
-      const percent = app.progressOf(app.project.path);
-      return percent === null ? ["Индексация", "обход папки"] : ["Индексация", `проект ${percent} %`];
-    }
-    if (app.project.state === "unavailable") return ["Папка проекта не найдена", ""];
-    if (app.project.state === "reindex_required") return ["Нужна переиндексация", ""];
-    if (app.waitingOf(app.project.path) > 0) return [`Ждут ${app.waitingOf(app.project.path)} документов`, "поиск работает по готовому"];
-    const problem = app.activity?.problems.find(p => p.project === app.project?.path);
-    if (problem) return [problemStatus(problem), "Подробнее — в ходе индексации"];
-    if (status?.updated_at) {
-      const time = new Date(status.updated_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
-      return ["Индекс актуален", `обновлён ${time}`];
-    }
-    return ["Индекс актуален", ""];
-  }
-
-  const status = $derived(statusText());
-
-  const statusDot = $derived(
-    !app.project
-      ? "off"
-      : app.project.state === "reindex_required"
-        ? "warn"
-        : app.project.state === "unavailable"
-          ? "off"
-          : app.progressOf(app.project.path) !== null || app.waitingOf(app.project.path) > 0
-            ? "busy"
-            : (app.activity?.problems.some((p) => p.project === app.project?.path) ?? false)
-              ? "warn"
-              : "ok",
-  );
 </script>
 
 <svelte:window onclick={() => (menuOpen = false)} />
 
 <aside>
-  <div class="brand">
-    <div class="logo">b</div>
-    <div><b>bars</b><small>поиск по документации проектов</small></div>
-  </div>
-
   <div class="projwrap" class:open={menuOpen}>
     <button
       class="proj"
@@ -121,12 +78,13 @@
   </div>
 
   {#if hasTree}
-    <label class="filter">
+    <div class="filter-row"><label class="filter">
       <Icon name="search" size={14} width={2.4} />
-      <input placeholder="Фильтр документов" autocomplete="off" bind:value={app.filter} />
+      <input placeholder="Фильтр документов" aria-label="Фильтр документов" autocomplete="off" bind:value={app.filter} />
     </label>
+    {#if app.searchActive}<button class="reset-scope" aria-label="Сбросить область поиска" title={(touched.length ? `Отмечено модулей: ${touched.length} из ${app.tree.length}` : "Ничего не отмечено — весь проект") + ". Сбросить область поиска"} onclick={() => app.clearSelection()}><Icon name="refresh" size={13} /></button>{/if}</div>
 
-    <div class="tree">
+    <div class="tree" role="tree" aria-label="Документы проекта">
       <button
         class="topics-row"
         class:on={app.topicsOpen}
@@ -149,14 +107,6 @@
       {/if}
     </div>
 
-    <div class="sfoot">
-      <span>
-        {touched.length
-          ? `Отмечено модулей: ${touched.length} из ${app.tree.length}`
-          : "Ничего не отмечено — весь проект"}
-      </span>
-      <button class="link" onclick={() => app.clearSelection()}>Сбросить</button>
-    </div>
   {:else}
     <div class="plist">
       <div class="plabel">Проекты</div>
@@ -181,24 +131,6 @@
     </div>
   {/if}
 
-  <div class="sfoot">
-    <div class="status">
-      <span class="dot {statusDot}"></span>
-      <span class="text">
-        <span class="line1">{status[0]}</span>
-        {#if status[1]}<span class="line2">{status[1]}</span>{/if}
-      </span>
-    </div>
-    <div class="tools">
-      <Notifications />
-      <button class="iconbtn" title="Светлая / тёмная тема" onclick={() => theme.toggle()}>
-        <Icon name="moon" size={17} width={2} />
-      </button>
-      <button class="iconbtn" title="Настройки" onclick={() => app.openSettings()}>
-        <Icon name="gear" size={17} width={2} />
-      </button>
-    </div>
-  </div>
 </aside>
 
 <style>
@@ -212,11 +144,7 @@
   .topics-row .ct { color: var(--faint); font-size: 11.5px; font-variant-numeric: tabular-nums; }
   .topics-row .ct:not(.zero) { color: var(--accent-text); font-weight: 600; }
   aside { background: var(--panel); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
-  .brand { padding: 18px 18px 12px; display: flex; align-items: center; gap: 10px; }
-  .logo { width: 30px; height: 30px; border-radius: 9px; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font-weight: 800; font-size: 16px; letter-spacing: -.5px; }
-  .brand b { font-size: 15px; }
-  .brand small { display: block; color: var(--muted); font-size: 11.5px; margin-top: -2px; }
-  .projwrap { position: relative; margin: 0 14px 10px; }
+  .projwrap { position: relative; margin: 8px 10px; }
   .proj { width: 100%; display: flex; align-items: center; gap: 10px; text-align: left; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-2); transition: border-color .15s; }
   .proj:hover { border-color: var(--line-2); }
   .pn { flex: 1; min-width: 0; }
@@ -233,10 +161,12 @@
   .pmenu-sep { height: 1px; background: var(--line); margin: 6px 4px; }
   .padd { display: flex; align-items: center; gap: 8px; width: 100%; border: 0; background: none; padding: 7px 8px; border-radius: 8px; color: var(--accent-text); font-weight: 600; font-size: 13px; }
   .padd:hover { background: var(--panel-2); }
-  .filter { margin: 0 14px 8px; position: relative; display: block; }
-  .filter input { width: 100%; padding: 8px 10px 8px 32px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel-2); outline: none; }
+  .filter-row { display: flex; align-items: center; gap: 4px; margin: 0 10px 5px; }
+  .filter { position: relative; display: block; flex: 1; min-width: 0; }
+  .filter input { width: 100%; height: 24px; padding: 2px 6px 2px 24px; font-size: 11px; border-radius: 5px; border: 1px solid var(--line); background: var(--panel-2); outline: none; }
   .filter input:focus { border-color: var(--accent); background: var(--panel); }
-  .filter :global(svg) { position: absolute; left: 10px; top: 10px; color: var(--faint); }
+  .filter :global(svg) { position: absolute; left: 6px; top: 5px; color: var(--faint); }
+  .reset-scope { display: grid; place-items: center; flex: none; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 4px; background: transparent; color: var(--muted); } .reset-scope:hover { background: var(--accent-soft); color: var(--accent-text); }
   .tree { flex: 1; overflow-y: auto; padding: 2px 8px 10px; min-height: 0; }
   .none { color: var(--muted); font-size: 12.5px; padding: 8px 10px; margin: 0; }
   .plist { padding: 0 8px; flex: 1; overflow-y: auto; min-height: 0; }
@@ -247,11 +177,4 @@
   .litem.on .pn b { color: var(--accent-text); }
   .ladd { display: flex; align-items: center; gap: 8px; width: calc(100% - 16px); margin: 6px 8px 10px; border: 1px dashed var(--line-2); background: none; padding: 8px 10px; border-radius: 9px; color: var(--accent-text); font-weight: 600; font-size: 13px; }
   .ladd:hover { background: var(--panel-2); }
-  .status { display: flex; align-items: center; gap: 8px; min-width: 0; }
-  .status .text { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
-  .status .line1 { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .status .line2 { font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tools { display: flex; gap: 2px; }
-  .iconbtn { border: 1px solid transparent; background: none; color: var(--muted); padding: 5px; border-radius: 8px; display: grid; place-items: center; }
-  .iconbtn:hover { background: var(--panel-2); border-color: var(--line); color: var(--text); }
 </style>

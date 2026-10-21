@@ -272,10 +272,11 @@ export class NewTopicsStore {
   }
 
   async remove(id: number): Promise<boolean> {
+    const version = this.#version;
     const project = this.project, revision = this.#revision(id);
     if (!project || revision === null) return false;
     const done = await this.#mutate(() => call("new_topics_delete", { project, id, revision }));
-    if (!done) return false;
+    if (!done || version !== this.#version) return false;
     if (this.selectedId === id) {
       this.selectedId = null;
       this.detail = null;

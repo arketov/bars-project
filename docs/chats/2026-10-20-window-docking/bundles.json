@@ -1,0 +1,39 @@
+{
+  "measuredAt": "2026-10-20T13:02:23.460Z",
+  "method": "Vite 8.3.4, full namespace export retained, es minify; gzip Node default; CSS dockview raw",
+  "rows": [
+    {
+      "name": "dockview-core",
+      "version": "8.6.1",
+      "license": "MIT",
+      "dist.unpackedSize": 5559923,
+      "time.modified": "2026-10-19T20:26:36.493Z",
+      "repository.url": "git+https://github.com/dockview/dockview.git",
+      "jsBytes": 455902,
+      "jsGzipBytes": 97413
+    },
+    {
+      "name": "golden-layout",
+      "version": "2.6.0",
+      "license": "MIT",
+      "dist.unpackedSize": 2059600,
+      "time.modified": "2023-02-21T17:06:51.158Z",
+      "repository.url": "git+https://github.com/golden-layout/golden-layout.git",
+      "jsBytes": 153939,
+      "jsGzipBytes": 32542
+    },
+    {
+      "name": "dock-spawn-ts",
+      "version": "4.4.0",
+      "license": "MIT",
+      "dist.unpackedSize": 1173261,
+      "time.modified": "2026-10-19T16:01:57.051Z",
+      "repository.url": "git+https://github.com/node-projects/dock-spawn-ts.git",
+      "buildError": "Error: Build failed with 2 errors:\n\n[MISSING_EXPORT] \"default\" is not exported by \"../../../AppData/Local/Temp/bars-docking-bundle-<temporary>/node_modules/dock-spawn-ts/lib/css/dock-manager-style.css\".\n   ╭─[ ../../../AppData/Local/Temp/bars-docking-bundle-<temporary>/node_modules/dock-spawn-ts/lib/js/webcomponent/DockSpawnTsWebcomponent.js:5:8 ]\n   │\n 5 │ import style1 from \"../../../lib/css/dock-manager-style.css\" with { type: 'css' };\n   │        ───┬──  \n   │           ╰──── Missing export\n───╯\n\n[MISSING_EXPORT] \"default\" is not exported by \"../../../AppData/Local/Temp/bars-docking-bundle-<temporary>/node_modules/dock-spawn-ts/lib/css/dock-manager.css\".\n   ╭─[ ../../../AppData/Local/Temp/bars-docking-bundle-<temporary>/node_modules/dock-spawn-ts/lib/js/webcomponent/DockSpawnTsWebcomponent.js:7:8 ]\n   │\n 7 │ import style2 from \"../../../lib/css/dock-manager.css\" with { type: 'css' };\n   │        ───┬──  \n   │           ╰──── Missing export\n───╯\n"
+    }
+  ],
+  "dockviewCss": {
+    "bytes": 159552,
+    "gzipBytes": 12761
+  }
+}

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { renderDocument, stripFrontmatter } from "./markdown";
+import { documentHeadings, renderDocument, stripFrontmatter } from "./markdown";
+
+it("структура учитывает frontmatter и не принимает код за заголовок", () => {
+  expect(documentHeadings("---\ntitle: Тема\n---\n\n# Тема\n\n```md\n## Это код\n```\n\n## **Раздел**\n")).toEqual([{ line: 5, label: "Тема" }, { line: 11, label: "Раздел" }]);
+});
 
 const DOC = `---
 title: Поиск

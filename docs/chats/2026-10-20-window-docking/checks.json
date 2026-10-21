@@ -1,0 +1,21 @@
+{
+  "documents": 4,
+  "localLinks": 16,
+  "nativeSuccess": true,
+  "fullUiTests": {
+    "files": 28,
+    "passed": 195
+  },
+  "latestFocusedTests": 2,
+  "svelteCheck": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "productionUiBuild": true,
+  "probeUiBuild": true,
+  "rustExampleBuild": true,
+  "rustfmt": true,
+  "powershellSyntax": true,
+  "nodeSyntax": true,
+  "cleanup": "blocked_by_automatic_review; retry code syntax checked only"
+}

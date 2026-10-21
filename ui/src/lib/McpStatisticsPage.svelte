@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
+  import { commandAdapter } from './command-adapters';
   import { mcpHistory, mcpHistoryControl, mcpHistoryLegacy, mcpHistoryDiagnostics, mcpHistoryOptions } from "./api";
   import { duration, incompleteness, localTime, outcomes, parameters, periodBounds, quantity, status, value, type Attempt, type HistoryFilter, type HistoryPage, type HistoryDiagnostics } from "./mcp-history";
   import type { McpStatistic } from "./mcp-statistics";
@@ -115,8 +116,8 @@
   onMount(() => { void load(); return () => { generation++; selectionVersion++; optionsVersion++; clearTimeout(optionsTimer); }; });
 </script>
 
-<svelte:window onkeydown={e => { if (e.key === "Escape") { if (confirmClear && !managing) void cancelClear(); else if (selected) void close(); } }} />
-<div class="mcp-page">
+<svelte:window onkeydown={e => { if (!e.defaultPrevented && !document.querySelector('dialog[open], [role="menu"]') && (!document.querySelector('.workspace') || e.target instanceof HTMLElement && e.target.closest('.mcp-page')) && e.key === "Escape") { if (confirmClear && !managing) { e.preventDefault(); void cancelClear(); } else if (selected) { e.preventDefault(); void close(); } } }} />
+<div class="mcp-page" data-command-blocked={confirmClear || undefined} use:commandAdapter={{ 'mcp.clear': { run: askClear, reason: () => managing ? 'Операция выполняется' : undefined } }}>
   <header><div><h1>Статистика MCP</h1><p class="muted">Отдельные вызовы: что запрошено, что применено и чем закончилось.</p></div><button class="ghost" onclick={() => load()} disabled={busy || managing}>Обновить</button></header>
   <p class="muted small">{updated ? `Обновлено: ${localTime(updated)}` : busy ? "Загрузка истории…" : "Свежие данные не получены"}. Даты и время — местные ({Intl.DateTimeFormat().resolvedOptions().timeZone}).</p>
   <div class="filters">
@@ -145,7 +146,7 @@
         <h2 id="mcp-list-title" tabindex="-1">Вызовы · {page.summary.calls}</h2>
         {#if page.records.length === 0}<div class="empty" role="status">{activeFilters ? "Нет совпадений. Измените или сбросьте фильтры." : "Вызовов за последние 24 часа пока нет. Здесь появятся обращения MCP после начала сбора; проверьте также последние 7 дней."}</div>{/if}
         {#each page.records as a (a.id)}
-          <button id={`mcp-call-${a.id}`} class="call-row" class:selected={selected?.id === a.id} aria-pressed={selected?.id === a.id} onclick={() => open(a)}>
+          <button id={`mcp-call-${a.id}`} class="call-row" class:selected={selected?.id === a.id} aria-pressed={selected?.id === a.id} onclick={() => open(a)} use:commandAdapter={{ 'mcp.details': { run: () => open(a) } }}>
             <time>{localTime(a.started)}</time><span><strong>{a.tool}</strong><small>{a.project_name ?? (a.project || "Без проекта")}</small><small>{a.project}</small><span class:bad={a.outcome === "error"} class="status-label">{status(a)}</span></span><span class="metrics">{quantity(a)}<small>{duration(a.duration_ms)}</small></span>
           </button>
         {/each}

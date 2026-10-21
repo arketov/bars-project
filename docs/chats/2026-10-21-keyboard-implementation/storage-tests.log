@@ -1,0 +1,8 @@
+
+running 3 tests
+test tests::cloned_writers_do_not_lose_updates ... ok
+test tests::write_failure_preserves_profile_and_unknown_version_requires_reset ... ok
+test tests::revisions_platforms_unknown_ids_and_corruption ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+

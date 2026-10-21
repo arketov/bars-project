@@ -50,6 +50,10 @@ function remembered(): string | null {
 
 class App {
   view = $state<View>("main");
+  searchActive = $state(true);
+  navigationVersion = $state(0);
+  topicsVersion = $state(0);
+  indexingOpen = $state(false);
   settingsTab = $state("models");
   projects = $state<ProjectInfo[]>([]);
   projectsLoaded = $state(false);
@@ -87,7 +91,7 @@ class App {
   /** «Новые темы» открыты в правой панели, как файл: вместо просмотра документа. */
   topicsOpen = $state(false);
   /** Контекст отображённой выдачи для ручной отметки «Не хватило знаний» (NT-02): не поле ввода, а то, что искали. */
-  displayed = $state<{ requestId: string; query: string; modules: string[]; files: string[] } | null>(null);
+  displayed = $state<{ requestId: string; project: string; query: string; modules: string[]; files: string[]; mode: RetrievalMode; includeRelated: boolean; limit: number | null; minScore: number | null } | null>(null);
   /** ID обращения, которое пользователь уже отметил; повторная отметка идемпотентна и не нужна. */
   markedRequest = $state<string | null>(null);
   consentOpen = $state(false);
@@ -117,7 +121,7 @@ class App {
       .sort((a, b) => b.sequence - a.sequence)[0] ?? null;
   }
 
-  private loadIndexingHistory(): Promise<void> {
+  loadIndexingHistory(): Promise<void> {
     if (this.#indexingPending) return this.#indexingPending;
     this.#indexingPending = this.readIndexingHistory().finally(() => { this.#indexingPending = null; });
     return this.#indexingPending;
@@ -241,7 +245,7 @@ class App {
         const events = await call<OperationEventsOutput>("operation_events", { epoch: this.#notifications.epoch, after: this.#notifications.cursor });
         if (epoch !== this.#epoch) return;
         this.#notifications.events(events);
-        if (this.view === "indexing" && (this.indexingHistoryError || events.epoch !== this.indexingHistory?.epoch
+        if ((this.view === "indexing" || this.indexingOpen) && (this.indexingHistoryError || events.epoch !== this.indexingHistory?.epoch
           || events.completed.some(op => op.project === this.current))) void this.loadIndexingHistory();
         this.notificationError = null;
       } catch {
@@ -366,10 +370,15 @@ class App {
     const requestId = newRequestId();
     this.searching = true;
     this.searchError = null;
+    this.results = null;
+    this.graphSearch = null;
+    this.displayed = null;
+    this.emptyInfo = null;
     const started = performance.now();
     try {
       const { modules, files } = this.scope;
       const mode=this.retrievalMode;
+      const includeRelated = this.includeRelated, limit = this.count, minScore = this.minScore;
       const output = await call<SearchOutput|GraphSearchOutput>(mode==='hybrid'?"search":"graph_search", {
         cwd: project.path,
         project: project.path,
@@ -377,15 +386,15 @@ class App {
         modules,
         files,
         ...(mode==='hybrid'?{}:{mode}),
-        ...(mode==='mix'?{include_related:this.includeRelated}:{}),
-        ...(this.count === null ? {} : { limit: this.count }),
-        ...(this.minScore === null ? {} : { min_score: this.minScore }),
+        ...(mode==='mix'?{include_related:includeRelated}:{}),
+        ...(limit === null ? {} : { limit }),
+        ...(minScore === null ? {} : { min_score: minScore }),
         // Служебное поле окна: ID отображаемого обращения. Воркер считает по нему спрос на тему, ручная отметка опирается на него же.
         _window: { request_id: requestId },
       });
       if (searchId !== this.#searchId || this.current !== project.path) return;
       this.results = output;
-      this.displayed = { requestId, query, modules, files };
+      this.displayed = { requestId, project: project.path, query, modules, files, mode, includeRelated, limit, minScore };
       this.markedRequest = null;
       this.graphSearch='requested_mode' in output?output as GraphSearchOutput:null;
       this.#notifications.resolve(`search:${project.path}`);
@@ -393,7 +402,7 @@ class App {
       else this.#notifications.resolve(`rerank:${project.path}`);
       this.publishNotifications();
       this.searchedQuery = query;
-      const emptyInfo = output.results.length === 0&&mode!=='graph' ? await this.diagnoseEmpty(project.path, modules, files) : null;
+      const emptyInfo = output.results.length === 0&&mode!=='graph' ? await this.diagnoseEmpty(project.path, modules, files, query) : null;
       if (searchId === this.#searchId && this.current === project.path) this.emptyInfo = emptyInfo;
     } catch (error) {
       if (searchId !== this.#searchId || this.current !== project.path) return;
@@ -426,12 +435,12 @@ class App {
    * Пустая выдача: ещё один запрос с порогом 0 показывает, что воркер прижмёт к нижнему пределу
    * настроек, и лучшего кандидата. Окно не обходит порог — оно только объясняет пользователю, почему пусто.
    */
-  async diagnoseEmpty(path: string, modules: string[], files: string[]): Promise<{ best: number | null; lowest: number | null }> {
+  async diagnoseEmpty(path: string, modules: string[], files: string[], query: string): Promise<{ best: number | null; lowest: number | null }> {
     try {
       const probe = await call<SearchOutput>("search", {
         cwd: path,
         project: path,
-        query: this.query.trim(),
+        query,
         modules,
         files,
         limit: 1,
@@ -469,12 +478,15 @@ class App {
 
   /** Нажатие на строку «Новые темы»: открывается в панели просмотра, не меняя область поиска и запрос. */
   openTopics(): void {
+    this.navigationVersion++;
+    this.topicsVersion++;
     this.view = "main";
     this.closeViewer();
     this.topicsOpen = true;
   }
 
   closeTopics(): void {
+    this.topicsVersion++;
     this.topicsOpen = false;
   }
 
@@ -482,16 +494,17 @@ class App {
     const project = this.project;
     if (!project) return;
     const reading = ++this.#reading;
-    this.view = "main";
     this.topicsOpen = false;
     try {
       // Путь индекса уже от корня проекта: исключаем docs/docs/x.md при совпадении имён.
       const output = await call<ReadOutput>("read", { cwd: project.path, project: project.path, path: `./${hit.path}` });
       if (reading !== this.#reading || this.current !== project.path) return;
+      this.view = "main";
       this.viewer = { hit, title: output.title, text: output.text, missing: false };
     } catch (error) {
       if (reading !== this.#reading || this.current !== project.path) return;
       if (error instanceof BarsError && error.kind === "file_not_found") {
+        this.view = "main";
         this.viewer = { hit, title: hit.title, text: "", missing: true };
       } else {
         this.flash(error instanceof Error ? error.message : String(error), true);
@@ -677,11 +690,18 @@ class App {
   }
 
   openIndexing(): void {
+    this.navigationVersion++;
     this.view = "indexing";
     void this.loadIndexingHistory();
   }
 
+  openSearch(): void {
+    this.navigationVersion++;
+    this.view = "main";
+  }
+
   openSettings(tab = "models"): void {
+    this.navigationVersion++;
     this.settingsTab = tab;
     this.view = "settings";
   }

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { tick } from "svelte";
+  import { commandAdapter } from './command-adapters';
   import { app } from "./app.svelte";
   import Icon from "./Icon.svelte";
   import type { Notice } from "./notifications";
@@ -29,7 +30,7 @@
   function close() { open = false; trigger?.focus(); }
   function outside(event: MouseEvent) { if (open && !root.contains(event.target as Node)) close(); }
   function keyboard(event: KeyboardEvent) {
-    if (!open) return;
+    if (!open || event.defaultPrevented || document.querySelector('dialog[open], [role="menu"]')) return;
     if (event.key === "Escape") { event.preventDefault(); close(); }
     if (event.key === "Tab") {
       const buttons = [...(panel?.querySelectorAll<HTMLElement>('button:not(:disabled), summary, [tabindex="0"]') ?? [])];
@@ -48,7 +49,7 @@
 </script>
 
 <svelte:window onclick={outside} onkeydown={keyboard} />
-<div class="notifications" bind:this={root}>
+<div class="notifications" bind:this={root} use:commandAdapter={{ 'notifications.open': { run: async () => { if (!open) await toggle(); else panel?.focus(); } } }}>
   <button class="bell" bind:this={trigger} title="Уведомления" aria-label={`Уведомления, непрочитанных: ${unread}`} aria-expanded={open} aria-controls="notifications-panel" onclick={toggle}>
     <Icon name="bell" size={17} width={2} />
     {#if unread}<span class="badge">{unread > 99 ? "99+" : unread}</span>{/if}
@@ -61,7 +62,7 @@
       {#if app.notificationHistoryWarning}<div class="connection" role="status">{app.notificationHistoryWarning}</div>{/if}
       <div class="list" bind:this={list}>
         {#each app.notifications as item (item.id)}
-          <article class:bad={item.bad} class:active={item.active} class:unread={item.unread} use:visible={item}>
+          <article class:bad={item.bad} class:active={item.active} class:unread={item.unread} use:visible={item} use:commandAdapter={{ 'notification.details': { run: () => { expanded = expanded === item.id ? null : item.id; }, reason: () => item.operation ? undefined : 'Нет данных операции' }, 'notification.retry': { run: () => app.retryNotification(item), reason: () => item.operation?.target_available && !item.active && !item.unknown && ['error','partial','cancelled'].includes(item.operation.state) ? undefined : 'Повтор недоступен' } }}>
             <div class="notice-icon" class:ok={item.operation?.state === "success"} class:warn={item.unknown || item.operation?.state === "cancelled"}><Icon name={item.unknown ? "warn" : item.bad ? "error" : item.active ? "refresh" : item.operation?.state === "cancelled" ? "stop" : "check"} size={16} /></div>
             <div class="content">
             <div class="heading"><b>{item.title}</b><span class="status">{status(item)}</span></div>

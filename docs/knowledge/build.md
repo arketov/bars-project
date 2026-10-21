@@ -9,18 +9,34 @@ title: Сборка bars — как собрать, проверить и что
 ## Требования к машине разработчика bars
 
 - Rust `1.99.0`: версия закреплена в `rust-toolchain.toml` вместе с компонентами `rustfmt` и `clippy`. Нижняя граница стека — 1.90 ([architecture/stack.md](../architecture/stack.md)); точный пин нужен, чтобы сборка не менялась от обновления stable.
-- Windows: MSVC 17.14+, CMake/Ninja, Vulkan SDK (`VULKAN_SDK`; `scripts/build-installer.ps1` находит его сам, остальные команды ждут переменную) и LLVM для bindgen в `llama-cpp-sys-2` (`LIBCLANG_PATH`, например `C:\Program Files\LLVM\bin`). Всё ставится через winget: `LLVM.LLVM`, `Kitware.CMake`, `Ninja-build.Ninja`, `KhronosGroup.VulkanSDK`. Для нативной GGUF-сборки использовать Developer PowerShell последнего MSVC, `CMAKE_GENERATOR=Ninja`, `CMAKE_BUILD_PARALLEL_LEVEL=1`, короткий `CARGO_TARGET_DIR` (например, `C:/bars-build`). MSBuild с вложенным shader generator нестабилен на чистом каталоге. macOS: Xcode Command Line Tools; Metal не проверен.
+- Windows: MSVC 17.14+, CMake/Ninja, Vulkan SDK (`VULKAN_SDK`; `scripts/build-installer.ps1` находит его сам, остальные команды ждут переменную) и LLVM для bindgen в `llama-cpp-sys-2` (`LIBCLANG_PATH`, например `C:\Program Files\LLVM\bin`). Всё ставится через winget: `LLVM.LLVM`, `Kitware.CMake`, `Ninja-build.Ninja`, `KhronosGroup.VulkanSDK`. Для нативной GGUF-сборки использовать Developer PowerShell последнего MSVC, `CMAKE_GENERATOR=Ninja`, `CMAKE_BUILD_PARALLEL_LEVEL=1`. MSBuild с вложенным shader generator нестабилен на чистом каталоге. macOS: Xcode Command Line Tools; Metal не проверен.
 - Сеть: `ort` скачивает ONNX Runtime с `cdn.pyke.io` при первой сборке `bars-core`.
 
-## Каталог сборки вне OneDrive
+## Где хранятся артефакты сборки target
 
-Репозиторий лежит в OneDrive, а каталог `target/` с ONNX Runtime и Tauri занимает гигабайты. Поэтому `CARGO_TARGET_DIR` задаётся вне репозитория:
+Локальный Vulkan SDK найден также в `C:/tools/VulkanSDK/1.4.363.0`. Штатный установочный скрипт проверяет `VULKAN_SDK`, `C:/VulkanSDK` и `C:/tools/VulkanSDK`; каталог `Lib` выбранного SDK добавляет в окружение линковщика текущего процесса. Это позволяет использовать готовые C++-артефакты, даже если их кэш сохранил старый путь к import library `vulkan-1.lib`. Глобальные переменные и установленный SDK скрипт не меняет.
 
-```bash
-export CARGO_TARGET_DIR="C:/bars-build"
+Cargo без переопределений пишет в `target/` корня workspace. Скрипты сборки и нативных проб по умолчанию используют тот же каталог внутри репозитория. Переменная `CARGO_TARGET_DIR` позволяет явно выбрать другой каталог:
+
+```powershell
+$env:CARGO_TARGET_DIR = 'C:/путь/к/своему/target'
 ```
 
-Путь в репозиторий не записывается: он у каждого свой.
+`scripts/build-installer.ps1` сохраняет заданный `CARGO_TARGET_DIR`; без него использует `<корень репозитория>/target`. EXE лежат в `<target>/debug/` или `<target>/release/`, NSIS — в `<target>/release/bundle/nsis/`; скрипт копирует установщик в `dist-installer/` либо указанный `-OutDir`. Это разные места: `target` — рабочие артефакты, выходной каталог — копия для передачи.
+
+Если работающий Vite удерживает `rolldown-binding.win32-x64-msvc.node`, `npm ci` может завершиться EPERM при удалении зависимостей. Не останавливать чужой процесс: для уже установленных зависимостей `scripts/build-installer.ps1 -SkipNpmCi` сначала проверяет `npm ls --depth=0`, затем собирает UI. Если предыдущий `npm ci` успел удалить часть пакетов, восстановить `npm install --ignore-scripts --prefer-offline` и проверить неизменность `package-lock.json` перед сборкой. Флаг не разрешает менять версии зависимостей.
+
+На машине разработки release-артефакты лежат в `target/` репозитория. Наличие папки не определяет, куда пишет следующий запуск: это задают `CARGO_TARGET_DIR` и текущий workspace. Не очищать общий Cargo target ради отдельного теста.
+
+## Где хранятся временные файлы тестов и кэш моделей
+
+| Данные | Место и жизненный цикл |
+|---|---|
+| Временные проекты, индексы и профили Rust-тестов | `tempfile::TempDir` в системном временном каталоге; на Windows обычно `%TEMP%` (`C:/Users/arketov/AppData/Local/Temp` на проверенной машине). Каталог удаляется при штатном уничтожении `TempDir`; аварийное завершение может оставить остатки |
+| Изолированный профиль интеграционного стенда | `BARS_USER_HOME` указывает на домашнюю папку стенда внутри собственного временного каталога; настройки клиентов и данные bars создаются в ней. Рабочий профиль пользователя не использовать |
+| Скачанные встроенные модели | `<домашняя папка>/.bars/models/`, на проверенной машине `C:/Users/arketov/.bars/models/`; это общий постоянный кэш, а не временные данные теста и не `.bars` проекта. Контракт — [local-models.md](../features/models/local-models.md#где-лежат-скачанные-модели) |
+
+Аппаратные исследования используют один собственный временный каталог вне репозитория, существующие веса только для чтения без копий. После сохранения небольших доказательств убрать собственные временные данные, включая неуспешный выход; общие модели и чужие артефакты не удалять (решение автора OQ-107 в [QUESTIONS.md](../../QUESTIONS.md)). Тесты с настоящей моделью, описанные далее, читают готовый пользовательский кэш без скачивания; не все временные файлы проекта создаются через `TempDir`.
 
 ## Проверки перед коммитом
 

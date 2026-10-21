@@ -1,0 +1,37 @@
+[
+  {
+    "state": "empty",
+    "expected": "Ничего не найдено",
+    "passed": true
+  },
+  {
+    "state": "loading",
+    "expected": "Ищем…",
+    "passed": true
+  },
+  {
+    "state": "error",
+    "expected": "Нет связи с воркером",
+    "passed": true
+  },
+  {
+    "state": "reindex",
+    "expected": "Проект нужно переиндексировать",
+    "passed": true
+  },
+  {
+    "state": "indexing",
+    "expected": "Идёт обновление индекса",
+    "passed": true
+  },
+  {
+    "state": "partial",
+    "expected": "Связи показаны не полностью",
+    "passed": true
+  },
+  {
+    "state": "fallback",
+    "expected": "применён hybrid",
+    "passed": true
+  }
+]

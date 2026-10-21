@@ -1,6 +1,12 @@
 /** Логика контекстного меню окна (ISS-07): какие пункты показать и как их выполнить. */
 
-export type MenuAction = "copy" | "paste" | "selectAll" | "open" | "editors" | "editor" | "reveal" | "path" | "check" | "deleteProject" | "checkProject";
+export type MenuAction = "copy" | "paste" | "selectAll" | "open" | "editors" | "editor" | "reveal" | "path" | "check" | "deleteProject" | "checkProject" | "copyTopic" | "closeTopic";
+
+export function topicAt(target: EventTarget | null): { id: number; element: HTMLElement } | null {
+  const element = target instanceof Element ? target.closest<HTMLElement>("[data-new-topic-id]") : null;
+  const id = Number(element?.dataset.newTopicId);
+  return element && Number.isSafeInteger(id) && id > 0 ? { id, element } : null;
+}
 
 export interface MenuItem {
   action: MenuAction;

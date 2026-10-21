@@ -1,0 +1,68 @@
+[
+  {
+    "extraHeader": "",
+    "eyeVisible": true,
+    "highlight": true,
+    "mode": "light",
+    "overflow": false,
+    "path": "features/window/requirements.md",
+    "rightRender": true,
+    "toolbarFits": true,
+    "width": 1440
+  },
+  {
+    "extraHeader": "",
+    "eyeVisible": true,
+    "highlight": true,
+    "mode": "dark",
+    "overflow": false,
+    "path": "features/window/requirements.md",
+    "rightRender": true,
+    "toolbarFits": true,
+    "width": 1440
+  },
+  {
+    "extraHeader": "",
+    "eyeVisible": true,
+    "highlight": true,
+    "mode": "light",
+    "overflow": false,
+    "path": "features/window/requirements.md",
+    "rightRender": true,
+    "toolbarFits": true,
+    "width": 1024
+  },
+  {
+    "extraHeader": "",
+    "eyeVisible": true,
+    "highlight": true,
+    "mode": "dark",
+    "overflow": false,
+    "path": "features/window/requirements.md",
+    "rightRender": true,
+    "toolbarFits": true,
+    "width": 1024
+  },
+  {
+    "extraHeader": "",
+    "eyeVisible": true,
+    "highlight": true,
+    "mode": "light",
+    "overflow": false,
+    "path": "features/window/requirements.md",
+    "rightRender": true,
+    "toolbarFits": true,
+    "width": 760
+  },
+  {
+    "extraHeader": "",
+    "eyeVisible": true,
+    "highlight": true,
+    "mode": "dark",
+    "overflow": false,
+    "path": "features/window/requirements.md",
+    "rightRender": true,
+    "toolbarFits": true,
+    "width": 760
+  }
+]

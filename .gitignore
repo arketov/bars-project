@@ -5,6 +5,8 @@
 # Frontend (Tauri UI)
 node_modules/
 dist/
+docking-dist/
+.vite/
 
 # bars indexing this very repository
 .bars/

@@ -403,6 +403,8 @@ dependencies = [
  "tauri-plugin-single-instance",
  "tempfile",
  "tokio",
+ "webview2-com",
+ "windows-core",
 ]
 
 [[package]]

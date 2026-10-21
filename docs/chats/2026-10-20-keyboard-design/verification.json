@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-20",
+  "scope": "documentation-design-only",
+  "command_ids": 95,
+  "concrete_defaults_windows": 16,
+  "concrete_defaults_macos": 16,
+  "defaults": {
+    "windows": {
+      "F6": "panel.next",
+      "Ctrl+S": "document.save",
+      "Ctrl+Shift+Tab": "tab.previous",
+      "Ctrl+I": "editor.italic",
+      "Ctrl+O": "document.open",
+      "Ctrl+Shift+P": "commands.open",
+      "Ctrl+K": "editor.link",
+      "Ctrl+W": "tab.close",
+      "Ctrl+B": "editor.bold",
+      "Ctrl+Comma": "settings.open",
+      "Ctrl+Tab": "tab.next",
+      "Ctrl+Shift+E": "document.preview",
+      "Shift+F6": "panel.previous",
+      "Ctrl+F": "document.find",
+      "Ctrl+Shift+M": "tab.move",
+      "Ctrl+Shift+F": "search.open"
+    },
+    "macos": {
+      "Cmd+S": "document.save",
+      "Cmd+Comma": "settings.open",
+      "Cmd+I": "editor.italic",
+      "Cmd+W": "tab.close",
+      "F6": "panel.next",
+      "Cmd+Shift+E": "document.preview",
+      "Ctrl+Tab": "tab.next",
+      "Cmd+B": "editor.bold",
+      "Cmd+K": "editor.link",
+      "Cmd+Shift+M": "tab.move",
+      "Cmd+F": "document.find",
+      "Cmd+Shift+F": "search.open",
+      "Cmd+Shift+P": "commands.open",
+      "Ctrl+Shift+Tab": "tab.previous",
+      "Cmd+O": "document.open",
+      "Shift+F6": "panel.previous"
+    }
+  },
+  "local_links_checked": 7,
+  "issues": [],
+  "physical_keyboard_checked": false,
+  "product_tests_run": false
+}

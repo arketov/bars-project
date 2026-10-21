@@ -11,11 +11,26 @@
   const open = $derived(forceOpen || opened);
   const check = $derived(checkState(node, app.selected));
   const title = $derived(node.path === "." ? "корень документации" : isDir ? `${node.path}/` : node.path.replace(/^\.\//, ""));
+  function keyboard(event: KeyboardEvent) {
+    if (event.defaultPrevented || event.isComposing || event.ctrlKey || event.metaKey || event.altKey || event.target instanceof HTMLInputElement) return;
+    const row = event.currentTarget as HTMLElement;
+    const rows = [...(row.closest('.tree')?.querySelectorAll<HTMLElement>('.row') ?? [])].filter(item => !!item.getClientRects().length);
+    const index = rows.indexOf(row);
+    if (['ArrowDown','ArrowUp','Home','End'].includes(event.key)) {
+      event.preventDefault();
+      rows[event.key === 'Home' ? 0 : event.key === 'End' ? rows.length-1 : Math.max(0,Math.min(rows.length-1,index+(event.key==='ArrowDown'?1:-1)))]?.focus();
+    } else if (event.key === 'ArrowRight' && isDir) {
+      event.preventDefault(); if (!open) opened=true; else row.parentElement?.querySelector<HTMLElement>('.kids .row')?.focus();
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault(); if (isDir && open && !forceOpen) opened=false; else row.parentElement?.parentElement?.closest('.node')?.querySelector<HTMLElement>(':scope > .row')?.focus();
+    } else if (event.key === ' ' && app.searchActive) { event.preventDefault(); app.toggleNode(node.path,check!=='all'); }
+    else if (event.key === 'Enter') { event.preventDefault(); if (isDir) opened=!opened; else if (node.documentPath) void app.openDocument({path:node.documentPath,title:node.label,first_line:0,last_line:0}); }
+  }
 </script>
 
 <div class="node {node.kind}" class:open>
   <!-- svelte-ignore a11y_no_noninteractive_tabindex: строка получает фокус для ContextMenu/Shift+F10. -->
-  <div class="row" data-document-path={node.documentPath} data-folder-path={isDir ? node.path : undefined} data-folder-kind={node.path === "." ? "Корневые документы" : node.kind === "module" ? "Модуль" : "Папка"} tabindex={isDir ? 0 : undefined} role={isDir ? "group" : undefined} aria-label={isDir ? title : undefined}>
+  <div class="row" data-document-path={node.documentPath} data-folder-path={isDir ? node.path : undefined} data-folder-kind={node.path === "." ? "Корневые документы" : node.kind === "module" ? "Модуль" : "Папка"} tabindex="0" role="treeitem" aria-selected={!!node.documentPath && app.viewer?.hit.path === node.documentPath} aria-expanded={isDir ? open : undefined} aria-label={title} onkeydown={keyboard}>
     {#if isDir}
       <button class="caret" aria-label={open ? "Свернуть" : "Развернуть"} onclick={() => (opened = !opened)}>
         <Icon name="chevron-right" size={10} width={2} />
@@ -24,6 +39,7 @@
       <span class="spacer"></span>
     {/if}
     <label {title} class:directory={isDir}>
+      {#if app.searchActive}
       <input
         type="checkbox"
         aria-label={title}
@@ -31,6 +47,7 @@
         indeterminate={check === "some"}
         onchange={(event) => app.toggleNode(node.path, event.currentTarget.checked)}
       />
+      {/if}
       {#if isDir}<Icon name="folder" size={14} /><span class="nm">{node.path === "." ? "Корневые документы" : node.label}</span>{/if}
     </label>
     {#if !isDir && node.documentPath}

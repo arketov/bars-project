@@ -8,6 +8,7 @@ import { app } from "./app.svelte";
 import type { Operation, OperationEventsOutput } from "./types";
 
 vi.mock("./api", async original => ({ ...await original<typeof import("./api")>(), call: vi.fn(), joinPath: vi.fn(), openPath: vi.fn(), pickFolder: vi.fn() }));
+vi.mock("./graph-renderer", () => ({ GraphRenderer: class { set() {} destroy() {} } }));
 import { call } from "./api";
 const invoke = vi.mocked(call);
 const project = { path: "C:/проект", name: "Проект", docs_root: "docs", state: "ready" as const, modules: [{ name: "manual", documents: 10 }] };
@@ -131,7 +132,7 @@ it("navigates from the notification center to the correct project while its tree
   [...document.querySelectorAll("button")].find(b => b.textContent === "Подробнее")!.click(); flushSync();
   [...document.querySelectorAll("button")].find(b => b.textContent?.includes("Ход индексации проекта"))!.click(); await settle();
   expect(app.current).toBe(project.path);
-  expect(document.querySelector("h1")?.textContent).toBe(project.name);
+  expect(document.querySelector('[data-panel-kind="indexing"] h1')?.textContent).toBe(project.name);
   expect(document.body.textContent).toContain("Индекс обновлён · добавлено 2");
   expect(document.querySelector("#notifications-panel")).toBeNull();
 });

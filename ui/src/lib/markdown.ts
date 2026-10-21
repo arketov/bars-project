@@ -37,6 +37,16 @@ export function stripFrontmatter(text: string): { body: string; lines: number } 
 
 const countLines = (raw: string) => (raw.match(/\n/g) ?? []).length;
 
+export function documentHeadings(text: string): { line: number; label: string }[] {
+  const { body, lines } = stripFrontmatter(text);
+  let line = lines + 1;
+  return marked.lexer(body).flatMap(token => {
+    const start = line;
+    line += countLines(token.raw);
+    return token.type === "heading" ? [{ line: start, label: plainText(token.text) }] : [];
+  });
+}
+
 export interface Highlight {
   first: number;
   last: number;
