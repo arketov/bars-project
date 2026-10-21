@@ -31,7 +31,7 @@ export interface TopicsList {
   loss_reason?: string | null;
 }
 
-export interface TopicVariant { id: number; text: string; scope: string }
+export interface TopicVariant { id: number; text: string; scope: string; original_params?: string }
 
 export interface TopicHit {
   path: string;
@@ -70,13 +70,13 @@ export interface TopicDetail extends TopicSummary {
 
 export const STATUS_LABEL: Record<TopicStatus, string> = {
   open: "Новая тема",
-  materials_found: "Есть материалы",
+  materials_found: "Найдены совпадения",
   resolved: "Закрыта",
 };
 
 export const FILTER_LABEL: Record<TopicFilter, string> = {
   active: "Активные",
-  materials_found: "Есть материалы",
+  materials_found: "Найдены совпадения",
   resolved: "Закрытые",
 };
 
@@ -88,7 +88,8 @@ export const REASON_LABEL: Record<string, string> = {
 };
 
 const INCOMPLETE_LABEL: Record<string, string> = {
-  indexing: "идёт индексация, а выдача пуста",
+  indexing: "идёт индексация",
+  rerank_unavailable: "rerank недоступен; проверка знаний не завершена",
   model_loading: "модель ещё загружается",
   reindex_required: "нужна переиндексация после смены модели",
   scope_missing: "область больше недоступна",
@@ -167,7 +168,7 @@ export const dateTime = (seconds: number): string =>
 
 /** Итог одной проверки по-русски: что именно нашлось по каждому варианту. */
 export function outcomeLabel(result: CheckResult): string {
-  if (result.outcome === "found") return `Найдено материалов: ${result.hits.length}`;
+  if (result.outcome === "found") return `Найдено совпадений: ${result.hits.length}`;
   if (result.outcome === "empty") return "Материалы не найдены при этой проверке";
   const reason = result.reason ? (INCOMPLETE_LABEL[result.reason] ?? result.reason) : "причина не указана";
   return `Проверка неполная: ${reason}`;
@@ -200,12 +201,33 @@ export function appliedParams(check: TopicCheck): string {
   try {
     const value = JSON.parse(check.params) as Record<string, unknown>;
     const parts: string[] = [];
+    if (value.score_kind === "rerank" || value.score_kind === "cosine") parts.push(`оценка ${value.score_kind}`);
     if (typeof value.min_score === "number") parts.push(`порог ${value.min_score.toFixed(2).replace(".", ",")}`);
     if (typeof value.results === "number") parts.push(`результатов ${value.results}`);
     if (typeof value.candidates === "number") parts.push(`кандидатов ${value.candidates}`);
     return parts.join(" · ");
   } catch {
     return "";
+  }
+}
+
+/** Каждый вариант мог использовать свою оценку, в том числе при сбое rerank в середине проверки. */
+export function variantCheckParams(check: TopicCheck, variantId: number): { params: string; rerankError: string | null } {
+  try {
+    const value = JSON.parse(check.params);
+    const perVariant = Array.isArray(value.variants);
+    const variant = perVariant ? value.variants.find((item: { variant_id: number }) => item.variant_id === variantId) : null;
+    return { params: perVariant ? JSON.stringify(variant?.applied ?? {}) : check.params, rerankError: typeof variant?.rerank_error === "string" ? variant.rerank_error : null };
+  } catch {
+    return { params: check.params, rerankError: null };
+  }
+}
+
+export function scoreKindChanged(original: string | undefined, current: string): boolean {
+  try {
+    return JSON.parse(original ?? "{}").score_kind === "rerank" && JSON.parse(current).score_kind === "cosine";
+  } catch {
+    return false;
   }
 }
 

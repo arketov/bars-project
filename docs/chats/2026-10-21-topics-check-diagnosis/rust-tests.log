@@ -1,0 +1,56 @@
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Finished `release` profile [optimized] target(s) in 39.21s
+     Running unittests src\lib.rs (C:/tools/bars-topics-target\release\deps\bars_core-e34a604ebdb2f1b9.exe)
+
+running 26 tests
+test new_topics::tests::measure_limits ... ignored, замер, не проверка
+test new_topics::tests::normalization_keeps_negations_numbers_and_identifiers ... ok
+test new_topics::tests::guard_detects_identifier_number_and_antonym_differences ... ok
+test new_topics::tests::corrupt_file_is_an_error_not_an_empty_list ... ok
+test new_topics::tests::newer_schema_is_refused_and_left_untouched ... ok
+test new_topics::tests::exact_text_merges_after_careful_normalization ... ok
+test new_topics::tests::data_survives_reopening ... ok
+test new_topics::tests::chain_a_b_c_is_not_glued_through_the_middle_question ... ok
+test new_topics::tests::same_event_id_is_counted_once ... ok
+test new_topics::tests::deleting_a_topic_allows_a_new_independent_appearance ... ok
+test new_topics::tests::clear_and_disable_reject_late_observations ... ok
+test new_topics::tests::a_check_never_reopens_a_resolved_topic_or_restores_a_deleted_one ... ok
+test new_topics::tests::close_vectors_merge_only_in_a_measured_space_and_without_lexical_difference ... ok
+test new_topics::tests::same_text_in_another_scope_is_a_separate_topic ... ok
+test new_topics::tests::clearing_removes_checks_and_ids_are_not_reused ... ok
+test new_topics::tests::demand_reopens_a_resolved_topic_and_keeps_the_decision_date ... ok
+test new_topics::tests::text_without_vector_is_stored_and_merges_exactly ... ok
+test new_topics::tests::a_check_with_materials_moves_an_open_topic_and_keeps_two_checks ... ok
+test new_topics::tests::complete_empty_check_clears_previous_automatic_match_but_preserves_user_resolution ... ok
+test new_topics::tests::variant_keeps_first_search_parameters_after_repeat_and_reopen ... ok
+test new_topics::tests::unmeasured_space_never_merges_semantically ... ok
+test new_topics::tests::vectors_of_different_spaces_are_not_compared ... ok
+test new_topics::tests::user_decisions_check_the_expected_revision ... ok
+test new_topics::tests::schema_one_database_is_migrated_with_its_topics_kept ... ok
+test new_topics::tests::topic_and_variant_limits_stop_new_records_without_evicting ... ok
+test new_topics::tests::bge_threshold_merges_owner_case_and_includes_boundary_for_both_profiles ... ok
+
+test result: ok. 25 passed; 0 failed; 1 ignored; 0 measured; 245 filtered out; finished in 0.83s
+
+     Running unittests src\lib.rs (C:/tools/bars-topics-target\release\deps\bars_worker-7b1b3763a4e245a1.exe)
+
+running 16 tests
+test handler::tests::new_topics::window_context_is_taken_out_of_the_params ... ok
+test handler::tests::new_topics::topic_methods_are_window_only_and_need_an_exact_project ... ok
+test handler::tests::new_topics::knowledge_check_reports_loading_rerank_as_incomplete_without_cosine_hits ... ok
+test handler::tests::new_topics::knowledge_check_requires_rerank_even_when_regular_search_disables_it ... ok
+test handler::tests::new_topics::empty_window_search_becomes_a_topic_and_repeats_merge ... ok
+test handler::tests::new_topics::delete_clear_and_rename_do_not_resurrect_data ... ok
+test handler::tests::new_topics::empty_check_leaves_the_topic_open_and_a_missing_scope_is_not_widened_silently ... ok
+test handler::tests::new_topics::project_deletion_removes_the_topics_database_and_blocks_late_writes ... ok
+test handler::tests::new_topics::knowledge_check_does_not_replace_failed_rerank_with_cosine ... ok
+test handler::tests::new_topics::mcp_collects_and_cli_does_not_through_the_channel ... ok
+test handler::tests::new_topics::not_ready_index_does_not_create_a_gap ... ok
+test handler::tests::new_topics::check_finds_materials_without_adding_demand_and_keeps_the_user_decision ... ok
+test handler::tests::new_topics::scope_is_kept_and_a_repeated_request_id_is_counted_once ... ok
+test handler::tests::new_topics::diagnostics_and_non_empty_results_do_not_create_demand ... ok
+test handler::tests::new_topics::manual_mark_creates_a_topic_with_a_non_empty_result_and_is_idempotent ... ok
+test handler::tests::new_topics::disabling_and_clearing_stop_late_and_new_records ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 217 filtered out; finished in 1.26s

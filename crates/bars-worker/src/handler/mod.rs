@@ -224,7 +224,7 @@ impl WorkerHandler {
     }
 
     async fn search(&self, params: SearchParams) -> Result<SearchOutput, RpcError> {
-        self.search_with_graph(params, None)
+        self.search_with_graph(params, None, false)
             .await
             .map(|(output, _, _)| output)
     }
@@ -233,6 +233,7 @@ impl WorkerHandler {
         &self,
         params: SearchParams,
         graph_budgets: Option<bars_core::graph::Budgets>,
+        require_rerank: bool,
     ) -> Result<
         (
             SearchOutput,
@@ -246,7 +247,11 @@ impl WorkerHandler {
         if status.state == ProjectState::ReindexRequired {
             return Err(errors::reindex_required());
         }
-        let settings = self.settings(&project)?;
+        let mut settings = self.settings(&project)?;
+        // Проверка знаний требует rerank независимо от переключателя обычного поиска.
+        if require_rerank {
+            settings.rerank.enabled = true;
+        }
         history::applied_field(
             "models",
             serde_json::json!({"embed":settings.embed.model,"rerank":settings.rerank.model,"rerank_requested":settings.rerank.enabled}),

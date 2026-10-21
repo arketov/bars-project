@@ -118,6 +118,7 @@ fn detail(topic: &TopicRow) -> NewTopicDetail {
                 id: v.id,
                 text: v.text.clone(),
                 scope: v.scope.clone(),
+                original_params: v.original_params.clone(),
             })
             .collect(),
         checks: topic.checks.iter().map(check_view).collect(),
@@ -271,6 +272,7 @@ impl WorkerHandler {
         };
         let mut results = Vec::with_capacity(topic.variants.len());
         let mut applied = None;
+        let mut variant_params = Vec::with_capacity(topic.variants.len());
         for variant in &topic.variants {
             let (scope, modules, files) = if params.expand {
                 ("project".to_string(), Vec::new(), Vec::new())
@@ -291,14 +293,21 @@ impl WorkerHandler {
                 min_score: None,
             };
             let outcome = CONTEXT
-                .scope(context.clone(), self.search_with_graph(search, None))
+                .scope(context.clone(), self.search_with_graph(search, None, true))
                 .await;
             let index_stamp = self.index_stamp(&project);
             let result = match outcome {
                 Ok((output, _, _)) => {
+                    variant_params.push(serde_json::json!({
+                        "variant_id": variant.id,
+                        "applied": output.applied,
+                        "rerank_error": output.rerank_error,
+                    }));
                     let hits: Vec<NewTopicHit> = output
                         .results
                         .iter()
+                        // Fallback обычного поиска не является результатом проверки знаний.
+                        .filter(|hit| hit.score_kind == bars_protocol::ScoreKind::Rerank)
                         .map(|hit| NewTopicHit {
                             path: hit.path.clone(),
                             title: hit.title.clone(),
@@ -315,10 +324,15 @@ impl WorkerHandler {
                     applied.get_or_insert_with(|| {
                         serde_json::to_string(&output.applied).unwrap_or_default()
                     });
-                    let (kind, reason) = if !hits.is_empty() {
-                        (VariantOutcome::Found, None)
+                    // Проверка знаний допускает только rerank, даже при непустом fallback.
+                    let (kind, reason) = if output.rerank_error.is_some()
+                        || output.applied.score_kind != bars_protocol::ScoreKind::Rerank
+                    {
+                        (VariantOutcome::Incomplete, Some("rerank_unavailable"))
                     } else if output.indexing {
                         (VariantOutcome::Incomplete, Some("indexing"))
+                    } else if !hits.is_empty() {
+                        (VariantOutcome::Found, None)
                     } else {
                         (VariantOutcome::Empty, None)
                     };
@@ -350,12 +364,17 @@ impl WorkerHandler {
             };
             results.push(result);
         }
+        let mut saved_params: serde_json::Value = applied
+            .as_deref()
+            .and_then(|value| serde_json::from_str(value).ok())
+            .unwrap_or_else(|| serde_json::json!({}));
+        saved_params["variants"] = serde_json::Value::Array(variant_params);
         let check = NewCheck {
             topic_revision: topic.revision,
             at: crate::mcp_history::now(),
             expanded: params.expand,
             model: settings.embed.model.clone(),
-            params: applied.unwrap_or_default(),
+            params: saved_params.to_string(),
             results,
         };
         // Тему могли удалить или очистить список, пока шла проверка: тогда она не восстанавливается.

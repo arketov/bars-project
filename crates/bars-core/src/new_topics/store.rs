@@ -168,6 +168,8 @@ pub struct VariantRow {
     pub id: i64,
     pub text: String,
     pub scope: String,
+    /// Параметры первого сохранённого обращения этой формулировки, JSON.
+    pub original_params: String,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -667,7 +669,16 @@ impl TopicStore {
             })?
             .collect::<Result<Vec<_>, _>>()?;
         let mut variants = self.db.prepare(
-            "SELECT id, topic_id, text, scope FROM variants WHERE (?1 IS NULL OR topic_id=?1) ORDER BY id",
+            "WITH first_observations AS (
+                SELECT o.variant_id, min(o.id) AS id FROM observations o
+                JOIN variants v ON v.id=o.variant_id
+                WHERE (?1 IS NULL OR v.topic_id=?1) GROUP BY o.variant_id
+             )
+             SELECT v.id, v.topic_id, v.text, v.scope, COALESCE(o.params, '{}')
+             FROM variants v
+             LEFT JOIN first_observations f ON f.variant_id=v.id
+             LEFT JOIN observations o ON o.id=f.id
+             WHERE (?1 IS NULL OR v.topic_id=?1) ORDER BY v.id",
         )?;
         let rows = variants.query_map([only], |r| {
             Ok((
@@ -676,6 +687,7 @@ impl TopicStore {
                     id: r.get(0)?,
                     text: r.get(2)?,
                     scope: r.get(3)?,
+                    original_params: r.get(4)?,
                 },
             ))
         })?;
@@ -807,8 +819,8 @@ impl TopicStore {
 
     /// Записывает проверку темы; прежних сохраняется последняя и новая. Тема, которой уже нет, не
     /// восстанавливается: `None`. Если хоть один вариант нашёл материалы, открытая тема получает статус
-    /// «Есть материалы»; закрытую решение пользователя не трогает. Пустой или неполный результат
-    /// статус не меняет.
+    /// «Найдены совпадения»; закрытую решением пользователя не трогает. Полностью пустая проверка
+    /// по одному индексу снимает прежнюю автоматическую находку; неполная статус не меняет.
     pub fn record_check(
         &mut self,
         topic: i64,
@@ -875,10 +887,22 @@ impl TopicStore {
             .results
             .iter()
             .any(|r| r.outcome == VariantOutcome::Found);
-        if found && status == "open" {
+        let all_empty = check.results.first().is_some_and(|first| {
+            check.results.iter().all(|result| {
+                result.outcome == VariantOutcome::Empty && result.index_stamp == first.index_stamp
+            })
+        });
+        let next_status = if found && status == "open" {
+            Some("materials_found")
+        } else if all_empty && status == "materials_found" {
+            Some("open")
+        } else {
+            None
+        };
+        if let Some(next_status) = next_status {
             tx.execute(
-                "UPDATE topics SET status='materials_found', revision=revision+1 WHERE id=?1",
-                [topic],
+                "UPDATE topics SET status=?2, revision=revision+1 WHERE id=?1",
+                params![topic, next_status],
             )?;
             // Переход сделала сама проверка: пока тему не меняли другие, проверка относится к новой
             // ревизии и не считается устаревшей (устаревает только от чужого изменения).

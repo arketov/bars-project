@@ -229,3 +229,24 @@ it("счётчик строки при ошибке чтения — проче�
   await settle();
   expect(host.querySelector(".topics-row .ct")?.textContent).toBe("—");
 });
+
+it("показывает исходный rerank и причину неполной проверки без cosine-результатов", async () => {
+  const detail = detailOf(summary(1));
+  detail.variants_list[0].original_params = '{"score_kind":"rerank","min_score":0.18}';
+  detail.checks = [{ id: 1, topic_revision: 1, at: 1_700_000_100, expanded: false, model: "m", conclusive: false,
+    params: JSON.stringify({ score_kind: "cosine", min_score: 0.24, variants: [{ variant_id: 10, applied: { score_kind: "cosine", min_score: 0.24 }, rerank_error: "rerank-модель ещё загружается" }] }),
+    results: [{ variant_id: 10, scope: "project", outcome: "incomplete", reason: "rerank_unavailable", hits: [] }],
+  }];
+  const fallback = invoke.getMockImplementation()!;
+  invoke.mockImplementation(async (method, params) => method === "new_topics_get" ? detail : fallback(method, params));
+  const host = show(NewTopicsPage);
+  await settle();
+  await app.topics.select(1);
+  await settle();
+  expect(host.textContent).toContain("Исходный поиск: оценка rerank · порог 0,18");
+  expect(host.textContent).toContain("Эта проверка: оценка cosine · порог 0,24");
+  expect(host.textContent).toContain("Проверка неполная");
+  expect(host.textContent).toContain("rerank-модель ещё загружается");
+  expect(host.querySelectorAll(".source")).toHaveLength(0);
+  expect(host.textContent).not.toContain("Есть материалы");
+});

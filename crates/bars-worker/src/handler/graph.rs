@@ -91,8 +91,9 @@ impl WorkerHandler {
         } else {
             None
         };
-        let (search, related, mut fallback_reason) =
-            self.search_with_graph(params.search, budgets).await?;
+        let (search, related, mut fallback_reason) = self
+            .search_with_graph(params.search, budgets, false)
+            .await?;
         if requested == RetrievalMode::Mix && !params.include_related {
             fallback_reason = Some("Связи отключены: include_related=false".into());
         }

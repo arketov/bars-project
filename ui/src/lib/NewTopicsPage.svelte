@@ -19,6 +19,8 @@
     sourcesLabel,
     STATUS_LABEL,
     summarizeCheck,
+    variantCheckParams,
+    scoreKindChanged,
     type TopicCheck,
     type TopicFilter,
     type TopicSummary,
@@ -108,18 +110,26 @@
     <h3>{heading}</h3>
     <p class="muted small">
       {dateTime(check.at)} · {check.expanded ? "весь проект (явное расширение)" : "исходная область"} · модель {check.model || "—"}
-      {#if appliedParams(check)}· {appliedParams(check)}{/if}
     </p>
     {#if detail && checkIsStale(check, detail)}
       <p class="notice warn">Тема изменилась после этой проверки; повторите её, если нужен актуальный итог.</p>
     {/if}
-    {#if summary.headline === "incomplete"}
+    {#if !check.conclusive || summary.headline === "incomplete"}
       <Banner kind="warn" title="Проверка неполная" text="Ни положительного, ни отрицательного окончательного вывода сделать нельзя. Тема не закрыта и область не расширялась." />
     {/if}
     {#each check.results as result (result.variant_id)}
+      {@const current = variantCheckParams(check, result.variant_id)}
+      {@const original = detail?.variants_list.find((variant) => variant.id === result.variant_id)?.original_params}
       <div class="vresult" class:found={result.outcome === "found"} class:incomplete={result.outcome === "incomplete"}>
         <p class="vtext">{variantText(result.variant_id)}</p>
         <p class="vscope muted small">{scopeLabel(result.scope)} · {outcomeLabel(result)}</p>
+        <p class="muted small">Исходный поиск: {original ? appliedParams({ ...check, params: original }) || "параметры не сохранены" : "параметры не сохранены"}</p>
+        <p class="muted small">Эта проверка: {appliedParams({ ...check, params: current.params }) || "параметры не сохранены"}</p>
+        {#if scoreKindChanged(original, current.params)}
+          <p class="notice warn">Способ оценки изменился: rerank → cosine. Эти совпадения не подтверждают появление знаний. Причина перехода: {current.rerankError ?? "не сохранена"}.</p>
+        {:else if current.rerankError}
+          <p class="notice warn">Поиск выполнен без rerank: {current.rerankError}</p>
+        {/if}
         {#each result.hits as hit (hit.path + ":" + hit.first_line)}
           <div class="source">
             <strong>{hit.title}</strong>
@@ -362,7 +372,7 @@
   .meta { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; color: var(--muted); font-size: 12px; }
   .tag { font-size: 11px; font-weight: 600; border: 1px solid var(--line); padding: 1px 8px; border-radius: 20px; white-space: nowrap; }
   .tag.open { color: var(--mid); border-color: var(--mid); }
-  .tag.materials_found { color: var(--good); border-color: var(--good); }
+  .tag.materials_found { color: var(--muted); border-color: var(--line); }
   .tag.resolved { color: var(--muted); }
   .empty-block { padding: 34px 10px; text-align: center; color: var(--muted); }
   .empty-block strong { display: block; color: var(--text); margin-bottom: 8px; }
@@ -389,13 +399,12 @@
   .check h3 { margin-top: 0; }
   .check.old { border-top: 0; margin-top: 10px; padding-top: 4px; opacity: .85; }
   .vresult { margin: 10px 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
-  .vresult.found { border-color: var(--good); }
   .vresult.incomplete { border-color: var(--mid); }
   .vtext { margin: 0 0 2px; font-weight: 600; font-size: 13.5px; overflow-wrap: anywhere; }
   .vscope { margin: 0 0 6px; }
-  .source { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 10px 12px; margin-top: 8px; border-radius: 9px; background: var(--good-soft); }
+  .source { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 10px 12px; margin-top: 8px; border-radius: 9px; background: var(--panel-2); }
   .source strong { font-size: 13px; }
-  .source code { font: 11.5px var(--mono); color: var(--good); overflow-wrap: anywhere; }
+  .source code { font: 11.5px var(--mono); color: var(--muted); overflow-wrap: anywhere; }
   .source .ghost { margin-top: 6px; }
   .notice { color: var(--muted); font-size: 12.5px; margin: 10px 0 0; line-height: 1.5; }
   .notice.warn { color: var(--mid); }

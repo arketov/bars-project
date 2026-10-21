@@ -61,6 +61,8 @@ pub struct NewTopicVariant {
     pub text: String,
     /// `project` или `m=<модули>;f=<файлы>`.
     pub scope: String,
+    /// Параметры первого сохранённого обращения, JSON.
+    pub original_params: String,
 }
 
 /// Найденный фрагмент: путь, заголовок, строки и оценка; текст документа не сохраняется.

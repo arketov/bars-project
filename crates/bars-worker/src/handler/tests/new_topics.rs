@@ -23,11 +23,15 @@ struct Env {
 
 impl Env {
     fn new() -> Self {
+        Self::with_provider(FakeProvider::new("m1"))
+    }
+
+    fn with_provider(provider: Arc<dyn crate::worker::ModelProvider>) -> Self {
         let home = TempDir::new().unwrap();
         let mut config = WorkerConfig::new(home.path().to_path_buf());
         config.secrets = Arc::new(MemorySecrets::default());
         config.autostart = Arc::new(MemoryAutostart::new("\"/opt/bars/bars\"", None));
-        let worker = Worker::start(config, FakeProvider::new("m1")).unwrap();
+        let worker = Worker::start(config, provider).unwrap();
         let handler = WorkerHandler::new(worker.clone());
         Self {
             projects: TempDir::new().unwrap(),
@@ -412,8 +416,7 @@ async fn manual_mark_creates_a_topic_with_a_non_empty_result_and_is_idempotent()
 async fn check_finds_materials_without_adding_demand_and_keeps_the_user_decision() {
     let env = Env::new();
     let root = env.ready_project().await;
-    env.search(&root, "как устроена индексация", NOTHING, window())
-        .await;
+    env.search(&root, "индексацию", NOTHING, window()).await;
     let topic = env.topics(&root, 1).await.remove(0);
 
     let before = env.detail(&root, topic.id).await;
@@ -427,6 +430,15 @@ async fn check_finds_materials_without_adding_demand_and_keeps_the_user_decision
     assert_eq!(check.results[0].outcome, "found", "{check:?}");
     assert!(!check.results[0].hits.is_empty());
     assert!(check.conclusive && !check.expanded);
+    let params: serde_json::Value = serde_json::from_str(&check.params).unwrap();
+    assert_eq!(params["score_kind"], "rerank");
+    assert_eq!(params["variants"][0]["applied"]["score_kind"], "rerank");
+    assert!(
+        check.results[0]
+            .hits
+            .iter()
+            .all(|hit| hit.score_kind == "rerank")
+    );
     assert_eq!(checked.topic.status, "materials_found");
     // Переход в «Есть материалы» сделала сама проверка: она относится к новой ревизии и не устаревшая.
     assert_eq!(check.topic_revision, checked.topic.revision);
@@ -512,6 +524,114 @@ async fn empty_check_leaves_the_topic_open_and_a_missing_scope_is_not_widened_si
     // Прежняя проверка осталась как предыдущая.
     assert_eq!(widened.checks.len(), 2);
     assert_eq!(widened.checks[1].results[0].outcome, "incomplete");
+    env.worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn knowledge_check_requires_rerank_even_when_regular_search_disables_it() {
+    let env = Env::new();
+    let root = env.ready_project().await;
+    fs::write(
+        root.join(".bars/config.toml"),
+        "[rerank]\nenabled=false\n[search]\nmin_score_rerank=0.18\n",
+    )
+    .unwrap();
+    let regular = env.search(&root, "fff", Some(0.0), window()).await;
+    assert!(!regular.results.is_empty());
+    assert_eq!(regular.applied.score_kind, bars_protocol::ScoreKind::Cosine);
+    let marked = env.mark(&root, "fff-mark", "fff", &[]).await;
+    let before = env.detail(&root, marked.topic_id).await;
+    let checked: NewTopicDetail = env
+        .window_call(Env::check_call(&root, &before, false))
+        .await;
+    let check = &checked.checks[0];
+    assert_eq!(check.results[0].outcome, "empty");
+    assert!(check.results[0].hits.is_empty());
+    assert!(check.conclusive);
+    assert_eq!(checked.topic.status, "open");
+    let params: serde_json::Value = serde_json::from_str(&check.params).unwrap();
+    assert_eq!(params["score_kind"], "rerank");
+    assert_eq!(params["variants"][0]["applied"]["score_kind"], "rerank");
+    assert!(!env.handler.settings(&root).unwrap().rerank.enabled);
+    assert_eq!(checked.topic.observations, before.topic.observations);
+    env.worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn knowledge_check_does_not_replace_failed_rerank_with_cosine() {
+    use bars_core::models::{EmbedError, Embedder, ModelFingerprint};
+    use bars_core::settings::Settings;
+    struct EmbedOnly(Arc<FakeProvider>);
+    impl ModelProvider for EmbedOnly {
+        fn fingerprint(&self, settings: &Settings) -> Result<ModelFingerprint, EmbedError> {
+            self.0.fingerprint(settings)
+        }
+        fn load(&self, settings: &Settings) -> Result<Box<dyn Embedder + Send>, EmbedError> {
+            self.0.load(settings)
+        }
+        // Загрузка rerank по умолчанию завершается ошибкой; embed и настоящий индекс доступны.
+    }
+    let env = Env::with_provider(Arc::new(EmbedOnly(FakeProvider::new("m1"))));
+    let root = env.ready_project().await;
+    fs::write(root.join(".bars/config.toml"), "[rerank]\nenabled=false\n").unwrap();
+    let regular = env.search(&root, "индексацию", Some(0.0), window()).await;
+    assert!(!regular.results.is_empty());
+    let marked = env.mark(&root, "failed-rerank", "индексацию", &[]).await;
+    let before = env.detail(&root, marked.topic_id).await;
+    let checked: NewTopicDetail = env
+        .window_call(Env::check_call(&root, &before, false))
+        .await;
+    let check = &checked.checks[0];
+    assert_eq!(check.results[0].outcome, "incomplete");
+    assert_eq!(
+        check.results[0].reason.as_deref(),
+        Some("rerank_unavailable")
+    );
+    assert!(
+        check.results[0].hits.is_empty(),
+        "cosine fallback must not be shown"
+    );
+    assert!(!check.conclusive);
+    assert_eq!(checked.topic.status, "open");
+    let params: serde_json::Value = serde_json::from_str(&check.params).unwrap();
+    assert!(
+        params["variants"][0]["rerank_error"]
+            .as_str()
+            .unwrap()
+            .contains("не подключена")
+    );
+    env.worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn knowledge_check_reports_loading_rerank_as_incomplete_without_cosine_hits() {
+    let env = Env::with_provider(Arc::new(FakeProvider {
+        background: true,
+        ..FakeProvider::plain("m1")
+    }));
+    let root = env.ready_project().await;
+    fs::write(root.join(".bars/config.toml"), "[rerank]\nenabled=false\n").unwrap();
+    let marked = env.mark(&root, "loading-rerank", "индексацию", &[]).await;
+    let before = env.detail(&root, marked.topic_id).await;
+    let checked: NewTopicDetail = env
+        .window_call(Env::check_call(&root, &before, false))
+        .await;
+    let check = &checked.checks[0];
+    assert_eq!(check.results[0].outcome, "incomplete");
+    assert_eq!(
+        check.results[0].reason.as_deref(),
+        Some("rerank_unavailable")
+    );
+    assert!(check.results[0].hits.is_empty());
+    assert!(!check.conclusive);
+    assert_eq!(checked.topic.status, "open");
+    let params: serde_json::Value = serde_json::from_str(&check.params).unwrap();
+    assert!(
+        params["variants"][0]["rerank_error"]
+            .as_str()
+            .unwrap()
+            .contains("грузится")
+    );
     env.worker.shutdown().await;
 }
 

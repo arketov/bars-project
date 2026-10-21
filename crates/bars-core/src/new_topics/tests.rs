@@ -77,6 +77,24 @@ fn exact_text_merges_after_careful_normalization() {
 }
 
 #[test]
+fn variant_keeps_first_search_parameters_after_repeat_and_reopen() {
+    let (dir, mut s) = store();
+    let mut first = obs("first", "проверка знаний");
+    first.params = r#"{"score_kind":"rerank","min_score":0.18}"#.into();
+    let Recorded::Created { topic_id } = s.record(&first).unwrap() else {
+        panic!("тема не создана")
+    };
+    let mut repeat = obs("second", "проверка знаний");
+    repeat.params = r#"{"score_kind":"cosine","min_score":0.24}"#.into();
+    s.record(&repeat).unwrap();
+    drop(s);
+    let s = TopicStore::open(dir.path()).unwrap();
+    let topic = s.get(topic_id).unwrap().unwrap();
+    assert_eq!(topic.variants.len(), 1);
+    assert_eq!(topic.variants[0].original_params, first.params);
+}
+
+#[test]
 fn normalization_keeps_negations_numbers_and_identifiers() {
     assert_ne!(
         normalize_question("не работает"),
@@ -719,4 +737,36 @@ fn clearing_removes_checks_and_ids_are_not_reused() {
             .unwrap()
             .is_none()
     );
+}
+
+#[test]
+fn complete_empty_check_clears_previous_automatic_match_but_preserves_user_resolution() {
+    let (_dir, mut s) = store();
+    let id = created(&mut s, "1", "проверка знаний");
+    let topic = s.get(id).unwrap().unwrap();
+    let variant = topic.variants[0].id;
+    s.record_check(id, &check_of(&topic, 10, vec![found(variant, "t")]))
+        .unwrap();
+    let matched = s.get(id).unwrap().unwrap();
+    assert_eq!(matched.status, TopicStatus::MaterialsFound);
+    let mut partial = empty_result(variant);
+    partial.outcome = VariantOutcome::Incomplete;
+    s.record_check(id, &check_of(&matched, 11, vec![partial]))
+        .unwrap();
+    assert_eq!(
+        s.get(id).unwrap().unwrap().status,
+        TopicStatus::MaterialsFound
+    );
+    s.record_check(id, &check_of(&matched, 12, vec![empty_result(variant)]))
+        .unwrap();
+    let empty = s.get(id).unwrap().unwrap();
+    assert_eq!(empty.status, TopicStatus::Open);
+    assert_eq!(empty.revision, matched.revision + 1);
+    assert_eq!(empty.checks[0].topic_revision, empty.revision);
+    s.set_status(id, empty.revision, TopicStatus::Resolved, 13)
+        .unwrap();
+    let resolved = s.get(id).unwrap().unwrap();
+    s.record_check(id, &check_of(&resolved, 14, vec![empty_result(variant)]))
+        .unwrap();
+    assert_eq!(s.get(id).unwrap().unwrap().status, TopicStatus::Resolved);
 }

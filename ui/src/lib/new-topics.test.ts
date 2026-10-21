@@ -3,6 +3,8 @@ import {
   activeCount,
   ago,
   appliedParams,
+  variantCheckParams,
+  scoreKindChanged,
   badgeText,
   checkIsStale,
   linesLabel,
@@ -100,4 +102,22 @@ it("ID обращения окна уникален и помечен источ
   const a = newRequestId(), b = newRequestId();
   expect(a).toMatch(/^window:/);
   expect(a).not.toBe(b);
+});
+
+it("различает исходный rerank и cosine, показывает параметры и сбой каждого варианта", () => {
+  const original = '{"score_kind":"rerank","min_score":0.18}';
+  const current = check([], { params: JSON.stringify({ score_kind: "cosine", min_score: 0.24, variants: [
+    { variant_id: 1, applied: { score_kind: "cosine", min_score: 0.24 }, rerank_error: "ошибка модели" },
+    { variant_id: 2, applied: { score_kind: "rerank", min_score: 0.18 }, rerank_error: null },
+  ] }) });
+  const first = variantCheckParams(current, 1), second = variantCheckParams(current, 2);
+  expect(scoreKindChanged(original, first.params)).toBe(true);
+  expect(scoreKindChanged(original, second.params)).toBe(false);
+  expect(first.rerankError).toBe("ошибка модели");
+  expect(second.rerankError).toBeNull();
+  expect(variantCheckParams(current, 3).params).toBe("{}");
+  expect(appliedParams({ ...current, params: original })).toBe("оценка rerank · порог 0,18");
+  expect(variantCheckParams(check([], { params: original }), 1).params).toBe(original);
+  expect(scoreKindChanged("не json", first.params)).toBe(false);
+  expect(outcomeLabel(result({ outcome: "incomplete", reason: "rerank_unavailable" }))).toContain("rerank недоступен");
 });
