@@ -61,7 +61,10 @@ $env:LIB = (Join-Path $env:VULKAN_SDK 'Lib') + ';' + $env:LIB
 $ninja = Join-Path $vsPath 'Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja'
 $env:PATH = "$ninja$([IO.Path]::PathSeparator)$env:PATH"
 if (-not $env:CARGO_TARGET_DIR) {
-    $env:CARGO_TARGET_DIR = Join-Path $root 'target'
+    # Путь репозитория с кириллицей («Рабочий стол») и длиной >250 символов ломает
+    # CMake TryCompile вложенного vulkan-shaders-gen: cl.exe не открывает файл.
+    # Короткий ASCII-каталог обходит оба ограничения.
+    $env:CARGO_TARGET_DIR = Join-Path $env:SystemDrive 'bt\bars'
 }
 
 Push-Location $root
