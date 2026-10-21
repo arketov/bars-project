@@ -8,7 +8,7 @@ title: Статистика вызовов MCP
 
 ## Границы учёта MCP
 
-Worker наблюдает типизированные MCP-вызовы после проверки IPC-сессии. Подробный контракт реализован для `bars_rag_search`, `bars_get_similar`, `bars_read`, `bars_outline`, `bars_projects`, `bars_status`, `bars_reindex`. Для внедряемых GraphRAG-операций собираются общие метаданные и количество `graph_items`; полный набор их аргументов не сохраняется. У `GraphQuery` это явно отмечено `graph_detail_contract_not_recorded`.
+Список самих инструментов и их параметров — в [инструментах MCP](../agent-tools/mcp-tools.md), операции графа — в [инструментах GraphRAG](../graphrag/tools.md). Worker наблюдает типизированные MCP-вызовы после проверки IPC-сессии. Подробный контракт реализован для `bars_rag_search`, `bars_get_similar`, `bars_read`, `bars_outline`, `bars_projects`, `bars_status`, `bars_reindex`. Для внедряемых GraphRAG-операций собираются общие метаданные и количество `graph_items`; полный набор их аргументов не сохраняется. У `GraphQuery` это явно отмечено `graph_detail_contract_not_recorded`.
 
 Сессия — одно соединение MCP с worker, **не чат клиента**. Переподключение создаёт новую сессию; повтор вызова — новую попытку. Проект — зарегистрированный корень и имя, разрешённые при исполнении. Пустая строка `project` означает «Без проекта»: общий список проектов либо неразрешённая цель.
 

@@ -25,7 +25,7 @@ try {
     Copy-Item -LiteralPath (Join-Path $env:CARGO_TARGET_DIR 'release/examples/workspace_probe.exe') -Destination $workspaceExe
     Get-ChildItem (Join-Path $env:CARGO_TARGET_DIR 'release') -Filter '*.dll' | Copy-Item -Destination $workspaceTemp
     $workspaceRedist = Get-ChildItem (Join-Path $workspaceVs 'VC/Redist/MSVC') -Directory | Where-Object Name -Match '^\d' | Sort-Object Name -Descending | Select-Object -First 1
-    Get-ChildItem (Join-Path $workspaceRedist.FullName 'x64/Microsoft.VC143.CRT') -Filter '*.dll' | Copy-Item -Destination $workspaceTemp
+    Get-ChildItem (Join-Path $workspaceRedist.FullName 'x64') -Directory -Filter 'Microsoft.VC*.CRT' | Get-ChildItem -Filter '*.dll' | Copy-Item -Destination $workspaceTemp
     # Только дочерний процесс стенда: журнал и служебные пути не читают рабочий профиль.
     $env:BARS_USER_HOME = $workspaceTemp
     $workspaceProcess = Start-Process -FilePath $workspaceExe -ArgumentList ('"' + $workspaceTemp + '"') -WindowStyle Hidden -PassThru

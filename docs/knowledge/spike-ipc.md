@@ -4,7 +4,7 @@ title: Спайк локального канала — DACL, занятое и�
 
 # Спайк локального канала bars
 
-Проверено 15-10-2026 на Windows 11, `interprocess` 2.4.5, `windows-sys` 0.61.2. Устройство канала — [architecture/ipc.md](../architecture/ipc.md).
+Проверено 15-10-2026 на Windows 11, `interprocess` 2.4.5, `windows-sys` 0.61.2. Устройство канала — [architecture/ipc.md](../architecture/ipc.md), что по нему передаётся — [architecture/protocol.md](../architecture/protocol.md).
 
 ## Что проверено в спайке канала
 

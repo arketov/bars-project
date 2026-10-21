@@ -15,6 +15,8 @@ pub fn create(app: &AppHandle, visible: bool) -> tauri::Result<()> {
         .inner_size(1280.0, 820.0)
         .min_inner_size(900.0, 600.0)
         .visible(visible)
+        // Обработчик файлов Tauri на Windows перехватывает HTML5 drag-and-drop WebView2 (ISS-21).
+        .disable_drag_drop_handler()
         .build()?;
     configure_shortcuts(&window)?;
     let hidden = window.clone();

@@ -4,7 +4,7 @@ title: Ход индексации в окне bars — очередь, прог
 
 # Ход индексации в окне bars
 
-Как окно показывает работу очереди индексации ([architecture/worker.md](../../architecture/worker.md), Т-10, Т-19). Мокап — [mockups/indexing.html](mockups/indexing.html), четыре сцены.
+Как окно показывает работу очереди индексации ([architecture/worker.md](../../architecture/worker.md), Т-10, Т-19). Мокап — [mockups/indexing.html](mockups/indexing.html), четыре сцены. Какие файлы и когда попадают в очередь — в [обновлении индекса](../indexing/updates.md); итоги операций дублируются в [центре уведомлений](notifications.md).
 
 ## Где виден ход индексации
 

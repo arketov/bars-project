@@ -20,7 +20,7 @@ Follow the project's own rules and locations first. Otherwise, use `chats/<YYYY-
 | Bug | `backlog/issues.md` | ID, source/date, symptom, known steps, expected/actual, status, verification; do not invent a cause. A log entry is not the bug's only record. |
 | Owner idea | `backlog/ideas.md` | ID, source/date, need, status and design links; not an accepted requirement. |
 
-Update existing documents before creating duplicates. Current behaviour and feature requirements belong in `features/<name>/`; shared structure belongs in `architecture/`. See `bars-docs` for the full document-kind table, format and Index.md rules. Link records instead of copying their text. Update the owning folder's index when adding a topic; individual session folders need no Index.md.
+Update existing documents before creating duplicates. Current behaviour and feature requirements belong in `features/<name>/`; shared structure belongs in `architecture/`. See `bars-docs` for the full document-kind table, format, link and Index.md rules. Link records instead of copying their text: every document a log entry or handoff mentions is a relative Markdown link with a readable name, such as `[delivery research](../../knowledge/delivery.md)`, not a path in backticks. Code paths and commits stay in backticks. Update the owning folder's index when adding a topic; individual session folders need no Index.md.
 
 ## Start of a session
 
@@ -51,7 +51,7 @@ Saving tokens:
 
 Write it at the end, and on large milestones of a long session. Not longer than a screen. Sections:
 
-- **Done** — what is ready and where it lies (files, commits).
+- **Done** — what is ready and where it lies: links to the changed documents, code files and commits in backticks.
 - **Not done** — what is left of the task.
 - **Difficulties** — what failed, what took the time, what is broken.
 - **Next** — where the next session starts.

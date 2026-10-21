@@ -1,0 +1,79 @@
+{
+  "success": true,
+  "native": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+  "checks": [
+    "release host: browser accelerator setting read back as disabled",
+    "worker read, document tab",
+    "source toggle, outline hide/show",
+    "service panels",
+    "keyboard activation, navigation column preserves search scope",
+    "pointer drag: tab to other zone and back, empty right zone kept, edge split and merge (ISS-21, synthetic PointerEvent)",
+    "both themes at 1440/1024/760, navigation column with mini-graph, compact filter and status below mini-graph",
+    "global search in both themes at 1440/1024/760: shared DOM, focus cycle/return, responsive scope, context menu, unchanged layout",
+    "IPC search with isolated FakeProvider, shared card expansion/scope/query, document read/highlight and focus from modal",
+    "persisted reference without document text",
+    "keyboard: command palette, future commands, settings, RU physical code, recording isolation, IPC save/read, live hint, rebind, stale revision rejection; both themes 1440/1024/760"
+  ],
+  "geometry": [
+    {
+      "width": 1440,
+      "mode": "light",
+      "background": "rgb(245, 244, 246)",
+      "navigation": 250,
+      "graph": [
+        250,
+        206
+      ]
+    },
+    {
+      "width": 1440,
+      "mode": "dark",
+      "background": "rgb(19, 17, 21)",
+      "navigation": 250,
+      "graph": [
+        250,
+        206
+      ]
+    },
+    {
+      "width": 1024,
+      "mode": "light",
+      "background": "rgb(245, 244, 246)",
+      "navigation": 250,
+      "graph": [
+        250,
+        206
+      ]
+    },
+    {
+      "width": 1024,
+      "mode": "dark",
+      "background": "rgb(19, 17, 21)",
+      "navigation": 250,
+      "graph": [
+        250,
+        206
+      ]
+    },
+    {
+      "width": 760,
+      "mode": "light",
+      "background": "rgb(245, 244, 246)",
+      "navigation": 250,
+      "graph": [
+        250,
+        206
+      ]
+    },
+    {
+      "width": 760,
+      "mode": "dark",
+      "background": "rgb(19, 17, 21)",
+      "navigation": 250,
+      "graph": [
+        250,
+        206
+      ]
+    }
+  ]
+}

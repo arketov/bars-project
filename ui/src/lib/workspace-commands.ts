@@ -62,7 +62,7 @@ export function workspaceCommands(options:WorkspaceCommands) {
     if(id.startsWith('panel.open.')) {options.open(id.slice(11) as Kind);return;}
     if(id==='layout.reset') {if(window.confirm('Сбросить раскладку? Документы и сочетания сохранятся.')) options.reset();return;}
     if(id==='project.add') {await app.addProject();return;}
-    if(id==='project.choose') {options.open('navigation'); await tick();host.querySelector<HTMLElement>('.proj')?.focus();return;}
+    if(id==='project.choose') {await tick();document.querySelector<HTMLElement>('.workspace .proj')?.focus();return;}
     if(id==='project.remove') {app.requestDeleteProject(target.project!);return;}
     if(id==='project.checkIndex') {await app.reindexCheck(target.project!);return;}
     if(id==='notifications.readAll') {app.readNotifications();return;}

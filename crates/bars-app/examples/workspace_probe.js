@@ -42,11 +42,33 @@
     assert(document.querySelector('.workspace').dataset.activePanel === lastId && document.activeElement === tabs.at(-1), 'End не активировал последнюю вкладку');
     tabs.at(-1).dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true })); await frames();
     assert(document.querySelector('.workspace').dataset.activePanel === 'search', 'Home не активировал поиск');
-    const navTab = document.querySelector('[data-workspace-panel="navigation"]').closest('[role="tab"]');
-    navTab.dispatchEvent(new MouseEvent('pointerdown', { button: 0, bubbles: true })); await frames();
+    assert(!document.querySelector('[data-workspace-panel="navigation"]') && document.querySelector('.column aside .tree'), 'Навигация не постоянная колонка');
+    document.querySelector('.column aside').dispatchEvent(new MouseEvent('pointerdown', { button: 0, bubbles: true })); await frames();
     assert(document.querySelector('.tree input[type="checkbox"]'), 'Фокус дерева отключил область поиска');
     button('Поиск').click(); await frames();
-    report.checks.push('keyboard activation, navigation preserves search scope');
+    report.checks.push('keyboard activation, navigation column preserves search scope');
+    // ISS-21: перенос вкладки событиями указателя (dndStrategy pointer), не через API.
+    const groupsOf = () => [...document.querySelectorAll('.dock .dv-groupview')].map(g => [...g.querySelectorAll('[data-workspace-panel]')].map(n => n.dataset.workspacePanel));
+    const dragTab = async (id, groupIndex, fy) => {
+      const tab = document.querySelector(`[data-workspace-panel="${id}"]`).closest('.dv-tab'), from = tab.getBoundingClientRect();
+      const to = document.querySelectorAll('.dock .dv-groupview')[groupIndex].getBoundingClientRect();
+      const sx = from.left + from.width / 2, sy = from.top + from.height / 2, tx = to.left + to.width / 2, ty = to.top + to.height * fy;
+      const send = (type, x, y, target) => (target ?? document.elementFromPoint(x, y) ?? document.body).dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y, pointerId: 7, pointerType: 'mouse', button: 0, buttons: type === 'pointerup' ? 0 : 1, isPrimary: true }));
+      send('pointerdown', sx, sy, tab);
+      for (let i = 1; i <= 20; i++) { send('pointermove', sx + (tx - sx) * i / 20, sy + (ty - sy) * i / 20); await frames(); }
+      send('pointerup', tx, ty); await frames(); await frames();
+    };
+    const docId = document.querySelector('[data-panel-kind="document"]') && [...document.querySelectorAll('[data-workspace-panel^="document:"]')][0].dataset.workspacePanel;
+    assert(document.querySelectorAll('.dock .dv-groupview').length === 2 && groupsOf()[1].includes(docId), 'Документ открыт не в правой зоне');
+    await dragTab(docId, 0, 0.5);
+    assert(groupsOf()[0].includes(docId) && groupsOf().length === 2 && groupsOf()[1].length === 0, 'Вкладка не перенесена указателем или правая зона пропала');
+    await dragTab(docId, 1, 0.5);
+    assert(groupsOf()[1].includes(docId), 'Вкладка не вернулась в правую зону');
+    await dragTab('search', 1, 0.93);
+    assert(groupsOf().length === 3, 'Перенос к краю не разделил зону');
+    await dragTab('search', 0, 0.5);
+    assert(groupsOf().length === 2 && groupsOf()[0].includes('search'), 'Пустая часть разделённой зоны не убрана');
+    report.checks.push('pointer drag: tab to other zone and back, empty right zone kept, edge split and merge (ISS-21, synthetic PointerEvent)');
     report.geometry = [];
     for (const width of [1440, 1024, 760]) {
       await invoke('workspace_probe_size', { width }); await frames();
@@ -61,7 +83,7 @@
       if (width < 1100) {
         button('Документы').click(); await frames();
         const rect = document.querySelector('.document').getBoundingClientRect();
-        const left = document.querySelector('[data-panel-kind="navigation"]').getBoundingClientRect().right;
+        const left = document.querySelector('.dock').getBoundingClientRect().left;
         assert(Math.abs(rect.left - left) < 3 && rect.right >= innerWidth - 2, 'Документ не занимает узкую рабочую область');
         button('Поиск').click(); await frames();
       }
@@ -69,25 +91,25 @@
         await wait(() => getComputedStyle(document.body).backgroundColor === (document.documentElement.dataset.mode === 'light' ? 'rgb(245, 244, 246)' : 'rgb(19, 17, 21)'), 'Тема не применилась после перехода');
         const style = getComputedStyle(document.body);
         assert(document.documentElement.scrollWidth <= innerWidth + 1, 'Переполнение окна');
-        const navigation = document.querySelector('[data-panel-kind="navigation"]').getBoundingClientRect();
+        const navigation = document.querySelector('.column aside').getBoundingClientRect();
         assert(navigation.width > 100 && navigation.height > 100, 'Потеря навигации');
-        const graph = document.querySelector('.graph-canvas')?.getBoundingClientRect();
-        assert(graph && graph.width > 50 && graph.height > 20, 'Граф не помещается в панель');
-        const footer = document.querySelector('.workspace-footer').getBoundingClientRect();
-        const graphPanel = document.querySelector('[data-panel-kind="graph"]').getBoundingClientRect();
-        assert(Math.abs(footer.bottom - graphPanel.bottom) < 2 && footer.top >= graph.bottom - 1, 'Статус расположен не под графом');
-        assert(Math.abs(footer.left - graphPanel.left) < 2 && Math.abs(footer.width - graphPanel.width) < 2, 'Статус вышел за ширину графа');
+        const graph = document.querySelector('.mini-graph .graph-canvas')?.getBoundingClientRect();
+        assert(graph && graph.width > 50 && graph.height > 20, 'Мини-граф не помещается в колонку');
+        const footer = document.querySelector('.column .statusbar').getBoundingClientRect();
+        const column = document.querySelector('.column').getBoundingClientRect();
+        assert(Math.abs(footer.bottom - column.bottom) < 2 && footer.top >= graph.bottom - 1, 'Статус расположен не под мини-графом');
+        assert(Math.abs(footer.left - column.left) < 2 && Math.abs(footer.width - column.width) < 2, 'Статус вышел за ширину колонки');
         const filter = document.querySelector('[placeholder="Фильтр документов"]').getBoundingClientRect();
         assert(filter.height <= 25, 'Фильтр документов слишком высокий');
         const query = document.querySelector('.ask textarea');
         assert(query.wrap === 'off' && query.scrollHeight <= query.clientHeight + 1 && getComputedStyle(query).overflowY === 'hidden', 'Поле запроса переносится или показывает скролл');
         const brand = document.querySelector('.workspace-brand').getBoundingClientRect();
         assert(brand.left <= 16 && brand.top <= 8, 'Бренд не в левом верхнем углу');
-        const tools = [...document.querySelectorAll('.graph-map-tools button')];
-        assert(tools.length === 5 && tools.every(tool => tool.querySelector('svg') && tool.getAttribute('aria-label') && tool.getAttribute('title') && tool.getBoundingClientRect().height === 20) && document.querySelector('.graph-map-tools').getBoundingClientRect().height <= 26, 'Неверная панель иконок графа');
+        const tools = [...document.querySelectorAll('.mini-graph .graph-map-tools button')];
+        assert(tools.length === 5 && tools.every(tool => tool.querySelector('svg') && tool.getAttribute('aria-label') && tool.getAttribute('title') && tool.getBoundingClientRect().height === 20) && document.querySelector('.mini-graph .graph-map-tools').getBoundingClientRect().height <= 26, 'Неверная панель иконок графа');
         assert(document.querySelector('[aria-label="Сбросить область поиска"]'), 'Нет компактного сброса области');
         const launcher = document.querySelector('[aria-label="Глобальный поиск"]');
-        const layoutBefore = Object.keys(localStorage).filter(k => k.startsWith('bars-workspace-v1:')).map(k => localStorage.getItem(k)).join();
+        const layoutBefore = Object.keys(localStorage).filter(k => k.startsWith('bars-workspace-v2:')).map(k => localStorage.getItem(k)).join();
         const treeNode = document.querySelector('aside');
         launcher.focus(); launcher.click(); await frames();
         const modal = document.querySelector('dialog[aria-label="Глобальный поиск"]');
@@ -109,13 +131,13 @@
         assert(modal.querySelector('.cmenu'), 'Контекстное меню осталось под модальным слоем');
         modal.querySelector('.close-search').click(); await frames();
         assert(!modal.open && document.activeElement === launcher, 'Не закрыт слой или потерян фокус');
-        assert(document.querySelector('[data-panel-kind="search"] textarea') === query && document.querySelector('[data-panel-kind="navigation"] aside') === treeNode, 'Не возвращены общие узлы');
-        assert(layoutBefore === Object.keys(localStorage).filter(k => k.startsWith('bars-workspace-v1:')).map(k => localStorage.getItem(k)).join(), 'Открытие поиска изменило раскладку');
+        assert(document.querySelector('[data-panel-kind="search"] textarea') === query && document.querySelector('.column aside') === treeNode, 'Не возвращены общие узлы');
+        assert(layoutBefore === Object.keys(localStorage).filter(k => k.startsWith('bars-workspace-v2:')).map(k => localStorage.getItem(k)).join(), 'Открытие поиска изменило раскладку');
         report.geometry.push({ width: innerWidth, mode: document.documentElement.dataset.mode, background: style.backgroundColor, navigation: navigation.width, graph: [graph.width, graph.height] });
         document.querySelector('[title="Светлая / тёмная тема"]').click(); await frames();
       }
     }
-    report.checks.push('both themes at 1440/1024/760, navigation and graph visible, compact filter and status below graph');
+    report.checks.push('both themes at 1440/1024/760, navigation column with mini-graph, compact filter and status below mini-graph');
     report.checks.push('global search in both themes at 1440/1024/760: shared DOM, focus cycle/return, responsive scope, context menu, unchanged layout');
     button('Панели ▾').click(); await frames(); button('Настройки').click(); await frames();
     document.querySelector('[aria-label="Глобальный поиск"]').click(); await frames();
@@ -136,10 +158,10 @@
     await wait(() => !modal.open && document.activeElement?.matches('.document header'), 'Переход из глобальной выдачи не передал фокус документу');
     assert(document.querySelector('.document .hit'), 'Найденные строки не подсвечены');
     report.checks.push('IPC search with isolated FakeProvider, shared card expansion/scope/query, document read/highlight and focus from modal');
-    const saved = Object.keys(localStorage).find(k => k.startsWith('bars-workspace-v1:') && localStorage.getItem(k).includes('docs/Тема.md'));
+    const saved = Object.keys(localStorage).find(k => k.startsWith('bars-workspace-v2:') && localStorage.getItem(k).includes('docs/Тема.md'));
     assert(saved, 'Нет сохранённой раскладки документа');
     const json = JSON.parse(localStorage.getItem(saved));
-    assert(json.version === 1 && !localStorage.getItem(saved).includes('Настоящий документ'), 'Неверное содержимое раскладки');
+    assert(json.version === 2 && !localStorage.getItem(saved).includes('Настоящий документ'), 'Неверное содержимое раскладки');
     report.checks.push('persisted reference without document text');
     // Клавиатура 1.3.2: синтетические DOM-события и настоящий IPC изолированного воркера.
     const key = (code, extra = {}) => document.activeElement.dispatchEvent(new KeyboardEvent('keydown', { code, key: code === 'KeyF' ? 'А' : code, ctrlKey: true, shiftKey: true, bubbles: true, cancelable: true, ...extra }));

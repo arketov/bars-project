@@ -115,6 +115,7 @@ fn main() -> anyhow::Result<()> {
                     .inner_size(1440.0, 850.0)
                     .data_directory(state.profile.clone())
                     .visible(true)
+                    .disable_drag_drop_handler()
                     .on_page_load(|window, payload| {
                         if payload.event() == tauri::webview::PageLoadEvent::Finished {
                             let _ = window.eval(include_str!("workspace_probe.js"));

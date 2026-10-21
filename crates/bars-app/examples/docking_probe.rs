@@ -50,6 +50,7 @@ async fn probe_open_document(app: tauri::AppHandle, state: State<'_, Probe>) -> 
     .inner_size(700.0, 500.0)
     .data_directory(state.profile.clone())
     .visible(true)
+    .disable_drag_drop_handler()
     .build()
     .map(|_| ())
     .map_err(|e| e.to_string())
@@ -140,6 +141,7 @@ fn main() -> anyhow::Result<()> {
                 .inner_size(1280.0, 820.0)
                 .data_directory(state.profile.clone())
                 .visible(true)
+                .disable_drag_drop_handler()
                 .on_page_load(|window, payload| {
                     let state = window.state::<Probe>();
                     let _ = std::fs::write(state.output.with_extension("page.txt"), format!("{:?} {}", payload.event(), payload.url()));

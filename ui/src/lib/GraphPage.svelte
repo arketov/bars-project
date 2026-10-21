@@ -242,18 +242,27 @@
         status = null;
         lastRequest = null;
         void updateStatus(path);
-        untrack(() => {
-            if (app.graphPreview) {
-                reply = app.graphPreview;
-                app.graphPreview = null;
-            } else void run();
-        });
+        untrack(() => void run());
         timer = setInterval(() => {
             void updateStatus(path);
         }, 1000);
         return () => {
             if (timer) clearInterval(timer);
         };
+    });
+    // Показ из выдачи общий для мини-графа и вкладки «Граф» (OQ-117): не забирается одним экземпляром.
+    // Объявлен после загрузки проекта, чтобы поздний ответ run() не затёр показ (epoch).
+    $effect(() => {
+        const preview = app.graphPreview;
+        if (!preview) return;
+        untrack(() => {
+            epoch++;
+            busy = false;
+            error = "";
+            reply = preview;
+            selected = null;
+            edge = null;
+        });
     });
     $effect(() => {
         const element = container,

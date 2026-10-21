@@ -94,16 +94,14 @@ it("глобальный поиск из настроек переносит т�
 it("глобальный поиск доступен с закрытыми панелями без их восстановления", async () => {
   component = mount(Workspace, { target: document.body }); flushSync(); await settle();
   const query = document.querySelector('textarea');
-  for (const id of ['search', 'navigation']) {
-    document.querySelector(`[data-workspace-panel="${id}"]`)!.closest('[role="tab"]')!.querySelector<HTMLElement>('.dv-default-tab-action')!.click();
-    flushSync(); await settle();
-  }
+  document.querySelector('[data-workspace-panel="search"]')!.closest('[role="tab"]')!.querySelector<HTMLElement>('.dv-default-tab-action')!.click();
+  flushSync(); await settle();
   const layout = localStorage.getItem(layoutKey(project.path));
   document.querySelector<HTMLButtonElement>('[aria-label="Глобальный поиск"]')!.click(); flushSync(); await settle();
   expect(document.querySelector('dialog[aria-label="Глобальный поиск"] textarea')).toBe(query);
   document.querySelector<HTMLButtonElement>('[aria-label="Закрыть поиск"]')!.click(); flushSync(); await settle();
   expect(document.querySelector('[data-panel-kind="search"]')).toBeNull();
-  expect(document.querySelector('[data-panel-kind="navigation"]')).toBeNull();
+  expect(document.querySelector('.column aside')).not.toBeNull();
   expect(localStorage.getItem(layoutKey(project.path))).toBe(layout);
 });
 
@@ -252,12 +250,30 @@ it("закрытие и повторное открытие настроек н�
   app.openSettings(); flushSync(); await settle();
   expect(settings.draft?.search.results).toBe(17); expect(load).not.toHaveBeenCalled();
 });
-it("фокус навигации не выключает область активного поиска", async () => {
+it("навигация и мини-граф — постоянная колонка, «Граф» открывает полный граф вкладкой", async () => {
   component = mount(Workspace, { target: document.body }); flushSync(); await settle();
-  const navigation = [...document.querySelectorAll<HTMLElement>('[role="tab"]')].find(t => t.textContent?.includes("Навигация"))!;
-  navigation.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, button: 0 })); flushSync();
-  expect(document.querySelector('.workspace')?.getAttribute('data-active-panel')).toBe("navigation");
+  expect([...document.querySelectorAll('[role="tab"]')].some(t => t.textContent?.includes("Навигация"))).toBe(false);
+  expect(document.querySelector('.dock aside')).toBeNull();
+  expect(document.querySelector('.column aside')).not.toBeNull();
+  expect(document.querySelector('.column .mini-graph')).not.toBeNull();
+  document.querySelector<HTMLElement>('.column aside')!.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, button: 0 })); flushSync();
   expect(app.searchActive).toBe(true);
+  [...document.querySelectorAll<HTMLButtonElement>('nav button')].find(b => b.textContent === "Граф")!.click(); flushSync(); await settle();
+  expect(document.querySelector('.workspace')?.getAttribute('data-active-panel')).toBe("graph");
+  expect(document.querySelector('.dock [data-panel-kind="graph"]')).not.toBeNull();
+  expect(document.querySelector('.column .mini-graph')).not.toBeNull();
+});
+it("правая зона есть сразу; документ открывается в ней, после закрытия зона остаётся", async () => {
+  component = mount(Workspace, { target: document.body }); flushSync(); await settle();
+  const saved = () => JSON.parse(localStorage.getItem(layoutKey(project.path))!);
+  app.viewer = { hit: hit("docs/a.md"), title: "А", text: "# А", missing: false }; flushSync(); await settle();
+  const layout = saved().layout;
+  const groupOf = (id: string) => (function find(node: any): string | undefined { return node.type === "leaf" ? (node.data.views.includes(id) ? node.data.id : undefined) : node.data.map(find).find(Boolean); })(layout.grid.root);
+  expect(groupOf(documentId("docs/a.md"))).toBeDefined();
+  expect(groupOf(documentId("docs/a.md"))).not.toBe(groupOf("search"));
+  const tab = document.querySelector('[data-workspace-panel="document:docs/a.md"]')!.closest('[role="tab"]')!;
+  tab.querySelector<HTMLElement>('.dv-default-tab-action')!.click(); flushSync(); await settle();
+  expect(saved().layout.grid.root.data).toHaveLength(2);
 });
 it("иконка сброса очищает область и сохраняет фильтр документов", async () => {
   app.selected = new Set(["manual"]); app.filter = "руководство";
@@ -265,6 +281,6 @@ it("иконка сброса очищает область и сохраняе�
   document.querySelector<HTMLButtonElement>('[aria-label="Сбросить область поиска"]')!.click(); flushSync();
   expect(app.selected.size).toBe(0);
   expect(app.filter).toBe("руководство");
-  expect(document.querySelector('[data-panel-kind="navigation"] .statusbar')).toBeNull();
-  expect(document.querySelector('.workspace-footer .statusbar')).not.toBeNull();
+  expect(document.querySelector('.dock .statusbar')).toBeNull();
+  expect(document.querySelector('.column .statusbar')).not.toBeNull();
 });

@@ -9,8 +9,9 @@
   import Sidebar from "./Sidebar.svelte";
   import SearchSurface from "./SearchSurface.svelte";
   import GlobalSearch from "./GlobalSearch.svelte";
+  import MiniGraph from "./MiniGraph.svelte";
   import Icon from "./Icon.svelte";
-  import { decodeLayout, defaultLayout, documentId, encodeLayout, layoutKey, panelTitles, type PanelKind, type PanelParams } from "./workspace-layout";
+  import { decodeLayout, defaultLayout, defaultSidebar, documentId, encodeLayout, ensureRightZone, layoutKey, removableEmptyGroups, panelTitles, type PanelKind, type PanelParams } from "./workspace-layout";
   import { messages } from "./workspace-messages";
   import CommandPalette from './CommandPalette.svelte';
   import { workspaceCommands } from './workspace-commands';
@@ -19,11 +20,36 @@
   let host: HTMLDivElement, api: DockviewApi;
   let ready = $state(false), menu = $state(false), active = $state("search");
   let globalSearch: GlobalSearch, parking: HTMLDivElement, searchSurface: HTMLDivElement, navigationSurface: HTMLDivElement;
+  let column: HTMLDivElement;
   let globalOpen = false;
   let palette: CommandPalette;
   let commands: ReturnType<typeof workspaceCommands> | undefined;
   let resizing = $state<{ id: string; width: number; height: number } | null>(null);
   let resizeControl = $state<HTMLDivElement>(null!);
+  // Постоянная левая колонка: навигация, мини-граф, статус (OQ-117).
+  let sidebar = $state({ ...defaultSidebar });
+  const clampWidth = (width: number) => Math.round(Math.max(220, Math.min(width, Math.max(220, window.innerWidth - 420))));
+  const clampGraph = (height: number) => Math.round(Math.max(80, Math.min(height, Math.max(80, (column?.clientHeight ?? 600) - 38 - 160))));
+  function dragSplit(kind: "width" | "graph", event: PointerEvent) {
+    if (event.button !== 0) return;
+    const handle = event.currentTarget as HTMLElement;
+    event.preventDefault();
+    try { handle.setPointerCapture(event.pointerId); } catch { /* указатель уже отпущен */ }
+    const start = { x: event.clientX, y: event.clientY, width: sidebar.width, graph: sidebar.graph };
+    const move = (e: PointerEvent) => {
+      if (kind === "width") sidebar.width = clampWidth(start.width + e.clientX - start.x);
+      else sidebar.graph = clampGraph(start.graph - (e.clientY - start.y));
+    };
+    const up = () => { handle.removeEventListener("pointermove", move); handle.removeEventListener("pointerup", up); handle.removeEventListener("pointercancel", up); persist(); };
+    handle.addEventListener("pointermove", move); handle.addEventListener("pointerup", up); handle.addEventListener("pointercancel", up);
+  }
+  function splitKey(kind: "width" | "graph", event: KeyboardEvent) {
+    const step: Record<string, number> = kind === "width" ? { ArrowLeft: -20, ArrowRight: 20 } : { ArrowUp: 20, ArrowDown: -20 };
+    const delta = step[event.key]; if (!delta) return;
+    event.preventDefault();
+    if (kind === "width") sidebar.width = clampWidth(sidebar.width + delta); else sidebar.graph = clampGraph(sidebar.graph + delta);
+    persist();
+  }
   function resizeGroup(id: string) {
     const panel = api.getPanel(id); if (!panel) return;
     const rect = panel.group.element.getBoundingClientRect();
@@ -41,18 +67,22 @@
     panel.group.api.setSize(event.key === 'ArrowLeft' || event.key === 'ArrowRight' ? { width: Math.max(220, rect.width + (event.key === 'ArrowRight' ? 20 : -20)) } : { height: Math.max(120, rect.height + (event.key === 'ArrowDown' ? 20 : -20)) });
   }
   const destinations = new Map<string, HTMLElement>();
+  const surfaceOf = (kind: string) => kind === "search" ? searchSurface : navigationSurface;
   function placeSurfaces() {
-    for (const [kind, surface] of [["search", searchSurface], ["navigation", navigationSurface]] as const) {
-      (destinations.get(kind) ?? parking).append(surface);
+    for (const kind of ["search", "navigation"] as const) {
+      const surface = surfaceOf(kind);
+      if (surface) (destinations.get(kind) ?? parking).append(surface);
     }
   }
   function attach(target: HTMLElement, kind: string) {
     destinations.set(kind, target);
-    if (!globalOpen) target.append(kind === "search" ? searchSurface : navigationSurface);
+    const surface = surfaceOf(kind);
+    if (!globalOpen && surface) target.append(surface);
     return { destroy() {
       if (destinations.get(kind) !== target) return;
       destinations.delete(kind);
-      if (!globalOpen) parking.append(kind === "search" ? searchSurface : navigationSurface);
+      const surface = surfaceOf(kind);
+      if (!globalOpen && surface) parking.append(surface);
     } };
   }
   function globalChanged(opened: boolean) {
@@ -66,36 +96,19 @@
   let storageError = false;
   let previousView = "main", previousTab = "models", previousNavigation = 0;
   let previousTopics = 0;
-  type PanelModel = { params: PanelParams; initial?: ViewedDocument; foreground: boolean; reserveFooter: boolean; attach: typeof attach };
+  type PanelModel = { params: PanelParams; initial?: ViewedDocument; foreground: boolean; attach: typeof attach };
   const models = new Map<string, PanelModel>();
-  let foreground = "search", navigationWidth = $state(250), documents = $state<{ id: string; title: string }[]>([]);
-  let footer = $state({ left: 0, top: 0, width: 0 });
-  let geometryFrame = 0;
-  function refreshGeometry() {
-    navigationWidth = api.getPanel("navigation")?.group.element.getBoundingClientRect().width ?? 0;
-    const group = (api.getPanel("graph") ?? api.getPanel("navigation"))?.group;
-    if (group) {
-      const rect = group.element.getBoundingClientRect();
-      footer = { left: rect.left, top: Math.max(rect.top, rect.bottom - 38), width: rect.width };
-    } else footer = { left: 0, top: 0, width: 0 };
-  }
-  function scheduleGeometry() {
-    cancelAnimationFrame(geometryFrame);
-    geometryFrame = requestAnimationFrame(refreshGeometry);
-  }
+  let foreground = "search", documents = $state<{ id: string; title: string }[]>([]);
   function refreshPanels() {
     app.indexingOpen = !!api.getPanel("indexing");
     documents = api.panels.filter(p => p.params?.kind === "document").map(p => ({ id: p.id, title: p.title ?? p.id }));
-    if (!api.getPanel(foreground)) foreground = api.getPanel("search") ? "search" : api.panels.find(p => p.params?.kind !== "navigation" && p.params?.kind !== "graph")?.id ?? "";
+    if (!api.getPanel(foreground)) foreground = api.getPanel("search") ? "search" : api.panels[0]?.id ?? "";
     app.searchActive = globalOpen || api.getPanel(foreground)?.params?.kind === "search";
-    const footerGroup = (api.getPanel("graph") ?? api.getPanel("navigation"))?.group;
-    // Событие Dockview может предшествовать окончательной геометрии DOM.
-    scheduleGeometry();
-    models.forEach((model, id) => { model.foreground = id === foreground; model.reserveFooter = api.getPanel(id)?.group === footerGroup; });
+    models.forEach((model, id) => { model.foreground = id === foreground; });
   }
   function persist() {
     if (restoring || !api) return;
-    try { localStorage.setItem(layoutKey(current), encodeLayout(api)); storageError = false; }
+    try { localStorage.setItem(layoutKey(current), encodeLayout(api, sidebar)); storageError = false; }
     catch { if (!storageError) app.flash("Не удалось сохранить раскладку", true); storageError = true; }
   }
   function restore(project: string | null) {
@@ -104,20 +117,21 @@
     current = project;
     try {
       const text = localStorage.getItem(layoutKey(project));
-      if (text) api.fromJSON(decodeLayout(text, project)); else defaultLayout(api);
+      const stored = text ? decodeLayout(text, project) : null;
+      if (stored) { api.fromJSON(stored.layout); sidebar = { width: clampWidth(stored.sidebar.width), graph: clampGraph(stored.sidebar.graph) }; }
+      else { defaultLayout(api, host.clientWidth); sidebar = { ...defaultSidebar }; }
     } catch {
-      defaultLayout(api);
+      defaultLayout(api, host.clientWidth); sidebar = { ...defaultSidebar };
       app.flash("Раскладка повреждена или устарела; восстановлена штатная", true);
     } finally {
-      api.getPanel("navigation")?.group.api.setConstraints({ minimumWidth: 220 });
-      api.getPanel("graph")?.group.api.setConstraints({ minimumWidth: 220 });
+      ensureRightZone(api, host.clientWidth);
       restoring = false; app.searchActive = api.activePanel?.params?.kind === "search"; active = api.activePanel?.id ?? "";
     }
   }
   function open(kind: Exclude<PanelKind, "document">) {
     if (kind === "topics") app.topicsOpen = true;
     let panel = api.getPanel(kind);
-    if (!panel) panel = api.addPanel({ id: kind, component: "workspace", title: panelTitles[kind], params: { kind }, position: api.getPanel("search") ? { referencePanel: "search", direction: "within" } : undefined });
+    if (!panel) panel = api.addPanel({ id: kind, component: "workspace", title: panelTitles[kind], params: { kind }, position: api.getPanel("search") ? { referencePanel: "search", direction: "within" } : api.groups[0] ? { referenceGroup: api.groups[0], direction: "within" } : undefined });
     panel.api.setActive();
     menu = false;
   }
@@ -128,6 +142,13 @@
     else if (kind === "logs" || kind === "mcp") app.openSettings(kind === "logs" ? "logs" : "mcp-statistics");
     open(kind);
   }
+  /** Группа для документа: где уже есть документы, иначе самая правая группа без поиска. */
+  function documentGroup() {
+    const existing = api.panels.find(p => p.params?.kind === "document");
+    if (existing) return existing.group;
+    const search = api.getPanel("search")?.group;
+    return api.groups.filter(g => g !== search).sort((a, b) => b.element.getBoundingClientRect().left - a.element.getBoundingClientRect().left)[0];
+  }
   function documentPanel(doc: ViewedDocument) {
     if (!current) return;
     incoming = doc;
@@ -136,16 +157,16 @@
     let panel = api.getPanel(id);
     if (panel) panel.api.updateParameters(params);
     else {
-      const target = api.panels.find(p => p.params?.kind === "document");
+      const target = documentGroup();
       panel = api.addPanel({ id, component: "workspace", title: doc.title, params,
-        position: target ? { referencePanel: target.id, direction: "within" } : api.getPanel("search") ? { referencePanel: "search", direction: "right" } : undefined,
-        initialWidth: Math.max(250, (host.clientWidth - 250) / 2) });
+        position: target ? { referenceGroup: target, direction: "within" } : api.getPanel("search") ? { referencePanel: "search", direction: "right" } : undefined,
+        initialWidth: Math.max(250, host.clientWidth / 2) });
     }
     incoming = undefined;
     panel.api.setActive();
     persist();
   }
-  function reset() { restoring = true; defaultLayout(api); restoring = false; persist(); menu = false; }
+  function reset() { restoring = true; defaultLayout(api, host.clientWidth); sidebar = { ...defaultSidebar }; restoring = false; persist(); menu = false; }
   function move(position: "left" | "right" | "top" | "bottom") {
     const panel = api.activePanel;
     const target = api.panels.find(p => p.group !== panel?.group) ?? api.panels.find(p => p !== panel);
@@ -192,6 +213,10 @@
     api = createDockview(host, {
       theme: theme.mode === "dark" ? themeDark : themeLight, messages,
       defaultRenderer: "always", disableFloatingGroups: true,
+      // HTML5 drag-and-drop в WebView2 перехватывает обработчик файлов Tauri (ISS-21).
+      dndStrategy: "pointer",
+      // Зоны не исчезают при переносе последней вкладки; лишние пустые группы убирает ensureRightZone.
+      closeEmptyGroups: false,
       defaultTabComponent: "workspace-tab",
       createTabComponent: () => {
         const tab = new DefaultTab();
@@ -200,7 +225,7 @@
       createComponent: () => {
         const element = document.createElement("div"); element.style.height = "100%";
         let component: ReturnType<typeof mount>;
-        const model = $state<PanelModel>({ params: { kind: "search" }, foreground: false, reserveFooter: false, attach });
+        const model = $state<PanelModel>({ params: { kind: "search" }, foreground: false, attach });
         let id: string;
         return { element,
           init: ({ params, api: panel }) => { id = panel.id; models.set(id, model); model.params = params as unknown as PanelParams; model.initial = incoming; model.foreground = id === foreground; component = mount(WorkspacePanel, { target: element, props: { model } }); },
@@ -210,24 +235,30 @@
       },
     });
     restore(app.current);
-    foreground = api.activePanel?.params?.kind === "navigation" || api.activePanel?.params?.kind === "graph" ? "search" : api.activePanel?.id ?? "search";
+    placeSurfaces();
+    foreground = api.activePanel?.id ?? "search";
     refreshPanels();
-    const resize = new ResizeObserver(scheduleGeometry);
-    resize.observe(host);
-    const subscriptions = [api.onDidLayoutChange(() => { persist(); refreshPanels(); }), api.onDidRemovePanel(panel => { if (!restoring && panel.id === "topics") app.topicsOpen = false; }), api.onDidActivePanelChange(event => {
+    let normalizing = false;
+    const subscriptions = [api.onDidLayoutChange(() => {
+      if (!restoring && !normalizing && (api.groups.length === 1 || removableEmptyGroups(api).length > 0)) {
+        normalizing = true;
+        try { ensureRightZone(api, host.clientWidth); } finally { normalizing = false; }
+      }
+      persist(); refreshPanels();
+    }), api.onDidRemovePanel(panel => { if (!restoring && panel.id === "topics") app.topicsOpen = false; }), api.onDidActivePanelChange(event => {
       const panel: IDockviewPanel | undefined = event.panel;
       active = panel?.id ?? "";
-      if (panel && panel.params?.kind !== "navigation" && panel.params?.kind !== "graph") foreground = panel.id;
+      if (panel) foreground = panel.id;
       refreshPanels();
     })];
     ready = true;
     void tick().then(() => { if (!disposed) commands = workspaceCommands({ api, host, open: navigate, search: () => globalSearch.open(), reset, palette, resize: resizeGroup }); });
-    return () => { disposed = true; stopKeys?.(); commands?.dispose(); palette.close(false); globalSearch.close(false); ready = false; resize.disconnect(); cancelAnimationFrame(geometryFrame); persist(); subscriptions.forEach(s => s.dispose()); api.dispose(); app.indexingOpen = false; };
+    return () => { disposed = true; stopKeys?.(); commands?.dispose(); palette.close(false); globalSearch.close(false); ready = false; persist(); subscriptions.forEach(s => s.dispose()); api.dispose(); app.indexingOpen = false; };
   });
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions: обработчик навигации дочерних ARIA-вкладок. -->
-<div class="workspace" style:--navigation-width={`${navigationWidth}px`} data-active-panel={active} onkeydown={(event) => {
+<div class="workspace" data-active-panel={active} onkeydown={(event) => {
   if (event.key === "Escape" && menu) { event.preventDefault(); menu = false; return; }
   const tab = event.target instanceof HTMLElement ? event.target.closest('[role="tab"]') : null;
   if (!tab || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
@@ -256,8 +287,18 @@
     <button aria-label="Список действий" aria-keyshortcuts={keybindings.aria('commands.open')} title={`Список действий · ${keybindings.hint('commands.open')}`} onclick={() => commands?.show()}>Действия</button>
     <button class="global-launch" aria-label="Глобальный поиск" aria-keyshortcuts={keybindings.aria('search.open')} title={`Глобальный поиск · ${keybindings.hint('search.open')}`} onclick={() => commands?.execute('search.open')}><Icon name="search" size={16} /></button>
   </nav>
-  <div class="dock" bind:this={host}></div>
-  <div class="workspace-footer" style:left={`${footer.left}px`} style:top={`${footer.top}px`} style:width={`${footer.width}px`} style:visibility={footer.width ? "visible" : "hidden"}><SidebarStatus /></div>
+  <div class="body">
+    <div class="column" bind:this={column} style:width={`${sidebar.width}px`} role="complementary" aria-label="Навигация">
+      <div class="tree-host" use:attach={"navigation"}></div>
+      <!-- svelte-ignore a11y_no_noninteractive_tabindex: фокусируемый separator — виджет ARIA. -->
+      <div class="split split-graph" role="separator" aria-orientation="horizontal" aria-label="Высота мини-графа" aria-valuenow={sidebar.graph} aria-valuemin={80} tabindex="0" onpointerdown={(e) => dragSplit("graph", e)} onkeydown={(e) => splitKey("graph", e)}></div>
+      <div class="mini-graph" style:height={`${sidebar.graph}px`}><MiniGraph /></div>
+      <SidebarStatus />
+    </div>
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex: фокусируемый separator — виджет ARIA. -->
+    <div class="split split-width" role="separator" aria-orientation="vertical" aria-label="Ширина навигации" aria-valuenow={sidebar.width} aria-valuemin={220} tabindex="0" onpointerdown={(e) => dragSplit("width", e)} onkeydown={(e) => splitKey("width", e)}></div>
+    <div class="dock" bind:this={host}></div>
+  </div>
 </div>
 <div hidden bind:this={parking}>
   <div class="shared-surface" bind:this={searchSurface}><SearchSurface /></div>
@@ -280,8 +321,20 @@
     .workspace-brand { display: flex; align-items: center; gap: 7px; margin-right: 12px; color: var(--text); font-size: 14px; }
     .logo { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 7px; background: var(--accent); color: var(--on-accent); font-size: 15px; font-weight: 800; }
   nav button { padding: 0; border: 0; background: transparent; color: var(--muted); font-size: 12px; font-style: italic; } nav button:hover, nav button.active { color: var(--accent-text); }
+  .body { flex: 1; min-height: 0; display: flex; }
+  .column { flex: none; display: flex; flex-direction: column; min-height: 0; background: var(--panel); }
+  .tree-host { flex: 1; min-height: 0; display: flex; }
+  .tree-host :global(aside) { border-right: 0; }
+  .mini-graph { flex: none; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+  .split { flex: none; background: var(--line); touch-action: none; }
+  .split:hover, .split:focus-visible { background: var(--accent); outline: none; }
+  .split-graph { height: 1px; cursor: row-resize; position: relative; }
+  .split-width { width: 1px; cursor: col-resize; position: relative; }
+  /* Узкая линия, широкая зона захвата. */
+  .split::after { content: ""; position: absolute; z-index: 5; }
+  .split-graph::after { left: 0; right: 0; top: -3px; bottom: -3px; }
+  .split-width::after { top: 0; bottom: 0; left: -3px; right: -3px; }
   .dock { flex: 1; min-height: 0; min-width: 0; }
-  .workspace-footer { position: fixed; height: 38px; z-index: 35; }
   .panels-menu { position: relative; } .menu { position: absolute; top: 24px; left: 0; z-index: 50; min-width: 190px; padding: 5px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); box-shadow: var(--shadow); }
   .menu button { display: block; width: 100%; padding: 4px 8px; text-align: left; font-style: normal; } .menu button:hover { background: var(--accent-soft); }
   .dock :global(.dockview-theme-light), .dock :global(.dockview-theme-dark) {
@@ -298,7 +351,7 @@
   @media (max-width: 1100px) {
     /* Overlay Dockview содержит contain:layout paint: расширять нужно его, а не вложенный документ. */
     .narrow-documents { display: inline-block; }
-    .dock :global(.dv-render-overlay:has(.workspace-content:not([data-panel-kind="navigation"]):not([data-panel-kind="graph"]))) { left: var(--navigation-width) !important; top: 28px !important; width: calc(100% - var(--navigation-width)) !important; height: calc(100% - 28px) !important; z-index: 10; background: var(--bg); }
-    .dock :global(.dv-render-overlay:has(.workspace-content[data-foreground="false"]:not([data-panel-kind="navigation"]):not([data-panel-kind="graph"]))) { display: none !important; }
+    .dock :global(.dv-render-overlay:has(.workspace-content)) { left: 0 !important; top: 28px !important; width: 100% !important; height: calc(100% - 28px) !important; z-index: 10; background: var(--bg); }
+    .dock :global(.dv-render-overlay:has(.workspace-content[data-foreground="false"])) { display: none !important; }
   }
 </style>

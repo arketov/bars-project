@@ -372,6 +372,7 @@ class App {
     this.searchError = null;
     this.results = null;
     this.graphSearch = null;
+    this.graphPreview = null;
     this.displayed = null;
     this.emptyInfo = null;
     const started = performance.now();

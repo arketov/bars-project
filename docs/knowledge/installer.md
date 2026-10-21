@@ -4,7 +4,7 @@ title: Установщик bars — NSIS или MSI, устройство ша�
 
 # Установщик bars: исследование и проверка
 
-Поведение установщика — [features/distribution/installer.md](../features/distribution/installer.md); здесь только исследование: почему NSIS, что в шаблоне Tauri пришлось обойти, как и что проверено руками (15-10-2026, Windows 11, Tauri CLI 2.12.3, NSIS 3.13).
+Поведение установщика — [features/distribution/installer.md](../features/distribution/installer.md); здесь только исследование (команды и окружение сборки — [build.md](build.md)): почему NSIS, что в шаблоне Tauri пришлось обойти, как и что проверено руками (15-10-2026, Windows 11, Tauri CLI 2.12.3, NSIS 3.13).
 
 ## NSIS или MSI
 

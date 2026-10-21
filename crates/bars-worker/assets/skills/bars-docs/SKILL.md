@@ -61,6 +61,18 @@ After zero results, check the subject, project and filters, then reformulate or 
 - Relative links; moving a file means fixing every link to it.
 - No secrets (keys, tokens, passwords).
 
+## Links in the text
+
+bars builds its document graph from links, and a reader of one search result follows them to the rest. Whenever you write or edit a document, turn every mention of another document into a link.
+
+- At the point of mention write a relative Markdown link with a readable name: `[worker settings](../settings/settings.md)`. Not a path in backticks, not «the settings document», not a bare URL.
+- Link what the text relies on: the requirement or decision a statement comes from, the feature it describes, the research behind a claim, the bug or idea it resolves, the session where it was done. Link a requirement number to the requirements document on its first mention in a section.
+- Link the document and name the section in words; heading anchors break when a heading changes.
+- Check the target exists before linking; find an unknown path with `bars_rag_search`. Never link to a document that is not written yet.
+- A new document links to its sources and is linked from its folder's `Index.md`; related documents link back to it when it replaces or extends their topic.
+- Code paths, commands and files outside the documentation stay in backticks.
+- Before finishing, reread the changed text: every mentioned document is a working link.
+
 ## Layout (advice)
 
 Project rules and existing locations take priority. Paths below are relative to the configured documentation root, not necessarily `docs/`. Search for the existing document on the topic first. Create a new document only for a new topic; no empty folders or placeholders.
