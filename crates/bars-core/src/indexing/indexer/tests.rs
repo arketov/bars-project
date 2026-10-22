@@ -940,3 +940,48 @@ fn cancelled_rebuild_keeps_the_old_index_and_leaves_no_new_file() {
     assert_eq!(index.document_count().unwrap(), 2);
     assert_eq!(index.stored_fingerprint().unwrap().unwrap().model, "old");
 }
+
+struct Deferring(&'static str);
+impl IndexObserver for Deferring {
+    fn defer(&self, path: &str) -> bool {
+        path.ends_with(self.0)
+    }
+}
+
+#[test]
+fn a_deferred_document_keeps_its_old_version_until_the_next_check() {
+    let dir = tempfile::tempdir().unwrap();
+    write(dir.path(), "docs/a.md", "# Старый\n\nТекст\n");
+    write(dir.path(), "docs/b.md", "# Второй\n");
+    let mut index = open(dir.path());
+    updated(dir.path(), &mut index, &mut FakeEmbedder::new("m"));
+    let before: Vec<_> = index.documents().unwrap();
+    write(dir.path(), "docs/a.md", "# Новый\n\nСодержимое изменено и стало длиннее\n");
+    write(dir.path(), "docs/b.md", "# Второй, правка\n");
+    write(dir.path(), "docs/c.md", "# Третий\n");
+
+    let outcome = update_index_observed(
+        dir.path(),
+        &mut index,
+        &settings(),
+        &mut FakeEmbedder::new("m"),
+        &Deferring("a.md"),
+    )
+    .unwrap();
+    let UpdateOutcome::Updated(report) = outcome else {
+        panic!("ждали обновление");
+    };
+    assert_eq!(report.deferred, 1);
+    assert_eq!((report.added, report.changed), (1, 1));
+    let a_before = before.iter().find(|d| d.path.ends_with("a.md")).unwrap();
+    let a_now = index
+        .documents()
+        .unwrap()
+        .into_iter()
+        .find(|d| d.path.ends_with("a.md"))
+        .unwrap();
+    assert_eq!(a_now.hash, a_before.hash, "отложенный документ не пересчитан");
+
+    let report = updated(dir.path(), &mut index, &mut FakeEmbedder::new("m"));
+    assert_eq!((report.deferred, report.changed), (0, 1));
+}
