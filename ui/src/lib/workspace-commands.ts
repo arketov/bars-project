@@ -3,6 +3,7 @@ import { tick } from 'svelte';
 import { app } from './app.svelte';
 import { catalog } from './keybindings';
 import { keybindings } from './keybindings.svelte';
+import { confirmClose } from './unsaved.svelte';
 import { adapterFor, type Adapter } from './command-adapters';
 import { documentAt, folderAt } from './contextmenu';
 import { copyText, documentAction, folderAction, folderTarget } from './api';
@@ -82,7 +83,12 @@ export function workspaceCommands(options:WorkspaceCommands) {
       const next=groups[(groups.indexOf(panel.group)+(id==='panel.next'?1:-1)+groups.length)%groups.length]; if(next.activePanel)focus(next.activePanel.id);return;
     }
     if(id==='tab.next'||id==='tab.previous') {const tabs=panel.group.panels;focus(tabs[(tabs.indexOf(panel)+(id==='tab.next'?1:-1)+tabs.length)%tabs.length].id);return;}
-    if(id==='tab.close') {panel.api.close();if(api.activePanel)focus(api.activePanel.id);return;}
+    if(id==='tab.close') {
+      const params=panel.params as {kind?:string;hit?:{path:string}}|undefined;
+      // НФТ-5: вкладка с несохранёнными правками закрывается только после записи или решения пользователя.
+      if(params?.kind==='document'&&params.hit&&!(await confirmClose(app.current,params.hit.path)))return;
+      panel.api.close();if(api.activePanel)focus(api.activePanel.id);return;
+    }
     if(id==='panel.resize') {options.resize(panel.id);return;}
     if(id==='tab.move') {
       const source=panel.group;

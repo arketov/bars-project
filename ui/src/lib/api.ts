@@ -109,6 +109,40 @@ export async function copyText(text: string): Promise<void> {
   await navigator.clipboard.writeText(text);
 }
 
+/** Ожидаемый отказ команд документа: `kind` — `invalid_path`, `outside_root`, `read_only`, `locked` и др. */
+export interface DocumentFailure { status: "error"; kind: string; message: string }
+export type DocumentReadOnly = "not_utf8" | "too_large" | "file";
+export interface DocumentRead {
+  status: "ok";
+  text: string;
+  /** `null` — файла ещё нет (например, `index.md` папки): запись создаст его. */
+  revision: string | null;
+  eol: "lf" | "crlf";
+  bom: boolean;
+  size: number;
+  read_only: DocumentReadOnly | null;
+}
+export type DocumentWrite =
+  | { status: "saved"; revision: string }
+  | { status: "conflict"; revision: string | null }
+  | DocumentFailure;
+
+/** Чтение документа для редактора; вне Tauri — `null`: окно в браузере правит текст из мока. */
+export async function documentRead(project: string, path: string): Promise<DocumentRead | DocumentFailure | null> {
+  return shell<DocumentRead | DocumentFailure>("document_read", { project, path });
+}
+
+/** Запись документа, если на диске ещё `baseRevision` (`null` — файла быть не должно). */
+export async function documentWrite(project: string, path: string, text: string, baseRevision: string | null, eol: "lf" | "crlf", bom: boolean): Promise<DocumentWrite> {
+  if (!inTauri()) return { status: "saved", revision: `browser-${text.length}-${Date.now()}` };
+  return (await shell<DocumentWrite>("document_write", { project, path, text, baseRevision, eol, bom }))!;
+}
+
+/** Ревизия документа на диске без текста; `revision: null` — файла нет. */
+export async function documentRevision(project: string, path: string): Promise<{ status: "ok"; revision: string | null } | DocumentFailure | null> {
+  return shell<{ status: "ok"; revision: string | null } | DocumentFailure>("document_revision", { project, path });
+}
+
 export interface DocumentEditor { id: string; label: string }
 
 export interface FolderTarget { id: string; absolute: string; missing: boolean }

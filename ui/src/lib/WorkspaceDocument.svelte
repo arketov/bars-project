@@ -2,17 +2,63 @@
   import { tick } from "svelte";
   import { call } from "./api";
   import Icon from "./Icon.svelte";
+  import Editor from "./Editor.svelte";
+  import { editors, type EditorBuffer } from "./editors.svelte";
+  import { catalog } from "./keybindings";
+  import { keybindings } from "./keybindings.svelte";
   import { app, type DocumentReference, type ViewedDocument } from "./app.svelte";
   import { BarsError, type ReadOutput } from "./types";
   import { documentHeadings, renderDocument, resolveDocumentLink } from "./markdown";
   import { loadBacklinks, type Backlink, type Backlinks } from "./backlinks";
   let { project, hit, initial }: { project: string; hit: DocumentReference; initial?: ViewedDocument } = $props();
   let doc = $state<ViewedDocument | null>(null), error = $state("");
-  let source = $state(false), outline = $state(true);
+  // Т-29: документ открывается в редакторе исходного Markdown; глаз переключает его на рендер.
+  let source = $state(true), outline = $state(true);
   let body = $state<HTMLDivElement>();
-  const html = $derived(doc ? renderDocument(doc.text, hit.first_line > 0 ? { first: hit.first_line, last: hit.last_line } : undefined) : "");
-  const lines = $derived(doc?.text.split("\n") ?? []);
-  const headings = $derived(documentHeadings(doc?.text ?? ""));
+  let editor = $state<ReturnType<typeof Editor>>();
+  let buffer = $state<EditorBuffer | null>(null);
+  const text = $derived(buffer?.text ?? doc?.text ?? "");
+  const range = $derived(hit.first_line > 0 ? { first: hit.first_line, last: hit.last_line } : null);
+  const html = $derived(doc && !source ? renderDocument(text, range ?? undefined) : "");
+  const headings = $derived(documentHeadings(text));
+  const status = $derived(buffer ? statusLabel(buffer) : "");
+  // Панель разметки (Т-29): по умолчанию скрыта ради плотности окна; выбор запоминается.
+  const TOOLBAR_KEY = "bars-editor-toolbar";
+  let toolbar = $state(false), cheat = $state(false);
+  try { toolbar = localStorage.getItem(TOOLBAR_KEY) === "1"; } catch { /* хранилище недоступно */ }
+  function toggleToolbar() {
+    toolbar = !toolbar;
+    try { localStorage.setItem(TOOLBAR_KEY, toolbar ? "1" : "0"); } catch { /* хранилище недоступно */ }
+  }
+  const helpers: [string, string, string?][] = [
+    ["editor.heading1", "H1"], ["editor.heading2", "H2"], ["editor.heading3", "H3"],
+    ["editor.bold", "Ж", "bold"], ["editor.italic", "К", "italic"], ["editor.code", "‹›"], ["editor.codeBlock", "{ }"],
+    ["editor.bulletList", "•"], ["editor.numberedList", "1."], ["editor.task", "☐"], ["editor.quote", "❝"],
+    ["editor.table", "▦"], ["editor.link", "↗"],
+  ];
+  const helperTitle = (id: string) => {
+    const hint = keybindings.hint(id);
+    return `${catalog.find(c => c.id === id)?.title ?? id}${hint && hint !== "Не назначено" ? ` (${hint})` : ""}`;
+  };
+  function helper(id: string) { editor?.run(id); editor?.focus(); }
+  function statusLabel(b: EditorBuffer): string {
+    switch (b.status) {
+      case "dirty": return "Изменено";
+      case "saving": return "Запись…";
+      case "saved": return b.savedAt ? `Записано в ${new Date(b.savedAt).toLocaleTimeString("ru-RU")}` : "Записано";
+      case "conflict": return "Конфликт версий";
+      case "error": return "Не записано";
+      case "readonly": return "Только чтение";
+      default: return "";
+    }
+  }
+  $effect(() => {
+    const current = doc, path = hit.path, root = project;
+    if (!current || current.missing) { buffer = null; return; }
+    const attached = editors.attach(root, path, current.text);
+    buffer = attached;
+    return () => { editors.detach(attached); };
+  });
   $effect(() => {
     const reference = hit, path = project, seed = initial;
     let cancelled = false;
@@ -64,22 +110,45 @@
     if (path) void app.openDocument({ path, title: path.split("/").pop() ?? path, first_line: 0, last_line: 0 });
   }
   function scroll(line: number) {
-    const target = source ? body?.querySelector(`[data-line="${line}"]`) : body?.querySelector("#hit");
-    target?.scrollIntoView({ block: "center" });
+    if (source) { if (line > 0) editor?.scrollToLine(line); return; }
+    body?.querySelector("#hit")?.scrollIntoView({ block: "center" });
   }
-  $effect(() => { void html; void source; void tick().then(() => scroll(hit.first_line)); });
+  // Прокрутка к отрывку при открытии, смене режима и нового отрывка; правки текста её не двигают.
+  $effect(() => { void source; void hit.first_line; void doc; void tick().then(() => scroll(hit.first_line)); });
 </script>
 
 <section class="document" bind:this={section} aria-label={hit.title} data-document-path={hit.path}>
   <header data-document-path={hit.path}><div><b>{doc?.title ?? hit.title}</b><small>{hit.path}</small></div>
-    <button title={source ? "Показать Markdown" : "Показать исходник (только чтение)"} aria-label="Исходник / рендер" aria-pressed={source} onclick={() => source = !source}><Icon name="eye" size={15} /></button>
+    {#if status}<span class="status" role="status" data-status={buffer?.status}>{status}</span>{/if}
+    {#if source && buffer && buffer.status !== "readonly"}<button class="tool-toggle" title="Панель разметки" aria-label="Панель разметки" aria-pressed={toolbar} onclick={toggleToolbar}>Aa</button>{/if}
+    <button title={source ? "Показать рендер" : "Показать исходник"} aria-label="Исходник / рендер" aria-pressed={source} onclick={() => { source = !source; void buffer?.save(); }}><Icon name="eye" size={15} /></button>
   </header>
   {#if error}<p role="alert">Не удалось прочитать документ: {error}</p>
   {:else if !doc}<p role="status">Чтение…</p>
   {:else if doc.missing}<p role="alert">Файл не найден, возможно, его удалили.</p><button onclick={() => { app.openSearch(); void app.search(); }}>Обновить выдачу</button>
   {:else}
-    <div class="body" bind:this={body}>
-      {#if source}<pre aria-label="Исходник Markdown, только чтение">{#each lines as line, i}<span data-line={i + 1} class:hit={i + 1 >= hit.first_line && i + 1 <= hit.last_line}>{line}{"\n"}</span>{/each}</pre>
+    {#if buffer && (buffer.status === "error" || buffer.status === "conflict" || buffer.status === "readonly")}
+      <p class="banner" role="alert" data-status={buffer.status}>{buffer.message}
+        {#if buffer.status === "error"} Черновик остался в окне, он не записан. <button onclick={() => void buffer?.retry()}>Повторить</button>
+        {:else if buffer.status === "conflict" && buffer.diskRevision === null} Правки остались в окне, пока вы не выберете.
+          <button onclick={() => void buffer?.keepMine()}>Записать заново</button>
+          <button onclick={() => void buffer?.takeDisk()}>Отбросить правки</button>
+        {:else if buffer.status === "conflict"} Правки в окне не записываются, пока вы не выберете версию.
+          <button onclick={() => void buffer?.keepMine()}>Оставить мою версию</button>
+          <button onclick={() => void buffer?.takeDisk()}>Взять версию с диска</button>
+          <button onclick={() => void buffer?.saveBeside()}>Сохранить мою рядом</button>{/if}
+      </p>
+    {/if}
+    {#if buffer?.notice}<p class="banner notice" role="status">{buffer.notice} <button aria-label="Скрыть сообщение" onclick={() => { if (buffer) buffer.notice = ""; }}>×</button></p>{/if}
+    {#if source && toolbar && buffer && buffer.status !== "readonly"}
+      <div class="tools" role="toolbar" aria-label="Помощники разметки">
+        {#each helpers as [id, text, style]}<button class={style} title={helperTitle(id)} aria-label={helperTitle(id)} onmousedown={(e) => e.preventDefault()} onclick={() => helper(id)}>{text}</button>{/each}
+        <button class="help" title="Шпаргалка по синтаксису" aria-label="Шпаргалка по синтаксису" aria-expanded={cheat} onmousedown={(e) => e.preventDefault()} onclick={() => cheat = !cheat}>?</button>
+      </div>
+      {#if cheat}<div class="cheat" role="note"><code># Заголовок</code> · <code>**жирный**</code> · <code>*курсив*</code> · <code>`код`</code> · <code>- пункт</code> · <code>1. пункт</code> · <code>- [ ] задача</code> · <code>&gt; цитата</code> · <code>[текст](путь.md)</code> · <code>| а | б |</code> — таблица; <code>Tab</code> переходит по ячейкам, <code>Enter</code> продолжает список.</div>{/if}
+    {/if}
+    <div class="body" class:editing={source} bind:this={body}>
+      {#if source}<Editor bind:this={editor} text={text} readonly={!buffer || buffer.status === "readonly" || buffer.status === "loading"} hit={range} oninput={(value) => buffer?.edit(value)} />
       {:else}<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions --><div class="md" onclick={followLink}>{@html html}</div>{/if}
     </div>
     <footer class="backlinks" aria-label="Ссылаются на этот документ">
@@ -107,7 +176,13 @@
   header div { flex: 1; min-width: 0; } b, small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } b { font-size: 13px; } small { font: 10px var(--mono); color: var(--muted); }
   button { border: 0; background: transparent; color: var(--muted); padding: 3px 6px; border-radius: 4px; } button:hover { background: var(--accent-soft); color: var(--accent-text); }
   .body { flex: 1; overflow: auto; padding: 10px 14px 60px; min-height: 0; }
-  pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.65 var(--mono); } pre span { display: block; } pre .hit { background: var(--accent-soft); }
+  .body.editing { padding: 0; overflow: hidden; }
+  .tools { display: flex; flex-wrap: wrap; gap: 2px; padding: 3px 8px; border-bottom: 1px solid var(--line); }
+  .tools button { min-width: 26px; font-size: 12px; } .tools .bold { font-weight: 700; } .tools .italic { font-style: italic; }
+  .tool-toggle[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-text); } .tool-toggle { font-size: 11px; }
+  .cheat { padding: 6px 10px; font-size: 11.5px; line-height: 1.7; background: var(--panel-2); border-bottom: 1px solid var(--line); } .cheat code { font: 11px var(--mono); }
+  .status { font-size: 11px; color: var(--muted); white-space: nowrap; } .status[data-status="error"], .status[data-status="conflict"] { color: var(--danger, #b3261e); }
+  .banner { margin: 0; padding: 6px 10px; font-size: 11.5px; background: var(--accent-soft); border-bottom: 1px solid var(--line); } .banner button { color: var(--accent-text); text-decoration: underline; }
   .md { font-size: 12px; line-height: 1.65; overflow-wrap: anywhere; } .md :global(h1) { font-size: 14px; } .md :global(h2), .md :global(h3) { font-size: 13px; }
   .md :global(.a) { color: var(--accent-text); text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; }
   .md :global(span.a) { text-decoration: none; }

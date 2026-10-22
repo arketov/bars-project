@@ -16,6 +16,8 @@
   import CommandPalette from './CommandPalette.svelte';
   import { workspaceCommands } from './workspace-commands';
   import { keybindings } from './keybindings.svelte';
+  import UnsavedDialog from './UnsavedDialog.svelte';
+  import { confirmClose, startFlushListener } from './unsaved.svelte';
 
   let host: HTMLDivElement, api: DockviewApi;
   let ready = $state(false), menu = $state(false), active = $state("search");
@@ -210,6 +212,8 @@
   onMount(() => {
     let disposed = false, stopKeys: (() => void) | undefined;
     void keybindings.start().then(stop => { if (disposed) stop(); else stopKeys = stop; }).catch(error => { keybindings.error = String(error); });
+    let stopFlush: (() => void) | undefined;
+    void startFlushListener().then(stop => { if (disposed) stop(); else stopFlush = stop; }).catch(error => app.flash(String(error), true));
     api = createDockview(host, {
       theme: theme.mode === "dark" ? themeDark : themeLight, messages,
       defaultRenderer: "always", disableFloatingGroups: true,
@@ -220,7 +224,17 @@
       defaultTabComponent: "workspace-tab",
       createTabComponent: () => {
         const tab = new DefaultTab();
-        return { element: tab.element, init(params) { tab.init(params); tab.element.dataset.workspacePanel = params.api.id; if (params.params.kind === "document") tab.element.dataset.documentPath = params.params.hit.path; }, dispose() { tab.dispose(); } };
+        return { element: tab.element, init(params) {
+          tab.init(params); tab.element.dataset.workspacePanel = params.api.id;
+          if (params.params.kind !== "document") return;
+          const path: string = params.params.hit.path;
+          tab.element.dataset.documentPath = path;
+          // НФТ-5: вкладку с несохранёнными правками не закрываем молча; обычное закрытие Dockview отменяется.
+          tab.element.querySelector(".dv-default-tab-action")?.addEventListener("click", (event) => {
+            event.stopImmediatePropagation(); event.preventDefault();
+            void confirmClose(app.current, path).then(ok => { if (ok) params.api.close(); });
+          }, true);
+        }, dispose() { tab.dispose(); } };
       },
       createComponent: () => {
         const element = document.createElement("div"); element.style.height = "100%";
@@ -253,7 +267,7 @@
     })];
     ready = true;
     void tick().then(() => { if (!disposed) commands = workspaceCommands({ api, host, open: navigate, search: () => globalSearch.open(), reset, palette, resize: resizeGroup }); });
-    return () => { disposed = true; stopKeys?.(); commands?.dispose(); palette.close(false); globalSearch.close(false); ready = false; persist(); subscriptions.forEach(s => s.dispose()); api.dispose(); app.indexingOpen = false; };
+    return () => { disposed = true; stopKeys?.(); stopFlush?.(); commands?.dispose(); palette.close(false); globalSearch.close(false); ready = false; persist(); subscriptions.forEach(s => s.dispose()); api.dispose(); app.indexingOpen = false; };
   });
 </script>
 
@@ -306,6 +320,7 @@
 </div>
 <GlobalSearch bind:this={globalSearch} search={() => searchSurface} tree={() => navigationSurface} changed={globalChanged} />
 <CommandPalette bind:this={palette} />
+<UnsavedDialog />
 {#if resizing}
   <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
   <div class="resize-control" bind:this={resizeControl} role="dialog" aria-label="Размер группы" data-command-blocked="true" tabindex="0" onkeydown={resizeKey}>Стрелки — размер группы · Enter — принять · Escape — отменить <button onclick={() => resizing = null}>Готово</button></div>

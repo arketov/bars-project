@@ -43,7 +43,7 @@ add('window', 'Аудиты', ['links|ссылок', 'duplicates|дублей', 
 add('editor', 'Редактор', [
   ['editor.bold', 'Жирный', 'Mod+KeyB'], ['editor.italic', 'Курсив', 'Mod+KeyI'], ['editor.link', 'Ссылка на документ', 'Mod+KeyK'],
   ...['heading1|Заголовок 1', 'heading2|Заголовок 2', 'heading3|Заголовок 3', 'code|Строчный код', 'codeBlock|Блок кода', 'bulletList|Маркированный список', 'numberedList|Нумерованный список', 'task|Задача', 'quote|Цитата', 'table|Таблица'].map(row => { const [id, title] = row.split('|'); return [`editor.${id}`, title] as [string, string]; }),
-].map(row => [row[0], row[1], row[2], 'Этап 3.4']));
+].map(row => [row[0], row[1], row[2]]));
 add('graph', 'Граф', ['view|Выбрать вид графа', 'filters|Фильтры графа', 'find|Найти узел', 'more|Следующая порция', 'source|Открыть источник', 'inspect|Инспектор', 'expand|Раскрыть документ', 'collapse|Свернуть документ', 'local|Локальный граф', 'project|Граф проекта', 'query|Граф запроса', 'pathStart|Первая вершина пути', 'pathEnd|Вторая вершина пути', 'pathNext|Следующий путь', 'pathPrevious|Предыдущий путь', 'impact|Влияние изменения', 'scope|Подграф как область поиска', 'context|Пакет контекста', 'pin|Закрепить узел', 'motion|Остановить движение', 'zoomIn|Увеличить граф', 'zoomOut|Уменьшить граф', 'fit|Уместить граф', 'pan|Перемещение камеры', 'list|Список графа', 'legend|Легенда'].map(row => { const [id, title] = row.split('|'); return [`graph.${id}`, title, '', 'Блок 2']; }));
 export const catalog: readonly Command[] = commands;
 export const platform: Platform = typeof navigator !== 'undefined' && /Mac/.test(navigator.platform) ? 'macos' : 'windows';
