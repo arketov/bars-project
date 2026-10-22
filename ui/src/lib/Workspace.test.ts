@@ -58,36 +58,28 @@ it('команда настроек клавиатуры не сбрасывае
   const query=document.querySelector<HTMLInputElement>('dialog[aria-label="Список действий"] input')!;
   query.value='Сочетания клавиш';query.dispatchEvent(new Event('input',{bubbles:true}));flushSync();
   query.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));flushSync();await settle();
-  expect(document.querySelector('section[aria-label="Сочетания клавиш"]')).not.toBeNull();
+  expect(app.view).toBe('settings');
   expect(app.settingsTab).toBe('keybindings');
 });
 
-it('фокус поля настроек закрывает активную вкладку группы, сохраняя поиск',async()=>{
-  const data=await mockCall('settings_get',{}) as SettingsOutput; settings.saved=structuredClone(data.settings);settings.draft=structuredClone(data.settings);
-  component=mount(Workspace,{target:document.body});flushSync();await settle();app.openSettings();flushSync();await settle();
-  document.querySelector<HTMLInputElement>('[data-panel-kind="settings"] input')!.focus();
-  window.dispatchEvent(new KeyboardEvent('keydown',{code:'KeyW',key:'Ц',ctrlKey:true,bubbles:true,cancelable:true}));flushSync();await settle();
-  expect(document.querySelector('[data-panel-kind="settings"]')).toBeNull();expect(document.querySelector('[data-panel-kind="search"]')).not.toBeNull();
-});
 
 it("глобальный поиск из настроек переносит те же узлы и не меняет раскладку", async () => {
   component = mount(Workspace, { target: document.body }); flushSync(); await settle();
   const query = document.querySelector<HTMLTextAreaElement>('textarea')!;
   const tree = document.querySelector('aside');
   app.query = "сохранить"; app.selected = new Set(["manual"]); app.filter = "папка";
-  app.openSettings(); flushSync(); await settle();
+  app.openSettings("logs"); flushSync(); await settle();
   const layout = localStorage.getItem(layoutKey(project.path));
   const launcher = document.querySelector<HTMLButtonElement>('[aria-label="Глобальный поиск"]')!;
   launcher.focus(); launcher.click(); flushSync(); await settle();
   const dialog = document.querySelector<HTMLDialogElement>('dialog[aria-label="Глобальный поиск"]')!;
   expect(dialog.open).toBe(true); expect(dialog.querySelector('textarea')).toBe(query);
   expect(dialog.querySelector('aside')).toBe(tree); expect(document.activeElement).toBe(query);
-  expect(app.searchActive).toBe(true);
   dialog.dispatchEvent(new Event('cancel', { cancelable: true })); flushSync(); await settle();
   expect(dialog.open).toBe(false); expect(document.activeElement).toBe(launcher);
   expect(document.querySelector('[data-panel-kind="search"] textarea')).toBe(query);
   expect(localStorage.getItem(layoutKey(project.path))).toBe(layout);
-  expect(app.searchActive).toBe(false); expect(app.query).toBe("сохранить");
+  expect(app.query).toBe("сохранить");
   expect([...app.selected]).toEqual(["manual"]); expect(app.filter).toBe("папка");
 });
 
@@ -201,28 +193,25 @@ it("поздний read закрытого документа не возвра�
   resolve({ title: "А", text: "Поздний текст" }); await settle();
   expect(document.body.textContent).not.toContain("Поздний текст");
 });
-it("новые темы не перехватывают открытие настроек; логи остаются отдельной панелью", async () => {
+it("настройки — отдельный экран, а не вкладка; логи остаются панелью", async () => {
   component = mount(Workspace, { target: document.body }); flushSync();
   app.openTopics(); flushSync(); await settle();
   app.openSettings(); flushSync(); await settle();
-  expect(document.querySelector('.workspace')?.getAttribute('data-active-panel')).toBe("settings");
+  expect(document.querySelector('[data-panel-kind="settings"]')).toBeNull();
   expect(document.querySelector('[data-panel-kind="topics"]')).not.toBeNull();
   app.openSettings("logs"); flushSync(); await settle();
   expect(document.querySelector('.workspace')?.getAttribute('data-active-panel')).toBe("logs");
-  expect(document.querySelector('[data-panel-kind="settings"] [aria-label="Логи воркера"]')).toBeNull();
-  app.openSettings(); flushSync(); await settle();
-  expect(document.querySelector('.workspace')?.getAttribute('data-active-panel')).toBe("settings");
 });
 it("стрелки и End переключают вкладки без сброса запроса и области", async () => {
   component = mount(Workspace, { target: document.body }); flushSync();
   app.query = "контракт"; app.selected = new Set(["manual"]);
-  app.openSettings(); flushSync(); await settle();
+  app.openSettings("logs"); flushSync(); await settle();
   const search = [...document.querySelectorAll<HTMLElement>('[role="tab"]')].find(t => t.textContent?.includes("Поиск"))!;
-  const settings = [...document.querySelectorAll<HTMLElement>('[role="tab"]')].find(t => t.textContent?.includes("Настройки"))!;
+  const logs = [...document.querySelectorAll<HTMLElement>('[role="tab"]')].find(t => t.textContent?.includes("Логи"))!;
   search.focus(); search.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true })); flushSync();
-  expect(document.activeElement).toBe(settings);
-  expect(document.querySelector('.workspace')?.getAttribute('data-active-panel')).toBe("settings");
-  settings.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true })); flushSync();
+  expect(document.activeElement).toBe(logs);
+  expect(document.querySelector('.workspace')?.getAttribute('data-active-panel')).toBe("logs");
+  logs.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true })); flushSync();
   expect(document.activeElement).toBe(search);
   expect(document.querySelector('.workspace')?.getAttribute('data-active-panel')).toBe("search");
   expect(app.query).toBe("контракт"); expect([...app.selected]).toEqual(["manual"]);
@@ -238,18 +227,6 @@ it("перенос документной вкладки сохраняет то
   expect(document.querySelector('.document pre')).toBe(source);
   expect(document.querySelector('[title="Показать структуру"]')).not.toBeNull();
 });
-it("закрытие и повторное открытие настроек не перечитывает несохранённый черновик", async () => {
-  const output = await mockCall("settings_get", {}) as SettingsOutput;
-  settings.saved = structuredClone(output.settings); settings.draft = structuredClone(output.settings);
-  settings.draft.search.results = 17;
-  const load = vi.spyOn(settings, "load");
-  component = mount(Workspace, { target: document.body }); flushSync();
-  app.openSettings(); flushSync(); await settle();
-  const tab = [...document.querySelectorAll('[role="tab"]')].find(t => t.textContent?.includes("Настройки"))!;
-  tab.querySelector<HTMLElement>('.dv-default-tab-action')!.click(); flushSync(); await settle();
-  app.openSettings(); flushSync(); await settle();
-  expect(settings.draft?.search.results).toBe(17); expect(load).not.toHaveBeenCalled();
-});
 it("навигация и мини-граф — постоянная колонка, «Граф» открывает полный граф вкладкой", async () => {
   component = mount(Workspace, { target: document.body }); flushSync(); await settle();
   expect([...document.querySelectorAll('[role="tab"]')].some(t => t.textContent?.includes("Навигация"))).toBe(false);
@@ -257,7 +234,6 @@ it("навигация и мини-граф — постоянная колон�
   expect(document.querySelector('.column aside')).not.toBeNull();
   expect(document.querySelector('.column .mini-graph')).not.toBeNull();
   document.querySelector<HTMLElement>('.column aside')!.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, button: 0 })); flushSync();
-  expect(app.searchActive).toBe(true);
   [...document.querySelectorAll<HTMLButtonElement>('nav button')].find(b => b.textContent === "Граф")!.click(); flushSync(); await settle();
   expect(document.querySelector('.workspace')?.getAttribute('data-active-panel')).toBe("graph");
   expect(document.querySelector('.dock [data-panel-kind="graph"]')).not.toBeNull();

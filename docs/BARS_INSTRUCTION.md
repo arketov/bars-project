@@ -37,6 +37,17 @@ bars splits each Markdown file into sections by headings and indexes every secti
 - **State the status at the top of a topic file**, in one line: what is verified and how (tests, a live run, a static reading of the code), what is not verified, what is open. A reader must not mistake a plan for a fact.
 - **Do not copy, link.** A requirement, a decision or a definition lives in exactly one place; other documents refer to it by link or by its number. Copies drift apart and then bars finds both versions.
 
+## Links in the text
+
+Links are how a reader of one search result reaches the rest, and bars builds its document graph from them. Whenever the text mentions another document, make the mention a link.
+
+- **Link at the point of mention**: a relative Markdown link with a readable name, `[worker settings](../settings/settings.md)`. Not a path in backticks (`` `features/settings/settings.md` ``), not «in the settings document», not a bare URL.
+- **What to link**: every document the text names or relies on — the requirement or decision a statement comes from, the feature it describes, the research behind a claim, the bug or idea it resolves, the session where it was done. A requirement number gets a link to the requirements document on first mention in a section.
+- **Link to the document, name the section in words**: `[search contract](../search/hybrid-search.md), section «Ranking»`. Heading anchors break when a heading changes.
+- **Check the target exists** before writing the link; find it with bars when the path is unknown. Never link to a document you only plan to write.
+- **A new document** links to its sources and is linked from its folder's `Index.md`; when it replaces or extends a topic, the related documents link back to it.
+- Code paths, commands and files outside the documentation stay in backticks.
+
 ## Current state, not history
 
 - A document describes **how things are now**. When something becomes outdated, edit or delete it. Do not append corrections or «update» / «continuation» layers to the end: bars searches everything it finds, and an old paragraph is returned as readily as the new one.
@@ -161,5 +172,6 @@ A session the user talks to keeps a folder `docs/chats/<YYYY-MM-DD>-<topic>/`. T
 2. Each section is understandable without its neighbours; the headings name the subject.
 3. The folder's `Index.md` lists the file; moved files have all links fixed.
 4. Nothing is copied from another document: there is a link or a number instead.
-5. Outdated text is edited or deleted, not left with a correction below.
-6. No secrets.
+5. Every document the text mentions is a working relative link, not a path in backticks.
+6. Outdated text is edited or deleted, not left with a correction below.
+7. No secrets.

@@ -88,7 +88,6 @@
   function globalChanged(opened: boolean) {
     globalOpen = opened;
     if (!opened) placeSurfaces();
-    app.searchActive = opened || api?.getPanel(foreground)?.params?.kind === "search";
   }
   let current: string | null = null, restoring = false;
   let incoming: ViewedDocument | undefined;
@@ -103,7 +102,6 @@
     app.indexingOpen = !!api.getPanel("indexing");
     documents = api.panels.filter(p => p.params?.kind === "document").map(p => ({ id: p.id, title: p.title ?? p.id }));
     if (!api.getPanel(foreground)) foreground = api.getPanel("search") ? "search" : api.panels[0]?.id ?? "";
-    app.searchActive = globalOpen || api.getPanel(foreground)?.params?.kind === "search";
     models.forEach((model, id) => { model.foreground = id === foreground; });
   }
   function persist() {
@@ -124,11 +122,13 @@
       defaultLayout(api, host.clientWidth); sidebar = { ...defaultSidebar };
       app.flash("Раскладка повреждена или устарела; восстановлена штатная", true);
     } finally {
+      api.getPanel("settings")?.api.close(); // вкладка настроек из прежних раскладок
       ensureRightZone(api, host.clientWidth);
-      restoring = false; app.searchActive = api.activePanel?.params?.kind === "search"; active = api.activePanel?.id ?? "";
+      restoring = false; active = api.activePanel?.id ?? "";
     }
   }
   function open(kind: Exclude<PanelKind, "document">) {
+    if (kind === "settings") { menu = false; return; } // настройки — отдельный экран в App.svelte, не вкладка
     if (kind === "topics") app.topicsOpen = true;
     let panel = api.getPanel(kind);
     if (!panel) panel = api.addPanel({ id: kind, component: "workspace", title: panelTitles[kind], params: { kind }, position: api.getPanel("search") ? { referencePanel: "search", direction: "within" } : api.groups[0] ? { referenceGroup: api.groups[0], direction: "within" } : undefined });

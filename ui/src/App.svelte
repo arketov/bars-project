@@ -6,6 +6,7 @@
   import ConsentDialog from "./lib/ConsentDialog.svelte";
   import DeleteProjectDialog from "./lib/DeleteProjectDialog.svelte";
   import { theme } from "./lib/theme.svelte";
+  import SettingsPage from "./lib/SettingsPage.svelte";
   import Workspace from "./lib/Workspace.svelte";
 
   onMount(() => {
@@ -31,6 +32,10 @@
 
 <Workspace />
 
+{#if app.view === "settings" && app.settingsTab !== "logs" && app.settingsTab !== "mcp-statistics"}
+  <div class="settings-screen"><SettingsPage /></div>
+{/if}
+
 {#if app.consentOpen}<ConsentDialog />{/if}
 {#if app.deletingProject}<DeleteProjectDialog />{/if}
 
@@ -41,6 +46,8 @@
 {/if}
 
 <style>
+  /* Настройки — отдельный экран поверх рабочей области, как раньше; раскладка под ним не трогается. */
+  .settings-screen { position: fixed; inset: 0; z-index: 50; background: var(--bg); overflow: auto; }
   .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 9px 16px; border-radius: 10px; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,.25); z-index: 80; max-width: 80vw; }
   .toast.bad { background: var(--bad); color: #fff; }
 </style>

@@ -11,6 +11,15 @@
   const open = $derived(forceOpen || opened);
   const check = $derived(checkState(node, app.selected));
   const title = $derived(node.path === "." ? "корень документации" : isDir ? `${node.path}/` : node.path.replace(/^\.\//, ""));
+  /** Т-32: имя папки работает как файл — открывает её Index.md и раскрывает папку; клик по чекбоксу отмечает область поиска. */
+  function openFolder() {
+    if (node.indexPath) void app.openDocument({ path: node.indexPath, title: node.label, first_line: 0, last_line: 0 });
+    if (!open) opened = true;
+  }
+  function folderClick(event: MouseEvent) {
+    event.preventDefault();
+    openFolder();
+  }
   function keyboard(event: KeyboardEvent) {
     if (event.defaultPrevented || event.isComposing || event.ctrlKey || event.metaKey || event.altKey || event.target instanceof HTMLInputElement) return;
     const row = event.currentTarget as HTMLElement;
@@ -23,8 +32,8 @@
       event.preventDefault(); if (!open) opened=true; else row.parentElement?.querySelector<HTMLElement>('.kids .row')?.focus();
     } else if (event.key === 'ArrowLeft') {
       event.preventDefault(); if (isDir && open && !forceOpen) opened=false; else row.parentElement?.parentElement?.closest('.node')?.querySelector<HTMLElement>(':scope > .row')?.focus();
-    } else if (event.key === ' ' && app.searchActive) { event.preventDefault(); app.toggleNode(node.path,check!=='all'); }
-    else if (event.key === 'Enter') { event.preventDefault(); if (isDir) opened=!opened; else if (node.documentPath) void app.openDocument({path:node.documentPath,title:node.label,first_line:0,last_line:0}); }
+    } else if (event.key === ' ') { event.preventDefault(); app.toggleNode(node.path,check!=='all'); }
+    else if (event.key === 'Enter') { event.preventDefault(); if (isDir) { if (node.indexPath) openFolder(); else opened=!opened; } else if (node.documentPath) void app.openDocument({path:node.documentPath,title:node.label,first_line:0,last_line:0}); }
   }
 </script>
 
@@ -39,7 +48,6 @@
       <span class="spacer"></span>
     {/if}
     <label {title} class:directory={isDir}>
-      {#if app.searchActive}
       <input
         type="checkbox"
         aria-label={title}
@@ -47,8 +55,7 @@
         indeterminate={check === "some"}
         onchange={(event) => app.toggleNode(node.path, event.currentTarget.checked)}
       />
-      {/if}
-      {#if isDir}<Icon name="folder" size={14} /><span class="nm">{node.path === "." ? "Корневые документы" : node.label}</span>{/if}
+      {#if isDir}<Icon name="folder" size={14} /><!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions: клавиатура — Enter на строке. --><span class="nm folder" onclick={folderClick}>{node.path === "." ? "Корневые документы" : node.label}</span>{/if}
     </label>
     {#if !isDir && node.documentPath}
       <button class="nm filename" title={node.documentPath} onclick={() => app.openDocument({ path: node.documentPath!, title: node.label, first_line: 0, last_line: 0 })}>{node.label}</button>
@@ -72,6 +79,7 @@
   .open > .row .caret { transform: rotate(90deg); }
   label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
   label.directory { flex: 1; min-width: 0; }
+  label .folder:hover { color: var(--accent-text); }
   .filename { border: 0; background: none; text-align: left; color: inherit; padding: 0; cursor: pointer; }
   .filename:hover { color: var(--accent-text); }
   .nm { flex: 1; font-size: 13px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

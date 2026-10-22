@@ -50,7 +50,6 @@ function remembered(): string | null {
 
 class App {
   view = $state<View>("main");
-  searchActive = $state(true);
   navigationVersion = $state(0);
   topicsVersion = $state(0);
   indexingOpen = $state(false);

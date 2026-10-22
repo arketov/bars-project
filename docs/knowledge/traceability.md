@@ -45,7 +45,7 @@ title: Трассировка требований bars — документы �
 | Т-31 | 3.5 → 3.5.1, 3.5.2; 3.1.1 | [База знаний](../features/knowledge-base/requirements.md): индекс/обновление ссылок |
 | Т-32 | 3.3 → 3.3.1; 3.1.1 | [База знаний](../features/knowledge-base/requirements.md): файл папки |
 | Т-33 | 3.3 → 3.3.1; 3.1.1 | [База знаний](../features/knowledge-base/requirements.md): дерево с диска и операции |
-| Т-34 | 3.3 → 3.3.1; 1.2.2 | [База знаний](../features/knowledge-base/requirements.md), [проект окна](../features/window/requirements.md): галочки при активном поиске |
+| Т-34 | 3.3 → 3.3.1; 1.2.2 | [База знаний](../features/knowledge-base/requirements.md), [проект окна](../features/window/requirements.md): галочки видны всегда |
 | Т-35 | 3.3 → 3.3.2; 3.1.1 | [База знаний](../features/knowledge-base/requirements.md): создание проекта |
 | Т-36 | 3.8 → 3.8.3; 3.8.1, 3.8.2 | [База знаний](../features/knowledge-base/requirements.md), [новые темы](../features/new-topics/requirements.md): аудиты и очередь |
 | Т-37 | 3.7 → 3.7.1; 4.4.1, 4.4.2 | [База знаний](../features/knowledge-base/requirements.md), [MCP](../features/agent-tools/mcp-tools.md): таблица соответствия и реальные действия |

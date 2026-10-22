@@ -16,6 +16,8 @@ export interface TreeNode {
   children: TreeNode[];
   /** Исходный путь индекса от корня проекта; только у файла. */
   documentPath?: string;
+  /** Исходный путь `Index.md` папки или модуля (Т-32); клик по имени папки открывает его. */
+  indexPath?: string;
 }
 
 export type CheckState = "all" | "some" | "none";
@@ -81,6 +83,12 @@ export function buildTree(documents: TreeDocument[], docsRoot: string): TreeNode
     });
     nodes.forEach((node) => sortNodes(node.children));
   };
+  const attachIndex = (node: TreeNode) => {
+    const index = node.children.find((child) => child.kind === "file" && child.name.toLowerCase() === "index.md");
+    if (index?.documentPath) node.indexPath = index.documentPath;
+    node.children.forEach(attachIndex);
+  };
+  modules.forEach(attachIndex);
   const result = [...modules.values()];
   result.forEach((module) => sortNodes(module.children));
   // Корневой модуль первым, остальные по имени.

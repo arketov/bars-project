@@ -24,6 +24,15 @@ const DOCS: TreeDocument[] = [
 
 const tree = () => buildTree(DOCS, "docs");
 
+describe("buildTree: Index.md папки (Т-32)", () => {
+  it("кладёт путь Index.md в папку и модуль; без файла пути нет", () => {
+    const modules = tree();
+    expect(modules[0].indexPath).toBe("docs/Index.md");
+    expect(modules.find((m) => m.path === "search")?.indexPath).toBe("docs/search/Index.md");
+    expect(modules.find((m) => m.path === "knowledge")?.indexPath).toBeUndefined();
+  });
+});
+
 describe("buildTree", () => {
   it("делит документы на модули, папки и файлы, считает чанки", () => {
     const modules = tree();

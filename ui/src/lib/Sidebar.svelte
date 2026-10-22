@@ -82,7 +82,7 @@
       <Icon name="search" size={14} width={2.4} />
       <input placeholder="Фильтр документов" aria-label="Фильтр документов" autocomplete="off" bind:value={app.filter} />
     </label>
-    {#if app.searchActive}<button class="reset-scope" aria-label="Сбросить область поиска" title={(touched.length ? `Отмечено модулей: ${touched.length} из ${app.tree.length}` : "Ничего не отмечено — весь проект") + ". Сбросить область поиска"} onclick={() => app.clearSelection()}><Icon name="refresh" size={13} /></button>{/if}</div>
+    <button class="reset-scope" aria-label="Сбросить область поиска" title={(touched.length ? `Отмечено модулей: ${touched.length} из ${app.tree.length}` : "Ничего не отмечено — весь проект") + ". Сбросить область поиска"} onclick={() => app.clearSelection()}><Icon name="refresh" size={13} /></button></div>
 
     <div class="tree" role="tree" aria-label="Документы проекта">
       <button
