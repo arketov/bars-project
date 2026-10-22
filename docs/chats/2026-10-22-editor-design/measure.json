@@ -1,0 +1,260 @@
+{
+ "browser": "Edg/155.0.4283.62",
+ "date": "2026-10-22T10:09:43.715Z",
+ "measure": [
+  {
+   "bytes": 7117,
+   "utf8": 10637,
+   "lines": 484,
+   "config": {
+    "lang": "plain",
+    "wrap": true
+   },
+   "createMs": 15.8,
+   "firstPaintMs": 20.5,
+   "dispatchMedianMs": 0.3,
+   "dispatchP95Ms": 0.9,
+   "typeToPaintMedianMs": 8.3,
+   "typeToPaintP95Ms": 9,
+   "scrollFrameMedianMs": 8.3,
+   "scrollFrameP95Ms": 8.6,
+   "toStringMs": 0.5,
+   "treeLength": 0,
+   "domLines": 64,
+   "heapMB": 12.2
+  },
+  {
+   "bytes": 7117,
+   "utf8": 10637,
+   "lines": 484,
+   "config": {
+    "lang": "gfm",
+    "wrap": true
+   },
+   "createMs": 15.7,
+   "firstPaintMs": 24.8,
+   "dispatchMedianMs": 0.4,
+   "dispatchP95Ms": 1.2,
+   "typeToPaintMedianMs": 8.3,
+   "typeToPaintP95Ms": 8.8,
+   "scrollFrameMedianMs": 8.3,
+   "scrollFrameP95Ms": 8.5,
+   "toStringMs": 0.1,
+   "treeLength": 7307,
+   "domLines": 64,
+   "heapMB": 14.1
+  },
+  {
+   "bytes": 7117,
+   "utf8": 10637,
+   "lines": 484,
+   "config": {
+    "lang": "gfm+code",
+    "wrap": true
+   },
+   "createMs": 6.3,
+   "firstPaintMs": 10.8,
+   "dispatchMedianMs": 0.5,
+   "dispatchP95Ms": 1.4,
+   "typeToPaintMedianMs": 8.3,
+   "typeToPaintP95Ms": 8.8,
+   "scrollFrameMedianMs": 8.3,
+   "scrollFrameP95Ms": 8.5,
+   "toStringMs": 0,
+   "treeLength": 7307,
+   "domLines": 64,
+   "heapMB": 18.1
+  },
+  {
+   "bytes": 68789,
+   "utf8": 102709,
+   "lines": 4664,
+   "config": {
+    "lang": "plain",
+    "wrap": true
+   },
+   "createMs": 1.7,
+   "firstPaintMs": 8.4,
+   "dispatchMedianMs": 0.2,
+   "dispatchP95Ms": 0.5,
+   "typeToPaintMedianMs": 8.3,
+   "typeToPaintP95Ms": 8.8,
+   "scrollFrameMedianMs": 8.3,
+   "scrollFrameP95Ms": 8.7,
+   "toStringMs": 0.1,
+   "treeLength": 0,
+   "domLines": 95,
+   "heapMB": 20.1
+  },
+  {
+   "bytes": 68789,
+   "utf8": 102709,
+   "lines": 4664,
+   "config": {
+    "lang": "gfm",
+    "wrap": true
+   },
+   "createMs": 3.5,
+   "firstPaintMs": 7.4,
+   "dispatchMedianMs": 0.4,
+   "dispatchP95Ms": 1,
+   "typeToPaintMedianMs": 8.4,
+   "typeToPaintP95Ms": 9.3,
+   "scrollFrameMedianMs": 8.3,
+   "scrollFrameP95Ms": 8.5,
+   "toStringMs": 0,
+   "treeLength": 68979,
+   "domLines": 95,
+   "heapMB": 17.6
+  },
+  {
+   "bytes": 68789,
+   "utf8": 102709,
+   "lines": 4664,
+   "config": {
+    "lang": "gfm+code",
+    "wrap": true
+   },
+   "createMs": 3.2,
+   "firstPaintMs": 8.7,
+   "dispatchMedianMs": 0.4,
+   "dispatchP95Ms": 0.7,
+   "typeToPaintMedianMs": 8.4,
+   "typeToPaintP95Ms": 8.6,
+   "scrollFrameMedianMs": 8.3,
+   "scrollFrameP95Ms": 9.4,
+   "toStringMs": 0.1,
+   "treeLength": 68979,
+   "domLines": 95,
+   "heapMB": 19.2
+  },
+  {
+   "bytes": 688053,
+   "utf8": 1026293,
+   "lines": 46508,
+   "config": {
+    "lang": "plain",
+    "wrap": true
+   },
+   "createMs": 5.9,
+   "firstPaintMs": 7.7,
+   "dispatchMedianMs": 0.2,
+   "dispatchP95Ms": 0.8,
+   "typeToPaintMedianMs": 8.3,
+   "typeToPaintP95Ms": 8.6,
+   "scrollFrameMedianMs": 8.4,
+   "scrollFrameP95Ms": 9.6,
+   "toStringMs": 1,
+   "treeLength": 0,
+   "domLines": 96,
+   "heapMB": 25.7
+  },
+  {
+   "bytes": 688053,
+   "utf8": 1026293,
+   "lines": 46508,
+   "config": {
+    "lang": "gfm",
+    "wrap": true
+   },
+   "createMs": 8.2,
+   "firstPaintMs": 11.4,
+   "dispatchMedianMs": 0.4,
+   "dispatchP95Ms": 1.2,
+   "typeToPaintMedianMs": 8.3,
+   "typeToPaintP95Ms": 9.3,
+   "scrollFrameMedianMs": 8.3,
+   "scrollFrameP95Ms": 11.6,
+   "toStringMs": 1,
+   "treeLength": 101810,
+   "domLines": 93,
+   "heapMB": 40.1
+  },
+  {
+   "bytes": 688053,
+   "utf8": 1026293,
+   "lines": 46508,
+   "config": {
+    "lang": "gfm+code",
+    "wrap": true
+   },
+   "createMs": 11.2,
+   "firstPaintMs": 16.7,
+   "dispatchMedianMs": 0.4,
+   "dispatchP95Ms": 1.6,
+   "typeToPaintMedianMs": 8.3,
+   "typeToPaintP95Ms": 9.2,
+   "scrollFrameMedianMs": 8.3,
+   "scrollFrameP95Ms": 9.4,
+   "toStringMs": 1.3,
+   "treeLength": 101174,
+   "domLines": 93,
+   "heapMB": 39.5
+  },
+  {
+   "bytes": 3441355,
+   "utf8": 5130635,
+   "lines": 232276,
+   "config": {
+    "lang": "plain",
+    "wrap": true
+   },
+   "createMs": 16.2,
+   "firstPaintMs": 20,
+   "dispatchMedianMs": 0.2,
+   "dispatchP95Ms": 0.6,
+   "typeToPaintMedianMs": 8.3,
+   "typeToPaintP95Ms": 9.8,
+   "scrollFrameMedianMs": 8.4,
+   "scrollFrameP95Ms": 10.8,
+   "toStringMs": 3.7,
+   "treeLength": 0,
+   "domLines": 96,
+   "heapMB": 41.8
+  },
+  {
+   "bytes": 3441355,
+   "utf8": 5130635,
+   "lines": 232276,
+   "config": {
+    "lang": "gfm",
+    "wrap": true
+   },
+   "createMs": 14,
+   "firstPaintMs": 16.1,
+   "dispatchMedianMs": 0.3,
+   "dispatchP95Ms": 0.9,
+   "typeToPaintMedianMs": 8.4,
+   "typeToPaintP95Ms": 10.6,
+   "scrollFrameMedianMs": 8.3,
+   "scrollFrameP95Ms": 8.5,
+   "toStringMs": 2.9,
+   "treeLength": 102460,
+   "domLines": 96,
+   "heapMB": 54.6
+  }
+ ],
+ "parse": [
+  {
+   "utf8": 102709,
+   "parsed": true,
+   "parseMs": 7.8,
+   "withIterateMs": 9,
+   "headings": 424
+  },
+  {
+   "utf8": 1026293,
+   "parsed": true,
+   "parseMs": 96.6,
+   "withIterateMs": 103.9,
+   "headings": 4228
+  },
+  {
+   "utf8": 5130635,
+   "parsed": true,
+   "parseMs": 459.9,
+   "withIterateMs": 491.7,
+   "headings": 21116
+  }
+ ]
+}

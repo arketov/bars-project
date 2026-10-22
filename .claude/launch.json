@@ -4,15 +4,37 @@
     {
       "name": "bars-ui",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--prefix", "ui"],
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "ui"
+      ],
       "port": 1420
     },
     {
       "name": "bars-graph-design",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "graph-design", "--prefix", "ui"],
+      "runtimeArgs": [
+        "run",
+        "graph-design",
+        "--prefix",
+        "ui"
+      ],
       "port": 4181,
       "url": "http://localhost:4181"
+    },
+    {
+      "name": "bars-editor-spike",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "editor-spike",
+        "--prefix",
+        "ui"
+      ],
+      "port": 4182,
+      "url": "http://localhost:4182"
     }
   ]
 }
