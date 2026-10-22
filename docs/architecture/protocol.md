@@ -126,6 +126,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | `new_topics_delete` | `project`, `id`, `revision` | `accepted: true` |
 | `new_topics_clear` | `project`, обязательный `confirmed: true` | `generation` |
 | `new_topics_settings` | `project`, `enabled` | `enabled`, `generation` |
+| `links_of` | `project` (абсолютный путь), `path` (от корня проекта) | `known`, `outgoing` (`line`, `text`, `raw`, `kind`, `target`, `target_title`, `broken`), `incoming` (`path`, `title`, `lines`); читает индекс ссылок, сверяя его с диском, модель не нужна; только окно ([индекс ссылок](../features/knowledge-base/link-index.md)) |
 
 Автозапуск — состояние ОС, а не настройка ([features/distribution/autostart.md](../features/distribution/autostart.md)); методы доступны окну и `bars-cli`, но не `bars-mcp` (аудитория `Cli`), решение агента, срез 7:
 

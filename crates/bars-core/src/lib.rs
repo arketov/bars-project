@@ -9,6 +9,7 @@ pub mod doc_path;
 pub mod graph;
 pub mod indexing;
 pub mod instruction;
+pub mod link_index;
 pub mod models;
 pub mod new_topics;
 pub mod outline;

@@ -307,6 +307,18 @@ export async function mockCall(method: string, params: Record<string, unknown>):
       const project = String(params.project ?? params.cwd);
       return { docs_root: "docs", documents: (DOCS_BY_PROJECT[project] ??= docs("docs")) };
     }
+    case "links_of": {
+      const project = String(params.project ?? params.cwd), path = String(params.path);
+      const others = (DOCS_BY_PROJECT[project] ??= docs("docs")).filter((d) => d.path !== path);
+      return {
+        known: true,
+        outgoing: [
+          ...(others[0] ? [{ line: 3, text: others[0].title, raw: others[0].path, kind: "inline", target: others[0].path, target_title: others[0].title, broken: false }] : []),
+          { line: 5, text: "Новая тема", raw: "Новая тема", kind: "wiki", broken: true },
+        ],
+        incoming: others[1] ? [{ path: others[1].path, title: others[1].title, lines: [2, 9] }] : [],
+      };
+    }
     case "activity":
       return activity();
     case "operation_events": {

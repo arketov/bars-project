@@ -6,6 +6,7 @@
 mod errors;
 mod graph;
 mod history;
+mod links;
 mod topics;
 
 #[cfg(test)]
@@ -53,6 +54,8 @@ pub struct WorkerHandler {
     worker: Worker,
     history: crate::mcp_history::History,
     topics: crate::new_topics::Collector,
+    /// Единственный писатель индекса ссылок (`.bars/links.sqlite3`): вызовы окна идут по очереди.
+    links_lock: std::sync::Arc<std::sync::Mutex<()>>,
     /// Близость документов последнего среза физического графа: проект, снимок графа, результат.
     physical_similarity: PhysicalSimilarityCache,
 }
@@ -76,6 +79,7 @@ impl WorkerHandler {
             worker,
             history,
             topics: crate::new_topics::Collector::new(),
+            links_lock: Default::default(),
             physical_similarity: Default::default(),
         }
     }
@@ -1172,6 +1176,7 @@ impl WorkerHandler {
                 .new_topics_settings(params)
                 .await
                 .map(|out| output_value(&out)),
+            Call::LinksOf(params) => self.links_of(params).await.map(|out| output_value(&out)),
             Call::AutostartGet(AutostartGetParams {}) => {
                 self.autostart_get().map(|out| output_value(&out))
             }

@@ -991,6 +991,7 @@ methods! {
     NewTopicsDelete: crate::NewTopicsDeleteParams => AcceptedOutput, "new_topics_delete", Window;
     NewTopicsClear: crate::NewTopicsClearParams => crate::NewTopicsGenerationOutput, "new_topics_clear", Window;
     NewTopicsSettings: crate::NewTopicsSettingsParams => crate::NewTopicsSettingsOutput, "new_topics_settings", Window;
+    LinksOf: crate::LinksOfParams => crate::LinksOfOutput, "links_of", Window;
     AutostartGet: AutostartGetParams => AutostartOutput, "autostart_get", Cli;
     AutostartSet: AutostartSetParams => AutostartOutput, "autostart_set", Cli;
 }

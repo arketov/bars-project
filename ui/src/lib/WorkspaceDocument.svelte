@@ -9,7 +9,7 @@
   import { app, type DocumentReference, type ViewedDocument } from "./app.svelte";
   import { BarsError, type ReadOutput, type SearchOutput } from "./types";
   import { documentHeadings, renderDocument, resolveDocumentLink } from "./markdown";
-  import { loadBacklinks, type Backlink, type Backlinks } from "./backlinks";
+  import { linkTitle, loadLinks, type DocumentLinks, type IncomingLink, type OutgoingLink } from "./document-links";
   import { linkTargets, resolveWikilink } from "./link-picker";
   let { project, hit, initial }: { project: string; hit: DocumentReference; initial?: ViewedDocument } = $props();
   let doc = $state<ViewedDocument | null>(null), error = $state("");
@@ -77,7 +77,7 @@
     }
     return () => { cancelled = true; };
   });
-  let backlinks = $state<Backlinks | null>(null), backlinksError = $state(""), backlinksOpen = $state(false), backlinksHeight = $state(140);
+  let backlinks = $state<DocumentLinks | null>(null), backlinksError = $state(""), backlinksOpen = $state(false), backlinksHeight = $state(140);
   let section = $state<HTMLElement>();
   const clampHeight = (value: number) => Math.max(48, Math.min(value, (section?.clientHeight ?? 400) * 0.7));
   function resizeBacklinks(event: PointerEvent) {
@@ -93,15 +93,18 @@
     event.preventDefault();
     backlinksHeight = clampHeight(backlinksHeight + (event.key === "ArrowUp" ? 24 : -24));
   }
+  // Ссылки читаются с диска заново при открытии документа и после каждой записи правок: список не ждёт индексации.
   $effect(() => {
-    const path = hit.path, root = project, docsRoot = app.docsRoot;
+    const path = hit.path, root = project;
+    void buffer?.savedAt;
     let cancelled = false;
-    backlinks = null;
     backlinksError = "";
-    void loadBacklinks(root, path, docsRoot).then(result => { if (!cancelled) backlinks = result; }).catch(e => { if (!cancelled) backlinksError = e instanceof Error ? e.message : String(e); });
+    void loadLinks(root, path).then(result => { if (!cancelled) backlinks = result; }).catch(e => { if (!cancelled) backlinksError = e instanceof Error ? e.message : String(e); });
     return () => { cancelled = true; };
   });
-  const openBacklink = (item: Backlink) => void app.openDocument({ path: item.path, title: item.title, first_line: item.lines[0] ?? 0, last_line: item.lines[0] ?? 0 });
+  const openPath = (path: string, title: string | undefined, line = 0) => void app.openDocument({ path, title: linkTitle(title, path), first_line: line, last_line: line });
+  const openIncoming = (item: IncomingLink) => openPath(item.path, item.title, item.lines[0] ?? 0);
+  const openOutgoing = (item: OutgoingLink) => { if (item.target) openPath(item.target, item.target_title); };
   /** Документы проекта из того же поиска, что и в главном окне (по смыслу), для выбора по `[[`; порядок — как в выдаче. */
   async function semanticLinks(query: string) {
     const output = await call<SearchOutput>("search", { cwd: project, project, query, modules: [], files: [], limit: 10 });
@@ -160,17 +163,24 @@
       {#if source}<Editor bind:this={editor} text={text} links={() => linkTargets(app.tree, app.docsRoot)} semantic={semanticLinks} readonly={!buffer || buffer.status === "readonly" || buffer.status === "loading"} hit={range} oninput={(value) => buffer?.edit(value)} />
       {:else}<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions --><div class="md" onclick={followLink}>{@html html}</div>{/if}
     </div>
-    <footer class="backlinks" aria-label="Ссылаются на этот документ">
+    <footer class="backlinks" aria-label="Ссылки документа">
       {#if backlinksOpen}<!-- svelte-ignore a11y_no_noninteractive_element_interactions, a11y_no_noninteractive_tabindex -->
         <div class="bl-grip" role="separator" aria-orientation="horizontal" aria-label="Высота панели ссылок" tabindex="0" onpointerdown={resizeBacklinks} onkeydown={resizeBacklinksByKey}></div>{/if}
-      <button class="bl-head" aria-expanded={backlinksOpen} onclick={() => backlinksOpen = !backlinksOpen}>Ссылаются на этот документ{backlinks ? ` · ${backlinks.items.length}` : ""}</button>
+      <button class="bl-head" aria-expanded={backlinksOpen} onclick={() => backlinksOpen = !backlinksOpen}>Ссылки{backlinks ? ` · входящих ${backlinks.incoming.length}, исходящих ${backlinks.outgoing.length}` : ""}</button>
       {#if backlinksOpen}<div class="bl-list" style:height="{backlinksHeight}px">
-        {#if backlinksError}<p class="bl-note" role="alert">Не удалось получить входящие ссылки: {backlinksError}</p>
+        {#if backlinksError}<p class="bl-note" role="alert">Не удалось получить ссылки: {backlinksError}</p>
         {:else if !backlinks}<p class="bl-note" role="status">Чтение…</p>
+        {:else if !backlinks.known}<p class="bl-note">Документа нет среди файлов проекта на диске.</p>
         {:else}
-          {#if backlinks.note}<p class="bl-note">{backlinks.note}</p>{/if}
-          {#if backlinks.items.length}<ul>{#each backlinks.items as item (item.path)}<li><button onclick={() => openBacklink(item)} title={item.path}><span class="bl-title">{item.title}</span><small>{item.path}{item.lines.length ? ` · строки ${item.lines.join(", ")}` : ""}</small></button></li>{/each}</ul>
-          {:else if !backlinks.note}<p class="bl-note">На этот документ никто не ссылается.</p>{/if}
+          <h4 class="bl-group">Ссылаются на этот документ</h4>
+          {#if backlinks.incoming.length}<ul>{#each backlinks.incoming as item (item.path)}<li><button onclick={() => openIncoming(item)} title={item.path}><span class="bl-title">{linkTitle(item.title, item.path)}</span><small>{item.path}{item.lines.length ? ` · строки ${item.lines.join(", ")}` : ""}</small></button></li>{/each}</ul>
+          {:else}<p class="bl-note">На этот документ никто не ссылается.</p>{/if}
+          <h4 class="bl-group">Этот документ ссылается</h4>
+          {#if backlinks.outgoing.length}<ul>{#each backlinks.outgoing as item (item.line + item.raw + item.kind)}<li>
+            {#if item.broken}<span class="bl-broken" title="Документа «{item.raw}» нет в проекте"><span class="bl-title">{item.text || item.raw}</span><small>ссылка в никуда · строка {item.line}</small></span>
+            {:else}<button onclick={() => openOutgoing(item)} title={item.target}><span class="bl-title">{linkTitle(item.target_title, item.target ?? item.raw)}</span><small>{item.target} · строка {item.line}</small></button>{/if}
+          </li>{/each}</ul>
+          {:else}<p class="bl-note">В документе нет ссылок на другие документы.</p>{/if}
         {/if}
       </div>{/if}
     </footer>
@@ -205,6 +215,9 @@
   .backlinks ul { list-style: none; margin: 0; padding: 0; }
   .backlinks li button { display: block; width: 100%; text-align: left; padding: 3px 4px; color: var(--accent-text); }
   .bl-title { display: block; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bl-group { margin: 6px 4px 2px; font-size: 11px; font-weight: 600; color: var(--muted); }
+  .bl-broken { display: block; padding: 3px 4px; color: var(--muted); }
+  .bl-broken .bl-title { text-decoration: line-through; }
   .bl-note { margin: 2px; font-size: 11.5px; color: var(--muted); }
   .outline { position: absolute; right: 10px; top: 62px; width: 150px; max-height: 36%; overflow: auto; padding: 5px; border: 1px solid var(--line); border-radius: 6px; background: color-mix(in srgb, var(--panel) 90%, transparent); box-shadow: var(--shadow); }
   .outline button { display: block; width: 100%; text-align: left; font-size: 11px; padding: 2px 4px; } .outline .close { width: auto; margin-left: auto; } .outline-open { position: absolute; right: 10px; top: 62px; background: var(--panel-2); }

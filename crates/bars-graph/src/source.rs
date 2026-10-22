@@ -1,3 +1,4 @@
+use crate::links::{self, LinkKind, decode_percent, resolve_path, wikilink_name};
 use crate::*;
 use pulldown_cmark::{Event, Options, Parser, Tag, TagEnd};
 use std::collections::{BTreeMap, BTreeSet};
@@ -140,26 +141,6 @@ fn roles(path: &str, heading: &str) -> Vec<Role> {
         }
     }
     roles
-}
-
-fn body_start(text: &str) -> usize {
-    let bom = if text.starts_with('\u{feff}') { 3 } else { 0 };
-    let mut offset = bom;
-    let mut lines = text[bom..].split_inclusive(['\r', '\n']);
-    if lines.next().is_none_or(|l| l.trim_end() != "---") {
-        return bom;
-    }
-    offset += text[bom..]
-        .split_inclusive(['\r', '\n'])
-        .next()
-        .map_or(0, str::len);
-    for line in lines {
-        offset += line.len();
-        if matches!(line.trim_end(), "---" | "...") {
-            return offset;
-        }
-    }
-    bom
 }
 
 pub fn anchor(label: &str) -> String {
@@ -471,11 +452,9 @@ pub fn build_cancellable(
             text: input.text,
         };
         let doc_id = reference.id.clone();
-        let start = body_start(&source.text);
+        let start = links::body_start(&source.text);
         let mut headings: Vec<Heading> = Vec::new();
         let mut paragraphs = Vec::new();
-        let mut links = Vec::new();
-        let mut code: Vec<Range<usize>> = Vec::new();
         let mut current: Option<(Range<usize>, u8, String)> = None;
         for (event, range) in Parser::new_ext(
             &source.text[start..],
@@ -487,9 +466,6 @@ pub fn build_cancellable(
                 return Err(GraphError::Cancelled);
             }
             let range = range.start + start..range.end + start;
-            if matches!(event, Event::Code(_) | Event::Start(Tag::CodeBlock(_))) {
-                code.push(range.clone());
-            }
             match event {
                 Event::Start(Tag::Heading { level, .. })
                     if source.text[range.clone()].trim_start().starts_with('#') =>
@@ -515,9 +491,6 @@ pub fn build_cancellable(
                     }
                 }
                 Event::Start(Tag::Paragraph) => paragraphs.push(range),
-                Event::Start(Tag::Link { dest_url, .. }) => {
-                    links.push((range, dest_url.to_string()))
-                }
                 _ => {}
             }
         }
@@ -597,24 +570,24 @@ pub fn build_cancellable(
             }
             assertions(&mut data, &source, owner_id, range)?;
         }
-        let wikis = wikilinks(&source.text, start, &code, &links);
-        for (range, target) in links {
-            let proof = evidence(&mut data, &source, range.clone(), "markdown-link-v1")?;
+        let parsed = links::parse_links(&source.text);
+        for link in parsed.iter().filter(|l| l.kind != LinkKind::Wiki) {
+            let proof = evidence(&mut data, &source, link.start..link.end, "markdown-link-v1")?;
             pending.push((
                 source.meta.docs_path.clone(),
-                owner(range.start).to_string(),
+                owner(link.start).to_string(),
                 proof,
-                target,
+                link.raw_target.clone(),
                 false,
             ));
         }
-        for (range, target) in wikis {
-            let proof = evidence(&mut data, &source, range.clone(), "markdown-link-v1")?;
+        for link in parsed.iter().filter(|l| l.kind == LinkKind::Wiki) {
+            let proof = evidence(&mut data, &source, link.start..link.end, "markdown-link-v1")?;
             pending.push((
                 source.meta.docs_path.clone(),
-                owner(range.start).to_string(),
+                owner(link.start).to_string(),
                 proof,
-                target,
+                link.raw_target.clone(),
                 true,
             ));
         }
@@ -706,7 +679,13 @@ pub fn build_cancellable(
             match wikilink_name(&target) {
                 // `[[#раздел]]` — ссылка внутри документа, ребра не даёт.
                 None => {}
-                Some(name) => match resolve_wikilink(&data.sources, &path, &name) {
+                Some(name) => match links::resolve_wikilink(
+                    data.sources
+                        .iter()
+                        .map(|s| (s.meta.docs_path.as_str(), s.meta.reference.id.clone())),
+                    &path,
+                    &name,
+                ) {
                     Some(id) => edge(
                         &mut data,
                         &owner,
@@ -798,104 +777,6 @@ pub fn build_cancellable(
     data.warnings.push("Явные правила не гарантируют полноту смысловых отношений; отсутствие связи не доказывает отсутствие проверки или зависимости".into());
     data.fingerprint();
     Ok(data)
-}
-
-fn decode_percent(text: &str) -> Option<String> {
-    let mut bytes = Vec::new();
-    let mut i = 0;
-    while i < text.len() {
-        if text.as_bytes()[i] == b'%' {
-            bytes.push(u8::from_str_radix(text.get(i + 1..i + 3)?, 16).ok()?);
-            i += 3;
-        } else {
-            bytes.push(text.as_bytes()[i]);
-            i += 1;
-        }
-    }
-    String::from_utf8(bytes).ok()
-}
-/// Ссылки `[[…]]` (как в Obsidian) вне кода и вне обычных ссылок; возвращает диапазон и текст между скобками.
-fn wikilinks(
-    text: &str,
-    start: usize,
-    code: &[Range<usize>],
-    links: &[(Range<usize>, String)],
-) -> Vec<(Range<usize>, String)> {
-    let mut found = Vec::new();
-    let mut at = start;
-    while let Some(open) = text[at..].find("[[") {
-        let open = at + open;
-        let body = open + 2;
-        let line_end = text[body..].find('\n').map_or(text.len(), |n| body + n);
-        let Some(close) = text[body..line_end].find("]]") else {
-            at = body;
-            continue;
-        };
-        let close = body + close;
-        let inner = &text[body..close];
-        let range = open..close + 2;
-        at = close + 2;
-        if inner.trim().is_empty() || inner.contains('[') || inner.contains(']') {
-            continue;
-        }
-        let overlaps = |r: &Range<usize>| r.start < range.end && range.start < r.end;
-        if code.iter().any(overlaps) || links.iter().any(|(r, _)| overlaps(r)) {
-            continue;
-        }
-        found.push((range, inner.to_string()));
-    }
-    found
-}
-
-/// Имя документа из `Название`, `Название|текст`, `папка/Название#раздел`; `None` — ссылка на раздел этого же документа.
-fn wikilink_name(inner: &str) -> Option<String> {
-    let name = inner.split('|').next()?.split('#').next()?.trim();
-    let name = name.strip_suffix(".md").or_else(|| name.strip_suffix(".MD")).unwrap_or(name);
-    (!name.trim().is_empty()).then(|| name.trim().to_string())
-}
-
-/// Документ по имени из `[[…]]`: без учёта регистра; имя с `/` сверяется с путём от корня документации,
-/// без `/` — с именем файла. Несколько кандидатов: в папке источника, затем самый короткий путь, затем по алфавиту.
-fn resolve_wikilink(sources: &[SourceDocument], from: &str, name: &str) -> Option<String> {
-    let name = name.replace('\\', "/").to_lowercase();
-    let name = name.trim_matches('/');
-    let from_dir = from.rsplit_once('/').map_or("", |(dir, _)| dir);
-    sources
-        .iter()
-        .filter_map(|source| {
-            let path = source.meta.docs_path.to_lowercase();
-            let stem = path.strip_suffix(".md").unwrap_or(&path);
-            let hit = if name.contains('/') {
-                stem == name || stem.ends_with(&format!("/{name}"))
-            } else {
-                stem.rsplit('/').next() == Some(name)
-            };
-            hit.then(|| {
-                let dir = source.meta.docs_path.rsplit_once('/').map_or("", |(dir, _)| dir);
-                (dir != from_dir, source.meta.docs_path.len(), &source.meta.docs_path, &source.meta.reference.id)
-            })
-        })
-        .min()
-        .map(|(_, _, _, id)| id.clone())
-}
-
-fn resolve_path(source: &str, target: &str) -> Option<String> {
-    let target = decode_percent(target)?.replace('\\', "/");
-    if target.starts_with('/') || target.contains(':') {
-        return None;
-    }
-    let mut parts: Vec<_> = source.split('/').collect();
-    parts.pop();
-    for part in target.split('/') {
-        match part {
-            "" | "." => {}
-            ".." => {
-                parts.pop()?;
-            }
-            part => parts.push(part),
-        }
-    }
-    Some(parts.join("/"))
 }
 
 #[cfg(test)]

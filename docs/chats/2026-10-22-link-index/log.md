@@ -1,0 +1,3 @@
+- Сборка `cargo` в рабочем дереве с кириллицей в пути падает на `vulkan-shaders-gen` (MSBuild): собирать с `CARGO_TARGET_DIR=C:/bars-build`.
+- Параллельная сессия «План 3.8.3» дописывает `broken_links` в `crates/bars-core/src/link_index/store.rs` в том же дереве; мои правки там — аддитивные.
+- Сверка индекса ссылок сделана при вызове `links_of`, а не заданием по `notify`: решение реализации, отражено в [индексе ссылок](../../features/knowledge-base/link-index.md).
