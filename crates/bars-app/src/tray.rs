@@ -81,6 +81,10 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
 pub fn quit_app(app: &AppHandle) {
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
+        // НФТ-5: окно записывает правки; отказ пользователя или ошибка записи оставляют процесс работать.
+        if !crate::flush::request(&app).await {
+            return;
+        }
         if let Some(handler) = app.state::<Shared>().get() {
             handler.worker().shutdown().await;
         }

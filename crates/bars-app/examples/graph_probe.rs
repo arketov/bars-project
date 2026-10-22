@@ -3,8 +3,12 @@
 #![allow(dead_code)]
 #[path = "../src/commands.rs"]
 mod commands;
+#[path = "../src/document_io.rs"]
+mod document_io;
 #[path = "../src/documents.rs"]
 mod documents;
+#[path = "../src/flush.rs"]
+mod flush;
 #[path = "../src/folders.rs"]
 mod folders;
 #[path = "../src/window.rs"]

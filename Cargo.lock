@@ -394,6 +394,7 @@ dependencies = [
  "anyhow",
  "bars-protocol",
  "bars-worker",
+ "blake3",
  "log",
  "serde_json",
  "tauri",

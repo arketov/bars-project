@@ -47,6 +47,7 @@ pub fn keybindings_save(
 pub struct Shared {
     handler: Mutex<Option<WorkerHandler>>,
     pub folders: crate::folders::Targets,
+    pub flush: crate::flush::Flush,
 }
 
 impl Shared {
@@ -184,6 +185,116 @@ pub async fn document_action(
         .map_err(|e| e.to_string())??;
     }
     Ok(absolute.display().to_string())
+}
+
+/// Корень проекта и корень документации для путей редактора.
+fn document_roots(state: &Shared, project: &str) -> Result<(std::path::PathBuf, String), String> {
+    let handler = state.get().ok_or("воркер ещё запускается")?;
+    let root = handler
+        .worker()
+        .resolve(project)
+        .map_err(|e| e.to_string())?;
+    let docs_root = handler
+        .worker()
+        .docs_root(&root)
+        .map_err(|e| e.to_string())?;
+    Ok((root, docs_root))
+}
+
+fn document_failure(error: &crate::document_io::DocError) -> Value {
+    serde_json::json!({ "status": "error", "kind": error.kind(), "message": error.message() })
+}
+
+/// Читает документ для редактора. Ожидаемые отказы приходят как `status: "error"` с `kind`.
+#[tauri::command]
+pub async fn document_read(
+    state: State<'_, Shared>,
+    project: String,
+    path: String,
+) -> Result<Value, String> {
+    use crate::document_io::{DocError, read, resolve};
+    let (root, docs_root) = document_roots(&state, &project)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let file = match resolve(&root, &docs_root, &path) {
+            Ok(file) => file,
+            Err(error) => return document_failure(&error),
+        };
+        match read(&file) {
+            Ok(out) => serde_json::json!({
+                "status": "ok", "text": out.text, "revision": out.revision, "eol": out.eol.name(),
+                "bom": out.bom, "size": out.size, "read_only": out.read_only.map(|r| r.name()),
+            }),
+            // Файла ещё нет (например, `index.md` папки): пустой документ без ревизии.
+            Err(DocError::NotFound) => serde_json::json!({
+                "status": "ok", "text": "", "revision": Value::Null, "eol": "lf", "bom": false,
+                "size": 0, "read_only": Value::Null,
+            }),
+            Err(error) => document_failure(&error),
+        }
+    })
+    .await
+    .map_err(|e| e.to_string())
+}
+
+/// Записывает документ, если на диске ещё ревизия `base_revision` (`null` — файла быть не должно).
+#[tauri::command]
+pub async fn document_write(
+    state: State<'_, Shared>,
+    project: String,
+    path: String,
+    text: String,
+    base_revision: Option<String>,
+    eol: String,
+    bom: bool,
+) -> Result<Value, String> {
+    use crate::document_io::{Eol, WriteOutcome, resolve, write};
+    let (root, docs_root) = document_roots(&state, &project)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let file = match resolve(&root, &docs_root, &path) {
+            Ok(file) => file,
+            Err(error) => return document_failure(&error),
+        };
+        match write(
+            &file,
+            &text,
+            base_revision.as_deref(),
+            Eol::parse(&eol),
+            bom,
+        ) {
+            Ok(WriteOutcome::Saved { revision }) => {
+                serde_json::json!({ "status": "saved", "revision": revision })
+            }
+            Ok(WriteOutcome::Conflict { current }) => {
+                serde_json::json!({ "status": "conflict", "revision": current })
+            }
+            Err(error) => document_failure(&error),
+        }
+    })
+    .await
+    .map_err(|e| e.to_string())
+}
+
+/// Текущая ревизия документа на диске без передачи текста; `revision: null` — файла нет.
+#[tauri::command]
+pub async fn document_revision(
+    state: State<'_, Shared>,
+    project: String,
+    path: String,
+) -> Result<Value, String> {
+    use crate::document_io::{resolve, revision};
+    let (root, docs_root) = document_roots(&state, &project)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let file = match resolve(&root, &docs_root, &path) {
+            Ok(file) => file,
+            Err(error) => return document_failure(&error),
+        };
+        match revision(&file) {
+            Ok(current) => serde_json::json!({ "status": "ok", "revision": current }),
+            Err(error) => document_failure(&error),
+        }
+    })
+    .await
+    .map_err(|e| e.to_string())
 }
 
 /// Проверяет и закрепляет цель папки при открытии меню.
@@ -430,9 +541,18 @@ mod log_tests {
     }
 }
 
+/// Ответ окна на просьбу записать правки перед выходом (НФТ-5): `clean`, `asking`, `proceed`, `cancel`.
+#[tauri::command]
+pub fn flush_reply(state: State<'_, Shared>, reply: String) -> bool {
+    state.flush.reply(reply)
+}
+
 /// Перезапускает весь процесс `bars`: окно и воркер — один процесс (OQ-57).
 #[tauri::command]
 pub async fn restart_app(app: AppHandle, state: State<'_, Shared>) -> Result<(), String> {
+    if !crate::flush::request(&app).await {
+        return Err("Перезапуск отменён: есть несохранённые правки".into());
+    }
     if let Some(handler) = state.get() {
         handler.worker().shutdown().await;
     }

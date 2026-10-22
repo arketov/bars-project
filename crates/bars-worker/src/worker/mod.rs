@@ -490,6 +490,12 @@ impl Worker {
         ))
     }
 
+    /// Корень документации зарегистрированного проекта относительно его корня; окно проверяет им пути записи.
+    pub fn docs_root(&self, path: &Path) -> Result<String, WorkerError> {
+        let path = self.registered(path)?;
+        Ok(self.inner.docs_root_of(&path))
+    }
+
     /// Короткое действие окна не должно пересечь удаление/смену настроек проекта.
     pub async fn folder_action_guard(&self) -> tokio::sync::OwnedRwLockWriteGuard<()> {
         Arc::clone(&self.inner.requests).write_owned().await

@@ -2,7 +2,11 @@
 //! методов напрямую, а `bars-mcp` и `bars-cli` приходят по каналу.
 
 mod commands;
+mod document_io;
+#[cfg(test)]
+mod document_io_tests;
 mod documents;
+mod flush;
 #[cfg(test)]
 mod folder_tests;
 mod folders;
@@ -51,6 +55,9 @@ fn main() -> anyhow::Result<()> {
             commands::open_path,
             commands::document_action,
             commands::document_editors,
+            commands::document_read,
+            commands::document_write,
+            commands::document_revision,
             commands::folder_target,
             commands::folder_action,
             commands::bars_dir,
@@ -62,6 +69,7 @@ fn main() -> anyhow::Result<()> {
             commands::mcp_history_legacy,
             commands::mcp_history_diagnostics,
             commands::restart_app,
+            commands::flush_reply,
         ])
         .setup(move |app| {
             let handle = app.handle().clone();
