@@ -10,15 +10,46 @@ marked.use({
     html(token: Tokens.HTML | Tokens.Tag) {
       return escapeHtml(token.text);
     },
-    // Ссылки не открываются в окне: путь виден, переход невозможен.
+    // Ссылка на другой .md открывается в окне (обработчик клика — у окна документа); внешние остаются видимым, но неактивным текстом.
     link(token: Tokens.Link) {
-      return `<span class="a">${this.parser.parseInline(token.tokens)}</span>`;
+      const inner = this.parser.parseInline(token.tokens);
+      if (!isDocumentLink(token.href)) return `<span class="a">${inner}</span>`;
+      return `<a class="a" href="#" data-doc-link="${escapeHtml(token.href)}">${inner}</a>`;
     },
     image(token: Tokens.Image) {
       return `<span class="a">${escapeHtml(token.text || token.href)}</span>`;
     },
   },
 });
+
+const targetFile = (href: string) => href.split("#")[0];
+
+/** Ссылка на другой Markdown-файл проекта: относительная, без схемы и без `//`. */
+export function isDocumentLink(href: string): boolean {
+  if (/^[a-z][a-z0-9+.-]*:/i.test(href) || href.startsWith("//") || href.startsWith("/")) return false;
+  return /\.md$/i.test(targetFile(href));
+}
+
+/** Путь документа от корня проекта для ссылки `href`, стоящей в документе `from`; вне проекта или не `.md` — `null`. */
+export function resolveDocumentLink(from: string, href: string): string | null {
+  if (!isDocumentLink(href)) return null;
+  let target: string;
+  try {
+    target = decodeURIComponent(targetFile(href)).replace(/\\/g, "/");
+  } catch {
+    return null;
+  }
+  const parts = from.split("/");
+  parts.pop();
+  for (const part of target.split("/")) {
+    if (part === "" || part === ".") continue;
+    if (part === "..") {
+      if (!parts.length) return null;
+      parts.pop();
+    } else parts.push(part);
+  }
+  return parts.join("/");
+}
 
 export function escapeHtml(text: string): string {
   return text

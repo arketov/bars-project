@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { Layout } from "./layout";
 import type { GEdge, GNode } from "./model";
-import { DEFAULT_FORCES, PhysicsCore, type CoreLink, type CoreNode } from "./physics-core";
+import { DEFAULT_FORCES, LEGACY_TUNING, PhysicsCore, SHELF_WIDTH, shelfPositions, type CoreLink, type CoreNode, type Tuning } from "./physics-core";
 import { PhysicsHost, type Positions } from "./physics-host";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -173,5 +173,69 @@ describe("раскладка в окне (расчёт вне основного
     layout.setGraph(nodes.slice(0, 3), [gedge(0, 0, 1)], (i) => i);
     expect(layout.get(1)?.pinned).toBe(true);
     expect(layout.togglePin(1)).toBe(false);
+  });
+});
+
+describe("одиночки на полке и разведение хабов", () => {
+  const withHub = (isolates: number) => {
+    const count = 30;
+    const nodes: CoreNode[] = Array.from({ length: count + isolates }, (_, index) => ({ index, kind: "document", owner: index, x: Math.cos(index) * 80, y: Math.sin(index * 1.7) * 80, pinned: false }));
+    const links: CoreLink[] = Array.from({ length: count - 1 }, (_, i) => ({ a: 0, b: i + 1, k: 0.5 }));
+    return { nodes, links };
+  };
+
+  it("документы без связей выстраиваются сеткой под связной частью, а не кольцом вокруг неё", () => {
+    const { nodes, links } = withHub(20);
+    const core = new PhysicsCore(7);
+    core.setForces({ ...DEFAULT_FORCES });
+    core.setGraph(nodes, links);
+    core.settle(600);
+    const { indices, coords } = core.snapshot();
+    const at = new Map(Array.from(indices).map((index, i) => [index, [coords[i * 2], coords[i * 2 + 1]] as const]));
+    const connectedBottom = Math.max(...Array.from({ length: 30 }, (_, i) => at.get(i)![1]));
+    const loose = Array.from({ length: 20 }, (_, i) => at.get(30 + i)!);
+    expect(Math.min(...loose.map((p) => p[1]))).toBeGreaterThan(connectedBottom);
+    // Сетка: несколько узлов на одной высоте с равным шагом.
+    const rows = new Set(loose.map((p) => Math.round(p[1])));
+    expect(rows.size).toBeLessThan(loose.length);
+  });
+
+  it("раскладка с полкой детерминирована; прежнее поведение включается настройкой", () => {
+    const run = (tuning?: Partial<Tuning>) => {
+      const { nodes, links } = withHub(10);
+      const core = new PhysicsCore(7, tuning);
+      core.setGraph(nodes, links);
+      core.settle(300);
+      return Array.from(core.snapshot().coords);
+    };
+    expect(run()).toEqual(run());
+    expect(run()).not.toEqual(run(LEGACY_TUNING));
+  });
+
+  it("чанки раскрытого документа без связей на полку не уходят, закреплённый документ остаётся на месте", () => {
+    const nodes: CoreNode[] = [
+      { index: 0, kind: "document", owner: 0, x: 0, y: 0, pinned: false },
+      { index: 1, kind: "document", owner: 1, x: 40, y: 0, pinned: false },
+      { index: 2, kind: "chunk", owner: 0, x: 5, y: 5, pinned: false },
+      { index: 3, kind: "document", owner: 3, x: 99, y: 77, pinned: true },
+    ];
+    const core = new PhysicsCore(7);
+    core.setGraph(nodes, [{ a: 0, b: 1, k: 0.5 }]);
+    core.settle(200);
+    const { indices, coords } = core.snapshot();
+    const at = new Map(Array.from(indices).map((index, i) => [index, [coords[i * 2], coords[i * 2 + 1]]]));
+    expect(at.get(3)).toEqual([99, 77]);
+    expect(Math.hypot(at.get(2)![0] - at.get(0)![0], at.get(2)![1] - at.get(0)![1])).toBeLessThan(60);
+  });
+
+  it("сетка одиночек: центр общий, шаг постоянный, ширина — доля связной части", () => {
+    const spots = shelfPositions(12, { x0: -100, x1: 100, y1: 50 });
+    expect(spots).toHaveLength(12);
+    expect(new Set(spots.map((s) => s.y)).size).toBeGreaterThan(1);
+    const xs = spots.map((s) => s.x);
+    expect((Math.max(...xs) + Math.min(...xs)) / 2).toBeCloseTo(0, 5);
+    expect(Math.max(...xs) - Math.min(...xs)).toBeLessThanOrEqual(200 * SHELF_WIDTH);
+    expect(Math.min(...spots.map((s) => s.y))).toBeGreaterThan(50);
+    expect(shelfPositions(0, null)).toEqual([]);
   });
 });

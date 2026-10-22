@@ -2,7 +2,7 @@
   import { tick } from "svelte";
   import { app } from "./app.svelte";
   import Icon from "./Icon.svelte";
-  import { renderDocument } from "./markdown";
+  import { renderDocument, resolveDocumentLink } from "./markdown";
 
   const doc = $derived(app.viewer);
   const html = $derived(
@@ -11,6 +11,14 @@
       : "",
   );
   let body: HTMLElement | undefined = $state();
+
+  function followLink(event: MouseEvent) {
+    const link = (event.target as HTMLElement).closest<HTMLElement>("a[data-doc-link]");
+    if (!link || !doc) return;
+    event.preventDefault();
+    const path = resolveDocumentLink(doc.hit.path, link.dataset.docLink ?? "");
+    if (path) void app.openDocument({ path, title: path.split("/").pop() ?? path, first_line: 0, last_line: 0 });
+  }
 
   // Документ прокручен к найденному разделу (main-window.md).
   $effect(() => {
@@ -36,7 +44,8 @@
           <button class="btn" onclick={() => { app.closeViewer(); void app.search(); }}>Обновить выдачу</button>
         </div>
       {:else}
-        <div class="md">{@html html}</div>
+        <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+        <div class="md" onclick={followLink}>{@html html}</div>
       {/if}
     </div>
   </section>
@@ -63,6 +72,7 @@
   .md :global(table) { border-collapse: collapse; margin: 0 0 .8em; }
   .md :global(th), .md :global(td) { border: 1px solid var(--line); padding: 4px 8px; }
   .md :global(.a) { color: var(--accent-text); }
+  .md :global(a.a) { text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
   .md :global(section.hit) { position: relative; background: var(--accent-soft); box-shadow: -14px 0 0 var(--accent-soft), 14px 0 0 var(--accent-soft); padding: 4px 0 6px; border-radius: 10px; }
   .md :global(section.hit::before) { content: ""; position: absolute; left: -14px; top: 0; bottom: 0; width: 3px; border-radius: 3px; background: var(--accent); }
   .md :global(.hitlabel) { display: inline-block; font: 600 11px var(--mono); color: var(--accent-text); margin-bottom: 2px; }

@@ -1,7 +1,7 @@
 // Срез физического графа в окне: ответ `graph_physical` (physical-v1) и устойчивая модель узлов панели.
 // Каждый ответ полный для своей области, пределов и раскрытых документов; индексы узлов при этом не меняются,
 // чтобы раскладка, выбор и закрепления переживали раскрытие чанков и «Показать ещё».
-import { type EdgeKind, type GEdge, type GNode, type LayerState } from "./model";
+import { type GEdge, type GNode, type LayerState, type SliceKind } from "./model";
 
 /** Чанки раскрываются порциями по 50. */
 export const PORTION = 50;
@@ -22,7 +22,7 @@ export interface ServerNode {
 }
 
 export interface ServerEdge {
-  kind: EdgeKind;
+  kind: SliceKind;
   /** Индексы в `nodes` того же среза; у ссылки `from → to` — направление ссылки. */
   from: number;
   to: number;
@@ -50,7 +50,7 @@ export interface ServerSlice {
   scope: { modules: string[]; files: string[] };
   nodes: ServerNode[];
   edges: ServerEdge[];
-  layers: Record<EdgeKind, ServerLayer>;
+  layers: Record<SliceKind, ServerLayer>;
   totals: { documents: number; chunks: number; links: number; document_pairs: number };
   shown: { documents: number; chunks: number; edges: number };
   applied: Limits;
@@ -83,7 +83,7 @@ export interface Slice {
   truncated: boolean;
   limitReasons: string[];
   warnings: string[];
-  layers: Record<EdgeKind, ServerLayer>;
+  layers: Record<SliceKind, ServerLayer>;
   snapshot: string;
   applied: Limits;
   usedBytes: number;

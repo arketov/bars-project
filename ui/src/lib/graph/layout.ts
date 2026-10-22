@@ -123,7 +123,7 @@ export class Layout {
         node,
         x: anchor ? anchor.x + Math.cos(angle) * spread : Math.cos(angle) * spread * 2,
         y: anchor ? anchor.y + Math.sin(angle) * spread : Math.sin(angle) * spread * 2,
-        r: node.kind === "chunk" ? 3.6 : 6,
+        r: node.kind === "chunk" ? 3.6 : node.kind === "query" ? 8 : 6,
         degree: 0,
         pinned: false,
       };
@@ -167,8 +167,21 @@ export class Layout {
    * Нужна при смене режима связей, чтобы расположение определяли только связи текущего режима.
    */
   reseed(): void {
+    // Вид запроса: запрос в центре, результаты по кругу в порядке выдачи, окружение — обычным рассевом.
+    const results = this.nodes.filter((p) => p.node.qrole === "result").sort((a, b) => (a.node.rank ?? 0) - (b.node.rank ?? 0));
+    results.forEach((p, i) => {
+      if (p.pinned) return;
+      const angle = (i / Math.max(1, results.length)) * Math.PI * 2 - Math.PI / 2;
+      p.x = Math.cos(angle) * 110;
+      p.y = Math.sin(angle) * 110;
+    });
     for (const p of this.nodes) {
-      if (p.pinned || p.node.kind === "chunk") continue;
+      if (p.node.kind === "query" && !p.pinned) {
+        p.x = 0;
+        p.y = 0;
+        continue;
+      }
+      if (p.pinned || p.node.kind === "chunk" || p.node.qrole === "result") continue;
       const angle = hash(p.node.index, 11) * Math.PI * 2;
       const radius = Math.sqrt(hash(p.node.index, 12)) * 260;
       p.x = Math.cos(angle) * radius;

@@ -1,0 +1,100 @@
+// ВРЕМЕННЫЙ стенд замера раскладки мини-графа (2.2.5); не коммитится.
+import { readFileSync, writeFileSync } from "node:fs";
+import { it } from "vitest";
+import { hash, springCoefficients, type GEdge } from "./model";
+import { DEFAULT_FORCES, PhysicsCore, type CoreLink, type CoreNode, type Forces, type Tuning } from "./physics-core";
+
+const DIR = "C:/Users/Shket/AppData/Local/Temp/claude/C--Users-Shket--claude-spares-spare-w1uvWi/31f94d61-6ee4-4d4c-b71a-2db06bb4e3d8/scratchpad";
+const data = JSON.parse(readFileSync(`${DIR}/snapshot.json`, "utf8")) as { docs: string[]; links: [number, number][] };
+const W = 313;
+const H = 300;
+const PAD = 14;
+
+interface Variant {
+  name: string;
+  tuning?: Partial<Tuning>;
+  forces?: Partial<Forces>;
+}
+
+function run(v: Variant) {
+  const n = data.docs.length;
+  const edges: GEdge[] = data.links.map(([a, b], id) => ({ id, key: String(id), kind: "markdown_link", a, b, raw: null, s: 1, lines: [] }));
+  const k = springCoefficients(edges, (i) => i);
+  const nodes: CoreNode[] = Array.from({ length: n }, (_, index) => {
+    const angle = hash(index, 11) * Math.PI * 2;
+    const radius = Math.sqrt(hash(index, 12)) * 260;
+    return { index, kind: "document", owner: index, x: Math.cos(angle) * radius, y: Math.sin(angle) * radius, pinned: false };
+  });
+  const links: CoreLink[] = edges.map((e) => ({ a: e.a, b: e.b, k: k.get(e.id) ?? 0 }));
+  const core = new PhysicsCore(7, v.tuning);
+  core.setForces({ ...DEFAULT_FORCES, ...v.forces });
+  core.setGraph(nodes, links);
+  core.settle(40);
+  core.reheat(0.8);
+  core.step(6000);
+  const { indices, coords } = core.snapshot();
+  const pos = new Map<number, [number, number]>();
+  for (let i = 0; i < indices.length; i++) pos.set(indices[i], [coords[i * 2], coords[i * 2 + 1]]);
+  const degree = new Map<number, number>();
+  for (const l of links) {
+    degree.set(l.a, (degree.get(l.a) ?? 0) + 1);
+    degree.set(l.b, (degree.get(l.b) ?? 0) + 1);
+  }
+  const all = [...pos.keys()];
+  const connected = all.filter((i) => (degree.get(i) ?? 0) > 0);
+  const pick = (values: number[], q: number) => [...values].sort((a, b) => a - b)[Math.min(values.length - 1, Math.max(0, Math.round(q * (values.length - 1))))];
+  const xs = all.map((i) => pos.get(i)![0]);
+  const ys = all.map((i) => pos.get(i)![1]);
+  const bw = Math.max(40, pick(xs, 0.98) - pick(xs, 0.02));
+  const bh = Math.max(40, pick(ys, 0.98) - pick(ys, 0.02));
+  const scale = Math.min(1.6, Math.max(0.12, Math.min((W - PAD * 2) / bw, (H - PAD * 2) / bh)));
+  const radius = 6 * Math.min(1.4, Math.max(0.55, Math.sqrt(scale)));
+  const px = (i: number) => [pos.get(i)![0] * scale, pos.get(i)![1] * scale] as const;
+  // Расстояние до ближайшего соседа среди связных, px.
+  const nn = connected.map((i) => {
+    let best = Infinity;
+    for (const j of connected) {
+      if (j === i) continue;
+      const [ax, ay] = px(i);
+      const [bx, by] = px(j);
+      best = Math.min(best, Math.hypot(ax - bx, ay - by));
+    }
+    return best;
+  });
+  const overlap = nn.filter((d) => d < radius * 2).length / connected.length;
+  const edgePx = links.map((l) => Math.hypot(px(l.a)[0] - px(l.b)[0], px(l.a)[1] - px(l.b)[1]));
+  const hidden = edgePx.filter((d) => d < radius * 2.2).length / links.length;
+  const cx = connected.map((i) => pos.get(i)![0]);
+  const cy = connected.map((i) => pos.get(i)![1]);
+  const cw = (Math.max(...cx) - Math.min(...cx)) * scale;
+  const ch = (Math.max(...cy) - Math.min(...cy)) * scale;
+  const unitLen = links.map((l) => Math.hypot(pos.get(l.a)![0] - pos.get(l.b)![0], pos.get(l.a)![1] - pos.get(l.b)![1]));
+  const chainPct = Math.round((unitLen.filter((d) => d < 1.6 * ({ ...DEFAULT_FORCES, ...v.forces }.length)).length / links.length) * 100);
+  const loose = all.length - connected.length;
+  writeFileSync(`${DIR}/pos-${v.name.split(' ')[0].replace(/[^A-Za-z0-9]/g, '_')}.json`, JSON.stringify({ scale, pos: all.map((i) => pos.get(i)), connected: all.map((i) => (degree.get(i) ?? 0) > 0), xs: [pick(xs, 0.02), pick(xs, 0.98)], ys: [pick(ys, 0.02), pick(ys, 0.98)], edges: data.links }));
+  return {
+    name: v.name,
+    scalePx: +scale.toFixed(3),
+    nodeRpx: +radius.toFixed(2),
+    nnMedianPx: +pick(nn, 0.5).toFixed(2),
+    nnP10Px: +pick(nn, 0.1).toFixed(2),
+    overlapPct: Math.round(overlap * 100),
+    edgeMedianPx: +pick(edgePx, 0.5).toFixed(1),
+    edgeHiddenPct: Math.round(hidden * 100),
+    connectedBox: `${Math.round(cw)}x${Math.round(ch)}`,
+    usePct: Math.round(((cw * ch) / (W * H)) * 100),
+    loose,
+    chainPct,
+  };
+}
+
+const variants: Variant[] = [
+  { name: "прежнее", tuning: { hubCharge: 0, springByDegree: false, shelf: false }, forces: { repel: 0.5, length: 60 } },
+  { name: "новое по умолчанию" },
+];
+
+it("замер раскладки", () => {
+  const rows = variants.map(run);
+  writeFileSync(`${DIR}/measure.json`, JSON.stringify(rows, null, 1));
+  console.table(rows);
+}, 600000);

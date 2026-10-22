@@ -14,11 +14,48 @@ export interface Forces {
   length: number;
 }
 
-export const DEFAULT_FORCES: Forces = { link: 1, repel: 1, gravity: 1, length: 60 };
+export const DEFAULT_FORCES: Forces = { link: 1, repel: 1, gravity: 1, length: 80 };
+
+/** Подбор раскладки (замер на снимке bars-project, docs/knowledge/graph-render.md): умолчания повторяют прежнее поведение. */
+export interface Tuning {
+  /** Заряд узла растёт с числом связей: `charge *= 1 + hubCharge·√степень`, хабы расталкивают окружение, а не слипаются. */
+  hubCharge: number;
+  /** Пружина делится на корень из меньшей степени концов (как по умолчанию в d3-force). */
+  springByDegree: boolean;
+  /** Одиночки без связей не участвуют в расчёте и выстраиваются сеткой под связной частью. */
+  shelf: boolean;
+}
+
+/** Принято замером 22-10-2026 на снимке bars-project (323 документа, 1209 пар ссылок, мини-панель 313×300 px): docs/knowledge/graph-render.md. */
+export const DEFAULT_TUNING: Tuning = { hubCharge: 0.4, springByDegree: false, shelf: true };
+/** Прежнее поведение: для сравнения в замерах и тестах. */
+export const LEGACY_TUNING: Tuning = { hubCharge: 0, springByDegree: false, shelf: false };
+
+/** Шаг сетки одиночек в единицах карты: узел 6 + зазор. */
+export const SHELF_CELL = 16;
+/** Доля ширины связной части, которую занимает сетка одиночек: вся ширина обрезается краями панели при вписывании. */
+export const SHELF_WIDTH = 0.6;
+
+/**
+ * Позиции одиночек сеткой под связной частью: ширина сетки — `SHELF_WIDTH` от ширины связной части (но не меньше 4 столбцов), центр по x общий.
+ * Порядок — по входному порядку, чтобы раскладка была детерминированной.
+ */
+export function shelfPositions(count: number, bounds: { x0: number; x1: number; y1: number } | null): { x: number; y: number }[] {
+  if (!count) return [];
+  const width = bounds ? Math.max(bounds.x1 - bounds.x0, SHELF_CELL * 4) : SHELF_CELL * 4;
+  const columns = Math.max(1, Math.min(count, Math.floor((width * SHELF_WIDTH) / SHELF_CELL)));
+  const cx = bounds ? (bounds.x0 + bounds.x1) / 2 : 0;
+  const top = (bounds?.y1 ?? 0) + SHELF_CELL * 2.5;
+  return Array.from({ length: count }, (_, i) => {
+    const row = Math.floor(i / columns);
+    const inRow = Math.min(columns, count - row * columns);
+    return { x: cx + ((i % columns) - (inRow - 1) / 2) * SHELF_CELL, y: top + row * SHELF_CELL };
+  });
+}
 
 export interface CoreNode {
   index: number;
-  kind: "document" | "chunk";
+  kind: "document" | "chunk" | "query";
   owner: number;
   x: number;
   y: number;
@@ -34,7 +71,7 @@ export interface CoreLink {
 
 interface SimNode {
   index: number;
-  kind: "document" | "chunk";
+  kind: "document" | "chunk" | "query";
   owner: number;
   x: number;
   y: number;
@@ -56,11 +93,15 @@ interface SimLink {
 
 /** Пружина по формуле проекта умножается на этот коэффициент: без него отталкивание рвёт цепочки (замер 21-10-2026). */
 const LINK_BASE = 3;
-const BASE_CHARGE = -60;
+/** Вдвое сильнее прежнего −60: замер показал, что при −60 связные документы налезают друг на друга при вписывании в мини-панель. */
+const BASE_CHARGE = -120;
 const CHILD_BUDGET = 35;
 const CENTER = 0.04;
 const FAR = 2;
 const GROUP_RATIO = 0.58;
+
+/** Документ без связей и без закрепления: чанки раскрытого документа держит группа владельца, их на полку не уводим. */
+const onShelf = (p: SimNode) => p.kind === "document" && p.degree === 0 && !p.pinned;
 
 export class PhysicsCore {
   readonly sim: Simulation<SimNode, SimLink>;
@@ -69,7 +110,10 @@ export class PhysicsCore {
   #links: SimLink[] = [];
   #byIndex = new Map<number, SimNode>();
 
-  constructor(seed = 7) {
+  tuning: Tuning;
+
+  constructor(seed = 7, tuning: Partial<Tuning> = {}) {
+    this.tuning = { ...DEFAULT_TUNING, ...tuning };
     let state = seed >>> 0 || 1;
     this.sim = forceSimulation<SimNode, SimLink>([])
       .randomSource(() => ((state = (Math.imul(state, 1664525) + 1013904223) >>> 0) / 4294967296))
@@ -87,7 +131,8 @@ export class PhysicsCore {
   }
 
   #strength(link: SimLink): number {
-    return Math.min(1, LINK_BASE * this.forces.link * link.k);
+    const base = Math.min(1, LINK_BASE * this.forces.link * link.k);
+    return this.tuning.springByDegree ? base / Math.sqrt(Math.max(1, Math.min(link.source.degree, link.target.degree))) : base;
   }
 
   #length(link: SimLink): number {
@@ -113,7 +158,7 @@ export class PhysicsCore {
   };
 
   #chargeOf(p: SimNode, children: Map<number, number>): number {
-    const base = p.kind === "chunk" ? -CHILD_BUDGET / (children.get(p.owner) ?? 1) : BASE_CHARGE;
+    const base = p.kind === "chunk" ? -CHILD_BUDGET / (children.get(p.owner) ?? 1) : BASE_CHARGE * (1 + this.tuning.hubCharge * Math.sqrt(p.degree));
     return base * this.forces.repel;
   }
 
@@ -157,7 +202,7 @@ export class PhysicsCore {
     this.#links = simLinks;
     this.#byIndex = map;
     for (const p of next) p.charge = this.#chargeOf(p, children);
-    this.sim.nodes(next);
+    this.sim.nodes(this.tuning.shelf ? next.filter((p) => !onShelf(p)) : next);
     // d3 перезаписывает node.index позицией в массиве; окно и рёбра опираются на индекс графа.
     next.forEach((p, i) => (p.index = nodes[i].index));
     (this.sim.force("link") as ReturnType<typeof forceLink<SimNode, SimLink>>).links(simLinks);
@@ -245,8 +290,23 @@ export class PhysicsCore {
     for (const n of this.nodes) n.vx = n.vy = 0;
   }
 
+  /** Одиночки сеткой под связной частью; закреплённые и перетаскиваемые остаются на своих местах. */
+  #placeShelf(): void {
+    const connected = this.nodes.filter((p) => !onShelf(p));
+    const loose = this.nodes.filter((p) => onShelf(p) && p.fx == null);
+    if (!loose.length) return;
+    const bounds = connected.length ? { x0: Math.min(...connected.map((p) => p.x)), x1: Math.max(...connected.map((p) => p.x)), y1: Math.max(...connected.map((p) => p.y)) } : null;
+    const spots = shelfPositions(loose.length, bounds);
+    loose.forEach((p, i) => {
+      p.x = spots[i].x;
+      p.y = spots[i].y;
+      p.vx = p.vy = 0;
+    });
+  }
+
   /** Координаты в порядке `nodes`: пара [x, y] на узел. */
   snapshot(): { indices: Int32Array; coords: Float32Array } {
+    if (this.tuning.shelf) this.#placeShelf();
     const indices = new Int32Array(this.nodes.length);
     const coords = new Float32Array(this.nodes.length * 2);
     this.nodes.forEach((n, i) => {

@@ -8,10 +8,11 @@
   import { BarsError } from "../types";
   import { draw, layoutLines, lineDistance, readPalette, toScreen, toWorld, type Camera, type Palette, type Scene, type Target } from "./draw";
   import { DEFAULT_FORCES, Layout, type Forces, type PNode } from "./layout";
-  import { EDGE_KINDS, KIND_TITLE, brightnessOf, drawStrength, springOf, widthOf, type EdgeKind, type GEdge, type Mode } from "./model";
+  import { EDGE_KINDS, KIND_TITLE, brightnessOf, drawStrength, springOf, widthOf, type EdgeKind, type GEdge, type Mode, type SliceKind } from "./model";
   import { graphStatus, loadPhysical, toggleGraphBuild } from "./physical-api";
   import { defaultSettings, loadSettings, saveSettings, type PanelKind, type PanelSettings } from "./settings";
   import { INITIAL_LIMITS, MAX_LIMITS, PORTION, SliceStore, emptySlice, type Limits, type Slice } from "./slice";
+  import { DEFAULT_DEPTH, MAX_DEPTH, QUERY_BUDGET, QUERY_MAX, buildQuerySlice, shapeQuery, type QueryInfo, type QueryInput, type RetrievalKind, type ScoreKind } from "./query";
 
   const reduced = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -27,14 +28,23 @@
   const mode = $derived(settings.mode);
   const minS = $derived(settings.minS);
   const forces = $derived(settings.forces);
-  const modeKinds = (m: Mode): EdgeKind[] => (m === "links" ? ["markdown_link"] : m === "meaning" ? ["document_similarity"] : m === "chunks" ? ["chunk_similarity"] : ["markdown_link", "document_similarity", "chunk_similarity"]);
+  const modeKinds = (m: Mode): SliceKind[] => (m === "links" ? ["markdown_link"] : m === "meaning" ? ["document_similarity"] : m === "chunks" ? ["chunk_similarity"] : ["markdown_link", "document_similarity", "chunk_similarity"]);
   const kinds = $derived.by(() => {
     const on = modeKinds(mode);
-    return { markdown_link: on.includes("markdown_link"), document_similarity: on.includes("document_similarity"), chunk_similarity: on.includes("chunk_similarity") } as Record<EdgeKind, boolean>;
+    return { markdown_link: on.includes("markdown_link"), document_similarity: on.includes("document_similarity"), chunk_similarity: on.includes("chunk_similarity"), query_result: true } as Record<EdgeKind, boolean>;
   });
 
   let store = new SliceStore();
+  /** Общий срез проекта; `slice` — то, что рисуется: общий срез или он же с узлом запроса и его связями (вид запроса, Т-47). */
+  let base = $state.raw<Slice>(emptySlice());
   let slice = $state.raw<Slice>(emptySlice());
+  /** Активный вид запроса; null — общий вид. */
+  let query = $state.raw<QueryInfo | null>(null);
+  let queryDepth = $state(DEFAULT_DEPTH);
+  let queryBudget = $state({ ...QUERY_BUDGET });
+  /** Поиск, для которого вид уже включался, и поиск, из которого пользователь вернулся в общий вид. */
+  let queryKey = "";
+  let queryOff = $state("");
   let loaded = $state(false);
   let loading = $state(false);
   let loadError = $state("");
@@ -90,12 +100,98 @@
   const chunksOfDoc = (index: number): number[] => slice.chunksOf.get(index) ?? [];
 
   function visibleNodes() {
+    if (queryShape) return queryShape.nodes.map((index) => slice.nodes[index]);
     const nodes = slice.nodes.filter((n) => n.kind === "document" && slice.visibleDocs.has(n.index));
     if (!mini) for (const [o, shown] of Object.entries(expanded)) for (const c of chunksOfDoc(Number(o)).slice(0, shown)) nodes.push(slice.nodes[c]);
     return nodes;
   }
 
-  const passes = (e: GEdge) => e.kind === "markdown_link" || e.s >= minS;
+  const passes = (e: GEdge) => e.kind === "markdown_link" || e.kind === "query_result" || e.s >= minS;
+
+  /** Что известно о завершённом поиске окна; null — поиска нет, он идёт, закончился ошибкой или относится к другому проекту. */
+  function queryInput(): QueryInput | null {
+    const results = app.results;
+    const shown = app.displayed;
+    if (!results || !shown || shown.project !== project()) return null;
+    const graph = app.graphSearch;
+    const requested = shown.mode as RetrievalKind;
+    const applied = (graph?.applied_mode ?? requested) as RetrievalKind;
+    const scoreKind: ScoreKind = applied === "graph" ? "none" : results.applied.score_kind;
+    return { id: shown.requestId, text: shown.query, hits: results.results, scoreKind, requested, applied, fallback: graph?.fallback_reason ?? null, minScore: results.applied.min_score };
+  }
+
+  /** Рисуемый срез: общий или вид запроса, смотря что включено. */
+  function compose() {
+    const input = queryInput();
+    if (input && input.id !== queryOff) {
+      const built = buildQuerySlice(base, input);
+      slice = built.slice;
+      query = built.info;
+    } else {
+      slice = base;
+      query = null;
+    }
+  }
+
+  const queryShape = $derived.by(() => (query ? shapeQuery(slice, query, modeKinds(mode), minS, queryDepth, queryBudget) : null));
+
+  function enterQuery() {
+    queryOff = "";
+    queryDepth = DEFAULT_DEPTH;
+    queryBudget = { ...QUERY_BUDGET };
+    selected = null;
+    compose();
+    if (query) announce(`Запрос «${query.text}»: ${query.results.length} результатов, окружение глубины ${queryDepth}`);
+    rebuild(0.9, true);
+  }
+
+  function leaveQuery() {
+    if (!query) return;
+    queryOff = query.id;
+    selected = null;
+    compose();
+    announce("Общий вид проекта");
+    rebuild(0.6);
+  }
+
+  /** Поиск завершился, сброшен или заменён: вид запроса следует за сессией поиска окна. */
+  function syncQuery() {
+    if (!loaded || loadError) return;
+    const input = queryInput();
+    if (input) {
+      if (input.id !== queryKey) {
+        queryKey = input.id;
+        enterQuery();
+      }
+    } else if (!app.searching && !app.searchError && queryKey) {
+      queryKey = "";
+      queryOff = "";
+      if (query) {
+        selected = null;
+        compose();
+        rebuild(0.6);
+      }
+    }
+  }
+
+  function setDepth(next: number) {
+    if (next === queryDepth) return;
+    queryDepth = next;
+    queryBudget = { ...QUERY_BUDGET };
+    rebuild(0.5);
+  }
+
+  function moreQuery() {
+    queryBudget = { nodes: Math.min(QUERY_MAX.nodes, queryBudget.nodes * 2), edges: Math.min(QUERY_MAX.edges, queryBudget.edges * 2) };
+    notice = "Показано больше узлов и связей: камера и позиции сохранены.";
+    rebuild(0.4);
+  }
+
+  const queryAtMaximum = $derived(queryBudget.nodes >= QUERY_MAX.nodes && queryBudget.edges >= QUERY_MAX.edges);
+  const queryOffered = $derived(!query && !!queryOff && queryInput()?.id === queryOff);
+  const queryMissing = $derived(query ? query.results.filter((r) => r.node === null).length : 0);
+  const SCORE_TEXT: Record<ScoreKind, string> = { rerank: "оценка rerank", cosine: "оценка — косинус (rerank не выполнялся)", none: "оценки нет" };
+  const SEARCH_MODE: Record<RetrievalKind, string> = { hybrid: "Обычный", mix: "Со связями", graph: "Отношения и пути" };
 
   function applyForces() {
     if (!layout) return;
@@ -117,7 +213,7 @@
 
   function visibleEdges(nodes = visibleNodes()): GEdge[] {
     const set = new Set(nodes.map((n) => n.index));
-    return slice.edges.filter((e) => kinds[e.kind] && passes(e) && !(mini && e.kind === "chunk_similarity") && set.has(e.a) && set.has(e.b));
+    return slice.edges.filter((e) => kinds[e.kind] && passes(e) && !(mini && e.kind === "chunk_similarity") && set.has(e.a) && set.has(e.b) && (!queryShape?.edgeIds || e.kind === "query_result" || queryShape.edgeIds.has(e.id)));
   }
 
   /** `fresh` — переложить с нуля (смена режима или первая загрузка): расположение определяют только текущие связи. */
@@ -261,7 +357,7 @@
   }
 
   async function toggleExpand(index: number) {
-    if (mini) return;
+    if (mini || query) return;
     const n = slice.nodes[index];
     if (n.kind !== "document" || !n.chunks) return;
     if (expanded[index]) {
@@ -402,7 +498,7 @@
     if (same) return;
     hovered = target;
     canvas.style.cursor = target ? "pointer" : "grab";
-    if (target?.type === "node") tip = { text: `${label(target.index)} · ${slice.nodes[target.index].kind === "document" ? "документ" : "чанк"}`, x: sx, y: sy };
+    if (target?.type === "node") tip = { text: `${label(target.index)} · ${slice.nodes[target.index].kind === "document" ? "документ" : slice.nodes[target.index].kind === "query" ? "запрос" : "чанк"}`, x: sx, y: sy };
     else if (target?.type === "edge") {
       const e = slice.edges[target.id];
       tip = { text: `${KIND_TITLE[e.kind]} · ${edgeTitle(e)}`, x: sx, y: sy };
@@ -540,7 +636,8 @@
     try {
       const server = await loadPhysical(path, request);
       if (id !== epoch || path !== project()) return;
-      slice = store.apply(server);
+      base = store.apply(server);
+      compose();
       loaded = true;
       loadError = "";
       loadErrorKind = "";
@@ -561,7 +658,9 @@
       loadError = error instanceof Error ? error.message : String(error);
       loadErrorKind = error instanceof BarsError ? (error.kind ?? "") : "";
       if (reason === "open" || reason === "refresh") {
-        slice = emptySlice();
+        base = emptySlice();
+        slice = base;
+        query = null;
         loaded = true;
         rebuild(0.5, true);
       }
@@ -592,7 +691,11 @@
     layout.onPositions = onPositions;
     layout.setForces($state.snapshot(settings.forces) as Forces);
     store = new SliceStore();
-    slice = emptySlice();
+    base = emptySlice();
+    slice = base;
+    query = null;
+    queryKey = "";
+    queryOff = "";
     expanded = {};
     selected = null;
     loaded = false;
@@ -626,13 +729,13 @@
   });
   const counts = $derived.by(() => {
     void revision;
-    const result: Record<EdgeKind, number> = { markdown_link: 0, document_similarity: 0, chunk_similarity: 0 };
+    const result: Record<EdgeKind, number> = { markdown_link: 0, document_similarity: 0, chunk_similarity: 0, query_result: 0 };
     const nodes = new Set(visibleNodes().map((n) => n.index));
     for (const e of slice.edges) if (nodes.has(e.a) && nodes.has(e.b) && !(mini && e.kind === "chunk_similarity") && passes(e)) result[e.kind]++;
     return result;
   });
   const totalCounts = $derived.by(() => {
-    const result: Record<EdgeKind, number> = { markdown_link: 0, document_similarity: 0, chunk_similarity: 0 };
+    const result: Record<EdgeKind, number> = { markdown_link: 0, document_similarity: 0, chunk_similarity: 0, query_result: 0 };
     const nodes = new Set(visibleNodes().map((n) => n.index));
     for (const e of slice.edges) if (nodes.has(e.a) && nodes.has(e.b)) result[e.kind]++;
     return result;
@@ -665,8 +768,11 @@
     return reverseLink(e) ? `${label(e.a)} и ${label(e.b)} ссылаются друг на друга` : `${label(e.a)} → ${label(e.b)}`;
   };
   const linesText = (e: GEdge) => (e.lines.length ? `строки ${e.lines.slice(0, 8).join(", ")}${e.lines.length > 8 ? "…" : ""}` : "строки неизвестны");
+  const CONN_KINDS: EdgeKind[] = [...EDGE_KINDS, "query_result"];
   const originText = (e: GEdge) =>
-    e.kind === "markdown_link"
+    e.kind === "query_result"
+      ? "Связь запроса с результатом поиска: сила — оценка поиска, а не связь между документами; в Markdown и индекс ничего не записывается."
+      : e.kind === "markdown_link"
       ? reverseLink(e)
         ? `Взаимные явные ссылки: «${label(e.a)}» → «${label(e.b)}» (${linesText(e)}) и обратная «${label(e.b)}» → «${label(e.a)}» (${linesText(reverseLink(e)!)}). На карте одна линия со стрелкой на каждом конце; направления хранятся отдельно.`
         : `Явная Markdown-ссылка из «${label(e.a)}» в «${label(e.b)}» (${linesText(e)}); стрелка на конце, куда ведёт ссылка. Число упоминаний не усиливает пружину.`
@@ -774,6 +880,17 @@
       schedule();
     });
   });
+  // Вид запроса следует за сессией поиска окна: включается после каждого завершённого поиска и выключается, когда поиск сброшен.
+  $effect(() => {
+    void app.results;
+    void app.displayed;
+    void app.searching;
+    void app.searchError;
+    void loaded;
+    void loadError;
+    if (!mounted) return;
+    untrack(syncQuery);
+  });
   $effect(() => {
     void selected;
     void findText;
@@ -837,6 +954,33 @@
         <button aria-label="Анализ связей: пути, влияние, контекст" title="Анализ связей: пути, влияние, контекст" onclick={() => (app.graphAnalysis = true)}><Icon name="layout" size={14} width={1.8} /></button>
       </div>
     </div>
+    {#if query}
+      <div class="qstack">
+      <div class="qbar" role="region" aria-label="Вид запроса">
+        <span class="qsq" aria-hidden="true"></span>
+        <b class="qtext" title={query.text}>Запрос «{query.text}»</b>
+        <span>{query.results.length} результатов</span>
+        <span>{SEARCH_MODE[query.applied]}{query.requested !== query.applied ? ` (запрошен «${SEARCH_MODE[query.requested]}»)` : ""} · {SCORE_TEXT[query.scoreKind]}</span>
+        <span class="depth" role="radiogroup" aria-label="Окружение результатов">Окружение
+          {#each Array.from({ length: MAX_DEPTH + 1 }, (_, i) => i) as d (d)}<button role="radio" aria-checked={queryDepth === d} class:on={queryDepth === d} onclick={() => setDepth(d)}>{d}</button>{/each}
+        </span>
+        <button class="more" onclick={leaveQuery}>Общий вид</button>
+      </div>
+      {#if query.fallback || queryMissing || !query.results.length}
+        <div class="banner" role="status">
+          {#if query.fallback}<span><b>Режим поиска изменён:</b> {query.fallback}</span>{/if}
+          {#if queryMissing}<span><b>Граф неполон:</b> {queryMissing} результатов без узла в графе — они в списке инспектора запроса.</span>{/if}
+          {#if !query.results.length}<span><b>Ничего не найдено:</b> порог {query.minScore.toFixed(2)}.</span>{/if}
+        </div>
+      {/if}
+      {#if queryShape?.truncated}
+        <div class="banner" role="status">
+          <span><b>Показано {queryShape.shown.nodes} из {queryShape.known.nodes} узлов · {queryShape.shown.edges} из {queryShape.known.edges} связей.</b> Результаты не вытесняются окружением.</span>
+          {#if queryAtMaximum}<span>Достигнут предел вида: уменьшите глубину или режим связей.</span>{:else}<button class="more" onclick={moreQuery}>Показать ещё</button>{/if}
+        </div>
+      {/if}
+      </div>
+    {/if}
     {#if layerIssues.length}
       <div class="banner" role="status">
         {#each layerIssues as kind (kind)}<span><b>{KIND_TITLE[kind]}:</b> {slice.layers[kind].note}.</span>{/each}
@@ -885,12 +1029,20 @@
       {#if toast}<div class="toast" role="status" aria-live="polite">{toast}</div>{/if}
       <div class="status" role="status">
         <span class="dot {motion}" title={MOTION_TEXT[motion]}></span>
-        {#if mini}
+        {#if query}
+          {#if !mini}{MOTION_TEXT[motion]} · {/if}<b>Запрос: {query.results.length} результатов</b> · узлов {queryShape?.shown.nodes ?? 0}{#if !mini} · связей {queryShape?.shown.edges ?? 0}{/if} · {MODE_NAME[mode].toLowerCase()}
+        {:else if mini}
           <b>Документы {slice.docCount}</b> · {MODE_NAME[mode].toLowerCase()}
         {:else}
           {MOTION_TEXT[motion]} · <b>Документы {slice.docCount} из {slice.totals.documents}</b>{#if shownChunks} · чанков {shownChunks} из {slice.totals.chunks}{/if}{#if isolates} · <button class="inline" onclick={() => (isolatesOnly = !isolatesOnly)} aria-pressed={isolatesOnly}>без связей: {isolates}</button>{/if}
         {/if}
       </div>
+      {#if mini && query}
+        <div class="qplate"><span class="qsq" aria-hidden="true"></span><span class="qt" title={query.text}>Запрос «{query.text}»</span><button class="inline" onclick={leaveQuery}>Общий вид</button></div>
+      {/if}
+      {#if queryOffered}
+        <div class="qplate dashed"><span class="qt" title={queryInput()?.text}>Запрос «{queryInput()?.text}»</span><button class="inline" onclick={enterQuery}>{mini ? "Показать" : "Показать запрос в графе"}</button></div>
+      {/if}
       {#if mini}
         <div class="mini-tools">
           <button aria-label="Вписать" title="Вписать" onclick={() => fit()}><Icon name="fit" size={13} width={1.8} /></button>
@@ -914,8 +1066,10 @@
           <div class="caption" role="status">
             <b title={selectedNode.label}>{selectedNode.label}</b>
             <span>{connections.length} связей</span>
-            <button class="inline" onclick={() => openSource(selectedNode.index)}>Открыть</button>
-            <button class="inline" onclick={() => openFull(selectedNode.index)}>В графе</button>
+            {#if selectedNode.kind !== "query"}
+              <button class="inline" onclick={() => openSource(selectedNode.index)}>Открыть</button>
+              <button class="inline" onclick={() => openFull(selectedNode.index)}>В графе</button>
+            {/if}
           </div>
         {/if}
       {/if}
@@ -928,6 +1082,9 @@
           {#each EDGE_KINDS as kind (kind)}
             <div class="row"><svg width="34" height="12" viewBox="0 0 34 12" aria-hidden="true"><line x1="1" y1="6" x2="29" y2="6" stroke={palette?.kindCss[kind] ?? "currentColor"} stroke-width="2.2" stroke-dasharray={dash(kind)} />{#if kind === "markdown_link"}<path d="M33 6l-6-3.5v7z" fill={palette?.kindCss[kind] ?? "currentColor"} />{/if}</svg>{KIND_TITLE[kind]}<small>{kind === "markdown_link" ? "стрелка на конце «куда ссылаются»" : kind === "chunk_similarity" ? "штрих, без стрелки" : "сплошная, без стрелки"}</small></div>
           {/each}
+          {#if query}
+            <div class="row"><svg width="34" height="12" viewBox="0 0 34 12" aria-hidden="true"><line x1="1" y1="6" x2="29" y2="6" stroke={palette?.kindCss.query_result ?? "currentColor"} stroke-width="2.2" /></svg>{KIND_TITLE.query_result}<small>оценка поиска; без оценки — пунктир</small></div>
+          {/if}
           <p class="hint">Взаимные ссылки — одна линия со стрелками на обоих концах.</p>
           <h4>Сила связи (s)</h4>
           <p class="hint">Толщина и яркость растут с силой; шкала абсолютная, от других рёбер экрана не зависит.</p>
@@ -968,14 +1125,14 @@
     <aside class="inspector" aria-label="Инспектор графа">
       {#if selectedNode}
         <header>
-          <span class="kind">{selectedNode.kind === "document" ? "Документ" : "Чанк"}</span>
+          <span class="kind">{selectedNode.kind === "document" ? "Документ" : selectedNode.kind === "query" ? "Запрос" : "Чанк"}</span>
           <h3>{selectedNode.label}</h3>
-          <p class="path">{selectedNode.path} · модуль {selectedNode.module}{#if selectedNode.kind === "chunk"} · строки {selectedNode.firstLine}–{selectedNode.lastLine}{/if}</p>
+          {#if selectedNode.kind !== "query"}<p class="path">{selectedNode.path} · модуль {selectedNode.module}{#if selectedNode.kind === "chunk"} · строки {selectedNode.firstLine}–{selectedNode.lastLine}{/if}</p>{/if}
           {#if selectedNode.kind === "chunk"}<p class="path">Владелец: <button class="inline" onclick={() => select({ type: "node", index: selectedNode.owner })}>{label(selectedNode.owner)}</button></p>{/if}
         </header>
         <div class="actions">
-          <button class="act" onclick={() => openSource(selectedNode.index)}><Icon name="doc" size={13} width={1.8} /> {selectedNode.kind === "document" ? "Открыть" : "Открыть диапазон"}</button>
-          {#if selectedNode.kind === "document" && selectedNode.chunks}
+          {#if selectedNode.kind !== "query"}<button class="act" onclick={() => openSource(selectedNode.index)}><Icon name="doc" size={13} width={1.8} /> {selectedNode.kind === "document" ? "Открыть" : "Открыть диапазон"}</button>{/if}
+          {#if selectedNode.kind === "document" && selectedNode.chunks && !query}
             <button class="act" onclick={() => void toggleExpand(selectedNode.index)} disabled={loading}>{expanded[selectedNode.index] ? "Свернуть чанки" : `Раскрыть чанки (${selectedNode.chunks})`}</button>
           {/if}
           <button class="act" onclick={() => pin(selectedNode.index)} aria-pressed={pinnedSel}>{pinnedSel ? "Открепить" : "Закрепить"}</button>
@@ -983,8 +1140,29 @@
         {#if selectedNode.kind === "document" && expanded[selectedNode.index] && expanded[selectedNode.index] < selectedNode.chunks}
           <p class="trunc" role="status">Показано {expanded[selectedNode.index]} из {selectedNode.chunks} чанков. <button class="inline" onclick={() => void moreChunks(selectedNode.index)} disabled={loading}>Ещё {Math.min(PORTION, selectedNode.chunks - expanded[selectedNode.index])}</button></p>
         {/if}
+        {#if selectedNode.kind === "query" && query}
+          <p class="origin">Запрос поиска. Режим «{SEARCH_MODE[query.applied]}», {SCORE_TEXT[query.scoreKind]}. Граф по тексту запроса ничего не ищет: на карте документы выдачи и их окружение по ссылкам и по смыслу.</p>
+          <h4>Результаты · {query.results.length}</h4>
+          <ul class="conns">
+            {#each query.results as r (r.rank)}
+              <li>
+                <button disabled={r.node === null} title={r.reason ?? r.path} onclick={() => r.node !== null && select({ type: "node", index: r.node })}>
+                  <span class="name">{r.rank}. {r.title}</span><small>{r.score === null ? "—" : r.score.toFixed(2)}{r.node === null ? " · нет в графе" : ""}</small>
+                </button>
+              </li>
+            {/each}
+          </ul>
+        {:else if selectedNode.qrole === "result" && query}
+          {@const found = query.results.find((x) => x.node === selectedNode.index)}
+          {#if found}
+            <p class="origin">Результат поиска №{found.rank}{found.score !== null ? ` · ${SCORE_TEXT[found.kind]} ${found.score.toFixed(2)}` : ""}. Совпавших фрагментов: {found.fragments.length}.</p>
+            <ul class="conns">
+              {#each found.fragments as f, i (i)}<li><span class="name" title={f.heading}>{f.heading || "без заголовка"}</span><small>строки {f.first}–{f.last} · {f.score.toFixed(2)}</small></li>{/each}
+            </ul>
+          {/if}
+        {/if}
         <h4>Связи · {connections.length}</h4>
-        {#each EDGE_KINDS as kind (kind)}
+        {#each CONN_KINDS as kind (kind)}
           {@const items = connections.filter((c) => c.edge.kind === kind)}
           {#if items.length}
             <h5>{KIND_TITLE[kind]} · {items.length}</h5>
@@ -995,7 +1173,7 @@
                   <button onclick={() => select({ type: "edge", id: c.edge.id })} title="Показать основание связи">
                     <svg width="30" height="10" viewBox="0 0 30 10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke={palette?.kindCss[kind]} stroke-opacity={line.b} stroke-width={line.w} stroke-dasharray={dash(kind)} />{#if kind === "markdown_link"}<path d="M29 5l-4-2.4v4.8z" fill={palette?.kindCss[kind]} />{/if}</svg>
                     <span class="name">{kind === "markdown_link" ? (c.edge.a === selectedNode.index ? "→ " : "← ") : ""}{label(c.other)}</span>
-                    <small>{c.edge.raw === null ? "ссылка" : c.edge.raw.toFixed(2)}</small>
+                    <small>{c.edge.raw === null ? (c.edge.kind === "query_result" ? "без оценки" : "ссылка") : c.edge.raw.toFixed(2)}</small>
                   </button>
                 </li>
               {/each}
@@ -1012,7 +1190,7 @@
         <p class="origin">{originText(selectedEdge)}</p>
         <table aria-label="Числа связи">
           <tbody>
-            <tr><th>Исходный cosine</th><td>{selectedEdge.raw === null ? "нет (ссылка)" : selectedEdge.raw.toFixed(3)}</td></tr>
+            <tr><th>{selectedEdge.kind === "query_result" ? "Оценка поиска" : "Исходный cosine"}</th><td>{selectedEdge.raw === null ? (selectedEdge.kind === "query_result" ? "нет" : "нет (ссылка)") : selectedEdge.raw.toFixed(3)}</td></tr>
             {#if selectedEdge.kind === "markdown_link"}<tr><th>Строки в тексте</th><td>{linesText(selectedEdge)}</td></tr>{/if}
             <tr><th>Сила s</th><td>{selectedEdge.s.toFixed(3)}{selectedEdge.kind === "markdown_link" ? " (факт наличия)" : ""}</td></tr>
             <tr><th>Толщина</th><td>{widthOf(drawStrength(selectedEdge)).toFixed(2)} px</td></tr>
@@ -1021,7 +1199,7 @@
             <tr><th>Пружина после ограничения</th><td>{springOfSelected === null ? "—" : springOfSelected.toFixed(3)}</td></tr>
           </tbody>
         </table>
-        <p class="hint">{selectedEdge.kind === "markdown_link" ? "Все ссылки имеют одну силу: частота не показывает важность." : "Близость не доказывает зависимость и не заменяет ссылку."} Значения разных видов не сопоставимы.</p>
+        <p class="hint">{selectedEdge.kind === "markdown_link" ? "Все ссылки имеют одну силу: частота не показывает важность." : selectedEdge.kind === "query_result" ? "Оценка поиска — не вероятность правильного ответа; rerank и косинус не сопоставимы." : "Близость не доказывает зависимость и не заменяет ссылку."} Значения разных видов не сопоставимы.</p>
         <div class="actions">
           <button class="act" onclick={() => select({ type: "node", index: selectedEdge.a })}>Узел: {label(selectedEdge.a).slice(0, 22)}</button>
           <button class="act" onclick={() => select({ type: "node", index: selectedEdge.b })}>Узел: {label(selectedEdge.b).slice(0, 22)}</button>
@@ -1048,12 +1226,25 @@
 
 <style>
   .pgw { display: flex; flex: 1; min-width: 0; min-height: 0; height: 100%; container-type: inline-size; }
-  .pg { position: relative; flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: auto auto auto minmax(0, 1fr); flex: 1; min-height: 0; min-width: 0; height: 100%; background: var(--panel); font-size: 12px; color: var(--text); overflow: hidden; }
+  .pg { position: relative; flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: auto auto auto auto minmax(0, 1fr); flex: 1; min-height: 0; min-width: 0; height: 100%; background: var(--panel); font-size: 12px; color: var(--text); overflow: hidden; }
   .pg.mini { display: flex; flex-direction: column; }
   .bar { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
   .banner { grid-column: 1 / -1; display: flex; gap: 8px 14px; align-items: center; flex-wrap: wrap; padding: 4px 10px; background: var(--mid-soft); color: var(--text); border-bottom: 1px solid var(--line); font-size: 11.5px; }
+  .qstack { grid-column: 1 / -1; display: flex; flex-direction: column; }
+  .qstack .banner { grid-column: auto; }
+  .qbar { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px 14px; flex-wrap: wrap; padding: 4px 10px; background: var(--accent-soft); border-bottom: 1px solid var(--line); font-size: 11.5px; }
+  .qbar .qtext { max-width: 38ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .qbar .more { border: 1px solid var(--line-2); background: var(--panel); border-radius: 5px; padding: 1px 8px; font-size: 11.5px; margin-left: auto; }
+  .qbar .depth { display: inline-flex; align-items: center; gap: 4px; }
+  .qbar .depth button { width: 20px; height: 20px; border: 1px solid var(--line-2); background: var(--panel); border-radius: 4px; font-size: 11px; }
+  .qbar .depth button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .qsq { display: inline-block; width: 9px; height: 9px; background: #d9730d; flex: none; }
+  .qplate { position: absolute; left: 6px; top: 4px; display: flex; align-items: center; gap: 6px; max-width: calc(100% - 90px); padding: 2px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); font-size: 11px; }
+  .qplate.dashed { border-style: dashed; }
+  .qplate button { white-space: nowrap; }
+  .qplate .qt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .banner .more { border: 1px solid var(--line-2); background: var(--panel); border-radius: 5px; padding: 1px 8px; font-size: 11.5px; }
-  .stage { grid-column: 1; grid-row: 4; position: relative; min-width: 0; min-height: 0; overflow: hidden; background: var(--panel); }
+  .stage { grid-column: 1; grid-row: 5; position: relative; min-width: 0; min-height: 0; overflow: hidden; background: var(--panel); }
   .pg.mini .stage { flex: 1; }
   canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; outline: none; }
   canvas.hide { visibility: hidden; }
@@ -1116,7 +1307,7 @@
   .legend .scale { display: flex; gap: 8px; }
   .legend .scale div { display: grid; justify-items: center; font-size: 10.5px; color: var(--muted); }
   .hint { margin: 4px 0; color: var(--muted); font-size: 11px; line-height: 1.4; }
-  .inspector { grid-column: 2; grid-row: 4; min-height: 0; overflow: auto; padding: 8px 10px; border-left: 1px solid var(--line); background: var(--panel); }
+  .inspector { grid-column: 2; grid-row: 5; min-height: 0; overflow: auto; padding: 8px 10px; border-left: 1px solid var(--line); background: var(--panel); }
   .inspector header { margin-bottom: 6px; }
   .inspector .kind { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--accent-text); font-weight: 600; }
   .inspector h3 { margin: 1px 0 2px; font-size: 13px; line-height: 1.3; overflow-wrap: anywhere; }
@@ -1151,7 +1342,7 @@
   @container (max-width: 640px) {
     .pg:not(.mini) { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto minmax(0, 1fr) minmax(0, 38%); }
     .stage { grid-column: 1; }
-    .inspector { grid-column: 1; grid-row: 5; border-left: 0; border-top: 1px solid var(--line); }
+    .inspector { grid-column: 1; grid-row: 6; border-left: 0; border-top: 1px solid var(--line); }
     .find input { width: 90px; }
   }
 </style>

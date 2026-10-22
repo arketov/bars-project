@@ -16,8 +16,8 @@ export interface Palette {
 }
 
 const KIND_COLORS = {
-  light: { markdown_link: "#d6336c", document_similarity: "#2b7bb9", chunk_similarity: "#7b4fc2" },
-  dark: { markdown_link: "#f0568c", document_similarity: "#5eb0ef", chunk_similarity: "#b18cf0" },
+  light: { markdown_link: "#d6336c", document_similarity: "#2b7bb9", chunk_similarity: "#7b4fc2", query_result: "#d9730d" },
+  dark: { markdown_link: "#f0568c", document_similarity: "#5eb0ef", chunk_similarity: "#b18cf0", query_result: "#ff9a4d" },
 };
 
 export function readPalette(el: HTMLElement): Palette {
@@ -38,6 +38,7 @@ export function readPalette(el: HTMLElement): Palette {
       markdown_link: parseColor(set.markdown_link),
       document_similarity: parseColor(set.document_similarity),
       chunk_similarity: parseColor(set.chunk_similarity),
+      query_result: parseColor(set.query_result),
     },
     kindCss: set,
   };
@@ -67,7 +68,7 @@ export interface Drawn {
   ids: number[];
 }
 
-const KIND_SLOT: EdgeKind[] = ["markdown_link", "document_similarity", "chunk_similarity"];
+const KIND_SLOT: EdgeKind[] = ["markdown_link", "document_similarity", "chunk_similarity", "query_result"];
 
 export function layoutLines(links: PLink[], kinds: Record<EdgeKind, boolean>): Drawn[] {
   const groups = new Map<string, PLink[]>();
@@ -130,7 +131,7 @@ export interface Scene {
 
 /** Радиус узла на экране: растёт с масштабом медленнее самой карты. */
 export function radiusOf(n: PNode, cam: Camera): number {
-  return Math.max(n.node.kind === "document" ? 3.2 : 2.2, n.r * Math.min(1.4, Math.max(0.55, Math.sqrt(cam.k))));
+  return Math.max(n.node.kind === "chunk" ? 2.2 : 3.2, n.r * Math.min(1.4, Math.max(0.55, Math.sqrt(cam.k))));
 }
 
 export function toScreen(cam: Camera, x: number, y: number): [number, number] {
@@ -180,7 +181,7 @@ export function draw(ctx: CanvasRenderingContext2D, scene: Scene): void {
     const l = d.link;
     const emphasised = incident(d) || chosenEdge(d);
     const faded = dimOthers && !emphasised;
-    const s = drawStrength(l.edge);
+    const s = l.edge.neutral ? 0.5 : drawStrength(l.edge);
     const [ax, ay, bx, by] = lineEnds(d, cam);
     const width = widthOf(s);
     const color = mixColor(palette.kind[l.edge.kind], palette.bg, brightnessOf(s));
@@ -196,7 +197,7 @@ export function draw(ctx: CanvasRenderingContext2D, scene: Scene): void {
     ctx.strokeStyle = color;
     ctx.fillStyle = color;
     ctx.lineWidth = width;
-    ctx.setLineDash(l.edge.kind === "chunk_similarity" ? [5, 3] : []);
+    ctx.setLineDash(l.edge.kind === "chunk_similarity" ? [5, 3] : l.edge.neutral ? [4, 3] : []);
     pathEdge(ctx, ax, ay, bx, by);
     ctx.stroke();
     ctx.setLineDash([]);
@@ -215,12 +216,13 @@ export function draw(ctx: CanvasRenderingContext2D, scene: Scene): void {
     if (sx < -20 || sy < -20 || sx > w + 20 || sy > h + 20) continue;
     const r = radiusOf(n, cam);
     ctx.globalAlpha = isRelated(n) ? 1 : 0.28;
-    const fill = n.node.color ?? (n.node.kind === "document" ? palette.muted : palette.faint);
+    const fill = n.node.kind === "query" ? palette.kindCss.query_result : (n.node.color ?? (n.node.kind === "document" ? palette.muted : palette.faint));
     ctx.fillStyle = fill;
     ctx.strokeStyle = palette.bgCss;
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     if (n.node.kind === "document") ctx.arc(sx, sy, r, 0, Math.PI * 2);
+    else if (n.node.kind === "query") ctx.rect(sx - r, sy - r, r * 2, r * 2);
     else {
       ctx.moveTo(sx, sy - r * 1.25);
       ctx.lineTo(sx + r * 1.25, sy);
@@ -230,6 +232,14 @@ export function draw(ctx: CanvasRenderingContext2D, scene: Scene): void {
     }
     ctx.fill();
     ctx.stroke();
+    if (n.node.qrole === "result") {
+      // Результат поиска: кольцо цвета связи запроса.
+      ctx.beginPath();
+      ctx.arc(sx, sy, r + 3, 0, Math.PI * 2);
+      ctx.strokeStyle = palette.kindCss.query_result;
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+    }
     const chosen = selected?.type === "node" && selected.index === n.index;
     const hot = scene.hovered?.type === "node" && scene.hovered.index === n.index;
     const marked = scene.marked.has(n.index);
@@ -283,6 +293,7 @@ function labels(ctx: CanvasRenderingContext2D, scene: Scene): void {
     if (hovered?.type === "node" && hovered.index === n.index) return 9e8;
     if (scene.related.has(n.index)) return 5e8 + n.degree;
     if (n.pinned) return 4e8;
+    if (n.node.kind === "query") return 9.5e8;
     return n.degree + (n.node.kind === "document" ? 0.5 : 0);
   };
   const cap = scene.related.size ? Math.max(budget, 14) : budget;

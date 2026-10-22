@@ -4,7 +4,8 @@
   import Icon from "./Icon.svelte";
   import { app, type DocumentReference, type ViewedDocument } from "./app.svelte";
   import { BarsError, type ReadOutput } from "./types";
-  import { documentHeadings, renderDocument } from "./markdown";
+  import { documentHeadings, renderDocument, resolveDocumentLink } from "./markdown";
+  import { loadBacklinks, type Backlink, type Backlinks } from "./backlinks";
   let { project, hit, initial }: { project: string; hit: DocumentReference; initial?: ViewedDocument } = $props();
   let doc = $state<ViewedDocument | null>(null), error = $state("");
   let source = $state(false), outline = $state(true);
@@ -29,6 +30,24 @@
     }
     return () => { cancelled = true; };
   });
+  let backlinks = $state<Backlinks | null>(null), backlinksError = $state(""), backlinksOpen = $state(true);
+  $effect(() => {
+    const path = hit.path, root = project, docsRoot = app.docsRoot;
+    let cancelled = false;
+    backlinks = null;
+    backlinksError = "";
+    void loadBacklinks(root, path, docsRoot).then(result => { if (!cancelled) backlinks = result; }).catch(e => { if (!cancelled) backlinksError = e instanceof Error ? e.message : String(e); });
+    return () => { cancelled = true; };
+  });
+  const openBacklink = (item: Backlink) => void app.openDocument({ path: item.path, title: item.title, first_line: item.lines[0] ?? 0, last_line: item.lines[0] ?? 0 });
+  /** Ссылка на другой `.md` открывает его в окне; путь считается от документа, в котором ссылка стоит. */
+  function followLink(event: MouseEvent) {
+    const link = (event.target as HTMLElement).closest<HTMLElement>("a[data-doc-link]");
+    if (!link) return;
+    event.preventDefault();
+    const path = resolveDocumentLink(hit.path, link.dataset.docLink ?? "");
+    if (path) void app.openDocument({ path, title: path.split("/").pop() ?? path, first_line: 0, last_line: 0 });
+  }
   function scroll(line: number) {
     const target = source ? body?.querySelector(`[data-line="${line}"]`) : body?.querySelector("#hit");
     target?.scrollIntoView({ block: "center" });
@@ -46,8 +65,20 @@
   {:else}
     <div class="body" bind:this={body}>
       {#if source}<pre aria-label="Исходник Markdown, только чтение">{#each lines as line, i}<span data-line={i + 1} class:hit={i + 1 >= hit.first_line && i + 1 <= hit.last_line}>{line}{"\n"}</span>{/each}</pre>
-      {:else}<div class="md">{@html html}</div>{/if}
+      {:else}<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions --><div class="md" onclick={followLink}>{@html html}</div>{/if}
     </div>
+    <footer class="backlinks" aria-label="Ссылаются на этот документ">
+      <button class="bl-head" aria-expanded={backlinksOpen} onclick={() => backlinksOpen = !backlinksOpen}>Ссылаются на этот документ{backlinks ? ` · ${backlinks.items.length}` : ""}</button>
+      {#if backlinksOpen}
+        {#if backlinksError}<p class="bl-note" role="alert">Не удалось получить входящие ссылки: {backlinksError}</p>
+        {:else if !backlinks}<p class="bl-note" role="status">Чтение…</p>
+        {:else}
+          {#if backlinks.note}<p class="bl-note">{backlinks.note}</p>{/if}
+          {#if backlinks.items.length}<ul>{#each backlinks.items as item (item.path)}<li><button onclick={() => openBacklink(item)} title={item.path}><span class="bl-title">{item.title}</span><small>{item.path}{item.lines.length ? ` · строки ${item.lines.join(", ")}` : ""}</small></button></li>{/each}</ul>
+          {:else if !backlinks.note}<p class="bl-note">На этот документ никто не ссылается.</p>{/if}
+        {/if}
+      {/if}
+    </footer>
     {#if outline}<nav class="outline" aria-label="Структура документа"><button class="close" aria-label="Скрыть структуру" onclick={() => outline = false}>×</button>{#each headings as h}<button onclick={() => { source = true; void tick().then(() => scroll(h.line)); }}>{h.label}</button>{/each}</nav>
     {:else}<button class="outline-open" title="Показать структуру" onclick={() => outline = true}>☷</button>{/if}
   {/if}
@@ -61,8 +92,17 @@
   .body { flex: 1; overflow: auto; padding: 10px 14px 60px; min-height: 0; }
   pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.65 var(--mono); } pre span { display: block; } pre .hit { background: var(--accent-soft); }
   .md { font-size: 12px; line-height: 1.65; overflow-wrap: anywhere; } .md :global(h1) { font-size: 14px; } .md :global(h2), .md :global(h3) { font-size: 13px; }
+  .md :global(.a) { color: var(--accent-text); text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; }
+  .md :global(span.a) { text-decoration: none; }
+  .md :global(a.a) { cursor: pointer; }
   .md :global(pre) { overflow: auto; background: var(--panel-2); padding: 8px; } .md :global(table) { border-collapse: collapse; } .md :global(td), .md :global(th) { border: 1px solid var(--line); padding: 4px; }
   .md :global(.hit) { background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 4px 8px; } .md :global(.hitlabel) { font-size: 10px; color: var(--accent-text); }
+  .backlinks { border-top: 1px solid var(--line); background: var(--panel); max-height: 38%; overflow: auto; padding: 4px 10px 6px; }
+  .bl-head { display: block; width: 100%; text-align: left; font-size: 11.5px; font-weight: 600; color: var(--text); padding: 4px 2px; }
+  .backlinks ul { list-style: none; margin: 0; padding: 0; }
+  .backlinks li button { display: block; width: 100%; text-align: left; padding: 3px 4px; color: var(--accent-text); }
+  .bl-title { display: block; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bl-note { margin: 2px; font-size: 11.5px; color: var(--muted); }
   .outline { position: absolute; right: 10px; top: 62px; width: 150px; max-height: 36%; overflow: auto; padding: 5px; border: 1px solid var(--line); border-radius: 6px; background: color-mix(in srgb, var(--panel) 90%, transparent); box-shadow: var(--shadow); }
   .outline button { display: block; width: 100%; text-align: left; font-size: 11px; padding: 2px 4px; } .outline .close { width: auto; margin-left: auto; } .outline-open { position: absolute; right: 10px; top: 62px; background: var(--panel-2); }
 </style>

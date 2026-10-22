@@ -186,3 +186,79 @@ it("«В графе» из мини-графа выбирает узел в по
   expect(app.graphFocus).toBeNull();
   expect(target.querySelector(".inspector h3")?.textContent).toContain("Документ 3");
 });
+
+const searchHit = (doc: number, score: number) => ({ path: `docs/${["adr", "features", "manual"][doc % 3]}/doc-${String(doc).padStart(2, "0")}.md`, module: "m", title: `Документ ${doc}`, heading_chain: "Раздел", first_line: 1, last_line: 4, text: "", score, score_kind: "rerank" as const });
+const finishSearch = (id: string, query: string, docs: number[]) => {
+  app.searching = false;
+  app.searchError = null;
+  app.results = { results: docs.map((d, i) => searchHit(d, 0.95 - i * 0.1)), applied: { results: docs.length, candidates: 50, rerank_candidates: 50, min_score: 0.1, score_kind: "rerank", clamped: false }, indexing: false, pending: 0 };
+  app.displayed = { requestId: id, project: "C:/a", query, modules: [], files: [], mode: "hybrid", includeRelated: true, limit: null, minScore: null };
+};
+
+it("вид запроса: после поиска граф перестраивается вокруг запроса, «Общий вид» возвращает проект, новый поиск включает вид снова", async () => {
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  expect(panel().dataset.nodes).toBe("36");
+  expect(target.querySelector(".qbar")).toBeNull();
+
+  finishSearch("r1", "как работает граф", [3, 7, 11]);
+  await settle();
+  expect(target.querySelector(".qbar")).not.toBeNull();
+  expect(target.querySelector(".qbar")!.textContent).toContain("Запрос «как работает граф»");
+  expect(target.querySelector(".qbar")!.textContent).toContain("3 результатов");
+  expect(target.querySelector(".qbar")!.textContent).toContain("оценка rerank");
+  // Запрос, три результата и их окружение; не весь проект.
+  const nodes = Number(panel().dataset.nodes);
+  expect(nodes).toBeGreaterThanOrEqual(4);
+  expect(nodes).toBeLessThan(36);
+  expect(target.textContent).toContain("Запрос: 3 результатов");
+  // Связь запроса с каждым результатом видна, даже в режиме «Ссылки».
+  expect(Number(panel().dataset.links)).toBeGreaterThanOrEqual(3);
+  // Граф ничего не запрашивал у воркера заново ради запроса.
+  expect(physicalCalls()).toHaveLength(1);
+
+  button("Общий вид")!.click();
+  await settle();
+  expect(target.querySelector(".qbar")).toBeNull();
+  expect(panel().dataset.nodes).toBe("36");
+  expect(target.textContent).toContain("Показать запрос в графе");
+
+  button("Показать запрос в графе")!.click();
+  await settle();
+  expect(target.querySelector(".qbar")).not.toBeNull();
+
+  button("Общий вид")!.click();
+  await settle();
+  finishSearch("r2", "другой запрос", [5]);
+  await settle();
+  expect(target.querySelector(".qbar")!.textContent).toContain("другой запрос");
+
+  app.results = null;
+  app.displayed = null;
+  await settle();
+  expect(target.querySelector(".qbar")).toBeNull();
+  expect(panel().dataset.nodes).toBe("36");
+  app.searching = false;
+});
+
+it("глубина окружения 0 оставляет запрос и результаты, пока идёт новый поиск прежний вид остаётся", async () => {
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  finishSearch("r1", "запрос", [3, 7]);
+  await settle();
+  const depth1 = Number(panel().dataset.nodes);
+  [...target.querySelectorAll<HTMLButtonElement>(".depth button")].find((b) => b.textContent === "0")!.click();
+  await settle();
+  expect(panel().dataset.nodes).toBe("3");
+  expect(depth1).toBeGreaterThan(3);
+  // Поиск начался: результаты окна обнулены, но вид остаётся до завершения.
+  app.searching = true;
+  app.results = null;
+  await settle();
+  expect(target.querySelector(".qbar")).not.toBeNull();
+  app.results = null;
+  app.displayed = null;
+  app.searching = false;
+  await settle();
+  expect(target.querySelector(".qbar")).toBeNull();
+});

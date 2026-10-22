@@ -1,7 +1,10 @@
 // Модель физического графа окна: сила связи, стиль и коэффициенты пружин.
 // Формулы — docs/features/graphrag/physical-graph.md («Сила, видимость и физика»), шкала рисунка — физический дизайн (OQ-118).
 
-export type EdgeKind = "markdown_link" | "document_similarity" | "chunk_similarity";
+/** Виды связей среза (слои графа). */
+export type SliceKind = "markdown_link" | "document_similarity" | "chunk_similarity";
+/** Вид ребра на карте: три вида среза и связь запроса с результатом (вид запроса, Т-47). */
+export type EdgeKind = SliceKind | "query_result";
 /** Режим карты: какие виды связей видны одновременно. */
 export type Mode = "links" | "meaning" | "chunks" | "all";
 export type LayerState = "ready" | "building" | "partial" | "stale" | "failed" | "cancelled" | "not_built" | "disabled";
@@ -11,7 +14,7 @@ export interface GNode {
   index: number;
   /** `ObjectRef.id` объекта в графе. */
   id: string;
-  kind: "document" | "chunk";
+  kind: "document" | "chunk" | "query";
   label: string;
   path: string;
   docsPath: string;
@@ -25,6 +28,10 @@ export interface GNode {
   lastLine: number;
   /** Цвет документа по Т-38, если назначен (этап 3.9). */
   color?: string;
+  /** Роль в виде запроса: результат поиска или связанный источник режима «Со связями». */
+  qrole?: "result" | "related";
+  /** Место результата в выдаче (с 1). */
+  rank?: number;
 }
 
 export interface GEdge {
@@ -40,14 +47,19 @@ export interface GEdge {
   s: number;
   /** Строки текста, где стоит ссылка. */
   lines: number[];
+  /** Связь запроса без оценки (режим «Отношения и пути»): рисуется нейтрально. */
+  neutral?: boolean;
+  /** Вид оценки связи запроса: rerank рисуется по абсолютной оценке, cosine — по окну модели. */
+  scoreKind?: "rerank" | "cosine" | "none";
 }
 
-export const EDGE_KINDS: EdgeKind[] = ["markdown_link", "document_similarity", "chunk_similarity"];
+export const EDGE_KINDS: SliceKind[] = ["markdown_link", "document_similarity", "chunk_similarity"];
 
 export const KIND_TITLE: Record<EdgeKind, string> = {
   markdown_link: "Ссылка",
   document_similarity: "Близость документов",
   chunk_similarity: "Близость чанков",
+  query_result: "Связь с запросом",
 };
 
 /** Окно cosine, в котором модель даёт значимые пары; допущенные пары документов лежат в 0,61–0,92 (решение OQ-118). */
@@ -57,8 +69,10 @@ export const WINDOW = { lo: 0.6, hi: 0.95 };
 export const DEFAULT_MIN_STRENGTH = 0.85;
 
 /** Сила для рисунка: фиксированное окно модели, а не диапазон экрана; у ссылки — её сила. */
-export function drawStrength(edge: Pick<GEdge, "kind" | "s" | "raw">): number {
+export function drawStrength(edge: Pick<GEdge, "kind" | "s" | "raw"> & { scoreKind?: GEdge["scoreKind"] }): number {
   if (edge.kind === "markdown_link" || edge.raw === null) return edge.s;
+  // Оценка rerank — не cosine модели: окно 0,60–0,95 к ней не применяется.
+  if (edge.kind === "query_result" && edge.scoreKind === "rerank") return edge.s;
   return Math.min(1, Math.max(0, (edge.raw - WINDOW.lo) / (WINDOW.hi - WINDOW.lo)));
 }
 
