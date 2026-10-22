@@ -137,6 +137,26 @@ pub struct ModelUnload {
     pub rerank_minutes: Option<u32>,
 }
 
+/// Сколько секунд после правки документа bars ждёт, прежде чем пересчитывать его (Т-41).
+pub const DEFAULT_EDIT_PAUSE_SECONDS: u32 = 30;
+/// Наибольшая пауза, секунд (час); «без паузы» — это `0`.
+pub const MAX_EDIT_PAUSE_SECONDS: u32 = 3_600;
+
+/// Таблица `[indexing]`: поведение очереди документов (`docs/features/indexing/document-queue.md`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct IndexingParams {
+    /// Пауза после правки до embed документа, секунд; `0` — без паузы.
+    pub edit_pause_seconds: u32,
+}
+
+impl Default for IndexingParams {
+    fn default() -> Self {
+        Self {
+            edit_pause_seconds: DEFAULT_EDIT_PAUSE_SECONDS,
+        }
+    }
+}
+
 /// Настройки пользователя: всё содержимое `settings.toml` с умолчаниями на месте пропущенного.
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct UserSettings {
@@ -145,6 +165,7 @@ pub struct UserSettings {
     pub unload: ModelUnload,
     pub search: SearchSettings,
     pub chunking: ChunkingParams,
+    pub indexing: IndexingParams,
 }
 
 /// Настройки проекта: только то, что `.bars/config.toml` может перекрыть (Т-5, Т-7).
@@ -153,6 +174,7 @@ pub struct ProjectConfig {
     docs_root: Option<String>,
     search: Option<raw::SearchOverrides>,
     chunking: Option<raw::ChunkingOverrides>,
+    indexing: Option<raw::IndexingOverrides>,
 }
 
 /// Настройки, с которыми работает один проект: пользовательские, перекрытые его `config.toml`.
@@ -162,6 +184,7 @@ pub struct Settings {
     pub rerank: RerankSettings,
     pub search: SearchSettings,
     pub chunking: ChunkingParams,
+    pub indexing: IndexingParams,
     /// Корень документации относительно корня проекта (Т-7).
     pub docs_root: String,
 }
@@ -185,11 +208,16 @@ impl Settings {
         if let Some(overrides) = &project.chunking {
             overrides.apply(&mut chunking);
         }
+        let mut indexing = user.indexing;
+        if let Some(overrides) = &project.indexing {
+            overrides.apply(&mut indexing);
+        }
         Self {
             embed: user.embed.clone(),
             rerank: user.rerank.clone(),
             search,
             chunking,
+            indexing,
             docs_root: project
                 .docs_root
                 .clone()
@@ -241,6 +269,7 @@ impl ProjectConfig {
                 docs_root: parsed.docs_root,
                 search: parsed.search,
                 chunking: parsed.chunking,
+                indexing: parsed.indexing,
             },
             warnings,
         })

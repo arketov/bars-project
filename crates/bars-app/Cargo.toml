@@ -21,6 +21,9 @@ tauri-plugin-single-instance.workspace = true
 serde_json.workspace = true
 tokio.workspace = true
 blake3.workspace = true
+toml.workspace = true
+trash.workspace = true
+bars-core.workspace = true
 
 [target.'cfg(windows)'.dependencies]
 # Те же версии, что у Tauri/Wry; дополнительных runtime-библиотек нет.

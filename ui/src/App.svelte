@@ -32,7 +32,7 @@
 
 <Workspace />
 
-{#if app.view === "settings" && app.settingsTab !== "logs" && app.settingsTab !== "mcp-statistics"}
+{#if app.view === "settings"}
   <div class="settings-screen"><SettingsPage /></div>
 {/if}
 

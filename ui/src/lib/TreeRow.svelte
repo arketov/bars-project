@@ -64,7 +64,7 @@
   </div>
   {#if isDir && open}
     <div class="kids">
-      {#each node.children as child (child.path)}
+      {#each node.children.filter((c) => !(c.kind === "file" && c.name.toLowerCase() === "index.md")) as child (child.path)}
         <TreeRow node={child} {forceOpen} />
       {/each}
     </div>

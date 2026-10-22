@@ -33,19 +33,22 @@ bars splits each Markdown file into sections by headings and indexes every secti
 - **A section stands on its own.** Never write «see above», «as described earlier», «the previous section». Name the subject in the heading and in the first sentence.
 - **Headings say what the section is about.** The heading chain is part of the text that is embedded: «Port setting of the worker» is found, «Settings» is found worse.
 - **Medium-sized sections.** A very long section is cut into several chunks that share one heading chain; a tiny one is glued to its neighbour. Prefer several medium sections to one huge one.
-- **One topic — one file.** When a file grows into several topics, split it by topic and link the parts from the folder's `Index.md`. Do not collect everything into one big file.
+- **One topic — one file.** When a file grows into several topics, split it by topic and list the parts in the folder's `Index.md`. Do not collect everything into one big file.
 - **State the status at the top of a topic file**, in one line: what is verified and how (tests, a live run, a static reading of the code), what is not verified, what is open. A reader must not mistake a plan for a fact.
 - **Do not copy, link.** A requirement, a decision or a definition lives in exactly one place; other documents refer to it by link or by its number. Copies drift apart and then bars finds both versions.
 
 ## Links in the text
 
-Links are how a reader of one search result reaches the rest, and bars builds its document graph from them. Whenever the text mentions another document, make the mention a link.
+A link is a claim that two documents are related. bars builds its document graph from links, and a reader of one search result follows them for details. A link without a relation is noise in both, so link on purpose, not on every mention.
 
-- **Link at the point of mention**: a relative Markdown link with a readable name, `[worker settings](../settings/settings.md)`. Not a path in backticks (`` `features/settings/settings.md` ``), not «in the settings document», not a bare URL.
-- **What to link**: every document the text names or relies on — the requirement or decision a statement comes from, the feature it describes, the research behind a claim, the bug or idea it resolves, the session where it was done. A requirement number gets a link to the requirements document on first mention in a section.
-- **Link to the document, name the section in words**: `[search contract](../search/hybrid-search.md), section «Ranking»`. Heading anchors break when a heading changes.
+- **Link when the text states a relation** to the target: the statement is based on it (a requirement, decision or research), it replaces, implements, verifies or fixes it, or the details live there. A passing mention is plain words.
+- **Once per section.** A document gets one link in a section, at its first relevant mention; later mentions in that section are words. The next section may link again: each section is read on its own.
+- **No link bundles.** When one passage relies on more than three documents, put them in one line «Based on: …» at the start of the section instead of scattering links through the paragraph.
+- **Do not link** a folder `Index.md` (no «← parent» back-links), lists of files changed in a session, a session in `chats/` from a document of the current state, or files outside the documentation root such as a question register or a plan: name them or use the ID, `OQ-12`.
+- **Readable name, relative path**: `[worker settings](../settings/settings.md)`, not a path in backticks or «in the settings document». Link the document and name the section in words: `[search contract](../search/hybrid-search.md), section «Ranking»`. Heading anchors break when a heading changes.
 - **Check the target exists** before writing the link; find it with bars when the path is unknown. Never link to a document you only plan to write.
-- **A new document** links to its sources and is linked from its folder's `Index.md`; when it replaces or extends a topic, the related documents link back to it.
+- **A new document** links to the sources it relies on and is listed in its folder's `Index.md`; a document it replaces or extends links to it.
+- Registers and traceability tables are exempt: each row links what it maps.
 - Code paths, commands and files outside the documentation stay in backticks.
 
 ## Current state, not history
@@ -110,7 +113,7 @@ Use the project's existing registers when provided; otherwise `backlog/` is the 
 |---|---|---|
 | Session event | `chats/<YYYY-MM-DD>-<topic>/log.md` | At most three lines for a finding, failed approach, changed plan or risky step; append without rereading. Example: why an experiment changed. |
 | Session handoff | `chats/<YYYY-MM-DD>-<topic>/handoff.md` | Done, Not done, Difficulties, Next; at most a screen. Example: the check the next session should run. |
-| Folder index | That folder's `Index.md` | Parent link and each file/subfolder with when to read it; update together with contents. Individual session folders are exempt. |
+| Folder index | That folder's `Index.md` | Each file/subfolder by name with when to read it, no links; update together with contents. Individual session folders are exempt. |
 
 A mixed task can produce linked documents: bug in the register, measured cause in knowledge, accepted behaviour in the feature, architectural rationale in an ADR. Keep one source for each fact. Session history stays in the journal; current product behaviour stays in the feature. Unaccepted proposals remain labelled proposals in research or plans.
 
@@ -123,8 +126,7 @@ A mixed task can produce linked documents: bug in the register, measured cause i
 ### Index.md in every folder
 
 - **Every folder has an `Index.md`**, except the session folders in `chats/`. The letter case of the name does not matter, but never keep two files that differ only by case in one folder: on Windows and macOS they are one file.
-- The index lists **every file and every subfolder** as a link with a one-line description. The usual form is a table with two columns: «File» and «When to read».
-- Start the index with a back-link to the parent: `[← Parent index](../Index.md)`.
+- The index lists **every file and every subfolder** by name in backticks with a one-line description, **without links** and without a back-link to the parent. The folder already relates its files; links from an index would tie every document to it in the graph. The usual form is a table with two columns: «File» and «When to read».
 - Adding, renaming or deleting a file changes the `Index.md` of its folder **in the same change**.
 - The root `Index.md` answers «where do I look for X»: a table «question → document», then the list of all modules.
 
@@ -170,8 +172,8 @@ A session the user talks to keeps a folder `docs/chats/<YYYY-MM-DD>-<topic>/`. T
 
 1. Every new or changed file has a `title`, one `#` heading and ATX headings only.
 2. Each section is understandable without its neighbours; the headings name the subject.
-3. The folder's `Index.md` lists the file; moved files have all links fixed.
+3. The folder's `Index.md` lists the file by name; moved files have all links fixed.
 4. Nothing is copied from another document: there is a link or a number instead.
-5. Every document the text mentions is a working relative link, not a path in backticks.
+5. Every link is a working relative link that states a relation; no document is linked twice in one section, and no link points to an `Index.md`.
 6. Outdated text is edited or deleted, not left with a correction below.
 7. No secrets.

@@ -1,7 +1,7 @@
 // Раскладка в окне: модель узлов для отрисовки и hit-testing, расчёт — в Web Worker (physics-host.ts).
 // Окно хранит координаты и закрепления и принимает порции только своего поколения и запуска раскладки.
 import { hash, springCoefficients, type GEdge, type GNode } from "./model";
-import { DEFAULT_FORCES, type CoreLink, type CoreNode, type Forces } from "./physics-core";
+import { DEFAULT_FORCES, nodeRadius, type CoreLink, type CoreNode, type Forces } from "./physics-core";
 import { PhysicsHost, type Positions, type ToPhysics } from "./physics-host";
 
 export { DEFAULT_FORCES };
@@ -146,6 +146,7 @@ export class Layout {
       l.source.degree++;
       l.target.degree++;
     }
+    for (const p of next) p.r = nodeRadius(p.node.kind, p.degree);
     this.nodes = next;
     this.links = links;
     this.#byIndex = nextMap;

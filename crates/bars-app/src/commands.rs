@@ -297,6 +297,68 @@ pub async fn document_revision(
     .map_err(|e| e.to_string())
 }
 
+/// Цвета и иконки проекта (Т-38). Отказы приходят как `status: "error"` с `kind`.
+fn appearance_json(appearance: &crate::appearance::Appearance) -> Value {
+    let section = |entries: &std::collections::BTreeMap<String, crate::appearance::Entry>| {
+        entries
+            .iter()
+            .map(|(path, entry)| {
+                (path.clone(), serde_json::json!({ "color": entry.color, "icon": entry.icon }))
+            })
+            .collect::<serde_json::Map<_, _>>()
+    };
+    serde_json::json!({
+        "status": "ok",
+        "folders": section(&appearance.folders),
+        "documents": section(&appearance.documents),
+    })
+}
+
+fn appearance_failure(error: &crate::appearance::AppearanceError) -> Value {
+    serde_json::json!({ "status": "error", "kind": error.kind(), "message": error.message() })
+}
+
+#[tauri::command]
+pub async fn appearance_read(state: State<'_, Shared>, project: String) -> Result<Value, String> {
+    let (root, _) = document_roots(&state, &project)?;
+    tauri::async_runtime::spawn_blocking(move || match crate::appearance::read(&root) {
+        Ok(appearance) => appearance_json(&appearance),
+        Err(error) => appearance_failure(&error),
+    })
+    .await
+    .map_err(|e| e.to_string())
+}
+
+/// Записывает цвет и иконку одной папки или документа; `null` сбрасывает поле.
+#[tauri::command]
+pub async fn appearance_set(
+    app: tauri::AppHandle,
+    state: State<'_, Shared>,
+    project: String,
+    kind: String,
+    path: String,
+    color: Option<String>,
+    icon: Option<String>,
+) -> Result<Value, String> {
+    use tauri::Emitter;
+    let (root, _) = document_roots(&state, &project)?;
+    let Some(kind) = crate::appearance::Kind::parse(&kind) else {
+        return Err("неизвестный вид: нужен folder или document".into());
+    };
+    let value = tauri::async_runtime::spawn_blocking(move || {
+        match crate::appearance::set(&root, kind, &path, color.as_deref(), icon.as_deref()) {
+            Ok(appearance) => appearance_json(&appearance),
+            Err(error) => appearance_failure(&error),
+        }
+    })
+    .await
+    .map_err(|e| e.to_string())?;
+    if value["status"] == "ok" {
+        let _ = app.emit("bars://appearance-changed", serde_json::json!({ "project": project }));
+    }
+    Ok(value)
+}
+
 /// Проверяет и закрепляет цель папки при открытии меню.
 #[tauri::command]
 pub async fn folder_target(

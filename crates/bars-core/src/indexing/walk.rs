@@ -41,6 +41,9 @@ pub struct WalkProblem {
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct Walk {
     pub files: Vec<DocFile>,
+    /// Папки корня документации без точки в имени, включая пустые: путь от корня проекта через `/`,
+    /// по возрастанию. Для дерева окна (Т-33); на индексацию не влияют.
+    pub dirs: Vec<String>,
     pub problems: Vec<WalkProblem>,
 }
 
@@ -121,6 +124,7 @@ pub fn walk_docs(project_root: &Path, docs_root: &Path) -> Result<Walk, WalkErro
             }
             if kind.is_dir() {
                 if !name.starts_with('.') {
+                    walk.dirs.push(project_path(&name));
                     pending.push((entry.path(), join(&inner, &name)));
                 }
             } else if kind.is_file() && is_indexed_name(&name, inner.is_empty()) {
@@ -140,6 +144,7 @@ pub fn walk_docs(project_root: &Path, docs_root: &Path) -> Result<Walk, WalkErro
         }
     }
     walk.files.sort_by(|a, b| a.path.cmp(&b.path));
+    walk.dirs.sort();
     walk.problems.sort_by(|a, b| a.path.cmp(&b.path));
     Ok(walk)
 }
@@ -248,6 +253,20 @@ mod tests {
         assert_eq!(module_of(&walk, "docs/a/b/y.md"), "a");
         assert_eq!(module_of(&walk, "docs/c/z.md"), "c");
         assert!(walk.problems.is_empty());
+    }
+
+    #[test]
+    fn empty_folders_are_listed_but_hidden_and_linked_ones_are_not() {
+        let dir = tempfile::tempdir().unwrap();
+        touch(dir.path(), "docs/a/x.md", b"# t");
+        touch(dir.path(), "docs/.hidden/y.md", b"# t");
+        fs::create_dir_all(dir.path().join("docs/empty/inner")).unwrap();
+        touch(dir.path(), "outside/secret.md", b"# t");
+        let linked = link_dir(&dir.path().join("outside"), &dir.path().join("docs/link"));
+        let walk = walk_docs(dir.path(), Path::new("docs")).unwrap();
+
+        assert_eq!(walk.dirs, ["docs/a", "docs/empty", "docs/empty/inner"]);
+        assert!(linked || !cfg!(windows));
     }
 
     #[test]

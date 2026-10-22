@@ -55,6 +55,8 @@ pub struct UpdateReport {
     pub changed: usize,
     pub unchanged: usize,
     pub removed: usize,
+    /// Документы, пропущенные из-за паузы после правки: их разберёт следующая проверка.
+    pub deferred: usize,
     /// Векторы, которые посчитала модель (одинаковые тексты считаются один раз).
     pub chunks_embedded: usize,
     /// Чанки, для которых модель не вызывалась: вектор взят из индекса или у такого же чанка документа.
@@ -89,6 +91,11 @@ pub trait IndexObserver {
     fn file(&self, _path: &str) {}
     /// Документ обработан: всего просмотрено документов и чанков (посчитанных и взятых из индекса).
     fn progress(&self, _documents_done: usize, _chunks_done: usize) {}
+    /// Документ ждёт паузы после правки (Т-41): проверка его пропускает, индекс остаётся как был.
+    /// Не вызывается, когда нарезка или корень документации изменились: тогда пересобирается всё.
+    fn defer(&self, _path: &str) -> bool {
+        false
+    }
     /// Вызывается перед каждым документом. Может ждать, пока снята пауза. `true` — остановить
     /// индексацию: уже записанные документы остаются, при полной переиндексации старый индекс цел.
     fn should_stop(&self) -> bool {
@@ -299,6 +306,11 @@ fn run_update(
         for (position, file) in walk.files.iter().enumerate() {
             if observer.should_stop() {
                 return Err(IndexingError::Cancelled);
+            }
+            if !report.full_check && observer.defer(&file.path) {
+                report.deferred += 1;
+                observer.progress(position + 1, report.chunks_embedded + report.chunks_reused);
+                continue;
             }
             observer.file(&file.path);
             observer.attempt(0);

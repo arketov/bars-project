@@ -244,19 +244,27 @@ it("поздний read закрытого документа не возвра�
   resolve({ title: "А", text: "Поздний текст" }); await settle();
   expect(document.body.textContent).not.toContain("Поздний текст");
 });
-it("настройки — отдельный экран, а не вкладка; логи остаются панелью", async () => {
+const openFromMenu = async (title: string) => {
+  [...document.querySelectorAll<HTMLButtonElement>('button')].find(b => b.textContent === "Панели ▾")!.click(); flushSync();
+  [...document.querySelectorAll<HTMLButtonElement>('.menu button')].find(b => b.textContent === title)!.click(); flushSync(); await settle();
+};
+it("настройки — отдельный экран, а не вкладка; вкладка «Логи» настроек остаётся в настройках, панель логов — из меню", async () => {
   component = mount(Workspace, { target: document.body }); flushSync();
   app.openTopics(); flushSync(); await settle();
   app.openSettings(); flushSync(); await settle();
   expect(document.querySelector('[data-panel-kind="settings"]')).toBeNull();
   expect(document.querySelector('[data-panel-kind="topics"]')).not.toBeNull();
   app.openSettings("logs"); flushSync(); await settle();
+  expect(app.view).toBe("settings");
+  expect(document.querySelector('[data-panel-kind="logs"]')).toBeNull();
+  app.openSearch(); flushSync(); await settle();
+  await openFromMenu("Логи");
   expect(document.querySelector('.workspace')?.getAttribute('data-active-panel')).toBe("logs");
 });
 it("стрелки и End переключают вкладки без сброса запроса и области", async () => {
   component = mount(Workspace, { target: document.body }); flushSync();
   app.query = "контракт"; app.selected = new Set(["manual"]);
-  app.openSettings("logs"); flushSync(); await settle();
+  await openFromMenu("Логи");
   const search = [...document.querySelectorAll<HTMLElement>('[role="tab"]')].find(t => t.textContent?.includes("Поиск"))!;
   const logs = [...document.querySelectorAll<HTMLElement>('[role="tab"]')].find(t => t.textContent?.includes("Логи"))!;
   search.focus(); search.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true })); flushSync();

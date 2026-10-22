@@ -7,8 +7,8 @@ use std::path::Path;
 use serde::Deserialize;
 
 use super::{
-    EmbedSettings, MAX_UNLOAD_MINUTES, ModelSource, RerankSettings, SettingsError, SettingsWarning,
-    UserSettings,
+    EmbedSettings, IndexingParams, MAX_EDIT_PAUSE_SECONDS, MAX_UNLOAD_MINUTES, ModelSource,
+    RerankSettings, SettingsError, SettingsWarning, UserSettings,
 };
 use crate::indexing::chunking::ChunkingParams;
 use crate::models::{Accelerator, BGE_RERANKER_V2_M3_ID, builtin_model, builtin_models};
@@ -25,6 +25,7 @@ pub(super) struct UserFile {
     pub(super) search: Option<SearchOverrides>,
     device: Option<DeviceTable>,
     pub(super) chunking: Option<ChunkingOverrides>,
+    pub(super) indexing: Option<IndexingOverrides>,
     #[serde(flatten)]
     unknown: Unknown,
 }
@@ -35,6 +36,7 @@ pub(super) struct ProjectFile {
     pub(super) docs_root: Option<String>,
     pub(super) search: Option<SearchOverrides>,
     pub(super) chunking: Option<ChunkingOverrides>,
+    pub(super) indexing: Option<IndexingOverrides>,
     #[serde(flatten)]
     unknown: Unknown,
 }
@@ -112,6 +114,14 @@ pub(super) struct SearchOverrides {
 pub(super) struct ChunkingOverrides {
     min_chars: Option<usize>,
     max_chars: Option<usize>,
+    #[serde(flatten)]
+    unknown: Unknown,
+}
+
+/// Таблица `[indexing]`.
+#[derive(Debug, Default, Clone, Deserialize)]
+pub(super) struct IndexingOverrides {
+    edit_pause_seconds: Option<u32>,
     #[serde(flatten)]
     unknown: Unknown,
 }
@@ -252,8 +262,34 @@ impl ChunkingOverrides {
     }
 }
 
+impl IndexingOverrides {
+    pub(super) fn validate(&self, file: &Path) -> Result<(), SettingsError> {
+        match self.edit_pause_seconds {
+            Some(seconds) if seconds > MAX_EDIT_PAUSE_SECONDS => Err(invalid(
+                file,
+                "indexing.edit_pause_seconds",
+                "больше 3600 секунд (час); чтобы не ждать, укажите 0",
+            )),
+            _ => Ok(()),
+        }
+    }
+
+    pub(super) fn apply(&self, target: &mut IndexingParams) {
+        if let Some(value) = self.edit_pause_seconds {
+            target.edit_pause_seconds = value;
+        }
+    }
+
+    pub(super) fn note_unknown(&self, file: &Path, warnings: &mut Vec<SettingsWarning>) {
+        note_unknown(&self.unknown, "indexing", file, warnings);
+    }
+}
+
 impl UserFile {
     pub(super) fn validate(&self, file: &Path) -> Result<(), SettingsError> {
+        if let Some(indexing) = &self.indexing {
+            indexing.validate(file)?;
+        }
         if let Some(embed) = &self.embed {
             positive(file, "embed.batch_size", embed.batch_size)?;
             unload_minutes(
@@ -301,6 +337,9 @@ impl UserFile {
         if let Some(chunking) = &self.chunking {
             chunking.apply(&mut settings.chunking);
         }
+        if let Some(indexing) = &self.indexing {
+            indexing.apply(&mut settings.indexing);
+        }
         settings
     }
 
@@ -329,12 +368,18 @@ impl UserFile {
         if let Some(chunking) = &self.chunking {
             chunking.note_unknown(file, &mut warnings);
         }
+        if let Some(indexing) = &self.indexing {
+            indexing.note_unknown(file, &mut warnings);
+        }
         warnings
     }
 }
 
 impl ProjectFile {
     pub(super) fn validate(&self, file: &Path) -> Result<(), SettingsError> {
+        if let Some(indexing) = &self.indexing {
+            indexing.validate(file)?;
+        }
         if let Some(search) = &self.search {
             search.validate(file)?;
         }
@@ -352,6 +397,9 @@ impl ProjectFile {
         }
         if let Some(chunking) = &self.chunking {
             chunking.note_unknown(file, &mut warnings);
+        }
+        if let Some(indexing) = &self.indexing {
+            indexing.note_unknown(file, &mut warnings);
         }
         warnings
     }

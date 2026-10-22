@@ -141,8 +141,7 @@
     if (kind === "indexing") app.openIndexing();
     else if (kind === "topics") app.openTopics();
     else if (kind === "settings") app.openSettings();
-    else if (kind === "logs" || kind === "mcp") app.openSettings(kind === "logs" ? "logs" : "mcp-statistics");
-    open(kind);
+    else open(kind);
   }
   /** Группа для документа: где уже есть документы, иначе самая правая группа без поиска. */
   function documentGroup() {
@@ -188,7 +187,7 @@
         previousView = view; previousTab = tab; previousNavigation = navigation;
         if (!presentingDocument) {
           globalSearch?.close(false);
-          open(view === "main" ? "search" : view === "settings" ? tab === "logs" ? "logs" : tab === "mcp-statistics" ? "mcp" : "settings" : view);
+          open(view === "main" ? "search" : view === "settings" ? "settings" : view);
         }
       }
     });

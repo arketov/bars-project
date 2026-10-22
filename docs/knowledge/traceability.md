@@ -49,7 +49,7 @@ title: Трассировка требований bars — документы �
 | Т-35 | 3.3 → 3.3.2; 3.1.1 | [База знаний](../features/knowledge-base/requirements.md): создание проекта |
 | Т-36 | 3.8 → 3.8.3; 3.8.1, 3.8.2 | [База знаний](../features/knowledge-base/requirements.md), [новые темы](../features/new-topics/requirements.md): аудиты и очередь |
 | Т-37 | 3.7 → 3.7.1; 4.4.1, 4.4.2 | [База знаний](../features/knowledge-base/requirements.md), [MCP](../features/agent-tools/mcp-tools.md): таблица соответствия и реальные действия |
-| Т-38 | 3.9 → 3.9.1; 2.1.5 | [База знаний](../features/knowledge-base/requirements.md): цвета/иконки во всех представлениях |
+| Т-38 | 3.9 → 3.9.1; 2.1.5 | [Цвета и иконки](../features/knowledge-base/colors-icons.md): хранение, выбор, наследование, показ во всех представлениях |
 | Т-39 | 3.6 → 3.6.1, 3.6.2; 3.1.1 | [База знаний](../features/knowledge-base/requirements.md), [поиск](../features/search/hybrid-search.md): два раздела выдачи |
 | Т-40 | 3.4 → 3.4.2; 1.1.2, 1.1.4, 1.3.2 | [База знаний](../features/knowledge-base/requirements.md), [проект окна](../features/window/requirements.md): вкладки и отдельные окна с редактором через контекстное меню; общее сохранение/конфликты |
 | Т-41 | 3.2 → 3.2.1, 3.2.2 | [База знаний](../features/knowledge-base/requirements.md): пауза embed |

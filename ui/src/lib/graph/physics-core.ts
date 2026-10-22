@@ -8,7 +8,7 @@ export interface Forces {
   link: number;
   /** Отталкивание узлов. */
   repel: number;
-  /** Слабое притяжение всех узлов друг к другу и к центру. */
+  /** Общее притяжение: все узлы тянутся к общему центру, как «Center force» Obsidian. */
   gravity: number;
   /** Длина связи между документами. */
   length: number;
@@ -26,10 +26,17 @@ export interface Tuning {
   shelf: boolean;
 }
 
-/** Принято замером 22-10-2026 на снимке bars-project (323 документа, 1209 пар ссылок, мини-панель 313×300 px): docs/knowledge/graph-render.md. */
-export const DEFAULT_TUNING: Tuning = { hubCharge: 0.4, springByDegree: false, shelf: true };
+/** Раунд 27: одиночки участвуют в раскладке и встают кольцом вокруг карты, как в Obsidian (docs/knowledge/graph-render.md). */
+export const DEFAULT_TUNING: Tuning = { hubCharge: 0.4, springByDegree: false, shelf: false };
 /** Прежнее поведение: для сравнения в замерах и тестах. */
 export const LEGACY_TUNING: Tuning = { hubCharge: 0, springByDegree: false, shelf: false };
+
+/** Радиус узла в единицах карты: хаб крупнее, как в Obsidian. `degree` — число видимых связей узла. */
+export function nodeRadius(kind: "document" | "chunk" | "query", degree: number): number {
+  if (kind === "chunk") return 3.6;
+  if (kind === "query") return 8;
+  return Math.min(18, 4 + 2 * Math.sqrt(degree));
+}
 
 /** Шаг сетки одиночек в единицах карты: узел 6 + зазор. */
 export const SHELF_CELL = 16;
@@ -93,11 +100,11 @@ interface SimLink {
 
 /** Пружина по формуле проекта умножается на этот коэффициент: без него отталкивание рвёт цепочки (замер 21-10-2026). */
 const LINK_BASE = 3;
-/** Вдвое сильнее прежнего −60: замер показал, что при −60 связные документы налезают друг на друга при вписывании в мини-панель. */
+/** Заряд документа: отталкивание действует на любом расстоянии (Barnes–Hut), поэтому карта растёт с числом узлов, а не сжимается в шар. */
 const BASE_CHARGE = -120;
 const CHILD_BUDGET = 35;
+/** Притяжение к общему центру при «общем притяжении» ×1: удерживает карту и одиночек кольцом вокруг неё. */
 const CENTER = 0.04;
-const FAR = 2;
 const GROUP_RATIO = 0.58;
 
 /** Документ без связей и без закрепления: чанки раскрытого документа держит группа владельца, их на полку не уводим. */
@@ -121,11 +128,10 @@ export class PhysicsCore {
       .alphaDecay(0.006)
       .velocityDecay(0.3)
       .force("link", forceLink<SimNode, SimLink>([]).strength((l) => this.#strength(l)).distance((l) => this.#length(l)))
-      .force("charge", forceManyBody<SimNode>().strength((n) => n.charge).distanceMax(420))
-      .force("far", forceManyBody<SimNode>().strength(() => FAR * this.forces.gravity).distanceMax(5000))
+      .force("charge", forceManyBody<SimNode>().strength((n) => n.charge))
       .force("collide", forceCollide<SimNode>((n) => n.r + 1.5))
-      .force("x", forceX<SimNode>(0).strength(CENTER))
-      .force("y", forceY<SimNode>(0).strength(CENTER))
+      .force("x", forceX<SimNode>(0).strength(CENTER * this.forces.gravity))
+      .force("y", forceY<SimNode>(0).strength(CENTER * this.forces.gravity))
       .force("group", this.#groupForce)
       .stop();
   }
@@ -198,6 +204,9 @@ export class PhysicsCore {
       l.source.degree++;
       l.target.degree++;
     }
+    for (const p of next) p.r = nodeRadius(p.kind, p.degree);
+    // d3 кэширует радиусы при initialize: функция пересчитывается для нового набора.
+    (this.sim.force("collide") as ReturnType<typeof forceCollide<SimNode>>).radius((n) => n.r + 1.5);
     this.nodes = next;
     this.#links = simLinks;
     this.#byIndex = map;
@@ -218,7 +227,6 @@ export class PhysicsCore {
     const link = this.sim.force("link") as ReturnType<typeof forceLink<SimNode, SimLink>>;
     link.strength((l) => this.#strength(l)).distance((l) => this.#length(l));
     (this.sim.force("charge") as ReturnType<typeof forceManyBody<SimNode>>).strength((n) => n.charge);
-    (this.sim.force("far") as ReturnType<typeof forceManyBody<SimNode>>).strength(() => FAR * this.forces.gravity);
     (this.sim.force("x") as ReturnType<typeof forceX<SimNode>>).strength(CENTER * this.forces.gravity);
     (this.sim.force("y") as ReturnType<typeof forceY<SimNode>>).strength(CENTER * this.forces.gravity);
   }

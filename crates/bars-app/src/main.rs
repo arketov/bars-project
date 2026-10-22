@@ -1,6 +1,9 @@
 //! `bars`: воркер с окном и треем (Т-1). Окно и воркер — один процесс: окно вызывает обработчик
 //! методов напрямую, а `bars-mcp` и `bars-cli` приходят по каналу.
 
+mod appearance;
+#[cfg(test)]
+mod appearance_tests;
 mod commands;
 mod document_io;
 #[cfg(test)]
@@ -58,6 +61,8 @@ fn main() -> anyhow::Result<()> {
             commands::document_read,
             commands::document_write,
             commands::document_revision,
+            commands::appearance_read,
+            commands::appearance_set,
             commands::folder_target,
             commands::folder_action,
             commands::bars_dir,
