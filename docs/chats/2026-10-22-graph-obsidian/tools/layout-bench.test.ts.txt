@@ -1,0 +1,64 @@
+// ВРЕМЕННЫЙ замер раунда 27 (не коммитится): раскладка настоящих срезов и SVG-рисунок для глаз.
+import { readFileSync, writeFileSync } from "node:fs";
+import { it } from "vitest";
+import { moduleColors } from "./draw";
+import { springCoefficients, type GEdge } from "./model";
+import { DEFAULT_FORCES, PhysicsCore, nodeRadius, type Forces } from "./physics-core";
+
+const DIR = process.env.BENCH_DIR!;
+const PAL: Record<string, string> = { red: "#d04545", orange: "#d9782a", amber: "#b58a14", green: "#2f9a5c", teal: "#1f9a95", blue: "#3f84cf", violet: "#8059c9", pink: "#d14a80", gray: "#85808a" };
+
+function run(name: string, mode: "links" | "meaning", forces: Forces, tag: string) {
+  const slice = JSON.parse(readFileSync(`${DIR}/slices/${name}.json`, "utf8"));
+  const docs = slice.nodes as { label: string; module: string }[];
+  const edges: GEdge[] = [];
+  slice.edges.forEach((e: { kind: string; from: number; to: number; raw: number | null; strength: number }, id: number) => {
+    if (mode === "links" ? e.kind !== "markdown_link" : e.kind !== "document_similarity" || e.strength < 0.85) return;
+    edges.push({ id, key: String(id), kind: e.kind as GEdge["kind"], a: e.from, b: e.to, raw: e.raw, s: e.strength, lines: [] });
+  });
+  const k = springCoefficients(edges, (i) => i);
+  const core = new PhysicsCore(7);
+  core.setForces(forces);
+  const hash = (i: number, s: number) => ((Math.sin(i * 12.9898 + s * 78.233) * 43758.5453) % 1 + 1) % 1;
+  const d0 = new Array(docs.length).fill(0);
+  for (const e of edges) { d0[e.a]++; d0[e.b]++; }
+  let li = 0;
+  const ring = 260 + 14 * Math.sqrt(docs.length);
+  const seed = (index: number) => {
+    if (d0[index] === 0) { const a = li++ * 2.399963; return [Math.cos(a) * ring, Math.sin(a) * ring]; }
+    return [Math.cos(hash(index, 11) * 6.28) * Math.sqrt(hash(index, 12)) * 260, Math.sin(hash(index, 11) * 6.28) * Math.sqrt(hash(index, 12)) * 260];
+  };
+  core.setGraph(docs.map((_, index) => { const [x, y] = seed(index); return { index, kind: "document" as const, owner: index, x, y, pinned: false }; }), edges.map((e) => ({ a: e.a, b: e.b, k: k.get(e.id) ?? 0 })));
+  const t = performance.now();
+  core.settle(1500);
+  const ms = performance.now() - t;
+  const { coords } = core.snapshot();
+  const deg = new Array(docs.length).fill(0);
+  for (const e of edges) { deg[e.a]++; deg[e.b]++; }
+  const xs = docs.map((_, i) => coords[i * 2]);
+  const ys = docs.map((_, i) => coords[i * 2 + 1]);
+  const x0 = Math.min(...xs) - 30, x1 = Math.max(...xs) + 30, y0 = Math.min(...ys) - 30, y1 = Math.max(...ys) + 30;
+  const W = 1100, H = 900;
+  const sc = Math.min(W / (x1 - x0), H / (y1 - y0));
+  const X = (x: number) => (x - x0) * sc, Y = (y: number) => (y - y0) * sc;
+  const colors = moduleColors(docs.map((d) => d.module));
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" style="background:#fff;font:11px Segoe UI">`;
+  for (const e of edges) svg += `<line x1="${X(coords[e.a * 2])}" y1="${Y(coords[e.a * 2 + 1])}" x2="${X(coords[e.b * 2])}" y2="${Y(coords[e.b * 2 + 1])}" stroke="#cfcfcf" stroke-width="1"/>`;
+  docs.forEach((d, i) => {
+    const r = Math.max(2, nodeRadius("document", deg[i]) * Math.pow(sc, 0.8));
+    svg += `<circle cx="${X(xs[i])}" cy="${Y(ys[i])}" r="${r}" fill="${PAL[colors.get(d.module) ?? "gray"]}" stroke="#fff"/>`;
+    if (r > 5.5) svg += `<text x="${X(xs[i])}" y="${Y(ys[i]) + r + 11}" text-anchor="middle" fill="#666">${d.label.slice(0, 30).replace(/[<&]/g, "")}</text>`;
+  });
+  svg += `<text x="8" y="16" fill="#000">${name} ${mode} ${tag} · узлов ${docs.length} · рёбер ${edges.length} · масштаб ${sc.toFixed(2)} · ${ms.toFixed(0)} мс</text></svg>`;
+  writeFileSync(`${DIR}/shots/${name}-${mode}-${tag}.svg`, svg);
+  writeFileSync(`${DIR}/shots/${name}-colors.json`, JSON.stringify([...colors]));
+  // Метрика: доля связей короче 2 длин и налезание узлов.
+  let short = 0;
+  for (const e of edges) if (Math.hypot(coords[e.a * 2] - coords[e.b * 2], coords[e.a * 2 + 1] - coords[e.b * 2 + 1]) < 2 * forces.length) short++;
+  console.log(`${name} ${mode} ${tag}: ширина ${(x1 - x0).toFixed(0)} высота ${(y1 - y0).toFixed(0)} коротких ${(100 * short / Math.max(1, edges.length)).toFixed(0)}% ${ms.toFixed(0)}мс`);
+}
+
+const variants: Record<string, Forces> = JSON.parse(process.env.BENCH_VARIANTS ?? "{}");
+it("bench", () => {
+  for (const [tag, f] of Object.entries({ def: DEFAULT_FORCES, ...variants })) for (const name of ["overdrive", "bars"]) for (const mode of ["links", "meaning"] as const) run(name, mode, f, tag);
+}, 600_000);

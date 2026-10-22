@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { Layout } from "./layout";
 import type { GEdge, GNode } from "./model";
-import { DEFAULT_FORCES, LEGACY_TUNING, PhysicsCore, SHELF_WIDTH, shelfPositions, type CoreLink, type CoreNode, type Tuning } from "./physics-core";
+import { DEFAULT_FORCES, LEGACY_TUNING, PhysicsCore, nodeRadius, type CoreLink, type CoreNode, type Tuning } from "./physics-core";
 import { PhysicsHost, type Positions } from "./physics-host";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -165,6 +165,20 @@ describe("раскладка в окне (расчёт вне основного
     expect(layout.active).toBe(false);
   });
 
+  it("новый набор узлов, пока порция прежнего в пути, не останавливает раскладку (раунд 27)", async () => {
+    layout = new Layout();
+    let moves = 0;
+    layout.onPositions = () => moves++;
+    const nodes = Array.from({ length: 10 }, (_, i) => gnode(i));
+    layout.setGraph(nodes, nodes.slice(1).map((_, i) => gedge(i, i, i + 1)), (i) => i);
+    layout.reheat(0.9);
+    // Срез перезагружен до прихода первой порции: она устарела, но worker должен продолжить с новым набором.
+    layout.setGraph(nodes, nodes.slice(1).map((_, i) => gedge(i, i, i + 1)), (i) => i);
+    layout.reheat(0.6);
+    await until(() => moves > 3);
+    expect(moves).toBeGreaterThan(3);
+  });
+
   it("закрепление сохраняется при смене набора узлов", async () => {
     layout = new Layout();
     const nodes = Array.from({ length: 4 }, (_, i) => gnode(i));
@@ -176,43 +190,63 @@ describe("раскладка в окне (расчёт вне основного
   });
 });
 
-describe("одиночки на полке и разведение хабов", () => {
-  const withHub = (isolates: number) => {
-    const count = 30;
+describe("одиночки кольцом, размер узла и размер карты (раунд 27)", () => {
+  const withHub = (isolates: number, count = 30) => {
     const nodes: CoreNode[] = Array.from({ length: count + isolates }, (_, index) => ({ index, kind: "document", owner: index, x: Math.cos(index) * 80, y: Math.sin(index * 1.7) * 80, pinned: false }));
     const links: CoreLink[] = Array.from({ length: count - 1 }, (_, i) => ({ a: 0, b: i + 1, k: 0.5 }));
     return { nodes, links };
   };
-
-  it("документы без связей выстраиваются сеткой под связной частью, а не кольцом вокруг неё", () => {
-    const { nodes, links } = withHub(20);
-    const core = new PhysicsCore(7);
+  const settle = (nodes: CoreNode[], links: CoreLink[], tuning?: Partial<Tuning>) => {
+    const core = new PhysicsCore(7, tuning);
     core.setForces({ ...DEFAULT_FORCES });
     core.setGraph(nodes, links);
-    core.settle(600);
+    core.settle(900);
     const { indices, coords } = core.snapshot();
-    const at = new Map(Array.from(indices).map((index, i) => [index, [coords[i * 2], coords[i * 2 + 1]] as const]));
-    const connectedBottom = Math.max(...Array.from({ length: 30 }, (_, i) => at.get(i)![1]));
-    const loose = Array.from({ length: 20 }, (_, i) => at.get(30 + i)!);
-    expect(Math.min(...loose.map((p) => p[1]))).toBeGreaterThan(connectedBottom);
-    // Сетка: несколько узлов на одной высоте с равным шагом.
-    const rows = new Set(loose.map((p) => Math.round(p[1])));
-    expect(rows.size).toBeLessThan(loose.length);
+    return new Map(Array.from(indices).map((index, i) => [index, [coords[i * 2], coords[i * 2 + 1]] as const]));
+  };
+
+  it("документы без связей встают кольцом вокруг связной части, как в Obsidian", () => {
+    const { nodes, links } = withHub(24);
+    const at = settle(nodes, links);
+    const core = Array.from({ length: 30 }, (_, i) => at.get(i)!);
+    const cx = core.reduce((s, p) => s + p[0], 0) / core.length;
+    const cy = core.reduce((s, p) => s + p[1], 0) / core.length;
+    const coreRadius = Math.max(...core.map((p) => Math.hypot(p[0] - cx, p[1] - cy)));
+    const loose = Array.from({ length: 24 }, (_, i) => at.get(30 + i)!);
+    const dist = loose.map((p) => Math.hypot(p[0] - cx, p[1] - cy)).sort((a, b) => a - b);
+    // Большинство одиночек за пределами связной части, и они окружают её со всех сторон.
+    expect(dist[Math.floor(dist.length / 4)]).toBeGreaterThan(coreRadius * 0.8);
+    const quadrants = new Set(loose.map((p) => `${Math.sign(p[0] - cx)}${Math.sign(p[1] - cy)}`));
+    expect(quadrants.size).toBe(4);
   });
 
-  it("раскладка с полкой детерминирована; прежнее поведение включается настройкой", () => {
+  it("раскладка детерминирована; прежнее поведение включается настройкой", () => {
     const run = (tuning?: Partial<Tuning>) => {
       const { nodes, links } = withHub(10);
-      const core = new PhysicsCore(7, tuning);
-      core.setGraph(nodes, links);
-      core.settle(300);
-      return Array.from(core.snapshot().coords);
+      return [...settle(nodes, links, tuning).values()].flat();
     };
     expect(run()).toEqual(run());
     expect(run()).not.toEqual(run(LEGACY_TUNING));
   });
 
-  it("чанки раскрытого документа без связей на полку не уходят, закреплённый документ остаётся на месте", () => {
+  it("радиус узла растёт с числом связей и ограничен сверху", () => {
+    expect(nodeRadius("document", 0)).toBe(4);
+    expect(nodeRadius("document", 9)).toBeGreaterThan(nodeRadius("document", 1));
+    expect(nodeRadius("document", 10_000)).toBe(18);
+    expect(nodeRadius("chunk", 50)).toBe(3.6);
+  });
+
+  it("отталкивание действует на любом расстоянии: карта растёт с числом узлов, а не сжимается в шар одного размера", () => {
+    const span = (count: number) => {
+      const nodes: CoreNode[] = Array.from({ length: count }, (_, index) => ({ index, kind: "document", owner: index, x: Math.cos(index) * 50, y: Math.sin(index * 1.3) * 50, pinned: false }));
+      const links: CoreLink[] = Array.from({ length: count - 1 }, (_, i) => ({ a: i + 1, b: Math.floor(i / 3), k: 0.5 }));
+      const xs = [...settle(nodes, links).values()].map((p) => p[0]);
+      return Math.max(...xs) - Math.min(...xs);
+    };
+    expect(span(240)).toBeGreaterThan(span(60) * 1.4);
+  });
+
+  it("чанки раскрытого документа держатся у владельца, закреплённый документ остаётся на месте", () => {
     const nodes: CoreNode[] = [
       { index: 0, kind: "document", owner: 0, x: 0, y: 0, pinned: false },
       { index: 1, kind: "document", owner: 1, x: 40, y: 0, pinned: false },
@@ -226,16 +260,5 @@ describe("одиночки на полке и разведение хабов", 
     const at = new Map(Array.from(indices).map((index, i) => [index, [coords[i * 2], coords[i * 2 + 1]]]));
     expect(at.get(3)).toEqual([99, 77]);
     expect(Math.hypot(at.get(2)![0] - at.get(0)![0], at.get(2)![1] - at.get(0)![1])).toBeLessThan(60);
-  });
-
-  it("сетка одиночек: центр общий, шаг постоянный, ширина — доля связной части", () => {
-    const spots = shelfPositions(12, { x0: -100, x1: 100, y1: 50 });
-    expect(spots).toHaveLength(12);
-    expect(new Set(spots.map((s) => s.y)).size).toBeGreaterThan(1);
-    const xs = spots.map((s) => s.x);
-    expect((Math.max(...xs) + Math.min(...xs)) / 2).toBeCloseTo(0, 5);
-    expect(Math.max(...xs) - Math.min(...xs)).toBeLessThanOrEqual(200 * SHELF_WIDTH);
-    expect(Math.min(...spots.map((s) => s.y))).toBeGreaterThan(50);
-    expect(shelfPositions(0, null)).toEqual([]);
   });
 });

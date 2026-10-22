@@ -11,6 +11,7 @@
     "graph-design": "vite --config vite.graph-design.config.ts",
     "probe:docking:build": "vite build --config vite.docking.config.ts",
     "probe:docking:measure": "node scripts/docking-benchmark.mjs",
+    "graph-stand": "vite --config vite.graph-stand.config.ts",
     "editor-spike": "vite --config vite.editor.config.ts"
   },
   "devDependencies": {

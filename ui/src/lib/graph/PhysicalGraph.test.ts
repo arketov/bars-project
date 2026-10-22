@@ -35,6 +35,7 @@ beforeEach(() => {
   app.tree = [];
   app.selected = new Set();
   app.graphFocus = null;
+  app.activeDocument = null;
   rpc.mockImplementation(async (method: string, params: Record<string, unknown>) => {
     if (method === "graph_status") return { state: "partial", snapshot: "mock-snapshot-0001", active_job: null, source_count: 36, error: null, method: "x" };
     if (method === "graph_physical") return physicalFixture(params);
@@ -68,6 +69,24 @@ it("загружает срез проекта с начальными пред�
   expect(Number(panel().dataset.links)).toBeGreaterThan(0);
 });
 
+it("мини-граф при открытом документе показывает его локальный граф: документ и соседей по ссылкам (Т-43, раунд 27)", async () => {
+  const slice = await physicalFixture({ request: { scope: { modules: [], files: [] }, limits: { max_documents: 500, max_chunks: 500, max_edges: 4000, max_bytes: 1 << 20 }, expanded: [], snapshot: null } });
+  const links = slice.edges.filter((e) => e.kind === "markdown_link");
+  const focus = links[0].from;
+  const neighbours = new Set([focus, ...links.filter((e) => e.from === focus).map((e) => e.to), ...links.filter((e) => e.to === focus).map((e) => e.from)]);
+  app.activeDocument = slice.nodes[focus].path;
+  target.className = "mini";
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  expect(Number(panel().dataset.nodes)).toBe(neighbours.size);
+  expect(target.textContent).toContain("Локальный граф");
+  expect(target.textContent).toContain(slice.nodes[focus].label);
+  // Другой документ — граф перестраивается вокруг него; без документа — общий вид проекта.
+  app.activeDocument = null;
+  await settle();
+  expect(panel().dataset.nodes).toBe("36");
+});
+
 it("смена режима перекладывает связи и сохраняется отдельно для полного графа", async () => {
   component = mount(PhysicalGraph, { target });
   await settle();
@@ -76,8 +95,8 @@ it("смена режима перекладывает связи и сохра�
   await settle();
   expect(panel().dataset.mode).toBe("all");
   expect(Number(panel().dataset.links)).toBeGreaterThan(links);
-  expect(JSON.parse(localStorage.getItem("bars.graph.full.C:/a")!).mode).toBe("all");
-  expect(localStorage.getItem("bars.graph.mini.C:/a")).toBeNull();
+  expect(JSON.parse(localStorage.getItem("bars.graph.v2.full.C:/a")!).mode).toBe("all");
+  expect(localStorage.getItem("bars.graph.v2.mini.C:/a")).toBeNull();
 });
 
 it("раскрытие документа запрашивает его чанки порциями по 50 на том же снимке", async () => {

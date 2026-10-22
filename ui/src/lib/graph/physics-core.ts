@@ -14,50 +14,25 @@ export interface Forces {
   length: number;
 }
 
-export const DEFAULT_FORCES: Forces = { link: 1, repel: 1, gravity: 1, length: 80 };
+export const DEFAULT_FORCES: Forces = { link: 1, repel: 1, gravity: 1, length: 150 };
 
-/** Подбор раскладки (замер на снимке bars-project, docs/knowledge/graph-render.md): умолчания повторяют прежнее поведение. */
+/** Подбор раскладки (docs/knowledge/graph-render.md). */
 export interface Tuning {
   /** Заряд узла растёт с числом связей: `charge *= 1 + hubCharge·√степень`, хабы расталкивают окружение, а не слипаются. */
   hubCharge: number;
   /** Пружина делится на корень из меньшей степени концов (как по умолчанию в d3-force). */
   springByDegree: boolean;
-  /** Одиночки без связей не участвуют в расчёте и выстраиваются сеткой под связной частью. */
-  shelf: boolean;
 }
 
-/** Раунд 27: одиночки участвуют в раскладке и встают кольцом вокруг карты, как в Obsidian (docs/knowledge/graph-render.md). */
-export const DEFAULT_TUNING: Tuning = { hubCharge: 0.4, springByDegree: false, shelf: false };
+export const DEFAULT_TUNING: Tuning = { hubCharge: 0.4, springByDegree: false };
 /** Прежнее поведение: для сравнения в замерах и тестах. */
-export const LEGACY_TUNING: Tuning = { hubCharge: 0, springByDegree: false, shelf: false };
+export const LEGACY_TUNING: Tuning = { hubCharge: 0, springByDegree: false };
 
 /** Радиус узла в единицах карты: хаб крупнее, как в Obsidian. `degree` — число видимых связей узла. */
 export function nodeRadius(kind: "document" | "chunk" | "query", degree: number): number {
   if (kind === "chunk") return 3.6;
   if (kind === "query") return 8;
   return Math.min(18, 4 + 2 * Math.sqrt(degree));
-}
-
-/** Шаг сетки одиночек в единицах карты: узел 6 + зазор. */
-export const SHELF_CELL = 16;
-/** Доля ширины связной части, которую занимает сетка одиночек: вся ширина обрезается краями панели при вписывании. */
-export const SHELF_WIDTH = 0.6;
-
-/**
- * Позиции одиночек сеткой под связной частью: ширина сетки — `SHELF_WIDTH` от ширины связной части (но не меньше 4 столбцов), центр по x общий.
- * Порядок — по входному порядку, чтобы раскладка была детерминированной.
- */
-export function shelfPositions(count: number, bounds: { x0: number; x1: number; y1: number } | null): { x: number; y: number }[] {
-  if (!count) return [];
-  const width = bounds ? Math.max(bounds.x1 - bounds.x0, SHELF_CELL * 4) : SHELF_CELL * 4;
-  const columns = Math.max(1, Math.min(count, Math.floor((width * SHELF_WIDTH) / SHELF_CELL)));
-  const cx = bounds ? (bounds.x0 + bounds.x1) / 2 : 0;
-  const top = (bounds?.y1 ?? 0) + SHELF_CELL * 2.5;
-  return Array.from({ length: count }, (_, i) => {
-    const row = Math.floor(i / columns);
-    const inRow = Math.min(columns, count - row * columns);
-    return { x: cx + ((i % columns) - (inRow - 1) / 2) * SHELF_CELL, y: top + row * SHELF_CELL };
-  });
 }
 
 export interface CoreNode {
@@ -98,17 +73,19 @@ interface SimLink {
   k: number;
 }
 
-/** Пружина по формуле проекта умножается на этот коэффициент: без него отталкивание рвёт цепочки (замер 21-10-2026). */
-const LINK_BASE = 3;
+/** Пружина по формуле проекта: `min(1, LINK_BASE·k_e)`. Подбор по снимкам настоящих срезов (раунд 27, graph-render.md). */
+const LINK_BASE = 0.9;
 /** Заряд документа: отталкивание действует на любом расстоянии (Barnes–Hut), поэтому карта растёт с числом узлов, а не сжимается в шар. */
-const BASE_CHARGE = -120;
+const BASE_CHARGE = -360;
 const CHILD_BUDGET = 35;
-/** Притяжение к общему центру при «общем притяжении» ×1: удерживает карту и одиночек кольцом вокруг неё. */
-const CENTER = 0.04;
+/** Притяжение к общему центру при «общем притяжении» ×1: держит карту собранной. */
+const CENTER = 0.16;
+/** Кольцо одиночек: радиус — 95-й процентиль удаления связных узлов от их центра плюс длина связи; сила к кольцу. */
+const RING_PULL = 0.3;
 const GROUP_RATIO = 0.58;
 
-/** Документ без связей и без закрепления: чанки раскрытого документа держит группа владельца, их на полку не уводим. */
-const onShelf = (p: SimNode) => p.kind === "document" && p.degree === 0 && !p.pinned;
+/** Документ без связей и без закрепления: встаёт на кольцо одиночек. */
+const isLone = (n: SimNode) => n.kind === "document" && n.degree === 0 && n.fx == null;
 
 export class PhysicsCore {
   readonly sim: Simulation<SimNode, SimLink>;
@@ -130,9 +107,10 @@ export class PhysicsCore {
       .force("link", forceLink<SimNode, SimLink>([]).strength((l) => this.#strength(l)).distance((l) => this.#length(l)))
       .force("charge", forceManyBody<SimNode>().strength((n) => n.charge))
       .force("collide", forceCollide<SimNode>((n) => n.r + 1.5))
-      .force("x", forceX<SimNode>(0).strength(CENTER * this.forces.gravity))
-      .force("y", forceY<SimNode>(0).strength(CENTER * this.forces.gravity))
+      .force("x", forceX<SimNode>(0).strength((n) => this.#center(n)))
+      .force("y", forceY<SimNode>(0).strength((n) => this.#center(n)))
       .force("group", this.#groupForce)
+      .force("ring", this.#ringForce)
       .stop();
   }
 
@@ -140,6 +118,36 @@ export class PhysicsCore {
     const base = Math.min(1, LINK_BASE * this.forces.link * link.k);
     return this.tuning.springByDegree ? base / Math.sqrt(Math.max(1, Math.min(link.source.degree, link.target.degree))) : base;
   }
+
+  #center(n: SimNode): number {
+    return CENTER * this.forces.gravity;
+  }
+
+  /** Одиночки (документы без связей) тянутся к кольцу вокруг связной части, как в Obsidian; вдоль кольца их разводит отталкивание. */
+  #ringForce = (alpha: number) => {
+    const lone: SimNode[] = [];
+    const linked: SimNode[] = [];
+    for (const n of this.nodes) (isLone(n) ? lone : linked).push(n);
+    if (!lone.length || !linked.length) return;
+    let cx = 0;
+    let cy = 0;
+    for (const n of linked) {
+      cx += n.x;
+      cy += n.y;
+    }
+    cx /= linked.length;
+    cy /= linked.length;
+    const dist = linked.map((n) => Math.hypot(n.x - cx, n.y - cy)).sort((a, b) => a - b);
+    const radius = dist[Math.floor((dist.length - 1) * 0.95)] + this.forces.length;
+    for (const n of lone) {
+      const dx = n.x - cx;
+      const dy = n.y - cy;
+      const d = Math.hypot(dx, dy) || 1;
+      const pull = ((radius - d) / d) * RING_PULL * alpha;
+      n.vx += dx * pull;
+      n.vy += dy * pull;
+    }
+  };
 
   #length(link: SimLink): number {
     return link.source.owner === link.target.owner && link.source.kind === "chunk" ? this.forces.length * GROUP_RATIO : this.forces.length;
@@ -211,7 +219,7 @@ export class PhysicsCore {
     this.#links = simLinks;
     this.#byIndex = map;
     for (const p of next) p.charge = this.#chargeOf(p, children);
-    this.sim.nodes(this.tuning.shelf ? next.filter((p) => !onShelf(p)) : next);
+    this.sim.nodes(next);
     // d3 перезаписывает node.index позицией в массиве; окно и рёбра опираются на индекс графа.
     next.forEach((p, i) => (p.index = nodes[i].index));
     (this.sim.force("link") as ReturnType<typeof forceLink<SimNode, SimLink>>).links(simLinks);
@@ -227,8 +235,8 @@ export class PhysicsCore {
     const link = this.sim.force("link") as ReturnType<typeof forceLink<SimNode, SimLink>>;
     link.strength((l) => this.#strength(l)).distance((l) => this.#length(l));
     (this.sim.force("charge") as ReturnType<typeof forceManyBody<SimNode>>).strength((n) => n.charge);
-    (this.sim.force("x") as ReturnType<typeof forceX<SimNode>>).strength(CENTER * this.forces.gravity);
-    (this.sim.force("y") as ReturnType<typeof forceY<SimNode>>).strength(CENTER * this.forces.gravity);
+    (this.sim.force("x") as ReturnType<typeof forceX<SimNode>>).strength((n) => this.#center(n));
+    (this.sim.force("y") as ReturnType<typeof forceY<SimNode>>).strength((n) => this.#center(n));
   }
 
   /** Перекладывает координаты из окна (рассев, перетаскивание): окно — источник правды о позициях. */
@@ -298,23 +306,8 @@ export class PhysicsCore {
     for (const n of this.nodes) n.vx = n.vy = 0;
   }
 
-  /** Одиночки сеткой под связной частью; закреплённые и перетаскиваемые остаются на своих местах. */
-  #placeShelf(): void {
-    const connected = this.nodes.filter((p) => !onShelf(p));
-    const loose = this.nodes.filter((p) => onShelf(p) && p.fx == null);
-    if (!loose.length) return;
-    const bounds = connected.length ? { x0: Math.min(...connected.map((p) => p.x)), x1: Math.max(...connected.map((p) => p.x)), y1: Math.max(...connected.map((p) => p.y)) } : null;
-    const spots = shelfPositions(loose.length, bounds);
-    loose.forEach((p, i) => {
-      p.x = spots[i].x;
-      p.y = spots[i].y;
-      p.vx = p.vy = 0;
-    });
-  }
-
   /** Координаты в порядке `nodes`: пара [x, y] на узел. */
   snapshot(): { indices: Int32Array; coords: Float32Array } {
-    if (this.tuning.shelf) this.#placeShelf();
     const indices = new Int32Array(this.nodes.length);
     const coords = new Float32Array(this.nodes.length * 2);
     this.nodes.forEach((n, i) => {

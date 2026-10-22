@@ -32,3 +32,6 @@ crates/bars-app/gen/
 
 # Временные копии корпусов; доказательства хранятся в docs/knowledge/.
 /spikes/memory/acceptance-2026-10-20/
+
+# Выгрузки срезов для стенда графа (ui/vite.graph-stand.config.ts): данные проектов пользователя
+/ui/.graph-slices/

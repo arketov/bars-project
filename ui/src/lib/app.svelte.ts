@@ -76,6 +76,8 @@ class App {
   graphAnalysis = $state(false);
   /** Узел, который полный граф выберет после открытия вкладки («В графе» из мини-графа). */
   graphFocus = $state<string | null>(null);
+  /** Путь последнего активного документа (от корня проекта): центр локального графа мини-панели (Т-43, раунд 27). */
+  activeDocument = $state<string | null>(null);
   /** Число результатов на этот запрос; `null` — по умолчанию из настроек. */
   count = $state<number | null>(null);
   defaultCount = $state(5);
@@ -505,6 +507,7 @@ class App {
       if (reading !== this.#reading || this.current !== project.path) return;
       this.view = "main";
       this.viewer = { hit, title: output.title, text: output.text, missing: false };
+      this.activeDocument = hit.path;
     } catch (error) {
       if (reading !== this.#reading || this.current !== project.path) return;
       if (error instanceof BarsError && error.kind === "file_not_found") {

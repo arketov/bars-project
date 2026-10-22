@@ -7,15 +7,18 @@ export interface PanelSettings {
   forces: Forces;
   minS: number;
   mode: Mode;
+  /** Глубина локального графа мини-панели: соседи документа (1) или и их соседи (2). */
+  depth: 1 | 2;
 }
 
 export type PanelKind = "mini" | "full";
 
 const MODES: Mode[] = ["links", "meaning", "chunks", "all"];
 
-export const defaultSettings = (): PanelSettings => ({ forces: { ...DEFAULT_FORCES }, minS: DEFAULT_MIN_STRENGTH, mode: "links" });
+export const defaultSettings = (): PanelSettings => ({ forces: { ...DEFAULT_FORCES }, minS: DEFAULT_MIN_STRENGTH, mode: "links", depth: 1 });
 
-const keyOf = (project: string, panel: PanelKind) => `bars.graph.${panel}.${project}`;
+/** v2 — раунд 27: прежние сохранённые силы подбирались под другую физику и не переносятся. */
+const keyOf = (project: string, panel: PanelKind) => `bars.graph.v2.${panel}.${project}`;
 
 const finite = (value: unknown, min: number, max: number, fallback: number): number =>
   typeof value === "number" && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
@@ -31,11 +34,12 @@ export function loadSettings(project: string, panel: PanelKind): PanelSettings {
         link: finite(forces.link, 0, 4, base.forces.link),
         repel: finite(forces.repel, 0, 4, base.forces.repel),
         gravity: finite(forces.gravity, 0, 4, base.forces.gravity),
-        length: finite(forces.length, 20, 160, base.forces.length),
+        length: finite(forces.length, 20, 240, base.forces.length),
       },
       minS: finite(raw.minS, 0.5, 0.95, base.minS),
       // Режим «по смыслу · чанки» требует раскрытых чанков, при открытии их нет.
       mode: MODES.includes(raw.mode as Mode) && raw.mode !== "chunks" ? (raw.mode as Mode) : base.mode,
+      depth: raw.depth === 2 ? 2 : 1,
     };
   } catch {
     return base;

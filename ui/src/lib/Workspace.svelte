@@ -262,6 +262,9 @@
       const panel: IDockviewPanel | undefined = event.panel;
       active = panel?.id ?? "";
       if (panel) foreground = panel.id;
+      // Мини-граф показывает локальный граф активного документа; вкладка поиска или графа его не сбрасывает.
+      const hit = (panel?.params as PanelParams | undefined)?.kind === "document" ? (panel!.params as { hit?: { path?: string } }).hit : undefined;
+      if (hit?.path) app.activeDocument = hit.path;
       refreshPanels();
     })];
     ready = true;

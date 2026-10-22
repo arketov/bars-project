@@ -6,7 +6,7 @@
   import { app } from "../app.svelte";
   import type { GraphStatus } from "../graph";
   import { BarsError } from "../types";
-  import { draw, layoutLines, lineDistance, readPalette, toScreen, toWorld, type Camera, type Palette, type Scene, type Target } from "./draw";
+  import { draw, layoutLines, lineDistance, moduleColors, radiusOf, readPalette, toScreen, toWorld, type Camera, type Palette, type Scene, type Target } from "./draw";
   import { DEFAULT_FORCES, Layout, type Forces, type PNode } from "./layout";
   import { EDGE_KINDS, KIND_TITLE, brightnessOf, drawStrength, springOf, widthOf, type EdgeKind, type GEdge, type Mode, type SliceKind } from "./model";
   import { graphStatus, loadPhysical, toggleGraphBuild } from "./physical-api";
@@ -99,8 +99,39 @@
   const label = (index: number) => slice.nodes[index].label;
   const chunksOfDoc = (index: number): number[] => slice.chunksOf.get(index) ?? [];
 
+  /** Центр локального графа мини-панели: последний активный документ, если он есть в срезе (Т-43, раунд 27). */
+  const focusIndex = $derived.by(() => {
+    const path = app.activeDocument;
+    if (!mini || !path) return null;
+    const n = base.nodes.find((x) => x.kind === "document" && x.path === path && base.visibleDocs.has(x.index));
+    return n ? n.index : null;
+  });
+  /** Мини-панель показывает локальный граф документа; вид запроса после поиска важнее. */
+  const isLocal = () => mini && !query && focusIndex !== null;
+
+  /** Документ и его соседи по видимым связям режима на глубину `depth`; ссылки — в обе стороны. */
+  function localDocs(): Set<number> {
+    const set = new Set<number>([focusIndex!]);
+    let frontier = new Set<number>(set);
+    for (let step = 0; step < settings.depth && frontier.size; step++) {
+      const next = new Set<number>();
+      for (const e of slice.edges) {
+        if (!kinds[e.kind] || e.kind === "chunk_similarity" || !passes(e)) continue;
+        if (frontier.has(e.a) && !set.has(e.b) && slice.visibleDocs.has(e.b)) next.add(e.b);
+        if (frontier.has(e.b) && !set.has(e.a) && slice.visibleDocs.has(e.a)) next.add(e.a);
+      }
+      for (const index of next) set.add(index);
+      frontier = next;
+    }
+    return set;
+  }
+
   function visibleNodes() {
     if (queryShape) return queryShape.nodes.map((index) => slice.nodes[index]);
+    if (isLocal()) {
+      const docs = localDocs();
+      return slice.nodes.filter((n) => n.kind === "document" && docs.has(n.index));
+    }
     const nodes = slice.nodes.filter((n) => n.kind === "document" && slice.visibleDocs.has(n.index));
     if (!mini) for (const [o, shown] of Object.entries(expanded)) for (const c of chunksOfDoc(Number(o)).slice(0, shown)) nodes.push(slice.nodes[c]);
     return nodes;
@@ -303,6 +334,9 @@
     return set;
   }
 
+  /** Цвет модуля для узлов без назначенного цвета: по всем модулям среза, чтобы цвет не менялся от вида. */
+  const moduleMap = $derived(moduleColors(base.nodes.filter((n) => n.kind === "document").map((n) => n.module)));
+
   function paint() {
     if (!canvas || !layout || !palette || size.w < 2) return;
     const ctx = canvas.getContext("2d");
@@ -314,7 +348,7 @@
     const groups = Object.entries(expanded).map(([o, shown]) => ({ owner: Number(o), shown, total: slice.nodes[Number(o)]?.chunks ?? shown }));
     const scene: Scene = {
       w: size.w, h: size.h, dpr: window.devicePixelRatio || 1, cam, nodes: layout.nodes, links: layout.links, palette, kinds,
-      selected, hovered, related: related(), marked: markedNodes(), groups, mini,
+      selected, hovered, related: related(), marked: markedNodes(), groups, mini, modules: moduleMap, focus: isLocal() ? focusIndex : null,
     };
     draw(ctx, scene);
   }
@@ -325,8 +359,17 @@
       camTarget = null;
     }
     if (!layout || size.w < 2) return;
-    const b = layout.bounds();
-    if (!b) return;
+    const raw = layout.bounds();
+    if (!raw) return;
+    // Локальный граф: документ в центре карты, как в Obsidian; границы симметричны вокруг него.
+    const centre = isLocal() && focusIndex !== null ? layout.get(focusIndex) : undefined;
+    const b = centre
+      ? (() => {
+          const rx = Math.max(centre.x - raw.x0, raw.x1 - centre.x);
+          const ry = Math.max(centre.y - raw.y0, raw.y1 - centre.y);
+          return { x0: centre.x - rx, x1: centre.x + rx, y0: centre.y - ry, y1: centre.y + ry };
+        })()
+      : raw;
     const pad = mini ? 14 : 36;
     const k = Math.min(1.6, Math.max(0.12, Math.min((size.w - pad * 2) / Math.max(40, b.x1 - b.x0), (size.h - pad * 2) / Math.max(40, b.y1 - b.y0))));
     const target = { k, x: size.w / 2 - ((b.x0 + b.x1) / 2) * k, y: size.h / 2 - ((b.y0 + b.y1) / 2) * k };
@@ -443,7 +486,7 @@
     for (const n of layout.nodes) {
       const [x, y] = toScreen(cam, n.x, n.y);
       const d = Math.hypot(x - sx, y - sy);
-      const reach = Math.max(8, n.r * Math.min(1.4, Math.max(0.55, Math.sqrt(cam.k))) + 5);
+      const reach = Math.max(8, radiusOf(n, cam) + 4);
       if (d < reach && d < bestD) {
         best = n;
         bestD = d;
@@ -880,6 +923,17 @@
       schedule();
     });
   });
+  // Мини-граф: другой активный документ или другая глубина — локальный граф раскладывается с нуля и вписывается.
+  $effect(() => {
+    void focusIndex;
+    void settings.depth;
+    if (!mounted || !mini) return;
+    untrack(() => {
+      if (!loaded || loadError || query) return;
+      selected = null;
+      rebuild(0.9, true);
+    });
+  });
   // Вид запроса следует за сессией поиска окна: включается после каждого завершённого поиска и выключается, когда поиск сброшен.
   $effect(() => {
     void app.results;
@@ -900,15 +954,21 @@
 </script>
 
 {#snippet forcesForm()}
-  <h4>Связи по смыслу</h4>
-  <label class="opt thr-row" title="Показывать близость не слабее выбранной силы s. Сила остальных рёбер не меняется.">
-    <span>Сила от</span><input type="range" min="0.5" max="0.95" step="0.01" aria-label="Порог показа близости" bind:value={settings.minS} oninput={onThreshold} /><b>{minS.toFixed(2)}</b>
-  </label>
+  {#if mini}
+    <h4>Локальный граф</h4>
+    <label class="opt slider" title="Соседи открытого документа (1) или и соседи соседей (2)"><span>Глубина</span><input type="range" min="1" max="2" step="1" aria-label="Глубина локального графа" bind:value={settings.depth} /><b>{settings.depth}</b></label>
+  {/if}
+  {#if mode !== "links"}
+    <h4>Связи по смыслу</h4>
+    <label class="opt thr-row" title="Показывать близость не слабее выбранной силы s. Сила остальных рёбер не меняется.">
+      <span>Сила от</span><input type="range" min="0.5" max="0.95" step="0.01" aria-label="Порог показа близости" bind:value={settings.minS} oninput={onThreshold} /><b>{minS.toFixed(2)}</b>
+    </label>
+  {/if}
   <h4>Раскладка</h4>
   <label class="opt slider" title="Насколько сильно связи сближают узлы"><span>Притяжение связей</span><input type="range" min="0" max="4" step="0.1" aria-label="Притяжение по связям" bind:value={settings.forces.link} oninput={applyForces} /><b>×{forces.link.toFixed(1)}</b></label>
   <label class="opt slider" title="Насколько узлы расталкивают друг друга"><span>Отталкивание</span><input type="range" min="0" max="4" step="0.1" aria-label="Отталкивание узлов" bind:value={settings.forces.repel} oninput={applyForces} /><b>×{forces.repel.toFixed(1)}</b></label>
-  <label class="opt slider" title="Слабое притяжение всех узлов друг к другу и к центру"><span>Общее притяжение</span><input type="range" min="0" max="4" step="0.1" aria-label="Общее притяжение узлов" bind:value={settings.forces.gravity} oninput={applyForces} /><b>×{forces.gravity.toFixed(1)}</b></label>
-  <label class="opt slider" title="Расстояние между связанными документами"><span>Длина связи</span><input type="range" min="20" max="160" step="1" aria-label="Длина связи" bind:value={settings.forces.length} oninput={applyForces} /><b>{forces.length}</b></label>
+  <label class="opt slider" title="Все узлы слегка тянутся к общему центру; документы без связей стоят кольцом вокруг карты"><span>Общее притяжение</span><input type="range" min="0" max="4" step="0.1" aria-label="Общее притяжение узлов" bind:value={settings.forces.gravity} oninput={applyForces} /><b>×{forces.gravity.toFixed(1)}</b></label>
+  <label class="opt slider" title="Расстояние между связанными документами"><span>Длина связи</span><input type="range" min="20" max="240" step="1" aria-label="Длина связи" bind:value={settings.forces.length} oninput={applyForces} /><b>{forces.length}</b></label>
   <button class="reset" onclick={resetForces}>По умолчанию</button>
   <p class="hint">Меняет движение узлов, а не силу связи: толщина, яркость и значения s прежние.</p>
 {/snippet}
@@ -1031,6 +1091,8 @@
         <span class="dot {motion}" title={MOTION_TEXT[motion]}></span>
         {#if query}
           {#if !mini}{MOTION_TEXT[motion]} · {/if}<b>Запрос: {query.results.length} результатов</b> · узлов {queryShape?.shown.nodes ?? 0}{#if !mini} · связей {queryShape?.shown.edges ?? 0}{/if} · {MODE_NAME[mode].toLowerCase()}
+        {:else if mini && isLocal() && focusIndex !== null}
+          <b>Локальный граф</b> · <span class="lt" title={slice.nodes[focusIndex].label}>{slice.nodes[focusIndex].label}</span>{#if nodeCount <= 1} · нет связей в режиме «{MODE_NAME[mode]}»{:else} · {MODE_NAME[mode].toLowerCase()}{/if}
         {:else if mini}
           <b>Документы {slice.docCount}</b> · {MODE_NAME[mode].toLowerCase()}
         {:else}
@@ -1085,7 +1147,7 @@
           {#if query}
             <div class="row"><svg width="34" height="12" viewBox="0 0 34 12" aria-hidden="true"><line x1="1" y1="6" x2="29" y2="6" stroke={palette?.kindCss.query_result ?? "currentColor"} stroke-width="2.2" /></svg>{KIND_TITLE.query_result}<small>оценка поиска; без оценки — пунктир</small></div>
           {/if}
-          <p class="hint">Взаимные ссылки — одна линия со стрелками на обоих концах.</p>
+          <p class="hint">Взаимные ссылки — одна линия со стрелками на обоих концах. В покое линии серые и тонкие; цвет вида — у связей выбранного или наведённого узла. Размер узла — число связей, цвет — модуль.</p>
           <h4>Сила связи (s)</h4>
           <p class="hint">Толщина и яркость растут с силой; шкала абсолютная, от других рёбер экрана не зависит.</p>
           <div class="scale">
@@ -1274,6 +1336,8 @@
   .tools button:disabled, .mini-tools button:disabled { opacity: 0.4; cursor: default; }
   button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
   .status { position: absolute; left: 8px; bottom: 6px; display: flex; align-items: center; gap: 6px; font-size: 10.5px; color: var(--muted); background: color-mix(in srgb, var(--panel) 85%, transparent); padding: 1px 6px; border-radius: 6px; max-width: calc(100% - 16px); }
+  .status b { white-space: nowrap; }
+  .status .lt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); flex: none; }
   .dot.running { background: var(--accent); animation: pulse 1.2s infinite; }
   .dot.stopped { background: var(--mid); }

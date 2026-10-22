@@ -78,8 +78,12 @@ export class Layout {
 
   #receive(message: Positions): void {
     if (this.#destroyed) return;
-    // Поздняя порция прежнего набора или остановленного запуска не сдвигает карту.
-    if (message.gen !== this.#gen || message.run !== this.#run) return;
+    // Поздняя порция прежнего набора или остановленного запуска не сдвигает карту, но подтверждается:
+    // без подтверждения worker ждёт его вечно и раскладка нового набора не идёт.
+    if (message.gen !== this.#gen || message.run !== this.#run) {
+      this.#transport.post({ t: "ack", seq: message.seq });
+      return;
+    }
     for (let i = 0; i < message.indices.length; i++) {
       const p = this.#byIndex.get(message.indices[i]);
       if (!p || p.pinned) continue;
@@ -176,7 +180,17 @@ export class Layout {
       p.x = Math.cos(angle) * 110;
       p.y = Math.sin(angle) * 110;
     });
+    // Одиночки — равномерно по окружности (золотой угол): физика держит их кольцом вокруг карты, как в Obsidian.
+    const lone = this.nodes.filter((p) => p.node.kind === "document" && p.degree === 0 && !p.pinned && p.node.qrole !== "result");
+    const loneSet = new Set(lone);
+    const ring = 260 + 14 * Math.sqrt(this.nodes.length);
+    lone.forEach((p, i) => {
+      const angle = i * 2.399963 + hash(p.node.index, 14) * 0.3;
+      p.x = Math.cos(angle) * ring;
+      p.y = Math.sin(angle) * ring;
+    });
     for (const p of this.nodes) {
+      if (loneSet.has(p)) continue;
       if (p.node.kind === "query" && !p.pinned) {
         p.x = 0;
         p.y = 0;

@@ -25,6 +25,18 @@
       "url": "http://localhost:4181"
     },
     {
+      "name": "bars-graph-stand",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "graph-stand",
+        "--prefix",
+        "ui"
+      ],
+      "port": 4183,
+      "url": "http://localhost:4183"
+    },
+    {
       "name": "bars-editor-spike",
       "runtimeExecutable": "npm",
       "runtimeArgs": [
