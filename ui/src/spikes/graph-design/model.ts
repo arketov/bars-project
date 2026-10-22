@@ -18,6 +18,12 @@ export interface GNode {
   owner: number;
   /** Цвет документа по Т-38, если назначен. */
   color?: string;
+  /** Роль в виде запроса: результат поиска, связанный источник режима «Со связями» или результат без объекта графа. */
+  qrole?: "result" | "related" | "ghost";
+  /** Место результата в выдаче (с 1). */
+  rank?: number;
+  /** Причина, по которой результат без объекта графа: слой не построен, документ изменён или удалён после поиска. */
+  ghost?: string;
 }
 
 export interface GEdge {
@@ -33,6 +39,10 @@ export interface GEdge {
   support: number;
   /** Строки текста, где стоит ссылка (у настоящих ссылок). */
   lines: number[];
+  /** Связь запроса без оценки (режим «Отношения и пути»): рисуется нейтрально, толщина не зависит от оценки. */
+  neutral?: boolean;
+  /** Вид оценки связи запроса: rerank рисуется по абсолютной оценке, cosine — по окну модели (query-graph.md). */
+  scoreKind?: "rerank" | "cosine" | "none";
 }
 
 export const EDGE_KINDS: EdgeKind[] = ["markdown_link", "document_similarity", "chunk_similarity"];
@@ -54,8 +64,10 @@ export function strengthOf(kind: EdgeKind, cosine: number | null): number {
 export const WINDOW = { lo: 0.6, hi: 0.95 };
 
 /** Сила для рисунка. Шкала `project` повторяет `s`; `window` растягивает фиксированное окно модели, а не диапазон экрана. */
-export function drawStrength(edge: Pick<GEdge, "kind" | "s" | "raw">, scale: ScaleName): number {
+export function drawStrength(edge: Pick<GEdge, "kind" | "s" | "raw" | "scoreKind">, scale: ScaleName): number {
   if (scale === "project" || edge.kind === "markdown_link" || edge.raw === null) return edge.s;
+  // Оценка rerank — не cosine модели: окно 0,60–0,95 к ней не применяется.
+  if (edge.kind === "query_result" && edge.scoreKind === "rerank") return edge.s;
   return Math.min(1, Math.max(0, (edge.raw - WINDOW.lo) / (WINDOW.hi - WINDOW.lo)));
 }
 

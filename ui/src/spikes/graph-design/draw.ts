@@ -198,7 +198,7 @@ export function draw(ctx: CanvasRenderingContext2D, scene: Scene): void {
     ctx.strokeStyle = color;
     ctx.fillStyle = color;
     ctx.lineWidth = width;
-    ctx.setLineDash(l.edge.kind === "chunk_similarity" ? [5, 3] : []);
+    ctx.setLineDash(l.edge.kind === "chunk_similarity" ? [5, 3] : l.edge.neutral ? [1.5, 3.5] : []);
     pathEdge(ctx, ax, ay, bx, by);
     ctx.stroke();
     ctx.setLineDash([]);
@@ -233,8 +233,30 @@ export function draw(ctx: CanvasRenderingContext2D, scene: Scene): void {
       ctx.lineTo(sx - r * 1.25, sy);
       ctx.closePath();
     }
-    ctx.fill();
-    ctx.stroke();
+    const role = n.node.qrole;
+    if (role === "ghost") {
+      // Результат без объекта графа: пустой пунктирный круг, связи ему не рисуются.
+      ctx.fillStyle = palette.bgCss;
+      ctx.fill();
+      ctx.setLineDash([2.5, 2.5]);
+      ctx.strokeStyle = palette.kindCss.query_result;
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+      ctx.setLineDash([]);
+    } else {
+      ctx.fill();
+      ctx.stroke();
+    }
+    if (role === "result" || role === "related") {
+      // Результат поиска: кольцо цвета запроса; связанный источник — пунктирное кольцо.
+      ctx.beginPath();
+      ctx.arc(sx, sy, r + 2.6, 0, Math.PI * 2);
+      ctx.strokeStyle = palette.kindCss.query_result;
+      ctx.lineWidth = role === "result" ? 1.7 : 1.2;
+      ctx.setLineDash(role === "related" ? [2.5, 2] : []);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
     const chosen = selected?.type === "node" && selected.index === n.index;
     const hot = scene.hovered?.type === "node" && scene.hovered.index === n.index;
     const marked = scene.marked.has(n.index);

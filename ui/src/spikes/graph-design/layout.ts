@@ -216,6 +216,26 @@ export class Layout {
     return this.#byIndex.get(index);
   }
 
+  /** Координаты всех узлов: общий вид запоминает их при входе в вид запроса и возвращает при выходе. */
+  snapshot(): Map<number, [number, number]> {
+    return new Map(this.nodes.map((n) => [n.index, [n.x, n.y] as [number, number]]));
+  }
+
+  /** Ставит узлы на заданные места без движения; закреплённые узлы остаются закреплёнными на новом месте. */
+  place(positions: Map<number, [number, number]>): void {
+    for (const p of this.nodes) {
+      const at = positions.get(p.index);
+      if (!at) continue;
+      p.x = at[0];
+      p.y = at[1];
+      p.vx = p.vy = 0;
+      if (p.pinned) {
+        p.fx = p.x;
+        p.fy = p.y;
+      }
+    }
+  }
+
   reheat(alpha: number): void {
     if (this.sim.alpha() < alpha) this.sim.alpha(alpha);
   }

@@ -1,0 +1,701 @@
+{
+ "input": {
+  "file": "ui/src/spikes/graph-design/fixture.json",
+  "sha256": "d1c71530b20576d69e3794f1bdbd847becb199abe9d27dc23b13048d1cf6ec8c",
+  "documents": 301,
+  "links": 1064,
+  "similarityPairs": 1088
+ },
+ "parameters": {
+  "fanout": 4,
+  "threshold": 0.82,
+  "budget": {
+   "nodes": 200,
+   "edges": 800
+  },
+  "sets": "200 детерминированных наборов результатов на строку",
+  "columns": "узлы и рёбра: минимум, медиана, 95-й процентиль, максимум"
+ },
+ "table": [
+  {
+   "results": 3,
+   "mode": "links",
+   "depth": 0,
+   "nodes": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "edges": [
+    3,
+    3,
+    4,
+    5
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 3,
+   "mode": "links",
+   "depth": 1,
+   "nodes": [
+    4,
+    11,
+    15,
+    16
+   ],
+   "edges": [
+    3,
+    19,
+    37,
+    49
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 3,
+   "mode": "links",
+   "depth": 2,
+   "nodes": [
+    4,
+    23,
+    34,
+    44
+   ],
+   "edges": [
+    3,
+    69,
+    126,
+    182
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 3,
+   "mode": "meaning",
+   "depth": 0,
+   "nodes": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "edges": [
+    3,
+    3,
+    3,
+    4
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 3,
+   "mode": "meaning",
+   "depth": 1,
+   "nodes": [
+    4,
+    6,
+    11,
+    16
+   ],
+   "edges": [
+    3,
+    5,
+    12,
+    19
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 3,
+   "mode": "meaning",
+   "depth": 2,
+   "nodes": [
+    4,
+    9,
+    21,
+    31
+   ],
+   "edges": [
+    3,
+    9,
+    28,
+    50
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 3,
+   "mode": "all",
+   "depth": 0,
+   "nodes": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "edges": [
+    3,
+    3,
+    4,
+    6
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 3,
+   "mode": "all",
+   "depth": 1,
+   "nodes": [
+    4,
+    12,
+    18,
+    23
+   ],
+   "edges": [
+    3,
+    27,
+    59,
+    100
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 3,
+   "mode": "all",
+   "depth": 2,
+   "nodes": [
+    4,
+    34,
+    54,
+    66
+   ],
+   "edges": [
+    3,
+    138,
+    280,
+    399
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 5,
+   "mode": "links",
+   "depth": 0,
+   "nodes": [
+    6,
+    6,
+    6,
+    6
+   ],
+   "edges": [
+    5,
+    5,
+    6,
+    12
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 5,
+   "mode": "links",
+   "depth": 1,
+   "nodes": [
+    8,
+    16,
+    22,
+    26
+   ],
+   "edges": [
+    7,
+    34,
+    60,
+    71
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 5,
+   "mode": "links",
+   "depth": 2,
+   "nodes": [
+    12,
+    34,
+    47,
+    57
+   ],
+   "edges": [
+    18,
+    115,
+    199,
+    278
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 5,
+   "mode": "meaning",
+   "depth": 0,
+   "nodes": [
+    6,
+    6,
+    6,
+    6
+   ],
+   "edges": [
+    5,
+    5,
+    5,
+    6
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 5,
+   "mode": "meaning",
+   "depth": 1,
+   "nodes": [
+    6,
+    11,
+    15,
+    20
+   ],
+   "edges": [
+    5,
+    11,
+    18,
+    26
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 5,
+   "mode": "meaning",
+   "depth": 2,
+   "nodes": [
+    6,
+    18,
+    29,
+    38
+   ],
+   "edges": [
+    5,
+    20,
+    40,
+    59
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 5,
+   "mode": "all",
+   "depth": 0,
+   "nodes": [
+    6,
+    6,
+    6,
+    6
+   ],
+   "edges": [
+    5,
+    5,
+    7,
+    12
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 5,
+   "mode": "all",
+   "depth": 1,
+   "nodes": [
+    9,
+    20,
+    26,
+    30
+   ],
+   "edges": [
+    10,
+    48,
+    90,
+    111
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 5,
+   "mode": "all",
+   "depth": 2,
+   "nodes": [
+    12,
+    51,
+    70,
+    82
+   ],
+   "edges": [
+    22,
+    229,
+    393,
+    465
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 10,
+   "mode": "links",
+   "depth": 0,
+   "nodes": [
+    11,
+    11,
+    11,
+    11
+   ],
+   "edges": [
+    10,
+    11,
+    14,
+    18
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 10,
+   "mode": "links",
+   "depth": 1,
+   "nodes": [
+    18,
+    30,
+    37,
+    41
+   ],
+   "edges": [
+    31,
+    76,
+    118,
+    145
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 10,
+   "mode": "links",
+   "depth": 2,
+   "nodes": [
+    30,
+    55,
+    68,
+    75
+   ],
+   "edges": [
+    85,
+    214,
+    315,
+    395
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 10,
+   "mode": "meaning",
+   "depth": 0,
+   "nodes": [
+    11,
+    11,
+    11,
+    11
+   ],
+   "edges": [
+    10,
+    10,
+    11,
+    13
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 10,
+   "mode": "meaning",
+   "depth": 1,
+   "nodes": [
+    12,
+    21,
+    28,
+    35
+   ],
+   "edges": [
+    11,
+    22,
+    36,
+    47
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 10,
+   "mode": "meaning",
+   "depth": 2,
+   "nodes": [
+    14,
+    33,
+    48,
+    59
+   ],
+   "edges": [
+    13,
+    39,
+    67,
+    88
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 10,
+   "mode": "all",
+   "depth": 0,
+   "nodes": [
+    11,
+    11,
+    11,
+    11
+   ],
+   "edges": [
+    10,
+    11,
+    14,
+    21
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 10,
+   "mode": "all",
+   "depth": 1,
+   "nodes": [
+    22,
+    35,
+    44,
+    47
+   ],
+   "edges": [
+    39,
+    109,
+    180,
+    229
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 10,
+   "mode": "all",
+   "depth": 2,
+   "nodes": [
+    42,
+    79,
+    96,
+    105
+   ],
+   "edges": [
+    145,
+    425,
+    577,
+    644
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 20,
+   "mode": "links",
+   "depth": 0,
+   "nodes": [
+    21,
+    21,
+    21,
+    21
+   ],
+   "edges": [
+    20,
+    24,
+    32,
+    41
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 20,
+   "mode": "links",
+   "depth": 1,
+   "nodes": [
+    37,
+    52,
+    60,
+    64
+   ],
+   "edges": [
+    87,
+    166,
+    232,
+    290
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 20,
+   "mode": "links",
+   "depth": 2,
+   "nodes": [
+    56,
+    82,
+    95,
+    99
+   ],
+   "edges": [
+    176,
+    357,
+    454,
+    515
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 20,
+   "mode": "meaning",
+   "depth": 0,
+   "nodes": [
+    21,
+    21,
+    21,
+    21
+   ],
+   "edges": [
+    20,
+    21,
+    22,
+    26
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 20,
+   "mode": "meaning",
+   "depth": 1,
+   "nodes": [
+    27,
+    40,
+    48,
+    57
+   ],
+   "edges": [
+    26,
+    47,
+    66,
+    92
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 20,
+   "mode": "meaning",
+   "depth": 2,
+   "nodes": [
+    33,
+    61,
+    75,
+    85
+   ],
+   "edges": [
+    33,
+    80,
+    112,
+    130
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 20,
+   "mode": "all",
+   "depth": 0,
+   "nodes": [
+    21,
+    21,
+    21,
+    21
+   ],
+   "edges": [
+    20,
+    25,
+    35,
+    42
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 20,
+   "mode": "all",
+   "depth": 1,
+   "nodes": [
+    47,
+    63,
+    74,
+    78
+   ],
+   "edges": [
+    108,
+    249,
+    350,
+    399
+   ],
+   "overBudget": 0
+  },
+  {
+   "results": 20,
+   "mode": "all",
+   "depth": 2,
+   "nodes": [
+    91,
+    113,
+    129,
+    134
+   ],
+   "edges": [
+    375,
+    653,
+    769,
+    794
+   ],
+   "overBudget": 0
+  }
+ ],
+ "checks": [
+  {
+   "name": "построение детерминировано",
+   "ok": true,
+   "detail": "82 узлов"
+  },
+  {
+   "name": "глубина 0 не добавляет узлов",
+   "ok": true,
+   "detail": "11"
+  },
+  {
+   "name": "при усечении добавлено ровно допустимое число соседей",
+   "ok": true,
+   "detail": "21 из 32"
+  },
+  {
+   "name": "первые соседи берутся раньше вторых",
+   "ok": true,
+   "detail": "первых 7, взято 7, соседей 10"
+  },
+  {
+   "name": "сила допущенной близости равна исходной",
+   "ok": true,
+   "detail": "186 пар"
+  },
+  {
+   "name": "порядок соседей не зависит от степени узла-хаба",
+   "ok": true,
+   "detail": "позиция хаба 0"
+  }
+ ]
+}
