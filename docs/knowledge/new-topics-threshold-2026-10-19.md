@@ -4,7 +4,7 @@ title: Порог дедупликации вопросов для «Новых 
 
 # Порог дедупликации вопросов для «Новых тем» — калибровка на bge-m3
 
-[← База знаний](Index.md) · [Сырые данные](new-topics-threshold-2026-10-19/Index.md) · [Требования NT-04](../features/new-topics/requirements.md) · [Устройство](../features/new-topics/design.md)
+← База знаний · Сырые данные · [Требования NT-04](../features/new-topics/requirements.md) · [Устройство](../features/new-topics/design.md)
 
 Исходный замер 19-10-2026 выбрал 0,79 для встроенной модели `BAAI/bge-m3` (fp32 и fp16) на русских вопросах одного проекта. **20-10-2026 автор выбрал порог 0,68; он внесён в код.** Прежние показатели точности относятся к 0,79. Для Qwen3 и Nomic порог не измерен. Разметку составил один агент, независимой человеческой экспертизы нет. Порог поиска «вопрос–документ» сюда не переносился и не использовался.
 
@@ -75,7 +75,7 @@ title: Порог дедупликации вопросов для «Новых 
 
 ## Лексические проверки и что они дают
 
-Проверки сравнивают два текста и запрещают автоматическое слияние, если они различаются по признаку. Компоненты и результат — [components.txt](new-topics-threshold-2026-10-19/components.txt), код — `guardDiffers` в [scripts/new-topics-threshold.mjs](../../scripts/new-topics-threshold.mjs).
+Проверки сравнивают два текста и запрещают автоматическое слияние, если они различаются по признаку. Компоненты и результат — [components.txt](new-topics-threshold-2026-10-19/components.txt), код — `guardDiffers` в `scripts/new-topics-threshold.mjs`.
 
 | Компонент | Что сравнивает | Ловушек поймано dev / test | Настоящих перефразов заблокировано dev / test |
 |---|---|---|---|
@@ -121,4 +121,4 @@ node scripts/new-topics-threshold.mjs checks <папка>
 node scripts/new-topics-threshold.mjs components <папка>
 ```
 
-Пример собран из чистого `HEAD e2d869e` (параллельная правка `search/` не входила), release, `CARGO_TARGET_DIR=C:/bars-build`, SHA-256 исполняемого файла `0736…DCE`. Файлы с векторами — [vectors-auto.bin.gz](new-topics-threshold-2026-10-19/vectors-auto.bin.gz) (fp32 DirectML; формат BGV1) и контрольные суммы в [Index.md](new-topics-threshold-2026-10-19/Index.md).
+Пример собран из чистого `HEAD e2d869e` (параллельная правка `search/` не входила), release, `CARGO_TARGET_DIR=C:/bars-build`, SHA-256 исполняемого файла `0736…DCE`. Файлы с векторами — [vectors-auto.bin.gz](new-topics-threshold-2026-10-19/vectors-auto.bin.gz) (fp32 DirectML; формат BGV1) и контрольные суммы в `Index.md`.

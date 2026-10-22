@@ -15,7 +15,7 @@ title: Трассировка требований bars — документы �
 | Т-1 | 1.1 → 1.1.4 | [worker](../architecture/worker.md), [компоненты](../architecture/components.md), [окно](../features/window/implementation.md): контроль одного процесса и трея |
 | Т-2 | 4.4 → 4.4.2 | [IPC](../architecture/ipc.md): контроль запуска через прокси |
 | Т-3 | 1.1 → 1.1.2; 2.1.1, 3.1.2, 4.2.2 | [Стек](../architecture/stack.md), [ADR-0002](../adr/0002-qwen-gguf.md): ограничение выбора библиотек/runtime |
-| Т-4 | 1.1 → 1.1.4; 4.4.2 | [Стек](../architecture/stack.md), [дистрибуция](../features/distribution/Index.md): Windows; macOS отложена до доступного Mac, требование не выполнено полностью |
+| Т-4 | 1.1 → 1.1.4; 4.4.2 | [Стек](../architecture/stack.md), дистрибуция: Windows; macOS отложена до доступного Mac, требование не выполнено полностью |
 | Т-5 | 3.1 → 3.1.1; 3.3.2, 3.9.1 | [Файлы](../architecture/files.md), [схема](../architecture/schema.md): хранение и контроль границ проекта |
 | Т-6 | 3.3 → 3.3.2; 4.4.2 | [Проекты](../features/projects/projects.md), [CLI](../features/agent-tools/cli.md): новый сценарий создания, контроль трёх способов регистрации |
 | Т-7 | 3.3 → 3.3.1; 3.2.1 | [Актуальность](../features/indexing/updates.md), [настройки](../features/settings/settings.md): дерево/обход при заданном корне |
@@ -67,7 +67,7 @@ title: Трассировка требований bars — документы �
 | НФТ-1 | 3.2 → 3.2.1 | [Нарезка](../features/indexing/chunking.md), [актуальность](../features/indexing/updates.md), [схема](../architecture/schema.md): контроль переиспользования |
 | НФТ-2 | 4.3 → 4.3.2, 4.3.3 | [Векторный поиск](../architecture/vector-search.md), [проба](spike-search.md): прежняя проверка Windows не закрывает естественные 5000 чанков и все модели |
 | НФТ-3 | 4.4 → 4.4.2; 4.2.2 | [Компоненты](../architecture/components.md), [worker](../architecture/worker.md): контроль лёгкого прокси |
-| НФТ-4 | 1.1 → 1.1.3, 1.1.4; 1.2.2, 1.3.2, 2.3.2, 3.4.1, 4.4.2 | [Окно](../features/window/Index.md), [MCP](../features/agent-tools/mcp-tools.md), [инструкция](../features/docs-convention/bars-instruction.md): язык проверяется в каждом пользовательском срезе |
+| НФТ-4 | 1.1 → 1.1.3, 1.1.4; 1.2.2, 1.3.2, 2.3.2, 3.4.1, 4.4.2 | Окно, [MCP](../features/agent-tools/mcp-tools.md), [инструкция](../features/docs-convention/bars-instruction.md): язык проверяется в каждом пользовательском срезе |
 | НФТ-5 | 3.4 → 3.4.1; 3.4.2 | [База знаний](../features/knowledge-base/requirements.md): сохранение при закрытии вкладки/панели/окна |
 | НФТ-6 | 3.6 → 3.6.1, 3.6.2 | [База знаний](../features/knowledge-base/requirements.md): реальный p95 поиска с диска |
 
@@ -92,4 +92,4 @@ title: Трассировка требований bars — документы �
 
 ## Что вне Т-N
 
-GraphRAG имеет собственные GR-01…GR-12, а проект раунда 17 добавляет общепродуктовые Т-46/Т-47. «Новые темы» дополнительно входят в Т-36; частный контракт NT остаётся в [фиче](../features/new-topics/Index.md). Пожелания и проблемы — [backlog/](../backlog/Index.md); охват этапов не означает закрытия их записей.
+GraphRAG имеет собственные GR-01…GR-12, а проект раунда 17 добавляет общепродуктовые Т-46/Т-47. «Новые темы» дополнительно входят в Т-36; частный контракт NT остаётся в фиче. Пожелания и проблемы — `backlog/`; охват этапов не означает закрытия их записей.

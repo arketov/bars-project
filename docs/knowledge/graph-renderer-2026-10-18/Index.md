@@ -6,12 +6,12 @@ title: GraphRAG — renderer и макет 18-10-2026
 
 Изолированный headless Chrome 128 на Windows, Node 24.16.0, WebGL ANGLE/RTX 3090. Никакого доступа к установленному bars или профилям клиентов. Это проверка браузерного renderer/фикстур, не native Tauri и не Mac.
 
-- [renderer.json](renderer.json) — 18 прогонов: одинаковая спираль, дерево и соседние связи; 250/1000/2000 узлов, три повтора каждой библиотеки.
-- [mockup.json](mockup.json) — проверки видов, шести операций, состояний, scope, клавиатуры, источника, обеих тем/760 px; данные явно тестовые.
-- [component.json](component.json) — проверки настоящего Svelte-компонента/Cytoscape на записанных Rust DTO: все виды/операции, quote/Escape, pin/unpin, destroy и поиск mix/graph; backend здесь фикстурный.
-- [validation.json](validation.json) — итог проверенного среза: Rust/IPC/proxies, UI/сборка, работающий установленный bars; отдельно непроведённые приёмки и недоступный bars_rag_search.
-- [component-light-1440.png](component-light-1440.png), [component-light-760.png](component-light-760.png), [component-dark-1440.png](component-dark-1440.png), [component-dark-760.png](component-dark-760.png) — настоящий компонент на тех же тестовых документах, отдельно от макета P1.
-- [light-1440.png](light-1440.png), [light-760.png](light-760.png), [dark-1440.png](dark-1440.png), [dark-760.png](dark-760.png) — макет P1.
+- `renderer.json` — 18 прогонов: одинаковая спираль, дерево и соседние связи; 250/1000/2000 узлов, три повтора каждой библиотеки.
+- `mockup.json` — проверки видов, шести операций, состояний, scope, клавиатуры, источника, обеих тем/760 px; данные явно тестовые.
+- `component.json` — проверки настоящего Svelte-компонента/Cytoscape на записанных Rust DTO: все виды/операции, quote/Escape, pin/unpin, destroy и поиск mix/graph; backend здесь фикстурный.
+- `validation.json` — итог проверенного среза: Rust/IPC/proxies, UI/сборка, работающий установленный bars; отдельно непроведённые приёмки и недоступный bars_rag_search.
+- `component-light-1440.png`, `component-light-760.png`, `component-dark-1440.png`, `component-dark-760.png` — настоящий компонент на тех же тестовых документах, отдельно от макета P1.
+- `light-1440.png`, `light-760.png`, `dark-1440.png`, `dark-760.png` — макет P1.
 
 ## Выбор renderer для P3
 

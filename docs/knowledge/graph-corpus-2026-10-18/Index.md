@@ -6,11 +6,11 @@ title: GraphRAG — development-корпус и ресурсная проба 18
 
 Read-only SQLite snapshot существующего индекса bars, существующие bge-m3 vectors; ни модель, ни переиндексация не запускались. 99 документов, 547 chunks, 1307 узлов, 5597 рёбер, включая 24 явных типизированных отношения. Это development-наблюдение после правки правил v4, **не независимый holdout и не сравнительная приёмка**.
 
-- [manifest.json](manifest.json) — source revisions, SHA-256 исходных результатов, model fingerprint и исключения.
-- [dataset.json.gz](dataset.json.gz) — согласованные исходные тексты, граф и evidence с точными диапазонами; development snapshot.
-- [measurement.json.gz](measurement.json.gz) — исходные счётчики, метаданные, исключения и 20 повторов четырёх операций.
-- [process.json.gz](process.json.gz) — отдельный процесс probe, samples памяти, хеш exe, среда; установленный bars не останавливался.
-- [assertions.json](assertions.json) — все 24 отношения с именами участников, polarity/qualifiers, quote и путём оригинала для проверки качества.
+- `manifest.json` — source revisions, SHA-256 исходных результатов, model fingerprint и исключения.
+- `dataset.json.gz` — согласованные исходные тексты, граф и evidence с точными диапазонами; development snapshot.
+- `measurement.json.gz` — исходные счётчики, метаданные, исключения и 20 повторов четырёх операций.
+- `process.json.gz` — отдельный процесс probe, samples памяти, хеш exe, среда; установленный bars не останавливался.
+- `assertions.json` — все 24 отношения с именами участников, polarity/qualifiers, quote и путём оригинала для проверки качества.
 
 ## Ресурсы без инференса
 

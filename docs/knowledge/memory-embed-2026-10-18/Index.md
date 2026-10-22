@@ -4,7 +4,7 @@ title: Embed precision и ограниченное хранение оценок
 
 # Embed precision и ограниченное хранение оценок — 18-10-2026
 
-[← База знаний](../Index.md). Статус: экспериментальный FP16 retrieval завершён на 100 вопросах, INT8 отклонён по контрпримеру. Приёмка нового ядрового FP16-профиля продолжается; эксперимент не заменяет её. Рабочий bars не закрывался. [Проект снижения](../../features/models/memory-plan.md).
+← База знаний (`knowledge/Index.md`). Статус: экспериментальный FP16 retrieval завершён на 100 вопросах, INT8 отклонён по контрпримеру. Приёмка нового ядрового FP16-профиля продолжается; эксперимент не заменяет её. Рабочий bars не закрывался. Проект снижения (`features/models/memory-plan.md`).
 
 ## Качество embed без новых модельных сессий
 
@@ -41,58 +41,58 @@ INT8 вычислил все 100 query-векторов, но guard остано
 
 ## Файлы
 
-- [vector-screen.json](vector-screen.json) — 16 комбинаций, строки ответов, метрики и SHA256 исходных query/index/cases.
-- [scores-full-50000.jsonl](scores-full-50000.jsonl) — старый сбор 50 тысяч оценок.
-- [scores-bounded-50000.jsonl](scores-bounded-50000.jsonl) — ограниченный сбор 50 тысяч оценок.
-- [scores-full-500000.jsonl](scores-full-500000.jsonl) — старый сбор 500 тысяч оценок.
-- [scores-bounded-500000.jsonl](scores-bounded-500000.jsonl) — ограниченный сбор 500 тысяч оценок.
-- [fp16-full-invalidated.rows.jsonl.gz](fp16-full-invalidated.rows.jsonl.gz) — 63 завершённых ответа, полный прогон не принят.
-- [fp16-full-invalidated.session.json.gz](fp16-full-invalidated.session.json.gz) — параметры/хеш бинарника остановленного процесса.
-- [fp16-full-invalidated.monitor.json.gz](fp16-full-invalidated.monitor.json.gz) — монитор остановленного одновременного FP16-процесса.
-- [build-staged.json](build-staged.json) — хеши release-стенда и источников; отдельная архивная копия hybrid до эквивалентной clippy-правки.
-- [verification.json](verification.json) — проверки core/worker/clippy и хеши синтетики.
-- [fp16-full-invalidated.json.gz](fp16-full-invalidated.json.gz) — причина отклонения полного процесса.
-- [partial-primary-check.json](partial-primary-check.json) — проверка 63 завершённых строк без признания полного прогона.
-- [preflight-status.json](preflight-status.json) — отказ стартового резерва и состояние системной памяти.
-- [fp16-full-summary.json](fp16-full-summary.json) — сравнение прототипа с прежним FP32-rerank baseline; не текущий продуктовый baseline.
-- [fp16-vs-current-summary.json](fp16-vs-current-summary.json) — все 100 FP16 ответов против текущего FP16-rerank baseline; speedup не вычисляется при загрязнённом времени.
-- [int8-vs-current-rejected.json](int8-vs-current-rejected.json) — подтверждённая потеря od-001 относительно текущего baseline.
-- [staged-evidence.json](staged-evidence.json) — источники, SHA-256, число ответов, exit и фазовая память двух процессов.
-- [build-core-v1.json](build-core-v1.json) — хеш нового ядрового release-стенда и источников на момент копирования бинарника.
-- [core-v1-sources.json.gz](core-v1-sources.json.gz) — соответствующие исходники ядрового стенда; SHA-256 сверены с build-core-v1.json.
-- [core-query-vs-current-summary.json](core-query-vs-current-summary.json) — 100 ответов ядрового query-пути против текущего baseline.
-- [core-query-vector-comparison.json](core-query-vector-comparison.json) — точное совпадение query-векторов прототипа и ядрового загрузчика; не document batches.
-- [core-query-evidence.json](core-query-evidence.json) — SHA-256, lifetime peak и ограничения query/cache-процессов.
-- [core-preflight-status.json](core-preflight-status.json) — два отказа запаса для длинной индексации; моделей не запускали.
-- [build-pair-v2.json](build-pair-v2.json) — хеши собранных core/worker стендов с новым FP16-профилем и текущих источников.
-- [core-pair-preflight-run.json.gz](core-pair-preflight-run.json.gz) — параметры попытки парного worker-замера; модели не запускались.
-- [core-pair-preflight.jsonl.gz](core-pair-preflight.jsonl.gz) — 90 с ожидания резерва 4 ГиБ RAM / 8 ГиБ commit и отсутствия сборок.
-- [core-query.rows.jsonl.gz](core-query.rows.jsonl.gz) — 100 ответов ядрового FP16 query-пути.
-- [core-query.session.json.gz](core-query.session.json.gz) — фактические device/precision/revision и хеш бинарника.
-- [core-query.config.json.gz](core-query.config.json.gz) — конфигурация ядрового query retrieval.
-- [core-query.complete.json.gz](core-query.complete.json.gz) — завершение ядрового query-прохода.
-- [core-query.native-memory.jsonl.gz](core-query.native-memory.jsonl.gz) — нативные сэмплы последовательного ядрового процесса.
-- [core-query.query-vectors.json.gz](core-query.query-vectors.json.gz) — все 100 query-векторов нового загрузчика.
-- [core-query.monitor.json.gz](core-query.monitor.json.gz) — внешний монитор, время не принимается как product latency.
-- [core-download.native-memory.jsonl.gz](core-download.native-memory.jsonl.gz) — настоящая проверка готового кэша без ONNX-сессии.
-- [core-download-corrupt.native-memory.jsonl.gz](core-download-corrupt.native-memory.jsonl.gz) — отказ повреждённого config по BLAKE3 без ONNX.
-- [fp16-staged.rows.jsonl.gz](fp16-staged.rows.jsonl.gz) — 100 ответов FP16-прототипа.
-- [fp16-staged.session.json.gz](fp16-staged.session.json.gz) — исполняемый файл и параметры сессии FP16.
-- [fp16-staged.config.json.gz](fp16-staged.config.json.gz) — конфигурация FP16 retrieval.
-- [fp16-staged.native-memory.jsonl.gz](fp16-staged.native-memory.jsonl.gz) — нативные сэмплы/маркеры FP16.
-- [fp16-staged.query-vectors.json.gz](fp16-staged.query-vectors.json.gz) — сохранённые FP16 query-векторы.
-- [fp16-staged.complete.json.gz](fp16-staged.complete.json.gz) — маркер завершения FP16.
-- [fp16-staged.monitor.json.gz](fp16-staged.monitor.json.gz) — внешний монитор FP16, загрязнение времени.
-- [int8-rejected.rows.jsonl.gz](int8-rejected.rows.jsonl.gz) — семь ответов INT8 до остановки.
-- [int8-rejected.session.json.gz](int8-rejected.session.json.gz) — бинарник и параметры сессии INT8.
-- [int8-rejected.config.json.gz](int8-rejected.config.json.gz) — конфигурация остановленного INT8 retrieval.
-- [int8-rejected.native-memory.jsonl.gz](int8-rejected.native-memory.jsonl.gz) — нативная память остановленного INT8.
-- [int8-rejected.query-vectors.json.gz](int8-rejected.query-vectors.json.gz) — все 100 INT8 query-векторов.
-- [int8-rejected.rejected.json.gz](int8-rejected.rejected.json.gz) — исходный контрпример quality guard.
-- [int8-rejected.monitor.json.gz](int8-rejected.monitor.json.gz) — внешний монитор и отказ качества INT8.
+- `vector-screen.json` — 16 комбинаций, строки ответов, метрики и SHA256 исходных query/index/cases.
+- `scores-full-50000.jsonl` — старый сбор 50 тысяч оценок.
+- `scores-bounded-50000.jsonl` — ограниченный сбор 50 тысяч оценок.
+- `scores-full-500000.jsonl` — старый сбор 500 тысяч оценок.
+- `scores-bounded-500000.jsonl` — ограниченный сбор 500 тысяч оценок.
+- `fp16-full-invalidated.rows.jsonl.gz` — 63 завершённых ответа, полный прогон не принят.
+- `fp16-full-invalidated.session.json.gz` — параметры/хеш бинарника остановленного процесса.
+- `fp16-full-invalidated.monitor.json.gz` — монитор остановленного одновременного FP16-процесса.
+- `build-staged.json` — хеши release-стенда и источников; отдельная архивная копия hybrid до эквивалентной clippy-правки.
+- `verification.json` — проверки core/worker/clippy и хеши синтетики.
+- `fp16-full-invalidated.json.gz` — причина отклонения полного процесса.
+- `partial-primary-check.json` — проверка 63 завершённых строк без признания полного прогона.
+- `preflight-status.json` — отказ стартового резерва и состояние системной памяти.
+- `fp16-full-summary.json` — сравнение прототипа с прежним FP32-rerank baseline; не текущий продуктовый baseline.
+- `fp16-vs-current-summary.json` — все 100 FP16 ответов против текущего FP16-rerank baseline; speedup не вычисляется при загрязнённом времени.
+- `int8-vs-current-rejected.json` — подтверждённая потеря od-001 относительно текущего baseline.
+- `staged-evidence.json` — источники, SHA-256, число ответов, exit и фазовая память двух процессов.
+- `build-core-v1.json` — хеш нового ядрового release-стенда и источников на момент копирования бинарника.
+- `core-v1-sources.json.gz` — соответствующие исходники ядрового стенда; SHA-256 сверены с build-core-v1.json.
+- `core-query-vs-current-summary.json` — 100 ответов ядрового query-пути против текущего baseline.
+- `core-query-vector-comparison.json` — точное совпадение query-векторов прототипа и ядрового загрузчика; не document batches.
+- `core-query-evidence.json` — SHA-256, lifetime peak и ограничения query/cache-процессов.
+- `core-preflight-status.json` — два отказа запаса для длинной индексации; моделей не запускали.
+- `build-pair-v2.json` — хеши собранных core/worker стендов с новым FP16-профилем и текущих источников.
+- `core-pair-preflight-run.json.gz` — параметры попытки парного worker-замера; модели не запускались.
+- `core-pair-preflight.jsonl.gz` — 90 с ожидания резерва 4 ГиБ RAM / 8 ГиБ commit и отсутствия сборок.
+- `core-query.rows.jsonl.gz` — 100 ответов ядрового FP16 query-пути.
+- `core-query.session.json.gz` — фактические device/precision/revision и хеш бинарника.
+- `core-query.config.json.gz` — конфигурация ядрового query retrieval.
+- `core-query.complete.json.gz` — завершение ядрового query-прохода.
+- `core-query.native-memory.jsonl.gz` — нативные сэмплы последовательного ядрового процесса.
+- `core-query.query-vectors.json.gz` — все 100 query-векторов нового загрузчика.
+- `core-query.monitor.json.gz` — внешний монитор, время не принимается как product latency.
+- `core-download.native-memory.jsonl.gz` — настоящая проверка готового кэша без ONNX-сессии.
+- `core-download-corrupt.native-memory.jsonl.gz` — отказ повреждённого config по BLAKE3 без ONNX.
+- `fp16-staged.rows.jsonl.gz` — 100 ответов FP16-прототипа.
+- `fp16-staged.session.json.gz` — исполняемый файл и параметры сессии FP16.
+- `fp16-staged.config.json.gz` — конфигурация FP16 retrieval.
+- `fp16-staged.native-memory.jsonl.gz` — нативные сэмплы/маркеры FP16.
+- `fp16-staged.query-vectors.json.gz` — сохранённые FP16 query-векторы.
+- `fp16-staged.complete.json.gz` — маркер завершения FP16.
+- `fp16-staged.monitor.json.gz` — внешний монитор FP16, загрязнение времени.
+- `int8-rejected.rows.jsonl.gz` — семь ответов INT8 до остановки.
+- `int8-rejected.session.json.gz` — бинарник и параметры сессии INT8.
+- `int8-rejected.config.json.gz` — конфигурация остановленного INT8 retrieval.
+- `int8-rejected.native-memory.jsonl.gz` — нативная память остановленного INT8.
+- `int8-rejected.query-vectors.json.gz` — все 100 INT8 query-векторов.
+- `int8-rejected.rejected.json.gz` — исходный контрпример quality guard.
+- `int8-rejected.monitor.json.gz` — внешний монитор и отказ качества INT8.
 
-- [verification-core.json](verification-core.json) — 219 core / 177 worker / 10 UI, сборка, ручная проверка и незавершённый clippy.
-- [core-worker-tests.log.gz](core-worker-tests.log.gz) — полный финальный lib-прогон.
-- [pair-build.log.gz](pair-build.log.gz) — успешная совместная сборка core/worker стендов.
-- [device-picker-tests.log.gz](device-picker-tests.log.gz) — десять тестов выбора устройства.
-- [ui-check.log.gz](ui-check.log.gz) — Svelte check без ошибок/предупреждений.
+- `verification-core.json` — 219 core / 177 worker / 10 UI, сборка, ручная проверка и незавершённый clippy.
+- `core-worker-tests.log.gz` — полный финальный lib-прогон.
+- `pair-build.log.gz` — успешная совместная сборка core/worker стендов.
+- `device-picker-tests.log.gz` — десять тестов выбора устройства.
+- `ui-check.log.gz` — Svelte check без ошибок/предупреждений.

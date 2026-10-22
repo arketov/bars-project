@@ -110,7 +110,7 @@ cargo build -p bars-cli -p bars-mcp --bins --locked
 
 Сессии стенда: обновление старых путей и дублей обоих клиентов при сохранении чужих записей; no-op без изменения байтов, mtime и backup; uninstall настоящим CLI; отсутствие восстановления удалённого после нового запуска; изоляция ошибки (невалидный JSON Claude не мешает обновить Codex); пустой профиль без создания папок клиентов. Дополнительно проверяется чтение записи установленным Codex (`codex mcp get bars --json`), stdio-вызов `bars_projects` и skills через NTFS junction (OQ-54).
 
-Изоляцию профиля (ISS-12) проверяет `scripts/test-client-profile-isolation.ps1`: без `BARS_USER_HOME` он сначала проверяет конструктор воркера, затем снимает SHA-256, mtime и наличие конфигов Codex и Claude, их backup и обоих skills до и после прогона worker, CLI и MCP. Содержимое конфигов в отчёт не попадает; параллельная запись в эти файлы засчитывается как изменение. Журнал приёмки — [2026-10-18-clients-auto-update](../../chats/2026-10-18-clients-auto-update/verification.md).
+Изоляцию профиля (ISS-12) проверяет `scripts/test-client-profile-isolation.ps1`: без `BARS_USER_HOME` он сначала проверяет конструктор воркера, затем снимает SHA-256, mtime и наличие конфигов Codex и Claude, их backup и обоих skills до и после прогона worker, CLI и MCP. Содержимое конфигов в отчёт не попадает; параллельная запись в эти файлы засчитывается как изменение. Журнал приёмки — 2026-10-18-clients-auto-update (`chats/2026-10-18-clients-auto-update`).
 
 ## Что не подтверждено
 

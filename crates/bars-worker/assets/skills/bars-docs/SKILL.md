@@ -63,15 +63,18 @@ After zero results, check the subject, project and filters, then reformulate or 
 
 ## Links in the text
 
-bars builds its document graph from links, and a reader of one search result follows them to the rest. Whenever you write or edit a document, turn every mention of another document into a link.
+A link is a claim that two documents are related. bars builds its document graph from links, and a reader of one search result follows them for details. A link without a relation is noise in both, so link on purpose, not on every mention.
 
-- At the point of mention write a relative Markdown link with a readable name: `[worker settings](../settings/settings.md)`. Not a path in backticks, not «the settings document», not a bare URL.
-- Link what the text relies on: the requirement or decision a statement comes from, the feature it describes, the research behind a claim, the bug or idea it resolves, the session where it was done. Link a requirement number to the requirements document on its first mention in a section.
-- Link the document and name the section in words; heading anchors break when a heading changes.
+- **Link when the text states a relation** to the target: the statement is based on it (a requirement, decision or research), it replaces, implements, verifies or fixes it, or the details live there. A passing mention is plain words.
+- **Once per section.** A document gets one link in a section, at its first relevant mention; later mentions in that section are words. The next section may link again: each section is read on its own.
+- **No link bundles.** When one passage relies on more than three documents, put them in one line «Based on: …» at the start of the section instead of scattering links through the paragraph.
+- **Do not link** a folder `Index.md` (no «← parent» back-links), lists of files changed in a session, a session in `chats/` from a document of the current state, or files outside the documentation root such as a question register or a plan: name them or use the ID, `OQ-12`.
+- Write a relative Markdown link with a readable name: `[worker settings](../settings/settings.md)`, not a path in backticks or «the settings document». Link the document and name the section in words; heading anchors break when a heading changes.
 - Check the target exists before linking; find an unknown path with `bars_rag_search`. Never link to a document that is not written yet.
-- A new document links to its sources and is linked from its folder's `Index.md`; related documents link back to it when it replaces or extends their topic.
+- A new document links to the sources it relies on and is listed in its folder's `Index.md`; a document it replaces or extends links to it.
+- Registers and traceability tables are exempt: each row links what it maps.
 - Code paths, commands and files outside the documentation stay in backticks.
-- Before finishing, reread the changed text: every mentioned document is a working link.
+- Before finishing, reread the changed text: every link is working and states a relation; no document is linked twice in one section.
 
 ## Layout (advice)
 
@@ -104,11 +107,11 @@ Feature-only requirements stay in the feature's `requirements.md`, not in the ma
 |---|---|---|
 | Session event | `chats/<YYYY-MM-DD>-<topic>/log.md` | Finding, failed approach, plan change or risky step; at most three lines appended without rereading. Example: why an experiment changed. |
 | Handoff | `chats/<YYYY-MM-DD>-<topic>/handoff.md` | Done, Not done, Difficulties, Next; at most a screen. Example: where the next session starts. |
-| Index | The folder's `Index.md` | Parent link and every file/subfolder with when to read it; update together with contents. Individual session folders are exempt. |
+| Index | The folder's `Index.md` | Every file/subfolder by name with when to read it, no links; update together with contents. Individual session folders are exempt. |
 
 For a mixed task, link the bug register, research, feature description and accepted ADR; do not copy the same fact among them. The journal records session history, not the only copy of a bug or enduring knowledge. Unaccepted proposals remain labelled in research or plans.
 
-- `Index.md` in every folder except session folders: back-link to the parent and a table «file — when to read» listing every file and subfolder. Change it in the same change as the files.
+- `Index.md` in every folder except session folders: a table «file — when to read» listing every file and subfolder by name in backticks, without links and without a back-link to the parent. The folder already relates its files; links from an index would tie every document to it in the graph. Change it in the same change as the files.
 - Module — a first-level subfolder; documents of one area go into one module.
 - `knowledge/` — research, measurements, code conventions; write when a finding outlives the session. Snapshot research gets a date in its name.
 - `adr/` — one decision per file `NNNN-<topic>.md`: status, date, context, decision (a person's words verbatim, with the date), consequences, rejected alternatives, «Where applied». An ADR is never rewritten: a new decision is a new ADR, the old one changes only its status. Topic documents link to the ADR instead of repeating it.

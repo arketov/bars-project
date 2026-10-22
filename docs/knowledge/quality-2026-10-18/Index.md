@@ -4,28 +4,28 @@ title: Доказательства бенча качества IDEA-06 от 18-
 
 # Доказательства бенча качества
 
-- [hardware.json](hardware.json) — i7-11700KF, RTX 3090 24 ГБ, память, ОС, драйвер и версии runtime.
-- [selection.json](selection.json) — выбор по обучающей части, зафиксированный до запуска проверочной части.
-- [train-first.json](train-first.json) — качество и задержки первого обучающего повтора; окончательные задержки считаются по трём повторам.
-- [train.json](train.json) — полная сводка обучающей сетки по трём повторам.
-- [test.json](test.json) — сводка отложенной части без повторного подбора.
-- [regression.json](regression.json) — прежние 24 вопроса bars; использовать метрики документов `docTop1`, `docHit3`, `docMrr10`.
-- [overdrive-manifest.json](overdrive-manifest.json) — хеши снимка ai-mutiplayer-bots, число документов и чанков, параметры индекса.
-- [bars-manifest.json](bars-manifest.json) — такой же манифест отдельного снимка bars.
-- [vector-check.json](vector-check.json) — численная сверка трёх сохранённых векторов со свежим embed и build info ONNX Runtime.
-- [anchor-check.json](anchor-check.json) — все 90 основных и 24 исторических опоры присутствуют ровно в одном чанке своего документа.
-- [cpu-cases.json](cpu-cases.json) — четыре обучающих вопроса для сверки устройств.
-- [cpu-reference.json](cpu-reference.json) — расхождения CPU/DirectML на 60 общих парах query/chunk.
-- [train-config.json](train-config.json) — параметры, хеши набора, бинарника и моделей обучающего прогона.
-- [test-config.json](test-config.json) — конфигурация отложенного прогона.
-- [regression-config.json](regression-config.json) — конфигурация регрессии bars.
-- [cpu-config.json](cpu-config.json) — конфигурация CPU-контроля.
-- [train-sessions.jsonl](train-sessions.jsonl) — устройство, загрузка и прогрев обучающей сессии.
-- [test-sessions.jsonl](test-sessions.jsonl) — загрузка и прогрев отложенной сессии.
-- [regression-sessions.jsonl](regression-sessions.jsonl) — загрузка и прогрев регрессии.
-- [cpu-sessions.jsonl](cpu-sessions.jsonl) — загрузка и прогрев CPU-контроля.
-- [train-rows.jsonl.gz](train-rows.jsonl.gz) — 3240 сырых строк обучающей сетки: 2880 поисков и 360 диагностических списков.
-- [test-rows.jsonl.gz](test-rows.jsonl.gz) — 360 строк отложенного прогона: 240 поисков и 120 списков.
-- [regression-rows.jsonl.gz](regression-rows.jsonl.gz) — 216 строк регрессии: 144 поиска и 72 списка.
-- [cpu-rows.jsonl.gz](cpu-rows.jsonl.gz) — 20 строк контроля: 8 поисков и 12 списков.
-- [checksums.json](checksums.json) — SHA-256 файлов доказательств, кроме самого списка хешей.
+- `hardware.json` — i7-11700KF, RTX 3090 24 ГБ, память, ОС, драйвер и версии runtime.
+- `selection.json` — выбор по обучающей части, зафиксированный до запуска проверочной части.
+- `train-first.json` — качество и задержки первого обучающего повтора; окончательные задержки считаются по трём повторам.
+- `train.json` — полная сводка обучающей сетки по трём повторам.
+- `test.json` — сводка отложенной части без повторного подбора.
+- `regression.json` — прежние 24 вопроса bars; использовать метрики документов `docTop1`, `docHit3`, `docMrr10`.
+- `overdrive-manifest.json` — хеши снимка ai-mutiplayer-bots, число документов и чанков, параметры индекса.
+- `bars-manifest.json` — такой же манифест отдельного снимка bars.
+- `vector-check.json` — численная сверка трёх сохранённых векторов со свежим embed и build info ONNX Runtime.
+- `anchor-check.json` — все 90 основных и 24 исторических опоры присутствуют ровно в одном чанке своего документа.
+- `cpu-cases.json` — четыре обучающих вопроса для сверки устройств.
+- `cpu-reference.json` — расхождения CPU/DirectML на 60 общих парах query/chunk.
+- `train-config.json` — параметры, хеши набора, бинарника и моделей обучающего прогона.
+- `test-config.json` — конфигурация отложенного прогона.
+- `regression-config.json` — конфигурация регрессии bars.
+- `cpu-config.json` — конфигурация CPU-контроля.
+- `train-sessions.jsonl` — устройство, загрузка и прогрев обучающей сессии.
+- `test-sessions.jsonl` — загрузка и прогрев отложенной сессии.
+- `regression-sessions.jsonl` — загрузка и прогрев регрессии.
+- `cpu-sessions.jsonl` — загрузка и прогрев CPU-контроля.
+- `train-rows.jsonl.gz` — 3240 сырых строк обучающей сетки: 2880 поисков и 360 диагностических списков.
+- `test-rows.jsonl.gz` — 360 строк отложенного прогона: 240 поисков и 120 списков.
+- `regression-rows.jsonl.gz` — 216 строк регрессии: 144 поиска и 72 списка.
+- `cpu-rows.jsonl.gz` — 20 строк контроля: 8 поисков и 12 списков.
+- `checksums.json` — SHA-256 файлов доказательств, кроме самого списка хешей.

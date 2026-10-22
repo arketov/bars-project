@@ -4,18 +4,18 @@ title: Сырые данные калибровки порога дедупли�
 
 # Сырые данные калибровки порога дедупликации вопросов
 
-[← База знаний](../Index.md) · [Выводы](../new-topics-threshold-2026-10-19.md)
+← База знаний (`knowledge/Index.md`) · Выводы (`knowledge/new-topics-threshold-2026-10-19.md`)
 
-Снимок 19-10-2026, IDEA-14. Воспроизведение — [scripts/new-topics-threshold.mjs](../../../scripts/new-topics-threshold.mjs) (`prepare`, `analyze`, `checks`, `components`) и пример `crates/bars-core/examples/bench_questions.rs`; команды в разделе «Воспроизведение» выводов. Сырые файлы векторов `auto.json`, `cpu.json`, `fp16-auto.json` (по 4,8 МБ) в репозиторий не вошли; в [vectors-auto.bin.gz](vectors-auto.bin.gz) лежат векторы fp32/DirectML в формате BGV1 (magic, u32 число, u32 размерность, float32 LE) в порядке [items.json](items.json).
+Снимок 19-10-2026, IDEA-14. Воспроизведение — `scripts/new-topics-threshold.mjs` (`prepare`, `analyze`, `checks`, `components`) и пример `crates/bars-core/examples/bench_questions.rs`; команды в разделе «Воспроизведение» выводов. Сырые файлы векторов `auto.json`, `cpu.json`, `fp16-auto.json` (по 4,8 МБ) в репозиторий не вошли; в `vectors-auto.bin.gz` лежат векторы fp32/DirectML в формате BGV1 (magic, u32 число, u32 размерность, float32 LE) в порядке `items.json`.
 
 | Файл | Когда читать |
 |---|---|
-| [variants.json](variants.json) | Перефразы, ключевые запросы и ловушки; разметка составлена до просмотра косинусов |
-| [items.json](items.json) | Все 224 текста с группой, делением dev/test и видом, и 31 ловушка как пары индексов |
-| [analysis.json](analysis.json) | Метрики трёх режимов: шум, распределения, перебор порогов 0,50…0,95, ближайшие разные пары, группировка |
-| [components.txt](components.txt) | Какие лексические проверки сколько ловушек ловят и сколько перефразов блокируют |
-| [checks.txt](checks.txt) | Перефразы, заблокированные всеми четырьмя компонентами, и ловушки, которые они пропустили |
-| [vectors-auto.bin.gz](vectors-auto.bin.gz) | Векторы bge-m3 fp32 DirectML для 224 текстов |
+| `variants.json` | Перефразы, ключевые запросы и ловушки; разметка составлена до просмотра косинусов |
+| `items.json` | Все 224 текста с группой, делением dev/test и видом, и 31 ловушка как пары индексов |
+| `analysis.json` | Метрики трёх режимов: шум, распределения, перебор порогов 0,50…0,95, ближайшие разные пары, группировка |
+| `components.txt` | Какие лексические проверки сколько ловушек ловят и сколько перефразов блокируют |
+| `checks.txt` | Перефразы, заблокированные всеми четырьмя компонентами, и ловушки, которые они пропустили |
+| `vectors-auto.bin.gz` | Векторы bge-m3 fp32 DirectML для 224 текстов |
 
 ## Контрольные суммы
 
