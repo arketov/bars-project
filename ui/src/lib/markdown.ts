@@ -22,6 +22,25 @@ marked.use({
   },
 });
 
+// `[[Название]]`, `[[папка/Название|текст]]`, `[[Название#раздел]]` — ссылки как в Obsidian (Т-30); имя разбирает окно по списку документов.
+marked.use({
+  extensions: [{
+    name: "wikilink",
+    level: "inline",
+    start: (src: string) => src.indexOf("[["),
+    tokenizer(src: string) {
+      const match = /^\[\[([^[\]\n]+?)\]\]/.exec(src);
+      return match ? { type: "wikilink", raw: match[0], inner: match[1] } : undefined;
+    },
+    renderer(token) {
+      const inner = String((token as unknown as { inner: string }).inner);
+      const [name, ...alias] = inner.split("|");
+      const shown = (alias.join("|") || name).trim();
+      return `<a class="a" href="#" data-wiki-link="${escapeHtml(inner)}">${escapeHtml(shown)}</a>`;
+    },
+  }],
+});
+
 const targetFile = (href: string) => href.split("#")[0];
 
 /** Ссылка на другой Markdown-файл проекта: относительная, без схемы и без `//`. */

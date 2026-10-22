@@ -3,6 +3,7 @@
   import { app } from "./app.svelte";
   import Icon from "./Icon.svelte";
   import { renderDocument, resolveDocumentLink } from "./markdown";
+  import { linkTargets, resolveWikilink } from "./link-picker";
 
   const doc = $derived(app.viewer);
   const html = $derived(
@@ -13,10 +14,12 @@
   let body: HTMLElement | undefined = $state();
 
   function followLink(event: MouseEvent) {
-    const link = (event.target as HTMLElement).closest<HTMLElement>("a[data-doc-link]");
+    const link = (event.target as HTMLElement).closest<HTMLElement>("a[data-doc-link], a[data-wiki-link]");
     if (!link || !doc) return;
     event.preventDefault();
-    const path = resolveDocumentLink(doc.hit.path, link.dataset.docLink ?? "");
+    const path = link.dataset.wikiLink !== undefined
+      ? resolveWikilink(linkTargets(app.tree, app.docsRoot), doc.hit.path, link.dataset.wikiLink)?.path
+      : resolveDocumentLink(doc.hit.path, link.dataset.docLink ?? "");
     if (path) void app.openDocument({ path, title: path.split("/").pop() ?? path, first_line: 0, last_line: 0 });
   }
 

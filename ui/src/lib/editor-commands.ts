@@ -1,6 +1,7 @@
 // Помощники разметки редактора (Т-29): команды `editor.*` над EditorView, переход по ячейкам таблицы и автопара `*`.
 // Сочетания приходят из реестра клавиатуры (Т-45): сами команды клавиш не знают.
 
+import { startCompletion } from "@codemirror/autocomplete";
 import { EditorSelection, type ChangeSpec, type EditorState } from "@codemirror/state";
 import type { Line } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
@@ -156,9 +157,20 @@ const table: EditorCommand = (view) => {
   return true;
 };
 
-/** Ссылка на документ: путь вводится вручную; выбор документа через `[[` — этап 3.5.2 (Т-30). */
+/** Ссылка на документ (Т-30): без выделения открывает тот же выбор, что `[[`; с выделением оборачивает его в `[…]()`. */
 const link: EditorCommand = (view) => {
   const { state } = view;
+  if (state.selection.ranges.every((range) => range.empty)) {
+    view.dispatch(
+      state.changeByRange((range) => ({
+        changes: { from: range.from, insert: "[[]]" },
+        range: EditorSelection.cursor(range.from + 2),
+      })),
+      { userEvent: "input.markup", scrollIntoView: true },
+    );
+    startCompletion(view);
+    return true;
+  }
   view.dispatch(
     state.changeByRange((range) => {
       if (range.empty) {

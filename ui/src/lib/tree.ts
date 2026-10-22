@@ -16,6 +16,8 @@ export interface TreeNode {
   children: TreeNode[];
   /** Исходный путь индекса от корня проекта; только у файла. */
   documentPath?: string;
+  /** Заголовок документа из индекса; только у файла. */
+  title?: string;
   /** Исходный путь `Index.md` папки или модуля (Т-32); клик по имени папки открывает его. */
   indexPath?: string;
 }
@@ -66,7 +68,7 @@ export function buildTree(documents: TreeDocument[], docsRoot: string): TreeNode
           kind: isFile ? "file" : "dir",
           chunks: 0,
           children: [],
-          ...(isFile ? { documentPath: document.path } : {}),
+          ...(isFile ? { documentPath: document.path, title: document.title } : {}),
         };
         node.children.push(child);
       }

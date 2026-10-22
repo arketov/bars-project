@@ -5,17 +5,22 @@
   import { Annotation, Compartment, EditorState, StateEffect, StateField } from "@codemirror/state";
   import { Decoration, EditorView, keymap, type DecorationSet } from "@codemirror/view";
   import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
-  import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
+  import { autocompletion, closeBrackets, closeBracketsKeymap, startCompletion, type CompletionContext } from "@codemirror/autocomplete";
   import { markdown, markdownKeymap, markdownLanguage } from "@codemirror/lang-markdown";
   import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
   import { languages } from "@codemirror/language-data";
   import { tags } from "@lezer/highlight";
   import { commandAdapter } from "./command-adapters";
   import { deleteStarPair, editorCommands, moveInTable, starInput } from "./editor-commands";
+  import { linkOptions, semanticOptions, type LinkOption, type LinkTarget } from "./link-picker";
 
-  let { text, readonly = false, hit = null, label = "Редактор Markdown", oninput }: {
+  let { text, readonly = false, hit = null, label = "Редактор Markdown", links = () => [], semantic, oninput }: {
     text: string;
     readonly?: boolean;
+    /** Документы проекта для выбора по `[[` (Т-30). */
+    links?: () => LinkTarget[];
+    /** Документы из поиска по смыслу по набранному после `[[`; показываются ниже совпадений по названию. */
+    semantic?: (query: string) => Promise<LinkTarget[]>;
     /** Найденный отрывок, строки с 1; подсветка снимается первой правкой. */
     hit?: { first: number; last: number } | null;
     label?: string;
@@ -89,6 +94,69 @@
     return editorCommands[id]?.(view) ?? false;
   }
 
+  /** `[[` открывает выбор документа; закрывающие `]]`, которые поставил автопар, уходят вместе с набранным. */
+  const SEMANTIC_DELAY = 250, SEMANTIC_MIN = 3;
+
+  function linkResult(context: CompletionContext, before: { from: number }, options: LinkOption[], base: number) {
+    if (!options.length) return null;
+    const after = context.state.sliceDoc(context.pos, context.pos + 2);
+    const tail = after === "]]" ? 2 : 0;
+    return {
+      from: before.from,
+      to: context.pos,
+      filter: false,
+      options: options.map((option, index) => ({
+        label: option.label,
+        detail: option.detail,
+        type: option.create ? "text" : "file",
+        boost: base - index,
+        apply: (v: EditorView, _c: unknown, from: number, to: number) => {
+          v.dispatch({
+            changes: { from, to: to + tail, insert: option.insert },
+            selection: { anchor: from + option.insert.length },
+            userEvent: "input.complete",
+          });
+        },
+      })),
+    };
+  }
+
+  // Поиск по смыслу идёт в фоне по паузе в наборе: список сразу показывает совпадения по названию, а документы
+  // из поиска дописываются ниже, когда ответ пришёл. «Создать ссылку» всегда последняя.
+  let semanticState: { query: string; found: LinkTarget[] | null } = { query: "", found: null };
+  let semanticTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function requestSemantic(query: string): void {
+    if (!semantic || semanticState.query === query) return;
+    semanticState = { query, found: null };
+    clearTimeout(semanticTimer);
+    semanticTimer = setTimeout(() => {
+      semantic(query).then((found) => {
+        if (semanticState.query !== query) return;
+        semanticState = { query, found };
+        if (view) startCompletion(view);
+      }).catch(() => { /* поиск недоступен: остаются совпадения по названию */ });
+    }, SEMANTIC_DELAY);
+  }
+
+  /** Совпадения по названию, имени и пути — сразу, затем документы из поиска по смыслу, в конце «Создать ссылку». */
+  function linkSource(context: CompletionContext) {
+    if (readonly) return null;
+    const before = context.matchBefore(/\[\[[^\][\n]*/);
+    if (!before) return null;
+    const query = before.text.slice(2).trim();
+    const all = links();
+    const local = linkOptions(all, query);
+    let options = local;
+    if (semantic && query.length >= SEMANTIC_MIN) {
+      requestSemantic(query);
+      if (semanticState.query === query && semanticState.found) {
+        options = [...local.filter((o) => !o.create), ...semanticOptions(all, semanticState.found, local), ...local.filter((o) => o.create)];
+      }
+    }
+    return linkResult(context, before, options, 1000);
+  }
+
   const adapter = Object.fromEntries(Object.keys(editorCommands).map((id) => [id, {
     run: () => { run(id); },
     reason: () => (readonly ? "Документ только для чтения" : undefined),
@@ -114,6 +182,7 @@
         extensions: [
           history(),
           closeBrackets(),
+          autocompletion({ override: [linkSource], icons: false, defaultKeymap: true }),
           syntaxHighlighting(style),
           markdown({ base: markdownLanguage, codeLanguages: languages }),
           keymap.of([

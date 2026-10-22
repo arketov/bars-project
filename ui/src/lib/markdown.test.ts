@@ -64,6 +64,13 @@ describe("renderChunk и plainText", () => {
     expect(html).toContain('<span class="a">корень</span>');
   });
 
+  it("[[ссылка]] как в Obsidian — активная, с псевдонимом показывает псевдоним, в коде остаётся текстом", () => {
+    const html = renderDocument("[[План]] и [[папка/Файл|подпись]] и `[[код]]`\n");
+    expect(html).toContain('<a class="a" href="#" data-wiki-link="План">План</a>');
+    expect(html).toContain('<a class="a" href="#" data-wiki-link="папка/Файл|подпись">подпись</a>');
+    expect(html).toContain("<code>[[код]]</code>");
+  });
+
   it("путь ссылки считается от документа и не выходит за корень проекта", async () => {
     const { resolveDocumentLink } = await import("./markdown");
     expect(resolveDocumentLink("docs/manual/new-topics.md", "../features/new-topics/plan.md#a")).toBe("docs/features/new-topics/plan.md");

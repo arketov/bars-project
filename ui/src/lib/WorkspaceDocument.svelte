@@ -7,9 +7,10 @@
   import { catalog } from "./keybindings";
   import { keybindings } from "./keybindings.svelte";
   import { app, type DocumentReference, type ViewedDocument } from "./app.svelte";
-  import { BarsError, type ReadOutput } from "./types";
+  import { BarsError, type ReadOutput, type SearchOutput } from "./types";
   import { documentHeadings, renderDocument, resolveDocumentLink } from "./markdown";
   import { loadBacklinks, type Backlink, type Backlinks } from "./backlinks";
+  import { linkTargets, resolveWikilink } from "./link-picker";
   let { project, hit, initial }: { project: string; hit: DocumentReference; initial?: ViewedDocument } = $props();
   let doc = $state<ViewedDocument | null>(null), error = $state("");
   // Т-29: документ открывается в редакторе исходного Markdown; глаз переключает его на рендер.
@@ -101,12 +102,20 @@
     return () => { cancelled = true; };
   });
   const openBacklink = (item: Backlink) => void app.openDocument({ path: item.path, title: item.title, first_line: item.lines[0] ?? 0, last_line: item.lines[0] ?? 0 });
+  /** Документы проекта из того же поиска, что и в главном окне (по смыслу), для выбора по `[[`; порядок — как в выдаче. */
+  async function semanticLinks(query: string) {
+    const output = await call<SearchOutput>("search", { cwd: project, project, query, modules: [], files: [], limit: 10 });
+    const byPath = new Map(linkTargets(app.tree, app.docsRoot).map((target) => [target.path, target]));
+    return output.results.flatMap((result) => byPath.get(result.path) ?? []);
+  }
   /** Ссылка на другой `.md` открывает его в окне; путь считается от документа, в котором ссылка стоит. */
   function followLink(event: MouseEvent) {
-    const link = (event.target as HTMLElement).closest<HTMLElement>("a[data-doc-link]");
+    const link = (event.target as HTMLElement).closest<HTMLElement>("a[data-doc-link], a[data-wiki-link]");
     if (!link) return;
     event.preventDefault();
-    const path = resolveDocumentLink(hit.path, link.dataset.docLink ?? "");
+    const path = link.dataset.wikiLink !== undefined
+      ? resolveWikilink(linkTargets(app.tree, app.docsRoot), hit.path, link.dataset.wikiLink)?.path
+      : resolveDocumentLink(hit.path, link.dataset.docLink ?? "");
     if (path) void app.openDocument({ path, title: path.split("/").pop() ?? path, first_line: 0, last_line: 0 });
   }
   function scroll(line: number) {
@@ -148,7 +157,7 @@
       {#if cheat}<div class="cheat" role="note"><code># Заголовок</code> · <code>**жирный**</code> · <code>*курсив*</code> · <code>`код`</code> · <code>- пункт</code> · <code>1. пункт</code> · <code>- [ ] задача</code> · <code>&gt; цитата</code> · <code>[текст](путь.md)</code> · <code>| а | б |</code> — таблица; <code>Tab</code> переходит по ячейкам, <code>Enter</code> продолжает список.</div>{/if}
     {/if}
     <div class="body" class:editing={source} bind:this={body}>
-      {#if source}<Editor bind:this={editor} text={text} readonly={!buffer || buffer.status === "readonly" || buffer.status === "loading"} hit={range} oninput={(value) => buffer?.edit(value)} />
+      {#if source}<Editor bind:this={editor} text={text} links={() => linkTargets(app.tree, app.docsRoot)} semantic={semanticLinks} readonly={!buffer || buffer.status === "readonly" || buffer.status === "loading"} hit={range} oninput={(value) => buffer?.edit(value)} />
       {:else}<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions --><div class="md" onclick={followLink}>{@html html}</div>{/if}
     </div>
     <footer class="backlinks" aria-label="Ссылаются на этот документ">

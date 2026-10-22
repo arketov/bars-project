@@ -475,6 +475,7 @@ pub fn build_cancellable(
         let mut headings: Vec<Heading> = Vec::new();
         let mut paragraphs = Vec::new();
         let mut links = Vec::new();
+        let mut code: Vec<Range<usize>> = Vec::new();
         let mut current: Option<(Range<usize>, u8, String)> = None;
         for (event, range) in Parser::new_ext(
             &source.text[start..],
@@ -486,6 +487,9 @@ pub fn build_cancellable(
                 return Err(GraphError::Cancelled);
             }
             let range = range.start + start..range.end + start;
+            if matches!(event, Event::Code(_) | Event::Start(Tag::CodeBlock(_))) {
+                code.push(range.clone());
+            }
             match event {
                 Event::Start(Tag::Heading { level, .. })
                     if source.text[range.clone()].trim_start().starts_with('#') =>
@@ -593,6 +597,7 @@ pub fn build_cancellable(
             }
             assertions(&mut data, &source, owner_id, range)?;
         }
+        let wikis = wikilinks(&source.text, start, &code, &links);
         for (range, target) in links {
             let proof = evidence(&mut data, &source, range.clone(), "markdown-link-v1")?;
             pending.push((
@@ -600,6 +605,17 @@ pub fn build_cancellable(
                 owner(range.start).to_string(),
                 proof,
                 target,
+                false,
+            ));
+        }
+        for (range, target) in wikis {
+            let proof = evidence(&mut data, &source, range.clone(), "markdown-link-v1")?;
+            pending.push((
+                source.meta.docs_path.clone(),
+                owner(range.start).to_string(),
+                proof,
+                target,
+                true,
             ));
         }
         let mut previous: Option<String> = None;
@@ -682,9 +698,34 @@ pub fn build_cancellable(
         }
         data.sources.push(source);
     }
-    for (path, owner, proof, target) in pending {
+    for (path, owner, proof, target, wiki) in pending {
         if cancelled() {
             return Err(GraphError::Cancelled);
+        }
+        if wiki {
+            match wikilink_name(&target) {
+                // `[[#раздел]]` — ссылка внутри документа, ребра не даёт.
+                None => {}
+                Some(name) => match resolve_wikilink(&data.sources, &path, &name) {
+                    Some(id) => edge(
+                        &mut data,
+                        &owner,
+                        &id,
+                        Predicate::LinksTo,
+                        Polarity::Positive,
+                        BTreeMap::new(),
+                        Origin::Structural,
+                        &proof,
+                    )?,
+                    None => data.broken_links.push(BrokenLink {
+                        source: owner,
+                        evidence: proof,
+                        target: format!("[[{target}]]"),
+                        reason: "target_not_indexed".into(),
+                    }),
+                },
+            }
+            continue;
         }
         if target.contains(':') || target.starts_with("//") {
             continue;
@@ -773,6 +814,71 @@ fn decode_percent(text: &str) -> Option<String> {
     }
     String::from_utf8(bytes).ok()
 }
+/// Ссылки `[[…]]` (как в Obsidian) вне кода и вне обычных ссылок; возвращает диапазон и текст между скобками.
+fn wikilinks(
+    text: &str,
+    start: usize,
+    code: &[Range<usize>],
+    links: &[(Range<usize>, String)],
+) -> Vec<(Range<usize>, String)> {
+    let mut found = Vec::new();
+    let mut at = start;
+    while let Some(open) = text[at..].find("[[") {
+        let open = at + open;
+        let body = open + 2;
+        let line_end = text[body..].find('\n').map_or(text.len(), |n| body + n);
+        let Some(close) = text[body..line_end].find("]]") else {
+            at = body;
+            continue;
+        };
+        let close = body + close;
+        let inner = &text[body..close];
+        let range = open..close + 2;
+        at = close + 2;
+        if inner.trim().is_empty() || inner.contains('[') || inner.contains(']') {
+            continue;
+        }
+        let overlaps = |r: &Range<usize>| r.start < range.end && range.start < r.end;
+        if code.iter().any(overlaps) || links.iter().any(|(r, _)| overlaps(r)) {
+            continue;
+        }
+        found.push((range, inner.to_string()));
+    }
+    found
+}
+
+/// Имя документа из `Название`, `Название|текст`, `папка/Название#раздел`; `None` — ссылка на раздел этого же документа.
+fn wikilink_name(inner: &str) -> Option<String> {
+    let name = inner.split('|').next()?.split('#').next()?.trim();
+    let name = name.strip_suffix(".md").or_else(|| name.strip_suffix(".MD")).unwrap_or(name);
+    (!name.trim().is_empty()).then(|| name.trim().to_string())
+}
+
+/// Документ по имени из `[[…]]`: без учёта регистра; имя с `/` сверяется с путём от корня документации,
+/// без `/` — с именем файла. Несколько кандидатов: в папке источника, затем самый короткий путь, затем по алфавиту.
+fn resolve_wikilink(sources: &[SourceDocument], from: &str, name: &str) -> Option<String> {
+    let name = name.replace('\\', "/").to_lowercase();
+    let name = name.trim_matches('/');
+    let from_dir = from.rsplit_once('/').map_or("", |(dir, _)| dir);
+    sources
+        .iter()
+        .filter_map(|source| {
+            let path = source.meta.docs_path.to_lowercase();
+            let stem = path.strip_suffix(".md").unwrap_or(&path);
+            let hit = if name.contains('/') {
+                stem == name || stem.ends_with(&format!("/{name}"))
+            } else {
+                stem.rsplit('/').next() == Some(name)
+            };
+            hit.then(|| {
+                let dir = source.meta.docs_path.rsplit_once('/').map_or("", |(dir, _)| dir);
+                (dir != from_dir, source.meta.docs_path.len(), &source.meta.docs_path, &source.meta.reference.id)
+            })
+        })
+        .min()
+        .map(|(_, _, _, id)| id.clone())
+}
+
 fn resolve_path(source: &str, target: &str) -> Option<String> {
     let target = decode_percent(target)?.replace('\\', "/");
     if target.starts_with('/') || target.contains(':') {
@@ -838,6 +944,75 @@ mod tests {
                 .unwrap();
             assert_eq!(source.text[ev.span.start..ev.span.end], ev.quote);
         }
+    }
+
+    #[test]
+    fn wikilinks_resolve_by_name_path_and_alias_outside_code() {
+        let a = "# А\n[[б]] и [[Папка/в|псевдоним]] и [[#раздел]] и [[нет такого]]\n\n`[[б]]`\n\n```md\n[[б]]\n```\n[текст [[б]]](г.md)\n";
+        let data = build(
+            "test",
+            "docs",
+            vec![
+                input("a.md", a),
+                input("Б.md", "# Б"),
+                input("папка/в.md", "# В"),
+                input("г.md", "# Г"),
+            ],
+        )
+        .unwrap();
+        let id = |path: &str| {
+            data.sources
+                .iter()
+                .find(|s| s.meta.docs_path == path)
+                .unwrap()
+                .meta
+                .reference
+                .id
+                .clone()
+        };
+        let targets: Vec<_> = data
+            .edges
+            .iter()
+            .filter(|e| e.predicate == Predicate::LinksTo)
+            .map(|e| e.to.clone())
+            .collect();
+        // [[б]] → Б.md (регистр не важен), [[Папка/в|псевдоним]] → папка/в.md, обычная ссылка → г.md;
+        // код, внутренний `[[#раздел]]` и `[[б]]` внутри обычной ссылки рёбер не дают.
+        assert_eq!(targets.len(), 3, "{targets:?}");
+        assert!(targets.contains(&id("Б.md")));
+        assert!(targets.contains(&id("папка/в.md")));
+        assert!(targets.contains(&id("г.md")));
+        assert_eq!(data.broken_links.len(), 1);
+        assert_eq!(data.broken_links[0].target, "[[нет такого]]");
+    }
+
+    #[test]
+    fn wikilink_with_equal_names_prefers_folder_of_source() {
+        let data = build(
+            "test",
+            "docs",
+            vec![
+                input("x/a.md", "[[общий]]"),
+                input("x/общий.md", "# 1"),
+                input("y/общий.md", "# 2"),
+            ],
+        )
+        .unwrap();
+        let near = data
+            .sources
+            .iter()
+            .find(|s| s.meta.docs_path == "x/общий.md")
+            .unwrap()
+            .meta
+            .reference
+            .id
+            .clone();
+        let edge = data
+            .edges
+            .iter()
+            .find(|e| e.predicate == Predicate::LinksTo)
+            .unwrap();
+        assert_eq!(edge.to, near);
     }
     #[test]
     fn polarity_condition_and_link_are_distinct() {
