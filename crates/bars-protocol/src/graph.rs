@@ -1,5 +1,6 @@
 use crate::Target;
 pub use bars_graph::GraphStatus;
+pub use bars_graph::physical::{PhysicalGraphSlice, PhysicalRequest};
 pub use bars_graph::{GraphReply, GraphRequest};
 use serde::{Deserialize, Serialize};
 
@@ -8,6 +9,14 @@ pub struct GraphQueryParams {
     #[serde(flatten)]
     pub target: Target,
     pub request: GraphRequest,
+}
+/// Срез физического графа для окна (`physical-v1`); только окно, MCP и CLI его не получают.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct GraphPhysicalParams {
+    #[serde(flatten)]
+    pub target: Target,
+    #[serde(default)]
+    pub request: PhysicalRequest,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct GraphStatusParams {

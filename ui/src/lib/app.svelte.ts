@@ -73,6 +73,10 @@ class App {
   includeRelated = $state(true);
   graphSearch = $state<GraphSearchOutput|null>(null);
   graphPreview = $state<GraphReply|null>(null);
+  /** Вкладка «Граф» показывает анализ связей (пути, влияние, контекст), а не физическую карту. */
+  graphAnalysis = $state(false);
+  /** Узел, который полный граф выберет после открытия вкладки («В графе» из мини-графа). */
+  graphFocus = $state<string | null>(null);
   /** Число результатов на этот запрос; `null` — по умолчанию из настроек. */
   count = $state<number | null>(null);
   defaultCount = $state(5);

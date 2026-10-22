@@ -947,6 +947,7 @@ methods! {
     GraphSearch: crate::GraphSearchParams => crate::GraphSearchOutput, "graph_search", All;
     GraphQuery: crate::GraphQueryParams => crate::GraphReply, "graph_query", All;
     GraphStatus: crate::GraphStatusParams => crate::GraphStatus, "graph_status", All;
+    GraphPhysical: crate::GraphPhysicalParams => crate::PhysicalGraphSlice, "graph_physical", Window;
     GraphBuild: crate::GraphBuildParams => crate::GraphAcceptedOutput, "graph_build", Cli;
     GraphCancel: crate::GraphCancelParams => CancelOutput, "graph_cancel", Cli;
     OperationEvents: crate::OperationEventsParams => crate::OperationEventsOutput, "operation_events", Window;

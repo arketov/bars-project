@@ -195,4 +195,117 @@ impl WorkerHandler {
         .await
         .map_err(internal)?
     }
+    /// Срез физического графа для окна: ссылки и близость чанков из готового графа, близость документов — по centroid готовых векторов.
+    pub(super) async fn graph_physical(
+        &self,
+        params: bars_protocol::GraphPhysicalParams,
+    ) -> Result<bars_protocol::PhysicalGraphSlice, RpcError> {
+        use bars_core::graph::LayerState;
+        use bars_core::graph::centroid::{self, DocumentSimilarity};
+        use bars_core::graph::physical::{self, Layer};
+        use bars_core::graph::similarity::StopReason;
+        let project = self.resolve(&params.target)?;
+        if !index_path(&project).exists() {
+            return Err(graph_error(GraphError::NotReady(
+                "индекс ещё не построен".into(),
+            )));
+        }
+        let gate = self
+            .worker
+            .gate(&project)
+            .map_err(worker_error)?
+            .read_owned()
+            .await;
+        let cache = self.physical_similarity.clone();
+        tokio::task::spawn_blocking(move || {
+            let _gate = gate;
+            let index = Index::open_read_only(&index_path(&project)).map_err(internal)?;
+            let data = store::load(index.conn()).map_err(graph_error)?;
+            let request = params.request;
+            query::validate_scope(&data, &request.scope).map_err(graph_error)?;
+            // Расчёт близости документов дорогой, а раскрытие чанков и «Показать ещё» повторяют запрос на том же снимке.
+            let cached = {
+                let slot = cache.lock().unwrap_or_else(|e| e.into_inner());
+                slot.as_ref()
+                    .filter(|(path, snapshot, _)| path == &project && snapshot == &data.snapshot)
+                    .map(|(_, _, value)| value.clone())
+            };
+            let similarity: std::sync::Arc<DocumentSimilarity> = match cached {
+                Some(value) => value,
+                None => {
+                    let value = std::sync::Arc::new(
+                        centroid::document_similarity(&index, &data, || false)
+                            .map_err(graph_error)?,
+                    );
+                    *cache.lock().unwrap_or_else(|e| e.into_inner()) =
+                        Some((project.clone(), data.snapshot.clone(), value.clone()));
+                    value
+                }
+            };
+            let layer = |state: LayerState, note: String| Layer { state, note };
+            let document_similarity = if similarity.documents == 0 || similarity.covered == 0 {
+                layer(
+                    LayerState::Failed,
+                    "Близость документов недоступна: у документов нет готовых векторов".into(),
+                )
+            } else if similarity.covered < similarity.documents || similarity.stopped.is_some() {
+                let mut note = format!(
+                    "Близость документов посчитана для {} из {} документов",
+                    similarity.covered, similarity.documents
+                );
+                if let Some((path, reason)) = similarity.skipped.first() {
+                    note.push_str(&format!("; например, {path}: {reason}"));
+                }
+                if similarity.stopped == Some(StopReason::ComparisonLimit) {
+                    note.push_str(&format!(
+                        "; расчёт остановлен по пределу сравнений ({}/{} строк)",
+                        similarity.rows.0, similarity.rows.1
+                    ));
+                }
+                layer(LayerState::Partial, note)
+            } else {
+                layer(
+                    LayerState::Ready,
+                    format!(
+                        "Документные представления по готовым векторам ({})",
+                        centroid::METHOD
+                    ),
+                )
+            };
+            // kNN считается по всему проекту, область лишь отбирает пары: у документа в узкой области может быть меньше k соседей.
+            let narrowed = !request.scope.modules.is_empty() || !request.scope.files.is_empty();
+            let document_similarity = if narrowed && document_similarity.state == LayerState::Ready {
+                layer(
+                    LayerState::Partial,
+                    format!(
+                        "{}; ближайшие документы выбраны по всему проекту, область лишь отбирает пары",
+                        document_similarity.note
+                    ),
+                )
+            } else {
+                document_similarity
+            };
+            let chunk_partial = data
+                .warnings
+                .iter()
+                .find(|w| w.starts_with("Граф близости частичный"));
+            let inputs = physical::LayerInputs {
+                markdown_link: layer(
+                    LayerState::Ready,
+                    "Ссылки разрешены Markdown-парсером".into(),
+                ),
+                document_similarity,
+                chunk_similarity: match chunk_partial {
+                    Some(note) => layer(LayerState::Partial, note.clone()),
+                    None => layer(
+                        LayerState::Ready,
+                        "Близость чанков по готовым векторам, k=5, tau=0,5".into(),
+                    ),
+                },
+            };
+            physical::project(&data, &similarity.pairs, &request, inputs).map_err(graph_error)
+        })
+        .await
+        .map_err(internal)?
+    }
 }

@@ -53,7 +53,19 @@ pub struct WorkerHandler {
     worker: Worker,
     history: crate::mcp_history::History,
     topics: crate::new_topics::Collector,
+    /// Близость документов последнего среза физического графа: проект, снимок графа, результат.
+    physical_similarity: PhysicalSimilarityCache,
 }
+
+type PhysicalSimilarityCache = std::sync::Arc<
+    std::sync::Mutex<
+        Option<(
+            std::path::PathBuf,
+            String,
+            std::sync::Arc<bars_core::graph::centroid::DocumentSimilarity>,
+        )>,
+    >,
+>;
 
 impl WorkerHandler {
     pub fn new(worker: Worker) -> Self {
@@ -64,6 +76,7 @@ impl WorkerHandler {
             worker,
             history,
             topics: crate::new_topics::Collector::new(),
+            physical_similarity: Default::default(),
         }
     }
 
@@ -1038,6 +1051,10 @@ impl WorkerHandler {
             }
             Call::GraphStatus(params) => self
                 .graph_status(params)
+                .await
+                .map(|out| output_value(&out)),
+            Call::GraphPhysical(params) => self
+                .graph_physical(params)
                 .await
                 .map(|out| output_value(&out)),
             Call::GraphBuild(_) => unreachable!(),

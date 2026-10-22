@@ -28,4 +28,4 @@ title: ADR-0004 — физика d3-force в worker и отрисовка Canvas
 
 ## Где применяется
 
-Пока только [воспроизводимый стенд](../../spikes/graph-physics/README.md) и [измерения](../chats/2026-10-21-graph-physics/run-3/measurement.json). Текущий `ui/src/lib/graph-renderer.ts` остаётся на Cytoscape. Следующая продуктовая реализация проверяет это предложение на согласованном дизайне и в настоящем окне.
+Стенд 2.1.4 ([дизайн](../features/graphrag/physical-graph-design.md)) и продуктовая панель 2.1.5: d3-force в Web Worker окна и Canvas2D, `ui/src/lib/graph/` ([реализация — раздел «Модули реализации» проекта физического графа](../features/graphrag/physical-graph.md)). Исходный [воспроизводимый стенд](../../spikes/graph-physics/README.md) и [измерения](../chats/2026-10-21-graph-physics/run-3/measurement.json) сохранены. Cytoscape остаётся только в экране анализа до переноса его действий GR-05 (этап 2.3). Статус не меняется: автор принял макет и поручил реализацию, но не утверждал ADR отдельным решением.

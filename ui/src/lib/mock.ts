@@ -284,6 +284,7 @@ function status(path: string): StatusOutput {
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function mockCall(method: string, params: Record<string, unknown>): Promise<unknown> {
+  if(method==='graph_physical')return (await import('./mock-physical')).physicalFixture(params);
   if(['graph_query','graph_status','graph_build','graph_cancel'].includes(method))return (await import('./mock-graph')).graphFixture(method,params);
   if(method==='graph_search'){
     const mode=String(params.mode??'hybrid'),graph=(await import('./mock-graph')).graphFixture('graph_query',{request:{operation:mode==='graph'?'relations':'paths',view:'mixed'}});

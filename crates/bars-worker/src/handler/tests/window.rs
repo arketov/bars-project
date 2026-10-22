@@ -57,6 +57,118 @@ async fn operation_events_window_dispatch_keeps_short_terminal_outcome_and_retry
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn physical_graph_slice_is_window_only_and_expands_chunks_on_the_same_snapshot() {
+    use bars_core::graph::LayerState;
+    use bars_core::graph::physical::{ExpandedDocument, PhysicalEdgeKind, PhysicalNodeKind};
+    use bars_protocol::{
+        GraphPhysicalParams, GraphStatus, GraphStatusParams, PhysicalGraphSlice, PhysicalRequest,
+        Target,
+    };
+    let env = Window::new();
+    let root = env.projects.path().join("физика");
+    fs::create_dir_all(root.join("docs/features")).unwrap();
+    fs::write(
+        root.join("docs/features/a.md"),
+        "# Альфа\n\nТекст про индексацию.\n\n## Раздел\n\nСсылка на [бета](b.md) и ещё раз [бета](b.md#бета).\n",
+    )
+    .unwrap();
+    fs::write(
+        root.join("docs/features/b.md"),
+        "# Бета\n\nОбратная ссылка на [альфа](a.md).\n",
+    )
+    .unwrap();
+    fs::write(root.join("docs/lonely.md"), "# Один\n\nБез ссылок.\n").unwrap();
+    let target = Target {
+        cwd: root.display().to_string(),
+        project: Some(root.display().to_string()),
+    };
+    let params = |request: PhysicalRequest| {
+        Call::GraphPhysical(GraphPhysicalParams {
+            target: target.clone(),
+            request,
+        })
+    };
+    let call = params(PhysicalRequest::default());
+    assert!(call.window_only());
+    assert!(!call.allowed_for(ClientKind::Mcp));
+    assert!(!call.allowed_for(ClientKind::Cli));
+    env.worker.register(&root).unwrap();
+    env.idle().await;
+    let deadline = Instant::now() + Duration::from_secs(30);
+    loop {
+        let status: GraphStatus = env
+            .call(Call::GraphStatus(GraphStatusParams {
+                target: target.clone(),
+            }))
+            .await;
+        if status.state == LayerState::Partial {
+            break;
+        }
+        assert!(Instant::now() < deadline, "граф не построился: {status:?}");
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+    let slice: PhysicalGraphSlice = env.call(call).await;
+    assert_eq!(slice.method, "physical-v1");
+    let documents: Vec<_> = slice
+        .nodes
+        .iter()
+        .filter(|n| n.kind == PhysicalNodeKind::Document)
+        .collect();
+    assert_eq!(documents.len(), 3);
+    assert!(
+        slice
+            .nodes
+            .iter()
+            .all(|n| n.kind == PhysicalNodeKind::Document)
+    );
+    let links: Vec<_> = slice
+        .edges
+        .iter()
+        .filter(|e| e.kind == PhysicalEdgeKind::MarkdownLink)
+        .collect();
+    assert_eq!(links.len(), 2, "A→B и B→A, повтор ссылки не создаёт ребра");
+    assert!(links.iter().any(|e| e.lines == vec![7]), "{links:?}");
+    assert!(!slice.truncated);
+    let alpha = documents
+        .iter()
+        .find(|n| n.docs_path == "features/a.md")
+        .unwrap();
+    assert!(alpha.chunks >= 1);
+    // Раскрытие того же документа на том же снимке добавляет его чанки с номерами строк источника.
+    let expanded: PhysicalGraphSlice = env
+        .call(params(PhysicalRequest {
+            snapshot: Some(slice.snapshot.clone()),
+            expanded: vec![ExpandedDocument {
+                document: alpha.id.clone(),
+                shown: 50,
+            }],
+            ..Default::default()
+        }))
+        .await;
+    assert_eq!(expanded.snapshot, slice.snapshot);
+    let chunks: Vec<_> = expanded
+        .nodes
+        .iter()
+        .filter(|n| n.kind == PhysicalNodeKind::Chunk)
+        .collect();
+    assert_eq!(chunks.len(), alpha.chunks);
+    assert!(
+        chunks
+            .iter()
+            .all(|c| c.owner == alpha.id && c.first_line >= 1)
+    );
+    // Устаревший снимок не склеивается со свежим.
+    let error = env
+        .error(params(PhysicalRequest {
+            snapshot: Some("старый".into()),
+            ..Default::default()
+        }))
+        .await;
+    assert!(error.message.contains("снимок"), "{error:?}");
+    env.worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn project_deletion_requires_confirmation_and_is_window_only() {
     use bars_protocol::ProjectDeleteParams;
     let env = Window::new();

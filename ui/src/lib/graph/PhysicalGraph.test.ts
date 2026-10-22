@@ -1,0 +1,188 @@
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import { flushSync, mount, tick, unmount } from "svelte";
+import PhysicalGraph from "./PhysicalGraph.svelte";
+import { app } from "../app.svelte";
+import { BarsError } from "../types";
+import { physicalFixture } from "../mock-physical";
+
+const { rpc } = vi.hoisted(() => ({ rpc: vi.fn() }));
+vi.mock("../api", () => ({
+  call: rpc,
+  inTauri: () => true,
+  joinPath: async (a: string, b: string) => a + "/" + b,
+  openPath: vi.fn(),
+  pickFolder: vi.fn(),
+}));
+
+let component: ReturnType<typeof mount> | null = null;
+let target: HTMLDivElement;
+const physicalCalls = () => rpc.mock.calls.filter((c) => c[0] === "graph_physical").map((c) => c[1].request);
+const settle = async () => {
+  for (let i = 0; i < 4; i++) {
+    await tick();
+    await new Promise((r) => setTimeout(r, 5));
+  }
+  flushSync();
+};
+const panel = () => target.querySelector<HTMLElement>(".pg")!;
+const button = (text: string) => [...target.querySelectorAll<HTMLButtonElement>("button")].find((b) => b.textContent?.trim().startsWith(text));
+
+beforeEach(() => {
+  localStorage.clear();
+  rpc.mockReset();
+  app.projects = [{ path: "C:/a", name: "A", docs_root: "docs", state: "ready", modules: [] }];
+  app.current = "C:/a";
+  app.tree = [];
+  app.selected = new Set();
+  app.graphFocus = null;
+  rpc.mockImplementation(async (method: string, params: Record<string, unknown>) => {
+    if (method === "graph_status") return { state: "partial", snapshot: "mock-snapshot-0001", active_job: null, source_count: 36, error: null, method: "x" };
+    if (method === "graph_physical") return physicalFixture(params);
+    return {};
+  });
+  target = document.createElement("div");
+  document.body.append(target);
+});
+
+afterEach(async () => {
+  if (component) await unmount(component);
+  component = null;
+  target.remove();
+  app.current = null;
+  app.projects = [];
+});
+
+it("загружает срез проекта с начальными пределами и показывает документы, режимы и счётчики", async () => {
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  const request = physicalCalls()[0];
+  expect(request).toMatchObject({ limits: { max_documents: 500, max_chunks: 500, max_edges: 4000 }, expanded: [], snapshot: null, scope: { modules: [], files: [] } });
+  expect(panel().dataset.loaded).toBe("true");
+  expect(panel().dataset.nodes).toBe("36");
+  expect(target.textContent).toContain("Документы 36 из 36");
+  const radios = [...target.querySelectorAll('[role="radio"]')].map((b) => b.textContent!.replace(/\s+/g, " ").trim());
+  expect(radios.some((r) => r.startsWith("Ссылки"))).toBe(true);
+  expect(radios.some((r) => r.startsWith("По смыслу ") || r === "По смыслу")).toBe(true);
+  // По умолчанию режим «Ссылки»: на карте только ссылки.
+  expect(panel().dataset.mode).toBe("links");
+  expect(Number(panel().dataset.links)).toBeGreaterThan(0);
+});
+
+it("смена режима перекладывает связи и сохраняется отдельно для полного графа", async () => {
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  const links = Number(panel().dataset.links);
+  [...target.querySelectorAll<HTMLButtonElement>('[role="radio"]')].find((b) => b.textContent!.includes("Все связи"))!.click();
+  await settle();
+  expect(panel().dataset.mode).toBe("all");
+  expect(Number(panel().dataset.links)).toBeGreaterThan(links);
+  expect(JSON.parse(localStorage.getItem("bars.graph.full.C:/a")!).mode).toBe("all");
+  expect(localStorage.getItem("bars.graph.mini.C:/a")).toBeNull();
+});
+
+it("раскрытие документа запрашивает его чанки порциями по 50 на том же снимке", async () => {
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  target.querySelector<HTMLButtonElement>('[aria-label="Показать списком"]')!.click();
+  await settle();
+  const row = [...target.querySelectorAll<HTMLButtonElement>(".list li button")].find((b) => b.textContent!.includes("Документ 7:"))!;
+  row.click();
+  await settle();
+  button("Раскрыть чанки (120)")!.click();
+  await settle();
+  let request = physicalCalls().at(-1)!;
+  expect(request.expanded).toEqual([{ document: "doc-7", shown: 50 }]);
+  expect(request.snapshot).toBe("mock-snapshot-0001");
+  expect(target.textContent).toContain("Показано 50 из 120 чанков");
+  expect(target.textContent).toMatch(/По смыслу · чанки\s*\d+/);
+  button("Ещё 50")!.click();
+  await settle();
+  request = physicalCalls().at(-1)!;
+  expect(request.expanded).toEqual([{ document: "doc-7", shown: 100 }]);
+  button("Свернуть чанки")!.click();
+  await settle();
+  expect(target.textContent).not.toContain("Показано 100 из 120 чанков");
+});
+
+it("усечённый срез объясняет причину и продолжается увеличением пределов на том же снимке", async () => {
+  rpc.mockImplementation(async (method: string, params: Record<string, unknown>) => {
+    if (method === "graph_status") return { state: "partial", snapshot: "mock-snapshot-0001", active_job: null };
+    const request = params.request as { limits: { max_documents: number } };
+    return physicalFixture({ ...params, request: { ...request, limits: { ...request.limits, max_documents: Math.min(request.limits.max_documents, 12) } } });
+  });
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  expect(target.textContent).toContain("Граф усечён");
+  expect(target.textContent).toContain("документов показано 12 из 36");
+  button("Показать ещё")!.click();
+  await settle();
+  expect(physicalCalls().at(-1)!.limits.max_documents).toBe(1000);
+  expect(physicalCalls().at(-1)!.snapshot).toBe("mock-snapshot-0001");
+});
+
+it("устаревший снимок при раскрытии приводит к повторной загрузке без снимка", async () => {
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  let first = true;
+  rpc.mockImplementation(async (method: string, params: Record<string, unknown>) => {
+    if (method === "graph_status") return { state: "partial", snapshot: "mock-snapshot-0001", active_job: null };
+    if (first && (params.request as { snapshot: string | null }).snapshot) {
+      first = false;
+      throw new BarsError("снимок графа устарел", "snapshot_expired");
+    }
+    return physicalFixture(params);
+  });
+  target.querySelector<HTMLButtonElement>('[aria-label="Показать списком"]')!.click();
+  await settle();
+  [...target.querySelectorAll<HTMLButtonElement>(".list li button")].find((b) => b.textContent!.includes("Документ 7:"))!.click();
+  await settle();
+  button("Раскрыть чанки (120)")!.click();
+  await settle();
+  const sent = physicalCalls();
+  expect(sent.at(-2)!.snapshot).toBe("mock-snapshot-0001");
+  expect(sent.at(-1)!.snapshot).toBeNull();
+  expect(panel().dataset.loaded).toBe("true");
+});
+
+it("граф не построен: показывает состояние и ставит построение, а не пустую карту", async () => {
+  rpc.mockImplementation(async (method: string) => {
+    if (method === "graph_status") return { state: "stale", snapshot: null, active_job: null };
+    if (method === "graph_physical") throw new BarsError("граф ещё не готов: Stale", "graph_not_ready");
+    return {};
+  });
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  expect(target.textContent).toContain("Граф ещё не построен или устарел");
+  button("Обновить граф")!.click();
+  await settle();
+  expect(rpc.mock.calls.some((c) => c[0] === "graph_build")).toBe(true);
+});
+
+it("смена проекта сбрасывает модель и отбрасывает поздний ответ прежнего", async () => {
+  app.projects = [
+    { path: "C:/a", name: "A", docs_root: "docs", state: "ready", modules: [] },
+    { path: "C:/b", name: "B", docs_root: "docs", state: "ready", modules: [] },
+  ];
+  const gate = { release: () => {} };
+  rpc.mockImplementation(async (method: string, params: Record<string, unknown>) => {
+    if (method === "graph_status") return { state: "partial", snapshot: "mock-snapshot-0001", active_job: null };
+    if (params.project === "C:/a") await new Promise<void>((r) => (gate.release = r));
+    return physicalFixture({ ...params, request: { ...(params.request as object), limits: { max_documents: params.project === "C:/a" ? 20 : 8, max_chunks: 500, max_edges: 4000, max_bytes: 1 << 20 } } });
+  });
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  app.current = "C:/b";
+  await settle();
+  gate.release();
+  await settle();
+  expect(panel().dataset.nodes).toBe("8");
+});
+
+it("«В графе» из мини-графа выбирает узел в полном графе", async () => {
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  app.graphFocus = "doc-3";
+  await settle();
+  expect(app.graphFocus).toBeNull();
+  expect(target.querySelector(".inspector h3")?.textContent).toContain("Документ 3");
+});

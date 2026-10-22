@@ -4,6 +4,7 @@
 //! Сходство не утверждает зависимость, направление факта, отрицание или условие.
 
 mod build;
+pub mod centroid;
 pub mod context;
 pub mod retrieval;
 pub mod similarity;

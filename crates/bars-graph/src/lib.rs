@@ -2,6 +2,7 @@
 //! Контракт: docs/features/graphrag/implementation.md, GR-01…GR-12.
 
 pub mod model;
+pub mod physical;
 pub mod query;
 pub mod source;
 #[cfg(feature = "storage")]

@@ -1,0 +1,94 @@
+{
+  "success": true,
+  "native": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+  "checks": [
+    "bars-project: мини-граф получил срез из воркера (321 документов, 1196 ссылок)",
+    "bars-project: IPC graph_physical — 321 документов, 1196 ссылок, 1320 пар близости, 381769 байт за 261 мс; усечение и устаревший снимок",
+    "bars-project: worker физики загружен приложением, движение началось и закончилось по ответам worker",
+    "bars-project: полный граф — ссылки 1196, по смыслу 1320, все связи 2516",
+    "bars-project: раскрытие «MAIN_IDEA — требования bars» — 37 из 37 чанков за 309 мс",
+    "bars-project: окна 1024, 760 и 1440 px без потери среза",
+    "overdrive-bots: мини-граф получил срез из воркера (330 документов, 1932 ссылок)",
+    "overdrive-bots: IPC graph_physical — 330 документов, 1932 ссылок, 1411 пар близости, 471079 байт за 405 мс; усечение и устаревший снимок",
+    "overdrive-bots: worker физики загружен приложением, движение началось и закончилось по ответам worker",
+    "overdrive-bots: полный граф — ссылки 1932, по смыслу 1411, все связи 3343",
+    "overdrive-bots: раскрытие «Аудит UX окна OVERDRIVE BOTS (09.10.2026)» — 50 из 67 чанков за 515 мс",
+    "overdrive-bots: окна 1024, 760 и 1440 px без потери среза"
+  ],
+  "projects": {
+    "bars-project": {
+      "name": "bars-project",
+      "mini": {
+        "nodes": 321,
+        "links": 1196,
+        "mode": "links"
+      },
+      "ipcMs": 261,
+      "slice": {
+        "documents": 321,
+        "chunks": 1365,
+        "links": 1196,
+        "linksTotal": 1196,
+        "documentPairs": 1320,
+        "documentPairsTotal": 1320,
+        "bytes": 381769,
+        "truncated": false,
+        "layers": {
+          "markdown_link": "ready",
+          "document_similarity": "ready",
+          "chunk_similarity": "partial"
+        }
+      },
+      "full": {
+        "nodes": 321,
+        "links": 1196,
+        "mode": "links",
+        "allLinks": 2516,
+        "meaningLinks": 1320
+      },
+      "expandMs": 309,
+      "expanded": {
+        "document": "MAIN_IDEA — требования bars",
+        "chunks": 37,
+        "shown": 37
+      }
+    },
+    "overdrive-bots": {
+      "name": "overdrive-bots",
+      "mini": {
+        "nodes": 330,
+        "links": 1932,
+        "mode": "links"
+      },
+      "ipcMs": 405,
+      "slice": {
+        "documents": 330,
+        "chunks": 1755,
+        "links": 1932,
+        "linksTotal": 1932,
+        "documentPairs": 1411,
+        "documentPairsTotal": 1411,
+        "bytes": 471079,
+        "truncated": false,
+        "layers": {
+          "markdown_link": "ready",
+          "document_similarity": "ready",
+          "chunk_similarity": "partial"
+        }
+      },
+      "full": {
+        "nodes": 330,
+        "links": 1932,
+        "mode": "links",
+        "allLinks": 3343,
+        "meaningLinks": 1411
+      },
+      "expandMs": 515,
+      "expanded": {
+        "document": "Аудит UX окна OVERDRIVE BOTS (09.10.2026)",
+        "chunks": 67,
+        "shown": 50
+      }
+    }
+  }
+}

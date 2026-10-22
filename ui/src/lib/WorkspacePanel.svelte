@@ -11,6 +11,7 @@
   import WorkerDown from "./WorkerDown.svelte";
   import EmptyProjects from "./EmptyProjects.svelte";
   import Missing from "./Missing.svelte";
+  import GraphTab from "./GraphTab.svelte";
   let { model }: { model: { params: PanelParams; initial?: ViewedDocument; foreground: boolean; attach: (target: HTMLElement, kind: string) => { destroy(): void } } } = $props();
   function attach(target: HTMLElement, kind: string) { return model.attach(target, kind); }
   const project = $derived(app.project);
@@ -32,11 +33,7 @@
   {:else if project.state === "unavailable"}<Missing {project} />
   {:else if kind === "topics"}<NewTopicsPage />
   {:else if kind === "graph"}
-    <div class="graph-shell">
-    {#await import("./GraphPage.svelte")}<p role="status">Загрузка графа…</p>
-    {:then graph}<graph.default />
-    {:catch error}<p role="alert">Не удалось загрузить граф: {String(error)}</p>{/await}
-    </div>
+    <div class="graph-shell"><GraphTab /></div>
   {/if}
 </div>
 

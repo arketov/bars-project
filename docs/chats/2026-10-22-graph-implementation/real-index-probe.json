@@ -1,0 +1,222 @@
+[
+  {
+    "project": "C:/Users/Shket/OneDrive/Рабочий стол/SELF Repository/bars-project",
+    "snapshot": "79c66c27ebe2d018004990208bd593e277f4f0f1fa4bfe393b51a55d831ad821",
+    "documents": 320,
+    "covered": 320,
+    "skipped": [],
+    "pairs_directed": 1600,
+    "cosine_buckets_0_to_1_step_0_1": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      56,
+      610,
+      896,
+      38
+    ],
+    "strongest": [
+      [
+        "overview.md",
+        "Index.md",
+        0.9279999732971191
+      ],
+      [
+        "Index.md",
+        "overview.md",
+        0.9279999732971191
+      ],
+      [
+        "features/graphrag/tools.md",
+        "features/graphrag/requirements.md",
+        0.9269999861717224
+      ],
+      [
+        "features/graphrag/requirements.md",
+        "features/graphrag/tools.md",
+        0.9269999861717224
+      ],
+      [
+        "knowledge/memory.md",
+        "features/models/memory-plan.md",
+        0.9210000038146973
+      ]
+    ],
+    "weakest": [
+      [
+        "chats/2026-10-18-memory-consolidation/log.md",
+        "knowledge/memory.md",
+        0.6230000257492065
+      ],
+      [
+        "chats/2026-10-18-memory-consolidation/log.md",
+        "knowledge/memory-fp16-2026-10-18/Index.md",
+        0.6259999871253967
+      ],
+      [
+        "chats/2026-10-20-update-installer/log.md",
+        "features/distribution/installer.md",
+        0.628000020980835
+      ],
+      [
+        "chats/2026-10-18-memory-consolidation/log.md",
+        "knowledge/memory-acceptance-2026-10-20/Index.md",
+        0.6340000033378601
+      ],
+      [
+        "chats/2026-10-20-update-installer/log.md",
+        "knowledge/build.md",
+        0.6340000033378601
+      ]
+    ],
+    "default_slice": {
+      "nodes": 320,
+      "edges": 2425,
+      "links": 1194,
+      "totals": {
+        "documents": 320,
+        "chunks": 1359,
+        "links": 1194,
+        "document_pairs": 1231
+      },
+      "truncated": false,
+      "limit_reasons": [],
+      "used_bytes": 385039,
+      "limits": {
+        "max_documents": 500,
+        "max_chunks": 500,
+        "max_edges": 4000,
+        "max_bytes": 1048576
+      }
+    },
+    "expanded_biggest_document": [
+      37,
+      2502,
+      413634,
+      14
+    ],
+    "biggest_document": [
+      "ef1418d2bf6f56a756faa3cbe067b5f4e992183d9b3827d80ec9cfec0f61e1c0",
+      "MAIN_IDEA — требования bars",
+      37
+    ],
+    "ms": {
+      "load": 227,
+      "centroid_knn": 547,
+      "project": 6
+    }
+  },
+  {
+    "project": "C:/Users/Shket/OneDrive/Рабочий стол/SELF Repository/overdrive/overdrive-bots",
+    "snapshot": "b87de2fa9f4825262787aab3c134dbd5222d77a4bbbdd80c77ba5db11a7433bd",
+    "documents": 330,
+    "covered": 330,
+    "skipped": [],
+    "pairs_directed": 1650,
+    "cosine_buckets_0_to_1_step_0_1": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      47,
+      683,
+      888,
+      32
+    ],
+    "strongest": [
+      [
+        "chats/2026-10-19-csp-handshake-features/csp-handshake-features-2026-10-19.md",
+        "architecture/native/csp-handshake-features.md",
+        0.9300000071525574
+      ],
+      [
+        "architecture/native/csp-handshake-features.md",
+        "chats/2026-10-19-csp-handshake-features/csp-handshake-features-2026-10-19.md",
+        0.9300000071525574
+      ],
+      [
+        "chats/2026-10-15-pit-entry-research/pit-entry-own-box.md",
+        "architecture/native/pit-drive-into-box.md",
+        0.9300000071525574
+      ],
+      [
+        "architecture/native/pit-drive-into-box.md",
+        "chats/2026-10-15-pit-entry-research/pit-entry-own-box.md",
+        0.9300000071525574
+      ],
+      [
+        "chats/2026-10-18-native-pit-q008/native-pit-service-q008-2026-10-18.md",
+        "architecture/native/pit-service.md",
+        0.9210000038146973
+      ]
+    ],
+    "weakest": [
+      [
+        "adr/0001-stock-dll-loader.md",
+        "architecture/environment/shared-resources.md",
+        0.6240000128746033
+      ],
+      [
+        "adr/0001-stock-dll-loader.md",
+        "architecture/native/approach-player.md",
+        0.625
+      ],
+      [
+        "adr/0001-stock-dll-loader.md",
+        "adr/index.md",
+        0.628000020980835
+      ],
+      [
+        "adr/0010-prune-stale-passwords.md",
+        "adr/0027-owner-decisions-before-13-10-2026.md",
+        0.6309999823570251
+      ],
+      [
+        "adr/0010-prune-stale-passwords.md",
+        "adr/0002-server-unchanged.md",
+        0.6359999775886536
+      ]
+    ],
+    "default_slice": {
+      "nodes": 330,
+      "edges": 3168,
+      "links": 1932,
+      "totals": {
+        "documents": 330,
+        "chunks": 1755,
+        "links": 1932,
+        "document_pairs": 1236
+      },
+      "truncated": false,
+      "limit_reasons": [],
+      "used_bytes": 468712,
+      "limits": {
+        "max_documents": 500,
+        "max_chunks": 500,
+        "max_edges": 4000,
+        "max_bytes": 1048576
+      }
+    },
+    "expanded_biggest_document": [
+      50,
+      3241,
+      505348,
+      15
+    ],
+    "biggest_document": [
+      "7ff708e19a2643b273ac442153f0c77190947422a8f62526a0e5737ef6c0b4c8",
+      "Аудит UX окна OVERDRIVE BOTS (09.10.2026)",
+      67
+    ],
+    "ms": {
+      "load": 1973,
+      "centroid_knn": 1240,
+      "project": 14
+    }
+  }
+]
