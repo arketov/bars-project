@@ -1,0 +1,14 @@
+
+running 1 test
+
+thread 'handler::tests::new_topics::real_bge_owner_pair_collects_from_search_and_merges' (22552) panicked at crates\bars-worker\src\handler\tests\new_topics.rs:56:13:
+индекс не готов
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test handler::tests::new_topics::real_bge_owner_pair_collects_from_search_and_merges ... FAILED
+
+failures:
+
+failures:
+    handler::tests::new_topics::real_bge_owner_pair_collects_from_search_and_merges
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 276 filtered out; finished in 46.89s

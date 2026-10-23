@@ -174,7 +174,12 @@ function auditFor(kind: string): MockAudit {
   return (auditState[kind] ??= { kind, runningUntil: 0, done: kind === "broken_links", schedule: kind === "broken_links" ? "on_change" : "off" });
 }
 interface MockFinding { standing: string; tag: string; group: string; reason: string; score?: number; subjects: unknown[]; detail: string; }
+const auditIgnored = new Set<string>();
+const mockFingerprint = (kind: string, i: number) => `${kind}:${i}`;
 const AUDIT_FINDINGS: Record<string, MockFinding[]> = {
+  contradictions: [
+    { standing: "known", tag: "num", group: "main", reason: "Возможное расхождение — сек: 30 ↔ 60", subjects: [{ path: "docs/manual/search.md", first_line: 12, last_line: 12, heading: "Время ожидания", role: "manual" }, { path: "docs/features/search/hybrid.md", first_line: 15, last_line: 15, heading: "Время ожидания", role: "feature" }], detail: "Время ожидания ответа сервера составляет 30 с.\n↔\nВремя ожидания ответа сервера составляет 60 секунд." },
+  ],
   broken_links: [
     { standing: "new", tag: "broken", group: "main", reason: "Ссылка на документ, которого нет", subjects: [{ path: "docs/features/search/hybrid.md", first_line: 14, last_line: 14, heading: "", role: "feature" }], detail: "Новая тема → Новая тема" },
     { standing: "known", tag: "broken", group: "main", reason: "Ссылка на документ, которого нет", subjects: [{ path: "docs/manual/search.md", first_line: 31, last_line: 31, heading: "", role: "manual" }], detail: "план → ../PLAN.md" },
@@ -189,7 +194,7 @@ function auditSummary(kind: string) {
   const audit = auditFor(kind), now = Math.floor(Date.now() / 1000);
   const running = audit.runningUntil > Date.now();
   if (!running && audit.runningUntil > 0) { audit.done = true; audit.runningUntil = 0; }
-  const findings = AUDIT_FINDINGS[kind] ?? [];
+  const findings = (AUDIT_FINDINGS[kind] ?? []).filter((_, i) => !auditIgnored.has(mockFingerprint(kind, i)));
   const main = findings.filter((f) => f.group === "main" && f.standing !== "gone");
   return {
     kind, state: running ? "running" : audit.done ? "complete" : "never", running_since: running ? now - 1 : undefined,
@@ -206,13 +211,18 @@ async function auditsCall(method: string, params: Record<string, unknown>): Prom
   switch (method) {
     case "audit_list":
       if (scene() === "audits-error") throw new BarsError("не удалось открыть хранилище аудитов: доступ запрещён", null, -32603);
-      return { audits: ["broken_links", "duplicates"].map(auditSummary), reindex_required: scene() === "audits-reindex", indexing: scene() === "audits-indexing" };
+      return { audits: ["broken_links", "duplicates", "contradictions"].map(auditSummary), reindex_required: scene() === "audits-reindex", indexing: scene() === "audits-indexing" };
+    case "audit_ignore": {
+      const fingerprint = String(params.fingerprint);
+      if (params.ignored) auditIgnored.add(fingerprint); else auditIgnored.delete(fingerprint);
+      return { ignored: Boolean(params.ignored) };
+    }
     case "audit_run": { const audit = auditFor(kind); const already = audit.runningUntil > Date.now(); if (!already) audit.runningUntil = Date.now() + 1800; return { accepted: true, already, queued: false }; }
     case "audit_cancel": { const audit = auditFor(kind), was = audit.runningUntil > Date.now(); audit.runningUntil = 0; return { cancelled: was }; }
     case "audit_schedule": auditFor(kind).schedule = String(params.mode); return { mode: String(params.mode) };
     case "audit_findings": {
       const group = params.group ? String(params.group) : null;
-      const items = (AUDIT_FINDINGS[kind] ?? []).filter((f) => (!group || f.group === group) && (params.include_gone || f.standing !== "gone"));
+      const items = (AUDIT_FINDINGS[kind] ?? []).map((f,i) => ({ ...f, fingerprint: mockFingerprint(kind,i), ignored: auditIgnored.has(mockFingerprint(kind,i)) })).filter((f) => (!group || f.group === group) && (params.include_gone || f.standing !== "gone") && (params.include_ignored || !f.ignored));
       return { run_id: auditFor(kind).done ? 1 : undefined, finished: Math.floor(Date.now() / 1000) - 3600, items, total: items.length };
     }
   }
@@ -371,7 +381,7 @@ export async function mockCall(method: string, params: Record<string, unknown>):
       const project = String(params.project ?? params.cwd);
       return { docs_root: "docs", documents: (DOCS_BY_PROJECT[project] ??= docs("docs")) };
     }
-    case "audit_list": case "audit_run": case "audit_cancel": case "audit_schedule": case "audit_findings":
+    case "audit_list": case "audit_run": case "audit_cancel": case "audit_schedule": case "audit_findings": case "audit_ignore":
       return auditsCall(method, params);
     case "links_of": {
       const project = String(params.project ?? params.cwd), path = String(params.path);

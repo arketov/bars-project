@@ -1236,6 +1236,10 @@ impl WorkerHandler {
                 .map(|out| output_value(&out)),
             Call::LinksOf(params) => self.links_of(params).await.map(|out| output_value(&out)),
             Call::AuditList(params) => self.audit_list(params).await.map(|out| output_value(&out)),
+            Call::AuditIgnore(params) => self
+                .audit_ignore(params)
+                .await
+                .map(|out| output_value(&out)),
             Call::AuditRun(params) => self.audit_run(params).await.map(|out| output_value(&out)),
             Call::AuditCancel(params) => self.audit_cancel(params).map(|out| output_value(&out)),
             Call::AuditFindings(params) => self

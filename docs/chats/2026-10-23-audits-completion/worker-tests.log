@@ -1,0 +1,24 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on build directory
+   Compiling bindgen v0.72.1
+   Compiling llama-cpp-sys-2 v0.1.160
+   Compiling llama-cpp-2 v0.1.160
+   Compiling bars-core v0.1.0 (<repo>\crates\bars-core)
+   Compiling bars-worker v0.1.0 (<repo>\crates\bars-worker)
+    Finished `release` profile [optimized] target(s) in 2m 55s
+     Running unittests src\lib.rs (C:/bt/bars\release\deps\bars_worker-ead86c2eeea92824.exe)
+
+running 11 tests
+test audits::tests::delete_waits_for_actual_finish_without_a_timeout ... ok
+test audits::tests::deleting_project_cancels_everything_and_refuses_new_runs ... ok
+test audits::tests::one_audit_runs_per_project_and_others_wait ... ok
+test audits::tests::cancel_flags_the_running_audit_and_drops_a_waiting_one ... ok
+test handler::tests::audits::window_methods_reject_relative_project_and_unknown_kind ... ok
+test handler::tests::audits::running_audit_is_returned_not_duplicated_and_other_kind_waits ... ok
+test handler::tests::audits::duplicates_run_splits_main_and_overlap_and_names_document_roles ... ok
+test handler::tests::audits::contradictions_and_ignore_round_trip_without_changing_files ... ok
+test handler::tests::audits::deleting_a_project_removes_the_audit_store_and_keeps_foreign_files ... ok
+test handler::tests::audits::broken_links_run_compares_runs_and_never_touches_markdown ... ok
+test handler::tests::audits::schedule_validates_modes_and_on_change_runs_only_after_changes ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 266 filtered out; finished in 1.22s

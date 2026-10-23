@@ -12,7 +12,9 @@ use bars_core::audits::{
     document_role, fingerprint,
 };
 use bars_core::link_index::LinkIndex;
-use bars_core::search::{DuplicateItem, DuplicateKind, DuplicatesRequest, duplicates};
+use bars_core::search::{
+    DuplicateItem, DuplicateKind, DuplicatesRequest, duplicates_from_snapshot, duplicates_snapshot,
+};
 use bars_core::storage::{Index, Journal, index_path};
 use bars_protocol::{
     AuditCancelOutput, AuditCancelParams, AuditFinding, AuditFindingsOutput, AuditFindingsParams,
@@ -202,6 +204,11 @@ fn run_summary(kind: AuditKind, store: &AuditStore, live: Live) -> Result<AuditS
         ),
     };
     let counts: Option<&RunRow> = result.as_ref();
+    let (total, new_count, gone_count, overlap_total) = counts
+        .map(|r| store.visible_counts(r.id))
+        .transpose()
+        .map_err(audit_error)?
+        .unwrap_or_default();
     Ok(AuditSummary {
         kind: kind.as_str().to_string(),
         state: state.to_string(),
@@ -223,16 +230,45 @@ fn run_summary(kind: AuditKind, store: &AuditStore, live: Live) -> Result<AuditS
             .filter(|text| !text.is_empty()),
         result_run_id: counts.map(|run| run.id),
         result_at: counts.map(|run| run.finished),
-        total: counts.map_or(0, |run| run.total),
-        new_count: counts.map_or(0, |run| run.new_count),
-        gone_count: counts.map_or(0, |run| run.gone_count),
-        overlap_total: counts.map_or(0, |run| run.overlap_total),
+        total,
+        new_count,
+        gone_count,
+        overlap_total,
         schedule: schedule.as_str().to_string(),
         schedules: schedules_of(kind),
     })
 }
 
 impl WorkerHandler {
+    pub(super) async fn audit_ignore(
+        &self,
+        params: bars_protocol::AuditIgnoreParams,
+    ) -> Result<bars_protocol::AuditIgnoreOutput, RpcError> {
+        let project = self.audits_project(&params.project)?;
+        let kind = parse_kind(&params.kind)?;
+        if params.fingerprint.len() != 32
+            || !params.fingerprint.bytes().all(|b| b.is_ascii_hexdigit())
+        {
+            return Err(RpcError::bars(
+                ErrorKind::InvalidParams,
+                "некорректный отпечаток находки",
+            ));
+        }
+        let ignored = params.ignored;
+        let found = tokio::task::spawn_blocking(move || {
+            AuditStore::open(&project)?.set_ignored(kind, &params.fingerprint, ignored)
+        })
+        .await
+        .map_err(internal)?
+        .map_err(audit_error)?;
+        if !found {
+            return Err(RpcError::bars(
+                ErrorKind::InvalidParams,
+                "находка больше недоступна: обновите список",
+            ));
+        }
+        Ok(bars_protocol::AuditIgnoreOutput { ignored })
+    }
     /// Проект окна: точный абсолютный путь зарегистрированного проекта.
     fn audits_project(&self, project: &str) -> Result<PathBuf, RpcError> {
         if !Path::new(project).is_absolute() {
@@ -241,7 +277,14 @@ impl WorkerHandler {
                 "аудит относится к точному проекту: нужен абсолютный путь",
             ));
         }
-        self.worker.resolve(project).map_err(worker_error)
+        let root = self.worker.resolve(project).map_err(worker_error)?;
+        if !root.is_dir() {
+            return Err(RpcError::bars(
+                ErrorKind::ProjectUnavailable,
+                "Папки проекта нет на диске",
+            ));
+        }
+        Ok(root)
     }
 
     pub(super) async fn audit_list(
@@ -381,6 +424,7 @@ impl WorkerHandler {
                 run.id,
                 params.group.as_deref(),
                 params.include_gone,
+                params.include_ignored,
                 offset,
                 limit,
             )?;
@@ -407,6 +451,8 @@ impl WorkerHandler {
                 .items
                 .into_iter()
                 .map(|row| AuditFinding {
+                    fingerprint: row.fingerprint,
+                    ignored: row.ignored,
                     standing: row.standing.as_str().to_string(),
                     tag: row.tag,
                     group: row.group,
@@ -491,6 +537,7 @@ impl WorkerHandler {
         match kind {
             AuditKind::BrokenLinks => self.compute_broken_links(project).await,
             AuditKind::Duplicates => self.compute_duplicates(project, cancel).await,
+            AuditKind::Contradictions => self.compute_contradictions(project, cancel).await,
         }
     }
 
@@ -539,6 +586,66 @@ impl WorkerHandler {
         }
     }
 
+    async fn compute_contradictions(&self, project: &Path, cancel: &CancelFlag) -> Outcome {
+        let status = match self.worker.status(project) {
+            Ok(s) => s,
+            Err(e) => return Outcome::failed(e.to_string()),
+        };
+        if matches!(
+            status.state,
+            ProjectState::ReindexRequired | ProjectState::Unavailable
+        ) {
+            return Outcome::failed("Индекс недоступен или требует переиндексации");
+        }
+        let busy = |s: &crate::worker::ProjectStatus| {
+            s.state == ProjectState::Indexing || s.queued || s.pending > 0
+        };
+        let before = busy(&status);
+        let generation = status.updated_at;
+        let gate = match self.worker.gate(project) {
+            Ok(g) => g.read_owned().await,
+            Err(e) => return Outcome::failed(e.to_string()),
+        };
+        let root = project.to_path_buf();
+        let cancel = cancel.clone();
+        let result = tokio::task::spawn_blocking(move || {
+            let chunks = {
+                let _gate = gate;
+                let index = Index::open(&index_path(&root), Journal::Wal).map_err(|e|e.to_string())?;
+                let mut stmt = index.conn().prepare("SELECT d.path,d.module,c.heading_chain,c.first_line,c.text,c.last_line FROM chunks c JOIN documents d ON d.id=c.document_id ORDER BY d.path,c.ordinal").map_err(|e|e.to_string())?;
+                stmt.query_map([], |r| Ok(bars_core::audits::contradictions::Chunk {path:r.get(0)?,module:r.get(1)?,heading:r.get(2)?,first_line:r.get(3)?,text:r.get(4)?,last_line:r.get(5)?})).map_err(|e|e.to_string())?.collect::<Result<Vec<_>,_>>().map_err(|e|e.to_string())?
+            };
+            bars_core::audits::contradictions::find(&chunks, &cancel)
+        }).await;
+        let unchanged = self.worker.status(project).is_ok_and(|s| {
+            s.state == ProjectState::Ready && !busy(&s) && s.updated_at == generation
+        });
+        let stamp = generation.map(crate::worker::index_token);
+        match result {
+            Ok(Ok(findings)) if !before && unchanged => Outcome {
+                status: RunStatus::Complete,
+                error: None,
+                stamp,
+                findings,
+            },
+            Ok(Ok(_)) => Outcome {
+                status: RunStatus::Partial,
+                error: Some(
+                    "Индекс изменился или идёт индексация: результат может быть неполным".into(),
+                ),
+                stamp,
+                findings: Vec::new(),
+            },
+            Ok(Err(e)) => Outcome {
+                status: RunStatus::Partial,
+                error: Some(e),
+                stamp,
+                findings: Vec::new(),
+            },
+            Err(e) => Outcome::failed(e.to_string()),
+        }
+    }
+
     async fn compute_duplicates(&self, project: &Path, cancel: &CancelFlag) -> Outcome {
         let status = match self.worker.status(project) {
             Ok(status) => status,
@@ -559,11 +666,11 @@ impl WorkerHandler {
         };
         let mut search = settings.search.clone();
         search.max_results = DUPLICATES_CAP;
-        let docs_root = self.worker.docs_root(project).ok();
         let busy = |status: &crate::worker::ProjectStatus| {
             status.state == ProjectState::Indexing || status.queued || status.pending > 0
         };
         let indexing_before = busy(&status);
+        let generation = status.updated_at;
         let gate = match self.worker.gate(project) {
             Ok(gate) => gate.read_owned().await,
             Err(error) => return Outcome::failed(error.to_string()),
@@ -577,9 +684,13 @@ impl WorkerHandler {
             results: Some(DUPLICATES_CAP),
         };
         let result = tokio::task::spawn_blocking(move || {
-            let _gate = gate;
-            let index = Index::open(&index_path(&root), Journal::Wal).map_err(|e| e.to_string())?;
-            duplicates(&index, &search, &request).map_err(|e| e.to_string())
+            let snapshot = {
+                let _gate = gate;
+                let index =
+                    Index::open(&index_path(&root), Journal::Wal).map_err(|e| e.to_string())?;
+                duplicates_snapshot(&index, &request).map_err(|e| e.to_string())?
+            };
+            duplicates_from_snapshot(snapshot, &search, request.results).map_err(|e| e.to_string())
         })
         .await;
         let response = match result {
@@ -587,13 +698,22 @@ impl WorkerHandler {
             Ok(Err(message)) => return Outcome::failed(message),
             Err(error) => return Outcome::failed(error.to_string()),
         };
-        let indexing_after = self.worker.status(project).is_ok_and(|s| busy(&s));
-        let stamp = docs_root.and_then(|root| docs_stamp(project, Path::new(&root)).ok());
+        let after = self.worker.status(project);
+        let indexing_after = after.as_ref().is_ok_and(|s| busy(s));
+        let changed = !after
+            .as_ref()
+            .is_ok_and(|s| s.state == ProjectState::Ready && s.updated_at == generation);
+        let stamp = generation.map(crate::worker::index_token);
         let findings: Vec<NewFinding> = response.items.iter().map(duplicate_finding).collect();
         let (status, error) = if indexing_before || indexing_after {
             (
                 RunStatus::Partial,
                 Some("Идёт индексация: результат может быть неполным".to_string()),
+            )
+        } else if changed {
+            (
+                RunStatus::Partial,
+                Some("Индекс изменился за время расчёта: прежний полный результат сохранён".into()),
             )
         } else if response.total > findings.len() {
             (
@@ -682,11 +802,6 @@ impl WorkerHandler {
     /// Останавливает аудиты проекта и ждёт их конца: после этого можно удалять файлы проекта.
     pub(super) async fn audits_begin_delete(&self, project: &Path) {
         self.audits.begin_delete(project);
-        for _ in 0..100 {
-            if !self.audits.is_busy(project) {
-                break;
-            }
-            tokio::time::sleep(Duration::from_millis(50)).await;
-        }
+        self.audits.wait_idle(project).await;
     }
 }

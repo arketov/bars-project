@@ -9,7 +9,8 @@ mod vector_top;
 
 pub use duplicates::{
     Change, Differences, DuplicateChunk, DuplicateCounts, DuplicateItem, DuplicateKind,
-    DuplicatesRequest, DuplicatesResponse, duplicates,
+    DuplicatesRequest, DuplicatesResponse, DuplicatesSnapshot, duplicates,
+    duplicates_from_snapshot, duplicates_snapshot,
 };
 pub use hybrid::{
     SearchError, SearchHit, SearchResponse, candidate_trace, search, search_expanded,

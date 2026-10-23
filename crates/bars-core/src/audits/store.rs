@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use super::AuditKind;
 
-const SCHEMA_VERSION: i64 = 1;
+const SCHEMA_VERSION: i64 = 2;
 
 /// Сколько последних запусков вида хранится (`audits.md`, «Находка и жизнь результата»).
 const KEEP_RUNS: i64 = 20;
@@ -139,7 +139,7 @@ pub struct Subject {
 #[derive(Debug, Clone, PartialEq)]
 pub struct NewFinding {
     pub fingerprint: String,
-    /// Подвид: `broken`, `exact`, `near`, `contained`, `partial`, `semantic`.
+    /// Подвид: `broken`, `exact`, `near`, `contained`, `partial`, `semantic`, `num`, `slot`, `swap`.
     pub tag: String,
     /// `main` — в умолчаниях экрана и в счётчиках; `overlap` — по переключателю «Перекрытие содержания».
     pub group: String,
@@ -153,6 +153,7 @@ pub struct NewFinding {
 #[derive(Debug, Clone, PartialEq)]
 pub struct FindingRow {
     pub id: i64,
+    pub ignored: bool,
     pub standing: Standing,
     pub fingerprint: String,
     pub tag: String,
@@ -233,7 +234,12 @@ impl AuditStore {
     pub fn open(project_root: &Path) -> Result<Self, AuditError> {
         let path = store_path(project_root);
         if let Some(parent) = path.parent() {
-            std::fs::create_dir_all(parent)?;
+            // Не воскрешаем удалённый корень проекта фоновым чтением аудитов.
+            match std::fs::create_dir(parent) {
+                Ok(()) => {}
+                Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {}
+                Err(e) => return Err(e.into()),
+            }
         }
         match Self::open_file(&path) {
             Err(AuditError::Sqlite(error)) if is_corrupt(&error) => {
@@ -277,6 +283,13 @@ impl AuditStore {
                  CREATE TABLE IF NOT EXISTS schedule (kind TEXT PRIMARY KEY, mode TEXT NOT NULL);
                  INSERT OR REPLACE INTO meta(key,value) VALUES('schema','1');
                  PRAGMA user_version=1;",
+            )?;
+            tx.execute_batch(
+                "CREATE TABLE IF NOT EXISTS ignored (
+                    kind TEXT NOT NULL, fingerprint TEXT NOT NULL,
+                    PRIMARY KEY(kind, fingerprint));
+                 INSERT OR REPLACE INTO meta(key,value) VALUES('schema','2');
+                 PRAGMA user_version=2;",
             )?;
             tx.commit()?;
         }
@@ -480,21 +493,26 @@ impl AuditStore {
         run_id: i64,
         group: Option<&str>,
         include_gone: bool,
+        include_ignored: bool,
         offset: i64,
         limit: i64,
     ) -> Result<FindingsPage, AuditError> {
-        let filter = "run_id=?1 AND (?2 IS NULL OR grp=?2) AND (?3 OR standing<>'gone')";
+        let ignored = "EXISTS (SELECT 1 FROM ignored i JOIN runs r ON r.kind=i.kind WHERE r.id=findings.run_id AND i.fingerprint=findings.fingerprint)";
+        let filter = format!(
+            "run_id=?1 AND (?2 IS NULL OR grp=?2) AND (?3 OR standing<>'gone') AND (?6 OR NOT {ignored})"
+        );
         let total: i64 = self.db.query_row(
             &format!("SELECT COUNT(*) FROM findings WHERE {filter}"),
-            params![run_id, group, include_gone],
+            params![run_id, group, include_gone, limit, offset, include_ignored],
             |r| r.get(0),
         )?;
         let mut statement = self.db.prepare(&format!(
-            "SELECT id, standing, fingerprint, tag, grp, reason, score, subjects, detail FROM findings
+            "SELECT id, standing, fingerprint, tag, grp, reason, score, subjects, detail, {ignored} FROM findings
              WHERE {filter} ORDER BY (standing='gone'), ord LIMIT ?4 OFFSET ?5"
         ))?;
-        let rows =
-            statement.query_map(params![run_id, group, include_gone, limit, offset], |r| {
+        let rows = statement.query_map(
+            params![run_id, group, include_gone, limit, offset, include_ignored],
+            |r| {
                 Ok((
                     r.get::<_, i64>(0)?,
                     r.get::<_, String>(1)?,
@@ -505,13 +523,17 @@ impl AuditStore {
                     r.get::<_, Option<f64>>(6)?,
                     r.get::<_, String>(7)?,
                     r.get::<_, String>(8)?,
+                    r.get::<_, bool>(9)?,
                 ))
-            })?;
+            },
+        )?;
         let mut items = Vec::new();
         for row in rows {
-            let (id, standing, fingerprint, tag, group, reason, score, subjects, detail) = row?;
+            let (id, standing, fingerprint, tag, group, reason, score, subjects, detail, ignored) =
+                row?;
             items.push(FindingRow {
                 id,
+                ignored,
                 standing: Standing::parse(&standing),
                 fingerprint,
                 tag,
@@ -525,5 +547,44 @@ impl AuditStore {
         let end = offset + items.len() as i64;
         let next = (end < total).then_some(end);
         Ok(FindingsPage { items, total, next })
+    }
+
+    /// Игнор не связан внешним ключом с историей: переживает очистку старых запусков.
+    pub fn set_ignored(
+        &self,
+        kind: AuditKind,
+        fingerprint: &str,
+        ignored: bool,
+    ) -> Result<bool, AuditError> {
+        let exists: bool = self.db.query_row(
+            "SELECT EXISTS(SELECT 1 FROM findings f JOIN runs r ON r.id=f.run_id WHERE r.kind=?1 AND f.fingerprint=?2)",
+            params![kind.as_str(), fingerprint], |r| r.get(0))?;
+        if !exists {
+            return Ok(false);
+        }
+        if ignored {
+            self.db.execute(
+                "INSERT OR IGNORE INTO ignored(kind,fingerprint) VALUES(?1,?2)",
+                params![kind.as_str(), fingerprint],
+            )?;
+        } else {
+            self.db.execute(
+                "DELETE FROM ignored WHERE kind=?1 AND fingerprint=?2",
+                params![kind.as_str(), fingerprint],
+            )?;
+        }
+        Ok(true)
+    }
+
+    /// Счётчики пересчитываются с учётом текущего игнора, без нового запуска аудита.
+    pub fn visible_counts(&self, run_id: i64) -> Result<(i64, i64, i64, i64), AuditError> {
+        Ok(self.db.query_row(
+            "SELECT COALESCE(SUM(grp='main' AND standing<>'gone'),0),
+                    COALESCE(SUM(grp='main' AND standing='new'),0),
+                    COALESCE(SUM(grp='main' AND standing='gone'),0),
+                    COALESCE(SUM(grp='overlap' AND standing<>'gone'),0)
+             FROM findings f JOIN runs r ON r.id=f.run_id WHERE f.run_id=?1
+             AND NOT EXISTS(SELECT 1 FROM ignored i WHERE i.kind=r.kind AND i.fingerprint=f.fingerprint)",
+            [run_id], |r| Ok((r.get(0)?,r.get(1)?,r.get(2)?,r.get(3)?)))?)
     }
 }

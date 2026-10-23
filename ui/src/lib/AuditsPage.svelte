@@ -27,7 +27,7 @@
   // Экран «Аудиты» (docs/features/knowledge-base/audits.md): состояние видов, запуск, расписание и находки.
   // Аудит читает документацию и ничего в ней не меняет; находка — повод посмотреть документ.
   const store = app.audits;
-  const KINDS: AuditKind[] = ["broken_links", "duplicates"];
+  const KINDS: AuditKind[] = ["broken_links", "duplicates", "contradictions"];
   const list = $derived(store.list);
 
   onMount(() => {
@@ -66,6 +66,7 @@
       <div class="skeleton" role="status" aria-label="Загрузка аудитов"></div>
       <div class="skeleton"></div>
     {:else if list}
+      <label class="overlap small"><input type="checkbox" checked={store.showIgnored} onchange={(event) => store.setShowIgnored(event.currentTarget.checked)} />Игнорируемые</label>
       {#if list.reindex_required}
         <Banner kind="warn" title="Индекс требует переиндексации" text="Повторы не запустить, пока индекс не обновлён; показан прежний результат." />
       {:else if list.indexing}
@@ -150,6 +151,7 @@
                         </button>
                       {/each}
                       {#if finding.detail}<p class="detail small">{finding.detail}</p>{/if}
+                      <button class="ghost sm" disabled={store.busy} onclick={() => store.ignore(kind, finding)}>{finding.ignored ? "Вернуть" : "Игнорировать"}</button>
                     </div>
                   {/each}
                   {#if page.next !== null}

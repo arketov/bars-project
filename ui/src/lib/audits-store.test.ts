@@ -12,6 +12,7 @@ const summary = (kind: AuditSummary["kind"], over: Partial<AuditSummary> = {}): 
   kind, state: "never", total: 0, new_count: 0, gone_count: 0, overlap_total: 0, schedule: "off", schedules: ["off", "daily", "weekly"], ...over,
 });
 const finding = (n: number, group: AuditFinding["group"] = "main"): AuditFinding => ({
+  fingerprint: String(n).padStart(32, "0"), ignored: false,
   standing: "known", tag: "partial", group, reason: "Заметная часть текста скопирована", score: 0.6,
   subjects: [{ path: `docs/${n}.md`, first_line: 1, last_line: 4, heading: "", role: "manual" }], detail: "",
 });
@@ -132,4 +133,45 @@ it("расписание и остановка идут через воркер 
   expect(invoke).toHaveBeenCalledWith("audit_schedule", { project: P, kind: "duplicates", mode: "weekly" });
   await store.cancel("duplicates");
   expect(invoke).toHaveBeenCalledWith("audit_cancel", { project: P, kind: "duplicates" });
+});
+
+it("игнор и возврат вызывают API и перечитывают счётчики и находки", async () => {
+  const f = finding(1);
+  invoke.mockImplementation(async (method) => {
+    if (method === "audit_ignore") return { ignored: true };
+    if (method === "audit_list") return listOf();
+    return { run_id: 7, items: [], total: 0 };
+  });
+  await store.ignore("contradictions", f);
+  expect(invoke).toHaveBeenCalledWith("audit_ignore", { project: P, kind: "contradictions", fingerprint: f.fingerprint, ignored: true });
+  expect(store.findings.contradictions.items).toEqual([]);
+  await store.ignore("contradictions", { ...f, ignored: true });
+  expect(invoke).toHaveBeenLastCalledWith("audit_findings", expect.objectContaining({ kind: "contradictions" }));
+  expect(invoke).toHaveBeenCalledWith("audit_ignore", expect.objectContaining({ ignored: false }));
+});
+
+it("центр уведомлений получает прирост один раз", async () => {
+  const notice = vi.fn();
+  store = new AuditsStore(flash, notice); store.bind(P);
+  await store.load();
+  audits = [summary("contradictions", { new_count: 1, result_run_id: 2 })];
+  await store.load(); await store.load();
+  expect(notice).toHaveBeenCalledTimes(1);
+  expect(notice).toHaveBeenCalledWith(P, expect.stringContaining("Противоречия"));
+  audits = [summary("contradictions", { new_count: 0, result_run_id: 2 })];
+  await store.load();
+  audits = [summary("contradictions", { new_count: 1, result_run_id: 2 })];
+  await store.load();
+  expect(notice).toHaveBeenCalledTimes(1); // Возврат игнорируемой находки того же запуска — не новое событие.
+});
+
+it("поздняя страница прежнего фильтра не заменяет новые данные", async () => {
+  let release!: (value: unknown) => void;
+  invoke.mockImplementationOnce(() => new Promise(resolve => { release = resolve; }));
+  const pending = store.loadFindings("duplicates", true);
+  store.open = { duplicates: true };
+  await store.setShowIgnored(true);
+  release({ run_id: 1, items: [finding(99)], total: 1 }); await pending;
+  expect(store.findings.duplicates.runId).toBe(7);
+  expect(store.findings.duplicates.items.every(f => f.fingerprint !== finding(99).fingerprint)).toBe(true);
 });

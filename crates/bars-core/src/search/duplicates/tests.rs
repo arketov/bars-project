@@ -8,6 +8,25 @@ use crate::storage::Journal;
 
 const DIM: usize = 16;
 
+#[test]
+fn owned_snapshot_survives_index_changes_and_keeps_one_generation() {
+    let text = (0..80)
+        .map(|i| format!("слово{}", letters(i)))
+        .collect::<Vec<_>>()
+        .join(" ");
+    let (_dir, mut index) = project(&[("a.md", text.clone()), ("b.md", text)]);
+    let settings = SearchSettings::default();
+    let request = DuplicatesRequest::default();
+    let before = duplicates(&index, &settings, &request).unwrap();
+    assert!(before.total > 0);
+    let snapshot = duplicates_snapshot(&index, &request).unwrap();
+    index.delete_document("docs/b.md").unwrap();
+    let after = duplicates_from_snapshot(snapshot, &settings, request.results).unwrap();
+    assert_eq!(after.total, before.total);
+    assert_eq!(after.items, before.items);
+    assert_eq!(duplicates(&index, &settings, &request).unwrap().total, 0);
+}
+
 /// Мешок слов; слова-маркеры «темаа» и «темаб» перевешивают остальное, поэтому два текста с одним
 /// маркером близки по смыслу при любых других словах.
 struct TopicEmbedder {

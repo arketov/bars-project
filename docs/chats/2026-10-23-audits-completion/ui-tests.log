@@ -1,0 +1,16 @@
+
+> bars-ui@0.0.0 test
+> vitest run audits-store.test.ts audits.test.ts AuditsPage.test.ts app-notifications.test.ts --maxWorkers=1
+
+
+ RUN  v5.0.4 <repo>/ui
+
+
+ Test Files  4 passed (4)
+      Tests  27 passed (27)
+   Start at  13:14:52
+   Duration  7.58s (environment 60%, tests 17%, transform 14%, import 8%)
+
+Environment  jsdom was created 4 times · 3.93s total, 60% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments

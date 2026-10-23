@@ -14,7 +14,7 @@ pub struct AuditListParams {
 /// Строка вида на экране аудитов.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AuditSummary {
-    /// `broken_links` или `duplicates`.
+    /// `broken_links`, `duplicates` или `contradictions`.
     pub kind: String,
     /// `never`, `queued`, `running`, `complete`, `partial`, `failed`.
     pub state: String,
@@ -51,9 +51,9 @@ pub struct AuditSummary {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AuditListOutput {
     pub audits: Vec<AuditSummary>,
-    /// Индекс требует переиндексации: `duplicates` не запускается, данные могут быть старыми.
+    /// Индекс требует переиндексации: виды по текстам/векторам индекса не запускаются.
     pub reindex_required: bool,
-    /// Идёт индексация: результат `duplicates` может быть неполным.
+    /// Идёт индексация: результат видов по индексу может быть неполным.
     pub indexing: bool,
 }
 
@@ -97,6 +97,8 @@ pub struct AuditFindingsParams {
     /// Показывать исчезнувшие (серым, после остальных).
     #[serde(default)]
     pub include_gone: bool,
+    #[serde(default)]
+    pub include_ignored: bool,
     /// Смещение: `next` прошлой страницы.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cursor: Option<i64>,
@@ -119,9 +121,11 @@ pub struct AuditSubject {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AuditFinding {
+    pub fingerprint: String,
+    pub ignored: bool,
     /// `new`, `known`, `gone`.
     pub standing: String,
-    /// `broken`, `exact`, `near`, `contained`, `partial`, `semantic`.
+    /// `broken`, `exact`, `near`, `contained`, `partial`, `semantic`, `num`, `slot`, `swap`.
     pub tag: String,
     /// `main` или `overlap`.
     pub group: String,
@@ -158,4 +162,17 @@ pub struct AuditScheduleParams {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AuditScheduleOutput {
     pub mode: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AuditIgnoreParams {
+    pub project: String,
+    pub kind: String,
+    pub fingerprint: String,
+    pub ignored: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AuditIgnoreOutput {
+    pub ignored: bool,
 }

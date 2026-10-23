@@ -1076,6 +1076,7 @@ methods! {
     AuditCancel: crate::AuditCancelParams => crate::AuditCancelOutput, "audit_cancel", Window;
     AuditFindings: crate::AuditFindingsParams => crate::AuditFindingsOutput, "audit_findings", Window;
     AuditSchedule: crate::AuditScheduleParams => crate::AuditScheduleOutput, "audit_schedule", Window;
+    AuditIgnore: crate::AuditIgnoreParams => crate::AuditIgnoreOutput, "audit_ignore", Window;
     AutostartGet: AutostartGetParams => AutostartOutput, "autostart_get", Cli;
     AutostartSet: AutostartSetParams => AutostartOutput, "autostart_set", Cli;
 }

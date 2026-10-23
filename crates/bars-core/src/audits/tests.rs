@@ -1,5 +1,97 @@
 use super::*;
 
+#[test]
+fn missing_project_is_not_recreated_by_opening_the_audit_store() {
+    let dir = tempfile::tempdir().unwrap();
+    let missing = dir.path().join("removed-project");
+    assert!(AuditStore::open(&missing).is_err());
+    assert!(!missing.exists());
+}
+
+#[test]
+fn ignore_survives_runs_pruning_and_reopen_and_counters_follow_it() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut store = AuditStore::open(dir.path()).unwrap();
+    run(&mut store, RunStatus::Complete, vec![]);
+    let row = run(
+        &mut store,
+        RunStatus::Complete,
+        vec![finding("a", "main"), finding("b", "overlap")],
+    );
+    assert_eq!(store.visible_counts(row.id).unwrap(), (1, 1, 0, 1));
+    assert!(
+        store
+            .set_ignored(AuditKind::BrokenLinks, "a", true)
+            .unwrap()
+    );
+    assert_eq!(store.visible_counts(row.id).unwrap(), (0, 0, 0, 1));
+    assert_eq!(
+        store
+            .findings(row.id, None, true, false, 0, 10)
+            .unwrap()
+            .total,
+        1
+    );
+    let all = store.findings(row.id, None, true, true, 0, 10).unwrap();
+    assert!(
+        all.items
+            .iter()
+            .find(|f| f.fingerprint == "a")
+            .unwrap()
+            .ignored
+    );
+    assert!(!store.set_ignored(AuditKind::Duplicates, "a", true).unwrap());
+    for _ in 0..25 {
+        run(&mut store, RunStatus::Complete, vec![finding("a", "main")]);
+    }
+    drop(store);
+    let store = AuditStore::open(dir.path()).unwrap();
+    let row = store
+        .latest_complete(AuditKind::BrokenLinks)
+        .unwrap()
+        .unwrap();
+    assert_eq!(store.visible_counts(row.id).unwrap(), (0, 0, 0, 0));
+    assert!(
+        store
+            .set_ignored(AuditKind::BrokenLinks, "a", false)
+            .unwrap()
+    );
+    assert_eq!(store.visible_counts(row.id).unwrap(), (1, 0, 0, 0));
+}
+
+#[test]
+fn schema_one_migrates_without_losing_results_or_schedule() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut store = AuditStore::open(dir.path()).unwrap();
+    let row = run(&mut store, RunStatus::Complete, vec![finding("a", "main")]);
+    store
+        .set_schedule(AuditKind::BrokenLinks, ScheduleMode::Daily)
+        .unwrap();
+    drop(store);
+    let db = rusqlite::Connection::open(store_path(dir.path())).unwrap();
+    db.execute_batch("DROP TABLE ignored; PRAGMA user_version=1;")
+        .unwrap();
+    drop(db);
+    let store = AuditStore::open(dir.path()).unwrap();
+    assert_eq!(
+        store
+            .latest_complete(AuditKind::BrokenLinks)
+            .unwrap()
+            .unwrap()
+            .id,
+        row.id
+    );
+    assert_eq!(
+        store.schedule(AuditKind::BrokenLinks).unwrap(),
+        ScheduleMode::Daily
+    );
+    assert!(
+        store
+            .set_ignored(AuditKind::BrokenLinks, "a", true)
+            .unwrap()
+    );
+}
+
 fn finding(key: &str, group: &str) -> NewFinding {
     NewFinding {
         fingerprint: key.to_string(),
@@ -69,7 +161,7 @@ fn first_complete_run_has_no_new_findings_and_second_marks_new_known_gone() {
         (second.total, second.new_count, second.gone_count),
         (2, 1, 1)
     );
-    let page = store.findings(second.id, None, true, 0, 10).unwrap();
+    let page = store.findings(second.id, None, true, false, 0, 10).unwrap();
     let standings: Vec<_> = page
         .items
         .iter()
@@ -83,7 +175,9 @@ fn first_complete_run_has_no_new_findings_and_second_marks_new_known_gone() {
             ("a", Standing::Gone)
         ]
     );
-    let without_gone = store.findings(second.id, None, false, 0, 10).unwrap();
+    let without_gone = store
+        .findings(second.id, None, false, false, 0, 10)
+        .unwrap();
     assert_eq!(without_gone.total, 2);
 }
 
@@ -102,7 +196,7 @@ fn overlap_group_is_counted_apart_and_never_new_in_the_headline() {
         (1, 0, 1)
     );
     let only_main = store
-        .findings(second.id, Some("main"), true, 0, 10)
+        .findings(second.id, Some("main"), true, false, 0, 10)
         .unwrap();
     assert_eq!(only_main.total, 1);
 }
@@ -129,7 +223,13 @@ fn incomplete_runs_keep_the_previous_complete_result() {
         .unwrap()
         .unwrap();
     assert_eq!(kept.id, complete.id);
-    assert_eq!(store.findings(kept.id, None, true, 0, 10).unwrap().total, 1);
+    assert_eq!(
+        store
+            .findings(kept.id, None, true, false, 0, 10)
+            .unwrap()
+            .total,
+        1
+    );
 }
 
 #[test]
@@ -156,12 +256,12 @@ fn paging_returns_a_cursor_until_the_end() {
     let mut store = AuditStore::open(dir.path()).unwrap();
     let items: Vec<_> = (0..5).map(|n| finding(&format!("f{n}"), "main")).collect();
     let row = run(&mut store, RunStatus::Complete, items);
-    let first = store.findings(row.id, None, true, 0, 2).unwrap();
+    let first = store.findings(row.id, None, true, false, 0, 2).unwrap();
     assert_eq!(
         (first.items.len(), first.next, first.total),
         (2, Some(2), 5)
     );
-    let last = store.findings(row.id, None, true, 4, 2).unwrap();
+    let last = store.findings(row.id, None, true, false, 4, 2).unwrap();
     assert_eq!((last.items.len(), last.next), (1, None));
 }
 
@@ -171,6 +271,17 @@ fn schedule_defaults_to_off_and_on_change_is_only_for_broken_links() {
     let store = AuditStore::open(dir.path()).unwrap();
     assert_eq!(
         store.schedule(AuditKind::Duplicates).unwrap(),
+        ScheduleMode::Off
+    );
+    assert_eq!(
+        store.schedule(AuditKind::BrokenLinks).unwrap(),
+        ScheduleMode::OnChange
+    );
+    store
+        .set_schedule(AuditKind::BrokenLinks, ScheduleMode::Off)
+        .unwrap();
+    assert_eq!(
+        store.schedule(AuditKind::BrokenLinks).unwrap(),
         ScheduleMode::Off
     );
     store

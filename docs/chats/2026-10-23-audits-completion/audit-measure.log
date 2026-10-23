@@ -1,0 +1,18 @@
+    Blocking waiting for file lock on build directory
+   Compiling tokenizers v0.22.2
+   Compiling ureq v3.4.2
+   Compiling tokenizers v0.23.2
+   Compiling llama-cpp-2 v0.1.160
+   Compiling bars-graph v0.1.0 (<repo>\crates\bars-graph)
+   Compiling hf-hub v0.5.0
+   Compiling candle-core v0.11.0
+   Compiling candle-nn v0.11.0
+   Compiling fastembed v7.1.1
+   Compiling bars-core v0.1.0 (<repo>\crates\bars-core)
+    Finished `release` profile [optimized] target(s) in 14m 13s
+     Running `C:/bt/bars\release\examples\audit_measure.exe <user>/AppData/Local/Temp/bars-audits-f547854addab43639ffffa6ccf435ef2/bars.sqlite docs/chats/2026-10-23-audits-completion/bars-measure.json`
+{"profile":"release","chunks":1653,"samples":[{"duplicates_ms":3718.3627,"duplicates_total":115,"duplicates_returned":115,"contradictions_ms":344.15430000000003,"contradictions_total":14,"contradictions_error":null},{"duplicates_ms":1504.1685,"duplicates_total":115,"duplicates_returned":115,"contradictions_ms":583.7139,"contradictions_total":14,"contradictions_error":null},{"duplicates_ms":1394.5186,"duplicates_total":115,"duplicates_returned":115,"contradictions_ms":520.5063,"contradictions_total":14,"contradictions_error":null}]}
+   Compiling bars-core v0.1.0 (<repo>\crates\bars-core)
+    Finished `release` profile [optimized] target(s) in 25.67s
+     Running `C:/bt/bars\release\examples\audit_measure.exe <user>/AppData/Local/Temp/bars-audits-f547854addab43639ffffa6ccf435ef2/overdrive.sqlite docs/chats/2026-10-23-audits-completion/overdrive-measure.json`
+{"profile":"release","chunks":2402,"samples":[{"duplicates_ms":2136.6793,"duplicates_total":216,"duplicates_returned":216,"contradictions_ms":431.2911,"contradictions_total":28,"contradictions_error":null},{"duplicates_ms":1612.5765,"duplicates_total":216,"duplicates_returned":216,"contradictions_ms":525.9066,"contradictions_total":28,"contradictions_error":null},{"duplicates_ms":1258.1321,"duplicates_total":216,"duplicates_returned":216,"contradictions_ms":389.26509999999996,"contradictions_total":28,"contradictions_error":null}]}

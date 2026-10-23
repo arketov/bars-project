@@ -16,9 +16,10 @@ const summary = (kind: AuditSummary["kind"], over: Partial<AuditSummary> = {}): 
   kind, state: "never", total: 0, new_count: 0, gone_count: 0, overlap_total: 0, schedule: "off",
   schedules: kind === "broken_links" ? ["off", "daily", "weekly", "on_change"] : ["off", "daily", "weekly"], ...over,
 });
-const broken: AuditFinding = { standing: "new", tag: "broken", group: "main", reason: "Ссылка на документ, которого нет", subjects: [{ path: "docs/a.md", first_line: 14, last_line: 14, heading: "", role: "document" }], detail: "Нет → нет.md" };
+const broken: AuditFinding = { fingerprint: "a".repeat(32), ignored: false, standing: "new", tag: "broken", group: "main", reason: "Ссылка на документ, которого нет", subjects: [{ path: "docs/a.md", first_line: 14, last_line: 14, heading: "", role: "document" }], detail: "Нет → нет.md" };
 const goneOne: AuditFinding = { ...broken, standing: "gone", subjects: [{ ...broken.subjects[0], path: "docs/b.md" }] };
 const duplicate: AuditFinding = {
+  fingerprint: "d".repeat(32), ignored: false,
   standing: "known", tag: "partial", group: "main", reason: "Заметная часть текста скопирована", score: 0.62,
   subjects: [
     { path: "docs/manual/x.md", first_line: 3, last_line: 9, heading: "Поиск/Как работает", role: "manual" },
@@ -70,6 +71,35 @@ beforeEach(() => {
 afterEach(() => {
   while (mounted.length) void unmount(mounted.pop()!);
   document.body.replaceChildren();
+});
+
+it("числовое расхождение показывает оба источника и позволяет игнорировать и вернуть", async () => {
+  const numeric: AuditFinding = { ...duplicate, tag: "num", reason: "Возможное расхождение — сек: 30 ↔ 60", detail: "Ожидание 30 с ↔ ожидание 60 с", subjects: [duplicate.subjects[0], { ...duplicate.subjects[0], path: "docs/b.md" }] };
+  audits.push(summary("contradictions", { state: "complete", result_run_id: 1, result_at: 1, total: 1 }));
+  findings.contradictions = [numeric];
+  const base = invoke.getMockImplementation()!;
+  invoke.mockImplementation(async (method, params) => {
+    if (method === "audit_ignore") {
+      const ignored = Boolean(params?.ignored);
+      findings.contradictions = [{ ...numeric, ignored }];
+      audits = audits.map(a => a.kind === "contradictions" ? { ...a, total: ignored ? 0 : 1 } : a);
+      return { ignored };
+    }
+    if (method === "audit_findings" && params?.kind === "contradictions") {
+      const items = findings.contradictions.filter(f => params?.include_ignored || !f.ignored);
+      return { run_id: 1, items, total: items.length };
+    }
+    return base(method,params);
+  });
+  const host = show(AuditsPage); await settle();
+  const c = card(host,"Противоречия"); button(c,"Показать находки")!.click(); await settle();
+  expect(c.textContent).toContain("30 ↔ 60"); expect(c.querySelectorAll(".subject")).toHaveLength(2);
+  button(c,"Игнорировать")!.click(); await settle();
+  expect(c.querySelector(".finding")).toBeNull();
+  const label = [...host.querySelectorAll("label")].find(l => l.textContent?.trim() === "Игнорируемые")!;
+  label.querySelector<HTMLInputElement>("input")!.click(); await settle();
+  button(c,"Вернуть")!.click(); await settle();
+  expect(button(c,"Игнорировать")).toBeDefined();
 });
 
 it("показывает виды с состоянием, временем и числом находок, а блок новых тем — входом", async () => {

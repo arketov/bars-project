@@ -18,6 +18,52 @@ fn cosine(a: &[f32], b: &[f32]) -> f32 {
     dot / (norm(a) * norm(b))
 }
 
+/// 3.8.3 / ISS-19: реальная модель, новый изолированный список, обе исходные формулировки.
+#[test]
+#[ignore = "приёмка ISS-19 на уже скачанной bge-m3, без скачивания"]
+fn new_topics_owner_pair_merges_with_real_bge_m3() {
+    use bars_core::new_topics::{EmbeddingSpace, Observation, Reason, Source, TopicStore};
+    let models = cached_models_dir().expect("нужна уже скачанная bge-m3");
+    assert!(bars_core::models::is_downloaded(&models, bars_core::models::BGE_M3_ID), "нужен полный локальный кэш модели; скачивание не разрешено стендом");
+    let mut model = BuiltinEmbedder::bge_m3(&models, Accelerator::Auto).unwrap();
+    let queries = [
+        "Аудит журналов возврата в боксы и предыдущей попытки входа результаты сессий",
+        "журналы возврата боксы",
+    ];
+    let vectors = model.embed(&queries).unwrap();
+    let similarity = cosine(&vectors[0], &vectors[1]);
+    let dir = tempfile::tempdir().unwrap();
+    let mut store = TopicStore::open(dir.path()).unwrap();
+    let generation = store.settings().unwrap().0;
+    for (i, (query, vector)) in queries.iter().zip(vectors).enumerate() {
+        store
+            .record(&Observation {
+                event_id: format!("acceptance-{i}"),
+                generation,
+                text: query.to_string(),
+                scope: "m=chats;f=".into(),
+                source: if i == 0 { Source::Mcp } else { Source::Window },
+                reason: Reason::EmptyResult,
+                params: "{}".into(),
+                index_stamp: Some("acceptance".into()),
+                vector: Some((
+                    EmbeddingSpace::from_fingerprint(model.fingerprint()),
+                    vector,
+                )),
+                at: 100 + i as i64,
+            })
+            .unwrap();
+    }
+    let topics = store.list().unwrap();
+    assert_eq!(topics.len(), 1, "cosine={similarity}");
+    assert_eq!(topics[0].observations, 2);
+    assert_eq!(topics[0].variants.len(), 2);
+    println!(
+        "ISS-19: cosine={similarity}; device={:?}; topics=1; observations=2; variants=2",
+        model.device()
+    );
+}
+
 #[test]
 fn cpu_embeddings_follow_meaning_and_keep_order() {
     let Some(models) = cached_models_dir() else {

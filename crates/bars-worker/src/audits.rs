@@ -57,6 +57,7 @@ struct State {
 #[derive(Clone, Default)]
 pub struct Audits {
     state: Arc<Mutex<State>>,
+    finished: Arc<tokio::sync::Notify>,
 }
 
 fn lock(state: &Mutex<State>) -> MutexGuard<'_, State> {
@@ -113,6 +114,8 @@ impl Audits {
             if runs.queue.is_empty() {
                 state.projects.remove(project);
             }
+            drop(state);
+            self.finished.notify_waiters();
             return None;
         };
         let cancel = CancelFlag::default();
@@ -182,11 +185,48 @@ impl Audits {
             .get(project)
             .is_some_and(|runs| runs.running.is_some())
     }
+
+    /// Удаление не должно пережить писателя БД: ждём событие, а не истечение пяти секунд.
+    pub async fn wait_idle(&self, project: &Path) {
+        loop {
+            let notified = self.finished.notified();
+            tokio::pin!(notified);
+            notified.as_mut().enable();
+            if !self.is_busy(project) {
+                return;
+            }
+            notified.await;
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn delete_waits_for_actual_finish_without_a_timeout() {
+        use std::{
+            future::Future,
+            task::{Context, Poll, Waker},
+        };
+        let audits = Audits::default();
+        let p = project();
+        assert!(matches!(
+            audits.request(&p, AuditKind::Contradictions),
+            Request::Start(_)
+        ));
+        audits.begin_delete(&p);
+        let mut waiting = std::pin::pin!(audits.wait_idle(&p));
+        let mut context = Context::from_waker(Waker::noop());
+        assert_eq!(waiting.as_mut().poll(&mut context), Poll::Pending);
+        assert!(matches!(
+            audits.request(&p, AuditKind::BrokenLinks),
+            Request::Deleting
+        ));
+        assert!(audits.finish(&p).is_none());
+        assert_eq!(waiting.as_mut().poll(&mut context), Poll::Ready(()));
+    }
 
     fn project() -> PathBuf {
         PathBuf::from("p")

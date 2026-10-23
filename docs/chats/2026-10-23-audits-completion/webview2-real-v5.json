@@ -1,0 +1,268 @@
+{
+  "success": true,
+  "probeRevision": "audits-3.8.3-real-v3",
+  "native": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+  "checks": [
+    "broken_links: launch through UI / real worker / full result",
+    "duplicates: launch through UI / real worker / full result",
+    "contradictions: launch through UI / real worker / full result",
+    "ignore / show ignored / restore through UI and persistent API",
+    "weekly schedule stored by worker",
+    "new finding notification / jump to audits",
+    "dark/1440: layout",
+    "dark/1024: layout",
+    "dark/760: layout",
+    "light/1440: layout",
+    "light/1024: layout",
+    "light/760: layout",
+    "source document opens in product editor through product Tauri commands",
+    "real bge-m3 / named MCP pipe + Window search / one topic, two variants and origins; diagnostic excluded",
+    "real model native flow: MCP → topic → document → full reindex preserves topic → rerank knowledge check → user resolves"
+  ],
+  "realModels": true,
+  "initialReadyMs": 30252.5,
+  "restoreInitiallyDisabled": false,
+  "beforeNotification": {
+    "kind": "broken_links",
+    "state": "complete",
+    "last_run_at": 1792747019,
+    "last_status": "complete",
+    "result_run_id": 1,
+    "result_at": 1792747019,
+    "total": 1,
+    "new_count": 0,
+    "gone_count": 0,
+    "overlap_total": 0,
+    "schedule": "on_change",
+    "schedules": [
+      "off",
+      "daily",
+      "weekly",
+      "on_change"
+    ]
+  },
+  "afterNotification": {
+    "kind": "broken_links",
+    "state": "running",
+    "running_since": 1792747024,
+    "last_run_at": 1792747024,
+    "last_status": "complete",
+    "result_run_id": 4,
+    "result_at": 1792747024,
+    "total": 2,
+    "new_count": 1,
+    "gone_count": 0,
+    "overlap_total": 0,
+    "schedule": "on_change",
+    "schedules": [
+      "off",
+      "daily",
+      "weekly",
+      "on_change"
+    ]
+  },
+  "realTopicsBefore": {
+    "id": 1,
+    "revision": 2,
+    "title": "Аудит журналов возврата в боксы и предыдущей попытки входа результаты сессий",
+    "status": "open",
+    "first_seen": 1792747027,
+    "last_seen": 1792747029,
+    "observations": 2,
+    "sources": [
+      "mcp",
+      "window"
+    ],
+    "reasons": [
+      "empty_result"
+    ],
+    "variants": 2
+  },
+  "initialKnowledgeCheck": {
+    "id": 1,
+    "revision": 2,
+    "title": "Аудит журналов возврата в боксы и предыдущей попытки входа результаты сессий",
+    "status": "open",
+    "first_seen": 1792747027,
+    "last_seen": 1792747029,
+    "observations": 2,
+    "sources": [
+      "mcp",
+      "window"
+    ],
+    "reasons": [
+      "empty_result"
+    ],
+    "variants": 2,
+    "variants_list": [
+      {
+        "id": 1,
+        "text": "Аудит журналов возврата в боксы и предыдущей попытки входа результаты сессий",
+        "scope": "project",
+        "original_params": "{\"results\":5,\"candidates\":30,\"rerank_candidates\":15,\"min_score\":1.0,\"score_kind\":\"cosine\",\"clamped\":false}"
+      },
+      {
+        "id": 2,
+        "text": "журналы возврата боксы",
+        "scope": "project",
+        "original_params": "{\"results\":5,\"candidates\":30,\"rerank_candidates\":15,\"min_score\":1.0,\"score_kind\":\"cosine\",\"clamped\":false}"
+      }
+    ],
+    "checks": [
+      {
+        "id": 1,
+        "topic_revision": 2,
+        "at": 1792747060,
+        "expanded": false,
+        "model": "BAAI/bge-m3",
+        "params": "{\"results\":5,\"candidates\":30,\"rerank_candidates\":15,\"min_score\":0.0,\"score_kind\":\"cosine\",\"clamped\":false,\"variants\":[{\"variant_id\":1,\"applied\":{\"results\":5,\"candidates\":30,\"rerank_candidates\":15,\"min_score\":0.0,\"score_kind\":\"cosine\",\"clamped\":false},\"rerank_error\":\"rerank-модель ещё скачивается или грузится (100 %): выдача без rerank\"},{\"variant_id\":2,\"applied\":{\"results\":5,\"candidates\":30,\"rerank_candidates\":15,\"min_score\":0.0,\"score_kind\":\"cosine\",\"clamped\":false},\"rerank_error\":\"rerank-модель ещё скачивается или грузится (100 %): выдача без rerank\"}]}",
+        "conclusive": false,
+        "results": [
+          {
+            "variant_id": 1,
+            "scope": "project",
+            "outcome": "incomplete",
+            "reason": "rerank_unavailable",
+            "index_stamp": "1792747060.244398700",
+            "hits": []
+          },
+          {
+            "variant_id": 2,
+            "scope": "project",
+            "outcome": "incomplete",
+            "reason": "rerank_unavailable",
+            "index_stamp": "1792747060.244398700",
+            "hits": []
+          }
+        ]
+      }
+    ]
+  },
+  "readyModels": {
+    "embed": {
+      "model": "BAAI/bge-m3",
+      "source": "builtin",
+      "requested": "auto",
+      "state": "ready",
+      "backend": "onnx",
+      "actual": "directml",
+      "fallback_reason": null,
+      "precision": "fp32"
+    },
+    "rerank": {
+      "model": "BAAI/bge-reranker-v2-m3",
+      "source": "builtin",
+      "requested": "cpu",
+      "state": "ready",
+      "backend": "onnx",
+      "actual": "cpu",
+      "fallback_reason": null,
+      "precision": "fp32"
+    }
+  },
+  "realCheck": {
+    "id": 1,
+    "revision": 3,
+    "title": "Аудит журналов возврата в боксы и предыдущей попытки входа результаты сессий",
+    "status": "materials_found",
+    "first_seen": 1792747027,
+    "last_seen": 1792747029,
+    "observations": 2,
+    "sources": [
+      "mcp",
+      "window"
+    ],
+    "reasons": [
+      "empty_result"
+    ],
+    "variants": 2,
+    "variants_list": [
+      {
+        "id": 1,
+        "text": "Аудит журналов возврата в боксы и предыдущей попытки входа результаты сессий",
+        "scope": "project",
+        "original_params": "{\"results\":5,\"candidates\":30,\"rerank_candidates\":15,\"min_score\":1.0,\"score_kind\":\"cosine\",\"clamped\":false}"
+      },
+      {
+        "id": 2,
+        "text": "журналы возврата боксы",
+        "scope": "project",
+        "original_params": "{\"results\":5,\"candidates\":30,\"rerank_candidates\":15,\"min_score\":1.0,\"score_kind\":\"cosine\",\"clamped\":false}"
+      }
+    ],
+    "checks": [
+      {
+        "id": 2,
+        "topic_revision": 3,
+        "at": 1792747073,
+        "expanded": false,
+        "model": "BAAI/bge-m3",
+        "params": "{\"results\":3,\"candidates\":30,\"rerank_candidates\":15,\"min_score\":0.1,\"score_kind\":\"rerank\",\"clamped\":false,\"variants\":[{\"variant_id\":1,\"applied\":{\"results\":3,\"candidates\":30,\"rerank_candidates\":15,\"min_score\":0.10000000149011612,\"score_kind\":\"rerank\",\"clamped\":false},\"rerank_error\":null},{\"variant_id\":2,\"applied\":{\"results\":3,\"candidates\":30,\"rerank_candidates\":15,\"min_score\":0.10000000149011612,\"score_kind\":\"rerank\",\"clamped\":false},\"rerank_error\":null}]}",
+        "conclusive": true,
+        "results": [
+          {
+            "variant_id": 1,
+            "scope": "project",
+            "outcome": "found",
+            "index_stamp": "1792747060.244398700",
+            "hits": [
+              {
+                "path": "docs/knowledge.md",
+                "title": "knowledge",
+                "heading_chain": "Журналы возврата в боксы",
+                "first_line": 1,
+                "last_line": 4,
+                "score": 0.9995342493057252,
+                "score_kind": "rerank"
+              }
+            ]
+          },
+          {
+            "variant_id": 2,
+            "scope": "project",
+            "outcome": "found",
+            "index_stamp": "1792747060.244398700",
+            "hits": [
+              {
+                "path": "docs/knowledge.md",
+                "title": "knowledge",
+                "heading_chain": "Журналы возврата в боксы",
+                "first_line": 1,
+                "last_line": 4,
+                "score": 0.9940045475959778,
+                "score_kind": "rerank"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": 1,
+        "topic_revision": 2,
+        "at": 1792747060,
+        "expanded": false,
+        "model": "BAAI/bge-m3",
+        "params": "{\"results\":5,\"candidates\":30,\"rerank_candidates\":15,\"min_score\":0.0,\"score_kind\":\"cosine\",\"clamped\":false,\"variants\":[{\"variant_id\":1,\"applied\":{\"results\":5,\"candidates\":30,\"rerank_candidates\":15,\"min_score\":0.0,\"score_kind\":\"cosine\",\"clamped\":false},\"rerank_error\":\"rerank-модель ещё скачивается или грузится (100 %): выдача без rerank\"},{\"variant_id\":2,\"applied\":{\"results\":5,\"candidates\":30,\"rerank_candidates\":15,\"min_score\":0.0,\"score_kind\":\"cosine\",\"clamped\":false},\"rerank_error\":\"rerank-модель ещё скачивается или грузится (100 %): выдача без rerank\"}]}",
+        "conclusive": false,
+        "results": [
+          {
+            "variant_id": 1,
+            "scope": "project",
+            "outcome": "incomplete",
+            "reason": "rerank_unavailable",
+            "index_stamp": "1792747060.244398700",
+            "hits": []
+          },
+          {
+            "variant_id": 2,
+            "scope": "project",
+            "outcome": "incomplete",
+            "reason": "rerank_unavailable",
+            "index_stamp": "1792747060.244398700",
+            "hits": []
+          }
+        ]
+      }
+    ]
+  }
+}

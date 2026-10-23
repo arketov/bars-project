@@ -1,0 +1,209 @@
+{
+  "success": false,
+  "probeRevision": "audits-3.8.3-real-v2",
+  "native": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+  "checks": [
+    "broken_links: launch through UI / real worker / full result",
+    "duplicates: launch through UI / real worker / full result",
+    "contradictions: launch through UI / real worker / full result",
+    "ignore / show ignored / restore through UI and persistent API",
+    "weekly schedule stored by worker",
+    "new finding notification / jump to audits",
+    "dark/1440: layout",
+    "dark/1024: layout",
+    "dark/760: layout",
+    "light/1440: layout",
+    "light/1024: layout",
+    "light/760: layout",
+    "source document opens in product editor through product Tauri commands",
+    "real bge-m3 / named MCP pipe + Window search / one topic, two variants and origins; diagnostic excluded"
+  ],
+  "realModels": true,
+  "initialReadyMs": 4923,
+  "restoreInitiallyDisabled": false,
+  "beforeNotification": {
+    "kind": "broken_links",
+    "state": "complete",
+    "last_run_at": 1792746206,
+    "last_status": "complete",
+    "result_run_id": 1,
+    "result_at": 1792746206,
+    "total": 1,
+    "new_count": 0,
+    "gone_count": 0,
+    "overlap_total": 0,
+    "schedule": "on_change",
+    "schedules": [
+      "off",
+      "daily",
+      "weekly",
+      "on_change"
+    ]
+  },
+  "afterNotification": {
+    "kind": "broken_links",
+    "state": "running",
+    "running_since": 1792746211,
+    "last_run_at": 1792746211,
+    "last_status": "complete",
+    "result_run_id": 4,
+    "result_at": 1792746211,
+    "total": 2,
+    "new_count": 1,
+    "gone_count": 0,
+    "overlap_total": 0,
+    "schedule": "on_change",
+    "schedules": [
+      "off",
+      "daily",
+      "weekly",
+      "on_change"
+    ]
+  },
+  "realTopicsBefore": {
+    "id": 1,
+    "revision": 2,
+    "title": "Аудит журналов возврата в боксы и предыдущей попытки входа результаты сессий",
+    "status": "open",
+    "first_seen": 1792746213,
+    "last_seen": 1792746213,
+    "observations": 2,
+    "sources": [
+      "mcp",
+      "window"
+    ],
+    "reasons": [
+      "empty_result"
+    ],
+    "variants": 2
+  },
+  "error": "TypeError: Cannot read properties of undefined (reading 'id')\n    at <anonymous>:91:90",
+  "bell": "<button class=\"bell svelte-11s20y7\" title=\"Уведомления\" aria-controls=\"notifications-panel\" aria-label=\"Уведомления, непрочитанных: 3\" aria-expanded=\"false\"><svg fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" stroke-width=\"2\"><path d=\"M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4\"></path></svg><!----> <span class=\"badge svelte-11s20y7\">3</span><!----></button>",
+  "audits": {
+    "audits": [
+      {
+        "kind": "broken_links",
+        "state": "complete",
+        "last_run_at": 1792746211,
+        "last_status": "complete",
+        "result_run_id": 4,
+        "result_at": 1792746211,
+        "total": 2,
+        "new_count": 1,
+        "gone_count": 0,
+        "overlap_total": 0,
+        "schedule": "on_change",
+        "schedules": [
+          "off",
+          "daily",
+          "weekly",
+          "on_change"
+        ]
+      },
+      {
+        "kind": "duplicates",
+        "state": "complete",
+        "last_run_at": 1792746207,
+        "last_status": "complete",
+        "result_run_id": 2,
+        "result_at": 1792746207,
+        "total": 0,
+        "new_count": 0,
+        "gone_count": 0,
+        "overlap_total": 0,
+        "schedule": "off",
+        "schedules": [
+          "off",
+          "daily",
+          "weekly"
+        ]
+      },
+      {
+        "kind": "contradictions",
+        "state": "complete",
+        "last_run_at": 1792746209,
+        "last_status": "complete",
+        "result_run_id": 3,
+        "result_at": 1792746209,
+        "total": 1,
+        "new_count": 0,
+        "gone_count": 0,
+        "overlap_total": 0,
+        "schedule": "weekly",
+        "schedules": [
+          "off",
+          "daily",
+          "weekly"
+        ]
+      }
+    ],
+    "reindex_required": false,
+    "indexing": false
+  },
+  "status": {
+    "path": "<user>\\AppData\\Local\\Temp\\bars-workspace-run-1e1da208c9dc463ea4db88b06136ee12\\audits-eSah3Z\\project",
+    "state": "ready",
+    "updated_at": "2026-10-23T09:04:04Z",
+    "pending": 0,
+    "model": {
+      "index": "builtin:BAAI/bge-m3",
+      "settings": "builtin:BAAI/bge-m3"
+    },
+    "last_error": null,
+    "watching": true,
+    "graph": {
+      "state": "partial",
+      "snapshot": "62c535f5e407112192317e34299dbaab6d33412b8c9a464d4e75f1c6a835dac9",
+      "active_job": null,
+      "source_count": 4,
+      "error": null,
+      "method": "explicit-markdown-v6"
+    }
+  },
+  "models": {
+    "embed": {
+      "model": "BAAI/bge-m3",
+      "source": "builtin",
+      "requested": "auto",
+      "state": "ready",
+      "backend": "onnx",
+      "actual": "directml",
+      "fallback_reason": null,
+      "precision": "fp32"
+    },
+    "rerank": {
+      "model": "BAAI/bge-reranker-v2-m3",
+      "source": "builtin",
+      "requested": "cpu",
+      "state": "unloaded",
+      "backend": "",
+      "actual": null,
+      "fallback_reason": null
+    }
+  },
+  "topics": {
+    "enabled": true,
+    "generation": 0,
+    "topics": [
+      {
+        "id": 1,
+        "revision": 2,
+        "title": "Аудит журналов возврата в боксы и предыдущей попытки входа результаты сессий",
+        "status": "open",
+        "first_seen": 1792746213,
+        "last_seen": 1792746213,
+        "observations": 2,
+        "sources": [
+          "mcp",
+          "window"
+        ],
+        "reasons": [
+          "empty_result"
+        ],
+        "variants": 2
+      }
+    ],
+    "store_path": "<user>\\AppData\\Local\\Temp\\bars-workspace-run-1e1da208c9dc463ea4db88b06136ee12\\audits-eSah3Z\\project\\.bars\\new-topics.sqlite3",
+    "losses": 0
+  }
+}

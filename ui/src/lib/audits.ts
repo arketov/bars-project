@@ -3,7 +3,7 @@
 
 import { plural } from "./format";
 
-export type AuditKind = "broken_links" | "duplicates";
+export type AuditKind = "broken_links" | "duplicates" | "contradictions";
 export type AuditState = "never" | "queued" | "running" | "complete" | "partial" | "failed";
 export type ScheduleMode = "off" | "daily" | "weekly" | "on_change";
 export type Standing = "new" | "known" | "gone";
@@ -41,6 +41,8 @@ export interface AuditSubject {
 }
 
 export interface AuditFinding {
+  fingerprint: string;
+  ignored: boolean;
   standing: Standing;
   tag: string;
   group: FindingGroup;
@@ -67,11 +69,13 @@ export interface AuditRunAnswer {
 export const KIND_LABEL: Record<AuditKind, string> = {
   broken_links: "Битые ссылки",
   duplicates: "Дубли",
+  contradictions: "Противоречия",
 };
 
 export const KIND_HINT: Record<AuditKind, string> = {
   broken_links: "Ссылки на документы, которых нет в проекте",
   duplicates: "Повторяющиеся описания в разных разделах",
+  contradictions: "Возможные числовые расхождения в текущей документации; без журналов сессий и ADR",
 };
 
 export const STATE_LABEL: Record<AuditState, string> = {
@@ -109,6 +113,9 @@ export const TAG_LABEL: Record<string, string> = {
   contained: "содержащийся",
   partial: "частичный",
   semantic: "смысловой",
+  num: "число с единицей",
+  slot: "значение величины",
+  swap: "замена значения",
 };
 
 /** Что показывает вид `duplicates` по умолчанию (3.8.2: сильные частичные — 6 из 7 настоящие). */
@@ -146,8 +153,8 @@ export const emptyResultLabel = (summary: AuditSummary): string =>
 export function stateNote(summary: AuditSummary, list: Pick<AuditList, "reindex_required" | "indexing">): string {
   if (summary.state === "failed") return summary.error || "Запуск не удался.";
   if (summary.state === "partial") return summary.error || "Запуск неполный: прежний полный результат сохранён.";
-  if (summary.kind === "duplicates" && list.reindex_required) return "Индекс требует переиндексации: повторы не запустить, показан прежний результат.";
-  if (summary.kind === "duplicates" && list.indexing) return "Идёт индексация: результат может быть неполным.";
+  if (summary.kind !== "broken_links" && list.reindex_required) return "Индекс требует переиндексации: аудит не запустить, показан прежний результат.";
+  if (summary.kind !== "broken_links" && list.indexing) return "Идёт индексация: результат может быть неполным.";
   return "";
 }
 

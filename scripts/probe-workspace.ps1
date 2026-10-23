@@ -1,4 +1,6 @@
-param([Parameter(Mandatory = $true)][string]$Output)
+param([Parameter(Mandatory = $true)][string]$Output,
+      [ValidateSet('workspace_probe', 'audits_probe')][string]$Example = 'workspace_probe',
+      [string]$RealModelsDir = '')
 $ErrorActionPreference = 'Stop'
 $workspaceRoot = Split-Path $PSScriptRoot -Parent
 $workspaceOutput = [IO.Path]::GetFullPath($Output)
@@ -18,20 +20,29 @@ try {
     Push-Location $workspaceRoot
     try {
         $workspaceManifest = Join-Path $workspaceRoot 'crates/bars-app/examples/workspace_probe.manifest'
-        cargo rustc --release -p bars-app --example workspace_probe -- -C link-arg=/MANIFEST:EMBED -C "link-arg=/MANIFESTINPUT:$workspaceManifest"
+        cargo rustc --release -p bars-app --example $Example -- -C link-arg=/MANIFEST:EMBED -C "link-arg=/MANIFESTINPUT:$workspaceManifest"
         if ($LASTEXITCODE) { throw 'Не собран нативный стенд рабочего окна' }
     } finally { Pop-Location }
     $workspaceExe = Join-Path $workspaceTemp 'workspace_probe.exe'
-    Copy-Item -LiteralPath (Join-Path $env:CARGO_TARGET_DIR 'release/examples/workspace_probe.exe') -Destination $workspaceExe
+    Copy-Item -LiteralPath (Join-Path $env:CARGO_TARGET_DIR "release/examples/$Example.exe") -Destination $workspaceExe
     Get-ChildItem (Join-Path $env:CARGO_TARGET_DIR 'release') -Filter '*.dll' | Copy-Item -Destination $workspaceTemp
     $workspaceRedist = Get-ChildItem (Join-Path $workspaceVs 'VC/Redist/MSVC') -Directory | Where-Object Name -Match '^\d' | Sort-Object Name -Descending | Select-Object -First 1
     Get-ChildItem (Join-Path $workspaceRedist.FullName 'x64') -Directory -Filter 'Microsoft.VC*.CRT' | Get-ChildItem -Filter '*.dll' | Copy-Item -Destination $workspaceTemp
     # Только дочерний процесс стенда: журнал и служебные пути не читают рабочий профиль.
     $env:BARS_USER_HOME = $workspaceTemp
-    $workspaceProcess = Start-Process -FilePath $workspaceExe -ArgumentList ('"' + $workspaceTemp + '"') -WindowStyle Hidden -PassThru
-    if (-not $workspaceProcess.WaitForExit(55000)) {
-        if ((Get-Process -Id $workspaceProcess.Id).Path -eq $workspaceExe) { Stop-Process -Id $workspaceProcess.Id }
-        throw 'Таймаут; остановлен только собственный стенд'
+    $workspaceArguments = '"' + $workspaceTemp + '"'
+    if ($RealModelsDir) {
+        if ($Example -ne 'audits_probe') { throw 'Настоящие модели поддерживает только audits_probe' }
+        $workspaceArguments += ' "' + (Resolve-Path -LiteralPath $RealModelsDir).Path + '"'
+    }
+    $workspaceProcess = Start-Process -FilePath $workspaceExe -ArgumentList $workspaceArguments -WindowStyle Hidden -PassThru
+    $workspaceDeadline = [Diagnostics.Stopwatch]::StartNew()
+    $workspaceTimeout = if ($RealModelsDir) { 155 } else { 55 }
+    while (-not $workspaceProcess.WaitForExit(1000)) {
+        if ($workspaceDeadline.Elapsed.TotalSeconds -ge $workspaceTimeout) {
+            if ((Get-Process -Id $workspaceProcess.Id).Path -eq $workspaceExe) { Stop-Process -Id $workspaceProcess.Id }
+            throw 'Таймаут; остановлен только собственный стенд'
+        }
     }
     $workspaceResult = Join-Path $workspaceTemp 'result.json'
     if (-not (Test-Path $workspaceResult)) { throw "Нет результата, exit=$($workspaceProcess.ExitCode)" }

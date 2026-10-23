@@ -1,0 +1,11 @@
+    Blocking waiting for file lock on build directory
+   Compiling bars-core v0.1.0 (<repo>\crates\bars-core)
+    Finished `release` profile [optimized] target(s) in 3m 52s
+     Running unittests src\lib.rs (C:/bt/bars\release\deps\bars_core-f471c4d65c086b94.exe)
+
+running 1 test
+test new_topics::tests::measure_limits ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 308 filtered out; finished in 23.69s
+
+тем 2000; запись: медиана 12.13 мс, p95 21.98 мс, макс 71.61 мс; последняя 25.08 мс; list 16.9 мс; файлы 9.3 МБ

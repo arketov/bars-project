@@ -109,6 +109,7 @@ impl Env {
             kind: kind.into(),
             group: group.map(str::to_string),
             include_gone: true,
+            include_ignored: false,
             cursor: None,
             limit: None,
         }))
@@ -142,6 +143,63 @@ fn md_hashes(root: &Path) -> Vec<(PathBuf, [u8; 32])> {
 const PARAGRAPH: &str = "Воркер держит очередь документов и по очереди отдаёт их индексатору, пока \
     модель не загружена, а пользователь может в это время искать по уже готовым векторам и текстам, \
     не дожидаясь окончания индексации всего проекта целиком.";
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn contradictions_and_ignore_round_trip_without_changing_files() {
+    let env = Env::new();
+    let root = env.project(&[
+        ("features/a.md", "# Настройки\n\nВремя ожидания ответа сервера в текущих настройках приложения составляет 30 с. Это значение задано по умолчанию для всех проектов.\n"),
+        ("manual/b.md", "# Настройки\n\nВремя ожидания ответа сервера в текущих настройках приложения составляет 60 секунд. Это значение задано по умолчанию для всех проектов.\n"),
+        ("chats/old.md", "# Настройки\n\nВремя ожидания ответа сервера в текущих настройках приложения составляет 90 с. Это значение задано по умолчанию для всех проектов.\n"),
+    ]).await;
+    let before = md_hashes(&root);
+    env.run(&root, "contradictions").await;
+    let summary = env.finished(&root, "contradictions").await;
+    assert_eq!(summary.state, "complete");
+    assert_eq!(summary.total, 1);
+    let page = env.findings(&root, "contradictions", None).await;
+    let finding = &page.items[0];
+    assert!(finding.reason.contains("Возможное расхождение"));
+    assert!(finding.subjects.iter().all(|s| !s.path.contains("chats/")));
+    let _: bars_protocol::AuditIgnoreOutput = env
+        .call(Call::AuditIgnore(bars_protocol::AuditIgnoreParams {
+            project: root.display().to_string(),
+            kind: "contradictions".into(),
+            fingerprint: finding.fingerprint.clone(),
+            ignored: true,
+        }))
+        .await;
+    assert_eq!(env.summary(&root, "contradictions").await.total, 0);
+    assert!(
+        env.findings(&root, "contradictions", None)
+            .await
+            .items
+            .is_empty()
+    );
+    let all: AuditFindingsOutput = env
+        .call(Call::AuditFindings(AuditFindingsParams {
+            project: root.display().to_string(),
+            kind: "contradictions".into(),
+            group: None,
+            include_gone: true,
+            include_ignored: true,
+            cursor: None,
+            limit: None,
+        }))
+        .await;
+    assert_eq!(all.total, 1);
+    assert!(all.items[0].ignored);
+    let _: bars_protocol::AuditIgnoreOutput = env
+        .call(Call::AuditIgnore(bars_protocol::AuditIgnoreParams {
+            project: root.display().to_string(),
+            kind: "contradictions".into(),
+            fingerprint: finding.fingerprint.clone(),
+            ignored: false,
+        }))
+        .await;
+    assert_eq!(env.summary(&root, "contradictions").await.total, 1);
+    assert_eq!(md_hashes(&root), before);
+}
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn broken_links_run_compares_runs_and_never_touches_markdown() {
@@ -299,7 +357,7 @@ async fn schedule_validates_modes_and_on_change_runs_only_after_changes() {
         .unwrap();
     assert_eq!(env.summary(&root, "duplicates").await.schedule, "weekly");
     assert_eq!(env.summary(&root, "duplicates").await.state, "never");
-    assert_eq!(env.summary(&root, "broken_links").await.schedule, "off");
+    assert_eq!(env.summary(&root, "broken_links").await.schedule, "on_change");
 
     env.handler
         .dispatch(set("broken_links", "on_change"))
@@ -350,7 +408,7 @@ async fn window_methods_reject_relative_project_and_unknown_kind() {
         .handler
         .dispatch(Call::AuditRun(AuditRunParams {
             project: root.display().to_string(),
-            kind: "contradictions".into(),
+            kind: "unsupported_audit".into(),
         }))
         .await
         .unwrap_err();

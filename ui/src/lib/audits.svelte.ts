@@ -11,6 +11,7 @@ import {
   type AuditList,
   type AuditRunAnswer,
   type AuditSummary,
+  type AuditFinding,
   type FindingGroup,
   type ScheduleMode,
 } from "./audits";
@@ -40,17 +41,22 @@ export class AuditsStore {
   findings = $state<Record<string, KindFindings>>({});
   /** «Перекрытие содержания»: смысловые и слабые частичные повторы. */
   showOverlap = $state(false);
+  showIgnored = $state(false);
   /** Идёт запрос запуска, остановки или смены расписания. */
   busy = $state(false);
 
   #flash: Flash;
   #version = 0;
   #seq = 0;
+  #findingSeq: Record<string, number> = {};
+  #notice: (project: string, text: string) => void;
   /** Сумма новых находок при прошлом чтении: уведомление только при приросте (A-04). */
   #seenNew: number | null = null;
+  #seenResults: Record<string, number | undefined> = {};
 
-  constructor(flash: Flash = () => {}) {
+  constructor(flash: Flash = () => {}, notice: (project: string, text: string) => void = () => {}) {
     this.#flash = flash;
+    this.#notice = notice;
   }
 
   setFlash(flash: Flash): void {
@@ -80,8 +86,11 @@ export class AuditsStore {
     this.open = {};
     this.findings = {};
     this.showOverlap = false;
+    this.showIgnored = false;
+    this.#findingSeq = {};
     this.busy = false;
     this.#seenNew = null;
+    this.#seenResults = {};
   }
 
   /** Читает состояния видов. `quiet` — фоновое обновление без индикатора и без показа ошибки поверх данных. */
@@ -110,11 +119,13 @@ export class AuditsStore {
   /** Уведомление приходит, когда число новых находок выросло, а не после каждого запуска. */
   #notify(list: AuditList): void {
     const total = newTotal(list);
-    if (this.#seenNew !== null && total > this.#seenNew) {
-      const fresh = list.audits.filter((audit) => audit.new_count > 0).map((audit) => KIND_LABEL[audit.kind]);
+    const fresh = list.audits.filter(audit => audit.new_count > 0 && audit.result_run_id !== this.#seenResults[audit.kind]).map(audit => KIND_LABEL[audit.kind]);
+    if (this.#seenNew !== null && total > this.#seenNew && fresh.length) {
       this.#flash(`Аудит: новые находки (${total}) — ${fresh.join(", ")}`);
+      if (this.project) this.#notice(this.project, `Новые находки (${total}) — ${fresh.join(", ")}`);
     }
     this.#seenNew = total;
+    this.#seenResults = Object.fromEntries(list.audits.map(audit => [audit.kind, audit.result_run_id]));
   }
 
   /** Раскрытый вид перечитывается, когда у него появился новый полный результат. */
@@ -143,6 +154,28 @@ export class AuditsStore {
     if (this.open.duplicates) await this.loadFindings("duplicates", true);
   }
 
+  async setShowIgnored(show: boolean): Promise<void> {
+    this.showIgnored = show;
+    await Promise.all(Object.keys(this.open).filter(k => this.open[k]).map(k => this.loadFindings(k as AuditKind, true)));
+  }
+
+  async ignore(kind: AuditKind, finding: AuditFinding): Promise<void> {
+    const project = this.project;
+    if (!project || this.busy) return;
+    const version = this.#version;
+    this.busy = true;
+    try {
+      await call("audit_ignore", { project, kind, fingerprint: finding.fingerprint, ignored: !finding.ignored });
+      if (version !== this.#version) return;
+      await this.load(true);
+      await this.loadFindings(kind, true);
+    } catch (error) {
+      if (version === this.#version) this.#flash(message(error), true);
+    } finally {
+      if (version === this.#version) this.busy = false;
+    }
+  }
+
   /** Страница находок. `reset` — с начала; иначе следующая по курсору. */
   async loadFindings(kind: AuditKind, reset: boolean): Promise<void> {
     const project = this.project;
@@ -150,6 +183,9 @@ export class AuditsStore {
     const version = this.#version;
     const current = this.findings[kind] ?? emptyFindings();
     if (!reset && current.next === null) return;
+    if (!reset && current.loading) return;
+    const seq = (this.#findingSeq[kind] ?? 0) + 1;
+    this.#findingSeq[kind] = seq;
     this.findings = { ...this.findings, [kind]: { ...(reset ? emptyFindings() : current), loading: true } };
     try {
       const group = this.group(kind);
@@ -157,19 +193,21 @@ export class AuditsStore {
         project,
         kind,
         include_gone: true,
+        include_ignored: this.showIgnored,
         ...(group ? { group } : {}),
         ...(!reset && current.next !== null ? { cursor: current.next } : {}),
       });
-      if (version !== this.#version) return;
+      if (version !== this.#version || seq !== this.#findingSeq[kind]) return;
       // Переключатель мог смениться, пока шёл запрос: устаревшую страницу не берём.
       if (this.group(kind) !== group) return;
+      if (!reset && current.runId !== (page.run_id ?? null)) { await this.loadFindings(kind, true); return; }
       const items = reset ? page.items : [...current.items, ...page.items];
       this.findings = {
         ...this.findings,
         [kind]: { items, total: page.total, next: page.next ?? null, loading: false, error: null, runId: page.run_id ?? null },
       };
     } catch (error) {
-      if (version !== this.#version) return;
+      if (version !== this.#version || seq !== this.#findingSeq[kind]) return;
       this.findings = { ...this.findings, [kind]: { ...(reset ? emptyFindings() : current), loading: false, error: message(error) } };
     }
   }

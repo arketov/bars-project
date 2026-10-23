@@ -1,0 +1,12 @@
+{
+  "success": false,
+  "native": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+  "checks": [
+    "broken_links: launch through UI / real worker / full result",
+    "duplicates: launch through UI / real worker / full result",
+    "contradictions: launch through UI / real worker / full result",
+    "ignore / show ignored / restore through UI and persistent API",
+    "weekly schedule stored by worker"
+  ],
+  "error": "Error: нет уведомления о новой находке\n    at wait (<anonymous>:7:182)\n    at async <anonymous>:39:5"
+}

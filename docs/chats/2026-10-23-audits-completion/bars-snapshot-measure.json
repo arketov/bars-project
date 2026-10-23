@@ -1,0 +1,33 @@
+{
+  "profile": "release",
+  "chunks": 1653,
+  "samples": [
+    {
+      "snapshot_ms": 457.2294,
+      "duplicates_ms": 728.9304,
+      "duplicates_total": 115,
+      "duplicates_returned": 115,
+      "contradictions_ms": 200.8313,
+      "contradictions_total": 14,
+      "contradictions_error": null
+    },
+    {
+      "snapshot_ms": 83.0961,
+      "duplicates_ms": 358.8924,
+      "duplicates_total": 115,
+      "duplicates_returned": 115,
+      "contradictions_ms": 216.89759999999998,
+      "contradictions_total": 14,
+      "contradictions_error": null
+    },
+    {
+      "snapshot_ms": 92.3547,
+      "duplicates_ms": 377.9373,
+      "duplicates_total": 115,
+      "duplicates_returned": 115,
+      "contradictions_ms": 201.0381,
+      "contradictions_total": 14,
+      "contradictions_error": null
+    }
+  ]
+}

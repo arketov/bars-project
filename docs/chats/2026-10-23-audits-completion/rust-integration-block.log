@@ -1,0 +1,47 @@
+    Blocking waiting for file lock on build directory
+   Compiling onig_sys v69.9.3
+   Compiling ring v0.17.14
+   Compiling libsqlite3-sys v0.38.2
+   Compiling llama-cpp-sys-2 v0.1.160
+   Compiling rustls v0.23.46
+   Compiling onig v6.5.3
+   Compiling rustls-webpki v0.103.15
+   Compiling tokenizers v0.22.2
+   Compiling tokenizers v0.23.2
+   Compiling llama-cpp-2 v0.1.160
+   Compiling ureq v3.4.2
+   Compiling candle-core v0.11.0
+   Compiling hf-hub v0.5.0
+   Compiling candle-nn v0.11.0
+   Compiling fastembed v7.1.1
+   Compiling rusqlite v0.40.2
+   Compiling bars-graph v0.1.0 (<repo>\crates\bars-graph)
+   Compiling bars-protocol v0.1.0 (<repo>\crates\bars-protocol)
+   Compiling bars-core v0.1.0 (<repo>\crates\bars-core)
+   Compiling bars-worker v0.1.0 (<repo>\crates\bars-worker)
+error: future cannot be sent between threads safely
+    --> crates\bars-worker\src\worker\mod.rs:358:39
+     |
+ 358 |         let queue_task = tokio::spawn(Arc::clone(&inner).run_queue());
+     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ future returned by `run_queue` is not `Send`
+     |
+     = help: within `impl Future<Output = ()>`, the trait `Send` is not implemented for `std::sync::MutexGuard<'_, worker::operations::Journal>`
+note: future is not `Send` as this value is used across an await
+    --> crates\bars-worker\src\worker\mod.rs:1591:66
+     |
+1581 |         let mut journal = lock(&self.models.operations);
+     |             ----------- has type `std::sync::MutexGuard<'_, worker::operations::Journal>` which is not `Send`
+...
+1591 |             if let Err(error) = worker.graph_start(&path, false).await {
+     |                                                                  ^^^^^ await occurs here, with `mut journal` maybe used later
+note: required by a bound in `tokio::spawn`
+    --> <user>\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\tokio-1.53.3\src\task\spawn.rs:176:21
+     |
+ 174 |     pub fn spawn<F>(future: F) -> JoinHandle<F::Output>
+     |            ----- required by a bound in this function
+ 175 |     where
+ 176 |         F: Future + Send + 'static,
+     |                     ^^^^ required by this bound in `spawn`
+
+error: could not compile `bars-worker` (lib test) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

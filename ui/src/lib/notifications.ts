@@ -2,7 +2,7 @@ import type { Operation, OperationEventsOutput } from "./types";
 
 export interface Notice {
   id: string; title: string; text: string; active: boolean; bad: boolean; unread: boolean;
-  percent: number | null; target?: "models" | "indexing"; project?: string;
+  percent: number | null; target?: "models" | "indexing" | "audits"; project?: string;
   operation?: Operation; epoch?: string; unknown?: boolean; updatedAt?: string;
 }
 

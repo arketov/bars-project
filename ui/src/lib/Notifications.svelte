@@ -43,7 +43,7 @@
   function status(item: Notice) {
     if (item.unknown) return "Неизвестно";
     const states: Record<string, string> = { queued: "В очереди", queue_paused: "Очередь на паузе", pause_requested: "Запрос паузы", paused: "На паузе", stop_requested: "Остановка", partial: "Частичный итог", error: "Ошибка", cancelled: "Отменено", success: "Готово" };
-    return states[item.operation?.state ?? ""] ?? (item.bad ? "Ошибка" : "В работе");
+    return states[item.operation?.state ?? ""] ?? (item.bad ? "Ошибка" : item.active ? "В работе" : "Готово");
   }
   async function visit(item: Notice) { await app.visitNotification(item); close(); }
 </script>
@@ -74,6 +74,7 @@
             {/if}
             <div class="meta">{#if item.updatedAt}<time datetime={item.updatedAt}>{time(item.updatedAt)}</time>{/if}<div class="actions">
               {#if item.operation}<button class="details" aria-expanded={expanded === item.id} onclick={() => expanded = expanded === item.id ? null : item.id}>Подробнее</button>{/if}
+              {#if item.target === "audits"}<button class="details" onclick={() => visit(item)}>Открыть аудиты →</button>{/if}
               {#if item.operation && !item.active && !item.unknown && ["error", "partial", "cancelled"].includes(item.operation.state)}<button disabled={!item.operation.target_available} onclick={() => app.retryNotification(item)}>Повторить</button>{/if}
             </div></div>
             {#if expanded === item.id && item.operation}

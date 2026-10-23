@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-23",
+  "inputs": [
+    {
+      "chunks": 1653,
+      "project": "bars-project",
+      "sha256": "5BBF9A647CCFFDD71651D67434598FEBDA7FF7124E85F5E85BB9CBC9EF58444E",
+      "bytes": 64630784
+    },
+    {
+      "chunks": 2402,
+      "project": "overdrive-bots",
+      "sha256": "38D366C20B65FC2249F4C911C7CF7B926AA60E24BE6CD3EFAE4130EFB8EAF770",
+      "bytes": 102293504
+    }
+  ],
+  "limitations": "Three repeats; concurrent builds on this machine; no cold-cache control or p95 estimate",
+  "method": "SQLite backup from read-only source; hashes of copied files after product measurements"
+}

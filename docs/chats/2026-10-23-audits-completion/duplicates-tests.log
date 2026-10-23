@@ -1,0 +1,21 @@
+   Compiling bars-core v0.1.0 (<repo>\crates\bars-core)
+    Finished `release` profile [optimized] target(s) in 26.09s
+     Running unittests src\lib.rs (C:/bt/bars\release\deps\bars_core-f471c4d65c086b94.exe)
+
+running 14 tests
+test search::duplicates::tests::own_text_drops_headings_and_the_service_header_list ... ok
+test search::duplicates::tests::half_of_a_text_is_a_partial_copy ... ok
+test search::duplicates::tests::short_sections_are_skipped_and_reported ... ok
+test search::duplicates::tests::a_section_inside_a_bigger_one_is_contained ... ok
+test search::duplicates::tests::module_filter_limits_the_area_and_unknown_module_is_invalid ... ok
+test search::duplicates::tests::changed_number_is_a_near_copy_that_shows_the_number ... ok
+test search::duplicates::tests::identical_block_in_four_sections_is_a_repeated_block_group ... ok
+test search::duplicates::tests::owned_snapshot_survives_index_changes_and_keeps_one_generation ... ok
+test search::duplicates::tests::dropped_negation_is_a_near_copy_that_shows_the_word ... ok
+test search::duplicates::tests::exact_copies_ignore_case_spacing_and_markup ... ok
+test search::duplicates::tests::exact_goes_first_then_by_strength_and_limit_is_clamped ... ok
+test search::duplicates::tests::semantic_candidate_needs_both_meaning_and_some_shared_words ... ok
+test search::duplicates::tests::shared_template_does_not_make_different_sections_duplicates ... ok
+test search::duplicates::tests::sections_of_one_document_are_not_partial_or_semantic_pairs ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 298 filtered out; finished in 0.42s

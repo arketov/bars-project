@@ -6,6 +6,7 @@
 
 use std::path::Path;
 
+pub mod contradictions;
 mod roles;
 mod store;
 
@@ -52,20 +53,26 @@ pub fn docs_stamp(
     Ok(fingerprint(&[&joined]))
 }
 
-/// Вид аудита. Противоречия в первую версию не входят (OQ-143).
+/// Вид аудита (OQ-137, OQ-143).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum AuditKind {
     BrokenLinks,
     Duplicates,
+    Contradictions,
 }
 
 impl AuditKind {
-    pub const ALL: [AuditKind; 2] = [AuditKind::BrokenLinks, AuditKind::Duplicates];
+    pub const ALL: [AuditKind; 3] = [
+        AuditKind::BrokenLinks,
+        AuditKind::Duplicates,
+        AuditKind::Contradictions,
+    ];
 
     pub fn as_str(self) -> &'static str {
         match self {
             AuditKind::BrokenLinks => "broken_links",
             AuditKind::Duplicates => "duplicates",
+            AuditKind::Contradictions => "contradictions",
         }
     }
 
@@ -75,7 +82,11 @@ impl AuditKind {
 
     /// Расписание по умолчанию: фоновая нагрузка без согласия не появляется (OQ-137).
     pub fn default_schedule(self) -> ScheduleMode {
-        ScheduleMode::Off
+        if self == AuditKind::BrokenLinks {
+            ScheduleMode::OnChange
+        } else {
+            ScheduleMode::Off
+        }
     }
 
     /// Режим «при изменении» есть только у дешёвого вида без модели.

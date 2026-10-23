@@ -1,0 +1,24 @@
+
+> bars-ui@0.0.0 check
+> svelte-check --tsconfig ./tsconfig.json
+
+Loading svelte-check in workspace: <repo>\ui
+Getting Svelte diagnostics...
+
+svelte-check found 0 errors and 0 warnings
+
+> bars-ui@0.0.0 test
+> vitest run --maxWorkers=1
+
+
+ RUN  v5.0.4 <repo>/ui
+
+
+ Test Files  62 passed (62)
+      Tests  482 passed (482)
+   Start at  14:28:53
+   Duration  108.31s (environment 66%, tests 25%, import 7%, transform 1%)
+
+Environment  jsdom was created 62 times · 60.22s total, 66% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments

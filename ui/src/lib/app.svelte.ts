@@ -106,7 +106,10 @@ class App {
   /** «Новые темы» открыты в правой панели, как файл: вместо просмотра документа. */
   topicsOpen = $state(false);
   /** Аудиты знаний текущего проекта (Т-36): экран в правой панели, как «Новые темы». */
-  audits = new AuditsStore((text, bad) => this.flash(text, bad));
+  audits = new AuditsStore((text, bad) => this.flash(text, bad), (project, text) => {
+    this.#notifications.put({ id: `audits:${project}`, title: "Аудиты", text, project, target: "audits", active: false, bad: false, percent: null, updatedAt: new Date().toISOString() }, String(++this.#auditNoticeAttempt));
+    this.publishNotifications();
+  });
   auditsOpen = $state(false);
   auditsVersion = $state(0);
   /** Контекст отображённой выдачи для ручной отметки «Не хватило знаний» (NT-02): не поле ввода, а то, что искали. */
@@ -124,6 +127,7 @@ class App {
   notifications = $state<Notice[]>([]);
   models = $state<ModelsInfoOutput | null>(null);
   #notifications = new NotificationCenter();
+  #auditNoticeAttempt = 0;
   #refreshing = false;
   #treeSignature = "";
   #treeSyncing = false;
@@ -177,6 +181,13 @@ class App {
     } catch (error) { this.flash(error instanceof Error ? error.message : String(error), true); }
   }
   async visitNotification(item: Notice): Promise<void> {
+    if (item.target === "audits") {
+      if (!item.project || !this.projects.some(p => p.path === item.project)) { this.flash("Проект больше недоступен", true); return; }
+      if (this.current !== item.project) await this.select(item.project);
+      if (this.current !== item.project) return;
+      this.openAudits();
+      return;
+    }
     const selectionVersion = this.#selectionVersion;
     const epoch = this.#epoch;
     try {

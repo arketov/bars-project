@@ -178,6 +178,23 @@ struct Item {
     s3: Vec<u64>,
 }
 
+struct RawItem {
+    public_id: String,
+    path: String,
+    module: String,
+    heading_chain: String,
+    first_line: usize,
+    last_line: usize,
+    embed_hash: String,
+    text: String,
+}
+
+/// Собственные строки и векторы одного поколения. Не держит соединение SQLite или lock проекта.
+pub struct DuplicatesSnapshot {
+    rows: Vec<RawItem>,
+    vectors: HashMap<String, Option<Vec<f32>>>,
+}
+
 impl Item {
     fn chunk(&self) -> DuplicateChunk {
         DuplicateChunk {
@@ -268,7 +285,7 @@ fn unique_sorted(mut hashes: Vec<u64>) -> Vec<u64> {
     hashes
 }
 
-fn load_items(index: &Index, modules: &[String]) -> Result<(Vec<Item>, usize), SearchError> {
+fn load_rows(index: &Index, modules: &[String]) -> Result<Vec<RawItem>, SearchError> {
     let mut statement = index.conn().prepare(
         "SELECT c.id, d.path, d.module, c.heading_chain, c.first_line, c.last_line, c.text,
                 d.hash, c.ordinal, c.embed_hash
@@ -277,7 +294,6 @@ fn load_items(index: &Index, modules: &[String]) -> Result<(Vec<Item>, usize), S
     )?;
     let mut rows = statement.query([])?;
     let mut items = Vec::new();
-    let mut skipped = 0;
     while let Some(row) = rows.next()? {
         let module: String = row.get(2)?;
         if !modules.is_empty() && !modules.contains(&module) {
@@ -289,13 +305,7 @@ fn load_items(index: &Index, modules: &[String]) -> Result<(Vec<Item>, usize), S
         let document_hash: String = row.get(7)?;
         let ordinal: i64 = row.get(8)?;
         let embed_hash: String = row.get(9)?;
-        let body = own_text(&text);
-        let (words, spans) = split_words(&body);
-        if words.len() < MIN_WORDS {
-            skipped += 1;
-            continue;
-        }
-        items.push(Item {
+        items.push(RawItem {
             public_id: super::similar::public_id(id, &document_hash, &path, ordinal, &embed_hash),
             path,
             module,
@@ -303,6 +313,30 @@ fn load_items(index: &Index, modules: &[String]) -> Result<(Vec<Item>, usize), S
             first_line: row.get::<_, i64>(4)? as usize,
             last_line: row.get::<_, i64>(5)? as usize,
             embed_hash,
+            text,
+        });
+    }
+    Ok(items)
+}
+
+fn prepare_rows(rows: Vec<RawItem>) -> (Vec<Item>, usize) {
+    let mut items = Vec::new();
+    let mut skipped = 0;
+    for raw in rows {
+        let body = own_text(&raw.text);
+        let (words, spans) = split_words(&body);
+        if words.len() < MIN_WORDS {
+            skipped += 1;
+            continue;
+        }
+        items.push(Item {
+            public_id: raw.public_id,
+            path: raw.path,
+            module: raw.module,
+            heading_chain: raw.heading_chain,
+            first_line: raw.first_line,
+            last_line: raw.last_line,
+            embed_hash: raw.embed_hash,
             s5: unique_sorted(shingle_hashes(&words, SHINGLE)),
             s3: unique_sorted(shingle_hashes(&words, SHINGLE_LOOSE)),
             body,
@@ -310,7 +344,47 @@ fn load_items(index: &Index, modules: &[String]) -> Result<(Vec<Item>, usize), S
             spans,
         });
     }
-    Ok((items, skipped))
+    (items, skipped)
+}
+
+fn scoped_rows(index: &Index, request: &DuplicatesRequest) -> Result<Vec<RawItem>, SearchError> {
+    Scope::build(
+        index,
+        &SearchRequest {
+            modules: request.modules.clone(),
+            ..SearchRequest::default()
+        },
+    )?;
+    load_rows(index, &request.modules)
+}
+
+/// Вызывающий держит lock только на чтение этого снимка, затем может закрыть индекс.
+pub fn duplicates_snapshot(
+    index: &Index,
+    request: &DuplicatesRequest,
+) -> Result<DuplicatesSnapshot, SearchError> {
+    let rows = scoped_rows(index, request)?;
+    let mut vectors = HashMap::new();
+    for row in &rows {
+        if let std::collections::hash_map::Entry::Vacant(entry) =
+            vectors.entry(row.embed_hash.clone())
+        {
+            let vector = index.vector(entry.key())?;
+            entry.insert(vector);
+        }
+    }
+    Ok(DuplicatesSnapshot { rows, vectors })
+}
+
+pub fn duplicates_from_snapshot(
+    snapshot: DuplicatesSnapshot,
+    settings: &SearchSettings,
+    results: Option<usize>,
+) -> Result<DuplicatesResponse, SearchError> {
+    let (items, skipped) = prepare_rows(snapshot.rows);
+    compute_duplicates(items, skipped, settings, results, |hash| {
+        Ok(snapshot.vectors.get(hash).cloned().flatten())
+    })
 }
 
 /// Пары разделов с числом общих окон; окна из `skip` и слишком частые не учитываются.
@@ -511,20 +585,26 @@ pub fn duplicates(
     settings: &SearchSettings,
     request: &DuplicatesRequest,
 ) -> Result<DuplicatesResponse, SearchError> {
-    Scope::build(
-        index,
-        &SearchRequest {
-            modules: request.modules.clone(),
-            ..SearchRequest::default()
-        },
-    )?;
-    let max = settings.max_results.max(1);
-    let results = request
-        .results
-        .map_or(DEFAULT_RESULTS.min(max), |value| value.clamp(1, max));
-    let clamped = request.results.is_some_and(|value| value != results);
+    let (items, skipped) = prepare_rows(scoped_rows(index, request)?);
+    let mut vectors: HashMap<String, Option<Vec<f32>>> = HashMap::new();
+    compute_duplicates(items, skipped, settings, request.results, |hash| {
+        if !vectors.contains_key(hash) {
+            vectors.insert(hash.to_owned(), index.vector(hash)?);
+        }
+        Ok(vectors[hash].clone())
+    })
+}
 
-    let (items, chunks_skipped_short) = load_items(index, &request.modules)?;
+fn compute_duplicates(
+    items: Vec<Item>,
+    chunks_skipped_short: usize,
+    settings: &SearchSettings,
+    requested: Option<usize>,
+    mut vector_of: impl FnMut(&str) -> Result<Option<Vec<f32>>, SearchError>,
+) -> Result<DuplicatesResponse, SearchError> {
+    let max = settings.max_results.max(1);
+    let results = requested.map_or(DEFAULT_RESULTS.min(max), |value| value.clamp(1, max));
+    let clamped = requested.is_some_and(|value| value != results);
 
     // Точные группы: совпадает весь нормализованный текст.
     let mut by_text: HashMap<String, Vec<usize>> = HashMap::new();
@@ -605,7 +685,6 @@ pub fn duplicates(
         |hash| loose_frequency[&hash] >= TEMPLATE_DF,
         LOOSE_DF_CAP,
     );
-    let mut vectors: HashMap<String, Option<Vec<f32>>> = HashMap::new();
     for (&(first, second), &shared) in &loose_counts {
         if lexical.contains(&(first, second)) || same_group(first, second) {
             continue;
@@ -624,12 +703,6 @@ pub fn duplicates(
         if strict_share >= PARTIAL_SHARE {
             continue;
         }
-        let mut vector_of = |hash: &str| -> Result<Option<Vec<f32>>, SearchError> {
-            if !vectors.contains_key(hash) {
-                vectors.insert(hash.to_string(), index.vector(hash)?);
-            }
-            Ok(vectors[hash].clone())
-        };
         let (Some(a), Some(b)) = (
             vector_of(&items[first].embed_hash)?,
             vector_of(&items[second].embed_hash)?,

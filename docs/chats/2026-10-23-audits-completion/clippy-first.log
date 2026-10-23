@@ -1,0 +1,70 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on build directory
+    Checking onig_sys v69.9.3
+    Checking ring v0.17.14
+    Checking libsqlite3-sys v0.38.2
+    Checking llama-cpp-sys-2 v0.1.160
+    Checking serde_spanned v1.1.2
+    Checking keyring-core v1.0.1
+    Checking notify-types v2.1.0
+    Checking cpufeatures v0.2.17
+    Checking recvmsg v1.0.0
+    Checking widestring v1.2.1
+    Checking file-id v0.2.3
+    Checking dirs v7.0.0
+    Checking rust-stemmers v1.2.0
+    Checking self_cell v1.3.0
+    Checking toml_edit v0.25.17+spec-1.1.0
+    Checking onig v6.5.3
+    Checking sha2 v0.10.9
+    Checking toml v1.1.8+spec-1.1.0
+    Checking notify v8.2.0
+    Checking windows-native-keyring-store v1.1.0
+    Checking rusqlite v0.40.2
+    Checking llama-cpp-2 v0.1.160
+    Checking notify-debouncer-full v0.7.0
+    Checking tokenizers v0.22.2
+    Checking tokenizers v0.23.2
+    Checking interprocess v2.4.5
+    Checking bars-graph v0.1.0 (<repo>\crates\bars-graph)
+    Checking rustls-webpki v0.103.15
+    Checking rustls v0.23.46
+    Checking bars-protocol v0.1.0 (<repo>\crates\bars-protocol)
+    Checking ureq v3.4.2
+    Checking candle-core v0.11.0
+    Checking hf-hub v0.5.0
+error: large size difference between variants
+    --> crates\bars-protocol\src\methods.rs:973:9
+     |
+ 973 | /         pub enum Call {
+ 974 | |             $($variant($params),)*
+     | |               -----------------
+     | |               |
+     | |               the largest variant contains at least 624 bytes
+     | |               the second-largest variant contains at least 320 bytes
+ 975 | |         }
+     | |_________^ the entire enum is at least 624 bytes
+...
+1024 | / methods! {
+1025 | |     GraphSearch: crate::GraphSearchParams => crate::GraphSearchOutput, "graph_search", All;
+1026 | |     GraphQuery: crate::GraphQueryParams => crate::GraphReply, "graph_query", All;
+1027 | |     GraphStatus: crate::GraphStatusParams => crate::GraphStatus, "graph_status", All;
+...    |
+1084 | |     AutostartSet: AutostartSetParams => AutostartOutput, "autostart_set", Cli;
+1085 | | }
+     | |_- in this macro invocation
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#large_enum_variant
+     = note: `-D clippy::large-enum-variant` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(clippy::large_enum_variant)]`
+     = note: this error originates in the macro `methods` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider boxing the large fields or introducing indirection in some other way to reduce the total size of the enum
+     |
+1026 -     GraphQuery: crate::GraphQueryParams => crate::GraphReply, "graph_query", All;
+1026 +     GraphQuery: Box<crate::GraphQueryParams> => crate::GraphReply, "graph_query", All;
+     |
+
+error: could not compile `bars-protocol` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

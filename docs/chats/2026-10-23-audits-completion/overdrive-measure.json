@@ -1,0 +1,30 @@
+{
+  "profile": "release",
+  "chunks": 2402,
+  "samples": [
+    {
+      "duplicates_ms": 2136.6793,
+      "duplicates_total": 216,
+      "duplicates_returned": 216,
+      "contradictions_ms": 431.2911,
+      "contradictions_total": 28,
+      "contradictions_error": null
+    },
+    {
+      "duplicates_ms": 1612.5765,
+      "duplicates_total": 216,
+      "duplicates_returned": 216,
+      "contradictions_ms": 525.9066,
+      "contradictions_total": 28,
+      "contradictions_error": null
+    },
+    {
+      "duplicates_ms": 1258.1321,
+      "duplicates_total": 216,
+      "duplicates_returned": 216,
+      "contradictions_ms": 389.26509999999996,
+      "contradictions_total": 28,
+      "contradictions_error": null
+    }
+  ]
+}
