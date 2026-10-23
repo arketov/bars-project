@@ -137,6 +137,7 @@ pub(crate) mod windows {
             }
             Ok(())
         }
+        #[allow(dead_code)] // нужен не всем примерам, подключающим файл
         pub(crate) fn wait_reserve(&self, commit_gib: u64, timeout: Duration) -> Result<()> {
             let started = Instant::now();
             let mut sufficient = 0;

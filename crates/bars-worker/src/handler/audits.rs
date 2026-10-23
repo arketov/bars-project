@@ -699,7 +699,7 @@ impl WorkerHandler {
             Err(error) => return Outcome::failed(error.to_string()),
         };
         let after = self.worker.status(project);
-        let indexing_after = after.as_ref().is_ok_and(|s| busy(s));
+        let indexing_after = after.as_ref().is_ok_and(busy);
         let changed = !after
             .as_ref()
             .is_ok_and(|s| s.state == ProjectState::Ready && s.updated_at == generation);

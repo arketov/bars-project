@@ -1,7 +1,13 @@
 //! Изолированная проба WebView2: без serve, single-instance, трея и профиля пользователя.
 #![allow(dead_code)]
+#[path = "../src/appearance.rs"]
+mod appearance;
+#[path = "../src/appearance_index.rs"]
+mod appearance_index;
 #[path = "../src/commands.rs"]
 mod commands;
+#[path = "../src/doc_window.rs"]
+mod doc_window;
 #[path = "../src/document_io.rs"]
 mod document_io;
 #[path = "../src/documents.rs"]
@@ -10,6 +16,10 @@ mod documents;
 mod flush;
 #[path = "../src/folders.rs"]
 mod folders;
+#[path = "../src/tree_io.rs"]
+mod tree_io;
+#[path = "../src/window.rs"]
+mod window;
 
 use bars_worker::{
     handler::WorkerHandler,

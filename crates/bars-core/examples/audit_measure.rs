@@ -26,8 +26,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         })?
         .collect::<Result<Vec<_>, _>>()?;
     let mut samples = Vec::new();
-    let mut settings = SearchSettings::default();
-    settings.max_results = 5000;
+    let settings = SearchSettings {
+        max_results: 5000,
+        ..SearchSettings::default()
+    };
     for _ in 0..3 {
         let clock = Instant::now();
         let request = DuplicatesRequest {

@@ -82,6 +82,7 @@ fn evidence(
     Ok(id)
 }
 
+#[allow(clippy::too_many_arguments)]
 fn edge(
     data: &mut Dataset,
     from: &str,

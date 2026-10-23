@@ -140,7 +140,7 @@ mod tests {
         assert!(!settings_file(&bars_only.path).exists());
 
         // Повтор ничего не пишет.
-        let again = sync(&env(&home), &[both.clone()]);
+        let again = sync(&env(&home), std::slice::from_ref(&both));
         assert!(matches!(&again[0], Ok(None)));
     }
 
@@ -150,7 +150,7 @@ mod tests {
         let work = TempDir::new().unwrap();
         let project = project(&work, "p");
         claude_knows(&home, &[&project]);
-        assert!(sync(&env(&home), &[project.clone()]).is_empty());
+        assert!(sync(&env(&home), std::slice::from_ref(&project)).is_empty());
         assert!(!settings_file(&project.path).exists());
 
         install(&env(&home), InstallClient::ClaudeCode).unwrap();
@@ -160,7 +160,7 @@ mod tests {
             r#"{"hooks": {"PreToolUse": [{"matcher": "Bash", "hooks": [{"type": "command", "command": "mine"}]}]}}"#,
         )
         .unwrap();
-        sync(&env(&home), &[project.clone()]);
+        sync(&env(&home), std::slice::from_ref(&project));
         let groups = settings(&project)["hooks"]["PreToolUse"].clone();
         assert_eq!(groups.as_array().unwrap().len(), 2);
         assert_eq!(groups[0]["hooks"][0]["command"], "mine");
@@ -179,7 +179,7 @@ mod tests {
             r#"{"hooks": {"PreToolUse": [{"matcher": "Bash", "hooks": [{"type": "command", "command": "mine"}]}]}}"#,
         )
         .unwrap();
-        sync(&env(&home), &[project.clone()]);
+        sync(&env(&home), std::slice::from_ref(&project));
 
         let changed = uninstall(&env(&home), InstallClient::ClaudeCode).unwrap();
         assert!(changed.contains(&settings_file(&project.path)));

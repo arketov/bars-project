@@ -462,8 +462,9 @@ fn atoms(body: &[(usize, &str)], max: usize) -> Vec<Atom> {
                 let segment_text: String = segment.iter().collect();
                 let start = line.as_ptr() as usize + source_offset;
                 source_offset += segment_text.len();
+                let span = start..start + segment_text.len();
                 atoms.push(Atom {
-                    source_spans: vec![start..start + segment_text.len()],
+                    source_spans: vec![span],
                     first_line: line_no,
                     last_line: line_no,
                     text: segment_text,

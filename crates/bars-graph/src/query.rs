@@ -239,6 +239,7 @@ impl WalkState {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn walk(
     view: &Allowed<'_>,
     request: &GraphRequest,

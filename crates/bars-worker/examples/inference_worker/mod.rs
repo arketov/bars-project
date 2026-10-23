@@ -158,9 +158,9 @@ pub async fn main() -> Result<()> {
     }
     for concurrency in [2, 4] {
         let mut tasks = Vec::new();
-        for i in 0..concurrency {
+        for query in queries.iter().take(concurrency) {
             let endpoint = endpoint.clone();
-            let query = queries[i].clone();
+            let query = query.clone();
             let project = project.clone();
             tasks.push(tokio::spawn(async move{
                 let mut client=Client::connect(&endpoint,ClientKind::Cli).await.map_err(|e|e.to_string())?;

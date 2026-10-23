@@ -49,6 +49,8 @@ fn rename_updates_three_documents_and_preserves_readonly_failure() {
     );
     // Удаление временного проекта на Windows требует снять readonly.
     let mut permissions = fs::metadata(&file).unwrap().permissions();
+    #[allow(clippy::permissions_set_readonly_false)]
+    // тест Windows: снимает атрибут «только чтение»
     permissions.set_readonly(false);
     fs::set_permissions(&file, permissions).unwrap();
 }

@@ -227,7 +227,7 @@ mod tests {
         let temp = tempfile::tempdir().unwrap();
         fs::create_dir_all(temp.path().join("docs/empty/child")).unwrap();
         let pinned = target(temp.path(), "docs", "empty/child", &[], "1".into()).unwrap();
-        assert_eq!(checked_path(&pinned).unwrap().1, false);
+        assert!(!checked_path(&pinned).unwrap().1);
         fs::create_dir_all(temp.path().join("docs/.hidden/child")).unwrap();
         assert!(target(temp.path(), "docs", ".hidden/child", &[], "1".into()).is_err());
         assert!(target(temp.path(), "docs", "absent", &[], "1".into()).is_err());

@@ -48,6 +48,7 @@ pub struct GraphArgs {
     pub path_kind: Option<String>,
 }
 #[derive(Debug, Subcommand)]
+#[allow(clippy::large_enum_variant)] // разбирается один раз при старте команды
 pub enum GraphAction {
     /// Общий или локальный подграф.
     Show(GraphArgs),

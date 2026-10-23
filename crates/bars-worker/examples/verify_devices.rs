@@ -178,10 +178,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(after_save["runtime"]["rerank"]["state"], "unloaded");
     let change_deadline = Instant::now() + Duration::from_secs(180);
     let changed_search = loop {
-        if let Ok(value) = handler.dispatch(search()).await {
-            if value["applied"]["score_kind"] == "rerank" && value.get("rerank_error").is_none() {
-                break value;
-            }
+        if let Ok(value) = handler.dispatch(search()).await
+            && value["applied"]["score_kind"] == "rerank"
+            && value.get("rerank_error").is_none()
+        {
+            break value;
         }
         if Instant::now() > change_deadline {
             return Err("search after device change timed out".into());

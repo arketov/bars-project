@@ -236,42 +236,6 @@ fn check_quantized_vectors(vectors: &[Vec<f32>], dim: usize) -> Result<(), Embed
     Ok(())
 }
 
-#[cfg(test)]
-mod quantized_tests {
-    use super::*;
-    #[test]
-    fn invalid_dense_output_is_rejected_before_index_or_search() {
-        check_quantized_vectors(&[vec![1., 0.]], 2).unwrap();
-        for vector in [
-            vec![0., 0.],
-            vec![f32::NAN, 0.],
-            vec![f32::INFINITY, 0.],
-            vec![f32::MAX, 0.],
-            vec![1.],
-        ] {
-            assert!(check_quantized_vectors(&[vector], 2).is_err());
-        }
-    }
-    #[test]
-    fn fp16_cpu_is_rejected_before_network_or_model_loading() {
-        let dir = tempfile::tempdir().unwrap();
-        let error = BuiltinEmbedder::bge_m3_fp16(dir.path(), Accelerator::Cpu)
-            .err()
-            .unwrap();
-        assert!(error.to_string().contains("DirectML"));
-        assert_eq!(std::fs::read_dir(dir.path()).unwrap().count(), 0);
-        #[cfg(windows)]
-        {
-            let error =
-                load_builtin_embedder(super::super::BGE_M3_FP16_ID, dir.path(), Accelerator::Cpu)
-                    .err()
-                    .unwrap();
-            assert!(error.to_string().contains("DirectML"));
-            assert_eq!(std::fs::read_dir(dir.path()).unwrap().count(), 0);
-        }
-    }
-}
-
 /// Выставляет окружение процесса так, чтобы все встроенные модели лежали в `models_dir`:
 /// `FASTEMBED_CACHE_DIR` для candle-моделей и без `HF_HOME`, который в fastembed перекрывает
 /// папку кэша (`docs/features/models/local-models.md`, «Где лежат скачанные модели»).
@@ -305,5 +269,41 @@ pub fn load_builtin_embedder(
             accelerator,
         )?)),
         Backend::NomicV2Moe => Ok(Box::new(CandleEmbedder::load(info, models_dir)?)),
+    }
+}
+
+#[cfg(test)]
+mod quantized_tests {
+    use super::*;
+    #[test]
+    fn invalid_dense_output_is_rejected_before_index_or_search() {
+        check_quantized_vectors(&[vec![1., 0.]], 2).unwrap();
+        for vector in [
+            vec![0., 0.],
+            vec![f32::NAN, 0.],
+            vec![f32::INFINITY, 0.],
+            vec![f32::MAX, 0.],
+            vec![1.],
+        ] {
+            assert!(check_quantized_vectors(&[vector], 2).is_err());
+        }
+    }
+    #[test]
+    fn fp16_cpu_is_rejected_before_network_or_model_loading() {
+        let dir = tempfile::tempdir().unwrap();
+        let error = BuiltinEmbedder::bge_m3_fp16(dir.path(), Accelerator::Cpu)
+            .err()
+            .unwrap();
+        assert!(error.to_string().contains("DirectML"));
+        assert_eq!(std::fs::read_dir(dir.path()).unwrap().count(), 0);
+        #[cfg(windows)]
+        {
+            let error =
+                load_builtin_embedder(super::super::BGE_M3_FP16_ID, dir.path(), Accelerator::Cpu)
+                    .err()
+                    .unwrap();
+            assert!(error.to_string().contains("DirectML"));
+            assert_eq!(std::fs::read_dir(dir.path()).unwrap().count(), 0);
+        }
     }
 }

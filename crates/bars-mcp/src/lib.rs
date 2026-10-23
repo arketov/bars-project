@@ -7,8 +7,8 @@
 //! Права MCP на стороне воркера задаёт `bars_protocol::Session`: `accept_model_change` от MCP
 //! сбрасывается в `false`, а прокси его и не передаёт.
 
-mod graph;
 mod disk_read;
+mod graph;
 mod instructions;
 mod observation;
 mod render;

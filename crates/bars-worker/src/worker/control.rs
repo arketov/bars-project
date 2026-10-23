@@ -162,12 +162,15 @@ impl JobCell {
     }
 }
 
+/// Проверка «документ ждёт паузы после правки».
+type DeferCheck = Arc<dyn Fn(&str, bool) -> bool + Send + Sync>;
+
 /// Наблюдатель, который задание передаёт индексатору.
 pub struct JobObserver {
     pause: Arc<Pause>,
     cell: Arc<JobCell>,
     /// Документ ждёт паузы после правки: проверка его пропускает (Т-41).
-    defer: Option<Arc<dyn Fn(&str, bool) -> bool + Send + Sync>>,
+    defer: Option<DeferCheck>,
     documents: Option<Arc<dyn IndexObserver + Send + Sync>>,
 }
 
@@ -181,7 +184,7 @@ impl JobObserver {
         }
     }
 
-    pub fn with_defer(mut self, defer: Arc<dyn Fn(&str, bool) -> bool + Send + Sync>) -> Self {
+    pub fn with_defer(mut self, defer: DeferCheck) -> Self {
         self.defer = Some(defer);
         self
     }

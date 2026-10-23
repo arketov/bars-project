@@ -63,7 +63,7 @@ impl Embedder for LocalModel {
     }
     fn embed(&mut self, texts: &[&str]) -> Result<Vec<Vec<f32>>, EmbedError> {
         self.0
-            .embed(texts.to_vec(), Some(1))
+            .embed(texts, Some(1))
             .map_err(|e| EmbedError::Embed(e.to_string()))
     }
 }

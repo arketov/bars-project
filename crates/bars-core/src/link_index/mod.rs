@@ -11,6 +11,6 @@ pub use bars_graph::links::{DocSet, moves};
 mod tests;
 
 pub use store::{
-    BrokenLink, IncomingLink, LINKS_PARSER_VERSION, LinkIndex, LinkIndexError, LinksOf, LinkPage,
+    BrokenLink, IncomingLink, LINKS_PARSER_VERSION, LinkIndex, LinkIndexError, LinkPage, LinksOf,
     OutgoingLink, RefreshStats, store_path,
 };

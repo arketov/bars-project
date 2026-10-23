@@ -507,9 +507,11 @@ fn appearance_failure(error: &crate::appearance::AppearanceError) -> Value {
 #[tauri::command]
 pub async fn appearance_read(state: State<'_, Shared>, project: String) -> Result<Value, String> {
     let (root, docs_root) = document_roots(&state, &project)?;
-    tauri::async_runtime::spawn_blocking(move || match crate::appearance::read_for_docs(&root, &docs_root) {
-        Ok(appearance) => appearance_json(&appearance),
-        Err(error) => appearance_failure(&error),
+    tauri::async_runtime::spawn_blocking(move || {
+        match crate::appearance::read_for_docs(&root, &docs_root) {
+            Ok(appearance) => appearance_json(&appearance),
+            Err(error) => appearance_failure(&error),
+        }
     })
     .await
     .map_err(|e| e.to_string())
@@ -531,14 +533,22 @@ pub async fn appearance_set(
     let Some(kind) = crate::appearance::Kind::parse(&kind) else {
         return Err("неизвестный вид: нужен folder или document".into());
     };
-    let value = tauri::async_runtime::spawn_blocking(move || {
-        match crate::appearance::set_for_docs(&root, &docs_root, kind, &path, color.as_deref(), icon.as_deref()) {
-            Ok(appearance) => appearance_json(&appearance),
-            Err(error) => appearance_failure(&error),
-        }
-    })
-    .await
-    .map_err(|e| e.to_string())?;
+    let value =
+        tauri::async_runtime::spawn_blocking(move || {
+            match crate::appearance::set_for_docs(
+                &root,
+                &docs_root,
+                kind,
+                &path,
+                color.as_deref(),
+                icon.as_deref(),
+            ) {
+                Ok(appearance) => appearance_json(&appearance),
+                Err(error) => appearance_failure(&error),
+            }
+        })
+        .await
+        .map_err(|e| e.to_string())?;
     if value["status"] == "ok" {
         let _ = app.emit(
             "bars://appearance-changed",

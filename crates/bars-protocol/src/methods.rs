@@ -970,6 +970,7 @@ macro_rules! methods {
 
         /// Разобранный вызов: по одному варианту на метод.
         #[derive(Debug, Clone, PartialEq)]
+        #[allow(clippy::large_enum_variant)] // короткоживущее значение: упаковка в Box меняет код всех обработчиков
         pub enum Call {
             $($variant($params),)*
         }

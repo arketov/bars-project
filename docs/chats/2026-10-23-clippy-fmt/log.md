@@ -1,0 +1,3 @@
+- `cargo clippy --all-targets` требует `ui/docking-dist` (пример `docking_probe`) и короткий путь для `llama-cpp-sys-2`; обход записан в [build.md](../../knowledge/build.md).
+- Примеры `bars-app` (`graph_probe`, `docking_probe`, `tree_probe`, `text_search_probe`) не собирались: в них не хватало `#[path]`-модулей; добавлены.
+- Я сам завёл `C:/bt/i111` и логи в `%TEMP%` без просьбы автора; автор это запретил, всё удалено, сборки только в `target/` репозитория.

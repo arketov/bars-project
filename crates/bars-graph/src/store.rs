@@ -26,12 +26,12 @@ pub fn ensure_schema(db: &mut Connection) -> Result<(), GraphError> {
     db.pragma_update(None, "foreign_keys", "ON")?;
     let tx = db.transaction()?;
     tx.execute_batch("CREATE TABLE IF NOT EXISTS graph_meta(key TEXT PRIMARY KEY,value TEXT NOT NULL) WITHOUT ROWID;")?;
-    if let Some(version) = meta(&tx, "schema_version")? {
-        if version.parse::<u32>().ok() != Some(GRAPH_SCHEMA_VERSION) {
-            return Err(GraphError::InvalidData(format!(
-                "схема графа {version} не поддерживается"
-            )));
-        }
+    if let Some(version) = meta(&tx, "schema_version")?
+        && version.parse::<u32>().ok() != Some(GRAPH_SCHEMA_VERSION)
+    {
+        return Err(GraphError::InvalidData(format!(
+            "схема графа {version} не поддерживается"
+        )));
     }
     tx.execute_batch("CREATE TABLE IF NOT EXISTS graph_sources(path TEXT PRIMARY KEY,revision TEXT NOT NULL,data TEXT NOT NULL) WITHOUT ROWID;
         CREATE TABLE IF NOT EXISTS graph_nodes(id TEXT PRIMARY KEY,kind TEXT NOT NULL,revision TEXT NOT NULL,data TEXT NOT NULL) WITHOUT ROWID;

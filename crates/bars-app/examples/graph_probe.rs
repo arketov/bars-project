@@ -1,8 +1,14 @@
 //! Проверка физического графа в продуктовом ui/dist в WebView2: изолированный воркер с FakeProvider и копиями
 //! документации bars-project и overdrive-bots (читаются только `.md`, исходные папки и их индексы не трогаются).
 #![allow(dead_code)]
+#[path = "../src/appearance.rs"]
+mod appearance;
+#[path = "../src/appearance_index.rs"]
+mod appearance_index;
 #[path = "../src/commands.rs"]
 mod commands;
+#[path = "../src/doc_window.rs"]
+mod doc_window;
 #[path = "../src/document_io.rs"]
 mod document_io;
 #[path = "../src/documents.rs"]
@@ -11,6 +17,8 @@ mod documents;
 mod flush;
 #[path = "../src/folders.rs"]
 mod folders;
+#[path = "../src/tree_io.rs"]
+mod tree_io;
 #[path = "../src/window.rs"]
 mod window;
 

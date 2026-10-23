@@ -24,7 +24,10 @@ fn cosine(a: &[f32], b: &[f32]) -> f32 {
 fn new_topics_owner_pair_merges_with_real_bge_m3() {
     use bars_core::new_topics::{EmbeddingSpace, Observation, Reason, Source, TopicStore};
     let models = cached_models_dir().expect("нужна уже скачанная bge-m3");
-    assert!(bars_core::models::is_downloaded(&models, bars_core::models::BGE_M3_ID), "нужен полный локальный кэш модели; скачивание не разрешено стендом");
+    assert!(
+        bars_core::models::is_downloaded(&models, bars_core::models::BGE_M3_ID),
+        "нужен полный локальный кэш модели; скачивание не разрешено стендом"
+    );
     let mut model = BuiltinEmbedder::bge_m3(&models, Accelerator::Auto).unwrap();
     let queries = [
         "Аудит журналов возврата в боксы и предыдущей попытки входа результаты сессий",

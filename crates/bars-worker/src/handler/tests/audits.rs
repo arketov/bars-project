@@ -357,7 +357,10 @@ async fn schedule_validates_modes_and_on_change_runs_only_after_changes() {
         .unwrap();
     assert_eq!(env.summary(&root, "duplicates").await.schedule, "weekly");
     assert_eq!(env.summary(&root, "duplicates").await.state, "never");
-    assert_eq!(env.summary(&root, "broken_links").await.schedule, "on_change");
+    assert_eq!(
+        env.summary(&root, "broken_links").await.schedule,
+        "on_change"
+    );
 
     env.handler
         .dispatch(set("broken_links", "on_change"))

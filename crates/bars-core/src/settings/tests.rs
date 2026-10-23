@@ -8,21 +8,36 @@ const PROJECT: &str = "config.toml";
 
 #[test]
 fn tei_settings_support_independent_embed_and_rerank() {
-    let loaded = user("[embed]\nsource='tei'\nmodel='BAAI/bge-m3'\nbase_url='http://127.0.0.1:8080'\n[rerank]\nenabled=true\nsource='tei'\nmodel='BAAI/bge-reranker-v2-m3'\nbase_url='http://127.0.0.1:8081'\n");
+    let loaded = user(
+        "[embed]\nsource='tei'\nmodel='BAAI/bge-m3'\nbase_url='http://127.0.0.1:8080'\n[rerank]\nenabled=true\nsource='tei'\nmodel='BAAI/bge-reranker-v2-m3'\nbase_url='http://127.0.0.1:8081'\n",
+    );
     assert_eq!(loaded.value.embed.source, ModelSource::Tei);
     assert_eq!(loaded.value.rerank.source, ModelSource::Tei);
     assert_eq!(loaded.value.embed.source.as_str(), "tei");
-    assert_eq!(loaded.value.rerank.base_url.as_deref(), Some("http://127.0.0.1:8081"));
-    assert!(user_err("[embed]\nsource='tei'\nmodel='m'\n").to_string().contains("base_url"));
+    assert_eq!(
+        loaded.value.rerank.base_url.as_deref(),
+        Some("http://127.0.0.1:8081")
+    );
+    assert!(
+        user_err("[embed]\nsource='tei'\nmodel='m'\n")
+            .to_string()
+            .contains("base_url")
+    );
 }
 
 #[test]
 fn lmstudio_embed_settings_and_independent_rerank() {
-    let loaded = user("[embed]\nsource='lmstudio'\nmodel='text-embedding-qwen3-embedding-0.6b'\nbase_url='http://127.0.0.1:1234/v1'\n[rerank]\nenabled=true\n");
+    let loaded = user(
+        "[embed]\nsource='lmstudio'\nmodel='text-embedding-qwen3-embedding-0.6b'\nbase_url='http://127.0.0.1:1234/v1'\n[rerank]\nenabled=true\n",
+    );
     assert_eq!(loaded.value.embed.source, ModelSource::Lmstudio);
     assert_eq!(loaded.value.embed.source.as_str(), "lmstudio");
     assert_eq!(loaded.value.rerank.source, ModelSource::Builtin);
-    assert!(user_err("[rerank]\nenabled=true\nsource='lmstudio'\n").to_string().contains("LM Studio"));
+    assert!(
+        user_err("[rerank]\nenabled=true\nsource='lmstudio'\n")
+            .to_string()
+            .contains("LM Studio")
+    );
 }
 
 #[test]

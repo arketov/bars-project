@@ -2,6 +2,8 @@
 #![allow(dead_code)]
 #[path = "../src/appearance.rs"]
 mod appearance;
+#[path = "../src/appearance_index.rs"]
+mod appearance_index;
 #[path = "../src/commands.rs"]
 mod commands;
 #[path = "../src/doc_window.rs"]
