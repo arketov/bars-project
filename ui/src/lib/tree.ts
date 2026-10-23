@@ -57,7 +57,7 @@ export function docsPrefix(docsRoot: string): string {
 /** Путь узла дерева (от корня документации; корневая группа — `.`, файлы корня — `./имя`) → путь проекта. */
 export function projectPathOf(nodePath: string, docsRoot: string): string {
   const relative = nodePath === "." ? "" : nodePath.replace(/^\.\//, "");
-  return joinPath(docsPrefix(docsRoot), relative);
+  return joinPath(docsPrefix(docsRoot), relative) || ".";
 }
 
 /**

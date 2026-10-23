@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { app } from "./app.svelte";
+import { BarsError } from "./types";
 import { buildTree, projectPathOf } from "./tree";
 import { destinations, entries, parentNodePath } from "./entries.svelte";
 
@@ -62,9 +63,73 @@ describe("дерево по диску (Т-33)", () => {
     expect(tree.map((m) => m.path)).toEqual(["a", "b"]);
     expect(tree[1].indexPath).toBe("b/index.md");
     expect(projectPathOf("a/x.md", ".")).toBe("a/x.md");
-    expect(projectPathOf(".", ".")).toBe("");
+    expect(projectPathOf(".", ".")).toBe(".");
     expect(projectPathOf("./root.md", "manual/docs")).toBe("manual/docs/root.md");
     expect(projectPathOf(".", "docs")).toBe("docs");
+  });
+});
+
+describe("обновление дерева", () => {
+  beforeEach(() => {
+    app.current = project.path;
+    app.projects = [project];
+    app.tree = [];
+    app.treeProblems = [];
+  });
+  afterEach(() => { vi.restoreAllMocks(); vi.clearAllMocks(); app.current = null; });
+  const snapshot = (revision: string, files: string[] = []) => ({ docs_root: "docs", revision, files: files.map(path => ({ path })), dirs: [], problems: [] });
+
+  it("пустое дерево подхватывает новый файл, затем новый заголовок без изменения числа чанков", async () => {
+    api.call.mockResolvedValue({ docs_root: "docs", documents: [] });
+    api.treeRead.mockResolvedValue(snapshot("empty"));
+    await app.loadTree();
+    api.call.mockResolvedValue({ docs_root: "docs", documents: [{ path: "docs/n.md", module: ".", title: "Первый", chunks: 1 }] });
+    api.treeRead.mockResolvedValue(snapshot("new", ["docs/n.md"]));
+    await app.syncTree();
+    expect(app.tree[0].children[0].title).toBe("Первый");
+    api.call.mockResolvedValue({ docs_root: "docs", documents: [{ path: "docs/n.md", module: ".", title: "Второй", chunks: 1 }] });
+    await app.syncTree();
+    expect(app.tree[0].children[0].title).toBe("Второй");
+  });
+
+  it("поздний снимок не отменяет собственную операцию", async () => {
+    let finish!: (value: ReturnType<typeof snapshot>) => void;
+    api.call.mockResolvedValue({ docs_root: "docs", documents: [] });
+    api.treeRead.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+    const older = app.syncTree();
+    api.treeRead.mockResolvedValue(snapshot("new", ["docs/new.md"]));
+    await app.loadTree();
+    finish(snapshot("old"));
+    await older;
+    expect(app.tree[0].children[0].documentPath).toBe("docs/new.md");
+  });
+
+  it("ошибка диска сохраняет последнее дерево и показывает причину", async () => {
+    api.call.mockResolvedValue({ docs_root: "docs", documents: [] });
+    api.treeRead.mockResolvedValue(snapshot("new", ["docs/new.md"]));
+    await app.loadTree();
+    api.treeRead.mockRejectedValue(Error("Нет доступа к диску"));
+    await app.syncTree();
+    expect(app.tree[0].children[0].documentPath).toBe("docs/new.md");
+    expect(app.treeProblems[0].reason).toContain("Нет доступа");
+  });
+
+  it("смена пустого корня обновляет цель создания даже при прежней ревизии дерева", async () => {
+    api.call.mockResolvedValue({ docs_root: "docs", documents: [] });
+    api.treeRead.mockResolvedValue(snapshot("empty"));
+    await app.loadTree();
+    api.treeRead.mockResolvedValue({ ...snapshot("empty"), docs_root: "manual" });
+    await app.syncTree();
+    expect(app.docsRoot).toBe("manual");
+  });
+
+  it("отсутствующий файл папки открывается пустым редактором только по явному клику папки", async () => {
+    api.call.mockRejectedValue(new BarsError("Файл не найден", "file_not_found"));
+    const hit = { path: "docs/empty/index.md", title: "Пустая", first_line: 0, last_line: 0 };
+    await app.openDocument(hit);
+    expect(app.viewer?.missing).toBe(true);
+    await app.openDocument(hit, true);
+    expect(app.viewer).toMatchObject({ missing: false, text: "", hit });
   });
 });
 
@@ -154,4 +219,37 @@ describe("операции с файлами и папками", () => {
     expect(api.entryTrash).toHaveBeenCalledWith(project.path, "docs/a");
     expect(app.toast?.text).toBe("Перемещено в корзину");
   });
+  it("смена проекта или корня после открытия диалога блокирует запись", async () => {
+    entries.open("newDoc", "a");
+    app.current = "C:/Другой";
+    app.docsRoot = "manual";
+    await entries.submit("новый");
+    expect(api.entryCreateDoc).not.toHaveBeenCalled();
+    expect(entries.error).toContain("Проект изменился");
+    app.current = project.path;
+    await entries.submit("новый");
+    expect(api.entryCreateDoc).not.toHaveBeenCalled();
+  });
+
+
+  it("конфликт записи открытого документа блокирует перенос", async () => {
+    const { editors } = await import("./editors.svelte");
+    vi.spyOn(editors, "flush").mockResolvedValue([{ project: project.path, path: "docs/a/x.md" } as never]);
+    entries.open("move", "a");
+    await entries.submit("empty");
+    expect(api.entryMove).not.toHaveBeenCalled();
+    expect(entries.error).toContain("несохранённые правки");
+  });
+
+
+  it("смена проекта во время записи буферов отменяет перенос", async () => {
+    const { editors } = await import("./editors.svelte");
+    vi.spyOn(editors, "flush").mockImplementation(async () => { app.current = "C:/Другой"; return []; });
+    entries.open("move", "a");
+    await entries.submit("empty");
+    expect(api.entryMove).not.toHaveBeenCalled();
+    expect(entries.error).toContain("Проект изменился");
+  });
+
+
 });

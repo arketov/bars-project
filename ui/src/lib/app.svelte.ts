@@ -41,15 +41,13 @@ const POLL_MS = 1000;
 /** Список проектов читает индексы, поэтому без перемен обновляется реже, чем ход. */
 const PROJECTS_EVERY = 5;
 /** Дерево с диска перечитывается раз в несколько тиков: обход каталогов дешевле индексации, но не бесплатен. */
-const TREE_EVERY = 3;
+const TREE_EVERY = 1;
 /** Состояния аудитов читаются раз в 15 тиков: вид идёт минуты, расписание — раз в минуту. */
 const AUDITS_EVERY = 15;
 
 /** Подпись входов дерева: по ней опрос понимает, что перестраивать нечего. */
 function treeSignature(documents: { path: string; chunks: number; title: string }[], disk?: string): string {
-  let chunks = 0;
-  for (const document of documents) chunks += document.chunks;
-  return `${documents.length}:${chunks}:${disk ?? ""}`;
+  return JSON.stringify([disk, documents.map(({ path, chunks, title }) => [path, chunks, title])]);
 }
 
 function remembered(): string | null {
@@ -129,6 +127,8 @@ class App {
   #refreshing = false;
   #treeSignature = "";
   #treeSyncing = false;
+  #treeRequest = 0;
+  treeProblems = $state<{ path: string; reason: string }[]>([]);
   #modelsPending: Promise<void> | null = null;
   #actionAttempt = 0;
   #selectionVersion = 0;
@@ -282,7 +282,7 @@ class App {
       this.#notifications.resolve("worker");
       if (force || changed || this.#tick % PROJECTS_EVERY === 0) await this.loadProjects();
       if (this.current) await this.loadStatus();
-      if (!force && this.tree.length && this.#tick % TREE_EVERY === 0 && !document.hidden) void this.syncTree();
+      if (!force && this.current && this.#tick % TREE_EVERY === 0 && !document.hidden) void this.syncTree();
       this.syncTopics(force);
     } catch (error) {
       if (epoch !== this.#epoch) return;
@@ -308,8 +308,7 @@ class App {
     if (!projects.some((project) => project.path === this.current)) {
       const next = projects[0]?.path ?? null;
       if (next !== this.current) await this.select(next);
-    } else if (this.tree.length === 0 && this.current) {
-      await this.loadTree();
+
     }
   }
 
@@ -342,20 +341,28 @@ class App {
     const path = this.current, epoch = this.#epoch;
     try {
       await this.readTree(path, epoch, true);
-    } catch {
-      if (path === this.current && epoch === this.#epoch) this.tree = [];
+    } catch (error) {
+      if (path === this.current && epoch === this.#epoch) this.treeProblems = [{ path: "", reason: String(error) }];
     }
   }
 
   /** Дерево идёт по диску (Т-33), сведения индекса подмешиваются по пути; без диска — только индекс. */
   private async readTree(path: string, epoch: number, force: boolean): Promise<void> {
-    const [output, disk] = await Promise.all([call<TreeOutput>("tree", { cwd: path, project: path }), treeRead(path).catch(() => null)]);
-    if (path !== this.current || epoch !== this.#epoch) return;
-    const signature = treeSignature(output.documents, disk?.revision);
+    const request = ++this.#treeRequest;
+    const inputs = await Promise.all([call<TreeOutput>("tree", { cwd: path, project: path }), treeRead(path)]).catch(error => {
+      if (request !== this.#treeRequest) return null;
+      throw error;
+    });
+    if (!inputs) return;
+    const [output, disk] = inputs;
+    if (request !== this.#treeRequest || path !== this.current || epoch !== this.#epoch) return;
+    this.treeProblems = disk?.problems ?? [];
+    const docsRoot = disk?.docs_root ?? output.docs_root;
+    const signature = `${docsRoot}:${treeSignature(output.documents, disk?.revision)}`;
     if (!force && signature === this.#treeSignature) return;
     this.#treeSignature = signature;
-    this.docsRoot = output.docs_root;
-    this.tree = buildTree(output.documents, output.docs_root, disk ? { files: disk.files.map((file) => file.path), dirs: disk.dirs } : undefined);
+    this.docsRoot = docsRoot;
+    this.tree = buildTree(output.documents, docsRoot, disk ? { files: disk.files.map((file) => file.path), dirs: disk.dirs } : undefined);
   }
 
   /** Подхватывает изменения вне bars (Проводник, агент) и новые документы индекса: перестраивает дерево, только если оно изменилось. */
@@ -365,8 +372,9 @@ class App {
     this.#treeSyncing = true;
     try {
       await this.readTree(path, this.#epoch, false);
-    } catch {
+    } catch (error) {
       // Сбой одного опроса оставляет прежнее дерево.
+      if (path === this.current) this.treeProblems = [{ path: "", reason: String(error) }];
     } finally {
       this.#treeSyncing = false;
     }
@@ -378,6 +386,9 @@ class App {
     this.#searchId++;
     this.searching = false;
     this.current = path;
+    this.tree = [];
+    this.treeProblems = [];
+    this.#treeSignature = "";
     try {
       if (path) localStorage.setItem(PROJECT_KEY, path);
       else localStorage.removeItem(PROJECT_KEY);
@@ -577,7 +588,7 @@ class App {
     }
   }
 
-  async openDocument(hit: DocumentReference): Promise<void> {
+  async openDocument(hit: DocumentReference, missingIsDraft = false): Promise<void> {
     // Отдельное окно показывает один документ: ссылка из него открывается в основном окне.
     if (this.documentWindow) {
       if (this.current) await openInMainWindow(this.current, hit.path, hit.first_line, hit.last_line).catch((error) => this.flash(String(error), true));
@@ -598,7 +609,9 @@ class App {
       if (reading !== this.#reading || this.current !== project.path) return;
       if (error instanceof BarsError && error.kind === "file_not_found") {
         this.view = "main";
-        this.viewer = { hit, title: hit.title, text: "", missing: true };
+        // Т-32: только явный клик по файлу папки разрешает пустой редактируемый документ.
+        this.viewer = { hit, title: hit.title, text: "", missing: !missingIsDraft };
+        if (missingIsDraft) this.activeDocument = hit.path;
       } else {
         this.flash(error instanceof Error ? error.message : String(error), true);
       }

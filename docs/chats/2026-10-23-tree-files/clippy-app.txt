@@ -1,0 +1,5 @@
+    Checking bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Checking bars-protocol v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-protocol)
+    Checking bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Checking bars-app v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-app)
+    Finished `release` profile [optimized] target(s) in 23.73s

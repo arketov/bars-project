@@ -1,0 +1,5 @@
+> bars-ui@0.0.0 build
+> vite build
+vite v8.3.4 building client environment for production...
+✓ 439 modules transformed.
+✓ built in 1.99s

@@ -1,0 +1,73 @@
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+   Compiling bars-app v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-app)
+    Finished `release` profile [optimized] target(s) in 2m 03s
+     Running unittests src\main.rs (target\release\deps\bars-d858486c37c3f64b.exe)
+
+running 64 tests
+test appearance_tests::palette_and_icons_have_no_duplicates ... ok
+test doc_window::tests::targets_are_found_until_removed ... ok
+test appearance_tests::resetting_every_field_removes_the_entry_and_the_empty_section ... ok
+test document_io_tests::read_marks_foreign_encoding_oversize_and_readonly_files_read_only ... ok
+test appearance_tests::broken_file_is_reported_and_never_overwritten ... ok
+test appearance_tests::document_takes_a_color_only ... ok
+test appearance_tests::wrong_types_inside_a_valid_file_count_as_broken ... ok
+test appearance_tests::bad_paths_and_values_are_rejected_without_touching_the_file ... ok
+test appearance_tests::unknown_values_are_kept_for_the_window_to_ignore ... ok
+test appearance_tests::set_writes_and_read_returns_the_same_entries ... ok
+test document_io_tests::read_normalizes_line_breaks_and_remembers_format ... ok
+test appearance_tests::folders_deeper_than_second_level_are_rejected ... ok
+test appearance_tests::missing_file_reads_as_empty ... ok
+test doc_window::tests::moved_windows_keep_identity_without_capturing_old_path_or_other_project ... ok
+test doc_window::tests::same_document_gets_the_same_window_label ... ok
+test commands::log_tests::logs_command_returns_filtered_serializable_snapshot ... ok
+test document_io_tests::write_to_readonly_file_fails_clearly_and_succeeds_after_it_is_released ... ok
+test document_io_tests::write_refuses_when_disk_changed_and_keeps_both_versions ... ok
+test document_io_tests::write_replaces_file_keeping_eol_bom_and_leaves_no_temp_file ... ok
+test document_io_tests::write_reports_deleted_file_as_conflict_without_recreating_it ... ok
+test flush::tests::reply_reaches_only_the_active_request ... ok
+test flush::tests::unknown_replies_are_ignored ... ok
+test documents::tests::document_paths_are_relative_markdown_and_preserve_spaces ... ok
+test flush::tests::clean_window_lets_the_process_exit ... ok
+test flush::tests::silent_window_does_not_block_exit ... ok
+test flush::tests::unanswered_question_keeps_the_process_running ... ok
+test flush::tests::user_can_discard_or_stay_after_the_window_asked ... ok
+test folders::tests::target_ids_do_not_accept_replaced_or_forged_targets ... ok
+test flush::tests::every_window_is_asked_not_only_the_first_to_answer ... ok
+test folders::tests::empty_disk_folder_is_a_menu_target_without_indexed_documents ... ok
+test folders::tests::folders_are_confirmed_by_components_and_copy_survives_removal ... ok
+test document_io_tests::resolve_rejects_escapes_foreign_files_and_bad_targets ... ok
+test document_io_tests::resolve_accepts_existing_and_new_documents_inside_docs_root ... ok
+test document_io_tests::write_creates_new_document_on_first_edit_and_never_overwrites_a_late_one ... ok
+test folders::tests::roots_nested_docs_and_virtual_group_work_without_documents ... ok
+test folders::tests::tree_proof_preserves_removed_node_but_never_another_registration_or_root ... ok
+test document_io_tests::write_without_parent_folder_fails_and_creates_nothing ... ok
+test link_move_tests::folder_move_updates_outbound_and_inbound_preserves_bom_crlf ... ok
+test link_move_tests::appearance_follows_folder_and_document_paths ... ok
+test tree_io_tests::measure_tree_10000_documents ... ignored, явный замер обхода 10 000 документов
+test tree_io_tests::t01_empty_folder_and_new_file_are_visible_at_once ... ok
+test tree_io_tests::late_destination_is_not_overwritten_by_the_os_move ... ok
+test tree_io_tests::rename_never_overwrites_an_existing_staging_path ... ok
+test tree_io_tests::hidden_ancestors_cannot_be_changed_through_tree_commands ... ok
+test tree_io_tests::t03_case_collision_is_refused ... ok
+test tree_io_tests::nested_and_dot_docs_root ... ok
+test link_move_tests::rename_updates_three_documents_and_preserves_readonly_failure ... ok
+test link_move_tests::occupied_referrer_does_not_block_other_updates_or_roll_back ... ok
+test link_move_tests::stale_preview_refuses_before_any_rename ... ok
+test tree_io_tests::t07_case_only_rename ... ok
+test tree_io_tests::t06_folder_move_carries_its_documents ... ok
+test tree_io_tests::t04_title_with_special_characters_is_quoted ... ok
+test tree_io_tests::t05_rename_keeps_content_and_does_not_touch_links ... ok
+test document_io_tests::resolve_rejects_junction_leaving_docs_root ... ok
+test tree_io_tests::t04_repeated_folder_is_refused_and_keeps_the_first ... ok
+test tree_io_tests::t04_new_folder_has_index_with_title_and_heading ... ok
+test folder_tests::folder_command_allows_deleted_folder_path_and_check_but_rejects_open ... ok
+test folder_tests::folder_command_returns_full_project_receipt_and_validated_path ... ok
+test folder_tests::folder_command_rejects_forged_paths_and_unknown_actions ... ok
+test tree_io_tests::t02_tree_matches_indexer_walk ... ok
+test folder_tests::folder_command_rejects_stale_registration_and_docs_root_roundtrip ... ok
+test tree_io_tests::t03_names_and_paths_are_checked ... ok
+test folders::tests::junction_escape_and_retarget_after_open_are_rejected ... ok
+test tree_io_tests::t08_trash_removes_the_node_or_refuses_without_deleting ... ok
+
+test result: ok. 63 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 7.05s

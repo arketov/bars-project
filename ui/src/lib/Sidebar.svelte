@@ -88,6 +88,7 @@
     <button class="reset-scope" aria-label="Новая папка (модуль)" title="Новая папка в корне документации — новый модуль" onclick={() => entries.open("newDir", ".")}><Icon name="folder" size={13} /></button></div>
 
     <div class="tree" role="tree" aria-label="Документы проекта">
+      {#each app.treeProblems as problem}<p class="none" role="status">{problem.path}{problem.path ? ": " : ""}{problem.reason}</p>{/each}
       <button
         class="topics-row"
         class:on={app.topicsOpen}
@@ -116,7 +117,7 @@
         <TreeRow {node} forceOpen={app.filter.trim() !== ""} />
       {/each}
       {#if app.tree.length === 0}
-        <p class="none">В индексе пока нет документов.</p>
+        <p class="none">В папке документации пока нет документов и папок.</p>
       {:else if shown.length === 0}
         <p class="none">Ничего не найдено.</p>
       {/if}

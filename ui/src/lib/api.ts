@@ -195,11 +195,13 @@ export type EntryResult =
   | { status: "partial"; path: string; index_path: string; kind: string; message: string }
   | DocumentFailure;
 
-/** Дерево с диска; вне приложения и при ошибке — `null`: окно строит дерево по индексу. */
+/** Дерево с диска; `null` только у тестового мока. Ошибка диска показывается в дереве. */
 export async function treeRead(project: string): Promise<DiskTreeOutput | null> {
   if (!inTauri()) return (await import("./mock-disk")).mockTreeRead(project);
   const out = await shell<DiskTreeOutput | DocumentFailure>("tree_read", { project });
-  return out && out.status === "ok" ? out : null;
+  if (!out) throw new Error("Не удалось прочитать дерево документации");
+  if (out.status === "error") throw new Error(out.message);
+  return out;
 }
 
 export async function entryCreateDoc(project: string, parent: string, name: string): Promise<EntryResult> {

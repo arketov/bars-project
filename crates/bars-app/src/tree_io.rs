@@ -110,6 +110,7 @@ pub struct TreeOut {
 
 /// Дерево с диска: те же файлы, что видит индексатор, и папки (в том числе пустые).
 pub fn read_tree(project: &Path, docs_root: &str) -> Result<TreeOut, TreeError> {
+    roots(project, docs_root)?;
     let walk = bars_core::indexing::walk::walk_docs(project, Path::new(docs_root))
         .map_err(|_| TreeError::DocsRootUnavailable)?;
     let files: Vec<TreeFile> = walk
@@ -203,6 +204,16 @@ impl Roots {
         if !relative.starts_with(&self.prefix) {
             return Err(TreeError::OutsideRoot);
         }
+        let inner = relative
+            .strip_prefix(&self.prefix)
+            .map_err(|_| TreeError::OutsideRoot)?;
+        let parts: Vec<_> = inner.components().collect();
+        // Папки с точки невидимы дереву; проверяем также предков, а не только имя цели.
+        for (index, part) in parts.iter().enumerate() {
+            if index + 1 < parts.len() && part.as_os_str().to_string_lossy().starts_with('.') {
+                return Err(TreeError::InvalidPath);
+            }
+        }
         let target = self.project.join(&relative);
         match fs::symlink_metadata(&target) {
             Ok(meta) => {
@@ -238,6 +249,13 @@ impl Roots {
             return Err(TreeError::ParentMissing);
         }
         if !dir.is_dir() {
+            return Err(TreeError::InvalidPath);
+        }
+        if dir != self.root
+            && dir
+                .file_name()
+                .is_some_and(|name| name.to_string_lossy().starts_with('.'))
+        {
             return Err(TreeError::InvalidPath);
         }
         Ok(dir)
@@ -279,6 +297,9 @@ const RESERVED: [&str; 22] = [
 /// расширения добавляется `.md`.
 pub fn check_name(name: &str, dir: bool) -> Result<String, TreeError> {
     let bad = |why: &str| Err(TreeError::InvalidName(why.to_string()));
+    if !dir && name.eq_ignore_ascii_case(".md") {
+        return bad("у документа нет имени");
+    }
     if name.is_empty() {
         return bad("имя пустое");
     }
@@ -341,6 +362,9 @@ fn yaml_title(title: &str) -> String {
             .chars()
             .all(|ch| ch.is_alphanumeric() || " -_.()".contains(ch))
         && !title.starts_with(['-', ' '])
+        && !["true", "false", "null", "~"]
+            .iter()
+            .any(|word| word.eq_ignore_ascii_case(title))
         && title.parse::<f64>().is_err();
     if plain_text {
         title.to_string()
@@ -495,20 +519,103 @@ pub fn move_entry(
     if case_only {
         // Файловая система без учёта регистра считает `a.md` и `A.md` одним файлом: через временное имя.
         let temp = parent.join(format!(".bars-rename-{}", std::process::id()));
-        fs::rename(&source, &temp).map_err(|e| io_error(&e))?;
-        if let Err(error) = fs::rename(&temp, &dest) {
-            let _ = fs::rename(&temp, &source);
+        if fs::symlink_metadata(&temp).is_ok() {
+            return Err(TreeError::Exists(
+                temp.file_name().unwrap().to_string_lossy().into_owned(),
+            ));
+        }
+        rename_without_replace(&source, &temp).map_err(|e| io_error(&e))?;
+        if let Err(error) = rename_without_replace(&temp, &dest) {
+            let _ = rename_without_replace(&temp, &source);
             return Err(io_error(&error));
         }
     } else {
-        fs::rename(&source, &dest).map_err(|e| io_error(&e))?;
+        rename_without_replace(&source, &dest).map_err(|e| io_error(&e))?;
     }
     Ok(roots.project_path(&dest))
 }
+
+/// Windows не заменяет файл, появившийся между проверкой имени и перемещением.
+#[cfg(windows)]
+pub(crate) fn rename_without_replace(from: &Path, to: &Path) -> std::io::Result<()> {
+    use std::os::windows::ffi::OsStrExt;
+    use windows::Win32::Storage::FileSystem::{MOVE_FILE_FLAGS, MoveFileExW};
+    use windows::core::PCWSTR;
+    let from: Vec<u16> = from.as_os_str().encode_wide().chain(Some(0)).collect();
+    let to: Vec<u16> = to.as_os_str().encode_wide().chain(Some(0)).collect();
+    unsafe {
+        MoveFileExW(
+            PCWSTR(from.as_ptr()),
+            PCWSTR(to.as_ptr()),
+            MOVE_FILE_FLAGS(0),
+        )
+    }
+    .map_err(|error| std::io::Error::from_raw_os_error(error.code().0 & 0xffff))
+}
+
+#[cfg(not(windows))]
+fn rename_without_replace(from: &Path, to: &Path) -> std::io::Result<()> {
+    fs::rename(from, to)
+}
+
 
 /// Отправляет файл или папку в корзину ОС. Недоступная корзина — отказ, безвозвратного пути нет.
 pub fn trash_entry(project: &Path, docs_root: &str, path: &str) -> Result<(), TreeError> {
     let roots = roots(project, docs_root)?;
     let (real, _) = existing_entry(&roots, path)?;
-    trash::delete(plain(&real)).map_err(|error| TreeError::TrashUnavailable(error.to_string()))
+    recycle(&plain(&real)).map_err(TreeError::TrashUnavailable)
+}
+
+#[cfg(not(windows))]
+fn recycle(path: &Path) -> Result<(), String> {
+    trash::delete(path).map_err(|error| error.to_string())
+}
+
+#[cfg(windows)]
+fn recycle(path: &Path) -> Result<(), String> {
+    use std::os::windows::ffi::OsStrExt;
+    use windows::Win32::System::Com::{
+        CLSCTX_INPROC_SERVER, COINIT_APARTMENTTHREADED, CoCreateInstance, CoInitializeEx,
+        CoUninitialize,
+    };
+    use windows::Win32::UI::Shell::{
+        FOF_NO_UI, FOFX_EARLYFAILURE, FOFX_RECYCLEONDELETE, FileOperation, IFileOperation,
+        IShellItem, SHCreateItemFromParsingName,
+    };
+    use windows::core::PCWSTR;
+
+    // Собственный STA: потоки Tokio могут уже иметь несовместимую COM-модель.
+    let path = path.to_owned();
+    std::thread::spawn(move || {
+        struct Com;
+        impl Drop for Com {
+            fn drop(&mut self) {
+                unsafe { CoUninitialize() };
+            }
+        }
+        let result = (|| -> windows::core::Result<()> {
+            unsafe {
+                CoInitializeEx(None, COINIT_APARTMENTTHREADED).ok()?;
+                let _com = Com;
+                let operation: IFileOperation =
+                    CoCreateInstance(&FileOperation, None, CLSCTX_INPROC_SERVER)?;
+                // ALLOWUNDO лишь допускает восстановление; RECYCLEONDELETE запрещает постоянное удаление.
+                operation
+                    .SetOperationFlags(FOF_NO_UI | FOFX_EARLYFAILURE | FOFX_RECYCLEONDELETE)?;
+                let wide: Vec<u16> = path.as_os_str().encode_wide().chain(Some(0)).collect();
+                let item: IShellItem = SHCreateItemFromParsingName(PCWSTR(wide.as_ptr()), None)?;
+                operation.DeleteItem(&item, None)?;
+                operation.PerformOperations()?;
+                if operation.GetAnyOperationsAborted()?.as_bool() {
+                    return Err(windows::core::Error::from_hresult(windows::core::HRESULT(
+                        0x800704C7u32 as i32,
+                    )));
+                }
+            }
+            Ok(())
+        })();
+        result.map_err(|error| error.to_string())
+    })
+    .join()
+    .map_err(|_| "Сбой службы корзины".to_string())?
 }

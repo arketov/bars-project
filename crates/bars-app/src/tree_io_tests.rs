@@ -50,6 +50,28 @@ fn t01_empty_folder_and_new_file_are_visible_at_once() {
 }
 
 #[test]
+#[ignore = "явный замер обхода 10 000 документов"]
+fn measure_tree_10000_documents() {
+    let dir = tempfile::tempdir().unwrap();
+    for module in 0..100 {
+        let folder = dir.path().join(format!("docs/m{module:03}"));
+        fs::create_dir_all(&folder).unwrap();
+        for file in 0..100 {
+            fs::write(folder.join(format!("d{file:03}.md")), "# t").unwrap();
+        }
+    }
+    let mut times = Vec::new();
+    for _ in 0..5 {
+        let start = std::time::Instant::now();
+        let tree = read_tree(dir.path(), "docs").unwrap();
+        times.push(start.elapsed().as_millis());
+        assert_eq!(tree.files.len(), 10000);
+        assert_eq!(tree.dirs.len(), 100);
+    }
+    println!("tree_read 10000 документов, мс: {times:?}");
+}
+
+#[test]
 fn t02_tree_matches_indexer_walk() {
     let dir = project();
     fs::write(dir.path().join("docs/BARS_INSTRUCTION.md"), "# i").unwrap();
@@ -244,12 +266,77 @@ fn t07_case_only_rename() {
 }
 
 #[test]
+fn rename_never_overwrites_an_existing_staging_path() {
+    let dir = project();
+    let staging = dir
+        .path()
+        .join(format!("docs/a/.bars-rename-{}", std::process::id()));
+    fs::write(&staging, "чужие данные").unwrap();
+    assert!(matches!(
+        move_entry(dir.path(), "docs", "docs/a/x.md", "docs/a", "X.md"),
+        Err(TreeError::Exists(_))
+    ));
+    assert_eq!(fs::read_to_string(&staging).unwrap(), "чужие данные");
+    assert_eq!(
+        fs::read_to_string(dir.path().join("docs/a/x.md")).unwrap(),
+        "# x"
+    );
+}
+
+#[cfg(windows)]
+#[test]
+fn late_destination_is_not_overwritten_by_the_os_move() {
+    let dir = project();
+    let source = dir.path().join("docs/a/x.md");
+    let destination = dir.path().join("docs/a/late.md");
+    fs::write(&destination, "появился после проверки").unwrap();
+    assert!(crate::tree_io::rename_without_replace(&source, &destination).is_err());
+    assert_eq!(fs::read_to_string(source).unwrap(), "# x");
+    assert_eq!(
+        fs::read_to_string(destination).unwrap(),
+        "появился после проверки"
+    );
+}
+
+#[test]
+fn hidden_ancestors_cannot_be_changed_through_tree_commands() {
+    let dir = project();
+    fs::create_dir_all(dir.path().join("docs/.hidden/inner")).unwrap();
+    fs::write(dir.path().join("docs/.hidden/inner/a.md"), "# a").unwrap();
+    assert!(create_doc(dir.path(), "docs", "docs/.hidden/inner", "b").is_err());
+    assert!(move_entry(dir.path(), "docs", "docs/.hidden/inner/a.md", "docs/a", "b").is_err());
+    assert!(trash_entry(dir.path(), "docs", "docs/.hidden/inner/a.md").is_err());
+}
+
+#[test]
 fn t08_trash_removes_the_node_or_refuses_without_deleting() {
     let dir = project();
     fs::create_dir_all(dir.path().join("docs/gone")).unwrap();
     fs::write(dir.path().join("docs/gone/g.md"), "# g").unwrap();
     match trash_entry(dir.path(), "docs", "docs/gone") {
-        Ok(()) => assert!(!dir.path().join("docs/gone").exists()),
+        Ok(()) => {
+            assert!(!dir.path().join("docs/gone").exists());
+            #[cfg(windows)]
+            {
+                let original = dir.path().join("docs/gone").canonicalize();
+                assert!(original.is_err());
+                let parent = dir.path().join("docs").canonicalize().unwrap();
+                let items: Vec<_> = trash::os_limited::list()
+                    .unwrap()
+                    .into_iter()
+                    .filter(|item| {
+                        item.name == "gone"
+                            && item.original_parent.canonicalize().ok().as_ref() == Some(&parent)
+                    })
+                    .collect();
+                assert_eq!(items.len(), 1, "узел действительно в корзине");
+                trash::os_limited::restore_all(items).unwrap();
+                assert_eq!(
+                    fs::read_to_string(dir.path().join("docs/gone/g.md")).unwrap(),
+                    "# g"
+                );
+            }
+        }
         // Среда без корзины: отказ и ничего не удалено.
         Err(TreeError::TrashUnavailable(_)) => assert!(dir.path().join("docs/gone/g.md").exists()),
         Err(other) => panic!("{other:?}"),

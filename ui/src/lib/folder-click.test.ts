@@ -4,7 +4,7 @@ import TreeRow from "./TreeRow.svelte";
 import { app } from "./app.svelte";
 import { buildTree } from "./tree";
 
-vi.mock("./api", () => ({ call: vi.fn(), joinPath: (a: string, b: string) => `${a}/${b}`, openPath: vi.fn(), pickFolder: vi.fn() }));
+vi.mock("./api", () => ({ call: vi.fn(), joinPath: (a: string, b: string) => `${a}/${b}`, openPath: vi.fn(), pickFolder: vi.fn(), inTauri: () => false }));
 
 describe("Клик по папке открывает её Index.md (Т-32)", () => {
   afterEach(() => { document.body.innerHTML = ""; vi.restoreAllMocks(); });
@@ -17,7 +17,7 @@ describe("Клик по папке открывает её Index.md (Т-32)", ()
     const el = document.createElement("div"); document.body.append(el);
     const c = mount(TreeRow, { target: el, props: { node: app.tree[0] } }); flushSync();
     el.querySelector<HTMLElement>(".nm")!.click(); flushSync();
-    expect(open).toHaveBeenCalledWith(expect.objectContaining({ path: "docs/модуль/Index.md" }));
+    expect(open).toHaveBeenCalledWith(expect.objectContaining({ path: "docs/модуль/Index.md" }), true);
     expect(el.querySelector(".kids")).not.toBeNull();
     expect(el.querySelector<HTMLInputElement>("input")!.checked).toBe(false);
     void unmount(c);

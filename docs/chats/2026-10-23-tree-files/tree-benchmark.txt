@@ -1,0 +1,10 @@
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+   Compiling bars-app v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-app)
+    Finished `release` profile [optimized] target(s) in 1m 00s
+     Running unittests src\main.rs (target\release\deps\bars-d858486c37c3f64b.exe)
+
+running 1 test
+tree_read 10000 документов, мс: [33, 30, 32, 33, 23]
+test tree_io_tests::measure_tree_10000_documents ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 62 filtered out; finished in 6.76s

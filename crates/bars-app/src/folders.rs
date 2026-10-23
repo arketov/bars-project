@@ -117,6 +117,16 @@ pub fn target(
     let root = project.join(relative(docs_root)?);
     let relative_folder = relative(folder)?;
     let path = root.join(&relative_folder);
+    if relative_folder
+        .components()
+        .any(|part| part.as_os_str().to_string_lossy().starts_with('.'))
+    {
+        return Err("Скрытая папка отсутствует в дереве проекта".into());
+    }
+    let disk_folder = || {
+        bars_core::indexing::walk::walk_docs(project, Path::new(docs_root))
+            .is_ok_and(|walk| walk.dirs.iter().any(|dir| project.join(dir) == path))
+    };
     if !relative_folder.as_os_str().is_empty()
         && !documents.iter().any(|doc| {
             let document = project.join(doc.path.replace('\\', "/"));
@@ -124,6 +134,7 @@ pub fn target(
                 .strip_prefix(&path)
                 .is_ok_and(|tail| tail.components().count() >= 1)
         })
+        && !disk_folder()
     {
         return Err("Папка отсутствует в дереве проекта; обновите дерево".into());
     }
@@ -209,6 +220,17 @@ mod tests {
             title: "Тема".into(),
             chunks: 1,
         }
+    }
+
+    #[test]
+    fn empty_disk_folder_is_a_menu_target_without_indexed_documents() {
+        let temp = tempfile::tempdir().unwrap();
+        fs::create_dir_all(temp.path().join("docs/empty/child")).unwrap();
+        let pinned = target(temp.path(), "docs", "empty/child", &[], "1".into()).unwrap();
+        assert_eq!(checked_path(&pinned).unwrap().1, false);
+        fs::create_dir_all(temp.path().join("docs/.hidden/child")).unwrap();
+        assert!(target(temp.path(), "docs", ".hidden/child", &[], "1".into()).is_err());
+        assert!(target(temp.path(), "docs", "absent", &[], "1".into()).is_err());
     }
 
     #[test]

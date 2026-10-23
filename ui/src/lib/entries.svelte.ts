@@ -10,6 +10,7 @@ export type EntryAction = "newDoc" | "newDir" | "rename" | "move" | "trash";
 export interface EntryRequest {
   action: EntryAction;
   project: string;
+  docsRoot: string;
   /** Узел дерева: в нём создаётся новое, его переименовывают, переносят или удаляют. */
   node: TreeNode;
   /** Текущее имя на диске; у корня документации пусто. */
@@ -73,8 +74,9 @@ class Entries {
       ? app.tree.find((module) => module.path === ".") ?? { path: ".", name: "", label: "Корень документации", kind: "module", chunks: 0, children: [] }
       : findNode(app.tree, nodePath);
     if (!node) return;
+    if (node.path === "." && action !== "newDoc" && action !== "newDir") return;
     this.error = null;
-    this.request = { action, project, node, name: nodeName(node), docs: countDocs(node) };
+    this.request = { action, project, docsRoot: app.docsRoot, node, name: nodeName(node), docs: countDocs(node) };
   }
 
   cancel(): void {
@@ -88,7 +90,11 @@ class Entries {
     const request = this.request;
     if (!request || this.busy) return;
     const { project, node } = request;
-    const at = (nodePath: string) => projectPathOf(nodePath, app.docsRoot);
+    if (app.current !== project || app.docsRoot !== request.docsRoot) {
+      this.error = "Проект изменился. Закройте диалог и откройте его заново.";
+      return;
+    }
+    const at = (nodePath: string) => projectPathOf(nodePath, request.docsRoot);
     this.busy = true;
     this.error = null;
     try {
@@ -100,6 +106,10 @@ class Entries {
           this.error = "В этом документе есть несохранённые правки, которые не удалось записать. Решите конфликт во вкладке документа.";
           return;
         }
+      }
+      if (app.current !== project || app.docsRoot !== request.docsRoot) {
+        this.error = "Проект изменился. Закройте диалог и откройте его заново.";
+        return;
       }
       let result: EntryResult;
       if (request.action === "newDoc") result = await entryCreateDoc(project, at(node.path), value.trim());

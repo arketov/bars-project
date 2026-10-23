@@ -21,7 +21,7 @@
   const title = $derived(node.path === "." ? "корень документации" : isDir ? `${node.path}/` : node.path.replace(/^\.\//, ""));
   /** Т-32: имя папки работает как файл — открывает её Index.md и раскрывает папку; клик по чекбоксу отмечает область поиска. */
   function openFolder() {
-    if (node.indexPath) void app.openDocument({ path: node.indexPath, title: node.label, first_line: 0, last_line: 0 });
+    if (node.indexPath) void app.openDocument({ path: node.indexPath, title: node.label, first_line: 0, last_line: 0 }, true);
     if (!open) opened = true;
   }
   function folderClick(event: MouseEvent) {
