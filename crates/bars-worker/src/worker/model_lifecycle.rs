@@ -99,6 +99,14 @@ mod tests {
         .expect("model maintenance did not complete");
     }
 
+    /// Переписывает настройки через временный файл и rename, как `settings_save`:
+    /// цикл обслуживания опрашивает файл раз в 5 мс и не должен видеть пустой.
+    fn rewrite_settings(home: &std::path::Path, text: &str) {
+        let temp = home.join("settings.toml.tmp");
+        std::fs::write(&temp, text).unwrap();
+        std::fs::rename(&temp, home.join("settings.toml")).unwrap();
+    }
+
     #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
     async fn timer_releases_both_sessions_and_next_query_reloads() {
         let home = tempfile::tempdir().unwrap();
@@ -166,11 +174,7 @@ mod tests {
         tokio::time::sleep(Duration::from_millis(150)).await;
         assert!(embed.slot().is_loaded(), "0 минут — модель не выгружается");
 
-        std::fs::write(
-            home.path().join("settings.toml"),
-            "[embed]\nunload_after_minutes = 15\n",
-        )
-        .unwrap();
+        rewrite_settings(home.path(), "[embed]\nunload_after_minutes = 15\n");
         worker.refresh_model_lifecycle();
         tokio::time::sleep(Duration::from_millis(100)).await;
         assert!(embed.slot().is_loaded(), "15 минут ещё не прошли");
@@ -197,11 +201,7 @@ mod tests {
         let mut rerank = worker.inner.models.reranker(&settings);
         embed.prepare().unwrap();
         rerank.rerank("q", &["d"]).unwrap();
-        std::fs::write(
-            home.path().join("settings.toml"),
-            "[rerank]\nenabled = false\n",
-        )
-        .unwrap();
+        rewrite_settings(home.path(), "[rerank]\nenabled = false\n");
         worker.refresh_model_lifecycle();
         wait(|| !rerank.slot().is_loaded()).await;
         assert!(embed.slot().is_loaded());
