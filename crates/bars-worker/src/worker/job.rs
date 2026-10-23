@@ -8,8 +8,8 @@ use std::path::Path;
 use std::sync::Arc;
 
 use bars_core::indexing::indexer::{
-    IndexObserver, IndexingError, ReindexReason, UpdateOutcome, UpdateReport,
-    rebuild_index_observed, update_index_observed,
+    IndexObserver, IndexingError, UpdateOutcome, UpdateReport, rebuild_index_observed,
+    update_index_observed,
 };
 use bars_core::models::ModelFingerprint;
 use bars_core::settings::Settings;
@@ -40,7 +40,7 @@ pub enum Outcome {
     },
     Updated(UpdateReport),
     /// Индекс построен другой моделью или старой схемой; индекс не тронут (Т-25).
-    ReindexRequired(ReindexReason),
+    ReindexRequired,
     /// Задание остановил пользователь: проект остаётся как был (OQ-55).
     Cancelled,
     /// Папки проекта нет.
@@ -146,7 +146,7 @@ fn check_project(
             Ok(()) => Outcome::Updated(report),
             Err(error) => Outcome::Failed(error.to_string()),
         },
-        Ok(UpdateOutcome::ReindexRequired(reason)) => Outcome::ReindexRequired(reason),
+        Ok(UpdateOutcome::ReindexRequired(_)) => Outcome::ReindexRequired,
         Err(IndexingError::Cancelled) => Outcome::Cancelled,
         Err(error) => indexing_failure(error),
     }
@@ -177,11 +177,8 @@ fn rebuild_project(
             return Outcome::Failed(error.to_string());
         }
         match compatibility {
-            Ok(Compatibility::ModelChanged) if !accepted => {
-                return Outcome::ReindexRequired(ReindexReason::ModelChanged);
-            }
-            Ok(Compatibility::SchemaOutdated) if !accepted => {
-                return Outcome::ReindexRequired(ReindexReason::SchemaOutdated);
+            Ok(Compatibility::ModelChanged | Compatibility::SchemaOutdated) if !accepted => {
+                return Outcome::ReindexRequired;
             }
             Ok(_) => {}
             Err(error) => return Outcome::Failed(error.to_string()),

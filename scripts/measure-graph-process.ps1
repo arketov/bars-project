@@ -1,4 +1,4 @@
-param([string]$Executable='C:/bg22/release/examples/graph_acceptance.exe',[string]$Project='C:/Users/arketov/Desktop/bars-project',[string]$Output='target/stage33-probe/real-corpus-v2')
+param([string]$Executable='C:/bt/bars/release/examples/graph_acceptance.exe',[string]$Project='C:/Users/arketov/Desktop/bars-project',[string]$Output='target/stage33-probe/real-corpus-v2')
 $probeRoot=(Get-Location).Path
 $probeOutput=[IO.Path]::GetFullPath((Join-Path $probeRoot $Output))
 if(-not $probeOutput.StartsWith($probeRoot+[IO.Path]::DirectorySeparatorChar)){throw 'Результат должен быть внутри checkout'}

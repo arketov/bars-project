@@ -1,7 +1,7 @@
 # Сначала cargo build -p bars-worker --features test-support --example client_refresh_session.
 param(
     [string]$EvidenceDir = (Join-Path $PSScriptRoot '../target/stage16/delivery'),
-    [string]$BinDir = (Join-Path $PSScriptRoot '../target/debug')
+    [string]$BinDir = $(if ($env:CARGO_TARGET_DIR) { "$env:CARGO_TARGET_DIR/debug" } else { 'C:/bt/bars/debug' })
 )
 $ErrorActionPreference = 'Stop'
 $repo16 = Split-Path $PSScriptRoot

@@ -12,7 +12,7 @@ $graphTemp = Join-Path ([IO.Path]::GetTempPath()) ('bars-graph-run-' + [guid]::N
 New-Item -ItemType Directory -Path $graphTemp | Out-Null
 try {
     $env:PATH = (Join-Path $env:USERPROFILE '.cargo/bin') + ';' + $env:PATH
-    if (-not $env:CARGO_TARGET_DIR) { $env:CARGO_TARGET_DIR = Join-Path $graphRoot 'target' }
+    if (-not $env:CARGO_TARGET_DIR) { $env:CARGO_TARGET_DIR = 'C:/bt/bars' }
     if (-not $env:VULKAN_SDK) { $env:VULKAN_SDK = (Get-ChildItem C:/tools/VulkanSDK,C:/VulkanSDK -Directory -ErrorAction SilentlyContinue | Sort-Object Name -Descending | Select-Object -First 1).FullName }
     $env:CMAKE_BUILD_PARALLEL_LEVEL = '1'
     $env:CMAKE_GENERATOR = 'Ninja'

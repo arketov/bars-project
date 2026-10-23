@@ -6,7 +6,7 @@ import { spawn } from 'node:child_process';
 import { createInterface } from 'node:readline';
 import { createHash } from 'node:crypto';
 
-const bin = path.resolve(process.argv[2] ?? 'target/debug');
+const bin = path.resolve(process.argv[2] ?? path.join(process.env.CARGO_TARGET_DIR ?? 'C:/bt/bars', 'debug'));
 const evidence = path.resolve(process.argv[3] ?? `target/mcp-disk-${Date.now()}`);
 assert.ok(!fs.existsSync(evidence), 'Нужна новая папка evidence');
 const home = path.join(evidence, 'home');

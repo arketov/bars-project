@@ -21,7 +21,7 @@ function Set-BuildEnvironment {
     $env:LIB='C:/BuildTools/VC/Tools/MSVC/14.44.35207/lib/x64;C:/Program Files (x86)/Windows Kits/10/Lib/10.0.26100.0/ucrt/x64;C:/Program Files (x86)/Windows Kits/10/Lib/10.0.26100.0/um/x64'
     $env:INCLUDE='C:/BuildTools/VC/Tools/MSVC/14.44.35207/include;C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/ucrt;C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/shared;C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/um;C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/winrt'
     $env:VULKAN_SDK='C:/Users/arketov/AppData/Local/bars-spikes/VulkanSDK/1.4.363.0'
-    $env:CARGO_TARGET_DIR='C:/bg22'
+    $env:CARGO_TARGET_DIR='C:/bt/bars'
     $env:CMAKE_BUILD_PARALLEL_LEVEL='1'
 }
 try {
@@ -38,7 +38,7 @@ try {
     Set-BuildEnvironment
     & cargo build --release --offline -p bars-core --example bench_inference -j 1 *> "$evidence/rebuild-core.log"
     if($LASTEXITCODE -ne 0){throw 'Core benchmark build failed'}
-    $bench='C:/bg22/release/examples/bench_inference.exe'
+    $bench='C:/bt/bars/release/examples/bench_inference.exe'
     $phase='core-example-tests'
     Write-Output $phase
     & cargo test --release --offline -p bars-core --example bench_inference -j 1 *> "$evidence/recovered-example-tests.log"
@@ -74,7 +74,7 @@ try {
     Write-Output $phase
     New-Item -ItemType Directory "$temp/pair" | Out-Null
     Copy-Item -LiteralPath "$evidence/fixture.json" -Destination "$temp/pair/fixture.json"
-    & scripts/run-memory-spike.ps1 -BenchPath C:/bg22/release/examples/bench_worker_memory.exe -ModelsPath $models -EvidencePath "$temp/pair" -Devices auto -Modes bounded -Repeat 2 -Fp16Embed -MemoryOnly -Scenario both-fp16 -SourcePath crates/bars-worker/examples/bench_worker_memory.rs -WaitSeconds 120
+    & scripts/run-memory-spike.ps1 -BenchPath C:/bt/bars/release/examples/bench_worker_memory.exe -ModelsPath $models -EvidencePath "$temp/pair" -Devices auto -Modes bounded -Repeat 2 -Fp16Embed -MemoryOnly -Scenario both-fp16 -SourcePath crates/bars-worker/examples/bench_worker_memory.rs -WaitSeconds 120
     $phase='completed'
     $ok=$true
 }catch{

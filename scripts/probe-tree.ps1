@@ -5,6 +5,7 @@ $treeOutput = [IO.Path]::GetFullPath($Output)
 $treeRun = Join-Path $treeRoot ('target/tree-probe-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $treeRun | Out-Null
 $env:PATH = (Join-Path $env:USERPROFILE '.cargo/bin') + ';' + $env:PATH
+if (-not $env:CARGO_TARGET_DIR) { $env:CARGO_TARGET_DIR = 'C:/bt/bars' }
 if (-not $env:VULKAN_SDK) { $env:VULKAN_SDK = (Get-ChildItem C:/tools/VulkanSDK,C:/VulkanSDK -Directory -ErrorAction SilentlyContinue | Sort-Object Name -Descending | Select-Object -First 1).FullName }
 $env:CMAKE_BUILD_PARALLEL_LEVEL = '1'
 $env:CMAKE_GENERATOR = 'Ninja'
@@ -18,7 +19,7 @@ try {
     $treeManifest = Join-Path $treeRoot 'crates/bars-app/examples/workspace_probe.manifest'
     cargo rustc --release -p bars-app --example tree_probe -- -C link-arg=/MANIFEST:EMBED -C "link-arg=/MANIFESTINPUT:$treeManifest"
     if ($LASTEXITCODE) { throw 'Не собран стенд дерева' }
-    $treeTarget = if ($env:CARGO_TARGET_DIR) { $env:CARGO_TARGET_DIR } else { Join-Path $treeRoot 'target' }
+    $treeTarget = $env:CARGO_TARGET_DIR
     Copy-Item -LiteralPath (Join-Path $treeTarget 'release/examples/tree_probe.exe') -Destination $treeRun
     Get-ChildItem (Join-Path $treeTarget 'release') -Filter '*.dll' | Copy-Item -Destination $treeRun
     $treeRedist = Get-ChildItem (Join-Path $treeVs 'VC/Redist/MSVC') -Directory | Where-Object Name -Match '^\d' | Sort-Object Name -Descending | Select-Object -First 1

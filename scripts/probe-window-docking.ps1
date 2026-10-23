@@ -11,7 +11,7 @@ try {
     if (-not (Test-Path (Join-Path $LibclangPath 'libclang.dll'))) { throw 'Нужен libclang.dll x64' }
     $env:LIBCLANG_PATH = $LibclangPath
     $env:PATH = (Join-Path $env:USERPROFILE '.cargo/bin') + ';' + $env:PATH
-    if (-not $env:CARGO_TARGET_DIR) { $env:CARGO_TARGET_DIR = Join-Path $probeRepo 'target' }
+    if (-not $env:CARGO_TARGET_DIR) { $env:CARGO_TARGET_DIR = 'C:/bt/bars' }
     if (-not $env:VULKAN_SDK) {
         $env:VULKAN_SDK = (Get-ChildItem C:/tools/VulkanSDK -Directory | Sort-Object Name -Descending | Select-Object -First 1).FullName
     }

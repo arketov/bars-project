@@ -8,7 +8,7 @@ $workspaceTemp = Join-Path ([IO.Path]::GetTempPath()) ('bars-workspace-run-' + [
 New-Item -ItemType Directory -Path $workspaceTemp | Out-Null
 try {
     $env:PATH = (Join-Path $env:USERPROFILE '.cargo/bin') + ';' + $env:PATH
-    if (-not $env:CARGO_TARGET_DIR) { $env:CARGO_TARGET_DIR = Join-Path $workspaceRoot 'target' }
+    if (-not $env:CARGO_TARGET_DIR) { $env:CARGO_TARGET_DIR = 'C:/bt/bars' }
     if (-not $env:VULKAN_SDK) { $env:VULKAN_SDK = (Get-ChildItem C:/tools/VulkanSDK,C:/VulkanSDK -Directory -ErrorAction SilentlyContinue | Sort-Object Name -Descending | Select-Object -First 1).FullName }
     $env:CMAKE_BUILD_PARALLEL_LEVEL = '1'
     $env:CMAKE_GENERATOR = 'Ninja'

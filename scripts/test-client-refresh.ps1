@@ -1,5 +1,5 @@
 param(
-    [string]$BinDir = (Join-Path $PSScriptRoot '../target/debug'),
+    [string]$BinDir = $(if ($env:CARGO_TARGET_DIR) { "$env:CARGO_TARGET_DIR/debug" } else { 'C:/bt/bars/debug' }),
     [string]$EvidenceDir = (Join-Path $PSScriptRoot ("../target/client-refresh-" + [guid]::NewGuid().ToString('N')))
 )
 $ErrorActionPreference = 'Stop'

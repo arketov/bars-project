@@ -8,7 +8,8 @@ $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot
 Set-Location $repo
 
-# Каталог сборки задаёт только пользователь (CARGO_TARGET_DIR); скрипт сам новых каталогов не создаёт.
+# Кэш сборки один — C:/bt/bars (docs/knowledge/build.md): в target/ репозитория длинный путь ломает llama.cpp.
+if (-not $env:CARGO_TARGET_DIR) { $env:CARGO_TARGET_DIR = 'C:/bt/bars' }
 # Без LIBCLANG_PATH bindgen в llama-cpp-sys-2 не находит libclang.
 if (-not $env:LIBCLANG_PATH -and (Test-Path 'C:\Program Files\LLVM\bin')) { $env:LIBCLANG_PATH = 'C:\Program Files\LLVM\bin' }
 $env:CMAKE_GENERATOR = 'Ninja'

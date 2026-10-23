@@ -158,7 +158,7 @@ impl Journal {
                 ),
             ),
             Outcome::Cancelled => ("cancelled", None, None),
-            Outcome::ReindexRequired(_) => (
+            Outcome::ReindexRequired => (
                 "error",
                 None,
                 Some("Нужна переиндексация с согласием пользователя на замену индекса.".into()),

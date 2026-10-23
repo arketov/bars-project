@@ -419,12 +419,9 @@ impl DocQueue {
             .any(|entry| entry.state != DocState::Error)
     }
 
-    pub fn len(&self) -> usize {
+    #[cfg(test)]
+    fn len(&self) -> usize {
         self.entries.len()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.entries.is_empty()
     }
 }
 

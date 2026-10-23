@@ -173,10 +173,6 @@ impl JobQueue {
             .map(|entry| &entry.job)
     }
 
-    pub fn len(&self) -> usize {
-        self.entries.len()
-    }
-
     pub fn is_empty(&self) -> bool {
         self.entries.is_empty()
     }
@@ -212,7 +208,7 @@ mod tests {
         let mut queue = JobQueue::new();
         queue.push(&p("x"), Job::files(Priority::Watch, [p("a.md")]));
         queue.push(&p("x"), Job::files(Priority::Watch, [p("b.md"), p("a.md")]));
-        assert_eq!(queue.len(), 1);
+        assert_eq!(queue.snapshot().len(), 1);
         assert_eq!(queue.get(&p("x")).unwrap().listed_files(), 2);
     }
 

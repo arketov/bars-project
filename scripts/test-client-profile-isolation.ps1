@@ -4,6 +4,8 @@ if ($env:BARS_USER_HOME) { throw 'Run without BARS_USER_HOME to verify the real 
 $cargo = (Get-Command cargo -ErrorAction SilentlyContinue).Source
 if (-not $cargo) { $cargo = Join-Path $env:USERPROFILE '.cargo/bin/cargo.exe' }
 if (-not (Test-Path -LiteralPath $cargo)) { throw 'cargo not found' }
+# Кэш сборки один — C:/bt/bars (docs/knowledge/build.md).
+if (-not $env:CARGO_TARGET_DIR) { $env:CARGO_TARGET_DIR = 'C:/bt/bars' }
 
 function Get-ProfileSnapshot {
     $files = @(

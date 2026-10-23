@@ -1287,7 +1287,7 @@ impl Inner {
             Outcome::Interrupted { .. }
             | Outcome::Cancelled
             | Outcome::Unavailable
-            | Outcome::ReindexRequired(_) => {
+            | Outcome::ReindexRequired => {
                 docs.remove_project(project);
             }
         }
@@ -1572,7 +1572,7 @@ impl Inner {
             ),
             Outcome::Unavailable => log::warn!("Папка проекта недоступна: {}", path.display()),
             Outcome::Cancelled => log::info!("Индексация отменена: {}", path.display()),
-            Outcome::ReindexRequired(_) => log::info!("Нужна переиндексация: {}", path.display()),
+            Outcome::ReindexRequired => log::info!("Нужна переиндексация: {}", path.display()),
         }
         let unfinished: Vec<_> = lock(&taken).iter().cloned().collect();
         self.finish_docs(&path, &unfinished, &result.outcome);
@@ -1652,7 +1652,7 @@ impl Inner {
                     status.last_error = None;
                     status.last_report = Some(report);
                 }
-                Outcome::ReindexRequired(_) => {
+                Outcome::ReindexRequired => {
                     status.state = ProjectState::ReindexRequired;
                     status.last_error = None;
                 }
