@@ -421,12 +421,21 @@ export async function mockCall(method: string, params: Record<string, unknown>):
       const hits = cosine ? HITS.map((hit, i) => ({ ...hit, score: [0.63, 0.60, 0.62][i], score_kind: "cosine" as const })) : HITS;
       const found = query.includes("нет") ? [] : hits.slice(0, limit);
       return {
-        results: found,
+        results: found.map(hit => ({ ...hit, chunk_id: `fixture-${HITS.findIndex(item => item.path === hit.path)}` })),
         applied: { results: limit, candidates: 30, rerank_candidates: 15, min_score: cosine ? 0 : 0.3, score_kind: cosine ? "cosine" : "rerank", clamped: false },
         rerank_error: scene() === "rerank-failed" ? "Test fixture: rerank unavailable" : null,
         indexing: scene() === "indexing",
         pending: scene() === "indexing" ? 118 : 0,
       };
+    }
+    case "similar": {
+      // Фикстура браузера: тот же вход по ID, область до лимита, источник отдельно.
+      const source = HITS[Number(String(params.chunk_id).replace("fixture-", ""))];
+      if (!source) throw new BarsError("ID раздела устарел", "chunk_not_found");
+      const modules = params.modules as string[] ?? [];
+      const requested = Number(params.limit ?? 5), limit = Math.max(1, Math.min(20, requested));
+      const hit = (item: SearchHit) => ({ ...item, chunk_id: `fixture-${HITS.indexOf(item)}`, score_kind: "cosine" as const });
+      return { source: { ...hit(source), score: 1 }, results: HITS.filter(item => item !== source && (!modules.length || modules.includes(item.module))).slice(0, limit).map(hit), limit, clamped: limit !== requested, indexing: scene() === "indexing", pending: scene() === "indexing" ? 118 : 0 };
     }
     case "read":
       return { title: "Гибридный поиск", text: DOC_TEXT };

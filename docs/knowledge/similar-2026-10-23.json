@@ -1,0 +1,533 @@
+{
+  "date": "2026-10-23T07:46:08.102Z",
+  "project": "C:/Users/arketov/Desktop/bars-project",
+  "cli": "target/release/bars-cli.exe",
+  "queries": [
+    "Как устроены поиск и индексация документации?",
+    "Как редактировать документ, использовать ссылки и граф?",
+    "Как выбираются модели и устройства выполнения?"
+  ],
+  "sources": 8,
+  "calls": 40,
+  "min_ms": 93.85660000000098,
+  "median_ms": 128.91049999999996,
+  "p95_ms": 454.03770000000077,
+  "max_ms": 621.5805,
+  "thresholds": [
+    {
+      "threshold": 0,
+      "retained": 40,
+      "empty_sources": 0
+    },
+    {
+      "threshold": 0.7,
+      "retained": 40,
+      "empty_sources": 0
+    },
+    {
+      "threshold": 0.8,
+      "retained": 21,
+      "empty_sources": 1
+    },
+    {
+      "threshold": 0.85,
+      "retained": 5,
+      "empty_sources": 4
+    },
+    {
+      "threshold": 0.9,
+      "retained": 0,
+      "empty_sources": 8
+    }
+  ],
+  "samples": [
+    {
+      "source": {
+        "id": "4546-97ccaeac",
+        "path": "docs/manual/how-it-works.md",
+        "heading": "Как устроен bars простыми словами/Что такое индекс проекта",
+        "first": 19,
+        "last": 23,
+        "score": 1
+      },
+      "neighbors": [
+        {
+          "id": "4568-d275a961",
+          "path": "docs/manual/projects.md",
+          "heading": "Проекты в bars — как добавить, убрать, перенести и удалить/Что лежит в папке .bars внутри проекта",
+          "first": 53,
+          "last": 62,
+          "score": 0.8385776
+        },
+        {
+          "id": "4544-5dfc1740",
+          "path": "docs/manual/how-it-works.md",
+          "heading": "Как устроен bars простыми словами",
+          "first": 5,
+          "last": 7,
+          "score": 0.8109349
+        },
+        {
+          "id": "638-620687fa",
+          "path": "docs/features/projects/projects.md",
+          "heading": "Реестр проектов bars/Перенесённый проект",
+          "first": 44,
+          "last": 46,
+          "score": 0.8063262
+        },
+        {
+          "id": "4522-f532a56e",
+          "path": "docs/manual/Index.md",
+          "heading": "Руководство пользователя bars/Где искать ответ в руководстве",
+          "first": 16,
+          "last": 33,
+          "score": 0.80565935
+        },
+        {
+          "id": "3549-5d7755cf",
+          "path": "docs/Index.md",
+          "heading": "Документация bars/Где искать ответ о bars",
+          "first": 9,
+          "last": 23,
+          "score": 0.79234445
+        }
+      ],
+      "times_ms": [
+        487.8001000000004,
+        454.03770000000077,
+        411.02270000000135,
+        218.32260000000133,
+        172.07719999999972
+      ],
+      "indexing": false,
+      "pending": 1
+    },
+    {
+      "source": {
+        "id": "4551-3644cfe3",
+        "path": "docs/manual/how-it-works.md",
+        "heading": "Как устроен bars простыми словами/Как bars узнаёт, что документы изменились",
+        "first": 60,
+        "last": 72,
+        "score": 1
+      },
+      "neighbors": [
+        {
+          "id": "4569-6da845e0",
+          "path": "docs/manual/projects.md",
+          "heading": "Проекты в bars — как добавить, убрать, перенести и удалить/Как проверить индекс проекта вручную",
+          "first": 64,
+          "last": 72,
+          "score": 0.85272354
+        },
+        {
+          "id": "4598-8ca0c462",
+          "path": "docs/manual/troubleshooting.md",
+          "heading": "Неполадки bars — частые проблемы и что делать/Изменения в документе не видны в поиске",
+          "first": 31,
+          "last": 33,
+          "score": 0.8516993
+        },
+        {
+          "id": "4544-5dfc1740",
+          "path": "docs/manual/how-it-works.md",
+          "heading": "Как устроен bars простыми словами",
+          "first": 5,
+          "last": 7,
+          "score": 0.8304458
+        },
+        {
+          "id": "4545-9e4b8c86",
+          "path": "docs/manual/how-it-works.md",
+          "heading": "Как устроен bars простыми словами/Из чего состоит bars",
+          "first": 9,
+          "last": 17,
+          "score": 0.80494624
+        },
+        {
+          "id": "4587-0ad0d744",
+          "path": "docs/manual/search.md",
+          "heading": "Как искать в окне bars — запрос, область, результаты и проценты/Ищет ли bars, пока идёт индексация",
+          "first": 148,
+          "last": 152,
+          "score": 0.8045573
+        }
+      ],
+      "times_ms": [
+        174.77449999999953,
+        155.02269999999953,
+        147.5005999999994,
+        149.33590000000004,
+        148.21529999999984
+      ],
+      "indexing": false,
+      "pending": 1
+    },
+    {
+      "source": {
+        "id": "4464-905beced",
+        "path": "docs/knowledge/search-during-indexing.md",
+        "heading": "Поиск во время индексации: замер задержки и очередь к модели/Меры и их эффект",
+        "first": 23,
+        "last": 34,
+        "score": 1
+      },
+      "neighbors": [
+        {
+          "id": "3659-063ba057",
+          "path": "docs/architecture/worker.md",
+          "heading": "Воркер bars — запуск, задачи внутри процесса, очередь, завершение/Модели в памяти воркера",
+          "first": 55,
+          "last": 67,
+          "score": 0.79226017
+        },
+        {
+          "id": "4463-1bfaa142",
+          "path": "docs/knowledge/search-during-indexing.md",
+          "heading": "Поиск во время индексации: замер задержки и очередь к модели/Что было",
+          "first": 11,
+          "last": 21,
+          "score": 0.7725813
+        },
+        {
+          "id": "4462-c3bbc2da",
+          "path": "docs/knowledge/search-during-indexing.md",
+          "heading": "Поиск во время индексации: замер задержки и очередь к модели",
+          "first": 5,
+          "last": 9,
+          "score": 0.7517618
+        },
+        {
+          "id": "4137-02c84485",
+          "path": "docs/features/window/indexing-progress.md",
+          "heading": "Ход индексации в окне bars/Страница индексации проекта",
+          "first": 16,
+          "last": 29,
+          "score": 0.7276197
+        },
+        {
+          "id": "4605-e7ae0327",
+          "path": "docs/manual/troubleshooting.md",
+          "heading": "Неполадки bars — частые проблемы и что делать/bars тормозит во время индексации",
+          "first": 80,
+          "last": 82,
+          "score": 0.72044206
+        }
+      ],
+      "times_ms": [
+        130.1182000000008,
+        117.53479999999945,
+        137.5009000000009,
+        128.91049999999996,
+        120.28420000000006
+      ],
+      "indexing": false,
+      "pending": 1
+    },
+    {
+      "source": {
+        "id": "308-1b441d9e",
+        "path": "docs/chats/2026-10-18-russian-interface/handoff.md",
+        "heading": "Возврат русского интерфейса — передача сессии",
+        "first": 5,
+        "last": 12,
+        "score": 1
+      },
+      "neighbors": [
+        {
+          "id": "297-2e547213",
+          "path": "docs/chats/2026-10-18-output-language/handoff.md",
+          "heading": "Передача сессии: язык сообщений поиска",
+          "first": 5,
+          "last": 7,
+          "score": 0.8353277
+        },
+        {
+          "id": "310-53dfeaee",
+          "path": "docs/chats/2026-10-18-russian-interface/log.md",
+          "heading": "Возврат русского интерфейса — находки",
+          "first": 5,
+          "last": 7,
+          "score": 0.782064
+        },
+        {
+          "id": "298-03fc4af4",
+          "path": "docs/chats/2026-10-18-output-language/handoff.md",
+          "heading": "Передача сессии: язык сообщений поиска/Сделано",
+          "first": 9,
+          "last": 24,
+          "score": 0.7810761
+        },
+        {
+          "id": "309-9d9a09b6",
+          "path": "docs/chats/2026-10-18-russian-interface/handoff.md",
+          "heading": "Возврат русского интерфейса — передача сессии/Не сделано",
+          "first": 14,
+          "last": 24,
+          "score": 0.77561945
+        },
+        {
+          "id": "263-b8fadf35",
+          "path": "docs/chats/2026-10-18-mcp-format-language/handoff.md",
+          "heading": "Английское оформление результатов MCP — передача сессии",
+          "first": 5,
+          "last": 11,
+          "score": 0.75650567
+        }
+      ],
+      "times_ms": [
+        121.49330000000009,
+        115.96520000000055,
+        214.8173000000006,
+        359.3570000000018,
+        621.5805
+      ],
+      "indexing": false,
+      "pending": 1
+    },
+    {
+      "source": {
+        "id": "4542-7de3208c",
+        "path": "docs/manual/graph.md",
+        "heading": "Как работает граф (graph, GraphRAG) в bars/Как писать документы, чтобы граф находил связи",
+        "first": 101,
+        "last": 107,
+        "score": 1
+      },
+      "neighbors": [
+        {
+          "id": "4612-2d671ad2",
+          "path": "docs/manual/writing-docs.md",
+          "heading": "Как писать документацию, чтобы bars её хорошо находил/Как писать, чтобы граф находил связи",
+          "first": 50,
+          "last": 52,
+          "score": 0.87478936
+        },
+        {
+          "id": "4537-34a877f9",
+          "path": "docs/manual/graph.md",
+          "heading": "Как работает граф (graph, GraphRAG) в bars/Что такое граф (graph) документов в bars и зачем он нужен",
+          "first": 9,
+          "last": 20,
+          "score": 0.83378553
+        },
+        {
+          "id": "4536-febacd8e",
+          "path": "docs/manual/graph.md",
+          "heading": "Как работает граф (graph, GraphRAG) в bars",
+          "first": 5,
+          "last": 7,
+          "score": 0.8070104
+        },
+        {
+          "id": "4539-7592bb62",
+          "path": "docs/manual/graph.md",
+          "heading": "Как работает граф (graph, GraphRAG) в bars/Режимы поиска: «Обычный», «Со связями» и «Отношения и пути»",
+          "first": 28,
+          "last": 40,
+          "score": 0.7910195
+        },
+        {
+          "id": "3612-72045632",
+          "path": "docs/architecture/graph.md",
+          "heading": "Граф документов bars — крейт bars-graph, схема и обновление",
+          "first": 5,
+          "last": 7,
+          "score": 0.78318715
+        }
+      ],
+      "times_ms": [
+        363.3899000000001,
+        118.4976999999999,
+        116.57569999999942,
+        103.07049999999981,
+        104.36369999999988
+      ],
+      "indexing": false,
+      "pending": 1
+    },
+    {
+      "source": {
+        "id": "4540-4d7b0bf8",
+        "path": "docs/manual/graph.md",
+        "heading": "Как работает граф (graph, GraphRAG) в bars/Вкладка «Граф» (graph) в окне bars — карта связей",
+        "first": 42,
+        "last": 84,
+        "score": 1
+      },
+      "neighbors": [
+        {
+          "id": "3559-4aa25f34",
+          "path": "docs/MAIN_IDEA.md",
+          "heading": "bars — локальная база знаний и RAG по документации проектов для людей и агентов/Требования",
+          "first": 138,
+          "last": 144,
+          "score": 0.85595614
+        },
+        {
+          "id": "3569-334a5e7f",
+          "path": "docs/MAIN_IDEA.md",
+          "heading": "bars — локальная база знаний и RAG по документации проектов для людей и агентов/Критерии приёмки",
+          "first": 285,
+          "last": 301,
+          "score": 0.80494314
+        },
+        {
+          "id": "3820-4aa981c8",
+          "path": "docs/features/graphrag/graph-actions-design.md",
+          "heading": "Дизайн работы с графом — уровни, инспектор, анализ и состояния/Где живут действия: мини-граф и полный граф",
+          "first": 33,
+          "last": 39,
+          "score": 0.7962813
+        },
+        {
+          "id": "4536-febacd8e",
+          "path": "docs/manual/graph.md",
+          "heading": "Как работает граф (graph, GraphRAG) в bars",
+          "first": 5,
+          "last": 7,
+          "score": 0.79516476
+        },
+        {
+          "id": "4539-7592bb62",
+          "path": "docs/manual/graph.md",
+          "heading": "Как работает граф (graph, GraphRAG) в bars/Режимы поиска: «Обычный», «Со связями» и «Отношения и пути»",
+          "first": 28,
+          "last": 40,
+          "score": 0.7936114
+        }
+      ],
+      "times_ms": [
+        94.37469999999848,
+        97.6335999999992,
+        97.2445000000007,
+        93.85660000000098,
+        100.02269999999953
+      ],
+      "indexing": false,
+      "pending": 1
+    },
+    {
+      "source": {
+        "id": "4612-2d671ad2",
+        "path": "docs/manual/writing-docs.md",
+        "heading": "Как писать документацию, чтобы bars её хорошо находил/Как писать, чтобы граф находил связи",
+        "first": 50,
+        "last": 52,
+        "score": 1
+      },
+      "neighbors": [
+        {
+          "id": "4542-7de3208c",
+          "path": "docs/manual/graph.md",
+          "heading": "Как работает граф (graph, GraphRAG) в bars/Как писать документы, чтобы граф находил связи",
+          "first": 101,
+          "last": 107,
+          "score": 0.87478936
+        },
+        {
+          "id": "4609-dd5c66f1",
+          "path": "docs/manual/writing-docs.md",
+          "heading": "Как писать документацию, чтобы bars её хорошо находил",
+          "first": 5,
+          "last": 11,
+          "score": 0.7789085
+        },
+        {
+          "id": "4613-75890078",
+          "path": "docs/manual/writing-docs.md",
+          "heading": "Как писать документацию, чтобы bars её хорошо находил/Что не попадёт в поиск bars",
+          "first": 54,
+          "last": 61,
+          "score": 0.77858555
+        },
+        {
+          "id": "4611-d342ee52",
+          "path": "docs/manual/writing-docs.md",
+          "heading": "Как писать документацию, чтобы bars её хорошо находил/Как разложить папки документации",
+          "first": 35,
+          "last": 48,
+          "score": 0.7667155
+        },
+        {
+          "id": "4537-34a877f9",
+          "path": "docs/manual/graph.md",
+          "heading": "Как работает граф (graph, GraphRAG) в bars/Что такое граф (graph) документов в bars и зачем он нужен",
+          "first": 9,
+          "last": 20,
+          "score": 0.75906557
+        }
+      ],
+      "times_ms": [
+        94.76549999999952,
+        103.18009999999958,
+        109.39710000000014,
+        144.01660000000084,
+        123.4359999999997
+      ],
+      "indexing": false,
+      "pending": 1
+    },
+    {
+      "source": {
+        "id": "3799-d5bb6665",
+        "path": "docs/features/docs-convention/delivery.md",
+        "heading": "Как соглашение о документации доходит до агента — стартовая инструкция, skills, BARS_INSTRUCTION.md/Выбор операции и области агентом",
+        "first": 22,
+        "last": 35,
+        "score": 1
+      },
+      "neighbors": [
+        {
+          "id": "3798-fc39898b",
+          "path": "docs/features/docs-convention/delivery.md",
+          "heading": "Как соглашение о документации доходит до агента — стартовая инструкция, skills, BARS_INSTRUCTION.md",
+          "first": 5,
+          "last": 20,
+          "score": 0.8339816
+        },
+        {
+          "id": "3801-e2591260",
+          "path": "docs/features/docs-convention/delivery.md",
+          "heading": "Как соглашение о документации доходит до агента — стартовая инструкция, skills, BARS_INSTRUCTION.md/BARS_INSTRUCTION.md",
+          "first": 46,
+          "last": 50,
+          "score": 0.82980824
+        },
+        {
+          "id": "3795-f7a51f87",
+          "path": "docs/features/docs-convention/Index.md",
+          "heading": "Соглашение о документации — фича bars",
+          "first": 5,
+          "last": 16,
+          "score": 0.81154984
+        },
+        {
+          "id": "3803-80dce77a",
+          "path": "docs/features/docs-convention/delivery.md",
+          "heading": "Как соглашение о документации доходит до агента — стартовая инструкция, skills, BARS_INSTRUCTION.md/Границы проверки доставки",
+          "first": 65,
+          "last": 67,
+          "score": 0.8088811
+        },
+        {
+          "id": "3802-d3186801",
+          "path": "docs/features/docs-convention/delivery.md",
+          "heading": "Как соглашение о документации доходит до агента — стартовая инструкция, skills, BARS_INSTRUCTION.md/Как проверить доставку",
+          "first": 52,
+          "last": 63,
+          "score": 0.8077123
+        }
+      ],
+      "times_ms": [
+        111.20739999999932,
+        133.16880000000128,
+        139.83740000000034,
+        143.6936999999998,
+        115.14799999999923
+      ],
+      "indexing": false,
+      "pending": 1
+    }
+  ]
+}

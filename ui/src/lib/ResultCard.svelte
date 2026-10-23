@@ -9,12 +9,15 @@
   import { relativeToDocs } from "./tree";
   import { plainText, renderChunk } from "./markdown";
   import type { SearchHit } from "./types";
+  import SimilarSections from "./SimilarSections.svelte";
 
   let { hit, rank, startOpen = false }: { hit: SearchHit; rank: number; startOpen?: boolean } = $props();
 
   // Раскрытость — выбор пользователя; пока он не трогал карточку, первая раскрыта (main-window.md).
   let toggled = $state<boolean | null>(null);
   const open = $derived(toggled ?? startOpen);
+  let similarOpen = $state(false);
+  const project = $derived(app.displayed?.project ?? app.current);
   const f = $derived(fit(hit.score, hit.score_kind));
   const dot = $derived(colorVar(documentColor(appearance.data, keyOf(relativeToDocs(hit.path, app.docsRoot || "")))));
   const shown = $derived(app.viewer?.hit.path === hit.path && app.viewer.hit.first_line === hit.first_line);
@@ -55,8 +58,12 @@
       <div class="cfoot">
         <button class="btn" onclick={() => app.openDocument(hit)}><Icon name="doc" size={14} />Открыть документ</button>
         <button class="ghost" onclick={copy}><Icon name="copy" size={14} />Копировать путь:строку</button>
+        <button class="ghost" disabled={!hit.chunk_id || !project} title={hit.chunk_id ? "Найти соседей по смыслу" : "ID раздела отсутствует. Обновите воркер и повторите поиск."} aria-expanded={similarOpen} onclick={() => similarOpen = !similarOpen}>Похожие разделы</button>
         <span class="nums">строки {hit.first_line}–{hit.last_line} · {hit.score_kind} {decimal(hit.score)}</span>
       </div>
+      {#if similarOpen && project && hit.chunk_id}
+        {#key project + ":" + hit.chunk_id}<SimilarSections {project} sourceId={hit.chunk_id} modules={app.project?.modules ?? []} onopen={(neighbor) => { if (app.current === project) void app.openDocument(neighbor); }} onrefresh={() => { similarOpen = false; void app.search(); }} />{/key}
+      {/if}
     </div>
   {/if}
 </div>

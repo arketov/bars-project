@@ -68,6 +68,15 @@ export interface ReadOutput {
   text: string;
 }
 
+export interface SimilarOutput {
+  source: SearchHit;
+  results: SearchHit[];
+  limit: number;
+  clamped: boolean;
+  indexing: boolean;
+  pending: number;
+}
+
 export interface TreeDocument {
   path: string;
   module: string;
