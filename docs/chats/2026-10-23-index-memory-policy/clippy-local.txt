@@ -1,0 +1,38 @@
+    Checking candle-core v0.11.0
+    Checking ureq v3.4.2
+    Checking bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+    Checking hf-hub v0.5.0
+    Checking bars-protocol v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-protocol)
+    Checking candle-nn v0.11.0
+    Checking fastembed v7.1.1
+    Checking bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Checking bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+error: redundant closure
+   --> crates\bars-worker\src\handler\audits.rs:702:55
+    |
+702 |         let indexing_after = after.as_ref().is_ok_and(|s| busy(s));
+    |                                                       ^^^^^^^^^^^ help: replace the closure with the function itself: `busy`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#redundant_closure
+    = note: `-D clippy::redundant-closure` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::redundant_closure)]`
+
+error: very complex type used. Consider factoring parts into `type` definitions
+   --> crates\bars-worker\src\worker\control.rs:170:12
+    |
+170 |     defer: Option<Arc<dyn Fn(&str, bool) -> bool + Send + Sync>>,
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#type_complexity
+    = note: `-D clippy::type-complexity` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::type_complexity)]`
+
+error: very complex type used. Consider factoring parts into `type` definitions
+   --> crates\bars-worker\src\worker\control.rs:184:40
+    |
+184 |     pub fn with_defer(mut self, defer: Arc<dyn Fn(&str, bool) -> bool + Send + Sync>) -> Self {
+    |                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#type_complexity
+
+error: could not compile `bars-worker` (lib) due to 3 previous errors

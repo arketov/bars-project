@@ -1,0 +1,14 @@
+✔ full serial and overlap accepted, percentiles reproducible (1.1589ms)
+✔ failed lifecycle never accepted (0.4312ms)
+✔ CPU fallback rejected (0.1789ms)
+✔ missing or changed responses rejected (0.2392ms)
+✔ false overlap and early serial start rejected (0.7465ms)
+✔ preflight-only real attempt rejected (0.3336ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 74.5844

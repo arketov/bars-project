@@ -39,21 +39,31 @@ impl Default for SlotRuntime {
 }
 
 fn same_embed(a: &EmbedSettings, b: &EmbedSettings) -> bool {
-    let mut a = a.clone();
-    if a.source != ModelSource::Builtin {
-        a.accelerator = b.accelerator;
+    if a.source != b.source {
+        return false;
     }
+    // HTTP options cannot change a builtin session; replacing it can keep two
+    // multi-GiB copies alive while indexing/search still holds the old Arc.
+    if a.source == ModelSource::Builtin {
+        return a.model == b.model && a.accelerator == b.accelerator;
+    }
+    let mut a = a.clone();
+    a.accelerator = b.accelerator;
     a == *b
 }
 
 fn same_rerank(a: &RerankSettings, b: &RerankSettings) -> bool {
+    if a.source != b.source {
+        return false;
+    }
+    if a.source == ModelSource::Builtin {
+        return a.model == b.model && a.accelerator == b.accelerator;
+    }
     let mut a = a.clone();
     // enabled управляет lifecycle, а не форматом сессии. Опрос нового состояния
     // после выключения не должен синхронно запускать дорогой drop.
     a.enabled = b.enabled;
-    if a.source != ModelSource::Builtin {
-        a.accelerator = b.accelerator;
-    }
+    a.accelerator = b.accelerator;
     a == *b
 }
 
@@ -1213,6 +1223,66 @@ mod tests {
     use super::fake::FakeProvider;
     use super::*;
     use std::sync::atomic::Ordering;
+
+    #[test]
+    fn builtin_ignores_http_options_without_allocating_duplicate_sessions() {
+        let provider = FakeProvider::new("m1");
+        let models = Models::new(provider.clone());
+        let initial = settings();
+        let mut old_embed = models.embedder(&initial).unwrap();
+        let mut old_rerank = models.reranker(&initial);
+        let before = old_embed.embed_query("same query").unwrap();
+        let scores = old_rerank.rerank("q", &["d"]).unwrap();
+        let mut other_project = initial.clone();
+        other_project.embed.base_url = Some("http://localhost:1234/v1".into());
+        other_project.embed.api_key_name = Some("unused-key-reference".into());
+        other_project.embed.api_key_env = Some("UNUSED_KEY_REFERENCE".into());
+        other_project.embed.batch_size = 1;
+        other_project.rerank.base_url = other_project.embed.base_url.clone();
+        other_project.rerank.api_key_name = other_project.embed.api_key_name.clone();
+        other_project.rerank.api_key_env = other_project.embed.api_key_env.clone();
+        other_project.rerank.enabled = !initial.rerank.enabled;
+        let mut embed = models.embedder(&other_project).unwrap();
+        let mut rerank = models.reranker(&other_project);
+        assert!(Arc::ptr_eq(old_embed.slot(), embed.slot()));
+        assert!(Arc::ptr_eq(old_rerank.slot(), rerank.slot()));
+        assert_eq!(embed.embed_query("same query").unwrap(), before);
+        assert_eq!(rerank.rerank("q", &["d"]).unwrap(), scores);
+        // Alternating status/project requests must not replace the resident slot either.
+        assert_eq!(models.runtime(&initial).unwrap().embed.state, "ready");
+        old_embed.embed_query("still active").unwrap();
+        old_rerank.rerank("q", &["d"]).unwrap();
+        assert_eq!(provider.counters.loads.load(Ordering::SeqCst), 1);
+        assert_eq!(provider.counters.rerank_loads.load(Ordering::SeqCst), 1);
+    }
+
+    #[test]
+    fn external_session_options_still_replace_the_correct_slot() {
+        let provider = FakeProvider::new("m1");
+        let models = Models::new(provider.clone());
+        let mut config = settings();
+        config.embed.source = ModelSource::Remote;
+        config.rerank.source = ModelSource::Remote;
+        let mut embed = models.embedder(&config).unwrap();
+        let rerank = models.reranker(&config);
+        embed.prepare().unwrap();
+        rerank.prepare().unwrap();
+        config.embed.batch_size += 1;
+        let mut changed = models.embedder(&config).unwrap();
+        assert!(!Arc::ptr_eq(embed.slot(), changed.slot()));
+        assert!(Arc::ptr_eq(rerank.slot(), models.reranker(&config).slot()));
+        changed.prepare().unwrap();
+        config.rerank.api_key_name = Some("different-key-reference".into());
+        let new_rerank = models.reranker(&config);
+        assert!(!Arc::ptr_eq(rerank.slot(), new_rerank.slot()));
+        assert!(Arc::ptr_eq(
+            changed.slot(),
+            models.embedder(&config).unwrap().slot()
+        ));
+        new_rerank.prepare().unwrap();
+        assert_eq!(provider.counters.loads.load(Ordering::SeqCst), 2);
+        assert_eq!(provider.counters.rerank_loads.load(Ordering::SeqCst), 2);
+    }
 
     #[test]
     fn download_uses_artifact_api_without_creating_an_inference_session() {

@@ -1,0 +1,41 @@
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Finished `release` profile [optimized] target(s) in 42.27s
+     Running unittests src\lib.rs (C:/bt/bars\release\deps\bars_worker-ead86c2eeea92824.exe)
+
+running 34 tests
+test worker::models::resident::tests::busy_slot_and_recent_completion_survive_reaping ... ok
+test worker::models::resident::tests::expensive_drop_can_reenter_slot_without_deadlock ... ok
+test worker::models::tests::batches_are_cut_by_count_and_by_padded_size ... ok
+test worker::models::tests::enabled_toggle_keeps_the_slot_for_background_retirement ... ok
+test worker::models::tests::external_session_options_still_replace_the_correct_slot ... ok
+test worker::models::tests::builtin_ignores_http_options_without_allocating_duplicate_sessions ... ok
+test worker::models::tests::disabled_rerank_waits_for_busy_slot_and_keeps_embed ... ok
+test worker::models::tests::embedding_goes_in_batches_of_four_and_keeps_order ... ok
+test worker::models::tests::external_models_get_a_fingerprint_with_unknown_dimension ... ok
+test worker::models::tests::external_embed_without_base_url_is_a_load_error ... ok
+test worker::models::tests::batch_size_is_four_for_builtin_and_from_settings_for_external ... ok
+test worker::models::tests::download_uses_artifact_api_without_creating_an_inference_session ... ok
+test worker::models::tests::a_loaded_model_busy_with_a_batch_is_ready_not_loading ... ok
+test worker::models::tests::query_gets_the_model_between_batches ... ok
+test worker::models::tests::concurrent_queries_after_eviction_load_once ... ok
+test worker::models::tests::failed_reload_keeps_slot_empty_and_can_be_retried ... ok
+test worker::models::tests::idle_sessions_reload_with_same_results_and_runtime_resets ... ok
+test worker::models::tests::model_is_not_loaded_until_the_first_embedding ... ok
+test worker::models::tests::provider_knows_every_builtin_model_and_its_fingerprint_without_loading ... ok
+test worker::models::tests::reaper_does_not_overlap_an_existing_load ... ok
+test worker::models::tests::reaper_leaves_old_readers_and_remote_models_alone ... ok
+test worker::models::tests::rerank_model_is_loaded_lazily_and_shared_until_settings_change ... ok
+test worker::models::tests::rerank_that_cannot_load_is_an_error_from_the_call ... ok
+test worker::models::tests::same_settings_share_one_slot_and_a_new_model_replaces_it ... ok
+test worker::models::tests::status_does_not_refresh_idle_but_inference_completion_does ... ok
+test worker::models::tests::stage17_external_device_preference_does_not_replace_a_slot ... ok
+test worker::models::tests::stage17_devices_replace_only_their_own_slots_and_keep_active_readers ... ok
+test worker::models::tests::failed_background_load_is_reported_to_the_next_search ... ok
+test worker::models::tests::rerank_loads_in_the_background_too ... ok
+test worker::models::tests::a_batch_already_waiting_for_the_lock_rechecks_query_priority ... ok
+test worker::models::tests::indexing_batches_yield_to_a_waiting_query ... ok
+test worker::models::tests::stage17_old_loader_cannot_publish_into_a_new_slot ... ok
+test worker::models::tests::search_does_not_wait_for_a_model_that_is_loading ... ok
+test worker::models::tests::download_and_search_load_share_one_lock_and_one_load_at_a_time ... ok
+
+test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 250 filtered out; finished in 0.40s

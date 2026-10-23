@@ -1,0 +1,34 @@
+{
+  "powershell_parse": "passed",
+  "release_example": "built",
+  "model_tests": 34,
+  "analyzer_tests": 6,
+  "strict_clippy": "blocked by existing diagnostics in graph/query.rs, graph/source.rs, graph/store.rs, handler/audits.rs, worker/control.rs",
+  "regression_before_fix": "failed: Arc::ptr_eq(old_embed.slot(), embed.slot())",
+  "rustfmt": "passed",
+  "sources": [
+    {
+      "path": "crates/bars-worker/src/worker/models.rs",
+      "sha256": "275BD16AD6C2CF7D510BA678144CB675588EAB7FBDC24E7634135EF6E383550C"
+    },
+    {
+      "path": "crates/bars-worker/examples/bench_worker_index_memory.rs",
+      "sha256": "804B547FD739C19B4DD5BC7C31BBED72DD9027C2E4F0161D79BD89481E2E0293"
+    },
+    {
+      "path": "scripts/run-model-overlap.ps1",
+      "sha256": "358D388FA8207CDA97909DCE018AFEF82057D12A16E263E736914247AA544408"
+    },
+    {
+      "path": "scripts/analyze-model-overlap.mjs",
+      "sha256": "3BBDE6A88E6767DF2971175D3A5F610F75F0C51FC947272694EA6E18863854BF"
+    },
+    {
+      "path": "scripts/analyze-model-overlap.test.mjs",
+      "sha256": "E75A5E8573C5C19FAB9C9C9E923D694070ED547DE8D8C6319A4A0283C19950F8"
+    }
+  ],
+  "binary_sha256": "58A1EF7553AD812ABC61CE3D7A4BC35DAA95544F54C29828CE8828121B71DDDE",
+  "documentation_links": "passed",
+  "manual_review": "Verified ConfiguredProvider consumes only source/model/accelerator for builtin load; external batch and credential references still replace slots; reviewed runner scope, docs root, failure evidence export, temporary cleanup"
+}

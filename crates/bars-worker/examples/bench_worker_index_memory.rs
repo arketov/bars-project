@@ -20,12 +20,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         time::Duration,
     };
     let a: Vec<_> = std::env::args().skip(1).collect();
-    if a.len() != 6
+    if !(a.len() == 6 || a.len() == 7)
         || !matches!(a[0].as_str(), "fp32" | "fp16")
         || !matches!(a[1].as_str(), "on" | "off")
         || !matches!(a[2].as_str(), "1" | "2" | "4")
+        || a.get(6)
+            .is_some_and(|mode| !matches!(mode.as_str(), "overlap" | "serial"))
     {
-        return Err("bench_worker_index_memory <fp32|fp16> <on|off rerank> <1|2|4 clients> <models> <copied-project> <new-run-dir>".into());
+        return Err("bench_worker_index_memory <fp32|fp16> <on|off rerank> <1|2|4 clients> <models> <copied-project> <new-run-dir> [overlap|serial]".into());
     }
     let embed = if a[0] == "fp16" {
         BGE_M3_FP16_ID
@@ -84,7 +86,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let worker = Worker::start(config, provider)?;
         let result = tokio::time::timeout(
             Duration::from_secs(1200),
-            exercise(&worker, &project, clients, rerank, &a[0], &log),
+            exercise(
+                &worker,
+                &project,
+                clients,
+                rerank,
+                &a[0],
+                a.get(6).is_some_and(|mode| mode == "serial"),
+                &log,
+            ),
         )
         .await;
         worker.shutdown().await;
@@ -111,6 +121,7 @@ async fn exercise(
     clients: usize,
     rerank: bool,
     precision: &str,
+    serial: bool,
     log: &memory::windows::Log,
 ) -> Result<(), Box<dyn std::error::Error>> {
     use bars_protocol::{Client, ClientKind, Endpoint, ScoreKind, SearchParams, Target};
@@ -246,7 +257,7 @@ async fn exercise(
                         let stable = out.results == expected[q];
                         let ok = out.rerank_error.is_none() && out.applied.score_kind == expected_kind && stable;
                         failures += usize::from(!ok);
-                        log.emit("search", "during_index", json!({"lane":lane,"n":n,"query":q,
+                        log.emit("search", if serial { "after_index" } else { "during_index" }, json!({"lane":lane,"n":n,"query":q,
                             "ms":start.elapsed().as_secs_f64()*1000.0,"before":before,"after":after,
                             "indexing":out.indexing,"hits":out.results.len(),"stable":stable,
                             "docs_before":progress_before.as_ref().map(|p|p.docs_done),
@@ -255,7 +266,7 @@ async fn exercise(
                             "chunks_after":progress_after.as_ref().map(|p|p.chunks_done),
                             "score_kind":out.applied.score_kind,"rerank_error":out.rerank_error,"ok":ok}));
                     }
-                    Err(e) => { failures += 1; log.emit("search", "during_index", json!({"lane":lane,"n":n,
+                    Err(e) => { failures += 1; log.emit("search", if serial { "after_index" } else { "during_index" }, json!({"lane":lane,"n":n,
                         "ms":start.elapsed().as_secs_f64()*1000.0,"before":before,"after":after,"ok":false,"error":e.to_string()})); }
                 }
             }
@@ -265,18 +276,22 @@ async fn exercise(
     log.emit(
         "marker",
         "reindex_start",
-        json!({"clients":clients,"rerank":rerank,"requests":100}),
+        json!({"clients":clients,"rerank":rerank,"requests":100,"mode":if serial {"serial"} else {"overlap"}}),
     );
     let start = Instant::now();
     worker.reindex(root, true, false)?;
-    while !worker.progress().is_some_and(|p| p.current_file.is_some()) {
-        tokio::task::yield_now().await;
+    if !serial {
+        while !worker.progress().is_some_and(|p| p.current_file.is_some()) {
+            if worker.is_idle() {
+                return Err("reindex completed before overlap could be observed".into());
+            }
+            tokio::task::yield_now().await;
+        }
     }
-    barrier.wait().await;
     // Observe index completion independently of the search series.
     let index_worker = worker.clone();
     let index_log = log.clone();
-    let completion = tokio::spawn(async move {
+    let mut completion = tokio::spawn(async move {
         while !index_worker.is_idle() {
             tokio::time::sleep(Duration::from_millis(10)).await;
         }
@@ -286,11 +301,19 @@ async fn exercise(
             json!({"ms":start.elapsed().as_secs_f64()*1000.0}),
         );
     });
+    if serial {
+        (&mut completion).await?;
+        log.plateau("serial_index_done");
+    }
+    log.emit("marker", "queries_start", json!({"serial":serial}));
+    barrier.wait().await;
     let mut failures = 0;
     while let Some(task) = tasks.join_next().await {
         failures += task?;
     }
-    completion.await?;
+    if !serial {
+        completion.await?;
+    }
     let status = worker.status(root)?;
     log.emit(
         "status",
