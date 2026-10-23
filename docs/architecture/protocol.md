@@ -85,7 +85,8 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | `index_pause` | — | `paused: true`: очередь приостановлена целиком, идущее задание замирает между документами, новые не берутся |
 | `index_resume` | — | `paused: false` |
 | `index_cancel` | `project` (путь или имя) | `cancelled`: идущее задание прервано между документами или ждущее снято с очереди. Старый индекс цел; проект в `reindex_required` в нём и остаётся — согласие придётся дать снова |
-| `activity` | — | `paused`, `running` (проект, вид, приоритет, документов в обходе и обработано, чанков, чанков в секунду, секунд, текущий файл), `queue` (проект, вид, приоритет, число файлов), `problems` (по проектам: файлы с ошибкой и `last_error`, `rebuild_not_applied`); `running` также несёт `embed_device` текущего задания и `attempt`; ошибка файла — `stage`, `attempts`, `previous_version` |
+| `activity` | — | `paused`, `running` (проект, вид, приоритет, документов в обходе и обработано, чанков, чанков в секунду, секунд, текущий файл), `queue` (проект, вид, приоритет, число файлов), `problems` (по проектам: файлы с ошибкой и `last_error`, `rebuild_not_applied`); `running` также несёт `embed_device` текущего задания и `attempt`; ошибка файла — `stage`, `attempts`, `previous_version`. `documents` — очередь документов по проектам, где она не пуста: `project`, `total`, счётчики `waiting`/`queued`/`indexing`/`error` и до 200 записей `{path, state, source, due_in, error}` в порядке выполнения ([очередь документов](../features/indexing/document-queue.md)) |
+| `index_retry` | `project`, `path` | `retried`: у документа была запись с ошибкой, теперь он снова в очереди |
 | `tree` | `cwd`, `project` | `docs_root` и документы из индекса: путь от корня проекта, модуль, `title`, число чанков. Читается без модели, поэтому дерево видно и в состоянии `reindex_required` |
 
 Доставка уведомлений этапа 28 (также только `Window`):
@@ -127,6 +128,16 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | `new_topics_clear` | `project`, обязательный `confirmed: true` | `generation` |
 | `new_topics_settings` | `project`, `enabled` | `enabled`, `generation` |
 | `links_of` | `project` (абсолютный путь), `path` (от корня проекта) | `known`, `outgoing` (`line`, `text`, `raw`, `kind`, `target`, `target_title`, `broken`), `incoming` (`path`, `title`, `lines`); читает индекс ссылок, сверяя его с диском, модель не нужна; только окно ([индекс ссылок](../features/knowledge-base/link-index.md)) |
+
+Методы аудитов знаний — аудитория `Window`; проект — абсолютный путь, вид — `broken_links` или `duplicates` (иначе `invalid_params`). Аудит читает индекс ссылок и индекс чанков, файлы не меняет, модель не загружает. Устройство, очередь и хранилище — [аудиты](../features/knowledge-base/audits.md).
+
+| Метод | Параметры | Ответ |
+|---|---|---|
+| `audit_list` | `project` | `audits` по виду: `state` (`never`, `queued`, `running`, `complete`, `partial`, `failed`), время последнего запуска и итог, `error`, `result_run_id` и `result_at` последнего полного запуска, `total`, `new_count`, `gone_count`, `overlap_total`, `schedule`, `schedules`; `reindex_required`, `indexing` |
+| `audit_run` | `project`, `kind` | `accepted`, `already` (вид уже шёл или ждал), `queued` (ждёт за другим аудитом проекта) |
+| `audit_cancel` | `project`, `kind` | `cancelled`: был идущий или ждущий запуск |
+| `audit_findings` | `project`, `kind`, `group` (`main`, `overlap`), `include_gone`, `cursor`, `limit` (до 200) | находки последнего полного запуска: `standing` (`new`, `known`, `gone`), `tag`, `group`, `reason`, `score`, `subjects` (`path`, `first_line`, `last_line`, `heading`, `role`), `detail`; `total`, `next`; без полного запуска — пустой список |
+| `audit_schedule` | `project`, `kind`, `mode` (`off`, `daily`, `weekly`, `on_change` — последнее только у `broken_links`) | `mode`; недопустимый режим — `invalid_params` |
 
 Автозапуск — состояние ОС, а не настройка ([features/distribution/autostart.md](../features/distribution/autostart.md)); методы доступны окну и `bars-cli`, но не `bars-mcp` (аудитория `Cli`), решение агента, срез 7:
 

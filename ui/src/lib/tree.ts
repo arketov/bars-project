@@ -20,6 +20,14 @@ export interface TreeNode {
   title?: string;
   /** Исходный путь `Index.md` папки или модуля (Т-32); клик по имени папки открывает его. */
   indexPath?: string;
+  /** Документ есть на диске, но ещё не в индексе (Т-33): число чанков неизвестно. */
+  indexed?: false;
+}
+
+/** Дерево с диска (`tree_read`): пути от корня проекта; пустые папки видны, документы без индекса тоже. */
+export interface DiskTree {
+  files: string[];
+  dirs: string[];
 }
 
 export type CheckState = "all" | "some" | "none";
@@ -37,7 +45,37 @@ export function relativeToDocs(path: string, docsRoot: string): string {
   return root && clean.startsWith(root + "/") ? clean.slice(root.length + 1) : clean;
 }
 
-export function buildTree(documents: TreeDocument[], docsRoot: string): TreeNode[] {
+function joinPath(base: string, name: string): string {
+  return base && name ? `${base}/${name}` : base || name;
+}
+
+/** Корень документации как префикс путей проекта: `docs`, `a/b` или пусто для `.`. */
+export function docsPrefix(docsRoot: string): string {
+  return docsRoot.replace(/\\/g, "/").replace(/^\.\/?/, "").replace(/\/+$/, "");
+}
+
+/** Путь узла дерева (от корня документации; корневая группа — `.`, файлы корня — `./имя`) → путь проекта. */
+export function projectPathOf(nodePath: string, docsRoot: string): string {
+  const relative = nodePath === "." ? "" : nodePath.replace(/^\.\//, "");
+  return joinPath(docsPrefix(docsRoot), relative);
+}
+
+/**
+ * Дерево «модуль → папки → файлы». Без `disk` — по индексу; с `disk` — по диску (Т-33): документы
+ * индекса, которых на диске уже нет, не показываются, а документы и пустые папки с диска добавляются.
+ */
+export function buildTree(documents: TreeDocument[], docsRoot: string, disk?: DiskTree): TreeNode[] {
+  const unindexed = new Set<string>();
+  if (disk) {
+    const onDisk = new Set(disk.files);
+    const known = new Set(documents.map((document) => document.path));
+    documents = documents.filter((document) => onDisk.has(document.path));
+    for (const path of disk.files) {
+      if (known.has(path)) continue;
+      unindexed.add(path);
+      documents.push({ path, module: "", title: path.slice(path.lastIndexOf("/") + 1), chunks: 0 });
+    }
+  }
   const modules = new Map<string, TreeNode>();
   const ensureModule = (name: string): TreeNode => {
     let node = modules.get(name);
@@ -69,12 +107,28 @@ export function buildTree(documents: TreeDocument[], docsRoot: string): TreeNode
           chunks: 0,
           children: [],
           ...(isFile ? { documentPath: document.path, title: document.title } : {}),
+          ...(isFile && unindexed.has(document.path) ? { indexed: false as const } : {}),
         };
         node.children.push(child);
       }
       child.chunks += document.chunks;
       node = child;
     });
+  }
+  for (const dir of disk?.dirs ?? []) {
+    const parts = relativeToDocs(dir, docsRoot).split("/").filter(Boolean);
+    if (!parts.length) continue;
+    let node = ensureModule(parts[0]);
+    let path = parts[0];
+    for (const part of parts.slice(1)) {
+      path = `${path}/${part}`;
+      let child = node.children.find((candidate) => candidate.path === path);
+      if (!child) {
+        child = { path, name: part, label: humanName(part), kind: "dir", chunks: 0, children: [] };
+        node.children.push(child);
+      }
+      node = child;
+    }
   }
   const sortNodes = (nodes: TreeNode[]) => {
     // Папки раньше файлов, внутри — по имени; `Index.md` первым среди файлов.
@@ -88,6 +142,8 @@ export function buildTree(documents: TreeDocument[], docsRoot: string): TreeNode
   const attachIndex = (node: TreeNode) => {
     const index = node.children.find((child) => child.kind === "file" && child.name.toLowerCase() === "index.md");
     if (index?.documentPath) node.indexPath = index.documentPath;
+    // Папка без файла: клик по имени открывает пустой документ, файл появится при первой правке (Т-32).
+    else if (disk && node.path !== ".") node.indexPath = projectPathOf(`${node.path}/index.md`, docsRoot);
     node.children.forEach(attachIndex);
   };
   modules.forEach(attachIndex);

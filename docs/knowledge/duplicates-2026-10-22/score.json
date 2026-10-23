@@ -1,0 +1,1171 @@
+{
+ "n": 120,
+ "universe": {
+  "overdrive-bots": {
+   "exact": 0,
+   "near": 0,
+   "contained": 0,
+   "partial_hi": 5,
+   "partial_lo": 17,
+   "semantic_hi": 4,
+   "semantic_mid": 52,
+   "semantic_lo": 110,
+   "miss_near": 0,
+   "miss_partial": 47,
+   "miss_semantic_gate": 3171,
+   "miss_semantic_cos": 229,
+   "template": 20
+  },
+  "bars-project": {
+   "exact": 0,
+   "near": 0,
+   "contained": 0,
+   "partial_hi": 0,
+   "partial_lo": 5,
+   "semantic_hi": 4,
+   "semantic_mid": 43,
+   "semantic_lo": 72,
+   "miss_near": 0,
+   "miss_partial": 23,
+   "miss_semantic_gate": 1840,
+   "miss_semantic_cos": 165,
+   "template": 1
+  }
+ },
+ "byStratum": {
+  "bars-project/semantic_mid": {
+   "n": 9,
+   "dup": 3,
+   "legit": 4,
+   "template": 0,
+   "different": 2,
+   "size": 43
+  },
+  "bars-project/miss_semantic_cos": {
+   "n": 9,
+   "dup": 1,
+   "legit": 5,
+   "template": 1,
+   "different": 2,
+   "size": 165
+  },
+  "overdrive-bots/miss_partial": {
+   "n": 8,
+   "dup": 1,
+   "legit": 2,
+   "template": 2,
+   "different": 3,
+   "size": 47
+  },
+  "overdrive-bots/semantic_hi": {
+   "n": 4,
+   "dup": 1,
+   "legit": 2,
+   "template": 0,
+   "different": 1,
+   "size": 4
+  },
+  "bars-project/miss_semantic_gate": {
+   "n": 9,
+   "dup": 1,
+   "legit": 1,
+   "template": 0,
+   "different": 7,
+   "size": 1840
+  },
+  "overdrive-bots/semantic_lo": {
+   "n": 8,
+   "dup": 1,
+   "legit": 3,
+   "template": 0,
+   "different": 4,
+   "size": 110
+  },
+  "overdrive-bots/semantic_mid": {
+   "n": 8,
+   "dup": 2,
+   "legit": 6,
+   "template": 0,
+   "different": 0,
+   "size": 52
+  },
+  "overdrive-bots/template": {
+   "n": 8,
+   "dup": 1,
+   "legit": 2,
+   "template": 3,
+   "different": 2,
+   "size": 20
+  },
+  "overdrive-bots/miss_semantic_gate": {
+   "n": 8,
+   "dup": 0,
+   "legit": 0,
+   "template": 1,
+   "different": 7,
+   "size": 3171
+  },
+  "bars-project/semantic_lo": {
+   "n": 9,
+   "dup": 2,
+   "legit": 5,
+   "template": 1,
+   "different": 1,
+   "size": 72
+  },
+  "overdrive-bots/partial_lo": {
+   "n": 8,
+   "dup": 2,
+   "legit": 3,
+   "template": 1,
+   "different": 2,
+   "size": 17
+  },
+  "overdrive-bots/miss_semantic_cos": {
+   "n": 8,
+   "dup": 1,
+   "legit": 3,
+   "template": 0,
+   "different": 4,
+   "size": 229
+  },
+  "overdrive-bots/partial_hi": {
+   "n": 5,
+   "dup": 5,
+   "legit": 0,
+   "template": 0,
+   "different": 0,
+   "size": 5
+  },
+  "bars-project/partial_lo": {
+   "n": 5,
+   "dup": 0,
+   "legit": 1,
+   "template": 1,
+   "different": 3,
+   "size": 5
+  },
+  "bars-project/semantic_hi": {
+   "n": 4,
+   "dup": 2,
+   "legit": 2,
+   "template": 0,
+   "different": 0,
+   "size": 4
+  },
+  "bars-project/miss_partial": {
+   "n": 9,
+   "dup": 2,
+   "legit": 5,
+   "template": 0,
+   "different": 2,
+   "size": 23
+  },
+  "bars-project/template": {
+   "n": 1,
+   "dup": 0,
+   "legit": 0,
+   "template": 0,
+   "different": 1,
+   "size": 1
+  }
+ },
+ "kinds": {
+  "semantic": {
+   "n": 42,
+   "dup": 11,
+   "legit": 22,
+   "template": 1,
+   "different": 8,
+   "wDup": 60.083333333333336,
+   "wAll": 284.99999999999994,
+   "precision": 0.26,
+   "ci": [
+    0.15,
+    0.41
+   ],
+   "estDupPairs": 60,
+   "estPairs": 285
+  },
+  "нет_вида": {
+   "n": 60,
+   "dup": 7,
+   "legit": 18,
+   "template": 7,
+   "different": 28,
+   "wDup": 264.8888888888889,
+   "wAll": 5496,
+   "precision": 0.12,
+   "ci": [
+    0.06,
+    0.22
+   ],
+   "estDupPairs": 265,
+   "estPairs": 5496
+  },
+  "partial": {
+   "n": 18,
+   "dup": 7,
+   "legit": 4,
+   "template": 2,
+   "different": 5,
+   "wDup": 9.25,
+   "wAll": 27,
+   "precision": 0.39,
+   "ci": [
+    0.2,
+    0.61
+   ],
+   "estDupPairs": 9,
+   "estPairs": 27
+  }
+ },
+ "sameFileStats": {
+  "n": 22,
+  "dup": 0,
+  "legit": 0
+ },
+ "estimated": {
+  "totalDupPairs": 334,
+  "foundByProduct": 69,
+  "recall": 0.21
+ },
+ "rules": [
+  {
+   "rule": "смысловой: cos ≥ 0.74, c3 ≥ 0,05 (как в продукте)",
+   "predicted": 707,
+   "dup": {
+    "precision": 0.16,
+    "recall": 0.35,
+    "sampleTp": 15,
+    "sampleFp": 51,
+    "ci": [
+     0.14,
+     0.34
+    ]
+   },
+   "overlap": {
+    "precision": 0.64,
+    "recall": 0.5,
+    "sampleTp": 49,
+    "sampleFp": 17,
+    "ci": [
+     0.63,
+     0.83
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.74, c3 ≥ 0,05, без пар внутри одного файла",
+   "predicted": 656,
+   "dup": {
+    "precision": 0.18,
+    "recall": 0.35,
+    "sampleTp": 15,
+    "sampleFp": 45,
+    "ci": [
+     0.16,
+     0.37
+    ]
+   },
+   "overlap": {
+    "precision": 0.69,
+    "recall": 0.5,
+    "sampleTp": 49,
+    "sampleFp": 11,
+    "ci": [
+     0.7,
+     0.89
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.74, без лексического шлюза",
+   "predicted": 5725,
+   "dup": {
+    "precision": 0.06,
+    "recall": 0.96,
+    "sampleTp": 16,
+    "sampleFp": 70,
+    "ci": [
+     0.12,
+     0.28
+    ]
+   },
+   "overlap": {
+    "precision": 0.15,
+    "recall": 0.96,
+    "sampleTp": 53,
+    "sampleFp": 33,
+    "ci": [
+     0.51,
+     0.71
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.78, c3 ≥ 0,05 (как в продукте)",
+   "predicted": 439,
+   "dup": {
+    "precision": 0.14,
+    "recall": 0.19,
+    "sampleTp": 12,
+    "sampleFp": 39,
+    "ci": [
+     0.14,
+     0.37
+    ]
+   },
+   "overlap": {
+    "precision": 0.73,
+    "recall": 0.36,
+    "sampleTp": 40,
+    "sampleFp": 11,
+    "ci": [
+     0.65,
+     0.88
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.78, c3 ≥ 0,05, без пар внутри одного файла",
+   "predicted": 388,
+   "dup": {
+    "precision": 0.16,
+    "recall": 0.19,
+    "sampleTp": 12,
+    "sampleFp": 33,
+    "ci": [
+     0.16,
+     0.41
+    ]
+   },
+   "overlap": {
+    "precision": 0.83,
+    "recall": 0.36,
+    "sampleTp": 40,
+    "sampleFp": 5,
+    "ci": [
+     0.77,
+     0.95
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.78, без лексического шлюза",
+   "predicted": 5453,
+   "dup": {
+    "precision": 0.05,
+    "recall": 0.8,
+    "sampleTp": 13,
+    "sampleFp": 56,
+    "ci": [
+     0.11,
+     0.3
+    ]
+   },
+   "overlap": {
+    "precision": 0.13,
+    "recall": 0.81,
+    "sampleTp": 42,
+    "sampleFp": 27,
+    "ci": [
+     0.49,
+     0.72
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.8, c3 ≥ 0,05 (как в продукте)",
+   "predicted": 285,
+   "dup": {
+    "precision": 0.21,
+    "recall": 0.18,
+    "sampleTp": 11,
+    "sampleFp": 31,
+    "ci": [
+     0.15,
+     0.41
+    ]
+   },
+   "overlap": {
+    "precision": 0.71,
+    "recall": 0.23,
+    "sampleTp": 33,
+    "sampleFp": 9,
+    "ci": [
+     0.64,
+     0.88
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.8, c3 ≥ 0,05, без пар внутри одного файла",
+   "predicted": 253,
+   "dup": {
+    "precision": 0.24,
+    "recall": 0.18,
+    "sampleTp": 11,
+    "sampleFp": 26,
+    "ci": [
+     0.17,
+     0.46
+    ]
+   },
+   "overlap": {
+    "precision": 0.81,
+    "recall": 0.23,
+    "sampleTp": 33,
+    "sampleFp": 4,
+    "ci": [
+     0.75,
+     0.96
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.8, без лексического шлюза",
+   "predicted": 5299,
+   "dup": {
+    "precision": 0.05,
+    "recall": 0.79,
+    "sampleTp": 12,
+    "sampleFp": 48,
+    "ci": [
+     0.12,
+     0.32
+    ]
+   },
+   "overlap": {
+    "precision": 0.12,
+    "recall": 0.68,
+    "sampleTp": 35,
+    "sampleFp": 25,
+    "ci": [
+     0.46,
+     0.7
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.82, c3 ≥ 0,05 (как в продукте)",
+   "predicted": 141,
+   "dup": {
+    "precision": 0.27,
+    "recall": 0.11,
+    "sampleTp": 9,
+    "sampleFp": 20,
+    "ci": [
+     0.17,
+     0.49
+    ]
+   },
+   "overlap": {
+    "precision": 0.83,
+    "recall": 0.13,
+    "sampleTp": 25,
+    "sampleFp": 4,
+    "ci": [
+     0.69,
+     0.95
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.82, c3 ≥ 0,05, без пар внутри одного файла",
+   "predicted": 130,
+   "dup": {
+    "precision": 0.29,
+    "recall": 0.11,
+    "sampleTp": 9,
+    "sampleFp": 17,
+    "ci": [
+     0.19,
+     0.54
+    ]
+   },
+   "overlap": {
+    "precision": 0.89,
+    "recall": 0.13,
+    "sampleTp": 25,
+    "sampleFp": 1,
+    "ci": [
+     0.81,
+     0.99
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.82, без лексического шлюза",
+   "predicted": 3544,
+   "dup": {
+    "precision": 0.07,
+    "recall": 0.73,
+    "sampleTp": 10,
+    "sampleFp": 31,
+    "ci": [
+     0.14,
+     0.39
+    ]
+   },
+   "overlap": {
+    "precision": 0.15,
+    "recall": 0.59,
+    "sampleTp": 27,
+    "sampleFp": 14,
+    "ci": [
+     0.51,
+     0.78
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.84, c3 ≥ 0,05 (как в продукте)",
+   "predicted": 103,
+   "dup": {
+    "precision": 0.29,
+    "recall": 0.09,
+    "sampleTp": 8,
+    "sampleFp": 17,
+    "ci": [
+     0.17,
+     0.52
+    ]
+   },
+   "overlap": {
+    "precision": 0.9,
+    "recall": 0.1,
+    "sampleTp": 22,
+    "sampleFp": 3,
+    "ci": [
+     0.7,
+     0.96
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.84, c3 ≥ 0,05, без пар внутри одного файла",
+   "predicted": 92,
+   "dup": {
+    "precision": 0.33,
+    "recall": 0.09,
+    "sampleTp": 8,
+    "sampleFp": 14,
+    "ci": [
+     0.2,
+     0.57
+    ]
+   },
+   "overlap": {
+    "precision": 1,
+    "recall": 0.1,
+    "sampleTp": 22,
+    "sampleFp": 0,
+    "ci": [
+     0.85,
+     1
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.84, без лексического шлюза",
+   "predicted": 1893,
+   "dup": {
+    "precision": 0.12,
+    "recall": 0.7,
+    "sampleTp": 9,
+    "sampleFp": 21,
+    "ci": [
+     0.17,
+     0.48
+    ]
+   },
+   "overlap": {
+    "precision": 0.16,
+    "recall": 0.33,
+    "sampleTp": 23,
+    "sampleFp": 7,
+    "ci": [
+     0.59,
+     0.88
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.86, c3 ≥ 0,05 (как в продукте)",
+   "predicted": 19,
+   "dup": {
+    "precision": 0.16,
+    "recall": 0.01,
+    "sampleTp": 3,
+    "sampleFp": 7,
+    "ci": [
+     0.11,
+     0.6
+    ]
+   },
+   "overlap": {
+    "precision": 0.95,
+    "recall": 0.02,
+    "sampleTp": 9,
+    "sampleFp": 1,
+    "ci": [
+     0.6,
+     0.98
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.86, c3 ≥ 0,05, без пар внутри одного файла",
+   "predicted": 18,
+   "dup": {
+    "precision": 0.16,
+    "recall": 0.01,
+    "sampleTp": 3,
+    "sampleFp": 6,
+    "ci": [
+     0.12,
+     0.65
+    ]
+   },
+   "overlap": {
+    "precision": 1,
+    "recall": 0.02,
+    "sampleTp": 9,
+    "sampleFp": 0,
+    "ci": [
+     0.7,
+     1
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.86, без лексического шлюза",
+   "predicted": 1413,
+   "dup": {
+    "precision": 0.15,
+    "recall": 0.62,
+    "sampleTp": 4,
+    "sampleFp": 10,
+    "ci": [
+     0.12,
+     0.55
+    ]
+   },
+   "overlap": {
+    "precision": 0.16,
+    "recall": 0.25,
+    "sampleTp": 10,
+    "sampleFp": 4,
+    "ci": [
+     0.45,
+     0.88
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.88, c3 ≥ 0,05 (как в продукте)",
+   "predicted": 8,
+   "dup": {
+    "precision": 0.38,
+    "recall": 0.01,
+    "sampleTp": 3,
+    "sampleFp": 5,
+    "ci": [
+     0.14,
+     0.69
+    ]
+   },
+   "overlap": {
+    "precision": 0.88,
+    "recall": 0.01,
+    "sampleTp": 7,
+    "sampleFp": 1,
+    "ci": [
+     0.53,
+     0.98
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.88, c3 ≥ 0,05, без пар внутри одного файла",
+   "predicted": 7,
+   "dup": {
+    "precision": 0.43,
+    "recall": 0.01,
+    "sampleTp": 3,
+    "sampleFp": 4,
+    "ci": [
+     0.16,
+     0.75
+    ]
+   },
+   "overlap": {
+    "precision": 1,
+    "recall": 0.01,
+    "sampleTp": 7,
+    "sampleFp": 0,
+    "ci": [
+     0.65,
+     1
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.88, без лексического шлюза",
+   "predicted": 609,
+   "dup": {
+    "precision": 0.34,
+    "recall": 0.62,
+    "sampleTp": 4,
+    "sampleFp": 6,
+    "ci": [
+     0.17,
+     0.69
+    ]
+   },
+   "overlap": {
+    "precision": 0.35,
+    "recall": 0.24,
+    "sampleTp": 8,
+    "sampleFp": 2,
+    "ci": [
+     0.49,
+     0.94
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.9, c3 ≥ 0,05 (как в продукте)",
+   "predicted": 1,
+   "dup": {
+    "precision": 1,
+    "recall": 0,
+    "sampleTp": 1,
+    "sampleFp": 0,
+    "ci": [
+     0.21,
+     1
+    ]
+   },
+   "overlap": {
+    "precision": 1,
+    "recall": 0,
+    "sampleTp": 1,
+    "sampleFp": 0,
+    "ci": [
+     0.21,
+     1
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.9, c3 ≥ 0,05, без пар внутри одного файла",
+   "predicted": 1,
+   "dup": {
+    "precision": 1,
+    "recall": 0,
+    "sampleTp": 1,
+    "sampleFp": 0,
+    "ci": [
+     0.21,
+     1
+    ]
+   },
+   "overlap": {
+    "precision": 1,
+    "recall": 0,
+    "sampleTp": 1,
+    "sampleFp": 0,
+    "ci": [
+     0.21,
+     1
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0.9, без лексического шлюза",
+   "predicted": 1,
+   "dup": {
+    "precision": 1,
+    "recall": 0,
+    "sampleTp": 1,
+    "sampleFp": 0,
+    "ci": [
+     0.21,
+     1
+    ]
+   },
+   "overlap": {
+    "precision": 1,
+    "recall": 0,
+    "sampleTp": 1,
+    "sampleFp": 0,
+    "ci": [
+     0.21,
+     1
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0,8, c3 ≥ 0.1, без пар внутри одного файла",
+   "predicted": 83,
+   "dup": {
+    "precision": 0.48,
+    "recall": 0.12,
+    "sampleTp": 7,
+    "sampleFp": 8,
+    "ci": [
+     0.25,
+     0.7
+    ]
+   },
+   "overlap": {
+    "precision": 0.67,
+    "recall": 0.06,
+    "sampleTp": 13,
+    "sampleFp": 2,
+    "ci": [
+     0.62,
+     0.96
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0,8, c3 ≥ 0.15, без пар внутри одного файла",
+   "predicted": 65,
+   "dup": {
+    "precision": 0.4,
+    "recall": 0.08,
+    "sampleTp": 4,
+    "sampleFp": 4,
+    "ci": [
+     0.22,
+     0.78
+    ]
+   },
+   "overlap": {
+    "precision": 0.58,
+    "recall": 0.04,
+    "sampleTp": 6,
+    "sampleFp": 2,
+    "ci": [
+     0.41,
+     0.93
+    ]
+   }
+  },
+  {
+   "rule": "смысловой: cos ≥ 0,8, c3 ≥ 0.2, без пар внутри одного файла",
+   "predicted": 30,
+   "dup": {
+    "precision": 0.84,
+    "recall": 0.07,
+    "sampleTp": 3,
+    "sampleFp": 1,
+    "ci": [
+     0.3,
+     0.95
+    ]
+   },
+   "overlap": {
+    "precision": 1,
+    "recall": 0.03,
+    "sampleTp": 4,
+    "sampleFp": 0,
+    "ci": [
+     0.51,
+     1
+    ]
+   }
+  },
+  {
+   "rule": "частичный: c5 ≥ 0.1, 10 общих окон",
+   "predicted": 99,
+   "dup": {
+    "precision": 0.34,
+    "recall": 0.1,
+    "sampleTp": 11,
+    "sampleFp": 20,
+    "ci": [
+     0.21,
+     0.53
+    ]
+   },
+   "overlap": {
+    "precision": 0.64,
+    "recall": 0.07,
+    "sampleTp": 21,
+    "sampleFp": 10,
+    "ci": [
+     0.5,
+     0.81
+    ]
+   }
+  },
+  {
+   "rule": "частичный: c5 ≥ 0.15, 10 общих окон",
+   "predicted": 66,
+   "dup": {
+    "precision": 0.48,
+    "recall": 0.09,
+    "sampleTp": 10,
+    "sampleFp": 15,
+    "ci": [
+     0.23,
+     0.59
+    ]
+   },
+   "overlap": {
+    "precision": 0.75,
+    "recall": 0.06,
+    "sampleTp": 17,
+    "sampleFp": 8,
+    "ci": [
+     0.48,
+     0.83
+    ]
+   }
+  },
+  {
+   "rule": "частичный: c5 ≥ 0.2, 10 общих окон",
+   "predicted": 49,
+   "dup": {
+    "precision": 0.47,
+    "recall": 0.07,
+    "sampleTp": 8,
+    "sampleFp": 13,
+    "ci": [
+     0.21,
+     0.59
+    ]
+   },
+   "overlap": {
+    "precision": 0.79,
+    "recall": 0.04,
+    "sampleTp": 14,
+    "sampleFp": 7,
+    "ci": [
+     0.45,
+     0.83
+    ]
+   }
+  },
+  {
+   "rule": "частичный: c5 ≥ 0.25, 10 общих окон",
+   "predicted": 27,
+   "dup": {
+    "precision": 0.34,
+    "recall": 0.03,
+    "sampleTp": 7,
+    "sampleFp": 11,
+    "ci": [
+     0.2,
+     0.61
+    ]
+   },
+   "overlap": {
+    "precision": 0.62,
+    "recall": 0.02,
+    "sampleTp": 11,
+    "sampleFp": 7,
+    "ci": [
+     0.39,
+     0.8
+    ]
+   }
+  },
+  {
+   "rule": "частичный: c5 ≥ 0.3, 10 общих окон",
+   "predicted": 17,
+   "dup": {
+    "precision": 0.43,
+    "recall": 0.02,
+    "sampleTp": 6,
+    "sampleFp": 6,
+    "ci": [
+     0.25,
+     0.75
+    ]
+   },
+   "overlap": {
+    "precision": 0.69,
+    "recall": 0.01,
+    "sampleTp": 8,
+    "sampleFp": 4,
+    "ci": [
+     0.39,
+     0.86
+    ]
+   }
+  },
+  {
+   "rule": "частичный: c5 ≥ 0.4, 10 общих окон",
+   "predicted": 8,
+   "dup": {
+    "precision": 0.88,
+    "recall": 0.02,
+    "sampleTp": 6,
+    "sampleFp": 1,
+    "ci": [
+     0.49,
+     0.97
+    ]
+   },
+   "overlap": {
+    "precision": 0.88,
+    "recall": 0.01,
+    "sampleTp": 6,
+    "sampleFp": 1,
+    "ci": [
+     0.49,
+     0.97
+    ]
+   }
+  },
+  {
+   "rule": "частичный: c5 ≥ 0.5, 10 общих окон",
+   "predicted": 5,
+   "dup": {
+    "precision": 1,
+    "recall": 0.01,
+    "sampleTp": 5,
+    "sampleFp": 0,
+    "ci": [
+     0.57,
+     1
+    ]
+   },
+   "overlap": {
+    "precision": 1,
+    "recall": 0.01,
+    "sampleTp": 5,
+    "sampleFp": 0,
+    "ci": [
+     0.57,
+     1
+    ]
+   }
+  },
+  {
+   "rule": "частичный: c5 ≥ 0.6, 10 общих окон",
+   "predicted": 4,
+   "dup": {
+    "precision": 1,
+    "recall": 0.01,
+    "sampleTp": 4,
+    "sampleFp": 0,
+    "ci": [
+     0.51,
+     1
+    ]
+   },
+   "overlap": {
+    "precision": 1,
+    "recall": 0,
+    "sampleTp": 4,
+    "sampleFp": 0,
+    "ci": [
+     0.51,
+     1
+    ]
+   }
+  },
+  {
+   "rule": "частичный: c5 ≥ 0.12, 5 общих окон",
+   "predicted": 169,
+   "dup": {
+    "precision": 0.24,
+    "recall": 0.12,
+    "sampleTp": 13,
+    "sampleFp": 30,
+    "ci": [
+     0.19,
+     0.45
+    ]
+   },
+   "overlap": {
+    "precision": 0.47,
+    "recall": 0.09,
+    "sampleTp": 25,
+    "sampleFp": 18,
+    "ci": [
+     0.43,
+     0.72
+    ]
+   }
+  },
+  {
+   "rule": "частичный: c5 ≥ 0.15, 5 общих окон",
+   "predicted": 87,
+   "dup": {
+    "precision": 0.39,
+    "recall": 0.1,
+    "sampleTp": 11,
+    "sampleFp": 21,
+    "ci": [
+     0.2,
+     0.52
+    ]
+   },
+   "overlap": {
+    "precision": 0.63,
+    "recall": 0.06,
+    "sampleTp": 19,
+    "sampleFp": 13,
+    "ci": [
+     0.42,
+     0.74
+    ]
+   }
+  },
+  {
+   "rule": "частичный: c5 ≥ 0.25, 5 общих окон",
+   "predicted": 27,
+   "dup": {
+    "precision": 0.34,
+    "recall": 0.03,
+    "sampleTp": 7,
+    "sampleFp": 11,
+    "ci": [
+     0.2,
+     0.61
+    ]
+   },
+   "overlap": {
+    "precision": 0.62,
+    "recall": 0.02,
+    "sampleTp": 11,
+    "sampleFp": 7,
+    "ci": [
+     0.39,
+     0.8
+    ]
+   }
+  },
+  {
+   "rule": "частичный: c5 ≥ 0,25 без пар внутри одного файла",
+   "predicted": 25,
+   "dup": {
+    "precision": 0.37,
+    "recall": 0.03,
+    "sampleTp": 7,
+    "sampleFp": 9,
+    "ci": [
+     0.23,
+     0.67
+    ]
+   },
+   "overlap": {
+    "precision": 0.67,
+    "recall": 0.02,
+    "sampleTp": 11,
+    "sampleFp": 5,
+    "ci": [
+     0.44,
+     0.86
+    ]
+   }
+  }
+ ]
+}

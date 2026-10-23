@@ -2,6 +2,7 @@
   import { app } from "./app.svelte";
   import { projectDot } from "./format";
   import Icon from "./Icon.svelte";
+  import { entries } from "./entries.svelte";
   import { badgeText } from "./new-topics";
   import { filterTree, touchedModules } from "./tree";
   import TreeRow from "./TreeRow.svelte";
@@ -82,7 +83,9 @@
       <Icon name="search" size={14} width={2.4} />
       <input placeholder="Фильтр документов" aria-label="Фильтр документов" autocomplete="off" bind:value={app.filter} />
     </label>
-    <button class="reset-scope" aria-label="Сбросить область поиска" title={(touched.length ? `Отмечено модулей: ${touched.length} из ${app.tree.length}` : "Ничего не отмечено — весь проект") + ". Сбросить область поиска"} onclick={() => app.clearSelection()}><Icon name="refresh" size={13} /></button></div>
+    <button class="reset-scope" aria-label="Сбросить область поиска" title={(touched.length ? `Отмечено модулей: ${touched.length} из ${app.tree.length}` : "Ничего не отмечено — весь проект") + ". Сбросить область поиска"} onclick={() => app.clearSelection()}><Icon name="refresh" size={13} /></button>
+    <button class="reset-scope" aria-label="Новый документ в корне документации" title="Новый документ в корне документации" onclick={() => entries.open("newDoc", ".")}><Icon name="doc" size={13} /></button>
+    <button class="reset-scope" aria-label="Новая папка (модуль)" title="Новая папка в корне документации — новый модуль" onclick={() => entries.open("newDir", ".")}><Icon name="folder" size={13} /></button></div>
 
     <div class="tree" role="tree" aria-label="Документы проекта">
       <button
@@ -96,6 +99,18 @@
         <Icon name="new-topics" size={15} width={1.7} />
         <span class="nm">Новые темы</span>
         <span class="ct" class:zero={app.topics.count === 0}>{badgeText(app.topics.count)}</span>
+      </button>
+      <button
+        class="topics-row"
+        class:on={app.auditsOpen}
+        aria-current={app.auditsOpen ? "true" : undefined}
+        aria-label={app.audits.newCount ? `Аудиты: новых находок ${app.audits.newCount}` : "Аудиты"}
+        title="Битые ссылки и повторы в документации"
+        onclick={() => app.openAudits()}
+      >
+        <Icon name="check" size={15} width={1.7} />
+        <span class="nm">Аудиты</span>
+        <span class="ct" class:zero={!app.audits.newCount}>{app.audits.newCount ? app.audits.newCount : ""}</span>
       </button>
       {#each shown as node (node.path)}
         <TreeRow {node} forceOpen={app.filter.trim() !== ""} />

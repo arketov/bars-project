@@ -1,6 +1,7 @@
 /** Логика контекстного меню окна (ISS-07): какие пункты показать и как их выполнить. */
 
-export type MenuAction = "copy" | "paste" | "selectAll" | "open" | "editors" | "editor" | "reveal" | "path" | "check" | "deleteProject" | "checkProject" | "copyTopic" | "closeTopic";
+export type EntryMenuAction = "newDoc" | "newDir" | "rename" | "move" | "trash";
+export type MenuAction = EntryMenuAction | "copy" | "paste" | "selectAll" | "open" | "newWindow" | "editors" | "editor" | "reveal" | "path" | "check" | "appearance" | "deleteProject" | "checkProject" | "copyTopic" | "closeTopic";
 
 export function topicAt(target: EventTarget | null): { id: number; element: HTMLElement } | null {
   const element = target instanceof Element ? target.closest<HTMLElement>("[data-new-topic-id]") : null;
@@ -33,6 +34,26 @@ export function folderAt(target: EventTarget | null): { path: string; kind: stri
   return element ? { path: element.dataset.folderPath!, kind: element.dataset.folderKind ?? "Папка", element } : null;
 }
 
+/** Строка дерева файлов и папок: путь узла и его вид (модуль, папка, файл). */
+export function treeEntryAt(target: EventTarget | null): { path: string; kind: "module" | "dir" | "file" } | null {
+  const element = target instanceof Element ? target.closest<HTMLElement>("[data-tree-node]") : null;
+  return element ? { path: element.dataset.treeNode!, kind: element.dataset.treeKind as "module" | "dir" | "file" } : null;
+}
+
+/** Действия над узлом дерева (Т-33). Корневую группу «Корневые документы» нельзя переименовать, перенести и удалить. */
+export function entryItems(kind: "module" | "dir" | "file", path: string): MenuItem[] {
+  const change: MenuItem[] = path === "." ? [] : [
+    { action: "rename", label: "Переименовать…" },
+    { action: "move", label: "Переместить…" },
+    { action: "trash", label: "Удалить…" },
+  ];
+  return kind === "file" ? change : [
+    { action: "newDoc", label: "Новый документ…" },
+    { action: "newDir", label: "Новая папка…" },
+    ...change,
+  ];
+}
+
 export function folderItems(state: string, missing = false): MenuItem[] {
   const reason = state === "unavailable" ? "Проект недоступен" : state === "reindex_required" ? "Нужно согласие на смену модели" : "Проверяется весь проект";
   return [
@@ -51,6 +72,7 @@ export function documentAt(target: EventTarget | null): { path: string; line: nu
 export function documentItems(): MenuItem[] {
   return [
     { action: "open", label: "Открыть" },
+    { action: "newWindow", label: "Открыть в новом окне" },
     { action: "editors", label: "Открыть в …" },
     { action: "reveal", label: /Mac/.test(navigator.platform) ? "Открыть в Finder" : "Открыть в Проводнике" },
     { action: "path", label: "Скопировать путь" },

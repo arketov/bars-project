@@ -1,0 +1,20 @@
+{
+  "chunks": 1497,
+  "statements": 14011,
+  "withNumbers": 560,
+  "withIds": 1442,
+  "candidatePairs": 726,
+  "flagged": 145,
+  "ms": 136,
+  "byKind": {
+    "number": 2,
+    "slot": 10,
+    "swap": 35,
+    "negation": 109,
+    "antonym": 1
+  },
+  "byScope": {
+    "current": 91,
+    "history": 54
+  }
+}

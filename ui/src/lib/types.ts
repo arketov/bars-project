@@ -3,7 +3,7 @@
 export type ProjectState = "ready" | "indexing" | "reindex_required" | "unavailable";
 export type ScoreKind = "rerank" | "cosine";
 export type JobKind = "rebuild" | "check" | "files";
-export type JobPriority = "explicit" | "watch" | "periodic";
+export type JobPriority = "explicit" | "edit" | "watch" | "periodic";
 
 export interface ModuleInfo {
   name: string;
@@ -119,11 +119,37 @@ export interface ProjectProblems {
   last_error: string | null;
 }
 
+export type DocumentState = "waiting" | "queued" | "indexing" | "error";
+export type DocumentSource = "explicit" | "edit" | "watch" | "periodic";
+
+/** Запись очереди документов (document-queue.md). */
+export interface QueuedDocument {
+  path: string;
+  state: DocumentState;
+  source: DocumentSource;
+  /** Секунд до конца паузы; только у `waiting`. */
+  due_in: number | null;
+  error: string | null;
+}
+
+/** Очередь документов проекта: поле `documents` ответа `activity`. */
+export interface ProjectDocuments {
+  project: string;
+  documents: QueuedDocument[];
+  total: number;
+  waiting: number;
+  queued: number;
+  indexing: number;
+  error: number;
+}
+
 export interface ActivityOutput {
   paused: boolean;
   running: RunningJob | null;
   queue: QueuedJob[];
   problems: ProjectProblems[];
+  /** Очередь документов по проектам; у старого воркера поля нет. */
+  documents?: ProjectDocuments[];
 }
 
 export interface OperationReport {

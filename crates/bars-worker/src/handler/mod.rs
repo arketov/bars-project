@@ -3,6 +3,7 @@
 //! `hello`, права клиента и сброс `accept_model_change` у MCP делает цикл соединения в
 //! `bars-protocol`; сюда доходят уже проверенные вызовы. Окно вызывает те же методы без канала (Т-20).
 
+mod audits;
 mod errors;
 mod graph;
 mod history;
@@ -27,18 +28,19 @@ use bars_core::storage::{Index, Journal, index_path};
 use bars_protocol::{
     AcceptedOutput, ActivityOutput, AppliedParams, AutostartGetParams, AutostartOutput,
     AutostartSetParams, Call, CancelOutput, CheckAllParams, ClientKind, ClientStatus,
-    ClientsStatusOutput, DuplicateChange, DuplicateChunk, DuplicateCounts, DuplicateDifferences,
-    DuplicateItem, DuplicateKind, DuplicatesOutput, DuplicatesParams, ErrorKind, FileProblem,
-    Heading, INTERNAL_ERROR, IndexCancelParams, InstallClient, InstallOutput, InstallParams,
-    InstructionOutput, JobKind as ProtocolJobKind, JobPriority, METHOD_NOT_FOUND,
-    ModelDownloadParams, ModelInfo, ModelStatus, ModelsInfoOutput, ModuleInfo, OutlineOutput,
-    OutlineParams, PausedOutput, ProjectInfo, ProjectProblems, ProjectState, ProjectsOutput,
-    QueuedJob, ReadOutput, ReadParams, RegisterOutput, RegisterParams, ReindexParams, RpcError,
-    RunningJob, SavedOutput, ScoreKind, SearchHit, SearchOutput, SearchParams, SecretOutput,
-    SecretSetParams, SecretStatusParams, SessionStartParams, SetDocsRootParams, SettingsOutput,
-    SettingsSaveParams, SimilarOutput, SimilarParams, StatusOutput, StatusParams, Target,
-    TreeDocument, TreeOutput, TreeParams, UninstallOutput, UninstallParams, UnregisterOutput,
-    UnregisterParams, output_value,
+    ClientsStatusOutput, DocumentSource, DocumentState, DuplicateChange, DuplicateChunk,
+    DuplicateCounts, DuplicateDifferences, DuplicateItem, DuplicateKind, DuplicatesOutput,
+    DuplicatesParams, ErrorKind, FileProblem, Heading, INTERNAL_ERROR, IndexCancelParams,
+    IndexRetryParams, InstallClient, InstallOutput, InstallParams, InstructionOutput,
+    JobKind as ProtocolJobKind, JobPriority, METHOD_NOT_FOUND, ModelDownloadParams, ModelInfo,
+    ModelStatus, ModelsInfoOutput, ModuleInfo, OutlineOutput, OutlineParams, PausedOutput,
+    ProjectDocuments, ProjectInfo, ProjectProblems, ProjectState, ProjectsOutput, QueuedDocument,
+    QueuedJob, ReadOutput, ReadParams, RegisterOutput, RegisterParams, ReindexParams, RetryOutput,
+    RpcError, RunningJob, SavedOutput, ScoreKind, SearchHit, SearchOutput, SearchParams,
+    SecretOutput, SecretSetParams, SecretStatusParams, SessionStartParams, SetDocsRootParams,
+    SettingsOutput, SettingsSaveParams, SimilarOutput, SimilarParams, StatusOutput, StatusParams,
+    Target, TreeDocument, TreeOutput, TreeParams, UninstallOutput, UninstallParams,
+    UnregisterOutput, UnregisterParams, output_value,
 };
 use serde_json::Value;
 
@@ -56,6 +58,8 @@ pub struct WorkerHandler {
     topics: crate::new_topics::Collector,
     /// Единственный писатель индекса ссылок (`.bars/links.sqlite3`): вызовы окна идут по очереди.
     links_lock: std::sync::Arc<std::sync::Mutex<()>>,
+    /// Очередь запусков аудитов знаний: один аудит на проект.
+    audits: crate::audits::Audits,
     /// Близость документов последнего среза физического графа: проект, снимок графа, результат.
     physical_similarity: PhysicalSimilarityCache,
 }
@@ -80,6 +84,7 @@ impl WorkerHandler {
             history,
             topics: crate::new_topics::Collector::new(),
             links_lock: Default::default(),
+            audits: Default::default(),
             physical_similarity: Default::default(),
         }
     }
@@ -707,6 +712,55 @@ impl WorkerHandler {
         Ok(CancelOutput { cancelled })
     }
 
+    /// Очередь документов проектов: состояния, оставшаяся пауза, ошибки (до 200 записей на
+    /// проект); проекты без записей в список не попадают.
+    fn documents(&self) -> Vec<ProjectDocuments> {
+        const LIMIT: usize = 200;
+        self.worker
+            .projects()
+            .into_iter()
+            .filter_map(|snapshot| {
+                let (documents, counts) = self.worker.doc_queue(&snapshot.path, LIMIT).ok()?;
+                (counts.total() > 0).then(|| ProjectDocuments {
+                    project: snapshot.path.display().to_string(),
+                    documents: documents
+                        .into_iter()
+                        .map(|document| QueuedDocument {
+                            path: document.path,
+                            state: match document.state {
+                                crate::worker::DocState::Waiting => DocumentState::Waiting,
+                                crate::worker::DocState::Queued => DocumentState::Queued,
+                                crate::worker::DocState::Indexing => DocumentState::Indexing,
+                                crate::worker::DocState::Error => DocumentState::Error,
+                            },
+                            source: document_source(document.source),
+                            due_in: document.due_in.map(|left| {
+                                to_u32(
+                                    left.as_secs() as usize + usize::from(left.subsec_nanos() > 0),
+                                )
+                            }),
+                            error: document.error,
+                        })
+                        .collect(),
+                    total: to_u32(counts.total()),
+                    waiting: to_u32(counts.waiting),
+                    queued: to_u32(counts.queued),
+                    indexing: to_u32(counts.indexing),
+                    error: to_u32(counts.error),
+                })
+            })
+            .collect()
+    }
+
+    fn index_retry(&self, params: IndexRetryParams) -> Result<RetryOutput, RpcError> {
+        let project = self.worker.resolve(&params.project).map_err(worker_error)?;
+        let retried = self
+            .worker
+            .doc_retry(&project, &params.path)
+            .map_err(worker_error)?;
+        Ok(RetryOutput { retried })
+    }
+
     /// Ход индексации, очередь и проблемы проектов: то, что показывают страница индексации и трей.
     fn activity(&self) -> ActivityOutput {
         let names: std::collections::HashMap<PathBuf, String> = self
@@ -766,6 +820,7 @@ impl WorkerHandler {
                     last_error: issues.last_error,
                 })
                 .collect(),
+            documents: self.documents(),
         }
     }
 
@@ -1027,7 +1082,9 @@ impl WorkerHandler {
             // БД новых тем закрывается до удаления файлов и не открывается заново, пока оно идёт.
             let project_path = PathBuf::from(&params.project);
             self.topics.begin_delete(&project_path);
+            self.audits_begin_delete(&project_path).await;
             let deleted = self.worker.delete_project(&params.project).await;
+            self.audits.end_delete(&project_path);
             self.topics.end_delete(&project_path);
             deleted.map_err(worker_error)?;
             return Ok(output_value(&UnregisterOutput { removed: true }));
@@ -1118,6 +1175,7 @@ impl WorkerHandler {
             Call::IndexPause(_) => Ok(output_value(&self.index_pause())),
             Call::IndexResume(_) => Ok(output_value(&self.index_resume())),
             Call::IndexCancel(params) => self.index_cancel(params).map(|out| output_value(&out)),
+            Call::IndexRetry(params) => self.index_retry(params).map(|out| output_value(&out)),
             Call::Activity(_) => Ok(output_value(&self.activity())),
             Call::OperationEvents(params) => {
                 Ok(output_value(&self.worker.operation_events(&params)))
@@ -1177,6 +1235,17 @@ impl WorkerHandler {
                 .await
                 .map(|out| output_value(&out)),
             Call::LinksOf(params) => self.links_of(params).await.map(|out| output_value(&out)),
+            Call::AuditList(params) => self.audit_list(params).await.map(|out| output_value(&out)),
+            Call::AuditRun(params) => self.audit_run(params).await.map(|out| output_value(&out)),
+            Call::AuditCancel(params) => self.audit_cancel(params).map(|out| output_value(&out)),
+            Call::AuditFindings(params) => self
+                .audit_findings(params)
+                .await
+                .map(|out| output_value(&out)),
+            Call::AuditSchedule(params) => self
+                .audit_schedule(params)
+                .await
+                .map(|out| output_value(&out)),
             Call::AutostartGet(AutostartGetParams {}) => {
                 self.autostart_get().map(|out| output_value(&out))
             }
@@ -1241,9 +1310,19 @@ fn job_kind(kind: JobKind) -> ProtocolJobKind {
     }
 }
 
+fn document_source(source: crate::worker::DocSource) -> DocumentSource {
+    match source {
+        crate::worker::DocSource::Explicit => DocumentSource::Explicit,
+        crate::worker::DocSource::Edit => DocumentSource::Edit,
+        crate::worker::DocSource::Watch => DocumentSource::Watch,
+        crate::worker::DocSource::Periodic => DocumentSource::Periodic,
+    }
+}
+
 fn job_priority(priority: Priority) -> JobPriority {
     match priority {
         Priority::Explicit => JobPriority::Explicit,
+        Priority::Edit => JobPriority::Edit,
         Priority::Watch => JobPriority::Watch,
         Priority::Periodic => JobPriority::Periodic,
     }

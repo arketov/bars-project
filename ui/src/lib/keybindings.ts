@@ -12,7 +12,7 @@ function add(context: Context, category: string, rows: [string, string, string?,
 }
 add('window', 'Окно', [
   ['commands.open', 'Список действий', 'Mod+Shift+KeyP'], ['search.open', 'Глобальный поиск', 'Mod+Shift+KeyF'],
-  ['search.main', 'Главный поиск'], ['document.open', 'Открыть документ по имени', 'Mod+KeyO', 'Этап 3.4'],
+  ['search.main', 'Главный поиск'], ['document.open', 'Открыть документ по имени', 'Mod+KeyO'],
   ['settings.open', 'Настройки', 'Mod+Comma'], ['settings.keybindings', 'Сочетания клавиш'],
   ['project.choose', 'Выбрать проект'], ['project.add', 'Добавить проект'], ['project.checkIndex', 'Проверить актуальность индекса'], ['project.remove', 'Удалить проект из bars'],
   ['panel.open', 'Открыть панель…'], ['notifications.open', 'Уведомления'], ['layout.reset', 'Сбросить раскладку'],
@@ -24,7 +24,7 @@ add('panel', 'Вкладки', [
   ['tab.close', 'Закрыть вкладку', 'Mod+KeyW'], ['tab.move', 'Переместить вкладку…', 'Mod+Shift+KeyM'], ['panel.resize', 'Изменить размер группы…'],
 ]);
 add('document', 'Документ', [
-  ['document.newWindow', 'Открыть документ в новом окне', '', 'Этап 3.4'], ['document.preview', 'Исходный текст / рендер', 'Mod+Shift+KeyE', 'Этап 3.4'],
+  ['document.newWindow', 'Открыть документ в новом окне'], ['document.preview', 'Исходный текст / рендер', 'Mod+Shift+KeyE', 'Этап 3.4'],
   ['document.outline', 'Показать / скрыть структуру', '', 'Этап 3.4'], ['document.links', 'Входящие / исходящие ссылки', '', 'Этап 3.5'],
   ['document.find', 'Найти в документе', 'Mod+KeyF', 'Этап 3.4'], ['document.save', 'Сохранить сейчас', 'Mod+KeyS', 'Этап 3.4'], ['document.syntaxHelp', 'Шпаргалка Markdown', '', 'Этап 3.4'],
 ]);

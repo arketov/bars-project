@@ -1,0 +1,3 @@
+22-10-2026: `cargo` из Git Bash и обычного PowerShell падает на `llama-cpp-sys-2` (VS-генератор); рабочий путь — `vcvars64.bat` из Visual Studio 18, `CMAKE_GENERATOR=Ninja`, `CARGO_TARGET_DIR=C:/bars-build`, `VULKAN_SDK` ([сборка](../../knowledge/build.md)).
+22-10-2026: `cargo clippy -D warnings` на workspace падает на чужом `bars-graph` (too_many_arguments, collapsible_if); свои крейты проверены без `-D`, замечаний по файлам аудитов нет.
+22-10-2026: каталог `link_index/` и `handler/links.rs` в рабочем дереве не закоммичены (3.5.1, другая сессия): виды аудитов от них зависят, коммит только своих файлов не соберётся.

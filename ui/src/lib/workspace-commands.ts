@@ -6,9 +6,11 @@ import { keybindings } from './keybindings.svelte';
 import { confirmClose } from './unsaved.svelte';
 import { adapterFor, type Adapter } from './command-adapters';
 import { documentAt, folderAt } from './contextmenu';
-import { copyText, documentAction, folderAction, folderTarget } from './api';
+import { call, copyText, documentAction, folderAction, folderTarget } from './api';
+import { documentTargets } from './link-picker';
+import type { SearchOutput } from './types';
 import { panelTitles, type PanelKind } from './workspace-layout';
-import type { Choice } from './CommandPalette.svelte';
+import type { Choice, More } from './CommandPalette.svelte';
 type Kind = Exclude<PanelKind,'document'>;
 type Target = { project:string|null; docsRoot:string; panel?:string; element:HTMLElement|null; path?:string; line?:number; folder?:boolean; adapters: Map<string,{adapter:Adapter;identity:string|number|undefined}> };
 export interface WorkspaceCommands {
@@ -17,7 +19,7 @@ export interface WorkspaceCommands {
   open: (kind:Kind)=>void;
   search: ()=>void;
   reset: ()=>void;
-  palette: { open:(items:Choice[],title?:string)=>void; close:(restore?:boolean)=>void; isOpen:()=>boolean };
+  palette: { open:(items:Choice[],title?:string,more?:More)=>void; close:(restore?:boolean)=>void; isOpen:()=>boolean };
   resize: (id:string)=>void;
 }
 export function workspaceCommands(options:WorkspaceCommands) {
@@ -39,6 +41,8 @@ export function workspaceCommands(options:WorkspaceCommands) {
     const captured=target.adapters.get(id);
     if(captured) { const {adapter,identity}=captured; if(!adapter.element.isConnected||adapterFor(id,target.element)!==adapter||identity!==adapter.identity?.())return 'Цель уже изменилась'; return adapter.reason(); }
     if (['commands.open','search.open','search.main','settings.open','settings.keybindings','project.add','project.choose','panel.open','layout.reset','notifications.readAll','notifications.clear','notifications.open','search.scope','search.scopeClear','search.options'].includes(id)||id.startsWith('panel.open.')) return;
+    if (id==='document.open') return app.current?undefined:'Проект не выбран';
+    if (id==='document.newWindow') return target.path&&!target.folder?undefined:'Выберите документ';
     if (id.startsWith('project.')) return app.current?undefined:'Проект не выбран';
     if (id.startsWith('target.')) return target.path&&(!target.folder||id!=='target.open')?undefined:'Выберите файл или папку';
     if (['panel.next','panel.previous','tab.next','tab.previous','tab.close','tab.move','panel.resize'].includes(id)) return target.panel?undefined:'Нет активной вкладки';
@@ -51,6 +55,18 @@ export function workspaceCommands(options:WorkspaceCommands) {
     if (element.tabIndex<0) element.tabIndex=0; element.focus();
   }
   function show(target=capture()) { palette.open(catalog.map(c=>({id:c.id,title:`${c.category} · ${c.title}`,hint:keybindings.hint(c.id),reason:reason(c.id,target),run:()=>execute(c.id,target)}))); }
+  /** `Ctrl+O` (Т-40): документы проекта по названию, ниже поиск по смыслу; `Enter` — вкладкой, `Alt+Enter` — в новом окне. */
+  function openByName() {
+    const project=app.current!, targets=documentTargets(app.tree,app.docsRoot,true);
+    const choice=(t:{path:string;docs:string;title:string},semantic=false):Choice=>({id:t.path,title:t.title,hint:semantic?`${t.docs} · по смыслу`:t.docs,
+      run:()=>app.openDocument({path:t.path,title:t.title,first_line:0,last_line:0}),alt:()=>app.openInNewWindow(t.path)});
+    const semantic:More=async query=>{
+      const output=await call<SearchOutput>('search',{cwd:project,project,query,modules:[],files:[],limit:10});
+      const byPath=new Map(targets.map(t=>[t.path,t]));
+      return output.results.flatMap(r=>byPath.get(r.path)??[]).filter((t,i,all)=>all.findIndex(o=>o.path===t.path)===i).map(t=>choice(t,true));
+    };
+    palette.open(targets.map(t=>choice(t)),'Открыть документ',semantic);
+  }
   async function execute(id:string,target=capture()) {
     const unavailable=reason(id,target); if(unavailable) { app.flash(unavailable,true); return; }
     const adapter=target.adapters.get(id)?.adapter;
@@ -62,6 +78,8 @@ export function workspaceCommands(options:WorkspaceCommands) {
     if(id==='panel.open') {palette.open(Object.entries(panelTitles).map(([kind,title])=>({id:kind,title,run:()=>options.open(kind as Kind)})),'Открыть панель');return;}
     if(id.startsWith('panel.open.')) {options.open(id.slice(11) as Kind);return;}
     if(id==='layout.reset') {if(window.confirm('Сбросить раскладку? Документы и сочетания сохранятся.')) options.reset();return;}
+    if(id==='document.open') {openByName();return;}
+    if(id==='document.newWindow') {await app.openInNewWindow(target.path!);return;}
     if(id==='project.add') {await app.addProject();return;}
     if(id==='project.choose') {await tick();document.querySelector<HTMLElement>('.workspace .proj')?.focus();return;}
     if(id==='project.remove') {app.requestDeleteProject(target.project!);return;}

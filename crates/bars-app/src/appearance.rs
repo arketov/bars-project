@@ -14,8 +14,25 @@ pub const COLORS: [&str; 9] = [
 
 /// Встроенные иконки папок; рисует `ui/src/lib/FolderIcon.svelte`.
 pub const ICONS: [&str; 20] = [
-    "folder", "book", "gear", "code", "flask", "chat", "star", "bolt", "shield", "chart",
-    "database", "globe", "users", "bug", "target", "rocket", "puzzle", "archive", "pencil",
+    "folder",
+    "book",
+    "gear",
+    "code",
+    "flask",
+    "chat",
+    "star",
+    "bolt",
+    "shield",
+    "chart",
+    "database",
+    "globe",
+    "users",
+    "bug",
+    "target",
+    "rocket",
+    "puzzle",
+    "archive",
+    "pencil",
     "magnifier",
 ];
 
@@ -104,19 +121,24 @@ fn read_section(
         .as_table()
         .ok_or_else(|| AppearanceError::Broken(format!("[{name}] должна быть таблицей")))?;
     for (path, value) in section {
-        let fields = value
-            .as_table()
-            .ok_or_else(|| AppearanceError::Broken(format!("[{name}.\"{path}\"] должна быть таблицей")))?;
+        let fields = value.as_table().ok_or_else(|| {
+            AppearanceError::Broken(format!("[{name}.\"{path}\"] должна быть таблицей"))
+        })?;
         let text = |key: &str| -> Result<Option<String>, AppearanceError> {
             match fields.get(key) {
                 None => Ok(None),
                 Some(value) => value
                     .as_str()
                     .map(|text| Some(text.to_string()))
-                    .ok_or_else(|| AppearanceError::Broken(format!("{key} у «{path}» должен быть строкой"))),
+                    .ok_or_else(|| {
+                        AppearanceError::Broken(format!("{key} у «{path}» должен быть строкой"))
+                    }),
             }
         };
-        let entry = Entry { color: text("color")?, icon: text("icon")? };
+        let entry = Entry {
+            color: text("color")?,
+            icon: text("icon")?,
+        };
         if !entry.is_empty() {
             out.insert(path.clone(), entry);
         }
@@ -149,19 +171,16 @@ fn section_text(name: &str, entries: &BTreeMap<String, Entry>, out: &mut String)
             if let Some(icon) = &entry.icon {
                 fields.push(format!("icon = {}", quote(icon)));
             }
-            (!fields.is_empty()).then(|| format!("{} = {{ {} }}
-", quote(path), fields.join(", ")))
+            (!fields.is_empty()).then(|| format!("{} = {{ {} }}\n", quote(path), fields.join(", ")))
         })
         .collect();
     if lines.is_empty() {
         return;
     }
     if !out.is_empty() {
-        out.push('
-');
+        out.push('\n');
     }
-    out.push_str(&format!("[{name}]
-"));
+    out.push_str(&format!("[{name}]\n"));
     out.extend(lines);
 }
 
@@ -187,17 +206,21 @@ fn check_path(kind: Kind, path: &str) -> Result<(), AppearanceError> {
     let parts: Vec<&str> = path.split('/').collect();
     if path.is_empty()
         || path.contains('\\')
-        || parts.iter().any(|part| part.is_empty() || *part == "." || *part == "..")
+        || parts
+            .iter()
+            .any(|part| part.is_empty() || *part == "." || *part == "..")
     {
-        return Err(AppearanceError::NotAllowed("Путь должен идти от корня документации без «.» и «..»"));
+        return Err(AppearanceError::NotAllowed(
+            "Путь должен идти от корня документации без «.» и «..»",
+        ));
     }
     match kind {
         Kind::Folder if parts.len() > MAX_FOLDER_DEPTH => Err(AppearanceError::NotAllowed(
             "Цвет и иконка выбираются только у модуля и его подпапок второго уровня",
         )),
-        Kind::Document if !path.to_lowercase().ends_with(".md") => {
-            Err(AppearanceError::NotAllowed("Цвет назначается документу .md"))
-        }
+        Kind::Document if !path.to_lowercase().ends_with(".md") => Err(
+            AppearanceError::NotAllowed("Цвет назначается документу .md"),
+        ),
         _ => Ok(()),
     }
 }
@@ -212,13 +235,19 @@ pub fn set(
 ) -> Result<Appearance, AppearanceError> {
     check_path(kind, path)?;
     if kind == Kind::Document && icon.is_some() {
-        return Err(AppearanceError::NotAllowed("У документа иконки нет, только цвет"));
+        return Err(AppearanceError::NotAllowed(
+            "У документа иконки нет, только цвет",
+        ));
     }
     if color.is_some_and(|value| !COLORS.contains(&value)) {
-        return Err(AppearanceError::InvalidValue("Такого цвета нет в палитре окна"));
+        return Err(AppearanceError::InvalidValue(
+            "Такого цвета нет в палитре окна",
+        ));
     }
     if icon.is_some_and(|value| !ICONS.contains(&value)) {
-        return Err(AppearanceError::InvalidValue("Такой иконки нет во встроенном наборе"));
+        return Err(AppearanceError::InvalidValue(
+            "Такой иконки нет во встроенном наборе",
+        ));
     }
     let _guard = LOCK.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
     let mut appearance = read(project)?;
@@ -226,7 +255,10 @@ pub fn set(
         Kind::Folder => &mut appearance.folders,
         Kind::Document => &mut appearance.documents,
     };
-    let entry = Entry { color: color.map(str::to_string), icon: icon.map(str::to_string) };
+    let entry = Entry {
+        color: color.map(str::to_string),
+        icon: icon.map(str::to_string),
+    };
     if entry.is_empty() {
         entries.remove(path);
     } else {

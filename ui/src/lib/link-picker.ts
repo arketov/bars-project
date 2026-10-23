@@ -20,17 +20,22 @@ export interface LinkOption {
   create: boolean;
 }
 
-/** Плоский список документов дерева; `Index.md` папок в выбор не входит (ссылки на него не ставят). */
-export function linkTargets(nodes: TreeNode[], docsRoot: string): LinkTarget[] {
+/** Плоский список документов дерева; `index.md` папок входит в список только по `withIndex`. */
+export function documentTargets(nodes: TreeNode[], docsRoot: string, withIndex = false): LinkTarget[] {
   const out: LinkTarget[] = [];
   const walk = (node: TreeNode) => {
-    if (node.kind === "file" && node.documentPath && node.name.toLowerCase() !== "index.md") {
+    if (node.kind === "file" && node.documentPath && (withIndex || node.name.toLowerCase() !== "index.md")) {
       out.push({ path: node.documentPath, docs: relativeToDocs(node.documentPath, docsRoot), title: node.title || node.label });
     }
     node.children.forEach(walk);
   };
   nodes.forEach(walk);
   return out;
+}
+
+/** Документы для выбора по `[[`: `Index.md` папок в выбор не входит (ссылки на него не ставят). */
+export function linkTargets(nodes: TreeNode[], docsRoot: string): LinkTarget[] {
+  return documentTargets(nodes, docsRoot);
 }
 
 const withoutMd = (path: string) => path.replace(/\.md$/i, "");

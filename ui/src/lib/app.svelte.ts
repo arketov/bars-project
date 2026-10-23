@@ -1,9 +1,10 @@
 // Состояние окна: проекты, дерево, поиск, просмотр документа, ход индексации.
 // Всё, что знает воркер, спрашивается у него; окно хранит только выбор пользователя.
 
-import { call, joinPath, openPath, pickFolder } from "./api";
+import { call, documentWindowOpen, joinPath, openInMainWindow, openPath, pickFolder, treeRead } from "./api";
 import type { GraphReply,GraphSearchOutput,RetrievalMode } from './graph';
 import { documentsIn } from "./format";
+import { AuditsStore } from "./audits.svelte";
 import { NewTopicsStore } from "./new-topics.svelte";
 import { newRequestId } from "./new-topics";
 import { NotificationCenter, type Notice } from "./notifications";
@@ -39,6 +40,17 @@ const PROJECT_KEY = "bars-project";
 const POLL_MS = 1000;
 /** Список проектов читает индексы, поэтому без перемен обновляется реже, чем ход. */
 const PROJECTS_EVERY = 5;
+/** Дерево с диска перечитывается раз в несколько тиков: обход каталогов дешевле индексации, но не бесплатен. */
+const TREE_EVERY = 3;
+/** Состояния аудитов читаются раз в 15 тиков: вид идёт минуты, расписание — раз в минуту. */
+const AUDITS_EVERY = 15;
+
+/** Подпись входов дерева: по ней опрос понимает, что перестраивать нечего. */
+function treeSignature(documents: { path: string; chunks: number; title: string }[], disk?: string): string {
+  let chunks = 0;
+  for (const document of documents) chunks += document.chunks;
+  return `${documents.length}:${chunks}:${disk ?? ""}`;
+}
 
 function remembered(): string | null {
   try {
@@ -95,6 +107,10 @@ class App {
   topics = new NewTopicsStore((text, bad) => this.flash(text, bad));
   /** «Новые темы» открыты в правой панели, как файл: вместо просмотра документа. */
   topicsOpen = $state(false);
+  /** Аудиты знаний текущего проекта (Т-36): экран в правой панели, как «Новые темы». */
+  audits = new AuditsStore((text, bad) => this.flash(text, bad));
+  auditsOpen = $state(false);
+  auditsVersion = $state(0);
   /** Контекст отображённой выдачи для ручной отметки «Не хватило знаний» (NT-02): не поле ввода, а то, что искали. */
   displayed = $state<{ requestId: string; project: string; query: string; modules: string[]; files: string[]; mode: RetrievalMode; includeRelated: boolean; limit: number | null; minScore: number | null } | null>(null);
   /** ID обращения, которое пользователь уже отметил; повторная отметка идемпотентна и не нужна. */
@@ -111,6 +127,8 @@ class App {
   models = $state<ModelsInfoOutput | null>(null);
   #notifications = new NotificationCenter();
   #refreshing = false;
+  #treeSignature = "";
+  #treeSyncing = false;
   #modelsPending: Promise<void> | null = null;
   #actionAttempt = 0;
   #selectionVersion = 0;
@@ -264,6 +282,7 @@ class App {
       this.#notifications.resolve("worker");
       if (force || changed || this.#tick % PROJECTS_EVERY === 0) await this.loadProjects();
       if (this.current) await this.loadStatus();
+      if (!force && this.tree.length && this.#tick % TREE_EVERY === 0 && !document.hidden) void this.syncTree();
       this.syncTopics(force);
     } catch (error) {
       if (epoch !== this.#epoch) return;
@@ -299,6 +318,9 @@ class App {
     this.topics.bind(this.current);
     if (!this.current || this.project?.state === "unavailable") return;
     if (force || this.#tick % PROJECTS_EVERY === 0) void this.topics.load(true);
+    // Аудиты обновляются реже: расписание срабатывает раз в минуту, новые находки — повод для уведомления (A-04).
+    this.audits.bind(this.current);
+    if (force || this.#tick % AUDITS_EVERY === 0) void this.audits.load(true);
   }
 
   async loadStatus(): Promise<void> {
@@ -319,12 +341,34 @@ class App {
     }
     const path = this.current, epoch = this.#epoch;
     try {
-      const output = await call<TreeOutput>("tree", { cwd: path, project: path });
-      if (path !== this.current || epoch !== this.#epoch) return;
-      this.docsRoot = output.docs_root;
-      this.tree = buildTree(output.documents, output.docs_root);
+      await this.readTree(path, epoch, true);
     } catch {
       if (path === this.current && epoch === this.#epoch) this.tree = [];
+    }
+  }
+
+  /** Дерево идёт по диску (Т-33), сведения индекса подмешиваются по пути; без диска — только индекс. */
+  private async readTree(path: string, epoch: number, force: boolean): Promise<void> {
+    const [output, disk] = await Promise.all([call<TreeOutput>("tree", { cwd: path, project: path }), treeRead(path).catch(() => null)]);
+    if (path !== this.current || epoch !== this.#epoch) return;
+    const signature = treeSignature(output.documents, disk?.revision);
+    if (!force && signature === this.#treeSignature) return;
+    this.#treeSignature = signature;
+    this.docsRoot = output.docs_root;
+    this.tree = buildTree(output.documents, output.docs_root, disk ? { files: disk.files.map((file) => file.path), dirs: disk.dirs } : undefined);
+  }
+
+  /** Подхватывает изменения вне bars (Проводник, агент) и новые документы индекса: перестраивает дерево, только если оно изменилось. */
+  async syncTree(): Promise<void> {
+    const path = this.current;
+    if (!path || this.#treeSyncing || this.project?.state === "unavailable") return;
+    this.#treeSyncing = true;
+    try {
+      await this.readTree(path, this.#epoch, false);
+    } catch {
+      // Сбой одного опроса оставляет прежнее дерево.
+    } finally {
+      this.#treeSyncing = false;
     }
   }
 
@@ -354,6 +398,8 @@ class App {
     this.minScore = null;
     this.status = null;
     this.topics.bind(path);
+    this.audits.bind(path);
+    this.auditsOpen = false;
     if (path) void this.topics.load(true);
     await this.loadTree();
     if (path) await this.loadStatus();
@@ -496,7 +542,47 @@ class App {
     this.topicsOpen = false;
   }
 
+  /** Нажатие на строку «Аудиты»: открывается в панели просмотра, не меняя область поиска и запрос. */
+  openAudits(): void {
+    this.navigationVersion++;
+    this.auditsVersion++;
+    this.view = "main";
+    this.closeViewer();
+    this.auditsOpen = true;
+  }
+
+  closeAudits(): void {
+    this.auditsVersion++;
+    this.auditsOpen = false;
+  }
+
+  /** Отдельное окно документа (Т-40): проект задан окном; выбор главного окна не запоминается и не меняется. */
+  documentWindow = $state(false);
+
+  async bindDocumentWindow(project: string): Promise<void> {
+    this.documentWindow = true;
+    this.current = project;
+    this.topics.bind(project);
+    await this.loadTree();
+  }
+
+  /** Открывает документ в отдельном окне bars; уже открытое окно выводится вперёд. */
+  async openInNewWindow(path: string): Promise<void> {
+    const project = this.current;
+    if (!project) return;
+    try {
+      await documentWindowOpen(project, path);
+    } catch (error) {
+      this.flash(error instanceof Error ? error.message : String(error), true);
+    }
+  }
+
   async openDocument(hit: DocumentReference): Promise<void> {
+    // Отдельное окно показывает один документ: ссылка из него открывается в основном окне.
+    if (this.documentWindow) {
+      if (this.current) await openInMainWindow(this.current, hit.path, hit.first_line, hit.last_line).catch((error) => this.flash(String(error), true));
+      return;
+    }
     const project = this.project;
     if (!project) return;
     const reading = ++this.#reading;
@@ -619,6 +705,16 @@ class App {
   async togglePause(): Promise<void> {
     try {
       await call(this.activity?.paused ? "index_resume" : "index_pause");
+      this.activity = await call<ActivityOutput>("activity");
+    } catch (error) {
+      this.flash(error instanceof Error ? error.message : String(error), true);
+    }
+  }
+
+  /** «Повторить» для документа с ошибкой в очереди документов (document-queue.md). */
+  async retryDocument(project: string, path: string): Promise<void> {
+    try {
+      await call("index_retry", { project, path });
       this.activity = await call<ActivityOutput>("activity");
     } catch (error) {
       this.flash(error instanceof Error ? error.message : String(error), true);

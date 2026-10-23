@@ -2,7 +2,7 @@ import type { DockviewApi, SerializedDockview } from "dockview-core";
 import type { DocumentReference } from "./app.svelte";
 
 // Навигация с мини-графом — постоянная колонка вне Dockview (OQ-117), поэтому её здесь нет.
-export const panelTitles = { search: "Поиск", graph: "Граф", settings: "Настройки", logs: "Логи", mcp: "Анализ MCP", indexing: "Индексация", topics: "Новые темы" } as const;
+export const panelTitles = { search: "Поиск", graph: "Граф", settings: "Настройки", logs: "Логи", mcp: "Анализ MCP", indexing: "Индексация", topics: "Новые темы", audits: "Аудиты" } as const;
 export type PanelKind = keyof typeof panelTitles | "document";
 export interface PanelParams { kind: PanelKind; project?: string; hit?: DocumentReference }
 export interface SidebarSize { width: number; graph: number }

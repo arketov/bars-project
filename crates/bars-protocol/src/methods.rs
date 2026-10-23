@@ -520,6 +520,8 @@ pub enum JobKind {
 pub enum JobPriority {
     /// Явная переиндексация, хук, регистрация.
     Explicit,
+    /// Правка документа в окне bars.
+    Edit,
     /// Слежение за файлами.
     Watch,
     /// Старт воркера и часовая проверка.
@@ -578,12 +580,81 @@ pub struct ProjectProblems {
     pub last_error: Option<String>,
 }
 
+/// Состояние документа в очереди.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DocumentState {
+    /// Ждёт, пока пройдёт пауза после правки.
+    Waiting,
+    /// Готов, ждёт своей очереди.
+    Queued,
+    /// Идёт эмбеддинг.
+    Indexing,
+    /// Не проиндексирован после повторов.
+    Error,
+}
+
+/// Откуда пришло изменение документа.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DocumentSource {
+    Explicit,
+    Edit,
+    Watch,
+    Periodic,
+}
+
+/// Запись очереди документов.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct QueuedDocument {
+    /// Путь от корня проекта.
+    pub path: String,
+    pub state: DocumentState,
+    pub source: DocumentSource,
+    /// Сколько секунд осталось до конца паузы; только у `waiting`.
+    pub due_in: Option<u32>,
+    /// Причина ошибки без ключей; только у `error`.
+    pub error: Option<String>,
+}
+
+/// Очередь документов проекта для страницы индексации (`document-queue.md`); проекты без
+/// записей в список не попадают.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ProjectDocuments {
+    pub project: String,
+    /// Записи в порядке выполнения, не больше 200.
+    pub documents: Vec<QueuedDocument>,
+    /// Сколько записей всего (включая не вошедшие в список).
+    pub total: u32,
+    pub waiting: u32,
+    pub queued: u32,
+    pub indexing: u32,
+    pub error: u32,
+}
+
+/// «Повторить» для документа с ошибкой.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct IndexRetryParams {
+    pub project: String,
+    /// Путь документа от корня проекта.
+    pub path: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RetryOutput {
+    /// У документа была запись с ошибкой, теперь он снова в очереди.
+    pub retried: bool,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ActivityOutput {
     pub paused: bool,
     pub running: Option<RunningJob>,
     pub queue: Vec<QueuedJob>,
     pub problems: Vec<ProjectProblems>,
+    /// Очередь документов по проектам: паузы после правок, состояния, ошибки.
+    #[serde(default)]
+    pub documents: Vec<ProjectDocuments>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -971,6 +1042,7 @@ methods! {
     IndexResume: IndexResumeParams => PausedOutput, "index_resume", Window;
     IndexCancel: IndexCancelParams => CancelOutput, "index_cancel", Window;
     Activity: ActivityParams => ActivityOutput, "activity", Window;
+    IndexRetry: IndexRetryParams => RetryOutput, "index_retry", Window;
     Tree: TreeParams => TreeOutput, "tree", Window;
     SettingsGet: SettingsGetParams => SettingsOutput, "settings_get", Window;
     SettingsSave: SettingsSaveParams => SavedOutput, "settings_save", Window;
@@ -992,6 +1064,11 @@ methods! {
     NewTopicsClear: crate::NewTopicsClearParams => crate::NewTopicsGenerationOutput, "new_topics_clear", Window;
     NewTopicsSettings: crate::NewTopicsSettingsParams => crate::NewTopicsSettingsOutput, "new_topics_settings", Window;
     LinksOf: crate::LinksOfParams => crate::LinksOfOutput, "links_of", Window;
+    AuditList: crate::AuditListParams => crate::AuditListOutput, "audit_list", Window;
+    AuditRun: crate::AuditRunParams => crate::AuditRunOutput, "audit_run", Window;
+    AuditCancel: crate::AuditCancelParams => crate::AuditCancelOutput, "audit_cancel", Window;
+    AuditFindings: crate::AuditFindingsParams => crate::AuditFindingsOutput, "audit_findings", Window;
+    AuditSchedule: crate::AuditScheduleParams => crate::AuditScheduleOutput, "audit_schedule", Window;
     AutostartGet: AutostartGetParams => AutostartOutput, "autostart_get", Cli;
     AutostartSet: AutostartSetParams => AutostartOutput, "autostart_set", Cli;
 }
@@ -1079,6 +1156,7 @@ mod tests {
         IndexResume(IndexResumeParams),
         IndexCancel(IndexCancelParams),
         Activity(ActivityParams),
+        IndexRetry(IndexRetryParams),
         Tree(TreeParams),
         SettingsGet(SettingsGetParams),
         SettingsSave(SettingsSaveParams),
@@ -1149,6 +1227,10 @@ mod tests {
             project: "bars".into(),
         });
         roundtrip(ActivityParams {});
+        roundtrip(IndexRetryParams {
+            project: "bars".into(),
+            path: "docs/a.md".into(),
+        });
         roundtrip(TreeParams { target: target() });
         roundtrip(AutostartGetParams {});
         roundtrip(AutostartSetParams { enabled: true });

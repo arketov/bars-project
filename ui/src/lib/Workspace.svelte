@@ -1,5 +1,8 @@
 <script lang="ts">
   import { onMount, mount, unmount, untrack, tick } from "svelte";
+  import { appearance } from "./appearance.svelte";
+  import { colorVar, documentColor, keyOf } from "./appearance";
+  import { relativeToDocs } from "./tree";
   import { createDockview, DefaultTab, themeLight, themeDark, type DockviewApi, type IDockviewPanel } from "dockview-core";
   import "dockview/dist/styles/dockview.css";
   import { app, type ViewedDocument } from "./app.svelte";
@@ -96,7 +99,7 @@
   let presented: ViewedDocument | null = null;
   let storageError = false;
   let previousView = "main", previousTab = "models", previousNavigation = 0;
-  let previousTopics = 0;
+  let previousTopics = 0, previousAudits = 0;
   type PanelModel = { params: PanelParams; initial?: ViewedDocument; foreground: boolean; attach: typeof attach };
   const models = new Map<string, PanelModel>();
   let foreground = "search", documents = $state<{ id: string; title: string }[]>([]);
@@ -132,6 +135,7 @@
   function open(kind: Exclude<PanelKind, "document">) {
     if (kind === "settings") { menu = false; return; } // настройки — отдельный экран в App.svelte, не вкладка
     if (kind === "topics") app.topicsOpen = true;
+    if (kind === "audits") app.auditsOpen = true;
     let panel = api.getPanel(kind);
     if (!panel) panel = api.addPanel({ id: kind, component: "workspace", title: panelTitles[kind], params: { kind }, position: api.getPanel("search") ? { referencePanel: "search", direction: "within" } : api.groups[0] ? { referenceGroup: api.groups[0], direction: "within" } : undefined });
     panel.api.setActive();
@@ -140,6 +144,7 @@
   function navigate(kind: Exclude<PanelKind, "document">) {
     if (kind === "indexing") app.openIndexing();
     else if (kind === "topics") app.openTopics();
+    else if (kind === "audits") app.openAudits();
     else if (kind === "settings") app.openSettings();
     else open(kind);
   }
@@ -204,6 +209,7 @@
     });
   }); });
   $effect(() => { const version = app.topicsVersion; if (ready) untrack(() => { if (version !== previousTopics) { previousTopics = version; if (app.topicsOpen) open("topics"); else api.getPanel("topics")?.api.close(); } }); });
+  $effect(() => { const version = app.auditsVersion; if (ready) untrack(() => { if (version !== previousAudits) { previousAudits = version; if (app.auditsOpen) open("audits"); else api.getPanel("audits")?.api.close(); } }); });
   $effect(() => { const mode = theme.mode; if (ready) api.updateOptions({ theme: mode === "dark" ? themeDark : themeLight }); });
   $effect(() => { if (app.consentOpen || app.deletingProject) untrack(() => globalSearch?.close(false)); });
   $effect(() => { if (ready && app.models && !keybindings.available) untrack(() => { void keybindings.load(); }); });
@@ -223,17 +229,26 @@
       defaultTabComponent: "workspace-tab",
       createTabComponent: () => {
         const tab = new DefaultTab();
+        let stopDot: (() => void) | undefined;
         return { element: tab.element, init(params) {
           tab.init(params); tab.element.dataset.workspacePanel = params.api.id;
           if (params.params.kind !== "document") return;
           const path: string = params.params.hit.path;
           tab.element.dataset.documentPath = path;
+          // Т-38: цветная точка вкладки документа — цвет документа или его папки.
+          const dot = document.createElement("span");
+          dot.className = "tab-color"; dot.setAttribute("aria-hidden", "true");
+          tab.element.prepend(dot);
+          stopDot = $effect.root(() => { $effect(() => {
+            const color = colorVar(documentColor(appearance.data, keyOf(relativeToDocs(path, app.docsRoot))));
+            dot.style.background = color ?? ""; dot.hidden = !color;
+          }); });
           // НФТ-5: вкладку с несохранёнными правками не закрываем молча; обычное закрытие Dockview отменяется.
           tab.element.querySelector(".dv-default-tab-action")?.addEventListener("click", (event) => {
             event.stopImmediatePropagation(); event.preventDefault();
             void confirmClose(app.current, path).then(ok => { if (ok) params.api.close(); });
           }, true);
-        }, dispose() { tab.dispose(); } };
+        }, dispose() { stopDot?.(); tab.dispose(); } };
       },
       createComponent: () => {
         const element = document.createElement("div"); element.style.height = "100%";
@@ -258,7 +273,7 @@
         try { ensureRightZone(api, host.clientWidth); } finally { normalizing = false; }
       }
       persist(); refreshPanels();
-    }), api.onDidRemovePanel(panel => { if (!restoring && panel.id === "topics") app.topicsOpen = false; }), api.onDidActivePanelChange(event => {
+    }), api.onDidRemovePanel(panel => { if (!restoring && panel.id === "topics") app.topicsOpen = false; if (!restoring && panel.id === "audits") app.auditsOpen = false; }), api.onDidActivePanelChange(event => {
       const panel: IDockviewPanel | undefined = event.panel;
       active = panel?.id ?? "";
       if (panel) foreground = panel.id;
@@ -354,6 +369,7 @@
   .dock { flex: 1; min-height: 0; min-width: 0; }
   .panels-menu { position: relative; } .menu { position: absolute; top: 24px; left: 0; z-index: 50; min-width: 190px; padding: 5px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); box-shadow: var(--shadow); }
   .menu button { display: block; width: 100%; padding: 4px 8px; text-align: left; font-style: normal; } .menu button:hover { background: var(--accent-soft); }
+  .dock :global(.tab-color) { width: 8px; height: 8px; border-radius: 50%; flex: none; margin-right: 6px; align-self: center; }
   .dock :global(.dockview-theme-light), .dock :global(.dockview-theme-dark) {
     --dv-background-color: var(--bg); --dv-group-view-background-color: var(--panel); --dv-tabs-and-actions-container-background-color: var(--panel-2);
     --dv-activegroup-visiblepanel-tab-background-color: var(--panel); --dv-activegroup-visiblepanel-tab-color: var(--accent-text);

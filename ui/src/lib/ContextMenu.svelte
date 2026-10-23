@@ -2,8 +2,12 @@
   import { onMount, tick } from "svelte";
   import { app } from "./app.svelte";
   import { call, copyText, documentAction, documentEditors, folderTarget, folderAction, type FolderTarget, type DocumentEditor } from "./api";
-  import { documentAt, documentItems, folderAt, folderItems, itemsFor, place, projectAt, projectItems, run, textField, topicAt, type MenuItem } from "./contextmenu";
+  import { documentAt, documentItems, entryItems, folderAt, folderItems, itemsFor, place, projectAt, projectItems, run, textField, topicAt, treeEntryAt, type EntryMenuAction, type MenuItem } from "./contextmenu";
+  import { entries } from "./entries.svelte";
   import type { TopicDetail } from "./new-topics";
+  import AppearancePicker from "./AppearancePicker.svelte";
+  import { canStyleFolder, keyOf } from "./appearance";
+  import { relativeToDocs } from "./tree";
 
   let items = $state<MenuItem[]>([]);
   let target: EventTarget | null = null;
@@ -16,6 +20,10 @@
   let project = $state<string | null>(null);
   let topic = $state<{ project: string; id: number } | null>(null);
   let openedCurrent: string | null = null;
+  let treeEntry: { project: string; path: string } | null = null;
+  // Т-38: цель выбора цвета и иконки, найденная при открытии меню, и открытая панель выбора.
+  let styleTarget: { kind: "folder" | "document"; path: string; label: string } | null = null;
+  let picker = $state<{ project: string; kind: "folder" | "document"; path: string; label: string; x: number; y: number } | null>(null);
   let editors = $state<DocumentEditor[]>([]);
   let submenu = $state(false);
   let generation = 0;
@@ -31,6 +39,7 @@
     if (topic && (current !== topic.project || !app.topicsOpen || !app.topics.topics.some(t => t.id === topic?.id))) close();
     if (pendingFolder && (current !== pendingFolder.project || app.docsRoot !== pendingFolder.docsRoot)) close();
     if (document && current !== document.project) close();
+    if (picker && current !== picker.project) picker = null;
     if (folder && (current !== folder.project || app.docsRoot !== folder.docsRoot || !app.projects.some(p => p.path === folder?.project))) close();
     if (project && (current !== openedCurrent || !app.projects.some(p => p.path === project))) close();
   });
@@ -45,6 +54,8 @@
     returnFocus = null;
     project = null;
     topic = null;
+    treeEntry = null;
+    styleTarget = null;
     submenu = false;
     generation++;
   }
@@ -71,6 +82,7 @@
     }
     const nearest = event.target instanceof Element ? event.target.closest("[data-document-path], [data-folder-path], [data-project-path]") : null;
     const directory = !textField(event.target) && nearest?.hasAttribute("data-folder-path") && folderAt(event.target);
+    const entry = !textField(event.target) && current ? treeEntryAt(event.target) : null;
     if (directory && current) {
       // Контекст ОС закрепляет бэкенд; запоздавшая проверка не воскрешает меню.
       returnFocus = directory.element;
@@ -81,6 +93,12 @@
         pendingFolder = null;
         folder = { ...pinned, project: current, docsRoot, kind: directory.kind };
         found.unshift(...folderItems(app.project?.state ?? "unavailable", pinned.missing));
+        const key = keyOf(directory.path);
+        if (canStyleFolder(key)) {
+          styleTarget = { kind: "folder", path: key, label: key.split("/").pop() ?? key };
+          found.push({ action: "appearance", label: "Цвет и иконка…" });
+        }
+        if (entry) { found.unshift(...entryItems(entry.kind, entry.path)); treeEntry = { project: current!, path: entry.path }; }
       } catch (error) {
         if (generation === version && app.current === current) { close(); app.flash(String(error), true); }
         return;
@@ -96,6 +114,10 @@
     if (file && app.current) {
       document = { ...file, project: app.current };
       found.unshift(...documentItems());
+      const key = keyOf(relativeToDocs(file.path, docsRoot));
+      styleTarget = { kind: "document", path: key, label: key.split("/").pop() ?? key };
+      found.push({ action: "appearance", label: "Цвет…" });
+      if (entry) { found.push(...entryItems(entry.kind, entry.path)); treeEntry = { project: app.current, path: entry.path }; }
     }
     if (!found.length) return close();
     target = event.target;
@@ -123,12 +145,23 @@
   async function pick(item: MenuItem) {
     if (item.disabled) return;
     if (item.action === "editors") { await showEditors(); return; }
+    if (item.action === "appearance" && styleTarget && app.current) {
+      const style = styleTarget, owner = app.current;
+      close();
+      picker = { ...style, project: owner, x: origin.x, y: origin.y };
+      return;
+    }
     const where = target;
+    const chosenEntry = treeEntry;
     const file = document;
     const directory = folder;
     const projectPath = project;
     const selectedTopic = topic;
     close(true);
+    if (chosenEntry && ["newDoc", "newDir", "rename", "move", "trash"].includes(item.action)) {
+      if (app.current === chosenEntry.project) entries.open(item.action as EntryMenuAction, chosenEntry.path);
+      return;
+    }
     try {
       if (selectedTopic) {
         if (app.current !== selectedTopic.project || !app.topicsOpen) return;
@@ -154,9 +187,11 @@
         if (!app.projects.some(p => p.path === projectPath)) return;
         await call("reindex", { cwd: projectPath, project: projectPath });
         app.flash("Проверка проекта поставлена в очередь");
-      } else if (file && ["open", "editor", "reveal", "path", "check"].includes(item.action)) {
+      } else if (file && ["open", "newWindow", "editor", "reveal", "path", "check"].includes(item.action)) {
         if (app.current !== file.project) return;
-        if (item.action === "open") {
+        if (item.action === "newWindow") {
+          await app.openInNewWindow(file.path);
+        } else if (item.action === "open") {
           const hit = app.results?.results.find(hit => hit.path === file.path && hit.first_line === file.line);
           await app.openDocument(hit ?? { path: file.path, title: file.path, first_line: 0, last_line: 0 });
         } else {
@@ -228,6 +263,10 @@
   if (!(event.target instanceof Node)) return close();
   if (box ? !box.contains(event.target) : returnFocus && !returnFocus.contains(event.target)) close();
 }} />
+
+{#if picker}
+  <AppearancePicker kind={picker.kind} path={picker.path} label={picker.label} x={picker.x} y={picker.y} onclose={() => (picker = null)} />
+{/if}
 
 {#if items.length}
   <div

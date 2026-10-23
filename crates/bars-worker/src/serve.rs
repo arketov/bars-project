@@ -67,6 +67,7 @@ pub async fn serve_with(
     let worker = Worker::start(config, provider)?;
     log::info!("Воркер готов принимать вызовы");
     let handler = Arc::new(WorkerHandler::new(worker.clone()));
+    handler.start_audit_scheduler();
     ready(WorkerHandler::clone(&handler));
     worker.refresh_clients();
     let result = run_server(listener, handler).await;

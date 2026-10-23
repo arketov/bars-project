@@ -10,7 +10,9 @@ use bars_core::storage::{Index, index_path};
 fn main() {
     let mut args = std::env::args().skip(1);
     let root = PathBuf::from(args.next().expect("корень проекта"));
-    let runs: usize = args.next().map_or(5, |value| value.parse().expect("число повторов"));
+    let runs: usize = args
+        .next()
+        .map_or(5, |value| value.parse().expect("число повторов"));
     let index = Index::open_read_only(&index_path(&root)).expect("индекс проекта");
     let settings = SearchSettings::default();
     let request = DuplicatesRequest {
@@ -42,6 +44,11 @@ fn main() {
             .iter()
             .map(|chunk| format!("{}:{}", chunk.path, chunk.first_line))
             .collect();
-        println!("{} {:.3} {}", item.kind.as_str(), item.score, places.join(" | "));
+        println!(
+            "{} {:.3} {}",
+            item.kind.as_str(),
+            item.score,
+            places.join(" | ")
+        );
     }
 }

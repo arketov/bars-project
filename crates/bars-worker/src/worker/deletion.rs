@@ -122,6 +122,8 @@ fn remove_working_files(project: &Path, home: &Path) -> io::Result<()> {
     // Рабочая БД «Новых тем» и её sidecar-файлы (NT-09).
     for sidecar in ["", "-wal", "-shm", "-journal"] {
         files.push(directory.join(format!("new-topics.sqlite3{sidecar}")));
+        // Результаты аудитов знаний: производные от текста, пересоздаются запуском.
+        files.push(directory.join(format!("audits.sqlite3{sidecar}")));
     }
     for suffix in ["", ".new", ".old"] {
         for sidecar in ["", "-wal", "-shm", "-journal"] {

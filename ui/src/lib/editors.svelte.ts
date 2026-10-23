@@ -46,6 +46,8 @@ export class EditorBuffer {
   eol: "lf" | "crlf" = "lf";
   bom = false;
   views = 0;
+  /** Вызывается после успешной записи: `Editors` сообщает о ней другим окнам. */
+  onSaved: ((revision: string) => void) | undefined;
   #saved = "";
   #timer: ReturnType<typeof setTimeout> | undefined;
   #writing: Promise<void> | null = null;
@@ -119,6 +121,7 @@ export class EditorBuffer {
       this.#saved = snapshot;
       this.savedAt = Date.now();
       this.message = "";
+      this.onSaved?.(result.revision);
       // Правки пришли во время записи: следующая запись начнётся сразу после этой, не через секунду.
       this.status = this.dirty ? "dirty" : "saved";
     } else if (result.status === "conflict") {
@@ -207,16 +210,47 @@ export class EditorBuffer {
   }
 }
 
-class Editors {
+/** Сообщение другим окнам о записи (Т-40): окно с тем же документом сверяет диск. */
+export interface SavedMessage { project: string; path: string; revision: string; origin: string }
+
+/** Канал между окнами; в приложении — события Tauri, в тестах — подмена. */
+export interface Bus {
+  emit(message: SavedMessage): void;
+  listen(handler: (message: SavedMessage) => void): void;
+}
+
+const SAVED_EVENT = "bars://document-saved";
+
+function tauriBus(): Bus {
+  const events = import("@tauri-apps/api/event");
+  return {
+    emit: (message) => void events.then(({ emit }) => emit(SAVED_EVENT, message)).catch(() => {}),
+    listen: (handler) => void events.then(({ listen }) => listen<SavedMessage>(SAVED_EVENT, ({ payload }) => handler(payload))).catch(() => {}),
+  };
+}
+
+export class Editors {
   #buffers = new Map<string, EditorBuffer>();
   #key = (project: string, path: string) => `${project}\n${path}`;
+  #bus: Bus | undefined;
+  /** Подпись окна в сообщениях: свою запись окно не принимает за чужую. */
+  readonly id = Math.random().toString(36).slice(2);
 
-  constructor() {
+  constructor(bus?: Bus) {
+    this.#bus = bus ?? (typeof window !== "undefined" && inTauri() ? tauriBus() : undefined);
+    this.#bus?.listen((message) => this.#remoteSaved(message));
     if (typeof window === "undefined") return;
     // Потеря фокуса и сворачивание в трей пишут сразу (Т-29); возвращение фокуса сверяет диск.
     window.addEventListener("focus", () => void this.checkAll());
     window.addEventListener("blur", () => void this.flush());
     document.addEventListener("visibilitychange", () => void (document.hidden ? this.flush() : this.checkAll()));
+  }
+
+  /** Другое окно записало документ: чистый буфер перечитывается, буфер с правками уходит в конфликт. */
+  #remoteSaved(message: SavedMessage): void {
+    if (message.origin === this.id) return;
+    const buffer = this.get(message.project, message.path);
+    if (buffer && buffer.revision !== message.revision) void buffer.checkDisk();
   }
 
   get(project: string, path: string): EditorBuffer | undefined {
@@ -229,6 +263,7 @@ class Editors {
     let buffer = this.#buffers.get(key);
     if (!buffer) {
       buffer = new EditorBuffer(project, path, seed);
+      buffer.onSaved = (revision) => this.#bus?.emit({ project, path, revision, origin: this.id });
       this.#buffers.set(key, buffer);
       if (inTauri()) void buffer.load();
       else buffer.status = "clean";

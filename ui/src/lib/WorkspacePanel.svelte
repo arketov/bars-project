@@ -8,6 +8,7 @@
   import McpStatisticsPage from "./McpStatisticsPage.svelte";
   import IndexingPage from "./IndexingPage.svelte";
   import NewTopicsPage from "./NewTopicsPage.svelte";
+  import AuditsPage from "./AuditsPage.svelte";
   import WorkerDown from "./WorkerDown.svelte";
   import EmptyProjects from "./EmptyProjects.svelte";
   import Missing from "./Missing.svelte";
@@ -32,6 +33,7 @@
   {:else if !project}<div></div>
   {:else if project.state === "unavailable"}<Missing {project} />
   {:else if kind === "topics"}<NewTopicsPage />
+  {:else if kind === "audits"}<AuditsPage />
   {:else if kind === "graph"}
     <div class="graph-shell"><GraphTab /></div>
   {/if}

@@ -47,6 +47,18 @@
       ],
       "port": 4182,
       "url": "http://localhost:4182"
+    },
+    {
+      "name": "bars-graph-actions",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "graph-actions",
+        "--prefix",
+        "ui"
+      ],
+      "port": 4184,
+      "url": "http://localhost:4184"
     }
   ]
 }

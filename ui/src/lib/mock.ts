@@ -167,6 +167,58 @@ function topicFor(params: Record<string, unknown>, expected = true): TopicDetail
   if (!topic || (expected && Number(params.revision) !== topic.revision)) throw new BarsError("тема изменилась или удалена: обновите список", "stale_ref", -32012);
   return topic;
 }
+// --- Аудиты знаний (docs/features/knowledge-base/audits.md): заглушка воркера для просмотра экрана ---
+interface MockAudit { kind: string; runningUntil: number; done: boolean; schedule: string; }
+const auditState: Record<string, MockAudit> = {};
+function auditFor(kind: string): MockAudit {
+  return (auditState[kind] ??= { kind, runningUntil: 0, done: kind === "broken_links", schedule: kind === "broken_links" ? "on_change" : "off" });
+}
+interface MockFinding { standing: string; tag: string; group: string; reason: string; score?: number; subjects: unknown[]; detail: string; }
+const AUDIT_FINDINGS: Record<string, MockFinding[]> = {
+  broken_links: [
+    { standing: "new", tag: "broken", group: "main", reason: "Ссылка на документ, которого нет", subjects: [{ path: "docs/features/search/hybrid.md", first_line: 14, last_line: 14, heading: "", role: "feature" }], detail: "Новая тема → Новая тема" },
+    { standing: "known", tag: "broken", group: "main", reason: "Ссылка на документ, которого нет", subjects: [{ path: "docs/manual/search.md", first_line: 31, last_line: 31, heading: "", role: "manual" }], detail: "план → ../PLAN.md" },
+    { standing: "gone", tag: "broken", group: "main", reason: "Ссылка на документ, которого нет", subjects: [{ path: "docs/adr/0001-layout.md", first_line: 9, last_line: 9, heading: "", role: "decision" }], detail: "" },
+  ],
+  duplicates: [
+    { standing: "known", tag: "partial", group: "main", reason: "Заметная часть текста скопирована", score: 0.62, subjects: [{ path: "docs/manual/search.md", first_line: 40, last_line: 52, heading: "Поиск/Как работает", role: "manual" }, { path: "docs/features/search/hybrid.md", first_line: 8, last_line: 21, heading: "Гибридный поиск", role: "feature" }], detail: "Поиск складывает результаты полнотекстового и векторного поиска и сортирует их." },
+    { standing: "known", tag: "semantic", group: "overlap", reason: "Близкий смысл, не копия", score: 0.84, subjects: [{ path: "docs/chats/2026-10-18-search/handoff.md", first_line: 5, last_line: 9, heading: "Сделано", role: "session_log" }, { path: "docs/features/search/hybrid.md", first_line: 30, last_line: 36, heading: "Проверка", role: "feature" }], detail: "" },
+  ],
+};
+function auditSummary(kind: string) {
+  const audit = auditFor(kind), now = Math.floor(Date.now() / 1000);
+  const running = audit.runningUntil > Date.now();
+  if (!running && audit.runningUntil > 0) { audit.done = true; audit.runningUntil = 0; }
+  const findings = AUDIT_FINDINGS[kind] ?? [];
+  const main = findings.filter((f) => f.group === "main" && f.standing !== "gone");
+  return {
+    kind, state: running ? "running" : audit.done ? "complete" : "never", running_since: running ? now - 1 : undefined,
+    last_run_at: audit.done ? now - 3600 : undefined, last_status: audit.done ? "complete" : undefined,
+    result_run_id: audit.done ? 1 : undefined, result_at: audit.done ? now - 3600 : undefined,
+    total: audit.done ? main.length : 0, new_count: audit.done ? main.filter((f) => f.standing === "new").length : 0,
+    gone_count: audit.done ? findings.filter((f) => f.standing === "gone").length : 0,
+    overlap_total: audit.done ? findings.filter((f) => f.group === "overlap").length : 0,
+    schedule: audit.schedule, schedules: kind === "broken_links" ? ["off", "daily", "weekly", "on_change"] : ["off", "daily", "weekly"],
+  };
+}
+async function auditsCall(method: string, params: Record<string, unknown>): Promise<unknown> {
+  const kind = String(params.kind ?? "");
+  switch (method) {
+    case "audit_list":
+      if (scene() === "audits-error") throw new BarsError("не удалось открыть хранилище аудитов: доступ запрещён", null, -32603);
+      return { audits: ["broken_links", "duplicates"].map(auditSummary), reindex_required: scene() === "audits-reindex", indexing: scene() === "audits-indexing" };
+    case "audit_run": { const audit = auditFor(kind); const already = audit.runningUntil > Date.now(); if (!already) audit.runningUntil = Date.now() + 1800; return { accepted: true, already, queued: false }; }
+    case "audit_cancel": { const audit = auditFor(kind), was = audit.runningUntil > Date.now(); audit.runningUntil = 0; return { cancelled: was }; }
+    case "audit_schedule": auditFor(kind).schedule = String(params.mode); return { mode: String(params.mode) };
+    case "audit_findings": {
+      const group = params.group ? String(params.group) : null;
+      const items = (AUDIT_FINDINGS[kind] ?? []).filter((f) => (!group || f.group === group) && (params.include_gone || f.standing !== "gone"));
+      return { run_id: auditFor(kind).done ? 1 : undefined, finished: Math.floor(Date.now() / 1000) - 3600, items, total: items.length };
+    }
+  }
+  throw new BarsError(`нет метода ${method}`, "method_not_found", -32601);
+}
+
 async function topicsCall(method: string, params: Record<string, unknown>): Promise<unknown> {
   if (scene() === "topics-error" && method === "new_topics_list") throw new BarsError("не удалось открыть хранилище тем: доступ запрещён", null, -32603);
   const store = topicStore();
@@ -265,6 +317,17 @@ function activity(): ActivityOutput {
         last_error: null,
       },
     ],
+    documents: [
+      {
+        project: "C:\\work\\bars-project",
+        documents: [
+          { path: "docs/features/indexing/document-queue.md", state: "waiting", source: "edit", due_in: 18, error: null },
+          { path: "docs/manual/search.md", state: "queued", source: "watch", due_in: null, error: null },
+          { path: "docs/knowledge/build.md", state: "error", source: "watch", due_in: null, error: "Провайдер вернул 503" },
+        ],
+        total: 3, waiting: 1, queued: 1, indexing: 0, error: 1,
+      },
+    ],
   };
 }
 
@@ -307,6 +370,8 @@ export async function mockCall(method: string, params: Record<string, unknown>):
       const project = String(params.project ?? params.cwd);
       return { docs_root: "docs", documents: (DOCS_BY_PROJECT[project] ??= docs("docs")) };
     }
+    case "audit_list": case "audit_run": case "audit_cancel": case "audit_schedule": case "audit_findings":
+      return auditsCall(method, params);
     case "links_of": {
       const project = String(params.project ?? params.cwd), path = String(params.path);
       const others = (DOCS_BY_PROJECT[project] ??= docs("docs")).filter((d) => d.path !== path);
@@ -340,6 +405,8 @@ export async function mockCall(method: string, params: Record<string, unknown>):
       return { paused };
     case "index_cancel":
       return { cancelled: true };
+    case "index_retry":
+      return { retried: true };
     case "reindex":
     case "unregister":
       return { accepted: true, removed: true };

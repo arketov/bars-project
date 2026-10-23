@@ -5,6 +5,7 @@ mod appearance;
 #[cfg(test)]
 mod appearance_tests;
 mod commands;
+mod doc_window;
 mod document_io;
 #[cfg(test)]
 mod document_io_tests;
@@ -15,6 +16,9 @@ mod folder_tests;
 mod folders;
 mod icons;
 mod tray;
+mod tree_io;
+#[cfg(test)]
+mod tree_io_tests;
 mod window;
 
 use std::sync::Arc;
@@ -61,6 +65,11 @@ fn main() -> anyhow::Result<()> {
             commands::document_read,
             commands::document_write,
             commands::document_revision,
+            commands::tree_read,
+            commands::entry_create_doc,
+            commands::entry_create_dir,
+            commands::entry_move,
+            commands::entry_trash,
             commands::appearance_read,
             commands::appearance_set,
             commands::folder_target,
@@ -75,6 +84,10 @@ fn main() -> anyhow::Result<()> {
             commands::mcp_history_diagnostics,
             commands::restart_app,
             commands::flush_reply,
+            commands::document_window_open,
+            commands::document_window_target,
+            commands::document_window_close,
+            commands::open_in_main_window,
         ])
         .setup(move |app| {
             let handle = app.handle().clone();

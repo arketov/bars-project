@@ -5,6 +5,7 @@
 //! поиск ([`search`]), чтение настроек ([`settings`]), структура документа ([`outline`]) и путь
 //! документа ([`doc_path`]). Остальное — каркас.
 
+pub mod audits;
 pub mod doc_path;
 pub mod graph;
 pub mod indexing;

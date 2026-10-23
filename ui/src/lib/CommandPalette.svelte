@@ -1,5 +1,8 @@
 <script lang="ts" module>
-  export interface Choice { id: string; title: string; hint?: string; reason?: string; run: () => void | Promise<void> }
+  export interface Choice { id: string; title: string; hint?: string; reason?: string; run: () => void | Promise<void>; alt?: () => void | Promise<void> }
+  /** Дополнительные пункты к набранному запросу (поиск по смыслу при выборе документа). */
+  export type More = (query: string) => Promise<Choice[]>;
+  export const MORE_DELAY_MS = 250, MORE_MIN_CHARS = 3;
 </script>
 <script lang="ts">
   import { tick } from 'svelte';
@@ -7,20 +10,31 @@
   let dialog: HTMLDialogElement, input: HTMLInputElement;
   let opened = $state(false), query = $state(''), index = $state(0), title = $state('Список действий'), choices = $state<Choice[]>([]);
   let previous: HTMLElement | null = null;
-  const rows = $derived(choices.filter(c => `${c.title} ${c.id}`.toLowerCase().includes(query.toLowerCase())));
-  export function open(items: Choice[], heading = 'Список действий') {
+  let more: More | undefined, extra = $state<Choice[]>([]);
+  const found = $derived(choices.filter(c => `${c.title} ${c.id}`.toLowerCase().includes(query.toLowerCase())));
+  // Пункты по смыслу идут после совпадений по названию; документ из первой группы не повторяется.
+  const rows = $derived([...found, ...extra.filter(e => !found.some(c => c.id === e.id))]);
+  $effect(() => {
+    const text = query.trim(), source = more;
+    extra = [];
+    if (!opened || !source || text.length < MORE_MIN_CHARS) return;
+    let stale = false;
+    const timer = setTimeout(() => { void source(text).then(items => { if (!stale) extra = items; }).catch(() => {}); }, MORE_DELAY_MS);
+    return () => { stale = true; clearTimeout(timer); };
+  });
+  export function open(items: Choice[], heading = 'Список действий', extraSource?: More) {
     if (opened) { input.focus(); return; }
-    previous = document.activeElement as HTMLElement; choices = items; title = heading; query = ''; index = 0; opened = true; dialog.showModal(); input.focus();
+    previous = document.activeElement as HTMLElement; choices = items; title = heading; more = extraSource; extra = []; query = ''; index = 0; opened = true; dialog.showModal(); input.focus();
   }
   export function close(restore = true) { if (!opened) return; opened = false; dialog.close(); if (restore && previous?.isConnected) previous.focus(); }
   export function isOpen() { return opened; }
-  async function execute(choice: Choice) { if (choice.reason) return; close(); try { await choice.run(); } catch(error) { app.flash(String(error),true); } }
+  async function execute(choice: Choice, alt = false) { if (choice.reason) return; close(); try { await (alt && choice.alt ? choice.alt() : choice.run()); } catch(error) { app.flash(String(error),true); } }
   function key(event: KeyboardEvent) {
     if (event.isComposing || event.keyCode === 229) return;
     if (['ArrowDown','ArrowUp','Home','End'].includes(event.key)) {
       event.preventDefault(); index = event.key === 'Home' ? 0 : event.key === 'End' ? rows.length - 1 : (index + (event.key === 'ArrowDown' ? 1 : -1) + rows.length) % Math.max(1, rows.length);
       void tick().then(() => dialog.querySelector(`[data-choice="${index}"]`)?.scrollIntoView?.({ block:'nearest' }));
-    } else if (event.key === 'Enter') { event.preventDefault(); const choice = rows[index]; if (choice) void execute(choice); }
+    } else if (event.key === 'Enter') { event.preventDefault(); const choice = rows[index]; if (choice) void execute(choice, event.altKey); }
   }
 </script>
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->

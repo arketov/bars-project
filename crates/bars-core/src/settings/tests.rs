@@ -570,3 +570,31 @@ base_url = \"http://localhost:8081\"
 ",
     );
 }
+
+#[test]
+fn edit_pause_defaults_to_thirty_seconds_and_project_overrides_it() {
+    assert_eq!(UserSettings::default().indexing.edit_pause_seconds, 30);
+    let user = user("[indexing]\nedit_pause_seconds = 5\n");
+    assert!(user.warnings.is_empty());
+    assert_eq!(user.value.indexing.edit_pause_seconds, 5);
+
+    let project = project("[indexing]\nedit_pause_seconds = 0\n");
+    let resolved = Settings::resolve(&user.value, &project.value);
+    assert_eq!(resolved.indexing.edit_pause_seconds, 0);
+    let untouched = Settings::resolve(&user.value, &ProjectConfig::default());
+    assert_eq!(untouched.indexing.edit_pause_seconds, 5);
+}
+
+#[test]
+fn edit_pause_over_an_hour_is_an_error_and_unknown_indexing_keys_warn() {
+    let error = user_err("[indexing]\nedit_pause_seconds = 3601\n");
+    assert!(error.to_string().contains("indexing.edit_pause_seconds"));
+    assert!(matches!(
+        project_err("[indexing]\nedit_pause_seconds = 4000\n"),
+        SettingsError::Invalid { .. }
+    ));
+    let warned = user("[indexing]\nedit_pause = 5\n");
+    assert_eq!(warned.warnings.len(), 1);
+    assert_eq!(warned.warnings[0].key, "indexing.edit_pause");
+    assert_eq!(warned.value.indexing.edit_pause_seconds, 30);
+}

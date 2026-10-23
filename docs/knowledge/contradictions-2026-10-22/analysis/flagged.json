@@ -1,0 +1,3679 @@
+[
+ {
+  "sim": 0.931,
+  "kinds": [
+   "slot",
+   "swap"
+  ],
+  "num": [],
+  "slot": [
+   {
+    "key": "откло раунд",
+    "a": [
+     "16"
+    ],
+    "b": [
+     "2"
+    ]
+   }
+  ],
+  "swap": [
+   {
+    "a": [
+     "16"
+    ],
+    "b": [
+     "2",
+     "5"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/MAIN_IDEA.md",
+   "lines": "222-235",
+   "heading": "bars — локальная база знаний и RAG по документации проектов для людей и агентов/Отклонённые альтернативы",
+   "text": "Исправление одним кликом в аудите — отклонено (раунд 16): аудит только даёт сведения."
+  },
+  "b": {
+   "path": "docs/features/knowledge-base/requirements.md",
+   "lines": "114-120",
+   "heading": "База знаний bars — постановка, решения автора и набросок устройства/Отклонённые альтернативы",
+   "text": "Исправление одним кликом в аудите — отклонено (раунд 2, ответ 5): аудит только даёт сведения."
+  }
+ },
+ {
+  "sim": 0.839,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/backlog/ideas.md",
+   "lines": "41-46",
+   "heading": "Пожелания автора/IDEA-16: git из bars",
+   "text": "Просто зафиксируем что идея есть и что надо требования собрать»."
+  },
+  "b": {
+   "path": "docs/features/knowledge-base/requirements.md",
+   "lines": "172-182",
+   "heading": "База знаний bars — постановка, решения автора и набросок устройства/Журнал раундов/Раунд 2 — 19-10-2026",
+   "text": "Просто зафиксируем что идея есть и что надо требования собрать» → вне скоупа."
+  }
+ },
+ {
+  "sim": 0.839,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/knowledge-base/requirements.md",
+   "lines": "122-148",
+   "heading": "База знаний bars — постановка, решения автора и набросок устройства/Улучшения сверх запроса",
+   "text": "Просто зафиксируем что идея есть и что надо требования собрать»."
+  },
+  "b": {
+   "path": "docs/features/knowledge-base/requirements.md",
+   "lines": "172-182",
+   "heading": "База знаний bars — постановка, решения автора и набросок устройства/Журнал раундов/Раунд 2 — 19-10-2026",
+   "text": "Просто зафиксируем что идея есть и что надо требования собрать» → вне скоупа."
+  }
+ },
+ {
+  "sim": 0.804,
+  "kinds": [
+   "slot",
+   "swap"
+  ],
+  "num": [],
+  "slot": [
+   {
+    "key": "откло раунд",
+    "a": [
+     "16"
+    ],
+    "b": [
+     "1"
+    ]
+   }
+  ],
+  "swap": [
+   {
+    "a": [
+     "16"
+    ],
+    "b": [
+     "1"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/MAIN_IDEA.md",
+   "lines": "222-235",
+   "heading": "bars — локальная база знаний и RAG по документации проектов для людей и агентов/Отклонённые альтернативы",
+   "text": "Хранить [[wikilinks]], как в Obsidian — был отклонён в раунде 16 (GitHub и GitLab их не отрисуют), принят автором 22-10-2026 (раунд 25): в файле стоят [[…]], граф и окно читают их наравне с обычными ссылками."
+  },
+  "b": {
+   "path": "docs/features/knowledge-base/requirements.md",
+   "lines": "114-120",
+   "heading": "База знаний bars — постановка, решения автора и набросок устройства/Отклонённые альтернативы",
+   "text": "Хранить [[wikilinks]], как в Obsidian — отклонено в раунде 1 (GitHub и GitLab их не отрисуют), принято автором 22-10-2026 (раунд 25 в MAINIDEA): в файле [[…]], граф и окно читают их наравне с обычными ссылками."
+  }
+ },
+ {
+  "sim": 0.793,
+  "kinds": [
+   "slot"
+  ],
+  "num": [],
+  "slot": [
+   {
+    "key": "leade hit",
+    "a": [
+     "1"
+    ],
+    "b": [
+     "3"
+    ]
+   }
+  ],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-inference-design/stage11-plan.md",
+   "lines": "61-71",
+   "heading": "Этап 11 — измерение и ускорение инференса/Протокол скорости, памяти и качества",
+   "text": "Качество: leader/Hit@1, Hit@3, MRR@10, nDCG@10, recall первого этапа, ложная выдача отрицательных вопросов; список потерь по идентификаторам и длинным разделам."
+  },
+  "b": {
+   "path": "docs/knowledge/inference-speed.md",
+   "lines": "102-117",
+   "heading": "Ускорение инференса bars/Протокол воспроизведения замеров",
+   "text": "Качество: leader, Hit@3, MRR@10, nDCG@10, recall первого этапа, ложная выдача отрицательных вопросов, список потерь по идентификаторам; и до порога, и при рабочих порогах."
+  }
+ },
+ {
+  "sim": 0.78,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "16"
+    ],
+    "b": [
+     "2"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/MAIN_IDEA.md",
+   "lines": "43-63",
+   "heading": "bars — локальная база знаний и RAG по документации проектов для людей и агентов/Границы",
+   "text": "git — clone, pull, commit, push (раунд 16): идея автора записана как IDEA-16, требования собираются отдельно."
+  },
+  "b": {
+   "path": "docs/features/knowledge-base/requirements.md",
+   "lines": "38-68",
+   "heading": "База знаний bars — постановка, решения автора и набросок устройства/Границы",
+   "text": "git (clone, pull, commit, push): идея зафиксирована как IDEA-16, требования собираются отдельно позже (ответ автора, раунд 2)."
+  }
+ },
+ {
+  "sim": 0.732,
+  "kinds": [
+   "slot",
+   "swap"
+  ],
+  "num": [],
+  "slot": [
+   {
+    "key": "учиты раунд",
+    "a": [
+     "16"
+    ],
+    "b": [
+     "3"
+    ]
+   }
+  ],
+  "swap": [
+   {
+    "a": [
+     "16"
+    ],
+    "b": [
+     "3",
+     "7"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/MAIN_IDEA.md",
+   "lines": "243-249",
+   "heading": "bars — локальная база знаний и RAG по документации проектов для людей и агентов/Открытые вопросы",
+   "text": "Ссылки с якорем file.md#раздел индекс ссылок не учитывает (раунд 16)."
+  },
+  "b": {
+   "path": "docs/features/knowledge-base/requirements.md",
+   "lines": "38-68",
+   "heading": "База знаний bars — постановка, решения автора и набросок устройства/Границы",
+   "text": "Ссылки с якорем file.md#раздел в существующих документах: индекс ссылок их не учитывает (раунд 3, ответ 7)."
+  }
+ },
+ {
+  "sim": 0.73,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/knowledge-base/requirements.md",
+   "lines": "122-148",
+   "heading": "База знаний bars — постановка, решения автора и набросок устройства/Улучшения сверх запроса",
+   "text": "Генерация текста нейросетью. — закрыт: «Аудиты это просто процессы для предоставлению сведений пользователю к примеру найденые дубликаты, найденые противоречия и т.д.» → Т-36; bars текст документов не пишет."
+  },
+  "b": {
+   "path": "docs/features/knowledge-base/requirements.md",
+   "lines": "172-182",
+   "heading": "База знаний bars — постановка, решения автора и набросок устройства/Журнал раундов/Раунд 2 — 19-10-2026",
+   "text": "Пишет ли bars текст сам → «Аудиты это просто процессы для предоставлению сведений пользователю к примеру найденые дубликаты, найденые противоречия и т.д.» → Т-36."
+  }
+ },
+ {
+  "sim": 0.713,
+  "kinds": [
+   "slot",
+   "swap"
+  ],
+  "num": [],
+  "slot": [
+   {
+    "key": "приня раунд",
+    "a": [
+     "16"
+    ],
+    "b": [
+     "3"
+    ]
+   }
+  ],
+  "swap": [
+   {
+    "a": [
+     "16"
+    ],
+    "b": [
+     "3",
+     "6"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/MAIN_IDEA.md",
+   "lines": "237-241",
+   "heading": "bars — локальная база знаний и RAG по документации проектов для людей и агентов/Улучшения сверх запроса",
+   "text": "Быстрый переход к документу Ctrl+O — статус: принято (раунд 16) → Т-40."
+  },
+  "b": {
+   "path": "docs/features/knowledge-base/requirements.md",
+   "lines": "122-148",
+   "heading": "База знаний bars — постановка, решения автора и набросок устройства/Улучшения сверх запроса",
+   "text": "Быстрый переход Ctrl+O — принято (раунд 3, ответ 6) → Т-40."
+  }
+ },
+ {
+  "sim": 0.703,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "50",
+     "256"
+    ],
+    "b": [
+     "147",
+     "10"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-19-new-topics-collect/handoff.md",
+   "lines": "1-9",
+   "heading": "Передача дел: сбор «Новых тем» в воркере (IDEA-14, шаг 19)",
+   "text": "Замер (debug, 2000 тем, векторы 1024): БД 9,3 МБ, запись медиана 52 мс, p95 98 мс; пределы 2000 тем, 50 вариантов, очередь 256."
+  },
+  "b": {
+   "path": "docs/features/new-topics/design.md",
+   "lines": "157-166",
+   "heading": "Новые темы — поведение окна и устройство фичи/Что сделано в воркере",
+   "text": "Пределы (замер, debug-сборка, 2000 тем с векторами 1024): БД 9,3 МБ; запись — медиана 52 мс, p95 98 мс, максимум 147 мс, список тем — 10 мс."
+  }
+ },
+ {
+  "sim": 0.667,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/Index.md",
+   "lines": "5-23",
+   "heading": "Фичи bars",
+   "text": "knowledge-base/   База знаний: редактор, ссылки, index.md папки, файлы, аудиты; требования Т-29…Т-42 зафиксированы, реализации нет"
+  },
+  "b": {
+   "path": "docs/project-status.md",
+   "lines": "9-23",
+   "heading": "Состояние bars — реализованные возможности и открытые проверки/Что реализовано в bars",
+   "text": "База знаний   Требования Т-29…Т-42 зафиксированы 19-10-2026: редактор, ссылки, index.md папки, файлы в дереве, аудиты, очередь документов."
+  }
+ },
+ {
+  "sim": 0.665,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-project-deletion/handoff.md",
+   "lines": "15-21",
+   "heading": "Этап 24 — удаление проекта, передача/Сложности",
+   "text": "Новая сессия агента может снова зарегистрировать папку по Т-6: постоянный запрет регистрации не добавлялся."
+  },
+  "b": {
+   "path": "docs/features/projects/deletion.md",
+   "lines": "9-15",
+   "heading": "Полное удаление проекта из bars/Что удаляет полное удаление проекта",
+   "text": "Новая сессия агента может снова зарегистрировать папку по Т-6."
+  }
+ },
+ {
+  "sim": 0.652,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-folder-menu-31/verification.md",
+   "lines": "15-31",
+   "heading": "Проверка этапа 31 — меню папок и ограничения приёмки/Автоматические проверки реализации",
+   "text": "cargo clippy --release --no-deps -p bars-app -p bars-worker --lib --bins -- -D warnings   Успешно, выбранные crates без lint зависимостей"
+  },
+  "b": {
+   "path": "docs/chats/2026-10-18-mcp-analysis-30/verification.md",
+   "lines": "32-41",
+   "heading": "Проверка этапа 30 — экран анализа MCP/Команды и результат",
+   "text": "cargo clippy --release -p bars-worker -p bars-app --lib --no-deps -- -D warnings — worker lib успешно; cargo clippy --release -p bars-app --bin bars --no-deps -- -D warnings — app успешно."
+  }
+ },
+ {
+  "sim": 0.652,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "11"
+    ],
+    "b": [
+     "226"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-mcp-history-29/verification.md",
+   "lines": "25-37",
+   "heading": "Проверка этапа 29 — история отдельных MCP-вызовов/Команды и результаты этапа 29",
+   "text": "cargo test --release -p bars-mcp --test mcp -- --test-threads=1 — 11 passed."
+  },
+  "b": {
+   "path": "docs/chats/2026-10-20-indexing-responsiveness/verification.md",
+   "lines": "19-35",
+   "heading": "ISS-16 — проект, проверки и результаты реализации/Проверки",
+   "text": "cargo test --release -p bars-worker --lib -- --test-threads=1   226 passed, 1 ignored"
+  }
+ },
+ {
+  "sim": 0.646,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-20-workspace-density/handoff.md",
+   "lines": "5-15",
+   "heading": "Передача — компактный макет 1.1.3",
+   "text": "JS syntax и git diff --check успешны."
+  },
+  "b": {
+   "path": "docs/chats/2026-10-20-workspace-design/handoff.md",
+   "lines": "5-15",
+   "heading": "Передача — макет каркаса окна, пункт 1.1.3",
+   "text": "JS syntax и git diff --check успешны, новых ошибок консоли нет."
+  }
+ },
+ {
+  "sim": 0.639,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/window/implementation.md",
+   "lines": "35-51",
+   "heading": "Как устроено окно bars/Интерфейс на Svelte",
+   "text": "ui/src — Svelte 5 (руны), TypeScript, Vite, без SvelteKit ([architecture/components.md](../../architecture/components.md))."
+  },
+  "b": {
+   "path": "docs/knowledge/build.md",
+   "lines": "41-65",
+   "heading": "Сборка bars/Проверки перед коммитом",
+   "text": "Окно — Svelte 5 + TypeScript + Vite в ui/ ([architecture/components.md](../architecture/components.md))."
+  }
+ },
+ {
+  "sim": 0.618,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/knowledge-base/requirements.md",
+   "lines": "122-148",
+   "heading": "База знаний bars — постановка, решения автора и набросок устройства/Улучшения сверх запроса",
+   "text": "Папка без index.md. — закрыт: «Всё верно» → Т-32."
+  },
+  "b": {
+   "path": "docs/features/knowledge-base/requirements.md",
+   "lines": "172-182",
+   "heading": "База знаний bars — постановка, решения автора и набросок устройства/Журнал раундов/Раунд 2 — 19-10-2026",
+   "text": "Пустой index.md → «Всё верно» → Т-32."
+  }
+ },
+ {
+  "sim": 0.602,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/MAIN_IDEA.md",
+   "lines": "13-29",
+   "heading": "bars — локальная база знаний и RAG по документации проектов для людей и агентов/Исходная формулировка",
+   "text": "По сути мы просто повторяем всю суть в gramax Только локально», «Да, но только лучше и не совершаем предыдущих ошибок.»"
+  },
+  "b": {
+   "path": "docs/MAIN_IDEA.md",
+   "lines": "321-325",
+   "heading": "bars — локальная база знаний и RAG по документации проектов для людей и агентов/Журнал раундов/Раунд 4 — 14-10-2026",
+   "text": "По сути мы просто повторяем всю суть в gramax Только локально»."
+  }
+ },
+ {
+  "sim": 0.592,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/window/refinement-design.md",
+   "lines": "59-65",
+   "heading": "Дизайн уведомлений, анализа MCP и меню папок/Меню корня, модуля и папки",
+   "text": "Папка/модуль/корень: «Открыть в Проводнике» (Finder на macOS), «Скопировать путь», «Проверить индекс проекта»."
+  },
+  "b": {
+   "path": "docs/manual/search.md",
+   "lines": "110-122",
+   "heading": "Как искать в окне bars — запрос, область, результаты и проценты/Меню по правому клику на файле, папке и карточке",
+   "text": "Папка, модуль или корень документации: «Открыть в Проводнике», «Скопировать путь», «Проверить индекс проекта» (проверяется весь проект, не только папка)."
+  }
+ },
+ {
+  "sim": 0.584,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-inference-design/stage11-plan.md",
+   "lines": "61-71",
+   "heading": "Этап 11 — измерение и ускорение инференса/Протокол скорости, памяти и качества",
+   "text": "Для эквивалентных оптимизаций предложение — отсутствие новых провалов лидера/Hit@3 на замороженном наборе и отсутствие снижения MRR; численные допуски определить до отбора по CPU/GPU-сверке."
+  },
+  "b": {
+   "path": "docs/knowledge/inference-speed.md",
+   "lines": "102-117",
+   "heading": "Ускорение инференса bars/Протокол воспроизведения замеров",
+   "text": "Для эквивалентных оптимизаций правило отбора — нет новых провалов лидера/Hit@3 и нет снижения MRR на замороженном наборе."
+  }
+ },
+ {
+  "sim": 0.583,
+  "kinds": [
+   "slot",
+   "swap"
+  ],
+  "num": [],
+  "slot": [
+   {
+    "key": "bin bars",
+    "a": [
+     "22"
+    ],
+    "b": [
+     "28"
+    ]
+   }
+  ],
+  "swap": [
+   {
+    "a": [
+     "22"
+    ],
+    "b": [
+     "28",
+     "350"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-22-editor-design/handoff.md",
+   "lines": "13-17",
+   "heading": "Передача сессии — проект редактора и исследование CodeMirror/Сделано позже в той же сессии (шаг 3)",
+   "text": "Проверено: cargo test -p bars-app --bin bars — 22 ок, cargo clippy -p bars-app --bin bars --tests --no-deps -- -D warnings, cargo fmt --check."
+  },
+  "b": {
+   "path": "docs/chats/2026-10-22-editor-design/handoff.md",
+   "lines": "33-38",
+   "heading": "Передача сессии — проект редактора и исследование CodeMirror/Шаг 6 (конфликт, диск, закрытие)",
+   "text": "Проверено: cargo test -p bars-app --bin bars — 28 ок, clippy (--no-deps) и fmt чисты; vitest 350 из 350, npm run check, npm run build."
+  }
+ },
+ {
+  "sim": 0.581,
+  "kinds": [
+   "slot",
+   "swap"
+  ],
+  "num": [],
+  "slot": [
+   {
+    "key": "rows jsonl",
+    "a": [
+     "24",
+     "22",
+     "30"
+    ],
+    "b": [
+     "216"
+    ]
+   }
+  ],
+  "swap": [
+   {
+    "a": [
+     "24",
+     "22",
+     "30"
+    ],
+    "b": [
+     "216",
+     "144",
+     "72"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-search-score-order/plan.md",
+   "lines": "25-47",
+   "heading": "ISS-02 — порядок и шкала без rerank/Доказательства и ограничения замера",
+   "text": "regression-rows.jsonl.gz   24   22   30"
+  },
+  "b": {
+   "path": "docs/knowledge/quality-2026-10-18/Index.md",
+   "lines": "5-31",
+   "heading": "Доказательства бенча качества",
+   "text": "regression-rows.jsonl.gz — 216 строк регрессии: 144 поиска и 72 списка."
+  }
+ },
+ {
+  "sim": 0.575,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/docs-convention/bars-instruction.md",
+   "lines": "16-37",
+   "heading": "BARS_INSTRUCTION.md — инструкция bars для моделей, которые пишут документацию/О чём инструкция",
+   "text": "Выбор чтения и поиска: определить предмет задачи; известный документ читать через read/outline без предварительного поиска, неизвестный контекст искать с подходящей областью."
+  },
+  "b": {
+   "path": "docs/features/docs-convention/delivery.md",
+   "lines": "5-20",
+   "heading": "Как соглашение о документации доходит до агента — стартовая инструкция, skills, BARS_INSTRUCTION.md",
+   "text": "сначала определить предмет задачи; для известного документа выбрать read/outline, для неизвестного контекста — предметный поиск с подходящей областью;"
+  }
+ },
+ {
+  "sim": 0.57,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/models/local-models.md",
+   "lines": "76-80",
+   "heading": "Встроенные модели bars/Когда модели освобождают память",
+   "text": "Mac и слабые GPU отдельно не приняты."
+  },
+  "b": {
+   "path": "docs/knowledge/memory.md",
+   "lines": "214-219",
+   "heading": "Память bars — замеры, причины пиков и результаты/Что не доказано",
+   "text": "Mac, ноутбук и слабые GPU."
+  }
+ },
+ {
+  "sim": 0.567,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/architecture/protocol.md",
+   "lines": "29-36",
+   "heading": "Протокол канала bars — методы, параметры, ошибки/Как метод находит проект/Разрешение цели вызова",
+   "text": "Если project не задан, проект — ближайшая к cwd зарегистрированная папка вверх по дереву (Т-15)."
+  },
+  "b": {
+   "path": "docs/features/projects/projects.md",
+   "lines": "29-31",
+   "heading": "Реестр проектов bars/Вложенные проекты",
+   "text": "Для cwd действует ближайший зарегистрированный проект вверх по дереву (Т-15)."
+  }
+ },
+ {
+  "sim": 0.565,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/window/settings-window.md",
+   "lines": "5-7",
+   "heading": "Экран настроек bars — модели, поиск, клиенты и статистика MCP",
+   "text": "Мокап — [mockups/settings.html](mockups/settings.html)."
+  },
+  "b": {
+   "path": "docs/features/window/settings-window.md",
+   "lines": "54-56",
+   "heading": "Экран настроек bars — модели, поиск, клиенты и статистика MCP/Вкладка «Запуск» в настройках",
+   "text": "Вкладки в мокапе [mockups/settings.html](mockups/settings.html) нет: решение агента (OQ-64)."
+  }
+ },
+ {
+  "sim": 0.556,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/architecture/stack.md",
+   "lines": "32-43",
+   "heading": "Стек bars/Модели bars",
+   "text": "ONNX Runtime скачивается при сборке с cdn.pyke.io и линкуется в bars статически: отдельной dll или dylib рядом с exe нет."
+  },
+  "b": {
+   "path": "docs/knowledge/stack-research.md",
+   "lines": "26-40",
+   "heading": "Исследование стека bars/ONNX Runtime в сборке",
+   "text": "По умолчанию ort при сборке скачивает статически линкуемый ONNX Runtime с cdn.pyke.io."
+  }
+ },
+ {
+  "sim": 0.554,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/window/document-actions.md",
+   "lines": "19-25",
+   "heading": "Документ из дерева и меню документа/Меню документа",
+   "text": "В подменю — «Программа по умолчанию», установленные VS Code, Блокнот и обнаруженные редакторы (Cursor, VSCodium, Notepad++, Sublime Text, Zed)."
+  },
+  "b": {
+   "path": "docs/manual/search.md",
+   "lines": "110-122",
+   "heading": "Как искать в окне bars — запрос, область, результаты и проценты/Меню по правому клику на файле, папке и карточке",
+   "text": "Файл в дереве или карточка результата: «Открыть», «Открыть в …» (программа по умолчанию, VS Code, Блокнот и найденные редакторы — Cursor, VSCodium, Notepad++, Sublime Text, Zed), «Открыть в Проводнике», «Скопировать путь» (полный путь без строки), «Проверить индекс»."
+  }
+ },
+ {
+  "sim": 0.55,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-client-profile-isolation/handoff.md",
+   "lines": "5-12",
+   "heading": "Передача — изоляция клиентского профиля от тестов",
+   "text": "Регрессия конструктора; повторный guard scripts/test-client-profile-isolation.ps1: worker 132/132, CLI 8/8, MCP 9/9."
+  },
+  "b": {
+   "path": "docs/chats/2026-10-18-clients-auto-update/verification.md",
+   "lines": "48-56",
+   "heading": "Проверки автообновления интеграций/Проверка изоляции профиля (ISS-12)",
+   "text": "scripts/test-client-profile-isolation.ps1 запускается без BARSUSERHOME: сначала безопасная регрессия конструктора (проверка до запуска serve), затем worker/CLI/MCP."
+  }
+ },
+ {
+  "sim": 0.55,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-19-chunk-id-design/log.md",
+   "lines": "1-5",
+   "heading": "log",
+   "text": "Автор оставил детали ID реализации (handoff 2026-10-18-similar-duplicates), поэтому OQ не заводил."
+  },
+  "b": {
+   "path": "docs/features/search/maintenance-tools.md",
+   "lines": "25-55",
+   "heading": "Похожие чанки и дубликаты для поддержки документации/Идентификатор чанка для get_similar",
+   "text": "Статус: реализовано 19-10-2026; детали ID автор оставил реализации (handoff (chats/2026-10-18-similar-duplicates)), формат принят автором 19-10-2026."
+  }
+ },
+ {
+  "sim": 0.536,
+  "kinds": [
+   "slot",
+   "swap"
+  ],
+  "num": [],
+  "slot": [
+   {
+    "key": "bars overd",
+    "a": [
+     "14"
+    ],
+    "b": [
+     "138"
+    ]
+   }
+  ],
+  "swap": [
+   {
+    "a": [
+     "24",
+     "100",
+     "14"
+    ],
+    "b": [
+     "138"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-20-plan-usability/plan-before.md",
+   "lines": "53-60",
+   "heading": "План/Этап: оперативная память и файл подкачки",
+   "text": "Выполнено 20-10-2026 в измеренном объёме: два свежих FP16-индекса, 24 bars + 100 overdrive + 14 holdout без новых потерь; совместный FP16 lifetime peak 4,46 ГиБ против 5,84 ГиБ третьего повтора прежней пары."
+  },
+  "b": {
+   "path": "docs/features/models/memory-plan.md",
+   "lines": "9-18",
+   "heading": "Снижение памяти моделей bars — проект и оставшаяся работа/Что уже сделано",
+   "text": "Исследование 20-10-2026: свежие FP16-индексы bars/overdrive, 138 вопросов без новых потерь; один совместный FP16-пик 4,46 ГиБ против 5,84 ГиБ третьего повтора прежней пары."
+  }
+ },
+ {
+  "sim": 0.534,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/distribution/autostart.md",
+   "lines": "21-32",
+   "heading": "Автозапуск bars при входе в систему/Методы и команда автозапуска",
+   "text": "bars-cli autostart [status\\ on\\ off]   то же из терминала; без аргумента — status ([agent-tools/cli.md](../agent-tools/cli.md))"
+  },
+  "b": {
+   "path": "docs/manual/install.md",
+   "lines": "39-45",
+   "heading": "Установка, запуск и обновление bars/Как включить запуск bars вместе с Windows",
+   "text": "Из терминала то же самое: bars-cli autostart on, выключить — bars-cli autostart off, проверить — bars-cli autostart."
+  }
+ },
+ {
+  "sim": 0.529,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/search/maintenance-tools.md",
+   "lines": "87-93",
+   "heading": "Похожие чанки и дубликаты для поддержки документации/Реализация и приёмка",
+   "text": "Различение точных, близких, частичных, смысловых и шаблонных повторов, пороги и задержка проверены на размеченном наборе и корпусе bars: [duplicates.md](../../knowledge/duplicates.md) (предложение агента, не решение автора)."
+  },
+  "b": {
+   "path": "docs/knowledge/Index.md",
+   "lines": "61-72",
+   "heading": "Внутренняя база знаний bars/Идеи развития и агенты",
+   "text": "[duplicates.md](duplicates.md)   IDEA-13: как различать точные, близкие, частичные, смысловые и шаблонные повторы, пороги и задержка"
+  }
+ },
+ {
+  "sim": 0.525,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-20-plan-usability/plan-before.md",
+   "lines": "34-38",
+   "heading": "План/Этап: поиск недоступен и 5 ГБ памяти при индексации (ISS-18)",
+   "text": "Мера ограничения ещё не принята; данные и отвергнутые allocator-опыты — [memory.md](docs/knowledge/memory.md#iss-18-установленная-сборка-и-allocator-20-10-2026)."
+  },
+  "b": {
+   "path": "docs/features/models/memory-plan.md",
+   "lines": "20-33",
+   "heading": "Снижение памяти моделей bars — проект и оставшаяся работа/Что остаётся",
+   "text": "Данные и ограничения — [memory.md](../../knowledge/memory.md#iss-18-установленная-сборка-и-allocator-20-10-2026)."
+  }
+ },
+ {
+  "sim": 0.52,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-20-plan-usability/plan-before.md",
+   "lines": "98-106",
+   "heading": "План/Хвосты: ручные проверки",
+   "text": "macOS: сборка, CoreML, dmg, нотаризация, LaunchAgent, критерии Т-4 — когда появится Mac."
+  },
+  "b": {
+   "path": "docs/project-status.md",
+   "lines": "31-39",
+   "heading": "Состояние bars — реализованные возможности и открытые проверки/Какие проверки bars ещё открыты",
+   "text": "macOS предусмотрена требованиями, но сборка, CoreML, .dmg, нотаризация и LaunchAgent на Mac ещё не проверены."
+  }
+ },
+ {
+  "sim": 0.52,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/backlog/issues.md",
+   "lines": "42-53",
+   "heading": "Известные проблемы bars/ISS-18: Во время индексации поиск недоступен («модель загружается») и приложение занимает около 5 ГБ памяти",
+   "text": "Принятая мера ограничения памяти пока отсутствует; [данные и отвергнутые allocator-опыты](../knowledge/memory.md#iss-18-установленная-сборка-и-allocator-20-10-2026)."
+  },
+  "b": {
+   "path": "docs/features/models/memory-plan.md",
+   "lines": "20-33",
+   "heading": "Снижение памяти моделей bars — проект и оставшаяся работа/Что остаётся",
+   "text": "Данные и ограничения — [memory.md](../../knowledge/memory.md#iss-18-установленная-сборка-и-allocator-20-10-2026)."
+  }
+ },
+ {
+  "sim": 0.518,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-22-query-graph-design/handoff.md",
+   "lines": "21-29",
+   "heading": "Проектирование графа от запроса — итог 22-10-2026/Сложности",
+   "text": "Проверка на случайных наборах не заменяет проверку настоящих запросов: реальные результаты сгруппированы по темам."
+  },
+  "b": {
+   "path": "docs/features/graphrag/query-graph.md",
+   "lines": "63-80",
+   "heading": "Проект графа от запроса — построение, глубина, пределы и сила связи/Пределы и усечение",
+   "text": "Реальные результаты сгруппированы по темам, и размеры могут отличаться; настоящие запросы — проверка 2.2.3."
+  }
+ },
+ {
+  "sim": 0.515,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "3.7"
+    ],
+    "b": [
+     "5.6"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-20-indexing-memory/handoff.md",
+   "lines": "14-20",
+   "heading": "ISS-18 — поиск проверен, память остаётся открытой/Не сделано",
+   "text": "Свободный commit к концу около 3,7 ГиБ, ниже резерва одиночного FP32-стенда."
+  },
+  "b": {
+   "path": "docs/chats/2026-10-20-memory-acceptance/log.md",
+   "lines": "5-12",
+   "heading": "Исследование памяти — находки сессии",
+   "text": "Свободный commit около 5,6 ГиБ ниже прежних резервов;"
+  }
+ },
+ {
+  "sim": 0.515,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/architecture/stack.md",
+   "lines": "17-30",
+   "heading": "Стек bars/Процесс, окно и трей bars",
+   "text": "Один экземпляр воркера   tauri-plugin-single-instance   2.5   второй запуск bars показывает окно работающего (Т-1)"
+  },
+  "b": {
+   "path": "docs/features/window/implementation.md",
+   "lines": "29-33",
+   "heading": "Как устроено окно bars/Окно, трей и один экземпляр",
+   "text": "Один экземпляр. tauri-plugin-single-instance передаёт второй запуск работающему экземпляру; тот показывает окно, если запуск был без --background, а новый процесс завершается."
+  }
+ },
+ {
+  "sim": 0.512,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "12"
+    ],
+    "b": [
+     "226"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-mcp-analysis-30/verification.md",
+   "lines": "32-41",
+   "heading": "Проверка этапа 30 — экран анализа MCP/Команды и результат",
+   "text": "cargo test --release -p bars-worker --lib mcphistory -- --test-threads=1 --nocapture — 12 passed: история, подсказки и настоящий IPC."
+  },
+  "b": {
+   "path": "docs/chats/2026-10-20-indexing-responsiveness/verification.md",
+   "lines": "19-35",
+   "heading": "ISS-16 — проект, проверки и результаты реализации/Проверки",
+   "text": "cargo test --release -p bars-worker --lib -- --test-threads=1   226 passed, 1 ignored"
+  }
+ },
+ {
+  "sim": 0.506,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/graphrag/requirements.md",
+   "lines": "76-102",
+   "heading": "Техническое задание GraphRAG для bars/GR-05. Графический просмотр и пользовательские действия",
+   "text": "Отказ автора от четвёртого вида 21-10-2026 (OQ-110) не исключает предикаты GR-02."
+  },
+  "b": {
+   "path": "docs/knowledge/traceability.md",
+   "lines": "55-61",
+   "heading": "Трассировка требований bars — документы и этапы/Требования Т-1…Т-47",
+   "text": "OQ-110 закрыт отказом от четвёртого вида"
+  }
+ },
+ {
+  "sim": 0.506,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/graphrag/Index.md",
+   "lines": "46-54",
+   "heading": "GraphRAG в bars — техническое задание и внедрение/Материалы проверок",
+   "text": "Первый опыт на готовых embeddings (knowledge/graph-embedding-2026-10-18.md): граф близости, проверка наивного расширения, границы результата."
+  },
+  "b": {
+   "path": "docs/knowledge/Index.md",
+   "lines": "50-59",
+   "heading": "Внутренняя база знаний bars/Граф знаний и GraphRAG",
+   "text": "[graph-embedding-2026-10-18.md](graph-embedding-2026-10-18.md)   Опыт графа близости на готовых векторах: метод, результат, почему наивное расширение не принято"
+  }
+ },
+ {
+  "sim": 0.504,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/MAIN_IDEA.md",
+   "lines": "124-136",
+   "heading": "bars — локальная база знаний и RAG по документации проектов для людей и агентов/Требования",
+   "text": "Решение автора 22-10-2026: «посмотри как ссылки делаются в файле в obsidian вот надо так же»; оно отменяет отклонение [[…]] в раунде 16."
+  },
+  "b": {
+   "path": "docs/MAIN_IDEA.md",
+   "lines": "428-430",
+   "heading": "bars — локальная база знаний и RAG по документации проектов для людей и агентов/Журнал раундов/Раунд 25 — 22-10-2026: ссылки как в Obsidian",
+   "text": "Какого хуя не сделано?», затем «посмотри как ссылки делаются в файле в obsidian вот надо так же!»."
+  }
+ },
+ {
+  "sim": 0.498,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "11"
+    ],
+    "b": [
+     "267"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-mcp-history-29/verification.md",
+   "lines": "25-37",
+   "heading": "Проверка этапа 29 — история отдельных MCP-вызовов/Команды и результаты этапа 29",
+   "text": "cargo test --release -p bars-mcp --test mcp -- --test-threads=1 — 11 passed."
+  },
+  "b": {
+   "path": "docs/chats/2026-10-20-indexing-responsiveness/verification.md",
+   "lines": "19-35",
+   "heading": "ISS-16 — проект, проверки и результаты реализации/Проверки",
+   "text": "cargo test --release -p bars-core --lib -- --test-threads=1 (в общем прогоне core/worker)   267 passed, 1 ignored"
+  }
+ },
+ {
+  "sim": 0.496,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/window/main-window.md",
+   "lines": "87-97",
+   "heading": "Главный экран окна bars/Контекстное меню окна",
+   "text": "Меню закрывается по Esc, клику вне него, прокрутке и потере фокуса окна."
+  },
+  "b": {
+   "path": "docs/manual/search.md",
+   "lines": "110-122",
+   "heading": "Как искать в окне bars — запрос, область, результаты и проценты/Меню по правому клику на файле, папке и карточке",
+   "text": "Меню закрывается по Esc, клику мимо или прокрутке."
+  }
+ },
+ {
+  "sim": 0.496,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "4"
+    ],
+    "b": [
+     "1",
+     "1.1"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/architecture/secrets.md",
+   "lines": "18-22",
+   "heading": "Ключи провайдеров bars/Как bars работает с хранилищем",
+   "text": "Крейт keyring-core с хранилищами windows-native-keyring-store (Windows) и apple-native-keyring-store (macOS, Keychain) — семейство keyring 4.x."
+  },
+  "b": {
+   "path": "docs/architecture/stack.md",
+   "lines": "69-80",
+   "heading": "Стек bars/Агенты и клиенты bars",
+   "text": "Ключи провайдеров   keyring-core 1.0 + windows-native-keyring-store 1.1 и apple-native-keyring-store 1.0 (фича keychain)   1.x   [secrets.md](secrets.md)"
+  }
+ },
+ {
+  "sim": 0.495,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/knowledge/stack-research.md",
+   "lines": "104-116",
+   "heading": "Исследование стека bars/Хуки и MCP в Claude Code и Codex",
+   "text": "Хук не запустится, пока пользователь не одобрит его командой /hooks в Codex."
+  },
+  "b": {
+   "path": "docs/manual/agents.md",
+   "lines": "32-36",
+   "heading": "bars и агенты — подключение Claude Code, Codex и других клиентов/Одобрение хука в Codex",
+   "text": "После установки выполните в Codex команду /hooks и одобрите хук bars."
+  }
+ },
+ {
+  "sim": 0.495,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-19-chunk-id-design/handoff.md",
+   "lines": "19-25",
+   "heading": "Передача сессии — ID чанка и get_similar/Сложности",
+   "text": "Сборка из Git Bash падает на llama-cpp; рабочий путь — Developer Shell, Ninja, CARGOTARGETDIR=C:/bars-build, VULKANSDK ([build.md](../../knowledge/build.md)). cargo test с примерами раз упал на занятом файле (link 1104): помог запуск --lib --tests."
+  },
+  "b": {
+   "path": "docs/chats/2026-10-19-chunk-id-design/log.md",
+   "lines": "1-5",
+   "heading": "log",
+   "text": "19-10-2026: сборка из Git Bash падает на llama-cpp (MSBuild, нет Ninja/MSVC в среде); рабочий путь — Developer Shell + CMAKEGENERATOR=Ninja + CARGOTARGETDIR=C:/bars-build + VULKANSDK=C:\\VulkanSDK\\1.4.363.0, cargo test --release (см. knowledge/build.md)."
+  }
+ },
+ {
+  "sim": 0.495,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/backlog/ideas.md",
+   "lines": "64-69",
+   "heading": "Пожелания автора/IDEA-14: Новые темы — запросы без найденного ответа",
+   "text": "Собирать запросы без найденных ответов из общего чата и MCP; дедуплицировать по уже вычисленному вектору с порогом."
+  },
+  "b": {
+   "path": "docs/features/new-topics/requirements.md",
+   "lines": "9-15",
+   "heading": "Новые темы — сценарии и требования/Потребность и решения автора",
+   "text": "Автор предложил собирать запросы из общего чата и MCP, дедуплицировать по уже вычисленному вектору с порогом, хранить в .bars, показывать результат только пользователю; разрешить удаление и проверку появления знаний."
+  }
+ },
+ {
+  "sim": 0.493,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "15"
+    ],
+    "b": [
+     "177"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-clients-auto-update/verification.md",
+   "lines": "9-21",
+   "heading": "Проверки автообновления интеграций/Автоматические проверки IDEA-10",
+   "text": "cargo test -p bars-worker clients:: --lib --locked после заключительных правок   15 passed, 0 failed"
+  },
+  "b": {
+   "path": "docs/chats/2026-10-18-notifications-28/verification.md",
+   "lines": "5-19",
+   "heading": "Проверка этапа 28 — уведомления",
+   "text": "Worker: итоговый cargo test --release -p bars-worker --lib — 177 passed, 0 failed."
+  }
+ },
+ {
+  "sim": 0.492,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/distribution/Index.md",
+   "lines": "5-14",
+   "heading": "Поставка bars",
+   "text": "Сделана Windows; macOS — когда появится Mac."
+  },
+  "b": {
+   "path": "docs/features/distribution/autostart.md",
+   "lines": "9-13",
+   "heading": "Автозапуск bars при входе в систему/Что записывается в ОС для автозапуска",
+   "text": "macOS: автозапуск пока не сделан (LaunchAgent, когда появится Mac, [installer.md](installer.md))."
+  }
+ },
+ {
+  "sim": 0.491,
+  "kinds": [
+   "number",
+   "swap"
+  ],
+  "num": [
+   {
+    "unit": "байт",
+    "a": [
+     "770"
+    ],
+    "b": [
+     "992"
+    ]
+   }
+  ],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "499",
+     "770",
+     "4176"
+    ],
+    "b": [
+     "798",
+     "992"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-installer-encoding/handoff.md",
+   "lines": "5-9",
+   "heading": "Кодировка скриптов сборки установщика",
+   "text": "Результат: dist-installer/bars0.1.0x64-setup.exe, 19 499 770 байт, SHA-256 4176DF6CDC9D77380B7E342B3D3DD98DC2210465C9C882B4CD39E4512FEA486E."
+  },
+  "b": {
+   "path": "docs/chats/2026-10-20-update-installer/handoff.md",
+   "lines": "5-12",
+   "heading": "Обновление и сборка установщика",
+   "text": "Новый файл: dist-installer/bars0.1.0x64-setup.exe, 19 798 992 байта, 20-10-2026 11:53:21."
+  }
+ },
+ {
+  "sim": 0.49,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-device-design/stage17-plan.md",
+   "lines": "65-78",
+   "heading": "Этап 17 — раздельные устройства моделей и устойчивость индексации/Ошибка документа и бюджет повторов",
+   "text": "Успешный вызов embed для следующего документа сбрасывает серию."
+  },
+  "b": {
+   "path": "docs/chats/2026-10-18-stage17-implementation/device-verification.md",
+   "lines": "11-16",
+   "heading": "Этап 17 — проверка устройств моделей и ошибок индексации/Проверенный продуктовый результат",
+   "text": "Успешный embed сбрасывает серию, неизменённые файлы — нет."
+  }
+ },
+ {
+  "sim": 0.49,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/window/settings-window.md",
+   "lines": "13-27",
+   "heading": "Экран настроек bars — модели, поиск, клиенты и статистика MCP/Вкладка «Модели» в настройках",
+   "text": "Мокап — [device-settings.html](mockups/device-settings.html)."
+  },
+  "b": {
+   "path": "docs/features/window/settings-window.md",
+   "lines": "54-56",
+   "heading": "Экран настроек bars — модели, поиск, клиенты и статистика MCP/Вкладка «Запуск» в настройках",
+   "text": "Вкладки в мокапе [mockups/settings.html](mockups/settings.html) нет: решение агента (OQ-64)."
+  }
+ },
+ {
+  "sim": 0.49,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/MAIN_IDEA.md",
+   "lines": "65-115",
+   "heading": "bars — локальная база знаний и RAG по документации проектов для людей и агентов/Требования",
+   "text": "Отдельной защиты от массового удаления нет: индекс следует за диском (OQ-08: «если их удалили, значит и нам надо удалять»)."
+  },
+  "b": {
+   "path": "docs/MAIN_IDEA.md",
+   "lines": "347-357",
+   "heading": "bars — локальная база знаний и RAG по документации проектов для людей и агентов/Журнал раундов/Раунд 10 — 14-10-2026 (вопросы проектирования, `QUESTIONS.md`)",
+   "text": "OQ-08 → «если их удалили, значит и нам надо удалять» → Т-22."
+  }
+ },
+ {
+  "sim": 0.489,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/settings/settings.md",
+   "lines": "34-55",
+   "heading": "Настройки bars/Параметры поиска в settings.toml",
+   "text": "Число результатов и кандидатов из вызова агента сверх maxresults, maxcandidates и maxrerankcandidates прижимается к пределу, как и порог (Т-18, Т-24)."
+  },
+  "b": {
+   "path": "docs/features/window/settings-window.md",
+   "lines": "29-36",
+   "heading": "Экран настроек bars — модели, поиск, клиенты и статистика MCP/Вкладка «Поиск» в настройках",
+   "text": "Число результатов с реранком и без, кандидатов на реранк, пределы агента maxresults и maxcandidates (Т-18)."
+  }
+ },
+ {
+  "sim": 0.486,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-project-context-menu/handoff.md",
+   "lines": "5-10",
+   "heading": "Этап 23 — меню проекта, передача",
+   "text": "UI 85/85, check/build, ручное ревью и diff check пройдены."
+  },
+  "b": {
+   "path": "docs/features/window/project-menu.md",
+   "lines": "21-25",
+   "heading": "Контекстное меню проекта/Проверки этапа 23",
+   "text": "Полный UI после этапа 24: 93/93, Svelte check без ошибок/предупреждений, production build; ручное ревью изменений и git diff --check пройдены."
+  }
+ },
+ {
+  "sim": 0.485,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-22-query-graph-design/handoff.md",
+   "lines": "15-19",
+   "heading": "Проектирование графа от запроса — итог 22-10-2026/Не сделано",
+   "text": "Настоящие запросы, скорость точного расчёта близости результатов (оценка 61 млн операций, не замер), качество близости документов (centroid), шкала рисунка для cosine, нативное окно, overdrive-bots."
+  },
+  "b": {
+   "path": "docs/chats/2026-10-22-query-transition/handoff.md",
+   "lines": "15-18",
+   "heading": "Макет перехода графа от запроса — итог 22-10-2026/Не сделано",
+   "text": "Настоящие запросы, скорость точного расчёта окружения, качество близости, шкала рисунка для cosine, нативное окно: результаты стенда подобраны по словам названий, оценки сочинены."
+  }
+ },
+ {
+  "sim": 0.479,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/window/main-window.md",
+   "lines": "87-97",
+   "heading": "Главный экран окна bars/Контекстное меню окна",
+   "text": "Меню закрывается по Esc, клику вне него, прокрутке и потере фокуса окна."
+  },
+  "b": {
+   "path": "docs/features/window/refinement-design.md",
+   "lines": "59-65",
+   "heading": "Дизайн уведомлений, анализа MCP и меню папок/Меню корня, модуля и папки",
+   "text": "Закрытие также по внешнему клику, прокрутке и потере фокуса."
+  }
+ },
+ {
+  "sim": 0.478,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/window/document-actions.md",
+   "lines": "19-25",
+   "heading": "Документ из дерева и меню документа/Меню документа",
+   "text": "Меню закрывается по Escape, внешнему клику, прокрутке, потере фокуса и смене проекта."
+  },
+  "b": {
+   "path": "docs/features/window/main-window.md",
+   "lines": "87-97",
+   "heading": "Главный экран окна bars/Контекстное меню окна",
+   "text": "Меню закрывается по Esc, клику вне него, прокрутке и потере фокуса окна."
+  }
+ },
+ {
+  "sim": 0.478,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/window/document-actions.md",
+   "lines": "78-92",
+   "heading": "Документ из дерева и меню документа/Контракт этапа 26: допуск путей и меняющееся дерево",
+   "text": "Меню закрывается по Escape, внешнему клику, прокрутке, потере фокуса и смене проекта."
+  },
+  "b": {
+   "path": "docs/features/window/main-window.md",
+   "lines": "87-97",
+   "heading": "Главный экран окна bars/Контекстное меню окна",
+   "text": "Меню закрывается по Esc, клику вне него, прокрутке и потере фокуса окна."
+  }
+ },
+ {
+  "sim": 0.474,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "20261018"
+    ],
+    "b": [
+     "20261020"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/knowledge/memory-2026-10-18/Index.md",
+   "lines": "5-49",
+   "heading": "Доказательства замеров памяти",
+   "text": "20261018T091246434Z-auto-bounded-1.stderr.txt — устройство и диагностический stderr опыта."
+  },
+  "b": {
+   "path": "docs/knowledge/memory-acceptance-2026-10-20/Index.md",
+   "lines": "5-67",
+   "heading": "Память — данные приёмки 20-10-2026",
+   "text": "20261020T090035448Z-previous-pair-third-auto-bounded-1.stderr.txt   Диагностика запуска"
+  }
+ },
+ {
+  "sim": 0.474,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "20261018"
+    ],
+    "b": [
+     "20261020"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/knowledge/memory-2026-10-18/Index.md",
+   "lines": "5-49",
+   "heading": "Доказательства замеров памяти",
+   "text": "20261018T091246434Z-auto-bounded-2.stderr.txt — устройство и диагностический stderr опыта."
+  },
+  "b": {
+   "path": "docs/knowledge/memory-acceptance-2026-10-20/Index.md",
+   "lines": "5-67",
+   "heading": "Память — данные приёмки 20-10-2026",
+   "text": "20261020T090035448Z-previous-pair-third-auto-bounded-1.stderr.txt   Диагностика запуска"
+  }
+ },
+ {
+  "sim": 0.473,
+  "kinds": [
+   "slot",
+   "swap"
+  ],
+  "num": [],
+  "slot": [
+   {
+    "key": "headl chrom",
+    "a": [
+     "143"
+    ],
+    "b": [
+     "128"
+    ]
+   }
+  ],
+  "swap": [
+   {
+    "a": [
+     "143",
+     "1"
+    ],
+    "b": [
+     "128"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/knowledge/graph-render.md",
+   "lines": "13-30",
+   "heading": "Физика и отрисовка постоянного графа bars/Метод сравнительного стенда",
+   "text": "Среда: Windows, Node 24.16.0, headless Chromium 143, ANGLE/D3D11, RTX 3090, DPR=1."
+  },
+  "b": {
+   "path": "docs/knowledge/graph-renderer-2026-10-18/Index.md",
+   "lines": "5-14",
+   "heading": "GraphRAG — renderer и макет 18-10-2026",
+   "text": "Изолированный headless Chrome 128 на Windows, Node 24.16.0, WebGL ANGLE/RTX 3090."
+  }
+ },
+ {
+  "sim": 0.473,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/graphrag/query-graph.md",
+   "lines": "48-61",
+   "heading": "Проект графа от запроса — построение, глубина, пределы и сила связи/Построение: от запроса к результатам, от результатов к связям",
+   "text": "Связь запроса видна в любом режиме."
+  },
+  "b": {
+   "path": "docs/features/graphrag/query-graph.md",
+   "lines": "165-180",
+   "heading": "Проект графа от запроса — построение, глубина, пределы и сила связи/Проверки проекта и критерии реализации",
+   "text": "Смена режима связей   Перекладка с нуля без запроса к воркеру; связь запроса видна в любом режиме"
+  }
+ },
+ {
+  "sim": 0.471,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/window/settings-window.md",
+   "lines": "58-64",
+   "heading": "Экран настроек bars — модели, поиск, клиенты и статистика MCP/Вкладка «Статистика MCP» в настройках",
+   "text": "Тема окна: «Как в системе», «Светлая», «Тёмная» — три плитки с превью, применяется сразу, без «Сохранить»."
+  },
+  "b": {
+   "path": "docs/manual/settings.md",
+   "lines": "49-55",
+   "heading": "Настройки bars — что меняет каждая вкладка/Вкладка «Запуск»",
+   "text": "Тема окна: «Как в системе», «Светлая», «Тёмная»."
+  }
+ },
+ {
+  "sim": 0.471,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-folder-menu-31/log.md",
+   "lines": "5-9",
+   "heading": "Находки этапа 31 — меню папок",
+   "text": "Нативный ввод прерван Escape; затем автор запретил Computer Use."
+  },
+  "b": {
+   "path": "docs/chats/2026-10-18-folder-menu-31/verification.md",
+   "lines": "33-39",
+   "heading": "Проверка этапа 31 — меню папок и ограничения приёмки/Нативная попытка и оставшаяся приёмка",
+   "text": "Сценарий меню/действий не завершён: ввод остановлен физическим Escape; затем автор явно запретил Computer Use."
+  }
+ },
+ {
+  "sim": 0.471,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/manual/projects.md",
+   "lines": "74-84",
+   "heading": "Проекты в bars — как добавить, убрать, перенести и удалить/Проект пропал: серая точка",
+   "text": "Частые причины: проект перенесли, диск отключён, папка OneDrive выгружена в облако."
+  },
+  "b": {
+   "path": "docs/manual/troubleshooting.md",
+   "lines": "54-58",
+   "heading": "Неполадки bars — частые проблемы и что делать/Серая точка: проект не найден",
+   "text": "Папки проекта нет на месте: перенесли, отключили диск, OneDrive выгрузил её в облако. bars ничего не удалил."
+  }
+ },
+ {
+  "sim": 0.471,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/architecture/worker.md",
+   "lines": "54-66",
+   "heading": "Воркер bars — запуск, задачи внутри процесса, очередь, завершение/Модели в памяти воркера",
+   "text": "Запрос ждёт не дольше одной пачки — в худшем случае одного очень длинного чанка, около 3 с: пока запрос и индексация делят одну модель, меньше не сделать."
+  },
+  "b": {
+   "path": "docs/knowledge/search-during-indexing.md",
+   "lines": "23-34",
+   "heading": "Поиск во время индексации: замер задержки и очередь к модели/Меры и их эффект",
+   "text": "Остаток — ожидание одной пачки, в худшем случае одного очень длинного чанка (около 3 с)."
+  }
+ },
+ {
+  "sim": 0.47,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-20-workspace-design/handoff.md",
+   "lines": "5-15",
+   "heading": "Передача — макет каркаса окна, пункт 1.1.3",
+   "text": "Розовые маркеры перед файлами дерева убраны, отсутствие проверено в DOM."
+  },
+  "b": {
+   "path": "docs/features/window/workspace-design.md",
+   "lines": "11-21",
+   "heading": "Макет каркаса рабочей области bars/Оформление и композиция",
+   "text": "По уточнению автора, перед файлами дерева нет розовых маркеров."
+  }
+ },
+ {
+  "sim": 0.469,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/clients/clients.md",
+   "lines": "23-32",
+   "heading": "Подключение bars к агентским клиентам/Codex",
+   "text": "Результат установки напоминает об одобрении только при фактическом изменении хука bars."
+  },
+  "b": {
+   "path": "docs/features/clients/clients.md",
+   "lines": "91-99",
+   "heading": "Подключение bars к агентским клиентам/Формат записей bars",
+   "text": "Результат install напоминает про /hooks только при фактическом изменении хука bars; узнать сохранённое одобрение bars не умеет."
+  }
+ },
+ {
+  "sim": 0.468,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/knowledge/search-quality.md",
+   "lines": "35-56",
+   "heading": "Бенч качества поиска и умолчания IDEA-06/Железо и программное окружение замера",
+   "text": "Модели   embed BAAI/bge-m3; rerank BAAI/bge-reranker-v2-m3, штатный ONNX-экспорт из кэша rozgo/bge-reranker-v2-m3"
+  },
+  "b": {
+   "path": "docs/knowledge/stack-research.md",
+   "lines": "5-24",
+   "heading": "Исследование стека bars",
+   "text": "BGERerankerV2M3 скачивает сторонний ONNX-экспорт rozgo/bge-reranker-v2-m3, а не репозиторий BAAI."
+  }
+ },
+ {
+  "sim": 0.466,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "8192",
+     "5028",
+     "512",
+     "314"
+    ],
+    "b": [
+     "5027.97",
+     "314.25"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-gguf-models/log.md",
+   "lines": "5-10",
+   "heading": "Журнал этапа 22 — GGUF-модели",
+   "text": "Microbatch 8192 резервировал 5028 MiB compute; microbatch 512 — 314 MiB, короткие векторы совпали."
+  },
+  "b": {
+   "path": "docs/knowledge/gguf-models.md",
+   "lines": "44-50",
+   "heading": "Qwen3 GGUF и llama.cpp — проверка и результаты/Сборка и найденные ограничения GGUF",
+   "text": "Первый спайк резервировал 5027,97 MiB CPU compute при microbatch8192; microbatch512 — 314,25 MiB."
+  }
+ },
+ {
+  "sim": 0.465,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/window/main-window.md",
+   "lines": "43-53",
+   "heading": "Главный экран окна bars/Запрос и выдача",
+   "text": "Запрос однострочный: текст и подсказка не переносятся визуально, полоса прокрутки не показывается; перенос строки не вставляется, а при вставке текста переносы заменяются пробелами."
+  },
+  "b": {
+   "path": "docs/manual/search.md",
+   "lines": "13-27",
+   "heading": "Как искать в окне bars — запрос, область, результаты и проценты/Как найти что-нибудь в окне bars",
+   "text": "Запрос однострочный: если вставить текст с переносами строк, они заменятся пробелами."
+  }
+ },
+ {
+  "sim": 0.464,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-folder-menu-31/handoff.md",
+   "lines": "15-17",
+   "heading": "Передача этапа 31 — меню папок документов/Сложности",
+   "text": "Нативный ввод прерван Escape; после запрета повторов не было."
+  },
+  "b": {
+   "path": "docs/chats/2026-10-18-folder-menu-31/log.md",
+   "lines": "5-9",
+   "heading": "Находки этапа 31 — меню папок",
+   "text": "Нативный ввод прерван Escape; затем автор запретил Computer Use."
+  }
+ },
+ {
+  "sim": 0.462,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/models/local-models.md",
+   "lines": "101-105",
+   "heading": "Встроенные модели bars/Приёмка продуктового FP16 rerank",
+   "text": "Слабые GPU, ноутбук и другие EP отдельно не проверены."
+  },
+  "b": {
+   "path": "docs/knowledge/memory.md",
+   "lines": "214-219",
+   "heading": "Память bars — замеры, причины пиков и результаты/Что не доказано",
+   "text": "Mac, ноутбук и слабые GPU."
+  }
+ },
+ {
+  "sim": 0.461,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-device-design/stage17-plan.md",
+   "lines": "80-88",
+   "heading": "Этап 17 — раздельные устройства моделей и устойчивость индексации/Целостность индекса и повторная проверка",
+   "text": "Решение автора, OQ-80, 18-10-2026: при полной переиндексации остальные документы обрабатываются, но хотя бы один пропуск из-за embed запрещает swap."
+  },
+  "b": {
+   "path": "docs/features/indexing/updates.md",
+   "lines": "68-80",
+   "heading": "Обновление индекса/Полная переиндексация",
+   "text": "OQ-80: если хотя бы один документ пропущен из-за ошибки embed, остальные обрабатываются, но старый индекс не заменяется неполным новым."
+  }
+ },
+ {
+  "sim": 0.461,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/knowledge/search-quality.md",
+   "lines": "72-99",
+   "heading": "Бенч качества поиска и умолчания IDEA-06/Первый этап: глубина действительно влияет на покрытие",
+   "text": "Обучающая часть, C30, 48 положительных вопросов."
+  },
+  "b": {
+   "path": "docs/knowledge/search-quality.md",
+   "lines": "101-117",
+   "heading": "Бенч качества поиска и умолчания IDEA-06/Качество и задержки обучающей части",
+   "text": "C30, 48 положительных вопросов; качество без порогов."
+  }
+ },
+ {
+  "sim": 0.461,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/MAIN_IDEA.md",
+   "lines": "43-63",
+   "heading": "bars — локальная база знаний и RAG по документации проектов для людей и агентов/Границы",
+   "text": "Реализация на Python (В-15)."
+  },
+  "b": {
+   "path": "docs/MAIN_IDEA.md",
+   "lines": "65-115",
+   "heading": "bars — локальная база знаний и RAG по документации проектов для людей и агентов/Требования",
+   "text": "Python не используется (В-15, В-18)."
+  }
+ },
+ {
+  "sim": 0.459,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-clients-auto-update/verification.md",
+   "lines": "58-62",
+   "heading": "Проверки автообновления интеграций/Оставшиеся ручные проверки интеграций",
+   "text": "События startup/resume и stdout хука этим изменением не расширены."
+  },
+  "b": {
+   "path": "docs/features/clients/clients.md",
+   "lines": "115-121",
+   "heading": "Подключение bars к агентским клиентам/Что не подтверждено",
+   "text": "Шаблон событий хука — startup resume."
+  }
+ },
+ {
+  "sim": 0.458,
+  "kinds": [
+   "swap",
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "48"
+    ],
+    "b": [
+     "32",
+     "8"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/knowledge/search-quality.md",
+   "lines": "101-117",
+   "heading": "Бенч качества поиска и умолчания IDEA-06/Качество и задержки обучающей части",
+   "text": "C30, 48 положительных вопросов; качество без порогов."
+  },
+  "b": {
+   "path": "docs/knowledge/search-quality.md",
+   "lines": "119-141",
+   "heading": "Бенч качества поиска и умолчания IDEA-06/Отложенная часть и пороги",
+   "text": "32 положительных и 8 отрицательных вопросов, C30/K15."
+  }
+ },
+ {
+  "sim": 0.457,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "3.52"
+    ],
+    "b": [
+     "3.56"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-memory-research/handoff.md",
+   "lines": "5-14",
+   "heading": "Передача сессии — этап 13, снижение памяти",
+   "text": "Настоящая проверка cached FP16-артефактов без ONNX: peak 3,52 МиБ; изменённый config отклонён BLAKE3/ready=false."
+  },
+  "b": {
+   "path": "docs/knowledge/memory-embed-2026-10-18/Index.md",
+   "lines": "26-40",
+   "heading": "Embed precision и ограниченное хранение оценок — 18-10-2026/Полный retrieval FP16 и отказ INT8",
+   "text": "В отдельной собственной копии изменён config.json: BLAKE3 отклонён, ready=false, peak 3,56 МиБ."
+  }
+ },
+ {
+  "sim": 0.457,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "20261020"
+    ],
+    "b": [
+     "20261018"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/knowledge/memory-acceptance-2026-10-20/Index.md",
+   "lines": "5-67",
+   "heading": "Память — данные приёмки 20-10-2026",
+   "text": "20261020T090035448Z-previous-pair-third-auto-bounded-1.stderr.txt   Диагностика запуска"
+  },
+  "b": {
+   "path": "docs/knowledge/memory-fp16-2026-10-18/Index.md",
+   "lines": "5-61",
+   "heading": "Приёмка памяти продуктового FP16 rerank",
+   "text": "20261018T130140009Z-worker-ttl-auto-bounded-1.stderr.txt — диагностика процесса."
+  }
+ },
+ {
+  "sim": 0.455,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/agent-tools/cli.md",
+   "lines": "63-69",
+   "heading": "Команды bars-cli/Установка и удаление",
+   "text": "bars-cli install --print-instruction печатает текст для агента и не обращается к воркеру."
+  },
+  "b": {
+   "path": "docs/manual/terminal.md",
+   "lines": "57-70",
+   "heading": "bars в терминале — основные команды bars-cli/Подключение агентов и автозапуск из терминала",
+   "text": "bars-cli install --print-instruction"
+  }
+ },
+ {
+  "sim": 0.453,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/knowledge/agent-tool-usage-2026-10-18.md",
+   "lines": "73-85",
+   "heading": "Качество вызовов bars агентами — разбор задач и фильтров 18-10-2026/Три сравнения областей на текущем индексе",
+   "text": "В каждом окончательном триплете state:ready и updatedat совпали до/после."
+  },
+  "b": {
+   "path": "docs/knowledge/agent-tool-usage-2026-10-18/Index.md",
+   "lines": "18-24",
+   "heading": "Доказательства исследования использования инструментов bars/Воспроизведение анализа",
+   "text": "Совпадение updatedat до/после окончательного триплета зафиксировано; исторический индекс не восстанавливался."
+  }
+ },
+ {
+  "sim": 0.453,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-20-indexing-memory/handoff.md",
+   "lines": "14-20",
+   "heading": "ISS-18 — поиск проверен, память остаётся открытой/Не сделано",
+   "text": "Свободный commit к концу около 3,7 ГиБ, ниже резерва одиночного FP32-стенда."
+  },
+  "b": {
+   "path": "docs/knowledge/memory.md",
+   "lines": "114-124",
+   "heading": "Память bars — замеры, причины пиков и результаты/ISS-18: установленная сборка и allocator, 20-10-2026",
+   "text": "К концу сессии свободно около 3,7 ГиБ commit: новые модели не запускались."
+  }
+ },
+ {
+  "sim": 0.452,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/window/empty-states.md",
+   "lines": "23-25",
+   "heading": "Пустые экраны окна bars/Индекс ещё пуст",
+   "text": "Если модель ещё не скачана — первой стадией идёт скачивание ([error-states.md](error-states.md))."
+  },
+  "b": {
+   "path": "docs/features/window/indexing-progress.md",
+   "lines": "16-28",
+   "heading": "Ход индексации в окне bars/Страница индексации проекта",
+   "text": "У встроенной нескачанной модели первой стадией идёт скачивание с ходом загрузки ([error-states.md](error-states.md))."
+  }
+ },
+ {
+  "sim": 0.451,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-19-new-topics-collect/log.md",
+   "lines": "1-3",
+   "heading": "log",
+   "text": "Окно ходит в dispatch напрямую, агент и CLI — через observed/handleplain: источник обращения определяю task-local SearchContext, а не новым аргументом MCP; диагностику окна отличаю служебным полем window, которое barscall вырезает до разбора вызова."
+  },
+  "b": {
+   "path": "docs/features/new-topics/design.md",
+   "lines": "157-166",
+   "heading": "Новые темы — поведение окна и устройство фичи/Что сделано в воркере",
+   "text": "Источник и назначение передаются task-local SearchContext: вызов по каналу — Mcp или Cli, прямой вызов окна — Window; окно помечает диагностику служебным полем window в параметрах barscall, которое вырезается до разбора вызова."
+  }
+ },
+ {
+  "sim": 0.448,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/architecture/protocol.md",
+   "lines": "29-36",
+   "heading": "Протокол канала bars — методы, параметры, ошибки/Как метод находит проект/Разрешение цели вызова",
+   "text": "Если project не задан, проект — ближайшая к cwd зарегистрированная папка вверх по дереву (Т-15)."
+  },
+  "b": {
+   "path": "docs/features/search/hybrid-search.md",
+   "lines": "5-15",
+   "heading": "Гибридный поиск",
+   "text": "Явно заданный проект или проект сессии: ближайшая к cwd агента папка, которая зарегистрирована в bars (Т-15)."
+  }
+ },
+ {
+  "sim": 0.448,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/manual/projects.md",
+   "lines": "64-72",
+   "heading": "Проекты в bars — как добавить, убрать, перенести и удалить/Как проверить индекс проекта вручную",
+   "text": "Полная перестройка с нуля — bars-cli reindex --full; обычно она не нужна."
+  },
+  "b": {
+   "path": "docs/manual/terminal.md",
+   "lines": "40-55",
+   "heading": "bars в терминале — основные команды bars-cli/Как добавить проект и проверить индекс из терминала",
+   "text": "reindex --full — перестроить индекс с нуля."
+  }
+ },
+ {
+  "sim": 0.447,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/adr/0001-docs-by-features.md",
+   "lines": "31-35",
+   "heading": "ADR-0001. Документация bars по фичам и журнал сессий/Отклонённые варианты раскладки docs",
+   "text": "Журнал на день chats/<date>/ — две сессии за день писали бы в один файл (OQ-43)."
+  },
+  "b": {
+   "path": "docs/features/docs-convention/session-log.md",
+   "lines": "5-7",
+   "heading": "Журнал сессии",
+   "text": "Папка на сессию, а не на день, чтобы две сессии не писали в один файл."
+  }
+ },
+ {
+  "sim": 0.447,
+  "kinds": [
+   "slot",
+   "swap"
+  ],
+  "num": [],
+  "slot": [
+   {
+    "key": "debou full",
+    "a": [
+     "8.2",
+     "0.7"
+    ],
+    "b": [
+     "500"
+    ]
+   }
+  ],
+  "swap": [
+   {
+    "a": [
+     "8.2",
+     "0.7"
+    ],
+    "b": [
+     "500"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/architecture/stack.md",
+   "lines": "57-67",
+   "heading": "Стек bars/Документы и файлы bars",
+   "text": "Слежение за файлами   notify + notify-debouncer-full   8.2 / 0.7   Т-10"
+  },
+  "b": {
+   "path": "docs/architecture/worker.md",
+   "lines": "76-88",
+   "heading": "Воркер bars — запуск, задачи внутри процесса, очередь, завершение/Реализация очереди и состояния воркера",
+   "text": "Слежение запускает notify-debouncer-full (500 мс) по корню документации."
+  }
+ },
+ {
+  "sim": 0.446,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-stage33-implementation/handoff.md",
+   "lines": "22-25",
+   "heading": "Передача сессии — реализация и открытая приёмка этапа 33/Не сделано",
+   "text": "Незавершённые отличия целевого контракта явно перечислены в features/graphrag/tools.md: context roots/includerelated, отдельные edgetypes/includeunresolved, per-file progress/errors, точный tokenizer."
+  },
+  "b": {
+   "path": "docs/features/graphrag/tools.md",
+   "lines": "30-34",
+   "heading": "Контракты инструментов GraphRAG для bars/Целевой контракт: незавершённые отличия",
+   "text": "Context roots/includerelated, отдельные edgetypes/includeunresolved, per-file progress/errors и точный tokenizer пока не реализованы; их нельзя передавать как работающие поля v1."
+  }
+ },
+ {
+  "sim": 0.446,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/backlog/issues.md",
+   "lines": "9-16",
+   "heading": "Известные проблемы bars/ISS-21: Вкладки рабочей области не переносятся мышью",
+   "text": "Причина: окно Tauri создавалось с включённым обработчиком перетаскивания файлов, который на Windows перехватывает HTML5 drag-and-drop WebView2, а Dockview переносил вкладки именно им."
+  },
+  "b": {
+   "path": "docs/features/window/workspace-plan.md",
+   "lines": "9-21",
+   "heading": "Внедрение панелей рабочего окна/Устройство переноса",
+   "text": "Перенос вкладок: dndStrategy: \"pointer\" — Dockview ведёт жест событиями указателя, а не HTML5 drag-and-drop, который в WebView2 перехватывает обработчик файлов Tauri (ISS-21)."
+  }
+ },
+ {
+  "sim": 0.444,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-clients-auto-update/handoff.md",
+   "lines": "5-13",
+   "heading": "Этап 14 — автообновление интеграций",
+   "text": "./scripts/test-client-refresh.ps1: шесть отдельных запусков production servewith на BARSUSERHOME."
+  },
+  "b": {
+   "path": "docs/features/clients/clients.md",
+   "lines": "101-113",
+   "heading": "Подключение bars к агентским клиентам/Как проверяется установка и автообновление",
+   "text": "Повторяемый стенд — scripts/test-client-refresh.ps1: шесть отдельных процессов с временным BARSUSERHOME, настоящие servewith, CLI и stdio-MCP, без подмены файловых операций."
+  }
+ },
+ {
+  "sim": 0.443,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/backlog/ideas.md",
+   "lines": "34-39",
+   "heading": "Пожелания автора/IDEA-15: Редактор и база знаний в окне",
+   "text": "Реализация не начата; по решению автора идёт после текущих этапов плана."
+  },
+  "b": {
+   "path": "docs/chats/2026-10-19-knowledge-base/handoff.md",
+   "lines": "13-26",
+   "heading": "База знаний bars — итог сессии 19-10-2026/Не сделано",
+   "text": "Проектирование (шаг 21) и макет (шаг 22) — по решению автора после фиксации и после текущих этапов плана."
+  }
+ },
+ {
+  "sim": 0.44,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/knowledge/development-ideas.md",
+   "lines": "73-87",
+   "heading": "Идеи развития bars/DEV-03. Меньше повторов при том же числе результатов",
+   "text": "Только при недостаточности простого подхода — эксперимент с MMR по существующим векторам. [Elasticsearch diversify retriever](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/retrievers/diversify-retriever) подтверждает применение MMR для уменьшения избыточности найденного контекста; перенос Elasticsearch в bars не предлагается."
+  },
+  "b": {
+   "path": "docs/knowledge/development-ideas.md",
+   "lines": "158-173",
+   "heading": "Идеи развития bars/Внешние источники и пределы их применимости",
+   "text": "[Elasticsearch Diversify Retriever](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/retrievers/diversify-retriever)   MMR используется для выбора менее избыточного набора результатов, с параметром баланса."
+  }
+ },
+ {
+  "sim": 0.44,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/graphrag/plan.md",
+   "lines": "11-30",
+   "heading": "План оставшихся работ GraphRAG в bars/Карта зависимостей этапов",
+   "text": "P0–P8 обозначают внутренние зависимости GraphRAG, а не готовность пользовательских этапов."
+  },
+  "b": {
+   "path": "docs/knowledge/traceability.md",
+   "lines": "74-91",
+   "heading": "Трассировка требований bars — документы и этапы/Требования GR-01…GR-12",
+   "text": "Внутренние обозначения P0–P8 сохраняются в документах фичи как зависимости."
+  }
+ },
+ {
+  "sim": 0.439,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "3294"
+    ],
+    "b": [
+     "2341",
+     "2363",
+     "331"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/knowledge/memory-embed-2026-10-18/Index.md",
+   "lines": "26-40",
+   "heading": "Embed precision и ограниченное хранение оценок — 18-10-2026/Полный retrieval FP16 и отказ INT8",
+   "text": "Lifetime peak последовательного процесса 3294 МиБ."
+  },
+  "b": {
+   "path": "docs/knowledge/memory.md",
+   "lines": "82-102",
+   "heading": "Память bars — замеры, причины пиков и результаты/FP16 rerank и выгрузка по простою: приёмка настоящим worker",
+   "text": "Одиночный FP16: удержание 2341 МиБ, lifetime peak 2363 МиБ, после drop 331 МиБ."
+  }
+ },
+ {
+  "sim": 0.438,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/architecture/ipc.md",
+   "lines": "36-38",
+   "heading": "Локальный канал bars/Протокол канала bars",
+   "text": "JSON-RPC 2.0, одно сообщение на строку, сериализация serdejson; готовая JSON-RPC-библиотека не нужна."
+  },
+  "b": {
+   "path": "docs/architecture/protocol.md",
+   "lines": "15-19",
+   "heading": "Протокол канала bars — методы, параметры, ошибки/Формат сообщений канала",
+   "text": "JSON-RPC 2.0, одно сообщение на строку, UTF-8."
+  }
+ },
+ {
+  "sim": 0.438,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/architecture/components.md",
+   "lines": "43-51",
+   "heading": "Компоненты bars/Интерфейс окна bars",
+   "text": "Svelte 5 + TypeScript + Vite, без SvelteKit."
+  },
+  "b": {
+   "path": "docs/knowledge/build.md",
+   "lines": "41-65",
+   "heading": "Сборка bars/Проверки перед коммитом",
+   "text": "Окно — Svelte 5 + TypeScript + Vite в ui/ ([architecture/components.md](../architecture/components.md))."
+  }
+ },
+ {
+  "sim": 0.437,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/adr/0001-docs-by-features.md",
+   "lines": "31-35",
+   "heading": "ADR-0001. Документация bars по фичам и журнал сессий/Отклонённые варианты раскладки docs",
+   "text": "Тип документа во frontmatter (kind: log) вместо папок — не нужно: модули-папки уже дают отбор (OQ-41)."
+  },
+  "b": {
+   "path": "docs/chats/2026-10-15-docs-convention/log.md",
+   "lines": "5-12",
+   "heading": "Журнал сессии 15-10-2026 — соглашение о документации",
+   "text": "Отказались от типов документов во frontmatter: автор — модули-папки уже дают отбор (OQ-41)."
+  }
+ },
+ {
+  "sim": 0.436,
+  "kinds": [
+   "antonym"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [
+   "да/нет"
+  ],
+  "a": {
+   "path": "docs/chats/2026-10-21-graph-design/handoff.md",
+   "lines": "15-19",
+   "heading": "Передача — дизайн физического графа 2.1.4/Не сделано",
+   "text": "Данные стенда: близость документов из kNN снимка (не centroid), оболочка окна показывает демонстрационный проект, а граф — снимок bars-project; результаты запроса подбираются по словам названий."
+  },
+  "b": {
+   "path": "docs/features/graphrag/physical-graph-design.md",
+   "lines": "9-15",
+   "heading": "Дизайн физического графа — панели, режимы связей и сила/Стенд для согласования",
+   "text": "Близость документов взята из kNN снимка, а не из centroid; у чанков нет диапазонов; запрос и его результаты подбираются по словам названий, а не поиском bars;"
+  }
+ },
+ {
+  "sim": 0.435,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/architecture/stack.md",
+   "lines": "17-30",
+   "heading": "Стек bars/Процесс, окно и трей bars",
+   "text": "Один экземпляр воркера   tauri-plugin-single-instance   2.5   второй запуск bars показывает окно работающего (Т-1)"
+  },
+  "b": {
+   "path": "docs/architecture/worker.md",
+   "lines": "5-24",
+   "heading": "Воркер bars — запуск, задачи внутри процесса, очередь, завершение",
+   "text": "второй запуск, когда воркер уже работает   tauri-plugin-single-instance передаёт запуск работающему воркеру; тот показывает окно, если запуск был без --background, а новый процесс завершается (Т-1)"
+  }
+ },
+ {
+  "sim": 0.435,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "768"
+    ],
+    "b": [
+     "1500"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/features/models/local-models.md",
+   "lines": "9-21",
+   "heading": "Встроенные модели bars/Каталог встроенных embed-моделей",
+   "text": "nomic-ai/nomic-embed-text-v2-moe   fastembed / candle   768   searchquery:  / searchdocument:    на выбор; только CPU"
+  },
+  "b": {
+   "path": "docs/manual/models.md",
+   "lines": "18-32",
+   "heading": "Модели в bars — встроенные и внешние, видеокарта и смена модели/Какие встроенные модели есть в bars",
+   "text": "nomic-ai/nomic-embed-text-v2-moe   на выбор; только процессор; видит только начало длинного куска (примерно 1500 символов)"
+  }
+ },
+ {
+  "sim": 0.434,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/graphrag/query-graph.md",
+   "lines": "48-61",
+   "heading": "Проект графа от запроса — построение, глубина, пределы и сила связи/Построение: от запроса к результатам, от результатов к связям",
+   "text": "Узел окружения виден, если в включённом режиме у него есть видимое ребро."
+  },
+  "b": {
+   "path": "docs/features/graphrag/query-graph.md",
+   "lines": "115-129",
+   "heading": "Проект графа от запроса — построение, глубина, пределы и сила связи/Макет перехода между общим видом и видом запроса/Правила перехода",
+   "text": "Смена режима связей   Перекладка с нуля без запроса к воркеру; связь запроса видна в любом режиме; узел окружения виден, если в режиме у него есть ребро"
+  }
+ },
+ {
+  "sim": 0.432,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/knowledge-base/requirements.md",
+   "lines": "122-148",
+   "heading": "База знаний bars — постановка, решения автора и набросок устройства/Улучшения сверх запроса",
+   "text": "Ссылки с якорем. — закрыт → Т-30."
+  },
+  "b": {
+   "path": "docs/features/knowledge-base/requirements.md",
+   "lines": "184-192",
+   "heading": "База знаний bars — постановка, решения автора и набросок устройства/Журнал раундов/Раунд 3 — 19-10-2026",
+   "text": "Ссылки с якорем → «Нет - старые мы не учитываем» → Т-30."
+  }
+ },
+ {
+  "sim": 0.43,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-inference-design/stage11-plan.md",
+   "lines": "61-71",
+   "heading": "Этап 11 — измерение и ускорение инференса/Протокол скорости, памяти и качества",
+   "text": "Скрининг: три прохода фиксированного train."
+  },
+  "b": {
+   "path": "docs/knowledge/inference-speed.md",
+   "lines": "102-117",
+   "heading": "Ускорение инференса bars/Протокол воспроизведения замеров",
+   "text": "Скрининг — три прохода train; финалисты — не меньше 100 тёплых наблюдений."
+  }
+ },
+ {
+  "sim": 0.429,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "12"
+    ],
+    "b": [
+     "11"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-mcp-analysis-30/verification.md",
+   "lines": "32-41",
+   "heading": "Проверка этапа 30 — экран анализа MCP/Команды и результат",
+   "text": "cargo test --release -p bars-worker --lib mcphistory -- --test-threads=1 --nocapture — 12 passed: история, подсказки и настоящий IPC."
+  },
+  "b": {
+   "path": "docs/chats/2026-10-18-mcp-history-29/verification.md",
+   "lines": "25-37",
+   "heading": "Проверка этапа 29 — история отдельных MCP-вызовов/Команды и результаты этапа 29",
+   "text": "cargo test --release -p bars-mcp --test mcp -- --test-threads=1 — 11 passed."
+  }
+ },
+ {
+  "sim": 0.428,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/manual/how-it-works.md",
+   "lines": "90-109",
+   "heading": "Как устроен bars простыми словами/Куда bars ходит в интернет",
+   "text": "Скачать встроенную модель — один раз, с huggingface.co."
+  },
+  "b": {
+   "path": "docs/manual/troubleshooting.md",
+   "lines": "39-46",
+   "heading": "Неполадки bars — частые проблемы и что делать/Ответ «модель загружается, повторите позже»",
+   "text": "«Не удалось скачать» — нет связи с huggingface.co."
+  }
+ },
+ {
+  "sim": 0.428,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "12"
+    ],
+    "b": [
+     "267"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-mcp-analysis-30/verification.md",
+   "lines": "32-41",
+   "heading": "Проверка этапа 30 — экран анализа MCP/Команды и результат",
+   "text": "cargo test --release -p bars-worker --lib mcphistory -- --test-threads=1 --nocapture — 12 passed: история, подсказки и настоящий IPC."
+  },
+  "b": {
+   "path": "docs/chats/2026-10-20-indexing-responsiveness/verification.md",
+   "lines": "19-35",
+   "heading": "ISS-16 — проект, проверки и результаты реализации/Проверки",
+   "text": "cargo test --release -p bars-core --lib -- --test-threads=1 (в общем прогоне core/worker)   267 passed, 1 ignored"
+  }
+ },
+ {
+  "sim": 0.428,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-21-keyboard-implementation/log.md",
+   "lines": "5-8",
+   "heading": "Реализация сочетаний клавиш — находки",
+   "text": "Rust cargo-test упёрся в C1083 длинного вложенного пути генератора Vulkan; изолированные тесты самого модуля rustc прошли."
+  },
+  "b": {
+   "path": "docs/features/window/keyboard-design.md",
+   "lines": "177-202",
+   "heading": "Сочетания клавиш bars — действия, умолчания и конфликты/Реализация и критерии проверки",
+   "text": "Полный cargo test не выдан за пройденный: сборка его зависимости остановилась на C1083 длинного вложенного пути генератора Vulkan; тесты модуля хранения отдельно прошли через rustc --test с готовыми зависимостями."
+  }
+ },
+ {
+  "sim": 0.428,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/knowledge-base/editor-design.md",
+   "lines": "82-99",
+   "heading": "Редактор документа bars — устройство чтения, записи и конфликтов/Проверка",
+   "text": "E-09   Ввод по-русски, раскладка, IME, AltGr; сочетания не перехватывают ввод в поле запроса"
+  },
+  "b": {
+   "path": "docs/features/knowledge-base/editor-design.md",
+   "lines": "101-104",
+   "heading": "Редактор документа bars — устройство чтения, записи и конфликтов/Проверка/Нативная приёмка: что проверено и что осталось",
+   "text": "Проверить в установленной сборке: E-09: набрать по-русски, переключить раскладку, AltGr, IME;"
+  }
+ },
+ {
+  "sim": 0.427,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-16-iss01-model-loading/handoff.md",
+   "lines": "5-12",
+   "heading": "Передача дел 16-10-2026 — ISS-01",
+   "text": "Каталог знает полный список файлов каждой встроенной модели и её размер: isdownloaded проверяет все файлы, downloadpercent считает ход по blobs/ (bars-core/src/models/catalog.rs)."
+  },
+  "b": {
+   "path": "docs/features/models/local-models.md",
+   "lines": "82-93",
+   "heading": "Встроенные модели bars/Когда модель считается скачанной",
+   "text": "Каталог моделей (bars-core/src/models/catalog.rs) знает полный список файлов каждой встроенной модели; модель скачана, когда в одном снимке кэша лежат все эти файлы и ни один не пуст."
+  }
+ },
+ {
+  "sim": 0.426,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/backlog/ideas.md",
+   "lines": "20-25",
+   "heading": "Пожелания автора/IDEA-12: Похожие чанки по ID",
+   "text": "[x] Сделано (19-10-2026: ядро, воркер, MCP barsgetsimilar, CLI similar; тесты на временных индексах, настоящая модель и живое приложение не проверены)"
+  },
+  "b": {
+   "path": "docs/chats/2026-10-20-plan-usability/plan-before.md",
+   "lines": "71-75",
+   "heading": "План/Этап: `get_similar` — похожие чанки по ID (IDEA-12)",
+   "text": "Реализовано и проверено тестами на временных индексах: ID в выдаче поиска, ядро, воркер, MCP barsgetsimilar, CLI similar."
+  }
+ },
+ {
+  "sim": 0.425,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "22",
+     "23"
+    ],
+    "b": [
+     "2.1",
+     "17",
+     "20"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/features/graphrag/physical-graph-design.md",
+   "lines": "5-7",
+   "heading": "Дизайн физического графа — панели, режимы связей и сила",
+   "text": "Основания — Т-43/Т-46/Т-47 в [MAINIDEA.md](../../MAINIDEA.md) (уточнения автора — раунды 22 и 23), проект физического графа, [исследование физики](../../knowledge/graph-render.md), [GR-05](requirements.md#gr-05-графический-просмотр-и-пользовательские-действия)."
+  },
+  "b": {
+   "path": "docs/knowledge/traceability.md",
+   "lines": "55-61",
+   "heading": "Трассировка требований bars — документы и этапы/Требования Т-1…Т-47",
+   "text": "Т-46   2.1 → 2.1.1…2.1.5; 1.1.4, 2.3.2   [GR-05](../features/graphrag/requirements.md#gr-05-графический-просмотр-и-пользовательские-действия): рамка раунда 17, состав видов уточнён раундом 20;"
+  }
+ },
+ {
+  "sim": 0.425,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/window/error-states.md",
+   "lines": "31-41",
+   "heading": "Экраны ошибок окна bars/Внешний провайдер недоступен",
+   "text": "Embed-провайдер не ответил, поиск не выполнен: красный баннер называет адрес провайдера и причину, кнопки «Открыть настройки» (вкладка «Модели») и «Повторить»."
+  },
+  "b": {
+   "path": "docs/manual/troubleshooting.md",
+   "lines": "60-70",
+   "heading": "Неполадки bars — частые проблемы и что делать/Внешний провайдер не отвечает",
+   "text": "Красный баннер называет адрес и причину:"
+  }
+ },
+ {
+  "sim": 0.424,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "20261020"
+    ],
+    "b": [
+     "20261018"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/knowledge/memory-acceptance-2026-10-20/Index.md",
+   "lines": "5-67",
+   "heading": "Память — данные приёмки 20-10-2026",
+   "text": "20261020T090035448Z-previous-pair-third-auto-bounded-1.stderr.txt   Диагностика запуска"
+  },
+  "b": {
+   "path": "docs/knowledge/memory-fp16-2026-10-18/Index.md",
+   "lines": "5-61",
+   "heading": "Приёмка памяти продуктового FP16 rerank",
+   "text": "20261018T130604982Z-worker-ttl-v2-auto-bounded-1.stderr.txt — диагностика процесса."
+  }
+ },
+ {
+  "sim": 0.424,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "20261020"
+    ],
+    "b": [
+     "20261018"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/knowledge/memory-acceptance-2026-10-20/Index.md",
+   "lines": "5-67",
+   "heading": "Память — данные приёмки 20-10-2026",
+   "text": "20261020T090035448Z-previous-pair-third-auto-bounded-1.stderr.txt   Диагностика запуска"
+  },
+  "b": {
+   "path": "docs/knowledge/memory-fp16-2026-10-18/Index.md",
+   "lines": "5-61",
+   "heading": "Приёмка памяти продуктового FP16 rerank",
+   "text": "20261018T130604982Z-worker-ttl-v2-auto-bounded-2.stderr.txt — диагностика процесса."
+  }
+ },
+ {
+  "sim": 0.422,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/MAIN_IDEA.md",
+   "lines": "392-398",
+   "heading": "bars — локальная база знаний и RAG по документации проектов для людей и агентов/Журнал раундов/Раунд 17 — 20-10-2026: рабочая область и граф",
+   "text": "Основание — заданный автором состав работ и замечания к неприменимости графа, UX/UI и отставанию от референса, сохранённые в [журнале обсуждения](chats/2026-10-20-plan-usability/log.md)."
+  },
+  "b": {
+   "path": "docs/backlog/ideas.md",
+   "lines": "48-53",
+   "heading": "Пожелания автора/IDEA-17: Переделка экрана «Граф»",
+   "text": "Уточнение 20-10-2026: граф неприменим, UX/UI не позволяют понять результат, визуально отстаёт от референса и оторван от функций приложения ([обсуждение](../chats/2026-10-20-plan-usability/log.md))."
+  }
+ },
+ {
+  "sim": 0.422,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-21-graph-design/handoff.md",
+   "lines": "15-19",
+   "heading": "Передача — дизайн физического графа 2.1.4/Не сделано",
+   "text": "Данные стенда: близость документов из kNN снимка (не centroid), оболочка окна показывает демонстрационный проект, а граф — снимок bars-project; результаты запроса подбираются по словам названий."
+  },
+  "b": {
+   "path": "docs/features/graphrag/physical-graph-design.md",
+   "lines": "9-15",
+   "heading": "Дизайн физического графа — панели, режимы связей и сила/Стенд для согласования",
+   "text": "Внутри стенда оболочка окна показывает демонстрационный проект (13 документов), а граф — снимок bars-project: это ограничение стенда."
+  }
+ },
+ {
+  "sim": 0.42,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-device-design/stage17-plan.md",
+   "lines": "90-96",
+   "heading": "Этап 17 — раздельные устройства моделей и устойчивость индексации/Отчёт и окно",
+   "text": "Мокап: [device-settings.html](../../features/window/mockups/device-settings.html)."
+  },
+  "b": {
+   "path": "docs/features/window/settings-window.md",
+   "lines": "54-56",
+   "heading": "Экран настроек bars — модели, поиск, клиенты и статистика MCP/Вкладка «Запуск» в настройках",
+   "text": "Вкладки в мокапе [mockups/settings.html](mockups/settings.html) нет: решение агента (OQ-64)."
+  }
+ },
+ {
+  "sim": 0.419,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/window/main-window.md",
+   "lines": "28-41",
+   "heading": "Главный экран окна bars/Дерево документов с галочками",
+   "text": "Первая строка внутри дерева — «Новые темы»: выше всех папок и корневых документов (отдельной строки «Корень документации» в дереве нет), значок листа с искрой, справа число активных тем; без галочки, стрелки и числа чанков."
+  },
+  "b": {
+   "path": "docs/manual/new-topics.md",
+   "lines": "9-13",
+   "heading": "Новые темы в bars/Что такое «Новые темы» в bars",
+   "text": "Первая строка в дереве документов слева, выше всех папок, — «Новые темы» со значком листа с искрой."
+  }
+ },
+ {
+  "sim": 0.419,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-19-new-topics-api/log.md",
+   "lines": "1-5",
+   "heading": "Находки сессии: «Новые темы», внутренний API окна (шаг 20, P3)",
+   "text": "Автор (19-10-2026): в этой сессии только P3, ручное объединение/разъединение тем отложено (OQ-102)."
+  },
+  "b": {
+   "path": "docs/chats/2026-10-20-plan-usability/plan-before.md",
+   "lines": "77-83",
+   "heading": "План/Этап: «Новые темы» (IDEA-14)",
+   "text": "OQ-102 (ручное объединение и разъединение тем — не в первом объёме)."
+  }
+ },
+ {
+  "sim": 0.419,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/architecture/protocol.md",
+   "lines": "114-137",
+   "heading": "Протокол канала bars — методы, параметры, ошибки/Методы новых тем (только окно)",
+   "text": "autostartset   enabled   то же, новое состояние; повтор безвреден; на ОС без автозапуска — invalidparams"
+  },
+  "b": {
+   "path": "docs/features/distribution/autostart.md",
+   "lines": "21-32",
+   "heading": "Автозапуск bars при входе в систему/Методы и команда автозапуска",
+   "text": "Метод autostartset   enabled: true\\ false; возвращает новое состояние; повтор безвреден."
+  }
+ },
+ {
+  "sim": 0.417,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "48"
+    ],
+    "b": [
+     "32",
+     "8"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/knowledge/search-quality.md",
+   "lines": "72-99",
+   "heading": "Бенч качества поиска и умолчания IDEA-06/Первый этап: глубина действительно влияет на покрытие",
+   "text": "Обучающая часть, C30, 48 положительных вопросов."
+  },
+  "b": {
+   "path": "docs/knowledge/search-quality.md",
+   "lines": "119-141",
+   "heading": "Бенч качества поиска и умолчания IDEA-06/Отложенная часть и пороги",
+   "text": "32 положительных и 8 отрицательных вопросов, C30/K15."
+  }
+ },
+ {
+  "sim": 0.417,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-inference-design/stage11-plan.md",
+   "lines": "73-79",
+   "heading": "Этап 11 — измерение и ускорение инференса/Внедрение после измерений",
+   "text": "INT8 rerank потерял Hit@3/MRR при пороге 0,1 на od-010, поэтому умолчанием не становится."
+  },
+  "b": {
+   "path": "docs/knowledge/inference-speed.md",
+   "lines": "44-61",
+   "heading": "Ускорение инференса bars/Отобранные и отклонённые оптимизации",
+   "text": "INT8 контрпример: od-010, порог 0,1 — секционный Hit@3 1 → 0, MRR 0,5 → 0."
+  }
+ },
+ {
+  "sim": 0.415,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "20261020"
+    ],
+    "b": [
+     "20261018"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/knowledge/memory-acceptance-2026-10-20/Index.md",
+   "lines": "5-67",
+   "heading": "Память — данные приёмки 20-10-2026",
+   "text": "20261020T090035448Z-previous-pair-third-auto-bounded-1.stderr.txt   Диагностика запуска"
+  },
+  "b": {
+   "path": "docs/knowledge/memory-fp16-2026-10-18/Index.md",
+   "lines": "5-61",
+   "heading": "Приёмка памяти продуктового FP16 rerank",
+   "text": "20261018T130716793Z-worker-ttl-repeat-auto-bounded-1.stderr.txt — диагностика процесса."
+  }
+ },
+ {
+  "sim": 0.415,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/Index.md",
+   "lines": "9-23",
+   "heading": "Документация bars/Где искать ответ о bars",
+   "text": "Куда развивается bars: редактор, ссылки, index.md папки, аудиты знаний   База знаний (features/knowledge-base/Index.md), требования Т-29…Т-42 в MAINIDEA.md; реализации нет"
+  },
+  "b": {
+   "path": "docs/project-status.md",
+   "lines": "9-23",
+   "heading": "Состояние bars — реализованные возможности и открытые проверки/Что реализовано в bars",
+   "text": "База знаний   Требования Т-29…Т-42 зафиксированы 19-10-2026: редактор, ссылки, index.md папки, файлы в дереве, аудиты, очередь документов."
+  }
+ },
+ {
+  "sim": 0.413,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-folder-menu-31/verification.md",
+   "lines": "15-31",
+   "heading": "Проверка этапа 31 — меню папок и ограничения приёмки/Автоматические проверки реализации",
+   "text": "cargo clippy --release --no-deps -p bars-app -p bars-worker --lib --bins -- -D warnings   Успешно, выбранные crates без lint зависимостей"
+  },
+  "b": {
+   "path": "docs/features/window/logs.md",
+   "lines": "38-50",
+   "heading": "Логи bars — хранение и просмотр/Результаты проверки 18-10-2026",
+   "text": "Clippy   Core/worker/app, lib/bins/tests, -D warnings: успешно."
+  }
+ },
+ {
+  "sim": 0.411,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/knowledge-base/requirements.md",
+   "lines": "122-148",
+   "heading": "База знаний bars — постановка, решения автора и набросок устройства/Улучшения сверх запроса",
+   "text": "Сейчас FTS5 работает по чанкам со стеммингом и слиянием через OR — это часть ранжирования, а не «найти все вхождения» (docs/features/search/hybrid-search.md:17)."
+  },
+  "b": {
+   "path": "docs/features/search/text-search.md",
+   "lines": "13-15",
+   "heading": "Поиск «В тексте» bars — вхождения строки в документах на диске/Чем «В тексте» отличается от «По смыслу»",
+   "text": "Нынешний поиск — ранжирование по чанкам: полнотекстовый FTS5 со стеммингом и слиянием слов через OR плюс векторный и реранк ([гибридный поиск](hybrid-search.md))."
+  }
+ },
+ {
+  "sim": 0.411,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/window/requirements.md",
+   "lines": "29-39",
+   "heading": "Рабочая область bars — проект панелей, поиска и управления/Предлагаемое устройство рабочей области/Композиция основного окна",
+   "text": "Слева   Постоянная колонка: навигация, под ней мини-граф, внизу статус."
+  },
+  "b": {
+   "path": "docs/features/window/workspace-design.md",
+   "lines": "11-21",
+   "heading": "Макет каркаса рабочей области bars/Оформление и композиция",
+   "text": "Слева — постоянная колонка: дерево и мини-граф под ним с регулируемой высотой, внизу статус; это не вкладки, колонка не перетаскивается и не скрывается (OQ-117)."
+  }
+ },
+ {
+  "sim": 0.411,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/manual/agents.md",
+   "lines": "82-88",
+   "heading": "bars и агенты — подключение Claude Code, Codex и других клиентов/Как агент выбирает проект",
+   "text": "bars кладёт в папку документации каждого проекта файл BARSINSTRUCTION.md — короткую инструкцию для агентов на английском: как оформлять документы, чтобы bars хорошо их находил. bars сам обновляет этот файл и не включает его в поиск."
+  },
+  "b": {
+   "path": "docs/manual/projects.md",
+   "lines": "53-62",
+   "heading": "Проекты в bars — как добавить, убрать, перенести и удалить/Что лежит в папке .bars внутри проекта",
+   "text": "Ещё bars кладёт в папку документации файл BARSINSTRUCTION.md — инструкцию для агентов, как оформлять документы."
+  }
+ },
+ {
+  "sim": 0.411,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/settings/settings.md",
+   "lines": "9-20",
+   "heading": "Настройки bars/Embed-модель в settings.toml",
+   "text": "model   BAAI/bge-m3   для builtin — модель из каталога [features/models/local-models.md](../models/local-models.md); для остальных — имя модели у провайдера"
+  },
+  "b": {
+   "path": "docs/features/settings/settings.md",
+   "lines": "102-118",
+   "heading": "Настройки bars/Как bars читает файлы настроек",
+   "text": "source = \"builtin\", а embed.model нет во встроенном каталоге ([features/models/local-models.md](../models/local-models.md)), или rerank.model не BAAI/bge-reranker-v2-m3;"
+  }
+ },
+ {
+  "sim": 0.409,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/architecture/stack.md",
+   "lines": "32-43",
+   "heading": "Стек bars/Модели bars",
+   "text": "ONNX Runtime скачивается при сборке с cdn.pyke.io и линкуется в bars статически: отдельной dll или dylib рядом с exe нет."
+  },
+  "b": {
+   "path": "docs/knowledge/build.md",
+   "lines": "5-13",
+   "heading": "Сборка bars",
+   "text": "Сеть: ort скачивает ONNX Runtime с cdn.pyke.io при первой сборке bars-core."
+  }
+ },
+ {
+  "sim": 0.409,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-chunk-truncation/handoff.md",
+   "lines": "5-9",
+   "heading": "Передача сессии — маркер продолжения чанка",
+   "text": "Части большого раздела с продолжением заканчиваются точным  ...(truncated); последняя часть и целые разделы без маркера."
+  },
+  "b": {
+   "path": "docs/features/indexing/chunking.md",
+   "lines": "39-49",
+   "heading": "Нарезка документа на чанки/Большой раздел: дорезка по абзацам",
+   "text": "Каждая часть большого раздела, у которой есть продолжение, заканчивается точным суффиксом  ...(truncated)."
+  }
+ },
+ {
+  "sim": 0.409,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/models/local-models.md",
+   "lines": "95-99",
+   "heading": "Встроенные модели bars/Один замок на скачивание и загрузку",
+   "text": "Поиск замок не ждёт: пока модель скачивается или грузится, он сразу отвечает modelloading с ходом скачивания в data.percent."
+  },
+  "b": {
+   "path": "docs/features/window/implementation.md",
+   "lines": "53-61",
+   "heading": "Как устроено окно bars/Что окно делает сверх мокапов",
+   "text": "Пока модель скачивается или грузится, воркер отвечает modelloading с data.percent; окно показывает баннер и само повторяет поиск раз в две секунды."
+  }
+ },
+ {
+  "sim": 0.408,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-folder-menu-31/verification.md",
+   "lines": "15-31",
+   "heading": "Проверка этапа 31 — меню папок и ограничения приёмки/Автоматические проверки реализации",
+   "text": "cargo clippy --release --no-deps -p bars-app -p bars-worker --lib --bins -- -D warnings   Успешно, выбранные crates без lint зависимостей"
+  },
+  "b": {
+   "path": "docs/chats/2026-10-18-notifications-28/verification.md",
+   "lines": "5-19",
+   "heading": "Проверка этапа 28 — уведомления",
+   "text": "Команды: npm --prefix ui test, npm --prefix ui run check, npm --prefix ui run build; cargo test --release -p bars-protocol --lib; cargo test --release -p bars-worker --lib; cargo clippy --release -p bars-worker --lib --no-deps -- -D warnings."
+  }
+ },
+ {
+  "sim": 0.407,
+  "kinds": [
+   "swap"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "1024"
+    ],
+    "b": [
+     "0.6",
+     "4"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/features/models/local-models.md",
+   "lines": "9-21",
+   "heading": "Встроенные модели bars/Каталог встроенных embed-моделей",
+   "text": "Qwen/Qwen3-Embedding-0.6B   llama.cpp / GGUF Q4KM   1024   инструкция для запроса   на выбор; сторонняя закреплённая конверсия enacimie"
+  },
+  "b": {
+   "path": "docs/knowledge/gguf-models.md",
+   "lines": "56-61",
+   "heading": "Qwen3 GGUF и llama.cpp — проверка и результаты/Источники GGUF",
+   "text": "[Qwen 0.6B GGUF](https://huggingface.co/Qwen/Qwen3-Embedding-0.6B-GGUF), [конверсия Q4](https://huggingface.co/enacimie/Qwen3-Embedding-0.6B-Q4KM-GGUF), [Qwen 4B GGUF](https://huggingface.co/Qwen/Qwen3-Embedding-4B-GGUF)."
+  }
+ },
+ {
+  "sim": 0.407,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/knowledge/memory.md",
+   "lines": "104-112",
+   "heading": "Память bars — замеры, причины пиков и результаты/Embed: FP16 и INT8",
+   "text": "Чистая скорость и естественный корпус НФТ-2 на 5000 chunks не приняты."
+  },
+  "b": {
+   "path": "docs/knowledge/memory.md",
+   "lines": "214-219",
+   "heading": "Память bars — замеры, причины пиков и результаты/Что не доказано",
+   "text": "Чистая скорость FP16, естественный корпус на 5000 chunks, рекомендации для 8/16/32 ГиБ и совместная нагрузка индексации с 1/2/4 поисками."
+  }
+ },
+ {
+  "sim": 0.405,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/knowledge/search-quality.md",
+   "lines": "11-33",
+   "heading": "Бенч качества поиска и умолчания IDEA-06/Методика",
+   "text": "Лимиты выдачи повышены только внутри бенча (для MRR@10 и порогов); задержка — вызов ядра без IPC и отрисовки."
+  },
+  "b": {
+   "path": "docs/knowledge/search-quality.md",
+   "lines": "58-70",
+   "heading": "Бенч качества поиска и умолчания IDEA-06/Корпус, разметка и воспроизводимость",
+   "text": "Лимиты выдачи внутри бенча повышены до 200/100 для анализа хвоста и порогов."
+  }
+ },
+ {
+  "sim": 0.405,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/features/window/keyboard-design.md",
+   "lines": "128-142",
+   "heading": "Сочетания клавиш bars — действия, умолчания и конфликты/Приоритеты обработчиков и ввода",
+   "text": "Обычные поля ввода сохраняют Ctrl/Cmd+A/C/X/V/Z, вставку без форматирования Mod+Shift+V, Redo, навигацию/выделение текста, удаление слов, Home/End."
+  },
+  "b": {
+   "path": "docs/features/window/keyboard-design.md",
+   "lines": "144-161",
+   "heading": "Сочетания клавиш bars — действия, умолчания и конфликты/Формат клавиш, русская раскладка и системные конфликты",
+   "text": "Текст: Mod+A/C/X/V/Z, Mod+Shift+V, Windows Ctrl+Y/Ctrl+Shift+Z, macOS Cmd+Shift+Z;"
+  }
+ },
+ {
+  "sim": 0.401,
+  "kinds": [
+   "number",
+   "swap"
+  ],
+  "num": [
+   {
+    "unit": "мс",
+    "a": [
+     "120",
+     "292"
+    ],
+    "b": [
+     "140.5",
+     "277.2"
+    ]
+   }
+  ],
+  "slot": [],
+  "swap": [
+   {
+    "a": [
+     "104",
+     "120",
+     "292"
+    ],
+    "b": [
+     "140.5",
+     "277.2"
+    ]
+   }
+  ],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-18-stage33-implementation/log.md",
+   "lines": "5-12",
+   "heading": "Сессия внедрения GraphRAG — события",
+   "text": "Реальный корпус: 104 документа/579 chunks, parse ~120 мс, kNN ~292 мс."
+  },
+  "b": {
+   "path": "docs/knowledge/graph-corpus-2026-10-18/Index.md",
+   "lines": "15-26",
+   "heading": "GraphRAG — development-корпус и ресурсная проба 18-10-2026/Ресурсы без инференса",
+   "text": "Parse 140,5 мс, точный bounded kNN 277,2 мс."
+  }
+ },
+ {
+  "sim": 0.401,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/chats/2026-10-20-plan-usability/plan-before.md",
+   "lines": "77-83",
+   "heading": "План/Этап: «Новые темы» (IDEA-14)",
+   "text": "Сбор в воркере, хранилище, внутренний API окна и панель со строкой дерева реализованы (19-10-2026, шаг 19 и шаг 20; проверено на подделке модели, компонентными тестами и в браузере на заглушке воркера); остаётся приёмка на настоящей bge-m3 и в собранном Tauri. [Требования NT-01…12](docs/features/new-topics/requirements.md), [дизайн](docs/features/new-topics/design.md), [план P0–P4](docs/features/new-topics/plan.md), [макет](docs/features/new-topics/design/mockup.html), [методы окна](docs/architecture/protocol.md#методы-новых-тем-только-окно)."
+  },
+  "b": {
+   "path": "docs/features/new-topics/design.md",
+   "lines": "5-7",
+   "heading": "Новые темы — поведение окна и устройство фичи",
+   "text": "С 19-10-2026 реализованы сбор в воркере, хранилище и дедупликация (P1–P2), внутренний API окна с проверкой тем (P3; [тесты](plan.md)) и экран с первой строкой дерева (P4; проверено компонентными тестами и в браузере на заглушке воркера, настоящая bge-m3 и собранное окно Tauri не проверялись)."
+  }
+ },
+ {
+  "sim": 0.4,
+  "kinds": [
+   "negation"
+  ],
+  "num": [],
+  "slot": [],
+  "swap": [],
+  "ant": [],
+  "a": {
+   "path": "docs/MAIN_IDEA.md",
+   "lines": "65-115",
+   "heading": "bars — локальная база знаний и RAG по документации проектов для людей и агентов/Требования",
+   "text": "Это совет, а не требование: bars не проверяет и не навязывает структуру docs/, на оформление файлов влияет только просьбой (OQ-39, OQ-41)."
+  },
+  "b": {
+   "path": "docs/features/docs-convention/Index.md",
+   "lines": "5-16",
+   "heading": "Соглашение о документации — фича bars",
+   "text": "На оформление файлов bars влияет только просьбой в инструкции."
+  }
+ }
+]

@@ -956,7 +956,11 @@ fn a_deferred_document_keeps_its_old_version_until_the_next_check() {
     let mut index = open(dir.path());
     updated(dir.path(), &mut index, &mut FakeEmbedder::new("m"));
     let before: Vec<_> = index.documents().unwrap();
-    write(dir.path(), "docs/a.md", "# Новый\n\nСодержимое изменено и стало длиннее\n");
+    write(
+        dir.path(),
+        "docs/a.md",
+        "# Новый\n\nСодержимое изменено и стало длиннее\n",
+    );
     write(dir.path(), "docs/b.md", "# Второй, правка\n");
     write(dir.path(), "docs/c.md", "# Третий\n");
 
@@ -980,7 +984,10 @@ fn a_deferred_document_keeps_its_old_version_until_the_next_check() {
         .into_iter()
         .find(|d| d.path.ends_with("a.md"))
         .unwrap();
-    assert_eq!(a_now.hash, a_before.hash, "отложенный документ не пересчитан");
+    assert_eq!(
+        a_now.hash, a_before.hash,
+        "отложенный документ не пересчитан"
+    );
 
     let report = updated(dir.path(), &mut index, &mut FakeEmbedder::new("m"));
     assert_eq!((report.deferred, report.changed), (0, 1));

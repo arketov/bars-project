@@ -38,7 +38,9 @@ describe("Меню папок этапа 31", () => {
     expect(app.selected.size).toBe(0); expect(app.current).toBe(project.path);
     expect(el.querySelector(".kids")).toBeNull();
     expect(button("Проверить индекс проекта").textContent).toContain("Проверяется весь проект");
-    expect(button("Открыть в …")).toBeUndefined(); expect(button("Удалить")).toBeUndefined();
+    expect(button("Открыть в …")).toBeUndefined();
+    // Т-33: над папкой доступны создание, переименование, перенос и удаление.
+    for (const label of ["Новый документ…", "Новая папка…", "Переименовать…", "Переместить…", "Удалить…"]) expect(button(label)).toBeDefined();
     expect(document.querySelector<HTMLElement>(".cmenu")!.style.left).not.toBe("9999px");
   });
   it("вложенная папка, клавиатура, Escape возвращает фокус строки", async () => {
@@ -46,9 +48,10 @@ describe("Меню папок этапа 31", () => {
     const row = el.querySelector<HTMLElement>('[data-folder-path="модуль/вложенная"]')!; row.focus();
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "F10", shiftKey: true, cancelable: true })); await settle();
     expect(api.folderTarget).toHaveBeenCalledWith(project.path, project.docs_root, "модуль/вложенная");
-    expect(document.activeElement).toBe(button("Открыть в Проводнике"));
+    expect(document.activeElement).toBe(button("Новый документ…"));
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "End", cancelable: true }));
-    expect(document.activeElement).toBe(button("Проверить индекс проекта"));
+    // Последний пункт — выбор цвета и иконки подпапки второго уровня (Т-38).
+    expect(document.activeElement).toBe(button("Цвет и иконка…"));
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); flushSync();
     expect(document.activeElement).toBe(row); expect(document.querySelector(".cmenu")).toBeNull();
   });

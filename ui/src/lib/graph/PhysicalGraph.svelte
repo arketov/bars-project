@@ -4,11 +4,13 @@
   import { onDestroy, onMount, untrack } from "svelte";
   import Icon from "../Icon.svelte";
   import { app } from "../app.svelte";
+  import { appearance } from "../appearance.svelte";
+  import { documentColor, keyOf } from "../appearance";
   import type { GraphStatus } from "../graph";
   import { BarsError } from "../types";
   import { draw, layoutLines, lineDistance, moduleColors, radiusOf, readPalette, toScreen, toWorld, type Camera, type Palette, type Scene, type Target } from "./draw";
   import { DEFAULT_FORCES, Layout, type Forces, type PNode } from "./layout";
-  import { EDGE_KINDS, KIND_TITLE, brightnessOf, drawStrength, springOf, widthOf, type EdgeKind, type GEdge, type Mode, type SliceKind } from "./model";
+  import { EDGE_KINDS, KIND_TITLE, brightnessOf, drawStrength, springOf, widthOf, type EdgeKind, type GEdge, type GNode, type Mode, type SliceKind } from "./model";
   import { graphStatus, loadPhysical, toggleGraphBuild } from "./physical-api";
   import { defaultSettings, loadSettings, saveSettings, type PanelKind, type PanelSettings } from "./settings";
   import { INITIAL_LIMITS, MAX_LIMITS, PORTION, SliceStore, emptySlice, type Limits, type Slice } from "./slice";
@@ -337,6 +339,10 @@
   /** Цвет модуля для узлов без назначенного цвета: по всем модулям среза, чтобы цвет не менялся от вида. */
   const moduleMap = $derived(moduleColors(base.nodes.filter((n) => n.kind === "document").map((n) => n.module)));
 
+  /** Т-38: цвет документа — свой или папки; чанк берёт цвет документа. Узлы без цвета красятся цветом модуля. */
+  const assigned = (node: GNode): string | null => (node.kind === "query" ? null : documentColor(appearance.data, keyOf(node.docsPath)));
+  $effect(() => { void appearance.data; untrack(schedule); });
+
   function paint() {
     if (!canvas || !layout || !palette || size.w < 2) return;
     const ctx = canvas.getContext("2d");
@@ -348,7 +354,7 @@
     const groups = Object.entries(expanded).map(([o, shown]) => ({ owner: Number(o), shown, total: slice.nodes[Number(o)]?.chunks ?? shown }));
     const scene: Scene = {
       w: size.w, h: size.h, dpr: window.devicePixelRatio || 1, cam, nodes: layout.nodes, links: layout.links, palette, kinds,
-      selected, hovered, related: related(), marked: markedNodes(), groups, mini, modules: moduleMap, focus: isLocal() ? focusIndex : null,
+      selected, hovered, related: related(), marked: markedNodes(), groups, mini, modules: moduleMap, assigned, focus: isLocal() ? focusIndex : null,
     };
     draw(ctx, scene);
   }

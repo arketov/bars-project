@@ -882,8 +882,9 @@ async fn window_gets_activity_tree_and_pause_from_the_handler() {
     worker.shutdown().await;
 }
 
-mod external_models;
+mod audits;
 mod concurrency;
+mod external_models;
 mod graph;
 mod links;
 mod new_topics;

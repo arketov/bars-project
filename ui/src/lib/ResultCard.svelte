@@ -4,6 +4,9 @@
   import { copyText } from "./api";
   import { decimal, fit, moduleLabel } from "./format";
   import Icon from "./Icon.svelte";
+  import { appearance } from "./appearance.svelte";
+  import { colorVar, documentColor, keyOf } from "./appearance";
+  import { relativeToDocs } from "./tree";
   import { plainText, renderChunk } from "./markdown";
   import type { SearchHit } from "./types";
 
@@ -13,6 +16,7 @@
   let toggled = $state<boolean | null>(null);
   const open = $derived(toggled ?? startOpen);
   const f = $derived(fit(hit.score, hit.score_kind));
+  const dot = $derived(colorVar(documentColor(appearance.data, keyOf(relativeToDocs(hit.path, app.docsRoot || "")))));
   const shown = $derived(app.viewer?.hit.path === hit.path && app.viewer.hit.first_line === hit.first_line);
   const crumbs = $derived(hit.heading_chain.split("/").join(" / "));
   const title = $derived(hit.heading_chain.split("/").pop() || hit.title);
@@ -35,7 +39,7 @@
     <div class="head">
       <div class="ctitle">{title}</div>
       <div class="crumbs"><span class="mono">{hit.path}:{hit.first_line}</span> · {crumbs}</div>
-      <div class="badges"><span class="badge acc">{moduleLabel(hit.module)}</span><span class="badge">{hit.title}</span></div>
+      <div class="badges">{#if dot}<span class="dot" style:background={dot} title="Цвет документа" aria-hidden="true"></span>{/if}<span class="badge acc">{moduleLabel(hit.module)}</span><span class="badge">{hit.title}</span></div>
       {#if !open}<div class="snippet">{plainText(hit.text)}</div>{/if}
     </div>
     <div class="fit {f.cls}" title={f.explanation}>
@@ -68,6 +72,7 @@
   .ctitle { font-weight: 600; font-size: 13px; line-height: 1.3; }
   .crumbs { color: var(--muted); font-size: 12.5px; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .crumbs .mono { color: var(--accent-text); font-size: 12px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; align-self: center; flex: none; }
   .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
   .snippet { color: var(--muted); margin-top: 8px; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 13.5px; }
   .fit { text-align: right; min-width: 80px; }

@@ -6,6 +6,7 @@
 //! доступа живёт в `bars-worker`, запуск воркера по требованию — позже.
 //! Контракт — `docs/architecture/protocol.md` и `docs/architecture/ipc.md`.
 
+mod audits;
 mod client;
 mod endpoint;
 mod error;
@@ -15,8 +16,8 @@ mod home;
 mod instruction;
 mod jsonrpc;
 mod launch;
-mod methods;
 mod links;
+mod methods;
 mod new_topics;
 mod operations;
 mod server;
@@ -25,6 +26,7 @@ mod text;
 #[cfg(windows)]
 pub mod winsid;
 
+pub use audits::*;
 pub use bars_graph as graph_types;
 pub use client::{Client, ClientError};
 pub use endpoint::Endpoint;
@@ -37,8 +39,8 @@ pub use jsonrpc::*;
 pub use launch::{
     LAUNCH_DEADLINE, connect_or_launch, connect_or_launch_with, spawn_worker, worker_exe,
 };
-pub use methods::*;
 pub use links::*;
+pub use methods::*;
 pub use new_topics::*;
 pub use operations::*;
 pub use server::{Handler, serve_connection};

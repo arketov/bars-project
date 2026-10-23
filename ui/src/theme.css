@@ -5,11 +5,14 @@
   --bg: #f5f4f6; --panel: #ffffff; --panel-2: #f8f7f9; --line: #e5e2e7; --line-2: #d4d0d8;
   --text: #1d1a20; --muted: #67616c; --faint: #a09aa6;
   --accent: #d6336c; --accent-text: #b8245a; --accent-soft: #fde8ef; --on-accent: #ffffff;
+  /* Палитра цветов документов и папок (Т-38); контраст со своим фоном панели не ниже 3:1. */
+  --pal-red: #d04545; --pal-orange: #d9782a; --pal-amber: #b58a14; --pal-green: #2f9a5c; --pal-teal: #1f9a95; --pal-blue: #3f84cf; --pal-violet: #8059c9; --pal-pink: #d14a80; --pal-gray: #85808a;
 }
 [data-mode="dark"] {
   --bg: #131115; --panel: #1b181d; --panel-2: #211d23; --line: #2c282f; --line-2: #3a353e;
   --text: #ece8ee; --muted: #988f9d; --faint: #665e6b;
   --accent: #f0568c; --accent-text: #ff7aa6; --accent-soft: #3a1a27; --on-accent: #2a0814;
+  --pal-red: #ec7070; --pal-orange: #f0a35c; --pal-amber: #e0bb45; --pal-green: #5cc287; --pal-teal: #46c1bb; --pal-blue: #6aa8ec; --pal-violet: #a98cea; --pal-pink: #ec79a6; --pal-gray: #8a8590;
 }
 
 /* Цвета оценки и состояний — общие для всех палитр */

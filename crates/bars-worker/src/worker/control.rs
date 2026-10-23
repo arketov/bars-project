@@ -166,15 +166,29 @@ impl JobCell {
 pub struct JobObserver {
     pause: Arc<Pause>,
     cell: Arc<JobCell>,
+    /// Документ ждёт паузы после правки: проверка его пропускает (Т-41).
+    defer: Option<Arc<dyn Fn(&str) -> bool + Send + Sync>>,
 }
 
 impl JobObserver {
     pub fn new(pause: Arc<Pause>, cell: Arc<JobCell>) -> Self {
-        Self { pause, cell }
+        Self {
+            pause,
+            cell,
+            defer: None,
+        }
+    }
+
+    pub fn with_defer(mut self, defer: Arc<dyn Fn(&str) -> bool + Send + Sync>) -> Self {
+        self.defer = Some(defer);
+        self
     }
 }
 
 impl IndexObserver for JobObserver {
+    fn defer(&self, path: &str) -> bool {
+        self.defer.as_ref().is_some_and(|defer| defer(path))
+    }
     fn execution(&self, info: bars_core::models::ExecutionInfo) {
         *lock(&self.cell.execution) = info;
     }

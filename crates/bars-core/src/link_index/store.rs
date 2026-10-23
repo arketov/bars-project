@@ -52,6 +52,15 @@ pub struct OutgoingLink {
     pub broken: bool,
 }
 
+/// Битая ссылка: источник от корня проекта, строка, текст ссылки и адресат как написан.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BrokenLink {
+    pub src: String,
+    pub line: u32,
+    pub text: String,
+    pub raw: String,
+}
+
 /// Документ, который ссылается на данный.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct IncomingLink {
@@ -383,6 +392,54 @@ impl LinkIndex {
             outgoing,
             incoming,
         })
+    }
+
+    /// Все битые ссылки проекта: источник, строка, текст и адресат как написан. Порядок — по
+    /// документу и позиции в тексте.
+    pub fn broken_links(&self) -> Result<Vec<BrokenLink>, LinkIndexError> {
+        let prefix = self.meta("docs_prefix")?.unwrap_or_default();
+        let mut docs: Vec<String> = Vec::new();
+        {
+            let mut statement = self.db.prepare("SELECT path FROM docs")?;
+            let rows = statement.query_map([], |r| r.get::<_, String>(0))?;
+            for row in rows {
+                docs.push(row?);
+            }
+        }
+        let set = DocSet::new(
+            docs.iter()
+                .map(|doc| relative_to_docs(doc, &prefix).to_string()),
+        );
+        let mut statement = self.db.prepare(
+            "SELECT src, line, start, end, kind, raw_target, text, fragment FROM links ORDER BY src, start",
+        )?;
+        let rows = statement.query_map([], |r| {
+            Ok((
+                r.get::<_, String>(0)?,
+                ParsedLink {
+                    line: r.get(1)?,
+                    start: r.get::<_, i64>(2)? as usize,
+                    end: r.get::<_, i64>(3)? as usize,
+                    kind: LinkKind::parse(&r.get::<_, String>(4)?).unwrap_or(LinkKind::Inline),
+                    raw_target: r.get(5)?,
+                    text: r.get(6)?,
+                    fragment: r.get(7)?,
+                },
+            ))
+        })?;
+        let mut broken = Vec::new();
+        for row in rows {
+            let (src, link) = row?;
+            if set.resolve(relative_to_docs(&src, &prefix), &link) == Resolved::Broken {
+                broken.push(BrokenLink {
+                    src,
+                    line: link.line,
+                    text: link.text,
+                    raw: link.raw_target,
+                });
+            }
+        }
+        Ok(broken)
     }
 }
 

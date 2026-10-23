@@ -10,6 +10,6 @@ mod store;
 mod tests;
 
 pub use store::{
-    IncomingLink, LINKS_PARSER_VERSION, LinkIndex, LinkIndexError, LinksOf,
+    BrokenLink, IncomingLink, LINKS_PARSER_VERSION, LinkIndex, LinkIndexError, LinksOf,
     OutgoingLink, RefreshStats, store_path,
 };

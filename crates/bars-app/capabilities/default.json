@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Окно bars: события и вызовы собственных команд. Файловой системы и оболочки у окна нет.",
-  "windows": ["main"],
+  "description": "Окна bars (главное и отдельные окна документов): события и вызовы собственных команд. Файловой системы и оболочки у окна нет.",
+  "windows": ["main", "doc-*"],
   "permissions": ["core:default"]
 }

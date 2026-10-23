@@ -7,6 +7,7 @@
 
 mod control;
 mod deletion;
+mod doc_queue;
 mod graph;
 mod job;
 mod model_lifecycle;
@@ -28,7 +29,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError, Weak};
-use std::time::{Duration, SystemTime};
+use std::time::{Duration, Instant, SystemTime};
 
 use crate::autostart::{Autostart, NoAutostart};
 use crate::clients::InstallEnv;
@@ -52,6 +53,8 @@ pub use timefmt::{index_token, rfc3339};
 
 use control::{JobCell, JobObserver, Pause};
 pub use control::{Kind as JobKind, Progress as JobProgress};
+use doc_queue::DocQueue;
+pub use doc_queue::{DocCounts, DocSource, DocState, DocView};
 use job::{JobEnv, Outcome};
 use queue::{Job, JobQueue};
 use registry::{has_markdown, normalize, project_name};
@@ -70,6 +73,19 @@ pub(crate) fn lock<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
     mutex.lock().unwrap_or_else(PoisonError::into_inner)
 }
 
+/// Ключ документа в очереди документов: путь от корня проекта через `/`, как в индексе.
+/// `None` — файл не под корнем проекта.
+fn doc_key(project: &Path, file: &Path) -> Option<String> {
+    let relative = file.strip_prefix(project).ok()?;
+    let parts: Option<Vec<&str>> = relative
+        .components()
+        .map(|component| component.as_os_str().to_str())
+        .collect();
+    parts
+        .filter(|parts| !parts.is_empty())
+        .map(|parts| parts.join("/"))
+}
+
 #[derive(Clone)]
 pub struct WorkerConfig {
     /// `~/.bars`: настройки, реестр, модели.
@@ -81,6 +97,9 @@ pub struct WorkerConfig {
     pub debounce: Duration,
     /// Через сколько после пачки событий проект проверяется целиком ([`TAIL_DELAY`]).
     pub tail_delay: Duration,
+    /// Пауза после правки до embed документа; `None` — из настроек (`[indexing]
+    /// edit_pause_seconds`, Т-41). Тесты задают короткую.
+    pub edit_pause: Option<Duration>,
     /// Куда установка и автообновление пишут записи клиентов; `None` — запись отключена.
     /// Приложение включает явно; тесты передают временный профиль.
     pub install_env: Option<InstallEnv>,
@@ -111,6 +130,7 @@ impl WorkerConfig {
             model_idle: ModelIdlePolicy::default(),
             debounce: DEBOUNCE,
             tail_delay: TAIL_DELAY,
+            edit_pause: None,
             install_env: None,
             secrets: Arc::new(OsSecrets::default()),
             autostart: Arc::new(NoAutostart),
@@ -257,6 +277,10 @@ struct Inner {
     registry: Mutex<Registry>,
     projects: Mutex<HashMap<PathBuf, Runtime>>,
     queue: Mutex<JobQueue>,
+    /// Очередь документов: паузы после правок и состояния (`document-queue.md`).
+    docs: Arc<Mutex<DocQueue>>,
+    /// Очередь документов изменилась: таймер пересчитывает ближайшую паузу.
+    doc_wake: Notify,
     /// Задание вынуто из очереди и ещё выполняется.
     busy: AtomicBool,
     wake: Notify,
@@ -315,6 +339,8 @@ impl Worker {
             registry: Mutex::new(registry),
             projects: Mutex::new(HashMap::new()),
             queue: Mutex::new(JobQueue::new()),
+            docs: Arc::new(Mutex::new(DocQueue::new())),
+            doc_wake: Notify::new(),
             busy: AtomicBool::new(false),
             wake: Notify::new(),
             stop: AtomicBool::new(false),
@@ -331,8 +357,9 @@ impl Worker {
         });
         let queue_task = tokio::spawn(Arc::clone(&inner).run_queue());
         let timer_task = tokio::spawn(Arc::clone(&inner).run_timer());
+        let doc_task = tokio::spawn(Arc::clone(&inner).run_doc_timer());
         let model_task = tokio::spawn(Arc::clone(&inner).run_model_maintenance());
-        lock(&inner.tasks).extend([queue_task, timer_task, model_task]);
+        lock(&inner.tasks).extend([queue_task, timer_task, doc_task, model_task]);
         for path in paths {
             inner.activate(&path, Priority::Periodic);
         }
@@ -394,9 +421,10 @@ impl Worker {
         }
         self.inner.wake.notify_one();
         let tasks: Vec<_> = lock(&self.inner.tasks).drain(..).collect();
-        // Первая — очередь: она дописывает текущее задание сама. Вторая — таймер, он ждёт часами.
+        // Первая — очередь: она дописывает текущее задание сама. Вторая — таймер, он ждёт часами;
+        // третья — таймер пауз документов, он тоже не нужен после остановки.
         for (position, task) in tasks.into_iter().enumerate() {
-            if position == 1 {
+            if position == 1 || position == 2 {
                 task.abort();
             }
             let _ = task.await;
@@ -570,6 +598,8 @@ impl Worker {
             .ok_or_else(|| WorkerError::NotRegistered(path.clone()))?;
         let queue = lock(&self.inner.queue);
         let queued = queue.get(&path);
+        let counts = lock(&self.inner.docs).counts(&path);
+        let live_docs = counts.waiting + counts.queued + counts.indexing;
         let status = &runtime.status;
         let scanning = lock(&self.inner.scans).contains_key(&path);
         Ok(ProjectStatus {
@@ -579,7 +609,13 @@ impl Worker {
                 status.state
             },
             updated_at: status.updated_at,
-            pending: queued.map_or(0, Job::listed_files),
+            // Записи очереди документов — это и есть ожидающие документы; без них — документы,
+            // названные в ждущем задании.
+            pending: if live_docs > 0 {
+                live_docs
+            } else {
+                queued.map_or(0, Job::listed_files)
+            },
             queued: queued.is_some(),
             model_index: status.model_index.clone(),
             model_settings: status.model_settings.clone(),
@@ -706,6 +742,45 @@ impl Worker {
                 files: job.listed_files(),
             })
             .collect()
+    }
+
+    /// Правка документов в окне bars: они ждут паузы Т-41 и идут в очередь с приоритетом правки
+    /// (Т-42). Файл, который уже виден слежению, остаётся одной записью.
+    pub fn documents_edited(&self, path: &Path, files: Vec<PathBuf>) -> Result<(), WorkerError> {
+        let path = self.registered(path)?;
+        if !files.is_empty() && self.status(&path)?.state != ProjectState::Unavailable {
+            self.inner.touch_files(&path, files, DocSource::Edit);
+        }
+        Ok(())
+    }
+
+    /// Очередь документов проекта для страницы индексации: до `limit` записей в порядке
+    /// выполнения и счётчики по состояниям.
+    pub fn doc_queue(
+        &self,
+        path: &Path,
+        limit: usize,
+    ) -> Result<(Vec<DocView>, DocCounts), WorkerError> {
+        let path = self.registered(path)?;
+        let docs = lock(&self.inner.docs);
+        Ok((
+            docs.snapshot(&path, Instant::now(), limit),
+            docs.counts(&path),
+        ))
+    }
+
+    /// «Повторить» для документа с ошибкой: он снова готов к индексации. `false` — записи нет
+    /// или она не в ошибке.
+    pub fn doc_retry(&self, path: &Path, document: &str) -> Result<bool, WorkerError> {
+        let path = self.registered(path)?;
+        let retried = lock(&self.inner.docs).retry(&path, document);
+        if retried {
+            let ready = lock(&self.inner.docs).ready_of(&path);
+            if let Some(ready) = ready {
+                self.inner.submit_docs(&path, ready.paths, ready.source);
+            }
+        }
+        Ok(retried)
     }
 
     /// Проблемы проектов по итогам последней проверки: файлы с ошибками и `last_error`.
@@ -880,10 +955,11 @@ impl Worker {
         &self.inner.config.bars_home
     }
 
-    /// Очередь пуста и ничего не выполняется.
+    /// Очередь пуста, ничего не выполняется и ни один документ не ждёт паузы или индексации.
     pub fn is_idle(&self) -> bool {
         let queue = lock(&self.inner.queue);
         queue.is_empty()
+            && !lock(&self.inner.docs).has_pending()
             && !self.inner.busy.load(Ordering::SeqCst)
             && lock(&self.inner.scans).is_empty()
     }
@@ -911,9 +987,10 @@ impl Inner {
     }
 
     fn cancel_queued(&self, path: &Path) -> bool {
+        let dropped = lock(&self.docs).remove_project(path) > 0;
         let mut queue = lock(&self.queue);
         let id = queue.get(path).map(|job| job.operation_id);
-        let removed = queue.remove(path);
+        let removed = queue.remove(path) || dropped;
         if let Some(id) = id {
             lock(&self.models.operations).finish(id, "cancelled", None, None);
         }
@@ -974,6 +1051,7 @@ impl Inner {
             .into();
             op.source = match merged.priority {
                 Priority::Explicit => "explicit",
+                Priority::Edit => "edit",
                 Priority::Watch => "watch",
                 Priority::Periodic => "periodic",
             }
@@ -1084,7 +1162,7 @@ impl Inner {
             runtime.watch_events = runtime.watch_events.saturating_add(1);
         }
         match event {
-            WatchEvent::Files(files) => self.enqueue(project, Job::files(Priority::Watch, files)),
+            WatchEvent::Files(files) => self.touch_files(project, files, DocSource::Watch),
             WatchEvent::Failed(message) => {
                 if let Some(runtime) = lock(&self.projects).get_mut(project) {
                     runtime.watch_failed = true;
@@ -1097,6 +1175,123 @@ impl Inner {
         }
         // Хвост пачки мог потеряться: проверка целиком через несколько секунд.
         self.arm_tail(project);
+    }
+
+    /// Пауза после правки до embed документа проекта (Т-41): значение конфигурации, иначе
+    /// `[indexing] edit_pause_seconds`; ошибка настроек не мешает — берётся умолчание.
+    fn edit_pause(&self, project: &Path) -> Duration {
+        self.config.edit_pause.unwrap_or_else(|| {
+            let seconds = Settings::load(&self.config.bars_home, project)
+                .map(|loaded| loaded.value.indexing.edit_pause_seconds)
+                .unwrap_or(bars_core::settings::DEFAULT_EDIT_PAUSE_SECONDS);
+            Duration::from_secs(u64::from(seconds))
+        })
+    }
+
+    /// Файлы изменились в окне или на диске. Существующие `.md` ждут паузы и идут в очередь
+    /// документов (Т-41, Т-42); пропавшие файлы, папки и проект, ждущий переиндексации, ставятся
+    /// заданием сразу: удалению пауза не нужна, а в `reindex_required` записи не создаются.
+    fn touch_files(&self, project: &Path, files: Vec<PathBuf>, source: DocSource) {
+        let reindex = lock(&self.projects)
+            .get(project)
+            .is_some_and(|runtime| runtime.status.state == ProjectState::ReindexRequired);
+        let mut direct = Vec::new();
+        let mut keys = Vec::new();
+        for file in files {
+            match doc_key(project, &file) {
+                Some(key) if !reindex && file.is_file() => keys.push(key),
+                _ => direct.push(file),
+            }
+        }
+        if !keys.is_empty() {
+            let pause = self.edit_pause(project);
+            let now = Instant::now();
+            let ready = {
+                let mut docs = lock(&self.docs);
+                for key in &keys {
+                    docs.touch(project, key, source, pause, now);
+                }
+                docs.ready_of(project)
+            };
+            if let Some(ready) = ready {
+                self.submit_docs(project, ready.paths, ready.source);
+            }
+            self.doc_wake.notify_one();
+        }
+        if !direct.is_empty() {
+            self.enqueue(project, Job::files(source.priority(), direct));
+        }
+    }
+
+    /// Отдаёт готовые документы заданию проекта: одна пачка на проект.
+    fn submit_docs(
+        &self,
+        project: &Path,
+        paths: std::collections::BTreeSet<String>,
+        source: DocSource,
+    ) {
+        let files = paths.into_iter().map(|path| project.join(path));
+        self.enqueue(project, Job::files(source.priority(), files));
+    }
+
+    /// Ждёт ближайшую паузу и отдаёт документы, у которых она истекла.
+    async fn run_doc_timer(self: Arc<Self>) {
+        loop {
+            if self.stop.load(Ordering::SeqCst) {
+                break;
+            }
+            let next = lock(&self.docs).next_due();
+            match next {
+                Some(due) => {
+                    let due = tokio::time::Instant::from_std(due);
+                    tokio::select! {
+                        () = tokio::time::sleep_until(due) => {}
+                        () = self.doc_wake.notified() => continue,
+                    }
+                }
+                None => {
+                    self.doc_wake.notified().await;
+                    continue;
+                }
+            }
+            let ready = lock(&self.docs).promote_due(Instant::now());
+            for item in ready {
+                self.submit_docs(&item.project, item.paths, item.source);
+            }
+        }
+    }
+
+    /// Итог задания для записей очереди документов. Успех снимает записи; документ с ошибкой
+    /// эмбеддинга остаётся с причиной; сбой задания возвращает остальные в очередь; остановка,
+    /// недоступная папка и ожидание переиндексации снимают все записи проекта.
+    fn finish_docs(&self, project: &Path, taken: &[String], outcome: &Outcome) {
+        use bars_core::indexing::indexer::UpdateReport;
+        let failures = |report: &UpdateReport| -> std::collections::BTreeMap<String, String> {
+            report
+                .problems
+                .iter()
+                .filter(|problem| problem.stage == "embedding")
+                .map(|problem| (problem.path.clone(), problem.reason.clone()))
+                .collect()
+        };
+        let mut docs = lock(&self.docs);
+        match outcome {
+            Outcome::Updated(report) => docs.finish(project, taken, &failures(report), false),
+            Outcome::Interrupted {
+                report,
+                cancelled: false,
+                ..
+            } => docs.finish(project, taken, &failures(report), true),
+            Outcome::Failed(_) => docs.finish(project, taken, &Default::default(), true),
+            Outcome::Interrupted { .. }
+            | Outcome::Cancelled
+            | Outcome::Unavailable
+            | Outcome::ReindexRequired(_) => {
+                docs.remove_project(project);
+            }
+        }
+        drop(docs);
+        self.doc_wake.notify_one();
     }
 
     /// Назначает полную проверку проекта через `tail_delay` (ISS-06): на Windows `notify` теряет
@@ -1263,10 +1458,37 @@ impl Inner {
             (Arc::clone(&runtime.gate), previous)
         };
 
+        // Документы очереди, которые задание разберёт, и те, что остаются ждать паузы (Т-41).
+        let taken = {
+            let listed = match &job.scope {
+                queue::Scope::Full => None,
+                queue::Scope::Files(files) => Some(
+                    files
+                        .iter()
+                        .filter_map(|file| doc_key(&path, file))
+                        .collect::<std::collections::BTreeSet<_>>(),
+                ),
+            };
+            let explicit = if rebuild {
+                Some(None)
+            } else if job.priority == Priority::Explicit {
+                Some(listed.as_ref())
+            } else {
+                None
+            };
+            lock(&self.docs).begin(&path, explicit)
+        };
         let worker = Arc::clone(self);
         let project = path.clone();
         lock(&self.models.operations).edit(operation_id, |op| op.state = "running".into());
-        let observer = JobObserver::new(Arc::clone(&self.pause), Arc::clone(&cell));
+        let mut observer = JobObserver::new(Arc::clone(&self.pause), Arc::clone(&cell));
+        if !rebuild {
+            let docs = Arc::clone(&self.docs);
+            let owner = path.clone();
+            observer = observer.with_defer(Arc::new(move |document: &str| {
+                lock(&docs).is_waiting(&owner, document)
+            }));
+        }
         log::info!("Начата индексация: {}", path.display());
         let result = tokio::task::spawn_blocking(move || {
             let env = JobEnv {
@@ -1334,6 +1556,7 @@ impl Inner {
             Outcome::Cancelled => log::info!("Индексация отменена: {}", path.display()),
             Outcome::ReindexRequired(_) => log::info!("Нужна переиндексация: {}", path.display()),
         }
+        self.finish_docs(&path, &taken, &result.outcome);
         let outcome = result.outcome.clone();
         // Публикация итога только после применения состояния проекта.
         self.apply(&path, previous, &job_gate, result);

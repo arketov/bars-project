@@ -579,6 +579,10 @@ pub fn duplicates(
         } else {
             continue;
         };
+        // Частичное совпадение разделов одного документа — рамка, а не повтор (0 из 22 на разметке).
+        if kind == DuplicateKind::Partial && items[first].path == items[second].path {
+            continue;
+        }
         lexical.insert((first, second));
         pairs.push(Pair {
             kind,
@@ -604,6 +608,10 @@ pub fn duplicates(
     let mut vectors: HashMap<String, Option<Vec<f32>>> = HashMap::new();
     for (&(first, second), &shared) in &loose_counts {
         if lexical.contains(&(first, second)) || same_group(first, second) {
+            continue;
+        }
+        // Смысловая близость разделов одного документа — их общая тема, а не повтор.
+        if items[first].path == items[second].path {
             continue;
         }
         let (left, right) = (items[first].s3.len(), items[second].s3.len());

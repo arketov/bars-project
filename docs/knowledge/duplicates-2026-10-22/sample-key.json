@@ -1,0 +1,2916 @@
+{
+ "universe": {
+  "overdrive-bots": {
+   "exact": 0,
+   "near": 0,
+   "contained": 0,
+   "partial_hi": 5,
+   "partial_lo": 17,
+   "semantic_hi": 4,
+   "semantic_mid": 52,
+   "semantic_lo": 110,
+   "miss_near": 0,
+   "miss_partial": 47,
+   "miss_semantic_gate": 3171,
+   "miss_semantic_cos": 229,
+   "template": 20
+  },
+  "bars-project": {
+   "exact": 0,
+   "near": 0,
+   "contained": 0,
+   "partial_hi": 0,
+   "partial_lo": 5,
+   "semantic_hi": 4,
+   "semantic_mid": 43,
+   "semantic_lo": 72,
+   "miss_near": 0,
+   "miss_partial": 23,
+   "miss_semantic_gate": 1840,
+   "miss_semantic_cos": 165,
+   "template": 1
+  }
+ },
+ "key": [
+  {
+   "id": "P001",
+   "project": "bars-project",
+   "stratum": "semantic_mid",
+   "stratumSize": 43,
+   "taken": 9,
+   "kind": "semantic",
+   "a": 615,
+   "b": 1406,
+   "first": {
+    "path": "docs/features/distribution/installer.md",
+    "lines": "54-61"
+   },
+   "second": {
+    "path": "docs/manual/install.md",
+    "lines": "63-70"
+   },
+   "c5": 0.0294,
+   "j5": 0.0107,
+   "c5raw": 0.0294,
+   "c3": 0.0857,
+   "cos": 0.8538,
+   "shared5": 2
+  },
+  {
+   "id": "P002",
+   "project": "bars-project",
+   "stratum": "miss_semantic_cos",
+   "stratumSize": 165,
+   "taken": 9,
+   "kind": null,
+   "a": 239,
+   "b": 241,
+   "first": {
+    "path": "docs/chats/2026-10-18-folder-menu-31/handoff.md",
+    "lines": "15-17"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-18-folder-menu-31/log.md",
+    "lines": "5-9"
+   },
+   "c5": 0.0164,
+   "j5": 0.0082,
+   "c5raw": 0.0164,
+   "c3": 0.1111,
+   "cos": 0.7778,
+   "shared5": 1
+  },
+  {
+   "id": "P003",
+   "project": "overdrive-bots",
+   "stratum": "miss_partial",
+   "stratumSize": 47,
+   "taken": 8,
+   "kind": null,
+   "a": 1397,
+   "b": 834,
+   "first": {
+    "path": "docs/features/run-panel/index.md",
+    "lines": "29-33"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-13-quick-improvements/log.md",
+    "lines": "4-13"
+   },
+   "c5": 0.1212,
+   "j5": 0.0601,
+   "c5raw": 0.1212,
+   "c3": 0.1437,
+   "cos": 0.695,
+   "shared5": 20
+  },
+  {
+   "id": "P004",
+   "project": "overdrive-bots",
+   "stratum": "semantic_hi",
+   "stratumSize": 4,
+   "taken": 4,
+   "kind": "semantic",
+   "a": 1368,
+   "b": 1708,
+   "first": {
+    "path": "docs/features/pits-and-service/auto-return.md",
+    "lines": "16-23"
+   },
+   "second": {
+    "path": "docs/manual/pits-and-service.md",
+    "lines": "61-70"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0.1228,
+   "cos": 0.8808,
+   "shared5": 0
+  },
+  {
+   "id": "P005",
+   "project": "bars-project",
+   "stratum": "miss_semantic_gate",
+   "stratumSize": 1840,
+   "taken": 9,
+   "kind": null,
+   "a": 821,
+   "b": 826,
+   "first": {
+    "path": "docs/features/knowledge-base/link-index.md",
+    "lines": "35-37"
+   },
+   "second": {
+    "path": "docs/features/knowledge-base/link-index.md",
+    "lines": "82-84"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0,
+   "cos": 0.8274,
+   "shared5": 0
+  },
+  {
+   "id": "P006",
+   "project": "overdrive-bots",
+   "stratum": "semantic_lo",
+   "stratumSize": 110,
+   "taken": 8,
+   "kind": "semantic",
+   "a": 608,
+   "b": 516,
+   "first": {
+    "path": "docs/backlog/research-queue.md",
+    "lines": "186-196"
+   },
+   "second": {
+    "path": "docs/architecture/runtime/runtime-latency.md",
+    "lines": "4-10"
+   },
+   "c5": 0.0222,
+   "j5": 0.0088,
+   "c5raw": 0.0444,
+   "c3": 0.0552,
+   "cos": 0.8012,
+   "shared5": 4
+  },
+  {
+   "id": "P007",
+   "project": "overdrive-bots",
+   "stratum": "semantic_mid",
+   "stratumSize": 52,
+   "taken": 8,
+   "kind": "semantic",
+   "a": 1700,
+   "b": 1604,
+   "first": {
+    "path": "docs/manual/limits-and-load.md",
+    "lines": "35-39"
+   },
+   "second": {
+    "path": "docs/manual/how-control-works.md",
+    "lines": "45-47"
+   },
+   "c5": 0.0789,
+   "j5": 0.037,
+   "c5raw": 0.0789,
+   "c3": 0.25,
+   "cos": 0.8572,
+   "shared5": 3
+  },
+  {
+   "id": "P008",
+   "project": "overdrive-bots",
+   "stratum": "miss_partial",
+   "stratumSize": 47,
+   "taken": 8,
+   "kind": null,
+   "a": 1399,
+   "b": 1316,
+   "first": {
+    "path": "docs/features/run-panel/index.md",
+    "lines": "39-41"
+   },
+   "second": {
+    "path": "docs/features/car-selection/requirements.md",
+    "lines": "4-16"
+   },
+   "c5": 0.125,
+   "j5": 0.0415,
+   "c5raw": 0.1875,
+   "c3": 0.0938,
+   "cos": 0.6542,
+   "shared5": 8
+  },
+  {
+   "id": "P009",
+   "project": "bars-project",
+   "stratum": "semantic_mid",
+   "stratumSize": 43,
+   "taken": 9,
+   "kind": "semantic",
+   "a": 142,
+   "b": 934,
+   "first": {
+    "path": "docs/backlog/ideas.md",
+    "lines": "20-25"
+   },
+   "second": {
+    "path": "docs/features/search/maintenance-tools.md",
+    "lines": "5-7"
+   },
+   "c5": 0.0351,
+   "j5": 0.0164,
+   "c5raw": 0.0351,
+   "c3": 0.0508,
+   "cos": 0.8672,
+   "shared5": 2
+  },
+  {
+   "id": "P010",
+   "project": "overdrive-bots",
+   "stratum": "template",
+   "stratumSize": 20,
+   "taken": 8,
+   "kind": null,
+   "a": 1673,
+   "b": 1575,
+   "first": {
+    "path": "docs/manual/in-game-panel.md",
+    "lines": "4-14"
+   },
+   "second": {
+    "path": "docs/manual/getting-started.md",
+    "lines": "4-17"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0.2817,
+   "c3": 0,
+   "cos": 0.836,
+   "shared5": 0
+  },
+  {
+   "id": "P011",
+   "project": "overdrive-bots",
+   "stratum": "miss_semantic_gate",
+   "stratumSize": 3171,
+   "taken": 8,
+   "kind": null,
+   "a": 658,
+   "b": 661,
+   "first": {
+    "path": "docs/chats/2026-10-07-advanced-control/csp-lua-input-setters.md",
+    "lines": "4-8"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-07-advanced-control/csp-lua-input-setters.md",
+    "lines": "39-49"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0,
+   "cos": 0.8667,
+   "shared5": 0
+  },
+  {
+   "id": "P012",
+   "project": "bars-project",
+   "stratum": "semantic_lo",
+   "stratumSize": 72,
+   "taken": 9,
+   "kind": "semantic",
+   "a": 1294,
+   "b": 880,
+   "first": {
+    "path": "docs/knowledge/memory.md",
+    "lines": "210-212"
+   },
+   "second": {
+    "path": "docs/features/models/memory-plan.md",
+    "lines": "20-33"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0.0694,
+   "c3": 0.0541,
+   "cos": 0.8268,
+   "shared5": 0
+  },
+  {
+   "id": "P013",
+   "project": "overdrive-bots",
+   "stratum": "semantic_lo",
+   "stratumSize": 110,
+   "taken": 8,
+   "kind": "semantic",
+   "a": 958,
+   "b": 965,
+   "first": {
+    "path": "docs/chats/2026-10-18-damage-driving-q005/damage-driving-threshold-q005-2026-10-18.md",
+    "lines": "4-8"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-18-damage-driving-q005/handoff.md",
+    "lines": "4-12"
+   },
+   "c5": 0.043,
+   "j5": 0.014,
+   "c5raw": 0.043,
+   "c3": 0.0543,
+   "cos": 0.803,
+   "shared5": 4
+  },
+  {
+   "id": "P014",
+   "project": "overdrive-bots",
+   "stratum": "miss_semantic_gate",
+   "stratumSize": 3171,
+   "taken": 8,
+   "kind": null,
+   "a": 637,
+   "b": 632,
+   "first": {
+    "path": "docs/chats/2026-10-06-original-research/log.md",
+    "lines": "88-107"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-06-original-research/log.md",
+    "lines": "4-18"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0,
+   "cos": 0.8299,
+   "shared5": 0
+  },
+  {
+   "id": "P015",
+   "project": "overdrive-bots",
+   "stratum": "template",
+   "stratumSize": 20,
+   "taken": 8,
+   "kind": null,
+   "a": 1550,
+   "b": 1293,
+   "first": {
+    "path": "docs/knowledge/player-modes-runs.md",
+    "lines": "34-41"
+   },
+   "second": {
+    "path": "docs/features/algorithmic-commands/player-following/police.md",
+    "lines": "21-23"
+   },
+   "c5": 0.08,
+   "j5": 0.0145,
+   "c5raw": 0.3,
+   "c3": 0.0769,
+   "cos": 0.7285,
+   "shared5": 4
+  },
+  {
+   "id": "P016",
+   "project": "overdrive-bots",
+   "stratum": "partial_lo",
+   "stratumSize": 17,
+   "taken": 8,
+   "kind": "partial",
+   "a": 162,
+   "b": 685,
+   "first": {
+    "path": "docs/architecture/environment/private-copy-binaries.md",
+    "lines": "57-65"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-07-multibot-live/stock-udp-ports.md",
+    "lines": "18-33"
+   },
+   "c5": 0.4015,
+   "j5": 0.123,
+   "c5raw": 0.4015,
+   "c3": 0.5076,
+   "cos": 0.8663,
+   "shared5": 53
+  },
+  {
+   "id": "P017",
+   "project": "bars-project",
+   "stratum": "semantic_mid",
+   "stratumSize": 43,
+   "taken": 9,
+   "kind": "semantic",
+   "a": 603,
+   "b": 198,
+   "first": {
+    "path": "docs/features/clients/clients.md",
+    "lines": "115-121"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-18-clients-auto-update/verification.md",
+    "lines": "58-62"
+   },
+   "c5": 0.0164,
+   "j5": 0.0072,
+   "c5raw": 0.0164,
+   "c3": 0.0794,
+   "cos": 0.8455,
+   "shared5": 1
+  },
+  {
+   "id": "P018",
+   "project": "overdrive-bots",
+   "stratum": "miss_semantic_cos",
+   "stratumSize": 229,
+   "taken": 8,
+   "kind": null,
+   "a": 579,
+   "b": 1287,
+   "first": {
+    "path": "docs/backlog/issues.md",
+    "lines": "26-32"
+   },
+   "second": {
+    "path": "docs/features/algorithmic-commands/player-following/index.md",
+    "lines": "10-21"
+   },
+   "c5": 0.0094,
+   "j5": 0.0033,
+   "c5raw": 0.0094,
+   "c3": 0.0561,
+   "cos": 0.7431,
+   "shared5": 1
+  },
+  {
+   "id": "P019",
+   "project": "bars-project",
+   "stratum": "miss_semantic_cos",
+   "stratumSize": 165,
+   "taken": 9,
+   "kind": null,
+   "a": 465,
+   "b": 903,
+   "first": {
+    "path": "docs/chats/2026-10-20-new-topics-grouping/handoff.md",
+    "lines": "5-11"
+   },
+   "second": {
+    "path": "docs/features/new-topics/plan.md",
+    "lines": "44-59"
+   },
+   "c5": 0.0597,
+   "j5": 0.0164,
+   "c5raw": 0.0672,
+   "c3": 0.0882,
+   "cos": 0.7966,
+   "shared5": 8
+  },
+  {
+   "id": "P020",
+   "project": "overdrive-bots",
+   "stratum": "partial_hi",
+   "stratumSize": 5,
+   "taken": 5,
+   "kind": "partial",
+   "a": 349,
+   "b": 1379,
+   "first": {
+    "path": "docs/architecture/native/pit-teleport.md",
+    "lines": "4-10"
+   },
+   "second": {
+    "path": "docs/features/pits-and-service/instant-pit.md",
+    "lines": "4-8"
+   },
+   "c5": 0.7778,
+   "j5": 0.28,
+   "c5raw": 0.7778,
+   "c3": 0.7234,
+   "cos": 0.8922,
+   "shared5": 35
+  },
+  {
+   "id": "P021",
+   "project": "overdrive-bots",
+   "stratum": "miss_semantic_cos",
+   "stratumSize": 229,
+   "taken": 8,
+   "kind": null,
+   "a": 100,
+   "b": 936,
+   "first": {
+    "path": "docs/architecture/app/in-game-control.md",
+    "lines": "52-59"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-16-panel-pit-service/handoff.md",
+    "lines": "8-10"
+   },
+   "c5": 0.0417,
+   "j5": 0.0084,
+   "c5raw": 0.0417,
+   "c3": 0.08,
+   "cos": 0.7504,
+   "shared5": 2
+  },
+  {
+   "id": "P022",
+   "project": "overdrive-bots",
+   "stratum": "semantic_hi",
+   "stratumSize": 4,
+   "taken": 4,
+   "kind": "semantic",
+   "a": 1543,
+   "b": 1516,
+   "first": {
+    "path": "docs/knowledge/UX_AUDIT_2026-10-09.md",
+    "lines": "576-584"
+   },
+   "second": {
+    "path": "docs/knowledge/UX_AUDIT_2026-10-09.md",
+    "lines": "275-278"
+   },
+   "c5": 0.1935,
+   "j5": 0.0435,
+   "c5raw": 0.1935,
+   "c3": 0.303,
+   "cos": 0.8821,
+   "shared5": 6
+  },
+  {
+   "id": "P023",
+   "project": "bars-project",
+   "stratum": "semantic_lo",
+   "stratumSize": 72,
+   "taken": 9,
+   "kind": "semantic",
+   "a": 192,
+   "b": 188,
+   "first": {
+    "path": "docs/chats/2026-10-18-clients-auto-update/plan.md",
+    "lines": "5-18"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-18-clients-auto-update/handoff.md",
+    "lines": "5-13"
+   },
+   "c5": 0.037,
+   "j5": 0.0172,
+   "c5raw": 0.037,
+   "c3": 0.0876,
+   "cos": 0.8108,
+   "shared5": 5
+  },
+  {
+   "id": "P024",
+   "project": "overdrive-bots",
+   "stratum": "miss_semantic_gate",
+   "stratumSize": 3171,
+   "taken": 8,
+   "kind": null,
+   "a": 215,
+   "b": 209,
+   "first": {
+    "path": "docs/architecture/native/collision-reactive-behavior.md",
+    "lines": "48-52"
+   },
+   "second": {
+    "path": "docs/architecture/native/collision-reactive-behavior.md",
+    "lines": "4-10"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0,
+   "cos": 0.8252,
+   "shared5": 0
+  },
+  {
+   "id": "P025",
+   "project": "overdrive-bots",
+   "stratum": "template",
+   "stratumSize": 20,
+   "taken": 8,
+   "kind": null,
+   "a": 568,
+   "b": 1277,
+   "first": {
+    "path": "docs/backlog/ideas.md",
+    "lines": "64-72"
+   },
+   "second": {
+    "path": "docs/features/algorithmic-commands/player-following/approach-and-follow.md",
+    "lines": "4-14"
+   },
+   "c5": 0.0286,
+   "j5": 0.0096,
+   "c5raw": 0.3,
+   "c3": 0.0278,
+   "cos": 0.7739,
+   "shared5": 2
+  },
+  {
+   "id": "P026",
+   "project": "bars-project",
+   "stratum": "partial_lo",
+   "stratumSize": 5,
+   "taken": 5,
+   "kind": "partial",
+   "a": 1140,
+   "b": 1141,
+   "first": {
+    "path": "docs/knowledge/duplicates-2026-10-19/Index.md",
+    "lines": "5-19"
+   },
+   "second": {
+    "path": "docs/knowledge/duplicates-2026-10-19/analysis/Index.md",
+    "lines": "5-15"
+   },
+   "c5": 0.4127,
+   "j5": 0.1383,
+   "c5raw": 0.4127,
+   "c3": 0.5692,
+   "cos": 0.852,
+   "shared5": 26
+  },
+  {
+   "id": "P027",
+   "project": "bars-project",
+   "stratum": "partial_lo",
+   "stratumSize": 5,
+   "taken": 5,
+   "kind": "partial",
+   "a": 829,
+   "b": 33,
+   "first": {
+    "path": "docs/features/knowledge-base/requirements.md",
+    "lines": "13-25"
+   },
+   "second": {
+    "path": "docs/MAIN_IDEA.md",
+    "lines": "388-390"
+   },
+   "c5": 0.2564,
+   "j5": 0.0885,
+   "c5raw": 0.2564,
+   "c3": 0.3,
+   "cos": 0.8041,
+   "shared5": 20
+  },
+  {
+   "id": "P028",
+   "project": "overdrive-bots",
+   "stratum": "miss_semantic_gate",
+   "stratumSize": 3171,
+   "taken": 8,
+   "kind": null,
+   "a": 1589,
+   "b": 1598,
+   "first": {
+    "path": "docs/manual/how-bots-work.md",
+    "lines": "32-34"
+   },
+   "second": {
+    "path": "docs/manual/how-bots-work.md",
+    "lines": "87-91"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0,
+   "cos": 0.8122,
+   "shared5": 0
+  },
+  {
+   "id": "P029",
+   "project": "overdrive-bots",
+   "stratum": "miss_partial",
+   "stratumSize": 47,
+   "taken": 8,
+   "kind": null,
+   "a": 1184,
+   "b": 395,
+   "first": {
+    "path": "docs/chats/2026-10-18-stage17-spline/runtime-ai-splines.md",
+    "lines": "37-41"
+   },
+   "second": {
+    "path": "docs/architecture/native/runtime-ai-spline.md",
+    "lines": "31-41"
+   },
+   "c5": 0.1605,
+   "j5": 0.051,
+   "c5raw": 0.1728,
+   "c3": 0.1566,
+   "cos": 0.7651,
+   "shared5": 13
+  },
+  {
+   "id": "P030",
+   "project": "bars-project",
+   "stratum": "semantic_lo",
+   "stratumSize": 72,
+   "taken": 9,
+   "kind": "semantic",
+   "a": 733,
+   "b": 581,
+   "first": {
+    "path": "docs/features/graphrag/requirements.md",
+    "lines": "56-60"
+   },
+   "second": {
+    "path": "docs/features/agent-tools/mcp-tools.md",
+    "lines": "17-21"
+   },
+   "c5": 0.0303,
+   "j5": 0.013,
+   "c5raw": 0.0303,
+   "c3": 0.0588,
+   "cos": 0.8108,
+   "shared5": 2
+  },
+  {
+   "id": "P031",
+   "project": "overdrive-bots",
+   "stratum": "miss_partial",
+   "stratumSize": 47,
+   "taken": 8,
+   "kind": null,
+   "a": 1156,
+   "b": 489,
+   "first": {
+    "path": "docs/chats/2026-10-18-stage15-adaptive/q016-client-race-order-2026-10-18.md",
+    "lines": "48-61"
+   },
+   "second": {
+    "path": "docs/architecture/runtime/race-order.md",
+    "lines": "65-73"
+   },
+   "c5": 0.1594,
+   "j5": 0.0284,
+   "c5raw": 0.1594,
+   "c3": 0.2394,
+   "cos": 0.7533,
+   "shared5": 11
+  },
+  {
+   "id": "P032",
+   "project": "bars-project",
+   "stratum": "semantic_hi",
+   "stratumSize": 4,
+   "taken": 4,
+   "kind": "semantic",
+   "a": 474,
+   "b": 154,
+   "first": {
+    "path": "docs/chats/2026-10-20-plan-usability/plan-before.md",
+    "lines": "34-38"
+   },
+   "second": {
+    "path": "docs/backlog/issues.md",
+    "lines": "42-53"
+   },
+   "c5": 0.0992,
+   "j5": 0.0239,
+   "c5raw": 0.1679,
+   "c3": 0.1318,
+   "cos": 0.8818,
+   "shared5": 13
+  },
+  {
+   "id": "P033",
+   "project": "overdrive-bots",
+   "stratum": "template",
+   "stratumSize": 20,
+   "taken": 8,
+   "kind": null,
+   "a": 1673,
+   "b": 1703,
+   "first": {
+    "path": "docs/manual/in-game-panel.md",
+    "lines": "4-14"
+   },
+   "second": {
+    "path": "docs/manual/pits-and-service.md",
+    "lines": "4-17"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0.2817,
+   "c3": 0,
+   "cos": 0.7091,
+   "shared5": 0
+  },
+  {
+   "id": "P034",
+   "project": "bars-project",
+   "stratum": "miss_semantic_cos",
+   "stratumSize": 165,
+   "taken": 9,
+   "kind": null,
+   "a": 1481,
+   "b": 627,
+   "first": {
+    "path": "docs/manual/writing-docs.md",
+    "lines": "35-48"
+   },
+   "second": {
+    "path": "docs/features/docs-convention/layout.md",
+    "lines": "5-29"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0.0526,
+   "cos": 0.7904,
+   "shared5": 0
+  },
+  {
+   "id": "P035",
+   "project": "bars-project",
+   "stratum": "miss_semantic_gate",
+   "stratumSize": 1840,
+   "taken": 9,
+   "kind": null,
+   "a": 1286,
+   "b": 1233,
+   "first": {
+    "path": "docs/knowledge/memory.md",
+    "lines": "104-112"
+   },
+   "second": {
+    "path": "docs/knowledge/inference-speed.md",
+    "lines": "63-69"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0.0455,
+   "cos": 0.8937,
+   "shared5": 0
+  },
+  {
+   "id": "P036",
+   "project": "bars-project",
+   "stratum": "miss_partial",
+   "stratumSize": 23,
+   "taken": 9,
+   "kind": null,
+   "a": 832,
+   "b": 10,
+   "first": {
+    "path": "docs/features/knowledge-base/requirements.md",
+    "lines": "70-72"
+   },
+   "second": {
+    "path": "docs/MAIN_IDEA.md",
+    "lines": "124-136"
+   },
+   "c5": 0.141,
+   "j5": 0.0116,
+   "c5raw": 0.1667,
+   "c3": 0.325,
+   "cos": 0.7888,
+   "shared5": 11
+  },
+  {
+   "id": "P037",
+   "project": "bars-project",
+   "stratum": "semantic_mid",
+   "stratumSize": 43,
+   "taken": 9,
+   "kind": "semantic",
+   "a": 1435,
+   "b": 922,
+   "first": {
+    "path": "docs/manual/projects.md",
+    "lines": "105-113"
+   },
+   "second": {
+    "path": "docs/features/projects/projects.md",
+    "lines": "29-31"
+   },
+   "c5": 0.0556,
+   "j5": 0.0196,
+   "c5raw": 0.0556,
+   "c3": 0.2895,
+   "cos": 0.8519,
+   "shared5": 2
+  },
+  {
+   "id": "P038",
+   "project": "bars-project",
+   "stratum": "miss_partial",
+   "stratumSize": 23,
+   "taken": 9,
+   "kind": null,
+   "a": 392,
+   "b": 391,
+   "first": {
+    "path": "docs/chats/2026-10-19-chunk-id-design/log.md",
+    "lines": "1-5"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-19-chunk-id-design/handoff.md",
+    "lines": "19-25"
+   },
+   "c5": 0.1538,
+   "j5": 0.05,
+   "c5raw": 0.1538,
+   "c3": 0.25,
+   "cos": 0.7587,
+   "shared5": 12
+  },
+  {
+   "id": "P039",
+   "project": "overdrive-bots",
+   "stratum": "partial_lo",
+   "stratumSize": 17,
+   "taken": 8,
+   "kind": "partial",
+   "a": 1397,
+   "b": 848,
+   "first": {
+    "path": "docs/features/run-panel/index.md",
+    "lines": "29-33"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-13-race-states-window/log.md",
+    "lines": "12-26"
+   },
+   "c5": 0.3033,
+   "j5": 0.148,
+   "c5raw": 0.3033,
+   "c3": 0.3629,
+   "cos": 0.8124,
+   "shared5": 37
+  },
+  {
+   "id": "P040",
+   "project": "bars-project",
+   "stratum": "semantic_mid",
+   "stratumSize": 43,
+   "taken": 9,
+   "kind": "semantic",
+   "a": 798,
+   "b": 799,
+   "first": {
+    "path": "docs/features/knowledge-base/colors-icons.md",
+    "lines": "9-20"
+   },
+   "second": {
+    "path": "docs/features/knowledge-base/colors-icons.md",
+    "lines": "22-24"
+   },
+   "c5": 0.0339,
+   "j5": 0.0161,
+   "c5raw": 0.0339,
+   "c3": 0.0984,
+   "cos": 0.8443,
+   "shared5": 2
+  },
+  {
+   "id": "P041",
+   "project": "overdrive-bots",
+   "stratum": "miss_semantic_cos",
+   "stratumSize": 229,
+   "taken": 8,
+   "kind": null,
+   "a": 1297,
+   "b": 1725,
+   "first": {
+    "path": "docs/features/bot-launch/index.md",
+    "lines": "16-24"
+   },
+   "second": {
+    "path": "docs/manual/race-commands.md",
+    "lines": "28-32"
+   },
+   "c5": 0.0217,
+   "j5": 0.004,
+   "c5raw": 0.0217,
+   "c3": 0.0652,
+   "cos": 0.7913,
+   "shared5": 1
+  },
+  {
+   "id": "P042",
+   "project": "overdrive-bots",
+   "stratum": "miss_partial",
+   "stratumSize": 47,
+   "taken": 8,
+   "kind": null,
+   "a": 1162,
+   "b": 1139,
+   "first": {
+    "path": "docs/chats/2026-10-18-stage15-adaptive/wpf-http-host-q029-2026-10-18.md",
+    "lines": "4-8"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-18-stage15-adaptive/contact-state-q028-2026-10-18.md",
+    "lines": "4-8"
+   },
+   "c5": 0.1212,
+   "j5": 0.0577,
+   "c5raw": 0.1818,
+   "c3": 0.1224,
+   "cos": 0.6796,
+   "shared5": 12
+  },
+  {
+   "id": "P043",
+   "project": "bars-project",
+   "stratum": "semantic_lo",
+   "stratumSize": 72,
+   "taken": 9,
+   "kind": "semantic",
+   "a": 1397,
+   "b": 1483,
+   "first": {
+    "path": "docs/manual/how-it-works.md",
+    "lines": "74-80"
+   },
+   "second": {
+    "path": "docs/manual/writing-docs.md",
+    "lines": "54-61"
+   },
+   "c5": 0.0571,
+   "j5": 0.0238,
+   "c5raw": 0.0571,
+   "c3": 0.1081,
+   "cos": 0.8236,
+   "shared5": 2
+  },
+  {
+   "id": "P044",
+   "project": "bars-project",
+   "stratum": "miss_semantic_gate",
+   "stratumSize": 1840,
+   "taken": 9,
+   "kind": null,
+   "a": 456,
+   "b": 459,
+   "first": {
+    "path": "docs/chats/2026-10-20-keyboard-design/handoff.md",
+    "lines": "5-13"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-20-keyboard-design/handoff.md",
+    "lines": "23-25"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0,
+   "cos": 0.8067,
+   "shared5": 0
+  },
+  {
+   "id": "P045",
+   "project": "bars-project",
+   "stratum": "miss_semantic_gate",
+   "stratumSize": 1840,
+   "taken": 9,
+   "kind": null,
+   "a": 167,
+   "b": 168,
+   "first": {
+    "path": "docs/chats/2026-10-16-iss01-model-loading/handoff.md",
+    "lines": "5-12"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-16-iss01-model-loading/handoff.md",
+    "lines": "14-26"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0,
+   "cos": 0.8068,
+   "shared5": 0
+  },
+  {
+   "id": "P046",
+   "project": "bars-project",
+   "stratum": "partial_lo",
+   "stratumSize": 5,
+   "taken": 5,
+   "kind": "partial",
+   "a": 5,
+   "b": 25,
+   "first": {
+    "path": "docs/MAIN_IDEA.md",
+    "lines": "13-29"
+   },
+   "second": {
+    "path": "docs/MAIN_IDEA.md",
+    "lines": "321-325"
+   },
+   "c5": 0.3191,
+   "j5": 0.061,
+   "c5raw": 0.3191,
+   "c3": 0.3469,
+   "cos": 0.7984,
+   "shared5": 15
+  },
+  {
+   "id": "P047",
+   "project": "bars-project",
+   "stratum": "miss_semantic_cos",
+   "stratumSize": 165,
+   "taken": 9,
+   "kind": null,
+   "a": 744,
+   "b": 581,
+   "first": {
+    "path": "docs/features/graphrag/tools.md",
+    "lines": "9-28"
+   },
+   "second": {
+    "path": "docs/features/agent-tools/mcp-tools.md",
+    "lines": "17-21"
+   },
+   "c5": 0.0222,
+   "j5": 0.0046,
+   "c5raw": 0.0222,
+   "c3": 0.0652,
+   "cos": 0.7969,
+   "shared5": 2
+  },
+  {
+   "id": "P048",
+   "project": "bars-project",
+   "stratum": "semantic_mid",
+   "stratumSize": 43,
+   "taken": 9,
+   "kind": "semantic",
+   "a": 567,
+   "b": 563,
+   "first": {
+    "path": "docs/chats/2026-10-22-query-transition/handoff.md",
+    "lines": "15-18"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-22-query-graph-design/handoff.md",
+    "lines": "15-19"
+   },
+   "c5": 0.125,
+   "j5": 0.0606,
+   "c5raw": 0.125,
+   "c3": 0.2,
+   "cos": 0.8503,
+   "shared5": 6
+  },
+  {
+   "id": "P049",
+   "project": "bars-project",
+   "stratum": "miss_partial",
+   "stratumSize": 23,
+   "taken": 9,
+   "kind": null,
+   "a": 436,
+   "b": 435,
+   "first": {
+    "path": "docs/chats/2026-10-20-global-search-implementation/log.md",
+    "lines": "5-11"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-20-global-search-implementation/handoff.md",
+    "lines": "21-27"
+   },
+   "c5": 0.1263,
+   "j5": 0.0536,
+   "c5raw": 0.1263,
+   "c3": 0.1546,
+   "cos": 0.7946,
+   "shared5": 12
+  },
+  {
+   "id": "P050",
+   "project": "overdrive-bots",
+   "stratum": "miss_semantic_cos",
+   "stratumSize": 229,
+   "taken": 8,
+   "kind": null,
+   "a": 1161,
+   "b": 612,
+   "first": {
+    "path": "docs/chats/2026-10-18-stage15-adaptive/q016-client-race-order-2026-10-18.md",
+    "lines": "127-133"
+   },
+   "second": {
+    "path": "docs/backlog/research-queue.md",
+    "lines": "234-244"
+   },
+   "c5": 0.0714,
+   "j5": 0.0222,
+   "c5raw": 0.0952,
+   "c3": 0.1012,
+   "cos": 0.793,
+   "shared5": 12
+  },
+  {
+   "id": "P051",
+   "project": "overdrive-bots",
+   "stratum": "semantic_mid",
+   "stratumSize": 52,
+   "taken": 8,
+   "kind": "semantic",
+   "a": 341,
+   "b": 1005,
+   "first": {
+    "path": "docs/architecture/native/pit-service.md",
+    "lines": "175-192"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-18-native-pit-q008/native-pit-service-q008-2026-10-18.md",
+    "lines": "85-100"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0.0588,
+   "cos": 0.8518,
+   "shared5": 0
+  },
+  {
+   "id": "P052",
+   "project": "bars-project",
+   "stratum": "semantic_hi",
+   "stratumSize": 4,
+   "taken": 4,
+   "kind": "semantic",
+   "a": 88,
+   "b": 94,
+   "first": {
+    "path": "docs/architecture/ipc.md",
+    "lines": "36-38"
+   },
+   "second": {
+    "path": "docs/architecture/protocol.md",
+    "lines": "15-19"
+   },
+   "c5": 0.1111,
+   "j5": 0.0541,
+   "c5raw": 0.1111,
+   "c3": 0.1579,
+   "cos": 0.8817,
+   "shared5": 4
+  },
+  {
+   "id": "P053",
+   "project": "overdrive-bots",
+   "stratum": "semantic_lo",
+   "stratumSize": 110,
+   "taken": 8,
+   "kind": "semantic",
+   "a": 222,
+   "b": 661,
+   "first": {
+    "path": "docs/architecture/native/csp-control-surface.md",
+    "lines": "78-93"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-07-advanced-control/csp-lua-input-setters.md",
+    "lines": "39-49"
+   },
+   "c5": 0.086,
+   "j5": 0.0314,
+   "c5raw": 0.086,
+   "c3": 0.1719,
+   "cos": 0.8309,
+   "shared5": 19
+  },
+  {
+   "id": "P054",
+   "project": "bars-project",
+   "stratum": "miss_semantic_cos",
+   "stratumSize": 165,
+   "taken": 9,
+   "kind": null,
+   "a": 1481,
+   "b": 3,
+   "first": {
+    "path": "docs/manual/writing-docs.md",
+    "lines": "35-48"
+   },
+   "second": {
+    "path": "docs/Index.md",
+    "lines": "31-43"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0.0526,
+   "cos": 0.7617,
+   "shared5": 0
+  },
+  {
+   "id": "P055",
+   "project": "overdrive-bots",
+   "stratum": "semantic_hi",
+   "stratumSize": 4,
+   "taken": 4,
+   "kind": "semantic",
+   "a": 313,
+   "b": 1042,
+   "first": {
+    "path": "docs/architecture/native/penalty-observation.md",
+    "lines": "30-36"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-18-q013-online-penalty/q013-online-penalty-2026-10-18.md",
+    "lines": "38-56"
+   },
+   "c5": 0.0185,
+   "j5": 0.0064,
+   "c5raw": 0.0185,
+   "c3": 0.0854,
+   "cos": 0.8909,
+   "shared5": 3
+  },
+  {
+   "id": "P056",
+   "project": "overdrive-bots",
+   "stratum": "partial_lo",
+   "stratumSize": 17,
+   "taken": 8,
+   "kind": "partial",
+   "a": 1279,
+   "b": 363,
+   "first": {
+    "path": "docs/features/algorithmic-commands/player-following/approach-and-follow.md",
+    "lines": "20-22"
+   },
+   "second": {
+    "path": "docs/architecture/native/player-modes.md",
+    "lines": "10-12"
+   },
+   "c5": 0.28,
+   "j5": 0.1628,
+   "c5raw": 0.28,
+   "c3": 0.3269,
+   "cos": 0.7741,
+   "shared5": 14
+  },
+  {
+   "id": "P057",
+   "project": "bars-project",
+   "stratum": "miss_semantic_gate",
+   "stratumSize": 1840,
+   "taken": 9,
+   "kind": null,
+   "a": 701,
+   "b": 696,
+   "first": {
+    "path": "docs/features/graphrag/plan.md",
+    "lines": "62-68"
+   },
+   "second": {
+    "path": "docs/features/graphrag/plan.md",
+    "lines": "5-9"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0,
+   "cos": 0.81,
+   "shared5": 0
+  },
+  {
+   "id": "P058",
+   "project": "bars-project",
+   "stratum": "miss_semantic_cos",
+   "stratumSize": 165,
+   "taken": 9,
+   "kind": null,
+   "a": 744,
+   "b": 580,
+   "first": {
+    "path": "docs/features/graphrag/tools.md",
+    "lines": "9-28"
+   },
+   "second": {
+    "path": "docs/features/agent-tools/mcp-tools.md",
+    "lines": "13-15"
+   },
+   "c5": 0.0208,
+   "j5": 0.0025,
+   "c5raw": 0.0208,
+   "c3": 0.06,
+   "cos": 0.7831,
+   "shared5": 1
+  },
+  {
+   "id": "P059",
+   "project": "bars-project",
+   "stratum": "miss_semantic_gate",
+   "stratumSize": 1840,
+   "taken": 9,
+   "kind": null,
+   "a": 879,
+   "b": 1282,
+   "first": {
+    "path": "docs/features/models/memory-plan.md",
+    "lines": "9-18"
+   },
+   "second": {
+    "path": "docs/knowledge/memory.md",
+    "lines": "36-55"
+   },
+   "c5": 0.0183,
+   "j5": 0.0077,
+   "c5raw": 0.0183,
+   "c3": 0.0274,
+   "cos": 0.8154,
+   "shared5": 4
+  },
+  {
+   "id": "P060",
+   "project": "overdrive-bots",
+   "stratum": "semantic_lo",
+   "stratumSize": 110,
+   "taken": 8,
+   "kind": "semantic",
+   "a": 720,
+   "b": 197,
+   "first": {
+    "path": "docs/chats/2026-10-11-direct-scenarios-overtake/direct-input-contract-2026-10-11.md",
+    "lines": "22-34"
+   },
+   "second": {
+    "path": "docs/architecture/native/approach-player.md",
+    "lines": "42-52"
+   },
+   "c5": 0.1203,
+   "j5": 0.0349,
+   "c5raw": 0.1203,
+   "c3": 0.195,
+   "cos": 0.8005,
+   "shared5": 19
+  },
+  {
+   "id": "P061",
+   "project": "bars-project",
+   "stratum": "miss_semantic_cos",
+   "stratumSize": 165,
+   "taken": 9,
+   "kind": null,
+   "a": 927,
+   "b": 941,
+   "first": {
+    "path": "docs/features/search/Index.md",
+    "lines": "5-16"
+   },
+   "second": {
+    "path": "docs/features/search/text-search.md",
+    "lines": "13-15"
+   },
+   "c5": 0.0274,
+   "j5": 0.0101,
+   "c5raw": 0.0274,
+   "c3": 0.0533,
+   "cos": 0.7775,
+   "shared5": 2
+  },
+  {
+   "id": "P062",
+   "project": "bars-project",
+   "stratum": "miss_partial",
+   "stratumSize": 23,
+   "taken": 9,
+   "kind": null,
+   "a": 17,
+   "b": 835,
+   "first": {
+    "path": "docs/MAIN_IDEA.md",
+    "lines": "222-235"
+   },
+   "second": {
+    "path": "docs/features/knowledge-base/requirements.md",
+    "lines": "114-120"
+   },
+   "c5": 0.1474,
+   "j5": 0.0538,
+   "c5raw": 0.1474,
+   "c3": 0.25,
+   "cos": 0.7355,
+   "shared5": 14
+  },
+  {
+   "id": "P063",
+   "project": "overdrive-bots",
+   "stratum": "semantic_mid",
+   "stratumSize": 52,
+   "taken": 8,
+   "kind": "semantic",
+   "a": 123,
+   "b": 629,
+   "first": {
+    "path": "docs/architecture/environment/acs-builds.md",
+    "lines": "4-8"
+   },
+   "second": {
+    "path": "docs/backlog/research-queue.md",
+    "lines": "448-458"
+   },
+   "c5": 0.0784,
+   "j5": 0.0193,
+   "c5raw": 0.1569,
+   "c3": 0.0755,
+   "cos": 0.8513,
+   "shared5": 4
+  },
+  {
+   "id": "P064",
+   "project": "overdrive-bots",
+   "stratum": "semantic_mid",
+   "stratumSize": 52,
+   "taken": 8,
+   "kind": "semantic",
+   "a": 939,
+   "b": 624,
+   "first": {
+    "path": "docs/chats/2026-10-18-component-damage-q003/component-damage-q003-2026-10-18.md",
+    "lines": "4-8"
+   },
+   "second": {
+    "path": "docs/backlog/research-queue.md",
+    "lines": "379-389"
+   },
+   "c5": 0.0261,
+   "j5": 0.0061,
+   "c5raw": 0.1739,
+   "c3": 0.0522,
+   "cos": 0.8442,
+   "shared5": 3
+  },
+  {
+   "id": "P065",
+   "project": "overdrive-bots",
+   "stratum": "template",
+   "stratumSize": 20,
+   "taken": 8,
+   "kind": null,
+   "a": 1673,
+   "b": 1685,
+   "first": {
+    "path": "docs/manual/in-game-panel.md",
+    "lines": "4-14"
+   },
+   "second": {
+    "path": "docs/manual/journal-and-troubleshooting.md",
+    "lines": "4-16"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0.2817,
+   "c3": 0,
+   "cos": 0.6863,
+   "shared5": 0
+  },
+  {
+   "id": "P066",
+   "project": "bars-project",
+   "stratum": "template",
+   "stratumSize": 1,
+   "taken": 1,
+   "kind": null,
+   "a": 418,
+   "b": 480,
+   "first": {
+    "path": "docs/chats/2026-10-19-new-topics-ui/handoff.md",
+    "lines": "10-13"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-20-plan-usability/plan-before.md",
+    "lines": "77-83"
+   },
+   "c5": 0.1707,
+   "j5": 0.0231,
+   "c5raw": 0.2683,
+   "c3": 0.1163,
+   "cos": 0.7138,
+   "shared5": 7
+  },
+  {
+   "id": "P067",
+   "project": "overdrive-bots",
+   "stratum": "semantic_lo",
+   "stratumSize": 110,
+   "taken": 8,
+   "kind": "semantic",
+   "a": 337,
+   "b": 1071,
+   "first": {
+    "path": "docs/architecture/native/pit-service.md",
+    "lines": "126-136"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-18-service-quiescence-q026/service-quiescence-q026-2026-10-18.md",
+    "lines": "65-71"
+   },
+   "c5": 0.0385,
+   "j5": 0.0087,
+   "c5raw": 0.0385,
+   "c3": 0.0949,
+   "cos": 0.812,
+   "shared5": 6
+  },
+  {
+   "id": "P068",
+   "project": "overdrive-bots",
+   "stratum": "semantic_mid",
+   "stratumSize": 52,
+   "taken": 8,
+   "kind": "semantic",
+   "a": 1108,
+   "b": 611,
+   "first": {
+    "path": "docs/chats/2026-10-18-stage13-formation/motion-gate-q017-2026-10-18.md",
+    "lines": "4-8"
+   },
+   "second": {
+    "path": "docs/backlog/research-queue.md",
+    "lines": "222-232"
+   },
+   "c5": 0.0472,
+   "j5": 0.0096,
+   "c5raw": 0.066,
+   "c3": 0.0648,
+   "cos": 0.8514,
+   "shared5": 5
+  },
+  {
+   "id": "P069",
+   "project": "overdrive-bots",
+   "stratum": "miss_semantic_cos",
+   "stratumSize": 229,
+   "taken": 8,
+   "kind": null,
+   "a": 1584,
+   "b": 1746,
+   "first": {
+    "path": "docs/manual/getting-started.md",
+    "lines": "93-101"
+   },
+   "second": {
+    "path": "docs/manual/settings.md",
+    "lines": "4-20"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0.0566,
+   "cos": 0.7494,
+   "shared5": 0
+  },
+  {
+   "id": "P070",
+   "project": "overdrive-bots",
+   "stratum": "miss_semantic_gate",
+   "stratumSize": 3171,
+   "taken": 8,
+   "kind": null,
+   "a": 1490,
+   "b": 1487,
+   "first": {
+    "path": "docs/knowledge/UX_AUDIT_2026-10-09.md",
+    "lines": "86-96"
+   },
+   "second": {
+    "path": "docs/knowledge/UX_AUDIT_2026-10-09.md",
+    "lines": "70-73"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0.0444,
+   "c3": 0,
+   "cos": 0.8703,
+   "shared5": 0
+  },
+  {
+   "id": "P071",
+   "project": "overdrive-bots",
+   "stratum": "miss_partial",
+   "stratumSize": 47,
+   "taken": 8,
+   "kind": null,
+   "a": 734,
+   "b": 727,
+   "first": {
+    "path": "docs/chats/2026-10-11-direct-scenarios-overtake/scenario-composition-2026-10-11.md",
+    "lines": "4-8"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-11-direct-scenarios-overtake/overtake-feasibility-2026-10-11.md",
+    "lines": "4-8"
+   },
+   "c5": 0.1622,
+   "j5": 0.0723,
+   "c5raw": 0.2162,
+   "c3": 0.0769,
+   "cos": 0.7265,
+   "shared5": 6
+  },
+  {
+   "id": "P072",
+   "project": "overdrive-bots",
+   "stratum": "semantic_hi",
+   "stratumSize": 4,
+   "taken": 4,
+   "kind": "semantic",
+   "a": 226,
+   "b": 1250,
+   "first": {
+    "path": "docs/architecture/native/csp-handshake-features.md",
+    "lines": "10-12"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-19-csp-handshake-features/csp-handshake-features-2026-10-19.md",
+    "lines": "10-17"
+   },
+   "c5": 0.039,
+   "j5": 0.0135,
+   "c5raw": 0.039,
+   "c3": 0.1026,
+   "cos": 0.8855,
+   "shared5": 3
+  },
+  {
+   "id": "P073",
+   "project": "overdrive-bots",
+   "stratum": "template",
+   "stratumSize": 20,
+   "taken": 8,
+   "kind": null,
+   "a": 588,
+   "b": 568,
+   "first": {
+    "path": "docs/backlog/issues.md",
+    "lines": "124-148"
+   },
+   "second": {
+    "path": "docs/backlog/ideas.md",
+    "lines": "64-72"
+   },
+   "c5": 0.0143,
+   "j5": 0.0014,
+   "c5raw": 0.2857,
+   "c3": 0.0139,
+   "cos": 0.7597,
+   "shared5": 1
+  },
+  {
+   "id": "P074",
+   "project": "bars-project",
+   "stratum": "partial_lo",
+   "stratumSize": 5,
+   "taken": 5,
+   "kind": "partial",
+   "a": 836,
+   "b": 145,
+   "first": {
+    "path": "docs/features/knowledge-base/requirements.md",
+    "lines": "122-148"
+   },
+   "second": {
+    "path": "docs/backlog/ideas.md",
+    "lines": "41-46"
+   },
+   "c5": 0.3774,
+   "j5": 0.0348,
+   "c5raw": 0.3774,
+   "c3": 0.4182,
+   "cos": 0.5817,
+   "shared5": 20
+  },
+  {
+   "id": "P075",
+   "project": "overdrive-bots",
+   "stratum": "miss_semantic_cos",
+   "stratumSize": 229,
+   "taken": 8,
+   "kind": null,
+   "a": 1263,
+   "b": 18,
+   "first": {
+    "path": "docs/chats/index.md",
+    "lines": "28-38"
+   },
+   "second": {
+    "path": "docs/PLAN.md",
+    "lines": "172-176"
+   },
+   "c5": 0.125,
+   "j5": 0.03,
+   "c5raw": 0.1667,
+   "c3": 0.0816,
+   "cos": 0.7503,
+   "shared5": 6
+  },
+  {
+   "id": "P076",
+   "project": "bars-project",
+   "stratum": "partial_lo",
+   "stratumSize": 5,
+   "taken": 5,
+   "kind": "partial",
+   "a": 836,
+   "b": 840,
+   "first": {
+    "path": "docs/features/knowledge-base/requirements.md",
+    "lines": "122-148"
+   },
+   "second": {
+    "path": "docs/features/knowledge-base/requirements.md",
+    "lines": "194-202"
+   },
+   "c5": 0.2857,
+   "j5": 0.0428,
+   "c5raw": 0.2967,
+   "c3": 0.3118,
+   "cos": 0.7371,
+   "shared5": 26
+  },
+  {
+   "id": "P077",
+   "project": "overdrive-bots",
+   "stratum": "semantic_mid",
+   "stratumSize": 52,
+   "taken": 8,
+   "kind": "semantic",
+   "a": 1428,
+   "b": 1298,
+   "first": {
+    "path": "docs/features/settings-and-game-setup/settings-page.md",
+    "lines": "14-16"
+   },
+   "second": {
+    "path": "docs/features/bot-launch/index.md",
+    "lines": "26-32"
+   },
+   "c5": 0.0874,
+   "j5": 0.0452,
+   "c5raw": 0.1845,
+   "c3": 0.0865,
+   "cos": 0.8502,
+   "shared5": 9
+  },
+  {
+   "id": "P078",
+   "project": "bars-project",
+   "stratum": "miss_partial",
+   "stratumSize": 23,
+   "taken": 9,
+   "kind": null,
+   "a": 682,
+   "b": 663,
+   "first": {
+    "path": "docs/features/graphrag/physical-graph-design.md",
+    "lines": "106-108"
+   },
+   "second": {
+    "path": "docs/features/graphrag/graph-actions-design.md",
+    "lines": "199-220"
+   },
+   "c5": 0.1795,
+   "j5": 0.0282,
+   "c5raw": 0.1795,
+   "c3": 0.2195,
+   "cos": 0.7164,
+   "shared5": 7
+  },
+  {
+   "id": "P079",
+   "project": "overdrive-bots",
+   "stratum": "miss_partial",
+   "stratumSize": 47,
+   "taken": 8,
+   "kind": null,
+   "a": 69,
+   "b": 1303,
+   "first": {
+    "path": "docs/adr/0023-adaptive-preset-policy.md",
+    "lines": "4-8"
+   },
+   "second": {
+    "path": "docs/features/bot-types/adaptive/requirements.md",
+    "lines": "4-18"
+   },
+   "c5": 0.2128,
+   "j5": 0.0405,
+   "c5raw": 0.234,
+   "c3": 0.1875,
+   "cos": 0.748,
+   "shared5": 10
+  },
+  {
+   "id": "P080",
+   "project": "overdrive-bots",
+   "stratum": "template",
+   "stratumSize": 20,
+   "taken": 8,
+   "kind": null,
+   "a": 644,
+   "b": 710,
+   "first": {
+    "path": "docs/chats/2026-10-06-research-journal/log.md",
+    "lines": "23-29"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-07-sources-next-steps/log.md",
+    "lines": "4-12"
+   },
+   "c5": 0.1545,
+   "j5": 0.0459,
+   "c5raw": 0.3171,
+   "c3": 0.1491,
+   "cos": 0.709,
+   "shared5": 19
+  },
+  {
+   "id": "P081",
+   "project": "overdrive-bots",
+   "stratum": "semantic_lo",
+   "stratumSize": 110,
+   "taken": 8,
+   "kind": "semantic",
+   "a": 619,
+   "b": 1051,
+   "first": {
+    "path": "docs/backlog/research-queue.md",
+    "lines": "318-328"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-18-resource-handles-q006/motion-observation-q009-2026-10-18.md",
+    "lines": "4-6"
+   },
+   "c5": 0.0943,
+   "j5": 0.0132,
+   "c5raw": 0.2075,
+   "c3": 0.0943,
+   "cos": 0.8173,
+   "shared5": 5
+  },
+  {
+   "id": "P082",
+   "project": "overdrive-bots",
+   "stratum": "template",
+   "stratumSize": 20,
+   "taken": 8,
+   "kind": null,
+   "a": 1265,
+   "b": 60,
+   "first": {
+    "path": "docs/chats/index.md",
+    "lines": "63-91"
+   },
+   "second": {
+    "path": "docs/adr/0018-startup-fuel-model-300m.md",
+    "lines": "20-22"
+   },
+   "c5": 0.0526,
+   "j5": 0.0035,
+   "c5raw": 0.3158,
+   "c3": 0.1026,
+   "cos": 0.5911,
+   "shared5": 2
+  },
+  {
+   "id": "P083",
+   "project": "bars-project",
+   "stratum": "semantic_mid",
+   "stratumSize": 43,
+   "taken": 9,
+   "kind": "semantic",
+   "a": 1447,
+   "b": 998,
+   "first": {
+    "path": "docs/manual/search.md",
+    "lines": "124-128"
+   },
+   "second": {
+    "path": "docs/features/window/indexing-progress.md",
+    "lines": "30-32"
+   },
+   "c5": 0.0556,
+   "j5": 0.0246,
+   "c5raw": 0.0556,
+   "c3": 0.1429,
+   "cos": 0.8418,
+   "shared5": 3
+  },
+  {
+   "id": "P084",
+   "project": "overdrive-bots",
+   "stratum": "partial_lo",
+   "stratumSize": 17,
+   "taken": 8,
+   "kind": "partial",
+   "a": 630,
+   "b": 54,
+   "first": {
+    "path": "docs/backlog/research-queue.md",
+    "lines": "460-470"
+   },
+   "second": {
+    "path": "docs/adr/0016-linear-pit-speed.md",
+    "lines": "4-12"
+   },
+   "c5": 0.2879,
+   "j5": 0.0686,
+   "c5raw": 0.2879,
+   "c3": 0.3538,
+   "cos": 0.8086,
+   "shared5": 19
+  },
+  {
+   "id": "P085",
+   "project": "overdrive-bots",
+   "stratum": "semantic_mid",
+   "stratumSize": 52,
+   "taken": 8,
+   "kind": "semantic",
+   "a": 205,
+   "b": 1371,
+   "first": {
+    "path": "docs/architecture/native/bot-return-policy.md",
+    "lines": "35-44"
+   },
+   "second": {
+    "path": "docs/features/pits-and-service/auto-return.md",
+    "lines": "38-40"
+   },
+   "c5": 0.1489,
+   "j5": 0.0314,
+   "c5raw": 0.2766,
+   "c3": 0.1837,
+   "cos": 0.8403,
+   "shared5": 7
+  },
+  {
+   "id": "P086",
+   "project": "bars-project",
+   "stratum": "miss_partial",
+   "stratumSize": 23,
+   "taken": 9,
+   "kind": null,
+   "a": 86,
+   "b": 109,
+   "first": {
+    "path": "docs/architecture/ipc.md",
+    "lines": "5-23"
+   },
+   "second": {
+    "path": "docs/architecture/secrets.md",
+    "lines": "5-7"
+   },
+   "c5": 0.1316,
+   "j5": 0.0237,
+   "c5raw": 0.1316,
+   "c3": 0.125,
+   "cos": 0.6192,
+   "shared5": 5
+  },
+  {
+   "id": "P087",
+   "project": "bars-project",
+   "stratum": "semantic_lo",
+   "stratumSize": 72,
+   "taken": 9,
+   "kind": "semantic",
+   "a": 1025,
+   "b": 960,
+   "first": {
+    "path": "docs/features/window/main-window.md",
+    "lines": "77-85"
+   },
+   "second": {
+    "path": "docs/features/window/document-actions.md",
+    "lines": "13-17"
+   },
+   "c5": 0.0556,
+   "j5": 0.0236,
+   "c5raw": 0.0556,
+   "c3": 0.0734,
+   "cos": 0.8065,
+   "shared5": 6
+  },
+  {
+   "id": "P088",
+   "project": "bars-project",
+   "stratum": "miss_semantic_gate",
+   "stratumSize": 1840,
+   "taken": 9,
+   "kind": null,
+   "a": 1001,
+   "b": 1074,
+   "first": {
+    "path": "docs/features/window/keyboard-design.md",
+    "lines": "5-7"
+   },
+   "second": {
+    "path": "docs/features/window/requirements.md",
+    "lines": "65-67"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0.0441,
+   "cos": 0.8238,
+   "shared5": 0
+  },
+  {
+   "id": "P089",
+   "project": "bars-project",
+   "stratum": "miss_partial",
+   "stratumSize": 23,
+   "taken": 9,
+   "kind": null,
+   "a": 789,
+   "b": 10,
+   "first": {
+    "path": "docs/features/knowledge-base/audits.md",
+    "lines": "13-15"
+   },
+   "second": {
+    "path": "docs/MAIN_IDEA.md",
+    "lines": "124-136"
+   },
+   "c5": 0.1795,
+   "j5": 0.0077,
+   "c5raw": 0.1795,
+   "c3": 0.1951,
+   "cos": 0.7498,
+   "shared5": 7
+  },
+  {
+   "id": "P090",
+   "project": "overdrive-bots",
+   "stratum": "semantic_lo",
+   "stratumSize": 110,
+   "taken": 8,
+   "kind": "semantic",
+   "a": 1403,
+   "b": 304,
+   "first": {
+    "path": "docs/features/scenarios/index.md",
+    "lines": "15-32"
+   },
+   "second": {
+    "path": "docs/architecture/native/native-scenarios.md",
+    "lines": "34-38"
+   },
+   "c5": 0.2013,
+   "j5": 0.0779,
+   "c5raw": 0.2013,
+   "c3": 0.2625,
+   "cos": 0.8092,
+   "shared5": 32
+  },
+  {
+   "id": "P091",
+   "project": "overdrive-bots",
+   "stratum": "partial_lo",
+   "stratumSize": 17,
+   "taken": 8,
+   "kind": "partial",
+   "a": 225,
+   "b": 1249,
+   "first": {
+    "path": "docs/architecture/native/csp-handshake-features.md",
+    "lines": "4-8"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-19-csp-handshake-features/csp-handshake-features-2026-10-19.md",
+    "lines": "4-8"
+   },
+   "c5": 0.3137,
+   "j5": 0.1053,
+   "c5raw": 0.3333,
+   "c3": 0.2642,
+   "cos": 0.8651,
+   "shared5": 16
+  },
+  {
+   "id": "P092",
+   "project": "bars-project",
+   "stratum": "semantic_lo",
+   "stratumSize": 72,
+   "taken": 9,
+   "kind": "semantic",
+   "a": 501,
+   "b": 498,
+   "first": {
+    "path": "docs/chats/2026-10-20-workspace-density/log.md",
+    "lines": "5-11"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-20-workspace-density/handoff.md",
+    "lines": "5-15"
+   },
+   "c5": 0.0089,
+   "j5": 0.0033,
+   "c5raw": 0.0089,
+   "c3": 0.0893,
+   "cos": 0.8219,
+   "shared5": 1
+  },
+  {
+   "id": "P093",
+   "project": "bars-project",
+   "stratum": "miss_partial",
+   "stratumSize": 23,
+   "taken": 9,
+   "kind": null,
+   "a": 145,
+   "b": 838,
+   "first": {
+    "path": "docs/backlog/ideas.md",
+    "lines": "41-46"
+   },
+   "second": {
+    "path": "docs/features/knowledge-base/requirements.md",
+    "lines": "172-182"
+   },
+   "c5": 0.2264,
+   "j5": 0.0531,
+   "c5raw": 0.2264,
+   "c3": 0.2545,
+   "cos": 0.6551,
+   "shared5": 12
+  },
+  {
+   "id": "P094",
+   "project": "overdrive-bots",
+   "stratum": "partial_lo",
+   "stratumSize": 17,
+   "taken": 8,
+   "kind": "partial",
+   "a": 1657,
+   "b": 1715,
+   "first": {
+    "path": "docs/manual/how-player-modes-work.md",
+    "lines": "4-8"
+   },
+   "second": {
+    "path": "docs/manual/player-modes.md",
+    "lines": "4-8"
+   },
+   "c5": 0.2632,
+   "j5": 0.0904,
+   "c5raw": 0.386,
+   "c3": 0.2679,
+   "cos": 0.7985,
+   "shared5": 15
+  },
+  {
+   "id": "P095",
+   "project": "overdrive-bots",
+   "stratum": "partial_hi",
+   "stratumSize": 5,
+   "taken": 5,
+   "kind": "partial",
+   "a": 220,
+   "b": 715,
+   "first": {
+    "path": "docs/architecture/native/csp-control-surface.md",
+    "lines": "37-51"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-11-control-surface/control-surface-2026-10-11.md",
+    "lines": "37-49"
+   },
+   "c5": 0.6056,
+   "j5": 0.4019,
+   "c5raw": 0.6197,
+   "c3": 0.7026,
+   "cos": 0.8756,
+   "shared5": 172
+  },
+  {
+   "id": "P096",
+   "project": "bars-project",
+   "stratum": "semantic_mid",
+   "stratumSize": 43,
+   "taken": 9,
+   "kind": "semantic",
+   "a": 947,
+   "b": 944,
+   "first": {
+    "path": "docs/features/search/text-search.md",
+    "lines": "65-77"
+   },
+   "second": {
+    "path": "docs/features/search/text-search.md",
+    "lines": "42-44"
+   },
+   "c5": 0.0196,
+   "j5": 0.0056,
+   "c5raw": 0.0196,
+   "c3": 0.0566,
+   "cos": 0.8547,
+   "shared5": 1
+  },
+  {
+   "id": "P097",
+   "project": "bars-project",
+   "stratum": "semantic_lo",
+   "stratumSize": 72,
+   "taken": 9,
+   "kind": "semantic",
+   "a": 1260,
+   "b": 1252,
+   "first": {
+    "path": "docs/knowledge/local-documentation-tools.md",
+    "lines": "203-211"
+   },
+   "second": {
+    "path": "docs/knowledge/local-documentation-tools.md",
+    "lines": "113-121"
+   },
+   "c5": 0.0467,
+   "j5": 0.0239,
+   "c5raw": 0.0467,
+   "c3": 0.0642,
+   "cos": 0.8156,
+   "shared5": 5
+  },
+  {
+   "id": "P098",
+   "project": "bars-project",
+   "stratum": "semantic_lo",
+   "stratumSize": 72,
+   "taken": 9,
+   "kind": "semantic",
+   "a": 1362,
+   "b": 491,
+   "first": {
+    "path": "docs/knowledge/window-docking.md",
+    "lines": "47-49"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-20-window-docking/handoff.md",
+    "lines": "15-21"
+   },
+   "c5": 0.0345,
+   "j5": 0.0112,
+   "c5raw": 0.0345,
+   "c3": 0.05,
+   "cos": 0.818,
+   "shared5": 2
+  },
+  {
+   "id": "P099",
+   "project": "overdrive-bots",
+   "stratum": "semantic_lo",
+   "stratumSize": 110,
+   "taken": 8,
+   "kind": "semantic",
+   "a": 1533,
+   "b": 1518,
+   "first": {
+    "path": "docs/knowledge/UX_AUDIT_2026-10-09.md",
+    "lines": "437-452"
+   },
+   "second": {
+    "path": "docs/knowledge/UX_AUDIT_2026-10-09.md",
+    "lines": "285-288"
+   },
+   "c5": 0.0615,
+   "j5": 0.019,
+   "c5raw": 0.0615,
+   "c3": 0.0746,
+   "cos": 0.8094,
+   "shared5": 4
+  },
+  {
+   "id": "P100",
+   "project": "bars-project",
+   "stratum": "semantic_mid",
+   "stratumSize": 43,
+   "taken": 9,
+   "kind": "semantic",
+   "a": 1496,
+   "b": 3,
+   "first": {
+    "path": "docs/project-status.md",
+    "lines": "41-43"
+   },
+   "second": {
+    "path": "docs/Index.md",
+    "lines": "31-43"
+   },
+   "c5": 0.0217,
+   "j5": 0.0063,
+   "c5raw": 0.0217,
+   "c3": 0.0625,
+   "cos": 0.8576,
+   "shared5": 1
+  },
+  {
+   "id": "P101",
+   "project": "overdrive-bots",
+   "stratum": "miss_semantic_cos",
+   "stratumSize": 229,
+   "taken": 8,
+   "kind": null,
+   "a": 1428,
+   "b": 449,
+   "first": {
+    "path": "docs/features/settings-and-game-setup/settings-page.md",
+    "lines": "14-16"
+   },
+   "second": {
+    "path": "docs/architecture/runtime/launch-service.md",
+    "lines": "54-61"
+   },
+   "c5": 0.0476,
+   "j5": 0.0202,
+   "c5raw": 0.1429,
+   "c3": 0.0769,
+   "cos": 0.7707,
+   "shared5": 5
+  },
+  {
+   "id": "P102",
+   "project": "overdrive-bots",
+   "stratum": "miss_semantic_gate",
+   "stratumSize": 3171,
+   "taken": 8,
+   "kind": null,
+   "a": 1375,
+   "b": 1378,
+   "first": {
+    "path": "docs/features/pits-and-service/index.md",
+    "lines": "4-20"
+   },
+   "second": {
+    "path": "docs/features/pits-and-service/index.md",
+    "lines": "41-51"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0.01,
+   "cos": 0.8546,
+   "shared5": 0
+  },
+  {
+   "id": "P103",
+   "project": "overdrive-bots",
+   "stratum": "partial_lo",
+   "stratumSize": 17,
+   "taken": 8,
+   "kind": "partial",
+   "a": 162,
+   "b": 686,
+   "first": {
+    "path": "docs/architecture/environment/private-copy-binaries.md",
+    "lines": "57-65"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-07-multibot-live/stock-udp-ports.md",
+    "lines": "35-39"
+   },
+   "c5": 0.3676,
+   "j5": 0.0633,
+   "c5raw": 0.3676,
+   "c3": 0.4286,
+   "cos": 0.8561,
+   "shared5": 25
+  },
+  {
+   "id": "P104",
+   "project": "overdrive-bots",
+   "stratum": "partial_hi",
+   "stratumSize": 5,
+   "taken": 5,
+   "kind": "partial",
+   "a": 716,
+   "b": 223,
+   "first": {
+    "path": "docs/chats/2026-10-11-control-surface/control-surface-2026-10-11.md",
+    "lines": "51-55"
+   },
+   "second": {
+    "path": "docs/architecture/native/csp-control-surface.md",
+    "lines": "95-99"
+   },
+   "c5": 0.7373,
+   "j5": 0.5179,
+   "c5raw": 0.7373,
+   "c3": 0.7627,
+   "cos": 0.9103,
+   "shared5": 87
+  },
+  {
+   "id": "P105",
+   "project": "bars-project",
+   "stratum": "semantic_hi",
+   "stratumSize": 4,
+   "taken": 4,
+   "kind": "semantic",
+   "a": 475,
+   "b": 1060,
+   "first": {
+    "path": "docs/chats/2026-10-20-plan-usability/plan-before.md",
+    "lines": "40-44"
+   },
+   "second": {
+    "path": "docs/features/window/refinement-plan.md",
+    "lines": "5-7"
+   },
+   "c5": 0.1053,
+   "j5": 0.0417,
+   "c5raw": 0.1053,
+   "c3": 0.1356,
+   "cos": 0.8838,
+   "shared5": 6
+  },
+  {
+   "id": "P106",
+   "project": "overdrive-bots",
+   "stratum": "miss_semantic_gate",
+   "stratumSize": 3171,
+   "taken": 8,
+   "kind": null,
+   "a": 252,
+   "b": 246,
+   "first": {
+    "path": "docs/architecture/native/memory-startup-configuration.md",
+    "lines": "36-38"
+   },
+   "second": {
+    "path": "docs/architecture/native/memory-startup-configuration.md",
+    "lines": "10-12"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0,
+   "cos": 0.8852,
+   "shared5": 0
+  },
+  {
+   "id": "P107",
+   "project": "overdrive-bots",
+   "stratum": "partial_hi",
+   "stratumSize": 5,
+   "taken": 5,
+   "kind": "partial",
+   "a": 218,
+   "b": 713,
+   "first": {
+    "path": "docs/architecture/native/csp-control-surface.md",
+    "lines": "12-19"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-11-control-surface/control-surface-2026-10-11.md",
+    "lines": "10-19"
+   },
+   "c5": 0.5361,
+   "j5": 0.3296,
+   "c5raw": 0.5723,
+   "c3": 0.6228,
+   "cos": 0.8972,
+   "shared5": 89
+  },
+  {
+   "id": "P108",
+   "project": "overdrive-bots",
+   "stratum": "miss_semantic_cos",
+   "stratumSize": 229,
+   "taken": 8,
+   "kind": null,
+   "a": 791,
+   "b": 558,
+   "first": {
+    "path": "docs/chats/2026-10-11-server-laps-sessions/session-transition-evidence-2026-10-11.md",
+    "lines": "16-31"
+   },
+   "second": {
+    "path": "docs/architecture/runtime/session-runtime.md",
+    "lines": "20-24"
+   },
+   "c5": 0.0252,
+   "j5": 0.0078,
+   "c5raw": 0.0252,
+   "c3": 0.0579,
+   "cos": 0.746,
+   "shared5": 3
+  },
+  {
+   "id": "P109",
+   "project": "bars-project",
+   "stratum": "miss_semantic_gate",
+   "stratumSize": 1840,
+   "taken": 9,
+   "kind": null,
+   "a": 944,
+   "b": 940,
+   "first": {
+    "path": "docs/features/search/text-search.md",
+    "lines": "42-44"
+   },
+   "second": {
+    "path": "docs/features/search/text-search.md",
+    "lines": "5-11"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0,
+   "cos": 0.8356,
+   "shared5": 0
+  },
+  {
+   "id": "P110",
+   "project": "overdrive-bots",
+   "stratum": "miss_semantic_gate",
+   "stratumSize": 3171,
+   "taken": 8,
+   "kind": null,
+   "a": 1418,
+   "b": 1415,
+   "first": {
+    "path": "docs/features/server-connection/players.md",
+    "lines": "24-28"
+   },
+   "second": {
+    "path": "docs/features/server-connection/players.md",
+    "lines": "4-14"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0,
+   "cos": 0.8128,
+   "shared5": 0
+  },
+  {
+   "id": "P111",
+   "project": "bars-project",
+   "stratum": "semantic_lo",
+   "stratumSize": 72,
+   "taken": 9,
+   "kind": "semantic",
+   "a": 1114,
+   "b": 1107,
+   "first": {
+    "path": "docs/knowledge/agent-tool-usage-2026-10-18/Index.md",
+    "lines": "5-16"
+   },
+   "second": {
+    "path": "docs/knowledge/agent-tool-usage-2026-10-18.md",
+    "lines": "19-27"
+   },
+   "c5": 0.0319,
+   "j5": 0.0109,
+   "c5raw": 0.0532,
+   "c3": 0.0521,
+   "cos": 0.8144,
+   "shared5": 3
+  },
+  {
+   "id": "P112",
+   "project": "overdrive-bots",
+   "stratum": "semantic_mid",
+   "stratumSize": 52,
+   "taken": 8,
+   "kind": "semantic",
+   "a": 989,
+   "b": 148,
+   "first": {
+    "path": "docs/chats/2026-10-18-headless-window-focus/headless-window-focus-2026-10-18.md",
+    "lines": "14-20"
+   },
+   "second": {
+    "path": "docs/architecture/environment/headless-and-profiles.md",
+    "lines": "104-106"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0.0521,
+   "cos": 0.8687,
+   "shared5": 0
+  },
+  {
+   "id": "P113",
+   "project": "bars-project",
+   "stratum": "semantic_hi",
+   "stratumSize": 4,
+   "taken": 4,
+   "kind": "semantic",
+   "a": 193,
+   "b": 198,
+   "first": {
+    "path": "docs/chats/2026-10-18-clients-auto-update/plan.md",
+    "lines": "20-25"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-18-clients-auto-update/verification.md",
+    "lines": "58-62"
+   },
+   "c5": 0.082,
+   "j5": 0.0318,
+   "c5raw": 0.082,
+   "c3": 0.127,
+   "cos": 0.9115,
+   "shared5": 5
+  },
+  {
+   "id": "P114",
+   "project": "overdrive-bots",
+   "stratum": "miss_partial",
+   "stratumSize": 47,
+   "taken": 8,
+   "kind": null,
+   "a": 1264,
+   "b": 819,
+   "first": {
+    "path": "docs/chats/index.md",
+    "lines": "40-61"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-13-player-modes-revised/handoff.md",
+    "lines": "8-18"
+   },
+   "c5": 0.2059,
+   "j5": 0.0203,
+   "c5raw": 0.2353,
+   "c3": 0.1176,
+   "cos": 0.6322,
+   "shared5": 7
+  },
+  {
+   "id": "P115",
+   "project": "bars-project",
+   "stratum": "miss_semantic_gate",
+   "stratumSize": 1840,
+   "taken": 9,
+   "kind": null,
+   "a": 823,
+   "b": 825,
+   "first": {
+    "path": "docs/features/knowledge-base/link-index.md",
+    "lines": "50-52"
+   },
+   "second": {
+    "path": "docs/features/knowledge-base/link-index.md",
+    "lines": "68-80"
+   },
+   "c5": 0,
+   "j5": 0,
+   "c5raw": 0,
+   "c3": 0,
+   "cos": 0.8312,
+   "shared5": 0
+  },
+  {
+   "id": "P116",
+   "project": "bars-project",
+   "stratum": "miss_partial",
+   "stratumSize": 23,
+   "taken": 9,
+   "kind": null,
+   "a": 418,
+   "b": 480,
+   "first": {
+    "path": "docs/chats/2026-10-19-new-topics-ui/handoff.md",
+    "lines": "10-13"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-20-plan-usability/plan-before.md",
+    "lines": "77-83"
+   },
+   "c5": 0.1707,
+   "j5": 0.0231,
+   "c5raw": 0.2683,
+   "c3": 0.1163,
+   "cos": 0.7138,
+   "shared5": 7
+  },
+  {
+   "id": "P117",
+   "project": "overdrive-bots",
+   "stratum": "partial_hi",
+   "stratumSize": 5,
+   "taken": 5,
+   "kind": "partial",
+   "a": 219,
+   "b": 714,
+   "first": {
+    "path": "docs/architecture/native/csp-control-surface.md",
+    "lines": "21-35"
+   },
+   "second": {
+    "path": "docs/chats/2026-10-11-control-surface/control-surface-2026-10-11.md",
+    "lines": "21-35"
+   },
+   "c5": 0.7232,
+   "j5": 0.51,
+   "c5raw": 0.8136,
+   "c3": 0.7507,
+   "cos": 0.9059,
+   "shared5": 256
+  },
+  {
+   "id": "P118",
+   "project": "overdrive-bots",
+   "stratum": "partial_lo",
+   "stratumSize": 17,
+   "taken": 8,
+   "kind": "partial",
+   "a": 54,
+   "b": 0,
+   "first": {
+    "path": "docs/adr/0016-linear-pit-speed.md",
+    "lines": "4-12"
+   },
+   "second": {
+    "path": "docs/CHANGELOG.md",
+    "lines": "6-38"
+   },
+   "c5": 0.2727,
+   "j5": 0.0218,
+   "c5raw": 0.2727,
+   "c3": 0.1385,
+   "cos": 0.5511,
+   "shared5": 18
+  },
+  {
+   "id": "P119",
+   "project": "bars-project",
+   "stratum": "miss_semantic_cos",
+   "stratumSize": 165,
+   "taken": 9,
+   "kind": null,
+   "a": 1442,
+   "b": 1024,
+   "first": {
+    "path": "docs/manual/search.md",
+    "lines": "66-78"
+   },
+   "second": {
+    "path": "docs/features/window/main-window.md",
+    "lines": "55-75"
+   },
+   "c5": 0.0707,
+   "j5": 0.0224,
+   "c5raw": 0.0808,
+   "c3": 0.1485,
+   "cos": 0.7562,
+   "shared5": 7
+  },
+  {
+   "id": "P120",
+   "project": "bars-project",
+   "stratum": "miss_semantic_cos",
+   "stratumSize": 165,
+   "taken": 9,
+   "kind": null,
+   "a": 902,
+   "b": 901,
+   "first": {
+    "path": "docs/features/new-topics/plan.md",
+    "lines": "34-42"
+   },
+   "second": {
+    "path": "docs/features/new-topics/plan.md",
+    "lines": "26-32"
+   },
+   "c5": 0.0431,
+   "j5": 0.0195,
+   "c5raw": 0.0431,
+   "c3": 0.0678,
+   "cos": 0.7856,
+   "shared5": 5
+  }
+ ]
+}

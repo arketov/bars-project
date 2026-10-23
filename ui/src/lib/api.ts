@@ -143,6 +143,87 @@ export async function documentRevision(project: string, path: string): Promise<{
   return shell<{ status: "ok"; revision: string | null } | DocumentFailure>("document_revision", { project, path });
 }
 
+/** Цвета и иконки проекта (Т-38): файл `.bars/appearance.toml`. */
+export interface AppearanceEntry { color: string | null; icon: string | null }
+export type AppearanceReply =
+  | { status: "ok"; folders: Record<string, AppearanceEntry>; documents: Record<string, AppearanceEntry> }
+  | DocumentFailure;
+
+export async function appearanceRead(project: string): Promise<AppearanceReply | null> {
+  return shell<AppearanceReply>("appearance_read", { project });
+}
+
+/** `null` у цвета или иконки сбрасывает поле. */
+export async function appearanceSet(project: string, kind: "folder" | "document", path: string, color: string | null, icon: string | null): Promise<AppearanceReply | null> {
+  return shell<AppearanceReply>("appearance_set", { project, kind, path, color, icon });
+}
+
+/** Открывает документ в отдельном окне bars (Т-40); уже открытое окно выводится вперёд. */
+export async function documentWindowOpen(project: string, path: string): Promise<void> {
+  if (!inTauri()) throw new Error("Отдельные окна доступны в приложении bars");
+  await shell("document_window_open", { project, path });
+}
+
+/** Документ этого окна, если оно отдельное окно документа; в главном окне и в браузере — `null`. */
+export async function documentWindowTarget(): Promise<{ project: string; path: string } | null> {
+  return shell<{ project: string; path: string } | null>("document_window_target");
+}
+
+/** Закрывает окно документа после записи правок. */
+export async function documentWindowClose(): Promise<void> {
+  await shell("document_window_close");
+}
+
+/** Просит основное окно открыть документ (ссылка внутри отдельного окна). */
+export async function openInMainWindow(project: string, path: string, firstLine: number, lastLine: number): Promise<void> {
+  await shell("open_in_main_window", { project, path, firstLine, lastLine });
+}
+
+/** Дерево документации по диску (Т-33): файлы и папки, пути от корня проекта. */
+export interface DiskTreeOutput {
+  status: "ok";
+  docs_root: string;
+  revision: string;
+  dirs: string[];
+  files: { path: string; size: number; modified: number }[];
+  problems: { path: string; reason: string }[];
+}
+
+/** Ответ операции с файлом или папкой: `partial` — папка создана, а её `index.md` нет. */
+export type EntryResult =
+  | { status: "ok"; path: string; index_path?: string }
+  | { status: "partial"; path: string; index_path: string; kind: string; message: string }
+  | DocumentFailure;
+
+/** Дерево с диска; вне приложения и при ошибке — `null`: окно строит дерево по индексу. */
+export async function treeRead(project: string): Promise<DiskTreeOutput | null> {
+  if (!inTauri()) return (await import("./mock-disk")).mockTreeRead(project);
+  const out = await shell<DiskTreeOutput | DocumentFailure>("tree_read", { project });
+  return out && out.status === "ok" ? out : null;
+}
+
+export async function entryCreateDoc(project: string, parent: string, name: string): Promise<EntryResult> {
+  if (!inTauri()) return (await import("./mock-disk")).mockEntry("create_doc", project, { parent, name });
+  return (await shell<EntryResult>("entry_create_doc", { project, parent, name }))!;
+}
+
+export async function entryCreateDir(project: string, parent: string, name: string): Promise<EntryResult> {
+  if (!inTauri()) return (await import("./mock-disk")).mockEntry("create_dir", project, { parent, name });
+  return (await shell<EntryResult>("entry_create_dir", { project, parent, name }))!;
+}
+
+/** Переименование и перемещение: `toParent` — папка назначения, `name` — имя на новом месте. */
+export async function entryMove(project: string, from: string, toParent: string, name: string): Promise<EntryResult> {
+  if (!inTauri()) return (await import("./mock-disk")).mockEntry("move", project, { from, toParent, name });
+  return (await shell<EntryResult>("entry_move", { project, from, toParent, name }))!;
+}
+
+/** Отправляет файл или папку в корзину ОС; без корзины — отказ. */
+export async function entryTrash(project: string, path: string): Promise<EntryResult> {
+  if (!inTauri()) return (await import("./mock-disk")).mockEntry("trash", project, { path });
+  return (await shell<EntryResult>("entry_trash", { project, path }))!;
+}
+
 export interface DocumentEditor { id: string; label: string }
 
 export interface FolderTarget { id: string; absolute: string; missing: boolean }

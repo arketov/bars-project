@@ -209,6 +209,33 @@ fn half_of_a_text_is_a_partial_copy() {
 }
 
 #[test]
+fn sections_of_one_document_are_not_partial_or_semantic_pairs() {
+    let phrase = "порядок работы сервиса задан отдельным решением владельца проекта сегодня";
+    // Два раздела одного файла: общая половина текста и общая тема со словами.
+    let partial_one = format!("{} {}", prose("дельта", 40), prose("эпсилон", 40));
+    let partial_two = format!("{} {}", prose("зета", 30), prose("эпсилон", 40));
+    let semantic_one = format!("темаа {} {phrase} {}", prose("ро", 20), prose("сигма", 20));
+    let semantic_two = format!("темаа {} {phrase} {}", prose("тау", 20), prose("фи", 20));
+    let one_file = |first: &str, second: &str| format!("{first}\n\n## Вторая часть\n\n{second}");
+
+    let (_dir, index) = project(&[("a/one.md", one_file(&partial_one, &partial_two))]);
+    let response = audit(&index);
+    assert_eq!(response.chunks_checked, 2, "{response:?}");
+    assert!(response.items.is_empty(), "{response:?}");
+
+    let (_dir, index) = project(&[("a/one.md", one_file(&semantic_one, &semantic_two))]);
+    let response = audit(&index);
+    assert_eq!(response.chunks_checked, 2, "{response:?}");
+    assert!(response.items.is_empty(), "{response:?}");
+
+    // Те же тексты в разных файлах пары дают: исключение касается только одного документа.
+    let (_dir, index) = project(&[("a/one.md", partial_one), ("b/two.md", partial_two)]);
+    assert_eq!(audit(&index).items.len(), 1);
+    let (_dir, index) = project(&[("a/one.md", semantic_one), ("b/two.md", semantic_two)]);
+    assert_eq!(audit(&index).items.len(), 1);
+}
+
+#[test]
 fn a_section_inside_a_bigger_one_is_contained() {
     let small = prose("тета", 40);
     let big = format!("{} {} {}", prose("йота", 40), small, prose("каппа", 40));

@@ -48,6 +48,7 @@ pub struct Shared {
     handler: Mutex<Option<WorkerHandler>>,
     pub folders: crate::folders::Targets,
     pub flush: crate::flush::Flush,
+    pub documents: crate::doc_window::Targets,
 }
 
 impl Shared {
@@ -249,6 +250,7 @@ pub async fn document_write(
 ) -> Result<Value, String> {
     use crate::document_io::{Eol, WriteOutcome, resolve, write};
     let (root, docs_root) = document_roots(&state, &project)?;
+    let worker = state.get().map(|handler| handler.worker().clone());
     tauri::async_runtime::spawn_blocking(move || {
         let file = match resolve(&root, &docs_root, &path) {
             Ok(file) => file,
@@ -262,6 +264,11 @@ pub async fn document_write(
             bom,
         ) {
             Ok(WriteOutcome::Saved { revision }) => {
+                // Правка из окна ждёт паузы Т-41 и идёт в очередь с приоритетом правки (Т-42);
+                // воркер, который не ответил, не мешает записи: файл всё равно увидит слежение.
+                if let Some(worker) = worker {
+                    let _ = worker.documents_edited(&root, vec![root.join(&path)]);
+                }
                 serde_json::json!({ "status": "saved", "revision": revision })
             }
             Ok(WriteOutcome::Conflict { current }) => {
@@ -297,13 +304,129 @@ pub async fn document_revision(
     .map_err(|e| e.to_string())
 }
 
+fn tree_failure(error: &crate::tree_io::TreeError) -> Value {
+    serde_json::json!({ "status": "error", "kind": error.kind(), "message": error.message() })
+}
+
+/// Дерево документации по диску (Т-33): файлы, как их видит индексатор, и папки, включая пустые.
+#[tauri::command]
+pub async fn tree_read(state: State<'_, Shared>, project: String) -> Result<Value, String> {
+    let (root, docs_root) = document_roots(&state, &project)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        match crate::tree_io::read_tree(&root, &docs_root) {
+            Ok(tree) => serde_json::json!({
+                "status": "ok",
+                "docs_root": tree.docs_root,
+                "revision": tree.revision,
+                "dirs": tree.dirs,
+                "files": tree.files.iter().map(|f| serde_json::json!({
+                    "path": f.path, "size": f.size, "modified": f.modified_ms,
+                })).collect::<Vec<_>>(),
+                "problems": tree.problems.iter().map(|(path, reason)| serde_json::json!({
+                    "path": path, "reason": reason,
+                })).collect::<Vec<_>>(),
+            }),
+            Err(error) => tree_failure(&error),
+        }
+    })
+    .await
+    .map_err(|e| e.to_string())
+}
+
+/// Создаёт документ `name` в папке `parent` (путь от корня проекта).
+#[tauri::command]
+pub async fn entry_create_doc(
+    state: State<'_, Shared>,
+    project: String,
+    parent: String,
+    name: String,
+) -> Result<Value, String> {
+    let (root, docs_root) = document_roots(&state, &project)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        match crate::tree_io::create_doc(&root, &docs_root, &parent, &name) {
+            Ok(path) => serde_json::json!({ "status": "ok", "path": path }),
+            Err(error) => tree_failure(&error),
+        }
+    })
+    .await
+    .map_err(|e| e.to_string())
+}
+
+/// Создаёт папку `name` в папке `parent` вместе с её `index.md`.
+#[tauri::command]
+pub async fn entry_create_dir(
+    state: State<'_, Shared>,
+    project: String,
+    parent: String,
+    name: String,
+) -> Result<Value, String> {
+    let (root, docs_root) = document_roots(&state, &project)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        match crate::tree_io::create_dir(&root, &docs_root, &parent, &name) {
+            Ok(created) => match created.index_error {
+                None => serde_json::json!({
+                    "status": "ok", "path": created.path, "index_path": created.index_path,
+                }),
+                Some(error) => serde_json::json!({
+                    "status": "partial", "path": created.path, "index_path": created.index_path,
+                    "kind": error.kind(), "message": error.message(),
+                }),
+            },
+            Err(error) => tree_failure(&error),
+        }
+    })
+    .await
+    .map_err(|e| e.to_string())
+}
+
+/// Переименовывает и перемещает файл или папку: `to_parent` — папка назначения, `name` — новое имя.
+#[tauri::command]
+pub async fn entry_move(
+    state: State<'_, Shared>,
+    project: String,
+    from: String,
+    to_parent: String,
+    name: String,
+) -> Result<Value, String> {
+    let (root, docs_root) = document_roots(&state, &project)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        match crate::tree_io::move_entry(&root, &docs_root, &from, &to_parent, &name) {
+            Ok(path) => serde_json::json!({ "status": "ok", "path": path }),
+            Err(error) => tree_failure(&error),
+        }
+    })
+    .await
+    .map_err(|e| e.to_string())
+}
+
+/// Отправляет файл или папку в корзину ОС.
+#[tauri::command]
+pub async fn entry_trash(
+    state: State<'_, Shared>,
+    project: String,
+    path: String,
+) -> Result<Value, String> {
+    let (root, docs_root) = document_roots(&state, &project)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        match crate::tree_io::trash_entry(&root, &docs_root, &path) {
+            Ok(()) => serde_json::json!({ "status": "ok" }),
+            Err(error) => tree_failure(&error),
+        }
+    })
+    .await
+    .map_err(|e| e.to_string())
+}
+
 /// Цвета и иконки проекта (Т-38). Отказы приходят как `status: "error"` с `kind`.
 fn appearance_json(appearance: &crate::appearance::Appearance) -> Value {
     let section = |entries: &std::collections::BTreeMap<String, crate::appearance::Entry>| {
         entries
             .iter()
             .map(|(path, entry)| {
-                (path.clone(), serde_json::json!({ "color": entry.color, "icon": entry.icon }))
+                (
+                    path.clone(),
+                    serde_json::json!({ "color": entry.color, "icon": entry.icon }),
+                )
             })
             .collect::<serde_json::Map<_, _>>()
     };
@@ -354,7 +477,10 @@ pub async fn appearance_set(
     .await
     .map_err(|e| e.to_string())?;
     if value["status"] == "ok" {
-        let _ = app.emit("bars://appearance-changed", serde_json::json!({ "project": project }));
+        let _ = app.emit(
+            "bars://appearance-changed",
+            serde_json::json!({ "project": project }),
+        );
     }
     Ok(value)
 }
@@ -605,8 +731,64 @@ mod log_tests {
 
 /// Ответ окна на просьбу записать правки перед выходом (НФТ-5): `clean`, `asking`, `proceed`, `cancel`.
 #[tauri::command]
-pub fn flush_reply(state: State<'_, Shared>, reply: String) -> bool {
-    state.flush.reply(reply)
+pub fn flush_reply(window: tauri::WebviewWindow, state: State<'_, Shared>, reply: String) -> bool {
+    state.flush.reply(window.label(), reply)
+}
+
+/// Открывает документ в отдельном окне bars (Т-40) или выводит вперёд уже открытое.
+#[tauri::command]
+pub async fn document_window_open(
+    app: AppHandle,
+    state: State<'_, Shared>,
+    project: String,
+    path: String,
+) -> Result<(), String> {
+    let (root, docs_root) = document_roots(&state, &project)?;
+    crate::document_io::resolve(&root, &docs_root, &path).map_err(|e| e.message())?;
+    crate::doc_window::open(&app, &state.documents, &project, &path)
+}
+
+/// Проект и путь документа окна; `null` — окно не окно документа (главное).
+#[tauri::command]
+pub fn document_window_target(
+    window: tauri::WebviewWindow,
+    state: State<'_, Shared>,
+) -> Option<Value> {
+    state
+        .documents
+        .get(window.label())
+        .map(|(project, path)| serde_json::json!({ "project": project, "path": path }))
+}
+
+/// Окно документа просит основное окно открыть документ (ссылка внутри документа): основное окно
+/// показывается и получает событие `bars://open-document`.
+#[tauri::command]
+pub fn open_in_main_window(
+    app: AppHandle,
+    project: String,
+    path: String,
+    first_line: u32,
+    last_line: u32,
+) -> Result<(), String> {
+    use tauri::Emitter;
+    crate::window::show(&app);
+    app.emit_to(
+        crate::window::LABEL,
+        "bars://open-document",
+        serde_json::json!({
+            "project": project, "path": path, "first_line": first_line, "last_line": last_line,
+        }),
+    )
+    .map_err(|e| e.to_string())
+}
+
+/// Закрывает окно документа после записи правок; главное окно командой не закрывается.
+#[tauri::command]
+pub fn document_window_close(window: tauri::WebviewWindow) -> Result<(), String> {
+    if !window.label().starts_with(crate::doc_window::PREFIX) {
+        return Err("закрывается только окно документа".into());
+    }
+    window.destroy().map_err(|e| e.to_string())
 }
 
 /// Перезапускает весь процесс `bars`: окно и воркер — один процесс (OQ-57).

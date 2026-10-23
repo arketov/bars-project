@@ -6,8 +6,15 @@
   import { decimal, documents, duration, jobReason, percentOf, plural, remainingSeconds } from "./format";
   import Icon from "./Icon.svelte";
   import { operationText } from "./notifications";
+  import type { DocumentSource, DocumentState } from "./types";
 
   const project = $derived(app.project);
+  /** Очередь документов проекта (document-queue.md): приходит в ответе `activity`, который окно опрашивает само. */
+  const docQueue = $derived(app.activity?.documents?.find((entry) => entry.project === project?.path) ?? null);
+  const DOC_STATE: Record<DocumentState, string> = { waiting: "ждёт паузы", queued: "в очереди", indexing: "идёт embed", error: "ошибка" };
+  const DOC_SOURCE: Record<DocumentSource, string> = { explicit: "по команде", edit: "правка в bars", watch: "правка на диске", periodic: "проверка" };
+
+  const waitingDocs = $derived(docQueue?.waiting ?? 0);
   const activity = $derived(app.activity);
   const running = $derived(activity?.running && activity.running.project === project?.path ? activity.running : null);
   const queued = $derived(activity?.queue.find((job) => job.project === project?.path) ?? null);
@@ -50,6 +57,8 @@
           Идёт проверка проекта: bars сверяет документы с индексом.
         {:else if queued}
           Проект ждёт своей очереди.
+        {:else if waitingDocs > 0}
+          Правки документов ждут паузы перед индексацией: {waitingDocs}. Поиск по смыслу увидит их, когда пауза кончится.
         {:else if problems?.last_error}
           {problems.last_error}
         {:else if files.length}
@@ -117,6 +126,39 @@
             </div>
           </div>
         </div>
+      {/if}
+
+      {#if docQueue && docQueue.total > 0}
+        <div class="panel docs" aria-label="Документы в очереди">
+          <div class="ch">
+            <h2>Документы</h2>
+            <span class="badge">{docQueue.total} {plural(docQueue.total, ["документ", "документа", "документов"])}</span>
+          </div>
+          <p class="muted small sums">
+            Ждут паузы: {docQueue.waiting} · в очереди: {docQueue.queued} · идёт embed: {docQueue.indexing} · с ошибкой: {docQueue.error}
+          </p>
+          <div>
+            {#each docQueue.documents as doc (doc.path)}
+              <div class="q doc" class:now={doc.state === "indexing"}>
+                <div class="grow">
+                  <b class="mono">{doc.path}</b>
+                  <div class="why">
+                    {DOC_SOURCE[doc.source]}{#if doc.state === "waiting" && doc.due_in !== null} · embed через {doc.due_in} с{/if}
+                  </div>
+                  {#if doc.state === "error" && doc.error}<div class="why err">{doc.error}</div>{/if}
+                </div>
+                <span class="badge" class:acc={doc.state === "indexing"} class:bad={doc.state === "error"}>{DOC_STATE[doc.state]}</span>
+                {#if doc.state === "error"}<button class="ghost sm" onclick={() => app.retryDocument(project.path, doc.path)}>Повторить</button>{/if}
+              </div>
+            {/each}
+          </div>
+          {#if docQueue.total > docQueue.documents.length}
+            <p class="muted small sums">Показано {docQueue.documents.length} из {docQueue.total}.</p>
+          {/if}
+        </div>
+        <p class="muted small">
+          Документ после правки ждёт паузу и индексируется один раз, когда правки стихли. «Проверить сейчас» не ждёт паузы.
+        </p>
       {/if}
 
       {#if !running && !queued}
@@ -242,4 +284,7 @@
   .t :global(svg) { color: var(--bad); flex: none; }
   .m { color: var(--muted); font-size: 12.5px; margin: 3px 0 0 25px; }
   .back { margin-top: 8px; }
+  .sums { padding: 0 14px; margin: 8px 0; }
+  .doc .mono { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+  .why.err { color: var(--bad); }
 </style>

@@ -15,6 +15,7 @@ use super::registry::Registry;
 use super::*;
 
 mod deletion;
+mod doc_queue;
 mod folders;
 mod graph;
 mod operations;
@@ -37,6 +38,7 @@ impl Env {
     fn config(&self) -> WorkerConfig {
         let mut config = WorkerConfig::new(self.home.path().to_path_buf());
         config.debounce = Duration::from_millis(100);
+        config.edit_pause = Some(Duration::ZERO);
         config
     }
 
