@@ -31,6 +31,7 @@
 
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
+html { overflow: hidden; }
 body {
   background: var(--bg); color: var(--text);
   font: 14px/1.5 "Segoe UI Variable Text", "Segoe UI", -apple-system, system-ui, sans-serif;

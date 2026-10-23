@@ -345,7 +345,7 @@
 
 <style>
   .resize-control { position:fixed; bottom:14px; left:50%; transform:translateX(-50%); z-index:100; padding:10px; background:var(--panel); color:var(--text); border:1px solid var(--line); font-size:12px; }
-  .workspace { height: 100vh; display: flex; flex-direction: column; min-width: 0; }
+  .workspace { position: fixed; inset: 0; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
   .shared-surface { display:flex; flex-direction:column; flex:1; width:100%; height:100%; min-width:0; min-height:0; }
   .shared-surface :global(main), .shared-surface :global(aside) { flex:1; width:100%; min-height:0; min-width:0; }
   nav .global-launch { margin-left:auto; display:flex; }
