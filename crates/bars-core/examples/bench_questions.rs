@@ -5,7 +5,10 @@
 
 use std::path::PathBuf;
 
-use bars_core::models::{Accelerator, BuiltinEmbedder, Embedder};
+use bars_core::models::{
+    Accelerator, BuiltinEmbedder, Embedder, QWEN3_4B_ID, builtin_model, is_downloaded,
+    load_builtin_embedder,
+};
 
 fn main() {
     let mut args = std::env::args().skip(1);
@@ -16,16 +19,24 @@ fn main() {
     let texts: Vec<String> = serde_json::from_slice(&std::fs::read(&texts_path).unwrap()).unwrap();
     let models = PathBuf::from(std::env::var_os("USERPROFILE").unwrap()).join(".bars/models");
     let (fp16, accelerator) = match mode.as_str() {
+        "qwen4-auto" => (false, Accelerator::Auto),
         "auto" => (false, Accelerator::Auto),
         "cpu" => (false, Accelerator::Cpu),
         "fp16-auto" => (true, Accelerator::Auto),
         "fp16-cpu" => (true, Accelerator::Cpu),
         other => panic!("режим: auto | cpu | fp16-auto | fp16-cpu, а не {other}"),
     };
-    let mut embedder = if fp16 {
-        BuiltinEmbedder::bge_m3_fp16(&models, accelerator).unwrap()
+    let mut embedder: Box<dyn Embedder> = if mode == "qwen4-auto" {
+        let info = builtin_model(QWEN3_4B_ID).unwrap();
+        assert!(
+            is_downloaded(&models, info.id),
+            "нужен готовый локальный артефакт; скачивание не разрешено стендом"
+        );
+        load_builtin_embedder(info.id, &models, accelerator).unwrap()
+    } else if fp16 {
+        Box::new(BuiltinEmbedder::bge_m3_fp16(&models, accelerator).unwrap())
     } else {
-        BuiltinEmbedder::bge_m3(&models, accelerator).unwrap()
+        Box::new(BuiltinEmbedder::bge_m3(&models, accelerator).unwrap())
     };
     let fingerprint = format!("{:?}", embedder.fingerprint());
     eprintln!("{mode}: {} текстов; {fingerprint}", texts.len());
@@ -37,6 +48,9 @@ fn main() {
         let norm = vector.iter().map(|x| x * x).sum::<f32>().sqrt();
         vector.iter_mut().for_each(|x| *x /= norm);
         vectors.push(vector);
+        if vectors.len() % 20 == 0 {
+            eprintln!("готово {}/{}", vectors.len(), texts.len());
+        }
     }
     let seconds = started.elapsed().as_secs_f64();
     let result = serde_json::json!({

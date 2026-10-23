@@ -16,6 +16,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .filter(|s| !s.is_empty())
         .ok_or("client_refresh_session требует BARS_USER_HOME")?;
     let home = std::path::PathBuf::from(home);
+    bars_worker::logging::init(&home.join(".bars"))?;
     let stop = home.join("stop");
     if stop.exists() {
         return Err("удалите stop перед новым запуском".into());

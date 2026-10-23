@@ -1,0 +1,8 @@
+{
+  "installed_bars_changed": false,
+  "user_profile_used": false,
+  "model_weights_preserved": "D:/text-generation-webui-1.16/models",
+  "signal": "SIGINT",
+  "runtime": "/root/Projects/oss/bars-tei-5-3",
+  "owned_tei_servers_stopped": true
+}

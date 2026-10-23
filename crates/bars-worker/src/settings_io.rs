@@ -204,6 +204,10 @@ pub fn save_user_settings(bars_home: &Path, settings: &SettingsDoc) -> Result<bo
     let embed = table(&mut doc, "embed");
     set_text(embed, "source", &settings.embed.source, &old.embed.source);
     set_text(embed, "model", &settings.embed.model, &old.embed.model);
+    // У внешнего источника model обязателен, даже если имя совпало с builtin default.
+    if settings.embed.source != "builtin" && !embed.contains_key("model") {
+        embed.insert("model", value(&settings.embed.model));
+    }
     set_optional(
         embed,
         "base_url",
@@ -249,6 +253,9 @@ pub fn save_user_settings(bars_home: &Path, settings: &SettingsDoc) -> Result<bo
         &old.rerank.source,
     );
     set_text(rerank, "model", &settings.rerank.model, &old.rerank.model);
+    if settings.rerank.source != "builtin" && !rerank.contains_key("model") {
+        rerank.insert("model", value(&settings.rerank.model));
+    }
     set_optional(
         rerank,
         "base_url",
@@ -439,17 +446,37 @@ mod tests {
     }
 
     #[test]
-    fn ollama_settings_roundtrip_and_reject_rerank_without_writing() {
+    fn tei_settings_roundtrip_both_models() {
         let home = home();
         let mut doc = current(home.path());
-        doc.embed.source = "ollama".into();
+        doc.embed.source = "tei".into();
+        doc.embed.model = "BAAI/bge-m3".into();
+        doc.embed.base_url = Some("http://127.0.0.1:8080".into());
+        doc.rerank.enabled = true;
+        doc.rerank.source = "tei".into();
+        doc.rerank.model = "BAAI/bge-reranker-v2-m3".into();
+        doc.rerank.base_url = Some("http://127.0.0.1:8081".into());
+        assert!(save_user_settings(home.path(), &doc).unwrap());
+        assert_eq!(current(home.path()), doc);
+    }
+
+    #[test]
+    fn ollama_settings_roundtrip_and_reject_rerank_without_writing() {
+        external_settings_roundtrip("ollama");
+        external_settings_roundtrip("lmstudio");
+    }
+
+    fn external_settings_roundtrip(source: &str) {
+        let home = home();
+        let mut doc = current(home.path());
+        doc.embed.source = source.into();
         doc.embed.model = "qwen3-embedding:0.6b".into();
         doc.embed.base_url = Some("http://127.0.0.1:11434".into());
         assert!(save_user_settings(home.path(), &doc).unwrap());
         assert_eq!(current(home.path()), doc);
         let before = fs::read_to_string(user_settings_path(home.path())).unwrap();
         doc.rerank.enabled = true;
-        doc.rerank.source = "ollama".into();
+        doc.rerank.source = source.into();
         assert!(save_user_settings(home.path(), &doc).is_err());
         assert_eq!(
             fs::read_to_string(user_settings_path(home.path())).unwrap(),

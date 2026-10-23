@@ -1,0 +1,101 @@
+{
+  "observed_at": "2026-10-23T12:48:27.6912716+05:00",
+  "verification": "static source and document consistency; no runtime acceptance",
+  "tools": [
+    "bars_relations",
+    "bars_paths",
+    "bars_impact",
+    "bars_context",
+    "bars_explore",
+    "bars_graph",
+    "bars_rag_search",
+    "bars_get_similar",
+    "bars_get_duplicates",
+    "bars_projects",
+    "bars_status",
+    "bars_reindex",
+    "bars_read",
+    "bars_outline"
+  ],
+  "tool_count": 14,
+  "missing_parity_rows": [],
+  "initialize_characters": 1980,
+  "docs_checked": [
+    "docs/knowledge/mcp-after-workspace.md",
+    "docs/features/agent-tools/mcp-tools.md",
+    "docs/features/agent-tools/Index.md",
+    "docs/chats/2026-10-23-mcp-workspace-research/log.md",
+    "docs/chats/2026-10-23-mcp-workspace-research/handoff.md"
+  ],
+  "doc_errors": [],
+  "sources": [
+    {
+      "sha256": "987522716341C4D22F48A2E4EDE0A7B92B0FE43F8026CE7A715F1F3679567248",
+      "path": "crates/bars-mcp/src/lib.rs"
+    },
+    {
+      "sha256": "65238C12F2D4EAF9B6A3C672AE0F0FDD3B938FE656B65B316B2A1233C46E3E74",
+      "path": "crates/bars-mcp/src/instructions.rs"
+    },
+    {
+      "sha256": "0D157D21FF37BAEC0387603514EE00DE34C8F269E376AE68C5F2A44A0BF22E1D",
+      "path": "crates/bars-mcp/src/render.rs"
+    },
+    {
+      "sha256": "135CEF52FA52DB41392C6CEF9954164C2BF3148330C6F1A07958FABC0A1CD4A0",
+      "path": "crates/bars-protocol/src/methods.rs"
+    },
+    {
+      "sha256": "2DC2476DD47C4BC94A882E28452438D0F7C0FD9FEBCF56A7E964551E3379A68A",
+      "path": "crates/bars-protocol/src/links.rs"
+    },
+    {
+      "sha256": "91897F6AED5F46B2EBC3534D2C1DCB7610A747EC9E68063BC6CAC8CC8E2CD585",
+      "path": "crates/bars-worker/src/handler/links.rs"
+    },
+    {
+      "sha256": "E322AD289ACD6517EDAEA96DE16D755465327F086D65D22419C8EF6BFD3AA5D5",
+      "path": "ui/src/lib/GraphTab.svelte"
+    },
+    {
+      "sha256": "5CCC0D2882EBE753A42476161BAABDFDAA36116AFDF8DA7247F3F34B87F580CC",
+      "path": "ui/src/lib/GraphPage.svelte"
+    },
+    {
+      "sha256": "B1D3785551659A0C91878C1B1FA229A1E0A4616078279AF62AA7BBDC17BA2EFE",
+      "path": "docs/features/agent-tools/window-parity.md"
+    }
+  ],
+  "graph_probe": "bars_relations returned graph_not_ready: stale; no rebuild",
+  "boundaries": [
+    "parallel dirty work preserved",
+    "no MCP API implementation",
+    "no installed-client or native-app acceptance"
+  ],
+  "final_validation_at": "2026-10-23T12:58:50.2829034+05:00",
+  "approved_scope": [
+    "instructions",
+    "bars_text_search",
+    "bars_links",
+    "no status counters",
+    "API implementation remains 4.4.2"
+  ],
+  "architect_review": {
+    "findings": [
+      "keep Window-only methods internal",
+      "Target DTO for MCP",
+      "independent cancellation context",
+      "bounded skipped samples",
+      "one link occurrence per record",
+      "snapshot-bound cursor",
+      "explicit history branches"
+    ],
+    "task": "/root/mcp_architect",
+    "status": "completed",
+    "method": "bars documents and source inspection"
+  },
+  "whitespace_check": {
+    "shared_plan": "pre-existing/parallel whitespace at line 70; owned 4.4 block checked separately",
+    "owned_docs": "passed"
+  }
+}

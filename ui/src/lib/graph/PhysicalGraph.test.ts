@@ -53,6 +53,26 @@ afterEach(async () => {
   app.projects = [];
 });
 
+it("показывает остановку и ошибки файлов, продолжает явным построением", async () => {
+  rpc.mockImplementation(async (method: string, params: Record<string, unknown>) => {
+    if (method === "graph_status") return { state: "cancelled", snapshot: "mock-snapshot-0001", active_job: null, paused: true, file_errors_total: 1, file_errors: [{ path: "docs/Ошибка.md", code: "invalid_utf8", message: "Файл не является UTF-8" }] };
+    if (method === "graph_physical") return physicalFixture(params);
+    return {};
+  });
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  expect(target.textContent).toContain("Обновление графа остановлено");
+  expect(target.textContent).toContain("Файлов с ошибками: 1");
+  expect(target.textContent).toContain("Ошибка.md: Файл не является UTF-8");
+  const select = target.querySelector<HTMLSelectElement>('[aria-label="Слой для обновления"]')!;
+  select.value = "structure";
+  select.dispatchEvent(new Event("change", { bubbles: true }));
+  await settle();
+  button("Продолжить")!.click();
+  await settle();
+  expect(rpc.mock.calls.some(c => c[0] === "graph_build" && c[1].layer === "structure")).toBe(true);
+});
+
 it("загружает срез проекта с начальными пределами и показывает документы, режимы и счётчики", async () => {
   component = mount(PhysicalGraph, { target });
   await settle();

@@ -1,0 +1,13 @@
+
+> bars-ui@0.0.0 test
+> vitest run --run src/lib/new-topics-store.test.ts src/lib/NewTopicsPage.test.ts
+
+
+ RUN  v5.0.4 C:/Users/arketov/Desktop/bars-project/ui
+
+
+ Test Files  2 passed (2)
+      Tests  29 passed (29)
+   Start at  16:08:01
+   Duration  2.86s (tests 54%, environment 31%, transform 8%, import 6%)
+

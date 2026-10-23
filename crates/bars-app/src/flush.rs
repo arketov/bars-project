@@ -24,6 +24,7 @@ type Reply = (String, String);
 #[derive(Default)]
 pub struct Flush {
     sender: Mutex<Option<UnboundedSender<Reply>>>,
+    operation: tokio::sync::Mutex<()>,
 }
 
 impl Flush {
@@ -81,6 +82,7 @@ async fn wait(
 /// Просит все окна записать несохранённые документы. `false` — пользователь или ошибка записи просят остаться.
 pub async fn request(app: &AppHandle) -> bool {
     let state = app.state::<Shared>();
+    let _operation = state.flush.operation.lock().await;
     let mut rx = state.flush.begin();
     if app.emit("bars://flush-request", ()).is_err() {
         state.flush.end();
@@ -98,6 +100,33 @@ pub async fn request(app: &AppHandle) -> bool {
     .await;
     state.flush.end();
     proceed
+}
+
+/// Перед переименованием все окна подтверждают запись; молчание запрещает операцию.
+pub async fn request_clean(app: &AppHandle) -> bool {
+    let state = app.state::<Shared>();
+    let _operation = state.flush.operation.lock().await;
+    let mut rx = state.flush.begin();
+    let mut pending: HashSet<String> = app.webview_windows().into_keys().collect();
+    if app.emit("bars://move-flush-request", ()).is_err() {
+        state.flush.end();
+        return false;
+    }
+    let result = tokio::time::timeout(Duration::from_secs(10), async {
+        while !pending.is_empty() {
+            match rx.recv().await {
+                Some((label, reply)) if reply == "clean" => {
+                    pending.remove(&label);
+                }
+                _ => return false,
+            }
+        }
+        true
+    })
+    .await
+    .unwrap_or(false);
+    state.flush.end();
+    result
 }
 
 #[cfg(test)]

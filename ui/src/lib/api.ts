@@ -191,9 +191,15 @@ export interface DiskTreeOutput {
 
 /** Ответ операции с файлом или папкой: `partial` — папка создана, а её `index.md` нет. */
 export type EntryResult =
-  | { status: "ok"; path: string; index_path?: string }
-  | { status: "partial"; path: string; index_path: string; kind: string; message: string }
+  | { status: "ok"; path: string; index_path?: string; updated?: string[]; failed?: {path: string; reason: string}[] }
+  | { status: "partial"; path: string; index_path?: string; kind?: string; message?: string; updated?: string[]; failed?: {path: string; reason: string}[] }
   | DocumentFailure;
+
+export interface MovePreview { status: "ok"; path: string; token: string; documents: {path: string; edits: number}[]; warnings: {path: string; line: number}[] }
+export async function entryPlanMove(project: string, from: string, toParent: string, name: string): Promise<MovePreview | DocumentFailure> {
+  if (!inTauri()) return { status: "ok", path: `${toParent}/${name}`, token: "mock", documents: [], warnings: [] };
+  return (await shell<MovePreview | DocumentFailure>("entry_plan_move", {project, from, toParent, name}))!;
+}
 
 /** Дерево с диска; `null` только у тестового мока. Ошибка диска показывается в дереве. */
 export async function treeRead(project: string): Promise<DiskTreeOutput | null> {
@@ -215,9 +221,9 @@ export async function entryCreateDir(project: string, parent: string, name: stri
 }
 
 /** Переименование и перемещение: `toParent` — папка назначения, `name` — имя на новом месте. */
-export async function entryMove(project: string, from: string, toParent: string, name: string): Promise<EntryResult> {
+export async function entryMove(project: string, from: string, toParent: string, name: string, token: string): Promise<EntryResult> {
   if (!inTauri()) return (await import("./mock-disk")).mockEntry("move", project, { from, toParent, name });
-  return (await shell<EntryResult>("entry_move", { project, from, toParent, name }))!;
+  return (await shell<EntryResult>("entry_move", { project, from, toParent, name, token }))!;
 }
 
 /** Отправляет файл или папку в корзину ОС; без корзины — отказ. */

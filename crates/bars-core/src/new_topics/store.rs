@@ -32,6 +32,8 @@ pub enum StoreError {
     Io(#[from] std::io::Error),
     #[error("достигнут предел хранения новых тем ({0}); новые записи остановлены")]
     LimitReached(usize),
+    #[error("объединение тем: {0}")]
+    InvalidMerge(&'static str),
 }
 
 /// Откуда пришло обращение.
@@ -113,6 +115,9 @@ impl EmbeddingSpace {
     /// Для неизмеренного пространства — `None`:
     /// семантического автослияния нет, остаётся точное совпадение (NT-04).
     pub fn merge_threshold(&self) -> Option<f32> {
+        if self.key == "builtin|Qwen/Qwen3-Embedding-4B@gguf-q4_k_m-4ea06f44bb1a3be5|2560||l2" {
+            return Some(0.75);
+        }
         let model = self.key.split('|').nth(1)?.to_lowercase();
         model.contains("bge-m3").then_some(0.68)
     }
@@ -414,6 +419,60 @@ impl TopicStore {
         Ok(generation)
     }
 
+    /// Явное объединение пользователем, в том числе вариантов разных embedding-пространств.
+    pub fn merge(
+        &mut self,
+        target: i64,
+        revision: i64,
+        source: i64,
+        source_revision: i64,
+    ) -> Result<Change, StoreError> {
+        if target == source {
+            return Err(StoreError::InvalidMerge("выберите другую тему"));
+        }
+        let tx = self
+            .db
+            .transaction_with_behavior(TransactionBehavior::Immediate)?;
+        for (id, expected) in [(target, revision), (source, source_revision)] {
+            if let Err(change) = Self::expect_revision(&tx, id, expected)? {
+                return Ok(change);
+            }
+        }
+        let count: i64 = tx.query_row(
+            "SELECT count(*) FROM variants WHERE topic_id IN (?1,?2)",
+            params![target, source],
+            |r| r.get(0),
+        )?;
+        if count as usize > MAX_VARIANTS_PER_TOPIC {
+            return Err(StoreError::InvalidMerge("превышен предел 50 формулировок"));
+        }
+        tx.execute(
+            "UPDATE topics SET revision=revision+1, status='open',
+            first_seen=min(first_seen,(SELECT first_seen FROM topics WHERE id=?2)),
+            last_seen=max(last_seen,(SELECT last_seen FROM topics WHERE id=?2)) WHERE id=?1",
+            params![target, source],
+        )?;
+        // Сохранённые проверки относятся к прежним составам тем, даже если номера ревизий совпали.
+        tx.execute(
+            "UPDATE checks SET topic_id=?1, topic_revision=0 WHERE topic_id IN (?1,?2)",
+            params![target, source],
+        )?;
+        tx.execute(
+            "UPDATE variants SET topic_id=?1 WHERE topic_id=?2",
+            params![target, source],
+        )?;
+        tx.execute(
+            "UPDATE observations SET topic_id=?1 WHERE topic_id=?2",
+            params![target, source],
+        )?;
+        tx.execute("DELETE FROM topics WHERE id=?1", [source])?;
+        tx.execute("DELETE FROM checks WHERE topic_id=?1 AND id NOT IN (SELECT id FROM checks WHERE topic_id=?1 ORDER BY at DESC,id DESC LIMIT ?2)", params![target,KEPT_CHECKS])?;
+        tx.commit()?;
+        Ok(Change::Updated {
+            revision: revision + 1,
+        })
+    }
+
     /// Удаляет тему с вариантами и наблюдениями. `true`, если тема была.
     pub fn delete_topic(&mut self, id: i64) -> Result<bool, StoreError> {
         Ok(self.db.execute("DELETE FROM topics WHERE id=?1", [id])? > 0)
@@ -584,7 +643,7 @@ impl TopicStore {
         let mut statement = tx.prepare(
             "SELECT v.topic_id, v.text, v.vector FROM variants v
              WHERE v.scope=?1 AND v.space=?2 AND v.vector IS NOT NULL
-               AND v.id=(SELECT min(id) FROM variants WHERE topic_id=v.topic_id AND space=v.space AND vector IS NOT NULL)",
+               AND v.id=(SELECT min(id) FROM variants WHERE topic_id=v.topic_id AND scope=v.scope AND space=v.space AND vector IS NOT NULL)",
         )?;
         let rows = statement.query_map(params![observation.scope, space.key], |r| {
             Ok((

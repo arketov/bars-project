@@ -49,6 +49,29 @@ it("ошибка чтения не выглядит нулём: счётчик �
   expect(store.count).toBe(2);
 });
 
+it("объединение передаёт ревизии обеих тем и обновляет карточку", async () => {
+  await store.load();
+  await store.select(1);
+  const fallback = invoke.getMockImplementation()!;
+  invoke.mockImplementation(async (method, params) => {
+    if (method !== "new_topics_merge") return fallback(method, params);
+    expect(params).toEqual({ project: P, id: 1, revision: 1, source_id: 2, source_revision: 3 });
+    topics = [summary(1, { revision: 2, observations: 2, variants: 2 })];
+    return { revision: 2 };
+  });
+  expect(await store.merge(1, 2)).toBe(true);
+  expect(store.topics).toHaveLength(1);
+  expect(store.detail?.observations).toBe(2);
+});
+
+it("конфликт при объединении сохраняет темы и обновляет список", async () => {
+  await store.load();
+  invoke.mockRejectedValueOnce(new BarsError("тема изменилась", "stale_ref"));
+  expect(await store.merge(1, 2)).toBe(false);
+  expect(store.topics).toHaveLength(2);
+  expect(flash).toHaveBeenCalledWith(expect.stringContaining("изменилась"), true);
+});
+
 it("ответ прежнего проекта после смены проекта не показывается", async () => {
   let release!: (value: TopicsList) => void;
   invoke.mockImplementationOnce(() => new Promise<TopicsList>((resolve) => { release = resolve; }));

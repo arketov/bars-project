@@ -21,6 +21,7 @@
   import { keybindings } from './keybindings.svelte';
   import UnsavedDialog from './UnsavedDialog.svelte';
   import { confirmClose, startFlushListener } from './unsaved.svelte';
+  import { moved, movedPath } from './moved.svelte';
 
   let host: HTMLDivElement, api: DockviewApi;
   let ready = $state(false), menu = $state(false), active = $state("search");
@@ -158,11 +159,14 @@
   function documentPanel(doc: ViewedDocument) {
     if (!current) return;
     incoming = doc;
-    const { path, title, first_line, last_line } = doc.hit;
-    const id = documentId(path), params: PanelParams = { kind: "document", project: current, hit: { path, title, first_line, last_line } };
-    let panel = api.getPanel(id);
+    // В раскладку попадает только адрес фрагмента; SearchHit может содержать текст документа.
+    const { path, title, first_line, last_line, column, length } = doc.hit;
+    const baseId = documentId(path), params: PanelParams = { kind: "document", project: current, hit: { path, title, first_line, last_line, column, length } };
+    let panel = api.panels.find(p => p.params?.kind === "document" && p.params?.hit?.path === path);
     if (panel) panel.api.updateParameters(params);
     else {
+      let id = baseId, suffix = 0;
+      while (api.getPanel(id)) id = `${baseId}:view:${++suffix}`;
       const target = documentGroup();
       panel = api.addPanel({ id, component: "workspace", title: doc.title, params,
         position: target ? { referenceGroup: target, direction: "within" } : api.getPanel("search") ? { referencePanel: "search", direction: "right" } : undefined,
@@ -267,6 +271,17 @@
     foreground = api.activePanel?.id ?? "search";
     refreshPanels();
     let normalizing = false;
+    const stopMoved = moved.subscribe(event => {
+      if (event.project !== current) return;
+      for (const panel of api.panels) {
+        const params = panel.params as PanelParams;
+        if (params.kind !== "document" || !params.hit) continue;
+        const path = movedPath(params.hit.path, event.from, event.to);
+        if (path !== params.hit.path) panel.api.updateParameters({ ...params, hit: { ...params.hit, path } });
+      }
+      if (app.activeDocument) app.activeDocument = movedPath(app.activeDocument, event.from, event.to);
+      persist();
+    });
     const subscriptions = [api.onDidLayoutChange(() => {
       if (!restoring && !normalizing && (api.groups.length === 1 || removableEmptyGroups(api).length > 0)) {
         normalizing = true;
@@ -284,7 +299,7 @@
     })];
     ready = true;
     void tick().then(() => { if (!disposed) commands = workspaceCommands({ api, host, open: navigate, search: () => globalSearch.open(), reset, palette, resize: resizeGroup }); });
-    return () => { disposed = true; stopKeys?.(); stopFlush?.(); commands?.dispose(); palette.close(false); globalSearch.close(false); ready = false; persist(); subscriptions.forEach(s => s.dispose()); api.dispose(); app.indexingOpen = false; };
+    return () => { disposed = true; stopMoved(); stopKeys?.(); stopFlush?.(); commands?.dispose(); palette.close(false); globalSearch.close(false); ready = false; persist(); subscriptions.forEach(s => s.dispose()); api.dispose(); app.indexingOpen = false; };
   });
 </script>
 

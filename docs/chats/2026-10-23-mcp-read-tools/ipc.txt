@@ -1,0 +1,17 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.47s
+     Running unittests src\lib.rs (C:/bt/bars\debug\deps\bars_worker-61e9024e2c58b65d.exe)
+
+running 10 tests
+test ipc::acl_windows::tests::current_sid_looks_like_a_sid ... ok
+test ipc::acl_windows::tests::sddl_has_exactly_one_protected_entry ... ok
+test ipc::listener::tests::taken_name_is_already_running ... ok
+test ipc::listener::tests::pipe_dacl_allows_only_the_current_user ... ok
+test ipc::tests::foreign_protocol_version_is_refused_with_an_update_hint ... ok
+test ipc::tests::mcp_cannot_call_cli_only_methods ... ok
+test ipc::tests::hello_then_call_over_the_real_channel ... ok
+test ipc::tests::ten_clients_at_once_and_a_dropped_one_changes_nothing ... ok
+test ipc::tests::no_worker_is_unavailable ... ok
+test ipc::tests::retry_connects_when_the_worker_comes_up_late ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 267 filtered out; finished in 0.38s
+

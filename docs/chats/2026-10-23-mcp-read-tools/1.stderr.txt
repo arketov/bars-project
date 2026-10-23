@@ -1,0 +1,11 @@
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 18s
+     Running unittests src\lib.rs (C:/bt/bars\debug\deps\bars_core-020aab726378d1a3.exe)
+     Running tests\builtin_embedder.rs (C:/bt/bars\debug\deps\builtin_embedder-d42fb3a12fd53673.exe)
+     Running tests\builtin_models.rs (C:/bt/bars\debug\deps\builtin_models-e46fdde5a431919f.exe)
+     Running tests\chunking_corpus.rs (C:/bt/bars\debug\deps\chunking_corpus-8aafe7e48cd106da.exe)
+     Running tests\index_corpus.rs (C:/bt/bars\debug\deps\index_corpus-4eb78fcd83395637.exe)
+     Running tests\outline_corpus.rs (C:/bt/bars\debug\deps\outline_corpus-03c0b0b936a98d0d.exe)
+     Running tests\search_corpus.rs (C:/bt/bars\debug\deps\search_corpus-a2280aa76868ab3c.exe)
+     Running tests\walk_corpus.rs (C:/bt/bars\debug\deps\walk_corpus-13015a07e38afb67.exe)
+

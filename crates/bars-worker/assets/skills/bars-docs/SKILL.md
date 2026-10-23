@@ -14,6 +14,8 @@ All tools take an optional `project` (default: the project of the session folder
 | Tool | Use it when | Key inputs | Notes |
 |---|---|---|---|
 | `bars_read` | The document is known (plan, register, contract, a path from a search hit). | `path` | Whole `.md` with line numbers; reads from disk, also files outside the index. |
+| `bars_text_search` | Find a literal or regex in saved Markdown, including a recent edit. | `query`, `case_sensitive`, `regex`, `path_filter`, `modules`, `files` | Disk, no embed. First five hits per document; continue one document with its project-relative `path`, `offset`, `revision`. On `stale_revision`, restart. Truncated totals are lower bounds; narrow scope, no global document pagination. |
+| `bars_links` | Inspect fresh incoming or outgoing links of one saved document. | project-relative `path`, `direction`, `limit`, `cursor` | Refreshes the link index, not GraphRAG. Follow `next_cursor`; on `stale_cursor`, restart. Check `known`, `has_more`, `limit_reasons`; clipped display fields are not the full source. |
 | `bars_outline` | You need the structure of a known document or one part of it before reading. | `path`, `levels`, `under` / `under_line` | Headings with line numbers; cheaper than `bars_read` for long files. |
 | `bars_rag_search` | The context is unknown: «where is X described», requirements, decisions, past sessions. | `query`, `modules`, `files`, `limit`, `mode` | Ask a concrete question in the user's language. `mode=mix` adds related sources from the graph, `mode=graph` returns relations; without `mode` the plain hybrid search runs. Each hit has an `id`. |
 | `bars_get_similar` | Before adding text: does a description already exist? Before editing: which other sections say the same? | `chunk_id` from a search hit, `modules`, `limit` | Closeness is not duplication; read both sections. An ID goes stale when its document changes (`chunk_not_found`): search again. |
@@ -38,6 +40,10 @@ All tools take an optional `project` (default: the project of the session folder
 6. Zero or odd results → check subject, project and filters, then `bars_status`; reformulate or read the primary source. An empty answer does not prove a requirement is absent, and is not a reason to reindex.
 
 Graph tools read a prebuilt graph; the semantic layer is incomplete, so a missing relation proves nothing. Check `partial`, `coverage` and `evidence` in every answer, and treat similarity as a hint, never as a dependency. Graph results need the graph to be built; on `graph_not_ready` fall back to `bars_rag_search`.
+
+## Freshness after editing
+
+Read/outline/text_search/links read saved disk content, never the window's unsaved editor buffer. Search/similar/duplicates use the embed index: a saved edit can wait for the document pause and queue. `pending` does not identify the reason; `ready` does not prove every file is current. Do not force reindex to bypass normal waiting. Use text_search for an exact recent string and links for fresh document links; GraphRAG has separate generations and may be stale/partial. `bars_graph` is not the window's physical graph. Agents edit files with their own file tools; MCP does not save, move or force-save documents.
 
 ## Choose the subject and sources
 

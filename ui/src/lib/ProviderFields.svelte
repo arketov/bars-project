@@ -24,14 +24,21 @@
 </script>
 
 <div class="field">
-  <div class="lbl"><b>Адрес API</b><small>{cfg.source === "ollama" ? "Корень сервера Ollama, без /api и /v1" : cfg.source === "remote" ? "OpenAI-совместимый endpoint" : "Локальный OpenAI-совместимый сервер"}</small></div>
+  <div class="lbl"><b>Адрес API</b><small>{cfg.source === "tei" ? "Корень сервера TEI, без /embed, /rerank и /v1" : cfg.source === "ollama" ? "Корень сервера Ollama, без /api и /v1" : cfg.source === "remote" ? "OpenAI-совместимый endpoint" : "Локальный OpenAI-совместимый сервер"}</small></div>
   <div>
-    <input class="inp mono" placeholder={cfg.source === "ollama" ? "http://127.0.0.1:11434" : "https://api.example.com/v1"} bind:value={cfg.base_url} />
+    <input class="inp mono" placeholder={cfg.source === "ollama" ? "http://127.0.0.1:11434" : cfg.source === "lmstudio" ? "http://127.0.0.1:1234" : "https://api.example.com/v1"} bind:value={cfg.base_url} />
     {#if errors[`${kind}.base_url`]}<small class="err">{errors[`${kind}.base_url`]}</small>{/if}
   </div>
 </div>
 {#if cfg.source === "ollama"}
   <p>Модель должна быть установлена в Ollama. Видеокартой и выгрузкой управляет Ollama; rerank выберите отдельно. После замены весов под прежним именем нужна полная переиндексация.</p>
+{/if}
+{#if cfg.source === "tei"}
+  <p>Запустите отдельный сервер Text Embeddings Inference для каждой модели. Имя должно совпадать с загруженной моделью; bars не переключает её на сервере. Видеокартой управляет TEI. Длинный вход отклоняется без обрезания. После замены весов нужна полная переиндексация.</p>
+{/if}
+{#if cfg.source === "lmstudio"}
+  <p>LM Studio может обрезать длинный вход без ошибки. Размер чанка в bars задаётся в символах, контекст модели — в токенах; это разные величины. Уменьшайте чанки и проверяйте предупреждения сервера о длине входа. bars не может гарантировать отсутствие усечения на этом API.</p>
+  <p>Запустите сервер LM Studio и укажите идентификатор embedding-модели из него (например, text-embedding-qwen3-embedding-0.6b). GPU, контекстом и выгрузкой управляет LM Studio. Штатного API rerank нет — выберите его отдельно. Для Qwen3 сохраняйте имя семейства в идентификаторе. После замены весов под прежним именем нужна полная переиндексация.</p>
 {/if}
 <div class="field">
   <div class="lbl"><b>Модель</b></div>
@@ -40,7 +47,7 @@
     {#if errors[`${kind}.model`]}<small class="err">{errors[`${kind}.model`]}</small>{/if}
   </div>
 </div>
-{#if cfg.source === "remote"}
+{#if cfg.source === "remote" || cfg.source === "tei" || cfg.source === "lmstudio"}
   <div class="field">
     <div class="lbl">
       <b>Ключ</b>

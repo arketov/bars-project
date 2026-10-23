@@ -177,6 +177,11 @@ impl WorkerHandler {
                     source_count: 0,
                     error: None,
                     method: bars_core::graph::METHOD_VERSION.into(),
+                    progress: None,
+                    file_errors: vec![],
+                    file_errors_total: 0,
+                    layers: Default::default(),
+                    paused: false,
                 });
             }
             // Чтение статуса во время создания текстовой БД не должно запускать её миграцию.
@@ -291,11 +296,12 @@ impl WorkerHandler {
                 .find(|w| w.starts_with("Граф близости частичный"));
             let inputs = physical::LayerInputs {
                 markdown_link: layer(
-                    LayerState::Ready,
-                    "Ссылки разрешены Markdown-парсером".into(),
+                    if data.failed_sources.is_empty() { LayerState::Ready } else { LayerState::Partial },
+                    if data.failed_sources.is_empty() { "Ссылки разрешены Markdown-парсером".into() } else { "Ссылки исключённых файлов не обработаны; подробности в ошибках файлов".into() },
                 ),
                 document_similarity,
                 chunk_similarity: match chunk_partial {
+                    _ if data.similarity_state == LayerState::NotBuilt => layer(LayerState::NotBuilt, "Близость чанков ещё не построена".into()),
                     Some(note) => layer(LayerState::Partial, note.clone()),
                     None => layer(
                         LayerState::Ready,

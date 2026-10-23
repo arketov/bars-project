@@ -95,6 +95,28 @@ it("показывает список, по умолчанию только ак
   expect(host.textContent).toContain("Совпадения сами по себе не закрывают тему");
 });
 
+it("из карточки объединяет выбранную другую тему с проверкой обеих ревизий", async () => {
+  const fallback = invoke.getMockImplementation()!;
+  invoke.mockImplementation(async (method, params) => {
+    if (method !== "new_topics_merge") return fallback(method, params);
+    topics = topics.filter(t => t.id !== Number(params?.source_id));
+    topics[0] = { ...topics[0], revision: 2, observations: 3 };
+    return { revision: 2 };
+  });
+  const host = show(NewTopicsPage);
+  await settle();
+  await app.topics.select(1);
+  await settle();
+  const select = host.querySelector<HTMLSelectElement>('label select')!;
+  const other = topics.find(t => t.id !== 1)!;
+  select.value = String(other.id);
+  select.dispatchEvent(new Event("change", { bubbles: true }));
+  flushSync();
+  button(host, "Объединить темы")!.click();
+  await settle();
+  expect(invoke).toHaveBeenCalledWith("new_topics_merge", { project: "C:/проект", id: 1, revision: 1, source_id: other.id, source_revision: other.revision });
+});
+
 it("переключение фильтра показывает закрытые темы", async () => {
   const host = show(NewTopicsPage);
   await settle();

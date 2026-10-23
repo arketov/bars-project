@@ -1,0 +1,580 @@
+{
+  "kind": "archived evidence replay; no new model execution",
+  "checkedSha256Files": 39,
+  "checksumManifestSha256": "f99d2640ec07bb9f287ca4a7943df9ad767b229c4743693d3b3c5753b7a05110",
+  "runs": [
+    {
+      "name": "dml-b4",
+      "archive": "gpu-screen.tar.gz",
+      "member": "quiet-gpu/dml-b4",
+      "n": 30,
+      "questions": 10,
+      "device": "directml",
+      "threads": 16,
+      "batch": 4,
+      "max_length": 512,
+      "median": 0.7024274,
+      "p95": 0.789104,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "fp16-dml-b4",
+      "archive": "gpu-screen.tar.gz",
+      "member": "quiet-gpu/fp16-dml-b4",
+      "n": 30,
+      "questions": 10,
+      "device": "directml",
+      "threads": 16,
+      "batch": 4,
+      "max_length": 512,
+      "median": 0.561863,
+      "p95": 0.6908576,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "dml-b4-sorted",
+      "archive": "gpu-screen.tar.gz",
+      "member": "quiet-gpu/dml-b4-sorted",
+      "n": 30,
+      "questions": 10,
+      "device": "directml",
+      "threads": 16,
+      "batch": 4,
+      "max_length": 512,
+      "median": 0.7765363,
+      "p95": 0.8286335,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "dml-b1",
+      "archive": "gpu-screen.tar.gz",
+      "member": "quiet-gpu/dml-b1",
+      "n": 30,
+      "questions": 10,
+      "device": "directml",
+      "threads": 16,
+      "batch": 1,
+      "max_length": 512,
+      "median": 1.2974231,
+      "p95": 1.4186703999999999,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "dml-b2",
+      "archive": "gpu-screen.tar.gz",
+      "member": "quiet-gpu/dml-b2",
+      "n": 30,
+      "questions": 10,
+      "device": "directml",
+      "threads": 16,
+      "batch": 2,
+      "max_length": 512,
+      "median": 0.9436917,
+      "p95": 1.0362197,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "dml-b8",
+      "archive": "gpu-screen.tar.gz",
+      "member": "quiet-gpu/dml-b8",
+      "n": 30,
+      "questions": 10,
+      "device": "directml",
+      "threads": 16,
+      "batch": 8,
+      "max_length": 512,
+      "median": 0.7305555,
+      "p95": 0.7750906,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "dml-b16",
+      "archive": "gpu-screen.tar.gz",
+      "member": "quiet-gpu/dml-b16",
+      "n": 30,
+      "questions": 10,
+      "device": "directml",
+      "threads": 16,
+      "batch": 16,
+      "max_length": 512,
+      "median": 0.6592802,
+      "p95": 0.6778566,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "minilm-dml-b4",
+      "archive": "gpu-screen.tar.gz",
+      "member": "quiet-gpu/minilm-dml-b4",
+      "n": 30,
+      "questions": 10,
+      "device": "directml",
+      "threads": 16,
+      "batch": 4,
+      "max_length": 512,
+      "median": 0.3701978,
+      "p95": 0.4669223,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": [
+        "od-002",
+        "od-044"
+      ]
+    },
+    {
+      "name": "dml-b4-l128",
+      "archive": "gpu-screen.tar.gz",
+      "member": "quiet-gpu/dml-b4-l128",
+      "n": 30,
+      "questions": 10,
+      "device": "directml",
+      "threads": 16,
+      "batch": 4,
+      "max_length": 128,
+      "median": 0.3591815,
+      "p95": 0.3971994,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": [
+        "od-002",
+        "od-019",
+        "od-020",
+        "od-031",
+        "od-043",
+        "od-044"
+      ]
+    },
+    {
+      "name": "dml-b4-l256",
+      "archive": "gpu-screen.tar.gz",
+      "member": "quiet-gpu/dml-b4-l256",
+      "n": 30,
+      "questions": 10,
+      "device": "directml",
+      "threads": 16,
+      "batch": 4,
+      "max_length": 256,
+      "median": 0.476544,
+      "p95": 0.5074567,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": [
+        "od-001",
+        "od-002"
+      ]
+    },
+    {
+      "name": "dml-b4-repeat",
+      "archive": "gpu-screen.tar.gz",
+      "member": "quiet-gpu/dml-b4-repeat",
+      "n": 30,
+      "questions": 10,
+      "device": "directml",
+      "threads": 16,
+      "batch": 4,
+      "max_length": 512,
+      "median": 0.7912726,
+      "p95": 0.8933436,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "dml-b4",
+      "archive": "gpu-combos.tar.gz",
+      "member": "quiet-combos/dml-b4",
+      "n": 30,
+      "questions": 10,
+      "device": "directml",
+      "threads": 16,
+      "batch": 4,
+      "max_length": 512,
+      "median": 0.7883982,
+      "p95": 0.8705037,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "fp16-dml-b16",
+      "archive": "gpu-combos.tar.gz",
+      "member": "quiet-combos/fp16-dml-b16",
+      "n": 30,
+      "questions": 10,
+      "device": "directml",
+      "threads": 16,
+      "batch": 16,
+      "max_length": 512,
+      "median": 0.3540961,
+      "p95": 0.3754579,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "dml-b4-fixed",
+      "archive": "gpu-combos.tar.gz",
+      "member": "quiet-combos/dml-b4-fixed",
+      "n": 30,
+      "questions": 10,
+      "device": "directml",
+      "threads": 16,
+      "batch": 4,
+      "max_length": 512,
+      "median": 0.733656,
+      "p95": 0.7661042,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "fp16-dml-b4-fixed",
+      "archive": "gpu-combos.tar.gz",
+      "member": "quiet-combos/fp16-dml-b4-fixed",
+      "n": 30,
+      "questions": 10,
+      "device": "directml",
+      "threads": 16,
+      "batch": 4,
+      "max_length": 512,
+      "median": 0.4254175,
+      "p95": 0.4587943,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "fp16-dml-b16-fixed",
+      "archive": "gpu-combos.tar.gz",
+      "member": "quiet-combos/fp16-dml-b16-fixed",
+      "n": 30,
+      "questions": 10,
+      "device": "directml",
+      "threads": 16,
+      "batch": 16,
+      "max_length": 512,
+      "median": 0.3451082,
+      "p95": 0.3720943,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "cpu-t16-pilot",
+      "archive": "cpu-pilot.tar.gz",
+      "member": "quiet-cpu-pilot/cpu-t16-pilot",
+      "n": 3,
+      "questions": 3,
+      "device": "cpu",
+      "threads": 16,
+      "batch": 4,
+      "max_length": 512,
+      "median": 7.9717701,
+      "p95": 8.7287651,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "cpu-t8-pilot",
+      "archive": "cpu-pilot.tar.gz",
+      "member": "quiet-cpu-pilot/cpu-t8-pilot",
+      "n": 3,
+      "questions": 3,
+      "device": "cpu",
+      "threads": 8,
+      "batch": 4,
+      "max_length": 512,
+      "median": 9.3464744,
+      "p95": 10.1102548,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "cpu-t4-pilot",
+      "archive": "cpu-pilot.tar.gz",
+      "member": "quiet-cpu-pilot/cpu-t4-pilot",
+      "n": 3,
+      "questions": 3,
+      "device": "cpu",
+      "threads": 4,
+      "batch": 4,
+      "max_length": 512,
+      "median": 12.599031,
+      "p95": 13.7119456,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "cpu-t2-pilot",
+      "archive": "cpu-pilot.tar.gz",
+      "member": "quiet-cpu-pilot/cpu-t2-pilot",
+      "n": 3,
+      "questions": 3,
+      "device": "cpu",
+      "threads": 2,
+      "batch": 4,
+      "max_length": 512,
+      "median": 21.9711655,
+      "p95": 22.5369832,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "cpu-t1-pilot",
+      "archive": "cpu-pilot.tar.gz",
+      "member": "quiet-cpu-pilot/cpu-t1-pilot",
+      "n": 3,
+      "questions": 3,
+      "device": "cpu",
+      "threads": 1,
+      "batch": 4,
+      "max_length": 512,
+      "median": 40.1305846,
+      "p95": 44.2205919,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "int8-t4-pilot",
+      "archive": "cpu-pilot.tar.gz",
+      "member": "quiet-cpu-pilot/int8-t4-pilot",
+      "n": 3,
+      "questions": 3,
+      "device": "cpu",
+      "threads": 4,
+      "batch": 4,
+      "max_length": 512,
+      "median": 5.9897913,
+      "p95": 6.6413564,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "production",
+      "archive": "full-retrieval.tar.gz",
+      "member": "full-overdrive/production",
+      "n": 100,
+      "questions": 100,
+      "device": "directml",
+      "threads": 16,
+      "batch": 4,
+      "max_length": 512,
+      "median": 0.6848163,
+      "p95": 0.7639177,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "final-fp16-b16",
+      "archive": "full-retrieval.tar.gz",
+      "member": "full-overdrive/final-fp16-b16",
+      "n": 100,
+      "questions": 100,
+      "device": "directml",
+      "threads": 16,
+      "batch": 16,
+      "max_length": 512,
+      "median": 0.422424,
+      "p95": 0.5004118,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "production",
+      "archive": "full-retrieval.tar.gz",
+      "member": "full-bars/production",
+      "n": 24,
+      "questions": 24,
+      "device": "directml",
+      "threads": 16,
+      "batch": 4,
+      "max_length": 512,
+      "median": 0.6725564,
+      "p95": 0.744071,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "final-fp16-b16",
+      "archive": "full-retrieval.tar.gz",
+      "member": "full-bars/final-fp16-b16",
+      "n": 24,
+      "questions": 24,
+      "device": "directml",
+      "threads": 16,
+      "batch": 16,
+      "max_length": 512,
+      "median": 0.399703,
+      "p95": 0.4981182,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "production",
+      "archive": "full-retrieval.tar.gz",
+      "member": "full-holdout/production",
+      "n": 14,
+      "questions": 14,
+      "device": "directml",
+      "threads": 16,
+      "batch": 4,
+      "max_length": 512,
+      "median": 0.8162917,
+      "p95": 0.8639459,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    },
+    {
+      "name": "final-fp16-b16",
+      "archive": "full-retrieval.tar.gz",
+      "member": "full-holdout/final-fp16-b16",
+      "n": 14,
+      "questions": 14,
+      "device": "directml",
+      "threads": 16,
+      "batch": 16,
+      "max_length": 512,
+      "median": 0.4751846,
+      "p95": 0.6058039,
+      "timingValid": true,
+      "qualitySource": "saved summary; gold inputs not reconstructed",
+      "savedLossIds": []
+    }
+  ],
+  "observations": 774,
+  "candidateReduction": {
+    "source": "work-reduction.json; saved offline quality simulation, latency unmeasured",
+    "variants": [
+      {
+        "spec": {
+          "k": 3
+        },
+        "meanPairs": 3,
+        "savedLossIds": [
+          "od-001",
+          "od-003",
+          "od-007",
+          "od-013",
+          "od-015",
+          "od-017",
+          "od-034",
+          "od-041",
+          "od-042",
+          "od-048",
+          "od-051",
+          "od-052",
+          "od-055",
+          "od-058"
+        ]
+      },
+      {
+        "spec": {
+          "k": 5
+        },
+        "meanPairs": 5,
+        "savedLossIds": [
+          "od-001",
+          "od-007",
+          "od-015",
+          "od-034",
+          "od-041",
+          "od-042",
+          "od-051",
+          "od-055",
+          "od-058"
+        ]
+      },
+      {
+        "spec": {
+          "k": 8
+        },
+        "meanPairs": 8,
+        "savedLossIds": [
+          "od-001",
+          "od-015",
+          "od-055",
+          "od-058"
+        ]
+      },
+      {
+        "spec": {
+          "k": 10
+        },
+        "meanPairs": 10,
+        "savedLossIds": [
+          "od-001",
+          "od-015",
+          "od-055"
+        ]
+      },
+      {
+        "spec": {
+          "k": 15
+        },
+        "meanPairs": 15,
+        "savedLossIds": []
+      },
+      {
+        "spec": {
+          "cutoff": 0.1
+        },
+        "meanPairs": 15,
+        "savedLossIds": []
+      },
+      {
+        "spec": {
+          "cutoff": 0.2
+        },
+        "meanPairs": 15,
+        "savedLossIds": []
+      },
+      {
+        "spec": {
+          "cutoff": 0.3
+        },
+        "meanPairs": 14.99,
+        "savedLossIds": []
+      },
+      {
+        "spec": {
+          "cutoff": 0.4
+        },
+        "meanPairs": 14.37,
+        "savedLossIds": []
+      },
+      {
+        "spec": {
+          "cutoff": 0.5
+        },
+        "meanPairs": 9.85,
+        "savedLossIds": [
+          "od-003"
+        ]
+      }
+    ]
+  }
+}

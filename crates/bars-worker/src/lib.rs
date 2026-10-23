@@ -14,6 +14,7 @@ pub mod mcp_statistics;
 pub mod new_topics;
 pub mod serve;
 pub mod settings_io;
+pub mod text_search;
 // Часть API воркера (ход индексации, выгрузка моделей, проверка очереди) нужна окну и тестам.
 #[allow(dead_code, unused_imports)]
 pub mod worker;

@@ -1,0 +1,18 @@
+{
+  "model": "Qwen3-Reranker-0.6B",
+  "object": "list",
+  "usage": {
+    "prompt_tokens": 187,
+    "total_tokens": 187
+  },
+  "results": [
+    {
+      "index": 1,
+      "relevance_score": 0.9998618364334106
+    },
+    {
+      "index": 0,
+      "relevance_score": 1.4041652320884168E-05
+    }
+  ]
+}

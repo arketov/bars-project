@@ -1,0 +1,38 @@
+    Blocking waiting for file lock on build directory
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Finished `release` profile [optimized] target(s) in 4m 40s
+     Running unittests src\lib.rs (C:/bt/bars\release\deps\bars_core-e34a604ebdb2f1b9.exe)
+
+running 7 tests
+test models::remote::tests::tei_context_error_and_missing_route_do_not_probe_other_protocols ... ok
+test models::remote::tests::tei_malformed_embedding_does_not_echo_a_key ... ok
+test models::remote::tests::tei_native_rerank_restores_order_and_requests_all_scores ... ok
+test models::remote::tests::tei_rejects_bad_embedding_responses ... ok
+test models::remote::tests::tei_rerank_rejects_invalid_scores_indices_and_shapes ... ok
+test models::remote::tests::tei_uses_native_batches_and_qwen_query_instruction ... ok
+test settings::tests::tei_settings_support_independent_embed_and_rerank ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 317 filtered out; finished in 0.03s
+
+     Running unittests src\lib.rs (C:/bt/bars\release\deps\bars_worker-ead86c2eeea92824.exe)
+
+running 2 tests
+test handler::tests::external_models::tei_native_embed_and_rerank_serve_full_worker_search ... ok
+test settings_io::tests::tei_settings_roundtrip_both_models ... FAILED
+
+failures:
+
+---- settings_io::tests::tei_settings_roundtrip_both_models stdout ----
+
+thread 'settings_io::tests::tei_settings_roundtrip_both_models' (29784) panicked at crates\bars-worker\src\settings_io.rs:452:55:
+called `Result::unwrap()` on an `Err` value: Invalid("C:\\Users\\arketov\\AppData\\Local\\Temp\\.tmphFEU1c\\settings.toml: ключ `embed.model`: для источника `tei` нужно имя модели у провайдера")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    settings_io::tests::tei_settings_roundtrip_both_models
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 279 filtered out; finished in 0.91s
+
+error: test failed, to rerun pass `-p bars-worker --lib`

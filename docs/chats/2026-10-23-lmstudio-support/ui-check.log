@@ -1,0 +1,8 @@
+
+> bars-ui@0.0.0 check
+> svelte-check --tsconfig ./tsconfig.json
+
+Loading svelte-check in workspace: c:\Users\arketov\Desktop\bars-project\ui
+Getting Svelte diagnostics...
+
+svelte-check found 0 errors and 0 warnings

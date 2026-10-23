@@ -46,7 +46,7 @@ const dirOf = (path: string) => path.split("/").slice(0, -1).join("/");
 /** Как документ называется в `[[…]]`: имя файла без `.md`; путь от корня документации, если такое имя есть у другого файла. */
 export function wikiName(target: LinkTarget, all: LinkTarget[]): string {
   const stem = stemOf(target.docs);
-  const clash = all.some((other) => other.docs !== target.docs && norm(stemOf(other.docs)) === norm(stem));
+  const clash = all.some((other) => other.docs !== target.docs && stemOf(other.docs).toLowerCase() === stem.toLowerCase());
   return clash ? withoutMd(target.docs) : stem;
 }
 
@@ -61,10 +61,10 @@ export function wikiTarget(inner: string): string | null {
 export function resolveWikilink(all: LinkTarget[], from: string, inner: string): LinkTarget | null {
   const name = wikiTarget(inner);
   if (!name) return null;
-  const wanted = norm(name.replace(/\\/g, "/")).replace(/^\/+|\/+$/g, "");
+  const wanted = name.replace(/\\/g, "/").toLowerCase().replace(/^\/+|\/+$/g, "");
   const here = dirOf(from);
   const hits = all.filter((target) => {
-    const stem = norm(withoutMd(target.docs));
+    const stem = withoutMd(target.docs).toLowerCase();
     return wanted.includes("/") ? stem === wanted || stem.endsWith(`/${wanted}`) : stem.split("/").pop() === wanted;
   });
   hits.sort((a, b) => Number(dirOf(a.path) !== here) - Number(dirOf(b.path) !== here) || a.docs.length - b.docs.length || a.docs.localeCompare(b.docs));
@@ -108,7 +108,7 @@ export function linkOptions(targets: LinkTarget[], query: string, limit = 30): L
     create: false,
   }));
   const typed = cleanTitle(query);
-  const exact = targets.some((t) => norm(t.title) === norm(typed) || norm(stemOf(t.docs)) === norm(typed));
+  const exact = targets.some((t) => t.title.toLowerCase() === typed.toLowerCase() || stemOf(t.docs).toLowerCase() === typed.toLowerCase());
   if (typed && !exact) {
     options.push({ label: `Создать ссылку на «${typed}»`, detail: "файла пока нет", insert: `[[${typed}]]`, create: true });
   }

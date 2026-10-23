@@ -86,7 +86,16 @@ impl Ord for Candidate {
 pub fn build_knn(
     nodes: &[VectorNode],
     options: KnnOptions,
+    cancelled: impl FnMut() -> bool,
+) -> Result<KnnGraph, InvalidInput> {
+    build_knn_observed(nodes, options, cancelled, |_, _| {})
+}
+
+pub fn build_knn_observed(
+    nodes: &[VectorNode],
+    options: KnnOptions,
     mut cancelled: impl FnMut() -> bool,
+    mut progress: impl FnMut(usize, usize),
 ) -> Result<KnnGraph, InvalidInput> {
     if options.k == 0 {
         return Err(InvalidInput("k должен быть положительным".into()));
@@ -191,6 +200,7 @@ pub fn build_knn(
                 })
                 .collect(),
         );
+        progress(result.neighbors.len(), result.total_nodes);
     }
     Ok(result)
 }

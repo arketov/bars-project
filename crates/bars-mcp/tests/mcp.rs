@@ -113,6 +113,8 @@ impl<R: tokio::io::AsyncRead + Unpin, W: tokio::io::AsyncWrite + Unpin> Rpc<R, W
 }
 
 type Pipe = Rpc<ReadHalf<DuplexStream>, WriteHalf<DuplexStream>>;
+#[path = "support/disk_read.rs"]
+mod disk_read;
 
 struct Harness {
     home: TempDir,
@@ -249,6 +251,7 @@ async fn initialize_and_tool_list_do_not_touch_the_worker() {
             "bars_get_similar",
             "bars_graph",
             "bars_impact",
+            "bars_links",
             "bars_outline",
             "bars_paths",
             "bars_projects",
@@ -256,7 +259,8 @@ async fn initialize_and_tool_list_do_not_touch_the_worker() {
             "bars_read",
             "bars_reindex",
             "bars_relations",
-            "bars_status"
+            "bars_status",
+            "bars_text_search"
         ]
     );
     assert_eq!(
@@ -408,9 +412,15 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
     assert!(found["applied"]["results"].as_u64().unwrap() >= 1);
 
     // Похожие чанки по ID из выдачи: JSON, текст, ошибки; вызовы попадают в статистику.
-    let chunk_id = found["results"][0]["chunk_id"].as_str().unwrap().to_string();
+    let chunk_id = found["results"][0]["chunk_id"]
+        .as_str()
+        .unwrap()
+        .to_string();
     let (is_error, similar) = mcp
-        .tool("bars_get_similar", json!({ "chunk_id": chunk_id, "limit": 2 }))
+        .tool(
+            "bars_get_similar",
+            json!({ "chunk_id": chunk_id, "limit": 2 }),
+        )
         .await;
     assert!(!is_error, "{similar}");
     let similar: Value = serde_json::from_str(&similar).unwrap();
@@ -424,12 +434,20 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
             .all(|hit| hit["chunk_id"] != chunk_id)
     );
     let (is_error, text) = mcp
-        .tool("bars_get_similar", json!({ "chunk_id": chunk_id, "format": "txt" }))
+        .tool(
+            "bars_get_similar",
+            json!({ "chunk_id": chunk_id, "format": "txt" }),
+        )
         .await;
     assert!(!is_error, "{text}");
     assert!(text.starts_with("=== SIMILAR: results "), "{text}");
-    assert!(text.contains(&format!("id: {chunk_id}
-")), "{text}");
+    assert!(
+        text.contains(&format!(
+            "id: {chunk_id}
+"
+        )),
+        "{text}"
+    );
     assert!(text.ends_with("=== END SIMILAR ==="), "{text}");
     let (is_error, text) = mcp
         .tool("bars_get_similar", json!({ "chunk_id": "99999-00000000" }))
@@ -590,18 +608,17 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
         if tool == "bars_reindex" {
             assert!(a.applied["operation_id"].is_number());
             assert!(a.applied["merged"].is_boolean());
-        }        if tool == "bars_get_similar" {
+        }
+        if tool == "bars_get_similar" {
             assert_eq!(a.result["unit"], "fragments");
             assert!(a.requested["chunk_id"].is_string());
             assert!(a.applied["source_chunk"].is_string());
             assert_eq!(a.applied["score_kind"], "cosine");
         }
     }
-    assert!(
-        page.records
-            .iter()
-            .any(|a| a.tool == "bars_get_similar" && a.outcome == "error" && a.error["kind"] == "chunk_not_found")
-    );
+    assert!(page.records.iter().any(|a| a.tool == "bars_get_similar"
+        && a.outcome == "error"
+        && a.error["kind"] == "chunk_not_found"));
     let search = page
         .records
         .iter()
@@ -1007,7 +1024,7 @@ async fn real_binary_answers_initialize_without_a_worker_and_exits_on_eof() {
         started.elapsed()
     );
     let tools = mcp.request("tools/list", json!({})).await;
-    assert_eq!(tools["result"]["tools"].as_array().unwrap().len(), 14);
+    assert_eq!(tools["result"]["tools"].as_array().unwrap().len(), 16);
 
     drop(mcp);
     let status = tokio::time::timeout(Duration::from_secs(10), child.wait())

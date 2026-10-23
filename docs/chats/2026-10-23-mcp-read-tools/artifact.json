@@ -1,0 +1,10 @@
+{
+  "path": "C:\\Users\\arketov\\Desktop\\bars-project\\target\\mcp-read-proof\\installer\\bars_0.1.0_x64-setup.exe",
+  "length": 21186273,
+  "last_write_utc": "2026-10-23T09:11:19.1743588Z",
+  "sha256": "9EEBD00A7557AF8A82BD5EF260772498E7B885C5CABFA3DBDFD36B491FAEE3C3",
+  "dos_signature": "MZ",
+  "pe_signature_hex": "50-45-00-00",
+  "installed": false,
+  "build": "scripts/build-installer.ps1 -SkipNpmCi -OutDir target/mcp-read-proof/installer"
+}

@@ -507,6 +507,18 @@ async fn vanished_project_folder_is_unavailable() {
     let harness = Harness::start("vanished", FakeProvider::new("m1")).await;
     let mut cli = harness.client(ClientKind::Cli).await;
     let root = ready_project(&harness, &mut cli).await;
+    // Ready относится к тексту; фоновый граф ещё может держать SQLite на Windows.
+    wait_status(
+        &mut cli,
+        &root,
+        "граф освободил индекс",
+        |s| {
+            s.graph
+                .as_ref()
+                .is_some_and(|g| g.active_job.is_none() && g.snapshot.is_some())
+        },
+    )
+    .await;
     fs::remove_dir_all(&root).unwrap();
     // Проверку по явной просьбе видит пропажу папки: проект становится недоступным.
     let params = ReindexParams {

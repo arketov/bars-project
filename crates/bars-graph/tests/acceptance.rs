@@ -1,4 +1,49 @@
 use bars_graph::*;
+
+#[test]
+fn structural_paths_remain_available_before_semantic_enrichment() {
+    let mut data = graph("# A\n\nТ-1 зависит от Т-2.");
+    data.semantic_state = LayerState::NotBuilt;
+    let document = data
+        .nodes
+        .iter()
+        .find(|n| n.reference.kind == Kind::Document)
+        .unwrap()
+        .reference
+        .clone();
+    let section = data
+        .nodes
+        .iter()
+        .find(|n| n.reference.kind == Kind::Section)
+        .unwrap()
+        .reference
+        .clone();
+    let request = GraphRequest {
+        operation: Operation::Paths,
+        from: Some(Endpoint::Ref(document)),
+        to: Some(Endpoint::Ref(section)),
+        path_kind: PathKind::Structural,
+        ..Default::default()
+    };
+    let result = query::execute(&data, &request, || false).unwrap();
+    assert!(
+        result
+            .items
+            .iter()
+            .any(|item| matches!(item, Item::Path { .. }))
+    );
+    assert!(matches!(
+        query::execute(
+            &data,
+            &GraphRequest {
+                path_kind: PathKind::Semantic,
+                ..request
+            },
+            || false
+        ),
+        Err(GraphError::NotReady(_))
+    ));
+}
 use bars_graph::{
     query::execute,
     source::{InputDocument, build},

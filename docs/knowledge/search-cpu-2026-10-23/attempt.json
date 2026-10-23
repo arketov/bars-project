@@ -1,0 +1,40 @@
+{
+  "status": "aborted-incomplete",
+  "exitCode": 75,
+  "modelProcessExited": true,
+  "modelRequested": "BAAI/bge-m3 FP32 DirectML, preparation only",
+  "latencyObservations": 0,
+  "partialIndex": {
+    "documents": 1,
+    "chunks": 7,
+    "vectors": 7
+  },
+  "completeMarkerExists": false,
+  "startupCommitHeadroomBytes": 9473159168,
+  "abortCommitHeadroomBytes": 195448832,
+  "abort": {
+    "kind": "abort",
+    "phase": "low_memory",
+    "elapsed_ms": 20253.702100000002,
+    "unix_ms": 1792748978870,
+    "pid": 49160,
+    "memory": {
+      "private_bytes": 4101464064,
+      "working_set_bytes": 624820224,
+      "lifetime_peak_working_set_bytes": 2227462144,
+      "lifetime_peak_commit_bytes": 4108718080,
+      "system_available_bytes": 7560704000,
+      "system_committed_bytes": 77436514304,
+      "system_commit_limit_bytes": 77631963136
+    },
+    "detail": "RAM <512 MiB or commit headroom <1 GiB"
+  },
+  "peakSampledPrivateBytes": 4108709888,
+  "samples": 190,
+  "clippy": {
+    "status": "failed-in-parallel-module",
+    "error": "E0063 missing field similarity_state",
+    "file": "crates/bars-graph/src/store.rs:485"
+  },
+  "limits": "No completed corpus index, CPU search latency, worker IPC or quality acceptance"
+}

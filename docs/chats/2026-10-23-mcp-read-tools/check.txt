@@ -1,0 +1,6 @@
+   Compiling llama-cpp-sys-2 v0.1.160
+    Checking bars-mcp v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-mcp)
+    Checking llama-cpp-2 v0.1.160
+    Checking bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Checking bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4m 23s

@@ -1,0 +1,62 @@
+[
+  {
+    "bytes": 20891,
+    "sha256": "3FEB0C5AAA2FD811D935D63379A76C0846DA5B5E4E431177D245A52FACA3DBA1",
+    "path": "crates/bars-core/src/models/remote.rs"
+  },
+  {
+    "bytes": 22388,
+    "sha256": "58897CB7C6E172E91186693DC9FD1A11F698A1E08729F4C3F4F486418EE26767",
+    "path": "crates/bars-core/src/models/remote/tests.rs"
+  },
+  {
+    "bytes": 14050,
+    "sha256": "8DE9B39DC9C39F1B69C4F8D265C2C87BA1B2EA557D069B84C8617092E66317C3",
+    "path": "crates/bars-core/src/settings/mod.rs"
+  },
+  {
+    "bytes": 23032,
+    "sha256": "9A453956C9A249AF1DB17749B2A8917B686DE56C67CBBA1A850AEE42E0498378",
+    "path": "crates/bars-worker/src/settings_io.rs"
+  },
+  {
+    "bytes": 5197,
+    "sha256": "151D869BF5D06735A5C5F940F0C1390292E6199B8107974558CAF7628632689D",
+    "path": "crates/bars-worker/examples/verify_external_inference.rs"
+  },
+  {
+    "bytes": 6448,
+    "sha256": "2E506723B98B722F0DB4962B59B6AC4B7EB06A6CDBF71C6DDAAB7D87C4A8EFED",
+    "path": "crates/bars-app/examples/workspace_probe.rs"
+  },
+  {
+    "bytes": 3507,
+    "sha256": "CC30D7A91B747EEA225EEF6947A6F9D13E24524DB01A8FBD3A94559A9B086CB9",
+    "path": "crates/bars-app/examples/external_inference_probe.js"
+  },
+  {
+    "bytes": 35098,
+    "sha256": "993129130A9741CD085408DD4914AA1853CAA6DF2295BAC50821DD329770037B",
+    "path": "ui/src/lib/SettingsPage.svelte"
+  },
+  {
+    "bytes": 5877,
+    "sha256": "E8D6332BA8AD145876E2F1B4FB771DCD78C582DE62C4807C30972196274C8430",
+    "path": "ui/src/lib/ProviderFields.svelte"
+  },
+  {
+    "bytes": 1930,
+    "sha256": "7C5E9B45E68931FBD6A475F812F4BB14934CB715A9749CE59EE3417CA28000D2",
+    "path": "ui/src/lib/settings-tei.test.ts"
+  },
+  {
+    "bytes": 92602368,
+    "sha256": "FF42AFD9CE61AE538A1FCAAB3AE397775530793E7C0C9F2DBA83FDFF53CB08E4",
+    "path": "C:/bt/bars/release/examples/workspace_probe.exe"
+  },
+  {
+    "bytes": 89905152,
+    "sha256": "E2C5E246D1D93C252879F492850AE01C927D4718297ADF6FF410ED6F1691AE97",
+    "path": "C:/bt/bars/release/examples/verify_external_inference.exe"
+  }
+]

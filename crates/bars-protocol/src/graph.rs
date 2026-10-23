@@ -27,6 +27,8 @@ pub struct GraphStatusParams {
 pub struct GraphBuildParams {
     #[serde(flatten)]
     pub target: Target,
+    #[serde(default)]
+    pub layer: bars_graph::BuildLayer,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct GraphCancelParams {

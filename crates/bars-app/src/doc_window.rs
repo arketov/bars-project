@@ -18,6 +18,33 @@ pub const CLOSE_REQUEST: &str = "bars://document-close-request";
 pub struct Targets(Mutex<HashMap<String, (String, String)>>);
 
 impl Targets {
+    pub fn move_paths(&self, project: &str, from: &str, to: &str) -> Vec<(String, String)> {
+        let mut changed = Vec::new();
+        for (label, (owner, path)) in self
+            .0
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .iter_mut()
+        {
+            if owner == project {
+                let next = bars_core::link_index::moves::mapped(path, from, to);
+                if next != *path {
+                    *path = next;
+                    changed.push((label.clone(), path.clone()));
+                }
+            }
+        }
+        changed
+    }
+
+    fn label_of(&self, project: &str, path: &str) -> Option<String> {
+        self.0
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .iter()
+            .find(|(_, (owner, doc))| owner == project && doc == path)
+            .map(|(label, _)| label.clone())
+    }
     fn set(&self, label: &str, project: &str, path: &str) {
         self.0
             .lock()
@@ -48,6 +75,16 @@ pub fn label_for(project: &str, path: &str) -> String {
     format!("{PREFIX}{}", &hash[..16])
 }
 
+fn vacant_label(base: &str, occupied: impl Fn(&str) -> bool) -> String {
+    let mut label = base.to_string();
+    let mut suffix = 0;
+    while occupied(&label) {
+        suffix += 1;
+        label = format!("{base}-{suffix}");
+    }
+    label
+}
+
 fn focus(window: &tauri::WebviewWindow) {
     let _ = window.show();
     let _ = window.unminimize();
@@ -56,7 +93,11 @@ fn focus(window: &tauri::WebviewWindow) {
 
 /// Открывает документ в отдельном окне или выводит вперёд уже открытое.
 pub fn open(app: &AppHandle, targets: &Targets, project: &str, path: &str) -> Result<(), String> {
-    let label = label_for(project, path);
+    let label = targets.label_of(project, path).unwrap_or_else(|| {
+        vacant_label(&label_for(project, path), |id| {
+            app.get_webview_window(id).is_some()
+        })
+    });
     if let Some(window) = app.get_webview_window(&label) {
         focus(&window);
         return Ok(());
@@ -97,6 +138,27 @@ pub fn open(app: &AppHandle, targets: &Targets, project: &str, path: &str) -> Re
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn moved_windows_keep_identity_without_capturing_old_path_or_other_project() {
+        let targets = Targets::default();
+        targets.set("doc-a", "C:/p", "docs/a/x.md");
+        targets.set("doc-b", "C:/q", "docs/a/x.md");
+        assert_eq!(
+            targets.move_paths("C:/p", "docs/a", "docs/b"),
+            vec![("doc-a".into(), "docs/b/x.md".into())]
+        );
+        assert_eq!(
+            targets.label_of("C:/p", "docs/b/x.md"),
+            Some("doc-a".into())
+        );
+        assert_eq!(targets.label_of("C:/p", "docs/a/x.md"), None);
+        assert_eq!(
+            targets.get("doc-b"),
+            Some(("C:/q".into(), "docs/a/x.md".into()))
+        );
+        assert_eq!(vacant_label("doc-a", |id| id == "doc-a"), "doc-a-1");
+    }
 
     #[test]
     fn same_document_gets_the_same_window_label() {

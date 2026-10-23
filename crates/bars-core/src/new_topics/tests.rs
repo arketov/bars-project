@@ -245,6 +245,144 @@ fn unmeasured_space_never_merges_semantically() {
 }
 
 #[test]
+fn measured_qwen_owner_pair_merges_but_other_artifacts_stay_unmeasured() {
+    let fixture: serde_json::Value =
+        serde_json::from_str(include_str!("qwen-owner-pair.json")).unwrap();
+    let (_dir, mut s) = store();
+    let space = EmbeddingSpace {
+        key: fixture["space"].as_str().unwrap().into(),
+    };
+    assert_eq!(space.merge_threshold(), Some(0.75));
+    for (index, row) in fixture["rows"].as_array().unwrap().iter().enumerate() {
+        let mut o = obs(&index.to_string(), row["text"].as_str().unwrap());
+        o.vector = Some((
+            space.clone(),
+            serde_json::from_value(row["vector"].clone()).unwrap(),
+        ));
+        let outcome = s.record(&o).unwrap();
+        if index == 1 {
+            assert!(matches!(
+                outcome,
+                Recorded::Merged {
+                    by: Match::Semantic,
+                    ..
+                }
+            ));
+        }
+    }
+    assert_eq!(s.list().unwrap()[0].observations, 2);
+    assert_eq!(s.list().unwrap()[0].variants.len(), 2);
+    for key in [
+        space.key.replace("4ea06f44bb1a3be5", "unmeasured"),
+        space.key.replace("|2560|", "|1024|"),
+        space.key.replace("builtin|", "http|"),
+    ] {
+        assert_eq!(EmbeddingSpace { key }.merge_threshold(), None);
+    }
+}
+
+#[test]
+fn explicit_merge_keeps_events_variants_and_invalidates_old_checks() {
+    let (_dir, mut s) = store();
+    let a = created(&mut s, "a", "план разработки");
+    let b = created(&mut s, "b", "где дорожная карта");
+    let ar = s.get(a).unwrap().unwrap();
+    let br = s.get(b).unwrap().unwrap();
+    s.record_check(b, &check_of(&br, 200, vec![found(br.variants[0].id, "t1")]))
+        .unwrap();
+    let br = s.get(b).unwrap().unwrap();
+    assert!(matches!(
+        s.merge(a, ar.revision, b, br.revision + 1).unwrap(),
+        Change::Conflict { .. }
+    ));
+    assert_eq!(s.list().unwrap().len(), 2);
+    assert!(matches!(
+        s.merge(a, ar.revision, b, br.revision).unwrap(),
+        Change::Updated { .. }
+    ));
+    let merged = s.get(a).unwrap().unwrap();
+    assert_eq!(merged.title, ar.title);
+    assert_eq!(merged.observations, 2);
+    assert_eq!(merged.variants.len(), 2);
+    assert_eq!(merged.checks[0].topic_revision, 0);
+    assert_eq!(merged.checks[0].results[0].variant_id, br.variants[0].id);
+    assert_eq!(s.topic_of_event("b").unwrap(), Some(a));
+    assert!(s.get(b).unwrap().is_none());
+    assert_eq!(
+        s.record(&obs("b", "где дорожная карта")).unwrap(),
+        Recorded::Duplicate
+    );
+    assert!(
+        s.record_check(b, &check_of(&br, 201, vec![]))
+            .unwrap()
+            .is_none()
+    );
+    assert!(matches!(
+        s.merge(a, merged.revision, a, merged.revision),
+        Err(StoreError::InvalidMerge(_))
+    ));
+}
+
+#[test]
+fn explicit_merge_refuses_overflow_without_dropping_variants_or_events() {
+    let (_dir, mut s) = store();
+    for i in 0..MAX_VARIANTS_PER_TOPIC {
+        s.record(&with_vector(
+            obs(&format!("event-{i}"), &format!("план {}", letters(i))),
+            bge(),
+            [1.0, 0.0, 0.0],
+        ))
+        .unwrap();
+    }
+    let source = created(&mut s, "extra", "другой вопрос");
+    let target = s
+        .list()
+        .unwrap()
+        .into_iter()
+        .find(|t| t.id != source)
+        .unwrap();
+    let other = s.get(source).unwrap().unwrap();
+    assert_eq!(target.variants.len(), MAX_VARIANTS_PER_TOPIC);
+    assert!(matches!(
+        s.merge(target.id, target.revision, source, other.revision),
+        Err(StoreError::InvalidMerge(_))
+    ));
+    let after = s.get(target.id).unwrap().unwrap();
+    assert_eq!(after, target);
+    assert_eq!(s.get(source).unwrap().unwrap(), other);
+}
+
+#[test]
+fn explicit_merge_keeps_a_semantic_representative_for_each_scope() {
+    let (_dir, mut s) = store();
+    s.record(&with_vector(
+        obs("a", "план проекта"),
+        bge(),
+        [1.0, 0.0, 0.0],
+    ))
+    .unwrap();
+    let mut other = with_vector(obs("b", "этапы проекта"), bge(), [1.0, 0.0, 0.0]);
+    other.scope = "m=features;f=".into();
+    s.record(&other).unwrap();
+    let rows = s.list().unwrap();
+    s.merge(rows[0].id, rows[0].revision, rows[1].id, rows[1].revision)
+        .unwrap();
+    for (id, scope) in [("c", "project"), ("d", "m=features;f=")] {
+        let mut next = with_vector(obs(id, "дорожная карта проекта"), bge(), [1.0, 0.0, 0.0]);
+        next.scope = scope.into();
+        assert!(matches!(
+            s.record(&next).unwrap(),
+            Recorded::Merged {
+                by: Match::Semantic,
+                ..
+            }
+        ));
+    }
+    assert_eq!(s.list().unwrap().len(), 1);
+    assert_eq!(s.list().unwrap()[0].observations, 4);
+}
+
+#[test]
 fn vectors_of_different_spaces_are_not_compared() {
     let (_dir, mut s) = store();
     s.record(&with_vector(

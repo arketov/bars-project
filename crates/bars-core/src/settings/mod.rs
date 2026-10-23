@@ -52,6 +52,10 @@ pub enum ModelSource {
     LocalOpenai,
     /// Нативный API Ollama (только embedding).
     Ollama,
+    /// OpenAI API LM Studio (только embedding).
+    Lmstudio,
+    /// Нативные API Hugging Face Text Embeddings Inference.
+    Tei,
 }
 
 impl ModelSource {
@@ -62,6 +66,8 @@ impl ModelSource {
             Self::Remote => "remote",
             Self::LocalOpenai => "local-openai",
             Self::Ollama => "ollama",
+            Self::Lmstudio => "lmstudio",
+            Self::Tei => "tei",
         }
     }
 }

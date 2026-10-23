@@ -1,0 +1,49 @@
+{
+  "embed": {
+    "model_id": "/mnt/d/text-generation-webui-1.16/models/tei-paraphrase-multilingual-MiniLM-L12-v2",
+    "model_sha": null,
+    "model_dtype": "float16",
+    "served_model_name": "/mnt/d/text-generation-webui-1.16/models/tei-paraphrase-multilingual-MiniLM-L12-v2",
+    "model_type": {
+      "embedding": {
+        "pooling": "mean"
+      }
+    },
+    "max_concurrent_requests": 8,
+    "max_input_length": 128,
+    "max_batch_tokens": 2048,
+    "max_batch_requests": null,
+    "max_client_batch_size": 32,
+    "auto_truncate": true,
+    "tokenization_workers": 2,
+    "version": "1.9.4",
+    "sha": "e80ef225ed0e6cb1717ce632a6a84b6cf211bb67",
+    "docker_label": "sha-e80ef22"
+  },
+  "rerank": {
+    "model_id": "/mnt/d/text-generation-webui-1.16/models/tei-mmarco-mMiniLMv2-L12-H384-v1",
+    "model_sha": null,
+    "model_dtype": "float16",
+    "served_model_name": "/mnt/d/text-generation-webui-1.16/models/tei-mmarco-mMiniLMv2-L12-H384-v1",
+    "model_type": {
+      "reranker": {
+        "id2label": {
+          "0": "LABEL_0"
+        },
+        "label2id": {
+          "LABEL_0": 0
+        }
+      }
+    },
+    "max_concurrent_requests": 8,
+    "max_input_length": 512,
+    "max_batch_tokens": 2048,
+    "max_batch_requests": null,
+    "max_client_batch_size": 32,
+    "auto_truncate": true,
+    "tokenization_workers": 2,
+    "version": "1.9.4",
+    "sha": "e80ef225ed0e6cb1717ce632a6a84b6cf211bb67",
+    "docker_label": "sha-e80ef22"
+  }
+}

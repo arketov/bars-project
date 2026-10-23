@@ -42,6 +42,7 @@
   let confirm = $state<"delete" | "clear" | null>(null);
   let editing = $state(false);
   let draft = $state("");
+  let mergeSource = $state("");
   let listEl: HTMLDivElement | undefined = $state();
 
   const activeTopics = $derived(store.topics.filter(isActive));
@@ -56,6 +57,7 @@
   });
 
   function pick(topic: TopicSummary) {
+    mergeSource = "";
     cardOpen = true;
     editing = false;
     if (store.selectedId !== topic.id) void store.select(topic.id);
@@ -289,6 +291,23 @@
       </div>
 
       <h3>Формулировки · {detail.variants_list.length}</h3>
+      {#if store.topics.length > 1}
+        <details>
+          <summary>Объединить с…</summary>
+          <p class="muted small">Формулировки и обращения выбранной темы перейдут в эту. Название сохранится; знания нужно проверить заново.</p>
+          <label>Другая тема
+            <select bind:value={mergeSource} disabled={store.busy || checking || !!store.batch}>
+              <option value="">Выберите тему</option>
+              {#each store.topics.filter((topic) => topic.id !== detail.id) as topic (topic.id)}
+                <option value={String(topic.id)}>{topic.title}</option>
+              {/each}
+            </select>
+          </label>
+          <button class="ghost" disabled={!mergeSource || store.busy || checking || !!store.batch} onclick={async () => {
+            if (await store.merge(detail.id, Number(mergeSource))) mergeSource = "";
+          }}>Объединить темы</button>
+        </details>
+      {/if}
       {#each detail.variants_list as variant (variant.id)}
         <div class="variant"><p>{variant.text}</p><span class="muted small">{scopeLabel(variant.scope)}</span></div>
       {/each}

@@ -37,6 +37,8 @@
     ["remote", "Удалённый провайдер"],
     ["local-openai", "Локальный адрес"],
     ["ollama", "Ollama"],
+    ["lmstudio", "LM Studio"],
+    ["tei", "TEI"],
   ];
   const THEMES: [ThemePref, string][] = [
     ["system", "Как в системе"],
@@ -72,17 +74,28 @@
       return;
     }
     cfg.source = source;
+    if (source === "tei") {
+      cfg.base_url = kind === "embed" ? "http://127.0.0.1:8080" : "http://127.0.0.1:8081";
+      cfg.model = kind === "embed" ? "BAAI/bge-m3" : "BAAI/bge-reranker-v2-m3";
+      cfg.api_key_name = null;
+      cfg.api_key_env = null;
+      return;
+    }
     if (source === "builtin") {
       cfg.model = (kind === "embed" ? settings.models?.embed[0]?.id : settings.models?.rerank[0]?.id) ?? cfg.model;
     } else {
       cfg.model = "";
-      if (source === "local-openai" || source === "ollama") {
+      if (source === "local-openai" || source === "ollama" || source === "lmstudio") {
         cfg.api_key_name = null;
         cfg.api_key_env = null;
       }
       if (source === "ollama") {
         cfg.base_url = "http://127.0.0.1:11434";
         cfg.model = "qwen3-embedding:0.6b";
+      }
+      if (source === "lmstudio") {
+        cfg.base_url = "http://127.0.0.1:1234";
+        cfg.model = "";
       }
     }
   }
@@ -155,6 +168,13 @@
               {/each}
             </div>
             {#if draft.embed.source === "builtin"}
+              {#if draft.embed.model === "BAAI/bge-m3" && draft.embed.accelerator === "auto" && settings.models?.runtime?.embed.actual === "directml" && settings.models?.embed.some(model => model.id === "BAAI/bge-m3:fp16")}
+                <div class="note info">
+                  <Icon name="info" size={16} />
+                  <span>Для bge-m3 доступен FP16 с меньшим расходом памяти. Только Windows/DirectML; потребуется переиндексация после вашего согласия.</span>
+                  <button class="ghost" onclick={() => selectEmbedModel("BAAI/bge-m3:fp16")}>Выбрать FP16</button>
+                </div>
+              {/if}
               {#each settings.models?.embed ?? [] as model (model.id)}
                 <div
                   class="model"
@@ -168,13 +188,6 @@
                   <span class="radio"></span>
                   <span class="mn">
                     <b>{model.id}</b>
-              {#if draft.embed.model === "BAAI/bge-m3" && draft.embed.accelerator === "auto" && settings.models?.runtime?.embed.actual === "directml" && settings.models?.embed.some(model => model.id === "BAAI/bge-m3:fp16")}
-                <div class="note info">
-                  <Icon name="info" size={16} />
-                  <span>Для bge-m3 доступен FP16 с меньшим расходом памяти. Только Windows/DirectML; потребуется переиндексация после вашего согласия.</span>
-                  <button class="ghost" onclick={() => selectEmbedModel("BAAI/bge-m3:fp16")}>Выбрать FP16</button>
-                </div>
-              {/if}
                     <small>{modelNote(model)}{model.id === savedModel ? " · в индексах сейчас" : ""}</small>
                     {#each model.warnings as warning (warning)}<small class="warnline">{warning}</small>{/each}
                   </span>
@@ -207,7 +220,7 @@
           </div>
           <div class="gbody" class:dim={!draft.rerank.enabled}>
             <div class="seg">
-              {#each SOURCES.filter(([id]) => id !== "ollama") as [id, title] (id)}
+              {#each SOURCES.filter(([id]) => id !== "ollama" && id !== "lmstudio") as [id, title] (id)}
                 <button class:on={draft.rerank.source === id} onclick={() => setSource("rerank", id)}>{title}</button>
               {/each}
             </div>

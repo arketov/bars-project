@@ -10,6 +10,187 @@ use crate::secrets::{KeyringSecrets, SecretStore};
 const KEY: &str = "sk-test-not-a-real-key-123456";
 
 #[test]
+fn tei_uses_native_batches_and_qwen_query_instruction() {
+    let server = FakeServer::start(|request| {
+        assert_eq!(request.path, "/embed");
+        let body = request.json();
+        assert_eq!(body["truncate"], false);
+        assert_eq!(body["normalize"], true);
+        assert!(body.get("model").is_none());
+        let inputs = body["inputs"].as_array().unwrap();
+        Response::ok(json!(
+            inputs.iter().map(|_| vec![1.0, 2.0]).collect::<Vec<_>>()
+        ))
+    });
+    let mut config = target(&server, "tei", true);
+    config.model = "Qwen/Qwen3-Embedding-0.6B".into();
+    let mut embedder = HttpEmbedder::new(config, 2);
+    assert_eq!(embedder.embed(&["а", "б", "в"]).unwrap().len(), 3);
+    embedder.embed_query("поиск").unwrap();
+    assert_eq!(embedder.fingerprint().source, "tei");
+    assert_eq!(embedder.fingerprint().dim, 2);
+    let requests = server.requests();
+    assert_eq!(requests.len(), 3);
+    assert_eq!(requests[0].json()["inputs"], json!(["а", "б"]));
+    assert_eq!(
+        requests[2].json()["inputs"],
+        json!([format!(
+            "{}поиск",
+            super::super::catalog::QWEN3_QUERY_PREFIX
+        )])
+    );
+    assert_eq!(
+        requests[0].header("authorization"),
+        Some(format!("Bearer {KEY}").as_str())
+    );
+}
+
+#[test]
+fn tei_rejects_bad_embedding_responses() {
+    for response in [
+        json!([[]]),
+        json!([[0.0, 0.0]]),
+        json!([[1e100]]),
+        json!([["a"]]),
+        json!({"data": []}),
+        json!([]),
+        json!([[1.0], [1.0, 2.0]]),
+    ] {
+        let inputs = if response.as_array().is_some_and(|items| items.len() == 2) {
+            vec!["а", "б"]
+        } else {
+            vec!["а"]
+        };
+        let server = FakeServer::start(move |_| Response::ok(response.clone()));
+        let mut embedder = HttpEmbedder::new(target(&server, "tei", false), 2);
+        assert!(embedder.embed(&inputs).is_err());
+    }
+}
+
+#[test]
+fn tei_native_rerank_restores_order_and_requests_all_scores() {
+    let server = FakeServer::start(|request| {
+        assert_eq!(request.path, "/rerank");
+        assert_eq!(
+            request.json(),
+            json!({"query":"запрос", "texts":["а", "б"],
+            "truncate":false, "raw_scores":false, "return_text":false})
+        );
+        Response::ok(json!([{"index":1,"score":0.9},{"index":0,"score":0.2}]))
+    });
+    let mut reranker = HttpReranker::new(target(&server, "tei", false));
+    assert_eq!(reranker.rerank("запрос", &["а", "б"]).unwrap(), [0.2, 0.9]);
+}
+
+#[test]
+fn tei_malformed_embedding_does_not_echo_a_key() {
+    let server = FakeServer::start(|_| Response::ok(json!([[KEY]])));
+    let mut embedder = HttpEmbedder::new(target(&server, "tei", true), 2);
+    let message = embedder.embed(&["текст"]).unwrap_err().to_string();
+    assert!(!message.contains(KEY));
+}
+
+#[test]
+fn local_qwen_query_has_instruction_but_documents_do_not() {
+    let server = embedding_server();
+    let mut config = target(&server, "local-openai", false);
+    config.model = "Qwen3-Embedding-0.6B".into();
+    let mut embedder = HttpEmbedder::new(config, 2);
+    embedder.embed(&["документ"]).unwrap();
+    embedder.embed_query("запрос").unwrap();
+    assert_eq!(server.requests()[0].json()["input"], json!(["документ"]));
+    assert_eq!(
+        server.requests()[1].json()["input"],
+        json!([format!(
+            "{}запрос",
+            super::super::catalog::QWEN3_QUERY_PREFIX
+        )])
+    );
+}
+
+#[test]
+fn tei_rerank_rejects_invalid_scores_indices_and_shapes() {
+    for response in [
+        json!([{"index":0,"score":0.1},{"index":0,"score":0.2}]),
+        json!([{"index":2,"score":0.1}]),
+        json!([{"index":0,"score":0.1}]),
+        json!([{"index":0,"score":1e100},{"index":1,"score":0.2}]),
+        json!([{"index":0,"score":-0.1},{"index":1,"score":0.2}]),
+        json!({"results":[{"index":0,"score":0.1}]}),
+    ] {
+        let server = FakeServer::start(move |_| Response::ok(response.clone()));
+        let mut reranker = HttpReranker::new(target(&server, "tei", false));
+        assert!(reranker.rerank("запрос", &["а", "б"]).is_err());
+    }
+}
+
+#[test]
+fn tei_context_error_and_missing_route_do_not_probe_other_protocols() {
+    for status in [400, 413, 404, 422] {
+        let server =
+            FakeServer::start(move |_| Response::status(status, "input too long or route missing"));
+        let mut embedder = HttpEmbedder::new(target(&server, "tei", false), 2);
+        assert!(matches!(
+            embedder.embed_query("текст"),
+            Err(EmbedError::Rejected(_))
+        ));
+        let mut reranker = HttpReranker::new(target(&server, "tei", false));
+        assert!(reranker.rerank("запрос", &["текст"]).is_err());
+        assert_eq!(server.requests().len(), 2);
+    }
+}
+
+#[test]
+fn lmstudio_batches_sort_response_and_instruct_only_qwen_queries() {
+    for model in [
+        "text-embedding-qwen3-embedding-0.6b",
+        "Qwen/Qwen3-Embedding-4B-GGUF",
+        "nomic-embed-text-v1.5",
+    ] {
+        let server = FakeServer::start(|request| {
+            assert_eq!(request.path, "/v1/embeddings");
+            let input = request.json()["input"].as_array().unwrap().clone();
+            let data: Vec<_> = input.iter().enumerate().rev().map(|(index, text)|
+                json!({"index":index,"embedding":[text.as_str().unwrap().len() as f64, 1.0]})).collect();
+            Response::ok(json!({"data":data}))
+        });
+        let mut config = target(&server, "lmstudio", false);
+        config.base_url.push_str("/v1/");
+        config.model = model.into();
+        let mut embedder = HttpEmbedder::new(config, 2);
+        assert_eq!(
+            embedder.embed(&["а", "abc", "abcd"]).unwrap(),
+            vec![vec![2.0, 1.0], vec![3.0, 1.0], vec![4.0, 1.0]]
+        );
+        embedder.embed_query("запрос").unwrap();
+        let requests = server.requests();
+        let expected = if model.contains("qwen3") || model.contains("Qwen3") {
+            format!("{}запрос", super::super::catalog::QWEN3_QUERY_PREFIX)
+        } else {
+            "запрос".into()
+        };
+        assert_eq!(requests[2].json()["input"], json!([expected]));
+        assert_eq!(embedder.fingerprint().source, "lmstudio");
+    }
+}
+
+#[test]
+fn lmstudio_rejects_corrupt_vectors_and_response_indices() {
+    for data in [
+        json!([{"embedding":[]}]),
+        json!([{"embedding":[1e100]}]),
+        json!([{"embedding":[1],"index":-1}]),
+        json!([{"embedding":[1],"index":2}]),
+        json!([{"embedding":[1],"index":0},{"embedding":[2],"index":0}]),
+    ] {
+        let server = FakeServer::start(move |_| Response::ok(json!({"data":data})));
+        let mut embedder = HttpEmbedder::new(target(&server, "lmstudio", false), 2);
+        assert!(embedder.embed_query("текст").is_err());
+        assert_eq!(server.requests().len(), 1);
+    }
+}
+
+#[test]
 fn ollama_batches_use_native_api_and_never_truncate() {
     let server = FakeServer::start(|request| {
         assert_eq!(request.path, "/api/embed");

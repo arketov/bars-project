@@ -45,6 +45,7 @@ pub struct Walk {
     /// по возрастанию. Для дерева окна (Т-33); на индексацию не влияют.
     pub dirs: Vec<String>,
     pub problems: Vec<WalkProblem>,
+    pub problems_total: usize,
 }
 
 /// Корень документации непригоден; обход не начат.
@@ -67,6 +68,25 @@ pub enum ReadError {
 
 /// Обходит `docs_root` (относительно `project_root`) и собирает индексируемые `.md`.
 pub fn walk_docs(project_root: &Path, docs_root: &Path) -> Result<Walk, WalkError> {
+    walk_docs_while(project_root, docs_root, || true)
+}
+
+/// Тот же обход с кооперативной остановкой между папками и записями.
+pub fn walk_docs_while(
+    project_root: &Path,
+    docs_root: &Path,
+    keep_going: impl Fn() -> bool,
+) -> Result<Walk, WalkError> {
+    walk_docs_bounded(project_root, docs_root, keep_going, usize::MAX)
+}
+
+/// Ограничивает накопление диагностик во время обхода, сохраняя их общее число.
+pub fn walk_docs_bounded(
+    project_root: &Path,
+    docs_root: &Path,
+    keep_going: impl Fn() -> bool,
+    problem_limit: usize,
+) -> Result<Walk, WalkError> {
     let docs_prefix = docs_prefix(docs_root)?;
     let start = project_root.join(docs_root);
     let unavailable =
@@ -79,42 +99,60 @@ pub fn walk_docs(project_root: &Path, docs_root: &Path) -> Result<Walk, WalkErro
     // Папка на диске и её путь внутри корня документации (пустой для самого корня).
     let mut pending = vec![(start, String::new())];
     while let Some((dir, inner)) = pending.pop() {
+        if !keep_going() {
+            break;
+        }
         let project_path = |name: &str| join(&join(&docs_prefix, &inner), name);
         let entries = match fs::read_dir(&dir) {
             Ok(entries) => entries,
             Err(error) => {
-                walk.problems.push(WalkProblem {
-                    path: join(&docs_prefix, &inner),
-                    reason: format!("папка не читается: {error}"),
-                });
+                walk.problem(
+                    problem_limit,
+                    WalkProblem {
+                        path: join(&docs_prefix, &inner),
+                        reason: format!("папка не читается: {error}"),
+                    },
+                );
                 continue;
             }
         };
         for entry in entries {
+            if !keep_going() {
+                break;
+            }
             let entry = match entry {
                 Ok(entry) => entry,
                 Err(error) => {
-                    walk.problems.push(WalkProblem {
-                        path: join(&docs_prefix, &inner),
-                        reason: format!("запись папки не читается: {error}"),
-                    });
+                    walk.problem(
+                        problem_limit,
+                        WalkProblem {
+                            path: join(&docs_prefix, &inner),
+                            reason: format!("запись папки не читается: {error}"),
+                        },
+                    );
                     continue;
                 }
             };
             let Ok(name) = entry.file_name().into_string() else {
-                walk.problems.push(WalkProblem {
-                    path: project_path(&entry.file_name().to_string_lossy()),
-                    reason: "имя не является корректным Unicode".to_string(),
-                });
+                walk.problem(
+                    problem_limit,
+                    WalkProblem {
+                        path: project_path(&entry.file_name().to_string_lossy()),
+                        reason: "имя не является корректным Unicode".to_string(),
+                    },
+                );
                 continue;
             };
             let metadata = match entry.metadata() {
                 Ok(metadata) => metadata,
                 Err(error) => {
-                    walk.problems.push(WalkProblem {
-                        path: project_path(&name),
-                        reason: format!("не читаются свойства: {error}"),
-                    });
+                    walk.problem(
+                        problem_limit,
+                        WalkProblem {
+                            path: project_path(&name),
+                            reason: format!("не читаются свойства: {error}"),
+                        },
+                    );
                     continue;
                 }
             };
@@ -147,6 +185,16 @@ pub fn walk_docs(project_root: &Path, docs_root: &Path) -> Result<Walk, WalkErro
     walk.dirs.sort();
     walk.problems.sort_by(|a, b| a.path.cmp(&b.path));
     Ok(walk)
+}
+
+/// Читает документ строго как UTF-8. BOM остаётся в тексте: его снимает нарезка.
+impl Walk {
+    fn problem(&mut self, limit: usize, problem: WalkProblem) {
+        self.problems_total += 1;
+        if self.problems.len() < limit {
+            self.problems.push(problem);
+        }
+    }
 }
 
 /// Читает документ строго как UTF-8. BOM остаётся в тексте: его снимает нарезка.

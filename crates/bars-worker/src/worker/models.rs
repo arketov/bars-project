@@ -281,6 +281,9 @@ impl ModelProvider for ConfiguredProvider {
     fn load_reranker(&self, settings: &Settings) -> Result<Box<dyn Reranker + Send>, RerankError> {
         let rerank = &settings.rerank;
         match rerank.source {
+            ModelSource::Lmstudio => Err(RerankError::Load(
+                "LM Studio не поддерживает штатный API rerank; выберите другой источник".into(),
+            )),
             ModelSource::Ollama => Err(RerankError::Load(
                 "Ollama не поддерживает API rerank; выберите другой источник".into(),
             )),

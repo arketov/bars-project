@@ -1,0 +1,14 @@
+{
+  "status": "rejected-correctly",
+  "error": "несовместимая модель seed",
+  "expected": {
+    "model": "BAAI/bge-m3",
+    "dim": 1024
+  },
+  "actualOverdrive": {
+    "model": "Qwen/Qwen3-Embedding-4B@gguf-q4_k_m-4ea06f44bb1a3be5",
+    "dim": 2560
+  },
+  "replacement": "read-only BARS snapshot; only meta/vectors saved, not a searchable index",
+  "cachedVectors": 1714
+}

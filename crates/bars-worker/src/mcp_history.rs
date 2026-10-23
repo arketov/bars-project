@@ -529,6 +529,29 @@ pub fn requested(tool: &str, source: &Value) -> Value {
         "bars_get_duplicates" => &["format", "project", "modules", "limit"],
         "bars_get_similar" => &["format", "project", "chunk_id", "modules", "limit"],
         "bars_read" => &["format", "project", "path"],
+        "bars_text_search" => &[
+            "format",
+            "project",
+            "query",
+            "case_sensitive",
+            "regex",
+            "path_filter",
+            "modules",
+            "files",
+            "limit_docs",
+            "limit_hits",
+            "path",
+            "offset",
+            "revision",
+        ],
+        "bars_links" => &[
+            "format",
+            "project",
+            "path",
+            "direction",
+            "limit",
+            "cursor_present",
+        ],
         "bars_outline" => &["format", "project", "path", "levels", "under", "under_line"],
         "bars_status" => &["format", "project"],
         "bars_reindex" => &["format", "project", "full"],
@@ -539,9 +562,10 @@ pub fn requested(tool: &str, source: &Value) -> Value {
         if let Some(v) = source.get(key) {
             let valid = v.is_null()
                 || match *key {
-                    "limit" | "candidates" | "under_line" => v.as_u64().is_some(),
+                    "limit" | "candidates" | "under_line" | "limit_docs" | "limit_hits"
+                    | "offset" => v.as_u64().is_some(),
                     "min_score" => v.is_number(),
-                    "full" => v.is_boolean(),
+                    "full" | "regex" | "case_sensitive" | "cursor_present" => v.is_boolean(),
                     "modules" | "files" => {
                         v.as_array().is_some_and(|a| a.iter().all(Value::is_string))
                     }

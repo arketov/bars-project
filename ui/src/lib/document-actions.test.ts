@@ -7,7 +7,7 @@ import { buildTree } from "./tree";
 import { documentAt } from "./contextmenu";
 
 const api = vi.hoisted(() => ({ call: vi.fn(), documentAction: vi.fn(), documentEditors: vi.fn(), copyText: vi.fn() }));
-vi.mock("./api", () => ({ ...api, joinPath: (a: string, b: string) => `${a}/${b}`, openPath: vi.fn(), pickFolder: vi.fn() }));
+vi.mock("./api", () => ({ ...api, joinPath: (a: string, b: string) => `${a}/${b}`, openPath: vi.fn(), pickFolder: vi.fn(), inTauri: () => false }));
 
 const components: ReturnType<typeof mount>[] = [];
 const project = { path: "C:/проект с пробелами", name: "Проект", docs_root: "docs", state: "ready" as const, modules: [] };

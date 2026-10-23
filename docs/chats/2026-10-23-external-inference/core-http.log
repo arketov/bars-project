@@ -1,0 +1,41 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Finished `release` profile [optimized] target(s) in 29.14s
+     Running unittests src\lib.rs (C:/bt/bars\release\deps\bars_core-f471c4d65c086b94.exe)
+
+running 29 tests
+test models::remote::tests::a_short_answer_is_a_count_error ... ok
+test models::remote::tests::a_transient_failure_that_clears_up_is_not_an_error ... ok
+test models::remote::tests::a_vector_of_another_size_than_the_first_is_rejected ... ok
+test models::remote::tests::answers_out_of_order_are_put_back_by_index ... ok
+test models::remote::tests::base_url_ending_in_v1_is_not_doubled ... ok
+test models::remote::tests::client_errors_are_not_retried_and_name_the_cause ... ok
+test models::remote::tests::document_embedding_does_not_multiply_the_indexer_retry_budget ... ok
+test models::remote::tests::embeddings_go_to_v1_embeddings_with_the_key_and_the_model ... ok
+test models::remote::tests::lmstudio_batches_sort_response_and_instruct_only_qwen_queries ... ok
+test models::remote::tests::lmstudio_rejects_corrupt_vectors_and_response_indices ... ok
+test models::remote::tests::local_address_needs_no_key_and_sends_no_authorization ... ok
+test models::remote::tests::ollama_batches_use_native_api_and_never_truncate ... ok
+test models::remote::tests::ollama_context_error_is_not_retried ... ok
+test models::remote::tests::ollama_dimension_changes_are_rejected ... ok
+test models::remote::tests::ollama_rejects_bad_vectors_and_counts ... ok
+test models::remote::tests::rerank_errors_name_the_status ... ok
+test models::remote::tests::rerank_falls_back_to_v1_rerank_and_remembers_it ... ok
+test models::remote::tests::rerank_logits_outside_the_unit_range_go_through_the_sigmoid ... ok
+test models::remote::tests::rerank_posts_cohere_shaped_request_and_returns_scores_in_document_order ... ok
+test models::remote::tests::rerank_with_a_missing_score_is_an_error ... ok
+test models::remote::tests::server_errors_are_retried_three_times_then_reported ... ok
+test models::remote::tests::tei_context_error_and_missing_route_do_not_probe_other_protocols ... ok
+test models::remote::tests::tei_native_rerank_restores_order_and_requests_all_scores ... ok
+test models::remote::tests::tei_rejects_bad_embedding_responses ... ok
+test models::remote::tests::tei_rerank_rejects_invalid_scores_indices_and_shapes ... ok
+test models::remote::tests::tei_uses_native_batches_and_qwen_query_instruction ... ok
+test models::remote::tests::texts_are_sent_in_batches_and_keep_their_order ... ok
+test models::remote::tests::the_key_never_reaches_an_error_even_when_the_provider_echoes_it ... ok
+test models::remote::tests::unreachable_address_is_an_error_not_a_panic ... ok
+
+test result: ok. 29 passed; 0 failed; 0 ignored; 0 measured; 293 filtered out; finished in 2.29s
+

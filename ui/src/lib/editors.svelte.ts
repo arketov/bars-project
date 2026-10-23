@@ -31,7 +31,7 @@ const failure = (error: unknown) => ({
 
 export class EditorBuffer {
   readonly project: string;
-  readonly path: string;
+  path: string;
   text = $state("");
   status = $state<EditorStatus>("loading");
   /** Пояснение к `error`, `conflict` и `readonly`. */
@@ -263,7 +263,8 @@ export class Editors {
     let buffer = this.#buffers.get(key);
     if (!buffer) {
       buffer = new EditorBuffer(project, path, seed);
-      buffer.onSaved = (revision) => this.#bus?.emit({ project, path, revision, origin: this.id });
+      const attached = buffer;
+      buffer.onSaved = (revision) => this.#bus?.emit({ project, path: attached.path, revision, origin: this.id });
       this.#buffers.set(key, buffer);
       if (inTauri()) void buffer.load();
       else buffer.status = "clean";
@@ -301,6 +302,16 @@ export class Editors {
   }
 
   /** Сверяет с диском открытые документы. */
+  movePaths(project: string, from: string, to: string): void {
+    for (const [key, buffer] of [...this.#buffers]) {
+      if (buffer.project !== project) continue;
+      const next = buffer.path === from ? to : buffer.path.startsWith(from + "/") ? to + buffer.path.slice(from.length) : buffer.path;
+      if (next === buffer.path) continue;
+      this.#buffers.delete(key); buffer.path = next;
+      this.#buffers.set(this.#key(project, next), buffer);
+    }
+  }
+
   async checkAll(): Promise<void> {
     if (!inTauri()) return;
     await Promise.all([...this.#buffers.values()].filter((buffer) => buffer.views > 0).map((buffer) => buffer.checkDisk()));

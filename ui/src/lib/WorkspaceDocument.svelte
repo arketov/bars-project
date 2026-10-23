@@ -8,9 +8,10 @@
   import { keybindings } from "./keybindings.svelte";
   import { app, type DocumentReference, type ViewedDocument } from "./app.svelte";
   import { BarsError, type ReadOutput, type SearchOutput } from "./types";
-  import { documentHeadings, renderDocument, resolveDocumentLink } from "./markdown";
+  import { documentHeadings, renderDocument } from "./markdown";
   import { linkTitle, loadLinks, type DocumentLinks, type IncomingLink, type OutgoingLink } from "./document-links";
-  import { linkTargets, resolveWikilink } from "./link-picker";
+  import { linkTargets } from "./link-picker";
+  import { followLink as documentLink } from "./follow-link.svelte";
   let { project, hit, initial }: { project: string; hit: DocumentReference; initial?: ViewedDocument } = $props();
   let doc = $state<ViewedDocument | null>(null), error = $state("");
   // Т-29: документ открывается в редакторе исходного Markdown; глаз переключает его на рендер.
@@ -19,7 +20,7 @@
   let editor = $state<ReturnType<typeof Editor>>();
   let buffer = $state<EditorBuffer | null>(null);
   const text = $derived(buffer?.text ?? doc?.text ?? "");
-  const range = $derived(hit.first_line > 0 ? { first: hit.first_line, last: hit.last_line } : null);
+  const range = $derived(hit.first_line > 0 ? { first: hit.first_line, last: hit.last_line, column: hit.column, length: hit.length } : null);
   const html = $derived(doc && !source ? renderDocument(text, range ?? undefined) : "");
   const headings = $derived(documentHeadings(text));
   const status = $derived(buffer ? statusLabel(buffer) : "");
@@ -104,7 +105,7 @@
   });
   const openPath = (path: string, title: string | undefined, line = 0) => void app.openDocument({ path, title: linkTitle(title, path), first_line: line, last_line: line });
   const openIncoming = (item: IncomingLink) => openPath(item.path, item.title, item.lines[0] ?? 0);
-  const openOutgoing = (item: OutgoingLink) => { if (item.target) openPath(item.target, item.target_title); };
+  const openOutgoing = (item: OutgoingLink) => { if (item.target) openPath(item.target, item.target_title); else void documentLink.open(project, hit.path, item.raw, item.kind === "wiki"); };
   /** Документы проекта из того же поиска, что и в главном окне (по смыслу), для выбора по `[[`; порядок — как в выдаче. */
   async function semanticLinks(query: string) {
     const output = await call<SearchOutput>("search", { cwd: project, project, query, modules: [], files: [], limit: 10 });
@@ -116,10 +117,7 @@
     const link = (event.target as HTMLElement).closest<HTMLElement>("a[data-doc-link], a[data-wiki-link]");
     if (!link) return;
     event.preventDefault();
-    const path = link.dataset.wikiLink !== undefined
-      ? resolveWikilink(linkTargets(app.tree, app.docsRoot), hit.path, link.dataset.wikiLink)?.path
-      : resolveDocumentLink(hit.path, link.dataset.docLink ?? "");
-    if (path) void app.openDocument({ path, title: path.split("/").pop() ?? path, first_line: 0, last_line: 0 });
+    void documentLink.open(project, hit.path, link.dataset.wikiLink ?? link.dataset.docLink ?? "", link.dataset.wikiLink !== undefined);
   }
   function scroll(line: number) {
     if (source) { if (line > 0) editor?.scrollToLine(line); return; }
@@ -177,7 +175,7 @@
           {:else}<p class="bl-note">На этот документ никто не ссылается.</p>{/if}
           <h4 class="bl-group">Этот документ ссылается</h4>
           {#if backlinks.outgoing.length}<ul>{#each backlinks.outgoing as item (item.line + item.raw + item.kind)}<li>
-            {#if item.broken}<span class="bl-broken" title="Документа «{item.raw}» нет в проекте"><span class="bl-title">{item.text || item.raw}</span><small>ссылка в никуда · строка {item.line}</small></span>
+            {#if item.broken}<button class="bl-broken" onclick={() => openOutgoing(item)} title="Создать документ «{item.raw}»"><span class="bl-title">{item.text || item.raw}</span><small>ссылка в никуда · строка {item.line}</small></button>
             {:else}<button onclick={() => openOutgoing(item)} title={item.target}><span class="bl-title">{linkTitle(item.target_title, item.target ?? item.raw)}</span><small>{item.target} · строка {item.line}</small></button>{/if}
           </li>{/each}</ul>
           {:else}<p class="bl-note">В документе нет ссылок на другие документы.</p>{/if}

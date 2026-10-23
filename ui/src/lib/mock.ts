@@ -271,6 +271,21 @@ async function topicsCall(method: string, params: Record<string, unknown>): Prom
       store.topics = store.topics.filter((t) => t !== topic);
       return { accepted: true };
     }
+    case "new_topics_merge": {
+      const topic = topicFor(params);
+      const source = topicFor({ ...params, id: params.source_id, revision: params.source_revision });
+      if (topic === source || topic.variants_list.length + source.variants_list.length > 50) throw new BarsError("объединение невозможно", "invalid_params", -32007);
+      topic.variants_list.push(...source.variants_list);
+      topic.observations += source.observations;
+      topic.first_seen = Math.min(topic.first_seen, source.first_seen);
+      topic.last_seen = Math.max(topic.last_seen, source.last_seen);
+      topic.sources = [...new Set([...topic.sources, ...source.sources])];
+      topic.reasons = [...new Set([...topic.reasons, ...source.reasons])];
+      topic.checks = [...topic.checks, ...source.checks].sort((a, b) => b.at - a.at).slice(0, 2).map(check => ({ ...check, topic_revision: 0 }));
+      topic.status = "open";
+      store.topics = store.topics.filter((t) => t !== source);
+      return { revision: ++topic.revision };
+    }
     case "new_topics_clear":
       if (params.confirmed !== true) throw new BarsError("нужно подтверждение", "invalid_params", -32007);
       store.topics = [];
@@ -358,6 +373,8 @@ function status(path: string): StatusOutput {
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function mockCall(method: string, params: Record<string, unknown>): Promise<unknown> {
+  // Браузерный стенд не имеет доступа к диску; не выдаём смысловые фикстуры за текстовый поиск.
+  if (method === 'text_search') return {documents:[],docs_total:0,hits_total:0,truncated:null,skipped:[],elapsed_ms:0};
   if(method==='graph_physical')return (await import('./mock-physical')).physicalFixture(params);
   if(['graph_query','graph_status','graph_build','graph_cancel'].includes(method))return (await import('./mock-graph')).graphFixture(method,params);
   if(method==='graph_search'){

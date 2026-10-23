@@ -192,7 +192,7 @@ export class BarsError extends Error {
 
 // --- настройки, модели, клиенты ---
 
-export type ModelSourceName = "builtin" | "remote" | "local-openai" | "ollama";
+export type ModelSourceName = "builtin" | "remote" | "local-openai" | "ollama" | "lmstudio" | "tei";
 
 export interface EmbedDoc {
   accelerator: "auto" | "cpu";

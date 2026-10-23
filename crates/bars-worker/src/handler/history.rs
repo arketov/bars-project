@@ -37,6 +37,8 @@ impl WorkerHandler {
             Call::Search(p) => ("bars_rag_search", Some(&p.target), output_value(p)),
             Call::Similar(p) => ("bars_get_similar", Some(&p.target), output_value(p)),
             Call::Read(p) => ("bars_read", Some(&p.target), output_value(p)),
+            Call::DiskText(p) => ("bars_text_search", Some(&p.target), output_value(p)),
+            Call::DiskLinks(p) => ("bars_links", Some(&p.target), output_value(p)),
             Call::Outline(p) => ("bars_outline", Some(&p.target), output_value(p)),
             Call::Status(p) => ("bars_status", Some(&p.target), output_value(p)),
             Call::Reindex(p) => ("bars_reindex", Some(&p.target), output_value(p)),
@@ -84,6 +86,21 @@ impl WorkerHandler {
             scope["cwd"] = json!(t.cwd);
         }
         match &call {
+            Call::DiskText(p) => {
+                scope["modules"] = json!(p.modules);
+                scope["files"] = json!(p.files);
+                scope["path"] = json!(p.path);
+                scope["offset"] = json!(p.offset);
+                scope["revision"] = json!(p.revision);
+                scope["case_sensitive"] = json!(p.case_sensitive);
+                scope["regex"] = json!(p.regex);
+                scope["path_filter"] = json!(p.path_filter);
+            }
+            Call::DiskLinks(p) => {
+                scope["path"] = json!(p.path);
+                scope["direction"] = json!(p.direction);
+                scope["cursor_present"] = json!(p.cursor.is_some());
+            }
             Call::GraphSearch(p) => {
                 scope["modules"] = json!(p.search.modules);
                 scope["files"] = json!(p.search.files);
@@ -186,6 +203,13 @@ fn complete_attempt(
     a.project_name = applied["resolved_project_name"].as_str().map(str::to_owned);
     match result {
         Err(e) => {
+            if tool == "bars_links" {
+                applied["cursor_validation"] = json!(match e.kind() {
+                    Some(ErrorKind::StaleCursor) => "stale",
+                    Some(ErrorKind::InvalidParams) => "invalid_params",
+                    _ => "not_completed",
+                });
+            }
             a.outcome = "error".into();
             a.error = json!({"code":e.code,"kind":e.kind().map(|k|k.name()),"stage":"worker","message":safe_error(e.kind())});
             a.result = json!({"count":null,"unit":"unknown"});
@@ -193,6 +217,17 @@ fn complete_attempt(
         Ok(out) => {
             a.outcome = "success".into();
             a.result = match tool {
+                "bars_text_search" => {
+                    applied["search"] = out["applied"].clone();
+                    applied["clamped"] = out["clamped"].clone();
+                    json!({"count":out["hits_total"],"unit":"occurrences","skipped_total":out["skipped_total"],"limit_reasons":out["limit_reasons"]})
+                }
+                "bars_links" => {
+                    applied["limit"] = out["applied_limit"].clone();
+                    applied["clamped"] = out["clamped"].clone();
+                    applied["cursor_validation"] = json!("valid_or_absent");
+                    json!({"count":out["items"].as_array().map(Vec::len),"unit":"links","has_more":out["has_more"],"limit_reasons":out["limit_reasons"]})
+                }
                 "bars_rag_search" => {
                     if out.get("applied_mode").is_some() {
                         applied["mode"] = out["applied_mode"].clone();

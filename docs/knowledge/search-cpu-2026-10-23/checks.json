@@ -1,0 +1,73 @@
+{
+  "status": "passed-no-model",
+  "checks": [
+    {
+      "name": "frozen-corpus",
+      "ok": true,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "name": "tampered-source",
+      "ok": true,
+      "exit": 1,
+      "stderr": "Error: \"повреждён снимок или повторён путь\""
+    },
+    {
+      "name": "insufficient-count",
+      "ok": true,
+      "exit": 1,
+      "stderr": "Error: \"нужно ровно 5000 естественных чанков\""
+    },
+    {
+      "name": "duplicate-path",
+      "ok": true,
+      "exit": 1,
+      "stderr": "Error: \"повреждён снимок или повторён путь\""
+    },
+    {
+      "name": "out-of-range",
+      "ok": true,
+      "exit": 1,
+      "stderr": "Error: \"неверное число выбранных чанков\""
+    },
+    {
+      "name": "compatible-cache",
+      "ok": true,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "name": "unique-natural-chunks-and-cache-accounting",
+      "ok": true
+    },
+    {
+      "name": "refuse-output-overwrite",
+      "ok": true,
+      "exit": 1,
+      "stderr": "Error: Os { code: 80, kind: AlreadyExists, message: \"Файл существует.\" }"
+    },
+    {
+      "name": "existing-output-unchanged",
+      "ok": true
+    },
+    {
+      "name": "reject-incompatible-model",
+      "ok": true,
+      "exit": 1,
+      "stderr": "Error: \"несовместимая модель seed\""
+    },
+    {
+      "name": "no-plan-after-rejected-model",
+      "ok": true
+    }
+  ],
+  "chunks": 5000,
+  "documents": 971,
+  "reused": 1666,
+  "pending": 3334,
+  "queries": 25,
+  "corpusSha256": "01569c25d15767cebd2a61696ca5dcb64d93867525c782dd900d59286507fd71",
+  "exeSha256": "7517f7d4af50436dd70f71cf91865e494708f4ca100825bc8ca769e21aa58d89",
+  "limitation": "No model inference, full index, latency or IPC acceptance in this check"
+}

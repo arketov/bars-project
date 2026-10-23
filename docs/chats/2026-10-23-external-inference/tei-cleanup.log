@@ -1,0 +1,5 @@
+embed 292 SIGINT
+rerank 296 SIGINT
+50360a0313d93ae0215f186b73c0590192dfebc859fef8b4e4ea671db66c974a  /root/Projects/oss/bars-tei-5-3/runtime/usr/local/bin/text-embeddings-router
+name, memory.used [MiB]
+NVIDIA GeForce RTX 3090, 7257 MiB

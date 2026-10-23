@@ -120,6 +120,11 @@ export interface GraphStatus {
   source_count: number;
   error: string | null;
   method: string;
+  progress?: { phase: string; processed: number; total: number | null; elapsed_ms: number } | null;
+  file_errors?: { path: string; code: string; message: string }[];
+  file_errors_total?: number;
+  paused?: boolean;
+  layers?: Record<string, { state: string; generation: string | null; fingerprint: string; processed: number; total: number; failed: number }>;
 }
 export type RetrievalMode = "hybrid" | "mix" | "graph";
 export interface GraphSearchOutput extends SearchOutput {

@@ -2,8 +2,9 @@
 // Устройство — docs/features/knowledge-base/tree-and-files.md.
 
 import { app } from "./app.svelte";
-import { entryCreateDir, entryCreateDoc, entryMove, entryTrash, type EntryResult } from "./api";
+import { entryCreateDir, entryCreateDoc, entryMove, entryPlanMove, entryTrash, type EntryResult, type MovePreview } from "./api";
 import { findNode, projectPathOf, type TreeNode } from "./tree";
+import { moved } from "./moved.svelte";
 
 export type EntryAction = "newDoc" | "newDir" | "rename" | "move" | "trash";
 
@@ -65,6 +66,9 @@ class Entries {
   request = $state<EntryRequest | null>(null);
   busy = $state(false);
   error = $state<string | null>(null);
+  preview = $state<MovePreview | null>(null);
+  previewValue = "";
+  report = $state<{path: string; reason: string}[] | null>(null);
 
   /** Открывает диалог для узла дерева; `nodePath` — путь узла (`.` — корень документации). */
   open(action: EntryAction, nodePath: string): void {
@@ -76,6 +80,7 @@ class Entries {
     if (!node) return;
     if (node.path === "." && action !== "newDoc" && action !== "newDir") return;
     this.error = null;
+    this.preview = null; this.report = null;
     this.request = { action, project, docsRoot: app.docsRoot, node, name: nodeName(node), docs: countDocs(node) };
   }
 
@@ -83,12 +88,14 @@ class Entries {
     if (this.busy) return;
     this.request = null;
     this.error = null;
+    this.preview = null; this.report = null;
   }
 
   /** Выполняет запрос; `value` — введённое имя (создание, переименование) или путь папки назначения (перемещение). */
   async submit(value: string): Promise<void> {
     const request = this.request;
     if (!request || this.busy) return;
+    if (this.report) { this.cancel(); return; }
     const { project, node } = request;
     if (app.current !== project || app.docsRoot !== request.docsRoot) {
       this.error = "Проект изменился. Закройте диалог и откройте его заново.";
@@ -102,7 +109,7 @@ class Entries {
         // Диск становится истиной: несохранённые правки уходят на диск до переименования и удаления.
         const { editors } = await import("./editors.svelte");
         const stuck = await editors.flush();
-        if (stuck.some((buffer) => buffer.project === project && inside(buffer.path, at(node.path), node.kind === "file"))) {
+        if (stuck.some((buffer) => buffer.project === project && (request.action !== "trash" || inside(buffer.path, at(node.path), node.kind === "file")))) {
           this.error = "В этом документе есть несохранённые правки, которые не удалось записать. Решите конфликт во вкладке документа.";
           return;
         }
@@ -111,13 +118,24 @@ class Entries {
         this.error = "Проект изменился. Закройте диалог и откройте его заново.";
         return;
       }
+      if (request.action === "rename" || request.action === "move") {
+        const parent = at(request.action === "rename" ? parentNodePath(node) : value);
+        const name = request.action === "rename" ? value.trim() : request.name;
+        if (!this.preview || this.previewValue !== value) {
+          const preview = await entryPlanMove(project, at(node.path), parent, name);
+          if (preview.status === "error") { this.error = preview.message; return; }
+          this.preview = preview; this.previewValue = value;
+          return;
+        }
+      }
       let result: EntryResult;
       if (request.action === "newDoc") result = await entryCreateDoc(project, at(node.path), value.trim());
       else if (request.action === "newDir") result = await entryCreateDir(project, at(node.path), value.trim());
-      else if (request.action === "rename") result = await entryMove(project, at(node.path), at(parentNodePath(node)), value.trim());
-      else if (request.action === "move") result = await entryMove(project, at(node.path), at(value), request.name);
+      else if (request.action === "rename") result = await entryMove(project, at(node.path), at(parentNodePath(node)), value.trim(), this.preview!.token);
+      else if (request.action === "move") result = await entryMove(project, at(node.path), at(value), request.name, this.preview!.token);
       else result = await entryTrash(project, at(node.path));
       if (result.status === "error") {
+        this.preview = null;
         this.error = result.message;
         return;
       }
@@ -125,7 +143,11 @@ class Entries {
         this.request = null;
         return;
       }
-      this.request = null;
+      this.report = result.failed?.length ? result.failed : null;
+      if (!this.report) this.request = null;
+      if ((request.action === "rename" || request.action === "move") && result.path) {
+        await moved.accept({project, from: at(node.path), to: result.path});
+      }
       await app.loadTree();
       app.selected = new Set([...app.selected].filter((path) => !!findNode(app.tree, path)));
       if (request.action === "newDoc" && result.status === "ok") {
@@ -135,7 +157,7 @@ class Entries {
         app.flash("Папка создана вместе с index.md");
         await app.openDocument({ path: result.index_path ?? "", title: result.path, first_line: 0, last_line: 0 });
       } else if (result.status === "partial") {
-        app.flash(`Папка создана, а index.md нет: ${result.message}`, true);
+        app.flash(result.failed ? "Перемещено; часть ссылок не обновлена. Список — в диалоге." : `Папка создана, а index.md нет: ${result.message}`, true);
       } else if (request.action === "trash") {
         app.flash("Перемещено в корзину");
       } else {

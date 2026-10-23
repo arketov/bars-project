@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { app } from "./app.svelte";
-import { BarsError } from "./types";
 import { buildTree, projectPathOf } from "./tree";
 import { destinations, entries, parentNodePath } from "./entries.svelte";
+import { BarsError } from "./types";
 
 const api = vi.hoisted(() => ({
   call: vi.fn(),
@@ -10,6 +10,7 @@ const api = vi.hoisted(() => ({
   entryCreateDoc: vi.fn(),
   entryCreateDir: vi.fn(),
   entryMove: vi.fn(),
+  entryPlanMove: vi.fn().mockResolvedValue({status: "ok", path: "docs/new.md", token: "snapshot", documents: [], warnings: []}),
   entryTrash: vi.fn(),
   inTauri: () => false,
 }));
@@ -197,10 +198,13 @@ describe("операции с файлами и папками", () => {
     api.entryMove.mockResolvedValue({ status: "ok", path: "docs/a/z.md" });
     entries.open("rename", "a/x.md");
     await entries.submit("z.md");
-    expect(api.entryMove).toHaveBeenLastCalledWith(project.path, "docs/a/x.md", "docs/a", "z.md");
+    expect(api.entryMove).not.toHaveBeenCalled();
+    await entries.submit("z.md");
+    expect(api.entryMove).toHaveBeenLastCalledWith(project.path, "docs/a/x.md", "docs/a", "z.md", "snapshot");
     entries.open("move", "a/x.md");
     await entries.submit("a/b");
-    expect(api.entryMove).toHaveBeenLastCalledWith(project.path, "docs/a/x.md", "docs/a/b", "x.md");
+    await entries.submit("a/b");
+    expect(api.entryMove).toHaveBeenLastCalledWith(project.path, "docs/a/x.md", "docs/a/b", "x.md", "snapshot");
     expect([...app.selected]).toEqual(["a/x.md"]);
   });
 
@@ -208,7 +212,8 @@ describe("операции с файлами и папками", () => {
     api.entryMove.mockResolvedValue({ status: "ok", path: "docs/r.md" });
     entries.open("rename", "./root.md");
     await entries.submit("r.md");
-    expect(api.entryMove).toHaveBeenCalledWith(project.path, "docs/root.md", "docs", "r.md");
+    await entries.submit("r.md");
+    expect(api.entryMove).toHaveBeenCalledWith(project.path, "docs/root.md", "docs", "r.md", "snapshot");
   });
 
   it("удаление идёт в корзину; корень документации открыть для переименования нельзя", async () => {
@@ -218,7 +223,30 @@ describe("операции с файлами и папками", () => {
     await entries.submit("");
     expect(api.entryTrash).toHaveBeenCalledWith(project.path, "docs/a");
     expect(app.toast?.text).toBe("Перемещено в корзину");
+    entries.open("rename", ".");
+    expect(entries.request).toBeNull();
   });
+
+  it("частичная неудача остаётся списком в диалоге; повтор не перемещает второй раз", async () => {
+    api.entryMove.mockResolvedValue({status:"partial",path:"docs/a/z.md",updated:["docs/root.md"],failed:[{path:"docs/busy.md",reason:"Файл занят"}]});
+    entries.open("rename","a/x.md");
+    await entries.submit("z.md"); await entries.submit("z.md");
+    expect(entries.report).toEqual([{path:"docs/busy.md",reason:"Файл занят"}]);
+    expect(entries.request).not.toBeNull();
+    await entries.submit("z.md");
+    expect(api.entryMove).toHaveBeenCalledTimes(1);
+    expect(entries.request).toBeNull();
+  });
+
+  it("новое имя требует нового плана, отказ применения сбрасывает прежний", async () => {
+    entries.open("rename","a/x.md");
+    await entries.submit("z.md"); await entries.submit("other.md");
+    expect(api.entryMove).not.toHaveBeenCalled();
+    api.entryMove.mockResolvedValue({status:"error",kind:"invalid_move",message:"документы изменились"});
+    await entries.submit("other.md");
+    expect(entries.preview).toBeNull(); expect(entries.error).toContain("изменились");
+  });
+
   it("смена проекта или корня после открытия диалога блокирует запись", async () => {
     entries.open("newDoc", "a");
     app.current = "C:/Другой";
@@ -231,7 +259,6 @@ describe("операции с файлами и папками", () => {
     expect(api.entryCreateDoc).not.toHaveBeenCalled();
   });
 
-
   it("конфликт записи открытого документа блокирует перенос", async () => {
     const { editors } = await import("./editors.svelte");
     vi.spyOn(editors, "flush").mockResolvedValue([{ project: project.path, path: "docs/a/x.md" } as never]);
@@ -241,7 +268,6 @@ describe("операции с файлами и папками", () => {
     expect(entries.error).toContain("несохранённые правки");
   });
 
-
   it("смена проекта во время записи буферов отменяет перенос", async () => {
     const { editors } = await import("./editors.svelte");
     vi.spyOn(editors, "flush").mockImplementation(async () => { app.current = "C:/Другой"; return []; });
@@ -250,6 +276,4 @@ describe("операции с файлами и папками", () => {
     expect(api.entryMove).not.toHaveBeenCalled();
     expect(entries.error).toContain("Проект изменился");
   });
-
-
 });

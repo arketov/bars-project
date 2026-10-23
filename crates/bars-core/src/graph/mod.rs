@@ -10,3 +10,4 @@ pub mod retrieval;
 pub mod similarity;
 pub use bars_graph::*;
 pub use build::build_index_graph;
+pub use build::build_index_graph_layer;

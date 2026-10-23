@@ -1,4 +1,4 @@
-//! Ошибки протокола: стандартные коды JSON-RPC и девять ошибок bars (`docs/architecture/protocol.md`).
+//! Ошибки протокола: стандартные коды JSON-RPC и ошибки bars (`docs/architecture/protocol.md`).
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
@@ -35,10 +35,12 @@ pub enum ErrorKind {
     CursorMismatch,
     Cancelled,
     ChunkNotFound,
+    StaleRevision,
+    StaleCursor,
 }
 
 impl ErrorKind {
-    pub const ALL: [ErrorKind; 16] = [
+    pub const ALL: [ErrorKind; 18] = [
         ErrorKind::ProtocolMismatch,
         ErrorKind::ProjectNotFound,
         ErrorKind::ProjectUnavailable,
@@ -55,6 +57,8 @@ impl ErrorKind {
         ErrorKind::CursorMismatch,
         ErrorKind::Cancelled,
         ErrorKind::ChunkNotFound,
+        ErrorKind::StaleRevision,
+        ErrorKind::StaleCursor,
     ];
 
     pub fn code(self) -> i32 {
@@ -75,6 +79,8 @@ impl ErrorKind {
             ErrorKind::CursorMismatch => -32014,
             ErrorKind::Cancelled => -32015,
             ErrorKind::ChunkNotFound => -32016,
+            ErrorKind::StaleRevision => -32017,
+            ErrorKind::StaleCursor => -32018,
         }
     }
 
@@ -97,6 +103,8 @@ impl ErrorKind {
             ErrorKind::CursorMismatch => "cursor_mismatch",
             ErrorKind::Cancelled => "cancelled",
             ErrorKind::ChunkNotFound => "chunk_not_found",
+            ErrorKind::StaleRevision => "stale_revision",
+            ErrorKind::StaleCursor => "stale_cursor",
         }
     }
 
@@ -188,7 +196,10 @@ mod tests {
             (-32014, "cursor_mismatch"),
             (-32015, "cancelled"),
             (-32016, "chunk_not_found"),
+            (-32017, "stale_revision"),
+            (-32018, "stale_cursor"),
         ];
+        assert_eq!(expected.len(), ErrorKind::ALL.len());
         for (kind, (code, name)) in ErrorKind::ALL.into_iter().zip(expected) {
             assert_eq!((kind.code(), kind.name()), (code, name));
             assert_eq!(ErrorKind::from_code(code), Some(kind));

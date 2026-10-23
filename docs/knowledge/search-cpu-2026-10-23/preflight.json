@@ -1,0 +1,14 @@
+{
+  "recordedAt": "2026-10-23T14:35:41.8839684+05:00",
+  "memory": {
+    "AvailableMBytes": 9833,
+    "CommittedBytes": 69745098752,
+    "CommitLimit": 74379010048
+  },
+  "cpu": {
+    "Name": "11th Gen Intel(R) Core(TM) i7-11700KF @ 3.60GHz",
+    "NumberOfCores": 8,
+    "NumberOfLogicalProcessors": 16
+  },
+  "temp": "C:\\Users\\arketov\\AppData\\Local\\Temp\\bars-search-cpu-01a1680e"
+}

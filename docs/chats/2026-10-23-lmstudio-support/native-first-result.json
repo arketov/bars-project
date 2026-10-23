@@ -1,0 +1,8 @@
+{
+  "success": false,
+  "checks": [
+    "LM Studio только в embed"
+  ],
+  "error": "TypeError: Cannot read properties of null (reading 'textContent')",
+  "stack": "TypeError: Cannot read properties of null (reading 'textContent')\n    at <anonymous>:19:18"
+}

@@ -1,0 +1,3129 @@
+{
+ "modes": {
+  "qwen4-auto": {
+   "fingerprint": "ModelFingerprint { source: \"builtin\", model: \"Qwen/Qwen3-Embedding-4B@gguf-q4_k_m-4ea06f44bb1a3be5\", dim: 2560, doc_prefix: \"\" }",
+   "execution": "ExecutionInfo { backend: \"llama.cpp\", actual: Some(\"vulkan\"), fallback_reason: None, precision: Some(\"q4_k_m\"), revision: Some(\"f4602530db1d980e16da9d7d3a70294cf5c190be\") }",
+   "seconds": 9.11,
+   "noiseVsFirst": {
+    "maxAbs": 0,
+    "meanAbs": 0,
+    "pairs": 3664
+   },
+   "counts": {
+    "dev": {
+     "different:ordinary": 7942,
+     "same:paraphrase": 29,
+     "same:keywords": 7,
+     "guard:negation": 9,
+     "guard:identifier": 9,
+     "guard:number": 5
+    },
+    "test": {
+     "different:ordinary": 4610,
+     "same:paraphrase": 28,
+     "guard:negation": 5,
+     "same:keywords": 4,
+     "guard:entity": 1,
+     "guard:number": 4,
+     "guard:identifier": 4
+    }
+   },
+   "stats": {
+    "dev": {
+     "same_paraphrase": {
+      "n": 29,
+      "min": 0.5857,
+      "p05": 0.683,
+      "p50": 0.8521,
+      "p95": 0.976,
+      "p99": 0.9787,
+      "max": 0.9787
+     },
+     "same_keywords": {
+      "n": 7,
+      "min": 0.6754,
+      "p05": 0.6754,
+      "p50": 0.8826,
+      "p95": 0.9264,
+      "p99": 0.9264,
+      "max": 0.9264
+     },
+     "different_ordinary": {
+      "n": 7942,
+      "min": 0.1286,
+      "p05": 0.2179,
+      "p50": 0.305,
+      "p95": 0.4613,
+      "p99": 0.5551,
+      "max": 0.7211
+     },
+     "guard_negation": {
+      "n": 9,
+      "min": 0.8512,
+      "p05": 0.8512,
+      "p50": 0.9352,
+      "p95": 0.9717,
+      "p99": 0.9717,
+      "max": 0.9717
+     },
+     "guard_number": {
+      "n": 5,
+      "min": 0.8515,
+      "p05": 0.8515,
+      "p50": 0.941,
+      "p95": 0.9722,
+      "p99": 0.9722,
+      "max": 0.9722
+     },
+     "guard_identifier": {
+      "n": 9,
+      "min": 0.632,
+      "p05": 0.632,
+      "p50": 0.9018,
+      "p95": 0.9419,
+      "p99": 0.9419,
+      "max": 0.9419
+     },
+     "guard_entity": {
+      "n": 0,
+      "min": null,
+      "p05": null,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "max": null
+     }
+    },
+    "test": {
+     "same_paraphrase": {
+      "n": 28,
+      "min": 0.781,
+      "p05": 0.8237,
+      "p50": 0.9103,
+      "p95": 0.9781,
+      "p99": 0.9882,
+      "max": 0.9882
+     },
+     "same_keywords": {
+      "n": 4,
+      "min": 0.7135,
+      "p05": 0.7135,
+      "p50": 0.7385,
+      "p95": 0.8682,
+      "p99": 0.8682,
+      "max": 0.8682
+     },
+     "different_ordinary": {
+      "n": 4610,
+      "min": 0.127,
+      "p05": 0.2039,
+      "p50": 0.2992,
+      "p95": 0.4677,
+      "p99": 0.5681,
+      "max": 0.7982
+     },
+     "guard_negation": {
+      "n": 5,
+      "min": 0.8065,
+      "p05": 0.8065,
+      "p50": 0.9204,
+      "p95": 0.9733,
+      "p99": 0.9733,
+      "max": 0.9733
+     },
+     "guard_number": {
+      "n": 4,
+      "min": 0.7615,
+      "p05": 0.7615,
+      "p50": 0.79,
+      "p95": 0.9949,
+      "p99": 0.9949,
+      "max": 0.9949
+     },
+     "guard_identifier": {
+      "n": 4,
+      "min": 0.6959,
+      "p05": 0.6959,
+      "p50": 0.7798,
+      "p95": 0.8004,
+      "p99": 0.8004,
+      "max": 0.8004
+     },
+     "guard_entity": {
+      "n": 1,
+      "min": 0.7656,
+      "p05": 0.7656,
+      "p50": 0.7656,
+      "p95": 0.7656,
+      "p99": 0.7656,
+      "max": 0.7656
+     }
+    }
+   },
+   "curve": {
+    "dev": [
+     {
+      "threshold": 0.5,
+      "same": 36,
+      "mergedSame": 36,
+      "recall": 1,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 1,
+      "ordinary": 7942,
+      "falseMerges": 228,
+      "falseMergesAfterCheck": 169,
+      "guard": 23,
+      "guardMerged": 23,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.51,
+      "same": 36,
+      "mergedSame": 36,
+      "recall": 1,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 1,
+      "ordinary": 7942,
+      "falseMerges": 195,
+      "falseMergesAfterCheck": 145,
+      "guard": 23,
+      "guardMerged": 23,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.52,
+      "same": 36,
+      "mergedSame": 36,
+      "recall": 1,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 1,
+      "ordinary": 7942,
+      "falseMerges": 161,
+      "falseMergesAfterCheck": 121,
+      "guard": 23,
+      "guardMerged": 23,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.53,
+      "same": 36,
+      "mergedSame": 36,
+      "recall": 1,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 1,
+      "ordinary": 7942,
+      "falseMerges": 123,
+      "falseMergesAfterCheck": 92,
+      "guard": 23,
+      "guardMerged": 23,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.54,
+      "same": 36,
+      "mergedSame": 36,
+      "recall": 1,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 1,
+      "ordinary": 7942,
+      "falseMerges": 108,
+      "falseMergesAfterCheck": 79,
+      "guard": 23,
+      "guardMerged": 23,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.55,
+      "same": 36,
+      "mergedSame": 36,
+      "recall": 1,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 1,
+      "ordinary": 7942,
+      "falseMerges": 85,
+      "falseMergesAfterCheck": 62,
+      "guard": 23,
+      "guardMerged": 23,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.56,
+      "same": 36,
+      "mergedSame": 36,
+      "recall": 1,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 1,
+      "ordinary": 7942,
+      "falseMerges": 71,
+      "falseMergesAfterCheck": 53,
+      "guard": 23,
+      "guardMerged": 23,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.57,
+      "same": 36,
+      "mergedSame": 36,
+      "recall": 1,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 1,
+      "ordinary": 7942,
+      "falseMerges": 62,
+      "falseMergesAfterCheck": 48,
+      "guard": 23,
+      "guardMerged": 23,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.58,
+      "same": 36,
+      "mergedSame": 36,
+      "recall": 1,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 1,
+      "ordinary": 7942,
+      "falseMerges": 51,
+      "falseMergesAfterCheck": 38,
+      "guard": 23,
+      "guardMerged": 23,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.59,
+      "same": 36,
+      "mergedSame": 35,
+      "recall": 0.9722,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.9722,
+      "ordinary": 7942,
+      "falseMerges": 44,
+      "falseMergesAfterCheck": 32,
+      "guard": 23,
+      "guardMerged": 23,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.6,
+      "same": 36,
+      "mergedSame": 35,
+      "recall": 0.9722,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.9722,
+      "ordinary": 7942,
+      "falseMerges": 39,
+      "falseMergesAfterCheck": 28,
+      "guard": 23,
+      "guardMerged": 23,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.61,
+      "same": 36,
+      "mergedSame": 35,
+      "recall": 0.9722,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.9722,
+      "ordinary": 7942,
+      "falseMerges": 29,
+      "falseMergesAfterCheck": 20,
+      "guard": 23,
+      "guardMerged": 23,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.62,
+      "same": 36,
+      "mergedSame": 35,
+      "recall": 0.9722,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.9722,
+      "ordinary": 7942,
+      "falseMerges": 27,
+      "falseMergesAfterCheck": 18,
+      "guard": 23,
+      "guardMerged": 23,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.63,
+      "same": 36,
+      "mergedSame": 35,
+      "recall": 0.9722,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.9722,
+      "ordinary": 7942,
+      "falseMerges": 22,
+      "falseMergesAfterCheck": 14,
+      "guard": 23,
+      "guardMerged": 23,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.64,
+      "same": 36,
+      "mergedSame": 35,
+      "recall": 0.9722,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.9722,
+      "ordinary": 7942,
+      "falseMerges": 20,
+      "falseMergesAfterCheck": 13,
+      "guard": 23,
+      "guardMerged": 22,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.65,
+      "same": 36,
+      "mergedSame": 35,
+      "recall": 0.9722,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.9722,
+      "ordinary": 7942,
+      "falseMerges": 18,
+      "falseMergesAfterCheck": 11,
+      "guard": 23,
+      "guardMerged": 22,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.66,
+      "same": 36,
+      "mergedSame": 35,
+      "recall": 0.9722,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.9722,
+      "ordinary": 7942,
+      "falseMerges": 13,
+      "falseMergesAfterCheck": 9,
+      "guard": 23,
+      "guardMerged": 22,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.67,
+      "same": 36,
+      "mergedSame": 35,
+      "recall": 0.9722,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.9722,
+      "ordinary": 7942,
+      "falseMerges": 8,
+      "falseMergesAfterCheck": 4,
+      "guard": 23,
+      "guardMerged": 22,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.68,
+      "same": 36,
+      "mergedSame": 34,
+      "recall": 0.9444,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.9444,
+      "ordinary": 7942,
+      "falseMerges": 7,
+      "falseMergesAfterCheck": 3,
+      "guard": 23,
+      "guardMerged": 22,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.69,
+      "same": 36,
+      "mergedSame": 33,
+      "recall": 0.9167,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.9167,
+      "ordinary": 7942,
+      "falseMerges": 4,
+      "falseMergesAfterCheck": 2,
+      "guard": 23,
+      "guardMerged": 22,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.7,
+      "same": 36,
+      "mergedSame": 32,
+      "recall": 0.8889,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.8889,
+      "ordinary": 7942,
+      "falseMerges": 3,
+      "falseMergesAfterCheck": 1,
+      "guard": 23,
+      "guardMerged": 22,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.71,
+      "same": 36,
+      "mergedSame": 32,
+      "recall": 0.8889,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.8889,
+      "ordinary": 7942,
+      "falseMerges": 2,
+      "falseMergesAfterCheck": 1,
+      "guard": 23,
+      "guardMerged": 22,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.72,
+      "same": 36,
+      "mergedSame": 32,
+      "recall": 0.8889,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.8889,
+      "ordinary": 7942,
+      "falseMerges": 1,
+      "falseMergesAfterCheck": 1,
+      "guard": 23,
+      "guardMerged": 22,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.73,
+      "same": 36,
+      "mergedSame": 32,
+      "recall": 0.8889,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.8889,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 22,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.74,
+      "same": 36,
+      "mergedSame": 32,
+      "recall": 0.8889,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.8889,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 22,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.75,
+      "same": 36,
+      "mergedSame": 32,
+      "recall": 0.8889,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.8889,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 22,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.76,
+      "same": 36,
+      "mergedSame": 32,
+      "recall": 0.8889,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.8889,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 21,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.77,
+      "same": 36,
+      "mergedSame": 31,
+      "recall": 0.8611,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.8611,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 21,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.78,
+      "same": 36,
+      "mergedSame": 30,
+      "recall": 0.8333,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.8333,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 21,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.79,
+      "same": 36,
+      "mergedSame": 30,
+      "recall": 0.8333,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.8333,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 21,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.8,
+      "same": 36,
+      "mergedSame": 28,
+      "recall": 0.7778,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.7778,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 21,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.81,
+      "same": 36,
+      "mergedSame": 28,
+      "recall": 0.7778,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.7778,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 21,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.82,
+      "same": 36,
+      "mergedSame": 28,
+      "recall": 0.7778,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.7778,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 20,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.83,
+      "same": 36,
+      "mergedSame": 25,
+      "recall": 0.6944,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.6944,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 20,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.84,
+      "same": 36,
+      "mergedSame": 22,
+      "recall": 0.6111,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.6111,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 20,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.85,
+      "same": 36,
+      "mergedSame": 21,
+      "recall": 0.5833,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.5833,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 20,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.86,
+      "same": 36,
+      "mergedSame": 18,
+      "recall": 0.5,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.5,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 18,
+      "guardMergedAfterCheck": 5,
+      "escapes": {
+       "negation": 5
+      }
+     },
+     {
+      "threshold": 0.87,
+      "same": 36,
+      "mergedSame": 18,
+      "recall": 0.5,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.5,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 17,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.88,
+      "same": 36,
+      "mergedSame": 14,
+      "recall": 0.3889,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.3889,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 17,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.89,
+      "same": 36,
+      "mergedSame": 12,
+      "recall": 0.3333,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.3333,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 16,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.9,
+      "same": 36,
+      "mergedSame": 12,
+      "recall": 0.3333,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.3333,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 3,
+      "escapes": {
+       "negation": 3
+      }
+     },
+     {
+      "threshold": 0.91,
+      "same": 36,
+      "mergedSame": 10,
+      "recall": 0.2778,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.2778,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 12,
+      "guardMergedAfterCheck": 2,
+      "escapes": {
+       "negation": 2
+      }
+     },
+     {
+      "threshold": 0.92,
+      "same": 36,
+      "mergedSame": 10,
+      "recall": 0.2778,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.2778,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 11,
+      "guardMergedAfterCheck": 2,
+      "escapes": {
+       "negation": 2
+      }
+     },
+     {
+      "threshold": 0.93,
+      "same": 36,
+      "mergedSame": 7,
+      "recall": 0.1944,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.1944,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 11,
+      "guardMergedAfterCheck": 2,
+      "escapes": {
+       "negation": 2
+      }
+     },
+     {
+      "threshold": 0.94,
+      "same": 36,
+      "mergedSame": 7,
+      "recall": 0.1944,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.1944,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 8,
+      "guardMergedAfterCheck": 2,
+      "escapes": {
+       "negation": 2
+      }
+     },
+     {
+      "threshold": 0.95,
+      "same": 36,
+      "mergedSame": 7,
+      "recall": 0.1944,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.1944,
+      "ordinary": 7942,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 23,
+      "guardMerged": 4,
+      "guardMergedAfterCheck": 1,
+      "escapes": {
+       "negation": 1
+      }
+     }
+    ],
+    "test": [
+     {
+      "threshold": 0.5,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 143,
+      "falseMergesAfterCheck": 82,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.51,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 119,
+      "falseMergesAfterCheck": 70,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.52,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 101,
+      "falseMergesAfterCheck": 62,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.53,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 88,
+      "falseMergesAfterCheck": 55,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.54,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 71,
+      "falseMergesAfterCheck": 43,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.55,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 59,
+      "falseMergesAfterCheck": 39,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.56,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 52,
+      "falseMergesAfterCheck": 37,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.57,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 46,
+      "falseMergesAfterCheck": 34,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.58,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 39,
+      "falseMergesAfterCheck": 29,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.59,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 33,
+      "falseMergesAfterCheck": 24,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.6,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 25,
+      "falseMergesAfterCheck": 20,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.61,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 21,
+      "falseMergesAfterCheck": 18,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.62,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 18,
+      "falseMergesAfterCheck": 18,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.63,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 17,
+      "falseMergesAfterCheck": 17,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.64,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 16,
+      "falseMergesAfterCheck": 16,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.65,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 12,
+      "falseMergesAfterCheck": 12,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.66,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 11,
+      "falseMergesAfterCheck": 11,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.67,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 7,
+      "falseMergesAfterCheck": 7,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.68,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 7,
+      "falseMergesAfterCheck": 7,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.69,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 7,
+      "falseMergesAfterCheck": 7,
+      "guard": 14,
+      "guardMerged": 14,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.7,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 6,
+      "falseMergesAfterCheck": 6,
+      "guard": 14,
+      "guardMerged": 13,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.71,
+      "same": 32,
+      "mergedSame": 32,
+      "recall": 1,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9688,
+      "ordinary": 4610,
+      "falseMerges": 5,
+      "falseMergesAfterCheck": 5,
+      "guard": 14,
+      "guardMerged": 13,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.72,
+      "same": 32,
+      "mergedSame": 31,
+      "recall": 0.9688,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9375,
+      "ordinary": 4610,
+      "falseMerges": 5,
+      "falseMergesAfterCheck": 5,
+      "guard": 14,
+      "guardMerged": 13,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.73,
+      "same": 32,
+      "mergedSame": 31,
+      "recall": 0.9688,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9375,
+      "ordinary": 4610,
+      "falseMerges": 4,
+      "falseMergesAfterCheck": 4,
+      "guard": 14,
+      "guardMerged": 13,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.74,
+      "same": 32,
+      "mergedSame": 30,
+      "recall": 0.9375,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9063,
+      "ordinary": 4610,
+      "falseMerges": 4,
+      "falseMergesAfterCheck": 4,
+      "guard": 14,
+      "guardMerged": 13,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.75,
+      "same": 32,
+      "mergedSame": 30,
+      "recall": 0.9375,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9063,
+      "ordinary": 4610,
+      "falseMerges": 4,
+      "falseMergesAfterCheck": 4,
+      "guard": 14,
+      "guardMerged": 13,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.76,
+      "same": 32,
+      "mergedSame": 30,
+      "recall": 0.9375,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9063,
+      "ordinary": 4610,
+      "falseMerges": 3,
+      "falseMergesAfterCheck": 3,
+      "guard": 14,
+      "guardMerged": 13,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.77,
+      "same": 32,
+      "mergedSame": 30,
+      "recall": 0.9375,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9063,
+      "ordinary": 4610,
+      "falseMerges": 1,
+      "falseMergesAfterCheck": 1,
+      "guard": 14,
+      "guardMerged": 11,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.78,
+      "same": 32,
+      "mergedSame": 30,
+      "recall": 0.9375,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.9063,
+      "ordinary": 4610,
+      "falseMerges": 1,
+      "falseMergesAfterCheck": 1,
+      "guard": 14,
+      "guardMerged": 10,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.79,
+      "same": 32,
+      "mergedSame": 29,
+      "recall": 0.9063,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.875,
+      "ordinary": 4610,
+      "falseMerges": 1,
+      "falseMergesAfterCheck": 1,
+      "guard": 14,
+      "guardMerged": 9,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.8,
+      "same": 32,
+      "mergedSame": 29,
+      "recall": 0.9063,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.875,
+      "ordinary": 4610,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 14,
+      "guardMerged": 8,
+      "guardMergedAfterCheck": 4,
+      "escapes": {
+       "negation": 4
+      }
+     },
+     {
+      "threshold": 0.81,
+      "same": 32,
+      "mergedSame": 29,
+      "recall": 0.9063,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.875,
+      "ordinary": 4610,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 14,
+      "guardMerged": 6,
+      "guardMergedAfterCheck": 3,
+      "escapes": {
+       "negation": 3
+      }
+     },
+     {
+      "threshold": 0.82,
+      "same": 32,
+      "mergedSame": 29,
+      "recall": 0.9063,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.875,
+      "ordinary": 4610,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 14,
+      "guardMerged": 6,
+      "guardMergedAfterCheck": 3,
+      "escapes": {
+       "negation": 3
+      }
+     },
+     {
+      "threshold": 0.83,
+      "same": 32,
+      "mergedSame": 28,
+      "recall": 0.875,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.8438,
+      "ordinary": 4610,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 14,
+      "guardMerged": 6,
+      "guardMergedAfterCheck": 3,
+      "escapes": {
+       "negation": 3
+      }
+     },
+     {
+      "threshold": 0.84,
+      "same": 32,
+      "mergedSame": 28,
+      "recall": 0.875,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.8438,
+      "ordinary": 4610,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 14,
+      "guardMerged": 6,
+      "guardMergedAfterCheck": 3,
+      "escapes": {
+       "negation": 3
+      }
+     },
+     {
+      "threshold": 0.85,
+      "same": 32,
+      "mergedSame": 26,
+      "recall": 0.8125,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.7813,
+      "ordinary": 4610,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 14,
+      "guardMerged": 6,
+      "guardMergedAfterCheck": 3,
+      "escapes": {
+       "negation": 3
+      }
+     },
+     {
+      "threshold": 0.86,
+      "same": 32,
+      "mergedSame": 26,
+      "recall": 0.8125,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.7813,
+      "ordinary": 4610,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 14,
+      "guardMerged": 6,
+      "guardMergedAfterCheck": 3,
+      "escapes": {
+       "negation": 3
+      }
+     },
+     {
+      "threshold": 0.87,
+      "same": 32,
+      "mergedSame": 22,
+      "recall": 0.6875,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.6563,
+      "ordinary": 4610,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 14,
+      "guardMerged": 6,
+      "guardMergedAfterCheck": 3,
+      "escapes": {
+       "negation": 3
+      }
+     },
+     {
+      "threshold": 0.88,
+      "same": 32,
+      "mergedSame": 21,
+      "recall": 0.6563,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.625,
+      "ordinary": 4610,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 14,
+      "guardMerged": 6,
+      "guardMergedAfterCheck": 3,
+      "escapes": {
+       "negation": 3
+      }
+     },
+     {
+      "threshold": 0.89,
+      "same": 32,
+      "mergedSame": 18,
+      "recall": 0.5625,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.5313,
+      "ordinary": 4610,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 14,
+      "guardMerged": 6,
+      "guardMergedAfterCheck": 3,
+      "escapes": {
+       "negation": 3
+      }
+     },
+     {
+      "threshold": 0.9,
+      "same": 32,
+      "mergedSame": 18,
+      "recall": 0.5625,
+      "sameBlockedByCheck": 1,
+      "recallWithChecks": 0.5313,
+      "ordinary": 4610,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 14,
+      "guardMerged": 6,
+      "guardMergedAfterCheck": 3,
+      "escapes": {
+       "negation": 3
+      }
+     },
+     {
+      "threshold": 0.91,
+      "same": 32,
+      "mergedSame": 15,
+      "recall": 0.4688,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.4688,
+      "ordinary": 4610,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 14,
+      "guardMerged": 5,
+      "guardMergedAfterCheck": 2,
+      "escapes": {
+       "negation": 2
+      }
+     },
+     {
+      "threshold": 0.92,
+      "same": 32,
+      "mergedSame": 10,
+      "recall": 0.3125,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.3125,
+      "ordinary": 4610,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 14,
+      "guardMerged": 5,
+      "guardMergedAfterCheck": 2,
+      "escapes": {
+       "negation": 2
+      }
+     },
+     {
+      "threshold": 0.93,
+      "same": 32,
+      "mergedSame": 9,
+      "recall": 0.2813,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.2813,
+      "ordinary": 4610,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 14,
+      "guardMerged": 3,
+      "guardMergedAfterCheck": 2,
+      "escapes": {
+       "negation": 2
+      }
+     },
+     {
+      "threshold": 0.94,
+      "same": 32,
+      "mergedSame": 8,
+      "recall": 0.25,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.25,
+      "ordinary": 4610,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 14,
+      "guardMerged": 2,
+      "guardMergedAfterCheck": 1,
+      "escapes": {
+       "negation": 1
+      }
+     },
+     {
+      "threshold": 0.95,
+      "same": 32,
+      "mergedSame": 6,
+      "recall": 0.1875,
+      "sameBlockedByCheck": 0,
+      "recallWithChecks": 0.1875,
+      "ordinary": 4610,
+      "falseMerges": 0,
+      "falseMergesAfterCheck": 0,
+      "guard": 14,
+      "guardMerged": 2,
+      "guardMergedAfterCheck": 1,
+      "escapes": {
+       "negation": 1
+      }
+     }
+    ]
+   },
+   "review": {
+    "dev": {
+     "closestDifferent": [
+      {
+       "cos": 0.7211,
+       "a": "Как вычисляется количество мест для ботов с учётом людей и резерва?",
+       "b": "Где задано правило, что уже присутствующие люди занимают резерв мест?",
+       "groups": [
+        "od-011",
+        "od-045"
+       ],
+       "indexes": [
+        10,
+        44
+       ]
+      },
+      {
+       "cos": 0.7184,
+       "a": "При каких значениях heartbeat_qpc OD_LEASE_TIMEOUT_SECONDS не продлевается?",
+       "b": "Где задано значение OD_LEASE_TIMEOUT_SECONDS?",
+       "groups": [
+        "od-026",
+        "g-d18a"
+       ],
+       "indexes": [
+        124,
+        197
+       ]
+      },
+      {
+       "cos": 0.7034,
+       "a": "При каких значениях heartbeat_qpc OD_LEASE_TIMEOUT_SECONDS не продлевается?",
+       "b": "Где задано значение OD_LEASE_RENEW_SECONDS?",
+       "groups": [
+        "od-026",
+        "g-d18b"
+       ],
+       "indexes": [
+        124,
+        198
+       ]
+      },
+      {
+       "cos": 0.6932,
+       "a": "Какие шаги обеспечивают согласованность настроек и новой модели при смене папки?",
+       "b": "Если новую папку не получилось записать в настройки, прежняя продолжит использоваться?",
+       "groups": [
+        "od-044",
+        "od-005"
+       ],
+       "indexes": [
+        43,
+        104
+       ]
+      },
+      {
+       "cos": 0.6888,
+       "a": "Если новую папку не получилось записать в настройки, прежняя продолжит использоваться?",
+       "b": "Какие действия синхронизируют настройки и новую модель при переключении папки?",
+       "groups": [
+        "od-005",
+        "od-044"
+       ],
+       "indexes": [
+        104,
+        133
+       ]
+      },
+      {
+       "cos": 0.686,
+       "a": "Какие поля метаданных исполняемого файла входят в идентичность кэша CSP?",
+       "b": "В каких условиях CspCacheIdentity.Align не меняет дату EXE?",
+       "groups": [
+        "od-047",
+        "od-029"
+       ],
+       "indexes": [
+        46,
+        126
+       ]
+      },
+      {
+       "cos": 0.6842,
+       "a": "Когда CspCacheIdentity.Align отказывается менять дату EXE?",
+       "b": "Какие поля метаданных исполняемого файла входят в идентичность кэша CSP?",
+       "groups": [
+        "od-029",
+        "od-047"
+       ],
+       "indexes": [
+        28,
+        46
+       ]
+      },
+      {
+       "cos": 0.6792,
+       "a": "Сколько максимум нужно ждать повторного входа после падения предыдущего клиента?",
+       "b": "Есть ли тестовое подтверждение, за какое время сервер освобождает слот после убитого клиента?",
+       "groups": [
+        "od-010",
+        "od-035"
+       ],
+       "indexes": [
+        9,
+        130
+       ]
+      },
+      {
+       "cos": 0.6698,
+       "a": "Как откатывается выбор папки, если окно не приняло уже открытую модель?",
+       "b": "Какие действия синхронизируют настройки и новую модель при переключении папки?",
+       "groups": [
+        "od-032",
+        "od-044"
+       ],
+       "indexes": [
+        31,
+        133
+       ]
+      },
+      {
+       "cos": 0.6658,
+       "a": "Если новую папку не получилось записать в настройки, прежняя продолжит использоваться?",
+       "b": "Что происходит, когда сохранение настроек не удалось?",
+       "groups": [
+        "od-005",
+        "g-d02b"
+       ],
+       "indexes": [
+        104,
+        171
+       ]
+      },
+      {
+       "cos": 0.6646,
+       "a": "Отключатся ли боты при сбое сохранения во время закрытия приложения?",
+       "b": "Что не даёт боту подключиться заново в промежутке между отключением и загрузкой нового состава?",
+       "groups": [
+        "od-006",
+        "od-007"
+       ],
+       "indexes": [
+        105,
+        106
+       ]
+      },
+      {
+       "cos": 0.6636,
+       "a": "Как исключено новое подключение между отключением ботов и загрузкой другого состава?",
+       "b": "Будут ли боты отключены, если сохранение перед выходом завершилось успешно?",
+       "groups": [
+        "od-007",
+        "g-d03b"
+       ],
+       "indexes": [
+        6,
+        172
+       ]
+      }
+     ],
+     "farthestSame": [
+      {
+       "cos": 0.5857,
+       "a": "Кто решает, в какой раскраске окажется машина после подключения?",
+       "b": "Что определяет скин автомобиля бота после входа на сервер?",
+       "groups": [
+        "od-001",
+        "od-001"
+       ],
+       "indexes": [
+        0,
+        100
+       ]
+      },
+      {
+       "cos": 0.6754,
+       "a": "Что произойдёт с движущимся ботом, когда менеджер перестанет посылать сигнал жизни?",
+       "b": "едущий бот менеджер перестал присылать heartbeat",
+       "groups": [
+        "od-014",
+        "od-014"
+       ],
+       "indexes": [
+        13,
+        113
+       ]
+      },
+      {
+       "cos": 0.683,
+       "a": "Как выяснить, из какого пути управления произошёл перенос машины в бокс?",
+       "b": "Как определить, каким путём управления машину отправили в пит?",
+       "groups": [
+        "od-015",
+        "od-015"
+       ],
+       "indexes": [
+        14,
+        114
+       ]
+      },
+      {
+       "cos": 0.6974,
+       "a": "Останется ли старый каталог рабочим, если новый путь не удалось сохранить?",
+       "b": "Если новую папку не получилось записать в настройки, прежняя продолжит использоваться?",
+       "groups": [
+        "od-005",
+        "od-005"
+       ],
+       "indexes": [
+        4,
+        104
+       ]
+      },
+      {
+       "cos": 0.7602,
+       "a": "Можно ли молча подключиться без пароля, если защищённый пароль перестал читаться?",
+       "b": "Подключится ли программа без пароля тихо, когда зашифрованный пароль не удаётся прочитать?",
+       "groups": [
+        "od-009",
+        "od-009"
+       ],
+       "indexes": [
+        8,
+        108
+       ]
+      },
+      {
+       "cos": 0.7798,
+       "a": "Одинаково ли выбирается направление прибытия для сопровождения и атаки игрока?",
+       "b": "Совпадает ли способ выбора стороны подъезда у режимов эскорта и атаки на игрока?",
+       "groups": [
+        "od-012",
+        "od-012"
+       ],
+       "indexes": [
+        11,
+        111
+       ]
+      },
+      {
+       "cos": 0.7917,
+       "a": "Почему у бота меняются фотографии автомобиля, хотя выбор машины остаётся прежним?",
+       "b": "Из-за чего превью машины бота подменяется, если саму машину не меняли?",
+       "groups": [
+        "od-002",
+        "od-002"
+       ],
+       "indexes": [
+        1,
+        101
+       ]
+      },
+      {
+       "cos": 0.7939,
+       "a": "Как вычисляется количество мест для ботов с учётом людей и резерва?",
+       "b": "По какой формуле считается число слотов под ботов при живых игроках и резерве?",
+       "groups": [
+        "od-011",
+        "od-011"
+       ],
+       "indexes": [
+        10,
+        110
+       ]
+      },
+      {
+       "cos": 0.8243,
+       "a": "Чем неудача повторного подключения отличается от неудачной очистки при отключении?",
+       "b": "В чём разница между сбоем реконнекта и сбоем очистки при отключении?",
+       "groups": [
+        "od-033",
+        "od-033"
+       ],
+       "indexes": [
+        32,
+        128
+       ]
+      },
+      {
+       "cos": 0.826,
+       "a": "Как построение пути учитывает другие машины на трассе?",
+       "b": "Каким образом планировщик маршрута принимает во внимание чужие автомобили на трассе?",
+       "groups": [
+        "od-013",
+        "od-013"
+       ],
+       "indexes": [
+        12,
+        112
+       ]
+      },
+      {
+       "cos": 0.8277,
+       "a": "Как менеджер продлевает аренду команд и что делает истечение срока?",
+       "b": "аренда команд менеджер истечение срока lease",
+       "groups": [
+        "od-046",
+        "od-046"
+       ],
+       "indexes": [
+        45,
+        134
+       ]
+      },
+      {
+       "cos": 0.8344,
+       "a": "Выбор единственной свободной модели в первой строке — серверная бронь или только распределение окна?",
+       "b": "Когда в первой строке автоматически выбрана единственная свободная модель, это резерв на сервере или лишь раскладка в окне?",
+       "groups": [
+        "od-031",
+        "od-031"
+       ],
+       "indexes": [
+        30,
+        127
+       ]
+      }
+     ],
+     "guards": [
+      {
+       "cos": 0.9722,
+       "a": "Какие поля обязательны в installation.json схемы 2?",
+       "b": "Какие поля обязательны в installation.json схемы 3?",
+       "groups": [
+        "g-d10a",
+        "g-d10b"
+       ],
+       "indexes": [
+        184,
+        185
+       ],
+       "kind": "guard:number",
+       "check": [
+        "identifier"
+       ]
+      },
+      {
+       "cos": 0.9717,
+       "a": "Продолжается ли анимация миниатюр в свёрнутом окне?",
+       "b": "Останавливается ли анимация миниатюр в свёрнутом окне?",
+       "groups": [
+        "od-003",
+        "g-d04b"
+       ],
+       "indexes": [
+        2,
+        173
+       ],
+       "kind": "guard:negation",
+       "check": []
+      },
+      {
+       "cos": 0.9587,
+       "a": "Будут ли боты отключены, если сохранение перед выходом завершилось ошибкой?",
+       "b": "Будут ли боты отключены, если сохранение перед выходом завершилось успешно?",
+       "groups": [
+        "od-006",
+        "g-d03b"
+       ],
+       "indexes": [
+        5,
+        172
+       ],
+       "kind": "guard:negation",
+       "check": [
+        "antonym"
+       ]
+      },
+      {
+       "cos": 0.9525,
+       "a": "Как работает rerank для 15 кандидатов?",
+       "b": "Как работает rerank для 30 кандидатов?",
+       "groups": [
+        "g-d08a",
+        "g-d08b"
+       ],
+       "indexes": [
+        180,
+        181
+       ],
+       "kind": "guard:number",
+       "check": [
+        "identifier"
+       ]
+      },
+      {
+       "cos": 0.9466,
+       "a": "Как запустить бота с подтверждением пароля?",
+       "b": "Как запустить бота без подтверждения пароля?",
+       "groups": [
+        "g-d01a",
+        "g-d01b"
+       ],
+       "indexes": [
+        168,
+        169
+       ],
+       "kind": "guard:negation",
+       "check": []
+      },
+      {
+       "cos": 0.9419,
+       "a": "Что означает ссылка local-dpapi в ServerProfile.PasswordRef?",
+       "b": "Что означает ссылка local-dpapi в ServerProfile.PasswordHash?",
+       "groups": [
+        "od-022",
+        "g-d14b"
+       ],
+       "indexes": [
+        21,
+        191
+       ],
+       "kind": "guard:identifier",
+       "check": [
+        "identifier"
+       ]
+      },
+      {
+       "cos": 0.9417,
+       "a": "Когда CspCacheIdentity.Align отказывается менять дату EXE?",
+       "b": "Когда CspCacheIdentity.Align отказывается менять дату DLL?",
+       "groups": [
+        "od-029",
+        "g-d16b"
+       ],
+       "indexes": [
+        28,
+        194
+       ],
+       "kind": "guard:identifier",
+       "check": [
+        "identifier"
+       ]
+      },
+      {
+       "cos": 0.941,
+       "a": "Что происходит при трёх неудачных попытках подключения?",
+       "b": "Что происходит при пяти неудачных попытках подключения?",
+       "groups": [
+        "g-d09a",
+        "g-d09b"
+       ],
+       "indexes": [
+        182,
+        183
+       ],
+       "kind": "guard:number",
+       "check": [
+        "number"
+       ]
+      },
+      {
+       "cos": 0.9387,
+       "a": "Работает ли поиск при открытом окне?",
+       "b": "Работает ли поиск при закрытом окне?",
+       "groups": [
+        "g-d07a",
+        "g-d07b"
+       ],
+       "indexes": [
+        178,
+        179
+       ],
+       "kind": "guard:negation",
+       "check": [
+        "antonym"
+       ]
+      },
+      {
+       "cos": 0.9352,
+       "a": "Как включить выгрузку моделей по простою?",
+       "b": "Как отключить выгрузку моделей по простою?",
+       "groups": [
+        "g-d06a",
+        "g-d06b"
+       ],
+       "indexes": [
+        176,
+        177
+       ],
+       "kind": "guard:negation",
+       "check": [
+        "antonym"
+       ]
+      },
+      {
+       "cos": 0.9346,
+       "a": "Что значит local-dpapi внутри ServerProfile.PasswordRef?",
+       "b": "Что означает ссылка local-dpapi в ServerProfile.PasswordHash?",
+       "groups": [
+        "od-022",
+        "g-d14b"
+       ],
+       "indexes": [
+        121,
+        191
+       ],
+       "kind": "guard:identifier",
+       "check": [
+        "identifier"
+       ]
+      },
+      {
+       "cos": 0.9129,
+       "a": "В каких условиях CspCacheIdentity.Align не меняет дату EXE?",
+       "b": "Когда CspCacheIdentity.Align отказывается менять дату DLL?",
+       "groups": [
+        "od-029",
+        "g-d16b"
+       ],
+       "indexes": [
+        126,
+        194
+       ],
+       "kind": "guard:identifier",
+       "check": [
+        "identifier"
+       ]
+      },
+      {
+       "cos": 0.9052,
+       "a": "анимация миниатюр когда окно свёрнуто",
+       "b": "Останавливается ли анимация миниатюр в свёрнутом окне?",
+       "groups": [
+        "od-003",
+        "g-d04b"
+       ],
+       "indexes": [
+        102,
+        173
+       ],
+       "kind": "guard:negation",
+       "check": []
+      },
+      {
+       "cos": 0.9018,
+       "a": "Где задано значение OD_LEASE_TIMEOUT_SECONDS?",
+       "b": "Где задано значение OD_LEASE_RENEW_SECONDS?",
+       "groups": [
+        "g-d18a",
+        "g-d18b"
+       ],
+       "indexes": [
+        197,
+        198
+       ],
+       "kind": "guard:identifier",
+       "check": [
+        "identifier"
+       ]
+      },
+      {
+       "cos": 0.8968,
+       "a": "Воркер следит за settings.toml?",
+       "b": "Воркер следит за config.toml?",
+       "groups": [
+        "g-d15a",
+        "g-d15b"
+       ],
+       "indexes": [
+        192,
+        193
+       ],
+       "kind": "guard:identifier",
+       "check": [
+        "identifier"
+       ]
+      },
+      {
+       "cos": 0.8942,
+       "a": "Какие файлы индексируются?",
+       "b": "Какие файлы не индексируются?",
+       "groups": [
+        "g-d05a",
+        "g-d05b"
+       ],
+       "indexes": [
+        174,
+        175
+       ],
+       "kind": "guard:negation",
+       "check": []
+      },
+      {
+       "cos": 0.8843,
+       "a": "Что нового в сборке 0.4.1?",
+       "b": "Что нового в сборке 0.4.2?",
+       "groups": [
+        "g-d12a",
+        "g-d12b"
+       ],
+       "indexes": [
+        188,
+        189
+       ],
+       "kind": "guard:number",
+       "check": [
+        "identifier"
+       ]
+      },
+      {
+       "cos": 0.8601,
+       "a": "Что происходит, когда сохранение настроек прошло успешно?",
+       "b": "Что происходит, когда сохранение настроек не удалось?",
+       "groups": [
+        "g-d02a",
+        "g-d02b"
+       ],
+       "indexes": [
+        170,
+        171
+       ],
+       "kind": "guard:negation",
+       "check": []
+      },
+      {
+       "cos": 0.8515,
+       "a": "Как устроен формат индекса версии 4?",
+       "b": "Как устроен формат индекса версии 5?",
+       "groups": [
+        "g-d11a",
+        "g-d11b"
+       ],
+       "indexes": [
+        186,
+        187
+       ],
+       "kind": "guard:number",
+       "check": [
+        "identifier"
+       ]
+      },
+      {
+       "cos": 0.8512,
+       "a": "Отключатся ли боты при сбое сохранения во время закрытия приложения?",
+       "b": "Будут ли боты отключены, если сохранение перед выходом завершилось успешно?",
+       "groups": [
+        "od-006",
+        "g-d03b"
+       ],
+       "indexes": [
+        105,
+        172
+       ],
+       "kind": "guard:negation",
+       "check": [
+        "antonym"
+       ]
+      },
+      {
+       "cos": 0.8125,
+       "a": "Какие ограничения размера и пути проверяет AcContentCatalog.ReadCar?",
+       "b": "Какие ограничения размера и пути проверяет AcContentCatalog.ReadTrack?",
+       "groups": [
+        "od-019",
+        "g-d13b"
+       ],
+       "indexes": [
+        18,
+        190
+       ],
+       "kind": "guard:identifier",
+       "check": [
+        "identifier"
+       ]
+      },
+      {
+       "cos": 0.7546,
+       "a": "Какие проверки пути и размера делает AcContentCatalog.ReadCar?",
+       "b": "Какие ограничения размера и пути проверяет AcContentCatalog.ReadTrack?",
+       "groups": [
+        "od-019",
+        "g-d13b"
+       ],
+       "indexes": [
+        118,
+        190
+       ],
+       "kind": "guard:identifier",
+       "check": [
+        "identifier"
+       ]
+      },
+      {
+       "cos": 0.632,
+       "a": "Какие параметры принимает bars_rag_search?",
+       "b": "Какие параметры принимает bars_relations?",
+       "groups": [
+        "g-d17a",
+        "g-d17b"
+       ],
+       "indexes": [
+        195,
+        196
+       ],
+       "kind": "guard:identifier",
+       "check": [
+        "identifier"
+       ]
+      }
+     ]
+    },
+    "test": {
+     "closestDifferent": [
+      {
+       "cos": 0.7982,
+       "a": "Как обычное значение агрессии сохраняется под override Police?",
+       "b": "Какое значение агрессии требуется во время Police и откуда принято это решение?",
+       "groups": [
+        "od-067",
+        "od-080"
+       ],
+       "indexes": [
+        66,
+        79
+       ]
+      },
+      {
+       "cos": 0.7665,
+       "a": "Куда откладывается обычная агрессия, пока действует override Police?",
+       "b": "Какая агрессия нужна в режиме Police и на чём основано это решение?",
+       "groups": [
+        "od-067",
+        "od-080"
+       ],
+       "indexes": [
+        154,
+        167
+       ]
+      },
+      {
+       "cos": 0.7635,
+       "a": "Как обычное значение агрессии сохраняется под override Police?",
+       "b": "Какая агрессия нужна в режиме Police и на чём основано это решение?",
+       "groups": [
+        "od-067",
+        "od-080"
+       ],
+       "indexes": [
+        66,
+        167
+       ]
+      },
+      {
+       "cos": 0.7517,
+       "a": "Какое значение агрессии требуется во время Police и откуда принято это решение?",
+       "b": "Куда откладывается обычная агрессия, пока действует override Police?",
+       "groups": [
+        "od-080",
+        "od-067"
+       ],
+       "indexes": [
+        79,
+        154
+       ]
+      },
+      {
+       "cos": 0.7234,
+       "a": "Как проверить, что обычная агрессивность вернулась после выхода из полицейского режима?",
+       "b": "Какая агрессия нужна в режиме Police и на чём основано это решение?",
+       "groups": [
+        "od-057",
+        "od-080"
+       ],
+       "indexes": [
+        144,
+        167
+       ]
+      },
+      {
+       "cos": 0.7063,
+       "a": "Какое значение агрессии требуется во время Police и откуда принято это решение?",
+       "b": "Как проверить, что обычная агрессивность вернулась после выхода из полицейского режима?",
+       "groups": [
+        "od-080",
+        "od-057"
+       ],
+       "indexes": [
+        79,
+        144
+       ]
+      },
+      {
+       "cos": 0.6954,
+       "a": "Как проверить, что обычная агрессивность вернулась после выхода из полицейского режима?",
+       "b": "Куда откладывается обычная агрессия, пока действует override Police?",
+       "groups": [
+        "od-057",
+        "od-067"
+       ],
+       "indexes": [
+        144,
+        154
+       ]
+      },
+      {
+       "cos": 0.6676,
+       "a": "Что мешает скрыть из списка игрока, у которого имя совпадает с именем бота?",
+       "b": "Что показывается пользователю, когда актуальный список игроков пропал, а боты всё ещё на сервере?",
+       "groups": [
+        "od-050",
+        "od-051"
+       ],
+       "indexes": [
+        137,
+        138
+       ]
+      },
+      {
+       "cos": 0.6633,
+       "a": "Как обычное значение агрессии сохраняется под override Police?",
+       "b": "Как проверить, что обычная агрессивность вернулась после выхода из полицейского режима?",
+       "groups": [
+        "od-067",
+        "od-057"
+       ],
+       "indexes": [
+        66,
+        144
+       ]
+      },
+      {
+       "cos": 0.6625,
+       "a": "Что видит пользователь при потере свежего игрового списка, если боты ещё подключены?",
+       "b": "Что мешает скрыть из списка игрока, у которого имя совпадает с именем бота?",
+       "groups": [
+        "od-051",
+        "od-050"
+       ],
+       "indexes": [
+        50,
+        137
+       ]
+      },
+      {
+       "cos": 0.662,
+       "a": "Как подтверждается восстановление обычной агрессии после отмены полицейского режима?",
+       "b": "Какая агрессия нужна в режиме Police и на чём основано это решение?",
+       "groups": [
+        "od-057",
+        "od-080"
+       ],
+       "indexes": [
+        56,
+        167
+       ]
+      },
+      {
+       "cos": 0.6585,
+       "a": "Как список участников избегает сокрытия человека с тем же именем, что у бота?",
+       "b": "Что видит пользователь при потере свежего игрового списка, если боты ещё подключены?",
+       "groups": [
+        "od-050",
+        "od-051"
+       ],
+       "indexes": [
+        49,
+        50
+       ]
+      }
+     ],
+     "farthestSame": [
+      {
+       "cos": 0.7135,
+       "a": "Где пользователь найдёт причину аварийного завершения приложения?",
+       "b": "приложение упало причина",
+       "groups": [
+        "od-052",
+        "od-052"
+       ],
+       "indexes": [
+        51,
+        139
+       ]
+      },
+      {
+       "cos": 0.7385,
+       "a": "Что происходит с прежней ещё не исполненной командой при приходе новой?",
+       "b": "старая команда не исполнена пришла новая",
+       "groups": [
+        "od-055",
+        "od-055"
+       ],
+       "indexes": [
+        54,
+        142
+       ]
+      },
+      {
+       "cos": 0.781,
+       "a": "Как список участников избегает сокрытия человека с тем же именем, что у бота?",
+       "b": "Что мешает скрыть из списка игрока, у которого имя совпадает с именем бота?",
+       "groups": [
+        "od-050",
+        "od-050"
+       ],
+       "indexes": [
+        49,
+        137
+       ]
+      },
+      {
+       "cos": 0.8237,
+       "a": "Что должно быть проверено до первого изменения при удалении модификации игры?",
+       "b": "Какие проверки обязательны перед любым действием при удалении мода игры?",
+       "groups": [
+        "od-059",
+        "od-059"
+       ],
+       "indexes": [
+        58,
+        146
+       ]
+      },
+      {
+       "cos": 0.8412,
+       "a": "Какое значение агрессии требуется во время Police и откуда принято это решение?",
+       "b": "Какая агрессия нужна в режиме Police и на чём основано это решение?",
+       "groups": [
+        "od-080",
+        "od-080"
+       ],
+       "indexes": [
+        79,
+        167
+       ]
+      },
+      {
+       "cos": 0.8469,
+       "a": "Какие физические проверки смены AI-линии уже выполнены и что осталось?",
+       "b": "Что уже проверено вживую по смене AI-линии и что ещё не проверено?",
+       "groups": [
+        "od-074",
+        "od-074"
+       ],
+       "indexes": [
+        73,
+        161
+       ]
+      },
+      {
+       "cos": 0.8623,
+       "a": "Может ли простое чтение состояния бота продлить управление или отправить команду?",
+       "b": "чтение статуса бота продление управления отправка команды",
+       "groups": [
+        "od-054",
+        "od-054"
+       ],
+       "indexes": [
+        53,
+        141
+       ]
+      },
+      {
+       "cos": 0.8624,
+       "a": "Что видит пользователь при потере свежего игрового списка, если боты ещё подключены?",
+       "b": "Что показывается пользователю, когда актуальный список игроков пропал, а боты всё ещё на сервере?",
+       "groups": [
+        "od-051",
+        "od-051"
+       ],
+       "indexes": [
+        50,
+        138
+       ]
+      },
+      {
+       "cos": 0.8663,
+       "a": "Какие свойства запуска нельзя подтвердить одними проверками прикладного слоя?",
+       "b": "Что в запуске невозможно доказать только проверками прикладного уровня?",
+       "groups": [
+        "od-071",
+        "od-071"
+       ],
+       "indexes": [
+        70,
+        158
+       ]
+      },
+      {
+       "cos": 0.8682,
+       "a": "Означает ли минимальная графика ботов полное отсутствие рендера?",
+       "b": "минимальная графика ботов рендер",
+       "groups": [
+        "od-060",
+        "od-060"
+       ],
+       "indexes": [
+        59,
+        147
+       ]
+      },
+      {
+       "cos": 0.8759,
+       "a": "Почему подключение не выполняет подготовку игровых файлов заново?",
+       "b": "Из-за чего при подключении игровые файлы повторно не готовятся?",
+       "groups": [
+        "od-053",
+        "od-053"
+       ],
+       "indexes": [
+        52,
+        140
+       ]
+      },
+      {
+       "cos": 0.8809,
+       "a": "Как обычное значение агрессии сохраняется под override Police?",
+       "b": "Куда откладывается обычная агрессия, пока действует override Police?",
+       "groups": [
+        "od-067",
+        "od-067"
+       ],
+       "indexes": [
+        66,
+        154
+       ]
+      }
+     ],
+     "guards": [
+      {
+       "cos": 0.9949,
+       "a": "Сколько памяти занимает индекс из 5000 чанков?",
+       "b": "Сколько памяти занимает индекс из 50000 чанков?",
+       "groups": [
+        "g-t06a",
+        "g-t06b"
+       ],
+       "indexes": [
+        208,
+        209
+       ],
+       "kind": "guard:number",
+       "check": [
+        "identifier"
+       ]
+      },
+      {
+       "cos": 0.9733,
+       "a": "Удаляются ли документы при удалении проекта?",
+       "b": "Сохраняются ли документы при удалении проекта?",
+       "groups": [
+        "g-t03a",
+        "g-t03b"
+       ],
+       "indexes": [
+        203,
+        204
+       ],
+       "kind": "guard:negation",
+       "check": []
+      },
+      {
+       "cos": 0.9389,
+       "a": "Что видит пользователь при потере свежего игрового списка, если боты ещё подключены?",
+       "b": "Что видит пользователь при получении свежего игрового списка, если боты ещё подключены?",
+       "groups": [
+        "od-051",
+        "g-t04b"
+       ],
+       "indexes": [
+        50,
+        205
+       ],
+       "kind": "guard:negation",
+       "check": []
+      },
+      {
+       "cos": 0.9225,
+       "a": "Как получить 5 результатов поиска?",
+       "b": "Как получить 50 результатов поиска?",
+       "groups": [
+        "g-t09a",
+        "g-t09b"
+       ],
+       "indexes": [
+        214,
+        215
+       ],
+       "kind": "guard:number",
+       "check": [
+        "identifier"
+       ]
+      },
+      {
+       "cos": 0.9204,
+       "a": "Как включить автозагрузку воркера?",
+       "b": "Как отключить автозагрузку воркера?",
+       "groups": [
+        "g-t01a",
+        "g-t01b"
+       ],
+       "indexes": [
+        199,
+        200
+       ],
+       "kind": "guard:negation",
+       "check": [
+        "antonym"
+       ]
+      },
+      {
+       "cos": 0.9098,
+       "a": "Что видит пользователь, когда индекс готов?",
+       "b": "Что видит пользователь, когда индекс не готов?",
+       "groups": [
+        "g-t02a",
+        "g-t02b"
+       ],
+       "indexes": [
+        201,
+        202
+       ],
+       "kind": "guard:negation",
+       "check": []
+      },
+      {
+       "cos": 0.8065,
+       "a": "Что показывается пользователю, когда актуальный список игроков пропал, а боты всё ещё на сервере?",
+       "b": "Что видит пользователь при получении свежего игрового списка, если боты ещё подключены?",
+       "groups": [
+        "od-051",
+        "g-t04b"
+       ],
+       "indexes": [
+        138,
+        205
+       ],
+       "kind": "guard:negation",
+       "check": []
+      },
+      {
+       "cos": 0.8004,
+       "a": "Что делает hook session-start?",
+       "b": "Что делает hook session-end?",
+       "groups": [
+        "g-t10a",
+        "g-t10b"
+       ],
+       "indexes": [
+        216,
+        217
+       ],
+       "kind": "guard:identifier",
+       "check": [
+        "identifier"
+       ]
+      },
+      {
+       "cos": 0.79,
+       "a": "Что делать при ошибке 503?",
+       "b": "Что делать при ошибке 504?",
+       "groups": [
+        "g-t08a",
+        "g-t08b"
+       ],
+       "indexes": [
+        212,
+        213
+       ],
+       "kind": "guard:number",
+       "check": [
+        "identifier"
+       ]
+      },
+      {
+       "cos": 0.7816,
+       "a": "Что известно про ISS-16?",
+       "b": "Что известно про ISS-17?",
+       "groups": [
+        "g-t11a",
+        "g-t11b"
+       ],
+       "indexes": [
+        218,
+        219
+       ],
+       "kind": "guard:identifier",
+       "check": [
+        "identifier"
+       ]
+      },
+      {
+       "cos": 0.7798,
+       "a": "Где описан NT-04?",
+       "b": "Где описан NT-05?",
+       "groups": [
+        "g-t12a",
+        "g-t12b"
+       ],
+       "indexes": [
+        220,
+        221
+       ],
+       "kind": "guard:identifier",
+       "check": [
+        "identifier"
+       ]
+      },
+      {
+       "cos": 0.7656,
+       "a": "Есть ли поддержка Windows?",
+       "b": "Есть ли поддержка macOS?",
+       "groups": [
+        "g-t05a",
+        "g-t05b"
+       ],
+       "indexes": [
+        206,
+        207
+       ],
+       "kind": "guard:entity",
+       "check": [
+        "identifier"
+       ]
+      },
+      {
+       "cos": 0.7615,
+       "a": "Что меняется во второй версии протокола?",
+       "b": "Что меняется в третьей версии протокола?",
+       "groups": [
+        "g-t07a",
+        "g-t07b"
+       ],
+       "indexes": [
+        210,
+        211
+       ],
+       "kind": "guard:number",
+       "check": [
+        "number"
+       ]
+      },
+      {
+       "cos": 0.6959,
+       "a": "Как работает bge-m3?",
+       "b": "Как работает bge-reranker-v2-m3?",
+       "groups": [
+        "g-t13a",
+        "g-t13b"
+       ],
+       "indexes": [
+        222,
+        223
+       ],
+       "kind": "guard:identifier",
+       "check": [
+        "identifier"
+       ]
+      }
+     ]
+    }
+   },
+   "selection": {
+    "rule": "ceil(max dev cos ordinary-different, 0.01) + max(0.02, 2 * max noise)",
+    "devMaxDifferent": 0.7211,
+    "margin": 0.02,
+    "chosen": 0.75
+   },
+   "pooledAtChosen": {
+    "same": 68,
+    "merged": 62,
+    "recallWilson95": [
+     0.821,
+     0.959
+    ],
+    "ordinaryPairs": 12552,
+    "falseMerges": 4,
+    "falseMergeRateUpper95": 0.00024
+   },
+   "atChosen": {
+    "dev": {
+     "threshold": 0.75,
+     "same": 36,
+     "mergedSame": 32,
+     "recall": 0.8889,
+     "sameBlockedByCheck": 0,
+     "recallWithChecks": 0.8889,
+     "ordinary": 7942,
+     "falseMerges": 0,
+     "falseMergesAfterCheck": 0,
+     "guard": 23,
+     "guardMerged": 22,
+     "guardMergedAfterCheck": 5,
+     "escapes": {
+      "negation": 5
+     }
+    },
+    "test": {
+     "threshold": 0.75,
+     "same": 32,
+     "mergedSame": 30,
+     "recall": 0.9375,
+     "sameBlockedByCheck": 1,
+     "recallWithChecks": 0.9063,
+     "ordinary": 4610,
+     "falseMerges": 4,
+     "falseMergesAfterCheck": 4,
+     "guard": 14,
+     "guardMerged": 13,
+     "guardMergedAfterCheck": 4,
+     "escapes": {
+      "negation": 4
+     }
+    }
+   },
+   "clustering": {
+    "representative": {
+     "dev": {
+      "seeds": 20,
+      "maxFalseJoins": 21,
+      "meanFalseJoins": 18.7,
+      "maxGroupsSplit": 4,
+      "meanGroupsSplit": 4,
+      "clusters": 78,
+      "groups": 91
+     },
+     "test": {
+      "seeds": 20,
+      "maxFalseJoins": 15,
+      "meanFalseJoins": 14.3,
+      "maxGroupsSplit": 2,
+      "meanGroupsSplit": 2,
+      "clusters": 54,
+      "groups": 65
+     }
+    },
+    "single-link": {
+     "dev": {
+      "seeds": 20,
+      "maxFalseJoins": 21,
+      "meanFalseJoins": 18.7,
+      "maxGroupsSplit": 4,
+      "meanGroupsSplit": 4,
+      "clusters": 78,
+      "groups": 91
+     },
+     "test": {
+      "seeds": 20,
+      "maxFalseJoins": 15,
+      "meanFalseJoins": 14.3,
+      "maxGroupsSplit": 2,
+      "meanGroupsSplit": 2,
+      "clusters": 54,
+      "groups": 65
+     }
+    },
+    "representative+checks": {
+     "dev": {
+      "seeds": 20,
+      "maxFalseJoins": 5,
+      "meanFalseJoins": 4.45,
+      "maxGroupsSplit": 4,
+      "meanGroupsSplit": 4,
+      "clusters": 91,
+      "groups": 91
+     },
+     "test": {
+      "seeds": 20,
+      "maxFalseJoins": 6,
+      "meanFalseJoins": 5.3,
+      "maxGroupsSplit": 3,
+      "meanGroupsSplit": 3,
+      "clusters": 64,
+      "groups": 65
+     }
+    },
+    "single-link+checks": {
+     "dev": {
+      "seeds": 20,
+      "maxFalseJoins": 5,
+      "meanFalseJoins": 4.45,
+      "maxGroupsSplit": 4,
+      "meanGroupsSplit": 4,
+      "clusters": 91,
+      "groups": 91
+     },
+     "test": {
+      "seeds": 20,
+      "maxFalseJoins": 6,
+      "meanFalseJoins": 5.3,
+      "maxGroupsSplit": 3,
+      "meanGroupsSplit": 3,
+      "clusters": 64,
+      "groups": 65
+     }
+    }
+   }
+  }
+ },
+ "inputs": {
+  "overdrive": "8d966917556299d5dc9b711cfd053c3921467ef6c70204e1ced0ac9fb5cd1e0f",
+  "variants": "9b8fc0cbe9d66522712e5835ca1088b1f5ce6f1a9f43e885e52267caf49874aa",
+  "script": "627a344ae6a348ffc6c0a3c2b98931e7478121a5fa6d9ae57f380d5e9a21420f",
+  "relabel": null
+ }
+}

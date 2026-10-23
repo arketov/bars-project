@@ -1,0 +1,33 @@
+[?25l
+Loading text-embedding-qwen3-embedding-0.6b 0% ⠋[?25l
+Loading text-embedding-qwen3-embedding-0.6b 0% ⠙[?25l
+Loading text-embedding-qwen3-embedding-0.6b 2% ⠙[?25l
+Loading text-embedding-qwen3-embedding-0.6b 2% ⠹[?25l
+Loading text-embedding-qwen3-embedding-0.6b 4% ⠹[?25l
+Loading text-embedding-qwen3-embedding-0.6b 4% ⠸[?25l
+Loading text-embedding-qwen3-embedding-0.6b 4% ⠼[?25l
+Loading text-embedding-qwen3-embedding-0.6b 6% ⠼[?25l
+Loading text-embedding-qwen3-embedding-0.6b 6% ⠴[?25l
+Loading text-embedding-qwen3-embedding-0.6b 7% ⠴[?25l
+Loading text-embedding-qwen3-embedding-0.6b 7% ⠦[?25l
+Loading text-embedding-qwen3-embedding-0.6b 9% ⠦[?25l
+Loading text-embedding-qwen3-embedding-0.6b 9% ⠧[?25l
+Loading text-embedding-qwen3-embedding-0.6b 9% ⠇[?25l
+Loading text-embedding-qwen3-embedding-0.6b 11% ⠇[?25l
+Loading text-embedding-qwen3-embedding-0.6b 11% ⠏[?25l
+Loading text-embedding-qwen3-embedding-0.6b 12% ⠏[?25l
+Loading text-embedding-qwen3-embedding-0.6b 12% ⠋[?25l
+Loading text-embedding-qwen3-embedding-0.6b 14% ⠋[?25l
+Loading text-embedding-qwen3-embedding-0.6b 14% ⠙[?25l
+Loading text-embedding-qwen3-embedding-0.6b 14% ⠹[?25l
+Loading text-embedding-qwen3-embedding-0.6b 15% ⠹[?25l
+Loading text-embedding-qwen3-embedding-0.6b 15% ⠸[?25l
+Loading text-embedding-qwen3-embedding-0.6b 17% ⠸[?25l
+Loading text-embedding-qwen3-embedding-0.6b 17% ⠼[?25l
+Loading text-embedding-qwen3-embedding-0.6b 18% ⠼[?25l
+Loading text-embedding-qwen3-embedding-0.6b 18% ⠴[?25l
+Loading text-embedding-qwen3-embedding-0.6b 100% ⠴
+Model loaded successfully in 1.49s.
+(609.54 MiB)
+To use the model in the API/SDK, use the identifier "text-embedding-qwen3-embedding-0.6b".
+[K[?25h

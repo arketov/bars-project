@@ -53,7 +53,25 @@ export function ensureRightZone(api: DockviewApi, width = 0): void {
 }
 
 export function encodeLayout(api: DockviewApi, sidebar: SidebarSize): string {
-  return JSON.stringify({ version: 2, layout: api.toJSON(), sidebar });
+  const layout = api.toJSON();
+  // ID живого вида сохраняется при переносе буфера; на диск пишутся ID текущих путей.
+  const ids = new Map(Object.entries(layout.panels).map(([id, panel]) => {
+    const params = panel.params as PanelParams;
+    return [id, params?.kind === "document" && params.hit ? documentId(params.hit.path) : id];
+  }));
+  layout.panels = Object.fromEntries(Object.entries(layout.panels).map(([id, panel]) => {
+    const next = ids.get(id)!; return [next, { ...panel, id: next }];
+  }));
+  const remap = (value: unknown): void => {
+    if (!value || typeof value !== "object") return;
+    if (Array.isArray(value)) { value.forEach(remap); return; }
+    const node = value as Record<string, unknown>;
+    if (Array.isArray(node.views)) node.views = node.views.map(id => typeof id === "string" ? ids.get(id) ?? id : id);
+    if (typeof node.activeView === "string") node.activeView = ids.get(node.activeView) ?? node.activeView;
+    Object.values(node).forEach(remap);
+  };
+  remap({grid:layout.grid,floatingGroups:layout.floatingGroups,popoutGroups:layout.popoutGroups,edgeGroups:layout.edgeGroups});
+  return JSON.stringify({ version: 2, layout, sidebar });
 }
 
 const size = (value: unknown, fallback: number) => typeof value === "number" && Number.isFinite(value) && value > 0 && value < 10000 ? Math.round(value) : fallback;

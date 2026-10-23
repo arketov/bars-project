@@ -16,6 +16,8 @@ mod flush;
 mod folder_tests;
 mod folders;
 mod icons;
+#[cfg(test)]
+mod link_move_tests;
 mod tray;
 mod tree_io;
 #[cfg(test)]
@@ -70,6 +72,7 @@ fn main() -> anyhow::Result<()> {
             commands::entry_create_doc,
             commands::entry_create_dir,
             commands::entry_move,
+            commands::entry_plan_move,
             commands::entry_trash,
             commands::appearance_read,
             commands::appearance_set,

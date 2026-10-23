@@ -10,6 +10,35 @@ use crate::worker::ConfiguredProvider;
 
 const KEY: &str = "sk-test-not-a-real-key-123456";
 
+#[tokio::test(flavor = "multi_thread")]
+async fn tei_native_embed_and_rerank_serve_full_worker_search() {
+    let embed = FakeServer::start(|request| {
+        assert_eq!(request.path, "/embed");
+        assert_eq!(request.json()["truncate"], false);
+        let vectors: Vec<_> = request.json()["inputs"].as_array().unwrap().iter()
+            .map(|text| vec![1.0, 1.0 + text.as_str().unwrap().len() as f64 % 7.0, 2.0]).collect();
+        Response::ok(json!(vectors))
+    });
+    let rerank = FakeServer::start(|request| {
+        assert_eq!(request.path, "/rerank");
+        assert_eq!(request.json()["raw_scores"], false);
+        assert_eq!(request.json()["truncate"], false);
+        let results: Vec<_> = request.json()["texts"].as_array().unwrap().iter().enumerate()
+            .map(|(index, text)| json!({"index":index, "score":if text.as_str().unwrap().contains("Борщ") {0.9} else {0.2}}))
+            .rev().collect();
+        Response::ok(json!(results))
+    });
+    let harness = harness("tei-search").await;
+    write_settings(&harness, &format!("[embed]\nsource='tei'\nmodel='BAAI/bge-m3'\nbase_url='{}'\nbatch_size=2\n[rerank]\nenabled=true\nsource='tei'\nmodel='BAAI/bge-reranker-v2-m3'\nbase_url='{}'\n", embed.url(), rerank.url()));
+    let mut cli = harness.client(ClientKind::Cli).await;
+    let root = register_and_index(&harness, &mut cli).await;
+    let found = cli.call(&search(&root, "очередь")).await.unwrap();
+    assert!(found.rerank_error.is_none());
+    assert_eq!(found.results[0].path, "docs/cooking.md");
+    assert!(embed.requests().iter().all(|r| r.json()["inputs"].as_array().unwrap().len() <= 2));
+    assert_eq!(rerank.requests().len(), 1);
+}
+
 /// Embed: четырёхмерный «мешок букв»; rerank: «Борщ» нравится больше остального.
 fn provider_server(rerank_status: u16) -> FakeServer {
     FakeServer::start(move |request: &Request| match request.path.as_str() {
@@ -60,6 +89,22 @@ fn secrets() -> Arc<dyn SecretStore> {
     let secrets = MemorySecrets::default();
     secrets.set("bars/test", KEY).unwrap();
     Arc::new(secrets)
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn lmstudio_embed_and_independent_http_rerank_serve_real_worker_search() {
+    let embed = provider_server(200);
+    let rerank = provider_server(200);
+    let harness = harness("lmstudio-search").await;
+    write_settings(&harness, &format!("[embed]\nsource='lmstudio'\nmodel='text-embedding-qwen3-embedding-0.6b'\nbase_url='{}/v1'\nbatch_size=2\n[rerank]\nenabled=true\nsource='local-openai'\nmodel='rr'\nbase_url='{}'\n", embed.url(), rerank.url()));
+    let mut cli = harness.client(ClientKind::Cli).await;
+    let root = register_and_index(&harness, &mut cli).await;
+    let found = cli.call(&search(&root, "очередь")).await.unwrap();
+    assert!(found.rerank_error.is_none());
+    assert_eq!(found.results[0].path, "docs/cooking.md");
+    assert!(embed.requests().iter().all(|r| r.path == "/v1/embeddings"));
+    assert!(embed.requests().iter().any(|r| r.json()["input"][0].as_str().unwrap().starts_with("Instruct:")));
+    assert!(rerank.requests().iter().any(|r| r.path == "/rerank"));
 }
 
 #[tokio::test(flavor = "multi_thread")]

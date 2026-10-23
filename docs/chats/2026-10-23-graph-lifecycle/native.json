@@ -1,0 +1,144 @@
+{
+  "success": true,
+  "native": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+  "checks": [
+    "Структура готова",
+    "Смысловая полнота не завышена",
+    "Прогресс дошёл до публикации",
+    "Ошибок файлов нет",
+    "Новое поколение структуры после правки",
+    "Старый снимок отклонён",
+    "Явная перестройка принята",
+    "Неизменные исходники дают тот же снимок",
+    "Выбранный слой сохраняет другие актуальные поколения"
+  ],
+  "before": {
+    "state": "partial",
+    "snapshot": "cbd56cc15dd72cb56a2a0cadabb0b629e8c069c1cdaa6751defd7eb47173d8b5",
+    "active_job": null,
+    "source_count": 1,
+    "error": null,
+    "method": "explicit-markdown-v6",
+    "progress": {
+      "phase": "publish",
+      "processed": 1,
+      "total": 1,
+      "elapsed_ms": 19
+    },
+    "file_errors": [],
+    "file_errors_total": 0,
+    "layers": {
+      "semantic": {
+        "state": "partial",
+        "generation": "74e9e7e00d35b195bd4c547a69d2ff23b4f779edd53d4785844ba79f22032c0d",
+        "fingerprint": "explicit-markdown-v6",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "similarity": {
+        "state": "partial",
+        "generation": "baf3e4a1157cc27e60f76d3751163e5c67fb0ba1b0f54dec06f3befc682e4453",
+        "fingerprint": "cosine-knn-v1:k=5:tau=0.5:limit=1000000",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "structure": {
+        "state": "ready",
+        "generation": "3cd371a94e022f541acbb87e2b0cef4f43d8f72fea41cf80bf736606e85fe8b6",
+        "fingerprint": "markdown-structure-v1",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      }
+    },
+    "paused": false
+  },
+  "after": {
+    "state": "partial",
+    "snapshot": "a5dacc5793a29c99def7eab7bcc19dd27afdc20c7404068399e5b24c13f1a7b7",
+    "active_job": null,
+    "source_count": 1,
+    "error": null,
+    "method": "explicit-markdown-v6",
+    "progress": {
+      "phase": "publish",
+      "processed": 1,
+      "total": 1,
+      "elapsed_ms": 8
+    },
+    "file_errors": [],
+    "file_errors_total": 0,
+    "layers": {
+      "semantic": {
+        "state": "partial",
+        "generation": "b7a2991862e770050fcb3dca8be780de396598ac436fa49ede53101106230d18",
+        "fingerprint": "explicit-markdown-v6",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "similarity": {
+        "state": "partial",
+        "generation": "baf3e4a1157cc27e60f76d3751163e5c67fb0ba1b0f54dec06f3befc682e4453",
+        "fingerprint": "cosine-knn-v1:k=5:tau=0.5:limit=1000000",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "structure": {
+        "state": "ready",
+        "generation": "a32df980098116e2b36d04803c1fa8d69d5ffdc56dae3298f6de04a1273f0cda",
+        "fingerprint": "markdown-structure-v1",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      }
+    },
+    "paused": false
+  },
+  "rebuilt": {
+    "state": "partial",
+    "snapshot": "a5dacc5793a29c99def7eab7bcc19dd27afdc20c7404068399e5b24c13f1a7b7",
+    "active_job": null,
+    "source_count": 1,
+    "error": null,
+    "method": "explicit-markdown-v6",
+    "progress": {
+      "phase": "publish",
+      "processed": 1,
+      "total": 1,
+      "elapsed_ms": 3
+    },
+    "file_errors": [],
+    "file_errors_total": 0,
+    "layers": {
+      "semantic": {
+        "state": "partial",
+        "generation": "b7a2991862e770050fcb3dca8be780de396598ac436fa49ede53101106230d18",
+        "fingerprint": "explicit-markdown-v6",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "similarity": {
+        "state": "partial",
+        "generation": "baf3e4a1157cc27e60f76d3751163e5c67fb0ba1b0f54dec06f3befc682e4453",
+        "fingerprint": "cosine-knn-v1:k=5:tau=0.5:limit=1000000",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "structure": {
+        "state": "ready",
+        "generation": "a32df980098116e2b36d04803c1fa8d69d5ffdc56dae3298f6de04a1273f0cda",
+        "fingerprint": "markdown-structure-v1",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      }
+    },
+    "paused": false
+  }
+}

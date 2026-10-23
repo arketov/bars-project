@@ -1,0 +1,24 @@
+
+running 18 tests
+test clients::refresh_tests::config_conflict_rereads_foreign_edits_and_bounds_retries ... ok
+test clients::tests::claude_install_writes_mcp_hook_and_skills_keeping_foreign_entries ... ok
+test clients::tests::uninstall_does_not_create_files ... ok
+test clients::tests::install_is_idempotent_and_updates_moved_paths ... ok
+test clients::refresh_tests::partial_write_report_survives_late_error_and_retry_finishes ... ok
+test clients::project_gate::tests::uninstall_removes_the_gate_and_keeps_foreign_hooks ... ok
+test clients::tests::claude_uninstall_removes_only_bars ... ok
+test clients::refresh_tests::normalizes_mixed_duplicate_hooks_preserving_foreign_groups ... ok
+test clients::tests::stale_reports_only_installed_clients_with_old_paths ... ok
+test clients::project_gate::tests::needs_the_bars_mcp_entry_and_keeps_foreign_hooks ... ok
+test clients::project_gate::tests::installs_only_for_projects_known_to_claude_code_and_bars ... ok
+test clients::refresh_tests::absent_clients_and_skills_only_are_never_installed ... ok
+test clients::tests::unparsable_file_is_not_written ... ok
+test clients::tests::codex_install_edits_toml_keeping_comments_and_asks_hook_approval ... ok
+test clients::refresh_tests::skills_and_mcp_updates_do_not_reset_codex_hook ... ok
+test clients::refresh_tests::uninstall_and_refresh_share_the_lock_in_both_orders ... ok
+test clients::refresh_tests::invalid_config_preflight_prevents_partial_writes_and_continues_other_client ... ok
+test clients::refresh_tests::mcp_or_hook_alone_repairs_both_clients ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 259 filtered out; finished in 8.19s
+
+

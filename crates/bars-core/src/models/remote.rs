@@ -1,7 +1,7 @@
 //! Внешние модели по HTTP: embed через OpenAI/Ollama API и rerank в формате Cohere
 //! (`docs/features/models/external-models.md`, Т-17).
 //!
-//! Ollama использует нативный embed API; остальные — OpenAI/Cohere API.
+//! Ollama и TEI используют нативные API; остальные — OpenAI/Cohere API.
 //! Ключ читается из [`KeyRef`] при каждом запросе и вычищается из сообщений об
 //! ошибках.
 
@@ -25,7 +25,7 @@ const SNIPPET_CHARS: usize = 300;
 /// Что нужно знать об адресе внешней модели.
 #[derive(Clone)]
 pub struct RemoteTarget {
-    /// `remote`, `local-openai` или `ollama`: идёт в отпечаток.
+    /// `remote`, `local-openai`, `ollama`, `lmstudio` или `tei`: идёт в отпечаток.
     pub source: &'static str,
     pub base_url: String,
     /// Имя модели у провайдера.
@@ -176,7 +176,9 @@ impl HttpEmbedder {
     pub fn new(target: RemoteTarget, batch_size: usize) -> Self {
         Self {
             agent: agent(EMBED_TIMEOUT),
-            url: if target.source == "ollama" {
+            url: if target.source == "tei" {
+                plain_url(&target.base_url, "embed")
+            } else if target.source == "ollama" {
                 plain_url(&target.base_url, "api/embed")
             } else {
                 versioned_url(&target.base_url, "embeddings")
@@ -198,6 +200,8 @@ impl HttpEmbedder {
         let mut body = json!({ "model": self.target.model, "input": batch });
         if self.target.source == "ollama" {
             body["truncate"] = json!(false);
+        } else if self.target.source == "tei" {
+            body = json!({"inputs": batch, "truncate": false, "normalize": true});
         }
         let text = post_with_retries(
             &self.agent,
@@ -207,7 +211,9 @@ impl HttpEmbedder {
             retries,
             self.pause,
         )?;
-        let vectors = if self.target.source == "ollama" {
+        let vectors = if self.target.source == "tei" {
+            parse_tei_embeddings(&text)
+        } else if self.target.source == "ollama" {
             parse_ollama_embeddings(&text)
         } else {
             parse_embeddings(&text)
@@ -221,6 +227,36 @@ impl HttpEmbedder {
         }
         Ok(vectors)
     }
+}
+
+fn parse_tei_embeddings(text: &str) -> Result<Vec<Vec<f32>>, String> {
+    // Типизированный serde-error способен повторить строку провайдера (в том числе ключ).
+    let value: Value =
+        serde_json::from_str(text).map_err(|error| format!("ответ TEI не JSON: {error}"))?;
+    let vectors: Vec<Vec<f32>> = value
+        .as_array()
+        .ok_or("ответ embed TEI не массив")?
+        .iter()
+        .map(|item| {
+            item.as_array()
+                .ok_or("вектор TEI не массив")?
+                .iter()
+                .map(|n| {
+                    n.as_f64()
+                        .map(|n| n as f32)
+                        .ok_or("координата TEI не число".to_string())
+                })
+                .collect()
+        })
+        .collect::<Result<_, String>>()?;
+    if vectors.iter().any(|vector| {
+        vector.is_empty()
+            || vector.iter().any(|n| !n.is_finite())
+            || vector.iter().all(|n| *n == 0.0)
+    }) {
+        return Err("TEI вернул пустой, нулевой или неконечный вектор".into());
+    }
+    Ok(vectors)
 }
 
 fn parse_ollama_embeddings(text: &str) -> Result<Vec<Vec<f32>>, String> {
@@ -265,10 +301,21 @@ fn parse_embeddings(text: &str) -> Result<Vec<Vec<f32>>, String> {
             .map(|number| number.as_f64().map(|n| n as f32))
             .collect::<Option<Vec<f32>>>()
             .ok_or("в `embedding` не только числа")?;
-        let index = item
-            .get("index")
-            .and_then(Value::as_u64)
-            .map_or(position, |index| index as usize);
+        if vector.is_empty() || vector.iter().any(|n| !n.is_finite()) {
+            return Err("провайдер вернул пустой вектор или неконечные координаты".into());
+        }
+        let index = match item.get("index") {
+            Some(value) => value
+                .as_u64()
+                .and_then(|n| usize::try_from(n).ok())
+                .ok_or("неверный `index` в ответе embeddings")?,
+            None => position,
+        };
+        if index >= data.len() || items.iter().any(|(seen, _)| *seen == index) {
+            return Err(
+                "повторяющийся или выходящий за границы `index` в ответе embeddings".into(),
+            );
+        }
         items.push((index, vector));
     }
     items.sort_by_key(|(index, _)| *index);
@@ -284,8 +331,18 @@ impl Embedder for HttpEmbedder {
     }
     fn embed_query(&mut self, text: &str) -> Result<Vec<f32>, EmbedError> {
         let instructed;
-        let text = if self.target.source == "ollama"
-            && self.target.model.split(':').next() == Some("qwen3-embedding")
+        let model = self.target.model.to_ascii_lowercase();
+        let lm_qwen = self.target.source == "lmstudio"
+            && (model.starts_with("text-embedding-qwen3-embedding-")
+                || model.starts_with("qwen3-embedding-")
+                || model.starts_with("qwen/qwen3-embedding-"));
+        let tei_qwen = matches!(self.target.source, "tei" | "local-openai")
+            && (model.starts_with("qwen/qwen3-embedding-")
+                || model.starts_with("qwen3-embedding-"));
+        let text = if lm_qwen
+            || tei_qwen
+            || (self.target.source == "ollama"
+                && self.target.model.split(':').next() == Some("qwen3-embedding"))
         {
             instructed = format!("{}{text}", super::catalog::QWEN3_QUERY_PREFIX);
             &instructed
@@ -348,7 +405,7 @@ impl HttpReranker {
     pub fn new(target: RemoteTarget) -> Self {
         let mut urls = vec![plain_url(&target.base_url, "rerank")];
         let versioned = versioned_url(&target.base_url, "rerank");
-        if !urls.contains(&versioned) {
+        if target.source != "tei" && !urls.contains(&versioned) {
             urls.push(versioned);
         }
         Self {
@@ -399,14 +456,24 @@ impl Reranker for HttpReranker {
         if documents.is_empty() {
             return Ok(Vec::new());
         }
-        let body = json!({
-            "model": self.target.model,
-            "query": query,
-            "documents": documents,
-            "top_n": documents.len(),
-        });
+        let body = if self.target.source == "tei" {
+            json!({"query": query, "texts": documents, "truncate": false,
+                "raw_scores": false, "return_text": false})
+        } else {
+            json!({
+                "model": self.target.model,
+                "query": query,
+                "documents": documents,
+                "top_n": documents.len(),
+            })
+        };
         let text = self.post(&body).map_err(RerankError::Rerank)?;
-        let scores = parse_rerank(&text, documents.len()).map_err(RerankError::Rerank)?;
+        let scores = if self.target.source == "tei" {
+            parse_tei_rerank(&text, documents.len())
+        } else {
+            parse_rerank(&text, documents.len())
+        }
+        .map_err(RerankError::Rerank)?;
         Ok(unit_scores(scores))
     }
 }
@@ -419,6 +486,21 @@ fn parse_rerank(text: &str, expected: usize) -> Result<Vec<f32>, String> {
         .or_else(|| value.get("data"))
         .and_then(Value::as_array)
         .ok_or("в ответе нет списка `results`")?;
+    parse_rerank_items(results, expected)
+}
+
+fn parse_tei_rerank(text: &str, expected: usize) -> Result<Vec<f32>, String> {
+    let value: Value =
+        serde_json::from_str(text).map_err(|error| format!("ответ TEI не JSON: {error}"))?;
+    let results = value.as_array().ok_or("ответ rerank TEI не массив")?;
+    let scores = parse_rerank_items(results, expected)?;
+    if scores.iter().any(|score| !(0.0..=1.0).contains(score)) {
+        return Err("TEI вернул оценку вне диапазона 0…1 при raw_scores=false".into());
+    }
+    Ok(scores)
+}
+
+fn parse_rerank_items(results: &[Value], expected: usize) -> Result<Vec<f32>, String> {
     let mut scores: Vec<Option<f32>> = vec![None; expected];
     for item in results {
         let index = item
@@ -433,6 +515,9 @@ fn parse_rerank(text: &str, expected: usize) -> Result<Vec<f32>, String> {
         let slot = scores.get_mut(index).ok_or_else(|| {
             format!("в ответе индекс {index} вне списка из {expected} документов")
         })?;
+        if !score.is_finite() || slot.is_some() {
+            return Err("провайдер вернул неконечную оценку или повторный индекс".into());
+        }
         *slot = Some(score);
     }
     let got = scores.iter().flatten().count();

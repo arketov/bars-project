@@ -333,6 +333,48 @@ pub fn set(
     Ok(appearance)
 }
 
+/// Ключи оформления следуют за документами и папками при перемещении.
+pub fn move_keys(
+    project: &Path,
+    docs_root: &str,
+    from: &str,
+    to: &str,
+) -> Result<(), AppearanceError> {
+    let _guard = LOCK.lock().unwrap_or_else(|e| e.into_inner());
+    let mut appearance = read(project)?;
+    let prefix = docs_root.trim_matches('/').trim_start_matches("./");
+    let local = |p: &str| {
+        if prefix == "." || prefix.is_empty() {
+            p.to_string()
+        } else {
+            p.strip_prefix(&format!("{prefix}/"))
+                .unwrap_or(p)
+                .to_string()
+        }
+    };
+    let from = local(from);
+    let to = local(to);
+    let mut changed = false;
+    for entries in [&mut appearance.folders, &mut appearance.documents] {
+        let updates: Vec<_> = entries
+            .iter()
+            .filter_map(|(key, value)| {
+                let new = bars_core::link_index::moves::mapped(key, &from, &to);
+                (new != *key).then(|| (key.clone(), new, value.clone()))
+            })
+            .collect();
+        for (old, new, value) in updates {
+            entries.remove(&old);
+            entries.insert(new, value);
+            changed = true;
+        }
+    }
+    if changed {
+        write(project, &appearance)?;
+    }
+    Ok(())
+}
+
 fn write(project: &Path, appearance: &Appearance) -> Result<(), AppearanceError> {
     let io = |e: std::io::Error| AppearanceError::Io(e.to_string());
     let file = file_of(project);

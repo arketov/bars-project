@@ -704,7 +704,7 @@ impl AcceleratorDoc {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EmbedDoc {
     pub accelerator: AcceleratorDoc,
-    /// `builtin`, `remote`, `local-openai` или `ollama` (только embed).
+    /// `builtin`, `remote`, `local-openai`, `tei`; `ollama`/`lmstudio` только embed.
     pub source: String,
     pub model: String,
     #[serde(default)]
@@ -1067,10 +1067,14 @@ methods! {
     NewTopicsCheck: crate::NewTopicsCheckParams => crate::NewTopicDetail, "new_topics_check", Window;
     NewTopicsSetStatus: crate::NewTopicsSetStatusParams => crate::NewTopicsChangedOutput, "new_topics_set_status", Window;
     NewTopicsRename: crate::NewTopicsRenameParams => crate::NewTopicsChangedOutput, "new_topics_rename", Window;
+    NewTopicsMerge: crate::NewTopicsMergeParams => crate::NewTopicsChangedOutput, "new_topics_merge", Window;
     NewTopicsDelete: crate::NewTopicsDeleteParams => AcceptedOutput, "new_topics_delete", Window;
     NewTopicsClear: crate::NewTopicsClearParams => crate::NewTopicsGenerationOutput, "new_topics_clear", Window;
     NewTopicsSettings: crate::NewTopicsSettingsParams => crate::NewTopicsSettingsOutput, "new_topics_settings", Window;
     LinksOf: crate::LinksOfParams => crate::LinksOfOutput, "links_of", Window;
+    TextSearch: crate::TextSearchParams => crate::TextSearchOutput, "text_search", Window;
+    DiskText: crate::DiskTextParams => crate::DiskTextOutput, "disk_text", All;
+    DiskLinks: crate::DiskLinksParams => crate::DiskLinksOutput, "disk_links", All;
     AuditList: crate::AuditListParams => crate::AuditListOutput, "audit_list", Window;
     AuditRun: crate::AuditRunParams => crate::AuditRunOutput, "audit_run", Window;
     AuditCancel: crate::AuditCancelParams => crate::AuditCancelOutput, "audit_cancel", Window;

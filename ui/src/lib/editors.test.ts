@@ -25,6 +25,22 @@ beforeEach(() => {
 });
 afterEach(() => vi.useRealTimers());
 
+it("перемещение сохраняет буфер и записывает по новому пути без захвата соседнего префикса", async () => {
+  vi.mocked(documentRead).mockResolvedValue(read());
+  const buffer = editors.attach("move-project", "docs/a/x.md", "");
+  const neighbor = editors.attach("move-project", "docs/ab/x.md", "");
+  await buffer.load(); await neighbor.load();
+  editors.movePaths("move-project", "docs/a", "docs/b");
+  expect(editors.get("move-project", "docs/a/x.md")).toBeUndefined();
+  expect(editors.get("move-project", "docs/b/x.md")).toBe(buffer);
+  expect(neighbor.path).toBe("docs/ab/x.md");
+  buffer.edit("Новая правка");
+  vi.mocked(documentWrite).mockResolvedValue(saved("r2"));
+  await buffer.save();
+  expect(vi.mocked(documentWrite).mock.calls.at(-1)?.slice(0,2)).toEqual(["move-project","docs/b/x.md"]);
+  editors.discard(buffer); editors.discard(neighbor);
+});
+
 it("чтение берёт текст, ревизию, перевод строк и BOM с диска", async () => {
   const buffer = await loaded({ eol: "crlf", bom: true });
   expect([buffer.text, buffer.revision, buffer.eol, buffer.bom, buffer.status]).toEqual(["# а\n", "r1", "crlf", true, "clean"]);

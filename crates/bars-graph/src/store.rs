@@ -135,6 +135,15 @@ pub fn publish(
     data: &Dataset,
     expected: &BTreeMap<String, String>,
 ) -> Result<(), GraphError> {
+    publish_with_errors(db, data, expected, &[])
+}
+
+pub fn publish_with_errors(
+    db: &mut Connection,
+    data: &Dataset,
+    expected: &BTreeMap<String, String>,
+    errors: &[GraphFileError],
+) -> Result<(), GraphError> {
     validate(data)?;
     let tx = db.transaction()?;
     if &document_manifest(&tx)? != expected {
@@ -147,7 +156,25 @@ pub fn publish(
         .iter()
         .map(|s| (s.meta.path.clone(), s.meta.hash.clone()))
         .collect();
-    if actual != *expected {
+    let failed: BTreeSet<_> = errors.iter().map(|e| e.path.as_str()).collect();
+    let failed_metadata: BTreeSet<_> = data
+        .failed_sources
+        .iter()
+        .map(|s| s.path.as_str())
+        .collect();
+    if actual.iter().any(|(p, h)| expected.get(p) != Some(h))
+        || failed_metadata != failed
+        || data
+            .failed_sources
+            .iter()
+            .any(|s| expected.get(&s.path) != Some(&s.hash))
+        || expected
+            .keys()
+            .any(|p| !actual.contains_key(p) && !failed.contains(p.as_str()))
+        || failed
+            .iter()
+            .any(|p| actual.contains_key(*p) || !expected.contains_key(*p))
+    {
         return Err(GraphError::InvalidData(
             "граф не покрывает снимок индексированных документов".into(),
         ));
@@ -220,6 +247,14 @@ pub fn publish(
         ("broken_links", serde_json::to_string(&data.broken_links)?),
         ("warnings", serde_json::to_string(&data.warnings)?),
         (
+            "similarity_state",
+            serde_json::to_string(&data.similarity_state)?,
+        ),
+        (
+            "failed_sources",
+            serde_json::to_string(&data.failed_sources)?,
+        ),
+        (
             "semantic_state",
             serde_json::to_string(&data.semantic_state)?,
         ),
@@ -227,7 +262,73 @@ pub fn publish(
         tx.execute("INSERT INTO graph_aux VALUES(?1,?2)", params![key, value])?;
     }
     set_meta(&tx, "snapshot", &data.snapshot)?;
+    set_meta(&tx, "manifest", &serde_json::to_string(expected)?)?;
+    set_meta(
+        &tx,
+        "file_errors",
+        &serde_json::to_string(&errors.iter().take(100).collect::<Vec<_>>())?,
+    )?;
+    set_meta(&tx, "file_errors_total", &errors.len().to_string())?;
     set_meta(&tx, "method", METHOD_VERSION)?;
+    let mut layers = BTreeMap::new();
+    for (name, origin, fingerprint, state) in [
+        (
+            "structure",
+            Origin::Structural,
+            "markdown-structure-v1",
+            if errors.is_empty() {
+                LayerState::Ready
+            } else {
+                LayerState::Partial
+            },
+        ),
+        (
+            "semantic",
+            Origin::ExplicitRule,
+            METHOD_VERSION,
+            data.semantic_state,
+        ),
+        (
+            "similarity",
+            Origin::Similarity,
+            "cosine-knn-v1:k=5:tau=0.5:limit=1000000",
+            data.similarity_state,
+        ),
+    ] {
+        let edges: Vec<_> = data.edges.iter().filter(|e| e.origin == origin).collect();
+        let proof: BTreeSet<_> = edges.iter().flat_map(|e| e.evidence.iter()).collect();
+        let evidence: Vec<_> = data
+            .evidence
+            .iter()
+            .filter(|e| proof.contains(&e.id))
+            .collect();
+        let source_revisions = (origin == Origin::Structural).then_some(expected);
+        let generation = blake3::hash(&serde_json::to_vec(&(
+            fingerprint,
+            source_revisions,
+            &edges,
+            evidence,
+            &data.failed_sources,
+        ))?)
+        .to_hex()
+        .to_string();
+        layers.insert(
+            name,
+            GraphLayerStatus {
+                state,
+                generation: if state == LayerState::NotBuilt {
+                    None
+                } else {
+                    Some(generation)
+                },
+                fingerprint: fingerprint.into(),
+                processed: data.sources.len(),
+                total: expected.len(),
+                failed: errors.len(),
+            },
+        );
+    }
+    set_meta(&tx, "layers", &serde_json::to_string(&layers)?)?;
     set_meta(
         &tx,
         "state",
@@ -244,6 +345,17 @@ pub fn publish(
 }
 
 pub fn status(db: &Connection) -> Result<GraphStatus, GraphError> {
+    if db.is_autocommit() {
+        let tx = db.unchecked_transaction()?;
+        let status = status_snapshot(&tx)?;
+        tx.commit()?;
+        Ok(status)
+    } else {
+        status_snapshot(db)
+    }
+}
+
+fn status_snapshot(db: &Connection) -> Result<GraphStatus, GraphError> {
     let exists: bool = db.query_row(
         "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='graph_meta')",
         [],
@@ -257,6 +369,11 @@ pub fn status(db: &Connection) -> Result<GraphStatus, GraphError> {
             source_count: 0,
             error: None,
             method: METHOD_VERSION.into(),
+            progress: None,
+            file_errors: vec![],
+            file_errors_total: 0,
+            layers: BTreeMap::new(),
+            paused: false,
         });
     }
     let mut state: LayerState = serde_json::from_str(&format!(
@@ -268,16 +385,74 @@ pub fn status(db: &Connection) -> Result<GraphStatus, GraphError> {
         state = LayerState::Stale;
     }
     let nonempty = |s: Option<String>| s.filter(|s| !s.is_empty());
+    let snapshot = nonempty(meta(db, "snapshot")?);
+    let source_count = db.query_row("SELECT count(*) FROM graph_sources", [], |r| {
+        r.get::<_, u32>(0)
+    })? as usize;
+    let file_errors_total = meta(db, "file_errors_total")?
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(0);
+    let mut layers: BTreeMap<String, GraphLayerStatus> = meta(db, "layers")?
+        .map(|v| serde_json::from_str(&v))
+        .transpose()?
+        .unwrap_or_default();
+    // Состояние задания не подменяет состояние сохранённого слоя тех же исходников.
+    let saved_manifest: Option<BTreeMap<String, String>> = meta(db, "manifest")?
+        .map(|v| serde_json::from_str(&v))
+        .transpose()?;
+    if method != METHOD_VERSION
+        || saved_manifest
+            .map(|m| document_manifest(db).map(|current| current != m))
+            .transpose()?
+            .unwrap_or(false)
+    {
+        for layer in layers.values_mut() {
+            layer.state = LayerState::Stale;
+        }
+    }
+    let mut file_errors: Vec<GraphFileError> = meta(db, "file_errors")?
+        .map(|v| serde_json::from_str(&v))
+        .transpose()?
+        .unwrap_or_default();
+    let docs_root: Option<String> = db
+        .query_row(
+            "SELECT data FROM graph_aux WHERE key='docs_root'",
+            [],
+            |r| r.get::<_, String>(0),
+        )
+        .optional()?
+        .map(|v| serde_json::from_str(&v))
+        .transpose()?;
+    if let Some(root) = docs_root {
+        for error in &mut file_errors {
+            if let Ok(path) = std::path::Path::new(&error.path).strip_prefix(&root) {
+                error.path = path.to_string_lossy().replace('\\', "/");
+            }
+        }
+    }
     Ok(GraphStatus {
         state,
-        snapshot: nonempty(meta(db, "snapshot")?),
+        snapshot,
         active_job: nonempty(meta(db, "active_job")?),
-        source_count: db.query_row("SELECT count(*) FROM graph_sources", [], |r| {
-            r.get::<_, u32>(0)
-        })? as usize,
+        source_count,
         error: nonempty(meta(db, "error")?),
         method,
+        progress: meta(db, "progress")?
+            .map(|v| serde_json::from_str(&v))
+            .transpose()?,
+        file_errors,
+        file_errors_total,
+        layers,
+        paused: meta(db, "paused")?.as_deref() == Some("true"),
     })
+}
+
+pub fn set_paused(db: &Connection, paused: bool) -> Result<(), GraphError> {
+    set_meta(db, "paused", if paused { "true" } else { "false" })
+}
+
+pub fn set_progress(db: &Connection, progress: &GraphProgress) -> Result<(), GraphError> {
+    set_meta(db, "progress", &serde_json::to_string(progress)?)
 }
 
 pub fn set_state(
@@ -336,10 +511,21 @@ pub fn load(db: &Connection) -> Result<Dataset, GraphError> {
         namespace: serde_json::from_str(&parse("namespace")?)?,
         docs_root: serde_json::from_str(&parse("docs_root")?)?,
         snapshot: state.snapshot.unwrap(),
+        layers: state.layers,
         sources: rows("sources")?
             .iter()
             .map(|s| serde_json::from_str(s))
             .collect::<Result<_, _>>()?,
+        failed_sources: tx
+            .query_row(
+                "SELECT data FROM graph_aux WHERE key='failed_sources'",
+                [],
+                |r| r.get::<_, String>(0),
+            )
+            .optional()?
+            .map(|s| serde_json::from_str(&s))
+            .transpose()?
+            .unwrap_or_default(),
         nodes: rows("nodes")?
             .iter()
             .map(|s| serde_json::from_str(s))
@@ -355,12 +541,25 @@ pub fn load(db: &Connection) -> Result<Dataset, GraphError> {
         broken_links: serde_json::from_str(&parse("broken_links")?)?,
         warnings: serde_json::from_str(&parse("warnings")?)?,
         semantic_state: serde_json::from_str(&parse("semantic_state")?)?,
+        similarity_state: tx
+            .query_row(
+                "SELECT data FROM graph_aux WHERE key='similarity_state'",
+                [],
+                |r| r.get::<_, String>(0),
+            )
+            .optional()?
+            .map(|s| serde_json::from_str(&s))
+            .transpose()?
+            .unwrap_or(LayerState::Partial),
     };
-    let expected: BTreeMap<_, _> = data
-        .sources
-        .iter()
-        .map(|s| (s.meta.path.clone(), s.meta.hash.clone()))
-        .collect();
+    let expected: BTreeMap<String, String> = if let Some(manifest) = meta(&tx, "manifest")? {
+        serde_json::from_str(&manifest)?
+    } else {
+        data.sources
+            .iter()
+            .map(|s| (s.meta.path.clone(), s.meta.hash.clone()))
+            .collect()
+    };
     if document_manifest(&tx)? != expected {
         return Err(GraphError::NotReady("stale".into()));
     }

@@ -1,0 +1,15 @@
+   Compiling bars-protocol v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-protocol)
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 36.34s
+     Running unittests src\lib.rs (C:/bt/bars\debug\deps\bars_worker-61e9024e2c58b65d.exe)
+
+running 6 tests
+test text_search::tests::text_search_snippet_keeps_match_after_long_unicode_prefix_and_cancels ... ok
+test text_search::tests::text_search_regex_errors_empty_matches_and_line_anchors ... ok
+test text_search::tests::text_search_limits_pages_and_changed_revision ... ok
+test text_search::tests::text_search_unicode_ranges_bom_crlf_and_disk_freshness ... ok
+test text_search::tests::text_search_scope_filter_and_exclusions ... ok
+test text_search::tests::text_search_worker_dispatch_without_index_and_model ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 271 filtered out; finished in 1.03s
+

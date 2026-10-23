@@ -40,6 +40,20 @@ const DOC: SettingsDoc = {
 };
 
 describe("settings-logic", () => {
+  it("validates LM Studio identity and disallows enabled rerank", () => {
+    const draft = clone(DOC);
+    draft.embed.source = "lmstudio";
+    draft.embed.model = "text-embedding-qwen3-embedding-0.6b";
+    draft.embed.base_url = "http://127.0.0.1:1234/v1";
+    expect(validate(draft)).toEqual({});
+    expect(needsReindex(DOC, draft)).toBe(true);
+    expect(parseFingerprint("lmstudio:model")).toEqual({source:"lmstudio",model:"model"});
+    draft.rerank.source = "lmstudio";
+    draft.rerank.enabled = true;
+    expect(validate(draft)["rerank.source"]).toContain("LM Studio");
+    draft.rerank.enabled = false;
+    expect(validate(draft)["rerank.source"]).toBeUndefined();
+  });
   it("supports Ollama embed identity but rejects enabled Ollama rerank", () => {
     const draft = clone(DOC);
     draft.embed.source = "ollama";
@@ -66,7 +80,6 @@ describe("settings-logic", () => {
       expect(validate(draft)["indexing.edit_pause_seconds"]).toBeTruthy();
     }
   });
-
   it("independent device preferences do not change index identity", () => {
     const draft = clone(DOC);
     draft.embed.accelerator = "cpu";

@@ -1,0 +1,29 @@
+{
+  "releaseBuild": {
+    "status": "passed",
+    "command": "cargo build --release -p bars-core --example bench_search_cpu",
+    "builtAt": "2026-10-23T09:45:34.298Z",
+    "exeSha256": "7517f7d4af50436dd70f71cf91865e494708f4ca100825bc8ca769e21aa58d89",
+    "scope": "Source of this example compiled before subsequent parallel graph edits; existing executable used by checks"
+  },
+  "rustfmt": {
+    "status": "passed",
+    "command": "rustfmt --edition 2024 --check crates/bars-core/examples/bench_search_cpu.rs"
+  },
+  "nodeSyntax": {
+    "status": "passed",
+    "command": "node --check scripts/check-search-cpu.mjs"
+  },
+  "clippy": {
+    "status": "failed",
+    "exit": 101,
+    "command": "cargo clippy --release -p bars-core --example bench_search_cpu -- -D warnings",
+    "scope": "3 diagnostics in parallel bars-graph; full log saved, no unrelated edits"
+  },
+  "manualReview": {
+    "status": "performed",
+    "scope": "Strict model/vector/corpus guards; release live SQLite snapshots before model load; no completed marker after partial attempt; own-process Monitor; no implicit downloads"
+  },
+  "sourceSha256": "4ed3ef613831f446910713105cb8e6dcac80be36045b4cd170465bec7898459d",
+  "checkScriptSha256": "b13ec91a147142c44cefb1cb0ffcb8fff251405f35c6a40880096130517b288d"
+}

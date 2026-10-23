@@ -1,5 +1,38 @@
 use super::*;
 
+#[test]
+fn shared_window_link_fixtures() {
+    let cases: serde_json::Value =
+        serde_json::from_str(include_str!("../../tests/fixtures/document-links.json")).unwrap();
+    for case in cases.as_array().unwrap() {
+        let paths = DocSet::new(
+            case["paths"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|p| p.as_str().unwrap().to_string()),
+        );
+        let mut found: Vec<_> = parse_links(case["text"].as_str().unwrap())
+            .iter()
+            .filter_map(
+                |link| match paths.resolve(case["source"].as_str().unwrap(), link) {
+                    Resolved::Found(p) => Some(p.to_string()),
+                    _ => None,
+                },
+            )
+            .collect();
+        found.sort();
+        let mut expected: Vec<_> = case["targets"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|p| p.as_str().unwrap().to_string())
+            .collect();
+        expected.sort();
+        assert_eq!(found, expected, "{}", case["name"]);
+    }
+}
+
 fn docs(paths: &[&str]) -> DocSet {
     DocSet::new(paths.iter().map(|p| p.to_string()))
 }

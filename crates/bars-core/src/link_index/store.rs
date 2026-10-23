@@ -7,6 +7,8 @@ use rusqlite::{Connection, TransactionBehavior, params};
 
 use crate::indexing::chunking::split_frontmatter;
 use crate::indexing::walk::{WalkError, read_utf8_path, walk_docs};
+mod page;
+pub use page::LinkPage;
 
 /// Версия разбора и разрешения ссылок: смена — полная пересборка индекса без модели.
 pub const LINKS_PARSER_VERSION: &str = "links-v1";
@@ -23,6 +25,8 @@ pub enum LinkIndexError {
     Io(#[from] std::io::Error),
     #[error("индекс ссылок: {0}")]
     Walk(#[from] WalkError),
+    #[error("сверка ссылок не завершена: {0}")]
+    Refresh(String),
 }
 
 /// `.bars/links.sqlite3` проекта.
@@ -196,8 +200,29 @@ impl LinkIndex {
         project_root: &Path,
         docs_root: &Path,
     ) -> Result<RefreshStats, LinkIndexError> {
+        self.refresh_policy(project_root, docs_root, false)
+    }
+
+    /// Агенту нельзя выдавать молча неполный снимок как свежий.
+    pub fn refresh_checked(
+        &mut self,
+        project_root: &Path,
+        docs_root: &Path,
+    ) -> Result<RefreshStats, LinkIndexError> {
+        self.refresh_policy(project_root, docs_root, true)
+    }
+
+    fn refresh_policy(
+        &mut self,
+        project_root: &Path,
+        docs_root: &Path,
+        strict: bool,
+    ) -> Result<RefreshStats, LinkIndexError> {
         let prefix = docs_prefix(docs_root)?;
         let walk = walk_docs(project_root, docs_root)?;
+        if strict && !walk.problems.is_empty() {
+            return Err(LinkIndexError::Refresh("не все папки прочитаны".into()));
+        }
         let reset = self.meta("parser")?.as_deref() != Some(LINKS_PARSER_VERSION)
             || self.meta("docs_prefix")?.as_deref() != Some(prefix.as_str());
 
@@ -223,9 +248,21 @@ impl LinkIndex {
             let modified = modified_ns(file.modified);
             let old = known.get(&file.path);
             if old.is_some_and(|(s, m, _)| *s == size && *m == modified && modified >= 0) {
+                if strict && old.is_some_and(|(_, _, h)| h == "unreadable") {
+                    return Err(LinkIndexError::Refresh(format!(
+                        "не прочитан {}",
+                        file.path
+                    )));
+                }
                 continue;
             }
             let text = read_utf8_path(&file.fs_path).ok();
+            if strict && text.is_none() {
+                return Err(LinkIndexError::Refresh(format!(
+                    "не прочитан {}",
+                    file.path
+                )));
+            }
             let hash = match &text {
                 Some(text) => blake3::hash(text.as_bytes()).to_hex().to_string(),
                 None => "unreadable".to_string(),

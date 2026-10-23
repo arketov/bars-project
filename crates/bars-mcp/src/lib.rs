@@ -1,4 +1,4 @@
-//! `bars-mcp` как библиотека: stdio-MCP с шестью инструментами (Т-2, Т-19).
+//! `bars-mcp` как библиотека: stdio-MCP с шестнадцатью инструментами (Т-2, Т-19).
 //!
 //! Каждый инструмент — один вызов метода протокола ([`bars_protocol`]); индекса и моделей здесь нет
 //! (НФТ-3). Ответ на `initialize` и список инструментов отдаются сразу, не подключаясь к воркеру;
@@ -8,6 +8,7 @@
 //! сбрасывается в `false`, а прокси его и не передаёт.
 
 mod graph;
+mod disk_read;
 mod instructions;
 mod observation;
 mod render;
@@ -270,7 +271,7 @@ impl BarsMcp {
         Self {
             env,
             client: Arc::new(Mutex::new(None)),
-            tool_router: Self::tool_router() + Self::graph_tool_router(),
+            tool_router: Self::tool_router() + Self::graph_tool_router() + disk_read::router(),
         }
     }
 

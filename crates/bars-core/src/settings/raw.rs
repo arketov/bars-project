@@ -545,6 +545,13 @@ impl RerankTable {
                 "Ollama не поддерживает API rerank; выберите встроенную модель или совместимый сервер",
             ));
         }
+        if self.source == Some(ModelSource::Lmstudio) {
+            return Err(invalid(
+                file,
+                "rerank.source",
+                "LM Studio не поддерживает штатный API rerank; выберите встроенную модель или совместимый сервер",
+            ));
+        }
         ProviderFields {
             table: "rerank",
             source: self.source,

@@ -1,0 +1,3 @@
+pid, process_name, used_gpu_memory [MiB]
+14624, C:\Programs\LMStudio\LM Studio\LM Studio.exe, [N/A]
+10184, C:\Programs\LMStudio\LM Studio\LM Studio.exe, [N/A]

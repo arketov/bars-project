@@ -24,6 +24,8 @@ Update existing documents before creating duplicates. Current behaviour and feat
 
 ## Start of a session
 
+For a just-saved handoff, read it from disk with `bars_read`; embedding may still be queued. Use `bars_text_search` for an exact phrase in saved session files. Neither tool reads unsaved editor buffers. Do not force reindex to make a recent journal entry searchable.
+
 Identify the task subject before looking for its history; resolve a stage number through the known project plan/register first. Find the latest `handoff.md` on that topic in `docs/chats/`. If the path is known, call `bars_read` directly, or `bars_outline` for headings; no preliminary search is required. Open `log.md` only when you need detailed history.
 
 If the handoff is unknown, search session history, for example `bars_rag_search({query:"Последние результаты проверки устройств моделей",modules:["chats"]})`. Use the project's actual first-level module name; discover it with `bars_projects` when needed. For cross-cutting current contracts, use a broader scope instead of restricting every query to history.

@@ -1,0 +1,28 @@
+   Compiling llama-cpp-2 v0.1.160
+   Compiling bars-protocol v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-protocol)
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Finished `release` profile [optimized] target(s) in 43.38s
+     Running unittests src\lib.rs (C:/bt/bars\release\deps\bars_worker-ead86c2eeea92824.exe)
+
+running 17 tests
+test handler::tests::new_topics::topic_methods_are_window_only_and_need_an_exact_project ... ok
+test handler::tests::new_topics::window_context_is_taken_out_of_the_params ... ok
+test handler::tests::new_topics::empty_window_search_becomes_a_topic_and_repeats_merge ... ok
+test handler::tests::new_topics::knowledge_check_does_not_replace_failed_rerank_with_cosine ... ok
+test handler::tests::new_topics::delete_clear_and_rename_do_not_resurrect_data ... ok
+test handler::tests::new_topics::project_deletion_removes_the_topics_database_and_blocks_late_writes ... ok
+test handler::tests::new_topics::mcp_collects_and_cli_does_not_through_the_channel ... ok
+test handler::tests::new_topics::knowledge_check_requires_rerank_even_when_regular_search_disables_it ... ok
+test handler::tests::new_topics::empty_check_leaves_the_topic_open_and_a_missing_scope_is_not_widened_silently ... ok
+test handler::tests::new_topics::explicit_merge_uses_both_revisions_and_keeps_observation_counts ... ok
+test handler::tests::new_topics::knowledge_check_reports_loading_rerank_as_incomplete_without_cosine_hits ... ok
+test handler::tests::new_topics::not_ready_index_does_not_create_a_gap ... ok
+test handler::tests::new_topics::manual_mark_creates_a_topic_with_a_non_empty_result_and_is_idempotent ... ok
+test handler::tests::new_topics::diagnostics_and_non_empty_results_do_not_create_demand ... ok
+test handler::tests::new_topics::scope_is_kept_and_a_repeated_request_id_is_counted_once ... ok
+test handler::tests::new_topics::check_finds_materials_without_adding_demand_and_keeps_the_user_decision ... ok
+test handler::tests::new_topics::disabling_and_clearing_stop_late_and_new_records ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 268 filtered out; finished in 1.58s
+

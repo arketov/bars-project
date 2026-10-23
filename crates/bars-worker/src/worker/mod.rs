@@ -962,6 +962,7 @@ impl Worker {
             && !lock(&self.inner.docs).has_pending()
             && !self.inner.busy.load(Ordering::SeqCst)
             && lock(&self.inner.scans).is_empty()
+            && lock(&self.inner.graph_jobs).is_empty()
     }
 
     fn registered(&self, path: &Path) -> Result<PathBuf, WorkerError> {
@@ -1502,7 +1503,8 @@ impl Inner {
             let owner = path.clone();
             observer = observer.with_defer(Arc::new(move |document: &str, full_check: bool| {
                 let docs = lock(&docs);
-                (!full_check && docs.is_waiting(&owner, document)) || docs.is_error(&owner, document)
+                (!full_check && docs.is_waiting(&owner, document))
+                    || docs.is_error(&owner, document)
             }));
         }
         log::info!("Начата индексация: {}", path.display());
@@ -1575,16 +1577,26 @@ impl Inner {
         let unfinished: Vec<_> = lock(&taken).iter().cloned().collect();
         self.finish_docs(&path, &unfinished, &result.outcome);
         let outcome = result.outcome.clone();
+        // Готовность текста публикуется уже с зарегистрированным заданием графа.
+        if matches!(outcome, Outcome::Updated(_) | Outcome::Interrupted { .. }) {
+            let worker = Worker {
+                inner: self.clone(),
+            };
+            if let Err(error) = worker.graph_start(&path, false).await {
+                log::warn!("Граф проекта не поставлен на обновление: {error}");
+            }
+        }
         // Публикация итога только после применения состояния проекта.
         self.apply(&path, previous, &job_gate, result);
-        let mut journal = lock(&self.models.operations);
-        journal.edit(operation_id, |op| {
-            let p = cell.progress();
-            op.docs_done = Some(p.docs_done);
-            op.docs_total = cell.total_known().then_some(p.docs_total);
-        });
-        journal.index_result(operation_id, &outcome, rebuild);
-        drop(journal);
+        {
+            let mut journal = lock(&self.models.operations);
+            journal.edit(operation_id, |op| {
+                let p = cell.progress();
+                op.docs_done = Some(p.docs_done);
+                op.docs_total = cell.total_known().then_some(p.docs_total);
+            });
+            journal.index_result(operation_id, &outcome, rebuild);
+        }
         *lock(&self.current) = None;
         if found_changes {
             self.after_full_check(&path, periodic);

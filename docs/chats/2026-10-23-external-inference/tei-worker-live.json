@@ -1,0 +1,118 @@
+{
+  "source": "tei",
+  "embed_url": "http://127.0.0.1:18085",
+  "embed_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+  "rerank_url": "http://127.0.0.1:18086",
+  "rerank_model": "cross-encoder/mmarco-mMiniLMv2-L12-H384-v1",
+  "settings_roundtrip": true,
+  "searches": [
+    {
+      "query": "Как найти документы по смыслу?",
+      "elapsed_ms": 192,
+      "output": {
+        "results": [
+          {
+            "chunk_id": "2-da30dd35",
+            "path": "docs/search.md",
+            "module": ".",
+            "title": "search",
+            "heading_chain": "search",
+            "first_line": 5,
+            "last_line": 7,
+            "text": "Семантический поиск находит документацию по смыслу. Индексация строит векторы документов.",
+            "score": 0.9091032147407532,
+            "score_kind": "rerank"
+          },
+          {
+            "chunk_id": "3-30e0f07b",
+            "path": "docs/theme.md",
+            "module": ".",
+            "title": "theme",
+            "heading_chain": "theme",
+            "first_line": 5,
+            "last_line": 7,
+            "text": "Окно приложения поддерживает светлую и тёмную тему оформления.",
+            "score": 0.00748962489888072,
+            "score_kind": "rerank"
+          },
+          {
+            "chunk_id": "1-016e39ff",
+            "path": "docs/cooking.md",
+            "module": ".",
+            "title": "cooking",
+            "heading_chain": "cooking",
+            "first_line": 5,
+            "last_line": 7,
+            "text": "Для борща нужны свёкла и капуста. Овощи варят в кастрюле.",
+            "score": 0.0001511819864390418,
+            "score_kind": "rerank"
+          }
+        ],
+        "applied": {
+          "results": 3,
+          "candidates": 30,
+          "rerank_candidates": 15,
+          "min_score": 0.0,
+          "score_kind": "rerank",
+          "clamped": false
+        },
+        "indexing": true,
+        "pending": 0
+      }
+    },
+    {
+      "query": "Какие овощи нужны для борща?",
+      "elapsed_ms": 82,
+      "output": {
+        "results": [
+          {
+            "chunk_id": "1-016e39ff",
+            "path": "docs/cooking.md",
+            "module": ".",
+            "title": "cooking",
+            "heading_chain": "cooking",
+            "first_line": 5,
+            "last_line": 7,
+            "text": "Для борща нужны свёкла и капуста. Овощи варят в кастрюле.",
+            "score": 0.9985162615776062,
+            "score_kind": "rerank"
+          },
+          {
+            "chunk_id": "3-30e0f07b",
+            "path": "docs/theme.md",
+            "module": ".",
+            "title": "theme",
+            "heading_chain": "theme",
+            "first_line": 5,
+            "last_line": 7,
+            "text": "Окно приложения поддерживает светлую и тёмную тему оформления.",
+            "score": 0.00034599160426296294,
+            "score_kind": "rerank"
+          },
+          {
+            "chunk_id": "2-da30dd35",
+            "path": "docs/search.md",
+            "module": ".",
+            "title": "search",
+            "heading_chain": "search",
+            "first_line": 5,
+            "last_line": 7,
+            "text": "Семантический поиск находит документацию по смыслу. Индексация строит векторы документов.",
+            "score": 0.00006553815910592675,
+            "score_kind": "rerank"
+          }
+        ],
+        "applied": {
+          "results": 3,
+          "candidates": 30,
+          "rerank_candidates": 15,
+          "min_score": 0.0,
+          "score_kind": "rerank",
+          "clamped": false
+        },
+        "indexing": false,
+        "pending": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+    Checking onig_sys v69.9.3
+    Checking ring v0.17.14
+    Checking libsqlite3-sys v0.38.2
+    Checking llama-cpp-sys-2 v0.1.160
+    Checking onig v6.5.3
+    Checking rusqlite v0.40.2
+    Checking llama-cpp-2 v0.1.160
+    Checking tokenizers v0.22.2
+    Checking tokenizers v0.23.2
+    Checking bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+    Checking rustls-webpki v0.103.15
+    Checking rustls v0.23.46
+    Checking bars-protocol v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-protocol)
+    Checking candle-core v0.11.0
+    Checking ureq v3.4.2
+    Checking hf-hub v0.5.0
+    Checking candle-nn v0.11.0
+    Checking fastembed v7.1.1
+    Checking bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Checking bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Finished `release` profile [optimized] target(s) in 12.31s

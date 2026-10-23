@@ -1,0 +1,41 @@
+{
+  "roots": [
+    "C:/Users/arketov/Desktop/cyberProject/ai-mutiplayer-bots/docs",
+    "C:/Users/arketov/Desktop/bars-project/docs",
+    "C:/Users/arketov/Desktop/cyberProject/docs",
+    "C:/Users/arketov/Desktop/cyberProject/cyberback/docs",
+    "C:/Users/arketov/Desktop/cyberProject/cyberdriver/docs",
+    "C:/Users/arketov/Desktop/cyberProject/cyberassistant/docs",
+    "C:/Users/arketov/Desktop/cyberProject/cyberalgorythm/docs"
+  ],
+  "seeds": [
+    "C:/Users/arketov/AppData/Local/Temp/bars-search-cpu-01a1680e/seed-vectors.sqlite"
+  ],
+  "queries": [
+    "Как подключить bars к Codex?",
+    "Как работает поиск без реранка?",
+    "Где хранятся скачанные модели?",
+    "Как выбирается устройство встроенной модели?",
+    "Как изменить размер чанка?",
+    "Что происходит при смене модели?",
+    "Как остановить индексацию?",
+    "Почему поиск недоступен во время загрузки модели?",
+    "Как устроен граф документов?",
+    "Как сохранить и восстановить раскладку окна?",
+    "Какие требования к удалению проекта?",
+    "Как обрабатываются относительные ссылки Markdown?",
+    "Как обнаружить дубликаты разделов?",
+    "Как читать документ с номерами строк?",
+    "Как переключить светлую и тёмную тему?",
+    "bars_rag_search",
+    "min_chars",
+    "settings.toml",
+    "NativePitStop",
+    "OwnershipLost",
+    "Как контролируется скорость ботов?",
+    "Как устроено обслуживание автомобиля в пит-лейне?",
+    "Какие доказательства подтверждают восстановление runtime spline после завершения владельца и как исключить запись в чужую траекторию?",
+    "Как найти документ по точному имени, ограничить область одним модулем и открыть найденный фрагмент в отдельном окне редактора?",
+    "Рецепт марсианского пирога из нейтринного шоколада"
+  ]
+}

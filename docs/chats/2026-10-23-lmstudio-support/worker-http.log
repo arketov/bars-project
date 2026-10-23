@@ -1,0 +1,17 @@
+    Blocking waiting for file lock on build directory
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Finished `release` profile [optimized] target(s) in 2m 06s
+     Running unittests src\lib.rs (C:/bt/bars\release\deps\bars_worker-ead86c2eeea92824.exe)
+
+running 7 tests
+test handler::tests::external_models::lmstudio_embed_and_independent_http_rerank_serve_real_worker_search ... ok
+test handler::tests::external_models::tei_native_embed_and_rerank_serve_full_worker_search ... ok
+test handler::tests::external_models::ollama_embed_and_independent_http_rerank_serve_real_worker_search ... ok
+test handler::tests::external_models::switching_the_embed_model_asks_for_reindex_and_does_not_start_it ... ok
+test handler::tests::external_models::local_openai_address_works_without_a_key ... ok
+test handler::tests::external_models::a_failing_rerank_provider_leaves_the_search_without_rerank_and_says_why ... ok
+test handler::tests::external_models::remote_embed_and_rerank_serve_search_with_the_key_from_the_store ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 274 filtered out; finished in 0.52s
+

@@ -4,8 +4,9 @@ import Workspace from "./Workspace.svelte";
 import WorkspaceDocument from "./WorkspaceDocument.svelte";
 import { app } from "./app.svelte";
 import { editors } from "./editors.svelte";
+import { moved } from "./moved.svelte";
 import { EditorView } from "@codemirror/view";
-import { documentId, layoutKey } from "./workspace-layout";
+import { decodeLayout, documentId, layoutKey } from "./workspace-layout";
 import { call } from "./api";
 import { mockCall } from "./mock";
 import { settings } from "./settings.svelte";
@@ -17,6 +18,22 @@ let component: ReturnType<typeof mount> | undefined;
 const project = { path: "C:/А", name: "А", docs_root: "docs", state: "ready" as const, modules: [{ name: "manual", documents: 1 }] };
 const hit = (path: string) => ({ path, title: path, first_line: 3, last_line: 4 });
 const settle = async () => { await new Promise(resolve => setTimeout(resolve, 0)); flushSync(); };
+
+it("после перемещения открытая вкладка получает новый путь и повторно не дублируется", async () => {
+  component = mount(Workspace,{target:document.body}); flushSync(); await settle();
+  app.viewer = {hit:hit("docs/a.md"),title:"А",text:"# А",missing:false}; flushSync(); await settle();
+  await moved.accept({project:project.path,from:"docs/a.md",to:"docs/new.md"}); flushSync(); await settle();
+  expect(document.querySelector('[data-document-path="docs/new.md"]')).not.toBeNull();
+  app.viewer = {hit:hit("docs/new.md"),title:"А",text:"# А",missing:false}; flushSync(); await settle();
+  const saved = JSON.parse(localStorage.getItem(layoutKey(project.path))!);
+  expect(Object.values(saved.layout.panels).filter((p: any) => p.params?.kind === "document")).toHaveLength(1);
+  expect(() => decodeLayout(JSON.stringify(saved), project.path)).not.toThrow();
+  // Новый файл с прежним именем открывается отдельно от перемещённого документа.
+  app.viewer = {hit:hit("docs/a.md"),title:"Другой А",text:"# Другой",missing:false}; flushSync(); await settle();
+  const next = JSON.parse(localStorage.getItem(layoutKey(project.path))!);
+  expect(Object.values(next.layout.panels).filter((p: any) => p.params?.kind === "document")).toHaveLength(2);
+  expect(() => decodeLayout(JSON.stringify(next),project.path)).not.toThrow();
+});
 beforeEach(() => {
   keybindings.active = {}; keybindings.recording = false;
   localStorage.clear(); vi.mocked(call).mockReset();
@@ -141,7 +158,9 @@ it("слой сохраняет общие режимы, показывает о
   expect(modal.textContent).toContain('Embed-провайдер не ответил');
   expect(modal.textContent).toContain('provider_error');
   app.projects = [{ ...project, state: 'reindex_required' }]; flushSync();
-  expect(modal.querySelector<HTMLTextAreaElement>('textarea')!.disabled).toBe(true);
+  expect(modal.querySelector<HTMLTextAreaElement>('textarea')!.disabled).toBe(false);
+  expect(modal.querySelector<HTMLSelectElement>('[aria-label="Режим поиска"]')!.disabled).toBe(true);
+  expect(modal.textContent).toContain('«В тексте» читает файлы и доступен');
   expect(vi.mocked(call).mock.calls.some(([method]) => method === 'reindex')).toBe(false);
   [...modal.querySelectorAll<HTMLButtonElement>('button')].find(b => b.textContent === 'Переиндексировать…')!.click(); flushSync();
   expect(app.consentOpen).toBe(true); expect(modal.open).toBe(false);
@@ -308,6 +327,15 @@ it("правая зона есть сразу; документ открывае
   const tab = document.querySelector('[data-workspace-panel="document:docs/a.md"]')!.closest('[role="tab"]')!;
   tab.querySelector<HTMLElement>('.dv-default-tab-action')!.click(); flushSync(); await settle();
   expect(saved().layout.grid.root.data).toHaveLength(2);
+});
+it("вхождение текста сохраняет столбец и длину через панель до CodeMirror", async () => {
+  component = mount(Workspace, { target: document.body }); flushSync(); await settle();
+  app.viewer = {hit:{path:'docs/точный.md',title:'Точный диапазон',first_line:2,last_line:2,column:4,length:6},title:'Точный диапазон',text:'# Тема\n😀 Привет мир\n',missing:false};
+  flushSync(); await settle(); await settle();
+  const panel=document.querySelector('section[data-document-path="docs/точный.md"]');
+  expect(panel?.querySelector('.cm-hit')?.textContent).toBe('Привет');
+  const layout=JSON.parse(localStorage.getItem(layoutKey(project.path))!);
+  expect(layout.layout.panels[documentId('docs/точный.md')].params.hit).toMatchObject({column:4,length:6});
 });
 it("иконка сброса очищает область и сохраняет фильтр документов", async () => {
   app.selected = new Set(["manual"]); app.filter = "руководство";

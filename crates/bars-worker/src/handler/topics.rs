@@ -27,7 +27,9 @@ const MAX_TITLE: usize = 300;
 
 fn topics_error(error: StoreError) -> RpcError {
     match error {
-        StoreError::LimitReached(_) => RpcError::bars(ErrorKind::InvalidParams, describe(&error)),
+        StoreError::LimitReached(_) | StoreError::InvalidMerge(_) => {
+            RpcError::bars(ErrorKind::InvalidParams, describe(&error))
+        }
         other => RpcError::standard(INTERNAL_ERROR, describe(&other)),
     }
 }
@@ -439,6 +441,25 @@ impl WorkerHandler {
             .await
             .map_err(topics_error)?;
         changed(change)
+    }
+
+    pub(super) async fn new_topics_merge(
+        &self,
+        params: bars_protocol::NewTopicsMergeParams,
+    ) -> Result<NewTopicsChangedOutput, RpcError> {
+        let project = self.topics_project(&params.project)?;
+        changed(
+            self.topics
+                .merge(
+                    &project,
+                    params.id,
+                    params.revision,
+                    params.source_id,
+                    params.source_revision,
+                )
+                .await
+                .map_err(topics_error)?,
+        )
     }
 
     pub(super) async fn new_topics_delete(

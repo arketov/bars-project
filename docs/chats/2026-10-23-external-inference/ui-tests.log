@@ -1,0 +1,13 @@
+
+> bars-ui@0.0.0 test
+> vitest run src/lib/settings-tei.test.ts src/lib/settings-ollama.test.ts src/lib/settings-lmstudio.test.ts src/lib/settings-logic.test.ts
+
+
+ RUN  v5.0.4 C:/Users/arketov/Desktop/bars-project/ui
+
+
+ Test Files  3 passed (3)
+      Tests  16 passed (16)
+   Start at  14:49:46
+   Duration  8.40s (environment 75%, transform 18%, tests 4%, import 2%)
+

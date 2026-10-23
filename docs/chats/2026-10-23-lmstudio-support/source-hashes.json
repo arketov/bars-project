@@ -1,0 +1,42 @@
+[
+  {
+    "path": "crates/bars-core/src/models/remote.rs",
+    "sha256": "3FEB0C5AAA2FD811D935D63379A76C0846DA5B5E4E431177D245A52FACA3DBA1"
+  },
+  {
+    "path": "crates/bars-core/src/models/remote/tests.rs",
+    "sha256": "58897CB7C6E172E91186693DC9FD1A11F698A1E08729F4C3F4F486418EE26767"
+  },
+  {
+    "path": "crates/bars-core/src/settings/mod.rs",
+    "sha256": "8DE9B39DC9C39F1B69C4F8D265C2C87BA1B2EA557D069B84C8617092E66317C3"
+  },
+  {
+    "path": "crates/bars-core/src/settings/raw.rs",
+    "sha256": "1716E46BD8133F6EB30CF51121FB13D16BF6A2107F3873C90507CB3E8F4EC68F"
+  },
+  {
+    "path": "crates/bars-worker/src/worker/models.rs",
+    "sha256": "33EEFB4758BE4F73011A93EF33FE5400EC600122F642FDD43ADD11999B218D61"
+  },
+  {
+    "path": "crates/bars-worker/examples/verify_lmstudio.rs",
+    "sha256": "BCE5A6A1A4AAC31C8A15E88323379217C5058FBD806E9BB5B26398F88B0EE7C4"
+  },
+  {
+    "path": "crates/bars-app/examples/lmstudio_probe.rs",
+    "sha256": "5750EAB769576321585A1849EFF67CF5C8E6A0E2C4C712D45A5417E4623E03B2"
+  },
+  {
+    "path": "crates/bars-app/examples/lmstudio_probe.js",
+    "sha256": "4E309BBDCCB3EDE716EE84C5ACD26C30D103ADBBEFA43E02840E5F73E65801F6"
+  },
+  {
+    "path": "ui/src/lib/SettingsPage.svelte",
+    "sha256": "993129130A9741CD085408DD4914AA1853CAA6DF2295BAC50821DD329770037B"
+  },
+  {
+    "path": "ui/src/lib/ProviderFields.svelte",
+    "sha256": "E8D6332BA8AD145876E2F1B4FB771DCD78C582DE62C4807C30972196274C8430"
+  }
+]

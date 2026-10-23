@@ -35,7 +35,11 @@ export async function confirmClose(project: string | null, path: string): Promis
 export async function startFlushListener(): Promise<() => void> {
   if (!inTauri()) return () => {};
   const [{ listen }, { invoke }] = await Promise.all([import("@tauri-apps/api/event"), import("@tauri-apps/api/core")]);
-  return listen("bars://flush-request", async () => {
+  const moveStop = await listen("bars://move-flush-request", async () => {
+    const rest = await editors.flush();
+    await invoke("flush_reply", {reply: rest.length ? "cancel" : "clean"});
+  });
+  const stop = await listen("bars://flush-request", async () => {
     const reply = (state: string) => invoke("flush_reply", { reply: state });
     const rest = await editors.flush();
     if (rest.length === 0) {
@@ -47,4 +51,5 @@ export async function startFlushListener(): Promise<() => void> {
     if (decision === "discard") rest.forEach((buffer) => editors.discard(buffer));
     await reply(decision === "discard" ? "proceed" : "cancel");
   });
+  return () => { stop(); moveStop(); };
 }

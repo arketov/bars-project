@@ -747,6 +747,13 @@ async fn topic_methods_are_window_only_and_need_an_exact_project() {
             revision: 1,
             title: "t".into(),
         }),
+        Call::NewTopicsMerge(bars_protocol::NewTopicsMergeParams {
+            project: project.into(),
+            id: 1,
+            revision: 1,
+            source_id: 2,
+            source_revision: 1,
+        }),
         Call::NewTopicsDelete(NewTopicsDeleteParams {
             project: project.into(),
             id: 1,
@@ -781,5 +788,35 @@ async fn topic_methods_are_window_only_and_need_an_exact_project() {
         }))
         .await;
     assert_eq!(relative.kind(), Some(ErrorKind::InvalidParams));
+    env.worker.shutdown().await;
+}
+
+#[tokio::test]
+async fn explicit_merge_uses_both_revisions_and_keeps_observation_counts() {
+    let env = Env::new();
+    let root = env.ready_project().await;
+    let first = env.mark(&root, "merge-a", "план разработки", &[]).await;
+    let second = env
+        .mark(&root, "merge-b", "дорожная карта проекта", &[])
+        .await;
+    let a = env.detail(&root, first.topic_id).await;
+    let b = env.detail(&root, second.topic_id).await;
+    let params = bars_protocol::NewTopicsMergeParams {
+        project: root.display().to_string(),
+        id: a.topic.id,
+        revision: a.topic.revision,
+        source_id: b.topic.id,
+        source_revision: b.topic.revision,
+    };
+    let mut stale = params.clone();
+    stale.source_revision += 1;
+    let error = env.window_error(Call::NewTopicsMerge(stale)).await;
+    assert_eq!(error.kind(), Some(bars_protocol::ErrorKind::StaleRef));
+    let _: bars_protocol::NewTopicsChangedOutput =
+        env.window_call(Call::NewTopicsMerge(params)).await;
+    let list = env.list(&root).await;
+    assert_eq!(list.topics.len(), 1);
+    assert_eq!(list.topics[0].observations, 2);
+    assert_eq!(env.detail(&root, a.topic.id).await.variants_list.len(), 2);
     env.worker.shutdown().await;
 }

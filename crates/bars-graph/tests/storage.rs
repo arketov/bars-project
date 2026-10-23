@@ -135,3 +135,78 @@ fn interrupted_job_keeps_previous_consistent_snapshot_and_bad_quote_never_publis
     assert!(store::publish(&mut db, &data, &manifest).is_err());
     assert_eq!(store::load(&db).unwrap().snapshot, data.snapshot);
 }
+
+#[test]
+fn failed_file_is_excluded_but_manifest_still_guards_late_publication() {
+    let (mut db, data, manifest) = setup();
+    store::publish(&mut db, &data, &manifest).unwrap();
+    let mut next = build(
+        "fixture",
+        "docs",
+        vec![input("b.md", "# B\n\nТ-1 зависит от Т-2.")],
+    )
+    .unwrap();
+    next.failed_sources.push(data.sources[0].meta.clone());
+    next.fingerprint();
+    let errors = vec![GraphFileError {
+        path: "docs/a.md".into(),
+        code: "unreadable".into(),
+        message: "Файл недоступен".into(),
+    }];
+    store::publish_with_errors(&mut db, &next, &manifest, &errors).unwrap();
+    let status = store::status(&db).unwrap();
+    assert_eq!(status.file_errors_total, 1);
+    assert_eq!(status.layers["structure"].state, LayerState::Partial);
+    assert_eq!(status.layers["structure"].total, 2);
+    let loaded = store::load(&db).unwrap();
+    assert_eq!(loaded.sources.len(), 1);
+    let reply = query::execute(
+        &loaded,
+        &GraphRequest {
+            scope: Scope {
+                files: vec!["a.md".into()],
+                modules: vec![],
+            },
+            ..Default::default()
+        },
+        || false,
+    )
+    .unwrap();
+    assert_eq!(reply.coverage.failed, 1);
+    assert_eq!(reply.coverage.processed, 0);
+    assert_eq!(reply.coverage.denominator, Some(1));
+    assert!(
+        loaded
+            .evidence
+            .iter()
+            .all(|e| e.document != data.sources[0].meta.reference)
+    );
+    db.execute("UPDATE documents SET hash='new' WHERE path='docs/a.md'", [])
+        .unwrap();
+    assert!(store::load(&db).is_err());
+    assert!(matches!(
+        store::publish_with_errors(&mut db, &next, &manifest, &errors),
+        Err(GraphError::StaleRef(_))
+    ));
+}
+
+#[test]
+fn diagnostics_and_pause_survive_schema_reopen_without_changing_snapshot() {
+    let (mut db, data, manifest) = setup();
+    store::publish(&mut db, &data, &manifest).unwrap();
+    store::set_paused(&db, true).unwrap();
+    let progress = GraphProgress {
+        phase: "structure".into(),
+        processed: 1,
+        total: Some(2),
+        elapsed_ms: 20,
+    };
+    store::set_progress(&db, &progress).unwrap();
+    store::ensure_schema(&mut db).unwrap();
+    let status = store::status(&db).unwrap();
+    assert!(status.paused);
+    assert_eq!(status.progress, Some(progress));
+    assert_eq!(store::load(&db).unwrap().snapshot, data.snapshot);
+    assert_eq!(status.layers["semantic"].state, LayerState::Partial);
+    assert_eq!(status.layers["structure"].state, LayerState::Ready);
+}

@@ -1,0 +1,19 @@
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 33.39s
+     Running unittests src\lib.rs (C:/bt/bars\debug\deps\bars_core-020aab726378d1a3.exe)
+
+running 11 tests
+test link_index::tests::limits_ten_thousand_documents ... ignored, замер, не проверка
+test link_index::tests::title_comes_from_frontmatter ... ok
+test link_index::tests::unchanged_files_are_not_parsed_again ... ok
+test link_index::tests::links_to_non_markdown_outside_root_external_and_own_section_are_ignored ... ok
+test link_index::tests::changed_parser_version_rebuilds_everything ... ok
+test link_index::tests::outgoing_and_incoming_links_match_by_path_and_name ... ok
+test link_index::tests::creating_and_removing_files_repairs_and_breaks_links ... ok
+test link_index::tests::works_without_model_and_rebuilds_after_file_loss ... ok
+test link_index::tests::corrupt_file_is_replaced ... ok
+test link_index::tests::bounded_pages_preserve_occurrences_and_snapshot ... ok
+test link_index::tests::link_page_byte_budget_keeps_a_resumable_valid_page ... ok
+
+test result: ok. 10 passed; 0 failed; 1 ignored; 0 measured; 300 filtered out; finished in 2.31s
+

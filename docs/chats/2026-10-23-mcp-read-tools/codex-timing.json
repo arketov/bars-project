@@ -1,0 +1,10 @@
+{
+  "client": "codex-cli 0.163.0-alpha.11.1",
+  "calls": 1,
+  "tool_elapsed_ms": 65005,
+  "outcome": "completed",
+  "configured_tool_timeout_sec": null,
+  "scope": "isolated stdio timing fixture; not old Transport closed reproduction",
+  "first_probe": "incomplete: model ended at yielded cell_id",
+  "real_profile_config_changed": false
+}

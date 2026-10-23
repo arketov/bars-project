@@ -1,0 +1,7 @@
+{
+  "worker_smoke_passed": true,
+  "temporary_profile_closed_by_probe": true,
+  "loaded_models": [],
+  "server_port12345_accepting": false,
+  "weights_preserved": true
+}

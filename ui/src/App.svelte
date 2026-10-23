@@ -6,6 +6,8 @@
   import ConsentDialog from "./lib/ConsentDialog.svelte";
   import DeleteProjectDialog from "./lib/DeleteProjectDialog.svelte";
   import EntryDialog from "./lib/EntryDialog.svelte";
+  import MissingLinkDialog from "./lib/MissingLinkDialog.svelte";
+  import { followLink } from "./lib/follow-link.svelte";
   import { entries } from "./lib/entries.svelte";
   import { theme } from "./lib/theme.svelte";
   import SettingsPage from "./lib/SettingsPage.svelte";
@@ -71,6 +73,7 @@
 {/if}
 
 <ContextMenu />
+{#if followLink.pending}<MissingLinkDialog />{/if}
 
 {#if app.toast}
   <div class="toast" class:bad={app.toast.bad} role="status">{app.toast.text}</div>

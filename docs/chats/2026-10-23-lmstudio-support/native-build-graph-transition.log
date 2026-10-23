@@ -1,0 +1,100 @@
+    Blocking waiting for file lock on build directory
+   Compiling bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+   Compiling bars-protocol v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-protocol)
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+error[E0425]: cannot find type `BuildLayer` in crate `bars_graph`
+  --> crates\bars-protocol\src\graph.rs:31:28
+   |
+31 |     pub layer: bars_graph::BuildLayer,
+   |                            ^^^^^^^^^^ not found in `bars_graph`
+
+error[E0433]: cannot find `BuildLayer` in `bars_graph`
+  --> crates\bars-core\src\graph\build.rs:14:57
+   |
+14 |     build_index_graph_layer(project, index, bars_graph::BuildLayer::All, cancelled)
+   |                                                         ^^^^^^^^^^ could not find `BuildLayer` in `bars_graph`
+
+error[E0433]: cannot find `BuildLayer` in `bars_graph`
+  --> crates\bars-core\src\graph\build.rs:25:29
+   |
+25 |     if layer == bars_graph::BuildLayer::All && matches!(status.state, LayerState::Ready | LayerState::Partial)
+   |                             ^^^^^^^^^^ could not find `BuildLayer` in `bars_graph`
+
+error[E0433]: cannot find `BuildLayer` in `bars_graph`
+   --> crates\bars-core\src\graph\build.rs:195:44
+    |
+195 |             if matches!(layer, bars_graph::BuildLayer::All | bars_graph::BuildLayer::Similarity) && let Some(vector) = index
+    |                                            ^^^^^^^^^^ could not find `BuildLayer` in `bars_graph`
+
+error[E0433]: cannot find `BuildLayer` in `bars_graph`
+   --> crates\bars-core\src\graph\build.rs:195:74
+    |
+195 |             if matches!(layer, bars_graph::BuildLayer::All | bars_graph::BuildLayer::Similarity) && let Some(vector) = index
+    |                                                                          ^^^^^^^^^^ could not find `BuildLayer` in `bars_graph`
+
+error[E0433]: cannot find `BuildLayer` in `bars_graph`
+   --> crates\bars-core\src\graph\build.rs:229:36
+    |
+229 |     if matches!(layer, bars_graph::BuildLayer::Structure | bars_graph::BuildLayer::Similarity) {
+    |                                    ^^^^^^^^^^ could not find `BuildLayer` in `bars_graph`
+
+error[E0433]: cannot find `BuildLayer` in `bars_graph`
+   --> crates\bars-core\src\graph\build.rs:229:72
+    |
+229 |     if matches!(layer, bars_graph::BuildLayer::Structure | bars_graph::BuildLayer::Similarity) {
+    |                                                                        ^^^^^^^^^^ could not find `BuildLayer` in `bars_graph`
+
+error[E0433]: cannot find `BuildLayer` in `bars_graph`
+   --> crates\bars-core\src\graph\build.rs:237:36
+    |
+237 |     if matches!(layer, bars_graph::BuildLayer::Structure | bars_graph::BuildLayer::Semantic) {
+    |                                    ^^^^^^^^^^ could not find `BuildLayer` in `bars_graph`
+
+error[E0433]: cannot find `BuildLayer` in `bars_graph`
+   --> crates\bars-core\src\graph\build.rs:237:72
+    |
+237 |     if matches!(layer, bars_graph::BuildLayer::Structure | bars_graph::BuildLayer::Semantic) {
+    |                                                                        ^^^^^^^^^^ could not find `BuildLayer` in `bars_graph`
+
+error[E0425]: cannot find type `BuildLayer` in crate `bars_graph`
+  --> crates\bars-core\src\graph\build.rs:20:24
+   |
+20 |     layer: bars_graph::BuildLayer,
+   |                        ^^^^^^^^^^ not found in `bars_graph`
+
+error[E0425]: cannot find type `BuildLayer` in crate `bars_graph`
+  --> crates\bars-core\src\graph\build.rs:59:24
+   |
+59 |     layer: bars_graph::BuildLayer,
+   |                        ^^^^^^^^^^ not found in `bars_graph`
+
+error[E0609]: no field `similarity_state` on type `bars_graph::Dataset`
+   --> crates\bars-core\src\graph\build.rs:240:18
+    |
+240 |             data.similarity_state = old.similarity_state;
+    |                  ^^^^^^^^^^^^^^^^ unknown field
+    |
+    = note: available fields are: `namespace`, `docs_root`, `snapshot`, `sources`, `failed_sources` ... and 6 others
+
+error[E0609]: no field `similarity_state` on type `&bars_graph::Dataset`
+   --> crates\bars-core\src\graph\build.rs:240:41
+    |
+240 |             data.similarity_state = old.similarity_state;
+    |                                         ^^^^^^^^^^^^^^^^ unknown field
+    |
+    = note: available fields are: `namespace`, `docs_root`, `snapshot`, `sources`, `failed_sources` ... and 6 others
+
+error[E0609]: no field `similarity_state` on type `bars_graph::Dataset`
+   --> crates\bars-core\src\graph\build.rs:296:10
+    |
+296 |     data.similarity_state = LayerState::Partial;
+    |          ^^^^^^^^^^^^^^^^ unknown field
+    |
+    = note: available fields are: `namespace`, `docs_root`, `snapshot`, `sources`, `failed_sources` ... and 6 others
+
+For more information about this error, try `rustc --explain E0425`.
+error: could not compile `bars-protocol` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+Some errors have detailed explanations: E0425, E0433, E0609.
+For more information about an error, try `rustc --explain E0425`.
+error: could not compile `bars-core` (lib) due to 13 previous errors

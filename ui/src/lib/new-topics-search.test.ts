@@ -3,7 +3,7 @@ import { app } from "./app.svelte";
 import { call } from "./api";
 import type { SearchOutput } from "./types";
 
-vi.mock("./api", () => ({ call: vi.fn(), joinPath: vi.fn(), openPath: vi.fn(), pickFolder: vi.fn() }));
+vi.mock("./api", () => ({ call: vi.fn(), joinPath: vi.fn(), openPath: vi.fn(), pickFolder: vi.fn(), inTauri: () => false }));
 const invoke = vi.mocked(call);
 const project = { name: "П", path: "C:/проект", docs_root: "docs", state: "ready" as const, modules: [] };
 const found: SearchOutput = {
@@ -31,7 +31,7 @@ beforeEach(() => {
 
 it("поздний поиск не заменяет новый; снимок сохраняет отправленные параметры", async () => {
   const requests: ((value: unknown) => void)[] = [];
-  invoke.mockImplementation(() => new Promise(done => requests.push(done)));
+  invoke.mockImplementation((method) => method === 'text_search' ? Promise.resolve({documents:[],docs_total:0,hits_total:0,skipped:[],truncated:null,elapsed_ms:0}) : new Promise(done => requests.push(done)));
   app.query = 'первый'; const first = app.search();
   app.query = 'второй'; app.count = 7; const second = app.search();
   app.query = 'черновик'; app.count = 11;
@@ -45,7 +45,7 @@ it("поздний поиск не заменяет новый; снимок с�
 it("новый поиск убирает старую выдачу; смена проекта отклоняет поздний ответ", async () => {
   app.query = 'первый'; await app.search();
   let resolve!: (value: unknown) => void;
-  invoke.mockImplementation(() => new Promise(done => resolve = done));
+  invoke.mockImplementation((method) => method === 'text_search' ? Promise.resolve({documents:[],docs_total:0,hits_total:0,skipped:[],truncated:null,elapsed_ms:0}) : new Promise(done => resolve = done));
   const pending = app.search();
   expect(app.results).toBeNull(); expect(app.displayed).toBeNull(); expect(app.searching).toBe(true);
   await app.select(null);
@@ -55,9 +55,9 @@ it("новый поиск убирает старую выдачу; смена �
 
 it("диагностика пустого ответа использует завершённый запрос, не изменённое поле", async () => {
   let resolve!: (value: unknown) => void;
-  invoke.mockImplementationOnce(() => new Promise(done => resolve = done));
+  invoke.mockImplementation((method) => method === 'text_search' ? Promise.resolve({documents:[],docs_total:0,hits_total:0,skipped:[],truncated:null,elapsed_ms:0}) : new Promise(done => resolve = done));
   app.query = 'исходный'; const pending = app.search();
-  app.query = 'изменённый'; resolve({ ...found, results: [] }); await pending;
+  app.query = 'изменённый'; invoke.mockImplementation(async method => method === 'search' ? found : listAnswer); resolve({ ...found, results: [] }); await pending;
   const diagnostic = invoke.mock.calls.find(([, args]) => (args as { _window?: { purpose?: string } })?._window?.purpose === 'diagnostic');
   expect(diagnostic?.[1]).toMatchObject({ query: 'исходный' });
 });

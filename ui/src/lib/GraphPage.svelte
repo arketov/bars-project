@@ -387,6 +387,9 @@
             reply?.layer_state ?? status?.state ?? "not_built"
         ]}. Отсутствие извлечённой связи не доказывает отсутствие зависимости.
         {#if status?.active_job}<span>Задание: {status.active_job}</span>{/if}
+        {#if status?.paused}<span>Автообновление остановлено; «Построить» продолжит обработку.</span>{/if}
+        {#if status?.progress && status.active_job}<span>Обработано {status.progress.processed} / {status.progress.total ?? "?"}</span>{/if}
+        {#if status?.file_errors_total}<details><summary>Файлов с ошибками: {status.file_errors_total}</summary>{#each status.file_errors ?? [] as item}<div>{item.path}: {item.message}</div>{/each}</details>{/if}
         {#if status?.error}<span>{status.error}</span>{/if}
     </div>
     {#if error}<div class="graph-error" role="alert">

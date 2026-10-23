@@ -4,6 +4,20 @@ use std::collections::BTreeMap;
 pub const METHOD_VERSION: &str = "explicit-markdown-v6";
 pub const DTO_VERSION: u32 = 1;
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum BuildLayer {
+    #[default]
+    All,
+    Structure,
+    Semantic,
+    Similarity,
+}
+
+fn legacy_similarity_state() -> LayerState {
+    LayerState::Partial
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -207,6 +221,41 @@ pub struct GraphStatus {
     pub source_count: usize,
     pub error: Option<String>,
     pub method: String,
+    #[serde(default)]
+    pub progress: Option<GraphProgress>,
+    #[serde(default)]
+    pub file_errors: Vec<GraphFileError>,
+    #[serde(default)]
+    pub file_errors_total: usize,
+    #[serde(default)]
+    pub layers: BTreeMap<String, GraphLayerStatus>,
+    #[serde(default)]
+    pub paused: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GraphProgress {
+    pub phase: String,
+    pub processed: usize,
+    pub total: Option<usize>,
+    pub elapsed_ms: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GraphFileError {
+    pub path: String,
+    pub code: String,
+    pub message: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GraphLayerStatus {
+    pub state: LayerState,
+    pub generation: Option<String>,
+    pub fingerprint: String,
+    pub processed: usize,
+    pub total: usize,
+    pub failed: usize,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -223,11 +272,17 @@ pub struct Dataset {
     pub docs_root: String,
     pub snapshot: String,
     pub sources: Vec<SourceDocument>,
+    #[serde(default)]
+    pub failed_sources: Vec<SourceMeta>,
+    #[serde(default)]
+    pub layers: BTreeMap<String, GraphLayerStatus>,
     pub nodes: Vec<Node>,
     pub edges: Vec<Edge>,
     pub evidence: Vec<Evidence>,
     pub broken_links: Vec<BrokenLink>,
     pub semantic_state: LayerState,
+    #[serde(default = "legacy_similarity_state")]
+    pub similarity_state: LayerState,
     pub warnings: Vec<String>,
 }
 
@@ -238,15 +293,22 @@ impl Dataset {
             docs_root: docs_root.into(),
             snapshot: String::new(),
             sources: vec![],
+            failed_sources: vec![],
+            layers: BTreeMap::new(),
             nodes: vec![],
             edges: vec![],
             evidence: vec![],
             broken_links: vec![],
             semantic_state: LayerState::Partial,
+            similarity_state: LayerState::NotBuilt,
             warnings: vec![],
         }
     }
     pub fn fingerprint(&mut self) {
+        self.nodes
+            .sort_by(|a, b| a.reference.id.cmp(&b.reference.id));
+        self.edges.sort_by(|a, b| a.id.cmp(&b.id));
+        self.evidence.sort_by(|a, b| a.id.cmp(&b.id));
         let mut sources: Vec<_> = self
             .sources
             .iter()
@@ -259,6 +321,9 @@ impl Dataset {
             sources,
             &self.nodes,
             &self.edges,
+            &self.failed_sources,
+            self.semantic_state,
+            self.similarity_state,
         ))
         .expect("граф сериализуется");
         self.snapshot = blake3::hash(&payload).to_hex().to_string();

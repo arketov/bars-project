@@ -5,6 +5,7 @@
   import Icon from "./Icon.svelte";
   import ResultCard from "./ResultCard.svelte";
   import SearchError from "./SearchError.svelte";
+  import TextResults from './TextResults.svelte';
   import GraphSearchBundle from './GraphSearchBundle.svelte';
   import { touchedModules } from "./tree";
 
@@ -30,7 +31,7 @@
   function onKey(event: KeyboardEvent) {
     if (event.key !== "Enter" || event.isComposing || event.keyCode === 229) return;
     event.preventDefault();
-    if (!event.isComposing && !blocked && !app.searching && app.query.trim()) void app.search();
+    if (!event.isComposing && app.query.trim()) void app.search();
   }
 
   function onInput(event: Event) {
@@ -47,13 +48,12 @@
 
 <main>
   <div class="top">
-    <div class="ask" class:dis={blocked}>
+    <div class="ask">
       <textarea
         aria-label="Поисковый запрос"
         rows="1"
         wrap="off"
         placeholder="Что найти в документации — например, «как считается порог релевантности»"
-        disabled={blocked}
         bind:value={app.query}
         onkeydown={onKey}
         oninput={onInput}
@@ -61,7 +61,7 @@
       <div class="askbar">
         <div class="scope">
           {#if blocked}
-            Поиск недоступен: нужна переиндексация
+            По смыслу: нужна переиндексация
           {:else if touched.length}
             Искать в: <b>{scopeLabel()}</b>
           {:else}
@@ -87,22 +87,29 @@
           <span class="sep"></span>
           <span class="kbdhint"><kbd>Enter</kbd></span>
         {/if}
-        <button class="btn go" disabled={blocked || app.searching || !app.query.trim()} onclick={() => app.search()}>
+        <button class="btn go" disabled={!app.query.trim()} onclick={() => app.search()}>
           Найти <Icon name="arrow-right" size={15} width={2.4} />
         </button>
       </div>
       {#if app.retrievalMode === 'mix'}<label class="related-option"><input type="checkbox" bind:checked={app.includeRelated} />Добавлять связанные источники</label>{/if}
+      <div class="text-options">
+        <button class="ghost sm" aria-label="Учитывать регистр" aria-pressed={app.textSearch.caseSensitive} onclick={() => app.textSearch.caseSensitive = !app.textSearch.caseSensitive}>Aa</button>
+        <button class="ghost sm" aria-label="Регулярное выражение" aria-pressed={app.textSearch.regex} onclick={() => app.textSearch.regex = !app.textSearch.regex}>.*</button>
+        <input aria-label="Фильтр пути текстового поиска" placeholder="Путь: features/ или features/*.md" bind:value={app.textSearch.pathFilter} onkeydown={onKey} />
+      </div>
     </div>
   </div>
 
   <div class="results">
     <div class="wrap">
+      <TextResults />
+      {#if app.searchedQuery}<h2 class="semantic-title">По смыслу</h2>{/if}
       {#if app.searching}<p role="status">Ищем…</p>{/if}
       {#if blocked && project}
         <Banner
           kind="warn"
           title="Проект {project.name} нужно переиндексировать"
-          text="Индекс построен моделью {app.status?.model.index ?? '—'}, а в настройках — {app.status?.model.settings ?? '—'}. Поиск по проекту не работает, пока вы не согласитесь на переиндексацию. Агенты получают ошибку «нужна переиндексация» и не могут запустить её сами."
+          text="Индекс построен моделью {app.status?.model.index ?? '—'}, а в настройках — {app.status?.model.settings ?? '—'}. Поиск по смыслу ждёт переиндексации; «В тексте» читает файлы и доступен."
         >
           <button class="btn sm" onclick={() => (app.consentOpen = true)}>Переиндексировать…</button>
         </Banner>
@@ -222,11 +229,14 @@
 </main>
 
 <style>
+  .text-options {display:flex; gap:4px; align-items:center; margin-top:6px;}
+  .text-options button[aria-pressed="true"] {background:var(--accent-soft); color:var(--accent-text);}
+  .text-options input {min-width:0; flex:1; font-size:12px; padding:3px 6px; border:1px solid var(--line); border-radius:4px; background:var(--panel-2); color:var(--text);}
+  .semantic-title {font-size:13px; margin:8px 0;}
   main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
   .top { padding: 8px 12px; width: 100%; max-width: 664px; margin: 0 auto; }
   .ask { max-width: 920px; margin: 0 auto; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); padding: 12px 12px 10px 16px; transition: border-color .15s, box-shadow .15s; }
   .ask:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow); }
-  .ask.dis { opacity: .6; }
   textarea { width: 100%; border: 0; outline: none; background: transparent; resize: none; overflow: hidden; font-size: 16px; line-height: 1.5; min-height: 26px; display: block; }
   textarea::placeholder { color: var(--faint); }
   .askbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; padding: 2px 0; }

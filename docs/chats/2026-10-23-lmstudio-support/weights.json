@@ -1,0 +1,5 @@
+{
+  "Algorithm": "SHA256",
+  "Hash": "06507C7B42688469C4E7298B0A1E16DEFF06CAF291CF0A5B278C308249C3E439",
+  "model": "Qwen3-Embedding-0.6B-Q8_0.gguf"
+}

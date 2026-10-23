@@ -85,6 +85,7 @@ async fn graph_real_ipc_auto_update_refs_scope_and_read_only_mcp() {
     let denied = rpc(mcp
         .call(&GraphBuildParams {
             target: target(&root),
+            layer: Default::default(),
         })
         .await);
     assert_eq!(denied.code, METHOD_NOT_FOUND);

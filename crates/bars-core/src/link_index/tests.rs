@@ -54,6 +54,84 @@ fn broken(index: &LinkIndex, path: &str) -> usize {
 }
 
 #[test]
+fn bounded_pages_preserve_occurrences_and_snapshot() {
+    let dir = project();
+    write(dir.path(), "docs/many.md", &"[x](a/one.md) ".repeat(3000));
+    let mut index = index(&dir);
+    let snapshot = index.snapshot().unwrap();
+    let first = index.page("docs/a/one.md", true, 0, 2).unwrap();
+    assert_eq!(first.items.len(), 2);
+    assert!(first.has_more);
+    let mut count = 0;
+    let mut offset = 0;
+    loop {
+        let page = index.page("docs/many.md", false, offset, 199).unwrap();
+        count += page.items.len();
+        if !page.has_more {
+            break;
+        }
+        assert!(page.next_offset > offset);
+        offset = page.next_offset;
+    }
+    assert_eq!(count, 3000);
+    index
+        .refresh_checked(dir.path(), Path::new("docs"))
+        .unwrap();
+    assert_eq!(snapshot, index.snapshot().unwrap());
+    write(dir.path(), "docs/new.md", "# Новый\n");
+    index
+        .refresh_checked(dir.path(), Path::new("docs"))
+        .unwrap();
+    assert_ne!(snapshot, index.snapshot().unwrap());
+    write(
+        dir.path(),
+        "docs/long.md",
+        &format!("[{}](a/one.md)", "😀".repeat(2000)),
+    );
+    index
+        .refresh_checked(dir.path(), Path::new("docs"))
+        .unwrap();
+    let page = index.page("docs/long.md", false, 0, 50).unwrap();
+    assert!(page.fields_truncated);
+    assert_eq!(
+        page.items[0]["text"].as_str().unwrap().chars().count(),
+        1024
+    );
+    assert!(!index.page("docs/unknown.md", false, 0, 50).unwrap().known);
+}
+
+#[test]
+fn link_page_byte_budget_keeps_a_resumable_valid_page() {
+    let dir = project();
+    let label = "😀".repeat(1024);
+    write(
+        dir.path(),
+        "docs/title.md",
+        &format!("---\ntitle: {label}\n---\n# Заголовок\n"),
+    );
+    write(
+        dir.path(),
+        "docs/large.md",
+        &format!("[{label}](title.md)\n").repeat(200),
+    );
+    let index = index(&dir);
+    let page = index.page("docs/large.md", false, 0, 200).unwrap();
+    assert!(page.bytes_limited && page.has_more);
+    assert!(!page.items.is_empty() && page.items.len() < 200);
+    assert!(serde_json::to_vec(&page.items).unwrap().len() < 512 * 1024 - 2048);
+    let mut offset = page.next_offset;
+    loop {
+        let next = index.page("docs/large.md", false, offset, 200).unwrap();
+        assert!(next.next_offset > offset);
+        offset = next.next_offset;
+        if !next.has_more {
+            break;
+        }
+    }
+    assert_eq!(offset, 200);
+}
+
+#[test]
 fn outgoing_and_incoming_links_match_by_path_and_name() {
     let dir = project();
     let index = index(&dir);

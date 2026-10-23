@@ -7,12 +7,14 @@
   import UnsavedDialog from "./UnsavedDialog.svelte";
   import WorkspaceDocument from "./WorkspaceDocument.svelte";
   import { confirmClose, startFlushListener } from "./unsaved.svelte";
+  import { moved, movedPath } from "./moved.svelte";
   let { project, path }: { project: string; path: string } = $props();
   const title = $derived(path.split("/").pop() ?? path);
   $effect(() => { document.title = `${title} — bars`; });
   onMount(() => {
     let disposed = false;
     const stops: (() => void)[] = [];
+    stops.push(moved.subscribe(event => { if (event.project === project) path = movedPath(path, event.from, event.to); }));
     const keep = (stop: () => void) => { if (disposed) stop(); else stops.push(stop); };
     void app.bindDocumentWindow(project);
     void startFlushListener().then(keep).catch((error) => app.flash(String(error), true));

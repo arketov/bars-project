@@ -1,0 +1,35 @@
+    Blocking waiting for file lock on build directory
+   Compiling onig v6.5.3
+   Compiling rusqlite v0.40.2
+   Compiling ureq v3.4.2
+   Compiling bars-app v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-app)
+   Compiling tokenizers v0.22.2
+   Compiling tokenizers v0.23.2
+   Compiling bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+   Compiling hf-hub v0.5.0
+   Compiling bars-protocol v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-protocol)
+   Compiling candle-core v0.11.0
+   Compiling candle-nn v0.11.0
+   Compiling fastembed v7.1.1
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+error[E0433]: cannot find `appearance_index` in the crate root
+   --> crates\bars-app\examples\..\src\appearance.rs:221:19
+    |
+221 |         if crate::appearance_index::migrate(project, docs_root, &key, &entry)? {
+    |                   ^^^^^^^^^^^^^^^^ could not find `appearance_index` in the crate root
+
+error[E0433]: cannot find `appearance_index` in the crate root
+   --> crates\bars-app\examples\..\src\appearance.rs:229:12
+    |
+229 |     crate::appearance_index::read(project, docs_root, &mut appearance)?;
+    |            ^^^^^^^^^^^^^^^^ could not find `appearance_index` in the crate root
+
+error[E0433]: cannot find `appearance_index` in the crate root
+   --> crates\bars-app\examples\..\src\appearance.rs:254:16
+    |
+254 |         crate::appearance_index::set(
+    |                ^^^^^^^^^^^^^^^^ could not find `appearance_index` in the crate root
+
+For more information about this error, try `rustc --explain E0433`.
+error: could not compile `bars-app` (example "lmstudio_probe") due to 3 previous errors

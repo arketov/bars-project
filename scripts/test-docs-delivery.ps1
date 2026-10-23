@@ -1,12 +1,16 @@
 # Сначала cargo build -p bars-worker --features test-support --example client_refresh_session.
-param([string]$EvidenceDir = (Join-Path $PSScriptRoot '../target/stage16/delivery'))
+param(
+    [string]$EvidenceDir = (Join-Path $PSScriptRoot '../target/stage16/delivery'),
+    [string]$BinDir = (Join-Path $PSScriptRoot '../target/debug')
+)
 $ErrorActionPreference = 'Stop'
 $repo16 = Split-Path $PSScriptRoot
 $EvidenceDir = [IO.Path]::GetFullPath($EvidenceDir)
 $sessionHome16 = Join-Path $EvidenceDir 'home'
 $project16 = Join-Path $EvidenceDir 'project'
-$worker16 = Join-Path $repo16 'target/debug/examples/client_refresh_session.exe'
-$cli16 = Join-Path $repo16 'target/debug/bars-cli.exe'
+$BinDir = [IO.Path]::GetFullPath($BinDir)
+$worker16 = Join-Path $BinDir 'examples/client_refresh_session.exe'
+$cli16 = Join-Path $BinDir 'bars-cli.exe'
 New-Item -ItemType Directory -Force -Path $sessionHome16,(Join-Path $project16 '.bars'),(Join-Path $project16 'manual/existing-notes') | Out-Null
 [IO.File]::WriteAllText((Join-Path $project16 '.bars/config.toml'), "docs_root = 'manual'`n")
 $untouched16 = Join-Path $project16 'manual/existing-notes/info.md'

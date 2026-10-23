@@ -1,0 +1,38 @@
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Finished `release` profile [optimized] target(s) in 25.09s
+     Running unittests src\lib.rs (C:/bt/bars\release\deps\bars_core-f471c4d65c086b94.exe)
+
+running 30 tests
+test new_topics::tests::corrupt_file_is_an_error_not_an_empty_list ... ok
+test new_topics::tests::guard_detects_identifier_number_and_antonym_differences ... ok
+test new_topics::tests::measure_limits ... ignored, замер, не проверка
+test new_topics::tests::data_survives_reopening ... ok
+test new_topics::tests::exact_text_merges_after_careful_normalization ... ok
+test new_topics::tests::normalization_keeps_negations_numbers_and_identifiers ... ok
+test new_topics::tests::measured_qwen_owner_pair_merges_but_other_artifacts_stay_unmeasured ... ok
+test new_topics::tests::chain_a_b_c_is_not_glued_through_the_middle_question ... ok
+test new_topics::tests::deleting_a_topic_allows_a_new_independent_appearance ... ok
+test new_topics::tests::demand_reopens_a_resolved_topic_and_keeps_the_decision_date ... ok
+test new_topics::tests::a_check_with_materials_moves_an_open_topic_and_keeps_two_checks ... ok
+test new_topics::tests::clearing_removes_checks_and_ids_are_not_reused ... ok
+test new_topics::tests::explicit_merge_keeps_events_variants_and_invalidates_old_checks ... ok
+test new_topics::tests::close_vectors_merge_only_in_a_measured_space_and_without_lexical_difference ... ok
+test new_topics::tests::clear_and_disable_reject_late_observations ... ok
+test new_topics::tests::explicit_merge_keeps_a_semantic_representative_for_each_scope ... ok
+test new_topics::tests::a_check_never_reopens_a_resolved_topic_or_restores_a_deleted_one ... ok
+test new_topics::tests::newer_schema_is_refused_and_left_untouched ... ok
+test new_topics::tests::complete_empty_check_clears_previous_automatic_match_but_preserves_user_resolution ... ok
+test new_topics::tests::same_event_id_is_counted_once ... ok
+test new_topics::tests::same_text_in_another_scope_is_a_separate_topic ... ok
+test new_topics::tests::unmeasured_space_never_merges_semantically ... ok
+test new_topics::tests::text_without_vector_is_stored_and_merges_exactly ... ok
+test new_topics::tests::vectors_of_different_spaces_are_not_compared ... ok
+test new_topics::tests::user_decisions_check_the_expected_revision ... ok
+test new_topics::tests::variant_keeps_first_search_parameters_after_repeat_and_reopen ... ok
+test new_topics::tests::schema_one_database_is_migrated_with_its_topics_kept ... ok
+test new_topics::tests::explicit_merge_refuses_overflow_without_dropping_variants_or_events ... ok
+test new_topics::tests::topic_and_variant_limits_stop_new_records_without_evicting ... ok
+test new_topics::tests::bge_threshold_merges_owner_case_and_includes_boundary_for_both_profiles ... ok
+
+test result: ok. 29 passed; 0 failed; 1 ignored; 0 measured; 298 filtered out; finished in 1.06s
+

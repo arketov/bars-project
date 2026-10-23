@@ -6,6 +6,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import { gunzipSync } from "node:zlib";
 
 import { fileURLToPath } from "node:url";
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -146,15 +147,15 @@ function pairsOf(items, guards, vectors, relabel) {
 function curve(pairs, split, thresholds, items) {
   const rows = [];
   for (const t of thresholds) {
-    const escapes = {}; let same = 0, merged = 0, ordinary = 0, ordinaryMerged = 0, guard = 0, guardMerged = 0, guardMergedAfterCheck = 0, sameBlocked = 0;
+    const escapes = {}; let same = 0, merged = 0, ordinary = 0, ordinaryMerged = 0, ordinaryMergedAfterCheck = 0, guard = 0, guardMerged = 0, guardMergedAfterCheck = 0, sameBlocked = 0;
     for (const p of pairs) {
       if (p.split !== split) continue;
       const over = p.cos >= t;
       if (p.label === "same") { same++; if (over) { merged++; if (guardDiffers(items[p.i].text, items[p.j].text).length) sameBlocked++; } }
-      else if (p.category === "different:ordinary") { ordinary++; if (over) ordinaryMerged++; }
+      else if (p.category === "different:ordinary") { ordinary++; if (over) { ordinaryMerged++; if (!guardDiffers(items[p.i].text, items[p.j].text).length) ordinaryMergedAfterCheck++; } }
       else { guard++; if (over) { guardMerged++; if (!guardDiffers(items[p.i].text, items[p.j].text).length) { guardMergedAfterCheck++; const k = p.category.slice(6); escapes[k] = (escapes[k] ?? 0) + 1; } } }
     }
-    rows.push({ threshold: round(t, 2), same, mergedSame: merged, recall: round(merged / same), sameBlockedByCheck: sameBlocked, recallWithChecks: round((merged - sameBlocked) / same), ordinary, falseMerges: ordinaryMerged, guard, guardMerged, guardMergedAfterCheck, escapes });
+    rows.push({ threshold: round(t, 2), same, mergedSame: merged, recall: round(merged / same), sameBlockedByCheck: sameBlocked, recallWithChecks: round((merged - sameBlocked) / same), ordinary, falseMerges: ordinaryMerged, falseMergesAfterCheck: ordinaryMergedAfterCheck, guard, guardMerged, guardMergedAfterCheck, escapes });
   }
   return rows;
 }
@@ -191,7 +192,7 @@ function clustering(items, vectors, split, threshold, seed, mode, withChecks) {
 function analyze(dir, modes, relabelFile) {
   const { items, guards } = JSON.parse(fs.readFileSync(path.join(dir, "items.json"), "utf8"));
   const relabel = relabelFile ? JSON.parse(fs.readFileSync(relabelFile, "utf8")) : null;
-  const loaded = modes.map((file) => ({ file, ...JSON.parse(fs.readFileSync(path.join(dir, file), "utf8")) }));
+  const loaded = modes.map((file) => { const raw = fs.readFileSync(path.join(dir, file)); return { file, ...JSON.parse(file.endsWith(".gz") ? gunzipSync(raw).toString("utf8") : raw.toString("utf8")) }; });
   const report = { modes: {} };
   const thresholds = Array.from({ length: 46 }, (_, k) => 0.5 + k * 0.01);
   // шум устройства/точности относительно первого режима

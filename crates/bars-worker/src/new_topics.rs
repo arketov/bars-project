@@ -133,6 +133,7 @@ fn with_store<T>(
 pub(crate) fn describe(error: &StoreError) -> String {
     match error {
         StoreError::LimitReached(limit) => format!("достигнут предел {limit} тем"),
+        StoreError::InvalidMerge(reason) => format!("объединение тем: {reason}"),
         StoreError::NewerSchema(version) => format!("схема БД новее поддерживаемой ({version})"),
         StoreError::Sqlite(_) => "ошибка БД новых тем".to_string(),
         StoreError::Io(_) => "не создана папка БД новых тем".to_string(),
@@ -382,6 +383,20 @@ impl Collector {
     ) -> Result<Change, StoreError> {
         self.blocking(project, move |store| store.rename(id, revision, &title))
             .await
+    }
+
+    pub async fn merge(
+        &self,
+        project: &Path,
+        target: i64,
+        revision: i64,
+        source: i64,
+        source_revision: i64,
+    ) -> Result<Change, StoreError> {
+        self.blocking(project, move |store| {
+            store.merge(target, revision, source, source_revision)
+        })
+        .await
     }
 
     pub async fn delete_checked(

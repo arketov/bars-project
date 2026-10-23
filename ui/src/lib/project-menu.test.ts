@@ -5,7 +5,7 @@ import ContextMenu from "./ContextMenu.svelte";
 import { app } from "./app.svelte";
 
 const api = vi.hoisted(() => ({ call: vi.fn() }));
-vi.mock("./api", () => ({ ...api, joinPath: vi.fn(), openPath: vi.fn(), pickFolder: vi.fn(), copyText: vi.fn(), documentAction: vi.fn(), documentEditors: vi.fn() }));
+vi.mock("./api", () => ({ ...api, joinPath: vi.fn(), openPath: vi.fn(), pickFolder: vi.fn(), copyText: vi.fn(), documentAction: vi.fn(), documentEditors: vi.fn(), inTauri: () => false }));
 const first = { name: "Одинаковое имя", path: "C:/первый проект", docs_root: "docs", state: "ready" as const, modules: [] };
 const second = { ...first, path: "D:/другой проект" };
 const components: ReturnType<typeof mount>[] = [];

@@ -1,0 +1,52 @@
+{
+  "success": true,
+  "checks": [
+    "TEI: independent embed/rerank selection, ports, UI save, real IPC readback",
+    "TEI controls present at 1440/1024/760; layout readback only"
+  ],
+  "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+  "settings": {
+    "embed": {
+      "accelerator": "auto",
+      "source": "tei",
+      "model": "BAAI/bge-m3",
+      "base_url": "http://127.0.0.1:8080",
+      "api_key_name": null,
+      "api_key_env": null,
+      "batch_size": 32,
+      "unload_after_minutes": 15
+    },
+    "rerank": {
+      "accelerator": "auto",
+      "enabled": true,
+      "source": "tei",
+      "model": "BAAI/bge-reranker-v2-m3",
+      "base_url": "http://127.0.0.1:8081",
+      "api_key_name": null,
+      "api_key_env": null,
+      "unload_after_minutes": 5
+    },
+    "search": {
+      "candidates": 30,
+      "rerank_candidates": 15,
+      "results": 5,
+      "results_reranked": 3,
+      "min_score_vector": 0,
+      "min_score_rerank": 0.10000000149011612,
+      "agent_min_score": [
+        0,
+        1
+      ],
+      "max_results": 20,
+      "max_candidates": 100,
+      "max_rerank_candidates": 50
+    },
+    "chunking": {
+      "min_chars": 250,
+      "max_chars": 6000
+    },
+    "indexing": {
+      "edit_pause_seconds": 30
+    }
+  }
+}

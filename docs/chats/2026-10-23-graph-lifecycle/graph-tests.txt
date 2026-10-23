@@ -1,0 +1,91 @@
+   Compiling bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.45s
+     Running unittests src\lib.rs (C:/bt/bars-graph-lifecycle\debug\deps\bars_graph-33c09550b8e86209.exe)
+
+running 26 tests
+test links::tests::parses_inline_reference_and_wiki_links_with_lines ... ok
+test links::tests::percent_encoded_paths_resolve ... ok
+test links::tests::fragments_and_own_section_links ... ok
+test links::moves::tests::broken_link_becoming_valid_is_warning_not_rewritten ... ok
+test links::moves::tests::references_edit_definition_once_keep_label_and_title ... ok
+test links::moves::tests::target_with_wiki_delimiter_refuses_invalid_plan ... ok
+test links::tests::resolves_paths_names_and_broken ... ok
+test links::moves::tests::capture_of_unmoved_target_is_repaired_and_warned ... ok
+test links::moves::tests::preserves_markup_code_titles_aliases_and_fragments ... ok
+test links::moves::tests::protects_unrelated_same_name_and_reports_capture ... ok
+test links::tests::code_url_and_frontmatter_are_not_links ... ok
+test links::tests::shared_window_link_fixtures ... ok
+test links::moves::tests::folder_internal_links_stay_and_crossing_links_change ... ok
+test source::tests::outside_paths_and_invalid_utf8_boundaries_are_not_facts ... ok
+test source::tests::edit_changes_revision_snapshot_and_does_not_reuse_another_heading ... ok
+test source::tests::polarity_condition_and_link_are_distinct ... ok
+test source::tests::wikilink_with_equal_names_prefers_folder_of_source ... ok
+test source::tests::source_offsets_reference_links_code_and_duplicate_anchors ... ok
+test source::tests::wikilinks_resolve_by_name_path_and_alias_outside_code ... ok
+test physical::tests::stale_snapshot_and_bad_limits_are_rejected ... ok
+test physical::tests::edge_budget_drops_weakest_similarity_after_links_and_degrades_layer ... ok
+test physical::tests::document_budget_walks_modules_round_robin_and_marks_truncation ... ok
+test physical::tests::document_similarity_is_undirected_max_and_scoped ... ok
+test physical::tests::links_keep_direction_collapse_repeats_and_skip_self_loops ... ok
+test physical::tests::slice_is_deterministic_and_within_byte_limit ... ok
+test physical::tests::expansion_adds_chunks_in_order_and_cap_does_not_evict_documents ... ok
+
+test result: ok. 26 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\acceptance.rs (C:/bt/bars-graph-lifecycle\debug\deps\acceptance-5344c84aba8d3db1.exe)
+
+running 20 tests
+test parsing_cancellation_stops_before_publishing_any_snapshot ... ok
+test cr_frontmatter_is_not_a_semantic_fact_and_terminal_newline_is_not_next_line ... ok
+test real_pronoun_clause_is_not_a_reversed_verification_fact ... ok
+test expensive_read_operations_observe_cancellation_and_work_limits ... ok
+test context_profiles_select_roles_and_reject_silent_ignored_inputs ... ok
+test document_projection_keeps_all_evidence_and_first_page_has_edges ... ok
+test structural_paths_remain_available_before_semantic_enrichment ... ok
+test s7_two_hops_no_path_and_limited_chain ... ok
+test s6_whole_scope_empty_topic_and_filtered_topics ... ok
+test s2_positive_negative_conditional_paths ... ok
+test s5_explicit_supersession_only_not_newer_date ... ok
+test uncertain_operands_abstain_without_losing_source_evidence ... ok
+test s4_positive_negative_and_condition_are_not_interchangeable ... ok
+test s3_positive_negative_budgeted_context ... ok
+test s1_positive_negative_conditional_impact ... ok
+test s8_structural_defect_valid_link_and_partial_semantic_audit ... ok
+test communities_separate_topics_inside_one_module_and_recompute_under_scope ... ok
+test context_budget_trims_extra_proofs_before_dropping_roles ... ok
+test refs_scope_ambiguity_cursor_and_envelope_are_checked ... ok
+test unrelated_edges_do_not_exhaust_path_budget ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\extraction.rs (C:/bt/bars-graph-lifecycle\debug\deps\extraction-88459f313064f012.exe)
+
+running 6 tests
+test ambiguous_aliases_short_names_case_and_code_blocks_do_not_merge ... ok
+test cleaned_names_preserve_paired_code_and_do_not_swallow_other_clauses ... ok
+test requires_is_only_a_legacy_input_filter_and_warns ... ok
+test negation_and_conditions_belong_to_the_assertion ... ok
+test chain_is_extracted_across_files_with_alias_declaration_proof ... ok
+test october_census_keeps_supported_facts_and_corrects_confirmed_errors ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\storage.rs (C:/bt/bars-graph-lifecycle\debug\deps\storage-c18e55e6d244f9a1.exe)
+
+running 7 tests
+test method_change_invalidates_cached_snapshot_even_with_unchanged_sources ... ok
+test migration_roundtrip_preserves_embedding_schema_and_data ... ok
+test text_mutation_invalidates_evidence_and_late_publish_rolls_back ... ok
+test diagnostics_and_pause_survive_schema_reopen_without_changing_snapshot ... ok
+test independent_evidence_survives_source_deletion ... ok
+test interrupted_job_keeps_previous_consistent_snapshot_and_bad_quote_never_publishes ... ok
+test failed_file_is_excluded_but_manifest_still_guards_late_publication ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+   Doc-tests bars_graph
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

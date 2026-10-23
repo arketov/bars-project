@@ -22,7 +22,7 @@
     /** Документы из поиска по смыслу по набранному после `[[`; показываются ниже совпадений по названию. */
     semantic?: (query: string) => Promise<LinkTarget[]>;
     /** Найденный отрывок, строки с 1; подсветка снимается первой правкой. */
-    hit?: { first: number; last: number } | null;
+    hit?: { first: number; last: number; column?: number; length?: number } | null;
     label?: string;
     oninput: (text: string) => void;
   } = $props();
@@ -33,7 +33,7 @@
   let echoed = untrack(() => text);
   const external = Annotation.define<boolean>();
   const editable = new Compartment();
-  const setHit = StateEffect.define<{ from: number; to: number } | null>();
+  const setHit = StateEffect.define<{ from: number; to: number; exact?: boolean } | null>();
   const hitField = StateField.define<DecorationSet>({
     create: () => Decoration.none,
     update(value, tr) {
@@ -41,6 +41,7 @@
         if (!effect.is(setHit)) continue;
         if (!effect.value) return Decoration.none;
         const marks = [];
+        if (effect.value.exact && effect.value.to > effect.value.from) return Decoration.set([Decoration.mark({class:'cm-hit'}).range(effect.value.from,effect.value.to)]);
         for (let n = tr.state.doc.lineAt(effect.value.from).number; n <= tr.state.doc.lineAt(effect.value.to).number; n++) {
           marks.push(Decoration.line({ class: "cm-hit" }).range(tr.state.doc.line(n).from));
         }
@@ -162,16 +163,17 @@
     reason: () => (readonly ? "Документ только для чтения" : undefined),
   }]));
 
-  function showHit(next: { first: number; last: number } | null): void {
+  function showHit(next: { first: number; last: number; column?: number; length?: number } | null): void {
     if (!view) return;
     const doc = view.state.doc;
     if (!next || next.first < 1 || next.first > doc.lines) {
       view.dispatch({ effects: setHit.of(null) });
       return;
     }
-    const from = doc.line(next.first).from;
-    const to = doc.line(Math.min(Math.max(next.last, next.first), doc.lines)).to;
-    view.dispatch({ effects: [setHit.of({ from, to }), placement(from)] });
+    const line = doc.line(next.first);
+    const from = Math.min(line.to, line.from + Math.max(0,(next.column ?? 1)-1));
+    const to = next.column !== undefined ? Math.min(line.to,from+(next.length ?? 0)) : doc.line(Math.min(Math.max(next.last, next.first), doc.lines)).to;
+    view.dispatch({ effects: [setHit.of({ from, to, exact:next.column !== undefined }), placement(from)] });
   }
 
   onMount(() => {
@@ -232,7 +234,7 @@
   });
 
   $effect(() => {
-    showHit(hit ? { first: hit.first, last: hit.last } : null);
+    showHit(hit ? { ...hit } : null);
   });
 </script>
 

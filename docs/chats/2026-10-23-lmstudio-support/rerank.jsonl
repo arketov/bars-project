@@ -1,0 +1,3 @@
+{"route":"/rerank","status":200,"body":"{\"error\":\"Unexpected endpoint or method. (POST /rerank)\"}"}
+{"route":"/v1/rerank","status":200,"body":"{\"error\":\"Unexpected endpoint or method. (POST /v1/rerank)\"}"}
+{"route":"/api/v1/rerank","status":404,"body":"{\"error\":\"Unexpected endpoint or method. (POST /api/v1/rerank)\"}"}

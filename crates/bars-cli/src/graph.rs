@@ -52,7 +52,10 @@ pub enum GraphAction {
     /// Общий или локальный подграф.
     Show(GraphArgs),
     /// Явно перестроить граф без переиндексации embeddings.
-    Build,
+    Build {
+        #[arg(long, default_value = "all", value_parser = ["all", "structure", "semantic", "similarity"])]
+        layer: String,
+    },
     /// Остановить принятое задание по ID; запрос не означает подтверждённую остановку.
     Cancel { job_id: String },
     /// Состояние слоя и фонового задания.
@@ -165,10 +168,17 @@ pub(super) async fn action(
 ) -> Result<(), Failure> {
     match action {
         GraphAction::Show(args) => query(client, target, json, out, args, Operation::Graph).await,
-        GraphAction::Build => emit(
+        GraphAction::Build { layer } => emit(
             out,
             json,
-            &call(client, &GraphBuildParams { target }).await?,
+            &call(
+                client,
+                &GraphBuildParams {
+                    target,
+                    layer: enum_value(&layer)?,
+                },
+            )
+            .await?,
             |r| {
                 format!(
                     "Задание принято: {}. Готовность проверяйте graph status.",
@@ -193,13 +203,44 @@ pub(super) async fn action(
             json,
             &call(client, &GraphStatusParams { target }).await?,
             |r| {
-                format!(
+                let mut text = format!(
                     "Граф: {}; источников: {}; задание: {}; ошибка: {}",
                     r.state.label(),
                     r.source_count,
                     r.active_job.as_deref().unwrap_or("нет"),
                     r.error.as_deref().unwrap_or("нет")
-                )
+                );
+                if r.paused {
+                    text.push_str("\nАвтообновление остановлено; graph build продолжит обработку.");
+                }
+                if let Some(p) = &r.progress {
+                    let phase = match p.phase.as_str() {
+                        "structure" => "разбор документов",
+                        "similarity" => "близость",
+                        "publish" => "публикация",
+                        _ => "ожидание",
+                    };
+                    text.push_str(&format!(
+                        "\nХод: {phase}, {} / {}, {} мс",
+                        p.processed,
+                        p.total.map_or("?".into(), |n| n.to_string()),
+                        p.elapsed_ms
+                    ));
+                }
+                for (name, layer) in &r.layers {
+                    text.push_str(&format!(
+                        "\n{name}: {}, документов {} / {}, ошибок {}",
+                        layer.state.label(),
+                        layer.processed,
+                        layer.total,
+                        layer.failed
+                    ));
+                }
+                text.push_str(&format!("\nФайлов с ошибками: {}", r.file_errors_total));
+                for error in &r.file_errors {
+                    text.push_str(&format!("\n{}: {}", error.path, error.message));
+                }
+                text
             },
         ),
     }

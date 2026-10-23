@@ -11,6 +11,8 @@ use serde_json::Value;
 use tauri::{AppHandle, State};
 use tauri_plugin_dialog::DialogExt;
 
+static MOVE_OPERATION: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
+
 #[tauri::command]
 pub fn keybindings_get(state: State<'_, Shared>) -> Result<Value, String> {
     let handler = state.get().ok_or("Воркер ещё запускается")?;
@@ -67,6 +69,7 @@ impl Shared {
 /// Вызов метода воркера по имени и параметрам.
 #[tauri::command]
 pub async fn bars_call(
+    window: tauri::WebviewWindow,
     state: State<'_, Shared>,
     method: String,
     mut params: Value,
@@ -76,6 +79,11 @@ pub async fn bars_call(
         .ok_or_else(|| RpcError::standard(INTERNAL_ERROR, "воркер ещё запускается"))?;
     // Служебное поле `_window` (назначение поиска, ID обращения) в протокол не попадает.
     let context = bars_worker::new_topics::SearchContext::take_from(&mut params);
+    if method == "text_search"
+        && let Some(params) = params.as_object_mut()
+    {
+        params.insert("window_id".into(), Value::String(window.label().to_owned()));
+    }
     let request = Request::new(Id::Number(0), &method, params);
     let call = Call::from_request(&request)?;
     let tree_binding = if let Call::Tree(params) = &call {
@@ -381,17 +389,72 @@ pub async fn entry_create_dir(
 
 /// Переименовывает и перемещает файл или папку: `to_parent` — папка назначения, `name` — новое имя.
 #[tauri::command]
-pub async fn entry_move(
+pub async fn entry_plan_move(
+    app: AppHandle,
     state: State<'_, Shared>,
     project: String,
     from: String,
     to_parent: String,
     name: String,
 ) -> Result<Value, String> {
+    let _operation = MOVE_OPERATION.lock().await;
+    if !crate::flush::request_clean(&app).await {
+        return Ok(
+            serde_json::json!({"status":"error","kind":"unsaved","message":"Не все окна подтвердили запись документов. Проверьте несохранённые правки."}),
+        );
+    }
     let (root, docs_root) = document_roots(&state, &project)?;
     tauri::async_runtime::spawn_blocking(move || {
-        match crate::tree_io::move_entry(&root, &docs_root, &from, &to_parent, &name) {
-            Ok(path) => serde_json::json!({ "status": "ok", "path": path }),
+        match crate::tree_io::plan_move(&root, &docs_root, &from, &to_parent, &name) {
+            Ok(plan) => serde_json::json!({ "status": "ok", "path": plan.path, "token": plan.token,
+                "documents": plan.updates.iter().map(|u| serde_json::json!({"path":u.path,"edits":u.edits.len()})).collect::<Vec<_>>(),
+                "warnings": plan.warnings.iter().map(|(path,line)| serde_json::json!({"path":path,"line":line})).collect::<Vec<_>>() }),
+            Err(error) => tree_failure(&error),
+        }
+    }).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn entry_move(
+    app: AppHandle,
+    state: State<'_, Shared>,
+    project: String,
+    from: String,
+    to_parent: String,
+    name: String,
+    token: String,
+) -> Result<Value, String> {
+    let _operation = MOVE_OPERATION.lock().await;
+    if !crate::flush::request_clean(&app).await {
+        return Ok(
+            serde_json::json!({"status":"error","kind":"unsaved","message":"Не все окна подтвердили запись документов. Проверьте несохранённые правки."}),
+        );
+    }
+    let (root, docs_root) = document_roots(&state, &project)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        match crate::tree_io::move_with_links(&root, &docs_root, &from, &to_parent, &name, &token) {
+            Ok(mut result) => {
+                use tauri::Emitter;
+                use tauri::Manager;
+                for (label, path) in app.state::<Shared>().documents.move_paths(&project, &result.from, &result.path) {
+                    if let Some(window) = app.get_webview_window(&label) { let _ = window.set_title(&format!("{} — bars",path.rsplit('/').next().unwrap_or(&path))); }
+                }
+                if let Some(handler) = app.state::<Shared>().get() {
+                    let mut paths = result.updated.iter().map(|p| root.join(p)).collect::<Vec<_>>();
+                    if let Ok(tree) = crate::tree_io::read_tree(&root, &docs_root) {
+                        paths.extend(tree.files.into_iter().filter(|f| f.path == result.path || f.path.starts_with(&format!("{}/",result.path))).map(|f| root.join(f.path)));
+                    }
+                    paths.sort(); paths.dedup();
+                    let _ = handler.worker().documents_edited(&root, paths);
+                }
+                if let Err(error) = crate::appearance::move_keys(&root, &docs_root, &result.from, &result.path) {
+                    result.failed.push((".bars/appearance.toml".into(), error.message()));
+                }
+                let _ = app.emit("bars://entry-moved", serde_json::json!({ "project":project,"from":result.from,"to":result.path }));
+                let _ = app.emit("bars://appearance-changed", serde_json::json!({"project":project}));
+                serde_json::json!({ "status": if result.failed.is_empty() {"ok"} else {"partial"}, "path": result.path,
+                    "updated": result.updated, "failed": result.failed.iter().map(|(path,reason)| serde_json::json!({"path":path,"reason":reason})).collect::<Vec<_>>() })
+            },
             Err(error) => tree_failure(&error),
         }
     })

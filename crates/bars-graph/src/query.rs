@@ -52,7 +52,13 @@ fn allowed<'a>(data: &'a Dataset, scope: &Scope) -> Result<Allowed<'a>, GraphErr
 
 pub fn validate_scope(data: &Dataset, scope: &Scope) -> Result<(), GraphError> {
     for module in &scope.modules {
-        if !data.sources.iter().any(|s| &s.meta.module == module) {
+        if !data
+            .sources
+            .iter()
+            .map(|s| &s.meta)
+            .chain(data.failed_sources.iter())
+            .any(|s| &s.module == module)
+        {
             return Err(GraphError::InvalidParams(format!(
                 "неизвестный модуль `{module}`"
             )));
@@ -62,7 +68,9 @@ pub fn validate_scope(data: &Dataset, scope: &Scope) -> Result<(), GraphError> {
         if !data
             .sources
             .iter()
-            .any(|s| s.meta.docs_path == file.replace('\\', "/"))
+            .map(|s| &s.meta)
+            .chain(data.failed_sources.iter())
+            .any(|s| s.docs_path == file.replace('\\', "/"))
         {
             return Err(GraphError::InvalidParams(format!(
                 "неизвестный файл `{file}`"
@@ -606,6 +614,13 @@ pub fn execute_ranked(
     if data.snapshot.is_empty() {
         return Err(GraphError::NotReady("not_built".into()));
     }
+    let needs_semantic = request.operation == Operation::Impact
+        || (request.operation == Operation::Paths && request.path_kind != PathKind::Structural)
+        || (request.operation == Operation::Relations
+            && (request.predicates.is_empty() || request.predicates.iter().any(|p| p.semantic())));
+    if needs_semantic && !matches!(data.semantic_state, LayerState::Ready | LayerState::Partial) {
+        return Err(GraphError::NotReady("semantic_not_built".into()));
+    }
     if let Some(paths) = request.max_paths {
         if paths == 0 {
             return Err(GraphError::InvalidParams(
@@ -655,17 +670,46 @@ pub fn execute_ranked(
         generations: BTreeMap::from([
             ("text_structure".into(), data.snapshot.clone()),
             ("method".into(), METHOD_VERSION.into()),
-        ]),
+        ])
+        .into_iter()
+        .chain(data.layers.iter().filter_map(|(name, layer)| {
+            layer.generation.as_ref().map(|g| (name.clone(), g.clone()))
+        }))
+        .collect(),
         layer_state: data.semantic_state,
         layer_states: BTreeMap::from([
-            ("structure".into(), LayerState::Ready),
+            (
+                "structure".into(),
+                if data.failed_sources.iter().any(|s| request.scope.allows(s)) {
+                    LayerState::Partial
+                } else {
+                    LayerState::Ready
+                },
+            ),
             ("semantic".into(), data.semantic_state),
+            ("similarity".into(), data.similarity_state),
         ]),
         coverage: Coverage {
-            indexed: view.sources.len(),
+            indexed: view.sources.len()
+                + data
+                    .failed_sources
+                    .iter()
+                    .filter(|s| request.scope.allows(s))
+                    .count(),
             processed: view.sources.len(),
-            failed: 0,
-            denominator: Some(view.sources.len()),
+            failed: data
+                .failed_sources
+                .iter()
+                .filter(|s| request.scope.allows(s))
+                .count(),
+            denominator: Some(
+                view.sources.len()
+                    + data
+                        .failed_sources
+                        .iter()
+                        .filter(|s| request.scope.allows(s))
+                        .count(),
+            ),
             method: "indexed_source_documents; semantic completeness unknown".into(),
             semantic_completeness: None,
         },

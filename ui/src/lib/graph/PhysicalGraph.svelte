@@ -653,7 +653,7 @@
     const path = project();
     if (!path) return;
     try {
-      await toggleGraphBuild(path, status?.active_job ?? null);
+      await toggleGraphBuild(path, status?.active_job ?? null, buildLayer);
       app.flash(status?.active_job ? "Остановка запрошена; исход появится в состоянии графа" : "Задание графа принято");
       await refreshStatus();
     } catch (error) {
@@ -844,6 +844,7 @@
   });
   const graphNotReady = $derived(loadErrorKind === "graph_not_ready");
   const building = $derived(!!status?.active_job || status?.state === "building");
+  let buildLayer = $state("all");
 
   onMount(() => {
     mini = !!host.closest(".mini");
@@ -1016,7 +1017,8 @@
         </button>
         <button aria-label="Настройки раскладки" aria-expanded={popover === "settings"} title="Настройки раскладки" onclick={() => (popover = popover === "settings" ? null : "settings")}><Icon name="gear" size={14} width={1.8} /></button>
         <button aria-label="Легенда и шкала силы" aria-expanded={legendOpen} title="Легенда и шкала силы" onclick={() => (legendOpen = !legendOpen)}><Icon name="info" size={14} width={1.8} /></button>
-        <button aria-label={building ? "Остановить построение графа" : "Обновить граф"} title={building ? "Остановить построение графа" : "Обновить граф: перестроить ссылки и близость чанков"} onclick={() => void rebuildGraph()}><Icon name="refresh" size={14} width={1.8} /></button>
+        <select aria-label="Слой для обновления" title="Слой для обновления всего проекта" bind:value={buildLayer} disabled={building}><option value="all">Все слои</option><option value="structure">Структура</option><option value="semantic">Отношения</option><option value="similarity">Близость</option></select>
+        <button aria-label={building ? "Остановить построение графа" : "Обновить граф"} title={building ? "Остановить построение графа" : "Обновить граф: перестроить выбранный слой"} onclick={() => void rebuildGraph()}><Icon name="refresh" size={14} width={1.8} /></button>
         <button aria-label="Анализ связей: пути, влияние, контекст" title="Анализ связей: пути, влияние, контекст" onclick={() => (app.graphAnalysis = true)}><Icon name="layout" size={14} width={1.8} /></button>
       </div>
     </div>
@@ -1045,6 +1047,13 @@
           {#if queryAtMaximum}<span>Достигнут предел вида: уменьшите глубину или режим связей.</span>{:else}<button class="more" onclick={moreQuery}>Показать ещё</button>{/if}
         </div>
       {/if}
+      </div>
+    {/if}
+    {#if status?.paused || (building && status?.progress) || status?.file_errors_total}
+      <div class="banner" role="status">
+        {#if status.paused}<span>Обновление графа остановлено.</span><button class="more" onclick={() => void rebuildGraph()}>Продолжить</button>{/if}
+        {#if building && status.progress}<span>{({ structure: "Разбор документов", similarity: "Расчёт близости", publish: "Публикация" } as Record<string, string>)[status.progress.phase] ?? "Построение"}: {status.progress.processed}{status.progress.total === null ? "" : ` / ${status.progress.total}`} · {(status.progress.elapsed_ms / 1000).toFixed(1)} с</span>{/if}
+        {#if status.file_errors_total}<details><summary>Файлов с ошибками: {status.file_errors_total}</summary>{#each status.file_errors ?? [] as error}<div>{error.path}: {error.message}</div>{/each}</details>{/if}
       </div>
     {/if}
     {#if layerIssues.length}

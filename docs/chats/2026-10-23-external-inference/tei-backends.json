@@ -1,0 +1,12 @@
+[
+  {
+    "kind": "embed",
+    "backend": "Starting FlashBert model on Cuda(CudaDevice(DeviceId(1)))",
+    "ready": "2026-10-23T10:44:03.019692Z"
+  },
+  {
+    "kind": "rerank",
+    "backend": "Starting FlashBert model on Cuda(CudaDevice(DeviceId(1)))",
+    "ready": "2026-10-23T10:44:05.71675Z"
+  }
+]

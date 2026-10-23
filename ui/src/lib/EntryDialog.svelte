@@ -47,7 +47,10 @@
   <dialog bind:this={dialog} aria-labelledby="entry-title" oncancel={(event) => { event.preventDefault(); entries.cancel(); }}>
     <form onsubmit={submit}>
       <h2 id="entry-title">{titles[request.action]()}</h2>
-      {#if request.action === "newDoc" || request.action === "newDir" || request.action === "rename"}
+      {#if entries.report}
+        <p>Перемещение выполнено. Не удалось обновить:</p>
+        <ul>{#each entries.report as failure}<li><b>{failure.path}</b>: {failure.reason}</li>{/each}</ul>
+      {:else if request.action === "newDoc" || request.action === "newDir" || request.action === "rename"}
         <label>
           {request.action === "newDir" ? "Имя папки" : request.action === "rename" && folder ? "Новое имя папки" : "Имя документа"}
           <input bind:this={field} bind:value autocomplete="off" spellcheck="false" aria-invalid={entries.error ? "true" : undefined} disabled={entries.busy} />
@@ -66,13 +69,18 @@
       {:else}
         <p>{folder ? `Папка вместе с документами внутри (${request.docs}) попадёт` : "Документ попадёт"} в корзину. Достать его можно из корзины Windows.</p>
       {/if}
-      {#if warnsAboutLinks}
-        <p class="hint warn">bars пока не правит ссылки в других документах: ссылки на {folder ? "эти документы" : "этот документ"} станут битыми.</p>
+      {#if !entries.report && warnsAboutLinks}
+        <p class="hint warn">{request.action === "trash" ? "Ссылки на удалённые документы станут битыми." : "Перед перемещением bars покажет план обновления ссылок."}</p>
+      {/if}
+      {#if !entries.report && entries.preview && entries.previewValue === value}
+        <p role="status">Документов с правками ссылок: {entries.preview.documents.length}.</p>
+        <ul>{#each entries.preview.documents as doc}<li>{doc.path}: {doc.edits}</li>{/each}</ul>
+        {#if entries.preview.warnings.length}<p class="warn">Ссылки, меняющие адресат из-за нового набора имён:</p><ul>{#each entries.preview.warnings as warning}<li>{warning.path}:{warning.line}</li>{/each}</ul>{/if}
       {/if}
       {#if entries.error}<p role="alert" class="error">{entries.error}</p>{/if}
       <footer>
-        <button type="button" class="ghost" disabled={entries.busy} onclick={() => entries.cancel()}>Отмена</button>
-        <button type="submit" class="btn" class:danger={request.action === "trash"} disabled={entries.busy || unchanged}>{submitLabel[request.action]}</button>
+        <button type="button" class="ghost" disabled={entries.busy} onclick={() => entries.cancel()}>{entries.report ? "Закрыть" : "Отмена"}</button>
+        {#if !entries.report}<button type="submit" class="btn" class:danger={request.action === "trash"} disabled={entries.busy || unchanged}>{(request.action === "rename" || request.action === "move") && (!entries.preview || entries.previewValue !== value) ? "Проверить ссылки" : submitLabel[request.action]}</button>{/if}
       </footer>
     </form>
   </dialog>
@@ -89,6 +97,7 @@
   .hint { color: var(--muted); font-size: 12px; }
   .hint.warn { color: var(--text); }
   .error { color: var(--bad); }
+  ul { font-size: 12px; padding-left: 20px; max-height: 220px; overflow: auto; overflow-wrap: anywhere; }
   footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
   .btn.danger { background: var(--bad); color: white; }
 </style>

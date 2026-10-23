@@ -1,0 +1,23 @@
+    Blocking waiting for file lock on build directory
+   Compiling bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+   Compiling bars-protocol v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-protocol)
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Finished `release` profile [optimized] target(s) in 58.58s
+     Running unittests src\lib.rs (C:/bt/bars\release\deps\bars_worker-ead86c2eeea92824.exe)
+
+running 11 tests
+test settings_io::tests::a_broken_file_is_not_replaced ... ok
+test settings_io::tests::defaults_roundtrip_without_creating_a_file ... ok
+test settings_io::tests::docs_root_is_written_next_to_other_keys ... ok
+test settings_io::tests::indexing_pause_roundtrips_and_rejects_out_of_range_values ... ok
+test settings_io::tests::invalid_values_are_rejected_and_the_file_stays ... ok
+test settings_io::tests::ollama_settings_roundtrip_and_reject_rerank_without_writing ... ok
+test settings_io::tests::only_changed_keys_are_written_and_comments_survive ... ok
+test settings_io::tests::remote_provider_is_saved_and_cleared_keys_are_removed ... ok
+test settings_io::tests::shared_device_is_migrated_once_without_losing_other_keys ... ok
+test settings_io::tests::tei_settings_roundtrip_both_models ... ok
+test settings_io::tests::unload_minutes_are_written_per_model_and_checked ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 270 filtered out; finished in 0.02s
+

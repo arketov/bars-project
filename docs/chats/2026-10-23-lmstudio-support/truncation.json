@@ -1,0 +1,14 @@
+[
+  {
+    "truncate": false,
+    "chars": 156000,
+    "coordinates": 1024,
+    "identical": true
+  },
+  {
+    "truncate": true,
+    "chars": 156000,
+    "coordinates": 1024,
+    "identical": true
+  }
+]

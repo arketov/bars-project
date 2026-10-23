@@ -1,7 +1,13 @@
 //! Проверка продуктового ui/dist в WebView2, изолированный воркер с FakeProvider.
 #![allow(dead_code)]
+#[path = "../src/appearance.rs"]
+mod appearance;
+#[path = "../src/appearance_index.rs"]
+mod appearance_index;
 #[path = "../src/commands.rs"]
 mod commands;
+#[path = "../src/doc_window.rs"]
+mod doc_window;
 #[path = "../src/document_io.rs"]
 mod document_io;
 #[path = "../src/documents.rs"]
@@ -10,6 +16,8 @@ mod documents;
 mod flush;
 #[path = "../src/folders.rs"]
 mod folders;
+#[path = "../src/tree_io.rs"]
+mod tree_io;
 #[path = "../src/window.rs"]
 mod window;
 
@@ -24,6 +32,7 @@ use tauri::{Manager, State, WebviewUrl, WebviewWindowBuilder};
 struct Probe {
     output: PathBuf,
     profile: PathBuf,
+    javascript: String,
 }
 
 #[tauri::command]
@@ -75,6 +84,10 @@ fn main() -> anyhow::Result<()> {
     let runtime = tokio::runtime::Runtime::new()?;
     let _entered = runtime.enter();
     let root = PathBuf::from(std::env::args_os().nth(1).expect("папка стенда"));
+    let javascript = match std::env::args_os().nth(2) {
+        Some(path) => std::fs::read_to_string(path)?,
+        None => include_str!("workspace_probe.js").to_string(),
+    };
     let temp = tempfile::Builder::new()
         .prefix("fixture-")
         .tempdir_in(&root)?;
@@ -96,9 +109,23 @@ fn main() -> anyhow::Result<()> {
         .manage(Probe {
             output: root.join("result.json"),
             profile: temp.path().join("webview"),
+            javascript,
         })
         .invoke_handler(tauri::generate_handler![
             commands::bars_call,
+            commands::tree_read,
+            commands::entry_create_doc,
+            commands::entry_create_dir,
+            commands::entry_move,
+            commands::entry_trash,
+            commands::folder_target,
+            commands::folder_action,
+            commands::document_read,
+            commands::document_write,
+            commands::document_revision,
+            commands::document_editors,
+            commands::document_window_target,
+            commands::appearance_read,
             commands::keybindings_get,
             commands::keybindings_save,
             keyboard_probe_accelerators,
@@ -118,11 +145,12 @@ fn main() -> anyhow::Result<()> {
                     .title("bars — проверка продуктовых панелей")
                     .inner_size(1440.0, 850.0)
                     .data_directory(state.profile.clone())
-                    .visible(true)
+                    .visible(std::env::args_os().nth(2).is_none())
                     .disable_drag_drop_handler()
                     .on_page_load(|window, payload| {
                         if payload.event() == tauri::webview::PageLoadEvent::Finished {
-                            let _ = window.eval(include_str!("workspace_probe.js"));
+                            let state = window.state::<Probe>();
+                            let _ = window.eval(&state.javascript);
                         }
                     })
                     .build()?;

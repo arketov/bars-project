@@ -1,0 +1,7 @@
+{
+  "devices": [
+    "name, driver_version, memory.total [MiB], memory.used [MiB]",
+    "NVIDIA GeForce RTX 3090, 616.92, 24576 MiB, 8085 MiB"
+  ],
+  "compute_processes": "pid, process_name, used_gpu_memory [MiB]"
+}

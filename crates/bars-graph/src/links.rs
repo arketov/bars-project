@@ -8,6 +8,8 @@ use std::ops::Range;
 
 use pulldown_cmark::{Event, LinkType, Options, Parser, Tag, TagEnd};
 
+pub mod moves;
+
 /// Вид ссылки в тексте.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LinkKind {
@@ -383,7 +385,10 @@ impl DocSet {
 }
 
 fn is_markdown(path: &str) -> bool {
-    path.len() > 3 && path[path.len() - 3..].eq_ignore_ascii_case(".md")
+    path.len() > 3
+        && path
+            .get(path.len() - 3..)
+            .is_some_and(|suffix| suffix.eq_ignore_ascii_case(".md"))
 }
 
 /// Итог разрешения ссылки.

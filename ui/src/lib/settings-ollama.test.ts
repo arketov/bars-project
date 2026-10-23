@@ -15,7 +15,10 @@ afterEach(() => {
   document.body.innerHTML = "";
 });
 
-it("selects Ollama only for embed, clears inherited keys and restores saved source", async () => {
+it.each([
+  ["ollama", "Ollama", "http://127.0.0.1:11434", "qwen3-embedding:0.6b"],
+  ["lmstudio", "LM Studio", "http://127.0.0.1:1234", ""],
+] as const)("selects %s only for embed, clears inherited keys and restores saved source", async (source, label, url, model) => {
   const output = await mockCall("settings_get", {}) as SettingsOutput;
   const saved = clone(output.settings);
   saved.embed.source = "remote";
@@ -29,19 +32,21 @@ it("selects Ollama only for embed, clears inherited keys and restores saved sour
   component = mount(SettingsPage, { target: document.body, props: { embedded: true } });
   flushSync();
   const buttons = () => [...document.querySelectorAll("button")];
-  const ollama = buttons().filter(b => b.textContent.trim() === "Ollama");
+  const ollama = buttons().filter(b => b.textContent.trim() === label);
   expect(ollama).toHaveLength(1);
   ollama[0].click();
   flushSync();
-  expect(settings.draft?.embed.source).toBe("ollama");
-  expect(settings.draft?.embed.base_url).toBe("http://127.0.0.1:11434");
-  expect(settings.draft?.embed.model).toBe("qwen3-embedding:0.6b");
+  expect(settings.draft?.embed.source).toBe(source);
+  expect(settings.draft?.embed.base_url).toBe(url);
+  expect(settings.draft?.embed.model).toBe(model);
   expect(settings.draft?.embed.api_key_name).toBeNull();
   expect(settings.draft?.embed.api_key_env).toBeNull();
   expect(settings.draft?.rerank).toEqual(saved.rerank);
-  expect(settings.errors).toEqual({});
+  if (source === "lmstudio") {
+    expect(settings.errors["embed.model"]).toBe("Укажите модель провайдера");
+  } else expect(settings.errors).toEqual({});
   expect(settings.willReindex).toBe(true);
-  expect(document.body.textContent).toContain("Корень сервера Ollama");
+  expect(document.body.textContent).toContain(source === "ollama" ? "Корень сервера Ollama" : "Запустите сервер LM Studio");
   buttons().find(b => b.textContent.trim() === "Удалённый провайдер")!.click();
   flushSync();
   expect(settings.draft?.embed).toEqual(saved.embed);

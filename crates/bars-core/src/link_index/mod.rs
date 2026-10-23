@@ -5,11 +5,12 @@
 //! Адресат ссылки не хранится: он зависит от набора документов и разрешается при чтении.
 
 mod store;
+pub use bars_graph::links::{DocSet, moves};
 
 #[cfg(test)]
 mod tests;
 
 pub use store::{
-    BrokenLink, IncomingLink, LINKS_PARSER_VERSION, LinkIndex, LinkIndexError, LinksOf,
+    BrokenLink, IncomingLink, LINKS_PARSER_VERSION, LinkIndex, LinkIndexError, LinksOf, LinkPage,
     OutgoingLink, RefreshStats, store_path,
 };

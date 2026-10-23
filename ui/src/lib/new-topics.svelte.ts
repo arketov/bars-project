@@ -271,6 +271,16 @@ export class NewTopicsStore {
     return done !== null;
   }
 
+  async merge(id: number, sourceId: number): Promise<boolean> {
+    const version = this.#version;
+    const project = this.project, revision = this.#revision(id), sourceRevision = this.#revision(sourceId);
+    if (!project || id === sourceId || revision === null || sourceRevision === null) return false;
+    const done = await this.#mutate(() => call("new_topics_merge", { project, id, revision, source_id: sourceId, source_revision: sourceRevision }));
+    if (!done || version !== this.#version) return false;
+    await this.#refreshAfterChange(id);
+    return true;
+  }
+
   async remove(id: number): Promise<boolean> {
     const version = this.#version;
     const project = this.project, revision = this.#revision(id);

@@ -1,0 +1,85 @@
+{
+  "algorithm": "sha256",
+  "files": [
+    {
+      "path": "docs/knowledge/search-cpu-2026-10-23/attempt.json",
+      "bytes": 1235,
+      "sha256": "84bd054d346d9630d0ce37cbae33a664369228321f4ee2a5d05f46ee8e29e48d"
+    },
+    {
+      "path": "docs/knowledge/search-cpu-2026-10-23/build.json",
+      "bytes": 1284,
+      "sha256": "1cced7b5a4b3751367438ef0bbb09a62658526f3cf302ec773a7ce98287867ce"
+    },
+    {
+      "path": "docs/knowledge/search-cpu-2026-10-23/cache-plan.json.gz",
+      "bytes": 435297,
+      "sha256": "d5a039809a75ffb759903751a2d5186b288c065f556e67ffad821d1c9e5d20c8"
+    },
+    {
+      "path": "docs/knowledge/search-cpu-2026-10-23/checks.json",
+      "bytes": 1897,
+      "sha256": "897d4bb3165fcc46c2ae7dfe840d501fb2d61eb72a8516cd1db638458a7de256"
+    },
+    {
+      "path": "docs/knowledge/search-cpu-2026-10-23/clippy.log.gz",
+      "bytes": 936,
+      "sha256": "d7589e41d5840faeedff13392b6301a2c7751cd833254c11e29c6656f1fb2388"
+    },
+    {
+      "path": "docs/knowledge/search-cpu-2026-10-23/corpus.json.gz",
+      "bytes": 2901562,
+      "sha256": "199667f24d9b331b02255cdda69975f0fcb1461d50c7720755efcf6022f6eb39"
+    },
+    {
+      "path": "docs/knowledge/search-cpu-2026-10-23/Index.md",
+      "bytes": 2766,
+      "sha256": "85468a50d0359ee531d8fd7ce128cc36d56aa876cfcfdeb16eb065f1e472e9b4"
+    },
+    {
+      "path": "docs/knowledge/search-cpu-2026-10-23/index.sqlite.memory.jsonl.gz",
+      "bytes": 7084,
+      "sha256": "100e438cc5a6e9f74d3cdbd5ec9880dde535a3a2e725227a0539cf246deda0d2"
+    },
+    {
+      "path": "docs/knowledge/search-cpu-2026-10-23/initial-seed-check.json",
+      "bytes": 391,
+      "sha256": "54a2e48c3090d3b99fce17bdb4ceeaf6391dde8502dfc2b4efddf0b1a9b4008c"
+    },
+    {
+      "path": "docs/knowledge/search-cpu-2026-10-23/inputs.json",
+      "bytes": 2521,
+      "sha256": "ba93f15825284188dc813fe6b42230497e7f87722e4749084a0c9ab8c9643c49"
+    },
+    {
+      "path": "docs/knowledge/search-cpu-2026-10-23/preflight.json",
+      "bytes": 403,
+      "sha256": "cf11546a719cd97468efa976cc5147552d09cd36ba17ba72f8a7b981ae7ae8a6"
+    },
+    {
+      "path": "docs/knowledge/search-cpu-2026-10-23/prepare.stderr.log.gz",
+      "bytes": 101,
+      "sha256": "3ce5a56f00b331393da86e63889a1231ccfafe9d2b075726ade3179d69979916"
+    },
+    {
+      "path": "docs/knowledge/search-cpu-2026-10-23/prepare.stdout.log.gz",
+      "bytes": 20,
+      "sha256": "9e72928e7a01615b4cf090daa617b4ca9d68531748f887f323f695eb4ca3ef63"
+    },
+    {
+      "path": "docs/knowledge/search-cpu-2026-10-23/seed-vectors.sqlite.gz",
+      "bytes": 6767328,
+      "sha256": "af6cba0e4d45fc5b058493f83b9693eca2356c9d1f046a4b0974608a960d419b"
+    },
+    {
+      "path": "crates/bars-core/examples/bench_search_cpu.rs",
+      "bytes": 19214,
+      "sha256": "4ed3ef613831f446910713105cb8e6dcac80be36045b4cd170465bec7898459d"
+    },
+    {
+      "path": "scripts/check-search-cpu.mjs",
+      "bytes": 4976,
+      "sha256": "b13ec91a147142c44cefb1cb0ffcb8fff251405f35c6a40880096130517b288d"
+    }
+  ]
+}

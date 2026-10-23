@@ -4,10 +4,12 @@
 //! `bars-protocol`; сюда доходят уже проверенные вызовы. Окно вызывает те же методы без канала (Т-20).
 
 mod audits;
+mod disk_read;
 mod errors;
 mod graph;
 mod history;
 mod links;
+mod text_search;
 mod topics;
 
 #[cfg(test)]
@@ -58,6 +60,7 @@ pub struct WorkerHandler {
     topics: crate::new_topics::Collector,
     /// Единственный писатель индекса ссылок (`.bars/links.sqlite3`): вызовы окна идут по очереди.
     links_lock: std::sync::Arc<std::sync::Mutex<()>>,
+    text_searches: text_search::ActiveSearches,
     /// Очередь запусков аудитов знаний: один аудит на проект.
     audits: crate::audits::Audits,
     /// Близость документов последнего среза физического графа: проект, снимок графа, результат.
@@ -84,6 +87,7 @@ impl WorkerHandler {
             history,
             topics: crate::new_topics::Collector::new(),
             links_lock: Default::default(),
+            text_searches: Default::default(),
             audits: Default::default(),
             physical_similarity: Default::default(),
         }
@@ -1095,7 +1099,7 @@ impl WorkerHandler {
             let project = self.resolve(&params.target)?;
             return self
                 .worker
-                .graph_build(&project)
+                .graph_build_layer(&project, params.layer)
                 .await
                 .map(|out| output_value(&out))
                 .map_err(graph::graph_error);
@@ -1222,6 +1226,10 @@ impl WorkerHandler {
                 .new_topics_rename(params)
                 .await
                 .map(|out| output_value(&out)),
+            Call::NewTopicsMerge(params) => self
+                .new_topics_merge(params)
+                .await
+                .map(|out| output_value(&out)),
             Call::NewTopicsDelete(params) => self
                 .new_topics_delete(params)
                 .await
@@ -1235,6 +1243,11 @@ impl WorkerHandler {
                 .await
                 .map(|out| output_value(&out)),
             Call::LinksOf(params) => self.links_of(params).await.map(|out| output_value(&out)),
+            Call::DiskText(params) => self.disk_text(params).await.map(|out| output_value(&out)),
+            Call::DiskLinks(params) => self.disk_links(params).await.map(|out| output_value(&out)),
+            Call::TextSearch(params) => {
+                self.text_search(params).await.map(|out| output_value(&out))
+            }
             Call::AuditList(params) => self.audit_list(params).await.map(|out| output_value(&out)),
             Call::AuditIgnore(params) => self
                 .audit_ignore(params)

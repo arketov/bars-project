@@ -1,0 +1,7 @@
+   Compiling bindgen v0.72.1
+   Compiling candle-nn v0.11.0
+   Compiling fastembed v7.1.1
+   Compiling llama-cpp-sys-2 v0.1.160
+   Compiling llama-cpp-2 v0.1.160
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Finished `release` profile [optimized] target(s) in 23.61s

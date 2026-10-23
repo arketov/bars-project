@@ -2,6 +2,8 @@
 // Всё, что знает воркер, спрашивается у него; окно хранит только выбор пользователя.
 
 import { call, documentWindowOpen, joinPath, openInMainWindow, openPath, pickFolder, treeRead } from "./api";
+import { TextSearchStore } from './text-search.svelte';
+import { editors } from './editors.svelte';
 import type { GraphReply,GraphSearchOutput,RetrievalMode } from './graph';
 import { documentsIn } from "./format";
 import { AuditsStore } from "./audits.svelte";
@@ -34,7 +36,7 @@ export interface ViewedDocument {
   missing: boolean;
 }
 
-export type DocumentReference = Pick<SearchHit, "path" | "title" | "first_line" | "last_line">;
+export type DocumentReference = Pick<SearchHit, "path" | "title" | "first_line" | "last_line"> & { column?: number; length?: number };
 
 const PROJECT_KEY = "bars-project";
 const POLL_MS = 1000;
@@ -78,6 +80,7 @@ class App {
   filter = $state("");
 
   query = $state("");
+  textSearch = new TextSearchStore();
   retrievalMode = $state<RetrievalMode>('hybrid');
   includeRelated = $state(true);
   graphSearch = $state<GraphSearchOutput|null>(null);
@@ -319,7 +322,6 @@ class App {
     if (!projects.some((project) => project.path === this.current)) {
       const next = projects[0]?.path ?? null;
       if (next !== this.current) await this.select(next);
-
     }
   }
 
@@ -392,6 +394,7 @@ class App {
   }
 
   async select(path: string | null): Promise<void> {
+    this.textSearch.reset();
     this.graphSearch=null;this.graphPreview=null;
     this.#selectionVersion++;
     this.#searchId++;
@@ -441,6 +444,10 @@ class App {
     if (!project || !query) return;
     const searchId = ++this.#searchId;
     const requestId = newRequestId();
+    const textParams = {project:project.path, query, ...this.scope, case_sensitive:this.textSearch.caseSensitive, regex:this.textSearch.regex, path_filter:this.textSearch.pathFilter, request_id:requestId};
+    const semanticScope = this.scope;
+    const mode=this.retrievalMode, includeRelated=this.includeRelated, limit=this.count, minScore=this.minScore;
+    this.textSearch.reset();
     this.searching = true;
     this.searchError = null;
     this.results = null;
@@ -449,10 +456,17 @@ class App {
     this.displayed = null;
     this.emptyInfo = null;
     const started = performance.now();
+    let textTask: Promise<void> | undefined;
     try {
-      const { modules, files } = this.scope;
-      const mode=this.retrievalMode;
-      const includeRelated = this.includeRelated, limit = this.count, minScore = this.minScore;
+      const unsaved = editors.unsaved.length ? await editors.flush() : [];
+      if (searchId !== this.#searchId || this.current !== project.path) return;
+      if (unsaved.length) {
+        this.textSearch.error = `Не удалось записать ${unsaved.map(b => b.path).join(', ')}. Разрешите конфликт или ошибку записи перед поиском.`;
+        return;
+      }
+      this.searchedQuery = query;
+      textTask = this.textSearch.search(textParams);
+      const { modules, files } = semanticScope;
       const output = await call<SearchOutput|GraphSearchOutput>(mode==='hybrid'?"search":"graph_search", {
         cwd: project.path,
         project: project.path,
@@ -490,6 +504,7 @@ class App {
       }
       if (this.searchError.kind === "model_loading") this.retrySearchLater(project.path, query);
     } finally {
+      await textTask;
       if (searchId === this.#searchId) {
         this.elapsedMs = Math.round(performance.now() - started);
         this.searching = false;
@@ -620,9 +635,9 @@ class App {
       if (reading !== this.#reading || this.current !== project.path) return;
       if (error instanceof BarsError && error.kind === "file_not_found") {
         this.view = "main";
-        // Т-32: только явный клик по файлу папки разрешает пустой редактируемый документ.
-        this.viewer = { hit, title: hit.title, text: "", missing: !missingIsDraft };
-        if (missingIsDraft) this.activeDocument = hit.path;
+          // Т-32: только явный клик по файлу папки разрешает пустой редактируемый документ.
+          this.viewer = { hit, title: hit.title, text: "", missing: !missingIsDraft };
+          if (missingIsDraft) this.activeDocument = hit.path;
       } else {
         this.flash(error instanceof Error ? error.message : String(error), true);
       }

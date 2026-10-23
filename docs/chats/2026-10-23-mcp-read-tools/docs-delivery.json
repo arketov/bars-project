@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "fake_models": true,
+  "custom_root": "manual",
+  "noop_mtime": true,
+  "layout_preserved": true,
+  "instruction_repaired": true
+}

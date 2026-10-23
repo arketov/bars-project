@@ -20,12 +20,28 @@ impl<S> FromContextPart<ToolCallContext<'_, S>> for Original {
             "bars_get_similar" => &["format", "project", "chunk_id", "modules", "limit"],
             "bars_get_duplicates" => &["format", "project", "modules", "limit"],
             "bars_read" => &["format", "project", "path"],
+            "bars_text_search" => &[
+                "format",
+                "project",
+                "query",
+                "case_sensitive",
+                "regex",
+                "path_filter",
+                "modules",
+                "files",
+                "limit_docs",
+                "limit_hits",
+                "path",
+                "offset",
+                "revision",
+            ],
+            "bars_links" => &["format", "project", "path", "direction", "limit"],
             "bars_outline" => &["format", "project", "path", "levels", "under", "under_line"],
             "bars_status" => &["format", "project"],
             "bars_reindex" => &["format", "project", "full"],
             _ => &["format"],
         };
-        let fields = context
+        let mut fields: serde_json::Map<String, Value> = context
             .arguments
             .as_ref()
             .map(|o| {
@@ -35,6 +51,18 @@ impl<S> FromContextPart<ToolCallContext<'_, S>> for Original {
                     .collect()
             })
             .unwrap_or_default();
+        if context.name.as_ref() == "bars_links" {
+            fields.insert(
+                "cursor_present".into(),
+                Value::Bool(
+                    context
+                        .arguments
+                        .as_ref()
+                        .and_then(|a| a.get("cursor"))
+                        .is_some_and(|v| !v.is_null()),
+                ),
+            );
+        }
         Ok(Self(Value::Object(fields)))
     }
 }

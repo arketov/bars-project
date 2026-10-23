@@ -5,7 +5,7 @@ import { app } from "./app.svelte";
 import { call } from "./api";
 import type { ProjectsOutput, SearchOutput } from "./types";
 
-vi.mock("./api", () => ({ call: vi.fn(), joinPath: vi.fn(), openPath: vi.fn(), pickFolder: vi.fn() }));
+vi.mock("./api", () => ({ call: vi.fn(), joinPath: vi.fn(), openPath: vi.fn(), pickFolder: vi.fn(), inTauri: () => false }));
 const invoke = vi.mocked(call);
 const first = { name: "Одинаковое имя", path: "C:/первый проект", docs_root: "docs", state: "ready" as const, modules: [] };
 const other = { ...first, path: "D:/другой проект" };

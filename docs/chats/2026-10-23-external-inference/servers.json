@@ -1,0 +1,12 @@
+{
+  "embed": {
+    "pid": 49412,
+    "command": "\"C:\\Users\\arketov\\AppData\\Local\\Temp\\bars-external-inference-5-3\\runtime\\llama-server.exe\" -m \"D:\\text-generation-webui-1.16\\models\\Qwen\\Qwen3-Embedding-0.6B-GGUF\\Qwen3-Embedding-0.6B-Q8_0.gguf\" --alias Qwen3-Embedding-0.6B --host 127.0.0.1 --port 18083 --embedding --pooling last -ngl 99 -c 4096 -b 4096 -ub 4096 -np 1",
+    "model_sha256": "06507C7B42688469C4E7298B0A1E16DEFF06CAF291CF0A5B278C308249C3E439"
+  },
+  "rerank": {
+    "pid": 48456,
+    "command": "\"C:\\Users\\arketov\\AppData\\Local\\Temp\\bars-external-inference-5-3\\runtime\\llama-server.exe\" -m \"D:\\text-generation-webui-1.16\\models\\ggml-org\\Qwen3-Reranker-0.6B-Q8_0-GGUF\\qwen3-reranker-0.6b-q8_0.gguf\" --alias Qwen3-Reranker-0.6B --host 127.0.0.1 --port 18084 --reranking -ngl 99 -c 4096 -b 4096 -ub 4096 -np 1",
+    "model_sha256": "22C9979CE4FBCDC5ACDC310C6641C32797EFF1AA980B8F7A2DB8A8EA23429A48"
+  }
+}

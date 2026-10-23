@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { cleanTitle, linkOptions, linkTargets, resolveWikilink, semanticOptions, wikiName, wikiTarget, type LinkTarget } from "./link-picker";
+
+it("поиск е/ё остаётся нечётким, но разные имена допускают отдельную ссылку", () => {
+  const all = [{path:"docs/Все.md",docs:"Все.md",title:"Все"}];
+  expect(linkOptions(all,"Всё").some(option => option.create)).toBe(true);
+  expect(resolveWikilink(all,"docs/x.md","Всё")).toBeNull();
+});
 import { buildTree } from "./tree";
 
 const target = (docs: string, title: string): LinkTarget => ({ path: `docs/${docs}`, docs, title });

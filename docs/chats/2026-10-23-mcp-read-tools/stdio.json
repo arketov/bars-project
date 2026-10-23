@@ -1,0 +1,11 @@
+{
+  "checks": [
+    "initialize <=2000",
+    "16 schemas",
+    "stdio tools/call",
+    "UTF-16",
+    "fresh text",
+    "fresh links"
+  ],
+  "profile_unchanged": true
+}

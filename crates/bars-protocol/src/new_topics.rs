@@ -177,6 +177,16 @@ pub struct NewTopicsDeleteParams {
 
 /// Результат изменения темы: её новая ревизия.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct NewTopicsMergeParams {
+    pub project: String,
+    pub id: i64,
+    pub revision: i64,
+    pub source_id: i64,
+    pub source_revision: i64,
+}
+
+/// Результат изменения темы: её новая ревизия.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct NewTopicsChangedOutput {
     pub revision: i64,
 }

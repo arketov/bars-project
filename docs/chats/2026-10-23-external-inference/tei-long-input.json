@@ -1,0 +1,14 @@
+[
+  {
+    "input_chars": 18432,
+    "body": "{\"error\":\"Input validation error: `inputs` must have less than 128 tokens. Given: 2050\",\"error_type\":\"Validation\"}",
+    "kind": "embed",
+    "status": 422
+  },
+  {
+    "input_chars": 18432,
+    "body": "{\"error\":\"Input validation error: `inputs` must have less than 512 tokens. Given: 2056\",\"error_type\":\"Validation\"}",
+    "kind": "rerank",
+    "status": 422
+  }
+]

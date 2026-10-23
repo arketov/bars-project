@@ -1,0 +1,101 @@
+[
+  {
+    "id": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+    "files": [
+      {
+        "rfilename": "1_Pooling/config.json",
+        "blobId": "d1514c3162bbe87b343f565fadc62e6c06f04f03",
+        "size": 190
+      },
+      {
+        "rfilename": "config.json",
+        "blobId": "c06d5b49495f044e6380e68a60538be17a6bd5d1",
+        "size": 645
+      },
+      {
+        "rfilename": "model.safetensors",
+        "blobId": "295bf8c5f879ae1c9b51986a824e4c0f70d9eb42",
+        "size": 470641600,
+        "lfs": {
+          "sha256": "eaa086f0ffee582aeb45b36e34cdd1fe2d6de2bef61f8a559a1bbc9bd955917b",
+          "size": 470641600,
+          "pointerSize": 134
+        }
+      },
+      {
+        "rfilename": "modules.json",
+        "blobId": "f7640f94e81bb7f4f04daf1668850b38763a13d9",
+        "size": 229
+      },
+      {
+        "rfilename": "sentence_bert_config.json",
+        "blobId": "5fd10429389515d3e5cccdeda08cae5fea1ae82e",
+        "size": 53
+      },
+      {
+        "rfilename": "special_tokens_map.json",
+        "blobId": "2ea7ad0e45a9d1d1591782ba7e29a703d0758831",
+        "size": 239
+      },
+      {
+        "rfilename": "tokenizer.json",
+        "blobId": "c8feb62b21a4f391c3e71d1e37218c14f19e88d2",
+        "size": 9081518,
+        "lfs": {
+          "sha256": "2c3387be76557bd40970cec13153b3bbf80407865484b209e655e5e4729076b8",
+          "size": 9081518,
+          "pointerSize": 132
+        }
+      },
+      {
+        "rfilename": "tokenizer_config.json",
+        "blobId": "3c1b565ae10a15a1d0c31096f834af2fd9359e91",
+        "size": 526
+      }
+    ],
+    "revision": "e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
+    "dir": "tei-paraphrase-multilingual-MiniLM-L12-v2"
+  },
+  {
+    "id": "cross-encoder/mmarco-mMiniLMv2-L12-H384-v1",
+    "files": [
+      {
+        "rfilename": "config.json",
+        "blobId": "43ac97f1bef372d4f1d30a32f9a84baffcf6575d",
+        "size": 891
+      },
+      {
+        "rfilename": "model.safetensors",
+        "blobId": "28b465f76ad713413a03db9d865baa6c70449ca4",
+        "size": 470592698,
+        "lfs": {
+          "sha256": "5daeca2481a76b5976a2bdc32f0a78532b6716da4f8cd3ff59460ef8d2f359b4",
+          "size": 470592698,
+          "pointerSize": 134
+        }
+      },
+      {
+        "rfilename": "special_tokens_map.json",
+        "blobId": "2ea7ad0e45a9d1d1591782ba7e29a703d0758831",
+        "size": 239
+      },
+      {
+        "rfilename": "tokenizer.json",
+        "blobId": "b77624b6c85b399b6d11c581617e579ce832af28",
+        "size": 17082660,
+        "lfs": {
+          "sha256": "62c24cdc13d4c9952d63718d6c9fa4c287974249e16b7ade6d5a85e7bbb75626",
+          "size": 17082660,
+          "pointerSize": 133
+        }
+      },
+      {
+        "rfilename": "tokenizer_config.json",
+        "blobId": "b59159d44c6bd4b1d9f7ae4f8da028da4238e06e",
+        "size": 435
+      }
+    ],
+    "revision": "1427fd652930e4ba29e8149678df786c240d8825",
+    "dir": "tei-mmarco-mMiniLMv2-L12-H384-v1"
+  }
+]

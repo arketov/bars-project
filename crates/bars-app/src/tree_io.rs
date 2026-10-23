@@ -483,14 +483,14 @@ fn existing_entry(roots: &Roots, path: &str) -> Result<(PathBuf, bool), TreeErro
 }
 
 /// Переименовывает и перемещает файл или папку; `to_parent` — папка назначения, `name` — новое имя.
-/// Возвращает новый путь проекта. Ссылки в документах не правятся (этап 3.5).
-pub fn move_entry(
+/// Проверка выполняется и до показа плана, и перед применением.
+fn move_target(
     project: &Path,
     docs_root: &str,
     from: &str,
     to_parent: &str,
     name: &str,
-) -> Result<String, TreeError> {
+) -> Result<(Roots, PathBuf, PathBuf), TreeError> {
     let roots = roots(project, docs_root)?;
     let (source, is_dir) = existing_entry(&roots, from)?;
     let parent = roots.existing_dir(to_parent)?;
@@ -511,7 +511,24 @@ pub fn move_entry(
     if let Some(found) = existing {
         return Err(TreeError::Exists(found));
     }
-    let same_folder = source.parent() == Some(parent.as_path());
+    Ok((roots, source, dest))
+}
+
+/// Только физическое перемещение; команда окна использует `move_with_links`.
+pub fn move_entry(
+    project: &Path,
+    docs_root: &str,
+    from: &str,
+    to_parent: &str,
+    name: &str,
+) -> Result<String, TreeError> {
+    let (roots, source, dest) = move_target(project, docs_root, from, to_parent, name)?;
+    let parent = dest.parent().ok_or(TreeError::InvalidPath)?;
+    let name = dest
+        .file_name()
+        .ok_or(TreeError::InvalidPath)?
+        .to_string_lossy();
+    let same_folder = source.parent() == Some(parent);
     let case_only = same_folder
         && source
             .file_name()
@@ -558,6 +575,167 @@ fn rename_without_replace(from: &Path, to: &Path) -> std::io::Result<()> {
     fs::rename(from, to)
 }
 
+#[derive(Debug)]
+pub struct LinkUpdate {
+    pub path: String,
+    pub read: document_io::ReadOut,
+    pub edits: Vec<bars_core::link_index::moves::Edit>,
+}
+
+#[derive(Debug)]
+pub struct MovePlan {
+    pub from: String,
+    pub path: String,
+    pub token: String,
+    pub updates: Vec<LinkUpdate>,
+    pub warnings: Vec<(String, u32)>,
+}
+
+/// Полный снимок перед записью. Ошибка чтения — отказ до физического перемещения.
+pub fn plan_move(
+    project: &Path,
+    docs_root: &str,
+    from: &str,
+    to_parent: &str,
+    name: &str,
+) -> Result<MovePlan, TreeError> {
+    use bars_core::link_index::{DocSet, moves};
+    let (roots, source, dest) = move_target(project, docs_root, from, to_parent, name)?;
+    let from = roots.project_path(&source);
+    let to = roots.project_path(&dest);
+    let tree = read_tree(project, docs_root)?;
+    if !tree.problems.is_empty() {
+        return Err(TreeError::Io(format!(
+            "Нельзя составить полный план ссылок: {:?}",
+            tree.problems
+        )));
+    }
+    let prefix = docs_root
+        .replace('\\', "/")
+        .trim_matches('/')
+        .trim_start_matches("./")
+        .to_string();
+    let local = |p: &str| {
+        if prefix == "." || prefix.is_empty() {
+            p.to_string()
+        } else {
+            p.strip_prefix(&format!("{prefix}/"))
+                .unwrap_or(p)
+                .to_string()
+        }
+    };
+    let before = DocSet::new(tree.files.iter().map(|f| local(&f.path)));
+    let after = DocSet::new(
+        before
+            .iter()
+            .map(|p| moves::mapped(p, &local(&from), &local(&to))),
+    );
+    let mut files = tree.files;
+    files.sort_by(|a, b| a.path.cmp(&b.path));
+    let mut hash = blake3::Hasher::new();
+    for value in [&from, &to] {
+        hash.update(value.as_bytes());
+        hash.update(b"\0");
+    }
+    let mut updates = Vec::new();
+    let mut warnings = Vec::new();
+    for file in files {
+        let absolute = document_io::resolve(project, docs_root, &file.path).map_err(doc_error)?;
+        let read = document_io::read(&absolute).map_err(doc_error)?;
+        if read.read_only == Some(document_io::ReadOnlyReason::NotUtf8) {
+            return Err(TreeError::Io(format!("{}: файл не в UTF-8", file.path)));
+        }
+        hash.update(file.path.as_bytes());
+        hash.update(b"\0");
+        hash.update(read.revision.as_bytes());
+        hash.update(b"\0");
+        let plan = moves::plan_with_sets(
+            &read.text,
+            &local(&file.path),
+            &before,
+            &after,
+            &local(&from),
+            &local(&to),
+        );
+        if !plan.invalid.is_empty() {
+            return Err(TreeError::InvalidMove(format!(
+                "{}: не удалось сохранить адресат ссылки на строках {:?}",
+                file.path, plan.invalid
+            )));
+        }
+        warnings.extend(
+            plan.warnings
+                .into_iter()
+                .map(|line| (file.path.clone(), line)),
+        );
+        if !plan.edits.is_empty() {
+            updates.push(LinkUpdate {
+                path: moves::mapped(&file.path, &from, &to),
+                read,
+                edits: plan.edits,
+            });
+        }
+    }
+    Ok(MovePlan {
+        from,
+        path: to,
+        token: hash.finalize().to_hex().to_string(),
+        updates,
+        warnings,
+    })
+}
+
+#[derive(Debug)]
+pub struct MoveResult {
+    pub from: String,
+    pub path: String,
+    pub updated: Vec<String>,
+    pub failed: Vec<(String, String)>,
+}
+
+pub fn move_with_links(
+    project: &Path,
+    docs_root: &str,
+    from: &str,
+    to_parent: &str,
+    name: &str,
+    token: &str,
+) -> Result<MoveResult, TreeError> {
+    let plan = plan_move(project, docs_root, from, to_parent, name)?;
+    if plan.token != token {
+        return Err(TreeError::InvalidMove(
+            "документы изменились; проверьте новый план ссылок".into(),
+        ));
+    }
+    let path = move_entry(project, docs_root, from, to_parent, name)?;
+    let mut result = MoveResult {
+        from: plan.from,
+        path,
+        updated: Vec::new(),
+        failed: Vec::new(),
+    };
+    for update in plan.updates {
+        let outcome = (|| {
+            let file = document_io::resolve(project, docs_root, &update.path)?;
+            let text = bars_core::link_index::moves::apply(&update.read.text, &update.edits);
+            document_io::write(
+                &file,
+                &text,
+                Some(&update.read.revision),
+                update.read.eol,
+                update.read.bom,
+            )
+        })();
+        match outcome {
+            Ok(WriteOutcome::Saved { .. }) => result.updated.push(update.path),
+            Ok(WriteOutcome::Conflict { .. }) => result
+                .failed
+                .push((update.path, "Файл изменился после составления плана".into())),
+            Err(error) => result.failed.push((update.path, error.message())),
+        }
+    }
+    Ok(result)
+}
 
 /// Отправляет файл или папку в корзину ОС. Недоступная корзина — отказ, безвозвратного пути нет.
 pub fn trash_entry(project: &Path, docs_root: &str, path: &str) -> Result<(), TreeError> {

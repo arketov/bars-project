@@ -5,6 +5,7 @@ use bars_core::storage::{Index, Journal, index_path};
 pub(super) struct GraphJob {
     pub id: String,
     pub cancel: Arc<AtomicBool>,
+    pub layer: bars_core::graph::BuildLayer,
 }
 struct Cleanup {
     inner: Arc<Inner>,
@@ -24,7 +25,38 @@ impl Worker {
         &self,
         project: &Path,
     ) -> Result<bars_protocol::GraphAcceptedOutput, GraphError> {
-        let guard = self.request_guard().await;
+        self.graph_build_layer(project, bars_core::graph::BuildLayer::All)
+            .await
+    }
+
+    pub async fn graph_build_layer(
+        &self,
+        project: &Path,
+        layer: bars_core::graph::BuildLayer,
+    ) -> Result<bars_protocol::GraphAcceptedOutput, GraphError> {
+        self.graph_start_layer(project, true, layer).await
+    }
+
+    pub(super) async fn graph_start(
+        &self,
+        project: &Path,
+        explicit: bool,
+    ) -> Result<bars_protocol::GraphAcceptedOutput, GraphError> {
+        self.graph_start_layer(project, explicit, bars_core::graph::BuildLayer::All)
+            .await
+    }
+
+    async fn graph_start_layer(
+        &self,
+        project: &Path,
+        explicit: bool,
+        layer: bars_core::graph::BuildLayer,
+    ) -> Result<bars_protocol::GraphAcceptedOutput, GraphError> {
+        let guard = if explicit {
+            Some(self.request_guard().await)
+        } else {
+            None
+        };
         if !index_path(project).exists() {
             return Err(GraphError::NotReady("индекс ещё не построен".into()));
         }
@@ -46,6 +78,9 @@ impl Worker {
         {
             let mut jobs = lock(&self.inner.graph_jobs);
             if let Some(job) = jobs.get(project) {
+                if explicit && job.layer != layer {
+                    return Err(GraphError::InvalidParams("у проекта уже выполняется задание другого слоя; дождитесь его или остановите".into()));
+                }
                 return Ok(bars_protocol::GraphAcceptedOutput {
                     accepted: true,
                     job_id: job.id.clone(),
@@ -56,6 +91,7 @@ impl Worker {
                 GraphJob {
                     id: id.clone(),
                     cancel: cancel.clone(),
+                    layer,
                 },
             );
         }
@@ -69,16 +105,48 @@ impl Worker {
                 project: project.clone(),
                 id: job_id.clone(),
             };
-            let _job = job_gate.lock_owned().await;
+            let _job = job_gate.clone().lock_owned().await;
+            if inner.stop.load(Ordering::Acquire)
+                || !lock(&inner.projects)
+                    .get(&project)
+                    .is_some_and(|r| !r.deleting && Arc::ptr_eq(&r.job_gate, &job_gate))
+            {
+                return;
+            }
             let _gate = gate.read_owned().await;
             let result = tokio::task::spawn_blocking(move || -> Result<(), GraphError> {
                 let mut index = Index::open(&index_path(&project), Journal::Wal)
                     .map_err(|e| GraphError::InvalidData(e.to_string()))?;
                 store::ensure_schema(index.conn_mut())?;
+                if cancel.load(Ordering::Acquire) {
+                    store::set_paused(index.conn(), true)?;
+                    store::set_state(index.conn(), LayerState::Cancelled, None, None)?;
+                    return Ok(());
+                }
+                if !explicit {
+                    let status = store::status(index.conn())?;
+                    if status.paused
+                        || (status.file_errors_total == 0
+                            && status.layers.len() == 3
+                            && status.layers.values().all(|l| {
+                                matches!(l.state, LayerState::Ready | LayerState::Partial)
+                            })
+                            && matches!(status.state, LayerState::Ready | LayerState::Partial)
+                            && store::load(index.conn()).is_ok())
+                    {
+                        return Ok(());
+                    }
+                } else {
+                    store::set_paused(index.conn(), false)?;
+                }
                 store::set_state(index.conn(), LayerState::Building, Some(&job_id), None)?;
                 let stopped =
                     || cancel.load(Ordering::Acquire) || inner.stop.load(Ordering::Acquire);
-                let result = bars_core::graph::build_index_graph(&project, &mut index, stopped);
+                let result =
+                    bars_core::graph::build_index_graph_layer(&project, &mut index, layer, stopped);
+                if cancel.load(Ordering::Acquire) {
+                    store::set_paused(index.conn(), true)?;
+                }
                 if let Err(error) = &result {
                     let _ = store::set_state(
                         index.conn(),
@@ -99,8 +167,12 @@ impl Worker {
                 Ok(Err(e)) => log::warn!("Задание графа не завершено: {e}"),
                 Err(e) => log::error!("Задание графа прервано: {e}"),
             }
+            // Следующая индексация не должна принять завершающееся задание за своё обновление.
+            drop(_cleanup);
         });
-        lock(&self.inner.tasks).push(handle);
+        let mut tasks = lock(&self.inner.tasks);
+        tasks.retain(|task| !task.is_finished());
+        tasks.push(handle);
         Ok(bars_protocol::GraphAcceptedOutput {
             accepted: true,
             job_id: id,

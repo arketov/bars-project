@@ -8,6 +8,7 @@
 
 mod audits;
 mod client;
+mod disk_read;
 mod endpoint;
 mod error;
 mod framing;
@@ -23,12 +24,14 @@ mod operations;
 mod server;
 mod session;
 mod text;
+mod text_search;
 #[cfg(windows)]
 pub mod winsid;
 
 pub use audits::*;
 pub use bars_graph as graph_types;
 pub use client::{Client, ClientError};
+pub use disk_read::*;
 pub use endpoint::Endpoint;
 pub use error::*;
 pub use framing::{MAX_REQUEST_LINE, MAX_RESPONSE_LINE, read_line_limited, write_line};
@@ -46,6 +49,7 @@ pub use operations::*;
 pub use server::{Handler, serve_connection};
 pub use session::Session;
 pub use text::number_lines;
+pub use text_search::*;
 
 /// Версия протокола. Клиент и воркер сверяют её в `hello`; любое несовместимое изменение методов
 /// увеличивает её.

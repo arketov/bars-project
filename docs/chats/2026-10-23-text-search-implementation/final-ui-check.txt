@@ -1,0 +1,17 @@
+
+> bars-ui@0.0.0 test
+> vitest run --maxWorkers=1 src/lib/audits-store.test.ts src/lib/Workspace.test.ts
+
+
+ RUN  v5.0.4 C:/Users/arketov/Desktop/bars-project/ui
+
+
+ Test Files  2 passed (2)
+      Tests  33 passed (33)
+   Start at  13:22:12
+   Duration  9.54s (tests 41%, environment 33%, import 14%, transform 12%)
+
+Environment  jsdom was created 2 times · 2.96s total, 33% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+

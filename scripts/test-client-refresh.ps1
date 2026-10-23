@@ -76,7 +76,14 @@ function Stop-Session($session) {
         Assert-That ($session.Process.WaitForExit(15000)) 'Worker shutdown timeout'
         Assert-That ($session.Process.ExitCode -eq 0) $session.Errors.Result
         Write-Fixture (Join-Path $EvidenceDir ($session.Name + '.stderr.txt')) $session.Errors.Result
-        return $session.Errors.Result
+        # Продукт пишет интеграционные события через log в файл, не в stderr.
+        $journalPath = Join-Path $session.Home '.bars/logs/worker.jsonl'
+        $entries = @(if (Test-Path -LiteralPath $journalPath) {
+            Get-Content -LiteralPath $journalPath | ForEach-Object { $_ | ConvertFrom-Json } |
+                Where-Object { $_.pid -eq $session.Process.Id }
+        })
+        Write-Fixture (Join-Path $EvidenceDir ($session.Name + '.events.json')) (ConvertTo-Json -InputObject $entries -Depth 6)
+        return ($entries.message -join "`n")
     } finally {
         if (-not $session.Process.HasExited) { $session.Process.Kill($true); $session.Process.WaitForExit() }
         $session.Process.Dispose()
@@ -129,7 +136,16 @@ try {
     }
     Write-Fixture (Join-Path $fixtureHome '.agents/skills/foreign/SKILL.md') 'foreign'
     $active = Start-Session '01-update'
-    Wait-Until { $path = Join-Path $fixtureHome '.agents/skills/bars-session-log/SKILL.md'; Test-Path -LiteralPath $path }
+    Wait-Until {
+        foreach ($skill in @('bars-docs','bars-session-log')) {
+            $expected = [IO.File]::ReadAllText((Join-Path $repo "crates/bars-worker/assets/skills/$skill/SKILL.md"))
+            foreach ($base in @('.agents/skills','.claude/skills')) {
+                $path = Join-Path $fixtureHome "$base/$skill/SKILL.md"
+                if (-not (Test-Path -LiteralPath $path) -or [IO.File]::ReadAllText($path) -cne $expected) { return $false }
+            }
+        }
+        return $true
+    }
     foreach ($skill in @('bars-docs','bars-session-log')) {
         $expected = [IO.File]::ReadAllText((Join-Path $repo "crates/bars-worker/assets/skills/$skill/SKILL.md"))
         foreach ($base in @('.agents/skills','.claude/skills')) {
@@ -188,7 +204,7 @@ try {
     $beforeClaude = [IO.File]::ReadAllText((Join-Path $fixtureHome '.claude.json'))
     $active = Start-Session '05-error-isolation'
     $log = Stop-Session $active; $active = $null
-    Assert-That ($log -match 'не разбирается' -and $log -match 'Codex: обновлено') 'Error isolation failed'
+    Assert-That ($log -match 'Claude Code: ошибка' -and $log -match 'Codex: обновлено') 'Error isolation failed'
     Assert-That ([IO.File]::ReadAllText((Join-Path $fixtureHome '.claude.json')) -ceq $beforeClaude) 'Preflight modified MCP'
     $emptyHome = Join-Path $EvidenceDir 'empty-home'
     New-Item -ItemType Directory -Path $emptyHome | Out-Null

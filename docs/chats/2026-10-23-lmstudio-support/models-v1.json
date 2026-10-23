@@ -1,0 +1,241 @@
+{
+  "models": [
+    {
+      "type": "llm",
+      "publisher": "google",
+      "key": "google/gemma-4-e2b",
+      "display_name": "Gemma 4 E2B",
+      "architecture": "gemma4",
+      "quantization": {
+        "name": "Q4_K_M",
+        "bits_per_weight": 4
+      },
+      "size_bytes": 4414788475,
+      "params_string": "4.6B",
+      "loaded_instances": [],
+      "max_context_length": 131072,
+      "format": "gguf",
+      "capabilities": {
+        "vision": true,
+        "trained_for_tool_use": true,
+        "reasoning": {
+          "allowed_options": [
+            "off",
+            "on"
+          ],
+          "default": "on"
+        }
+      },
+      "description": null,
+      "variants": [
+        "google/gemma-4-e2b@q4_k_m"
+      ],
+      "selected_variant": "google/gemma-4-e2b@q4_k_m"
+    },
+    {
+      "type": "llm",
+      "publisher": "ggml-org",
+      "key": "qwen3-reranker-0.6b",
+      "display_name": "Qwen3 Reranker 0.6B",
+      "architecture": "qwen3",
+      "quantization": {
+        "name": "Q8_0",
+        "bits_per_weight": 8
+      },
+      "size_bytes": 639153184,
+      "params_string": "0.6B",
+      "loaded_instances": [],
+      "max_context_length": 40960,
+      "format": "gguf",
+      "capabilities": {
+        "vision": false,
+        "trained_for_tool_use": true,
+        "reasoning": {
+          "allowed_options": [
+            "off",
+            "on"
+          ],
+          "default": "on"
+        }
+      },
+      "description": null
+    },
+    {
+      "type": "embedding",
+      "publisher": "Qwen",
+      "key": "text-embedding-qwen3-embedding-0.6b",
+      "display_name": "Qwen3 Embedding 0.6B",
+      "quantization": {
+        "name": "Q8_0",
+        "bits_per_weight": 8
+      },
+      "size_bytes": 639150592,
+      "params_string": "0.6B",
+      "loaded_instances": [
+        {
+          "id": "text-embedding-qwen3-embedding-0.6b",
+          "config": {
+            "context_length": 8192
+          }
+        }
+      ],
+      "max_context_length": 32768,
+      "format": "gguf"
+    },
+    {
+      "type": "llm",
+      "publisher": "lmstudio-community",
+      "key": "qwen3.6-35b-a3b",
+      "display_name": "Qwen3.6 35B A3B",
+      "architecture": "qwen35moe",
+      "quantization": {
+        "name": "Q4_K_M",
+        "bits_per_weight": 4
+      },
+      "size_bytes": 22069579744,
+      "params_string": "35B-A3B",
+      "loaded_instances": [],
+      "max_context_length": 262144,
+      "format": "gguf",
+      "capabilities": {
+        "vision": true,
+        "trained_for_tool_use": true,
+        "reasoning": {
+          "allowed_options": [
+            "off",
+            "on"
+          ],
+          "default": "on"
+        }
+      },
+      "description": null
+    },
+    {
+      "type": "llm",
+      "publisher": "lmstudio-community",
+      "key": "gemma-4-31b-it-qat",
+      "display_name": "Gemma 4 31B Instruct QAT",
+      "architecture": "gemma4",
+      "quantization": {
+        "name": "Q4_0",
+        "bits_per_weight": 4
+      },
+      "size_bytes": 18851726784,
+      "params_string": "31B",
+      "loaded_instances": [],
+      "max_context_length": 262144,
+      "format": "gguf",
+      "capabilities": {
+        "vision": true,
+        "trained_for_tool_use": true,
+        "reasoning": {
+          "allowed_options": [
+            "off",
+            "on"
+          ],
+          "default": "on"
+        }
+      },
+      "description": null
+    },
+    {
+      "type": "llm",
+      "publisher": "lmstudio-community",
+      "key": "gemma-4-26b-a4b-it-qat",
+      "display_name": "Gemma 4 26B A4B Instruct QAT",
+      "architecture": "gemma4",
+      "quantization": {
+        "name": "Q4_0",
+        "bits_per_weight": 4
+      },
+      "size_bytes": 15634190528,
+      "params_string": "26B-A4B",
+      "loaded_instances": [],
+      "max_context_length": 262144,
+      "format": "gguf",
+      "capabilities": {
+        "vision": true,
+        "trained_for_tool_use": true,
+        "reasoning": {
+          "allowed_options": [
+            "off",
+            "on"
+          ],
+          "default": "on"
+        }
+      },
+      "description": null
+    },
+    {
+      "type": "llm",
+      "publisher": "lmstudio-community",
+      "key": "gemma-4-12b-it-qat",
+      "display_name": "Gemma 4 12B Instruct QAT",
+      "architecture": "gemma4",
+      "quantization": {
+        "name": "Q4_0",
+        "bits_per_weight": 4
+      },
+      "size_bytes": 7150993888,
+      "params_string": "12B",
+      "loaded_instances": [],
+      "max_context_length": 262144,
+      "format": "gguf",
+      "capabilities": {
+        "vision": true,
+        "trained_for_tool_use": true,
+        "reasoning": {
+          "allowed_options": [
+            "off",
+            "on"
+          ],
+          "default": "on"
+        }
+      },
+      "description": null
+    },
+    {
+      "type": "embedding",
+      "publisher": "nomic-ai",
+      "key": "text-embedding-nomic-embed-text-v1.5",
+      "display_name": "Nomic Embed Text v1.5",
+      "quantization": {
+        "name": "Q4_K_M",
+        "bits_per_weight": 4
+      },
+      "size_bytes": 84106624,
+      "params_string": null,
+      "loaded_instances": [],
+      "max_context_length": 2048,
+      "format": "gguf"
+    },
+    {
+      "type": "llm",
+      "publisher": "t-tech",
+      "key": "t-pro-it-2.0",
+      "display_name": "T Pro Instruct 2.0",
+      "architecture": "qwen3",
+      "quantization": {
+        "name": "Q4_0",
+        "bits_per_weight": 4
+      },
+      "size_bytes": 18637019168,
+      "params_string": "33B",
+      "loaded_instances": [],
+      "max_context_length": 40960,
+      "format": "gguf",
+      "capabilities": {
+        "vision": false,
+        "trained_for_tool_use": true,
+        "reasoning": {
+          "allowed_options": [
+            "off",
+            "on"
+          ],
+          "default": "on"
+        }
+      },
+      "description": null
+    }
+  ]
+}

@@ -2,8 +2,8 @@
   import { tick } from "svelte";
   import { app } from "./app.svelte";
   import Icon from "./Icon.svelte";
-  import { renderDocument, resolveDocumentLink } from "./markdown";
-  import { linkTargets, resolveWikilink } from "./link-picker";
+  import { renderDocument } from "./markdown";
+  import { followLink as documentLink } from "./follow-link.svelte";
 
   const doc = $derived(app.viewer);
   const html = $derived(
@@ -17,10 +17,7 @@
     const link = (event.target as HTMLElement).closest<HTMLElement>("a[data-doc-link], a[data-wiki-link]");
     if (!link || !doc) return;
     event.preventDefault();
-    const path = link.dataset.wikiLink !== undefined
-      ? resolveWikilink(linkTargets(app.tree, app.docsRoot), doc.hit.path, link.dataset.wikiLink)?.path
-      : resolveDocumentLink(doc.hit.path, link.dataset.docLink ?? "");
-    if (path) void app.openDocument({ path, title: path.split("/").pop() ?? path, first_line: 0, last_line: 0 });
+    if (app.current) void documentLink.open(app.current, doc.hit.path, link.dataset.wikiLink ?? link.dataset.docLink ?? "", link.dataset.wikiLink !== undefined);
   }
 
   // Документ прокручен к найденному разделу (main-window.md).

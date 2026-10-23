@@ -1,0 +1,37 @@
+   Compiling bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Finished `release` profile [optimized] target(s) in 25.51s
+     Running unittests src\lib.rs (C:/bt/bars\release\deps\bars_core-f471c4d65c086b94.exe)
+
+running 28 tests
+test settings::tests::agent_limits_the_wrong_way_round_are_invalid ... ok
+test settings::tests::broken_toml_is_a_parse_error_naming_the_file ... ok
+test settings::tests::edit_pause_defaults_to_thirty_seconds_and_project_overrides_it ... ok
+test settings::tests::embed_provider_fields_are_checked_on_read ... ok
+test settings::tests::every_catalog_model_and_both_remote_kinds_are_accepted ... ok
+test settings::tests::factory_values_match_the_settings_doc ... ok
+test settings::tests::integers_are_accepted_where_scores_are_floats ... ok
+test settings::tests::independent_devices_migrate_without_overriding_explicit_preferences ... ok
+test settings::tests::lmstudio_embed_settings_and_independent_rerank ... ok
+test settings::tests::edit_pause_over_an_hour_is_an_error_and_unknown_indexing_keys_warn ... ok
+test settings::tests::local_openai_source_is_read_from_its_kebab_name ... ok
+test settings::tests::empty_files_give_the_factory_values ... ok
+test settings::tests::ollama_embed_settings_and_independent_rerank ... ok
+test settings::tests::project_does_not_change_models_or_device ... ok
+test settings::tests::project_file_is_validated_like_the_user_file ... ok
+test settings::tests::rerank_provider_fields_are_checked_only_when_rerank_is_enabled ... ok
+test settings::tests::scores_outside_zero_to_one_are_invalid ... ok
+test settings::tests::an_unreadable_path_is_a_read_error ... ok
+test settings::tests::unknown_keys_are_warned_about_and_ignored ... ok
+test settings::tests::project_keys_override_user_keys_one_by_one ... ok
+test settings::tests::unload_minutes_are_read_per_model_and_kept_out_of_model_settings ... ok
+test settings::tests::unload_minutes_over_a_week_are_invalid_even_for_disabled_rerank ... ok
+test settings::tests::wrong_types_and_unknown_choices_are_parse_errors ... ok
+test settings::tests::user_file_overrides_only_the_keys_it_sets ... ok
+test settings::tests::zero_counts_and_sizes_are_invalid ... ok
+test settings::tests::missing_files_mean_factory_values_and_are_not_created ... ok
+test settings::tests::a_broken_project_file_fails_the_whole_load ... ok
+test settings::tests::load_reads_both_files_and_merges_their_warnings ... ok
+
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 293 filtered out; finished in 0.00s
+

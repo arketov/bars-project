@@ -8,7 +8,7 @@ import { buildTree } from "./tree";
 import { folderItems } from "./contextmenu";
 
 const api = vi.hoisted(() => ({ call: vi.fn(), folderTarget: vi.fn(), folderAction: vi.fn(), copyText: vi.fn(), documentAction: vi.fn(), documentEditors: vi.fn() }));
-vi.mock("./api", () => ({ ...api, joinPath: (a: string, b: string) => `${a}/${b}`, openPath: vi.fn(), pickFolder: vi.fn() }));
+vi.mock("./api", () => ({ ...api, joinPath: (a: string, b: string) => `${a}/${b}`, openPath: vi.fn(), pickFolder: vi.fn(), inTauri: () => false }));
 const mounted: ReturnType<typeof mount>[] = [];
 const project = { path: "C:/Проект", name: "Проект", docs_root: "manual/docs", state: "ready" as const, modules: [] };
 function host() { const el = document.createElement("div"); document.body.append(el); return el; }

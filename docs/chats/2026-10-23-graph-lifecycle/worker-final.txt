@@ -1,0 +1,19 @@
+   Compiling bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+   Compiling bars-protocol v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-protocol)
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 39.55s
+     Running unittests src\lib.rs (C:/bt/bars\debug\deps\bars_worker-61e9024e2c58b65d.exe)
+
+running 8 tests
+test worker::tests::graph::automatic_graph_job_is_visible_and_duplicate_build_uses_same_id ... ok
+test handler::tests::graph::graph_search_fallback_is_explicit_and_hybrid_shape_unchanged ... ok
+test worker::tests::graph::graph_restart_recovers_interrupted_build_without_reembedding ... ok
+test handler::tests::window::physical_graph_slice_is_window_only_and_expands_chunks_on_the_same_snapshot ... ok
+test worker::tests::graph::graph_bad_utf8_is_partial_and_recovery_reuses_index_vectors ... ok
+test worker::tests::graph::selected_layer_preserves_current_layers_but_never_reuses_old_revision ... ok
+test worker::tests::graph::graph_cancel_queued_build_then_retry_and_rename_remove_old_evidence ... ok
+test handler::tests::graph::graph_real_ipc_auto_update_refs_scope_and_read_only_mcp ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 274 filtered out; finished in 31.67s
+

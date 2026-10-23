@@ -11,6 +11,9 @@ test-support = []
 
 [dependencies]
 log.workspace = true
+blake3.workspace = true
+regex.workspace = true
+rayon.workspace = true
 bars-core.workspace = true
 bars-protocol.workspace = true
 tokio.workspace = true

@@ -1,0 +1,67 @@
+    Checking indexmap v2.14.2
+    Checking serde v1.0.229
+    Checking tokio v1.53.3
+    Checking futures-task v0.3.34
+    Checking futures-channel v0.3.34
+    Checking monostate v0.1.18
+    Checking hashbrown v0.16.1
+   Compiling bindgen v0.72.1
+    Checking anstyle-wincon v3.0.11
+    Checking toml_datetime v1.1.2+spec-1.1.0
+    Checking anstyle-query v1.1.5
+    Checking serde_spanned v1.1.2
+    Checking futures-util v0.3.34
+    Checking anstream v1.0.0
+    Checking toml v1.1.8+spec-1.1.0
+    Checking clap_builder v4.6.7
+    Checking spm_precompiled v0.1.4
+    Checking compact_str v0.9.1
+    Checking dary_heap v0.3.9
+    Checking ahash v0.8.12
+    Checking serde_urlencoded v0.7.1
+    Checking rust-stemmers v1.2.0
+    Checking serde_json v1.0.154
+    Checking zip v8.6.0
+    Checking toml_edit v0.25.17+spec-1.1.0
+    Checking tokenizers v0.22.2
+    Checking safetensors v0.8.0
+    Checking bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+    Checking ureq v3.4.2
+    Checking tokenizers v0.23.2
+    Checking clap v4.6.7
+    Checking tokio-util v0.7.20
+    Checking tokio-native-tls v0.3.1
+    Checking tower v0.5.3
+    Checking interprocess v2.4.5
+crates\bars-graph\src\query.rs:242:1: warning: this function has too many arguments (8/7)
+crates\bars-graph\src\source.rs:85:1: warning: this function has too many arguments (8/7)
+crates\bars-graph\src\store.rs:29:5: warning: this `if` statement can be collapsed
+    Checking tower-http v0.6.11
+    Checking h2 v0.4.20
+warning: `bars-graph` (lib) generated 3 warnings (run `cargo clippy --fix --lib -p bars-graph -- ` to apply 1 suggestion)
+    Checking bars-protocol v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-protocol)
+   Compiling llama-cpp-sys-2 v0.1.160
+    Checking candle-core v0.11.0
+    Checking hyper v1.12.0
+    Checking candle-nn v0.11.0
+    Checking hyper-util v0.1.21
+crates\bars-protocol\src\methods.rs:973:9: warning: large size difference between variants: the entire enum is at least 624 bytes
+    Checking hyper-tls v0.6.0
+    Checking reqwest v0.12.28
+warning: `bars-protocol` (lib) generated 1 warning
+    Checking bars-cli v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-cli)
+    Checking hf-hub v0.5.0
+crates\bars-cli\src\graph.rs:51:1: warning: large size difference between variants: the entire enum is at least 384 bytes
+    Checking fastembed v7.1.1
+warning: `bars-cli` (lib) generated 1 warning
+    Checking llama-cpp-2 v0.1.160
+    Checking bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+crates\bars-core\src\indexing\chunking.rs:466:35: warning: a `Vec` of `Range` that is only one element
+crates\bars-core\src\new_topics\store.rs:296:10: warning: using `chunks_exact` with a constant chunk size: help: consider using `as_chunks` instead: `as_chunks::<4>().0.iter()`
+warning: `bars-core` (lib) generated 2 warnings (run `cargo clippy --fix --lib -p bars-core -- ` to apply 1 suggestion)
+    Checking bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+crates\bars-worker\src\handler\audits.rs:702:55: warning: redundant closure: help: replace the closure with the function itself: `busy`
+crates\bars-worker\src\worker\control.rs:170:12: warning: very complex type used. Consider factoring parts into `type` definitions
+crates\bars-worker\src\worker\control.rs:184:40: warning: very complex type used. Consider factoring parts into `type` definitions
+warning: `bars-worker` (lib) generated 3 warnings (run `cargo clippy --fix --lib -p bars-worker -- ` to apply 1 suggestion)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 31.50s
