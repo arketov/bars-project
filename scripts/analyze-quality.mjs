@@ -1,6 +1,7 @@
 // IDEA-06: анализ сырых строк. Node.js, без дополнительных пакетов.
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
+import { pathToFileURL } from 'node:url';
 
 export function metrics(hits, goldCount) {
   const seen = new Set();
@@ -106,8 +107,10 @@ function selfTest(){
   assert.throws(()=>validateRun([{...complete[0],repeat:2}],config,data),/лишняя/);
   console.log('quality analysis: all assertions passed');
 }
-if(process.argv[2]==='--self-test')selfTest();
-else {
+// Импорт метрик из других анализаторов не запускает этот.
+const main=process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href;
+if(main&&process.argv[2]==='--self-test')selfTest();
+else if(main){
   const [datasetPath,output,...dirs]=process.argv.slice(2);
   if(!dirs.length)throw Error('node scripts/analyze-quality.mjs <cases.json> <summary.json> <run-dir> [...]');
   const dataset=JSON.parse(fs.readFileSync(datasetPath,'utf8').replace(/^\uFEFF/,''));

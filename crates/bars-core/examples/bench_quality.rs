@@ -11,7 +11,7 @@ use bars_core::search::{SearchRequest, SearchSettings, candidate_trace, search};
 use bars_core::storage::{Index, Journal};
 use quality::{Row, digest, file_digest, load_cases, pack_hits, validate_cases};
 use serde_json::json;
-use std::collections::HashSet;
+use std::collections::{BTreeSet, HashSet};
 use std::fs::{self, File, OpenOptions};
 use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
@@ -27,9 +27,9 @@ fn main() -> Result<()> {
             validate_cases(Path::new(&a[1]),&cases)?;
             eprintln!("валидно вопросов: {}",cases.len()); Ok(())
         }
-        Some("run") if a.len()==10 => run(&a),
+        Some("run") if a.len()==10 || a.len()==11 => run(&a),
         Some("verify") if a.len()==3 => verify_vectors(Path::new(&a[1]), Path::new(&a[2])),
-        _ => Err("prepare <source-project> <new-workspace> <models> | validate <snapshot-project> <cases.json> | verify <workspace> <models> | run <workspace> <cases.json> <models> <output-dir> <split> <candidates-csv> <K-csv> <repeats> <auto|cpu>".into())
+        _ => Err("prepare <source-project> <new-workspace> <models> | validate <snapshot-project> <cases.json> | verify <workspace> <models> | run <workspace> <cases.json> <models> <output-dir> <split> <candidates-csv> <K-csv> <repeats> <auto|cpu> [all|gold|first|nochats]".into())
     }
 }
 
@@ -193,13 +193,25 @@ fn run(a: &[String]) -> Result<()> {
         "auto" => Accelerator::Auto,
         _ => return Err("устройство: auto/cpu".into()),
     };
+    let scope = a.get(10).map_or("all", String::as_str);
     let all = load_cases(cases_path)?;
     validate_cases(&workspace.join("project"), &all)?;
-    let cases: Vec<_> = all.iter().filter(|c| c.split == *split).collect();
+    let db = workspace.join("index.sqlite");
+    let index = Index::open(&db, Journal::Delete)?;
+    let project_modules: BTreeSet<String> = index
+        .documents()?
+        .iter()
+        .map(|d| module_of(&d.path))
+        .collect();
+    let mut cases = Vec::new();
+    for case in all.iter().filter(|c| c.split == *split) {
+        if let Some(modules) = scope_modules(scope, case, &project_modules)? {
+            cases.push((case, modules));
+        }
+    }
     if cases.is_empty() {
         return Err("выборка пуста".into());
     }
-    let db = workspace.join("index.sqlite");
     let manifest_bytes = fs::read(workspace.join("manifest.json"))?;
     let manifest: serde_json::Value = serde_json::from_slice(&manifest_bytes)?;
     if manifest["index_blake3"] != file_digest(&db)? {
@@ -212,8 +224,12 @@ fn run(a: &[String]) -> Result<()> {
         }
     }
     fs::create_dir_all(out)?;
-    let config = json!({"dataset":file_digest(cases_path)?,"manifest":digest(&manifest_bytes),"binary":file_digest(&std::env::current_exe()?)?,
+    let mut config = json!({"dataset":file_digest(cases_path)?,"manifest":digest(&manifest_bytes),"binary":file_digest(&std::env::current_exe()?)?,
         "split":split,"candidates":counts,"depths":depths,"repeats":repeats,"accelerator":a[9],"threshold":0,"models":model_manifest(models)?});
+    // Без области в конфигурации остаются старые прогоны: их можно продолжить.
+    if scope != "all" {
+        config["scope"] = json!(scope);
+    }
     let cfg = out.join("config.json");
     if cfg.exists() {
         let previous: serde_json::Value = serde_json::from_slice(&fs::read(&cfg)?)?;
@@ -237,7 +253,6 @@ fn run(a: &[String]) -> Result<()> {
         .create(true)
         .append(true)
         .open(rows_path)?;
-    let index = Index::open(&db, Journal::Delete)?;
     let started = Instant::now();
     let mut model = BuiltinEmbedder::bge_m3(models, accelerator)?;
     let embed_load = started.elapsed().as_secs_f64();
@@ -274,10 +289,11 @@ fn run(a: &[String]) -> Result<()> {
         "embed_load":embed_load,"rerank_load":rerank_load,"warmup":started.elapsed().as_secs_f64(),"resumed":completed.len()})
     )?;
     for repeat in 0..repeats {
-        for (ci, case) in cases.iter().enumerate() {
+        for (ci, (case, modules)) in cases.iter().enumerate() {
             for &count in &counts {
                 let request = SearchRequest {
                     query: case.query.clone(),
+                    modules: modules.clone(),
                     candidates: Some(count),
                     ..Default::default()
                 };
@@ -372,6 +388,32 @@ fn run(a: &[String]) -> Result<()> {
     }
     Ok(())
 }
+/// Модуль документа по пути от корня проекта (Т-7): первая папка под `docs/`, файл в корне — `.`.
+fn module_of(path: &str) -> String {
+    let inner = path.strip_prefix("docs/").unwrap_or(path);
+    match inner.split_once('/') {
+        Some((module, _)) => module.to_string(),
+        None => ".".to_string(),
+    }
+}
+
+/// Область поиска вопроса по варианту замера module-scope.md; `None` — вопрос в варианте не участвует.
+fn scope_modules(
+    scope: &str,
+    case: &quality::Case,
+    project: &BTreeSet<String>,
+) -> Result<Option<Vec<String>>> {
+    let gold: BTreeSet<String> = case.gold.iter().map(|g| module_of(&g.path)).collect();
+    Ok(match scope {
+        "all" => Some(Vec::new()),
+        "gold" => (!gold.is_empty()).then(|| gold.into_iter().collect()),
+        "first" => case.gold.first().map(|g| vec![module_of(&g.path)]),
+        "nochats" => (!gold.is_empty() && !gold.contains("chats"))
+            .then(|| project.iter().filter(|m| *m != "chats").cloned().collect()),
+        _ => return Err("область: all/gold/first/nochats".into()),
+    })
+}
+
 fn verify_vectors(workspace: &Path, models: &Path) -> Result<()> {
     use bars_core::indexing::chunking::chunk_document;
     let index = Index::open(&workspace.join("index.sqlite"), Journal::Delete)?;
