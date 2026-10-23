@@ -137,6 +137,35 @@ pub(crate) mod windows {
             }
             Ok(())
         }
+        pub(crate) fn wait_reserve(&self, commit_gib: u64, timeout: Duration) -> Result<()> {
+            let started = Instant::now();
+            let mut sufficient = 0;
+            self.emit(
+                "marker",
+                "resource_wait",
+                json!({"min_commit_gib":commit_gib}),
+            );
+            loop {
+                if headroom(&memory(), 4 * GIB, commit_gib * GIB) {
+                    sufficient += 1;
+                } else {
+                    sufficient = 0;
+                }
+                if sufficient >= 3 {
+                    self.emit("timing", "resource_ready", json!({"min_commit_gib":commit_gib,"ms":started.elapsed().as_secs_f64()*1000.0}));
+                    return Ok(());
+                }
+                if started.elapsed() >= timeout {
+                    self.emit(
+                        "abort",
+                        "resource_wait_timeout",
+                        json!({"min_commit_gib":commit_gib}),
+                    );
+                    return Err("insufficient headroom before reload".into());
+                }
+                std::thread::sleep(Duration::from_millis(100));
+            }
+        }
     }
     pub(crate) struct Monitor {
         done: Arc<AtomicBool>,

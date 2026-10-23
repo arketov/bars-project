@@ -70,7 +70,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     fs::create_dir_all(home.parent().unwrap())?;
     fs::create_dir(&home)?;
     let settings_text = format!(
-        "[embed]\nmodel = \"{embed_id}\"\naccelerator = \"{}\"\n[rerank]\nenabled = true\naccelerator = \"{}\"\n",
+        "[embed]\nmodel = \"{embed_id}\"\naccelerator = \"{}\"\nunload_after_minutes = 0\n[rerank]\nenabled = true\naccelerator = \"{}\"\n",
         args[1], args[1]
     );
     fs::write(home.join("settings.toml"), &settings_text)?;
@@ -87,7 +87,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         check_interval: Duration::from_millis(100),
     };
     log.emit("config", "startup", json!({"mode":args[0], "accelerator":args[1], "embed_model":embed_id,"loader":"production-worker", "expect_cpu_fallback":expect_fallback, "fixture_blake3":blake3::hash(&fs::read(&args[3])?).to_hex().to_string(), "interval_ms":100,
-        "startup_min_commit_gib":if with_embed {8} else {6}, "rerank_ttl_seconds":3, "embed_ttl_seconds":config.model_idle.embed.as_secs(), "check_interval_ms":100}));
+        "startup_min_commit_gib":if with_embed {8} else {6}, "rerank_ttl_seconds":3, "embed_ttl_seconds":config.model_idle.embed.as_secs(), "embed_pinned_until_rerank_proof":true, "check_interval_ms":100}));
     let monitor = Monitor::start(log.clone());
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(2)
@@ -241,7 +241,7 @@ async fn exercise(
         return Err("embed retired before rerank proof".into());
     }
     log.plateau("rerank_dropped");
-    log.reserve(5)?;
+    log.wait_reserve(5, std::time::Duration::from_secs(120))?;
     let start = Instant::now();
     let scores = rerank.rerank(&fixture.query, &texts)?;
     let delta = scores
@@ -265,6 +265,14 @@ async fn exercise(
         json!({"ms":start.elapsed().as_secs_f64()*1000.0}),
     );
     log.plateau("rerank_second_drop");
+    // Keep the other session resident through both rerank retirement checks:
+    // maintenance drops embed first and awaits its potentially slow destructor.
+    std::fs::write(
+        worker.bars_home().join("settings.toml"),
+        settings_text
+            .replace("enabled = true", "enabled = false")
+            .replace("unload_after_minutes = 0\n", ""),
+    )?;
     if let Some(embed) = embed {
         wait(|| !embed.slot().is_loaded(), 130).await?;
     }
