@@ -115,8 +115,8 @@ it("смена режима перекладывает связи и сохра�
   await settle();
   expect(panel().dataset.mode).toBe("all");
   expect(Number(panel().dataset.links)).toBeGreaterThan(links);
-  expect(JSON.parse(localStorage.getItem("bars.graph.v2.full.C:/a")!).mode).toBe("all");
-  expect(localStorage.getItem("bars.graph.v2.mini.C:/a")).toBeNull();
+  expect(JSON.parse(localStorage.getItem("bars.graph.v3.full.C:/a")!).mode).toBe("all");
+  expect(localStorage.getItem("bars.graph.v3.mini.C:/a")).toBeNull();
 });
 
 it("раскрытие документа запрашивает его чанки порциями по 50 на том же снимке", async () => {

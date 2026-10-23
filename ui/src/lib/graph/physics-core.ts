@@ -1,6 +1,6 @@
 // Ядро физики: d3-force над обезличенными узлами (индекс, вид, владелец, координаты). Работает в Web Worker
 // (ADR-0004) и, без Worker (тесты), на основном потоке. Текст, источники и evidence остаются в модели окна.
-// Параметры подобраны замером цепочек на снимке bars-project (docs/knowledge/graph-render.md, «Подбор параметров раскладки»).
+// Параметры подобраны замером на выгрузках bars-project и overdrive-bots (docs/knowledge/graph-render.md, «Плавная и послушная физика»).
 import { forceCollide, forceLink, forceManyBody, forceSimulation, forceX, forceY, type Simulation } from "d3-force";
 
 export interface Forces {
@@ -16,17 +16,33 @@ export interface Forces {
 
 export const DEFAULT_FORCES: Forces = { link: 1, repel: 1, gravity: 1, length: 150 };
 
-/** Подбор раскладки (docs/knowledge/graph-render.md). */
+/** Подбор раскладки (docs/knowledge/graph-render.md): все численные параметры физики при ползунках ×1. */
 export interface Tuning {
-  /** Заряд узла растёт с числом связей: `charge *= 1 + hubCharge·√степень`, хабы расталкивают окружение, а не слипаются. */
+  /** Пружина `min(1, linkBase·k_e)`. */
+  linkBase: number;
+  /** Пружина делится на `степень^springDegree` меньшего конца: 0 — без поправки, 1 — как по умолчанию в d3-force. */
+  springDegree: number;
+  /** Заряд документа при длине связи `chargeScaleLength`; растёт как квадрат длины, чтобы «Длина связи» меняла масштаб карты целиком, а не только тянула пружины против отталкивания. */
+  charge: number;
+  /** Длина связи, при которой заряд равен `charge`; 0 — заряд не зависит от длины (раунд 27). */
+  chargeScaleLength: number;
+  /** Заряд растёт с числом связей: `charge *= 1 + hubCharge·√степень`, хабы расталкивают окружение, а не слипаются. */
   hubCharge: number;
-  /** Пружина делится на корень из меньшей степени концов (как по умолчанию в d3-force). */
-  springByDegree: boolean;
+  /** Дальность отталкивания в длинах связи; `Infinity` — на любом расстоянии. */
+  chargeRange: number;
+  /** Притяжение к общему центру. */
+  center: number;
+  /** Трение d3: доля скорости, теряемая за шаг. */
+  velocityDecay: number;
+  /** Охлаждение d3 за шаг. */
+  alphaDecay: number;
+  /** Жёсткость столкновения (0…1). */
+  collide: number;
 }
 
-export const DEFAULT_TUNING: Tuning = { hubCharge: 0.4, springByDegree: false };
-/** Прежнее поведение: для сравнения в замерах и тестах. */
-export const LEGACY_TUNING: Tuning = { hubCharge: 0, springByDegree: false };
+export const DEFAULT_TUNING: Tuning = { linkBase: 0.9, springDegree: 0, charge: -100, chargeScaleLength: 100, hubCharge: 0.2, chargeRange: 3, center: 0.04, velocityDecay: 0.45, alphaDecay: 0.02, collide: 0.7 };
+/** Физика раунда 27 (до 23-10-2026): для сравнения в замерах и тестах. */
+export const LEGACY_TUNING: Tuning = { linkBase: 0.9, springDegree: 0, charge: -360, chargeScaleLength: 0, hubCharge: 0.4, chargeRange: Infinity, center: 0.16, velocityDecay: 0.3, alphaDecay: 0.006, collide: 1 };
 
 /** Радиус узла в единицах карты: хаб крупнее, как в Obsidian. `degree` — число видимых связей узла. */
 export function nodeRadius(kind: "document" | "chunk" | "query", degree: number): number {
@@ -52,7 +68,9 @@ export interface CoreLink {
 }
 
 interface SimNode {
-  index: number;
+  /** Номер узла в графе окна. `index` принадлежит d3: по нему d3 хранит заряд и радиус столкновения, перезаписывать его нельзя. */
+  id: number;
+  index?: number;
   kind: "document" | "chunk" | "query";
   owner: number;
   x: number;
@@ -73,13 +91,7 @@ interface SimLink {
   k: number;
 }
 
-/** Пружина по формуле проекта: `min(1, LINK_BASE·k_e)`. Подбор по снимкам настоящих срезов (раунд 27, graph-render.md). */
-const LINK_BASE = 0.9;
-/** Заряд документа: отталкивание действует на любом расстоянии (Barnes–Hut), поэтому карта растёт с числом узлов, а не сжимается в шар. */
-const BASE_CHARGE = -360;
 const CHILD_BUDGET = 35;
-/** Притяжение к общему центру при «общем притяжении» ×1: держит карту собранной. */
-const CENTER = 0.16;
 /** Кольцо одиночек: радиус — 95-й процентиль удаления связных узлов от их центра плюс длина связи; сила к кольцу. */
 const RING_PULL = 0.3;
 const GROUP_RATIO = 0.58;
@@ -101,12 +113,11 @@ export class PhysicsCore {
     let state = seed >>> 0 || 1;
     this.sim = forceSimulation<SimNode, SimLink>([])
       .randomSource(() => ((state = (Math.imul(state, 1664525) + 1013904223) >>> 0) / 4294967296))
-      // Медленное охлаждение и малое трение: узлы скользят, раскладка не «замерзает» раньше времени.
-      .alphaDecay(0.006)
-      .velocityDecay(0.3)
+      .alphaDecay(this.tuning.alphaDecay)
+      .velocityDecay(this.tuning.velocityDecay)
       .force("link", forceLink<SimNode, SimLink>([]).strength((l) => this.#strength(l)).distance((l) => this.#length(l)))
-      .force("charge", forceManyBody<SimNode>().strength((n) => n.charge))
-      .force("collide", forceCollide<SimNode>((n) => n.r + 1.5))
+      .force("charge", forceManyBody<SimNode>().strength((n) => n.charge).distanceMax(this.tuning.chargeRange * this.forces.length))
+      .force("collide", forceCollide<SimNode>((n) => n.r + 1.5).strength(this.tuning.collide))
       .force("x", forceX<SimNode>(0).strength((n) => this.#center(n)))
       .force("y", forceY<SimNode>(0).strength((n) => this.#center(n)))
       .force("group", this.#groupForce)
@@ -115,12 +126,12 @@ export class PhysicsCore {
   }
 
   #strength(link: SimLink): number {
-    const base = Math.min(1, LINK_BASE * this.forces.link * link.k);
-    return this.tuning.springByDegree ? base / Math.sqrt(Math.max(1, Math.min(link.source.degree, link.target.degree))) : base;
+    const base = Math.min(1, this.tuning.linkBase * this.forces.link * link.k);
+    return base / Math.max(1, Math.min(link.source.degree, link.target.degree)) ** this.tuning.springDegree;
   }
 
   #center(n: SimNode): number {
-    return CENTER * this.forces.gravity;
+    return this.tuning.center * this.forces.gravity;
   }
 
   /** Одиночки (документы без связей) тянутся к кольцу вокруг связной части, как в Obsidian; вдоль кольца их разводит отталкивание. */
@@ -172,8 +183,10 @@ export class PhysicsCore {
   };
 
   #chargeOf(p: SimNode, children: Map<number, number>): number {
-    const base = p.kind === "chunk" ? -CHILD_BUDGET / (children.get(p.owner) ?? 1) : BASE_CHARGE * (1 + this.tuning.hubCharge * Math.sqrt(p.degree));
-    return base * this.forces.repel;
+    const base = p.kind === "chunk" ? -CHILD_BUDGET / (children.get(p.owner) ?? 1) : this.tuning.charge * (1 + this.tuning.hubCharge * Math.sqrt(p.degree));
+    // Чанки делят бюджет владельца и держатся группой у него: их заряд от длины связи не зависит.
+    const scale = this.tuning.chargeScaleLength && p.kind !== "chunk" ? (this.forces.length / this.tuning.chargeScaleLength) ** 2 : 1;
+    return base * scale * this.forces.repel;
   }
 
   /** Заменяет набор узлов и пружин; координаты и закрепления приходят от окна, оно же их хранит. */
@@ -182,7 +195,7 @@ export class PhysicsCore {
     const map = new Map<number, SimNode>();
     for (const n of nodes) {
       const existing = this.#byIndex.get(n.index);
-      const p: SimNode = existing ?? { index: n.index, kind: n.kind, owner: n.owner, x: n.x, y: n.y, vx: 0, vy: 0, r: n.kind === "chunk" ? 3.6 : 6, charge: BASE_CHARGE, degree: 0, pinned: false };
+      const p: SimNode = existing ?? { id: n.index, kind: n.kind, owner: n.owner, x: n.x, y: n.y, vx: 0, vy: 0, r: n.kind === "chunk" ? 3.6 : 6, charge: this.tuning.charge, degree: 0, pinned: false };
       p.kind = n.kind;
       p.owner = n.owner;
       p.x = n.x;
@@ -220,8 +233,6 @@ export class PhysicsCore {
     this.#byIndex = map;
     for (const p of next) p.charge = this.#chargeOf(p, children);
     this.sim.nodes(next);
-    // d3 перезаписывает node.index позицией в массиве; окно и рёбра опираются на индекс графа.
-    next.forEach((p, i) => (p.index = nodes[i].index));
     (this.sim.force("link") as ReturnType<typeof forceLink<SimNode, SimLink>>).links(simLinks);
   }
 
@@ -234,7 +245,7 @@ export class PhysicsCore {
     // d3 кэширует силы при initialize: повторная установка функций пересчитывает их.
     const link = this.sim.force("link") as ReturnType<typeof forceLink<SimNode, SimLink>>;
     link.strength((l) => this.#strength(l)).distance((l) => this.#length(l));
-    (this.sim.force("charge") as ReturnType<typeof forceManyBody<SimNode>>).strength((n) => n.charge);
+    (this.sim.force("charge") as ReturnType<typeof forceManyBody<SimNode>>).strength((n) => n.charge).distanceMax(this.tuning.chargeRange * this.forces.length);
     (this.sim.force("x") as ReturnType<typeof forceX<SimNode>>).strength((n) => this.#center(n));
     (this.sim.force("y") as ReturnType<typeof forceY<SimNode>>).strength((n) => this.#center(n));
   }
@@ -311,7 +322,7 @@ export class PhysicsCore {
     const indices = new Int32Array(this.nodes.length);
     const coords = new Float32Array(this.nodes.length * 2);
     this.nodes.forEach((n, i) => {
-      indices[i] = n.index;
+      indices[i] = n.id;
       coords[i * 2] = n.x;
       coords[i * 2 + 1] = n.y;
     });

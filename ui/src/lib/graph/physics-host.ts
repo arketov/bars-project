@@ -27,8 +27,8 @@ export interface Positions {
   coords: Float32Array;
 }
 
-/** Шагов d3 за порцию: баланс между плавностью и числом сообщений. */
-const TICKS_PER_BATCH = 2;
+/** Шагов d3 за порцию: окно подтверждает порцию после отрисовки кадра, поэтому один шаг — один кадр, как в d3 и Obsidian. */
+const TICKS_PER_BATCH = 1;
 
 export class PhysicsHost {
   #core = new PhysicsCore();

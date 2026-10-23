@@ -12,7 +12,7 @@
   import { DEFAULT_FORCES, Layout, type Forces, type PNode } from "./layout";
   import { EDGE_KINDS, KIND_TITLE, brightnessOf, drawStrength, springOf, widthOf, type EdgeKind, type GEdge, type GNode, type Mode, type SliceKind } from "./model";
   import { graphStatus, loadPhysical, toggleGraphBuild } from "./physical-api";
-  import { defaultSettings, loadSettings, saveSettings, type PanelKind, type PanelSettings } from "./settings";
+  import { FORCE_RANGE, defaultSettings, loadSettings, saveSettings, type PanelKind, type PanelSettings } from "./settings";
   import { INITIAL_LIMITS, MAX_LIMITS, PORTION, SliceStore, emptySlice, type Limits, type Slice } from "./slice";
   import { DEFAULT_DEPTH, MAX_DEPTH, QUERY_BUDGET, QUERY_MAX, buildQuerySlice, shapeQuery, type QueryInfo, type QueryInput, type RetrievalKind, type ScoreKind } from "./query";
 
@@ -230,7 +230,8 @@
     if (!layout) return;
     layout.setForces($state.snapshot(forces) as Forces);
     if (reduced) layout.settle(600, true);
-    else if (!stopped) layout.reheat(0.5);
+    // Мягкий подогрев: карта плавно перетекает к новому равновесию, а не перекладывается заново.
+    else if (!stopped) layout.reheat(0.3);
     revision++;
     schedule();
   }
@@ -256,11 +257,12 @@
     layout.setGraph(nodes, visibleEdges(nodes), owner);
     if (fresh) {
       layout.reseed();
-      // Остановка и reduced motion: раскладка считается сразу, без анимации; иначе — короткая подготовка и дальше движение.
+      // Остановка и reduced motion: раскладка считается сразу, без анимации; иначе — подготовка без показа (первые
+      // шаги из рассева самые резкие) и дальше спокойное движение.
       if (reduced || stopped) layout.settle(600, true);
       else {
-        layout.settle(40);
-        layout.reheat(0.8);
+        layout.settle(100);
+        layout.reheat(0.5);
       }
       autoFitSince = performance.now();
       lastAutoFit = 0;
@@ -285,6 +287,8 @@
       else schedule();
     }
     paint();
+    // Следующий шаг физики — только после показанного кадра: один шаг на кадр.
+    layout.frameDone();
     const next = reduced ? "reduced" : stopped ? "stopped" : layout.active && !hidden ? "running" : "idle";
     if (next !== motion) motion = next;
   }
@@ -737,6 +741,7 @@
     epoch++;
     layout?.destroy();
     layout = new Layout();
+    layout.paced = true;
     layout.onPositions = onPositions;
     layout.setForces($state.snapshot(settings.forces) as Forces);
     store = new SliceStore();
@@ -972,10 +977,10 @@
     </label>
   {/if}
   <h4>Раскладка</h4>
-  <label class="opt slider" title="Насколько сильно связи сближают узлы"><span>Притяжение связей</span><input type="range" min="0" max="4" step="0.1" aria-label="Притяжение по связям" bind:value={settings.forces.link} oninput={applyForces} /><b>×{forces.link.toFixed(1)}</b></label>
-  <label class="opt slider" title="Насколько узлы расталкивают друг друга"><span>Отталкивание</span><input type="range" min="0" max="4" step="0.1" aria-label="Отталкивание узлов" bind:value={settings.forces.repel} oninput={applyForces} /><b>×{forces.repel.toFixed(1)}</b></label>
-  <label class="opt slider" title="Все узлы слегка тянутся к общему центру; документы без связей стоят кольцом вокруг карты"><span>Общее притяжение</span><input type="range" min="0" max="4" step="0.1" aria-label="Общее притяжение узлов" bind:value={settings.forces.gravity} oninput={applyForces} /><b>×{forces.gravity.toFixed(1)}</b></label>
-  <label class="opt slider" title="Расстояние между связанными документами"><span>Длина связи</span><input type="range" min="20" max="240" step="1" aria-label="Длина связи" bind:value={settings.forces.length} oninput={applyForces} /><b>{forces.length}</b></label>
+  <label class="opt slider" title="Насколько сильно связи сближают узлы"><span>Притяжение связей</span><input type="range" min={FORCE_RANGE.link.min} max={FORCE_RANGE.link.max} step={FORCE_RANGE.link.step} aria-label="Притяжение по связям" bind:value={settings.forces.link} oninput={applyForces} /><b>×{forces.link.toFixed(2)}</b></label>
+  <label class="opt slider" title="Насколько узлы расталкивают друг друга"><span>Отталкивание</span><input type="range" min={FORCE_RANGE.repel.min} max={FORCE_RANGE.repel.max} step={FORCE_RANGE.repel.step} aria-label="Отталкивание узлов" bind:value={settings.forces.repel} oninput={applyForces} /><b>×{forces.repel.toFixed(2)}</b></label>
+  <label class="opt slider" title="Все узлы слегка тянутся к общему центру; документы без связей стоят кольцом вокруг карты"><span>Общее притяжение</span><input type="range" min={FORCE_RANGE.gravity.min} max={FORCE_RANGE.gravity.max} step={FORCE_RANGE.gravity.step} aria-label="Общее притяжение узлов" bind:value={settings.forces.gravity} oninput={applyForces} /><b>×{forces.gravity.toFixed(2)}</b></label>
+  <label class="opt slider" title="Расстояние между связанными документами: меняет масштаб всей карты"><span>Длина связи</span><input type="range" min={FORCE_RANGE.length.min} max={FORCE_RANGE.length.max} step={FORCE_RANGE.length.step} aria-label="Длина связи" bind:value={settings.forces.length} oninput={applyForces} /><b>{forces.length}</b></label>
   <button class="reset" onclick={resetForces}>По умолчанию</button>
   <p class="hint">Меняет движение узлов, а не силу связи: толщина, яркость и значения s прежние.</p>
 {/snippet}
