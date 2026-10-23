@@ -1,0 +1,10 @@
+{
+  "machine": 332,
+  "bytes": 21284318,
+  "last_write": "2026-10-23T15:58:46.3163854+05:00",
+  "path": "C:\\Users\\arketov\\Desktop\\bars-project\\dist-installer\\bars_0.1.0_x64-setup.exe",
+  "contains_ui_change": "FP16 selection recommendation; UI check 0/0; 15 targeted tests passed",
+  "mz": 23117,
+  "sha256": "EF87E0A3CF9A4F928693BC05F281E7C068DDA9EE6B2D9CB2DE3A1719E74E7D57",
+  "pe": 17744
+}

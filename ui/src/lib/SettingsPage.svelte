@@ -168,6 +168,13 @@
                   <span class="radio"></span>
                   <span class="mn">
                     <b>{model.id}</b>
+              {#if draft.embed.model === "BAAI/bge-m3" && draft.embed.accelerator === "auto" && settings.models?.runtime?.embed.actual === "directml" && settings.models?.embed.some(model => model.id === "BAAI/bge-m3:fp16")}
+                <div class="note info">
+                  <Icon name="info" size={16} />
+                  <span>Для bge-m3 доступен FP16 с меньшим расходом памяти. Только Windows/DirectML; потребуется переиндексация после вашего согласия.</span>
+                  <button class="ghost" onclick={() => selectEmbedModel("BAAI/bge-m3:fp16")}>Выбрать FP16</button>
+                </div>
+              {/if}
                     <small>{modelNote(model)}{model.id === savedModel ? " · в индексах сейчас" : ""}</small>
                     {#each model.warnings as warning (warning)}<small class="warnline">{warning}</small>{/each}
                   </span>

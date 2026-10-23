@@ -1,0 +1,11 @@
+{
+  "ui_source_sha256": "D43689B3BFA458099858AC27E962BA42B40190957C9BD3F4E5FC73C004EBFF1B",
+  "svelte_errors": 0,
+  "svelte_warnings": 0,
+  "implementation_closed": "OQ-155 owner acceptance",
+  "ui_tests": 15,
+  "installer_sha256": "EF87E0A3CF9A4F928693BC05F281E7C068DDA9EE6B2D9CB2DE3A1719E74E7D57",
+  "ui_test_source_sha256": "F8D49C72921CDDC7BFA8F2479C0231FAE47B595EE4CFC4E07847C4835E2D5AED",
+  "ui_test_command": "npm test --prefix ui -- --maxWorkers=1 src/lib/settings-memory.test.ts src/lib/settings-logic.test.ts",
+  "installed_acceptance": "deferred by owner; installation prohibition retained"
+}
