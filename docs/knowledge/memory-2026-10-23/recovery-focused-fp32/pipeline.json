@@ -1,0 +1,12 @@
+{
+  "temporary_root_removed": true,
+  "phase": "fp32-on-4",
+  "ok": true,
+  "bars": [
+    {
+      "Id": 38128,
+      "StartTime": "2026-10-23T14:50:05.1292193+05:00"
+    }
+  ],
+  "error": null
+}

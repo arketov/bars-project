@@ -1,0 +1,66 @@
+{
+  "pid": 55092,
+  "reindex_start_ms": 264673.5485,
+  "reindex_end_ms": 482343.902,
+  "phases": [
+    {
+      "phase": "baseline",
+      "elapsed_ms": 2078.5525,
+      "private_bytes": 4153344,
+      "working_set_bytes": 14737408,
+      "lifetime_peak_working_set_bytes": 14737408,
+      "lifetime_peak_commit_bytes": 4165632,
+      "system_available_bytes": 14353473536,
+      "system_committed_bytes": 56626384896,
+      "system_commit_limit_bytes": 67378831360
+    },
+    {
+      "phase": "embed_loaded",
+      "elapsed_ms": 260092.04940000002,
+      "private_bytes": 5251035136,
+      "working_set_bytes": 666640384,
+      "lifetime_peak_working_set_bytes": 2219757568,
+      "lifetime_peak_commit_bytes": 5269495808,
+      "system_available_bytes": 14310612992,
+      "system_committed_bytes": 63968772096,
+      "system_commit_limit_bytes": 67378831360
+    },
+    {
+      "phase": "both_warm",
+      "elapsed_ms": 264672.37549999997,
+      "private_bytes": 5252751360,
+      "working_set_bytes": 656728064,
+      "lifetime_peak_working_set_bytes": 2219757568,
+      "lifetime_peak_commit_bytes": 5281652736,
+      "system_available_bytes": 14776754176,
+      "system_committed_bytes": 63485390848,
+      "system_commit_limit_bytes": 67378831360
+    },
+    {
+      "phase": "series_done",
+      "elapsed_ms": 484345.6997,
+      "private_bytes": 5266845696,
+      "working_set_bytes": 682070016,
+      "lifetime_peak_working_set_bytes": 2219757568,
+      "lifetime_peak_commit_bytes": 5287862272,
+      "system_available_bytes": 15055650816,
+      "system_committed_bytes": 60232482816,
+      "system_commit_limit_bytes": 67378831360
+    },
+    {
+      "phase": "shutdown",
+      "elapsed_ms": 486608.1517,
+      "private_bytes": 248279040,
+      "working_set_bytes": 165974016,
+      "lifetime_peak_working_set_bytes": 2219757568,
+      "lifetime_peak_commit_bytes": 5287862272,
+      "system_available_bytes": 14887079936,
+      "system_committed_bytes": 55579553792,
+      "system_commit_limit_bytes": 67378831360
+    }
+  ],
+  "before_reindex_private_peak_bytes": 5280976896,
+  "during_reindex_private_peak_bytes": 5282205696,
+  "during_reindex_working_set_peak_bytes": 691630080,
+  "during_samples": 2105
+}

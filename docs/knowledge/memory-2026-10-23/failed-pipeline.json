@@ -1,0 +1,12 @@
+{
+  "bars": [
+    {
+      "Id": 28748,
+      "StartTime": "2026-10-23T12:31:19.5341271+05:00"
+    }
+  ],
+  "phase": "pair-1",
+  "error": "Owned run pair-1 failed: 1",
+  "ok": false,
+  "temporary_root_removed": true
+}

@@ -1,0 +1,6 @@
+{"available_bytes":14515015680,"required_commit_gib":2,"phase":"validate-fp16-artifact","utc":"2026-10-23T08:12:26.5838769Z","free_commit_bytes":11627036672,"ready":true}
+{"available_bytes":14690177024,"required_commit_gib":2,"phase":"validate-fp16-artifact","utc":"2026-10-23T08:12:28.8777632Z","free_commit_bytes":11600535552,"ready":true}
+{"available_bytes":13262225408,"required_commit_gib":2,"phase":"validate-fp16-artifact","utc":"2026-10-23T08:12:31.1729115Z","free_commit_bytes":13061279744,"ready":true}
+{"available_bytes":12400300032,"required_commit_gib":8,"phase":"pair-1","utc":"2026-10-23T08:12:43.2449428Z","free_commit_bytes":12387946496,"ready":true}
+{"available_bytes":12272750592,"required_commit_gib":8,"phase":"pair-1","utc":"2026-10-23T08:12:45.5184979Z","free_commit_bytes":12477943808,"ready":true}
+{"available_bytes":12169396224,"required_commit_gib":8,"phase":"pair-1","utc":"2026-10-23T08:12:47.8094491Z","free_commit_bytes":12439543808,"ready":true}

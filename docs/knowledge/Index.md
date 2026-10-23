@@ -45,6 +45,7 @@ title: Внутренняя база знаний bars
 | [gguf-models.md](gguf-models.md) | Qwen3 GGUF и llama.cpp: качество против bge-m3, память, сборка Windows/Vulkan |
 | [gguf-2026-10-18/](gguf-2026-10-18/Index.md) | Сырые данные этапа 22: сводка и строки измерений |
 | [memory.md](memory.md) | Память bars: метрики, причины пиков, FP16 rerank и выгрузка, FP16/INT8 embed, подкачка |
+| `memory-2026-10-23/` | Доказательства 4.2.1: профиль ORT/VM/GPU, два полных FP16 lifecycle, 1200 поисков в 12 конфигурациях, 10 полных процессов и два защитных выхода |
 | [memory-acceptance-2026-10-20/](memory-acceptance-2026-10-20/Index.md) | Продолжение приёмки: парные процессы, baseline окна, свежие FP16-индексы и контроль индексатора |
 | [memory-2026-10-18/](memory-2026-10-18/Index.md) | Сырые снимки памяти FP32-опытов |
 | [memory-fp16-2026-10-18/](memory-fp16-2026-10-18/Index.md) | Сырые данные приёмки памяти FP16 rerank, повторной загрузки и CPU fallback |

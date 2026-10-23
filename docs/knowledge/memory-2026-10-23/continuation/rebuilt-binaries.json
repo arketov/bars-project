@@ -1,0 +1,32 @@
+{
+  "note": "Rebuilt during download, before FP16 runs; FP32 first pass used initial provenance binaries",
+  "sources": [
+    {
+      "sha256": "9A4741D21B62763C823D8BCC0B09664B3F2EA9D8FA3DF037FD7607DFA966D0B0",
+      "file": "crates/bars-core/examples/bench_memory.rs"
+    },
+    {
+      "sha256": "1FAFE2281A099099FE1E90382E88F8A788193F6451411C78DBA5CAB8C66E47EF",
+      "file": "crates/bars-worker/examples/bench_worker_memory.rs"
+    },
+    {
+      "sha256": "BB849CA827FD83632B9FCAB22751873FDC5A87930F956D9E1D2C051C73502D82",
+      "file": "crates/bars-worker/examples/bench_worker_index_memory.rs"
+    },
+    {
+      "sha256": "4AFDF2047529607D8E94C8557ECD3C4F01C81D2E4A05EDF16D5A69E8166E8787",
+      "file": "crates/bars-worker/src/worker/models.rs"
+    }
+  ],
+  "binaries": [
+    {
+      "sha256": "4EA3DC68FB8253706A8170A73783DB2F7C6A0E5994BD2A22E13A76865BF37E83",
+      "file": "bench_worker_memory.exe"
+    },
+    {
+      "sha256": "2E25414918C26C1271AE9B579DB35D27BC07F440C32AB82AF53B0E7E935A99F3",
+      "file": "bench_worker_index_memory.exe"
+    }
+  ],
+  "utc": "2026-10-23T09:04:00.5391667Z"
+}

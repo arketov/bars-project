@@ -1,0 +1,20 @@
+{
+  "gpu": {
+    "Name": "NVIDIA GeForce RTX 3090",
+    "DriverVersion": "32.0.16.1692"
+  },
+  "directml": {
+    "Length": 10239288,
+    "Version": "1.15.6+260914-0959.1.os-germanium.2f9444f"
+  },
+  "os": {
+    "Caption": "Майкрософт Windows 11 Pro",
+    "Version": "10.0.26300",
+    "TotalVisibleMemorySize": 33439780
+  },
+  "cpu": {
+    "Name": "11th Gen Intel(R) Core(TM) i7-11700KF @ 3.60GHz",
+    "NumberOfCores": 8,
+    "NumberOfLogicalProcessors": 16
+  }
+}

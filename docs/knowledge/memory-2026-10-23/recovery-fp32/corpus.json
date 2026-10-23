@@ -1,0 +1,1610 @@
+[
+  {
+    "file": "BARS_INSTRUCTION.md",
+    "sha256": "6B4B1A6CDA1D6543F79CDB4B88384EBF10ACC8B8A69B2A1A74827CF649A14CEF"
+  },
+  {
+    "file": "Index.md",
+    "sha256": "BEC40F1DC80D082E39FE8BBD64959C78CD42A6BCE89B891A9530C795DFC94B33"
+  },
+  {
+    "file": "MAIN_IDEA.md",
+    "sha256": "03D3E33CF77066BAC87480A1863EAC9D7279641A9A41349510091E3F12465F98"
+  },
+  {
+    "file": "overview.md",
+    "sha256": "5FCFF3786AD6BFA58CBA5E215C31CB1AA30EB7F9D3DDE4EBA48324EE6E4B5179"
+  },
+  {
+    "file": "project-status.md",
+    "sha256": "D3D49C6311D641A1787B2317079DFEF872D0607665108A5FEC7E9C2B4462859E"
+  },
+  {
+    "file": "adr\\0001-docs-by-features.md",
+    "sha256": "940DB385338CD4DADB2437A5C57F271E110500593B0B013899CD3BCFA5B6216F"
+  },
+  {
+    "file": "adr\\0002-qwen-gguf.md",
+    "sha256": "511BA917892F8504503AF3C323F4CD039950AE354C4F2A6008FE7B14AEDACF6E"
+  },
+  {
+    "file": "adr\\0003-window-docking.md",
+    "sha256": "1F4A923BD041CCF61EF41ED12721BF325EAB4D88473CE8E42FDF5E27888322E0"
+  },
+  {
+    "file": "adr\\0004-graph-physics-renderer.md",
+    "sha256": "54FE7373F0C5C12807934947847630C444CCA62132AFB20C9A29580633F3E32D"
+  },
+  {
+    "file": "adr\\0005-editor-codemirror.md",
+    "sha256": "5AACFF8955DCA5CA2C486F975CCD0CAD564DD6078DC7D2F4571F80DBD2A47AD2"
+  },
+  {
+    "file": "adr\\Index.md",
+    "sha256": "5E92388A09ABD5BBA85D55934E1B46DF26704C7B41F2AA4E9CD65F40403F915E"
+  },
+  {
+    "file": "architecture\\components.md",
+    "sha256": "0D4AA80D4B1408A834FEB961CAF28A8D839F2F4DC5CD1F462F651ADDAB6166EF"
+  },
+  {
+    "file": "architecture\\files.md",
+    "sha256": "CF556FA75CEEB1B875D1413A667223B28EBCACFF5867F29B8E299863A23BEB19"
+  },
+  {
+    "file": "architecture\\graph.md",
+    "sha256": "1853B6228275888CFEE66C0A1D0552196107724A8134121C2530BF37EE522408"
+  },
+  {
+    "file": "architecture\\Index.md",
+    "sha256": "88DBE9397FD9BEB53A49302B5B1A284CD2033A4F32917842898CECA8BF0D0328"
+  },
+  {
+    "file": "architecture\\ipc.md",
+    "sha256": "666126AE3DCBBC10A79383DAF6C8CAC799117B0A514C3008201F26165A3C6998"
+  },
+  {
+    "file": "architecture\\protocol.md",
+    "sha256": "660845A47A785027F8622783B4AC2E2A83508B2F16B672E68F9DCA78327F9299"
+  },
+  {
+    "file": "architecture\\schema.md",
+    "sha256": "E0A492917372462EC377C21652C3A5B5CFEC0808A18E41060D00C0C9755C754D"
+  },
+  {
+    "file": "architecture\\secrets.md",
+    "sha256": "4E2E60F183960F89046BF021B7618D5B4DC50E169C405657395FACC92E8327B6"
+  },
+  {
+    "file": "architecture\\stack.md",
+    "sha256": "B227F553F114A33221CF132703C38DAC36EB08D8FA8607DC16E78DEDCAB9441C"
+  },
+  {
+    "file": "architecture\\vector-search.md",
+    "sha256": "F681550F2390FFFAAA9E34095D2C393EDB8AC20489E5AC9BD5E1240E857EA6BD"
+  },
+  {
+    "file": "architecture\\worker.md",
+    "sha256": "5C960865C045C2FD4E06DF52188871EBA53E06F2BB5B5405C02B7FE2175E0601"
+  },
+  {
+    "file": "backlog\\ideas.md",
+    "sha256": "F757880672FAB21A6CFEF5BB85E0C37FA03CA2B6B050CD4776C94171A8604051"
+  },
+  {
+    "file": "backlog\\Index.md",
+    "sha256": "2D95203AB09DF85E792A011C090991CFDB66121FD3653513B3113C08AAD1CB21"
+  },
+  {
+    "file": "backlog\\issues.md",
+    "sha256": "0EA9EBAB25AE0AA0904A251B8FAAC695923708D9899411F58466B9216FC5EB7B"
+  },
+  {
+    "file": "chats\\Index.md",
+    "sha256": "5E1BABB0B30B725C1B240A3E1A41FB3166504BA9986E5A7E589522581ED82678"
+  },
+  {
+    "file": "chats\\2026-10-15-docs-convention\\handoff.md",
+    "sha256": "855B879C77A6F6B51D18DE3B12F5070132041891571A0631590CC15B6848FB63"
+  },
+  {
+    "file": "chats\\2026-10-15-docs-convention\\log.md",
+    "sha256": "464DAD833FF13410497314D6F34DCB6D333F9B5563210ACA6DC77A6CA21DF791"
+  },
+  {
+    "file": "chats\\2026-10-16-bars-instruction\\handoff.md",
+    "sha256": "622CF288999F015C523AB96D66304E37873EF11C2DC4D35122591C154F3C977E"
+  },
+  {
+    "file": "chats\\2026-10-16-bars-instruction\\log.md",
+    "sha256": "E2BCB1348B24439A3B5E2B8E15ABF4075376393075AB84FF6CCA928AB2AFC6E4"
+  },
+  {
+    "file": "chats\\2026-10-16-idea06-measurements\\handoff.md",
+    "sha256": "A899637DC539B8431AE153D7137D1F6EA030FEBFFD66D1209F3BBC573344D47A"
+  },
+  {
+    "file": "chats\\2026-10-16-iss01-model-loading\\handoff.md",
+    "sha256": "5CE80C263E5597329249E554F14370ACD8745047E0BCC942D301AE0A7860F06A"
+  },
+  {
+    "file": "chats\\2026-10-16-iss01-model-loading\\log.md",
+    "sha256": "0FFDA9B067550AA80ED9F0D5C4D7A9794541386215A76CEFBC9DE182C673DD69"
+  },
+  {
+    "file": "chats\\2026-10-16-iss06-watcher\\handoff.md",
+    "sha256": "96E70016D3565A9E5A7E2A90EEDF0AD58745903B493916806421214A54962FFB"
+  },
+  {
+    "file": "chats\\2026-10-16-iss09-search-vs-index\\handoff.md",
+    "sha256": "C91AA52613E374084EB447290E0C5787C14890A58FC46D6A1ECBA69AECEB8563"
+  },
+  {
+    "file": "chats\\2026-10-16-plan-review\\handoff.md",
+    "sha256": "3B04645DD108606E8022A185559CADEADA6F0EEC222F3961044879D55A4D20E5"
+  },
+  {
+    "file": "chats\\2026-10-16-plan-review\\log.md",
+    "sha256": "DD36013A8C6BA1FE9185D947762600EFE2AA085148E2EA39AB79DA689893D010"
+  },
+  {
+    "file": "chats\\2026-10-16-window-small-fixes\\handoff.md",
+    "sha256": "5D1C8E06AB4B0CA223D0EC3E5EBD144DFCA65AE234EE1A7ED71A375DD41D731B"
+  },
+  {
+    "file": "chats\\2026-10-18-agent-tool-usage\\handoff.md",
+    "sha256": "EE39B58C0474318D90800E46D789785FAD7A5AC41D8FDC9A91A03DB490B050A3"
+  },
+  {
+    "file": "chats\\2026-10-18-agent-tool-usage\\log.md",
+    "sha256": "EF6B1E4E5EDC346B06EEEAA49815787E1DB03A01B9C197BC71D0793D695C31B2"
+  },
+  {
+    "file": "chats\\2026-10-18-chunk-truncation\\handoff.md",
+    "sha256": "BE1FA254D7E1EE17C27FAB816D125923D84369B1CCA2CA224B1B7C197580F4D6"
+  },
+  {
+    "file": "chats\\2026-10-18-client-profile-isolation\\handoff.md",
+    "sha256": "414A2381A86F61AE4981FB149EADF9799206A7C326FB0A285833B9597351325C"
+  },
+  {
+    "file": "chats\\2026-10-18-client-profile-isolation\\log.md",
+    "sha256": "56707B6EF656DDFB17ED92B17F5FEB6B7193E2257DCB89FAA5B1A721579A6972"
+  },
+  {
+    "file": "chats\\2026-10-18-clients-auto-update\\handoff.md",
+    "sha256": "87D901F6FA0149342AF3C9E91F0FF61C6CB172903198E5F74EDAAEA32004D489"
+  },
+  {
+    "file": "chats\\2026-10-18-clients-auto-update\\log.md",
+    "sha256": "D1498B5A17B737FFF98988991BDA7794599CFEBDC027C7E53834BDF4C88D2EA2"
+  },
+  {
+    "file": "chats\\2026-10-18-clients-auto-update\\plan.md",
+    "sha256": "D6328C429830A76F67E25498D58DDDED24E2F8A72B4DDCE02A24F0E99E3D00E0"
+  },
+  {
+    "file": "chats\\2026-10-18-clients-auto-update\\verification.md",
+    "sha256": "E29BC8CB0603479D9B61696A86C8F9517A90BCBDF35DE42BA73F4112CB7D7877"
+  },
+  {
+    "file": "chats\\2026-10-18-development-ideas\\handoff.md",
+    "sha256": "2140A34B7358407E1483AA84DD90F58C9A03283DC8567B4ECE2C95969A0E24AF"
+  },
+  {
+    "file": "chats\\2026-10-18-development-ideas\\log.md",
+    "sha256": "59C39D43B351157972D99B01D7A03C7402E8CEC6A41F6DA64C802F1B021F0A31"
+  },
+  {
+    "file": "chats\\2026-10-18-device-design\\handoff.md",
+    "sha256": "D401D2F3F2D8D32817FE81F0FA87A99F9BD2BE568FD8085C12596B7A080FFADB"
+  },
+  {
+    "file": "chats\\2026-10-18-device-design\\log.md",
+    "sha256": "19A71CB9A9661070592BB5EAA327C82A3AED4A9D8697D28433C9EDB11D7C8989"
+  },
+  {
+    "file": "chats\\2026-10-18-device-design\\stage17-plan.md",
+    "sha256": "6B6D116452A6BB94FA83783166FCEAB5607A349B23857DB5C78FF5D3AD04C144"
+  },
+  {
+    "file": "chats\\2026-10-18-docs-layout-design\\handoff.md",
+    "sha256": "D85E83783B2C10AE456730A6433FF13615A3B3F15B3B82FFADF5C3AF88162177"
+  },
+  {
+    "file": "chats\\2026-10-18-docs-layout-design\\log.md",
+    "sha256": "8E0E9632A22E45E8CB6A61ACAE40F0AC04ADB5E6AAC08DEA131D0464AC0F0977"
+  },
+  {
+    "file": "chats\\2026-10-18-docs-layout-design\\plan.md",
+    "sha256": "2D971232B797ED4208896DEDCB85674CFA82D2FD0F1BDCB6FE980022D557CD96"
+  },
+  {
+    "file": "chats\\2026-10-18-docs-layout-design\\verification.md",
+    "sha256": "C654312B8866E05CE4012FD02EAB782EE137A0FFF59FEAB28ACF1BD6A90A4893"
+  },
+  {
+    "file": "chats\\2026-10-18-document-actions\\handoff.md",
+    "sha256": "1E474C1836F42B0627C61380E73D80E5B42167AD2B4DB9112D87A69BAB980281"
+  },
+  {
+    "file": "chats\\2026-10-18-document-actions\\log.md",
+    "sha256": "433B0773D99E43216CFDAAACC3E84A43500FFDCCEF618C69782B497AE4C61C52"
+  },
+  {
+    "file": "chats\\2026-10-18-documentation-tools\\handoff.md",
+    "sha256": "422241F00DBC60E33CC44B759B80F9570D010D85F21FB5CC5D0A44835B6C13D6"
+  },
+  {
+    "file": "chats\\2026-10-18-documentation-tools\\log.md",
+    "sha256": "5826617F21F5EA4C444C7236EDBDADF6062955EC32DD363926A2B3E50209B75C"
+  },
+  {
+    "file": "chats\\2026-10-18-folder-menu-31\\handoff.md",
+    "sha256": "83847B4120ECB6FADA163F178AC433C4DB91168557FCF4DB9F17D82371C169AF"
+  },
+  {
+    "file": "chats\\2026-10-18-folder-menu-31\\log.md",
+    "sha256": "83A4E9755171F79E5B9F6F30CED376BCD893B335461F5A8C38FC7C533317E582"
+  },
+  {
+    "file": "chats\\2026-10-18-folder-menu-31\\verification.md",
+    "sha256": "6DE646CC520A85609BEC1E07155C0AA4E1F5BA89EFFD93B025B56E5BBB14F86A"
+  },
+  {
+    "file": "chats\\2026-10-18-gguf-models\\handoff.md",
+    "sha256": "8D75EE113B9C41443D78B607D50F52B521EEA718A911E05EC65174E916523669"
+  },
+  {
+    "file": "chats\\2026-10-18-gguf-models\\log.md",
+    "sha256": "561A496A175792CC54CF548D8C476A761234A2231B6952808787464451297E08"
+  },
+  {
+    "file": "chats\\2026-10-18-gguf-models\\stage22-plan.md",
+    "sha256": "8D7E6B8933B290A938D335DC401C5167C2D7BC25BF893EA35EB5F393B38A563F"
+  },
+  {
+    "file": "chats\\2026-10-18-graphrag-integration\\handoff.md",
+    "sha256": "8B98F5B72D1DF31012826C0832594E86A3E44345BDB83B2C204F81C3EC5E1664"
+  },
+  {
+    "file": "chats\\2026-10-18-graphrag-integration\\log.md",
+    "sha256": "41CD79EF41D67911315B98AF39194ACD50F956F39F272A7F7934A44C9617723F"
+  },
+  {
+    "file": "chats\\2026-10-18-idea06-benchmark\\handoff.md",
+    "sha256": "6E1425A8A3494C82CE88DC980338094FCC9B31087D5B3BC34F28918D81AC2393"
+  },
+  {
+    "file": "chats\\2026-10-18-idea06-benchmark\\log.md",
+    "sha256": "F11F6F8812309FF3238022B4942FA1497A7D3EB3B9F60F248D8E9681EF84446D"
+  },
+  {
+    "file": "chats\\2026-10-18-inference-design\\handoff.md",
+    "sha256": "1592A43D8962FAF094886AFD1DFCCB9E9462340FCDF6E9D5635AF842CAE9558D"
+  },
+  {
+    "file": "chats\\2026-10-18-inference-design\\log.md",
+    "sha256": "7C61462AEE29487B94A1CADF72B4E695982A13582651CB9A1AE476437C2F068D"
+  },
+  {
+    "file": "chats\\2026-10-18-inference-design\\stage11-plan.md",
+    "sha256": "85488640C5A46F61BF238504EBAD66A74E91C1C2F2B65E96634BA5E74586646B"
+  },
+  {
+    "file": "chats\\2026-10-18-inference-research\\handoff.md",
+    "sha256": "6B68EF51239426BC03D0F555DD6497D64347C3C44F2C410109644F21A724A938"
+  },
+  {
+    "file": "chats\\2026-10-18-inference-research\\log.md",
+    "sha256": "F8B89C0F92019E61B4A5D072D7EE823497E0A9F7D8BFD3C14D339C8FF471702A"
+  },
+  {
+    "file": "chats\\2026-10-18-installer-encoding\\handoff.md",
+    "sha256": "9DF4417F808BF2024E4E92C32F308C0AF27CA3CD8C88101A81BAD8FBE78CBCF7"
+  },
+  {
+    "file": "chats\\2026-10-18-installer-path\\handoff.md",
+    "sha256": "1229ACF83E25B7B28D7F93A93593999E5790BE9E4D6D42E07C041752824495B2"
+  },
+  {
+    "file": "chats\\2026-10-18-knowledge-gaps\\handoff.md",
+    "sha256": "D652828B63612C5BA1D8E4D28A54B0D85158FDC1090C9DBE6B1D323CE97CD271"
+  },
+  {
+    "file": "chats\\2026-10-18-knowledge-gaps\\log.md",
+    "sha256": "5B826F6B7709F1028FA62572ED8BA04745786DD4FF5A10AD0E8340A1F8BB1FD9"
+  },
+  {
+    "file": "chats\\2026-10-18-mcp-analysis-30\\handoff.md",
+    "sha256": "F00D03A4E6EC2A9B56F35D85510AB36427E557834FCC13DCD97A9DF31CBA6CA9"
+  },
+  {
+    "file": "chats\\2026-10-18-mcp-analysis-30\\log.md",
+    "sha256": "4213F774B426C05BC0E6329EED1A0B0B12608DCEC2994BFECD163738A657BCE6"
+  },
+  {
+    "file": "chats\\2026-10-18-mcp-analysis-30\\verification.md",
+    "sha256": "36C23C40514F10690B90E211F16A79BE63D12E638DF383CA8CA5C761203FFB47"
+  },
+  {
+    "file": "chats\\2026-10-18-mcp-format-language\\handoff.md",
+    "sha256": "6E378FC20B4C98BC3241AFC1D8618373346B76D18C8E25B1A5AC3660AF7688DB"
+  },
+  {
+    "file": "chats\\2026-10-18-mcp-history-29\\handoff.md",
+    "sha256": "5705DC1862623CF1DB1E32CF72DE44D00D3631BA783844D22CFD14B22B825953"
+  },
+  {
+    "file": "chats\\2026-10-18-mcp-history-29\\log.md",
+    "sha256": "B085297423B7A24408511DDD5CBFF903B2D68F41E8ADBBA79FA199405B79E3F4"
+  },
+  {
+    "file": "chats\\2026-10-18-mcp-history-29\\verification.md",
+    "sha256": "FC271849DF842B665AAF8D2D50698C4F2623E94EA5D14F0DF697E6B7970E5714"
+  },
+  {
+    "file": "chats\\2026-10-18-mcp-statistics\\handoff.md",
+    "sha256": "DB913E80C22ECCFA6DA4D239F6FC04BAA26BEC0C021E51034C1FCADF69993530"
+  },
+  {
+    "file": "chats\\2026-10-18-mcp-statistics\\log.md",
+    "sha256": "1E080904029B8888197C3B07AB3BCA7A7DBC59F170239FE922E9D2CC4592E672"
+  },
+  {
+    "file": "chats\\2026-10-18-mcp-transport\\handoff.md",
+    "sha256": "496414C7496B1D985EEA8D2E72C3E4B4D108AFB656E156E521D9FCB0B04A3F6B"
+  },
+  {
+    "file": "chats\\2026-10-18-memory-consolidation\\handoff.md",
+    "sha256": "86035C16046D2C1589614FC31E99723931E6800E87E4129AC18CEDF6271F84AD"
+  },
+  {
+    "file": "chats\\2026-10-18-memory-consolidation\\log.md",
+    "sha256": "55726B1ED03502C4514A78AED1B3465DE9346FB105AC6FAB7B54AC7E6FD2156C"
+  },
+  {
+    "file": "chats\\2026-10-18-memory-research\\handoff.md",
+    "sha256": "5D9B08437191A4C5AEE8DC7F0CCDED4A65683C6DAC8A40AD6984DF5BF1C06070"
+  },
+  {
+    "file": "chats\\2026-10-18-memory-research\\log.md",
+    "sha256": "FD17DB8918764A9D7914A72A7B6AF5718FCDA3CEE585A53F5E85486C2640D042"
+  },
+  {
+    "file": "chats\\2026-10-18-notification-center\\handoff.md",
+    "sha256": "F083B9B5D51F757A87F7EA1CE8A5A0EE5EB9E51CE4C805A6592857B19599A30D"
+  },
+  {
+    "file": "chats\\2026-10-18-notification-center\\log.md",
+    "sha256": "B6C67AFC0B7DD069BCA1D2585C597409AA869D25E8CB3ED8992CAA734D18098B"
+  },
+  {
+    "file": "chats\\2026-10-18-notifications-28\\handoff.md",
+    "sha256": "C133C180824C0DFB6D2980B5827038DD02D5445EBF9715B67E77BD05F6105A22"
+  },
+  {
+    "file": "chats\\2026-10-18-notifications-28\\log.md",
+    "sha256": "CD8130C44EB3FD66DEF55CF85C8E41AA913B00EBAD14251A0668CDEC99C1C186"
+  },
+  {
+    "file": "chats\\2026-10-18-notifications-28\\verification.md",
+    "sha256": "50363586BDDA8A4530488FA386EC947E081872C6EEFFE95D0F348E3AA687D5F4"
+  },
+  {
+    "file": "chats\\2026-10-18-output-language\\handoff.md",
+    "sha256": "3AAB8B6355B7E8A9DDD5ABE74011AD5C2FE10981E61BC4878E42D79E121C912D"
+  },
+  {
+    "file": "chats\\2026-10-18-project-context-menu\\handoff.md",
+    "sha256": "FB1CC18D384CB09664D35ACFF0A07A4DE78BA66AE09B5EF22C7FD9C68952C168"
+  },
+  {
+    "file": "chats\\2026-10-18-project-deletion\\handoff.md",
+    "sha256": "978370AA25175A52311A3E9BD3DF97850CFA15328A1F478B5ACF1060032999B7"
+  },
+  {
+    "file": "chats\\2026-10-18-project-deletion\\log.md",
+    "sha256": "0DD146E91E94166CB9147E89B59C2FC97122B71FEEFEF5DF473721AD8736A06D"
+  },
+  {
+    "file": "chats\\2026-10-18-project-docs\\handoff.md",
+    "sha256": "5A575F11B373A03E793BB6D0771296F657E33FD1F654916E5E529D8B11F68980"
+  },
+  {
+    "file": "chats\\2026-10-18-project-docs\\log.md",
+    "sha256": "A81BC61FDFA0347EF76D0E500855544D962C180611FC0F8AF6580843C808E08F"
+  },
+  {
+    "file": "chats\\2026-10-18-russian-interface\\handoff.md",
+    "sha256": "1F88C4F697801BF73B7191EB018AFC798C7FB02271FDEB3C0369CE08E6816F7E"
+  },
+  {
+    "file": "chats\\2026-10-18-russian-interface\\log.md",
+    "sha256": "9F2B8D5BBEC1DD0E426899CE0978691058926DD3D3D6ABED356A1A7872016026"
+  },
+  {
+    "file": "chats\\2026-10-18-search-layout\\handoff.md",
+    "sha256": "8B10935E279AC78AE5BEA2C44EF5472E2F1389A45F4F0DB8A0C0987E31521ED6"
+  },
+  {
+    "file": "chats\\2026-10-18-search-score-order\\handoff.md",
+    "sha256": "528653CAA465A05995A181990D1017BEA86ACB791BE3597DB9AAEEAF26D3FBB0"
+  },
+  {
+    "file": "chats\\2026-10-18-search-score-order\\log.md",
+    "sha256": "4E7C4D6F67430FCC5111AE9A5ED541BCC1746F73BB81BB36FB63ECC9A2905494"
+  },
+  {
+    "file": "chats\\2026-10-18-search-score-order\\plan.md",
+    "sha256": "EF1EEEC647F7A5D6515A324085A9EEE512A6B43839675CD0A0A2088D49604F29"
+  },
+  {
+    "file": "chats\\2026-10-18-similar-duplicates\\handoff.md",
+    "sha256": "354483083BECC9B8BD5EA0467995ED8AAA487DE5FB29D2DE8A5F2CC6F66A0EC7"
+  },
+  {
+    "file": "chats\\2026-10-18-similar-duplicates\\log.md",
+    "sha256": "1B8A68033EC325CF28658A561B91B1C9F1DA583A6902ABFB71E514AD150BBEDD"
+  },
+  {
+    "file": "chats\\2026-10-18-stage17-implementation\\device-verification.md",
+    "sha256": "C84371D4560B02111E826DD1A063CA5EB5C4830A2FF55E18A8B55FB1FDA02AFF"
+  },
+  {
+    "file": "chats\\2026-10-18-stage17-implementation\\handoff.md",
+    "sha256": "84BEE31CAD2B215F78DA6310B7E625C2D564817D61F52FF2713CEC714587336C"
+  },
+  {
+    "file": "chats\\2026-10-18-stage17-implementation\\log.md",
+    "sha256": "2988F84DECB523351526E0DA33BC6DA44981AC25E1B2FD76E64678F49EC0B576"
+  },
+  {
+    "file": "chats\\2026-10-18-stage26-contracts\\handoff.md",
+    "sha256": "306B30B6B84B3705EF107E735E4F28EA54461E833BE62452F384FFDEE39FC211"
+  },
+  {
+    "file": "chats\\2026-10-18-stage26-contracts\\log.md",
+    "sha256": "DFC9117213F41A1BF08EDCE95E13CE93204E2BE3CB5AA5F79385DF2999DA1DEB"
+  },
+  {
+    "file": "chats\\2026-10-18-stage33-implementation\\handoff.md",
+    "sha256": "FF64EC740DC9F28753348CC9F236B163CAEE9913673C9E992936358E3AFA3CA5"
+  },
+  {
+    "file": "chats\\2026-10-18-stage33-implementation\\log.md",
+    "sha256": "6E14729AB9D821E23826AF4B4D41554784BDEF186D00D7CD79FB94F08FFAE882"
+  },
+  {
+    "file": "chats\\2026-10-18-window-design-27\\handoff.md",
+    "sha256": "EF2776BB7BEA161E78E13282344927E6D05AC257924B01341F3B64B375730A8F"
+  },
+  {
+    "file": "chats\\2026-10-18-window-design-27\\log.md",
+    "sha256": "3D23B93DA1BD0CB9FBB652B27273D3D36F3132145680C8B7208C959B123C0335"
+  },
+  {
+    "file": "chats\\2026-10-18-window-design-27\\verification.md",
+    "sha256": "FEE514F730BDB30213682F4E2B71BBBEEA6E3E0EA700FD71906F12FAF8FB5193"
+  },
+  {
+    "file": "chats\\2026-10-18-window-refinement\\handoff.md",
+    "sha256": "ADB169C98820B0F686989D6A62F7426B9BB88D649C256C928441089059D2E772"
+  },
+  {
+    "file": "chats\\2026-10-18-window-refinement\\log.md",
+    "sha256": "A0857764BD0E78E05109CF3F0DBACEC3DBC2DD88BA0FE94C8C7712F857BFB21F"
+  },
+  {
+    "file": "chats\\2026-10-18-worker-logs\\handoff.md",
+    "sha256": "300F03C808A00DF85A68828CFAAD888157054AA584BF3612ABECA44F17E3DFD3"
+  },
+  {
+    "file": "chats\\2026-10-18-worker-logs\\log.md",
+    "sha256": "099BF0A9D88EA9E38A45FEB8BAFD2704D3155700C0414320F7978697414B15E5"
+  },
+  {
+    "file": "chats\\2026-10-19-chunk-id-design\\handoff.md",
+    "sha256": "288D59F26234C38FA1F3CCC44BDA2A789BD5920A67777E372BEB7A49B2E9ED41"
+  },
+  {
+    "file": "chats\\2026-10-19-chunk-id-design\\log.md",
+    "sha256": "3751587DB9EA59A8B7EF1E6FD4B4F9998F36F4292C2DCFEFF870C0CC07F16E24"
+  },
+  {
+    "file": "chats\\2026-10-19-docs-audit\\handoff.md",
+    "sha256": "6BB2E58D51E6D25BC954159C93F3AA63D063EF3B9DE7A7DB226DB53D2B5D50A7"
+  },
+  {
+    "file": "chats\\2026-10-19-duplicates-research\\handoff.md",
+    "sha256": "1730211E05FF07040133EB5092E0DAE2BB36083047319F46B42FBD4E7692D67E"
+  },
+  {
+    "file": "chats\\2026-10-19-duplicates-research\\log.md",
+    "sha256": "9982B9E5E605074D0B9929EBC4B639D9F667DB7A25C4C0192A94B8CA1FFE0321"
+  },
+  {
+    "file": "chats\\2026-10-19-iss18-model-loading\\handoff.md",
+    "sha256": "99E907BC7C048560B4B1118629671B38743B5419668FE76F6F37C208ACC36233"
+  },
+  {
+    "file": "chats\\2026-10-19-iss18-model-loading\\log.md",
+    "sha256": "E875D58FEB13B90B8C3ABCB548642653AF978AAAEC8202910271205ADD49CD83"
+  },
+  {
+    "file": "chats\\2026-10-19-knowledge-base\\handoff.md",
+    "sha256": "7D7A2D3D4F6B455FC6471287EF3F308609FFEFA33AF3AE989ACF81AF005AB474"
+  },
+  {
+    "file": "chats\\2026-10-19-knowledge-base\\log.md",
+    "sha256": "9C8514FA4E5457A148E0567E6A0F1F22C4C176E52E80A11CAC16FF0EC4BAD954"
+  },
+  {
+    "file": "chats\\2026-10-19-new-topics-api\\handoff.md",
+    "sha256": "0E5C7D34527D4301069BC278E2186AECD1B15B09D44D45B0E3ED37F60C8359C9"
+  },
+  {
+    "file": "chats\\2026-10-19-new-topics-api\\log.md",
+    "sha256": "6BFC45105D32E18A93FD4ECC8959D3E3C6FFF27BD03A2538757E4163D4C713A8"
+  },
+  {
+    "file": "chats\\2026-10-19-new-topics-collect\\handoff.md",
+    "sha256": "7E4CF8B541FD1E9B40FF1FCC1D556B04C839BAB8293D7758316F8BA50314A737"
+  },
+  {
+    "file": "chats\\2026-10-19-new-topics-collect\\log.md",
+    "sha256": "3A6CBDECE80831FC5B7310C48679ECC29C81C4A7C11A29A481B7AD1F1B8690CA"
+  },
+  {
+    "file": "chats\\2026-10-19-new-topics-threshold\\handoff.md",
+    "sha256": "BCEEEA696737967CA97C2E87331E52BCA56B5B2D015FACB19899038B60905036"
+  },
+  {
+    "file": "chats\\2026-10-19-new-topics-threshold\\log.md",
+    "sha256": "B8C0F0146E8615FE2294B9426A2AE1B8A9C4C6480A61C15FFC869D1D79E653D6"
+  },
+  {
+    "file": "chats\\2026-10-19-new-topics-ui\\handoff.md",
+    "sha256": "E53A04957B63563B72068ACEC0EA07A41C192BD31C538E20CA58778BBC9A008D"
+  },
+  {
+    "file": "chats\\2026-10-19-new-topics-ui\\log.md",
+    "sha256": "BEA0C96C683D5C3726035C9B7EA5A91B1D80D5652050A2F6F6B3D7AB350398E8"
+  },
+  {
+    "file": "chats\\2026-10-19-plan-backlog-cleanup\\handoff.md",
+    "sha256": "287AFC6C374177E447F6FA62B6EC402D858C811978FCFEA5FCA1DB0983B47386"
+  },
+  {
+    "file": "chats\\2026-10-19-user-manual\\handoff.md",
+    "sha256": "B7F878825513DB2EE2A3ED2403F951D6623F2DAFB16EBB7C14B615C2331EBE19"
+  },
+  {
+    "file": "chats\\2026-10-19-user-manual\\log.md",
+    "sha256": "9F6CF01991E42FF1EA160B2C7CC4B3CEFABED4C44614181E7D863745315ACE4B"
+  },
+  {
+    "file": "chats\\2026-10-20-decisions-storage\\handoff.md",
+    "sha256": "9B5C28A26426D232C13E43AD624ABA7A22F6A100BEA472182756977BAD4319C0"
+  },
+  {
+    "file": "chats\\2026-10-20-global-search-design\\handoff.md",
+    "sha256": "0CCEB3676EB14973FBD4DF0A4933EF65E05B0192B054C468BF12BFE2E37EA06F"
+  },
+  {
+    "file": "chats\\2026-10-20-global-search-design\\log.md",
+    "sha256": "6281F56CDC78642BA41CFF24D6EC3BDB589F15931485C8B0BE4F9F4B0CFA9521"
+  },
+  {
+    "file": "chats\\2026-10-20-global-search-implementation\\handoff.md",
+    "sha256": "E02996B130B92496CC8BD2A5EF784ED4DE25627ACD151BC7791A775978F49633"
+  },
+  {
+    "file": "chats\\2026-10-20-global-search-implementation\\log.md",
+    "sha256": "86DF81001DF130A75964EAFD8518732339DF9ADD0BD38196BAFE1617789054AF"
+  },
+  {
+    "file": "chats\\2026-10-20-graph-quality\\handoff.md",
+    "sha256": "B6795381B612E6DA6C064DC958C7B9C940A79535268363590D59690ED73C8F96"
+  },
+  {
+    "file": "chats\\2026-10-20-graph-quality\\log.md",
+    "sha256": "A328053E1CF0EEF8FBEDC20347389C69FAA11264A79715FD6E50072E919ACCA9"
+  },
+  {
+    "file": "chats\\2026-10-20-indexing-details\\handoff.md",
+    "sha256": "BFCD55DCCDC459DDFDD10232BA377B93444152BD6AD90A61CB3DECF8806519E1"
+  },
+  {
+    "file": "chats\\2026-10-20-indexing-details\\log.md",
+    "sha256": "FF2BBB48147BD7A5C5462C7F88B66FA77DFB53AC127A755A1FDA60399D42A84F"
+  },
+  {
+    "file": "chats\\2026-10-20-indexing-memory\\handoff.md",
+    "sha256": "773207C8CC5DAEFF692D1C117149F815EE1335C5260F429388883CF93ACC626D"
+  },
+  {
+    "file": "chats\\2026-10-20-indexing-memory\\log.md",
+    "sha256": "D89E21C84648C2B757870119DFA0B3D36D83068E2702DD9AF423578B1EF78F0F"
+  },
+  {
+    "file": "chats\\2026-10-20-indexing-responsiveness\\handoff.md",
+    "sha256": "EEC450A5EDF00B2ECBC8A55B1F4878652F777C5AABA84E841FA4E065A1ACBB6E"
+  },
+  {
+    "file": "chats\\2026-10-20-indexing-responsiveness\\log.md",
+    "sha256": "666E8BFBD8D89DEA73B39B13875B8721D68DD0F4FD8CB583E3C632EE86D17735"
+  },
+  {
+    "file": "chats\\2026-10-20-indexing-responsiveness\\verification.md",
+    "sha256": "B6D3CE18A874FF9E04948A0FFBE7898CCE900D06AF826044842E019E0A26E2CA"
+  },
+  {
+    "file": "chats\\2026-10-20-keyboard-design\\handoff.md",
+    "sha256": "E80B737D25AA0C55062219B67008A3F958B2B7C92EB81398088EC4F173242585"
+  },
+  {
+    "file": "chats\\2026-10-20-keyboard-design\\log.md",
+    "sha256": "6204F82343C6744F870410D09ECF15643DA53C735953639B1D1608EFE808FE66"
+  },
+  {
+    "file": "chats\\2026-10-20-memory-acceptance\\handoff.md",
+    "sha256": "8F2D0233D747449D614877527AD187A45B4B29BC0FA6C675AEF0D33B85359E53"
+  },
+  {
+    "file": "chats\\2026-10-20-memory-acceptance\\log.md",
+    "sha256": "6BFAF756019B81CC389248AB20833368AE3E354C40EDD827E7C1D46C816C91FC"
+  },
+  {
+    "file": "chats\\2026-10-20-new-topics-grouping\\handoff.md",
+    "sha256": "67EEA05800636DCF1B0BEBA7E8CA26B2372A6C1F41A90C110D601BBC6858E67E"
+  },
+  {
+    "file": "chats\\2026-10-20-new-topics-grouping\\log.md",
+    "sha256": "3D8555F0DE9FBD1F067DEE40C049D40959428860B985E0EFBD04ED17B9A131FB"
+  },
+  {
+    "file": "chats\\2026-10-20-plan-usability\\handoff.md",
+    "sha256": "6C9AB4439254ABF1E8321D125395383F48F97A7D76A287AD5D4E4474AC64D4B8"
+  },
+  {
+    "file": "chats\\2026-10-20-plan-usability\\log.md",
+    "sha256": "06C22C53B5A6CCFE0EBCFA6F15935B7D918AB5E789C6EE19F9127A2BEDC98F0C"
+  },
+  {
+    "file": "chats\\2026-10-20-plan-usability\\plan-before.md",
+    "sha256": "40792669C8A0F49B3366C5A7ABF2DC01D6B23A23ED5423B5B10E00E86CC35815"
+  },
+  {
+    "file": "chats\\2026-10-20-topics-context-menu\\handoff.md",
+    "sha256": "06F17E5D1CB4FF8C620B6856AF8C0BA44C49BD475080F2BD4FD4D6E852CC017B"
+  },
+  {
+    "file": "chats\\2026-10-20-update-installer\\handoff.md",
+    "sha256": "974137D9D1CA3DFA195AD00CAD382D5B0282D25DBBCA953034B0083F93A98C6E"
+  },
+  {
+    "file": "chats\\2026-10-20-update-installer\\log.md",
+    "sha256": "9BD2FDD8A10749648628EBD01300211F9EFED51C9BEC944630F20995538686D3"
+  },
+  {
+    "file": "chats\\2026-10-20-window-docking\\handoff.md",
+    "sha256": "3F4B2BEFE20FE116D45003FEF22762C0DEF6D029465E36EEDDEFB814BA3F926A"
+  },
+  {
+    "file": "chats\\2026-10-20-window-docking\\log.md",
+    "sha256": "A7FE6472693DB2D53720B8EDE9EB35CB17DBF03CE51575E9A16D024FF02DE6DB"
+  },
+  {
+    "file": "chats\\2026-10-20-window-foundation\\handoff.md",
+    "sha256": "0A6560A67A0F82E6290AE3A1F291C50312FC27F596646AF9FE9468BB34924673"
+  },
+  {
+    "file": "chats\\2026-10-20-window-foundation\\log.md",
+    "sha256": "72B66B5E7605BF5E2A90AC3C8CDDF7CE9FFA48204CB56DF219003943BE178DE0"
+  },
+  {
+    "file": "chats\\2026-10-20-workspace-density\\handoff.md",
+    "sha256": "2F58845D446A2217B24A526EB391C7D7006DD54E07CC63946764CE69A0D46C27"
+  },
+  {
+    "file": "chats\\2026-10-20-workspace-density\\log.md",
+    "sha256": "BE502798707668BB08A03C789D84FBED01631A5FD8E44E80F20F0597C0BF7A81"
+  },
+  {
+    "file": "chats\\2026-10-20-workspace-design\\handoff.md",
+    "sha256": "F148342EFB2DB13E0B3CC7A92D9B00A6CB8FE8229D55C9B21CC4E6F7F998736B"
+  },
+  {
+    "file": "chats\\2026-10-20-workspace-design\\log.md",
+    "sha256": "F0CB34E56EF3259C94ACF8FC9153E11E21D99DB4D41AF188F2CB316845CA4ECA"
+  },
+  {
+    "file": "chats\\2026-10-20-workspace-implementation\\handoff.md",
+    "sha256": "CDA4FCB5D53689590B3F5B7F61E07813CEAF8459C3F0181B29F164D734825FDA"
+  },
+  {
+    "file": "chats\\2026-10-20-workspace-implementation\\log.md",
+    "sha256": "386F3E3D7D907AE3435A32C51A165454761EBAF21C6AC1BE8E14E8266E6EB31C"
+  },
+  {
+    "file": "chats\\2026-10-21-fourth-edge\\handoff.md",
+    "sha256": "656028807B65E2CB34FE0C8AD64B0612C97DF563692C498D034AB104B817C020"
+  },
+  {
+    "file": "chats\\2026-10-21-fourth-edge\\log.md",
+    "sha256": "44897E298F8D533986A939E60BB9B36EE7FF154C7EF00DAF249F04A8726BB809"
+  },
+  {
+    "file": "chats\\2026-10-21-graph-design\\handoff.md",
+    "sha256": "F5A8E7379F21E0E4A6EFB201430A04CB15703B574797507F342C8ECBE5F8853B"
+  },
+  {
+    "file": "chats\\2026-10-21-graph-design\\log.md",
+    "sha256": "47FA2EA381E088BD13CDB9255CEF54483CDF23EBAB05265D2839A9140F57CA74"
+  },
+  {
+    "file": "chats\\2026-10-21-graph-physics\\handoff.md",
+    "sha256": "805322B94A66D04137268C9AD8590D535F6948A6C7066C29824930242D083539"
+  },
+  {
+    "file": "chats\\2026-10-21-graph-physics\\log.md",
+    "sha256": "E87C303D5DC0DD84AE68DCEB81951668EC9075197FA78DEF53B481C60C3D4FD7"
+  },
+  {
+    "file": "chats\\2026-10-21-graph-physics\\run-3\\Index.md",
+    "sha256": "AAE4F85CE68C94344E8AACF627EB583D7FDE5EBC4156B82CEAE7A73711E06B0F"
+  },
+  {
+    "file": "chats\\2026-10-21-inference-backlog\\handoff.md",
+    "sha256": "ED99897944F5B8F63C217EFFD3ADFCE8EF6021F369D48BC0F08775354E3D0511"
+  },
+  {
+    "file": "chats\\2026-10-21-keyboard-implementation\\handoff.md",
+    "sha256": "A95900D1EECABF221C9C6541EE2E1A3D5923C83F939F74BF155A0759BEA7A4C7"
+  },
+  {
+    "file": "chats\\2026-10-21-keyboard-implementation\\log.md",
+    "sha256": "EC23E1C6980973456482CCD64104404F131C8634ED4315456F7877019F7BF4F4"
+  },
+  {
+    "file": "chats\\2026-10-21-physical-graph-design\\handoff.md",
+    "sha256": "3F85A5730A5DEA753EA4AAC556F42843BFC2FEFA61BBFF518AAFF41FF6DD24C8"
+  },
+  {
+    "file": "chats\\2026-10-21-physical-graph-design\\log.md",
+    "sha256": "8E70B602AFF6ECCD45D1BF7CC74D41E180F5175654FFED6185EA6773A26AB7B2"
+  },
+  {
+    "file": "chats\\2026-10-21-topics-check-diagnosis\\handoff.md",
+    "sha256": "8D1FC0B3E6F71CC064D27E065ABE01073FD4BC714D0792D9AE81E4335F2BFC19"
+  },
+  {
+    "file": "chats\\2026-10-21-workspace-sidebar\\handoff.md",
+    "sha256": "EE41A8AC0B7A42437A38C817011B126C347C7330918EECD3326906B163695B7E"
+  },
+  {
+    "file": "chats\\2026-10-21-workspace-sidebar\\log.md",
+    "sha256": "52C156C874AF75F48B4E6DFC6938C81DAD9CA05E9F9A695A9A17F3AACA29E002"
+  },
+  {
+    "file": "chats\\2026-10-22-audits-impl\\handoff.md",
+    "sha256": "99DFEA73D56AA17B58A5E13DD98019AEF928DCFE137C52BABBD42D0E263D5BC3"
+  },
+  {
+    "file": "chats\\2026-10-22-audits-impl\\log.md",
+    "sha256": "066B366BC15639816F3A2076F44730661A460561E1380C16A9BDFD94BF731030"
+  },
+  {
+    "file": "chats\\2026-10-22-contradictions-research\\handoff.md",
+    "sha256": "5FA7D59B5F7BC62A6E71EE2CC3032B5DEF2FFF723271844DEA58BB4894D73764"
+  },
+  {
+    "file": "chats\\2026-10-22-contradictions-research\\log.md",
+    "sha256": "5CCC56E38C69F05A0D2AB8DD8B447490E9A82DBF4025BBF65AC548F4D305FBB0"
+  },
+  {
+    "file": "chats\\2026-10-22-document-queue\\handoff.md",
+    "sha256": "D8968F540F5F4348446236D499C8F394341BD58E4C3C0D59A072C70050B33AF1"
+  },
+  {
+    "file": "chats\\2026-10-22-document-queue\\log.md",
+    "sha256": "5E97BBCA317CAEE8DD397E6EA4A2B9038DB9797472E586B41065E61F1EC1FD2A"
+  },
+  {
+    "file": "chats\\2026-10-22-duplicates-labeling\\handoff.md",
+    "sha256": "F51A4600188F027849C355A9344DDC0424C7B147A54FC5AE14B08DAD5B0A67C1"
+  },
+  {
+    "file": "chats\\2026-10-22-duplicates-labeling\\log.md",
+    "sha256": "344915AB097E734ED44BDE9B78308323CA645B0A77A8DDE630B9350C7F7FAA2D"
+  },
+  {
+    "file": "chats\\2026-10-22-editor-acceptance\\handoff.md",
+    "sha256": "E91F6705998157F4DD5F564AD44D1B96875062E0B9AB41F43E74A8E0B8268536"
+  },
+  {
+    "file": "chats\\2026-10-22-editor-design\\handoff.md",
+    "sha256": "116920CA6B8B0E7A148D15D43EE8541E4969D62DE12FB8814B3DBA240859C2BD"
+  },
+  {
+    "file": "chats\\2026-10-22-editor-design\\log.md",
+    "sha256": "642124AF03F5FE0445AC4F05925FD466512783EB07E12DE77BBA93FD1302B73C"
+  },
+  {
+    "file": "chats\\2026-10-22-graph-actions-design\\handoff.md",
+    "sha256": "384AD807A2BCFBC38BA7334D9B3306FC118C8817EECDB30CA60B9796DD3AF941"
+  },
+  {
+    "file": "chats\\2026-10-22-graph-actions-design\\log.md",
+    "sha256": "547D8AB60DE142104564CDC535BF1523FE580F8AEEA8A8015B5F4C5A34E6ED34"
+  },
+  {
+    "file": "chats\\2026-10-22-graph-contracts\\handoff.md",
+    "sha256": "B5D7B05E74F9E0A90C4C1E73EF0B642CFE0CD837DEBDB7ABCB43FD413370F1F8"
+  },
+  {
+    "file": "chats\\2026-10-22-graph-contracts\\log.md",
+    "sha256": "637030DE2E7A3494007877C0CEFCAB78B8448C2C93313C28C44E65178C575E95"
+  },
+  {
+    "file": "chats\\2026-10-22-graph-implementation\\handoff.md",
+    "sha256": "6B6F9839F788806CAB472D2A620DD5A4F1870F69A8FEBB8F2409AACF3AC17907"
+  },
+  {
+    "file": "chats\\2026-10-22-graph-implementation\\log.md",
+    "sha256": "53CC4825D21DBF0578D1C14C8E1BAF090D9E9EE3A8D35CB0701A2428F23C154D"
+  },
+  {
+    "file": "chats\\2026-10-22-graph-obsidian\\handoff.md",
+    "sha256": "71F327A2E7EEF2C448309E22A159C152B1AD92D2DA429EE48F8969B59DB07F7F"
+  },
+  {
+    "file": "chats\\2026-10-22-graph-obsidian\\log.md",
+    "sha256": "7CF9023B498D18B147F26BDAEF43522FBB4EA509C5943AC3BAA5FA532A5728BB"
+  },
+  {
+    "file": "chats\\2026-10-22-kb-design\\handoff.md",
+    "sha256": "90F243BFB381FE65F65DFF615FCAC738350FA641FDA912838562EA528A272FF1"
+  },
+  {
+    "file": "chats\\2026-10-22-kb-design\\log.md",
+    "sha256": "233579622600AB9FF074531E9D2FAD338C3450649AF5198E45BC2022DBDD13E8"
+  },
+  {
+    "file": "chats\\2026-10-22-link-index\\handoff.md",
+    "sha256": "D8686579EA85013A34196A3B13233DE14C35E50C959712D96873962F70B795B0"
+  },
+  {
+    "file": "chats\\2026-10-22-link-index\\log.md",
+    "sha256": "28BB38AE2B978107B334C8D0FDEC018B2EEED043A228F8BD9536985BBF9593D4"
+  },
+  {
+    "file": "chats\\2026-10-22-links-rule\\handoff.md",
+    "sha256": "A8EFDCC3FDD98E5C9883BD8E324D9A6378EDE179ACB270462DEC3B54D7B102EF"
+  },
+  {
+    "file": "chats\\2026-10-22-mini-graph-layout\\handoff.md",
+    "sha256": "69EE73618B72BE67DD9B19C08550BA7D448A87AF7EF2170C058E52D2F735BD02"
+  },
+  {
+    "file": "chats\\2026-10-22-query-graph-design\\handoff.md",
+    "sha256": "BD6A6AAAB15288E47C00785DDC6FA1AA73452730A598FA192FEEDE8811BDA727"
+  },
+  {
+    "file": "chats\\2026-10-22-query-graph-design\\log.md",
+    "sha256": "22FC71B9D68847B1E518975E603D139E9C99AF9DD1215FA787B1665C12B8E850"
+  },
+  {
+    "file": "chats\\2026-10-22-query-transition\\handoff.md",
+    "sha256": "DE8598AF4825DF71EF568163659A8B5BBFFFBF2C6834B2094F4BFF3F96D7EF75"
+  },
+  {
+    "file": "chats\\2026-10-22-query-transition\\log.md",
+    "sha256": "E087898DF211E2207CCA5C8F7AF7D51C9A41A287F752C222475F694272C390B5"
+  },
+  {
+    "file": "chats\\2026-10-22-tabs-windows\\handoff.md",
+    "sha256": "698AE61DB3D648A083F41437E21AD3FFCE6B8615A93132A3222DA95FB8C1F1B4"
+  },
+  {
+    "file": "chats\\2026-10-22-tabs-windows\\log.md",
+    "sha256": "52A2CBDB2C8FA3E223C084A7CE5CE9D64757A5157E520DA05847946E605486A6"
+  },
+  {
+    "file": "chats\\2026-10-22-text-search-research\\handoff.md",
+    "sha256": "5B43B4C7B6C778759628C75F76D5D2843B1AB0B67F1A02368A9AC3C83B57A831"
+  },
+  {
+    "file": "chats\\2026-10-22-text-search-research\\log.md",
+    "sha256": "F077DF0C90C8BA9474C5B58A47A5CBC639ECB5147A8640A4CEF54503A3C65848"
+  },
+  {
+    "file": "chats\\2026-10-22-tree-files\\log.md",
+    "sha256": "1ED0A2B6C64A9EDCF584DB04BD663C262FD07F978FFAACAB64F830EE54EAFB4C"
+  },
+  {
+    "file": "chats\\2026-10-23-agent-window\\handoff.md",
+    "sha256": "FD5DA4A9EF8B683C277F0E995AA80E184E8153ECAED3BABDB935CF2ADD3521FB"
+  },
+  {
+    "file": "chats\\2026-10-23-agent-window\\log.md",
+    "sha256": "F6A9F2CCA445BB1A8D0765011BEC111EF02BDDAEFBEB98BEC5487D50451F248A"
+  },
+  {
+    "file": "chats\\2026-10-23-audits-completion\\log.md",
+    "sha256": "48368BABC8D686D7376AD252FB4AC54D873A45293BC9C2A70EC513789E18BC0E"
+  },
+  {
+    "file": "chats\\2026-10-23-audits-completion\\verification.md",
+    "sha256": "9401A32A5671E68EB557F62F7366731D63CA9A31B5D134B5BD94DDF32F6504C4"
+  },
+  {
+    "file": "chats\\2026-10-23-document-queue\\handoff.md",
+    "sha256": "C72A45D152C824050AD33E37FAF5A23D31A03AE9FD012AF1A43931772F35E424"
+  },
+  {
+    "file": "chats\\2026-10-23-document-queue\\log.md",
+    "sha256": "DFA1DBFA67F9962564A76A27B57F2DF114CEF12116D32A4B9B909C8E44838AEE"
+  },
+  {
+    "file": "chats\\2026-10-23-document-queue\\verification.md",
+    "sha256": "A9CA0192B819EBB7108DAC5F5BA2E87EDB3F43AD965D5D6887F3B60E75D6F5FD"
+  },
+  {
+    "file": "chats\\2026-10-23-graph-extraction\\handoff.md",
+    "sha256": "270F2B90599873782DBDAF3B9363E713EAE8E4134DD6AA52EFE44D3E97691A46"
+  },
+  {
+    "file": "chats\\2026-10-23-graph-extraction\\log.md",
+    "sha256": "32ECF83D4CE6633BFA13C5EF1AE54556853038564A2B1B6E77D41C3568172CFF"
+  },
+  {
+    "file": "chats\\2026-10-23-indexing-memory\\handoff.md",
+    "sha256": "6522346914B1F0E08EEA5FA97B76376D418ACE17AB4D96544511BB997C5A8B56"
+  },
+  {
+    "file": "chats\\2026-10-23-indexing-memory\\log.md",
+    "sha256": "039FF687C50A0E8B2BF95A15504DBBC7618C6772493BA8CD7D3E20BEE21F6D98"
+  },
+  {
+    "file": "chats\\2026-10-23-links-move\\handoff.md",
+    "sha256": "1287D75950239C22014CB4E054B60B5A73483E059E669B84CA525E4E38FB6841"
+  },
+  {
+    "file": "chats\\2026-10-23-links-move\\log.md",
+    "sha256": "D3AE8AD4254EB6D1A432AAFFF89B92402CCA3A26F4ED35F8B20BCB59FEA1D845"
+  },
+  {
+    "file": "chats\\2026-10-23-mcp-read-tools\\log.md",
+    "sha256": "F39EE8595A38EEE4340866570A68598BEA371EF9C88F53DE1728FCB3918089E0"
+  },
+  {
+    "file": "chats\\2026-10-23-mcp-workspace-research\\handoff.md",
+    "sha256": "886136A233DE3F714ECCF17CEDAAADBEF09F44FEFA2871ECFCFEBC360C45FC3E"
+  },
+  {
+    "file": "chats\\2026-10-23-mcp-workspace-research\\log.md",
+    "sha256": "E1F00E8490E907EB57696A312C24EBE9927FCF963A3ABCEB7CCD3958CC4A4DEE"
+  },
+  {
+    "file": "chats\\2026-10-23-ollama-support\\handoff.md",
+    "sha256": "A7B2718CFAF3D06438FCBB2C021F54D48136585D694505EC2082B4064AC227CD"
+  },
+  {
+    "file": "chats\\2026-10-23-ollama-support\\log.md",
+    "sha256": "49045F466BC1DAED7F4863C663D575E4DA74CE5209F10B5EA82EBE0FA1833535"
+  },
+  {
+    "file": "chats\\2026-10-23-plan-item-clarification\\handoff.md",
+    "sha256": "364625898FE9A92CD54808CDA8A3688E596EC515016CED4BD8C7D3DE73F3CAE5"
+  },
+  {
+    "file": "chats\\2026-10-23-rerank-speed\\handoff.md",
+    "sha256": "9D6E6BEEBB767D45B95062F5E6017EF2B5B69709CAB9D61D19BD66C44E7CFC8F"
+  },
+  {
+    "file": "chats\\2026-10-23-rerank-speed\\log.md",
+    "sha256": "E12D8A61AC12B9136A187EEB01C2D893B4AABB932F05C4D6F3BCE38EC442DD91"
+  },
+  {
+    "file": "chats\\2026-10-23-text-search-implementation\\handoff.md",
+    "sha256": "BDD0B97D166E0EE82D13A71C54A2846CC2D5FBBFAC9AF732FE9BAECED88A90E3"
+  },
+  {
+    "file": "chats\\2026-10-23-text-search-implementation\\log.md",
+    "sha256": "23F9B73FC01424D23B5542B690E29B0680926F2E01A5DD1CA9A421ACC02C406B"
+  },
+  {
+    "file": "chats\\2026-10-23-tree-files\\log.md",
+    "sha256": "351D96044B490D209E3382414585F6F796863714CFAEDF32E3AABC5F1D6E77BD"
+  },
+  {
+    "file": "features\\Index.md",
+    "sha256": "BD452CD1662347F613E8E13C184A9B589A6B22381A5AB1AA96722310BFAA1021"
+  },
+  {
+    "file": "features\\agent-tools\\cli.md",
+    "sha256": "B9A0AE9DBCC32F9F6302132C3BA16DFBEF21E7C989C1D5AB5313E48580AD108C"
+  },
+  {
+    "file": "features\\agent-tools\\Index.md",
+    "sha256": "48556550BEDFD8690257B2F77C73BC2CBDE69437BAD49871F4FBAB9BA2910D98"
+  },
+  {
+    "file": "features\\agent-tools\\mcp-tools.md",
+    "sha256": "CB5D58F2465C5B681CA6806CD79AF68D3D0A82D2D56E1CBC60F5BDA29039AE65"
+  },
+  {
+    "file": "features\\agent-tools\\window-parity.md",
+    "sha256": "C58FF74E57A95B2F9B9031727DD7BF7C58E00211B1FDB416F0630517F0A6D8F6"
+  },
+  {
+    "file": "features\\clients\\clients.md",
+    "sha256": "2D115E250BFB3B3DC6D26DD93CC2B963B96D8050A055FE14B6F966D9663069BC"
+  },
+  {
+    "file": "features\\clients\\Index.md",
+    "sha256": "D46CF59973978E997DBA1999E7B33EE5532148A5AB654B40FE5156635F752A4A"
+  },
+  {
+    "file": "features\\distribution\\autostart.md",
+    "sha256": "0BE4AD00CB33738CE6DFAF5976F4FADDFAAAB80F9EFC83B6D92F17C017940543"
+  },
+  {
+    "file": "features\\distribution\\Index.md",
+    "sha256": "C70E1AEB236B05C39EB26E90B37890B671918893F2BF00C51226BF19B17B8775"
+  },
+  {
+    "file": "features\\distribution\\installer.md",
+    "sha256": "66B54A55685D1E98E076C8CC5B50002FF6BE68E46A5E3BCAE308089905D32414"
+  },
+  {
+    "file": "features\\docs-convention\\bars-instruction.md",
+    "sha256": "06AE6A92430FEBE0BF92D9339BEDD9E58DF1C727175A8EF715B5215149931E5A"
+  },
+  {
+    "file": "features\\docs-convention\\delivery.md",
+    "sha256": "E1844680C941A4900537DCD0B51EF5C123682AC27EA8384213E4727C12E22EEE"
+  },
+  {
+    "file": "features\\docs-convention\\Index.md",
+    "sha256": "DCE89EE8F59F519557C2EB39D98F00B2FB9D55F2B86A5CFA1F25D83EB6A86CA9"
+  },
+  {
+    "file": "features\\docs-convention\\layout.md",
+    "sha256": "FDB7B351D81ED90D6FD6CB15804412DBCE2DF4999F2BDFFEF4078A70196BBC48"
+  },
+  {
+    "file": "features\\docs-convention\\session-log.md",
+    "sha256": "DE671AC9F1F059A941E7C6DD3E67F69D8B82D5266CDE9F19F93D41AED1C7A1D8"
+  },
+  {
+    "file": "features\\graphrag\\graph-actions-design.md",
+    "sha256": "534DA37E9C0461F15D5922DBB0A04DF1BE4BD1C2C37D376C777025FC20FAA4B5"
+  },
+  {
+    "file": "features\\graphrag\\implementation.md",
+    "sha256": "F727D196758B2E9F9A91C70768A61739571C3C7E6E57F456809E867ED1344E1E"
+  },
+  {
+    "file": "features\\graphrag\\Index.md",
+    "sha256": "DFC3CB50D91C3A8148E9699022B33739552005DBAA69D6776B45108928EB2DE3"
+  },
+  {
+    "file": "features\\graphrag\\physical-graph-design.md",
+    "sha256": "7ABC11FAA656F3800674C05B8280D763EB36497443BCE5F5CA67B7FC75F52A59"
+  },
+  {
+    "file": "features\\graphrag\\physical-graph.md",
+    "sha256": "7B8290523C640ECB7CE5B415774A57D301DC5DC1D7C3FD4A6C85B7BC46F15A90"
+  },
+  {
+    "file": "features\\graphrag\\plan.md",
+    "sha256": "859CF3FF62741EA3C4A60B66E6FC5783F0A38549AAD34506D46E3B7FD5A665E2"
+  },
+  {
+    "file": "features\\graphrag\\query-graph.md",
+    "sha256": "F0849AC1F10AAC42415A60C43C3B468DCB39F1BA10838871C17DEFFC10077B68"
+  },
+  {
+    "file": "features\\graphrag\\requirements.md",
+    "sha256": "923C0D711961975929F53538EBF6ECBB453B453D2A7456819321969A32FB82CE"
+  },
+  {
+    "file": "features\\graphrag\\tools.md",
+    "sha256": "42CF3BE7FB69F2B1A02C263514320B1B8083E9C9FE268F96A5E50F9890DC1C6D"
+  },
+  {
+    "file": "features\\graphrag\\window.md",
+    "sha256": "D994DDBAAD005B66D375D2D30AEE5A919B34576197D016EC674CA28F7B56FACA"
+  },
+  {
+    "file": "features\\indexing\\chunking.md",
+    "sha256": "06AB7C7A31213FF6FAA07D0671D1832214A1B9B99ED8155CDA7EB895D285D0E4"
+  },
+  {
+    "file": "features\\indexing\\document-queue.md",
+    "sha256": "B449EA4D7DE4A869A685937ADBAEB25EF42999A43763ADA100DF1C9BFF102F45"
+  },
+  {
+    "file": "features\\indexing\\Index.md",
+    "sha256": "2473598489359B139A1A30F8D8CA6E90D181D33402F6BEB98C688BFD023B79EF"
+  },
+  {
+    "file": "features\\indexing\\updates.md",
+    "sha256": "B01D5F215DFC21EC6D6CEF6854A409BF24F3D45F621E087B10F5D761EE596305"
+  },
+  {
+    "file": "features\\knowledge-base\\audits.md",
+    "sha256": "338931E96C1A3FAAFFD15B17E98106FB3079F4377B1769522F8135120EB09712"
+  },
+  {
+    "file": "features\\knowledge-base\\colors-icons.md",
+    "sha256": "BB108997264EF20F753583FC897E286E7850B5EBFCF81B9574BCFBFF060148F2"
+  },
+  {
+    "file": "features\\knowledge-base\\editor-design.md",
+    "sha256": "0DC5B8C2A37F6B5B58E2CEB63EA5510B458BF9A493E9979E805F6F3EFA93AE80"
+  },
+  {
+    "file": "features\\knowledge-base\\Index.md",
+    "sha256": "A3306E82284CDB7BD72D9552BC76DDBC7A13D88869CE41977382A3193CE7EE47"
+  },
+  {
+    "file": "features\\knowledge-base\\link-index.md",
+    "sha256": "07C0D5AF162AED66C572C4D771441CEF2FFABD550380547781CF5BD9BAF204CC"
+  },
+  {
+    "file": "features\\knowledge-base\\requirements.md",
+    "sha256": "6711FED5A7883AC28E026EB574CD2CEEAFA272098E4105D6379BEEB97AAE142E"
+  },
+  {
+    "file": "features\\knowledge-base\\tree-and-files.md",
+    "sha256": "C6B2EBB122081DB7D86BBCA253D4DFBC3BCD9CC809487B5DD38A5F9CEB641D7D"
+  },
+  {
+    "file": "features\\models\\external-models.md",
+    "sha256": "99DADD4E7B4A033A79339CD9E3A418C2FEA46B5DF08B1517EFB90F973985974C"
+  },
+  {
+    "file": "features\\models\\Index.md",
+    "sha256": "A84BA39284C9F53783D08109F4EA1F5607D7A65525B94FDAC991F9079FAF7BB4"
+  },
+  {
+    "file": "features\\models\\local-models.md",
+    "sha256": "5BBAA5197E65AC7C1A8CFC3503520A40639177484F8C6A4FC97C73181F3F5704"
+  },
+  {
+    "file": "features\\models\\memory-plan.md",
+    "sha256": "5D08BF2F1B19ED9FC42CAC2A487A911D53971ECC2572C0AFF1D810A6BB299212"
+  },
+  {
+    "file": "features\\new-topics\\design.md",
+    "sha256": "E56D4825C3D668C8C2FC6B3A6C7D1EFC09A977488F7E309735FBA03A227FA27A"
+  },
+  {
+    "file": "features\\new-topics\\Index.md",
+    "sha256": "7D238CB5DF9A199134AEC7B4DAD957D63AE176433525F732EA2627A08833247B"
+  },
+  {
+    "file": "features\\new-topics\\plan.md",
+    "sha256": "BADC158AFF6577474F67B70CBED22409E01D40E31BAB15CA7CD4B21D270A339B"
+  },
+  {
+    "file": "features\\new-topics\\requirements.md",
+    "sha256": "566147F2D044AE551CBD83A6F2309713B06990ED50E691BD84A01A40C842A063"
+  },
+  {
+    "file": "features\\new-topics\\design\\Index.md",
+    "sha256": "8508E7AE2C5C9D725DD0655BB1E7726AB227283916D4CA0DE3B030E6A5F1D6BF"
+  },
+  {
+    "file": "features\\projects\\deletion.md",
+    "sha256": "902AD2B39ECB2813A3E9380ED0CBD09B64CFC8A2D0A51BF7DB737317BC53452E"
+  },
+  {
+    "file": "features\\projects\\Index.md",
+    "sha256": "E1051D9FAAA7DC4787DE98CB2E6C06F67C35D27C6238672FD111FEF913B2FE5D"
+  },
+  {
+    "file": "features\\projects\\projects.md",
+    "sha256": "F92E8D554EDB2CA0F9290D7B5C10CA118990C1A70D84B82218EC9B2FE5C0DCC4"
+  },
+  {
+    "file": "features\\search\\hybrid-search.md",
+    "sha256": "C3C202F4C1262F7E9EAFCF910F15DAF9BF241B2D2D73A6F0D93BDD2637858365"
+  },
+  {
+    "file": "features\\search\\Index.md",
+    "sha256": "F5E6416F44350CEC2DA4EA8A300FE4328D9EFB48B55E09C567B889E8AE332CE5"
+  },
+  {
+    "file": "features\\search\\maintenance-tools.md",
+    "sha256": "3CFB34556D609B9245156347B2F7F7C943CA5A7BD58E6FFAF7A4D1D613BED4B1"
+  },
+  {
+    "file": "features\\search\\text-search.md",
+    "sha256": "6371A31D83651227B36A0AE30327D31A00258A4CE6568A448559F3ED3A08ED5E"
+  },
+  {
+    "file": "features\\settings\\Index.md",
+    "sha256": "1055B07013F8E8E24902C19835C4C9C716964ADE19AE22D5B703CF648A835FEF"
+  },
+  {
+    "file": "features\\settings\\settings.md",
+    "sha256": "228F80FD82F3090DE4809BA48920DCD72682B6A56831EEF0B6862C22DBCFCA64"
+  },
+  {
+    "file": "features\\window\\document-actions.md",
+    "sha256": "0F1BA829F55AAE7C8ECC41038B8DBBBF2711CE101CA516E598F2855E9BCE320E"
+  },
+  {
+    "file": "features\\window\\empty-states.md",
+    "sha256": "50F71A2B7B81F47E8713508D22A4028FFEDF3DD04F590626D4CBCA85BF91F3F8"
+  },
+  {
+    "file": "features\\window\\error-states.md",
+    "sha256": "ABEBF58B9A3A7B33D386E3F12BF13EF0A2B597F5C68A1AD652A177E0DB75CA6A"
+  },
+  {
+    "file": "features\\window\\global-search-design.md",
+    "sha256": "7EA8E142136DF33AE78560AEB26D0DB278752291B4EE292C69AAFD830C71B979"
+  },
+  {
+    "file": "features\\window\\implementation.md",
+    "sha256": "13DA751004C8C17F69557144916F43DA072183A302F59B5A8D98FFB630914FB3"
+  },
+  {
+    "file": "features\\window\\Index.md",
+    "sha256": "A275D4F5061D4A9C1E13D5B1EC3308BC111701895F24ED9828DABB36D6EAF930"
+  },
+  {
+    "file": "features\\window\\indexing-progress.md",
+    "sha256": "3CB8B72C762E29456B176A7DDBFEC471F21558CF731D7FEA549EFEC8B7D68C7F"
+  },
+  {
+    "file": "features\\window\\keyboard-design.md",
+    "sha256": "50D68AD11DC5209D29157CE0B31633225FEC3C85919912B1198AB6CB4CB57FC0"
+  },
+  {
+    "file": "features\\window\\logs.md",
+    "sha256": "FC83E83E1F87D3DB6B167DC2CBD333A5A07B8DF427C15FA2BFA10FF7EFA42258"
+  },
+  {
+    "file": "features\\window\\main-window.md",
+    "sha256": "1A9BD25C32403C9B4A9605A4B4EAA1F02CCA6EF44BE399E4208EAD4A2BE41D4E"
+  },
+  {
+    "file": "features\\window\\mcp-statistics.md",
+    "sha256": "B8B61D5B96C43441FA914B615F1585BF753C02D1E44A3A6E68821FB21E88D1D0"
+  },
+  {
+    "file": "features\\window\\notifications.md",
+    "sha256": "7D6CF653A0D0FD31BDE5BFE8496C680B6D4292A1B89013983AF77EDCF26F824C"
+  },
+  {
+    "file": "features\\window\\palette.md",
+    "sha256": "D0C8917D350524FB44F7F7532E739016515D4A1DFED2EE2C9136B7BC05FBED43"
+  },
+  {
+    "file": "features\\window\\project-menu.md",
+    "sha256": "965B4867AEEC9163746E0970C70DCADEF7D5F383E4345B747E04C0F3F69942BC"
+  },
+  {
+    "file": "features\\window\\refinement-design.md",
+    "sha256": "CEFA809720EDC5268E2366155D88FEAD3A900371D3349D092816E796A289704B"
+  },
+  {
+    "file": "features\\window\\refinement-plan.md",
+    "sha256": "0FBB5058CB43A38D17C25B57E383DA11DEF537B0ADF94A980A39644F67DB8FCE"
+  },
+  {
+    "file": "features\\window\\reindex-consent.md",
+    "sha256": "E676F5396D7948CFF4CD40E9730A8B133C03FF50941A1B17C12FE34ABA6DD311"
+  },
+  {
+    "file": "features\\window\\requirements.md",
+    "sha256": "8EE20059862B9C434C384DC4059BE718BCE1E0BA166932516B30E9EA56CEA4A2"
+  },
+  {
+    "file": "features\\window\\settings-window.md",
+    "sha256": "953C4DACA991E9BF33C56D039F226ABD89DC0A67583E48335C6F899B9309B60B"
+  },
+  {
+    "file": "features\\window\\workspace-decisions.md",
+    "sha256": "86B870B03783AE096AEA6FE7CDC79E8B6991531E8B08CAB60B6CFF0496C94A9A"
+  },
+  {
+    "file": "features\\window\\workspace-design.md",
+    "sha256": "C61D84FCC3554ACECE9D35F3EB70C81CA0CB32B418DC8834CAA5C6C0F34057A0"
+  },
+  {
+    "file": "features\\window\\workspace-plan.md",
+    "sha256": "C47B658A87ADCDFA09DD927BDC8BEFF5D7A2D63CB344DF7351726F1A1C694240"
+  },
+  {
+    "file": "features\\window\\mockups\\Index.md",
+    "sha256": "E9A2B0EAC68833D98A40D1EAC3C365A0BF3D12327305AD882ABC70E330C52E7B"
+  },
+  {
+    "file": "knowledge\\agent-tool-usage-2026-10-18.md",
+    "sha256": "3F43C149AA09ACC88CF9737BC767B424017A0E500B12F9E6A6E76DE69121B81B"
+  },
+  {
+    "file": "knowledge\\build.md",
+    "sha256": "C90BA3C97B16DC8448C8E341B766480E6C76E33193CED56E2E171DB7F2BCF35D"
+  },
+  {
+    "file": "knowledge\\contradictions.md",
+    "sha256": "75CAD6F13A689089A97D2970705A62B5102D48958A5C075AB20A35D51CA58774"
+  },
+  {
+    "file": "knowledge\\development-ideas.md",
+    "sha256": "8CE73D05BDFEEC7DC048583E2F4F98E78D6FCAF27B08050FDE367F744380EF63"
+  },
+  {
+    "file": "knowledge\\duplicates.md",
+    "sha256": "107927D6D13C75C4620EAA9E18D66070F24E060534ED9CEC6FEDB8298F02F190"
+  },
+  {
+    "file": "knowledge\\editor-spike.md",
+    "sha256": "1BB69B0AF3323F8ECBD89204EEE91360A7AF681E5B46B2095F87287CC2351571"
+  },
+  {
+    "file": "knowledge\\gguf-models.md",
+    "sha256": "D60A61291C417A6BE22D025D8EF17369ACCBECFBE685040AE54077638FAC76BF"
+  },
+  {
+    "file": "knowledge\\graph-embedding-2026-10-18.md",
+    "sha256": "DA9AC26791BAB886A0BBCFDA00C254905C714924272BE2B1E032A02F23405C0C"
+  },
+  {
+    "file": "knowledge\\graph-render.md",
+    "sha256": "AFE94290E6B41DE3017834086E3174EE969AF77E692CD9C9F2E8776EE2BF687E"
+  },
+  {
+    "file": "knowledge\\graph-research.md",
+    "sha256": "79D61391AA9C749E9FF47A90B11CF9D1AB8F3A866BB766BC2FB74E11D96FAB58"
+  },
+  {
+    "file": "knowledge\\Index.md",
+    "sha256": "B302EFF8F9E8A453355CBDABC4C3DED263D7C443D0B1C6E4A85DB354662C56D9"
+  },
+  {
+    "file": "knowledge\\inference-devices.md",
+    "sha256": "B2E11124D05955FDFE62F546BFD23C682680E2C098EF1DC355318B8F01669ADE"
+  },
+  {
+    "file": "knowledge\\inference-speed.md",
+    "sha256": "3CEB04B9F06CCAEA2254DF4F9E74C8CC6A651476996C5F5E76BD6A0D460A8C3B"
+  },
+  {
+    "file": "knowledge\\installer.md",
+    "sha256": "39B2F3A529C6224E318B18F259DFB7951771DCAA49CD2C55B1F44430A3E917E7"
+  },
+  {
+    "file": "knowledge\\local-documentation-tools.md",
+    "sha256": "EFC480F5D83C1C05493676231CC902204A6022818A901ADEE5C6E5E91FCF25D5"
+  },
+  {
+    "file": "knowledge\\mcp-after-workspace.md",
+    "sha256": "59D2D793BE069BBB6224DB52DD2BA6F4CC9E7E38D88D33AE20D423FA84201D2C"
+  },
+  {
+    "file": "knowledge\\memory.md",
+    "sha256": "29B197FD22718EF979451D447B4724F4F64442F1E829BAA3D1BDBC4818941FFF"
+  },
+  {
+    "file": "knowledge\\new-topics-threshold-2026-10-19.md",
+    "sha256": "EF4BE126B65D9B9A8A34AE3139FDDE5F943A3968181D0DBF7EAD64B973D58008"
+  },
+  {
+    "file": "knowledge\\ollama.md",
+    "sha256": "DB9E838F36A0EC224649A29CEF1C593978D3F2FA602544BBB700D198308B2BD4"
+  },
+  {
+    "file": "knowledge\\rerank-speed.md",
+    "sha256": "4697F9ED5E88C74C06E45E92196397445588222CE759574D9CE3476672C3DCB3"
+  },
+  {
+    "file": "knowledge\\search-during-indexing.md",
+    "sha256": "2B5733A5F5C5E03867ADC5FDCF71911F725AAA35F802F43DC0715781F5706B89"
+  },
+  {
+    "file": "knowledge\\search-quality.md",
+    "sha256": "363FA1FED162AB867EC039BAC75EA729D6141FEA42E4A1B5E37D5D74B2465EAF"
+  },
+  {
+    "file": "knowledge\\spike-detach.md",
+    "sha256": "8339194063653496B920C24DAED69B56E402C39781DF3A0E5267EC4830C14E71"
+  },
+  {
+    "file": "knowledge\\spike-ipc.md",
+    "sha256": "5CBA8D4296FE5D081187D161C849997E9B3285ED3AD1DC63930A82307C591B26"
+  },
+  {
+    "file": "knowledge\\spike-search.md",
+    "sha256": "E351F008D54D5D88477AEDF7401B841BB9BAEB6C7175556D2CE6F452C9A19A66"
+  },
+  {
+    "file": "knowledge\\stack-research.md",
+    "sha256": "DB575A4B3725F8507E58E0A825A37E2F5133ECFE47133FE57E40A790A74A80C1"
+  },
+  {
+    "file": "knowledge\\text-search-2026-10-22.md",
+    "sha256": "1AEAFA06344C3F15B8CCF0FD28A2A41193EEDE270AC468C389415A9F6C82C4B8"
+  },
+  {
+    "file": "knowledge\\traceability.md",
+    "sha256": "1CF91EDB8911FF356EFF757333136183ED5507D58A7391F2853370699DA02225"
+  },
+  {
+    "file": "knowledge\\window-docking.md",
+    "sha256": "F9642918F33112658112D85703123358CA61DCD830E411E7C517AA53DB59F8BA"
+  },
+  {
+    "file": "knowledge\\agent-tool-usage-2026-10-18\\Index.md",
+    "sha256": "3E23C08B689BA4E1E918C0D2931B5DB04F2EC8BE7C2A2C9962A53CF5A599C612"
+  },
+  {
+    "file": "knowledge\\contradictions-2026-10-22\\Index.md",
+    "sha256": "5173FD47955A8192666D45009A261E553D976CB8DA32A728568355FCB82099DC"
+  },
+  {
+    "file": "knowledge\\duplicates-2026-10-19\\Index.md",
+    "sha256": "4C2F1EFE66306322AD2905B2548B63F9CAE215E448002535CBFAC92ADBF85302"
+  },
+  {
+    "file": "knowledge\\duplicates-2026-10-19\\analysis\\Index.md",
+    "sha256": "C5C58B829673B08D45E5F2D28B61FA66F732360D44D2CB077377D1F1EF0E9BD9"
+  },
+  {
+    "file": "knowledge\\duplicates-2026-10-19\\bench\\Index.md",
+    "sha256": "413F3955238121CBC6E5484BCA1AD0C79DFBB20BF1EF8FE37A853848299C1DBB"
+  },
+  {
+    "file": "knowledge\\duplicates-2026-10-22\\Index.md",
+    "sha256": "88ECAC5F5F76AD0838E72AD4B85CF7284622953F3107C5E9F8D620B2F2022A48"
+  },
+  {
+    "file": "knowledge\\gguf-2026-10-18\\Index.md",
+    "sha256": "1B8D5AE3AB6AC5531260DAF33A15C8F3978F606466E033875BD4A037A50FE7C5"
+  },
+  {
+    "file": "knowledge\\graph-corpus-2026-10-18\\Index.md",
+    "sha256": "CB3B804FF247871E6A5530E9687F6A4CDA5ED20952A5731CA653BE782C4EF3CF"
+  },
+  {
+    "file": "knowledge\\graph-embedding-2026-10-18\\Index.md",
+    "sha256": "0D73A3D17A478AAF637DF957B72C0E88EB731AC0C14F9E19D9363C46C2ADB6DF"
+  },
+  {
+    "file": "knowledge\\graph-quality-2026-10-20\\Index.md",
+    "sha256": "2A21F99B8EB6CDAE0739E3DFD8DA7E42A2FD3E1E7EA6C2760A8DD4CBB2F0742E"
+  },
+  {
+    "file": "knowledge\\graph-renderer-2026-10-18\\Index.md",
+    "sha256": "85F4BCCA1AC305667BE8468C872D7AD7E5D2AD49AAB98FFADAACA991AC6B9D50"
+  },
+  {
+    "file": "knowledge\\graph-search-probes-2026-10-18\\Index.md",
+    "sha256": "885C9F28F7D8C40D41F131766C4D3AFE7993CCFE078B93E2D6EBA7724394AFB3"
+  },
+  {
+    "file": "knowledge\\inference-2026-10-18\\Index.md",
+    "sha256": "89332E7DEF7E75300DCB445D4FDE36B4398BC54247059D95CA9D6C8EBA61717D"
+  },
+  {
+    "file": "knowledge\\memory-2026-10-18\\Index.md",
+    "sha256": "498EFA13E4C97E0F4CEAFF815AD60B82062B56951412BB71CDA3A624DDADB6EE"
+  },
+  {
+    "file": "knowledge\\memory-2026-10-23\\Index.md",
+    "sha256": "D3B61D395E4D9638065568B47014DBBF55124146684C3344B3366CA03437369C"
+  },
+  {
+    "file": "knowledge\\memory-acceptance-2026-10-20\\Index.md",
+    "sha256": "FCB40133BC4A5C574E73DD3900219B82CFA12B34E169F8200284CC1D0FE9D98C"
+  },
+  {
+    "file": "knowledge\\memory-embed-2026-10-18\\Index.md",
+    "sha256": "AA65C56FB339A152B406FA3B33FF243AF45F717F1BA3E162F7F00EA0F3B670E4"
+  },
+  {
+    "file": "knowledge\\memory-fp16-2026-10-18\\Index.md",
+    "sha256": "70AC017BB23268FC980A92FEABA27B29DBE4F680F178D468DCFF9C60753B2E61"
+  },
+  {
+    "file": "knowledge\\new-topics-threshold-2026-10-19\\Index.md",
+    "sha256": "C03546259E3B0761A257F241760296480D8B4779632A952DABF37E0D50B5A0B0"
+  },
+  {
+    "file": "knowledge\\quality-2026-10-18\\Index.md",
+    "sha256": "DB07AC8380BD0678E4084A6DCFB9C821AAC3E34744C03B946A4E30063C759D17"
+  },
+  {
+    "file": "knowledge\\text-search-2026-10-22\\bars-project-quiet.md",
+    "sha256": "3599E9AB5BCC694AC08FA5C39C45AA0D2F26B024DB700CA12286846AC22A205E"
+  },
+  {
+    "file": "knowledge\\text-search-2026-10-22\\bars-project-repeats.md",
+    "sha256": "55D9CF304707558FECEF52FA05FAEA62021D0FE97D60A4F3B4BEA794B2ABF5ED"
+  },
+  {
+    "file": "knowledge\\text-search-2026-10-22\\Index.md",
+    "sha256": "3EFE1371846387C10872DA3CC45C95BD10B9D47CCB78FF45D146ED00BED0FF12"
+  },
+  {
+    "file": "knowledge\\text-search-2026-10-22\\matrix.md",
+    "sha256": "D8A2681C7A697175DD74A9C03C538042B1D69C4EA52AEDD7CC011CAACCFD3261"
+  },
+  {
+    "file": "knowledge\\text-search-2026-10-22\\overdrive-bots-and-docs.md",
+    "sha256": "1AC58BFBE7F3E25967BC11F9F55798AC969BB586BEF91B8168C0AC8E6F1F2E84"
+  },
+  {
+    "file": "knowledge\\text-search-2026-10-22\\overdrive-project-repeat.md",
+    "sha256": "F29A898F39C0B9322210CDE6FF93D2CBB1625E540C9299A30F4C82070FEBA812"
+  },
+  {
+    "file": "manual\\activity.md",
+    "sha256": "F5FEAE231786AE3E8DB66223E446415D290AF4DB777CB738C0B8B5B16BD2870E"
+  },
+  {
+    "file": "manual\\agents.md",
+    "sha256": "4CE867FBDBBE04C3E77C2361F7FED50B63AE6E845B8B6166FB608082C16A773F"
+  },
+  {
+    "file": "manual\\audits.md",
+    "sha256": "E606845E2A8CD2B15C8E799E0E3BFA0AAC753C73DF45EC255BC304EC0832E341"
+  },
+  {
+    "file": "manual\\graph.md",
+    "sha256": "FC23E45AEAB3FC3B1263315A7EF40976E29459455A687A01BBA5CB3AE8F3B8BF"
+  },
+  {
+    "file": "manual\\how-it-works.md",
+    "sha256": "A77805080756CA95DA1D70AE72EBFDF451D3CD5A59EFCD33653E8E9302768F6C"
+  },
+  {
+    "file": "manual\\Index.md",
+    "sha256": "2DE61E547AC0BAEBBE51551CC852E34433758073C8F4125446172D2D7568BE51"
+  },
+  {
+    "file": "manual\\install.md",
+    "sha256": "44CB4E63E157E29E4EB6FF4ACE1E94E64C67E6C74893FC5050A7395926042A36"
+  },
+  {
+    "file": "manual\\models.md",
+    "sha256": "767E27F366EB05C5EB9642D875130890EF4CAC5028E53221CFAE348856B12F5D"
+  },
+  {
+    "file": "manual\\new-topics.md",
+    "sha256": "41CE05A26736A6D237D913C48378810AEB71FC4B013B6158A95A8DD339E9C4E0"
+  },
+  {
+    "file": "manual\\projects.md",
+    "sha256": "0515FC2C4578F88633F2D669735ABF9D104D57E54EFF742FDFA7DEB787A175B5"
+  },
+  {
+    "file": "manual\\search.md",
+    "sha256": "175400A0A0CF6EDE2B0416092EFDCC28E3D76A3DBB0BE5A390742C5406EBFE5D"
+  },
+  {
+    "file": "manual\\settings.md",
+    "sha256": "DAD651EF40915FC412FE3F4A30B96B6C2F19CDE28D6A7397F0361073E9F4A127"
+  },
+  {
+    "file": "manual\\terminal.md",
+    "sha256": "705F11ACD879580035556AA9EAEB1792C6A3CFE70017A3375886A50A8FA915B3"
+  },
+  {
+    "file": "manual\\troubleshooting.md",
+    "sha256": "A2104BB8F901C112D6CA249F668930DCE5483A3693A52F5FA6DA0DCE24E8392C"
+  },
+  {
+    "file": "manual\\writing-docs.md",
+    "sha256": "9C13C6EA540DFE4EB8F9EBE8098C0D7BAB39BB5162C5B93B5183C5E1E63487B5"
+  }
+]

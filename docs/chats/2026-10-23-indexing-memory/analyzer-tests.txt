@@ -1,0 +1,13 @@
+✔ Only complete series accepted; overlap p95 needs 100 overlapping calls (1.4648ms)
+✔ Truncated, missing and failed run rejected (0.2733ms)
+✔ Pair requires both FP16 runtimes, reload and completed lifecycle phases (0.3475ms)
+✔ Reindex memory excludes later samples and needs a completed interval (0.6194ms)
+✔ Complete load queries do not turn a guarded process into a full pass (0.712ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 67.2931

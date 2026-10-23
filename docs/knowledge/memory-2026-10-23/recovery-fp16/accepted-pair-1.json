@@ -1,0 +1,105 @@
+{
+  "completed": true,
+  "accepted": true,
+  "searches": {
+    "count": 0,
+    "median_ms": null,
+    "p95_ms": null,
+    "max_ms": null
+  },
+  "full_overlap": {
+    "count": 0,
+    "median_ms": null,
+    "p95_ms": null,
+    "max_ms": null
+  },
+  "failed": 0,
+  "sampled_private_peak_bytes": 4617142272,
+  "lifetime_peak_commit_bytes": 4617142272,
+  "working_set_peak_bytes": 2823397376,
+  "runtime": null,
+  "reindex_ms": null,
+  "reindex_memory": {
+    "before_sampled_private_peak_bytes": null,
+    "during_sampled_private_peak_bytes": null,
+    "during_samples": 0
+  },
+  "index_progress": {
+    "docs_first": null,
+    "docs_last": null,
+    "chunks_first": null,
+    "chunks_last": null
+  },
+  "phases": [
+    {
+      "phase": "baseline",
+      "private_bytes": 3993600,
+      "working_set_bytes": 13045760,
+      "lifetime_peak_working_set_bytes": 13045760,
+      "lifetime_peak_commit_bytes": 4009984,
+      "system_available_bytes": 8222703616,
+      "system_committed_bytes": 66443669504,
+      "system_commit_limit_bytes": 77631963136
+    },
+    {
+      "phase": "embed_batch_retained",
+      "private_bytes": 2259501056,
+      "working_set_bytes": 608583680,
+      "lifetime_peak_working_set_bytes": 2899955712,
+      "lifetime_peak_commit_bytes": 3493978112,
+      "system_available_bytes": 7504162816,
+      "system_committed_bytes": 67033862144,
+      "system_commit_limit_bytes": 77631963136
+    },
+    {
+      "phase": "rerank_retained",
+      "private_bytes": 4401397760,
+      "working_set_bytes": 964820992,
+      "lifetime_peak_working_set_bytes": 2899955712,
+      "lifetime_peak_commit_bytes": 4590469120,
+      "system_available_bytes": 7949185024,
+      "system_committed_bytes": 68989796352,
+      "system_commit_limit_bytes": 77631963136
+    },
+    {
+      "phase": "rerank_dropped",
+      "private_bytes": 4091428864,
+      "working_set_bytes": 670404608,
+      "lifetime_peak_working_set_bytes": 2899955712,
+      "lifetime_peak_commit_bytes": 4590469120,
+      "system_available_bytes": 8389361664,
+      "system_committed_bytes": 68715126784,
+      "system_commit_limit_bytes": 77631963136
+    },
+    {
+      "phase": "rerank_second_drop",
+      "private_bytes": 2501259264,
+      "working_set_bytes": 685174784,
+      "lifetime_peak_working_set_bytes": 2899955712,
+      "lifetime_peak_commit_bytes": 4617142272,
+      "system_available_bytes": 7997526016,
+      "system_committed_bytes": 69476868096,
+      "system_commit_limit_bytes": 77631963136
+    },
+    {
+      "phase": "all_models_dropped",
+      "private_bytes": 386445312,
+      "working_set_bytes": 158388224,
+      "lifetime_peak_working_set_bytes": 2899955712,
+      "lifetime_peak_commit_bytes": 4617142272,
+      "system_available_bytes": 8583700480,
+      "system_committed_bytes": 67146678272,
+      "system_commit_limit_bytes": 77631963136
+    },
+    {
+      "phase": "worker_shutdown",
+      "private_bytes": 147542016,
+      "working_set_bytes": 155537408,
+      "lifetime_peak_working_set_bytes": 2899955712,
+      "lifetime_peak_commit_bytes": 4617142272,
+      "system_available_bytes": 8452341760,
+      "system_committed_bytes": 67106607104,
+      "system_commit_limit_bytes": 77631963136
+    }
+  ]
+}

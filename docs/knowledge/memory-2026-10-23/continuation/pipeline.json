@@ -1,0 +1,12 @@
+{
+  "temporary_root_removed": true,
+  "phase": "pair-1",
+  "ok": false,
+  "error": "Insufficient natural headroom; no model started",
+  "bars": [
+    {
+      "Id": 28748,
+      "StartTime": "2026-10-23T12:31:19.5341271+05:00"
+    }
+  ]
+}

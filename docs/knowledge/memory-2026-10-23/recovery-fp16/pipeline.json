@@ -1,0 +1,12 @@
+{
+  "temporary_root_removed": true,
+  "ok": false,
+  "error": "Failed series: fp16-off-1, fp16-on-4",
+  "phase": "fp16-on-4",
+  "bars": [
+    {
+      "Id": 38128,
+      "StartTime": "2026-10-23T14:50:05.1292193+05:00"
+    }
+  ]
+}

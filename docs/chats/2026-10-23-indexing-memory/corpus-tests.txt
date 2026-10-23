@@ -1,0 +1,2 @@
+402-document SHA256 roundtrip OK
+Traversal path rejected before destination creation

@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "series": [],
+  "pairs": [
+    {
+      "name": "pair-1.jsonl.gz",
+      "completed": false,
+      "accepted": false,
+      "searches": {
+        "count": 0,
+        "median_ms": null,
+        "p95_ms": null,
+        "max_ms": null
+      },
+      "full_overlap": {
+        "count": 0,
+        "median_ms": null,
+        "p95_ms": null,
+        "max_ms": null
+      },
+      "failed": 0,
+      "sampled_private_peak_bytes": 4525740032,
+      "lifetime_peak_commit_bytes": 4525740032,
+      "working_set_peak_bytes": 2748891136,
+      "runtime": null,
+      "reindex_ms": null,
+      "phases": [
+        {
+          "phase": "baseline",
+          "private_bytes": 4038656,
+          "working_set_bytes": 13045760,
+          "lifetime_peak_working_set_bytes": 13045760,
+          "lifetime_peak_commit_bytes": 4059136,
+          "system_available_bytes": 16974577664,
+          "system_committed_bytes": 51120787456,
+          "system_commit_limit_bytes": 62935072768
+        },
+        {
+          "phase": "embed_batch_retained",
+          "private_bytes": 2264043520,
+          "working_set_bytes": 617684992,
+          "lifetime_peak_working_set_bytes": 2899820544,
+          "lifetime_peak_commit_bytes": 3530309632,
+          "system_available_bytes": 15632048128,
+          "system_committed_bytes": 54326087680,
+          "system_commit_limit_bytes": 62935072768
+        },
+        {
+          "phase": "rerank_retained",
+          "private_bytes": 4396376064,
+          "working_set_bytes": 975527936,
+          "lifetime_peak_working_set_bytes": 2899820544,
+          "lifetime_peak_commit_bytes": 4525740032,
+          "system_available_bytes": 13884436480,
+          "system_committed_bytes": 60210147328,
+          "system_commit_limit_bytes": 62935072768
+        },
+        {
+          "phase": "rerank_dropped",
+          "private_bytes": 4091224064,
+          "working_set_bytes": 677060608,
+          "lifetime_peak_working_set_bytes": 2899820544,
+          "lifetime_peak_commit_bytes": 4525740032,
+          "system_available_bytes": 14458073088,
+          "system_committed_bytes": 59549310976,
+          "system_commit_limit_bytes": 62935072768
+        },
+        {
+          "phase": "worker_shutdown",
+          "private_bytes": 373436416,
+          "working_set_bytes": 151035904,
+          "lifetime_peak_working_set_bytes": 2899820544,
+          "lifetime_peak_commit_bytes": 4525740032,
+          "system_available_bytes": 15956955136,
+          "system_committed_bytes": 54346817536,
+          "system_commit_limit_bytes": 62935072768
+        }
+      ]
+    }
+  ],
+  "matrix_complete": false,
+  "repeated_pair_complete": false,
+  "timing_valid": false
+}

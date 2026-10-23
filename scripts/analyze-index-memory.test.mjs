@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {summarize,summarizePair} from './analyze-index-memory.mjs';
+import {summarize,summarizePair,combineMatrices} from './analyze-index-memory.mjs';
 const rows=()=>[
   {kind:'runtime',phase:'warm',detail:{embed:{actual:'directml'}}},
   ...Array.from({length:100},(_,n)=>({kind:'search',detail:{ok:true,before:true,after:true,indexing:true,ms:n+1}})),
@@ -48,4 +48,18 @@ test('Reindex memory excludes later samples and needs a completed interval',()=>
   assert.deepEqual(summarize(input).reindex_memory,{before_sampled_private_peak_bytes:20,during_sampled_private_peak_bytes:30,during_samples:1});
   input.splice(3,1);
   assert.equal(summarize(input).reindex_memory.during_sampled_private_peak_bytes,null);
+});
+
+test('Complete load queries do not turn a guarded process into a full pass',()=>{
+  const datasets=['fp16','fp32'].map(p=>({name:p,corpus:[{file:'a\\b.md',sha256:'AA'}],summary:{pairs:p==='fp16'?[{accepted:true},{accepted:true}]:[],series:['off','on'].flatMap(r=>[1,2,4].map(n=>({name:`${p}-${r}-${n}`,accepted:true,searches:{count:100},full_overlap:{count:100},failed:0})))}}));
+  datasets[0].summary.series[0].accepted=false;
+  datasets[1].corpus[0]={file:'a/b.md',sha256:'aa'};
+  const result=combineMatrices(datasets);
+  assert.equal(result.load_queries_complete,true);
+  assert.equal(result.full_processes_complete,false);
+  assert.equal(result.accepted_processes,11);
+  assert.equal(result.repeated_pair_complete,true);
+  assert.throws(()=>combineMatrices([datasets[0],datasets[0]]),/Duplicate/);
+  datasets[1].corpus[0].sha256='BB';
+  assert.throws(()=>combineMatrices(datasets),/corpora differ/);
 });

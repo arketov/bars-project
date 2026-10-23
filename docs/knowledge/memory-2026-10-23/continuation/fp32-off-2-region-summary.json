@@ -1,0 +1,84 @@
+{
+  "source": "fp32-off-2-regions.json",
+  "pid": 55092,
+  "snapshot_utc": "2026-10-23T08:55:55.2782083Z",
+  "process_private_bytes": 5263564800,
+  "private_regions_bytes": 5200265216,
+  "allocation_groups": 290,
+  "largest_private_groups": [
+    {
+      "type": 131072,
+      "allocation_base": 1997885145088,
+      "committed_bytes": 536870912,
+      "regions": 1
+    },
+    {
+      "type": 131072,
+      "allocation_base": 2001689575424,
+      "committed_bytes": 536870912,
+      "regions": 1
+    },
+    {
+      "type": 131072,
+      "allocation_base": 2002226446336,
+      "committed_bytes": 536870912,
+      "regions": 1
+    },
+    {
+      "type": 131072,
+      "allocation_base": 1998422016000,
+      "committed_bytes": 488636416,
+      "regions": 1
+    },
+    {
+      "type": 131072,
+      "allocation_base": 2001135927296,
+      "committed_bytes": 268435456,
+      "regions": 1
+    },
+    {
+      "type": 131072,
+      "allocation_base": 2001404362752,
+      "committed_bytes": 268435456,
+      "regions": 1
+    },
+    {
+      "type": 131072,
+      "allocation_base": 2000833937408,
+      "committed_bytes": 134217728,
+      "regions": 1
+    },
+    {
+      "type": 131072,
+      "allocation_base": 2000968155136,
+      "committed_bytes": 134217728,
+      "regions": 1
+    },
+    {
+      "type": 131072,
+      "allocation_base": 2000528539648,
+      "committed_bytes": 70516736,
+      "regions": 1
+    },
+    {
+      "type": 131072,
+      "allocation_base": 2000699719680,
+      "committed_bytes": 67108864,
+      "regions": 1
+    },
+    {
+      "type": 131072,
+      "allocation_base": 2000766828544,
+      "committed_bytes": 67108864,
+      "regions": 1
+    },
+    {
+      "type": 131072,
+      "allocation_base": 1997561987072,
+      "committed_bytes": 33619968,
+      "regions": 1
+    }
+  ],
+  "largest_group_fraction": 0.10323914064001462,
+  "attribution": "VirtualQueryEx allocation bases do not identify ONNX tensors, DML resources or allocation stacks"
+}

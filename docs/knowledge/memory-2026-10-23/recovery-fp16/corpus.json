@@ -1,0 +1,194 @@
+[
+  {
+    "file": "MAIN_IDEA.md",
+    "sha256": "03D3E33CF77066BAC87480A1863EAC9D7279641A9A41349510091E3F12465F98"
+  },
+  {
+    "file": "knowledge\\graph-research.md",
+    "sha256": "79D61391AA9C749E9FF47A90B11CF9D1AB8F3A866BB766BC2FB74E11D96FAB58"
+  },
+  {
+    "file": "knowledge\\local-documentation-tools.md",
+    "sha256": "EFC480F5D83C1C05493676231CC902204A6022818A901ADEE5C6E5E91FCF25D5"
+  },
+  {
+    "file": "knowledge\\memory.md",
+    "sha256": "29B197FD22718EF979451D447B4724F4F64442F1E829BAA3D1BDBC4818941FFF"
+  },
+  {
+    "file": "features\\new-topics\\design.md",
+    "sha256": "E56D4825C3D668C8C2FC6B3A6C7D1EFC09A977488F7E309735FBA03A227FA27A"
+  },
+  {
+    "file": "knowledge\\development-ideas.md",
+    "sha256": "8CE73D05BDFEEC7DC048583E2F4F98E78D6FCAF27B08050FDE367F744380EF63"
+  },
+  {
+    "file": "features\\window\\keyboard-design.md",
+    "sha256": "50D68AD11DC5209D29157CE0B31633225FEC3C85919912B1198AB6CB4CB57FC0"
+  },
+  {
+    "file": "knowledge\\text-search-2026-10-22\\matrix.md",
+    "sha256": "D8A2681C7A697175DD74A9C03C538042B1D69C4EA52AEDD7CC011CAACCFD3261"
+  },
+  {
+    "file": "features\\graphrag\\tools.md",
+    "sha256": "42CF3BE7FB69F2B1A02C263514320B1B8083E9C9FE268F96A5E50F9890DC1C6D"
+  },
+  {
+    "file": "features\\graphrag\\graph-actions-design.md",
+    "sha256": "534DA37E9C0461F15D5922DBB0A04DF1BE4BD1C2C37D376C777025FC20FAA4B5"
+  },
+  {
+    "file": "features\\graphrag\\query-graph.md",
+    "sha256": "F0849AC1F10AAC42415A60C43C3B468DCB39F1BA10838871C17DEFFC10077B68"
+  },
+  {
+    "file": "features\\graphrag\\physical-graph.md",
+    "sha256": "7B8290523C640ECB7CE5B415774A57D301DC5DC1D7C3FD4A6C85B7BC46F15A90"
+  },
+  {
+    "file": "knowledge\\graph-render.md",
+    "sha256": "AFE94290E6B41DE3017834086E3174EE969AF77E692CD9C9F2E8776EE2BF687E"
+  },
+  {
+    "file": "architecture\\protocol.md",
+    "sha256": "660845A47A785027F8622783B4AC2E2A83508B2F16B672E68F9DCA78327F9299"
+  },
+  {
+    "file": "architecture\\worker.md",
+    "sha256": "5C960865C045C2FD4E06DF52188871EBA53E06F2BB5B5405C02B7FE2175E0601"
+  },
+  {
+    "file": "features\\knowledge-base\\editor-design.md",
+    "sha256": "0DC5B8C2A37F6B5B58E2CEB63EA5510B458BF9A493E9979E805F6F3EFA93AE80"
+  },
+  {
+    "file": "features\\agent-tools\\mcp-tools.md",
+    "sha256": "CB5D58F2465C5B681CA6806CD79AF68D3D0A82D2D56E1CBC60F5BDA29039AE65"
+  },
+  {
+    "file": "knowledge\\duplicates.md",
+    "sha256": "107927D6D13C75C4620EAA9E18D66070F24E060534ED9CEC6FEDB8298F02F190"
+  },
+  {
+    "file": "features\\graphrag\\requirements.md",
+    "sha256": "923C0D711961975929F53538EBF6ECBB453B453D2A7456819321969A32FB82CE"
+  },
+  {
+    "file": "knowledge\\search-quality.md",
+    "sha256": "363FA1FED162AB867EC039BAC75EA729D6141FEA42E4A1B5E37D5D74B2465EAF"
+  },
+  {
+    "file": "features\\knowledge-base\\requirements.md",
+    "sha256": "6711FED5A7883AC28E026EB574CD2CEEAFA272098E4105D6379BEEB97AAE142E"
+  },
+  {
+    "file": "BARS_INSTRUCTION.md",
+    "sha256": "6B4B1A6CDA1D6543F79CDB4B88384EBF10ACC8B8A69B2A1A74827CF649A14CEF"
+  },
+  {
+    "file": "chats\\2026-10-18-inference-design\\stage11-plan.md",
+    "sha256": "85488640C5A46F61BF238504EBAD66A74E91C1C2F2B65E96634BA5E74586646B"
+  },
+  {
+    "file": "manual\\search.md",
+    "sha256": "175400A0A0CF6EDE2B0416092EFDCC28E3D76A3DBB0BE5A390742C5406EBFE5D"
+  },
+  {
+    "file": "features\\models\\local-models.md",
+    "sha256": "5BBAA5197E65AC7C1A8CFC3503520A40639177484F8C6A4FC97C73181F3F5704"
+  },
+  {
+    "file": "features\\window\\mcp-statistics.md",
+    "sha256": "B8B61D5B96C43441FA914B615F1585BF753C02D1E44A3A6E68821FB21E88D1D0"
+  },
+  {
+    "file": "features\\graphrag\\physical-graph-design.md",
+    "sha256": "7ABC11FAA656F3800674C05B8280D763EB36497443BCE5F5CA67B7FC75F52A59"
+  },
+  {
+    "file": "knowledge\\inference-speed.md",
+    "sha256": "3CEB04B9F06CCAEA2254DF4F9E74C8CC6A651476996C5F5E76BD6A0D460A8C3B"
+  },
+  {
+    "file": "chats\\2026-10-18-device-design\\stage17-plan.md",
+    "sha256": "6B6D116452A6BB94FA83783166FCEAB5607A349B23857DB5C78FF5D3AD04C144"
+  },
+  {
+    "file": "features\\window\\notifications.md",
+    "sha256": "7D6CF653A0D0FD31BDE5BFE8496C680B6D4292A1B89013983AF77EDCF26F824C"
+  },
+  {
+    "file": "knowledge\\agent-tool-usage-2026-10-18.md",
+    "sha256": "3F43C149AA09ACC88CF9737BC767B424017A0E500B12F9E6A6E76DE69121B81B"
+  },
+  {
+    "file": "knowledge\\inference-devices.md",
+    "sha256": "B2E11124D05955FDFE62F546BFD23C682680E2C098EF1DC355318B8F01669ADE"
+  },
+  {
+    "file": "chats\\2026-10-20-plan-usability\\plan-before.md",
+    "sha256": "40792669C8A0F49B3366C5A7ABF2DC01D6B23A23ED5423B5B10E00E86CC35815"
+  },
+  {
+    "file": "features\\graphrag\\plan.md",
+    "sha256": "859CF3FF62741EA3C4A60B66E6FC5783F0A38549AAD34506D46E3B7FD5A665E2"
+  },
+  {
+    "file": "features\\window\\document-actions.md",
+    "sha256": "0F1BA829F55AAE7C8ECC41038B8DBBBF2711CE101CA516E598F2855E9BCE320E"
+  },
+  {
+    "file": "knowledge\\new-topics-threshold-2026-10-19.md",
+    "sha256": "EF4BE126B65D9B9A8A34AE3139FDDE5F943A3968181D0DBF7EAD64B973D58008"
+  },
+  {
+    "file": "features\\window\\requirements.md",
+    "sha256": "8EE20059862B9C434C384DC4059BE718BCE1E0BA166932516B30E9EA56CEA4A2"
+  },
+  {
+    "file": "features\\search\\maintenance-tools.md",
+    "sha256": "3CFB34556D609B9245156347B2F7F7C943CA5A7BD58E6FFAF7A4D1D613BED4B1"
+  },
+  {
+    "file": "features\\knowledge-base\\link-index.md",
+    "sha256": "07C0D5AF162AED66C572C4D771441CEF2FFABD550380547781CF5BD9BAF204CC"
+  },
+  {
+    "file": "features\\settings\\settings.md",
+    "sha256": "228F80FD82F3090DE4809BA48920DCD72682B6A56831EEF0B6862C22DBCFCA64"
+  },
+  {
+    "file": "features\\clients\\clients.md",
+    "sha256": "2D115E250BFB3B3DC6D26DD93CC2B963B96D8050A055FE14B6F966D9663069BC"
+  },
+  {
+    "file": "features\\knowledge-base\\tree-and-files.md",
+    "sha256": "C6B2EBB122081DB7D86BBCA253D4DFBC3BCD9CC809487B5DD38A5F9CEB641D7D"
+  },
+  {
+    "file": "features\\graphrag\\implementation.md",
+    "sha256": "F727D196758B2E9F9A91C70768A61739571C3C7E6E57F456809E867ED1344E1E"
+  },
+  {
+    "file": "features\\knowledge-base\\audits.md",
+    "sha256": "338931E96C1A3FAAFFD15B17E98106FB3079F4377B1769522F8135120EB09712"
+  },
+  {
+    "file": "backlog\\issues.md",
+    "sha256": "0EA9EBAB25AE0AA0904A251B8FAAC695923708D9899411F58466B9216FC5EB7B"
+  },
+  {
+    "file": "features\\indexing\\document-queue.md",
+    "sha256": "B449EA4D7DE4A869A685937ADBAEB25EF42999A43763ADA100DF1C9BFF102F45"
+  },
+  {
+    "file": "knowledge\\traceability.md",
+    "sha256": "1CF91EDB8911FF356EFF757333136183ED5507D58A7391F2853370699DA02225"
+  },
+  {
+    "file": "features\\new-topics\\requirements.md",
+    "sha256": "566147F2D044AE551CBD83A6F2309713B06990ED50E691BD84A01A40C842A063"
+  }
+]

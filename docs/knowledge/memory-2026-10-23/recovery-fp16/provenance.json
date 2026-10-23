@@ -1,0 +1,54 @@
+{
+  "utc": "2026-10-23T09:28:42.8832715Z",
+  "binaries": [
+    {
+      "file": "bench_inference.exe",
+      "sha256": "95FB3A92CC8DDDBADE9E2DB5E0EB82A378ED35749E8B63947CF31017B044A8F5"
+    },
+    {
+      "file": "bench_worker_memory.exe",
+      "sha256": "4EA3DC68FB8253706A8170A73783DB2F7C6A0E5994BD2A22E13A76865BF37E83"
+    }
+  ],
+  "sources": [
+    {
+      "file": "Cargo.lock",
+      "sha256": "7FBFEA356EA6F1DDBE8B7E4B0FA59F27F3B93BBCBD1C66C01777BB0FF1E9E877"
+    },
+    {
+      "file": "crates/bars-core/examples/bench_memory.rs",
+      "sha256": "9A4741D21B62763C823D8BCC0B09664B3F2EA9D8FA3DF037FD7607DFA966D0B0"
+    },
+    {
+      "file": "crates/bars-worker/examples/bench_worker_memory.rs",
+      "sha256": "1FAFE2281A099099FE1E90382E88F8A788193F6451411C78DBA5CAB8C66E47EF"
+    },
+    {
+      "file": "crates/bars-worker/examples/bench_worker_index_memory.rs",
+      "sha256": "BB849CA827FD83632B9FCAB22751873FDC5A87930F956D9E1D2C051C73502D82"
+    },
+    {
+      "file": "crates/bars-worker/src/worker/models.rs",
+      "sha256": "4AFDF2047529607D8E94C8557ECD3C4F01C81D2E4A05EDF16D5A69E8166E8787"
+    },
+    {
+      "file": "crates/bars-core/src/models/builtin.rs",
+      "sha256": "C7E6669583DE0964A86C6D5BD3C9B954148B28A3F8C00F700C77B9B941F41B52"
+    },
+    {
+      "file": "crates/bars-core/src/models/builtin_rerank.rs",
+      "sha256": "16F8B3ED0B7F2C1AD877C997D6E9C0CF0CF935C94EF657A219CCFDA833F0EDCA"
+    },
+    {
+      "file": "scripts/run-index-memory.ps1",
+      "sha256": "A2F2BC4750B1D88D97C54D503B09FCB8D126D08491FFB7865C1D66F2174AA689"
+    }
+  ],
+  "timing_valid": false,
+  "bars": [
+    {
+      "Id": 28748,
+      "StartTime": "2026-10-23T12:31:19.5341271+05:00"
+    }
+  ]
+}

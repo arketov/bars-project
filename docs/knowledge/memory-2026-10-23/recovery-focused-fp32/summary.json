@@ -1,0 +1,855 @@
+{
+  "schema": 1,
+  "series": [
+    {
+      "name": "fp32-off-1",
+      "completed": true,
+      "accepted": true,
+      "terminal_event": {
+        "kind": "end",
+        "phase": "end",
+        "detail": {
+          "ok": true,
+          "error": null
+        }
+      },
+      "searches": {
+        "count": 100,
+        "median_ms": 205.56650000000002,
+        "p95_ms": 346.7345,
+        "max_ms": 415.3817
+      },
+      "full_overlap": {
+        "count": 100,
+        "median_ms": 205.56650000000002,
+        "p95_ms": 346.7345,
+        "max_ms": 415.3817
+      },
+      "failed": 0,
+      "sampled_private_peak_bytes": 5239635968,
+      "lifetime_peak_commit_bytes": 5239672832,
+      "working_set_peak_bytes": 2187874304,
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null,
+          "precision": "fp32"
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "unloaded",
+          "backend": "",
+          "actual": null,
+          "fallback_reason": null
+        }
+      },
+      "reindex_ms": 77386.332,
+      "reindex_memory": {
+        "before_sampled_private_peak_bytes": 5235904512,
+        "during_sampled_private_peak_bytes": 5239635968,
+        "during_samples": 758
+      },
+      "index_progress": {
+        "docs_first": 0,
+        "docs_last": 10,
+        "chunks_first": 0,
+        "chunks_last": 161
+      },
+      "phases": [
+        {
+          "phase": "baseline",
+          "private_bytes": 4112384,
+          "working_set_bytes": 14667776,
+          "lifetime_peak_working_set_bytes": 14667776,
+          "lifetime_peak_commit_bytes": 4124672,
+          "system_available_bytes": 10512691200,
+          "system_committed_bytes": 57897033728,
+          "system_commit_limit_bytes": 67232976896
+        },
+        {
+          "phase": "embed_loaded",
+          "private_bytes": 5226442752,
+          "working_set_bytes": 638926848,
+          "lifetime_peak_working_set_bytes": 2194759680,
+          "lifetime_peak_commit_bytes": 5237506048,
+          "system_available_bytes": 13410934784,
+          "system_committed_bytes": 59791618048,
+          "system_commit_limit_bytes": 67232976896
+        },
+        {
+          "phase": "both_warm",
+          "private_bytes": 5228134400,
+          "working_set_bytes": 640434176,
+          "lifetime_peak_working_set_bytes": 2194759680,
+          "lifetime_peak_commit_bytes": 5237506048,
+          "system_available_bytes": 13272899584,
+          "system_committed_bytes": 59960340480,
+          "system_commit_limit_bytes": 67232976896
+        },
+        {
+          "phase": "series_done",
+          "private_bytes": 5230284800,
+          "working_set_bytes": 642838528,
+          "lifetime_peak_working_set_bytes": 2194759680,
+          "lifetime_peak_commit_bytes": 5239672832,
+          "system_available_bytes": 12879990784,
+          "system_committed_bytes": 59980750848,
+          "system_commit_limit_bytes": 67232976896
+        },
+        {
+          "phase": "shutdown",
+          "private_bytes": 248733696,
+          "working_set_bytes": 158957568,
+          "lifetime_peak_working_set_bytes": 2194759680,
+          "lifetime_peak_commit_bytes": 5239672832,
+          "system_available_bytes": 12912504832,
+          "system_committed_bytes": 55429853184,
+          "system_commit_limit_bytes": 67232976896
+        }
+      ],
+      "ort_events": 1072,
+      "placements": [
+        {
+          "ms": 4077.5759999999996,
+          "provider": "CPUExecutionProvider",
+          "nodes": 8
+        },
+        {
+          "ms": 4078.9606000000003,
+          "provider": "DmlExecutionProvider",
+          "nodes": 703
+        }
+      ],
+      "gpu_samples": 332,
+      "gpu_dedicated_peak_bytes": 4602441728,
+      "gpu_shared_peak_bytes": 1085460480,
+      "allocator_events": 2,
+      "allocator_messages": [
+        "Creating BFCArena for Cpu with following configs: initial_chunk_size_bytes: 1048576 max_dead_bytes_per_chunk: 134217728 initial_growth_chunk_size_bytes: 2097152 max_power_of_two_extend_bytes: 1073741824 memory limit: 18446744073709551615 arena_extend_strategy: 0",
+        "Creating 21 bins of max chunk size 256 to 268435456"
+      ]
+    },
+    {
+      "name": "fp32-off-2",
+      "completed": true,
+      "accepted": true,
+      "terminal_event": {
+        "kind": "end",
+        "phase": "end",
+        "detail": {
+          "ok": true,
+          "error": null
+        }
+      },
+      "searches": {
+        "count": 100,
+        "median_ms": 343.1632,
+        "p95_ms": 635.6321,
+        "max_ms": 1110.239
+      },
+      "full_overlap": {
+        "count": 100,
+        "median_ms": 343.1632,
+        "p95_ms": 635.6321,
+        "max_ms": 1110.239
+      },
+      "failed": 0,
+      "sampled_private_peak_bytes": 5236371456,
+      "lifetime_peak_commit_bytes": 5240061952,
+      "working_set_peak_bytes": 2092191744,
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null,
+          "precision": "fp32"
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "unloaded",
+          "backend": "",
+          "actual": null,
+          "fallback_reason": null
+        }
+      },
+      "reindex_ms": 85477.8172,
+      "reindex_memory": {
+        "before_sampled_private_peak_bytes": 3532926976,
+        "during_sampled_private_peak_bytes": 5236371456,
+        "during_samples": 827
+      },
+      "index_progress": {
+        "docs_first": 0,
+        "docs_last": 1,
+        "chunks_first": 0,
+        "chunks_last": 42
+      },
+      "phases": [
+        {
+          "phase": "baseline",
+          "private_bytes": 4268032,
+          "working_set_bytes": 14749696,
+          "lifetime_peak_working_set_bytes": 14749696,
+          "lifetime_peak_commit_bytes": 4280320,
+          "system_available_bytes": 12931420160,
+          "system_committed_bytes": 54019682304,
+          "system_commit_limit_bytes": 67232976896
+        },
+        {
+          "phase": "embed_loaded",
+          "private_bytes": 2747719680,
+          "working_set_bytes": 426905600,
+          "lifetime_peak_working_set_bytes": 2296180736,
+          "lifetime_peak_commit_bytes": 3584253952,
+          "system_available_bytes": 13031690240,
+          "system_committed_bytes": 56316575744,
+          "system_commit_limit_bytes": 67232976896
+        },
+        {
+          "phase": "both_warm",
+          "private_bytes": 2947399680,
+          "working_set_bytes": 578478080,
+          "lifetime_peak_working_set_bytes": 2296180736,
+          "lifetime_peak_commit_bytes": 3584253952,
+          "system_available_bytes": 12801310720,
+          "system_committed_bytes": 56563924992,
+          "system_commit_limit_bytes": 67232976896
+        },
+        {
+          "phase": "series_done",
+          "private_bytes": 5224341504,
+          "working_set_bytes": 641662976,
+          "lifetime_peak_working_set_bytes": 2296180736,
+          "lifetime_peak_commit_bytes": 5240061952,
+          "system_available_bytes": 11191087104,
+          "system_committed_bytes": 64245444608,
+          "system_commit_limit_bytes": 67232976896
+        },
+        {
+          "phase": "shutdown",
+          "private_bytes": 230453248,
+          "working_set_bytes": 160161792,
+          "lifetime_peak_working_set_bytes": 2296180736,
+          "lifetime_peak_commit_bytes": 5240061952,
+          "system_available_bytes": 11704586240,
+          "system_committed_bytes": 57036271616,
+          "system_commit_limit_bytes": 67232976896
+        }
+      ],
+      "ort_events": 1072,
+      "placements": [
+        {
+          "ms": 2788.2139,
+          "provider": "CPUExecutionProvider",
+          "nodes": 8
+        },
+        {
+          "ms": 2789.0384,
+          "provider": "DmlExecutionProvider",
+          "nodes": 703
+        }
+      ],
+      "gpu_samples": 189,
+      "gpu_dedicated_peak_bytes": 4602437632,
+      "gpu_shared_peak_bytes": 1185746944,
+      "allocator_events": 2,
+      "allocator_messages": [
+        "Creating BFCArena for Cpu with following configs: initial_chunk_size_bytes: 1048576 max_dead_bytes_per_chunk: 134217728 initial_growth_chunk_size_bytes: 2097152 max_power_of_two_extend_bytes: 1073741824 memory limit: 18446744073709551615 arena_extend_strategy: 0",
+        "Creating 21 bins of max chunk size 256 to 268435456"
+      ]
+    },
+    {
+      "name": "fp32-off-4",
+      "completed": true,
+      "accepted": true,
+      "terminal_event": {
+        "kind": "end",
+        "phase": "end",
+        "detail": {
+          "ok": true,
+          "error": null
+        }
+      },
+      "searches": {
+        "count": 100,
+        "median_ms": 449.10080000000005,
+        "p95_ms": 929.0286,
+        "max_ms": 1187.989
+      },
+      "full_overlap": {
+        "count": 100,
+        "median_ms": 449.10080000000005,
+        "p95_ms": 929.0286,
+        "max_ms": 1187.989
+      },
+      "failed": 0,
+      "sampled_private_peak_bytes": 5231480832,
+      "lifetime_peak_commit_bytes": 5231534080,
+      "working_set_peak_bytes": 2236227584,
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null,
+          "precision": "fp32"
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "unloaded",
+          "backend": "",
+          "actual": null,
+          "fallback_reason": null
+        }
+      },
+      "reindex_ms": 104413.0177,
+      "reindex_memory": {
+        "before_sampled_private_peak_bytes": 3556155392,
+        "during_sampled_private_peak_bytes": 5231480832,
+        "during_samples": 1014
+      },
+      "index_progress": {
+        "docs_first": 0,
+        "docs_last": 0,
+        "chunks_first": 0,
+        "chunks_last": 0
+      },
+      "phases": [
+        {
+          "phase": "baseline",
+          "private_bytes": 4304896,
+          "working_set_bytes": 14807040,
+          "lifetime_peak_working_set_bytes": 14807040,
+          "lifetime_peak_commit_bytes": 4317184,
+          "system_available_bytes": 10301841408,
+          "system_committed_bytes": 58159964160,
+          "system_commit_limit_bytes": 67232976896
+        },
+        {
+          "phase": "embed_loaded",
+          "private_bytes": 2751889408,
+          "working_set_bytes": 419676160,
+          "lifetime_peak_working_set_bytes": 2262253568,
+          "lifetime_peak_commit_bytes": 3556159488,
+          "system_available_bytes": 9848758272,
+          "system_committed_bytes": 59749584896,
+          "system_commit_limit_bytes": 67232976896
+        },
+        {
+          "phase": "both_warm",
+          "private_bytes": 2937278464,
+          "working_set_bytes": 564514816,
+          "lifetime_peak_working_set_bytes": 2262253568,
+          "lifetime_peak_commit_bytes": 3556159488,
+          "system_available_bytes": 9803878400,
+          "system_committed_bytes": 59782230016,
+          "system_commit_limit_bytes": 67232976896
+        },
+        {
+          "phase": "series_done",
+          "private_bytes": 5222064128,
+          "working_set_bytes": 629592064,
+          "lifetime_peak_working_set_bytes": 2262253568,
+          "lifetime_peak_commit_bytes": 5231534080,
+          "system_available_bytes": 12667166720,
+          "system_committed_bytes": 59117301760,
+          "system_commit_limit_bytes": 67232976896
+        },
+        {
+          "phase": "shutdown",
+          "private_bytes": 242532352,
+          "working_set_bytes": 163364864,
+          "lifetime_peak_working_set_bytes": 2262253568,
+          "lifetime_peak_commit_bytes": 5231534080,
+          "system_available_bytes": 13275996160,
+          "system_committed_bytes": 53357985792,
+          "system_commit_limit_bytes": 66919735296
+        }
+      ],
+      "ort_events": 1072,
+      "placements": [
+        {
+          "ms": 3133.5375,
+          "provider": "CPUExecutionProvider",
+          "nodes": 8
+        },
+        {
+          "ms": 3134.7114,
+          "provider": "DmlExecutionProvider",
+          "nodes": 703
+        }
+      ],
+      "gpu_samples": 220,
+      "gpu_dedicated_peak_bytes": 4602433536,
+      "gpu_shared_peak_bytes": 1152192512,
+      "allocator_events": 2,
+      "allocator_messages": [
+        "Creating BFCArena for Cpu with following configs: initial_chunk_size_bytes: 1048576 max_dead_bytes_per_chunk: 134217728 initial_growth_chunk_size_bytes: 2097152 max_power_of_two_extend_bytes: 1073741824 memory limit: 18446744073709551615 arena_extend_strategy: 0",
+        "Creating 21 bins of max chunk size 256 to 268435456"
+      ]
+    },
+    {
+      "name": "fp32-on-1",
+      "completed": true,
+      "accepted": true,
+      "terminal_event": {
+        "kind": "end",
+        "phase": "end",
+        "detail": {
+          "ok": true,
+          "error": null
+        }
+      },
+      "searches": {
+        "count": 100,
+        "median_ms": 512.5296999999999,
+        "p95_ms": 889.9861999999999,
+        "max_ms": 1103.4537
+      },
+      "full_overlap": {
+        "count": 100,
+        "median_ms": 512.5296999999999,
+        "p95_ms": 889.9861999999999,
+        "max_ms": 1103.4537
+      },
+      "failed": 0,
+      "sampled_private_peak_bytes": 7347564544,
+      "lifetime_peak_commit_bytes": 7347630080,
+      "working_set_peak_bytes": 2276159488,
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null,
+          "precision": "fp32"
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null,
+          "precision": "fp16",
+          "revision": "6f5ff65298512715a1e669753bc754d2bc8f367b"
+        }
+      },
+      "reindex_ms": 92662.4379,
+      "reindex_memory": {
+        "before_sampled_private_peak_bytes": 5111619584,
+        "during_sampled_private_peak_bytes": 7347564544,
+        "during_samples": 890
+      },
+      "index_progress": {
+        "docs_first": 0,
+        "docs_last": 18,
+        "chunks_first": 0,
+        "chunks_last": 268
+      },
+      "phases": [
+        {
+          "phase": "baseline",
+          "private_bytes": 4268032,
+          "working_set_bytes": 14831616,
+          "lifetime_peak_working_set_bytes": 14831616,
+          "lifetime_peak_commit_bytes": 4280320,
+          "system_available_bytes": 12742021120,
+          "system_committed_bytes": 53317251072,
+          "system_commit_limit_bytes": 66692579328
+        },
+        {
+          "phase": "embed_loaded",
+          "private_bytes": 2743259136,
+          "working_set_bytes": 425603072,
+          "lifetime_peak_working_set_bytes": 2295754752,
+          "lifetime_peak_commit_bytes": 3582926848,
+          "system_available_bytes": 11216642048,
+          "system_committed_bytes": 56771571712,
+          "system_commit_limit_bytes": 66692579328
+        },
+        {
+          "phase": "both_warm",
+          "private_bytes": 5102505984,
+          "working_set_bytes": 960638976,
+          "lifetime_peak_working_set_bytes": 2295754752,
+          "lifetime_peak_commit_bytes": 5114814464,
+          "system_available_bytes": 12619931648,
+          "system_committed_bytes": 59177750528,
+          "system_commit_limit_bytes": 66692579328
+        },
+        {
+          "phase": "series_done",
+          "private_bytes": 7340122112,
+          "working_set_bytes": 991457280,
+          "lifetime_peak_working_set_bytes": 2295754752,
+          "lifetime_peak_commit_bytes": 7347630080,
+          "system_available_bytes": 12727840768,
+          "system_committed_bytes": 60443156480,
+          "system_commit_limit_bytes": 66692579328
+        },
+        {
+          "phase": "shutdown",
+          "private_bytes": 388497408,
+          "working_set_bytes": 169512960,
+          "lifetime_peak_working_set_bytes": 2295754752,
+          "lifetime_peak_commit_bytes": 7347630080,
+          "system_available_bytes": 12554297344,
+          "system_committed_bytes": 54330949632,
+          "system_commit_limit_bytes": 66692579328
+        }
+      ],
+      "ort_events": 2313,
+      "placements": [
+        {
+          "ms": 2756.9876,
+          "provider": "CPUExecutionProvider",
+          "nodes": 8
+        },
+        {
+          "ms": 2758.1107,
+          "provider": "DmlExecutionProvider",
+          "nodes": 703
+        },
+        {
+          "ms": 16902.874499999998,
+          "provider": "DmlExecutionProvider",
+          "nodes": 626
+        },
+        {
+          "ms": 16986.3897,
+          "provider": "CPUExecutionProvider",
+          "nodes": 134
+        }
+      ],
+      "gpu_samples": 222,
+      "gpu_dedicated_peak_bytes": 6342746112,
+      "gpu_shared_peak_bytes": 1185746944,
+      "allocator_events": 4,
+      "allocator_messages": [
+        "Creating BFCArena for Cpu with following configs: initial_chunk_size_bytes: 1048576 max_dead_bytes_per_chunk: 134217728 initial_growth_chunk_size_bytes: 2097152 max_power_of_two_extend_bytes: 1073741824 memory limit: 18446744073709551615 arena_extend_strategy: 0",
+        "Creating 21 bins of max chunk size 256 to 268435456"
+      ]
+    },
+    {
+      "name": "fp32-on-2",
+      "completed": true,
+      "accepted": true,
+      "terminal_event": {
+        "kind": "end",
+        "phase": "end",
+        "detail": {
+          "ok": true,
+          "error": null
+        }
+      },
+      "searches": {
+        "count": 100,
+        "median_ms": 644.8423,
+        "p95_ms": 978.2315,
+        "max_ms": 1188.2769
+      },
+      "full_overlap": {
+        "count": 100,
+        "median_ms": 644.8423,
+        "p95_ms": 978.2315,
+        "max_ms": 1188.2769
+      },
+      "failed": 0,
+      "sampled_private_peak_bytes": 7344791552,
+      "lifetime_peak_commit_bytes": 7344820224,
+      "working_set_peak_bytes": 2193190912,
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null,
+          "precision": "fp32"
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null,
+          "precision": "fp16",
+          "revision": "6f5ff65298512715a1e669753bc754d2bc8f367b"
+        }
+      },
+      "reindex_ms": 92519.127,
+      "reindex_memory": {
+        "before_sampled_private_peak_bytes": 5102575616,
+        "during_sampled_private_peak_bytes": 7344791552,
+        "during_samples": 900
+      },
+      "index_progress": {
+        "docs_first": 0,
+        "docs_last": 9,
+        "chunks_first": 0,
+        "chunks_last": 137
+      },
+      "phases": [
+        {
+          "phase": "baseline",
+          "private_bytes": 4280320,
+          "working_set_bytes": 14827520,
+          "lifetime_peak_working_set_bytes": 14827520,
+          "lifetime_peak_commit_bytes": 4292608,
+          "system_available_bytes": 13597982720,
+          "system_committed_bytes": 52551057408,
+          "system_commit_limit_bytes": 65868779520
+        },
+        {
+          "phase": "embed_loaded",
+          "private_bytes": 2752729088,
+          "working_set_bytes": 423972864,
+          "lifetime_peak_working_set_bytes": 2229235712,
+          "lifetime_peak_commit_bytes": 3521495040,
+          "system_available_bytes": 13320974336,
+          "system_committed_bytes": 55257210880,
+          "system_commit_limit_bytes": 65868779520
+        },
+        {
+          "phase": "both_warm",
+          "private_bytes": 5084729344,
+          "working_set_bytes": 950935552,
+          "lifetime_peak_working_set_bytes": 2229235712,
+          "lifetime_peak_commit_bytes": 5115670528,
+          "system_available_bytes": 12955377664,
+          "system_committed_bytes": 57561845760,
+          "system_commit_limit_bytes": 65868779520
+        },
+        {
+          "phase": "series_done",
+          "private_bytes": 7337164800,
+          "working_set_bytes": 984641536,
+          "lifetime_peak_working_set_bytes": 2229235712,
+          "lifetime_peak_commit_bytes": 7344820224,
+          "system_available_bytes": 13147955200,
+          "system_committed_bytes": 60015656960,
+          "system_commit_limit_bytes": 65868779520
+        },
+        {
+          "phase": "shutdown",
+          "private_bytes": 396902400,
+          "working_set_bytes": 169431040,
+          "lifetime_peak_working_set_bytes": 2229235712,
+          "lifetime_peak_commit_bytes": 7344820224,
+          "system_available_bytes": 13923262464,
+          "system_committed_bytes": 53058441216,
+          "system_commit_limit_bytes": 65868779520
+        }
+      ],
+      "ort_events": 2313,
+      "placements": [
+        {
+          "ms": 2604.9359999999997,
+          "provider": "CPUExecutionProvider",
+          "nodes": 8
+        },
+        {
+          "ms": 2605.6698,
+          "provider": "DmlExecutionProvider",
+          "nodes": 703
+        },
+        {
+          "ms": 8878.5288,
+          "provider": "DmlExecutionProvider",
+          "nodes": 626
+        },
+        {
+          "ms": 8930.082799999998,
+          "provider": "CPUExecutionProvider",
+          "nodes": 134
+        }
+      ],
+      "gpu_samples": 205,
+      "gpu_dedicated_peak_bytes": 6343786496,
+      "gpu_shared_peak_bytes": 1187209216,
+      "allocator_events": 4,
+      "allocator_messages": [
+        "Creating BFCArena for Cpu with following configs: initial_chunk_size_bytes: 1048576 max_dead_bytes_per_chunk: 134217728 initial_growth_chunk_size_bytes: 2097152 max_power_of_two_extend_bytes: 1073741824 memory limit: 18446744073709551615 arena_extend_strategy: 0",
+        "Creating 21 bins of max chunk size 256 to 268435456"
+      ]
+    },
+    {
+      "name": "fp32-on-4",
+      "completed": true,
+      "accepted": true,
+      "terminal_event": {
+        "kind": "end",
+        "phase": "end",
+        "detail": {
+          "ok": true,
+          "error": null
+        }
+      },
+      "searches": {
+        "count": 100,
+        "median_ms": 933.2892,
+        "p95_ms": 1093.1074999999998,
+        "max_ms": 1221.3836000000001
+      },
+      "full_overlap": {
+        "count": 100,
+        "median_ms": 933.2892,
+        "p95_ms": 1093.1074999999998,
+        "max_ms": 1221.3836000000001
+      },
+      "failed": 0,
+      "sampled_private_peak_bytes": 7329124352,
+      "lifetime_peak_commit_bytes": 7329144832,
+      "working_set_peak_bytes": 2076807168,
+      "runtime": {
+        "embed": {
+          "model": "BAAI/bge-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null,
+          "precision": "fp32"
+        },
+        "rerank": {
+          "model": "BAAI/bge-reranker-v2-m3",
+          "source": "builtin",
+          "requested": "auto",
+          "state": "ready",
+          "backend": "onnx",
+          "actual": "directml",
+          "fallback_reason": null,
+          "precision": "fp16",
+          "revision": "6f5ff65298512715a1e669753bc754d2bc8f367b"
+        }
+      },
+      "reindex_ms": 73528.7049,
+      "reindex_memory": {
+        "before_sampled_private_peak_bytes": 5072326656,
+        "during_sampled_private_peak_bytes": 7329124352,
+        "during_samples": 729
+      },
+      "index_progress": {
+        "docs_first": 0,
+        "docs_last": 6,
+        "chunks_first": 0,
+        "chunks_last": 92
+      },
+      "phases": [
+        {
+          "phase": "baseline",
+          "private_bytes": 4227072,
+          "working_set_bytes": 14839808,
+          "lifetime_peak_working_set_bytes": 14839808,
+          "lifetime_peak_commit_bytes": 4239360,
+          "system_available_bytes": 14064320512,
+          "system_committed_bytes": 52647038976,
+          "system_commit_limit_bytes": 65868779520
+        },
+        {
+          "phase": "embed_loaded",
+          "private_bytes": 2724728832,
+          "working_set_bytes": 406335488,
+          "lifetime_peak_working_set_bytes": 2228981760,
+          "lifetime_peak_commit_bytes": 3516473344,
+          "system_available_bytes": 13711278080,
+          "system_committed_bytes": 55356424192,
+          "system_commit_limit_bytes": 65868779520
+        },
+        {
+          "phase": "both_warm",
+          "private_bytes": 5065273344,
+          "working_set_bytes": 929337344,
+          "lifetime_peak_working_set_bytes": 2228981760,
+          "lifetime_peak_commit_bytes": 5076582400,
+          "system_available_bytes": 13359988736,
+          "system_committed_bytes": 57485950976,
+          "system_commit_limit_bytes": 65868779520
+        },
+        {
+          "phase": "series_done",
+          "private_bytes": 7319662592,
+          "working_set_bytes": 971264000,
+          "lifetime_peak_working_set_bytes": 2228981760,
+          "lifetime_peak_commit_bytes": 7329144832,
+          "system_available_bytes": 13120647168,
+          "system_committed_bytes": 59916951552,
+          "system_commit_limit_bytes": 65868779520
+        },
+        {
+          "phase": "shutdown",
+          "private_bytes": 251707392,
+          "working_set_bytes": 167866368,
+          "lifetime_peak_working_set_bytes": 2228981760,
+          "lifetime_peak_commit_bytes": 7329144832,
+          "system_available_bytes": 13853282304,
+          "system_committed_bytes": 52866748416,
+          "system_commit_limit_bytes": 65868779520
+        }
+      ],
+      "ort_events": 2313,
+      "placements": [
+        {
+          "ms": 2603.0775999999996,
+          "provider": "CPUExecutionProvider",
+          "nodes": 8
+        },
+        {
+          "ms": 2603.8267,
+          "provider": "DmlExecutionProvider",
+          "nodes": 703
+        },
+        {
+          "ms": 8815.9019,
+          "provider": "DmlExecutionProvider",
+          "nodes": 626
+        },
+        {
+          "ms": 8867.7984,
+          "provider": "CPUExecutionProvider",
+          "nodes": 134
+        }
+      ],
+      "gpu_samples": 173,
+      "gpu_dedicated_peak_bytes": 6342729728,
+      "gpu_shared_peak_bytes": 1118703616,
+      "allocator_events": 4,
+      "allocator_messages": [
+        "Creating BFCArena for Cpu with following configs: initial_chunk_size_bytes: 1048576 max_dead_bytes_per_chunk: 134217728 initial_growth_chunk_size_bytes: 2097152 max_power_of_two_extend_bytes: 1073741824 memory limit: 18446744073709551615 arena_extend_strategy: 0",
+        "Creating 21 bins of max chunk size 256 to 268435456"
+      ]
+    }
+  ],
+  "pairs": [],
+  "matrix_complete": false,
+  "repeated_pair_complete": false,
+  "timing_valid": false
+}

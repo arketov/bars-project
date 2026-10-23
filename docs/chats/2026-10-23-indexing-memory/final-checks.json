@@ -1,0 +1,9 @@
+{
+  "gzip_files_checked": 167,
+  "markdown_files_checked": 8,
+  "load_queries": 1200,
+  "accepted_processes": 10,
+  "repeated_pair_complete": true,
+  "full_processes_complete": false,
+  "own_temporary_roots_removed": true
+}

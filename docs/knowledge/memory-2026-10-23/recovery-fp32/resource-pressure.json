@@ -1,0 +1,16 @@
+{
+  "pid": 10424,
+  "elapsed_ms": 41867.0554,
+  "start_free_commit": 10571939840,
+  "end_free_commit": 1051971584,
+  "end_available_ram": 11664244736,
+  "process_private_delta": 4068683776,
+  "system_commit_delta": 9519968256,
+  "residual_delta": 5451284480,
+  "residual_interpretation": "System commit minus own process private commit is a residual, not attribution to named processes",
+  "preflight_wait_off2": {
+    "samples": 263,
+    "min_free_commit": 2078453760,
+    "max_free_commit": 7383715840
+  }
+}

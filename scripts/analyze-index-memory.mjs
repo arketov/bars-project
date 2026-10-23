@@ -24,6 +24,7 @@ export function summarize(rows) {
     ?measured.filter(r=>r.elapsed_ms>=start&&r.elapsed_ms<=end):[];
   return {completed,accepted:completed&&searches.length===100&&searches.every(r=>r.detail.ok===true)
       &&rows.some(r=>r.phase==='reindex_done')&&rows.some(r=>r.phase==='warm'&&r.kind==='runtime'),
+    terminal_event:rows.length?{kind:rows.at(-1).kind,phase:rows.at(-1).phase,detail:rows.at(-1).detail}:null,
     searches:timings(searches),full_overlap:timings(overlap),failed:searches.filter(r=>!r.detail.ok).length,
     sampled_private_peak_bytes:peak('private_bytes'),lifetime_peak_commit_bytes:peak('lifetime_peak_commit_bytes'),
     working_set_peak_bytes:peak('working_set_bytes'),runtime:rows.find(r=>r.kind==='runtime')?.detail??null,
@@ -43,6 +44,20 @@ export function summarizePair(rows) {
     &&reload?.scores?.length===15&&reload.scores.every(Number.isFinite)&&reload.max_score_delta<=1e-5
     &&['embed_batch_retained','rerank_retained','rerank_dropped','all_models_dropped','worker_shutdown'].every(p=>rows.some(r=>r.phase===p&&r.kind==='plateau_end'));
   return {...base,accepted};
+}
+
+export function combineMatrices(datasets) {
+  const canonical=rows=>JSON.stringify(rows.map(r=>({file:r.file.replaceAll('\\','/'),sha256:r.sha256.toUpperCase()})).sort((a,b)=>a.file<b.file?-1:a.file>b.file?1:0));
+  if(!datasets.length||datasets.some(d=>canonical(d.corpus)!==canonical(datasets[0].corpus)))throw Error('Matrix corpora differ');
+  const series=datasets.flatMap(d=>d.summary.series.map(s=>({...s,dataset:d.name})));
+  if(new Set(series.map(s=>s.name)).size!==series.length)throw Error('Duplicate matrix configurations');
+  const expected=['fp32','fp16'].flatMap(p=>['off','on'].flatMap(r=>[1,2,4].map(n=>`${p}-${r}-${n}`)));
+  const pairs=datasets.flatMap(d=>d.summary.pairs);
+  return {schema:1,corpus_files:datasets[0].corpus.length,datasets:datasets.map(d=>d.name),series,pairs,
+    load_queries_complete:series.length===12&&expected.every(n=>series.some(s=>s.name===n&&s.searches.count===100&&s.full_overlap.count===100&&s.failed===0)),
+    full_processes_complete:series.length===12&&expected.every(n=>series.some(s=>s.name===n&&s.accepted)),
+    accepted_processes:series.filter(s=>s.accepted).length,repeated_pair_complete:pairs.filter(p=>p.accepted).length>=2,
+    allocation_attribution_complete:false,timing_valid:false};
 }
 
 function readRows(file) {
@@ -75,4 +90,11 @@ function main(root) {
   fs.writeFileSync(path.join(root,'summary.json'),JSON.stringify(out,null,2)+'\n');
   console.log(JSON.stringify({series:series.length,pairs:pairs.length,matrix_complete:out.matrix_complete,repeated_pair_complete:out.repeated_pair_complete}));
 }
-if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href)main(process.argv[2]);
+if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href){
+  if(process.argv[2]==='--combine'){
+    const [output,...roots]=process.argv.slice(3);
+    const combined=combineMatrices(roots.map(root=>({name:path.basename(root),corpus:JSON.parse(fs.readFileSync(path.join(root,'corpus.json'))),summary:JSON.parse(fs.readFileSync(path.join(root,'summary.json')))})));
+    fs.writeFileSync(output,JSON.stringify(combined,null,2)+'\n');
+    console.log(JSON.stringify({load_queries_complete:combined.load_queries_complete,accepted_processes:combined.accepted_processes,full_processes_complete:combined.full_processes_complete,repeated_pair_complete:combined.repeated_pair_complete}));
+  }else main(process.argv[2]);
+}

@@ -1,0 +1,12 @@
+{
+  "temporary_root_removed": true,
+  "ok": false,
+  "error": "Insufficient natural headroom; no model started",
+  "phase": "fp32-off-2",
+  "bars": [
+    {
+      "Id": 28748,
+      "StartTime": "2026-10-23T12:31:19.5341271+05:00"
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+{
+  "name": "fp32-on-1",
+  "completed": true,
+  "accepted": true,
+  "terminal_event": {
+    "kind": "end",
+    "phase": "end",
+    "detail": {
+      "ok": true,
+      "error": null
+    }
+  },
+  "searches": {
+    "count": 100,
+    "median_ms": 512.5296999999999,
+    "p95_ms": 889.9861999999999,
+    "max_ms": 1103.4537
+  },
+  "full_overlap": {
+    "count": 100,
+    "median_ms": 512.5296999999999,
+    "p95_ms": 889.9861999999999,
+    "max_ms": 1103.4537
+  },
+  "failed": 0,
+  "sampled_private_peak_bytes": 7347564544,
+  "lifetime_peak_commit_bytes": 7347630080,
+  "working_set_peak_bytes": 2276159488,
+  "runtime": {
+    "embed": {
+      "model": "BAAI/bge-m3",
+      "source": "builtin",
+      "requested": "auto",
+      "state": "ready",
+      "backend": "onnx",
+      "actual": "directml",
+      "fallback_reason": null,
+      "precision": "fp32"
+    },
+    "rerank": {
+      "model": "BAAI/bge-reranker-v2-m3",
+      "source": "builtin",
+      "requested": "auto",
+      "state": "ready",
+      "backend": "onnx",
+      "actual": "directml",
+      "fallback_reason": null,
+      "precision": "fp16",
+      "revision": "6f5ff65298512715a1e669753bc754d2bc8f367b"
+    }
+  },
+  "reindex_ms": 92662.4379,
+  "reindex_memory": {
+    "before_sampled_private_peak_bytes": 5111619584,
+    "during_sampled_private_peak_bytes": 7347564544,
+    "during_samples": 890
+  },
+  "index_progress": {
+    "docs_first": 0,
+    "docs_last": 18,
+    "chunks_first": 0,
+    "chunks_last": 268
+  },
+  "phases": [
+    {
+      "phase": "baseline",
+      "private_bytes": 4268032,
+      "working_set_bytes": 14831616,
+      "lifetime_peak_working_set_bytes": 14831616,
+      "lifetime_peak_commit_bytes": 4280320,
+      "system_available_bytes": 12742021120,
+      "system_committed_bytes": 53317251072,
+      "system_commit_limit_bytes": 66692579328
+    },
+    {
+      "phase": "embed_loaded",
+      "private_bytes": 2743259136,
+      "working_set_bytes": 425603072,
+      "lifetime_peak_working_set_bytes": 2295754752,
+      "lifetime_peak_commit_bytes": 3582926848,
+      "system_available_bytes": 11216642048,
+      "system_committed_bytes": 56771571712,
+      "system_commit_limit_bytes": 66692579328
+    },
+    {
+      "phase": "both_warm",
+      "private_bytes": 5102505984,
+      "working_set_bytes": 960638976,
+      "lifetime_peak_working_set_bytes": 2295754752,
+      "lifetime_peak_commit_bytes": 5114814464,
+      "system_available_bytes": 12619931648,
+      "system_committed_bytes": 59177750528,
+      "system_commit_limit_bytes": 66692579328
+    },
+    {
+      "phase": "series_done",
+      "private_bytes": 7340122112,
+      "working_set_bytes": 991457280,
+      "lifetime_peak_working_set_bytes": 2295754752,
+      "lifetime_peak_commit_bytes": 7347630080,
+      "system_available_bytes": 12727840768,
+      "system_committed_bytes": 60443156480,
+      "system_commit_limit_bytes": 66692579328
+    },
+    {
+      "phase": "shutdown",
+      "private_bytes": 388497408,
+      "working_set_bytes": 169512960,
+      "lifetime_peak_working_set_bytes": 2295754752,
+      "lifetime_peak_commit_bytes": 7347630080,
+      "system_available_bytes": 12554297344,
+      "system_committed_bytes": 54330949632,
+      "system_commit_limit_bytes": 66692579328
+    }
+  ],
+  "ort_events": 2313,
+  "placements": [
+    {
+      "ms": 2756.9876,
+      "provider": "CPUExecutionProvider",
+      "nodes": 8
+    },
+    {
+      "ms": 2758.1107,
+      "provider": "DmlExecutionProvider",
+      "nodes": 703
+    },
+    {
+      "ms": 16902.874499999998,
+      "provider": "DmlExecutionProvider",
+      "nodes": 626
+    },
+    {
+      "ms": 16986.3897,
+      "provider": "CPUExecutionProvider",
+      "nodes": 134
+    }
+  ],
+  "gpu_samples": 222,
+  "gpu_dedicated_peak_bytes": 6342746112,
+  "gpu_shared_peak_bytes": 1185746944,
+  "allocator_events": 4,
+  "allocator_messages": [
+    "Creating BFCArena for Cpu with following configs: initial_chunk_size_bytes: 1048576 max_dead_bytes_per_chunk: 134217728 initial_growth_chunk_size_bytes: 2097152 max_power_of_two_extend_bytes: 1073741824 memory limit: 18446744073709551615 arena_extend_strategy: 0",
+    "Creating 21 bins of max chunk size 256 to 268435456"
+  ]
+}
