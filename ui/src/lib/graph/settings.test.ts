@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_FORCES } from "./physics-core";
-import { defaultSettings, loadSettings, saveSettings } from "./settings";
+import { FORCE_RANGE, defaultSettings, loadSettings, saveSettings } from "./settings";
 
 describe("настройки раскладки панели графа", () => {
   beforeEach(() => localStorage.clear());
@@ -14,13 +14,18 @@ describe("настройки раскладки панели графа", () => 
   });
 
   it("значения ограничиваются допустимыми, испорченный JSON даёт умолчания", () => {
-    localStorage.setItem("bars.graph.v2.full.C:/a", JSON.stringify({ forces: { link: 99, repel: -5, gravity: "x", length: 1 }, minS: 0.1, mode: "all" }));
+    localStorage.setItem("bars.graph.v3.full.C:/a", JSON.stringify({ forces: { link: 99, repel: -5, gravity: "x", length: 1 }, minS: 0.1, mode: "all" }));
     const loaded = loadSettings("C:/a", "full");
-    expect(loaded.forces).toEqual({ link: 4, repel: 0, gravity: DEFAULT_FORCES.gravity, length: 20 });
+    expect(loaded.forces).toEqual({ link: FORCE_RANGE.link.max, repel: FORCE_RANGE.repel.min, gravity: DEFAULT_FORCES.gravity, length: FORCE_RANGE.length.min });
     expect(loaded.minS).toBe(0.5);
     expect(loaded.mode).toBe("all");
-    localStorage.setItem("bars.graph.v2.full.C:/a", "{не json");
+    localStorage.setItem("bars.graph.v3.full.C:/a", "{не json");
     expect(loadSettings("C:/a", "full")).toEqual(defaultSettings());
+  });
+
+  it("силы, сохранённые под прежнюю физику (v2), не переносятся", () => {
+    localStorage.setItem("bars.graph.v2.full.C:/a", JSON.stringify({ forces: { link: 3, repel: 3, gravity: 3, length: 60 } }));
+    expect(loadSettings("C:/a", "full").forces).toEqual(DEFAULT_FORCES);
   });
 
   it("режим чанков не восстанавливается: при открытии чанки не раскрыты", () => {

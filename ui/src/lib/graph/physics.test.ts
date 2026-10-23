@@ -19,7 +19,7 @@ describe("ядро физики", () => {
     core.setForces({ ...DEFAULT_FORCES });
     core.setGraph(nodes, links);
     core.settle(500);
-    const at = new Map(core.nodes.map((n) => [n.index, n]));
+    const at = new Map(core.nodes.map((n) => [n.id, n]));
     const short = links.filter((l) => Math.hypot(at.get(l.a)!.x - at.get(l.b)!.x, at.get(l.a)!.y - at.get(l.b)!.y) < 1.6 * DEFAULT_FORCES.length);
     expect(short.length / links.length).toBeGreaterThanOrEqual(0.8);
   });
@@ -41,8 +41,26 @@ describe("ядро физики", () => {
     const core = new PhysicsCore(7);
     core.setGraph(nodes, links);
     core.settle(200);
-    const pinned = core.nodes.find((n) => n.index === 2)!;
+    const pinned = core.nodes.find((n) => n.id === 2)!;
     expect([pinned.x, pinned.y]).toEqual([10, 20]);
+  });
+
+  it("номера узлов не совпадают с позицией (вид запроса, локальный граф): каждый узел отталкивается своим зарядом", () => {
+    // Запрос с большим номером и результаты вразброс, как подмножество большого среза; все стартуют почти в одной точке.
+    const query = 900;
+    const results = [3, 41, 77, 150, 260, 333, 512, 640];
+    const nodes: CoreNode[] = [
+      { index: query, kind: "query", owner: query, x: 0, y: 0, pinned: false },
+      ...results.map((index, i): CoreNode => ({ index, kind: "document", owner: index, x: Math.cos(i) * 20, y: Math.sin(i) * 20, pinned: false })),
+    ];
+    const core = new PhysicsCore(7);
+    core.setForces({ ...DEFAULT_FORCES });
+    core.setGraph(nodes, results.map((b) => ({ a: query, b, k: 0.4 })));
+    core.settle(600);
+    const docs = core.nodes.filter((n) => n.kind === "document");
+    const nearest = docs.map((a) => Math.min(...docs.filter((b) => b !== a).map((b) => Math.hypot(a.x - b.x, a.y - b.y))));
+    expect(Math.min(...nearest)).toBeGreaterThan(DEFAULT_FORCES.length * 0.3);
+    expect(Array.from(core.snapshot().indices).sort((a, b) => a - b)).toEqual([...results, query].sort((a, b) => a - b));
   });
 });
 
@@ -149,6 +167,23 @@ describe("раскладка в окне (расчёт вне основного
     const before = layout.nodes.map((n) => [n.x, n.y]);
     await wait(60);
     expect(layout.nodes.map((n) => [n.x, n.y])).toEqual(before);
+  });
+
+  it("окно с отрисовкой: следующий шаг физики только после показанного кадра", async () => {
+    layout = new Layout();
+    layout.paced = true;
+    let batches = 0;
+    layout.onPositions = () => batches++;
+    const nodes = Array.from({ length: 10 }, (_, i) => gnode(i));
+    layout.setGraph(nodes, nodes.slice(1).map((_, i) => gedge(i, i, i + 1)), (i) => i);
+    layout.reheat(0.9);
+    await until(() => batches === 1);
+    await wait(60);
+    expect(batches).toBe(1);
+    layout.frameDone();
+    await until(() => batches === 2);
+    await wait(60);
+    expect(batches).toBe(2);
   });
 
   it("после остановки поздние порции не двигают карту", async () => {

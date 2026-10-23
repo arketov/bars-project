@@ -64,6 +64,12 @@ export class Layout {
   forces: Forces = { ...DEFAULT_FORCES };
   /** Вызывается после применения порции координат: окно перерисовывает карту. */
   onPositions: (settled: boolean) => void = () => {};
+  /**
+   * Порция подтверждается после отрисовки (`frameDone`), а не сразу: один шаг физики на кадр, движение не идёт рывками
+   * от того, что за один кадр пришло несколько порций, а за другой ни одной. Без окна (тесты ядра) — сразу.
+   */
+  paced = false;
+  #unacked: number | null = null;
   #byIndex = new Map<number, PNode>();
   #pins = new Set<number>();
   #transport: Transport;
@@ -91,8 +97,17 @@ export class Layout {
       p.y = message.coords[i * 2 + 1];
     }
     this.#active = message.active;
-    this.#transport.post({ t: "ack", seq: message.seq });
+    if (this.paced) this.#unacked = message.seq;
+    else this.#transport.post({ t: "ack", seq: message.seq });
     this.onPositions(message.settled);
+  }
+
+  /** Кадр с последней порцией нарисован: физика делает следующий шаг. */
+  frameDone(): void {
+    if (this.#unacked === null || this.#destroyed) return;
+    const seq = this.#unacked;
+    this.#unacked = null;
+    this.#transport.post({ t: "ack", seq });
   }
 
   /** Идёт ли движение (по последней порции). */

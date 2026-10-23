@@ -15,10 +15,18 @@ export type PanelKind = "mini" | "full";
 
 const MODES: Mode[] = ["links", "meaning", "chunks", "all"];
 
+/** Рабочие диапазоны ползунков раскладки (замер 23-10-2026): за их пределами карта не становится лучше, только разваливается или слипается. */
+export const FORCE_RANGE: Record<keyof Forces, { min: number; max: number; step: number }> = {
+  link: { min: 0.2, max: 2, step: 0.05 },
+  repel: { min: 0.25, max: 3, step: 0.05 },
+  gravity: { min: 0, max: 3, step: 0.05 },
+  length: { min: 40, max: 300, step: 5 },
+};
+
 export const defaultSettings = (): PanelSettings => ({ forces: { ...DEFAULT_FORCES }, minS: DEFAULT_MIN_STRENGTH, mode: "links", depth: 1 });
 
-/** v2 — раунд 27: прежние сохранённые силы подбирались под другую физику и не переносятся. */
-const keyOf = (project: string, panel: PanelKind) => `bars.graph.v2.${panel}.${project}`;
+/** v3 — физика 23-10-2026: прежние сохранённые силы подбирались под другую физику и не переносятся. */
+const keyOf = (project: string, panel: PanelKind) => `bars.graph.v3.${panel}.${project}`;
 
 const finite = (value: unknown, min: number, max: number, fallback: number): number =>
   typeof value === "number" && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
@@ -31,10 +39,10 @@ export function loadSettings(project: string, panel: PanelKind): PanelSettings {
     const forces = (raw.forces ?? {}) as Partial<Forces>;
     return {
       forces: {
-        link: finite(forces.link, 0, 4, base.forces.link),
-        repel: finite(forces.repel, 0, 4, base.forces.repel),
-        gravity: finite(forces.gravity, 0, 4, base.forces.gravity),
-        length: finite(forces.length, 20, 240, base.forces.length),
+        link: finite(forces.link, FORCE_RANGE.link.min, FORCE_RANGE.link.max, base.forces.link),
+        repel: finite(forces.repel, FORCE_RANGE.repel.min, FORCE_RANGE.repel.max, base.forces.repel),
+        gravity: finite(forces.gravity, FORCE_RANGE.gravity.min, FORCE_RANGE.gravity.max, base.forces.gravity),
+        length: finite(forces.length, FORCE_RANGE.length.min, FORCE_RANGE.length.max, base.forces.length),
       },
       minS: finite(raw.minS, 0.5, 0.95, base.minS),
       // Режим «по смыслу · чанки» требует раскрытых чанков, при открытии их нет.
