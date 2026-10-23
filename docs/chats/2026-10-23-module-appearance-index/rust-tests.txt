@@ -1,0 +1,22 @@
+   Compiling bars-app v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-app)
+    Finished `release` profile [optimized] target(s) in 24.53s
+     Running unittests src\main.rs (target\release\deps\bars-d858486c37c3f64b.exe)
+
+running 15 tests
+test appearance_tests::palette_and_icons_have_no_duplicates ... ok
+test appearance_tests::wrong_types_inside_a_valid_file_count_as_broken ... ok
+test appearance_tests::unknown_values_are_kept_for_the_window_to_ignore ... ok
+test appearance_tests::bad_paths_and_values_are_rejected_without_touching_the_file ... ok
+test appearance_tests::document_takes_a_color_only ... ok
+test appearance_tests::missing_file_reads_as_empty ... ok
+test appearance_tests::broken_file_is_reported_and_never_overwritten ... ok
+test appearance_tests::resetting_every_field_removes_the_entry_and_the_empty_section ... ok
+test appearance_tests::migration_keeps_explicit_index_and_module_move_carries_style ... ok
+test appearance_tests::set_writes_and_read_returns_the_same_entries ... ok
+test link_move_tests::appearance_follows_folder_and_document_paths ... ok
+test appearance_tests::folders_deeper_than_second_level_are_rejected ... ok
+test appearance_tests::module_index_survives_copy_and_preserves_content ... ok
+test appearance_tests::module_index_overrides_legacy_and_local_entries_stay_local ... ok
+test appearance_tests::module_index_creation_and_broken_frontmatter ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 53 filtered out; finished in 0.15s

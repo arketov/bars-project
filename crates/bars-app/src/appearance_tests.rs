@@ -186,3 +186,138 @@ fn palette_and_icons_have_no_duplicates() {
     icons.dedup();
     assert_eq!(icons.len(), ICONS.len());
 }
+
+#[test]
+fn module_index_survives_copy_and_preserves_content() {
+    let first = project();
+    let second = project();
+    for dir in [&first, &second] {
+        fs::create_dir_all(dir.path().join("notes/features")).unwrap();
+    }
+    let file = first.path().join("notes/features/index.md");
+    fs::write(
+        &file,
+        "\u{feff}---\r\ntitle: Фичи\r\ncustom: keep\r\n---\r\n\r\n# Фичи\r\nТекст\r\n",
+    )
+    .unwrap();
+    let got = set_for_docs(
+        first.path(),
+        "notes",
+        Kind::Folder,
+        "features",
+        Some("teal"),
+        Some("gear"),
+    )
+    .unwrap();
+    assert_eq!(got.folders["features"].icon.as_deref(), Some("gear"));
+    let text = fs::read_to_string(&file).unwrap();
+    assert!(text.starts_with("\u{feff}---\r\ntitle: Фичи\r\ncustom: keep\r\n"));
+    assert!(text.ends_with("---\r\n\r\n# Фичи\r\nТекст\r\n"));
+    assert!(!first.path().join(".bars/appearance.toml").exists());
+    fs::copy(file, second.path().join("notes/features/Index.md")).unwrap();
+    assert_eq!(read_for_docs(second.path(), "notes").unwrap(), got);
+    set_for_docs(second.path(), "notes", Kind::Folder, "features", None, None).unwrap();
+    assert!(
+        !read_for_docs(second.path(), "notes")
+            .unwrap()
+            .folders
+            .contains_key("features")
+    );
+    assert_eq!(read_for_docs(first.path(), "notes").unwrap(), got);
+}
+
+#[test]
+fn module_index_creation_and_broken_frontmatter() {
+    let dir = project();
+    fs::create_dir_all(dir.path().join("docs/module")).unwrap();
+    set_for_docs(
+        dir.path(),
+        "docs",
+        Kind::Folder,
+        "module",
+        Some("blue"),
+        None,
+    )
+    .unwrap();
+    let file = dir.path().join("docs/module/Index.md");
+    assert!(
+        fs::read_to_string(&file)
+            .unwrap()
+            .contains("title: \"module\"")
+    );
+    for bad in [
+        "---\ntitle: broken\n",
+        "---\ncolor: [blue]\n---\n",
+        "---\nicon: gear\nicon: book\n---\n",
+    ] {
+        fs::write(&file, bad).unwrap();
+        assert!(
+            set_for_docs(
+                dir.path(),
+                "docs",
+                Kind::Folder,
+                "module",
+                Some("red"),
+                None
+            )
+            .is_err()
+        );
+        assert_eq!(fs::read_to_string(&file).unwrap(), bad);
+    }
+    assert!(set_for_docs(dir.path(), "docs", Kind::Folder, "..", Some("red"), None).is_err());
+}
+
+#[test]
+fn module_index_overrides_legacy_and_local_entries_stay_local() {
+    let dir = project();
+    fs::create_dir_all(dir.path().join("docs/module")).unwrap();
+    set(
+        dir.path(),
+        Kind::Folder,
+        "module",
+        Some("red"),
+        Some("book"),
+    )
+    .unwrap();
+    set(dir.path(), Kind::Folder, "module/sub", Some("pink"), None).unwrap();
+    let migrated = read_for_docs(dir.path(), "docs").unwrap();
+    assert_eq!(migrated.folders["module"].color.as_deref(), Some("red"));
+    assert!(!read(dir.path()).unwrap().folders.contains_key("module"));
+    set_for_docs(
+        dir.path(),
+        "docs",
+        Kind::Folder,
+        "module",
+        Some("blue"),
+        Some("gear"),
+    )
+    .unwrap();
+    let got = read_for_docs(dir.path(), "docs").unwrap();
+    assert_eq!(got.folders["module"].color.as_deref(), Some("blue"));
+    assert_eq!(got.folders["module/sub"].color.as_deref(), Some("pink"));
+    set_for_docs(dir.path(), "docs", Kind::Folder, "module", None, None).unwrap();
+    assert!(
+        !read_for_docs(dir.path(), "docs")
+            .unwrap()
+            .folders
+            .contains_key("module")
+    );
+}
+
+#[test]
+fn migration_keeps_explicit_index_and_module_move_carries_style() {
+    let dir = project();
+    fs::create_dir_all(dir.path().join("docs/old")).unwrap();
+    fs::write(
+        dir.path().join("docs/old/Index.md"),
+        "---\ntitle: Old\ncolor: teal\nicon: gear\n---\n# Old\n",
+    )
+    .unwrap();
+    set(dir.path(), Kind::Folder, "old", Some("red"), Some("book")).unwrap();
+    let got = read_for_docs(dir.path(), "docs").unwrap();
+    assert_eq!(got.folders["old"].color.as_deref(), Some("teal"));
+    fs::rename(dir.path().join("docs/old"), dir.path().join("docs/new")).unwrap();
+    let got = read_for_docs(dir.path(), "docs").unwrap();
+    assert!(!got.folders.contains_key("old"));
+    assert_eq!(got.folders["new"].icon.as_deref(), Some("gear"));
+}

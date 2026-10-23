@@ -1,4 +1,4 @@
-//! Цвета и иконки (Т-38): файл `.bars/appearance.toml` проекта. Markdown-файлы не меняются.
+//! Цвета и иконки (Т-38): модули в Index.md, документы и подпапки в `.bars/appearance.toml`.
 //! Устройство — `docs/features/knowledge-base/colors-icons.md`.
 
 use std::collections::BTreeMap;
@@ -98,7 +98,7 @@ impl AppearanceError {
 
     pub fn message(&self) -> String {
         match self {
-            Self::Broken(detail) => format!("Не удалось прочитать .bars/appearance.toml: {detail}"),
+            Self::Broken(detail) => format!("Не удалось прочитать оформление: {detail}"),
             Self::NotAllowed(text) | Self::InvalidValue(text) => (*text).to_string(),
             Self::Io(detail) => format!("Не удалось записать оформление: {detail}"),
         }
@@ -199,6 +199,71 @@ pub fn read(project: &Path) -> Result<Appearance, AppearanceError> {
         Err(error) if error.kind() == ErrorKind::NotFound => Ok(Appearance::default()),
         Err(error) => Err(AppearanceError::Io(error.to_string())),
     }
+}
+
+pub fn read_for_docs(project: &Path, docs_root: &str) -> Result<Appearance, AppearanceError> {
+    let _guard = LOCK.lock().unwrap_or_else(|e| e.into_inner());
+    let mut appearance = read(project)?;
+    let legacy: Vec<_> = appearance
+        .folders
+        .iter()
+        .filter(|(key, _)| !key.contains('/'))
+        .map(|(k, v)| (k.clone(), v.clone()))
+        .collect();
+    let mut migrated = false;
+    for (key, entry) in legacy {
+        check_path(Kind::Folder, &key)?;
+        if entry.color.as_deref().is_some_and(|v| !COLORS.contains(&v))
+            || entry.icon.as_deref().is_some_and(|v| !ICONS.contains(&v))
+        {
+            continue;
+        }
+        if crate::appearance_index::migrate(project, docs_root, &key, &entry)? {
+            appearance.folders.remove(&key);
+            migrated = true;
+        }
+    }
+    if migrated {
+        write(project, &appearance)?;
+    }
+    crate::appearance_index::read(project, docs_root, &mut appearance)?;
+    Ok(appearance)
+}
+
+pub fn set_for_docs(
+    project: &Path,
+    docs_root: &str,
+    kind: Kind,
+    path: &str,
+    color: Option<&str>,
+    icon: Option<&str>,
+) -> Result<Appearance, AppearanceError> {
+    // Завершаем перенос до сброса полей, чтобы старое значение не воскресло после сброса.
+    check_path(kind, path)?;
+    if kind == Kind::Document && icon.is_some() {
+        return Err(AppearanceError::NotAllowed(
+            "У документа иконки нет, только цвет",
+        ));
+    }
+    if color.is_some_and(|v| !COLORS.contains(&v)) || icon.is_some_and(|v| !ICONS.contains(&v)) {
+        return Err(AppearanceError::InvalidValue("Неизвестный цвет или иконка"));
+    }
+    read_for_docs(project, docs_root)?;
+    if kind == Kind::Folder && !path.contains('/') {
+        let _guard = LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        crate::appearance_index::set(
+            project,
+            docs_root,
+            path,
+            &Entry {
+                color: color.map(str::to_owned),
+                icon: icon.map(str::to_owned),
+            },
+        )?;
+    } else {
+        set(project, kind, path, color, icon)?;
+    }
+    read_for_docs(project, docs_root)
 }
 
 /// Путь от корня документации: прямые слеши, без пустых частей, `.` и `..`.

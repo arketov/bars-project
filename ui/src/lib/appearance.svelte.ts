@@ -1,4 +1,4 @@
-// Хранилище цветов и иконок проекта (Т-38): читает `.bars/appearance.toml` через команды Tauri,
+// Хранилище цветов и иконок проекта (Т-38): читает Index.md модулей и локальный TOML через Tauri,
 // держит одну копию на окно и перечитывает её по событию из другого окна.
 // Вне Tauri (просмотр в браузере) значения живут в памяти страницы.
 
@@ -90,6 +90,7 @@ export const appearance = new Appearance();
 $effect.root(() => {
   $effect(() => {
     const project = app.current;
+    app.tree; // Изменения Index.md с диска обновляют оформление модулей.
     void appearance.load(project);
   });
 });

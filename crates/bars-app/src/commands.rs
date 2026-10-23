@@ -443,8 +443,8 @@ fn appearance_failure(error: &crate::appearance::AppearanceError) -> Value {
 
 #[tauri::command]
 pub async fn appearance_read(state: State<'_, Shared>, project: String) -> Result<Value, String> {
-    let (root, _) = document_roots(&state, &project)?;
-    tauri::async_runtime::spawn_blocking(move || match crate::appearance::read(&root) {
+    let (root, docs_root) = document_roots(&state, &project)?;
+    tauri::async_runtime::spawn_blocking(move || match crate::appearance::read_for_docs(&root, &docs_root) {
         Ok(appearance) => appearance_json(&appearance),
         Err(error) => appearance_failure(&error),
     })
@@ -464,12 +464,12 @@ pub async fn appearance_set(
     icon: Option<String>,
 ) -> Result<Value, String> {
     use tauri::Emitter;
-    let (root, _) = document_roots(&state, &project)?;
+    let (root, docs_root) = document_roots(&state, &project)?;
     let Some(kind) = crate::appearance::Kind::parse(&kind) else {
         return Err("неизвестный вид: нужен folder или document".into());
     };
     let value = tauri::async_runtime::spawn_blocking(move || {
-        match crate::appearance::set(&root, kind, &path, color.as_deref(), icon.as_deref()) {
+        match crate::appearance::set_for_docs(&root, &docs_root, kind, &path, color.as_deref(), icon.as_deref()) {
             Ok(appearance) => appearance_json(&appearance),
             Err(error) => appearance_failure(&error),
         }

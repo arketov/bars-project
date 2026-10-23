@@ -2,6 +2,7 @@
 //! методов напрямую, а `bars-mcp` и `bars-cli` приходят по каналу.
 
 mod appearance;
+mod appearance_index;
 #[cfg(test)]
 mod appearance_tests;
 mod commands;
