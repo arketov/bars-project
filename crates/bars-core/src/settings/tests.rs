@@ -6,6 +6,20 @@ use super::*;
 const USER: &str = "settings.toml";
 const PROJECT: &str = "config.toml";
 
+#[test]
+fn ollama_embed_settings_and_independent_rerank() {
+    let loaded = user(
+        "[embed]\nsource = 'ollama'\nmodel = 'qwen3-embedding:0.6b'\nbase_url = 'http://127.0.0.1:11434'\n[rerank]\nenabled = true\n",
+    );
+    assert_eq!(loaded.value.embed.source, ModelSource::Ollama);
+    assert_eq!(loaded.value.embed.source.as_str(), "ollama");
+    assert_eq!(loaded.value.rerank.source, ModelSource::Builtin);
+    let error = user_err(
+        "[rerank]\nenabled = true\nsource = 'ollama'\nmodel = 'reranker'\nbase_url = 'http://127.0.0.1:11434'\n",
+    );
+    assert!(error.to_string().contains("Ollama"));
+}
+
 fn user(text: &str) -> Loaded<UserSettings> {
     UserSettings::parse(text, Path::new(USER)).unwrap()
 }

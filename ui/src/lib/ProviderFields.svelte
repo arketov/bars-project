@@ -24,12 +24,15 @@
 </script>
 
 <div class="field">
-  <div class="lbl"><b>Адрес API</b><small>{cfg.source === "remote" ? "OpenAI-совместимый endpoint" : "Локальный OpenAI-совместимый сервер"}</small></div>
+  <div class="lbl"><b>Адрес API</b><small>{cfg.source === "ollama" ? "Корень сервера Ollama, без /api и /v1" : cfg.source === "remote" ? "OpenAI-совместимый endpoint" : "Локальный OpenAI-совместимый сервер"}</small></div>
   <div>
-    <input class="inp mono" placeholder="https://api.example.com/v1" bind:value={cfg.base_url} />
+    <input class="inp mono" placeholder={cfg.source === "ollama" ? "http://127.0.0.1:11434" : "https://api.example.com/v1"} bind:value={cfg.base_url} />
     {#if errors[`${kind}.base_url`]}<small class="err">{errors[`${kind}.base_url`]}</small>{/if}
   </div>
 </div>
+{#if cfg.source === "ollama"}
+  <p>Модель должна быть установлена в Ollama. Видеокартой и выгрузкой управляет Ollama; rerank выберите отдельно. После замены весов под прежним именем нужна полная переиндексация.</p>
+{/if}
 <div class="field">
   <div class="lbl"><b>Модель</b></div>
   <div>

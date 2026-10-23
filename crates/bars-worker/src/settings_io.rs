@@ -439,6 +439,25 @@ mod tests {
     }
 
     #[test]
+    fn ollama_settings_roundtrip_and_reject_rerank_without_writing() {
+        let home = home();
+        let mut doc = current(home.path());
+        doc.embed.source = "ollama".into();
+        doc.embed.model = "qwen3-embedding:0.6b".into();
+        doc.embed.base_url = Some("http://127.0.0.1:11434".into());
+        assert!(save_user_settings(home.path(), &doc).unwrap());
+        assert_eq!(current(home.path()), doc);
+        let before = fs::read_to_string(user_settings_path(home.path())).unwrap();
+        doc.rerank.enabled = true;
+        doc.rerank.source = "ollama".into();
+        assert!(save_user_settings(home.path(), &doc).is_err());
+        assert_eq!(
+            fs::read_to_string(user_settings_path(home.path())).unwrap(),
+            before
+        );
+    }
+
+    #[test]
     fn indexing_pause_roundtrips_and_rejects_out_of_range_values() {
         let home = home();
         let file = user_settings_path(home.path());

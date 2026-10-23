@@ -1,0 +1,6 @@
+{
+  "models": "D:/text-generation-webui-1.16/models",
+  "version": "0.40.9",
+  "archive_sha256": "C35019C95679EAE1CB28FDA4732A7C97978B9FBCBD8ADFB5CBCC8FE7C161EA0B",
+  "source": "https://github.com/ollama/ollama/releases/download/v0.40.9/ollama-windows-amd64.zip"
+}

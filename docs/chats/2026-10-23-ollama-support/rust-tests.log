@@ -1,0 +1,22 @@
+    Blocking waiting for file lock on build directory
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Finished `release` profile [optimized] target(s) in 20m 53s
+     Running unittests src\lib.rs (C:/bt/bars\release\deps\bars_core-e34a604ebdb2f1b9.exe)
+
+running 5 tests
+test settings::tests::ollama_embed_settings_and_independent_rerank ... ok
+test models::remote::tests::ollama_context_error_is_not_retried ... ok
+test models::remote::tests::ollama_dimension_changes_are_rejected ... ok
+test models::remote::tests::ollama_batches_use_native_api_and_never_truncate ... ok
+test models::remote::tests::ollama_rejects_bad_vectors_and_counts ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 304 filtered out; finished in 0.01s
+
+     Running unittests src\lib.rs (C:/bt/bars\release\deps\bars_worker-ead86c2eeea92824.exe)
+
+running 2 tests
+test settings_io::tests::ollama_settings_roundtrip_and_reject_rerank_without_writing ... ok
+test handler::tests::external_models::ollama_embed_and_independent_http_rerank_serve_real_worker_search ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 274 filtered out; finished in 0.14s

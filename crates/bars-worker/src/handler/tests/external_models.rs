@@ -62,6 +62,52 @@ fn secrets() -> Arc<dyn SecretStore> {
     Arc::new(secrets)
 }
 
+#[tokio::test(flavor = "multi_thread")]
+async fn ollama_embed_and_independent_http_rerank_serve_real_worker_search() {
+    let server = FakeServer::start(|request| {
+        assert_eq!(request.path, "/api/embed");
+        assert_eq!(request.json()["truncate"], false);
+        let vectors: Vec<_> = request.json()["input"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|text| {
+                json!([
+                    1.0,
+                    1.0 + text.as_str().unwrap().len() as f64 % 7.0,
+                    2.0,
+                    3.0
+                ])
+            })
+            .collect();
+        Response::ok(json!({"embeddings": vectors}))
+    });
+    let rerank = provider_server(200);
+    let harness = harness("ollama-search").await;
+    write_settings(
+        &harness,
+        &format!(
+            "[embed]\nsource = 'ollama'\nmodel = 'qwen3-embedding:0.6b'\nbase_url = '{}'\nbatch_size = 2\n[rerank]\nenabled = true\nsource = 'local-openai'\nmodel = 'rr'\nbase_url = '{}'\n",
+            server.url(),
+            rerank.url()
+        ),
+    );
+    let mut cli = harness.client(ClientKind::Cli).await;
+    let root = register_and_index(&harness, &mut cli).await;
+    let found = cli.call(&search(&root, "очередь")).await.unwrap();
+    assert!(found.rerank_error.is_none());
+    assert_eq!(found.results[0].path, "docs/cooking.md");
+    assert_eq!(found.applied.results, 3);
+    assert!(
+        server
+            .requests()
+            .iter()
+            .all(|r| r.header("authorization").is_none()
+                && r.json()["input"].as_array().unwrap().len() <= 2)
+    );
+    assert!(rerank.requests().iter().any(|r| r.path == "/rerank"));
+}
+
 async fn harness(name: &str) -> Harness {
     let provider = ConfiguredProvider::with_secrets(PathBuf::from("models-not-used"), secrets());
     Harness::start(name, Arc::new(provider)).await

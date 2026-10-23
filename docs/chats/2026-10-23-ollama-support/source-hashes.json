@@ -1,0 +1,42 @@
+{
+  "head": "a75288236b43f766fc7c96561b9f95f53ac2ffcc",
+  "probe_sha256": "0BB1D58352D1DCEC181D5D5D11242C94FE4BA8716F22E91269F72198F2DBA091",
+  "sources": [
+    {
+      "path": "crates/bars-core/src/models/remote.rs",
+      "sha256": "E5CE4608999000566FBB05D6CF01D834813AEC38EF8E3077F5393E90B141647F"
+    },
+    {
+      "path": "crates/bars-core/src/settings/mod.rs",
+      "sha256": "35A59B06E789865F5AD58FF4FBDCB4C32DCAFEDE3722BC06B5C892ED7C9F4CB6"
+    },
+    {
+      "path": "crates/bars-core/src/settings/raw.rs",
+      "sha256": "6A5A385B729D9F8B5DE88EDF713CD67063BF727038C21FAEA7D34722C830899E"
+    },
+    {
+      "path": "crates/bars-worker/src/worker/models.rs",
+      "sha256": "4AFDF2047529607D8E94C8557ECD3C4F01C81D2E4A05EDF16D5A69E8166E8787"
+    },
+    {
+      "path": "crates/bars-worker/examples/verify_ollama.rs",
+      "sha256": "F0BBA8C9ECE3E303F8C0579F8A47FF289B6357F88CF89A3D1F17D73633BE7DF7"
+    },
+    {
+      "path": "ui/src/lib/SettingsPage.svelte",
+      "sha256": "B1D25BD1C018115E825AF137CE0E391DDDCA049A2A231A81034D36A9BE15CC1C"
+    },
+    {
+      "path": "ui/src/lib/ProviderFields.svelte",
+      "sha256": "64407CD44AB204EC1A3E364B06E5876A1CF03C447D814C7F54FD6451AEC45D3A"
+    },
+    {
+      "path": "ui/src/lib/settings-logic.ts",
+      "sha256": "5CB93A701B6D63A16F7E462B1992E911CFF158730FAB6F65BF01BB7101B5F7FC"
+    },
+    {
+      "path": "ui/src/lib/types.ts",
+      "sha256": "E6497D0A1B67D0602506E5884F76622E885C7CA55AED9248B297518B88B831DA"
+    }
+  ]
+}

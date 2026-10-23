@@ -28,7 +28,7 @@ export function parseFingerprint(
   const index = fingerprint.indexOf(":");
   if (index < 0) return null;
   const source = fingerprint.slice(0, index);
-  if (source !== "builtin" && source !== "remote" && source !== "local-openai") return null;
+  if (source !== "builtin" && source !== "remote" && source !== "local-openai" && source !== "ollama") return null;
   return { source, model: fingerprint.slice(index + 1) };
 }
 
@@ -65,6 +65,9 @@ export function validate(doc: SettingsDoc): Record<string, string> {
     }
   }
   const rerank = doc.rerank;
+  if (rerank.enabled && rerank.source === "ollama") {
+    errors["rerank.source"] = "Ollama не поддерживает API rerank; выберите другой источник";
+  }
   if (rerank.enabled && rerank.source !== "builtin") {
     if (!rerank.model.trim()) errors["rerank.model"] = "Укажите модель провайдера";
     if (!rerank.base_url || !isHttpUrl(rerank.base_url)) {

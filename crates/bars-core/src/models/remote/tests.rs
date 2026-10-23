@@ -9,6 +9,88 @@ use crate::secrets::{KeyringSecrets, SecretStore};
 
 const KEY: &str = "sk-test-not-a-real-key-123456";
 
+#[test]
+fn ollama_batches_use_native_api_and_never_truncate() {
+    let server = FakeServer::start(|request| {
+        assert_eq!(request.path, "/api/embed");
+        assert_eq!(request.json()["truncate"], false);
+        assert_eq!(request.header("authorization"), None);
+        let vectors: Vec<_> = request.json()["input"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|text| json!([text.as_str().unwrap().len() as f64, 1.0]))
+            .collect();
+        Response::ok(json!({"embeddings": vectors}))
+    });
+    let mut config = target(&server, "ollama", false);
+    config.model = "qwen3-embedding:0.6b".into();
+    let mut embedder = HttpEmbedder::new(config, 2);
+    assert_eq!(
+        embedder.embed(&["а", "abc", "abcd"]).unwrap(),
+        vec![vec![2.0, 1.0], vec![3.0, 1.0], vec![4.0, 1.0]]
+    );
+    embedder.embed_query("запрос").unwrap();
+    assert_eq!(embedder.fingerprint().source, "ollama");
+    assert_eq!(embedder.fingerprint().dim, 2);
+    let requests = server.requests();
+    assert_eq!(requests.len(), 3);
+    assert_eq!(requests[0].json()["input"], json!(["а", "abc"]));
+    assert_eq!(
+        requests[2].json()["input"],
+        json!([format!(
+            "{}запрос",
+            super::super::catalog::QWEN3_QUERY_PREFIX
+        )])
+    );
+}
+
+#[test]
+fn ollama_rejects_bad_vectors_and_counts() {
+    for response in [
+        json!({"embeddings": [[]]}),
+        json!({"embeddings": [[1e100]]}),
+        json!({"embeddings": [["a"]]}),
+        json!({"data": []}),
+        json!({"embeddings": []}),
+    ] {
+        let server = FakeServer::start(move |_| Response::ok(response.clone()));
+        let mut embedder = HttpEmbedder::new(target(&server, "ollama", false), 2);
+        assert!(embedder.embed(&["текст"]).is_err());
+    }
+}
+
+#[test]
+fn ollama_context_error_is_not_retried() {
+    let server = FakeServer::start(|_| Response::status(400, "input length exceeds context"));
+    let mut embedder =
+        HttpEmbedder::new(target(&server, "ollama", false), 2).with_retry_pause(Duration::ZERO);
+    assert!(matches!(
+        embedder.embed_query("длинный вход"),
+        Err(EmbedError::Rejected(_))
+    ));
+    assert_eq!(server.requests().len(), 1);
+}
+
+#[test]
+fn ollama_dimension_changes_are_rejected() {
+    let calls = Arc::new(AtomicUsize::new(0));
+    let count = Arc::clone(&calls);
+    let server = FakeServer::start(move |_| {
+        let dim = 2 + count.fetch_add(1, Ordering::SeqCst);
+        Response::ok(json!({"embeddings": [vec![1.0; dim]]}))
+    });
+    let mut embedder = HttpEmbedder::new(target(&server, "ollama", false), 2);
+    embedder.embed_query("первый").unwrap();
+    assert!(matches!(
+        embedder.embed_query("второй"),
+        Err(EmbedError::Dimension {
+            expected: 2,
+            got: 3
+        })
+    ));
+}
+
 fn store_with_key() -> Arc<dyn SecretStore> {
     let store = KeyringSecrets::with_store(keyring_core::mock::Store::new().unwrap());
     store.set("bars/test", KEY).unwrap();

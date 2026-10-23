@@ -538,6 +538,13 @@ impl RerankTable {
         if self.enabled != Some(true) {
             return Ok(());
         }
+        if self.source == Some(ModelSource::Ollama) {
+            return Err(invalid(
+                file,
+                "rerank.source",
+                "Ollama не поддерживает API rerank; выберите встроенную модель или совместимый сервер",
+            ));
+        }
         ProviderFields {
             table: "rerank",
             source: self.source,

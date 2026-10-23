@@ -12,6 +12,7 @@ title: Внутренняя база знаний bars
 
 | Файл | Когда читать |
 |---|---|
+| `ollama.md` | Нативный embed API Ollama, кандидаты Qwen3 и отсутствие штатного rerank |
 | [editor-spike.md](editor-spike.md) | CodeMirror 6: замеры ввода, прокрутки и разбора на документах до 5 МБ, размер сборки, что не проверено; рекомендация ADR-0005 |
 | [window-docking.md](window-docking.md) | Сравнение docking, Svelte/WebView2-проба и отдельное окно с общим воркером; рекомендация ADR-0003 |
 | [graph-render.md](graph-render.md) | Obsidian, физика и отрисовка на двух проектах, рекомендация d3-force/worker/Canvas2D и границы опыта |

@@ -50,6 +50,8 @@ pub enum ModelSource {
     Remote,
     /// Локальный OpenAI-совместимый адрес.
     LocalOpenai,
+    /// Нативный API Ollama (только embedding).
+    Ollama,
 }
 
 impl ModelSource {
@@ -59,6 +61,7 @@ impl ModelSource {
             Self::Builtin => "builtin",
             Self::Remote => "remote",
             Self::LocalOpenai => "local-openai",
+            Self::Ollama => "ollama",
         }
     }
 }

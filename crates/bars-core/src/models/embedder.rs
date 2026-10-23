@@ -5,7 +5,7 @@
 /// Совпадает у двух моделей — векторы одного индекса сравнимы. Отличается — нужна переиндексация.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ModelFingerprint {
-    /// `builtin`, `remote` или `local-openai`.
+    /// `builtin`, `remote`, `local-openai` или `ollama`.
     pub source: String,
     /// Идентификатор модели: `BAAI/bge-m3` или имя у провайдера.
     pub model: String,

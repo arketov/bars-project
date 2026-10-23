@@ -36,6 +36,7 @@
     ["builtin", "Встроенная"],
     ["remote", "Удалённый провайдер"],
     ["local-openai", "Локальный адрес"],
+    ["ollama", "Ollama"],
   ];
   const THEMES: [ThemePref, string][] = [
     ["system", "Как в системе"],
@@ -75,7 +76,14 @@
       cfg.model = (kind === "embed" ? settings.models?.embed[0]?.id : settings.models?.rerank[0]?.id) ?? cfg.model;
     } else {
       cfg.model = "";
-      if (source === "local-openai") cfg.api_key_name = null;
+      if (source === "local-openai" || source === "ollama") {
+        cfg.api_key_name = null;
+        cfg.api_key_env = null;
+      }
+      if (source === "ollama") {
+        cfg.base_url = "http://127.0.0.1:11434";
+        cfg.model = "qwen3-embedding:0.6b";
+      }
     }
   }
 
@@ -192,7 +200,7 @@
           </div>
           <div class="gbody" class:dim={!draft.rerank.enabled}>
             <div class="seg">
-              {#each SOURCES as [id, title] (id)}
+              {#each SOURCES.filter(([id]) => id !== "ollama") as [id, title] (id)}
                 <button class:on={draft.rerank.source === id} onclick={() => setSource("rerank", id)}>{title}</button>
               {/each}
             </div>

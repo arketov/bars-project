@@ -1,0 +1,17 @@
+[
+  {
+    "status": 404,
+    "route": "/rerank",
+    "body": "404 page not found"
+  },
+  {
+    "status": 404,
+    "route": "/v1/rerank",
+    "body": "404 page not found"
+  },
+  {
+    "status": 404,
+    "route": "/api/rerank",
+    "body": "404 page not found"
+  }
+]

@@ -1,0 +1,2 @@
+time=2026-10-23T13:25:01.534+05:00 level=INFO source=routes.go:2513 msg="Listening on 127.0.0.1:11435 (version 0.40.9)"
+time=2026-10-23T13:25:08.824+05:00 level=INFO source=types.go:32 msg="inference compute" id=0 filter_id=0 library=CUDA compute=8.6 name=CUDA0 description="NVIDIA GeForce RTX 3090" libdirs=ollama,cuda_v13 driver=13.4 pci_id=0000:01:00.0 type=discrete total="24.0 GiB" available="22.8 GiB"

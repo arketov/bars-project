@@ -271,6 +271,9 @@ impl ModelProvider for ConfiguredProvider {
     fn load_reranker(&self, settings: &Settings) -> Result<Box<dyn Reranker + Send>, RerankError> {
         let rerank = &settings.rerank;
         match rerank.source {
+            ModelSource::Ollama => Err(RerankError::Load(
+                "Ollama не поддерживает API rerank; выберите другой источник".into(),
+            )),
             ModelSource::Builtin => {
                 if rerank.model != BGE_RERANKER_V2_M3_ID {
                     return Err(RerankError::Load(format!(

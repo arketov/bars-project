@@ -40,6 +40,20 @@ const DOC: SettingsDoc = {
 };
 
 describe("settings-logic", () => {
+  it("supports Ollama embed identity but rejects enabled Ollama rerank", () => {
+    const draft = clone(DOC);
+    draft.embed.source = "ollama";
+    draft.embed.model = "qwen3-embedding:0.6b";
+    draft.embed.base_url = "http://127.0.0.1:11434";
+    expect(validate(draft)).toEqual({});
+    expect(needsReindex(DOC, draft)).toBe(true);
+    expect(parseFingerprint("ollama:qwen3-embedding:0.6b")).toEqual({ source: "ollama", model: "qwen3-embedding:0.6b" });
+    draft.rerank.enabled = true;
+    draft.rerank.source = "ollama";
+    expect(validate(draft)["rerank.source"]).toContain("Ollama");
+    draft.rerank.enabled = false;
+    expect(validate(draft)["rerank.source"]).toBeUndefined();
+  });
   it("validates the indexing pause without requiring a rebuild", () => {
     const draft = clone(DOC);
     for (const seconds of [0, 30, 3600]) {

@@ -1,8 +1,8 @@
-//! Внешние модели по HTTP: embed через OpenAI-совместимый API и rerank в формате Cohere
+//! Внешние модели по HTTP: embed через OpenAI/Ollama API и rerank в формате Cohere
 //! (`docs/features/models/external-models.md`, Т-17).
 //!
-//! Удалённый провайдер и локальный сервер (llama-server, Ollama, vLLM) различаются адресом и
-//! наличием ключа. Ключ читается из [`KeyRef`] при каждом запросе и вычищается из сообщений об
+//! Ollama использует нативный embed API; остальные — OpenAI/Cohere API.
+//! Ключ читается из [`KeyRef`] при каждом запросе и вычищается из сообщений об
 //! ошибках.
 
 use std::time::Duration;
@@ -25,7 +25,7 @@ const SNIPPET_CHARS: usize = 300;
 /// Что нужно знать об адресе внешней модели.
 #[derive(Clone)]
 pub struct RemoteTarget {
-    /// `remote` или `local-openai`: идёт в отпечаток.
+    /// `remote`, `local-openai` или `ollama`: идёт в отпечаток.
     pub source: &'static str,
     pub base_url: String,
     /// Имя модели у провайдера.
@@ -151,7 +151,7 @@ fn post_with_retries(
     }
 }
 
-/// Embed через `POST <base_url>/v1/embeddings`.
+/// Embed через OpenAI `/v1/embeddings` либо Ollama `/api/embed`.
 pub struct HttpEmbedder {
     agent: ureq::Agent,
     url: String,
@@ -176,7 +176,11 @@ impl HttpEmbedder {
     pub fn new(target: RemoteTarget, batch_size: usize) -> Self {
         Self {
             agent: agent(EMBED_TIMEOUT),
-            url: versioned_url(&target.base_url, "embeddings"),
+            url: if target.source == "ollama" {
+                plain_url(&target.base_url, "api/embed")
+            } else {
+                versioned_url(&target.base_url, "embeddings")
+            },
             fingerprint: remote_fingerprint(target.source, &target.model),
             target,
             batch_size: batch_size.max(1),
@@ -191,7 +195,10 @@ impl HttpEmbedder {
     }
 
     fn request(&self, batch: &[&str], retries: u32) -> Result<Vec<Vec<f32>>, EmbedError> {
-        let body = json!({ "model": self.target.model, "input": batch });
+        let mut body = json!({ "model": self.target.model, "input": batch });
+        if self.target.source == "ollama" {
+            body["truncate"] = json!(false);
+        }
         let text = post_with_retries(
             &self.agent,
             &self.url,
@@ -200,7 +207,12 @@ impl HttpEmbedder {
             retries,
             self.pause,
         )?;
-        let vectors = parse_embeddings(&text).map_err(EmbedError::Embed)?;
+        let vectors = if self.target.source == "ollama" {
+            parse_ollama_embeddings(&text)
+        } else {
+            parse_embeddings(&text)
+        }
+        .map_err(EmbedError::Embed)?;
         if vectors.len() != batch.len() {
             return Err(EmbedError::Count {
                 expected: batch.len(),
@@ -209,6 +221,30 @@ impl HttpEmbedder {
         }
         Ok(vectors)
     }
+}
+
+fn parse_ollama_embeddings(text: &str) -> Result<Vec<Vec<f32>>, String> {
+    let value: Value =
+        serde_json::from_str(text).map_err(|error| format!("ответ Ollama не JSON: {error}"))?;
+    let data = value
+        .get("embeddings")
+        .and_then(Value::as_array)
+        .ok_or("в ответе Ollama нет списка `embeddings`")?;
+    data.iter()
+        .map(|item| {
+            let vector: Vec<f32> = item
+                .as_array()
+                .ok_or("вектор Ollama не массив")?
+                .iter()
+                .map(|number| number.as_f64().map(|n| n as f32))
+                .collect::<Option<_>>()
+                .ok_or("вектор Ollama содержит нечисловую координату")?;
+            if vector.is_empty() || vector.iter().any(|n| !n.is_finite()) {
+                return Err("Ollama вернула пустой вектор или неконечные координаты".into());
+            }
+            Ok(vector)
+        })
+        .collect()
 }
 
 fn parse_embeddings(text: &str) -> Result<Vec<Vec<f32>>, String> {
@@ -247,6 +283,15 @@ impl Embedder for HttpEmbedder {
         }
     }
     fn embed_query(&mut self, text: &str) -> Result<Vec<f32>, EmbedError> {
+        let instructed;
+        let text = if self.target.source == "ollama"
+            && self.target.model.split(':').next() == Some("qwen3-embedding")
+        {
+            instructed = format!("{}{text}", super::catalog::QWEN3_QUERY_PREFIX);
+            &instructed
+        } else {
+            text
+        };
         let mut vectors = self.request(&[text], RETRIES)?;
         let vector = vectors.remove(0);
         if self.fingerprint.dim == 0 {

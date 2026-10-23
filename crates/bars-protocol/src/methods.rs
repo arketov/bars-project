@@ -704,7 +704,7 @@ impl AcceleratorDoc {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EmbedDoc {
     pub accelerator: AcceleratorDoc,
-    /// `builtin`, `remote` или `local-openai`.
+    /// `builtin`, `remote`, `local-openai` или `ollama` (только embed).
     pub source: String,
     pub model: String,
     #[serde(default)]

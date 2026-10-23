@@ -1,0 +1,14 @@
+
+running 10 tests
+test settings_io::tests::a_broken_file_is_not_replaced ... ok
+test settings_io::tests::ollama_settings_roundtrip_and_reject_rerank_without_writing ... ok
+test settings_io::tests::defaults_roundtrip_without_creating_a_file ... ok
+test settings_io::tests::docs_root_is_written_next_to_other_keys ... ok
+test settings_io::tests::invalid_values_are_rejected_and_the_file_stays ... ok
+test settings_io::tests::only_changed_keys_are_written_and_comments_survive ... ok
+test settings_io::tests::shared_device_is_migrated_once_without_losing_other_keys ... ok
+test settings_io::tests::unload_minutes_are_written_per_model_and_checked ... ok
+test settings_io::tests::remote_provider_is_saved_and_cleared_keys_are_removed ... ok
+test settings_io::tests::indexing_pause_roundtrips_and_rejects_out_of_range_values ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 266 filtered out; finished in 0.04s
