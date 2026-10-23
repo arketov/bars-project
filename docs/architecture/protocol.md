@@ -100,7 +100,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 
 | Метод | Параметры | Ответ |
 |---|---|---|
-| `settings_get` | — | `file`, `settings` (пять таблиц `settings.toml` с умолчаниями на месте пропущенного: `embed`, `rerank`, `search`, `device`, `chunking`) и `warnings` (неизвестные ключи) |
+| `settings_get` | — | `file`, `settings` (таблицы с умолчаниями на месте пропущенного: `embed`, `rerank`, `search`, `chunking`, `indexing`; устройство — внутри каждой модели) и `warnings` (неизвестные ключи). `indexing.edit_pause_seconds`: целое 0…3600 |
 | `settings_save` | `settings` | `saved: true`. Воркер правит файл на месте (комментарии и порядок ключей сохраняются, пишутся только изменённые ключи), проверяет результат тем же разбором, что при чтении, и пишет атомарно; не прошедшие проверку значения — `invalid_params`, файл не тронут. Потом ставит все проекты на проверку: проекты с другой моделью индекса переходят в `reindex_required`, эмбеддинг не запускается (Т-25) |
 | `models_info` | — | встроенные embed-модели каталога и rerank-модель: размерность, бэкенд (`onnx` или `candle`), предупреждения, `downloaded`, `downloading`, `download_percent` (0…100 или null), `download_error` (безопасная ошибка ручного скачивания или null); папка моделей; `runtime.embed` и `runtime.rerank` с model/source/requested/state/backend/actual/fallback_reason и необязательными precision/revision фактической сессии, без загрузки модели и ожидания инференса |
 | `model_download` | `id` | `accepted`; модель скачивается в фоне. Явный итог — в `operation_events`; `downloading` и полный комплект файлов в `models_info` не доказывают готовность сессии |

@@ -68,6 +68,9 @@ async fn a_stream_of_edits_embeds_the_document_once_after_the_pause() {
     );
     let status = worker.status(&project).unwrap();
     assert_eq!(status.pending, 1);
+    let summary = worker.summary();
+    assert!(summary.tooltip.contains("ждут паузы: 1"));
+    assert!(summary.indexing.unwrap().text.contains("ждут паузы: 1"));
     assert!(!worker.is_idle());
 
     idle(&worker).await;
@@ -199,5 +202,202 @@ async fn stopping_a_project_drops_its_records() {
     assert_eq!(worker.doc_queue(&project, 10).unwrap().1.waiting, 1);
     assert!(worker.cancel(&project).unwrap());
     assert_eq!(worker.doc_queue(&project, 10).unwrap().1.total(), 0);
+    worker.shutdown().await;
+}
+
+#[derive(Default)]
+struct Inspection {
+    target: Mutex<Option<(Arc<DocQueueMutex>, PathBuf)>>,
+    snapshots: Mutex<Vec<Vec<DocView>>>,
+    reject: std::sync::atomic::AtomicBool,
+}
+type DocQueueMutex = Mutex<DocQueue>;
+
+struct InspectProvider {
+    inner: Arc<FakeProvider>,
+    inspection: Arc<Inspection>,
+}
+struct InspectEmbedder {
+    inner: Box<dyn bars_core::models::Embedder + Send>,
+    inspection: Arc<Inspection>,
+}
+
+impl bars_core::models::Embedder for InspectEmbedder {
+    fn fingerprint(&self) -> &bars_core::models::ModelFingerprint {
+        self.inner.fingerprint()
+    }
+    fn embed(&mut self, texts: &[&str]) -> Result<Vec<Vec<f32>>, bars_core::models::EmbedError> {
+        if let Some((docs, project)) = &*lock(&self.inspection.target) {
+            lock(&self.inspection.snapshots).push(lock(docs).snapshot(
+                project,
+                Instant::now(),
+                200,
+            ));
+        }
+        if self.inspection.reject.load(Ordering::SeqCst)
+            && texts.iter().any(|text| text.contains("ОШИБКА"))
+        {
+            return Err(bars_core::models::EmbedError::Rejected(
+                "отказ тестового провайдера".into(),
+            ));
+        }
+        self.inner.embed(texts)
+    }
+}
+
+impl ModelProvider for InspectProvider {
+    fn fingerprint(
+        &self,
+        settings: &Settings,
+    ) -> Result<bars_core::models::ModelFingerprint, bars_core::models::EmbedError> {
+        self.inner.fingerprint(settings)
+    }
+    fn load(
+        &self,
+        settings: &Settings,
+    ) -> Result<Box<dyn bars_core::models::Embedder + Send>, bars_core::models::EmbedError> {
+        Ok(Box::new(InspectEmbedder {
+            inner: self.inner.load(settings)?,
+            inspection: Arc::clone(&self.inspection),
+        }))
+    }
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn a_periodic_check_exposes_discovered_documents_and_retains_provider_errors() {
+    let env = Env::new();
+    let project = env.project("periodic", &[("a.md", DOC)]);
+    let inspection = Arc::new(Inspection::default());
+    let worker = Worker::start(
+        env.config(),
+        Arc::new(InspectProvider {
+            inner: env.provider.clone(),
+            inspection: inspection.clone(),
+        }),
+    )
+    .unwrap();
+    let project = worker.register(&project).unwrap().path;
+    idle(&worker).await;
+    *lock(&inspection.target) = Some((worker.inner.docs.clone(), project.clone()));
+    inspection.reject.store(true, Ordering::SeqCst);
+    // События намеренно теряются: расхождения должен найти полный проход.
+    let deaf = ProjectWatcher::start(
+        &project,
+        "docs",
+        Duration::from_millis(100),
+        Arc::new(|_| {}),
+    )
+    .unwrap();
+    drop(
+        lock(&worker.inner.projects)
+            .get_mut(&project)
+            .unwrap()
+            .watcher
+            .replace(deaf),
+    );
+    for (path, title) in [
+        ("a.md", "ОШИБКА"),
+        ("b.md", "Новый второй"),
+        ("c.md", "Новый третий"),
+    ] {
+        fs::write(project.join("docs").join(path), doc(title)).unwrap();
+    }
+    worker.check_all();
+    idle(&worker).await;
+    let snapshots = lock(&inspection.snapshots).clone();
+    assert!(
+        snapshots
+            .iter()
+            .any(|rows| rows.iter().any(|row| row.state == DocState::Queued))
+    );
+    for rows in snapshots {
+        assert_eq!(
+            rows.iter()
+                .filter(|row| row.state == DocState::Indexing)
+                .count(),
+            1
+        );
+        assert!(rows.iter().all(|row| row.source == DocSource::Periodic));
+    }
+    let (items, counts) = worker.doc_queue(&project, 200).unwrap();
+    assert_eq!((counts.error, counts.total()), (1, 1));
+    assert!(
+        items[0]
+            .error
+            .as_ref()
+            .unwrap()
+            .contains("отказ тестового провайдера")
+    );
+    assert_eq!(
+        documents(&project),
+        3,
+        "старая версия ошибочного документа сохранена"
+    );
+    let before = lock(&inspection.snapshots).len();
+    worker.check_all();
+    idle(&worker).await;
+    assert_eq!(
+        lock(&inspection.snapshots).len(),
+        before,
+        "ошибка ждёт явного повтора"
+    );
+    assert_eq!(worker.summary().health, Health::Attention);
+    fs::write(
+        project.join(".bars/config.toml"),
+        "[chunking]\nmax_chars = 1000\n",
+    )
+    .unwrap();
+    worker.check_all();
+    idle(&worker).await;
+    assert_eq!(
+        lock(&inspection.snapshots).len(),
+        before,
+        "новая нарезка не повторяет ошибку автоматически"
+    );
+    assert!(
+        worker
+            .status(&project)
+            .unwrap()
+            .last_report
+            .unwrap()
+            .full_check
+    );
+    assert_eq!(worker.doc_queue(&project, 200).unwrap().1.error, 1);
+    assert_eq!(
+        Index::open(&index_path(&project), Journal::Wal)
+            .unwrap()
+            .stored_layout()
+            .unwrap()
+            .unwrap()
+            .chunking
+            .max_chars,
+        6000
+    );
+    worker
+        .check_files(&project, vec![project.join("docs/a.md")])
+        .unwrap();
+    idle(&worker).await;
+    assert_eq!(worker.doc_queue(&project, 200).unwrap().1.error, 1);
+    inspection.reject.store(false, Ordering::SeqCst);
+    assert!(worker.doc_retry(&project, "docs/a.md").unwrap());
+    idle(&worker).await;
+    assert_eq!(worker.doc_queue(&project, 200).unwrap().1.total(), 0);
+    assert_eq!(
+        Index::open(&index_path(&project), Journal::Wal)
+            .unwrap()
+            .stored_layout()
+            .unwrap()
+            .unwrap()
+            .chunking
+            .max_chars,
+        1000
+    );
+    assert!(
+        lock(&inspection.snapshots)
+            .last()
+            .unwrap()
+            .iter()
+            .any(|row| row.source == DocSource::Explicit)
+    );
     worker.shutdown().await;
 }

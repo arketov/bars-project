@@ -2,7 +2,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import type { ModelsInfoOutput } from "./types";
 import type { Notice } from "./notifications";
 
-vi.mock("./api", () => ({ call: vi.fn(), joinPath: vi.fn(), openPath: vi.fn(), pickFolder: vi.fn() }));
+vi.mock("./api", () => ({ call: vi.fn(), joinPath: vi.fn(), openPath: vi.fn(), pickFolder: vi.fn(), inTauri: () => false }));
 import { call } from "./api";
 import { app } from "./app.svelte";
 const invoke = vi.mocked(call);

@@ -1,0 +1,3 @@
+  FAILED: ggml/src/ggml-vulkan/vulkan-shaders-gen-prefix/src/vulkan-shaders-gen-stamp/vulkan-shaders-gen-configure C:/Users/arketov/Desktop/bars-project/target/debug/build/llama-cpp-sys-2-318f3cd75a101845/out/build/ggml/src/ggml-vulkan/vulkan-shaders-gen-prefix/src/vulkan-shaders-gen-stamp/vulkan-shaders-gen-configure
+      FAILED: CMakeFiles/cmTC_bd97f.dir/testCCompiler.c.obj
+      C:\Users\arketov\Desktop\bars-project\target\debug\build\llama-cpp-sys-2-318f3cd75a101845\out\build\ggml\src\ggml-vulkan\vulkan-shaders-gen-prefix\src\vulkan-shaders-gen-build\CMakeFiles\CMakeScratch\TryCompile-fmpkmq\testCCompiler.c : fatal error C1083: ╨Э╨╡ ╤Г╨┤╨░╨╡╤В╤Б╤П ╨╛╤В╨║╤А╤Л╤В╤М ╤Д╨░╨╣╨╗ ╤Б╨╛╨╖╨┤╨░╨╜╨╜╤Л╨╣ ╨║╨╛╨╝╨┐╨╕╨╗╤П╤В╨╛╤А╨╛╨╝: : Invalid argument,

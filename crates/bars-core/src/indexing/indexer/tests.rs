@@ -7,6 +7,101 @@ use crate::storage::index_path;
 const DIM: usize = 4;
 
 #[test]
+fn scan_discovery_excludes_metadata_only_changes_and_includes_confirmed_deletions() {
+    #[derive(Default)]
+    struct Found(std::cell::RefCell<Vec<String>>);
+    impl IndexObserver for Found {
+        fn discovered(&self, paths: &[String]) {
+            self.0.replace(paths.to_vec());
+        }
+    }
+    let dir = tempfile::tempdir().unwrap();
+    for name in ["a", "b", "c"] {
+        write(dir.path(), &format!("docs/{name}.md"), "# Документ\n");
+    }
+    let mut index = open(dir.path());
+    updated(dir.path(), &mut index, &mut FakeEmbedder::new("m"));
+    let snapshot = ScanSnapshot::read(Some(&index)).unwrap();
+    write(dir.path(), "docs/a.md", "# Документ\n");
+    write(dir.path(), "docs/b.md", "# Изменённое содержимое\n");
+    write(dir.path(), "docs/d.md", "# Новый\n");
+    std::fs::remove_file(dir.path().join("docs/c.md")).unwrap();
+    let observer = Found::default();
+    let report = scan_index(dir.path(), &snapshot, &settings(), &observer).unwrap();
+    assert_eq!(
+        (
+            report.added,
+            report.changed,
+            report.removed,
+            report.unchanged
+        ),
+        (1, 1, 1, 1)
+    );
+    let mut paths = observer.0.into_inner();
+    paths.sort();
+    assert_eq!(paths, ["docs/b.md", "docs/c.md", "docs/d.md"]);
+    assert_eq!(
+        index.document_count().unwrap(),
+        3,
+        "scan не записывает индекс"
+    );
+}
+
+#[test]
+fn discovery_precedes_processing_in_priority_order_and_reports_deletions() {
+    #[derive(Default)]
+    struct Events {
+        discovered: std::cell::RefCell<Vec<String>>,
+        files: std::cell::RefCell<Vec<String>>,
+        done: std::cell::RefCell<Vec<String>>,
+    }
+    impl IndexObserver for Events {
+        fn discovered(&self, paths: &[String]) {
+            self.discovered.replace(paths.to_vec());
+        }
+        fn priority(&self, path: &str) -> u8 {
+            u8::from(path.ends_with("z.md"))
+        }
+        fn file(&self, path: &str) {
+            assert!(self.discovered.borrow().contains(&path.to_string()));
+            self.files.borrow_mut().push(path.to_string());
+        }
+        fn document_done(&self, path: &str, error: Option<&str>) {
+            assert!(error.is_none());
+            self.done.borrow_mut().push(path.to_string());
+        }
+    }
+    let dir = tempfile::tempdir().unwrap();
+    write(dir.path(), "docs/old.md", "# Удаляемый\n");
+    let mut index = open(dir.path());
+    let mut embedder = FakeEmbedder::new("m");
+    updated(dir.path(), &mut index, &mut embedder);
+    std::fs::remove_file(dir.path().join("docs/old.md")).unwrap();
+    write(dir.path(), "docs/a.md", "# Первый\n");
+    write(dir.path(), "docs/z.md", "# Приоритетный\n");
+    let observer = Events::default();
+    update_index_observed(
+        dir.path(),
+        &mut index,
+        &settings(),
+        &mut embedder,
+        &observer,
+    )
+    .unwrap();
+    let mut found = observer.discovered.into_inner();
+    found.sort();
+    assert_eq!(found, ["docs/a.md", "docs/old.md", "docs/z.md"]);
+    assert_eq!(
+        observer.files.into_inner(),
+        ["docs/z.md", "docs/a.md", "docs/old.md"]
+    );
+    assert_eq!(
+        observer.done.into_inner(),
+        ["docs/z.md", "docs/a.md", "docs/old.md"]
+    );
+}
+
+#[test]
 fn a_scan_snapshot_survives_closing_and_replacing_the_index_file() {
     let dir = tempfile::tempdir().unwrap();
     write(dir.path(), "docs/a.md", "# Документ\n");
@@ -943,7 +1038,7 @@ fn cancelled_rebuild_keeps_the_old_index_and_leaves_no_new_file() {
 
 struct Deferring(&'static str);
 impl IndexObserver for Deferring {
-    fn defer(&self, path: &str) -> bool {
+    fn defer(&self, path: &str, _full_check: bool) -> bool {
         path.ends_with(self.0)
     }
 }

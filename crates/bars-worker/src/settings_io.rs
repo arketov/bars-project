@@ -97,6 +97,9 @@ pub fn to_doc(user: &UserSettings) -> SettingsDoc {
             min_chars: count(user.chunking.min_chars),
             max_chars: count(user.chunking.max_chars),
         },
+        indexing: bars_protocol::IndexingDoc {
+            edit_pause_seconds: user.indexing.edit_pause_seconds,
+        },
     }
 }
 
@@ -354,8 +357,17 @@ pub fn save_user_settings(bars_home: &Path, settings: &SettingsDoc) -> Result<bo
         old.chunking.max_chars,
     );
 
+    set_count(
+        table(&mut doc, "indexing"),
+        "edit_pause_seconds",
+        settings.indexing.edit_pause_seconds,
+        old.indexing.edit_pause_seconds,
+    );
+
     // Пустые таблицы, которые мы сами завели, в файле не нужны.
-    for name in ["embed", "rerank", "search", "device", "chunking"] {
+    for name in [
+        "embed", "rerank", "search", "device", "chunking", "indexing",
+    ] {
         if doc
             .get(name)
             .and_then(Item::as_table)
@@ -424,6 +436,29 @@ mod tests {
         assert_eq!(doc.search.agent_min_score, [0.0, 1.0]);
         assert!(!save_user_settings(home.path(), &doc).unwrap());
         assert!(!user_settings_path(home.path()).exists());
+    }
+
+    #[test]
+    fn indexing_pause_roundtrips_and_rejects_out_of_range_values() {
+        let home = home();
+        let file = user_settings_path(home.path());
+        fs::write(
+            &file,
+            "# моя пауза\n[indexing]\nedit_pause_seconds = 30 # секунд\n",
+        )
+        .unwrap();
+        let mut doc = current(home.path());
+        doc.indexing.edit_pause_seconds = 0;
+        assert!(save_user_settings(home.path(), &doc).unwrap());
+        assert_eq!(current(home.path()).indexing.edit_pause_seconds, 0);
+        assert!(fs::read_to_string(&file).unwrap().contains("# моя пауза"));
+        let before = fs::read_to_string(&file).unwrap();
+        doc.indexing.edit_pause_seconds = 3601;
+        assert!(save_user_settings(home.path(), &doc).is_err());
+        assert_eq!(fs::read_to_string(&file).unwrap(), before);
+        doc.indexing.edit_pause_seconds = 3600;
+        assert!(save_user_settings(home.path(), &doc).unwrap());
+        assert_eq!(current(home.path()).indexing.edit_pause_seconds, 3600);
     }
 
     #[test]

@@ -280,7 +280,7 @@ struct Inner {
     /// Очередь документов: паузы после правок и состояния (`document-queue.md`).
     docs: Arc<Mutex<DocQueue>>,
     /// Очередь документов изменилась: таймер пересчитывает ближайшую паузу.
-    doc_wake: Notify,
+    doc_wake: Arc<Notify>,
     /// Задание вынуто из очереди и ещё выполняется.
     busy: AtomicBool,
     wake: Notify,
@@ -340,7 +340,7 @@ impl Worker {
             projects: Mutex::new(HashMap::new()),
             queue: Mutex::new(JobQueue::new()),
             docs: Arc::new(Mutex::new(DocQueue::new())),
-            doc_wake: Notify::new(),
+            doc_wake: Arc::new(Notify::new()),
             busy: AtomicBool::new(false),
             wake: Notify::new(),
             stop: AtomicBool::new(false),
@@ -1481,12 +1481,28 @@ impl Inner {
         let worker = Arc::clone(self);
         let project = path.clone();
         lock(&self.models.operations).edit(operation_id, |op| op.state = "running".into());
-        let mut observer = JobObserver::new(Arc::clone(&self.pause), Arc::clone(&cell));
+        let taken = Arc::new(Mutex::new(taken.into_iter().collect()));
+        let source = match job.priority {
+            Priority::Explicit => DocSource::Explicit,
+            Priority::Edit => DocSource::Edit,
+            Priority::Watch => DocSource::Watch,
+            Priority::Periodic => DocSource::Periodic,
+        };
+        let mut observer = JobObserver::new(Arc::clone(&self.pause), Arc::clone(&cell))
+            .with_documents(Arc::new(doc_queue::Observer {
+                docs: Arc::clone(&self.docs),
+                project: path.clone(),
+                source,
+                taken: Arc::clone(&taken),
+                wake: Arc::clone(&self.doc_wake),
+                rebuild,
+            }));
         if !rebuild {
             let docs = Arc::clone(&self.docs);
             let owner = path.clone();
-            observer = observer.with_defer(Arc::new(move |document: &str| {
-                lock(&docs).is_waiting(&owner, document)
+            observer = observer.with_defer(Arc::new(move |document: &str, full_check: bool| {
+                let docs = lock(&docs);
+                (!full_check && docs.is_waiting(&owner, document)) || docs.is_error(&owner, document)
             }));
         }
         log::info!("Начата индексация: {}", path.display());
@@ -1556,7 +1572,8 @@ impl Inner {
             Outcome::Cancelled => log::info!("Индексация отменена: {}", path.display()),
             Outcome::ReindexRequired(_) => log::info!("Нужна переиндексация: {}", path.display()),
         }
-        self.finish_docs(&path, &taken, &result.outcome);
+        let unfinished: Vec<_> = lock(&taken).iter().cloned().collect();
+        self.finish_docs(&path, &unfinished, &result.outcome);
         let outcome = result.outcome.clone();
         // Публикация итога только после применения состояния проекта.
         self.apply(&path, previous, &job_gate, result);

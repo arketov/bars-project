@@ -94,6 +94,10 @@ export function validate(doc: SettingsDoc): Record<string, string> {
   }
   positive("chunking.min_chars", doc.chunking.min_chars, "Минимум чанка");
   positive("chunking.max_chars", doc.chunking.max_chars, "Максимум чанка");
+  const pause = doc.indexing.edit_pause_seconds;
+  if (!Number.isInteger(pause) || pause < 0 || pause > 3600) {
+    errors["indexing.edit_pause_seconds"] = "Целое число от 0 до 3600 секунд; 0 — без паузы";
+  }
   return errors;
 }
 

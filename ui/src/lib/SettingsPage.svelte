@@ -24,6 +24,7 @@
     ["models", "Модели"],
     ["search", "Поиск"],
     ["chunks", "Нарезка"],
+    ["indexing", "Индексация"],
     ["clients", "Клиенты"],
     ["system", "Запуск"],
     ["look", "Оформление"],
@@ -274,6 +275,15 @@
           <div class="gbody">
             <div class="field"><div class="lbl"><b>Минимум, знаков</b><small>Раздел короче склеивается со следующим</small></div><div><input class="inp" type="number" min="1" bind:value={draft.chunking.min_chars} />{#if errors["chunking.min_chars"]}<small class="err">{errors["chunking.min_chars"]}</small>{/if}</div></div>
             <div class="field"><div class="lbl"><b>Максимум, знаков</b><small>Раздел длиннее режется на несколько чанков</small></div><div><input class="inp" type="number" min="1" bind:value={draft.chunking.max_chars} />{#if errors["chunking.max_chars"]}<small class="err">{errors["chunking.max_chars"]}</small>{/if}</div></div>
+          </div>
+        </div>
+      {:else if draft && tab === "indexing"}
+        <h1>Индексация</h1>
+        <p class="lead">После правки документа bars ждёт паузу перед обновлением поиска по смыслу. Новая правка запускает ожидание заново.</p>
+        <div class="group">
+          <div class="ghead"><h2>Пауза после правки</h2></div>
+          <div class="gbody">
+            <div class="field"><div class="lbl"><label for="edit-pause"><b>Пауза, секунд</b></label><small>0 — без паузы. Новое значение действует для следующих правок; проект может переопределить его в .bars/config.toml.</small></div><div><input id="edit-pause" class="inp" type="number" min="0" max="3600" step="1" bind:value={draft.indexing.edit_pause_seconds} />{#if errors["indexing.edit_pause_seconds"]}<small class="err">{errors["indexing.edit_pause_seconds"]}</small>{/if}</div></div>
           </div>
         </div>
       {:else if tab === "clients"}

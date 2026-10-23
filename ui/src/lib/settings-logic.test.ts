@@ -12,6 +12,7 @@ import {
 import type { SettingsDoc } from "./types";
 
 const DOC: SettingsDoc = {
+  indexing: { edit_pause_seconds: 30 },
   embed: { accelerator: "auto", source: "builtin", model: "BAAI/bge-m3", base_url: null, api_key_name: null, api_key_env: null, batch_size: 32, unload_after_minutes: 15 },
   rerank: {
     accelerator: "auto",
@@ -39,6 +40,19 @@ const DOC: SettingsDoc = {
 };
 
 describe("settings-logic", () => {
+  it("validates the indexing pause without requiring a rebuild", () => {
+    const draft = clone(DOC);
+    for (const seconds of [0, 30, 3600]) {
+      draft.indexing.edit_pause_seconds = seconds;
+      expect(validate(draft)["indexing.edit_pause_seconds"]).toBeUndefined();
+      expect(needsReindex(DOC, draft)).toBe(false);
+    }
+    for (const seconds of [-1, 0.5, 3601, NaN, undefined]) {
+      draft.indexing.edit_pause_seconds = seconds as number;
+      expect(validate(draft)["indexing.edit_pause_seconds"]).toBeTruthy();
+    }
+  });
+
   it("independent device preferences do not change index identity", () => {
     const draft = clone(DOC);
     draft.embed.accelerator = "cpu";

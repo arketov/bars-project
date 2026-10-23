@@ -1,0 +1,39 @@
+{
+  "core": {
+    "path": "C:/bt/bars/release/deps/bars_core-e34a604ebdb2f1b9.exe",
+    "sha256": "3E5A96C88A154C407E19912F0B2C254CA6E40A4BEED6869982E3467651F91140",
+    "invoked": "2026-10-23T08:19:33.6990097Z",
+    "features": [
+      "test-support"
+    ],
+    "exit": 0
+  },
+  "protocol": {
+    "path": "C:/bt/bars/release/deps/bars_protocol-9a617525397379d2.exe",
+    "sha256": "C510530E0210BC47A0D9136A4C0EA53AAA6F35E8FD863C3C8F9AAC33D004F7AD",
+    "exit": 0
+  },
+  "sources": [
+    {
+      "path": "crates/bars-core/src/indexing/indexer.rs",
+      "sha256": "8F56BE89C0597331BB19943BA119B4D5E3673D90B68C0C0370F01D1609CED3DF",
+      "modified": "2026-10-23T08:13:25.4580982Z"
+    },
+    {
+      "path": "crates/bars-core/src/indexing/indexer/tests.rs",
+      "sha256": "9F4B83A07B95D0B6622DF3F945EE14DFE6515775F82067756DA9B8CC06CAAC69",
+      "modified": "2026-10-23T08:12:51.1171616Z"
+    },
+    {
+      "path": "crates/bars-protocol/src/methods.rs",
+      "sha256": "A0020B3284BBCD9482F56BC3CF81A1584BAB681C5169B45C410F24FB9A5E6FCF",
+      "modified": "2026-10-23T08:03:51.5961958Z"
+    }
+  ],
+  "worker": {
+    "path": "C:/bt/bars/release/deps/bars_worker-ead86c2eeea92824.exe",
+    "sha256": "5D9032DF6839EA7FC918CA1388B0D8FF4D8FA3701A5EB8751B2ECC3523B2B118",
+    "invoked": "2026-10-23T08:19:33.6995369Z",
+    "result": "273 passed, 1 failed (audit kind), 1 ignored"
+  }
+}

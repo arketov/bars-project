@@ -757,6 +757,12 @@ pub struct ChunkingDoc {
     pub max_chars: u32,
 }
 
+/// Таблица `[indexing]`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct IndexingDoc {
+    pub edit_pause_seconds: u32,
+}
+
 /// Настройки пользователя (`~/.bars/settings.toml`) целиком, с умолчаниями на месте пропущенного.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SettingsDoc {
@@ -764,6 +770,7 @@ pub struct SettingsDoc {
     pub rerank: RerankDoc,
     pub search: SearchDoc,
     pub chunking: ChunkingDoc,
+    pub indexing: IndexingDoc,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

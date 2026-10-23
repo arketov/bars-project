@@ -27,6 +27,12 @@ struct Observer {
     inner: Arc<Inner>,
     id: u64,
     cancel: Arc<AtomicBool>,
+    found: Mutex<Vec<String>>,
+}
+
+struct ScanResult {
+    report: UpdateReport,
+    paths: Vec<String>,
 }
 enum Failure {
     Cancelled,
@@ -40,6 +46,9 @@ fn failed(error: impl ToString) -> Failure {
     Failure::Failed(error.to_string())
 }
 impl IndexObserver for Observer {
+    fn discovered(&self, paths: &[String]) {
+        *lock(&self.found) = paths.to_vec();
+    }
     fn should_stop(&self) -> bool {
         self.cancel.load(Ordering::SeqCst) || self.inner.stop.load(Ordering::SeqCst)
     }
@@ -115,12 +124,13 @@ impl Worker {
             let worker = inner.clone();
             let root = path.clone();
             let stopped = cancel.clone();
-            let result = tokio::task::spawn_blocking(move || -> Result<UpdateReport, Failure> {
+            let result = tokio::task::spawn_blocking(move || -> Result<ScanResult, Failure> {
                 let index_gate = read;
                 let observer = Observer {
                     inner: worker.clone(),
                     id,
                     cancel,
+                    found: Mutex::new(Vec::new()),
                 };
                 if observer.should_stop() {
                     return Err(Failure::Cancelled);
@@ -150,13 +160,16 @@ impl Worker {
                 drop(index);
                 // Обход диска не удерживает читателя перед ожидающей подменой индекса.
                 drop(index_gate);
-                scan_index(&root, &snapshot, &settings.index_settings(), &observer).map_err(|e| {
-                    if matches!(e, IndexingError::Cancelled) {
-                        Failure::Cancelled
-                    } else {
-                        failed(e)
-                    }
-                })
+                let report = scan_index(&root, &snapshot, &settings.index_settings(), &observer)
+                    .map_err(|e| {
+                        if matches!(e, IndexingError::Cancelled) {
+                            Failure::Cancelled
+                        } else {
+                            failed(e)
+                        }
+                    })?;
+                let paths = lock(&observer.found).clone();
+                Ok(ScanResult { report, paths })
             })
             .await;
             let mut projects = lock(&inner.projects);
@@ -182,7 +195,7 @@ impl Worker {
             }
             let result = result.map_err(failed).and_then(|v| v);
             match result {
-                Ok(report) => {
+                Ok(ScanResult { report, paths }) => {
                     let update = report.full_check
                         || report.added + report.changed + report.removed > 0
                         || !report.problems.is_empty();
@@ -201,6 +214,17 @@ impl Worker {
                         index_applied: false,
                     };
                     if update {
+                        if projects.get(&path).is_some_and(|runtime| {
+                            !matches!(
+                                runtime.status.state,
+                                ProjectState::ReindexRequired | ProjectState::Unavailable
+                            )
+                        }) {
+                            let mut docs = lock(&inner.docs);
+                            for document in paths {
+                                docs.found(&path, &document, DocSource::Explicit);
+                            }
+                        }
                         inner.enqueue_for(&path, Job::check(Priority::Explicit), &projects);
                     }
                     lock(&inner.models.operations).finish(
@@ -328,6 +352,47 @@ mod tests {
         drop(gate);
         assert_eq!(finish(&worker, id).await.state, "cancelled");
         assert!(worker.queued().is_empty());
+        assert!(worker.doc_queue(root.path(), 200).unwrap().0.is_empty());
+        worker.shutdown().await;
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn scan_exposes_explicit_documents_while_indexing_is_paused() {
+        let (_home, root, worker, provider) = setup().await;
+        worker.pause();
+        let project = worker.projects()[0].path.clone();
+        let deaf = ProjectWatcher::start(
+            &project,
+            "docs",
+            Duration::from_millis(100),
+            Arc::new(|_| {}),
+        )
+        .unwrap();
+        drop(
+            lock(&worker.inner.projects)
+                .get_mut(&project)
+                .unwrap()
+                .watcher
+                .replace(deaf),
+        );
+        let before = provider.counters.embed_calls.load(Ordering::SeqCst);
+        fs::write(root.path().join("docs/b.md"), "# Найден проверкой\n").unwrap();
+        let (id, _, _) = worker.scan_receipt(&project).unwrap();
+        assert_eq!(finish(&worker, id).await.state, "success");
+        let (items, counts) = worker.doc_queue(&project, 200).unwrap();
+        assert_eq!((counts.queued, counts.indexing), (1, 0));
+        assert_eq!(
+            (items[0].path.as_str(), items[0].source),
+            ("docs/b.md", DocSource::Explicit)
+        );
+        assert_eq!(provider.counters.embed_calls.load(Ordering::SeqCst), before);
+        worker.resume();
+        let deadline = Instant::now() + Duration::from_secs(5);
+        while !worker.is_idle() {
+            assert!(Instant::now() < deadline);
+            tokio::time::sleep(Duration::from_millis(5)).await;
+        }
+        assert!(worker.doc_queue(&project, 200).unwrap().0.is_empty());
         worker.shutdown().await;
     }
     #[tokio::test(flavor = "multi_thread", worker_threads = 2)]

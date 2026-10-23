@@ -3,7 +3,7 @@
 
 use bars_protocol::ProjectState;
 
-use super::Worker;
+use super::{Worker, lock};
 
 /// Общее состояние для иконки трея.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -56,6 +56,14 @@ impl Worker {
         };
 
         let waiting: usize = queued.iter().map(|job| job.files.max(1)).sum();
+        let documents: Vec<_> = {
+            let docs = lock(&self.inner.docs);
+            projects
+                .iter()
+                .map(|project| (project, docs.counts(&project.path)))
+                .collect()
+        };
+        let paused: usize = documents.iter().map(|(_, counts)| counts.waiting).sum();
         let indexing = if let Some(progress) = &progress {
             let percent = percent(progress.docs_done, progress.docs_total);
             let text = match percent {
@@ -69,10 +77,24 @@ impl Worker {
                 project: progress.project.display().to_string(),
             })
         } else {
-            queued.first().map(|job| Line {
-                text: format!("В очереди: {}", name_of(&job.project)),
-                project: job.project.display().to_string(),
-            })
+            queued
+                .first()
+                .map(|job| Line {
+                    text: format!("В очереди: {}", name_of(&job.project)),
+                    project: job.project.display().to_string(),
+                })
+                .or_else(|| {
+                    documents
+                        .iter()
+                        .find(|(_, counts)| counts.waiting + counts.queued > 0)
+                        .map(|(project, counts)| Line {
+                            text: format!(
+                                "{} · ждут паузы: {}, в очереди: {}",
+                                project.name, counts.waiting, counts.queued
+                            ),
+                            project: project.path.display().to_string(),
+                        })
+                })
         };
 
         let needs_reindex = projects
@@ -84,10 +106,23 @@ impl Worker {
                 project: project.path.display().to_string(),
             })
         } else {
-            problems.first().map(|issues| Line {
-                text: format!("Ошибка индексации: {}", name_of(&issues.project)),
-                project: issues.project.display().to_string(),
-            })
+            problems
+                .first()
+                .map(|issues| Line {
+                    text: format!("Ошибка индексации: {}", name_of(&issues.project)),
+                    project: issues.project.display().to_string(),
+                })
+                .or_else(|| {
+                    documents.iter().find(|(_, counts)| counts.error > 0).map(
+                        |(project, counts)| Line {
+                            text: format!(
+                                "{} · документов с ошибкой: {}",
+                                project.name, counts.error
+                            ),
+                            project: project.path.display().to_string(),
+                        },
+                    )
+                })
         };
 
         let health = if attention.is_some() {
@@ -97,7 +132,7 @@ impl Worker {
         } else {
             Health::Idle
         };
-        let tooltip = match (health, &progress, &attention) {
+        let mut tooltip = match (health, &progress, &attention) {
             (Health::Attention, _, Some(line)) => format!("bars · нужно внимание: {}", line.text),
             (Health::Busy, Some(progress), _) => {
                 let percent = percent(progress.docs_done, progress.docs_total)
@@ -108,9 +143,16 @@ impl Worker {
                     name_of(&progress.project)
                 )
             }
-            (Health::Busy, None, _) => format!("bars · в очереди {waiting}"),
+            (Health::Busy, None, _) if waiting > 0 => format!("bars · в очереди {waiting}"),
+            (Health::Busy, None, _) if paused == 0 => indexing.as_ref().map_or_else(
+                || "bars".to_string(),
+                |line| format!("bars · {}", line.text),
+            ),
             _ => "bars".to_string(),
         };
+        if paused > 0 {
+            tooltip.push_str(&format!(" · ждут паузы: {paused}"));
+        }
         Summary {
             health,
             tooltip,

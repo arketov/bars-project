@@ -55,7 +55,7 @@ pub struct UpdateReport {
     pub changed: usize,
     pub unchanged: usize,
     pub removed: usize,
-    /// Документы, пропущенные из-за паузы после правки: их разберёт следующая проверка.
+    /// Документы, ждущие паузы после правки или явного повтора ошибки.
     pub deferred: usize,
     /// Векторы, которые посчитала модель (одинаковые тексты считаются один раз).
     pub chunks_embedded: usize,
@@ -89,11 +89,20 @@ pub trait IndexObserver {
     fn begin(&self, _documents: usize) {}
     /// Документ взят в работу.
     fn file(&self, _path: &str) {}
+    /// Расхождения метаданных или содержимого, включая удаления.
+    fn discovered(&self, _paths: &[String]) {}
+    /// Приоритет документа внутри прохода: старший обрабатывается раньше.
+    fn priority(&self, _path: &str) -> u8 {
+        0
+    }
+    /// Итог одного документа. При сбое всего задания вызывается только для завершённых.
+    fn document_done(&self, _path: &str, _error: Option<&str>) {}
     /// Документ обработан: всего просмотрено документов и чанков (посчитанных и взятых из индекса).
     fn progress(&self, _documents_done: usize, _chunks_done: usize) {}
-    /// Документ ждёт паузы после правки (Т-41): проверка его пропускает, индекс остаётся как был.
-    /// Не вызывается, когда нарезка или корень документации изменились: тогда пересобирается всё.
-    fn defer(&self, _path: &str) -> bool {
+    /// Документ ждёт паузы после правки (Т-41) или явного повтора ошибки:
+    /// проверка его пропускает, индекс остаётся как был.
+    /// `full_check` требует новой нарезки: пауза правки не мешает ей, ошибка ждёт явного повтора.
+    fn defer(&self, _path: &str, _full_check: bool) -> bool {
         false
     }
     /// Вызывается перед каждым документом. Может ждать, пока снята пауза. `true` — остановить
@@ -283,7 +292,7 @@ fn run_update(
     embedder: &mut dyn Embedder,
     observer: &dyn IndexObserver,
 ) -> Result<UpdateReport, IndexingError> {
-    let walk = walk_docs(project_root, Path::new(&settings.docs_root))?;
+    let mut walk = walk_docs(project_root, Path::new(&settings.docs_root))?;
     let layout = settings.layout();
     let mut report = UpdateReport {
         full_check: index.stored_layout()?.as_ref() != Some(&layout),
@@ -299,6 +308,29 @@ fn run_update(
         .map(|document| (document.path.clone(), document))
         .collect();
 
+    let on_disk: HashSet<&str> = walk.files.iter().map(|file| file.path.as_str()).collect();
+    let changed: Vec<String> = walk
+        .files
+        .iter()
+        .filter(|file| {
+            report.full_check
+                || stored
+                    .get(&file.path)
+                    .is_none_or(|old| !same_stat(old, file))
+        })
+        .map(|file| file.path.clone())
+        .chain(
+            stored
+                .keys()
+                .filter(|path| {
+                    !on_disk.contains(path.as_str()) && !is_covered_by_problem(path, &walk.problems)
+                })
+                .cloned(),
+        )
+        .collect();
+    observer.discovered(&changed);
+    walk.files
+        .sort_by_cached_key(|file| std::cmp::Reverse(observer.priority(&file.path)));
     observer.begin(walk.files.len());
     observer.execution(embedder.execution());
     let mut consecutive = 0;
@@ -307,7 +339,7 @@ fn run_update(
             if observer.should_stop() {
                 return Err(IndexingError::Cancelled);
             }
-            if !report.full_check && observer.defer(&file.path) {
+            if observer.defer(&file.path, report.full_check) {
                 report.deferred += 1;
                 observer.progress(position + 1, report.chunks_embedded + report.chunks_reused);
                 continue;
@@ -315,6 +347,7 @@ fn run_update(
             observer.file(&file.path);
             observer.attempt(0);
             let before = report.chunks_embedded;
+            let problems_before = report.problems.len();
             let outcome = process_file(
                 index,
                 embedder,
@@ -340,13 +373,21 @@ fn run_update(
                 Ok(()) if report.chunks_embedded > before => consecutive = 0,
                 Ok(()) => {}
             }
+            observer.document_done(
+                &file.path,
+                report.problems[problems_before..]
+                    .iter()
+                    .rev()
+                    .find(|p| p.path == file.path)
+                    .map(|p| p.reason.as_str()),
+            );
             observer.progress(position + 1, report.chunks_embedded + report.chunks_reused);
             observer.report(&report);
             if consecutive >= 3 {
                 return Err(IndexingError::ConsecutiveFailures);
             }
         }
-        finish_update(index, &walk, &stored, &layout, &mut report)
+        finish_update(index, &walk, &stored, &layout, &mut report, observer)
     })();
     match result {
         Ok(()) => Ok(report),
@@ -433,6 +474,7 @@ fn finish_update(
     stored: &HashMap<String, StoredDocument>,
     layout: &Layout,
     report: &mut UpdateReport,
+    observer: &dyn IndexObserver,
 ) -> Result<(), IndexingError> {
     let on_disk: HashSet<&str> = walk.files.iter().map(|file| file.path.as_str()).collect();
     for path in stored.keys() {
@@ -440,12 +482,17 @@ fn finish_update(
             && !is_covered_by_problem(path, &walk.problems)
             && index.delete_document(path)?
         {
+            observer.file(path);
             report.removed += 1;
+            observer.document_done(path, None);
         }
     }
 
     index.remove_orphan_vectors()?;
-    if report.full_check && !report.problems.iter().any(|p| p.stage == "embedding") {
+    if report.full_check
+        && report.deferred == 0
+        && !report.problems.iter().any(|p| p.stage == "embedding")
+    {
         index.write_layout(layout)?;
     }
     index.touch_updated_at()?;
@@ -643,6 +690,7 @@ pub fn scan_index(
         .extend(walk.problems.iter().map(problem_from_walk));
     observer.begin(walk.files.len());
     let mut seen = HashSet::new();
+    let mut changed = Vec::new();
     for (position, file) in walk.files.iter().enumerate() {
         if observer.should_stop() {
             return Err(IndexingError::Cancelled);
@@ -654,28 +702,41 @@ pub fn scan_index(
         } else {
             match read_utf8(file) {
                 Ok(text) => match known {
-                    None => report.added += 1,
+                    None => {
+                        report.added += 1;
+                        changed.push(file.path.clone());
+                    }
                     Some(d)
                         if !full_check
                             && d.hash == blake3::hash(text.as_bytes()).to_hex().as_str() =>
                     {
                         report.unchanged += 1
                     }
-                    Some(_) => report.changed += 1,
+                    Some(_) => {
+                        report.changed += 1;
+                        changed.push(file.path.clone());
+                    }
                 },
-                Err(error) => report.problems.push(Problem {
-                    path: file.path.clone(),
-                    reason: error.to_string(),
-                    ..Default::default()
-                }),
+                Err(error) => {
+                    changed.push(file.path.clone());
+                    report.problems.push(Problem {
+                        path: file.path.clone(),
+                        reason: error.to_string(),
+                        ..Default::default()
+                    });
+                }
             }
         }
         observer.progress(position + 1, 0);
     }
-    report.removed = stored
+    let removed: Vec<String> = stored
         .keys()
         .filter(|p| !seen.contains(p.as_str()) && !is_covered_by_problem(p, &walk.problems))
-        .count();
+        .cloned()
+        .collect();
+    report.removed = removed.len();
+    changed.extend(removed);
+    observer.discovered(&changed);
     Ok(report)
 }
 

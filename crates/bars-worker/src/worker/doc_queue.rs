@@ -57,6 +57,8 @@ struct DocEntry {
     seq: u64,
     /// Документ изменили, пока он индексировался: после этого он снова ждёт паузы до этого момента.
     redo_due: Option<Instant>,
+    /// Передан текущему проходу, хотя ещё ждёт обработки внутри него.
+    claimed: bool,
     error: Option<String>,
 }
 
@@ -126,6 +128,7 @@ impl DocQueue {
                 match entry.state {
                     DocState::Indexing => entry.redo_due = Some(due),
                     _ => {
+                        entry.claimed = false;
                         entry.error = None;
                         if ready {
                             entry.state = DocState::Queued;
@@ -152,6 +155,7 @@ impl DocQueue {
                         due_at: (!ready).then_some(due),
                         seq,
                         redo_due: None,
+                        claimed: false,
                         error: None,
                     },
                 );
@@ -191,7 +195,7 @@ impl DocQueue {
     pub fn ready_of(&self, project: &Path) -> Option<Ready> {
         let mut ready: Option<Ready> = None;
         for ((owner, path), entry) in &self.entries {
-            if owner != project || entry.state != DocState::Queued {
+            if owner != project || entry.state != DocState::Queued || entry.claimed {
                 continue;
             }
             let item = ready.get_or_insert_with(|| Ready {
@@ -212,6 +216,51 @@ impl DocQueue {
             .is_some_and(|entry| entry.state == DocState::Waiting)
     }
 
+    /// Проверка обнаружила расхождение; это не новая правка и не сдвиг паузы.
+    pub fn found(&mut self, project: &Path, path: &str, source: DocSource) {
+        if !self
+            .entries
+            .contains_key(&(project.to_path_buf(), path.to_string()))
+        {
+            self.touch(project, path, source, Duration::ZERO, Instant::now());
+        }
+    }
+
+    /// Текущий проход забирает найденный документ.
+    pub fn discover(&mut self, project: &Path, path: &str, source: DocSource) {
+        self.found(project, path, source);
+        if let Some(entry) = self
+            .entries
+            .get_mut(&(project.to_path_buf(), path.to_string()))
+            && entry.state == DocState::Queued
+        {
+            entry.claimed = true;
+        }
+    }
+
+    pub fn is_error(&self, project: &Path, path: &str) -> bool {
+        self.entries
+            .get(&(project.to_path_buf(), path.to_string()))
+            .is_some_and(|entry| entry.state == DocState::Error)
+    }
+
+    pub fn priority(&self, project: &Path, path: &str) -> u8 {
+        self.entries
+            .get(&(project.to_path_buf(), path.to_string()))
+            .map_or(0, |entry| entry.source as u8)
+    }
+
+    pub fn start(&mut self, project: &Path, path: &str) {
+        if let Some(entry) = self
+            .entries
+            .get_mut(&(project.to_path_buf(), path.to_string()))
+            && entry.state == DocState::Queued
+        {
+            entry.state = DocState::Indexing;
+            entry.claimed = true;
+        }
+    }
+
     /// Задание берёт документы в работу. Готовые (`Queued`) берутся все; ждущие — только по явной
     /// команде пользователя и только названные в ней (`explicit`; `None` — все). Возвращает
     /// взятые пути.
@@ -226,18 +275,26 @@ impl DocQueue {
                 continue;
             }
             let take = match entry.state {
-                DocState::Queued => true,
+                DocState::Queued => !entry.claimed,
                 DocState::Waiting => match explicit {
                     None => false,
                     Some(None) => true,
                     Some(Some(listed)) => listed.contains(path),
                 },
-                DocState::Indexing | DocState::Error => false,
+                DocState::Error => {
+                    explicit.is_some_and(|listed| listed.is_none_or(|paths| paths.contains(path)))
+                }
+                DocState::Indexing => false,
             };
             if take {
-                entry.state = DocState::Indexing;
+                if explicit.is_some_and(|listed| listed.is_none_or(|paths| paths.contains(path))) {
+                    entry.source = DocSource::Explicit;
+                }
+                entry.state = DocState::Queued;
+                entry.claimed = true;
                 entry.due_at = None;
                 entry.redo_due = None;
+                entry.error = None;
                 taken.push(path.clone());
             }
         }
@@ -259,9 +316,10 @@ impl DocQueue {
             let Some(entry) = self.entries.get_mut(&key) else {
                 continue;
             };
-            if entry.state != DocState::Indexing {
+            if !matches!(entry.state, DocState::Indexing | DocState::Queued) {
                 continue;
             }
+            entry.claimed = false;
             if let Some(due) = entry.redo_due.take() {
                 entry.state = DocState::Waiting;
                 entry.due_at = Some(due);
@@ -286,6 +344,7 @@ impl DocQueue {
             Some(entry) if entry.state == DocState::Error => {
                 entry.state = DocState::Queued;
                 entry.error = None;
+                entry.claimed = false;
                 true
             }
             _ => false,
@@ -369,6 +428,66 @@ impl DocQueue {
     }
 }
 
+/// Адаптер событий индексатора: снимок расхождений и фактическая обработка документов.
+pub(super) struct Observer {
+    pub docs: std::sync::Arc<std::sync::Mutex<DocQueue>>,
+    pub project: PathBuf,
+    pub source: DocSource,
+    pub taken: std::sync::Arc<std::sync::Mutex<BTreeSet<String>>>,
+    pub wake: std::sync::Arc<tokio::sync::Notify>,
+    pub rebuild: bool,
+}
+
+impl bars_core::indexing::indexer::IndexObserver for Observer {
+    fn discovered(&self, paths: &[String]) {
+        let mut docs = super::lock(&self.docs);
+        for path in paths {
+            if !self.project.join(path).exists() {
+                // Обход уже подтвердил удаление; прежняя пауза/ошибка больше не относится к файлу.
+                docs.touch(
+                    &self.project,
+                    path,
+                    self.source,
+                    Duration::ZERO,
+                    Instant::now(),
+                );
+            }
+            docs.discover(&self.project, path, self.source);
+        }
+        super::lock(&self.taken).extend(paths.iter().cloned());
+    }
+
+    fn priority(&self, path: &str) -> u8 {
+        super::lock(&self.docs).priority(&self.project, path)
+    }
+
+    fn file(&self, path: &str) {
+        super::lock(&self.docs).start(&self.project, path);
+    }
+
+    fn document_done(&self, path: &str, error: Option<&str>) {
+        if self.rebuild && error.is_none() {
+            return;
+        }
+        let failed = error
+            .map(|reason| (path.to_string(), reason.to_string()))
+            .into_iter()
+            .collect();
+        let mut docs = super::lock(&self.docs);
+        docs.finish(&self.project, &[path.to_string()], &failed, false);
+        // Новая правка уже завершённого документа принадлежит следующему проходу.
+        // Итог текущего задания не должен снять её запись.
+        if !self.rebuild {
+            super::lock(&self.taken).remove(path);
+        }
+        let waiting = docs.is_waiting(&self.project, path);
+        drop(docs);
+        if waiting {
+            self.wake.notify_one();
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -431,6 +550,7 @@ mod tests {
         queue.touch(&project(), "a.md", DocSource::Edit, Duration::ZERO, base);
         let taken = queue.begin(&project(), None);
         assert_eq!(taken, vec!["a.md".to_string()]);
+        queue.start(&project(), "a.md");
         queue.touch(&project(), "a.md", DocSource::Edit, PAUSE, at(base, 1));
         assert_eq!(queue.counts(&project()).indexing, 1);
         queue.finish(&project(), &taken, &BTreeMap::new(), false);
@@ -539,5 +659,130 @@ mod tests {
         assert_eq!(queue.remove_project(&project()), 1);
         assert_eq!(queue.len(), 1);
         assert_eq!(queue.counts(Path::new("other")).total(), 1);
+    }
+
+    #[test]
+    fn discovery_preserves_waiting_errors_and_document_priority() {
+        let mut queue = DocQueue::new();
+        let now = Instant::now();
+        queue.touch(&project(), "edit.md", DocSource::Edit, PAUSE, now);
+        queue.discover(&project(), "edit.md", DocSource::Periodic);
+        assert!(queue.is_waiting(&project(), "edit.md"));
+        queue.discover(&project(), "bad.md", DocSource::Periodic);
+        queue.start(&project(), "bad.md");
+        queue.finish(
+            &project(),
+            &["bad.md".into()],
+            &BTreeMap::from([("bad.md".into(), "ошибка чтения".into())]),
+            false,
+        );
+        queue.discover(&project(), "bad.md", DocSource::Watch);
+        assert!(queue.is_error(&project(), "bad.md"));
+        assert!(queue.priority(&project(), "edit.md") > queue.priority(&project(), "bad.md"));
+        let listed = BTreeSet::from(["bad.md".into()]);
+        queue.begin(&project(), Some(Some(&listed)));
+        assert!(!queue.is_error(&project(), "bad.md"));
+        assert!(queue.is_waiting(&project(), "edit.md"));
+    }
+
+    #[test]
+    fn only_the_document_being_processed_is_indexing() {
+        let mut queue = DocQueue::new();
+        for path in ["a.md", "b.md"] {
+            queue.discover(&project(), path, DocSource::Explicit);
+        }
+        let taken = vec!["a.md".into(), "b.md".into()];
+        assert_eq!(queue.counts(&project()).queued, 2);
+        assert!(
+            queue.ready_of(&project()).is_none(),
+            "текущий проход уже владеет записями"
+        );
+        queue.start(&project(), "a.md");
+        assert_eq!(
+            (
+                queue.counts(&project()).indexing,
+                queue.counts(&project()).queued
+            ),
+            (1, 1)
+        );
+        queue.finish(&project(), &["a.md".into()], &BTreeMap::new(), false);
+        queue.finish(&project(), &taken, &BTreeMap::new(), true);
+        assert_eq!(queue.counts(&project()).queued, 1);
+        assert_eq!(queue.len(), 1);
+        assert_eq!(
+            queue.ready_of(&project()).unwrap().paths,
+            BTreeSet::from(["b.md".into()])
+        );
+    }
+
+    #[test]
+    fn job_completion_does_not_consume_an_edit_after_document_completion() {
+        use bars_core::indexing::indexer::IndexObserver;
+        let project_dir = tempfile::tempdir().unwrap();
+        std::fs::write(project_dir.path().join("a.md"), "# Документ").unwrap();
+        let docs = std::sync::Arc::new(std::sync::Mutex::new(DocQueue::new()));
+        let taken = std::sync::Arc::new(std::sync::Mutex::new(BTreeSet::new()));
+        let observer = Observer {
+            docs: docs.clone(),
+            project: project_dir.path().to_path_buf(),
+            source: DocSource::Periodic,
+            taken: taken.clone(),
+            wake: std::sync::Arc::new(tokio::sync::Notify::new()),
+            rebuild: false,
+        };
+        observer.discovered(&["a.md".into()]);
+        observer.file("a.md");
+        observer.document_done("a.md", None);
+        super::super::lock(&docs).touch(
+            project_dir.path(),
+            "a.md",
+            DocSource::Edit,
+            Duration::ZERO,
+            Instant::now(),
+        );
+        super::super::lock(&docs).finish(
+            project_dir.path(),
+            &super::super::lock(&taken)
+                .iter()
+                .cloned()
+                .collect::<Vec<_>>(),
+            &BTreeMap::new(),
+            false,
+        );
+        assert_eq!(
+            super::super::lock(&docs).counts(project_dir.path()).queued,
+            1
+        );
+    }
+
+    #[tokio::test]
+    async fn an_edit_during_embedding_wakes_the_pause_timer_when_the_document_finishes() {
+        use bars_core::indexing::indexer::IndexObserver;
+        let project_dir = tempfile::tempdir().unwrap();
+        std::fs::write(project_dir.path().join("a.md"), "# Документ").unwrap();
+        let docs = std::sync::Arc::new(std::sync::Mutex::new(DocQueue::new()));
+        let wake = std::sync::Arc::new(tokio::sync::Notify::new());
+        let observer = Observer {
+            docs: docs.clone(),
+            project: project_dir.path().to_path_buf(),
+            source: DocSource::Periodic,
+            taken: std::sync::Arc::new(std::sync::Mutex::new(BTreeSet::new())),
+            wake: wake.clone(),
+            rebuild: false,
+        };
+        observer.discovered(&["a.md".into()]);
+        observer.file("a.md");
+        super::super::lock(&docs).touch(
+            project_dir.path(),
+            "a.md",
+            DocSource::Edit,
+            PAUSE,
+            Instant::now(),
+        );
+        observer.document_done("a.md", None);
+        tokio::time::timeout(Duration::from_millis(100), wake.notified())
+            .await
+            .expect("таймер должен проснуться до конца прохода");
+        assert!(super::super::lock(&docs).is_waiting(project_dir.path(), "a.md"));
     }
 }

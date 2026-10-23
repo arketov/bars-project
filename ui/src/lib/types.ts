@@ -232,6 +232,7 @@ export interface SearchDoc {
 }
 
 export interface SettingsDoc {
+  indexing: { edit_pause_seconds: number };
   embed: EmbedDoc;
   rerank: RerankDoc;
   search: SearchDoc;

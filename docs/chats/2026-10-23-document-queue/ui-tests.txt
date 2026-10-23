@@ -1,0 +1,307 @@
+
+> bars-ui@0.0.0 test
+> vitest run
+
+
+ RUN  v5.0.4 C:/Users/arketov/Desktop/bars-project/ui
+
+ ❯ src/lib/project-menu.test.ts (0 test)
+ ❯ src/lib/project-deletion.test.ts (0 test)
+ ❯ src/lib/folder-click.test.ts (0 test)
+ ❯ src/lib/folder-menu.test.ts (0 test)
+ ❯ src/lib/document-actions.test.ts (0 test)
+ ❯ src/lib/graph/physics.test.ts (17 tests | 1 failed) 13714ms
+   ❯ одиночки кольцом, размер узла и размер карты (раунд 27) (5)
+     × раскладка детерминирована; прежнее поведение включается настройкой 5368ms
+ ❯ src/lib/KeybindingsPage.test.ts (2 tests | 1 failed) 10042ms
+   × конфликт блокирует запись; явная замена меняет только черновик; ошибка сохраняет правки 7897ms
+ ❯ src/lib/NewTopicsPage.test.ts (15 tests | 2 failed) 25663ms
+   × показывает список, по умолчанию только активные, и карточку выбранной темы 5092ms
+   × удаление просит подтверждения: фокус на «Отмена», отмена ничего не удаляет 7515ms
+ ❯ src/lib/document-windows.test.ts (10 tests | 2 failed) 9912ms
+   × Ctrl+O (в русской раскладке тоже) открывает выбор документа по названию; Enter открывает вкладкой 7871ms
+   × Alt+Enter в выборе документа открывает его в новом окне 526ms
+ ❯ src/lib/graph/PhysicalGraph.test.ts (11 tests | 2 failed) 35014ms
+   × загружает срез проекта с начальными пределами и показывает документы, режимы и счётчики 8213ms
+   × раскрытие документа запрашивает его чанки порциями по 50 на том же снимке 5332ms
+ ❯ src/lib/DocumentWindow.test.ts (4 tests | 1 failed) 18240ms
+   × окно показывает один документ в редакторе и подписано его именем; ссылки идут в основное окно 12104ms
+ ❯ src/lib/NotificationsPanel.test.ts (3 tests | 1 failed) 7815ms
+   × shows progress, closes on Escape and restores focus 5711ms
+ ❯ src/lib/Workspace.test.ts (21 tests | 4 failed) 55161ms
+   × горячая клавиша RU открывает общий поиск; повтор фокусирует запрос, IME не выполняется 8156ms
+   × чтение из слоя завершает переход документом с фокусом, включая удалённый файл 6048ms
+   × слой сохраняет общие режимы, показывает ошибку и передаёт согласие на переиндексацию 460ms
+   × несколько документов справа, подсветка и режим вкладки сохраняются при переключении 5282ms
+ ❯ src/lib/agent-tools-parity.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/agent-tools-parity.test.ts [ src/lib/agent-tools-parity.test.ts ]
+Error: Denied ID C:/Users/arketov/Desktop/bars-project/crates/bars-mcp/src/lib.rs?raw
+  File: C:/Users/arketov/Desktop/bars-project/crates/bars-mcp/src/lib.rs?raw
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/node.js:20128:31
+ ❯ doTransform node_modules/vite/dist/node/chunks/node.js:20105:17
+ ❯ fetchModule node_modules/vite/dist/node/chunks/node.js:36165:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/20]⎯
+
+ FAIL  src/lib/document-actions.test.ts [ src/lib/document-actions.test.ts ]
+ FAIL  src/lib/folder-click.test.ts [ src/lib/folder-click.test.ts ]
+ FAIL  src/lib/folder-menu.test.ts [ src/lib/folder-menu.test.ts ]
+ FAIL  src/lib/project-deletion.test.ts [ src/lib/project-deletion.test.ts ]
+ FAIL  src/lib/project-menu.test.ts [ src/lib/project-menu.test.ts ]
+Error: [vitest] No "inTauri" export is defined on the "./api" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+
+vi.mock(import("./api"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ new Editors src/lib/editors.svelte.ts:240:58
+    238|
+    239|   constructor(bus?: Bus) {
+    240|     this.#bus = bus ?? (typeof window !== "undefined" && inTauri() ? t…
+       |                                                          ^
+    241|     this.#bus?.listen((message) => this.#remoteSaved(message));
+    242|     if (typeof window === "undefined") return;
+ ❯ src/lib/editors.svelte.ts:321:24
+ ❯ src/lib/app.svelte.ts:6:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/20]⎯
+
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 14 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/document-windows.test.ts > Ctrl+O (в русской раскладке тоже) открывает выбор документа по названию; Enter открывает вкладкой
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/lib/document-windows.test.ts:142:1
+    140| }
+    141|
+    142| it("Ctrl+O (в русской раскладке тоже) открывает выбор документа по наз…
+       | ^
+    143|   const open = vi.spyOn(app, "openDocument").mockResolvedValue();
+    144|   const modal = await openPicker();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/20]⎯
+
+ FAIL  src/lib/document-windows.test.ts > Alt+Enter в выборе документа открывает его в новом окне
+AssertionError: expected "openInNewWindow" to be called with arguments: [ 'docs/manual/a.md' ]
+
+Received:
+
+  1st openInNewWindow call:
+
+  [
+-   "docs/manual/a.md",
++   "docs/manual/b.md",
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/lib/document-windows.test.ts:161:20
+    159|   const modal = await openPicker();
+    160|   modal.querySelector<HTMLInputElement>("input")!.dispatchEvent(new Ke…
+    161|   expect(inWindow).toHaveBeenCalledWith("docs/manual/a.md");
+       |                    ^
+    162|   expect(open).not.toHaveBeenCalled();
+    163|   open.mockRestore(); inWindow.mockRestore();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/20]⎯
+
+ FAIL  src/lib/DocumentWindow.test.ts > окно показывает один документ в редакторе и подписано его именем; ссылки идут в основное окно
+Error: Hook timed out in 10000ms.
+If this is a long-running hook, pass a timeout value as the last argument or configure it globally with "hookTimeout".
+ ❯ src/lib/DocumentWindow.test.ts:24:1
+     22| let component: ReturnType<typeof mount> | undefined;
+     23|
+     24| beforeEach(async () => {
+       | ^
+     25|   listeners.clear();
+     26|   vi.mocked(call).mockReset();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/20]⎯
+
+ FAIL  src/lib/KeybindingsPage.test.ts > конфликт блокирует запись; явная замена меняет только черновик; ошибка сохраняет правки
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/lib/KeybindingsPage.test.ts:14:1
+     12| const button=(root:ParentNode,text:string)=>[...root.querySelectorAll<…
+     13| const row=(title:string)=>[...document.querySelectorAll('.binding-row'…
+     14| it('конфликт блокирует запись; явная замена меняет только черновик; ош…
+       | ^
+     15|   component=mount(KeybindingsPage,{target:document.body});flushSync();
+     16|   button(row('Настройки'),'Назначить').click();flushSync();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/20]⎯
+
+ FAIL  src/lib/NewTopicsPage.test.ts > показывает список, по умолчанию только активные, и карточку выбранной темы
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/lib/NewTopicsPage.test.ts:81:1
+     79| });
+     80|
+     81| it("показывает список, по умолчанию только активные, и карточку выбран…
+       | ^
+     82|   const host = show(NewTopicsPage);
+     83|   await settle();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/20]⎯
+
+ FAIL  src/lib/NewTopicsPage.test.ts > удаление просит подтверждения: фокус на «Отмена», отмена ничего не удаляет
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/lib/NewTopicsPage.test.ts:154:1
+    152| });
+    153|
+    154| it("удаление просит подтверждения: фокус на «Отмена», отмена ничего не…
+       | ^
+    155|   const host = show(NewTopicsPage);
+    156|   await settle();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/20]⎯
+
+ FAIL  src/lib/NotificationsPanel.test.ts > shows progress, closes on Escape and restores focus
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/lib/NotificationsPanel.test.ts:9:1
+      7| afterEach(async () => { for (const component of components.splice(0)) …
+      8|
+      9| it("shows progress, closes on Escape and restores focus", async () => {
+       | ^
+     10|   app.notifications = [{ id: "test", title: "Загрузка · bge", text: "С…
+     11|   const target = document.createElement("div"); document.body.append(t…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/20]⎯
+
+ FAIL  src/lib/Workspace.test.ts > горячая клавиша RU открывает общий поиск; повтор фокусирует запрос, IME не выполняется
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/lib/Workspace.test.ts:31:1
+     29| });
+     30|
+     31| it('горячая клавиша RU открывает общий поиск; повтор фокусирует запрос…
+       | ^
+     32|   component=mount(Workspace,{target:document.body});flushSync();await …
+     33|   app.openSettings();flushSync();await settle();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/20]⎯
+
+ FAIL  src/lib/Workspace.test.ts > чтение из слоя завершает переход документом с фокусом, включая удалённый файл
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/lib/Workspace.test.ts:112:1
+    110| });
+    111|
+    112| it("чтение из слоя завершает переход документом с фокусом, включая уда…
+       | ^
+    113|   component = mount(Workspace, { target: document.body }); flushSync()…
+    114|   app.openSettings(); flushSync(); await settle();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/20]⎯
+
+ FAIL  src/lib/Workspace.test.ts > слой сохраняет общие режимы, показывает ошибку и передаёт согласие на переиндексацию
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/lib/Workspace.test.ts:144:74
+    142|   expect(modal.textContent).toContain('provider_error');
+    143|   app.projects = [{ ...project, state: 'reindex_required' }]; flushSyn…
+    144|   expect(modal.querySelector<HTMLTextAreaElement>('textarea')!.disable…
+       |                                                                          ^
+    145|   expect(vi.mocked(call).mock.calls.some(([method]) => method === 'rei…
+    146|   [...modal.querySelectorAll<HTMLButtonElement>('button')].find(b => b…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/20]⎯
+
+ FAIL  src/lib/Workspace.test.ts > несколько документов справа, подсветка и режим вкладки сохраняются при переключении
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/lib/Workspace.test.ts:151:1
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/20]⎯
+
+ FAIL  src/lib/graph/PhysicalGraph.test.ts > загружает срез проекта с начальными пределами и показывает документы, режимы и счётчики
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/lib/graph/PhysicalGraph.test.ts:56:1
+     54| });
+     55|
+     56| it("загружает срез проекта с начальными пределами и показывает докумен…
+       | ^
+     57|   component = mount(PhysicalGraph, { target });
+     58|   await settle();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/20]⎯
+
+ FAIL  src/lib/graph/PhysicalGraph.test.ts > раскрытие документа запрашивает его чанки порциями по 50 на том же снимке
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/lib/graph/PhysicalGraph.test.ts:102:1
+    100| });
+    101|
+    102| it("раскрытие документа запрашивает его чанки порциями по 50 на том же…
+       | ^
+    103|   component = mount(PhysicalGraph, { target });
+    104|   await settle();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/20]⎯
+
+ FAIL  src/lib/graph/physics.test.ts > одиночки кольцом, размер узла и размер карты (раунд 27) > раскладка детерминирована; прежнее поведение включается настройкой
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/lib/graph/physics.test.ts:223:3
+    221|   });
+    222|
+    223|   it("раскладка детерминирована; прежнее поведение включается настройк…
+       |   ^
+    224|     const run = (tuning?: Partial<Tuning>) => {
+    225|       const { nodes, links } = withHub(10);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/20]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+TypeError: Cannot read properties of undefined (reading 'transformCallback')
+ ❯ transformCallback node_modules/@tauri-apps/api/core.js:72:39
+ ❯ listen node_modules/@tauri-apps/api/event.js:142:18
+ ❯ src/lib/moved.svelte.ts:15:95
+     13|     if (this.#started) return;
+     14|     this.#started = true;
+     15|     if (inTauri()) void import("@tauri-apps/api/event").then(({listen}…
+       |                                                                                               ^
+     16|   }
+     17|   subscribe(callback: (event: EntryMoved) => void): () => void {
+
+This error originated in "src/lib/document-windows.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The last test to run before this error was "Ctrl+O (в русской раскладке тоже) открывает выбор документа по названию; Enter открывает вкладкой". This means either:
+- the error was thrown while Vitest was running this test, or
+- the error was thrown after the test completed, and this was the most recent test at that point.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  14 failed | 48 passed (62)
+      Tests  14 failed | 420 passed (434)
+     Errors  1 error
+   Start at  12:58:05
+   Duration  112.17s (environment 50%, import 24%, tests 17%, transform 8%, setup 1%, worker 1%)
+
+Environment  jsdom was created 62 times · 739.67s total, 50% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments

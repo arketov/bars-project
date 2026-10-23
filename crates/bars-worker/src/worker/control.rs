@@ -167,7 +167,8 @@ pub struct JobObserver {
     pause: Arc<Pause>,
     cell: Arc<JobCell>,
     /// Документ ждёт паузы после правки: проверка его пропускает (Т-41).
-    defer: Option<Arc<dyn Fn(&str) -> bool + Send + Sync>>,
+    defer: Option<Arc<dyn Fn(&str, bool) -> bool + Send + Sync>>,
+    documents: Option<Arc<dyn IndexObserver + Send + Sync>>,
 }
 
 impl JobObserver {
@@ -176,18 +177,41 @@ impl JobObserver {
             pause,
             cell,
             defer: None,
+            documents: None,
         }
     }
 
-    pub fn with_defer(mut self, defer: Arc<dyn Fn(&str) -> bool + Send + Sync>) -> Self {
+    pub fn with_defer(mut self, defer: Arc<dyn Fn(&str, bool) -> bool + Send + Sync>) -> Self {
         self.defer = Some(defer);
+        self
+    }
+
+    pub fn with_documents(mut self, documents: Arc<dyn IndexObserver + Send + Sync>) -> Self {
+        self.documents = Some(documents);
         self
     }
 }
 
 impl IndexObserver for JobObserver {
-    fn defer(&self, path: &str) -> bool {
-        self.defer.as_ref().is_some_and(|defer| defer(path))
+    fn discovered(&self, paths: &[String]) {
+        if let Some(documents) = &self.documents {
+            documents.discovered(paths);
+        }
+    }
+    fn priority(&self, path: &str) -> u8 {
+        self.documents
+            .as_ref()
+            .map_or(0, |documents| documents.priority(path))
+    }
+    fn document_done(&self, path: &str, error: Option<&str>) {
+        if let Some(documents) = &self.documents {
+            documents.document_done(path, error);
+        }
+    }
+    fn defer(&self, path: &str, full_check: bool) -> bool {
+        self.defer
+            .as_ref()
+            .is_some_and(|defer| defer(path, full_check))
     }
     fn execution(&self, info: bars_core::models::ExecutionInfo) {
         *lock(&self.cell.execution) = info;
@@ -204,6 +228,9 @@ impl IndexObserver for JobObserver {
     }
 
     fn file(&self, path: &str) {
+        if let Some(documents) = &self.documents {
+            documents.file(path);
+        }
         *lock(&self.cell.file) = Some(path.to_string());
     }
 
