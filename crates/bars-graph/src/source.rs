@@ -4,6 +4,10 @@ use pulldown_cmark::{Event, Options, Parser, Tag, TagEnd};
 use std::collections::{BTreeMap, BTreeSet};
 use std::ops::Range;
 
+mod entities;
+pub(crate) use entities::declaration as alias_declaration;
+use entities::{Entities, operand};
+
 pub struct InputDocument {
     pub path: String,
     pub docs_path: String,
@@ -159,61 +163,9 @@ pub fn anchor(label: &str) -> String {
         .collect()
 }
 
-fn clean(label: &str) -> String {
-    label
-        .trim()
-        .trim_start_matches(['-', '*', '+', ' '])
-        .trim()
-        .trim_matches(['`', '«', '»', '"', '\'', '.', ';', ':'])
-        .trim()
-        .to_string()
-}
-
-fn entity(data: &mut Dataset, source: &SourceDocument, label: &str, proof: &str) -> String {
-    let label = clean(label);
-    let explicit_requirement = label
-        .strip_prefix("Т-")
-        .is_some_and(|n| !n.is_empty() && n.chars().all(|c| c.is_ascii_digit()));
-    let namespace = if explicit_requirement {
-        format!("{}:requirement", data.namespace)
-    } else {
-        format!("{}:{}", data.namespace, source.meta.docs_path)
-    };
-    let reference = object_ref(
-        &namespace,
-        Kind::Entity,
-        &label.to_lowercase(),
-        METHOD_VERSION,
-    );
-    if let Some(node) = data
-        .nodes
-        .iter_mut()
-        .find(|n| n.reference.id == reference.id)
-    {
-        if !node.source_ids.contains(&source.meta.reference.id) {
-            node.source_ids.push(source.meta.reference.id.clone());
-        }
-        if !node.evidence.iter().any(|e| e == proof) {
-            node.evidence.push(proof.into());
-        }
-    } else {
-        data.nodes.push(Node {
-            reference: reference.clone(),
-            label,
-            namespace,
-            aliases: vec![],
-            source_ids: vec![source.meta.reference.id.clone()],
-            evidence: vec![proof.into()],
-            roles: vec![],
-            parent: None,
-            anchor: None,
-        });
-    }
-    reference.id
-}
-
 /// Только явно выраженные предикаты; правило не делает смыслового вывода из cosine.
 fn assertions(
+    entities: &Entities,
     data: &mut Dataset,
     source: &SourceDocument,
     owner: &str,
@@ -240,54 +192,86 @@ fn assertions(
             && matches!(ch, '.' | '!' | '?' | ';')
             && text[end..].chars().next().is_none_or(char::is_whitespace)
         {
-            assertion_clause(data, source, owner, range.start + start..range.start + end)?;
+            assertion_clause(
+                entities,
+                data,
+                source,
+                owner,
+                range.start + start..range.start + end,
+            )?;
             start = end;
         }
     }
     if start < text.len() {
-        assertion_clause(data, source, owner, range.start + start..range.end)?;
+        assertion_clause(
+            entities,
+            data,
+            source,
+            owner,
+            range.start + start..range.end,
+        )?;
     }
     Ok(())
 }
 
 fn assertion_clause(
+    entities: &Entities,
     data: &mut Dataset,
     source: &SourceDocument,
     owner: &str,
     range: Range<usize>,
 ) -> Result<(), GraphError> {
-    let raw = source.text[range.clone()].trim();
+    let raw = source.text[range.clone()]
+        .trim()
+        .trim_end_matches(['.', ';'])
+        .trim();
     if raw.contains('?') {
         return Ok(());
     }
-    let mut conditions = BTreeMap::new();
+    let mut qualifiers = BTreeMap::new();
     let mut clause = raw;
-    if ["если ", "при ", "когда "]
+    let lower = raw.to_lowercase();
+    if ["если ", "при ", "когда ", "без "]
         .iter()
-        .any(|p| raw.to_lowercase().starts_with(p))
+        .any(|p| lower.starts_with(p))
     {
-        let Some((condition, rest)) = raw.split_once(", ") else {
+        if let Some(at) = outside(raw, ",") {
+            qualifiers.insert("condition".into(), raw[..at].trim().into());
+            clause = raw[at + 1..].trim();
+        } else if lower.starts_with("без драйвера ") {
+            // This unpunctuated form has an explicit one-token driver ID (the census failure).
+            let rest = &raw["без драйвера ".len()..];
+            let Some(at) = rest.find(char::is_whitespace) else {
+                return Ok(());
+            };
+            let driver = &rest[..at];
+            if driver.is_empty()
+                || !driver
+                    .trim_matches('`')
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || "_-.".contains(c))
+            {
+                return Ok(());
+            }
+            let at = "без драйвера ".len() + at;
+            qualifiers.insert("condition".into(), raw[..at].into());
+            clause = raw[at..].trim();
+        } else {
             return Ok(());
-        };
-        conditions.insert("condition".into(), condition.into());
-        clause = rest;
-    }
-    for (phrase, predicate) in [
-        ("зависит от", Predicate::DependsOn),
-        ("использует", Predicate::Uses),
-        ("реализует", Predicate::Implements),
-        ("проверяет", Predicate::Verifies),
-        ("заменяет", Predicate::Supersedes),
-        ("требует", Predicate::Requires),
-        ("запускается только после", Predicate::Requires),
-        ("выполняется только после", Predicate::Requires),
-    ] {
-        let lower = clause.to_lowercase();
-        if lower.len() != clause.len() {
-            continue;
         }
+    }
+    for (phrase, predicate, precondition) in [
+        ("зависит от", Predicate::DependsOn, false),
+        ("использует", Predicate::Uses, false),
+        ("реализует", Predicate::Implements, false),
+        ("проверяет", Predicate::Verifies, false),
+        ("заменяет", Predicate::Supersedes, false),
+        ("требует", Predicate::DependsOn, true),
+        ("запускается только после", Predicate::DependsOn, true),
+        ("выполняется только после", Predicate::DependsOn, true),
+    ] {
         let marker = format!(" {phrase} ");
-        let Some(at) = lower.find(&marker) else {
+        let Some(at) = outside(clause, &marker) else {
             continue;
         };
         let mut left = clause[..at].trim();
@@ -298,105 +282,104 @@ fn assertion_clause(
         } else {
             Polarity::Positive
         };
-        let mut qualifiers = conditions.clone();
-        if let Some((object, condition)) = right.split_once(", если ") {
-            right = object;
-            qualifiers.insert("condition".into(), format!("если {condition}"));
+        let mut qualifiers = qualifiers.clone();
+        if let Some(at) = outside(right, ",") {
+            let condition = right[at + 1..].trim();
+            if !["если ", "когда ", "при ", "без "]
+                .iter()
+                .any(|p| condition.to_lowercase().starts_with(p))
+                || qualifiers.contains_key("condition")
+                || outside(condition, ",").is_some()
+            {
+                continue;
+            }
+            qualifiers.insert("condition".into(), condition.into());
+            right = right[..at].trim();
         }
-        // Несколько предложений/предикатов требуют отдельного разбора; не поглощать соседний факт.
-        if left.contains(['\n', '.', '!', ';', ':', ',']) || right.contains(['\n', '!', ';']) {
-            continue;
-        }
-        // Местоимение не является именованным участником; порядок слов не задаёт направление.
-        if !explicit_operand(left) || !explicit_operand(right) {
-            continue;
-        }
-        right = right.trim_end_matches('.');
-        if right.contains(". ")
-            || left.is_empty()
-            || right.is_empty()
-            || left.chars().count() > 160
-            || right.chars().count() > 160
+        if operand(left).is_none()
+            || operand(right).is_none()
+            || entities.ambiguous(&source.meta.docs_path, left)
+            || entities.ambiguous(&source.meta.docs_path, right)
         {
             continue;
         }
+        if precondition {
+            qualifiers.insert("kind".into(), "precondition".into());
+        }
         let proof = evidence(data, source, range.clone(), METHOD_VERSION)?;
-        let from = entity(data, source, left, &proof);
-        let to = entity(data, source, right, &proof);
-        edge(
-            data,
-            owner,
-            &from,
-            Predicate::Mentions,
-            Polarity::Positive,
-            BTreeMap::new(),
-            Origin::Structural,
-            &proof,
-        )?;
-        edge(
-            data,
-            owner,
-            &to,
-            Predicate::Mentions,
-            Polarity::Positive,
-            BTreeMap::new(),
-            Origin::Structural,
-            &proof,
-        )?;
+        let Some((from, mut identity_proofs)) = entities.resolve(data, source, left, &proof)?
+        else {
+            continue;
+        };
+        let Some((to, other_proofs)) = entities.resolve(data, source, right, &proof)? else {
+            continue;
+        };
+        identity_proofs.extend(other_proofs);
+        for id in [&from, &to] {
+            edge(
+                data,
+                owner,
+                id,
+                Predicate::Mentions,
+                Polarity::Positive,
+                BTreeMap::new(),
+                Origin::Structural,
+                &proof,
+            )?;
+        }
         edge(
             data,
             &from,
             &to,
             predicate,
             polarity,
-            qualifiers,
+            qualifiers.clone(),
             Origin::ExplicitRule,
             &proof,
         )?;
+        // An alias declaration is part of the proof of this identity, not an unrelated citation.
+        for identity in identity_proofs {
+            edge(
+                data,
+                &from,
+                &to,
+                predicate,
+                polarity,
+                qualifiers.clone(),
+                Origin::ExplicitRule,
+                &identity,
+            )?;
+        }
         break;
     }
     Ok(())
 }
 
-fn explicit_operand(text: &str) -> bool {
-    // Без синтаксического разбора нельзя определить участника сложной фразы.
-    if text.bytes().filter(|b| *b == b'`').count() % 2 != 0 {
-        return false;
+/// Search only outside inline code and bracketed expressions; offsets stay in source UTF-8.
+fn outside(text: &str, marker: &str) -> Option<usize> {
+    let lower = text.to_lowercase();
+    if lower.len() != text.len() {
+        return None;
     }
-    !text.split_whitespace().any(|word| {
-        let lower = word
-            .trim_matches(|ch: char| !ch.is_alphanumeric() && ch != '_')
-            .to_lowercase();
-        matches!(
-            lower.as_str(),
-            "он" | "она"
-                | "оно"
-                | "они"
-                | "это"
-                | "его"
-                | "её"
-                | "ее"
-                | "их"
-                | "который"
-                | "которая"
-                | "которое"
-                | "которые"
-                | "которой"
-                | "и"
-                | "или"
-                | "но"
-                | "а"
-                | "если"
-                | "когда"
-                | "при"
-                | "использует"
-                | "проверяет"
-                | "требует"
-                | "зависит"
-                | "заменяет"
-                | "реализует"
-        )
-    })
+    let mut code = false;
+    let mut nesting = 0usize;
+    for (at, ch) in text.char_indices() {
+        if ch == '`' {
+            code = !code;
+        }
+        if !code {
+            if nesting == 0 && lower[at..].starts_with(marker) {
+                return Some(at);
+            }
+            if matches!(ch, '(' | '[') {
+                nesting += 1;
+            }
+            if matches!(ch, ')' | ']') {
+                nesting = nesting.saturating_sub(1);
+            }
+        }
+    }
+    None
 }
 
 struct Heading {
@@ -422,6 +405,7 @@ pub fn build_cancellable(
     mut cancelled: impl FnMut() -> bool,
 ) -> Result<Dataset, GraphError> {
     inputs.sort_by(|a, b| a.docs_path.cmp(&b.docs_path));
+    let entities = Entities::collect(&inputs, &mut cancelled)?;
     let mut data = Dataset::empty(namespace, docs_root);
     let mut pending = Vec::new();
     let mut seen = BTreeSet::new();
@@ -568,7 +552,7 @@ pub fn build_cancellable(
             if let Some(node) = data.nodes.iter_mut().find(|n| n.reference.id == owner_id) {
                 node.evidence.push(proof);
             }
-            assertions(&mut data, &source, owner_id, range)?;
+            assertions(&entities, &mut data, &source, owner_id, range)?;
         }
         let parsed = links::parse_links(&source.text);
         for link in parsed.iter().filter(|l| l.kind != LinkKind::Wiki) {

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
-pub const METHOD_VERSION: &str = "explicit-markdown-v5";
+pub const METHOD_VERSION: &str = "explicit-markdown-v6";
 pub const DTO_VERSION: u32 = 1;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -95,6 +95,7 @@ pub enum Predicate {
     Implements,
     Verifies,
     Supersedes,
+    /// Legacy input filter; extraction emits DependsOn with kind=precondition.
     Requires,
     SimilarTo,
     CoOccurs,

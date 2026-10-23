@@ -310,9 +310,14 @@ fn real_pronoun_clause_is_not_a_reversed_verification_fact() {
         data.edges.iter().filter(|e| e.predicate.semantic()).count(),
         2
     );
-    assert!(data.edges.iter().any(|e| e.predicate == Predicate::Requires
-        && e.polarity == Polarity::Negative
-        && e.qualifiers.contains_key("condition")));
+    assert!(
+        data.edges
+            .iter()
+            .any(|e| e.predicate == Predicate::DependsOn
+                && e.qualifiers.get("kind").map(String::as_str) == Some("precondition")
+                && e.polarity == Polarity::Negative
+                && e.qualifiers.contains_key("condition"))
+    );
     for ev in &data.evidence {
         assert_eq!(
             data.sources[0].text.get(ev.span.start..ev.span.end),

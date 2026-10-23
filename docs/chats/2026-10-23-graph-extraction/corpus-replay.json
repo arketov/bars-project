@@ -1,0 +1,305 @@
+{
+  "method": "explicit-markdown-v6",
+  "source_snapshot": "39bb48000a0a7db93d17ca4c58c7f331742796039976952e54f8640e5949e41f",
+  "snapshot": "24b1f0d0d7a7f6a8b97c60f8331a94411daad7a923bfa7e6dc46d456f3e95da2",
+  "documents": 66,
+  "verified_spans": 2079,
+  "limitations": "development replay; no chunks, embeddings, retrieval, holdout or live worker acceptance",
+  "assertions": [
+    {
+      "subject": "новая правка",
+      "object": "ждущую запись того же документа",
+      "predicate": "supersedes",
+      "polarity": "positive",
+      "qualifiers": {},
+      "proof": [
+        {
+          "path": "MAIN_IDEA.md",
+          "quote": " новая правка заменяет ждущую запись того же документа.",
+          "span": {
+            "start": 16002,
+            "end": 16103,
+            "first_line": 109,
+            "last_line": 109
+          }
+        }
+      ]
+    },
+    {
+      "subject": "меню проекта",
+      "object": "меню папки дерева",
+      "predicate": "supersedes",
+      "polarity": "negative",
+      "qualifiers": {},
+      "proof": [
+        {
+          "path": "backlog/issues.md",
+          "quote": " меню проекта не заменяет меню папки дерева.",
+          "span": {
+            "start": 9949,
+            "end": 10029,
+            "first_line": 51,
+            "last_line": 51
+          }
+        }
+      ]
+    },
+    {
+      "subject": "модель",
+      "object": "CPU fallback",
+      "predicate": "uses",
+      "polarity": "positive",
+      "qualifiers": {
+        "condition": "Без драйвера Vulkan"
+      },
+      "proof": [
+        {
+          "path": "features/distribution/installer.md",
+          "quote": " Без драйвера Vulkan модель использует CPU fallback.",
+          "span": {
+            "start": 13143,
+            "end": 13222,
+            "first_line": 77,
+            "last_line": 77
+          }
+        }
+      ]
+    },
+    {
+      "subject": "повторное открытие неизменённого проверенного кэша",
+      "object": "отметку",
+      "predicate": "uses",
+      "polarity": "positive",
+      "qualifiers": {},
+      "proof": [
+        {
+          "path": "features/models/local-models.md",
+          "quote": " повторное открытие неизменённого проверенного кэша использует отметку.",
+          "span": {
+            "start": 14735,
+            "end": 14869,
+            "first_line": 84,
+            "last_line": 84
+          }
+        }
+      ]
+    },
+    {
+      "subject": "MCP",
+      "object": "ID конкретной допущенной попытки вместе с epoch соединения/worker",
+      "predicate": "uses",
+      "polarity": "positive",
+      "qualifiers": {},
+      "proof": [
+        {
+          "path": "features/new-topics/design.md",
+          "quote": " MCP использует ID конкретной допущенной попытки вместе с epoch соединения/worker.",
+          "span": {
+            "start": 11510,
+            "end": 11646,
+            "first_line": 61,
+            "last_line": 61
+          }
+        }
+      ]
+    },
+    {
+      "subject": "Проверка",
+      "object": "существующий model_loading/переиндексационный контракт",
+      "predicate": "uses",
+      "polarity": "positive",
+      "qualifiers": {},
+      "proof": [
+        {
+          "path": "features/new-topics/design.md",
+          "quote": " Проверка использует существующий model_loading/переиндексационный контракт;",
+          "span": {
+            "start": 30042,
+            "end": 30174,
+            "first_line": 141,
+            "last_line": 141
+          }
+        }
+      ]
+    },
+    {
+      "subject": "Сбор",
+      "object": "открытого окна",
+      "predicate": "depends_on",
+      "polarity": "negative",
+      "qualifiers": {
+        "kind": "precondition"
+      },
+      "proof": [
+        {
+          "path": "features/new-topics/requirements.md",
+          "quote": " Сбор не требует открытого окна.",
+          "span": {
+            "start": 2674,
+            "end": 2732,
+            "first_line": 19,
+            "last_line": 19
+          }
+        }
+      ]
+    },
+    {
+      "subject": "Повторное открытие меню",
+      "object": "цель",
+      "predicate": "supersedes",
+      "polarity": "positive",
+      "qualifiers": {},
+      "proof": [
+        {
+          "path": "features/window/document-actions.md",
+          "quote": " Повторное открытие меню заменяет цель;",
+          "span": {
+            "start": 10131,
+            "end": 10203,
+            "first_line": 47,
+            "last_line": 47
+          }
+        }
+      ]
+    },
+    {
+      "subject": "отказ учёта",
+      "object": "результат инструмента",
+      "predicate": "supersedes",
+      "polarity": "negative",
+      "qualifiers": {},
+      "proof": [
+        {
+          "path": "features/window/mcp-statistics.md",
+          "quote": " отказ учёта не заменяет результат инструмента.",
+          "span": {
+            "start": 13604,
+            "end": 13691,
+            "first_line": 74,
+            "last_line": 74
+          }
+        }
+      ]
+    },
+    {
+      "subject": "Проверка браузерного экрана",
+      "object": "нативную приёмку этапа 32",
+      "predicate": "supersedes",
+      "polarity": "negative",
+      "qualifiers": {},
+      "proof": [
+        {
+          "path": "features/window/mcp-statistics.md",
+          "quote": " Проверка браузерного экрана не заменяет нативную приёмку этапа 32.",
+          "span": {
+            "start": 19941,
+            "end": 20063,
+            "first_line": 100,
+            "last_line": 100
+          }
+        }
+      ]
+    },
+    {
+      "subject": "Снятие регистрации `unregister`",
+      "object": "полное удаление",
+      "predicate": "supersedes",
+      "polarity": "negative",
+      "qualifiers": {},
+      "proof": [
+        {
+          "path": "features/window/project-menu.md",
+          "quote": " Снятие регистрации `unregister` не заменяет полное удаление.",
+          "span": {
+            "start": 1827,
+            "end": 1929,
+            "first_line": 13,
+            "last_line": 13
+          }
+        }
+      ]
+    },
+    {
+      "subject": "Проверка",
+      "object": "существующий `reindex`",
+      "predicate": "uses",
+      "polarity": "positive",
+      "qualifiers": {},
+      "proof": [
+        {
+          "path": "features/window/project-menu.md",
+          "quote": " Проверка использует существующий `reindex`;",
+          "span": {
+            "start": 2791,
+            "end": 2865,
+            "first_line": 17,
+            "last_line": 17
+          }
+        }
+      ]
+    },
+    {
+      "subject": "Изменение устройства",
+      "object": "переиндексации",
+      "predicate": "depends_on",
+      "polarity": "negative",
+      "qualifiers": {
+        "kind": "precondition"
+      },
+      "proof": [
+        {
+          "path": "features/window/settings-window.md",
+          "quote": " Изменение устройства не требует переиндексации;",
+          "span": {
+            "start": 3287,
+            "end": 3377,
+            "first_line": 21,
+            "last_line": 21
+          }
+        }
+      ]
+    },
+    {
+      "subject": "bars",
+      "object": "две модели",
+      "predicate": "uses",
+      "polarity": "positive",
+      "qualifiers": {},
+      "proof": [
+        {
+          "path": "manual/models.md",
+          "quote": "bars использует две модели:\n",
+          "span": {
+            "start": 741,
+            "end": 788,
+            "first_line": 11,
+            "last_line": 11
+          }
+        }
+      ]
+    },
+    {
+      "subject": "Первое скачивание",
+      "object": "сети",
+      "predicate": "depends_on",
+      "polarity": "positive",
+      "qualifiers": {
+        "kind": "precondition"
+      },
+      "proof": [
+        {
+          "path": "overview.md",
+          "quote": " Первое скачивание требует сети.",
+          "span": {
+            "start": 6835,
+            "end": 6894,
+            "first_line": 47,
+            "last_line": 47
+          }
+        }
+      ]
+    }
+  ],
+  "cross_file_entities": 0,
+  "two_step_semantic_chains": 0
+}

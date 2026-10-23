@@ -98,7 +98,14 @@ fn allowed_sources<'a>(
                 return None;
             }
             if !scope.modules.is_empty() || !scope.files.is_empty() {
-                n.aliases.clear();
+                n.aliases.retain(|alias| {
+                    n.evidence
+                        .iter()
+                        .filter_map(|id| evidence.get(id))
+                        .filter(|e| e.method == METHOD_VERSION)
+                        .filter_map(|e| crate::source::alias_declaration(&e.quote))
+                        .any(|(id, declared)| id == n.label && declared == *alias)
+                });
             }
             Some((n.reference.id.clone(), n))
         })
@@ -152,15 +159,21 @@ fn resolve(endpoint: &Endpoint, view: &Allowed<'_>) -> Result<Vec<Node>, GraphEr
             if label.trim().is_empty() {
                 return Err(GraphError::InvalidParams("пустая метка объекта".into()));
             }
-            let label = label.trim().to_lowercase();
+            let exact_label = label.trim();
+            let label = exact_label.to_lowercase();
             Ok(view
                 .nodes
                 .values()
                 .filter(|n| {
                     kind.is_none_or(|k| n.reference.kind == k)
                         && namespace.as_ref().is_none_or(|ns| &n.namespace == ns)
-                        && (n.label.to_lowercase() == label
-                            || n.aliases.iter().any(|a| a.to_lowercase() == label))
+                        && ((if n.reference.kind == Kind::Entity
+                            && n.namespace.ends_with(":technical")
+                        {
+                            n.label == exact_label
+                        } else {
+                            n.label.to_lowercase() == label
+                        }) || n.aliases.iter().any(|a| a.to_lowercase() == label))
                 })
                 .cloned()
                 .collect())
@@ -177,7 +190,14 @@ fn relevant(text: &str, query: &str) -> usize {
         .count()
 }
 fn matches(edge: &Edge, request: &GraphRequest) -> bool {
-    (request.predicates.is_empty() || request.predicates.contains(&edge.predicate))
+    (request.predicates.is_empty()
+        || request.predicates.contains(&edge.predicate)
+        || (request.predicates.contains(&Predicate::Requires)
+            && edge.predicate == Predicate::DependsOn
+            && edge
+                .qualifiers
+                .get("kind")
+                .is_some_and(|k| k == "precondition")))
         && request.polarity.is_none_or(|p| edge.polarity == p)
         && request
             .qualifiers
@@ -661,7 +681,14 @@ pub fn execute_ranked(
         truncated: false,
         limit_reasons: vec![],
         next_cursor: None,
-        warnings: data.warnings.clone(),
+        warnings: {
+            let mut warnings = data.warnings.clone();
+            if request.predicates.contains(&Predicate::Requires) {
+                warnings
+                    .push("requires устарел: используйте depends_on с kind=precondition".into());
+            }
+            warnings
+        },
         method: METHOD_VERSION.into(),
         elapsed_ms: 0,
         resolution: "resolved".into(),
