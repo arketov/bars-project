@@ -34,7 +34,7 @@ title: Как соглашение о документации доходит д
 - Сверить два выбранных источника: `bars_rag_search({query:"Как выбирается устройство rerank?",files:["features/models/local-models.md","features/settings/settings.md"]})`.
 - Прочитать известный контракт: `bars_read({path:"features/settings/settings.md"})`; получить структуру: `bars_outline({path:"features/settings/settings.md"})`.
 
-При пустой выдаче проверить предмет, проект и фильтры; не считать ноль отсутствием требования и не запускать из-за него переиндексацию. Не вводится обязательная частота фильтрации. Правило и примеры доставляются стартовой инструкцией, описаниями MCP/аргументов, обоими skills и полным BARS_INSTRUCTION.
+При пустой выдаче проверить предмет, проект и фильтры; не считать ноль отсутствием требования и не запускать из-за него переиндексацию. Не вводится обязательная частота фильтрации. Правило и примеры доставляются стартовой инструкцией, описаниями MCP/аргументов, skills `bars-docs` и `bars-session-log` и полным BARS_INSTRUCTION.
 
 ## Skills bars
 
@@ -45,6 +45,8 @@ title: Как соглашение о документации доходит д
 - `bars-end` — завершение сессии по команде пользователя ([session-end.md](session-end.md)): опись того, что было в сессии, перенос фактов в документы-владельцы, правка устаревших повторов, `handoff.md`, отчёт. Агент сам его не вызывает.
 
 Skills ставятся в пользовательскую папку клиента, а не в проект: bars не пишет в репозиторий ничего, кроме `.bars` и `BARS_INSTRUCTION.md` (Т-5, Т-8). Установка и удаление трогают только папки skills с именами bars. Папка skills: Claude Code — `~/.claude/skills`, Codex — `~/.agents/skills` ([clients.md](../clients/clients.md)). Тексты skills лежат в `bars-worker/assets/skills/` и зашиты в bars.
+
+Новый skill добавляется в четырёх местах: папка с `SKILL.md` в `assets/skills/`, строка в списке `SKILLS` (`bars-worker/src/clients/mod.rs`), ожидаемое число файлов в тестах установки, удаления и частичного обновления (`clients/tests.rs`, `clients/refresh_tests.rs`), списки skills в `scripts/test-client-refresh.ps1`, `test-client-profile-isolation.ps1`, `test-docs-convention.ps1` и `test-mcp-disk-read.mjs`. Тесты считают файлы, поэтому без правки чисел они падают.
 
 ## BARS_INSTRUCTION.md
 
