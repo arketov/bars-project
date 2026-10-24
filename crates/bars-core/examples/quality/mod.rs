@@ -94,7 +94,12 @@ pub fn validate_cases(root: &Path, cases: &[Case]) -> Result<()> {
             }
             let source = fs::read_to_string(root.join(&g.path))?;
             let lines: Vec<_> = source.lines().collect();
-            let heading = format!("## {}", g.heading);
+            // Таблица без раздела `##` размечается заголовком документа целиком: `# …`.
+            let heading = if g.heading.starts_with('#') {
+                g.heading.clone()
+            } else {
+                format!("## {}", g.heading)
+            };
             let starts: Vec<_> = lines
                 .iter()
                 .enumerate()

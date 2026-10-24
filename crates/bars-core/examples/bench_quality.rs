@@ -1,14 +1,16 @@
 //! IDEA-06: воспроизводимый бенч реального search. Методика — search-quality-benchmark.md.
 mod quality;
+#[path = "quality/registry.rs"]
+mod registry;
 
-use bars_core::indexing::chunking::ChunkingParams;
+use bars_core::indexing::chunking::{ChunkingParams, chunk_document};
 use bars_core::indexing::indexer::{IndexSettings, UpdateOutcome, update_index};
 use bars_core::models::{
     Accelerator, BuiltinEmbedder, BuiltinReranker, EmbedError, Embedder, ModelFingerprint,
     RerankError, Reranker,
 };
 use bars_core::search::{SearchRequest, SearchSettings, candidate_trace, search};
-use bars_core::storage::{Index, Journal};
+use bars_core::storage::{DocumentRecord, Index, Journal};
 use quality::{Row, digest, file_digest, load_cases, pack_hits, validate_cases};
 use serde_json::json;
 use std::collections::{BTreeSet, HashSet};
@@ -21,7 +23,11 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 fn main() -> Result<()> {
     let a: Vec<String> = std::env::args().skip(1).collect();
     match a.first().map(String::as_str) {
-        Some("prepare") if a.len()==4 => prepare(Path::new(&a[1]),Path::new(&a[2]),Path::new(&a[3])),
+        Some("prepare") if (4..=6).contains(&a.len()) => {
+            let variant = a.get(4).map_or("A", String::as_str);
+            let seed = a.get(5).filter(|s| *s != "-").map(Path::new);
+            prepare(Path::new(&a[1]), Path::new(&a[2]), Path::new(&a[3]), variant, seed)
+        }
         Some("validate") if a.len()==3 => {
             let cases=load_cases(Path::new(&a[2]))?;
             validate_cases(Path::new(&a[1]),&cases)?;
@@ -29,7 +35,7 @@ fn main() -> Result<()> {
         }
         Some("run") if a.len()==10 || a.len()==11 => run(&a),
         Some("verify") if a.len()==3 => verify_vectors(Path::new(&a[1]), Path::new(&a[2])),
-        _ => Err("prepare <source-project> <new-workspace> <models> | validate <snapshot-project> <cases.json> | verify <workspace> <models> | run <workspace> <cases.json> <models> <output-dir> <split> <candidates-csv> <K-csv> <repeats> <auto|cpu> [all|gold|first|nochats]".into())
+        _ => Err("prepare <source-project> <new-workspace> <models> [A|B|C|D] [seed-index|-] | validate <snapshot-project> <cases.json> | verify <workspace> <models> | run <workspace> <cases.json> <models> <output-dir> <split> <candidates-csv> <K-csv> <repeats> <auto|cpu> [all|gold|first|nochats]".into())
     }
 }
 
@@ -63,16 +69,35 @@ fn copy_docs(
     Ok(())
 }
 
-fn prepare(source: &Path, workspace: &Path, models: &Path) -> Result<()> {
+/// `variant`: A — штатная нарезка, B/C — реестры по `registry.rs`, D — `max_chars=1500`
+/// (пункт 6.3.1). `seed` — индекс, векторы которого переиспользуются; `-` — без него.
+fn prepare(
+    source: &Path,
+    workspace: &Path,
+    models: &Path,
+    variant: &str,
+    seed: Option<&Path>,
+) -> Result<()> {
     if workspace.exists() {
         return Err("prepare требует новую папку".into());
     }
+    if !matches!(variant, "A" | "B" | "C" | "D") {
+        return Err("вариант нарезки: A/B/C/D".into());
+    }
+    // Индекс строится штатной нарезкой, чтобы seed подошёл; вариант заменяет чанки после
+    // и переиспользует векторы чанков с тем же текстом.
+    let chunking = ChunkingParams::default();
+    let small = ChunkingParams {
+        max_chars: registry::WINDOW,
+        ..ChunkingParams::default()
+    };
     let snapshot = workspace.join("project");
     fs::create_dir_all(&snapshot)?;
     let mut files = Vec::new();
     copy_docs(source, &snapshot, Path::new("docs"), &mut files)?;
     let db = workspace.join("index.sqlite");
-    let seed = source.join(".bars/index.sqlite");
+    let default_seed = source.join(".bars/index.sqlite");
+    let seed = seed.unwrap_or(&default_seed);
     if seed.exists() {
         // VACUUM INTO учитывает WAL; исходный индекс открыт только для чтения.
         let conn = rusqlite::Connection::open_with_flags(
@@ -86,10 +111,20 @@ fn prepare(source: &Path, workspace: &Path, models: &Path) -> Result<()> {
     let load = started.elapsed().as_secs_f64();
     let mut index = Index::open(&db, Journal::Delete)?;
     let settings = IndexSettings {
-        chunking: ChunkingParams::default(),
+        chunking,
         docs_root: "docs".into(),
     };
-    let outcome = update_index(&snapshot, &mut index, &settings, &mut model)?;
+    let mut outcome = update_index(&snapshot, &mut index, &settings, &mut model)?;
+    if let UpdateOutcome::ReindexRequired(reason) = &outcome
+        && seed.exists()
+    {
+        // Seed другой модели или нарезки: индекс строится заново, без чужих векторов.
+        eprintln!("seed не подошёл ({reason:?}), индекс строится заново");
+        drop(index);
+        fs::remove_file(&db)?;
+        index = Index::open(&db, Journal::Delete)?;
+        outcome = update_index(&snapshot, &mut index, &settings, &mut model)?;
+    }
     let UpdateOutcome::Updated(report) = outcome else {
         return Err(format!("несовместимый seed: {outcome:?}").into());
     };
@@ -97,13 +132,61 @@ fn prepare(source: &Path, workspace: &Path, models: &Path) -> Result<()> {
         return Err(format!("ошибки индекса: {:?}", report.problems).into());
     }
     let indexed = index.documents()?;
+    let (mut rechunked, mut embedded) = (0, 0);
+    if variant != "A" {
+        for doc in &indexed {
+            let text = fs::read_to_string(snapshot.join(&doc.path))?;
+            let chunked = chunk_document(&doc.path, &text, &settings.chunking);
+            let chunks = if variant == "D" {
+                chunk_document(&doc.path, &text, &small).chunks
+            } else {
+                registry::rechunk(&doc.path, &chunked.chunks, variant)
+            };
+            if chunks == chunked.chunks {
+                continue;
+            }
+            let mut missing: Vec<(&str, &str)> = Vec::new();
+            for chunk in &chunks {
+                if !index.has_vector(&chunk.embed_hash)?
+                    && !missing.iter().any(|(hash, _)| *hash == chunk.embed_hash)
+                {
+                    missing.push((&chunk.embed_hash, &chunk.embed_text));
+                }
+            }
+            let texts: Vec<&str> = missing.iter().map(|(_, text)| *text).collect();
+            let vectors = if texts.is_empty() {
+                Vec::new()
+            } else {
+                model.embed(&texts)?
+            };
+            let new_vectors: Vec<(&str, &[f32])> = missing
+                .iter()
+                .zip(&vectors)
+                .map(|((hash, _), vector)| (*hash, vector.as_slice()))
+                .collect();
+            index.replace_document(
+                &DocumentRecord {
+                    path: &doc.path,
+                    module: &module_of(&doc.path),
+                    title: &chunked.title,
+                    size: doc.size,
+                    modified_ns: doc.modified_ns,
+                    hash: &doc.hash,
+                    chunks: &chunks,
+                },
+                &new_vectors,
+            )?;
+            rechunked += 1;
+            embedded += missing.len();
+        }
+    }
     let expected = bars_core::indexing::walk::walk_docs(&snapshot, Path::new("docs"))?
         .files
         .len();
     if indexed.len() != expected {
         return Err("число документов индекса и снимка различается".into());
     }
-    for doc in indexed {
+    for doc in index.documents()? {
         if !files
             .iter()
             .any(|m| m["path"] == doc.path && m["blake3"] == doc.hash)
@@ -113,14 +196,15 @@ fn prepare(source: &Path, workspace: &Path, models: &Path) -> Result<()> {
     }
     let metadata = json!({"source":source,"files":files,"documents":index.document_count()?,"chunks":index.chunk_count()?,
         "vectors":index.vector_count()?,"embed":format!("{:?}",model.fingerprint()),"device":format!("{:?}",model.device()),
-        "layout":format!("{:?}",index.stored_layout()?),"model_load_secs":load,"index_seconds":started.elapsed().as_secs_f64()-load,
+        "layout":format!("{:?}",index.stored_layout()?),"variant":variant,"registry_window":registry::WINDOW,"variant_d_max_chars":small.max_chars,
+        "rechunked_documents":rechunked,"rechunk_embedded":embedded,"model_load_secs":load,"index_seconds":started.elapsed().as_secs_f64()-load,
         "update":format!("{report:?}"),"index_blake3":file_digest(&db)?});
     fs::write(
         workspace.join("manifest.json"),
         serde_json::to_vec_pretty(&metadata)?,
     )?;
     eprintln!(
-        "{} документов, {} чанков; {report:?}",
+        "{} документов, {} чанков; вариант {variant}: переделано {rechunked}, новых векторов {embedded}; {report:?}",
         index.document_count()?,
         index.chunk_count()?
     );

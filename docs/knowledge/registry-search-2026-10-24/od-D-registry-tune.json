@@ -1,0 +1,1735 @@
+{
+  "quality_unit": "canonical section",
+  "sources": [
+    {
+      "dir": ".bars/bench-registry/runs/od-D/registry-tune",
+      "config": {
+        "dataset": "143eeff359cb7f6a47654a27a7cc3162e70631e8d043c861012299599a737558",
+        "manifest": "9b2e91779656913f76eb8cf22536b464fc041d8fce0fa4c77237f3283d96fcfa",
+        "binary": "401fda9a4c07b8c6db1a77bb868169f3423023e6284b0920ece47382460f0680",
+        "split": "tune",
+        "candidates": [
+          30
+        ],
+        "depths": [
+          15
+        ],
+        "repeats": 1,
+        "accelerator": "auto",
+        "threshold": 0,
+        "models": [
+          {
+            "path": "models--BAAI--bge-m3\\blobs\\1eebfb28493f67bba03ce0ef64bfdc7fc5a3bd9d7493f818bb1d78cd798416b4",
+            "bytes": 2266820608,
+            "blake3": "9825dbab52b78758a8473baa4cae158ca66016ea836d3857c7d1d4711ed296bf"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\blobs\\1eebfb28493f67bba03ce0ef64bfdc7fc5a3bd9d7493f818bb1d78cd798416b4.lock",
+            "bytes": 0,
+            "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\blobs\\21106b6d7dab2952c1d496fb21d5dc9db75c28ed361a05f5020bbba27810dd08",
+            "bytes": 17098108,
+            "blake3": "a085385b8b6f4a3f16a3493c180e694f92897e919d00aa9b3cd7fbffe1269cee"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\blobs\\21106b6d7dab2952c1d496fb21d5dc9db75c28ed361a05f5020bbba27810dd08.lock",
+            "bytes": 0,
+            "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\blobs\\3cdc05e5f550d8bd136f28efcea0ad5e6b4169c8",
+            "bytes": 65552,
+            "blake3": "c2ac747b0c02deb5055f25e53f8d0b3339e9bae4cc8a2c5cf4d542fe68d159c1"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\blobs\\3cdc05e5f550d8bd136f28efcea0ad5e6b4169c8.lock",
+            "bytes": 0,
+            "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\blobs\\b1879d702821e753ffe4245048eee415d54a9385",
+            "bytes": 964,
+            "blake3": "7928b0181fe837ea946ad566a4c8c3421b414988e65c61af6cedf79586971810"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\blobs\\b1879d702821e753ffe4245048eee415d54a9385.lock",
+            "bytes": 0,
+            "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\blobs\\dc69ac559dcba2694012009aaa108c614541789a",
+            "bytes": 444,
+            "blake3": "edaa88adc0a2806c739cf5ccab9672ec19869cf58002203e4921607d7676f0b4"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\blobs\\dc69ac559dcba2694012009aaa108c614541789a.lock",
+            "bytes": 0,
+            "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\blobs\\e6eda1c72da8f9dc30fdd9b69c73d35af3b7a7ad",
+            "bytes": 687,
+            "blake3": "b1d5af0afc82d0e61c53bd9086a705eb7a7c7c235113a720c4985d82c6d4e45d"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\blobs\\e6eda1c72da8f9dc30fdd9b69c73d35af3b7a7ad.lock",
+            "bytes": 0,
+            "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\blobs\\f84251230831afb359ab26d9fd37d5936d4d9bb5d1d5410e66442f630f24435b",
+            "bytes": 724923,
+            "blake3": "7cd2d6508ce32463a70482fd41cdb42fc0e4b00d3cc91ef699f4c46398c80d10"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\blobs\\f84251230831afb359ab26d9fd37d5936d4d9bb5d1d5410e66442f630f24435b.lock",
+            "bytes": 0,
+            "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\refs\\main",
+            "bytes": 40,
+            "blake3": "2d7e05b0aa200b85997ce7b8a8f30dd5f370a249f016dd85631f19015e9b3ad8"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\snapshots\\5617a9f61b028005a4858fdac845db406aefb181\\config.json",
+            "bytes": 687,
+            "blake3": "b1d5af0afc82d0e61c53bd9086a705eb7a7c7c235113a720c4985d82c6d4e45d"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\snapshots\\5617a9f61b028005a4858fdac845db406aefb181\\onnx\\Constant_7_attr__value",
+            "bytes": 65552,
+            "blake3": "c2ac747b0c02deb5055f25e53f8d0b3339e9bae4cc8a2c5cf4d542fe68d159c1"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\snapshots\\5617a9f61b028005a4858fdac845db406aefb181\\onnx\\model.onnx",
+            "bytes": 724923,
+            "blake3": "7cd2d6508ce32463a70482fd41cdb42fc0e4b00d3cc91ef699f4c46398c80d10"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\snapshots\\5617a9f61b028005a4858fdac845db406aefb181\\onnx\\model.onnx_data",
+            "bytes": 2266820608,
+            "blake3": "9825dbab52b78758a8473baa4cae158ca66016ea836d3857c7d1d4711ed296bf"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\snapshots\\5617a9f61b028005a4858fdac845db406aefb181\\special_tokens_map.json",
+            "bytes": 964,
+            "blake3": "7928b0181fe837ea946ad566a4c8c3421b414988e65c61af6cedf79586971810"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\snapshots\\5617a9f61b028005a4858fdac845db406aefb181\\tokenizer.json",
+            "bytes": 17098108,
+            "blake3": "a085385b8b6f4a3f16a3493c180e694f92897e919d00aa9b3cd7fbffe1269cee"
+          },
+          {
+            "path": "models--BAAI--bge-m3\\snapshots\\5617a9f61b028005a4858fdac845db406aefb181\\tokenizer_config.json",
+            "bytes": 444,
+            "blake3": "edaa88adc0a2806c739cf5ccab9672ec19869cf58002203e4921607d7676f0b4"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\blobs\\001ea7ea4e342cda3a615c6792962118f9ce8481",
+            "bytes": 758,
+            "blake3": "8787637040f354a66fc3c88c15077fb3ce7def77fca6c326926d8df869a50ff6"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\blobs\\001ea7ea4e342cda3a615c6792962118f9ce8481.lock",
+            "bytes": 0,
+            "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\blobs\\328a00a9a560aadcf2a3064f917517359eb3cc26",
+            "bytes": 1173,
+            "blake3": "54693e6b3ab433a83416028e923cc1a3e48ac4b3e901413cce59c1b219e5bd34"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\blobs\\328a00a9a560aadcf2a3064f917517359eb3cc26.lock",
+            "bytes": 0,
+            "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\blobs\\3af844cd2de818a95d2b5de5893a336836312c8ade03f53b286ac6beae080321",
+            "bytes": 108479,
+            "blake3": "14425d0f018ca39a0d7132f2e9ab6fe2821480af28c6cbc40f01d03fceb164c9"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\blobs\\3af844cd2de818a95d2b5de5893a336836312c8ade03f53b286ac6beae080321.lock",
+            "bytes": 0,
+            "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\blobs\\84b66c787b9b98977a16d5c993a3959210a214c98fc3466da263c949c2068945",
+            "bytes": 2271088656,
+            "blake3": "c0ebf4a03b1e067879633ffa968f600dea7c6c0c5ea8d3548fc82560cce0ef9a"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\blobs\\84b66c787b9b98977a16d5c993a3959210a214c98fc3466da263c949c2068945.lock",
+            "bytes": 0,
+            "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\blobs\\8bf8afbfd11306bd872018c53bfdf2e160a56f8edbcf49933324404791c148d3",
+            "bytes": 17082900,
+            "blake3": "6b125367faacadc927af65361f5d64bbe95c2befe6e3c337b72830193f59b34b"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\blobs\\8bf8afbfd11306bd872018c53bfdf2e160a56f8edbcf49933324404791c148d3.lock",
+            "bytes": 0,
+            "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\blobs\\b1879d702821e753ffe4245048eee415d54a9385",
+            "bytes": 964,
+            "blake3": "7928b0181fe837ea946ad566a4c8c3421b414988e65c61af6cedf79586971810"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\blobs\\b1879d702821e753ffe4245048eee415d54a9385.lock",
+            "bytes": 0,
+            "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\refs\\fbd57b17b4db111a9d16813bb08b4c804fac18e9",
+            "bytes": 40,
+            "blake3": "2ec5dbf25b4fc2d8ab0c96d7c8bb04c727cdd89ba4bd6c056d6897d910f57f43"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\refs\\main",
+            "bytes": 40,
+            "blake3": "2ec5dbf25b4fc2d8ab0c96d7c8bb04c727cdd89ba4bd6c056d6897d910f57f43"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\snapshots\\fbd57b17b4db111a9d16813bb08b4c804fac18e9\\config.json",
+            "bytes": 758,
+            "blake3": "8787637040f354a66fc3c88c15077fb3ce7def77fca6c326926d8df869a50ff6"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\snapshots\\fbd57b17b4db111a9d16813bb08b4c804fac18e9\\model.onnx",
+            "bytes": 108479,
+            "blake3": "14425d0f018ca39a0d7132f2e9ab6fe2821480af28c6cbc40f01d03fceb164c9"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\snapshots\\fbd57b17b4db111a9d16813bb08b4c804fac18e9\\model.onnx.data",
+            "bytes": 2271088656,
+            "blake3": "c0ebf4a03b1e067879633ffa968f600dea7c6c0c5ea8d3548fc82560cce0ef9a"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\snapshots\\fbd57b17b4db111a9d16813bb08b4c804fac18e9\\special_tokens_map.json",
+            "bytes": 964,
+            "blake3": "7928b0181fe837ea946ad566a4c8c3421b414988e65c61af6cedf79586971810"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\snapshots\\fbd57b17b4db111a9d16813bb08b4c804fac18e9\\tokenizer.json",
+            "bytes": 17082900,
+            "blake3": "6b125367faacadc927af65361f5d64bbe95c2befe6e3c337b72830193f59b34b"
+          },
+          {
+            "path": "models--rozgo--bge-reranker-v2-m3\\snapshots\\fbd57b17b4db111a9d16813bb08b4c804fac18e9\\tokenizer_config.json",
+            "bytes": 1173,
+            "blake3": "54693e6b3ab433a83416028e923cc1a3e48ac4b3e901413cce59c1b219e5bd34"
+          }
+        ]
+      }
+    }
+  ],
+  "quality": [
+    {
+      "name": "tune/C30/search/K0",
+      "threshold": 0,
+      "positive": 10,
+      "negative": 3,
+      "top1": 0.4,
+      "hit3": 0.5,
+      "hit5": 0.5,
+      "mrr10": 0.4722222222222222,
+      "ndcg10": 0.523298974489942,
+      "docTop1": 0.5,
+      "docHit3": 0.6,
+      "docMrr10": 0.5611111111111111,
+      "falseNonempty": 1,
+      "falseNonemptyCount": 3,
+      "lostAnswers": 0,
+      "repeatOrderChanges": 0,
+      "median": 0.3737641,
+      "p95": 0.8236898,
+      "embedMedian": 0.2263992,
+      "rerankMedian": 0,
+      "restMedian": 0.158052,
+      "categories": {
+        "identifier": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.6,
+          "hit3": 0.8,
+          "hit5": 0.8,
+          "mrr10": 0.7222222222222222,
+          "ndcg10": 0.7863919498470878,
+          "docTop1": 0.8,
+          "docHit3": 1,
+          "docMrr10": 0.9,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.3737641,
+          "p95": 0.5115815,
+          "embedMedian": 0.1874363,
+          "rerankMedian": 0,
+          "restMedian": 0.1473649
+        },
+        "semantic": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.2,
+          "hit3": 0.2,
+          "hit5": 0.2,
+          "mrr10": 0.22222222222222224,
+          "ndcg10": 0.26020599913279624,
+          "docTop1": 0.2,
+          "docHit3": 0.2,
+          "docMrr10": 0.22222222222222224,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.3507285,
+          "p95": 0.5186093,
+          "embedMedian": 0.1823588,
+          "rerankMedian": 0,
+          "restMedian": 0.14359450000000007
+        },
+        "negative": {
+          "positive": 0,
+          "negative": 3,
+          "top1": 0,
+          "hit3": 0,
+          "hit5": 0,
+          "mrr10": 0,
+          "ndcg10": 0,
+          "docTop1": 0,
+          "docHit3": 0,
+          "docMrr10": 0,
+          "falseNonempty": 1,
+          "falseNonemptyCount": 3,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.6670976,
+          "p95": 0.8236898,
+          "embedMedian": 0.3188168,
+          "rerankMedian": 0,
+          "restMedian": 0.35154360000000007
+        }
+      }
+    },
+    {
+      "name": "tune/C30/search/K0",
+      "threshold": 0.4,
+      "positive": 10,
+      "negative": 3,
+      "top1": 0.4,
+      "hit3": 0.5,
+      "hit5": 0.5,
+      "mrr10": 0.4611111111111111,
+      "ndcg10": 0.4931959749235439,
+      "docTop1": 0.4,
+      "docHit3": 0.5,
+      "docMrr10": 0.4611111111111111,
+      "falseNonempty": 1,
+      "falseNonemptyCount": 3,
+      "lostAnswers": 0,
+      "repeatOrderChanges": 0,
+      "median": 0.3737641,
+      "p95": 0.8236898,
+      "embedMedian": 0.2263992,
+      "rerankMedian": 0,
+      "restMedian": 0.158052,
+      "categories": {
+        "identifier": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.6,
+          "hit3": 0.8,
+          "hit5": 0.8,
+          "mrr10": 0.7,
+          "ndcg10": 0.7261859507142916,
+          "docTop1": 0.6,
+          "docHit3": 0.8,
+          "docMrr10": 0.7,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.3737641,
+          "p95": 0.5115815,
+          "embedMedian": 0.1874363,
+          "rerankMedian": 0,
+          "restMedian": 0.1473649
+        },
+        "semantic": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.2,
+          "hit3": 0.2,
+          "hit5": 0.2,
+          "mrr10": 0.22222222222222224,
+          "ndcg10": 0.26020599913279624,
+          "docTop1": 0.2,
+          "docHit3": 0.2,
+          "docMrr10": 0.22222222222222224,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.3507285,
+          "p95": 0.5186093,
+          "embedMedian": 0.1823588,
+          "rerankMedian": 0,
+          "restMedian": 0.14359450000000007
+        },
+        "negative": {
+          "positive": 0,
+          "negative": 3,
+          "top1": 0,
+          "hit3": 0,
+          "hit5": 0,
+          "mrr10": 0,
+          "ndcg10": 0,
+          "docTop1": 0,
+          "docHit3": 0,
+          "docMrr10": 0,
+          "falseNonempty": 1,
+          "falseNonemptyCount": 3,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.6670976,
+          "p95": 0.8236898,
+          "embedMedian": 0.3188168,
+          "rerankMedian": 0,
+          "restMedian": 0.35154360000000007
+        }
+      }
+    },
+    {
+      "name": "tune/C30/search/K0",
+      "threshold": 0.5,
+      "positive": 10,
+      "negative": 3,
+      "top1": 0.1,
+      "hit3": 0.1,
+      "hit5": 0.1,
+      "mrr10": 0.1,
+      "ndcg10": 0.1,
+      "docTop1": 0.1,
+      "docHit3": 0.1,
+      "docMrr10": 0.1,
+      "falseNonempty": 1,
+      "falseNonemptyCount": 3,
+      "lostAnswers": 4,
+      "repeatOrderChanges": 0,
+      "median": 0.3737641,
+      "p95": 0.8236898,
+      "embedMedian": 0.2263992,
+      "rerankMedian": 0,
+      "restMedian": 0.158052,
+      "categories": {
+        "identifier": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0,
+          "hit3": 0,
+          "hit5": 0,
+          "mrr10": 0,
+          "ndcg10": 0,
+          "docTop1": 0,
+          "docHit3": 0,
+          "docMrr10": 0,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 4,
+          "repeatOrderChanges": 0,
+          "median": 0.3737641,
+          "p95": 0.5115815,
+          "embedMedian": 0.1874363,
+          "rerankMedian": 0,
+          "restMedian": 0.1473649
+        },
+        "semantic": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.2,
+          "hit3": 0.2,
+          "hit5": 0.2,
+          "mrr10": 0.2,
+          "ndcg10": 0.2,
+          "docTop1": 0.2,
+          "docHit3": 0.2,
+          "docMrr10": 0.2,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.3507285,
+          "p95": 0.5186093,
+          "embedMedian": 0.1823588,
+          "rerankMedian": 0,
+          "restMedian": 0.14359450000000007
+        },
+        "negative": {
+          "positive": 0,
+          "negative": 3,
+          "top1": 0,
+          "hit3": 0,
+          "hit5": 0,
+          "mrr10": 0,
+          "ndcg10": 0,
+          "docTop1": 0,
+          "docHit3": 0,
+          "docMrr10": 0,
+          "falseNonempty": 1,
+          "falseNonemptyCount": 3,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.6670976,
+          "p95": 0.8236898,
+          "embedMedian": 0.3188168,
+          "rerankMedian": 0,
+          "restMedian": 0.35154360000000007
+        }
+      }
+    },
+    {
+      "name": "tune/C30/search/K0",
+      "threshold": 0.6,
+      "positive": 10,
+      "negative": 3,
+      "top1": 0.1,
+      "hit3": 0.1,
+      "hit5": 0.1,
+      "mrr10": 0.1,
+      "ndcg10": 0.1,
+      "docTop1": 0.1,
+      "docHit3": 0.1,
+      "docMrr10": 0.1,
+      "falseNonempty": 0,
+      "falseNonemptyCount": 0,
+      "lostAnswers": 4,
+      "repeatOrderChanges": 0,
+      "median": 0.3737641,
+      "p95": 0.8236898,
+      "embedMedian": 0.2263992,
+      "rerankMedian": 0,
+      "restMedian": 0.158052,
+      "categories": {
+        "identifier": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0,
+          "hit3": 0,
+          "hit5": 0,
+          "mrr10": 0,
+          "ndcg10": 0,
+          "docTop1": 0,
+          "docHit3": 0,
+          "docMrr10": 0,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 4,
+          "repeatOrderChanges": 0,
+          "median": 0.3737641,
+          "p95": 0.5115815,
+          "embedMedian": 0.1874363,
+          "rerankMedian": 0,
+          "restMedian": 0.1473649
+        },
+        "semantic": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.2,
+          "hit3": 0.2,
+          "hit5": 0.2,
+          "mrr10": 0.2,
+          "ndcg10": 0.2,
+          "docTop1": 0.2,
+          "docHit3": 0.2,
+          "docMrr10": 0.2,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.3507285,
+          "p95": 0.5186093,
+          "embedMedian": 0.1823588,
+          "rerankMedian": 0,
+          "restMedian": 0.14359450000000007
+        },
+        "negative": {
+          "positive": 0,
+          "negative": 3,
+          "top1": 0,
+          "hit3": 0,
+          "hit5": 0,
+          "mrr10": 0,
+          "ndcg10": 0,
+          "docTop1": 0,
+          "docHit3": 0,
+          "docMrr10": 0,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.6670976,
+          "p95": 0.8236898,
+          "embedMedian": 0.3188168,
+          "rerankMedian": 0,
+          "restMedian": 0.35154360000000007
+        }
+      }
+    },
+    {
+      "name": "tune/C30/search/K0/cosine",
+      "threshold": 0,
+      "positive": 10,
+      "negative": 3,
+      "top1": 0.2,
+      "hit3": 0.4,
+      "hit5": 0.4,
+      "mrr10": 0.3,
+      "ndcg10": 0.3261859507142915,
+      "docTop1": 0.2,
+      "docHit3": 0.6,
+      "docMrr10": 0.3833333333333333,
+      "falseNonempty": 1,
+      "falseNonemptyCount": 3,
+      "lostAnswers": 0,
+      "repeatOrderChanges": 0,
+      "median": 0.3737641,
+      "p95": 0.8236898,
+      "embedMedian": 0.2263992,
+      "rerankMedian": 0,
+      "restMedian": 0.158052,
+      "categories": {
+        "identifier": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.2,
+          "hit3": 0.6,
+          "hit5": 0.6,
+          "mrr10": 0.4,
+          "ndcg10": 0.452371901428583,
+          "docTop1": 0.2,
+          "docHit3": 1,
+          "docMrr10": 0.5666666666666667,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.3737641,
+          "p95": 0.5115815,
+          "embedMedian": 0.1874363,
+          "rerankMedian": 0,
+          "restMedian": 0.1473649
+        },
+        "semantic": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.2,
+          "hit3": 0.2,
+          "hit5": 0.2,
+          "mrr10": 0.2,
+          "ndcg10": 0.2,
+          "docTop1": 0.2,
+          "docHit3": 0.2,
+          "docMrr10": 0.2,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.3507285,
+          "p95": 0.5186093,
+          "embedMedian": 0.1823588,
+          "rerankMedian": 0,
+          "restMedian": 0.14359450000000007
+        },
+        "negative": {
+          "positive": 0,
+          "negative": 3,
+          "top1": 0,
+          "hit3": 0,
+          "hit5": 0,
+          "mrr10": 0,
+          "ndcg10": 0,
+          "docTop1": 0,
+          "docHit3": 0,
+          "docMrr10": 0,
+          "falseNonempty": 1,
+          "falseNonemptyCount": 3,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.6670976,
+          "p95": 0.8236898,
+          "embedMedian": 0.3188168,
+          "rerankMedian": 0,
+          "restMedian": 0.35154360000000007
+        }
+      }
+    },
+    {
+      "name": "tune/C30/search/K0/cosine",
+      "threshold": 0.4,
+      "positive": 10,
+      "negative": 3,
+      "top1": 0.2,
+      "hit3": 0.4,
+      "hit5": 0.4,
+      "mrr10": 0.3,
+      "ndcg10": 0.3261859507142915,
+      "docTop1": 0.2,
+      "docHit3": 0.5,
+      "docMrr10": 0.3333333333333333,
+      "falseNonempty": 1,
+      "falseNonemptyCount": 3,
+      "lostAnswers": 0,
+      "repeatOrderChanges": 0,
+      "median": 0.3737641,
+      "p95": 0.8236898,
+      "embedMedian": 0.2263992,
+      "rerankMedian": 0,
+      "restMedian": 0.158052,
+      "categories": {
+        "identifier": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.2,
+          "hit3": 0.6,
+          "hit5": 0.6,
+          "mrr10": 0.4,
+          "ndcg10": 0.452371901428583,
+          "docTop1": 0.2,
+          "docHit3": 0.8,
+          "docMrr10": 0.4666666666666666,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.3737641,
+          "p95": 0.5115815,
+          "embedMedian": 0.1874363,
+          "rerankMedian": 0,
+          "restMedian": 0.1473649
+        },
+        "semantic": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.2,
+          "hit3": 0.2,
+          "hit5": 0.2,
+          "mrr10": 0.2,
+          "ndcg10": 0.2,
+          "docTop1": 0.2,
+          "docHit3": 0.2,
+          "docMrr10": 0.2,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.3507285,
+          "p95": 0.5186093,
+          "embedMedian": 0.1823588,
+          "rerankMedian": 0,
+          "restMedian": 0.14359450000000007
+        },
+        "negative": {
+          "positive": 0,
+          "negative": 3,
+          "top1": 0,
+          "hit3": 0,
+          "hit5": 0,
+          "mrr10": 0,
+          "ndcg10": 0,
+          "docTop1": 0,
+          "docHit3": 0,
+          "docMrr10": 0,
+          "falseNonempty": 1,
+          "falseNonemptyCount": 3,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.6670976,
+          "p95": 0.8236898,
+          "embedMedian": 0.3188168,
+          "rerankMedian": 0,
+          "restMedian": 0.35154360000000007
+        }
+      }
+    },
+    {
+      "name": "tune/C30/search/K0/cosine",
+      "threshold": 0.5,
+      "positive": 10,
+      "negative": 3,
+      "top1": 0.1,
+      "hit3": 0.1,
+      "hit5": 0.1,
+      "mrr10": 0.1,
+      "ndcg10": 0.1,
+      "docTop1": 0.1,
+      "docHit3": 0.1,
+      "docMrr10": 0.1,
+      "falseNonempty": 1,
+      "falseNonemptyCount": 3,
+      "lostAnswers": 3,
+      "repeatOrderChanges": 0,
+      "median": 0.3737641,
+      "p95": 0.8236898,
+      "embedMedian": 0.2263992,
+      "rerankMedian": 0,
+      "restMedian": 0.158052,
+      "categories": {
+        "identifier": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0,
+          "hit3": 0,
+          "hit5": 0,
+          "mrr10": 0,
+          "ndcg10": 0,
+          "docTop1": 0,
+          "docHit3": 0,
+          "docMrr10": 0,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 3,
+          "repeatOrderChanges": 0,
+          "median": 0.3737641,
+          "p95": 0.5115815,
+          "embedMedian": 0.1874363,
+          "rerankMedian": 0,
+          "restMedian": 0.1473649
+        },
+        "semantic": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.2,
+          "hit3": 0.2,
+          "hit5": 0.2,
+          "mrr10": 0.2,
+          "ndcg10": 0.2,
+          "docTop1": 0.2,
+          "docHit3": 0.2,
+          "docMrr10": 0.2,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.3507285,
+          "p95": 0.5186093,
+          "embedMedian": 0.1823588,
+          "rerankMedian": 0,
+          "restMedian": 0.14359450000000007
+        },
+        "negative": {
+          "positive": 0,
+          "negative": 3,
+          "top1": 0,
+          "hit3": 0,
+          "hit5": 0,
+          "mrr10": 0,
+          "ndcg10": 0,
+          "docTop1": 0,
+          "docHit3": 0,
+          "docMrr10": 0,
+          "falseNonempty": 1,
+          "falseNonemptyCount": 3,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.6670976,
+          "p95": 0.8236898,
+          "embedMedian": 0.3188168,
+          "rerankMedian": 0,
+          "restMedian": 0.35154360000000007
+        }
+      }
+    },
+    {
+      "name": "tune/C30/search/K0/cosine",
+      "threshold": 0.6,
+      "positive": 10,
+      "negative": 3,
+      "top1": 0.1,
+      "hit3": 0.1,
+      "hit5": 0.1,
+      "mrr10": 0.1,
+      "ndcg10": 0.1,
+      "docTop1": 0.1,
+      "docHit3": 0.1,
+      "docMrr10": 0.1,
+      "falseNonempty": 0,
+      "falseNonemptyCount": 0,
+      "lostAnswers": 3,
+      "repeatOrderChanges": 0,
+      "median": 0.3737641,
+      "p95": 0.8236898,
+      "embedMedian": 0.2263992,
+      "rerankMedian": 0,
+      "restMedian": 0.158052,
+      "categories": {
+        "identifier": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0,
+          "hit3": 0,
+          "hit5": 0,
+          "mrr10": 0,
+          "ndcg10": 0,
+          "docTop1": 0,
+          "docHit3": 0,
+          "docMrr10": 0,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 3,
+          "repeatOrderChanges": 0,
+          "median": 0.3737641,
+          "p95": 0.5115815,
+          "embedMedian": 0.1874363,
+          "rerankMedian": 0,
+          "restMedian": 0.1473649
+        },
+        "semantic": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.2,
+          "hit3": 0.2,
+          "hit5": 0.2,
+          "mrr10": 0.2,
+          "ndcg10": 0.2,
+          "docTop1": 0.2,
+          "docHit3": 0.2,
+          "docMrr10": 0.2,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.3507285,
+          "p95": 0.5186093,
+          "embedMedian": 0.1823588,
+          "rerankMedian": 0,
+          "restMedian": 0.14359450000000007
+        },
+        "negative": {
+          "positive": 0,
+          "negative": 3,
+          "top1": 0,
+          "hit3": 0,
+          "hit5": 0,
+          "mrr10": 0,
+          "ndcg10": 0,
+          "docTop1": 0,
+          "docHit3": 0,
+          "docMrr10": 0,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 0.6670976,
+          "p95": 0.8236898,
+          "embedMedian": 0.3188168,
+          "rerankMedian": 0,
+          "restMedian": 0.35154360000000007
+        }
+      }
+    },
+    {
+      "name": "tune/C30/search/K15",
+      "threshold": 0,
+      "positive": 10,
+      "negative": 3,
+      "top1": 0.3,
+      "hit3": 0.6,
+      "hit5": 0.7,
+      "mrr10": 0.4533333333333333,
+      "ndcg10": 0.5148712314377457,
+      "docTop1": 0.3,
+      "docHit3": 0.6,
+      "docMrr10": 0.4533333333333333,
+      "falseNonempty": 1,
+      "falseNonemptyCount": 3,
+      "lostAnswers": 0,
+      "repeatOrderChanges": 0,
+      "median": 4.8850739,
+      "p95": 10.4502228,
+      "embedMedian": 0.2487896,
+      "rerankMedian": 4.5113781,
+      "restMedian": 0.15515950000000078,
+      "categories": {
+        "identifier": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.4,
+          "hit3": 0.8,
+          "hit5": 1,
+          "mrr10": 0.6066666666666667,
+          "ndcg10": 0.7035565121611999,
+          "docTop1": 0.4,
+          "docHit3": 0.8,
+          "docMrr10": 0.6066666666666667,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 4.8787545,
+          "p95": 4.9796047,
+          "embedMedian": 0.206079,
+          "rerankMedian": 4.3664353,
+          "restMedian": 0.16785430000000012
+        },
+        "semantic": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.2,
+          "hit3": 0.4,
+          "hit5": 0.4,
+          "mrr10": 0.3,
+          "ndcg10": 0.3261859507142915,
+          "docTop1": 0.2,
+          "docHit3": 0.4,
+          "docMrr10": 0.3,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 5.3315102,
+          "p95": 10.4502228,
+          "embedMedian": 0.218895,
+          "rerankMedian": 4.9574557,
+          "restMedian": 0.13783780000000023
+        },
+        "negative": {
+          "positive": 0,
+          "negative": 3,
+          "top1": 0,
+          "hit3": 0,
+          "hit5": 0,
+          "mrr10": 0,
+          "ndcg10": 0,
+          "docTop1": 0,
+          "docHit3": 0,
+          "docMrr10": 0,
+          "falseNonempty": 1,
+          "falseNonemptyCount": 3,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 5.9524784,
+          "p95": 8.9178015,
+          "embedMedian": 0.2889561,
+          "rerankMedian": 5.2608213,
+          "restMedian": 0.29037550000000056
+        }
+      }
+    },
+    {
+      "name": "tune/C30/search/K15",
+      "threshold": 0.02,
+      "positive": 10,
+      "negative": 3,
+      "top1": 0.3,
+      "hit3": 0.6,
+      "hit5": 0.7,
+      "mrr10": 0.4533333333333333,
+      "ndcg10": 0.5148712314377457,
+      "docTop1": 0.3,
+      "docHit3": 0.6,
+      "docMrr10": 0.4533333333333333,
+      "falseNonempty": 1,
+      "falseNonemptyCount": 3,
+      "lostAnswers": 0,
+      "repeatOrderChanges": 0,
+      "median": 4.8850739,
+      "p95": 10.4502228,
+      "embedMedian": 0.2487896,
+      "rerankMedian": 4.5113781,
+      "restMedian": 0.15515950000000078,
+      "categories": {
+        "identifier": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.4,
+          "hit3": 0.8,
+          "hit5": 1,
+          "mrr10": 0.6066666666666667,
+          "ndcg10": 0.7035565121611999,
+          "docTop1": 0.4,
+          "docHit3": 0.8,
+          "docMrr10": 0.6066666666666667,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 4.8787545,
+          "p95": 4.9796047,
+          "embedMedian": 0.206079,
+          "rerankMedian": 4.3664353,
+          "restMedian": 0.16785430000000012
+        },
+        "semantic": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.2,
+          "hit3": 0.4,
+          "hit5": 0.4,
+          "mrr10": 0.3,
+          "ndcg10": 0.3261859507142915,
+          "docTop1": 0.2,
+          "docHit3": 0.4,
+          "docMrr10": 0.3,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 5.3315102,
+          "p95": 10.4502228,
+          "embedMedian": 0.218895,
+          "rerankMedian": 4.9574557,
+          "restMedian": 0.13783780000000023
+        },
+        "negative": {
+          "positive": 0,
+          "negative": 3,
+          "top1": 0,
+          "hit3": 0,
+          "hit5": 0,
+          "mrr10": 0,
+          "ndcg10": 0,
+          "docTop1": 0,
+          "docHit3": 0,
+          "docMrr10": 0,
+          "falseNonempty": 1,
+          "falseNonemptyCount": 3,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 5.9524784,
+          "p95": 8.9178015,
+          "embedMedian": 0.2889561,
+          "rerankMedian": 5.2608213,
+          "restMedian": 0.29037550000000056
+        }
+      }
+    },
+    {
+      "name": "tune/C30/search/K15",
+      "threshold": 0.05,
+      "positive": 10,
+      "negative": 3,
+      "top1": 0.3,
+      "hit3": 0.6,
+      "hit5": 0.7,
+      "mrr10": 0.4533333333333333,
+      "ndcg10": 0.5148712314377457,
+      "docTop1": 0.3,
+      "docHit3": 0.6,
+      "docMrr10": 0.4533333333333333,
+      "falseNonempty": 1,
+      "falseNonemptyCount": 3,
+      "lostAnswers": 0,
+      "repeatOrderChanges": 0,
+      "median": 4.8850739,
+      "p95": 10.4502228,
+      "embedMedian": 0.2487896,
+      "rerankMedian": 4.5113781,
+      "restMedian": 0.15515950000000078,
+      "categories": {
+        "identifier": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.4,
+          "hit3": 0.8,
+          "hit5": 1,
+          "mrr10": 0.6066666666666667,
+          "ndcg10": 0.7035565121611999,
+          "docTop1": 0.4,
+          "docHit3": 0.8,
+          "docMrr10": 0.6066666666666667,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 4.8787545,
+          "p95": 4.9796047,
+          "embedMedian": 0.206079,
+          "rerankMedian": 4.3664353,
+          "restMedian": 0.16785430000000012
+        },
+        "semantic": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.2,
+          "hit3": 0.4,
+          "hit5": 0.4,
+          "mrr10": 0.3,
+          "ndcg10": 0.3261859507142915,
+          "docTop1": 0.2,
+          "docHit3": 0.4,
+          "docMrr10": 0.3,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 5.3315102,
+          "p95": 10.4502228,
+          "embedMedian": 0.218895,
+          "rerankMedian": 4.9574557,
+          "restMedian": 0.13783780000000023
+        },
+        "negative": {
+          "positive": 0,
+          "negative": 3,
+          "top1": 0,
+          "hit3": 0,
+          "hit5": 0,
+          "mrr10": 0,
+          "ndcg10": 0,
+          "docTop1": 0,
+          "docHit3": 0,
+          "docMrr10": 0,
+          "falseNonempty": 1,
+          "falseNonemptyCount": 3,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 5.9524784,
+          "p95": 8.9178015,
+          "embedMedian": 0.2889561,
+          "rerankMedian": 5.2608213,
+          "restMedian": 0.29037550000000056
+        }
+      }
+    },
+    {
+      "name": "tune/C30/search/K15",
+      "threshold": 0.1,
+      "positive": 10,
+      "negative": 3,
+      "top1": 0.3,
+      "hit3": 0.6,
+      "hit5": 0.7,
+      "mrr10": 0.4533333333333333,
+      "ndcg10": 0.5148712314377457,
+      "docTop1": 0.3,
+      "docHit3": 0.6,
+      "docMrr10": 0.4533333333333333,
+      "falseNonempty": 0.6666666666666666,
+      "falseNonemptyCount": 2,
+      "lostAnswers": 0,
+      "repeatOrderChanges": 0,
+      "median": 4.8850739,
+      "p95": 10.4502228,
+      "embedMedian": 0.2487896,
+      "rerankMedian": 4.5113781,
+      "restMedian": 0.15515950000000078,
+      "categories": {
+        "identifier": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.4,
+          "hit3": 0.8,
+          "hit5": 1,
+          "mrr10": 0.6066666666666667,
+          "ndcg10": 0.7035565121611999,
+          "docTop1": 0.4,
+          "docHit3": 0.8,
+          "docMrr10": 0.6066666666666667,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 4.8787545,
+          "p95": 4.9796047,
+          "embedMedian": 0.206079,
+          "rerankMedian": 4.3664353,
+          "restMedian": 0.16785430000000012
+        },
+        "semantic": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.2,
+          "hit3": 0.4,
+          "hit5": 0.4,
+          "mrr10": 0.3,
+          "ndcg10": 0.3261859507142915,
+          "docTop1": 0.2,
+          "docHit3": 0.4,
+          "docMrr10": 0.3,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 5.3315102,
+          "p95": 10.4502228,
+          "embedMedian": 0.218895,
+          "rerankMedian": 4.9574557,
+          "restMedian": 0.13783780000000023
+        },
+        "negative": {
+          "positive": 0,
+          "negative": 3,
+          "top1": 0,
+          "hit3": 0,
+          "hit5": 0,
+          "mrr10": 0,
+          "ndcg10": 0,
+          "docTop1": 0,
+          "docHit3": 0,
+          "docMrr10": 0,
+          "falseNonempty": 0.6666666666666666,
+          "falseNonemptyCount": 2,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 5.9524784,
+          "p95": 8.9178015,
+          "embedMedian": 0.2889561,
+          "rerankMedian": 5.2608213,
+          "restMedian": 0.29037550000000056
+        }
+      }
+    },
+    {
+      "name": "tune/C30/search/K15",
+      "threshold": 0.3,
+      "positive": 10,
+      "negative": 3,
+      "top1": 0.3,
+      "hit3": 0.6,
+      "hit5": 0.7,
+      "mrr10": 0.4533333333333333,
+      "ndcg10": 0.5148712314377457,
+      "docTop1": 0.3,
+      "docHit3": 0.6,
+      "docMrr10": 0.4533333333333333,
+      "falseNonempty": 0.3333333333333333,
+      "falseNonemptyCount": 1,
+      "lostAnswers": 0,
+      "repeatOrderChanges": 0,
+      "median": 4.8850739,
+      "p95": 10.4502228,
+      "embedMedian": 0.2487896,
+      "rerankMedian": 4.5113781,
+      "restMedian": 0.15515950000000078,
+      "categories": {
+        "identifier": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.4,
+          "hit3": 0.8,
+          "hit5": 1,
+          "mrr10": 0.6066666666666667,
+          "ndcg10": 0.7035565121611999,
+          "docTop1": 0.4,
+          "docHit3": 0.8,
+          "docMrr10": 0.6066666666666667,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 4.8787545,
+          "p95": 4.9796047,
+          "embedMedian": 0.206079,
+          "rerankMedian": 4.3664353,
+          "restMedian": 0.16785430000000012
+        },
+        "semantic": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.2,
+          "hit3": 0.4,
+          "hit5": 0.4,
+          "mrr10": 0.3,
+          "ndcg10": 0.3261859507142915,
+          "docTop1": 0.2,
+          "docHit3": 0.4,
+          "docMrr10": 0.3,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 5.3315102,
+          "p95": 10.4502228,
+          "embedMedian": 0.218895,
+          "rerankMedian": 4.9574557,
+          "restMedian": 0.13783780000000023
+        },
+        "negative": {
+          "positive": 0,
+          "negative": 3,
+          "top1": 0,
+          "hit3": 0,
+          "hit5": 0,
+          "mrr10": 0,
+          "ndcg10": 0,
+          "docTop1": 0,
+          "docHit3": 0,
+          "docMrr10": 0,
+          "falseNonempty": 0.3333333333333333,
+          "falseNonemptyCount": 1,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 5.9524784,
+          "p95": 8.9178015,
+          "embedMedian": 0.2889561,
+          "rerankMedian": 5.2608213,
+          "restMedian": 0.29037550000000056
+        }
+      }
+    },
+    {
+      "name": "tune/C30/search/K15",
+      "threshold": 0.5,
+      "positive": 10,
+      "negative": 3,
+      "top1": 0.3,
+      "hit3": 0.6,
+      "hit5": 0.7,
+      "mrr10": 0.4533333333333333,
+      "ndcg10": 0.5148712314377457,
+      "docTop1": 0.3,
+      "docHit3": 0.6,
+      "docMrr10": 0.4533333333333333,
+      "falseNonempty": 0,
+      "falseNonemptyCount": 0,
+      "lostAnswers": 0,
+      "repeatOrderChanges": 0,
+      "median": 4.8850739,
+      "p95": 10.4502228,
+      "embedMedian": 0.2487896,
+      "rerankMedian": 4.5113781,
+      "restMedian": 0.15515950000000078,
+      "categories": {
+        "identifier": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.4,
+          "hit3": 0.8,
+          "hit5": 1,
+          "mrr10": 0.6066666666666667,
+          "ndcg10": 0.7035565121611999,
+          "docTop1": 0.4,
+          "docHit3": 0.8,
+          "docMrr10": 0.6066666666666667,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 4.8787545,
+          "p95": 4.9796047,
+          "embedMedian": 0.206079,
+          "rerankMedian": 4.3664353,
+          "restMedian": 0.16785430000000012
+        },
+        "semantic": {
+          "positive": 5,
+          "negative": 0,
+          "top1": 0.2,
+          "hit3": 0.4,
+          "hit5": 0.4,
+          "mrr10": 0.3,
+          "ndcg10": 0.3261859507142915,
+          "docTop1": 0.2,
+          "docHit3": 0.4,
+          "docMrr10": 0.3,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 5.3315102,
+          "p95": 10.4502228,
+          "embedMedian": 0.218895,
+          "rerankMedian": 4.9574557,
+          "restMedian": 0.13783780000000023
+        },
+        "negative": {
+          "positive": 0,
+          "negative": 3,
+          "top1": 0,
+          "hit3": 0,
+          "hit5": 0,
+          "mrr10": 0,
+          "ndcg10": 0,
+          "docTop1": 0,
+          "docHit3": 0,
+          "docMrr10": 0,
+          "falseNonempty": 0,
+          "falseNonemptyCount": 0,
+          "lostAnswers": 0,
+          "repeatOrderChanges": 0,
+          "median": 5.9524784,
+          "p95": 8.9178015,
+          "embedMedian": 0.2889561,
+          "rerankMedian": 5.2608213,
+          "restMedian": 0.29037550000000056
+        }
+      }
+    }
+  ],
+  "retrieval": [
+    {
+      "name": "tune/C30/fts/K0",
+      "positive": 10,
+      "curve": [
+        {
+          "k": 3,
+          "recall": 0.5,
+          "hit": 0.5
+        },
+        {
+          "k": 5,
+          "recall": 0.7,
+          "hit": 0.7
+        },
+        {
+          "k": 8,
+          "recall": 0.8,
+          "hit": 0.8
+        },
+        {
+          "k": 10,
+          "recall": 0.8,
+          "hit": 0.8
+        },
+        {
+          "k": 15,
+          "recall": 0.9,
+          "hit": 0.9
+        },
+        {
+          "k": 20,
+          "recall": 0.9,
+          "hit": 0.9
+        },
+        {
+          "k": 30,
+          "recall": 0.9,
+          "hit": 0.9
+        },
+        {
+          "k": 50,
+          "recall": 0.9,
+          "hit": 0.9
+        }
+      ],
+      "ranks": [
+        {
+          "id": "ro-01",
+          "rank": 8
+        },
+        {
+          "id": "ro-02",
+          "rank": 1
+        },
+        {
+          "id": "ro-03",
+          "rank": 3
+        },
+        {
+          "id": "ro-04",
+          "rank": 1
+        },
+        {
+          "id": "ro-05",
+          "rank": 5
+        },
+        {
+          "id": "ro-06",
+          "rank": 4
+        },
+        {
+          "id": "ro-07",
+          "rank": 11
+        },
+        {
+          "id": "ro-08",
+          "rank": 3
+        },
+        {
+          "id": "ro-09",
+          "rank": null
+        },
+        {
+          "id": "ro-10",
+          "rank": 1
+        }
+      ]
+    },
+    {
+      "name": "tune/C30/vector/K0",
+      "positive": 10,
+      "curve": [
+        {
+          "k": 3,
+          "recall": 0.4,
+          "hit": 0.4
+        },
+        {
+          "k": 5,
+          "recall": 0.4,
+          "hit": 0.4
+        },
+        {
+          "k": 8,
+          "recall": 0.4,
+          "hit": 0.4
+        },
+        {
+          "k": 10,
+          "recall": 0.4,
+          "hit": 0.4
+        },
+        {
+          "k": 15,
+          "recall": 0.4,
+          "hit": 0.4
+        },
+        {
+          "k": 20,
+          "recall": 0.5,
+          "hit": 0.5
+        },
+        {
+          "k": 30,
+          "recall": 0.5,
+          "hit": 0.5
+        },
+        {
+          "k": 50,
+          "recall": 0.5,
+          "hit": 0.5
+        }
+      ],
+      "ranks": [
+        {
+          "id": "ro-01",
+          "rank": 2
+        },
+        {
+          "id": "ro-02",
+          "rank": 17
+        },
+        {
+          "id": "ro-03",
+          "rank": null
+        },
+        {
+          "id": "ro-04",
+          "rank": 1
+        },
+        {
+          "id": "ro-05",
+          "rank": 2
+        },
+        {
+          "id": "ro-06",
+          "rank": null
+        },
+        {
+          "id": "ro-07",
+          "rank": null
+        },
+        {
+          "id": "ro-08",
+          "rank": null
+        },
+        {
+          "id": "ro-09",
+          "rank": null
+        },
+        {
+          "id": "ro-10",
+          "rank": 1
+        }
+      ]
+    },
+    {
+      "name": "tune/C30/fused/K0",
+      "positive": 10,
+      "curve": [
+        {
+          "k": 3,
+          "recall": 0.5,
+          "hit": 0.5
+        },
+        {
+          "k": 5,
+          "recall": 0.5,
+          "hit": 0.5
+        },
+        {
+          "k": 8,
+          "recall": 0.5,
+          "hit": 0.5
+        },
+        {
+          "k": 10,
+          "recall": 0.7,
+          "hit": 0.7
+        },
+        {
+          "k": 15,
+          "recall": 0.7,
+          "hit": 0.7
+        },
+        {
+          "k": 20,
+          "recall": 0.9,
+          "hit": 0.9
+        },
+        {
+          "k": 30,
+          "recall": 0.9,
+          "hit": 0.9
+        },
+        {
+          "k": 50,
+          "recall": 0.9,
+          "hit": 0.9
+        }
+      ],
+      "ranks": [
+        {
+          "id": "ro-01",
+          "rank": 1
+        },
+        {
+          "id": "ro-02",
+          "rank": 2
+        },
+        {
+          "id": "ro-03",
+          "rank": 9
+        },
+        {
+          "id": "ro-04",
+          "rank": 1
+        },
+        {
+          "id": "ro-05",
+          "rank": 1
+        },
+        {
+          "id": "ro-06",
+          "rank": 9
+        },
+        {
+          "id": "ro-07",
+          "rank": 18
+        },
+        {
+          "id": "ro-08",
+          "rank": 20
+        },
+        {
+          "id": "ro-09",
+          "rank": null
+        },
+        {
+          "id": "ro-10",
+          "rank": 1
+        }
+      ]
+    }
+  ]
+}

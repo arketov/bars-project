@@ -1,0 +1,310 @@
+[
+  {
+    "id": "bars-01",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "как bars режет документы на чанки по заголовкам",
+    "gold": [
+      {
+        "path": "docs/features/indexing/chunking.md",
+        "heading": "Разбор документа перед нарезкой",
+        "evidence": "1. Файл читается как UTF-8; BOM отбрасывается. Переводы строк `CRLF` и `CR` приводятся к `LF` до любого разбор",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-02",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "как работает гибридный поиск и слияние RRF",
+    "gold": [
+      {
+        "path": "docs/features/search/hybrid-search.md",
+        "heading": "Область поиска",
+        "evidence": "1. **Проект.** Явно заданный проект или проект сессии: ближайшая к cwd агента папка, которая зарегистрирована ",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-03",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "какие инструменты MCP доступны агенту",
+    "gold": [
+      {
+        "path": "docs/features/agent-tools/mcp-tools.md",
+        "heading": "Проект вызова",
+        "evidence": "Параметр `project` необязателен во всех инструментах. Без него проект — ближайшая к рабочей папке сессии зарег",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-04",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "команды CLI bars-cli",
+    "gold": [
+      {
+        "path": "docs/features/agent-tools/cli.md",
+        "heading": "Общие правила bars-cli",
+        "evidence": "- Проект по умолчанию — ближайшая к текущей папке зарегистрированная папка; `--project <путь>` задаёт его явно",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-05",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "как хранятся ключи провайдеров и секреты",
+    "gold": [
+      {
+        "path": "docs/architecture/secrets.md",
+        "heading": "Где лежат ключи провайдеров",
+        "evidence": "Ключи удалённых провайдеров embed и rerank хранятся в хранилище ОС через крейт `keyring`:",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-06",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "схема SQLite индекса и таблицы",
+    "gold": [
+      {
+        "path": "docs/architecture/schema.md",
+        "heading": "Таблицы индекса",
+        "evidence": "| `meta` | пары «ключ — значение»: версия схемы, версия bars, отпечаток модели ([features/models/local-models.",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-07",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "как воркер ставит проекты в очередь индексации",
+    "gold": [
+      {
+        "path": "docs/architecture/worker.md",
+        "heading": "Запуск воркера bars",
+        "evidence": "| Как запущен | Что происходит |",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-08",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "установщик NSIS и обновление на месте",
+    "gold": [
+      {
+        "path": "docs/features/distribution/installer.md",
+        "heading": "Что кладёт установщик",
+        "evidence": "В одну папку, без прав администратора (режим `currentUser`, по умолчанию `%LOCALAPPDATA%\\bars`; пользователь м",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-09",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "автозапуск воркера при входе в систему",
+    "gold": [
+      {
+        "path": "docs/features/distribution/autostart.md",
+        "heading": "Что записывается в ОС для автозапуска",
+        "evidence": "На Windows — строковое значение `bars` в `HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run` со значением `\"<",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-10",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "подключение к внешним embed-моделям по HTTP",
+    "gold": [
+      {
+        "path": "docs/features/models/external-models.md",
+        "heading": "Embed через OpenAI-совместимый API",
+        "evidence": "Запрос `POST <base_url>/v1/embeddings` с телом `{\"model\": \"...\", \"input\": [...]}`. Чанки отправляются пачками;",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-12",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "как регистрируется проект и что такое корень проекта",
+    "gold": [
+      {
+        "path": "docs/features/projects/projects.md",
+        "heading": "Что хранит реестр проектов",
+        "evidence": "`~/.bars/projects.toml` — список проектов: абсолютный путь к корню проекта и время регистрации. Всё остальное ",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-13",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "порядок настроек и файл settings.toml",
+    "gold": [
+      {
+        "path": "docs/features/settings/settings.md",
+        "heading": "Embed-модель в settings.toml",
+        "evidence": "Таблица `[embed]` — модель для всех проектов (Т-16, Т-17):",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-14",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "состояния окна при ошибках поиска",
+    "gold": [
+      {
+        "path": "docs/features/window/error-states.md",
+        "heading": "Принципы показа ошибок в окне",
+        "evidence": "- Ошибка называется по-человечески, с причиной и действием; код вроде `provider_error` — мелким шрифтом для от",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-16",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "прогресс индексации в окне",
+    "gold": [
+      {
+        "path": "docs/features/window/indexing-progress.md",
+        "heading": "Где виден ход индексации",
+        "evidence": "- **Точка проекта** в списке: цвет акцента, мигает; в подписи — процент или «ждёт» ([main-window.md](main-wind",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-17",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "согласие пользователя на переиндексацию после смены модели",
+    "gold": [
+      {
+        "path": "docs/features/window/reindex-consent.md",
+        "heading": "Когда открывается диалог согласия",
+        "evidence": "- Сразу после «Сохранить» на вкладке «Модели», если выбранная модель отличается от модели индекса хотя бы у од",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-18",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "как слежение за файлами обновляет индекс",
+    "gold": [
+      {
+        "path": "docs/features/indexing/updates.md",
+        "heading": "Какие файлы индексируются",
+        "evidence": "Все `**/*.md` под корнем документации проекта (Т-7). Расширение `.md` сверяется без учёта регистра. Модуль фай",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-19",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "как установить bars в Claude Code и Codex",
+    "gold": [
+      {
+        "path": "docs/features/clients/clients.md",
+        "heading": "Что прописывается в клиенте",
+        "evidence": "Две записи с именем `bars`:",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-20",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "как вести журнал сессии log.md и handoff.md",
+    "gold": [
+      {
+        "path": "docs/features/docs-convention/session-log.md",
+        "heading": "log.md — записи по ходу работы",
+        "evidence": "Зачем: если сессия оборвётся или контекст сожмётся, следующая сессия узнает, где остановились и что уже не сра",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-21",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "раскладка папки docs и Index.md",
+    "gold": [
+      {
+        "path": "docs/features/docs-convention/layout.md",
+        "heading": "База знаний knowledge",
+        "evidence": "Знание разработки, которое не описывает продукт напрямую: исследования, сравнения библиотек, замеры, соглашени",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-22",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "протокол между окном и воркером",
+    "gold": [
+      {
+        "path": "docs/architecture/protocol.md",
+        "heading": "Кто пользуется протоколом bars",
+        "evidence": "- **`bars-mcp`** превращает каждый MCP-инструмент в один вызов метода ([features/agent-tools/mcp-tools.md](../",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-23",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "косинусная близость и перебор векторов",
+    "gold": [
+      {
+        "path": "docs/architecture/vector-search.md",
+        "heading": "Точный перебор и ANN — в чём разница",
+        "evidence": "- **Точный перебор** сравнивает вектор запроса с каждым вектором индекса и возвращает действительно ближайшие.",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  },
+  {
+    "id": "bars-24",
+    "split": "regression",
+    "category": "historical-document",
+    "query": "стек Rust Tauri fastembed",
+    "gold": [
+      {
+        "path": "docs/architecture/stack.md",
+        "heading": "Инструменты сборки bars",
+        "evidence": "- **Rust** stable не старше 1.90 (этого требует `tauri-plugin-single-instance`; `rusqlite` требует 1.88). Верс",
+        "reason": "Историческая проверка попадания в документ; основной метрикой остаётся document_relevant."
+      }
+    ]
+  }
+]

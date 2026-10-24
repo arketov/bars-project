@@ -67,7 +67,7 @@ function analyze(dataset, dirs) {
       continue;
     }
     for(const cosine of (part[0].k ? [false] : [false,true])) {
-      for(const threshold of (part[0].k ? [0,.1,.3,.5] : [0,.4,.5,.6])) {
+      for(const threshold of (part[0].k ? [0,.02,.05,.1,.3,.5] : [0,.4,.5,.6])) {
         quality.push({name:name+(cosine?'/cosine':''),threshold,...summarize(part,cases,threshold,cosine),
           categories:Object.fromEntries([...new Set(part.map(r=>cases.get(r.id).category))].map(cat=>[cat,summarize(part.filter(r=>cases.get(r.id).category===cat),cases,threshold,cosine)]))});
       }
