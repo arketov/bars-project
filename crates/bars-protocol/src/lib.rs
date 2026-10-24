@@ -54,3 +54,7 @@ pub use text_search::*;
 /// Версия протокола. Клиент и воркер сверяют её в `hello`; любое несовместимое изменение методов
 /// увеличивает её.
 pub const PROTOCOL_VERSION: u32 = 1;
+
+/// Идентификатор сборки (коммит, из которого собран exe), `unknown` без git. Воркер отдаёт его в
+/// `hello`, клиент сверяет со своим и предупреждает о расхождении (`docs/architecture/protocol.md`).
+pub const BUILD_ID: &str = env!("BARS_BUILD_ID");

@@ -79,6 +79,24 @@ pub struct Client {
     writer: Writer,
     next_id: i64,
     worker_version: String,
+    build_warning: Option<String>,
+}
+
+/// Предупреждение, если клиент и воркер собраны из разных коммитов. `unknown` (сборка без git)
+/// у любой стороны — сравнить нечего; пустая сборка воркера — воркер старее поля `worker_build`.
+fn build_mismatch(client: &str, worker: &str) -> Option<String> {
+    if client == "unknown" || worker == "unknown" || client == worker {
+        return None;
+    }
+    let worker = if worker.is_empty() {
+        "до появления сверки"
+    } else {
+        worker
+    };
+    Some(format!(
+        "клиент и воркер bars собраны из разных сборок (клиент {client}, воркер {worker}): \
+         часть возможностей может не работать; переустановите bars, чтобы все exe были из одной сборки"
+    ))
 }
 
 impl Client {
@@ -128,6 +146,7 @@ impl Client {
             writer: Box::pin(write_half),
             next_id: 1,
             worker_version: String::new(),
+            build_warning: None,
         };
         let hello = client
             .call(&HelloParams {
@@ -139,6 +158,7 @@ impl Client {
         let HelloOutput {
             protocol,
             worker_version,
+            worker_build,
         } = hello;
         if protocol != PROTOCOL_VERSION {
             return Err(ClientError::Rpc(RpcError::bars(
@@ -149,12 +169,18 @@ impl Client {
             )));
         }
         client.worker_version = worker_version;
+        client.build_warning = build_mismatch(crate::BUILD_ID, &worker_build);
         Ok(client)
     }
 
     /// Версия воркера из `hello`.
     pub fn worker_version(&self) -> &str {
         &self.worker_version
+    }
+
+    /// Предупреждение из `hello`, если клиент и воркер собраны из разных сборок.
+    pub fn build_warning(&self) -> Option<&str> {
+        self.build_warning.as_deref()
     }
 
     /// Вызывает метод и ждёт ответ.
@@ -168,6 +194,17 @@ impl Client {
         params: &M,
         context: Option<&serde_json::Value>,
     ) -> Result<M::Output, ClientError> {
+        let value = self.call_value(params, context).await?;
+        serde_json::from_value(value).map_err(|error| ClientError::BadReply(error.to_string()))
+    }
+
+    /// Вызывает метод и возвращает ответ воркера как есть, без разбора в типы клиента: поля,
+    /// которых клиент не знает, не теряются (`bars-cli --json`).
+    pub async fn call_value<M: Method>(
+        &mut self,
+        params: &M,
+        context: Option<&serde_json::Value>,
+    ) -> Result<serde_json::Value, ClientError> {
         let id = Id::Number(self.next_id);
         self.next_id += 1;
         let mut request = params.request(id.clone());
@@ -193,7 +230,30 @@ impl Client {
                 "id ответа не совпал с id вызова".into(),
             ));
         }
-        let value = response.into_result().map_err(ClientError::Rpc)?;
-        serde_json::from_value(value).map_err(|error| ClientError::BadReply(error.to_string()))
+        response.into_result().map_err(ClientError::Rpc)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::build_mismatch;
+
+    #[test]
+    fn same_or_unknown_build_is_silent() {
+        assert_eq!(build_mismatch("abc", "abc"), None);
+        assert_eq!(build_mismatch("unknown", "abc"), None);
+        assert_eq!(build_mismatch("abc", "unknown"), None);
+    }
+
+    #[test]
+    fn different_build_warns_with_both_ids() {
+        let text = build_mismatch("abc", "def").expect("сборки разные");
+        assert!(text.contains("abc") && text.contains("def"), "{text}");
+    }
+
+    #[test]
+    fn worker_without_build_field_warns() {
+        let text = build_mismatch("abc", "").expect("воркер старой сборки");
+        assert!(text.contains("до появления сверки"), "{text}");
     }
 }

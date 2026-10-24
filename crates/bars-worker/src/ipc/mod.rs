@@ -61,6 +61,7 @@ mod tests {
         let endpoint = start("it-hello");
         let mut client = Client::connect(&endpoint, ClientKind::Cli).await.unwrap();
         assert_eq!(client.worker_version(), env!("CARGO_PKG_VERSION"));
+        assert_eq!(client.build_warning(), None, "клиент и воркер одной сборки");
         let out = client.call(&ProjectsParams {}).await.unwrap();
         assert!(out.projects.is_empty());
         let error = client

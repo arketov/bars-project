@@ -94,6 +94,7 @@ where
                 output_value(&HelloOutput {
                     protocol: PROTOCOL_VERSION,
                     worker_version: env!("CARGO_PKG_VERSION").to_string(),
+                    worker_build: crate::BUILD_ID.to_string(),
                 }),
             ),
             Ok(call) => {

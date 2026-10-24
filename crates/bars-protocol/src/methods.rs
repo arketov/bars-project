@@ -53,6 +53,9 @@ pub struct HelloParams {
 pub struct HelloOutput {
     pub protocol: u32,
     pub worker_version: String,
+    /// Сборка воркера (`BUILD_ID`). У воркера старой сборки поля нет — приходит пустая строка.
+    #[serde(default)]
+    pub worker_build: String,
 }
 
 // --- search ---

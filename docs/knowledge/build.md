@@ -10,6 +10,7 @@ title: Сборка bars — как собрать, проверить и что
 
 - Rust `1.99.0`: версия закреплена в `rust-toolchain.toml` вместе с компонентами `rustfmt` и `clippy`. Нижняя граница стека — 1.90 ([architecture/stack.md](../architecture/stack.md)); точный пин нужен, чтобы сборка не менялась от обновления stable.
 - Windows: MSVC 17.14+, CMake/Ninja, Vulkan SDK (`VULKAN_SDK`; `scripts/build-installer.ps1` находит его сам, остальные команды ждут переменную) и LLVM для bindgen в `llama-cpp-sys-2` (`LIBCLANG_PATH`, например `C:\Program Files\LLVM\bin`). Всё ставится через winget: `LLVM.LLVM`, `Kitware.CMake`, `Ninja-build.Ninja`, `KhronosGroup.VulkanSDK`. Для нативной GGUF-сборки использовать Developer PowerShell последнего MSVC, `CMAKE_GENERATOR=Ninja`, `CMAKE_BUILD_PARALLEL_LEVEL=1`. MSBuild с вложенным shader generator нестабилен на чистом каталоге. macOS: Xcode Command Line Tools; Metal не проверен.
+- git в `PATH`: `bars-protocol` берёт из него идентификатор сборки для сверки в `hello` ([протокол](../architecture/protocol.md)); без git сборка идёт, но проверка сборок молчит (`unknown`).
 - Сеть: `ort` скачивает ONNX Runtime с `cdn.pyke.io` при первой сборке `bars-core`.
 
 ## Где хранятся артефакты сборки target

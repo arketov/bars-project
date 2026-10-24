@@ -1,0 +1,580 @@
+{
+  "real:.bars/index.sqlite": {
+    "brute": {
+      "triangle_threads_1_ms": 257.1241,
+      "triangle_threads_4_ms": 67.2538,
+      "triangle_threads_8_ms": 33.7474
+    },
+    "chunks": 1946,
+    "current_build_knn_matches_triangle": true,
+    "current_build_knn_ms": 3766.2776999999996,
+    "dim": 1024,
+    "edit_exact": {
+      "affected_rows": {
+        "max": 77.0,
+        "mean": 20.9,
+        "median": 10.0,
+        "p95": 56.0
+      },
+      "chunks_per_edit": {
+        "max": 66.0,
+        "mean": 14.3,
+        "median": 10.0,
+        "p95": 34.0
+      },
+      "edits": 20,
+      "matches_full_recompute": true,
+      "ms": {
+        "max": 29.038700000000002,
+        "mean": 8.34881,
+        "median": 7.0678,
+        "p95": 23.4547
+      }
+    },
+    "hnsw": [
+      {
+        "build_ms": 666.9943000000001,
+        "ef_construction": 100,
+        "ef_search": 32,
+        "links_mb": 0.215776,
+        "m": 16,
+        "query_all_ms": 37.7252,
+        "query_all_threads": 8,
+        "query_ms_single_thread": 0.0939146,
+        "recall": 0.9998972250770812
+      },
+      {
+        "build_ms": 666.9943000000001,
+        "ef_construction": 100,
+        "ef_search": 64,
+        "links_mb": 0.215776,
+        "m": 16,
+        "query_all_ms": 76.6092,
+        "query_all_threads": 8,
+        "query_ms_single_thread": 0.1468418,
+        "recall": 1.0
+      },
+      {
+        "build_ms": 666.9943000000001,
+        "ef_construction": 100,
+        "ef_search": 128,
+        "links_mb": 0.215776,
+        "m": 16,
+        "query_all_ms": 148.478,
+        "query_all_threads": 8,
+        "query_ms_single_thread": 0.221327,
+        "recall": 1.0
+      }
+    ],
+    "hnsw_edits": {
+      "edits": 20,
+      "insert_document_ms": {
+        "max": 14.6818,
+        "mean": 4.610785,
+        "median": 3.195,
+        "p95": 8.944799999999999
+      },
+      "live": 1946,
+      "nodes_total": 2177,
+      "recall_after_edits": 1.0
+    },
+    "lookup_cost": {
+      "edges": 9730,
+      "hashmap_total_ms": 0.7552,
+      "linear_find_ms_per_lookup": 0.0027541,
+      "linear_total_ms_estimate": 53.594786000000006
+    },
+    "memory_mb": {
+      "vectors": 7.970816
+    },
+    "structure": {
+      "chunks_per_doc": 4.442922374429224,
+      "max_indegree": 34,
+      "mean_indegree": 5.0,
+      "mean_top1_cosine": 0.8243881460022706,
+      "rows_with_full_k": 1.0,
+      "rows_with_neighbors": 1.0
+    }
+  },
+  "real:C:/Users/Shket/OneDrive/Рабочий стол/SELF Repository/overdrive/overdrive-bots/.bars/index.sqlite": {
+    "brute": {
+      "triangle_threads_1_ms": 133.0173,
+      "triangle_threads_4_ms": 55.2351,
+      "triangle_threads_8_ms": 50.075
+    },
+    "chunks": 1755,
+    "current_build_knn_matches_triangle": false,
+    "current_build_knn_ms": 2563.835,
+    "dim": 1024,
+    "edit_exact": {
+      "affected_rows": {
+        "max": 38.0,
+        "mean": 13.45,
+        "median": 13.0,
+        "p95": 28.0
+      },
+      "chunks_per_edit": {
+        "max": 67.0,
+        "mean": 12.25,
+        "median": 7.0,
+        "p95": 43.0
+      },
+      "edits": 20,
+      "matches_full_recompute": true,
+      "ms": {
+        "max": 30.947599999999998,
+        "mean": 8.98916,
+        "median": 5.9103,
+        "p95": 28.2846
+      }
+    },
+    "hnsw": [
+      {
+        "build_ms": 444.1521,
+        "ef_construction": 100,
+        "ef_search": 32,
+        "links_mb": 0.194764,
+        "m": 16,
+        "query_all_ms": 49.3105,
+        "query_all_threads": 8,
+        "query_ms_single_thread": 0.0727122,
+        "recall": 0.9998860398860399
+      },
+      {
+        "build_ms": 444.1521,
+        "ef_construction": 100,
+        "ef_search": 64,
+        "links_mb": 0.194764,
+        "m": 16,
+        "query_all_ms": 72.9769,
+        "query_all_threads": 8,
+        "query_ms_single_thread": 0.1291802,
+        "recall": 1.0
+      },
+      {
+        "build_ms": 444.1521,
+        "ef_construction": 100,
+        "ef_search": 128,
+        "links_mb": 0.194764,
+        "m": 16,
+        "query_all_ms": 130.4657,
+        "query_all_threads": 8,
+        "query_ms_single_thread": 0.2805384,
+        "recall": 1.0
+      }
+    ],
+    "hnsw_edits": {
+      "edits": 20,
+      "insert_document_ms": {
+        "max": 17.0953,
+        "mean": 5.45778,
+        "median": 3.6814999999999998,
+        "p95": 15.4541
+      },
+      "live": 1755,
+      "nodes_total": 2087,
+      "recall_after_edits": 1.0
+    },
+    "lookup_cost": {
+      "edges": 8775,
+      "hashmap_total_ms": 0.6238,
+      "linear_find_ms_per_lookup": 0.0023076,
+      "linear_total_ms_estimate": 40.49838
+    },
+    "memory_mb": {
+      "vectors": 7.18848
+    },
+    "structure": {
+      "chunks_per_doc": 5.318181818181818,
+      "max_indegree": 23,
+      "mean_indegree": 5.0,
+      "mean_top1_cosine": 0.8336195451921208,
+      "rows_with_full_k": 1.0,
+      "rows_with_neighbors": 1.0
+    }
+  },
+  "synthetic:10000": {
+    "brute": {
+      "triangle_threads_1_ms": 6003.6481,
+      "triangle_threads_4_ms": 1812.1616999999999,
+      "triangle_threads_8_ms": 1093.3031
+    },
+    "chunks": 10000,
+    "dim": 1024,
+    "edit_exact": {
+      "affected_rows": {
+        "max": 9.0,
+        "mean": 2.3,
+        "median": 2.0,
+        "p95": 8.0
+      },
+      "chunks_per_edit": {
+        "max": 9.0,
+        "mean": 6.85,
+        "median": 7.0,
+        "p95": 9.0
+      },
+      "edits": 20,
+      "matches_full_recompute": true,
+      "ms": {
+        "max": 50.6046,
+        "mean": 29.318179999999995,
+        "median": 27.8613,
+        "p95": 44.4371
+      }
+    },
+    "hnsw": [
+      {
+        "build_ms": 6777.238600000001,
+        "ef_construction": 100,
+        "ef_search": 32,
+        "links_mb": 1.069784,
+        "m": 16,
+        "query_all_ms": 399.3198,
+        "query_all_threads": 8,
+        "query_ms_single_thread": 0.1456342,
+        "recall": 0.99978
+      },
+      {
+        "build_ms": 6777.238600000001,
+        "ef_construction": 100,
+        "ef_search": 64,
+        "links_mb": 1.069784,
+        "m": 16,
+        "query_all_ms": 473.1651,
+        "query_all_threads": 8,
+        "query_ms_single_thread": 0.2791246,
+        "recall": 0.99982
+      },
+      {
+        "build_ms": 6777.238600000001,
+        "ef_construction": 100,
+        "ef_search": 128,
+        "links_mb": 1.069784,
+        "m": 16,
+        "query_all_ms": 1125.2351,
+        "query_all_threads": 8,
+        "query_ms_single_thread": 0.496081,
+        "recall": 0.9999
+      }
+    ],
+    "hnsw_edits": {
+      "edits": 20,
+      "insert_document_ms": {
+        "max": 35.2418,
+        "mean": 10.625345,
+        "median": 9.4038,
+        "p95": 17.3384
+      },
+      "live": 10000,
+      "nodes_total": 10133,
+      "recall_after_edits": 1.0
+    },
+    "lookup_cost": {
+      "edges": 50000,
+      "hashmap_total_ms": 4.223,
+      "linear_find_ms_per_lookup": 0.0225529,
+      "linear_total_ms_estimate": 2255.29
+    },
+    "memory_mb": {
+      "vectors": 40.96
+    },
+    "structure": {
+      "chunks_per_doc": 6.006006006006006,
+      "max_indegree": 19,
+      "mean_indegree": 5.0,
+      "mean_top1_cosine": 0.8093240631401539,
+      "rows_with_full_k": 1.0,
+      "rows_with_neighbors": 1.0
+    }
+  },
+  "synthetic:2000": {
+    "brute": {
+      "triangle_threads_1_ms": 214.3633,
+      "triangle_threads_4_ms": 82.2344,
+      "triangle_threads_8_ms": 75.2837
+    },
+    "chunks": 2000,
+    "current_build_knn_matches_triangle": true,
+    "current_build_knn_ms": 3836.74,
+    "dim": 1024,
+    "edit_exact": {
+      "affected_rows": {
+        "max": 6.0,
+        "mean": 1.95,
+        "median": 1.0,
+        "p95": 5.0
+      },
+      "chunks_per_edit": {
+        "max": 9.0,
+        "mean": 6.4,
+        "median": 7.0,
+        "p95": 9.0
+      },
+      "edits": 20,
+      "matches_full_recompute": true,
+      "ms": {
+        "max": 10.1927,
+        "mean": 4.490265000000001,
+        "median": 4.0448,
+        "p95": 7.3998
+      }
+    },
+    "hnsw": [
+      {
+        "build_ms": 836.9179,
+        "ef_construction": 100,
+        "ef_search": 32,
+        "links_mb": 0.213832,
+        "m": 16,
+        "query_all_ms": 53.8782,
+        "query_all_threads": 8,
+        "query_ms_single_thread": 0.120341,
+        "recall": 1.0
+      },
+      {
+        "build_ms": 836.9179,
+        "ef_construction": 100,
+        "ef_search": 64,
+        "links_mb": 0.213832,
+        "m": 16,
+        "query_all_ms": 104.8539,
+        "query_all_threads": 8,
+        "query_ms_single_thread": 0.2386998,
+        "recall": 1.0
+      },
+      {
+        "build_ms": 836.9179,
+        "ef_construction": 100,
+        "ef_search": 128,
+        "links_mb": 0.213832,
+        "m": 16,
+        "query_all_ms": 145.8004,
+        "query_all_threads": 8,
+        "query_ms_single_thread": 0.32096,
+        "recall": 1.0
+      }
+    ],
+    "hnsw_edits": {
+      "edits": 20,
+      "insert_document_ms": {
+        "max": 6.3786,
+        "mean": 2.9275650000000004,
+        "median": 2.6166,
+        "p95": 5.7225
+      },
+      "live": 2000,
+      "nodes_total": 2138,
+      "recall_after_edits": 1.0
+    },
+    "lookup_cost": {
+      "edges": 10000,
+      "hashmap_total_ms": 0.8666,
+      "linear_find_ms_per_lookup": 0.0033123,
+      "linear_total_ms_estimate": 66.246
+    },
+    "memory_mb": {
+      "vectors": 8.192
+    },
+    "structure": {
+      "chunks_per_doc": 6.116207951070336,
+      "max_indegree": 20,
+      "mean_indegree": 5.0,
+      "mean_top1_cosine": 0.8088232110440731,
+      "rows_with_full_k": 1.0,
+      "rows_with_neighbors": 1.0
+    }
+  },
+  "synthetic:20000": {
+    "brute": {
+      "triangle_threads_1_ms": 22486.497,
+      "triangle_threads_4_ms": 9935.286100000001,
+      "triangle_threads_8_ms": 7353.371700000001
+    },
+    "chunks": 20000,
+    "dim": 1024,
+    "edit_exact": {
+      "affected_rows": {
+        "max": 10.0,
+        "mean": 2.55,
+        "median": 2.0,
+        "p95": 9.0
+      },
+      "chunks_per_edit": {
+        "max": 9.0,
+        "mean": 6.65,
+        "median": 7.0,
+        "p95": 9.0
+      },
+      "edits": 20,
+      "matches_full_recompute": true,
+      "ms": {
+        "max": 136.30519999999999,
+        "mean": 66.807075,
+        "median": 63.9463,
+        "p95": 135.8281
+      }
+    },
+    "hnsw": [
+      {
+        "build_ms": 16149.1817,
+        "ef_construction": 100,
+        "ef_search": 32,
+        "links_mb": 2.146556,
+        "m": 16,
+        "query_all_ms": 531.9701,
+        "query_all_threads": 8,
+        "query_ms_single_thread": 0.1472124,
+        "recall": 0.99945
+      },
+      {
+        "build_ms": 16149.1817,
+        "ef_construction": 100,
+        "ef_search": 64,
+        "links_mb": 2.146556,
+        "m": 16,
+        "query_all_ms": 1200.4934999999998,
+        "query_all_threads": 8,
+        "query_ms_single_thread": 0.3315476,
+        "recall": 0.99974
+      },
+      {
+        "build_ms": 16149.1817,
+        "ef_construction": 100,
+        "ef_search": 128,
+        "links_mb": 2.146556,
+        "m": 16,
+        "query_all_ms": 2842.8125,
+        "query_all_threads": 8,
+        "query_ms_single_thread": 0.6032326,
+        "recall": 0.99983
+      }
+    ],
+    "hnsw_edits": {
+      "edits": 20,
+      "insert_document_ms": {
+        "max": 26.3112,
+        "mean": 5.7248,
+        "median": 4.294499999999999,
+        "p95": 9.3291
+      },
+      "live": 20000,
+      "nodes_total": 20135,
+      "recall_after_edits": 1.0
+    },
+    "lookup_cost": {
+      "edges": 100000,
+      "hashmap_total_ms": 7.5717,
+      "linear_find_ms_per_lookup": 0.0262928,
+      "linear_total_ms_estimate": 5258.56
+    },
+    "memory_mb": {
+      "vectors": 81.92
+    },
+    "structure": {
+      "chunks_per_doc": 6.0368246302444915,
+      "max_indegree": 19,
+      "mean_indegree": 5.0,
+      "mean_top1_cosine": 0.809154237088561,
+      "rows_with_full_k": 1.0,
+      "rows_with_neighbors": 1.0
+    }
+  },
+  "synthetic:5000": {
+    "brute": {
+      "triangle_threads_1_ms": 1814.9904000000001,
+      "triangle_threads_4_ms": 484.9928,
+      "triangle_threads_8_ms": 312.7623
+    },
+    "chunks": 5000,
+    "current_build_knn_matches_triangle": true,
+    "current_build_knn_ms": 25997.161200000002,
+    "dim": 1024,
+    "edit_exact": {
+      "affected_rows": {
+        "max": 11.0,
+        "mean": 2.9,
+        "median": 2.0,
+        "p95": 10.0
+      },
+      "chunks_per_edit": {
+        "max": 9.0,
+        "mean": 7.05,
+        "median": 8.0,
+        "p95": 9.0
+      },
+      "edits": 20,
+      "matches_full_recompute": true,
+      "ms": {
+        "max": 44.8099,
+        "mean": 23.508415000000003,
+        "median": 21.471500000000002,
+        "p95": 37.5187
+      }
+    },
+    "hnsw": [
+      {
+        "build_ms": 2735.9688,
+        "ef_construction": 100,
+        "ef_search": 32,
+        "links_mb": 0.531608,
+        "m": 16,
+        "query_all_ms": 112.3572,
+        "query_all_threads": 8,
+        "query_ms_single_thread": 0.1222146,
+        "recall": 1.0
+      },
+      {
+        "build_ms": 2735.9688,
+        "ef_construction": 100,
+        "ef_search": 64,
+        "links_mb": 0.531608,
+        "m": 16,
+        "query_all_ms": 267.7503,
+        "query_all_threads": 8,
+        "query_ms_single_thread": 0.1992752,
+        "recall": 1.0
+      },
+      {
+        "build_ms": 2735.9688,
+        "ef_construction": 100,
+        "ef_search": 128,
+        "links_mb": 0.531608,
+        "m": 16,
+        "query_all_ms": 451.7313,
+        "query_all_threads": 8,
+        "query_ms_single_thread": 0.4899646,
+        "recall": 1.0
+      }
+    ],
+    "hnsw_edits": {
+      "edits": 20,
+      "insert_document_ms": {
+        "max": 11.469,
+        "mean": 4.87692,
+        "median": 4.759399999999999,
+        "p95": 6.808599999999999
+      },
+      "live": 5000,
+      "nodes_total": 5142,
+      "recall_after_edits": 1.0
+    },
+    "lookup_cost": {
+      "edges": 25000,
+      "hashmap_total_ms": 4.8303,
+      "linear_find_ms_per_lookup": 0.0064025,
+      "linear_total_ms_estimate": 320.125
+    },
+    "memory_mb": {
+      "vectors": 20.48
+    },
+    "structure": {
+      "chunks_per_doc": 6.009615384615385,
+      "max_indegree": 20,
+      "mean_indegree": 5.0,
+      "mean_top1_cosine": 0.8090034423232079,
+      "rows_with_full_k": 1.0,
+      "rows_with_neighbors": 1.0
+    }
+  }
+}

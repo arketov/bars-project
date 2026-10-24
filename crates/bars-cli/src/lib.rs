@@ -24,7 +24,6 @@ use bars_protocol::{
     worker_exe,
 };
 use clap::{Args, Parser, Subcommand};
-use serde::Serialize;
 
 /// Аргументы командной строки.
 #[derive(Debug, Parser)]
@@ -285,7 +284,7 @@ pub async fn run(cli: Cli, env: &Env, out: &mut dyn Write, err: &mut dyn Write) 
             }
         };
     }
-    match execute(cli, env, out).await {
+    match execute(cli, env, out, err).await {
         Ok(()) => 0,
         Err(Failure::Client(error)) => {
             let _ = writeln!(err, "{}", render::error(&error, json));
@@ -359,26 +358,41 @@ fn absolute(path: &Path, cwd: &Path) -> String {
     clean.display().to_string()
 }
 
-fn emit<T: Serialize>(
+/// Ответ метода: разобранный для человеческого вывода и исходный для `--json`.
+struct Reply<T> {
+    typed: T,
+    raw: serde_json::Value,
+}
+
+fn emit<T>(
     out: &mut dyn Write,
     json: bool,
-    output: &T,
+    reply: &Reply<T>,
     human: impl FnOnce(&T) -> String,
 ) -> Result<(), Failure> {
     let text = if json {
-        serde_json::to_string_pretty(output).expect("ответы методов сериализуются")
+        // Ответ воркера как есть: поля, которых клиент не знает, не теряются.
+        serde_json::to_string_pretty(&reply.raw).expect("ответ воркера сериализуется")
     } else {
-        human(output)
+        human(&reply.typed)
     };
     writeln!(out, "{text}")?;
     Ok(())
 }
 
-async fn call<M: Method>(client: &mut Client, params: &M) -> Result<M::Output, Failure> {
-    Ok(client.call(params).await?)
+async fn call<M: Method>(client: &mut Client, params: &M) -> Result<Reply<M::Output>, Failure> {
+    let raw = client.call_value(params, None).await?;
+    let typed = serde_json::from_value(raw.clone())
+        .map_err(|error| ClientError::BadReply(error.to_string()))?;
+    Ok(Reply { typed, raw })
 }
 
-async fn execute(cli: Cli, env: &Env, out: &mut dyn Write) -> Result<(), Failure> {
+async fn execute(
+    cli: Cli,
+    env: &Env,
+    out: &mut dyn Write,
+    err: &mut dyn Write,
+) -> Result<(), Failure> {
     let json = cli.json;
     let target = Target {
         cwd: env.cwd.display().to_string(),
@@ -388,6 +402,9 @@ async fn execute(cli: Cli, env: &Env, out: &mut dyn Write) -> Result<(), Failure
             .map(|value| project_arg(value, &env.cwd)),
     };
     let mut client = connect(env).await?;
+    if let Some(warning) = client.build_warning() {
+        let _ = writeln!(err, "bars-cli: предупреждение: {warning}");
+    }
     match cli.command {
         Command::Relations(args) => {
             graph::query(
@@ -619,5 +636,34 @@ async fn execute(cli: Cli, env: &Env, out: &mut dyn Write) -> Result<(), Failure
                 render::unregister,
             )
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn json_prints_the_worker_reply_with_fields_the_client_does_not_know() {
+        let reply = Reply {
+            typed: 1_u32,
+            raw: json!({ "known": 1, "unknown_to_client": { "layers": [1, 2] } }),
+        };
+        let mut out = Vec::new();
+        emit(&mut out, true, &reply, |n| n.to_string()).unwrap_or_else(|_| panic!("запись"));
+        let printed: serde_json::Value = serde_json::from_slice(&out).unwrap();
+        assert_eq!(printed, reply.raw);
+    }
+
+    #[test]
+    fn text_mode_uses_the_typed_reply() {
+        let reply = Reply {
+            typed: 7_u32,
+            raw: json!({ "known": 7 }),
+        };
+        let mut out = Vec::new();
+        emit(&mut out, false, &reply, |n| format!("n={n}")).unwrap_or_else(|_| panic!("запись"));
+        assert_eq!(String::from_utf8(out).unwrap(), "n=7\n");
     }
 }

@@ -323,7 +323,12 @@ impl BarsMcp {
         let mut slot = self.client.lock().await;
         for attempt in 0..2 {
             if slot.is_none() {
-                *slot = Some(self.connect().await?);
+                let client = self.connect().await?;
+                if let Some(warning) = client.build_warning() {
+                    // stdout занят протоколом MCP; stderr клиент складывает в журнал сервера.
+                    eprintln!("bars-mcp: предупреждение: {warning}");
+                }
+                *slot = Some(client);
             }
             let client = slot.as_mut().expect("соединение открыто выше");
             match tokio::time::timeout(self.env.call_timeout, client.call_observed(params, context))

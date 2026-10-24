@@ -39,7 +39,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 
 | Метод | Параметры | Ответ | Кто вызывает |
 |---|---|---|---|
-| `hello` | `protocol`, `client` (`mcp` / `cli`), `client_version` | `protocol`, `worker_version` | все |
+| `hello` | `protocol`, `client` (`mcp` / `cli`), `client_version` | `protocol`, `worker_version`, `worker_build` | все |
 | `search` | `cwd`, `project`, `query`, `modules`, `files`, `limit`, `candidates`, `min_score` | результаты и применённые параметры ([features/search/hybrid-search.md](../features/search/hybrid-search.md)) | MCP, CLI |
 | `similar` | `cwd`, `project`, `chunk_id`, `modules`, `limit` | исходный чанк, ближайшие чанки с косинусной близостью и применённый `limit` ([features/search/maintenance-tools.md](../features/search/maintenance-tools.md)); неизвестный или устаревший ID — `chunk_not_found` | MCP, CLI |
 | `duplicates` | `cwd`, `project`, `modules`, `limit` | записи о повторах (`kind`, чанки с ID, `score`, `shared`, `differences`, `repeated_block`), `counts`, `total`, применённый `limit` и `clamped`, `chunks_checked`, `chunks_skipped_short` ([features/search/maintenance-tools.md](../features/search/maintenance-tools.md#get_duplicates-аудит-дублей-проекта)) | MCP, CLI |
@@ -161,6 +161,10 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 ## Версия протокола bars
 
 `protocol` — целое число (сейчас 1), его увеличивает любое несовместимое изменение методов. `bars`, `bars-mcp` и `bars-cli` поставляются вместе, поэтому воркер принимает только свою версию. Чужая версия — ошибка `protocol_mismatch` с текстом «обновите bars»: значит, установлены exe из разных сборок.
+
+### Сверка сборок в hello
+
+Версия протокола и версия крейтов не меняются от коммита к коммиту, поэтому exe из разных сборок с одним протоколом друг от друга не отличить. Для этого воркер в `hello` отдаёт `worker_build` — идентификатор сборки `BUILD_ID` (12 знаков коммита, из которого собран exe; сборочный скрипт `bars-protocol` берёт его у git, без git — `unknown`). Клиент сравнивает его со своим и при расхождении держит предупреждение (`Client::build_warning`), не прерывая соединение: `bars-cli` пишет его в stderr строкой «bars-cli: предупреждение: …», `bars-mcp` — в stderr процесса при открытии соединения. Предупреждения нет, если сборка неизвестна (`unknown`) у любой стороны. Воркер старой сборки, у которого поля нет, считается расхождением. Идентификатор — коммит, а не содержимое дерева: две сборки из одного коммита с разными незафиксированными правками он не различает; cargo пересобирает `bars-protocol`, а с ним все три exe, после каждого нового коммита (`.git/logs/HEAD`).
 
 ## Ошибки протокола bars
 
