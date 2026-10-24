@@ -186,7 +186,7 @@ it("устаревший снимок при раскрытии приводит
 it("граф не построен: показывает состояние и ставит построение, а не пустую карту", async () => {
   rpc.mockImplementation(async (method: string) => {
     if (method === "graph_status") return { state: "stale", snapshot: null, active_job: null };
-    if (method === "graph_physical") throw new BarsError("граф ещё не готов: Stale", "graph_not_ready");
+    if (method === "graph_physical") throw new BarsError("граф ещё не готов: документы изменились после построения, граф ждёт обновления", "graph_not_ready");
     return {};
   });
   component = mount(PhysicalGraph, { target });

@@ -70,6 +70,54 @@ fn method_change_invalidates_cached_snapshot_even_with_unchanged_sources() {
     assert!(matches!(store::load(&db), Err(GraphError::NotReady(_))));
 }
 #[test]
+fn not_ready_messages_are_plain_russian_without_debug_output() {
+    let (mut db, data, manifest) = setup();
+    store::publish(&mut db, &data, &manifest).unwrap();
+    db.execute(
+        "UPDATE documents SET hash='changed' WHERE path='docs/a.md'",
+        [],
+    )
+    .unwrap();
+    let message = store::load(&db).unwrap_err().to_string();
+    assert_eq!(
+        message,
+        "граф ещё не готов: документы изменились после построения, граф ждёт обновления"
+    );
+    for state in [
+        LayerState::Disabled,
+        LayerState::NotBuilt,
+        LayerState::Building,
+        LayerState::Stale,
+        LayerState::Failed,
+        LayerState::Cancelled,
+        LayerState::Ready,
+        LayerState::Partial,
+    ] {
+        let text = format!(
+            "{}{}",
+            state.not_ready_reason(),
+            state.background_job_warning()
+        );
+        assert!(!text.is_ascii() && !text.contains("Some("), "{state:?}");
+    }
+}
+#[test]
+fn legacy_similarity_warning_is_read_as_plain_text() {
+    let old =
+        "Граф близости частичный: Some(ComparisonLimit); завершено 539/1856 строк".to_string();
+    assert!(is_similarity_warning(&old));
+    assert_eq!(
+        humanize_warning(old),
+        "Близость посчитана для 539 из 1856 чанков: достигнут предел сравнений"
+    );
+    let new = similarity_partial_warning(10, 20, "расчёт остановлен");
+    assert!(is_similarity_warning(&new));
+    assert_eq!(humanize_warning(new.clone()), new);
+    let other = "Граф частичный: файлы с ошибками исключены".to_string();
+    assert!(!is_similarity_warning(&other));
+    assert_eq!(humanize_warning(other.clone()), other);
+}
+#[test]
 fn text_mutation_invalidates_evidence_and_late_publish_rolls_back() {
     let (mut db, data, manifest) = setup();
     store::publish(&mut db, &data, &manifest).unwrap();

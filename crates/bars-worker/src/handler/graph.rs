@@ -293,7 +293,7 @@ impl WorkerHandler {
             let chunk_partial = data
                 .warnings
                 .iter()
-                .find(|w| w.starts_with("Граф близости частичный"));
+                .find(|w| bars_core::graph::is_similarity_warning(w));
             let inputs = physical::LayerInputs {
                 markdown_link: layer(
                     if data.failed_sources.is_empty() { LayerState::Ready } else { LayerState::Partial },

@@ -31,6 +31,15 @@ pub enum StopReason {
     Cancelled,
 }
 
+impl StopReason {
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::ComparisonLimit => "достигнут предел сравнений",
+            Self::Cancelled => "расчёт остановлен",
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct KnnGraph {
     /// Только полностью проверенные source-узлы; target может ещё не иметь строки.

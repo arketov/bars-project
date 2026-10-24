@@ -211,6 +211,73 @@ impl LayerState {
             Self::Cancelled => "отменён",
         }
     }
+
+    /// Причина, по которой граф в этом состоянии не читается: хвост сообщения «граф ещё не готов: …».
+    pub fn not_ready_reason(self) -> &'static str {
+        match self {
+            Self::Disabled => "слой графа выключен",
+            Self::NotBuilt => "граф не построен",
+            Self::Building => "граф строится, готового снимка ещё нет",
+            Self::Stale => "документы изменились после построения, граф ждёт обновления",
+            Self::Failed => "построение графа завершилось ошибкой, готового снимка нет",
+            Self::Cancelled => "построение графа остановлено, готового снимка нет",
+            Self::Ready | Self::Partial => "готового снимка графа нет",
+        }
+    }
+
+    /// Предупреждение о снимке, возвращённом вместо результата фонового задания.
+    pub fn background_job_warning(self) -> &'static str {
+        match self {
+            Self::Building => {
+                "Граф сейчас перестраивается; ответ построен по предыдущему согласованному снимку тех же исходников"
+            }
+            Self::Cancelled => {
+                "Последнее построение графа остановлено; ответ построен по предыдущему согласованному снимку тех же исходников"
+            }
+            Self::Failed => {
+                "Последнее построение графа завершилось ошибкой; ответ построен по предыдущему согласованному снимку тех же исходников"
+            }
+            _ => "Ответ построен по предыдущему согласованному снимку тех же исходников",
+        }
+    }
+}
+
+/// Начало предупреждения о неполной близости чанков; по нему слои отличают такое предупреждение от прочих.
+pub const SIMILARITY_WARNING_PREFIX: &str = "Близость посчитана для ";
+const LEGACY_SIMILARITY_WARNING_PREFIX: &str = "Граф близости частичный: ";
+
+/// «Близость посчитана для 539 из 1856 чанков: достигнут предел сравнений».
+pub fn similarity_partial_warning(done: usize, total: usize, reason: &str) -> String {
+    format!("{SIMILARITY_WARNING_PREFIX}{done} из {total} чанков: {reason}")
+}
+
+pub fn is_similarity_warning(warning: &str) -> bool {
+    warning.starts_with(SIMILARITY_WARNING_PREFIX)
+        || warning.starts_with(LEGACY_SIMILARITY_WARNING_PREFIX)
+}
+
+/// Предупреждение графа, построенного до ISS-83 («Граф близости частичный: Some(ComparisonLimit); завершено 539/1856 строк»),
+/// читается человеческим текстом; остальные строки возвращаются как есть.
+pub fn humanize_warning(warning: String) -> String {
+    let Some(rest) = warning.strip_prefix(LEGACY_SIMILARITY_WARNING_PREFIX) else {
+        return warning;
+    };
+    let Some((reason, counts)) = rest.split_once("; завершено ") else {
+        return warning;
+    };
+    let reason = match reason {
+        "Some(ComparisonLimit)" => "достигнут предел сравнений",
+        "Some(Cancelled)" => "расчёт остановлен",
+        _ => return warning,
+    };
+    let counts = counts.trim_end_matches(" строк");
+    match counts.split_once('/') {
+        Some((done, total)) => match (done.parse(), total.parse()) {
+            (Ok(done), Ok(total)) => similarity_partial_warning(done, total, reason),
+            _ => warning,
+        },
+        None => warning,
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

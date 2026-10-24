@@ -474,7 +474,9 @@ pub fn load(db: &Connection) -> Result<Dataset, GraphError> {
     let tx = db.unchecked_transaction()?;
     let state = status(&tx)?;
     if state.method != METHOD_VERSION {
-        return Err(GraphError::NotReady("method_changed".into()));
+        return Err(GraphError::NotReady(
+            "изменился способ построения, граф нужно перестроить".into(),
+        ));
     }
     if !matches!(
         state.state,
@@ -485,7 +487,7 @@ pub fn load(db: &Connection) -> Result<Dataset, GraphError> {
             | LayerState::Failed
     ) || state.snapshot.is_none()
     {
-        return Err(GraphError::NotReady(format!("{:?}", state.state)));
+        return Err(GraphError::NotReady(state.state.not_ready_reason().into()));
     }
     let rows = |table: &str| -> Result<Vec<String>, GraphError> {
         let sql = match table {
@@ -539,7 +541,10 @@ pub fn load(db: &Connection) -> Result<Dataset, GraphError> {
             .map(|s| serde_json::from_str(s))
             .collect::<Result<_, _>>()?,
         broken_links: serde_json::from_str(&parse("broken_links")?)?,
-        warnings: serde_json::from_str(&parse("warnings")?)?,
+        warnings: serde_json::from_str::<Vec<String>>(&parse("warnings")?)?
+            .into_iter()
+            .map(humanize_warning)
+            .collect(),
         semantic_state: serde_json::from_str(&parse("semantic_state")?)?,
         similarity_state: tx
             .query_row(
@@ -561,13 +566,16 @@ pub fn load(db: &Connection) -> Result<Dataset, GraphError> {
             .collect()
     };
     if document_manifest(&tx)? != expected {
-        return Err(GraphError::NotReady("stale".into()));
+        return Err(GraphError::NotReady(
+            LayerState::Stale.not_ready_reason().into(),
+        ));
     }
     if matches!(
         state.state,
         LayerState::Building | LayerState::Cancelled | LayerState::Failed
     ) {
-        data.warnings.push(format!("Состояние фонового задания {:?}; возвращён предыдущий согласованный снимок тех же исходников",state.state));
+        data.warnings
+            .push(state.state.background_job_warning().into());
     }
     tx.commit()?;
     validate(&data)?;

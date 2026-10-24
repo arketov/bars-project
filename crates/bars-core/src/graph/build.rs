@@ -272,7 +272,7 @@ fn build_graph(
             data.warnings.extend(
                 old.warnings
                     .iter()
-                    .filter(|w| w.starts_with("Граф близости частичный"))
+                    .filter(|w| bars_graph::is_similarity_warning(w))
                     .cloned(),
             );
         }
@@ -306,12 +306,11 @@ fn build_graph(
         if cancelled() {
             return Err(GraphError::Cancelled);
         }
-        if knn.stop_reason.is_some() {
-            data.warnings.push(format!(
-                "Граф близости частичный: {:?}; завершено {}/{} строк",
-                knn.stop_reason,
+        if let Some(reason) = knn.stop_reason {
+            data.warnings.push(bars_graph::similarity_partial_warning(
                 knn.neighbors.len(),
-                knn.total_nodes
+                knn.total_nodes,
+                reason.label(),
             ));
         }
         for (from, neighbors) in knn.neighbors {

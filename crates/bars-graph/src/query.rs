@@ -613,14 +613,18 @@ pub fn execute_ranked(
         return Err(GraphError::SnapshotExpired);
     }
     if data.snapshot.is_empty() {
-        return Err(GraphError::NotReady("not_built".into()));
+        return Err(GraphError::NotReady(
+            LayerState::NotBuilt.not_ready_reason().into(),
+        ));
     }
     let needs_semantic = request.operation == Operation::Impact
         || (request.operation == Operation::Paths && request.path_kind != PathKind::Structural)
         || (request.operation == Operation::Relations
             && (request.predicates.is_empty() || request.predicates.iter().any(|p| p.semantic())));
     if needs_semantic && !matches!(data.semantic_state, LayerState::Ready | LayerState::Partial) {
-        return Err(GraphError::NotReady("semantic_not_built".into()));
+        return Err(GraphError::NotReady(
+            "смысловой слой графа не построен".into(),
+        ));
     }
     if let Some(paths) = request.max_paths {
         if paths == 0 {
