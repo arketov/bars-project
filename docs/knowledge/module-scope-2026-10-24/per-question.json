@@ -1,0 +1,5241 @@
+{
+ "mt-bars-01": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.25
+   }
+  }
+ },
+ "mt-bars-02": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-bars-03": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   }
+  }
+ },
+ "mt-bars-04": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-bars-05": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-bars-06": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "architecture",
+  "modules": [
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  }
+ },
+ "mt-bars-07": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "architecture",
+  "modules": [
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-bars-08": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "knowledge",
+  "modules": [
+   "knowledge"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-bars-09": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "knowledge",
+  "modules": [
+   "knowledge"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-bars-10": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "knowledge",
+  "modules": [
+   "knowledge"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-bars-11": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "manual",
+  "modules": [
+   "manual"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-bars-12": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "manual",
+  "modules": [
+   "manual"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  }
+ },
+ "mt-bars-13": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "adr",
+  "modules": [
+   "adr"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.1429
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.1667
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  }
+ },
+ "mt-bars-14": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "backlog",
+  "modules": [
+   "backlog"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-bars-15": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "chats",
+  "modules": [
+   "chats"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  }
+ },
+ "mt-bars-16": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "multi-module",
+  "modules": [
+   "manual",
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-bars-17": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "multi-module",
+  "modules": [
+   "manual",
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  }
+ },
+ "mt-bars-18": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "multi-module",
+  "modules": [
+   "manual",
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-bars-19": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "multi-module",
+  "modules": [
+   "chats",
+   "knowledge"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.1667
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.25
+   }
+  }
+ },
+ "mt-bars-20": {
+  "split": "tune",
+  "project": "bars-project",
+  "category": "multi-module",
+  "modules": [
+   "manual",
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-od-01": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "manual",
+  "modules": [
+   "manual"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.2
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.2
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   }
+  }
+ },
+ "mt-od-02": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "manual",
+  "modules": [
+   "manual"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.1429
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.1111
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-od-03": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "adr",
+  "modules": [
+   "adr"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-od-04": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "adr",
+  "modules": [
+   "adr"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-od-05": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "architecture",
+  "modules": [
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  }
+ },
+ "mt-od-06": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "architecture",
+  "modules": [
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-od-07": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "architecture",
+  "modules": [
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  }
+ },
+ "mt-od-08": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-od-09": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-od-10": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "knowledge",
+  "modules": [
+   "knowledge"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-od-11": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "backlog",
+  "modules": [
+   "backlog"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-od-12": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "chats",
+  "modules": [
+   "chats"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-od-13": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "manual",
+  "modules": [
+   "manual"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.1429
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.125
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  }
+ },
+ "mt-od-14": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "architecture",
+  "modules": [
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-od-15": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "manual",
+  "modules": [
+   "manual"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-od-16": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "multi-module",
+  "modules": [
+   "adr",
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.2
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   }
+  }
+ },
+ "mt-od-17": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "multi-module",
+  "modules": [
+   "manual",
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-od-18": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "multi-module",
+  "modules": [
+   "manual",
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-od-19": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "multi-module",
+  "modules": [
+   "manual",
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "mt-od-20": {
+  "split": "tune",
+  "project": "overdrive-bots",
+  "category": "multi-module",
+  "modules": [
+   "manual",
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-01": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.25
+   }
+  }
+ },
+ "ms-bars-02": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-03": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-04": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0.125
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.125
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  }
+ },
+ "ms-bars-05": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-06": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  }
+ },
+ "ms-bars-07": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-08": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  }
+ },
+ "ms-bars-09": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-10": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-11": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-12": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.2
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.2
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  }
+ },
+ "ms-bars-13": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "knowledge",
+  "modules": [
+   "knowledge"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-14": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "knowledge",
+  "modules": [
+   "knowledge"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-15": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "multi-module",
+  "modules": [
+   "knowledge",
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-16": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "knowledge",
+  "modules": [
+   "knowledge"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-17": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "knowledge",
+  "modules": [
+   "knowledge"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  }
+ },
+ "ms-bars-18": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "knowledge",
+  "modules": [
+   "knowledge"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-19": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "knowledge",
+  "modules": [
+   "knowledge"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.25
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-20": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "architecture",
+  "modules": [
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  }
+ },
+ "ms-bars-21": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "architecture",
+  "modules": [
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.25
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-22": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "architecture",
+  "modules": [
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-23": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "architecture",
+  "modules": [
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.1429
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.1429
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-24": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "architecture",
+  "modules": [
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  }
+ },
+ "ms-bars-25": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "multi-module",
+  "modules": [
+   "manual",
+   "architecture",
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-26": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "manual",
+  "modules": [
+   "manual"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-27": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "manual",
+  "modules": [
+   "manual"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-28": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "manual",
+  "modules": [
+   "manual"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-29": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "adr",
+  "modules": [
+   "adr"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  }
+ },
+ "ms-bars-30": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "adr",
+  "modules": [
+   "adr"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-31": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "adr",
+  "modules": [
+   "adr"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-32": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0.2
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.2
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.25
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   }
+  }
+ },
+ "ms-bars-33": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "backlog",
+  "modules": [
+   "backlog"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-34": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "chats",
+  "modules": [
+   "chats"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  }
+ },
+ "ms-bars-35": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "multi-module",
+  "modules": [
+   "chats",
+   "knowledge"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-36": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "chats",
+  "modules": [
+   "chats"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.2
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.25
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.1429
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   }
+  }
+ },
+ "ms-bars-37": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "multi-module",
+  "modules": [
+   "features",
+   "manual"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-38": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "multi-module",
+  "modules": [
+   "features",
+   "adr"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-39": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "multi-module",
+  "modules": [
+   "architecture",
+   "knowledge"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-bars-40": {
+  "split": "test",
+  "project": "bars-project",
+  "category": "knowledge",
+  "modules": [
+   "knowledge"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-01": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "architecture",
+  "modules": [
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-02": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "multi-module",
+  "modules": [
+   "architecture",
+   "manual"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.125
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-03": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "architecture",
+  "modules": [
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-04": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "architecture",
+  "modules": [
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  }
+ },
+ "ms-od-05": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "architecture",
+  "modules": [
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.1111
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0.125
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.125
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   }
+  }
+ },
+ "ms-od-06": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "architecture",
+  "modules": [
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  }
+ },
+ "ms-od-07": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "architecture",
+  "modules": [
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-08": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "architecture",
+  "modules": [
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.2
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.2
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-09": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "multi-module",
+  "modules": [
+   "architecture",
+   "manual"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-10": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "architecture",
+  "modules": [
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0.1429
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.1429
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  }
+ },
+ "ms-od-11": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-12": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "multi-module",
+  "modules": [
+   "features",
+   "adr"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.25
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.1429
+   }
+  }
+ },
+ "ms-od-13": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-14": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-15": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "multi-module",
+  "modules": [
+   "features",
+   "manual"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  }
+ },
+ "ms-od-16": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  }
+ },
+ "ms-od-17": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "multi-module",
+  "modules": [
+   "features",
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-18": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   }
+  }
+ },
+ "ms-od-19": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-20": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "features",
+  "modules": [
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  }
+ },
+ "ms-od-21": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "adr",
+  "modules": [
+   "adr"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.2
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.2
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-22": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "adr",
+  "modules": [
+   "adr"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.1111
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.2
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.25
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   }
+  }
+ },
+ "ms-od-23": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "adr",
+  "modules": [
+   "adr"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.1429
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.1429
+   }
+  }
+ },
+ "ms-od-24": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "adr",
+  "modules": [
+   "adr"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-25": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "adr",
+  "modules": [
+   "adr"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  }
+ },
+ "ms-od-26": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "multi-module",
+  "modules": [
+   "manual",
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.2
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.2
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-27": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "manual",
+  "modules": [
+   "manual"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-28": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "multi-module",
+  "modules": [
+   "manual",
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-29": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "multi-module",
+  "modules": [
+   "manual",
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-30": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "multi-module",
+  "modules": [
+   "knowledge",
+   "architecture"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0.1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-31": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "knowledge",
+  "modules": [
+   "knowledge"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  }
+ },
+ "ms-od-32": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "backlog",
+  "modules": [
+   "backlog"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-33": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "backlog",
+  "modules": [
+   "backlog"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-34": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "multi-module",
+  "modules": [
+   "chats",
+   "features"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.25
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-35": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "chats",
+  "modules": [
+   "chats"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-36": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "chats",
+  "modules": [
+   "chats"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-37": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "multi-module",
+  "modules": [
+   "architecture",
+   "adr"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.2
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.1429
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.2
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.25
+   }
+  }
+ },
+ "ms-od-38": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "multi-module",
+  "modules": [
+   "features",
+   "manual"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 1
+   }
+  }
+ },
+ "ms-od-39": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "multi-module",
+  "modules": [
+   "architecture",
+   "adr"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.3333
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "C": {
+    "hit3": 1,
+    "mrr10": 1
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  }
+ },
+ "ms-od-40": {
+  "split": "test",
+  "project": "overdrive-bots",
+  "category": "multi-module",
+  "modules": [
+   "features",
+   "adr"
+  ],
+  "K0": {
+   "A": {
+    "hit3": 0,
+    "mrr10": 0.1
+   },
+   "B": {
+    "hit3": 0,
+    "mrr10": 0.2
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.125
+   },
+   "D": {
+    "hit3": 0,
+    "mrr10": 0.1
+   }
+  },
+  "K15": {
+   "A": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "B": {
+    "hit3": 1,
+    "mrr10": 0.5
+   },
+   "C": {
+    "hit3": 0,
+    "mrr10": 0.1667
+   },
+   "D": {
+    "hit3": 1,
+    "mrr10": 0.5
+   }
+  }
+ }
+}

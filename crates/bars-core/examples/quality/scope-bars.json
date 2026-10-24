@@ -1,5 +1,315 @@
 [
   {
+    "id": "mt-bars-01",
+    "split": "tune",
+    "category": "features",
+    "query": "Сколько секунд bars ждёт после последней правки документа, прежде чем пересчитать его векторы, и ждёт ли он, если документ найден проверкой при старте?",
+    "gold": [
+      {
+        "path": "docs/features/indexing/document-queue.md",
+        "heading": "Пауза",
+        "evidence": "Документы, найденные проверкой при старте, хуком, периодической проверкой или явной командой, паузы не ждут",
+        "reason": "Раздел называет умолчание паузы и случаи, когда пауза не применяется."
+      }
+    ]
+  },
+  {
+    "id": "mt-bars-02",
+    "split": "tune",
+    "category": "features",
+    "query": "Почему включён ли автозапуск bars, определяется по записи в реестре Windows, а не по параметру в файле настроек?",
+    "gold": [
+      {
+        "path": "docs/features/distribution/autostart.md",
+        "heading": "Где живёт состояние автозапуска",
+        "evidence": "второй источник правды в файле разошёлся бы с первым",
+        "reason": "Раздел объясняет, почему состояние автозапуска не хранится в settings.toml."
+      }
+    ]
+  },
+  {
+    "id": "mt-bars-03",
+    "split": "tune",
+    "category": "features",
+    "query": "Какой проект выберет bars для агента, если рабочая папка лежит внутри проекта, который сам вложен в другой зарегистрированный проект?",
+    "gold": [
+      {
+        "path": "docs/features/projects/projects.md",
+        "heading": "Вложенные проекты",
+        "evidence": "Для `cwd` действует ближайший зарегистрированный проект вверх по дереву",
+        "reason": "Раздел задаёт правило выбора проекта для вложенных."
+      }
+    ]
+  },
+  {
+    "id": "mt-bars-04",
+    "split": "tune",
+    "category": "features",
+    "query": "Нужно ли подтверждение пользователя на переиндексацию, если он поменял максимальный размер куска документа или папку документации?",
+    "gold": [
+      {
+        "path": "docs/features/indexing/updates.md",
+        "heading": "Изменение нарезки или корня документации",
+        "evidence": "Согласие пользователя не нужно: модель не менялась",
+        "reason": "Раздел отвечает, что смена нарезки не требует согласия."
+      }
+    ]
+  },
+  {
+    "id": "mt-bars-05",
+    "split": "tune",
+    "category": "features",
+    "query": "С какой оценки rerank результат в окне bars подсвечивается зелёным?",
+    "gold": [
+      {
+        "path": "docs/features/window/palette.md",
+        "heading": "Цвета оценки и состояний",
+        "evidence": "зелёный — высокая числовая оценка rerank (от 0,75)",
+        "reason": "Раздел задаёт цвет по оценке rerank."
+      }
+    ]
+  },
+  {
+    "id": "mt-bars-06",
+    "split": "tune",
+    "category": "architecture",
+    "query": "Какая версия Visual Studio нужна на Windows, чтобы ONNX Runtime из крейта ort вообще линковался?",
+    "gold": [
+      {
+        "path": "docs/architecture/stack.md",
+        "heading": "Инструменты сборки bars",
+        "evidence": "MSVC из Visual Studio 2022 не старше 17.14 — более старые не линкуют ONNX Runtime из `ort`.",
+        "reason": "Раздел называет минимальный MSVC."
+      }
+    ]
+  },
+  {
+    "id": "mt-bars-07",
+    "split": "tune",
+    "category": "architecture",
+    "query": "Почему для окна bars выбрали Svelte, а не React?",
+    "gold": [
+      {
+        "path": "docs/architecture/components.md",
+        "heading": "Интерфейс окна bars",
+        "evidence": "React — тяжелее при той же пользе",
+        "reason": "Раздел называет причины выбора Svelte и отклонённые варианты."
+      }
+    ]
+  },
+  {
+    "id": "mt-bars-08",
+    "split": "tune",
+    "category": "knowledge",
+    "query": "Насколько замедлилась индексация после ограничения размера пачки встроенной модели и что это дало запросам поиска во время индексации?",
+    "gold": [
+      {
+        "path": "docs/knowledge/search-during-indexing.md",
+        "heading": "Меры и их эффект",
+        "evidence": "Индексация стала медленнее на 7%.",
+        "reason": "Раздел даёт цену меры: индексация медленнее на 7%."
+      }
+    ]
+  },
+  {
+    "id": "mt-bars-09",
+    "split": "tune",
+    "category": "knowledge",
+    "query": "Почему для репозитория bars не заведена непрерывная интеграция?",
+    "gold": [
+      {
+        "path": "docs/knowledge/build.md",
+        "heading": "Чего нет и что не проверено",
+        "evidence": "macOS-раннеры платные с множителем 10 (OQ-18)",
+        "reason": "Раздел записывает причину отсутствия CI."
+      }
+    ]
+  },
+  {
+    "id": "mt-bars-10",
+    "split": "tune",
+    "category": "knowledge",
+    "query": "Почему установщик Windows сделан на NSIS, а не на MSI?",
+    "gold": [
+      {
+        "path": "docs/knowledge/installer.md",
+        "heading": "NSIS или MSI",
+        "evidence": "ему не нужны права администратора",
+        "reason": "Раздел сравнивает форматы и обосновывает выбор NSIS."
+      }
+    ]
+  },
+  {
+    "id": "mt-bars-11",
+    "split": "tune",
+    "category": "manual",
+    "query": "Какой порог оценки используется по умолчанию в поиске bars без rerank и с rerank?",
+    "gold": [
+      {
+        "path": "docs/manual/how-it-works.md",
+        "heading": "Что такое порог в поиске bars",
+        "evidence": "Без rerank порог по умолчанию выключен (0), с rerank — 0,1 (10 %).",
+        "reason": "Раздел называет умолчания порога простыми словами."
+      }
+    ]
+  },
+  {
+    "id": "mt-bars-12",
+    "split": "tune",
+    "category": "manual",
+    "query": "Что означает код выхода 3 у команд bars-cli?",
+    "gold": [
+      {
+        "path": "docs/manual/terminal.md",
+        "heading": "Что значат коды выхода bars-cli",
+        "evidence": "проекту нужна переиндексация после смены модели",
+        "reason": "Таблица кодов выхода."
+      }
+    ]
+  },
+  {
+    "id": "mt-bars-13",
+    "split": "tune",
+    "category": "adr",
+    "query": "Почему журнал сессий не стали раскладывать по папкам с датой дня?",
+    "gold": [
+      {
+        "path": "docs/adr/0001-docs-by-features.md",
+        "heading": "Отклонённые варианты раскладки docs",
+        "evidence": "две сессии за день писали бы в один файл",
+        "reason": "Раздел перечисляет отклонённые раскладки и причины."
+      }
+    ]
+  },
+  {
+    "id": "mt-bars-14",
+    "split": "tune",
+    "category": "backlog",
+    "query": "Почему короткий вызов bars_read может ждать конца долгого поиска с rerank, если агент прислал их одним сообщением?",
+    "gold": [
+      {
+        "path": "docs/backlog/issues.md",
+        "heading": "ISS-69. bars-mcp выполняет вызовы агента по очереди",
+        "evidence": "одно соединение с воркером за мьютексом на всё время вызова",
+        "reason": "Запись бага описывает причину очереди вызовов."
+      }
+    ]
+  },
+  {
+    "id": "mt-bars-15",
+    "split": "tune",
+    "category": "chats",
+    "query": "Почему в сессии замера CPU-поиска пришлось взять отдельный снимок bars вместо живого индекса overdrive?",
+    "gold": [
+      {
+        "path": "docs/chats/2026-10-23-search-cpu/handoff.md",
+        "heading": "Сложности",
+        "evidence": "Live seed OVERDRIVE сменился на Qwen3-4B",
+        "reason": "Итог сессии описывает несовместимость живого индекса."
+      }
+    ]
+  },
+  {
+    "id": "mt-bars-16",
+    "split": "tune",
+    "category": "multi-module",
+    "query": "Где лежит журнал работы bars и сколько старых файлов он хранит?",
+    "gold": [
+      {
+        "path": "docs/manual/activity.md",
+        "heading": "Журнал работы bars: вкладка «Логи»",
+        "evidence": "плюс три старых файла, каждый до 2 МБ",
+        "reason": "Руководство называет файл и число архивов."
+      },
+      {
+        "path": "docs/features/window/logs.md",
+        "heading": "Хранение журнала воркера",
+        "evidence": "три архива `worker.1.jsonl`…`worker.3.jsonl`, каждый до 2 МиБ",
+        "reason": "ТЗ фиксирует хранение и ротацию."
+      }
+    ]
+  },
+  {
+    "id": "mt-bars-17",
+    "split": "tune",
+    "category": "multi-module",
+    "query": "В каких файлах Codex bars прописывает хук и что нужно сделать в самом Codex, чтобы этот хук заработал?",
+    "gold": [
+      {
+        "path": "docs/manual/agents.md",
+        "heading": "Какие файлы клиента меняет bars",
+        "evidence": "| Codex | `~/.codex/config.toml` | `~/.codex/hooks.json` | `~/.agents/skills/` |",
+        "reason": "Руководство: таблица файлов клиентов."
+      },
+      {
+        "path": "docs/features/clients/clients.md",
+        "heading": "Codex",
+        "evidence": "пока пользователь не одобрит его командой `/hooks` в Codex",
+        "reason": "ТЗ: одобрение хука в Codex."
+      }
+    ]
+  },
+  {
+    "id": "mt-bars-18",
+    "split": "tune",
+    "category": "multi-module",
+    "query": "Что bars делает с очень коротким разделом документа, чтобы он не остался бесполезным куском?",
+    "gold": [
+      {
+        "path": "docs/manual/how-it-works.md",
+        "heading": "Как bars режет документ на куски",
+        "evidence": "маленький раздел, короче примерно 250 символов, склеивается со следующим",
+        "reason": "Руководство простыми словами."
+      },
+      {
+        "path": "docs/features/indexing/chunking.md",
+        "heading": "Маленький раздел: склейка",
+        "evidence": "склеивается со следующим разделом документа (Т-23, OQ-20)",
+        "reason": "ТЗ: точные правила склейки."
+      }
+    ]
+  },
+  {
+    "id": "mt-bars-19",
+    "split": "tune",
+    "category": "multi-module",
+    "query": "Удалось ли при исследовании скорости rerank проверить ускорение на ноутбуке автора?",
+    "gold": [
+      {
+        "path": "docs/chats/2026-10-23-rerank-speed/handoff.md",
+        "heading": "Сложности",
+        "evidence": "Ноутбук недоступен по ответу автора",
+        "reason": "Итог сессии: ноутбук недоступен."
+      },
+      {
+        "path": "docs/knowledge/rerank-speed.md",
+        "heading": "Что известно о ноутбуке",
+        "evidence": "доступа к ноутбуку нет. Его ускорение не подтверждено",
+        "reason": "Исследование: ускорение на ноутбуке не подтверждено."
+      }
+    ]
+  },
+  {
+    "id": "mt-bars-20",
+    "split": "tune",
+    "category": "multi-module",
+    "query": "Через сколько времени после пачки изменений bars перепроверяет весь проект на случай, если Windows потеряла часть событий?",
+    "gold": [
+      {
+        "path": "docs/manual/how-it-works.md",
+        "heading": "Как bars узнаёт, что документы изменились",
+        "evidence": "**через 5 секунд** после пачки изменений — ещё раз перепроверяет весь проект",
+        "reason": "Руководство называет срок."
+      },
+      {
+        "path": "docs/features/indexing/updates.md",
+        "heading": "Слежение, которое теряет события",
+        "evidence": "после каждой пачки событий проект проверяется целиком через 5 секунд",
+        "reason": "ТЗ: защита от потери событий."
+      }
+    ]
+  },
+  {
     "id": "ms-bars-01",
     "split": "test",
     "category": "features",
@@ -72,7 +382,7 @@
   {
     "id": "ms-bars-06",
     "split": "test",
-    "category": "multi-module",
+    "category": "features",
     "query": "Если встроенная модель в этот момент подгружается в память, сразу ли MCP-инструмент вернёт агенту ошибку?",
     "gold": [
       {
@@ -80,12 +390,6 @@
         "heading": "Как bars-mcp отвечает и ошибается",
         "evidence": "На `model_loading` прокси сам повторяет вызов раз в секунду до 60 с (`MODEL_WAIT`)",
         "reason": "Описано автоматическое ожидание загрузки модели прокси до 60 секунд."
-      },
-      {
-        "path": "docs/backlog/issues.md",
-        "heading": "ISS-18: Во время индексации поиск недоступен («модель загружается») и приложение занимает около 5 ГБ памяти",
-        "evidence": "а MCP на `model_loading` повторяет вызов до 60 с",
-        "reason": "Запись об ошибке фиксирует, что MCP сам повторяет вызов до 60 секунд."
       }
     ]
   },
@@ -215,8 +519,8 @@
       },
       {
         "path": "docs/features/knowledge-base/audits.md",
-        "heading": "Реализация",
-        "evidence": "область — текущая документация без `chats/` и `adr/`; выпускается вместе с игнорированием находки",
+        "heading": "Состав",
+        "evidence": "числовые правила над текстами индекса без `chats/` и `adr/`",
         "reason": "Пункт реализации аудита противоречий называет область по умолчанию и исключения."
       }
     ]
@@ -466,15 +770,9 @@
   {
     "id": "ms-bars-32",
     "split": "test",
-    "category": "multi-module",
+    "category": "features",
     "query": "Почему вкладки рабочей области в Windows нельзя было перетаскивать мышью?",
     "gold": [
-      {
-        "path": "docs/backlog/issues.md",
-        "heading": "ISS-21: Вкладки рабочей области не переносятся мышью",
-        "evidence": "окно Tauri создавалось с включённым обработчиком перетаскивания файлов, который на Windows перехватывает HTML5 drag-and-drop WebView2",
-        "reason": "Запись об ошибке называет установленную причину."
-      },
       {
         "path": "docs/features/window/workspace-plan.md",
         "heading": "Устройство переноса",
@@ -608,15 +906,9 @@
   {
     "id": "ms-bars-40",
     "split": "test",
-    "category": "multi-module",
+    "category": "knowledge",
     "query": "Нашли ли причину того, что bars занимает несколько гигабайт памяти во время индексации, и принята ли мера ограничения?",
     "gold": [
-      {
-        "path": "docs/backlog/issues.md",
-        "heading": "ISS-18: Во время индексации поиск недоступен («модель загружается») и приложение занимает около 5 ГБ памяти",
-        "evidence": "Принятая мера ограничения памяти пока отсутствует;",
-        "reason": "Запись об ошибке фиксирует статус: расход воспроизведён, меры нет."
-      },
       {
         "path": "docs/knowledge/memory.md",
         "heading": "ISS-18: установленная сборка и allocator, 20-10-2026",

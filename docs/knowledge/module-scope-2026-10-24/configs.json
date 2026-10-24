@@ -1,0 +1,114 @@
+{
+ "tune/bars/all": {
+  "dataset": "1ec3e8fb999ed982e27988ee1ab5d9ea0674d12004eefd0bfa3b4dcdbcff85d3",
+  "manifest": "0f3400b116acd5fbbedcbf4ac9b4abc951c6ece79944c40f5f666b9040922dbb",
+  "binary": "a00d5d0c10ffddb0901d0aaca9b1eda07bb0255ae1d0059f62ff63598660bb56",
+  "scope": "all",
+  "split": "tune"
+ },
+ "tune/bars/gold": {
+  "dataset": "1ec3e8fb999ed982e27988ee1ab5d9ea0674d12004eefd0bfa3b4dcdbcff85d3",
+  "manifest": "0f3400b116acd5fbbedcbf4ac9b4abc951c6ece79944c40f5f666b9040922dbb",
+  "binary": "a00d5d0c10ffddb0901d0aaca9b1eda07bb0255ae1d0059f62ff63598660bb56",
+  "scope": "gold",
+  "split": "tune"
+ },
+ "tune/bars/first": {
+  "dataset": "1ec3e8fb999ed982e27988ee1ab5d9ea0674d12004eefd0bfa3b4dcdbcff85d3",
+  "manifest": "0f3400b116acd5fbbedcbf4ac9b4abc951c6ece79944c40f5f666b9040922dbb",
+  "binary": "a00d5d0c10ffddb0901d0aaca9b1eda07bb0255ae1d0059f62ff63598660bb56",
+  "scope": "first",
+  "split": "tune"
+ },
+ "tune/bars/nochats": {
+  "dataset": "1ec3e8fb999ed982e27988ee1ab5d9ea0674d12004eefd0bfa3b4dcdbcff85d3",
+  "manifest": "0f3400b116acd5fbbedcbf4ac9b4abc951c6ece79944c40f5f666b9040922dbb",
+  "binary": "a00d5d0c10ffddb0901d0aaca9b1eda07bb0255ae1d0059f62ff63598660bb56",
+  "scope": "nochats",
+  "split": "tune"
+ },
+ "tune/od/all": {
+  "dataset": "9a3e35995783e1fbd411ca975ded370252c35b3b211dacafd01c3af69a77268f",
+  "manifest": "3ba092190e62fc53f396fdf656137af40765620df6accad8cb5888e1985ccf61",
+  "binary": "a00d5d0c10ffddb0901d0aaca9b1eda07bb0255ae1d0059f62ff63598660bb56",
+  "scope": "all",
+  "split": "tune"
+ },
+ "tune/od/gold": {
+  "dataset": "9a3e35995783e1fbd411ca975ded370252c35b3b211dacafd01c3af69a77268f",
+  "manifest": "3ba092190e62fc53f396fdf656137af40765620df6accad8cb5888e1985ccf61",
+  "binary": "a00d5d0c10ffddb0901d0aaca9b1eda07bb0255ae1d0059f62ff63598660bb56",
+  "scope": "gold",
+  "split": "tune"
+ },
+ "tune/od/first": {
+  "dataset": "9a3e35995783e1fbd411ca975ded370252c35b3b211dacafd01c3af69a77268f",
+  "manifest": "3ba092190e62fc53f396fdf656137af40765620df6accad8cb5888e1985ccf61",
+  "binary": "a00d5d0c10ffddb0901d0aaca9b1eda07bb0255ae1d0059f62ff63598660bb56",
+  "scope": "first",
+  "split": "tune"
+ },
+ "tune/od/nochats": {
+  "dataset": "9a3e35995783e1fbd411ca975ded370252c35b3b211dacafd01c3af69a77268f",
+  "manifest": "3ba092190e62fc53f396fdf656137af40765620df6accad8cb5888e1985ccf61",
+  "binary": "a00d5d0c10ffddb0901d0aaca9b1eda07bb0255ae1d0059f62ff63598660bb56",
+  "scope": "nochats",
+  "split": "tune"
+ },
+ "test/bars/all": {
+  "dataset": "1ec3e8fb999ed982e27988ee1ab5d9ea0674d12004eefd0bfa3b4dcdbcff85d3",
+  "manifest": "0f3400b116acd5fbbedcbf4ac9b4abc951c6ece79944c40f5f666b9040922dbb",
+  "binary": "a00d5d0c10ffddb0901d0aaca9b1eda07bb0255ae1d0059f62ff63598660bb56",
+  "scope": "all",
+  "split": "test"
+ },
+ "test/bars/gold": {
+  "dataset": "1ec3e8fb999ed982e27988ee1ab5d9ea0674d12004eefd0bfa3b4dcdbcff85d3",
+  "manifest": "0f3400b116acd5fbbedcbf4ac9b4abc951c6ece79944c40f5f666b9040922dbb",
+  "binary": "a00d5d0c10ffddb0901d0aaca9b1eda07bb0255ae1d0059f62ff63598660bb56",
+  "scope": "gold",
+  "split": "test"
+ },
+ "test/bars/first": {
+  "dataset": "1ec3e8fb999ed982e27988ee1ab5d9ea0674d12004eefd0bfa3b4dcdbcff85d3",
+  "manifest": "0f3400b116acd5fbbedcbf4ac9b4abc951c6ece79944c40f5f666b9040922dbb",
+  "binary": "a00d5d0c10ffddb0901d0aaca9b1eda07bb0255ae1d0059f62ff63598660bb56",
+  "scope": "first",
+  "split": "test"
+ },
+ "test/bars/nochats": {
+  "dataset": "1ec3e8fb999ed982e27988ee1ab5d9ea0674d12004eefd0bfa3b4dcdbcff85d3",
+  "manifest": "0f3400b116acd5fbbedcbf4ac9b4abc951c6ece79944c40f5f666b9040922dbb",
+  "binary": "a00d5d0c10ffddb0901d0aaca9b1eda07bb0255ae1d0059f62ff63598660bb56",
+  "scope": "nochats",
+  "split": "test"
+ },
+ "test/od/all": {
+  "dataset": "9a3e35995783e1fbd411ca975ded370252c35b3b211dacafd01c3af69a77268f",
+  "manifest": "3ba092190e62fc53f396fdf656137af40765620df6accad8cb5888e1985ccf61",
+  "binary": "a00d5d0c10ffddb0901d0aaca9b1eda07bb0255ae1d0059f62ff63598660bb56",
+  "scope": "all",
+  "split": "test"
+ },
+ "test/od/gold": {
+  "dataset": "9a3e35995783e1fbd411ca975ded370252c35b3b211dacafd01c3af69a77268f",
+  "manifest": "3ba092190e62fc53f396fdf656137af40765620df6accad8cb5888e1985ccf61",
+  "binary": "a00d5d0c10ffddb0901d0aaca9b1eda07bb0255ae1d0059f62ff63598660bb56",
+  "scope": "gold",
+  "split": "test"
+ },
+ "test/od/first": {
+  "dataset": "9a3e35995783e1fbd411ca975ded370252c35b3b211dacafd01c3af69a77268f",
+  "manifest": "3ba092190e62fc53f396fdf656137af40765620df6accad8cb5888e1985ccf61",
+  "binary": "a00d5d0c10ffddb0901d0aaca9b1eda07bb0255ae1d0059f62ff63598660bb56",
+  "scope": "first",
+  "split": "test"
+ },
+ "test/od/nochats": {
+  "dataset": "9a3e35995783e1fbd411ca975ded370252c35b3b211dacafd01c3af69a77268f",
+  "manifest": "3ba092190e62fc53f396fdf656137af40765620df6accad8cb5888e1985ccf61",
+  "binary": "a00d5d0c10ffddb0901d0aaca9b1eda07bb0255ae1d0059f62ff63598660bb56",
+  "scope": "nochats",
+  "split": "test"
+ }
+}

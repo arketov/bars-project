@@ -1,0 +1,2 @@
+- Находка: `validate` отверг наборы 23-10-2026 — закрытые ISS-18 и ISS-21 исчезли из `backlog/issues.md`, опора в `audits.md` переписана; эталоны исправлены до первого прогона ([бенч](../../knowledge/module-scope-bench.md)).
+- Сборка `bench_quality` заняла 16 минут (llama.cpp); готовый `C:/bt/bars/release/examples/bench_quality.exe` остался, пригодится 6.3.1.
