@@ -10,7 +10,9 @@
 //! почти не зависят. Временный каталог удаляется в конце. Индексы пользователя не открываются.
 
 use bars_core::graph::similarity::{KnnOptions, VectorNode, build_knn_observed};
-use bars_core::graph::{BuildLayer, GraphRequest, Operation, build_index_graph_layer, query, store};
+use bars_core::graph::{
+    BuildLayer, GraphRequest, Operation, build_index_graph_layer, query, store,
+};
 use bars_core::indexing::chunking::ChunkingParams;
 use bars_core::indexing::indexer::{IndexSettings, UpdateOutcome, update_index};
 use bars_core::models::{EmbedError, Embedder, ModelFingerprint};
@@ -93,8 +95,10 @@ fn tagged(text: &str, tag: &str) -> String {
             }
         })
         .collect::<Vec<_>>()
-        .join("
-")
+        .join(
+            "
+",
+        )
 }
 
 fn table_bytes(index: &Index, table: &str) -> (i64, i64) {
@@ -151,7 +155,11 @@ fn measure(source: &Path, target_chunks: usize, work: &Path) -> Value {
             let target = docs.join(relative);
             std::fs::create_dir_all(target.parent().unwrap()).unwrap();
             let text = std::fs::read_to_string(file).unwrap();
-            let text = if pass == 0 { text } else { tagged(&text, &format!("кк{pass}")) };
+            let text = if pass == 0 {
+                text
+            } else {
+                tagged(&text, &format!("кк{pass}"))
+            };
             std::fs::write(target, text).unwrap();
         }
         let UpdateOutcome::Updated(report) =
@@ -219,14 +227,19 @@ fn measure(source: &Path, target_chunks: usize, work: &Path) -> Value {
     // Загрузка так, как её делает воркер на каждый запрос: открыть только на чтение и разобрать весь набор.
     let path = index_path(&project);
     let ro = Index::open_read_only(&path).unwrap();
-    let sizes: Value = ["graph_sources", "graph_nodes", "graph_edges", "graph_evidence"]
-        .iter()
-        .map(|t| {
-            let (count, bytes) = table_bytes(&ro, t);
-            (t.to_string(), json!({"rows": count, "json_bytes": bytes}))
-        })
-        .collect::<serde_json::Map<_, _>>()
-        .into();
+    let sizes: Value = [
+        "graph_sources",
+        "graph_nodes",
+        "graph_edges",
+        "graph_evidence",
+    ]
+    .iter()
+    .map(|t| {
+        let (count, bytes) = table_bytes(&ro, t);
+        (t.to_string(), json!({"rows": count, "json_bytes": bytes}))
+    })
+    .collect::<serde_json::Map<_, _>>()
+    .into();
     let mut open_runs = Vec::new();
     let mut load_runs = Vec::new();
     for _ in 0..LOAD_RUNS {
@@ -249,10 +262,18 @@ fn measure(source: &Path, target_chunks: usize, work: &Path) -> Value {
         sql_runs.push(t.elapsed());
         let t = Instant::now();
         let parsed = (
-            s.iter().map(|x| serde_json::from_str::<bars_graph::SourceDocument>(x).unwrap()).count(),
-            n.iter().map(|x| serde_json::from_str::<bars_graph::Node>(x).unwrap()).count(),
-            e.iter().map(|x| serde_json::from_str::<bars_graph::Edge>(x).unwrap()).count(),
-            v.iter().map(|x| serde_json::from_str::<bars_graph::Evidence>(x).unwrap()).count(),
+            s.iter()
+                .map(|x| serde_json::from_str::<bars_graph::SourceDocument>(x).unwrap())
+                .fold(0, |count, _| count + 1),
+            n.iter()
+                .map(|x| serde_json::from_str::<bars_graph::Node>(x).unwrap())
+                .fold(0, |count, _| count + 1),
+            e.iter()
+                .map(|x| serde_json::from_str::<bars_graph::Edge>(x).unwrap())
+                .fold(0, |count, _| count + 1),
+            v.iter()
+                .map(|x| serde_json::from_str::<bars_graph::Evidence>(x).unwrap())
+                .fold(0, |count, _| count + 1),
         );
         parse_runs.push(t.elapsed());
         std::hint::black_box(parsed);
@@ -323,7 +344,10 @@ fn main() {
     let work = std::env::temp_dir().join("bars-graph-load");
     assert!(!work.exists(), "{} уже существует", work.display());
     std::fs::create_dir_all(&work).unwrap();
-    let results: Vec<Value> = targets.iter().map(|t| measure(&source, *t, &work)).collect();
+    let results: Vec<Value> = targets
+        .iter()
+        .map(|t| measure(&source, *t, &work))
+        .collect();
     let report = json!({
         "date": "2026-10-24", "method": "natural corpus files, then tagged copies; hashed-word vectors; release build",
         "load_runs": LOAD_RUNS, "sizes": results,

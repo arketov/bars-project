@@ -8,6 +8,7 @@
   import TextResults from './TextResults.svelte';
   import GraphSearchBundle from './GraphSearchBundle.svelte';
   import { touchedModules } from "./tree";
+  import { SEARCH_MODE, fallbackText } from "./graph/query";
 
   const project = $derived(app.project);
   const blocked = $derived(project?.state === "reindex_required");
@@ -71,7 +72,7 @@
         <div class="search-options">
         <label class="retrieval-mode">
           <span>Поиск</span>
-          <span class="mode-control"><select aria-label="Режим поиска" disabled={blocked || app.searching} bind:value={app.retrievalMode}><option value="hybrid">Обычный</option><option value="mix">Со связями</option><option value="graph">Отношения и пути</option></select><Icon name="chevron-down" size={12} /></span>
+          <span class="mode-control"><select aria-label="Режим поиска" disabled={blocked || app.searching} bind:value={app.retrievalMode}>{#each Object.entries(SEARCH_MODE) as [mode, name] (mode)}<option value={mode}>{name}</option>{/each}</select><Icon name="chevron-down" size={12} /></span>
         </label>
         <div class="count" title="Сколько результатов вернуть. По умолчанию — из настроек">
           Результатов
@@ -129,7 +130,9 @@
           <SearchError error={app.searchError} />
         {:else if results}
           {#if app.graphSearch}
-            <div class="graph-search-info" role="status">Запрошен {app.graphSearch.requested_mode}; применён {app.graphSearch.applied_mode}.{#if app.graphSearch.fallback_reason}<p>Причина: {app.graphSearch.fallback_reason}</p>{/if}</div>
+            {#if app.graphSearch.requested_mode !== app.graphSearch.applied_mode}
+              <div class="graph-search-info" role="status">Запрошен режим «{SEARCH_MODE[app.graphSearch.requested_mode]}», применён «{SEARCH_MODE[app.graphSearch.applied_mode]}».{#if app.graphSearch.fallback_reason}<p>Причина: {fallbackText(app.graphSearch.fallback_reason)}</p>{/if}</div>
+            {/if}
             {#each [app.graphSearch.related,app.graphSearch.graph_results].filter(Boolean) as graph}
               {#if graph}<GraphSearchBundle {graph} related={graph === app.graphSearch.related} />{/if}
             {/each}

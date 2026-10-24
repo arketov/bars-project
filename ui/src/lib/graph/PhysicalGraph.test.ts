@@ -280,6 +280,44 @@ it("вид запроса: после поиска граф перестраив
   app.searching = false;
 });
 
+it("вход в прежний экран «Анализ связей» лежит в меню «Ещё» с пометкой «прежний экран» (ISS-55)", async () => {
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  expect(target.querySelector('[aria-label="Анализ связей: пути, влияние, контекст"]')).toBeNull();
+  expect(target.querySelector('[role="menu"]')).toBeNull();
+  target.querySelector<HTMLButtonElement>('[aria-label="Ещё"]')!.click();
+  await settle();
+  const item = target.querySelector<HTMLButtonElement>('[role="menuitem"]')!;
+  expect(item.textContent).toContain("Анализ связей");
+  expect(item.textContent).toContain("прежний экран");
+  app.graphAnalysis = false;
+  item.click();
+  await settle();
+  expect(app.graphAnalysis).toBe(true);
+  expect(target.querySelector('[role="menu"]')).toBeNull();
+  app.graphAnalysis = false;
+});
+
+it("«Открыть связи и основания» из выдачи включает вид запроса, даже если из него вышли в общий вид (ISS-55)", async () => {
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  finishSearch("r1", "как работает граф", [3, 7]);
+  await settle();
+  button("Общий вид")!.click();
+  await settle();
+  expect(target.querySelector(".qbar")).toBeNull();
+
+  app.graphShowQuery = true;
+  await settle();
+  expect(target.querySelector(".qbar")).not.toBeNull();
+  expect(app.graphShowQuery).toBe(false);
+  expect(app.graphAnalysis).toBe(false);
+  app.results = null;
+  app.displayed = null;
+  await settle();
+  app.searching = false;
+});
+
 it("глубина окружения 0 оставляет запрос и результаты, пока идёт новый поиск прежний вид остаётся", async () => {
   component = mount(PhysicalGraph, { target });
   await settle();

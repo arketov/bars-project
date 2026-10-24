@@ -111,7 +111,7 @@
     <button
         class="ghost"
         onclick={() => {
-            app.graphPreview = graph;
+            app.graphShowQuery = true;
             app.view = "graph";
         }}>Открыть связи и основания в графе ↗</button
     >

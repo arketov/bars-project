@@ -14,7 +14,7 @@
   import { graphStatus, loadPhysical, toggleGraphBuild } from "./physical-api";
   import { FORCE_RANGE, defaultSettings, loadSettings, saveSettings, type PanelKind, type PanelSettings } from "./settings";
   import { INITIAL_LIMITS, MAX_LIMITS, PORTION, SliceStore, emptySlice, type Limits, type Slice } from "./slice";
-  import { DEFAULT_DEPTH, MAX_DEPTH, QUERY_BUDGET, QUERY_MAX, buildQuerySlice, shapeQuery, type QueryInfo, type QueryInput, type RetrievalKind, type ScoreKind } from "./query";
+  import { DEFAULT_DEPTH, MAX_DEPTH, QUERY_BUDGET, QUERY_MAX, SEARCH_MODE, buildQuerySlice, fallbackText, shapeQuery, type QueryInfo, type QueryInput, type RetrievalKind, type ScoreKind } from "./query";
 
   const reduced = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -70,7 +70,7 @@
   let findText = $state("");
   let legendOpen = $state(false);
   /** Открытое меню: настройки раскладки. */
-  let popover = $state<"settings" | null>(null);
+  let popover = $state<"settings" | "more" | null>(null);
   let notice = $state("");
   let rendererError = $state("");
   let revision = $state(0);
@@ -224,7 +224,6 @@
   const queryOffered = $derived(!query && !!queryOff && queryInput()?.id === queryOff);
   const queryMissing = $derived(query ? query.results.filter((r) => r.node === null).length : 0);
   const SCORE_TEXT: Record<ScoreKind, string> = { rerank: "оценка rerank", cosine: "оценка — косинус (rerank не выполнялся)", none: "оценки нет" };
-  const SEARCH_MODE: Record<RetrievalKind, string> = { hybrid: "Обычный", mix: "Со связями", graph: "Отношения и пути" };
 
   function applyForces() {
     if (!layout) return;
@@ -957,6 +956,17 @@
     if (!mounted) return;
     untrack(syncQuery);
   });
+  // «Открыть связи и основания» из выдачи: вид запроса включается снова, даже если из него вышли в общий вид.
+  $effect(() => {
+    if (!app.graphShowQuery || mini || !loaded || loadError) return;
+    untrack(() => {
+      app.graphShowQuery = false;
+      const input = queryInput();
+      if (!input) return;
+      queryKey = input.id;
+      if (!query || queryOff) enterQuery();
+    });
+  });
   $effect(() => {
     void selected;
     void findText;
@@ -1024,7 +1034,7 @@
         <button aria-label="Легенда и шкала силы" aria-expanded={legendOpen} title="Легенда и шкала силы" onclick={() => (legendOpen = !legendOpen)}><Icon name="info" size={14} width={1.8} /></button>
         <select aria-label="Слой для обновления" title="Слой для обновления всего проекта" bind:value={buildLayer} disabled={building}><option value="all">Все слои</option><option value="structure">Структура</option><option value="semantic">Отношения</option><option value="similarity">Близость</option></select>
         <button aria-label={building ? "Остановить построение графа" : "Обновить граф"} title={building ? "Остановить построение графа" : "Обновить граф: перестроить выбранный слой"} onclick={() => void rebuildGraph()}><Icon name="refresh" size={14} width={1.8} /></button>
-        <button aria-label="Анализ связей: пути, влияние, контекст" title="Анализ связей: пути, влияние, контекст" onclick={() => (app.graphAnalysis = true)}><Icon name="layout" size={14} width={1.8} /></button>
+        <button class="more-menu" aria-label="Ещё" title="Ещё" aria-haspopup="menu" aria-expanded={popover === "more"} onclick={() => (popover = popover === "more" ? null : "more")}>⋯</button>
       </div>
     </div>
     {#if query}
@@ -1041,7 +1051,7 @@
       </div>
       {#if query.fallback || queryMissing || !query.results.length}
         <div class="banner" role="status">
-          {#if query.fallback}<span><b>Режим поиска изменён:</b> {query.fallback}</span>{/if}
+          {#if query.fallback}<span><b>Режим поиска изменён:</b> {fallbackText(query.fallback)}</span>{/if}
           {#if queryMissing}<span><b>Граф неполон:</b> {queryMissing} результатов без узла в графе — они в списке инспектора запроса.</span>{/if}
           {#if !query.results.length}<span><b>Ничего не найдено:</b> порог {query.minScore.toFixed(2)}.</span>{/if}
         </div>
@@ -1141,7 +1151,7 @@
           <button aria-label="Настройки раскладки" aria-expanded={popover === "settings"} title="Настройки раскладки" onclick={() => (popover = popover === "settings" ? null : "settings")}><Icon name="gear" size={13} width={1.8} /></button>
           <button aria-label="Открыть полный граф" title="Открыть полный граф вкладкой" onclick={() => openFull()}><Icon name="arrow-right" size={13} width={1.8} /></button>
         </div>
-        {#if popover}
+        {#if popover === "settings"}
           <section class="pop" aria-label="Настройки раскладки">{@render forcesForm()}</section>
         {/if}
         {#if selectedNode}
@@ -1157,6 +1167,11 @@
       {/if}
       {#if popover === "settings" && !mini}
         <section class="pop full" aria-label="Настройки раскладки">{@render forcesForm()}</section>
+      {/if}
+      {#if popover === "more" && !mini}
+        <div class="pop menu" role="menu" aria-label="Ещё" tabindex="-1" onkeydown={(e) => { if (e.key === "Escape") { e.stopPropagation(); popover = null; } }}>
+          <button role="menuitem" onclick={() => { popover = null; app.graphAnalysis = true; }}>Анализ связей<small>прежний экран: пути, влияние, контекст</small></button>
+        </div>
       {/if}
       {#if legendOpen && !mini}
         <section class="legend" aria-label="Легенда графа">
@@ -1377,6 +1392,11 @@
   .legend h4, .inspector h4 { margin: 8px 0 3px; font-size: 10.5px; letter-spacing: 0.02em; color: var(--muted); font-weight: 600; }
   .pop { position: absolute; top: 30px; right: 4px; width: min(230px, calc(100% - 8px)); padding: 6px 8px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--panel); box-shadow: var(--shadow); z-index: 5; }
   .pop.full { top: 8px; right: 8px; width: 260px; }
+  .pop.menu { top: 34px; width: 230px; padding: 4px; display: flex; flex-direction: column; }
+  .pop.menu button { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 5px 8px; border: 0; border-radius: 5px; background: transparent; color: var(--text); font-size: 12px; text-align: left; }
+  .pop.menu button:hover { background: var(--accent-soft); color: var(--accent-text); }
+  .pop.menu small { font-size: 10.5px; color: var(--muted); }
+  .tools .more-menu { font-size: 14px; line-height: 1; }
   .pop h4 { margin: 0 0 4px; font-size: 10.5px; color: var(--muted); font-weight: 600; }
   .opt { display: flex; align-items: center; gap: 6px; margin: 3px 0; font-size: 11px; }
   .opt span { flex: 1; min-width: 0; }

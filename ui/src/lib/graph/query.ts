@@ -16,6 +16,14 @@ export const MAX_DEPTH = 2;
 export type ScoreKind = "rerank" | "cosine" | "none";
 export type RetrievalKind = "hybrid" | "mix" | "graph";
 
+/** Подписи режимов поиска: те же в выборе режима, в выдаче и в виде запроса (ISS-45). */
+export const SEARCH_MODE: Record<RetrievalKind, string> = { hybrid: "Обычный", mix: "Со связями", graph: "Отношения и пути" };
+
+/** Причина отката режима словами окна: идентификатор параметра протокола заменён названием настройки (ISS-45). */
+export function fallbackText(reason: string): string {
+  return reason.replace("include_related=false", "«Добавлять связанные источники» выключено");
+}
+
 /** Что известно о завершённом поиске: хватает для вида и не зависит от остального состояния окна. */
 export interface QueryInput {
   /** Идентификатор поиска: ключ возврата в общий вид и защита от позднего ответа. */
