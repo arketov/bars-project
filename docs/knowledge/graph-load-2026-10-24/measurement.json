@@ -1,0 +1,443 @@
+{
+  "date": "2026-10-24",
+  "method": "natural corpus files, then tagged copies; hashed-word vectors; release build",
+  "load_runs": 15,
+  "sizes": [
+    {
+      "target_chunks": 1250,
+      "chunks": 1301,
+      "documents": 240,
+      "files": 240,
+      "full_copies": 0,
+      "graph": {
+        "sources": 240,
+        "nodes": 3254,
+        "edges": 9015,
+        "evidence": 8220,
+        "similar_edges": 2162
+      },
+      "table_sizes": {
+        "graph_sources": {
+          "rows": 240,
+          "json_bytes": 1931785
+        },
+        "graph_nodes": {
+          "rows": 3254,
+          "json_bytes": 2120299
+        },
+        "graph_edges": {
+          "rows": 9015,
+          "json_bytes": 3635955
+        },
+        "graph_evidence": {
+          "rows": 8220,
+          "json_bytes": 6675719
+        }
+      },
+      "build_ms": {
+        "all_fresh": {
+          "ms": 10245.0,
+          "state": "Partial"
+        },
+        "structure": {
+          "ms": 27086.6,
+          "state": "Partial"
+        },
+        "semantic": {
+          "ms": 21444.9,
+          "state": "Partial"
+        },
+        "similarity": {
+          "ms": 28214.0,
+          "state": "Partial"
+        }
+      },
+      "knn_capped_1m": {
+        "ms": 4241.2,
+        "rows_done": 769,
+        "rows_total": 1301,
+        "stop_reason": "Some(ComparisonLimit)"
+      },
+      "load": {
+        "open_read_only": {
+          "runs": 15,
+          "min_ms": 0.5,
+          "median_ms": 0.5,
+          "p95_ms": 1.0,
+          "max_ms": 3.9
+        },
+        "store_load": {
+          "runs": 15,
+          "min_ms": 803.1,
+          "median_ms": 1232.0,
+          "p95_ms": 1938.6,
+          "max_ms": 2206.3
+        },
+        "sql_read": {
+          "runs": 15,
+          "min_ms": 81.6,
+          "median_ms": 128.3,
+          "p95_ms": 197.1,
+          "max_ms": 210.1
+        },
+        "json_parse": {
+          "runs": 15,
+          "min_ms": 31.0,
+          "median_ms": 47.7,
+          "p95_ms": 67.2,
+          "max_ms": 82.0
+        },
+        "validate": {
+          "runs": 15,
+          "min_ms": 375.6,
+          "median_ms": 578.0,
+          "p95_ms": 1874.5,
+          "max_ms": 1913.1
+        }
+      },
+      "query_after_load": {
+        "graph_default": {
+          "runs": 15,
+          "min_ms": 103.7,
+          "median_ms": 142.3,
+          "p95_ms": 510.8,
+          "max_ms": 1127.0
+        },
+        "explore_whole_scope": {
+          "runs": 15,
+          "min_ms": 175.9,
+          "median_ms": 236.7,
+          "p95_ms": 384.7,
+          "max_ms": 409.3
+        }
+      }
+    },
+    {
+      "target_chunks": 2500,
+      "chunks": 2557,
+      "documents": 680,
+      "files": 680,
+      "full_copies": 0,
+      "graph": {
+        "sources": 680,
+        "nodes": 6684,
+        "edges": 14140,
+        "evidence": 15077,
+        "similar_edges": 983
+      },
+      "table_sizes": {
+        "graph_sources": {
+          "rows": 680,
+          "json_bytes": 3537396
+        },
+        "graph_nodes": {
+          "rows": 6684,
+          "json_bytes": 4232952
+        },
+        "graph_edges": {
+          "rows": 14140,
+          "json_bytes": 5490748
+        },
+        "graph_evidence": {
+          "rows": 15077,
+          "json_bytes": 12126870
+        }
+      },
+      "build_ms": {
+        "all_fresh": {
+          "ms": 36191.4,
+          "state": "Partial"
+        },
+        "structure": {
+          "ms": 37997.6,
+          "state": "Partial"
+        },
+        "semantic": {
+          "ms": 45415.1,
+          "state": "Partial"
+        },
+        "similarity": {
+          "ms": 46994.2,
+          "state": "Partial"
+        }
+      },
+      "knn_capped_1m": {
+        "ms": 2999.3,
+        "rows_done": 391,
+        "rows_total": 2557,
+        "stop_reason": "Some(ComparisonLimit)"
+      },
+      "load": {
+        "open_read_only": {
+          "runs": 15,
+          "min_ms": 0.3,
+          "median_ms": 0.5,
+          "p95_ms": 0.8,
+          "max_ms": 0.8
+        },
+        "store_load": {
+          "runs": 15,
+          "min_ms": 909.1,
+          "median_ms": 1317.8,
+          "p95_ms": 1593.2,
+          "max_ms": 1621.8
+        },
+        "sql_read": {
+          "runs": 15,
+          "min_ms": 216.7,
+          "median_ms": 319.1,
+          "p95_ms": 379.1,
+          "max_ms": 409.1
+        },
+        "json_parse": {
+          "runs": 15,
+          "min_ms": 68.8,
+          "median_ms": 98.6,
+          "p95_ms": 251.8,
+          "max_ms": 554.2
+        },
+        "validate": {
+          "runs": 15,
+          "min_ms": 654.8,
+          "median_ms": 815.3,
+          "p95_ms": 1028.9,
+          "max_ms": 1206.1
+        }
+      },
+      "query_after_load": {
+        "graph_default": {
+          "runs": 15,
+          "min_ms": 130.9,
+          "median_ms": 251.9,
+          "p95_ms": 407.7,
+          "max_ms": 450.0
+        },
+        "explore_whole_scope": {
+          "runs": 15,
+          "min_ms": 104.9,
+          "median_ms": 167.0,
+          "p95_ms": 231.7,
+          "max_ms": 259.8
+        }
+      }
+    },
+    {
+      "target_chunks": 5000,
+      "chunks": 5146,
+      "documents": 1000,
+      "files": 1000,
+      "full_copies": 1,
+      "graph": {
+        "sources": 1000,
+        "nodes": 12642,
+        "edges": 27041,
+        "evidence": 28886,
+        "similar_edges": 613
+      },
+      "table_sizes": {
+        "graph_sources": {
+          "rows": 1000,
+          "json_bytes": 7256351
+        },
+        "graph_nodes": {
+          "rows": 12642,
+          "json_bytes": 8084158
+        },
+        "graph_edges": {
+          "rows": 27041,
+          "json_bytes": 10391983
+        },
+        "graph_evidence": {
+          "rows": 28886,
+          "json_bytes": 23596878
+        }
+      },
+      "build_ms": {
+        "all_fresh": {
+          "ms": 75056.8,
+          "state": "Partial"
+        },
+        "structure": {
+          "ms": 136943.5,
+          "state": "Partial"
+        },
+        "semantic": {
+          "ms": 123561.6,
+          "state": "Partial"
+        },
+        "similarity": {
+          "ms": 107013.1,
+          "state": "Partial"
+        }
+      },
+      "knn_capped_1m": {
+        "ms": 3116.3,
+        "rows_done": 194,
+        "rows_total": 5146,
+        "stop_reason": "Some(ComparisonLimit)"
+      },
+      "load": {
+        "open_read_only": {
+          "runs": 15,
+          "min_ms": 0.4,
+          "median_ms": 0.5,
+          "p95_ms": 0.7,
+          "max_ms": 0.9
+        },
+        "store_load": {
+          "runs": 15,
+          "min_ms": 2330.1,
+          "median_ms": 3243.3,
+          "p95_ms": 3595.3,
+          "max_ms": 4261.3
+        },
+        "sql_read": {
+          "runs": 15,
+          "min_ms": 320.2,
+          "median_ms": 486.2,
+          "p95_ms": 688.4,
+          "max_ms": 688.4
+        },
+        "json_parse": {
+          "runs": 15,
+          "min_ms": 98.7,
+          "median_ms": 162.2,
+          "p95_ms": 208.0,
+          "max_ms": 318.9
+        },
+        "validate": {
+          "runs": 15,
+          "min_ms": 793.6,
+          "median_ms": 1007.3,
+          "p95_ms": 1337.4,
+          "max_ms": 1763.8
+        }
+      },
+      "query_after_load": {
+        "graph_default": {
+          "runs": 15,
+          "min_ms": 208.0,
+          "median_ms": 296.0,
+          "p95_ms": 530.6,
+          "max_ms": 570.0
+        },
+        "explore_whole_scope": {
+          "runs": 15,
+          "min_ms": 218.4,
+          "median_ms": 311.0,
+          "p95_ms": 358.8,
+          "max_ms": 396.9
+        }
+      }
+    },
+    {
+      "target_chunks": 10000,
+      "chunks": 10190,
+      "documents": 1960,
+      "files": 1960,
+      "full_copies": 2,
+      "graph": {
+        "sources": 1960,
+        "nodes": 24890,
+        "edges": 51785,
+        "evidence": 56736,
+        "similar_edges": 346
+      },
+      "table_sizes": {
+        "graph_sources": {
+          "rows": 1960,
+          "json_bytes": 14412402
+        },
+        "graph_nodes": {
+          "rows": 24890,
+          "json_bytes": 16074491
+        },
+        "graph_edges": {
+          "rows": 51785,
+          "json_bytes": 19829364
+        },
+        "graph_evidence": {
+          "rows": 56736,
+          "json_bytes": 46583102
+        }
+      },
+      "build_ms": {
+        "all_fresh": {
+          "ms": 202960.7,
+          "state": "Partial"
+        },
+        "structure": {
+          "ms": 279040.2,
+          "state": "Partial"
+        },
+        "semantic": {
+          "ms": 370052.2,
+          "state": "Partial"
+        },
+        "similarity": {
+          "ms": 252487.8,
+          "state": "Partial"
+        }
+      },
+      "knn_capped_1m": {
+        "ms": 1706.1,
+        "rows_done": 98,
+        "rows_total": 10190,
+        "stop_reason": "Some(ComparisonLimit)"
+      },
+      "load": {
+        "open_read_only": {
+          "runs": 15,
+          "min_ms": 0.3,
+          "median_ms": 0.5,
+          "p95_ms": 0.8,
+          "max_ms": 0.9
+        },
+        "store_load": {
+          "runs": 15,
+          "min_ms": 4113.3,
+          "median_ms": 4898.5,
+          "p95_ms": 5284.8,
+          "max_ms": 6258.0
+        },
+        "sql_read": {
+          "runs": 15,
+          "min_ms": 437.8,
+          "median_ms": 1128.9,
+          "p95_ms": 1501.0,
+          "max_ms": 2257.1
+        },
+        "json_parse": {
+          "runs": 15,
+          "min_ms": 153.2,
+          "median_ms": 424.0,
+          "p95_ms": 637.0,
+          "max_ms": 848.4
+        },
+        "validate": {
+          "runs": 15,
+          "min_ms": 2231.4,
+          "median_ms": 3589.7,
+          "p95_ms": 5178.7,
+          "max_ms": 5260.8
+        }
+      },
+      "query_after_load": {
+        "graph_default": {
+          "runs": 15,
+          "min_ms": 684.4,
+          "median_ms": 794.2,
+          "p95_ms": 948.3,
+          "max_ms": 1021.8
+        },
+        "explore_whole_scope": {
+          "runs": 15,
+          "min_ms": 590.0,
+          "median_ms": 857.3,
+          "p95_ms": 1065.1,
+          "max_ms": 1109.8
+        }
+      }
+    }
+  ]
+}
