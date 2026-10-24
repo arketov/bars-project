@@ -15,7 +15,7 @@ function Get-ProfileSnapshot {
         '.claude.json.bars-backup', '.claude/settings.json.bars-backup'
     ) | ForEach-Object { Join-Path $env:USERPROFILE $_ }
     foreach ($base in @('.agents/skills', '.claude/skills')) {
-        foreach ($skill in @('bars-docs', 'bars-session-log')) {
+        foreach ($skill in @('bars-docs', 'bars-session-log', 'bars-end')) {
             $path = Join-Path $env:USERPROFILE "$base/$skill"
             if (Test-Path -LiteralPath $path) {
                 $files += Get-ChildItem -LiteralPath $path -File -Recurse | ForEach-Object FullName

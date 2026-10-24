@@ -28,8 +28,8 @@ function exited(child) {
   return new Promise((resolve,reject) => { child.once('exit',resolve); child.once('error',reject); });
 }
 const profileFiles = ['.codex/config.toml','.codex/hooks.json','.claude.json','.claude/settings.json',
-  '.agents/skills/bars-docs/SKILL.md','.agents/skills/bars-session-log/SKILL.md',
-  '.claude/skills/bars-docs/SKILL.md','.claude/skills/bars-session-log/SKILL.md'];
+  '.agents/skills/bars-docs/SKILL.md','.agents/skills/bars-session-log/SKILL.md','.agents/skills/bars-end/SKILL.md',
+  '.claude/skills/bars-docs/SKILL.md','.claude/skills/bars-session-log/SKILL.md','.claude/skills/bars-end/SKILL.md'];
 function profile() {
   return Object.fromEntries(profileFiles.flatMap(name => [name,name+'.bars-backup']).map(name => {
     const file = path.join(process.env.USERPROFILE ?? process.env.HOME,name);

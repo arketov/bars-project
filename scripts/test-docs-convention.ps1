@@ -10,8 +10,8 @@ $cargoExe16 = if ($cargo16) { $cargo16.Source } else { Join-Path $env:USERPROFIL
 function ProfileSnapshot16 {
     $snapshot16 = [ordered]@{}
     foreach ($relative16 in @('.claude.json','.claude/settings.json','.codex/config.toml','.codex/hooks.json',
-        '.claude/skills/bars-docs/SKILL.md','.claude/skills/bars-session-log/SKILL.md',
-        '.agents/skills/bars-docs/SKILL.md','.agents/skills/bars-session-log/SKILL.md')) {
+        '.claude/skills/bars-docs/SKILL.md','.claude/skills/bars-session-log/SKILL.md','.claude/skills/bars-end/SKILL.md',
+        '.agents/skills/bars-docs/SKILL.md','.agents/skills/bars-session-log/SKILL.md','.agents/skills/bars-end/SKILL.md')) {
         foreach ($suffix16 in @('', '.bars-backup')) {
             $file16 = Join-Path $env:USERPROFILE ($relative16 + $suffix16)
             $snapshot16[$relative16 + $suffix16] = if (Test-Path -LiteralPath $file16 -PathType Leaf) {

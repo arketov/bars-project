@@ -43,7 +43,7 @@ fn claude_install_writes_mcp_hook_and_skills_keeping_foreign_entries() {
 
     let done = install(&env, InstallClient::ClaudeCode).unwrap();
     assert!(!done.needs_hook_approval);
-    assert_eq!(done.changed_files.len(), 4, "{:?}", done.changed_files);
+    assert_eq!(done.changed_files.len(), 5, "{:?}", done.changed_files);
 
     let value = read_json(&claude_json);
     assert_eq!(value["mcpServers"]["serena"]["command"], "serena");
@@ -63,7 +63,7 @@ fn claude_install_writes_mcp_hook_and_skills_keeping_foreign_entries() {
         "\"/opt/bars/bars-cli\" hook session-start"
     );
 
-    for name in ["bars-docs", "bars-session-log"] {
+    for name in ["bars-docs", "bars-session-log", "bars-end"] {
         let skill = home
             .path()
             .join(".claude/skills")
@@ -122,7 +122,7 @@ fn claude_uninstall_removes_only_bars() {
     install(&env, InstallClient::ClaudeCode).unwrap();
 
     let removed = uninstall(&env, InstallClient::ClaudeCode).unwrap();
-    assert_eq!(removed.len(), 4);
+    assert_eq!(removed.len(), 5);
     assert_eq!(
         read_json(&claude_json),
         json!({"mcpServers": {"serena": {"command": "serena"}}})
@@ -133,6 +133,7 @@ fn claude_uninstall_removes_only_bars() {
     );
     assert!(home.path().join(".claude/skills/custom/SKILL.md").exists());
     assert!(!home.path().join(".claude/skills/bars-docs").exists());
+    assert!(!home.path().join(".claude/skills/bars-end").exists());
     assert!(
         uninstall(&env, InstallClient::ClaudeCode)
             .unwrap()

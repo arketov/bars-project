@@ -79,14 +79,14 @@ Codex не запускает новый или изменённый хук, п�
 
 ## Skills в клиентах
 
-Установка кладёт два skills: `bars-docs` и `bars-session-log` ([delivery.md](../docs-convention/delivery.md)); тексты зашиты в bars.
+Установка кладёт три skills: `bars-docs`, `bars-session-log` и `bars-end` ([delivery.md](../docs-convention/delivery.md)); тексты зашиты в bars.
 
 | Клиент | Папка skills |
 |---|---|
 | Claude Code | `~/.claude/skills/<имя>/SKILL.md` |
 | Codex | `~/.agents/skills/<имя>/SKILL.md` |
 
-Codex читает пользовательские skills из `~/.agents/skills`, а не из `~/.codex/skills` ([документация Codex](https://learn.chatgpt.com/docs/build-skills), обращение 15-10-2026). Удаление убирает только папки `bars-docs` и `bars-session-log`. Если `~/.claude/skills` или `~/.agents/skills` — ссылка на чужую папку, skills попадут туда (OQ-54).
+Codex читает пользовательские skills из `~/.agents/skills`, а не из `~/.codex/skills` ([документация Codex](https://learn.chatgpt.com/docs/build-skills), обращение 15-10-2026). Удаление убирает только папки `bars-docs`, `bars-session-log` и `bars-end`. Если `~/.claude/skills` или `~/.agents/skills` — ссылка на чужую папку, skills попадут туда (OQ-54).
 
 ## Формат записей bars
 

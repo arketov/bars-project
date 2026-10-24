@@ -201,7 +201,7 @@ fn partial_write_report_survives_late_error_and_retry_finishes() {
     assert!(done.needs_hook_approval);
     fs::remove_dir(&blocked).unwrap();
     let done = updated(&env, InstallClient::Codex);
-    assert_eq!(done.changed_files.len(), 2);
+    assert_eq!(done.changed_files.len(), 3);
     assert!(!done.needs_hook_approval);
 }
 

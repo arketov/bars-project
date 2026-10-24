@@ -98,8 +98,8 @@ function Wait-Until([scriptblock]$predicate) {
 }
 function Get-Snapshot {
     $files = @('.claude.json','.claude/settings.json','.codex/config.toml','.codex/hooks.json',
-        '.claude/skills/bars-docs/SKILL.md','.claude/skills/bars-session-log/SKILL.md',
-        '.agents/skills/bars-docs/SKILL.md','.agents/skills/bars-session-log/SKILL.md')
+        '.claude/skills/bars-docs/SKILL.md','.claude/skills/bars-session-log/SKILL.md','.claude/skills/bars-end/SKILL.md',
+        '.agents/skills/bars-docs/SKILL.md','.agents/skills/bars-session-log/SKILL.md','.agents/skills/bars-end/SKILL.md')
     $snapshot = [ordered]@{}
     foreach ($file in $files) {
         foreach ($suffix in @('', '.bars-backup')) {
@@ -130,14 +130,14 @@ try {
     Write-Fixture (Join-Path $fixtureHome '.codex/config.toml') "# foreign comment`n[mcp_servers.other]`ncommand = 'other'`n[mcp_servers.bars]`ncommand = 'old/bars-mcp'`n"
     Write-Fixture (Join-Path $fixtureHome '.codex/hooks.json') $oldHook
     foreach ($base in @('.agents/skills','.claude/skills')) {
-        foreach ($skill in @('bars-docs','bars-session-log')) {
+        foreach ($skill in @('bars-docs','bars-session-log','bars-end')) {
             Write-Fixture (Join-Path $fixtureHome "$base/$skill/SKILL.md") 'old skill text'
         }
     }
     Write-Fixture (Join-Path $fixtureHome '.agents/skills/foreign/SKILL.md') 'foreign'
     $active = Start-Session '01-update'
     Wait-Until {
-        foreach ($skill in @('bars-docs','bars-session-log')) {
+        foreach ($skill in @('bars-docs','bars-session-log','bars-end')) {
             $expected = [IO.File]::ReadAllText((Join-Path $repo "crates/bars-worker/assets/skills/$skill/SKILL.md"))
             foreach ($base in @('.agents/skills','.claude/skills')) {
                 $path = Join-Path $fixtureHome "$base/$skill/SKILL.md"
@@ -146,7 +146,7 @@ try {
         }
         return $true
     }
-    foreach ($skill in @('bars-docs','bars-session-log')) {
+    foreach ($skill in @('bars-docs','bars-session-log','bars-end')) {
         $expected = [IO.File]::ReadAllText((Join-Path $repo "crates/bars-worker/assets/skills/$skill/SKILL.md"))
         foreach ($base in @('.agents/skills','.claude/skills')) {
             Assert-That ([IO.File]::ReadAllText((Join-Path $fixtureHome "$base/$skill/SKILL.md")) -ceq $expected) "Skill mismatch: $base/$skill"

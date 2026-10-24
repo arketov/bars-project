@@ -26,7 +26,7 @@ pub use refresh::{RefreshResult, refresh};
 pub(crate) use refresh::{lock, report, report_gates};
 
 /// Имена skills bars: их ставит и убирает установка (Т-28).
-const SKILLS: [(&str, &str); 2] = [
+const SKILLS: [(&str, &str); 3] = [
     (
         "bars-docs",
         include_str!("../../assets/skills/bars-docs/SKILL.md"),
@@ -34,6 +34,10 @@ const SKILLS: [(&str, &str); 2] = [
     (
         "bars-session-log",
         include_str!("../../assets/skills/bars-session-log/SKILL.md"),
+    ),
+    (
+        "bars-end",
+        include_str!("../../assets/skills/bars-end/SKILL.md"),
     ),
 ];
 

@@ -51,7 +51,7 @@ Saving tokens:
 
 ## handoff.md — at the end of a session
 
-Write it at the end, and on large milestones of a long session. Not longer than a screen. Sections:
+Write it at the end, and on large milestones of a long session. When the user ends the session with `/bars-end`, that skill also moves the session's knowledge into the documentation and then writes the handoff. Not longer than a screen. Sections:
 
 - **Done** — what is ready and where it lies: links to the main resulting documents, other changed documents by name, code files and commits in backticks.
 - **Not done** — what is left of the task.
