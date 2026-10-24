@@ -1,0 +1,80 @@
+[
+ {
+  "task": "T01",
+  "case": "holdout-S2-conditional",
+  "tool": "bars_relations",
+  "query": "Когда ключ окружения заменяет ключ из хранилища?"
+ },
+ {
+  "task": "T02",
+  "case": "dev-S4-negative",
+  "tool": "bars_relations",
+  "query": "Может ли агент MCP дать согласие на смену модели?"
+ },
+ {
+  "task": "T03",
+  "case": "holdout-S4-positive",
+  "tool": "bars_relations",
+  "query": "Требуется ли ключ для локального адреса модели?"
+ },
+ {
+  "task": "T04",
+  "case": "dev-S3-positive",
+  "tool": "bars_context",
+  "query": "Собери основания перехода Qwen на GGUF"
+ },
+ {
+  "task": "T05",
+  "case": "holdout-S3-conditional",
+  "tool": "bars_context",
+  "query": "Что доступно до одобрения хука Codex?"
+ },
+ {
+  "task": "T06",
+  "case": "dev-S5-negative",
+  "tool": "bars_context",
+  "query": "Был ли выбран отдельный llama-server для встроенного Qwen?"
+ },
+ {
+  "task": "T07",
+  "case": "dev-S6-positive",
+  "tool": "bars_explore (topics)",
+  "query": "Какие ограничения моделей и индексации документированы?"
+ },
+ {
+  "task": "T08",
+  "case": "holdout-S8-positive",
+  "tool": "bars_explore (connectivity)",
+  "query": "Какие ссылки проекта не разрешаются в выбранном снимке?"
+ },
+ {
+  "task": "T09",
+  "case": "dev-S8-negative",
+  "tool": "bars_explore (coverage)",
+  "query": "Можно ли считать отсутствие извлечённой проверки доказанным отсутствием тестов?"
+ },
+ {
+  "task": "T10",
+  "case": "dev-S1-positive",
+  "tool": "bars_impact (root: features/indexing/chunking.md)",
+  "query": "Какие описания затронет изменение нарезки чанков?"
+ },
+ {
+  "task": "T11",
+  "case": "holdout-S7-positive",
+  "tool": "bars_paths",
+  "query": "Как одобрение хука связано с регистрацией проекта и доступом MCP?"
+ },
+ {
+  "task": "T12",
+  "case": "audit-Z10-mix",
+  "tool": "bars_rag_search mode=mix",
+  "query": "Какие описания затронет изменение нарезки чанков?"
+ },
+ {
+  "task": "T13",
+  "case": "dev-S8-positive",
+  "tool": "bars_explore (conflict_candidates)",
+  "query": "Есть ли противоречивые описания доступности поиска при перестройке?"
+ }
+]

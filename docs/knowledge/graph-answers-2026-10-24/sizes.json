@@ -1,0 +1,816 @@
+[
+ {
+  "id": "dev-S1-positive",
+  "scenario": "S1",
+  "operation": "impact",
+  "items": 0,
+  "J": {
+   "chars": 1972,
+   "bytes": 2081
+  },
+  "A": {
+   "chars": 61,
+   "bytes": 61
+  },
+  "B": {
+   "chars": 336,
+   "bytes": 336
+  },
+  "C": {
+   "chars": 223,
+   "bytes": 223
+  }
+ },
+ {
+  "id": "dev-S1-negative",
+  "scenario": "S1",
+  "operation": "impact",
+  "items": 0,
+  "J": {
+   "chars": 1971,
+   "bytes": 2080
+  },
+  "A": {
+   "chars": 61,
+   "bytes": 61
+  },
+  "B": {
+   "chars": 336,
+   "bytes": 336
+  },
+  "C": {
+   "chars": 223,
+   "bytes": 223
+  }
+ },
+ {
+  "id": "holdout-S1-positive",
+  "scenario": "S1",
+  "operation": "impact",
+  "items": 0,
+  "J": {
+   "chars": 1971,
+   "bytes": 2080
+  },
+  "A": {
+   "chars": 61,
+   "bytes": 61
+  },
+  "B": {
+   "chars": 336,
+   "bytes": 336
+  },
+  "C": {
+   "chars": 223,
+   "bytes": 223
+  }
+ },
+ {
+  "id": "holdout-S1-conditional",
+  "scenario": "S1",
+  "operation": "impact",
+  "items": 0,
+  "J": {
+   "chars": 1971,
+   "bytes": 2080
+  },
+  "A": {
+   "chars": 61,
+   "bytes": 61
+  },
+  "B": {
+   "chars": 336,
+   "bytes": 336
+  },
+  "C": {
+   "chars": 223,
+   "bytes": 223
+  }
+ },
+ {
+  "id": "dev-S2-positive",
+  "scenario": "S2",
+  "operation": "paths",
+  "items": 0,
+  "J": {
+   "chars": 1897,
+   "bytes": 2006
+  },
+  "A": {
+   "chars": 60,
+   "bytes": 60
+  },
+  "B": {
+   "chars": 300,
+   "bytes": 300
+  },
+  "C": {
+   "chars": 222,
+   "bytes": 222
+  }
+ },
+ {
+  "id": "dev-S2-negative",
+  "scenario": "S2",
+  "operation": "paths",
+  "items": 0,
+  "J": {
+   "chars": 1893,
+   "bytes": 2002
+  },
+  "A": {
+   "chars": 60,
+   "bytes": 60
+  },
+  "B": {
+   "chars": 300,
+   "bytes": 300
+  },
+  "C": {
+   "chars": 222,
+   "bytes": 222
+  }
+ },
+ {
+  "id": "holdout-S2-positive",
+  "scenario": "S2",
+  "operation": "paths",
+  "items": 0,
+  "J": {
+   "chars": 1906,
+   "bytes": 2026
+  },
+  "A": {
+   "chars": 60,
+   "bytes": 60
+  },
+  "B": {
+   "chars": 300,
+   "bytes": 300
+  },
+  "C": {
+   "chars": 222,
+   "bytes": 222
+  }
+ },
+ {
+  "id": "holdout-S2-conditional",
+  "scenario": "S2",
+  "operation": "relations",
+  "items": 9,
+  "J": {
+   "chars": 26481,
+   "bytes": 27713
+  },
+  "A": {
+   "chars": 1761,
+   "bytes": 2645
+  },
+  "B": {
+   "chars": 1883,
+   "bytes": 2767
+  },
+  "C": {
+   "chars": 2777,
+   "bytes": 3643
+  }
+ },
+ {
+  "id": "dev-S3-positive",
+  "scenario": "S3",
+  "operation": "context",
+  "items": 4,
+  "J": {
+   "chars": 22158,
+   "bytes": 27043
+  },
+  "A": {
+   "chars": 4587,
+   "bytes": 6980
+  },
+  "B": {
+   "chars": 4807,
+   "bytes": 7200
+  },
+  "C": {
+   "chars": 5128,
+   "bytes": 7487
+  }
+ },
+ {
+  "id": "dev-S3-negative",
+  "scenario": "S3",
+  "operation": "context",
+  "items": 4,
+  "J": {
+   "chars": 31464,
+   "bytes": 40801
+  },
+  "A": {
+   "chars": 5061,
+   "bytes": 7750
+  },
+  "B": {
+   "chars": 5281,
+   "bytes": 7970
+  },
+  "C": {
+   "chars": 5644,
+   "bytes": 8293
+  }
+ },
+ {
+  "id": "holdout-S3-positive",
+  "scenario": "S3",
+  "operation": "context",
+  "items": 5,
+  "J": {
+   "chars": 31139,
+   "bytes": 40095
+  },
+  "A": {
+   "chars": 5327,
+   "bytes": 8010
+  },
+  "B": {
+   "chars": 5535,
+   "bytes": 8218
+  },
+  "C": {
+   "chars": 5951,
+   "bytes": 8590
+  }
+ },
+ {
+  "id": "holdout-S3-conditional",
+  "scenario": "S3",
+  "operation": "context",
+  "items": 6,
+  "J": {
+   "chars": 28358,
+   "bytes": 34114
+  },
+  "A": {
+   "chars": 5984,
+   "bytes": 9087
+  },
+  "B": {
+   "chars": 6167,
+   "bytes": 9270
+  },
+  "C": {
+   "chars": 6648,
+   "bytes": 9703
+  }
+ },
+ {
+  "id": "dev-S4-positive",
+  "scenario": "S4",
+  "operation": "relations",
+  "items": 1,
+  "J": {
+   "chars": 4649,
+   "bytes": 4908
+  },
+  "A": {
+   "chars": 254,
+   "bytes": 360
+  },
+  "B": {
+   "chars": 376,
+   "bytes": 482
+  },
+  "C": {
+   "chars": 522,
+   "bytes": 626
+  }
+ },
+ {
+  "id": "dev-S4-negative",
+  "scenario": "S4",
+  "operation": "relations",
+  "items": 3,
+  "J": {
+   "chars": 10259,
+   "bytes": 10817
+  },
+  "A": {
+   "chars": 658,
+   "bytes": 939
+  },
+  "B": {
+   "chars": 780,
+   "bytes": 1061
+  },
+  "C": {
+   "chars": 1122,
+   "bytes": 1397
+  }
+ },
+ {
+  "id": "holdout-S4-positive",
+  "scenario": "S4",
+  "operation": "relations",
+  "items": 2,
+  "J": {
+   "chars": 7435,
+   "bytes": 7859
+  },
+  "A": {
+   "chars": 440,
+   "bytes": 617
+  },
+  "B": {
+   "chars": 562,
+   "bytes": 739
+  },
+  "C": {
+   "chars": 808,
+   "bytes": 981
+  }
+ },
+ {
+  "id": "holdout-S4-conditional",
+  "scenario": "S4",
+  "operation": "relations",
+  "items": 0,
+  "J": {
+   "chars": 1848,
+   "bytes": 1981
+  },
+  "A": {
+   "chars": 64,
+   "bytes": 64
+  },
+  "B": {
+   "chars": 246,
+   "bytes": 246
+  },
+  "C": {
+   "chars": 229,
+   "bytes": 229
+  }
+ },
+ {
+  "id": "dev-S5-positive",
+  "scenario": "S5",
+  "operation": "context",
+  "items": 3,
+  "J": {
+   "chars": 25576,
+   "bytes": 31684
+  },
+  "A": {
+   "chars": 3893,
+   "bytes": 5605
+  },
+  "B": {
+   "chars": 4127,
+   "bytes": 5839
+  },
+  "C": {
+   "chars": 4397,
+   "bytes": 6079
+  }
+ },
+ {
+  "id": "dev-S5-negative",
+  "scenario": "S5",
+  "operation": "context",
+  "items": 5,
+  "J": {
+   "chars": 27302,
+   "bytes": 33108
+  },
+  "A": {
+   "chars": 6282,
+   "bytes": 9629
+  },
+  "B": {
+   "chars": 6490,
+   "bytes": 9837
+  },
+  "C": {
+   "chars": 6922,
+   "bytes": 10223
+  }
+ },
+ {
+  "id": "holdout-S5-positive",
+  "scenario": "S5",
+  "operation": "context",
+  "items": 6,
+  "J": {
+   "chars": 34930,
+   "bytes": 44583
+  },
+  "A": {
+   "chars": 6837,
+   "bytes": 10477
+  },
+  "B": {
+   "chars": 7020,
+   "bytes": 10660
+  },
+  "C": {
+   "chars": 7543,
+   "bytes": 11129
+  }
+ },
+ {
+  "id": "holdout-S5-conditional",
+  "scenario": "S5",
+  "operation": "context",
+  "items": 5,
+  "J": {
+   "chars": 24506,
+   "bytes": 29930
+  },
+  "A": {
+   "chars": 5683,
+   "bytes": 8865
+  },
+  "B": {
+   "chars": 5891,
+   "bytes": 9073
+  },
+  "C": {
+   "chars": 6305,
+   "bytes": 9443
+  }
+ },
+ {
+  "id": "dev-S6-positive",
+  "scenario": "S6",
+  "operation": "explore",
+  "items": 9,
+  "J": {
+   "chars": 103606,
+   "bytes": 111021
+  },
+  "A": {
+   "chars": 2097,
+   "bytes": 2097
+  },
+  "B": {
+   "chars": 2280,
+   "bytes": 2280
+  },
+  "C": {
+   "chars": 3210,
+   "bytes": 3210
+  }
+ },
+ {
+  "id": "dev-S6-negative",
+  "scenario": "S6",
+  "operation": "explore",
+  "items": 9,
+  "J": {
+   "chars": 89866,
+   "bytes": 96203
+  },
+  "A": {
+   "chars": 1844,
+   "bytes": 1844
+  },
+  "B": {
+   "chars": 2027,
+   "bytes": 2027
+  },
+  "C": {
+   "chars": 2837,
+   "bytes": 2837
+  }
+ },
+ {
+  "id": "holdout-S6-positive",
+  "scenario": "S6",
+  "operation": "explore",
+  "items": 9,
+  "J": {
+   "chars": 115176,
+   "bytes": 123464
+  },
+  "A": {
+   "chars": 2332,
+   "bytes": 2332
+  },
+  "B": {
+   "chars": 2515,
+   "bytes": 2515
+  },
+  "C": {
+   "chars": 3481,
+   "bytes": 3481
+  }
+ },
+ {
+  "id": "holdout-S6-conditional",
+  "scenario": "S6",
+  "operation": "explore",
+  "items": 8,
+  "J": {
+   "chars": 46860,
+   "bytes": 50398
+  },
+  "A": {
+   "chars": 1046,
+   "bytes": 1046
+  },
+  "B": {
+   "chars": 1229,
+   "bytes": 1229
+  },
+  "C": {
+   "chars": 1789,
+   "bytes": 1789
+  }
+ },
+ {
+  "id": "dev-S7-positive",
+  "scenario": "S7",
+  "operation": "paths",
+  "items": 0,
+  "J": {
+   "chars": 1915,
+   "bytes": 2055
+  },
+  "A": {
+   "chars": 60,
+   "bytes": 60
+  },
+  "B": {
+   "chars": 300,
+   "bytes": 300
+  },
+  "C": {
+   "chars": 222,
+   "bytes": 222
+  }
+ },
+ {
+  "id": "dev-S7-negative",
+  "scenario": "S7",
+  "operation": "relations",
+  "items": 0,
+  "J": {
+   "chars": 1861,
+   "bytes": 2016
+  },
+  "A": {
+   "chars": 64,
+   "bytes": 64
+  },
+  "B": {
+   "chars": 246,
+   "bytes": 246
+  },
+  "C": {
+   "chars": 229,
+   "bytes": 229
+  }
+ },
+ {
+  "id": "holdout-S7-positive",
+  "scenario": "S7",
+  "operation": "paths",
+  "items": 0,
+  "J": {
+   "chars": 3847,
+   "bytes": 4052
+  },
+  "A": {
+   "chars": 132,
+   "bytes": 136
+  },
+  "B": {
+   "chars": 363,
+   "bytes": 367
+  },
+  "C": {
+   "chars": 243,
+   "bytes": 243
+  }
+ },
+ {
+  "id": "holdout-S7-conditional",
+  "scenario": "S7",
+  "operation": "relations",
+  "items": 0,
+  "J": {
+   "chars": 1872,
+   "bytes": 2038
+  },
+  "A": {
+   "chars": 64,
+   "bytes": 64
+  },
+  "B": {
+   "chars": 246,
+   "bytes": 246
+  },
+  "C": {
+   "chars": 229,
+   "bytes": 229
+  }
+ },
+ {
+  "id": "dev-S8-positive",
+  "scenario": "S8",
+  "operation": "explore",
+  "items": 0,
+  "J": {
+   "chars": 1817,
+   "bytes": 1926
+  },
+  "A": {
+   "chars": 62,
+   "bytes": 62
+  },
+  "B": {
+   "chars": 289,
+   "bytes": 289
+  },
+  "C": {
+   "chars": 225,
+   "bytes": 225
+  }
+ },
+ {
+  "id": "dev-S8-negative",
+  "scenario": "S8",
+  "operation": "explore",
+  "items": 40,
+  "J": {
+   "chars": 36074,
+   "bytes": 40806
+  },
+  "A": {
+   "chars": 10370,
+   "bytes": 15444
+  },
+  "B": {
+   "chars": 10492,
+   "bytes": 15566
+  },
+  "C": {
+   "chars": 13112,
+   "bytes": 18026
+  }
+ },
+ {
+  "id": "holdout-S8-positive",
+  "scenario": "S8",
+  "operation": "explore",
+  "items": 50,
+  "J": {
+   "chars": 52935,
+   "bytes": 56513
+  },
+  "A": {
+   "chars": 9971,
+   "bytes": 13054
+  },
+  "B": {
+   "chars": 10135,
+   "bytes": 13218
+  },
+  "C": {
+   "chars": 13689,
+   "bytes": 16572
+  }
+ },
+ {
+  "id": "holdout-S8-conditional",
+  "scenario": "S8",
+  "operation": "explore",
+  "items": 40,
+  "J": {
+   "chars": 36082,
+   "bytes": 40823
+  },
+  "A": {
+   "chars": 10370,
+   "bytes": 15444
+  },
+  "B": {
+   "chars": 10492,
+   "bytes": 15566
+  },
+  "C": {
+   "chars": 13112,
+   "bytes": 18026
+  }
+ },
+ {
+  "id": "dev-control-exact-1",
+  "scenario": "control",
+  "operation": "context",
+  "items": 3,
+  "J": {
+   "chars": 16824,
+   "bytes": 20273
+  },
+  "A": {
+   "chars": 2574,
+   "bytes": 3800
+  },
+  "B": {
+   "chars": 2806,
+   "bytes": 4032
+  },
+  "C": {
+   "chars": 3020,
+   "bytes": 4224
+  }
+ },
+ {
+  "id": "dev-control-exact-2",
+  "scenario": "control",
+  "operation": "context",
+  "items": 3,
+  "J": {
+   "chars": 15243,
+   "bytes": 18029
+  },
+  "A": {
+   "chars": 2779,
+   "bytes": 3930
+  },
+  "B": {
+   "chars": 3013,
+   "bytes": 4164
+  },
+  "C": {
+   "chars": 3283,
+   "bytes": 4404
+  }
+ },
+ {
+  "id": "holdout-control-exact-1",
+  "scenario": "control",
+  "operation": "context",
+  "items": 3,
+  "J": {
+   "chars": 16464,
+   "bytes": 19356
+  },
+  "A": {
+   "chars": 2767,
+   "bytes": 4187
+  },
+  "B": {
+   "chars": 3001,
+   "bytes": 4421
+  },
+  "C": {
+   "chars": 3229,
+   "bytes": 4625
+  }
+ },
+ {
+  "id": "holdout-control-exact-2",
+  "scenario": "control",
+  "operation": "context",
+  "items": 3,
+  "J": {
+   "chars": 19981,
+   "bytes": 23866
+  },
+  "A": {
+   "chars": 3547,
+   "bytes": 5523
+  },
+  "B": {
+   "chars": 3777,
+   "bytes": 5753
+  },
+  "C": {
+   "chars": 4033,
+   "bytes": 5981
+  }
+ },
+ {
+  "id": "audit-Z10-mix",
+  "scenario": "mix",
+  "operation": "search",
+  "items": 5,
+  "J": {
+   "chars": 70395,
+   "bytes": 87861
+  },
+  "A": {
+   "chars": 10353,
+   "bytes": 14596
+  },
+  "B": {
+   "chars": 10554,
+   "bytes": 14797
+  },
+  "C": {
+   "chars": 22427,
+   "bytes": 26670
+  }
+ }
+]

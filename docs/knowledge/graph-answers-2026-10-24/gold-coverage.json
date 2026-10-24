@@ -1,0 +1,214 @@
+[
+ {
+  "task": "T01",
+  "case": "holdout-S2-conditional",
+  "kind": "conditional",
+  "gold": [
+   {
+    "path": "architecture/secrets.md",
+    "line": 26,
+    "role": "constraint",
+    "found": false
+   }
+  ]
+ },
+ {
+  "task": "T02",
+  "case": "dev-S4-negative",
+  "kind": "negative",
+  "gold": [
+   {
+    "path": "features/window/reindex-consent.md",
+    "line": 13,
+    "role": "constraint",
+    "found": false
+   }
+  ]
+ },
+ {
+  "task": "T03",
+  "case": "holdout-S4-positive",
+  "kind": "positive",
+  "gold": [
+   {
+    "path": "features/models/external-models.md",
+    "line": 32,
+    "role": "constraint",
+    "found": false
+   }
+  ]
+ },
+ {
+  "task": "T04",
+  "case": "dev-S3-positive",
+  "kind": "positive",
+  "gold": [
+   {
+    "path": "adr/0002-qwen-gguf.md",
+    "line": 11,
+    "role": "decision",
+    "found": true
+   },
+   {
+    "path": "features/models/local-models.md",
+    "line": 29,
+    "role": "behavior",
+    "found": false
+   },
+   {
+    "path": "adr/0002-qwen-gguf.md",
+    "line": 25,
+    "role": "constraint",
+    "found": true
+   }
+  ]
+ },
+ {
+  "task": "T05",
+  "case": "holdout-S3-conditional",
+  "kind": "conditional",
+  "gold": [
+   {
+    "path": "features/clients/clients.md",
+    "line": 30,
+    "role": "behavior",
+    "found": false
+   },
+   {
+    "path": "features/clients/clients.md",
+    "line": 30,
+    "role": "constraint",
+    "found": false
+   }
+  ]
+ },
+ {
+  "task": "T06",
+  "case": "dev-S5-negative",
+  "kind": "negative",
+  "gold": [
+   {
+    "path": "adr/0002-qwen-gguf.md",
+    "line": 29,
+    "role": "decision",
+    "found": true
+   }
+  ]
+ },
+ {
+  "task": "T07",
+  "case": "dev-S6-positive",
+  "kind": "positive",
+  "gold": [
+   {
+    "path": "features/models/local-models.md",
+    "line": 49,
+    "role": "constraint",
+    "found": false
+   },
+   {
+    "path": "features/indexing/updates.md",
+    "line": 68,
+    "role": "behavior",
+    "found": false
+   },
+   {
+    "path": "features/search/hybrid-search.md",
+    "line": 29,
+    "role": "behavior",
+    "found": false
+   }
+  ]
+ },
+ {
+  "task": "T08",
+  "case": "holdout-S8-positive",
+  "kind": "positive",
+  "gold": []
+ },
+ {
+  "task": "T09",
+  "case": "dev-S8-negative",
+  "kind": "negative",
+  "gold": []
+ },
+ {
+  "task": "T10",
+  "case": "dev-S1-positive",
+  "kind": "positive",
+  "expectation": "Документированная зависимость индексатора и embeddings от нарезки; ссылки сами по себе не зависимости.",
+  "gold": [
+   {
+    "path": "features/indexing/updates.md",
+    "line": 66,
+    "role": "behavior",
+    "found": false
+   },
+   {
+    "path": "features/indexing/chunking.md",
+    "line": 69,
+    "role": "behavior",
+    "found": false
+   }
+  ]
+ },
+ {
+  "task": "T11",
+  "case": "holdout-S7-positive",
+  "kind": "positive",
+  "gold": [
+   {
+    "path": "features/clients/clients.md",
+    "line": 30,
+    "role": "behavior",
+    "found": false
+   },
+   {
+    "path": "features/projects/projects.md",
+    "line": 7,
+    "role": "requirement",
+    "found": false
+   }
+  ]
+ },
+ {
+  "task": "T12",
+  "case": "audit-Z10-mix",
+  "kind": "positive",
+  "expectation": "Документированная зависимость индексатора и embeddings от нарезки; ссылки сами по себе не зависимости.",
+  "gold": [
+   {
+    "path": "features/indexing/updates.md",
+    "line": 66,
+    "role": "behavior",
+    "found": true
+   },
+   {
+    "path": "features/indexing/chunking.md",
+    "line": 69,
+    "role": "behavior",
+    "found": false
+   }
+  ]
+ },
+ {
+  "task": "T13",
+  "case": "dev-S8-positive",
+  "kind": "positive",
+  "expectation": "Кандидат расхождения, требуется различить смену модели и полную перестройку прежней моделью.",
+  "gold": [
+   {
+    "path": "features/window/reindex-consent.md",
+    "line": 19,
+    "role": "behavior",
+    "found": false
+   },
+   {
+    "path": "features/indexing/updates.md",
+    "line": 70,
+    "role": "verification",
+    "found": false
+   }
+  ]
+ }
+]

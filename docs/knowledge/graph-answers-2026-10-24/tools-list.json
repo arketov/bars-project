@@ -1,0 +1,3715 @@
+{
+ "tools": [
+  {
+   "name": "bars_context",
+   "description": "Контекст query по ролям requirement/decision/behavior/architecture/constraint/verification. Первичные источники, общий byte/token budget, missing_roles. Без генерации ответа и скрытого обогащения.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+     "Format": {
+      "description": "Вид ответа инструмента.",
+      "oneOf": [
+       {
+        "description": "Текст с явными границами блоков (по умолчанию).",
+        "type": "string",
+        "const": "txt"
+       },
+       {
+        "description": "JSON ответа воркера одной строкой.",
+        "type": "string",
+        "const": "json"
+       }
+      ]
+     },
+     "ObjectRef": {
+      "type": "object",
+      "properties": {
+       "kind": {
+        "$ref": "#/$defs/Kind"
+       },
+       "id": {
+        "type": "string"
+       },
+       "revision": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "kind",
+       "id",
+       "revision"
+      ]
+     },
+     "Kind": {
+      "type": "string",
+      "enum": [
+       "document",
+       "section",
+       "chunk",
+       "entity",
+       "community"
+      ]
+     },
+     "Endpoint": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/ObjectRef"
+       },
+       {
+        "type": "object",
+        "properties": {
+         "label": {
+          "type": "string"
+         },
+         "kind": {
+          "anyOf": [
+           {
+            "$ref": "#/$defs/Kind"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "namespace": {
+          "type": [
+           "string",
+           "null"
+          ]
+         }
+        },
+        "required": [
+         "label"
+        ]
+       }
+      ]
+     },
+     "Budgets": {
+      "type": "object",
+      "properties": {
+       "max_depth": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_nodes": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_edges": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_fanout": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_paths": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "timeout_ms": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_bytes": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       }
+      },
+      "additionalProperties": false
+     },
+     "Predicate": {
+      "oneOf": [
+       {
+        "type": "string",
+        "enum": [
+         "contains",
+         "covers",
+         "next_chunk",
+         "links_to",
+         "mentions",
+         "depends_on",
+         "uses",
+         "implements",
+         "verifies",
+         "supersedes",
+         "similar_to",
+         "co_occurs",
+         "member_of"
+        ]
+       },
+       {
+        "description": "Legacy input filter; extraction emits DependsOn with kind=precondition.",
+        "type": "string",
+        "const": "requires"
+       }
+      ]
+     },
+     "Direction": {
+      "type": "string",
+      "enum": [
+       "incoming",
+       "outgoing",
+       "both"
+      ]
+     },
+     "Polarity": {
+      "type": "string",
+      "enum": [
+       "positive",
+       "negative"
+      ]
+     },
+     "View": {
+      "type": "string",
+      "enum": [
+       "documents",
+       "sections",
+       "chunks",
+       "entities",
+       "mixed"
+      ]
+     },
+     "PathKind": {
+      "type": "string",
+      "enum": [
+       "semantic",
+       "structural",
+       "mixed"
+      ]
+     },
+     "Analysis": {
+      "type": "string",
+      "enum": [
+       "topics",
+       "connectivity",
+       "coverage",
+       "conflict_candidates"
+      ]
+     },
+     "Grouping": {
+      "type": "string",
+      "enum": [
+       "communities",
+       "modules"
+      ]
+     },
+     "Role": {
+      "type": "string",
+      "enum": [
+       "requirement",
+       "decision",
+       "behavior",
+       "architecture",
+       "constraint",
+       "verification"
+      ]
+     },
+     "TaskProfile": {
+      "type": "string",
+      "enum": [
+       "implementation",
+       "investigation",
+       "decision"
+      ]
+     }
+    },
+    "type": "object",
+    "properties": {
+     "project": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "format": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Format"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "query": {
+      "description": "Вопрос на языке пользователя; обязателен для context и один из входов relations.",
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "entity_ref": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/ObjectRef"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "from": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Endpoint"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "to": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Endpoint"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "roots": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/ObjectRef"
+      },
+      "default": []
+     },
+     "modules": {
+      "description": "Область как у rag_search: существующие модули и/или файлы от docs-root.",
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "default": []
+     },
+     "files": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "default": []
+     },
+     "snapshot": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "cursor": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "budgets": {
+      "$ref": "#/$defs/Budgets",
+      "default": {
+       "max_depth": null,
+       "max_nodes": null,
+       "max_edges": null,
+       "max_fanout": null,
+       "max_paths": null,
+       "timeout_ms": null,
+       "max_bytes": null
+      }
+     },
+     "limit": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "predicates": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/Predicate"
+      },
+      "default": []
+     },
+     "direction": {
+      "$ref": "#/$defs/Direction",
+      "default": "both"
+     },
+     "polarity": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Polarity"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "qualifiers": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "string"
+      },
+      "default": {}
+     },
+     "view": {
+      "$ref": "#/$defs/View",
+      "default": "documents"
+     },
+     "local": {
+      "type": "boolean",
+      "default": false
+     },
+     "include_paths": {
+      "type": "boolean",
+      "default": false
+     },
+     "path_kind": {
+      "$ref": "#/$defs/PathKind",
+      "default": "semantic"
+     },
+     "max_hops": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "max_paths": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "topic": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "whole_scope": {
+      "type": "boolean",
+      "default": false
+     },
+     "analysis": {
+      "$ref": "#/$defs/Analysis",
+      "default": "topics"
+     },
+     "grouping": {
+      "$ref": "#/$defs/Grouping",
+      "default": "communities"
+     },
+     "roles": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/Role"
+      },
+      "default": []
+     },
+     "task_profile": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/TaskProfile"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "token_budget": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "tokenizer_id": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "change_description": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     }
+    },
+    "additionalProperties": false
+   }
+  },
+  {
+   "name": "bars_explore",
+   "description": "Обзор темы topic либо whole_scope=true: topics/connectivity/coverage/conflict_candidates. Структурные дефекты отдельно от кандидатов смысловых пробелов; неполнота extraction видна. Только чтение.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+     "Format": {
+      "description": "Вид ответа инструмента.",
+      "oneOf": [
+       {
+        "description": "Текст с явными границами блоков (по умолчанию).",
+        "type": "string",
+        "const": "txt"
+       },
+       {
+        "description": "JSON ответа воркера одной строкой.",
+        "type": "string",
+        "const": "json"
+       }
+      ]
+     },
+     "ObjectRef": {
+      "type": "object",
+      "properties": {
+       "kind": {
+        "$ref": "#/$defs/Kind"
+       },
+       "id": {
+        "type": "string"
+       },
+       "revision": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "kind",
+       "id",
+       "revision"
+      ]
+     },
+     "Kind": {
+      "type": "string",
+      "enum": [
+       "document",
+       "section",
+       "chunk",
+       "entity",
+       "community"
+      ]
+     },
+     "Endpoint": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/ObjectRef"
+       },
+       {
+        "type": "object",
+        "properties": {
+         "label": {
+          "type": "string"
+         },
+         "kind": {
+          "anyOf": [
+           {
+            "$ref": "#/$defs/Kind"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "namespace": {
+          "type": [
+           "string",
+           "null"
+          ]
+         }
+        },
+        "required": [
+         "label"
+        ]
+       }
+      ]
+     },
+     "Budgets": {
+      "type": "object",
+      "properties": {
+       "max_depth": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_nodes": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_edges": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_fanout": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_paths": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "timeout_ms": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_bytes": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       }
+      },
+      "additionalProperties": false
+     },
+     "Predicate": {
+      "oneOf": [
+       {
+        "type": "string",
+        "enum": [
+         "contains",
+         "covers",
+         "next_chunk",
+         "links_to",
+         "mentions",
+         "depends_on",
+         "uses",
+         "implements",
+         "verifies",
+         "supersedes",
+         "similar_to",
+         "co_occurs",
+         "member_of"
+        ]
+       },
+       {
+        "description": "Legacy input filter; extraction emits DependsOn with kind=precondition.",
+        "type": "string",
+        "const": "requires"
+       }
+      ]
+     },
+     "Direction": {
+      "type": "string",
+      "enum": [
+       "incoming",
+       "outgoing",
+       "both"
+      ]
+     },
+     "Polarity": {
+      "type": "string",
+      "enum": [
+       "positive",
+       "negative"
+      ]
+     },
+     "View": {
+      "type": "string",
+      "enum": [
+       "documents",
+       "sections",
+       "chunks",
+       "entities",
+       "mixed"
+      ]
+     },
+     "PathKind": {
+      "type": "string",
+      "enum": [
+       "semantic",
+       "structural",
+       "mixed"
+      ]
+     },
+     "Analysis": {
+      "type": "string",
+      "enum": [
+       "topics",
+       "connectivity",
+       "coverage",
+       "conflict_candidates"
+      ]
+     },
+     "Grouping": {
+      "type": "string",
+      "enum": [
+       "communities",
+       "modules"
+      ]
+     },
+     "Role": {
+      "type": "string",
+      "enum": [
+       "requirement",
+       "decision",
+       "behavior",
+       "architecture",
+       "constraint",
+       "verification"
+      ]
+     },
+     "TaskProfile": {
+      "type": "string",
+      "enum": [
+       "implementation",
+       "investigation",
+       "decision"
+      ]
+     }
+    },
+    "type": "object",
+    "properties": {
+     "project": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "format": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Format"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "query": {
+      "description": "Вопрос на языке пользователя; обязателен для context и один из входов relations.",
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "entity_ref": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/ObjectRef"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "from": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Endpoint"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "to": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Endpoint"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "roots": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/ObjectRef"
+      },
+      "default": []
+     },
+     "modules": {
+      "description": "Область как у rag_search: существующие модули и/или файлы от docs-root.",
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "default": []
+     },
+     "files": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "default": []
+     },
+     "snapshot": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "cursor": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "budgets": {
+      "$ref": "#/$defs/Budgets",
+      "default": {
+       "max_depth": null,
+       "max_nodes": null,
+       "max_edges": null,
+       "max_fanout": null,
+       "max_paths": null,
+       "timeout_ms": null,
+       "max_bytes": null
+      }
+     },
+     "limit": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "predicates": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/Predicate"
+      },
+      "default": []
+     },
+     "direction": {
+      "$ref": "#/$defs/Direction",
+      "default": "both"
+     },
+     "polarity": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Polarity"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "qualifiers": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "string"
+      },
+      "default": {}
+     },
+     "view": {
+      "$ref": "#/$defs/View",
+      "default": "documents"
+     },
+     "local": {
+      "type": "boolean",
+      "default": false
+     },
+     "include_paths": {
+      "type": "boolean",
+      "default": false
+     },
+     "path_kind": {
+      "$ref": "#/$defs/PathKind",
+      "default": "semantic"
+     },
+     "max_hops": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "max_paths": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "topic": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "whole_scope": {
+      "type": "boolean",
+      "default": false
+     },
+     "analysis": {
+      "$ref": "#/$defs/Analysis",
+      "default": "topics"
+     },
+     "grouping": {
+      "$ref": "#/$defs/Grouping",
+      "default": "communities"
+     },
+     "roles": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/Role"
+      },
+      "default": []
+     },
+     "task_profile": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/TaskProfile"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "token_budget": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "tokenizer_id": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "change_description": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     }
+    },
+    "additionalProperties": false
+   }
+  },
+  {
+   "name": "bars_get_duplicates",
+   "description": "Аудит дублей проекта: повторяющиеся и разошедшиеся описания, чтобы выбрать основной источник и заменить повторы ссылками. Без исходного чанка; project обязателен, modules ограничивает область. Виды: exact — одинаковый текст; near — почти одинаковые копии (с различиями слов, чисел и отрицаний); contained — один раздел внутри другого; partial — скопирована заметная часть; semantic — близки по смыслу, только повод прочитать оба. Наиболее явные первыми; одинаковый блок в четырёх и больше разделах помечен repeated_block (скорее шаблон). Ничего не удаляет и не объединяет. Короткие разделы (меньше 15 слов) не сравниваются.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+     "Format": {
+      "description": "Вид ответа инструмента.",
+      "oneOf": [
+       {
+        "description": "Текст с явными границами блоков (по умолчанию).",
+        "type": "string",
+        "const": "txt"
+       },
+       {
+        "description": "JSON ответа воркера одной строкой.",
+        "type": "string",
+        "const": "json"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "properties": {
+     "project": {
+      "description": "Проект: путь к корню или имя. Обязателен: аудит читает весь проект.",
+      "type": "string"
+     },
+     "modules": {
+      "description": "Существующие папки первого уровня docs-root; `.` — корневой. Без поля — весь проект.",
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "default": []
+     },
+     "limit": {
+      "description": "Сколько записей вернуть.",
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0
+     },
+     "format": {
+      "description": "Вид ответа: `txt` (по умолчанию) или `json`.",
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Format"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "required": [
+     "project"
+    ]
+   }
+  },
+  {
+   "name": "bars_get_similar",
+   "description": "Похожие чанки по ID чанка из выдачи bars_rag_search (поле id): перед правкой —                        найти похожие описания и разделы для проверки, перед добавлением текста —                        существующее описание. Возвращает ближайшие чанки выбранной области (modules),                        исключая исходный; оценка — косинусная близость к исходному чанку. Близость не                        доказывает дублирование, согласие или зависимость документов: читай найденное.                        ID действует, пока не изменился документ чанка; при chunk_not_found найди чанк                        поиском заново. Без project — проект сессии.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+     "Format": {
+      "description": "Вид ответа инструмента.",
+      "oneOf": [
+       {
+        "description": "Текст с явными границами блоков (по умолчанию).",
+        "type": "string",
+        "const": "txt"
+       },
+       {
+        "description": "JSON ответа воркера одной строкой.",
+        "type": "string",
+        "const": "json"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "properties": {
+     "chunk_id": {
+      "description": "ID чанка (поле `id` результата bars_rag_search или bars_get_similar); действует, пока не изменился документ чанка.",
+      "type": "string"
+     },
+     "project": {
+      "description": "Проект: путь к корню или имя. Без него — проект сессии.",
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "modules": {
+      "description": "Существующие папки первого уровня docs-root; `.` — корневой. Ограничивает область кандидатов, исходный чанк может быть в другом модуле. Без поля — весь проект.",
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "default": []
+     },
+     "limit": {
+      "description": "Сколько похожих чанков вернуть.",
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0
+     },
+     "format": {
+      "description": "Вид ответа: `txt` (по умолчанию) или `json`.",
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Format"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "required": [
+     "chunk_id"
+    ]
+   }
+  },
+  {
+   "name": "bars_graph",
+   "description": "Общий/локальный граф documents/sections/chunks/entities/mixed. Local требует roots; depth ограничен budgets.max_depth. Связи типизированы, поколения и scope фиксированы; курсор только того же запроса. Граф не строится вызовом чтения.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+     "Format": {
+      "description": "Вид ответа инструмента.",
+      "oneOf": [
+       {
+        "description": "Текст с явными границами блоков (по умолчанию).",
+        "type": "string",
+        "const": "txt"
+       },
+       {
+        "description": "JSON ответа воркера одной строкой.",
+        "type": "string",
+        "const": "json"
+       }
+      ]
+     },
+     "ObjectRef": {
+      "type": "object",
+      "properties": {
+       "kind": {
+        "$ref": "#/$defs/Kind"
+       },
+       "id": {
+        "type": "string"
+       },
+       "revision": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "kind",
+       "id",
+       "revision"
+      ]
+     },
+     "Kind": {
+      "type": "string",
+      "enum": [
+       "document",
+       "section",
+       "chunk",
+       "entity",
+       "community"
+      ]
+     },
+     "Endpoint": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/ObjectRef"
+       },
+       {
+        "type": "object",
+        "properties": {
+         "label": {
+          "type": "string"
+         },
+         "kind": {
+          "anyOf": [
+           {
+            "$ref": "#/$defs/Kind"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "namespace": {
+          "type": [
+           "string",
+           "null"
+          ]
+         }
+        },
+        "required": [
+         "label"
+        ]
+       }
+      ]
+     },
+     "Budgets": {
+      "type": "object",
+      "properties": {
+       "max_depth": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_nodes": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_edges": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_fanout": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_paths": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "timeout_ms": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_bytes": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       }
+      },
+      "additionalProperties": false
+     },
+     "Predicate": {
+      "oneOf": [
+       {
+        "type": "string",
+        "enum": [
+         "contains",
+         "covers",
+         "next_chunk",
+         "links_to",
+         "mentions",
+         "depends_on",
+         "uses",
+         "implements",
+         "verifies",
+         "supersedes",
+         "similar_to",
+         "co_occurs",
+         "member_of"
+        ]
+       },
+       {
+        "description": "Legacy input filter; extraction emits DependsOn with kind=precondition.",
+        "type": "string",
+        "const": "requires"
+       }
+      ]
+     },
+     "Direction": {
+      "type": "string",
+      "enum": [
+       "incoming",
+       "outgoing",
+       "both"
+      ]
+     },
+     "Polarity": {
+      "type": "string",
+      "enum": [
+       "positive",
+       "negative"
+      ]
+     },
+     "View": {
+      "type": "string",
+      "enum": [
+       "documents",
+       "sections",
+       "chunks",
+       "entities",
+       "mixed"
+      ]
+     },
+     "PathKind": {
+      "type": "string",
+      "enum": [
+       "semantic",
+       "structural",
+       "mixed"
+      ]
+     },
+     "Analysis": {
+      "type": "string",
+      "enum": [
+       "topics",
+       "connectivity",
+       "coverage",
+       "conflict_candidates"
+      ]
+     },
+     "Grouping": {
+      "type": "string",
+      "enum": [
+       "communities",
+       "modules"
+      ]
+     },
+     "Role": {
+      "type": "string",
+      "enum": [
+       "requirement",
+       "decision",
+       "behavior",
+       "architecture",
+       "constraint",
+       "verification"
+      ]
+     },
+     "TaskProfile": {
+      "type": "string",
+      "enum": [
+       "implementation",
+       "investigation",
+       "decision"
+      ]
+     }
+    },
+    "type": "object",
+    "properties": {
+     "project": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "format": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Format"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "query": {
+      "description": "Вопрос на языке пользователя; обязателен для context и один из входов relations.",
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "entity_ref": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/ObjectRef"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "from": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Endpoint"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "to": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Endpoint"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "roots": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/ObjectRef"
+      },
+      "default": []
+     },
+     "modules": {
+      "description": "Область как у rag_search: существующие модули и/или файлы от docs-root.",
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "default": []
+     },
+     "files": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "default": []
+     },
+     "snapshot": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "cursor": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "budgets": {
+      "$ref": "#/$defs/Budgets",
+      "default": {
+       "max_depth": null,
+       "max_nodes": null,
+       "max_edges": null,
+       "max_fanout": null,
+       "max_paths": null,
+       "timeout_ms": null,
+       "max_bytes": null
+      }
+     },
+     "limit": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "predicates": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/Predicate"
+      },
+      "default": []
+     },
+     "direction": {
+      "$ref": "#/$defs/Direction",
+      "default": "both"
+     },
+     "polarity": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Polarity"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "qualifiers": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "string"
+      },
+      "default": {}
+     },
+     "view": {
+      "$ref": "#/$defs/View",
+      "default": "documents"
+     },
+     "local": {
+      "type": "boolean",
+      "default": false
+     },
+     "include_paths": {
+      "type": "boolean",
+      "default": false
+     },
+     "path_kind": {
+      "$ref": "#/$defs/PathKind",
+      "default": "semantic"
+     },
+     "max_hops": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "max_paths": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "topic": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "whole_scope": {
+      "type": "boolean",
+      "default": false
+     },
+     "analysis": {
+      "$ref": "#/$defs/Analysis",
+      "default": "topics"
+     },
+     "grouping": {
+      "$ref": "#/$defs/Grouping",
+      "default": "communities"
+     },
+     "roles": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/Role"
+      },
+      "default": []
+     },
+     "task_profile": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/TaskProfile"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "token_budget": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "tokenizer_id": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "change_description": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     }
+    },
+    "additionalProperties": false
+   }
+  },
+  {
+   "name": "bars_impact",
+   "description": "Документированное влияние изменения roots: обратные зависимости и полные пути с evidence. Гиперссылки не означают зависимости, результат не доказывает дефект кода. Только чтение.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+     "Format": {
+      "description": "Вид ответа инструмента.",
+      "oneOf": [
+       {
+        "description": "Текст с явными границами блоков (по умолчанию).",
+        "type": "string",
+        "const": "txt"
+       },
+       {
+        "description": "JSON ответа воркера одной строкой.",
+        "type": "string",
+        "const": "json"
+       }
+      ]
+     },
+     "ObjectRef": {
+      "type": "object",
+      "properties": {
+       "kind": {
+        "$ref": "#/$defs/Kind"
+       },
+       "id": {
+        "type": "string"
+       },
+       "revision": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "kind",
+       "id",
+       "revision"
+      ]
+     },
+     "Kind": {
+      "type": "string",
+      "enum": [
+       "document",
+       "section",
+       "chunk",
+       "entity",
+       "community"
+      ]
+     },
+     "Endpoint": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/ObjectRef"
+       },
+       {
+        "type": "object",
+        "properties": {
+         "label": {
+          "type": "string"
+         },
+         "kind": {
+          "anyOf": [
+           {
+            "$ref": "#/$defs/Kind"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "namespace": {
+          "type": [
+           "string",
+           "null"
+          ]
+         }
+        },
+        "required": [
+         "label"
+        ]
+       }
+      ]
+     },
+     "Budgets": {
+      "type": "object",
+      "properties": {
+       "max_depth": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_nodes": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_edges": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_fanout": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_paths": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "timeout_ms": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_bytes": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       }
+      },
+      "additionalProperties": false
+     },
+     "Predicate": {
+      "oneOf": [
+       {
+        "type": "string",
+        "enum": [
+         "contains",
+         "covers",
+         "next_chunk",
+         "links_to",
+         "mentions",
+         "depends_on",
+         "uses",
+         "implements",
+         "verifies",
+         "supersedes",
+         "similar_to",
+         "co_occurs",
+         "member_of"
+        ]
+       },
+       {
+        "description": "Legacy input filter; extraction emits DependsOn with kind=precondition.",
+        "type": "string",
+        "const": "requires"
+       }
+      ]
+     },
+     "Direction": {
+      "type": "string",
+      "enum": [
+       "incoming",
+       "outgoing",
+       "both"
+      ]
+     },
+     "Polarity": {
+      "type": "string",
+      "enum": [
+       "positive",
+       "negative"
+      ]
+     },
+     "View": {
+      "type": "string",
+      "enum": [
+       "documents",
+       "sections",
+       "chunks",
+       "entities",
+       "mixed"
+      ]
+     },
+     "PathKind": {
+      "type": "string",
+      "enum": [
+       "semantic",
+       "structural",
+       "mixed"
+      ]
+     },
+     "Analysis": {
+      "type": "string",
+      "enum": [
+       "topics",
+       "connectivity",
+       "coverage",
+       "conflict_candidates"
+      ]
+     },
+     "Grouping": {
+      "type": "string",
+      "enum": [
+       "communities",
+       "modules"
+      ]
+     },
+     "Role": {
+      "type": "string",
+      "enum": [
+       "requirement",
+       "decision",
+       "behavior",
+       "architecture",
+       "constraint",
+       "verification"
+      ]
+     },
+     "TaskProfile": {
+      "type": "string",
+      "enum": [
+       "implementation",
+       "investigation",
+       "decision"
+      ]
+     }
+    },
+    "type": "object",
+    "properties": {
+     "project": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "format": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Format"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "query": {
+      "description": "Вопрос на языке пользователя; обязателен для context и один из входов relations.",
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "entity_ref": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/ObjectRef"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "from": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Endpoint"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "to": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Endpoint"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "roots": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/ObjectRef"
+      },
+      "default": []
+     },
+     "modules": {
+      "description": "Область как у rag_search: существующие модули и/или файлы от docs-root.",
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "default": []
+     },
+     "files": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "default": []
+     },
+     "snapshot": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "cursor": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "budgets": {
+      "$ref": "#/$defs/Budgets",
+      "default": {
+       "max_depth": null,
+       "max_nodes": null,
+       "max_edges": null,
+       "max_fanout": null,
+       "max_paths": null,
+       "timeout_ms": null,
+       "max_bytes": null
+      }
+     },
+     "limit": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "predicates": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/Predicate"
+      },
+      "default": []
+     },
+     "direction": {
+      "$ref": "#/$defs/Direction",
+      "default": "both"
+     },
+     "polarity": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Polarity"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "qualifiers": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "string"
+      },
+      "default": {}
+     },
+     "view": {
+      "$ref": "#/$defs/View",
+      "default": "documents"
+     },
+     "local": {
+      "type": "boolean",
+      "default": false
+     },
+     "include_paths": {
+      "type": "boolean",
+      "default": false
+     },
+     "path_kind": {
+      "$ref": "#/$defs/PathKind",
+      "default": "semantic"
+     },
+     "max_hops": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "max_paths": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "topic": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "whole_scope": {
+      "type": "boolean",
+      "default": false
+     },
+     "analysis": {
+      "$ref": "#/$defs/Analysis",
+      "default": "topics"
+     },
+     "grouping": {
+      "$ref": "#/$defs/Grouping",
+      "default": "communities"
+     },
+     "roles": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/Role"
+      },
+      "default": []
+     },
+     "task_profile": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/TaskProfile"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "token_budget": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "tokenizer_id": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "change_description": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     }
+    },
+    "additionalProperties": false
+   }
+  },
+  {
+   "name": "bars_links",
+   "description": "Свежая страница исходящих или входящих ссылок одного .md после сверки диска. Общий индекс панели ссылок, без embed; не GraphRAG. path — от корня проекта. Проверяйте known, has_more, next_cursor и limit_reasons; stale_cursor требует начать сначала. Исходные файлы не меняются; внешние URL не открываются.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+     "Format": {
+      "description": "Вид ответа инструмента.",
+      "oneOf": [
+       {
+        "description": "Текст с явными границами блоков (по умолчанию).",
+        "type": "string",
+        "const": "txt"
+       },
+       {
+        "description": "JSON ответа воркера одной строкой.",
+        "type": "string",
+        "const": "json"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "properties": {
+     "project": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "format": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Format"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "path": {
+      "description": ".md от корня проекта, через /; не от docs-root.",
+      "type": "string"
+     },
+     "direction": {
+      "description": "outgoing (по умолчанию) или incoming; одно вхождение на запись.",
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "limit": {
+      "description": "50 по умолчанию; максимум 200. Ноль недопустим.",
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint",
+      "minimum": 0
+     },
+     "cursor": {
+      "description": "Непрозрачный next_cursor; при stale_cursor начать сначала.",
+      "type": [
+       "string",
+       "null"
+      ]
+     }
+    },
+    "additionalProperties": false,
+    "required": [
+     "path"
+    ]
+   }
+  },
+  {
+   "name": "bars_outline",
+   "description": "Заголовки известного `.md` с номерами строк; можно вызвать сразу без поиска, например для определения предмета этапа по плану. Читается с диска, включая файлы вне индекса; path — от корня документации или проекта. levels фильтрует уровни, under (цепочка заголовков) или under_line — только вложенные в заголовок. Для полного текста — bars_read.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+     "Format": {
+      "description": "Вид ответа инструмента.",
+      "oneOf": [
+       {
+        "description": "Текст с явными границами блоков (по умолчанию).",
+        "type": "string",
+        "const": "txt"
+       },
+       {
+        "description": "JSON ответа воркера одной строкой.",
+        "type": "string",
+        "const": "json"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "properties": {
+     "path": {
+      "description": "Путь к `.md`: от корня документации, затем от корня проекта.",
+      "type": "string"
+     },
+     "project": {
+      "description": "Проект: путь к корню или имя. Без него — проект сессии.",
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "levels": {
+      "description": "Какие уровни заголовков вернуть (1…6); по умолчанию все.",
+      "type": "array",
+      "items": {
+       "type": "integer",
+       "format": "uint8",
+       "minimum": 0,
+       "maximum": 255
+      },
+      "default": []
+     },
+     "under": {
+      "description": "Только заголовки внутри этого: цепочка `Заголовок 1/Заголовок 2`, как `heading_chain` в поиске.",
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "under_line": {
+      "description": "Только заголовки внутри заголовка на этой строке.",
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0
+     },
+     "format": {
+      "description": "Вид ответа: `txt` (по умолчанию) или `json`.",
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Format"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "required": [
+     "path"
+    ]
+   }
+  },
+  {
+   "name": "bars_paths",
+   "description": "Ограниченные пути между from/to: ObjectRef либо label/kind/namespace. По умолчанию смысловые рёбра; structural/mixed выбираются явно. Evidence каждого шага, partial и scope; без построения графа.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+     "Format": {
+      "description": "Вид ответа инструмента.",
+      "oneOf": [
+       {
+        "description": "Текст с явными границами блоков (по умолчанию).",
+        "type": "string",
+        "const": "txt"
+       },
+       {
+        "description": "JSON ответа воркера одной строкой.",
+        "type": "string",
+        "const": "json"
+       }
+      ]
+     },
+     "ObjectRef": {
+      "type": "object",
+      "properties": {
+       "kind": {
+        "$ref": "#/$defs/Kind"
+       },
+       "id": {
+        "type": "string"
+       },
+       "revision": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "kind",
+       "id",
+       "revision"
+      ]
+     },
+     "Kind": {
+      "type": "string",
+      "enum": [
+       "document",
+       "section",
+       "chunk",
+       "entity",
+       "community"
+      ]
+     },
+     "Endpoint": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/ObjectRef"
+       },
+       {
+        "type": "object",
+        "properties": {
+         "label": {
+          "type": "string"
+         },
+         "kind": {
+          "anyOf": [
+           {
+            "$ref": "#/$defs/Kind"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "namespace": {
+          "type": [
+           "string",
+           "null"
+          ]
+         }
+        },
+        "required": [
+         "label"
+        ]
+       }
+      ]
+     },
+     "Budgets": {
+      "type": "object",
+      "properties": {
+       "max_depth": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_nodes": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_edges": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_fanout": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_paths": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "timeout_ms": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_bytes": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       }
+      },
+      "additionalProperties": false
+     },
+     "Predicate": {
+      "oneOf": [
+       {
+        "type": "string",
+        "enum": [
+         "contains",
+         "covers",
+         "next_chunk",
+         "links_to",
+         "mentions",
+         "depends_on",
+         "uses",
+         "implements",
+         "verifies",
+         "supersedes",
+         "similar_to",
+         "co_occurs",
+         "member_of"
+        ]
+       },
+       {
+        "description": "Legacy input filter; extraction emits DependsOn with kind=precondition.",
+        "type": "string",
+        "const": "requires"
+       }
+      ]
+     },
+     "Direction": {
+      "type": "string",
+      "enum": [
+       "incoming",
+       "outgoing",
+       "both"
+      ]
+     },
+     "Polarity": {
+      "type": "string",
+      "enum": [
+       "positive",
+       "negative"
+      ]
+     },
+     "View": {
+      "type": "string",
+      "enum": [
+       "documents",
+       "sections",
+       "chunks",
+       "entities",
+       "mixed"
+      ]
+     },
+     "PathKind": {
+      "type": "string",
+      "enum": [
+       "semantic",
+       "structural",
+       "mixed"
+      ]
+     },
+     "Analysis": {
+      "type": "string",
+      "enum": [
+       "topics",
+       "connectivity",
+       "coverage",
+       "conflict_candidates"
+      ]
+     },
+     "Grouping": {
+      "type": "string",
+      "enum": [
+       "communities",
+       "modules"
+      ]
+     },
+     "Role": {
+      "type": "string",
+      "enum": [
+       "requirement",
+       "decision",
+       "behavior",
+       "architecture",
+       "constraint",
+       "verification"
+      ]
+     },
+     "TaskProfile": {
+      "type": "string",
+      "enum": [
+       "implementation",
+       "investigation",
+       "decision"
+      ]
+     }
+    },
+    "type": "object",
+    "properties": {
+     "project": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "format": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Format"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "query": {
+      "description": "Вопрос на языке пользователя; обязателен для context и один из входов relations.",
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "entity_ref": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/ObjectRef"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "from": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Endpoint"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "to": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Endpoint"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "roots": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/ObjectRef"
+      },
+      "default": []
+     },
+     "modules": {
+      "description": "Область как у rag_search: существующие модули и/или файлы от docs-root.",
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "default": []
+     },
+     "files": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "default": []
+     },
+     "snapshot": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "cursor": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "budgets": {
+      "$ref": "#/$defs/Budgets",
+      "default": {
+       "max_depth": null,
+       "max_nodes": null,
+       "max_edges": null,
+       "max_fanout": null,
+       "max_paths": null,
+       "timeout_ms": null,
+       "max_bytes": null
+      }
+     },
+     "limit": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "predicates": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/Predicate"
+      },
+      "default": []
+     },
+     "direction": {
+      "$ref": "#/$defs/Direction",
+      "default": "both"
+     },
+     "polarity": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Polarity"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "qualifiers": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "string"
+      },
+      "default": {}
+     },
+     "view": {
+      "$ref": "#/$defs/View",
+      "default": "documents"
+     },
+     "local": {
+      "type": "boolean",
+      "default": false
+     },
+     "include_paths": {
+      "type": "boolean",
+      "default": false
+     },
+     "path_kind": {
+      "$ref": "#/$defs/PathKind",
+      "default": "semantic"
+     },
+     "max_hops": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "max_paths": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "topic": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "whole_scope": {
+      "type": "boolean",
+      "default": false
+     },
+     "analysis": {
+      "$ref": "#/$defs/Analysis",
+      "default": "topics"
+     },
+     "grouping": {
+      "$ref": "#/$defs/Grouping",
+      "default": "communities"
+     },
+     "roles": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/Role"
+      },
+      "default": []
+     },
+     "task_profile": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/TaskProfile"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "token_budget": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "tokenizer_id": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "change_description": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     }
+    },
+    "additionalProperties": false
+   }
+  },
+  {
+   "name": "bars_projects",
+   "description": "Зарегистрированные проекты: путь, корень документации, состояние и существующие модули первого уровня с числом документов. Используй для выбора project и modules, когда их имена неизвестны; вложенная папка не отдельный модуль.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+     "Format": {
+      "description": "Вид ответа инструмента.",
+      "oneOf": [
+       {
+        "description": "Текст с явными границами блоков (по умолчанию).",
+        "type": "string",
+        "const": "txt"
+       },
+       {
+        "description": "JSON ответа воркера одной строкой.",
+        "type": "string",
+        "const": "json"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "properties": {
+     "format": {
+      "description": "Вид ответа: `txt` (по умолчанию) или `json`.",
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Format"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "bars_rag_search",
+   "description": "Поиск неизвестного контекста после определения предмета задачи; для известного документа можно сразу bars_read/bars_outline. Гибридный поиск возвращает фрагменты с источниками, строками и оценкой. modules выбирает существующие папки первого уровня: например, [\"backlog\"] для пожеланий или [\"chats\"] для истории. files — уже выбранные индексируемые документы: например, [\"features/models/local-models.md\",\"features/settings/settings.md\"] для сверки устройства rerank; пути от docs-root. Не угадывать список файлов; межслойную задачу можно искать без фильтров. Без project — проект сессии.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+     "RetrievalMode": {
+      "type": "string",
+      "enum": [
+       "hybrid",
+       "mix",
+       "graph"
+      ]
+     },
+     "Budgets": {
+      "type": "object",
+      "properties": {
+       "max_depth": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_nodes": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_edges": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_fanout": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_paths": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "timeout_ms": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_bytes": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       }
+      },
+      "additionalProperties": false
+     },
+     "Format": {
+      "description": "Вид ответа инструмента.",
+      "oneOf": [
+       {
+        "description": "Текст с явными границами блоков (по умолчанию).",
+        "type": "string",
+        "const": "txt"
+       },
+       {
+        "description": "JSON ответа воркера одной строкой.",
+        "type": "string",
+        "const": "json"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "properties": {
+     "mode": {
+      "description": "Явный hybrid/mix/graph. Без поля — прежний поиск и прежняя форма ответа.",
+      "anyOf": [
+       {
+        "$ref": "#/$defs/RetrievalMode"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "graph_budgets": {
+      "$ref": "#/$defs/Budgets",
+      "default": {
+       "max_depth": null,
+       "max_nodes": null,
+       "max_edges": null,
+       "max_fanout": null,
+       "max_paths": null,
+       "timeout_ms": null,
+       "max_bytes": null
+      }
+     },
+     "include_related": {
+      "description": "В mix: отключить расширение и пакеты оснований; без поля включено.",
+      "type": [
+       "boolean",
+       "null"
+      ]
+     },
+     "related_budget": {
+      "description": "В mix: предел байт пакета оснований, не увеличивает graph_budgets.max_bytes.",
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0
+     },
+     "query": {
+      "description": "Предметный вопрос на языке пользователя после определения задачи; не шаблон «этап N требования ошибки пожелания».",
+      "type": "string"
+     },
+     "project": {
+      "description": "Проект: путь к корню или имя. Без него — проект сессии.",
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "modules": {
+      "description": "Существующие папки первого уровня docs-root из bars_projects; `.` — корневой. Примеры: [\"backlog\"] для пожеланий, [\"chats\"] для истории. Для межслойной задачи можно не ограничивать.",
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "default": []
+     },
+     "files": {
+      "description": "Уже выбранные индексируемые документы, пути от docs-root, без docs/ при корне docs. Пример сверки: [\"features/models/local-models.md\", \"features/settings/settings.md\"]. Не угадывать; для целого документа — bars_read.",
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "default": []
+     },
+     "limit": {
+      "description": "Сколько результатов вернуть.",
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0
+     },
+     "candidates": {
+      "description": "Сколько кандидатов брать до реранка.",
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0
+     },
+     "min_score": {
+      "description": "Порог оценки результата, 0…1.",
+      "type": [
+       "number",
+       "null"
+      ],
+      "format": "float"
+     },
+     "format": {
+      "description": "Вид ответа: `txt` (по умолчанию) или `json`.",
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Format"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "required": [
+     "query"
+    ]
+   }
+  },
+  {
+   "name": "bars_read",
+   "description": "Прочитать известный документ `.md` целиком с номерами строк и title, без обязательного предварительного поиска. Подходит для плана/реестра, чтобы определить предмет этапа. Читает с диска, включая файлы вне индекса; path — от корня документации или проекта (как в выдаче). Для заголовков — bars_outline.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+     "Format": {
+      "description": "Вид ответа инструмента.",
+      "oneOf": [
+       {
+        "description": "Текст с явными границами блоков (по умолчанию).",
+        "type": "string",
+        "const": "txt"
+       },
+       {
+        "description": "JSON ответа воркера одной строкой.",
+        "type": "string",
+        "const": "json"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "properties": {
+     "path": {
+      "description": "Путь к `.md`: от корня документации, затем от корня проекта.",
+      "type": "string"
+     },
+     "project": {
+      "description": "Проект: путь к корню или имя. Без него — проект сессии.",
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "format": {
+      "description": "Вид ответа: `txt` (по умолчанию) или `json`.",
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Format"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "required": [
+     "path"
+    ]
+   }
+  },
+  {
+   "name": "bars_reindex",
+   "description": "Переиндексация проекта: проверка актуальности или, с full, полная. Возвращается сразу, ход виден в bars_status. После смены модели переиндексацию запускает только пользователь: инструмент ответит ошибкой reindex_needs_consent.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+     "Format": {
+      "description": "Вид ответа инструмента.",
+      "oneOf": [
+       {
+        "description": "Текст с явными границами блоков (по умолчанию).",
+        "type": "string",
+        "const": "txt"
+       },
+       {
+        "description": "JSON ответа воркера одной строкой.",
+        "type": "string",
+        "const": "json"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "properties": {
+     "project": {
+      "description": "Проект: путь к корню или имя. Без него — проект сессии.",
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "full": {
+      "description": "Полная переиндексация вместо проверки актуальности.",
+      "type": "boolean",
+      "default": false
+     },
+     "format": {
+      "description": "Вид ответа: `txt` (по умолчанию) или `json`.",
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Format"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "bars_relations",
+   "description": "Явные отношения с исходными доказательствами. Ровно один query/entity_ref; отрицания и условия сохраняются. Неоднозначное имя возвращает кандидатов. Только чтение готового графа.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+     "Format": {
+      "description": "Вид ответа инструмента.",
+      "oneOf": [
+       {
+        "description": "Текст с явными границами блоков (по умолчанию).",
+        "type": "string",
+        "const": "txt"
+       },
+       {
+        "description": "JSON ответа воркера одной строкой.",
+        "type": "string",
+        "const": "json"
+       }
+      ]
+     },
+     "ObjectRef": {
+      "type": "object",
+      "properties": {
+       "kind": {
+        "$ref": "#/$defs/Kind"
+       },
+       "id": {
+        "type": "string"
+       },
+       "revision": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "kind",
+       "id",
+       "revision"
+      ]
+     },
+     "Kind": {
+      "type": "string",
+      "enum": [
+       "document",
+       "section",
+       "chunk",
+       "entity",
+       "community"
+      ]
+     },
+     "Endpoint": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/ObjectRef"
+       },
+       {
+        "type": "object",
+        "properties": {
+         "label": {
+          "type": "string"
+         },
+         "kind": {
+          "anyOf": [
+           {
+            "$ref": "#/$defs/Kind"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "namespace": {
+          "type": [
+           "string",
+           "null"
+          ]
+         }
+        },
+        "required": [
+         "label"
+        ]
+       }
+      ]
+     },
+     "Budgets": {
+      "type": "object",
+      "properties": {
+       "max_depth": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_nodes": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_edges": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_fanout": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_paths": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "timeout_ms": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       },
+       "max_bytes": {
+        "type": [
+         "integer",
+         "null"
+        ],
+        "format": "uint32",
+        "minimum": 0
+       }
+      },
+      "additionalProperties": false
+     },
+     "Predicate": {
+      "oneOf": [
+       {
+        "type": "string",
+        "enum": [
+         "contains",
+         "covers",
+         "next_chunk",
+         "links_to",
+         "mentions",
+         "depends_on",
+         "uses",
+         "implements",
+         "verifies",
+         "supersedes",
+         "similar_to",
+         "co_occurs",
+         "member_of"
+        ]
+       },
+       {
+        "description": "Legacy input filter; extraction emits DependsOn with kind=precondition.",
+        "type": "string",
+        "const": "requires"
+       }
+      ]
+     },
+     "Direction": {
+      "type": "string",
+      "enum": [
+       "incoming",
+       "outgoing",
+       "both"
+      ]
+     },
+     "Polarity": {
+      "type": "string",
+      "enum": [
+       "positive",
+       "negative"
+      ]
+     },
+     "View": {
+      "type": "string",
+      "enum": [
+       "documents",
+       "sections",
+       "chunks",
+       "entities",
+       "mixed"
+      ]
+     },
+     "PathKind": {
+      "type": "string",
+      "enum": [
+       "semantic",
+       "structural",
+       "mixed"
+      ]
+     },
+     "Analysis": {
+      "type": "string",
+      "enum": [
+       "topics",
+       "connectivity",
+       "coverage",
+       "conflict_candidates"
+      ]
+     },
+     "Grouping": {
+      "type": "string",
+      "enum": [
+       "communities",
+       "modules"
+      ]
+     },
+     "Role": {
+      "type": "string",
+      "enum": [
+       "requirement",
+       "decision",
+       "behavior",
+       "architecture",
+       "constraint",
+       "verification"
+      ]
+     },
+     "TaskProfile": {
+      "type": "string",
+      "enum": [
+       "implementation",
+       "investigation",
+       "decision"
+      ]
+     }
+    },
+    "type": "object",
+    "properties": {
+     "project": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "format": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Format"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "query": {
+      "description": "Вопрос на языке пользователя; обязателен для context и один из входов relations.",
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "entity_ref": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/ObjectRef"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "from": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Endpoint"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "to": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Endpoint"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "roots": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/ObjectRef"
+      },
+      "default": []
+     },
+     "modules": {
+      "description": "Область как у rag_search: существующие модули и/или файлы от docs-root.",
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "default": []
+     },
+     "files": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "default": []
+     },
+     "snapshot": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "cursor": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "budgets": {
+      "$ref": "#/$defs/Budgets",
+      "default": {
+       "max_depth": null,
+       "max_nodes": null,
+       "max_edges": null,
+       "max_fanout": null,
+       "max_paths": null,
+       "timeout_ms": null,
+       "max_bytes": null
+      }
+     },
+     "limit": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "predicates": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/Predicate"
+      },
+      "default": []
+     },
+     "direction": {
+      "$ref": "#/$defs/Direction",
+      "default": "both"
+     },
+     "polarity": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Polarity"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "qualifiers": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "string"
+      },
+      "default": {}
+     },
+     "view": {
+      "$ref": "#/$defs/View",
+      "default": "documents"
+     },
+     "local": {
+      "type": "boolean",
+      "default": false
+     },
+     "include_paths": {
+      "type": "boolean",
+      "default": false
+     },
+     "path_kind": {
+      "$ref": "#/$defs/PathKind",
+      "default": "semantic"
+     },
+     "max_hops": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "max_paths": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "topic": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "whole_scope": {
+      "type": "boolean",
+      "default": false
+     },
+     "analysis": {
+      "$ref": "#/$defs/Analysis",
+      "default": "topics"
+     },
+     "grouping": {
+      "$ref": "#/$defs/Grouping",
+      "default": "communities"
+     },
+     "roles": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/Role"
+      },
+      "default": []
+     },
+     "task_profile": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/TaskProfile"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "token_budget": {
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint32",
+      "minimum": 0,
+      "default": null
+     },
+     "tokenizer_id": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     },
+     "change_description": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "default": null
+     }
+    },
+    "additionalProperties": false
+   }
+  },
+  {
+   "name": "bars_status",
+   "description": "Состояние индекса проекта: когда обновлён, идёт ли индексация, сколько документов ждёт, модель индекса, нужна ли переиндексация, последняя ошибка.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+     "Format": {
+      "description": "Вид ответа инструмента.",
+      "oneOf": [
+       {
+        "description": "Текст с явными границами блоков (по умолчанию).",
+        "type": "string",
+        "const": "txt"
+       },
+       {
+        "description": "JSON ответа воркера одной строкой.",
+        "type": "string",
+        "const": "json"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "properties": {
+     "project": {
+      "description": "Проект: путь к корню или имя. Без него — проект сессии.",
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "format": {
+      "description": "Вид ответа: `txt` (по умолчанию) или `json`.",
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Format"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "bars_text_search",
+   "description": "Точные вхождения в сохранённых .md с диска: литерал/regex, регистр, область. Не требует embed; не видит несохранённый редактор. До пяти вхождений на документ; продолжение одного документа через path/offset/revision. При усечении totals — нижняя граница; общей пагинации документов нет, сузьте область. Смысловой поиск — bars_rag_search.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+     "Format": {
+      "description": "Вид ответа инструмента.",
+      "oneOf": [
+       {
+        "description": "Текст с явными границами блоков (по умолчанию).",
+        "type": "string",
+        "const": "txt"
+       },
+       {
+        "description": "JSON ответа воркера одной строкой.",
+        "type": "string",
+        "const": "json"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "properties": {
+     "project": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "format": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Format"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "query": {
+      "description": "Литерал или регулярное выражение; поиск по сохранённым .md без модели.",
+      "type": "string"
+     },
+     "case_sensitive": {
+      "type": "boolean",
+      "default": false
+     },
+     "regex": {
+      "type": "boolean",
+      "default": false
+     },
+     "path_filter": {
+      "type": "string",
+      "default": ""
+     },
+     "modules": {
+      "description": "Папки первого уровня docs-root; пусто — весь проект.",
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "default": []
+     },
+     "files": {
+      "description": "Пути от docs-root (без docs/ при корне docs).",
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "default": []
+     },
+     "limit_docs": {
+      "description": "20 по умолчанию; максимум 100. Ноль недопустим.",
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint",
+      "minimum": 0
+     },
+     "limit_hits": {
+      "description": "100 по умолчанию; максимум 500. Ноль недопустим.",
+      "type": [
+       "integer",
+       "null"
+      ],
+      "format": "uint",
+      "minimum": 0
+     },
+     "path": {
+      "description": "Продолжение одного документа: точный path ответа, от корня проекта.",
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "offset": {
+      "type": "integer",
+      "format": "uint",
+      "minimum": 0,
+      "default": 0
+     },
+     "revision": {
+      "description": "Ревизия предыдущей порции; изменившаяся — stale_revision.",
+      "type": [
+       "string",
+       "null"
+      ]
+     }
+    },
+    "additionalProperties": false,
+    "required": [
+     "query"
+    ]
+   }
+  }
+ ]
+}

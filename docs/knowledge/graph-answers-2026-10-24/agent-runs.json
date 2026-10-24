@@ -1,0 +1,523 @@
+{
+ "model": "sonnet",
+ "date": "2026-10-24",
+ "source": "итоговые сообщения шести субагентов; полные тексты ответов в транскрипт не сохранились, здесь — их оценки и вердикт по эталону",
+ "runs": {
+  "J1": {
+   "format": "J",
+   "subagent_tokens": 134790,
+   "tool_uses": 14,
+   "duration_ms": 180000,
+   "tasks": [
+    {
+     "task": "T01",
+     "sufficient": "no",
+     "difficulty": 4,
+     "verdict": "ok"
+    },
+    {
+     "task": "T02",
+     "sufficient": "no",
+     "difficulty": 4,
+     "verdict": "ok"
+    },
+    {
+     "task": "T03",
+     "sufficient": "no",
+     "difficulty": 4,
+     "verdict": "ok"
+    },
+    {
+     "task": "T04",
+     "sufficient": "yes",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T05",
+     "sufficient": "no",
+     "difficulty": 4,
+     "verdict": "ok"
+    },
+    {
+     "task": "T06",
+     "sufficient": "yes",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T07",
+     "sufficient": "partial",
+     "difficulty": 4,
+     "verdict": "ok"
+    },
+    {
+     "task": "T08",
+     "sufficient": "partial",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T09",
+     "sufficient": "yes",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T10",
+     "sufficient": "no",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T11",
+     "sufficient": "no",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T12",
+     "sufficient": "yes",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T13",
+     "sufficient": "partial",
+     "difficulty": 2,
+     "verdict": "ok"
+    }
+   ]
+  },
+  "J2": {
+   "format": "J",
+   "subagent_tokens": 151312,
+   "tool_uses": 16,
+   "duration_ms": 174798,
+   "tasks": [
+    {
+     "task": "T01",
+     "sufficient": "no",
+     "difficulty": 4,
+     "verdict": "ok"
+    },
+    {
+     "task": "T02",
+     "sufficient": "no",
+     "difficulty": 4,
+     "verdict": "ok"
+    },
+    {
+     "task": "T03",
+     "sufficient": "no",
+     "difficulty": 4,
+     "verdict": "ok"
+    },
+    {
+     "task": "T04",
+     "sufficient": "yes",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T05",
+     "sufficient": "partial",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T06",
+     "sufficient": "yes",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T07",
+     "sufficient": "partial",
+     "difficulty": 4,
+     "verdict": "ok"
+    },
+    {
+     "task": "T08",
+     "sufficient": "partial",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T09",
+     "sufficient": "yes",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T10",
+     "sufficient": "no",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T11",
+     "sufficient": "no",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T12",
+     "sufficient": "yes",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T13",
+     "sufficient": "partial",
+     "difficulty": 2,
+     "verdict": "ok"
+    }
+   ]
+  },
+  "A1": {
+   "format": "A",
+   "subagent_tokens": 119622,
+   "tool_uses": 6,
+   "duration_ms": 82948,
+   "tasks": [
+    {
+     "task": "T01",
+     "sufficient": "no",
+     "difficulty": 4,
+     "verdict": "ok"
+    },
+    {
+     "task": "T02",
+     "sufficient": "no",
+     "difficulty": 4,
+     "verdict": "ok"
+    },
+    {
+     "task": "T03",
+     "sufficient": "no",
+     "difficulty": 4,
+     "verdict": "ok"
+    },
+    {
+     "task": "T04",
+     "sufficient": "yes",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T05",
+     "sufficient": "no",
+     "difficulty": 4,
+     "verdict": "ok"
+    },
+    {
+     "task": "T06",
+     "sufficient": "yes",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T07",
+     "sufficient": "partial",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T08",
+     "sufficient": "yes",
+     "difficulty": 2,
+     "verdict": "overclaim"
+    },
+    {
+     "task": "T09",
+     "sufficient": "yes",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T10",
+     "sufficient": "no",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T11",
+     "sufficient": "no",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T12",
+     "sufficient": "partial",
+     "difficulty": 3,
+     "verdict": "related_lost"
+    },
+    {
+     "task": "T13",
+     "sufficient": "no",
+     "difficulty": 3,
+     "verdict": "ok"
+    }
+   ]
+  },
+  "A2": {
+   "format": "A",
+   "subagent_tokens": 122933,
+   "tool_uses": 6,
+   "duration_ms": 82551,
+   "tasks": [
+    {
+     "task": "T01",
+     "sufficient": "no",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T02",
+     "sufficient": "no",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T03",
+     "sufficient": "no",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T04",
+     "sufficient": "yes",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T05",
+     "sufficient": "no",
+     "difficulty": 4,
+     "verdict": "ok"
+    },
+    {
+     "task": "T06",
+     "sufficient": "yes",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T07",
+     "sufficient": "partial",
+     "difficulty": 4,
+     "verdict": "ok"
+    },
+    {
+     "task": "T08",
+     "sufficient": "yes",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T09",
+     "sufficient": "yes",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T10",
+     "sufficient": "no",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T11",
+     "sufficient": "no",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T12",
+     "sufficient": "partial",
+     "difficulty": 3,
+     "verdict": "related_lost"
+    },
+    {
+     "task": "T13",
+     "sufficient": "no",
+     "difficulty": 3,
+     "verdict": "ok"
+    }
+   ]
+  },
+  "B1": {
+   "format": "B",
+   "subagent_tokens": 116536,
+   "tool_uses": 7,
+   "duration_ms": 74951,
+   "tasks": [
+    {
+     "task": "T01",
+     "sufficient": "no",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T02",
+     "sufficient": "no",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T03",
+     "sufficient": "no",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T04",
+     "sufficient": "yes",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T05",
+     "sufficient": "no",
+     "difficulty": 4,
+     "verdict": "ok"
+    },
+    {
+     "task": "T06",
+     "sufficient": "yes",
+     "difficulty": 1,
+     "verdict": "ok"
+    },
+    {
+     "task": "T07",
+     "sufficient": "partial",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T08",
+     "sufficient": "partial",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T09",
+     "sufficient": "yes",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T10",
+     "sufficient": "no",
+     "difficulty": 1,
+     "verdict": "ok"
+    },
+    {
+     "task": "T11",
+     "sufficient": "no",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T12",
+     "sufficient": "yes",
+     "difficulty": 3,
+     "verdict": "related_lost"
+    },
+    {
+     "task": "T13",
+     "sufficient": "no",
+     "difficulty": 1,
+     "verdict": "ok"
+    }
+   ]
+  },
+  "B2": {
+   "format": "B",
+   "subagent_tokens": 123603,
+   "tool_uses": 6,
+   "duration_ms": 69754,
+   "tasks": [
+    {
+     "task": "T01",
+     "sufficient": "no",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T02",
+     "sufficient": "no",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T03",
+     "sufficient": "no",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T04",
+     "sufficient": "yes",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T05",
+     "sufficient": "no",
+     "difficulty": 4,
+     "verdict": "ok"
+    },
+    {
+     "task": "T06",
+     "sufficient": "yes",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T07",
+     "sufficient": "partial",
+     "difficulty": 3,
+     "verdict": "ok"
+    },
+    {
+     "task": "T08",
+     "sufficient": "partial",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T09",
+     "sufficient": "yes",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T10",
+     "sufficient": "no",
+     "difficulty": 1,
+     "verdict": "ok"
+    },
+    {
+     "task": "T11",
+     "sufficient": "no",
+     "difficulty": 2,
+     "verdict": "ok"
+    },
+    {
+     "task": "T12",
+     "sufficient": "yes",
+     "difficulty": 3,
+     "verdict": "related_lost"
+    },
+    {
+     "task": "T13",
+     "sufficient": "no",
+     "difficulty": 1,
+     "verdict": "ok"
+    }
+   ]
+  }
+ }
+}
