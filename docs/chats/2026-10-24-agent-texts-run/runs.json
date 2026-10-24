@@ -1,0 +1,1039 @@
+{
+ "old-z01": {
+  "all": [
+   [
+    "bars_rag_search",
+    15330,
+    false
+   ]
+  ],
+  "bars_calls": 1,
+  "other_calls": 0,
+  "toolsearch": 0,
+  "bars_chars": 15330,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "Какое ограничение длины у стартовой инструкции bars для агентов?"
+   }
+  ],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"Какое ограничение длины у стартовой инструкции bars для агентов?\"}"
+   ]
+  ]
+ },
+ "new-z01": {
+  "all": [
+   [
+    "ToolSearch",
+    471,
+    false
+   ],
+   [
+    "bars_rag_search",
+    14265,
+    false
+   ]
+  ],
+  "bars_calls": 1,
+  "other_calls": 0,
+  "toolsearch": 1,
+  "bars_chars": 14265,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "Ограничение длины стартовой инструкции bars для агентов",
+    "limit": 8
+   }
+  ],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"Ограничение длины стартовой инструкции bars для агентов\", \"limit\": 8}"
+   ]
+  ]
+ },
+ "old-z02": {
+  "all": [
+   [
+    "ToolSearch",
+    471,
+    false
+   ],
+   [
+    "bars_rag_search",
+    16981,
+    false
+   ],
+   [
+    "bars_rag_search",
+    1311,
+    true
+   ],
+   [
+    "bars_rag_search",
+    17815,
+    false
+   ]
+  ],
+  "bars_calls": 3,
+  "other_calls": 0,
+  "toolsearch": 1,
+  "bars_chars": 36107,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "Текстовый формат выдачи bars_rag_search: границы блоков, рендерер MCP",
+    "limit": 10
+   },
+   {
+    "query": "Формат текстового результата rag_search txt json поля id score heading_chain",
+    "mode": "mix",
+    "limit": 10
+   },
+   {
+    "query": "Контракт текстового рендерера результатов поиска MCP: блоки RESULT, APPLIED PARAMETERS, поля выдачи",
+    "modules": [
+     "features",
+     "architecture",
+     "adr",
+     "manual"
+    ],
+    "limit": 8
+   }
+  ],
+  "errors": [
+   [
+    "mcp__bars__bars_rag_search",
+    "Error: result (79 163 characters across 3 lines) exceeds maximum allowed tokens. Output has been saved to C:\\Users\\Shket\\.claude\\projects\\C--Users-Shket-OneDriv"
+   ]
+  ],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"Текстовый формат выдачи bars_rag_search: границы блоков, рендерер MCP\", \"limit\": 10}"
+   ],
+   [
+    "bars_rag_search",
+    "{\"query\": \"Формат текстового результата rag_search txt json поля id score heading_chain\", \"limit\": 10, \"mode\": \"mix\"}"
+   ],
+   [
+    "bars_rag_search",
+    "{\"query\": \"Контракт текстового рендерера результатов поиска MCP: блоки RESULT, APPLIED PARAMETERS, поля выдачи\", \"limit\": 8, \"modules\": [\"features\", \"architectu"
+   ]
+  ]
+ },
+ "new-z02": {
+  "all": [
+   [
+    "bars_rag_search",
+    16523,
+    false
+   ],
+   [
+    "bars_rag_search",
+    6285,
+    false
+   ],
+   [
+    "Grep",
+    155,
+    true
+   ]
+  ],
+  "bars_calls": 2,
+  "other_calls": 1,
+  "toolsearch": 0,
+  "bars_chars": 22808,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "текстовый формат выдачи bars_rag_search, рендерер результатов MCP",
+    "limit": 10
+   },
+   {
+    "query": "текстовый вид ответа поиска: блоки SEARCH, RESULT, APPLIED PARAMETERS, рендерер txt",
+    "modules": [
+     "features",
+     "architecture",
+     "manual",
+     "adr"
+    ],
+    "limit": 10
+   }
+  ],
+  "errors": [
+   [
+    "Grep",
+    "PreToolUse:Grep hook error: Too many consecutive grep calls without using symbolic tools. You can continue using grep now if needed, the counter was reset."
+   ]
+  ],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"текстовый формат выдачи bars_rag_search, рендерер результатов MCP\", \"limit\": 10}"
+   ],
+   [
+    "bars_rag_search",
+    "{\"query\": \"текстовый вид ответа поиска: блоки SEARCH, RESULT, APPLIED PARAMETERS, рендерер txt\", \"modules\": [\"features\", \"architecture\", \"manual\", \"adr\"], \"limi"
+   ],
+   [
+    "Grep",
+    "{\"pattern\": \"APPLIED PARAMETERS|=== RESULT|=== END SEARCH\", \"path\": \"C:\\\\Users\\\\Shket\\\\OneDrive\\\\Рабочий стол\\\\SELF Repository\\\\bars-project\", \"glob\": \"!docs/ch"
+   ]
+  ]
+ },
+ "old-z03": {
+  "all": [
+   [
+    "bars_rag_search",
+    17926,
+    false
+   ]
+  ],
+  "bars_calls": 1,
+  "other_calls": 0,
+  "toolsearch": 0,
+  "bars_chars": 17926,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "Текстовый формат ответа поиска bars в MCP: из каких блоков состоит",
+    "limit": 8
+   }
+  ],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"Текстовый формат ответа поиска bars в MCP: из каких блоков состоит\", \"limit\": 8}"
+   ]
+  ]
+ },
+ "new-z03": {
+  "all": [
+   [
+    "bars_rag_search",
+    13468,
+    false
+   ]
+  ],
+  "bars_calls": 1,
+  "other_calls": 0,
+  "toolsearch": 0,
+  "bars_chars": 13468,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "текстовый формат ответа поиска MCP, блоки ответа",
+    "modules": [
+     "features",
+     "architecture"
+    ],
+    "limit": 6
+   }
+  ],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"текстовый формат ответа поиска MCP, блоки ответа\", \"modules\": [\"features\", \"architecture\"], \"limit\": 6}"
+   ]
+  ]
+ },
+ "old-z04": {
+  "all": [
+   [
+    "bars_rag_search",
+    13154,
+    false
+   ]
+  ],
+  "bars_calls": 1,
+  "other_calls": 0,
+  "toolsearch": 0,
+  "bars_chars": 13154,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "итог сессии про историю MCP-вызовов",
+    "modules": [
+     "chats"
+    ]
+   }
+  ],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"итог сессии про историю MCP-вызовов\", \"modules\": [\"chats\"]}"
+   ]
+  ]
+ },
+ "new-z04": {
+  "all": [
+   [
+    "Glob",
+    14,
+    false
+   ],
+   [
+    "Glob",
+    14,
+    false
+   ],
+   [
+    "Bash",
+    1191,
+    false
+   ],
+   [
+    "Bash",
+    2496,
+    false
+   ],
+   [
+    "Bash",
+    1729,
+    false
+   ]
+  ],
+  "bars_calls": 0,
+  "other_calls": 5,
+  "toolsearch": 0,
+  "bars_chars": 0,
+  "graph_calls": 0,
+  "search": [],
+  "errors": [],
+  "inputs": [
+   [
+    "Glob",
+    "{\"pattern\": \"docs/chats/*mcp*\"}"
+   ],
+   [
+    "Glob",
+    "{\"pattern\": \"docs/chats/*histor*\"}"
+   ],
+   [
+    "Bash",
+    "{\"command\": \"cd \\\"C:/Users/Shket/OneDrive/Рабочий стол/SELF Repository/bars-project/docs/chats\\\" && ls | grep -i -E \\\"mcp|call|log|journal|histor|journ|audit\\\" "
+   ],
+   [
+    "Bash",
+    "{\"command\": \"cd \\\"C:/Users/Shket/OneDrive/Рабочий стол/SELF Repository/bars-project/docs/chats\\\" && ls 2026-10-18-mcp-history-29 2026-10-18-mcp-statistics; grep"
+   ],
+   [
+    "Bash",
+    "{\"command\": \"cd \\\"C:/Users/Shket/OneDrive/Рабочий стол/SELF Repository/bars-project/docs/chats\\\" && ls 2026-10-18-mcp-analysis-30; cat -n 2026-10-18-mcp-analysi"
+   ]
+  ]
+ },
+ "old-z05": {
+  "all": [
+   [
+    "bars_get_duplicates",
+    8830,
+    false
+   ]
+  ],
+  "bars_calls": 1,
+  "other_calls": 0,
+  "toolsearch": 0,
+  "bars_chars": 8830,
+  "graph_calls": 0,
+  "search": [],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_get_duplicates",
+    "{\"project\": \"C:\\\\Users\\\\Shket\\\\OneDrive\\\\Рабочий стол\\\\SELF Repository\\\\bars-project\", \"modules\": [\"features\"], \"limit\": 15}"
+   ]
+  ]
+ },
+ "new-z05": {
+  "all": [
+   [
+    "bars_get_duplicates",
+    8782,
+    false
+   ]
+  ],
+  "bars_calls": 1,
+  "other_calls": 0,
+  "toolsearch": 0,
+  "bars_chars": 8782,
+  "graph_calls": 0,
+  "search": [],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_get_duplicates",
+    "{\"project\": \"C:\\\\Users\\\\Shket\\\\OneDrive\\\\Рабочий стол\\\\SELF Repository\\\\bars-project\", \"modules\": [\"features\"], \"limit\": 15}"
+   ]
+  ]
+ },
+ "old-z06": {
+  "all": [
+   [
+    "ToolSearch",
+    471,
+    false
+   ],
+   [
+    "bars_rag_search",
+    16882,
+    false
+   ],
+   [
+    "Grep",
+    434,
+    false
+   ],
+   [
+    "Grep",
+    2799,
+    false
+   ]
+  ],
+  "bars_calls": 1,
+  "other_calls": 2,
+  "toolsearch": 1,
+  "bars_chars": 16882,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "Пути в параметре files пишутся от корня документации, без префикса docs/",
+    "limit": 15
+   }
+  ],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"Пути в параметре files пишутся от корня документации, без префикса docs/\", \"limit\": 15}"
+   ],
+   [
+    "Grep",
+    "{\"pattern\": \"без (префикса )?`?docs/\", \"path\": \"C:\\\\Users\\\\Shket\\\\OneDrive\\\\Рабочий стол\\\\SELF Repository\\\\bars-project\\\\docs\", \"output_mode\": \"content\", \"glob\""
+   ],
+   [
+    "Grep",
+    "{\"pattern\": \"от (корня документации|docs-root)|docs-root.*без|без.*docs/\", \"path\": \"C:\\\\Users\\\\Shket\\\\OneDrive\\\\Рабочий стол\\\\SELF Repository\\\\bars-project\", \"g"
+   ]
+  ]
+ },
+ "new-z06": {
+  "all": [
+   [
+    "bars_rag_search",
+    16882,
+    false
+   ],
+   [
+    "Grep",
+    434,
+    false
+   ],
+   [
+    "Grep",
+    3074,
+    false
+   ]
+  ],
+  "bars_calls": 1,
+  "other_calls": 2,
+  "toolsearch": 0,
+  "bars_chars": 16882,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "пути в параметре files пишутся от корня документации без префикса docs/",
+    "limit": 15
+   }
+  ],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"пути в параметре files пишутся от корня документации без префикса docs/\", \"limit\": 15}"
+   ],
+   [
+    "Grep",
+    "{\"pattern\": \"без (префикса )?`?docs/\", \"path\": \"C:\\\\Users\\\\Shket\\\\OneDrive\\\\Рабочий стол\\\\SELF Repository\\\\bars-project\", \"glob\": \"*.md\", \"output_mode\": \"conten"
+   ],
+   [
+    "Grep",
+    "{\"pattern\": \"files.{0,200}(от docs-root|от корня документации|без `?docs/)\", \"path\": \"C:\\\\Users\\\\Shket\\\\OneDrive\\\\Рабочий стол\\\\SELF Repository\\\\bars-project\", "
+   ]
+  ]
+ },
+ "old-z07": {
+  "all": [
+   [
+    "bars_rag_search",
+    9830,
+    false
+   ]
+  ],
+  "bars_calls": 1,
+  "other_calls": 0,
+  "toolsearch": 0,
+  "bars_chars": 9830,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "Как выбирается устройство CPU или GPU для rerank?",
+    "modules": [
+     "features"
+    ]
+   }
+  ],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"Как выбирается устройство CPU или GPU для rerank?\", \"modules\": [\"features\"]}"
+   ]
+  ]
+ },
+ "new-z07": {
+  "all": [
+   [
+    "bars_rag_search",
+    9830,
+    false
+   ]
+  ],
+  "bars_calls": 1,
+  "other_calls": 0,
+  "toolsearch": 0,
+  "bars_chars": 9830,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "Как выбирается устройство CPU или GPU для модели rerank",
+    "modules": [
+     "features"
+    ],
+    "limit": 6
+   }
+  ],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"Как выбирается устройство CPU или GPU для модели rerank\", \"modules\": [\"features\"], \"limit\": 6}"
+   ]
+  ]
+ },
+ "old-z08": {
+  "all": [
+   [
+    "Grep",
+    1104,
+    false
+   ]
+  ],
+  "bars_calls": 0,
+  "other_calls": 1,
+  "toolsearch": 0,
+  "bars_chars": 0,
+  "graph_calls": 0,
+  "search": [],
+  "errors": [],
+  "inputs": [
+   [
+    "Grep",
+    "{\"pattern\": \"3\\\\.3\\\\.4\", \"path\": \"C:\\\\Users\\\\Shket\\\\OneDrive\\\\Рабочий стол\\\\SELF Repository\\\\bars-project\\\\PLAN.md\", \"output_mode\": \"content\", \"-C\": 3}"
+   ]
+  ]
+ },
+ "new-z08": {
+  "all": [
+   [
+    "Grep",
+    1104,
+    false
+   ],
+   [
+    "Grep",
+    727,
+    false
+   ]
+  ],
+  "bars_calls": 0,
+  "other_calls": 2,
+  "toolsearch": 0,
+  "bars_chars": 0,
+  "graph_calls": 0,
+  "search": [],
+  "errors": [],
+  "inputs": [
+   [
+    "Grep",
+    "{\"pattern\": \"3\\\\.3\\\\.4\", \"path\": \"C:\\\\Users\\\\Shket\\\\OneDrive\\\\Рабочий стол\\\\SELF Repository\\\\bars-project\\\\PLAN.md\", \"output_mode\": \"content\", \"-n\": true, \"-C\":"
+   ],
+   [
+    "Grep",
+    "{\"pattern\": \"ISS-57\", \"path\": \"C:\\\\Users\\\\Shket\\\\OneDrive\\\\Рабочий стол\\\\SELF Repository\\\\bars-project\\\\docs\\\\backlog\\\\issues.md\", \"output_mode\": \"content\", \"-n"
+   ]
+  ]
+ },
+ "old-z09": {
+  "all": [
+   [
+    "ToolSearch",
+    0,
+    false
+   ],
+   [
+    "bars_rag_search",
+    5849,
+    false
+   ],
+   [
+    "Grep",
+    155,
+    true
+   ],
+   [
+    "Grep",
+    933,
+    false
+   ]
+  ],
+  "bars_calls": 1,
+  "other_calls": 2,
+  "toolsearch": 1,
+  "bars_chars": 5849,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "Что требует Т-25?",
+    "limit": 5
+   }
+  ],
+  "errors": [
+   [
+    "Grep",
+    "PreToolUse:Grep hook error: Too many consecutive grep calls without using symbolic tools. You can continue using grep now if needed, the counter was reset."
+   ]
+  ],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"Что требует Т-25?\", \"limit\": 5}"
+   ],
+   [
+    "Grep",
+    "{\"pattern\": \"Т-25\", \"path\": \"C:\\\\Users\\\\Shket\\\\OneDrive\\\\Рабочий стол\\\\SELF Repository\\\\bars-project\\\\docs\\\\MAIN_IDEA.md\", \"output_mode\": \"content\", \"-n\": true,"
+   ],
+   [
+    "Grep",
+    "{\"pattern\": \"Т-25\", \"path\": \"C:\\\\Users\\\\Shket\\\\OneDrive\\\\Рабочий стол\\\\SELF Repository\\\\bars-project\\\\docs\\\\MAIN_IDEA.md\", \"output_mode\": \"content\", \"-n\": true,"
+   ]
+  ]
+ },
+ "new-z09": {
+  "all": [
+   [
+    "bars_outline",
+    1737,
+    false
+   ],
+   [
+    "bars_read",
+    1299,
+    true
+   ],
+   [
+    "Grep",
+    953,
+    false
+   ]
+  ],
+  "bars_calls": 2,
+  "other_calls": 1,
+  "toolsearch": 0,
+  "bars_chars": 3036,
+  "graph_calls": 0,
+  "search": [],
+  "errors": [
+   [
+    "mcp__bars__bars_read",
+    "Error: result (68 289 characters across 473 lines) exceeds maximum allowed tokens. Output has been saved to C:\\Users\\Shket\\.claude\\projects\\C--Users-Shket-OneDr"
+   ]
+  ],
+  "inputs": [
+   [
+    "bars_outline",
+    "{\"path\": \"MAIN_IDEA.md\", \"levels\": [2, 3]}"
+   ],
+   [
+    "bars_read",
+    "{\"path\": \"MAIN_IDEA.md\"}"
+   ],
+   [
+    "Grep",
+    "{\"pattern\": \"Т-25\", \"path\": \"C:\\\\Users\\\\Shket\\\\.claude\\\\projects\\\\C--Users-Shket-OneDrive--------------SELF-Repository-bars-project\\\\16cd007b-bb7a-469d-8262-80f"
+   ]
+  ]
+ },
+ "old-z10": {
+  "all": [
+   [
+    "bars_rag_search",
+    15751,
+    false
+   ]
+  ],
+  "bars_calls": 1,
+  "other_calls": 0,
+  "toolsearch": 0,
+  "bars_chars": 15751,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "Как bars обновляет ссылки при переименовании документа?",
+    "mode": "mix",
+    "limit": 8
+   }
+  ],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"Как bars обновляет ссылки при переименовании документа?\", \"mode\": \"mix\", \"limit\": 8}"
+   ]
+  ]
+ },
+ "new-z10": {
+  "all": [
+   [
+    "bars_rag_search",
+    15631,
+    false
+   ],
+   [
+    "bars_context",
+    55,
+    true
+   ]
+  ],
+  "bars_calls": 2,
+  "other_calls": 0,
+  "toolsearch": 0,
+  "bars_chars": 15686,
+  "graph_calls": 1,
+  "search": [
+   {
+    "query": "Как bars обновляет ссылки при переименовании документа",
+    "limit": 8
+   }
+  ],
+  "errors": [
+   [
+    "mcp__bars__bars_context",
+    "Ошибка bars (graph_not_ready): граф ещё не готов: stale"
+   ]
+  ],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"Как bars обновляет ссылки при переименовании документа\", \"limit\": 8}"
+   ],
+   [
+    "bars_context",
+    "{\"query\": \"Как bars обновляет ссылки при переименовании документа\", \"budgets\": {\"timeout_ms\": 5000}}"
+   ]
+  ]
+ },
+ "old-z11": {
+  "all": [
+   [
+    "ToolSearch",
+    471,
+    false
+   ],
+   [
+    "bars_read",
+    13523,
+    false
+   ],
+   [
+    "bars_rag_search",
+    17444,
+    false
+   ],
+   [
+    "Grep",
+    7236,
+    false
+   ]
+  ],
+  "bars_calls": 2,
+  "other_calls": 1,
+  "toolsearch": 1,
+  "bars_chars": 30967,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "индекс ссылок link-index: какие документы на него опираются",
+    "mode": "mix",
+    "limit": 15
+   }
+  ],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_read",
+    "{\"path\": \"features/knowledge-base/link-index.md\"}"
+   ],
+   [
+    "bars_rag_search",
+    "{\"query\": \"индекс ссылок link-index: какие документы на него опираются\", \"mode\": \"mix\", \"limit\": 15}"
+   ],
+   [
+    "Grep",
+    "{\"pattern\": \"link-index\\\\.md\", \"path\": \"C:\\\\Users\\\\Shket\\\\OneDrive\\\\Рабочий стол\\\\SELF Repository\\\\bars-project\\\\docs\", \"glob\": \"!chats/**\", \"output_mode\": \"con"
+   ]
+  ]
+ },
+ "new-z11": {
+  "all": [
+   [
+    "bars_rag_search",
+    19175,
+    false
+   ],
+   [
+    "Grep",
+    8158,
+    false
+   ]
+  ],
+  "bars_calls": 1,
+  "other_calls": 1,
+  "toolsearch": 0,
+  "bars_chars": 19175,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "индекс ссылок link-index",
+    "limit": 15
+   }
+  ],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"индекс ссылок link-index\", \"limit\": 15}"
+   ],
+   [
+    "Grep",
+    "{\"pattern\": \"link-index\", \"path\": \"C:\\\\Users\\\\Shket\\\\OneDrive\\\\Рабочий стол\\\\SELF Repository\\\\bars-project\\\\docs\", \"glob\": \"!chats/**\", \"output_mode\": \"content\""
+   ]
+  ]
+ },
+ "old-z12": {
+  "all": [
+   [
+    "bars_rag_search",
+    13151,
+    false
+   ]
+  ],
+  "bars_calls": 1,
+  "other_calls": 0,
+  "toolsearch": 0,
+  "bars_chars": 13151,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "Как вести журнал сессии: log.md и handoff.md, когда писать, лимиты строк",
+    "limit": 12
+   }
+  ],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"Как вести журнал сессии: log.md и handoff.md, когда писать, лимиты строк\", \"limit\": 12}"
+   ]
+  ]
+ },
+ "new-z12": {
+  "all": [
+   [
+    "ToolSearch",
+    471,
+    false
+   ],
+   [
+    "bars_rag_search",
+    13103,
+    false
+   ],
+   [
+    "bars_read",
+    2116,
+    false
+   ],
+   [
+    "Grep",
+    2652,
+    false
+   ]
+  ],
+  "bars_calls": 2,
+  "other_calls": 1,
+  "toolsearch": 1,
+  "bars_chars": 15219,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "как вести журнал сессии: log.md, handoff.md, правила записи",
+    "limit": 12
+   }
+  ],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"как вести журнал сессии: log.md, handoff.md, правила записи\", \"limit\": 12}"
+   ],
+   [
+    "bars_read",
+    "{\"path\": \"features/docs-convention/session-log.md\"}"
+   ],
+   [
+    "Grep",
+    "{\"pattern\": \"handoff\", \"path\": \"C:\\\\Users\\\\Shket\\\\OneDrive\\\\Рабочий стол\\\\SELF Repository\\\\bars-project\\\\docs\\\\features\", \"output_mode\": \"content\", \"glob\": \"*.m"
+   ]
+  ]
+ },
+ "old-z13": {
+  "all": [
+   [
+    "bars_rag_search",
+    10431,
+    false
+   ]
+  ],
+  "bars_calls": 1,
+  "other_calls": 0,
+  "toolsearch": 0,
+  "bars_chars": 10431,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "Что делает хук начала сессии bars (SessionStart)?"
+   }
+  ],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"Что делает хук начала сессии bars (SessionStart)?\"}"
+   ]
+  ]
+ },
+ "new-z13": {
+  "all": [
+   [
+    "bars_rag_search",
+    7952,
+    false
+   ]
+  ],
+  "bars_calls": 1,
+  "other_calls": 0,
+  "toolsearch": 0,
+  "bars_chars": 7952,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "Что делает хук начала сессии SessionStart",
+    "limit": 6
+   }
+  ],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"Что делает хук начала сессии SessionStart\", \"limit\": 6}"
+   ]
+  ]
+ },
+ "old-z14": {
+  "all": [
+   [
+    "bars_rag_search",
+    12102,
+    false
+   ]
+  ],
+  "bars_calls": 1,
+  "other_calls": 0,
+  "toolsearch": 0,
+  "bars_chars": 12102,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "во время индексации поиск отвечает «модель загружается» model_loading",
+    "modules": [
+     "backlog"
+    ]
+   }
+  ],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"во время индексации поиск отвечает «модель загружается» model_loading\", \"modules\": [\"backlog\"]}"
+   ]
+  ]
+ },
+ "new-z14": {
+  "all": [
+   [
+    "bars_rag_search",
+    12102,
+    false
+   ],
+   [
+    "Grep",
+    153,
+    false
+   ]
+  ],
+  "bars_calls": 1,
+  "other_calls": 1,
+  "toolsearch": 0,
+  "bars_chars": 12102,
+  "graph_calls": 0,
+  "search": [
+   {
+    "query": "во время индексации поиск отвечает «модель загружается» model_loading",
+    "modules": [
+     "backlog"
+    ]
+   }
+  ],
+  "errors": [],
+  "inputs": [
+   [
+    "bars_rag_search",
+    "{\"query\": \"во время индексации поиск отвечает «модель загружается» model_loading\", \"modules\": [\"backlog\"]}"
+   ],
+   [
+    "Grep",
+    "{\"pattern\": \"ISS-18\", \"path\": \"C:\\\\Users\\\\Shket\\\\OneDrive\\\\Рабочий стол\\\\SELF Repository\\\\bars-project\\\\docs\\\\backlog\\\\issues.md\", \"output_mode\": \"content\"}"
+   ]
+  ]
+ }
+}
