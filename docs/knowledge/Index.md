@@ -20,6 +20,7 @@ title: Внутренняя база знаний bars
 | `mcp-after-workspace.md` | Исследование 4.4.1: изменения MCP после блоков 1–3, свежесть, очередь, варианты объёма и проверки доставки |
 | [editor-spike.md](editor-spike.md) | CodeMirror 6: замеры ввода, прокрутки и разбора на документах до 5 МБ, размер сборки, что не проверено; рекомендация ADR-0005 |
 | [window-docking.md](window-docking.md) | Сравнение docking, Svelte/WebView2-проба и отдельное окно с общим воркером; рекомендация ADR-0003 |
+| [context-menus.md](context-menus.md) | Опись объектов окна и их контекстных меню, устройство меню Проводника, VS Code и Obsidian, предложения для модели меню |
 | [graph-render.md](graph-render.md) | Obsidian, физика и отрисовка на двух проектах, рекомендация d3-force/worker/Canvas2D и границы опыта |
 | [graph-quality-2026-10-20/](graph-quality-2026-10-20/Index.md) | Независимая разметка S1–S8, holdout и сравнение GraphRAG с hybrid на замороженном корпусе |
 | [build.md](build.md) | Собрать проект, прогнать проверки перед коммитом и тесты со встроенной моделью |
