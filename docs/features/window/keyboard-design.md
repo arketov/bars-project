@@ -68,6 +68,8 @@ title: Сочетания клавиш bars — действия, умолчан
 | `target.open` / `target.reveal` / `target.copyPath` | Открыть документ / показать файл или папку в ОС / скопировать путь; цели и ограничения из document-actions.md |
 | `file.create` / `folder.create` / `target.rename` / `target.move` / `target.delete` | Операции выбранного файла/папки; этап 3.3, подтверждения и контроль путей обязательны |
 | `project.create` | Создание проекта; этап 3.3.2 |
+| `tab.closeOthers` / `tab.closeRight` / `target.style` / `target.checkIndex` | Закрыть другие вкладки группы / закрыть вкладки справа / цвет и иконка узла дерева / проверить индекс файла или папки; пункты меню по [модели меню](document-actions.md), записи в реестре появятся с шагом 3.3.4 |
+| `link.copy` / `link.createTarget` / `heading.goTo` / `heading.copyLink` | Скопировать ссылку / создать документ для битой ссылки / перейти к заголовку структуры / скопировать ссылку на заголовок; меню ссылки и структуры, шаг 3.3.5 |
 | `topics.copyQuery` / `topics.rename` / `topics.delete` | Исходный запрос / переименование / удаление выбранной новой темы; текущее меню строки |
 | `notification.details` / `notification.retry` / `notifications.readAll` / `notifications.clear` | Подробности / допустимый повтор выбранной операции / прочитать уведомления / очистить завершённые; ISS-13 |
 | `mcp.details` / `mcp.clear` | Подробности выбранного вызова / очистить историю с прежним подтверждением; ISS-14 |
