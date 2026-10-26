@@ -31,15 +31,17 @@ it('порция читает только файл, при другой рев�
   rpc.mockResolvedValueOnce(result('changed',3));await store.loadMore('docs/a.md');
   expect(store.output?.documents[0].hits.map(h=>h.column)).toEqual([3]);
 });
-it('перед поиском ждёт запись, конфликт не отправляет ни один запрос',async()=>{
+it('перед поиском ждёт запись своего проекта, конфликт показывает предупреждение и не блокирует запросы',async()=>{
   let done!:(v:never[])=>void;
-  vi.spyOn(editors,'unsaved','get').mockReturnValue([{}] as never);
+  vi.spyOn(editors,'unsaved','get').mockReturnValue([{project:'C:/p'}] as never);
   vi.spyOn(editors,'flush').mockImplementation(()=>new Promise(resolve=>done=resolve));
   rpc.mockRejectedValue(Error('модель'));
   const pending=app.search();expect(rpc).not.toHaveBeenCalled();done([]);await pending;
   expect(rpc.mock.calls.map(c=>c[0])).toEqual(['text_search','search']);
   rpc.mockClear();vi.mocked(editors.flush).mockResolvedValue([{path:'docs/a.md'}] as never);
-  await app.search();expect(rpc).not.toHaveBeenCalled();expect(app.textSearch.error).toContain('docs/a.md');
+  await app.search();expect(rpc.mock.calls.map(c=>c[0])).toEqual(['text_search','search']);
+  expect(editors.flush).toHaveBeenLastCalledWith('C:/p');
+  expect(app.searchUnsaved[0].path).toBe('docs/a.md');expect(app.textSearch.error).not.toContain('Разрешите конфликт');
 });
 it('ошибка выражения относится только к текстовой выдаче',async()=>{
   const store=new TextSearchStore();rpc.mockRejectedValue(Error('Некорректное выражение: [ в позиции 1'));

@@ -279,6 +279,8 @@ export class Editors {
   /** Вид закрыт. Буфер без правок и записи удаляется; с правками остаётся и дописывается в фоне. */
   detach(buffer: EditorBuffer): void {
     buffer.views = Math.max(0, buffer.views - 1);
+    // Пользователь уже отбросил правки: отцепление вида не должно снова писать их.
+    if (this.get(buffer.project, buffer.path) !== buffer) return;
     if (buffer.views > 0) return;
     if (buffer.dirty) void buffer.save();
     else if (buffer.status !== "saving") {
@@ -299,9 +301,10 @@ export class Editors {
   }
 
   /** Записывает всё несохранённое; возвращает буферы, которые записать не удалось (конфликт, ошибка). */
-  async flush(): Promise<EditorBuffer[]> {
-    await Promise.all(this.unsaved.map((buffer) => buffer.save()));
-    return this.unsaved;
+  async flush(project?: string): Promise<EditorBuffer[]> {
+    const scoped = () => this.unsaved.filter(buffer => project === undefined || buffer.project === project);
+    await Promise.all(scoped().map((buffer) => buffer.save()));
+    return scoped();
   }
 
   /** Сверяет с диском открытые документы. */

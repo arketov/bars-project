@@ -398,7 +398,7 @@ pub async fn entry_plan_move(
     name: String,
 ) -> Result<Value, String> {
     let _operation = MOVE_OPERATION.lock().await;
-    if !crate::flush::request_clean(&app).await {
+    if !crate::flush::request_clean(&app, &project).await {
         return Ok(
             serde_json::json!({"status":"error","kind":"unsaved","message":"Не все окна подтвердили запись документов. Проверьте несохранённые правки."}),
         );
@@ -425,7 +425,7 @@ pub async fn entry_move(
     token: String,
 ) -> Result<Value, String> {
     let _operation = MOVE_OPERATION.lock().await;
-    if !crate::flush::request_clean(&app).await {
+    if !crate::flush::request_clean(&app, &project).await {
         return Ok(
             serde_json::json!({"status":"error","kind":"unsaved","message":"Не все окна подтвердили запись документов. Проверьте несохранённые правки."}),
         );

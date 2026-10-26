@@ -4,6 +4,7 @@
 import { call, documentWindowOpen, joinPath, openInMainWindow, openPath, pickFolder, treeRead } from "./api";
 import { TextSearchStore } from './text-search.svelte';
 import { editors } from './editors.svelte';
+import { confirmProjectLeave } from './unsaved.svelte';
 import type { GraphReply,GraphSearchOutput,RetrievalMode } from './graph';
 import { documentsIn } from "./format";
 import { AuditsStore } from "./audits.svelte";
@@ -73,6 +74,8 @@ class App {
   /** Текст ошибки, пока воркер не отвечает (error-states.md, «Воркер недоступен»). */
   workerDown = $state<string | null>(null);
   current = $state<string | null>(remembered());
+  searchUnsaved = $state<{ path: string; reason: string }[]>([]);
+  #leavingProject = false;
   status = $state<StatusOutput | null>(null);
 
   docsRoot = $state("docs");
@@ -414,6 +417,13 @@ class App {
   }
 
   async select(path: string | null): Promise<void> {
+    if (this.#leavingProject) return;
+    if (path !== this.current && this.current && editors.unsaved.some(b => b.project === this.current)) {
+      this.#leavingProject = true;
+      try { if (!await confirmProjectLeave(this.current)) return; }
+      finally { this.#leavingProject = false; }
+    }
+    this.searchUnsaved = [];
     this.textSearch.reset();
     this.graphSearch=null;this.graphPreview=null;
     this.#selectionVersion++;
@@ -458,6 +468,14 @@ class App {
     this.selected = new Set();
   }
 
+  openSearchUnsaved(path: string): void {
+    const buffer = this.current ? editors.get(this.current, path) : undefined;
+    if (!buffer) { void this.openDocument({path, title:path, first_line:0, last_line:0}); return; }
+    this.view = "main";
+    this.viewer = {hit:{path,title:path,first_line:0,last_line:0},title:path,text:buffer.text,missing:false};
+    this.activeDocument = path;
+  }
+
   async search(): Promise<void> {
     const project = this.project;
     const query = this.query.trim();
@@ -469,6 +487,7 @@ class App {
     const mode=this.retrievalMode, includeRelated=this.includeRelated, limit=this.count, minScore=this.minScore;
     this.textSearch.reset();
     this.searching = true;
+    this.searchUnsaved = [];
     this.searchError = null;
     this.results = null;
     this.graphSearch = null;
@@ -478,12 +497,9 @@ class App {
     const started = performance.now();
     let textTask: Promise<void> | undefined;
     try {
-      const unsaved = editors.unsaved.length ? await editors.flush() : [];
+      const unsaved = editors.unsaved.some(b => b.project === project.path) ? await editors.flush(project.path) : [];
       if (searchId !== this.#searchId || this.current !== project.path) return;
-      if (unsaved.length) {
-        this.textSearch.error = `Не удалось записать ${unsaved.map(b => b.path).join(', ')}. Разрешите конфликт или ошибку записи перед поиском.`;
-        return;
-      }
+      this.searchUnsaved = unsaved.map(b => ({ path: b.path, reason: b.message || "Правки не записаны" }));
       this.searchedQuery = query;
       textTask = this.textSearch.search(textParams);
       const { modules, files } = semanticScope;
@@ -695,6 +711,7 @@ class App {
 
   async removeProject(path: string): Promise<void> {
     try {
+      if (editors.unsaved.some(b => b.project === path) && !await confirmProjectLeave(path)) return;
       await call("unregister", { cwd: path, project: path });
       await this.loadProjects();
     } catch (error) {
@@ -722,6 +739,7 @@ class App {
     this.deleteBusy = true;
     this.deleteError = null;
     try {
+      if (editors.unsaved.some(b => b.project === project.path) && !await confirmProjectLeave(project.path)) { this.deleteBusy = false; return; }
       await call("project_delete", { project: project.path, confirmed: true });
     } catch (error) {
       this.deleteError = error instanceof Error ? error.message : String(error);

@@ -103,12 +103,12 @@ pub async fn request(app: &AppHandle) -> bool {
 }
 
 /// Перед переименованием все окна подтверждают запись; молчание запрещает операцию.
-pub async fn request_clean(app: &AppHandle) -> bool {
+pub async fn request_clean(app: &AppHandle, project: &str) -> bool {
     let state = app.state::<Shared>();
     let _operation = state.flush.operation.lock().await;
     let mut rx = state.flush.begin();
     let mut pending: HashSet<String> = app.webview_windows().into_keys().collect();
-    if app.emit("bars://move-flush-request", ()).is_err() {
+    if app.emit("bars://move-flush-request", project).is_err() {
         state.flush.end();
         return false;
     }
