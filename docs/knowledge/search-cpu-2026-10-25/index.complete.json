@@ -1,0 +1,8 @@
+{
+  "chunks": 5000,
+  "reused": 4592,
+  "computed": 408,
+  "device": "cpu",
+  "index_blake3": "69b8c22701332ccd24e8a449fc0a1c56043b3f7726db7e481cb2c4368a58be05",
+  "corpus_blake3": "4a034fa84018e00debb470cfc6b10367548567fbbb863e4e727ebcd9e8a3cb8d"
+}

@@ -1,0 +1,18 @@
+{
+  "status": "complete-core-only",
+  "execution": "ExecutionInfo { backend: \"onnx\", actual: Some(\"cpu\"), fallback_reason: None, precision: Some(\"fp32\"), revision: None }",
+  "chunks": 5000,
+  "unique_queries": 25,
+  "observations": 100,
+  "load_seconds": 3.242789,
+  "first_search_seconds": 0.3323995,
+  "median_seconds": 0.3132885,
+  "p95_seconds": 0.3795035,
+  "max_seconds": 0.4464613,
+  "under_one_second": 100,
+  "embed_median_seconds": 0.0400724,
+  "embed_p95_seconds": 0.0777532,
+  "index_blake3": "69b8c22701332ccd24e8a449fc0a1c56043b3f7726db7e481cb2c4368a58be05",
+  "inputs_blake3": "45d7bcbc440457636f47c4d3a8f4026ab54fce69cccd6c4d9b53fdc036de3ef9",
+  "boundary": "core search, no IPC/UI, warm model, OS cache uncontrolled"
+}

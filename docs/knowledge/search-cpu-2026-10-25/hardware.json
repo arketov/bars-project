@@ -1,0 +1,21 @@
+{
+  "cpu": "Intel(R) Core(TM) Ultra 5 125H",
+  "cores": "14",
+  "logical": "18",
+  "ram_gib": 31.6,
+  "gpu": "Intel(R) Arc(TM) Graphics",
+  "os": "Windows 11 Home Single Language 10.0.26100",
+  "bars_commit": "8ad9868030f86a9b5b52d29a61fbd1970cb718a4",
+  "sources_sha256": {
+    "crates/bars-core/examples/bench_search_cpu.rs": "10ef293981a38aa718884cc27ded4f0d6c33e4cec09cd4211903d721d26f92aa",
+    "crates/bars-worker/examples/bench_worker_search_cpu.rs": "109f69a3dafa79fe6f39eb248f20d540f492fa154f14efd330fbd20cf898f20e"
+  },
+  "exe_sha256": {
+    "C:/bt/bars/release/examples/bench_search_cpu.exe": "5539311625bddc8991c8dafb627ab3d7a58582b321e4c6ea766c90cbf1fdb72b",
+    "C:/bt/bars/release/examples/bench_worker_search_cpu.exe": "f95f8109690f6c960ab8cf53dbae7c7e699e6c3531238fa6060f0f1fe427fe1a"
+  },
+  "corpus_sha256": "01569c25d15767cebd2a61696ca5dcb64d93867525c782dd900d59286507fd71",
+  "index_sha256": "a92cf95e459dde65b48f7a65a5ac3e74093e50ef615a5b43735767b27042b750",
+  "note": "Работающий bars (около 6-7 ГиБ private), сборки и агенты других сессий шли параллельно (OQ-195); выделенного окна не было",
+  "bars_commit_note": "HEAD на момент упаковки; стенды не закоммичены, их состояние задают sources_sha256"
+}

@@ -1,0 +1,20 @@
+{
+  "status": "complete-worker-ipc",
+  "chunks": 5000,
+  "unique_queries": 25,
+  "observations": 100,
+  "settle_seconds": 2.6068360999999998,
+  "first_search_seconds": 5.8034464,
+  "first_embed_seconds": 0.0792754,
+  "median_seconds": 0.1196506,
+  "p95_seconds": 0.2132157,
+  "max_seconds": 0.2738256,
+  "under_one_second": 100,
+  "embed_median_seconds": 0.0420424,
+  "embed_p95_seconds": 0.0716083,
+  "same_as_core": 92,
+  "documents_embedded": 0,
+  "index_blake3": "69b8c22701332ccd24e8a449fc0a1c56043b3f7726db7e481cb2c4368a58be05",
+  "inputs_blake3": "45d7bcbc440457636f47c4d3a8f4026ab54fce69cccd6c4d9b53fdc036de3ef9",
+  "boundary": "client-measured IPC to real worker, CPU embed, rerank off, model load in first search, OS cache uncontrolled"
+}

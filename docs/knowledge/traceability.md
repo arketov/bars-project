@@ -65,7 +65,7 @@ title: Трассировка требований bars — документы �
 | ID | Владеющий этап; дополнительные шаги | Документы и границы |
 |---|---|---|
 | НФТ-1 | 3.2 → 3.2.1 | [Нарезка](../features/indexing/chunking.md), [актуальность](../features/indexing/updates.md), [схема](../architecture/schema.md): контроль переиспользования |
-| НФТ-2 | 4.3 → 4.3.2, 4.3.3 | [Векторный поиск](../architecture/vector-search.md), [проба](spike-search.md): прежняя проверка Windows не закрывает естественные 5000 чанков и все модели |
+| НФТ-2 | 4.3 → 4.3.2, 4.3.3 | [Векторный поиск](../architecture/vector-search.md), [проба](spike-search.md), [естественные 5000 чанков на CPU](inference-speed.md): через воркер и IPC 200 из 200 ответов быстрее 1 с на ноутбуке; одна машина, одна модель |
 | НФТ-3 | 4.4 → 4.4.2; 4.2.2 | [Компоненты](../architecture/components.md), [worker](../architecture/worker.md): контроль лёгкого прокси |
 | НФТ-4 | 1.1 → 1.1.3, 1.1.4; 1.2.2, 1.3.2, 2.3.2, 3.4.1, 4.4.2 | Окно, [MCP](../features/agent-tools/mcp-tools.md), [инструкция](../features/docs-convention/bars-instruction.md): язык проверяется в каждом пользовательском срезе |
 | НФТ-5 | 3.4 → 3.4.1; 3.4.2 | [База знаний](../features/knowledge-base/requirements.md): сохранение при закрытии вкладки/панели/окна |

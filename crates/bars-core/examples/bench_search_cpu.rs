@@ -231,7 +231,7 @@ fn guarded(output: &str, reserve: u64, action: impl FnOnce() -> Result<()>) -> R
         Err("аппаратный прогон требует Windows guard; freeze/cache-plan доступны отдельно".into())
     }
 }
-/// `cpu` — запасное устройство подготовки (OQ-191); измеряемый путь от него не зависит.
+/// `cpu` — запасное устройство подготовки (OQ-196); измеряемый путь от него не зависит.
 fn prepare(corpus: &Corpus, inputs: &Inputs, output: &str, models: &Path, cpu: bool) -> Result<()> {
     validate(corpus)?;
     if Path::new(output).exists() {
