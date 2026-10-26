@@ -29,6 +29,12 @@ pub struct DocumentSimilarity {
     pub rows: (usize, usize),
 }
 
+#[derive(Clone)]
+pub struct DocumentRepresentations {
+    pub vectors: Vec<VectorNode>,
+    pub skipped: Vec<(String, String)>,
+}
+
 /// Доли символов исходного текста, приходящиеся на каждый чанк документа; пересечения учитываются один раз.
 pub fn chunk_weights(text: &str, spans: &[Vec<(usize, usize)>]) -> Vec<f64> {
     let mut cuts = BTreeSet::new();
@@ -79,6 +85,16 @@ pub fn document_similarity(
     data: &Dataset,
     mut cancelled: impl FnMut() -> bool,
 ) -> Result<DocumentSimilarity, GraphError> {
+    let representations = document_representations(index, data, &mut cancelled)?;
+    similarity_from_representations(data, &representations, cancelled)
+}
+
+/// Общие представления физического графа и вида запроса; модели не вызываются.
+pub fn document_representations(
+    index: &Index,
+    data: &Dataset,
+    mut cancelled: impl FnMut() -> bool,
+) -> Result<DocumentRepresentations, GraphError> {
     let evidence: HashMap<&str, (usize, usize)> = data
         .evidence
         .iter()
@@ -182,9 +198,17 @@ pub fn document_similarity(
         });
     }
     drop(statement);
-    let covered = centroids.len();
+    Ok(DocumentRepresentations { vectors: centroids, skipped })
+}
+
+pub fn similarity_from_representations(
+    data: &Dataset,
+    representations: &DocumentRepresentations,
+    mut cancelled: impl FnMut() -> bool,
+) -> Result<DocumentSimilarity, GraphError> {
+    let covered = representations.vectors.len();
     let knn = build_knn(
-        &centroids,
+        &representations.vectors,
         KnnOptions {
             k: K,
             min_cosine: TAU,
@@ -212,7 +236,7 @@ pub fn document_similarity(
         pairs,
         documents: data.sources.len(),
         covered,
-        skipped,
+        skipped: representations.skipped.clone(),
         stopped: knn.stop_reason,
         rows,
     })

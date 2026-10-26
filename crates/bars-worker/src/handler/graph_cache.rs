@@ -179,6 +179,8 @@ impl GraphCache {
         {
             let Some(oldest) = slots
                 .iter()
+                // Активный Slot остаётся общим для загрузчика и ожидающих читателей.
+                .filter(|(_, s)| Arc::strong_count(s) == 1)
                 .min_by_key(|(_, s)| s.used.load(Ordering::Relaxed))
                 .map(|(p, _)| p.clone())
             else {
@@ -305,6 +307,91 @@ mod tests {
             (a.join().unwrap(), b.join().unwrap())
         });
         assert!(Arc::ptr_eq(&snapshots.0, &snapshots.1));
+    }
+
+    #[test]
+    fn waiting_reader_times_out_without_discarding_shared_snapshot() {
+        let project = tempfile::tempdir().unwrap();
+        drop(fixture(project.path(), "# A\n\nТекст."));
+        let cache = GraphCache::default();
+        let gate = Arc::new(RwLock::new(()));
+        let first = load(&cache, project.path(), &gate);
+        let slot = cache.slots.lock().unwrap()[project.path()].clone();
+        let held = slot.entry.lock().unwrap();
+        assert!(matches!(
+            cache.load(
+                project.path(),
+                &gate,
+                Instant::now() + Duration::from_millis(10)
+            ),
+            Err(GraphError::TimedOut)
+        ));
+        drop(held);
+        assert!(Arc::ptr_eq(&first, &load(&cache, project.path(), &gate)));
+    }
+
+    #[test]
+    fn lru_evicts_idle_slots_without_splitting_active_loads() {
+        let cache = GraphCache::default();
+        let active = Arc::new(Slot::default());
+        active.bytes.store(RETAINED_BYTES, Ordering::Relaxed);
+        let idle = Arc::new(Slot::default());
+        idle.used.store(1, Ordering::Relaxed);
+        idle.bytes.store(1, Ordering::Relaxed);
+        {
+            let mut slots = cache.slots.lock().unwrap();
+            slots.insert(PathBuf::from("active"), active.clone());
+            slots.insert(PathBuf::from("idle"), idle);
+        }
+        cache.trim();
+        assert!(Arc::ptr_eq(
+            &cache.slots.lock().unwrap()[Path::new("active")],
+            &active
+        ));
+        assert!(!cache.slots.lock().unwrap().contains_key(Path::new("idle")));
+        // Превышение числа проектов снимается после освобождения активных записей.
+        for i in 0..MAX_PROJECTS {
+            let slot = Arc::new(Slot::default());
+            slot.used.store(i as u64 + 2, Ordering::Relaxed);
+            cache
+                .slots
+                .lock()
+                .unwrap()
+                .insert(PathBuf::from(format!("project-{i}")), slot);
+        }
+        cache.trim();
+        assert_eq!(cache.slots.lock().unwrap().len(), MAX_PROJECTS);
+        assert!(
+            cache
+                .slots
+                .lock()
+                .unwrap()
+                .contains_key(Path::new("active"))
+        );
+        assert!(
+            !cache
+                .slots
+                .lock()
+                .unwrap()
+                .contains_key(Path::new("project-0"))
+        );
+        drop(active);
+        cache
+            .slots
+            .lock()
+            .unwrap()
+            .get(Path::new("project-1"))
+            .unwrap()
+            .bytes
+            .store(1, Ordering::Relaxed);
+        cache.trim();
+        assert!(
+            !cache
+                .slots
+                .lock()
+                .unwrap()
+                .contains_key(Path::new("active"))
+        );
     }
 
     #[test]

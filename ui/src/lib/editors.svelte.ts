@@ -33,6 +33,8 @@ export class EditorBuffer {
   readonly project: string;
   path: string;
   text = $state("");
+  /** Граница истории отмены: успешное чтение диска, даже если текст совпал. */
+  historyVersion = $state(0);
   status = $state<EditorStatus>("loading");
   /** Пояснение к `error`, `conflict` и `readonly`. */
   message = $state("");
@@ -80,6 +82,7 @@ export class EditorBuffer {
       return;
     }
     this.text = read.text;
+    this.historyVersion++;
     this.#saved = read.text;
     this.revision = read.revision;
     this.eol = read.eol;

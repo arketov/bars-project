@@ -158,7 +158,7 @@
       {#if cheat}<div class="cheat" role="note"><code># Заголовок</code> · <code>**жирный**</code> · <code>*курсив*</code> · <code>`код`</code> · <code>- пункт</code> · <code>1. пункт</code> · <code>- [ ] задача</code> · <code>&gt; цитата</code> · <code>[текст](путь.md)</code> · <code>| а | б |</code> — таблица; <code>Tab</code> переходит по ячейкам, <code>Enter</code> продолжает список.</div>{/if}
     {/if}
     <div class="body" class:editing={source} bind:this={body}>
-      {#if source}<Editor bind:this={editor} text={text} links={() => linkTargets(app.tree, app.docsRoot)} semantic={semanticLinks} readonly={!buffer || buffer.status === "readonly" || buffer.status === "loading"} hit={range} oninput={(value) => buffer?.edit(value)} />
+      {#if source}<Editor bind:this={editor} text={text} historyVersion={buffer?.historyVersion ?? 0} links={() => linkTargets(app.tree, app.docsRoot)} semantic={semanticLinks} readonly={!buffer || buffer.status === "readonly" || buffer.status === "loading"} hit={range} oninput={(value) => buffer?.edit(value)} />
       {:else}<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions --><div class="md" onclick={followLink}>{@html html}</div>{/if}
     </div>
     <footer class="backlinks" aria-label="Ссылки документа">

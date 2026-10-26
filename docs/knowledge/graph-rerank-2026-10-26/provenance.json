@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-26",
+  "head": "c6e05eb68ec0877963f3284c46f4d6eef7274734",
+  "sources": {
+    "crates/bars-core/examples/graph_quality.rs": "b43438215b13e4818be9fb9b827cbf89d9556f9a60fcf035410e07b0245fa2c8",
+    "scripts/graph-quality-analyze.mjs": "700a6786277c3b6d221f0f9e9c3607326770b34b09ae596e13a4e6b987d77b0f",
+    "scripts/graph-quality-analyze.test.mjs": "4ff2bcd65eb68a77f04cea350ed7d492a93c0ed10e1c8f6c569ef1acacdb4cc4",
+    "scripts/prepare-graph-rerank.mjs": "f5ffa9db662146b5ba8ae9e616db834975904bab96e81ecee7f65ee437ad45fc",
+    "crates/bars-core/src/search/hybrid.rs": "b8febe43385f216f5655a17c9e6552e5f8173fdb00f76b5f1c5276c798dfde70",
+    "crates/bars-core/src/graph/retrieval.rs": "2d0b575b62841e991ba95749aa63ec12e356a3d1d76f7d807d9a8ea346fca782",
+    "crates/bars-core/src/models/builtin_rerank.rs": "16f8b3ed0b7f2c1ad877c997d6e9c0cf0cf935c94ef657a219ccfda833f0edca",
+    "crates/bars-core/src/models/rerank_artifact.rs": "308fc9805add13bb11fd56b8355c7c7ccf4d7780de63e7b378cb7d2aab7eda76"
+  },
+  "inputs": {
+    "docs/knowledge/graph-quality-2026-10-20/gold-matched.json": "abc706e3ba6aec611bbeb72f6fbaa5f0d7b773eede5e1ed3be542044915766e5",
+    "docs/knowledge/graph-quality-2026-10-20/index.sqlite.gz": "469fee560324bb3efacf646e5b44647dab08b1e7fae854b91e5ae86e5a7c4206",
+    "docs/knowledge/graph-quality-2026-10-20/query-vectors.json.gz": "4393722c678a3722e7d15acf03c3040090a9a12efa36a8f05affd1b9a89482c0",
+    "docs/knowledge/graph-quality-2026-10-20/dataset.json.gz": "eceb076a0e84766458926e6e6e0a8d7f637ff4ba7de6327fab8a7519f83007a8",
+    "docs/knowledge/graph-quality-2026-10-20/freeze.json.gz": "640ad26f384745e52d90238909f2a59c5c0d920334f13069109e5ea0d30f31aa"
+  },
+  "artifactHashes": {
+    "analysis.json.gz": "8e9fad0f7a08c6234f0488e1109c8ddb091c4347bda2fc0d8bfab308a981f4e8",
+    "corpus.json.gz": "72a0c78e1c46ff592c5a9506be9f9e2b11d58ee5d16c13044c5e04c74007a4de",
+    "dataset.json.gz": "4b8b5d688a64d406d91f4a30031985aab5012dea76569feafefe10026d78fe15",
+    "results.json.gz": "72150a28b182a05b2c3c695fbcdc269063868c1a18e34ffc05003c3b0c1cdf48",
+    "summary.json": "0935b760fd502e4e186f4a3b29c44f0ecaa6d7dbaf9ffa0a6a05fe00ce653139"
+  },
+  "executable_sha256": "f1a3a4b83c0def166adc791477734c69d81bb958a1a47c7ddbdb589efe7e33a6",
+  "limitations": [
+    "Known corpus; no independent holdout",
+    "Debug; fixed order; concurrent builds/tests; no speed acceptance",
+    "Core retrieval only; no IPC/native/installed acceptance"
+  ],
+  "scope": "66 frozen documents / 503 existing FP32 bge-m3 vectors; current graph; local FP16 DirectML rerank"
+}

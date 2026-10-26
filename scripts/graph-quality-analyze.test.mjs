@@ -21,6 +21,7 @@ test('evaluation preserves UTF-8 spans, atomic paths, missing roles and empty de
     {type:'path',path:{nodes:[],evidence:['ev'],steps:[],complete:true,padding:'x'.repeat(3000)}}],
     evidence:[ev],nodes:[],sources:[source.meta],layer_state:'partial',missing_roles:['constraint'],truncated:false};
   const variants=['hybrid','hybrid_wide','structural','mix'].map(name=>({name,hits:[{path:'docs/feature.md',text,first_line:1,last_line:1}]}));
+  variants.push({name:'mix_rerank',hits:[],related:{...graph,items:[graph.items[0]]}});
   const results={snapshot:'snapshot',rows:[{id:'case',graph,variants},{id:'empty',graph:{...graph,items:[]},variants}]};
   for(const [file,value] of [['dataset.json',data],['gold.json',gold],['results.json',results]]) fs.writeFileSync(path.join(root,file),JSON.stringify(value));
   const run=spawnSync(process.execPath,['scripts/graph-quality-analyze.mjs',root,path.join(root,'gold.json'),path.join(root,'results.json'),path.join(root,'analysis.gz')],{encoding:'utf8'});
@@ -31,6 +32,9 @@ test('evaluation preserves UTF-8 spans, atomic paths, missing roles and empty de
   assert.equal(report.rows[0].variants.graph.skipped,1);
   assert(report.rows[0].variants.graph.bytes<=gold.budget_bytes);
   assert.equal(report.rows[1].variants.graph.recall,null);
+  assert.equal(report.rows[0].variants.mix_rerank_hits.found,0);
+  assert.equal(report.rows[0].variants.mix_rerank.found,1);
+  assert.equal(report.summaries.find(s=>s.split==='dev'&&s.scenario==='S3'&&s.name==='mix_rerank').found,1);
   // An incomplete returned proof must not be reconstructed from the full corpus silently.
   graph.evidence=[];
   fs.writeFileSync(path.join(root,'results.json'),JSON.stringify(results));

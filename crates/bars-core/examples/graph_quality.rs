@@ -1,7 +1,10 @@
 //! Research driver: isolated frozen index only; existing query model, no reindex/download.
 use bars_core::{
     graph::{self, *},
-    models::{EmbedError, Embedder, ModelFingerprint, bge_m3_fingerprint},
+    models::{
+        Accelerator, BuiltinReranker, EmbedError, Embedder, ModelFingerprint, Reranker,
+        bge_m3_fingerprint, reranker_is_downloaded,
+    },
     search::{SearchRequest, SearchSettings, search, search_expanded},
     storage::{Index, Journal},
 };
@@ -92,8 +95,12 @@ fn write(p: &Path, v: &impl serde::Serialize) -> Result<(), Box<dyn std::error::
 }
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<_> = std::env::args().collect();
-    if !((args.len() == 3 && args[1] == "freeze") || (args.len() == 6 && args[1] == "run")) {
-        return Err("freeze <snapshot> | run <snapshot> <gold> <local-models> <NEW-result>".into());
+    if !((args.len() == 3 && args[1] == "freeze")
+        || (args.len() == 6 && ["run", "run-rerank"].contains(&args[1].as_str())))
+    {
+        return Err(
+            "freeze <snapshot> | run[-rerank] <snapshot> <gold> <local-models> <NEW-result>".into(),
+        );
     }
     let command = &args[1];
     let root = Path::new(&args[2]).canonicalize()?;
@@ -185,6 +192,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         )?;
         vectors
     };
+    let mut reranker = if command == "run-rerank" {
+        let models = Path::new(&args[4]);
+        if !reranker_is_downloaded(models, Accelerator::Auto)
+            || !reranker_is_downloaded(models, Accelerator::Cpu)
+        {
+            return Err(
+                "local verified FP16 and FP32 reranker artifacts required; no download allowed"
+                    .into(),
+            );
+        }
+        Some(BuiltinReranker::bge_reranker_v2_m3(
+            models,
+            Accelerator::Auto,
+        )?)
+    } else {
+        None
+    };
+    let rerank_device = reranker.as_ref().map(|r| format!("{:?}", r.device()));
     let mut rows = Vec::new();
     for case in gold["cases"].as_array().unwrap() {
         for ev in case["evidence"].as_array().unwrap() {
@@ -242,61 +267,98 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             None
         };
         let mut variants = Vec::new();
-        for (name, candidates, results, expand) in [
+        for (base_name, candidates, results, expand) in [
             ("hybrid", 30, 5, false),
             ("hybrid_wide", 100, 20, false),
             ("structural", 30, 5, true),
             ("mix", 30, 5, true),
+            ("hybrid_ui", 30, 3, false),
+            ("mix_ui", 30, 3, true),
         ] {
-            let request = SearchRequest {
-                query: q.into(),
-                files: data
-                    .sources
-                    .iter()
-                    .map(|s| s.meta.docs_path.clone())
-                    .collect(),
-                candidates: Some(candidates),
-                results: Some(results),
-                ..Default::default()
-            };
-            let mut related = None;
-            let start = Instant::now();
-            let mut expansion = |idx: &Index, seeds: &[i64], limit| {
-                let graph_data = if name == "structural" {
-                    &structural
+            for use_rerank in [false, true] {
+                if use_rerank && reranker.is_none() {
+                    continue;
+                }
+                if base_name.ends_with("_ui") && !use_rerank {
+                    continue;
+                }
+                let name = if use_rerank {
+                    format!("{base_name}_rerank")
                 } else {
-                    &data
+                    base_name.into()
                 };
-                let (ids, reply) = graph::retrieval::expand(
-                    idx,
-                    graph_data,
-                    &request,
-                    seeds,
-                    limit,
-                    Budgets::default(),
-                )?;
-                related = Some(reply);
-                Ok(ids)
-            };
-            let result = if expand {
-                search_expanded(
-                    &index,
-                    &mut embedder,
-                    None,
-                    &SearchSettings::default(),
-                    &request,
-                    Some(&mut expansion),
-                )?
-            } else {
-                search(
-                    &index,
-                    &mut embedder,
-                    None,
-                    &SearchSettings::default(),
-                    &request,
-                )?
-            };
-            variants.push(json!({"name":name,"elapsed_ms":start.elapsed().as_secs_f64()*1000.0,"candidates":result.applied.candidates,"results_limit":result.applied.results,"min_score":result.applied.min_score,"score_kind":format!("{:?}",result.applied.score_kind),"hits":result.hits.iter().map(|h|json!({"path":h.path,"first_line":h.first_line,"last_line":h.last_line,"text":h.text,"score":h.score,"id":h.public_id})).collect::<Vec<_>>(),"related":related}));
+                let request = SearchRequest {
+                    query: q.into(),
+                    files: data
+                        .sources
+                        .iter()
+                        .map(|s| s.meta.docs_path.clone())
+                        .collect(),
+                    candidates: Some(candidates),
+                    results: Some(results),
+                    rerank_candidates: Some(if candidates == 100 { 50 } else { 15 }),
+                    min_score: Some(if base_name.ends_with("_ui") { 0.1 } else { 0.0 }),
+                    ..Default::default()
+                };
+                let mut related = None;
+                let start = Instant::now();
+                let mut expansion = |idx: &Index, seeds: &[i64], limit| {
+                    let graph_data = if base_name == "structural" {
+                        &structural
+                    } else {
+                        &data
+                    };
+                    let (ids, reply) = graph::retrieval::expand(
+                        idx,
+                        graph_data,
+                        &request,
+                        seeds,
+                        limit,
+                        Budgets::default(),
+                    )?;
+                    related = Some(reply);
+                    Ok(ids)
+                };
+                let rr = if use_rerank {
+                    reranker.as_mut().map(|r| r as &mut dyn Reranker)
+                } else {
+                    None
+                };
+                let result = if expand {
+                    search_expanded(
+                        &index,
+                        &mut embedder,
+                        rr,
+                        &SearchSettings::default(),
+                        &request,
+                        Some(&mut expansion),
+                    )?
+                } else {
+                    search(
+                        &index,
+                        &mut embedder,
+                        rr,
+                        &SearchSettings::default(),
+                        &request,
+                    )?
+                };
+                if use_rerank
+                    && (result.rerank_error.is_some()
+                        || result.applied.score_kind != bars_core::search::ScoreKind::Rerank)
+                {
+                    return Err(format!(
+                        "rerank failed for {} / {name}: {:?}",
+                        case["id"], result.rerank_error
+                    )
+                    .into());
+                }
+                eprintln!(
+                    "{} {name} {:.0} ms",
+                    case["id"],
+                    start.elapsed().as_secs_f64() * 1000.0
+                );
+                variants.push(json!({"name":name,"elapsed_ms":start.elapsed().as_secs_f64()*1000.0,"rerank_candidates":result.applied.rerank_candidates,"rerank_error":result.rerank_error,"candidates":result.applied.candidates,"results_limit":result.applied.results,"min_score":result.applied.min_score,"score_kind":format!("{:?}",result.applied.score_kind),"hits":result.hits.iter().map(|h|json!({"path":h.path,"first_line":h.first_line,"last_line":h.last_line,"text":h.text,"score":h.score,"id":h.public_id})).collect::<Vec<_>>(),"related":related}));
+            }
         }
         rows.push(json!({"id":case["id"],"graph":match reply { Ok(r)=>json!(r), Err(e)=>json!({"error":e.to_string()}) },"graph_modules":modules_reply.map(|r|match r{Ok(r)=>json!(r),Err(e)=>json!({"error":e.to_string()})}),"graph_ms":graph_ms,"variants":variants}));
     }
@@ -337,7 +399,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     write(
         Path::new(&args[5]),
-        &json!({"snapshot":data.snapshot,"rows":rows,"contract_probes":probes}),
+        &json!({"snapshot":data.snapshot,"rerank_model":"BAAI/bge-reranker-v2-m3","rerank_device":rerank_device,"rows":rows,"contract_probes":probes}),
     )?;
     Ok(())
 }

@@ -215,7 +215,7 @@ it("Ctrl+Ж по физической клавише B делает выделе
   expect(buffer.text).toBe("# А\n\n**Текст**");
   editors.discard(buffer);
 });
-it("вкладка с конфликтом версий не закрывается молча: «Вернуться» оставляет её, «Закрыть без записи» закрывает", async () => {
+it.each(["крестик", "колёсико"])("%s: при конфликте «Вернуться» оставляет вкладку, «Закрыть без записи» закрывает", async (gesture) => {
   component = mount(Workspace, { target: document.body }); flushSync();
   app.viewer = { hit: hit("docs/a.md"), title: "А", text: "# А", missing: false }; flushSync(); await settle();
   const buffer = editors.get(project.path, "docs/a.md")!;
@@ -223,7 +223,10 @@ it("вкладка с конфликтом версий не закрывает�
   const section = document.querySelector('section[data-document-path="docs/a.md"]')!;
   expect([...section.querySelectorAll("button")].map(b => b.textContent?.trim())).toEqual(expect.arrayContaining(["Оставить мою версию", "Взять версию с диска", "Сохранить мою рядом"]));
   const tab = () => document.querySelector('[role="tab"] [data-document-path="docs/a.md"], [role="tab"][data-document-path="docs/a.md"]');
-  const closeTab = () => (tab()!.closest('[role="tab"]')!.querySelector('.dv-default-tab-action') as HTMLElement).click();
+  const closeTab = () => {
+    if (gesture === "крестик") (tab()!.closest('[role="tab"]')!.querySelector('.dv-default-tab-action') as HTMLElement).click();
+    else tab()!.dispatchEvent(new MouseEvent("auxclick", { button: 1, bubbles: true, cancelable: true }));
+  };
   closeTab(); flushSync(); await settle();
   expect(document.querySelector('[role="alertdialog"]')?.textContent).toContain("docs/a.md");
   [...document.querySelectorAll<HTMLButtonElement>('[role="alertdialog"] button')].find(b => b.textContent === "Вернуться")!.click(); flushSync(); await settle();
@@ -233,6 +236,34 @@ it("вкладка с конфликтом версий не закрывает�
   [...document.querySelectorAll<HTMLButtonElement>('[role="alertdialog"] button')].find(b => b.textContent === "Закрыть без записи")!.click(); flushSync(); await settle();
   expect(tab()).toBeNull();
   expect(editors.get(project.path, "docs/a.md")).toBeUndefined();
+});
+
+it("крестик отменяет штатное закрытие, но пропускает click к списку Dockview", async () => {
+  component = mount(Workspace, { target: document.body }); flushSync();
+  app.viewer = { hit: hit("docs/a.md"), title: "А", text: "# А", missing: false }; flushSync(); await settle();
+  const tab = document.querySelector<HTMLElement>('[role="tab"] [data-document-path="docs/a.md"]')!;
+  const bubble = vi.fn((event: Event) => expect(event.defaultPrevented).toBe(true));
+  tab.parentElement!.addEventListener("click", bubble, { once: true });
+  tab.querySelector<HTMLElement>(".dv-default-tab-action")!.click();
+  expect(bubble).toHaveBeenCalledOnce();
+  await settle();
+  expect(document.querySelector('[role="tab"] [data-document-path="docs/a.md"]')).toBeNull();
+});
+
+it("колёсико закрывает служебную вкладку без автопрокрутки; другие кнопки её не закрывают", async () => {
+  component = mount(Workspace, { target: document.body }); flushSync(); await settle();
+  const tab = document.querySelector<HTMLElement>('[data-workspace-panel="search"]')!;
+  for (const button of [0, 2]) {
+    tab.dispatchEvent(new MouseEvent("auxclick", { button, bubbles: true, cancelable: true }));
+    expect(tab.isConnected).toBe(true);
+  }
+  const down = new MouseEvent("mousedown", { button: 1, bubbles: true, cancelable: true });
+  tab.dispatchEvent(down);
+  expect(down.defaultPrevented).toBe(true);
+  tab.dispatchEvent(new MouseEvent("auxclick", { button: 1, bubbles: true, cancelable: true }));
+  await settle();
+  expect(tab.isConnected).toBe(false);
+  expect(document.querySelector('[data-panel-kind="search"]')).toBeNull();
 });
 it("повторное действие открывает закрытую панель; испорченная раскладка не мешает запуску", async () => {
   localStorage.setItem(layoutKey(project.path), "{broken");

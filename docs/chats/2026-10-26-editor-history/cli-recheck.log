@@ -1,0 +1,14 @@
+
+running 9 tests
+test arguments_are_checked_before_the_worker_is_called ... ok
+test unreachable_worker_exits_with_two ... ok
+test print_instruction_needs_no_worker ... ok
+test install_and_uninstall_edit_client_files_in_temp_home ... ok
+test session_start_hook_registers_project_and_never_fails ... ok
+test register_search_outline_read_scenario ... ok
+test request_errors_exit_with_one ... ok
+test graph_cli_operations_and_search_modes_match_worker_json ... ok
+test model_change_needs_consent_and_exits_with_three ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.98s
+

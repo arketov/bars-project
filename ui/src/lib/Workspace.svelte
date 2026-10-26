@@ -236,6 +236,15 @@
         let stopDot: (() => void) | undefined;
         return { element: tab.element, init(params) {
           tab.init(params); tab.element.dataset.workspacePanel = params.api.id;
+          // Средняя кнопка повторяет крестик, включая проверку правок и закрытие списка переполнения.
+          tab.element.addEventListener("mousedown", event => {
+            if (event.button === 1) event.preventDefault();
+          });
+          tab.element.addEventListener("auxclick", event => {
+            if (event.button !== 1) return;
+            event.preventDefault();
+            tab.element.querySelector<HTMLElement>(".dv-default-tab-action")?.click();
+          });
           if (params.params.kind !== "document") return;
           const path: string = params.params.hit.path;
           tab.element.dataset.documentPath = path;
@@ -249,7 +258,8 @@
           }); });
           // НФТ-5: вкладку с несохранёнными правками не закрываем молча; обычное закрытие Dockview отменяется.
           tab.element.querySelector(".dv-default-tab-action")?.addEventListener("click", (event) => {
-            event.stopImmediatePropagation(); event.preventDefault();
+            // DefaultTab учитывает defaultPrevented; всплытие нужно Dockview для закрытия списка.
+            event.preventDefault();
             void confirmClose(app.current, path).then(ok => { if (ok) params.api.close(); });
           }, true);
         }, dispose() { stopDot?.(); tab.dispose(); } };
