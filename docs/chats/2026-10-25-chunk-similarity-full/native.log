@@ -1,0 +1,15 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.42
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+    Blocking waiting for file lock on build directory
+   Compiling tauri-build v2.7.2
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+   Compiling tauri v2.12.3
+   Compiling bars-app v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-app)
+   Compiling tauri-plugin-fs v2.7.1
+   Compiling tauri-plugin-dialog v2.8.3
+   Compiling tauri-plugin-opener v2.7.2
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+   Compiling tauri-plugin-single-instance v2.5.4
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 10m 10s

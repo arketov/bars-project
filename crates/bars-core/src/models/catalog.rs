@@ -524,6 +524,18 @@ mod tests {
         std::fs::create_dir_all(model.join("blobs")).unwrap();
         let half = layout(BGE_M3_ID).unwrap().size_bytes / 2;
         let file = std::fs::File::create(model.join("blobs/x.incomplete")).unwrap();
+        // Only logical length matters; NTFS otherwise allocates gigabytes of zeros.
+        #[cfg(windows)]
+        {
+            use std::os::windows::process::CommandExt;
+            let status = std::process::Command::new("fsutil")
+                .args(["sparse", "setflag"])
+                .arg(model.join("blobs/x.incomplete"))
+                .creation_flags(0x08000000)
+                .status()
+                .unwrap();
+            assert!(status.success(), "не удалось создать разреженную фикстуру");
+        }
         file.set_len(half).unwrap();
         assert_eq!(download_percent(dir.path(), BGE_M3_ID), Some(50));
 

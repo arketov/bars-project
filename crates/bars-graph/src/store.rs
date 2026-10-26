@@ -15,7 +15,7 @@ fn meta(db: &Connection, key: &str) -> Result<Option<String>, GraphError> {
 }
 fn set_meta(db: &Connection, key: &str, value: &str) -> Result<(), GraphError> {
     db.execute(
-        "INSERT INTO graph_meta VALUES(?1,?2) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+        "INSERT INTO graph_meta VALUES(?1,?2) ON CONFLICT(key) DO UPDATE SET value=excluded.value WHERE value<>excluded.value",
         params![key, value],
     )?;
     Ok(())
@@ -59,6 +59,44 @@ pub fn ensure_schema(db: &mut Connection) -> Result<(), GraphError> {
     if meta(&tx, "state")?.is_none() {
         set_meta(&tx, "state", "not_built")?;
     }
+    // Счётчик живёт в файле: кэш не удерживает SQLite-handle, мешающий подмене на Windows.
+    tx.execute_batch(
+        "INSERT OR IGNORE INTO graph_meta VALUES('read_epoch',hex(randomblob(16)));
+        INSERT OR IGNORE INTO graph_meta VALUES('read_revision','0');",
+    )?;
+    for table in [
+        "graph_meta",
+        "graph_sources",
+        "graph_nodes",
+        "graph_edges",
+        "graph_evidence",
+        "graph_aux",
+        "documents",
+        "chunks",
+        "vectors",
+        "meta",
+    ] {
+        let exists: bool = tx.query_row(
+            "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name=?1)",
+            [table],
+            |r| r.get(0),
+        )?;
+        if !exists {
+            continue;
+        }
+        for event in ["INSERT", "UPDATE", "DELETE"] {
+            let row = if event == "DELETE" { "OLD" } else { "NEW" };
+            let filter = if table == "graph_meta" {
+                format!(
+                    "WHEN {row}.key NOT IN ('read_revision','read_epoch','knn_prepared','knn_checkpoint','knn_complete','knn_input_revision','knn_input_epoch')"
+                )
+            } else {
+                String::new()
+            };
+            tx.execute_batch(&format!("CREATE TRIGGER IF NOT EXISTS graph_read_{table}_{event} AFTER {event} ON {table} {filter} BEGIN
+                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END;"))?;
+        }
+    }
     tx.commit()?;
     Ok(())
 }
@@ -70,11 +108,47 @@ pub fn document_manifest(db: &Connection) -> Result<BTreeMap<String, String>, Gr
         .collect::<Result<_, _>>()?)
 }
 
+// Модель и доступность векторов меняют близость даже без правки Markdown.
+fn similarity_inputs(db: &Connection) -> Result<String, GraphError> {
+    let mut stmt =
+        db.prepare("SELECT key,value FROM meta WHERE key LIKE 'model_%' ORDER BY key")?;
+    let model = stmt
+        .query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))?
+        .collect::<Result<Vec<_>, _>>()?;
+    let vectors_exist: bool = db.query_row(
+        "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE name='vectors')",
+        [],
+        |r| r.get(0),
+    )?;
+    let vectors: Vec<String> = if vectors_exist {
+        let mut stmt = db.prepare("SELECT DISTINCT v.embed_hash FROM vectors v CROSS JOIN chunks c ON c.embed_hash=v.embed_hash ORDER BY v.embed_hash")?;
+        stmt.query_map([], |r| r.get(0))?
+            .collect::<Result<_, _>>()?
+    } else {
+        vec![]
+    };
+    Ok(blake3::hash(&serde_json::to_vec(&(model, vectors))?)
+        .to_hex()
+        .to_string())
+}
+
 pub fn validate(data: &Dataset) -> Result<(), GraphError> {
+    validate_until(data, None)
+}
+
+fn check_deadline(deadline: Option<std::time::Instant>) -> Result<(), GraphError> {
+    if deadline.is_some_and(|end| std::time::Instant::now() >= end) {
+        return Err(GraphError::TimedOut);
+    }
+    Ok(())
+}
+
+fn validate_until(data: &Dataset, deadline: Option<std::time::Instant>) -> Result<(), GraphError> {
     let mut sources = BTreeMap::new();
     let mut nodes = BTreeSet::new();
     let mut proof = BTreeSet::new();
     for source in &data.sources {
+        check_deadline(deadline)?;
         if sources
             .insert(source.meta.reference.id.clone(), source)
             .is_some()
@@ -88,6 +162,7 @@ pub fn validate(data: &Dataset) -> Result<(), GraphError> {
         }
     }
     for ev in &data.evidence {
+        check_deadline(deadline)?;
         let source = sources
             .get(&ev.document.id)
             .ok_or_else(|| GraphError::InvalidData("неизвестный источник evidence".into()))?;
@@ -103,6 +178,7 @@ pub fn validate(data: &Dataset) -> Result<(), GraphError> {
         }
     }
     for node in &data.nodes {
+        check_deadline(deadline)?;
         if !nodes.insert(node.reference.id.clone())
             || node.source_ids.is_empty()
             || node.source_ids.iter().any(|id| !sources.contains_key(id))
@@ -115,6 +191,7 @@ pub fn validate(data: &Dataset) -> Result<(), GraphError> {
     }
     let mut edges = BTreeSet::new();
     for edge in &data.edges {
+        check_deadline(deadline)?;
         if !edges.insert(edge.id.clone())
             || !nodes.contains(&edge.from)
             || !nodes.contains(&edge.to)
@@ -270,6 +347,7 @@ pub fn publish_with_errors(
     )?;
     set_meta(&tx, "file_errors_total", &errors.len().to_string())?;
     set_meta(&tx, "method", METHOD_VERSION)?;
+    set_meta(&tx, "similarity_inputs", &similarity_inputs(&tx)?)?;
     let mut layers = BTreeMap::new();
     for (name, origin, fingerprint, state) in [
         (
@@ -291,7 +369,11 @@ pub fn publish_with_errors(
         (
             "similarity",
             Origin::Similarity,
-            "cosine-knn-v1:k=5:tau=0.5:limit=1000000",
+            data.layers
+                .get("similarity")
+                .map(|l| l.fingerprint.as_str())
+                .filter(|s| !s.is_empty())
+                .unwrap_or("cosine-knn-v1:k=5:tau=0.5:limit=1000000"),
             data.similarity_state,
         ),
     ] {
@@ -315,6 +397,58 @@ pub fn publish_with_errors(
         layers.insert(
             name,
             GraphLayerStatus {
+                stale_reason: None,
+                freshness: if state == LayerState::NotBuilt {
+                    Freshness::NotBuilt
+                } else {
+                    Freshness::Current
+                },
+                completeness: if state == LayerState::NotBuilt {
+                    Completeness::Unknown
+                } else if !errors.is_empty() {
+                    Completeness::Partial
+                } else if name == "semantic" || state == LayerState::NotBuilt {
+                    Completeness::Unknown
+                } else if state == LayerState::Ready {
+                    Completeness::Complete
+                } else {
+                    Completeness::Partial
+                },
+                availability: Availability::Enabled,
+                coverage: data
+                    .layers
+                    .get(name)
+                    .map(|l| l.coverage.clone())
+                    .unwrap_or_else(|| LayerCoverage {
+                        unit: if name == "similarity" {
+                            "chunks"
+                        } else {
+                            "documents"
+                        }
+                        .into(),
+                        processed: if name == "similarity" || state == LayerState::NotBuilt {
+                            0
+                        } else {
+                            data.sources.len()
+                        },
+                        total: if name == "similarity" {
+                            data.nodes
+                                .iter()
+                                .filter(|n| n.reference.kind == Kind::Chunk)
+                                .count()
+                        } else {
+                            expected.len()
+                        },
+                        missing: if name == "similarity" {
+                            0
+                        } else {
+                            errors.len()
+                        },
+                        comparisons: 0,
+                        reason: (name == "similarity")
+                            .then(|| "Покрытие расчёта не сохранено".into()),
+                    }),
+                source_revisions: expected.clone(),
                 state,
                 generation: if state == LayerState::NotBuilt {
                     None
@@ -339,6 +473,7 @@ pub fn publish_with_errors(
         },
     )?;
     set_meta(&tx, "active_job", "")?;
+    set_meta(&tx, "job_state", "\"idle\"")?;
     set_meta(&tx, "error", "")?;
     tx.commit()?;
     Ok(())
@@ -363,6 +498,10 @@ fn status_snapshot(db: &Connection) -> Result<GraphStatus, GraphError> {
     )?;
     if !exists {
         return Ok(GraphStatus {
+            freshness: Freshness::NotBuilt,
+            completeness: Completeness::Unknown,
+            availability: Availability::Enabled,
+            job_state: JobState::Idle,
             state: LayerState::NotBuilt,
             snapshot: None,
             active_job: None,
@@ -400,14 +539,75 @@ fn status_snapshot(db: &Connection) -> Result<GraphStatus, GraphError> {
     let saved_manifest: Option<BTreeMap<String, String>> = meta(db, "manifest")?
         .map(|v| serde_json::from_str(&v))
         .transpose()?;
-    if method != METHOD_VERSION
+    let stale = state == LayerState::Stale
+        || method != METHOD_VERSION
         || saved_manifest
-            .map(|m| document_manifest(db).map(|current| current != m))
+            .as_ref()
+            .map(|m| document_manifest(db).map(|current| &current != m))
             .transpose()?
-            .unwrap_or(false)
-    {
-        for layer in layers.values_mut() {
+            .unwrap_or(false);
+    let similarity_changed = match meta(db, "similarity_inputs")? {
+        Some(saved) => similarity_inputs(db)? != saved,
+        None => true,
+    };
+    for (name, layer) in &mut layers {
+        // Старые сохранённые поколения: полнота смысла неизвестна даже после прохода.
+        if layer.coverage.unit.is_empty() {
+            layer.availability = if layer.state == LayerState::Disabled {
+                Availability::Disabled
+            } else {
+                Availability::Enabled
+            };
+            layer.freshness = if layer.generation.is_some() {
+                Freshness::Current
+            } else {
+                Freshness::NotBuilt
+            };
+            layer.completeness = if layer.failed > 0 {
+                Completeness::Partial
+            } else if name == "semantic" || layer.generation.is_none() {
+                Completeness::Unknown
+            } else if layer.state == LayerState::Ready {
+                Completeness::Complete
+            } else {
+                Completeness::Partial
+            };
+            layer.source_revisions = saved_manifest.clone().unwrap_or_default();
+            layer.coverage = LayerCoverage {
+                unit: if name == "similarity" {
+                    "chunks"
+                } else {
+                    "documents"
+                }
+                .into(),
+                processed: if name == "similarity" {
+                    0
+                } else {
+                    layer.processed
+                },
+                total: if name == "similarity" { 0 } else { layer.total },
+                missing: layer.failed,
+                comparisons: 0,
+                reason: (name == "similarity")
+                    .then(|| "Покрытие прежнего расчёта неизвестно".into()),
+            };
+        }
+        if stale && layer.availability == Availability::Enabled && layer.generation.is_some() {
+            layer.stale_reason = Some(
+                if method != METHOD_VERSION {
+                    "Изменился метод построения"
+                } else {
+                    "Изменились исходные ревизии или граф ожидает явного обновления"
+                }
+                .into(),
+            );
             layer.state = LayerState::Stale;
+            layer.freshness = Freshness::Stale;
+        }
+        if name == "similarity" && layer.generation.is_some() && similarity_changed {
+            layer.freshness = Freshness::Stale;
+            layer.state = LayerState::Stale;
+            layer.stale_reason = Some("Изменилась модель или доступность векторов; у прежнего графа fingerprint векторов может отсутствовать".into());
         }
     }
     let mut file_errors: Vec<GraphFileError> = meta(db, "file_errors")?
@@ -430,7 +630,19 @@ fn status_snapshot(db: &Connection) -> Result<GraphStatus, GraphError> {
             }
         }
     }
-    Ok(GraphStatus {
+    let mut result = GraphStatus {
+        freshness: Freshness::NotBuilt,
+        completeness: Completeness::Unknown,
+        availability: Availability::Enabled,
+        job_state: meta(db, "job_state")?
+            .map(|v| serde_json::from_str(&v))
+            .transpose()?
+            .unwrap_or(match state {
+                LayerState::Building => JobState::Running,
+                LayerState::Cancelled => JobState::Stopped,
+                LayerState::Failed => JobState::Failed,
+                _ => JobState::Idle,
+            }),
         state,
         snapshot,
         active_job: nonempty(meta(db, "active_job")?),
@@ -444,7 +656,9 @@ fn status_snapshot(db: &Connection) -> Result<GraphStatus, GraphError> {
         file_errors_total,
         layers,
         paused: meta(db, "paused")?.as_deref() == Some("true"),
-    })
+    };
+    result.derive_data_state();
+    Ok(result)
 }
 
 pub fn set_paused(db: &Connection, paused: bool) -> Result<(), GraphError> {
@@ -461,9 +675,22 @@ pub fn set_state(
     job: Option<&str>,
     error: Option<&str>,
 ) -> Result<(), GraphError> {
-    let state = serde_json::to_string(&state)?;
     let tx = db.unchecked_transaction()?;
-    set_meta(&tx, "state", state.trim_matches('"'))?;
+    let job_state = match state {
+        LayerState::Building => Some(JobState::Running),
+        LayerState::Cancelled => Some(JobState::Stopped),
+        LayerState::Failed => Some(JobState::Failed),
+        _ => None,
+    };
+    if let Some(job_state) = job_state {
+        set_meta(&tx, "job_state", &serde_json::to_string(&job_state)?)?;
+    } else {
+        set_meta(
+            &tx,
+            "state",
+            serde_json::to_string(&state)?.trim_matches('"'),
+        )?;
+    }
     set_meta(&tx, "active_job", job.unwrap_or(""))?;
     set_meta(&tx, "error", error.unwrap_or(""))?;
     tx.commit()?;
@@ -471,37 +698,87 @@ pub fn set_state(
 }
 
 pub fn load(db: &Connection) -> Result<Dataset, GraphError> {
+    load_snapshot(db, false, None, &mut 0)
+}
+
+/// Последнее целое поколение; устаревшие данные явно помечены и не годятся для mix.
+pub fn load_previous(db: &Connection) -> Result<Dataset, GraphError> {
+    load_snapshot(db, true, None, &mut 0)
+}
+
+/// Целый снимок или ошибка дедлайна; частично загруженный Dataset не публикуется.
+pub fn load_previous_until(
+    db: &Connection,
+    deadline: std::time::Instant,
+) -> Result<Dataset, GraphError> {
+    load_previous_sized_until(db, deadline).map(|(data, _)| data)
+}
+
+/// Размер JSON учитывается при чтении строк, без повторной сериализации Dataset.
+pub fn load_previous_sized_until(
+    db: &Connection,
+    deadline: std::time::Instant,
+) -> Result<(Dataset, usize), GraphError> {
+    check_deadline(Some(deadline))?;
+    db.progress_handler(1000, Some(move || std::time::Instant::now() >= deadline))?;
+    let mut bytes = 0usize;
+    let result = load_snapshot(db, true, Some(deadline), &mut bytes);
+    db.progress_handler(0, None::<fn() -> bool>)?;
+    check_deadline(Some(deadline))?;
+    result.map(|data| (data, bytes.saturating_mul(2)))
+}
+
+fn load_rows<T: serde::de::DeserializeOwned>(
+    db: &Connection,
+    sql: &str,
+    deadline: Option<std::time::Instant>,
+    bytes: &mut usize,
+) -> Result<Vec<T>, GraphError> {
+    let mut statement = db.prepare(sql)?;
+    let mut rows = statement.query([])?;
+    let mut values = Vec::new();
+    while let Some(row) = rows.next()? {
+        check_deadline(deadline)?;
+        let text = row
+            .get_ref(0)?
+            .as_str()
+            .map_err(|e| GraphError::InvalidData(e.to_string()))?;
+        *bytes = bytes.saturating_add(text.len());
+        values.push(serde_json::from_str(text)?);
+    }
+    Ok(values)
+}
+
+fn load_snapshot(
+    db: &Connection,
+    allow_stale: bool,
+    deadline: Option<std::time::Instant>,
+    bytes: &mut usize,
+) -> Result<Dataset, GraphError> {
+    check_deadline(deadline)?;
     let tx = db.unchecked_transaction()?;
     let state = status(&tx)?;
+    if meta(&tx, "schema_version")?.and_then(|v| v.parse::<u32>().ok())
+        != Some(GRAPH_SCHEMA_VERSION)
+    {
+        return Err(GraphError::NotReady(
+            "Несовместимая схема графа; обновите граф".into(),
+        ));
+    }
     if state.method != METHOD_VERSION {
         return Err(GraphError::NotReady(
             "изменился способ построения, граф нужно перестроить".into(),
         ));
     }
-    if !matches!(
-        state.state,
-        LayerState::Ready
-            | LayerState::Partial
-            | LayerState::Building
-            | LayerState::Cancelled
-            | LayerState::Failed
-    ) || state.snapshot.is_none()
+    if state.snapshot.is_none()
+        || state
+            .layers
+            .get("structure")
+            .is_none_or(|l| l.generation.is_none() || l.availability == Availability::Disabled)
+        || (!allow_stale && state.freshness == Freshness::Stale)
     {
         return Err(GraphError::NotReady(state.state.not_ready_reason().into()));
     }
-    let rows = |table: &str| -> Result<Vec<String>, GraphError> {
-        let sql = match table {
-            "sources" => "SELECT data FROM graph_sources ORDER BY path",
-            "nodes" => "SELECT data FROM graph_nodes ORDER BY id",
-            "edges" => "SELECT data FROM graph_edges ORDER BY id",
-            "evidence" => "SELECT data FROM graph_evidence ORDER BY id",
-            _ => unreachable!(),
-        };
-        let mut stmt = tx.prepare(sql)?;
-        Ok(stmt
-            .query_map([], |r| r.get(0))?
-            .collect::<Result<_, _>>()?)
-    };
     let parse = |key: &str| -> Result<String, GraphError> {
         Ok(
             tx.query_row("SELECT data FROM graph_aux WHERE key=?1", [key], |r| {
@@ -514,10 +791,12 @@ pub fn load(db: &Connection) -> Result<Dataset, GraphError> {
         docs_root: serde_json::from_str(&parse("docs_root")?)?,
         snapshot: state.snapshot.unwrap(),
         layers: state.layers,
-        sources: rows("sources")?
-            .iter()
-            .map(|s| serde_json::from_str(s))
-            .collect::<Result<_, _>>()?,
+        sources: load_rows(
+            &tx,
+            "SELECT data FROM graph_sources ORDER BY path",
+            deadline,
+            bytes,
+        )?,
         failed_sources: tx
             .query_row(
                 "SELECT data FROM graph_aux WHERE key='failed_sources'",
@@ -528,18 +807,24 @@ pub fn load(db: &Connection) -> Result<Dataset, GraphError> {
             .map(|s| serde_json::from_str(&s))
             .transpose()?
             .unwrap_or_default(),
-        nodes: rows("nodes")?
-            .iter()
-            .map(|s| serde_json::from_str(s))
-            .collect::<Result<_, _>>()?,
-        edges: rows("edges")?
-            .iter()
-            .map(|s| serde_json::from_str(s))
-            .collect::<Result<_, _>>()?,
-        evidence: rows("evidence")?
-            .iter()
-            .map(|s| serde_json::from_str(s))
-            .collect::<Result<_, _>>()?,
+        nodes: load_rows(
+            &tx,
+            "SELECT data FROM graph_nodes ORDER BY id",
+            deadline,
+            bytes,
+        )?,
+        edges: load_rows(
+            &tx,
+            "SELECT data FROM graph_edges ORDER BY id",
+            deadline,
+            bytes,
+        )?,
+        evidence: load_rows(
+            &tx,
+            "SELECT data FROM graph_evidence ORDER BY id",
+            deadline,
+            bytes,
+        )?,
         broken_links: serde_json::from_str(&parse("broken_links")?)?,
         warnings: serde_json::from_str::<Vec<String>>(&parse("warnings")?)?
             .into_iter()
@@ -565,19 +850,31 @@ pub fn load(db: &Connection) -> Result<Dataset, GraphError> {
             .map(|s| (s.meta.path.clone(), s.meta.hash.clone()))
             .collect()
     };
-    if document_manifest(&tx)? != expected {
+    if document_manifest(&tx)? != expected && !allow_stale {
         return Err(GraphError::NotReady(
             LayerState::Stale.not_ready_reason().into(),
         ));
     }
-    if matches!(
-        state.state,
-        LayerState::Building | LayerState::Cancelled | LayerState::Failed
-    ) {
-        data.warnings
-            .push(state.state.background_job_warning().into());
+    if state.freshness == Freshness::Stale {
+        data.warnings.push(
+                "Граф устарел · Показан предыдущий снимок; изменились входы графа или требуется его обновление"
+                .into(),
+        );
+    }
+    let job_layer = match state.job_state {
+        JobState::Running => Some(LayerState::Building),
+        JobState::Stopped => Some(LayerState::Cancelled),
+        JobState::Failed => Some(LayerState::Failed),
+        _ => None,
+    };
+    if let Some(job_layer) = job_layer {
+        data.warnings.push(if state.freshness == Freshness::Stale {
+            "Показан предыдущий снимок; состояние задания не меняет свежесть данных".into()
+        } else {
+            job_layer.background_job_warning().into()
+        });
     }
     tx.commit()?;
-    validate(&data)?;
+    validate_until(&data, deadline)?;
     Ok(data)
 }

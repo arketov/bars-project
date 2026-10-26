@@ -37,10 +37,11 @@ pub enum ErrorKind {
     ChunkNotFound,
     StaleRevision,
     StaleCursor,
+    GraphTimeout,
 }
 
 impl ErrorKind {
-    pub const ALL: [ErrorKind; 18] = [
+    pub const ALL: [ErrorKind; 19] = [
         ErrorKind::ProtocolMismatch,
         ErrorKind::ProjectNotFound,
         ErrorKind::ProjectUnavailable,
@@ -59,6 +60,7 @@ impl ErrorKind {
         ErrorKind::ChunkNotFound,
         ErrorKind::StaleRevision,
         ErrorKind::StaleCursor,
+        ErrorKind::GraphTimeout,
     ];
 
     pub fn code(self) -> i32 {
@@ -81,6 +83,7 @@ impl ErrorKind {
             ErrorKind::ChunkNotFound => -32016,
             ErrorKind::StaleRevision => -32017,
             ErrorKind::StaleCursor => -32018,
+            ErrorKind::GraphTimeout => -32019,
         }
     }
 
@@ -105,6 +108,7 @@ impl ErrorKind {
             ErrorKind::ChunkNotFound => "chunk_not_found",
             ErrorKind::StaleRevision => "stale_revision",
             ErrorKind::StaleCursor => "stale_cursor",
+            ErrorKind::GraphTimeout => "graph_timeout",
         }
     }
 
@@ -198,6 +202,7 @@ mod tests {
             (-32016, "chunk_not_found"),
             (-32017, "stale_revision"),
             (-32018, "stale_cursor"),
+            (-32019, "graph_timeout"),
         ];
         assert_eq!(expected.len(), ErrorKind::ALL.len());
         for (kind, (code, name)) in ErrorKind::ALL.into_iter().zip(expected) {

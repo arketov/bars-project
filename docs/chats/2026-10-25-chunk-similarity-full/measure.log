@@ -1,0 +1,18 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.42
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+    Blocking waiting for file lock on build directory
+   Compiling winapi-util v0.1.11
+   Compiling bindgen v0.72.1
+   Compiling tokenizers v0.22.2
+   Compiling same-file v1.0.6
+   Compiling walkdir v2.5.0
+   Compiling tokenizers v0.23.2
+   Compiling llama-cpp-sys-2 v0.1.160
+   Compiling candle-core v0.11.0
+   Compiling candle-nn v0.11.0
+   Compiling fastembed v7.1.1
+   Compiling llama-cpp-2 v0.1.160
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 11m 10s

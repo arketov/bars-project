@@ -10,6 +10,8 @@ title: Контракты инструментов GraphRAG для bars
 
 Worker: `graph_query` принимает `{cwd?, project?, request: GraphRequest}`. MCP выставляет шесть read-only имён из таблицы соответствия; `operation` выбирается именем инструмента, `modules/files` передаются плоско и преобразуются в `request.scope`. CLI принимает те же поля через JSON запроса. Неизвестные поля GraphRequest отклоняются.
 
+Состояние 2.2.5: `graph_status` и `bars_status.graph` возвращают независимые `freshness=not_built|current|stale`, `completeness=complete|partial|unknown`, `availability=enabled|disabled`, `job_state=idle|queued|running|stopped|failed`. Общие признаки выводятся из включённых `layers`; прежнее `state` описывает данные, а не активное задание. У каждого слоя — те же три признака данных, generation/fingerprint, `source_revisions` и `coverage` (`unit`, `processed`, `total`, `missing`, `comparisons`, `reason`). Покрытие близости относится к чанкам, единица comparisons определяется fingerprint метода: направленные сравнения прежнего kNN или неориентированные пары точного парного прохода; покрытия разных единиц не складываются. GraphReply включает `layers` с ревизиями возвращённых источников; общий статус слоя консервативен для проекта. Совместимый устаревший снимок возвращается с предупреждением, mix переходит к обычному поиску, context проверяет текущие ревизии. `read` дополнительно возвращает `revision` — BLAKE3 исходного UTF-8 текста; окно проверяет её перед выделением строк старого графа. Подробности и ограничения — [контракт чтения прежнего снимка](implementation.md).
+
 | Операция | Реализованные входы |
 |---|---|
 | relations | Ровно один `query`/`entity_ref`; `predicates`, `direction`, `polarity`, `qualifiers` |

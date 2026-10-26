@@ -540,11 +540,18 @@ impl Scope {
         text: &[i64],
         exact: &[i64],
     ) -> Result<HashMap<i64, f32>, SearchError> {
+        // Random BLOB lookups reread overflow pages; a full search streams vectors once.
+        // Scoped requests keep their selective lookup instead of scanning unrelated vectors.
+        let from = if self.params.is_empty() {
+            "vectors v CROSS JOIN chunks c ON c.embed_hash = v.embed_hash
+             CROSS JOIN documents d ON d.id = c.document_id"
+        } else {
+            "chunks c JOIN documents d ON d.id = c.document_id
+             JOIN vectors v ON v.embed_hash = c.embed_hash"
+        };
         let sql = format!(
             "SELECT c.id, v.vector
-             FROM chunks c
-             JOIN documents d ON d.id = c.document_id
-             JOIN vectors v ON v.embed_hash = c.embed_hash
+             FROM {from}
              WHERE {}",
             self.clause
         );

@@ -36,10 +36,11 @@ export interface ViewedDocument {
   missing: boolean;
 }
 
-export type DocumentReference = Pick<SearchHit, "path" | "title" | "first_line" | "last_line"> & { column?: number; length?: number };
+export type DocumentReference = Pick<SearchHit, "path" | "title" | "first_line" | "last_line"> & { column?: number; length?: number; expectedRevision?: string };
 
 const PROJECT_KEY = "bars-project";
 const POLL_MS = 1000;
+const HIDDEN_POLL_MS = 10_000;
 /** Список проектов читает индексы, поэтому без перемен обновляется реже, чем ход. */
 const PROJECTS_EVERY = 5;
 /** Дерево с диска перечитывается раз в несколько тиков: обход каталогов дешевле индексации, но не бесплатен. */
@@ -134,6 +135,8 @@ class App {
   #notifications = new NotificationCenter();
   #auditNoticeAttempt = 0;
   #refreshing = false;
+  #refreshAgain = false;
+  #lastHiddenPoll = 0;
   #treeSignature = "";
   #treeSyncing = false;
   #treeRequest = 0;
@@ -248,7 +251,8 @@ class App {
   }
 
   start(): void {
-    if (this.#timer) return;
+    if (this.#timer || this.documentWindow) return;
+    document.addEventListener("visibilitychange", this.#visible);
     void this.refresh(true);
     this.#timer = setInterval(() => void this.refresh(false), POLL_MS);
   }
@@ -256,7 +260,10 @@ class App {
   stop(): void {
     if (this.#timer) clearInterval(this.#timer);
     this.#timer = null;
+    document.removeEventListener("visibilitychange", this.#visible);
   }
+
+  #visible = (): void => { if (!document.hidden) void this.refresh(true); };
 
   flash(text: string, bad = false): void {
     if (bad) {
@@ -270,7 +277,11 @@ class App {
   }
 
   async refresh(force: boolean): Promise<void> {
-    if (this.#refreshing) return;
+    if (this.documentWindow) return;
+    if (this.#refreshing) { this.#refreshAgain ||= force; return; }
+    const hidden = document.hidden && !force;
+    if (hidden && Date.now() - this.#lastHiddenPoll < HIDDEN_POLL_MS) return;
+    if (hidden) this.#lastHiddenPoll = Date.now();
     this.#refreshing = true;
     this.#tick += 1;
     const epoch = this.#epoch;
@@ -280,25 +291,30 @@ class App {
       const changed = JSON.stringify(activity.running?.project) !== JSON.stringify(this.activity?.running?.project)
         || activity.queue.length !== (this.activity?.queue.length ?? 0);
       this.activity = activity;
+      let modelsChanged = false;
       try {
         const events = await call<OperationEventsOutput>("operation_events", { epoch: this.#notifications.epoch, after: this.#notifications.cursor });
         if (epoch !== this.#epoch) return;
         this.#notifications.events(events);
-        if ((this.view === "indexing" || this.indexingOpen) && (this.indexingHistoryError || events.epoch !== this.indexingHistory?.epoch
+        modelsChanged = [...events.active, ...events.completed].some(op => op.kind === "download" || op.kind === "prepare");
+        if (!hidden && (this.view === "indexing" || this.indexingOpen) && (this.indexingHistoryError || events.epoch !== this.indexingHistory?.epoch
           || events.completed.some(op => op.project === this.current))) void this.loadIndexingHistory();
         this.notificationError = null;
       } catch {
         this.notificationError = "Не удалось получить события. Сохранён последний снимок; исход операций пока неизвестен.";
       }
       // Отдельный сбой каталога не означает остановку загрузок или всего воркера.
-      try { await this.loadModels(); } catch { /* Сохраняем последний снимок. */ }
+      if (!hidden && (modelsChanged || (force && this.view === "settings"))) {
+        try { await this.loadModels(); } catch { /* Сохраняем последний снимок. */ }
+      }
       this.publishNotifications();
       this.#failures = 0;
       this.workerDown = null;
       this.#notifications.resolve("worker");
+      if (hidden) return;
       if (force || changed || this.#tick % PROJECTS_EVERY === 0) await this.loadProjects();
       if (this.current) await this.loadStatus();
-      if (!force && this.current && this.#tick % TREE_EVERY === 0 && !document.hidden) void this.syncTree();
+      if (this.current && (force || this.#tick % TREE_EVERY === 0) && !document.hidden) void this.syncTree();
       this.syncTopics(force);
     } catch (error) {
       if (epoch !== this.#epoch) return;
@@ -312,10 +328,12 @@ class App {
       }
     } finally {
       this.#refreshing = false;
+      if (this.#refreshAgain) { this.#refreshAgain = false; void this.refresh(true); }
     }
   }
 
   async loadProjects(): Promise<void> {
+    if (this.documentWindow) return;
     const epoch = this.#epoch;
     const { projects } = await call<ProjectsOutput>("projects");
     if (epoch !== this.#epoch) return;
@@ -599,6 +617,8 @@ class App {
   documentWindow = $state(false);
 
   async bindDocumentWindow(project: string): Promise<void> {
+    this.stop();
+    this.#epoch += 1;
     this.documentWindow = true;
     this.current = project;
     this.topics.bind(project);
@@ -630,12 +650,17 @@ class App {
       // Путь индекса уже от корня проекта: исключаем docs/docs/x.md при совпадении имён.
       const output = await call<ReadOutput>("read", { cwd: project.path, project: project.path, path: `./${hit.path}` });
       if (reading !== this.#reading || this.current !== project.path) return;
+      if (hit.expectedRevision && hit.expectedRevision !== output.revision) {
+        this.flash("Документ изменился после построения графа");
+        hit = { ...hit, first_line: 0, last_line: 0, column: undefined, length: undefined };
+      }
       this.view = "main";
       this.viewer = { hit, title: output.title, text: output.text, missing: false };
       this.activeDocument = hit.path;
     } catch (error) {
       if (reading !== this.#reading || this.current !== project.path) return;
       if (error instanceof BarsError && error.kind === "file_not_found") {
+        if (hit.expectedRevision) { this.flash("Источник удалён", true); return; }
         this.view = "main";
           // Т-32: только явный клик по файлу папки разрешает пустой редактируемый документ.
           this.viewer = { hit, title: hit.title, text: "", missing: !missingIsDraft };

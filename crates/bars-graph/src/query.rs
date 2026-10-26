@@ -39,12 +39,17 @@ struct Allowed<'a> {
     sources: BTreeMap<String, &'a SourceMeta>,
     adjacency: BTreeMap<String, Vec<usize>>,
 }
-fn allowed<'a>(data: &'a Dataset, scope: &Scope) -> Result<Allowed<'a>, GraphError> {
+fn allowed<'a>(
+    data: &'a Dataset,
+    scope: &Scope,
+    current: Option<&BTreeMap<String, String>>,
+) -> Result<Allowed<'a>, GraphError> {
     validate_scope(data, scope)?;
     let sources: BTreeMap<_, _> = data
         .sources
         .iter()
         .filter(|s| scope.allows(&s.meta))
+        .filter(|s| current.is_none_or(|m| m.get(&s.meta.path) == Some(&s.meta.hash)))
         .map(|s| (s.meta.reference.id.clone(), &s.meta))
         .collect();
     allowed_sources(data, scope, sources)
@@ -590,6 +595,31 @@ pub fn execute_ranked(
     request: &GraphRequest,
     evidence_scores: &BTreeMap<String, f32>,
     pre_elapsed: Duration,
+    cancelled: impl FnMut() -> bool,
+) -> Result<GraphReply, GraphError> {
+    execute_overlay(
+        data,
+        request,
+        evidence_scores,
+        pre_elapsed,
+        &QueryOverlay::default(),
+        cancelled,
+    )
+}
+
+/// Данные одного запроса, не изменяющие общий снимок.
+#[derive(Default)]
+pub struct QueryOverlay {
+    pub current_sources: Option<BTreeMap<String, String>>,
+    pub warnings: Vec<String>,
+}
+
+pub fn execute_overlay(
+    data: &Dataset,
+    request: &GraphRequest,
+    evidence_scores: &BTreeMap<String, f32>,
+    pre_elapsed: Duration,
+    overlay: &QueryOverlay,
     mut cancelled: impl FnMut() -> bool,
 ) -> Result<GraphReply, GraphError> {
     validate_request(request)?;
@@ -639,7 +669,18 @@ pub fn execute_ranked(
         clamped |= hops > budget.max_depth;
         budget.max_depth = budget.max_depth.min(hops);
     }
-    let view = allowed(data, &request.scope)?;
+    let view = allowed(data, &request.scope, overlay.current_sources.as_ref())?;
+    let excluded = data
+        .sources
+        .iter()
+        .filter(|s| {
+            request.scope.allows(&s.meta)
+                && overlay
+                    .current_sources
+                    .as_ref()
+                    .is_some_and(|m| m.get(&s.meta.path) != Some(&s.meta.hash))
+        })
+        .count();
     let mut fingerprint_request = request.clone();
     fingerprint_request.cursor = None;
     fingerprint_request.snapshot = None;
@@ -668,6 +709,35 @@ pub fn execute_ranked(
         reasons: BTreeSet::new(),
     };
     let mut reply = GraphReply {
+        layers: data
+            .layers
+            .iter()
+            .map(|(name, layer)| {
+                let mut layer = layer.clone();
+                layer
+                    .source_revisions
+                    .retain(|path, _| view.sources.values().any(|s| &s.path == path));
+                if !request.scope.modules.is_empty() || !request.scope.files.is_empty() {
+                    let failed = data.failed_sources.iter().filter(|s| request.scope.allows(s)).count();
+                    layer.processed = view.sources.len();
+                    layer.total = view.sources.len() + failed;
+                    layer.failed = failed;
+                    if name == "similarity" {
+                        layer.coverage = LayerCoverage {
+                            unit: "chunks".into(), processed: 0,
+                            total: view.nodes.values().filter(|n| n.reference.kind == Kind::Chunk).count(),
+                            missing: 0, comparisons: 0,
+                            reason: Some("kNN рассчитан по проекту; точное покрытие выбранной области неизвестно".into()),
+                        };
+                    } else {
+                        layer.coverage.processed = layer.processed;
+                        layer.coverage.total = layer.total;
+                        layer.coverage.missing = failed;
+                    }
+                }
+                (name.clone(), layer)
+            })
+            .collect(),
         schema_version: DTO_VERSION,
         operation: request.operation,
         scope: request.scope.clone(),
@@ -695,20 +765,20 @@ pub fn execute_ranked(
             ("similarity".into(), data.similarity_state),
         ]),
         coverage: Coverage {
-            indexed: view.sources.len()
+            indexed: view.sources.len() + excluded
                 + data
                     .failed_sources
                     .iter()
                     .filter(|s| request.scope.allows(s))
                     .count(),
             processed: view.sources.len(),
-            failed: data
+            failed: excluded + data
                 .failed_sources
                 .iter()
                 .filter(|s| request.scope.allows(s))
                 .count(),
             denominator: Some(
-                view.sources.len()
+                view.sources.len() + excluded
                     + data
                         .failed_sources
                         .iter()
@@ -732,6 +802,7 @@ pub fn execute_ranked(
         next_cursor: None,
         warnings: {
             let mut warnings = data.warnings.clone();
+            warnings.extend(overlay.warnings.iter().cloned());
             if request.predicates.contains(&Predicate::Requires) {
                 warnings
                     .push("requires устарел: используйте depends_on с kind=precondition".into());
@@ -1396,4 +1467,9 @@ fn materialize(reply: &mut GraphReply, view: &Allowed<'_>) {
         .into_iter()
         .filter_map(|id| view.sources.get(id).map(|s| (*s).clone()))
         .collect();
+    for layer in reply.layers.values_mut() {
+        layer
+            .source_revisions
+            .retain(|path, _| reply.sources.iter().any(|s| &s.path == path));
+    }
 }

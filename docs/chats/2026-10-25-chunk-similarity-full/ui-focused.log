@@ -1,0 +1,13 @@
+
+> bars-ui@0.0.0 test
+> vitest run src/lib/GraphPage.test.ts
+
+
+ RUN  v5.0.4 C:/Users/arketov/Desktop/bars-project/ui
+
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  15:39:28
+   Duration  1.15s (environment 60%, transform 19%, import 10%, tests 9%)
+

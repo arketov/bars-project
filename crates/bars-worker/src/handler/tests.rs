@@ -519,7 +519,21 @@ async fn vanished_project_folder_is_unavailable() {
         },
     )
     .await;
-    fs::remove_dir_all(&root).unwrap();
+    // Idle не запрещает новое короткое чтение; Windows может временно удерживать файл.
+    let remove_deadline = Instant::now() + Duration::from_secs(5);
+    loop {
+        match fs::remove_dir_all(&root) {
+            Ok(()) => break,
+            Err(error)
+                if cfg!(windows)
+                    && error.raw_os_error() == Some(32)
+                    && Instant::now() < remove_deadline =>
+            {
+                tokio::time::sleep(Duration::from_millis(20)).await;
+            }
+            Err(error) => panic!("не удалось подготовить исчезнувший проект: {error}"),
+        }
+    }
     // Проверку по явной просьбе видит пропажу папки: проект становится недоступным.
     let params = ReindexParams {
         target: target(&root),

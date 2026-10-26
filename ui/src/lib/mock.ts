@@ -1,5 +1,5 @@
 // Заглушка воркера для просмотра интерфейса в браузере (`npm run dev`) и для проверок без Tauri.
-// Сцена выбирается параметром адреса: `?scene=empty|indexing|consent|worker-down|provider|missing|cosine|rerank-failed`.
+// Сцена выбирается параметром адреса: `?scene=empty|indexing|consent|reindex-required|worker-down|provider|missing|cosine|rerank-failed`.
 
 import { BarsError } from "./types";
 import { clone } from "./settings-logic";
@@ -60,6 +60,7 @@ const projects = (): ProjectInfo[] => {
         { path: "C:\\work\\bars-project", name: "bars-project", docs_root: "docs", state: "indexing", modules },
         { path: "C:\\work\\ai-mutiplayer-bots", name: "ai-mutiplayer-bots", docs_root: "docs", state: "ready", modules },
       ];
+    case "reindex-required":
     case "consent":
       return [
         { path: "C:\\work\\bars-project", name: "bars-project", docs_root: "docs", state: "reindex_required", modules },
@@ -364,7 +365,7 @@ function status(path: string): StatusOutput {
     state: project.state,
     updated_at: "2026-10-15T14:02:00Z",
     pending: 0,
-    model: { index: "builtin:BAAI/bge-m3", settings: scene() === "consent" ? "remote:text-embedding-3-small" : "builtin:BAAI/bge-m3" },
+    model: { index: "builtin:BAAI/bge-m3", settings: scene() === "consent" || scene() === "reindex-required" ? "remote:text-embedding-3-small" : "builtin:BAAI/bge-m3" },
     last_error: scene() === "provider" ? "провайдер https://api.example.com не ответил: 401" : null,
     watching: project.state !== "unavailable",
   };
@@ -375,7 +376,10 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export async function mockCall(method: string, params: Record<string, unknown>): Promise<unknown> {
   // Браузерный стенд не имеет доступа к диску; не выдаём смысловые фикстуры за текстовый поиск.
   if (method === 'text_search') return {documents:[],docs_total:0,hits_total:0,truncated:null,skipped:[],elapsed_ms:0};
-  if(method==='graph_physical')return (await import('./mock-physical')).physicalFixture(params);
+  if(method==='graph_physical'){
+    const project = String(params.project ?? params.cwd);
+    return (await import('./mock-physical')).physicalFixture(params, (DOCS_BY_PROJECT[project] ??= docs("docs")));
+  }
   if(['graph_query','graph_status','graph_build','graph_cancel'].includes(method))return (await import('./mock-graph')).graphFixture(method,params);
   if(method==='graph_search'){
     const mode=String(params.mode??'hybrid'),graph=(await import('./mock-graph')).graphFixture('graph_query',{request:{operation:mode==='graph'?'relations':'paths',view:'mixed'}});
@@ -442,6 +446,7 @@ export async function mockCall(method: string, params: Record<string, unknown>):
       return { project: projects()[0] };
     case "search": {
       await delay(180);
+      if (status(String(params.project ?? params.cwd)).state === "reindex_required") throw new BarsError("Нужна переиндексация: модель индекса отличается от выбранной. Разрешите переиндексацию проекта.", "reindex_required", -32004);
       if (scene() === "provider") throw new BarsError("провайдер https://api.example.com не ответил: 401", "provider_error", -32008);
       const query = String(params.query ?? "").toLowerCase();
       const limit = Number(params.limit ?? 3);

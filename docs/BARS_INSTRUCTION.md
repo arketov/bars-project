@@ -15,6 +15,12 @@ Identify the subject and information needed before calling a tool. Resolve a sta
 
 The examples assume the suggested layout; use the target project's actual modules and documents. Filters are optional, not a quota. After an empty result, check the subject, project and scope, then reformulate or read a known primary source. Zero results do not prove that a requirement is absent and do not justify reindexing. Check result text as well as its heading; a chunk may contain adjacent sections.
 
+## Saved files and index freshness
+
+`bars_read`, `bars_outline`, `bars_text_search` and `bars_links` read saved disk content, never an unsaved window editor buffer. Use text_search for exact literals/regex and links for incoming/outgoing links of a project-relative document. Respect continuation revisions/cursors and truncation; a stale revision/cursor requires restarting the request.
+
+Semantic search, similar and duplicates use the embed index. Saved edits may wait for a pause and the document queue; `pending` does not explain why, and `ready` does not prove every file is current. Do not force reindex to bypass normal waiting. GraphRAG has separate generations and may be stale/partial; it is not the window's physical graph or its fresh link panel. Agents edit files through their own file tools; MCP does not save or move them.
+
 ## How bars reads documents
 
 bars splits each Markdown file into sections by headings and indexes every section on its own. A search result is one section: its text, its heading chain, the file path and the file `title`. The reader of a result does not see the neighbouring sections. Every rule below follows from this.
@@ -38,6 +44,8 @@ bars splits each Markdown file into sections by headings and indexes every secti
 - **Do not copy, link.** A requirement, a decision or a definition lives in exactly one place; other documents refer to it by link or by its number. Copies drift apart and then bars finds both versions.
 
 ## Links in the text
+
+bars also reads Obsidian-style `[[name]]`, `[[folder/name]]` and `[[name|label]]`. Names refer to Markdown filenames without the extension; paths start at the documentation root. `#fragment` resolves to the document. A missing name remains a broken link until a document is created. Rename or move through bars to update incoming and outgoing links; after an external move, fix links yourself. Relative Markdown links remain supported and portable.
 
 A link is a claim that two documents are related. bars builds its document graph from links, and a reader of one search result follows them for details. A link without a relation is noise in both, so link on purpose, not on every mention.
 

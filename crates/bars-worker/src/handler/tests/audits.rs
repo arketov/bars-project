@@ -19,6 +19,17 @@ struct Env {
     _home: TempDir,
 }
 
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn audit_scheduler_is_joined_by_worker_shutdown() {
+    let env = Env::new();
+    env.handler.start_audit_scheduler();
+    tokio::time::timeout(Duration::from_secs(5), env.worker.shutdown())
+        .await
+        .unwrap();
+    assert!(env.worker.is_stopping());
+    env.handler.audit_schedule_tick().await;
+}
+
 impl Env {
     fn new() -> Self {
         let home = TempDir::new().unwrap();

@@ -1,0 +1,53 @@
+[
+  {
+    "utc": "2026-10-25T11:08:18.1503647Z",
+    "processes": [
+      {
+        "ProcessId": 22500,
+        "Name": "bars.exe",
+        "CreationDate": "2026-10-25T12:59:36.935144+05:00",
+        "ReadTransferCount": 572256740027,
+        "WriteTransferCount": 43534221660,
+        "ReadOperationCount": 159608936,
+        "KernelModeTime": 8346250000,
+        "UserModeTime": 16502656250,
+        "WorkingSetSize": 1408843776,
+        "PrivatePageCount": 9157795840
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-25T11:08:23.3378030Z",
+    "processes": [
+      {
+        "ProcessId": 22500,
+        "Name": "bars.exe",
+        "CreationDate": "2026-10-25T12:59:36.935144+05:00",
+        "ReadTransferCount": 572353874240,
+        "WriteTransferCount": 43535585668,
+        "ReadOperationCount": 159640366,
+        "KernelModeTime": 8348437500,
+        "UserModeTime": 16507187500,
+        "WorkingSetSize": 1406844928,
+        "PrivatePageCount": 9154752512
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-25T11:08:28.5000209Z",
+    "processes": [
+      {
+        "ProcessId": 22500,
+        "Name": "bars.exe",
+        "CreationDate": "2026-10-25T12:59:36.935144+05:00",
+        "ReadTransferCount": 572559209902,
+        "WriteTransferCount": 43537221560,
+        "ReadOperationCount": 159709433,
+        "KernelModeTime": 8352031250,
+        "UserModeTime": 16512812500,
+        "WorkingSetSize": 1407549440,
+        "PrivatePageCount": 9156177920
+      }
+    ]
+  }
+]

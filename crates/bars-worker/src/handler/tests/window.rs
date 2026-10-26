@@ -101,7 +101,7 @@ async fn physical_graph_slice_is_window_only_and_expands_chunks_on_the_same_snap
                 target: target.clone(),
             }))
             .await;
-        if status.state == LayerState::Partial {
+        if status.state == LayerState::Ready {
             break;
         }
         assert!(Instant::now() < deadline, "граф не построился: {status:?}");
@@ -165,6 +165,24 @@ async fn physical_graph_slice_is_window_only_and_expands_chunks_on_the_same_snap
         }))
         .await;
     assert!(error.message.contains("снимок"), "{error:?}");
+    let index = bars_core::storage::Index::open(
+        &bars_core::storage::index_path(&root),
+        bars_core::storage::Journal::Wal,
+    )
+    .unwrap();
+    index
+        .conn()
+        .execute(
+            "UPDATE documents SET hash='changed' WHERE path='docs/features/a.md'",
+            [],
+        )
+        .unwrap();
+    let previous: PhysicalGraphSlice = env.call(params(PhysicalRequest::default())).await;
+    assert_eq!(previous.snapshot, slice.snapshot);
+    assert_eq!(previous.layers.document_similarity.state, LayerState::Stale);
+    assert_eq!(previous.layers.markdown_link.state, LayerState::Stale);
+    assert!(previous.warnings.iter().any(|w| w.contains("Граф устарел")));
+    drop(index);
     env.worker.shutdown().await;
 }
 

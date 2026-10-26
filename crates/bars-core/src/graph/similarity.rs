@@ -5,6 +5,7 @@ use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt;
 
 /// ID задаёт вызывающий слой; это не публичный SQLite rowid.
+#[derive(Clone)]
 pub struct VectorNode {
     pub id: String,
     pub vector: Vec<f32>,
@@ -18,7 +19,7 @@ pub struct KnnOptions {
     pub max_comparisons: u64,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct SimilarNeighbor {
     pub id: String,
     /// Cosine в [-1, 1], не вероятность истинности связи.

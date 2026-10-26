@@ -48,7 +48,7 @@ async fn graph_cli_operations_and_search_modes_match_worker_json() {
     loop {
         let status = bars(&env, &["--json", "graph", "status"]).await;
         if status.code == 0
-            && serde_json::from_str::<Value>(&status.out).unwrap()["state"] == "partial"
+            && serde_json::from_str::<Value>(&status.out).unwrap()["freshness"] == "current"
         {
             break;
         }

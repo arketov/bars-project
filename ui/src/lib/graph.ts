@@ -88,6 +88,7 @@ export interface GraphReply {
   scope: { modules: string[]; files: string[] };
   layer_state: string;
   layer_states: Record<string, string>;
+  layers?: Record<string, GraphLayerStatus>;
   coverage: {
     indexed: number;
     processed: number;
@@ -114,6 +115,10 @@ export interface GraphReply {
   method: string;
 }
 export interface GraphStatus {
+  freshness?: "not_built" | "current" | "stale";
+  completeness?: "complete" | "partial" | "unknown";
+  availability?: "enabled" | "disabled";
+  job_state?: "idle" | "queued" | "running" | "stopped" | "failed";
   state: string;
   snapshot: string | null;
   active_job: string | null;
@@ -124,8 +129,33 @@ export interface GraphStatus {
   file_errors?: { path: string; code: string; message: string }[];
   file_errors_total?: number;
   paused?: boolean;
-  layers?: Record<string, { state: string; generation: string | null; fingerprint: string; processed: number; total: number; failed: number }>;
+  layers?: Record<string, GraphLayerStatus>;
 }
+export interface GraphLayerStatus {
+  stale_reason?: string | null;
+  state: string;
+  freshness: "not_built" | "current" | "stale";
+  completeness: "complete" | "partial" | "unknown";
+  availability: "enabled" | "disabled";
+  generation: string | null;
+  fingerprint: string;
+  source_revisions: Record<string, string>;
+  coverage: { unit: string; processed: number; total: number; missing: number; comparisons: number; reason: string | null };
+  processed: number; total: number; failed: number;
+}
+export function graphDataLabel(status: GraphStatus): string {
+  if (status.availability === "disabled") return "Граф выключен";
+  if (status.freshness === "stale") return "Граф устарел";
+  if (status.freshness === "current") return "Граф актуален";
+  return "Граф ещё не построен";
+}
+export const completenessLabels: Record<string, string> = {
+  complete: "Расчёт завершён полностью", partial: "Есть известные пропуски", unknown: "Полнота отношений не установлена",
+};
+export const jobLabels: Record<string, string> = {
+  idle: "", queued: "Ожидает выполнения", running: "Обновляется",
+  stopped: "Построение остановлено · После новых изменений граф обновится автоматически", failed: "Не удалось обновить граф",
+};
 export type RetrievalMode = "hybrid" | "mix" | "graph";
 export interface GraphSearchOutput extends SearchOutput {
   requested_mode: RetrievalMode;

@@ -7,6 +7,7 @@ mod audits;
 mod disk_read;
 mod errors;
 mod graph;
+pub(crate) mod graph_cache;
 mod history;
 mod links;
 mod text_search;
@@ -65,6 +66,7 @@ pub struct WorkerHandler {
     audits: crate::audits::Audits,
     /// Близость документов последнего среза физического графа: проект, снимок графа, результат.
     physical_similarity: PhysicalSimilarityCache,
+    graph_cache: std::sync::Arc<graph_cache::GraphCache>,
 }
 
 type PhysicalSimilarityCache = std::sync::Arc<
@@ -79,6 +81,7 @@ type PhysicalSimilarityCache = std::sync::Arc<
 
 impl WorkerHandler {
     pub fn new(worker: Worker) -> Self {
+        let graph_cache = worker.graph_cache();
         let history = crate::mcp_history::History::new(worker.bars_home().to_path_buf());
         history.start_maintenance();
         Self {
@@ -90,6 +93,7 @@ impl WorkerHandler {
             text_searches: Default::default(),
             audits: Default::default(),
             physical_similarity: Default::default(),
+            graph_cache,
         }
     }
 
@@ -181,12 +185,8 @@ impl WorkerHandler {
             modules: params.modules,
             results: params.limit.map(|value| value as usize),
         };
-        let gate = self
-            .worker
-            .gate(&project)
-            .map_err(worker_error)?
-            .read_owned()
-            .await;
+        let project_gate = self.worker.gate(&project).map_err(worker_error)?;
+        let gate = project_gate.clone().read_owned().await;
         let response = tokio::task::spawn_blocking(move || {
             let _gate = gate;
             let index = Index::open(&index_path(&project), Journal::Wal)?;
@@ -341,12 +341,8 @@ impl WorkerHandler {
         });
         // Замок держится на всё время поиска: подмена индекса при полной переиндексации ждёт,
         // пока поиски дочитают (`worker.md`, «Индекс проекта в воркере»).
-        let gate = self
-            .worker
-            .gate(&project)
-            .map_err(worker_error)?
-            .read_owned()
-            .await;
+        let project_gate = self.worker.gate(&project).map_err(worker_error)?;
+        let gate = project_gate.clone().read_owned().await;
         // Rerank-модель, пока она скачивается или грузится, поиск тоже не ждёт: выдача идёт без неё.
         let mut skipped_rerank = None;
         let mut reranker = None;
@@ -371,6 +367,7 @@ impl WorkerHandler {
                 }
             }
         }
+        let datasets = self.graph_cache.clone();
         let response = tokio::task::spawn_blocking(move || {
             let _gate = gate;
             let index = Index::open(&index_path(&project), Journal::Wal)?;
@@ -379,16 +376,40 @@ impl WorkerHandler {
             let mut related = None;
             let mut fallback = None;
             let result = if let Some(budgets) = graph_budgets {
-                match bars_core::graph::store::load(index.conn()) {
+                let graph_started = std::time::Instant::now();
+                let timeout = budgets
+                    .resolve()
+                    .map_err(|e| bars_core::search::SearchError::InvalidParams(e.to_string()))?
+                    .0
+                    .timeout_ms;
+                let deadline = graph_started + std::time::Duration::from_millis(u64::from(timeout));
+                let loaded = datasets
+                    .load(&project, &project_gate, deadline)
+                    .and_then(|data| {
+                        if data
+                            .layers
+                            .values()
+                            .any(|l| l.freshness == bars_core::graph::Freshness::Stale)
+                        {
+                            Err(bars_core::graph::GraphError::NotReady(
+                                "граф устарел".into(),
+                            ))
+                        } else {
+                            Ok(data)
+                        }
+                    });
+                let load_elapsed = graph_started.elapsed();
+                match loaded {
                     Ok(data) => {
                         let mut expand = |index: &Index, seeds: &[i64], limit: usize| {
-                            let (ids, reply) = bars_core::graph::retrieval::expand(
+                            let (ids, reply) = bars_core::graph::retrieval::expand_timed(
                                 index,
                                 &data,
                                 &request,
                                 seeds,
                                 limit,
                                 budgets.clone(),
+                                load_elapsed,
                             )?;
                             related = Some(reply);
                             Ok(ids)
@@ -517,7 +538,12 @@ impl WorkerHandler {
     fn read(&self, params: ReadParams) -> Result<ReadOutput, RpcError> {
         let (text, settings) = self.document(&params.target, &params.path)?;
         let title = chunk_document(&params.path, &text, &settings.chunking).title;
-        Ok(ReadOutput { title, text })
+        let revision = blake3::hash(text.as_bytes()).to_hex().to_string();
+        Ok(ReadOutput {
+            title,
+            text,
+            revision,
+        })
     }
 
     async fn projects(&self) -> Result<ProjectsOutput, RpcError> {

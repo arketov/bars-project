@@ -1,0 +1,5 @@
+    Blocking waiting for file lock on build directory
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+   Compiling bars-app v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-app)
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2m 55s

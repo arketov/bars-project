@@ -315,6 +315,8 @@ pub struct ReadParams {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ReadOutput {
+    #[serde(default)]
+    pub revision: String,
     pub title: String,
     /// Текст документа как есть; номера строк клиенты ставят одной функцией `number_lines`.
     pub text: String,

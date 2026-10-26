@@ -1,0 +1,388 @@
+{
+  "success": true,
+  "native": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+  "checks": [
+    "Структура готова",
+    "Смысловая полнота не завышена",
+    "Прогресс дошёл до публикации",
+    "Ошибок файлов нет",
+    "Новое поколение структуры после правки",
+    "Старый снимок отклонён",
+    "Явная перестройка принята",
+    "Неизменные исходники дают тот же снимок",
+    "Выбранный слой сохраняет другие актуальные поколения",
+    "Граф устарел без правок файлов",
+    "Проверка без переиндексации принята",
+    "Scan без правок восстановил тот же снимок",
+    "В собранном окне доступен вход в граф",
+    "Карта открылась после автообновления"
+  ],
+  "before": {
+    "freshness": "current",
+    "completeness": "unknown",
+    "availability": "enabled",
+    "job_state": "idle",
+    "state": "ready",
+    "snapshot": "1814d6080835e788a716f4ee46d408a0d36ed0849d9d54c67f76c58150bf61cc",
+    "active_job": null,
+    "source_count": 1,
+    "error": null,
+    "method": "explicit-markdown-v6",
+    "progress": {
+      "phase": "publish",
+      "processed": 1,
+      "total": 1,
+      "elapsed_ms": 0
+    },
+    "file_errors": [],
+    "file_errors_total": 0,
+    "layers": {
+      "semantic": {
+        "stale_reason": null,
+        "freshness": "current",
+        "completeness": "unknown",
+        "availability": "enabled",
+        "coverage": {
+          "unit": "documents",
+          "processed": 1,
+          "total": 1,
+          "missing": 0,
+          "comparisons": 0,
+          "reason": null
+        },
+        "source_revisions": {
+          "docs/Тема.md": "9e9f22d26159e1f465f37392c559df0fcc03c51b6bc1eac0f416aa96f6d425b0"
+        },
+        "state": "partial",
+        "generation": "74e9e7e00d35b195bd4c547a69d2ff23b4f779edd53d4785844ba79f22032c0d",
+        "fingerprint": "explicit-markdown-v6",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "similarity": {
+        "stale_reason": null,
+        "freshness": "current",
+        "completeness": "complete",
+        "availability": "enabled",
+        "coverage": {
+          "unit": "chunks",
+          "processed": 1,
+          "total": 1,
+          "missing": 0,
+          "comparisons": 0,
+          "reason": null
+        },
+        "source_revisions": {
+          "docs/Тема.md": "9e9f22d26159e1f465f37392c559df0fcc03c51b6bc1eac0f416aa96f6d425b0"
+        },
+        "state": "ready",
+        "generation": "c95811f36e9acb031dbb3f6bd89591ab4b1515782fcb9ec7a399ddc905c12e26",
+        "fingerprint": "exact-pairs-f64-v1:k5:tau0.5",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "structure": {
+        "stale_reason": null,
+        "freshness": "current",
+        "completeness": "complete",
+        "availability": "enabled",
+        "coverage": {
+          "unit": "documents",
+          "processed": 1,
+          "total": 1,
+          "missing": 0,
+          "comparisons": 0,
+          "reason": null
+        },
+        "source_revisions": {
+          "docs/Тема.md": "9e9f22d26159e1f465f37392c559df0fcc03c51b6bc1eac0f416aa96f6d425b0"
+        },
+        "state": "ready",
+        "generation": "9e222e101eb566ab5cdc166cf2109f162d0e75de8d6ddf4de370de28060b6da2",
+        "fingerprint": "markdown-structure-v1",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      }
+    },
+    "paused": false
+  },
+  "after": {
+    "freshness": "current",
+    "completeness": "unknown",
+    "availability": "enabled",
+    "job_state": "idle",
+    "state": "ready",
+    "snapshot": "766a010227cdebe85b58af390a10f5a8da8e07eec50f6001074292e7ddc75e01",
+    "active_job": null,
+    "source_count": 1,
+    "error": null,
+    "method": "explicit-markdown-v6",
+    "progress": {
+      "phase": "publish",
+      "processed": 1,
+      "total": 1,
+      "elapsed_ms": 0
+    },
+    "file_errors": [],
+    "file_errors_total": 0,
+    "layers": {
+      "semantic": {
+        "stale_reason": null,
+        "freshness": "current",
+        "completeness": "unknown",
+        "availability": "enabled",
+        "coverage": {
+          "unit": "documents",
+          "processed": 1,
+          "total": 1,
+          "missing": 0,
+          "comparisons": 0,
+          "reason": null
+        },
+        "source_revisions": {
+          "docs/Тема.md": "97fdfbb95c377e0d2dc27eb81352e622659e680cc07d597545cbe4bdd0cb80f3"
+        },
+        "state": "partial",
+        "generation": "60127a51ac4d19840e22671be4aa07ceaff34690e635983752ad2e9c94acce2b",
+        "fingerprint": "explicit-markdown-v6",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "similarity": {
+        "stale_reason": null,
+        "freshness": "current",
+        "completeness": "complete",
+        "availability": "enabled",
+        "coverage": {
+          "unit": "chunks",
+          "processed": 1,
+          "total": 1,
+          "missing": 0,
+          "comparisons": 0,
+          "reason": null
+        },
+        "source_revisions": {
+          "docs/Тема.md": "97fdfbb95c377e0d2dc27eb81352e622659e680cc07d597545cbe4bdd0cb80f3"
+        },
+        "state": "ready",
+        "generation": "c95811f36e9acb031dbb3f6bd89591ab4b1515782fcb9ec7a399ddc905c12e26",
+        "fingerprint": "exact-pairs-f64-v1:k5:tau0.5",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "structure": {
+        "stale_reason": null,
+        "freshness": "current",
+        "completeness": "complete",
+        "availability": "enabled",
+        "coverage": {
+          "unit": "documents",
+          "processed": 1,
+          "total": 1,
+          "missing": 0,
+          "comparisons": 0,
+          "reason": null
+        },
+        "source_revisions": {
+          "docs/Тема.md": "97fdfbb95c377e0d2dc27eb81352e622659e680cc07d597545cbe4bdd0cb80f3"
+        },
+        "state": "ready",
+        "generation": "9c5f1f46fce197312940c5585e11f2d1e6686136bb9f9716c9150badede30a53",
+        "fingerprint": "markdown-structure-v1",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      }
+    },
+    "paused": false
+  },
+  "rebuilt": {
+    "freshness": "current",
+    "completeness": "unknown",
+    "availability": "enabled",
+    "job_state": "idle",
+    "state": "ready",
+    "snapshot": "766a010227cdebe85b58af390a10f5a8da8e07eec50f6001074292e7ddc75e01",
+    "active_job": null,
+    "source_count": 1,
+    "error": null,
+    "method": "explicit-markdown-v6",
+    "progress": {
+      "phase": "publish",
+      "processed": 1,
+      "total": 1,
+      "elapsed_ms": 0
+    },
+    "file_errors": [],
+    "file_errors_total": 0,
+    "layers": {
+      "semantic": {
+        "stale_reason": null,
+        "freshness": "current",
+        "completeness": "unknown",
+        "availability": "enabled",
+        "coverage": {
+          "unit": "documents",
+          "processed": 1,
+          "total": 1,
+          "missing": 0,
+          "comparisons": 0,
+          "reason": null
+        },
+        "source_revisions": {
+          "docs/Тема.md": "97fdfbb95c377e0d2dc27eb81352e622659e680cc07d597545cbe4bdd0cb80f3"
+        },
+        "state": "partial",
+        "generation": "60127a51ac4d19840e22671be4aa07ceaff34690e635983752ad2e9c94acce2b",
+        "fingerprint": "explicit-markdown-v6",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "similarity": {
+        "stale_reason": null,
+        "freshness": "current",
+        "completeness": "complete",
+        "availability": "enabled",
+        "coverage": {
+          "unit": "chunks",
+          "processed": 1,
+          "total": 1,
+          "missing": 0,
+          "comparisons": 0,
+          "reason": null
+        },
+        "source_revisions": {
+          "docs/Тема.md": "97fdfbb95c377e0d2dc27eb81352e622659e680cc07d597545cbe4bdd0cb80f3"
+        },
+        "state": "ready",
+        "generation": "c95811f36e9acb031dbb3f6bd89591ab4b1515782fcb9ec7a399ddc905c12e26",
+        "fingerprint": "exact-pairs-f64-v1:k5:tau0.5",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "structure": {
+        "stale_reason": null,
+        "freshness": "current",
+        "completeness": "complete",
+        "availability": "enabled",
+        "coverage": {
+          "unit": "documents",
+          "processed": 1,
+          "total": 1,
+          "missing": 0,
+          "comparisons": 0,
+          "reason": null
+        },
+        "source_revisions": {
+          "docs/Тема.md": "97fdfbb95c377e0d2dc27eb81352e622659e680cc07d597545cbe4bdd0cb80f3"
+        },
+        "state": "ready",
+        "generation": "9c5f1f46fce197312940c5585e11f2d1e6686136bb9f9716c9150badede30a53",
+        "fingerprint": "markdown-structure-v1",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      }
+    },
+    "paused": false
+  },
+  "checked": {
+    "freshness": "current",
+    "completeness": "unknown",
+    "availability": "enabled",
+    "job_state": "idle",
+    "state": "ready",
+    "snapshot": "766a010227cdebe85b58af390a10f5a8da8e07eec50f6001074292e7ddc75e01",
+    "active_job": null,
+    "source_count": 1,
+    "error": null,
+    "method": "explicit-markdown-v6",
+    "progress": {
+      "phase": "publish",
+      "processed": 1,
+      "total": 1,
+      "elapsed_ms": 0
+    },
+    "file_errors": [],
+    "file_errors_total": 0,
+    "layers": {
+      "semantic": {
+        "stale_reason": null,
+        "freshness": "current",
+        "completeness": "unknown",
+        "availability": "enabled",
+        "coverage": {
+          "unit": "documents",
+          "processed": 1,
+          "total": 1,
+          "missing": 0,
+          "comparisons": 0,
+          "reason": null
+        },
+        "source_revisions": {
+          "docs/Тема.md": "97fdfbb95c377e0d2dc27eb81352e622659e680cc07d597545cbe4bdd0cb80f3"
+        },
+        "state": "partial",
+        "generation": "60127a51ac4d19840e22671be4aa07ceaff34690e635983752ad2e9c94acce2b",
+        "fingerprint": "explicit-markdown-v6",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "similarity": {
+        "stale_reason": null,
+        "freshness": "current",
+        "completeness": "complete",
+        "availability": "enabled",
+        "coverage": {
+          "unit": "chunks",
+          "processed": 1,
+          "total": 1,
+          "missing": 0,
+          "comparisons": 0,
+          "reason": null
+        },
+        "source_revisions": {
+          "docs/Тема.md": "97fdfbb95c377e0d2dc27eb81352e622659e680cc07d597545cbe4bdd0cb80f3"
+        },
+        "state": "ready",
+        "generation": "c95811f36e9acb031dbb3f6bd89591ab4b1515782fcb9ec7a399ddc905c12e26",
+        "fingerprint": "exact-pairs-f64-v1:k5:tau0.5",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "structure": {
+        "stale_reason": null,
+        "freshness": "current",
+        "completeness": "complete",
+        "availability": "enabled",
+        "coverage": {
+          "unit": "documents",
+          "processed": 1,
+          "total": 1,
+          "missing": 0,
+          "comparisons": 0,
+          "reason": null
+        },
+        "source_revisions": {
+          "docs/Тема.md": "97fdfbb95c377e0d2dc27eb81352e622659e680cc07d597545cbe4bdd0cb80f3"
+        },
+        "state": "ready",
+        "generation": "9c5f1f46fce197312940c5585e11f2d1e6686136bb9f9716c9150badede30a53",
+        "fingerprint": "markdown-structure-v1",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      }
+    },
+    "paused": false
+  }
+}

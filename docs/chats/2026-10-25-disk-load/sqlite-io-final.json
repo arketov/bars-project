@@ -1,0 +1,90 @@
+[
+  {
+    "mode": "lookup",
+    "rows": 3515,
+    "bytes": 35993600,
+    "checksum": 46947282,
+    "ms": 620.8274,
+    "digest": "8e1baa46a8e76ca02f41117d52b43fd6652e48c5e2f97d4775904d001da90b97",
+    "plan": [
+      "SCAN c",
+      "SEARCH d USING INTEGER PRIMARY KEY (rowid=?)",
+      "SEARCH v USING PRIMARY KEY (embed_hash=?)"
+    ],
+    "readBytes": 467491085,
+    "readOps": 141469
+  },
+  {
+    "mode": "sequential",
+    "rows": 3515,
+    "bytes": 35993600,
+    "checksum": 46947282,
+    "ms": 173.71370000000002,
+    "digest": "8e1baa46a8e76ca02f41117d52b43fd6652e48c5e2f97d4775904d001da90b97",
+    "plan": [
+      "SCAN v",
+      "SEARCH c USING INDEX chunks_embed_hash (embed_hash=?)",
+      "SEARCH d USING INTEGER PRIMARY KEY (rowid=?)"
+    ],
+    "readBytes": 50263075,
+    "readOps": 14381
+  },
+  {
+    "mode": "lookup",
+    "rows": 3515,
+    "bytes": 35993600,
+    "checksum": 46947282,
+    "ms": 465.61509999999987,
+    "digest": "8e1baa46a8e76ca02f41117d52b43fd6652e48c5e2f97d4775904d001da90b97",
+    "plan": [
+      "SCAN c",
+      "SEARCH d USING INTEGER PRIMARY KEY (rowid=?)",
+      "SEARCH v USING PRIMARY KEY (embed_hash=?)"
+    ],
+    "readBytes": 467489466,
+    "readOps": 141466
+  },
+  {
+    "mode": "sequential",
+    "rows": 3515,
+    "bytes": 35993600,
+    "checksum": 46947282,
+    "ms": 148.07590000000005,
+    "digest": "8e1baa46a8e76ca02f41117d52b43fd6652e48c5e2f97d4775904d001da90b97",
+    "plan": [
+      "SCAN v",
+      "SEARCH c USING INDEX chunks_embed_hash (embed_hash=?)",
+      "SEARCH d USING INTEGER PRIMARY KEY (rowid=?)"
+    ],
+    "readBytes": 50263075,
+    "readOps": 14381
+  },
+  {
+    "mode": "lookup_keys",
+    "rows": 3515,
+    "bytes": 0,
+    "checksum": 0,
+    "ms": 276.4507000000001,
+    "digest": "2a54f1dbaf9f22961aabd1a60acb548e54d5d27731b84ce2befa9140a844793c",
+    "plan": [
+      "SCAN c USING COVERING INDEX chunks_embed_hash",
+      "SEARCH v USING PRIMARY KEY (embed_hash=?)"
+    ],
+    "readBytes": 450871999,
+    "readOps": 137409
+  },
+  {
+    "mode": "sequential_keys",
+    "rows": 3515,
+    "bytes": 0,
+    "checksum": 0,
+    "ms": 10.435199999999895,
+    "digest": "2a54f1dbaf9f22961aabd1a60acb548e54d5d27731b84ce2befa9140a844793c",
+    "plan": [
+      "SCAN v",
+      "SEARCH c USING COVERING INDEX chunks_embed_hash (embed_hash=?)"
+    ],
+    "readBytes": 2506869,
+    "readOps": 615
+  }
+]

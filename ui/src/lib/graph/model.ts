@@ -14,6 +14,7 @@ export interface GNode {
   index: number;
   /** `ObjectRef.id` объекта в графе. */
   id: string;
+  revision?: string;
   kind: "document" | "chunk" | "query";
   label: string;
   path: string;

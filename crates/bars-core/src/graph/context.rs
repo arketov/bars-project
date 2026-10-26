@@ -31,6 +31,17 @@ pub fn evidence_scores(
     settings: &SearchSettings,
     request: &GraphRequest,
 ) -> Result<(BTreeMap<String, f32>, bool), SearchError> {
+    evidence_scores_current(index, data, embedder, settings, request, None)
+}
+
+pub fn evidence_scores_current(
+    index: &Index,
+    data: &Dataset,
+    embedder: &mut dyn Embedder,
+    settings: &SearchSettings,
+    request: &GraphRequest,
+    current: Option<&BTreeMap<String, String>>,
+) -> Result<(BTreeMap<String, f32>, bool), SearchError> {
     bars_graph::query::validate_request(request)
         .and_then(|_| bars_graph::query::validate_scope(data, &request.scope))
         .map_err(|error| SearchError::InvalidParams(error.to_string()))?;
@@ -62,6 +73,7 @@ pub fn evidence_scores(
             .sources
             .iter()
             .filter(|s| request.scope.allows(&s.meta) && ids.contains(&s.meta.reference.id))
+            .filter(|s| current.is_none_or(|m| m.get(&s.meta.path) == Some(&s.meta.hash)))
             .map(|s| s.meta.docs_path.clone())
             .collect::<Vec<_>>();
         if files.is_empty() {

@@ -59,7 +59,7 @@ beforeEach(() => {
     this.removeAttribute("open");
     this.dispatchEvent(new Event("close"));
   };
-  rpc.mockImplementation(async (method: string) =>
+  rpc.mockImplementation(async (method: string, params?: { path?: string }) =>
     method === "graph_status"
       ? {
           state: "partial",
@@ -68,7 +68,7 @@ beforeEach(() => {
           error: null,
         }
       : method === "read"
-        ? { title: "Текущий файл", text: "# Текущий файл" }
+        ? { title: "Текущий файл", text: "# Текущий файл", revision: output().sources.find((source) => `./${source.path}` === params?.path)?.hash }
         : output(),
   );
 });

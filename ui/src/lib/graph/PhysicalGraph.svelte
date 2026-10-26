@@ -7,6 +7,7 @@
   import { appearance } from "../appearance.svelte";
   import { documentColor, keyOf } from "../appearance";
   import type { GraphStatus } from "../graph";
+  import { graphDataLabel, completenessLabels, jobLabels } from "../graph";
   import { BarsError } from "../types";
   import { draw, layoutLines, lineDistance, moduleColors, radiusOf, readPalette, toScreen, toWorld, type Camera, type Palette, type Scene, type Target } from "./draw";
   import { DEFAULT_FORCES, Layout, type Forces, type PNode } from "./layout";
@@ -643,7 +644,7 @@
     const n = slice.nodes[index];
     const first = line ?? (n.kind === "chunk" ? n.firstLine : 0);
     const last = line ?? (n.kind === "chunk" ? n.lastLine : 0);
-    void app.openDocument({ path: n.path, title: n.kind === "chunk" ? label(n.owner) : n.label, first_line: first, last_line: last });
+    void app.openDocument({ path: n.path, title: n.kind === "chunk" ? label(n.owner) : n.label, first_line: first, last_line: last, expectedRevision: slice.nodes[n.owner]?.revision });
   }
 
   /** Из мини-графа: полный граф вкладкой, в нём — тот же узел выбранным. */
@@ -728,7 +729,7 @@
       const value = await graphStatus(path);
       if (path !== project()) return;
       status = value;
-      const ready = ["ready", "partial"].includes(value.state);
+      const ready = !!value.snapshot;
       const changed = !!value.snapshot && value.snapshot !== slice.snapshot;
       if (ready && !loading && (changed || (loadError && loadErrorKind === "graph_not_ready"))) void load(slice.snapshot ? "refresh" : "open");
     } catch {
@@ -1064,11 +1065,13 @@
       {/if}
       </div>
     {/if}
-    {#if status?.paused || (building && status?.progress) || status?.file_errors_total}
+    {#if status}
       <div class="banner" role="status">
-        {#if status.paused}<span>Обновление графа остановлено.</span><button class="more" onclick={() => void rebuildGraph()}>Продолжить</button>{/if}
-        {#if building && status.progress}<span>{({ structure: "Разбор документов", similarity: "Расчёт близости", publish: "Публикация" } as Record<string, string>)[status.progress.phase] ?? "Построение"}: {status.progress.processed}{status.progress.total === null ? "" : ` / ${status.progress.total}`} · {(status.progress.elapsed_ms / 1000).toFixed(1)} с</span>{/if}
+        <span>{graphDataLabel(status)} · {completenessLabels[status.completeness ?? "unknown"]} · {jobLabels[status.job_state ?? "idle"]}</span>
+        {#if status.job_state === "stopped"}<button class="more" onclick={() => void rebuildGraph()}>Продолжить</button>{/if}
+        {#if building && status.progress}<span>{({ structure: "Разбор документов", similarity: "Расчёт близости", similarity_pairs: "Сравнено пар", publish: "Публикация" } as Record<string, string>)[status.progress.phase] ?? "Построение"}: {status.progress.processed}{status.progress.total === null ? "" : ` / ${status.progress.total}`} · {(status.progress.elapsed_ms / 1000).toFixed(1)} с</span>{/if}
         {#if status.file_errors_total}<details><summary>Файлов с ошибками: {status.file_errors_total}</summary>{#each status.file_errors ?? [] as error}<div>{error.path}: {error.message}</div>{/each}</details>{/if}
+        {#if status.error}<span>{status.error}</span>{/if}
       </div>
     {/if}
     {#if layerIssues.length}

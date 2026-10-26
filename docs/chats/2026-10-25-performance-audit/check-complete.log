@@ -1,0 +1,33 @@
+
+=== cargo fmt --check ===
+
+=== cargo clippy ===
+    Blocking waiting for file lock on build directory
+   Compiling bindgen v0.72.1
+   Compiling llama-cpp-sys-2 v0.1.160
+    Checking llama-cpp-2 v0.1.160
+    Checking bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Checking bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Checking bars-app v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-app)
+    Checking bars-mcp v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-mcp)
+    Checking bars-cli v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-cli)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 37.54s
+
+=== cargo build ===
+    Blocking waiting for file lock on build directory
+   Compiling bindgen v0.72.1
+   Compiling bars-mcp v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-mcp)
+   Compiling bars-cli v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-cli)
+   Compiling llama-cpp-sys-2 v0.1.160
+   Compiling llama-cpp-2 v0.1.160
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+   Compiling bars-app v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2m 53s
+
+=== cargo test ===
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+   Compiling bars-mcp v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-mcp)
+   Compiling bars-cli v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-cli)
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+   Compiling bars-app v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-app)

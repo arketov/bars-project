@@ -33,6 +33,21 @@ struct Probe {
     project: PathBuf,
 }
 #[tauri::command]
+fn graph_lifecycle_probe_stale(state: State<'_, Probe>) -> Result<(), String> {
+    let index = bars_core::storage::Index::open(
+        &bars_core::storage::index_path(&state.project),
+        bars_core::storage::Journal::Wal,
+    )
+    .map_err(|e| e.to_string())?;
+    bars_core::graph::store::set_state(
+        index.conn(),
+        bars_core::graph::LayerState::Stale,
+        None,
+        None,
+    )
+    .map_err(|e| e.to_string())
+}
+#[tauri::command]
 fn graph_lifecycle_probe_external(state: State<'_, Probe>) -> Result<(), String> {
     std::fs::write(
         state.project.join("docs/Тема.md"),
@@ -99,6 +114,7 @@ fn main() -> anyhow::Result<()> {
             commands::appearance_read,
             commands::keybindings_get,
             graph_lifecycle_probe_external,
+            graph_lifecycle_probe_stale,
             graph_lifecycle_probe_finish,
             graph_lifecycle_probe_size
         ])

@@ -1,0 +1,110 @@
+{
+  "utc": "2026-10-25T12:21:05.8959628Z",
+  "head": "4738aa059c88d8299fda775b42a22b849b15dfa9",
+  "files": [
+    {
+      "path": "Cargo.toml",
+      "sha256": "A9B9804F193A5C0B53DF30E16F0392EB31655B01502F7FC8BE06DF121B8A6929"
+    },
+    {
+      "path": "crates/bars-core/src/graph/build.rs",
+      "sha256": "520C4AA7FD44569D23741E2AE129838ADD3E95F5BCE8CBDBB5A34A51A4367C57"
+    },
+    {
+      "path": "crates/bars-core/src/graph/build/job.rs",
+      "sha256": "F4D041A3EE0F630224C2D5B81E2E23AC106E68D925405063F557F16F2982A06A"
+    },
+    {
+      "path": "crates/bars-core/src/graph/mod.rs",
+      "sha256": "D6C17B407A971D6266A0C85473383A67F265CB522B7F9ED7233CFF6CC0945C1D"
+    },
+    {
+      "path": "crates/bars-core/src/graph/similarity_job.rs",
+      "sha256": "AA9148028D75D17707B3E0BE44CC24A1013CEAE24D8F77E10AF452AB803CC48B"
+    },
+    {
+      "path": "crates/bars-core/src/graph/context.rs",
+      "sha256": "DEEEAE555157302C5D4F1891AB22383959963730D91B1EC080EB06EDA04035E1"
+    },
+    {
+      "path": "crates/bars-core/src/graph/retrieval.rs",
+      "sha256": "2D0B575B62841E991BA95749AA63EC12E356A3D1D76F7D807D9A8EA346FCA782"
+    },
+    {
+      "path": "crates/bars-graph/src/model.rs",
+      "sha256": "BAFEA7A42EA4A58D84B383006A0074145BB4B2F30E2308F8458CF0FD4467842E"
+    },
+    {
+      "path": "crates/bars-graph/src/query.rs",
+      "sha256": "65D497D45BEF39D8D2ACDE73C2D6F2D886465B0E77A374580C6B998E7A46080B"
+    },
+    {
+      "path": "crates/bars-graph/src/store.rs",
+      "sha256": "A094DAE36ECA9500ABF0793AC58A023E67F84B62CD4BA969FBA87B68E395A06F"
+    },
+    {
+      "path": "crates/bars-graph/tests/storage.rs",
+      "sha256": "E5BF9699A406DEEA3C935680389DF93742CECC95BFD541A6D65FF511978B4BDF"
+    },
+    {
+      "path": "crates/bars-protocol/src/error.rs",
+      "sha256": "E135C386B591D2B79193AB5CD22DD60CB06EF69411D3D344BD1447BE09D7D3F3"
+    },
+    {
+      "path": "crates/bars-worker/src/handler/mod.rs",
+      "sha256": "9887D060C632EAF4A9EACBC6849BCF168CF1BE7E745C71396EDA5C6063CD032D"
+    },
+    {
+      "path": "crates/bars-worker/src/handler/graph.rs",
+      "sha256": "DDAE0B6327FF57B6795EE72BFDAA3B805F679F54335943047DDEE3EA58D9FB3D"
+    },
+    {
+      "path": "crates/bars-worker/src/handler/graph_cache.rs",
+      "sha256": "2D9854F2F4449E88FEDC311870F51BEECEC4BEA60E8555D76CD227025AC9FBBC"
+    },
+    {
+      "path": "crates/bars-worker/src/handler/audits.rs",
+      "sha256": "36CF7205D59ABCEE6E6453AFF4F4F5AD7FA2F7CCE86056DFA8DF6501CD354616"
+    },
+    {
+      "path": "crates/bars-worker/src/handler/tests.rs",
+      "sha256": "E3E640A4C0676586EED82B7070A0A48DEB77461E63CB05706935E1BAA4DE0CB0"
+    },
+    {
+      "path": "crates/bars-worker/src/handler/tests/audits.rs",
+      "sha256": "E6C83801A93BB35BCA84F71D8D465725CE9F882A92FE68ECB97B58E864214B1F"
+    },
+    {
+      "path": "crates/bars-worker/src/worker/mod.rs",
+      "sha256": "D65EE84CE86C4987042F5C3472D0EFDCEA6AD9BBCD05D5C18C48B41342451F6F"
+    },
+    {
+      "path": "crates/bars-worker/src/worker/graph.rs",
+      "sha256": "220DC8B6459B0623B874D552A3C77B036D3A5AE8B08E853BA5934193AB38FC3D"
+    },
+    {
+      "path": "crates/bars-worker/src/worker/graph/inputs.rs",
+      "sha256": "02430DC0B801D34F07B5DB464E252A6B4F78F7F420B4B9606DB95CCB8D7DB609"
+    },
+    {
+      "path": "crates/bars-worker/src/worker/deletion.rs",
+      "sha256": "C55B560BA277E579E2D061F3916EFC774A722041EA3E541EC4871CCE16BA68CC"
+    },
+    {
+      "path": "ui/src/App.svelte",
+      "sha256": "6849384FAB883F6CE01B672DD41EAC979FEA41382C4345D1012022BA421EE48D"
+    },
+    {
+      "path": "ui/src/lib/app.svelte.ts",
+      "sha256": "356F43880DFCF01DA2EA58996DD42E9A1C88F828634FB0EB2997E9803BA4D407"
+    },
+    {
+      "path": "ui/src/lib/Notifications.svelte",
+      "sha256": "B2AA2BAE5DAC94E2205C7B8963C837201217DD761173EEE7FED15510F91177C6"
+    },
+    {
+      "path": "ui/src/lib/resource-polling.test.ts",
+      "sha256": "FBC8DEC31857EF7F660A8CC669082606D414D12AA53232112F67898F421BFB3D"
+    }
+  ]
+}

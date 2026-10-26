@@ -349,6 +349,39 @@ fn bounded_cosines_match_full_scan_and_keep_text_candidates() {
 }
 
 #[test]
+fn streamed_cosines_keep_shared_vectors_and_skip_missing_and_orphan_vectors() {
+    let (_dir, index, _) = project();
+    index.conn().execute_batch(
+        "UPDATE chunks SET embed_hash=(SELECT c.embed_hash FROM chunks c JOIN documents d ON d.id=c.document_id WHERE d.path='docs/search/hybrid.md')
+         WHERE document_id=(SELECT id FROM documents WHERE path='docs/models/embed.md');
+         DELETE FROM vectors WHERE embed_hash=(SELECT c.embed_hash FROM chunks c JOIN documents d ON d.id=c.document_id WHERE d.path='docs/root.md');
+         INSERT INTO vectors VALUES('orphan',zeroblob(4));",
+    ).unwrap();
+    let query = vec![0.125_f32; DIM];
+    let all = Scope::build(&index, &request("поиск"))
+        .unwrap()
+        .cosines(&index, &query, 100, &[], &[])
+        .unwrap();
+    assert_eq!(all.len(), 3);
+    let mut scoped = request("поиск");
+    scoped.modules = vec!["search".into()];
+    let selected = Scope::build(&index, &scoped)
+        .unwrap()
+        .cosines(&index, &query, 100, &[], &[])
+        .unwrap();
+    assert_eq!(selected.len(), 2);
+    for (id, score) in selected {
+        assert_eq!(score.to_bits(), all[&id].to_bits());
+    }
+    let scores: Vec<_> = all.values().map(|score| score.to_bits()).collect();
+    assert!(
+        scores
+            .iter()
+            .any(|score| scores.iter().filter(|s| *s == score).count() >= 2)
+    );
+}
+
+#[test]
 fn exact_identifier_is_found_first() {
     let (_dir, index, mut embedder) = project();
 

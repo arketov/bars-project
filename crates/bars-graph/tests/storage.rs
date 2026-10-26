@@ -55,6 +55,28 @@ fn migration_roundtrip_preserves_embedding_schema_and_data() {
     store::ensure_schema(&mut db).unwrap();
     assert_eq!(store::load(&db).unwrap().sources.len(), 2);
 }
+
+#[test]
+fn load_deadline_does_not_return_partial_data_or_leave_sqlite_interrupted() {
+    let (mut db, data, manifest) = setup();
+    store::publish(&mut db, &data, &manifest).unwrap();
+    assert!(matches!(
+        store::load_previous_until(&db, std::time::Instant::now()),
+        Err(GraphError::TimedOut)
+    ));
+    let loaded = store::load_previous_until(
+        &db,
+        std::time::Instant::now() + std::time::Duration::from_secs(5),
+    )
+    .unwrap();
+    assert_eq!(loaded.snapshot, data.snapshot);
+    assert_eq!(loaded.evidence, data.evidence);
+    assert_eq!(
+        db.query_row("SELECT 1", [], |r| r.get::<_, i32>(0))
+            .unwrap(),
+        1
+    );
+}
 #[test]
 fn method_change_invalidates_cached_snapshot_even_with_unchanged_sources() {
     let (mut db, data, manifest) = setup();
@@ -257,4 +279,131 @@ fn diagnostics_and_pause_survive_schema_reopen_without_changing_snapshot() {
     assert_eq!(store::load(&db).unwrap().snapshot, data.snapshot);
     assert_eq!(status.layers["semantic"].state, LayerState::Partial);
     assert_eq!(status.layers["structure"].state, LayerState::Ready);
+}
+
+#[test]
+fn freshness_completeness_and_job_are_independent_and_old_snapshot_is_explicit() {
+    let (mut db, mut data, manifest) = setup();
+    data.similarity_state = LayerState::Ready;
+    store::publish(&mut db, &data, &manifest).unwrap();
+    let status = store::status(&db).unwrap();
+    assert_eq!(status.freshness, Freshness::Current);
+    assert_eq!(status.completeness, Completeness::Unknown);
+    assert_eq!(status.state, LayerState::Ready);
+    assert_eq!(
+        status.layers["semantic"].completeness,
+        Completeness::Unknown
+    );
+    assert_eq!(
+        status.layers["similarity"].completeness,
+        Completeness::Complete
+    );
+    for (state, job) in [
+        (LayerState::Building, JobState::Running),
+        (LayerState::Cancelled, JobState::Stopped),
+        (LayerState::Failed, JobState::Failed),
+    ] {
+        store::set_state(&db, state, Some("job"), None).unwrap();
+        let status = store::status(&db).unwrap();
+        assert_eq!(status.freshness, Freshness::Current);
+        assert_eq!(status.job_state, job);
+        assert_eq!(status.state, LayerState::Ready);
+    }
+    db.execute("DELETE FROM documents WHERE path='docs/a.md'", [])
+        .unwrap();
+    store::set_state(&db, LayerState::Building, Some("job"), None).unwrap();
+    let status = store::status(&db).unwrap();
+    assert_eq!(status.state, LayerState::Stale);
+    assert_eq!(status.freshness, Freshness::Stale);
+    assert_eq!(status.job_state, JobState::Running);
+    assert_eq!(status.completeness, Completeness::Unknown);
+    assert!(store::load(&db).is_err());
+    let old = store::load_previous(&db).unwrap();
+    assert_eq!(old.snapshot, data.snapshot);
+    assert_eq!(old.sources.len(), 2);
+    assert!(old.warnings.iter().any(|w| w.contains("Граф устарел")));
+    assert_eq!(old.layers["structure"].source_revisions, manifest);
+    let reply = query::execute(&old, &GraphRequest::default(), || false).unwrap();
+    assert_eq!(reply.layers["structure"].freshness, Freshness::Stale);
+}
+
+#[test]
+fn disabled_layers_do_not_lower_aggregate_and_partial_is_not_stale() {
+    let (mut db, data, manifest) = setup();
+    store::publish(&mut db, &data, &manifest).unwrap();
+    let mut status = store::status(&db).unwrap();
+    status.layers.get_mut("semantic").unwrap().availability = Availability::Disabled;
+    status.layers.get_mut("similarity").unwrap().availability = Availability::Disabled;
+    status.derive_data_state();
+    assert_eq!(status.completeness, Completeness::Complete);
+    assert_eq!(status.freshness, Freshness::Current);
+    let structure = status.layers.get_mut("structure").unwrap();
+    structure.completeness = Completeness::Partial;
+    status.derive_data_state();
+    assert_eq!(status.freshness, Freshness::Current);
+    assert_eq!(status.completeness, Completeness::Partial);
+    status.layers.get_mut("structure").unwrap().availability = Availability::Disabled;
+    status.derive_data_state();
+    assert_eq!(status.availability, Availability::Disabled);
+    assert_eq!(status.state, LayerState::Disabled);
+}
+
+#[test]
+fn legacy_layers_load_without_writes_and_missing_vector_fingerprint_is_stale() {
+    let (mut db, data, manifest) = setup();
+    store::publish(&mut db, &data, &manifest).unwrap();
+    let mut layers = serde_json::to_value(store::status(&db).unwrap().layers).unwrap();
+    for layer in layers.as_object_mut().unwrap().values_mut() {
+        for key in [
+            "freshness",
+            "completeness",
+            "availability",
+            "coverage",
+            "source_revisions",
+        ] {
+            layer.as_object_mut().unwrap().remove(key);
+        }
+    }
+    db.execute(
+        "UPDATE graph_meta SET value=?1 WHERE key='layers'",
+        [layers.to_string()],
+    )
+    .unwrap();
+    db.execute("DELETE FROM graph_meta WHERE key='similarity_inputs'", [])
+        .unwrap();
+    let changes = db.total_changes();
+    let status = store::status(&db).unwrap();
+    assert_eq!(
+        status.layers["semantic"].completeness,
+        Completeness::Unknown
+    );
+    // Эта фикстура ещё не строила близость: отсутствующее поколение остаётся not_built.
+    assert_eq!(status.layers["similarity"].freshness, Freshness::NotBuilt);
+    assert_eq!(status.layers["structure"].source_revisions, manifest);
+    store::load_previous(&db).unwrap();
+    assert_eq!(db.total_changes(), changes);
+}
+
+#[test]
+fn vector_model_change_marks_similarity_and_aggregate_stale() {
+    let (mut db, mut data, manifest) = setup();
+    data.similarity_state = LayerState::Ready;
+    store::publish(&mut db, &data, &manifest).unwrap();
+    db.execute(
+        "INSERT INTO meta VALUES('model_fingerprint','new-model')",
+        [],
+    )
+    .unwrap();
+    let status = store::status(&db).unwrap();
+    assert_eq!(status.layers["structure"].freshness, Freshness::Current);
+    assert_eq!(status.layers["similarity"].freshness, Freshness::Stale);
+    assert_eq!(status.freshness, Freshness::Stale);
+    assert!(store::load(&db).is_err());
+    assert!(
+        store::load_previous(&db)
+            .unwrap()
+            .warnings
+            .iter()
+            .any(|w| w.contains("Граф устарел"))
+    );
 }

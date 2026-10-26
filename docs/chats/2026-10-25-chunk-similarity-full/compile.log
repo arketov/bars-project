@@ -1,0 +1,71 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.42
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+   Compiling bindgen v0.72.1
+    Checking bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+    Checking tauri-plugin-fs v2.7.1
+   Compiling bars-app v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-app)
+    Checking bars-protocol v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-protocol)
+    Checking bars-mcp v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-mcp)
+    Checking bars-cli v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-cli)
+    Checking tauri-plugin-opener v2.7.2
+   Compiling llama-cpp-sys-2 v0.1.160
+    Checking tauri-plugin-dialog v2.8.3
+    Checking tauri-plugin-single-instance v2.5.4
+    Checking llama-cpp-2 v0.1.160
+    Checking bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+error[E0425]: cannot find value `layout` in this scope
+   --> crates\bars-core\src\graph\build.rs:341:28
+    |
+341 |             .strip_prefix(&layout.docs_root)
+    |                            ^^^^^^ not found in this scope
+    |
+note: function `crate::models::catalog::layout` exists but is inaccessible
+   --> crates\bars-core\src\models\catalog.rs:176:1
+    |
+176 | fn layout(id: &str) -> Option<Layout> {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not accessible
+
+error[E0425]: cannot find value `namespace` in this scope
+   --> crates\bars-core\src\graph\build.rs:347:18
+    |
+347 |                 &namespace,
+    |                  ^^^^^^^^^ not found in this scope
+
+warning: unused import: `Checkpoint`
+ --> crates\bars-core\src\graph\build\job.rs:3:49
+  |
+3 | use crate::graph::similarity_job::{Calculation, Checkpoint, METHOD};
+  |                                                 ^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+error[E0277]: the trait bound `usize: FromSql` is not satisfied
+   --> crates\bars-core\src\graph\build\job.rs:135:70
+    |
+135 |         .query_row("SELECT count(*) FROM chunks", [], |r| r.get::<_, usize>(0))?;
+    |                                                             ---      ^^^^^ the trait `FromSql` is not implemented for `usize`
+    |                                                             |
+    |                                                             required by a bound introduced by this call
+    |
+    = help: the following other types implement trait `FromSql`:
+              f32
+              f64
+              i16
+              i32
+              i64
+              i8
+              isize
+              u16
+            and 2 others
+note: required by a bound in `rusqlite::Row::<'_>::get`
+   --> C:\Users\arketov\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rusqlite-0.40.2\src\row.rs:285:32
+    |
+285 |     pub fn get<I: RowIndex, T: FromSql>(&self, idx: I) -> Result<T> {
+    |                                ^^^^^^^ required by this bound in `Row::<'_>::get`
+
+Some errors have detailed explanations: E0277, E0425.
+For more information about an error, try `rustc --explain E0277`.
+warning: `bars-core` (lib) generated 1 warning
+error: could not compile `bars-core` (lib) due to 3 previous errors; 1 warning emitted

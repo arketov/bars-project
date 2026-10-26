@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "checks": [],
+  "error": "Начальный граф",
+  "detail": {},
+  "stack": "Error: Начальный граф\n    at wait (<anonymous>:13:11)\n    at async <anonymous>:23:20"
+}

@@ -11,6 +11,7 @@ pub(super) fn graph_error(error: GraphError) -> RpcError {
         GraphError::NotReady(_) => ErrorKind::GraphNotReady,
         GraphError::CapabilityUnavailable(_) => ErrorKind::GraphCapabilityUnavailable,
         GraphError::Cancelled => ErrorKind::Cancelled,
+        GraphError::TimedOut => ErrorKind::GraphTimeout,
         _ => return RpcError::standard(INTERNAL_ERROR, error.to_string()),
     };
     RpcError::bars(kind, error.to_string())
@@ -116,6 +117,17 @@ impl WorkerHandler {
         params: GraphQueryParams,
     ) -> Result<GraphReply, RpcError> {
         query::validate_request(&params.request).map_err(graph_error)?;
+        let started = std::time::Instant::now();
+        let deadline = started
+            + std::time::Duration::from_millis(u64::from(
+                params
+                    .request
+                    .budgets
+                    .resolve()
+                    .map_err(graph_error)?
+                    .0
+                    .timeout_ms,
+            ));
         let project = self.resolve(&params.target)?;
         let settings = if params.request.operation == bars_core::graph::Operation::Context {
             Some(self.settings(&project)?)
@@ -130,29 +142,39 @@ impl WorkerHandler {
                 "индекс ещё не построен".into(),
             )));
         }
-        let gate = self
-            .worker
-            .gate(&project)
-            .map_err(worker_error)?
-            .read_owned()
-            .await;
+        let project_gate = self.worker.gate(&project).map_err(worker_error)?;
+        let gate = tokio::time::timeout_at(deadline.into(), project_gate.clone().read_owned())
+            .await
+            .map_err(|_| graph_error(GraphError::TimedOut))?;
+        let cache = self.graph_cache.clone();
         tokio::task::spawn_blocking(move || {
             let _gate=gate;
             let index=Index::open_read_only(&index_path(&project)).map_err(internal)?;
-            let mut data=store::load(index.conn()).map_err(|e|{
+            let data=cache.load(&project, &project_gate, deadline).map_err(|e|{
                 if params.request.snapshot.is_some()&&matches!(e,GraphError::NotReady(_)){graph_error(GraphError::SnapshotExpired)}else{graph_error(e)}
             })?;
+            let mut overlay = query::QueryOverlay::default();
             query::validate_scope(&data, &params.request.scope).map_err(graph_error)?;
-            let started=std::time::Instant::now();let mut scores=std::collections::BTreeMap::new();
+            if params.request.operation == bars_core::graph::Operation::Context {
+                let current = store::document_manifest(index.conn()).map_err(graph_error)?;
+                if !data.sources.iter().any(|s| params.request.scope.allows(&s.meta) && current.get(&s.meta.path) == Some(&s.meta.hash)) {
+                    return Err(graph_error(GraphError::NotReady("В прежнем снимке нет подтверждённых текущих источников для контекста; обновите граф".into())));
+                }
+                overlay.current_sources = Some(current);
+            }
+            super::graph_cache::check(deadline).map_err(graph_error)?;
+            let mut scores=std::collections::BTreeMap::new();
             if let Some(settings)=settings{
                 if let Some(model)=embedder.as_mut(){
-                    match bars_core::graph::context::evidence_scores(&index,&data,model,&settings.search,&params.request){
-                        Ok((values,limited))=>{scores=values;if limited{data.warnings.push("Контекст: отбор по ролям прерван по timeout_ms".into());}},
-                        Err(error)=>data.warnings.push(format!("Контекст: существующая модель недоступна, использован текстовый отбор: {error}")),
+                    let mut request = params.request.clone();
+                    request.budgets.timeout_ms = Some(deadline.saturating_duration_since(std::time::Instant::now()).as_millis().max(1) as u32);
+                    match bars_core::graph::context::evidence_scores_current(&index,&data,model,&settings.search,&request,overlay.current_sources.as_ref()){
+                        Ok((values,limited))=>{scores=values;if limited{overlay.warnings.push("Контекст: отбор по ролям прерван по timeout_ms".into());}},
+                        Err(error)=>overlay.warnings.push(format!("Контекст: существующая модель недоступна, использован текстовый отбор: {error}")),
                     }
-                }else{data.warnings.push("Контекст: локальная embed-модель не загружена; использован текстовый отбор без загрузки модели".into());}
+                }else{overlay.warnings.push("Контекст: локальная embed-модель не загружена; использован текстовый отбор без загрузки модели".into());}
             }
-            query::execute_ranked(&data,&params.request,&scores,started.elapsed(),||false).map_err(graph_error)
+            query::execute_overlay(&data,&params.request,&scores,started.elapsed(),&overlay,||false).map_err(graph_error)
         }).await.map_err(internal)?
     }
     pub(super) async fn graph_status(
@@ -171,6 +193,14 @@ impl WorkerHandler {
             let _gate = gate;
             if !index_path(&project).exists() {
                 return Ok(GraphStatus {
+                    freshness: bars_core::graph::Freshness::NotBuilt,
+                    completeness: bars_core::graph::Completeness::Unknown,
+                    availability: bars_core::graph::Availability::Enabled,
+                    job_state: if worker.active_graph_job(&project).is_some() {
+                        bars_core::graph::JobState::Queued
+                    } else {
+                        bars_core::graph::JobState::Idle
+                    },
                     state: bars_core::graph::LayerState::NotBuilt,
                     snapshot: None,
                     active_job: worker.active_graph_job(&project),
@@ -193,7 +223,9 @@ impl WorkerHandler {
             let mut state = store::status(&db).map_err(graph_error)?;
             if let Some(job) = worker.active_graph_job(&project) {
                 state.active_job = Some(job);
-                state.state = bars_core::graph::LayerState::Building;
+                if state.job_state != bars_core::graph::JobState::Running {
+                    state.job_state = bars_core::graph::JobState::Queued;
+                }
             }
             Ok(state)
         })
@@ -215,17 +247,18 @@ impl WorkerHandler {
                 "индекс ещё не построен".into(),
             )));
         }
-        let gate = self
-            .worker
-            .gate(&project)
-            .map_err(worker_error)?
-            .read_owned()
-            .await;
+        let project_gate = self.worker.gate(&project).map_err(worker_error)?;
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+        let gate = tokio::time::timeout_at(deadline.into(), project_gate.clone().read_owned())
+            .await
+            .map_err(|_| graph_error(GraphError::TimedOut))?;
         let cache = self.physical_similarity.clone();
+        let datasets = self.graph_cache.clone();
         tokio::task::spawn_blocking(move || {
             let _gate = gate;
             let index = Index::open_read_only(&index_path(&project)).map_err(internal)?;
-            let data = store::load(index.conn()).map_err(graph_error)?;
+            let data = datasets.load(&project, &project_gate, deadline).map_err(graph_error)?;
+            let stale = data.layers.values().any(|l| l.freshness == bars_core::graph::Freshness::Stale);
             let request = params.request;
             query::validate_scope(&data, &request.scope).map_err(graph_error)?;
             // Расчёт близости документов дорогой, а раскрытие чанков и «Показать ещё» повторяют запрос на том же снимке.
@@ -236,6 +269,7 @@ impl WorkerHandler {
                     .map(|(_, _, value)| value.clone())
             };
             let similarity: std::sync::Arc<DocumentSimilarity> = match cached {
+                _ if stale => std::sync::Arc::new(DocumentSimilarity { pairs: vec![], documents: data.sources.len(), covered: 0, skipped: vec![], stopped: None, rows: (0, 0) }),
                 Some(value) => value,
                 None => {
                     let value = std::sync::Arc::new(
@@ -303,12 +337,21 @@ impl WorkerHandler {
                 chunk_similarity: match chunk_partial {
                     _ if data.similarity_state == LayerState::NotBuilt => layer(LayerState::NotBuilt, "Близость чанков ещё не построена".into()),
                     Some(note) => layer(LayerState::Partial, note.clone()),
+                    None if data.similarity_state == LayerState::Partial => layer(LayerState::Partial,
+                        data.layers.get("similarity").map(|l| format!("Близость посчитана для {} из {} чанков; {}", l.coverage.processed, l.coverage.total, l.coverage.reason.as_deref().unwrap_or("есть известные пропуски"))).unwrap_or_else(|| "Полнота прежнего расчёта близости неизвестна".into())),
                     None => layer(
                         LayerState::Ready,
                         "Близость чанков по готовым векторам, k=5, tau=0,5".into(),
                     ),
                 },
             };
+            let mut inputs = inputs;
+            if stale {
+                for layer in [&mut inputs.markdown_link, &mut inputs.document_similarity, &mut inputs.chunk_similarity] {
+                    layer.state = LayerState::Stale;
+                    layer.note = "Граф устарел · Показан предыдущий снимок; близость документов ждёт обновления".into();
+                }
+            }
             physical::project(&data, &similarity.pairs, &request, inputs).map_err(graph_error)
         })
         .await

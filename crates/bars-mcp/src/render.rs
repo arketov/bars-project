@@ -292,6 +292,49 @@ pub fn status(output: &StatusOutput) -> String {
         );
     }
     if let Some(graph) = &output.graph {
+        let _ = write!(
+            text,
+            "\nGraph data: {}; completeness: {}; availability: {}; job_state: {}",
+            serde_json::to_value(graph.freshness)
+                .unwrap()
+                .as_str()
+                .unwrap(),
+            serde_json::to_value(graph.completeness)
+                .unwrap()
+                .as_str()
+                .unwrap(),
+            serde_json::to_value(graph.availability)
+                .unwrap()
+                .as_str()
+                .unwrap(),
+            serde_json::to_value(graph.job_state)
+                .unwrap()
+                .as_str()
+                .unwrap()
+        );
+        for (name, layer) in &graph.layers {
+            if let Some(reason) = &layer.stale_reason {
+                let _ = write!(text, "\nGraph layer {name} stale_reason: {reason}");
+            }
+            let _ = write!(
+                text,
+                "\nGraph layer {name}: freshness={}; completeness={}; coverage={}/{} {}; missing={}; comparisons={}; reason={}",
+                serde_json::to_value(layer.freshness)
+                    .unwrap()
+                    .as_str()
+                    .unwrap(),
+                serde_json::to_value(layer.completeness)
+                    .unwrap()
+                    .as_str()
+                    .unwrap(),
+                layer.coverage.processed,
+                layer.coverage.total,
+                layer.coverage.unit,
+                layer.coverage.missing,
+                layer.coverage.comparisons,
+                layer.coverage.reason.as_deref().unwrap_or("none")
+            );
+        }
         let state = serde_json::to_value(graph.state).expect("graph state serializes");
         let _ = write!(
             text,
@@ -357,6 +400,7 @@ mod tests {
             read(
                 "документ.md",
                 &ReadOutput {
+                    revision: String::new(),
                     title: "Документ".into(),
                     text: "# Заголовок\nТекст".into()
                 }

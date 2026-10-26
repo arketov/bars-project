@@ -26,7 +26,7 @@ async fn graph_restart_recovers_interrupted_build_without_reembedding() {
     idle(&worker).await;
     let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
     let status = store::status(index.conn()).unwrap();
-    assert_eq!(status.state, LayerState::Partial);
+    assert_eq!(status.state, LayerState::Ready);
     assert!(status.active_job.is_none());
     assert_eq!(store::load(index.conn()).unwrap().snapshot, snapshot);
     drop(index);
@@ -58,8 +58,8 @@ async fn graph_cancel_queued_build_then_retry_and_rename_remove_old_evidence() {
     }
     let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
     assert_eq!(
-        store::status(index.conn()).unwrap().state,
-        LayerState::Cancelled
+        store::status(index.conn()).unwrap().job_state,
+        bars_core::graph::JobState::Stopped
     );
     assert!(store::status(index.conn()).unwrap().paused);
     let old = store::load(index.conn()).unwrap();
@@ -69,8 +69,8 @@ async fn graph_cancel_queued_build_then_retry_and_rename_remove_old_evidence() {
     let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
     assert!(store::status(index.conn()).unwrap().paused);
     assert_eq!(
-        store::status(index.conn()).unwrap().state,
-        LayerState::Cancelled
+        store::status(index.conn()).unwrap().job_state,
+        bars_core::graph::JobState::Stopped
     );
     drop(index);
     worker.shutdown().await;
@@ -205,6 +205,352 @@ async fn selected_layer_preserves_current_layers_but_never_reuses_old_revision()
     let similarity =
         build_index_graph_layer(&project, &mut index, BuildLayer::Similarity, || false).unwrap();
     assert_eq!(semantic.layers["semantic"], similarity.layers["semantic"]);
-    assert_eq!(similarity.layers["similarity"].state, LayerState::Partial);
+    assert_eq!(similarity.layers["similarity"].state, LayerState::Ready);
+    assert_eq!(
+        similarity.layers["similarity"].completeness,
+        bars_core::graph::Completeness::Complete
+    );
     assert_eq!(store::load(index.conn()).unwrap().sources.len(), 1);
+    index.conn().execute("DELETE FROM vectors", []).unwrap();
+    assert_eq!(
+        store::status(index.conn()).unwrap().freshness,
+        bars_core::graph::Freshness::Stale
+    );
+    let missing =
+        build_index_graph_layer(&project, &mut index, BuildLayer::Similarity, || false).unwrap();
+    let layer = &missing.layers["similarity"];
+    assert_eq!(layer.freshness, bars_core::graph::Freshness::Current);
+    assert_eq!(layer.completeness, bars_core::graph::Completeness::Partial);
+    assert_eq!(layer.coverage.unit, "chunks");
+    assert_eq!(layer.coverage.processed, 0);
+    assert_eq!(layer.coverage.missing, layer.coverage.total);
+    assert!(layer.coverage.total > 0);
+}
+
+async fn graph_idle(worker: &Worker, project: &Path) {
+    wait_until("задание графа завершится", || {
+        worker.active_graph_job(project).is_none()
+    })
+    .await;
+}
+fn quiet(worker: &Worker, project: &Path) {
+    lock(&worker.inner.projects)
+        .get_mut(project)
+        .unwrap()
+        .watcher
+        .take();
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn graph_scan_without_changes_repairs_stale_and_resumes_stopped_revision() {
+    let env = Env::new();
+    let project = env.project("graph-scan", &[("a.md", "# A\n\nТ-1 зависит от Т-2.")]);
+    let worker = env.start();
+    worker.register(&project).unwrap();
+    idle(&worker).await;
+    quiet(&worker, &project);
+    let calls = env.provider.counters.embed_calls.load(Ordering::SeqCst);
+    let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
+    let snapshot = store::load(index.conn()).unwrap().snapshot;
+    store::set_state(index.conn(), LayerState::Stale, None, None).unwrap();
+    drop(index);
+    worker.scan_receipt(&project).unwrap();
+    idle(&worker).await;
+    let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
+    assert_eq!(
+        store::status(index.conn()).unwrap().state,
+        LayerState::Ready
+    );
+    assert_eq!(store::load(index.conn()).unwrap().snapshot, snapshot);
+    drop(index);
+    let gate = lock(&worker.inner.projects)[&project].job_gate.clone();
+    let held = gate.lock_owned().await;
+    let accepted = worker.graph_build(&project).await.unwrap();
+    worker.graph_cancel(&project, &accepted.job_id).unwrap();
+    drop(held);
+    graph_idle(&worker, &project).await;
+    worker.graph_start(&project, false).await.unwrap();
+    graph_idle(&worker, &project).await;
+    let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
+    assert!(store::status(index.conn()).unwrap().paused);
+    drop(index);
+    worker.scan_receipt(&project).unwrap();
+    idle(&worker).await;
+    let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
+    let status = store::status(index.conn()).unwrap();
+    assert!(!status.paused);
+    assert_eq!(status.state, LayerState::Ready);
+    assert_eq!(
+        env.provider.counters.embed_calls.load(Ordering::SeqCst),
+        calls
+    );
+    drop(index);
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn graph_cancel_does_not_drop_new_revision_merged_into_queued_job() {
+    let env = Env::new();
+    let project = env.project(
+        "graph-merge",
+        &[("a.md", "# A\n\nАльфа."), ("b.md", "# B\n\nБета.")],
+    );
+    let worker = env.start();
+    worker.register(&project).unwrap();
+    idle(&worker).await;
+    quiet(&worker, &project);
+    let gate = lock(&worker.inner.projects)[&project].job_gate.clone();
+    let held = gate.lock_owned().await;
+    let accepted = worker.graph_build(&project).await.unwrap();
+    worker.graph_cancel(&project, &accepted.job_id).unwrap();
+    // Публикация новой индексной ревизии до освобождения очереди графа.
+    let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
+    index
+        .conn()
+        .execute("DELETE FROM documents WHERE path='docs/b.md'", [])
+        .unwrap();
+    drop(index);
+    let merged = worker.graph_start(&project, false).await.unwrap();
+    assert_eq!(merged.job_id, accepted.job_id);
+    drop(held);
+    graph_idle(&worker, &project).await;
+    let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
+    let status = store::status(index.conn()).unwrap();
+    assert!(!status.paused);
+    assert_eq!(status.state, LayerState::Ready);
+    assert_eq!(store::load(index.conn()).unwrap().sources.len(), 1);
+    drop(index);
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn graph_unchanged_file_error_skips_calculation_and_same_hash_recovery_rebuilds() {
+    let env = Env::new();
+    let text = "# A\n\nТ-1 зависит от Т-2.";
+    let project = env.project(
+        "graph-error-repeat",
+        &[("a.md", text), ("b.md", "# B\n\nТекст.")],
+    );
+    let worker = env.start();
+    worker.register(&project).unwrap();
+    idle(&worker).await;
+    quiet(&worker, &project);
+    let calls = env.provider.counters.embed_calls.load(Ordering::SeqCst);
+    fs::write(project.join("docs/a.md"), [0xff, 0xfe]).unwrap();
+    worker.graph_build(&project).await.unwrap();
+    graph_idle(&worker, &project).await;
+    let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
+    assert_eq!(store::status(index.conn()).unwrap().file_errors_total, 1);
+    let marker = bars_core::graph::GraphProgress {
+        phase: "skip-proof".into(),
+        processed: 7,
+        total: Some(7),
+        elapsed_ms: 123,
+    };
+    store::set_progress(index.conn(), &marker).unwrap();
+    drop(index);
+    for _ in 0..2 {
+        worker.graph_start(&project, false).await.unwrap();
+        graph_idle(&worker, &project).await;
+        let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
+        assert_eq!(
+            store::status(index.conn()).unwrap().progress.unwrap().phase,
+            "skip-proof"
+        );
+    }
+    fs::write(project.join("docs/a.md"), text).unwrap();
+    worker.graph_start(&project, false).await.unwrap();
+    graph_idle(&worker, &project).await;
+    let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
+    assert_eq!(store::status(index.conn()).unwrap().file_errors_total, 0);
+    assert_eq!(store::load(index.conn()).unwrap().sources.len(), 2);
+    assert_eq!(
+        env.provider.counters.embed_calls.load(Ordering::SeqCst),
+        calls
+    );
+    drop(index);
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn graph_new_index_revision_after_stop_and_restart_updates_automatically() {
+    let env = Env::new();
+    let project = env.project(
+        "graph-stop-new",
+        &[("a.md", "# A\n\nАльфа."), ("b.md", "# B\n\nБета.")],
+    );
+    let worker = env.start();
+    worker.register(&project).unwrap();
+    idle(&worker).await;
+    quiet(&worker, &project);
+    let gate = lock(&worker.inner.projects)[&project].job_gate.clone();
+    let held = gate.lock_owned().await;
+    let accepted = worker.graph_build(&project).await.unwrap();
+    worker.graph_cancel(&project, &accepted.job_id).unwrap();
+    drop(held);
+    graph_idle(&worker, &project).await;
+    worker.shutdown().await;
+    let worker = env.start();
+    idle(&worker).await;
+    quiet(&worker, &project);
+    let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
+    assert!(store::status(index.conn()).unwrap().paused);
+    index
+        .conn()
+        .execute("DELETE FROM documents WHERE path='docs/b.md'", [])
+        .unwrap();
+    drop(index);
+    worker.graph_start(&project, false).await.unwrap();
+    graph_idle(&worker, &project).await;
+    let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
+    assert!(!store::status(index.conn()).unwrap().paused);
+    assert_eq!(store::load(index.conn()).unwrap().sources.len(), 1);
+    drop(index);
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn graph_signal_at_completion_publishes_latest_index_without_retry_delay() {
+    let env = Env::new();
+    let project = env.project(
+        "graph-finishing-signal",
+        &[("a.md", "# A\n\nАльфа."), ("b.md", "# B\n\nБета.")],
+    );
+    let worker = env.start();
+    worker.register(&project).unwrap();
+    idle(&worker).await;
+    quiet(&worker, &project);
+    let gate = lock(&worker.inner.projects)[&project].job_gate.clone();
+    let held = gate.lock_owned().await;
+    worker.graph_build(&project).await.unwrap();
+    let reached = Arc::new(Notify::new());
+    let release = Arc::new(Notify::new());
+    lock(&worker.inner.graph_jobs)
+        .get_mut(&project)
+        .unwrap()
+        .finish_hook = Some((reached.clone(), release.clone()));
+    drop(held);
+    tokio::time::timeout(Duration::from_secs(5), reached.notified())
+        .await
+        .unwrap();
+    // Расчёт окончен, но задание ещё активно: сигнал не должен потеряться при снятии.
+    let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
+    index
+        .conn()
+        .execute("DELETE FROM documents WHERE path='docs/b.md'", [])
+        .unwrap();
+    drop(index);
+    worker.graph_start(&project, false).await.unwrap();
+    release.notify_one();
+    graph_idle(&worker, &project).await;
+    let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
+    assert_eq!(
+        store::status(index.conn()).unwrap().state,
+        LayerState::Ready
+    );
+    assert_eq!(store::load(index.conn()).unwrap().sources.len(), 1);
+    drop(index);
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn graph_persisted_retry_releases_gates_and_manual_build_bypasses_delay() {
+    let env = Env::new();
+    let project = env.project("graph-delayed-retry", &[("a.md", "# A\n\nТекст.")]);
+    let worker = env.start();
+    worker.register(&project).unwrap();
+    idle(&worker).await;
+    quiet(&worker, &project);
+    let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
+    let key: String = index
+        .conn()
+        .query_row(
+            "SELECT value FROM graph_meta WHERE key='auto_completed'",
+            [],
+            |r| r.get(0),
+        )
+        .unwrap();
+    let after = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as u64
+        + 300_000;
+    let retry = serde_json::json!([key, {"failures": 3, "after_ms": after}]).to_string();
+    index.conn().execute("INSERT INTO graph_meta(key,value) VALUES('auto_retry',?1) ON CONFLICT(key) DO UPDATE SET value=excluded.value", [&retry]).unwrap();
+    store::set_state(
+        index.conn(),
+        LayerState::Failed,
+        None,
+        Some("сбой предыдущего процесса"),
+    )
+    .unwrap();
+    drop(index);
+    worker.graph_start(&project, false).await.unwrap();
+    wait_until("отложенный повтор", || {
+        lock(&worker.inner.graph_jobs)
+            .get(&project)
+            .is_some_and(|j| j.waiting_retry)
+    })
+    .await;
+    assert!(worker.is_idle());
+    let gate = lock(&worker.inner.projects)[&project].job_gate.clone();
+    let held = tokio::time::timeout(Duration::from_secs(1), gate.lock_owned())
+        .await
+        .unwrap();
+    drop(held);
+    worker.graph_build(&project).await.unwrap();
+    graph_idle(&worker, &project).await;
+    let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
+    assert_eq!(
+        store::status(index.conn()).unwrap().state,
+        LayerState::Ready
+    );
+    let retry: String = index
+        .conn()
+        .query_row(
+            "SELECT value FROM graph_meta WHERE key='auto_retry'",
+            [],
+            |r| r.get(0),
+        )
+        .unwrap();
+    assert!(retry.is_empty());
+    drop(index);
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn graph_late_cancel_with_new_file_error_does_not_restart_same_inputs() {
+    let env = Env::new();
+    let project = env.project(
+        "graph-late-cancel",
+        &[("a.md", "# A\n\nАльфа."), ("b.md", "# B\n\nБета.")],
+    );
+    let worker = env.start();
+    worker.register(&project).unwrap();
+    idle(&worker).await;
+    quiet(&worker, &project);
+    fs::write(project.join("docs/a.md"), [0xff, 0xfe]).unwrap();
+    let gate = lock(&worker.inner.projects)[&project].job_gate.clone();
+    let held = gate.lock_owned().await;
+    let job = worker.graph_build(&project).await.unwrap();
+    let reached = Arc::new(Notify::new());
+    let release = Arc::new(Notify::new());
+    lock(&worker.inner.graph_jobs)
+        .get_mut(&project)
+        .unwrap()
+        .finish_hook = Some((reached.clone(), release.clone()));
+    drop(held);
+    tokio::time::timeout(Duration::from_secs(5), reached.notified())
+        .await
+        .unwrap();
+    worker.graph_cancel(&project, &job.job_id).unwrap();
+    release.notify_one();
+    graph_idle(&worker, &project).await;
+    worker.graph_start(&project, false).await.unwrap();
+    graph_idle(&worker, &project).await;
+    let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
+    assert!(store::status(index.conn()).unwrap().paused);
+    assert_eq!(store::status(index.conn()).unwrap().file_errors_total, 1);
+    drop(index);
+    worker.shutdown().await;
 }
