@@ -5,7 +5,7 @@ use serde_json::{Value, json};
 use std::{
     path::{Path, PathBuf},
     sync::{
-        Arc,
+        Arc, Mutex, MutexGuard,
         atomic::{AtomicU8, AtomicU64, Ordering},
     },
     time::Duration,
@@ -24,6 +24,7 @@ struct Inner {
     lost: AtomicU64,
     last_loss: AtomicU8,
     writes: Arc<tokio::sync::Semaphore>,
+    storage: Mutex<()>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -168,6 +169,15 @@ fn save(db: &Connection, a: &Attempt) -> rusqlite::Result<()> {
 }
 
 impl History {
+    fn connection(&self) -> rusqlite::Result<(MutexGuard<'_, ()>, Connection)> {
+        // Свои writer'ы ждут здесь, не расходуя короткий timeout внешней блокировки.
+        let storage = self
+            .0
+            .storage
+            .lock()
+            .map_err(|_| rusqlite::Error::InvalidQuery)?;
+        Ok((storage, open(&self.0.home)?))
+    }
     pub fn write_permit(&self) -> Option<tokio::sync::OwnedSemaphorePermit> {
         match self.0.writes.clone().try_acquire_owned() {
             Ok(permit) => Some(permit),
@@ -209,6 +219,7 @@ impl History {
             lost: AtomicU64::new(0),
             last_loss: AtomicU8::new(0),
             writes: Arc::new(tokio::sync::Semaphore::new(8)),
+            storage: Mutex::new(()),
         }));
         this.observe(this.recover());
         this
@@ -235,7 +246,7 @@ impl History {
         }
     }
     fn recover(&self) -> rusqlite::Result<()> {
-        let mut db = open(&self.0.home)?;
+        let (_storage, mut db) = self.connection()?;
         let tx = db.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
         prune(&tx, now())?;
         self.mark_unknown(&tx, "worker_restarted")?;
@@ -262,7 +273,7 @@ impl History {
         requested: Value,
         complete: bool,
     ) -> rusqlite::Result<Option<Attempt>> {
-        let mut db = open(&self.0.home)?;
+        let (_storage, mut db) = self.connection()?;
         let tx = db.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
         let (enabled, generation): (bool, i64) = tx.query_row(
             "SELECT enabled,generation FROM history_settings WHERE id=1",
@@ -306,7 +317,7 @@ impl History {
         Ok(Some(a))
     }
     pub fn finish(&self, a: &Attempt) -> rusqlite::Result<()> {
-        let mut db = open(&self.0.home)?;
+        let (_storage, mut db) = self.connection()?;
         let tx = db.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
         let live:bool=tx.query_row("SELECT EXISTS(SELECT 1 FROM attempts a JOIN history_settings s ON a.generation=s.generation WHERE a.id=?1 AND s.enabled=1 AND a.outcome='running')",[a.id],|r|r.get(0))?;
         if live {
@@ -316,7 +327,7 @@ impl History {
         tx.commit()
     }
     pub fn set_enabled(&self, enabled: bool) -> rusqlite::Result<()> {
-        let mut db = open(&self.0.home)?;
+        let (_storage, mut db) = self.connection()?;
         let tx = db.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
         prune(&tx, now())?;
         if !enabled {
@@ -329,7 +340,7 @@ impl History {
         if !confirmed {
             return Err(rusqlite::Error::InvalidQuery);
         }
-        let mut db = open(&self.0.home)?;
+        let (_storage, mut db) = self.connection()?;
         let tx = db.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
         tx.execute_batch("DELETE FROM attempts; DELETE FROM calls; UPDATE history_settings SET generation=generation+1;")?;
         tx.commit()?;
@@ -337,7 +348,7 @@ impl History {
         Ok(())
     }
     pub fn page(&self, f: &Filter) -> rusqlite::Result<Page> {
-        let mut db = open(&self.0.home)?;
+        let (_storage, mut db) = self.connection()?;
         let tx = db.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
         prune(&tx, now())?;
         let time = now();
@@ -426,7 +437,7 @@ impl History {
         project_query: &str,
         session_query: &str,
     ) -> rusqlite::Result<Value> {
-        let mut db = open(&self.0.home)?;
+        let (_storage, mut db) = self.connection()?;
         let tx = db.transaction()?;
         let from = f.from.unwrap_or(now() - 86400).max(now() - WEEK);
         let to = f.to.unwrap_or(now() + 1);
@@ -448,13 +459,13 @@ impl History {
     }
     pub fn legacy(&self) -> rusqlite::Result<Vec<crate::mcp_statistics::Row>> {
         // open выполняет миграцию/отсечение до legacy-чтения.
-        let db = open(&self.0.home)?;
+        let (_storage, db) = self.connection()?;
         prune(&db, now())?;
         drop(db);
         crate::mcp_statistics::legacy_snapshot(&self.0.home)
     }
     pub fn maintain(&self) {
-        self.observe(open(&self.0.home).and_then(|db| {
+        self.observe(self.connection().and_then(|(_storage, db)| {
             prune(&db, now())?;
             db.execute_batch("PRAGMA wal_checkpoint(TRUNCATE);")
         }));
@@ -769,6 +780,36 @@ mod tests {
         assert!(!a.incomplete.is_empty());
         assert!(serde_json::to_string(&a).unwrap().len() <= 32768);
         assert!(!serde_json::to_string(&a).unwrap().contains("SECRET"));
+    }
+    #[test]
+    fn own_writer_waits_without_spending_sqlite_busy_timeout() {
+        let home = tempfile::tempdir().unwrap();
+        let h = History::new(home.path().into());
+        // Задержавшийся writer этого же экземпляра, а не внешний захват БД.
+        let storage = h.0.storage.lock().unwrap();
+        let db = open(home.path()).unwrap();
+        db.execute_batch("BEGIN IMMEDIATE").unwrap();
+        let (started, ready) = std::sync::mpsc::channel();
+        let (done, result) = std::sync::mpsc::channel();
+        let other = h.clone();
+        let writer = std::thread::spawn(move || {
+            started.send(()).unwrap();
+            done.send(other.begin("s", "bars_read", "p", None, json!({}), true))
+                .unwrap();
+        });
+        ready.recv().unwrap();
+        let premature = result.recv_timeout(Duration::from_millis(100));
+        db.execute_batch("ROLLBACK").unwrap();
+        drop(db);
+        drop(storage);
+        writer.join().unwrap();
+        assert!(
+            matches!(premature, Err(std::sync::mpsc::RecvTimeoutError::Timeout)),
+            "свой writer не должен отказывать по busy timeout: {premature:?}"
+        );
+        assert!(result.recv().unwrap().unwrap().is_some());
+        assert_eq!(h.page(&Filter::default()).unwrap().records.len(), 1);
+        assert_eq!(h.lost(), 0);
     }
     #[test]
     fn refused_writer_is_visible_and_does_not_insert_a_false_success() {
