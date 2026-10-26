@@ -1157,6 +1157,18 @@ impl WorkerHandler {
                     .map_err(graph::graph_error)
             }
             Call::ProjectDelete(_) => unreachable!(),
+            Call::ProjectObserve(params) => {
+                if params.window.is_empty() || params.window.len() > 128 {
+                    return Err(RpcError::standard(
+                        bars_protocol::INVALID_PARAMS,
+                        "некорректный ID окна",
+                    ));
+                }
+                self.worker
+                    .observe_window(&params.window, params.project.as_deref().map(Path::new))
+                    .map_err(worker_error)?;
+                Ok(output_value(&SavedOutput { saved: true }))
+            }
             // `hello` обрабатывает цикл соединения.
             Call::Hello(_) => Err(RpcError::standard(
                 INTERNAL_ERROR,

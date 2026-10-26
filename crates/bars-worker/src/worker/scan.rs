@@ -9,6 +9,7 @@ pub(super) struct ScanJob {
     cancel: Arc<AtomicBool>,
     generation: u64,
     key: u64,
+    priority: Arc<Mutex<Priority>>,
 }
 struct Cleanup {
     inner: Arc<Inner>,
@@ -61,6 +62,14 @@ impl IndexObserver for Observer {
 }
 impl Worker {
     pub fn scan_receipt(&self, path: &Path) -> Result<(u64, bool, JobKind), WorkerError> {
+        self.scan_with_priority(path, Priority::Explicit)
+    }
+
+    pub(super) fn scan_with_priority(
+        &self,
+        path: &Path,
+        priority: Priority,
+    ) -> Result<(u64, bool, JobKind), WorkerError> {
         let path = self.registered(path)?;
         let settings = Settings::load(self.bars_home(), &path)
             .map_err(|e| io::Error::other(e.to_string()))?
@@ -86,6 +95,17 @@ impl Worker {
                 && scan.key == key
                 && !scan.cancel.load(Ordering::SeqCst)
             {
+                let mut current = lock(&scan.priority);
+                *current = (*current).max(priority);
+                lock(&self.inner.models.operations).edit(scan.id, |op| {
+                    op.source = match *current {
+                        Priority::Explicit => "explicit",
+                        Priority::Edit => "edit",
+                        Priority::Watch => "watch",
+                        Priority::Periodic => "periodic",
+                    }
+                    .into();
+                });
                 return Ok((scan.id, true, JobKind::Check));
             }
             scan.cancel.store(true, Ordering::SeqCst);
@@ -94,7 +114,12 @@ impl Worker {
         let gate = runtime.gate.clone();
         let id = lock(&self.inner.models.operations).begin(
             "scan",
-            "explicit",
+            match priority {
+                Priority::Explicit => "explicit",
+                Priority::Edit => "edit",
+                Priority::Watch => "watch",
+                Priority::Periodic => "periodic",
+            },
             Some(path.display().to_string()),
             generation,
             None,
@@ -103,6 +128,7 @@ impl Worker {
             key,
         );
         let cancel = Arc::new(AtomicBool::new(false));
+        let scan_priority = Arc::new(Mutex::new(priority));
         scans.insert(
             path.clone(),
             ScanJob {
@@ -110,6 +136,7 @@ impl Worker {
                 cancel: cancel.clone(),
                 generation,
                 key,
+                priority: scan_priority.clone(),
             },
         );
         let inner = self.inner.clone();
@@ -175,6 +202,7 @@ impl Worker {
             let mut check_graph = false;
             {
                 let mut projects = lock(&inner.projects);
+                let priority = *lock(&scan_priority);
                 let current = projects
                     .get_mut(&path)
                     .filter(|r| !r.deleting && r.generation == generation);
@@ -198,6 +226,11 @@ impl Worker {
                 let result = result.map_err(failed).and_then(|v| v);
                 match result {
                     Ok(ScanResult { report, paths }) => {
+                        // Т-8 сохраняется и при проверке без задания обновления индекса.
+                        let _ = bars_core::instruction::sync(&path, &inner.docs_root_of(&path));
+                        if let Some(runtime) = current {
+                            runtime.status.last_error = None;
+                        }
                         check_graph = true;
                         let update = report.full_check
                             || report.added + report.changed + report.removed > 0
@@ -225,10 +258,19 @@ impl Worker {
                             }) {
                                 let mut docs = lock(&inner.docs);
                                 for document in paths {
-                                    docs.found(&path, &document, DocSource::Explicit);
+                                    docs.found(
+                                        &path,
+                                        &document,
+                                        match priority {
+                                            Priority::Explicit => DocSource::Explicit,
+                                            Priority::Edit => DocSource::Edit,
+                                            Priority::Watch => DocSource::Watch,
+                                            Priority::Periodic => DocSource::Periodic,
+                                        },
+                                    );
                                 }
                             }
-                            inner.enqueue_for(&path, Job::check(Priority::Explicit), &projects);
+                            inner.enqueue_for(&path, Job::check(priority), &projects);
                         }
                         lock(&inner.models.operations).finish(
                             id,
@@ -255,17 +297,28 @@ impl Worker {
                                     Some("Нужна переиндексация с согласием пользователя.".into()),
                                 )
                             }
-                            Failure::Failed(message) => ("error", Some(message)),
+                            Failure::Failed(message) => {
+                                if let Some(runtime) = current {
+                                    runtime.status.last_error = Some(message.clone());
+                                }
+                                ("error", Some(message))
+                            }
                         };
                         lock(&inner.models.operations).finish(id, state, None, error);
                     }
                 }
             }
             if check_graph {
+                let priority = *lock(&scan_priority);
                 let worker = Worker {
                     inner: inner.clone(),
                 };
-                if let Err(error) = worker.graph_checked(&path).await {
+                let result = if priority == Priority::Explicit {
+                    worker.graph_checked(&path).await
+                } else {
+                    worker.graph_start(&path, false).await
+                };
+                if let Err(error) = result {
                     log::warn!("Граф после проверки не поставлен на обновление: {error}");
                 }
             }
@@ -277,10 +330,9 @@ impl Worker {
 
 impl Inner {
     pub(super) fn cancel_scan(&self, path: &Path) -> bool {
-        lock(&self.scans).get(path).is_some_and(|s| {
-            s.cancel.store(true, Ordering::SeqCst);
-            true
-        })
+        lock(&self.scans)
+            .get(path)
+            .is_some_and(|s| !s.cancel.swap(true, Ordering::SeqCst))
     }
 }
 
@@ -365,6 +417,29 @@ mod tests {
         assert_eq!(finish(&worker, id).await.state, "cancelled");
         assert!(worker.queued().is_empty());
         assert!(worker.doc_queue(root.path(), 200).unwrap().0.is_empty());
+        worker.shutdown().await;
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn explicit_check_promotes_an_inflight_background_scan() {
+        let (_home, root, worker, _) = setup().await;
+        worker.pause();
+        fs::write(root.path().join("docs/new.md"), "# Новое\n").unwrap();
+        let gate = worker.gate(root.path()).unwrap().write_owned().await;
+        let (id, _, _) = worker
+            .scan_with_priority(root.path(), Priority::Periodic)
+            .unwrap();
+        let (same, merged, _) = worker.scan_receipt(root.path()).unwrap();
+        assert!(merged);
+        assert_eq!(same, id);
+        worker
+            .scan_with_priority(root.path(), Priority::Watch)
+            .unwrap();
+        drop(gate);
+        let result = finish(&worker, id).await;
+        assert_eq!(result.source, "explicit");
+        assert_eq!(result.report.unwrap().added, 1);
+        assert_eq!(worker.queued()[0].priority, Priority::Explicit);
         worker.shutdown().await;
     }
 

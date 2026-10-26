@@ -47,6 +47,11 @@ impl WorkerHandler {
         };
         let preparation = std::time::Instant::now();
         let project = target.and_then(|t| self.resolve(t).ok());
+        if let Some(project) = &project {
+            self.worker
+                .observe_mcp(project)
+                .map_err(super::worker_error)?;
+        }
         let path = project
             .as_ref()
             .map(|p| p.display().to_string())

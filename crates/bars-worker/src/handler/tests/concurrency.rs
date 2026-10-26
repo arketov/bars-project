@@ -140,7 +140,11 @@ async fn full_rebuild_keeps_status_window_controls_and_full_ipc_search_responsiv
             epoch: Some(epoch.clone()),
             after: Some(0),
         });
-        if let Some(scan) = events.completed.iter().find(|op| op.kind == "scan") {
+        if let Some(scan) = events
+            .completed
+            .iter()
+            .find(|op| op.kind == "scan" && op.source == "explicit")
+        {
             assert_eq!(scan.state, "success");
             let report = scan.report.as_ref().unwrap();
             assert_eq!(report.added, 1);

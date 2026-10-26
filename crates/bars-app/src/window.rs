@@ -25,6 +25,11 @@ pub fn create(app: &AppHandle, visible: bool) -> tauri::Result<()> {
         if let WindowEvent::CloseRequested { api, .. } = event {
             api.prevent_close();
             let _ = hidden.hide();
+            if let Some(state) = hidden.try_state::<crate::commands::Shared>()
+                && let Some(handler) = state.get()
+            {
+                let _ = handler.worker().observe_window(hidden.label(), None);
+            }
         }
     });
     Ok(())

@@ -1,0 +1,8 @@
+*.txt
+native/fixture-*/
+*.patch
+*.index
+index-baseline.*
+index-task.*
+commit-task.ps1
+preserve-eol.cjs

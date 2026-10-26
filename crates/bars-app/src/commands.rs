@@ -77,6 +77,15 @@ pub async fn bars_call(
     let handler = state
         .get()
         .ok_or_else(|| RpcError::standard(INTERNAL_ERROR, "воркер ещё запускается"))?;
+    if method == "project_observe"
+        && let Some(params) = params.as_object_mut()
+    {
+        params.insert("window".into(), Value::String(window.label().to_owned()));
+        // Закрытие главного окна скрывает WebView, но его JS продолжает работать.
+        if !window.is_visible().unwrap_or(false) {
+            params.insert("project".into(), Value::Null);
+        }
+    }
     // Служебное поле `_window` (назначение поиска, ID обращения) в протокол не попадает.
     let context = bars_worker::new_topics::SearchContext::take_from(&mut params);
     if method == "text_search"

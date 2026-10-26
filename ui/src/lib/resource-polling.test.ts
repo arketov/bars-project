@@ -35,7 +35,7 @@ it("document windows retain the main project and have no general poll", async ()
   invoke.mockClear(); vi.useFakeTimers();
   app.start(); await app.refresh(true); await app.loadProjects();
   await vi.advanceTimersByTimeAsync(20_000);
-  expect(invoke).not.toHaveBeenCalled();
+  expect(invoke.mock.calls.map(([method]) => method)).toEqual(["project_observe", "project_observe", "project_observe"]);
   expect(app.current).toBe("document-project");
   expect(localStorage.getItem("bars-project")).toBe("main-project");
 });
@@ -55,4 +55,21 @@ it("a forced refresh received during a request runs immediately afterward", asyn
   finish({ running: null, queue: [], problems: [] });
   await first;
   await vi.waitFor(() => expect(invoke.mock.calls.filter(([method]) => method === "activity")).toHaveLength(2));
+});
+
+it("window observation follows project selection, survives hiding and releases on stop", async () => {
+  vi.useFakeTimers();
+  await app.bindDocumentWindow("one");
+  app.start();
+  const initial = invoke.mock.calls.find(([method]) => method === "project_observe")![1]!;
+  expect(initial.project).toBe("one");
+  invoke.mockClear();
+  vi.spyOn(document, "hidden", "get").mockReturnValue(true);
+  await app.select("two");
+  expect(invoke).toHaveBeenCalledWith("project_observe", { window: initial.window, project: "two" });
+  invoke.mockClear();
+  await vi.advanceTimersByTimeAsync(10_000);
+  expect(invoke).toHaveBeenCalledWith("project_observe", { window: initial.window, project: "two" });
+  app.stop();
+  expect(invoke).toHaveBeenLastCalledWith("project_observe", { window: initial.window, project: null });
 });

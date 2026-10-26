@@ -374,6 +374,7 @@ function status(path: string): StatusOutput {
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function mockCall(method: string, params: Record<string, unknown>): Promise<unknown> {
+  if (method === "project_observe") return { saved: true };
   // Браузерный стенд не имеет доступа к диску; не выдаём смысловые фикстуры за текстовый поиск.
   if (method === 'text_search') return {documents:[],docs_total:0,hits_total:0,truncated:null,skipped:[],elapsed_ms:0};
   if(method==='graph_physical'){

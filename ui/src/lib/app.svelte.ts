@@ -63,6 +63,10 @@ function remembered(): string | null {
 }
 
 class App {
+  #windowId = crypto.randomUUID();
+  #watchTimer: ReturnType<typeof setInterval> | null = null;
+  #watch = (): void => { void call("project_observe", { window: this.#windowId, project: this.current }).catch(() => {}); };
+  #releaseWatch = (): void => { void call("project_observe", { window: this.#windowId, project: null }).catch(() => {}); };
   view = $state<View>("main");
   navigationVersion = $state(0);
   topicsVersion = $state(0);
@@ -254,6 +258,11 @@ class App {
   }
 
   start(): void {
+    if (!this.#watchTimer) {
+      this.#watch();
+      this.#watchTimer = setInterval(this.#watch, 10_000);
+      window.addEventListener("pagehide", this.#releaseWatch);
+    }
     if (this.#timer || this.documentWindow) return;
     document.addEventListener("visibilitychange", this.#visible);
     void this.refresh(true);
@@ -261,12 +270,21 @@ class App {
   }
 
   stop(): void {
+    if (this.#watchTimer) {
+      clearInterval(this.#watchTimer);
+      this.#watchTimer = null;
+      this.#releaseWatch();
+    }
+    window.removeEventListener("pagehide", this.#releaseWatch);
     if (this.#timer) clearInterval(this.#timer);
     this.#timer = null;
     document.removeEventListener("visibilitychange", this.#visible);
   }
 
-  #visible = (): void => { if (!document.hidden) void this.refresh(true); };
+  #visible = (): void => {
+    this.#watch();
+    if (!document.hidden) void this.refresh(true);
+  };
 
   flash(text: string, bad = false): void {
     if (bad) {
@@ -430,6 +448,7 @@ class App {
     this.#searchId++;
     this.searching = false;
     this.current = path;
+    if (this.#watchTimer) this.#watch();
     this.tree = [];
     this.treeProblems = [];
     this.#treeSignature = "";

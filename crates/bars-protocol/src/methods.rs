@@ -416,6 +416,12 @@ pub struct RegisterParams {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ProjectObserveParams {
+    pub window: String,
+    pub project: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RegisterOutput {
     pub project: ProjectInfo,
 }
@@ -1048,6 +1054,7 @@ methods! {
     Register: RegisterParams => RegisterOutput, "register", Cli;
     Unregister: UnregisterParams => UnregisterOutput, "unregister", Cli;
     ProjectDelete: ProjectDeleteParams => UnregisterOutput, "project_delete", Window;
+    ProjectObserve: ProjectObserveParams => SavedOutput, "project_observe", Window;
     SessionStart: SessionStartParams => AcceptedOutput, "session_start", Cli;
     Install: InstallParams => InstallOutput, "install", Cli;
     Uninstall: UninstallParams => UninstallOutput, "uninstall", Cli;

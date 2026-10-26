@@ -251,6 +251,18 @@ async fn mcp_collects_and_cli_does_not_through_the_channel() {
 
     cli.call(&empty).await.unwrap();
     let mut mcp = harness.client(ClientKind::Mcp).await;
+    mcp.call(&StatusParams {
+        target: target(&root),
+    })
+    .await
+    .unwrap();
+    wait_status(
+        &mut cli,
+        &root,
+        "начальная проверка MCP завершена",
+        |status| status.state == ProjectState::Ready && status.pending == 0,
+    )
+    .await;
     mcp.call(&empty).await.unwrap();
 
     let deadline = Instant::now() + Duration::from_secs(5);
