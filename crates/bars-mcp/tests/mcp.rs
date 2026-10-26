@@ -126,10 +126,15 @@ struct Harness {
 
 impl Harness {
     fn new(name: &str) -> Self {
+        let home = TempDir::new().unwrap();
+        let endpoint = Endpoint::named(&format!(
+            "mcp-{name}-{}",
+            home.path().file_name().unwrap().to_string_lossy()
+        ));
         Self {
-            home: TempDir::new().unwrap(),
+            home,
             projects: TempDir::new().unwrap(),
-            endpoint: Endpoint::named(&format!("mcp-{name}")),
+            endpoint,
             provider: FakeProvider::new("m1"),
             launches: Arc::new(AtomicUsize::new(0)),
         }
@@ -952,6 +957,45 @@ async fn connection_to_the_worker_lives_across_calls() {
     assert_eq!(rows.len(), 1);
     assert_eq!((rows[0].calls, rows[0].errors), (2, 0));
     assert_eq!(rows[0].tool, "bars_projects");
+}
+
+/// Два одинаковых ярлыка фикстуры не должны подключать клиентов к чужому тестовому воркеру.
+#[tokio::test(flavor = "multi_thread")]
+async fn two_test_workers_with_same_label_have_separate_registries() {
+    let first = Harness::new("isolation");
+    let second = Harness::new("isolation");
+    let a = first.project("first");
+    let b = second.project("second");
+    let mut left = first.connect(first.env(&a));
+    let mut right = second.connect(second.env(&b));
+    left.initialize().await;
+    right.initialize().await;
+    assert!(!left.tool("bars_projects", json!({})).await.0);
+    assert!(!right.tool("bars_projects", json!({})).await.0);
+    first.register(&a).await;
+    second.register(&b).await;
+    let (_, left_projects) = left.tool("bars_projects", json!({})).await;
+    let (_, right_projects) = right.tool("bars_projects", json!({})).await;
+    let left_projects: Value = serde_json::from_str(&left_projects).unwrap();
+    let right_projects: Value = serde_json::from_str(&right_projects).unwrap();
+    assert_eq!(
+        left_projects["projects"].as_array().unwrap().len(),
+        1,
+        "{left_projects}"
+    );
+    assert_eq!(
+        right_projects["projects"].as_array().unwrap().len(),
+        1,
+        "{right_projects}"
+    );
+    assert_eq!(
+        left_projects["projects"][0]["path"],
+        a.display().to_string()
+    );
+    assert_eq!(
+        right_projects["projects"][0]["path"],
+        b.display().to_string()
+    );
 }
 
 /// Текст по умолчанию: блоки с явными границами; `format=json` — JSON ответа воркера.

@@ -148,7 +148,10 @@ async fn mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion() {
 impl Harness {
     async fn start(name: &str, provider: Arc<dyn ModelProvider>) -> Self {
         let home = TempDir::new().unwrap();
-        let endpoint = Endpoint::named(&format!("handler-{name}"));
+        let endpoint = Endpoint::named(&format!(
+            "handler-{name}-{}",
+            home.path().file_name().unwrap().to_string_lossy()
+        ));
         let mut config = WorkerConfig::new(home.path().to_path_buf());
         // Клиенты живут во временной папке: настоящие ~/.claude и ~/.codex тесты не трогают.
         config.install_env = Some(InstallEnv {
@@ -741,8 +744,11 @@ async fn second_worker_on_the_same_channel_gives_way() {
 /// Клиент запускает воркер, которого нет: `launch` поднимает его на том же канале.
 #[tokio::test]
 async fn client_launches_the_worker_on_demand() {
-    let endpoint = Endpoint::named("handler-launch");
     let home = TempDir::new().unwrap();
+    let endpoint = Endpoint::named(&format!(
+        "handler-launch-{}",
+        home.path().file_name().unwrap().to_string_lossy()
+    ));
     let config = WorkerConfig::new(home.path().to_path_buf());
     let served = endpoint.clone();
     let mut client = bars_protocol::connect_or_launch_with(

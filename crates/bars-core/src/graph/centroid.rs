@@ -35,6 +35,48 @@ pub struct DocumentRepresentations {
     pub skipped: Vec<(String, String)>,
 }
 
+/// Точный cosine anchor со всеми готовыми документами области, независимо от общего kNN.
+pub fn exact_document_pairs(
+    representations: &DocumentRepresentations,
+    id: &str,
+    targets: &std::collections::HashSet<String>,
+    min_cosine: f32,
+    mut cancelled: impl FnMut() -> bool,
+) -> Result<Vec<DocumentPair>, GraphError> {
+    let Some(a) = representations.vectors.iter().find(|v| v.id == id) else {
+        return Ok(vec![]);
+    };
+    let mut pairs = Vec::new();
+    for b in representations
+        .vectors
+        .iter()
+        .filter(|v| targets.contains(&v.id) && v.id != id)
+    {
+        if cancelled() {
+            return Err(GraphError::Cancelled);
+        }
+        let mut dot = 0.0f64;
+        let mut aa = 0.0f64;
+        let mut bb = 0.0f64;
+        for (&x, &y) in a.vector.iter().zip(&b.vector) {
+            let x = f64::from(x);
+            let y = f64::from(y);
+            dot += x * y;
+            aa += x * x;
+            bb += y * y;
+        }
+        let cosine = (dot / (aa * bb).sqrt()).clamp(-1.0, 1.0) as f32;
+        if cosine.is_finite() && cosine >= min_cosine {
+            pairs.push(DocumentPair {
+                a: id.into(),
+                b: b.id.clone(),
+                cosine,
+            });
+        }
+    }
+    Ok(pairs)
+}
+
 /// Доли символов исходного текста, приходящиеся на каждый чанк документа; пересечения учитываются один раз.
 pub fn chunk_weights(text: &str, spans: &[Vec<(usize, usize)>]) -> Vec<f64> {
     let mut cuts = BTreeSet::new();
@@ -198,7 +240,10 @@ pub fn document_representations(
         });
     }
     drop(statement);
-    Ok(DocumentRepresentations { vectors: centroids, skipped })
+    Ok(DocumentRepresentations {
+        vectors: centroids,
+        skipped,
+    })
 }
 
 pub fn similarity_from_representations(
@@ -245,6 +290,34 @@ pub fn similarity_from_representations(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn exact_scope_is_independent_of_global_top_five_and_physical_limits() {
+        let representations = DocumentRepresentations {
+            vectors: (0..610)
+                .map(|i| VectorNode {
+                    id: format!("d{i}"),
+                    vector: vec![1.0, i as f32 / 1000.0],
+                })
+                .collect(),
+            skipped: vec![],
+        };
+        let targets = ["d0".to_string(), "d609".to_string()].into_iter().collect();
+        let pairs = exact_document_pairs(&representations, "d0", &targets, 0.5, || false).unwrap();
+        assert_eq!(pairs.len(), 1);
+        assert_eq!(pairs[0].b, "d609");
+        let expected = 1.0 / (1.0 + 0.609f64.powi(2)).sqrt();
+        assert!((f64::from(pairs[0].cosine) - expected).abs() < 1e-6);
+        assert!(matches!(
+            exact_document_pairs(&representations, "d0", &targets, 0.5, || true),
+            Err(GraphError::Cancelled)
+        ));
+        assert!(
+            exact_document_pairs(&representations, "missing", &targets, 0.5, || false)
+                .unwrap()
+                .is_empty()
+        );
+    }
 
     #[test]
     fn overlap_is_counted_once_and_split_equally() {

@@ -1,6 +1,7 @@
 use crate::Target;
 pub use bars_graph::GraphStatus;
 pub use bars_graph::physical::{PhysicalGraphSlice, PhysicalRequest};
+pub use bars_graph::query_slice::{QueryGraphSlice, QuerySliceRequest};
 pub use bars_graph::{GraphReply, GraphRequest};
 use serde::{Deserialize, Serialize};
 
@@ -17,6 +18,12 @@ pub struct GraphPhysicalParams {
     pub target: Target,
     #[serde(default)]
     pub request: PhysicalRequest,
+}
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct GraphQuerySliceParams {
+    #[serde(flatten)]
+    pub target: Target,
+    pub request: QuerySliceRequest,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct GraphStatusParams {

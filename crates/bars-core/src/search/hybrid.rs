@@ -92,6 +92,13 @@ pub fn search_expanded(
     request: &SearchRequest,
     mut expansion: Option<&mut CandidateExpansion<'_>>,
 ) -> Result<SearchResponse, SearchError> {
+    // FTS открывает служебные таблицы лениво: смена схемы между чтениями ломает xConnect.
+    // Сохраняем транзакцию вызывающего кода, если поиск уже работает в его снимке.
+    let _snapshot = if index.conn().is_autocommit() {
+        Some(index.conn().unchecked_transaction()?)
+    } else {
+        None
+    };
     let match_query = fts_query(&request.query)
         .ok_or_else(|| SearchError::InvalidParams("в запросе нет ни одного слова".to_string()))?;
     if matches!(

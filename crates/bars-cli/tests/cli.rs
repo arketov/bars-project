@@ -113,7 +113,10 @@ impl Harness {
         let home = TempDir::new().unwrap();
         let projects = TempDir::new().unwrap();
         let provider = FakeProvider::new("m1");
-        let endpoint = Endpoint::named(&format!("cli-{name}"));
+        let endpoint = Endpoint::named(&format!(
+            "cli-{name}-{}",
+            home.path().file_name().unwrap().to_string_lossy()
+        ));
         let handle = tokio::runtime::Handle::current();
         let launch = {
             let (home, endpoint, provider) = (

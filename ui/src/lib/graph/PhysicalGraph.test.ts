@@ -4,6 +4,7 @@ import PhysicalGraph from "./PhysicalGraph.svelte";
 import { app } from "../app.svelte";
 import { BarsError } from "../types";
 import { physicalFixture as buildPhysicalFixture } from "../mock-physical";
+import { queryFixture } from "../mock-query";
 
 // Большой набор нужен только проверкам порций и пределов, не браузерному макету.
 const modules = ["adr", "features", "manual"];
@@ -45,9 +46,15 @@ beforeEach(() => {
   app.selected = new Set();
   app.graphFocus = null;
   app.activeDocument = null;
+  app.results = null;
+  app.displayed = null;
+  app.graphSearch = null;
+  app.searching = false;
+  app.searchError = null;
   rpc.mockImplementation(async (method: string, params: Record<string, unknown>) => {
     if (method === "graph_status") return { state: "partial", snapshot: "mock-snapshot-0001", active_job: null, source_count: 36, error: null, method: "x" };
     if (method === "graph_physical") return physicalFixture(params);
+    if (method === "graph_query_slice") return queryFixture(params, documents);
     return {};
   });
   target = document.createElement("div");
@@ -349,4 +356,55 @@ it("глубина окружения 0 оставляет запрос и ре�
   app.searching = false;
   await settle();
   expect(target.querySelector(".qbar")).toBeNull();
+});
+
+it("Rust получает область завершённого поиска, смена режима связей не вызывает IPC", async () => {
+  component = mount(PhysicalGraph, { target }); await settle();
+  finishSearch("projection", "индексация", [3, 7]); await settle();
+  const calls = () => rpc.mock.calls.filter(c => c[0] === "graph_query_slice");
+  expect(calls()).toHaveLength(1);
+  expect(calls()[0][1].request).toMatchObject({id:"projection",scope:{modules:[],files:[]},depth:1,fanout:4,max_nodes:200});
+  target.querySelector<HTMLButtonElement>('[role="tab"][aria-selected="false"]')?.click(); await settle();
+  expect(calls()).toHaveLength(1);
+});
+it("поздний ответ прежнего поиска не заменяет новый граф", async () => {
+  component = mount(PhysicalGraph, { target }); await settle();
+  const previous = rpc.getMockImplementation()!;
+  let finish!: (value: unknown) => void;
+  let oldParams: Record<string, unknown> = {};
+  rpc.mockImplementation(async (method: string, params: Record<string, unknown>) => {
+    if (method === "graph_query_slice" && (params.request as {id:string}).id === "old") { oldParams=params; return new Promise(resolve => {finish=resolve;}); }
+    return previous(method, params);
+  });
+  finishSearch("old", "старый запрос", [3]); await settle();
+  finishSearch("new", "новый запрос", [7]); await settle();
+  expect(target.querySelector(".qbar")?.textContent).toContain("новый запрос");
+  finish(queryFixture(oldParams, documents)); await settle();
+  expect(target.querySelector(".qbar")?.textContent).toContain("новый запрос");
+});
+it("ошибка нового среза видна, предыдущий граф и результаты остаются", async () => {
+  component = mount(PhysicalGraph, { target }); await settle();
+  finishSearch("kept", "сохранённый запрос", [3]); await settle();
+  const previous = rpc.getMockImplementation()!;
+  rpc.mockImplementation(async (method: string, params: Record<string, unknown>) => {
+    if (method === "graph_query_slice") throw new BarsError("снимок графа устарел", "snapshot_expired");
+    return previous(method,params);
+  });
+  const depth = target.querySelector<HTMLButtonElement>('.qbar [role="radio"][aria-checked="false"]')!;
+  depth.click(); await settle();
+  expect(target.querySelector('[role="alert"]')?.textContent).toContain("снимок графа устарел");
+  expect(target.querySelector(".qbar")?.textContent).toContain("сохранённый запрос");
+});
+it("возврат к уже загруженной глубине отменяет поздний ответ новой глубины", async () => {
+  component=mount(PhysicalGraph,{target});await settle();finishSearch("depth-race","индекс",[3]);await settle();
+  const original=Number(panel().dataset.nodes);
+  const previous=rpc.getMockImplementation()!;let finish!: (v:unknown)=>void;let pending:Record<string,unknown>={};
+  rpc.mockImplementation(async (method:string,params:Record<string,unknown>)=>{
+    if(method==="graph_query_slice"){pending=params;return new Promise(resolve=>{finish=resolve;});}return previous(method,params);
+  });
+  const depths=()=>[...target.querySelectorAll<HTMLButtonElement>('.qbar .depth button')];
+  depths().find(b=>b.textContent==='0')!.click();await settle();
+  depths().find(b=>b.textContent==='1')!.click();await settle();
+  finish(queryFixture(pending,documents));await settle();
+  expect(Number(panel().dataset.nodes)).toBe(original);
 });

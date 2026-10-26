@@ -10,6 +10,7 @@ mod graph;
 pub(crate) mod graph_cache;
 mod history;
 mod links;
+mod query_slice;
 mod text_search;
 mod topics;
 
@@ -66,6 +67,7 @@ pub struct WorkerHandler {
     audits: crate::audits::Audits,
     /// Близость документов последнего среза физического графа: проект, снимок графа, результат.
     physical_similarity: PhysicalSimilarityCache,
+    document_representations: query_slice::RepresentationCache,
     graph_cache: std::sync::Arc<graph_cache::GraphCache>,
 }
 
@@ -93,6 +95,7 @@ impl WorkerHandler {
             text_searches: Default::default(),
             audits: Default::default(),
             physical_similarity: Default::default(),
+            document_representations: Default::default(),
             graph_cache,
         }
     }
@@ -370,7 +373,7 @@ impl WorkerHandler {
         let datasets = self.graph_cache.clone();
         let response = tokio::task::spawn_blocking(move || {
             let _gate = gate;
-            let index = Index::open(&index_path(&project), Journal::Wal)?;
+            let index = Index::open_read_only(&index_path(&project))?;
             // Нет rerank-модели или она не отработала: выдача идёт без неё, причина — в ответе.
             let reranker = reranker.as_mut().map(|model| model as &mut dyn Reranker);
             let mut related = None;
@@ -1149,6 +1152,10 @@ impl WorkerHandler {
                 .await
                 .map(|out| output_value(&out)),
             Call::GraphBuild(_) => unreachable!(),
+            Call::GraphQuerySlice(params) => self
+                .graph_query_slice(params)
+                .await
+                .map(|out| output_value(&out)),
             Call::GraphCancel(params) => {
                 let project = self.resolve(&params.target)?;
                 self.worker

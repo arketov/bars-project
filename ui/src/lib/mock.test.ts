@@ -1,8 +1,8 @@
 import { afterEach, expect, it } from "vitest";
 import { mockCall } from "./mock";
 import type { ActivityOutput, SearchOutput, SettingsOutput, StatusOutput, TreeDocument } from "./types";
-import { SliceStore, type ServerSlice } from "./graph/slice";
-import { buildQuerySlice } from "./graph/query";
+import { type ServerSlice } from "./graph/slice";
+import { acceptQuerySlice, queryRequest, type QueryInput, type ServerQuerySlice } from "./graph/query";
 
 afterEach(() => window.history.replaceState(null, "", "/"));
 
@@ -17,10 +17,12 @@ it("дерево, поиск и физический граф использую
     expect(node).toMatchObject({ label: doc.title, chunks: doc.chunks, module: doc.module });
   }
   const search = await mockCall("search", { project, query: "порог" }) as SearchOutput;
-  const query = buildQuerySlice(new SliceStore().apply(graph), {
+  const input: QueryInput = {
     id: "test", text: "порог", hits: search.results, scoreKind: "rerank",
-    requested: "hybrid", applied: "hybrid", minScore: 0.3,
-  });
+    requested: "hybrid", applied: "hybrid", minScore: 0.3, scope: { modules: [], files: [] },
+  };
+  const server = await mockCall("graph_query_slice", { project, request: queryRequest(input, 1, 0.5) }) as ServerQuerySlice;
+  const query = acceptQuerySlice(server, input);
   expect(query.info.results).toHaveLength(3);
   expect(query.info.results.every(r => r.node !== null && r.status === "ready")).toBe(true);
   expect(query.slice.edges.filter(e => e.kind === "query_result")).toHaveLength(3);

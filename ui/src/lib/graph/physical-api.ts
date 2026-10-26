@@ -2,6 +2,11 @@
 import { call } from "../api";
 import type { GraphStatus } from "../graph";
 import type { PhysicalRequest, ServerSlice } from "./slice";
+import type { QueryRequest, ServerQuerySlice } from "./query";
+
+export function loadQuery(project: string, request: QueryRequest): Promise<ServerQuerySlice> {
+  return call<ServerQuerySlice>("graph_query_slice", { cwd: project, project, request });
+}
 
 export function loadPhysical(project: string, request: PhysicalRequest): Promise<ServerSlice> {
   return call<ServerSlice>("graph_physical", { cwd: project, project, request });

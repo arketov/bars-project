@@ -377,6 +377,10 @@ export async function mockCall(method: string, params: Record<string, unknown>):
   if (method === "project_observe") return { saved: true };
   // Браузерный стенд не имеет доступа к диску; не выдаём смысловые фикстуры за текстовый поиск.
   if (method === 'text_search') return {documents:[],docs_total:0,hits_total:0,truncated:null,skipped:[],elapsed_ms:0};
+  if(method==='graph_query_slice'){
+    const project = String(params.project ?? params.cwd);
+    return (await import('./mock-query')).queryFixture(params, (DOCS_BY_PROJECT[project] ??= docs("docs")));
+  }
   if(method==='graph_physical'){
     const project = String(params.project ?? params.cwd);
     return (await import('./mock-physical')).physicalFixture(params, (DOCS_BY_PROJECT[project] ??= docs("docs")));
