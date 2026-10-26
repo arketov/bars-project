@@ -10,7 +10,7 @@ export function queryFixture(params: Record<string, unknown>, documents: TreeDoc
     const known = results.find(x => x.path === h.path);
     if (known) { known.fragments.push(h); known.score = Math.max(known.score ?? 0, h.score ?? 0); continue; }
     const index = physical.nodes.findIndex(n => n.path === h.path);
-    results.push({ path: h.path, title: h.title, rank: results.length + 1, node: index < 0 ? null : index, score: h.score, fragments: [h] });
+    results.push({ channel: h.channel, status: "ready", path: h.path, title: h.title, rank: results.length + 1, node: index < 0 ? null : index, score: h.channel === "related" ? null : h.score, fragments: [h] });
   }
   const roots = results.flatMap(x => x.node === null ? [] : [x.node]);
   const views = {} as ServerQuerySlice["views"];
@@ -27,5 +27,5 @@ export function queryFixture(params: Record<string, unknown>, documents: TreeDoc
     }
     views[mode] = [...seen];
   }
-  return { physical, fingerprint: "mock-query", query_node:{id:`query:${r.id}`,label:r.text}, query_edges:results.flatMap(x=>x.node===null?[]:[{to:x.node,raw_score:x.score,score_kind:r.score_kind,strength:x.score===null?.5:Math.min(1,Math.max(0,x.score)),neutral:x.score===null}]), id: r.id, text: r.text, score_kind: r.score_kind, results, views, depth_of: physical.nodes.map(() => 0), anchor_of: physical.nodes.map((_,i) => i), known_nodes: views.all.length + 1, known_edges: physical.edges.length + roots.length, used_bytes: 0 };
+  return { physical, fingerprint: "mock-query", query_node:{id:`query:${r.id}`,label:r.text}, query_edges:results.flatMap(x=>x.node===null || x.channel === "related"?[]:[{to:x.node,raw_score:x.score,score_kind:r.score_kind,strength:x.score===null?.5:Math.min(1,Math.max(0,x.score)),neutral:x.score===null}]), id: r.id, text: r.text, score_kind: r.score_kind, results, views, depth_of: physical.nodes.map(() => 0), anchor_of: physical.nodes.map((_,i) => i), known_nodes: views.all.length + 1, known_edges: physical.edges.length + roots.length, used_bytes: 0 };
 }

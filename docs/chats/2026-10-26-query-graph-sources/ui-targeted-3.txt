@@ -1,0 +1,34 @@
+
+> bars-ui@0.0.0 test
+> vitest run src/lib/graph/query.test.ts src/lib/graph/PhysicalGraph.test.ts src/lib/graph/physics.test.ts
+
+
+ RUN  v5.0.4 C:/Users/arketov/Desktop/bars-project/ui
+
+ ❯ src/lib/graph/PhysicalGraph.test.ts (20 tests | 1 failed) 4766ms
+   × явная карточка выбирает результат именно в срезе запроса 267ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/graph/PhysicalGraph.test.ts > явная карточка выбирает результат именно в срезе запроса
+AssertionError: expected 'Выберите узел или связь' to contain 'Документ 7'
+
+Expected: "Документ 7"
+Received: "Выберите узел или связь"
+
+ ❯ src/lib/graph/PhysicalGraph.test.ts:428:62
+    426|   await settle();
+    427|   expect(app.graphFocus).toBeNull();
+    428|   expect(target.querySelector(".inspector h3")?.textContent).toContain…
+       |                                                              ^
+    429| });
+    430|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 45 passed (46)
+   Start at  16:27:54
+   Duration  6.71s (tests 62%, environment 27%, transform 7%, import 3%)
+

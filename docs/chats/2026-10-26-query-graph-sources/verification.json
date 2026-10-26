@@ -1,0 +1,81 @@
+{
+  "task": "2.4.2",
+  "date": "2026-10-26",
+  "parent": "14259b4ea1b999a7638aea45e65acbff1802f065",
+  "gate": {
+    "command": "pwsh -File scripts/check.ps1 -Jobs 1",
+    "rust_test_threads": 1,
+    "passed": true,
+    "log": "check-final.txt",
+    "sha256": "a040ff30a32846535ac64aa0e9332b62ed692ff080f0bc5627d1c72bd894e437",
+    "ui_files": 76,
+    "ui_tests": 582
+  },
+  "native": {
+    "passed": true,
+    "checks": 19,
+    "artifact": "native-final.json",
+    "provider": "FakeProvider",
+    "documents": 3,
+    "installed": false
+  },
+  "real": {
+    "artifact": "real-slices.json",
+    "queries": [
+      {
+        "query": "Как сохранить правки при смене проекта?",
+        "documents": 3,
+        "related": 0,
+        "physical_nodes": 11,
+        "bundles": 0,
+        "projection_ms": 50,
+        "bytes": 12638
+      },
+      {
+        "query": "Как очередь документов откладывает обновление индекса после правки?",
+        "documents": 8,
+        "related": 5,
+        "physical_nodes": 11,
+        "bundles": 20,
+        "projection_ms": 55,
+        "bytes": 15746
+      },
+      {
+        "query": "Какие требования и решения связаны с графом?",
+        "documents": 1,
+        "related": 0,
+        "physical_nodes": 5,
+        "bundles": 1,
+        "projection_ms": 33,
+        "bytes": 5690
+      }
+    ],
+    "method": "Ответы установленного воркера; chunk_id сверены с readonly SQLite перед получением source_hash; проекция использует готовые векторы, без моделей и переиндексации. UI воспроизводит все три сохранённых ответа.",
+    "limits": "Три запроса не подтверждают качество GraphRAG или универсальный бюджет; физические жесты, установленная версия и полная приёмка Т-47 обоих проектов отдельно."
+  },
+  "review": {
+    "method": "manual",
+    "resolved": [
+      "старая версия графа не доказывает правку файла",
+      "исчезнувшая область сохраняется без расширения до проекта",
+      "нет свежих связей у изменённых результатов",
+      "нет оценки запроса у related, в том числе дубликатов",
+      "путь выделяет только существующие рёбра текущей ревизии",
+      "координаты и закрепления разделены по ID между видами",
+      "выбор карточки ждёт среза",
+      "related — глубина 1, не новый корень глубины 0",
+      "усечение нейтральных результатов учитывается в числе известных рёбер"
+    ]
+  },
+  "negative_logs": [
+    "check-1.txt",
+    "check-2.txt",
+    "check-3.txt",
+    "check-final-failed-lock.txt",
+    "check-final-failed-fmt.txt",
+    "check-final-failed-fmt-2.txt",
+    "check-final-failed-worker-clippy.txt",
+    "real-probe.txt",
+    "ui-targeted-3.txt"
+  ]
+}

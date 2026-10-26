@@ -1,0 +1,1082 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.42
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+
+=== cargo fmt --check ===
+
+=== cargo clippy ===
+    Blocking waiting for file lock on build directory
+    Checking bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+    Checking bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Checking bars-protocol v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-protocol)
+    Checking bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+   Compiling bars-app v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-app)
+    Checking bars-cli v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-cli)
+    Checking bars-mcp v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-mcp)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 7m 00s
+
+=== cargo build ===
+    Blocking waiting for file lock on build directory
+   Compiling bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+   Compiling bars-protocol v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-protocol)
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+   Compiling bars-app v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-app)
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+   Compiling bars-cli v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-cli)
+   Compiling bars-mcp v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-mcp)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 7m 30s
+
+=== cargo test ===
+    Blocking waiting for file lock on build directory
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+   Compiling bars-protocol v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-protocol)
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+   Compiling bars-cli v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-cli)
+   Compiling bars-mcp v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-mcp)
+   Compiling bars-app v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-app)
+   Compiling bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7m 17s
+     Running unittests src\main.rs (C:/bt/bars\debug\deps\bars-3fc803c1116cb80a.exe)
+
+running 68 tests
+test appearance_tests::bad_paths_and_values_are_rejected_without_touching_the_file ... ok
+test appearance_tests::broken_file_is_reported_and_never_overwritten ... ok
+test appearance_tests::document_takes_a_color_only ... ok
+test appearance_tests::folders_deeper_than_second_level_are_rejected ... ok
+test appearance_tests::migration_keeps_explicit_index_and_module_move_carries_style ... ok
+test appearance_tests::missing_file_reads_as_empty ... ok
+test appearance_tests::module_index_creation_and_broken_frontmatter ... ok
+test appearance_tests::module_index_overrides_legacy_and_local_entries_stay_local ... ok
+test appearance_tests::module_index_survives_copy_and_preserves_content ... ok
+test appearance_tests::palette_and_icons_have_no_duplicates ... ok
+test appearance_tests::resetting_every_field_removes_the_entry_and_the_empty_section ... ok
+test appearance_tests::set_writes_and_read_returns_the_same_entries ... ok
+test appearance_tests::unknown_values_are_kept_for_the_window_to_ignore ... ok
+test appearance_tests::wrong_types_inside_a_valid_file_count_as_broken ... ok
+test commands::log_tests::logs_command_returns_filtered_serializable_snapshot ... ok
+test doc_window::tests::moved_windows_keep_identity_without_capturing_old_path_or_other_project ... ok
+test doc_window::tests::same_document_gets_the_same_window_label ... ok
+test doc_window::tests::targets_are_found_until_removed ... ok
+test document_io_tests::read_marks_foreign_encoding_oversize_and_readonly_files_read_only ... ok
+test document_io_tests::read_normalizes_line_breaks_and_remembers_format ... ok
+test document_io_tests::resolve_accepts_existing_and_new_documents_inside_docs_root ... ok
+test document_io_tests::resolve_rejects_escapes_foreign_files_and_bad_targets ... ok
+test document_io_tests::resolve_rejects_junction_leaving_docs_root ... ok
+test document_io_tests::write_creates_new_document_on_first_edit_and_never_overwrites_a_late_one ... ok
+test document_io_tests::write_refuses_when_disk_changed_and_keeps_both_versions ... ok
+test document_io_tests::write_replaces_file_keeping_eol_bom_and_leaves_no_temp_file ... ok
+test document_io_tests::write_reports_deleted_file_as_conflict_without_recreating_it ... ok
+test document_io_tests::write_to_readonly_file_fails_clearly_and_succeeds_after_it_is_released ... ok
+test document_io_tests::write_without_parent_folder_fails_and_creates_nothing ... ok
+test documents::tests::document_paths_are_relative_markdown_and_preserve_spaces ... ok
+test flush::tests::clean_window_lets_the_process_exit ... ok
+test flush::tests::every_window_is_asked_not_only_the_first_to_answer ... ok
+test flush::tests::reply_reaches_only_the_active_request ... ok
+test flush::tests::silent_window_does_not_block_exit ... ok
+test flush::tests::unanswered_question_keeps_the_process_running ... ok
+test flush::tests::unknown_replies_are_ignored ... ok
+test flush::tests::user_can_discard_or_stay_after_the_window_asked ... ok
+test folder_tests::folder_command_allows_deleted_folder_path_and_check_but_rejects_open ... ok
+test folder_tests::folder_command_rejects_forged_paths_and_unknown_actions ... ok
+test folder_tests::folder_command_rejects_stale_registration_and_docs_root_roundtrip ... ok
+test folder_tests::folder_command_returns_full_project_receipt_and_validated_path ... ok
+test folders::tests::empty_disk_folder_is_a_menu_target_without_indexed_documents ... ok
+test folders::tests::folders_are_confirmed_by_components_and_copy_survives_removal ... ok
+test folders::tests::junction_escape_and_retarget_after_open_are_rejected ... ok
+test folders::tests::roots_nested_docs_and_virtual_group_work_without_documents ... ok
+test folders::tests::target_ids_do_not_accept_replaced_or_forged_targets ... ok
+test folders::tests::tree_proof_preserves_removed_node_but_never_another_registration_or_root ... ok
+test link_move_tests::appearance_follows_folder_and_document_paths ... ok
+test link_move_tests::folder_move_updates_outbound_and_inbound_preserves_bom_crlf ... ok
+test link_move_tests::occupied_referrer_does_not_block_other_updates_or_roll_back ... ok
+test link_move_tests::rename_updates_three_documents_and_preserves_readonly_failure ... ok
+test link_move_tests::stale_preview_refuses_before_any_rename ... ok
+test tree_io_tests::hidden_ancestors_cannot_be_changed_through_tree_commands ... ok
+test tree_io_tests::late_destination_is_not_overwritten_by_the_os_move ... ok
+test tree_io_tests::measure_tree_10000_documents ... ignored, явный замер обхода 10 000 документов
+test tree_io_tests::nested_and_dot_docs_root ... ok
+test tree_io_tests::rename_never_overwrites_an_existing_staging_path ... ok
+test tree_io_tests::t01_empty_folder_and_new_file_are_visible_at_once ... ok
+test tree_io_tests::t02_tree_matches_indexer_walk ... ok
+test tree_io_tests::t03_case_collision_is_refused ... ok
+test tree_io_tests::t03_names_and_paths_are_checked ... ok
+test tree_io_tests::t04_new_folder_has_index_with_title_and_heading ... ok
+test tree_io_tests::t04_repeated_folder_is_refused_and_keeps_the_first ... ok
+test tree_io_tests::t04_title_with_special_characters_is_quoted ... ok
+test tree_io_tests::t05_rename_keeps_content_and_does_not_touch_links ... ok
+test tree_io_tests::t06_folder_move_carries_its_documents ... ok
+test tree_io_tests::t07_case_only_rename ... ok
+test tree_io_tests::t08_trash_removes_the_node_or_refuses_without_deleting ... ok
+
+test result: ok. 67 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 2.51s
+
+     Running unittests src\lib.rs (C:/bt/bars\debug\deps\bars_cli-6295e4e5a356c453.exe)
+
+running 6 tests
+test gate::tests::catches_search_and_shell_reads ... ok
+test gate::tests::denies_docs_reads_until_a_bars_call ... ok
+test gate::tests::follows_the_configured_docs_root_and_ignores_a_dot_root ... ok
+test gate::tests::skips_chats_code_and_other_sessions ... ok
+test tests::json_prints_the_worker_reply_with_fields_the_client_does_not_know ... ok
+test tests::text_mode_uses_the_typed_reply ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\main.rs (C:/bt/bars\debug\deps\bars_cli-88d7692ee17bbeda.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\cli.rs (C:/bt/bars\debug\deps\cli-ef3ee2eda19d51a7.exe)
+
+running 9 tests
+test arguments_are_checked_before_the_worker_is_called ... ok
+test graph_cli_operations_and_search_modes_match_worker_json ... ok
+test install_and_uninstall_edit_client_files_in_temp_home ... ok
+test model_change_needs_consent_and_exits_with_three ... ok
+test print_instruction_needs_no_worker ... ok
+test register_search_outline_read_scenario ... ok
+test request_errors_exit_with_one ... ok
+test session_start_hook_registers_project_and_never_fails ... ok
+test unreachable_worker_exits_with_two ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.91s
+
+     Running unittests src\lib.rs (C:/bt/bars\debug\deps\bars_core-5b4cdee242a34cae.exe)
+
+running 341 tests
+test audits::contradictions::tests::controls_history_rounding_equivalent_units_and_cancel ... ok
+test audits::contradictions::tests::numbers_exclude_versions_dates_ids_and_large_values ... ok
+test audits::contradictions::tests::numeric_conflict_has_sources_and_stable_identity ... ok
+test audits::contradictions::tests::numeric_rules_keep_the_research_seeded_pairs_and_controls ... ok
+test audits::tests::corrupt_store_is_replaced ... ok
+test audits::tests::first_complete_run_has_no_new_findings_and_second_marks_new_known_gone ... ok
+test audits::tests::ignore_survives_runs_pruning_and_reopen_and_counters_follow_it ... ok
+test audits::tests::incomplete_runs_keep_the_previous_complete_result ... ok
+test audits::tests::missing_project_is_not_recreated_by_opening_the_audit_store ... ok
+test audits::tests::only_the_last_twenty_runs_and_the_last_complete_are_kept ... ok
+test audits::tests::overlap_group_is_counted_apart_and_never_new_in_the_headline ... ok
+test audits::tests::paging_returns_a_cursor_until_the_end ... ok
+test audits::tests::roles_follow_the_path ... ok
+test audits::tests::schedule_defaults_to_off_and_on_change_is_only_for_broken_links ... ok
+test audits::tests::schema_one_migrates_without_losing_results_or_schedule ... ok
+test doc_path::tests::absolute_path_is_taken_as_is ... ok
+test doc_path::tests::backslashes_work_like_slashes ... ok
+test doc_path::tests::docs_root_dot_is_the_project_root ... ok
+test doc_path::tests::docs_root_wins_over_the_project_root ... ok
+test doc_path::tests::explicit_dot_slash_goes_from_the_project_root ... ok
+test doc_path::tests::missing_file_and_directory_are_not_found ... ok
+test doc_path::tests::only_markdown_files_are_allowed ... ok
+test doc_path::tests::path_from_search_results_falls_back_to_the_project_root ... ok
+test doc_path::tests::relative_path_goes_from_the_docs_root ... ok
+test doc_path::tests::uppercase_extension_is_markdown ... ok
+test graph::build::job::tests::active_quantum_and_disk_resume_produce_identical_neighbors ... ok
+test graph::build::job::tests::active_quantum_reuses_vectors_but_invalidates_same_key_vector_write ... ok
+test graph::build::job::tests::similarity_job_changed_manifest_or_vector_invalidates_preparation ... ok
+test graph::build::job::tests::similarity_job_sqlite_checkpoint_preserves_snapshot_and_resumes_without_markdown ... ok
+test graph::centroid::tests::empty_or_repeated_spans_do_not_inflate_weight ... ok
+test graph::centroid::tests::exact_scope_is_independent_of_global_top_five_and_physical_limits ... ok
+test graph::centroid::tests::normalize_rejects_zero_and_non_finite ... ok
+test graph::centroid::tests::overlap_is_counted_once_and_split_equally ... ok
+test graph::similarity::tests::cancellation_discards_unfinished_row ... ok
+test graph::similarity::tests::filter_before_knn_prevents_hidden_nodes_from_consuming_top_k ... ok
+test graph::similarity::tests::heap_top_k_matches_full_sort ... ok
+test graph::similarity::tests::invalid_vectors_and_parameters_are_rejected ... ok
+test graph::similarity::tests::normalized_cosine_order_sign_and_no_self_edge ... ok
+test graph::similarity::tests::threshold_empty_singleton_and_extreme_finite_values ... ok
+test graph::similarity::tests::ties_and_partial_coverage_are_independent_of_input_order ... ok
+test graph::similarity_job::tests::changed_vector_config_dimension_or_inputs_reject_checkpoint ... ok
+test graph::similarity_job::tests::full_pairs_exceed_the_former_million_comparison_limit ... ok
+test graph::similarity_job::tests::pair_kernel_matches_previous_formula_and_deterministic_ties ... ok
+test graph::similarity_job::tests::quantum_cancellation_and_serialized_restart_keep_exact_result ... ok
+test graph::similarity_job::tests::repeated_edit_insert_delete_and_empty_rows_match_full_rebuild ... ok
+test indexing::chunking::tests::big_section_is_split_by_paragraphs_with_one_chain ... ok
+test indexing::chunking::tests::chain_and_other_headers_for_parent ... ok
+test indexing::chunking::tests::code_block_is_not_cut_when_it_fits ... ok
+test indexing::chunking::tests::crlf_and_bom_do_not_change_the_result ... ok
+test indexing::chunking::tests::embed_text_has_path_chain_and_no_line_number ... ok
+test indexing::chunking::tests::empty_and_frontmatter_only_documents_give_no_chunks ... ok
+test indexing::chunking::tests::empty_intro_gives_no_chunk ... ok
+test indexing::chunking::tests::frontmatter_gives_title_and_keeps_line_numbers ... ok
+test indexing::chunking::tests::graph_source_spans_preserve_original_bom_crlf_and_unicode_splits ... ok
+test indexing::chunking::tests::graph_spans_do_not_claim_generated_other_headers_as_own_content ... ok
+test indexing::chunking::tests::graph_spans_exclude_padding_from_previous_section ... ok
+test indexing::chunking::tests::headings_inside_code_fences_are_text ... ok
+test indexing::chunking::tests::inserting_a_line_on_top_only_shifts_line_numbers ... ok
+test indexing::chunking::tests::last_small_section_is_attached_to_the_previous_chunk ... ok
+test indexing::chunking::tests::long_line_is_cut_by_characters ... ok
+test indexing::chunking::tests::renaming_the_file_changes_the_hash ... ok
+test indexing::chunking::tests::section_at_limit_and_last_piece_have_no_truncation_marker ... ok
+test indexing::chunking::tests::sections_after_a_skipped_level_get_the_nearest_parent ... ok
+test indexing::chunking::tests::size_is_counted_in_characters_not_bytes ... ok
+test indexing::chunking::tests::small_chunk_is_padded_from_above_when_the_next_does_not_fit ... ok
+test indexing::chunking::tests::small_chunk_without_text_above_stays_short ... ok
+test indexing::chunking::tests::small_section_is_merged_with_the_next_without_other_headers ... ok
+test indexing::chunking::tests::title_falls_back_to_file_name_and_names_the_intro ... ok
+test indexing::chunking::tests::unclosed_frontmatter_is_text ... ok
+test indexing::indexer::tests::a_deferred_document_keeps_its_old_version_until_the_next_check ... ok
+test indexing::indexer::tests::a_scan_snapshot_survives_closing_and_replacing_the_index_file ... ok
+test indexing::indexer::tests::cancelled_rebuild_keeps_the_old_index_and_leaves_no_new_file ... ok
+test indexing::indexer::tests::changed_chunking_rechunks_everything_but_reuses_vectors ... ok
+test indexing::indexer::tests::changed_model_asks_for_reindex_without_calling_the_model ... ok
+test indexing::indexer::tests::deleted_file_leaves_the_index_with_its_vectors_cleaned ... ok
+test indexing::indexer::tests::discovery_precedes_processing_in_priority_order_and_reports_deletions ... ok
+test indexing::indexer::tests::editing_one_section_embeds_only_its_chunks ... ok
+test indexing::indexer::tests::embedding_failure_keeps_written_documents_and_resumes_later ... ok
+test indexing::indexer::tests::failed_rebuild_keeps_the_old_index_intact ... ok
+test indexing::indexer::tests::first_run_embeds_every_chunk_and_records_layout ... ok
+test indexing::indexer::tests::invalid_utf8_is_reported_and_dropped_from_the_index ... ok
+test indexing::indexer::tests::missing_docs_root_is_an_error_and_keeps_the_index ... ok
+test indexing::indexer::tests::observer_sees_every_document_and_can_stop_the_update ... ok
+test indexing::indexer::tests::outdated_schema_asks_for_reindex ... ok
+test indexing::indexer::tests::problem_path_covers_itself_and_its_subtree_only ... ok
+test indexing::indexer::tests::rebuild_replaces_the_index_and_embeds_everything_again ... ok
+test indexing::indexer::tests::rebuild_without_an_existing_index_just_builds_one ... ok
+test indexing::indexer::tests::repeated_section_is_embedded_once ... ok
+test indexing::indexer::tests::rewritten_identical_content_is_not_embedded_again ... ok
+test indexing::indexer::tests::same_size_edit_is_found_through_mtime_and_hash ... ok
+test indexing::indexer::tests::scan_discovery_excludes_metadata_only_changes_and_includes_confirmed_deletions ... ok
+test indexing::indexer::tests::scan_reports_differences_without_writing_or_creating_an_index ... ok
+test indexing::indexer::tests::scan_reports_unreadable_text_without_deleting_the_published_document ... ok
+test indexing::indexer::tests::second_run_touches_nothing ... ok
+test indexing::indexer::tests::stage17_incomplete_rebuild_never_swaps_even_with_last_document_failure ... ok
+test indexing::indexer::tests::stage17_partial_layout_change_does_not_mark_failed_file_as_current ... ok
+test indexing::indexer::tests::stage17_rejected_document_is_not_retried_and_layout_is_not_advanced ... ok
+test indexing::indexer::tests::stage17_retries_once_and_three_times_with_one_budget ... ok
+test indexing::indexer::tests::stage17_series_stops_with_report_and_cancellation_keeps_report ... ok
+test indexing::indexer::tests::stage17_skips_bad_document_preserves_version_and_retries_next_check ... ok
+test indexing::indexer::tests::stage17_success_resets_series_but_unchanged_files_do_not ... ok
+test indexing::indexer::tests::wrong_vector_dimension_is_an_error_and_writes_nothing ... ok
+test indexing::walk::tests::docs_root_must_be_relative_and_inside_project ... ok
+test indexing::walk::tests::empty_folders_are_listed_but_hidden_and_linked_ones_are_not ... ok
+test indexing::walk::tests::exclusions ... ok
+test indexing::walk::tests::instruction_file_is_skipped_in_any_case ... ok
+test indexing::walk::tests::links_are_not_followed ... ok
+test indexing::walk::tests::missing_or_file_docs_root_is_an_error ... ok
+test indexing::walk::tests::modules_follow_first_level_folders ... ok
+test indexing::walk::tests::nested_docs_root_gives_paths_from_project_root ... ok
+test indexing::walk::tests::project_root_as_docs_root_skips_dot_folders ... ok
+test indexing::walk::tests::read_utf8_keeps_bom_and_rejects_other_encodings ... ok
+test indexing::walk::tests::read_utf8_reports_io_error_for_vanished_file ... ok
+test indexing::walk::tests::size_and_modified_time_are_reported ... ok
+test instruction::tests::custom_root_sync_preserves_the_projects_layout ... ok
+test instruction::tests::missing_docs_root_is_not_created ... ok
+test instruction::tests::writes_missing_file_and_fixes_edited_one ... ok
+test link_index::tests::bounded_pages_preserve_occurrences_and_snapshot ... ok
+test link_index::tests::changed_parser_version_rebuilds_everything ... ok
+test link_index::tests::corrupt_file_is_replaced ... ok
+test link_index::tests::creating_and_removing_files_repairs_and_breaks_links ... ok
+test link_index::tests::limits_ten_thousand_documents ... ignored, замер, не проверка
+test link_index::tests::link_page_byte_budget_keeps_a_resumable_valid_page ... ok
+test link_index::tests::links_to_non_markdown_outside_root_external_and_own_section_are_ignored ... ok
+test link_index::tests::outgoing_and_incoming_links_match_by_path_and_name ... ok
+test link_index::tests::title_comes_from_frontmatter ... ok
+test link_index::tests::unchanged_files_are_not_parsed_again ... ok
+test link_index::tests::works_without_model_and_rebuilds_after_file_loss ... ok
+test models::artifact::tests::marker_requires_matching_files_hash_size_and_metadata ... ok
+test models::artifact::tests::rejects_changed_and_missing_files ... ok
+test models::builtin::quantized_tests::fp16_cpu_is_rejected_before_network_or_model_loading ... ok
+test models::builtin::quantized_tests::invalid_dense_output_is_rejected_before_index_or_search ... ok
+test models::builtin_rerank::tests::allocation_backoff_is_bounded_and_gpu_only ... ok
+test models::builtin_rerank::tests::logits_report_flags_a_model_that_scores_everything_near_zero ... ok
+test models::builtin_rerank::tests::sigmoid_maps_logits_into_the_unit_range ... ok
+test models::catalog::tests::cached_download_gets_artifacts_without_parsing_an_onnx_session ... ok
+test models::catalog::tests::candle_model_needs_single_weights_or_every_shard ... ok
+test models::catalog::tests::catalog_has_expected_models_and_fp32_bge_m3_comes_first ... ok
+test models::catalog::tests::download_percent_follows_blob_sizes_and_stops_short_of_100_until_done ... ok
+test models::catalog::tests::downloaded_means_every_file_of_the_model_is_in_a_snapshot ... ok
+test models::catalog::tests::files_report_names_missing_files_and_sizes ... ok
+test models::catalog::tests::fingerprints_differ_between_models_and_nomic_carries_its_document_prefix ... ok
+test models::catalog::tests::reranker_is_found_under_the_onnx_export_repo ... ok
+test models::catalog::tests::slow_and_short_input_models_warn ... ok
+test models::catalog::tests::weights_behind_a_symlink_count_as_downloaded ... ok
+test models::embed_artifact::tests::complete_pinned_cache_needs_marker_and_changed_files_invalidate_it ... ok
+test models::embed_artifact::tests::precision_and_revision_are_part_of_index_identity ... ok
+test models::execution::tests::fallback_records_cpu_and_reason_without_claiming_a_successful_gpu_session ... ok
+test models::gguf::tests::gguf_fingerprint_requires_consent_for_previous_candle_vectors ... ok
+test models::gguf::tests::truncation_preserves_last_token_and_context_bounds ... ok
+test models::gguf_artifact::tests::readiness_needs_hash_and_changed_file_invalidates_marker ... ok
+test models::remote::tests::a_short_answer_is_a_count_error ... ok
+test models::remote::tests::a_transient_failure_that_clears_up_is_not_an_error ... ok
+test models::remote::tests::a_vector_of_another_size_than_the_first_is_rejected ... ok
+test models::remote::tests::answers_out_of_order_are_put_back_by_index ... ok
+test models::remote::tests::base_url_ending_in_v1_is_not_doubled ... ok
+test models::remote::tests::client_errors_are_not_retried_and_name_the_cause ... ok
+test models::remote::tests::document_embedding_does_not_multiply_the_indexer_retry_budget ... ok
+test models::remote::tests::embeddings_go_to_v1_embeddings_with_the_key_and_the_model ... ok
+test models::remote::tests::lmstudio_batches_sort_response_and_instruct_only_qwen_queries ... ok
+test models::remote::tests::lmstudio_rejects_corrupt_vectors_and_response_indices ... ok
+test models::remote::tests::local_address_needs_no_key_and_sends_no_authorization ... ok
+test models::remote::tests::local_qwen_query_has_instruction_but_documents_do_not ... ok
+test models::remote::tests::ollama_batches_use_native_api_and_never_truncate ... ok
+test models::remote::tests::ollama_context_error_is_not_retried ... ok
+test models::remote::tests::ollama_dimension_changes_are_rejected ... ok
+test models::remote::tests::ollama_rejects_bad_vectors_and_counts ... ok
+test models::remote::tests::rerank_errors_name_the_status ... ok
+test models::remote::tests::rerank_falls_back_to_v1_rerank_and_remembers_it ... ok
+test models::remote::tests::rerank_logits_outside_the_unit_range_go_through_the_sigmoid ... ok
+test models::remote::tests::rerank_posts_cohere_shaped_request_and_returns_scores_in_document_order ... ok
+test models::remote::tests::rerank_with_a_missing_score_is_an_error ... ok
+test models::remote::tests::server_errors_are_retried_three_times_then_reported ... ok
+test models::remote::tests::tei_context_error_and_missing_route_do_not_probe_other_protocols ... ok
+test models::remote::tests::tei_malformed_embedding_does_not_echo_a_key ... ok
+test models::remote::tests::tei_native_rerank_restores_order_and_requests_all_scores ... ok
+test models::remote::tests::tei_rejects_bad_embedding_responses ... ok
+test models::remote::tests::tei_rerank_rejects_invalid_scores_indices_and_shapes ... ok
+test models::remote::tests::tei_uses_native_batches_and_qwen_query_instruction ... ok
+test models::remote::tests::texts_are_sent_in_batches_and_keep_their_order ... ok
+test models::remote::tests::the_key_never_reaches_an_error_even_when_the_provider_echoes_it ... ok
+test models::remote::tests::unreachable_address_is_an_error_not_a_panic ... ok
+test models::rerank_artifact::tests::complete_files_need_verified_marker_and_modification_invalidates_it ... ok
+test models::rerank_artifact::tests::corrupt_artifact_is_rejected_before_session_creation ... ok
+test models::rerank_artifact::tests::cpu_does_not_require_gpu_export_and_other_revisions_do_not_count ... ok
+test new_topics::tests::a_check_never_reopens_a_resolved_topic_or_restores_a_deleted_one ... ok
+test new_topics::tests::a_check_with_materials_moves_an_open_topic_and_keeps_two_checks ... ok
+test new_topics::tests::bge_threshold_merges_owner_case_and_includes_boundary_for_both_profiles ... ok
+test new_topics::tests::chain_a_b_c_is_not_glued_through_the_middle_question ... ok
+test new_topics::tests::clear_and_disable_reject_late_observations ... ok
+test new_topics::tests::clearing_removes_checks_and_ids_are_not_reused ... ok
+test new_topics::tests::close_vectors_merge_only_in_a_measured_space_and_without_lexical_difference ... ok
+test new_topics::tests::complete_empty_check_clears_previous_automatic_match_but_preserves_user_resolution ... ok
+test new_topics::tests::corrupt_file_is_an_error_not_an_empty_list ... ok
+test new_topics::tests::data_survives_reopening ... ok
+test new_topics::tests::deleting_a_topic_allows_a_new_independent_appearance ... ok
+test new_topics::tests::demand_reopens_a_resolved_topic_and_keeps_the_decision_date ... ok
+test new_topics::tests::exact_text_merges_after_careful_normalization ... ok
+test new_topics::tests::explicit_merge_keeps_a_semantic_representative_for_each_scope ... ok
+test new_topics::tests::explicit_merge_keeps_events_variants_and_invalidates_old_checks ... ok
+test new_topics::tests::explicit_merge_refuses_overflow_without_dropping_variants_or_events ... ok
+test new_topics::tests::guard_detects_identifier_number_and_antonym_differences ... ok
+test new_topics::tests::measure_limits ... ignored, замер, не проверка
+test new_topics::tests::measured_qwen_owner_pair_merges_but_other_artifacts_stay_unmeasured ... ok
+test new_topics::tests::newer_schema_is_refused_and_left_untouched ... ok
+test new_topics::tests::normalization_keeps_negations_numbers_and_identifiers ... ok
+test new_topics::tests::same_event_id_is_counted_once ... ok
+test new_topics::tests::same_text_in_another_scope_is_a_separate_topic ... ok
+test new_topics::tests::schema_one_database_is_migrated_with_its_topics_kept ... ok
+test new_topics::tests::text_without_vector_is_stored_and_merges_exactly ... ok
+test new_topics::tests::topic_and_variant_limits_stop_new_records_without_evicting ... ok
+test new_topics::tests::unmeasured_space_never_merges_semantically ... ok
+test new_topics::tests::user_decisions_check_the_expected_revision ... ok
+test new_topics::tests::variant_keeps_first_search_parameters_after_repeat_and_reopen ... ok
+test new_topics::tests::vectors_of_different_spaces_are_not_compared ... ok
+test outline::tests::closing_hashes_are_dropped_from_the_text ... ok
+test outline::tests::crlf_and_bom_do_not_shift_lines ... ok
+test outline::tests::document_without_headings_is_empty ... ok
+test outline::tests::duplicate_chains_are_merged_in_document_order ... ok
+test outline::tests::filters_by_level ... ok
+test outline::tests::heading_like_line_inside_frontmatter_is_not_a_heading ... ok
+test outline::tests::headings_inside_code_blocks_are_ignored ... ok
+test outline::tests::line_numbers_count_frontmatter ... ok
+test outline::tests::rejects_level_outside_one_to_six ... ok
+test outline::tests::returns_all_headings_with_line_numbers ... ok
+test outline::tests::setext_and_headings_without_text_are_ignored ... ok
+test outline::tests::skipped_levels_still_nest_by_chain ... ok
+test outline::tests::under_a_heading_without_children_is_empty ... ok
+test outline::tests::under_chain_returns_nested_headings_without_the_heading_itself ... ok
+test outline::tests::under_goes_to_any_depth_and_levels_filter_it ... ok
+test outline::tests::under_line_matches_chain ... ok
+test outline::tests::under_stops_at_a_heading_of_the_same_or_higher_level ... ok
+test outline::tests::unknown_chain_and_non_heading_line_are_errors ... ok
+test search::duplicates::tests::a_section_inside_a_bigger_one_is_contained ... ok
+test search::duplicates::tests::changed_number_is_a_near_copy_that_shows_the_number ... ok
+test search::duplicates::tests::dropped_negation_is_a_near_copy_that_shows_the_word ... ok
+test search::duplicates::tests::exact_copies_ignore_case_spacing_and_markup ... ok
+test search::duplicates::tests::exact_goes_first_then_by_strength_and_limit_is_clamped ... ok
+test search::duplicates::tests::half_of_a_text_is_a_partial_copy ... ok
+test search::duplicates::tests::identical_block_in_four_sections_is_a_repeated_block_group ... ok
+test search::duplicates::tests::module_filter_limits_the_area_and_unknown_module_is_invalid ... ok
+test search::duplicates::tests::own_text_drops_headings_and_the_service_header_list ... ok
+test search::duplicates::tests::owned_snapshot_survives_index_changes_and_keeps_one_generation ... ok
+test search::duplicates::tests::sections_of_one_document_are_not_partial_or_semantic_pairs ... ok
+test search::duplicates::tests::semantic_candidate_needs_both_meaning_and_some_shared_words ... ok
+test search::duplicates::tests::shared_template_does_not_make_different_sections_duplicates ... ok
+test search::duplicates::tests::short_sections_are_skipped_and_reported ... ok
+test search::hybrid::tests::agent_threshold_outside_the_limits_is_clamped ... ok
+test search::hybrid::tests::bounded_cosines_match_full_scan_and_keep_text_candidates ... ok
+test search::hybrid::tests::changed_model_requires_reindexing ... ok
+test search::hybrid::tests::chunks_with_the_identifier_go_first_and_keep_their_order ... ok
+test search::hybrid::tests::empty_index_gives_no_results ... ok
+test search::hybrid::tests::empty_selection_searches_the_whole_project ... ok
+test search::hybrid::tests::equal_fusion_scores_are_decided_by_the_full_text_place ... ok
+test search::hybrid::tests::exact_identifier_is_found_first ... ok
+test search::hybrid::tests::explicit_result_count_is_honoured_and_default_comes_from_settings ... ok
+test search::hybrid::tests::failed_rerank_falls_back_to_cosine_and_says_why ... ok
+test search::hybrid::tests::file_filter_is_relative_to_the_docs_root ... ok
+test search::hybrid::tests::fts_syntax_in_the_query_is_plain_text ... ok
+test search::hybrid::tests::fusion_rewards_agreement_between_the_two_lists ... ok
+test search::hybrid::tests::graph_context_reuses_one_query_embedding_and_respects_role_scope ... ok
+test search::hybrid::tests::graph_expansion_precedes_rerank_and_keeps_scope_and_threshold ... ok
+test search::hybrid::tests::hit_carries_everything_the_requirements_ask_for ... ok
+test search::hybrid::tests::identifier_goes_to_fts_both_as_a_phrase_and_as_words ... ok
+test search::hybrid::tests::module_filter_keeps_only_that_module ... ok
+test search::hybrid::tests::modules_and_files_are_united ... ok
+test search::hybrid::tests::only_words_with_inner_separators_count_as_identifiers ... ok
+test search::hybrid::tests::query_without_words_is_invalid_params ... ok
+test search::hybrid::tests::rerank_orders_by_its_score_and_labels_it ... ok
+test search::hybrid::tests::rerank_threshold_filters_and_default_count_is_the_reranked_one ... ok
+test search::hybrid::tests::root_module_is_selected_by_a_dot ... ok
+test search::hybrid::tests::search_pins_snapshot_before_lazy_fts_open_during_schema_publication ... ok
+test search::hybrid::tests::search_preserves_caller_transaction ... ok
+test search::hybrid::tests::similar_chunks::editing_the_document_makes_its_ids_stale_even_if_the_row_number_is_reused ... ok
+test search::hybrid::tests::similar_chunks::limit_is_applied_and_clamped_to_the_maximum ... ok
+test search::hybrid::tests::similar_chunks::malformed_unknown_and_forged_ids_are_rejected ... ok
+test search::hybrid::tests::similar_chunks::module_filter_limits_candidates_but_not_the_source ... ok
+test search::hybrid::tests::similar_chunks::neighbours_exclude_the_source_and_are_ordered_by_cosine ... ok
+test search::hybrid::tests::similar_chunks::search_hits_carry_an_id_the_similar_tool_accepts ... ok
+test search::hybrid::tests::stemming_connects_word_forms ... ok
+test search::hybrid::tests::streamed_cosines_keep_shared_vectors_and_skip_missing_and_orphan_vectors ... ok
+test search::hybrid::tests::threshold_drops_results_below_it_and_is_reported ... ok
+test search::hybrid::tests::unknown_module_or_file_is_invalid_params ... ok
+test search::params::tests::agent_threshold_is_clamped_to_the_users_range ... ok
+test search::params::tests::defaults_follow_the_settings_without_a_rerank ... ok
+test search::params::tests::explicit_values_inside_the_limits_are_applied ... ok
+test search::params::tests::rerank_changes_result_count_threshold_and_score_kind ... ok
+test search::params::tests::users_own_threshold_is_not_clamped ... ok
+test search::params::tests::values_over_the_limits_are_clamped_and_reported ... ok
+test search::params::tests::zero_results_is_raised_to_one ... ok
+test search::vector_top::tests::matches_full_sort_and_keeps_text_scores_outside_top ... ok
+test secrets::tests::environment_overrides_the_store_only_when_set ... ok
+test secrets::tests::key_round_trips_and_a_missing_one_is_none ... ok
+test secrets::tests::no_name_and_no_env_means_no_key ... ok
+test settings::tests::a_broken_project_file_fails_the_whole_load ... ok
+test settings::tests::agent_limits_the_wrong_way_round_are_invalid ... ok
+test settings::tests::an_unreadable_path_is_a_read_error ... ok
+test settings::tests::broken_toml_is_a_parse_error_naming_the_file ... ok
+test settings::tests::edit_pause_defaults_to_thirty_seconds_and_project_overrides_it ... ok
+test settings::tests::edit_pause_over_an_hour_is_an_error_and_unknown_indexing_keys_warn ... ok
+test settings::tests::embed_provider_fields_are_checked_on_read ... ok
+test settings::tests::empty_files_give_the_factory_values ... ok
+test settings::tests::every_catalog_model_and_both_remote_kinds_are_accepted ... ok
+test settings::tests::factory_values_match_the_settings_doc ... ok
+test settings::tests::independent_devices_migrate_without_overriding_explicit_preferences ... ok
+test settings::tests::integers_are_accepted_where_scores_are_floats ... ok
+test settings::tests::lmstudio_embed_settings_and_independent_rerank ... ok
+test settings::tests::load_reads_both_files_and_merges_their_warnings ... ok
+test settings::tests::local_openai_source_is_read_from_its_kebab_name ... ok
+test settings::tests::missing_files_mean_factory_values_and_are_not_created ... ok
+test settings::tests::ollama_embed_settings_and_independent_rerank ... ok
+test settings::tests::project_does_not_change_models_or_device ... ok
+test settings::tests::project_file_is_validated_like_the_user_file ... ok
+test settings::tests::project_keys_override_user_keys_one_by_one ... ok
+test settings::tests::rerank_provider_fields_are_checked_only_when_rerank_is_enabled ... ok
+test settings::tests::scores_outside_zero_to_one_are_invalid ... ok
+test settings::tests::tei_settings_support_independent_embed_and_rerank ... ok
+test settings::tests::unknown_keys_are_warned_about_and_ignored ... ok
+test settings::tests::unload_minutes_are_read_per_model_and_kept_out_of_model_settings ... ok
+test settings::tests::unload_minutes_over_a_week_are_invalid_even_for_disabled_rerank ... ok
+test settings::tests::user_file_overrides_only_the_keys_it_sets ... ok
+test settings::tests::wrong_types_and_unknown_choices_are_parse_errors ... ok
+test settings::tests::zero_counts_and_sizes_are_invalid ... ok
+test storage::index::tests::changed_stem_version_rebuilds_fts_from_chunks ... ok
+test storage::index::tests::compatibility_follows_the_fingerprint ... ok
+test storage::index::tests::delete_document_removes_chunks_and_fts_rows ... ok
+test storage::index::tests::layout_roundtrips_and_is_absent_until_written ... ok
+test storage::index::tests::newer_schema_is_not_opened ... ok
+test storage::index::tests::open_creates_file_with_schema_and_wal ... ok
+test storage::index::tests::orphan_vectors_are_removed_and_shared_ones_stay ... ok
+test storage::index::tests::replace_document_is_atomic ... ok
+test storage::index::tests::replace_document_replaces_old_version_and_its_fts_rows ... ok
+test storage::index::tests::replace_document_writes_chunks_fts_and_normalized_vectors ... ok
+test storage::stem::tests::english_forms_share_a_stem ... ok
+test storage::stem::tests::mixed_and_numeric_words_stay_as_they_are ... ok
+test storage::stem::tests::punctuation_splits_words_and_whitespace_collapses ... ok
+test storage::stem::tests::russian_forms_share_a_stem ... ok
+test tests::blake3_hash_is_stable ... ok
+test tests::bundled_sqlite_has_fts5 ... ok
+test tests::default_model_is_bge_m3 ... ok
+test tests::russian_stemmer_works ... ok
+
+test result: ok. 339 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 61.87s
+
+     Running tests\builtin_embedder.rs (C:/bt/bars\debug\deps\builtin_embedder-35c7a3d2780c7ac5.exe)
+
+running 4 tests
+test auto_accelerator_gives_the_same_vectors_as_cpu ... ok
+test cpu_embeddings_follow_meaning_and_keep_order ... ok
+test indexes_a_small_project_with_bge_m3 ... ok
+test new_topics_owner_pair_merges_with_real_bge_m3 ... ignored, приёмка ISS-19 на уже скачанной bge-m3, без скачивания
+
+test result: ok. 3 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 45.72s
+
+     Running tests\builtin_models.rs (C:/bt/bars\debug\deps\builtin_models-14fa3452a3a3c2a3.exe)
+
+running 3 tests
+test builtin_rerank_scores_are_probabilities_in_input_order ... ok
+test nomic_embed_v2_moe_through_candle ... ok
+test qwen3_embedding_through_candle ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 34.53s
+
+     Running tests\chunking_corpus.rs (C:/bt/bars\debug\deps\chunking_corpus-d9b8981fcac0e252.exe)
+
+running 3 tests
+test corpus_is_deterministic ... ok
+test corpus_with_default_params ... ok
+test corpus_with_small_params ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.42s
+
+     Running tests\index_corpus.rs (C:/bt/bars\debug\deps\index_corpus-38fd40d9a851a200.exe)
+
+running 1 test
+test indexes_the_bars_docs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 22.28s
+
+     Running tests\outline_corpus.rs (C:/bt/bars\debug\deps\outline_corpus-c90cb5eb002f9dce.exe)
+
+running 2 tests
+test outline_lines_match_the_files_and_the_chunker ... ok
+test t26_scenarios_on_a_real_document ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
+
+     Running tests\search_corpus.rs (C:/bt/bars\debug\deps\search_corpus-32634b472bcb2c94.exe)
+error: test failed, to rerun pass `-p bars-core --test search_corpus`
+
+Caused by:
+  could not execute process `C:/bt/bars\debug\deps\search_corpus-32634b472bcb2c94.exe` (never executed)
+
+Caused by:
+  Процесс не может получить доступ к файлу, так как этот файл занят другим процессом. (os error 32)
+     Running tests\walk_corpus.rs (C:/bt/bars\debug\deps\walk_corpus-de8d193e8e45c73e.exe)
+
+running 1 test
+test walks_the_bars_docs_and_feeds_chunking ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s
+
+     Running unittests src\lib.rs (C:/bt/bars\debug\deps\bars_graph-89541cf3359f06c5.exe)
+
+running 35 tests
+test links::moves::tests::broken_link_becoming_valid_is_warning_not_rewritten ... ok
+test links::moves::tests::capture_of_unmoved_target_is_repaired_and_warned ... ok
+test links::moves::tests::folder_internal_links_stay_and_crossing_links_change ... ok
+test links::moves::tests::preserves_markup_code_titles_aliases_and_fragments ... ok
+test links::moves::tests::protects_unrelated_same_name_and_reports_capture ... ok
+test links::moves::tests::references_edit_definition_once_keep_label_and_title ... ok
+test links::moves::tests::target_with_wiki_delimiter_refuses_invalid_plan ... ok
+test links::tests::code_url_and_frontmatter_are_not_links ... ok
+test links::tests::fragments_and_own_section_links ... ok
+test links::tests::parses_inline_reference_and_wiki_links_with_lines ... ok
+test links::tests::percent_encoded_paths_resolve ... ok
+test links::tests::resolves_paths_names_and_broken ... ok
+test links::tests::shared_window_link_fixtures ... ok
+test physical::tests::document_budget_walks_modules_round_robin_and_marks_truncation ... ok
+test physical::tests::document_similarity_is_undirected_max_and_scoped ... ok
+test physical::tests::edge_budget_drops_weakest_similarity_after_links_and_degrades_layer ... ok
+test physical::tests::expansion_adds_chunks_in_order_and_cap_does_not_evict_documents ... ok
+test physical::tests::links_keep_direction_collapse_repeats_and_skip_self_loops ... ok
+test physical::tests::slice_is_deterministic_and_within_byte_limit ... ok
+test physical::tests::stale_snapshot_and_bad_limits_are_rejected ... ok
+test query_slice::tests::byte_truncation_measures_the_complete_serialized_reply ... ok
+test query_slice::tests::changed_or_missing_results_are_ghosts_without_fresh_edges ... ok
+test query_slice::tests::depth_two_fanout_and_determinism ... ok
+test query_slice::tests::grouped_results_keep_absolute_score_and_precede_environment ... ok
+test query_slice::tests::hard_edge_and_byte_limits_include_query_metadata ... ok
+test query_slice::tests::invalid_snapshot_params_empty_results_and_cancellation ... ok
+test query_slice::tests::related_without_physical_connection_stays_in_list_without_query_score ... ok
+test query_slice::tests::scoped_neighbour_beyond_physical_slice_and_all_inner_edges ... ok
+test query_slice::tests::zero_depth_keeps_result_to_result_edges_without_environment ... ok
+test source::tests::edit_changes_revision_snapshot_and_does_not_reuse_another_heading ... ok
+test source::tests::outside_paths_and_invalid_utf8_boundaries_are_not_facts ... ok
+test source::tests::polarity_condition_and_link_are_distinct ... ok
+test source::tests::source_offsets_reference_links_code_and_duplicate_anchors ... ok
+test source::tests::wikilink_with_equal_names_prefers_folder_of_source ... ok
+test source::tests::wikilinks_resolve_by_name_path_and_alias_outside_code ... ok
+
+test result: ok. 35 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running tests\acceptance.rs (C:/bt/bars\debug\deps\acceptance-aeea3b22b343609d.exe)
+
+running 20 tests
+test communities_separate_topics_inside_one_module_and_recompute_under_scope ... ok
+test context_budget_trims_extra_proofs_before_dropping_roles ... ok
+test context_profiles_select_roles_and_reject_silent_ignored_inputs ... ok
+test cr_frontmatter_is_not_a_semantic_fact_and_terminal_newline_is_not_next_line ... ok
+test document_projection_keeps_all_evidence_and_first_page_has_edges ... ok
+test expensive_read_operations_observe_cancellation_and_work_limits ... ok
+test parsing_cancellation_stops_before_publishing_any_snapshot ... ok
+test real_pronoun_clause_is_not_a_reversed_verification_fact ... ok
+test refs_scope_ambiguity_cursor_and_envelope_are_checked ... ok
+test s1_positive_negative_conditional_impact ... ok
+test s2_positive_negative_conditional_paths ... ok
+test s3_positive_negative_budgeted_context ... ok
+test s4_positive_negative_and_condition_are_not_interchangeable ... ok
+test s5_explicit_supersession_only_not_newer_date ... ok
+test s6_whole_scope_empty_topic_and_filtered_topics ... ok
+test s7_two_hops_no_path_and_limited_chain ... ok
+test s8_structural_defect_valid_link_and_partial_semantic_audit ... ok
+test structural_paths_remain_available_before_semantic_enrichment ... ok
+test uncertain_operands_abstain_without_losing_source_evidence ... ok
+test unrelated_edges_do_not_exhaust_path_budget ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests\extraction.rs (C:/bt/bars\debug\deps\extraction-234291fc2b539d94.exe)
+
+running 6 tests
+test ambiguous_aliases_short_names_case_and_code_blocks_do_not_merge ... ok
+test chain_is_extracted_across_files_with_alias_declaration_proof ... ok
+test cleaned_names_preserve_paired_code_and_do_not_swallow_other_clauses ... ok
+test negation_and_conditions_belong_to_the_assertion ... ok
+test october_census_keeps_supported_facts_and_corrects_confirmed_errors ... ok
+test requires_is_only_a_legacy_input_filter_and_warns ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\storage.rs (C:/bt/bars\debug\deps\storage-714ceffa50e80272.exe)
+
+running 14 tests
+test diagnostics_and_pause_survive_schema_reopen_without_changing_snapshot ... ok
+test disabled_layers_do_not_lower_aggregate_and_partial_is_not_stale ... ok
+test failed_file_is_excluded_but_manifest_still_guards_late_publication ... ok
+test freshness_completeness_and_job_are_independent_and_old_snapshot_is_explicit ... ok
+test independent_evidence_survives_source_deletion ... ok
+test interrupted_job_keeps_previous_consistent_snapshot_and_bad_quote_never_publishes ... ok
+test legacy_layers_load_without_writes_and_missing_vector_fingerprint_is_stale ... ok
+test legacy_similarity_warning_is_read_as_plain_text ... ok
+test load_deadline_does_not_return_partial_data_or_leave_sqlite_interrupted ... ok
+test method_change_invalidates_cached_snapshot_even_with_unchanged_sources ... ok
+test migration_roundtrip_preserves_embedding_schema_and_data ... ok
+test not_ready_messages_are_plain_russian_without_debug_output ... ok
+test text_mutation_invalidates_evidence_and_late_publish_rolls_back ... ok
+test vector_model_change_marks_similarity_and_aggregate_stale ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running unittests src\lib.rs (C:/bt/bars\debug\deps\bars_mcp-3bf191a2b8d7365c.exe)
+
+running 5 tests
+test render::tests::english_document_framing_preserves_numbered_source ... ok
+test render::tests::english_search_framing_preserves_source_language ... ok
+test tests::model_loading_is_retried_until_the_model_answers ... ok
+test tests::model_loading_past_the_wait_is_returned_to_the_agent ... ok
+test tests::other_errors_are_not_retried ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running unittests src\main.rs (C:/bt/bars\debug\deps\bars_mcp-e734461b108a8691.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\mcp.rs (C:/bt/bars\debug\deps\mcp-846e4a39c970c109.exe)
+
+running 15 tests
+test agent_cannot_consent_to_reindex_after_model_change ... ok
+test all_graph_tools_and_explicit_search_modes_use_real_worker_dtos ... ok
+test connection_to_the_worker_lives_across_calls ... ok
+test default_format_is_text_with_explicit_delimiters ... ok
+test disk_read::disk_reads_bounded_skips_and_parallel_clients ... ok
+test disk_read::disk_reads_freshness_continuation_scope_and_history ... ok
+test first_tool_call_starts_the_worker_and_all_six_tools_answer ... ok
+test history_parallel_connections_repeat_and_collection_controls ... ok
+test history_preserves_original_missing_null_zero_and_excludes_payloads ... ok
+test initialize_and_tool_list_do_not_touch_the_worker ... ok
+test project_is_resolved_by_session_cwd_and_explicit_project_wins ... ok
+test proxy_has_no_heavy_dependencies ... ok
+test real_binary_answers_initialize_without_a_worker_and_exits_on_eof ... ok
+test two_test_workers_with_same_label_have_separate_registries ... ok
+test unreachable_worker_is_a_readable_tool_error ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 19.66s
+
+     Running unittests src\lib.rs (C:/bt/bars\debug\deps\bars_protocol-f12123c6301f7c73.exe)
+
+running 58 tests
+test client::tests::different_build_warns_with_both_ids ... ok
+test client::tests::same_or_unknown_build_is_silent ... ok
+test client::tests::worker_without_build_field_warns ... ok
+test disk_read::tests::disk_read_admission_does_not_open_window_methods ... ok
+test endpoint::tests::current_endpoint_matches_the_platform ... ok
+test endpoint::tests::suffix_is_cleaned_of_path_characters ... ok
+test error::tests::bars_error_carries_kind_and_extra_data ... ok
+test error::tests::codes_and_names_follow_the_table ... ok
+test error::tests::exit_codes_follow_the_table ... ok
+test error::tests::standard_error_has_no_data ... ok
+test framing::tests::crlf_is_trimmed_and_empty_line_is_a_line ... ok
+test framing::tests::disconnect_in_the_middle_of_a_line_is_unexpected_eof ... ok
+test framing::tests::invalid_utf8_is_invalid_data ... ok
+test framing::tests::limit_holds_without_a_newline ... ok
+test framing::tests::line_over_the_limit_is_invalid_data ... ok
+test framing::tests::line_split_across_writes_is_assembled ... ok
+test framing::tests::two_lines_then_eof ... ok
+test framing::tests::write_line_adds_the_newline_once ... ok
+test instruction::tests::mcp_config_is_valid_json_with_an_empty_args_list ... ok
+test instruction::tests::text_names_both_executables_and_forbids_consent ... ok
+test jsonrpc::tests::broken_json_is_parse_error_with_null_id ... ok
+test jsonrpc::tests::empty_response_is_an_error ... ok
+test jsonrpc::tests::invalid_request_keeps_the_id_when_it_is_readable ... ok
+test jsonrpc::tests::json_that_is_not_a_call_is_invalid_request ... ok
+test jsonrpc::tests::missing_params_are_allowed ... ok
+test jsonrpc::tests::newline_inside_text_stays_escaped ... ok
+test jsonrpc::tests::request_is_one_line ... ok
+test jsonrpc::tests::response_roundtrip_and_into_result ... ok
+test launch::tests::launch_failure_is_reported_as_unavailable ... ok
+test launch::tests::worker_that_never_comes_up_times_out_with_a_hint ... ok
+test methods::tests::every_method_roundtrips_through_a_request ... ok
+test methods::tests::heading_line_matches_the_outline_format ... ok
+test methods::tests::install_client_uses_hyphenated_name ... ok
+test methods::tests::model_runtime_carries_optional_precision_and_revision ... ok
+test methods::tests::only_the_documented_methods_are_open_to_mcp ... ok
+test methods::tests::optional_params_are_omitted_and_default_when_missing ... ok
+test methods::tests::project_delete_requires_confirmation_in_params_and_is_window_only ... ok
+test methods::tests::project_state_uses_snake_case ... ok
+test methods::tests::projects_accepts_missing_params ... ok
+test methods::tests::search_output_roundtrips ... ok
+test methods::tests::unknown_method_and_bad_params_have_standard_codes ... ok
+test methods::tests::window_methods_are_closed_on_the_channel ... ok
+test server::tests::broken_json_gets_an_error_and_the_next_call_still_works ... ok
+test server::tests::clean_close_between_lines_is_ok ... ok
+test server::tests::method_before_hello_is_protocol_mismatch_and_connection_stays ... ok
+test server::tests::original_context_survives_but_never_breaks_request_size ... ok
+test server::tests::oversized_line_gets_invalid_request_and_the_connection_closes ... ok
+test session::tests::any_method_before_hello_is_protocol_mismatch ... ok
+test session::tests::consent_flag_survives_only_from_cli ... ok
+test session::tests::foreign_protocol_version_is_rejected_with_update_hint ... ok
+test session::tests::hello_opens_the_session ... ok
+test session::tests::mcp_cannot_call_cli_only_methods ... ok
+test text::tests::crlf_does_not_leave_carriage_returns ... ok
+test text::tests::empty_text_has_no_lines ... ok
+test text::tests::lines_are_numbered_from_one ... ok
+test text_search::tests::text_search_is_window_only_and_defaults_roundtrip ... ok
+test winsid::tests::own_process_belongs_to_the_current_user ... ok
+test winsid::tests::system_process_is_not_ours_or_not_readable ... ok
+
+test result: ok. 58 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+     Running unittests src\lib.rs (C:/bt/bars\debug\deps\bars_worker-2d554603454c2edf.exe)
+
+running 312 tests
+test audits::tests::cancel_flags_the_running_audit_and_drops_a_waiting_one ... ok
+test audits::tests::delete_waits_for_actual_finish_without_a_timeout ... ok
+test audits::tests::deleting_project_cancels_everything_and_refuses_new_runs ... ok
+test audits::tests::one_audit_runs_per_project_and_others_wait ... ok
+test autostart::tests::repair_rewrites_a_stale_entry_but_not_a_missing_one ... ok
+test autostart::tests::set_is_idempotent ... ok
+test clients::project_gate::tests::installs_only_for_projects_known_to_claude_code_and_bars ... ok
+test clients::project_gate::tests::needs_the_bars_mcp_entry_and_keeps_foreign_hooks ... ok
+test clients::project_gate::tests::uninstall_removes_the_gate_and_keeps_foreign_hooks ... ok
+test clients::refresh_tests::absent_clients_and_skills_only_are_never_installed ... ok
+test clients::refresh_tests::config_conflict_rereads_foreign_edits_and_bounds_retries ... ok
+test clients::refresh_tests::invalid_config_preflight_prevents_partial_writes_and_continues_other_client ... ok
+test clients::refresh_tests::mcp_or_hook_alone_repairs_both_clients ... ok
+test clients::refresh_tests::normalizes_mixed_duplicate_hooks_preserving_foreign_groups ... ok
+test clients::refresh_tests::partial_write_report_survives_late_error_and_retry_finishes ... ok
+test clients::refresh_tests::skills_and_mcp_updates_do_not_reset_codex_hook ... ok
+test clients::refresh_tests::uninstall_and_refresh_share_the_lock_in_both_orders ... ok
+test clients::tests::claude_install_writes_mcp_hook_and_skills_keeping_foreign_entries ... ok
+test clients::tests::claude_uninstall_removes_only_bars ... ok
+test clients::tests::codex_install_edits_toml_keeping_comments_and_asks_hook_approval ... ok
+test clients::tests::install_is_idempotent_and_updates_moved_paths ... ok
+test clients::tests::stale_reports_only_installed_clients_with_old_paths ... ok
+test clients::tests::uninstall_does_not_create_files ... ok
+test clients::tests::unparsable_file_is_not_written ... ok
+test handler::graph_cache::tests::deadline_and_concurrent_readers_share_one_snapshot ... ok
+test handler::graph_cache::tests::frozen_graph_resource_probe ... ignored, явный замер на согласованном срезе индекса, без модели и рабочего профиля
+test handler::graph_cache::tests::lru_evicts_idle_slots_without_splitting_active_loads ... ok
+test handler::graph_cache::tests::replacement_and_registration_do_not_reuse_old_snapshot_or_lock_file ... ok
+test handler::graph_cache::tests::shared_snapshot_invalidates_on_status_sources_and_corruption ... ok
+test handler::graph_cache::tests::waiting_reader_times_out_without_discarding_shared_snapshot ... ok
+test handler::query_slice::tests::disk_changes_deletion_and_escape_are_distinct ... ok
+test handler::tests::audits::audit_scheduler_is_joined_by_worker_shutdown ... ok
+test handler::tests::audits::broken_links_run_compares_runs_and_never_touches_markdown ... ok
+test handler::tests::audits::contradictions_and_ignore_round_trip_without_changing_files ... ok
+test handler::tests::audits::deleting_a_project_removes_the_audit_store_and_keeps_foreign_files ... ok
+test handler::tests::audits::duplicates_run_splits_main_and_overlap_and_names_document_roles ... ok
+test handler::tests::audits::running_audit_is_returned_not_duplicated_and_other_kind_waits ... ok
+test handler::tests::audits::schedule_validates_modes_and_on_change_runs_only_after_changes ... ok
+test handler::tests::audits::window_methods_reject_relative_project_and_unknown_kind ... ok
+test handler::tests::cli_works_with_a_project_end_to_end ... ok
+test handler::tests::client_launches_the_worker_on_demand ... ok
+test handler::tests::concurrency::full_rebuild_keeps_status_window_controls_and_full_ipc_search_responsive ... ok
+test handler::tests::duplicates_are_audited_through_the_channel_for_cli_and_mcp ... ok
+test handler::tests::explicit_project_by_name_and_wrong_calls ... ok
+test handler::tests::external_models::a_failing_rerank_provider_leaves_the_search_without_rerank_and_says_why ... ok
+test handler::tests::external_models::lmstudio_embed_and_independent_http_rerank_serve_real_worker_search ... ok
+test handler::tests::external_models::local_openai_address_works_without_a_key ... ok
+test handler::tests::external_models::ollama_embed_and_independent_http_rerank_serve_real_worker_search ... ok
+test handler::tests::external_models::remote_embed_and_rerank_serve_search_with_the_key_from_the_store ... ok
+test handler::tests::external_models::switching_the_embed_model_asks_for_reindex_and_does_not_start_it ... ok
+test handler::tests::external_models::tei_native_embed_and_rerank_serve_full_worker_search ... ok
+test handler::tests::graph::graph_real_ipc_auto_update_refs_scope_and_read_only_mcp ... ok
+test handler::tests::graph::graph_search_fallback_is_explicit_and_hybrid_shape_unchanged ... ok
+test handler::tests::graph::stale_snapshot_status_and_context_share_revision_rules_over_ipc ... ok
+test handler::tests::history::mcp_history_ui_real_ipc_record_has_readable_input_and_result ... ok
+test handler::tests::history::mcp_history_worker_restart_leaves_interrupted_ipc_unknown_and_repeat_is_new ... ok
+test handler::tests::install_and_uninstall_work_through_the_channel ... ok
+test handler::tests::links::links_of_reads_fresh_files_and_rejects_relative_project ... ok
+test handler::tests::mcp_reads_but_cannot_register_or_consent ... ok
+test handler::tests::mcp_request_starts_observation_while_cli_status_does_not ... ok
+test handler::tests::mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion ... ok
+test handler::tests::new_topics::check_finds_materials_without_adding_demand_and_keeps_the_user_decision ... ok
+test handler::tests::new_topics::delete_clear_and_rename_do_not_resurrect_data ... ok
+test handler::tests::new_topics::diagnostics_and_non_empty_results_do_not_create_demand ... ok
+test handler::tests::new_topics::disabling_and_clearing_stop_late_and_new_records ... ok
+test handler::tests::new_topics::empty_check_leaves_the_topic_open_and_a_missing_scope_is_not_widened_silently ... ok
+test handler::tests::new_topics::empty_window_search_becomes_a_topic_and_repeats_merge ... ok
+test handler::tests::new_topics::explicit_merge_uses_both_revisions_and_keeps_observation_counts ... ok
+test handler::tests::new_topics::knowledge_check_does_not_replace_failed_rerank_with_cosine ... ok
+test handler::tests::new_topics::knowledge_check_reports_loading_rerank_as_incomplete_without_cosine_hits ... ok
+test handler::tests::new_topics::knowledge_check_requires_rerank_even_when_regular_search_disables_it ... ok
+test handler::tests::new_topics::manual_mark_creates_a_topic_with_a_non_empty_result_and_is_idempotent ... ok
+test handler::tests::new_topics::mcp_collects_and_cli_does_not_through_the_channel ... ok
+test handler::tests::new_topics::not_ready_index_does_not_create_a_gap ... ok
+test handler::tests::new_topics::project_deletion_removes_the_topics_database_and_blocks_late_writes ... ok
+test handler::tests::new_topics::scope_is_kept_and_a_repeated_request_id_is_counted_once ... ok
+test handler::tests::new_topics::topic_methods_are_window_only_and_need_an_exact_project ... ok
+test handler::tests::new_topics::window_context_is_taken_out_of_the_params ... ok
+test handler::tests::search_answers_model_loading_while_the_model_loads_and_works_after ... ok
+test handler::tests::search_with_the_real_bge_m3 ... ok
+test handler::tests::second_worker_on_the_same_channel_gives_way ... ok
+test handler::tests::session_start_registers_a_project_with_docs ... ok
+test handler::tests::similar_chunks_work_by_id_through_the_channel_for_cli_and_mcp ... ok
+test handler::tests::vanished_project_folder_is_unavailable ... ok
+test handler::tests::window::another_docs_root_is_written_and_indexed ... ok
+test handler::tests::window::autostart_is_off_by_default_and_toggles ... ok
+test handler::tests::window::autostart_set_is_refused_where_the_os_has_none ... ok
+test handler::tests::window::clients_status_follows_install_and_instruction_names_the_exes ... ok
+test handler::tests::window::models_info_reports_downloaded_files_and_download_starts ... ok
+test handler::tests::window::operation_events_window_dispatch_keeps_short_terminal_outcome_and_retry ... ok
+test handler::tests::window::physical_graph_slice_is_window_only_and_expands_chunks_on_the_same_snapshot ... ok
+test handler::tests::window::project_deletion_requires_confirmation_and_is_window_only ... ok
+test handler::tests::window::reranker_download_marker_follows_selected_precision ... ok
+test handler::tests::window::saving_settings_puts_projects_with_another_model_into_reindex_required ... ok
+test handler::tests::window::secret_is_stored_and_never_returned ... ok
+test handler::tests::window::settings_roundtrip_through_the_handler ... ok
+test handler::tests::window_gets_activity_tree_and_pause_from_the_handler ... ok
+test handler::tests::window_methods_are_closed_on_the_channel ... ok
+test handler::topics::tests::scope_round_trips_through_topic_scope ... ok
+test ipc::acl_windows::tests::current_sid_looks_like_a_sid ... ok
+test ipc::acl_windows::tests::sddl_has_exactly_one_protected_entry ... ok
+test ipc::listener::tests::pipe_dacl_allows_only_the_current_user ... ok
+test ipc::listener::tests::taken_name_is_already_running ... ok
+test ipc::tests::foreign_protocol_version_is_refused_with_an_update_hint ... ok
+test ipc::tests::hello_then_call_over_the_real_channel ... ok
+test ipc::tests::mcp_cannot_call_cli_only_methods ... ok
+test ipc::tests::no_worker_is_unavailable ... ok
+test ipc::tests::retry_connects_when_the_worker_comes_up_late ... ok
+test ipc::tests::ten_clients_at_once_and_a_dropped_one_changes_nothing ... ok
+test keybindings::tests::cloned_writers_do_not_lose_updates ... ok
+test keybindings::tests::revisions_platforms_unknown_ids_and_corruption ... ok
+test keybindings::tests::write_failure_preserves_profile_and_unknown_version_requires_reset ... ok
+test logging::tests::concurrent_read_write_and_corruption ... ok
+test logging::tests::only_bars_targets_and_supported_levels ... ok
+test logging::tests::process_fixture ... ok
+test logging::tests::restart_after_partial_line_preserves_next_event ... ok
+test logging::tests::rotate_restart_filter_and_bound ... ok
+test logging::tests::two_processes_keep_history_without_payloads ... ok
+test logging::tests::write_failure_is_visible_and_recovers ... ok
+test mcp_history::tests::allowlist_and_utf8_budget_do_not_capture_unrelated_payloads ... ok
+test mcp_history::tests::corrupt_or_future_database_is_not_replaced ... ok
+test mcp_history::tests::measured_storage_overhead_and_file_size ... ok
+test mcp_history::tests::migration_preserves_recent_legacy_without_inventing_attempts ... ok
+test mcp_history::tests::options_find_unloaded_sessions_and_bound_results ... ok
+test mcp_history::tests::paging_filters_summary_and_retention_use_the_same_scope ... ok
+test mcp_history::tests::refused_writer_is_visible_and_does_not_insert_a_false_success ... ok
+test mcp_history::tests::restart_disable_and_clear_never_resurrect_inflight_calls ... ok
+test mcp_history::tests::row_and_byte_limits_evict_oldest ... ok
+test mcp_history::tests::serialized_budget_and_writer_capacity_are_bounded ... ok
+test mcp_statistics::tests::corrupt_database_is_reported_and_preserved ... ok
+test mcp_statistics::tests::persists_and_groups_by_session_project_tool_with_errors ... ok
+test mcp_statistics::tests::utc_retention_and_row_cap ... ok
+test serve::tests::blocked_refresh_does_not_delay_ipc_and_shutdown_waits_for_it ... ok
+test serve::tests::default_worker_does_not_enable_client_profile_writes ... ok
+test settings_io::tests::a_broken_file_is_not_replaced ... ok
+test settings_io::tests::defaults_roundtrip_without_creating_a_file ... ok
+test settings_io::tests::docs_root_is_written_next_to_other_keys ... ok
+test settings_io::tests::indexing_pause_roundtrips_and_rejects_out_of_range_values ... ok
+test settings_io::tests::invalid_values_are_rejected_and_the_file_stays ... ok
+test settings_io::tests::ollama_settings_roundtrip_and_reject_rerank_without_writing ... ok
+test settings_io::tests::only_changed_keys_are_written_and_comments_survive ... ok
+test settings_io::tests::remote_provider_is_saved_and_cleared_keys_are_removed ... ok
+test settings_io::tests::settings_conflict_writes_nothing_and_retry_still_checks_revision ... ok
+test settings_io::tests::settings_patch_deletion_identical_edits_and_invalid_values ... ok
+test settings_io::tests::settings_patch_merges_external_fields_and_preserves_comments ... ok
+test settings_io::tests::settings_two_writers_cannot_silently_replace_each_other ... ok
+test settings_io::tests::shared_device_is_migrated_once_without_losing_other_keys ... ok
+test settings_io::tests::tei_settings_roundtrip_both_models ... ok
+test settings_io::tests::unload_minutes_are_written_per_model_and_checked ... ok
+test text_search::tests::text_search_limits_pages_and_changed_revision ... ok
+test text_search::tests::text_search_regex_errors_empty_matches_and_line_anchors ... ok
+test text_search::tests::text_search_scope_filter_and_exclusions ... ok
+test text_search::tests::text_search_snippet_keeps_match_after_long_unicode_prefix_and_cancels ... ok
+test text_search::tests::text_search_unicode_ranges_bom_crlf_and_disk_freshness ... ok
+test text_search::tests::text_search_worker_dispatch_without_index_and_model ... ok
+test worker::control::tests::cancel_wakes_a_paused_job ... ok
+test worker::control::tests::pause_blocks_until_resume ... ok
+test worker::control::tests::progress_follows_the_observer ... ok
+test worker::control::tests::without_pause_nothing_blocks_or_stops ... ok
+test worker::doc_queue::tests::an_edit_during_embedding_wakes_the_pause_timer_when_the_document_finishes ... ok
+test worker::doc_queue::tests::an_edit_during_indexing_makes_the_document_wait_again_once ... ok
+test worker::doc_queue::tests::an_interrupted_job_returns_the_rest_to_the_queue ... ok
+test worker::doc_queue::tests::discovery_preserves_waiting_errors_and_document_priority ... ok
+test worker::doc_queue::tests::job_completion_does_not_consume_an_edit_after_document_completion ... ok
+test worker::doc_queue::tests::only_the_document_being_processed_is_indexing ... ok
+test worker::doc_queue::tests::order_is_indexing_then_ready_by_source_then_waiting_then_errors ... ok
+test worker::doc_queue::tests::removing_a_project_leaves_the_others ... ok
+test worker::doc_queue::tests::repeated_edits_keep_one_record_and_restart_the_pause ... ok
+test worker::doc_queue::tests::success_removes_the_record_and_failure_keeps_it_with_the_reason ... ok
+test worker::doc_queue::tests::the_senior_source_wins ... ok
+test worker::doc_queue::tests::waiting_documents_are_taken_only_by_an_explicit_command ... ok
+test worker::doc_queue::tests::zero_pause_makes_the_record_ready_at_once ... ok
+test worker::graph::inputs::tests::failed_file_probe_stays_inside_document_root ... ok
+test worker::graph::inputs::tests::retry_is_bounded_and_grows ... ok
+test worker::model_lifecycle::tests::disabling_wakes_maintenance_and_shutdown_wakes_long_timer ... ok
+test worker::model_lifecycle::tests::settings_minutes_override_the_policy_and_zero_means_never ... ok
+test worker::model_lifecycle::tests::shutdown_joins_in_flight_blocking_drop ... ok
+test worker::model_lifecycle::tests::timer_releases_both_sessions_and_next_query_reloads ... ok
+test worker::model_lifecycle::tests::unload_after_zero_minutes_keeps_the_model_loaded ... ok
+test worker::models::resident::tests::busy_slot_and_recent_completion_survive_reaping ... ok
+test worker::models::resident::tests::expensive_drop_can_reenter_slot_without_deadlock ... ok
+test worker::models::tests::a_batch_already_waiting_for_the_lock_rechecks_query_priority ... ok
+test worker::models::tests::a_loaded_model_busy_with_a_batch_is_ready_not_loading ... ok
+test worker::models::tests::batch_size_is_four_for_builtin_and_from_settings_for_external ... ok
+test worker::models::tests::batches_are_cut_by_count_and_by_padded_size ... ok
+test worker::models::tests::builtin_ignores_http_options_without_allocating_duplicate_sessions ... ok
+test worker::models::tests::concurrent_queries_after_eviction_load_once ... ok
+test worker::models::tests::disabled_rerank_waits_for_busy_slot_and_keeps_embed ... ok
+test worker::models::tests::download_and_search_load_share_one_lock_and_one_load_at_a_time ... ok
+test worker::models::tests::download_uses_artifact_api_without_creating_an_inference_session ... ok
+test worker::models::tests::embedding_goes_in_batches_of_four_and_keeps_order ... ok
+test worker::models::tests::enabled_toggle_keeps_the_slot_for_background_retirement ... ok
+test worker::models::tests::external_embed_without_base_url_is_a_load_error ... ok
+test worker::models::tests::external_models_get_a_fingerprint_with_unknown_dimension ... ok
+test worker::models::tests::external_session_options_still_replace_the_correct_slot ... ok
+test worker::models::tests::failed_background_load_is_reported_to_the_next_search ... ok
+test worker::models::tests::failed_reload_keeps_slot_empty_and_can_be_retried ... ok
+test worker::models::tests::idle_sessions_reload_with_same_results_and_runtime_resets ... ok
+test worker::models::tests::indexing_batches_yield_to_a_waiting_query ... ok
+test worker::models::tests::model_is_not_loaded_until_the_first_embedding ... ok
+test worker::models::tests::provider_knows_every_builtin_model_and_its_fingerprint_without_loading ... ok
+test worker::models::tests::query_gets_the_model_between_batches ... ok
+test worker::models::tests::reaper_does_not_overlap_an_existing_load ... ok
+test worker::models::tests::reaper_leaves_old_readers_and_remote_models_alone ... ok
+test worker::models::tests::rerank_loads_in_the_background_too ... ok
+test worker::models::tests::rerank_model_is_loaded_lazily_and_shared_until_settings_change ... ok
+test worker::models::tests::rerank_that_cannot_load_is_an_error_from_the_call ... ok
+test worker::models::tests::same_settings_share_one_slot_and_a_new_model_replaces_it ... ok
+test worker::models::tests::search_does_not_wait_for_a_model_that_is_loading ... ok
+test worker::models::tests::stage17_devices_replace_only_their_own_slots_and_keep_active_readers ... ok
+test worker::models::tests::stage17_external_device_preference_does_not_replace_a_slot ... ok
+test worker::models::tests::stage17_old_loader_cannot_publish_into_a_new_slot ... ok
+test worker::models::tests::status_does_not_refresh_idle_but_inference_completion_does ... ok
+test worker::queue::tests::full_check_absorbs_file_list_and_priority_rises ... ok
+test worker::queue::tests::higher_priority_goes_first_then_oldest ... ok
+test worker::queue::tests::merge_keeps_the_place_in_line ... ok
+test worker::queue::tests::rebuild_absorbs_a_check_and_keeps_consent ... ok
+test worker::queue::tests::remove_takes_the_project_off ... ok
+test worker::queue::tests::repeated_job_for_a_waiting_project_merges ... ok
+test worker::registry::tests::add_persists_and_reloads ... ok
+test worker::registry::tests::broken_file_is_an_error_and_is_not_overwritten ... ok
+test worker::registry::tests::discover_prefers_registered_then_bars_then_git_then_cwd ... ok
+test worker::registry::tests::dots_in_the_path_are_normalized ... ok
+test worker::registry::tests::duplicate_name_needs_a_path ... ok
+test worker::registry::tests::has_markdown_needs_a_real_document ... ok
+test worker::registry::tests::missing_file_is_an_empty_registry ... ok
+test worker::registry::tests::nested_cwd_belongs_to_the_nearest_registered_project ... ok
+test worker::registry::tests::relative_path_is_refused ... ok
+test worker::registry::tests::remove_drops_the_entry_and_keeps_project_files ... ok
+test worker::registry::tests::resolve_by_path_and_by_name ... ok
+test worker::scan::tests::changed_settings_discard_scan_and_do_not_queue_a_stale_update ... ok
+test worker::scan::tests::deleting_a_project_cancels_scan_without_recreating_the_index ... ok
+test worker::scan::tests::explicit_check_promotes_an_inflight_background_scan ... ok
+test worker::scan::tests::model_mismatch_requires_consent_without_loading_a_model ... ok
+test worker::scan::tests::re_registration_does_not_merge_with_or_publish_an_old_scan ... ok
+test worker::scan::tests::scan_exposes_explicit_documents_while_indexing_is_paused ... ok
+test worker::scan::tests::scan_merges_cancels_and_ignores_the_update_pause ... ok
+test worker::tests::activity::inactive_checks_do_not_queue_unchanged_projects_or_embed ... ok
+test worker::tests::activity::mcp_renews_one_hour_without_scanning_each_request ... ok
+test worker::tests::activity::windows_switch_close_expire_and_preserve_other_observers ... ok
+test worker::tests::all_registered_projects_are_checked_at_start ... ok
+test worker::tests::broken_registry_stops_the_start_instead_of_being_replaced ... ok
+test worker::tests::broken_settings_leave_an_error_and_do_not_stop_the_worker ... ok
+test worker::tests::cancel_takes_a_waiting_project_off_the_queue ... ok
+test worker::tests::deaf_watcher_is_restarted_by_the_periodic_check ... ok
+test worker::tests::deletion::deletion_cancels_running_job_even_when_queue_is_paused ... ok
+test worker::tests::deletion::deletion_cleans_project_and_keeps_documents_other_projects_and_shared_settings ... ok
+test worker::tests::deletion::deletion_finishes_when_the_calling_task_disconnects ... ok
+test worker::tests::deletion::deletion_keeps_unknown_files_and_removes_missing_project_registration ... ok
+test worker::tests::deletion::deletion_rejects_junction_and_preserves_target ... ok
+test worker::tests::deletion::deletion_rejects_shared_user_home ... ok
+test worker::tests::deletion::deletion_rejects_unexpected_file_types_before_removing_config_and_allows_retry ... ok
+test worker::tests::deletion::deletion_reports_locked_file_and_allows_retry ... ok
+test worker::tests::deletion::deletion_waits_for_readers_and_does_not_revive_on_watch_tail_or_timer ... ok
+test worker::tests::doc_queue::a_deleted_document_leaves_the_index_without_a_pause ... ok
+test worker::tests::doc_queue::a_periodic_check_exposes_discovered_documents_and_retains_provider_errors ... ok
+test worker::tests::doc_queue::a_stream_of_edits_embeds_the_document_once_after_the_pause ... ok
+test worker::tests::doc_queue::a_waiting_document_survives_a_full_check_until_its_pause_ends ... ok
+test worker::tests::doc_queue::an_explicit_check_does_not_wait_for_the_pause ... ok
+test worker::tests::doc_queue::no_records_are_created_while_the_project_waits_for_a_reindex ... ok
+test worker::tests::doc_queue::stopping_a_project_drops_its_records ... ok
+test worker::tests::document_menu_check_queues_explicit_file_and_updates_index ... ok
+test worker::tests::existing_project_config_is_kept ... ok
+test worker::tests::file_change_reaches_the_index_without_manual_actions ... ok
+test worker::tests::folders::folder_action_serializes_settings_and_keeps_full_explicit_receipt ... ok
+test worker::tests::folders::folder_identity_changes_on_docs_root_roundtrip_and_reregistration ... ok
+test worker::tests::folders::folder_native_fixture ... ignored, только по явному BARS_FOLDER_FIXTURE в новом временном каталоге
+test worker::tests::full_reindex_waits_for_searches_before_swapping_the_file ... ok
+test worker::tests::full_reindex_with_stale_state_still_asks_for_consent ... ok
+test worker::tests::graph::automatic_graph_job_is_visible_and_duplicate_build_uses_same_id ... ok
+test worker::tests::graph::graph_bad_utf8_is_partial_and_recovery_reuses_index_vectors ... ok
+test worker::tests::graph::graph_cancel_does_not_drop_new_revision_merged_into_queued_job ... ok
+test worker::tests::graph::graph_cancel_queued_build_then_retry_and_rename_remove_old_evidence ... ok
+test worker::tests::graph::graph_late_cancel_with_new_file_error_does_not_restart_same_inputs ... ok
+test worker::tests::graph::graph_new_index_revision_after_stop_and_restart_updates_automatically ... ok
+test worker::tests::graph::graph_persisted_retry_releases_gates_and_manual_build_bypasses_delay ... ok
+test worker::tests::graph::graph_restart_recovers_interrupted_build_without_reembedding ... ok
+test worker::tests::graph::graph_scan_without_changes_repairs_stale_and_resumes_stopped_revision ... ok
+test worker::tests::graph::graph_signal_at_completion_publishes_latest_index_without_retry_delay ... ok
+test worker::tests::graph::graph_unchanged_file_error_skips_calculation_and_same_hash_recovery_rebuilds ... ok
+test worker::tests::graph::selected_layer_preserves_current_layers_but_never_reuses_old_revision ... ok
+test worker::tests::hourly_check_finds_changes_the_watcher_missed ... ok
+test worker::tests::hundreds_of_files_at_once_reach_the_index ... ok
+test worker::tests::missing_project_is_unavailable_and_returns_when_the_folder_does ... ok
+test worker::tests::model_change_requires_reindex_and_waits_for_consent ... ok
+test worker::tests::model_that_cannot_load_is_an_error_not_a_crash ... ok
+test worker::tests::moved_project_is_registered_anew_and_reuses_its_index ... ok
+test worker::tests::notification_download_failure_is_retained_and_cleared_on_retry ... ok
+test worker::tests::operations::operation_journal_retention_gap_epoch_and_terminal_immutability ... ok
+test worker::tests::operations::operation_model_failure_is_explicit_safe_and_retry_is_new_attempt ... ok
+test worker::tests::operations::operation_preparation_retry_after_terminal_failure_starts_a_new_attempt ... ok
+test worker::tests::operations::operation_queue_merge_cancel_retry_and_registration_identity ... ok
+test worker::tests::operations::operation_result_distinguishes_partial_cancel_and_unapplied_rebuild ... ok
+test worker::tests::operations::operation_short_job_delivers_its_own_applied_report_and_next_attempt_id ... ok
+test worker::tests::pause_freezes_the_queue_until_resume ... ok
+test worker::tests::queued_jobs_report_kind_and_priority ... ok
+test worker::tests::register_twice_keeps_one_entry ... ok
+test worker::tests::registered_project_is_indexed_without_permanent_watching ... ok
+test worker::tests::session_start_finds_the_root_and_registers_only_real_documentation ... ok
+test worker::tests::shutdown_does_not_hang_on_a_paused_queue ... ok
+test worker::tests::stale_rebuild_file_is_removed_at_start ... ok
+test worker::tests::summary_follows_the_queue_and_the_model ... ok
+test worker::tests::unregister_stops_everything_and_keeps_project_files ... ok
+test worker::timefmt::tests::epoch_start ... ok
+test worker::timefmt::tests::index_token_tells_apart_updates_within_one_second ... ok
+test worker::timefmt::tests::known_moments ... ok
+test worker::watcher::tests::everything_else_is_not ... ok
+test worker::watcher::tests::folders_and_the_root_are_relevant ... ok
+test worker::watcher::tests::hundreds_of_files_at_once_are_seen_or_reported_lost ... ok
+test worker::watcher::tests::markdown_files_are_relevant ... ok
+test worker::watcher::tests::missing_docs_root_cannot_be_watched ... ok
+test worker::watcher::tests::real_changes_reach_the_sink_in_one_batch ... ok
+
+test result: ok. 310 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 165.18s
+
+error: 1 target failed:
+    `-p bars-core --test search_corpus`
+
+Провалено: cargo test (код 101). Коммитить нельзя.
+
+Step              Code Seconds
+----              ---- -------
+cargo fmt --check    0       2
+cargo clippy         0     421
+cargo build          0     450
+cargo test         101     806
+

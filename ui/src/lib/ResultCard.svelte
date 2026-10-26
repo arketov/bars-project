@@ -24,13 +24,21 @@
   const crumbs = $derived(hit.heading_chain.split("/").join(" / "));
   const title = $derived(hit.heading_chain.split("/").pop() || hit.title);
 
+  function showInGraph() {
+    app.graphAnalysis = false;
+    app.graphPreview = null;
+    app.graphFocus = hit.path;
+    app.graphShowQuery = true;
+    app.view = "graph";
+  }
+
   async function copy() {
     await copyText(`${hit.path}:${hit.first_line}`);
     app.flash("Путь скопирован");
   }
 </script>
 
-<div class="card" class:open class:shown data-document-path={hit.path} data-document-line={hit.first_line} use:commandAdapter={{ 'result.open': { run: () => app.openDocument(hit) }, 'result.expand': { run: () => { toggled = !open; } } }}>
+<div class="card" class:open class:shown data-document-path={hit.path} data-document-line={hit.first_line} use:commandAdapter={{ 'result.graph': { run: showInGraph }, 'result.open': { run: () => app.openDocument(hit) }, 'result.expand': { run: () => { toggled = !open; } } }}>
   <div
     class="chead"
     role="button"
@@ -57,6 +65,7 @@
       <div class="text">{@html renderChunk(hit.text)}</div>
       <div class="cfoot">
         <button class="btn" onclick={() => app.openDocument(hit)}><Icon name="doc" size={14} />Открыть документ</button>
+        <button class="ghost" onclick={showInGraph}>В графе</button>
         <button class="ghost" onclick={copy}><Icon name="copy" size={14} />Копировать путь:строку</button>
         <button class="ghost" disabled={!hit.chunk_id || !project} title={hit.chunk_id ? "Найти соседей по смыслу" : "ID раздела отсутствует. Обновите воркер и повторите поиск."} aria-expanded={similarOpen} onclick={() => similarOpen = !similarOpen}>Похожие разделы</button>
         <span class="nums">строки {hit.first_line}–{hit.last_line} · {hit.score_kind} {decimal(hit.score)}</span>

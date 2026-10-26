@@ -141,6 +141,8 @@ async fn physical_graph_slice_is_window_only_and_expands_chunks_on_the_same_snap
             files: vec![],
         },
         hits: vec![bars_core::graph::query_slice::QueryHit {
+            source_hash: String::new(),
+            channel: Default::default(),
             path: alpha.path.clone(),
             title: alpha.label.clone(),
             heading: "Альфа".into(),
@@ -654,4 +656,79 @@ async fn autostart_set_is_refused_where_the_os_has_none() {
         .unwrap_err();
     assert_eq!(error.kind(), Some(ErrorKind::InvalidParams));
     worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn query_slice_keeps_historical_scope_without_widening() {
+    use bars_core::graph::{
+        LayerState, Scope,
+        query_slice::{QueryHit, QueryScoreKind, QuerySourceState},
+    };
+    use bars_protocol::{GraphQuerySliceParams, GraphStatus, GraphStatusParams, QuerySliceRequest};
+    let env = Window::new();
+    let root = env.project("query-history", "docs");
+    env.worker.register(&root).unwrap();
+    env.idle().await;
+    let target = target(&root);
+    let deadline = Instant::now() + Duration::from_secs(30);
+    loop {
+        let status: GraphStatus = env
+            .call(Call::GraphStatus(GraphStatusParams {
+                target: target.clone(),
+            }))
+            .await;
+        if status.state == LayerState::Ready {
+            break;
+        }
+        assert!(Instant::now() < deadline, "граф не построился: {status:?}");
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+    let request = QuerySliceRequest {
+        id: "old-search".into(),
+        text: "удалённый документ".into(),
+        scope: Scope {
+            modules: vec!["removed".into()],
+            files: vec!["removed/gone.md".into()],
+        },
+        hits: vec![QueryHit {
+            source_hash: "saved-revision".into(),
+            channel: Default::default(),
+            path: "docs/removed/gone.md".into(),
+            title: "Удалённый".into(),
+            heading: String::new(),
+            first: 1,
+            last: 1,
+            score: Some(0.8),
+        }],
+        score_kind: QueryScoreKind::Cosine,
+        depth: 1,
+        fanout: 4,
+        min_strength: 0.5,
+        max_nodes: 200,
+        max_edges: 800,
+        max_bytes: 262144,
+        snapshot: None,
+    };
+    let reply: bars_protocol::QueryGraphSlice = env
+        .call(Call::GraphQuerySlice(GraphQuerySliceParams {
+            target,
+            request,
+        }))
+        .await;
+    assert_eq!(
+        reply.results[0].status,
+        QuerySourceState::DeletedSinceSearch
+    );
+    assert!(reply.results[0].node.is_some());
+    assert_eq!(
+        reply.physical.totals.documents, 0,
+        "область не расширилась до всего проекта"
+    );
+    assert_eq!(
+        reply.physical.nodes.len(),
+        1,
+        "только сохранённый результат-призрак"
+    );
+    assert!(reply.physical.edges.is_empty());
+    env.worker.shutdown().await;
 }

@@ -1,0 +1,42 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.42
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+
+=== cargo fmt --check ===
+
+=== cargo clippy ===
+    Blocking waiting for file lock on build directory
+    Checking bars-protocol v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-protocol)
+    Checking bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+   Compiling bars-app v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-app)
+    Checking bars-cli v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-cli)
+    Checking bars-mcp v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-mcp)
+error[E0308]: mismatched types
+  --> crates\bars-worker\src\handler\query_slice.rs:82:56
+   |
+82 | ...w() >= deadline { Err(GraphError::TimedOut) } else { Ok(source_state(&project, hit)) } }).map_err(graph_error)
+   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Option<QuerySourceState>`, found `Result<_, GraphError>`
+   |
+   = note: expected enum `std::option::Option<bars_core::graph::query_slice::QuerySourceState>`
+              found enum `std::result::Result<_, bars_core::graph::GraphError>`
+
+error[E0308]: mismatched types
+  --> crates\bars-worker\src\handler\query_slice.rs:82:91
+   |
+82 | ... else { Ok(source_state(&project, hit)) } }).map_err(graph_error)
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Option<QuerySourceState>`, found `Result<Option<QuerySourceState>, _>`
+   |
+   = note: expected enum `Option<_>`
+              found enum `std::result::Result<Option<_>, _>`
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `bars-worker` (lib test) due to 2 previous errors
+
+Провалено: cargo clippy (код 101). Коммитить нельзя.
+
+Step              Code Seconds
+----              ---- -------
+cargo fmt --check    0       3
+cargo clippy       101     324
+

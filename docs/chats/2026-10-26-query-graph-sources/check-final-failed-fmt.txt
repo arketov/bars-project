@@ -1,0 +1,86 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.42
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+
+=== cargo fmt --check ===
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-worker\src\worker\mod.rs:1493:
+                     } else {
+                         self.wake.notified().await;
+                     }
+-                },
++                }
+             }
+         }
+     }
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-worker\src\worker\mod.rs:1510:
+         }
+     }
+ 
+-    async fn process(self: &Arc<Self>, path: PathBuf, job: Job, job_gate: Arc<tokio::sync::Mutex<()>>, _job: tokio::sync::OwnedMutexGuard<()>) {
++    async fn process(
++        self: &Arc<Self>,
++        path: PathBuf,
++        job: Job,
++        job_gate: Arc<tokio::sync::Mutex<()>>,
++        _job: tokio::sync::OwnedMutexGuard<()>,
++    ) {
+         let operation_id = job.operation_id;
+         let _pending = operations::PendingResult(Arc::clone(&self.models.operations), operation_id);
+         let rebuild = job.rebuild.is_some();
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-worker\src\worker\queue.rs:138:
+     }
+ 
+     /// Занятый проект остаётся в очереди; выбирается старшее доступное задание.
+-    pub fn pop_available<T>(&mut self, mut acquire: impl FnMut(&Path) -> Option<T>) -> Option<(PathBuf, Job, T)> {
+-        let mut candidates: Vec<_> = self
+-            .entries
+-            .iter()
+-            .enumerate()
+-            .collect();
+-        candidates.sort_by(|(_, a), (_, b)| b.job.priority.cmp(&a.job.priority).then(a.seq.cmp(&b.seq)));
+-        let (position, guard) = candidates.into_iter().find_map(|(position, entry)| {
+-            acquire(&entry.project).map(|guard| (position, guard))
+-        })?;
++    pub fn pop_available<T>(
++        &mut self,
++        mut acquire: impl FnMut(&Path) -> Option<T>,
++    ) -> Option<(PathBuf, Job, T)> {
++        let mut candidates: Vec<_> = self.entries.iter().enumerate().collect();
++        candidates
++            .sort_by(|(_, a), (_, b)| b.job.priority.cmp(&a.job.priority).then(a.seq.cmp(&b.seq)));
++        let (position, guard) = candidates
++            .into_iter()
++            .find_map(|(position, entry)| acquire(&entry.project).map(|guard| (position, guard)))?;
+         let entry = self.entries.remove(position);
+         Some((entry.project, entry.job, guard))
+     }
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-worker\src\worker\queue.rs:154:
+ 
+     #[cfg(test)]
+     fn pop(&mut self) -> Option<(PathBuf, Job)> {
+-        self.pop_available(|_| Some(())).map(|(path, job, ())| (path, job))
++        self.pop_available(|_| Some(()))
++            .map(|(path, job, ())| (path, job))
+     }
+ 
+     /// Снимает проект с очереди; `true`, если он там был.
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-worker\src\worker\scan.rs:273:
+                             let job = if report.full_check || paths.is_empty() {
+                                 Job::check(priority)
+                             } else {
+-                                Job::files(priority, paths.into_iter().map(|document| path.join(document)))
++                                Job::files(
++                                    priority,
++                                    paths.into_iter().map(|document| path.join(document)),
++                                )
+                             };
+                             inner.enqueue_for(&path, job, &projects);
+                         }
+
+Провалено: cargo fmt --check (код 1). Коммитить нельзя.
+
+Step              Code Seconds
+----              ---- -------
+cargo fmt --check    1       2
+

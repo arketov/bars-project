@@ -90,6 +90,8 @@ pub enum ScoreKind {
 /// Один результат поиска (Т-13).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SearchHit {
+    #[serde(default)]
+    pub source_hash: String,
     /// Непрозрачный ID чанка для `similar`; действует, пока не изменился документ чанка
     /// (`docs/features/search/maintenance-tools.md`).
     #[serde(default)]
@@ -1477,6 +1479,7 @@ mod tests {
     fn search_output_roundtrips() {
         let output = SearchOutput {
             results: vec![SearchHit {
+                source_hash: "hash".into(),
                 chunk_id: "7-0a1b2c3d".into(),
                 path: "docs/a.md".into(),
                 module: ".".into(),

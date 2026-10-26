@@ -1,0 +1,30 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.42
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+
+=== cargo fmt --check ===
+
+=== cargo clippy ===
+    Checking bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Checking bars-mcp v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-mcp)
+    Checking bars-cli v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-cli)
+    Checking bars-app v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-app)
+error: unused import: `SavedOutput`
+ --> crates\bars-worker\src\handler\tests\window.rs:9:62
+  |
+9 |     ModelDownloadParams, ModelsInfoOutput, ModelsInfoParams, SavedOutput, SecretOutput,
+  |                                                              ^^^^^^^^^^^
+  |
+  = note: `-D unused-imports` implied by `-D warnings`
+  = help: to override `-D warnings` add `#[allow(unused_imports)]`
+
+error: could not compile `bars-worker` (lib test) due to 1 previous error
+
+Провалено: cargo clippy (код 101). Коммитить нельзя.
+
+Step              Code Seconds
+----              ---- -------
+cargo fmt --check    0       4
+cargo clippy       101      41
+

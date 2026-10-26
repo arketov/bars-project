@@ -43,6 +43,7 @@ pub enum SearchError {
 /// Один результат (Т-13).
 #[derive(Debug, Clone, PartialEq)]
 pub struct SearchHit {
+    pub source_hash: String,
     pub chunk_id: i64,
     /// Непрозрачный ID чанка для `get_similar`; действует, пока не изменился документ чанка.
     pub public_id: String,
@@ -419,6 +420,7 @@ pub(super) fn load_hits(index: &Index, ids: &[i64]) -> Result<Vec<SearchHit>, Se
                     ordinal,
                     &embed_hash,
                 ),
+                source_hash: document_hash,
                 path,
                 module: row.get(1)?,
                 title: row.get(2)?,

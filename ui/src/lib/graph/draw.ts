@@ -155,6 +155,7 @@ export interface Scene {
   related: Set<number>;
   /** Узлы, отмеченные фильтром списка или поиском по узлам. */
   marked: Set<number>;
+  highlighted?: Set<number>;
   groups: { owner: number; shown: number; total: number }[];
   mini: boolean;
   /** Цвет модуля (идентификатор палитры) для узлов без назначенного цвета. */
@@ -262,7 +263,7 @@ export function draw(ctx: CanvasRenderingContext2D, scene: Scene): void {
   for (const d of lines) {
     const l = d.link;
     const kind = l.edge.kind;
-    const emphasised = incident(d) || chosenEdge(d);
+    const emphasised = incident(d) || chosenEdge(d) || d.ids.some(id => scene.highlighted?.has(id));
     const faded = dimOthers && !emphasised;
     const s = l.edge.neutral ? 0.5 : drawStrength(l.edge);
     const [ax, ay, bx, by] = lineEnds(d, cam);
@@ -308,7 +309,7 @@ export function draw(ctx: CanvasRenderingContext2D, scene: Scene): void {
     const r = radiusOf(n, cam);
     if (sx < -r - 20 || sy < -r - 20 || sx > w + r + 20 || sy > h + r + 20) continue;
     ctx.globalAlpha = isRelated(n) ? 1 : 0.3;
-    ctx.fillStyle = nodeFill(n, palette, scene.modules, scene.assigned);
+    ctx.fillStyle = n.node.ghost ? palette.bgCss : nodeFill(n, palette, scene.modules, scene.assigned);
     ctx.strokeStyle = palette.bgCss;
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -323,7 +324,8 @@ export function draw(ctx: CanvasRenderingContext2D, scene: Scene): void {
     }
     ctx.fill();
     ctx.stroke();
-    if (n.node.qrole === "result") {
+    if (n.node.qrole) {
+      ctx.setLineDash(n.node.qrole === "related" || n.node.ghost ? [3, 3] : []);
       // Результат поиска: кольцо цвета связи запроса.
       ctx.beginPath();
       ctx.arc(sx, sy, r + 3, 0, Math.PI * 2);
@@ -331,6 +333,7 @@ export function draw(ctx: CanvasRenderingContext2D, scene: Scene): void {
       ctx.lineWidth = 1.8;
       ctx.stroke();
     }
+    ctx.setLineDash([]);
     const chosen = selected?.type === "node" && selected.index === n.index;
     const hot = hoverNode === n.index;
     const marked = scene.marked.has(n.index);

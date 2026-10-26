@@ -25,6 +25,8 @@ export interface PLink {
   k: number;
 }
 
+export type SavedPositions = { id: string; x: number; y: number; pinned: boolean }[];
+
 interface Transport {
   post(message: ToPhysics): void;
   close(): void;
@@ -113,6 +115,31 @@ export class Layout {
   /** Идёт ли движение (по последней порции). */
   get active(): boolean {
     return this.#active;
+  }
+
+  save(): SavedPositions {
+    return this.nodes.map(p => ({ id: p.node.id, x: p.x, y: p.y, pinned: p.pinned }));
+  }
+
+  clear(): void {
+    this.cool();
+    this.#byIndex.clear();
+    this.#pins.clear();
+    this.nodes = [];
+    this.links = [];
+  }
+
+  restore(saved: SavedPositions): void {
+    const byId = new Map(saved.map(p => [p.id, p]));
+    this.cool();
+    for (const p of this.nodes) {
+      const previous = byId.get(p.node.id);
+      if (!previous) continue;
+      p.x = previous.x;
+      p.y = previous.y;
+      if (p.pinned !== previous.pinned) this.togglePin(p.index);
+    }
+    this.#transport.post({ t: "place", gen: this.#gen, positions: this.nodes.map(p => ({ index: p.index, x: p.x, y: p.y })) });
   }
 
   /** Заменяет видимый набор, сохраняя координаты неизменившихся узлов; новые появляются рядом с владельцем или соседом. */

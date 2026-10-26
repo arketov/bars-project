@@ -160,6 +160,7 @@ mod tests {
             }],
         };
         let h = SearchHit {
+            source_hash: String::new(),
             chunk_id: 1,
             public_id: "1-00000000".into(),
             path: "a.md".into(),

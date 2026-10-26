@@ -11,12 +11,35 @@ mod tests;
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct QueryHit {
+    #[serde(default)]
+    pub source_hash: String,
+    #[serde(default)]
+    pub channel: QueryChannel,
     pub path: String,
     pub title: String,
     pub heading: String,
     pub first: usize,
     pub last: usize,
     pub score: Option<f32>,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum QueryChannel {
+    #[default]
+    Primary,
+    Related,
+    Graph,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum QuerySourceState {
+    Ready,
+    NoGraphObject,
+    ChangedSinceSearch,
+    DeletedSinceSearch,
+    Unavailable,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -71,6 +94,9 @@ impl QuerySliceRequest {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct QuerySliceResult {
+    pub channel: QueryChannel,
+    pub status: QuerySourceState,
+    pub map_reason: Option<String>,
     pub path: String,
     pub title: String,
     pub rank: usize,
@@ -118,7 +144,17 @@ pub fn project(
     data: &Dataset,
     request: &QuerySliceRequest,
     inputs: LayerInputs,
-    mut cosine: impl FnMut(&str, &HashSet<String>) -> Result<Vec<DocumentPair>, GraphError>,
+    cosine: impl FnMut(&str, &HashSet<String>) -> Result<Vec<DocumentPair>, GraphError>,
+) -> Result<QueryGraphSlice, GraphError> {
+    project_checked(data, request, inputs, cosine, |_| Ok(None))
+}
+
+pub fn project_checked(
+    data: &Dataset,
+    request: &QuerySliceRequest,
+    inputs: LayerInputs,
+    cosine: impl FnMut(&str, &HashSet<String>) -> Result<Vec<DocumentPair>, GraphError>,
+    mut current: impl FnMut(&QueryHit) -> Result<Option<QuerySourceState>, GraphError>,
 ) -> Result<QueryGraphSlice, GraphError> {
     request.validate()?;
     if request
@@ -134,25 +170,55 @@ pub fn project(
         .filter(|s| request.scope.allows(&s.meta))
         .map(|s| (s.meta.reference.id.clone(), s))
         .collect();
-    let by_path: HashMap<_, _> = sources
+    let mut by_path: HashMap<_, _> = sources
         .values()
-        .map(|s| (s.meta.path.as_str(), s.meta.reference.id.clone()))
+        .map(|s| (s.meta.path.clone(), s.meta.reference.id.clone()))
         .collect();
-    let all: HashSet<String> = sources.keys().cloned().collect();
+    let mut all: HashSet<String> = sources.keys().cloned().collect();
     let mut results: Vec<QuerySliceResult> = Vec::new();
     for (rank, hit) in request.hits.iter().enumerate() {
+        let status = current(hit)?.unwrap_or_else(|| {
+            match by_path
+                .get(hit.path.as_str())
+                .and_then(|id| sources.get(id))
+            {
+                Some(source)
+                    if !hit.source_hash.is_empty() && source.meta.hash != hit.source_hash =>
+                {
+                    // Без проверки диска нельзя установить, какая версия новее.
+                    QuerySourceState::NoGraphObject
+                }
+                Some(_) => QuerySourceState::Ready,
+                None => QuerySourceState::NoGraphObject,
+            }
+        });
         if let Some(r) = results.iter_mut().find(|r| r.path == hit.path) {
-            if request.score_kind != QueryScoreKind::None {
+            if status != QuerySourceState::Ready {
+                r.status = status;
+            }
+            if r.channel == QueryChannel::Related && hit.channel == QueryChannel::Primary {
+                r.channel = QueryChannel::Primary;
+                r.rank = rank + 1;
+            }
+            if request.score_kind != QueryScoreKind::None
+                && r.channel == QueryChannel::Primary
+                && hit.channel == QueryChannel::Primary
+            {
                 r.score = r.score.into_iter().chain(hit.score).max_by(f32::total_cmp);
             }
             r.fragments.push(hit.clone());
         } else {
             results.push(QuerySliceResult {
+                channel: hit.channel,
+                status,
+                map_reason: None,
                 path: hit.path.clone(),
                 title: hit.title.clone(),
                 rank: rank + 1,
                 node: None,
-                score: if request.score_kind == QueryScoreKind::None {
+                score: if request.score_kind == QueryScoreKind::None
+                    || hit.channel != QueryChannel::Primary
+                {
                     None
                 } else {
                     hit.score
@@ -161,6 +227,36 @@ pub fn project(
             });
         }
     }
+    // Нельзя присоединять свежие связи к старой версии результата.
+    let mut ghosts = HashMap::new();
+    for r in &results {
+        if r.status != QuerySourceState::Ready {
+            let id = format!("ghost:{}", r.path);
+            if let Some(old) = by_path.insert(r.path.clone(), id.clone()) {
+                all.remove(&old);
+            }
+            ghosts.insert(id, r.clone());
+        }
+    }
+    // Связанные пакеты и окружение используют один точный расчёт для каждого
+    // результата. Финальные рёбра фильтруют его до выбранных документов.
+    let mut cached: HashMap<String, Vec<DocumentPair>> = HashMap::new();
+    let mut compute = cosine;
+    let mut cosine =
+        |id: &str, targets: &HashSet<String>| -> Result<Vec<DocumentPair>, GraphError> {
+            if let Some(pairs) = cached.get(id) {
+                return Ok(pairs
+                    .iter()
+                    .filter(|p| targets.contains(&p.b))
+                    .cloned()
+                    .collect());
+            }
+            let pairs = compute(id, targets)?;
+            if targets == &all {
+                cached.insert(id.into(), pairs.clone());
+            }
+            Ok(pairs)
+        };
     let result_ids: Vec<String> = results
         .iter()
         .filter_map(|r| by_path.get(r.path.as_str()).cloned())
@@ -203,12 +299,53 @@ pub fn project(
         }
     }
     let mut neighbours: HashMap<String, (Vec<String>, Vec<String>)> = HashMap::new();
-    let mut order = result_ids.clone();
+    let mut order: Vec<_> = result_ids
+        .iter()
+        .filter(|id| {
+            let r = results
+                .iter()
+                .find(|r| by_path.get(r.path.as_str()) == Some(*id))
+                .unwrap();
+            r.channel != QueryChannel::Related
+        })
+        .cloned()
+        .collect();
+    let primary_ids = order.clone();
+    // Related без физической связи остаётся в инспекторе, оценка не выдумывается.
+    for id in &result_ids {
+        if order.contains(id) {
+            continue;
+        }
+        let mut connected = primary_ids.iter().any(|root| {
+            links.contains_key(&(id.clone(), root.clone()))
+                || links.contains_key(&(root.clone(), id.clone()))
+        });
+        if !connected {
+            for root in &primary_ids {
+                if ghosts.contains_key(root) {
+                    continue;
+                }
+                if cosine(root, &all)?
+                    .iter()
+                    .any(|p| p.b == *id && p.cosine >= request.min_strength)
+                {
+                    connected = true;
+                    break;
+                }
+            }
+        }
+        if connected && request.depth > 0 {
+            order.push(id.clone());
+        }
+    }
     let mut selected: HashSet<String> = order.iter().cloned().collect();
-    let mut depths: HashMap<String, usize> = order.iter().map(|id| (id.clone(), 0)).collect();
+    let mut depths: HashMap<String, usize> = order
+        .iter()
+        .map(|id| (id.clone(), usize::from(!primary_ids.contains(id))))
+        .collect();
     let mut anchors: HashMap<String, String> =
         order.iter().map(|id| (id.clone(), id.clone())).collect();
-    let mut frontier = order.clone();
+    let mut frontier = primary_ids.clone();
     for depth in 1..=request.depth {
         for id in &frontier {
             let mut linked: Vec<String> = links
@@ -233,7 +370,11 @@ pub fn project(
             });
             linked.dedup();
             linked.truncate(request.fanout);
-            let mut pairs = cosine(id, &all)?;
+            let mut pairs = if ghosts.contains_key(id) {
+                vec![]
+            } else {
+                cosine(id, &all)?
+            };
             pairs.retain(|p| {
                 p.cosine.is_finite()
                     && p.cosine >= request.min_strength
@@ -268,6 +409,11 @@ pub fn project(
                 }
             }
         }
+        if depth == 1 {
+            next.extend(order.iter().filter(|id| depths[*id] == 1).cloned());
+            let mut seen = HashSet::new();
+            next.retain(|id| seen.insert(id.clone()));
+        }
         frontier = next;
     }
     let known_nodes = order.len() + 1;
@@ -277,11 +423,15 @@ pub fn project(
     } else {
         request.max_nodes.saturating_sub(1)
     };
+    let before_limits: HashSet<_> = order.iter().cloned().collect();
     order.truncate(cap);
     let selected: HashSet<String> = order.iter().cloned().collect();
     let mut similarities: BTreeMap<(String, String), f32> = BTreeMap::new();
     {
         for id in &order {
+            if ghosts.contains_key(id) {
+                continue;
+            }
             for pair in cosine(id, &selected)? {
                 if pair.cosine >= request.min_strength
                     && pair.a != pair.b
@@ -300,6 +450,22 @@ pub fn project(
     let nodes: Vec<PhysicalNode> = order
         .iter()
         .map(|id| {
+            if let Some(r) = ghosts.get(id) {
+                return PhysicalNode {
+                    id: id.clone(),
+                    revision: r.fragments[0].source_hash.clone(),
+                    kind: PhysicalNodeKind::Document,
+                    label: r.title.clone(),
+                    path: r.path.clone(),
+                    docs_path: r.path.clone(),
+                    module: String::new(),
+                    owner: id.clone(),
+                    chunks: 0,
+                    ordinal: None,
+                    first_line: 0,
+                    last_line: 0,
+                };
+            }
             let s = sources[id];
             PhysicalNode {
                 id: id.clone(),
@@ -350,9 +516,34 @@ pub fn project(
             .get(result.path.as_str())
             .and_then(|id| indices.get(id))
             .copied();
+        if result.node.is_none() {
+            result.map_reason = Some(
+                if by_path
+                    .get(result.path.as_str())
+                    .is_some_and(|id| before_limits.contains(id))
+                {
+                    if cap < request.max_nodes.saturating_sub(1) {
+                        "Предел числа связей карты".into()
+                    } else {
+                        "Предел числа узлов карты".into()
+                    }
+                } else if request.depth == 0 && result.channel == QueryChannel::Related {
+                    "Окружение скрыто на глубине 0".into()
+                } else {
+                    "Без физической связи с результатами".into()
+                },
+            );
+        }
     }
-    let query_edges = results.iter().filter(|r| r.node.is_some()).count();
-    let known_edges = edges.len() + result_ids.len();
+    let query_edges = results
+        .iter()
+        .filter(|r| r.node.is_some() && r.channel != QueryChannel::Related)
+        .count();
+    let known_edges = edges.len()
+        + results
+            .iter()
+            .filter(|r| r.channel != QueryChannel::Related)
+            .count();
     edges.sort_by(|a, b| {
         a.from
             .max(a.to)
@@ -366,11 +557,42 @@ pub fn project(
     for mode in ["links", "meaning", "all", "chunks"] {
         let mut visible: HashSet<String> = result_ids
             .iter()
-            .filter(|id| selected.contains(*id))
+            .filter(|id| {
+                selected.contains(*id)
+                    && results.iter().any(|r| {
+                        r.channel != QueryChannel::Related
+                            && by_path.get(r.path.as_str()) == Some(*id)
+                    })
+            })
             .cloned()
             .collect();
+        let mut related_visible = Vec::new();
+        for r in results
+            .iter()
+            .filter(|r| r.channel == QueryChannel::Related)
+        {
+            let Some(&index) = r.node.as_ref() else {
+                continue;
+            };
+            let connected = edges.iter().any(|e| {
+                let other = if e.from == index {
+                    e.to
+                } else if e.to == index {
+                    e.from
+                } else {
+                    return false;
+                };
+                let enabled = mode == "all"
+                    || mode == "links" && e.kind == PhysicalEdgeKind::MarkdownLink
+                    || mode == "meaning" && e.kind == PhysicalEdgeKind::DocumentSimilarity;
+                enabled && primary_ids.iter().any(|id| indices.get(id) == Some(&other))
+            });
+            if connected && let Some(id) = by_path.get(r.path.as_str()) {
+                related_visible.push(id.clone());
+            }
+        }
         let mut frontier: Vec<_> = visible.iter().cloned().collect();
-        for _ in 0..request.depth {
+        for step in 0..request.depth {
             let mut next = Vec::new();
             for id in frontier {
                 if let Some((link, sim)) = neighbours.get(&id) {
@@ -382,6 +604,13 @@ pub fn project(
                         if selected.contains(other) && visible.insert(other.clone()) {
                             next.push(other.clone());
                         }
+                    }
+                }
+            }
+            if step == 0 {
+                for id in &related_visible {
+                    if visible.insert(id.clone()) {
+                        next.push(id.clone());
                     }
                 }
             }
@@ -446,6 +675,7 @@ pub fn project(
         },
         query_edges: results
             .iter()
+            .filter(|r| r.channel != QueryChannel::Related)
             .filter_map(|r| {
                 r.node.map(|to| QueryResultEdge {
                     to,
@@ -460,6 +690,7 @@ pub fn project(
             data.snapshot.as_str(),
             "query-v1",
             request,
+            &results,
         ))?)
         .to_hex()
         .to_string(),
@@ -517,6 +748,7 @@ pub fn project(
         for r in &mut reply.results {
             if r.path == node.path {
                 r.node = None;
+                r.map_reason = Some("Предел размера карты в байтах".into());
             }
         }
     }

@@ -2,7 +2,7 @@ use super::errors::worker_error;
 use super::graph::graph_error;
 use super::{WorkerHandler, index_path, internal};
 use bars_core::graph::{
-    Dataset, Freshness, GraphError, LayerState, centroid, physical, query, query_slice,
+    Dataset, Freshness, GraphError, LayerState, centroid, physical, query_slice,
 };
 use bars_core::storage::Index;
 use bars_protocol::{GraphQuerySliceParams, QueryGraphSlice, RpcError};
@@ -60,7 +60,8 @@ impl WorkerHandler {
             let _gate = gate;
             let data = datasets.load(&project,&project_gate,deadline).map_err(graph_error)?;
             let request = params.request;
-            query::validate_scope(&data,&request.scope).map_err(graph_error)?;
+            // Фильтры относятся к завершённому поиску: файлы и модули могли исчезнуть.
+            // Их существование не проверяем по новому снимку и область не расширяем.
             if request.snapshot.as_ref().is_some_and(|s| s != &data.snapshot) {return Err(graph_error(GraphError::SnapshotExpired));}
             let stale = data.layers.values().any(|l| l.freshness == Freshness::Stale);
             let index = Index::open_read_only(&index_path(&project)).map_err(internal)?;
@@ -74,12 +75,84 @@ impl WorkerHandler {
                 document_similarity:layer(state, &format!("Точный cosine в области: {covered} из {} документов с готовыми представлениями{}",allowed.len(),if stale {"; граф устарел, близость ждёт обновления"} else {""})),
                 chunk_similarity:layer(LayerState::NotBuilt,"Отдельная проекция чанков"),
             };
-            query_slice::project(&data,&request,inputs,|id,targets| {
+            query_slice::project_checked(&data,&request,inputs,|id,targets| {
                 if Instant::now() >= deadline {return Err(GraphError::TimedOut);}
                 let Some(vectors) = &vectors else {return Ok(vec![])};
                 centroid::exact_document_pairs(vectors,id,targets,request.min_strength,|| Instant::now() >= deadline)
                     .map_err(|e| if matches!(e,GraphError::Cancelled) {GraphError::TimedOut} else {e})
-            }).map_err(graph_error)
+            }, |hit| { if Instant::now() >= deadline { Err(GraphError::TimedOut) } else { Ok(source_state(&project, hit)) } }).map_err(graph_error)
         }).await.map_err(internal)?
+    }
+}
+
+fn source_state(
+    project: &Path,
+    hit: &query_slice::QueryHit,
+) -> Option<query_slice::QuerySourceState> {
+    use query_slice::QuerySourceState as State;
+    if hit.source_hash.is_empty() {
+        return None;
+    }
+    let relative = Path::new(&hit.path);
+    if relative
+        .components()
+        .any(|c| !matches!(c, std::path::Component::Normal(_)))
+    {
+        return Some(State::Unavailable);
+    }
+    let path = project.join(relative);
+    let canonical = match path.canonicalize() {
+        Ok(path) => path,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+            return Some(State::DeletedSinceSearch);
+        }
+        Err(_) => return Some(State::Unavailable),
+    };
+    let Ok(root) = project.canonicalize() else {
+        return Some(State::Unavailable);
+    };
+    if !canonical.starts_with(root) {
+        return Some(State::Unavailable);
+    }
+    match std::fs::read_to_string(canonical) {
+        Ok(text) if blake3::hash(text.as_bytes()).to_hex().as_str() != hit.source_hash => {
+            Some(State::ChangedSinceSearch)
+        }
+        Ok(_) => None,
+        Err(_) => Some(State::Unavailable),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use query_slice::{QueryHit, QuerySourceState as State};
+    #[test]
+    fn disk_changes_deletion_and_escape_are_distinct() {
+        let project = tempfile::tempdir().unwrap();
+        std::fs::write(project.path().join("a.md"), "original").unwrap();
+        let mut hit = QueryHit {
+            source_hash: blake3::hash(b"original").to_hex().to_string(),
+            channel: Default::default(),
+            path: "a.md".into(),
+            title: String::new(),
+            heading: String::new(),
+            first: 1,
+            last: 1,
+            score: None,
+        };
+        assert_eq!(source_state(project.path(), &hit), None);
+        std::fs::write(project.path().join("a.md"), "changed").unwrap();
+        assert_eq!(
+            source_state(project.path(), &hit),
+            Some(State::ChangedSinceSearch)
+        );
+        hit.path = "absent.md".into();
+        assert_eq!(
+            source_state(project.path(), &hit),
+            Some(State::DeletedSinceSearch)
+        );
+        hit.path = "../outside.md".into();
+        assert_eq!(source_state(project.path(), &hit), Some(State::Unavailable));
     }
 }

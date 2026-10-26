@@ -1,0 +1,22 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.42
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+    Blocking waiting for file lock on build directory
+   Compiling onig v6.5.3
+   Compiling tokenizers v0.22.2
+   Compiling candle-core v0.11.0
+   Compiling ureq v3.4.2
+   Compiling llama-cpp-sys-2 v0.1.160
+   Compiling tokenizers v0.23.2
+   Compiling rusqlite v0.40.2
+   Compiling hf-hub v0.5.0
+   Compiling candle-nn v0.11.0
+   Compiling fastembed v7.1.1
+   Compiling llama-cpp-2 v0.1.160
+   Compiling bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 10m 11s
+     Running `C:/bt/bars\debug\examples\query_slice_probe.exe . docs/chats/2026-10-26-query-graph-sources/real-slices.json docs/chats/2026-10-26-query-graph-sources/real-search-hybrid.json docs/chats/2026-10-26-query-graph-sources/real-search-mix.json docs/chats/2026-10-26-query-graph-sources/real-search-graph.json`
+Error: Sqlite(SqliteFailure(Error { code: Unknown, extended_code: 1 }, Some("cannot start a transaction within a transaction")))
+error: process didn't exit successfully: `C:/bt/bars\debug\examples\query_slice_probe.exe . docs/chats/2026-10-26-query-graph-sources/real-slices.json docs/chats/2026-10-26-query-graph-sources/real-search-hybrid.json docs/chats/2026-10-26-query-graph-sources/real-search-mix.json docs/chats/2026-10-26-query-graph-sources/real-search-graph.json` (exit code: 1)

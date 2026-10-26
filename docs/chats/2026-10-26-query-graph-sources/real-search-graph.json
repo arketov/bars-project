@@ -1,0 +1,290 @@
+{
+  "results": [],
+  "applied": {
+    "results": 0,
+    "candidates": 0,
+    "rerank_candidates": 0,
+    "min_score": 0,
+    "score_kind": "cosine",
+    "clamped": false
+  },
+  "indexing": false,
+  "pending": 13,
+  "requested_mode": "graph",
+  "applied_mode": "graph",
+  "fallback_reason": null,
+  "related": null,
+  "graph_results": {
+    "layers": {
+      "semantic": {
+        "stale_reason": null,
+        "freshness": "current",
+        "completeness": "unknown",
+        "availability": "enabled",
+        "coverage": {
+          "unit": "documents",
+          "processed": 554,
+          "total": 554,
+          "missing": 0,
+          "comparisons": 0,
+          "reason": null
+        },
+        "source_revisions": {
+          "docs/features/window/global-search-design.md": "8a8c4697d16d761d90291dc4ddf2c0ccfb2fb74a6e1894d057c26399476dce2c"
+        },
+        "state": "partial",
+        "generation": "cac0257168a8ec792f8271d2a16d6d12387ea561fa560302d5a8a6e26adf0f62",
+        "fingerprint": "explicit-markdown-v6",
+        "processed": 554,
+        "total": 554,
+        "failed": 0
+      },
+      "similarity": {
+        "stale_reason": null,
+        "freshness": "current",
+        "completeness": "complete",
+        "availability": "enabled",
+        "coverage": {
+          "unit": "chunks",
+          "processed": 2442,
+          "total": 2442,
+          "missing": 0,
+          "comparisons": 2186031,
+          "reason": null
+        },
+        "source_revisions": {
+          "docs/features/window/global-search-design.md": "8a8c4697d16d761d90291dc4ddf2c0ccfb2fb74a6e1894d057c26399476dce2c"
+        },
+        "state": "ready",
+        "generation": "332152e993583c74c78c1b518875be5216afb8cb2a874b79440d1538df840223",
+        "fingerprint": "exact-pairs-f64-v1:k5:tau0.5",
+        "processed": 554,
+        "total": 554,
+        "failed": 0
+      },
+      "structure": {
+        "stale_reason": null,
+        "freshness": "current",
+        "completeness": "complete",
+        "availability": "enabled",
+        "coverage": {
+          "unit": "documents",
+          "processed": 554,
+          "total": 554,
+          "missing": 0,
+          "comparisons": 0,
+          "reason": null
+        },
+        "source_revisions": {
+          "docs/features/window/global-search-design.md": "8a8c4697d16d761d90291dc4ddf2c0ccfb2fb74a6e1894d057c26399476dce2c"
+        },
+        "state": "ready",
+        "generation": "28c2e2e4a194589183389c7242910dc472e8fea725cbb0a62b8639fb91887ede",
+        "fingerprint": "markdown-structure-v1",
+        "processed": 554,
+        "total": 554,
+        "failed": 0
+      }
+    },
+    "schema_version": 1,
+    "operation": "relations",
+    "scope": {
+      "modules": [],
+      "files": []
+    },
+    "snapshot": "d45034d0b4d6b49cf2e9f591cdd548fe0eb53159a329c1dda4eb803a60350610",
+    "generations": {
+      "method": "explicit-markdown-v6",
+      "semantic": "cac0257168a8ec792f8271d2a16d6d12387ea561fa560302d5a8a6e26adf0f62",
+      "similarity": "332152e993583c74c78c1b518875be5216afb8cb2a874b79440d1538df840223",
+      "structure": "28c2e2e4a194589183389c7242910dc472e8fea725cbb0a62b8639fb91887ede",
+      "text_structure": "d45034d0b4d6b49cf2e9f591cdd548fe0eb53159a329c1dda4eb803a60350610"
+    },
+    "layer_state": "partial",
+    "layer_states": {
+      "semantic": "partial",
+      "similarity": "ready",
+      "structure": "ready"
+    },
+    "coverage": {
+      "indexed": 554,
+      "processed": 554,
+      "failed": 0,
+      "denominator": 554,
+      "method": "indexed_source_documents; semantic completeness unknown",
+      "semantic_completeness": null
+    },
+    "requested": {
+      "operation": "relations",
+      "scope": {
+        "modules": [],
+        "files": []
+      },
+      "budgets": {
+        "max_depth": null,
+        "max_nodes": null,
+        "max_edges": null,
+        "max_fanout": null,
+        "max_paths": null,
+        "timeout_ms": null,
+        "max_bytes": null
+      },
+      "limit": 5,
+      "snapshot": null,
+      "cursor": null,
+      "query": "Какие требования и решения связаны с графом?",
+      "entity_ref": null,
+      "from": null,
+      "to": null,
+      "roots": [],
+      "predicates": [],
+      "direction": "both",
+      "polarity": null,
+      "qualifiers": {},
+      "view": "documents",
+      "local": false,
+      "include_paths": false,
+      "path_kind": "semantic",
+      "max_hops": null,
+      "max_paths": null,
+      "topic": null,
+      "whole_scope": false,
+      "analysis": "topics",
+      "grouping": "communities",
+      "roles": [],
+      "task_profile": null,
+      "token_budget": null,
+      "tokenizer_id": null,
+      "change_description": null
+    },
+    "applied": {
+      "max_depth": 2,
+      "max_nodes": 250,
+      "max_edges": 1000,
+      "max_fanout": 50,
+      "max_paths": 5,
+      "timeout_ms": 1000,
+      "max_bytes": 262144
+    },
+    "applied_limit": 5,
+    "clamped": false,
+    "items": [
+      {
+        "type": "relation",
+        "assertion": {
+          "id": "a616c58401a04727884241deb6d3066d6a9e036d5bd292c624bbe0bc6241b71b",
+          "from": "e4d8e4edc3e81298585bfef1adc4598906a3489df98a01b4359840982f2ebd6e",
+          "to": "b43df59803142b6a79cf956dc9fb661cb8de58912f652cd3f2c450f8a2a049a1",
+          "predicate": "depends_on",
+          "polarity": "positive",
+          "qualifiers": {
+            "kind": "precondition"
+          },
+          "origin": "explicit_rule",
+          "evidence": [
+            "d2ee31a199106ef70eda78636d4eb98db202ccb4fba66d3d5e72ccfabbe17766"
+          ]
+        }
+      }
+    ],
+    "nodes": [
+      {
+        "reference": {
+          "kind": "entity",
+          "id": "b43df59803142b6a79cf956dc9fb661cb8de58912f652cd3f2c450f8a2a049a1",
+          "revision": "5567259bda5225cda8cd6c907eb76734112f995015230421080ad36c3ebe59e1"
+        },
+        "label": "отдельного разрешения OQ-106/OQ-113",
+        "namespace": "//?/C:/Users/arketov/Desktop/bars-project:features/window/global-search-design.md",
+        "aliases": [],
+        "source_ids": [
+          "c579682a28dfd545e0e56be3f4c207461e9a0621651f3e590439f08f3f96e421"
+        ],
+        "evidence": [
+          "d2ee31a199106ef70eda78636d4eb98db202ccb4fba66d3d5e72ccfabbe17766"
+        ],
+        "roles": []
+      },
+      {
+        "reference": {
+          "kind": "entity",
+          "id": "e4d8e4edc3e81298585bfef1adc4598906a3489df98a01b4359840982f2ebd6e",
+          "revision": "5567259bda5225cda8cd6c907eb76734112f995015230421080ad36c3ebe59e1"
+        },
+        "label": "установленное приложение",
+        "namespace": "//?/C:/Users/arketov/Desktop/bars-project:features/window/global-search-design.md",
+        "aliases": [],
+        "source_ids": [
+          "c579682a28dfd545e0e56be3f4c207461e9a0621651f3e590439f08f3f96e421"
+        ],
+        "evidence": [
+          "d2ee31a199106ef70eda78636d4eb98db202ccb4fba66d3d5e72ccfabbe17766"
+        ],
+        "roles": []
+      }
+    ],
+    "sources": [
+      {
+        "reference": {
+          "kind": "document",
+          "id": "c579682a28dfd545e0e56be3f4c207461e9a0621651f3e590439f08f3f96e421",
+          "revision": "8a8c4697d16d761d90291dc4ddf2c0ccfb2fb74a6e1894d057c26399476dce2c"
+        },
+        "path": "docs/features/window/global-search-design.md",
+        "docs_path": "features/window/global-search-design.md",
+        "module": "features",
+        "title": "Глобальный поиск — дизайн окна и переходов",
+        "hash": "8a8c4697d16d761d90291dc4ddf2c0ccfb2fb74a6e1894d057c26399476dce2c"
+      }
+    ],
+    "assertions": [
+      {
+        "id": "a616c58401a04727884241deb6d3066d6a9e036d5bd292c624bbe0bc6241b71b",
+        "from": "e4d8e4edc3e81298585bfef1adc4598906a3489df98a01b4359840982f2ebd6e",
+        "to": "b43df59803142b6a79cf956dc9fb661cb8de58912f652cd3f2c450f8a2a049a1",
+        "predicate": "depends_on",
+        "polarity": "positive",
+        "qualifiers": {
+          "kind": "precondition"
+        },
+        "origin": "explicit_rule",
+        "evidence": [
+          "d2ee31a199106ef70eda78636d4eb98db202ccb4fba66d3d5e72ccfabbe17766"
+        ]
+      }
+    ],
+    "evidence": [
+      {
+        "id": "d2ee31a199106ef70eda78636d4eb98db202ccb4fba66d3d5e72ccfabbe17766",
+        "document": {
+          "kind": "document",
+          "id": "c579682a28dfd545e0e56be3f4c207461e9a0621651f3e590439f08f3f96e421",
+          "revision": "8a8c4697d16d761d90291dc4ddf2c0ccfb2fb74a6e1894d057c26399476dce2c"
+        },
+        "span": {
+          "start": 12591,
+          "end": 12711,
+          "first_line": 57,
+          "last_line": 57
+        },
+        "quote": " установленное приложение требует отдельного разрешения OQ-106/OQ-113.",
+        "source_hash": "8a8c4697d16d761d90291dc4ddf2c0ccfb2fb74a6e1894d057c26399476dce2c",
+        "method": "explicit-markdown-v6"
+      }
+    ],
+    "truncated": false,
+    "limit_reasons": [],
+    "next_cursor": null,
+    "warnings": [
+      "Явные правила не гарантируют полноту смысловых отношений; отсутствие связи не доказывает отсутствие проверки или зависимости"
+    ],
+    "method": "explicit-markdown-v6",
+    "elapsed_ms": 84,
+    "resolution": "resolved",
+    "candidates": [],
+    "missing_roles": [],
+    "budget_mode": "bytes",
+    "used_bytes": 6726
+  },
+  "_probe_query": "Какие требования и решения связаны с графом?"
+}

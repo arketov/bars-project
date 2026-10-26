@@ -23,6 +23,8 @@ fn request(data: &Dataset) -> QuerySliceRequest {
         text: "индекс".into(),
         scope: Scope::default(),
         hits: vec![QueryHit {
+            source_hash: String::new(),
+            channel: Default::default(),
             path: data.sources[0].meta.path.clone(),
             title: "Результат".into(),
             heading: "Раздел".into(),
@@ -99,6 +101,8 @@ fn grouped_results_keep_absolute_score_and_precede_environment() {
     second.first = 10;
     r.hits.push(second);
     r.hits.push(QueryHit {
+        source_hash: String::new(),
+        channel: Default::default(),
         path: data.sources[11].meta.path.clone(),
         ..r.hits[0].clone()
     });
@@ -126,6 +130,8 @@ fn zero_depth_keeps_result_to_result_edges_without_environment() {
     let mut r = request(&data);
     r.depth = 0;
     r.hits.push(QueryHit {
+        source_hash: String::new(),
+        channel: Default::default(),
         path: data.sources[7].meta.path.clone(),
         ..r.hits[0].clone()
     });
@@ -168,6 +174,8 @@ fn hard_edge_and_byte_limits_include_query_metadata() {
     let mut r = request(&data);
     r.hits = (0..8)
         .map(|i| QueryHit {
+            source_hash: String::new(),
+            channel: Default::default(),
             path: data.sources[i].meta.path.clone(),
             ..r.hits[0].clone()
         })
@@ -206,6 +214,8 @@ fn byte_truncation_measures_the_complete_serialized_reply() {
     r.max_bytes = 4096;
     r.hits = (0..8)
         .map(|i| QueryHit {
+            source_hash: String::new(),
+            channel: Default::default(),
             path: data.sources[i].meta.path.clone(),
             ..r.hits[0].clone()
         })
@@ -223,4 +233,126 @@ fn byte_truncation_measures_the_complete_serialized_reply() {
             .filter_map(|r| r.node)
             .all(|i| i < o.physical.nodes.len())
     );
+}
+
+#[test]
+fn changed_or_missing_results_are_ghosts_without_fresh_edges() {
+    let data = corpus(3);
+    let mut r = request(&data);
+    r.hits[0].source_hash = "old".into();
+    let reply = project(&data, &r, inputs(), pairs).unwrap();
+    assert_eq!(reply.results[0].status, QuerySourceState::NoGraphObject);
+    assert_eq!(reply.physical.nodes.len(), 1);
+    assert!(reply.physical.edges.is_empty());
+    assert_eq!(reply.query_edges.len(), 1);
+    r.hits[0].path = "docs/m/missing.md".into();
+    let reply = project(&data, &r, inputs(), pairs).unwrap();
+    assert_eq!(reply.results[0].status, QuerySourceState::NoGraphObject);
+    assert!(reply.results[0].node.is_some());
+    let reply = project_checked(&data, &r, inputs(), pairs, |_| {
+        Ok(Some(QuerySourceState::DeletedSinceSearch))
+    })
+    .unwrap();
+    assert_eq!(
+        reply.results[0].status,
+        QuerySourceState::DeletedSinceSearch
+    );
+    assert!(reply.physical.edges.is_empty());
+}
+
+#[test]
+fn related_without_physical_connection_stays_in_list_without_query_score() {
+    let data = corpus(3);
+    let mut r = request(&data);
+    let mut related = r.hits[0].clone();
+    related.path = data.sources[1].meta.path.clone();
+    related.channel = QueryChannel::Related;
+    related.score = Some(0.99);
+    r.hits.push(related.clone());
+    r.hits.push(related);
+    let reply = project(&data, &r, inputs(), |_, _| Ok(vec![])).unwrap();
+    assert_eq!(reply.results.len(), 2);
+    assert!(reply.results[1].node.is_none());
+    assert!(reply.results[1].score.is_none());
+    assert_eq!(reply.query_edges.len(), 1);
+    let reply = project(&data, &r, inputs(), pairs).unwrap();
+    assert!(reply.results[1].node.is_some());
+    assert_eq!(reply.query_edges.len(), 1);
+    assert!(reply.views["meaning"].contains(&reply.results[1].node.unwrap()));
+    assert_eq!(reply.depth_of[reply.results[1].node.unwrap()], 1);
+    r.depth = 0;
+    let reply = project(&data, &r, inputs(), pairs).unwrap();
+    assert!(reply.results[1].node.is_none());
+    assert!(
+        reply.results[1]
+            .map_reason
+            .as_ref()
+            .unwrap()
+            .contains("глубине 0")
+    );
+}
+
+#[test]
+fn omitted_neutral_results_report_the_edge_limit() {
+    let data = corpus(3);
+    let mut r = request(&data);
+    r.hits = (0..3)
+        .map(|i| QueryHit {
+            path: data.sources[i].meta.path.clone(),
+            ..r.hits[0].clone()
+        })
+        .collect();
+    r.score_kind = QueryScoreKind::None;
+    r.depth = 0;
+    r.max_edges = 1;
+    let reply = project(&data, &r, inputs(), pairs).unwrap();
+    assert_eq!(reply.query_edges.len(), 1);
+    assert_eq!(reply.known_edges, 3);
+    assert!(reply.physical.limit_reasons.iter().any(|r| r == "edges"));
+    assert!(
+        reply.results[1]
+            .map_reason
+            .as_ref()
+            .unwrap()
+            .contains("связей")
+    );
+}
+
+#[test]
+fn related_sources_are_environment_not_new_depth_zero_roots() {
+    let data = corpus(3);
+    let ids: Vec<_> = data
+        .sources
+        .iter()
+        .map(|s| s.meta.reference.id.clone())
+        .collect();
+    let mut r = request(&data);
+    r.hits.push(QueryHit {
+        path: data.sources[1].meta.path.clone(),
+        channel: QueryChannel::Related,
+        score: None,
+        ..r.hits[0].clone()
+    });
+    let chain = |id: &str, targets: &HashSet<String>| {
+        Ok(ids
+            .iter()
+            .enumerate()
+            .filter(|(i, b)| {
+                targets.contains(*b)
+                    && ((*i == 1 && (id == ids[0] || id == ids[2])) || (*i != 1 && id == ids[1]))
+            })
+            .map(|(_, b)| DocumentPair {
+                a: id.into(),
+                b: b.clone(),
+                cosine: 0.9,
+            })
+            .collect())
+    };
+    let one = project(&data, &r, inputs(), chain).unwrap();
+    assert_eq!(one.physical.nodes.len(), 2);
+    assert_eq!(one.views["meaning"].len(), 2);
+    r.depth = 2;
+    let two = project(&data, &r, inputs(), chain).unwrap();
+    assert_eq!(two.physical.nodes.len(), 3);
+    assert_eq!(two.views["meaning"].len(), 3);
 }

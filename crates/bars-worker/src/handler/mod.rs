@@ -1407,6 +1407,7 @@ fn score_kind(kind: bars_core::search::ScoreKind) -> ScoreKind {
 
 fn hit(hit: bars_core::search::SearchHit) -> SearchHit {
     SearchHit {
+        source_hash: hit.source_hash,
         chunk_id: hit.public_id,
         path: hit.path,
         module: hit.module,

@@ -1,0 +1,28 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.42
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+
+=== cargo fmt --check ===
+
+=== cargo clippy ===
+    Checking bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+error: `job` already exists, having another argument having almost the same name makes code comprehension and documentation more difficult
+    --> crates\bars-worker\src\worker\mod.rs:1516:9
+     |
+1516 |         job: Job,
+     |         ^^^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#duplicate_underscore_argument
+     = note: `-D clippy::duplicate-underscore-argument` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(clippy::duplicate_underscore_argument)]`
+
+error: could not compile `bars-worker` (lib) due to 1 previous error
+
+Провалено: cargo clippy (код 101). Коммитить нельзя.
+
+Step              Code Seconds
+----              ---- -------
+cargo fmt --check    0       2
+cargo clippy       101       3
+

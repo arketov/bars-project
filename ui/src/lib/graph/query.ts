@@ -1,4 +1,5 @@
 // Адаптер Rust QueryGraphSlice. Отбор окружения и бюджеты принадлежат воркеру.
+import type { GraphReply } from "../graph";
 import type { SearchHit } from "../types";
 import type { Mode } from "./model";
 import { SliceStore, type ServerSlice, type Slice } from "./slice";
@@ -18,6 +19,7 @@ export interface QueryInput {
   id: string;
   text: string;
   hits: SearchHit[];
+  bundle?: GraphReply | null;
   scope: { modules: string[]; files: string[] };
   scoreKind: ScoreKind;
   requested: RetrievalKind;
@@ -29,7 +31,7 @@ export interface QueryRequest {
   id: string;
   text: string;
   scope: QueryInput["scope"];
-  hits: { path: string; title: string; heading: string; first: number; last: number; score: number | null }[];
+  hits: { source_hash?: string; channel?: "primary" | "related" | "graph"; path: string; title: string; heading: string; first: number; last: number; score: number | null }[];
   score_kind: ScoreKind;
   depth: number;
   fanout: number;
@@ -41,7 +43,8 @@ export interface QueryRequest {
 }
 export function queryRequest(input: QueryInput, depth: number, minStrength: number, budget = QUERY_BUDGET, snapshot: string | null = null): QueryRequest {
   return { id: input.id, text: input.text, scope: input.scope,
-    hits: input.hits.map(h => ({ path: h.path, title: h.title, heading: h.heading_chain, first: h.first_line, last: h.last_line, score: input.scoreKind === "none" ? null : h.score })),
+    hits: [...input.hits.map(h => ({ source_hash: h.source_hash ?? "", channel: "primary" as const, path: h.path, title: h.title, heading: h.heading_chain, first: h.first_line, last: h.last_line, score: input.scoreKind === "none" ? null : h.score })),
+      ...(input.bundle?.sources ?? []).filter(s => !input.hits.some(h => h.path === s.path)).map(s => ({ source_hash: s.hash, channel: input.applied === "graph" ? "graph" as const : "related" as const, path: s.path, title: s.title, heading: "", first: 0, last: 0, score: null }))],
     score_kind: input.scoreKind, depth, fanout: FANOUT, min_strength: minStrength,
     max_nodes: budget.nodes, max_edges: budget.edges, max_bytes: budget.nodes > 200 ? 524288 : 262144, snapshot };
 }
@@ -53,7 +56,8 @@ export interface QueryResult {
   score: number | null;
   kind: ScoreKind;
   fragments: { heading: string; first: number; last: number; score: number | null }[];
-  status: "ready" | "no_graph_object";
+  channel?: "primary" | "related" | "graph";
+  status: "ready" | "no_graph_object" | "changed_since_search" | "deleted_since_search" | "unavailable";
   reason?: string;
 }
 export interface ServerQuerySlice {
@@ -64,7 +68,7 @@ export interface ServerQuerySlice {
   id: string;
   text: string;
   score_kind: ScoreKind;
-  results: { path: string; title: string; rank: number; node: number | null; score: number | null; fragments: QueryRequest["hits"] }[];
+  results: { map_reason?: string | null; channel?: QueryResult["channel"]; status?: QueryResult["status"]; path: string; title: string; rank: number; node: number | null; score: number | null; fragments: QueryRequest["hits"] }[];
   views: Record<Mode, number[]>;
   depth_of: number[];
   anchor_of: number[];
@@ -73,6 +77,8 @@ export interface ServerQuerySlice {
   used_bytes: number;
 }
 export interface QueryInfo {
+  changedSnapshot?: boolean;
+  bundle?: GraphReply | null;
   id: string;
   text: string;
   queryNode: number;
@@ -97,14 +103,14 @@ export function acceptQuerySlice(server: ServerQuerySlice, input: QueryInput): Q
   slice.visibleDocs.add(queryNode);
   const results: QueryResult[] = server.results.map(r => ({ ...r, kind: server.score_kind,
     fragments: r.fragments,
-    status: r.node === null ? "no_graph_object" : "ready",
-    reason: r.node === null ? "документа нет в срезе запроса: он вне снимка, области или пределов" : undefined }));
+    status: r.status ?? (r.node === null ? "no_graph_object" : "ready"),
+    reason: r.map_reason ?? (r.node === null ? "Документ вне карты" : undefined) }));
   for (const r of results) {
     if (r.node === null) continue;
-    slice.nodes[r.node] = { ...slice.nodes[r.node], qrole: "result", rank: r.rank };
+    slice.nodes[r.node] = { ...slice.nodes[r.node], qrole: r.channel === "related" ? "related" : "result", ghost: r.status !== "ready", rank: r.rank };
   }
   for (const e of server.query_edges) slice.edges.push({ id: slice.edges.length, key: `query_result:${queryNode}:${e.to}`, kind: "query_result", a: queryNode, b: e.to, raw: e.raw_score, s: e.strength, lines: [], neutral: e.neutral, scoreKind: e.score_kind });
-  return { slice, info: { id: server.id, text: server.text, queryNode, requested: input.requested, applied: input.applied, fallback: input.fallback, scoreKind: server.score_kind, results, minScore: input.minScore, server } };
+  return { slice, info: { changedSnapshot: !!input.bundle && input.bundle.snapshot !== server.physical.snapshot, bundle: input.bundle, id: server.id, text: server.text, queryNode, requested: input.requested, applied: input.applied, fallback: input.fallback, scoreKind: server.score_kind, results, minScore: input.minScore, server } };
 }
 export interface Shape {
   nodes: number[];

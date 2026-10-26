@@ -2,6 +2,7 @@
   // Физический граф проекта (пункт плана 2.1.5): одна панель для мини-графа под навигацией и для вкладки «Граф».
   // Данные — срез `graph_physical` (physical-v1), физика — Web Worker, отрисовка — Canvas2D. Дизайн: docs/features/graphrag/physical-graph-design.md.
   import { onDestroy, onMount, untrack } from "svelte";
+  import GraphSearchBundle from "../GraphSearchBundle.svelte";
   import Icon from "../Icon.svelte";
   import { app } from "../app.svelte";
   import { appearance } from "../appearance.svelte";
@@ -46,6 +47,8 @@
   let queryDepth = $state(DEFAULT_DEPTH);
   let queryBudget = $state({ ...QUERY_BUDGET });
   /** Поиск, для которого вид уже включался, и поиск, из которого пользователь вернулся в общий вид. */
+  let generalState: { positions: ReturnType<Layout["save"]>; camera: Camera; w: number; h: number; selection: Target; expanded: Record<number, number>; stopped: boolean } | null = null;
+  let packageIndex = $state<number | null>(null);
   let queryKey = "";
   let queryOff = $state("");
   let queryEpoch = 0;
@@ -157,7 +160,7 @@
     const requested = shown.mode as RetrievalKind;
     const applied = (graph?.applied_mode ?? requested) as RetrievalKind;
     const scoreKind: ScoreKind = applied === "graph" ? "none" : results.applied.score_kind;
-    return { id: shown.requestId, text: shown.query, hits: results.results, scope: { modules: shown.modules, files: shown.files }, scoreKind, requested, applied, fallback: graph?.fallback_reason ?? null, minScore: results.applied.min_score };
+    return { id: shown.requestId, text: shown.query, hits: results.results, bundle: graph?.related ?? graph?.graph_results, scope: { modules: shown.modules, files: shown.files }, scoreKind, requested, applied, fallback: graph?.fallback_reason ?? null, minScore: results.applied.min_score };
   }
 
   /** Рисуемый срез: общий или вид запроса, смотря что включено. */
@@ -174,16 +177,17 @@
 
   const queryShape = $derived.by(() => (query ? shapeQuery(slice, query, mode) : null));
 
-  async function requestQuery(fresh = false) {
+  async function requestQuery(fresh = false, checkSources = false) {
     const input = queryInput();
     const path = project();
     if (!input || !path) return;
-    const request = queryRequest(input, queryDepth, minS, queryBudget, queryBuilt?.info.id === input.id ? queryBuilt.slice.snapshot : null);
+    const request = queryRequest(input, queryDepth, minS, queryBudget, !checkSources && queryBuilt?.info.id === input.id ? queryBuilt.slice.snapshot : null);
     const key = JSON.stringify({ ...request, snapshot: null });
     const generation = ++queryEpoch;
-    if (queryBuilt?.info.id === input.id && key === queryRequestKey) {
+    if (!checkSources && queryBuilt?.info.id === input.id && key === queryRequestKey) {
       queryLoading = false;
       queryError = "";
+      if (fresh) layout?.clear();
       compose();
       rebuild(0.5, fresh);
       return;
@@ -193,10 +197,19 @@
     try {
       const server = await loadQuery(path, request);
       if (generation !== queryEpoch || path !== project() || queryInput()?.id !== input.id || queryOff === input.id) return;
-      queryBuilt = acceptQuerySlice(server, input);
+      const built = acceptQuerySlice(server, input);
+      if (queryBuilt?.info.id === input.id && (queryBuilt.info.changedSnapshot || queryBuilt.slice.snapshot !== built.slice.snapshot)) built.info.changedSnapshot = true;
+      const positions = !fresh ? layout?.save() : undefined;
+      const selectedId = selected?.type === "node" ? slice.nodes[selected.index]?.id : undefined;
+      const selectedPath = selected?.type === "node" ? slice.nodes[selected.index]?.path : undefined;
+      layout?.clear();
+      queryBuilt = built;
       queryRequestKey = key;
       compose();
       rebuild(fresh ? 0.9 : 0.5, fresh);
+      if (positions) layout?.restore(positions);
+      selected = selectedId ? { type: "node", index: slice.nodes.findIndex(n => n.id === selectedId || (!!selectedPath && n.path === selectedPath)) } : null;
+      if (selected?.type === "node" && selected.index < 0) selected = null;
     } catch (error) {
       if (generation !== queryEpoch || path !== project() || queryInput()?.id !== input.id || queryOff === input.id) return;
       queryError = `Граф запроса не обновлён: ${error instanceof Error ? error.message : String(error)}`;
@@ -206,14 +219,34 @@
   }
 
   function enterQuery() {
+    if (!query && !generalState && layout) generalState = { positions: layout.save(), camera: { ...cam }, w: size.w, h: size.h, selection: selected ? { ...selected } : null, expanded: { ...expanded }, stopped };
+    expanded = {};
+    packageIndex = app.graphPackage;
+    app.graphPackage = null;
     queryOff = "";
     queryDepth = DEFAULT_DEPTH;
     queryBudget = { ...QUERY_BUDGET };
     selected = null;
-    compose();
     void requestQuery(true);
     if (query) announce(`Запрос «${query.text}»: ${query.results.length} результатов, окружение глубины ${queryDepth}`);
-    rebuild(0.9, true);
+  }
+
+  function restoreGeneral() {
+    layout?.clear();
+    compose();
+    if (!generalState) { rebuild(0.6); return; }
+    const saved = generalState;
+    generalState = null;
+    expanded = saved.expanded;
+    selected = saved.selection;
+    stopped = saved.stopped;
+    layout?.setGraph(visibleNodes(), visibleEdges(), owner);
+    layout?.restore(saved.positions);
+    cam = { ...saved.camera, x: saved.camera.x + (size.w - saved.w) / 2, y: saved.camera.y + (size.h - saved.h) / 2 };
+    autoFitSince = 0;
+    camTarget = null;
+    revision++;
+    schedule();
   }
 
   function leaveQuery() {
@@ -222,10 +255,8 @@
     queryEpoch++;
     queryError = "";
     queryLoading = false;
-    selected = null;
-    compose();
+    restoreGeneral();
     announce("Общий вид проекта");
-    rebuild(0.6);
   }
 
   /** Поиск завершился, сброшен или заменён: вид запроса следует за сессией поиска окна. */
@@ -245,9 +276,7 @@
       queryLoading = false;
       queryOff = "";
       if (query) {
-        selected = null;
-        compose();
-        rebuild(0.6);
+        restoreGeneral();
       }
     }
   }
@@ -267,7 +296,10 @@
 
   const queryAtMaximum = $derived(queryBudget.nodes >= QUERY_MAX.nodes && queryBudget.edges >= QUERY_MAX.edges);
   const queryOffered = $derived(!query && !!queryOff && queryInput()?.id === queryOff);
-  const queryMissing = $derived(query ? query.results.filter((r) => r.node === null).length : 0);
+  const queryResultCount = $derived(query?.results.filter(r => r.channel !== "related").length ?? 0);
+  const queryRelatedCount = $derived(query?.results.filter(r => r.channel === "related").length ?? 0);
+  const queryMissing = $derived(query ? query.results.filter((r) => r.status !== "ready" || r.node === null).length : 0);
+  const SOURCE_TEXT = { ready: "Актуален", no_graph_object: "Связи для версии выдачи недоступны", changed_since_search: "Документ изменён после поиска", deleted_since_search: "Документ удалён после поиска", unavailable: "Текущий файл недоступен" };
   const SCORE_TEXT: Record<ScoreKind, string> = { rerank: "оценка rerank", cosine: "оценка — косинус (rerank не выполнялся)", none: "оценки нет" };
 
   function applyForces() {
@@ -349,7 +381,7 @@
       else if (idle || now - lastAutoFit > 300) {
         lastAutoFit = now;
         fit(true);
-        if (idle) autoFitSince = 0;
+        if (idle || query) autoFitSince = 0;
       }
     }
     schedule();
@@ -393,6 +425,30 @@
   const assigned = (node: GNode): string | null => (node.kind === "query" ? null : documentColor(appearance.data, keyOf(node.docsPath)));
   $effect(() => { void appearance.data; untrack(schedule); });
 
+  function packageEdges(): Set<number> {
+    const found = new Set<number>();
+    const bundle = query?.bundle;
+    if (!bundle || packageIndex === null) return found;
+    const item = bundle.items.filter(i => ["path", "impact", "relation", "edge"].includes(i.type))[packageIndex];
+    if (!item) return found;
+    const assertions = item.type === "path" || item.type === "impact" ? item.path.steps.flatMap(step => bundle.assertions.filter(e => e.id === step.edge)) : item.type === "relation" ? [item.assertion] : item.type === "edge" ? [item.edge] : [];
+    const ownerPath = (id: string) => {
+      const node = bundle.nodes.find(n => n.reference.id === id);
+      return bundle.sources.find(s => s.reference.id === id || node?.source_ids.includes(s.reference.id))?.path;
+    };
+    for (const edge of assertions) {
+      const a = ownerPath(edge.from), b = ownerPath(edge.to);
+      for (const physical of visibleEdges()) {
+        if (physical.kind === "query_result") continue;
+        const x = slice.nodes[physical.a], y = slice.nodes[physical.b];
+        if (x.ghost || y.ghost) continue;
+        const current = [x, y].every(n => bundle.sources.some(s => s.path === n.path && s.reference.revision === n.revision));
+        if (current && (x.path === a && y.path === b || x.path === b && y.path === a)) found.add(physical.id);
+      }
+    }
+    return found;
+  }
+
   function paint() {
     if (!canvas || !layout || !palette || size.w < 2) return;
     const ctx = canvas.getContext("2d");
@@ -404,7 +460,7 @@
     const groups = Object.entries(expanded).map(([o, shown]) => ({ owner: Number(o), shown, total: slice.nodes[Number(o)]?.chunks ?? shown }));
     const scene: Scene = {
       w: size.w, h: size.h, dpr: window.devicePixelRatio || 1, cam, nodes: layout.nodes, links: layout.links, palette, kinds,
-      selected, hovered, related: related(), marked: markedNodes(), groups, mini, modules: moduleMap, assigned, focus: isLocal() ? focusIndex : null,
+      highlighted: packageEdges(), selected, hovered, related: related(), marked: markedNodes(), groups, mini, modules: moduleMap, assigned, focus: isLocal() ? focusIndex : null,
     };
     draw(ctx, scene);
   }
@@ -688,6 +744,9 @@
   /** Открывает источник: документ целиком, диапазон чанка или строку, где стоит ссылка. */
   function openSource(index: number, line?: number) {
     const n = slice.nodes[index];
+    const result = query?.results.find(r => r.node === index);
+    if (result?.status === "deleted_since_search" || result?.status === "unavailable") return;
+    if (result?.status === "changed_since_search") { void app.openDocument({ path: n.path, title: n.label, first_line: 0, last_line: 0, expectedRevision: n.revision }); return; }
     const first = line ?? (n.kind === "chunk" ? n.firstLine : 0);
     const last = line ?? (n.kind === "chunk" ? n.lastLine : 0);
     void app.openDocument({ path: n.path, title: n.kind === "chunk" ? label(n.owner) : n.label, first_line: first, last_line: last, expectedRevision: slice.nodes[n.owner]?.revision });
@@ -777,6 +836,7 @@
       status = value;
       const ready = !!value.snapshot;
       const changed = !!value.snapshot && value.snapshot !== slice.snapshot;
+      if (query && changed && !queryLoading) void requestQuery(false, true);
       if (!query && ready && !loading && (changed || (loadError && loadErrorKind === "graph_not_ready"))) void load(slice.snapshot ? "refresh" : "open");
     } catch {
       // Состояние графа не прочиталось: срез и его ошибка остаются на экране.
@@ -787,6 +847,8 @@
     epoch++;
     queryEpoch++;
     queryBuilt = null;
+    generalState = null;
+    packageIndex = null;
     queryError = "";
     queryLoading = false;
     layout?.destroy();
@@ -977,13 +1039,18 @@
   // Из мини-графа: «В графе» выбирает узел в полном графе.
   $effect(() => {
     const id = app.graphFocus;
-    if (!id || mini || !loaded) return;
+    void query;
+    void revision;
+    if (!id || mini || !loaded || app.graphShowQuery || queryLoading) return;
     untrack(() => {
-      const index = store.indexOf(id);
-      app.graphFocus = null;
+      const index = slice.nodes.find(n => n.id === id || n.path === id)?.index;
       if (index === undefined || !layout?.get(index)) return;
+      app.graphFocus = null;
       selected = { type: "node", index };
       const p = layout.get(index)!;
+      autoFitSince = 0;
+      camTarget = null;
+      fitted = true;
       if (size.w > 1) cam = { k: Math.max(cam.k, 1.1), x: size.w / 2 - p.x * Math.max(cam.k, 1.1), y: size.h / 2 - p.y * Math.max(cam.k, 1.1) };
       schedule();
     });
@@ -1019,6 +1086,7 @@
       if (!input) return;
       queryKey = input.id;
       if (!query || queryOff) enterQuery();
+      else { packageIndex = app.graphPackage; app.graphPackage = null; schedule(); }
     });
   });
   $effect(() => {
@@ -1098,17 +1166,19 @@
       <div class="qbar" role="region" aria-label="Вид запроса">
         <span class="qsq" aria-hidden="true"></span>
         <b class="qtext" title={query.text}>Запрос «{query.text}»</b>
-        <span>{query.results.length} результатов</span>
+        <span>{queryResultCount} результатов{#if queryRelatedCount} · {queryRelatedCount} связанных источников{/if}</span>
+        <button class="more" disabled={queryLoading} onclick={() => void requestQuery(false, true)}>Проверить источники</button>
         <span>{SEARCH_MODE[query.applied]}{query.requested !== query.applied ? ` (запрошен «${SEARCH_MODE[query.requested]}»)` : ""} · {SCORE_TEXT[query.scoreKind]}</span>
         <span class="depth" role="radiogroup" aria-label="Окружение результатов">Окружение
           {#each Array.from({ length: MAX_DEPTH + 1 }, (_, i) => i) as d (d)}<button role="radio" aria-checked={queryDepth === d} class:on={queryDepth === d} onclick={() => setDepth(d)}>{d}</button>{/each}
         </span>
         <button class="more" onclick={leaveQuery}>Общий вид</button>
       </div>
-      {#if query.fallback || queryMissing || !query.results.length}
+      {#if query.fallback || queryMissing || query.changedSnapshot || !query.results.length}
         <div class="banner" role="status">
           {#if query.fallback}<span><b>Режим поиска изменён:</b> {fallbackText(query.fallback)}</span>{/if}
-          {#if queryMissing}<span><b>Граф неполон:</b> {queryMissing} результатов без узла в графе — они в списке инспектора запроса.</span>{/if}
+          {#if query.changedSnapshot}<span>Граф обновлён после поиска; выдача и её оценки сохранены.</span>{/if}
+          {#if queryMissing}<span><b>Граф неполон:</b> {queryMissing} источников изменены, недоступны или вне карты — причины в инспекторе запроса.</span>{/if}
           {#if !query.results.length}<span><b>Ничего не найдено:</b> порог {query.minScore.toFixed(2)}.</span>{/if}
         </div>
       {/if}
@@ -1178,7 +1248,7 @@
       <div class="status" role="status">
         <span class="dot {motion}" title={MOTION_TEXT[motion]}></span>
         {#if query}
-          {#if !mini}{MOTION_TEXT[motion]} · {/if}<b>Запрос: {query.results.length} результатов</b> · узлов {queryShape?.shown.nodes ?? 0}{#if !mini} · связей {queryShape?.shown.edges ?? 0}{/if} · {MODE_NAME[mode].toLowerCase()}
+          {#if !mini}{MOTION_TEXT[motion]} · {/if}<b>Запрос: {queryResultCount} результатов</b>{#if queryRelatedCount} · {queryRelatedCount} связанных источников{/if} · узлов {queryShape?.shown.nodes ?? 0}{#if !mini} · связей {queryShape?.shown.edges ?? 0}{/if} · {MODE_NAME[mode].toLowerCase()}
         {:else if mini && isLocal() && focusIndex !== null}
           <b>Локальный граф</b> · <span class="lt" title={slice.nodes[focusIndex].label}>{slice.nodes[focusIndex].label}</span>{#if nodeCount <= 1} · нет связей в режиме «{MODE_NAME[mode]}»{:else} · {MODE_NAME[mode].toLowerCase()}{/if}
         {:else if mini}
@@ -1286,7 +1356,7 @@
           {#if selectedNode.kind === "chunk"}<p class="path">Владелец: <button class="inline" onclick={() => select({ type: "node", index: selectedNode.owner })}>{label(selectedNode.owner)}</button></p>{/if}
         </header>
         <div class="actions">
-          {#if selectedNode.kind !== "query"}<button class="act" onclick={() => openSource(selectedNode.index)}><Icon name="doc" size={13} width={1.8} /> {selectedNode.kind === "document" ? "Открыть" : "Открыть диапазон"}</button>{/if}
+          {#if selectedNode.kind !== "query"}<button class="act" disabled={query?.results.some(r => r.node === selectedNode.index && (r.status === "deleted_since_search" || r.status === "unavailable"))} onclick={() => openSource(selectedNode.index)}><Icon name="doc" size={13} width={1.8} /> {selectedNode.kind === "document" ? "Открыть" : "Открыть диапазон"}</button>{/if}
           {#if selectedNode.kind === "document" && selectedNode.chunks && !query}
             <button class="act" onclick={() => void toggleExpand(selectedNode.index)} disabled={loading}>{expanded[selectedNode.index] ? "Свернуть чанки" : `Раскрыть чанки (${selectedNode.chunks})`}</button>
           {/if}
@@ -1302,15 +1372,15 @@
             {#each query.results as r (r.rank)}
               <li>
                 <button disabled={r.node === null} title={r.reason ?? r.path} onclick={() => r.node !== null && select({ type: "node", index: r.node })}>
-                  <span class="name">{r.rank}. {r.title}</span><small>{r.score === null ? "—" : r.score.toFixed(2)}{r.node === null ? " · нет в графе" : ""}</small>
+                  <span class="name">{r.rank}. {r.title}</span><small>{r.score === null ? "—" : r.score.toFixed(2)}{r.channel === "related" ? " · связанный источник" : ""} · {SOURCE_TEXT[r.status]}{r.node === null ? ` · ${r.reason}` : ""}</small>
                 </button>
               </li>
             {/each}
           </ul>
-        {:else if selectedNode.qrole === "result" && query}
+        {:else if selectedNode.qrole && query}
           {@const found = query.results.find((x) => x.node === selectedNode.index)}
           {#if found}
-            <p class="origin">Результат поиска №{found.rank}{found.score !== null ? ` · ${SCORE_TEXT[found.kind]} ${found.score.toFixed(2)}` : ""}. Совпавших фрагментов: {found.fragments.length}.</p>
+            <p class="origin">{SOURCE_TEXT[found.status]} · {found.channel === "related" ? "Связанный источник без оценки запроса" : `Результат поиска №${found.rank}`}{found.score !== null ? ` · ${SCORE_TEXT[found.kind]} ${found.score.toFixed(2)}` : ""}. Совпавших фрагментов: {found.fragments.length}.</p>
             <ul class="conns">
               {#each found.fragments as f, i (i)}<li><span class="name" title={f.heading}>{f.heading || "без заголовка"}</span><small>строки {f.first}–{f.last} · {f.score === null ? "оценки нет" : f.score.toFixed(2)}</small></li>{/each}
             </ul>
@@ -1372,6 +1442,9 @@
           </tbody>
         </table>
         <p class="keys"><kbd>←↑↓→</kbd> соседний узел <kbd>M</kbd> режим связей <kbd>Enter</kbd> раскрыть <kbd>Пробел</kbd> закрепить <kbd>F</kbd> вписать <kbd>Esc</kbd> снять</p>
+      {/if}
+      {#if query?.bundle}
+        <GraphSearchBundle graph={query.bundle} states={Object.fromEntries(query.results.map(r => [r.path,r.status]))} related={query.applied === "mix"} embedded selected={packageIndex} onselect={(index) => { packageIndex = index; schedule(); }} />
       {/if}
       {#if notice}<p class="notice" role="status">{notice}</p>{/if}
     </aside>

@@ -29,7 +29,7 @@ add('document', 'Документ', [
   ['document.find', 'Найти в документе', 'Mod+KeyF', 'Этап 3.4'], ['document.save', 'Сохранить сейчас', 'Mod+KeyS', 'Этап 3.4'], ['document.syntaxHelp', 'Шпаргалка Markdown', '', 'Этап 3.4'],
 ]);
 add('window', 'Поиск', [['search.scope', 'Область поиска'], ['search.scopeClear', 'Сбросить область поиска'], ['search.options', 'Параметры поиска']]);
-add('result', 'Результат', [['result.open', 'Открыть результат'], ['result.graph', 'Показать результат в графе', '', 'Блок 2'], ['result.expand', 'Раскрыть результат']]);
+add('result', 'Результат', [['result.open', 'Открыть результат'], ['result.graph', 'Показать результат в графе'], ['result.expand', 'Раскрыть результат']]);
 add('target', 'Файл и папка', [['target.open', 'Открыть документ'], ['target.reveal', 'Показать в ОС'], ['target.copyPath', 'Скопировать путь']]);
 add('target', 'Файл и папка', [
   ['file.create', 'Создать файл'], ['folder.create', 'Создать папку'],

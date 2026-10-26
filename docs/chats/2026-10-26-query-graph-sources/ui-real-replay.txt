@@ -1,0 +1,13 @@
+
+> bars-ui@0.0.0 test
+> vitest run src/lib/graph/query-real.test.ts
+
+
+ RUN  v5.0.4 C:/Users/arketov/Desktop/bars-project/ui
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  16:54:42
+   Duration  4.11s (environment 94%, transform 4%, worker 1%, import 1%)
+

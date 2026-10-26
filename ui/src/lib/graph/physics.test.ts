@@ -296,4 +296,24 @@ describe("одиночки кольцом, размер узла и размер
     expect(at.get(3)).toEqual([99, 77]);
     expect(Math.hypot(at.get(2)![0] - at.get(0)![0], at.get(2)![1] - at.get(0)![1])).toBeLessThan(60);
   });
+  it("возвращает координаты и закрепления по ID, не по индексу другого вида", async () => {
+    const layout = new Layout();
+    const node = (index: number, id: string): GNode => ({index,id,kind:"document",label:id,path:id,docsPath:id,module:".",owner:index,chunks:0,ordinal:null,firstLine:1,lastLine:1});
+    layout.setGraph([node(0,"a"),node(1,"b")], [], i=>i);
+    layout.dragTo(0, 123, -45);
+    layout.togglePin(0);
+    const saved = layout.save();
+    layout.clear();
+    layout.setGraph([node(0,"query-other")], [], i=>i);
+    expect(layout.get(0)?.pinned).toBe(false);
+    layout.clear();
+    layout.setGraph([node(1,"a"),node(0,"b")], [], i=>i);
+    layout.restore(saved);
+    await wait(25);
+    expect(layout.get(1)).toMatchObject({x:123,y:-45,pinned:true});
+    expect(layout.get(0)?.pinned).toBe(false);
+    expect(layout.active).toBe(false);
+    layout.destroy();
+  });
+
 });

@@ -408,3 +408,22 @@ it("возврат к уже загруженной глубине отменя�
   finish(queryFixture(pending,documents));await settle();
   expect(Number(panel().dataset.nodes)).toBe(original);
 });
+
+it("возврат из запроса восстанавливает выбранный узел общего вида", async () => {
+  component = mount(PhysicalGraph, {target}); await settle();
+  app.graphFocus = "doc-3"; await settle();
+  expect(target.querySelector(".inspector h3")?.textContent).toContain("Документ 3");
+  finishSearch("return-selection", "очередь", [7]); await settle();
+  button("Общий вид")!.click(); await settle();
+  expect(target.querySelector(".inspector h3")?.textContent).toContain("Документ 3");
+});
+it("явная карточка выбирает результат именно в срезе запроса", async () => {
+  component = mount(PhysicalGraph, {target}); await settle();
+  finishSearch("card-focus", "очередь", [7]); await settle();
+  button("Общий вид")!.click(); await settle();
+  app.graphFocus = searchHit(7, .8).path;
+  app.graphShowQuery = true;
+  await settle();
+  expect(app.graphFocus).toBeNull();
+  expect(target.querySelector(".inspector h3")?.textContent).toContain("Документ 7");
+});

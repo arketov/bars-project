@@ -6,7 +6,7 @@
         type GraphEdge,
         type Evidence,
     } from "./graph";
-    let { graph, related = false }: { graph: GraphReply; related?: boolean } =
+    let { graph, related = false, embedded = false, selected = null, onselect, states = {} }: { graph: GraphReply; related?: boolean; embedded?: boolean; selected?: number | null; onselect?: (index: number) => void; states?: Record<string, string> } =
         $props();
     const label = (id: string) =>
         graph.nodes.find((node) => node.reference.id === id)?.label ?? id;
@@ -28,12 +28,13 @@
         const source = graph.sources.find((source) =>
             sameRef(source.reference, proof.document),
         );
-        if (source)
+        if (source && states[source.path] !== "deleted_since_search" && states[source.path] !== "unavailable")
             await app.openDocument({
                 path: source.path,
                 title: source.title,
-                first_line: proof.span.first_line,
-                last_line: proof.span.last_line,
+                first_line: states[source.path] === "changed_since_search" ? 0 : proof.span.first_line,
+                last_line: states[source.path] === "changed_since_search" ? 0 : proof.span.last_line,
+                expectedRevision: proof.document.revision,
             });
     }
 </script>
@@ -45,8 +46,13 @@
         частичный
     </p>
     {#if graph.truncated}<p>Усечено: {graph.limit_reasons.join(", ")}</p>{/if}
-    {#each cards.slice(0, 3) as item}
+    {#each (embedded ? cards : cards.slice(0, 3)) as item, index}
         <article>
+            <button class="link" aria-pressed={selected === index} onclick={() => {
+                if (embedded) onselect?.(index);
+                else { app.graphAnalysis = false; app.graphPreview = null; app.graphPackage = index; app.graphShowQuery = true; app.view = "graph"; }
+            }}>{embedded ? "Выделить путь на карте" : "Показать путь в графе"}</button>
+            {#if embedded}<p>На карте выделяются существующие физические связи. Все шаги и основания — ниже.</p>{/if}
             {#if item.type === "path" || item.type === "impact"}
                 <h3>
                     {item.path.nodes.map((node) => label(node.id)).join(" → ")}
@@ -95,6 +101,7 @@
                             <pre>{proof.quote}</pre>
                             <button
                                 class="link"
+                                disabled={!!source && ["deleted_since_search", "unavailable"].includes(states[source.path])}
                                 onclick={() => void open(proof)}
                                 >Открыть текущий файл ↗</button
                             >
@@ -104,17 +111,18 @@
             {/each}
         </article>
     {/each}
-    {#if cards.length > 3}<p>
+    {#if !embedded && cards.length > 3}<p>
             Показаны первые 3 пакета из {cards.length}; остальные доступны в
             графе.
         </p>{/if}
-    <button
+    {#if !embedded}<button
         class="ghost"
         onclick={() => {
+            app.graphAnalysis = false; app.graphPreview = null; app.graphPackage = null;
             app.graphShowQuery = true;
             app.view = "graph";
         }}>Открыть связи и основания в графе ↗</button
-    >
+    >{/if}
 </section>
 
 <style>
