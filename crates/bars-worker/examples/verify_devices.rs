@@ -134,9 +134,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .map_err(|e| e.to_string())?,
     )?;
     handler
-        .dispatch(Call::SettingsSave(SettingsSaveParams {
-            settings: current.settings.clone(),
-        }))
+        .dispatch(Call::SettingsSave(SettingsSaveParams::between(
+            current.clone(),
+            current.settings.clone(),
+        )))
         .await
         .map_err(|e| e.to_string())?;
     let saved: SettingsOutput = serde_json::from_value(
@@ -164,7 +165,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "directml"
     };
     handler
-        .dispatch(Call::SettingsSave(SettingsSaveParams { settings: changed }))
+        .dispatch(Call::SettingsSave(SettingsSaveParams::between(
+            saved.clone(),
+            changed,
+        )))
         .await
         .map_err(|e| e.to_string())?;
     let after_save = handler

@@ -17,6 +17,87 @@ use bars_core::settings::{
 use bars_protocol::{ChunkingDoc, EmbedDoc, RerankDoc, SearchDoc, SettingsDoc};
 use toml_edit::{DocumentMut, Item, Table, value};
 
+// Все окна одного воркера сравнивают и записывают настройки последовательно.
+static SETTINGS_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
+fn snapshot(bars_home: &Path) -> Result<bars_protocol::SettingsOutput, SaveError> {
+    let file = user_settings_path(bars_home);
+    let bytes = match fs::read(&file) {
+        Ok(bytes) => Some(bytes),
+        Err(error) if error.kind() == io::ErrorKind::NotFound => None,
+        Err(source) => return Err(SaveError::Read { file, source }),
+    };
+    let revision = bytes
+        .as_ref()
+        .map(|bytes| format!("{}-{}", bytes.len(), blake3::hash(bytes).to_hex()));
+    let text = String::from_utf8(bytes.unwrap_or_default())
+        .map_err(|error| SaveError::Invalid(error.to_string()))?;
+    let loaded =
+        UserSettings::parse(&text, &file).map_err(|error| SaveError::Invalid(error.to_string()))?;
+    Ok(bars_protocol::SettingsOutput {
+        file: file.display().to_string(),
+        revision,
+        settings: to_doc(&loaded.value),
+        warnings: loaded.warnings.iter().map(ToString::to_string).collect(),
+    })
+}
+
+pub fn load_user_settings(bars_home: &Path) -> Result<bars_protocol::SettingsOutput, SaveError> {
+    let _guard = SETTINGS_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
+    snapshot(bars_home)
+}
+
+pub fn save_changes(
+    bars_home: &Path,
+    params: bars_protocol::SettingsSaveParams,
+) -> Result<bars_protocol::SettingsSaveOutput, SaveError> {
+    let _guard = SETTINGS_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
+    let current = snapshot(bars_home)?;
+    let base = serde_json::to_value(&params.base).expect("settings serialize");
+    let mut merged = serde_json::to_value(&current.settings).expect("settings serialize");
+    let mut conflicts = Vec::new();
+    for (path, mine) in &params.changes {
+        let (section, key) = path
+            .split_once('.')
+            .ok_or_else(|| SaveError::Invalid(format!("Неизвестное поле настроек: {path}")))?;
+        let disk = merged
+            .get_mut(section)
+            .and_then(|table| table.get_mut(key))
+            .ok_or_else(|| SaveError::Invalid(format!("Неизвестное поле настроек: {path}")))?;
+        if current.revision != params.expected_revision
+            && *disk != base[section][key]
+            && disk != mine
+        {
+            conflicts.push(bars_protocol::SettingsConflict {
+                key: path.clone(),
+                base: base[section][key].clone(),
+                disk: disk.clone(),
+                mine: mine.clone(),
+            });
+        }
+        *disk = mine.clone();
+    }
+    let settings: SettingsDoc =
+        serde_json::from_value(merged).map_err(|error| SaveError::Invalid(error.to_string()))?;
+    if !conflicts.is_empty() {
+        return Ok(bars_protocol::SettingsSaveOutput {
+            status: bars_protocol::SettingsSaveStatus::Conflict,
+            conflicts,
+            current,
+        });
+    }
+    write_user_settings(bars_home, &settings, Some(&current))?;
+    Ok(bars_protocol::SettingsSaveOutput {
+        status: bars_protocol::SettingsSaveStatus::Saved,
+        conflicts,
+        current: snapshot(bars_home)?,
+    })
+}
+
 #[derive(Debug, thiserror::Error)]
 pub enum SaveError {
     /// Значения не прошли проверку чтения: файл не записан.
@@ -192,9 +273,28 @@ fn set_flag(table: &mut Table, key: &str, new: bool, old: bool) {
 }
 
 /// Записывает `settings` в `<bars_home>/settings.toml`. Возвращает `true`, если файл изменился.
-pub fn save_user_settings(bars_home: &Path, settings: &SettingsDoc) -> Result<bool, SaveError> {
+#[cfg(test)]
+fn save_user_settings(bars_home: &Path, settings: &SettingsDoc) -> Result<bool, SaveError> {
+    write_user_settings(bars_home, settings, None)
+}
+
+fn write_user_settings(
+    bars_home: &Path,
+    settings: &SettingsDoc,
+    expected: Option<&bars_protocol::SettingsOutput>,
+) -> Result<bool, SaveError> {
     let file = user_settings_path(bars_home);
     let text = read_text(&file)?;
+    if let Some(expected) = expected {
+        let revision = file
+            .exists()
+            .then(|| format!("{}-{}", text.len(), blake3::hash(text.as_bytes()).to_hex()));
+        if revision != expected.revision {
+            return Err(SaveError::Invalid(
+                "Настройки снова изменились на диске. Повторите сохранение".into(),
+            ));
+        }
+    }
     let current = UserSettings::parse(&text, &file)
         .map_err(|error| SaveError::Invalid(error.to_string()))?
         .value;
@@ -389,6 +489,13 @@ pub fn save_user_settings(bars_home: &Path, settings: &SettingsDoc) -> Result<bo
     if new_text == text {
         return Ok(false);
     }
+    if read_text(&file)? != text
+        || expected.is_some_and(|snapshot| snapshot.revision.is_some() != file.exists())
+    {
+        return Err(SaveError::Invalid(
+            "Настройки снова изменились на диске. Повторите сохранение".into(),
+        ));
+    }
     write_atomic(&file, &new_text)?;
     Ok(true)
 }
@@ -408,6 +515,150 @@ pub fn save_docs_root(project: &Path, docs_root: &str) -> Result<(), SaveError> 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn settings_patch_merges_external_fields_and_preserves_comments() {
+        let home = home();
+        let file = user_settings_path(home.path());
+        let base = load_user_settings(home.path()).unwrap();
+        assert_eq!(base.revision, None);
+        let mut mine = base.settings.clone();
+        mine.search.results = 9;
+        fs::write(
+            &file,
+            "# outside\n[search]\ncandidates = 40 # keep\n[future]\nkey = 7\n",
+        )
+        .unwrap();
+        let result = save_changes(
+            home.path(),
+            bars_protocol::SettingsSaveParams::between(base, mine),
+        )
+        .unwrap();
+        assert_eq!(result.status, bars_protocol::SettingsSaveStatus::Saved);
+        assert_eq!(result.current.settings.search.results, 9);
+        assert_eq!(result.current.settings.search.candidates, 40);
+        assert!(result.current.revision.is_some());
+        let text = fs::read_to_string(file).unwrap();
+        assert!(text.contains("# outside"));
+        assert!(text.contains("candidates = 40 # keep"));
+        assert!(text.contains("key = 7"));
+    }
+
+    #[test]
+    fn settings_conflict_writes_nothing_and_retry_still_checks_revision() {
+        let home = home();
+        let file = user_settings_path(home.path());
+        let base = load_user_settings(home.path()).unwrap();
+        let mut mine = base.settings.clone();
+        mine.search.results = 9;
+        mine.search.candidates = 41;
+        let mut params = bars_protocol::SettingsSaveParams::between(base, mine);
+        fs::write(&file, "[search]\nresults = 8\n").unwrap();
+        let conflict = save_changes(home.path(), params.clone()).unwrap();
+        assert_eq!(conflict.status, bars_protocol::SettingsSaveStatus::Conflict);
+        assert_eq!(conflict.conflicts.len(), 1);
+        assert_eq!(conflict.conflicts[0].key, "search.results");
+        assert_eq!(conflict.conflicts[0].disk, 8);
+        assert_eq!(
+            fs::read_to_string(&file).unwrap(),
+            "[search]\nresults = 8\n"
+        );
+        params.base = conflict.current.settings;
+        params.expected_revision = conflict.current.revision;
+        fs::write(&file, "[search]\nresults = 7\n").unwrap();
+        let second = save_changes(home.path(), params.clone()).unwrap();
+        assert_eq!(second.status, bars_protocol::SettingsSaveStatus::Conflict);
+        params.base = second.current.settings;
+        params.expected_revision = second.current.revision;
+        let saved = save_changes(home.path(), params).unwrap();
+        assert_eq!(saved.status, bars_protocol::SettingsSaveStatus::Saved);
+        assert_eq!(saved.current.settings.search.results, 9);
+        assert_eq!(saved.current.settings.search.candidates, 41);
+    }
+
+    #[test]
+    fn settings_patch_deletion_identical_edits_and_invalid_values() {
+        let home = home();
+        let file = user_settings_path(home.path());
+        fs::write(&file, "[search]\nresults = 8\n").unwrap();
+        let base = load_user_settings(home.path()).unwrap();
+        let mut mine = base.settings.clone();
+        mine.search.results = 9;
+        let params = bars_protocol::SettingsSaveParams::between(base, mine);
+        fs::remove_file(&file).unwrap();
+        assert_eq!(
+            save_changes(home.path(), params.clone()).unwrap().status,
+            bars_protocol::SettingsSaveStatus::Conflict
+        );
+        assert!(!file.exists());
+        fs::write(&file, "# same change\n[search]\nresults = 9\n").unwrap();
+        assert_eq!(
+            save_changes(home.path(), params).unwrap().status,
+            bars_protocol::SettingsSaveStatus::Saved
+        );
+        let base = load_user_settings(home.path()).unwrap();
+        let mut mine = base.settings.clone();
+        mine.search.results = 0;
+        let before = fs::read(&file).unwrap();
+        assert!(
+            save_changes(
+                home.path(),
+                bars_protocol::SettingsSaveParams::between(base.clone(), mine)
+            )
+            .is_err()
+        );
+        let mut params =
+            bars_protocol::SettingsSaveParams::between(base.clone(), base.settings.clone());
+        params
+            .changes
+            .insert("search.typo".into(), serde_json::json!(7));
+        assert!(save_changes(home.path(), params).is_err());
+        assert_eq!(fs::read(file).unwrap(), before);
+    }
+
+    #[test]
+    fn settings_two_writers_cannot_silently_replace_each_other() {
+        let home = home();
+        let base = load_user_settings(home.path()).unwrap();
+        fs::write(user_settings_path(home.path()), "").unwrap();
+        assert!(load_user_settings(home.path()).unwrap().revision.is_some());
+        let barrier = std::sync::Arc::new(std::sync::Barrier::new(2));
+        let results = std::thread::scope(|scope| {
+            let handles: Vec<_> = [8, 9]
+                .into_iter()
+                .map(|value| {
+                    let barrier = barrier.clone();
+                    let base = base.clone();
+                    let path = home.path();
+                    scope.spawn(move || {
+                        let mut mine = base.settings.clone();
+                        mine.search.results = value;
+                        barrier.wait();
+                        save_changes(path, bars_protocol::SettingsSaveParams::between(base, mine))
+                            .unwrap()
+                    })
+                })
+                .collect();
+            handles
+                .into_iter()
+                .map(|handle| handle.join().unwrap())
+                .collect::<Vec<_>>()
+        });
+        assert_eq!(
+            results
+                .iter()
+                .filter(|result| result.status == bars_protocol::SettingsSaveStatus::Saved)
+                .count(),
+            1
+        );
+        assert_eq!(
+            results
+                .iter()
+                .filter(|result| result.status == bars_protocol::SettingsSaveStatus::Conflict)
+                .count(),
+            1
+        );
+    }
 
     #[test]
     fn shared_device_is_migrated_once_without_losing_other_keys() {

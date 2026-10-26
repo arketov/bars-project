@@ -81,9 +81,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut changed = current.settings.clone();
     changed.embed.batch_size = 3;
     handler
-        .dispatch(Call::SettingsSave(SettingsSaveParams {
-            settings: changed.clone(),
-        }))
+        .dispatch(Call::SettingsSave(SettingsSaveParams::between(
+            current.clone(),
+            changed.clone(),
+        )))
         .await
         .map_err(|e| e.to_string())?;
     let saved: SettingsOutput = serde_json::from_value(

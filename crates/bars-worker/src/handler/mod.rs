@@ -903,26 +903,23 @@ impl WorkerHandler {
     // --- методы окна: настройки, модели, ключи, клиенты ---
 
     fn settings_get(&self) -> Result<SettingsOutput, RpcError> {
-        let loaded = bars_core::settings::UserSettings::load(self.worker.bars_home())
-            .map_err(|error| RpcError::standard(INTERNAL_ERROR, error.to_string()))?;
-        Ok(SettingsOutput {
-            file: bars_core::settings::user_settings_path(self.worker.bars_home())
-                .display()
-                .to_string(),
-            settings: settings_io::to_doc(&loaded.value),
-            warnings: loaded.warnings.iter().map(ToString::to_string).collect(),
-        })
+        settings_io::load_user_settings(self.worker.bars_home()).map_err(save_error)
     }
 
     /// Сохраняет настройки и ставит все проекты на проверку: проекты, чей индекс построен другой
     /// моделью, перейдут в `reindex_required`, и окно покажет диалог согласия (Т-25). Эмбеддинг
     /// при этом не запускается.
-    fn settings_save(&self, params: SettingsSaveParams) -> Result<SavedOutput, RpcError> {
-        settings_io::save_user_settings(self.worker.bars_home(), &params.settings)
-            .map_err(save_error)?;
-        self.worker.refresh_model_lifecycle();
-        self.worker.check_all();
-        Ok(SavedOutput { saved: true })
+    fn settings_save(
+        &self,
+        params: SettingsSaveParams,
+    ) -> Result<bars_protocol::SettingsSaveOutput, RpcError> {
+        let output =
+            settings_io::save_changes(self.worker.bars_home(), params).map_err(save_error)?;
+        if output.status == bars_protocol::SettingsSaveStatus::Saved {
+            self.worker.refresh_model_lifecycle();
+            self.worker.check_all();
+        }
+        Ok(output)
     }
 
     fn models_info(&self) -> ModelsInfoOutput {

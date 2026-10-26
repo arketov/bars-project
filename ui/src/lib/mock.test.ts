@@ -1,5 +1,7 @@
 import { afterEach, expect, it } from "vitest";
 import { mockCall } from "./mock";
+import { clone } from "./settings-logic";
+import { settingsChanges } from "./settings.svelte";
 import type { ActivityOutput, SearchOutput, SettingsOutput, StatusOutput, TreeDocument } from "./types";
 import { type ServerSlice } from "./graph/slice";
 import { acceptQuerySlice, queryRequest, type QueryInput, type ServerQuerySlice } from "./graph/query";
@@ -57,10 +59,10 @@ it("сцена переиндексации без задания возвращ
 
 it("Save/Get accepts a proxy-backed settings draft and keeps devices independent", async () => {
   const before = await mockCall("settings_get", {}) as SettingsOutput;
-  const draft = new Proxy(before.settings, {});
+  const draft = new Proxy(clone(before.settings), {});
   draft.embed.accelerator = "cpu";
   draft.rerank.accelerator = "auto";
-  await mockCall("settings_save", {settings:draft});
+  await mockCall("settings_save", { base: before.settings, changes: settingsChanges(before.settings, draft), expected_revision: before.revision });
   const saved = await mockCall("settings_get", {}) as SettingsOutput;
   expect(saved.settings.embed.accelerator).toBe("cpu");
   expect(saved.settings.rerank.accelerator).toBe("auto");

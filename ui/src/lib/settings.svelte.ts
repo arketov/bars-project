@@ -13,6 +13,8 @@ import type {
   ModelsInfoOutput,
   SettingsDoc,
   SettingsOutput,
+  SettingsSaveOutput,
+  SettingsConflict,
 } from "./types";
 
 /** Имя записи в хранилище ОС по умолчанию, если пользователь задаёт ключ впервые. */
@@ -21,6 +23,12 @@ export const DEFAULT_KEY_NAMES = { embed: "bars-embed", rerank: "bars-rerank" } 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 class SettingsState {
+  revision = $state<string | null>(null);
+  conflict = $state<SettingsOutput | null>(null);
+  conflicts = $state<SettingsConflict[]>([]);
+  loading = $state(false);
+  leaveOpen = $state(false);
+  private leaveResolve: ((ok: boolean) => void) | null = null;
   file = $state("");
   warnings = $state<string[]>([]);
   saved = $state<SettingsDoc | null>(null);
@@ -50,15 +58,23 @@ class SettingsState {
   }
 
   async load(): Promise<void> {
+    if (this.saving || this.loading) return;
+    this.loading = true;
     try {
       const output = await call<SettingsOutput>("settings_get");
-      this.file = output.file;
-      this.warnings = output.warnings;
-      this.saved = clone(output.settings);
-      this.draft = clone(output.settings);
+      if (this.saved && this.draft && this.dirty) {
+        const changes = settingsChanges(this.saved, this.draft);
+        const conflicts = Object.entries(changes).filter(([key, mine]) =>
+          !same(field(output.settings, key), field(this.saved!, key)) && !same(field(output.settings, key), mine)
+        ).map(([key, mine]) => ({ key, base: field(this.saved!, key), disk: field(output.settings, key), mine }));
+        if (conflicts.length) { this.conflict = output; this.conflicts = conflicts; }
+        else { this.accept(output); this.draft = applyChanges(output.settings, changes); }
+      } else this.accept(output);
       this.loadError = null;
     } catch (error) {
       this.loadError = error instanceof Error ? error.message : String(error);
+    } finally {
+      this.loading = false;
     }
     await Promise.all([this.loadModels(), this.loadClients(), this.loadSecrets(), this.loadAutostart()]);
   }
@@ -120,7 +136,39 @@ class SettingsState {
   }
 
   reset(): void {
-    if (this.saved) this.draft = clone(this.saved);
+    if (this.conflict) this.accept(this.conflict);
+    else if (this.saved) this.draft = clone(this.saved);
+  }
+
+  private accept(output: SettingsOutput): void {
+    this.file = output.file; this.warnings = output.warnings; this.revision = output.revision;
+    this.saved = clone(output.settings); this.draft = clone(output.settings);
+    this.conflict = null; this.conflicts = [];
+  }
+
+  async resolveConflict(mine: boolean): Promise<void> {
+    if (!this.conflict || !this.saved || !this.draft || this.saving) return;
+    const changes = settingsChanges(this.saved, this.draft);
+    if (!mine) for (const conflict of this.conflicts) delete changes[conflict.key];
+    const disk = this.conflict;
+    this.accept(disk); this.draft = applyChanges(disk.settings, changes);
+    if (mine) await this.save();
+  }
+
+  confirmLeave(): boolean | Promise<boolean> {
+    if (this.saving || this.loading) return false;
+    if (!this.dirty) return true;
+    if (this.leaveResolve) return Promise.resolve(false);
+    this.leaveOpen = true;
+    return new Promise(resolve => { this.leaveResolve = resolve; });
+  }
+
+  async finishLeave(choice: "save" | "discard" | "stay"): Promise<void> {
+    if (this.saving) return;
+    const ok = choice === "save" ? await this.save() : choice === "discard";
+    if (choice === "discard") this.reset();
+    this.leaveOpen = false;
+    this.leaveResolve?.(ok); this.leaveResolve = null;
   }
 
   /** Число клиентов, которым нужно действие пользователя: метка на вкладке «Клиенты». */
@@ -130,12 +178,15 @@ class SettingsState {
 
   /** Сохраняет; при смене модели ждёт, пока воркер переведёт проекты в «нужна переиндексация», и открывает диалог согласия. */
   async save(): Promise<boolean> {
-    if (!this.draft || !this.dirty || Object.keys(this.errors).length) return false;
+    if (!this.saved || !this.draft || !this.dirty || this.saving || this.loading || this.loadError || Object.keys(this.errors).length) return false;
     this.saving = true;
     const reindex = this.willReindex;
     try {
-      await call("settings_save", { settings: this.draft });
-      this.saved = clone(this.draft);
+      const output = await call<SettingsSaveOutput>("settings_save", {
+        base: clone(this.saved), changes: settingsChanges(this.saved, this.draft), expected_revision: this.revision,
+      });
+      if (output.status === "conflict") { this.conflict = output; this.conflicts = output.conflicts; return false; }
+      this.accept(output);
       await this.loadSecrets();
       app.flash("Настройки сохранены");
       if (reindex) await this.awaitConsent();
@@ -166,19 +217,31 @@ class SettingsState {
   /** Модель индекса возвращается в настройки: отпечатки снова совпадают, переиндексация не нужна (OQ-56). */
   async revertModel(indexFingerprint: string | null): Promise<void> {
     const parsed = parseFingerprint(indexFingerprint);
-    if (!parsed || !this.saved) return;
+    if (!parsed || this.saving || this.loading) return;
+    if (!this.saved) await this.load();
+    if (!this.saved || this.loadError || this.saving || this.loading) return;
+    const pending = this.draft ? settingsChanges(this.saved, this.draft) : {};
+    delete pending["embed.source"]; delete pending["embed.model"];
     const next = clone(this.saved);
     next.embed.source = parsed.source;
     next.embed.model = parsed.model;
+    this.saving = true;
     try {
-      await call("settings_save", { settings: next });
-      this.saved = clone(next);
-      this.draft = clone(next);
+      const output = await call<SettingsSaveOutput>("settings_save", { base: clone(this.saved), changes: settingsChanges(this.saved, next), expected_revision: this.revision });
+      if (output.status === "conflict") {
+        this.draft = applyChanges(next, pending); this.conflict = output; this.conflicts = output.conflicts;
+        app.consentOpen = false;
+        app.openSettings(); return;
+      }
+      this.accept(output);
+      this.draft = applyChanges(output.settings, pending);
       app.consentOpen = false;
       await app.recheck();
       app.flash("Прежняя модель возвращена: переиндексация не нужна");
     } catch (error) {
       app.flash(error instanceof Error ? error.message : String(error), true);
+    } finally {
+      this.saving = false;
     }
   }
 
@@ -245,3 +308,25 @@ class SettingsState {
 }
 
 export const settings = new SettingsState();
+
+const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+function field(doc: SettingsDoc, path: string): unknown {
+  const [section, key] = path.split(".");
+  return (doc[section as keyof SettingsDoc] as unknown as Record<string, unknown>)[key];
+}
+export function settingsChanges(base: SettingsDoc, draft: SettingsDoc): Record<string, unknown> {
+  const changes: Record<string, unknown> = {};
+  for (const [section, fields] of Object.entries(draft)) for (const [key, value] of Object.entries(fields)) {
+    const path = `${section}.${key}`;
+    if (!same(field(base, path), value)) changes[path] = value === undefined ? value : clone(value);
+  }
+  return changes;
+}
+function applyChanges(base: SettingsDoc, changes: Record<string, unknown>): SettingsDoc {
+  const next = clone(base);
+  for (const [path, value] of Object.entries(changes)) {
+    const [section, key] = path.split(".");
+    (next[section as keyof SettingsDoc] as unknown as Record<string, unknown>)[key] = value === undefined ? value : clone(value);
+  }
+  return next;
+}

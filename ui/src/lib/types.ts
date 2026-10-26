@@ -241,10 +241,14 @@ export interface SettingsDoc {
 }
 
 export interface SettingsOutput {
+  revision: string | null;
   file: string;
   settings: SettingsDoc;
   warnings: string[];
 }
+
+export interface SettingsConflict { key: string; base: unknown; disk: unknown; mine: unknown }
+export interface SettingsSaveOutput extends SettingsOutput { status: "saved" | "conflict"; conflicts: SettingsConflict[] }
 
 export interface ModelInfo {
   id: string;

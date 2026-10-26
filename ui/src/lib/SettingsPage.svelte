@@ -17,7 +17,10 @@
 
   let { embedded = false }: { embedded?: boolean } = $props();
   onMount(() => {
-    if (!settings.draft) void settings.load();
+    if (!embedded || !settings.draft) void settings.load();
+    const leave = () => settings.confirmLeave();
+    app.settingsLeave = leave;
+    return () => { if (app.settingsLeave === leave) app.settingsLeave = null; };
   });
 
   const TABS = [
@@ -122,6 +125,8 @@
   }
 </script>
 
+<svelte:window onfocus={() => { if (!embedded) void settings.load(); }} />
+
 <div class="app has-savebar" class:embedded>
   <aside>
     <div class="brand">
@@ -148,6 +153,19 @@
       {#each settings.warnings as warning (warning)}
         <div class="note warn"><Icon name="warn" size={16} /><span>{warning}</span></div>
       {/each}
+
+      {#if settings.conflict}
+        <div class="note warn" role="alert">
+          <div><b>settings.toml изменён вне окна</b>
+            {#each settings.conflicts as conflict (conflict.key)}
+              <p><code>{conflict.key}</code>: было {JSON.stringify(conflict.base)}, на диске {JSON.stringify(conflict.disk)}, моё {JSON.stringify(conflict.mine)}</p>
+            {/each}
+            <button class="ghost" disabled={settings.saving || settings.loading} onclick={() => settings.resolveConflict(false)}>Взять с диска</button>
+            <button class="btn" disabled={settings.saving || settings.loading} onclick={() => settings.resolveConflict(true)}>Оставить моё</button>
+          </div>
+        </div>
+      {/if}
+      <fieldset disabled={settings.saving || settings.loading || !!settings.loadError} inert={settings.saving || settings.loading || !!settings.loadError}>
 
       {#if tab === "keybindings"}
         <KeybindingsPage />
@@ -392,6 +410,7 @@
           </div>
         </div>
       {/if}
+      </fieldset>
     </div>
   </main>
 </div>
@@ -401,12 +420,32 @@
     <span class="grow">
       {#if hasErrors}Есть ошибки в значениях — исправьте их, чтобы сохранить{:else if settings.dirty}Изменения не сохранены{:else}Настройки сохранены в <span class="mono">{settings.file}</span>{/if}
     </span>
-    <button class="ghost" disabled={!settings.dirty} onclick={() => settings.reset()}>Отменить</button>
-    <button class="btn" disabled={!settings.dirty || hasErrors || settings.saving} onclick={() => settings.save()}>{settings.saving ? "Сохраняю…" : "Сохранить"}</button>
+    <button class="ghost" disabled={!settings.dirty || settings.saving || settings.loading} onclick={() => settings.reset()}>Отменить</button>
+    <button class="btn" disabled={!settings.dirty || hasErrors || settings.saving || settings.loading || !!settings.loadError} onclick={() => settings.save()}>{settings.saving ? "Сохраняю…" : "Сохранить"}</button>
 </div>{/if}
 {/if}
 
+{#if settings.leaveOpen}
+  <dialog open use:leaveModal aria-label="Несохранённые настройки" oncancel={(event) => { event.preventDefault(); void settings.finishLeave("stay"); }}>
+    <h2>Сохранить изменения настроек?</h2>
+    <p>Правки ещё не записаны в settings.toml.</p>
+    <button class="btn" disabled={settings.saving} onclick={() => settings.finishLeave("save")}>Сохранить</button>
+    <button class="ghost" disabled={settings.saving} onclick={() => settings.finishLeave("discard")}>Не сохранять</button>
+    <button class="ghost" disabled={settings.saving} onclick={() => settings.finishLeave("stay")}>Остаться</button>
+  </dialog>
+{/if}
+
+<script lang="ts" module>
+  function leaveModal(node: HTMLDialogElement) {
+    node.removeAttribute("open"); node.showModal();
+    node.querySelector<HTMLButtonElement>("button:last-child")?.focus();
+  }
+</script>
+
 <style>
+  fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  dialog { z-index: 90; background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 20px; }
+  dialog::backdrop { background: rgb(0 0 0 / .35); }
   .app.embedded { height: 100%; grid-template-columns: 140px minmax(0, 1fr); padding-bottom: 64px; }
   .embedded .brand { padding: 8px; } .embedded .brand small { display: none; }
   .embedded .page { padding: 12px; } .embedded .nav button { font-size: 12px; padding: 5px 8px; }

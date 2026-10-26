@@ -76,9 +76,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let expected = format!("{}:{}", args[0], args[2]);
         if status.model_index.as_deref() != Some(expected.as_str()) { return Err("wrong index model".into()); }
         let current: SettingsOutput = serde_json::from_value(handler.dispatch(Call::SettingsGet(SettingsGetParams {})).await.map_err(|e| e.to_string())?)?;
-        let mut changed = current.settings;
+        let mut changed = current.settings.clone();
         changed.embed.batch_size = 3;
-        handler.dispatch(Call::SettingsSave(SettingsSaveParams { settings: changed.clone() })).await.map_err(|e| e.to_string())?;
+        handler.dispatch(Call::SettingsSave(SettingsSaveParams::between(current.clone(), changed.clone()))).await.map_err(|e| e.to_string())?;
         let saved: SettingsOutput = serde_json::from_value(handler.dispatch(Call::SettingsGet(SettingsGetParams {})).await.map_err(|e| e.to_string())?)?;
         if saved.settings != changed { return Err("settings roundtrip failed".into()); }
         let mut searches = Vec::new();

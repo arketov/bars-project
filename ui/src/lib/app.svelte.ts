@@ -67,7 +67,16 @@ class App {
   #watchTimer: ReturnType<typeof setInterval> | null = null;
   #watch = (): void => { void call("project_observe", { window: this.#windowId, project: this.current }).catch(() => {}); };
   #releaseWatch = (): void => { void call("project_observe", { window: this.#windowId, project: null }).catch(() => {}); };
-  view = $state<View>("main");
+  private currentView = $state<View>("main");
+  settingsLeave: (() => boolean | Promise<boolean>) | null = null;
+  get view(): View { return this.currentView; }
+  set view(next: View) {
+    if (this.currentView === "settings" && next !== "settings" && this.settingsLeave) {
+      const decision = this.settingsLeave();
+      if (typeof decision === "boolean") { if (decision) this.currentView = next; }
+      else void decision.then(ok => { if (ok && this.currentView === "settings") this.currentView = next; });
+    } else this.currentView = next;
+  }
   navigationVersion = $state(0);
   topicsVersion = $state(0);
   indexingOpen = $state(false);

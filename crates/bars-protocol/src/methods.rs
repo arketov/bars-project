@@ -786,6 +786,7 @@ pub struct SettingsDoc {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SettingsOutput {
+    pub revision: Option<String>,
     /// Путь к `settings.toml`.
     pub file: String,
     pub settings: SettingsDoc,
@@ -795,7 +796,52 @@ pub struct SettingsOutput {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SettingsSaveParams {
-    pub settings: SettingsDoc,
+    pub base: SettingsDoc,
+    pub changes: std::collections::BTreeMap<String, serde_json::Value>,
+    pub expected_revision: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SettingsConflict {
+    pub key: String,
+    pub base: serde_json::Value,
+    pub disk: serde_json::Value,
+    pub mine: serde_json::Value,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SettingsSaveOutput {
+    pub status: SettingsSaveStatus,
+    pub conflicts: Vec<SettingsConflict>,
+    #[serde(flatten)]
+    pub current: SettingsOutput,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SettingsSaveStatus {
+    Saved,
+    Conflict,
+}
+
+impl SettingsSaveParams {
+    pub fn between(base: SettingsOutput, settings: SettingsDoc) -> Self {
+        let old = serde_json::to_value(&base.settings).expect("settings serialize");
+        let new = serde_json::to_value(settings).expect("settings serialize");
+        let mut changes = std::collections::BTreeMap::new();
+        for (section, fields) in new.as_object().expect("settings object") {
+            for (key, value) in fields.as_object().expect("settings table") {
+                if value != &old[section][key] {
+                    changes.insert(format!("{section}.{key}"), value.clone());
+                }
+            }
+        }
+        Self {
+            base: base.settings,
+            expected_revision: base.revision,
+            changes,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1066,7 +1112,7 @@ methods! {
     IndexRetry: IndexRetryParams => RetryOutput, "index_retry", Window;
     Tree: TreeParams => TreeOutput, "tree", Window;
     SettingsGet: SettingsGetParams => SettingsOutput, "settings_get", Window;
-    SettingsSave: SettingsSaveParams => SavedOutput, "settings_save", Window;
+    SettingsSave: SettingsSaveParams => SettingsSaveOutput, "settings_save", Window;
     ModelsInfo: ModelsInfoParams => ModelsInfoOutput, "models_info", Window;
     ModelDownload: ModelDownloadParams => AcceptedOutput, "model_download", Window;
     SecretSet: SecretSetParams => SecretOutput, "secret_set", Window;

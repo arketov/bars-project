@@ -6,9 +6,8 @@ use bars_core::secrets::MemorySecrets;
 use bars_protocol::{
     AutostartGetParams, AutostartOutput, AutostartSetParams, CheckAllParams, ClientsStatusOutput,
     ClientsStatusParams, InstallClient, InstallParams, InstructionOutput, InstructionParams,
-    ModelDownloadParams, ModelsInfoOutput, ModelsInfoParams, SavedOutput, SecretOutput,
-    SecretSetParams, SecretStatusParams, SetDocsRootParams, SettingsGetParams, SettingsOutput,
-    SettingsSaveParams,
+    ModelDownloadParams, ModelsInfoOutput, ModelsInfoParams, SecretOutput, SecretSetParams,
+    SecretStatusParams, SetDocsRootParams, SettingsGetParams, SettingsOutput, SettingsSaveParams,
 };
 use serde::de::DeserializeOwned;
 
@@ -350,22 +349,25 @@ async fn settings_roundtrip_through_the_handler() {
     assert_eq!(output.settings.embed.source, "builtin");
     assert!(output.file.ends_with("settings.toml"));
 
-    let mut settings = output.settings;
+    let mut settings = output.settings.clone();
     settings.search.results = 9;
     settings.rerank.enabled = true;
-    let saved: SavedOutput = window
-        .call(Call::SettingsSave(SettingsSaveParams {
-            settings: settings.clone(),
-        }))
+    let saved: bars_protocol::SettingsSaveOutput = window
+        .call(Call::SettingsSave(SettingsSaveParams::between(
+            output.clone(),
+            settings.clone(),
+        )))
         .await;
-    assert!(saved.saved);
+    assert_eq!(saved.status, bars_protocol::SettingsSaveStatus::Saved);
     let again: SettingsOutput = window.call(Call::SettingsGet(SettingsGetParams {})).await;
     assert_eq!(again.settings.search.results, 9);
     assert!(again.settings.rerank.enabled);
 
     settings.chunking.min_chars = 0;
     let error = window
-        .error(Call::SettingsSave(SettingsSaveParams { settings }))
+        .error(Call::SettingsSave(SettingsSaveParams::between(
+            again, settings,
+        )))
         .await;
     assert_eq!(error.kind(), Some(ErrorKind::InvalidParams));
     window.worker.shutdown().await;
@@ -386,10 +388,12 @@ async fn saving_settings_puts_projects_with_another_model_into_reindex_required(
     window.provider.set_model("m2");
     let settings = window
         .call::<SettingsOutput>(Call::SettingsGet(SettingsGetParams {}))
-        .await
-        .settings;
+        .await;
     window
-        .call::<SavedOutput>(Call::SettingsSave(SettingsSaveParams { settings }))
+        .call::<bars_protocol::SettingsSaveOutput>(Call::SettingsSave(SettingsSaveParams::between(
+            settings.clone(),
+            settings.settings.clone(),
+        )))
         .await;
     window.idle().await;
     let status = window.worker.status(&root).unwrap();

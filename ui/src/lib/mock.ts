@@ -478,10 +478,20 @@ export async function mockCall(method: string, params: Record<string, unknown>):
     case "read":
       return { title: "Гибридный поиск", text: DOC_TEXT };
     case "settings_get":
-      return { file: "C:\\Users\\me\\.bars\\settings.toml", settings: clone(savedSettings), warnings: [] };
-    case "settings_save":
-      savedSettings = clone(params.settings as SettingsDoc);
-      return { saved: true };
+      return { file: "C:\\Users\\me\\.bars\\settings.toml", revision: JSON.stringify(savedSettings), settings: clone(savedSettings), warnings: [] };
+    case "settings_save": {
+      const next = clone(savedSettings) as unknown as Record<string, Record<string, unknown>>;
+      const base = params.base as Record<string, Record<string, unknown>>;
+      const conflicts = [];
+      for (const [path, mine] of Object.entries(params.changes as Record<string, unknown>)) {
+        const [section, key] = path.split('.');
+        const disk = next[section][key];
+        if (JSON.stringify(savedSettings) !== params.expected_revision && JSON.stringify(disk) !== JSON.stringify(base[section][key]) && JSON.stringify(disk) !== JSON.stringify(mine)) conflicts.push({ key: path, base: base[section][key], disk, mine });
+        next[section][key] = mine;
+      }
+      if (!conflicts.length) savedSettings = next as unknown as SettingsDoc;
+      return { status: conflicts.length ? "conflict" : "saved", conflicts, ...(await mockCall("settings_get", {}) as object) };
+    }
     case "models_info":
       return {
         runtime: null,
