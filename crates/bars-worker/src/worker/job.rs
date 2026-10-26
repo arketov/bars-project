@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 use bars_core::indexing::indexer::{
     IndexObserver, IndexingError, UpdateOutcome, UpdateReport, rebuild_index_observed,
-    update_index_observed,
+    update_index_paths_observed,
 };
 use bars_core::models::ModelFingerprint;
 use bars_core::settings::Settings;
@@ -103,7 +103,7 @@ pub fn run(env: &JobEnv<'_>, project: &Path, job: &Job) -> JobResult {
             rebuild.accepted,
             &mut result,
         ),
-        None => check_project(env, project, &settings, &mut result),
+        None => check_project(env, project, &settings, &mut result, &job.scope),
     };
     if matches!(outcome, Outcome::Updated(_)) {
         // Т-8: инструкция сверяется после каждой успешной проверки. Сбой записи индексацию
@@ -119,6 +119,7 @@ fn check_project(
     project: &Path,
     settings: &Settings,
     result: &mut JobResult,
+    scope: &super::queue::Scope,
 ) -> Outcome {
     let mut embedder = match env.models.embedder(settings) {
         Ok(embedder) => embedder,
@@ -128,12 +129,20 @@ fn check_project(
         Ok(index) => index,
         Err(error) => return Outcome::Failed(error.to_string()),
     };
-    let updated = update_index_observed(
+    let paths = match scope {
+        super::queue::Scope::Full => None,
+        super::queue::Scope::Files(files) => files
+            .iter()
+            .map(|path| super::doc_key(project, path))
+            .collect::<Option<std::collections::HashSet<_>>>(),
+    };
+    let updated = update_index_paths_observed(
         project,
         &mut index,
         &settings.index_settings(),
         &mut embedder,
         env.observer,
+        paths.as_ref(),
     );
     result.index_model = index
         .stored_fingerprint()

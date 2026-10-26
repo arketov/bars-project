@@ -13,16 +13,22 @@ $env:CMAKE_GENERATOR='Ninja'
 $env:CMAKE_BUILD_PARALLEL_LEVEL='1'
 $env:RUST_TEST_THREADS='1'
 cargo fmt --all
-if ($Mode -eq 'native') {
-    New-Item -ItemType Directory -Force docs/chats/2026-10-26-indexing-activity/native | Out-Null
+if ($Mode -in @('native', 'native-queue')) {
+    $probeFolder = if ($Mode -eq 'native-queue') { 'native-queue' } else { 'native' }
+    $probeScript = if ($Mode -eq 'native-queue') { 'indexing_queue_probe.js' } else { 'indexing_activity_probe.js' }
+    New-Item -ItemType Directory -Force "docs/chats/2026-10-26-indexing-activity/$probeFolder" | Out-Null
     cargo build -j 2 -p bars-app --example workspace_probe
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     mt.exe -manifest crates/bars-app/examples/workspace_probe.manifest '-outputresource:C:/bt/bars/debug/examples/workspace_probe.exe;#1'
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-    & C:/bt/bars/debug/examples/workspace_probe.exe "$PWD/docs/chats/2026-10-26-indexing-activity/native" "$PWD/crates/bars-app/examples/indexing_activity_probe.js"
+    & C:/bt/bars/debug/examples/workspace_probe.exe "$PWD/docs/chats/2026-10-26-indexing-activity/$probeFolder" "$PWD/crates/bars-app/examples/$probeScript"
     exit $LASTEXITCODE
 }
 if ($Mode -eq 'all') { & pwsh -File scripts/check.ps1 -Jobs 2; exit $LASTEXITCODE }
+if ($Mode -eq 'bulk') {
+    cargo test -j 2 --workspace --lib --tests --bins --no-fail-fast hundreds_of_files_at_once_reach_the_index
+    exit $LASTEXITCODE
+}
 if ($Mode -eq 'verify') {
     cargo clippy -j 2 --workspace --all-targets -- -D warnings
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

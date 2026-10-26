@@ -27,7 +27,9 @@ export function operationText(op: Operation): string {
     return "Результат недоступен";
   }
   const stages: Record<string, string> = { queued: "В очереди", queue_paused: "Очередь на паузе", pause_requested: "Пауза запрошена · после текущего документа", paused: "На паузе · вся очередь", stop_requested: "Остановка запрошена" };
-  if (stages[op.state]) return stages[op.state] + (op.state === "queued" && op.queue_position !== undefined && op.queue_position !== null ? ` · перед ним ${op.queue_position} заданий` : "");
+  if (stages[op.state]) return stages[op.state]
+    + (op.kind === "files" && op.docs_total !== null ? ` · документов: ${op.docs_total}` : "")
+    + (op.state === "queued" && op.queue_position !== undefined && op.queue_position !== null ? ` · перед ним ${op.queue_position} заданий` : "");
   if (op.kind === "download" || op.kind === "prepare") return op.percent === 100 ? (op.kind === "download" ? "Файлы 100 % · проверка файлов" : "Файлы 100 % · подготовка модели") : op.kind === "download" ? "Скачивание файлов модели" : "Подготовка модели";
   return op.docs_total === null ? "Обход папки" : `${op.docs_done ?? 0} из ${op.docs_total} документов`;
 }
@@ -96,7 +98,7 @@ export class NotificationCenter {
       const previous = this.items.find(n => n.id === id);
       const silent = op.source !== "explicit" && op.state === "success" && op.report && op.report.added + op.report.changed + op.report.removed === 0 && !op.report.problems;
       if (silent) { this.items = this.items.filter(n => n.id !== id); continue; }
-      const names: Record<string, string> = { scan: "Проверка файлов", check: "Проверка индекса", files: "Проверка изменений", rebuild: "Переиндексация", download: "Скачивание модели", prepare: "Подготовка модели" };
+      const names: Record<string, string> = { scan: "Проверка файлов", check: "Обновление индекса", files: "Обновление документов", rebuild: "Переиндексация", download: "Скачивание модели", prepare: "Подготовка модели" };
       const percent = terminal ? null : op.percent ?? (op.docs_total ? Math.min(100, Math.round((op.docs_done ?? 0) / op.docs_total * 100)) : null);
       const signature = id === problemId ? `${op.state}:${op.error}:${JSON.stringify(op.report)}` : terminal ? `${op.sequence}:${op.state}` : "active";
       this.put({ id, title: names[op.kind] ?? "Операция", text: operationText(op), active: !terminal, bad, percent, operation: op, epoch: output.epoch, project: op.project ?? undefined, target: op.project ? "indexing" : "models", updatedAt: this.signatures.get(id) === signature ? previous?.updatedAt : terminal ? op.finished_at! : previous?.updatedAt ?? op.started_at }, signature, terminal || op.source === "explicit" && !first);

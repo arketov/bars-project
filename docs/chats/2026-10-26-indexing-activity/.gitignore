@@ -1,8 +1,10 @@
 *.txt
 native/fixture-*/
+native-queue/fixture-*/
 *.patch
 *.index
 index-baseline.*
 index-task.*
 commit-task.ps1
+commit-queue.ps1
 preserve-eol.cjs

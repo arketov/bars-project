@@ -268,10 +268,21 @@ impl DocQueue {
         &mut self,
         project: &Path,
         explicit: Option<Option<&BTreeSet<String>>>,
+        selected: Option<&BTreeSet<String>>,
     ) -> Vec<String> {
         let mut taken = Vec::new();
         for ((owner, path), entry) in &mut self.entries {
             if owner != project {
+                continue;
+            }
+            if selected.is_some_and(|paths| {
+                !paths.iter().any(|prefix| {
+                    path == prefix
+                        || path
+                            .strip_prefix(prefix)
+                            .is_some_and(|rest| rest.starts_with('/'))
+                })
+            }) {
                 continue;
             }
             let take = match entry.state {
@@ -489,6 +500,21 @@ impl bars_core::indexing::indexer::IndexObserver for Observer {
 mod tests {
     use super::*;
 
+    #[test]
+    fn selected_job_does_not_claim_or_remove_other_queued_documents() {
+        let mut queue = DocQueue::new();
+        let now = Instant::now();
+        for path in ["docs/a.md", "docs/b.md"] {
+            queue.touch(&project(), path, DocSource::Watch, Duration::ZERO, now);
+        }
+        let selected = BTreeSet::from(["docs/a.md".to_owned()]);
+        let taken = queue.begin(&project(), None, Some(&selected));
+        assert_eq!(taken, ["docs/a.md"]);
+        queue.finish(&project(), &taken, &BTreeMap::new(), false);
+        assert_eq!(queue.counts(&project()).queued, 1);
+        assert_eq!(queue.begin(&project(), None, None), ["docs/b.md"]);
+    }
+
     const PAUSE: Duration = Duration::from_secs(30);
 
     fn project() -> PathBuf {
@@ -545,7 +571,7 @@ mod tests {
         let base = Instant::now();
         let mut queue = DocQueue::new();
         queue.touch(&project(), "a.md", DocSource::Edit, Duration::ZERO, base);
-        let taken = queue.begin(&project(), None);
+        let taken = queue.begin(&project(), None, None);
         assert_eq!(taken, vec!["a.md".to_string()]);
         queue.start(&project(), "a.md");
         queue.touch(&project(), "a.md", DocSource::Edit, PAUSE, at(base, 1));
@@ -563,7 +589,7 @@ mod tests {
         for path in ["ok.md", "bad.md"] {
             queue.touch(&project(), path, DocSource::Watch, Duration::ZERO, now);
         }
-        let taken = queue.begin(&project(), None);
+        let taken = queue.begin(&project(), None, None);
         let failed = BTreeMap::from([("bad.md".to_string(), "сбой модели".to_string())]);
         queue.finish(&project(), &taken, &failed, false);
         assert_eq!(queue.len(), 1);
@@ -588,7 +614,7 @@ mod tests {
         for path in ["a.md", "b.md", "c.md"] {
             queue.touch(&project(), path, DocSource::Watch, Duration::ZERO, now);
         }
-        let taken = queue.begin(&project(), None);
+        let taken = queue.begin(&project(), None, None);
         let failed = BTreeMap::from([("a.md".to_string(), "сбой".to_string())]);
         queue.finish(&project(), &taken, &failed, true);
         let counts = queue.counts(&project());
@@ -602,16 +628,19 @@ mod tests {
         queue.touch(&project(), "a.md", DocSource::Edit, PAUSE, now);
         queue.touch(&project(), "b.md", DocSource::Edit, PAUSE, now);
         queue.touch(&project(), "r.md", DocSource::Watch, Duration::ZERO, now);
-        assert_eq!(queue.begin(&project(), None), vec!["r.md".to_string()]);
+        assert_eq!(
+            queue.begin(&project(), None, None),
+            vec!["r.md".to_string()]
+        );
 
         let listed = BTreeSet::from(["a.md".to_string()]);
         assert_eq!(
-            queue.begin(&project(), Some(Some(&listed))),
+            queue.begin(&project(), Some(Some(&listed)), None),
             vec!["a.md".to_string()]
         );
         assert!(queue.is_waiting(&project(), "b.md"));
         assert_eq!(
-            queue.begin(&project(), Some(None)),
+            queue.begin(&project(), Some(None), None),
             vec!["b.md".to_string()]
         );
     }
@@ -677,7 +706,7 @@ mod tests {
         assert!(queue.is_error(&project(), "bad.md"));
         assert!(queue.priority(&project(), "edit.md") > queue.priority(&project(), "bad.md"));
         let listed = BTreeSet::from(["bad.md".into()]);
-        queue.begin(&project(), Some(Some(&listed)));
+        queue.begin(&project(), Some(Some(&listed)), None);
         assert!(!queue.is_error(&project(), "bad.md"));
         assert!(queue.is_waiting(&project(), "edit.md"));
     }

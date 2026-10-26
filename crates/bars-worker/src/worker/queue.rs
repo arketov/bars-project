@@ -40,6 +40,8 @@ pub struct Job {
     pub operation_id: u64,
     pub priority: Priority,
     pub scope: Scope,
+    /// Обновление продолжает полный scan: после применения проверяется потерянный хвост notify.
+    pub reconciled: bool,
     /// Если задано, вместо проверки актуальности строится новый индекс.
     pub rebuild: Option<Rebuild>,
 }
@@ -50,6 +52,7 @@ impl Job {
             operation_id: 0,
             priority,
             scope: Scope::Full,
+            reconciled: true,
             rebuild: None,
         }
     }
@@ -59,6 +62,7 @@ impl Job {
             operation_id: 0,
             priority,
             scope: Scope::Files(files.into_iter().collect()),
+            reconciled: false,
             rebuild: None,
         }
     }
@@ -68,6 +72,7 @@ impl Job {
             operation_id: 0,
             priority: Priority::Explicit,
             scope: Scope::Full,
+            reconciled: false,
             rebuild: Some(Rebuild { accepted }),
         }
     }
@@ -83,6 +88,7 @@ impl Job {
     /// Сливает повторное задание в это: больший приоритет, полная проверка поглощает список
     /// файлов, переиндексация поглощает проверку, согласие хоть одного задания сохраняется.
     fn merge(&mut self, other: Job) {
+        self.reconciled |= other.reconciled;
         self.priority = self.priority.max(other.priority);
         self.scope = match (std::mem::replace(&mut self.scope, Scope::Full), other.scope) {
             (Scope::Files(mut mine), Scope::Files(theirs)) => {
@@ -137,16 +143,25 @@ impl JobQueue {
         self.next_seq += 1;
     }
 
-    /// Забирает задание с наибольшим приоритетом; при равных — самое давнее.
-    pub fn pop(&mut self) -> Option<(PathBuf, Job)> {
-        let position = self
-            .entries
-            .iter()
-            .enumerate()
-            .max_by(|(_, a), (_, b)| a.job.priority.cmp(&b.job.priority).then(b.seq.cmp(&a.seq)))
-            .map(|(position, _)| position)?;
+    /// Занятый проект остаётся в очереди; выбирается старшее доступное задание.
+    pub fn pop_available<T>(
+        &mut self,
+        mut acquire: impl FnMut(&Path) -> Option<T>,
+    ) -> Option<(PathBuf, Job, T)> {
+        let mut candidates: Vec<_> = self.entries.iter().enumerate().collect();
+        candidates
+            .sort_by(|(_, a), (_, b)| b.job.priority.cmp(&a.job.priority).then(a.seq.cmp(&b.seq)));
+        let (position, guard) = candidates
+            .into_iter()
+            .find_map(|(position, entry)| acquire(&entry.project).map(|guard| (position, guard)))?;
         let entry = self.entries.remove(position);
-        Some((entry.project, entry.job))
+        Some((entry.project, entry.job, guard))
+    }
+
+    #[cfg(test)]
+    fn pop(&mut self) -> Option<(PathBuf, Job)> {
+        self.pop_available(|_| Some(()))
+            .map(|(path, job, ())| (path, job))
     }
 
     /// Снимает проект с очереди; `true`, если он там был.
@@ -184,6 +199,22 @@ mod tests {
 
     fn p(name: &str) -> PathBuf {
         PathBuf::from(name)
+    }
+
+    #[test]
+    fn unavailable_head_remains_mergeable_and_ready_priority_is_preserved() {
+        let mut queue = JobQueue::new();
+        queue.push(&p("blocked"), Job::check(Priority::Explicit));
+        queue.push(&p("low"), Job::check(Priority::Periodic));
+        queue.push(&p("ready"), Job::check(Priority::Watch));
+        let (path, _, ()) = queue
+            .pop_available(|path| (path != p("blocked")).then_some(()))
+            .unwrap();
+        assert_eq!(path, p("ready"));
+        queue.push(&p("blocked"), Job::files(Priority::Watch, [p("new.md")]));
+        assert_eq!(queue.snapshot().len(), 2);
+        assert_eq!(queue.pop().unwrap().0, p("blocked"));
+        assert_eq!(queue.pop().unwrap().0, p("low"));
     }
 
     #[test]

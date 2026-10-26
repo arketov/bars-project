@@ -180,6 +180,18 @@ pub fn update_index_observed(
     embedder: &mut dyn Embedder,
     observer: &dyn IndexObserver,
 ) -> Result<UpdateOutcome, IndexingError> {
+    update_index_paths_observed(project_root, index, settings, embedder, observer, None)
+}
+
+/// Применяет найденные документы/каталоги; смена layout требует всей области.
+pub fn update_index_paths_observed(
+    project_root: &Path,
+    index: &mut Index,
+    settings: &IndexSettings,
+    embedder: &mut dyn Embedder,
+    observer: &dyn IndexObserver,
+    paths: Option<&HashSet<String>>,
+) -> Result<UpdateOutcome, IndexingError> {
     match index.compatibility(embedder.fingerprint())? {
         Compatibility::ModelChanged => {
             return Ok(UpdateOutcome::ReindexRequired(ReindexReason::ModelChanged));
@@ -195,7 +207,7 @@ pub fn update_index_observed(
         }
         Compatibility::Compatible => {}
     }
-    run_update(project_root, index, settings, embedder, observer).map(UpdateOutcome::Updated)
+    run_update(project_root, index, settings, embedder, observer, paths).map(UpdateOutcome::Updated)
 }
 
 /// Строит индекс заново во временном файле рядом с `index_path` и подменяет им старый.
@@ -280,7 +292,7 @@ fn build_new(
     let mut index = Index::open(new_path, Journal::Delete)?;
     embedder.prepare()?;
     index.write_fingerprint(&embedder.fingerprint().clone())?;
-    let report = run_update(project_root, &mut index, settings, embedder, observer)?;
+    let report = run_update(project_root, &mut index, settings, embedder, observer, None)?;
     index.close()?;
     Ok(report)
 }
@@ -291,6 +303,7 @@ fn run_update(
     settings: &IndexSettings,
     embedder: &mut dyn Embedder,
     observer: &dyn IndexObserver,
+    paths: Option<&HashSet<String>>,
 ) -> Result<UpdateReport, IndexingError> {
     let mut walk = walk_docs(project_root, Path::new(&settings.docs_root))?;
     let layout = settings.layout();
@@ -298,15 +311,25 @@ fn run_update(
         full_check: index.stored_layout()?.as_ref() != Some(&layout),
         ..UpdateReport::default()
     };
-    report
-        .problems
-        .extend(walk.problems.iter().map(problem_from_walk));
-
-    let stored: HashMap<String, StoredDocument> = index
+    let mut stored: HashMap<String, StoredDocument> = index
         .documents()?
         .into_iter()
         .map(|document| (document.path.clone(), document))
         .collect();
+
+    if let Some(paths) = paths.filter(|_| !report.full_check) {
+        walk.files.retain(|file| in_update_scope(paths, &file.path));
+        stored.retain(|path, _| in_update_scope(paths, path));
+        walk.problems.retain(|problem| {
+            in_update_scope(paths, &problem.path)
+                || paths
+                    .iter()
+                    .any(|path| is_covered_by_problem(path, std::slice::from_ref(problem)))
+        });
+    }
+    report
+        .problems
+        .extend(walk.problems.iter().map(problem_from_walk));
 
     let on_disk: HashSet<&str> = walk.files.iter().map(|file| file.path.as_str()).collect();
     let changed: Vec<String> = walk
@@ -399,6 +422,18 @@ fn run_update(
                 source: Box::new(source),
             })
         }
+    }
+}
+
+fn in_update_scope(paths: &HashSet<String>, mut path: &str) -> bool {
+    loop {
+        if paths.contains(path) {
+            return true;
+        }
+        let Some((parent, _)) = path.rsplit_once('/') else {
+            return false;
+        };
+        path = parent;
     }
 }
 

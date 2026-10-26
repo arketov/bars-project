@@ -1088,6 +1088,17 @@ impl Inner {
         queue.push(project, job);
         let merged = queue.get(project).expect("задание поставлено");
         journal.edit(id, |op| {
+            op.docs_total = match &merged.scope {
+                queue::Scope::Files(files)
+                    if files.iter().all(|path| {
+                        path.extension()
+                            .is_some_and(|ext| ext.eq_ignore_ascii_case("md"))
+                    }) =>
+                {
+                    Some(files.len())
+                }
+                _ => None,
+            };
             op.kind = match JobKind::of(merged) {
                 JobKind::Rebuild => "rebuild",
                 JobKind::Check => "check",
@@ -1464,19 +1475,36 @@ impl Inner {
                 continue;
             }
             let next = {
+                let projects = lock(&self.projects);
                 let mut queue = lock(&self.queue);
-                let next = queue.pop();
+                let next = queue.pop_available(|path| {
+                    let runtime = projects.get(path).filter(|runtime| !runtime.deleting)?;
+                    let job_gate = Arc::clone(&runtime.job_gate);
+                    let guard = Arc::clone(&job_gate).try_lock_owned().ok()?;
+                    Some((job_gate, guard))
+                });
                 if next.is_some() {
                     self.busy.store(true, Ordering::SeqCst);
                 }
                 next
             };
             match next {
-                Some((path, job)) => {
-                    self.process(path, job).await;
+                Some((path, job, (job_gate, guard))) => {
+                    self.process(path, job, job_gate, guard).await;
                     self.busy.store(false, Ordering::SeqCst);
                 }
-                None => self.wake.notified().await,
+                None => {
+                    // Чужой держатель gate может не сигналить очередь; проверяем только готовность.
+                    let blocked = !lock(&self.queue).is_empty();
+                    if blocked {
+                        tokio::select! {
+                            () = self.wake.notified() => {},
+                            () = tokio::time::sleep(Duration::from_millis(50)) => {},
+                        }
+                    } else {
+                        self.wake.notified().await;
+                    }
+                }
             }
         }
     }
@@ -1493,18 +1521,17 @@ impl Inner {
         }
     }
 
-    async fn process(self: &Arc<Self>, path: PathBuf, job: Job) {
+    async fn process(
+        self: &Arc<Self>,
+        path: PathBuf,
+        job: Job,
+        job_gate: Arc<tokio::sync::Mutex<()>>,
+        _project_lease: tokio::sync::OwnedMutexGuard<()>,
+    ) {
         let operation_id = job.operation_id;
         let _pending = operations::PendingResult(Arc::clone(&self.models.operations), operation_id);
         let rebuild = job.rebuild.is_some();
-        let Some(job_gate) = lock(&self.projects)
-            .get(&path)
-            .map(|r| Arc::clone(&r.job_gate))
-        else {
-            return;
-        };
-        let _job = Arc::clone(&job_gate).lock_owned().await;
-        let full_check = job.rebuild.is_none() && job.scope == queue::Scope::Full;
+        let full_check = job.rebuild.is_none() && job.reconciled;
         let periodic = job.priority == Priority::Periodic;
         let cell = JobCell::new(&path, &job);
         let (gate, previous) = {
@@ -1547,7 +1574,7 @@ impl Inner {
             } else {
                 None
             };
-            lock(&self.docs).begin(&path, explicit)
+            lock(&self.docs).begin(&path, explicit, listed.as_ref())
         };
         let worker = Arc::clone(self);
         let project = path.clone();

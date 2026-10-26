@@ -1,0 +1,33 @@
+{
+  "observationDate": "2026-10-26",
+  "source": "MCP bars_status и скриншот автора; процесс воркера 22980",
+  "projects": [
+    {
+      "project": "bars-project",
+      "state": "ready",
+      "pending": 359,
+      "updatedAtUtc": "2026-10-26T11:15:20Z",
+      "lastError": null,
+      "graph": {
+        "activeJob": null,
+        "jobState": "idle",
+        "phase": "publish",
+        "reportedElapsedMs": 6201
+      }
+    },
+    {
+      "project": "overdrive-bots",
+      "state": "ready",
+      "pending": 79,
+      "updatedAtUtc": null,
+      "lastError": null,
+      "graph": {
+        "activeJob": "graph:5",
+        "jobState": "running",
+        "phase": "publish",
+        "reportedElapsedMs": 3172
+      }
+    }
+  ],
+  "qualification": "Стек вызовов живого графа не снимался. Блокировка начала очереди и повторные queued-ID воспроизведены отдельно удержанием блокировки проекта в регрессионном тесте."
+}

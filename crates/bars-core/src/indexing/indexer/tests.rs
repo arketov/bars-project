@@ -7,6 +7,100 @@ use crate::storage::index_path;
 const DIM: usize = 4;
 
 #[test]
+fn scoped_update_embeds_only_selected_changes_and_preserves_other_pending_changes() {
+    let dir = tempfile::tempdir().unwrap();
+    for name in ["a", "b", "c"] {
+        write(
+            dir.path(),
+            &format!("docs/{name}.md"),
+            &format!("# Исходный {name}\n"),
+        );
+    }
+    let mut index = open(dir.path());
+    let mut embedder = FakeEmbedder::new("m");
+    updated(dir.path(), &mut index, &mut embedder);
+    let before = embedder.vectors_computed;
+    write(dir.path(), "docs/a.md", "# Изменённый первый документ\n");
+    write(dir.path(), "docs/b.md", "# Изменённый второй документ\n");
+    std::fs::remove_file(dir.path().join("docs/c.md")).unwrap();
+    let only_a = HashSet::from(["docs/a.md".to_owned()]);
+    let UpdateOutcome::Updated(report) = update_index_paths_observed(
+        dir.path(),
+        &mut index,
+        &settings(),
+        &mut embedder,
+        &NoObserver,
+        Some(&only_a),
+    )
+    .unwrap() else {
+        panic!("ожидалось обновление")
+    };
+    assert_eq!(
+        (
+            report.added,
+            report.changed,
+            report.removed,
+            report.unchanged
+        ),
+        (0, 1, 0, 0)
+    );
+    assert_eq!(embedder.vectors_computed, before + 1);
+    assert_eq!(
+        index.document_count().unwrap(),
+        3,
+        "невыбранное удаление ждёт своей очереди"
+    );
+    let UpdateOutcome::Updated(report) = update_index_paths_observed(
+        dir.path(),
+        &mut index,
+        &settings(),
+        &mut embedder,
+        &NoObserver,
+        Some(&only_a),
+    )
+    .unwrap() else {
+        panic!("ожидалось обновление")
+    };
+    assert_eq!(report.unchanged, 1);
+    assert_eq!(
+        embedder.vectors_computed,
+        before + 1,
+        "повтор не пересчитывает вектор"
+    );
+    let report = updated(dir.path(), &mut index, &mut embedder);
+    assert_eq!((report.changed, report.removed), (1, 1));
+    assert_eq!(embedder.vectors_computed, before + 2);
+}
+
+#[test]
+fn scoped_directory_update_includes_children_and_ignores_other_directories() {
+    let dir = tempfile::tempdir().unwrap();
+    write(dir.path(), "docs/group/a.md", "# А\n");
+    write(dir.path(), "docs/other/b.md", "# Б\n");
+    let mut index = open(dir.path());
+    let mut embedder = FakeEmbedder::new("m");
+    updated(dir.path(), &mut index, &mut embedder);
+    write(dir.path(), "docs/group/new.md", "# Новый внутри группы\n");
+    write(dir.path(), "docs/other/new.md", "# Новый в другой группе\n");
+    let selected = HashSet::from(["docs/group".to_owned()]);
+    let UpdateOutcome::Updated(report) = update_index_paths_observed(
+        dir.path(),
+        &mut index,
+        &settings(),
+        &mut embedder,
+        &NoObserver,
+        Some(&selected),
+    )
+    .unwrap() else {
+        panic!("ожидалось обновление")
+    };
+    assert_eq!((report.added, report.unchanged), (1, 1));
+    assert_eq!(index.document_count().unwrap(), 3);
+    assert!(paths(&index).contains(&"docs/group/new.md".to_owned()));
+    assert!(!paths(&index).contains(&"docs/other/new.md".to_owned()));
+}
+
+#[test]
 fn scan_discovery_excludes_metadata_only_changes_and_includes_confirmed_deletions() {
     #[derive(Default)]
     struct Found(std::cell::RefCell<Vec<String>>);

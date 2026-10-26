@@ -15,6 +15,23 @@ const events = (active: Operation[] = [], completed: Operation[] = [], cursor = 
 const report = { added: 1, changed: 2, removed: 3, unchanged: 4, problems: 0, index_applied: true };
 const finished = (patch: Partial<Operation> = {}) => op({ sequence: 1, state: "success", finished_at: "2026-10-18T10:00:03Z", report, ...patch });
 
+it("distinguishes independent file scans from queued index and document updates", () => {
+  const c = new NotificationCenter();
+  c.events(events([
+    op({ id: 1, kind: "scan", state: "running" }),
+    op({ id: 2, kind: "check", state: "queued" }),
+    op({ id: 3, kind: "files", state: "queued" }),
+  ]));
+  expect(c.items.map(item => item.title).sort()).toEqual(["Обновление документов", "Обновление индекса", "Проверка файлов"]);
+  c.events(events([
+    op({ id: 1, kind: "scan", state: "running", docs_done: 3 }),
+    op({ id: 2, kind: "check", state: "queued", queue_position: 0 }),
+    op({ id: 3, kind: "files", state: "queued", queue_position: 1 }),
+  ]));
+  expect(c.items).toHaveLength(3);
+  expect(c.items.find(item => item.operation?.id === 3)?.text).toContain("документов: 10");
+});
+
 it("updates one card without reordering or unread progress; completion requires attention", () => {
   const c = new NotificationCenter(); c.events(events([op()])); c.read();
   c.events(events([op({ docs_done: 4 })]));

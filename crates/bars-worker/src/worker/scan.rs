@@ -128,6 +128,7 @@ impl Worker {
             key,
         );
         let cancel = Arc::new(AtomicBool::new(false));
+        lock(&self.inner.models.operations).edit(id, |op| op.state = "running".into());
         let scan_priority = Arc::new(Mutex::new(priority));
         scans.insert(
             path.clone(),
@@ -257,10 +258,10 @@ impl Worker {
                                 )
                             }) {
                                 let mut docs = lock(&inner.docs);
-                                for document in paths {
+                                for document in &paths {
                                     docs.found(
                                         &path,
-                                        &document,
+                                        document,
                                         match priority {
                                             Priority::Explicit => DocSource::Explicit,
                                             Priority::Edit => DocSource::Edit,
@@ -270,7 +271,16 @@ impl Worker {
                                     );
                                 }
                             }
-                            inner.enqueue_for(&path, Job::check(priority), &projects);
+                            let mut job = if report.full_check || paths.is_empty() {
+                                Job::check(priority)
+                            } else {
+                                Job::files(
+                                    priority,
+                                    paths.into_iter().map(|document| path.join(document)),
+                                )
+                            };
+                            job.reconciled = true;
+                            inner.enqueue_for(&path, job, &projects);
                         }
                         lock(&inner.models.operations).finish(
                             id,

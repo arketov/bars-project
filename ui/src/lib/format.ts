@@ -80,7 +80,7 @@ export const SCORE_LABEL: Record<ScoreKind, string> = { rerank: "rerank", cosine
 export function jobReason(kind: JobKind, priority: JobPriority, files: number): string {
   if (kind === "rebuild") return "полная переиндексация по согласию";
   if (kind === "files") return `правки файлов, ${documents(files)}`;
-  return priority === "periodic" ? "проверка при старте или по часам" : "проверка по запросу";
+  return priority === "periodic" ? "первичное или фоновое обновление" : "обновление по запросу";
 }
 
 export interface DotInfo {

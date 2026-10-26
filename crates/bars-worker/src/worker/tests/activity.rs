@@ -1,6 +1,75 @@
 use super::*;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn busy_project_stays_merged_while_other_project_updates_and_scans_finish() {
+    let env = Env::new();
+    let one = env.project("blocked", &[("a.md", DOC)]);
+    let two = env.project("ready", &[("a.md", DOC)]);
+    let worker = env.start();
+    worker.register(&one).unwrap();
+    worker.register(&two).unwrap();
+    idle(&worker).await;
+    let before = env.provider.counters.texts.load(Ordering::SeqCst);
+    let job_gate = lock(&worker.inner.projects)[&one].job_gate.clone();
+    let held = job_gate.lock_owned().await;
+    worker.pause();
+    fs::write(one.join("docs/a.md"), "# Изменение занятого проекта\n").unwrap();
+    fs::write(two.join("docs/a.md"), "# Изменение готового проекта\n").unwrap();
+    worker.scan_receipt(&one).unwrap();
+    worker.scan_receipt(&two).unwrap();
+    wait_until(
+        "обе проверки закончились без обработчика обновления",
+        || lock(&worker.inner.scans).is_empty(),
+    )
+    .await;
+    let id = lock(&worker.inner.queue).get(&one).unwrap().operation_id;
+    worker.resume();
+    wait_until(
+        "готовый проект обошёл занятый",
+        || {
+            worker
+                .status(&two)
+                .unwrap()
+                .last_report
+                .is_some_and(|report| report.changed == 1)
+        },
+    )
+    .await;
+    assert_eq!(
+        env.provider.counters.texts.load(Ordering::SeqCst),
+        before + 1
+    );
+    for _ in 0..3 {
+        worker.scan_receipt(&one).unwrap();
+        wait_until(
+            "повторная проверка завершена",
+            || lock(&worker.inner.scans).is_empty(),
+        )
+        .await;
+        let queued = worker.queued();
+        assert_eq!(queued.len(), 1);
+        assert_eq!(
+            lock(&worker.inner.queue).get(&one).unwrap().operation_id,
+            id
+        );
+        let active = worker.operation_events(&Default::default()).active;
+        let updates: Vec<_> = active
+            .iter()
+            .filter(|op| op.project.as_deref() == one.to_str() && op.kind != "scan")
+            .collect();
+        assert_eq!(updates.len(), 1);
+        assert_eq!(updates[0].state, "queued");
+    }
+    drop(held);
+    idle(&worker).await;
+    assert_eq!(
+        env.provider.counters.texts.load(Ordering::SeqCst),
+        before + 2
+    );
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn inactive_checks_do_not_queue_unchanged_projects_or_embed() {
     let env = Env::new();
     let project = env.project("quiet", &[("a.md", DOC)]);

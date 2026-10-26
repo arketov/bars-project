@@ -148,6 +148,17 @@ impl Worker {
             let mut layer = layer;
             let mut build_state = bars_core::graph::GraphBuildState::default();
             loop {
+                if inner.stop.load(Ordering::Acquire) {
+                    return;
+                }
+                // Между квантами сначала применяем новые документы, иначе граф гоняет старые входы.
+                let update_waiting =
+                    !inner.pause.is_paused() && lock(&inner.queue).get(&project).is_some();
+                if update_waiting {
+                    inner.wake.notify_one();
+                    tokio::time::sleep(Duration::from_millis(10)).await;
+                    continue;
+                }
                 let job_guard = job_gate.clone().lock_owned().await;
                 if inner.stop.load(Ordering::Acquire)
                     || !lock(&inner.projects)
@@ -215,6 +226,7 @@ impl Worker {
                 }
                 drop(read_guard);
                 drop(job_guard);
+                inner.wake.notify_one();
                 force = false;
                 let (retry, stopped, continuing) = match result {
                     Ok(Ok(AttemptResult::Done)) => (None, false, false),
