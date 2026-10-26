@@ -1,0 +1,63 @@
+{
+  "task": "2.4.1",
+  "date": "2026-10-26",
+  "gate": {
+    "command": "pwsh -File scripts/check.ps1 -Jobs 1",
+    "rust_test_threads": 1,
+    "passed": true,
+    "log": "check-alone.txt",
+    "sha256": "fd9e435da2c50c3fb90bfd9aa31909435924e1c0af94514c7f27ebc9cb14c565",
+    "steps": [
+      {
+        "step": "cargo fmt --check",
+        "exit_code": 0
+      },
+      {
+        "step": "cargo clippy",
+        "exit_code": 0
+      },
+      {
+        "step": "cargo build",
+        "exit_code": 0
+      },
+      {
+        "step": "cargo test",
+        "exit_code": 0
+      },
+      {
+        "step": "ui: npm run check",
+        "exit_code": 0
+      },
+      {
+        "step": "ui: npm test",
+        "exit_code": 0
+      }
+    ],
+    "ui_test_files": 68,
+    "ui_tests": 522
+  },
+  "native": {
+    "artifact": "result.json",
+    "checks": 10,
+    "passed": true,
+    "provider": "FakeProvider",
+    "documents": 3
+  },
+  "fts": {
+    "negative": "fts-schema-reproduction-4.txt",
+    "error_code": 17,
+    "snapshot": "fts-schema-snapshot.txt",
+    "search_regressions": 2
+  },
+  "ipc": {
+    "negative": "ipc-isolation-before-3.txt",
+    "positive": "ipc-isolation-after-2.txt",
+    "separate_registries": true
+  },
+  "remaining": [
+    "2.4.2",
+    "OQ-207",
+    "installed-app acceptance",
+    "real-corpus T-47 acceptance"
+  ]
+}

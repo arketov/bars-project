@@ -103,6 +103,11 @@
 
   <div class="results">
     <div class="wrap">
+      {#if app.searchUnsaved.length}
+        <div role="alert" class="save-warning">
+          {#each app.searchUnsaved as item}<p>Не записано: <button class="link" onclick={() => app.openSearchUnsaved(item.path)}>{item.path}</button> — {item.reason}{item.reason.endsWith(".") ? "" : "."} Результаты по записанной версии.</p>{/each}
+        </div>
+      {/if}
       <TextResults />
       {#if app.searchedQuery}<h2 class="semantic-title">По смыслу</h2>{/if}
       {#if app.searching}<p role="status">Ищем…</p>{/if}
@@ -232,6 +237,8 @@
 </main>
 
 <style>
+  .save-warning { border: 1px solid var(--mid); border-radius: 6px; padding: 8px 10px; margin-bottom: 10px; font-size: 12px; overflow-wrap: anywhere; }
+  .save-warning p { margin: 0; }
   .text-options {display:flex; gap:4px; align-items:center; margin-top:6px;}
   .text-options button[aria-pressed="true"] {background:var(--accent-soft); color:var(--accent-text);}
   .text-options input {min-width:0; flex:1; font-size:12px; padding:3px 6px; border:1px solid var(--line); border-radius:4px; background:var(--panel-2); color:var(--text);}

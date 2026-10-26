@@ -1,0 +1,5664 @@
+{
+  "snapshot": "d3006cf8309e8d50eea431e328e82b9b0eb32dc6b61b12d10ec2fb166c245664",
+  "device": "DirectMl",
+  "summaries": [
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "hybrid_hits",
+      "expected": 52,
+      "found": 28,
+      "complete": 17,
+      "bytes": 353153,
+      "packets": 179
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "hybrid",
+      "expected": 52,
+      "found": 28,
+      "complete": 17,
+      "bytes": 353153,
+      "packets": 179
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "hybrid_rerank_hits",
+      "expected": 52,
+      "found": 33,
+      "complete": 20,
+      "bytes": 354428,
+      "packets": 178
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "hybrid_rerank",
+      "expected": 52,
+      "found": 33,
+      "complete": 20,
+      "bytes": 354428,
+      "packets": 178
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "hybrid_wide_hits",
+      "expected": 52,
+      "found": 35,
+      "complete": 22,
+      "bytes": 580791,
+      "packets": 318
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "hybrid_wide",
+      "expected": 52,
+      "found": 35,
+      "complete": 22,
+      "bytes": 580791,
+      "packets": 318
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 52,
+      "found": 34,
+      "complete": 23,
+      "bytes": 577274,
+      "packets": 297
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "hybrid_wide_rerank",
+      "expected": 52,
+      "found": 34,
+      "complete": 23,
+      "bytes": 577274,
+      "packets": 297
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "structural_hits",
+      "expected": 52,
+      "found": 25,
+      "complete": 14,
+      "bytes": 322320,
+      "packets": 180
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "structural",
+      "expected": 52,
+      "found": 27,
+      "complete": 15,
+      "bytes": 546877,
+      "packets": 260
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "structural_rerank_hits",
+      "expected": 52,
+      "found": 34,
+      "complete": 21,
+      "bytes": 353101,
+      "packets": 179
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "structural_rerank",
+      "expected": 52,
+      "found": 34,
+      "complete": 21,
+      "bytes": 542048,
+      "packets": 249
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "mix_hits",
+      "expected": 52,
+      "found": 26,
+      "complete": 15,
+      "bytes": 331362,
+      "packets": 179
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "mix",
+      "expected": 52,
+      "found": 27,
+      "complete": 16,
+      "bytes": 549051,
+      "packets": 246
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "mix_rerank_hits",
+      "expected": 52,
+      "found": 33,
+      "complete": 20,
+      "bytes": 364849,
+      "packets": 179
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "mix_rerank",
+      "expected": 52,
+      "found": 33,
+      "complete": 20,
+      "bytes": 550060,
+      "packets": 240
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 52,
+      "found": 24,
+      "complete": 16,
+      "bytes": 148120,
+      "packets": 79
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "hybrid_ui_rerank",
+      "expected": 52,
+      "found": 24,
+      "complete": 16,
+      "bytes": 148120,
+      "packets": 79
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "mix_ui_rerank_hits",
+      "expected": 52,
+      "found": 24,
+      "complete": 16,
+      "bytes": 139870,
+      "packets": 77
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "mix_ui_rerank",
+      "expected": 52,
+      "found": 29,
+      "complete": 18,
+      "bytes": 549272,
+      "packets": 191
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "hybrid_hits",
+      "expected": 7,
+      "found": 4,
+      "complete": 1,
+      "bytes": 28306,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "hybrid",
+      "expected": 7,
+      "found": 4,
+      "complete": 1,
+      "bytes": 28306,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "hybrid_rerank_hits",
+      "expected": 7,
+      "found": 5,
+      "complete": 2,
+      "bytes": 30899,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "hybrid_rerank",
+      "expected": 7,
+      "found": 5,
+      "complete": 2,
+      "bytes": 30899,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "hybrid_wide_hits",
+      "expected": 7,
+      "found": 6,
+      "complete": 3,
+      "bytes": 64726,
+      "packets": 41
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "hybrid_wide",
+      "expected": 7,
+      "found": 6,
+      "complete": 3,
+      "bytes": 64726,
+      "packets": 41
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 7,
+      "found": 6,
+      "complete": 3,
+      "bytes": 63990,
+      "packets": 32
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "hybrid_wide_rerank",
+      "expected": 7,
+      "found": 6,
+      "complete": 3,
+      "bytes": 63990,
+      "packets": 32
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "structural_hits",
+      "expected": 7,
+      "found": 4,
+      "complete": 1,
+      "bytes": 30274,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "structural",
+      "expected": 7,
+      "found": 4,
+      "complete": 1,
+      "bytes": 58452,
+      "packets": 29
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "structural_rerank_hits",
+      "expected": 7,
+      "found": 5,
+      "complete": 2,
+      "bytes": 30984,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "structural_rerank",
+      "expected": 7,
+      "found": 5,
+      "complete": 2,
+      "bytes": 61143,
+      "packets": 30
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "mix_hits",
+      "expected": 7,
+      "found": 4,
+      "complete": 1,
+      "bytes": 30413,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "mix",
+      "expected": 7,
+      "found": 4,
+      "complete": 1,
+      "bytes": 62353,
+      "packets": 29
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "mix_rerank_hits",
+      "expected": 7,
+      "found": 5,
+      "complete": 2,
+      "bytes": 30984,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "mix_rerank",
+      "expected": 7,
+      "found": 5,
+      "complete": 2,
+      "bytes": 61514,
+      "packets": 29
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 7,
+      "found": 3,
+      "complete": 1,
+      "bytes": 19263,
+      "packets": 12
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "hybrid_ui_rerank",
+      "expected": 7,
+      "found": 3,
+      "complete": 1,
+      "bytes": 19263,
+      "packets": 12
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "mix_ui_rerank_hits",
+      "expected": 7,
+      "found": 3,
+      "complete": 1,
+      "bytes": 18374,
+      "packets": 12
+    },
+    {
+      "split": "all",
+      "scenario": "S1",
+      "name": "mix_ui_rerank",
+      "expected": 7,
+      "found": 4,
+      "complete": 1,
+      "bytes": 57971,
+      "packets": 23
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "hybrid_hits",
+      "expected": 5,
+      "found": 2,
+      "complete": 1,
+      "bytes": 37249,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "hybrid",
+      "expected": 5,
+      "found": 2,
+      "complete": 1,
+      "bytes": 37249,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "hybrid_rerank_hits",
+      "expected": 5,
+      "found": 3,
+      "complete": 2,
+      "bytes": 35624,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "hybrid_rerank",
+      "expected": 5,
+      "found": 3,
+      "complete": 2,
+      "bytes": 35624,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "hybrid_wide_hits",
+      "expected": 5,
+      "found": 3,
+      "complete": 2,
+      "bytes": 64581,
+      "packets": 39
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "hybrid_wide",
+      "expected": 5,
+      "found": 3,
+      "complete": 2,
+      "bytes": 64581,
+      "packets": 39
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 5,
+      "found": 4,
+      "complete": 3,
+      "bytes": 63966,
+      "packets": 34
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "hybrid_wide_rerank",
+      "expected": 5,
+      "found": 4,
+      "complete": 3,
+      "bytes": 63966,
+      "packets": 34
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "structural_hits",
+      "expected": 5,
+      "found": 2,
+      "complete": 1,
+      "bytes": 36660,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "structural",
+      "expected": 5,
+      "found": 2,
+      "complete": 1,
+      "bytes": 62788,
+      "packets": 30
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "structural_rerank_hits",
+      "expected": 5,
+      "found": 4,
+      "complete": 3,
+      "bytes": 33476,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "structural_rerank",
+      "expected": 5,
+      "found": 4,
+      "complete": 3,
+      "bytes": 60045,
+      "packets": 30
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "mix_hits",
+      "expected": 5,
+      "found": 2,
+      "complete": 1,
+      "bytes": 35378,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "mix",
+      "expected": 5,
+      "found": 2,
+      "complete": 1,
+      "bytes": 61293,
+      "packets": 28
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "mix_rerank_hits",
+      "expected": 5,
+      "found": 3,
+      "complete": 2,
+      "bytes": 33683,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "mix_rerank",
+      "expected": 5,
+      "found": 3,
+      "complete": 2,
+      "bytes": 62363,
+      "packets": 29
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 5,
+      "found": 3,
+      "complete": 2,
+      "bytes": 21432,
+      "packets": 11
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "hybrid_ui_rerank",
+      "expected": 5,
+      "found": 3,
+      "complete": 2,
+      "bytes": 21432,
+      "packets": 11
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "mix_ui_rerank_hits",
+      "expected": 5,
+      "found": 3,
+      "complete": 2,
+      "bytes": 17980,
+      "packets": 10
+    },
+    {
+      "split": "all",
+      "scenario": "S2",
+      "name": "mix_ui_rerank",
+      "expected": 5,
+      "found": 3,
+      "complete": 2,
+      "bytes": 60667,
+      "packets": 22
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "hybrid_hits",
+      "expected": 9,
+      "found": 6,
+      "complete": 2,
+      "bytes": 35315,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "hybrid",
+      "expected": 9,
+      "found": 6,
+      "complete": 2,
+      "bytes": 35315,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "hybrid_rerank_hits",
+      "expected": 9,
+      "found": 7,
+      "complete": 2,
+      "bytes": 32644,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "hybrid_rerank",
+      "expected": 9,
+      "found": 7,
+      "complete": 2,
+      "bytes": 32644,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "hybrid_wide_hits",
+      "expected": 9,
+      "found": 8,
+      "complete": 3,
+      "bytes": 64841,
+      "packets": 41
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "hybrid_wide",
+      "expected": 9,
+      "found": 8,
+      "complete": 3,
+      "bytes": 64841,
+      "packets": 41
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 9,
+      "found": 6,
+      "complete": 3,
+      "bytes": 64630,
+      "packets": 38
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "hybrid_wide_rerank",
+      "expected": 9,
+      "found": 6,
+      "complete": 3,
+      "bytes": 64630,
+      "packets": 38
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "structural_hits",
+      "expected": 9,
+      "found": 6,
+      "complete": 2,
+      "bytes": 28068,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "structural",
+      "expected": 9,
+      "found": 7,
+      "complete": 2,
+      "bytes": 59680,
+      "packets": 31
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "structural_rerank_hits",
+      "expected": 9,
+      "found": 7,
+      "complete": 2,
+      "bytes": 34187,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "structural_rerank",
+      "expected": 9,
+      "found": 7,
+      "complete": 2,
+      "bytes": 60214,
+      "packets": 30
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "mix_hits",
+      "expected": 9,
+      "found": 6,
+      "complete": 2,
+      "bytes": 25942,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "mix",
+      "expected": 9,
+      "found": 6,
+      "complete": 2,
+      "bytes": 59968,
+      "packets": 31
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "mix_rerank_hits",
+      "expected": 9,
+      "found": 7,
+      "complete": 2,
+      "bytes": 31840,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "mix_rerank",
+      "expected": 9,
+      "found": 7,
+      "complete": 2,
+      "bytes": 59414,
+      "packets": 29
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 9,
+      "found": 4,
+      "complete": 2,
+      "bytes": 20482,
+      "packets": 12
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "hybrid_ui_rerank",
+      "expected": 9,
+      "found": 4,
+      "complete": 2,
+      "bytes": 20482,
+      "packets": 12
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "mix_ui_rerank_hits",
+      "expected": 9,
+      "found": 4,
+      "complete": 2,
+      "bytes": 19457,
+      "packets": 12
+    },
+    {
+      "split": "all",
+      "scenario": "S3",
+      "name": "mix_ui_rerank",
+      "expected": 9,
+      "found": 5,
+      "complete": 2,
+      "bytes": 61509,
+      "packets": 25
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "hybrid_hits",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 44701,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "hybrid",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 44701,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "hybrid_rerank_hits",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 42182,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "hybrid_rerank",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 42182,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "hybrid_wide_hits",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 64963,
+      "packets": 33
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "hybrid_wide",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 64963,
+      "packets": 33
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 62845,
+      "packets": 36
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "hybrid_wide_rerank",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 62845,
+      "packets": 36
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "structural_hits",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 36780,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "structural",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 61866,
+      "packets": 29
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "structural_rerank_hits",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 42214,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "structural_rerank",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 62073,
+      "packets": 28
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "mix_hits",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 37893,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "mix",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 61207,
+      "packets": 28
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "mix_rerank_hits",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 42182,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "mix_rerank",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 63264,
+      "packets": 28
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 18210,
+      "packets": 10
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "hybrid_ui_rerank",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 18210,
+      "packets": 10
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "mix_ui_rerank_hits",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 18210,
+      "packets": 10
+    },
+    {
+      "split": "all",
+      "scenario": "S4",
+      "name": "mix_ui_rerank",
+      "expected": 4,
+      "found": 4,
+      "complete": 4,
+      "bytes": 62056,
+      "packets": 23
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "hybrid_hits",
+      "expected": 6,
+      "found": 5,
+      "complete": 3,
+      "bytes": 37020,
+      "packets": 19
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "hybrid",
+      "expected": 6,
+      "found": 5,
+      "complete": 3,
+      "bytes": 37020,
+      "packets": 19
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "hybrid_rerank_hits",
+      "expected": 6,
+      "found": 6,
+      "complete": 4,
+      "bytes": 38031,
+      "packets": 19
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "hybrid_rerank",
+      "expected": 6,
+      "found": 6,
+      "complete": 4,
+      "bytes": 38031,
+      "packets": 19
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "hybrid_wide_hits",
+      "expected": 6,
+      "found": 6,
+      "complete": 4,
+      "bytes": 64843,
+      "packets": 35
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "hybrid_wide",
+      "expected": 6,
+      "found": 6,
+      "complete": 4,
+      "bytes": 64843,
+      "packets": 35
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 6,
+      "found": 6,
+      "complete": 4,
+      "bytes": 63254,
+      "packets": 35
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "hybrid_wide_rerank",
+      "expected": 6,
+      "found": 6,
+      "complete": 4,
+      "bytes": 63254,
+      "packets": 35
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "structural_hits",
+      "expected": 6,
+      "found": 4,
+      "complete": 2,
+      "bytes": 38187,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "structural",
+      "expected": 6,
+      "found": 5,
+      "complete": 3,
+      "bytes": 63786,
+      "packets": 29
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "structural_rerank_hits",
+      "expected": 6,
+      "found": 6,
+      "complete": 4,
+      "bytes": 35820,
+      "packets": 19
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "structural_rerank",
+      "expected": 6,
+      "found": 6,
+      "complete": 4,
+      "bytes": 61419,
+      "packets": 28
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "mix_hits",
+      "expected": 6,
+      "found": 5,
+      "complete": 3,
+      "bytes": 37020,
+      "packets": 19
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "mix",
+      "expected": 6,
+      "found": 6,
+      "complete": 4,
+      "bytes": 61480,
+      "packets": 27
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "mix_rerank_hits",
+      "expected": 6,
+      "found": 6,
+      "complete": 4,
+      "bytes": 38031,
+      "packets": 19
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "mix_rerank",
+      "expected": 6,
+      "found": 6,
+      "complete": 4,
+      "bytes": 62271,
+      "packets": 27
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 6,
+      "found": 4,
+      "complete": 2,
+      "bytes": 26802,
+      "packets": 12
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "hybrid_ui_rerank",
+      "expected": 6,
+      "found": 4,
+      "complete": 2,
+      "bytes": 26802,
+      "packets": 12
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "mix_ui_rerank_hits",
+      "expected": 6,
+      "found": 4,
+      "complete": 2,
+      "bytes": 26802,
+      "packets": 12
+    },
+    {
+      "split": "all",
+      "scenario": "S5",
+      "name": "mix_ui_rerank",
+      "expected": 6,
+      "found": 6,
+      "complete": 4,
+      "bytes": 60789,
+      "packets": 23
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "hybrid_hits",
+      "expected": 8,
+      "found": 0,
+      "complete": 0,
+      "bytes": 38715,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "hybrid",
+      "expected": 8,
+      "found": 0,
+      "complete": 0,
+      "bytes": 38715,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "hybrid_rerank_hits",
+      "expected": 8,
+      "found": 0,
+      "complete": 0,
+      "bytes": 44136,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "hybrid_rerank",
+      "expected": 8,
+      "found": 0,
+      "complete": 0,
+      "bytes": 44136,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "hybrid_wide_hits",
+      "expected": 8,
+      "found": 0,
+      "complete": 0,
+      "bytes": 64323,
+      "packets": 34
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "hybrid_wide",
+      "expected": 8,
+      "found": 0,
+      "complete": 0,
+      "bytes": 64323,
+      "packets": 34
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 8,
+      "found": 0,
+      "complete": 0,
+      "bytes": 64893,
+      "packets": 29
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "hybrid_wide_rerank",
+      "expected": 8,
+      "found": 0,
+      "complete": 0,
+      "bytes": 64893,
+      "packets": 29
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "structural_hits",
+      "expected": 8,
+      "found": 0,
+      "complete": 0,
+      "bytes": 32393,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "structural",
+      "expected": 8,
+      "found": 0,
+      "complete": 0,
+      "bytes": 59112,
+      "packets": 30
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "structural_rerank_hits",
+      "expected": 8,
+      "found": 0,
+      "complete": 0,
+      "bytes": 42579,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "structural_rerank",
+      "expected": 8,
+      "found": 0,
+      "complete": 0,
+      "bytes": 60653,
+      "packets": 27
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "mix_hits",
+      "expected": 8,
+      "found": 0,
+      "complete": 0,
+      "bytes": 40575,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "mix",
+      "expected": 8,
+      "found": 0,
+      "complete": 0,
+      "bytes": 61285,
+      "packets": 26
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "mix_rerank_hits",
+      "expected": 8,
+      "found": 0,
+      "complete": 0,
+      "bytes": 46845,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "mix_rerank",
+      "expected": 8,
+      "found": 0,
+      "complete": 0,
+      "bytes": 61268,
+      "packets": 25
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 8,
+      "found": 0,
+      "complete": 0,
+      "bytes": 2420,
+      "packets": 1
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "hybrid_ui_rerank",
+      "expected": 8,
+      "found": 0,
+      "complete": 0,
+      "bytes": 2420,
+      "packets": 1
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "mix_ui_rerank_hits",
+      "expected": 8,
+      "found": 0,
+      "complete": 0,
+      "bytes": 2420,
+      "packets": 1
+    },
+    {
+      "split": "all",
+      "scenario": "S6",
+      "name": "mix_ui_rerank",
+      "expected": 8,
+      "found": 1,
+      "complete": 0,
+      "bytes": 60157,
+      "packets": 15
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "hybrid_hits",
+      "expected": 6,
+      "found": 3,
+      "complete": 2,
+      "bytes": 39006,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "hybrid",
+      "expected": 6,
+      "found": 3,
+      "complete": 2,
+      "bytes": 39006,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "hybrid_rerank_hits",
+      "expected": 6,
+      "found": 4,
+      "complete": 2,
+      "bytes": 42354,
+      "packets": 19
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "hybrid_rerank",
+      "expected": 6,
+      "found": 4,
+      "complete": 2,
+      "bytes": 42354,
+      "packets": 19
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "hybrid_wide_hits",
+      "expected": 6,
+      "found": 4,
+      "complete": 2,
+      "bytes": 64461,
+      "packets": 36
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "hybrid_wide",
+      "expected": 6,
+      "found": 4,
+      "complete": 2,
+      "bytes": 64461,
+      "packets": 36
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 6,
+      "found": 4,
+      "complete": 2,
+      "bytes": 64199,
+      "packets": 30
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "hybrid_wide_rerank",
+      "expected": 6,
+      "found": 4,
+      "complete": 2,
+      "bytes": 64199,
+      "packets": 30
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "structural_hits",
+      "expected": 6,
+      "found": 1,
+      "complete": 0,
+      "bytes": 36383,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "structural",
+      "expected": 6,
+      "found": 1,
+      "complete": 0,
+      "bytes": 62620,
+      "packets": 30
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "structural_rerank_hits",
+      "expected": 6,
+      "found": 4,
+      "complete": 2,
+      "bytes": 43604,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "structural_rerank",
+      "expected": 6,
+      "found": 4,
+      "complete": 2,
+      "bytes": 60381,
+      "packets": 27
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "mix_hits",
+      "expected": 6,
+      "found": 1,
+      "complete": 0,
+      "bytes": 35339,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "mix",
+      "expected": 6,
+      "found": 1,
+      "complete": 0,
+      "bytes": 61440,
+      "packets": 28
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "mix_rerank_hits",
+      "expected": 6,
+      "found": 4,
+      "complete": 2,
+      "bytes": 49890,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "mix_rerank",
+      "expected": 6,
+      "found": 4,
+      "complete": 2,
+      "bytes": 61584,
+      "packets": 25
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 6,
+      "found": 2,
+      "complete": 1,
+      "bytes": 12120,
+      "packets": 6
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "hybrid_ui_rerank",
+      "expected": 6,
+      "found": 2,
+      "complete": 1,
+      "bytes": 12120,
+      "packets": 6
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "mix_ui_rerank_hits",
+      "expected": 6,
+      "found": 2,
+      "complete": 1,
+      "bytes": 9236,
+      "packets": 5
+    },
+    {
+      "split": "all",
+      "scenario": "S7",
+      "name": "mix_ui_rerank",
+      "expected": 6,
+      "found": 2,
+      "complete": 1,
+      "bytes": 59955,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "hybrid_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 51964,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "hybrid",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 51964,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "hybrid_rerank_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 49805,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "hybrid_rerank",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 49805,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "hybrid_wide_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 64022,
+      "packets": 28
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "hybrid_wide",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 64022,
+      "packets": 28
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 64431,
+      "packets": 28
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "hybrid_wide_rerank",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 64431,
+      "packets": 28
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "structural_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 42698,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "structural",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 61122,
+      "packets": 26
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "structural_rerank_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 51225,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "structural_rerank",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 56478,
+      "packets": 22
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "mix_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 47925,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "mix",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 60464,
+      "packets": 23
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "mix_rerank_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 52641,
+      "packets": 20
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "mix_rerank",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 59917,
+      "packets": 22
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 6559,
+      "packets": 3
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "hybrid_ui_rerank",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 6559,
+      "packets": 3
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "mix_ui_rerank_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 6559,
+      "packets": 3
+    },
+    {
+      "split": "all",
+      "scenario": "S8",
+      "name": "mix_ui_rerank",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 64082,
+      "packets": 17
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "hybrid_hits",
+      "expected": 24,
+      "found": 12,
+      "complete": 9,
+      "bytes": 192803,
+      "packets": 90
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "hybrid",
+      "expected": 24,
+      "found": 12,
+      "complete": 9,
+      "bytes": 192803,
+      "packets": 90
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "hybrid_rerank_hits",
+      "expected": 24,
+      "found": 15,
+      "complete": 10,
+      "bytes": 189777,
+      "packets": 89
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "hybrid_rerank",
+      "expected": 24,
+      "found": 15,
+      "complete": 10,
+      "bytes": 189777,
+      "packets": 89
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "hybrid_wide_hits",
+      "expected": 24,
+      "found": 17,
+      "complete": 12,
+      "bytes": 290598,
+      "packets": 146
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "hybrid_wide",
+      "expected": 24,
+      "found": 17,
+      "complete": 12,
+      "bytes": 290598,
+      "packets": 146
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 24,
+      "found": 17,
+      "complete": 12,
+      "bytes": 289253,
+      "packets": 140
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "hybrid_wide_rerank",
+      "expected": 24,
+      "found": 17,
+      "complete": 12,
+      "bytes": 289253,
+      "packets": 140
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "structural_hits",
+      "expected": 24,
+      "found": 11,
+      "complete": 8,
+      "bytes": 181563,
+      "packets": 90
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "structural",
+      "expected": 24,
+      "found": 12,
+      "complete": 8,
+      "bytes": 275393,
+      "packets": 120
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "structural_rerank_hits",
+      "expected": 24,
+      "found": 16,
+      "complete": 11,
+      "bytes": 187348,
+      "packets": 90
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "structural_rerank",
+      "expected": 24,
+      "found": 16,
+      "complete": 11,
+      "bytes": 270533,
+      "packets": 118
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "mix_hits",
+      "expected": 24,
+      "found": 11,
+      "complete": 8,
+      "bytes": 185217,
+      "packets": 90
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "mix",
+      "expected": 24,
+      "found": 11,
+      "complete": 8,
+      "bytes": 270608,
+      "packets": 114
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "mix_rerank_hits",
+      "expected": 24,
+      "found": 15,
+      "complete": 10,
+      "bytes": 195744,
+      "packets": 90
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "mix_rerank",
+      "expected": 24,
+      "found": 15,
+      "complete": 10,
+      "bytes": 272392,
+      "packets": 112
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 24,
+      "found": 10,
+      "complete": 8,
+      "bytes": 73086,
+      "packets": 39
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "hybrid_ui_rerank",
+      "expected": 24,
+      "found": 10,
+      "complete": 8,
+      "bytes": 73086,
+      "packets": 39
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "mix_ui_rerank_hits",
+      "expected": 24,
+      "found": 10,
+      "complete": 8,
+      "bytes": 69313,
+      "packets": 38
+    },
+    {
+      "split": "dev",
+      "scenario": "all",
+      "name": "mix_ui_rerank",
+      "expected": 24,
+      "found": 13,
+      "complete": 9,
+      "bytes": 271774,
+      "packets": 85
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "hybrid_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 15806,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "hybrid",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 15806,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "hybrid_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 16827,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "hybrid_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 16827,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "hybrid_wide_hits",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 32489,
+      "packets": 20
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "hybrid_wide",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 32489,
+      "packets": 20
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 32397,
+      "packets": 13
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "hybrid_wide_rerank",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 32397,
+      "packets": 13
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "structural_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 18083,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "structural",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 30763,
+      "packets": 13
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "structural_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 16912,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "structural_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 31573,
+      "packets": 14
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "mix_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 18430,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "mix",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 31406,
+      "packets": 13
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "mix_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 16912,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "mix_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 31457,
+      "packets": 13
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 3,
+      "found": 1,
+      "complete": 1,
+      "bytes": 11531,
+      "packets": 6
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "hybrid_ui_rerank",
+      "expected": 3,
+      "found": 1,
+      "complete": 1,
+      "bytes": 11531,
+      "packets": 6
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "mix_ui_rerank_hits",
+      "expected": 3,
+      "found": 1,
+      "complete": 1,
+      "bytes": 10642,
+      "packets": 6
+    },
+    {
+      "split": "dev",
+      "scenario": "S1",
+      "name": "mix_ui_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 27485,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "hybrid_hits",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 22133,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "hybrid",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 22133,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "hybrid_rerank_hits",
+      "expected": 2,
+      "found": 1,
+      "complete": 1,
+      "bytes": 17748,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "hybrid_rerank",
+      "expected": 2,
+      "found": 1,
+      "complete": 1,
+      "bytes": 17748,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "hybrid_wide_hits",
+      "expected": 2,
+      "found": 1,
+      "complete": 1,
+      "bytes": 32004,
+      "packets": 18
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "hybrid_wide",
+      "expected": 2,
+      "found": 1,
+      "complete": 1,
+      "bytes": 32004,
+      "packets": 18
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 2,
+      "found": 1,
+      "complete": 1,
+      "bytes": 31899,
+      "packets": 13
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "hybrid_wide_rerank",
+      "expected": 2,
+      "found": 1,
+      "complete": 1,
+      "bytes": 31899,
+      "packets": 13
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "structural_hits",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 21167,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "structural",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 31841,
+      "packets": 14
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "structural_rerank_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 17639,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "structural_rerank",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 28313,
+      "packets": 14
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "mix_hits",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 22430,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "mix",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 30314,
+      "packets": 12
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "mix_rerank_hits",
+      "expected": 2,
+      "found": 1,
+      "complete": 1,
+      "bytes": 17748,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "mix_rerank",
+      "expected": 2,
+      "found": 1,
+      "complete": 1,
+      "bytes": 31303,
+      "packets": 14
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 2,
+      "found": 1,
+      "complete": 1,
+      "bytes": 9773,
+      "packets": 5
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "hybrid_ui_rerank",
+      "expected": 2,
+      "found": 1,
+      "complete": 1,
+      "bytes": 9773,
+      "packets": 5
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "mix_ui_rerank_hits",
+      "expected": 2,
+      "found": 1,
+      "complete": 1,
+      "bytes": 9773,
+      "packets": 5
+    },
+    {
+      "split": "dev",
+      "scenario": "S2",
+      "name": "mix_ui_rerank",
+      "expected": 2,
+      "found": 1,
+      "complete": 1,
+      "bytes": 28983,
+      "packets": 9
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "hybrid_hits",
+      "expected": 4,
+      "found": 2,
+      "complete": 1,
+      "bytes": 16269,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "hybrid",
+      "expected": 4,
+      "found": 2,
+      "complete": 1,
+      "bytes": 16269,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "hybrid_rerank_hits",
+      "expected": 4,
+      "found": 3,
+      "complete": 1,
+      "bytes": 14709,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "hybrid_rerank",
+      "expected": 4,
+      "found": 3,
+      "complete": 1,
+      "bytes": 14709,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "hybrid_wide_hits",
+      "expected": 4,
+      "found": 4,
+      "complete": 2,
+      "bytes": 32262,
+      "packets": 22
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "hybrid_wide",
+      "expected": 4,
+      "found": 4,
+      "complete": 2,
+      "bytes": 32262,
+      "packets": 22
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 4,
+      "found": 4,
+      "complete": 2,
+      "bytes": 32053,
+      "packets": 20
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "hybrid_wide_rerank",
+      "expected": 4,
+      "found": 4,
+      "complete": 2,
+      "bytes": 32053,
+      "packets": 20
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "structural_hits",
+      "expected": 4,
+      "found": 2,
+      "complete": 1,
+      "bytes": 16269,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "structural",
+      "expected": 4,
+      "found": 3,
+      "complete": 1,
+      "bytes": 28325,
+      "packets": 14
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "structural_rerank_hits",
+      "expected": 4,
+      "found": 3,
+      "complete": 1,
+      "bytes": 14709,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "structural_rerank",
+      "expected": 4,
+      "found": 3,
+      "complete": 1,
+      "bytes": 29729,
+      "packets": 15
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "mix_hits",
+      "expected": 4,
+      "found": 2,
+      "complete": 1,
+      "bytes": 13687,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "mix",
+      "expected": 4,
+      "found": 2,
+      "complete": 1,
+      "bytes": 28725,
+      "packets": 14
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "mix_rerank_hits",
+      "expected": 4,
+      "found": 3,
+      "complete": 1,
+      "bytes": 14709,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "mix_rerank",
+      "expected": 4,
+      "found": 3,
+      "complete": 1,
+      "bytes": 29747,
+      "packets": 14
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 4,
+      "found": 2,
+      "complete": 1,
+      "bytes": 8882,
+      "packets": 6
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "hybrid_ui_rerank",
+      "expected": 4,
+      "found": 2,
+      "complete": 1,
+      "bytes": 8882,
+      "packets": 6
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "mix_ui_rerank_hits",
+      "expected": 4,
+      "found": 2,
+      "complete": 1,
+      "bytes": 8882,
+      "packets": 6
+    },
+    {
+      "split": "dev",
+      "scenario": "S3",
+      "name": "mix_ui_rerank",
+      "expected": 4,
+      "found": 3,
+      "complete": 1,
+      "bytes": 31255,
+      "packets": 12
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "hybrid_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 27420,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "hybrid",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 27420,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "hybrid_rerank_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 22233,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "hybrid_rerank",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 22233,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "hybrid_wide_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 32388,
+      "packets": 12
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "hybrid_wide",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 32388,
+      "packets": 12
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 31505,
+      "packets": 17
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "hybrid_wide_rerank",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 31505,
+      "packets": 17
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "structural_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 20982,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "structural",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 31307,
+      "packets": 13
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "structural_rerank_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 22233,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "structural_rerank",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 31505,
+      "packets": 13
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "mix_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 20982,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "mix",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 29964,
+      "packets": 13
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "mix_rerank_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 22233,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "mix_rerank",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 31215,
+      "packets": 13
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 10325,
+      "packets": 6
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "hybrid_ui_rerank",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 10325,
+      "packets": 6
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "mix_ui_rerank_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 10325,
+      "packets": 6
+    },
+    {
+      "split": "dev",
+      "scenario": "S4",
+      "name": "mix_ui_rerank",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 31377,
+      "packets": 11
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "hybrid_hits",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 14694,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "hybrid",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 14694,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "hybrid_rerank_hits",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 16621,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "hybrid_rerank",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 16621,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "hybrid_wide_hits",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 32578,
+      "packets": 18
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "hybrid_wide",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 32578,
+      "packets": 18
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 31747,
+      "packets": 19
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "hybrid_wide_rerank",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 31747,
+      "packets": 19
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "structural_hits",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 15576,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "structural",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 32325,
+      "packets": 16
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "structural_rerank_hits",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 14410,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "structural_rerank",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 31159,
+      "packets": 16
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "mix_hits",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 14694,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "mix",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 30742,
+      "packets": 15
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "mix_rerank_hits",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 16621,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "mix_rerank",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 30471,
+      "packets": 14
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 10167,
+      "packets": 6
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "hybrid_ui_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 10167,
+      "packets": 6
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "mix_ui_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 10167,
+      "packets": 6
+    },
+    {
+      "split": "dev",
+      "scenario": "S5",
+      "name": "mix_ui_rerank",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 31238,
+      "packets": 12
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "hybrid_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 22093,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "hybrid",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 22093,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "hybrid_rerank_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 27040,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "hybrid_rerank",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 27040,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "hybrid_wide_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 32244,
+      "packets": 14
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "hybrid_wide",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 32244,
+      "packets": 14
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 32571,
+      "packets": 12
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "hybrid_wide_rerank",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 32571,
+      "packets": 12
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "structural_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 17368,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "structural",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 29265,
+      "packets": 14
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "structural_rerank_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 25397,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "structural_rerank",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 30570,
+      "packets": 12
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "mix_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 22847,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "mix",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 29772,
+      "packets": 12
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "mix_rerank_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 27427,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "mix_rerank",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 29841,
+      "packets": 11
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 2416,
+      "packets": 1
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "hybrid_ui_rerank",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 2416,
+      "packets": 1
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "mix_ui_rerank_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 2416,
+      "packets": 1
+    },
+    {
+      "split": "dev",
+      "scenario": "S6",
+      "name": "mix_ui_rerank",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 29930,
+      "packets": 6
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "hybrid_hits",
+      "expected": 3,
+      "found": 1,
+      "complete": 1,
+      "bytes": 22780,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "hybrid",
+      "expected": 3,
+      "found": 1,
+      "complete": 1,
+      "bytes": 22780,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "hybrid_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 26779,
+      "packets": 9
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "hybrid_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 26779,
+      "packets": 9
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "hybrid_wide_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 32139,
+      "packets": 15
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "hybrid_wide",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 32139,
+      "packets": 15
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 32038,
+      "packets": 14
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "hybrid_wide_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 32038,
+      "packets": 14
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "structural_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 23060,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "structural",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 30753,
+      "packets": 12
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "structural_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 26311,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "structural_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 30170,
+      "packets": 11
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "mix_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 21284,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "mix",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 30558,
+      "packets": 12
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "mix_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 30616,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "mix_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 30616,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 6060,
+      "packets": 2
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "hybrid_ui_rerank",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 6060,
+      "packets": 2
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "mix_ui_rerank_hits",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 3176,
+      "packets": 1
+    },
+    {
+      "split": "dev",
+      "scenario": "S7",
+      "name": "mix_ui_rerank",
+      "expected": 3,
+      "found": 0,
+      "complete": 0,
+      "bytes": 28943,
+      "packets": 6
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "hybrid_hits",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 27692,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "hybrid",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 27692,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "hybrid_rerank_hits",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 24507,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "hybrid_rerank",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 24507,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "hybrid_wide_hits",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 32426,
+      "packets": 14
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "hybrid_wide",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 32426,
+      "packets": 14
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 32633,
+      "packets": 14
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "hybrid_wide_rerank",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 32633,
+      "packets": 14
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "structural_hits",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 25142,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "structural",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 31523,
+      "packets": 12
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "structural_rerank_hits",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 26165,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "structural_rerank",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 28567,
+      "packets": 11
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "mix_hits",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 26947,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "mix",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 30081,
+      "packets": 11
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "mix_rerank_hits",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 26165,
+      "packets": 10
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "mix_rerank",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 29299,
+      "packets": 11
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 1351,
+      "packets": 1
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "hybrid_ui_rerank",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 1351,
+      "packets": 1
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "mix_ui_rerank_hits",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 1351,
+      "packets": 1
+    },
+    {
+      "split": "dev",
+      "scenario": "S8",
+      "name": "mix_ui_rerank",
+      "expected": 2,
+      "found": 0,
+      "complete": 0,
+      "bytes": 32643,
+      "packets": 8
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "hybrid_hits",
+      "expected": 28,
+      "found": 16,
+      "complete": 8,
+      "bytes": 160350,
+      "packets": 89
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "hybrid",
+      "expected": 28,
+      "found": 16,
+      "complete": 8,
+      "bytes": 160350,
+      "packets": 89
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "hybrid_rerank_hits",
+      "expected": 28,
+      "found": 18,
+      "complete": 10,
+      "bytes": 164651,
+      "packets": 89
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "hybrid_rerank",
+      "expected": 28,
+      "found": 18,
+      "complete": 10,
+      "bytes": 164651,
+      "packets": 89
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "hybrid_wide_hits",
+      "expected": 28,
+      "found": 18,
+      "complete": 10,
+      "bytes": 290193,
+      "packets": 172
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "hybrid_wide",
+      "expected": 28,
+      "found": 18,
+      "complete": 10,
+      "bytes": 290193,
+      "packets": 172
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 28,
+      "found": 17,
+      "complete": 11,
+      "bytes": 288021,
+      "packets": 157
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "hybrid_wide_rerank",
+      "expected": 28,
+      "found": 17,
+      "complete": 11,
+      "bytes": 288021,
+      "packets": 157
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "structural_hits",
+      "expected": 28,
+      "found": 14,
+      "complete": 6,
+      "bytes": 140757,
+      "packets": 90
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "structural",
+      "expected": 28,
+      "found": 15,
+      "complete": 7,
+      "bytes": 271484,
+      "packets": 140
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "structural_rerank_hits",
+      "expected": 28,
+      "found": 18,
+      "complete": 10,
+      "bytes": 165753,
+      "packets": 89
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "structural_rerank",
+      "expected": 28,
+      "found": 18,
+      "complete": 10,
+      "bytes": 271515,
+      "packets": 131
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "mix_hits",
+      "expected": 28,
+      "found": 15,
+      "complete": 7,
+      "bytes": 146145,
+      "packets": 89
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "mix",
+      "expected": 28,
+      "found": 16,
+      "complete": 8,
+      "bytes": 278443,
+      "packets": 132
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "mix_rerank_hits",
+      "expected": 28,
+      "found": 18,
+      "complete": 10,
+      "bytes": 169105,
+      "packets": 89
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "mix_rerank",
+      "expected": 28,
+      "found": 18,
+      "complete": 10,
+      "bytes": 277668,
+      "packets": 128
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 28,
+      "found": 14,
+      "complete": 8,
+      "bytes": 75034,
+      "packets": 40
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "hybrid_ui_rerank",
+      "expected": 28,
+      "found": 14,
+      "complete": 8,
+      "bytes": 75034,
+      "packets": 40
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "mix_ui_rerank_hits",
+      "expected": 28,
+      "found": 14,
+      "complete": 8,
+      "bytes": 70557,
+      "packets": 39
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "mix_ui_rerank",
+      "expected": 28,
+      "found": 16,
+      "complete": 9,
+      "bytes": 277498,
+      "packets": 106
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "hybrid_hits",
+      "expected": 4,
+      "found": 2,
+      "complete": 0,
+      "bytes": 12500,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "hybrid",
+      "expected": 4,
+      "found": 2,
+      "complete": 0,
+      "bytes": 12500,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "hybrid_rerank_hits",
+      "expected": 4,
+      "found": 3,
+      "complete": 1,
+      "bytes": 14072,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "hybrid_rerank",
+      "expected": 4,
+      "found": 3,
+      "complete": 1,
+      "bytes": 14072,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "hybrid_wide_hits",
+      "expected": 4,
+      "found": 3,
+      "complete": 1,
+      "bytes": 32237,
+      "packets": 21
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "hybrid_wide",
+      "expected": 4,
+      "found": 3,
+      "complete": 1,
+      "bytes": 32237,
+      "packets": 21
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 4,
+      "found": 3,
+      "complete": 1,
+      "bytes": 31593,
+      "packets": 19
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "hybrid_wide_rerank",
+      "expected": 4,
+      "found": 3,
+      "complete": 1,
+      "bytes": 31593,
+      "packets": 19
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "structural_hits",
+      "expected": 4,
+      "found": 2,
+      "complete": 0,
+      "bytes": 12191,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "structural",
+      "expected": 4,
+      "found": 2,
+      "complete": 0,
+      "bytes": 27689,
+      "packets": 16
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "structural_rerank_hits",
+      "expected": 4,
+      "found": 3,
+      "complete": 1,
+      "bytes": 14072,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "structural_rerank",
+      "expected": 4,
+      "found": 3,
+      "complete": 1,
+      "bytes": 29570,
+      "packets": 16
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "mix_hits",
+      "expected": 4,
+      "found": 2,
+      "complete": 0,
+      "bytes": 11983,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "mix",
+      "expected": 4,
+      "found": 2,
+      "complete": 0,
+      "bytes": 30947,
+      "packets": 16
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "mix_rerank_hits",
+      "expected": 4,
+      "found": 3,
+      "complete": 1,
+      "bytes": 14072,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "mix_rerank",
+      "expected": 4,
+      "found": 3,
+      "complete": 1,
+      "bytes": 30057,
+      "packets": 16
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 4,
+      "found": 2,
+      "complete": 0,
+      "bytes": 7732,
+      "packets": 6
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "hybrid_ui_rerank",
+      "expected": 4,
+      "found": 2,
+      "complete": 0,
+      "bytes": 7732,
+      "packets": 6
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "mix_ui_rerank_hits",
+      "expected": 4,
+      "found": 2,
+      "complete": 0,
+      "bytes": 7732,
+      "packets": 6
+    },
+    {
+      "split": "holdout",
+      "scenario": "S1",
+      "name": "mix_ui_rerank",
+      "expected": 4,
+      "found": 2,
+      "complete": 0,
+      "bytes": 30486,
+      "packets": 13
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "hybrid_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 15116,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "hybrid",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 15116,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "hybrid_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 17876,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "hybrid_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 17876,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "hybrid_wide_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 32577,
+      "packets": 21
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "hybrid_wide",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 32577,
+      "packets": 21
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 32067,
+      "packets": 21
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "hybrid_wide_rerank",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 32067,
+      "packets": 21
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "structural_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 15493,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "structural",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 30947,
+      "packets": 16
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "structural_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 15837,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "structural_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 31732,
+      "packets": 16
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "mix_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 12948,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "mix",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 30979,
+      "packets": 16
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "mix_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 15935,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "mix_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 31060,
+      "packets": 15
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 11659,
+      "packets": 6
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "hybrid_ui_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 11659,
+      "packets": 6
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "mix_ui_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 8207,
+      "packets": 5
+    },
+    {
+      "split": "holdout",
+      "scenario": "S2",
+      "name": "mix_ui_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 31684,
+      "packets": 13
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "hybrid_hits",
+      "expected": 5,
+      "found": 4,
+      "complete": 1,
+      "bytes": 19046,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "hybrid",
+      "expected": 5,
+      "found": 4,
+      "complete": 1,
+      "bytes": 19046,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "hybrid_rerank_hits",
+      "expected": 5,
+      "found": 4,
+      "complete": 1,
+      "bytes": 17935,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "hybrid_rerank",
+      "expected": 5,
+      "found": 4,
+      "complete": 1,
+      "bytes": 17935,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "hybrid_wide_hits",
+      "expected": 5,
+      "found": 4,
+      "complete": 1,
+      "bytes": 32579,
+      "packets": 19
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "hybrid_wide",
+      "expected": 5,
+      "found": 4,
+      "complete": 1,
+      "bytes": 32579,
+      "packets": 19
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 5,
+      "found": 2,
+      "complete": 1,
+      "bytes": 32577,
+      "packets": 18
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "hybrid_wide_rerank",
+      "expected": 5,
+      "found": 2,
+      "complete": 1,
+      "bytes": 32577,
+      "packets": 18
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "structural_hits",
+      "expected": 5,
+      "found": 4,
+      "complete": 1,
+      "bytes": 11799,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "structural",
+      "expected": 5,
+      "found": 4,
+      "complete": 1,
+      "bytes": 31355,
+      "packets": 17
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "structural_rerank_hits",
+      "expected": 5,
+      "found": 4,
+      "complete": 1,
+      "bytes": 19478,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "structural_rerank",
+      "expected": 5,
+      "found": 4,
+      "complete": 1,
+      "bytes": 30485,
+      "packets": 15
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "mix_hits",
+      "expected": 5,
+      "found": 4,
+      "complete": 1,
+      "bytes": 12255,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "mix",
+      "expected": 5,
+      "found": 4,
+      "complete": 1,
+      "bytes": 31243,
+      "packets": 17
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "mix_rerank_hits",
+      "expected": 5,
+      "found": 4,
+      "complete": 1,
+      "bytes": 17131,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "mix_rerank",
+      "expected": 5,
+      "found": 4,
+      "complete": 1,
+      "bytes": 29667,
+      "packets": 15
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 5,
+      "found": 2,
+      "complete": 1,
+      "bytes": 11600,
+      "packets": 6
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "hybrid_ui_rerank",
+      "expected": 5,
+      "found": 2,
+      "complete": 1,
+      "bytes": 11600,
+      "packets": 6
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "mix_ui_rerank_hits",
+      "expected": 5,
+      "found": 2,
+      "complete": 1,
+      "bytes": 10575,
+      "packets": 6
+    },
+    {
+      "split": "holdout",
+      "scenario": "S3",
+      "name": "mix_ui_rerank",
+      "expected": 5,
+      "found": 2,
+      "complete": 1,
+      "bytes": 30254,
+      "packets": 13
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "hybrid_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 17281,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "hybrid",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 17281,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "hybrid_rerank_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 19949,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "hybrid_rerank",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 19949,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "hybrid_wide_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 32575,
+      "packets": 21
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "hybrid_wide",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 32575,
+      "packets": 21
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 31340,
+      "packets": 19
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "hybrid_wide_rerank",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 31340,
+      "packets": 19
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "structural_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 15798,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "structural",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 30559,
+      "packets": 16
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "structural_rerank_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 19981,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "structural_rerank",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 30568,
+      "packets": 15
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "mix_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 16911,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "mix",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 31243,
+      "packets": 15
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "mix_rerank_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 19949,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "mix_rerank",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 32049,
+      "packets": 15
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 7885,
+      "packets": 4
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "hybrid_ui_rerank",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 7885,
+      "packets": 4
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "mix_ui_rerank_hits",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 7885,
+      "packets": 4
+    },
+    {
+      "split": "holdout",
+      "scenario": "S4",
+      "name": "mix_ui_rerank",
+      "expected": 2,
+      "found": 2,
+      "complete": 2,
+      "bytes": 30679,
+      "packets": 12
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "hybrid_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 22326,
+      "packets": 9
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "hybrid",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 22326,
+      "packets": 9
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "hybrid_rerank_hits",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 21410,
+      "packets": 9
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "hybrid_rerank",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 21410,
+      "packets": 9
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "hybrid_wide_hits",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 32265,
+      "packets": 17
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "hybrid_wide",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 32265,
+      "packets": 17
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 31507,
+      "packets": 16
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "hybrid_wide_rerank",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 31507,
+      "packets": 16
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "structural_hits",
+      "expected": 3,
+      "found": 1,
+      "complete": 0,
+      "bytes": 22611,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "structural",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 31461,
+      "packets": 13
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "structural_rerank_hits",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 21410,
+      "packets": 9
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "structural_rerank",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 30260,
+      "packets": 12
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "mix_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 22326,
+      "packets": 9
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "mix",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 30738,
+      "packets": 12
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "mix_rerank_hits",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 21410,
+      "packets": 9
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "mix_rerank",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 31800,
+      "packets": 13
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 16635,
+      "packets": 6
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "hybrid_ui_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 16635,
+      "packets": 6
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "mix_ui_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 16635,
+      "packets": 6
+    },
+    {
+      "split": "holdout",
+      "scenario": "S5",
+      "name": "mix_ui_rerank",
+      "expected": 3,
+      "found": 3,
+      "complete": 2,
+      "bytes": 29551,
+      "packets": 11
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "hybrid_hits",
+      "expected": 5,
+      "found": 0,
+      "complete": 0,
+      "bytes": 16622,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "hybrid",
+      "expected": 5,
+      "found": 0,
+      "complete": 0,
+      "bytes": 16622,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "hybrid_rerank_hits",
+      "expected": 5,
+      "found": 0,
+      "complete": 0,
+      "bytes": 17096,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "hybrid_rerank",
+      "expected": 5,
+      "found": 0,
+      "complete": 0,
+      "bytes": 17096,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "hybrid_wide_hits",
+      "expected": 5,
+      "found": 0,
+      "complete": 0,
+      "bytes": 32079,
+      "packets": 20
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "hybrid_wide",
+      "expected": 5,
+      "found": 0,
+      "complete": 0,
+      "bytes": 32079,
+      "packets": 20
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 5,
+      "found": 0,
+      "complete": 0,
+      "bytes": 32322,
+      "packets": 17
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "hybrid_wide_rerank",
+      "expected": 5,
+      "found": 0,
+      "complete": 0,
+      "bytes": 32322,
+      "packets": 17
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "structural_hits",
+      "expected": 5,
+      "found": 0,
+      "complete": 0,
+      "bytes": 15025,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "structural",
+      "expected": 5,
+      "found": 0,
+      "complete": 0,
+      "bytes": 29847,
+      "packets": 16
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "structural_rerank_hits",
+      "expected": 5,
+      "found": 0,
+      "complete": 0,
+      "bytes": 17182,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "structural_rerank",
+      "expected": 5,
+      "found": 0,
+      "complete": 0,
+      "bytes": 30083,
+      "packets": 15
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "mix_hits",
+      "expected": 5,
+      "found": 0,
+      "complete": 0,
+      "bytes": 17728,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "mix",
+      "expected": 5,
+      "found": 0,
+      "complete": 0,
+      "bytes": 31513,
+      "packets": 14
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "mix_rerank_hits",
+      "expected": 5,
+      "found": 0,
+      "complete": 0,
+      "bytes": 19418,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "mix_rerank",
+      "expected": 5,
+      "found": 0,
+      "complete": 0,
+      "bytes": 31427,
+      "packets": 14
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 5,
+      "found": 0,
+      "complete": 0,
+      "bytes": 4,
+      "packets": 0
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "hybrid_ui_rerank",
+      "expected": 5,
+      "found": 0,
+      "complete": 0,
+      "bytes": 4,
+      "packets": 0
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "mix_ui_rerank_hits",
+      "expected": 5,
+      "found": 0,
+      "complete": 0,
+      "bytes": 4,
+      "packets": 0
+    },
+    {
+      "split": "holdout",
+      "scenario": "S6",
+      "name": "mix_ui_rerank",
+      "expected": 5,
+      "found": 1,
+      "complete": 0,
+      "bytes": 30227,
+      "packets": 9
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "hybrid_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 16226,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "hybrid",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 16226,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "hybrid_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 15575,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "hybrid_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 15575,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "hybrid_wide_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 32322,
+      "packets": 21
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "hybrid_wide",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 32322,
+      "packets": 21
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 32161,
+      "packets": 16
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "hybrid_wide_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 32161,
+      "packets": 16
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "structural_hits",
+      "expected": 3,
+      "found": 1,
+      "complete": 0,
+      "bytes": 13323,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "structural",
+      "expected": 3,
+      "found": 1,
+      "complete": 0,
+      "bytes": 31867,
+      "packets": 18
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "structural_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 17293,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "structural_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 30211,
+      "packets": 16
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "mix_hits",
+      "expected": 3,
+      "found": 1,
+      "complete": 0,
+      "bytes": 14055,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "mix",
+      "expected": 3,
+      "found": 1,
+      "complete": 0,
+      "bytes": 30882,
+      "packets": 16
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "mix_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 19274,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "mix_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 30968,
+      "packets": 15
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 6060,
+      "packets": 4
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "hybrid_ui_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 6060,
+      "packets": 4
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "mix_ui_rerank_hits",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 6060,
+      "packets": 4
+    },
+    {
+      "split": "holdout",
+      "scenario": "S7",
+      "name": "mix_ui_rerank",
+      "expected": 3,
+      "found": 2,
+      "complete": 1,
+      "bytes": 31012,
+      "packets": 14
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "hybrid_hits",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 24272,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "hybrid",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 24272,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "hybrid_rerank_hits",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 25298,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "hybrid_rerank",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 25298,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "hybrid_wide_hits",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 31596,
+      "packets": 14
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "hybrid_wide",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 31596,
+      "packets": 14
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "hybrid_wide_rerank_hits",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 31798,
+      "packets": 14
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "hybrid_wide_rerank",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 31798,
+      "packets": 14
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "structural_hits",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 17556,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "structural",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 29599,
+      "packets": 14
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "structural_rerank_hits",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 25060,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "structural_rerank",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 27911,
+      "packets": 11
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "mix_hits",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 20978,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "mix",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 30383,
+      "packets": 12
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "mix_rerank_hits",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 26476,
+      "packets": 10
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "mix_rerank",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 30618,
+      "packets": 11
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "hybrid_ui_rerank_hits",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 5208,
+      "packets": 2
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "hybrid_ui_rerank",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 5208,
+      "packets": 2
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "mix_ui_rerank_hits",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 5208,
+      "packets": 2
+    },
+    {
+      "split": "holdout",
+      "scenario": "S8",
+      "name": "mix_ui_rerank",
+      "expected": 1,
+      "found": 0,
+      "complete": 0,
+      "bytes": 31439,
+      "packets": 9
+    }
+  ],
+  "pairs": [
+    {
+      "left": "hybrid",
+      "right": "mix",
+      "wins": [
+        {
+          "id": "holdout-S5-positive",
+          "scenario": "S5",
+          "left": 1,
+          "right": 2
+        }
+      ],
+      "losses": [
+        {
+          "id": "dev-S7-negative",
+          "scenario": "S7",
+          "left": 1,
+          "right": 0
+        },
+        {
+          "id": "holdout-S7-conditional",
+          "scenario": "S7",
+          "left": 1,
+          "right": 0
+        }
+      ],
+      "ties": 33
+    },
+    {
+      "left": "hybrid_hits",
+      "right": "mix_hits",
+      "wins": [],
+      "losses": [
+        {
+          "id": "dev-S7-negative",
+          "scenario": "S7",
+          "left": 1,
+          "right": 0
+        },
+        {
+          "id": "holdout-S7-conditional",
+          "scenario": "S7",
+          "left": 1,
+          "right": 0
+        }
+      ],
+      "ties": 34
+    },
+    {
+      "left": "hybrid_rerank",
+      "right": "mix_rerank",
+      "wins": [],
+      "losses": [],
+      "ties": 36
+    },
+    {
+      "left": "hybrid_rerank_hits",
+      "right": "mix_rerank_hits",
+      "wins": [],
+      "losses": [],
+      "ties": 36
+    },
+    {
+      "left": "hybrid_ui_rerank",
+      "right": "mix_ui_rerank",
+      "wins": [
+        {
+          "id": "dev-S1-positive",
+          "scenario": "S1",
+          "left": 0,
+          "right": 1
+        },
+        {
+          "id": "dev-S3-positive",
+          "scenario": "S3",
+          "left": 1,
+          "right": 2
+        },
+        {
+          "id": "dev-S5-positive",
+          "scenario": "S5",
+          "left": 1,
+          "right": 2
+        },
+        {
+          "id": "holdout-S5-positive",
+          "scenario": "S5",
+          "left": 1,
+          "right": 2
+        },
+        {
+          "id": "holdout-S6-conditional",
+          "scenario": "S6",
+          "left": 0,
+          "right": 1
+        }
+      ],
+      "losses": [],
+      "ties": 31
+    },
+    {
+      "left": "hybrid_ui_rerank_hits",
+      "right": "mix_ui_rerank_hits",
+      "wins": [],
+      "losses": [],
+      "ties": 36
+    },
+    {
+      "left": "hybrid_wide_rerank",
+      "right": "mix_rerank",
+      "wins": [
+        {
+          "id": "holdout-S3-positive",
+          "scenario": "S3",
+          "left": 0,
+          "right": 2
+        }
+      ],
+      "losses": [
+        {
+          "id": "dev-S1-positive",
+          "scenario": "S1",
+          "left": 2,
+          "right": 1
+        },
+        {
+          "id": "holdout-S2-positive",
+          "scenario": "S2",
+          "left": 2,
+          "right": 1
+        },
+        {
+          "id": "dev-S3-positive",
+          "scenario": "S3",
+          "left": 3,
+          "right": 2
+        }
+      ],
+      "ties": 32
+    },
+    {
+      "left": "hybrid_wide_rerank_hits",
+      "right": "mix_rerank_hits",
+      "wins": [
+        {
+          "id": "holdout-S3-positive",
+          "scenario": "S3",
+          "left": 0,
+          "right": 2
+        }
+      ],
+      "losses": [
+        {
+          "id": "dev-S1-positive",
+          "scenario": "S1",
+          "left": 2,
+          "right": 1
+        },
+        {
+          "id": "holdout-S2-positive",
+          "scenario": "S2",
+          "left": 2,
+          "right": 1
+        },
+        {
+          "id": "dev-S3-positive",
+          "scenario": "S3",
+          "left": 3,
+          "right": 2
+        }
+      ],
+      "ties": 32
+    }
+  ],
+  "hit3": {
+    "hybrid": {
+      "found": 4,
+      "total": 4
+    },
+    "hybrid_rerank": {
+      "found": 4,
+      "total": 4
+    },
+    "hybrid_wide": {
+      "found": 4,
+      "total": 4
+    },
+    "hybrid_wide_rerank": {
+      "found": 4,
+      "total": 4
+    },
+    "structural": {
+      "found": 4,
+      "total": 4
+    },
+    "structural_rerank": {
+      "found": 4,
+      "total": 4
+    },
+    "mix": {
+      "found": 4,
+      "total": 4
+    },
+    "mix_rerank": {
+      "found": 4,
+      "total": 4
+    },
+    "hybrid_ui_rerank": {
+      "found": 4,
+      "total": 4
+    },
+    "mix_ui_rerank": {
+      "found": 4,
+      "total": 4
+    }
+  },
+  "timings": {
+    "hybrid": {
+      "p50": 57.9434,
+      "p95": 188.49630000000002
+    },
+    "hybrid_rerank": {
+      "p50": 261.19379999999995,
+      "p95": 766.9955000000001
+    },
+    "hybrid_wide": {
+      "p50": 50.7018,
+      "p95": 173.1769
+    },
+    "hybrid_wide_rerank": {
+      "p50": 1543.9742999999999,
+      "p95": 2625.6005
+    },
+    "structural": {
+      "p50": 145.136,
+      "p95": 558.5
+    },
+    "structural_rerank": {
+      "p50": 372.742,
+      "p95": 781.0015999999999
+    },
+    "mix": {
+      "p50": 158.0291,
+      "p95": 524.1981999999999
+    },
+    "mix_rerank": {
+      "p50": 372.3544,
+      "p95": 718.0828
+    },
+    "hybrid_ui_rerank": {
+      "p50": 270.9691,
+      "p95": 474.38989999999995
+    },
+    "mix_ui_rerank": {
+      "p50": 396.882,
+      "p95": 822.2726
+    }
+  }
+}

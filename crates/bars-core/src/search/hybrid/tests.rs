@@ -9,6 +9,97 @@ use crate::storage::Journal;
 
 const DIM: usize = 32;
 
+#[test]
+fn search_pins_snapshot_before_lazy_fts_open_during_schema_publication() {
+    use rusqlite::hooks::{AuthAction, AuthContext, Authorization};
+    use std::sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+        mpsc,
+    };
+    use std::time::Duration;
+
+    let (_dir, index, mut embedder) = project();
+    let path = index.conn().path().unwrap().to_string();
+    drop(index);
+    let reader = Index::open_read_only(Path::new(&path)).unwrap();
+    let writer = rusqlite::Connection::open(&path).unwrap();
+    let (start_tx, start_rx) = mpsc::channel();
+    let (done_tx, done_rx) = mpsc::channel();
+    let publish = std::thread::spawn(move || {
+        let mut generation = 0;
+        while start_rx.recv_timeout(Duration::from_secs(2)).is_ok() {
+            writer
+                .execute_batch(&format!(
+                    "CREATE TABLE schema_publication_{generation}(id INTEGER)"
+                ))
+                .unwrap();
+            generation += 1;
+            done_tx.send(()).unwrap();
+        }
+        generation
+    });
+    let active = Arc::new(AtomicBool::new(false));
+    let flag = active.clone();
+    reader
+        .conn()
+        .authorizer(Some(move |context: AuthContext<'_>| {
+            if let AuthAction::Read { table_name, .. } = context.action
+                && table_name == "chunks_fts_config"
+            {
+                flag.store(true, Ordering::SeqCst);
+            }
+            Authorization::Allow
+        }))
+        .unwrap();
+    // Переключаем схему точно при исполнении внутренних FTS-запросов, без гонки по sleep.
+    let mut publications = 0;
+    reader
+        .conn()
+        .progress_handler(
+            1,
+            Some(move || {
+                if active.load(Ordering::SeqCst) && publications < 512 {
+                    publications += 1;
+                    start_tx.send(()).unwrap();
+                    done_rx.recv_timeout(Duration::from_secs(2)).unwrap();
+                }
+                false
+            }),
+        )
+        .unwrap();
+    let response = run(&reader, &mut embedder, &request("векторный"));
+    reader
+        .conn()
+        .progress_handler(0, None::<fn() -> bool>)
+        .unwrap();
+    reader
+        .conn()
+        .authorizer(None::<fn(AuthContext<'_>) -> Authorization>)
+        .unwrap();
+    assert!(
+        publish.join().unwrap() > 0,
+        "публикация действительно пересеклась с FTS"
+    );
+    assert!(!response.unwrap().hits.is_empty());
+    assert!(reader.conn().is_autocommit(), "поиск освободил свой снимок");
+}
+
+#[test]
+fn search_preserves_caller_transaction() {
+    let (_dir, index, mut embedder) = project();
+    let transaction = index.conn().unchecked_transaction().unwrap();
+    assert!(
+        !run(&index, &mut embedder, &request("векторный"))
+            .unwrap()
+            .hits
+            .is_empty()
+    );
+    assert!(!index.conn().is_autocommit());
+    transaction.rollback().unwrap();
+    assert!(index.conn().is_autocommit());
+}
+
 /// Мешок слов: каждое слово после стемминга падает в одну из `DIM` корзин. Близость выходит
 /// осмысленной без модели.
 struct BagEmbedder {

@@ -10,7 +10,7 @@
   import { DEFAULT_FORCES, Layout, type Forces, type PNode } from "../../lib/graph/layout";
   import { brightnessOf, drawStrength, springOf, widthOf, DEFAULT_MIN_STRENGTH, type GEdge, type GNode, type Mode } from "../../lib/graph/model";
   import { INITIAL_LIMITS, PORTION, type Slice } from "../../lib/graph/slice";
-  import { DEFAULT_DEPTH, MAX_DEPTH, QUERY_BUDGET, QUERY_MAX, buildQuerySlice, shapeQuery, type QueryInfo, type QueryInput, type RetrievalKind, type ScoreKind } from "../../lib/graph/query";
+  import { DEFAULT_DEPTH, MAX_DEPTH, QUERY_BUDGET, QUERY_MAX, buildQuerySlice, shapeQuery, type QueryInfo, type QueryInput, type RetrievalKind, type ScoreKind } from "./query";
   import { draw, emptyOverlay, layoutLines, lineDistance, moduleColors, radiusOf, readPalette, toScreen, toWorld, type Camera, type Overlay, type Palette, type Scene, type Target } from "./draw";
   import {
     AUDIT_NAME, CHUNK_LIMIT, CHUNK_MAX, F, GROUP_NAME, LEVELS, LEVEL_NAME, PREDICATE_GROUP, PREDICATE_NAME, ROLE_LETTER, ROLE_NAME, SCENARIO_TARGETS, XKIND_TITLE, XStore,

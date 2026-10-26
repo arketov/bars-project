@@ -133,6 +133,64 @@ async fn physical_graph_slice_is_window_only_and_expands_chunks_on_the_same_snap
         .iter()
         .find(|n| n.docs_path == "features/a.md")
         .unwrap();
+    // Вид запроса имеет отдельную команду, не зависит от лимита общего среза и доступен только окну.
+    let query_request = bars_protocol::QuerySliceRequest {
+        id: "search-1".into(),
+        text: "индексация".into(),
+        scope: bars_core::graph::Scope {
+            modules: vec!["features".into()],
+            files: vec![],
+        },
+        hits: vec![bars_core::graph::query_slice::QueryHit {
+            path: alpha.path.clone(),
+            title: alpha.label.clone(),
+            heading: "Альфа".into(),
+            first: 1,
+            last: 7,
+            score: Some(0.83),
+        }],
+        score_kind: bars_core::graph::query_slice::QueryScoreKind::Cosine,
+        depth: 1,
+        fanout: 4,
+        min_strength: 0.5,
+        max_nodes: 200,
+        max_edges: 800,
+        max_bytes: 262144,
+        snapshot: Some(slice.snapshot.clone()),
+    };
+    let query_call = Call::GraphQuerySlice(bars_protocol::GraphQuerySliceParams {
+        target: target.clone(),
+        request: query_request.clone(),
+    });
+    assert!(query_call.window_only());
+    assert!(!query_call.allowed_for(ClientKind::Mcp));
+    assert!(!query_call.allowed_for(ClientKind::Cli));
+    let projected: bars_protocol::QueryGraphSlice = env.call(query_call).await;
+    assert_eq!(projected.physical.snapshot, slice.snapshot);
+    assert_eq!(projected.results[0].score, Some(0.83));
+    assert!(
+        projected
+            .physical
+            .nodes
+            .iter()
+            .all(|n| n.module == "features")
+    );
+    assert_eq!(
+        projected.physical.nodes.len(),
+        2,
+        "ссылка включает второй документ области"
+    );
+    let mut expired = query_request;
+    expired.snapshot = Some("expired".into());
+    let rejected = env
+        .error(Call::GraphQuerySlice(
+            bars_protocol::GraphQuerySliceParams {
+                target: target.clone(),
+                request: expired,
+            },
+        ))
+        .await;
+    assert!(rejected.message.contains("снимок"));
     assert!(alpha.chunks >= 1);
     // Раскрытие того же документа на том же снимке добавляет его чанки с номерами строк источника.
     let expanded: PhysicalGraphSlice = env

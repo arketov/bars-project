@@ -253,6 +253,7 @@ impl WorkerHandler {
             .await
             .map_err(|_| graph_error(GraphError::TimedOut))?;
         let cache = self.physical_similarity.clone();
+        let representations = self.document_representations.clone();
         let datasets = self.graph_cache.clone();
         tokio::task::spawn_blocking(move || {
             let _gate = gate;
@@ -273,7 +274,7 @@ impl WorkerHandler {
                 Some(value) => value,
                 None => {
                     let value = std::sync::Arc::new(
-                        centroid::document_similarity(&index, &data, || false)
+                        centroid::similarity_from_representations(&data, super::query_slice::representations(&representations, &project, &index, &data, deadline).map_err(graph_error)?.as_ref(), || std::time::Instant::now() >= deadline)
                             .map_err(graph_error)?,
                     );
                     *cache.lock().unwrap_or_else(|e| e.into_inner()) =

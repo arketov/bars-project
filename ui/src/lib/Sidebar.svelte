@@ -18,10 +18,10 @@
   );
   const hasTree = $derived(!!app.project && app.project.state !== "unavailable");
 
-  function pick(path: string) {
+  async function pick(path: string) {
     menuOpen = false;
-    app.openSearch();
-    void app.select(path);
+    if (path !== app.current) await app.select(path);
+    if (app.current === path) app.openSearch();
   }
 
 </script>

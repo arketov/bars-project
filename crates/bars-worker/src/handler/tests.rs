@@ -29,6 +29,40 @@ struct Harness {
 }
 
 #[tokio::test]
+async fn mcp_request_starts_observation_while_cli_status_does_not() {
+    let harness = Harness::start("mcp-observation", FakeProvider::new("m1")).await;
+    let root = harness.project("quiet", &[("guide.md", "# Руководство\n")]);
+    let mut cli = harness.client(ClientKind::Cli).await;
+    cli.call(&RegisterParams {
+        path: root.display().to_string(),
+    })
+    .await
+    .unwrap();
+    let params = StatusParams {
+        target: target(&root),
+    };
+    assert!(!cli.call(&params).await.unwrap().watching);
+    let mut mcp = harness.client(ClientKind::Mcp).await;
+    mcp.call(&ReadParams {
+        target: target(&root),
+        path: "guide.md".into(),
+    })
+    .await
+    .unwrap();
+    assert!(cli.call(&params).await.unwrap().watching);
+    let denied = cli
+        .call(&bars_protocol::ProjectObserveParams {
+            window: "fake".into(),
+            project: Some(root.display().to_string()),
+        })
+        .await
+        .unwrap_err();
+    assert!(
+        matches!(denied, ClientError::Rpc(error) if error.code == bars_protocol::METHOD_NOT_FOUND)
+    );
+}
+
+#[tokio::test]
 async fn mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion() {
     let harness = Harness::start("mcp-statistics", FakeProvider::new("m1")).await;
     let root = harness.project("stats", &[("guide.md", "# Руководство\n")]);
@@ -114,7 +148,10 @@ async fn mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion() {
 impl Harness {
     async fn start(name: &str, provider: Arc<dyn ModelProvider>) -> Self {
         let home = TempDir::new().unwrap();
-        let endpoint = Endpoint::named(&format!("handler-{name}"));
+        let endpoint = Endpoint::named(&format!(
+            "handler-{name}-{}",
+            home.path().file_name().unwrap().to_string_lossy()
+        ));
         let mut config = WorkerConfig::new(home.path().to_path_buf());
         // Клиенты живут во временной папке: настоящие ~/.claude и ~/.codex тесты не трогают.
         config.install_env = Some(InstallEnv {
@@ -314,7 +351,7 @@ async fn cli_works_with_a_project_end_to_end() {
         })
         .await
         .unwrap();
-    assert!(status.watching);
+    assert!(!status.watching);
     assert_eq!(status.model.index.as_deref(), Some("builtin:m1"));
     assert_eq!(status.model.settings, "builtin:m1");
     assert!(status.updated_at.unwrap().ends_with('Z'));
@@ -507,6 +544,15 @@ async fn vanished_project_folder_is_unavailable() {
     let harness = Harness::start("vanished", FakeProvider::new("m1")).await;
     let mut cli = harness.client(ClientKind::Cli).await;
     let root = ready_project(&harness, &mut cli).await;
+    let mut mcp = harness.client(ClientKind::Mcp).await;
+    assert!(
+        mcp.call(&StatusParams {
+            target: target(&root)
+        })
+        .await
+        .unwrap()
+        .watching
+    );
     // Ready относится к тексту; фоновый граф ещё может держать SQLite на Windows.
     wait_status(
         &mut cli,
@@ -698,8 +744,11 @@ async fn second_worker_on_the_same_channel_gives_way() {
 /// Клиент запускает воркер, которого нет: `launch` поднимает его на том же канале.
 #[tokio::test]
 async fn client_launches_the_worker_on_demand() {
-    let endpoint = Endpoint::named("handler-launch");
     let home = TempDir::new().unwrap();
+    let endpoint = Endpoint::named(&format!(
+        "handler-launch-{}",
+        home.path().file_name().unwrap().to_string_lossy()
+    ));
     let config = WorkerConfig::new(home.path().to_path_buf());
     let served = endpoint.clone();
     let mut client = bars_protocol::connect_or_launch_with(

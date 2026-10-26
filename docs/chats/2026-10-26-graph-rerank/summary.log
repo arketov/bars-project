@@ -1,0 +1,463 @@
+{
+  "device": "DirectMl",
+  "totals": [
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "hybrid",
+      "expected": 52,
+      "found": 28,
+      "complete": 17,
+      "bytes": 353153,
+      "packets": 179
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "hybrid_rerank",
+      "expected": 52,
+      "found": 33,
+      "complete": 20,
+      "bytes": 354428,
+      "packets": 178
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "hybrid_wide",
+      "expected": 52,
+      "found": 35,
+      "complete": 22,
+      "bytes": 580791,
+      "packets": 318
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "hybrid_wide_rerank",
+      "expected": 52,
+      "found": 34,
+      "complete": 23,
+      "bytes": 577274,
+      "packets": 297
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "structural",
+      "expected": 52,
+      "found": 27,
+      "complete": 15,
+      "bytes": 546877,
+      "packets": 260
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "structural_rerank",
+      "expected": 52,
+      "found": 34,
+      "complete": 21,
+      "bytes": 542048,
+      "packets": 249
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "mix",
+      "expected": 52,
+      "found": 27,
+      "complete": 16,
+      "bytes": 549051,
+      "packets": 246
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "mix_rerank",
+      "expected": 52,
+      "found": 33,
+      "complete": 20,
+      "bytes": 550060,
+      "packets": 240
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "hybrid_ui_rerank",
+      "expected": 52,
+      "found": 24,
+      "complete": 16,
+      "bytes": 148120,
+      "packets": 79
+    },
+    {
+      "split": "all",
+      "scenario": "all",
+      "name": "mix_ui_rerank",
+      "expected": 52,
+      "found": 29,
+      "complete": 18,
+      "bytes": 549272,
+      "packets": 191
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "hybrid",
+      "expected": 28,
+      "found": 16,
+      "complete": 8,
+      "bytes": 160350,
+      "packets": 89
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "hybrid_rerank",
+      "expected": 28,
+      "found": 18,
+      "complete": 10,
+      "bytes": 164651,
+      "packets": 89
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "hybrid_wide",
+      "expected": 28,
+      "found": 18,
+      "complete": 10,
+      "bytes": 290193,
+      "packets": 172
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "hybrid_wide_rerank",
+      "expected": 28,
+      "found": 17,
+      "complete": 11,
+      "bytes": 288021,
+      "packets": 157
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "structural",
+      "expected": 28,
+      "found": 15,
+      "complete": 7,
+      "bytes": 271484,
+      "packets": 140
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "structural_rerank",
+      "expected": 28,
+      "found": 18,
+      "complete": 10,
+      "bytes": 271515,
+      "packets": 131
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "mix",
+      "expected": 28,
+      "found": 16,
+      "complete": 8,
+      "bytes": 278443,
+      "packets": 132
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "mix_rerank",
+      "expected": 28,
+      "found": 18,
+      "complete": 10,
+      "bytes": 277668,
+      "packets": 128
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "hybrid_ui_rerank",
+      "expected": 28,
+      "found": 14,
+      "complete": 8,
+      "bytes": 75034,
+      "packets": 40
+    },
+    {
+      "split": "holdout",
+      "scenario": "all",
+      "name": "mix_ui_rerank",
+      "expected": 28,
+      "found": 16,
+      "complete": 9,
+      "bytes": 277498,
+      "packets": 106
+    }
+  ],
+  "pairs": [
+    {
+      "left": "hybrid",
+      "right": "mix",
+      "wins": [
+        {
+          "id": "holdout-S5-positive",
+          "scenario": "S5",
+          "left": 1,
+          "right": 2
+        }
+      ],
+      "losses": [
+        {
+          "id": "dev-S7-negative",
+          "scenario": "S7",
+          "left": 1,
+          "right": 0
+        },
+        {
+          "id": "holdout-S7-conditional",
+          "scenario": "S7",
+          "left": 1,
+          "right": 0
+        }
+      ],
+      "ties": 33
+    },
+    {
+      "left": "hybrid_hits",
+      "right": "mix_hits",
+      "wins": [],
+      "losses": [
+        {
+          "id": "dev-S7-negative",
+          "scenario": "S7",
+          "left": 1,
+          "right": 0
+        },
+        {
+          "id": "holdout-S7-conditional",
+          "scenario": "S7",
+          "left": 1,
+          "right": 0
+        }
+      ],
+      "ties": 34
+    },
+    {
+      "left": "hybrid_rerank",
+      "right": "mix_rerank",
+      "wins": [],
+      "losses": [],
+      "ties": 36
+    },
+    {
+      "left": "hybrid_rerank_hits",
+      "right": "mix_rerank_hits",
+      "wins": [],
+      "losses": [],
+      "ties": 36
+    },
+    {
+      "left": "hybrid_ui_rerank",
+      "right": "mix_ui_rerank",
+      "wins": [
+        {
+          "id": "dev-S1-positive",
+          "scenario": "S1",
+          "left": 0,
+          "right": 1
+        },
+        {
+          "id": "dev-S3-positive",
+          "scenario": "S3",
+          "left": 1,
+          "right": 2
+        },
+        {
+          "id": "dev-S5-positive",
+          "scenario": "S5",
+          "left": 1,
+          "right": 2
+        },
+        {
+          "id": "holdout-S5-positive",
+          "scenario": "S5",
+          "left": 1,
+          "right": 2
+        },
+        {
+          "id": "holdout-S6-conditional",
+          "scenario": "S6",
+          "left": 0,
+          "right": 1
+        }
+      ],
+      "losses": [],
+      "ties": 31
+    },
+    {
+      "left": "hybrid_ui_rerank_hits",
+      "right": "mix_ui_rerank_hits",
+      "wins": [],
+      "losses": [],
+      "ties": 36
+    },
+    {
+      "left": "hybrid_wide_rerank",
+      "right": "mix_rerank",
+      "wins": [
+        {
+          "id": "holdout-S3-positive",
+          "scenario": "S3",
+          "left": 0,
+          "right": 2
+        }
+      ],
+      "losses": [
+        {
+          "id": "dev-S1-positive",
+          "scenario": "S1",
+          "left": 2,
+          "right": 1
+        },
+        {
+          "id": "holdout-S2-positive",
+          "scenario": "S2",
+          "left": 2,
+          "right": 1
+        },
+        {
+          "id": "dev-S3-positive",
+          "scenario": "S3",
+          "left": 3,
+          "right": 2
+        }
+      ],
+      "ties": 32
+    },
+    {
+      "left": "hybrid_wide_rerank_hits",
+      "right": "mix_rerank_hits",
+      "wins": [
+        {
+          "id": "holdout-S3-positive",
+          "scenario": "S3",
+          "left": 0,
+          "right": 2
+        }
+      ],
+      "losses": [
+        {
+          "id": "dev-S1-positive",
+          "scenario": "S1",
+          "left": 2,
+          "right": 1
+        },
+        {
+          "id": "holdout-S2-positive",
+          "scenario": "S2",
+          "left": 2,
+          "right": 1
+        },
+        {
+          "id": "dev-S3-positive",
+          "scenario": "S3",
+          "left": 3,
+          "right": 2
+        }
+      ],
+      "ties": 32
+    }
+  ],
+  "hit3": {
+    "hybrid": {
+      "found": 4,
+      "total": 4
+    },
+    "hybrid_rerank": {
+      "found": 4,
+      "total": 4
+    },
+    "hybrid_wide": {
+      "found": 4,
+      "total": 4
+    },
+    "hybrid_wide_rerank": {
+      "found": 4,
+      "total": 4
+    },
+    "structural": {
+      "found": 4,
+      "total": 4
+    },
+    "structural_rerank": {
+      "found": 4,
+      "total": 4
+    },
+    "mix": {
+      "found": 4,
+      "total": 4
+    },
+    "mix_rerank": {
+      "found": 4,
+      "total": 4
+    },
+    "hybrid_ui_rerank": {
+      "found": 4,
+      "total": 4
+    },
+    "mix_ui_rerank": {
+      "found": 4,
+      "total": 4
+    }
+  },
+  "timings": {
+    "hybrid": {
+      "p50": 57.9434,
+      "p95": 188.49630000000002
+    },
+    "hybrid_rerank": {
+      "p50": 261.19379999999995,
+      "p95": 766.9955000000001
+    },
+    "hybrid_wide": {
+      "p50": 50.7018,
+      "p95": 173.1769
+    },
+    "hybrid_wide_rerank": {
+      "p50": 1543.9742999999999,
+      "p95": 2625.6005
+    },
+    "structural": {
+      "p50": 145.136,
+      "p95": 558.5
+    },
+    "structural_rerank": {
+      "p50": 372.742,
+      "p95": 781.0015999999999
+    },
+    "mix": {
+      "p50": 158.0291,
+      "p95": 524.1981999999999
+    },
+    "mix_rerank": {
+      "p50": 372.3544,
+      "p95": 718.0828
+    },
+    "hybrid_ui_rerank": {
+      "p50": 270.9691,
+      "p95": 474.38989999999995
+    },
+    "mix_ui_rerank": {
+      "p50": 396.882,
+      "p95": 822.2726
+    }
+  }
+}

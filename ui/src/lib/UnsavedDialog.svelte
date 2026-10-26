@@ -5,34 +5,44 @@
   import type { EditorBuffer } from "./editors.svelte";
 
   let back = $state<HTMLButtonElement>();
+  let modal = $state<HTMLDialogElement>();
   const pending = $derived(unsavedPrompt.pending);
-  $effect(() => { if (pending) void tick().then(() => back?.focus()); });
+  $effect(() => {
+    const question = pending;
+    if (question) void tick().then(() => {
+      if (pending !== question || !modal?.isConnected) return;
+      if (!modal.open) modal.showModal();
+      back?.focus();
+    });
+  });
   const reason = (buffer: EditorBuffer) =>
     buffer.status === "conflict" ? buffer.message || "Файл изменён на диске"
       : buffer.status === "error" ? `Не записано: ${buffer.message}`
       : "Правки не записаны";
   function keydown(event: KeyboardEvent) {
-    if (event.key === "Escape") { event.stopPropagation(); pending?.resolve("cancel"); }
+    if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); if (!pending?.busy) pending?.resolve("cancel"); }
   }
 </script>
 
 {#if pending}
   <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-  <div class="backdrop" role="alertdialog" aria-modal="true" aria-labelledby="unsaved-title" tabindex="-1" data-command-blocked="true" onkeydown={keydown}>
+  <dialog bind:this={modal} class="backdrop" role="alertdialog" aria-modal="true" aria-labelledby="unsaved-title" tabindex="-1" data-command-blocked="true" onkeydown={keydown} oncancel={(event) => { event.preventDefault(); if (!pending.busy) pending.resolve("cancel"); }}>
     <div class="box">
       <h2 id="unsaved-title">Есть несохранённые правки</h2>
       <p>Эти документы не записаны на диск. Если закрыть без записи, правки пропадут.</p>
       <ul>{#each pending.items as buffer (buffer.path)}<li><b>{buffer.path}</b><small>{reason(buffer)}</small></li>{/each}</ul>
       <div class="actions">
-        <button bind:this={back} class="primary" onclick={() => pending.resolve("cancel")}>Вернуться</button>
-        <button class="danger" onclick={() => pending.resolve("discard")}>Закрыть без записи</button>
+        <button bind:this={back} class="primary" disabled={pending.busy} onclick={() => pending.resolve("cancel")}>Вернуться</button>
+        {#if pending.allowBeside}<button disabled={pending.busy} onclick={() => unsavedPrompt.saveBeside()}>Сохранить рядом и закрыть</button>{/if}
+        <button class="danger" disabled={pending.busy} onclick={() => pending.resolve("discard")}>Закрыть без записи</button>
       </div>
     </div>
-  </div>
+  </dialog>
 {/if}
 
 <style>
-  .backdrop { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; background: rgb(0 0 0 / 0.35); }
+  .backdrop { position: fixed; inset: 0; width: 100vw; height: 100vh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; display: grid; place-items: center; background: rgb(0 0 0 / 0.35); }
+  .backdrop::backdrop { background: transparent; }
   .box { width: min(460px, calc(100vw - 32px)); max-height: 80vh; overflow: auto; padding: 14px 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--text); box-shadow: var(--shadow); }
   h2 { margin: 0 0 6px; font-size: 14px; } p { margin: 0 0 8px; font-size: 12px; color: var(--muted); }
   ul { margin: 0 0 12px; padding: 0; list-style: none; } li { padding: 4px 0; border-top: 1px solid var(--line); }

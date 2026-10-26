@@ -75,6 +75,7 @@ const rows=gold.cases.map(c=>{
   for(const v of raw.variants) {
     for(const h of v.hits) assert(data.sources.some(s=>h.path===s.meta.path),`hit outside frozen corpus: ${h.path}`);
     const packets=v.hits.map(hitPacket);
+    variants[`${v.name}_hits`]=score(c,pack(packets,gold.budget_bytes));
     if(v.related) packets.push(...graphPackets(v.related));
     variants[v.name]=score(c,pack(packets,gold.budget_bytes));
   }
@@ -102,7 +103,7 @@ const rows=gold.cases.map(c=>{
 const summaries=[];
 for(const split of ['dev','holdout']) for(const scenario of ['all',...Array.from({length:8},(_,i)=>`S${i+1}`)]) {
   const part=rows.filter(r=>r.split===split&&(scenario==='all'||r.scenario===scenario));
-  for(const name of ['hybrid','hybrid_wide','structural','mix','graph']) {
+  for(const name of Object.keys(rows[0].variants)) {
     const values=part.map(r=>r.variants[name]), expected=values.reduce((n,v)=>n+v.expected,0),found=values.reduce((n,v)=>n+v.found,0);
     summaries.push({split,scenario,name,expected,found,recall:expected?found/expected:null,
       complete:values.filter(v=>v.complete===true).length,scored_cases:values.filter(v=>v.complete!==null).length,

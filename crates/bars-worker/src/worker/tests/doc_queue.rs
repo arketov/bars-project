@@ -47,6 +47,7 @@ async fn a_stream_of_edits_embeds_the_document_once_after_the_pause() {
     let project = env.project("alpha", &[("a.md", DOC)]);
     let worker = started(&env, Duration::from_millis(1500));
     worker.register(&project).unwrap();
+    worker.observe_window("main", Some(&project)).unwrap();
     idle(&worker).await;
     let before = embed_calls(&env);
 
@@ -151,6 +152,7 @@ async fn a_deleted_document_leaves_the_index_without_a_pause() {
     let project = env.project("alpha", &[("a.md", DOC), ("b.md", DOC)]);
     let worker = started(&env, Duration::from_secs(120));
     worker.register(&project).unwrap();
+    worker.observe_window("main", Some(&project)).unwrap();
     idle(&worker).await;
     assert_eq!(documents(&project), 2);
 

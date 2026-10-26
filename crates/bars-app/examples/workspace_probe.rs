@@ -80,6 +80,16 @@ fn workspace_probe_size(window: tauri::WebviewWindow, width: f64) -> Result<(), 
         .map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+fn workspace_probe_visibility(window: tauri::WebviewWindow, visible: bool) -> Result<(), String> {
+    if visible {
+        window.show()
+    } else {
+        window.hide()
+    }
+    .map_err(|e| e.to_string())
+}
+
 fn main() -> anyhow::Result<()> {
     let runtime = tokio::runtime::Runtime::new()?;
     let _entered = runtime.enter();
@@ -136,6 +146,7 @@ fn main() -> anyhow::Result<()> {
             commands::mcp_history_control,
             commands::mcp_history_legacy,
             workspace_probe_finish,
+            workspace_probe_visibility,
             workspace_probe_size
         ])
         .setup(|app| {

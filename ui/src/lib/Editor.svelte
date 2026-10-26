@@ -2,7 +2,7 @@
   // Редактор исходного Markdown на CodeMirror 6 (Т-29, ADR-0005). Текст и запись — в буфере `editors`;
   // здесь только вид: подсветка CommonMark и GFM, продолжение списков, автопары, подсветка найденного отрывка.
   import { onMount, untrack } from "svelte";
-  import { Annotation, Compartment, EditorState, StateEffect, StateField } from "@codemirror/state";
+  import { Annotation, Compartment, EditorState, StateEffect, StateField, Transaction } from "@codemirror/state";
   import { Decoration, EditorView, keymap, type DecorationSet } from "@codemirror/view";
   import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
   import { autocompletion, closeBrackets, closeBracketsKeymap, startCompletion, type CompletionContext } from "@codemirror/autocomplete";
@@ -14,8 +14,9 @@
   import { deleteStarPair, editorCommands, moveInTable, starInput } from "./editor-commands";
   import { linkOptions, semanticOptions, type LinkOption, type LinkTarget } from "./link-picker";
 
-  let { text, readonly = false, hit = null, label = "Редактор Markdown", links = () => [], semantic, oninput }: {
+  let { text, historyVersion = 0, readonly = false, hit = null, label = "Редактор Markdown", links = () => [], semantic, oninput }: {
     text: string;
+    historyVersion?: number;
     readonly?: boolean;
     /** Документы проекта для выбора по `[[` (Т-30). */
     links?: () => LinkTarget[];
@@ -31,7 +32,9 @@
   let view: EditorView | undefined;
   /** Последний текст, который редактор сам отдал наружу: возврат его через `text` не перезаписывает документ. */
   let echoed = untrack(() => text);
+  let loadedVersion = untrack(() => historyVersion);
   const external = Annotation.define<boolean>();
+  const undoHistory = new Compartment();
   const editable = new Compartment();
   const setHit = StateEffect.define<{ from: number; to: number; exact?: boolean } | null>();
   const hitField = StateField.define<DecorationSet>({
@@ -182,7 +185,7 @@
       state: EditorState.create({
         doc: text,
         extensions: [
-          history(),
+          undoHistory.of(history()),
           closeBrackets(),
           autocompletion({ override: [linkSource], icons: false, defaultKeymap: true }),
           syntaxHighlighting(style),
@@ -216,16 +219,21 @@
 
   $effect(() => {
     const next = text;
-    if (!view || next === echoed) return;
+    const version = historyVersion;
+    if (!view || (next === echoed && version === loadedVersion)) return;
     echoed = next;
+    loadedVersion = version;
     // Перечитанный с диска текст заменяет документ, курсор остаётся на прежнем смещении.
     const { anchor, head } = view.state.selection.main;
     const end = next.length;
     view.dispatch({
       changes: { from: 0, to: view.state.doc.length, insert: next },
       selection: { anchor: Math.min(anchor, end), head: Math.min(head, end) },
-      annotations: external.of(true),
+      annotations: [external.of(true), Transaction.addToHistory.of(false)],
+      // Удаление поля history очищает и отмену, и повтор; одной addToHistory недостаточно.
+      effects: undoHistory.reconfigure([]),
     });
+    view.dispatch({ effects: undoHistory.reconfigure(history()) });
   });
 
   $effect(() => {

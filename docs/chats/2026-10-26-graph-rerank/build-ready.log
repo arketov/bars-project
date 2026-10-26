@@ -1,0 +1,10 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.42
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+   Compiling bindgen v0.72.1
+   Compiling bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+   Compiling llama-cpp-sys-2 v0.1.160
+   Compiling llama-cpp-2 v0.1.160
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 50.70s

@@ -5,6 +5,7 @@
 //! выбор проекта, `status`, `reindex`, `session_start`, доступ к проекту для поиска и модели.
 //! Поиск в очереди не стоит: он берёт [`Worker::gate`] на чтение и открывает индекс сам.
 
+mod activity;
 mod control;
 mod deletion;
 mod doc_queue;
@@ -62,7 +63,7 @@ use watcher::{DEBOUNCE, ProjectWatcher, Sink, WatchEvent};
 
 /// Как часто воркер проверяет все проекты (Т-10). Слежение за файлами может молчать, поэтому
 /// проверка не должна быть редкой: на неизменном проекте она дешёвая, эмбеддинг не запускается.
-pub const PERIODIC_INTERVAL: Duration = Duration::from_secs(15 * 60);
+pub const PERIODIC_INTERVAL: Duration = Duration::from_secs(60 * 60);
 
 /// Через сколько после пачки событий проект проверяется целиком: ловит хвост, который
 /// `notify` потерял при переполнении буфера (ISS-06).
@@ -237,6 +238,8 @@ struct Runtime {
     job_gate: Arc<tokio::sync::Mutex<()>>,
     status: RuntimeStatus,
     watcher: Option<ProjectWatcher>,
+    mcp_until: Option<Instant>,
+    windows: HashMap<String, Instant>,
     /// `notify` сообщил об ошибке или папка пропадала: слежение надо поднять заново.
     watch_failed: bool,
     /// Сколько сообщений слежения пришло с начала последней полной проверки. Проверка нашла
@@ -263,6 +266,8 @@ impl Runtime {
                 last_report: None,
             },
             watcher: None,
+            mcp_until: None,
+            windows: HashMap::new(),
             watch_failed: false,
             watch_events: 0,
             tail_armed: false,
@@ -387,8 +392,9 @@ impl Worker {
         let queue_task = tokio::spawn(Arc::clone(&inner).run_queue());
         let timer_task = tokio::spawn(Arc::clone(&inner).run_timer());
         let doc_task = tokio::spawn(Arc::clone(&inner).run_doc_timer());
+        let activity_task = tokio::spawn(Arc::clone(&inner).run_activity_timer());
         let model_task = tokio::spawn(Arc::clone(&inner).run_model_maintenance());
-        lock(&inner.tasks).extend([queue_task, timer_task, doc_task, model_task]);
+        lock(&inner.tasks).extend([queue_task, timer_task, doc_task, model_task, activity_task]);
         for path in paths {
             inner.activate(&path, Priority::Periodic);
         }
@@ -607,7 +613,8 @@ impl Worker {
         let cwd = normalize(cwd)?;
         let discovered = lock(&self.inner.registry).discover_root(&cwd);
         if discovered.registered {
-            self.inner.activate(&discovered.root, Priority::Explicit);
+            self.observe_mcp(&discovered.root)?;
+            let _ = self.scan_receipt(&discovered.root);
             self.sync_project_gates(Some(&discovered.root));
             return Ok(Some(discovered.root));
         }
@@ -617,6 +624,7 @@ impl Worker {
             return Ok(None);
         }
         let root = self.register(&discovered.root)?.path;
+        self.observe_mcp(&root)?;
         self.sync_project_gates(Some(&root));
         Ok(Some(root))
     }
@@ -1098,8 +1106,8 @@ impl Inner {
         Some((id, was_merged, JobKind::of(merged)))
     }
 
-    /// Вводит проект в работу: папка на месте, слежение запущено, проверка в очереди. Папки нет —
-    /// проект `unavailable`.
+    /// Проверяет папку и запускает проверку; слежение — только при активности проекта.
+    /// Папки нет — проект `unavailable`; регистрация сразу ставит начальное обновление.
     fn activate(self: &Arc<Self>, path: &Path, priority: Priority) {
         let registry = lock(&self.registry);
         if !registry.contains(path) {
@@ -1127,7 +1135,19 @@ impl Inner {
         }
         drop(registry);
         self.ensure_watching(path);
-        self.enqueue(path, Job::check(priority));
+        if priority == Priority::Explicit {
+            self.enqueue(path, Job::check(priority));
+            return;
+        }
+        let worker = Worker {
+            inner: self.clone(),
+        };
+        if let Err(error) = worker.scan_with_priority(path, priority)
+            && !matches!(error, WorkerError::ConsentRequired(_))
+            && let Some(runtime) = lock(&self.projects).get_mut(path)
+        {
+            runtime.status.last_error = Some(error.to_string());
+        }
     }
 
     fn check_all(self: &Arc<Self>) {
@@ -1142,7 +1162,9 @@ impl Inner {
         let generation = lock(&self.projects)
             .get(path)
             .filter(|runtime| {
-                !runtime.deleting && (runtime.watcher.is_none() || runtime.watch_failed)
+                !runtime.deleting
+                    && runtime.observed(Instant::now())
+                    && (runtime.watcher.is_none() || runtime.watch_failed)
             })
             .map(|runtime| Arc::clone(&runtime.job_gate));
         let Some(generation) = generation else {
@@ -1167,7 +1189,11 @@ impl Inner {
             let mut projects = lock(&self.projects);
             projects
                 .get_mut(path)
-                .filter(|runtime| !runtime.deleting && Arc::ptr_eq(&runtime.job_gate, &generation))
+                .filter(|runtime| {
+                    !runtime.deleting
+                        && runtime.observed(Instant::now())
+                        && Arc::ptr_eq(&runtime.job_gate, &generation)
+                })
                 .and_then(|runtime| {
                     runtime.watch_failed = started.is_none();
                     std::mem::replace(&mut runtime.watcher, started.take())
@@ -1182,7 +1208,7 @@ impl Inner {
     fn on_watch_event(self: &Arc<Self>, project: &Path, event: WatchEvent) {
         if !lock(&self.projects)
             .get(project)
-            .is_some_and(|runtime| !runtime.deleting)
+            .is_some_and(|runtime| !runtime.deleting && runtime.observed(Instant::now()))
         {
             return;
         }
@@ -1206,9 +1232,17 @@ impl Inner {
                     runtime.status.last_error = Some(format!("слежение за файлами: {message}"));
                 }
                 // События могли потеряться: проверка целиком.
-                self.enqueue(project, Job::check(Priority::Watch));
+                let worker = Worker {
+                    inner: self.clone(),
+                };
+                let _ = worker.scan_with_priority(project, Priority::Watch);
             }
-            WatchEvent::Rescan => self.enqueue(project, Job::check(Priority::Watch)),
+            WatchEvent::Rescan => {
+                let worker = Worker {
+                    inner: self.clone(),
+                };
+                let _ = worker.scan_with_priority(project, Priority::Watch);
+            }
         }
         // Хвост пачки мог потеряться: проверка целиком через несколько секунд.
         self.arm_tail(project);
@@ -1340,7 +1374,7 @@ impl Inner {
             let Some(runtime) = projects.get_mut(project) else {
                 return;
             };
-            if runtime.tail_armed || runtime.deleting {
+            if runtime.tail_armed || runtime.deleting || !runtime.observed(Instant::now()) {
                 return;
             }
             runtime.tail_armed = true;
@@ -1357,10 +1391,9 @@ impl Inner {
             if inner.stop.load(Ordering::SeqCst) {
                 return;
             }
-            if let Some(runtime) = lock(&inner.projects)
-                .get_mut(&project)
-                .filter(|r| !r.deleting && Arc::ptr_eq(&r.job_gate, &generation))
-            {
+            if let Some(runtime) = lock(&inner.projects).get_mut(&project).filter(|r| {
+                !r.deleting && r.observed(Instant::now()) && Arc::ptr_eq(&r.job_gate, &generation)
+            }) {
                 runtime.tail_armed = false;
             } else {
                 return;
@@ -1371,7 +1404,8 @@ impl Inner {
             let restart = Arc::clone(&inner);
             let path = project.clone();
             let _ = tokio::task::spawn_blocking(move || restart.ensure_watching(&path)).await;
-            inner.enqueue(&project, Job::check(Priority::Watch));
+            let worker = Worker { inner };
+            let _ = worker.scan_with_priority(&project, Priority::Watch);
         });
     }
 

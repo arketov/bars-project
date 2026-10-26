@@ -74,6 +74,7 @@ fn main() -> anyhow::Result<()> {
     let runtime = tokio::runtime::Runtime::new()?;
     let _entered = runtime.enter();
     let root = PathBuf::from(std::env::args_os().nth(1).expect("каталог результатов"));
+    let query_probe = std::env::args().nth(2).as_deref() == Some("--query");
     let fixture = tempfile::Builder::new()
         .prefix("fixture-")
         .tempdir_in(&root)?;
@@ -83,6 +84,16 @@ fn main() -> anyhow::Result<()> {
         project.join("docs/Тема.md"),
         "---\ntitle: Проверка текста\n---\n\n# Проверка текста\n😀 ПрИвЕт привет\n",
     )?;
+    if query_probe {
+        std::fs::write(
+            project.join("docs/Индекс.md"),
+            "# Индексация\n\nСсылка на [тему](Тема.md) и [очередь](Очередь.md).\n",
+        )?;
+        std::fs::write(
+            project.join("docs/Очередь.md"),
+            "# Очередь\n\nИндексация документов. [Индекс](Индекс.md).\n",
+        )?;
+    }
     let worker = Worker::start(
         WorkerConfig::new(fixture.path().join("home")),
         FakeProvider::new("graph-lifecycle-probe"),
@@ -125,9 +136,18 @@ fn main() -> anyhow::Result<()> {
                 .data_directory(fixture.path().join("webview"))
                 .disable_drag_drop_handler()
                 .visible(false)
-                .on_page_load(|window, payload| {
+                .on_page_load(move |window, payload| {
                     if payload.event() == tauri::webview::PageLoadEvent::Finished {
-                        let _ = window.eval(include_str!("graph_lifecycle_probe.js"));
+                        let script = if query_probe {
+                            std::fs::read_to_string(concat!(
+                                env!("CARGO_MANIFEST_DIR"),
+                                "/examples/query_graph_probe.js"
+                            ))
+                            .expect("скрипт пробы графа запроса")
+                        } else {
+                            include_str!("graph_lifecycle_probe.js").to_string()
+                        };
+                        let _ = window.eval(&script);
                     }
                 })
                 .build()?;

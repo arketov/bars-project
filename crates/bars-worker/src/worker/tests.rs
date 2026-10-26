@@ -14,6 +14,7 @@ use super::models::fake::FakeProvider;
 use super::registry::Registry;
 use super::*;
 
+mod activity;
 mod deletion;
 mod doc_queue;
 mod folders;
@@ -189,7 +190,7 @@ fn state(worker: &Worker, project: &Path) -> ProjectState {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-async fn registered_project_is_indexed_and_watched() {
+async fn registered_project_is_indexed_without_permanent_watching() {
     let env = Env::new();
     let project = env.project("alpha", &[("a.md", DOC), ("mod/b.md", DOC)]);
     let worker = env.start();
@@ -201,7 +202,7 @@ async fn registered_project_is_indexed_and_watched() {
     let status = worker.status(&project).unwrap();
     assert_eq!(status.state, ProjectState::Ready);
     assert!(status.updated_at.is_some());
-    assert!(status.watching);
+    assert!(!status.watching);
     assert_eq!(status.last_error, None);
     assert_eq!(status.model_index, status.model_settings);
     assert_eq!(status.model_index.as_deref(), Some("builtin:m1"));
@@ -289,6 +290,7 @@ async fn file_change_reaches_the_index_without_manual_actions() {
     let project = env.project("alpha", &[("a.md", DOC)]);
     let worker = env.start();
     worker.register(&project).unwrap();
+    worker.observe_mcp(&project).unwrap();
     idle(&worker).await;
     assert_eq!(documents(&project), 1);
 
@@ -317,6 +319,7 @@ async fn hourly_check_finds_changes_the_watcher_missed() {
     config.periodic_interval = Duration::from_millis(200);
     let worker = Worker::start(config, env.provider.clone()).unwrap();
     worker.register(&root).unwrap();
+    worker.observe_mcp(&root).unwrap();
     idle(&worker).await;
     let status = worker.status(&root).unwrap();
     assert!(!status.watching);
@@ -346,6 +349,7 @@ async fn hundreds_of_files_at_once_reach_the_index() {
     config.tail_delay = Duration::from_millis(300);
     let worker = Worker::start(config, env.provider.clone()).unwrap();
     worker.register(&project).unwrap();
+    worker.observe_mcp(&project).unwrap();
     idle(&worker).await;
 
     const FILES: usize = 400;
@@ -371,6 +375,7 @@ async fn deaf_watcher_is_restarted_by_the_periodic_check() {
     config.tail_delay = Duration::from_millis(150);
     let worker = Worker::start(config, env.provider.clone()).unwrap();
     let path = worker.register(&project).unwrap().path;
+    worker.observe_mcp(&path).unwrap();
     idle(&worker).await;
     assert_eq!(documents(&project), 1);
 
@@ -520,7 +525,7 @@ async fn missing_project_is_unavailable_and_returns_when_the_folder_does() {
     idle(&worker).await;
     let status = worker.status(&gone).unwrap();
     assert_eq!(status.state, ProjectState::Ready);
-    assert!(status.watching);
+    assert!(!status.watching);
     assert_eq!(documents(&gone), 1);
     worker.shutdown().await;
 }
@@ -748,6 +753,11 @@ async fn queued_jobs_report_kind_and_priority() {
     let worker = env.start();
     worker.pause();
     worker.register(&project).unwrap();
+    wait_until(
+        "проверка обнаружила документы",
+        || !worker.queued().is_empty(),
+    )
+    .await;
 
     let queued = worker.queued();
     assert_eq!(queued.len(), 1);
@@ -780,6 +790,11 @@ async fn summary_follows_the_queue_and_the_model() {
 
     worker.pause();
     worker.register(&project).unwrap();
+    wait_until(
+        "проверка обнаружила документы",
+        || !worker.queued().is_empty(),
+    )
+    .await;
     let busy = worker.summary();
     assert_eq!(busy.health, Health::Busy);
     assert!(busy.indexing.unwrap().text.contains("alpha"));

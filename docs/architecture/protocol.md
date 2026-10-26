@@ -14,6 +14,8 @@ title: Протокол канала bars — методы, параметры, 
 
 ## Формат сообщений канала
 
+Внутренний метод окна `project_observe {window, project}` подтверждает открытый проект; `project: null` снимает привязку окна. Ответ — `{saved: true}`. Он недоступен клиентам MCP и CLI по каналу. Сроки и правила активности описаны в [обновлении индекса](../features/indexing/updates.md).
+
 JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одном соединении можно делать несколько вызовов по очереди. `bars-mcp` держит соединение всю сессию, `bars-cli` открывает его на одну команду.
 
 Первый вызов на соединении — `hello`. Без него воркер отвечает на любой метод ошибкой `protocol_mismatch`.
@@ -55,6 +57,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | `graph_search` | параметры `search` плюс `mode` (`hybrid`/`mix`/`graph`), `graph_budgets`, `include_related`, `related_budget` | ответ `search` плюс `requested_mode`, `applied_mode`, `fallback_reason`, `related`, `graph_results` | MCP, CLI |
 | `graph_status` | `cwd`, `project` | состояние слоя графа: состояние, снимок, активное задание, число источников, ошибка, версия метода | MCP, CLI |
 | `graph_physical` | `cwd`, `project`, `request` (`PhysicalRequest`: `scope`, `limits`, `expanded`, `snapshot`) | `PhysicalGraphSlice` (`physical-v1`) — узлы, рёбра индексами узлов, состояния трёх слоёв, итоги области, усечение; ошибки те же, что у графа, устаревший `snapshot` — `snapshot_expired` | только окно |
+| `graph_query_slice` | `cwd`, `project`, `request` (`QuerySliceRequest`: завершённый поиск, область, глубина, fanout, порог, пределы, снимок) | `QueryGraphSlice` (`query-v1`) — результаты и их окружение из всей области, точный cosine, готовые списки режимов, состояния слоёв, fingerprint, усечение и размер всего ответа; устаревший снимок — `snapshot_expired` | только окно |
 | `graph_build` | `cwd`, `project` | `accepted: true` и `job_id`; ход виден в `graph_status` | CLI |
 | `graph_cancel` | `cwd`, `project`, `job_id` | `cancelled`: задание остановлено или уже не активно | CLI |
 | `install` | `client` (`claude-code` / `codex`) | какие файлы изменены, нужно ли одобрить хук в Codex | CLI |

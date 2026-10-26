@@ -12,10 +12,10 @@
   import { draw, layoutLines, lineDistance, moduleColors, radiusOf, readPalette, toScreen, toWorld, type Camera, type Palette, type Scene, type Target } from "./draw";
   import { DEFAULT_FORCES, Layout, type Forces, type PNode } from "./layout";
   import { EDGE_KINDS, KIND_TITLE, brightnessOf, drawStrength, springOf, widthOf, type EdgeKind, type GEdge, type GNode, type Mode, type SliceKind } from "./model";
-  import { graphStatus, loadPhysical, toggleGraphBuild } from "./physical-api";
+  import { graphStatus, loadPhysical, loadQuery, toggleGraphBuild } from "./physical-api";
   import { FORCE_RANGE, defaultSettings, loadSettings, saveSettings, type PanelKind, type PanelSettings } from "./settings";
   import { INITIAL_LIMITS, MAX_LIMITS, PORTION, SliceStore, emptySlice, type Limits, type Slice } from "./slice";
-  import { DEFAULT_DEPTH, MAX_DEPTH, QUERY_BUDGET, QUERY_MAX, SEARCH_MODE, buildQuerySlice, fallbackText, shapeQuery, type QueryInfo, type QueryInput, type RetrievalKind, type ScoreKind } from "./query";
+  import { DEFAULT_DEPTH, MAX_DEPTH, QUERY_BUDGET, QUERY_MAX, SEARCH_MODE, acceptQuerySlice, queryRequest, fallbackText, shapeQuery, type QueryBuild, type QueryInfo, type QueryInput, type RetrievalKind, type ScoreKind } from "./query";
 
   const reduced = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -48,6 +48,11 @@
   /** Поиск, для которого вид уже включался, и поиск, из которого пользователь вернулся в общий вид. */
   let queryKey = "";
   let queryOff = $state("");
+  let queryEpoch = 0;
+  let queryBuilt: QueryBuild | null = null;
+  let queryError = $state("");
+  let queryLoading = $state(false);
+  let queryRequestKey = "";
   let loaded = $state(false);
   let loading = $state(false);
   let loadError = $state("");
@@ -147,27 +152,58 @@
     const results = app.results;
     const shown = app.displayed;
     if (!results || !shown || shown.project !== project()) return null;
+    if (JSON.stringify({ modules: shown.modules, files: shown.files }) !== JSON.stringify(app.scope)) return null;
     const graph = app.graphSearch;
     const requested = shown.mode as RetrievalKind;
     const applied = (graph?.applied_mode ?? requested) as RetrievalKind;
     const scoreKind: ScoreKind = applied === "graph" ? "none" : results.applied.score_kind;
-    return { id: shown.requestId, text: shown.query, hits: results.results, scoreKind, requested, applied, fallback: graph?.fallback_reason ?? null, minScore: results.applied.min_score };
+    return { id: shown.requestId, text: shown.query, hits: results.results, scope: { modules: shown.modules, files: shown.files }, scoreKind, requested, applied, fallback: graph?.fallback_reason ?? null, minScore: results.applied.min_score };
   }
 
   /** Рисуемый срез: общий или вид запроса, смотря что включено. */
   function compose() {
     const input = queryInput();
-    if (input && input.id !== queryOff) {
-      const built = buildQuerySlice(base, input);
-      slice = built.slice;
-      query = built.info;
+    if (input && input.id !== queryOff && queryBuilt?.info.id === input.id) {
+      slice = queryBuilt.slice;
+      query = queryBuilt.info;
     } else {
       slice = base;
       query = null;
     }
   }
 
-  const queryShape = $derived.by(() => (query ? shapeQuery(slice, query, modeKinds(mode), minS, queryDepth, queryBudget) : null));
+  const queryShape = $derived.by(() => (query ? shapeQuery(slice, query, mode) : null));
+
+  async function requestQuery(fresh = false) {
+    const input = queryInput();
+    const path = project();
+    if (!input || !path) return;
+    const request = queryRequest(input, queryDepth, minS, queryBudget, queryBuilt?.info.id === input.id ? queryBuilt.slice.snapshot : null);
+    const key = JSON.stringify({ ...request, snapshot: null });
+    const generation = ++queryEpoch;
+    if (queryBuilt?.info.id === input.id && key === queryRequestKey) {
+      queryLoading = false;
+      queryError = "";
+      compose();
+      rebuild(0.5, fresh);
+      return;
+    }
+    queryLoading = true;
+    queryError = "";
+    try {
+      const server = await loadQuery(path, request);
+      if (generation !== queryEpoch || path !== project() || queryInput()?.id !== input.id || queryOff === input.id) return;
+      queryBuilt = acceptQuerySlice(server, input);
+      queryRequestKey = key;
+      compose();
+      rebuild(fresh ? 0.9 : 0.5, fresh);
+    } catch (error) {
+      if (generation !== queryEpoch || path !== project() || queryInput()?.id !== input.id || queryOff === input.id) return;
+      queryError = `Граф запроса не обновлён: ${error instanceof Error ? error.message : String(error)}`;
+    } finally {
+      if (generation === queryEpoch) queryLoading = false;
+    }
+  }
 
   function enterQuery() {
     queryOff = "";
@@ -175,6 +211,7 @@
     queryBudget = { ...QUERY_BUDGET };
     selected = null;
     compose();
+    void requestQuery(true);
     if (query) announce(`Запрос «${query.text}»: ${query.results.length} результатов, окружение глубины ${queryDepth}`);
     rebuild(0.9, true);
   }
@@ -182,6 +219,9 @@
   function leaveQuery() {
     if (!query) return;
     queryOff = query.id;
+    queryEpoch++;
+    queryError = "";
+    queryLoading = false;
     selected = null;
     compose();
     announce("Общий вид проекта");
@@ -199,6 +239,10 @@
       }
     } else if (!app.searching && !app.searchError && queryKey) {
       queryKey = "";
+      queryEpoch++;
+      queryBuilt = null;
+      queryError = "";
+      queryLoading = false;
       queryOff = "";
       if (query) {
         selected = null;
@@ -212,13 +256,13 @@
     if (next === queryDepth) return;
     queryDepth = next;
     queryBudget = { ...QUERY_BUDGET };
-    rebuild(0.5);
+    void requestQuery();
   }
 
   function moreQuery() {
     queryBudget = { nodes: Math.min(QUERY_MAX.nodes, queryBudget.nodes * 2), edges: Math.min(QUERY_MAX.edges, queryBudget.edges * 2) };
     notice = "Показано больше узлов и связей: камера и позиции сохранены.";
-    rebuild(0.4);
+    void requestQuery();
   }
 
   const queryAtMaximum = $derived(queryBudget.nodes >= QUERY_MAX.nodes && queryBudget.edges >= QUERY_MAX.edges);
@@ -241,7 +285,9 @@
     applyForces();
   }
 
-  function onThreshold() {
+  function onThreshold(event: Event) {
+    settings.minS = Number((event.currentTarget as HTMLInputElement).value);
+    if (query) { void requestQuery(true); return; }
     rebuild(0.35);
   }
 
@@ -731,7 +777,7 @@
       status = value;
       const ready = !!value.snapshot;
       const changed = !!value.snapshot && value.snapshot !== slice.snapshot;
-      if (ready && !loading && (changed || (loadError && loadErrorKind === "graph_not_ready"))) void load(slice.snapshot ? "refresh" : "open");
+      if (!query && ready && !loading && (changed || (loadError && loadErrorKind === "graph_not_ready"))) void load(slice.snapshot ? "refresh" : "open");
     } catch {
       // Состояние графа не прочиталось: срез и его ошибка остаются на экране.
     }
@@ -739,6 +785,10 @@
 
   function resetFor(path: string | null) {
     epoch++;
+    queryEpoch++;
+    queryBuilt = null;
+    queryError = "";
+    queryLoading = false;
     layout?.destroy();
     layout = new Layout();
     layout.paced = true;
@@ -831,7 +881,9 @@
         ? `Взаимные явные ссылки: «${label(e.a)}» → «${label(e.b)}» (${linesText(e)}) и обратная «${label(e.b)}» → «${label(e.a)}» (${linesText(reverseLink(e)!)}). На карте одна линия со стрелкой на каждом конце; направления хранятся отдельно.`
         : `Явная Markdown-ссылка из «${label(e.a)}» в «${label(e.b)}» (${linesText(e)}); стрелка на конце, куда ведёт ссылка. Число упоминаний не усиливает пружину.`
       : e.kind === "document_similarity"
-        ? "Метод document-centroid-v1: косинус документных представлений — взвешенного среднего готовых векторов чанков документа. Пара попала в k=5 ближайших хотя бы одного из двух документов при cosine не ниже 0,5."
+        ? query
+          ? "Метод document-centroid-v1: точный косинус готовых документных представлений внутри области поиска; общий kNN не используется."
+          : "Метод document-centroid-v1: косинус документных представлений — взвешенного среднего готовых векторов чанков документа. Пара попала в k=5 ближайших хотя бы одного из двух документов при cosine не ниже 0,5."
         : slice.nodes[e.a].owner === slice.nodes[e.b].owner
           ? "Косинус готовых векторов двух чанков одного документа: общий владелец, не новое межфайловое знание."
           : "Косинус готовых векторов двух чанков; kNN k=5, tau=0.5, неориентированная пара.";
@@ -896,6 +948,7 @@
 
   onDestroy(() => {
     epoch++;
+    queryEpoch++;
     if (raf) cancelAnimationFrame(raf);
     if (statusTimer) clearInterval(statusTimer);
     hostObserver?.disconnect();
@@ -997,6 +1050,8 @@
 {/snippet}
 
 <div class="pgw" bind:this={host}>
+{#if queryLoading}<p role="status">Строится граф запроса…</p>{/if}
+{#if queryError}<p role="alert">{queryError}</p>{/if}
 <div class="pg" class:mini role="region" aria-label={mini ? "Мини-граф" : "Физический граф проекта"} data-mode={mode} data-motion={motion} data-nodes={nodeCount} data-links={linkCount} data-loaded={loaded}>
   {#if !mini}
     <div class="bar" role="toolbar" aria-label="Управление графом">
@@ -1257,7 +1312,7 @@
           {#if found}
             <p class="origin">Результат поиска №{found.rank}{found.score !== null ? ` · ${SCORE_TEXT[found.kind]} ${found.score.toFixed(2)}` : ""}. Совпавших фрагментов: {found.fragments.length}.</p>
             <ul class="conns">
-              {#each found.fragments as f, i (i)}<li><span class="name" title={f.heading}>{f.heading || "без заголовка"}</span><small>строки {f.first}–{f.last} · {f.score.toFixed(2)}</small></li>{/each}
+              {#each found.fragments as f, i (i)}<li><span class="name" title={f.heading}>{f.heading || "без заголовка"}</span><small>строки {f.first}–{f.last} · {f.score === null ? "оценки нет" : f.score.toFixed(2)}</small></li>{/each}
             </ul>
           {/if}
         {/if}

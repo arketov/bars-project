@@ -416,6 +416,12 @@ pub struct RegisterParams {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ProjectObserveParams {
+    pub window: String,
+    pub project: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RegisterOutput {
     pub project: ProjectInfo,
 }
@@ -1032,6 +1038,7 @@ methods! {
     GraphQuery: crate::GraphQueryParams => crate::GraphReply, "graph_query", All;
     GraphStatus: crate::GraphStatusParams => crate::GraphStatus, "graph_status", All;
     GraphPhysical: crate::GraphPhysicalParams => crate::PhysicalGraphSlice, "graph_physical", Window;
+    GraphQuerySlice: crate::GraphQuerySliceParams => crate::QueryGraphSlice, "graph_query_slice", Window;
     GraphBuild: crate::GraphBuildParams => crate::GraphAcceptedOutput, "graph_build", Cli;
     GraphCancel: crate::GraphCancelParams => CancelOutput, "graph_cancel", Cli;
     OperationEvents: crate::OperationEventsParams => crate::OperationEventsOutput, "operation_events", Window;
@@ -1048,6 +1055,7 @@ methods! {
     Register: RegisterParams => RegisterOutput, "register", Cli;
     Unregister: UnregisterParams => UnregisterOutput, "unregister", Cli;
     ProjectDelete: ProjectDeleteParams => UnregisterOutput, "project_delete", Window;
+    ProjectObserve: ProjectObserveParams => SavedOutput, "project_observe", Window;
     SessionStart: SessionStartParams => AcceptedOutput, "session_start", Cli;
     Install: InstallParams => InstallOutput, "install", Cli;
     Uninstall: UninstallParams => UninstallOutput, "uninstall", Cli;
