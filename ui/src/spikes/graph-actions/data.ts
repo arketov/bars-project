@@ -2,6 +2,7 @@
 // Это иллюстрация дизайна, а не продукт: путь по карте и локальный граф в продукте тоже считает клиент,
 // а смысловой путь, влияние, контекст, обзор и аудит — воркер (`graph_query`); здесь они повторены по снимку.
 import fixtureJson from "./fixture.json";
+import overdriveJson from "./overdrive.json";
 import type { GEdge, GNode, LayerState } from "../../lib/graph/model";
 
 type Doc = [title: string, path: string, docsPath: string, module: string, chunks: number];
@@ -33,7 +34,7 @@ export interface Fixture {
   evidence: Record<string, Ev>;
 }
 
-export const F = fixtureJson as unknown as Fixture;
+export const F = (typeof location !== "undefined" && new URLSearchParams(location.search).get("project") === "overdrive-bots" ? overdriveJson : fixtureJson) as unknown as Fixture;
 
 export type Level = "documents" | "chunks" | "entities" | "mixed";
 export const LEVELS: Level[] = ["documents", "chunks", "entities", "mixed"];
@@ -78,11 +79,12 @@ export type Scenario = "" | "empty" | "notbuilt" | "nolinks" | "lagging" | "file
 export const SCENARIOS: Scenario[] = ["empty", "notbuilt", "nolinks", "lagging", "fileerrors", "unresolved", "ambiguous", "conflict", "conditions", "limit", "stale", "deleted", "norender"];
 
 const docIdx = (part: string) => F.docs.findIndex((d) => d[2].toLowerCase().includes(part.toLowerCase()) || d[0].toLowerCase().includes(part.toLowerCase()));
+const overdrive = F.method === 'markdown-links-mockup-v1';
 /** Объекты, на которые сценарии накладывают состояние (настоящие документы и утверждения снимка). */
 export const SCENARIO_TARGETS = {
-  stale: ["features/search/hybrid-search", "features/indexing/updates", "manual/search"].map(docIdx).filter((i) => i >= 0),
-  deleted: [docIdx("features/window/notifications")].filter((i) => i >= 0),
-  fileErrors: [["features/models/local-models.md", "файл занят другим процессом"], ["knowledge/inference-2026-10-18/Index.md", "не удалось прочитать UTF-8 в строке 212"], ["backlog/ideas.md", "превышен предел извлечения 2 с"]] as [string, string][],
+  stale: overdrive ? [0, 1] : ["features/search/hybrid-search", "features/indexing/updates", "manual/search"].map(docIdx).filter((i) => i >= 0),
+  deleted: overdrive ? [0] : [docIdx("features/window/notifications")].filter((i) => i >= 0),
+  fileErrors: (overdrive ? F.docs.slice(0, 2).map(d => [d[2], 'Сценарий макета: файл занят другим процессом']) : [["features/models/local-models.md", "файл занят другим процессом"], ["knowledge/inference-2026-10-18/Index.md", "не удалось прочитать UTF-8 в строке 212"], ["backlog/ideas.md", "превышен предел извлечения 2 с"]]) as [string, string][],
   conflict: [F.assertions.findIndex((a) => a.predicate === "uses" && F.entities[a.from].label === "bars"), F.assertions.findIndex((a) => a.predicate === "requires" && F.entities[a.to].label.startsWith("исключительного"))].filter((i) => i >= 0),
   condition: F.assertions.findIndex((a) => F.entities[a.from].label.startsWith("Без драйвера Vulkan")),
 };

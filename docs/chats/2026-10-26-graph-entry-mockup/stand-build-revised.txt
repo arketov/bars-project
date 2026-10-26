@@ -1,0 +1,171 @@
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 444 modules transformed.
+rendering chunks...
+computing gzip size...
+graph-actions-dist/graph-actions.html                                                0.60 kB │ gzip:   0.38 kB
+graph-actions-dist/assets/physics.worker-k6szTsVV.js                                19.96 kB
+graph-actions-dist/assets/graph-actions-CUTGgFbU.css                                10.53 kB │ gzip:   3.12 kB
+graph-actions-dist/assets/PhysicalGraph-zII7FETJ.css                                17.74 kB │ gzip:   3.40 kB
+graph-actions-dist/assets/App-DzfoC2d6.css                                         208.25 kB │ gzip:  23.62 kB
+graph-actions-dist/assets/dist-UEasySvv.js                                           0.04 kB │ gzip:   0.06 kB
+graph-actions-dist/assets/dist-BH__9MAU.js                                           0.04 kB │ gzip:   0.06 kB
+graph-actions-dist/assets/dist-Buhi6PZh.js                                           0.04 kB │ gzip:   0.06 kB
+graph-actions-dist/assets/mock-JfZPXCO9.js                                           0.04 kB │ gzip:   0.06 kB
+graph-actions-dist/assets/app.svelte-B93qXxu9.js                                     0.04 kB │ gzip:   0.06 kB
+graph-actions-dist/assets/dist-D7PTleX1.js                                           0.04 kB │ gzip:   0.06 kB
+graph-actions-dist/assets/javascript-C8q4ZItq.js                                     0.05 kB │ gzip:   0.07 kB
+graph-actions-dist/assets/PhysicalGraph-8n5f4TU0.js                                  0.05 kB │ gzip:   0.07 kB
+graph-actions-dist/assets/editors.svelte-B-V0Cdx8.js                                 0.05 kB │ gzip:   0.06 kB
+graph-actions-dist/assets/mock-physical-CtJlRPmb.js                                  0.06 kB │ gzip:   0.07 kB
+graph-actions-dist/assets/types-DwCKz6C-.js                                          0.14 kB │ gzip:   0.13 kB
+graph-actions-dist/assets/core-CSf8FaVs.js                                           0.24 kB │ gzip:   0.19 kB
+graph-actions-dist/assets/diff-ChtP43wD.js                                           0.30 kB │ gzip:   0.23 kB
+graph-actions-dist/assets/brainfuck-D5EjA2JK.js                                      0.59 kB │ gzip:   0.32 kB
+graph-actions-dist/assets/properties-C357ku5U.js                                     0.66 kB │ gzip:   0.34 kB
+graph-actions-dist/assets/cmake-84nbDH0I.js                                          0.75 kB │ gzip:   0.45 kB
+graph-actions-dist/assets/asciiarmor-C_eisQCp.js                                     0.77 kB │ gzip:   0.40 kB
+graph-actions-dist/assets/protobuf-D1ij_kNL.js                                       0.80 kB │ gzip:   0.51 kB
+graph-actions-dist/assets/http-CLVgA2GD.js                                           0.84 kB │ gzip:   0.42 kB
+graph-actions-dist/assets/solr-B78wSQJQ.js                                           0.86 kB │ gzip:   0.45 kB
+graph-actions-dist/assets/troff-C2dAgh7P.js                                          0.95 kB │ gzip:   0.43 kB
+graph-actions-dist/assets/toml-BPTmHmyx.js                                           1.04 kB │ gzip:   0.53 kB
+graph-actions-dist/assets/spreadsheet-CTIncYxj.js                                    1.13 kB │ gzip:   0.53 kB
+graph-actions-dist/assets/model-D28-RAcN.js                                          1.13 kB │ gzip:   0.67 kB
+graph-actions-dist/assets/event-Dehy61Lr.js                                          1.35 kB │ gzip:   0.64 kB
+graph-actions-dist/assets/mbox-BEMVcqjs.js                                           1.38 kB │ gzip:   0.65 kB
+graph-actions-dist/assets/mock-query-K9hpJZK8.js                                     1.43 kB │ gzip:   0.75 kB
+graph-actions-dist/assets/preload-helper-BLdHbfdN.js                                 1.51 kB │ gzip:   0.79 kB
+graph-actions-dist/assets/rpm-gpDK5sbt.js                                            1.59 kB │ gzip:   0.81 kB
+graph-actions-dist/assets/sieve-tLWDfEkZ.js                                          1.61 kB │ gzip:   0.76 kB
+graph-actions-dist/assets/factor-LKH5gN8L.js                                         1.66 kB │ gzip:   0.60 kB
+graph-actions-dist/assets/eiffel-BEjRio4Q.js                                         1.69 kB │ gzip:   0.90 kB
+graph-actions-dist/assets/z80-Co3PbHdE.js                                            1.75 kB │ gzip:   0.79 kB
+graph-actions-dist/assets/mumps-BSzj6Xyz.js                                          1.82 kB │ gzip:   0.95 kB
+graph-actions-dist/assets/elm-Cshzl8qu.js                                            1.86 kB │ gzip:   0.81 kB
+graph-actions-dist/assets/mathematica-u8YMmbU0.js                                    1.89 kB │ gzip:   0.80 kB
+graph-actions-dist/assets/dockerfile-DJkHQgkl.js                                     1.90 kB │ gzip:   0.65 kB
+graph-actions-dist/assets/turtle-Cx3rYX2g.js                                         1.95 kB │ gzip:   0.89 kB
+graph-actions-dist/assets/dist-Db2IWX5E.js                                           1.95 kB │ gzip:   1.25 kB
+graph-actions-dist/assets/ebnf-D4c0_ac3.js                                           1.97 kB │ gzip:   0.80 kB
+graph-actions-dist/assets/smalltalk-BLp5-jwC.js                                      1.99 kB │ gzip:   0.85 kB
+graph-actions-dist/assets/fcl-ClOhbFR7.js                                            2.02 kB │ gzip:   0.95 kB
+graph-actions-dist/assets/ntriples-CzMBulkp.js                                       2.05 kB │ gzip:   0.72 kB
+graph-actions-dist/assets/dtd-DTF72YNO.js                                            2.09 kB │ gzip:   0.87 kB
+graph-actions-dist/assets/octave-D2Q8cUp1.js                                         2.10 kB │ gzip:   1.07 kB
+graph-actions-dist/assets/yacas-CXXgtw0p.js                                          2.14 kB │ gzip:   1.08 kB
+graph-actions-dist/assets/pascal-Dp_KdFgX.js                                         2.25 kB │ gzip:   1.17 kB
+graph-actions-dist/assets/simple-mode-DXiLM1-G.js                                    2.27 kB │ gzip:   1.09 kB
+graph-actions-dist/assets/apl-gfMMiTNf.js                                            2.29 kB │ gzip:   1.22 kB
+graph-actions-dist/assets/commonlisp-DgAKBe0r.js                                     2.31 kB │ gzip:   1.09 kB
+graph-actions-dist/assets/tcl-BGfruO1u.js                                            2.35 kB │ gzip:   1.22 kB
+graph-actions-dist/assets/graph-actions-BhLI_fXk.js                                  2.39 kB │ gzip:   1.08 kB
+graph-actions-dist/assets/shell-DwuoZtxw.js                                          2.43 kB │ gzip:   1.20 kB
+graph-actions-dist/assets/webidl-D5jiJvOU.js                                         2.44 kB │ gzip:   1.24 kB
+graph-actions-dist/assets/pig-AF4Hwhju.js                                            2.51 kB │ gzip:   1.37 kB
+graph-actions-dist/assets/puppet-BZyAS7I4.js                                         2.51 kB │ gzip:   1.19 kB
+graph-actions-dist/assets/forth-D6RzAl64.js                                          2.53 kB │ gzip:   1.32 kB
+graph-actions-dist/assets/dist-BNVhiBu1.js                                           2.57 kB │ gzip:   1.48 kB
+graph-actions-dist/assets/velocity-CqftRsjg.js                                       2.70 kB │ gzip:   1.11 kB
+graph-actions-dist/assets/core-BL3NQqEA.js                                           2.74 kB │ gzip:   1.09 kB
+graph-actions-dist/assets/tiddlywiki-VlUiK86J.js                                     2.76 kB │ gzip:   1.07 kB
+graph-actions-dist/assets/modelica-CqHI_q-D.js                                       2.79 kB │ gzip:   1.28 kB
+graph-actions-dist/assets/oz-BwTct_5T.js                                             2.88 kB │ gzip:   1.27 kB
+graph-actions-dist/assets/mock-disk-DiXZzhzC.js                                      2.90 kB │ gzip:   1.36 kB
+graph-actions-dist/assets/r-CxDmU1I4.js                                              2.92 kB │ gzip:   1.33 kB
+graph-actions-dist/assets/mock-physical-V3N751uI.js                                  2.96 kB │ gzip:   1.57 kB
+graph-actions-dist/assets/stex-DNzd62Q_.js                                           3.09 kB │ gzip:   1.17 kB
+graph-actions-dist/assets/lua-DPCEkfD_.js                                            3.12 kB │ gzip:   1.40 kB
+graph-actions-dist/assets/cypher-p9eYesGn.js                                         3.18 kB │ gzip:   1.49 kB
+graph-actions-dist/assets/tiki-DTszW0OQ.js                                           3.22 kB │ gzip:   1.25 kB
+graph-actions-dist/assets/dist-DZ4x73In.js                                           3.28 kB │ gzip:   1.68 kB
+graph-actions-dist/assets/vhdl-kS471soi.js                                           3.31 kB │ gzip:   1.49 kB
+graph-actions-dist/assets/sparql-Dz-mlCAC.js                                         3.33 kB │ gzip:   1.59 kB
+graph-actions-dist/assets/mscgen-qgSLujhx.js                                         3.49 kB │ gzip:   0.97 kB
+graph-actions-dist/assets/vb-BthdM_4N.js                                             3.65 kB │ gzip:   1.81 kB
+graph-actions-dist/assets/d-DWkQyNnU.js                                              3.69 kB │ gzip:   1.67 kB
+graph-actions-dist/assets/q-B9NhS7L_.js                                              3.69 kB │ gzip:   1.69 kB
+graph-actions-dist/assets/swift-DKB6_1j6.js                                          3.76 kB │ gzip:   1.81 kB
+graph-actions-dist/assets/settings-logic-CU-TPpli.js                                 3.81 kB │ gzip:   1.52 kB
+graph-actions-dist/assets/coffeescript-De_zI4J0.js                                   3.84 kB │ gzip:   1.69 kB
+graph-actions-dist/assets/fortran-Bt6PBEDR.js                                        3.86 kB │ gzip:   1.93 kB
+graph-actions-dist/assets/asn1-DCl_8MCW.js                                           3.97 kB │ gzip:   1.95 kB
+graph-actions-dist/assets/dylan-S7ucR4pR.js                                          4.03 kB │ gzip:   1.62 kB
+graph-actions-dist/assets/asterisk-BEn0Cwpx.js                                       4.05 kB │ gzip:   1.73 kB
+graph-actions-dist/assets/livescript-BXxG0Yva.js                                     4.08 kB │ gzip:   1.62 kB
+graph-actions-dist/assets/ttcn-cfg-2b4Gb5sE.js                                       4.09 kB │ gzip:   1.72 kB
+graph-actions-dist/assets/groovy-CUpZ7dEl.js                                         4.12 kB │ gzip:   1.74 kB
+graph-actions-dist/assets/haskell-BRsoo5mP.js                                        4.15 kB │ gzip:   1.91 kB
+graph-actions-dist/assets/gas-BHEdbvp9.js                                            4.55 kB │ gzip:   1.27 kB
+graph-actions-dist/assets/mllike-B45xgp2S.js                                         4.82 kB │ gzip:   1.57 kB
+graph-actions-dist/assets/ttcn-PPSTk1ow.js                                           4.84 kB │ gzip:   2.14 kB
+graph-actions-dist/assets/dist-IC331tfF.js                                           4.88 kB │ gzip:   2.32 kB
+graph-actions-dist/assets/crystal-Bsdphhtm.js                                        5.01 kB │ gzip:   2.10 kB
+graph-actions-dist/assets/ruby-ChfNwlCY.js                                           5.07 kB │ gzip:   2.15 kB
+graph-actions-dist/assets/ecl-BVIeWmwY.js                                            5.11 kB │ gzip:   2.30 kB
+graph-actions-dist/assets/julia-CQfgDRfP.js                                          5.26 kB │ gzip:   2.16 kB
+graph-actions-dist/assets/vbscript-D9f6rSsU.js                                       5.43 kB │ gzip:   2.56 kB
+graph-actions-dist/assets/mirc-C9zpzAZU.js                                           5.91 kB │ gzip:   2.70 kB
+graph-actions-dist/assets/xquery-BKJx4mf9.js                                         6.15 kB │ gzip:   2.57 kB
+graph-actions-dist/assets/cobol-DHLQUbN7.js                                          6.19 kB │ gzip:   2.98 kB
+graph-actions-dist/assets/python-B_1Jd8HM.js                                         6.27 kB │ gzip:   2.67 kB
+graph-actions-dist/assets/scheme-D9qYN0V5.js                                         6.35 kB │ gzip:   2.37 kB
+graph-actions-dist/assets/pug-Bt_cQqhG.js                                            6.60 kB │ gzip:   1.98 kB
+graph-actions-dist/assets/textile-C4jVoHG1.js                                        6.74 kB │ gzip:   2.44 kB
+graph-actions-dist/assets/nsis-viPvXFiq.js                                           7.06 kB │ gzip:   3.08 kB
+graph-actions-dist/assets/nginx-8H7HVH4w.js                                          7.40 kB │ gzip:   2.72 kB
+graph-actions-dist/assets/powershell-D8WpQPaX.js                                     7.68 kB │ gzip:   3.28 kB
+graph-actions-dist/assets/erlang-BV0c4Hdn.js                                         7.84 kB │ gzip:   2.90 kB
+graph-actions-dist/assets/haxe-DjVOVvNP.js                                           7.86 kB │ gzip:   2.94 kB
+graph-actions-dist/assets/verilog-CjI9Y6RI.js                                        8.18 kB │ gzip:   3.47 kB
+graph-actions-dist/assets/sas-C2OyD2Y6.js                                            9.33 kB │ gzip:   4.11 kB
+graph-actions-dist/assets/clojure-BflJGmDX.js                                        9.40 kB │ gzip:   4.02 kB
+graph-actions-dist/assets/perl-BkSkiI9m.js                                           9.73 kB │ gzip:   3.50 kB
+graph-actions-dist/assets/idl-BUZw3wgd.js                                            9.82 kB │ gzip:   4.40 kB
+graph-actions-dist/assets/gherkin-oBAE_ms0.js                                       10.15 kB │ gzip:   5.09 kB
+graph-actions-dist/assets/dist-Bh_XcA_V.js                                          11.52 kB │ gzip:   5.16 kB
+graph-actions-dist/assets/editors.svelte-CVIk3qJZ.js                                13.04 kB │ gzip:   4.56 kB
+graph-actions-dist/assets/dist-Cr5D4OBM.js                                          14.27 kB │ gzip:   5.76 kB
+graph-actions-dist/assets/dist-dck1fWCB.js                                          16.20 kB │ gzip:   7.46 kB
+graph-actions-dist/assets/javascript-B9I2pbsP.js                                    16.93 kB │ gzip:   5.71 kB
+graph-actions-dist/assets/dist-Dh2xyIrs.js                                          20.65 kB │ gzip:   9.32 kB
+graph-actions-dist/assets/dist-BewWq95n.js                                          21.67 kB │ gzip:  10.08 kB
+graph-actions-dist/assets/clike-xvONpD0Z.js                                         22.04 kB │ gzip:   7.75 kB
+graph-actions-dist/assets/dist-Dvhm7MeX.js                                          22.92 kB │ gzip:  10.41 kB
+graph-actions-dist/assets/stylus-BOVgKnng.js                                        23.51 kB │ gzip:   8.55 kB
+graph-actions-dist/assets/mock-BY6pNb_v.js                                          24.55 kB │ gzip:   8.35 kB
+graph-actions-dist/assets/css-CnaYoQib.js                                           24.66 kB │ gzip:   8.25 kB
+graph-actions-dist/assets/dist-DclCkC_a.js                                          26.68 kB │ gzip:  12.69 kB
+graph-actions-dist/assets/dist-oVfos7R4.js                                          28.34 kB │ gzip:  11.52 kB
+graph-actions-dist/assets/dist-CNYirn7L.js                                          30.68 kB │ gzip:  12.73 kB
+graph-actions-dist/assets/dist-DS-6K0Fd.js                                          32.11 kB │ gzip:  13.00 kB
+graph-actions-dist/assets/dist-DnbaOUIq.js                                          35.03 kB │ gzip:  12.35 kB
+graph-actions-dist/assets/sql-DuQMFDvy.js                                           36.83 kB │ gzip:  10.90 kB
+graph-actions-dist/assets/dist-C7O5IQ5o.js                                          44.54 kB │ gzip:  19.32 kB
+graph-actions-dist/assets/dist-DsVVrKaT.js                                          44.62 kB │ gzip:  15.38 kB
+graph-actions-dist/assets/dist-BY53wBCb.js                                          47.69 kB │ gzip:  19.52 kB
+graph-actions-dist/assets/index-client-BiI8PrLW.js                                  48.43 kB │ gzip:  18.61 kB
+graph-actions-dist/assets/app.svelte-C0intC7n.js                                    56.18 kB │ gzip:  17.28 kB
+graph-actions-dist/assets/dist-BaHizNUs.js                                          83.65 kB │ gzip:  30.64 kB
+graph-actions-dist/assets/dist-BHWpnJH_.js                                          84.40 kB │ gzip:  33.65 kB
+graph-actions-dist/assets/dist-B3HipI1_.js                                          98.10 kB │ gzip:  28.76 kB
+graph-actions-dist/assets/dist-C4_xs73s.js                                         103.86 kB │ gzip:  34.73 kB
+graph-actions-dist/assets/PhysicalGraph-S28FA0MO.js                                111.77 kB │ gzip:  33.43 kB
+graph-actions-dist/assets/PhysicalGraph-BI0PZWe7.js                                111.78 kB │ gzip:  33.43 kB
+graph-actions-dist/assets/mock-graph-DN--A9BZ.js                                   227.04 kB │ gzip:  24.70 kB
+graph-actions-dist/assets/dist-DsME90Un.js                                         299.80 kB │ gzip:  97.32 kB
+graph-actions-dist/assets/PhysicalGraph.svelte_svelte_type_style_lang-CzbHl88e.js  555.55 kB │ gzip: 152.77 kB
+graph-actions-dist/assets/App-BPLOKrjo.js                                          769.25 kB │ gzip: 216.68 kB
+
+✓ built in 6.07s
+[plugin builtin:vite-reporter]
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[PLUGIN_TIMINGS] JavaScript callbacks ran for 3.7s of this 6.0s build (60%).
+The slowest callbacks, timed inside each callback (the wait before a callback starts is excluded, the time it awaits is included):
+  - plugin vite:worker-import-meta-url transform (25%, 1.5s, 1 call)
+  - plugin vite-plugin-svelte:compile transform (24%, 1.5s, 48 calls)
+Additional callback time came from callbacks under 1s.
+See https://rolldown.rs/reference/InputOptions.checks#bundlertimings for more details.

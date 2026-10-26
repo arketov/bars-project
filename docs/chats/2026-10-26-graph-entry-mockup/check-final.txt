@@ -1,0 +1,43 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.42
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+
+=== cargo fmt --check ===
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-protocol\src\methods.rs:821:
+
+ #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+ #[serde(rename_all = "snake_case")]
+-pub enum SettingsSaveStatus { Saved, Conflict }
++pub enum SettingsSaveStatus {
++    Saved,
++    Conflict,
++}
+
+ impl SettingsSaveParams {
+     pub fn between(base: SettingsOutput, settings: SettingsDoc) -> Self {
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-worker\src\settings_io.rs:586:
+         mine.search.results = 9;
+         let params = bars_protocol::SettingsSaveParams::between(base, mine);
+         fs::remove_file(&file).unwrap();
+-        assert_eq!(save_changes(home.path(), params.clone()).unwrap().status, bars_protocol::SettingsSaveStatus::Conflict);
++        assert_eq!(
++            save_changes(home.path(), params.clone()).unwrap().status,
++            bars_protocol::SettingsSaveStatus::Conflict
++        );
+         assert!(!file.exists());
+         fs::write(&file, "# same change\n[search]\nresults = 9\n").unwrap();
+-        assert_eq!(save_changes(home.path(), params).unwrap().status, bars_protocol::SettingsSaveStatus::Saved);
++        assert_eq!(
++            save_changes(home.path(), params).unwrap().status,
++            bars_protocol::SettingsSaveStatus::Saved
++        );
+         let base = load_user_settings(home.path()).unwrap();
+         let mut mine = base.settings.clone();
+         mine.search.results = 0;
+
+Провалено: cargo fmt --check (код 1). Коммитить нельзя.
+
+Step              Code Seconds
+----              ---- -------
+cargo fmt --check    1       3

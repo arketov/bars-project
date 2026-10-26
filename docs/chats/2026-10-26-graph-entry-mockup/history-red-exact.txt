@@ -1,0 +1,14 @@
+
+running 1 test
+
+thread 'mcp_history::tests::own_writer_waits_without_spending_sqlite_busy_timeout' (23652) panicked at crates\bars-worker\src\mcp_history.rs:797:9:
+свой writer не должен отказывать по busy timeout: Ok(Err(SqliteFailure(Error { code: DatabaseBusy, extended_code: 5 }, Some("database is locked"))))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test mcp_history::tests::own_writer_waits_without_spending_sqlite_busy_timeout ... FAILED
+
+failures:
+
+failures:
+    mcp_history::tests::own_writer_waits_without_spending_sqlite_busy_timeout
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 316 filtered out; finished in 0.11s

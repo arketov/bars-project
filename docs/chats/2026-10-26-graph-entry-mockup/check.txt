@@ -1,0 +1,304 @@
+
+=== cargo fmt --check ===
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-graph\src\query_slice.rs:177:
+     let mut results: Vec<QuerySliceResult> = Vec::new();
+     for (rank, hit) in request.hits.iter().enumerate() {
+         let status = current(hit).unwrap_or_else(|| {
+-            match by_path.get(hit.path.as_str()).and_then(|id| sources.get(id)) {
+-                Some(source) if !hit.source_hash.is_empty() && source.meta.hash != hit.source_hash => QuerySourceState::ChangedSinceSearch,
++            match by_path
++                .get(hit.path.as_str())
++                .and_then(|id| sources.get(id))
++            {
++                Some(source)
++                    if !hit.source_hash.is_empty() && source.meta.hash != hit.source_hash =>
++                {
++                    QuerySourceState::ChangedSinceSearch
++                }
+                 Some(_) => QuerySourceState::Ready,
+                 None => QuerySourceState::NoGraphObject,
+             }
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-graph\src\query_slice.rs:185:
+         });
+         if let Some(r) = results.iter_mut().find(|r| r.path == hit.path) {
+-            if status != QuerySourceState::Ready { r.status = status; }
++            if status != QuerySourceState::Ready {
++                r.status = status;
++            }
+             if request.score_kind != QueryScoreKind::None {
+                 r.score = r.score.into_iter().chain(hit.score).max_by(f32::total_cmp);
+             }
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-graph\src\query_slice.rs:197:
+                 title: hit.title.clone(),
+                 rank: rank + 1,
+                 node: None,
+-                score: if request.score_kind == QueryScoreKind::None || hit.channel != QueryChannel::Primary {
++                score: if request.score_kind == QueryScoreKind::None
++                    || hit.channel != QueryChannel::Primary
++                {
+                     None
+                 } else {
+                     hit.score
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-graph\src\query_slice.rs:257:
+         }
+     }
+     let mut neighbours: HashMap<String, (Vec<String>, Vec<String>)> = HashMap::new();
+-    let mut order: Vec<_> = result_ids.iter().filter(|id| {
+-        let r = results.iter().find(|r| by_path.get(r.path.as_str()) == Some(*id)).unwrap();
+-        r.channel != QueryChannel::Related
+-    }).cloned().collect();
++    let mut order: Vec<_> = result_ids
++        .iter()
++        .filter(|id| {
++            let r = results
++                .iter()
++                .find(|r| by_path.get(r.path.as_str()) == Some(*id))
++                .unwrap();
++            r.channel != QueryChannel::Related
++        })
++        .cloned()
++        .collect();
+     // Related без физической связи остаётся в инспекторе, оценка не выдумывается.
+     for id in &result_ids {
+-        if order.contains(id) { continue; }
+-        let connected = order.iter().any(|root| links.contains_key(&(id.clone(), root.clone())) || links.contains_key(&(root.clone(), id.clone())))
+-            || order.iter().any(|root| cosine(root, &all).is_ok_and(|pairs| pairs.iter().any(|p| p.b == *id && p.cosine >= request.min_strength)));
+-        if connected { order.push(id.clone()); }
++        if order.contains(id) {
++            continue;
++        }
++        let connected = order.iter().any(|root| {
++            links.contains_key(&(id.clone(), root.clone()))
++                || links.contains_key(&(root.clone(), id.clone()))
++        }) || order.iter().any(|root| {
++            cosine(root, &all).is_ok_and(|pairs| {
++                pairs
++                    .iter()
++                    .any(|p| p.b == *id && p.cosine >= request.min_strength)
++            })
++        });
++        if connected {
++            order.push(id.clone());
++        }
+     }
+     let mut selected: HashSet<String> = order.iter().cloned().collect();
+     let mut depths: HashMap<String, usize> = order.iter().map(|id| (id.clone(), 0)).collect();
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-graph\src\query_slice.rs:365:
+         .iter()
+         .map(|id| {
+             if let Some(r) = ghosts.get(id) {
+-                return PhysicalNode { id: id.clone(), revision: r.fragments[0].source_hash.clone(), kind: PhysicalNodeKind::Document,
+-                    label: r.title.clone(), path: r.path.clone(), docs_path: r.path.clone(), module: String::new(), owner: id.clone(), chunks: 0, ordinal: None, first_line: 0, last_line: 0 };
++                return PhysicalNode {
++                    id: id.clone(),
++                    revision: r.fragments[0].source_hash.clone(),
++                    kind: PhysicalNodeKind::Document,
++                    label: r.title.clone(),
++                    path: r.path.clone(),
++                    docs_path: r.path.clone(),
++                    module: String::new(),
++                    owner: id.clone(),
++                    chunks: 0,
++                    ordinal: None,
++                    first_line: 0,
++                    last_line: 0,
++                };
+             }
+             let s = sources[id];
+             PhysicalNode {
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-graph\src\query_slice.rs:419:
+             .and_then(|id| indices.get(id))
+             .copied();
+     }
+-    let query_edges = results.iter().filter(|r| r.node.is_some() && r.channel != QueryChannel::Related).count();
++    let query_edges = results
++        .iter()
++        .filter(|r| r.node.is_some() && r.channel != QueryChannel::Related)
++        .count();
+     let known_edges = edges.len() + result_ids.len();
+     edges.sort_by(|a, b| {
+         a.from
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-graph\src\query_slice.rs:434:
+     for mode in ["links", "meaning", "all", "chunks"] {
+         let mut visible: HashSet<String> = result_ids
+             .iter()
+-            .filter(|id| selected.contains(*id) && results.iter().any(|r| r.channel != QueryChannel::Related && by_path.get(r.path.as_str()) == Some(*id)))
++            .filter(|id| {
++                selected.contains(*id)
++                    && results.iter().any(|r| {
++                        r.channel != QueryChannel::Related
++                            && by_path.get(r.path.as_str()) == Some(*id)
++                    })
++            })
+             .cloned()
+             .collect();
+         let mut frontier: Vec<_> = visible.iter().cloned().collect();
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-protocol\src\methods.rs:831:
+                 }
+             }
+         }
+-        Self { base: base.settings, expected_revision: base.revision, changes }
++        Self {
++            base: base.settings,
++            expected_revision: base.revision,
++            changes,
++        }
+     }
+ }
+
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-worker\src\handler\mod.rs:909:
+     /// Сохраняет настройки и ставит все проекты на проверку: проекты, чей индекс построен другой
+     /// моделью, перейдут в `reindex_required`, и окно покажет диалог согласия (Т-25). Эмбеддинг
+     /// при этом не запускается.
+-    fn settings_save(&self, params: SettingsSaveParams) -> Result<bars_protocol::SettingsSaveOutput, RpcError> {
+-        let output = settings_io::save_changes(self.worker.bars_home(), params).map_err(save_error)?;
++    fn settings_save(
++        &self,
++        params: SettingsSaveParams,
++    ) -> Result<bars_protocol::SettingsSaveOutput, RpcError> {
++        let output =
++            settings_io::save_changes(self.worker.bars_home(), params).map_err(save_error)?;
+         if output.saved {
+             self.worker.refresh_model_lifecycle();
+             self.worker.check_all();
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-worker\src\settings_io.rs:27:
+         Err(error) if error.kind() == io::ErrorKind::NotFound => None,
+         Err(source) => return Err(SaveError::Read { file, source }),
+     };
+-    let revision = bytes.as_ref().map(|bytes| format!("{}-{}", bytes.len(), blake3::hash(bytes).to_hex()));
+-    let text = String::from_utf8(bytes.unwrap_or_default()).map_err(|error| SaveError::Invalid(error.to_string()))?;
+-    let loaded = UserSettings::parse(&text, &file).map_err(|error| SaveError::Invalid(error.to_string()))?;
++    let revision = bytes
++        .as_ref()
++        .map(|bytes| format!("{}-{}", bytes.len(), blake3::hash(bytes).to_hex()));
++    let text = String::from_utf8(bytes.unwrap_or_default())
++        .map_err(|error| SaveError::Invalid(error.to_string()))?;
++    let loaded =
++        UserSettings::parse(&text, &file).map_err(|error| SaveError::Invalid(error.to_string()))?;
+     Ok(bars_protocol::SettingsOutput {
+-        file: file.display().to_string(), revision, settings: to_doc(&loaded.value),
++        file: file.display().to_string(),
++        revision,
++        settings: to_doc(&loaded.value),
+         warnings: loaded.warnings.iter().map(ToString::to_string).collect(),
+     })
+ }
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-worker\src\settings_io.rs:38:
+
+ pub fn load_user_settings(bars_home: &Path) -> Result<bars_protocol::SettingsOutput, SaveError> {
+-    let _guard = SETTINGS_LOCK.lock().unwrap_or_else(|error| error.into_inner());
++    let _guard = SETTINGS_LOCK
++        .lock()
++        .unwrap_or_else(|error| error.into_inner());
+     snapshot(bars_home)
+ }
+
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-worker\src\settings_io.rs:44:
+-pub fn save_changes(bars_home: &Path, params: bars_protocol::SettingsSaveParams) -> Result<bars_protocol::SettingsSaveOutput, SaveError> {
+-    let _guard = SETTINGS_LOCK.lock().unwrap_or_else(|error| error.into_inner());
++pub fn save_changes(
++    bars_home: &Path,
++    params: bars_protocol::SettingsSaveParams,
++) -> Result<bars_protocol::SettingsSaveOutput, SaveError> {
++    let _guard = SETTINGS_LOCK
++        .lock()
++        .unwrap_or_else(|error| error.into_inner());
+     let current = snapshot(bars_home)?;
+     let base = serde_json::to_value(&params.base).expect("settings serialize");
+     let mut merged = serde_json::to_value(&current.settings).expect("settings serialize");
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-worker\src\settings_io.rs:49:
+     let mut conflicts = Vec::new();
+     for (path, mine) in &params.changes {
+-        let (section, key) = path.split_once('.').ok_or_else(|| SaveError::Invalid(format!("Неизвестное поле настроек: {path}")))?;
+-        let disk = merged.get_mut(section).and_then(|table| table.get_mut(key))
++        let (section, key) = path
++            .split_once('.')
+             .ok_or_else(|| SaveError::Invalid(format!("Неизвестное поле настроек: {path}")))?;
+-        if current.revision != params.expected_revision && *disk != base[section][key] && disk != mine {
+-            conflicts.push(bars_protocol::SettingsConflict { key: path.clone(), base: base[section][key].clone(), disk: disk.clone(), mine: mine.clone() });
++        let disk = merged
++            .get_mut(section)
++            .and_then(|table| table.get_mut(key))
++            .ok_or_else(|| SaveError::Invalid(format!("Неизвестное поле настроек: {path}")))?;
++        if current.revision != params.expected_revision
++            && *disk != base[section][key]
++            && disk != mine
++        {
++            conflicts.push(bars_protocol::SettingsConflict {
++                key: path.clone(),
++                base: base[section][key].clone(),
++                disk: disk.clone(),
++                mine: mine.clone(),
++            });
+         }
+         *disk = mine.clone();
+     }
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-worker\src\settings_io.rs:59:
+-    let settings: SettingsDoc = serde_json::from_value(merged).map_err(|error| SaveError::Invalid(error.to_string()))?;
++    let settings: SettingsDoc =
++        serde_json::from_value(merged).map_err(|error| SaveError::Invalid(error.to_string()))?;
+     if !conflicts.is_empty() {
+-        return Ok(bars_protocol::SettingsSaveOutput { saved: false, conflicts, current });
++        return Ok(bars_protocol::SettingsSaveOutput {
++            saved: false,
++            conflicts,
++            current,
++        });
+     }
+     write_user_settings(bars_home, &settings, Some(&current))?;
+-    Ok(bars_protocol::SettingsSaveOutput { saved: true, conflicts, current: snapshot(bars_home)? })
++    Ok(bars_protocol::SettingsSaveOutput {
++        saved: true,
++        conflicts,
++        current: snapshot(bars_home)?,
++    })
+ }
+
+ #[derive(Debug, thiserror::Error)]
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-worker\src\settings_io.rs:244:
+     write_user_settings(bars_home, settings, None)
+ }
+
+-fn write_user_settings(bars_home: &Path, settings: &SettingsDoc, expected: Option<&bars_protocol::SettingsOutput>) -> Result<bool, SaveError> {
++fn write_user_settings(
++    bars_home: &Path,
++    settings: &SettingsDoc,
++    expected: Option<&bars_protocol::SettingsOutput>,
++) -> Result<bool, SaveError> {
+     let file = user_settings_path(bars_home);
+     let text = read_text(&file)?;
+     if let Some(expected) = expected {
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-worker\src\settings_io.rs:251:
+-        let revision = file.exists().then(|| format!("{}-{}", text.len(), blake3::hash(text.as_bytes()).to_hex()));
++        let revision = file
++            .exists()
++            .then(|| format!("{}-{}", text.len(), blake3::hash(text.as_bytes()).to_hex()));
+         if revision != expected.revision {
+-            return Err(SaveError::Invalid("Настройки снова изменились на диске. Повторите сохранение".into()));
++            return Err(SaveError::Invalid(
++                "Настройки снова изменились на диске. Повторите сохранение".into(),
++            ));
+         }
+     }
+     let current = UserSettings::parse(&text, &file)
+Diff in \\?\C:\Users\arketov\Desktop\bars-project\crates\bars-worker\src\settings_io.rs:447:
+     if new_text == text {
+         return Ok(false);
+     }
+-    if read_text(&file)? != text || expected.is_some_and(|snapshot| snapshot.revision.is_some() != file.exists()) {
+-        return Err(SaveError::Invalid("Настройки снова изменились на диске. Повторите сохранение".into()));
++    if read_text(&file)? != text
++        || expected.is_some_and(|snapshot| snapshot.revision.is_some() != file.exists())
++    {
++        return Err(SaveError::Invalid(
++            "Настройки снова изменились на диске. Повторите сохранение".into(),
++        ));
+     }
+     write_atomic(&file, &new_text)?;
+     Ok(true)
+
+Провалено: cargo fmt --check (код 1). Коммитить нельзя.
+
+Step              Code Seconds
+----              ---- -------
+cargo fmt --check    1       3

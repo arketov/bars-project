@@ -1,0 +1,12 @@
+
+> bars-ui@0.0.0 test
+> vitest run --run src/spikes/graph-actions/entry-ui.test.ts src/spikes/graph-actions/entry.test.ts src/spikes/graph-actions/data.test.ts
+
+
+ RUN  v5.0.4 C:/Users/arketov/Desktop/bars-project/ui
+
+
+ Test Files  3 passed (3)
+      Tests  21 passed (21)
+   Start at  17:54:22
+   Duration  1.85s (environment 61%, tests 14%, transform 13%, import 11%)

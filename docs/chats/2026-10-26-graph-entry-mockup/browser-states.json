@@ -1,0 +1,64 @@
+[
+  {
+    "project": "overdrive-bots",
+    "scene": "empty",
+    "passed": true
+  },
+  {
+    "project": "overdrive-bots",
+    "scene": "notbuilt",
+    "passed": true
+  },
+  {
+    "project": "overdrive-bots",
+    "scene": "nolinks",
+    "passed": true
+  },
+  {
+    "project": "overdrive-bots",
+    "scene": "stale",
+    "passed": true
+  },
+  {
+    "project": "overdrive-bots",
+    "scene": "fileerrors",
+    "passed": true
+  },
+  {
+    "project": "bars-project",
+    "scene": "empty",
+    "passed": true
+  },
+  {
+    "project": "bars-project",
+    "scene": "notbuilt",
+    "passed": true
+  },
+  {
+    "project": "bars-project",
+    "scene": "nolinks",
+    "passed": true
+  },
+  {
+    "project": "bars-project",
+    "scene": "stale",
+    "passed": true
+  },
+  {
+    "project": "bars-project",
+    "scene": "fileerrors",
+    "passed": true
+  },
+  {
+    "project": "bars-project",
+    "scene": "norender",
+    "passed": true,
+    "expected": "Ошибка и повтор показа без общего списка узлов"
+  },
+  {
+    "project": "overdrive-bots",
+    "scene": "norender",
+    "passed": true,
+    "expected": "Ошибка и повтор показа без общего списка узлов"
+  }
+]

@@ -1,0 +1,29 @@
+
+> bars-ui@0.0.0 check
+> svelte-check --tsconfig ./tsconfig.json
+
+Loading svelte-check in workspace: c:\Users\arketov\Desktop\bars-project\ui
+Getting Svelte diagnostics...
+
+c:\Users\arketov\Desktop\bars-project\ui\src\lib\ContextMenu.svelte:102:52
+Error: This comparison appears to be unintentional because the types 'ProjectState | undefined' and '"starting"' have no overlap. (ts)
+      try {
+        const pinned = entry && (app.workerDown || app.project?.state === 'starting') ? null : await folderTarget(current, docsRoot, directory.path);
+        if (generation !== version || app.current !== current || app.docsRoot !== docsRoot) return;
+
+c:\Users\arketov\Desktop\bars-project\ui\src\spikes\graph-actions\PhysicalGraph.svelte:1301:69
+Error: Argument of type 'number | null' is not assignable to parameter of type 'number'.
+  Type 'null' is not assignable to type 'number'. (ts)
+        <div class="entry-actions" aria-label="Карточка результата поиска">
+          <span>Завершённый поиск · сценарий макета</span><b>{label(result.node)}</b>
+          <button class="act" onclick={() => showResult(result.node)}>В графе</button>
+
+c:\Users\arketov\Desktop\bars-project\ui\src\spikes\graph-actions\PhysicalGraph.svelte:1302:57
+Error: Argument of type 'number | null' is not assignable to parameter of type 'number'.
+  Type 'null' is not assignable to type 'number'. (ts)
+          <span>Завершённый поиск · сценарий макета</span><b>{label(result.node)}</b>
+          <button class="act" onclick={() => showResult(result.node)}>В графе</button>
+          <span>Выбирает источник этой выдачи. Запрос и область сохраняются.</span>
+
+====================================
+svelte-check found 3 errors and 0 warnings in 2 files
