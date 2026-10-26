@@ -1,0 +1,8 @@
+{
+  "success": false,
+  "checks": [
+    "Первый запуск: только центр, без пустой правой зоны",
+    "Документ создаёт правую зону"
+  ],
+  "error": "TypeError: Cannot read properties of null (reading 'getBoundingClientRect')\n    at <anonymous>:36:28"
+}

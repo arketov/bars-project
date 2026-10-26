@@ -1,72 +1,125 @@
 import { afterEach, expect, it } from "vitest";
 import { createDockview, type DockviewApi } from "dockview-core";
-import { decodeLayout, defaultLayout, documentId, encodeLayout, ensureRightZone, layoutKey, removableEmptyGroups } from "./workspace-layout";
-let api: DockviewApi;
+import { decodeLayout, defaultLayout, documentId, encodeLayout, layoutKey, legacyLayoutKey, rightZoneWidth, WorkspaceZones } from "./workspace-layout";
+let api: DockviewApi, zones: WorkspaceZones;
 const sidebar = { width: 300, graph: 200 };
 afterEach(() => { api?.dispose(); document.body.replaceChildren(); });
 function create() {
   const host = document.createElement("div"); document.body.append(host);
-  api = createDockview(host, { closeEmptyGroups: false, createComponent: () => ({ element: document.createElement("div"), init() {} }) });
-  api.layout(1440, 900); defaultLayout(api, 1440);
+  api = createDockview(host, { closeEmptyGroups: true, createComponent: () => ({ element: document.createElement("div"), init() {} }) });
+  api.layout(1200, 800); defaultLayout(api); zones = new WorkspaceZones(api); zones.restore(); zones.size();
 }
-it("штатная раскладка: поиск и пустая правая зона, без навигации и графа", () => {
-  create();
-  expect(api.panels.map(p => p.id)).toEqual(["search"]);
-  expect(api.groups).toHaveLength(2);
-  expect(api.groups.find(g => g !== api.getPanel("search")!.group)!.panels).toHaveLength(0);
+function doc(path = "docs/a.md") {
+  return api.addPanel({ id: documentId(path), component: "workspace", title: path, params: { kind: "document", project: "А", hit: { path, title: path, first_line: 2, last_line: 4 } }, position: { referenceGroup: zones.documentGroup(), direction: "within" } });
+}
+const sync = () => { zones.normalize(); zones.size(); };
+it("первый документ создаёт правую зону 40%, последняя вкладка убирает её", () => {
+  create(); expect(api.groups).toHaveLength(1);
+  const p = doc(); sync(); expect(api.groups).toHaveLength(2); expect(p.group.width).toBe(480);
+  p.api.close(); sync(); expect(api.groups).toHaveLength(1); expect(api.getPanel("search")).toBeDefined();
+  expect(zones.state.rightWidth).toBe(480); expect(doc().group.width).toBe(480);
 });
-it("правая зона создаётся снова, когда осталась одна группа", () => {
-  create();
-  api.removeGroup(api.groups.find(g => g !== api.getPanel("search")!.group)!);
-  expect(api.groups).toHaveLength(1);
-  ensureRightZone(api, 1440);
-  expect(api.groups).toHaveLength(2);
-  ensureRightZone(api, 1440);
-  expect(api.groups).toHaveLength(2);
+it("ширина переживает закрытие, сериализацию и сжатие окна", () => {
+  create(); const p = doc(); sync(); p.group.api.setSize({ width: 570 }); sync();
+  expect(zones.state.rightWidth).toBe(570);
+  api.layout(500, 800); sync(); sync(); expect(zones.state.rightWidth).toBe(570);
+  api.layout(1200, 800); sync(); expect(p.group.width).toBe(570);
+  p.api.close(); sync();
+  const saved = decodeLayout(encodeLayout(api, sidebar, zones.state), "А")!;
+  api.fromJSON(saved.layout); zones.restore(saved.zones); sync();
+  expect(doc().group.width).toBe(570);
+  expect(rightZoneWidth(1200)).toBe(480); expect(rightZoneWidth(500, 900)).toBe(280);
 });
-it("опустевшая зона остаётся, пустая часть разделённой зоны убирается", () => {
-  create();
-  const searchGroup = api.getPanel("search")!.group;
-  const right = api.groups.find(g => g !== searchGroup)!;
-  api.addPanel({ id: "graph", component: "workspace", title: "Граф", params: { kind: "graph" }, position: { referenceGroup: right, direction: "within" } });
-  api.getPanel("search")!.api.moveTo({ group: right, position: "center" });
-  expect(searchGroup.panels).toHaveLength(0);
-  expect(api.groups).toHaveLength(2);
-  expect(removableEmptyGroups(api)).toEqual([]);
-  api.getPanel("search")!.api.moveTo({ group: right, position: "bottom" });
-  const bottom = api.getPanel("search")!.group;
-  api.getPanel("search")!.api.moveTo({ group: searchGroup, position: "center" });
-  expect(removableEmptyGroups(api)).toEqual([bottom.id]);
-  ensureRightZone(api, 1440);
-  expect(api.groups).toHaveLength(2);
-  expect(removableEmptyGroups(api)).toEqual([]);
+it("верх/низ наследует правую роль; служебная вкладка удерживает зону", () => {
+  create(); const p = doc(); sync();
+  const graph = api.addPanel({ id: "graph", component: "workspace", params: { kind: "graph" }, position: { referencePanel: p.id, direction: "below" } }); sync();
+  expect(zones.state.roles[graph.group.id]).toBe("right");
+  p.api.close(); sync(); expect(api.groups).toHaveLength(2);
+  graph.api.close(); sync(); expect(api.groups).toHaveLength(1);
 });
-it("восстанавливает перенос, вертикальное разделение, активную вкладку и размеры колонки", () => {
-  create();
-  api.addPanel({ id: documentId("docs/a.md"), component: "workspace", title: "А", params: { kind: "document", project: "А", hit: { path: "docs/a.md", title: "А", first_line: 2, last_line: 4 } }, position: { referencePanel: "search", direction: "right" } });
-  api.addPanel({ id: "graph", component: "workspace", title: "Граф", params: { kind: "graph" }, position: { referencePanel: "search", direction: "below" } });
-  api.getPanel(documentId("docs/a.md"))!.api.setActive();
-  const saved = encodeLayout(api, sidebar), groups = api.groups.length;
-  const stored = decodeLayout(saved, "А")!;
-  api.fromJSON(stored.layout);
-  expect(api.groups).toHaveLength(groups);
-  expect(api.activePanel?.id).toBe(documentId("docs/a.md"));
-  expect(api.getPanel("graph")!.group).not.toBe(api.getPanel("search")!.group);
-  expect(stored.sidebar).toEqual(sidebar);
-  expect(saved).not.toContain('"text"');
+it.each([false, true])("пустой центр: поиск справа, граф уже справа=%s; без дублей", (withGraph) => {
+  create(); const p = doc(); sync();
+  if (withGraph) api.addPanel({ id: "graph", component: "workspace", params: { kind: "graph" }, position: { referencePanel: p.id, direction: "within" } });
+  api.getPanel("search")!.api.moveTo({ group: p.group, position: "center" }); sync();
+  expect(zones.state.roles[api.getPanel("search")!.group.id]).toBe("right");
+  expect(zones.state.roles[api.getPanel("graph")!.group.id]).toBe("center");
+  expect(api.panels.filter(p => p.id === "graph")).toHaveLength(1);
+  sync(); expect(api.groups).toHaveLength(2);
+});
+it("закрытие всего окна восстанавливает поиск; пользовательское деление центра сохраняется", () => {
+  create(); api.getPanel("search")!.api.close(); sync(); expect(api.activePanel?.id).toBe("search");
+  const logs = api.addPanel({ id: "logs", component: "workspace", params: { kind: "logs" }, position: { referencePanel: "search", direction: "below" } }); sync();
+  expect(zones.state.roles[logs.group.id]).toBe("center");
+  api.getPanel("search")!.api.close(); sync(); expect(api.getPanel("search")).toBeUndefined(); expect(api.groups).toHaveLength(1);
+});
+it("выбор правой группы не следует за перенесённым в центр документом", () => {
+  create(); const a = doc(); sync(); const b = doc("docs/b.md");
+  a.api.moveTo({ group: api.getPanel("search")!.group, position: "center" }); sync();
+  expect(doc("docs/c.md").group).toBe(b.group); expect(a.group).not.toBe(b.group);
+});
+it("v2: пустая правая группа удаляется, её ширина сохраняется", () => {
+  create(); const right = api.addGroup({ referenceGroup: api.groups[0], direction: "right", initialWidth: 530 });
+  right.api.setSize({ width: 530 });
+  const saved = decodeLayout(JSON.stringify({ version: 2, layout: api.toJSON(), sidebar }), "А")!;
+  expect(saved.zones.rightWidth).toBe(530);
+  api.fromJSON(saved.layout); zones.restore(saved.zones);
+  expect(api.getGroup(right.id)).toBeUndefined(); expect(api.groups).toHaveLength(1); expect(doc().group.width).toBe(530);
+});
+it("v2: единственная непустая группа становится центром без потери вкладки", () => {
+  create(); const p = doc(); api.getPanel("search")!.api.close();
+  api.addGroup({ referenceGroup: p.group, direction: "left", skipSetActive: true }); p.api.setActive();
+  const saved = decodeLayout(JSON.stringify({ version: 2, layout: api.toJSON(), sidebar }), "А")!;
+  api.fromJSON(saved.layout); zones.restore(saved.zones);
+  expect(api.groups).toHaveLength(1); expect(api.activePanel?.id).toBe(p.id); expect(zones.group("center")?.activePanel?.id).toBe(p.id);
+});
+it("сериализация сохраняет роли, деление, активность, адреса без текста и размеры навигации", () => {
+  create(); const p = doc(); sync();
+  const logs = api.addPanel({ id: "logs", component: "workspace", params: { kind: "logs" }, position: { referencePanel: p.id, direction: "below" } }); sync();
+  p.api.setActive(); zones.activate();
+  const saved = encodeLayout(api, sidebar, zones.state), stored = decodeLayout(saved, "А")!;
+  api.fromJSON(stored.layout); zones.restore(stored.zones);
+  expect(api.groups).toHaveLength(3); expect(api.activePanel?.id).toBe(p.id);
+  expect(zones.group("right")?.id).toBe(stored.zones.last.right);
+  expect(stored.sidebar).toEqual(sidebar); expect(saved).not.toContain('"text"');
   expect(() => decodeLayout(saved, "Б")).toThrow("Неверная ссылка");
+  api.getPanel("logs")!.api.close(); sync(); expect(zones.state.roles[logs.group.id]).toBeUndefined();
 });
-it("отвергает повреждение, неизвестные панели и версии; версия 1 заменяется молча; ключи проектов различны", () => {
-  create();
-  expect(() => decodeLayout("{", "А")).toThrow();
-  const value = JSON.parse(encodeLayout(api, sidebar));
-  value.version = 3; expect(() => decodeLayout(JSON.stringify(value), "А")).toThrow();
+it("повреждение и неизвестные версии отклоняются; v1 заменяется; ключи проектов и версий различны", () => {
+  create(); expect(() => decodeLayout("{", "А")).toThrow();
+  const value = JSON.parse(encodeLayout(api, sidebar, zones.state));
+  value.version = 4; expect(() => decodeLayout(JSON.stringify(value), "А")).toThrow();
   value.version = 1; expect(decodeLayout(JSON.stringify(value), "А")).toBeNull();
-  value.version = 2; value.layout.panels.search.params.kind = "__proto__";
-  expect(() => decodeLayout(JSON.stringify(value), "А")).toThrow();
-  value.layout.panels.search.params.kind = "navigation";
+  value.version = 3; value.layout.panels.search.params.kind = "__proto__";
   expect(() => decodeLayout(JSON.stringify(value), "А")).toThrow();
   value.layout.panels.search.params.kind = "search"; value.sidebar = { width: "x", graph: -5 };
   expect(decodeLayout(JSON.stringify(value), "А")!.sidebar).toEqual({ width: 250, graph: 240 });
-  expect(layoutKey("А")).not.toBe(layoutKey("Б"));
+  expect(layoutKey("А")).not.toBe(layoutKey("Б")); expect(layoutKey("А")).not.toBe(legacyLayoutKey("А"));
+  value.zones.roles = { a: "x" }; expect(() => decodeLayout(JSON.stringify(value), "А")).toThrow("роли");
+});
+
+it("новая правая зона занимает всю высоту рядом с разделённым центром", () => {
+  create();
+  api.addPanel({ id: "logs", component: "workspace", params: { kind: "logs" }, position: { referencePanel: "search", direction: "below" } }); sync();
+  const p = doc(); sync(); expect(p.group.height).toBe(800); expect(p.group.width).toBe(480);
+});
+it("v2 сохраняет пользовательские деления внутри левой ветви как центр", () => {
+  create(); const p = doc(); sync();
+  const logs = api.addPanel({ id: "logs", component: "workspace", params: { kind: "logs" }, position: { referencePanel: "search", direction: "below" } });
+  const mcp = api.addPanel({ id: "mcp", component: "workspace", params: { kind: "mcp" }, position: { referencePanel: logs.id, direction: "right" } });
+  const saved = decodeLayout(JSON.stringify({ version: 2, layout: api.toJSON(), sidebar }), "А")!;
+  expect(saved.zones.roles[mcp.group.id]).toBe("center"); expect(saved.zones.roles[p.group.id]).toBe("right");
+});
+it("последний resize сохраняется даже при закрытии до layout-события", () => {
+  create(); const p = doc(); sync();
+  const stop = api.onDidRemoveGroup(g => zones.removed(g));
+  p.group.api.setSize({width:555}); p.api.close(); sync();
+  expect(zones.state.rightWidth).toBe(555); stop.dispose();
+});
+it("суммарная ширина двух правых колонок переживает изменение окна", () => {
+  create(); const p = doc(); sync();
+  const logs = api.addPanel({id:'logs',component:'workspace',params:{kind:'logs'},position:{referencePanel:p.id,direction:'right'}}); sync();
+  const remembered = zones.state.rightWidth!;
+  api.layout(1500,800); sync(); sync();
+  expect(zones.state.rightWidth).toBe(remembered);
+  expect(p.group.width+logs.group.width).toBe(remembered);
 });

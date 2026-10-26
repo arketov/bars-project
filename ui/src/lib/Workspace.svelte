@@ -14,16 +14,17 @@
   import GlobalSearch from "./GlobalSearch.svelte";
   import MiniGraph from "./MiniGraph.svelte";
   import Icon from "./Icon.svelte";
-  import { decodeLayout, defaultLayout, defaultSidebar, documentId, encodeLayout, ensureRightZone, layoutKey, removableEmptyGroups, panelTitles, type PanelKind, type PanelParams } from "./workspace-layout";
+  import { decodeLayout, defaultLayout, defaultSidebar, documentId, encodeLayout, WorkspaceZones, layoutKey, legacyLayoutKey, panelTitles, type PanelKind, type PanelParams } from "./workspace-layout";
   import { messages } from "./workspace-messages";
   import CommandPalette from './CommandPalette.svelte';
   import { workspaceCommands } from './workspace-commands';
   import { keybindings } from './keybindings.svelte';
   import UnsavedDialog from './UnsavedDialog.svelte';
-  import { confirmClose, startFlushListener } from './unsaved.svelte';
+  import { confirmClose, confirmProjectLeave, startFlushListener } from './unsaved.svelte';
   import { moved, movedPath } from './moved.svelte';
 
   let host: HTMLDivElement, api: DockviewApi;
+  let zones: WorkspaceZones;
   let ready = $state(false), menu = $state(false), active = $state("search");
   let globalSearch: GlobalSearch, parking: HTMLDivElement, searchSurface: HTMLDivElement, navigationSurface: HTMLDivElement;
   let column: HTMLDivElement;
@@ -112,7 +113,7 @@
   }
   function persist() {
     if (restoring || !api) return;
-    try { localStorage.setItem(layoutKey(current), encodeLayout(api, sidebar)); storageError = false; }
+    try { localStorage.setItem(layoutKey(current), encodeLayout(api, sidebar, zones.state)); storageError = false; }
     catch { if (!storageError) app.flash("Не удалось сохранить раскладку", true); storageError = true; }
   }
   function restore(project: string | null) {
@@ -120,18 +121,19 @@
     restoring = true;
     current = project;
     try {
-      const text = localStorage.getItem(layoutKey(project));
+      const text = localStorage.getItem(layoutKey(project)) ?? localStorage.getItem(legacyLayoutKey(project));
       const stored = text ? decodeLayout(text, project) : null;
-      if (stored) { api.fromJSON(stored.layout); sidebar = { width: clampWidth(stored.sidebar.width), graph: clampGraph(stored.sidebar.graph) }; }
-      else { defaultLayout(api, host.clientWidth); sidebar = { ...defaultSidebar }; }
+      if (stored) { api.fromJSON(stored.layout); zones.restore(stored.zones); sidebar = { width: clampWidth(stored.sidebar.width), graph: clampGraph(stored.sidebar.graph) }; }
+      else { defaultLayout(api); zones.restore(); sidebar = { ...defaultSidebar }; }
     } catch {
-      defaultLayout(api, host.clientWidth); sidebar = { ...defaultSidebar };
+      defaultLayout(api); zones.restore(); sidebar = { ...defaultSidebar };
       app.flash("Раскладка повреждена или устарела; восстановлена штатная", true);
     } finally {
       api.getPanel("settings")?.api.close(); // вкладка настроек из прежних раскладок
-      ensureRightZone(api, host.clientWidth);
+      zones.normalize(); zones.size();
       restoring = false; active = api.activePanel?.id ?? "";
     }
+    persist();
   }
   function open(kind: Exclude<PanelKind, "document">) {
     if (kind === "settings") { menu = false; return; } // настройки — отдельный экран в App.svelte, не вкладка
@@ -149,13 +151,6 @@
     else if (kind === "settings") app.openSettings();
     else open(kind);
   }
-  /** Группа для документа: где уже есть документы, иначе самая правая группа без поиска. */
-  function documentGroup() {
-    const existing = api.panels.find(p => p.params?.kind === "document");
-    if (existing) return existing.group;
-    const search = api.getPanel("search")?.group;
-    return api.groups.filter(g => g !== search).sort((a, b) => b.element.getBoundingClientRect().left - a.element.getBoundingClientRect().left)[0];
-  }
   function documentPanel(doc: ViewedDocument) {
     if (!current) return;
     incoming = doc;
@@ -167,16 +162,21 @@
     else {
       let id = baseId, suffix = 0;
       while (api.getPanel(id)) id = `${baseId}:view:${++suffix}`;
-      const target = documentGroup();
+      const target = zones.documentGroup();
       panel = api.addPanel({ id, component: "workspace", title: doc.title, params,
-        position: target ? { referenceGroup: target, direction: "within" } : api.getPanel("search") ? { referencePanel: "search", direction: "right" } : undefined,
-        initialWidth: Math.max(250, host.clientWidth / 2) });
+        position: { referenceGroup: target, direction: "within" } });
     }
     incoming = undefined;
     panel.api.setActive();
     persist();
   }
-  function reset() { restoring = true; defaultLayout(api, host.clientWidth); sidebar = { ...defaultSidebar }; restoring = false; persist(); menu = false; }
+  async function reset() {
+    menu = false;
+    const project = current;
+    if (project && !(await confirmProjectLeave(project))) return;
+    if (project !== current) return;
+    restoring = true; defaultLayout(api); zones.restore(); sidebar = { ...defaultSidebar }; restoring = false; persist(); menu = false;
+  }
   function move(position: "left" | "right" | "top" | "bottom") {
     const panel = api.activePanel;
     const target = api.panels.find(p => p.group !== panel?.group) ?? api.panels.find(p => p !== panel);
@@ -228,8 +228,7 @@
       defaultRenderer: "always", disableFloatingGroups: true,
       // HTML5 drag-and-drop в WebView2 перехватывает обработчик файлов Tauri (ISS-21).
       dndStrategy: "pointer",
-      // Зоны не исчезают при переносе последней вкладки; лишние пустые группы убирает ensureRightZone.
-      closeEmptyGroups: false,
+      closeEmptyGroups: true,
       defaultTabComponent: "workspace-tab",
       createTabComponent: () => {
         const tab = new DefaultTab();
@@ -276,6 +275,7 @@
         };
       },
     });
+    zones = new WorkspaceZones(api);
     restore(app.current);
     placeSurfaces();
     foreground = api.activePanel?.id ?? "search";
@@ -292,16 +292,17 @@
       if (app.activeDocument) app.activeDocument = movedPath(app.activeDocument, event.from, event.to);
       persist();
     });
-    const subscriptions = [api.onDidLayoutChange(() => {
-      if (!restoring && !normalizing && (api.groups.length === 1 || removableEmptyGroups(api).length > 0)) {
+    const subscriptions = [api.onDidRemoveGroup(group => { if (!restoring) zones.removed(group); }), api.onDidLayoutChange(() => {
+      if (!restoring && !normalizing) {
         normalizing = true;
-        try { ensureRightZone(api, host.clientWidth); } finally { normalizing = false; }
+        try { zones.normalize(); zones.size(); } finally { normalizing = false; }
       }
       persist(); refreshPanels();
     }), api.onDidRemovePanel(panel => { if (!restoring && panel.id === "topics") app.topicsOpen = false; if (!restoring && panel.id === "audits") app.auditsOpen = false; }), api.onDidActivePanelChange(event => {
       const panel: IDockviewPanel | undefined = event.panel;
       active = panel?.id ?? "";
       if (panel) foreground = panel.id;
+      if (!restoring) zones.activate();
       // Мини-граф показывает локальный граф активного документа; вкладка поиска или графа его не сбрасывает.
       const hit = (panel?.params as PanelParams | undefined)?.kind === "document" ? (panel!.params as { hit?: { path?: string } }).hit : undefined;
       if (hit?.path) app.activeDocument = hit.path;

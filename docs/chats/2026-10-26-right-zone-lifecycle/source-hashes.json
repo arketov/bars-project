@@ -1,0 +1,7 @@
+{
+  "ui/src/lib/Workspace.svelte": "5605f9ace3dbd4b87df2ac9df920c0e39dc707b8e0b2b93dec064010f5ef72da",
+  "ui/src/lib/Workspace.test.ts": "42171e769c2b88980c9a9854e48abe32384e9616a999900794ed765e3246d51b",
+  "ui/src/lib/workspace-layout.ts": "f286fec3b9c2a8a589ecfbe612f1552748d8c7ac0dd4a42ed309e7c7bac2361c",
+  "ui/src/lib/workspace-layout.test.ts": "95df2213a95174e7bfe1dc2f811fb6e74e361030075c7d850f26d22d7ec08ecc",
+  "crates/bars-app/examples/right_zone_probe.js": "4485ce0d0d84c36769b918f0d1fdbb775095aba0be313733b84031f858a10d13"
+}

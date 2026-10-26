@@ -1,0 +1,60 @@
+
+=== cargo fmt --check ===
+
+=== cargo clippy ===
+    Blocking waiting for file lock on build directory
+    Checking bars-protocol v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-protocol)
+    Checking bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Checking bars-cli v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-cli)
+    Checking bars-mcp v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-mcp)
+error[E0063]: missing field `revision` in initializer of `bars_protocol::SettingsOutput`
+   --> crates\bars-worker\src\handler\mod.rs:908:12
+    |
+908 |         Ok(SettingsOutput {
+    |            ^^^^^^^^^^^^^^ missing `revision`
+
+error[E0609]: no field `settings` on type `bars_protocol::SettingsSaveParams`
+   --> crates\bars-worker\src\handler\mod.rs:921:74
+    |
+921 |         settings_io::save_user_settings(self.worker.bars_home(), &params.settings)
+    |                                                                          ^^^^^^^^ unknown field
+    |
+    = note: available fields are: `base`, `changes`, `expected_revision`
+
+Some errors have detailed explanations: E0063, E0609.
+For more information about an error, try `rustc --explain E0063`.
+error: could not compile `bars-worker` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error[E0560]: struct `bars_protocol::SettingsSaveParams` has no field named `settings`
+   --> crates\bars-worker\src\handler\tests\window.rs:358:13
+    |
+358 |             settings: settings.clone(),
+    |             ^^^^^^^^ `bars_protocol::SettingsSaveParams` does not have this field
+    |
+    = note: available fields are: `base`, `changes`, `expected_revision`
+
+error[E0560]: struct `bars_protocol::SettingsSaveParams` has no field named `settings`
+   --> crates\bars-worker\src\handler\tests\window.rs:368:56
+    |
+368 |         .error(Call::SettingsSave(SettingsSaveParams { settings }))
+    |                                                        ^^^^^^^^ `bars_protocol::SettingsSaveParams` does not have this field
+    |
+    = note: available fields are: `base`, `changes`, `expected_revision`
+
+error[E0560]: struct `bars_protocol::SettingsSaveParams` has no field named `settings`
+   --> crates\bars-worker\src\handler\tests\window.rs:392:70
+    |
+392 |         .call::<SavedOutput>(Call::SettingsSave(SettingsSaveParams { settings }))
+    |                                                                      ^^^^^^^^ `bars_protocol::SettingsSaveParams` does not have this field
+    |
+    = note: available fields are: `base`, `changes`, `expected_revision`
+
+Some errors have detailed explanations: E0063, E0560, E0609.
+error: could not compile `bars-worker` (lib test) due to 5 previous errors
+
+Провалено: cargo clippy (код 101). Коммитить нельзя.
+
+Step              Code Seconds
+----              ---- -------
+cargo fmt --check    0       2
+cargo clippy       101      43

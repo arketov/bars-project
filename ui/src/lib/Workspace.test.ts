@@ -102,7 +102,7 @@ it("глобальный поиск из настроек переносит т�
   expect([...app.selected]).toEqual(["manual"]); expect(app.filter).toBe("папка");
 });
 
-it("глобальный поиск доступен с закрытыми панелями без их восстановления", async () => {
+it("глобальный поиск сохраняет общий ввод после восстановления пустого центра", async () => {
   component = mount(Workspace, { target: document.body }); flushSync(); await settle();
   const query = document.querySelector('textarea');
   document.querySelector('[data-workspace-panel="search"]')!.closest('[role="tab"]')!.querySelector<HTMLElement>('.dv-default-tab-action')!.click();
@@ -111,7 +111,7 @@ it("глобальный поиск доступен с закрытыми па�
   document.querySelector<HTMLButtonElement>('[aria-label="Глобальный поиск"]')!.click(); flushSync(); await settle();
   expect(document.querySelector('dialog[aria-label="Глобальный поиск"] textarea')).toBe(query);
   document.querySelector<HTMLButtonElement>('[aria-label="Закрыть поиск"]')!.click(); flushSync(); await settle();
-  expect(document.querySelector('[data-panel-kind="search"]')).toBeNull();
+  expect(document.querySelector('[data-panel-kind="search"] textarea')).toBe(query);
   expect(document.querySelector('.column aside')).not.toBeNull();
   expect(localStorage.getItem(layoutKey(project.path))).toBe(layout);
 });
@@ -263,7 +263,7 @@ it("колёсико закрывает служебную вкладку без
   tab.dispatchEvent(new MouseEvent("auxclick", { button: 1, bubbles: true, cancelable: true }));
   await settle();
   expect(tab.isConnected).toBe(false);
-  expect(document.querySelector('[data-panel-kind="search"]')).toBeNull();
+  expect(document.querySelectorAll('[data-panel-kind="search"]')).toHaveLength(1);
 });
 it("повторное действие открывает закрытую панель; испорченная раскладка не мешает запуску", async () => {
   localStorage.setItem(layoutKey(project.path), "{broken");
@@ -347,9 +347,10 @@ it("навигация и мини-граф — постоянная колон�
   expect(document.querySelector('.dock [data-panel-kind="graph"]')).not.toBeNull();
   expect(document.querySelector('.column .mini-graph')).not.toBeNull();
 });
-it("правая зона есть сразу; документ открывается в ней, после закрытия зона остаётся", async () => {
+it("правая зона появляется с документом и исчезает после закрытия", async () => {
   component = mount(Workspace, { target: document.body }); flushSync(); await settle();
   const saved = () => JSON.parse(localStorage.getItem(layoutKey(project.path))!);
+  expect(saved().layout.grid.root.data).toHaveLength(1);
   app.viewer = { hit: hit("docs/a.md"), title: "А", text: "# А", missing: false }; flushSync(); await settle();
   const layout = saved().layout;
   const groupOf = (id: string) => (function find(node: any): string | undefined { return node.type === "leaf" ? (node.data.views.includes(id) ? node.data.id : undefined) : node.data.map(find).find(Boolean); })(layout.grid.root);
@@ -357,7 +358,7 @@ it("правая зона есть сразу; документ открывае
   expect(groupOf(documentId("docs/a.md"))).not.toBe(groupOf("search"));
   const tab = document.querySelector('[data-workspace-panel="document:docs/a.md"]')!.closest('[role="tab"]')!;
   tab.querySelector<HTMLElement>('.dv-default-tab-action')!.click(); flushSync(); await settle();
-  expect(saved().layout.grid.root.data).toHaveLength(2);
+  expect(saved().layout.grid.root.data).toHaveLength(1);
 });
 it("вхождение текста сохраняет столбец и длину через панель до CodeMirror", async () => {
   component = mount(Workspace, { target: document.body }); flushSync(); await settle();
@@ -376,4 +377,55 @@ it("иконка сброса очищает область и сохраняе�
   expect(app.filter).toBe("руководство");
   expect(document.querySelector('.dock .statusbar')).toBeNull();
   expect(document.querySelector('.column .statusbar')).not.toBeNull();
+});
+
+it("сброс раскладки: отмена сохраняет конфликт и зоны, подтверждение возвращает один центр", async () => {
+  vi.spyOn(window, 'confirm').mockReturnValue(true);
+  component = mount(Workspace, { target: document.body }); flushSync(); await settle();
+  app.viewer = { hit: hit('docs/a.md'), title: 'А', text: '# А', missing: false }; flushSync(); await settle();
+  const buffer = editors.get(project.path, 'docs/a.md')!;
+  buffer.edit('# Мой текст'); buffer.status = 'conflict'; buffer.diskRevision = 'диск'; buffer.message = 'Конфликт'; flushSync();
+  const source = document.querySelector('.cm-editor');
+  const before = localStorage.getItem(layoutKey(project.path));
+  await openFromMenu('Сбросить раскладку');
+  expect(document.querySelector('[role="alertdialog"]')).not.toBeNull();
+  [...document.querySelectorAll<HTMLButtonElement>('[role="alertdialog"] button')].find(b => b.textContent === 'Вернуться')!.click(); await settle();
+  expect(localStorage.getItem(layoutKey(project.path))).toBe(before);
+  expect(document.querySelector('.cm-editor')).toBe(source); expect(buffer.text).toBe('# Мой текст');
+  await openFromMenu('Сбросить раскладку');
+  [...document.querySelectorAll<HTMLButtonElement>('[role="alertdialog"] button')].find(b => b.textContent === 'Закрыть без записи')!.click(); await settle();
+  expect(document.querySelector('.document')).toBeNull();
+  const saved = JSON.parse(localStorage.getItem(layoutKey(project.path))!);
+  expect(Object.values(saved.zones.roles)).toEqual(['center']);
+});
+it.each([false, true])("проект хранит свою ширину отдельно; v2 остаётся, ошибка записи v3=%s", async (failWrite) => {
+  component = mount(Workspace, { target: document.body }); flushSync(); await settle();
+  const value = JSON.parse(localStorage.getItem(layoutKey(project.path))!);
+  await unmount(component); component = undefined;
+  value.version = 2; delete value.zones;
+  value.layout.grid.width = 1200; value.layout.grid.orientation = 'HORIZONTAL';
+  value.layout.grid.root.data[0].size = 670;
+  value.layout.grid.root.data.push({type:'leaf',size:530,data:{id:'old-right',views:[]}});
+  const oldKey = `bars-workspace-v2:${project.path}`, old = JSON.stringify(value);
+  localStorage.setItem(oldKey, old); localStorage.removeItem(layoutKey(project.path));
+  if (failWrite) {
+    const set = Storage.prototype.setItem;
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(function (this: Storage, key, value) {
+      if (key === layoutKey(project.path)) throw new DOMException('Нет места', 'QuotaExceededError');
+      set.call(this, key, value);
+    });
+  }
+  component = mount(Workspace, { target: document.body }); flushSync(); await settle();
+  if (failWrite) {
+    expect(localStorage.getItem(layoutKey(project.path))).toBeNull();
+    expect(localStorage.getItem(oldKey)).toBe(old); expect(app.toast?.text).toContain('Не удалось сохранить раскладку');
+    expect(document.querySelector('[data-panel-kind="search"]')).not.toBeNull(); return;
+  }
+  const saved = JSON.parse(localStorage.getItem(layoutKey(project.path))!);
+  expect(saved.version).toBe(3); expect(saved.zones.rightWidth).toBe(530);
+  expect(Object.values(saved.zones.roles)).toEqual(['center']); expect(localStorage.getItem(oldKey)).toBe(old);
+  const next = {...project,path:'C:/Б',name:'Б'}; app.projects=[project,next]; app.current=next.path; flushSync(); await settle();
+  expect(JSON.parse(localStorage.getItem(layoutKey(next.path))!).zones.rightWidth).toBeUndefined();
+  app.current=project.path; flushSync(); await settle();
+  expect(JSON.parse(localStorage.getItem(layoutKey(project.path))!).zones.rightWidth).toBe(530);
 });
