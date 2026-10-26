@@ -18,8 +18,8 @@
   },
   {
    "path": "core-1.processes.json",
-   "bytes": 709,
-   "sha256": "f8d0a87d693f54276793a9f2b85b7eee774f90938ed9e01fd63bb06046092f29"
+   "bytes": 708,
+   "sha256": "f8f6a989af66e9a73d980a388909ed656a278440b8321b0ef65c637fa1bab576"
   },
   {
    "path": "core-1.rows.jsonl.gz",
@@ -48,8 +48,8 @@
   },
   {
    "path": "hardware.json",
-   "bytes": 1373,
-   "sha256": "222ac1be9f38f63f116aace5f090b7bdb87858b00189b525f726baec7a7a7a32"
+   "bytes": 1353,
+   "sha256": "a7aff290880f05b535b7e117d0912dd3298d9c523a5ecfe03cc5facc313ae4b9"
   },
   {
    "path": "index.complete.json",
@@ -58,8 +58,8 @@
   },
   {
    "path": "inputs.json",
-   "bytes": 3066,
-   "sha256": "7fc4d1064d78a68e48b096a2d2ebff07843a795e95d2fbe451c62df9e439979c"
+   "bytes": 3023,
+   "sha256": "956c1cea7aafa2cd1628b8d1603f2711783fc73e5433b33f83e030881d3267a0"
   },
   {
    "path": "prepare-cpu.memory.jsonl.gz",
@@ -88,8 +88,8 @@
   },
   {
    "path": "worker-1.processes.json",
-   "bytes": 711,
-   "sha256": "0c80b68a145f241b915e0d2f585c7d0677d31202cddb592cbd6b34ecf75f08f5"
+   "bytes": 709,
+   "sha256": "0178b14dade2a5e6ff7e9d9e1604d394a1b9de99abf11a29cbc7a732b993ec47"
   },
   {
    "path": "worker-1.rows.jsonl.gz",
