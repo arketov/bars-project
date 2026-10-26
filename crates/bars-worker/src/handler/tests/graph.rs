@@ -34,7 +34,7 @@ async fn graph_real_ipc_auto_update_refs_scope_and_read_only_mcp() {
             indexed(s)
                 && s.graph
                     .as_ref()
-                    .is_some_and(|g| g.state == LayerState::Partial)
+                    .is_some_and(|g| g.state == LayerState::Ready)
         },
     )
     .await;
@@ -137,8 +137,7 @@ async fn graph_real_ipc_auto_update_refs_scope_and_read_only_mcp() {
             })
             .await
             .unwrap();
-        if state.snapshot.as_ref().is_some_and(|s| s != &old) && state.state == LayerState::Partial
-        {
+        if state.snapshot.as_ref().is_some_and(|s| s != &old) && state.state == LayerState::Ready {
             break;
         }
         assert!(Instant::now() < deadline, "автопересчёт графа: {state:?}");
@@ -259,7 +258,7 @@ async fn graph_search_fallback_is_explicit_and_hybrid_shape_unchanged() {
     assert_eq!(out.applied_mode, bars_core::graph::RetrievalMode::Hybrid);
     assert!(out.fallback_reason.is_some());
     assert_eq!(out.search.results, before.results);
-    let error = rpc(cli
+    let previous = cli
         .call(&bars_protocol::GraphSearchParams {
             search: search(&root, "поиск"),
             mode: bars_core::graph::RetrievalMode::Graph,
@@ -267,6 +266,113 @@ async fn graph_search_fallback_is_explicit_and_hybrid_shape_unchanged() {
             include_related: true,
             related_budget: None,
         })
+        .await
+        .unwrap();
+    assert!(
+        previous
+            .graph_results
+            .unwrap()
+            .warnings
+            .iter()
+            .any(|w| w.contains("Граф устарел"))
+    );
+    db.conn()
+        .execute("UPDATE documents SET hash='changed'", [])
+        .unwrap();
+    let error = rpc(cli
+        .call(&GraphQueryParams {
+            target: target(&root),
+            request: GraphRequest {
+                operation: Operation::Context,
+                query: Some("поиск".into()),
+                ..Default::default()
+            },
+        })
         .await);
     assert_eq!(error.kind(), Some(ErrorKind::GraphNotReady));
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn stale_snapshot_status_and_context_share_revision_rules_over_ipc() {
+    let harness = Harness::start("graph-stale-layers", FakeProvider::new("m1")).await;
+    let root = harness.project(
+        "stale-layers",
+        &[
+            ("a.md", "# Устройство\n\nТ-1 использует Т-2."),
+            ("b.md", "# Решение\n\nТ-3 использует Т-4."),
+        ],
+    );
+    let mut cli = harness.client(ClientKind::Cli).await;
+    cli.call(&RegisterParams {
+        path: root.display().to_string(),
+    })
+    .await
+    .unwrap();
+    let built = wait_status(
+        &mut cli,
+        &root,
+        "полный граф без задания",
+        |s| {
+            indexed(s)
+                && s.graph
+                    .as_ref()
+                    .is_some_and(|g| g.state == LayerState::Ready && g.active_job.is_none())
+        },
+    )
+    .await;
+    let snapshot = built.graph.unwrap().snapshot.unwrap();
+    let db = bars_core::storage::Index::open(
+        &bars_core::storage::index_path(&root),
+        bars_core::storage::Journal::Wal,
+    )
+    .unwrap();
+    db.conn()
+        .execute(
+            "UPDATE documents SET hash='changed' WHERE path='docs/a.md'",
+            [],
+        )
+        .unwrap();
+    bars_core::graph::store::set_state(db.conn(), LayerState::Building, Some("new-job"), None)
+        .unwrap();
+    let status = cli
+        .call(&StatusParams {
+            target: target(&root),
+        })
+        .await
+        .unwrap()
+        .graph
+        .unwrap();
+    assert_eq!(status.freshness, bars_core::graph::Freshness::Stale);
+    assert_eq!(status.job_state, bars_core::graph::JobState::Running);
+    assert_eq!(status.state, LayerState::Stale);
+    let old = cli
+        .call(&GraphQueryParams {
+            target: target(&root),
+            request: GraphRequest::default(),
+        })
+        .await
+        .unwrap();
+    assert_eq!(old.snapshot, snapshot);
+    assert!(old.warnings.iter().any(|w| w.contains("Граф устарел")));
+    let context = cli
+        .call(&GraphQueryParams {
+            target: target(&root),
+            request: GraphRequest {
+                operation: Operation::Context,
+                query: Some("Решение".into()),
+                ..Default::default()
+            },
+        })
+        .await
+        .unwrap();
+    assert_eq!(context.coverage.failed, 1);
+    assert!(context.sources.iter().all(|s| s.path != "docs/a.md"));
+    assert!(context.sources.iter().any(|s| s.path == "docs/b.md"));
+    assert!(context.evidence.iter().all(|e| {
+        context
+            .sources
+            .iter()
+            .any(|s| s.reference == e.document && s.path != "docs/a.md")
+    }));
+    assert!(context.warnings.iter().any(|w| w.contains("Граф устарел")));
 }

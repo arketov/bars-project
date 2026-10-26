@@ -1,0 +1,66 @@
+
+=== cargo fmt --check ===
+
+=== cargo clippy ===
+    Blocking waiting for file lock on build directory
+   Compiling bindgen v0.72.1
+   Compiling llama-cpp-sys-2 v0.1.160
+    Checking llama-cpp-2 v0.1.160
+    Checking bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Checking bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Checking bars-app v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-app)
+    Checking bars-cli v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-cli)
+    Checking bars-mcp v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-mcp)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 50.29s
+
+=== cargo build ===
+    Blocking waiting for file lock on build directory
+   Compiling bindgen v0.72.1
+   Compiling llama-cpp-sys-2 v0.1.160
+   Compiling llama-cpp-2 v0.1.160
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+   Compiling bars-app v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1m 07s
+
+=== cargo test ===
+    Blocking waiting for file lock on build directory
+   Compiling bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+   Compiling bindgen v0.72.1
+error[E0599]: no method named `progress_handler` found for reference `&Connection` in the current scope
+   --> crates\bars-graph\src\store.rs:674:8
+    |
+674 |     db.progress_handler(1000, Some(move || std::time::Instant::now() >= deadline));
+    |        ^^^^^^^^^^^^^^^^
+    |
+help: there is a method `busy_handler` with a similar name, but with different arguments
+   --> C:\Users\arketov\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rusqlite-0.40.2\src\busy.rs:57:5
+    |
+ 57 |     pub fn busy_handler(&self, callback: Option<fn(i32) -> bool>) -> Result<()> {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0599]: no method named `progress_handler` found for reference `&Connection` in the current scope
+   --> crates\bars-graph\src\store.rs:676:8
+    |
+676 |     db.progress_handler(0, None::<fn() -> bool>);
+    |        ^^^^^^^^^^^^^^^^
+    |
+help: there is a method `busy_handler` with a similar name, but with different arguments
+   --> C:\Users\arketov\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rusqlite-0.40.2\src\busy.rs:57:5
+    |
+ 57 |     pub fn busy_handler(&self, callback: Option<fn(i32) -> bool>) -> Result<()> {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `bars-graph` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+
+Провалено: cargo test (код 101). Коммитить нельзя.
+
+Step              Code Seconds
+----              ---- -------
+cargo fmt --check    0       2
+cargo clippy         0      50
+cargo build          0      67
+cargo test         101     216
+

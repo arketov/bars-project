@@ -23,6 +23,19 @@ afterEach(async () => {
 });
 
 describe("Документы этапа 18", () => {
+  it("проверяет ревизию источника графа перед выделением строк", async () => {
+    setup();
+    const flash = vi.spyOn(app, "flash");
+    api.call.mockResolvedValueOnce({ title: "Документ", text: "Новый текст", revision: "new" });
+    await app.openDocument({ ...reference("docs/a.md"), first_line: 4, last_line: 5, expectedRevision: "old" });
+    expect(app.viewer?.hit.first_line).toBe(0);
+    expect(app.viewer?.hit.last_line).toBe(0);
+    expect(flash).toHaveBeenCalledWith("Документ изменился после построения графа");
+    api.call.mockResolvedValueOnce({ title: "Документ", text: "Текст", revision: "same" });
+    await app.openDocument({ ...reference("docs/a.md"), first_line: 4, last_line: 5, expectedRevision: "same" });
+    expect(app.viewer?.hit.first_line).toBe(4);
+    flash.mockRestore();
+  });
   it.each(["docs", "guide/manual", "."])("сохраняет исходный путь дерева при docs_root=%s", root => {
     const path = root === "." ? "Index.md" : `${root}/Index.md`;
     const tree = buildTree([{ path, module: ".", title: "Обзор", chunks: 0 }], root);

@@ -1,0 +1,27 @@
+{
+  "scope": "frozen project graph; shared machine; no inference; elapsed time only",
+  "source_documents": 493,
+  "nodes": 5384,
+  "edges": 13111,
+  "direct_load_ms": [
+    809.3935,
+    752.5279,
+    771.9139
+  ],
+  "cold_cache_ms": 1120.4758,
+  "repeated_cache_ms": [
+    259.3212,
+    0.7184,
+    0.6944,
+    0.6907000000000001,
+    0.7611,
+    0.6945,
+    0.6947,
+    0.8432999999999999,
+    0.6868,
+    0.6702
+  ],
+  "estimated_retained_bytes": 48261856,
+  "dataset_blake3": "3bb9887b2013648e19e4085fe790128a0212d78e86fa966ddb10362c340ff862",
+  "identical_datasets": true
+}

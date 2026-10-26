@@ -172,17 +172,19 @@ impl Worker {
                 Ok(ScanResult { report, paths })
             })
             .await;
-            let mut projects = lock(&inner.projects);
-            let current = projects
-                .get_mut(&path)
-                .filter(|r| !r.deleting && r.generation == generation);
-            let valid = current.is_some()
-                && !stopped.load(Ordering::SeqCst)
-                && !inner.stop.load(Ordering::SeqCst)
-                && Settings::load(&inner.config.bars_home, &path)
-                    .is_ok_and(|s| operations::settings_key(&s.value) == key);
-            if !valid {
-                lock(&inner.models.operations).finish(
+            let mut check_graph = false;
+            {
+                let mut projects = lock(&inner.projects);
+                let current = projects
+                    .get_mut(&path)
+                    .filter(|r| !r.deleting && r.generation == generation);
+                let valid = current.is_some()
+                    && !stopped.load(Ordering::SeqCst)
+                    && !inner.stop.load(Ordering::SeqCst)
+                    && Settings::load(&inner.config.bars_home, &path)
+                        .is_ok_and(|s| operations::settings_key(&s.value) == key);
+                if !valid {
+                    lock(&inner.models.operations).finish(
                     id,
                     "cancelled",
                     None,
@@ -191,70 +193,80 @@ impl Worker {
                             .into(),
                     ),
                 );
-                return;
-            }
-            let result = result.map_err(failed).and_then(|v| v);
-            match result {
-                Ok(ScanResult { report, paths }) => {
-                    let update = report.full_check
-                        || report.added + report.changed + report.removed > 0
-                        || !report.problems.is_empty();
-                    let outcome = OperationReport {
-                        added: report.added,
-                        changed: report.changed,
-                        removed: report.removed,
-                        unchanged: report.unchanged,
-                        problems: report.problems.len(),
-                        problem_paths: report
-                            .problems
-                            .iter()
-                            .take(20)
-                            .map(|p| p.path.chars().take(512).collect())
-                            .collect(),
-                        index_applied: false,
-                    };
-                    if update {
-                        if projects.get(&path).is_some_and(|runtime| {
-                            !matches!(
-                                runtime.status.state,
-                                ProjectState::ReindexRequired | ProjectState::Unavailable
-                            )
-                        }) {
-                            let mut docs = lock(&inner.docs);
-                            for document in paths {
-                                docs.found(&path, &document, DocSource::Explicit);
-                            }
-                        }
-                        inner.enqueue_for(&path, Job::check(Priority::Explicit), &projects);
-                    }
-                    lock(&inner.models.operations).finish(
-                        id,
-                        if report.problems.is_empty() {
-                            "success"
-                        } else {
-                            "partial"
-                        },
-                        Some(outcome),
-                        None,
-                    );
+                    return;
                 }
-                Err(failure) => {
-                    let (state, error) = match failure {
-                        Failure::Cancelled => ("cancelled", None),
-                        Failure::ReindexRequired { index, settings } => {
-                            if let Some(runtime) = current {
-                                runtime.status.state = ProjectState::ReindexRequired;
-                                runtime.status.model_index = index;
-                                runtime.status.model_settings = Some(settings);
+                let result = result.map_err(failed).and_then(|v| v);
+                match result {
+                    Ok(ScanResult { report, paths }) => {
+                        check_graph = true;
+                        let update = report.full_check
+                            || report.added + report.changed + report.removed > 0
+                            || !report.problems.is_empty();
+                        let outcome = OperationReport {
+                            added: report.added,
+                            changed: report.changed,
+                            removed: report.removed,
+                            unchanged: report.unchanged,
+                            problems: report.problems.len(),
+                            problem_paths: report
+                                .problems
+                                .iter()
+                                .take(20)
+                                .map(|p| p.path.chars().take(512).collect())
+                                .collect(),
+                            index_applied: false,
+                        };
+                        if update {
+                            if projects.get(&path).is_some_and(|runtime| {
+                                !matches!(
+                                    runtime.status.state,
+                                    ProjectState::ReindexRequired | ProjectState::Unavailable
+                                )
+                            }) {
+                                let mut docs = lock(&inner.docs);
+                                for document in paths {
+                                    docs.found(&path, &document, DocSource::Explicit);
+                                }
                             }
-                            (
-                                "error",
-                                Some("Нужна переиндексация с согласием пользователя.".into()),
-                            )
+                            inner.enqueue_for(&path, Job::check(Priority::Explicit), &projects);
                         }
-                        Failure::Failed(message) => ("error", Some(message)),
-                    };
-                    lock(&inner.models.operations).finish(id, state, None, error);
+                        lock(&inner.models.operations).finish(
+                            id,
+                            if report.problems.is_empty() {
+                                "success"
+                            } else {
+                                "partial"
+                            },
+                            Some(outcome),
+                            None,
+                        );
+                    }
+                    Err(failure) => {
+                        let (state, error) = match failure {
+                            Failure::Cancelled => ("cancelled", None),
+                            Failure::ReindexRequired { index, settings } => {
+                                if let Some(runtime) = current {
+                                    runtime.status.state = ProjectState::ReindexRequired;
+                                    runtime.status.model_index = index;
+                                    runtime.status.model_settings = Some(settings);
+                                }
+                                (
+                                    "error",
+                                    Some("Нужна переиндексация с согласием пользователя.".into()),
+                                )
+                            }
+                            Failure::Failed(message) => ("error", Some(message)),
+                        };
+                        lock(&inner.models.operations).finish(id, state, None, error);
+                    }
+                }
+            }
+            if check_graph {
+                let worker = Worker {
+                    inner: inner.clone(),
+                };
+                if let Err(error) = worker.graph_checked(&path).await {
+                    log::warn!("Граф после проверки не поставлен на обновление: {error}");
                 }
             }
         });

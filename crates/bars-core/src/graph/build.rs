@@ -1,8 +1,9 @@
-use super::similarity::{KnnOptions, VectorNode, build_knn_observed};
+mod job;
 use crate::indexing::chunking::chunk_document_with_spans;
 use crate::storage::Index;
 use bars_graph::source::{InputChunk, InputDocument};
 use bars_graph::{GraphError, Kind, LayerState, Origin, Polarity, Predicate};
+pub use job::GraphBuildState;
 use std::io::Read;
 use std::path::Path;
 
@@ -20,11 +21,50 @@ pub fn build_index_graph_layer(
     layer: bars_graph::BuildLayer,
     mut cancelled: impl FnMut() -> bool,
 ) -> Result<bars_graph::store::GraphStatus, GraphError> {
+    let mut state = GraphBuildState::default();
+    loop {
+        if let Some(status) =
+            build_index_graph_step_with_state(project, index, layer, &mut state, &mut cancelled)?
+        {
+            return Ok(status);
+        }
+    }
+}
+
+/// Один рабочий квант; None требует продолжения после освобождения gate проекта.
+pub fn build_index_graph_step(
+    project: &Path,
+    index: &mut Index,
+    layer: bars_graph::BuildLayer,
+    cancelled: impl FnMut() -> bool,
+) -> Result<Option<bars_graph::store::GraphStatus>, GraphError> {
+    build_index_graph_step_with_state(
+        project,
+        index,
+        layer,
+        &mut GraphBuildState::default(),
+        cancelled,
+    )
+}
+
+pub fn build_index_graph_step_with_state(
+    project: &Path,
+    index: &mut Index,
+    layer: bars_graph::BuildLayer,
+    state: &mut GraphBuildState,
+    mut cancelled: impl FnMut() -> bool,
+) -> Result<Option<bars_graph::store::GraphStatus>, GraphError> {
     bars_graph::store::ensure_schema(index.conn_mut())?;
+    job::ensure_revision(index)?;
     let status = bars_graph::store::status(index.conn())?;
-    if layer == bars_graph::BuildLayer::All
+    if status.job_state == bars_graph::JobState::Idle
+        && layer == bars_graph::BuildLayer::All
         && matches!(status.state, LayerState::Ready | LayerState::Partial)
         && status.file_errors_total == 0
+        && status
+            .layers
+            .get("similarity")
+            .is_some_and(|l| l.fingerprint == crate::graph::similarity_job::METHOD)
         && status.layers.len() == 3
         && status
             .layers
@@ -32,7 +72,7 @@ pub fn build_index_graph_layer(
             .all(|l| matches!(l.state, LayerState::Ready | LayerState::Partial))
         && bars_graph::store::load(index.conn()).is_ok()
     {
-        return Ok(status);
+        return Ok(Some(status));
     }
     let job = format!(
         "auto:{}",
@@ -47,7 +87,7 @@ pub fn build_index_graph_layer(
         status.active_job.as_deref().or(Some(&job)),
         None,
     )?;
-    let result = build_graph(project, index, layer, &mut cancelled);
+    let result = build_graph(project, index, layer, state, &mut cancelled);
     if let Err(error) = &result {
         let state = if matches!(error, GraphError::Cancelled) {
             LayerState::Cancelled
@@ -63,14 +103,27 @@ fn build_graph(
     project: &Path,
     index: &mut Index,
     layer: bars_graph::BuildLayer,
+    state: &mut GraphBuildState,
     mut cancelled: impl FnMut() -> bool,
-) -> Result<bars_graph::store::GraphStatus, GraphError> {
+) -> Result<Option<bars_graph::store::GraphStatus>, GraphError> {
+    if let Some(active) = state.take_current(project, index, layer)? {
+        return job::run_active(
+            index,
+            active,
+            state,
+            &mut cancelled,
+            std::time::Duration::from_secs(2),
+        );
+    }
+    if let Some(prepared) = job::load(project, index, layer)? {
+        return job::run(index, prepared, state, &mut cancelled);
+    }
     let layout = index
         .stored_layout()
         .map_err(|e| GraphError::InvalidData(e.to_string()))?
         .ok_or_else(|| GraphError::NotReady("индекс ещё не имеет параметров нарезки".into()))?;
     let expected = bars_graph::store::document_manifest(index.conn())?;
-    let previous = match bars_graph::store::load(index.conn()) {
+    let previous = match bars_graph::store::load_previous(index.conn()) {
         Ok(data) => Some(data),
         Err(GraphError::NotReady(_)) => None,
         Err(error) => return Err(error),
@@ -201,14 +254,11 @@ fn build_graph(
             if matches!(
                 layer,
                 bars_graph::BuildLayer::All | bars_graph::BuildLayer::Similarity
-            ) && let Some(vector) = index
-                .vector(&hash)
+            ) && index
+                .has_vector(&hash)
                 .map_err(|e| GraphError::InvalidData(e.to_string()))?
             {
-                vectors.push(VectorNode {
-                    id: reference.id,
-                    vector,
-                });
+                vectors.push((reference.id, hash.clone()));
             }
             chunks.push(InputChunk {
                 key,
@@ -247,7 +297,12 @@ fn build_graph(
     ) {
         data.edges.retain(|e| e.origin != Origin::ExplicitRule);
         data.semantic_state = LayerState::NotBuilt;
-        if let Some(old) = &reuse {
+        if let Some(old) = &reuse
+            && old
+                .layers
+                .get("semantic")
+                .is_some_and(|l| l.freshness == bars_graph::Freshness::Current)
+        {
             data.edges.extend(
                 old.edges
                     .iter()
@@ -261,7 +316,12 @@ fn build_graph(
         layer,
         bars_graph::BuildLayer::Structure | bars_graph::BuildLayer::Semantic
     ) {
-        if let Some(old) = &reuse {
+        if let Some(old) = &reuse
+            && old
+                .layers
+                .get("similarity")
+                .is_some_and(|l| l.freshness == bars_graph::Freshness::Current)
+        {
             data.edges.extend(
                 old.edges
                     .iter()
@@ -269,6 +329,9 @@ fn build_graph(
                     .cloned(),
             );
             data.similarity_state = old.similarity_state;
+            if let Some(layer) = old.layers.get("similarity") {
+                data.layers.insert("similarity".into(), layer.clone());
+            }
             data.warnings.extend(
                 old.warnings
                     .iter()
@@ -277,75 +340,30 @@ fn build_graph(
             );
         }
     } else {
-        progress(index, "similarity", 0, Some(vectors.len()))?;
-        let mut last_progress = std::time::Instant::now();
-        let mut progress_error = None;
-        let knn = build_knn_observed(
-            &vectors,
-            KnnOptions {
-                k: 5,
-                min_cosine: 0.5,
-                max_comparisons: 1_000_000,
-            },
-            &mut cancelled,
-            |processed, total| {
-                if processed == total
-                    || last_progress.elapsed() >= std::time::Duration::from_millis(100)
-                {
-                    if let Err(error) = progress(index, "similarity", processed, Some(total)) {
-                        progress_error = Some(error);
-                    }
-                    last_progress = std::time::Instant::now();
-                }
-            },
-        )
-        .map_err(|e| GraphError::InvalidData(e.to_string()))?;
-        if let Some(error) = progress_error {
-            return Err(error);
-        }
-        if cancelled() {
-            return Err(GraphError::Cancelled);
-        }
-        if let Some(reason) = knn.stop_reason {
-            data.warnings.push(bars_graph::similarity_partial_warning(
-                knn.neighbors.len(),
-                knn.total_nodes,
-                reason.label(),
-            ));
-        }
-        for (from, neighbors) in knn.neighbors {
-            for neighbor in neighbors {
-                let a = data.nodes.iter().find(|n| n.reference.id == from).unwrap();
-                let b = data
-                    .nodes
-                    .iter()
-                    .find(|n| n.reference.id == neighbor.id)
-                    .unwrap();
-                let mut evidence = a.evidence.clone();
-                evidence.extend(b.evidence.iter().cloned());
-                evidence.sort();
-                evidence.dedup();
-                if evidence.is_empty() {
-                    continue;
-                }
-                let id = blake3::hash(format!("similar:{from}:{}", neighbor.id).as_bytes())
-                    .to_hex()
-                    .to_string();
-                data.edges.push(bars_graph::Edge {
-                    id,
-                    from: from.clone(),
-                    to: neighbor.id,
-                    predicate: Predicate::SimilarTo,
-                    polarity: Polarity::Positive,
-                    qualifiers: Default::default(),
-                    origin: Origin::Similarity,
-                    evidence,
-                    score: Some(neighbor.cosine),
-                });
-            }
-        }
-        data.similarity_state = LayerState::Partial;
+        let prepared = job::Prepared {
+            key: job::input_key(index)?,
+            layer,
+            data,
+            vectors,
+            expected,
+            errors,
+        };
+        index
+            .conn()
+            .execute("DELETE FROM graph_meta WHERE key='knn_checkpoint'", [])?;
+        job::save(index, "knn_prepared", &prepared)?;
+        return job::run(index, prepared, state, &mut cancelled);
     }
+    finish_graph(index, data, expected, errors, &mut cancelled).map(Some)
+}
+
+fn finish_graph(
+    index: &mut Index,
+    mut data: bars_graph::Dataset,
+    expected: std::collections::BTreeMap<String, String>,
+    errors: Vec<bars_graph::GraphFileError>,
+    mut cancelled: impl FnMut() -> bool,
+) -> Result<bars_graph::store::GraphStatus, GraphError> {
     for error in &errors {
         let (module, title): (String, String) = index.conn().query_row(
             "SELECT module,title FROM documents WHERE path=?1",
@@ -353,13 +371,13 @@ fn build_graph(
             |r| Ok((r.get(0)?, r.get(1)?)),
         )?;
         let relative = Path::new(&error.path)
-            .strip_prefix(&layout.docs_root)
+            .strip_prefix(&data.docs_root)
             .map_err(|_| GraphError::InvalidData("путь ошибки вне корня документации".into()))?
             .to_string_lossy()
             .replace('\\', "/");
         data.failed_sources.push(bars_graph::SourceMeta {
             reference: bars_graph::object_ref(
-                &namespace,
+                &data.namespace,
                 Kind::Document,
                 &relative,
                 &expected[&error.path],
@@ -380,7 +398,17 @@ fn build_graph(
     data.snapshot = blake3::hash(&serde_json::to_vec(&(&data.snapshot, &expected, &errors))?)
         .to_hex()
         .to_string();
-    progress(index, "publish", expected.len(), Some(expected.len()))?;
+    bars_graph::store::set_progress(
+        index.conn(),
+        &bars_graph::GraphProgress {
+            phase: "publish".into(),
+            processed: expected.len(),
+            total: Some(expected.len()),
+            elapsed_ms: bars_graph::store::status(index.conn())?
+                .progress
+                .map_or(0, |p| p.elapsed_ms),
+        },
+    )?;
     if cancelled() {
         return Err(GraphError::Cancelled);
     }

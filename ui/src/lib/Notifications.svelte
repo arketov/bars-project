@@ -26,7 +26,7 @@
     watch(item);
     return { update: watch, destroy: () => observer?.disconnect() };
   }
-  async function toggle() { open = !open; if (open) { await tick(); panel?.focus(); } }
+  async function toggle() { open = !open; if (open) { void app.loadModels().catch(() => {}); await tick(); panel?.focus(); } }
   function close() { open = false; trigger?.focus(); }
   function outside(event: MouseEvent) { if (open && !root.contains(event.target as Node)) close(); }
   function keyboard(event: KeyboardEvent) {

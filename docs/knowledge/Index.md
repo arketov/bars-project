@@ -12,6 +12,7 @@ title: Внутренняя база знаний bars
 
 | Файл | Когда читать |
 |---|---|
+| `resource-efficiency.md` | Снижение CPU, чтения и памяти без потери качества: повторная загрузка графа, кванты, опрос окон, приоритеты и границы доказательств |
 | `lmstudio.md` | LM Studio: OpenAI embed, GPU-проба, отсутствие rerank и серверное усечение длинного входа |
 | `ollama.md` | Нативный embed API Ollama, кандидаты Qwen3 и отсутствие штатного rerank |
 | `external-inference.md` | Отбор llama.cpp, Infinity, TEI и vLLM для внешних embedding/rerank; несовместимость нативного TEI с Cohere |

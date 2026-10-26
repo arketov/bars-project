@@ -113,6 +113,7 @@ export class SliceStore {
       chunks: n.chunks,
       ordinal: n.ordinal,
       firstLine: n.first_line,
+      revision: n.revision,
       lastLine: n.last_line,
     };
     this.nodes[index] = node;

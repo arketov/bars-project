@@ -9,6 +9,7 @@
         operationLabels,
         roleLabels,
         stateLabels,
+        graphDataLabel, completenessLabels, jobLabels,
         sameRef,
         type GraphReply,
         type GraphNode,
@@ -74,7 +75,6 @@
                     reply &&
                     value.snapshot &&
                     reply.snapshot !== value.snapshot &&
-                    ["ready", "partial"].includes(value.state) &&
                     !busy
                 ) {
                     selected = null;
@@ -215,6 +215,7 @@
         sourceDialog?.close();
         await app.openDocument({
             path: meta.path,
+            expectedRevision: meta.hash,
             title: meta.title,
             first_line: evidence.span.first_line,
             last_line: evidence.span.last_line,
@@ -387,7 +388,7 @@
             reply?.layer_state ?? status?.state ?? "not_built"
         ]}. Отсутствие извлечённой связи не доказывает отсутствие зависимости.
         {#if status?.active_job}<span>Задание: {status.active_job}</span>{/if}
-        {#if status?.paused}<span>Автообновление остановлено; «Построить» продолжит обработку.</span>{/if}
+        {#if status}<span>{graphDataLabel(status)} · {completenessLabels[status.completeness ?? "unknown"]} · {jobLabels[status.job_state ?? "idle"]}</span>{/if}
         {#if status?.progress && status.active_job}<span>Обработано {status.progress.processed} / {status.progress.total ?? "?"}</span>{/if}
         {#if status?.file_errors_total}<details><summary>Файлов с ошибками: {status.file_errors_total}</summary>{#each status.file_errors ?? [] as item}<div>{item.path}: {item.message}</div>{/each}</details>{/if}
         {#if status?.error}<span>{status.error}</span>{/if}

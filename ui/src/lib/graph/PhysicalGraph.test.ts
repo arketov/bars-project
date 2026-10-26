@@ -3,7 +3,16 @@ import { flushSync, mount, tick, unmount } from "svelte";
 import PhysicalGraph from "./PhysicalGraph.svelte";
 import { app } from "../app.svelte";
 import { BarsError } from "../types";
-import { physicalFixture } from "../mock-physical";
+import { physicalFixture as buildPhysicalFixture } from "../mock-physical";
+
+// Большой набор нужен только проверкам порций и пределов, не браузерному макету.
+const modules = ["adr", "features", "manual"];
+const documents = Array.from({ length: 36 }, (_, i) => ({
+  path: `docs/${modules[i % 3]}/doc-${String(i).padStart(2, "0")}.md`,
+  module: modules[i % 3], title: `Документ ${i}: ${modules[i % 3]}`,
+  chunks: i === 7 ? 120 : 2 + (i % 5) * 2,
+}));
+const physicalFixture = (params: Record<string, unknown>) => buildPhysicalFixture(params, documents);
 
 const { rpc } = vi.hoisted(() => ({ rpc: vi.fn() }));
 vi.mock("../api", () => ({
@@ -55,13 +64,15 @@ afterEach(async () => {
 
 it("показывает остановку и ошибки файлов, продолжает явным построением", async () => {
   rpc.mockImplementation(async (method: string, params: Record<string, unknown>) => {
-    if (method === "graph_status") return { state: "cancelled", snapshot: "mock-snapshot-0001", active_job: null, paused: true, file_errors_total: 1, file_errors: [{ path: "docs/Ошибка.md", code: "invalid_utf8", message: "Файл не является UTF-8" }] };
+    if (method === "graph_status") return { state: "ready", freshness: "current", completeness: "partial", job_state: "stopped", snapshot: "mock-snapshot-0001", active_job: null, paused: true, file_errors_total: 1, file_errors: [{ path: "docs/Ошибка.md", code: "invalid_utf8", message: "Файл не является UTF-8" }] };
     if (method === "graph_physical") return physicalFixture(params);
     return {};
   });
   component = mount(PhysicalGraph, { target });
   await settle();
-  expect(target.textContent).toContain("Обновление графа остановлено");
+  expect(target.textContent).toContain("Построение остановлено");
+  expect(target.textContent).toContain("Граф актуален");
+  expect(target.textContent).toContain("Есть известные пропуски");
   expect(target.textContent).toContain("Файлов с ошибками: 1");
   expect(target.textContent).toContain("Ошибка.md: Файл не является UTF-8");
   const select = target.querySelector<HTMLSelectElement>('[aria-label="Слой для обновления"]')!;

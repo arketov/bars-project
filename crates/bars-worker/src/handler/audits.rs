@@ -325,6 +325,9 @@ impl WorkerHandler {
 
     /// Запуск вида: сразу, если проект свободен, иначе в очередь проекта.
     fn audit_start(&self, project: &Path, kind: AuditKind) -> Result<AuditRunOutput, RpcError> {
+        if self.worker.is_stopping() {
+            return Err(RpcError::bars(ErrorKind::Cancelled, "Воркер завершается"));
+        }
         match self.audits.request(project, kind) {
             Request::Start(cancel) => {
                 self.spawn_audit(project.to_path_buf(), kind, cancel);
@@ -478,10 +481,21 @@ impl WorkerHandler {
     /// Фоновое задание: выполняет запуск, затем ждущие виды проекта по одному.
     fn spawn_audit(&self, project: PathBuf, kind: AuditKind, cancel: CancelFlag) {
         let handler = self.clone();
-        tokio::spawn(async move {
+        self.worker.spawn_task(async move {
             let mut current = (kind, cancel);
             loop {
-                handler.run_audit(&project, current.0, &current.1).await;
+                {
+                    let run = handler.run_audit(&project, current.0, &current.1);
+                    tokio::pin!(run);
+                    tokio::select! {
+                        _ = &mut run => {},
+                        _ = handler.worker.stopping() => {
+                            for kind in AuditKind::ALL { handler.audits.cancel(&project, kind); }
+                            current.1.store(true, std::sync::atomic::Ordering::SeqCst);
+                            run.await;
+                        }
+                    }
+                }
                 match handler.audits.finish(&project) {
                     Some(next) => current = next,
                     None => break,
@@ -737,6 +751,9 @@ impl WorkerHandler {
 
     /// Одна проверка расписания: вид запускается, если его режим включён и пришло время.
     pub async fn audit_schedule_tick(&self) {
+        if self.worker.is_stopping() {
+            return;
+        }
         let projects: Vec<PathBuf> = self
             .worker
             .projects()
@@ -751,12 +768,28 @@ impl WorkerHandler {
             let root = project.clone();
             let docs_root = self.worker.docs_root(&project).ok();
             let due = tokio::task::spawn_blocking(move || {
-                let store = AuditStore::open(&root).ok()?;
+                let store = match AuditStore::open(&root) {
+                    Ok(store) => store,
+                    Err(error) => {
+                        log::warn!("Расписание аудитов {}: {error}", root.display());
+                        return None;
+                    }
+                };
                 let now = now();
                 let mut due = Vec::new();
+                // Ленивая метка общая для всех видов, включая ошибку обхода.
+                let stamp = std::cell::OnceCell::new();
                 for kind in AuditKind::ALL {
-                    let mode = store.schedule(kind).ok()?;
-                    let latest = store.latest_run(kind).ok()?;
+                    let (mode, latest) = match store
+                        .schedule(kind)
+                        .and_then(|mode| store.latest_run(kind).map(|latest| (mode, latest)))
+                    {
+                        Ok(value) => value,
+                        Err(error) => {
+                            log::warn!("Расписание аудитов {} {kind:?}: {error}", root.display());
+                            continue;
+                        }
+                    };
                     let is_due = match mode {
                         ScheduleMode::Off => false,
                         ScheduleMode::Daily | ScheduleMode::Weekly => {
@@ -765,10 +798,21 @@ impl WorkerHandler {
                             })
                         }
                         ScheduleMode::OnChange => {
-                            let stamp = docs_root
-                                .as_deref()
-                                .and_then(|docs| docs_stamp(&root, Path::new(docs)).ok());
-                            stamp.is_some() && latest.as_ref().is_none_or(|run| run.stamp != stamp)
+                            let stamp = stamp.get_or_init(|| {
+                                docs_root.as_deref().and_then(|docs| {
+                                    match docs_stamp(&root, Path::new(docs)) {
+                                        Ok(stamp) => Some(stamp),
+                                        Err(error) => {
+                                            log::warn!(
+                                                "Обход для расписания {}: {error}",
+                                                root.display()
+                                            );
+                                            None
+                                        }
+                                    }
+                                })
+                            });
+                            stamp.is_some() && latest.as_ref().is_none_or(|run| &run.stamp != stamp)
                         }
                     };
                     if is_due {
@@ -778,8 +822,10 @@ impl WorkerHandler {
                 Some(due)
             })
             .await
-            .ok()
-            .flatten()
+            .unwrap_or_else(|error| {
+                log::warn!("Проверка расписания {}: {error}", project.display());
+                None
+            })
             .unwrap_or_default();
             for kind in due {
                 let _ = self.audit_start(&project, kind);
@@ -791,9 +837,12 @@ impl WorkerHandler {
     /// воркере запуск выполняется тогда же), дальше раз в минуту.
     pub fn start_audit_scheduler(&self) {
         let handler = self.clone();
-        tokio::spawn(async move {
+        self.worker.spawn_task(async move {
             loop {
-                tokio::time::sleep(SCHEDULE_TICK).await;
+                tokio::select! {
+                    _ = tokio::time::sleep(SCHEDULE_TICK) => {},
+                    _ = handler.worker.stopping() => break,
+                }
                 handler.audit_schedule_tick().await;
             }
         });

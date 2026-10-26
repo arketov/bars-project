@@ -64,6 +64,7 @@ export interface SearchOutput {
 }
 
 export interface ReadOutput {
+  revision?: string;
   title: string;
   text: string;
 }

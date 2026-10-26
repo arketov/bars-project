@@ -18,7 +18,7 @@
     const call = (method, params = {}) => invoke('bars_call', { method, params: { cwd: project, project, ...params } });
     const ready = async () => {
       const status = await call('graph_status');
-      return !status.active_job && status.snapshot && status.state === 'partial' ? status : null;
+      return !status.active_job && status.snapshot && status.state === 'ready' ? status : null;
     };
     const before = await wait(ready, 'Начальный граф');
     assert(before.layers.structure.state === 'ready', 'Структура готова');
@@ -39,7 +39,18 @@
     const rebuilt = await wait(ready, 'Перестройка');
     assert(rebuilt.snapshot === after.snapshot, 'Неизменные исходники дают тот же снимок');
     assert(rebuilt.layers.semantic.generation === after.layers.semantic.generation && rebuilt.layers.similarity.generation === after.layers.similarity.generation, 'Выбранный слой сохраняет другие актуальные поколения');
-    await invoke('graph_lifecycle_probe_finish', { result: { success: true, native: navigator.userAgent, checks, before, after, rebuilt } });
+    await invoke('graph_lifecycle_probe_stale');
+    assert((await call('graph_status')).state === 'stale', 'Граф устарел без правок файлов');
+    const scan = await call('reindex', { full: false, accept_model_change: false });
+    assert(scan.accepted, 'Проверка без переиндексации принята');
+    const checked = await wait(ready, 'Scan без изменений восстановил граф');
+    assert(checked.snapshot === rebuilt.snapshot, 'Scan без правок восстановил тот же снимок');
+    const graphButton = [...document.querySelectorAll('button')].find(button => button.textContent.trim() === 'Граф');
+    assert(graphButton, 'В собранном окне доступен вход в граф');
+    graphButton.click();
+    await wait(() => graphButton.classList.contains('active') && document.querySelector('canvas'), 'Карта графа в собранном окне');
+    assert(document.querySelector('canvas'), 'Карта открылась после автообновления');
+    await invoke('graph_lifecycle_probe_finish', { result: { success: true, native: navigator.userAgent, checks, before, after, rebuilt, checked } });
   } catch (error) {
     await invoke('graph_lifecycle_probe_finish', { result: { success: false, checks, error: error.message ?? String(error), detail: error, stack: error.stack } });
   }

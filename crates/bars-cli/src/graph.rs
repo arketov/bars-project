@@ -212,8 +212,31 @@ pub(super) async fn action(
                     r.error.as_deref().unwrap_or("нет")
                 );
                 if r.paused {
-                    text.push_str("\nАвтообновление остановлено; graph build продолжит обработку.");
+                    text.push_str("\nПостроение остановлено; после новых изменений граф обновится автоматически.");
                 }
+                text.push_str(&format!(
+                    "\nСвежесть: {}; полнота: {}; задание: {}",
+                    match r.freshness {
+                        bars_protocol::graph_types::Freshness::Current => "актуален",
+                        bars_protocol::graph_types::Freshness::Stale => "устарел",
+                        bars_protocol::graph_types::Freshness::NotBuilt => "ещё не построен",
+                    },
+                    match r.completeness {
+                        bars_protocol::graph_types::Completeness::Complete =>
+                            "расчёт завершён полностью",
+                        bars_protocol::graph_types::Completeness::Partial =>
+                            "есть известные пропуски",
+                        bars_protocol::graph_types::Completeness::Unknown =>
+                            "полнота отношений не установлена",
+                    },
+                    match r.job_state {
+                        bars_protocol::graph_types::JobState::Idle => "нет",
+                        bars_protocol::graph_types::JobState::Queued => "ожидает выполнения",
+                        bars_protocol::graph_types::JobState::Running => "обновляется",
+                        bars_protocol::graph_types::JobState::Stopped => "остановлено",
+                        bars_protocol::graph_types::JobState::Failed => "ошибка",
+                    }
+                ));
                 if let Some(p) = &r.progress {
                     let phase = match p.phase.as_str() {
                         "structure" => "разбор документов",
@@ -230,11 +253,17 @@ pub(super) async fn action(
                 }
                 for (name, layer) in &r.layers {
                     text.push_str(&format!(
-                        "\n{name}: {}, документов {} / {}, ошибок {}",
+                        "\n{name}: {}, {} {} / {}, пропущено {}, сравнений {}",
                         layer.state.label(),
-                        layer.processed,
-                        layer.total,
-                        layer.failed
+                        match layer.coverage.unit.as_str() {
+                            "documents" => "документов",
+                            "chunks" => "чанков",
+                            _ => "единиц",
+                        },
+                        layer.coverage.processed,
+                        layer.coverage.total,
+                        layer.coverage.missing,
+                        layer.coverage.comparisons
                     ));
                 }
                 text.push_str(&format!("\nФайлов с ошибками: {}", r.file_errors_total));

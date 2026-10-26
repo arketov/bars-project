@@ -1,0 +1,32 @@
+[
+  {
+    "cancel_ms": 20,
+    "chunks": 2149,
+    "completed_before_cancel": false,
+    "dimension": 2560,
+    "edit_equal": true,
+    "edit_ms": 204,
+    "edit_pairs": 27846,
+    "full_ms": 5328,
+    "index": ".bars/index.sqlite",
+    "oracle_equal": true,
+    "pairs": 2308026,
+    "quanta": 262,
+    "resume_equal": true
+  },
+  {
+    "cancel_ms": 20,
+    "chunks": 3510,
+    "completed_before_cancel": false,
+    "dimension": 2560,
+    "edit_equal": true,
+    "edit_ms": 147,
+    "edit_pairs": 3509,
+    "full_ms": 14568,
+    "index": "C:/Users/arketov/Desktop/cyberProject/ai-mutiplayer-bots/.bars/index.sqlite",
+    "oracle_equal": true,
+    "pairs": 6158295,
+    "quanta": 719,
+    "resume_equal": true
+  }
+]

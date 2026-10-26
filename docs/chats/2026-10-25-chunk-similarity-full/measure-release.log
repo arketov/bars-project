@@ -1,0 +1,31 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.42
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+    Updating crates.io index
+     Locking 5 packages to highest Rust 1.99.0 compatible versions
+      Adding arrayvec v0.7.8
+      Adding blake3 v1.8.7
+      Adding constant_time_eq v0.4.2
+      Adding cpufeatures v0.3.1
+      Adding libc v0.2.191
+ Downloading crates ...
+  Downloaded find-msvc-tools v0.1.15
+  Downloaded smallvec v1.16.4
+  Downloaded cc v1.10.0
+   Compiling find-msvc-tools v0.1.15
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling serde v1.0.229
+   Compiling serde_json v1.0.154
+   Compiling smallvec v1.16.4
+   Compiling memchr v2.8.3
+   Compiling cc v1.10.0
+   Compiling syn v3.0.9
+   Compiling libsqlite3-sys v0.38.2
+   Compiling blake3 v1.8.7
+   Compiling serde_derive v1.0.229
+   Compiling rusqlite v0.40.2
+   Compiling knn-probe v0.0.0 (C:\Users\arketov\Desktop\bars-project\scripts\knn-probe)
+    Finished `release` profile [optimized] target(s) in 29.37s

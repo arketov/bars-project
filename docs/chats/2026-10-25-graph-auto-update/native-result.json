@@ -1,0 +1,192 @@
+{
+  "success": true,
+  "native": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+  "checks": [
+    "Структура готова",
+    "Смысловая полнота не завышена",
+    "Прогресс дошёл до публикации",
+    "Ошибок файлов нет",
+    "Новое поколение структуры после правки",
+    "Старый снимок отклонён",
+    "Явная перестройка принята",
+    "Неизменные исходники дают тот же снимок",
+    "Выбранный слой сохраняет другие актуальные поколения",
+    "Граф устарел без правок файлов",
+    "Проверка без переиндексации принята",
+    "Scan без правок восстановил тот же снимок",
+    "В собранном окне доступен вход в граф",
+    "Карта открылась после автообновления"
+  ],
+  "before": {
+    "state": "partial",
+    "snapshot": "4f57611b613de0ebcaea973782dda3236f93126f6fc16182fff01d96b5187612",
+    "active_job": null,
+    "source_count": 1,
+    "error": null,
+    "method": "explicit-markdown-v6",
+    "progress": {
+      "phase": "publish",
+      "processed": 1,
+      "total": 1,
+      "elapsed_ms": 79
+    },
+    "file_errors": [],
+    "file_errors_total": 0,
+    "layers": {
+      "semantic": {
+        "state": "partial",
+        "generation": "74e9e7e00d35b195bd4c547a69d2ff23b4f779edd53d4785844ba79f22032c0d",
+        "fingerprint": "explicit-markdown-v6",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "similarity": {
+        "state": "partial",
+        "generation": "baf3e4a1157cc27e60f76d3751163e5c67fb0ba1b0f54dec06f3befc682e4453",
+        "fingerprint": "cosine-knn-v1:k=5:tau=0.5:limit=1000000",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "structure": {
+        "state": "ready",
+        "generation": "86b2d1a0e39e7032e5a582c2dc9ce607c5afb56b2c8c5206253c5e74aabe02fc",
+        "fingerprint": "markdown-structure-v1",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      }
+    },
+    "paused": false
+  },
+  "after": {
+    "state": "partial",
+    "snapshot": "20e76d43f5ceef82f6ab22c5d6805a93287611a745a5b9bd6eee02203eb597cb",
+    "active_job": null,
+    "source_count": 1,
+    "error": null,
+    "method": "explicit-markdown-v6",
+    "progress": {
+      "phase": "publish",
+      "processed": 1,
+      "total": 1,
+      "elapsed_ms": 58
+    },
+    "file_errors": [],
+    "file_errors_total": 0,
+    "layers": {
+      "semantic": {
+        "state": "partial",
+        "generation": "29fd8d02479080864a2f4e8960ee720abbf417e21dce9beb0474624e3600b7a8",
+        "fingerprint": "explicit-markdown-v6",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "similarity": {
+        "state": "partial",
+        "generation": "baf3e4a1157cc27e60f76d3751163e5c67fb0ba1b0f54dec06f3befc682e4453",
+        "fingerprint": "cosine-knn-v1:k=5:tau=0.5:limit=1000000",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "structure": {
+        "state": "ready",
+        "generation": "0683366d9e734abd2213f95c4575db387fb91ebd7e03717bc6d7e42835eed24c",
+        "fingerprint": "markdown-structure-v1",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      }
+    },
+    "paused": false
+  },
+  "rebuilt": {
+    "state": "partial",
+    "snapshot": "20e76d43f5ceef82f6ab22c5d6805a93287611a745a5b9bd6eee02203eb597cb",
+    "active_job": null,
+    "source_count": 1,
+    "error": null,
+    "method": "explicit-markdown-v6",
+    "progress": {
+      "phase": "publish",
+      "processed": 1,
+      "total": 1,
+      "elapsed_ms": 36
+    },
+    "file_errors": [],
+    "file_errors_total": 0,
+    "layers": {
+      "semantic": {
+        "state": "partial",
+        "generation": "29fd8d02479080864a2f4e8960ee720abbf417e21dce9beb0474624e3600b7a8",
+        "fingerprint": "explicit-markdown-v6",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "similarity": {
+        "state": "partial",
+        "generation": "baf3e4a1157cc27e60f76d3751163e5c67fb0ba1b0f54dec06f3befc682e4453",
+        "fingerprint": "cosine-knn-v1:k=5:tau=0.5:limit=1000000",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "structure": {
+        "state": "ready",
+        "generation": "0683366d9e734abd2213f95c4575db387fb91ebd7e03717bc6d7e42835eed24c",
+        "fingerprint": "markdown-structure-v1",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      }
+    },
+    "paused": false
+  },
+  "checked": {
+    "state": "partial",
+    "snapshot": "20e76d43f5ceef82f6ab22c5d6805a93287611a745a5b9bd6eee02203eb597cb",
+    "active_job": null,
+    "source_count": 1,
+    "error": null,
+    "method": "explicit-markdown-v6",
+    "progress": {
+      "phase": "publish",
+      "processed": 1,
+      "total": 1,
+      "elapsed_ms": 65
+    },
+    "file_errors": [],
+    "file_errors_total": 0,
+    "layers": {
+      "semantic": {
+        "state": "partial",
+        "generation": "29fd8d02479080864a2f4e8960ee720abbf417e21dce9beb0474624e3600b7a8",
+        "fingerprint": "explicit-markdown-v6",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "similarity": {
+        "state": "partial",
+        "generation": "baf3e4a1157cc27e60f76d3751163e5c67fb0ba1b0f54dec06f3befc682e4453",
+        "fingerprint": "cosine-knn-v1:k=5:tau=0.5:limit=1000000",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      },
+      "structure": {
+        "state": "ready",
+        "generation": "0683366d9e734abd2213f95c4575db387fb91ebd7e03717bc6d7e42835eed24c",
+        "fingerprint": "markdown-structure-v1",
+        "processed": 1,
+        "total": 1,
+        "failed": 0
+      }
+    },
+    "paused": false
+  }
+}

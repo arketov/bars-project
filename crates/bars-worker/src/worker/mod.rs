@@ -285,6 +285,7 @@ struct Inner {
     busy: AtomicBool,
     wake: Notify,
     stop: AtomicBool,
+    stop_wake: Notify,
     models: Models,
     handle: Handle,
     tasks: Mutex<Vec<JoinHandle<()>>>,
@@ -297,6 +298,7 @@ struct Inner {
     downloads: Mutex<HashSet<String>>,
     download_errors: Mutex<HashMap<String, String>>,
     graph_jobs: Mutex<HashMap<PathBuf, graph::GraphJob>>,
+    graph_cache: Arc<crate::handler::graph_cache::GraphCache>,
     scans: Mutex<HashMap<PathBuf, scan::ScanJob>>,
 }
 
@@ -317,6 +319,31 @@ pub struct Worker {
 }
 
 impl Worker {
+    pub(crate) fn is_stopping(&self) -> bool {
+        self.inner.stop.load(Ordering::SeqCst)
+    }
+
+    pub(crate) async fn stopping(&self) {
+        let notified = self.inner.stop_wake.notified();
+        tokio::pin!(notified);
+        notified.as_mut().enable();
+        if !self.is_stopping() {
+            notified.await;
+        }
+    }
+
+    pub(crate) fn spawn_task(
+        &self,
+        future: impl std::future::Future<Output = ()> + Send + 'static,
+    ) {
+        let mut tasks = lock(&self.inner.tasks);
+        if !self.is_stopping() {
+            tasks.push(self.inner.handle.spawn(future));
+        }
+    }
+    pub(crate) fn graph_cache(&self) -> Arc<crate::handler::graph_cache::GraphCache> {
+        self.inner.graph_cache.clone()
+    }
     pub fn model_runtime(&self) -> Option<bars_protocol::ModelsRuntime> {
         let user = bars_core::settings::UserSettings::load(self.bars_home())
             .ok()?
@@ -348,11 +375,13 @@ impl Worker {
             handle: Handle::current(),
             tasks: Mutex::new(Vec::new()),
             model_wake: Notify::new(),
+            stop_wake: Notify::new(),
             pause: Arc::new(Pause::default()),
             current: Mutex::new(None),
             downloads: Mutex::new(HashSet::new()),
             download_errors: Mutex::new(HashMap::new()),
             graph_jobs: Mutex::new(HashMap::new()),
+            graph_cache: Default::default(),
             scans: Mutex::new(HashMap::new()),
         });
         let queue_task = tokio::spawn(Arc::clone(&inner).run_queue());
@@ -413,6 +442,8 @@ impl Worker {
     /// Перестаёт брать задания, дожидается текущего, снимает слежение.
     pub async fn shutdown(&self) {
         self.inner.stop.store(true, Ordering::SeqCst);
+        self.inner.stop_wake.notify_waiters();
+        self.inner.graph_cache.clear();
         self.inner.model_wake.notify_one();
         // Задание на паузе иначе не закончится никогда: его останавливают, остальные дописываются.
         if self.inner.pause.is_paused() {
@@ -429,6 +460,8 @@ impl Worker {
             }
             let _ = task.await;
         }
+        // Завершающаяся публикация могла заполнить кэш после первого clear.
+        self.inner.graph_cache.clear();
         let watchers: Vec<_> = lock(&self.inner.projects)
             .values_mut()
             .filter_map(|runtime| runtime.watcher.take())
@@ -483,6 +516,7 @@ impl Worker {
         let path = self.resolve(selector)?;
         lock(&self.inner.registry).remove(&path)?;
         let runtime = lock(&self.inner.projects).remove(&path);
+        self.inner.graph_cache.remove(&path);
         self.inner.cancel_queued(&path);
         self.inner.cancel_scan(&path);
         // Слежение останавливается вне блокировок: поток `notify` может ждать их.
@@ -962,7 +996,9 @@ impl Worker {
             && !lock(&self.inner.docs).has_pending()
             && !self.inner.busy.load(Ordering::SeqCst)
             && lock(&self.inner.scans).is_empty()
-            && lock(&self.inner.graph_jobs).is_empty()
+            && lock(&self.inner.graph_jobs)
+                .values()
+                .all(graph::GraphJob::idle)
     }
 
     fn registered(&self, path: &Path) -> Result<PathBuf, WorkerError> {

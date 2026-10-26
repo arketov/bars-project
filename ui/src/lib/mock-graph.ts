@@ -10,7 +10,11 @@ export function graphFixture(
   const request = (params.request ?? {}) as Record<string, unknown>;
   if (method === "graph_status")
     return {
-      state: building ? "building" : "partial",
+      state: "ready",
+      freshness: "current",
+      completeness: "unknown",
+      availability: "enabled",
+      job_state: building ? "running" : "idle",
       snapshot: records["graph:documents"].snapshot,
       active_job: building ? "fixture-job" : null,
       source_count: 6,

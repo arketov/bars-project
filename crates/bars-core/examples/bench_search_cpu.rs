@@ -231,7 +231,8 @@ fn guarded(output: &str, reserve: u64, action: impl FnOnce() -> Result<()>) -> R
         Err("аппаратный прогон требует Windows guard; freeze/cache-plan доступны отдельно".into())
     }
 }
-fn prepare(corpus: &Corpus, inputs: &Inputs, output: &str, models: &Path) -> Result<()> {
+/// `cpu` — запасное устройство подготовки (OQ-191); измеряемый путь от него не зависит.
+fn prepare(corpus: &Corpus, inputs: &Inputs, output: &str, models: &Path, cpu: bool) -> Result<()> {
     validate(corpus)?;
     if Path::new(output).exists() {
         return Err("индекс уже существует".into());
@@ -280,9 +281,14 @@ fn prepare(corpus: &Corpus, inputs: &Inputs, output: &str, models: &Path) -> Res
             } else {
                 if embedder.is_none() {
                     eprintln!("требуется настоящий embed; reused={reused}, computed={computed}");
-                    let loaded = model(models, Accelerator::Auto)?;
-                    if loaded.device() != Device::DirectMl {
-                        return Err("подготовка требует DirectML без CPU fallback".into());
+                    let (accelerator, device) = if cpu {
+                        (Accelerator::Cpu, Device::Cpu)
+                    } else {
+                        (Accelerator::Auto, Device::DirectMl)
+                    };
+                    let loaded = model(models, accelerator)?;
+                    if loaded.device() != device {
+                        return Err(format!("подготовка требует {device:?} без fallback").into());
                     }
                     embedder = Some(loaded);
                 }
@@ -326,7 +332,7 @@ fn prepare(corpus: &Corpus, inputs: &Inputs, output: &str, models: &Path) -> Res
     }
     save(
         &format!("{output}.complete.json"),
-        &json!({"chunks":5000,"reused":reused,"computed":computed,"index_blake3":digest(&fs::read(output)?),"corpus_blake3":digest(&serde_json::to_vec(corpus)?)}),
+        &json!({"chunks":5000,"reused":reused,"computed":computed,"device":if cpu {"cpu"} else {"directml"},"index_blake3":digest(&fs::read(output)?),"corpus_blake3":digest(&serde_json::to_vec(corpus)?)}),
     )
 }
 
@@ -456,8 +462,8 @@ fn main() -> Result<()> {
         Some("validate") if a.len() == 2 => validate(&read(&a[1])?),
         Some("cache-plan") if a.len() == 4 => cache_plan(&read(&a[1])?, &read(&a[2])?, &a[3]),
         Some("preflight") if a.len() == 2 => guarded(&a[1], 8, || Ok(())),
-        Some("prepare") if a.len() == 5 => guarded(&a[3], 8, || prepare(&read(&a[1])?, &read(&a[2])?, &a[3], Path::new(&a[4]))),
+        Some("prepare") if a.len() == 5 || (a.len() == 6 && a[5] == "cpu") => guarded(&a[3], 8, || prepare(&read(&a[1])?, &read(&a[2])?, &a[3], Path::new(&a[4]), a.len() == 6)),
         Some("run") if a.len() == 5 => guarded(&a[4], 6, || run(&read(&a[1])?, &a[2], Path::new(&a[3]), &a[4])),
-        _ => Err("freeze <inputs.json> <new-corpus.json> | validate <corpus.json> | cache-plan <corpus.json> <inputs.json> <new-plan.json> | preflight <new-log-prefix> | prepare <corpus.json> <inputs.json> <new-index.sqlite> <models> | run <inputs.json> <index.sqlite> <models> <new-rows.jsonl>".into()),
+        _ => Err("freeze <inputs.json> <new-corpus.json> | validate <corpus.json> | cache-plan <corpus.json> <inputs.json> <new-plan.json> | preflight <new-log-prefix> | prepare <corpus.json> <inputs.json> <new-index.sqlite> <models> [cpu] | run <inputs.json> <index.sqlite> <models> <new-rows.jsonl>".into()),
     }
 }

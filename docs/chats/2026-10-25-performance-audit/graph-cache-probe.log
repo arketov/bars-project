@@ -1,0 +1,7 @@
+
+running 1 test
+{"scope":"frozen project graph; shared machine; no inference; elapsed time only","source_documents":491,"nodes":5338,"edges":13047,"direct_load_ms":[788.1985,782.6035999999999,775.2101],"cold_cache_ms":1334.5519000000002,"repeated_cache_ms":[1.1355,0.7017,0.6930000000000001,0.6552,0.6668000000000001,0.6869000000000001,0.7166,0.6977,0.6531,0.6606],"estimated_retained_bytes":48530922,"dataset_blake3":"f07ac84b0025269b0369302e86f41f139f44ecddfc80b2b431f3629f58bdc896","identical_datasets":true}
+test handler::graph_cache::tests::frozen_graph_resource_probe ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 299 filtered out; finished in 11.73s
+

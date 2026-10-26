@@ -280,8 +280,59 @@ pub fn humanize_warning(warning: String) -> String {
     }
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Freshness {
+    #[default]
+    NotBuilt,
+    Current,
+    Stale,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Completeness {
+    Complete,
+    Partial,
+    #[default]
+    Unknown,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Availability {
+    #[default]
+    Enabled,
+    Disabled,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum JobState {
+    #[default]
+    Idle,
+    Queued,
+    Running,
+    Stopped,
+    Failed,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct LayerCoverage {
+    pub unit: String,
+    pub processed: usize,
+    pub total: usize,
+    pub missing: usize,
+    pub comparisons: u64,
+    pub reason: Option<String>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct GraphStatus {
+    pub freshness: Freshness,
+    pub completeness: Completeness,
+    pub availability: Availability,
+    pub job_state: JobState,
     pub state: LayerState,
     pub snapshot: Option<String>,
     pub active_job: Option<String>,
@@ -317,12 +368,69 @@ pub struct GraphFileError {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct GraphLayerStatus {
+    #[serde(default)]
+    pub stale_reason: Option<String>,
+    #[serde(default)]
+    pub freshness: Freshness,
+    #[serde(default)]
+    pub completeness: Completeness,
+    #[serde(default)]
+    pub availability: Availability,
+    #[serde(default)]
+    pub coverage: LayerCoverage,
+    #[serde(default)]
+    pub source_revisions: BTreeMap<String, String>,
     pub state: LayerState,
     pub generation: Option<String>,
     pub fingerprint: String,
     pub processed: usize,
     pub total: usize,
     pub failed: usize,
+}
+
+impl GraphStatus {
+    pub fn derive_data_state(&mut self) {
+        let layers: Vec<_> = self
+            .layers
+            .values()
+            .filter(|l| l.availability == Availability::Enabled)
+            .collect();
+        self.availability = if !self.layers.is_empty() && layers.is_empty() {
+            Availability::Disabled
+        } else {
+            Availability::Enabled
+        };
+        self.freshness = if layers.iter().any(|l| l.freshness == Freshness::Stale) {
+            Freshness::Stale
+        } else if layers.is_empty() || layers.iter().any(|l| l.freshness == Freshness::NotBuilt) {
+            Freshness::NotBuilt
+        } else {
+            Freshness::Current
+        };
+        self.completeness = if layers
+            .iter()
+            .any(|l| l.completeness == Completeness::Partial)
+        {
+            Completeness::Partial
+        } else if layers.is_empty()
+            || layers.iter().any(|l| {
+                l.completeness == Completeness::Unknown || l.freshness == Freshness::NotBuilt
+            })
+        {
+            Completeness::Unknown
+        } else {
+            Completeness::Complete
+        };
+        self.state = if self.availability == Availability::Disabled {
+            LayerState::Disabled
+        } else {
+            match self.freshness {
+                Freshness::Stale => LayerState::Stale,
+                Freshness::NotBuilt => LayerState::NotBuilt,
+                Freshness::Current => LayerState::Ready,
+            }
+        };
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -688,6 +796,8 @@ pub struct Coverage {
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GraphReply {
+    #[serde(default)]
+    pub layers: BTreeMap<String, GraphLayerStatus>,
     pub schema_version: u32,
     pub operation: Operation,
     pub scope: Scope,
@@ -734,6 +844,8 @@ pub enum GraphError {
     CapabilityUnavailable(String),
     #[error("обработка графа отменена")]
     Cancelled,
+    #[error("превышено время обработки графа")]
+    TimedOut,
     #[error("ошибка графа: {0}")]
     InvalidData(String),
     #[cfg(feature = "storage")]
@@ -752,6 +864,7 @@ impl GraphError {
             Self::NotReady(_) => "graph_not_ready",
             Self::CapabilityUnavailable(_) => "graph_capability_unavailable",
             Self::Cancelled => "cancelled",
+            Self::TimedOut => "timeout",
             _ => "internal",
         }
     }

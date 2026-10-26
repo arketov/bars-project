@@ -284,7 +284,7 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
     assert!(!mcp.tool("bars_projects", json!({})).await.0);
     harness.register(&root).await;
     wait_status(&mut mcp, "автоматический граф", |s| {
-        indexed(s) && s["graph"]["state"] == "partial"
+        indexed(s) && s["graph"]["freshness"] == "current"
     })
     .await;
     let (error, text) = mcp

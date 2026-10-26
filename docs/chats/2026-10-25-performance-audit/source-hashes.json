@@ -1,0 +1,54 @@
+{
+  "utc": "2026-10-25T11:12:01.7861139Z",
+  "head": "4738aa059c88d8299fda775b42a22b849b15dfa9",
+  "files": [
+    {
+      "path": "ui/src/App.svelte",
+      "sha256": "1604F08AEA1E2F851F091EB3C0B9F6D2F1C910C03DAAFC6B8FA39D9359712D8D"
+    },
+    {
+      "path": "ui/src/lib/app.svelte.ts",
+      "sha256": "DA3CC6B59C982D4850EC4548DBDFB48717B2899526DDC16E585D26892562B806"
+    },
+    {
+      "path": "crates/bars-app/src/tree_io.rs",
+      "sha256": "6158657F271BE75E971B0FE27E846D36AC82CA56D4461D2F5DE483EC9E8CA8DE"
+    },
+    {
+      "path": "crates/bars-worker/src/handler/audits.rs",
+      "sha256": "4527AFB63F6547A957EC6591E53C2CEFDB72BC0C2935A79AB3CD9131ACFFFF72"
+    },
+    {
+      "path": "crates/bars-core/src/audits/mod.rs",
+      "sha256": "660C841FA0A9309B5A9F3E7F1708E278AAAD3C9C94DC3FFCE3030290DC48E012"
+    },
+    {
+      "path": "crates/bars-worker/src/handler/graph.rs",
+      "sha256": "0F2970216C2A4EFF1A4BAF196C9FBB81A7751DD7862012A35EC8217B98F05791"
+    },
+    {
+      "path": "crates/bars-worker/src/worker/graph.rs",
+      "sha256": "88281E13A6DBA890C31CF600633FC8BFF6D41BD22CF7704DCFA2955A1BC345CD"
+    },
+    {
+      "path": "crates/bars-core/src/graph/build.rs",
+      "sha256": "486F09FE70EAEFC76E7FFB414204D5D57DF6F99830D899B75236DB8BB26C5C77"
+    },
+    {
+      "path": "crates/bars-core/src/graph/build/job.rs",
+      "sha256": "2195AF7953C1626CC5C1AC015F345EBBB46CFD48DAB95ACD60F891177F0456CF"
+    },
+    {
+      "path": "crates/bars-core/src/graph/similarity_job.rs",
+      "sha256": "A9FB888E23A9E02F0D1945789669A83B5F4F49472302ABA91DC074E03A0A5229"
+    },
+    {
+      "path": "crates/bars-core/src/search/hybrid.rs",
+      "sha256": "14F597DC5B3624B177CC35EEA34052FEFB4A944E9067F6987FE72D87FEE62146"
+    },
+    {
+      "path": "crates/bars-worker/src/worker/model_lifecycle.rs",
+      "sha256": "27DCF83B8ACC4902AA057F0274D508C545578EE1532F254D7DE14C0E3D4E0524"
+    }
+  ]
+}

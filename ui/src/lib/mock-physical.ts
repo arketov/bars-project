@@ -1,20 +1,18 @@
-// Только браузерный макет и тесты: детерминированный срез `graph_physical` на синтетическом проекте.
+// Только браузерный макет и тесты: документы дерева, демонстрационные связи.
 // Настоящий срез строит Rust (crates/bars-graph/src/physical.rs); здесь повторены его правила пределов и раскрытия.
 import { hash } from "./graph/model";
+import type { TreeDocument } from "./types";
 import type { Limits, PhysicalRequest, ServerEdge, ServerNode, ServerSlice } from "./graph/slice";
 
-const MODULES = ["adr", "features", "manual"];
-const DOCS = 36;
 const SNAPSHOT = "mock-snapshot-0001";
 
-const chunkCount = (doc: number) => (doc === 7 ? 120 : 2 + (doc % 5) * 2);
-const docPath = (doc: number) => `${MODULES[doc % MODULES.length]}/doc-${String(doc).padStart(2, "0")}.md`;
 const docId = (doc: number) => `doc-${doc}`;
 const chunkId = (doc: number, ordinal: number) => `chunk-${doc}-${ordinal}`;
 
 /** Документы по кругу модулей, внутри — по пути (то же правило, что в Rust). */
-function roundRobin(limit: number): number[] {
-  const groups = MODULES.map((m) => Array.from({ length: DOCS }, (_, i) => i).filter((i) => MODULES[i % MODULES.length] === m).sort((a, b) => docPath(a).localeCompare(docPath(b))));
+function roundRobin(documents: TreeDocument[], selected: number[], limit: number): number[] {
+  const modules = [...new Set(documents.map((doc) => doc.module))].sort();
+  const groups = modules.map((m) => selected.filter((i) => documents[i].module === m).sort((a, b) => documents[a].path.localeCompare(documents[b].path)));
   const picked: number[] = [];
   for (let round = 0; picked.length < limit; round++) {
     let any = false;
@@ -29,13 +27,18 @@ function roundRobin(limit: number): number[] {
   return picked;
 }
 
-export function physicalFixture(params: Record<string, unknown>): ServerSlice {
+export function physicalFixture(params: Record<string, unknown>, documents: TreeDocument[]): ServerSlice {
+  const DOCS = documents.length;
+  const chunkCount = (doc: number) => documents[doc].chunks;
+  const docPath = (doc: number) => documents[doc].path.replace(/^docs\//, "");
   const request = (params.request ?? {}) as Partial<PhysicalRequest>;
   const limits = (request.limits ?? { max_documents: 500, max_chunks: 500, max_edges: 4000, max_bytes: 1 << 20 }) as Limits;
   if (request.snapshot && request.snapshot !== SNAPSHOT) throw Object.assign(new Error("снимок графа устарел"), { data: { kind: "snapshot_expired" } });
-  const shown = roundRobin(limits.max_documents);
+  const scope = request.scope ?? { modules: [], files: [] };
+  const selected = documents.flatMap((doc, i) => (!scope.modules.length && !scope.files.length) || scope.modules.includes(doc.module) || scope.files.includes(docPath(i)) || scope.files.includes(doc.path) ? [i] : []);
+  const shown = roundRobin(documents, selected, limits.max_documents);
   const nodes: ServerNode[] = shown.map((doc) => ({
-    id: docId(doc), revision: "r1", kind: "document", label: `Документ ${doc}: ${MODULES[doc % MODULES.length]}`, path: `docs/${docPath(doc)}`, docs_path: docPath(doc), module: MODULES[doc % MODULES.length],
+    id: docId(doc), revision: "r1", kind: "document", label: documents[doc].title, path: documents[doc].path, docs_path: docPath(doc), module: documents[doc].module,
     owner: docId(doc), chunks: chunkCount(doc), ordinal: null, first_line: 1, last_line: 1,
   }));
   const at = new Map(shown.map((doc, i) => [doc, i]));
@@ -63,7 +66,7 @@ export function physicalFixture(params: Record<string, unknown>): ServerSlice {
     if (!at.has(doc)) continue;
     for (let o = 0; o < Math.min(count, chunkCount(doc)) && chunksShown < limits.max_chunks; o++) {
       chunkAt.set(chunkId(doc, o), nodes.length);
-      nodes.push({ id: chunkId(doc, o), revision: "r1", kind: "chunk", label: `Раздел ${o + 1}`, path: `docs/${docPath(doc)}`, docs_path: docPath(doc), module: MODULES[doc % MODULES.length], owner: docId(doc), chunks: 0, ordinal: o, first_line: 4 + o * 6, last_line: 9 + o * 6 });
+      nodes.push({ id: chunkId(doc, o), revision: "r1", kind: "chunk", label: `Раздел ${o + 1}`, path: documents[doc].path, docs_path: docPath(doc), module: documents[doc].module, owner: docId(doc), chunks: 0, ordinal: o, first_line: 4 + o * 6, last_line: 9 + o * 6 });
       chunksShown++;
     }
   }
@@ -79,9 +82,9 @@ export function physicalFixture(params: Record<string, unknown>): ServerSlice {
   }
   const all = [...edges, ...sims, ...chunkSims];
   const kept = all.slice(0, limits.max_edges);
-  const ready = { state: "ready" as const, note: "Макет: синтетические данные" };
+  const ready = { state: "ready" as const, note: "Макет: документы дерева, демонстрационные связи" };
   const reasons: string[] = [];
-  if (shown.length < DOCS) reasons.push(`документов показано ${shown.length} из ${DOCS}`);
+  if (shown.length < selected.length) reasons.push(`документов показано ${shown.length} из ${selected.length}`);
   if (kept.length < all.length) reasons.push(`не показано связей: ${all.length - kept.length}`);
   return {
     schema_version: 1,
@@ -91,7 +94,7 @@ export function physicalFixture(params: Record<string, unknown>): ServerSlice {
     nodes,
     edges: kept,
     layers: { markdown_link: ready, document_similarity: ready, chunk_similarity: ready },
-    totals: { documents: DOCS, chunks: Array.from({ length: DOCS }, (_, i) => chunkCount(i)).reduce((a, b) => a + b, 0), links: edges.length, document_pairs: sims.length },
+    totals: { documents: selected.length, chunks: selected.reduce((sum, i) => sum + chunkCount(i), 0), links: edges.length, document_pairs: sims.length },
     shown: { documents: shown.length, chunks: chunksShown, edges: kept.length },
     applied: limits,
     truncated: reasons.length > 0,

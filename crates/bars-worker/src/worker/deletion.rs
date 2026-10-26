@@ -47,6 +47,7 @@ impl Worker {
         let _ = tokio::task::spawn_blocking(move || drop(watcher)).await;
         let _job = job_gate.lock_owned().await;
         let _readers = gate.write_owned().await;
+        self.inner.graph_cache.remove(&path);
         let project = path.clone();
         let home = self.bars_home().to_path_buf();
         let result = tokio::task::spawn_blocking(move || remove_working_files(&project, &home))

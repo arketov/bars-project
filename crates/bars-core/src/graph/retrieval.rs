@@ -12,8 +12,29 @@ pub fn expand(
     request: &SearchRequest,
     seeds: &[i64],
     limit: usize,
-    mut budgets: Budgets,
+    budgets: Budgets,
 ) -> Result<(Vec<i64>, GraphReply), SearchError> {
+    expand_timed(
+        index,
+        data,
+        request,
+        seeds,
+        limit,
+        budgets,
+        std::time::Duration::ZERO,
+    )
+}
+
+pub fn expand_timed(
+    index: &Index,
+    data: &Dataset,
+    request: &SearchRequest,
+    seeds: &[i64],
+    limit: usize,
+    mut budgets: Budgets,
+    pre_elapsed: std::time::Duration,
+) -> Result<(Vec<i64>, GraphReply), SearchError> {
+    let started = std::time::Instant::now();
     let sources: BTreeMap<_, _> = data
         .sources
         .iter()
@@ -68,8 +89,14 @@ pub fn expand(
         limit: Some(limit.min(20) as u32),
         ..Default::default()
     };
-    let reply = query::execute(data, &graph_request, || false)
-        .map_err(|e| SearchError::InvalidParams(e.to_string()))?;
+    let reply = query::execute_ranked(
+        data,
+        &graph_request,
+        &BTreeMap::new(),
+        pre_elapsed + started.elapsed(),
+        || false,
+    )
+    .map_err(|e| SearchError::InvalidParams(e.to_string()))?;
     let seeds: BTreeSet<_> = seeds.iter().copied().collect();
     let mut seen = BTreeSet::new();
     let candidates = reply
