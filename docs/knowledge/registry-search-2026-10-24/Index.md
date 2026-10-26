@@ -7,7 +7,7 @@ title: Доказательства замера реестров от 24-10-202
 Сырые данные раздела о реестрах в [бенче качества](../search-quality.md). Стенд — `<корпус>-<вариант>`: `bars` — снимок docs bars-project, `od` — снимок docs overdrive-bots; варианты нарезки A, B, C, D. Прогон — `registry-tune`, `registry-test`, `scope` (регрессия по разделам), `documents` (регрессия bars по документам).
 
 - `selection.json` — правило и выбор варианта, записанные до проверочной части; поправка чисел регрессии overdrive дописана после неё отдельным полем.
-- `regression-scope-bars.json`, `regression-scope-overdrive.json`, `regression-bars-documents.json` — регрессионные наборы: вопросы `scope-bars.json`, `scope-overdrive-bots.json` и `bars.json`, чьи эталоны сходятся с нынешними документами (36 из 40, 40 из 40, 22 из 24).
+- `regression-scope-bars.json`, `regression-scope-overdrive.json`, `regression-bars-documents.json` — регрессионные наборы: вопросы `scope-bars.json`, `scope-overdrive-bots.json` и `bars.json`, чьи эталоны сходились со снимком 24-10-2026 (36 из 40, 40 из 40, 22 из 24); `scope-bars.json` позже исправлен, отобраны вопросы его прежней версии.
 - `<стенд>-<прогон>.json` — сводка `scripts/analyze-quality.mjs` по прогону: метрики по порогам и категориям.
 - `<стенд>-<прогон>-rows.jsonl.gz` — сырые строки прогона: каждый настоящий поиск и диагностические списки FTS, векторов и слияния.
 - `runs.json` — конфигурации прогонов (хеши набора, бинарника, моделей), устройство, загрузка и прогрев, число строк.
