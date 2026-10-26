@@ -4,7 +4,7 @@
   import FolderIcon from "./FolderIcon.svelte";
   import { appearance } from "./appearance.svelte";
   import { colorVar, documentColor, folderColor, folderIcon, keyOf } from "./appearance";
-  import { entries } from "./entries.svelte";
+  import { treeCommandAdapter } from "./tree-commands";
   import { checkState, type TreeNode } from "./tree";
   import TreeRow from "./TreeRow.svelte";
 
@@ -41,15 +41,13 @@
     } else if (event.key === 'ArrowLeft') {
       event.preventDefault(); if (isDir && open && !forceOpen) opened=false; else row.parentElement?.parentElement?.closest('.node')?.querySelector<HTMLElement>(':scope > .row')?.focus();
     } else if (event.key === ' ') { event.preventDefault(); app.toggleNode(node.path,check!=='all'); }
-    else if (event.key === 'F2' && node.path !== '.') { event.preventDefault(); entries.open('rename', node.path); }
-    else if (event.key === 'Delete' && node.path !== '.') { event.preventDefault(); entries.open('trash', node.path); }
     else if (event.key === 'Enter') { event.preventDefault(); if (isDir) { if (node.indexPath) openFolder(); else opened=!opened; } else if (node.documentPath) void app.openDocument({path:node.documentPath,title:node.label,first_line:0,last_line:0}); }
   }
 </script>
 
 <div class="node {node.kind}" class:open>
   <!-- svelte-ignore a11y_no_noninteractive_tabindex: строка получает фокус для ContextMenu/Shift+F10. -->
-  <div class="row" data-document-path={node.documentPath} data-folder-path={isDir ? node.path : undefined} data-tree-node={node.path} data-tree-kind={node.kind} data-folder-kind={node.path === "." ? "Корневые документы" : node.kind === "module" ? "Модуль" : "Папка"} tabindex="0" role="treeitem" aria-selected={!!node.documentPath && app.viewer?.hit.path === node.documentPath} aria-expanded={isDir ? open : undefined} aria-label={title} onkeydown={keyboard}>
+  <div class="row" use:treeCommandAdapter={node.path} data-menu-kind={isDir ? "folder" : "file"} data-menu-place="tree" data-document-path={node.documentPath} data-folder-path={isDir ? node.path : undefined} data-tree-node={node.path} data-tree-kind={node.kind} data-folder-kind={node.path === "." ? "Корневые документы" : node.kind === "module" ? "Модуль" : "Папка"} tabindex="0" role="treeitem" aria-selected={!!node.documentPath && app.viewer?.hit.path === node.documentPath} aria-expanded={isDir ? open : undefined} aria-label={title} onkeydown={keyboard}>
     {#if isDir}
       <button class="caret" aria-label={open ? "Свернуть" : "Развернуть"} onclick={() => (opened = !opened)}>
         <Icon name="chevron-right" size={10} width={2} />

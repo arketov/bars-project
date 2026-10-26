@@ -31,7 +31,11 @@ add('document', 'Документ', [
 add('window', 'Поиск', [['search.scope', 'Область поиска'], ['search.scopeClear', 'Сбросить область поиска'], ['search.options', 'Параметры поиска']]);
 add('result', 'Результат', [['result.open', 'Открыть результат'], ['result.graph', 'Показать результат в графе', '', 'Блок 2'], ['result.expand', 'Раскрыть результат']]);
 add('target', 'Файл и папка', [['target.open', 'Открыть документ'], ['target.reveal', 'Показать в ОС'], ['target.copyPath', 'Скопировать путь']]);
-add('target', 'Файл и папка', ['file.create|Создать файл', 'folder.create|Создать папку', 'target.rename|Переименовать', 'target.move|Переместить', 'target.delete|Удалить'].map(row => { const [id, title] = row.split('|'); return [id, title, '', 'Этап 3.3']; }));
+add('target', 'Файл и папка', [
+  ['file.create', 'Создать файл'], ['folder.create', 'Создать папку'],
+  ['target.rename', 'Переименовать', 'F2'], ['target.move', 'Переместить'], ['target.delete', 'Удалить', 'Delete'],
+  ['target.style', 'Цвет и иконка'], ['target.checkIndex', 'Проверить индекс'], ['target.openExternal', 'Открыть в программе…'],
+]);
 add('window', 'Проект', [['project.create', 'Создать проект', '', 'Этап 3.3.2']]);
 add('topics', 'Новые темы', [['topics.copyQuery', 'Скопировать исходный запрос'], ['topics.rename', 'Переименовать тему'], ['topics.delete', 'Удалить тему']]);
 add('notification', 'Уведомления', [['notification.details', 'Подробности уведомления'], ['notification.retry', 'Повторить операцию']]);
@@ -88,7 +92,10 @@ export function conflicts(overrides: Overrides, os: Platform): [Command, Command
   return pairs;
 }
 export function validate(overrides: Overrides, os: Platform): string[] {
-  return [...catalog.flatMap(c => { const b = bindingFor(c, overrides, os); const error = b && invalid(b, os); return error ? [`${c.title}: ${error}`] : []; }), ...conflicts(overrides, os).map(([a, b]) => `Конфликт: ${a.title} ↔ ${b.title}`)];
+  return [...catalog.flatMap(c => { const b = bindingFor(c, overrides, os);
+    // Delete — штатная команда выбранного узла дерева; вне дерева адаптера нет.
+    const treeDelete = c.id === 'target.delete' && b?.code === 'Delete' && !b.modifiers.length;
+    const error = b && !treeDelete && invalid(b, os); return error ? [`${c.title}: ${error}`] : []; }), ...conflicts(overrides, os).map(([a, b]) => `Конфликт: ${a.title} ↔ ${b.title}`)];
 }
 
 /** Новое умолчание уступает сохранённому назначению; два пользовательских конфликта отклоняют карту. */

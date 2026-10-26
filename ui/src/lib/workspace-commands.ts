@@ -44,6 +44,7 @@ export function workspaceCommands(options:WorkspaceCommands) {
     if (id==='document.open') return app.current?undefined:'Проект не выбран';
     if (id==='document.newWindow') return target.path&&!target.folder?undefined:'Выберите документ';
     if (id.startsWith('project.')) return app.current?undefined:'Проект не выбран';
+    if (['file.create','folder.create','target.rename','target.move','target.delete','target.style','target.checkIndex','target.openExternal'].includes(id)) return 'Выберите строку дерева';
     if (id.startsWith('target.')) return target.path&&(!target.folder||id!=='target.open')?undefined:'Выберите файл или папку';
     if (['panel.next','panel.previous','tab.next','tab.previous','tab.close','tab.move','panel.resize'].includes(id)) return target.panel?undefined:'Нет активной вкладки';
     return 'Выберите соответствующую строку или панель';

@@ -6,6 +6,9 @@ import Sidebar from "./Sidebar.svelte";
 import { app } from "./app.svelte";
 import { buildTree } from "./tree";
 import { folderItems } from "./contextmenu";
+import { keybindings } from './keybindings.svelte';
+import { entries } from './entries.svelte';
+import { adapterFor } from './command-adapters';
 
 const api = vi.hoisted(() => ({ call: vi.fn(), folderTarget: vi.fn(), folderAction: vi.fn(), copyText: vi.fn(), documentAction: vi.fn(), documentEditors: vi.fn() }));
 vi.mock("./api", () => ({ ...api, joinPath: (a: string, b: string) => `${a}/${b}`, openPath: vi.fn(), pickFolder: vi.fn(), inTauri: () => false }));
@@ -16,6 +19,7 @@ const settle = async () => { await new Promise(r => setTimeout(r, 0)); flushSync
 const button = (label: string) => [...document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')].find(b => b.textContent?.startsWith(label))!;
 async function open(el: Element) { el.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: 9999, clientY: 9999 })); await settle(); }
 beforeEach(() => {
+  app.workerDown = null; keybindings.active = {};
   app.current = project.path; app.projects = [project]; app.docsRoot = project.docs_root;
   app.tree = buildTree([{ path: "manual/docs/модуль/вложенная/Документ.md", module: "модуль", title: "Документ", chunks: 1 }], project.docs_root);
   app.selected = new Set();
@@ -28,9 +32,65 @@ afterEach(async () => {
   for (const c of mounted.splice(0)) await unmount(c);
   app.current = null; app.projects = []; app.tree = []; app.toast = null; app.selected = new Set();
   document.body.innerHTML = ""; vi.clearAllMocks();
+  entries.cancel(); keybindings.active = {}; app.workerDown = null;
 });
 
 describe("Меню папок этапа 31", () => {
+  it('группы с разделителями, удаление последним; меню и команда реестра открывают один диалог', async () => {
+    const el = host(); mounted.push(mount(TreeRow, { target: el, props: {node:app.tree[0]} })); flushSync();
+    const row = el.querySelector<HTMLElement>('.row')!;
+    await open(row);
+    const menu = document.querySelector('.primary')!;
+    expect([...menu.querySelectorAll('[role="menuitem"]')].map(b => b.textContent?.trim())).toEqual([
+      'Новый документ…','Новая папка…','Переименовать…F2','Переместить…','Показать в Проводнике',
+      'Скопировать путь','Цвет и иконка…','Проверить индекс проектаПроверяется весь проект','Удалить…Delete',
+    ]);
+    expect(menu.querySelectorAll('[role="separator"]')).toHaveLength(5);
+    expect(menu.firstElementChild?.getAttribute('role')).toBe('menuitem');
+    expect(menu.lastElementChild?.classList.contains('danger')).toBe(true);
+    button('Переименовать…').click(); await settle();
+    expect(entries.request?.node.path).toBe('модуль'); expect(entries.request?.action).toBe('rename');
+    entries.cancel();
+    await adapterFor('target.rename',row)!.run();
+    expect(entries.request?.node.path).toBe('модуль'); expect(entries.request?.action).toBe('rename');
+  });
+  it('недоступная проверка в обходе стрелками; Enter/клик ничего не запускает, причина читаема', async () => {
+    app.projects = [{...project,state:'unavailable'}];
+    const el = host(); mounted.push(mount(TreeRow, {target:el,props:{node:app.tree[0]}})); flushSync();
+    await open(el.querySelector('.row')!);
+    const check = button('Проверить индекс проекта');
+    expect(check.getAttribute('aria-disabled')).toBe('true'); expect(check.title).toContain('недоступен');
+    expect(document.getElementById(check.getAttribute('aria-describedby')!)?.textContent).toContain('недоступен');
+    window.dispatchEvent(new KeyboardEvent('keydown',{key:'End',cancelable:true}));
+    window.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowUp',cancelable:true})); flushSync();
+    expect(document.activeElement).toBe(check); expect(document.querySelector('.reason')?.textContent).toContain('недоступен');
+    check.click(); await settle(); expect(api.folderAction).not.toHaveBeenCalled();
+    expect(document.querySelector('.cmenu')).not.toBeNull();
+  });
+  it('при потере воркера меню папки показывает причины без IPC; назначения перечитываются при открытии', async () => {
+    const el = host(); mounted.push(mount(TreeRow, {target:el,props:{node:app.tree[0]}})); flushSync();
+    const row = el.querySelector<HTMLElement>('.row')!;
+    app.workerDown = 'Нет соединения'; keybindings.active = {'target.rename':{code:'F3',modifiers:[]}};
+    await open(row);
+    expect(api.folderTarget).not.toHaveBeenCalled();
+    expect(button('Переименовать…').getAttribute('aria-disabled')).toBe('true');
+    expect(button('Переименовать…').textContent).toContain('F3');
+    button('Удалить…').click(); expect(entries.request).toBeNull();
+    app.current = 'C:/другой'; flushSync(); expect(document.querySelector('.cmenu')).toBeNull();
+    app.current = project.path;
+    window.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'})); await settle();
+    app.workerDown = null; keybindings.active = {'target.rename':null}; await open(row);
+    expect(button('Переименовать…').querySelector('.shortcut')?.textContent).toBe('');
+  });
+  it('стрелка вправо и клик на сером выборе программы не вызывают IPC', async () => {
+    const el = host(); mounted.push(mount(TreeRow, {target:el,props:{node:app.tree[0],forceOpen:true}})); flushSync();
+    app.workerDown = 'Нет соединения';
+    await open(el.querySelector('[data-menu-kind="file"]')!);
+    const programs = button('Открыть в …'); programs.focus();
+    window.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',cancelable:true})); programs.click(); await settle();
+    expect(programs.getAttribute('aria-disabled')).toBe('true');
+    expect(api.documentEditors).not.toHaveBeenCalled(); expect(document.querySelector('.sub')).toBeNull();
+  });
   it.each([".nm", "svg", "input", ".ct", ".row"])("правый клик %s закрепляет модуль без выбора/раскрытия", async selector => {
     const el = host(); mounted.push(mount(TreeRow, { target: el, props: { node: app.tree[0] } })); flushSync();
     await open(el.querySelector(selector)!);
@@ -50,8 +110,8 @@ describe("Меню папок этапа 31", () => {
     expect(api.folderTarget).toHaveBeenCalledWith(project.path, project.docs_root, "модуль/вложенная");
     expect(document.activeElement).toBe(button("Новый документ…"));
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "End", cancelable: true }));
-    // Последний пункт — выбор цвета и иконки подпапки второго уровня (Т-38).
-    expect(document.activeElement).toBe(button("Цвет и иконка…"));
+    // Опасная группа последняя, после оформления и проверки индекса (ISS-57).
+    expect(document.activeElement).toBe(button("Удалить…"));
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); flushSync();
     expect(document.activeElement).toBe(row); expect(document.querySelector(".cmenu")).toBeNull();
   });

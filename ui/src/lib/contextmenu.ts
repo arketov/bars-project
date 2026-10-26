@@ -10,6 +10,11 @@ export function topicAt(target: EventTarget | null): { id: number; element: HTML
 }
 
 export interface MenuItem {
+  id?: string;
+  group?: string;
+  danger?: boolean;
+  shortcut?: string;
+  children?: MenuItem[];
   action: MenuAction;
   label: string;
   editor?: string;
@@ -38,20 +43,6 @@ export function folderAt(target: EventTarget | null): { path: string; kind: stri
 export function treeEntryAt(target: EventTarget | null): { path: string; kind: "module" | "dir" | "file" } | null {
   const element = target instanceof Element ? target.closest<HTMLElement>("[data-tree-node]") : null;
   return element ? { path: element.dataset.treeNode!, kind: element.dataset.treeKind as "module" | "dir" | "file" } : null;
-}
-
-/** Действия над узлом дерева (Т-33). Корневую группу «Корневые документы» нельзя переименовать, перенести и удалить. */
-export function entryItems(kind: "module" | "dir" | "file", path: string): MenuItem[] {
-  const change: MenuItem[] = path === "." ? [] : [
-    { action: "rename", label: "Переименовать…" },
-    { action: "move", label: "Переместить…" },
-    { action: "trash", label: "Удалить…" },
-  ];
-  return kind === "file" ? change : [
-    { action: "newDoc", label: "Новый документ…" },
-    { action: "newDir", label: "Новая папка…" },
-    ...change,
-  ];
 }
 
 export function folderItems(state: string, missing = false): MenuItem[] {

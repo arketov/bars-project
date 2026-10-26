@@ -1,13 +1,16 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
   import { app } from "./app.svelte";
-  import { call, copyText, documentAction, documentEditors, folderTarget, folderAction, type FolderTarget, type DocumentEditor } from "./api";
-  import { documentAt, documentItems, entryItems, folderAt, folderItems, itemsFor, place, projectAt, projectItems, run, textField, topicAt, treeEntryAt, type EntryMenuAction, type MenuItem } from "./contextmenu";
-  import { entries } from "./entries.svelte";
+  import { call, copyText, documentAction, documentEditors, folderTarget, folderAction, type FolderTarget } from "./api";
+  import { documentAt, documentItems, folderAt, folderItems, itemsFor, place, projectAt, projectItems, run, textField, topicAt, treeEntryAt, type MenuItem } from "./contextmenu";
   import type { TopicDetail } from "./new-topics";
   import AppearancePicker from "./AppearancePicker.svelte";
   import { canStyleFolder, keyOf } from "./appearance";
-  import { relativeToDocs } from "./tree";
+  import { findNode, relativeToDocs } from "./tree";
+  import { editorMenu, menuTargetAt, treeMenu } from "./menu-model";
+  import { executeTreeCommand, type TreeCommandTarget } from "./tree-commands";
+  import { keybindings } from "./keybindings.svelte";
+  const menuId = $props.id();
 
   let items = $state<MenuItem[]>([]);
   let target: EventTarget | null = null;
@@ -20,11 +23,11 @@
   let project = $state<string | null>(null);
   let topic = $state<{ project: string; id: number } | null>(null);
   let openedCurrent: string | null = null;
-  let treeEntry: { project: string; path: string } | null = null;
+  let treeTarget = $state<TreeCommandTarget | null>(null);
+  let reason = $state('');
   // Т-38: цель выбора цвета и иконки, найденная при открытии меню, и открытая панель выбора.
   let styleTarget: { kind: "folder" | "document"; path: string; label: string } | null = null;
   let picker = $state<{ project: string; kind: "folder" | "document"; path: string; label: string; x: number; y: number } | null>(null);
-  let editors = $state<DocumentEditor[]>([]);
   let submenu = $state(false);
   let generation = 0;
   let origin = { x: 0, y: 0 };
@@ -36,6 +39,7 @@
 
   $effect(() => {
     const current = app.current;
+    if (treeTarget && (current !== treeTarget.project || app.docsRoot !== treeTarget.docsRoot || !findNode(app.tree, treeTarget.path))) close();
     if (topic && (current !== topic.project || !app.topicsOpen || !app.topics.topics.some(t => t.id === topic?.id))) close();
     if (pendingFolder && (current !== pendingFolder.project || app.docsRoot !== pendingFolder.docsRoot)) close();
     if (document && current !== document.project) close();
@@ -54,7 +58,8 @@
     returnFocus = null;
     project = null;
     topic = null;
-    treeEntry = null;
+    treeTarget = null;
+    reason = '';
     styleTarget = null;
     submenu = false;
     generation++;
@@ -65,7 +70,13 @@
     if (box) at = place(origin.x, origin.y, box.offsetWidth, box.offsetHeight, innerWidth, innerHeight);
   }
 
-  async function open(event: MouseEvent) {
+  $effect(() => {
+    // Строка причины меняет высоту меню у нижнего края окна.
+    const description = reason;
+    if (box && items.length && description) void position();
+  });
+
+  async function open(event: Pick<MouseEvent, 'target' | 'preventDefault' | 'clientX' | 'clientY'>) {
     // Стандартное меню webview выключено всегда: своё — только там, где есть что показать.
     event.preventDefault();
     close();
@@ -80,25 +91,24 @@
         { action: "copyTopic", label: "Скопировать" },
         { action: "closeTopic", label: "Закрыть", disabled: app.topics.busy });
     }
-    const nearest = event.target instanceof Element ? event.target.closest("[data-document-path], [data-folder-path], [data-project-path]") : null;
+    const nearest = menuTargetAt(event.target);
     const directory = !textField(event.target) && nearest?.hasAttribute("data-folder-path") && folderAt(event.target);
-    const entry = !textField(event.target) && current ? treeEntryAt(event.target) : null;
+    const entry = !textField(event.target) && current && nearest?.hasAttribute('data-tree-node') ? treeEntryAt(nearest) : null;
     if (directory && current) {
       // Контекст ОС закрепляет бэкенд; запоздавшая проверка не воскрешает меню.
       returnFocus = directory.element;
       pendingFolder = { project: current, docsRoot };
       try {
-        const pinned = await folderTarget(current, docsRoot, directory.path);
+        const pinned = entry && (app.workerDown || !app.project) ? null : await folderTarget(current, docsRoot, directory.path);
         if (generation !== version || app.current !== current || app.docsRoot !== docsRoot) return;
         pendingFolder = null;
-        folder = { ...pinned, project: current, docsRoot, kind: directory.kind };
-        found.unshift(...folderItems(app.project?.state ?? "unavailable", pinned.missing));
+        folder = pinned ? { ...pinned, project: current, docsRoot, kind: directory.kind } : null;
+        if (!entry && pinned) found.unshift(...folderItems(app.project?.state ?? "unavailable", pinned.missing));
         const key = keyOf(directory.path);
         if (canStyleFolder(key)) {
           styleTarget = { kind: "folder", path: key, label: key.split("/").pop() ?? key };
-          found.push({ action: "appearance", label: "Цвет и иконка…" });
+          if (!entry) found.push({ action: "appearance", label: "Цвет и иконка…" });
         }
-        if (entry) { found.unshift(...entryItems(entry.kind, entry.path)); treeEntry = { project: current!, path: entry.path }; }
       } catch (error) {
         if (generation === version && app.current === current) { close(); app.flash(String(error), true); }
         return;
@@ -110,14 +120,20 @@
       openedCurrent = app.current;
       found.unshift(...projectItems());
     }
-    const file = !folder && !project && !textField(event.target) && documentAt(event.target);
+    const file = !folder && !project && !textField(event.target) && nearest?.hasAttribute('data-document-path') && documentAt(nearest);
     if (file && app.current) {
       document = { ...file, project: app.current };
-      found.unshift(...documentItems());
+      if (!entry) found.unshift(...documentItems());
       const key = keyOf(relativeToDocs(file.path, docsRoot));
       styleTarget = { kind: "document", path: key, label: key.split("/").pop() ?? key };
-      found.push({ action: "appearance", label: "Цвет…" });
-      if (entry) { found.push(...entryItems(entry.kind, entry.path)); treeEntry = { project: app.current, path: entry.path }; }
+      if (!entry) found.push({ action: "appearance", label: "Цвет…" });
+    }
+    if (entry && current && nearest) {
+      treeTarget = { project: current, docsRoot, path: entry.path, element: nearest, pinned: folder ?? undefined };
+      returnFocus = nearest;
+      found.splice(0, found.length, ...treeMenu({ ...entry, state: app.project?.state ?? 'starting',
+        workerDown: !!app.workerDown, missing: folder?.missing, canStyle: !!styleTarget,
+        copySelection: !!itemsFor(event.target).length, mac: /Mac/.test(navigator.platform) }, id => keybindings.binding(id) ? keybindings.hint(id) : ''));
     }
     if (!found.length) return close();
     target = event.target;
@@ -126,7 +142,7 @@
     origin = { x: event.clientX, y: event.clientY };
     await position();
     if (version !== generation) return;
-    box?.querySelector<HTMLButtonElement>("button:not(:disabled)")?.focus({ preventScroll: true });
+    box?.querySelector<HTMLButtonElement>('button:not([aria-disabled="true"]):not(.danger)')?.focus({ preventScroll: true });
   }
 
   async function showEditors() {
@@ -135,7 +151,7 @@
     try {
       const found = await documentEditors();
       if (version !== generation) return;
-      editors = [{ id: "default", label: "Программа по умолчанию" }, ...found];
+      items = items.map(item => item.action === 'editors' ? { ...item, children: editorMenu(found) } : item);
       submenu = true;
       await position();
       box?.querySelector<HTMLButtonElement>(".sub button")?.focus({ preventScroll: true });
@@ -145,6 +161,13 @@
   async function pick(item: MenuItem) {
     if (item.disabled) return;
     if (item.action === "editors") { await showEditors(); return; }
+    if (treeTarget && (item.id || item.action === 'editor') && item.action !== 'copy') {
+      const captured = treeTarget;
+      close(true);
+      try { await executeTreeCommand(item.id ?? 'target.openExternal', captured, item.editor); }
+      catch (error) { app.flash(String(error instanceof Error ? error.message : error), true); }
+      return;
+    }
     if (item.action === "appearance" && styleTarget && app.current) {
       const style = styleTarget, owner = app.current;
       close();
@@ -152,16 +175,11 @@
       return;
     }
     const where = target;
-    const chosenEntry = treeEntry;
     const file = document;
     const directory = folder;
     const projectPath = project;
     const selectedTopic = topic;
     close(true);
-    if (chosenEntry && ["newDoc", "newDir", "rename", "move", "trash"].includes(item.action)) {
-      if (app.current === chosenEntry.project) entries.open(item.action as EntryMenuAction, chosenEntry.path);
-      return;
-    }
     try {
       if (selectedTopic) {
         if (app.current !== selectedTopic.project || !app.topicsOpen) return;
@@ -208,6 +226,10 @@
   }
 
   function navigate(event: KeyboardEvent) {
+    if (event.key === 'Escape' && submenu) {
+      event.preventDefault(); submenu = false;
+      box?.querySelector<HTMLButtonElement>('[aria-haspopup="menu"]')?.focus(); void position(); return;
+    }
     if (event.key === "Escape" && (returnFocus || items.length)) { event.preventDefault(); close(true); return; }
     if (event.key === "Tab" && returnFocus && !items.length) { close(); return; }
     if ((event.shiftKey && event.key === "F10") || event.key === "ContextMenu") {
@@ -220,8 +242,12 @@
       }
     }
     if (!items.length || !box) return;
-    if (event.key === "Escape" || event.key === "Tab") { close(event.key === "Escape"); return; }
-    if (event.key === "ArrowRight") { event.preventDefault(); void showEditors(); return; }
+    if (event.key === "Escape" || event.key === "Tab") { event.preventDefault(); close(true); return; }
+    if (event.key === "ArrowRight" && globalThis.document.activeElement?.getAttribute('aria-haspopup') === 'menu') {
+      event.preventDefault();
+      if (globalThis.document.activeElement.getAttribute('aria-disabled') !== 'true') void showEditors();
+      return;
+    }
     if (event.key === "ArrowLeft" && submenu) {
       event.preventDefault(); submenu = false;
       box.querySelector<HTMLButtonElement>('[aria-haspopup="menu"]')?.focus();
@@ -229,7 +255,7 @@
     }
     if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
-    const buttons = Array.from(box.querySelectorAll<HTMLButtonElement>(submenu ? ".sub button:not(:disabled)" : ".primary button:not(:disabled)"));
+    const buttons = Array.from(box.querySelectorAll<HTMLButtonElement>(submenu ? ".sub button" : ".primary button"));
     const index = buttons.indexOf(globalThis.document.activeElement as HTMLButtonElement);
     const next = event.key === "Home" ? 0 : event.key === "End" ? buttons.length - 1
       : (index + (event.key === "ArrowUp" ? -1 : 1) + buttons.length) % buttons.length;
@@ -237,6 +263,23 @@
   }
 
   onMount(() => {
+    const chooseEditor = async (event: Event) => {
+      const captured = (event as CustomEvent<TreeCommandTarget>).detail;
+      const rect = captured.element.getBoundingClientRect();
+      const opening = open({ target: captured.element, preventDefault() {}, clientX: rect.left, clientY: rect.bottom });
+      const version = generation;
+      await opening;
+      if (version === generation && treeTarget?.project === captured.project && treeTarget.path === captured.path) await showEditors();
+    };
+    const style = (event: Event) => {
+      const target = (event as CustomEvent<TreeCommandTarget>).detail;
+      const rect = target.element.getBoundingClientRect();
+      const kind = target.element.dataset.treeKind === 'file' ? 'document' : 'folder';
+      close();
+      picker = { project: target.project, kind, path: keyOf(target.path), label: target.path.split('/').pop()!, x: rect.left, y: rect.bottom };
+    };
+    addEventListener('bars-tree-style', style);
+    addEventListener('bars-tree-editors', chooseEditor);
     const onKey = navigate;
     const onScroll = (event: Event) => {
       if (!(event.target instanceof Node) || !box?.contains(event.target)) close();
@@ -244,16 +287,22 @@
     addEventListener("contextmenu", open);
     addEventListener("keydown", onKey);
     const dismiss = () => close();
+    const dialogClosed = (event: Event) => {
+      // Отложенный close списка команд не закрывает уже открытое им меню дерева.
+      if (event.target instanceof Node && (box ? event.target.contains(box) : !!returnFocus && event.target.contains(returnFocus))) close();
+    };
     addEventListener("blur", dismiss);
     addEventListener("resize", dismiss);
-    addEventListener("close", dismiss, true);
+    addEventListener("close", dialogClosed, true);
     addEventListener("scroll", onScroll, true);
     return () => {
+      removeEventListener('bars-tree-style', style);
+      removeEventListener('bars-tree-editors', chooseEditor);
       removeEventListener("contextmenu", open);
       removeEventListener("keydown", onKey);
       removeEventListener("blur", dismiss);
       removeEventListener("resize", dismiss);
-      removeEventListener("close", dismiss, true);
+      removeEventListener("close", dialogClosed, true);
       removeEventListener("scroll", onScroll, true);
     };
   });
@@ -279,14 +328,20 @@
     onmousedown={(event) => event.preventDefault()}
   >
     <div class="primary" role="menu" aria-label="Действия">
-      {#each items as item (item.action)}
-        <button role="menuitem" disabled={item.disabled} aria-haspopup={item.action === "editors" ? "menu" : undefined} aria-expanded={item.action === "editors" ? submenu : undefined} onclick={() => pick(item)}>{item.label}{item.action === "editors" ? " ▸" : ""}{#if item.hint}<small>{item.hint}</small>{/if}</button>
+      {#each items as item, index (item.action)}
+        {#if index > 0 && item.group && item.group !== items[index - 1].group}<div class="separator" role="separator"></div>{/if}
+        <button role="menuitem" class:danger={item.danger} aria-disabled={item.disabled ? 'true' : undefined} aria-describedby={item.disabled ? `${menuId}-${index}` : undefined} title={item.hint}
+          aria-haspopup={item.action === "editors" ? "menu" : undefined} aria-expanded={item.action === "editors" ? submenu : undefined}
+          onfocus={() => reason = item.disabled ? item.hint ?? '' : ''} onmouseenter={() => reason = item.disabled ? item.hint ?? '' : ''} onmouseleave={() => reason = ''}
+          onclick={() => pick(item)}><span>{item.label}{#if item.hint && !item.disabled}<small>{item.hint}</small>{/if}</span><span class="shortcut">{item.shortcut ?? ''}{item.action === "editors" ? " ▸" : ''}</span></button>
+        {#if item.disabled && item.hint}<span class="sr-only" id={`${menuId}-${index}`}>{item.hint}</span>{/if}
       {/each}
+      {#if reason}<div class="reason">Недоступно: {reason}</div>{/if}
     </div>
     {#if submenu}
       <div class="sub" role="menu" aria-label="Открыть в редакторе">
-        {#each editors as editor (editor.id)}
-          <button role="menuitem" onclick={() => pick({ action: "editor", label: editor.label, editor: editor.id })}>{editor.label}</button>
+        {#each items.find(item => item.action === 'editors')?.children ?? [] as editor (editor.editor)}
+          <button role="menuitem" onclick={() => pick(editor)}>{editor.label}</button>
         {/each}
       </div>
     {/if}
@@ -298,8 +353,15 @@
   .primary { min-width: 180px; }
   .sub { min-width: 180px; border-left: 1px solid var(--line); margin-left: 4px; padding-left: 4px; }
   @media (max-width: 480px) { .cmenu { flex-direction: column; } .sub { border-left: 0; border-top: 1px solid var(--line); margin: 4px 0 0; padding: 4px 0 0; } }
-  .cmenu button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 4px 8px; border-radius: 5px; font-size: 12px; color: var(--text); }
+  .cmenu button { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; text-align: left; border: 0; background: none; padding: 4px 8px; border-radius: 6px; font-size: 12px; color: var(--text); }
   .cmenu button:hover, .cmenu button:focus-visible { background: var(--accent-soft); color: var(--accent-text); }
-  .cmenu button:disabled { color: var(--muted); cursor: default; background: none; }
+  .cmenu button.danger { color: var(--bad); }
+  .cmenu button.danger:hover, .cmenu button.danger:focus-visible { background: var(--bad-soft); color: var(--bad); }
+  .cmenu button[aria-disabled="true"] { color: var(--muted); opacity: .7; cursor: default; }
+  .cmenu button[aria-disabled="true"]:hover, .cmenu button[aria-disabled="true"]:focus-visible { background: var(--panel-2); color: var(--muted); }
+  .separator { height: 1px; background: var(--line); margin: 4px 2px; }
+  .shortcut { font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .reason { font-size: 11px; line-height: 1.5; color: var(--muted); padding: 6px 8px 4px; border-top: 1px solid var(--line); margin-top: 4px; }
   .cmenu small { display: block; font-size: 11px; color: var(--muted); }
 </style>
