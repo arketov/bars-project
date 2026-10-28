@@ -274,12 +274,16 @@ export class Editors {
   #buffers = new Map<string, EditorBuffer>();
   #key = (project: string, path: string) => `${project}\n${path}`;
   #bus: Bus | undefined;
+  #savedListeners = new Set<(message: SavedMessage) => void>();
   /** Подпись окна в сообщениях: свою запись окно не принимает за чужую. */
   readonly id = Math.random().toString(36).slice(2);
 
   constructor(bus?: Bus) {
     this.#bus = bus ?? (typeof window !== "undefined" && inTauri() ? tauriBus() : undefined);
-    this.#bus?.listen((message) => this.#remoteSaved(message));
+    this.#bus?.listen((message) => {
+      if (message.origin !== this.id) this.#savedListeners.forEach((handler) => handler(message));
+      this.#remoteSaved(message);
+    });
     if (typeof window === "undefined") return;
     // Потеря фокуса и сворачивание в трей пишут сразу (Т-29); возвращение фокуса сверяет диск.
     window.addEventListener("focus", () => void this.checkAll());
@@ -294,6 +298,12 @@ export class Editors {
     if (buffer && buffer.revision !== message.revision) void buffer.checkDisk();
   }
 
+  /** Запись документа в этом или другом окне: окно документа по ней обновляет дерево для `[[` без опроса. */
+  subscribeSaved(handler: (message: SavedMessage) => void): () => void {
+    this.#savedListeners.add(handler);
+    return () => this.#savedListeners.delete(handler);
+  }
+
   get(project: string, path: string): EditorBuffer | undefined {
     return this.#buffers.get(this.#key(project, path));
   }
@@ -305,7 +315,11 @@ export class Editors {
     if (!buffer) {
       buffer = new EditorBuffer(project, path, seed);
       const attached = buffer;
-      buffer.onSaved = (revision) => this.#bus?.emit({ project, path: attached.path, revision, origin: this.id });
+      buffer.onSaved = (revision) => {
+        const message = { project, path: attached.path, revision, origin: this.id };
+        this.#savedListeners.forEach((handler) => handler(message));
+        this.#bus?.emit(message);
+      };
       this.#buffers.set(key, buffer);
       if (inTauri()) void buffer.load();
       else buffer.status = "clean";
