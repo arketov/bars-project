@@ -8,6 +8,10 @@
   import TreeRow from "./TreeRow.svelte";
 
   let menuOpen = $state(false);
+  let seenMenuRequest = app.projectsMenuRequest;
+  $effect(() => {
+    if (app.projectsMenuRequest !== seenMenuRequest) { seenMenuRequest = app.projectsMenuRequest; menuOpen = true; }
+  });
 
   const shown = $derived(filterTree(app.tree, app.filter));
   const touched = $derived(touchedModules(app.tree, app.selected));

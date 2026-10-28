@@ -90,3 +90,12 @@ it("исчезновение целевого проекта закрывает 
   app.projects = [first]; await settle();
   expect(document.querySelector(".cmenu")).toBeNull(); expect(api.call).not.toHaveBeenCalled();
 });
+
+it("пункт «Проекты» трея открывает список проектов, не переключая проект (ISS-43)", async () => {
+  expect(document.querySelector(".projmenu")).toBeNull();
+  app.view = "settings";
+  app.openProjectsMenu(); await settle();
+  expect(app.view).toBe("main");
+  expect(document.querySelectorAll(".projmenu .pitem")).toHaveLength(2);
+  expect(app.current).toBe(first.path);
+});

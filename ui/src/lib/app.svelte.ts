@@ -959,6 +959,14 @@ class App {
     void this.loadIndexingHistory();
   }
 
+  /** Счётчик запросов открыть меню проектов в боковой панели (пункт «Проекты» трея, ISS-43). */
+  projectsMenuRequest = $state(0);
+
+  openProjectsMenu(): void {
+    this.openSearch();
+    this.projectsMenuRequest++;
+  }
+
   openSearch(): void {
     this.navigationVersion++;
     this.view = "main";

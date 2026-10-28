@@ -50,6 +50,7 @@
           if (payload.project) await app.select(payload.project);
           if (payload.view === "settings") app.openSettings();
           else if (payload.view === "indexing") app.openIndexing();
+          else if (payload.view === "projects") app.openProjectsMenu();
           else app.openSearch();
         }).then(keep),
       );
