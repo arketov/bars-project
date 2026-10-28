@@ -40,3 +40,6 @@ crates/bars-app/gen/
 # Временный стенд WebView2 и корневые логи проверок.
 /.bars-tab-close-runtime/
 /.bars-*.log
+
+# Стенды проверок в журналах сессий: профили WebView2, временные базы и копии проектов (OQ-223)
+docs/chats/**/fixture-*/

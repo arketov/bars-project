@@ -13,8 +13,8 @@ Follow the project's own rules and locations first. Otherwise, use `chats/<YYYY-
 
 | Content | Recommended location | Example and writing rule |
 |---|---|---|
-| Session event | Session `log.md` | Failed experiment or changed approach; at most three lines, append without rereading. |
-| Session handoff | Session `handoff.md` | Done, Not done, Difficulties, Next; at most a screen. |
+| Session event | Session `log.md` | Failed experiment or changed approach; up to about 400 characters, append without rereading. |
+| Session handoff | Session `handoff.md` | Done, Not done, Difficulties (omit when none), Next, headed in the user's language; at most a screen. |
 | Enduring research or measurement | `knowledge/<topic>.md` | Method, evidence, findings and limits; a journal entry links to it. A measurement is not a shipped change. |
 | Accepted rationale | `adr/NNNN-<topic>.md` | Owner-selected architecture, dated decision and consequences; a proposal is not an accepted ADR. |
 | Bug | `backlog/issues.md` | ID, source/date, symptom, known steps, expected/actual, status, verification; do not invent a cause. A log entry is not the bug's only record. |
@@ -45,7 +45,7 @@ Do not write the ordinary course of work, code, command output or what the diff 
 
 Saving tokens:
 
-- an entry is at most three lines;
+- an entry is at most about 400 characters: a Markdown paragraph is one line of any length, so count characters, not lines;
 - append to the end of the file without reading it, for example with `>>`;
 - a decision with reasons goes to `adr/`, a durable finding to `knowledge/`; the journal keeps one line with a link.
 
@@ -55,7 +55,11 @@ Write it at the end, and on large milestones of a long session. When the user en
 
 - **Done** — what is ready and where it lies: links to the main resulting documents, other changed documents by name, code files and commits in backticks.
 - **Not done** — what is left of the task.
-- **Difficulties** — what failed, what took the time, what is broken.
+- **Difficulties** — what failed, what took the time, what is broken; omit the section when there were none.
 - **Next** — where the next session starts.
+
+Section headings are written in the user's language (in Russian: «Сделано», «Не сделано», «Сложности», «Дальше»). When the session continues an earlier one on the same topic, the first line after the title links to that session's handoff: «Предыдущая сессия: [handoff](../<folder>/handoff.md)».
+
+Browser profiles, caches, temporary databases and tool dumps are not committed; raw measurement data needed later goes to `knowledge/<topic>-<date>/` next to the research.
 
 No keys, tokens, passwords or personal data in the journal, even in command output.

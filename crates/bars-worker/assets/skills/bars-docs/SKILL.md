@@ -111,8 +111,8 @@ Feature-only requirements stay in the feature's `requirements.md`, not in the ma
 
 | Document kind | Recommended location | Content and example |
 |---|---|---|
-| Session event | `chats/<YYYY-MM-DD>-<topic>/log.md` | Finding, failed approach, plan change or risky step; at most three lines appended without rereading. Example: why an experiment changed. |
-| Handoff | `chats/<YYYY-MM-DD>-<topic>/handoff.md` | Done, Not done, Difficulties, Next; at most a screen. Example: where the next session starts. |
+| Session event | `chats/<YYYY-MM-DD>-<topic>/log.md` | Finding, failed approach, plan change or risky step; up to about 400 characters appended without rereading. Example: why an experiment changed. |
+| Handoff | `chats/<YYYY-MM-DD>-<topic>/handoff.md` | Done, Not done, Difficulties (omit when none), Next, headed in the user's language; at most a screen. Example: where the next session starts. |
 | Index | The folder's `Index.md` | Every file/subfolder by name with when to read it, no links; update together with contents. Individual session folders are exempt. |
 
 For a mixed task, link the bug register, research, feature description and accepted ADR; do not copy the same fact among them. The journal records session history, not the only copy of a bug or enduring knowledge. Unaccepted proposals remain labelled in research or plans.
