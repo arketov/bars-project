@@ -873,6 +873,37 @@ async fn search_answers_model_loading_while_the_model_loads_and_works_after() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn a_failed_background_load_answers_provider_error_with_the_error_kind() {
+    let provider = Arc::new(FakeProvider {
+        background: true,
+        fail_load: true,
+        ..FakeProvider::plain("m1")
+    });
+    let harness = Harness::start("failed-load", provider).await;
+    let mut cli = harness.client(ClientKind::Cli).await;
+    let root = harness.project("broken", &[("a.md", "# Борщ\n\nСвёкла и капуста.\n")]);
+    cli.call(&RegisterParams {
+        path: root.display().to_string(),
+    })
+    .await
+    .unwrap();
+
+    let deadline = Instant::now() + Duration::from_secs(10);
+    let error = loop {
+        let error = rpc(cli.call(&search(&root, "борщ")).await);
+        if error.kind() != Some(ErrorKind::ModelLoading) {
+            break error;
+        }
+        assert!(Instant::now() < deadline, "ошибка загрузки не пришла");
+        tokio::time::sleep(Duration::from_millis(20)).await;
+    };
+    assert_eq!(error.kind(), Some(ErrorKind::ProviderError));
+    let data = error.data.expect("data с видом ошибки");
+    // Текст библиотеки без признаков нехватки памяти даёт `runtime`, а не «файлов нет».
+    assert_eq!(data["reason"], "runtime", "{data}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn window_methods_are_closed_on_the_channel() {
     let harness = Harness::start("window-closed", FakeProvider::new("m1")).await;
     let mut cli = harness.client(ClientKind::Cli).await;
