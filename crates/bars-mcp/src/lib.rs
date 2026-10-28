@@ -1,4 +1,5 @@
-//! `bars-mcp` как библиотека: stdio-MCP с шестнадцатью инструментами (Т-2, Т-19).
+//! `bars-mcp` как библиотека: stdio-MCP с десятью инструментами и шестью графовыми, которые скрыты,
+//! пока `settings.toml` не включит их (Т-2, Т-19, OQ-162).
 //!
 //! Каждый инструмент — один вызов метода протокола ([`bars_protocol`]); индекса и моделей здесь нет
 //! (НФТ-3). Ответ на `initialize` и список инструментов отдаются сразу, не подключаясь к воркеру;
@@ -12,6 +13,7 @@ mod graph;
 mod instructions;
 mod observation;
 mod render;
+mod settings;
 
 use std::io;
 use std::path::{Path, PathBuf};
@@ -31,7 +33,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tokio::sync::Mutex;
 
-pub use instructions::INSTRUCTIONS;
+pub use instructions::{INSTRUCTIONS, instructions};
 
 /// Сколько прокси ждёт ответа воркера на один вызов. Первый поиск может ждать загрузки модели.
 pub const CALL_TIMEOUT: Duration = Duration::from_secs(120);
@@ -62,6 +64,9 @@ pub struct Env {
     pub call_timeout: Duration,
     /// Сколько повторять вызов, пока модель загружается ([`MODEL_WAIT`]).
     pub model_wait: Duration,
+    /// Папка `~/.bars`: из её `settings.toml` прокси узнаёт, показывать ли графовые инструменты.
+    /// `None` — не читать, инструменты скрыты.
+    pub bars_home: Option<PathBuf>,
 }
 
 impl Env {
@@ -73,6 +78,7 @@ impl Env {
             launch: Launch::Worker,
             call_timeout: CALL_TIMEOUT,
             model_wait: MODEL_WAIT,
+            bars_home: bars_protocol::user_home().map(|home| home.join(".bars")),
         })
     }
 }
@@ -90,6 +96,8 @@ pub struct BarsMcp {
     env: Env,
     client: Arc<Mutex<Option<Client>>>,
     tool_router: ToolRouter<Self>,
+    /// Показаны ли шесть графовых инструментов; решается при создании сессии (OQ-162).
+    graph_tools: bool,
 }
 
 /// Вид ответа инструмента.
@@ -315,11 +323,19 @@ impl BarsMcp {
             .await
     }
 
+    /// Сессия MCP. Графовые инструменты попадают в список, только если `settings.toml` включает их
+    /// (`[mcp] graph_tools`); скрытый инструмент вызвать нельзя — клиент получит «неизвестный».
     pub fn new(env: Env) -> Self {
+        let graph_tools = settings::graph_tools_enabled(env.bars_home.as_deref());
+        let mut tool_router = Self::tool_router() + disk_read::router();
+        if graph_tools {
+            tool_router += Self::graph_tool_router();
+        }
         Self {
             env,
             client: Arc::new(Mutex::new(None)),
-            tool_router: Self::tool_router() + Self::graph_tool_router() + disk_read::router(),
+            tool_router,
+            graph_tools,
         }
     }
 
@@ -733,7 +749,7 @@ impl BarsMcp {
 impl ServerHandler for BarsMcp {
     fn get_info(&self) -> ServerConfig {
         ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
-            .with_instructions(INSTRUCTIONS)
+            .with_instructions(instructions(self.graph_tools))
     }
 }
 

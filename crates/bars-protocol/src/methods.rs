@@ -779,6 +779,13 @@ pub struct IndexingDoc {
     pub edit_pause_seconds: u32,
 }
 
+/// Таблица `[mcp]`: что `bars-mcp` показывает агентам.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct McpDoc {
+    /// Показывать ли шесть графовых инструментов; по умолчанию скрыты (OQ-162).
+    pub graph_tools: bool,
+}
+
 /// Настройки пользователя (`~/.bars/settings.toml`) целиком, с умолчаниями на месте пропущенного.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SettingsDoc {
@@ -787,6 +794,8 @@ pub struct SettingsDoc {
     pub search: SearchDoc,
     pub chunking: ChunkingDoc,
     pub indexing: IndexingDoc,
+    #[serde(default)]
+    pub mcp: McpDoc,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

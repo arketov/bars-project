@@ -1,4 +1,18 @@
-//! Стартовая инструкция initialize (Т-27), не больше 2000 знаков.
+//! Стартовая инструкция initialize (Т-27), не больше 2000 знаков в обоих видах.
+
+/// Инструкция для сессии: строка о графовых инструментах — только когда они показаны (OQ-162).
+pub fn instructions(graph_tools: bool) -> String {
+    if graph_tools {
+        INSTRUCTIONS.replacen("\n\nРаскладка", &format!("\n{GRAPH_NOTE}\n\nРаскладка"), 1)
+    } else {
+        INSTRUCTIONS.to_string()
+    }
+}
+
+/// Строка о шести графовых инструментах, которых по умолчанию нет в списке.
+const GRAPH_NOTE: &str = "Шесть графовых инструментов читают GraphRAG, не физическую карту окна. Проверяй stale/partial/evidence; similarity не доказывает зависимость.";
+
+/// Инструкция по умолчанию: графовые инструменты скрыты.
 pub const INSTRUCTIONS: &str = r#"bars — локальная база Markdown-документации проекта.
 
 Сначала определи предмет задачи; номер этапа уточни по известному плану/реестру.
@@ -11,6 +25,5 @@ pub const INSTRUCTIONS: &str = r#"bars — локальная база Markdown-
 
 Без project — проект сессии. format=json — JSON, иначе текстовые блоки.
 read/outline/text_search/links читают диск, не несохранённый редактор. rag_search/similar/duplicates — индекс: правка ждёт паузы и очереди. pending не объясняет причину ожидания; ready не доказывает свежесть каждого файла. После смены модели reindex запускает пользователь; reindex_needs_consent — сообщи и не повторяй.
-Шесть графовых инструментов читают GraphRAG, не физическую карту окна. Проверяй stale/partial/evidence; similarity не доказывает зависимость.
 
 Раскладка — совет, правила проекта важнее: features/ — фичи, architecture/ — устройство, knowledge/ — исследования, adr/ — решения, backlog/ — баги/идеи, chats/ — сессии. Index.md, title, ATX, самостоятельные разделы. log.md — только находка/сбой/смена плана, до трёх строк; handoff.md — итог. Подробности: skills bars-docs, bars-session-log."#;

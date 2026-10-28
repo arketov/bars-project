@@ -9,7 +9,7 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::{Duration, Instant};
 
-use bars_mcp::{BarsMcp, CALL_TIMEOUT, Env, INSTRUCTIONS, Launch, MODEL_WAIT};
+use bars_mcp::{BarsMcp, CALL_TIMEOUT, Env, INSTRUCTIONS, Launch, MODEL_WAIT, instructions};
 use bars_protocol::{Client, ClientKind, Endpoint, RegisterParams};
 use bars_worker::serve::serve;
 use bars_worker::worker::WorkerConfig;
@@ -177,7 +177,17 @@ impl Harness {
             })),
             call_timeout: CALL_TIMEOUT,
             model_wait: MODEL_WAIT,
+            bars_home: Some(self.home.path().to_path_buf()),
         }
+    }
+
+    /// Включает графовые инструменты, как человек в окне: ключ `[mcp] graph_tools` в `settings.toml`.
+    fn show_graph_tools(&self) {
+        fs::write(
+            self.home.path().join("settings.toml"),
+            "[mcp]\ngraph_tools = true\n",
+        )
+        .unwrap();
     }
 
     /// MCP-сервер в памяти и сырой клиент к нему.
@@ -223,19 +233,106 @@ fn indexed(status: &Value) -> bool {
     status["state"] == "ready" && !status["updated_at"].is_null() && status["pending"] == 0
 }
 
+const GRAPH_TOOLS: [&str; 6] = [
+    "bars_context",
+    "bars_explore",
+    "bars_graph",
+    "bars_impact",
+    "bars_paths",
+    "bars_relations",
+];
+
+async fn tool_names(mcp: &mut Pipe) -> Vec<String> {
+    let tools = mcp.request("tools/list", json!({})).await;
+    let mut names: Vec<_> = tools["result"]["tools"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|tool| tool["name"].as_str().unwrap().to_string())
+        .collect();
+    names.sort();
+    names
+}
+
+/// OQ-162: без ключа `[mcp] graph_tools` шесть графовых инструментов не в списке и не вызываются,
+/// в инструкции о них ни слова; ключ возвращает их со следующей сессией.
+#[tokio::test(flavor = "multi_thread")]
+async fn graph_tools_are_hidden_until_settings_show_them() {
+    let harness = Harness::new("graph-hidden");
+    let root = harness.project("proj");
+    let mut hidden = harness.connect(harness.env(&root));
+    let init = hidden.initialize().await;
+    let text = init["result"]["instructions"].as_str().unwrap();
+    assert_eq!(text, INSTRUCTIONS);
+    assert_eq!(text, instructions(false));
+    assert!(!text.contains("графовых"), "{text}");
+    let names = tool_names(&mut hidden).await;
+    assert_eq!(names.len(), 10, "{names:?}");
+    assert!(
+        GRAPH_TOOLS
+            .iter()
+            .all(|tool| !names.contains(&tool.to_string()))
+    );
+    let answer = hidden
+        .request(
+            "tools/call",
+            json!({ "name": "bars_graph", "arguments": {"view":"mixed"} }),
+        )
+        .await;
+    assert!(
+        answer["result"].is_null() && answer["error"]["message"] == "tool not found",
+        "скрытый инструмент не вызывается: {answer}"
+    );
+    assert_eq!(
+        harness.launches.load(Ordering::SeqCst),
+        0,
+        "до воркера вызов не дошёл"
+    );
+
+    harness.show_graph_tools();
+    let mut shown = harness.connect(harness.env(&root));
+    let init = shown.initialize().await;
+    let text = init["result"]["instructions"].as_str().unwrap();
+    assert_eq!(text, instructions(true));
+    assert!(text.contains("Шесть графовых инструментов"), "{text}");
+    assert!(
+        text.chars().count() <= 2000,
+        "Т-27: не длиннее 2 000 знаков"
+    );
+    let names = tool_names(&mut shown).await;
+    assert_eq!(names.len(), 16, "{names:?}");
+    assert!(
+        GRAPH_TOOLS
+            .iter()
+            .all(|tool| names.contains(&tool.to_string()))
+    );
+
+    let mut still_hidden = harness.connect(Env {
+        bars_home: None,
+        ..harness.env(&root)
+    });
+    still_hidden.initialize().await;
+    assert_eq!(tool_names(&mut still_hidden).await.len(), 10);
+}
+
 #[tokio::test(flavor = "multi_thread")]
 async fn initialize_and_tool_list_do_not_touch_the_worker() {
     let harness = Harness::new("init");
     let root = harness.project("proj");
+    harness.show_graph_tools();
     let mut mcp = harness.connect(harness.env(&root));
 
     let init = mcp.initialize().await;
-    let instructions = init["result"]["instructions"]
+    let text = init["result"]["instructions"]
         .as_str()
         .expect("instructions в ответе на initialize (Т-27)");
-    assert_eq!(instructions, INSTRUCTIONS);
+    assert_eq!(text, instructions(true));
     assert!(
-        instructions.chars().count() <= 2000,
+        text.chars().count() <= 2000,
+        "Т-27: не длиннее 2 000 знаков"
+    );
+    assert!(
+        INSTRUCTIONS.chars().count() <= 2000,
         "Т-27: не длиннее 2 000 знаков"
     );
 
@@ -286,6 +383,7 @@ async fn initialize_and_tool_list_do_not_touch_the_worker() {
 #[tokio::test(flavor = "multi_thread")]
 async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
     let harness = Harness::new("graph-tools");
+    harness.show_graph_tools();
     let root = harness.project("graph");
     fs::write(
         root.join("docs/requirements.md"),
@@ -1077,7 +1175,10 @@ async fn default_format_is_text_with_explicit_delimiters() {
 /// клиент закрывает stdin.
 #[tokio::test(flavor = "multi_thread")]
 async fn real_binary_answers_initialize_without_a_worker_and_exits_on_eof() {
+    // Настоящий exe читает `~/.bars/settings.toml`: домашняя папка подменена пустой, как в проверках клиентов.
+    let home = TempDir::new().unwrap();
     let mut child = tokio::process::Command::new(env!("CARGO_BIN_EXE_bars-mcp"))
+        .env(bars_protocol::USER_HOME_VAR, home.path())
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
@@ -1096,7 +1197,11 @@ async fn real_binary_answers_initialize_without_a_worker_and_exits_on_eof() {
         started.elapsed()
     );
     let tools = mcp.request("tools/list", json!({})).await;
-    assert_eq!(tools["result"]["tools"].as_array().unwrap().len(), 16);
+    assert_eq!(
+        tools["result"]["tools"].as_array().unwrap().len(),
+        10,
+        "без настройки графовых инструментов нет (OQ-162)"
+    );
 
     drop(mcp);
     let status = tokio::time::timeout(Duration::from_secs(10), child.wait())

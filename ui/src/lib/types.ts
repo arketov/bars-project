@@ -239,6 +239,8 @@ export interface SettingsDoc {
   rerank: RerankDoc;
   search: SearchDoc;
   chunking: { min_chars: number; max_chars: number };
+  /** Таблица `[mcp]`: что MCP показывает агентам. */
+  mcp: { graph_tools: boolean };
 }
 
 export interface SettingsOutput {

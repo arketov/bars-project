@@ -13,6 +13,7 @@ import type { SettingsDoc } from "./types";
 
 const DOC: SettingsDoc = {
   indexing: { edit_pause_seconds: 30 },
+  mcp: { graph_tools: false },
   embed: { accelerator: "auto", source: "builtin", model: "BAAI/bge-m3", base_url: null, api_key_name: null, api_key_env: null, batch_size: 32, unload_after_minutes: 15 },
   rerank: {
     accelerator: "auto",
