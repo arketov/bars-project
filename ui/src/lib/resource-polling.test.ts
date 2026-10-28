@@ -47,6 +47,21 @@ it("hidden polling only reads notifications once per ten seconds", async () => {
   expect(invoke.mock.calls.map(([method]) => method)).toEqual(["activity", "operation_events", "activity", "operation_events"]);
 });
 
+it("the interval timer of a hidden window reads only notifications and showing it runs a full refresh", async () => {
+  vi.useFakeTimers(); vi.setSystemTime(new Date("2026-10-28T12:00:00Z"));
+  const hidden = vi.spyOn(document, "hidden", "get").mockReturnValue(true);
+  app.start(); await vi.advanceTimersByTimeAsync(0);
+  invoke.mockClear();
+  await vi.advanceTimersByTimeAsync(9_000);
+  const methods = () => invoke.mock.calls.map(([method]) => method).filter(method => method !== "project_observe");
+  expect(methods()).toEqual(["activity", "operation_events"]);
+  invoke.mockClear();
+  hidden.mockReturnValue(false);
+  document.dispatchEvent(new Event("visibilitychange"));
+  await vi.advanceTimersByTimeAsync(0);
+  expect(methods()).toEqual(expect.arrayContaining(["activity", "operation_events", "projects"]));
+});
+
 it("a forced refresh received during a request runs immediately afterward", async () => {
   let finish!: (value: unknown) => void;
   invoke.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
