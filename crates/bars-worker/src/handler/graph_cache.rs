@@ -452,7 +452,7 @@ mod tests {
         let cold_ms = started.elapsed().as_secs_f64() * 1000.0;
         assert_eq!(
             expected,
-            blake3::hash(&serde_json::to_vec(&first).unwrap())
+            blake3::hash(&serde_json::to_vec(&*first).unwrap())
                 .to_hex()
                 .as_str()
         );

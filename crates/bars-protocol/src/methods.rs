@@ -1260,6 +1260,7 @@ mod tests {
         SettingsSave(SettingsSaveParams),
         ModelsInfo(ModelsInfoParams),
         ModelDownload(ModelDownloadParams),
+        ModelRetry(ModelRetryParams),
         SecretSet(SecretSetParams),
         SecretStatus(SecretStatusParams),
         ClientsStatus(ClientsStatusParams),

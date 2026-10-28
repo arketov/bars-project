@@ -234,6 +234,7 @@ mod tests {
         io::Error::other("сбой приёма")
     }
 
+    #[tokio::test]
     async fn accept_errors_below_the_limit_are_retried_and_a_success_resets_the_series() {
         // Четыре ошибки подряд при пределе 5 не останавливают цикл, а успех обнуляет серию;
         // цикл заканчивается только пятью ошибками после третьего соединения.
