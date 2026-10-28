@@ -144,7 +144,7 @@
                         {#if standingLabel(finding)}<span class="stand {finding.standing}">{standingLabel(finding)}</span>{/if}
                       </p>
                       {#each finding.subjects as subject, i (i)}
-                        <button class="subject" onclick={() => openSubject(subject)} title="Открыть документ на строке">
+                        <button class="subject" data-document-path={subject.path} data-document-line={subject.first_line} data-menu-kind="file" data-menu-place="card" onclick={() => openSubject(subject)} title="Открыть документ на строке">
                           <code>{subject.path}:{linesLabel(subject)}</code>
                           {#if kind === "duplicates"}<span class="role">{roleLabel(subject.role)}</span>{/if}
                           {#if subject.heading}<span class="muted small">{subject.heading.split("/").join(" / ")}</span>{/if}

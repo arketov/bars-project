@@ -63,7 +63,7 @@
     {:else}
       <ol aria-label="Записи журнала" aria-busy={loading}>
         {#each data.entries as entry}
-          <li class:warning={entry.level === "warn"} class:failure={entry.level === "error"}>
+          <li class:warning={entry.level === "warn"} class:failure={entry.level === "error"} data-menu-kind="row" data-menu-row="log">
             <div class="meta"><time datetime={entry.time}>{new Date(entry.time).toLocaleString("ru-RU")}</time> · <b>{names[entry.level]}</b> · PID {entry.pid}</div>
             <div class="target">{entry.target}</div>
             <p class="message">{entry.message}</p>

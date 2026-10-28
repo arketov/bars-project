@@ -30,7 +30,7 @@
         <article>
           <h3>{doc.title}</h3><div class="path">{doc.path}</div>
           {#each doc.hits as hit, index (`${hit.line}:${hit.column}:${index}`)}
-            <button class="occurrence" onclick={() => open(doc, hit)} title={`Открыть строку ${hit.line}, столбец ${hit.column}`}>
+            <button class="occurrence" data-document-path={doc.path} data-document-line={hit.line} data-menu-kind="file" data-menu-place="card" onclick={() => open(doc, hit)} title={`Открыть строку ${hit.line}, столбец ${hit.column}`}>
               <span class="line">{hit.line}</span><span class="snippet">{#each pieces(hit.text, hit.ranges) as piece}{#if piece.mark}<mark>{piece.text}</mark>{:else}{piece.text}{/if}{/each}</span>
             </button>
           {/each}

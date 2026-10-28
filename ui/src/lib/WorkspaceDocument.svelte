@@ -1,6 +1,8 @@
 <script lang="ts">
   import { tick } from "svelte";
-  import { call } from "./api";
+  import { call, copyText } from "./api";
+  import { commandAdapter } from "./command-adapters";
+  import { headingLinkText } from "./link-commands";
   import Icon from "./Icon.svelte";
   import Editor from "./Editor.svelte";
   import { editors, type EditorBuffer } from "./editors.svelte";
@@ -137,6 +139,19 @@
     if (source) { if (line > 0) editor?.scrollToLine(line); return; }
     body?.querySelector("#hit")?.scrollIntoView({ block: "center" });
   }
+  function goToHeading(line: number) { source = true; void tick().then(() => scroll(line)); }
+  /** Команды строки структуры (меню и список действий): переход и ссылка `[[Документ#Заголовок]]`. */
+  const headingCommands = (heading: { line: number; label: string }) => ({
+    "heading.goTo": { run: () => goToHeading(heading.line) },
+    "heading.copyLink": {
+      run: async () => {
+        const link = headingLinkText(hit.path, heading.label);
+        if (!link) throw new Error("Документа нет в дереве проекта");
+        await copyText(link); app.flash("Ссылка на заголовок скопирована");
+      },
+      reason: () => headingLinkText(hit.path, heading.label) ? undefined : "Документа нет в дереве проекта",
+    },
+  });
   // Прокрутка к отрывку при открытии, смене режима и нового отрывка; правки текста её не двигают.
   $effect(() => { void source; void hit.first_line; void doc; void tick().then(() => scroll(hit.first_line)); });
 </script>
@@ -187,10 +202,10 @@
         {:else if !backlinks.known}<p class="bl-note">Документа нет среди файлов проекта на диске.</p>
         {:else}
           <h4 class="bl-group">Ссылаются на этот документ</h4>
-          {#if backlinks.incoming.length}<ul>{#each backlinks.incoming as item (item.path)}<li><button onclick={() => openIncoming(item)} title={item.path}><span class="bl-title">{linkTitle(item.title, item.path)}</span><small>{item.path}{item.lines.length ? ` · строки ${item.lines.join(", ")}` : ""}</small></button></li>{/each}</ul>
+          {#if backlinks.incoming.length}<ul>{#each backlinks.incoming as item (item.path)}<li data-document-path={item.path} data-document-line={item.lines[0] ?? 0} data-menu-kind="file" data-menu-place="card"><button onclick={() => openIncoming(item)} title={item.path}><span class="bl-title">{linkTitle(item.title, item.path)}</span><small>{item.path}{item.lines.length ? ` · строки ${item.lines.join(", ")}` : ""}</small></button></li>{/each}</ul>
           {:else}<p class="bl-note">На этот документ никто не ссылается.</p>{/if}
           <h4 class="bl-group">Этот документ ссылается</h4>
-          {#if backlinks.outgoing.length}<ul>{#each backlinks.outgoing as item (item.line + item.raw + item.kind)}<li>
+          {#if backlinks.outgoing.length}<ul>{#each backlinks.outgoing as item (item.line + item.raw + item.kind)}<li data-menu-kind="link" data-doc-link={item.kind === "wiki" ? undefined : item.raw} data-wiki-link={item.kind === "wiki" ? item.raw : undefined} data-link-text={item.text} data-link-target={item.target}>
             {#if item.broken}<button class="bl-broken" onclick={() => openOutgoing(item)} title="Создать документ «{item.raw}»"><span class="bl-title">{item.text || item.raw}</span><small>ссылка в никуда · строка {item.line}</small></button>
             {:else}<button onclick={() => openOutgoing(item)} title={item.target}><span class="bl-title">{linkTitle(item.target_title, item.target ?? item.raw)}</span><small>{item.target} · строка {item.line}</small></button>{/if}
           </li>{/each}</ul>
@@ -198,7 +213,7 @@
         {/if}
       </div>{/if}
     </footer>
-    {#if outline}<nav class="outline" aria-label="Структура документа"><button class="close" aria-label="Скрыть структуру" onclick={() => outline = false}>×</button>{#each headings as h}<button onclick={() => { source = true; void tick().then(() => scroll(h.line)); }}>{h.label}</button>{/each}</nav>
+    {#if outline}<nav class="outline" aria-label="Структура документа"><button class="close" aria-label="Скрыть структуру" onclick={() => outline = false}>×</button>{#each headings as h (`${h.line}:${h.label}`)}<button data-menu-kind="heading" use:commandAdapter={headingCommands(h)} onclick={() => goToHeading(h.line)}>{h.label}</button>{/each}</nav>
     {:else}<button class="outline-open" title="Показать структуру" onclick={() => outline = true}>☷</button>{/if}
   {/if}
 </section>

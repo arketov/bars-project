@@ -28,6 +28,10 @@ add('document', 'Документ', [
   ['document.outline', 'Показать / скрыть структуру', '', 'Этап 3.4'], ['document.links', 'Входящие / исходящие ссылки', '', 'Этап 3.5'],
   ['document.find', 'Найти в документе', 'Mod+KeyF', 'Этап 3.4'], ['document.save', 'Сохранить сейчас', 'Mod+KeyS', 'Этап 3.4'], ['document.syntaxHelp', 'Шпаргалка Markdown', '', 'Этап 3.4'],
 ]);
+add('document', 'Ссылки и структура', [
+  ['link.copy', 'Скопировать ссылку'], ['link.createTarget', 'Создать документ по ссылке'],
+  ['heading.goTo', 'Перейти к заголовку'], ['heading.copyLink', 'Скопировать ссылку на заголовок'],
+]);
 add('window', 'Поиск', [['search.scope', 'Область поиска'], ['search.scopeClear', 'Сбросить область поиска'], ['search.options', 'Параметры поиска']]);
 add('result', 'Результат', [['result.open', 'Открыть результат'], ['result.graph', 'Показать результат в графе'], ['result.expand', 'Раскрыть результат']]);
 add('target', 'Файл и папка', [['target.open', 'Открыть документ'], ['target.reveal', 'Показать в ОС'], ['target.copyPath', 'Скопировать путь']]);

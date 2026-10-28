@@ -14,7 +14,7 @@ marked.use({
     link(token: Tokens.Link) {
       const inner = this.parser.parseInline(token.tokens);
       if (!isDocumentLink(token.href)) return `<span class="a">${inner}</span>`;
-      return `<a class="a" href="#" data-doc-link="${escapeHtml(token.href)}">${inner}</a>`;
+      return `<a class="a" href="#" data-menu-kind="link" data-doc-link="${escapeHtml(token.href)}">${inner}</a>`;
     },
     image(token: Tokens.Image) {
       return `<span class="a">${escapeHtml(token.text || token.href)}</span>`;
@@ -36,7 +36,7 @@ marked.use({
       const inner = String((token as unknown as { inner: string }).inner);
       const [name, ...alias] = inner.split("|");
       const shown = (alias.join("|") || name).trim();
-      return `<a class="a" href="#" data-wiki-link="${escapeHtml(inner)}">${escapeHtml(shown)}</a>`;
+      return `<a class="a" href="#" data-menu-kind="link" data-wiki-link="${escapeHtml(inner)}">${escapeHtml(shown)}</a>`;
     },
   }],
 });

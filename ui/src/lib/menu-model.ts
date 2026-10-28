@@ -33,6 +33,9 @@ const definitions: Partial<Record<MenuAction, [string, MenuGroup, number]>> = {
   reveal: ['target.reveal', 'path', 0], path: ['target.copyPath', 'path', 1],
   appearance: ['target.style', 'style', 0], check: ['target.checkIndex', 'index', 0],
   checkProject: ['target.checkIndex', 'index', 0], trash: ['target.delete', 'delete', 0],
+  copyLink: ['link.copy', 'path', 2], createTarget: ['link.createTarget', 'create', 2],
+  goHeading: ['heading.goTo', 'open', 0], copyHeading: ['heading.copyLink', 'path', 2],
+  copyTopic: ['topics.copyQuery', 'path', 2], closeTopic: ['topics.delete', 'delete', 0],
 };
 /** Общий порядок; разделители рендерятся только между непустыми группами. */
 export function groupMenu(items: ModelItem[]): ModelItem[] {
@@ -105,6 +108,13 @@ function item(action: MenuAction, label: string, extra: { reason?: string; expla
   return { id, group, order, action, label, danger: group === 'delete', disabled: !!extra.reason,
     hint: extra.reason || extra.explanation, shortcut: extra.shortcut ?? '' };
 }
+/** Группа `tab`: четыре пункта вкладки документа и служебной панели с причинами недоступности. */
+function tabItems(tab: NonNullable<DocumentMenuTarget['tab']>, hint: (id: string) => string): ModelItem[] {
+  return [item('closeTab', 'Закрыть', { shortcut: hint('tab.close') }),
+    item('closeOthers', 'Закрыть другие', { reason: tab.others ? undefined : noOtherTabs, shortcut: hint('tab.closeOthers') }),
+    item('closeRight', 'Закрыть справа', { reason: tab.right ? undefined : noRightTabs, shortcut: hint('tab.closeRight') }),
+    item('moveTab', 'Переместить вкладку…', { reason: tab.canMove ? undefined : cannotMoveTab, shortcut: hint('tab.move') })];
+}
 /**
  * Меню документа на вкладке, в шапке, на карточке, в рендере и в редакторе: один набор групп на все места.
  * Редактор — правка текста и подменю «Документ ▸» с группами вкладки; `nested` строит это подменю.
@@ -127,12 +137,7 @@ export function documentMenu(target: DocumentMenuTarget, hint: (id: string) => s
   if (target.copySelection && (target.place === 'card' || target.place === 'render')) {
     out.push(item('copy', 'Копировать', { shortcut: textShortcut('copy', target.mac) }));
   }
-  if (target.tab && target.place !== 'card') {
-    out.push(item('closeTab', 'Закрыть', { shortcut: hint('tab.close') }),
-      item('closeOthers', 'Закрыть другие', { reason: target.tab.others ? undefined : noOtherTabs, shortcut: hint('tab.closeOthers') }),
-      item('closeRight', 'Закрыть справа', { reason: target.tab.right ? undefined : noRightTabs, shortcut: hint('tab.closeRight') }),
-      item('moveTab', 'Переместить вкладку…', { reason: target.tab.canMove ? undefined : cannotMoveTab, shortcut: hint('tab.move') }));
-  }
+  if (target.tab && target.place !== 'card') out.push(...tabItems(target.tab, hint));
   if (target.place === 'card') out.push(item('open', 'Открыть'));
   out.push(item('newWindow', 'Открыть в новом окне', { shortcut: hint('document.newWindow') }));
   // Одна глубина подменю: внутри «Документ ▸» редакторы раскрывает меню при открытии подменю.
@@ -149,6 +154,80 @@ export function documentMenu(target: DocumentMenuTarget, hint: (id: string) => s
 export function nestedEditors(editors: readonly { id: string; label: string }[]): ModelItem[] {
   return editorMenu(editors).map((editor, order) => ({ ...editor, order: 2 + order / 100,
     label: editor.editor === 'default' ? 'Открыть в программе по умолчанию' : `Открыть в ${editor.label}` }));
+}
+
+/** Меню вкладки служебной панели: только группа `tab`. */
+export function panelTabMenu(tab: NonNullable<DocumentMenuTarget['tab']>, hint: (id: string) => string = () => ''): ModelItem[] {
+  return groupMenu(tabItems(tab, hint));
+}
+
+export interface LinkMenuTarget {
+  /** Документ-цель найден среди файлов проекта. */
+  resolved: boolean;
+  /** Путь для «Создать документ» допустим. */
+  canCreate: boolean;
+  workerDown?: boolean;
+  copySelection?: boolean;
+  mac?: boolean;
+}
+/** Меню ссылки в тексте и исходящей строки панели «Ссылки»: цель есть — открыть и скопировать, битая — создать и скопировать. */
+export function linkMenu(target: LinkMenuTarget): ModelItem[] {
+  const out: ModelItem[] = [];
+  const busy = target.workerDown ? 'Нет связи с воркером. Дождитесь подключения.' : undefined;
+  if (target.copySelection) out.push(item('copy', 'Копировать', { shortcut: textShortcut('copy', target.mac) }));
+  if (target.resolved) {
+    out.push(item('open', 'Открыть цель'), item('newWindow', 'Открыть в новом окне', { reason: busy }));
+  } else out.push(item('createTarget', 'Создать документ', { reason: busy || (target.canCreate ? undefined : 'Недопустимый путь ссылки') }));
+  out.push(item('copyLink', 'Скопировать ссылку'));
+  return groupMenu(out);
+}
+
+/** Строки экранов: команды реестра, чьи обработчики экран зарегистрировал на строке. */
+export type RowKind = 'indexing' | 'mcp' | 'notification' | 'log';
+export const rowKinds: readonly RowKind[] = ['indexing', 'mcp', 'notification', 'log'];
+const rowCommands: Record<RowKind, { id: string; action: MenuAction; label: string; group: MenuGroup; order: number; onlyWhenAllowed?: boolean }[]> = {
+  indexing: [{ id: 'indexing.details', action: 'details', label: 'Подробности', group: 'open', order: 0 }],
+  mcp: [{ id: 'mcp.details', action: 'details', label: 'Подробности', group: 'open', order: 0 }],
+  notification: [
+    { id: 'notification.details', action: 'details', label: 'Подробности', group: 'open', order: 0 },
+    { id: 'notification.retry', action: 'retry', label: 'Повторить', group: 'open', order: 1, onlyWhenAllowed: true },
+  ],
+  log: [{ id: 'logs.copy', action: 'copyLog', label: 'Скопировать журнал', group: 'path', order: 0 }],
+};
+/**
+ * `reason(id)`: `null` — у строки нет обработчика команды, пункта нет; строка — команда сейчас недоступна;
+ * `undefined` — доступна. «Повторить» недоступное не показывается: повтор допустим не везде.
+ */
+export function rowMenu(kind: RowKind, reason: (id: string) => string | null | undefined, hint: (id: string) => string = () => '', copySelection = false, mac = false): ModelItem[] {
+  const out: ModelItem[] = [];
+  if (copySelection) out.push(item('copy', 'Копировать', { shortcut: textShortcut('copy', mac) }));
+  for (const command of rowCommands[kind]) {
+    const why = reason(command.id);
+    if (why === null || (command.onlyWhenAllowed && why)) continue;
+    out.push({ id: command.id, group: command.group, order: command.order, action: command.action, label: command.label,
+      disabled: !!why, hint: why || undefined, shortcut: hint(command.id) });
+  }
+  return groupMenu(out);
+}
+
+/** Меню заголовка структуры: обработчики команд зарегистрированы на строке структуры. */
+export function headingMenu(reason: (id: string) => string | null | undefined, hint: (id: string) => string = () => '', copySelection = false, mac = false): ModelItem[] {
+  const out: ModelItem[] = [];
+  if (copySelection) out.push(item('copy', 'Копировать', { shortcut: textShortcut('copy', mac) }));
+  for (const [action, label] of [['goHeading', 'Перейти к заголовку'], ['copyHeading', 'Скопировать ссылку на заголовок']] as const) {
+    const [id] = definitions[action]!;
+    const why = reason(id);
+    if (why !== null) out.push(item(action, label, { reason: why || undefined, shortcut: hint(id) }));
+  }
+  return groupMenu(out);
+}
+
+/** Строка «Новых тем»: запрос копируется, закрытие опасное и серое, пока идёт операция с темами. */
+export function topicMenu(busy: boolean, copySelection = false, mac = false): ModelItem[] {
+  const out: ModelItem[] = [];
+  if (copySelection) out.push(item('copy', 'Копировать', { shortcut: textShortcut('copy', mac) }));
+  out.push(item('copyTopic', 'Скопировать запрос'), item('closeTopic', 'Закрыть тему', { reason: busy ? 'Идёт операция с темами' : undefined }));
+  return groupMenu(out);
 }
 
 /** Ближайший объект останавливает поиск: вложенная цель не наследует меню документа. */

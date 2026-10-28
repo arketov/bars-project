@@ -59,15 +59,15 @@ describe("renderDocument", () => {
 describe("renderChunk и plainText", () => {
   it("ссылка на другой .md — активная, внешняя и картинка — нет", () => {
     const html = renderDocument("[план](../features/x/plan.md#раздел), [сайт](https://x.y), [корень](/a.md)\n");
-    expect(html).toContain('<a class="a" href="#" data-doc-link="../features/x/plan.md#раздел">план</a>');
+    expect(html).toContain('<a class="a" href="#" data-menu-kind="link" data-doc-link="../features/x/plan.md#раздел">план</a>');
     expect(html).toContain('<span class="a">сайт</span>');
     expect(html).toContain('<span class="a">корень</span>');
   });
 
   it("[[ссылка]] как в Obsidian — активная, с псевдонимом показывает псевдоним, в коде остаётся текстом", () => {
     const html = renderDocument("[[План]] и [[папка/Файл|подпись]] и `[[код]]`\n");
-    expect(html).toContain('<a class="a" href="#" data-wiki-link="План">План</a>');
-    expect(html).toContain('<a class="a" href="#" data-wiki-link="папка/Файл|подпись">подпись</a>');
+    expect(html).toContain('<a class="a" href="#" data-menu-kind="link" data-wiki-link="План">План</a>');
+    expect(html).toContain('<a class="a" href="#" data-menu-kind="link" data-wiki-link="папка/Файл|подпись">подпись</a>');
     expect(html).toContain("<code>[[код]]</code>");
   });
 

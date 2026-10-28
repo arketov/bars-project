@@ -7,10 +7,11 @@
   import AppearancePicker from "./AppearancePicker.svelte";
   import { canStyleFolder, keyOf } from "./appearance";
   import { findDocumentNode, findNode, relativeToDocs } from "./tree";
-  import { documentMenu, documentPlaces, editorMenu, groupMenu, menuTargetAt, nestedEditors, treeMenu, type DocumentPlace, type ModelItem, type TextCommand } from "./menu-model";
+  import { documentMenu, documentPlaces, editorMenu, groupMenu, headingMenu, linkMenu, menuTargetAt, nestedEditors, panelTabMenu, rowKinds, rowMenu, topicMenu, treeMenu, type DocumentPlace, type ModelItem, type RowKind, type TextCommand } from "./menu-model";
   import { executeTreeCommand, type TreeCommandTarget } from "./tree-commands";
   import { editorHostOf, executeDocumentCommand, type DocumentCommandTarget } from "./document-commands";
-  import { adapterFor } from "./command-adapters";
+  import { executeLinkCommand, resolveLink, type LinkCommandTarget } from "./link-commands";
+  import { adapterFor, runAdapter } from "./command-adapters";
   import { tabHost } from "./workspace-tabs";
   import { keybindings } from "./keybindings.svelte";
   const menuId = $props.id();
@@ -34,6 +35,10 @@
   // Действие пункта, чьё подменю открыто: «Открыть в …» или «Документ ▸»; глубина одна.
   let submenu = $state<string | null>(null);
   let documentTarget = $state<DocumentCommandTarget | null>(null);
+  // Шаг 3.3.7: ссылка, строка экрана или заголовок с обработчиками команд и вкладка служебной панели.
+  let linkTarget: LinkCommandTarget | null = null;
+  let rowTarget: { project: string; element: HTMLElement } | null = null;
+  let panelTarget: { project: string; panelId: string } | null = null;
   let generation = 0;
   let origin = { x: 0, y: 0 };
   // Меню внутри showModal должно принадлежать тому же верхнему слою WebView.
@@ -48,6 +53,7 @@
     if (topic && (current !== topic.project || !app.topicsOpen || !app.topics.topics.some(t => t.id === topic?.id))) close();
     if (pendingFolder && (current !== pendingFolder.project || app.docsRoot !== pendingFolder.docsRoot)) close();
     if (document && current !== document.project) close();
+    if ((linkTarget && current !== linkTarget.project) || (rowTarget && current !== rowTarget.project) || (panelTarget && current !== panelTarget.project)) close();
     if (picker && current !== picker.project) picker = null;
     if (folder && (current !== folder.project || app.docsRoot !== folder.docsRoot || !app.projects.some(p => p.path === folder?.project))) close();
     if (project && (current !== openedCurrent || !app.projects.some(p => p.path === project))) close();
@@ -68,6 +74,9 @@
     styleTarget = null;
     submenu = null;
     documentTarget = null;
+    linkTarget = null;
+    rowTarget = null;
+    panelTarget = null;
     generation++;
   }
 
@@ -93,9 +102,7 @@
     if (row && current && app.topicsOpen && app.topics.topics.some(t => t.id === row.id)) {
       topic = { project: current, id: row.id };
       returnFocus = row.element;
-      found.splice(0, found.length,
-        { action: "copyTopic", label: "Скопировать" },
-        { action: "closeTopic", label: "Закрыть", disabled: app.topics.busy });
+      found.splice(0, found.length, ...topicMenu(app.topics.busy));
     }
     const nearest = menuTargetAt(event.target);
     const directory = !textField(event.target) && nearest?.hasAttribute("data-folder-path") && folderAt(event.target);
@@ -153,8 +160,37 @@
         }, id => ["tab.close", "tab.closeOthers", "tab.closeRight", "tab.move", "document.newWindow"].includes(id) && keybindings.binding(id) ? keybindings.hint(id) : ""));
       }
     }
+    const kind = !folder && !project && !topic && !entry && !textField(event.target) ? nearest?.dataset.menuKind : undefined;
+    if (current && nearest && kind && kind !== 'file' && kind !== 'editor') {
+      const mac = /Mac/.test(navigator.platform), copySelection = found.some(entryItem => entryItem.action === 'copy');
+      const hint = (id: string) => keybindings.binding(id) ? keybindings.hint(id) : '';
+      // Обработчик команды на строке: нет — пункта нет, есть — серый с причиной или доступный.
+      const handler = (id: string) => { const adapter = adapterFor(id, nearest); return adapter ? adapter.reason() : null; };
+      let built: ModelItem[] = [];
+      if (kind === 'link') {
+        const raw = nearest.dataset.wikiLink ?? nearest.dataset.docLink;
+        const source = nearest.closest<HTMLElement>('[data-document-path]')?.dataset.documentPath;
+        if (raw !== undefined && source) {
+          const wiki = nearest.dataset.wikiLink !== undefined, known = nearest.dataset.linkTarget || undefined;
+          const resolved = resolveLink(source, raw, wiki, known);
+          linkTarget = { project: current, docsRoot, source, raw, wiki, known, text: (nearest.dataset.linkText ?? nearest.textContent ?? '').trim() };
+          built = linkMenu({ resolved: !!resolved.target, canCreate: !!resolved.create, workerDown: !!app.workerDown, copySelection, mac });
+        }
+      } else if (kind === 'heading') {
+        rowTarget = { project: current, element: nearest };
+        built = headingMenu(handler, hint, copySelection, mac);
+      } else if (kind === 'row' && rowKinds.includes(nearest.dataset.menuRow as RowKind)) {
+        rowTarget = { project: current, element: nearest };
+        built = rowMenu(nearest.dataset.menuRow as RowKind, handler, hint, copySelection, mac);
+      } else if (kind === 'panel-tab') {
+        const panelId = tabHost()?.panelAt(nearest), state = panelId ? tabHost()?.state(panelId) : undefined;
+        if (panelId && state) { panelTarget = { project: current, panelId }; built = panelTabMenu(state, hint); }
+      }
+      if (built.length) { found.splice(0, found.length, ...built); returnFocus = nearest; }
+      else { linkTarget = null; rowTarget = null; panelTarget = null; }
+    }
     if (entry && current && nearest) {
-      treeTarget = { project: current, docsRoot, path: entry.path, element: nearest, pinned: folder ?? undefined };
+      treeTarget ={ project: current, docsRoot, path: entry.path, element: nearest, pinned: folder ?? undefined };
       returnFocus = nearest;
       found.splice(0, found.length, ...treeMenu({ ...entry, state: app.project?.state ?? 'starting',
         workerDown: !!app.workerDown, missing: folder?.missing, canStyle: !!styleTarget,
@@ -196,6 +232,20 @@
       close(true);
       try { await executeDocumentCommand(item.id, captured, item.editor); }
       catch (error) { app.flash(String(error instanceof Error ? error.message : error), true); }
+      return;
+    }
+    if (item.action !== 'copy' && item.id && (linkTarget || rowTarget || panelTarget)) {
+      const [link, row, panel] = [linkTarget, rowTarget, panelTarget];
+      close(true);
+      try {
+        if (link) await executeLinkCommand(item.id, link);
+        else if (row) await runAdapter(item.id, row.element);
+        else if (panel) {
+          const host = tabHost();
+          if (!host || panel.project !== app.current) throw new Error('Вкладка уже закрыта');
+          await host.run(item.id, panel.panelId);
+        }
+      } catch (error) { app.flash(String(error instanceof Error ? error.message : error), true); }
       return;
     }
     if (treeTarget && (item.id || item.action === 'editor') && item.action !== 'copy') {
@@ -257,7 +307,7 @@
     if (event.key === "Tab" && returnFocus && !items.length) { close(); return; }
     if ((event.shiftKey && event.key === "F10") || event.key === "ContextMenu") {
       const element = globalThis.document.activeElement;
-      if (element instanceof HTMLElement && (projectAt(element) || folderAt(element) || documentAt(element) || topicAt(element))) {
+      if (element instanceof HTMLElement && (projectAt(element) || folderAt(element) || documentAt(element) || topicAt(element) || menuTargetAt(element))) {
         event.preventDefault();
         const rect = element.getBoundingClientRect();
         element.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: rect.left, clientY: rect.bottom }));

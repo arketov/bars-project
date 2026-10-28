@@ -254,7 +254,7 @@ it("меню темы копирует исходный запрос, а не п
   const row = host.querySelector('[data-new-topic-id="1"]')!;
   row.querySelector(".ttitle")!.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
   await settle();
-  expect([...menu.querySelectorAll('[role="menuitem"]')].map(b => b.textContent?.trim())).toEqual(["Скопировать", "Закрыть"]);
+  expect([...menu.querySelectorAll('[role="menuitem"]')].map(b => b.textContent?.trim())).toEqual(["Скопировать запрос", "Закрыть тему"]);
   button(menu, "Скопировать")!.click();
   await settle();
   expect(copyText).toHaveBeenCalledWith(original);
@@ -309,7 +309,7 @@ it("Shift+F10 открывает меню; ошибка буфера не уда
   row.focus();
   row.dispatchEvent(new KeyboardEvent("keydown", { key: "F10", shiftKey: true, bubbles: true, cancelable: true }));
   await settle();
-  expect(document.activeElement?.textContent?.trim()).toBe("Скопировать");
+  expect(document.activeElement?.textContent?.trim()).toBe("Скопировать запрос");
   button(menu, "Скопировать")!.click();
   await settle();
   expect(host.querySelector('[data-new-topic-id="1"]')).not.toBeNull();

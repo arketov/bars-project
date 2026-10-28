@@ -146,7 +146,7 @@
         <h2 id="mcp-list-title" tabindex="-1">Вызовы · {page.summary.calls}</h2>
         {#if page.records.length === 0}<div class="empty" role="status">{activeFilters ? "Нет совпадений. Измените или сбросьте фильтры." : "Вызовов за последние 24 часа пока нет. Здесь появятся обращения MCP после начала сбора; проверьте также последние 7 дней."}</div>{/if}
         {#each page.records as a (a.id)}
-          <button id={`mcp-call-${a.id}`} class="call-row" class:selected={selected?.id === a.id} aria-pressed={selected?.id === a.id} onclick={() => open(a)} use:commandAdapter={{ 'mcp.details': { run: () => open(a) } }}>
+          <button id={`mcp-call-${a.id}`} class="call-row" data-menu-kind="row" data-menu-row="mcp" class:selected={selected?.id === a.id} aria-pressed={selected?.id === a.id} onclick={() => open(a)} use:commandAdapter={{ 'mcp.details': { run: () => open(a) } }}>
             <time>{localTime(a.started)}</time><span><strong>{a.tool}</strong><small>{a.project_name ?? (a.project || "Без проекта")}</small><small>{a.project}</small><span class:bad={a.outcome === "error"} class="status-label">{status(a)}</span></span><span class="metrics">{quantity(a)}<small>{duration(a.duration_ms)}</small></span>
           </button>
         {/each}

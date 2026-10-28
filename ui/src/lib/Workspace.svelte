@@ -249,6 +249,8 @@
         let stopDot: (() => void) | undefined;
         return { element: tab.element, init(params) {
           tab.init(params); tab.element.dataset.workspacePanel = params.api.id;
+          // Вкладка служебной панели — цель без документа; у вкладки документа ниже вид «file».
+          tab.element.dataset.menuKind = "panel-tab"; tab.element.dataset.menuPlace = "tab";
           // Средняя кнопка повторяет крестик, включая проверку правок и закрытие списка переполнения.
           tab.element.addEventListener("mousedown", event => {
             if (event.button === 1) event.preventDefault();

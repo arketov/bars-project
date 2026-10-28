@@ -50,7 +50,8 @@ export async function executeDocumentCommand(id: string, target: DocumentCommand
   if (id === 'document.newWindow') { await app.openInNewWindow(target.path); return; }
   if (id === 'target.open') {
     const hit = app.results?.results.find(hit => hit.path === target.path && hit.first_line === target.line);
-    await app.openDocument(hit ?? { path: target.path, title: target.path, first_line: 0, last_line: 0 });
+    // Находка аудита, вхождение и входящая ссылка несут строку: документ открывается на ней.
+    await app.openDocument(hit ?? { path: target.path, title: target.path, first_line: target.line, last_line: target.line });
     return;
   }
   const action = id === 'target.reveal' ? 'reveal' : id === 'target.copyPath' ? 'path' : id === 'target.checkIndex' ? 'check' : 'open';
