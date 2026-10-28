@@ -140,7 +140,11 @@
     if (kind === "topics") app.topicsOpen = true;
     if (kind === "audits") app.auditsOpen = true;
     let panel = api.getPanel(kind);
-    if (!panel) panel = api.addPanel({ id: kind, component: "workspace", title: panelTitles[kind], params: { kind }, position: api.getPanel("search") ? { referencePanel: "search", direction: "within" } : api.groups[0] ? { referenceGroup: api.groups[0], direction: "within" } : undefined });
+    if (!panel) {
+      // Новая служебная вкладка — в центре (Т-43, ISS-44), а не рядом с «Поиском», даже если он перенесён вправо.
+      const target = zones.serviceGroup() ?? api.groups[0];
+      panel = api.addPanel({ id: kind, component: "workspace", title: panelTitles[kind], params: { kind }, position: target ? { referenceGroup: target, direction: "within" } : undefined });
+    }
     panel.api.setActive();
     menu = false;
   }
@@ -424,13 +428,6 @@
     --dv-tab-font-size: 12px; --dv-drag-over-background-color: var(--accent-soft); --dv-drag-over-border-color: var(--accent);
   }
   .dock :global(.dv-tab) { font-style: italic; }
-  .narrow-documents { display: none; }
-  @media (max-width: 1100px) {
-    /* Overlay Dockview содержит contain:layout paint: расширять нужно его, а не вложенный документ. */
-    .narrow-documents { display: inline-block; }
-    .dock :global(.dv-render-overlay:has(.workspace-content)) { left: 0 !important; top: 28px !important; width: 100% !important; height: calc(100% - 28px) !important; z-index: 10; background: var(--bg); }
-    .dock :global(.dv-render-overlay:has(.workspace-content[data-foreground="false"])) { display: none !important; }
-  }
   /* Превью переноса: размер справа равен будущей зоне, подпись — место открытия (Т-43). */
   .dock :global(.dv-drop-target-selection.dv-drop-target-right) { left: auto !important; right: 0; width: var(--zone-preview, 50%) !important; }
   .dock :global(.dv-drop-target-selection)::after { position: absolute; inset: 0; display: grid; place-items: center; color: var(--accent-text); font-size: 12px; font-style: italic; pointer-events: none; }
@@ -438,4 +435,11 @@
   .dock :global(.dv-drop-target-selection.dv-drop-target-left)::after { content: "Откроется слева"; }
   .dock :global(.dv-drop-target-selection.dv-drop-target-top)::after { content: "Откроется сверху"; }
   .dock :global(.dv-drop-target-selection.dv-drop-target-bottom)::after { content: "Откроется снизу"; }
+  .narrow-documents { display: none; }
+  @media (max-width: 1100px) {
+    /* Overlay Dockview содержит contain:layout paint: расширять нужно его, а не вложенный документ. */
+    .narrow-documents { display: inline-block; }
+    .dock :global(.dv-render-overlay:has(.workspace-content)) { left: 0 !important; top: 28px !important; width: 100% !important; height: calc(100% - 28px) !important; z-index: 10; background: var(--bg); }
+    .dock :global(.dv-render-overlay:has(.workspace-content[data-foreground="false"])) { display: none !important; }
+  }
 </style>

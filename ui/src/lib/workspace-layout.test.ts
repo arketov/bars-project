@@ -158,3 +158,10 @@ it("зона, появившаяся сбросом, получает разме
   expect(zones.state.rightWidth).toBeUndefined();
   graph.group.api.setSize({ width: 540 }); sync(); expect(zones.state.rightWidth).toBe(540);
 });
+it("служебная вкладка открывается в центре, даже когда «Поиск» перенесён вправо (ISS-44)", () => {
+  create(); const p = doc(); sync();
+  api.getPanel("search")!.api.moveTo({ group: p.group, position: "center" }); sync();
+  const audits = api.addPanel({ id: "audits", component: "workspace", params: { kind: "audits" }, position: { referenceGroup: zones.serviceGroup()!, direction: "within" } }); sync();
+  expect(zones.state.roles[audits.group.id]).toBe("center"); expect(audits.group).not.toBe(p.group);
+  expect(doc("docs/b.md").group).toBe(p.group);
+});

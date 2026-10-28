@@ -143,6 +143,8 @@ export class WorkspaceZones {
     const open = !!box && !this.group("right") && group.height >= this.api.height - 1 && box.left + box.width >= this.api.width - 1;
     return dropCell(x, y, width, height, this.previewWidth(), { role, open });
   }
+  /** Место служебной вкладки по таблице 3.2.3: последняя активная группа центра, независимо от положения «Поиска» (ISS-44). */
+  serviceGroup() { return this.group("center"); }
   documentGroup() {
     const existing = this.group("right");
     if (existing) return existing;
