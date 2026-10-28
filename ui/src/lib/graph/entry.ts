@@ -14,14 +14,14 @@ export interface GraphAction {
 }
 
 export const GRAPH_ACTIONS: GraphAction[] = [
-  { id: "nearby", label: "Что рядом", hint: "Документ и его соседи, глубина 1–3", ready: false },
-  { id: "inbound", label: "Кто ссылается", hint: "Входящие ссылки с путями и строками", ready: false },
-  { id: "path", label: "Путь до…", hint: "Путь по карте, не зависимость", ready: false },
+  { id: "nearby", label: "Что рядом", hint: "Документ и его соседи, глубина 1–3", ready: true },
+  { id: "inbound", label: "Кто ссылается", hint: "Входящие ссылки с путями и строками", ready: true },
+  { id: "path", label: "Путь до…", hint: "Путь по карте, не зависимость", ready: true },
   { id: "impact", label: "Что затронет правка", hint: "Документированные зависимости; ссылки-соседи отдельно", ready: false },
 ];
 
 export const NO_SELECTION_TEXT = "Выберите документ на карте или найдите его по названию — граф покажет, что с ним связано.";
-const NOT_CONNECTED = "Действие ещё не подключено к карте; оно появится в следующем обновлении графа.";
+const NOT_CONNECTED = "Действие ещё не подключено к карте: оно использует смысловой слой и появится в следующем обновлении графа.";
 
 export interface ActionState {
   enabled: boolean;

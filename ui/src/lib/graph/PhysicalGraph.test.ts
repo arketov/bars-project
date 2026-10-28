@@ -440,9 +440,11 @@ it("полный граф открывается на открытом доку�
   const row = target.querySelector('[aria-label="Действия над документом"]')!;
   expect(row.textContent).toContain("Документ 4");
   expect([...row.querySelectorAll("button")].map((b) => b.textContent)).toEqual(["Что рядом", "Кто ссылается", "Путь до…", "Что затронет правка"]);
-  // Действия ещё не подключены к карте: недоступны, причина — в подсказке.
-  expect(row.querySelector<HTMLButtonElement>('[data-action="nearby"]')!.disabled).toBe(true);
-  expect(row.querySelector<HTMLButtonElement>('[data-action="nearby"]')!.title).toContain("не подключено");
+  // Навигационные действия подключены (2.3.6); «Что затронет правка» ждёт смыслового слоя и остаётся недоступным с причиной.
+  expect(row.querySelector<HTMLButtonElement>('[data-action="nearby"]')!.disabled).toBe(false);
+  expect(row.querySelector<HTMLButtonElement>('[data-action="path"]')!.disabled).toBe(false);
+  expect(row.querySelector<HTMLButtonElement>('[data-action="impact"]')!.disabled).toBe(true);
+  expect(row.querySelector<HTMLButtonElement>('[data-action="impact"]')!.title).toContain("не подключено");
   // Смена активного документа уже открытую вкладку не перебрасывает.
   app.activeDocument = "docs/manual/doc-05.md";
   await settle();
@@ -491,4 +493,135 @@ it("служебные сведения и слой обновления леж�
   expect(target.querySelector('[aria-label="Настройки графа"].pop, section[aria-label="Настройки графа"]')).not.toBeNull();
   expect(target.querySelector(".facts")?.textContent).toContain("Снимок графа");
   expect(target.querySelector('[aria-label="Слой для обновления"]')).not.toBeNull();
+});
+
+const act = async (id: string) => {
+  target.querySelector<HTMLButtonElement>(`.entry-actions [data-action="${id}"]`)!.click();
+  await settle();
+};
+const strip = (name: string) => target.querySelector<HTMLElement>(`.qbar[aria-label="${name}"]`);
+const find = async (text: string) => {
+  const input = target.querySelector<HTMLInputElement>('[aria-label="Найти узел графа"]')!;
+  input.value = text;
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  await settle();
+  input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+  await settle();
+};
+
+it("«Что рядом»: карта перекладывается вокруг документа, глубина растёт до 3, «Общий вид» возвращает всё", async () => {
+  app.activeDocument = "docs/features/doc-04.md";
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  await act("nearby");
+  expect(strip("Локальный граф")?.textContent).toContain("Локальный граф «Документ 4: features»");
+  expect(panel().dataset.nodes).toBe("3");
+  const depth = (d: string) => [...target.querySelectorAll<HTMLButtonElement>('.qbar[aria-label="Локальный граф"] .depth button')].find((b) => b.textContent === d)!;
+  expect(depth("1").getAttribute("aria-checked")).toBe("true");
+  depth("2").click();
+  await settle();
+  expect(panel().dataset.nodes).toBe("5");
+  depth("3").click();
+  await settle();
+  expect(Number(panel().dataset.nodes)).toBeGreaterThan(5);
+  expect(Number(panel().dataset.nodes)).toBeLessThan(36);
+  // Выбор центра сохранён, вид запроса и область поиска не затронуты.
+  expect(target.querySelector(".inspector h3")?.textContent).toContain("Документ 4");
+  expect(rpc.mock.calls.some((c) => c[0] === "graph_query_slice")).toBe(false);
+  button("Общий вид")!.click();
+  await settle();
+  expect(strip("Локальный граф")).toBeNull();
+  expect(panel().dataset.nodes).toBe("36");
+});
+
+it("«Кто ссылается»: читает индекс ссылок, помечает источники вне карты и открывает источник на строке ссылки", async () => {
+  const previous = rpc.getMockImplementation()!;
+  rpc.mockImplementation(async (method: string, params: Record<string, unknown>) => {
+    if (method === "links_of") return { known: true, outgoing: [], incoming: [{ path: "docs/adr/doc-03.md", title: "Документ 3: adr", lines: [4, 9] }, { path: "docs/outside/zzz.md", lines: [2] }] };
+    return previous(method, params);
+  });
+  app.activeDocument = "docs/features/doc-04.md";
+  const open = vi.spyOn(app, "openDocument").mockResolvedValue(undefined);
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  await act("inbound");
+  expect(rpc.mock.calls.find((c) => c[0] === "links_of")![1]).toEqual({ project: "C:/a", path: "docs/features/doc-04.md" });
+  const box = target.querySelector<HTMLElement>('.viewbox[aria-label="Кто ссылается"]')!;
+  expect(strip("Кто ссылается")?.textContent).toContain("2 документов");
+  expect(box.textContent).toContain("Документ 3: adr");
+  expect(box.textContent).toContain("строки 4, 9");
+  expect(box.textContent).toContain("zzz.md · строки 2 · вне карты");
+  expect(box.textContent).toContain("не доказанные зависимости");
+  box.querySelectorAll(".conns > li")[1].querySelector("button")!.click();
+  expect(open).toHaveBeenCalledWith({ path: "docs/outside/zzz.md", title: "zzz", first_line: 2, last_line: 2 });
+  open.mockRestore();
+  button("Общий вид")!.click();
+  await settle();
+  expect(target.querySelector('.viewbox[aria-label="Кто ссылается"]')).toBeNull();
+});
+
+it("«Кто ссылается»: ошибка чтения не превращается в «никто не ссылается», пустой ответ назван пустым", async () => {
+  const previous = rpc.getMockImplementation()!;
+  let fail = true;
+  rpc.mockImplementation(async (method: string, params: Record<string, unknown>) => {
+    if (method === "links_of") {
+      if (fail) throw new Error("индекс ссылок занят");
+      return { known: true, outgoing: [], incoming: [] };
+    }
+    return previous(method, params);
+  });
+  app.activeDocument = "docs/features/doc-04.md";
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  await act("inbound");
+  const box = () => target.querySelector<HTMLElement>('.viewbox[aria-label="Кто ссылается"]')!.textContent!;
+  expect(box()).toContain("индекс ссылок занят");
+  expect(box()).toContain("Это не значит, что ссылок нет");
+  expect(box()).not.toContain("Ни один документ не ссылается");
+  fail = false;
+  [...target.querySelectorAll<HTMLButtonElement>(".viewbox button")].find((b) => b.textContent === "Повторить")!.click();
+  await settle();
+  expect(box()).toContain("Ни один документ не ссылается на «Документ 4: features»");
+});
+
+it("«Путь до…»: вторая вершина выбирается в поиске узла; путь по карте с шагами, вариантами и подписью «не зависимость»", async () => {
+  app.activeDocument = "docs/features/doc-04.md";
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  await act("path");
+  expect(strip("Путь по карте")?.textContent).toContain("выберите вторую вершину");
+  expect(button("Отмена")).toBeDefined();
+  await find("Документ 6:");
+  const bar = strip("Путь по карте")!;
+  expect(bar.textContent).toContain("Документ 4: features → Документ 6: adr");
+  expect(bar.textContent).toContain("2 шага");
+  expect(bar.textContent).toContain("вариант 1 из");
+  expect(target.textContent).toContain("Путь по карте показывает соседство на карте, а не зависимость");
+  const steps = target.querySelectorAll('.viewbox[aria-label="Шаги пути"] li');
+  expect(steps.length).toBe(2);
+  expect(steps[0].textContent).toContain("1. Документ 4: features → Документ 5");
+  expect(steps[0].textContent).toContain("Открыть основание");
+  // Карта не двигается: число узлов прежнее, локальный вид не включался.
+  expect(panel().dataset.nodes).toBe("36");
+  expect(strip("Локальный граф")).toBeNull();
+  button("Общий вид")!.click();
+  await settle();
+  expect(strip("Путь по карте")).toBeNull();
+});
+
+it("«Путь до…»: нет пути в режиме — причина и «Искать во всех связях»; Escape отменяет выбор второй вершины", async () => {
+  app.activeDocument = "docs/features/doc-04.md";
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  await act("path");
+  panel().querySelector("canvas")!.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  await settle();
+  expect(strip("Путь по карте")).toBeNull();
+  await act("path");
+  await find("Документ 21:");
+  expect(strip("Путь по карте")!.textContent).toContain("В режиме «Ссылки» пути не длиннее 6 шагов нет");
+  button("Искать во всех связях")!.click();
+  await settle();
+  expect(panel().dataset.mode).toBe("all");
+  expect(strip("Путь по карте")!.textContent).toContain("вариант 1 из");
 });

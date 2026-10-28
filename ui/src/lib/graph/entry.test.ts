@@ -13,10 +13,13 @@ it("действия документа: без выбора недоступн�
   expect(GRAPH_ACTIONS.map((a) => a.label)).toEqual(["Что рядом", "Кто ссылается", "Путь до…", "Что затронет правка"]);
 });
 
-it("неподключённое действие не включается и называет причину; подключённое — включается для документа", () => {
+it("действия навигации подключены (2.3.6), «Что затронет правка» ждёт смыслового слоя (2.3.8)", () => {
+  const ready = Object.fromEntries(GRAPH_ACTIONS.map((a) => [a.id, a.ready]));
+  expect(ready).toEqual({ nearby: true, inbound: true, path: true, impact: false });
+  const impact = GRAPH_ACTIONS.find((a) => a.id === "impact")!;
+  expect(actionState(impact, "document")).toMatchObject({ enabled: false });
   const [first] = GRAPH_ACTIONS;
-  expect(actionState(first, "document")).toMatchObject({ enabled: false });
-  expect(actionState({ ...first, ready: true }, "document")).toEqual({ enabled: true, reason: first.hint });
+  expect(actionState(first, "document")).toEqual({ enabled: true, reason: first.hint });
 });
 
 it("кнопка обновления активна только для устаревшего, не построенного, остановленного и упавшего графа (ISS-56)", () => {

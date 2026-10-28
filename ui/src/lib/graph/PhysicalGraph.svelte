@@ -14,7 +14,9 @@
   import { DEFAULT_FORCES, Layout, type Forces, type PNode } from "./layout";
   import { EDGE_KINDS, KIND_TITLE, brightnessOf, drawStrength, springOf, widthOf, type EdgeKind, type GEdge, type GNode, type Mode, type SliceKind } from "./model";
   import { graphStatus, loadPhysical, loadQuery, startGraphBuild, stopGraphBuild } from "./physical-api";
-  import { GRAPH_ACTIONS, NO_SELECTION_TEXT, actionState, buildControls } from "./entry";
+  import { GRAPH_ACTIONS, NO_SELECTION_TEXT, actionState, buildControls, type ActionId } from "./entry";
+  import { LOCAL_LIMITS, LOCAL_MAX_DEPTH, PATH_MAX_HOPS, adjacency, localGraph, mapPaths, type MapPath } from "./navigation";
+  import { linkTitle, loadLinks, type IncomingLink } from "../document-links";
   import { FORCE_RANGE, defaultSettings, loadSettings, saveSettings, type PanelKind, type PanelSettings } from "./settings";
   import { INITIAL_LIMITS, MAX_LIMITS, PORTION, SliceStore, emptySlice, type Limits, type Slice } from "./slice";
   import { DEFAULT_DEPTH, MAX_DEPTH, QUERY_BUDGET, QUERY_MAX, SEARCH_MODE, acceptQuerySlice, queryRequest, fallbackText, shapeQuery, type QueryBuild, type QueryInfo, type QueryInput, type RetrievalKind, type ScoreKind } from "./query";
@@ -120,30 +122,27 @@
     const n = base.nodes.find((x) => x.kind === "document" && x.path === path && base.visibleDocs.has(x.index));
     return n ? n.index : null;
   });
-  /** Мини-панель показывает локальный граф документа; вид запроса после поиска важнее. */
-  const isLocal = () => mini && !query && focusIndex !== null;
+  /** Локальный вид полной панели («Что рядом», 2.3.6): центр, глубина 1–3 и ступень пределов 200/800 → 350/1400 → 500/2000. */
+  let localView = $state<{ center: number; depth: number; step: number } | null>(null);
+  /** Наложения действий — путь по карте и входящие ссылки: карта не двигается, выделенное подписано, остальное приглушено. */
+  let pathView = $state<{ from: number; to: number | null; directed: boolean; index: number } | null>(null);
+  let inboundView = $state<{ center: number; state: "loading" | "ready" | "error"; sources: IncomingLink[]; known: boolean; error: string } | null>(null);
+  let inboundEpoch = 0;
 
-  /** Документ и его соседи по видимым связям режима на глубину `depth`; ссылки — в обе стороны. */
-  function localDocs(): Set<number> {
-    const set = new Set<number>([focusIndex!]);
-    let frontier = new Set<number>(set);
-    for (let step = 0; step < settings.depth && frontier.size; step++) {
-      const next = new Set<number>();
-      for (const e of slice.edges) {
-        if (!kinds[e.kind] || e.kind === "chunk_similarity" || !passes(e)) continue;
-        if (frontier.has(e.a) && !set.has(e.b) && slice.visibleDocs.has(e.b)) next.add(e.b);
-        if (frontier.has(e.b) && !set.has(e.a) && slice.visibleDocs.has(e.a)) next.add(e.a);
-      }
-      for (const index of next) set.add(index);
-      frontier = next;
-    }
-    return set;
-  }
+  const localCenter = () => (mini ? focusIndex : (localView?.center ?? null));
+  const localDepth = () => (mini ? settings.depth : (localView?.depth ?? 1));
+  /** Локальный граф: мини-панель — документ открытой вкладки, полная панель — выбранное действие; вид запроса после поиска важнее. */
+  const isLocal = () => !query && localCenter() !== null;
+
+  /** Связи между документами в текущем режиме: основа локального графа и пути по карте. */
+  const navEdges = $derived(slice.edges.filter((e) => kinds[e.kind] && (e.kind === "markdown_link" || e.kind === "document_similarity") && passes(e) && slice.visibleDocs.has(e.a) && slice.visibleDocs.has(e.b)));
+  /** Документ и его соседи по видимым связям режима на глубину `depth`; ссылки — в обе стороны. У мини-панели предела нет. */
+  const localShape = $derived.by(() => (isLocal() ? localGraph(adjacency(navEdges), localCenter()!, localDepth(), mini ? undefined : LOCAL_LIMITS[localView!.step]) : null));
 
   function visibleNodes() {
     if (queryShape) return queryShape.nodes.map((index) => slice.nodes[index]);
-    if (isLocal()) {
-      const docs = localDocs();
+    if (localShape) {
+      const docs = localShape.depthOf;
       return slice.nodes.filter((n) => n.kind === "document" && docs.has(n.index));
     }
     const nodes = slice.nodes.filter((n) => n.kind === "document" && slice.visibleDocs.has(n.index));
@@ -221,8 +220,15 @@
     }
   }
 
+  /** Запоминает общий вид (места узлов, камеру, выбор): к нему возвращает «Общий вид». Уже запомненный не перезаписывается. */
+  function saveGeneral() {
+    if (!generalState && layout) generalState = { positions: layout.save(), camera: { ...cam }, w: size.w, h: size.h, selection: selected ? { ...selected } : null, expanded: { ...expanded }, stopped };
+  }
+
   function enterQuery() {
-    if (!query && !generalState && layout) generalState = { positions: layout.save(), camera: { ...cam }, w: size.w, h: size.h, selection: selected ? { ...selected } : null, expanded: { ...expanded }, stopped };
+    if (!query) saveGeneral();
+    localView = null;
+    dropOverlay();
     expanded = {};
     packageIndex = app.graphPackage;
     app.graphPackage = null;
@@ -328,7 +334,7 @@
 
   function visibleEdges(nodes = visibleNodes()): GEdge[] {
     const set = new Set(nodes.map((n) => n.index));
-    return slice.edges.filter((e) => kinds[e.kind] && passes(e) && !(mini && e.kind === "chunk_similarity") && set.has(e.a) && set.has(e.b) && (!queryShape?.edgeIds || e.kind === "query_result" || queryShape.edgeIds.has(e.id)));
+    return slice.edges.filter((e) => kinds[e.kind] && passes(e) && !(mini && e.kind === "chunk_similarity") && set.has(e.a) && set.has(e.b) && (!queryShape?.edgeIds || e.kind === "query_result" || queryShape.edgeIds.has(e.id)) && (!localShape || localShape.edgeIds.has(e.id)));
   }
 
   /** `fresh` — переложить с нуля (смена режима или первая загрузка): расположение определяют только текущие связи. */
@@ -463,7 +469,7 @@
     const groups = Object.entries(expanded).map(([o, shown]) => ({ owner: Number(o), shown, total: slice.nodes[Number(o)]?.chunks ?? shown }));
     const scene: Scene = {
       w: size.w, h: size.h, dpr: window.devicePixelRatio || 1, cam, nodes: layout.nodes, links: layout.links, palette, kinds,
-      highlighted: packageEdges(), selected, hovered, related: related(), marked: markedNodes(), groups, mini, modules: moduleMap, assigned, focus: isLocal() ? focusIndex : null,
+      highlighted: packageEdges(), selected, hovered, related: related(), marked: markedNodes(), groups, mini, modules: moduleMap, assigned, focus: isLocal() ? localCenter() : null, overlay,
     };
     draw(ctx, scene);
   }
@@ -477,7 +483,7 @@
     const raw = layout.bounds();
     if (!raw) return;
     // Локальный граф: документ в центре карты, как в Obsidian; границы симметричны вокруг него.
-    const centre = isLocal() && focusIndex !== null ? layout.get(focusIndex) : undefined;
+    const centre = isLocal() && localCenter() !== null ? layout.get(localCenter()!) : undefined;
     const b = centre
       ? (() => {
           const rx = Math.max(centre.x - raw.x0, raw.x1 - centre.x);
@@ -515,7 +521,7 @@
   }
 
   async function toggleExpand(index: number) {
-    if (mini || query) return;
+    if (mini || query || localView) return;
     const n = slice.nodes[index];
     if (n.kind !== "document" || !n.chunks) return;
     if (expanded[index]) {
@@ -584,6 +590,11 @@
   const atMaximum = $derived(slice.applied.max_documents >= MAX_LIMITS.max_documents && slice.applied.max_edges >= MAX_LIMITS.max_edges);
 
   function select(target: Target) {
+    // Пока выбирается вторая вершина пути, щелчок по документу выбирает её, а пустое место выбор не снимает.
+    if (pathView && pathView.to === null) {
+      if (target?.type === "node") pickPathEnd(target.index);
+      return;
+    }
     selected = target;
     if (target?.type === "node") notice = "";
     schedule();
@@ -724,7 +735,17 @@
       }
       const next = neighbourInDirection(selected.index, ...arrows[event.key]);
       if (next !== null) select({ type: "node", index: next });
-    } else if (event.key === "Escape") select(null);
+    } else if (event.key === "Escape") {
+      if (pathView && pathView.to === null) dropOverlay();
+      else select(null);
+    } else if (!mini && event.code === "KeyL" && selectedNode?.kind === "document") startLocal(selectedNode.index);
+    else if (!mini && event.code === "KeyP" && selectedNode?.kind === "document") startPath(selectedNode.index);
+    else if (!mini && pathView && event.code === "BracketLeft") shiftVariant(-1);
+    else if (!mini && pathView && event.code === "BracketRight") shiftVariant(1);
+    else if (!mini && event.key === "Backspace" && (localView || pathView || inboundView)) {
+      event.preventDefault();
+      goGeneral();
+    }
     else if (event.key === "Enter" && selected?.type === "node") void toggleExpand(selected.index);
     else if (event.key === " " && selected?.type === "node") {
       event.preventDefault();
@@ -736,6 +757,124 @@
     else return;
     event.stopPropagation();
   }
+
+  // ---------- Действия навигации (2.3.6): «Что рядом», «Кто ссылается», «Путь до…».
+
+  const isDocument = (index: number) => slice.nodes[index]?.kind === "document";
+
+  /** Снимает наложение действия; запрос, ещё не вернувшийся из индекса ссылок, отбрасывается. */
+  function dropOverlay() {
+    pathView = null;
+    inboundView = null;
+    inboundEpoch++;
+  }
+
+  /** «Общий вид»: убирает наложение и локальный вид и возвращает прежние места узлов, камеру и выбор (OQ-144). */
+  function goGeneral() {
+    dropOverlay();
+    if (localView) {
+      localView = null;
+      restoreGeneral();
+      announce("Общий вид проекта");
+    } else schedule();
+  }
+
+  /** «Что рядом»: карта перекладывается вокруг документа; прежний общий вид или вид запроса остаются доступны возвратом. */
+  function startLocal(index: number) {
+    if (mini || !isDocument(index)) return;
+    dropOverlay();
+    if (query) leaveQuery();
+    saveGeneral();
+    expanded = {};
+    localView = { center: index, depth: 1, step: 0 };
+    selected = { type: "node", index };
+    rebuild(0.9, true);
+    announce(`Локальный граф «${label(index)}»: соседи, глубина 1`);
+  }
+
+  function setLocalDepth(depth: number) {
+    if (!localView || depth === localView.depth) return;
+    localView.depth = depth;
+    rebuild(0.6);
+    autoFitSince = performance.now();
+    lastAutoFit = 0;
+  }
+
+  function moreLocal() {
+    if (!localView || localView.step >= LOCAL_LIMITS.length - 1) return;
+    localView.step++;
+    notice = "Показано больше узлов и связей: камера и позиции сохранены.";
+    rebuild(0.5);
+  }
+
+  /** «Путь до…»: вторая вершина выбирается щелчком, в поиске узла или в списке; карта не двигается. */
+  function startPath(index: number) {
+    if (mini || !isDocument(index)) return;
+    dropOverlay();
+    pathView = { from: index, to: null, directed: false, index: 0 };
+    announce(`Путь от «${label(index)}»: выберите вторую вершину`);
+    schedule();
+  }
+
+  function pickPathEnd(index: number) {
+    if (!pathView || pathView.to !== null) return;
+    if (!isDocument(index)) {
+      notice = "Путь строится между документами: выберите документ.";
+      return;
+    }
+    if (index === pathView.from) {
+      notice = "Выберите другой документ: начало пути уже выбрано.";
+      return;
+    }
+    notice = "";
+    pathView.to = index;
+    pathView.index = 0;
+    schedule();
+  }
+
+  function shiftVariant(delta: number) {
+    if (!pathView || paths.length < 2) return;
+    pathView.index = (pathView.index + delta + paths.length) % paths.length;
+    schedule();
+  }
+
+  /** «Кто ссылается»: свежий индекс ссылок воркера; ошибка чтения не превращается в «никто не ссылается». */
+  async function startInbound(index: number) {
+    const path = project();
+    if (mini || !path || !isDocument(index)) return;
+    dropOverlay();
+    const id = ++inboundEpoch;
+    inboundView = { center: index, state: "loading", sources: [], known: true, error: "" };
+    schedule();
+    try {
+      const reply = await loadLinks(path, slice.nodes[index].path);
+      if (id !== inboundEpoch || path !== project()) return;
+      inboundView = { center: index, state: "ready", sources: reply.incoming, known: reply.known, error: "" };
+    } catch (error) {
+      if (id !== inboundEpoch || path !== project()) return;
+      inboundView = { center: index, state: "error", sources: [], known: true, error: error instanceof Error ? error.message : String(error) };
+    }
+    schedule();
+  }
+
+  function runAction(id: ActionId) {
+    const n = selectedNode;
+    if (!n || n.kind !== "document") return;
+    if (id === "nearby") startLocal(n.index);
+    else if (id === "inbound") void startInbound(n.index);
+    else if (id === "path") startPath(n.index);
+  }
+
+  /** Строка списка «Кто ссылается»: источник открывается на строке ссылки, в том числе вне карты. */
+  function openInbound(source: IncomingLink) {
+    const line = source.lines[0] ?? 0;
+    void app.openDocument({ path: source.path, title: linkTitle(source.title, source.path), first_line: line, last_line: line });
+  }
+
+  const onMapIndex = (path: string): number | null => {
+    const found = visibleNodes().find((n) => n.kind === "document" && n.path === path);
+    return found ? found.index : null;
+  };
 
   function pin(index: number) {
     const on = layout?.togglePin(index);
@@ -792,6 +931,11 @@
     if (event.key !== "Enter") return;
     const q = findText.trim().toLowerCase();
     const found = layout?.nodes.filter((n) => n.node.label.toLowerCase().includes(q)) ?? [];
+    if (pathView && pathView.to === null) {
+      const doc = found.find((n) => n.node.kind === "document" && n.index !== pathView!.from);
+      if (doc) pickPathEnd(doc.index);
+      return;
+    }
     if (found.length) select({ type: "node", index: found[0].index });
   }
 
@@ -817,6 +961,10 @@
       loaded = true;
       loadError = "";
       loadErrorKind = "";
+      // Документ локального вида, пути или входящих мог исчезнуть из области: такое действие снимается.
+      if (localView && !slice.visibleDocs.has(localView.center)) { localView = null; generalState = null; }
+      if (pathView && (!slice.visibleDocs.has(pathView.from) || (pathView.to !== null && !slice.visibleDocs.has(pathView.to)))) pathView = null;
+      if (inboundView && !slice.visibleDocs.has(inboundView.center)) dropOverlay();
       // Раскрытый документ мог исчезнуть из области или потерять чанки: раскрытие без узлов не держим.
       const alive = Object.fromEntries(Object.entries(expanded).filter(([index]) => chunksOfDoc(Number(index)).length > 0 && slice.visibleDocs.has(Number(index))));
       if (Object.keys(alive).length !== Object.keys(expanded).length) expanded = alive;
@@ -881,6 +1029,8 @@
     queryKey = "";
     queryOff = "";
     expanded = {};
+    localView = null;
+    dropOverlay();
     selected = null;
     loaded = false;
     openedOnObject = false;
@@ -897,6 +1047,31 @@
   }
 
   // Данные для разметки.
+  /** Пути ищутся по связям, которые сейчас видны: режим, порог и (в локальном виде) показанные узлы. */
+  const pathEdges = $derived.by(() => {
+    const shown = new Set(visibleNodes().map((n) => n.index));
+    return navEdges.filter((e) => shown.has(e.a) && shown.has(e.b) && (!localShape || localShape.edgeIds.has(e.id)));
+  });
+  const paths = $derived.by<MapPath[]>(() => (pathView && pathView.to !== null ? mapPaths(adjacency(pathEdges, pathView.directed), pathView.from, pathView.to) : []));
+  const currentPath = $derived(paths.length && pathView ? paths[Math.min(pathView.index, paths.length - 1)] : null);
+  const stepWord = (n: number) => (n % 10 === 1 && n % 100 !== 11 ? "шаг" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? "шага" : "шагов");
+  const overlay = $derived.by<{ nodes: Map<number, string>; edges: Set<number> } | undefined>(() => {
+    if (pathView) {
+      if (pathView.to === null) return { nodes: new Map([[pathView.from, ""]]), edges: new Set() };
+      if (!currentPath) return undefined;
+      return { nodes: new Map(currentPath.nodes.map((n, i) => [n, String(i + 1)])), edges: new Set(currentPath.steps.map((s) => s.edge.id)) };
+    }
+    if (inboundView?.state === "ready") {
+      const nodes = new Map<number, string>([[inboundView.center, ""]]);
+      for (const s of inboundView.sources) {
+        const index = onMapIndex(s.path);
+        if (index !== null) nodes.set(index, "");
+      }
+      const edges = new Set(navEdges.filter((e) => e.kind === "markdown_link" && e.b === inboundView!.center && nodes.has(e.a)).map((e) => e.id));
+      return { nodes, edges };
+    }
+    return undefined;
+  });
   const selectedNode = $derived(selected?.type === "node" ? slice.nodes[selected.index] : null);
   const selectedEdge = $derived(selected?.type === "edge" ? slice.edges[selected.id] : null);
   const connections = $derived.by(() => {
@@ -1223,7 +1398,7 @@
         <b class="entry-title" title={selectedNode.label}>{selectedNode.label}</b>
         {#each GRAPH_ACTIONS as action (action.id)}
           {@const state = actionState(action, selectedKind)}
-          <button class="act" data-action={action.id} disabled={!state.enabled} title={state.reason}>{action.label}</button>
+          <button class="act" data-action={action.id} disabled={!state.enabled} title={state.reason} onclick={() => runAction(action.id)}>{action.label}</button>
         {/each}
       {:else}
         <span class="entry-hint">{NO_SELECTION_TEXT}</span>
@@ -1232,6 +1407,64 @@
         {/each}
       {/if}
     </div>
+    {#if localView || pathView || inboundView}
+      <div class="qstack">
+      {#if localView && localShape}
+        <div class="qbar" role="region" aria-label="Локальный граф">
+          <b class="qtext" title={label(localView.center)}>Локальный граф «{label(localView.center)}»</b>
+          <span class="depth" role="radiogroup" aria-label="Глубина локального графа">Глубина
+            {#each Array.from({ length: LOCAL_MAX_DEPTH }, (_, i) => i + 1) as d (d)}
+              <button role="radio" aria-checked={localView.depth === d} class:on={localView.depth === d} disabled={localShape.truncated && d > localView.depth} title={localShape.truncated && d > localView.depth ? "Достигнут предел обхода: следующий шаг недоступен" : `Соседи на ${d} шаг${d > 1 ? "а" : ""}`} onclick={() => setLocalDepth(d)}>{d}</button>
+            {/each}
+          </span>
+          <span>связи: {MODE_NAME[mode].toLowerCase()} · узлов {localShape.depthOf.size} · связей {localShape.edgeIds.size}</span>
+          <button class="more" onclick={goGeneral}>Общий вид</button>
+        </div>
+        {#if localShape.truncated}
+          <div class="banner" role="status">
+            <span><b>Достигнут предел обхода:</b> показано {localShape.depthOf.size} из {localShape.known.nodes} узлов, {localShape.edgeIds.size} из {localShape.known.edges} связей.</span>
+            {#if localView.step < LOCAL_LIMITS.length - 1}<button class="more" onclick={moreLocal}>Показать ещё</button>{:else}<span>Максимум вида: уменьшите глубину или выберите другой режим связей.</span>{/if}
+          </div>
+        {:else if localShape.depthOf.size <= 1}
+          <div class="banner" role="status"><span>В режиме «{MODE_NAME[mode]}» у документа связей не найдено. Документ остаётся на карте; другой режим может показать соседей.</span></div>
+        {/if}
+      {/if}
+      {#if pathView}
+        <div class="qbar" role="region" aria-label="Путь по карте">
+          {#if pathView.to === null}
+            <b class="qtext" title={label(pathView.from)}>Путь от «{label(pathView.from)}»</b>
+            <span>выберите вторую вершину щелчком, в поиске узла или в списке</span>
+            <button class="more" onclick={dropOverlay}>Отмена</button>
+          {:else if currentPath}
+            <b class="qtext" title="{label(pathView.from)} → {label(pathView.to)}">Путь по карте: {label(pathView.from)} → {label(pathView.to)}</b>
+            <span>{currentPath.steps.length} {stepWord(currentPath.steps.length)}</span>
+            <span class="depth">вариант {Math.min(pathView.index, paths.length - 1) + 1} из {paths.length}
+              <button aria-label="Предыдущий вариант пути" title="Предыдущий вариант ([)" disabled={paths.length < 2} onclick={() => shiftVariant(-1)}>◀</button>
+              <button aria-label="Следующий вариант пути" title="Следующий вариант (])" disabled={paths.length < 2} onclick={() => shiftVariant(1)}>▶</button>
+            </span>
+            <label class="chk"><input type="checkbox" checked={pathView.directed} onchange={(e) => { pathView!.directed = e.currentTarget.checked; pathView!.index = 0; }} /> по направлению ссылок</label>
+            <button class="more" onclick={goGeneral}>Общий вид</button>
+          {:else}
+            <b class="qtext">Путь: {label(pathView.from)} → {label(pathView.to)}</b>
+            <span>В режиме «{MODE_NAME[mode]}»{pathView.directed ? " по направлению ссылок" : ""} пути не длиннее {PATH_MAX_HOPS} шагов нет</span>
+            {#if mode !== "all"}<button class="more ghost" onclick={() => setMode("all")}>Искать во всех связях</button>{/if}
+            {#if pathView.directed}<button class="more ghost" onclick={() => { pathView!.directed = false; }}>Не учитывать направление</button>{/if}
+            <button class="more" onclick={goGeneral}>Общий вид</button>
+          {/if}
+        </div>
+        {#if currentPath}
+          <div class="banner" role="status"><span>Путь по карте показывает соседство на карте, а не зависимость.</span></div>
+        {/if}
+      {/if}
+      {#if inboundView}
+        <div class="qbar" role="region" aria-label="Кто ссылается">
+          <b class="qtext" title={label(inboundView.center)}>Кто ссылается на «{label(inboundView.center)}»</b>
+          <span>{inboundView.state === "loading" ? "читаем индекс ссылок…" : inboundView.state === "error" ? "не удалось прочитать" : `${inboundView.sources.length} документов`}</span>
+          <button class="more" onclick={goGeneral}>Общий вид</button>
+        </div>
+      {/if}
+      </div>
+    {/if}
     {#if query}
       <div class="qstack">
       <div class="qbar" role="region" aria-label="Вид запроса">
@@ -1324,6 +1557,8 @@
           {#if !mini}{MOTION_TEXT[motion]} · {/if}<b>Запрос: {queryResultCount} результатов</b>{#if queryRelatedCount} · {queryRelatedCount} связанных источников{/if} · узлов {queryShape?.shown.nodes ?? 0}{#if !mini} · связей {queryShape?.shown.edges ?? 0}{/if} · {MODE_NAME[mode].toLowerCase()}
         {:else if mini && isLocal() && focusIndex !== null}
           <b>Локальный граф</b> · <span class="lt" title={slice.nodes[focusIndex].label}>{slice.nodes[focusIndex].label}</span>{#if nodeCount <= 1} · нет связей в режиме «{MODE_NAME[mode]}»{:else} · {MODE_NAME[mode].toLowerCase()}{/if}
+        {:else if !mini && localView && localShape}
+          {MOTION_TEXT[motion]} · <b>Локальный граф: {localShape.depthOf.size} из {slice.docCount} документов</b> · глубина {localView.depth}
         {:else if mini}
           <b>Документы {slice.docCount}</b> · {MODE_NAME[mode].toLowerCase()}
         {:else}
@@ -1421,6 +1656,50 @@
 
   {#if !mini}
     <aside class="inspector" aria-label="Инспектор графа">
+      {#if pathView && currentPath}
+        <section class="viewbox" aria-label="Шаги пути">
+          <h4>Шаги пути · {currentPath.steps.length}</h4>
+          <ol class="conns steps">
+            {#each currentPath.steps as step, i (i)}
+              <li>
+                <span class="name" title="{label(currentPath.nodes[i])} — {label(currentPath.nodes[i + 1])}">{i + 1}. {label(currentPath.nodes[i])} {step.edge.kind === "markdown_link" ? (step.forward ? "→" : "←") : "—"} {label(currentPath.nodes[i + 1])}</span>
+                <small>{KIND_TITLE[step.edge.kind]} · {step.edge.kind === "markdown_link" ? linesText(step.edge) : `cosine ${step.edge.raw === null ? "—" : step.edge.raw.toFixed(2)}`}</small>
+                {#if step.edge.kind === "markdown_link" && step.edge.lines.length}<button class="inline" onclick={() => openSource(step.edge.a, step.edge.lines[0])}>Открыть основание</button>{/if}
+              </li>
+            {/each}
+          </ol>
+          <p class="hint">Показано соседство на карте в режиме «{MODE_NAME[mode]}», а не зависимость. Смысловой путь с основаниями — отдельное действие следующего шага.</p>
+        </section>
+      {/if}
+      {#if inboundView}
+        <section class="viewbox" aria-label="Кто ссылается">
+          <h4>Кто ссылается на «{label(inboundView.center)}»</h4>
+          {#if inboundView.state === "loading"}
+            <p class="hint" role="status">Читаем индекс ссылок…</p>
+          {:else if inboundView.state === "error"}
+            <p class="hint" role="alert">Не удалось прочитать ссылки: {inboundView.error}. Это не значит, что ссылок нет.</p>
+            <div class="actions"><button class="act" onclick={() => void startInbound(inboundView!.center)}>Повторить</button></div>
+          {:else if !inboundView.known}
+            <p class="hint" role="status">Документа ещё нет в индексе ссылок: он появится после сохранения на диск.</p>
+          {:else if !inboundView.sources.length}
+            <p class="hint" role="status">Ни один документ не ссылается на «{label(inboundView.center)}» по индексу ссылок на диске.</p>
+          {:else}
+            <p class="hint">Ссылаются {inboundView.sources.length}. Это явные ссылки в тексте, а не доказанные зависимости; открытие источника область поиска не меняет.</p>
+            <ul class="conns">
+              {#each inboundView.sources as source (source.path)}
+                {@const onMap = onMapIndex(source.path)}
+                <li>
+                  <button onclick={() => openInbound(source)} title="Открыть «{source.path}» на строке ссылки">
+                    <span class="name">{linkTitle(source.title, source.path)}</span>
+                    <small>{source.path} · {source.lines.length ? `строки ${source.lines.slice(0, 6).join(", ")}${source.lines.length > 6 ? "…" : ""}` : "строки неизвестны"}{onMap === null ? " · вне карты" : ""}</small>
+                  </button>
+                  {#if onMap !== null}<button class="inline" onclick={() => { selected = { type: "node", index: onMap }; schedule(); }}>На карте</button>{/if}
+                </li>
+              {/each}
+            </ul>
+          {/if}
+        </section>
+      {/if}
       {#if selectedNode}
         <header>
           <span class="kind">{selectedNode.kind === "document" ? "Документ" : selectedNode.kind === "query" ? "Запрос" : "Чанк"}</span>
@@ -1434,6 +1713,11 @@
             <button class="act" onclick={() => void toggleExpand(selectedNode.index)} disabled={loading}>{expanded[selectedNode.index] ? "Свернуть чанки" : `Раскрыть чанки (${selectedNode.chunks})`}</button>
           {/if}
           <button class="act" onclick={() => pin(selectedNode.index)} aria-pressed={pinnedSel}>{pinnedSel ? "Открепить" : "Закрепить"}</button>
+          {#if selectedNode.kind === "document"}
+            {#each GRAPH_ACTIONS.filter((a) => a.ready) as action (action.id)}
+              <button class="act" data-inspector-action={action.id} title={action.hint} onclick={() => runAction(action.id)}>{action.label}</button>
+            {/each}
+          {/if}
         </div>
         {#if selectedNode.kind === "document" && expanded[selectedNode.index] && expanded[selectedNode.index] < selectedNode.chunks}
           <p class="trunc" role="status">Показано {expanded[selectedNode.index]} из {selectedNode.chunks} чанков. <button class="inline" onclick={() => void moreChunks(selectedNode.index)} disabled={loading}>Ещё {Math.min(PORTION, selectedNode.chunks - expanded[selectedNode.index])}</button></p>
@@ -1628,6 +1912,11 @@
   .legend small { margin-left: auto; color: var(--faint); font-size: 10.5px; }
   .legend .scale { display: flex; gap: 8px; }
   .legend .scale div { display: grid; justify-items: center; font-size: 10.5px; color: var(--muted); }
+  .viewbox { margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  .viewbox .steps { padding-left: 0; }
+  .viewbox li { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; padding: 2px 4px; font-size: 11.5px; }
+  .viewbox li small { color: var(--muted); font-size: 10.5px; }
+  .qbar .chk { display: inline-flex; align-items: center; gap: 4px; }
   .hint { margin: 4px 0; color: var(--muted); font-size: 11px; line-height: 1.4; }
   .inspector { grid-column: 2; grid-row: 2; min-height: 0; overflow: auto; padding: 8px 10px; border-left: 1px solid var(--line); background: var(--panel); }
   .inspector header { margin-bottom: 6px; }
