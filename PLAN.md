@@ -241,7 +241,7 @@ Embed через Ollama и LM Studio уже работает; пользоват
 
 Карты NVIDIA считают через CUDA, установленную пользователем, без неё — через Vulkan; ускорители включаются там, где дают выигрыш. Подробности — docs/features/models/.
 
-- 8.1.1 Исследование: CUDA в сборке bars — llama.cpp с CUDA и Vulkan в одном процессе, CUDA EP при статическом ONNX Runtime, обнаружение установленных CUDA и cuDNN и их версий, откат на Vulkan → docs/knowledge/inference-devices.md.
+- [x] 8.1.1 Исследование: CUDA в сборке bars — llama.cpp с CUDA и Vulkan в одном процессе, CUDA EP при статическом ONNX Runtime, обнаружение установленных CUDA и cuDNN и их версий, откат на Vulkan → docs/knowledge/inference-devices.md. Выполнено 28-10-2026, коммит `45929e7`, итог — docs/chats/2026-10-28-cuda-research/handoff.md.
 - 8.1.2 Исследование: ускорители на RTX 3090 — flash attention, квант KV-cache, пачки, CUDA Graphs, TensorRT, IO binding; скорость, память и совпадение оценок против Vulkan и DirectML → docs/knowledge/inference-speed.md.
 - 8.1.3 Проектирование: устройство CUDA — требования к установленной CUDA, откат с причиной, включённые ускорители, показ в окне, правка Т-3 через автора → local-models.md и settings.md, согласование.
 - 8.1.4 Реализация: CUDA для GGUF и ONNX при установленной CUDA, откат на Vulkan, выбранные ускорители.
@@ -250,9 +250,9 @@ Embed через Ollama и LM Studio уже работает; пользоват
 
 Сильные rerank-модели работают во встроенном llama.cpp рядом с bge-reranker-v2-m3 и видят чанк целиком. Подробности — docs/features/models/.
 
-- 8.2.1 Исследование: rerank-модели в GGUF — Qwen3-Reranker 0.6B/4B/8B, bge-reranker-v2-gemma, mxbai-rerank-v2 и другие; лицензии, русский язык, длина входа, кванты, режим rerank в llama-cpp-2 → docs/knowledge/.
-- 8.2.2 Исследование: качество кандидатов против bge-reranker-v2-m3 на бенче — длинный вход, строки реестров, порог, кванты → docs/knowledge/search-quality.md.
-- 8.2.3 Исследование: скорость и память кандидатов на CPU, Vulkan и CUDA, на слабой GPU и ноутбуке → docs/knowledge/inference-speed.md, выбор моделей с автором.
+- [x] 8.2.1 Исследование: rerank-модели в GGUF — Qwen3-Reranker 0.6B/4B/8B, bge-reranker-v2-gemma, mxbai-rerank-v2 и другие; лицензии, русский язык, длина входа, кванты, режим rerank в llama-cpp-2 → docs/knowledge/. Выполнено 28-10-2026, итог — docs/chats/2026-10-28-rerank-gguf/handoff.md.
+- 8.2.2 Исследование: качество кандидатов против bge-reranker-v2-m3 на бенче — длинный вход, строки реестров, порог, кванты → docs/knowledge/search-quality.md; нужен домашний компьютер.
+- 8.2.3 Исследование: скорость и память кандидатов на CPU, Vulkan и CUDA, на слабой GPU и ноутбуке → docs/knowledge/inference-speed.md, выбор моделей с автором; нужен домашний компьютер.
 - 8.2.4 Проектирование: rerank во встроенном llama.cpp — шкала и порог Т-24, длина входа, число кандидатов, пачки, выгрузка, правка Т-17 через автора → local-models.md и settings.md, согласование.
 - 8.2.5 Реализация: новые rerank-модели в каталоге, скачивание с проверкой, оценки и порог, выбор в окне.
 
