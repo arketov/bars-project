@@ -21,7 +21,7 @@ add('window', 'Окно', [
 for (const [kind, title] of Object.entries(panelTitles)) add('window', 'Панели', [[`panel.open.${kind}`, title]]);
 add('panel', 'Вкладки', [
   ['tab.next', 'Следующая вкладка', 'Control+Tab'], ['tab.previous', 'Предыдущая вкладка', 'Control+Shift+Tab'],
-  ['tab.close', 'Закрыть вкладку', 'Mod+KeyW'], ['tab.move', 'Переместить вкладку…', 'Mod+Shift+KeyM'], ['panel.resize', 'Изменить размер группы…'],
+  ['tab.close', 'Закрыть вкладку', 'Mod+KeyW'], ['tab.closeOthers', 'Закрыть другие вкладки'], ['tab.closeRight', 'Закрыть вкладки справа'], ['tab.move', 'Переместить вкладку…', 'Mod+Shift+KeyM'], ['panel.resize', 'Изменить размер группы…'],
 ]);
 add('document', 'Документ', [
   ['document.newWindow', 'Открыть документ в новом окне'], ['document.preview', 'Исходный текст / рендер', 'Mod+Shift+KeyE', 'Этап 3.4'],

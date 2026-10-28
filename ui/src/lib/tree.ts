@@ -210,6 +210,16 @@ export function findNode(tree: TreeNode[], path: string): TreeNode | undefined {
   return undefined;
 }
 
+/** Узел-файл дерева по исходному пути документа (`docs/a.md`); у документа вне дерева узла нет. */
+export function findDocumentNode(tree: TreeNode[], documentPath: string): TreeNode | undefined {
+  for (const node of tree) {
+    if (node.documentPath === documentPath) return node;
+    const inner = findDocumentNode(node.children, documentPath);
+    if (inner) return inner;
+  }
+  return undefined;
+}
+
 /** Модули, затронутые выбором, для строки «Искать в: …» и подписи «Отмечено модулей: N из M». */
 export function touchedModules(tree: TreeNode[], sel: ReadonlySet<string>): TreeNode[] {
   return tree.filter((module) => checkState(module, sel) !== "none");

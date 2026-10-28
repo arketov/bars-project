@@ -135,8 +135,8 @@
   $effect(() => { void source; void hit.first_line; void doc; void tick().then(() => scroll(hit.first_line)); });
 </script>
 
-<section class="document" bind:this={section} aria-label={hit.title} data-document-path={hit.path}>
-  <header data-document-path={hit.path}><div><b>{doc?.title ?? hit.title}</b><small>{hit.path}</small></div>
+<section class="document" bind:this={section} aria-label={hit.title} data-document-path={hit.path} data-menu-kind="file" data-menu-place="render">
+  <header data-document-path={hit.path} data-menu-kind="file" data-menu-place="header"><div><b>{doc?.title ?? hit.title}</b><small>{hit.path}</small></div>
     {#if status}<span class="status" role="status" data-status={buffer?.status}>{status}</span>{/if}
     {#if source && buffer && buffer.status !== "readonly"}<button class="tool-toggle" title="Панель разметки" aria-label="Панель разметки" aria-pressed={toolbar} onclick={toggleToolbar}>Aa</button>{/if}
     <button title={source ? "Показать рендер" : "Показать исходник"} aria-label="Исходник / рендер" aria-pressed={source} onclick={() => { source = !source; void buffer?.save(); }}><Icon name="eye" size={15} /></button>
@@ -167,7 +167,7 @@
       </div>
       {#if cheat}<div class="cheat" role="note"><code># Заголовок</code> · <code>**жирный**</code> · <code>*курсив*</code> · <code>`код`</code> · <code>- пункт</code> · <code>1. пункт</code> · <code>- [ ] задача</code> · <code>&gt; цитата</code> · <code>[текст](путь.md)</code> · <code>| а | б |</code> — таблица; <code>Tab</code> переходит по ячейкам, <code>Enter</code> продолжает список.</div>{/if}
     {/if}
-    <div class="body" class:editing={source} bind:this={body}>
+    <div class="body" class:editing={source} bind:this={body} data-document-path={hit.path} data-menu-kind={source ? "editor" : "file"} data-menu-place={source ? "editor" : "render"}>
       {#if source}<Editor bind:this={editor} text={text} historyVersion={buffer?.historyVersion ?? 0} links={() => linkTargets(app.tree, app.docsRoot)} semantic={semanticLinks} readonly={!buffer || buffer.status === "readonly" || buffer.status === "loading"} hit={range} oninput={(value) => buffer?.edit(value)} />
       {:else}<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions --><div class="md" onclick={followLink}>{@html html}</div>{/if}
     </div>

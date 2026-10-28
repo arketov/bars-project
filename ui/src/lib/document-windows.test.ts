@@ -5,7 +5,7 @@ import Workspace from "./Workspace.svelte";
 import { app } from "./app.svelte";
 import { call, documentRead, documentRevision, documentWrite, openInMainWindow, type DocumentRead } from "./api";
 import { Editors, type Bus, type SavedMessage } from "./editors.svelte";
-import { documentItems } from "./contextmenu";
+import { documentMenu } from "./menu-model";
 import { documentTargets } from "./link-picker";
 import { keybindings } from "./keybindings.svelte";
 import { buildTree } from "./tree";
@@ -94,7 +94,7 @@ it("запись другого документа или проекта не т
 });
 
 it("контекстное меню документа предлагает «Открыть в новом окне» сразу после «Открыть»", () => {
-  const items = documentItems();
+  const items = documentMenu({ path: "docs/a.md", place: "card", state: "ready", inTree: true });
   expect(items.map((item) => item.action).slice(0, 2)).toEqual(["open", "newWindow"]);
   expect(items[1].label).toBe("Открыть в новом окне");
 });

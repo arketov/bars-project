@@ -257,6 +257,7 @@
           if (params.params.kind !== "document") return;
           const path: string = params.params.hit.path;
           tab.element.dataset.documentPath = path;
+          tab.element.dataset.menuKind = "file"; tab.element.dataset.menuPlace = "tab";
           // Т-38: цветная точка вкладки документа — цвет документа или его папки.
           const dot = document.createElement("span");
           dot.className = "tab-color"; dot.setAttribute("aria-hidden", "true");
