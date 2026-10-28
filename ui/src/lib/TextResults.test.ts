@@ -11,5 +11,11 @@ it('выделяет текст безопасно и открывает точ�
   component=mount(TextResults,{target:host});flushSync();
   expect(host.querySelector('mark')?.textContent).toBe('текст');expect(host.querySelector('текст')).toBeNull();
   host.querySelector<HTMLButtonElement>('.occurrence')!.click();
-  expect(open).toHaveBeenCalledWith({path:'docs/a.md',title:'A',first_line:8,last_line:8,column:4,length:6});
+  expect(open).toHaveBeenCalledWith({path:'docs/a.md',title:'A',first_line:8,last_line:8,column:4,length:6,fromSearch:true});
+});
+it('печатает строку с несколькими вхождениями один раз и отмечает оба',()=>{
+  app.textSearch.output={documents:[{path:'docs/a.md',title:'A',module:'.',revision:'r',hits_total:1,has_more:false,hits:[{line:3,column:1,length:5,text:'порог и снова порог',ranges:[[0,5],[14,19]]}]}],docs_total:1,hits_total:1,skipped:[],truncated:null,elapsed_ms:2};
+  const host=document.createElement('div');component=mount(TextResults,{target:host});flushSync();
+  expect(host.querySelector('.snippet')?.textContent).toBe('порог и снова порог');
+  expect([...host.querySelectorAll('mark')].map(m=>m.textContent)).toEqual(['порог','порог']);
 });

@@ -26,7 +26,7 @@
   }
 
   function step(delta: number) {
-    app.count = Math.min(20, Math.max(1, app.shownCount + delta));
+    app.count = Math.min(app.maxCount, Math.max(1, app.shownCount + delta));
   }
 
   function onKey(event: KeyboardEvent) {

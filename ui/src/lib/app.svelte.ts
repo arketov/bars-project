@@ -23,6 +23,8 @@ import {
   type ReadOutput,
   type SearchHit,
   type SearchOutput,
+  type SettingsDoc,
+  type SettingsOutput,
   type StatusOutput,
   type TreeOutput,
 } from "./types";
@@ -37,7 +39,7 @@ export interface ViewedDocument {
   missing: boolean;
 }
 
-export type DocumentReference = Pick<SearchHit, "path" | "title" | "first_line" | "last_line"> & { column?: number; length?: number; expectedRevision?: string };
+export type DocumentReference = Pick<SearchHit, "path" | "title" | "first_line" | "last_line"> & { column?: number; length?: number; expectedRevision?: string; /** Открыт из выдачи или «В тексте»: только такой вкладке уместно «Обновить выдачу». */ fromSearch?: boolean };
 
 const PROJECT_KEY = "bars-project";
 const POLL_MS = 1000;
@@ -113,7 +115,8 @@ class App {
   activeDocument = $state<string | null>(null);
   /** Число результатов на этот запрос; `null` — по умолчанию из настроек. */
   count = $state<number | null>(null);
-  defaultCount = $state(5);
+  /** Настройки поиска из settings.toml: умолчание «Результатов» и их предел; `null` — ещё не прочитаны. */
+  searchSettings = $state<{ results: number; resultsReranked: number; maxResults: number; rerank: boolean } | null>(null);
   results = $state<SearchOutput | null>(null);
   searchedQuery = $state("");
   searching = $state(false);
@@ -249,8 +252,29 @@ class App {
     return searchScope(this.tree, this.selected);
   }
 
+  /** Умолчание «Результатов» с rerank или без него (Т-18); до чтения настроек — 5. */
+  get defaultCount(): number {
+    const s = this.searchSettings;
+    return s ? (s.rerank ? s.resultsReranked : s.results) : 5;
+  }
+
+  /** Верхний предел степпера — `search.max_results`; до чтения настроек — 20. */
+  get maxCount(): number {
+    return this.searchSettings?.maxResults ?? 20;
+  }
+
   get shownCount(): number {
-    return this.count ?? this.results?.applied.results ?? this.defaultCount;
+    return Math.min(this.count ?? this.results?.applied.results ?? this.defaultCount, this.maxCount);
+  }
+
+  applySearchSettings(doc: SettingsDoc): void {
+    this.searchSettings = { results: doc.search.results, resultsReranked: doc.search.results_reranked, maxResults: doc.search.max_results, rerank: doc.rerank.enabled };
+  }
+
+  async loadSearchSettings(): Promise<void> {
+    try {
+      this.applySearchSettings((await call<SettingsOutput>("settings_get")).settings);
+    } catch { /* остаются умолчания; настройки перечитаются при открытии экрана настроек */ }
   }
 
   /** Проекты, которым нужна переиндексация (Т-25). */
@@ -275,6 +299,7 @@ class App {
     }
     if (this.#timer || this.documentWindow) return;
     document.addEventListener("visibilitychange", this.#visible);
+    void this.loadSearchSettings();
     void this.refresh(true);
     this.#timer = setInterval(() => void this.refresh(false), POLL_MS);
   }

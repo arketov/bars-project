@@ -119,6 +119,14 @@
     event.preventDefault();
     void documentLink.open(project, hit.path, link.dataset.wikiLink ?? link.dataset.docLink ?? "", link.dataset.wikiLink !== undefined);
   }
+  /** Закрывает свою вкладку тем же крестиком, что и мышь: проверка правок и список переполнения Dockview работают как обычно. */
+  function closeTab() {
+    document.querySelector<HTMLElement>(`[data-workspace-panel][data-document-path="${CSS.escape(hit.path)}"] .dv-default-tab-action`)?.click();
+  }
+  /** Файла нет — открываем пустой черновик; на диске он появится при первой правке (editor-design.md, Т-32). */
+  function createFile() {
+    if (doc) doc = { ...doc, text: "", missing: false };
+  }
   function scroll(line: number) {
     if (source) { if (line > 0) editor?.scrollToLine(line); return; }
     body?.querySelector("#hit")?.scrollIntoView({ block: "center" });
@@ -135,7 +143,9 @@
   </header>
   {#if error}<p role="alert">Не удалось прочитать документ: {error}</p>
   {:else if !doc}<p role="status">Чтение…</p>
-  {:else if doc.missing}<p role="alert">Файл не найден, возможно, его удалили.</p><button onclick={() => { app.openSearch(); void app.search(); }}>Обновить выдачу</button>
+  {:else if doc.missing}<p role="alert">Файл не найден, возможно, его удалили.</p>
+    {#if hit.fromSearch}<button onclick={() => { app.openSearch(); void app.search(); }}>Обновить выдачу</button>
+    {:else}<button onclick={closeTab}>Закрыть вкладку</button> <button onclick={createFile} title="Пустой документ; файл появится на диске при первой правке">Создать файл</button>{/if}
   {:else}
     {#if buffer && (buffer.status === "error" || buffer.status === "conflict" || buffer.status === "readonly")}
       <p class="banner" role="alert" data-status={buffer.status}>{buffer.message}

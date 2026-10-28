@@ -144,6 +144,7 @@ class SettingsState {
     this.file = output.file; this.warnings = output.warnings; this.revision = output.revision;
     this.saved = clone(output.settings); this.draft = clone(output.settings);
     this.conflict = null; this.conflicts = [];
+    app.applySearchSettings(output.settings);
   }
 
   async resolveConflict(mine: boolean): Promise<void> {

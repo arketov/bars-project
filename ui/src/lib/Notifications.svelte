@@ -26,6 +26,8 @@
     watch(item);
     return { update: watch, destroy: () => observer?.disconnect() };
   }
+  /** Имя проекта из реестра; пути в подсказке (ISS-51). Нет в реестре — последняя часть пути. */
+  const projectName = (path: string) => app.projects.find(p => p.path === path)?.name ?? (path.split(/[\\/]/).filter(Boolean).pop() ?? path);
   async function toggle() { open = !open; if (open) { void app.loadModels().catch(() => {}); await tick(); panel?.focus(); } }
   function close() { open = false; trigger?.focus(); }
   function outside(event: MouseEvent) { if (open && !root.contains(event.target as Node)) close(); }
@@ -66,7 +68,7 @@
             <div class="notice-icon" class:ok={item.operation?.state === "success"} class:warn={item.unknown || item.operation?.state === "cancelled"}><Icon name={item.unknown ? "warn" : item.bad ? "error" : item.active ? "refresh" : item.operation?.state === "cancelled" ? "stop" : "check"} size={16} /></div>
             <div class="content">
             <div class="heading"><b>{item.title}</b><span class="status">{status(item)}</span></div>
-            {#if item.project || item.operation?.model}<div class="subject">{item.project ?? item.operation?.model}{#if item.operation?.variant}<span class="variant"> · {item.operation.variant}</span>{/if}</div>{/if}
+            {#if item.project || item.operation?.model}<div class="subject" title={item.project ?? undefined}>{item.project ? projectName(item.project) : item.operation?.model}{#if item.operation?.variant}<span class="variant"> · {item.operation.variant}</span>{/if}</div>{/if}
             <p class="result">{item.text}</p>
             {#if item.active && !item.unknown && !["queued", "queue_paused"].includes(item.operation?.state ?? "")}
               {#if item.percent !== null}<progress aria-label={item.title} value={item.percent} max="100"></progress><small>{item.percent} %</small>
