@@ -63,12 +63,103 @@ fn docs_root_wins_over_the_project_root() {
 }
 
 #[test]
-fn absolute_path_is_taken_as_is() {
+fn absolute_path_inside_the_project_is_read() {
+    let dir = project();
+    let file = dir.path().join("docs/a/x.md");
+    assert_eq!(resolve(&dir, file.to_str().unwrap()).unwrap(), file);
+}
+
+#[test]
+fn absolute_path_outside_the_project_is_refused() {
     let dir = project();
     let other = tempfile::tempdir().unwrap();
     let file = other.path().join("outside.md");
     fs::write(&file, "# вне\n").unwrap();
-    assert_eq!(resolve(&dir, file.to_str().unwrap()).unwrap(), file);
+    assert!(matches!(
+        resolve(&dir, file.to_str().unwrap()),
+        Err(DocPathError::OutsideProject(_))
+    ));
+    // Несуществующий файл снаружи отвечает так же: наличие файла не раскрывается.
+    let missing = other.path().join("missing.md");
+    assert!(matches!(
+        resolve(&dir, missing.to_str().unwrap()),
+        Err(DocPathError::OutsideProject(_))
+    ));
+}
+
+#[test]
+fn parent_directory_leaving_the_project_is_refused() {
+    let dir = project();
+    for path in ["../x.md", "a/../../../x.md", "./../x.md", "..\\x.md"] {
+        assert!(
+            matches!(resolve(&dir, path), Err(DocPathError::OutsideProject(_))),
+            "{path:?}"
+        );
+    }
+}
+
+#[test]
+fn parent_directory_staying_inside_is_normalized() {
+    let dir = project();
+    assert_eq!(
+        resolve(&dir, "a/../a/x.md").unwrap(),
+        dir.path().join("docs").join("a/x.md")
+    );
+}
+
+#[test]
+fn project_relative_form_is_printed_with_slashes() {
+    let dir = project();
+    for path in ["a/x.md", "docs/a/x.md", "a\\x.md"] {
+        assert_eq!(
+            project_relative_path(dir.path(), Path::new("docs"), path).unwrap(),
+            "docs/a/x.md",
+            "{path:?}"
+        );
+    }
+}
+
+#[test]
+fn stored_candidates_try_the_docs_root_first() {
+    assert_eq!(
+        stored_candidates("docs", "a/x.md"),
+        ["docs/a/x.md", "a/x.md"]
+    );
+    assert_eq!(stored_candidates("docs", "./README.md"), ["README.md"]);
+    assert_eq!(stored_candidates(".", "a\\x.md"), ["a/x.md"]);
+    assert!(stored_candidates("docs", "../x.md").is_empty());
+}
+
+#[test]
+fn unknown_file_message_lists_candidates() {
+    let stored = ["docs/features/a/x.md", "docs/adr/x.md", "docs/y.md"];
+    assert_eq!(
+        unknown_file_message("docs", stored, "x.md"),
+        "неизвестный файл `x.md`; возможно: adr/x.md, features/a/x.md"
+    );
+    assert_eq!(
+        unknown_file_message("docs", stored, "nothing.md"),
+        "неизвестный файл `nothing.md`"
+    );
+}
+
+#[test]
+fn unknown_module_message_lists_modules_and_hints_a_subfolder() {
+    let docs = [
+        (
+            "features".to_string(),
+            "docs/features/models/m.md".to_string(),
+        ),
+        ("adr".to_string(), "docs/adr/0001.md".to_string()),
+    ];
+    assert_eq!(
+        unknown_module_message("docs", "models", &docs),
+        "неизвестный модуль `models`; есть: adr, features; models — подпапка features, модуль — папка первого уровня; сузить область можно путём в files"
+    );
+    assert_eq!(
+        unknown_module_message("docs", "nope", &docs),
+        "неизвестный модуль `nope`; есть: adr, features"
+    );
 }
 
 #[test]

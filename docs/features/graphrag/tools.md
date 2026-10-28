@@ -230,6 +230,8 @@ next: for an exact phrase use bars_text_search
 | `bars_explore` | `topic` или `whole_scope`, `analysis`, `grouping`, `limit`, `cursor` |
 | `bars_graph` | `view`, `local`, `roots`, `documents`, `predicates`, `direction`, `max_depth`, `include_paths`, `limit`, `cursor` |
 
+Реализовано 28-10-2026 (4.3.3): шесть структур аргументов в `bars-mcp` с этими полями, кроме `documents`, `timeout_ms` у всех — 5000 по умолчанию; поле другой операции отклоняется ошибкой разбора. `documents` у `impact`, `context` и `graph` добавляется в 4.3.5 вместе со входом по пути.
+
 Поле входит в схему, когда оно работает: `change_description` — после его реализации; `context.roots`, `include_related` и `graph.include_unresolved` — после реализации по таблице решений выше; `tokenizer_id` из схемы убран (единственное значение — `estimate-v1`, ответ его называет). Описание операции начинается с задачи, для которой её звать; описание поля — одна фраза про действие. Список шести схем — не больше 14 КБ (измерено 4.3.1: 14 199 байт у чернового набора).
 
 ### Проверки контракта ответа графа

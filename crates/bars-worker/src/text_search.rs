@@ -239,15 +239,24 @@ pub fn search_with_policy(
             .unwrap_or(path)
             .to_owned()
     };
+    // Обе формы пути (от корня документации и от корня проекта) — OQ-169.
+    let stored_forms = |inputs: &[&String]| -> std::collections::HashSet<String> {
+        inputs
+            .iter()
+            .flat_map(|input| bars_core::doc_path::stored_candidates(&prefix, input))
+            .collect()
+    };
+    let wanted_files = stored_forms(&p.files.iter().collect::<Vec<_>>());
+    let wanted_path = p.path.as_ref().map(|path| stored_forms(&[path]));
     let files: Vec<_> = walk
         .files
         .into_iter()
         .filter(|f| {
             let inner = relative(&f.path);
-            (p.path.as_ref().is_none_or(|path| *path == f.path))
+            (wanted_path.as_ref().is_none_or(|set| set.contains(&f.path)))
                 && (p.modules.is_empty() && p.files.is_empty()
                     || p.modules.contains(&f.module)
-                    || p.files.contains(&inner))
+                    || wanted_files.contains(&f.path))
                 && filter.as_ref().is_none_or(|r| r.is_match(&inner))
         })
         .collect();

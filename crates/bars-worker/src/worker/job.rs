@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 use bars_core::indexing::indexer::{
     IndexObserver, IndexingError, UpdateOutcome, UpdateReport, rebuild_index_observed,
-    update_index_paths_observed,
+    recover_index_files, update_index_paths_observed,
 };
 use bars_core::models::ModelFingerprint;
 use bars_core::settings::Settings;
@@ -80,6 +80,15 @@ pub fn run(env: &JobEnv<'_>, project: &Path, job: &Job) -> JobResult {
             index_model: None,
             settings_model: None,
         };
+    }
+    // Задание идёт под `job_gate` проекта: недописанная подмена прошлого запуска или неудачного
+    // отката приводится к одному индексу до открытия.
+    if let Err(error) = recover_index_files(&index_path(project)) {
+        log::error!(
+            "Не удалось восстановить файлы индекса {}: {error}",
+            project.display()
+        );
+        return JobResult::failed(format!("Файлы индекса не восстановлены: {error}"));
     }
     let settings = match Settings::load(env.bars_home, project) {
         Ok(loaded) => loaded.value,
@@ -230,6 +239,15 @@ fn indexing_failure(error: IndexingError) -> Outcome {
             message: "Full rebuild not applied: documents failed to embed".into(),
             cancelled: false,
         },
+        IndexingError::Swap {
+            cause,
+            rollback: Some(rollback),
+        } => {
+            log::error!(
+                "Подмена индекса не удалась: {cause}; прежний индекс не возвращён: {rollback}"
+            );
+            Outcome::Failed("Подмена индекса не удалась, прежний индекс не возвращён".into())
+        }
         error => Outcome::Failed(error.to_string()),
     }
 }

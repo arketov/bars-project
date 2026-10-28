@@ -1,6 +1,7 @@
 //! GraphRAG без модельного runtime: контракты, источники и ограниченные операции.
 //! Контракт: docs/features/graphrag/implementation.md, GR-01…GR-12.
 
+pub mod hints;
 pub mod links;
 pub mod model;
 pub mod physical;

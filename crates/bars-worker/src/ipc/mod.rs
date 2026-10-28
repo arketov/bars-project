@@ -4,8 +4,10 @@
 mod acl_windows;
 mod listener;
 
+use std::future::Future;
 use std::io;
 use std::sync::Arc;
+use std::time::Duration;
 
 use bars_protocol::{Handler, serve_connection};
 use interprocess::local_socket::tokio::Listener;
@@ -13,15 +15,74 @@ use interprocess::local_socket::traits::tokio::Listener as _;
 
 pub use listener::{BindError, bind};
 
-/// Принимает соединения и обслуживает каждое в своей задаче. Возвращается только с ошибкой `accept`.
+/// Принимает соединения и обслуживает каждое в своей задаче. Единичная ошибка `accept` пишется в
+/// лог и приём повторяется после паузы; возвращается только с ошибкой после серии неудач подряд
+/// (`docs/architecture/worker.md`, «Ошибка приёма соединения канала», ISS-70).
 pub async fn run_server<H: Handler>(listener: Listener, handler: Arc<H>) -> io::Result<()> {
+    accept_loop(
+        || listener.accept(),
+        |stream| {
+            let handler = Arc::clone(&handler);
+            tokio::spawn(async move {
+                // Обрыв клиента посреди вызова не касается воркера и остальных соединений.
+                let _ = serve_connection(stream, handler).await;
+            });
+        },
+        AcceptRetry::DEFAULT,
+    )
+    .await
+}
+
+/// Пауза и предел повтора приёма: пауза начинается с `first`, удваивается до `max`, серия из
+/// `limit` ошибок подряд без успешного приёма завершает цикл.
+#[derive(Clone, Copy)]
+struct AcceptRetry {
+    first: Duration,
+    max: Duration,
+    limit: u32,
+}
+
+impl AcceptRetry {
+    /// Решение агента, ждёт ответа автора (OQ-226): 19 пауз дают не меньше минуты.
+    const DEFAULT: Self = Self {
+        first: Duration::from_millis(100),
+        max: Duration::from_secs(5),
+        limit: 20,
+    };
+}
+
+async fn accept_loop<S, Fut>(
+    mut accept: impl FnMut() -> Fut,
+    mut serve: impl FnMut(S),
+    retry: AcceptRetry,
+) -> io::Result<()>
+where
+    Fut: Future<Output = io::Result<S>>,
+{
+    let mut failures = 0u32;
+    let mut pause = retry.first;
     loop {
-        let stream = listener.accept().await?;
-        let handler = Arc::clone(&handler);
-        tokio::spawn(async move {
-            // Обрыв клиента посреди вызова не касается воркера и остальных соединений.
-            let _ = serve_connection(stream, handler).await;
-        });
+        match accept().await {
+            Ok(stream) => {
+                failures = 0;
+                pause = retry.first;
+                serve(stream);
+            }
+            Err(error) => {
+                failures += 1;
+                if failures >= retry.limit {
+                    log::error!(
+                        "Канал не принимает соединения: {failures} ошибок подряд, последняя: {error}"
+                    );
+                    return Err(error);
+                }
+                log::warn!(
+                    "Ошибка приёма соединения ({failures} подряд): {error}; повтор через {pause:?}"
+                );
+                tokio::time::sleep(pause).await;
+                pause = (pause * 2).min(retry.max);
+            }
+        }
     }
 }
 
@@ -161,5 +222,76 @@ mod tests {
         for task in tasks {
             task.await.unwrap();
         }
+    }
+
+    const FAST: AcceptRetry = AcceptRetry {
+        first: Duration::from_millis(1),
+        max: Duration::from_millis(4),
+        limit: 5,
+    };
+
+    fn broken() -> io::Error {
+        io::Error::other("сбой приёма")
+    }
+
+    async fn accept_errors_below_the_limit_are_retried_and_a_success_resets_the_series() {
+        // Четыре ошибки подряд при пределе 5 не останавливают цикл, а успех обнуляет серию;
+        // цикл заканчивается только пятью ошибками после третьего соединения.
+        let mut script = vec![Ok(1)];
+        script.extend((0..4).map(|_| Err(broken())));
+        script.push(Ok(2));
+        script.extend((0..4).map(|_| Err(broken())));
+        script.push(Ok(3));
+        script.extend((0..5).map(|_| Err(broken())));
+        script.reverse();
+        let mut served = Vec::new();
+        let result = accept_loop(
+            || {
+                let next = script.pop().expect("цикл читает сверх сценария");
+                async move { next }
+            },
+            |n| served.push(n),
+            FAST,
+        )
+        .await;
+        assert!(result.is_err());
+        assert_eq!(served, vec![1, 2, 3]);
+    }
+
+    #[tokio::test]
+    async fn a_series_of_accept_errors_ends_the_loop_with_the_last_error() {
+        let mut calls = 0u32;
+        let begin = Instant::now();
+        let error = accept_loop(
+            || {
+                calls += 1;
+                let n = calls;
+                async move { Err::<(), _>(io::Error::other(format!("ошибка {n}"))) }
+            },
+            |()| {},
+            FAST,
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(calls, 5);
+        assert_eq!(error.to_string(), "ошибка 5");
+        // Паузы 1, 2, 4, 4 мс: цикл не крутится вхолостую.
+        assert!(
+            begin.elapsed() >= Duration::from_millis(11),
+            "{:?}",
+            begin.elapsed()
+        );
+    }
+
+    #[test]
+    fn default_retry_waits_at_least_a_minute_before_giving_up() {
+        let retry = AcceptRetry::DEFAULT;
+        let mut pause = retry.first;
+        let mut total = Duration::ZERO;
+        for _ in 1..retry.limit {
+            total += pause;
+            pause = (pause * 2).min(retry.max);
+        }
+        assert!(total >= Duration::from_secs(60), "{total:?}");
     }
 }

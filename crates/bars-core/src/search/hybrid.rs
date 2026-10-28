@@ -437,6 +437,23 @@ pub(super) fn load_hits(index: &Index, ids: &[i64]) -> Result<Vec<SearchHit>, Se
     Ok(hits)
 }
 
+/// Текст ошибки неизвестного модуля со списком существующих (OQ-169).
+fn unknown_module(index: &Index, module: &str) -> Result<String, SearchError> {
+    let docs_root = index
+        .stored_layout()?
+        .map(|layout| layout.docs_root)
+        .unwrap_or_default();
+    let mut statement = index.conn().prepare("SELECT module, path FROM documents")?;
+    let docs = statement
+        .query_map([], |row| {
+            Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+        })?
+        .collect::<Result<Vec<_>, _>>()?;
+    Ok(crate::doc_path::unknown_module_message(
+        &docs_root, module, &docs,
+    ))
+}
+
 /// Отбор по модулям и файлам (Т-14): условие для SQL и его параметры.
 pub(super) struct Scope {
     clause: String,
@@ -456,9 +473,7 @@ impl Scope {
                 .prepare_cached("SELECT EXISTS(SELECT 1 FROM documents WHERE module = ?1)")?
                 .query_row([module], |row| row.get::<_, bool>(0))?;
             if !known {
-                return Err(SearchError::InvalidParams(format!(
-                    "неизвестный модуль `{module}`"
-                )));
+                return Err(SearchError::InvalidParams(unknown_module(index, module)?));
             }
             params.push(Value::from(module.clone()));
         }
@@ -470,24 +485,38 @@ impl Scope {
         }
 
         if !request.files.is_empty() {
-            // Файлы заданы от корня документации, а в индексе путь — от корня проекта.
-            let docs_root = index.stored_layout()?.map(|layout| layout.docs_root);
+            // Файл задаётся от корня документации или от корня проекта (OQ-169); в индексе путь —
+            // от корня проекта.
+            let docs_root = index
+                .stored_layout()?
+                .map(|layout| layout.docs_root)
+                .unwrap_or_default();
             let mut stored_paths = Vec::new();
             for file in &request.files {
-                let relative = file.replace('\\', "/");
-                let stored = match &docs_root {
-                    Some(root) => format!("{}/{}", root.trim_end_matches('/'), relative),
-                    None => relative.clone(),
-                };
-                let known = index
-                    .conn()
-                    .prepare_cached("SELECT EXISTS(SELECT 1 FROM documents WHERE path = ?1)")?
-                    .query_row([&stored], |row| row.get::<_, bool>(0))?;
-                if !known {
-                    return Err(SearchError::InvalidParams(format!(
-                        "неизвестный файл `{file}`"
-                    )));
+                let mut found = None;
+                for candidate in crate::doc_path::stored_candidates(&docs_root, file) {
+                    let known = index
+                        .conn()
+                        .prepare_cached("SELECT EXISTS(SELECT 1 FROM documents WHERE path = ?1)")?
+                        .query_row([&candidate], |row| row.get::<_, bool>(0))?;
+                    if known {
+                        found = Some(candidate);
+                        break;
+                    }
                 }
+                let Some(stored) = found else {
+                    let mut statement = index.conn().prepare("SELECT path FROM documents")?;
+                    let known = statement
+                        .query_map([], |row| row.get::<_, String>(0))?
+                        .collect::<Result<Vec<_>, _>>()?;
+                    return Err(SearchError::InvalidParams(
+                        crate::doc_path::unknown_file_message(
+                            &docs_root,
+                            known.iter().map(String::as_str),
+                            file,
+                        ),
+                    ));
+                };
                 stored_paths.push(stored);
             }
             parts.push(format!("d.path IN ({})", placeholders(stored_paths.len())));

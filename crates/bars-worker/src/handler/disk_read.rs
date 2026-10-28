@@ -6,7 +6,7 @@ use bars_protocol::{
 };
 use serde_json::json;
 use std::{
-    path::{Component, Path},
+    path::Path,
     sync::{Arc, atomic::AtomicBool},
     time::Instant,
 };
@@ -26,16 +26,25 @@ impl Drop for CancelOnDrop {
 }
 
 fn document_path(path: &str) -> Result<(), RpcError> {
-    if path.is_empty()
-        || path.contains(['\\', ':'])
-        || !path.to_lowercase().ends_with(".md")
-        || Path::new(path)
-            .components()
-            .any(|p| !matches!(p, Component::Normal(_)))
-    {
-        return Err(invalid("Нужен путь .md от корня проекта через /, без .."));
+    if !path.trim().to_lowercase().ends_with(".md") {
+        return Err(invalid("Нужен путь к файлу .md"));
     }
     Ok(())
+}
+
+/// Документ ссылок в форме индекса (от корня проекта). Файла нет на диске — первая форма пути:
+/// `known: false` остаётся ответом, а не ошибкой; выход за корень проекта — `invalid_params`.
+fn links_document(project: &Path, docs_root: &str, path: &str) -> Result<String, RpcError> {
+    match bars_core::doc_path::project_relative_path(project, Path::new(docs_root), path) {
+        Ok(stored) => Ok(stored),
+        Err(bars_core::doc_path::DocPathError::NotFound(_)) => {
+            bars_core::doc_path::stored_candidates(docs_root, path)
+                .into_iter()
+                .next()
+                .ok_or_else(|| invalid("Нужен путь к файлу .md внутри проекта"))
+        }
+        Err(error) => Err(super::errors::doc_path_error(error)),
+    }
 }
 
 impl WorkerHandler {
@@ -55,6 +64,11 @@ impl WorkerHandler {
         }
         let project = self.resolve(&p.target)?;
         let docs = self.worker.docs_root(&project).map_err(worker_error)?;
+        let continued = p
+            .path
+            .as_deref()
+            .map(|path| links_document(&project, &docs, path))
+            .transpose()?;
         let docs_limit = p.limit_docs.unwrap_or(20).min(100);
         let hits_limit = p.limit_hits.unwrap_or(100).min(500);
         let requested = json!({"limit_docs":p.limit_docs,"limit_hits":p.limit_hits});
@@ -73,7 +87,7 @@ impl WorkerHandler {
             files: p.files,
             limit_docs: Some(docs_limit),
             limit_hits: Some(hits_limit),
-            path: p.path,
+            path: continued,
             offset: p.offset,
             revision: p.revision,
             ..Default::default()
@@ -122,8 +136,9 @@ impl WorkerHandler {
         }
         let project = self.resolve(&p.target)?;
         let docs = self.worker.docs_root(&project).map_err(worker_error)?;
+        let path = links_document(&project, &docs, &p.path)?;
         let binding = blake3::hash(
-            &serde_json::to_vec(&(project.to_string_lossy(), &p.path, &p.direction)).unwrap(),
+            &serde_json::to_vec(&(project.to_string_lossy(), &path, &p.direction)).unwrap(),
         )
         .to_hex()
         .to_string();
@@ -156,7 +171,7 @@ impl WorkerHandler {
             };
             let limit = p.limit.unwrap_or(50).min(200);
             let page = index
-                .page(&p.path, p.direction == "incoming", offset, limit)
+                .page(&path, p.direction == "incoming", offset, limit)
                 .map_err(internal)?;
             let mut reasons = vec![];
             if page.has_more {

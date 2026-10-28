@@ -506,6 +506,7 @@ export async function mockCall(method: string, params: Record<string, unknown>):
         models_dir: "C:\\Users\\me\\.bars\\models",
       };
     case "model_download":
+    case "model_retry":
       return { accepted: true };
     case "secret_status":
       return { present: secrets.has(String(params.name)) };

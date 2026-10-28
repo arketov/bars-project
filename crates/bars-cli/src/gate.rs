@@ -112,15 +112,32 @@ fn reads_docs(tool: &str, args: &Value, docs: &str) -> bool {
             if in_chats(&norm(path)) {
                 return false;
             }
+            if in_docs(path, docs) {
+                return true;
+            }
             let glob = match text(args, "glob") {
                 "" if tool == "Glob" => text(args, "pattern"),
                 glob => glob,
             };
-            in_docs(path, docs) || norm(glob).ends_with(".md")
+            // Шаблон `*.md` вне документации пропускается: путь поиска или явная папка в шаблоне
+            // называют другое место; без них поиск идёт от корня проекта и заходит в документацию.
+            norm(glob).ends_with(".md") && path.is_empty() && glob_reaches_docs(glob, docs)
         }
         "Bash" | "PowerShell" => shell_reads_docs(text(args, "command"), docs),
         _ => false,
     }
+}
+
+/// Шаблон без заданной папки (`*.md`, `**/*.md`) или с папкой документации (`docs/**/*.md`)
+/// доходит до документации; шаблон с другой папкой (`crates/**/*.md`) — нет.
+fn glob_reaches_docs(glob: &str, docs: &str) -> bool {
+    let glob = norm(glob);
+    let literal: Vec<&str> = glob
+        .split('/')
+        .take_while(|part| !part.contains(['*', '?', '[', '{']))
+        .filter(|part| !part.is_empty() && *part != ".")
+        .collect();
+    literal.is_empty() || in_docs(&format!("{}/", literal.join("/")), docs)
 }
 
 /// Звенья конвейера разбираются по отдельности: `| head` в конце команды и путь в тексте
@@ -177,6 +194,16 @@ mod tests {
             ("Read", json!({"file_path": "/p/src/main.rs"})),
             ("Read", json!({"file_path": "/p/README.md"})),
             ("Grep", json!({"pattern": "x", "path": "/p/docs/chats"})),
+            ("Glob", json!({"pattern": "crates/**/*.md"})),
+            ("Glob", json!({"pattern": "*.md", "path": "/p/crates"})),
+            (
+                "Grep",
+                json!({"pattern": "x", "path": "/p/src", "glob": "*.md"}),
+            ),
+            (
+                "Grep",
+                json!({"pattern": "x", "glob": "crates/*/README.md"}),
+            ),
             ("Bash", json!({"command": "git log -- docs/a.md | head"})),
             ("Edit", json!({"file_path": "/p/docs/a.md"})),
         ] {
@@ -195,6 +222,8 @@ mod tests {
             ("Grep", json!({"pattern": "x", "path": "/p/docs"})),
             ("Grep", json!({"pattern": "x", "glob": "*.md"})),
             ("Glob", json!({"pattern": "docs/**/*.md"})),
+            ("Glob", json!({"pattern": "**/*.md"})),
+            ("Grep", json!({"pattern": "x", "glob": "./docs/*/a.md"})),
             ("Bash", json!({"command": "cat docs/a.md"})),
             (
                 "PowerShell",

@@ -61,30 +61,27 @@ fn allowed<'a>(
 }
 
 pub fn validate_scope(data: &Dataset, scope: &Scope) -> Result<(), GraphError> {
-    for module in &scope.modules {
-        if !data
-            .sources
+    let metas = || {
+        data.sources
             .iter()
             .map(|s| &s.meta)
             .chain(data.failed_sources.iter())
-            .any(|s| &s.module == module)
-        {
-            return Err(GraphError::InvalidParams(format!(
-                "неизвестный модуль `{module}`"
-            )));
+    };
+    for module in &scope.modules {
+        if !metas().any(|s| &s.module == module) {
+            let docs: Vec<(&str, &str)> = metas()
+                .map(|s| (s.module.as_str(), s.docs_path.as_str()))
+                .collect();
+            return Err(GraphError::InvalidParams(
+                crate::hints::unknown_module_message(module, &docs),
+            ));
         }
     }
     for file in &scope.files {
-        if !data
-            .sources
-            .iter()
-            .map(|s| &s.meta)
-            .chain(data.failed_sources.iter())
-            .any(|s| s.docs_path == file.replace('\\', "/"))
-        {
-            return Err(GraphError::InvalidParams(format!(
-                "неизвестный файл `{file}`"
-            )));
+        if !metas().any(|s| crate::model::file_matches(file, s)) {
+            return Err(GraphError::InvalidParams(
+                crate::hints::unknown_file_message(metas().map(|s| s.docs_path.as_str()), file),
+            ));
         }
     }
     Ok(())

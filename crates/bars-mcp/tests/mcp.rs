@@ -315,6 +315,109 @@ async fn graph_tools_are_hidden_until_settings_show_them() {
     assert_eq!(tool_names(&mut still_hidden).await.len(), 10);
 }
 
+/// ISS-23: у каждой графовой операции своя схема — только свои поля и общие; шесть схем вместе
+/// не больше 14 КБ (контракт ответа графа, 4.3.2).
+#[tokio::test(flavor = "multi_thread")]
+async fn every_graph_tool_lists_only_its_own_parameters() {
+    let harness = Harness::new("graph-schemas");
+    let root = harness.project("proj");
+    harness.show_graph_tools();
+    let mut mcp = harness.connect(harness.env(&root));
+    mcp.initialize().await;
+    let common = ["project", "format", "modules", "files", "timeout_ms"];
+    let own: [(&str, &[&str]); 6] = [
+        (
+            "bars_relations",
+            &[
+                "query",
+                "entity_ref",
+                "predicates",
+                "direction",
+                "polarity",
+                "qualifiers",
+                "limit",
+                "cursor",
+            ],
+        ),
+        (
+            "bars_paths",
+            &[
+                "from",
+                "to",
+                "path_kind",
+                "max_hops",
+                "max_paths",
+                "predicates",
+            ],
+        ),
+        (
+            "bars_impact",
+            &["roots", "predicates", "max_depth", "limit", "cursor"],
+        ),
+        (
+            "bars_context",
+            &["query", "task_profile", "roles", "token_budget"],
+        ),
+        (
+            "bars_explore",
+            &[
+                "topic",
+                "whole_scope",
+                "analysis",
+                "grouping",
+                "limit",
+                "cursor",
+            ],
+        ),
+        (
+            "bars_graph",
+            &[
+                "view",
+                "local",
+                "roots",
+                "predicates",
+                "direction",
+                "max_depth",
+                "include_paths",
+                "limit",
+                "cursor",
+            ],
+        ),
+    ];
+    let tools = mcp.request("tools/list", json!({})).await;
+    let tools = tools["result"]["tools"].as_array().unwrap();
+    let mut total = 0;
+    for (name, fields) in own {
+        let tool = tools.iter().find(|t| t["name"] == name).unwrap();
+        eprintln!("SIZE {name} {}", tool.to_string().len());
+        if name == "bars_graph" {
+            eprintln!("DUMP {}", tool["inputSchema"]);
+        }
+        total += tool.to_string().len();
+        let mut listed: Vec<_> = tool["inputSchema"]["properties"]
+            .as_object()
+            .unwrap()
+            .keys()
+            .cloned()
+            .collect();
+        listed.sort();
+        let mut expected: Vec<String> = common
+            .iter()
+            .chain(fields.iter())
+            .map(|f| f.to_string())
+            .collect();
+        expected.sort();
+        assert_eq!(listed, expected, "{name}");
+        assert!(
+            tool["description"].as_str().unwrap().chars().count() <= 400,
+            "{name}: описание не длиннее 400 знаков"
+        );
+    }
+    assert!(total <= 14 * 1024, "шесть схем: {total} байт");
+    let (error, text) = mcp.tool("bars_paths", json!({"query":"Т-1"})).await;
+    assert!(error, "поле чужой операции отклоняется: {text}");
+}
+
 #[tokio::test(flavor = "multi_thread")]
 async fn initialize_and_tool_list_do_not_touch_the_worker() {
     let harness = Harness::new("init");

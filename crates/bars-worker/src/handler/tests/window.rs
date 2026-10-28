@@ -492,6 +492,9 @@ async fn models_info_reports_downloaded_files_and_download_starts() {
         assert!(Instant::now() < deadline, "скачивание не закончилось");
         tokio::time::sleep(Duration::from_millis(20)).await;
     }
+    window
+        .call::<bars_protocol::AcceptedOutput>(Call::ModelRetry(bars_protocol::ModelRetryParams {}))
+        .await;
     window.worker.shutdown().await;
 }
 

@@ -884,6 +884,10 @@ pub struct ModelInfo {
     /// Безопасное сообщение последней ошибки ручного скачивания.
     #[serde(default)]
     pub download_error: Option<String>,
+    /// Вид ошибки встроенной embed-модели: `network`, `files_missing`, `out_of_memory`, `runtime`.
+    /// У rerank-модели вида нет (OQ-218).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub download_error_reason: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -921,6 +925,12 @@ pub struct ModelsRuntime {
 pub struct ModelDownloadParams {
     pub id: String,
 }
+
+/// Кнопка «Повторить» на экране ошибки модели: снимает паузу перед повтором фоновой загрузки
+/// всех моделей, следующий поиск загружает модель сразу
+/// (`docs/features/models/local-models.md`, ISS-71).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ModelRetryParams {}
 
 /// Запись ключа провайдера в хранилище ОС. Значение никогда не попадает в лог и в `Debug`.
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1129,6 +1139,7 @@ methods! {
     SettingsSave: SettingsSaveParams => SettingsSaveOutput, "settings_save", Window;
     ModelsInfo: ModelsInfoParams => ModelsInfoOutput, "models_info", Window;
     ModelDownload: ModelDownloadParams => AcceptedOutput, "model_download", Window;
+    ModelRetry: ModelRetryParams => AcceptedOutput, "model_retry", Window;
     SecretSet: SecretSetParams => SecretOutput, "secret_set", Window;
     SecretStatus: SecretStatusParams => SecretOutput, "secret_status", Window;
     ClientsStatus: ClientsStatusParams => ClientsStatusOutput, "clients_status", Window;
@@ -1336,6 +1347,7 @@ mod tests {
             Call::from(SettingsGetParams {}),
             Call::from(ModelsInfoParams {}),
             Call::from(ModelDownloadParams { id: "m".into() }),
+            Call::from(ModelRetryParams {}),
             Call::from(SecretSetParams {
                 name: "n".into(),
                 value: "v".into(),

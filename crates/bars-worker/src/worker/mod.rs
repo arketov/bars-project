@@ -35,6 +35,7 @@ use std::time::{Duration, Instant, SystemTime};
 use crate::autostart::{Autostart, NoAutostart};
 use crate::clients::InstallEnv;
 use bars_core::indexing::indexer::UpdateReport;
+use bars_core::models::{ModelErrorKind, ModelFailure};
 use bars_core::secrets::{OsSecrets, SecretStore};
 use bars_core::settings::{DEFAULT_DOCS_ROOT, Settings, project_config_path};
 use bars_protocol::ProjectState;
@@ -68,6 +69,24 @@ pub const PERIODIC_INTERVAL: Duration = Duration::from_secs(60 * 60);
 /// Через сколько после пачки событий проект проверяется целиком: ловит хвост, который
 /// `notify` потерял при переполнении буфера (ISS-06).
 pub const TAIL_DELAY: Duration = Duration::from_secs(5);
+
+/// Безопасный текст ошибки скачивания по виду: ответ провайдера, URL и токены в окно не уходят.
+fn download_error_text(kind: ModelErrorKind) -> &'static str {
+    match kind {
+        ModelErrorKind::Network => {
+            "Не удалось скачать модель. Проверьте подключение и повторите в настройках моделей."
+        }
+        ModelErrorKind::FilesMissing => {
+            "Файлы модели не найдены или повреждены. Скачайте их заново."
+        }
+        ModelErrorKind::OutOfMemory => {
+            "Модели не хватило памяти. Закройте тяжёлые программы или выберите другое устройство."
+        }
+        ModelErrorKind::Runtime => {
+            "Встроенная модель не отработала. Подробности — в журнале воркера."
+        }
+    }
+}
 
 /// Мьютекс, переживающий панику другого потока: состояние воркера не должно умирать от неё.
 pub(crate) fn lock<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
@@ -301,7 +320,7 @@ struct Inner {
     current: Mutex<Option<Arc<JobCell>>>,
     /// Модели, которые сейчас скачиваются по кнопке окна.
     downloads: Mutex<HashSet<String>>,
-    download_errors: Mutex<HashMap<String, String>>,
+    download_errors: Mutex<HashMap<String, ModelFailure>>,
     graph_jobs: Mutex<HashMap<PathBuf, graph::GraphJob>>,
     graph_cache: Arc<crate::handler::graph_cache::GraphCache>,
     scans: Mutex<HashMap<PathBuf, scan::ScanJob>>,
@@ -389,6 +408,10 @@ impl Worker {
             graph_cache: Default::default(),
             scans: Mutex::new(HashMap::new()),
         });
+        // Очередь ещё не идёт: никто не держит файлы индекса, восстановление безопасно.
+        for path in &paths {
+            recover_project_index(path);
+        }
         let queue_task = tokio::spawn(Arc::clone(&inner).run_queue());
         let timer_task = tokio::spawn(Arc::clone(&inner).run_timer());
         let doc_task = tokio::spawn(Arc::clone(&inner).run_doc_timer());
@@ -937,7 +960,7 @@ impl Worker {
         ids
     }
 
-    pub fn download_errors(&self) -> HashMap<String, String> {
+    pub fn download_errors(&self) -> HashMap<String, ModelFailure> {
         lock(&self.inner.download_errors).clone()
     }
 
@@ -969,15 +992,25 @@ impl Worker {
         );
         self.inner.handle.spawn_blocking(move || {
             let _attempt = models::ModelAttempt(Arc::clone(&inner.models.operations), operation);
-            let _download = DownloadCleanup { inner: Arc::clone(&inner), id: id.clone() };
+            let _download = DownloadCleanup {
+                inner: Arc::clone(&inner),
+                id: id.clone(),
+            };
             log::info!("Начато скачивание модели {id}");
-            let success = inner.models.download_operation(&settings, reranker, Some(operation)).is_ok();
-            if !success {
-                log::error!("Не удалось скачать модель {id}; подробности — в состоянии модели");
-                // В UI не передаём произвольный ответ провайдера, URL или токены.
+            let outcome = inner
+                .models
+                .download_operation(&settings, reranker, Some(operation));
+            let success = outcome.is_ok();
+            if let Err(failure) = outcome {
+                log::error!(
+                    "Не удалось скачать модель {id} ({}); подробности — в состоянии модели",
+                    failure.kind.as_str()
+                );
+                // В UI не передаём произвольный ответ провайдера, URL или токены: только вид ошибки
+                // и фиксированный текст по нему.
                 lock(&inner.download_errors).insert(
                     id.clone(),
-                    "Не удалось скачать модель. Проверьте подключение и повторите в настройках моделей.".into(),
+                    ModelFailure::new(failure.kind, download_error_text(failure.kind)),
                 );
             } else {
                 log::info!("Скачивание модели {id} завершено");
@@ -1134,7 +1167,6 @@ impl Inner {
             self.mark_unavailable(path);
             return;
         }
-        remove_stale_rebuild(path);
         {
             let mut projects = lock(&self.projects);
             let runtime = projects
@@ -1791,16 +1823,18 @@ fn ensure_project_config(project: &Path) -> io::Result<()> {
     )
 }
 
-/// Недописанная переиндексация прошлого запуска оставляет `index.sqlite.new`: он не нужен
-/// (`docs/architecture/worker.md`, «Завершение воркера»).
-fn remove_stale_rebuild(project: &Path) {
-    let index = bars_core::storage::index_path(project);
-    let mut name = index.file_name().unwrap_or_default().to_os_string();
-    name.push(".new");
-    let new = index.with_file_name(&name);
-    for suffix in ["", "-wal", "-shm", "-journal"] {
-        let mut file = new.clone().into_os_string();
-        file.push(suffix);
-        let _ = fs::remove_file(PathBuf::from(file));
+/// Недописанная подмена прошлого запуска оставляет `index.sqlite.new` или `index.sqlite.old`;
+/// правила — `docs/architecture/worker.md`, «Восстановление файлов индекса при старте».
+fn recover_project_index(project: &Path) {
+    if !project.is_dir() {
+        return;
+    }
+    if let Err(error) =
+        bars_core::indexing::indexer::recover_index_files(&bars_core::storage::index_path(project))
+    {
+        log::error!(
+            "Не удалось восстановить файлы индекса {}: {error}",
+            project.display()
+        );
     }
 }

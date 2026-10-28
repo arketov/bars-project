@@ -106,23 +106,22 @@ pub(super) fn ensure(dir: &Path, profile: Profile) -> Result<PathBuf, EmbedError
         .map_err(|e| load_error(e.to_string()))?;
     let repo = api.repo(repo());
     let (name, _, _) = profile.model();
-    let model = repo.get(name).map_err(|e| load_error(e.to_string()))?;
+    let hub_error = super::failure::hub_embed_error;
+    let files_error = EmbedError::Files;
+    let model = repo.get(name).map_err(hub_error)?;
     for (name, _) in TOKENIZERS {
-        repo.get(name).map_err(|e| load_error(e.to_string()))?;
+        repo.get(name).map_err(hub_error)?;
     }
-    let before =
-        signature(dir, profile).ok_or_else(|| load_error("неполный кэш quantized embed".into()))?;
+    let before = signature(dir, profile)
+        .ok_or_else(|| files_error("неполный кэш quantized embed".into()))?;
     if !super::artifact::marked(&marker(dir, profile), &before) {
-        super::artifact::verify(&model, profile.model().2).map_err(load_error)?;
+        super::artifact::verify(&model, profile.model().2).map_err(files_error)?;
         for (name, hash) in TOKENIZERS {
-            super::artifact::verify(
-                &repo.get(name).map_err(|e| load_error(e.to_string()))?,
-                hash,
-            )
-            .map_err(load_error)?;
+            super::artifact::verify(&repo.get(name).map_err(hub_error)?, hash)
+                .map_err(files_error)?;
         }
         if signature(dir, profile).as_ref() != Some(&before) {
-            return Err(load_error("кэш embed изменился во время проверки".into()));
+            return Err(files_error("кэш embed изменился во время проверки".into()));
         }
         super::artifact::mark(&marker(dir, profile), &before).map_err(load_error)?;
     }
@@ -140,7 +139,7 @@ pub(super) fn fetch(
         .map(|(name, _)| {
             let path = cache
                 .get(name)
-                .ok_or_else(|| EmbedError::Load(format!("нет файла {name}")))?;
+                .ok_or_else(|| EmbedError::Files(format!("нет файла {name}")))?;
             fs::read(path).map_err(|e| EmbedError::Load(e.to_string()))
         })
         .collect();

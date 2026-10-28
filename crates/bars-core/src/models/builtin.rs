@@ -262,7 +262,11 @@ pub fn load_builtin_embedder(
         Backend::Onnx if info.id == super::catalog::BGE_M3_FP16_ID => Ok(Box::new(
             BuiltinEmbedder::bge_m3_fp16(models_dir, accelerator)?,
         )),
-        Backend::Onnx => Ok(Box::new(BuiltinEmbedder::bge_m3(models_dir, accelerator)?)),
+        Backend::Onnx => {
+            // Файлы получает bars, а не fastembed: тогда сеть и файлы различимы по типу ошибки.
+            super::download_onnx_artifacts(models_dir, info.id)?;
+            Ok(Box::new(BuiltinEmbedder::bge_m3(models_dir, accelerator)?))
+        }
         Backend::Gguf => Ok(Box::new(super::GgufEmbedder::load(
             info,
             models_dir,

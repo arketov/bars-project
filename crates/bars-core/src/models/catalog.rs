@@ -209,26 +209,38 @@ fn is_present(path: &std::path::Path) -> bool {
 }
 
 /// Получает файлы ONNX-каталога без создания сессии и чтения весов целиком в память.
-pub fn download_onnx_artifacts(models_dir: &std::path::Path, id: &str) -> Result<(), String> {
+pub fn download_onnx_artifacts(
+    models_dir: &std::path::Path,
+    id: &str,
+) -> Result<(), super::ModelFailure> {
+    use super::{ModelErrorKind, ModelFailure};
     if id == BGE_M3_FP16_ID {
         return super::embed_artifact::ensure(models_dir, super::embed_artifact::Profile::Fp16)
             .map(|_| ())
-            .map_err(|e| e.to_string());
+            .map_err(|e| e.failure());
     }
-    let info = layout(id)
-        .filter(|l| !l.safetensors)
-        .ok_or_else(|| format!("для модели `{id}` нет ONNX-списка файлов"))?;
+    let info = layout(id).filter(|l| !l.safetensors).ok_or_else(|| {
+        ModelFailure::new(
+            ModelErrorKind::Runtime,
+            format!("для модели `{id}` нет ONNX-списка файлов"),
+        )
+    })?;
     let api = hf_hub::api::sync::ApiBuilder::from_cache(hf_hub::Cache::new(models_dir.into()))
         .with_token(None)
         .with_progress(false)
         .with_retries(3)
         .build()
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| ModelFailure::new(ModelErrorKind::Runtime, e.to_string()))?;
     let repo = api.repo(hf_hub::Repo::model(info.repo.into()));
     for file in info.files {
-        let path = repo.get(file).map_err(|e| e.to_string())?;
+        let path = repo
+            .get(file)
+            .map_err(|e| ModelFailure::new(super::failure::hub_kind(&e), e.to_string()))?;
         if !is_present(&path) {
-            return Err(format!("файл модели пуст или отсутствует: {file}"));
+            return Err(ModelFailure::new(
+                ModelErrorKind::FilesMissing,
+                format!("файл модели пуст или отсутствует: {file}"),
+            ));
         }
     }
     Ok(())

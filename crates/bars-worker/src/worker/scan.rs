@@ -34,6 +34,7 @@ struct Observer {
 struct ScanResult {
     report: UpdateReport,
     paths: Vec<String>,
+    stem_outdated: bool,
 }
 enum Failure {
     Cancelled,
@@ -184,6 +185,11 @@ impl Worker {
                         _ => {}
                     }
                 }
+                // Читатель FTS не чинит: устаревший стемминг ставит обычное задание обновления.
+                let stem_outdated = match &index {
+                    Some(index) => index.stem_outdated().map_err(failed)?,
+                    None => false,
+                };
                 let snapshot = ScanSnapshot::read(index.as_ref()).map_err(failed)?;
                 drop(index);
                 // Обход диска не удерживает читателя перед ожидающей подменой индекса.
@@ -197,7 +203,11 @@ impl Worker {
                         }
                     })?;
                 let paths = lock(&observer.found).clone();
-                Ok(ScanResult { report, paths })
+                Ok(ScanResult {
+                    report,
+                    paths,
+                    stem_outdated,
+                })
             })
             .await;
             let mut check_graph = false;
@@ -226,7 +236,11 @@ impl Worker {
                 }
                 let result = result.map_err(failed).and_then(|v| v);
                 match result {
-                    Ok(ScanResult { report, paths }) => {
+                    Ok(ScanResult {
+                        report,
+                        paths,
+                        stem_outdated,
+                    }) => {
                         // Т-8 сохраняется и при проверке без задания обновления индекса.
                         let _ = bars_core::instruction::sync(&path, &inner.docs_root_of(&path));
                         if let Some(runtime) = current {
@@ -235,7 +249,8 @@ impl Worker {
                         check_graph = true;
                         let update = report.full_check
                             || report.added + report.changed + report.removed > 0
-                            || !report.problems.is_empty();
+                            || !report.problems.is_empty()
+                            || stem_outdated;
                         let outcome = OperationReport {
                             added: report.added,
                             changed: report.changed,
@@ -271,7 +286,8 @@ impl Worker {
                                     );
                                 }
                             }
-                            let mut job = if report.full_check || paths.is_empty() {
+                            let mut job = if report.full_check || stem_outdated || paths.is_empty()
+                            {
                                 Job::check(priority)
                             } else {
                                 Job::files(

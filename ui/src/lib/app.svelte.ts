@@ -649,6 +649,16 @@ class App {
   }
 
   /** «Искать по всему проекту» и «Порог N для этого запроса» из пустой выдачи. */
+  /** «Повторить» на экране ошибки модели: воркер снимает паузу перед повтором загрузки (ISS-71), затем поиск. */
+  async retryModelSearch(): Promise<void> {
+    try {
+      await call("model_retry", {});
+    } catch {
+      // Без сброса поиск всё равно повторяется: воркер сам вернёт ошибку.
+    }
+    await this.search();
+  }
+
   async searchWhole(): Promise<void> {
     this.clearSelection();
     await this.search();

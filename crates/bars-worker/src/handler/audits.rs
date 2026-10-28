@@ -15,7 +15,7 @@ use bars_core::link_index::LinkIndex;
 use bars_core::search::{
     DuplicateItem, DuplicateKind, DuplicatesRequest, duplicates_from_snapshot, duplicates_snapshot,
 };
-use bars_core::storage::{Index, Journal, index_path};
+use bars_core::storage::{Index, index_path};
 use bars_protocol::{
     AuditCancelOutput, AuditCancelParams, AuditFinding, AuditFindingsOutput, AuditFindingsParams,
     AuditListOutput, AuditListParams, AuditRunOutput, AuditRunParams, AuditScheduleOutput,
@@ -625,7 +625,7 @@ impl WorkerHandler {
         let result = tokio::task::spawn_blocking(move || {
             let chunks = {
                 let _gate = gate;
-                let index = Index::open(&index_path(&root), Journal::Wal).map_err(|e|e.to_string())?;
+                let index = Index::open_read_only(&index_path(&root)).map_err(|e|e.to_string())?;
                 let mut stmt = index.conn().prepare("SELECT d.path,d.module,c.heading_chain,c.first_line,c.text,c.last_line FROM chunks c JOIN documents d ON d.id=c.document_id ORDER BY d.path,c.ordinal").map_err(|e|e.to_string())?;
                 stmt.query_map([], |r| Ok(bars_core::audits::contradictions::Chunk {path:r.get(0)?,module:r.get(1)?,heading:r.get(2)?,first_line:r.get(3)?,text:r.get(4)?,last_line:r.get(5)?})).map_err(|e|e.to_string())?.collect::<Result<Vec<_>,_>>().map_err(|e|e.to_string())?
             };
@@ -700,8 +700,7 @@ impl WorkerHandler {
         let result = tokio::task::spawn_blocking(move || {
             let snapshot = {
                 let _gate = gate;
-                let index =
-                    Index::open(&index_path(&root), Journal::Wal).map_err(|e| e.to_string())?;
+                let index = Index::open_read_only(&index_path(&root)).map_err(|e| e.to_string())?;
                 duplicates_snapshot(&index, &request).map_err(|e| e.to_string())?
             };
             duplicates_from_snapshot(snapshot, &search, request.results).map_err(|e| e.to_string())

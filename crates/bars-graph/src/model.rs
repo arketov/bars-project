@@ -513,14 +513,18 @@ pub struct Scope {
     #[serde(default)]
     pub files: Vec<String>,
 }
+/// Файл из области подходит документу в обеих формах пути: от корня документации и от корня
+/// проекта (OQ-169).
+pub(crate) fn file_matches(input: &str, source: &SourceMeta) -> bool {
+    let normalized = crate::hints::normalize_file(input);
+    normalized == source.docs_path || normalized == source.path
+}
+
 impl Scope {
     pub fn allows(&self, source: &SourceMeta) -> bool {
         (self.modules.is_empty() && self.files.is_empty())
             || self.modules.contains(&source.module)
-            || self
-                .files
-                .iter()
-                .any(|p| p.replace('\\', "/") == source.docs_path)
+            || self.files.iter().any(|p| file_matches(p, source))
     }
 }
 

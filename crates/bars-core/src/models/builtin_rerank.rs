@@ -123,19 +123,7 @@ fn load(models_dir: &Path, gpu: bool) -> Result<TextRerank, RerankError> {
 
 // Ошибки графа/драйвера не маскируем повтором. Уменьшаем только пачку при нехватке памяти.
 fn smaller_batch(device: Device, current: usize, message: &str) -> Option<usize> {
-    let message = message.to_ascii_lowercase();
-    let allocation = [
-        "out of memory",
-        "outofmemory",
-        "e_outofmemory",
-        "0x8007000e",
-        "failed to allocate",
-        "bad allocation",
-        "not enough memory",
-    ]
-    .iter()
-    .any(|s| message.contains(s));
-    if device != Device::DirectMl || !allocation {
+    if device != Device::DirectMl || !super::is_out_of_memory(message) {
         return None;
     }
     match current {

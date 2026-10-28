@@ -64,8 +64,49 @@ const DOC: &str = "# Заголовок\n\nТекст раздела про ин
 
 #[tokio::test(flavor = "multi_thread")]
 async fn notification_download_failure_is_retained_and_cleared_on_retry() {
+    let failure =
+        failed_download(|| bars_core::models::EmbedError::Load("backend test failure".into()))
+            .await;
+    assert_eq!(failure.kind.as_str(), "runtime");
+    assert!(failure.message.contains("журнале воркера"));
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn download_failure_kind_follows_the_error_type_and_text_stays_safe() {
+    let network = failed_download(|| {
+        bars_core::models::EmbedError::Network(
+            "https://huggingface.co/x?token=secret: timeout".into(),
+        )
+    })
+    .await;
+    assert_eq!(network.kind.as_str(), "network");
+    assert!(network.message.contains("Проверьте подключение"));
+    assert!(!network.message.contains("secret"));
+    let files =
+        failed_download(|| bars_core::models::EmbedError::Files("SHA-256 не совпал".into())).await;
+    assert_eq!(files.kind.as_str(), "files_missing");
+    assert!(files.message.contains("повреждены"));
+    // Слова про файлы и сеть в тексте библиотеки вид не меняют; нехватка памяти — по списку признаков.
+    let words = failed_download(|| {
+        bars_core::models::EmbedError::Load("файл не найден, нет сети huggingface.co".into())
+    })
+    .await;
+    assert_eq!(words.kind.as_str(), "runtime");
+    let memory = failed_download(|| {
+        bars_core::models::EmbedError::Load("DirectML: 0x8007000E bad allocation".into())
+    })
+    .await;
+    assert_eq!(memory.kind.as_str(), "out_of_memory");
+    assert!(memory.message.contains("не хватило памяти"));
+}
+
+/// Скачивание, которое всегда падает с заданной ошибкой: проверяет хранение ошибки, повтор и
+/// очистку при новом запуске; возвращает сохранённую ошибку.
+async fn failed_download(
+    make: fn() -> bars_core::models::EmbedError,
+) -> bars_core::models::ModelFailure {
     let env = Env::new();
-    struct FailedDownload;
+    struct FailedDownload(fn() -> bars_core::models::EmbedError);
     impl ModelProvider for FailedDownload {
         fn fingerprint(
             &self,
@@ -87,14 +128,12 @@ async fn notification_download_failure_is_retained_and_cleared_on_retry() {
                 bars_core::models::Accelerator::Cpu
             );
             std::thread::sleep(Duration::from_millis(150));
-            Err(bars_core::models::EmbedError::Load(
-                "backend test failure".into(),
-            ))
+            Err((self.0)())
         }
     }
     fs::write(env.home.path().join("settings.toml"), "[embed]\nsource='remote'\naccelerator='cpu'\nmodel='test'\nbase_url='https://example.invalid/v1'\napi_key_name='test'\n").unwrap();
     bars_core::settings::UserSettings::load(env.home.path()).unwrap();
-    let worker = Worker::start(env.config(), Arc::new(FailedDownload)).unwrap();
+    let worker = Worker::start(env.config(), Arc::new(FailedDownload(make))).unwrap();
     assert!(worker.start_download("BAAI/bge-m3", false));
     assert!(!worker.start_download("BAAI/bge-m3", false));
     wait_until("ошибка скачивания", || {
@@ -102,7 +141,7 @@ async fn notification_download_failure_is_retained_and_cleared_on_retry() {
     })
     .await;
     let errors = worker.download_errors();
-    assert!(errors["BAAI/bge-m3"].contains("Проверьте подключение"));
+    let failure = errors["BAAI/bge-m3"].clone();
     assert_eq!(
         worker.download_errors(),
         errors,
@@ -115,6 +154,7 @@ async fn notification_download_failure_is_retained_and_cleared_on_retry() {
     })
     .await;
     worker.shutdown().await;
+    failure
 }
 
 #[tokio::test(flavor = "multi_thread")]
@@ -694,6 +734,65 @@ async fn stale_rebuild_file_is_removed_at_start() {
     let worker = env.start();
     idle(&worker).await;
     assert!(!stale.exists());
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn interrupted_swap_returns_the_old_index_at_start() {
+    let env = Env::new();
+    let project = env.project("alpha", &[("a.md", DOC)]);
+    let worker = env.start();
+    worker.register(&project).unwrap();
+    idle(&worker).await;
+    worker.shutdown().await;
+    // Подмена оборвалась: нового файла на месте нет, прежний лежит как `.old`.
+    let index = index_path(&project);
+    let old = project.join(".bars/index.sqlite.old");
+    fs::rename(&index, &old).unwrap();
+    let partial = project.join(".bars/index.sqlite.new");
+    fs::write(&partial, "обрывок").unwrap();
+
+    let worker = env.start();
+    idle(&worker).await;
+    assert!(index.exists() && !old.exists() && !partial.exists());
+    assert_eq!(documents(&project), 1);
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn job_restores_the_old_index_left_by_a_failed_rollback() {
+    let env = Env::new();
+    let project = env.project("alpha", &[("a.md", DOC)]);
+    let worker = env.start();
+    worker.register(&project).unwrap();
+    idle(&worker).await;
+    let index = index_path(&project);
+    let old = project.join(".bars/index.sqlite.old");
+    fs::rename(&index, &old).unwrap();
+
+    worker
+        .check_files(&project, vec![project.join("docs/a.md")])
+        .unwrap();
+    idle(&worker).await;
+    assert!(index.exists() && !old.exists());
+    assert_eq!(documents(&project), 1);
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn periodic_check_does_not_touch_the_index_files() {
+    let env = Env::new();
+    let project = env.project("alpha", &[("a.md", DOC)]);
+    let worker = env.start();
+    worker.register(&project).unwrap();
+    idle(&worker).await;
+    worker.pause();
+    // Файл идущей полной переиндексации: проверка из таймера его не трогает (ISS-67).
+    let building = project.join(".bars/index.sqlite.new");
+    fs::write(&building, "строится").unwrap();
+    worker.check_all();
+    tokio::time::sleep(Duration::from_millis(300)).await;
+    assert!(building.exists());
     worker.shutdown().await;
 }
 

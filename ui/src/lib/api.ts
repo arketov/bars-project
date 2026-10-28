@@ -33,7 +33,7 @@ export const inTauri = (): boolean => typeof window !== "undefined" && "__TAURI_
 interface RpcErrorShape {
   code?: number;
   message?: string;
-  data?: { kind?: string; percent?: number } | null;
+  data?: { kind?: string; percent?: number; reason?: string } | null;
 }
 
 export function toBarsError(raw: unknown): BarsError {

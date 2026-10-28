@@ -226,68 +226,63 @@ pub struct OutlineArgs {
 impl BarsMcp {
     #[tool(
         name = "bars_relations",
-        description = "Что объект требует, использует, реализует, проверяет или заменяет: явные \
-                       отношения из текста с исходными доказательствами (evidence). Вход — ровно одно \
-                       из query (имя или вопрос) и entity_ref; отрицания и условия сохраняются. \
-                       Неоднозначное имя возвращает кандидатов, а не догадку. Смысловой слой \
-                       частичный: пустой ответ не доказывает, что отношений нет."
+        description = "Что с чем связано явным утверждением («от чего зависит», «что заменяет»): \
+                       факты с основанием из текста. Вход — ровно одно из query (имя или вопрос) и \
+                       entity_ref; отрицания и условия сохраняются. Неоднозначное имя возвращает \
+                       кандидатов, а не догадку. Смысловой слой частичный: пустой ответ не \
+                       доказывает, что отношений нет."
     )]
     async fn bars_relations(
         &self,
         original: observation::Original,
-        Parameters(args): Parameters<graph::GraphArgs>,
+        Parameters(args): Parameters<graph::RelationsArgs>,
     ) -> CallToolResult {
-        self.graph_call(original, args, bars_graph::Operation::Relations)
-            .await
+        self.graph_call(original, args.into_call()).await
     }
 
     #[tool(
         name = "bars_paths",
-        description = "Как связаны два объекта: ограниченные пути между from и to (ObjectRef из \
-                       другого ответа графа либо label с kind/namespace) с evidence каждого шага. По \
-                       умолчанию смысловые рёбра, structural/mixed — явно в path_kind. Путь — связь, \
-                       а не объяснение причины; отсутствие пути не доказывает отсутствия связи."
+        description = "Как связаны два объекта: ограниченные пути между from и to (объект из \
+                       ответа графа либо подпись label) с основанием каждого шага. По умолчанию \
+                       смысловые рёбра, structural и mixed — явно в path_kind. Путь — связь, а не \
+                       объяснение причины; отсутствие пути не доказывает отсутствия связи."
     )]
     async fn bars_paths(
         &self,
         original: observation::Original,
-        Parameters(args): Parameters<graph::GraphArgs>,
+        Parameters(args): Parameters<graph::PathsArgs>,
     ) -> CallToolResult {
-        self.graph_call(original, args, bars_graph::Operation::Paths)
-            .await
+        self.graph_call(original, args.into_call()).await
     }
 
     #[tool(
         name = "bars_impact",
-        description = "Какие документы перепроверить при изменении объекта: обратные зависимости и \
-                       проверки с evidence. Вход — roots из ответа другой графовой операции. Смысловой \
-                       слой частичный: пустой ответ не значит, что зависимостей нет; гиперссылки сюда \
-                       не входят — их даёт bars_links с direction=incoming."
+        description = "Какие документы перепроверить после правки объекта: обратные зависимости и \
+                       проверки с основанием. Вход — roots из ответа другой графовой операции. \
+                       Смысловой слой частичный: пустой ответ не значит, что зависимостей нет; \
+                       гиперссылки сюда не входят — их даёт bars_links с direction=incoming."
     )]
     async fn bars_impact(
         &self,
         original: observation::Original,
-        Parameters(args): Parameters<graph::GraphArgs>,
+        Parameters(args): Parameters<graph::ImpactArgs>,
     ) -> CallToolResult {
-        self.graph_call(original, args, bars_graph::Operation::Impact)
-            .await
+        self.graph_call(original, args.into_call()).await
     }
 
     #[tool(
         name = "bars_context",
-        description = "Первичные источники для задачи query по ролям: требование, решение, \
-                       поведение, устройство, ограничение, проверка (roles, task_profile). Не ответ, \
-                       а список для чтения в пределах token_budget; смотри missing_roles. По \
-                       умолчанию прерывается через 1 с — для большого проекта задай \
-                       budgets.timeout_ms до 5000."
+        description = "Собрать первичные источники к задаче query по ролям: требование, решение, \
+                       поведение, устройство, ограничение, проверка (roles, task_profile). Не \
+                       готовый ответ, а список для чтения в пределах token_budget; смотри \
+                       missing_roles."
     )]
     async fn bars_context(
         &self,
         original: observation::Original,
-        Parameters(args): Parameters<graph::GraphArgs>,
+        Parameters(args): Parameters<graph::ContextArgs>,
     ) -> CallToolResult {
-        self.graph_call(original, args, bars_graph::Operation::Context)
-            .await
+        self.graph_call(original, args.into_call()).await
     }
 
     #[tool(
@@ -300,27 +295,24 @@ impl BarsMcp {
     async fn bars_explore(
         &self,
         original: observation::Original,
-        Parameters(args): Parameters<graph::GraphArgs>,
+        Parameters(args): Parameters<graph::ExploreArgs>,
     ) -> CallToolResult {
-        self.graph_call(original, args, bars_graph::Operation::Explore)
-            .await
+        self.graph_call(original, args.into_call()).await
     }
 
     #[tool(
         name = "bars_graph",
-        description = "Посмотреть подграф документов, разделов, чанков или сущностей (view), \
-                       например чтобы проверить находку bars_explore. local=true с roots — \
-                       окрестность объектов на глубину budgets.max_depth; без local — общий граф в \
-                       пределах бюджетов. Ответ объёмный: задавай limit. Вызов только читает готовый \
-                       граф и не строит его."
+        description = "Подграф документов, разделов, чанков или сущностей (view), например чтобы \
+                       проверить находку bars_explore. local=true с roots — окрестность объектов на \
+                       глубину max_depth; без local — общий граф в пределах бюджетов. Ответ \
+                       объёмный: задавай limit. Вызов только читает готовый граф и не строит его."
     )]
     async fn bars_graph(
         &self,
         original: observation::Original,
-        Parameters(args): Parameters<graph::GraphArgs>,
+        Parameters(args): Parameters<graph::GraphViewArgs>,
     ) -> CallToolResult {
-        self.graph_call(original, args, bars_graph::Operation::Graph)
-            .await
+        self.graph_call(original, args.into_call()).await
     }
 
     /// Сессия MCP. Графовые инструменты попадают в список, только если `settings.toml` включает их
