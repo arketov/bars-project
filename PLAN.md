@@ -230,7 +230,7 @@
 
 Embed через Ollama и LM Studio уже работает; пользователь получает через них и rerank, хотя штатного API rerank у обоих нет. Подробности — docs/features/models/external-models.md.
 
-- 7.1.1 Исследование: способ rerank без штатного API, в том числе генеративная замена, совместимые модели → docs/knowledge/ollama.md и docs/knowledge/lmstudio.md, согласование с автором.
+- [x] 7.1.1 Исследование: способ rerank без штатного API, в том числе генеративная замена, совместимые модели → docs/knowledge/ollama.md и docs/knowledge/lmstudio.md, согласование с автором. Выполнено 28-10-2026, решение ADR-0006, итог — docs/chats/2026-10-28-rerank-logprobs/handoff.md.
 - 7.1.2 Реализация: rerank по согласованному способу, проверка на RTX 3090.
 
 ## Блок 8. Модели под железо пользователя

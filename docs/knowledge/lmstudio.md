@@ -4,11 +4,26 @@ title: LM Studio — API моделей и проверка подключени
 
 # LM Studio — API моделей и проверка подключения
 
-Статус 23-10-2026: официальный API исследован; LM Studio 0.4.26+4/Qwen3 0.6B Q8_0 прошёл реальный индекс → сохранение настройки → два поиска. Установленное окно и сравнительное качество не проверены. Реализация подключения описана во [внешних моделях](../features/models/external-models.md).
+Статус 23-10-2026: официальный API исследован; LM Studio 0.4.26+4/Qwen3 0.6B Q8_0 прошёл реальный индекс → сохранение настройки → два поиска. Установленное окно и сравнительное качество не проверены. 28-10-2026 пробой на LM Studio 0.4.26 исследованы logprobs для rerank без штатного API; способ согласован с автором ([ADR-0006](../adr/0006-rerank-yes-no-logprobs.md)), reranker-модель не проверялась. Реализация подключения описана во [внешних моделях](../features/models/external-models.md).
 
 ## Возможности LM Studio
 
-[Официальный embedding API](https://lmstudio.ai/docs/developer/openai-compat/embeddings) совместим с OpenAI: массив `input`, имя `model`, ответ `data[].embedding/index`. [CLI](https://lmstudio.ai/docs/cli) позволяет выбрать GPU, контекст и отдельный идентификатор загруженной модели. Штатного rerank среди опубликованных endpoints нет; [upstream #521](https://github.com/lmstudio-ai/lms/issues/521) открыт на дату исследования. GGUF reranker сам по себе не создаёт поддерживаемый API scoring.
+[Официальный embedding API](https://lmstudio.ai/docs/developer/openai-compat/embeddings) совместим с OpenAI: массив `input`, имя `model`, ответ `data[].embedding/index`. [CLI](https://lmstudio.ai/docs/cli) позволяет выбрать GPU, контекст и отдельный идентификатор загруженной модели. Штатного rerank среди опубликованных endpoints нет; [upstream #521](https://github.com/lmstudio-ai/lms/issues/521) открыт на 28-10-2026. GGUF reranker сам по себе не создаёт поддерживаемый API scoring. В [списке OpenAI-совместимых маршрутов](https://lmstudio.ai/docs/developer/openai-compat) есть `/v1/decisions`, но он требует особой «decision model», и формат ответа не документирован. Для rerank он не рассматривается.
+
+## Rerank в LM Studio через logprobs
+
+Согласованный способ — тот же, что для Ollama: Qwen3-Reranker, один токен на пару, `p = e^yes / (e^yes + e^no)`. Промпт, правило отсутствующего токена, пул из 4 запросов и сбой без частичного rerank описаны в [исследовании Ollama](ollama.md). Отличается только транспорт.
+
+Проба 28-10-2026: LM Studio 0.4.26, `google/gemma-4-e4b`, RTX 3090, отдельный порт. Модель загружена из имеющихся, ничего не скачивалось.
+- `/v1/completions` (сырой промпт без шаблона) с `logprobs`/`top_logprobs`: `"logprobs": null`.
+- `/v1/chat/completions` с `logprobs: true`: тоже `null`.
+- [`/v1/responses`](https://lmstudio.ai/blog/lmstudio-v0.3.39) с `include: ["message.output_text.logprobs"]`, `top_logprobs: 5`, `reasoning: {effort: "none"}` вернул градуированные значения. Релевантная пара: `yes` −0,0002, `no` −8,49. Нерелевантная: `no` −3·10⁻⁶, `yes` −16,7.
+- Без `effort: none` первый токен уходит в `reasoning` и `output_text` пуст.
+- Прогретый вызов занял 0,5–1,1 с.
+
+Получается, оценки в LM Studio даёт только `/v1/responses`, а шаблон чата накладывает сервер. Поэтому system и user передаются обычными сообщениями. При этом нужно проверить, что отрендеренный промпт оканчивается пустым блоком `<think>` формата Qwen3-Reranker. Ответ эхом показал `frequency_penalty: 1.1`, хотя в запросе был 0. Если штраф действует на logprobs, оценка смещается для документа с «yes»/«no» в тексте. Первый вывод типа `reasoning` считается сбоем, а не оценкой. Модель после пробы выгружена, сервер остановлен.
+
+Обычная чат-модель на пробе даёт почти бинарные оценки. Поэтому она допускается только с пометкой «качество не проверено», основная модель — Qwen3-Reranker.
 
 ## Модели и границы проверки
 
