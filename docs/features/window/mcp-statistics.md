@@ -8,7 +8,9 @@ title: Статистика вызовов MCP
 
 ## Границы учёта MCP
 
-Список самих инструментов и их параметров — в [инструментах MCP](../agent-tools/mcp-tools.md), операции графа — в [инструментах GraphRAG](../graphrag/tools.md). Worker наблюдает типизированные MCP-вызовы после проверки IPC-сессии. Подробный контракт реализован для `bars_rag_search`, `bars_get_similar`, `bars_read`, `bars_outline`, `bars_projects`, `bars_status`, `bars_reindex`. Для внедряемых GraphRAG-операций собираются общие метаданные и количество `graph_items`; полный набор их аргументов не сохраняется. У `GraphQuery` это явно отмечено `graph_detail_contract_not_recorded`.
+Список самих инструментов и их параметров — в [инструментах MCP](../agent-tools/mcp-tools.md), операции графа — в [инструментах GraphRAG](../graphrag/tools.md). Worker наблюдает типизированные MCP-вызовы после проверки IPC-сессии. Подробный контракт реализован для `bars_rag_search`, `bars_get_similar`, `bars_read`, `bars_outline`, `bars_projects`, `bars_status`, `bars_reindex`. У шести GraphRAG-операций в `requested` сохраняются основные исходные аргументы — `query`, `entity_ref`, `from`, `to`, `roots`, `topic`, `whole_scope`, `analysis`, `view`, `local`, `budgets`, `limit`, `roles`, `task_profile`, область `modules`/`files`, `project`, `format`; в `applied` — область и операция. Подробности ответа сверх количества `graph_items` не сохраняются, это отмечено `graph_detail_contract_not_recorded`.
+
+Повтор прокси при `model_loading` различим: `applied.proxy_attempt` — номер попытки прокси для одного вызова агента (1 — первая, 2 и дальше — повторы прокси). Повтор агента начинается снова с 1. У записи без исходного контекста номера нет.
 
 Сессия — одно соединение MCP с worker, **не чат клиента**. Переподключение создаёт новую сессию; повтор вызова — новую попытку. Проект — зарегистрированный корень и имя, разрешённые при исполнении. Пустая строка `project` означает «Без проекта»: общий список проектов либо неразрешённая цель.
 

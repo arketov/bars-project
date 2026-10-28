@@ -523,7 +523,8 @@ pub fn bounded(v: Value, field: &str, budget: &mut usize, notes: &mut Vec<String
     }
 }
 
-/// Только плоский allowlist с проверкой типов; nested payload не проходит.
+/// Только allowlist с проверкой типов; вложенные значения допускаются лишь у графовых ссылок и
+/// пределов (`roots`, `entity_ref`, `from`, `to`, `budgets`), объём режет [`bounded`].
 pub fn requested(tool: &str, source: &Value) -> Value {
     let fields: &[&str] = match tool {
         "bars_rag_search" => &[
@@ -536,6 +537,29 @@ pub fn requested(tool: &str, source: &Value) -> Value {
             "limit",
             "candidates",
             "min_score",
+            "include_related",
+            "related_budget",
+        ],
+        "bars_relations" | "bars_paths" | "bars_impact" | "bars_context" | "bars_explore"
+        | "bars_graph" => &[
+            "format",
+            "project",
+            "query",
+            "entity_ref",
+            "from",
+            "to",
+            "roots",
+            "modules",
+            "files",
+            "topic",
+            "whole_scope",
+            "analysis",
+            "view",
+            "local",
+            "budgets",
+            "limit",
+            "roles",
+            "task_profile",
         ],
         "bars_get_duplicates" => &["format", "project", "modules", "limit"],
         "bars_get_similar" => &["format", "project", "chunk_id", "modules", "limit"],
@@ -574,15 +598,21 @@ pub fn requested(tool: &str, source: &Value) -> Value {
             let valid = v.is_null()
                 || match *key {
                     "limit" | "candidates" | "under_line" | "limit_docs" | "limit_hits"
-                    | "offset" => v.as_u64().is_some(),
+                    | "offset" | "related_budget" => v.as_u64().is_some(),
                     "min_score" => v.is_number(),
-                    "full" | "regex" | "case_sensitive" | "cursor_present" => v.is_boolean(),
-                    "modules" | "files" => {
+                    "full" | "regex" | "case_sensitive" | "cursor_present" | "include_related"
+                    | "whole_scope" | "local" => v.is_boolean(),
+                    "modules" | "files" | "roles" => {
                         v.as_array().is_some_and(|a| a.iter().all(Value::is_string))
                     }
                     "levels" => v
                         .as_array()
                         .is_some_and(|a| a.iter().all(|v| v.as_u64().is_some())),
+                    "entity_ref" | "from" | "to" => v.is_object(),
+                    "roots" => v.as_array().is_some_and(|a| a.iter().all(Value::is_object)),
+                    "budgets" => v
+                        .as_object()
+                        .is_some_and(|o| o.values().all(|v| v.is_null() || v.as_u64().is_some())),
                     _ => v.is_string(),
                 };
             if valid {

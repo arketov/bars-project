@@ -73,7 +73,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 
 ## Ответы методов bars
 
-- `search` — `results` (путь от корня проекта, `module`, `title`, `heading_chain` строкой `Заголовок 1/Заголовок 2`, `first_line`, `last_line`, `text`, `score`, `score_kind`), `applied` (число результатов, кандидатов, кандидатов реранка, порог, вид оценки, `clamped`), `indexing`, `pending` и, если rerank не отработал, `rerank_error`.
+- `search` — `results` (путь от корня проекта, `module`, `title`, `heading_chain` строкой `Заголовок 1/Заголовок 2`, `sections` — заголовки разделов, приклеенных к чанку после первого, в виде строк `## Заголовок`, поле пропускается, если их нет, `first_line`, `last_line`, `text`, `score`, `score_kind`), `applied` (число результатов, кандидатов, кандидатов реранка, порог, вид оценки, `clamped`), `indexing`, `pending` и, если rerank не отработал, `rerank_error`.
 - `outline` — `headings`: номер строки, уровень, текст. Строку `7 ## Стадия` из заголовка собирает функция крейта `bars-protocol`, общая для MCP и CLI.
 - `read` — `title` и `text` как есть. Номера строк ставит функция `number_lines` крейта `bars-protocol`: у MCP и CLI вывод одинаковый (Т-20).
 - `status` — поля из таблицы в [worker.md](worker.md) и `path` проекта; время — RFC 3339.

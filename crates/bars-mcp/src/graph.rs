@@ -44,7 +44,12 @@ pub struct GraphArgs {
     pub change_description: Option<String>,
 }
 impl BarsMcp {
-    pub(super) async fn graph_call(&self, args: GraphArgs, operation: Operation) -> CallToolResult {
+    pub(super) async fn graph_call(
+        &self,
+        original: observation::Original,
+        args: GraphArgs,
+        operation: Operation,
+    ) -> CallToolResult {
         let format = args.format;
         let target = self.target(args.project);
         let request = GraphRequest {
@@ -83,8 +88,11 @@ impl BarsMcp {
             change_description: args.change_description,
         };
         finish(
-            self.call(&bars_protocol::GraphQueryParams { target, request })
-                .await,
+            self.call_observed(
+                &bars_protocol::GraphQueryParams { target, request },
+                Some(&original.0),
+            )
+            .await,
             format,
             |out| {
                 format!(

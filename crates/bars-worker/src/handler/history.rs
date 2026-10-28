@@ -90,6 +90,14 @@ impl WorkerHandler {
         if let Some(t) = target {
             scope["cwd"] = json!(t.cwd);
         }
+        // Номер попытки прокси при `model_loading`: повтор прокси, а не агента (ISS-31).
+        if let Some(attempt) = original
+            .as_ref()
+            .and_then(|v| v.get("proxy_attempt"))
+            .and_then(Value::as_u64)
+        {
+            scope["proxy_attempt"] = json!(attempt);
+        }
         match &call {
             Call::DiskText(p) => {
                 scope["modules"] = json!(p.modules);
@@ -110,9 +118,13 @@ impl WorkerHandler {
                 scope["modules"] = json!(p.search.modules);
                 scope["files"] = json!(p.search.files);
                 scope["mode"] = json!(p.mode);
+                scope["include_related"] = json!(p.include_related);
+                scope["related_budget"] = json!(p.related_budget);
             }
-            Call::GraphQuery(_) => {
-                scope["details"] = json!("not_recorded");
+            Call::GraphQuery(p) => {
+                scope["operation"] = json!(p.request.operation);
+                scope["modules"] = json!(p.request.scope.modules);
+                scope["files"] = json!(p.request.scope.files);
             }
             Call::Search(p) => {
                 scope["modules"] = json!(p.modules);

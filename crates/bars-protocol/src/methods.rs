@@ -102,6 +102,9 @@ pub struct SearchHit {
     pub title: String,
     /// Цепочка заголовков в виде `Заголовок 1/Заголовок 2`.
     pub heading_chain: String,
+    /// Заголовки разделов, приклеенных к чанку после первого, строками `## Заголовок` (ISS-28).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub sections: Vec<String>,
     pub first_line: u32,
     pub last_line: u32,
     pub text: String,
@@ -1486,6 +1489,7 @@ mod tests {
                 module: ".".into(),
                 title: "A".into(),
                 heading_chain: "A/Б".into(),
+                sections: vec!["## В".into()],
                 first_line: 3,
                 last_line: 9,
                 text: "текст".into(),

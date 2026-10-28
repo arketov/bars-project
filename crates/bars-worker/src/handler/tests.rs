@@ -964,3 +964,17 @@ mod graph;
 mod links;
 mod new_topics;
 mod window;
+
+/// ISS-28: заголовки приклеенных разделов видны в результате, а список `other headers:` и
+/// строки в блоках кода в них не попадают.
+#[test]
+fn merged_sections_list_glued_headings_only() {
+    assert_eq!(
+        super::merged_sections(
+            "текст\n\n## Б\nещё\n```\n# не заголовок\n```\n\n### В\nи ещё\nother headers:\n## Г"
+        ),
+        ["## Б", "### В"]
+    );
+    assert!(super::merged_sections("текст без заголовков").is_empty());
+    assert!(super::merged_sections("other headers:\n## Б").is_empty());
+}

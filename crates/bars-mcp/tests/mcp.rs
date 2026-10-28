@@ -240,6 +240,14 @@ async fn initialize_and_tool_list_do_not_touch_the_worker() {
     );
 
     let tools = mcp.request("tools/list", json!({})).await;
+    // ISS-27: перенос строки в описании без `\` приносит модели серии пробелов.
+    for tool in tools["result"]["tools"].as_array().unwrap() {
+        let listed = tool.to_string();
+        assert!(
+            !listed.contains("  "),
+            "двойной пробел в описании: {listed}"
+        );
+    }
     let mut names: Vec<_> = tools["result"]["tools"]
         .as_array()
         .unwrap()
@@ -361,6 +369,26 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
     let tools = mcp.request("tools/list", json!({})).await;
     assert!(!tools.to_string().contains("graph_build"));
     assert!(!tools.to_string().contains("graph_cancel"));
+    // ISS-31: история хранит аргументы графовых операций и номер попытки прокси.
+    let page = bars_worker::mcp_history::History::new(harness.home.path().into())
+        .page(&bars_worker::mcp_history::Filter {
+            limit: Some(100),
+            ..Default::default()
+        })
+        .unwrap();
+    let record = |tool: &str| {
+        page.records
+            .iter()
+            .find(|a| a.tool == tool)
+            .unwrap_or_else(|| panic!("{tool} в истории"))
+    };
+    assert_eq!(record("bars_relations").requested["query"], "Т-1");
+    assert_eq!(record("bars_paths").requested["to"]["label"], "Т-3");
+    assert_eq!(record("bars_impact").requested["roots"], json!([root]));
+    assert_eq!(record("bars_explore").requested["whole_scope"], true);
+    assert_eq!(record("bars_graph").requested["view"], "mixed");
+    assert_eq!(record("bars_graph").applied["operation"], "graph");
+    assert!(page.records.iter().all(|a| a.applied["proxy_attempt"] == 1));
 }
 
 #[tokio::test(flavor = "multi_thread")]

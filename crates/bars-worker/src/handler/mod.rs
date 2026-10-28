@@ -405,7 +405,7 @@ impl WorkerHandler {
                 match loaded {
                     Ok(data) => {
                         let mut expand = |index: &Index, seeds: &[i64], limit: usize| {
-                            let (ids, reply) = bars_core::graph::retrieval::expand_timed(
+                            match bars_core::graph::retrieval::expand_timed(
                                 index,
                                 &data,
                                 &request,
@@ -413,9 +413,27 @@ impl WorkerHandler {
                                 limit,
                                 budgets.clone(),
                                 load_elapsed,
-                            )?;
-                            related = Some(reply);
-                            Ok(ids)
+                            ) {
+                                Ok((ids, reply)) => {
+                                    related = Some(reply);
+                                    Ok(ids)
+                                }
+                                // Пакет не помещается даже пустым: выдача без него (ISS-88).
+                                Err(bars_core::search::SearchError::InvalidParams(message))
+                                    if message.contains(
+                                        bars_core::graph::query::ENVELOPE_DOES_NOT_FIT,
+                                    ) =>
+                                {
+                                    fallback = Some(
+                                        "Связанные источники не выданы: пакет не помещается в \
+                                         related_budget (или graph_budgets.max_bytes) даже пустым; \
+                                         увеличьте related_budget"
+                                            .into(),
+                                    );
+                                    Ok(Vec::new())
+                                }
+                                Err(error) => Err(error),
+                            }
                         };
                         bars_core::search::search_expanded(
                             &index,
@@ -1413,6 +1431,7 @@ fn hit(hit: bars_core::search::SearchHit) -> SearchHit {
         path: hit.path,
         module: hit.module,
         title: hit.title,
+        sections: merged_sections(&hit.text),
         heading_chain: hit.heading_chain,
         first_line: to_u32(hit.first_line),
         last_line: to_u32(hit.last_line),
@@ -1420,6 +1439,24 @@ fn hit(hit: bars_core::search::SearchHit) -> SearchHit {
         score: hit.score,
         score_kind: score_kind(hit.score_kind),
     }
+}
+
+/// Заголовки разделов, приклеенных к чанку после первого (ISS-28): заголовки в тексте чанка до
+/// списка `other headers:`, по правилам нарезки — ATX вне блоков кода.
+fn merged_sections(text: &str) -> Vec<String> {
+    let own = if text.starts_with("other headers:") {
+        ""
+    } else {
+        text.split("\nother headers:").next().unwrap_or(text)
+    };
+    outline(own, &OutlineQuery::default())
+        .map(|headings| {
+            headings
+                .into_iter()
+                .map(|h| format!("{} {}", "#".repeat(h.level), h.text))
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
 fn duplicate_item(item: bars_core::search::DuplicateItem) -> DuplicateItem {

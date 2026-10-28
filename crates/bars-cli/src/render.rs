@@ -35,6 +35,9 @@ fn hit_lines(text: &mut String, number: usize, hit: &SearchHit) {
         let _ = writeln!(text, "   id: {}", hit.chunk_id);
     }
     let _ = writeln!(text, "   {} — {}", hit.title, hit.heading_chain);
+    if !hit.sections.is_empty() {
+        let _ = writeln!(text, "   и разделы: {}", hit.sections.join("; "));
+    }
     let _ = writeln!(
         text,
         "{}
@@ -62,8 +65,9 @@ pub fn similar(output: &SimilarOutput) -> String {
     }
     let _ = write!(
         text,
-        "Применено: результатов {}{}. Оценка — косинусная близость к исходному чанку; близость не доказывает дублирование.",
+        "Применено: предел результатов {}, выдано {}{}. Оценка — косинусная близость к исходному чанку; близость не доказывает дублирование.",
         output.limit,
+        output.results.len(),
         if output.clamped {
             "; значение прижато к пределу"
         } else {
@@ -204,8 +208,9 @@ pub fn search(output: &SearchOutput) -> String {
     let applied = &output.applied;
     let _ = write!(
         text,
-        "Применено: результатов {}, кандидатов {}, порог {} ({}){}",
+        "Применено: предел результатов {}, выдано {}, кандидатов {}, порог {} ({}){}",
         applied.results,
+        output.results.len(),
         applied.candidates,
         applied.min_score,
         score_kind(applied.score_kind),
