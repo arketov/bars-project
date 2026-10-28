@@ -1134,6 +1134,7 @@ methods! {
     NewTopicsClear: crate::NewTopicsClearParams => crate::NewTopicsGenerationOutput, "new_topics_clear", Window;
     NewTopicsSettings: crate::NewTopicsSettingsParams => crate::NewTopicsSettingsOutput, "new_topics_settings", Window;
     LinksOf: crate::LinksOfParams => crate::LinksOfOutput, "links_of", Window;
+    LinksInto: crate::LinksIntoParams => crate::LinksIntoOutput, "links_into", Window;
     TextSearch: crate::TextSearchParams => crate::TextSearchOutput, "text_search", Window;
     DiskText: crate::DiskTextParams => crate::DiskTextOutput, "disk_text", All;
     DiskLinks: crate::DiskLinksParams => crate::DiskLinksOutput, "disk_links", All;

@@ -2,7 +2,7 @@
 // Устройство — docs/features/knowledge-base/tree-and-files.md.
 
 import { app } from "./app.svelte";
-import { entryCreateDir, entryCreateDoc, entryMove, entryPlanMove, entryTrash, type EntryResult, type MovePreview } from "./api";
+import { entryCreateDir, entryCreateDoc, entryMove, entryPlanDelete, entryPlanMove, entryTrash, type DeletePlan, type EntryResult, type MovePreview } from "./api";
 import { findNode, projectPathOf, type TreeNode } from "./tree";
 import { moved } from "./moved.svelte";
 
@@ -69,6 +69,11 @@ class Entries {
   preview = $state<MovePreview | null>(null);
   previewValue = "";
   report = $state<{path: string; reason: string}[] | null>(null);
+  /** Подтверждение удаления: `loading` — идёт подсчёт входящих ссылок, `unchecked` — индекс ссылок недоступен. */
+  deleteState = $state<"loading" | "ready" | "unchecked">("loading");
+  deletePlan = $state<DeletePlan | null>(null);
+  /** Номер подсчёта: ответ закрытого или переоткрытого диалога его не перезаписывает. */
+  private planSeq = 0;
 
   /** Открывает диалог для узла дерева; `nodePath` — путь узла (`.` — корень документации). */
   open(action: EntryAction, nodePath: string): void {
@@ -81,7 +86,24 @@ class Entries {
     if (node.path === "." && action !== "newDoc" && action !== "newDir") return;
     this.error = null;
     this.preview = null; this.report = null;
-    this.request = { action, project, docsRoot: app.docsRoot, node, name: nodeName(node), docs: countDocs(node) };
+    this.deletePlan = null; this.deleteState = "loading";
+    const request: EntryRequest = { action, project, docsRoot: app.docsRoot, node, name: nodeName(node), docs: countDocs(node) };
+    this.request = request;
+    if (action === "trash") void this.planDelete(request, ++this.planSeq);
+  }
+
+  /** Число входящих ссылок считается один раз, при открытии диалога (tree-and-files.md, «Удаление»). */
+  private async planDelete(request: EntryRequest, seq: number): Promise<void> {
+    let plan: DeletePlan | null = null;
+    try {
+      const answer = await entryPlanDelete(request.project, projectPathOf(request.node.path, request.docsRoot));
+      if (answer.status === "ok") plan = answer;
+    } catch {
+      // Подсчёт не удался: диалог скажет «Ссылки не проверены», удаление остаётся возможным.
+    }
+    if (this.planSeq !== seq) return;
+    this.deletePlan = plan;
+    this.deleteState = plan?.links_checked ? "ready" : "unchecked";
   }
 
   cancel(): void {
@@ -89,6 +111,8 @@ class Entries {
     this.request = null;
     this.error = null;
     this.preview = null; this.report = null;
+    this.deletePlan = null;
+    this.planSeq++;
   }
 
   /** Выполняет запрос; `value` — введённое имя (создание, переименование) или путь папки назначения (перемещение). */
@@ -96,6 +120,7 @@ class Entries {
     const request = this.request;
     if (!request || this.busy) return;
     if (this.report) { this.cancel(); return; }
+    if (request.action === "trash" && this.deleteState === "loading") return;
     const { project, node } = request;
     if (app.current !== project || app.docsRoot !== request.docsRoot) {
       this.error = "Проект изменился. Закройте диалог и откройте его заново.";

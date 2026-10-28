@@ -12,6 +12,7 @@ const api = vi.hoisted(() => ({
   entryMove: vi.fn(),
   entryPlanMove: vi.fn().mockResolvedValue({status: "ok", path: "docs/new.md", token: "snapshot", documents: [], warnings: []}),
   entryTrash: vi.fn(),
+  entryPlanDelete: vi.fn().mockResolvedValue({ status: "ok", folder: true, documents: 3, links_checked: true, links: 0, sources: [] }),
   inTauri: () => false,
 }));
 vi.mock("./api", () => ({ ...api, joinPath: (a: string, b: string) => `${a}/${b}`, openPath: vi.fn(), pickFolder: vi.fn() }));
@@ -220,11 +221,59 @@ describe("операции с файлами и папками", () => {
     api.entryTrash.mockResolvedValue({ status: "ok", path: "docs/a" });
     entries.open("trash", "a");
     expect(entries.request?.docs).toBe(3);
+    await vi.waitFor(() => expect(entries.deleteState).toBe("ready"));
+    expect(api.entryPlanDelete).toHaveBeenCalledWith(project.path, "docs/a");
     await entries.submit("");
     expect(api.entryTrash).toHaveBeenCalledWith(project.path, "docs/a");
     expect(app.toast?.text).toBe("Перемещено в корзину");
     entries.open("rename", ".");
     expect(entries.request).toBeNull();
+  });
+
+  it("подтверждение удаления называет число ссылок и документов-источников; без ссылок — пустой список", async () => {
+    api.entryPlanDelete.mockResolvedValueOnce({
+      status: "ok", folder: false, documents: 1, links_checked: true, links: 3,
+      sources: [
+        { path: "docs/root.md", title: "root", links: [{ line: 4, text: "x" }, { line: 9, text: "икс" }] },
+        { path: "docs/a/b/y.md", links: [{ line: 2, text: "x" }] },
+      ],
+    });
+    entries.open("trash", "a/x.md");
+    expect(entries.deleteState).toBe("loading");
+    await entries.submit("");
+    expect(api.entryTrash).not.toHaveBeenCalled();
+    await vi.waitFor(() => expect(entries.deleteState).toBe("ready"));
+    expect(entries.deletePlan?.links).toBe(3);
+    expect(entries.deletePlan?.sources).toHaveLength(2);
+    entries.cancel();
+    expect(entries.deletePlan).toBeNull();
+    entries.open("trash", "a/x.md");
+    await vi.waitFor(() => expect(entries.deleteState).toBe("ready"));
+    expect(entries.deletePlan?.sources).toEqual([]);
+  });
+
+  it("индекс ссылок недоступен: «Ссылки не проверены», удаление остаётся возможным", async () => {
+    api.entryPlanDelete.mockResolvedValueOnce({ status: "ok", folder: false, documents: 1, links_checked: false, links: 0, sources: [] });
+    entries.open("trash", "a/x.md");
+    await vi.waitFor(() => expect(entries.deleteState).toBe("unchecked"));
+    api.entryTrash.mockResolvedValue({ status: "ok", path: "docs/a/x.md" });
+    await entries.submit("");
+    expect(api.entryTrash).toHaveBeenCalledWith(project.path, "docs/a/x.md");
+    api.entryPlanDelete.mockRejectedValueOnce(new Error("воркер ещё запускается"));
+    entries.open("trash", "a/x.md");
+    await vi.waitFor(() => expect(entries.deleteState).toBe("unchecked"));
+  });
+
+  it("поздний ответ подсчёта закрытого диалога не попадает в следующий", async () => {
+    let late: (plan: unknown) => void = () => {};
+    api.entryPlanDelete.mockReturnValueOnce(new Promise((resolve) => { late = resolve; }));
+    entries.open("trash", "a/x.md");
+    entries.cancel();
+    entries.open("trash", "./root.md");
+    await vi.waitFor(() => expect(entries.deleteState).toBe("ready"));
+    late({ status: "ok", folder: false, documents: 1, links_checked: true, links: 9, sources: [{ path: "docs/z.md", links: [{ line: 1, text: "z" }] }] });
+    await Promise.resolve();
+    expect(entries.deletePlan?.links).toBe(0);
   });
 
   it("частичная неудача остаётся списком в диалоге; повтор не перемещает второй раз", async () => {

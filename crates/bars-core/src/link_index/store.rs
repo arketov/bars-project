@@ -73,6 +73,21 @@ pub struct IncomingLink {
     pub lines: Vec<u32>,
 }
 
+/// Ссылка на документ набора: строка источника и видимый текст ссылки.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LinkInto {
+    pub line: u32,
+    pub text: String,
+}
+
+/// Документ вне набора, ссылающийся на документы набора (`LinkIndex::links_into`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SourceInto {
+    pub path: String,
+    pub title: Option<String>,
+    pub links: Vec<LinkInto>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LinksOf {
     /// Документ учтён индексом ссылок (есть на диске и найден обходом).
@@ -429,6 +444,75 @@ impl LinkIndex {
             outgoing,
             incoming,
         })
+    }
+
+    /// Входящие ссылки на любой документ набора `paths` (от корня проекта) из документов вне набора:
+    /// то, что станет битым при удалении набора. Ссылки внутри набора не считаются.
+    pub fn links_into(&self, paths: &[String]) -> Result<Vec<SourceInto>, LinkIndexError> {
+        let prefix = self.meta("docs_prefix")?.unwrap_or_default();
+        let mut titles: HashMap<String, Option<String>> = HashMap::new();
+        {
+            let mut statement = self.db.prepare("SELECT path, title FROM docs")?;
+            let rows = statement.query_map([], |r| Ok((r.get::<_, String>(0)?, r.get(1)?)))?;
+            for row in rows {
+                let (doc, title) = row?;
+                titles.insert(doc, title);
+            }
+        }
+        let set = DocSet::new(
+            titles
+                .keys()
+                .map(|doc| relative_to_docs(doc, &prefix).to_string()),
+        );
+        let inside: HashSet<&str> = paths.iter().map(String::as_str).collect();
+        let inside_docs: HashSet<&str> = paths
+            .iter()
+            .map(|path| relative_to_docs(path, &prefix))
+            .collect();
+        let mut statement = self.db.prepare(
+            "SELECT src, line, start, end, kind, raw_target, text, fragment FROM links ORDER BY src, start",
+        )?;
+        let rows = statement.query_map([], |r| {
+            Ok((
+                r.get::<_, String>(0)?,
+                ParsedLink {
+                    line: r.get(1)?,
+                    start: r.get::<_, i64>(2)? as usize,
+                    end: r.get::<_, i64>(3)? as usize,
+                    kind: LinkKind::parse(&r.get::<_, String>(4)?).unwrap_or(LinkKind::Inline),
+                    raw_target: r.get(5)?,
+                    text: r.get(6)?,
+                    fragment: r.get(7)?,
+                },
+            ))
+        })?;
+        let mut found: Vec<SourceInto> = Vec::new();
+        for row in rows {
+            let (src, link) = row?;
+            if inside.contains(src.as_str()) {
+                continue;
+            }
+            let Resolved::Found(target) = set.resolve(relative_to_docs(&src, &prefix), &link)
+            else {
+                continue;
+            };
+            if !inside_docs.contains(target) {
+                continue;
+            }
+            let item = LinkInto {
+                line: link.line,
+                text: link.text,
+            };
+            match found.last_mut() {
+                Some(last) if last.path == src => last.links.push(item),
+                _ => found.push(SourceInto {
+                    title: titles.get(&src).cloned().flatten(),
+                    path: src,
+                    links: vec![item],
+                }),
+            }
+        }
+        Ok(found)
     }
 
     /// Все битые ссылки проекта: источник, строка, текст и адресат как написан. Порядок — по

@@ -49,3 +49,32 @@ pub struct LinksOfOutput {
     pub outgoing: Vec<OutgoingLinkItem>,
     pub incoming: Vec<IncomingLinkItem>,
 }
+
+/// Входящие ссылки на набор документов из документов вне набора: что станет битым при удалении.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct LinksIntoParams {
+    pub project: String,
+    /// Документы набора, пути от корня проекта (файл или все документы папки).
+    pub paths: Vec<String>,
+}
+
+/// Ссылка на документ набора: строка источника и видимый текст.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct LinkIntoItem {
+    pub line: u32,
+    pub text: String,
+}
+
+/// Документ вне набора и его ссылки на набор.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct LinksIntoSource {
+    pub path: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    pub links: Vec<LinkIntoItem>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct LinksIntoOutput {
+    pub sources: Vec<LinksIntoSource>,
+}

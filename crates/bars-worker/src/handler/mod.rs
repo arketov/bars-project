@@ -1285,6 +1285,7 @@ impl WorkerHandler {
                 .await
                 .map(|out| output_value(&out)),
             Call::LinksOf(params) => self.links_of(params).await.map(|out| output_value(&out)),
+            Call::LinksInto(params) => self.links_into(params).await.map(|out| output_value(&out)),
             Call::DiskText(params) => self.disk_text(params).await.map(|out| output_value(&out)),
             Call::DiskLinks(params) => self.disk_links(params).await.map(|out| output_value(&out)),
             Call::TextSearch(params) => {

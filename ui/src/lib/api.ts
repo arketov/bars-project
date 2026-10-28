@@ -232,6 +232,23 @@ export async function entryTrash(project: string, path: string): Promise<EntryRe
   return (await shell<EntryResult>("entry_trash", { project, path }))!;
 }
 
+/** Что видит подтверждение удаления: документы узла и входящие ссылки на них из документов, которые останутся. */
+export interface DeletePlan {
+  status: "ok";
+  folder: boolean;
+  documents: number;
+  /** `false` — индекс ссылок недоступен; числа ссылок тогда нет. */
+  links_checked: boolean;
+  links: number;
+  sources: { path: string; title?: string; links: { line: number; text: string }[] }[];
+}
+
+/** Считает входящие ссылки до удаления; ничего не меняет. */
+export async function entryPlanDelete(project: string, path: string): Promise<DeletePlan | DocumentFailure> {
+  if (!inTauri()) return (await import("./mock-disk")).mockPlanDelete(project, path);
+  return (await shell<DeletePlan | DocumentFailure>("entry_plan_delete", { project, path }))!;
+}
+
 export interface DocumentEditor { id: string; label: string }
 
 export interface FolderTarget { id: string; absolute: string; missing: boolean }

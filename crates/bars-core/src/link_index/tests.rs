@@ -164,6 +164,43 @@ fn outgoing_and_incoming_links_match_by_path_and_name() {
 }
 
 #[test]
+fn links_into_set_skip_sources_inside_the_set() {
+    let dir = project();
+    let index = index(&dir);
+    // Удаляется один документ: ссылаются two.md (строка 3) и three.md (строка 6).
+    let one = index.links_into(&["docs/a/one.md".to_string()]).unwrap();
+    let view: Vec<_> = one
+        .iter()
+        .map(|s| {
+            (
+                s.path.as_str(),
+                s.links.iter().map(|l| l.line).collect::<Vec<_>>(),
+            )
+        })
+        .collect();
+    assert_eq!(
+        view,
+        vec![("docs/a/two.md", vec![3]), ("docs/b/three.md", vec![6])]
+    );
+    assert_eq!(one[0].links[0].text, "обратно");
+    assert_eq!(one[1].title, None);
+    // Удаляется вся папка a: ссылки one↔two внутри набора не считаются, остаётся three → one.
+    let folder = index
+        .links_into(&["docs/a/one.md".to_string(), "docs/a/two.md".to_string()])
+        .unwrap();
+    assert_eq!(folder.len(), 1);
+    assert_eq!(folder[0].path, "docs/b/three.md");
+    // На документ без входящих ссылок и на пустой набор — ничего.
+    assert!(
+        index
+            .links_into(&["docs/Index.md".to_string()])
+            .unwrap()
+            .is_empty()
+    );
+    assert!(index.links_into(&[]).unwrap().is_empty());
+}
+
+#[test]
 fn creating_and_removing_files_repairs_and_breaks_links() {
     let dir = project();
     let mut index = index(&dir);

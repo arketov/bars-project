@@ -134,6 +134,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | `new_topics_delete` | `project`, `id`, `revision` | `accepted: true` |
 | `new_topics_clear` | `project`, обязательный `confirmed: true` | `generation` |
 | `new_topics_settings` | `project`, `enabled` | `enabled`, `generation` |
+| `links_into` | `project` (абсолютный путь), `paths` (документы удаляемого набора от корня проекта) | `sources` (`path`, `title`, `links` — `line`, `text`): входящие ссылки на набор из документов вне набора; индекс ссылок, модель не нужна; только окно ([индекс ссылок](../features/knowledge-base/link-index.md)) |
 | `links_of` | `project` (абсолютный путь), `path` (от корня проекта) | `known`, `outgoing` (`line`, `text`, `raw`, `kind`, `target`, `target_title`, `broken`), `incoming` (`path`, `title`, `lines`); читает индекс ссылок, сверяя его с диском, модель не нужна; только окно ([индекс ссылок](../features/knowledge-base/link-index.md)) |
 | `text_search` | `project`, `query`, регистр, regex, путь, `modules`/`files`, пределы; `path`/`offset`/`revision` для порции | документы с вхождениями, UTF-16 диапазоны, усечение, пропуски и время; читает диск без индекса и модели; только окно ([поиск в тексте](../features/search/text-search.md)) |
 
