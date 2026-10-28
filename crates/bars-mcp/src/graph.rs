@@ -8,6 +8,88 @@ use std::collections::BTreeMap;
 /// Время графовой операции в MCP по умолчанию, мс; воркер прижимает любое значение к тому же пределу (OQ-219).
 const GRAPH_TIMEOUT_MS: u32 = 5000;
 
+/// Схема без служебного шума: `default`, `uint32`, `minimum: 0` и `["x","null"]` не помогают
+/// агенту, а шесть схем списка инструментов держат в 14 КБ (контракт ответа графа, 4.3.2).
+fn slim(schema: &mut schemars::Schema) {
+    fn walk(value: &mut serde_json::Value) {
+        match value {
+            serde_json::Value::Object(map) => {
+                map.remove("default");
+                if map.get("format").is_some_and(|v| v == "uint32") {
+                    map.remove("format");
+                }
+                if map.get("minimum").is_some_and(|v| v == 0) {
+                    map.remove("minimum");
+                }
+                if let Some(serde_json::Value::Array(kinds)) = map.get("type") {
+                    let rest: Vec<_> = kinds.iter().filter(|k| *k != "null").cloned().collect();
+                    if rest.len() == 1 {
+                        map.insert("type".into(), rest[0].clone());
+                    }
+                }
+                map.values_mut().for_each(walk);
+            }
+            serde_json::Value::Array(items) => items.iter_mut().for_each(walk),
+            _ => {}
+        }
+    }
+    if let Some(map) = schema.as_object_mut() {
+        let mut value = serde_json::Value::Object(std::mem::take(map));
+        walk(&mut value);
+        if let serde_json::Value::Object(slim) = value {
+            *map = slim;
+        }
+    }
+}
+
+/// `format` без отдельного определения Format: оно ещё раз повторяло бы описания в каждой схеме.
+fn format_schema(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
+    schemars::json_schema!({
+        "description": "По умолчанию `txt`.",
+        "type": "string",
+        "enum": ["txt", "json"]
+    })
+}
+
+/// Объект графа как в другом ответе: `kind`, `id`, `revision` без изменений.
+fn object_ref_schema(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
+    schemars::json_schema!({
+        "description": "Объект из ответа графа: kind, id, revision как получены.",
+        "type": "object",
+        "properties": {
+            "kind": {"type": "string"},
+            "id": {"type": "string"},
+            "revision": {"type": "string"}
+        },
+        "required": ["kind", "id", "revision"]
+    })
+}
+
+/// Массив объектов графа для `roots`.
+fn object_refs_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+    schemars::json_schema!({
+        "description": "Объекты из ответа графа.",
+        "type": "array",
+        "items": object_ref_schema(generator)
+    })
+}
+
+/// Список предикатов связи по именам, без определения с описаниями вариантов.
+fn predicates_schema(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
+    schemars::json_schema!({
+        "description": "Только эти предикаты.",
+        "type": "array",
+        "items": {
+            "type": "string",
+            "enum": [
+                "contains", "covers", "next_chunk", "links_to", "mentions", "depends_on", "uses",
+                "implements", "verifies", "supersedes", "requires", "similar_to", "co_occurs",
+                "member_of"
+            ]
+        }
+    })
+}
+
 /// Структура аргументов одной операции: общие поля и поля операции. Своя структура на операцию даёт
 /// схему без чужих полей (ISS-23); `deny_unknown_fields` отклоняет поле другой операции, а не глотает.
 macro_rules! graph_args {
@@ -15,16 +97,17 @@ macro_rules! graph_args {
         $(#[$meta])*
         #[derive(Debug, Default, Deserialize, Serialize, schemars::JsonSchema)]
         #[serde(default, deny_unknown_fields)]
+        #[schemars(transform = slim)]
         pub struct $name {
-            /// Проект: путь к корню или имя. Без него — проект сессии.
+            /// Путь или имя проекта; по умолчанию проект сессии.
             pub project: Option<String>,
-            /// Вид ответа: `txt` (по умолчанию) или `json`.
+            #[schemars(schema_with = "format_schema")]
             pub format: Option<Format>,
-            /// Только эти папки первого уровня docs-root (имена из `bars_projects`).
+            /// Область: папки первого уровня docs-root.
             pub modules: Vec<String>,
-            /// Только эти документы, пути от docs-root.
+            /// Область: документы, пути от docs-root.
             pub files: Vec<String>,
-            /// Предел времени, мс (по умолчанию и максимум 5000); при срыве приходит найденное.
+            /// Время, мс: по умолчанию и максимум 5000.
             pub timeout_ms: Option<u32>,
             $($(#[$fmeta])* pub $field: $ty,)*
         }
@@ -34,11 +117,11 @@ macro_rules! graph_args {
 graph_args!(RelationsArgs {
     /// Имя или вопрос; вместо `entity_ref`.
     query: Option<String>,
-    /// Объект из другого ответа графа; вместо `query`.
+    #[schemars(schema_with = "object_ref_schema")]
     entity_ref: Option<ObjectRef>,
-    /// Только эти предикаты связи.
+    #[schemars(schema_with = "predicates_schema")]
     predicates: Vec<Predicate>,
-    /// Какие связи объекта: `incoming`, `outgoing` или `both` (по умолчанию).
+    /// Направление связей; по умолчанию `both`.
     direction: Direction,
     /// `positive`, `negative` или `any`: утверждение или «связи нет» в тексте.
     polarity: Option<Polarity>,
@@ -46,7 +129,7 @@ graph_args!(RelationsArgs {
     qualifiers: BTreeMap<String, String>,
     /// Сколько фактов вернуть.
     limit: Option<u32>,
-    /// Продолжение: `next_cursor` предыдущего ответа.
+    /// `next_cursor` прошлого ответа.
     cursor: Option<String>,
 });
 
@@ -61,20 +144,20 @@ graph_args!(PathsArgs {
     max_hops: Option<u32>,
     /// Не больше стольких путей (максимум 20).
     max_paths: Option<u32>,
-    /// Только эти предикаты связи.
+    #[schemars(schema_with = "predicates_schema")]
     predicates: Vec<Predicate>,
 });
 
 graph_args!(ImpactArgs {
-    /// Объекты из ответа графа, чьё изменение проверяется; обязательны.
+    #[schemars(schema_with = "object_refs_schema")]
     roots: Vec<ObjectRef>,
-    /// Только эти предикаты связи.
+    #[schemars(schema_with = "predicates_schema")]
     predicates: Vec<Predicate>,
     /// Глубина обхода зависимостей (по умолчанию 2, максимум 6).
     max_depth: Option<u32>,
     /// Сколько документов вернуть.
     limit: Option<u32>,
-    /// Продолжение: `next_cursor` предыдущего ответа.
+    /// `next_cursor` прошлого ответа.
     cursor: Option<String>,
 });
 
@@ -100,20 +183,20 @@ graph_args!(ExploreArgs {
     grouping: Grouping,
     /// Сколько элементов вернуть.
     limit: Option<u32>,
-    /// Продолжение: `next_cursor` предыдущего ответа.
+    /// `next_cursor` прошлого ответа.
     cursor: Option<String>,
 });
 
 graph_args!(GraphViewArgs {
-    /// Что показывать: `documents`, `sections`, `chunks`, `entities` или `mixed`.
+    /// Что показывать; по умолчанию `documents`.
     view: View,
-    /// `true` — окрестность `roots`; без него — общий граф в пределах бюджета.
+    /// `true` — окрестность `roots`; иначе общий граф.
     local: bool,
-    /// Объекты из ответа графа для `local`.
+    #[schemars(schema_with = "object_refs_schema")]
     roots: Vec<ObjectRef>,
-    /// Только эти предикаты связи.
+    #[schemars(schema_with = "predicates_schema")]
     predicates: Vec<Predicate>,
-    /// Какие связи от корней: `incoming`, `outgoing` или `both`.
+    /// Направление связей от корней; по умолчанию `both`.
     direction: Direction,
     /// Глубина окрестности для `local` (по умолчанию 2, максимум 6).
     max_depth: Option<u32>,
@@ -121,7 +204,7 @@ graph_args!(GraphViewArgs {
     include_paths: bool,
     /// Сколько рёбер и узлов вернуть.
     limit: Option<u32>,
-    /// Продолжение: `next_cursor` предыдущего ответа.
+    /// `next_cursor` прошлого ответа.
     cursor: Option<String>,
 });
 

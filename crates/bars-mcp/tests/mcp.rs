@@ -389,10 +389,6 @@ async fn every_graph_tool_lists_only_its_own_parameters() {
     let mut total = 0;
     for (name, fields) in own {
         let tool = tools.iter().find(|t| t["name"] == name).unwrap();
-        eprintln!("SIZE {name} {}", tool.to_string().len());
-        if name == "bars_graph" {
-            eprintln!("DUMP {}", tool["inputSchema"]);
-        }
         total += tool.to_string().len();
         let mut listed: Vec<_> = tool["inputSchema"]["properties"]
             .as_object()
