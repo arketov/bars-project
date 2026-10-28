@@ -9,19 +9,16 @@ export interface GraphAction {
   label: string;
   /** Что получит пользователь; показывается подсказкой. */
   hint: string;
-  /** Действие подключено к карте; остальные видны, но недоступны с причиной до своего шага переноса. */
-  ready: boolean;
 }
 
 export const GRAPH_ACTIONS: GraphAction[] = [
-  { id: "nearby", label: "Что рядом", hint: "Документ и его соседи, глубина 1–3", ready: true },
-  { id: "inbound", label: "Кто ссылается", hint: "Входящие ссылки с путями и строками", ready: true },
-  { id: "path", label: "Путь до…", hint: "Путь по карте, не зависимость", ready: true },
-  { id: "impact", label: "Что затронет правка", hint: "Документированные зависимости; ссылки-соседи отдельно", ready: false },
+  { id: "nearby", label: "Что рядом", hint: "Документ и его соседи, глубина 1–3" },
+  { id: "inbound", label: "Кто ссылается", hint: "Входящие ссылки с путями и строками" },
+  { id: "path", label: "Путь до…", hint: "Путь по карте, не зависимость" },
+  { id: "impact", label: "Что затронет правка", hint: "Документированные зависимости; ссылки-соседи отдельно" },
 ];
 
 export const NO_SELECTION_TEXT = "Выберите документ на карте или найдите его по названию — граф покажет, что с ним связано.";
-const NOT_CONNECTED = "Действие ещё не подключено к карте: оно использует смысловой слой и появится в следующем обновлении графа.";
 
 export interface ActionState {
   enabled: boolean;
@@ -33,7 +30,6 @@ export interface ActionState {
 export function actionState(action: GraphAction, kind: "document" | "chunk" | "query" | null): ActionState {
   if (kind === null) return { enabled: false, reason: "Выберите документ на карте" };
   if (kind !== "document") return { enabled: false, reason: kind === "query" ? "Действие относится к документу, а не к запросу" : "Действие относится к документу: выберите его владельца" };
-  if (!action.ready) return { enabled: false, reason: NOT_CONNECTED };
   return { enabled: true, reason: action.hint };
 }
 

@@ -8,12 +8,13 @@
   import { appearance } from "../appearance.svelte";
   import { documentColor, keyOf } from "../appearance";
   import type { GraphStatus } from "../graph";
-  import { graphDataLabel, completenessLabels, jobLabels } from "../graph";
+  import { graphDataLabel, completenessLabels, jobLabels, roleLabels } from "../graph";
   import { BarsError } from "../types";
   import { draw, layoutLines, lineDistance, moduleColors, radiusOf, readPalette, toScreen, toWorld, type Camera, type Palette, type Scene, type Target } from "./draw";
   import { DEFAULT_FORCES, Layout, type Forces, type PNode } from "./layout";
   import { EDGE_KINDS, KIND_TITLE, brightnessOf, drawStrength, springOf, widthOf, type EdgeKind, type GEdge, type GNode, type Mode, type SliceKind } from "./model";
-  import { graphStatus, loadPhysical, loadQuery, startGraphBuild, stopGraphBuild } from "./physical-api";
+  import { graphStatus, loadPhysical, loadQuery, semanticQuery, startGraphBuild, stopGraphBuild } from "./physical-api";
+  import { CONTEXT_BUDGETS, DEFAULT_BUDGET, PROFILES, auditRequests, contextRequest, digestAudit, digestContext, digestImpact, digestMeaningPaths, digestTopics, emptyImpact, entitiesRequest, entityRoots, impactRequest, meaningPathRequest, pathDocuments, semanticError, topicsRequest, type AuditPass, type AuditSection, type AuditView, type ContextView, type Grouping, type ImpactEntry, type ImpactView, type MeaningPathView, type Proof, type Scope, type SemanticKind, type TaskProfile, type Topic, type TopicsView } from "./semantic";
   import { GRAPH_ACTIONS, NO_SELECTION_TEXT, actionState, buildControls, type ActionId } from "./entry";
   import { LOCAL_LIMITS, LOCAL_MAX_DEPTH, PATH_MAX_HOPS, adjacency, localGraph, mapPaths, type MapPath } from "./navigation";
   import { linkTitle, loadLinks, type IncomingLink } from "../document-links";
@@ -85,7 +86,7 @@
   let findText = $state("");
   let legendOpen = $state(false);
   /** Открытое меню: настройки раскладки. */
-  let popover = $state<"settings" | "more" | null>(null);
+  let popover = $state<"settings" | "more" | "analysis" | null>(null);
   let notice = $state("");
   let rendererError = $state("");
   let revision = $state(0);
@@ -129,6 +130,33 @@
   let pathView = $state<{ from: number; to: number | null; directed: boolean; index: number } | null>(null);
   let inboundView = $state<{ center: number; state: "loading" | "ready" | "error"; sources: IncomingLink[]; known: boolean; error: string } | null>(null);
   let inboundEpoch = 0;
+  /** Действие смыслового слоя (2.3.8): влияние, смысловой путь, контекст, обзор тем, аудит. Накладывается на карту, как путь и входящие; одно за раз. */
+  interface SemanticState {
+    kind: SemanticKind;
+    /** Документ действия (влияние) или начало пути. */
+    center: number | null;
+    to: number | null;
+    state: "form" | "loading" | "ready" | "error";
+    error: string;
+    /** Вариант смыслового пути. */
+    index: number;
+    structural: boolean;
+    grouping: Grouping;
+    /** Выделенная тема (номер) или все темы. */
+    topic: number | null;
+    section: AuditSection["id"];
+    impact?: ImpactView;
+    meaning?: MeaningPathView;
+    context?: ContextView;
+    topics?: TopicsView;
+    audit?: AuditView;
+  }
+  let sem = $state.raw<SemanticState | null>(null);
+  let semEpoch = 0;
+  let ctxQuery = $state("");
+  let ctxProfile = $state<TaskProfile>("implementation");
+  let ctxBudget = $state(DEFAULT_BUDGET);
+  let ctxSubgraph = $state(false);
   /** Подграф (2.3.7): узлы, отмеченные для «Искать в подграфе»; Shift+щелчок, «В подграф» и «Выбрать весь локальный граф». */
   let marks = $state.raw<ReadonlySet<number>>(new Set());
 
@@ -746,9 +774,12 @@
       else select(null);
     } else if (!mini && event.code === "KeyL" && selectedNode?.kind === "document") startLocal(selectedNode.index);
     else if (!mini && event.code === "KeyP" && selectedNode?.kind === "document") startPath(selectedNode.index);
-    else if (!mini && pathView && event.code === "BracketLeft") shiftVariant(-1);
-    else if (!mini && pathView && event.code === "BracketRight") shiftVariant(1);
-    else if (!mini && event.key === "Backspace" && (localView || pathView || inboundView)) {
+    else if (!mini && event.code === "KeyI" && selectedNode?.kind === "document") startImpact(selectedNode.index);
+    else if (!mini && pathView && !sem && event.code === "BracketLeft") shiftVariant(-1);
+    else if (!mini && pathView && !sem && event.code === "BracketRight") shiftVariant(1);
+    else if (!mini && sem?.kind === "meaning-path" && event.code === "BracketLeft") shiftMeaning(-1);
+    else if (!mini && sem?.kind === "meaning-path" && event.code === "BracketRight") shiftMeaning(1);
+    else if (!mini && event.key === "Backspace" && (localView || pathView || inboundView || sem)) {
       event.preventDefault();
       goGeneral();
     }
@@ -774,6 +805,8 @@
     pathView = null;
     inboundView = null;
     inboundEpoch++;
+    sem = null;
+    semEpoch++;
   }
 
   /** «Общий вид»: убирает наложение и локальный вид и возвращает прежние места узлов, камеру и выбор (OQ-144). */
@@ -898,6 +931,18 @@
     return [...found];
   });
 
+  /** Документы подграфа в путях от корня документации: область «Контекста задачи». */
+  const subgraphFiles = $derived.by(() => {
+    const found = new Set<string>();
+    for (const index of marks) {
+      const n = slice.nodes[index];
+      if (!n || n.kind === "query" || n.ghost) continue;
+      const owner = n.kind === "chunk" ? slice.nodes[n.owner] : n;
+      if (owner?.docsPath) found.add(owner.docsPath);
+    }
+    return [...found];
+  });
+
   /** «Искать в подграфе»: область поиска заменяется документами подграфа, фокус уходит в поле поиска; поиск не запускается. */
   function searchInSubgraph() {
     const result = graphScope.apply(subgraphDocs);
@@ -914,6 +959,226 @@
     if (id === "nearby") startLocal(n.index);
     else if (id === "inbound") void startInbound(n.index);
     else if (id === "path") startPath(n.index);
+    else if (id === "impact") startImpact(n.index);
+  }
+
+  // ---------- Действия смыслового слоя (2.3.8): «Что затронет правка», «Смысловой путь», «Анализ».
+
+  const semBase = (kind: SemanticKind): SemanticState => ({ kind, center: null, to: null, state: "loading", error: "", index: 0, structural: false, grouping: "communities", topic: null, section: "isolates" });
+  const scopeNow = (): Scope => ({ modules: [...app.scope.modules], files: [...app.scope.files] });
+  const docIndex = (id: string): number | null => {
+    const i = store.indexOf(id);
+    return i !== undefined && slice.visibleDocs.has(i) ? i : null;
+  };
+
+  /** Запускает действие: старый ответ, пришедший после нового действия или смены проекта, отбрасывается. */
+  async function runSem(next: SemanticState, job: () => Promise<Partial<SemanticState>>) {
+    const path = project();
+    if (!path) return;
+    const id = ++semEpoch;
+    sem = { ...next, state: "loading", error: "" };
+    schedule();
+    try {
+      const patch = await job();
+      if (id !== semEpoch || path !== project() || !sem) return;
+      sem = { ...sem, ...patch, state: "ready", error: "" };
+    } catch (error) {
+      if (id !== semEpoch || path !== project() || !sem) return;
+      sem = { ...sem, state: "error", error: semanticError(error) };
+    }
+    schedule();
+  }
+
+  /** «Что затронет правка»: сначала сущности документа в смысловом слое, затем документированные зависимости от них; ссылки-соседи — отдельной группой, без смысловой оценки. */
+  function startImpact(index: number) {
+    const path = project();
+    const n = slice.nodes[index];
+    if (mini || !path || !isDocument(index)) return;
+    dropOverlay();
+    void runSem({ ...semBase("impact"), center: index }, async () => {
+      const roots = entityRoots(await semanticQuery(path, entitiesRequest(n.docsPath)));
+      if (!roots.length) return { impact: emptyImpact() };
+      return { impact: digestImpact(await semanticQuery(path, impactRequest(roots, scopeNow())), n.id, roots.length) };
+    });
+  }
+
+  /** «Смысловой путь» между двумя выбранными документами; карта путей по ссылкам остаётся под ним и возвращается кнопкой. */
+  function startMeaning(structural = false) {
+    const path = project();
+    const view = pathView;
+    if (mini || !path || !view || view.to === null) return;
+    const from = slice.nodes[view.from];
+    const to = slice.nodes[view.to];
+    void runSem({ ...semBase("meaning-path"), center: view.from, to: view.to, structural }, async () => ({ meaning: digestMeaningPaths(await semanticQuery(path, meaningPathRequest(from, to, structural, scopeNow()))) }));
+  }
+
+  function backToMapPath() {
+    semEpoch++;
+    sem = null;
+    schedule();
+  }
+
+  function shiftMeaning(delta: number) {
+    const count = sem?.meaning?.paths.length ?? 0;
+    if (!sem || count < 2) return;
+    sem = { ...sem, index: (sem.index + delta + count) % count };
+    schedule();
+  }
+
+  /** «Контекст задачи»: форма в инспекторе; область — поиска или подграф (передаётся областью документов, `context.roots` в контракте v1 нет). */
+  function openContext(fromSubgraph = false) {
+    if (mini) return;
+    dropOverlay();
+    popover = null;
+    ctxSubgraph = fromSubgraph && subgraphFiles.length > 0;
+    if (!ctxQuery.trim()) ctxQuery = app.query.trim();
+    sem = { ...semBase("context"), state: "form" };
+    schedule();
+  }
+
+  function runContext() {
+    const path = project();
+    const current = sem;
+    if (!path || !current || current.kind !== "context" || !ctxQuery.trim()) return;
+    const scope: Scope = ctxSubgraph && subgraphFiles.length ? { modules: [], files: subgraphFiles } : scopeNow();
+    void runSem(current, async () => ({ context: digestContext(await semanticQuery(path, contextRequest(ctxQuery, ctxProfile, ctxBudget, scope))) }));
+  }
+
+  /** «Обзор тем»: темы проекта наложением номеров на документы; перекладка карты в свёрнутые группы не делается. */
+  function openTopics(grouping: Grouping = "communities") {
+    const path = project();
+    if (mini || !path) return;
+    dropOverlay();
+    popover = null;
+    void runSem({ ...semBase("topics"), grouping }, async () => ({ topics: digestTopics(await semanticQuery(path, topicsRequest(grouping, scopeNow())), grouping) }));
+  }
+
+  function pickTopic(topic: number | null) {
+    if (!sem) return;
+    sem = { ...sem, topic: sem.topic === topic ? null : topic };
+    schedule();
+  }
+
+  function markTopic(topic: Topic) {
+    const found = topic.members.map(docIndex).filter((i): i is number => i !== null);
+    if (!found.length) {
+      notice = "Документов этой темы нет на карте: сузьте или расширьте область поиска.";
+      return;
+    }
+    marks = new Set([...marks, ...found]);
+    schedule();
+  }
+
+  /** Хабы считаются по числу ссылок на карте: структура, а не важность. */
+  function hubDocs(): { id: string; label: string; links: number }[] {
+    const degree = new Map<number, number>();
+    for (const e of slice.edges) {
+      if (e.kind !== "markdown_link") continue;
+      degree.set(e.a, (degree.get(e.a) ?? 0) + 1);
+      degree.set(e.b, (degree.get(e.b) ?? 0) + 1);
+    }
+    return [...degree].filter(([i, d]) => d >= 3 && isDocument(i)).sort((a, b) => b[1] - a[1] || a[0] - b[0]).slice(0, 5).map(([i, d]) => ({ id: slice.nodes[i].id, label: slice.nodes[i].label, links: d }));
+  }
+
+  /** «Аудит связей»: три прохода `explore`; находки одного прохода не пропадают из-за ошибки другого. Это не экран аудитов (Т-36). */
+  function openAudit() {
+    const path = project();
+    if (mini || !path) return;
+    dropOverlay();
+    popover = null;
+    void runSem(semBase("audit"), async () => {
+      const passes: AuditPass[] = await Promise.all(
+        auditRequests(scopeNow()).map(async (request): Promise<AuditPass> => {
+          try {
+            return { ok: true, reply: await semanticQuery(path, request) };
+          } catch (error) {
+            return { ok: false, error: semanticError(error) };
+          }
+        }),
+      );
+      const failed = passes.find((p) => !p.ok);
+      if (failed && passes.every((p) => !p.ok)) throw new Error(failed.ok ? "" : failed.error);
+      return { audit: digestAudit(passes, hubDocs()) };
+    });
+  }
+
+  /** «Повторить» после ошибки или устаревшего ответа: то же действие с теми же параметрами. */
+  function retrySem() {
+    const s = sem;
+    if (!s) return;
+    if (s.kind === "impact" && s.center !== null) startImpact(s.center);
+    else if (s.kind === "meaning-path") startMeaning(s.structural);
+    else if (s.kind === "context") runContext();
+    else if (s.kind === "topics") openTopics(s.grouping);
+    else if (s.kind === "audit") openAudit();
+  }
+
+  function selectDocument(id: string) {
+    const i = docIndex(id);
+    if (i === null) notice = "Документа нет на карте: он вне области поиска или не показан.";
+    else select({ type: "node", index: i });
+  }
+
+  function pickAuditSection(id: AuditSection["id"]) {
+    if (!sem) return;
+    sem = { ...sem, section: id };
+    schedule();
+  }
+
+  /** Основание ответа: документ открывается на строках цитаты, если не изменился после снимка графа. */
+  function openProof(proof: Proof) {
+    if (!proof.path) return;
+    void app.openDocument({ path: proof.path, title: proof.title, first_line: proof.firstLine, last_line: proof.lastLine, expectedRevision: proof.revision });
+  }
+
+  /** Ссылки-соседи документа влияния: документы карты, связанные с ним явной ссылкой в любую сторону; зависимостью не считаются. */
+  const impactNeighbours = $derived.by(() => {
+    const s = sem;
+    if (s?.kind !== "impact" || s.center === null) return [] as number[];
+    const center = s.center;
+    const found = new Set<number>();
+    for (const e of slice.edges) {
+      if (e.kind !== "markdown_link") continue;
+      if (e.a === center) found.add(e.b);
+      else if (e.b === center) found.add(e.a);
+    }
+    const affected = new Set([...(s.impact?.documents.keys() ?? [])].map(docIndex));
+    return [...found].filter((i) => slice.visibleDocs.has(i) && isDocument(i) && !affected.has(i)).sort((a, b) => label(a).localeCompare(label(b)));
+  });
+
+  /** Наложение действия на карту: подписи на документах, слабые (косвенные, соседи) — пунктирным кольцом. Пустое наложение не включается: оно приглушило бы всю карту. */
+  function semanticOverlay(): { nodes: Map<number, string>; edges: Set<number>; weak: Set<number> } | undefined {
+    const s = sem;
+    if (!s || s.state !== "ready") return undefined;
+    const nodes = new Map<number, string>();
+    const weak = new Set<number>();
+    const put = (id: string, badge: string, isWeak = false) => {
+      const i = docIndex(id);
+      if (i === null) return;
+      if (!nodes.has(i)) nodes.set(i, badge);
+      if (isWeak) weak.add(i);
+    };
+    if (s.kind === "impact" && s.impact && s.center !== null) {
+      nodes.set(s.center, "");
+      for (const [id, depth] of s.impact.documents) put(id, String(depth), depth > 1);
+      for (const i of impactNeighbours) if (!nodes.has(i)) {
+        nodes.set(i, "");
+        weak.add(i);
+      }
+    } else if (s.kind === "meaning-path" && s.meaning) {
+      const path = s.meaning.paths[Math.min(s.index, s.meaning.paths.length - 1)];
+      if (path) for (const [id, step] of pathDocuments(path)) put(id, step);
+    } else if (s.kind === "context" && s.context) {
+      for (const [id, badge] of s.context.documents) put(id, badge);
+    } else if (s.kind === "topics" && s.topics) {
+      for (const t of s.topics.topics) if (s.topic === null || s.topic === t.number) for (const id of t.members) put(id, String(t.number));
+    } else if (s.kind === "audit" && s.audit) {
+      const section = s.audit.sections.find((x) => x.id === s.section);
+      const counts = new Map<string, number>();
+      for (const f of section?.findings ?? []) for (const id of f.documents) counts.set(id, (counts.get(id) ?? 0) + 1);
+      for (const [id, count] of counts) put(id, section?.id === "unresolved" ? String(count) : "");
+    }
+    return nodes.size ? { nodes, edges: new Set<number>(), weak } : undefined;
   }
 
   /** Строка списка «Кто ссылается»: источник открывается на строке ссылки, в том числе вне карты. */
@@ -1016,6 +1281,7 @@
       if (localView && !slice.visibleDocs.has(localView.center)) { localView = null; generalState = null; }
       if (pathView && (!slice.visibleDocs.has(pathView.from) || (pathView.to !== null && !slice.visibleDocs.has(pathView.to)))) pathView = null;
       if (inboundView && !slice.visibleDocs.has(inboundView.center)) dropOverlay();
+      if (sem && ((sem.center !== null && !slice.visibleDocs.has(sem.center)) || (sem.to !== null && !slice.visibleDocs.has(sem.to)))) dropOverlay();
       // Раскрытый документ мог исчезнуть из области или потерять чанки: раскрытие без узлов не держим.
       const alive = Object.fromEntries(Object.entries(expanded).filter(([index]) => chunksOfDoc(Number(index)).length > 0 && slice.visibleDocs.has(Number(index))));
       if (Object.keys(alive).length !== Object.keys(expanded).length) expanded = alive;
@@ -1107,7 +1373,8 @@
   const paths = $derived.by<MapPath[]>(() => (pathView && pathView.to !== null ? mapPaths(adjacency(pathEdges, pathView.directed), pathView.from, pathView.to) : []));
   const currentPath = $derived(paths.length && pathView ? paths[Math.min(pathView.index, paths.length - 1)] : null);
   const stepWord = (n: number) => (n % 10 === 1 && n % 100 !== 11 ? "шаг" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? "шага" : "шагов");
-  const overlay = $derived.by<{ nodes: Map<number, string>; edges: Set<number> } | undefined>(() => {
+  const overlay = $derived.by<{ nodes: Map<number, string>; edges: Set<number>; weak?: Set<number> } | undefined>(() => {
+    if (sem) return semanticOverlay();
     if (pathView) {
       if (pathView.to === null) return { nodes: new Map([[pathView.from, ""]]), edges: new Set() };
       if (!currentPath) return undefined;
@@ -1367,6 +1634,43 @@
   });
 </script>
 
+{#snippet proofList(proofs: Proof[])}
+  {#each proofs as p (p.id)}
+    <div class="proof">
+      <q>{p.quote}</q>
+      <small>{p.path ? `${p.path}, ` : ""}строки {p.firstLine}–{p.lastLine}</small>
+      {#if p.path}<button class="inline" onclick={() => openProof(p)}>Открыть основание</button>{/if}
+    </div>
+  {/each}
+{/snippet}
+{#snippet semNotes(lines: string[])}
+  {#each lines as line (line)}<p class="hint">{line}</p>{/each}
+{/snippet}
+{#snippet semStatus()}
+  {#if sem?.state === "loading"}
+    <p class="hint" role="status">Читаем смысловой слой…</p>
+  {:else if sem?.state === "error"}
+    <p class="hint" role="alert">{sem.error}</p>
+    <div class="actions"><button class="act" onclick={retrySem}>Повторить</button></div>
+  {/if}
+{/snippet}
+{#snippet impactGroup(title: string, entries: ImpactEntry[])}
+  {#if entries.length}
+    <h4>{title} · {entries.length}</h4>
+    <ul class="conns rich">
+      {#each entries as e, i (`${title}${i}`)}
+        <li>
+          <span class="name" title={e.label}>{e.label}</span>
+          <small>{e.steps.join(" · ")}</small>
+          {#each e.conditions as c, k (k)}<small>условие: {c}</small>{/each}
+          {@render proofList(e.proofs)}
+          <small>проверить описание</small>
+        </li>
+      {/each}
+    </ul>
+  {/if}
+{/snippet}
+
 {#snippet forcesForm()}
   {#if mini}
     <h4>Локальный граф</h4>
@@ -1442,6 +1746,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" /></svg>
         </button>
         <button aria-label="Настройки графа" aria-expanded={popover === "settings"} title="Настройки графа: раскладка, порог, слои, легенда, сведения" onclick={() => (popover = popover === "settings" ? null : "settings")}><Icon name="gear" size={14} width={1.8} /></button>
+        <button class="analysis-menu" aria-haspopup="menu" aria-expanded={popover === "analysis"} title="Контекст задачи, обзор тем и аудит связей" onclick={() => (popover = popover === "analysis" ? null : "analysis")}>Анализ ▾</button>
         <button class="more-menu" aria-label="Ещё" title="Ещё" aria-haspopup="menu" aria-expanded={popover === "more"} onclick={() => (popover = popover === "more" ? null : "more")}>⋯</button>
       </div>
     </div>
@@ -1459,7 +1764,7 @@
         {/each}
       {/if}
     </div>
-    {#if localView || pathView || inboundView || marks.size}
+    {#if localView || pathView || inboundView || marks.size || sem}
       <div class="qstack">
       {#if localView && localShape}
         <div class="qbar" role="region" aria-label="Локальный граф">
@@ -1482,7 +1787,7 @@
           <div class="banner" role="status"><span>В режиме «{MODE_NAME[mode]}» у документа связей не найдено. Документ остаётся на карте; другой режим может показать соседей.</span></div>
         {/if}
       {/if}
-      {#if pathView}
+      {#if pathView && sem?.kind !== "meaning-path"}
         <div class="qbar" role="region" aria-label="Путь по карте">
           {#if pathView.to === null}
             <b class="qtext" title={label(pathView.from)}>Путь от «{label(pathView.from)}»</b>
@@ -1496,12 +1801,14 @@
               <button aria-label="Следующий вариант пути" title="Следующий вариант (])" disabled={paths.length < 2} onclick={() => shiftVariant(1)}>▶</button>
             </span>
             <label class="chk"><input type="checkbox" checked={pathView.directed} onchange={(e) => { pathView!.directed = e.currentTarget.checked; pathView!.index = 0; }} /> по направлению ссылок</label>
+            <button class="more ghost" data-semantic="meaning-path" title="Путь по утверждениям смыслового слоя с основанием каждого шага" onclick={() => startMeaning()}>Смысловой путь</button>
             <button class="more" onclick={goGeneral}>Общий вид</button>
           {:else}
             <b class="qtext">Путь: {label(pathView.from)} → {label(pathView.to)}</b>
             <span>В режиме «{MODE_NAME[mode]}»{pathView.directed ? " по направлению ссылок" : ""} пути не длиннее {PATH_MAX_HOPS} шагов нет</span>
             {#if mode !== "all"}<button class="more ghost" onclick={() => setMode("all")}>Искать во всех связях</button>{/if}
             {#if pathView.directed}<button class="more ghost" onclick={() => { pathView!.directed = false; }}>Не учитывать направление</button>{/if}
+            <button class="more ghost" data-semantic="meaning-path" title="Путь по утверждениям смыслового слоя с основанием каждого шага" onclick={() => startMeaning()}>Смысловой путь</button>
             <button class="more" onclick={goGeneral}>Общий вид</button>
           {/if}
         </div>
@@ -1513,6 +1820,7 @@
         <div class="qbar" role="region" aria-label="Подграф">
           <b>Подграф: {marks.size} узлов · {subgraphDocs.length} документов</b>
           <button class="more ghost" disabled={!subgraphDocs.length} title={subgraphDocs.length ? "Заменить область поиска документами подграфа" : "В подграфе нет документов"} onclick={searchInSubgraph}>Искать в подграфе</button>
+          <button class="more ghost" disabled={!subgraphFiles.length} title={subgraphFiles.length ? "Собрать контекст задачи по документам подграфа: подграф передаётся областью документов" : "В подграфе нет документов"} onclick={() => openContext(true)}>Собрать контекст</button>
           <button class="more" onclick={clearMarks}>Очистить</button>
         </div>
       {/if}
@@ -1522,6 +1830,57 @@
           <span>{inboundView.state === "loading" ? "читаем индекс ссылок…" : inboundView.state === "error" ? "не удалось прочитать" : `${inboundView.sources.length} документов`}</span>
           <button class="more" onclick={goGeneral}>Общий вид</button>
         </div>
+      {/if}
+      {#if sem}
+        {@const wait = sem.state === "loading" ? "читаем смысловой слой…" : sem.state === "error" ? "не удалось выполнить" : ""}
+        {#if sem.kind === "impact" && sem.center !== null}
+          <div class="qbar" role="region" aria-label="Влияние изменения">
+            <b class="qtext" title={label(sem.center)}>Что затронет правка «{label(sem.center)}»</b>
+            <span>{#if sem.impact}прямое {sem.impact.direct.length} · косвенное {sem.impact.indirect.length} · ссылки-соседи {impactNeighbours.length}{:else}{wait}{/if}</span>
+            <button class="more" onclick={goGeneral}>Общий вид</button>
+          </div>
+          {#if sem.impact}<div class="banner" role="status"><span>Результат означает «проверить описание», а не «сломано». Ссылки-соседи — не доказанная зависимость.</span></div>{/if}
+        {:else if sem.kind === "meaning-path" && sem.center !== null && sem.to !== null}
+          {@const mp = sem.meaning}
+          <div class="qbar" role="region" aria-label="Смысловой путь">
+            <b class="qtext" title="{label(sem.center)} → {label(sem.to)}">Смысловой путь: {label(sem.center)} → {label(sem.to)}</b>
+            {#if mp && mp.paths.length}
+              <span>{mp.paths.length} {mp.paths.length === 1 ? "вариант" : "вариантов"}</span>
+              <span class="depth">вариант {Math.min(sem.index, mp.paths.length - 1) + 1} из {mp.paths.length}
+                <button aria-label="Предыдущий смысловой путь" title="Предыдущий вариант ([)" disabled={mp.paths.length < 2} onclick={() => shiftMeaning(-1)}>◀</button>
+                <button aria-label="Следующий смысловой путь" title="Следующий вариант (])" disabled={mp.paths.length < 2} onclick={() => shiftMeaning(1)}>▶</button>
+              </span>
+            {:else if mp}<span>{mp.resolution === "ambiguous" ? "имя неоднозначно" : "смысловых путей не найдено"}</span>
+            {:else}<span>{wait}</span>{/if}
+            <label class="chk"><input type="checkbox" checked={sem.structural} onchange={(e) => startMeaning(e.currentTarget.checked)} /> со структурными шагами</label>
+            <button class="more ghost" onclick={backToMapPath}>Путь по карте</button>
+            <button class="more" onclick={goGeneral}>Общий вид</button>
+          </div>
+        {:else if sem.kind === "context"}
+          <div class="qbar" role="region" aria-label="Контекст задачи">
+            <b class="qtext" title={ctxQuery}>Контекст «{ctxQuery.trim() || "…"}»</b>
+            {#if sem.context}
+              <span>{PROFILES.find((p) => p.id === ctxProfile)?.label.toLowerCase()} · {sem.context.covered} из {sem.context.total} ролей · {(sem.context.usedBytes / 1024).toFixed(1)}{sem.context.maxBytes ? ` из ${(sem.context.maxBytes / 1024).toFixed(0)}` : ""} КБ</span>
+            {:else}<span>{sem.state === "form" ? "заполните задачу в инспекторе" : wait}</span>{/if}
+            <button class="more" onclick={goGeneral}>Общий вид</button>
+          </div>
+        {:else if sem.kind === "topics"}
+          <div class="qbar" role="region" aria-label="Обзор тем">
+            <b>Обзор тем</b>
+            <span>{sem.topics ? `${sem.topics.topics.length} тем · ${sem.topics.documents.size} документов` : wait}</span>
+            <span class="depth" role="radiogroup" aria-label="Группировка тем">
+              <button role="radio" aria-checked={sem.grouping === "communities"} class:on={sem.grouping === "communities"} class="wide" onclick={() => openTopics("communities")}>Сообщества</button>
+              <button role="radio" aria-checked={sem.grouping === "modules"} class:on={sem.grouping === "modules"} class="wide" onclick={() => openTopics("modules")}>Модули</button>
+            </span>
+            <button class="more" onclick={goGeneral}>Общий вид</button>
+          </div>
+        {:else if sem.kind === "audit"}
+          <div class="qbar" role="region" aria-label="Аудит связей">
+            <b>Аудит связей</b>
+            <span>{sem.audit ? `${sem.audit.sections.reduce((n, s) => n + s.findings.length, 0)} находок · ${sem.audit.documents.size} документов` : wait}</span>
+            <button class="more" onclick={goGeneral}>Общий вид</button>
+          </div>
+        {/if}
       {/if}
       </div>
     {/if}
@@ -1664,6 +2023,13 @@
       {#if popover === "settings" && !mini}
         <section class="pop full" aria-label="Настройки графа">{@render forcesForm()}</section>
       {/if}
+      {#if popover === "analysis" && !mini}
+        <div class="pop menu" role="menu" aria-label="Анализ" tabindex="-1" onkeydown={(e) => { if (e.key === "Escape") { e.stopPropagation(); popover = null; } }}>
+          <button role="menuitem" data-analysis="context" onclick={() => openContext(marks.size > 0)}>Контекст задачи<small>источники по ролям под задачу</small></button>
+          <button role="menuitem" data-analysis="topics" onclick={() => openTopics()}>Обзор тем<small>темы проекта и их представители</small></button>
+          <button role="menuitem" data-analysis="audit" onclick={openAudit}>Аудит связей<small>изоляты, неразрешённые ссылки, кандидаты</small></button>
+        </div>
+      {/if}
       {#if popover === "more" && !mini}
         <div class="pop menu" role="menu" aria-label="Ещё" tabindex="-1" onkeydown={(e) => { if (e.key === "Escape") { e.stopPropagation(); popover = null; } }}>
           <button role="menuitem" onclick={() => { popover = null; app.graphAnalysis = true; }}>Анализ связей<small>прежний экран: пути, влияние, контекст</small></button>
@@ -1716,7 +2082,145 @@
 
   {#if !mini}
     <aside class="inspector" aria-label="Инспектор графа">
-      {#if pathView && currentPath}
+      {#if sem}
+        {#if sem.kind === "impact" && sem.center !== null}
+          <section class="viewbox" aria-label="Влияние изменения">
+            <h4>Что затронет правка «{label(sem.center)}»</h4>
+            {@render semStatus()}
+            {#if sem.impact}
+              {@const im = sem.impact}
+              {#if !im.direct.length && !im.indirect.length}
+                <p class="hint" role="status">Документированных зависимостей не найдено{im.notes.semanticIncomplete ? "; смысловой слой неполон — это не доказывает, что правка ничего не затронет" : " в обработанных отношениях"}.</p>
+              {/if}
+              {#if im.entities}<p class="hint">Проверено сущностей документа в смысловом слое: {im.entities}.</p>{/if}
+              {@render impactGroup("Прямое", im.direct)}
+              {@render impactGroup("Косвенное", im.indirect)}
+              <h4>Ссылки-соседи · {impactNeighbours.length}</h4>
+              {#if impactNeighbours.length}
+                <p class="hint">Ссылаются друг на друга. Это явные ссылки в тексте, а не доказанная зависимость.</p>
+                <ul class="conns">
+                  {#each impactNeighbours as i (i)}
+                    <li><button onclick={() => select({ type: "node", index: i })} title={slice.nodes[i].path}><span class="name">{label(i)}</span><small>{slice.nodes[i].path}</small></button></li>
+                  {/each}
+                </ul>
+              {:else}
+                <p class="hint">У документа нет явных ссылок на карте.</p>
+              {/if}
+              {@render semNotes(im.notes.lines)}
+            {/if}
+          </section>
+        {:else if sem.kind === "meaning-path" && sem.center !== null && sem.to !== null}
+          <section class="viewbox" aria-label="Шаги смыслового пути">
+            <h4>Смысловой путь «{label(sem.center)}» → «{label(sem.to)}»</h4>
+            {@render semStatus()}
+            {#if sem.meaning}
+              {@const mp = sem.meaning}
+              {#if mp.resolution === "ambiguous" || mp.resolution === "not_found"}
+                <p class="hint" role="status">{mp.resolution === "ambiguous" ? "Имя конца пути неоднозначно: путь не угадывается." : "Конец пути не найден в смысловом слое."}</p>
+                <ul class="conns">{#each mp.candidates as c, i (i)}<li><span class="name" title={c}>{c}</span></li>{/each}</ul>
+              {:else if !mp.paths.length}
+                <p class="hint" role="status">Смысловых путей {sem.structural ? "со структурными шагами " : ""}в области не найдено{mp.notes.semanticIncomplete ? "; смысловой слой неполон — отсутствие пути не доказывает отсутствие связи" : ""}.{sem.structural ? "" : " Структурные шаги (ссылки) можно включить галочкой в полосе."}</p>
+              {:else}
+                {@const path = mp.paths[Math.min(sem.index, mp.paths.length - 1)]}
+                <ol class="conns steps">
+                  {#each path.steps as step, i (i)}
+                    <li>
+                      <span class="name" title={step.sentence}>{i + 1}. {step.sentence}</span>
+                      <small>{step.forward ? "ход по направлению утверждения" : "ход против направления утверждения"}{step.negative ? " · в источнике отрицание" : ""}</small>
+                      {#each step.conditions as c, k (k)}<small>условие: {c}</small>{/each}
+                      {@render proofList(step.proofs)}
+                    </li>
+                  {/each}
+                </ol>
+                {#if !path.complete}<p class="hint">Путь неполный: обход остановлен пределом.</p>{/if}
+                <p class="hint">Кратчайший путь не объясняет причину: проверьте основания шагов.</p>
+              {/if}
+              {@render semNotes(mp.notes.lines)}
+            {/if}
+          </section>
+        {:else if sem.kind === "context"}
+          <section class="viewbox" aria-label="Контекст задачи">
+            <h4>Контекст задачи</h4>
+            <div class="form">
+              <label>Задача<textarea rows="3" bind:value={ctxQuery} aria-label="Задача для контекста" placeholder="Что нужно сделать или выяснить?"></textarea></label>
+              <label>Профиль<select bind:value={ctxProfile} aria-label="Профиль задачи">{#each PROFILES as p (p.id)}<option value={p.id}>{p.label}</option>{/each}</select></label>
+              <label>Бюджет<select bind:value={ctxBudget} aria-label="Бюджет контекста">{#each CONTEXT_BUDGETS as b (b)}<option value={b}>{b} токенов</option>{/each}</select></label>
+              <label class="chk"><input type="checkbox" bind:checked={ctxSubgraph} disabled={!subgraphFiles.length} /> Только документы подграфа ({subgraphFiles.length})</label>
+              <button class="act" onclick={runContext} disabled={!ctxQuery.trim() || sem.state === "loading"}>Собрать контекст</button>
+            </div>
+            {#if ctxSubgraph && subgraphFiles.length}<p class="hint">Подграф передан областью документов: отдельного входа по узлам в контракте v1 нет.</p>{/if}
+            {#if sem.state !== "form"}{@render semStatus()}{/if}
+            {#if sem.context}
+              {@const cx = sem.context}
+              {#each cx.groups as g (g.role)}
+                <h4>{g.label} · {g.proofs.length}</h4>
+                {@render proofList(g.proofs)}
+              {/each}
+              {#if !cx.groups.length}<p class="hint" role="status">Источников по ролям не найдено для этой задачи в выбранной области.</p>{/if}
+              {#if cx.missing.length}<p class="hint" role="status">Непокрытые роли: {cx.missing.map((r) => roleLabels[r] ?? r).join(", ")}. Это значит «не найдено в обработанных отношениях», а не «их нет».</p>{/if}
+              <p class="hint">Бюджет {cx.budgetMode === "estimated" ? "оценочный (по размеру ответа, не токены вашей модели)" : "точный"}: использовано {(cx.usedBytes / 1024).toFixed(1)} КБ{cx.maxBytes ? ` из ${(cx.maxBytes / 1024).toFixed(0)}` : ""}.</p>
+              {@render semNotes(cx.notes.lines)}
+            {/if}
+          </section>
+        {:else if sem.kind === "topics"}
+          <section class="viewbox" aria-label="Темы проекта">
+            <h4>Темы проекта{sem.topics ? ` · ${sem.topics.topics.length}` : ""}</h4>
+            {@render semStatus()}
+            {#if sem.topics}
+              {@const tv = sem.topics}
+              <p class="hint">Группировка: {tv.grouping === "modules" ? "по модулям" : "сообщества по связям документов"}. Названия собраны из заголовков представителей, а не придуманы. Темы показаны номерами на документах карты.</p>
+              {#if !tv.topics.length}<p class="hint" role="status">Тем не найдено: в области нет сгруппированных документов.</p>{/if}
+              <ul class="conns topics">
+                {#each tv.topics as t (t.id)}
+                  <li class:on={sem.topic === t.number}>
+                    <span class="name" title={t.label}><b>{t.number}.</b> {t.label}</span>
+                    <small>{t.members.length} документов</small>
+                    <span class="row-actions">
+                      <button class="inline" aria-pressed={sem.topic === t.number} onclick={() => pickTopic(t.number)}>{sem.topic === t.number ? "Показать все темы" : "Показать на карте"}</button>
+                      <button class="inline" onclick={() => markTopic(t)}>В подграф</button>
+                    </span>
+                    {#if t.representatives.length}<span class="row-actions">Представители: {#each t.representatives as r (r.id)}<button class="inline" onclick={() => selectDocument(r.id)}>{r.title}</button>{/each}</span>{/if}
+                  </li>
+                {/each}
+              </ul>
+              {@render semNotes(tv.notes.lines)}
+            {/if}
+          </section>
+        {:else if sem.kind === "audit"}
+          <section class="viewbox" aria-label="Аудит связей">
+            <h4>Аудит связей</h4>
+            {@render semStatus()}
+            {#if sem.audit}
+              {@const au = sem.audit}
+              {@const current = au.sections.find((s) => s.id === sem!.section) ?? au.sections[0]}
+              <div class="tabs" role="group" aria-label="Разделы аудита">
+                {#each au.sections as s (s.id)}<button class="act" aria-pressed={current.id === s.id} onclick={() => pickAuditSection(s.id)}>{s.title} · {s.error ? "!" : s.findings.length}</button>{/each}
+              </div>
+              <p class="hint">{current.caution}</p>
+              {#if current.error}
+                <p class="hint" role="alert">{current.error}</p>
+                <div class="actions"><button class="act" onclick={openAudit}>Повторить аудит</button></div>
+              {:else if !current.findings.length}
+                <p class="hint" role="status">Не найдено{current.truncated ? ", но обход усечён" : ""}. Это не доказательство, что проблем нет.</p>
+              {:else}
+                <ul class="conns rich">
+                  {#each current.findings.slice(0, 40) as f, i (i)}
+                    <li>
+                      <span class="name" title={f.label}>{f.label || "Без названия"}</span>
+                      <small>{f.detail}</small>
+                      {@render proofList(f.proofs)}
+                      {#if f.documents.length}<button class="inline" onclick={() => selectDocument(f.documents[0])}>На карте</button>{/if}
+                    </li>
+                  {/each}
+                </ul>
+                {#if current.findings.length > 40}<p class="trunc">Показаны 40 из {current.findings.length}.</p>{/if}
+              {/if}
+              {@render semNotes(au.notes)}
+            {/if}
+          </section>
+        {/if}
+      {/if}
+      {#if pathView && currentPath && sem?.kind !== "meaning-path"}
         <section class="viewbox" aria-label="Шаги пути">
           <h4>Шаги пути · {currentPath.steps.length}</h4>
           <ol class="conns steps">
@@ -1728,7 +2232,7 @@
               </li>
             {/each}
           </ol>
-          <p class="hint">Показано соседство на карте в режиме «{MODE_NAME[mode]}», а не зависимость. Смысловой путь с основаниями — отдельное действие следующего шага.</p>
+          <p class="hint">Показано соседство на карте в режиме «{MODE_NAME[mode]}», а не зависимость. Путь по утверждениям с основаниями — кнопка «Смысловой путь» в полосе.</p>
         </section>
       {/if}
       {#if inboundView}
@@ -1777,7 +2281,7 @@
             <button class="act" aria-pressed={marks.has(selectedNode.index)} title="Отметить для «Искать в подграфе» (Shift+щелчок, Shift+пробел)" onclick={() => toggleMark(selectedNode.index)}>{marks.has(selectedNode.index) ? "Из подграфа" : "В подграф"}</button>
           {/if}
           {#if selectedNode.kind === "document"}
-            {#each GRAPH_ACTIONS.filter((a) => a.ready) as action (action.id)}
+            {#each GRAPH_ACTIONS as action (action.id)}
               <button class="act" data-inspector-action={action.id} title={action.hint} onclick={() => runAction(action.id)}>{action.label}</button>
             {/each}
           {/if}
@@ -1962,6 +2466,7 @@
   .pop.menu button:hover { background: var(--accent-soft); color: var(--accent-text); }
   .pop.menu small { font-size: 10.5px; color: var(--muted); }
   .tools .more-menu { font-size: 14px; line-height: 1; }
+  .tools .analysis-menu { width: auto; padding: 0 8px; font-size: 11.5px; color: var(--text); border: 1px solid var(--line-2); }
   .pop h4 { margin: 0 0 4px; font-size: 10.5px; color: var(--muted); font-weight: 600; }
   .opt { display: flex; align-items: center; gap: 6px; margin: 3px 0; font-size: 11px; }
   .opt span { flex: 1; min-width: 0; }
@@ -1976,6 +2481,17 @@
   .legend .scale { display: flex; gap: 8px; }
   .legend .scale div { display: grid; justify-items: center; font-size: 10.5px; color: var(--muted); }
   .viewbox { margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  .viewbox .form { display: flex; flex-direction: column; gap: 6px; margin: 4px 0; }
+  .viewbox .form label { display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: var(--muted); }
+  .viewbox .form label.chk { flex-direction: row; align-items: center; }
+  .viewbox .form textarea, .viewbox .form select { font: inherit; font-size: 11.5px; padding: 3px 6px; border: 1px solid var(--line-2); border-radius: 5px; background: var(--panel); color: var(--text); resize: vertical; }
+  .viewbox .proof { display: flex; flex-direction: column; gap: 1px; margin: 2px 0 2px 4px; padding-left: 6px; border-left: 2px solid var(--line-2); font-size: 11px; }
+  .viewbox .proof q { quotes: "«" "»"; color: var(--text); }
+  .viewbox .tabs { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0; }
+  .viewbox .conns.rich li, .viewbox .conns.topics li { flex-direction: column; align-items: flex-start; }
+  .viewbox .conns.topics li.on { background: var(--accent-soft); border-radius: 5px; }
+  .viewbox .row-actions { display: flex; flex-wrap: wrap; gap: 2px 10px; font-size: 10.5px; color: var(--muted); }
+  .qbar .depth button.wide { width: auto; padding: 0 8px; }
   .viewbox .steps { padding-left: 0; }
   .viewbox li { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; padding: 2px 4px; font-size: 11.5px; }
   .viewbox li small { color: var(--muted); font-size: 10.5px; }

@@ -1,6 +1,6 @@
 // Вызовы воркера для физического графа: срез `graph_physical` (только окно), состояние слоя и построение графа.
 import { call } from "../api";
-import type { GraphStatus } from "../graph";
+import type { GraphReply, GraphStatus } from "../graph";
 import type { PhysicalRequest, ServerSlice } from "./slice";
 import type { QueryRequest, ServerQuerySlice } from "./query";
 
@@ -10,6 +10,11 @@ export function loadQuery(project: string, request: QueryRequest): Promise<Serve
 
 export function loadPhysical(project: string, request: PhysicalRequest): Promise<ServerSlice> {
   return call<ServerSlice>("graph_physical", { cwd: project, project, request });
+}
+
+/** Операция смыслового слоя (`graph_query`): влияние, путь, контекст, обзор, аудит. Запись и построение она не запускает. */
+export function semanticQuery(project: string, request: Record<string, unknown>): Promise<GraphReply> {
+  return call<GraphReply>("graph_query", { cwd: project, project, request });
 }
 
 export function graphStatus(project: string): Promise<GraphStatus> {

@@ -442,11 +442,8 @@ it("полный граф открывается на открытом доку�
   const row = target.querySelector('[aria-label="Действия над документом"]')!;
   expect(row.textContent).toContain("Документ 4");
   expect([...row.querySelectorAll("button")].map((b) => b.textContent)).toEqual(["Что рядом", "Кто ссылается", "Путь до…", "Что затронет правка"]);
-  // Навигационные действия подключены (2.3.6); «Что затронет правка» ждёт смыслового слоя и остаётся недоступным с причиной.
-  expect(row.querySelector<HTMLButtonElement>('[data-action="nearby"]')!.disabled).toBe(false);
-  expect(row.querySelector<HTMLButtonElement>('[data-action="path"]')!.disabled).toBe(false);
-  expect(row.querySelector<HTMLButtonElement>('[data-action="impact"]')!.disabled).toBe(true);
-  expect(row.querySelector<HTMLButtonElement>('[data-action="impact"]')!.title).toContain("не подключено");
+  // Все четыре действия подключены (2.3.6, 2.3.8) и доступны у документа.
+  for (const id of ["nearby", "inbound", "path", "impact"]) expect(row.querySelector<HTMLButtonElement>(`[data-action="${id}"]`)!.disabled).toBe(false);
   // Смена активного документа уже открытую вкладку не перебрасывает.
   app.activeDocument = "docs/manual/doc-05.md";
   await settle();

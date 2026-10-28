@@ -165,7 +165,7 @@ export interface Scene {
   /** Документ в центре локального графа. */
   focus?: number | null;
   /** Наложение действия (путь по карте, входящие ссылки): карта не двигается, выделенные узлы подписаны значком (номер шага или пусто), остальное приглушено. */
-  overlay?: { nodes: Map<number, string>; edges: Set<number> };
+  overlay?: { nodes: Map<number, string>; edges: Set<number>; /** Узлы со слабым смыслом (косвенное влияние, ссылки-соседи): пунктирное кольцо цвета подписи вместо сплошного акцента. */ weak?: Set<number> };
   /** Узлы подграфа — набор для «Искать в подграфе»: тонкое кольцо и квадрат-галочка. */
   subgraph?: ReadonlySet<number>;
 }
@@ -378,9 +378,12 @@ export function draw(ctx: CanvasRenderingContext2D, scene: Scene): void {
       ctx.globalAlpha = 1;
       ctx.beginPath();
       ctx.arc(sx, sy, r + 3.5, 0, Math.PI * 2);
-      ctx.strokeStyle = palette.accent;
+      const weak = scene.overlay?.weak?.has(n.index) ?? false;
+      ctx.strokeStyle = weak ? palette.muted : palette.accent;
       ctx.lineWidth = 2;
+      ctx.setLineDash(weak ? [3, 2.5] : []);
       ctx.stroke();
+      ctx.setLineDash([]);
       if (badge) {
         ctx.beginPath();
         ctx.arc(sx + r + 4, sy - r - 4, 7, 0, Math.PI * 2);
