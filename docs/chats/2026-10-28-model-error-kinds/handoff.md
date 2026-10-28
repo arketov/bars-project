@@ -8,7 +8,7 @@ title: Виды ошибок встроенной модели — итог 3.4.
 
 - Проект ISS-36: [экраны ошибок](../../features/window/error-states.md), раздел «Виды ошибок встроенной модели» — четыре значения `data.reason` (`network`, `files_missing`, `out_of_memory`, `runtime`), заголовки, кнопки по виду, правило определения причины воркером (типы там, где вызов принадлежит bars; общий список признаков нехватки памяти там, где ошибку формирует библиотека), неизвестное читается как `runtime`.
 - Контракт в [протоколе](../../architecture/protocol.md): `data.reason` у `provider_error`, `download_error_reason` в `models_info`. Поправлены `window/implementation.md` и статус ISS-36 в `backlog/issues.md`.
-- Вопрос OQ-218 (вид ошибки rerank) записан в `QUESTIONS.md` с рекомендацией «не нужен».
+- OQ-218 (вид ошибки rerank) закрыт ответом автора «Не нужен»: у rerank остаётся текст `rerank_error`.
 
 ## Не сделано
 
