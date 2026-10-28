@@ -97,6 +97,8 @@ title: Внутренняя база знаний bars
 | `new-topics-threshold-2026-10-19.md` | Пороги «Новых тем»: bge-m3 0,68, Qwen3 4B 0,75; измерения, реальные пропуски, ложные слияния и границы косинуса |
 | [new-topics-threshold-2026-10-19/](new-topics-threshold-2026-10-19/Index.md) | Сырые данные калибровки: пары, анализ, проверки, векторы |
 | [local-documentation-tools.md](local-documentation-tools.md) | 14 идей быстрых локальных инструментов документации, сравнение с аналогами, источники |
+| [session-journals.md](session-journals.md) | Проверка соглашения о журналах `docs/chats/` (шаг 6.4.1): записи `log.md`, читают ли handoff, вес `chats` в поиске и в git, предложения OQ-223 |
+| [session-journals-2026-10-28/](session-journals-2026-10-28/Index.md) | Скрипты и счётчики этой проверки |
 | [agent-tool-usage-2026-10-18.md](agent-tool-usage-2026-10-18.md) | Как агенты вызывают bars и как выбирать область поиска |
 | [agent-tool-usage-2026-10-18/](agent-tool-usage-2026-10-18/Index.md) | Сырые частоты, ручные оценки и пробы фильтров |
 | `agent-texts-run-2026-10-24.md` | 14 задач аудита агентами Sonnet со старыми и новыми текстами bars: вызовы, объём, правильность, какие правила брать в свод правил агента |
