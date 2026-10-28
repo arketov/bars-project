@@ -16,7 +16,10 @@ title: Rerank через Ollama и LM Studio — итог исследовани
 
 ## Сложности
 
-Сведения о версии Ollama с logprobs (0.12.11) взяты из сторонних changelog. Эхо `frequency_penalty: 1.1` в LM Studio при запрошенном 0 не объяснено.
+- Версия Ollama с logprobs (0.12.11) взята из сторонних changelog. Проверенная ранее 0.40.9 новее, но живой проверки logprobs нет.
+- Эхо `frequency_penalty: 1.1` в LM Studio при запрошенном 0 не объяснено. Это вынесено в риски [исследования LM Studio](../../knowledge/lmstudio.md).
+- У gemma-4 первый токен ушёл в reasoning и `output_text` был пуст. Решено через `reasoning.effort: none`, записано там же.
+- В рабочем дереве лежали незакоммиченные правки параллельных сессий в тех же PLAN.md и QUESTIONS.md. В коммит индексировались только свои куски (`git apply --cached`), rebase шёл с autostash.
 
 ## Дальше
 
