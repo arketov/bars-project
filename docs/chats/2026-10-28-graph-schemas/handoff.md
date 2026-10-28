@@ -15,7 +15,7 @@ title: Итог сессии 4.3.3 — своя схема у каждой гр�
 - Схемы худеют: общий `slim` убирает `default`, `uint32`, `minimum: 0` и `["x","null"]`; `format`, `predicates` и `ObjectRef` описаны сжато в самих полях. Шесть записей списка инструментов — 14 201 байт при пределе 14 336 (14 КБ контракта).
 - Описания операций начинаются с задачи и не длиннее 400 знаков; про `budgets.timeout_ms` и `budgets.max_depth` в них больше нет.
 - Тест `every_graph_tool_lists_only_its_own_parameters` в `crates/bars-mcp/tests/mcp.rs`: точный состав полей каждой схемы, предел описания, 14 КБ, отказ на чужом поле.
-- Документы: статус реализации в разделе схем [инструментов GraphRAG](../../features/graphrag/tools.md), строка проекта в [инструментах MCP](../../features/agent-tools/mcp-tools.md), статус ISS-23 в `backlog/issues.md`.
+- Документы: статус реализации и приёмы сжатия в разделе схем того же контракта, строка проекта в [инструментах MCP](../../features/agent-tools/mcp-tools.md), статус ISS-23 в `backlog/issues.md`.
 
 ## Не сделано
 

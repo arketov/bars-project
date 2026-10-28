@@ -19,7 +19,7 @@ Worker: `graph_query` принимает `{cwd?, project?, request: GraphRequest
 | impact | Непустые `roots`, обратный обход положительных зависимостей; `change_description` возвращает capability unavailable |
 | context | Непустой `query`, `task_profile=implementation\|investigation\|decision`, сужающие `roles`, `token_budget`; `tokenizer_id`/`roots` возвращают capability unavailable; estimated byte budget всего DTO |
 | explore | Ровно один `topic`/`whole_scope=true`; `analysis=topics\|connectivity\|coverage\|conflict_candidates`, `grouping=communities\|modules` |
-| graph | `view=documents\|sections\|chunks\|entities\|mixed`, `local`, `roots`, `include_paths`, `predicates`, `direction`; depth задаётся `budgets.max_depth` |
+| graph | `view=documents\|sections\|chunks\|entities\|mixed`, `local`, `roots`, `include_paths`, `predicates`, `direction`; depth задаётся `budgets.max_depth` (в MCP — полем `max_depth`) |
 
 Общие входы: `scope`, `budgets`, `limit`, `snapshot`, `cursor`. Фактические численные пределы — в [правилах реализации](implementation.md#пределы-выполнения); ресурсная приёмка ещё открыта. Endpoint/ObjectRef устаревшей ревизии не заменяется поиском похожего объекта.
 
@@ -120,7 +120,7 @@ Search: без `mode` — прежний Search и прежняя форма о�
 
 ## Ответ графа для агента — текст, предел, пустые ответы
 
-Статус: проект 28-10-2026, принят автором по OQ-219: пакет предложений [исследования формата ответов](../../knowledge/graph-answer-format.md) и таймаут MCP 5000 мс; форму входа по пути документа автор поручил проектировать агенту. Реализация — шаги плана 4.3.3–4.3.9; в коде пока JSON одной строкой (ISS-22). Раздел задаёт только текстовый вид `format=txt`; DTO v1 и `format=json` не меняются. Канал `structuredContent` с `outputSchema` не вводится: клиент агента читает текст.
+Статус: проект 28-10-2026, принят автором по OQ-219: пакет предложений [исследования формата ответов](../../knowledge/graph-answer-format.md) и таймаут MCP 5000 мс; форму входа по пути документа автор поручил проектировать агенту. Схемы операций реализованы (4.3.3), остальная реализация — шаги плана 4.3.4–4.3.9; в коде пока JSON одной строкой (ISS-22). Раздел задаёт только текстовый вид `format=txt`; DTO v1 и `format=json` не меняются. Канал `structuredContent` с `outputSchema` не вводится: клиент агента читает текст.
 
 Один текст на все клиенты: его собирают функции `bars-protocol`, общие у MCP и CLI; окно «Со связями» показывает те же факты списком (4.3.4). Служебные подписи блоков — на английском, содержимое и подсказки воркера — на языке пользователя (правило языка в `AGENTS.md`).
 
@@ -232,7 +232,7 @@ next: for an exact phrase use bars_text_search
 
 Реализовано 28-10-2026 (4.3.3): шесть структур аргументов в `bars-mcp` с этими полями, кроме `documents`, `timeout_ms` у всех — 5000 по умолчанию; поле другой операции отклоняется ошибкой разбора. `documents` у `impact`, `context` и `graph` добавляется в 4.3.5 вместе со входом по пути.
 
-Поле входит в схему, когда оно работает: `change_description` — после его реализации; `context.roots`, `include_related` и `graph.include_unresolved` — после реализации по таблице решений выше; `tokenizer_id` из схемы убран (единственное значение — `estimate-v1`, ответ его называет). Описание операции начинается с задачи, для которой её звать; описание поля — одна фраза про действие. Список шести схем — не больше 14 КБ (измерено 4.3.1: 14 199 байт у чернового набора).
+Поле входит в схему, когда оно работает: `change_description` — после его реализации; `context.roots`, `include_related` и `graph.include_unresolved` — после реализации по таблице решений выше; `tokenizer_id` из схемы убран (единственное значение — `estimate-v1`, ответ его называет). Описание операции начинается с задачи, для которой её звать; описание поля — одна фраза про действие. Список шести схем — не больше 14 КБ (измерено 4.3.1: 14 199 байт у чернового набора; реализация 4.3.3 — 14 201 байт). Размер держат так: из схем `schemars` убраны `default`, `uint32`, `minimum: 0` и nullable-типы, а `format`, `predicates` и `ObjectRef` описаны в самих полях без общих определений с описаниями вариантов; новое поле или длинное описание проверяет тест списка инструментов.
 
 ### Проверки контракта ответа графа
 
