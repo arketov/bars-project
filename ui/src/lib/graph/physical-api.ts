@@ -16,8 +16,12 @@ export function graphStatus(project: string): Promise<GraphStatus> {
   return call<GraphStatus>("graph_status", { cwd: project, project });
 }
 
-/** Ставит построение графа или просит остановить идущее; возвращает идентификатор задания, если оно есть. */
-export async function toggleGraphBuild(project: string, activeJob: string | null, layer = "all"): Promise<void> {
-  if (activeJob) await call("graph_cancel", { cwd: project, project, job_id: activeJob });
-  else await call("graph_build", { cwd: project, project, layer });
+/** Ставит построение графа выбранного слоя. */
+export async function startGraphBuild(project: string, layer = "all"): Promise<void> {
+  await call("graph_build", { cwd: project, project, layer });
+}
+
+/** Просит остановить идущее построение; воркер подтверждает остановку в состоянии графа. */
+export async function stopGraphBuild(project: string, job: string): Promise<void> {
+  await call("graph_cancel", { cwd: project, project, job_id: job });
 }

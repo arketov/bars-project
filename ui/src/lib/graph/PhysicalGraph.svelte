@@ -13,7 +13,8 @@
   import { draw, layoutLines, lineDistance, moduleColors, radiusOf, readPalette, toScreen, toWorld, type Camera, type Palette, type Scene, type Target } from "./draw";
   import { DEFAULT_FORCES, Layout, type Forces, type PNode } from "./layout";
   import { EDGE_KINDS, KIND_TITLE, brightnessOf, drawStrength, springOf, widthOf, type EdgeKind, type GEdge, type GNode, type Mode, type SliceKind } from "./model";
-  import { graphStatus, loadPhysical, loadQuery, toggleGraphBuild } from "./physical-api";
+  import { graphStatus, loadPhysical, loadQuery, startGraphBuild, stopGraphBuild } from "./physical-api";
+  import { GRAPH_ACTIONS, NO_SELECTION_TEXT, actionState, buildControls } from "./entry";
   import { FORCE_RANGE, defaultSettings, loadSettings, saveSettings, type PanelKind, type PanelSettings } from "./settings";
   import { INITIAL_LIMITS, MAX_LIMITS, PORTION, SliceStore, emptySlice, type Limits, type Slice } from "./slice";
   import { DEFAULT_DEPTH, MAX_DEPTH, QUERY_BUDGET, QUERY_MAX, SEARCH_MODE, acceptQuerySlice, queryRequest, fallbackText, shapeQuery, type QueryBuild, type QueryInfo, type QueryInput, type RetrievalKind, type ScoreKind } from "./query";
@@ -57,6 +58,8 @@
   let queryLoading = $state(false);
   let queryRequestKey = "";
   let loaded = $state(false);
+  /** Вкладка уже открылась на объекте (или решила не открываться): повторно выбор по активному документу не выставляется. */
+  let openedOnObject = false;
   let loading = $state(false);
   let loadError = $state("");
   let loadErrorKind = $state("");
@@ -758,12 +761,27 @@
     app.view = "graph";
   }
 
-  async function rebuildGraph() {
+  /** «Обновить граф» / «Продолжить» / «Повторить»: запуск построения выбранного слоя. */
+  async function startBuild() {
     const path = project();
     if (!path) return;
     try {
-      await toggleGraphBuild(path, status?.active_job ?? null, buildLayer);
-      app.flash(status?.active_job ? "Остановка запрошена; исход появится в состоянии графа" : "Задание графа принято");
+      await startGraphBuild(path, buildLayer);
+      app.flash("Задание графа принято");
+      await refreshStatus();
+    } catch (error) {
+      app.flash(error instanceof Error ? error.message : String(error), true);
+    }
+  }
+
+  /** «Остановить построение»: останавливает только идущее задание, автообновление будущих изменений не выключается (OQ-190). */
+  async function stopBuild() {
+    const path = project();
+    const job = status?.active_job;
+    if (!path || !job) return;
+    try {
+      await stopGraphBuild(path, job);
+      app.flash("Остановка запрошена; исход появится в состоянии графа");
       await refreshStatus();
     } catch (error) {
       app.flash(error instanceof Error ? error.message : String(error), true);
@@ -865,6 +883,7 @@
     expanded = {};
     selected = null;
     loaded = false;
+    openedOnObject = false;
     loading = false;
     loadError = "";
     loadErrorKind = "";
@@ -962,8 +981,10 @@
     return layout?.links.length ?? 0;
   });
   const graphNotReady = $derived(loadErrorKind === "graph_not_ready");
-  const building = $derived(!!status?.active_job || status?.state === "building");
+  const controls = $derived(buildControls(status));
+  const building = $derived(controls.building);
   let buildLayer = $state("all");
+  const selectedKind = $derived(selectedNode ? selectedNode.kind : null);
 
   onMount(() => {
     mini = !!host.closest(".mini");
@@ -1055,6 +1076,28 @@
       schedule();
     });
   });
+  // Открытие вкладки на объекте: если есть открытый документ и нет ни завершённого поиска, ни перехода из мини-графа,
+  // полный граф один раз выбирает этот документ и центрирует камеру. Вид запроса и «Общий вид» остаются прежними (OQ-204).
+  $effect(() => {
+    void revision;
+    if (mini || !loaded || loadError || openedOnObject || loading || queryLoading) return;
+    untrack(() => {
+      if (app.graphFocus || app.graphShowQuery || queryInput() || query) { openedOnObject = true; return; }
+      const path = app.activeDocument;
+      const index = path ? base.nodes.find((n) => n.kind === "document" && n.path === path && base.visibleDocs.has(n.index))?.index : undefined;
+      if (index !== undefined && !layout?.get(index)) return;
+      openedOnObject = true;
+      if (index === undefined) return;
+      selected = { type: "node", index };
+      const p = layout!.get(index)!;
+      const k = Math.max(cam.k, 1.1);
+      autoFitSince = 0;
+      camTarget = null;
+      fitted = true;
+      if (size.w > 1) cam = { k, x: size.w / 2 - p.x * k, y: size.h / 2 - p.y * k };
+      schedule();
+    });
+  });
   // Мини-граф: другой активный документ или другая глубина — локальный граф раскладывается с нуля и вписывается.
   $effect(() => {
     void focusIndex;
@@ -1115,6 +1158,22 @@
   <label class="opt slider" title="Расстояние между связанными документами: меняет масштаб всей карты"><span>Длина связи</span><input type="range" min={FORCE_RANGE.length.min} max={FORCE_RANGE.length.max} step={FORCE_RANGE.length.step} aria-label="Длина связи" bind:value={settings.forces.length} oninput={applyForces} /><b>{forces.length}</b></label>
   <button class="reset" onclick={resetForces}>По умолчанию</button>
   <p class="hint">Меняет движение узлов, а не силу связи: толщина, яркость и значения s прежние.</p>
+  {#if !mini}
+    <h4>Обновление графа</h4>
+    <label class="opt" title="Какой слой перестраивает кнопка «Обновить граф»"><span>Слой</span><select aria-label="Слой для обновления" bind:value={buildLayer} disabled={building}><option value="all">Все слои</option><option value="structure">Структура</option><option value="semantic">Отношения</option><option value="similarity">Близость</option></select></label>
+    <button class="reset" aria-expanded={legendOpen} onclick={() => { legendOpen = !legendOpen; popover = null; }}>Легенда и шкала силы</button>
+    <details class="facts">
+      <summary>Сведения</summary>
+      <table aria-label="Сведения о графе">
+        <tbody>
+          <tr><th>Документов</th><td>{slice.docCount} из {slice.totals.documents}</td></tr>
+          <tr><th>Чанков раскрыто</th><td>{shownChunks} из {slice.totals.chunks}</td></tr>
+          <tr><th>Снимок графа</th><td title={slice.snapshot}>{slice.snapshot.slice(0, 8) || "—"}</td></tr>
+          {#each EDGE_KINDS as kind (kind)}<tr><th>{KIND_TITLE[kind]}</th><td>{kind === "chunk_similarity" && !shownChunks ? "при раскрытии" : counts[kind]}{totalCounts[kind] > counts[kind] ? ` из ${totalCounts[kind]}` : ""} · слой {STATE_TEXT[slice.layers[kind].state]}</td></tr>{/each}
+        </tbody>
+      </table>
+    </details>
+  {/if}
 {/snippet}
 
 <div class="pgw" bind:this={host}>
@@ -1122,6 +1181,7 @@
 {#if queryError}<p role="alert">{queryError}</p>{/if}
 <div class="pg" class:mini role="region" aria-label={mini ? "Мини-граф" : "Физический граф проекта"} data-mode={mode} data-motion={motion} data-nodes={nodeCount} data-links={linkCount} data-loaded={loaded}>
   {#if !mini}
+    <div class="top">
     <div class="bar" role="toolbar" aria-label="Управление графом">
       <label class="find">
         <Icon name="search" size={13} width={1.8} />
@@ -1140,7 +1200,7 @@
               {#if m === "links"}<path d="M21 6l-5-3v6z" fill={palette?.kindCss.markdown_link ?? "currentColor"} />{/if}
             </svg>
             {MODE_NAME[m]}
-            <b>{m === "chunks" && !shownChunks ? "—" : modeCount(m)}</b>{#if m !== "links" && modeCount(m) < modeTotal(m) && (m !== "chunks" || shownChunks)}<small>из {modeTotal(m)}</small>{/if}
+            <b>{m === "chunks" && !shownChunks ? "—" : modeCount(m)}</b>
             {#if issue}<span class="state {issue.layer.state}">{STATE_TEXT[issue.layer.state]}</span>{/if}
           </button>
         {/each}
@@ -1154,12 +1214,23 @@
         <button aria-label={view === "list" ? "Показать карту" : "Показать списком"} aria-pressed={view === "list"} title={view === "list" ? "Показать карту" : "Показать списком"} onclick={() => (view = view === "list" ? "map" : "list")}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" /></svg>
         </button>
-        <button aria-label="Настройки раскладки" aria-expanded={popover === "settings"} title="Настройки раскладки" onclick={() => (popover = popover === "settings" ? null : "settings")}><Icon name="gear" size={14} width={1.8} /></button>
-        <button aria-label="Легенда и шкала силы" aria-expanded={legendOpen} title="Легенда и шкала силы" onclick={() => (legendOpen = !legendOpen)}><Icon name="info" size={14} width={1.8} /></button>
-        <select aria-label="Слой для обновления" title="Слой для обновления всего проекта" bind:value={buildLayer} disabled={building}><option value="all">Все слои</option><option value="structure">Структура</option><option value="semantic">Отношения</option><option value="similarity">Близость</option></select>
-        <button aria-label={building ? "Остановить построение графа" : "Обновить граф"} title={building ? "Остановить построение графа" : "Обновить граф: перестроить выбранный слой"} onclick={() => void rebuildGraph()}><Icon name="refresh" size={14} width={1.8} /></button>
+        <button aria-label="Настройки графа" aria-expanded={popover === "settings"} title="Настройки графа: раскладка, порог, слои, легенда, сведения" onclick={() => (popover = popover === "settings" ? null : "settings")}><Icon name="gear" size={14} width={1.8} /></button>
         <button class="more-menu" aria-label="Ещё" title="Ещё" aria-haspopup="menu" aria-expanded={popover === "more"} onclick={() => (popover = popover === "more" ? null : "more")}>⋯</button>
       </div>
+    </div>
+    <div class="entry-actions" role="group" aria-label="Действия над документом">
+      {#if selectedNode}
+        <b class="entry-title" title={selectedNode.label}>{selectedNode.label}</b>
+        {#each GRAPH_ACTIONS as action (action.id)}
+          {@const state = actionState(action, selectedKind)}
+          <button class="act" data-action={action.id} disabled={!state.enabled} title={state.reason}>{action.label}</button>
+        {/each}
+      {:else}
+        <span class="entry-hint">{NO_SELECTION_TEXT}</span>
+        {#each GRAPH_ACTIONS as action (action.id)}
+          <button class="act" data-action={action.id} disabled title={actionState(action, null).reason}>{action.label}</button>
+        {/each}
+      {/if}
     </div>
     {#if query}
       <div class="qstack">
@@ -1191,9 +1262,11 @@
       </div>
     {/if}
     {#if status}
-      <div class="banner" role="status">
-        <span>{graphDataLabel(status)} · {completenessLabels[status.completeness ?? "unknown"]} · {jobLabels[status.job_state ?? "idle"]}</span>
-        {#if status.job_state === "stopped"}<button class="more" onclick={() => void rebuildGraph()}>Продолжить</button>{/if}
+      <div class="banner state" role="status" aria-label="Состояние графа">
+        <span>{graphDataLabel(status)} · {completenessLabels[status.completeness ?? "unknown"]}{jobLabels[status.job_state ?? "idle"] ? ` · ${jobLabels[status.job_state ?? "idle"]}` : ""}</span>
+        {#if controls.staleReason}<span>Ждёт обновления: {controls.staleReason}</span>{/if}
+        <button class="more" disabled={!controls.updateEnabled} title={controls.updateReason} onclick={() => void startBuild()}>{controls.updateLabel}</button>
+        <button class="more ghost" disabled={!controls.stopEnabled} title={controls.stopReason} onclick={() => void stopBuild()}>Остановить построение</button>
         {#if building && status.progress}<span>{({ structure: "Разбор документов", similarity: "Расчёт близости", similarity_pairs: "Сравнено пар", publish: "Публикация" } as Record<string, string>)[status.progress.phase] ?? "Построение"}: {status.progress.processed}{status.progress.total === null ? "" : ` / ${status.progress.total}`} · {(status.progress.elapsed_ms / 1000).toFixed(1)} с</span>{/if}
         {#if status.file_errors_total}<details><summary>Файлов с ошибками: {status.file_errors_total}</summary>{#each status.file_errors ?? [] as error}<div>{error.path}: {error.message}</div>{/each}</details>{/if}
         {#if status.error}<span>{status.error}</span>{/if}
@@ -1202,7 +1275,6 @@
     {#if layerIssues.length}
       <div class="banner" role="status">
         {#each layerIssues as kind (kind)}<span><b>{KIND_TITLE[kind]}:</b> {slice.layers[kind].note}.</span>{/each}
-        <button class="more" onclick={() => void rebuildGraph()}>{building ? "Остановить построение" : "Обновить граф"}</button>
       </div>
     {/if}
     {#if loaded && !loadError && slice.truncated}
@@ -1211,6 +1283,7 @@
         {#if atMaximum}<span>Достигнут максимум среза: сузьте область в дереве.</span>{:else}<button class="more" onclick={() => void continueSlice()} disabled={loading}>Показать ещё</button>{/if}
       </div>
     {/if}
+    </div>
   {/if}
 
   <div class="stage" bind:this={stage}>
@@ -1223,7 +1296,7 @@
         <div class="empty" role="alert">
           <b>{graphNotReady ? (building ? "Граф строится" : "Граф ещё не построен или устарел") : "Граф недоступен"}</b>
           <span>{loadError}</span>
-          {#if graphNotReady}<button class="act" onclick={() => void rebuildGraph()}>{building ? "Остановить построение" : "Обновить граф"}</button>{/if}
+          {#if graphNotReady && !building}<button class="act" disabled={!controls.updateEnabled} title={controls.updateReason} onclick={() => void startBuild()}>{controls.updateLabel}</button>{/if}
         </div>
       {:else if slice.docCount === 0}
         <div class="empty" role="status"><b>В выбранной области нет документов</b><span>Измените область в дереве или в фильтре документов.</span></div>
@@ -1294,7 +1367,7 @@
         {/if}
       {/if}
       {#if popover === "settings" && !mini}
-        <section class="pop full" aria-label="Настройки раскладки">{@render forcesForm()}</section>
+        <section class="pop full" aria-label="Настройки графа">{@render forcesForm()}</section>
       {/if}
       {#if popover === "more" && !mini}
         <div class="pop menu" role="menu" aria-label="Ещё" tabindex="-1" onkeydown={(e) => { if (e.key === "Escape") { e.stopPropagation(); popover = null; } }}>
@@ -1431,17 +1504,19 @@
           {#if selectedEdge.kind === "markdown_link" && selectedEdge.lines.length}<button class="act" onclick={() => openSource(selectedEdge.a, selectedEdge.lines[0])}><Icon name="doc" size={13} width={1.8} /> Источник ссылки</button>{/if}
         </div>
       {:else}
-        <header><span class="kind">Граф проекта</span><h3>Выберите узел или связь</h3></header>
-        <p class="hint">Инспектор показывает тип, происхождение и числа связи, ведёт к источнику. Движение камеры область поиска не меняет.</p>
-        <table aria-label="Состав среза">
-          <tbody>
-            <tr><th>Документов</th><td>{slice.docCount} из {slice.totals.documents}</td></tr>
-            <tr><th>Чанков раскрыто</th><td>{shownChunks} из {slice.totals.chunks}</td></tr>
-            <tr><th>Снимок графа</th><td title={slice.snapshot}>{slice.snapshot.slice(0, 8) || "—"}</td></tr>
-            {#each EDGE_KINDS as kind (kind)}<tr><th>{KIND_TITLE[kind]}</th><td>{kind === "chunk_similarity" && !shownChunks ? "при раскрытии" : counts[kind]} · слой {STATE_TEXT[slice.layers[kind].state]}</td></tr>{/each}
-          </tbody>
-        </table>
-        <p class="keys"><kbd>←↑↓→</kbd> соседний узел <kbd>M</kbd> режим связей <kbd>Enter</kbd> раскрыть <kbd>Пробел</kbd> закрепить <kbd>F</kbd> вписать <kbd>Esc</kbd> снять</p>
+        <header><span class="kind">Граф проекта</span><h3>Выберите документ</h3></header>
+        <p class="hint">Щёлкните узел или найдите документ по названию — граф покажет, что с ним связано, и откроет источник. Движение камеры область поиска не меняет.</p>
+        <details class="key-help">
+          <summary>Как управлять картой с клавиатуры</summary>
+          <dl>
+            <dt>Стрелки</dt><dd>Выбрать соседний узел</dd>
+            <dt>M</dt><dd>Следующий режим связей</dd>
+            <dt>Enter</dt><dd>Раскрыть чанки документа</dd>
+            <dt>Пробел</dt><dd>Закрепить или открепить</dd>
+            <dt>F</dt><dd>Вписать карту</dd>
+            <dt>Esc</dt><dd>Снять выбор</dd>
+          </dl>
+        </details>
       {/if}
       {#if query?.bundle}
         <GraphSearchBundle graph={query.bundle} states={Object.fromEntries(query.results.map(r => [r.path,r.status]))} related={query.applied === "mix"} embedded selected={packageIndex} onselect={(index) => { packageIndex = index; schedule(); }} />
@@ -1454,8 +1529,21 @@
 
 <style>
   .pgw { display: flex; flex: 1; min-width: 0; min-height: 0; height: 100%; container-type: inline-size; }
-  .pg { position: relative; flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: auto auto auto auto minmax(0, 1fr); flex: 1; min-height: 0; min-width: 0; height: 100%; background: var(--panel); font-size: 12px; color: var(--text); overflow: hidden; }
+  .pg { position: relative; flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: auto minmax(0, 1fr); flex: 1; min-height: 0; min-width: 0; height: 100%; background: var(--panel); font-size: 12px; color: var(--text); overflow: hidden; }
   .pg.mini { display: flex; flex-direction: column; }
+  .top { grid-column: 1 / -1; grid-row: 1; display: flex; flex-direction: column; min-width: 0; }
+  .entry-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 4px 10px; border-bottom: 1px solid var(--line); font-size: 11.5px; }
+  .entry-title { max-width: 32ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .entry-hint { flex: 1 1 260px; color: var(--muted); }
+  .banner.state .ghost { background: transparent; }
+  .banner .more:disabled { opacity: 0.5; cursor: default; }
+  .facts { margin-top: 6px; font-size: 11px; }
+  .facts summary { cursor: pointer; color: var(--muted); }
+  .key-help { margin-top: 8px; font-size: 11px; color: var(--muted); }
+  .key-help summary { cursor: pointer; }
+  .key-help dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 6px 0 0; }
+  .key-help dt { font-weight: 600; color: var(--text); }
+  .key-help dd { margin: 0; }
   .bar { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
   .banner { grid-column: 1 / -1; display: flex; gap: 8px 14px; align-items: center; flex-wrap: wrap; padding: 4px 10px; background: var(--mid-soft); color: var(--text); border-bottom: 1px solid var(--line); font-size: 11.5px; }
   .qstack { grid-column: 1 / -1; display: flex; flex-direction: column; }
@@ -1472,7 +1560,7 @@
   .qplate button { white-space: nowrap; }
   .qplate .qt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .banner .more { border: 1px solid var(--line-2); background: var(--panel); border-radius: 5px; padding: 1px 8px; font-size: 11.5px; }
-  .stage { grid-column: 1; grid-row: 5; position: relative; min-width: 0; min-height: 0; overflow: hidden; background: var(--panel); }
+  .stage { grid-column: 1; grid-row: 2; position: relative; min-width: 0; min-height: 0; overflow: hidden; background: var(--panel); }
   .pg.mini .stage { flex: 1; }
   canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; outline: none; }
   canvas.hide { visibility: hidden; }
@@ -1487,7 +1575,6 @@
   .mode[aria-checked="true"] { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); position: relative; z-index: 1; }
   .mode:disabled { opacity: 0.5; cursor: default; }
   .mode b { font-weight: 600; }
-  .mode small { color: var(--faint); font-size: 10px; }
   .mode .state { font-size: 10px; padding: 0 5px; border-radius: 8px; background: var(--mid-soft); color: var(--mid); }
   .mode .state.failed { background: var(--bad-soft); color: var(--bad); }
   .toast { position: absolute; left: 6px; top: 6px; max-width: calc(100% - 150px); padding: 4px 10px; border-radius: 8px; background: var(--text); color: var(--panel); font-size: 11.5px; line-height: 1.35; box-shadow: var(--shadow); pointer-events: none; z-index: 6; animation: toast-in 0.18s ease-out; }
@@ -1542,7 +1629,7 @@
   .legend .scale { display: flex; gap: 8px; }
   .legend .scale div { display: grid; justify-items: center; font-size: 10.5px; color: var(--muted); }
   .hint { margin: 4px 0; color: var(--muted); font-size: 11px; line-height: 1.4; }
-  .inspector { grid-column: 2; grid-row: 5; min-height: 0; overflow: auto; padding: 8px 10px; border-left: 1px solid var(--line); background: var(--panel); }
+  .inspector { grid-column: 2; grid-row: 2; min-height: 0; overflow: auto; padding: 8px 10px; border-left: 1px solid var(--line); background: var(--panel); }
   .inspector header { margin-bottom: 6px; }
   .inspector .kind { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--accent-text); font-weight: 600; }
   .inspector h3 { margin: 1px 0 2px; font-size: 13px; line-height: 1.3; overflow-wrap: anywhere; }
@@ -1563,7 +1650,6 @@
   tr + tr { border-top: 1px solid var(--line); }
   .trunc { margin: 4px 0; padding: 3px 6px; border-radius: 5px; background: var(--mid-soft); font-size: 11px; }
   .notice { margin: 8px 0 0; padding: 4px 6px; border-radius: 5px; background: var(--accent-soft); color: var(--accent-text); font-size: 11px; }
-  .keys { color: var(--muted); font-size: 10.5px; line-height: 2; }
   .list { position: absolute; inset: 0; display: flex; flex-direction: column; min-height: 0; }
   .list-tools { display: flex; gap: 8px; align-items: center; padding: 6px 8px; border-bottom: 1px solid var(--line); }
   .list-tools input[type="search"] { flex: 1; height: 24px; border: 1px solid var(--line-2); border-radius: 6px; padding: 0 6px; background: transparent; font-size: 11px; }
@@ -1575,9 +1661,9 @@
   .glyph { width: 8px; height: 8px; flex: none; background: var(--muted); border-radius: 50%; }
   .glyph.chunk { border-radius: 1px; transform: rotate(45deg) scale(0.8); background: var(--faint); }
   @container (max-width: 640px) {
-    .pg:not(.mini) { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto minmax(0, 1fr) minmax(0, 38%); }
+    .pg:not(.mini) { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) minmax(0, 38%); }
     .stage { grid-column: 1; }
-    .inspector { grid-column: 1; grid-row: 6; border-left: 0; border-top: 1px solid var(--line); }
+    .inspector { grid-column: 1; grid-row: 3; border-left: 0; border-top: 1px solid var(--line); }
     .find input { width: 90px; }
   }
 </style>

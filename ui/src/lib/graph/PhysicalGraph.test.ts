@@ -82,6 +82,10 @@ it("показывает остановку и ошибки файлов, про
   expect(target.textContent).toContain("Есть известные пропуски");
   expect(target.textContent).toContain("Файлов с ошибками: 1");
   expect(target.textContent).toContain("Ошибка.md: Файл не является UTF-8");
+  expect(button("Остановить построение")!.disabled).toBe(true);
+  expect(button("Продолжить")!.disabled).toBe(false);
+  target.querySelector<HTMLButtonElement>('[aria-label="Настройки графа"]')!.click();
+  await settle();
   const select = target.querySelector<HTMLSelectElement>('[aria-label="Слой для обновления"]')!;
   select.value = "structure";
   select.dispatchEvent(new Event("change", { bubbles: true }));
@@ -426,4 +430,65 @@ it("явная карточка выбирает результат именно
   await settle();
   expect(app.graphFocus).toBeNull();
   expect(target.querySelector(".inspector h3")?.textContent).toContain("Документ 7");
+});
+
+it("полный граф открывается на открытом документе: узел выбран, действия над документом доступны по причине (ISS-58)", async () => {
+  app.activeDocument = "docs/features/doc-04.md";
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  expect(target.querySelector(".inspector h3")?.textContent).toContain("Документ 4");
+  const row = target.querySelector('[aria-label="Действия над документом"]')!;
+  expect(row.textContent).toContain("Документ 4");
+  expect([...row.querySelectorAll("button")].map((b) => b.textContent)).toEqual(["Что рядом", "Кто ссылается", "Путь до…", "Что затронет правка"]);
+  // Действия ещё не подключены к карте: недоступны, причина — в подсказке.
+  expect(row.querySelector<HTMLButtonElement>('[data-action="nearby"]')!.disabled).toBe(true);
+  expect(row.querySelector<HTMLButtonElement>('[data-action="nearby"]')!.title).toContain("не подключено");
+  // Смена активного документа уже открытую вкладку не перебрасывает.
+  app.activeDocument = "docs/manual/doc-05.md";
+  await settle();
+  expect(target.querySelector(".inspector h3")?.textContent).toContain("Документ 4");
+});
+
+it("без документа вкладка открывается картой проекта и подсказывает, что выбрать; завершённый поиск важнее документа (OQ-204)", async () => {
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  expect(target.querySelector(".inspector h3")?.textContent).toBe("Выберите документ");
+  expect(target.querySelector(".entry-hint")?.textContent).toContain("Выберите документ на карте");
+  expect([...target.querySelectorAll<HTMLButtonElement>(".entry-actions button")].every((b) => b.disabled)).toBe(true);
+  await unmount(component);
+  component = null;
+  app.activeDocument = "docs/adr/doc-03.md";
+  finishSearch("s1", "очередь", [2, 5]);
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  expect(target.querySelector(".qbar")).not.toBeNull();
+  expect(target.querySelector(".inspector h3")?.textContent).not.toContain("Документ 3");
+});
+
+it("«Обновить граф» и «Остановить построение» — разные кнопки; во время построения доступна только остановка (ISS-56)", async () => {
+  rpc.mockImplementation(async (method: string, params: Record<string, unknown>) => {
+    if (method === "graph_status") return { state: "building", freshness: "stale", completeness: "unknown", job_state: "running", snapshot: "mock-snapshot-0001", active_job: "job-7", source_count: 36, error: null, method: "x" };
+    if (method === "graph_physical") return physicalFixture(params);
+    return {};
+  });
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  expect(button("Обновить граф")!.disabled).toBe(true);
+  expect(button("Остановить построение")!.disabled).toBe(false);
+  button("Остановить построение")!.click();
+  await settle();
+  expect(rpc.mock.calls.some((c) => c[0] === "graph_cancel" && c[1].job_id === "job-7")).toBe(true);
+  expect(rpc.mock.calls.some((c) => c[0] === "graph_build")).toBe(false);
+});
+
+it("служебные сведения и слой обновления лежат в настройках графа, а не на первом экране", async () => {
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  expect(target.textContent).not.toContain("Снимок графа");
+  expect(target.querySelector('[aria-label="Слой для обновления"]')).toBeNull();
+  target.querySelector<HTMLButtonElement>('[aria-label="Настройки графа"]')!.click();
+  await settle();
+  expect(target.querySelector('[aria-label="Настройки графа"].pop, section[aria-label="Настройки графа"]')).not.toBeNull();
+  expect(target.querySelector(".facts")?.textContent).toContain("Снимок графа");
+  expect(target.querySelector('[aria-label="Слой для обновления"]')).not.toBeNull();
 });
