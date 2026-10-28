@@ -496,6 +496,17 @@ async fn explicit_project_by_name_and_wrong_calls() {
     assert_eq!(missing.kind(), Some(ErrorKind::FileNotFound));
     let not_md = rpc(cli.call(&by_name("guide.txt")).await);
     assert_eq!(not_md.kind(), Some(ErrorKind::InvalidParams));
+    // Чтение не выходит за корень проекта (OQ-169, ISS-89): ни `..`, ни абсолютный путь снаружи.
+    let outside_file = harness.projects.path().join("outside.md");
+    std::fs::write(&outside_file, "# вне проекта\n").unwrap();
+    for path in [
+        "../outside.md",
+        "../../outside.md",
+        outside_file.to_str().unwrap(),
+    ] {
+        let refused = rpc(cli.call(&by_name(path)).await);
+        assert_eq!(refused.kind(), Some(ErrorKind::InvalidParams), "{path}");
+    }
     let unknown = rpc(cli
         .call(&ReadParams {
             target: Target {
