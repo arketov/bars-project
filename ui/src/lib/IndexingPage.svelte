@@ -244,7 +244,7 @@
             <div class="hrow">
               <span class="muted">Сейчас ничего не индексируется. {documents(app.documentsOf(project))} в индексе.</span>
               <span class="sp"></span>
-              <button class="btn sm" onclick={() => app.reindexCheck(project.path)}>Проверить сейчас</button>
+              <button class="btn sm" disabled={app.checking} onclick={() => app.reindexCheck(project.path)}>{app.checking ? "Проверяем…" : "Проверить сейчас"}</button>
             </div>
             <p class="muted small none">bars сверяет документы с индексом сам: по правке файла и каждые 15 минут. Кнопка запускает проверку этого проекта немедленно.</p>
           </div>

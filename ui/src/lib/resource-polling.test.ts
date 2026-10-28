@@ -51,10 +51,33 @@ it("a forced refresh received during a request runs immediately afterward", asyn
   let finish!: (value: unknown) => void;
   invoke.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
   const first = app.refresh(false);
-  await app.refresh(true);
+  const forced = app.refresh(true);
+  expect(invoke.mock.calls.filter(([method]) => method === "activity")).toHaveLength(1);
   finish({ running: null, queue: [], problems: [] });
   await first;
-  await vi.waitFor(() => expect(invoke.mock.calls.filter(([method]) => method === "activity")).toHaveLength(2));
+  await forced;
+  expect(invoke.mock.calls.filter(([method]) => method === "activity")).toHaveLength(2);
+});
+
+it("manual check shows the checking state until the deferred refresh completes", async () => {
+  let finish!: (value: unknown) => void;
+  invoke.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+  const tick = app.refresh(false);
+  const check = app.recheck();
+  await vi.waitFor(() => expect(app.checking).toBe(true));
+  finish({ running: null, queue: [], problems: [] });
+  await tick;
+  await check;
+  expect(app.checking).toBe(false);
+  expect(invoke.mock.calls.filter(([method]) => method === "check_all")).toHaveLength(1);
+  expect(invoke.mock.calls.filter(([method]) => method === "activity")).toHaveLength(2);
+});
+
+it("a second manual check is ignored while one is running", async () => {
+  const first = app.recheck();
+  await app.recheck();
+  await first;
+  expect(invoke.mock.calls.filter(([method]) => method === "check_all")).toHaveLength(1);
 });
 
 it("window observation follows project selection, survives hiding and releases on stop", async () => {

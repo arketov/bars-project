@@ -156,6 +156,9 @@ class App {
   #auditNoticeAttempt = 0;
   #refreshing = false;
   #refreshAgain = false;
+  #refreshWaiters: Array<() => void> = [];
+  /** Идёт ручная проверка («Проверить сейчас»): кнопки показывают «Проверяем…» до конца обновления. */
+  checking = $state(false);
   #lastHiddenPoll = 0;
   #treeSignature = "";
   #treeSyncing = false;
@@ -384,7 +387,12 @@ class App {
       }
     } finally {
       this.#refreshing = false;
-      if (this.#refreshAgain) { this.#refreshAgain = false; void this.refresh(true); }
+      if (this.#refreshAgain) {
+        this.#refreshAgain = false;
+        const waiters = this.#refreshWaiters;
+        this.#refreshWaiters = [];
+        void this.refresh(true).finally(() => waiters.forEach(resolve => resolve()));
+      }
     }
   }
 
@@ -829,11 +837,15 @@ class App {
   }
 
   async reindexCheck(path: string): Promise<void> {
+    if (this.checking) return;
+    this.checking = true;
     try {
       await call("reindex", { cwd: path, project: path });
       await this.refresh(true);
     } catch (error) {
       this.flash(error instanceof Error ? error.message : String(error), true);
+    } finally {
+      this.checking = false;
     }
   }
 
@@ -878,11 +890,15 @@ class App {
 
   /** «Проверить сейчас»: ставит на проверку все проекты, пропавшие возвращаются в работу, если папка на месте. */
   async recheck(): Promise<void> {
+    if (this.checking) return;
+    this.checking = true;
     try {
       await call("check_all");
       await this.refresh(true);
     } catch (error) {
       this.flash(error instanceof Error ? error.message : String(error), true);
+    } finally {
+      this.checking = false;
     }
   }
 
