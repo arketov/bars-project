@@ -3,11 +3,12 @@ import {call} from './api';
 import {TextSearchStore, type TextOutput, type TextQuery} from './text-search.svelte';
 import {app} from './app.svelte';
 import {editors} from './editors.svelte';
+import {BarsError} from './types';
 vi.mock('./api', () => ({call:vi.fn(), inTauri:()=>false, joinPath:vi.fn(), openPath:vi.fn(), pickFolder:vi.fn()}));
 const rpc=vi.mocked(call);
 const params:TextQuery={project:'C:/p',query:'Привет',modules:[],files:[],case_sensitive:false,regex:false,path_filter:'',request_id:'1'};
 const result=(revision='r',column=1):TextOutput=>({documents:[{path:'docs/a.md',module:'.',title:'A',revision,hits_total:10,has_more:true,hits:[{line:1,column,length:6,text:'Привет',ranges:[[0,6]]}]}],docs_total:1,hits_total:10,truncated:null,skipped:[],elapsed_ms:1});
-beforeEach(()=>{vi.restoreAllMocks();rpc.mockReset();app.textSearch.reset();app.projects=[{path:'C:/p',name:'P',docs_root:'docs',state:'ready',modules:[]}];app.current='C:/p';app.query='Привет';app.tree=[];app.selected=new Set();app.retrievalMode='hybrid';});
+beforeEach(()=>{vi.restoreAllMocks();rpc.mockReset();app.clearNotifications();app.textSearch.reset();app.projects=[{path:'C:/p',name:'P',docs_root:'docs',state:'ready',modules:[]}];app.current='C:/p';app.query='Привет';app.tree=[];app.selected=new Set();app.retrievalMode='hybrid';});
 it('текстовый ответ виден до смыслового, ошибка модели его не убирает',async()=>{
   let reject!: (e:Error)=>void;
   rpc.mockImplementation(async(method)=>{if(method==='text_search')return result();return new Promise((_,no)=>reject=no);});
@@ -42,6 +43,21 @@ it('перед поиском ждёт запись своего проекта,
   await app.search();expect(rpc.mock.calls.map(c=>c[0])).toEqual(['text_search','search']);
   expect(editors.flush).toHaveBeenLastCalledWith('C:/p');
   expect(app.searchUnsaved[0].path).toBe('docs/a.md');expect(app.textSearch.error).not.toContain('Разрешите конфликт');
+});
+it('проект ждёт переиндексации: поиск по смыслу не вызывается, уведомления об ошибке нет (ISS-46)',async()=>{
+  app.projects=[{path:'C:/p',name:'P',docs_root:'docs',state:'reindex_required',modules:[]}];
+  rpc.mockImplementation(async(method)=>{if(method==='text_search')return result();throw new Error('не должен вызываться');});
+  await app.search();
+  expect(rpc.mock.calls.map(c=>c[0])).toEqual(['text_search']);
+  expect(app.textSearch.output?.docs_total).toBe(1);
+  expect(app.searchError).toBeNull();expect(app.results).toBeNull();expect(app.searching).toBe(false);
+  expect(app.notifications.some(n=>n.id==='search:C:/p')).toBe(false);
+});
+it('ответ reindex_required воркера не пишет ошибку в уведомления',async()=>{
+  rpc.mockImplementation(async(method)=>{if(method==='text_search')return result();throw new BarsError('Нужна переиндексация','reindex_required');});
+  await app.search();
+  expect(app.searchError?.kind).toBe('reindex_required');
+  expect(app.notifications.some(n=>n.id==='search:C:/p')).toBe(false);
 });
 it('ошибка выражения относится только к текстовой выдаче',async()=>{
   const store=new TextSearchStore();rpc.mockRejectedValue(Error('Некорректное выражение: [ в позиции 1'));

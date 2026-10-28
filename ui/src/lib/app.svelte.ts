@@ -556,6 +556,12 @@ class App {
       this.searchUnsaved = unsaved.map(b => ({ path: b.path, reason: b.message || "Правки не записаны" }));
       this.searchedQuery = query;
       textTask = this.textSearch.search(textParams);
+      if (project.state === "reindex_required") {
+        // Поиск по смыслу ждёт согласия на переиндексацию (error-states.md): воркеру не звоним, «В тексте» читает файлы.
+        this.#notifications.resolve(`search:${project.path}`);
+        this.publishNotifications();
+        return;
+      }
       const { modules, files } = semanticScope;
       const output = await call<SearchOutput|GraphSearchOutput>(mode==='hybrid'?"search":"graph_search", {
         cwd: project.path,
@@ -588,7 +594,8 @@ class App {
       this.displayed = null;
       this.graphSearch = null;
       this.searchError = error instanceof BarsError ? error : new BarsError(String(error));
-      if (this.searchError.kind !== "model_loading") {
+      // `reindex_required` — гонка с обновлением списка проектов: баннер переиндексации появится сам, уведомление не нужно.
+      if (this.searchError.kind !== "model_loading" && this.searchError.kind !== "reindex_required") {
         this.#notifications.error(`search:${project.path}`, `Ошибка поиска · ${project.name}`, this.searchError.message);
         this.publishNotifications();
       }
