@@ -1,0 +1,3 @@
+- На машине сессии Intel Arc, NVIDIA и CUDA нет: исследование 8.1.1 только по исходникам крейтов и документации, без сборки и запуска CUDA.
+- Статический llama.cpp с `cuda` на Windows линкует cudart/cublas/nvcuda — без CUDA exe не стартует; путь — `dynamic-backends` ([исследование](../../knowledge/inference-devices.md)).
+- Номер OQ-223 параллельно заняла сессия журналов; вопросы этой сессии — OQ-224, OQ-225.

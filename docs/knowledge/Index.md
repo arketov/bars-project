@@ -55,7 +55,7 @@ title: Внутренняя база знаний bars
 |---|---|
 | [inference-speed.md](inference-speed.md) | Скорость инференса: FP16 rerank против FP32, worker и конкуренция, отклонённые методы, протокол замеров |
 | [inference-2026-10-18/](inference-2026-10-18/Index.md) | Сырые данные этапа 11: GPU/CPU-сетки, полный retrieval, worker, индексация |
-| [inference-devices.md](inference-devices.md) | CPU, GPU и NPU, ограничения DirectML, диагностика неверных оценок rerank, кандидаты EP и библиотек |
+| [inference-devices.md](inference-devices.md) | CPU, GPU и NPU, ограничения DirectML, диагностика неверных оценок rerank, кандидаты EP и библиотек; CUDA в сборке bars — llama.cpp `dynamic-backends`, CUDA EP ORT 1.28, обнаружение CUDA и cuDNN, откат на Vulkan и DirectML |
 | [gguf-models.md](gguf-models.md) | Qwen3 GGUF и llama.cpp: качество против bge-m3, память, сборка Windows/Vulkan |
 | [gguf-2026-10-18/](gguf-2026-10-18/Index.md) | Сырые данные этапа 22: сводка и строки измерений |
 | [memory.md](memory.md) | Память bars: метрики, причины пиков, FP16 rerank и выгрузка, FP16/INT8 embed, подкачка |
