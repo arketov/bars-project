@@ -229,6 +229,16 @@
       // HTML5 drag-and-drop в WebView2 перехватывает обработчик файлов Tauri (ISS-21).
       dndStrategy: "pointer",
       closeEmptyGroups: true,
+      // 3.2.5: полосы 48 px и превью задаёт приложение; корневая полоса (без «center») не участвует.
+      dropPositionResolver: { resolve: ({ x, y, width, height, zones: accepted, event }) => {
+        if (!accepted.has("center") || !zones) return null;
+        const under = document.elementFromPoint(event.clientX, event.clientY);
+        const group = under && api.groups.find(g => g.element.contains(under));
+        if (!group) return null;
+        const position = zones.cell(group, x, y, width, height);
+        if (position === "right") host.style.setProperty("--zone-preview", `${zones.previewWidth()}px`);
+        return { position };
+      } },
       defaultTabComponent: "workspace-tab",
       createTabComponent: () => {
         const tab = new DefaultTab();
@@ -413,4 +423,11 @@
     .dock :global(.dv-render-overlay:has(.workspace-content)) { left: 0 !important; top: 28px !important; width: 100% !important; height: calc(100% - 28px) !important; z-index: 10; background: var(--bg); }
     .dock :global(.dv-render-overlay:has(.workspace-content[data-foreground="false"])) { display: none !important; }
   }
+  /* Превью переноса: размер справа равен будущей зоне, подпись — место открытия (Т-43). */
+  .dock :global(.dv-drop-target-selection.dv-drop-target-right) { left: auto !important; right: 0; width: var(--zone-preview, 50%) !important; }
+  .dock :global(.dv-drop-target-selection)::after { position: absolute; inset: 0; display: grid; place-items: center; color: var(--accent-text); font-size: 12px; font-style: italic; pointer-events: none; }
+  .dock :global(.dv-drop-target-selection.dv-drop-target-right)::after { content: "Откроется справа"; }
+  .dock :global(.dv-drop-target-selection.dv-drop-target-left)::after { content: "Откроется слева"; }
+  .dock :global(.dv-drop-target-selection.dv-drop-target-top)::after { content: "Откроется сверху"; }
+  .dock :global(.dv-drop-target-selection.dv-drop-target-bottom)::after { content: "Откроется снизу"; }
 </style>

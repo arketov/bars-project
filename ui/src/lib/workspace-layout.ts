@@ -59,6 +59,28 @@ export function rightZoneWidth(available: number, remembered?: number): number {
   return Math.round(Math.max(220, Math.min(remembered ?? available * .4, Math.max(220, available - 220))));
 }
 
+export type DropCell = "top" | "bottom" | "left" | "right" | "center";
+export interface DropContext { role?: ZoneRole; open: boolean }
+export const edgeStrip = 48, minGroupWidth = 220, minGroupHeight = 120;
+
+/**
+ * Клетка сброса над содержимым группы: полосы 48 px у краёв, в углах выигрывают верх/низ.
+ * `open` — справа можно открыть зону (центр без зоны, на всю высоту, у края окна).
+ * Недоступное деление не предлагается: курсор остаётся в клетке «в группу».
+ */
+export function dropCell(x: number, y: number, width: number, height: number, zoneWidth: number, context: DropContext): DropCell {
+  if (!context.role) return "center";
+  if (height >= 2 * minGroupHeight) {
+    if (y < edgeStrip) return "top";
+    if (y > height - edgeStrip) return "bottom";
+  }
+  if (context.role === "center") {
+    if (context.open && x > width - edgeStrip && width - zoneWidth >= minGroupWidth) return "right";
+    if (x < edgeStrip && width >= 2 * minGroupWidth) return "left";
+  }
+  return "center";
+}
+
 /** Роли не зависят от названия/наличия вкладки поиска. Нормализация — после завершения операции Dockview. */
 export class WorkspaceZones {
   state: ZoneState = { roles: {}, last: {} };
@@ -113,6 +135,14 @@ export class WorkspaceZones {
     }
     this.assign(); this.activate();
   }
+  /** Ширина правой зоны для превью и для итога — одно вычисление (3.2.5). */
+  previewWidth() { return rightZoneWidth(this.api.width, this.state.rightWidth); }
+  cell(group: DockviewGroupPanel, x: number, y: number, width: number, height: number): DropCell {
+    const role = this.state.roles[group.id];
+    const box = columns(this.api.toJSON()).get(group.id);
+    const open = !!box && !this.group("right") && group.height >= this.api.height - 1 && box.left + box.width >= this.api.width - 1;
+    return dropCell(x, y, width, height, this.previewWidth(), { role, open });
+  }
   documentGroup() {
     const existing = this.group("right");
     if (existing) return existing;
@@ -140,8 +170,16 @@ export class WorkspaceZones {
       }
       this.measured = width();
     } else {
-      if (measured > 0 && measured !== this.measured) this.state.rightWidth = measured;
-      this.measured = measured;
+      const target = rightZoneWidth(available, this.state.rightWidth);
+      const center = [...columns(this.api.toJSON())].filter(([id]) => this.state.roles[id] === "center").sort((a, b) => b[1].left - a[1].left)[0];
+      if (!this.measured && measured > 0 && measured !== target && center) {
+        // Зона появилась сбросом вкладки: Dockview даёт ей половину группы, а превью показывало запомненный размер.
+        this.api.getGroup(center[0])?.api.setSize({ width: center[1].width + measured - target });
+        this.measured = width();
+      } else {
+        if (measured > 0 && measured !== this.measured) this.state.rightWidth = measured;
+        this.measured = measured;
+      }
     }
   }
 }
