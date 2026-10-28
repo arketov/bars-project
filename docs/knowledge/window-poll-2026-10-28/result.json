@@ -1,0 +1,118 @@
+{
+  "documents": 588,
+  "worker": "real handler.dispatch, FakeProvider, indexed copy of docs/",
+  "tree_read": "proxy: walk_docs in spawn_blocking (Tauri read_tree not included)",
+  "methods": [
+    {
+      "method": "activity",
+      "p50_ms": 0.0984,
+      "p95_ms": 0.2263,
+      "max_ms": 0.42269999999999996,
+      "cpu_ms_per_call": 0.15625
+    },
+    {
+      "method": "operation_events",
+      "p50_ms": 0.011300000000000001,
+      "p95_ms": 0.0265,
+      "max_ms": 0.1528,
+      "cpu_ms_per_call": 0.0
+    },
+    {
+      "method": "status",
+      "p50_ms": 10.2122,
+      "p95_ms": 15.7074,
+      "max_ms": 402.7527,
+      "cpu_ms_per_call": 9.296875
+    },
+    {
+      "method": "tree",
+      "p50_ms": 5.2279,
+      "p95_ms": 7.9974,
+      "max_ms": 27.1915,
+      "cpu_ms_per_call": 4.84375
+    },
+    {
+      "method": "tree_read",
+      "p50_ms": 24.9416,
+      "p95_ms": 33.6446,
+      "max_ms": 49.2834,
+      "cpu_ms_per_call": 24.609375
+    },
+    {
+      "method": "projects",
+      "p50_ms": 3.0057,
+      "p95_ms": 3.9775,
+      "max_ms": 15.0177,
+      "cpu_ms_per_call": 2.734375
+    },
+    {
+      "method": "new_topics_list",
+      "p50_ms": 0.2702,
+      "p95_ms": 0.4013,
+      "max_ms": 0.48569999999999997,
+      "cpu_ms_per_call": 0.3125
+    },
+    {
+      "method": "audit_list",
+      "p50_ms": 3.0534,
+      "p95_ms": 4.8092999999999995,
+      "max_ms": 5.3932,
+      "cpu_ms_per_call": 3.046875
+    },
+    {
+      "method": "models_info",
+      "p50_ms": 0.29119999999999996,
+      "p95_ms": 0.778,
+      "max_ms": 1.0774000000000001,
+      "cpu_ms_per_call": 0.3125
+    },
+    {
+      "method": "project_observe",
+      "p50_ms": 0.0015999999999999999,
+      "p95_ms": 0.0018,
+      "max_ms": 0.0162,
+      "cpu_ms_per_call": 0.0
+    }
+  ],
+  "scenarios": [
+    {
+      "scenario": "без окон (фон воркера)",
+      "seconds": 60,
+      "calls": 0,
+      "cpu_ms": 46.875,
+      "cpu_percent_of_one_core": 0.078125
+    },
+    {
+      "scenario": "одно видимое главное окно",
+      "seconds": 60.0142842,
+      "calls": 338,
+      "calls_per_s": 5.631992524872937,
+      "cpu_ms": 2531.25,
+      "cpu_percent_of_one_core": 4.217745881238054
+    },
+    {
+      "scenario": "одно спрятанное главное окно",
+      "seconds": 60.0077716,
+      "calls": 18,
+      "calls_per_s": 0.2999611470324954,
+      "cpu_ms": 31.25,
+      "cpu_percent_of_one_core": 0.05207658802647489
+    },
+    {
+      "scenario": "четыре окна сейчас: главное + 3 окна документа",
+      "seconds": 60.0047788,
+      "calls": 352,
+      "calls_per_s": 5.866199443434995,
+      "cpu_ms": 2015.625,
+      "cpu_percent_of_one_core": 3.3591074582879723
+    },
+    {
+      "scenario": "четыре окна до 3.5.1: все опрашивают как главное",
+      "seconds": 60.009546,
+      "calls": 1339,
+      "calls_per_s": 22.313116649807682,
+      "cpu_ms": 9281.25,
+      "cpu_percent_of_one_core": 15.466289313370243
+    }
+  ]
+}

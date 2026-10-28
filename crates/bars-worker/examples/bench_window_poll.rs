@@ -98,16 +98,16 @@ async fn main_tick(ctx: &Ctx, tick: u64, hidden: bool) {
     if hidden {
         return;
     }
-    if tick % 5 == 0 {
+    if tick.is_multiple_of(5) {
         ctx.call("projects").await;
     }
     ctx.call("status").await;
     ctx.call("tree").await;
     ctx.call("tree_read").await;
-    if tick % 5 == 0 {
+    if tick.is_multiple_of(5) {
         ctx.call("new_topics_list").await;
     }
-    if tick % 15 == 0 {
+    if tick.is_multiple_of(15) {
         ctx.call("audit_list").await;
     }
 }
@@ -154,7 +154,9 @@ async fn scenario(
         tasks.push(tokio::spawn(watch_loop(ctx.clone(), stop.clone())));
     }
     tokio::time::sleep(Duration::from_secs(secs)).await;
-    stop.notify_waiters();
+    for t in &tasks {
+        t.abort();
+    }
     for t in tasks {
         let _ = t.await;
     }
