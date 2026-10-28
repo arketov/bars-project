@@ -9,6 +9,7 @@
   import { confirmClose, startFlushListener } from "./unsaved.svelte";
   import { moved, movedPath } from "./moved.svelte";
   let { project, path }: { project: string; path: string } = $props();
+  let main = $state<HTMLElement>();
   const title = $derived(path.split("/").pop() ?? path);
   $effect(() => { document.title = `${title} — bars`; });
   onMount(() => {
@@ -24,11 +25,14 @@
           if (await confirmClose(project, path)) await documentWindowClose();
         }).then(keep)).catch((error) => app.flash(String(error), true));
     }
-    return () => { disposed = true; stops.forEach((stop) => stop()); };
+    // «Закрыть вкладку» удалённого документа закрывает окно документа.
+    const closeDeleted = () => void documentWindowClose();
+    main?.addEventListener("bars:close-document", closeDeleted);
+    return () => { disposed = true; stops.forEach((stop) => stop()); main?.removeEventListener("bars:close-document", closeDeleted); };
   });
 </script>
 
-<main class="document-window" aria-label={title}>
+<main class="document-window" aria-label={title} bind:this={main}>
   <WorkspaceDocument {project} hit={{ path, title, first_line: 0, last_line: 0 }} />
 </main>
 <UnsavedDialog />

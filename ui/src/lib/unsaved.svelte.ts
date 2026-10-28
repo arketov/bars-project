@@ -63,6 +63,8 @@ export async function startFlushListener(): Promise<() => void> {
   });
   const stop = await listen("bars://flush-request", async () => {
     const reply = (state: string) => invoke("flush_reply", { reply: state });
+    // Запись может идти дольше первых 3 с ожидания процесса: «writing» просит ждать её окончания (OQ-174).
+    if (editors.unsaved.length > 0) await reply("writing");
     const rest = await editors.flush();
     if (rest.length === 0) {
       await reply("clean");
@@ -73,5 +75,9 @@ export async function startFlushListener(): Promise<() => void> {
     if (decision === "discard") rest.forEach((buffer) => editors.discard(buffer));
     await reply(decision === "discard" ? "proceed" : "cancel");
   });
-  return () => { stop(); moveStop(); };
+  // Выход отменён, потому что запись не кончилась за минуту: правка осталась на экране.
+  const stillWriting = await listen("bars://flush-still-writing", () => {
+    void import("./app.svelte").then(({ app }) => app.flash("Документ ещё записывается", true));
+  });
+  return () => { stop(); moveStop(); stillWriting(); };
 }

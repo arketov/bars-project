@@ -145,6 +145,7 @@ class Entries {
       }
       this.report = result.failed?.length ? result.failed : null;
       if (!this.report) this.request = null;
+      if (request.action === "trash") moved.trashed(project, at(node.path));
       if ((request.action === "rename" || request.action === "move") && result.path) {
         await moved.accept({project, from: at(node.path), to: result.path});
       }

@@ -42,6 +42,11 @@
     const hint = keybindings.hint(id);
     return `${catalog.find(c => c.id === id)?.title ?? id}${hint && hint !== "Не назначено" ? ` (${hint})` : ""}`;
   };
+  /** «Закрыть вкладку» / «Отбросить правки» удалённого документа: буфер отбрасывается, вкладку закрывает окно. */
+  function closeDeleted() {
+    if (buffer) editors.discard(buffer);
+    section?.dispatchEvent(new CustomEvent("bars:close-document", { bubbles: true }));
+  }
   function helper(id: string) { editor?.run(id); editor?.focus(); }
   function statusLabel(b: EditorBuffer): string {
     switch (b.status) {
@@ -49,6 +54,7 @@
       case "saving": return "Запись…";
       case "saved": return b.savedAt ? `Записано в ${new Date(b.savedAt).toLocaleTimeString("ru-RU")}` : "Записано";
       case "conflict": return "Конфликт версий";
+      case "deleted": return "Файл удалён";
       case "error": return "Не записано";
       case "readonly": return "Только чтение";
       default: return "";
@@ -147,12 +153,12 @@
     {#if hit.fromSearch}<button onclick={() => { app.openSearch(); void app.search(); }}>Обновить выдачу</button>
     {:else}<button onclick={closeTab}>Закрыть вкладку</button> <button onclick={createFile} title="Пустой документ; файл появится на диске при первой правке">Создать файл</button>{/if}
   {:else}
-    {#if buffer && (buffer.status === "error" || buffer.status === "conflict" || buffer.status === "readonly")}
+    {#if buffer && (buffer.status === "error" || buffer.status === "conflict" || buffer.status === "deleted" || buffer.status === "readonly")}
       <p class="banner" role="alert" data-status={buffer.status}>{buffer.message}
         {#if buffer.status === "error"} Черновик остался в окне, он не записан. <button onclick={() => void buffer?.retry()}>Повторить</button>
-        {:else if buffer.status === "conflict" && buffer.diskRevision === null} Правки остались в окне, пока вы не выберете.
-          <button onclick={() => void buffer?.keepMine()}>Записать заново</button>
-          <button onclick={() => void buffer?.takeDisk()}>Отбросить правки</button>
+        {:else if buffer.status === "deleted"} {buffer.dirty ? "Правки остались в окне, пока вы не выберете." : "Текст остался в окне."}
+          <button onclick={() => void buffer?.restore()}>Записать заново</button>
+          <button onclick={closeDeleted}>{buffer.dirty ? "Отбросить правки" : "Закрыть вкладку"}</button>
         {:else if buffer.status === "conflict"} Правки в окне не записываются, пока вы не выберете версию.
           <button onclick={() => void buffer?.keepMine()}>Оставить мою версию</button>
           <button onclick={() => void buffer?.takeDisk()}>Взять версию с диска</button>

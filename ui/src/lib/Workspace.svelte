@@ -280,7 +280,7 @@
         const model = $state<PanelModel>({ params: { kind: "search" }, foreground: false, attach });
         let id: string;
         return { element,
-          init: ({ params, api: panel }) => { id = panel.id; models.set(id, model); model.params = params as unknown as PanelParams; model.initial = incoming; model.foreground = id === foreground; component = mount(WorkspacePanel, { target: element, props: { model } }); },
+          init: ({ params, api: panel }) => { id = panel.id; element.addEventListener("bars:close-document", () => panel.close()); models.set(id, model); model.params = params as unknown as PanelParams; model.initial = incoming; model.foreground = id === foreground; component = mount(WorkspacePanel, { target: element, props: { model } }); },
           update: ({ params }) => { model.params = params as unknown as PanelParams; model.initial = incoming; },
           dispose: () => { models.delete(id); if (component) void unmount(component); },
         };
@@ -303,6 +303,13 @@
       if (app.activeDocument) app.activeDocument = movedPath(app.activeDocument, event.from, event.to);
       persist();
     });
+    const stopTrashed = moved.subscribeTrashed(event => {
+      if (event.project !== current) return;
+      for (const panel of [...api.panels]) {
+        const params = panel.params as PanelParams;
+        if (params.kind === "document" && params.hit && event.closed.includes(params.hit.path)) panel.api.close();
+      }
+    });
     const subscriptions = [api.onDidRemoveGroup(group => { if (!restoring) zones.removed(group); }), api.onDidLayoutChange(() => {
       if (!restoring && !normalizing) {
         normalizing = true;
@@ -321,7 +328,7 @@
     })];
     ready = true;
     void tick().then(() => { if (!disposed) commands = workspaceCommands({ api, host, open: navigate, search: () => globalSearch.open(), reset, palette, resize: resizeGroup }); });
-    return () => { disposed = true; stopMoved(); stopKeys?.(); stopFlush?.(); commands?.dispose(); palette.close(false); globalSearch.close(false); ready = false; persist(); subscriptions.forEach(s => s.dispose()); api.dispose(); app.indexingOpen = false; };
+    return () => { disposed = true; stopMoved(); stopTrashed(); stopKeys?.(); stopFlush?.(); commands?.dispose(); palette.close(false); globalSearch.close(false); ready = false; persist(); subscriptions.forEach(s => s.dispose()); api.dispose(); app.indexingOpen = false; };
   });
 </script>
 
