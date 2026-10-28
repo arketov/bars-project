@@ -5,6 +5,8 @@ import { app } from "../app.svelte";
 import { BarsError } from "../types";
 import { physicalFixture as buildPhysicalFixture } from "../mock-physical";
 import { queryFixture } from "../mock-query";
+import { buildTree } from "../tree";
+import { graphScope } from "../graph-scope.svelte";
 
 // Большой набор нужен только проверкам порций и пределов, не браузерному макету.
 const modules = ["adr", "features", "manual"];
@@ -624,4 +626,48 @@ it("«Путь до…»: нет пути в режиме — причина и 
   await settle();
   expect(panel().dataset.mode).toBe("all");
   expect(strip("Путь по карте")!.textContent).toContain("вариант 1 из");
+});
+
+it("подграф: «В подграф» в инспекторе, «Выбрать весь локальный граф» и «Искать в подграфе» заменяют область поиска документами подграфа (2.3.7)", async () => {
+  app.tree = buildTree(documents, "docs");
+  app.docsRoot = "docs";
+  app.selected = new Set();
+  app.activeDocument = "docs/features/doc-04.md";
+  graphScope.state = null;
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  expect(strip("Подграф")).toBeNull();
+  const mark = () => [...target.querySelectorAll<HTMLButtonElement>(".inspector .actions button")].find((b) => b.textContent === "В подграф" || b.textContent === "Из подграфа")!;
+  mark().click();
+  await settle();
+  expect(strip("Подграф")?.textContent).toContain("Подграф: 1 узлов · 1 документов");
+  expect(mark().textContent).toBe("Из подграфа");
+  await act("nearby");
+  button("Выбрать весь локальный граф")!.click();
+  await settle();
+  expect(strip("Подграф")?.textContent).toContain("Подграф: 3 узлов · 3 документов");
+  // Область ещё прежняя, поиск не запускался.
+  expect([...app.selected]).toEqual([]);
+  expect(rpc.mock.calls.some((c) => c[0] === "search")).toBe(false);
+  button("Искать в подграфе")!.click();
+  await settle();
+  expect(app.view).toBe("main");
+  expect([...app.selected].length).toBe(3);
+  expect([...app.selected].every((p) => /^(adr|features|manual)\/doc-\d+\.md$/.test(p))).toBe(true);
+  expect(graphScope.active?.documents).toBe(3);
+  expect(rpc.mock.calls.some((c) => c[0] === "search")).toBe(false);
+  graphScope.restore();
+  expect([...app.selected]).toEqual([]);
+});
+
+it("подграф: «Очистить» снимает отметки; запрос в подграф не попадает", async () => {
+  app.activeDocument = "docs/features/doc-04.md";
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  [...target.querySelectorAll<HTMLButtonElement>(".inspector .actions button")].find((b) => b.textContent === "В подграф")!.click();
+  await settle();
+  expect(strip("Подграф")).not.toBeNull();
+  button("Очистить")!.click();
+  await settle();
+  expect(strip("Подграф")).toBeNull();
 });

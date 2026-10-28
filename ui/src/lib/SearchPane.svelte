@@ -7,7 +7,8 @@
   import SearchError from "./SearchError.svelte";
   import TextResults from './TextResults.svelte';
   import GraphSearchBundle from './GraphSearchBundle.svelte';
-  import { touchedModules } from "./tree";
+  import { touchedModules, searchScope } from "./tree";
+  import { graphScope } from "./graph-scope.svelte";
   import { SEARCH_MODE, fallbackText } from "./graph/query";
 
   const project = $derived(app.project);
@@ -19,6 +20,19 @@
   );
   const percent = $derived(project ? app.progressOf(project.path) : null);
   const results = $derived(app.results);
+  let field = $state<HTMLTextAreaElement | null>(null);
+  /** Область, пришедшая из графа («Искать в подграфе»): над поиском видна, пока галочки дерева не тронуты вручную. */
+  const fromGraph = $derived(graphScope.active);
+  /** Выдача на экране считана в другой области, чем действует сейчас. */
+  const staleScope = $derived.by(() => {
+    const shown = app.displayed;
+    if (!fromGraph || !shown) return false;
+    const now = searchScope(app.tree, app.selected);
+    return JSON.stringify({ modules: shown.modules, files: shown.files }) !== JSON.stringify({ modules: now.modules, files: now.files });
+  });
+  $effect(() => {
+    if (graphScope.focusTick) queueMicrotask(() => field?.focus());
+  });
 
   function scopeLabel(): string {
     if (!touched.length) return "";
@@ -49,8 +63,15 @@
 
 <main>
   <div class="top">
+    {#if fromGraph}
+      <div class="graph-scope" role="status" aria-label="Область из графа">
+        <span>Область из графа: <b>{fromGraph.documents} {plural(fromGraph.documents, ["документ", "документа", "документов"])}</b>{#if fromGraph.skipped} · {fromGraph.skipped} исключено: удалены или вне проекта{/if}</span>
+        <button class="link" onclick={() => graphScope.restore()}>Вернуть прежнюю область</button>
+      </div>
+    {/if}
     <div class="ask">
       <textarea
+        bind:this={field}
         aria-label="Поисковый запрос"
         rows="1"
         wrap="off"
@@ -64,7 +85,7 @@
           {#if blocked}
             По смыслу: нужна переиндексация
           {:else if touched.length}
-            Искать в: <b>{scopeLabel()}</b>
+            {#if fromGraph}Искать в: <b>подграфе из графа</b>{:else}Искать в: <b>{scopeLabel()}</b>{/if}
           {:else}
             Искать во <b>всём проекте</b>
           {/if}
@@ -101,8 +122,9 @@
     </div>
   </div>
 
-  <div class="results">
+  <div class="results" bind:this={graphScope.scrollHost}>
     <div class="wrap">
+      {#if staleScope}<p class="muted hint" role="status">Выдача ниже относится к прежней области. Нажмите «Найти», чтобы искать в области из графа.</p>{/if}
       {#if app.searchUnsaved.length}
         <div role="alert" class="save-warning">
           {#each app.searchUnsaved as item}<p>Не записано: <button class="link" onclick={() => app.openSearchUnsaved(item.path)}>{item.path}</button> — {item.reason}{item.reason.endsWith(".") ? "" : "."} Результаты по записанной версии.</p>{/each}
@@ -262,6 +284,8 @@
   .scope b { color: var(--text); font-weight: 600; }
   .kbdhint { color: var(--faint); font-size: 12px; white-space: nowrap; }
   .go { padding: 9px 18px; border-radius: 10px; }
+  .graph-scope { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 0 0 6px; padding: 5px 10px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--accent-soft); font-size: 12px; }
+  .graph-scope .link { margin-left: auto; }
   .results { flex: 1; overflow-y: auto; padding: 4px 12px 60px; min-height: 0; }
   .wrap { max-width: 640px; margin: 0 auto; }
   .score-help { font-size: 12px; line-height: 1.5; margin: -6px 2px 14px; }

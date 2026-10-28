@@ -166,6 +166,8 @@ export interface Scene {
   focus?: number | null;
   /** Наложение действия (путь по карте, входящие ссылки): карта не двигается, выделенные узлы подписаны значком (номер шага или пусто), остальное приглушено. */
   overlay?: { nodes: Map<number, string>; edges: Set<number> };
+  /** Узлы подграфа — набор для «Искать в подграфе»: тонкое кольцо и квадрат-галочка. */
+  subgraph?: ReadonlySet<number>;
 }
 
 /** До стольких узлов локальный граф мини-панели подписан целиком. */
@@ -353,6 +355,23 @@ export function draw(ctx: CanvasRenderingContext2D, scene: Scene): void {
       ctx.globalAlpha = 1;
       ctx.fillStyle = palette.accent;
       ctx.fillRect(sx + r - 1, sy - r - 4, 4, 4);
+    }
+    if (scene.subgraph?.has(n.index)) {
+      ctx.globalAlpha = 1;
+      ctx.beginPath();
+      ctx.arc(sx, sy, r + 6, 0, Math.PI * 2);
+      ctx.strokeStyle = palette.accent;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.fillStyle = palette.accent;
+      ctx.fillRect(sx + r + 2, sy + r - 1, 5, 5);
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(sx + r + 3, sy + r + 1.5);
+      ctx.lineTo(sx + r + 4.3, sy + r + 3);
+      ctx.lineTo(sx + r + 6, sy + r + 0.5);
+      ctx.stroke();
     }
     const badge = scene.overlay?.nodes.get(n.index);
     if (badge !== undefined) {

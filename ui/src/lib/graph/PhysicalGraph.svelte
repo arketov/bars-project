@@ -17,6 +17,7 @@
   import { GRAPH_ACTIONS, NO_SELECTION_TEXT, actionState, buildControls, type ActionId } from "./entry";
   import { LOCAL_LIMITS, LOCAL_MAX_DEPTH, PATH_MAX_HOPS, adjacency, localGraph, mapPaths, type MapPath } from "./navigation";
   import { linkTitle, loadLinks, type IncomingLink } from "../document-links";
+  import { graphScope } from "../graph-scope.svelte";
   import { FORCE_RANGE, defaultSettings, loadSettings, saveSettings, type PanelKind, type PanelSettings } from "./settings";
   import { INITIAL_LIMITS, MAX_LIMITS, PORTION, SliceStore, emptySlice, type Limits, type Slice } from "./slice";
   import { DEFAULT_DEPTH, MAX_DEPTH, QUERY_BUDGET, QUERY_MAX, SEARCH_MODE, acceptQuerySlice, queryRequest, fallbackText, shapeQuery, type QueryBuild, type QueryInfo, type QueryInput, type RetrievalKind, type ScoreKind } from "./query";
@@ -128,6 +129,8 @@
   let pathView = $state<{ from: number; to: number | null; directed: boolean; index: number } | null>(null);
   let inboundView = $state<{ center: number; state: "loading" | "ready" | "error"; sources: IncomingLink[]; known: boolean; error: string } | null>(null);
   let inboundEpoch = 0;
+  /** Подграф (2.3.7): узлы, отмеченные для «Искать в подграфе»; Shift+щелчок, «В подграф» и «Выбрать весь локальный граф». */
+  let marks = $state.raw<ReadonlySet<number>>(new Set());
 
   const localCenter = () => (mini ? focusIndex : (localView?.center ?? null));
   const localDepth = () => (mini ? settings.depth : (localView?.depth ?? 1));
@@ -469,7 +472,7 @@
     const groups = Object.entries(expanded).map(([o, shown]) => ({ owner: Number(o), shown, total: slice.nodes[Number(o)]?.chunks ?? shown }));
     const scene: Scene = {
       w: size.w, h: size.h, dpr: window.devicePixelRatio || 1, cam, nodes: layout.nodes, links: layout.links, palette, kinds,
-      highlighted: packageEdges(), selected, hovered, related: related(), marked: markedNodes(), groups, mini, modules: moduleMap, assigned, focus: isLocal() ? localCenter() : null, overlay,
+      highlighted: packageEdges(), selected, hovered, related: related(), marked: markedNodes(), groups, mini, modules: moduleMap, assigned, focus: isLocal() ? localCenter() : null, overlay, subgraph: marks,
     };
     draw(ctx, scene);
   }
@@ -631,7 +634,7 @@
     return edge ? { type: "edge", id: edge.id } : null;
   }
 
-  let drag: { mode: "pan" | "node"; index: number; sx: number; sy: number; cam: Camera; moved: boolean; target: Target } | null = null;
+  let drag: { mode: "pan" | "node"; index: number; sx: number; sy: number; cam: Camera; moved: boolean; target: Target; shift: boolean } | null = null;
 
   function onDown(event: PointerEvent) {
     if (event.button !== 0 || !canvas) return;
@@ -639,7 +642,7 @@
     canvas.focus({ preventScroll: true });
     const [sx, sy] = pointer(event);
     const target = hit(sx, sy);
-    drag = target?.type === "node" ? { mode: "node", index: target.index, sx, sy, cam, moved: false, target } : { mode: "pan", index: -1, sx, sy, cam, moved: false, target };
+    drag = target?.type === "node" ? { mode: "node", index: target.index, sx, sy, cam, moved: false, target, shift: event.shiftKey } : { mode: "pan", index: -1, sx, sy, cam, moved: false, target, shift: event.shiftKey };
   }
 
   function onMove(event: PointerEvent) {
@@ -680,7 +683,10 @@
     const d = drag;
     drag = null;
     if (d.mode === "node") layout?.dragEnd(d.index);
-    if (!d.moved) select(d.target);
+    if (!d.moved) {
+      if (d.shift && !mini && d.target?.type === "node") toggleMark(d.target.index);
+      else select(d.target);
+    }
     schedule();
   }
 
@@ -749,7 +755,8 @@
     else if (event.key === "Enter" && selected?.type === "node") void toggleExpand(selected.index);
     else if (event.key === " " && selected?.type === "node") {
       event.preventDefault();
-      pin(selected.index);
+      if (event.shiftKey && !mini) toggleMark(selected.index);
+      else pin(selected.index);
     } else if (event.key.toLowerCase() === "m" || event.key.toLowerCase() === "ь") cycleMode();
     else if (event.key === "+" || event.key === "=") zoomAt(1.25);
     else if (event.key === "-") zoomAt(0.8);
@@ -855,6 +862,50 @@
       inboundView = { center: index, state: "error", sources: [], known: true, error: error instanceof Error ? error.message : String(error) };
     }
     schedule();
+  }
+
+  /** В подграф и из подграфа: запрос и неразрешённая ссылка подграфом не становятся. */
+  function toggleMark(index: number) {
+    if (mini || slice.nodes[index]?.kind === "query" || slice.nodes[index]?.ghost) return;
+    const next = new Set(marks);
+    if (next.has(index)) next.delete(index);
+    else next.add(index);
+    marks = next;
+    schedule();
+  }
+
+  function clearMarks() {
+    marks = new Set();
+    schedule();
+  }
+
+  /** «Выбрать весь локальный граф»: отмечает документы показанного локального вида. */
+  function markLocal() {
+    if (!localShape) return;
+    marks = new Set([...marks, ...localShape.depthOf.keys()]);
+    schedule();
+  }
+
+  /** Документы подграфа: чанк сводится к владельцу, повторы убираются (пути от корня проекта). */
+  const subgraphDocs = $derived.by(() => {
+    const found = new Set<string>();
+    for (const index of marks) {
+      const n = slice.nodes[index];
+      if (!n || n.kind === "query" || n.ghost) continue;
+      const owner = n.kind === "chunk" ? slice.nodes[n.owner] : n;
+      if (owner?.path) found.add(owner.path);
+    }
+    return [...found];
+  });
+
+  /** «Искать в подграфе»: область поиска заменяется документами подграфа, фокус уходит в поле поиска; поиск не запускается. */
+  function searchInSubgraph() {
+    const result = graphScope.apply(subgraphDocs);
+    if (!result.ok) {
+      notice = result.reason;
+      return;
+    }
+    app.flash(`Область поиска: ${result.documents} документов из графа${result.skipped ? `; ${result.skipped} исключено: удалены или вне проекта` : ""}`);
   }
 
   function runAction(id: ActionId) {
@@ -1030,6 +1081,7 @@
     queryOff = "";
     expanded = {};
     localView = null;
+    marks = new Set();
     dropOverlay();
     selected = null;
     loaded = false;
@@ -1407,7 +1459,7 @@
         {/each}
       {/if}
     </div>
-    {#if localView || pathView || inboundView}
+    {#if localView || pathView || inboundView || marks.size}
       <div class="qstack">
       {#if localView && localShape}
         <div class="qbar" role="region" aria-label="Локальный граф">
@@ -1418,6 +1470,7 @@
             {/each}
           </span>
           <span>связи: {MODE_NAME[mode].toLowerCase()} · узлов {localShape.depthOf.size} · связей {localShape.edgeIds.size}</span>
+          <button class="more ghost" onclick={markLocal} title="Отметить все документы локального графа для поиска в подграфе">Выбрать весь локальный граф</button>
           <button class="more" onclick={goGeneral}>Общий вид</button>
         </div>
         {#if localShape.truncated}
@@ -1455,6 +1508,13 @@
         {#if currentPath}
           <div class="banner" role="status"><span>Путь по карте показывает соседство на карте, а не зависимость.</span></div>
         {/if}
+      {/if}
+      {#if marks.size}
+        <div class="qbar" role="region" aria-label="Подграф">
+          <b>Подграф: {marks.size} узлов · {subgraphDocs.length} документов</b>
+          <button class="more ghost" disabled={!subgraphDocs.length} title={subgraphDocs.length ? "Заменить область поиска документами подграфа" : "В подграфе нет документов"} onclick={searchInSubgraph}>Искать в подграфе</button>
+          <button class="more" onclick={clearMarks}>Очистить</button>
+        </div>
       {/if}
       {#if inboundView}
         <div class="qbar" role="region" aria-label="Кто ссылается">
@@ -1713,6 +1773,9 @@
             <button class="act" onclick={() => void toggleExpand(selectedNode.index)} disabled={loading}>{expanded[selectedNode.index] ? "Свернуть чанки" : `Раскрыть чанки (${selectedNode.chunks})`}</button>
           {/if}
           <button class="act" onclick={() => pin(selectedNode.index)} aria-pressed={pinnedSel}>{pinnedSel ? "Открепить" : "Закрепить"}</button>
+          {#if selectedNode.kind !== "query" && !selectedNode.ghost}
+            <button class="act" aria-pressed={marks.has(selectedNode.index)} title="Отметить для «Искать в подграфе» (Shift+щелчок, Shift+пробел)" onclick={() => toggleMark(selectedNode.index)}>{marks.has(selectedNode.index) ? "Из подграфа" : "В подграф"}</button>
+          {/if}
           {#if selectedNode.kind === "document"}
             {#each GRAPH_ACTIONS.filter((a) => a.ready) as action (action.id)}
               <button class="act" data-inspector-action={action.id} title={action.hint} onclick={() => runAction(action.id)}>{action.label}</button>
