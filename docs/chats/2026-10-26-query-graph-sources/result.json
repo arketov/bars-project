@@ -1,0 +1,302 @@
+{
+  "success": true,
+  "checks": [
+    "Настоящий поиск воркера вернул результаты",
+    "Tauri передаёт QueryGraphSlice",
+    "Результаты настоящего поиска найдены в снимке",
+    "Весь ответ укладывается в байтовый предел",
+    "Глубина ноль не добавляет окружение",
+    "Старый снимок отклонён",
+    "Завершённый поиск включает мини-граф запроса",
+    "Полный граф получает срез запроса",
+    "Переключение глубины получает Rust-срез",
+    "Возврат одной панели сохраняет другую",
+    "Возврат сохраняет запрос и порядок выдачи",
+    "Возврат сохраняет прокрутку выдачи",
+    "Карточка предлагает явный переход в граф",
+    "Карточка включает запрос и выбирает документ",
+    "Поиск несёт ревизию документа",
+    "Правка после поиска видна отдельно",
+    "Изменённый результат — узел без свежих связей",
+    "Удаление после поиска видимо"
+  ],
+  "elapsed_ms": 26.100000008940697,
+  "native": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+  "slice": {
+    "physical": {
+      "schema_version": 1,
+      "method": "query-v1",
+      "snapshot": "8b9bf426a0d4764eb17efee8ea9b645e9747d0ba9952f721b5e9598d41c462e1",
+      "scope": {
+        "modules": [],
+        "files": []
+      },
+      "nodes": [
+        {
+          "id": "326dbc2b37b7e9f63fc9b0b4d8261b4641f6367cd4502642d3b70792e8ea4453",
+          "revision": "7144a4a0db42cb5a4480aa61c777fb26d3a7cdafb6082a600a1a36d6535869b7",
+          "kind": "document",
+          "label": "Очередь",
+          "path": "docs/Очередь.md",
+          "docs_path": "Очередь.md",
+          "module": ".",
+          "owner": "326dbc2b37b7e9f63fc9b0b4d8261b4641f6367cd4502642d3b70792e8ea4453",
+          "chunks": 0,
+          "ordinal": null,
+          "first_line": 1,
+          "last_line": 1
+        },
+        {
+          "id": "0ec2a4b24f2548e3ad95afda500b9f3c588d60943f3a301db744a6de564ed83c",
+          "revision": "c1d0dd82b20d1243d5666f5b9fc9e36be5c9c4d4e27ead13a58d501d6cdc65ca",
+          "kind": "document",
+          "label": "Индекс",
+          "path": "docs/Индекс.md",
+          "docs_path": "Индекс.md",
+          "module": ".",
+          "owner": "0ec2a4b24f2548e3ad95afda500b9f3c588d60943f3a301db744a6de564ed83c",
+          "chunks": 0,
+          "ordinal": null,
+          "first_line": 1,
+          "last_line": 1
+        },
+        {
+          "id": "2611261ca6de448558751231d4c0584ca4e07590832694cf2c099e2c05ae76f0",
+          "revision": "9e9f22d26159e1f465f37392c559df0fcc03c51b6bc1eac0f416aa96f6d425b0",
+          "kind": "document",
+          "label": "Проверка текста",
+          "path": "docs/Тема.md",
+          "docs_path": "Тема.md",
+          "module": ".",
+          "owner": "2611261ca6de448558751231d4c0584ca4e07590832694cf2c099e2c05ae76f0",
+          "chunks": 0,
+          "ordinal": null,
+          "first_line": 1,
+          "last_line": 1
+        }
+      ],
+      "edges": [
+        {
+          "kind": "markdown_link",
+          "from": 0,
+          "to": 1,
+          "raw": null,
+          "strength": 1,
+          "lines": [
+            3
+          ]
+        },
+        {
+          "kind": "markdown_link",
+          "from": 1,
+          "to": 0,
+          "raw": null,
+          "strength": 1,
+          "lines": [
+            3
+          ]
+        },
+        {
+          "kind": "document_similarity",
+          "from": 1,
+          "to": 0,
+          "raw": 0.9997159242630004,
+          "strength": 0.9997159242630004,
+          "lines": []
+        },
+        {
+          "kind": "markdown_link",
+          "from": 1,
+          "to": 2,
+          "raw": null,
+          "strength": 1,
+          "lines": [
+            3
+          ]
+        },
+        {
+          "kind": "document_similarity",
+          "from": 1,
+          "to": 2,
+          "raw": 0.999962031841278,
+          "strength": 0.999962031841278,
+          "lines": []
+        },
+        {
+          "kind": "document_similarity",
+          "from": 2,
+          "to": 0,
+          "raw": 0.9997820258140564,
+          "strength": 0.9997820258140564,
+          "lines": []
+        }
+      ],
+      "layers": {
+        "markdown_link": {
+          "state": "ready",
+          "note": "Ссылки текущего снимка графа"
+        },
+        "document_similarity": {
+          "state": "ready",
+          "note": "Точный cosine в области: 3 из 3 документов с готовыми представлениями"
+        },
+        "chunk_similarity": {
+          "state": "not_built",
+          "note": "Вид документов; расчёт чанков — отдельная проекция"
+        }
+      },
+      "totals": {
+        "documents": 3,
+        "chunks": 0,
+        "links": 3,
+        "document_pairs": 0
+      },
+      "shown": {
+        "documents": 3,
+        "chunks": 0,
+        "edges": 6
+      },
+      "applied": {
+        "max_documents": 200,
+        "max_chunks": 1,
+        "max_edges": 800,
+        "max_bytes": 262144
+      },
+      "truncated": false,
+      "limit_reasons": [],
+      "warnings": [],
+      "used_bytes": 0
+    },
+    "fingerprint": "8b26cec2104357a82a3b9aeabf455ad3686b44e4b0fea64e9835d29245ef6f0a",
+    "query_node": {
+      "id": "query:native",
+      "label": "индексация"
+    },
+    "query_edges": [
+      {
+        "to": 0,
+        "raw_score": 0.9941527247428894,
+        "score_kind": "cosine",
+        "strength": 0.9941527247428894,
+        "neutral": false
+      },
+      {
+        "to": 1,
+        "raw_score": 0.9953027367591858,
+        "score_kind": "cosine",
+        "strength": 0.9953027367591858,
+        "neutral": false
+      },
+      {
+        "to": 2,
+        "raw_score": 0.995782732963562,
+        "score_kind": "cosine",
+        "strength": 0.995782732963562,
+        "neutral": false
+      }
+    ],
+    "id": "native",
+    "text": "индексация",
+    "score_kind": "cosine",
+    "results": [
+      {
+        "channel": "primary",
+        "status": "ready",
+        "path": "docs/Очередь.md",
+        "title": "Очередь",
+        "rank": 1,
+        "node": 0,
+        "score": 0.9941527247428894,
+        "fragments": [
+          {
+            "source_hash": "7144a4a0db42cb5a4480aa61c777fb26d3a7cdafb6082a600a1a36d6535869b7",
+            "channel": "primary",
+            "path": "docs/Очередь.md",
+            "title": "Очередь",
+            "heading": "Очередь",
+            "first": 1,
+            "last": 3,
+            "score": 0.9941527247428894
+          }
+        ]
+      },
+      {
+        "channel": "primary",
+        "status": "ready",
+        "path": "docs/Индекс.md",
+        "title": "Индекс",
+        "rank": 2,
+        "node": 1,
+        "score": 0.9953027367591858,
+        "fragments": [
+          {
+            "source_hash": "c1d0dd82b20d1243d5666f5b9fc9e36be5c9c4d4e27ead13a58d501d6cdc65ca",
+            "channel": "primary",
+            "path": "docs/Индекс.md",
+            "title": "Индекс",
+            "heading": "Индексация",
+            "first": 1,
+            "last": 3,
+            "score": 0.9953027367591858
+          }
+        ]
+      },
+      {
+        "channel": "primary",
+        "status": "ready",
+        "path": "docs/Тема.md",
+        "title": "Проверка текста",
+        "rank": 3,
+        "node": 2,
+        "score": 0.995782732963562,
+        "fragments": [
+          {
+            "source_hash": "9e9f22d26159e1f465f37392c559df0fcc03c51b6bc1eac0f416aa96f6d425b0",
+            "channel": "primary",
+            "path": "docs/Тема.md",
+            "title": "Проверка текста",
+            "heading": "Проверка текста",
+            "first": 5,
+            "last": 6,
+            "score": 0.995782732963562
+          }
+        ]
+      }
+    ],
+    "views": {
+      "all": [
+        0,
+        1,
+        2
+      ],
+      "chunks": [
+        0,
+        1,
+        2
+      ],
+      "links": [
+        0,
+        1,
+        2
+      ],
+      "meaning": [
+        0,
+        1,
+        2
+      ]
+    },
+    "depth_of": [
+      0,
+      0,
+      0
+    ],
+    "anchor_of": [
+      0,
+      1,
+      2
+    ],
+    "known_nodes": 4,
+    "known_edges": 9,
+    "used_bytes": 4414
+  }
+}

@@ -1,0 +1,13 @@
+
+> bars-ui@0.0.0 test
+> vitest run src/lib/graph/query.test.ts src/lib/graph/PhysicalGraph.test.ts src/lib/graph/physics.test.ts src/lib/GraphSearchBundle.test.ts
+
+
+ RUN  v5.0.4 C:/Users/arketov/Desktop/bars-project/ui
+
+
+ Test Files  4 passed (4)
+      Tests  48 passed (48)
+   Start at  16:34:12
+   Duration  7.85s (tests 48%, environment 40%, transform 6%, import 5%)
+

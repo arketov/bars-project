@@ -1123,8 +1123,8 @@ methods! {
     Instruction: InstructionParams => InstructionOutput, "instruction", Window;
     SetDocsRoot: SetDocsRootParams => AcceptedOutput, "set_docs_root", Window;
     CheckAll: CheckAllParams => AcceptedOutput, "check_all", Window;
-    NewTopicsList: crate::NewTopicsListParams => crate::NewTopicsListOutput, "new_topics_list", Window;
-    NewTopicsGet: crate::NewTopicsGetParams => crate::NewTopicDetail, "new_topics_get", Window;
+    NewTopicsList: crate::NewTopicsListParams => crate::NewTopicsListOutput, "new_topics_list", All;
+    NewTopicsGet: crate::NewTopicsGetParams => crate::NewTopicDetail, "new_topics_get", All;
     NewTopicsMarkMissing: crate::NewTopicsMarkMissingParams => crate::NewTopicsMarkMissingOutput, "new_topics_mark_missing", Window;
     NewTopicsCheck: crate::NewTopicsCheckParams => crate::NewTopicDetail, "new_topics_check", Window;
     NewTopicsSetStatus: crate::NewTopicsSetStatusParams => crate::NewTopicsChangedOutput, "new_topics_set_status", Window;
@@ -1137,10 +1137,10 @@ methods! {
     TextSearch: crate::TextSearchParams => crate::TextSearchOutput, "text_search", Window;
     DiskText: crate::DiskTextParams => crate::DiskTextOutput, "disk_text", All;
     DiskLinks: crate::DiskLinksParams => crate::DiskLinksOutput, "disk_links", All;
-    AuditList: crate::AuditListParams => crate::AuditListOutput, "audit_list", Window;
-    AuditRun: crate::AuditRunParams => crate::AuditRunOutput, "audit_run", Window;
-    AuditCancel: crate::AuditCancelParams => crate::AuditCancelOutput, "audit_cancel", Window;
-    AuditFindings: crate::AuditFindingsParams => crate::AuditFindingsOutput, "audit_findings", Window;
+    AuditList: crate::AuditListParams => crate::AuditListOutput, "audit_list", All;
+    AuditRun: crate::AuditRunParams => crate::AuditRunOutput, "audit_run", All;
+    AuditCancel: crate::AuditCancelParams => crate::AuditCancelOutput, "audit_cancel", All;
+    AuditFindings: crate::AuditFindingsParams => crate::AuditFindingsOutput, "audit_findings", All;
     AuditSchedule: crate::AuditScheduleParams => crate::AuditScheduleOutput, "audit_schedule", Window;
     AuditIgnore: crate::AuditIgnoreParams => crate::AuditIgnoreOutput, "audit_ignore", Window;
     AutostartGet: AutostartGetParams => AutostartOutput, "autostart_get", Cli;

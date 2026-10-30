@@ -1,0 +1,14 @@
+   Compiling bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+error[E0502]: cannot borrow `results` as mutable because it is also borrowed as immutable
+   --> crates\bars-graph\src\query_slice.rs:463:19
+    |
+222 |     for r in &results {
+    |              -------- immutable borrow occurs here
+...
+463 |     for result in &mut results {
+    |                   ^^^^^^^^^^^^ mutable borrow occurs here
+464 |         result.node = by_path
+    |                       ------- immutable borrow later used here
+
+For more information about this error, try `rustc --explain E0502`.
+error: could not compile `bars-graph` (lib) due to 1 previous error

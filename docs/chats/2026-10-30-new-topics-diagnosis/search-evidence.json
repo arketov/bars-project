@@ -1,0 +1,227 @@
+[
+  {
+    "id": 49,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен AI hints и lookahead: потребители и границы причинного сравнения? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.9758085,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/ai-hints-consumption.md"
+  },
+  {
+    "id": 50,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен «Поведение ботов» в native: возврат после поломки, возврат застрявшего, «Ехать» после возврата, отмена автовыезда? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.9911868,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/bot-return-policy.md"
+  },
+  {
+    "id": 51,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Столкновение-реактивный тип ботов «Реактивный»: контракт профиля, native-зоны столкновения, кривая агрессии, живое доказательство роста? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.9953544,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/collision-reactive-behavior.md"
+  },
+  {
+    "id": 52,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Совместный research recorder controls и wheel? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.98141783,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/controls-wheel-recorder.md"
+  },
+  {
+    "id": 53,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Поле Features в handshake: как CSP 0.2.11 сообщает серверу свои возможности, условие [REMOTE] __FEATURES и почему бот присылает пустое? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.9997565,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/csp-handshake-features.md"
+  },
+  {
+    "id": 54,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Штатное завершение headless AC: PhysicsAvatar, Car и Q-065? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.9563089,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/game-shutdown.md"
+  },
+  {
+    "id": 55,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Групповая Police: независимые группы по цели, роли и Revision, одна атака на группу, ожидание и находки прогонов? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.9857729,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/group-police.md"
+  },
+  {
+    "id": 56,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Q-059: stock Hold consumer, bindings и ограниченный recorder? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.97112906,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/hold-motion-observation.md"
+  },
+  {
+    "id": 57,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Стартовые cfg бота в памяти: race.ini и восемь cfg без временных INI, перехваты CSP и native loader, живая проверка? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.99948263,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/memory-startup-configuration.md"
+  },
+  {
+    "id": 58,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Native admission на сервере: доказательство handshake, игровая идентичность, disconnect собственного сокета, освобождение слота, живое доказательство? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.9922444,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/native-admission.md"
+  },
+  {
+    "id": 59,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Native GameAdapter: физические кадры OnPhysicsStepCompleted, команды Hold/Drive/SetBehavior, правила ABI? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.9893063,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/native-game-adapter.md"
+  },
+  {
+    "id": 60,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Здоровье native: привязки двигателя, КПП и подвески, witness CannotDrive, канал health, доказательство восстановления после отказа двигателя? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.9961755,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/native-health-recovery.md"
+  },
+  {
+    "id": 61,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Native бокс, пит-лейн, полные круги и эпоха сессии: привязки сборки, наблюдение, игровой proof? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.98445636,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/native-pit-lap-session.md"
+  },
+  {
+    "id": 62,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Возврат бота в свой бокс: четыре пути, общий перенос place_in_own_box, маска источников телепорта? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.9884919,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/native-pit-return.md"
+  },
+  {
+    "id": 63,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Штатный loader DLL-плагинов AC: plugins.ini, экспорты acp*, вызовы init/update/GUI, доказательство загрузки? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.9859904,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/native-plugin-loader.md"
+  },
+  {
+    "id": 64,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен «Заехать в боксы своим ходом»: OD_DRIVE_INTO_BOX, профиль скорости до бокса, Hold на прибытии, отмена? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.9937588,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/pit-drive-into-box.md"
+  },
+  {
+    "id": 65,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Пит-обслуживание AC/CSP: выбор работ, native-вызовы, таймер, readback и отмена? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.98138225,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/pit-service.md"
+  },
+  {
+    "id": 66,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Мгновенный перенос в бокс: ручная «В боксы» и сценарий «→ боксы», Hold до «Ехать»? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.9827572,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/pit-teleport.md"
+  },
+  {
+    "id": 67,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Режимы игрока «Подъехать», Follow и Police: владение операцией, граница обгона? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.9817707,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/player-modes.md"
+  },
+  {
+    "id": 68,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Police: временная агрессия 100%, обычное значение под override, восстановление после отмены? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.99518895,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/police-aggression.md"
+  },
+  {
+    "id": 69,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Одиночная Police: расчёт атаки SoloPoliceAttack, маршрут к цели, проезд мимо и разворот, известные дефекты? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.99945146,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/police-solo.md"
+  },
+  {
+    "id": 70,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Police: штатный AI игнорирует только выбранную цель — hooks awareness и rear-TTI, срок действия, ABI4? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.9993068,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/police-target-filter.md"
+  },
+  {
+    "id": 71,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен Q-004: продолжение сценария после обслуживания — проект контракта? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.9947595,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/scenario-service-continuation.md"
+  },
+  {
+    "id": 72,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен PlaceCar: перенос собственной машины в позу на трассе? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.99518895,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/track-placement.md"
+  },
+  {
+    "id": 73,
+    "original_hits": 0,
+    "refined_hits": 2,
+    "refined_query": "Как устроен DRS, KERS и тормозной баланс: native-пути, ограничения машин и readback? Каковы жизненный цикл и границы проверки?",
+    "top_score": 0.96182173,
+    "threshold": 0.18,
+    "path": "docs/architecture/native/vehicle-systems-control.md"
+  }
+]

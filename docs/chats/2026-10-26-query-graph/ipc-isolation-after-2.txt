@@ -1,0 +1,134 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.42
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+    Blocking waiting for file lock on build directory
+   Compiling bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 29.09s
+     Running unittests src\main.rs (C:/bt/bars\debug\deps\bars-3fc803c1116cb80a.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 68 filtered out; finished in 0.00s
+
+     Running unittests src\lib.rs (C:/bt/bars\debug\deps\bars_cli-6295e4e5a356c453.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+     Running unittests src\main.rs (C:/bt/bars\debug\deps\bars_cli-88d7692ee17bbeda.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\cli.rs (C:/bt/bars\debug\deps\cli-ef3ee2eda19d51a7.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+     Running unittests src\lib.rs (C:/bt/bars\debug\deps\bars_core-5b4cdee242a34cae.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 341 filtered out; finished in 0.00s
+
+     Running tests\builtin_embedder.rs (C:/bt/bars\debug\deps\builtin_embedder-35c7a3d2780c7ac5.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+     Running tests\builtin_models.rs (C:/bt/bars\debug\deps\builtin_models-14fa3452a3a3c2a3.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests\chunking_corpus.rs (C:/bt/bars\debug\deps\chunking_corpus-d9b8981fcac0e252.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests\index_corpus.rs (C:/bt/bars\debug\deps\index_corpus-38fd40d9a851a200.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests\outline_corpus.rs (C:/bt/bars\debug\deps\outline_corpus-c90cb5eb002f9dce.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests\search_corpus.rs (C:/bt/bars\debug\deps\search_corpus-32634b472bcb2c94.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests\walk_corpus.rs (C:/bt/bars\debug\deps\walk_corpus-de8d193e8e45c73e.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running unittests src\lib.rs (C:/bt/bars\debug\deps\bars_graph-89541cf3359f06c5.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 33 filtered out; finished in 0.00s
+
+     Running tests\acceptance.rs (C:/bt/bars\debug\deps\acceptance-aeea3b22b343609d.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 20 filtered out; finished in 0.00s
+
+     Running tests\extraction.rs (C:/bt/bars\debug\deps\extraction-234291fc2b539d94.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+     Running tests\storage.rs (C:/bt/bars\debug\deps\storage-714ceffa50e80272.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s
+
+     Running unittests src\lib.rs (C:/bt/bars\debug\deps\bars_mcp-3bf191a2b8d7365c.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s
+
+     Running unittests src\main.rs (C:/bt/bars\debug\deps\bars_mcp-e734461b108a8691.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\mcp.rs (C:/bt/bars\debug\deps\mcp-846e4a39c970c109.exe)
+
+running 1 test
+test two_test_workers_with_same_label_have_separate_registries ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.61s
+
+     Running unittests src\lib.rs (C:/bt/bars\debug\deps\bars_protocol-f12123c6301f7c73.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 58 filtered out; finished in 0.00s
+
+     Running unittests src\lib.rs (C:/bt/bars\debug\deps\bars_worker-2d554603454c2edf.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 307 filtered out; finished in 0.00s
+

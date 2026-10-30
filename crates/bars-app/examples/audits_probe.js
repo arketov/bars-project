@@ -71,7 +71,7 @@
       await wait(async()=>{const s=await call('status',{cwd:project});const tree=await call('tree',{cwd:project});return s.state==='ready' && s.pending===0 && tree.documents.some(d=>d.path==='docs/new.md');},'исходный индекс не готов для сбора тем');
       const long='Аудит журналов возврата в боксы и предыдущей попытки входа результаты сессий';
       const short='журналы возврата боксы';
-      assert(await invoke('audits_probe_mcp_denied'),'внутренний список тем доступен MCP');
+      assert(await invoke('audits_probe_mcp_denied'),'очистка тем доступна MCP');
       const mcp=await invoke('audits_probe_mcp_search',{query:long});
       assert(mcp.results.length===0,'MCP fixture: ожидался успешный пустой поиск');
       const windowSearch=await call('search',{cwd:project,query:short,min_score:1,rerank:false,_window:{request_id:'probe-real-window'}});

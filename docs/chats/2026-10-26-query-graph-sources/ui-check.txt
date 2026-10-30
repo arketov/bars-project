@@ -1,0 +1,15 @@
+
+> bars-ui@0.0.0 check
+> svelte-check --tsconfig ./tsconfig.json
+
+Loading svelte-check in workspace: c:\Users\arketov\Desktop\bars-project\ui
+Getting Svelte diagnostics...
+
+c:\Users\arketov\Desktop\bars-project\ui\src\lib\ContextMenu.svelte:96:52
+Error: This comparison appears to be unintentional because the types 'ProjectState | undefined' and '"starting"' have no overlap. (ts)
+      try {
+        const pinned = entry && (app.workerDown || app.project?.state === 'starting') ? null : await folderTarget(current, docsRoot, directory.path);
+        if (generation !== version || app.current !== current || app.docsRoot !== docsRoot) return;
+
+====================================
+svelte-check found 1 error and 0 warnings in 1 file

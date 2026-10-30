@@ -472,6 +472,7 @@ name = "bars-mcp"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bars-core",
  "bars-graph",
  "bars-protocol",
  "bars-worker",

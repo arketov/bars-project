@@ -1,0 +1,36 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.42
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+
+=== cargo fmt --check ===
+
+=== cargo clippy ===
+    Checking bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+   Compiling bars-protocol v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-protocol)
+    Checking bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Checking bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+    Checking bars-mcp v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-mcp)
+    Checking bars-cli v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-cli)
+error[E0308]: `?` operator has incompatible types
+   --> crates\bars-worker\src\handler\graph.rs:277:75
+    |
+277 | ...data, &super::query_slice::representations(&representations, &project, &index, &data, deadline).map_err(graph_error)?, || std::t...
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `DocumentRepresentations`, found `Arc<DocumentRepresentations>`
+    |
+    = note: `?` operator cannot convert from `std::sync::Arc<DocumentRepresentations>` to `DocumentRepresentations`
+    = note: expected struct `DocumentRepresentations`
+               found struct `std::sync::Arc<DocumentRepresentations>`
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `bars-worker` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `bars-worker` (lib test) due to 1 previous error
+
+Провалено: cargo clippy (код 101). Коммитить нельзя.
+
+Step              Code Seconds
+----              ---- -------
+cargo fmt --check    0       2
+cargo clippy       101      15
+

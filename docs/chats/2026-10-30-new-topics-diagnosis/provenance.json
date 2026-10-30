@@ -1,0 +1,12 @@
+[
+  {
+    "source_archive": "rollout-2026-10-25T14-04-33-01a1724d-f415-7061-92d2-52127b3c5a04.jsonl",
+    "timestamp": "2026-10-25T10:55:08.799Z",
+    "input": "const project=\"C:\\\\Users\\\\arketov\\\\Desktop\\\\cyberProject\\\\ai-mutiplayer-bots\";\nfunction parse(r){let s=r.content.map(c=>c.text||\"\").join(\"\\n\");return JSON.parse(s.slice(s.indexOf(\"{\"),s.lastIndexOf(\"}\")+1));}\nconst names=load(\"nativeNames\");const out=[];\nfor(let i=0;i<names.length;i+=6){const batch=names.slice(i,i+6);const res=await Promise.allSettled(batch.map(async n=>{const query=\"Как устроен native-механизм, его callbacks, жизненный цикл и границы проверки?\";const path=\"architecture/native/\"+n+\".md\";const raw=await tools.mcp__bars__bars_rag_search({project,files:[path],query,limit:1,candidates:8,format:\"json\"});const parsed=parse(raw);store(\"nativeSourceRag:\"+n,{query,path,raw});return {name:n,result:parsed.results?.[0]??parsed};}));for(let j=0;j<res.length;j++)out.push(res[j].status===\"fulfilled\"?res[j].value:{name:batch[j],error:String(res[j].reason)});}\nstore(\"nativeSourceRagInventory\",out);text(out.map(x=>({name:x.name,id:x.result?.chunk_id,path:x.result?.path,heading:x.result?.heading_chain,error:x.error})));\n"
+  },
+  {
+    "source_archive": "rollout-2026-10-30T14-14-12-01a18c16-94ca-7661-94fb-94167a0c0ad4.jsonl",
+    "timestamp": "2026-10-30T10:08:33.991Z",
+    "input": "text(await tools.exec_command({cmd:\"@'\\nimport json,subprocess\\nfrom pathlib import Path\\nroot=Path('.build/docs-audit')\\nfor p in sorted(root.glob('topic-*.json'),key=lambda p:int(p.stem.split('-')[-1])):\\n d=json.loads(p.read_text(encoding='utf-8-sig'))\\n if d.get('status')!='open' or d['id'] in (42,43): continue\\n v=d['variants_list'][0];scope=v['scope'];args={'query':v['text'],'limit':3}\\n if scope!='project':\\n  m,f=scope.split(';f=');m=m[2:]\\n  if m:args['modules']=m.split(',')\\n  if f:args['files']=f.split(',')\\n raw=subprocess.check_output(['python',str(root/'bars_call.py'),'bars_rag_search',json.dumps(args,ensure_ascii=False)],encoding='utf-8')\\n (root/f'topics-final-{d[\\\"id\\\"]}.json').write_text(raw,encoding='utf-8')\\n obj=json.loads(raw);print(d['id'],str(obj)[:180],flush=True)\\n'@ | Set-Content -Encoding utf8 .build/docs-audit/verify_topics.py\\npython .build/docs-audit/verify_topics.py\",\"workdir\":\"C:\\\\Users\\\\arketov\\\\Desktop\\\\cyberProject\\\\ai-mutiplayer-bots\",\"yield_time_ms\":1000,\"max_output_tokens\":800}));\n"
+  }
+]

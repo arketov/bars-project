@@ -1,0 +1,78 @@
+   Compiling serde v1.0.229
+   Compiling llama-cpp-sys-2 v0.1.160
+   Compiling ahash v0.8.12
+   Compiling spm_precompiled v0.1.4
+   Compiling compact_str v0.9.1
+   Compiling dary_heap v0.3.9
+   Compiling tokenizers v0.22.2
+   Compiling safetensors v0.8.0
+   Compiling serde_urlencoded v0.7.1
+   Compiling reqwest v0.12.28
+   Compiling candle-core v0.11.0
+   Compiling ureq v3.4.2
+   Compiling tokenizers v0.23.2
+   Compiling hf-hub v0.5.0
+   Compiling candle-nn v0.11.0
+   Compiling toml_datetime v1.1.2+spec-1.1.0
+   Compiling toml v1.1.8+spec-1.1.0
+   Compiling fastembed v7.1.1
+   Compiling llama-cpp-2 v0.1.160
+   Compiling bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+   Compiling rust-stemmers v1.2.0
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 19s
+     Running unittests src\lib.rs (C:/bt/bars\debug\deps\bars_core-fca4265e5c05e211.exe)
+
+running 36 tests
+test search::hybrid::tests::agent_threshold_outside_the_limits_is_clamped ... ok
+test search::hybrid::tests::bounded_cosines_match_full_scan_and_keep_text_candidates ... ok
+test search::hybrid::tests::changed_model_requires_reindexing ... ok
+test search::hybrid::tests::chunks_with_the_identifier_go_first_and_keep_their_order ... ok
+test search::hybrid::tests::empty_index_gives_no_results ... ok
+test search::hybrid::tests::empty_selection_searches_the_whole_project ... ok
+test search::hybrid::tests::equal_fusion_scores_are_decided_by_the_full_text_place ... ok
+test search::hybrid::tests::exact_identifier_is_found_first ... ok
+test search::hybrid::tests::explicit_result_count_is_honoured_and_default_comes_from_settings ... ok
+test search::hybrid::tests::failed_rerank_falls_back_to_cosine_and_says_why ... ok
+test search::hybrid::tests::file_filter_is_relative_to_the_docs_root ... ok
+test search::hybrid::tests::fts_syntax_in_the_query_is_plain_text ... ok
+test search::hybrid::tests::fusion_rewards_agreement_between_the_two_lists ... ok
+test search::hybrid::tests::graph_context_reuses_one_query_embedding_and_respects_role_scope ... ok
+test search::hybrid::tests::graph_expansion_precedes_rerank_and_keeps_scope_and_threshold ... ok
+test search::hybrid::tests::hit_carries_everything_the_requirements_ask_for ... ok
+test search::hybrid::tests::identifier_goes_to_fts_both_as_a_phrase_and_as_words ... ok
+test search::hybrid::tests::module_filter_keeps_only_that_module ... ok
+test search::hybrid::tests::modules_and_files_are_united ... ok
+test search::hybrid::tests::only_words_with_inner_separators_count_as_identifiers ... ok
+test search::hybrid::tests::query_without_words_is_invalid_params ... ok
+test search::hybrid::tests::rerank_orders_by_its_score_and_labels_it ... ok
+test search::hybrid::tests::rerank_threshold_filters_and_default_count_is_the_reranked_one ... ok
+test search::hybrid::tests::root_module_is_selected_by_a_dot ... ok
+test search::hybrid::tests::search_pins_snapshot_before_lazy_fts_open_during_schema_publication ... FAILED
+test search::hybrid::tests::search_preserves_caller_transaction ... ok
+test search::hybrid::tests::similar_chunks::editing_the_document_makes_its_ids_stale_even_if_the_row_number_is_reused ... ok
+test search::hybrid::tests::similar_chunks::limit_is_applied_and_clamped_to_the_maximum ... ok
+test search::hybrid::tests::similar_chunks::malformed_unknown_and_forged_ids_are_rejected ... ok
+test search::hybrid::tests::similar_chunks::module_filter_limits_candidates_but_not_the_source ... ok
+test search::hybrid::tests::similar_chunks::neighbours_exclude_the_source_and_are_ordered_by_cosine ... ok
+test search::hybrid::tests::similar_chunks::search_hits_carry_an_id_the_similar_tool_accepts ... ok
+test search::hybrid::tests::stemming_connects_word_forms ... ok
+test search::hybrid::tests::streamed_cosines_keep_shared_vectors_and_skip_missing_and_orphan_vectors ... ok
+test search::hybrid::tests::threshold_drops_results_below_it_and_is_reported ... ok
+test search::hybrid::tests::unknown_module_or_file_is_invalid_params ... ok
+
+failures:
+
+---- search::hybrid::tests::search_pins_snapshot_before_lazy_fts_open_during_schema_publication stdout ----
+
+thread 'search::hybrid::tests::search_pins_snapshot_before_lazy_fts_open_during_schema_publication' (46520) panicked at crates\bars-core\src\search\hybrid\tests.rs:25:47:
+called `Result::unwrap()` on an `Err` value: Sqlite(SqliteFailure(Error { code: CannotOpen, extended_code: 14 }, Some("unable to open database file: C:\\Users\\arketov\\AppData\\Local\\Temp\\.tmplzHV5V\\.bars\\index.sqlite")))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    search::hybrid::tests::search_pins_snapshot_before_lazy_fts_open_during_schema_publication
+
+test result: FAILED. 35 passed; 1 failed; 0 ignored; 0 measured; 305 filtered out; finished in 1.97s
+
+error: test failed, to rerun pass `-p bars-core --lib`

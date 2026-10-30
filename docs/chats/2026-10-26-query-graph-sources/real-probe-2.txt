@@ -1,0 +1,12 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.42
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on build directory
+   Compiling bars-graph v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-graph)
+   Compiling bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5m 07s
+     Running `C:/bt/bars\debug\examples\query_slice_probe.exe . docs/chats/2026-10-26-query-graph-sources/real-slices.json docs/chats/2026-10-26-query-graph-sources/real-search-hybrid.json docs/chats/2026-10-26-query-graph-sources/real-search-mix.json docs/chats/2026-10-26-query-graph-sources/real-search-graph.json`

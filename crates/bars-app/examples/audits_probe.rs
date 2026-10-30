@@ -47,8 +47,9 @@ async fn audits_probe_mcp_denied(state: State<'_, Probe>) -> Result<bool, String
             .await
             .map_err(|e| e.to_string())?;
     match client
-        .call(&bars_protocol::NewTopicsListParams {
+        .call(&bars_protocol::NewTopicsClearParams {
             project: state.project.display().to_string(),
+            confirmed: true,
         })
         .await
     {
@@ -58,7 +59,7 @@ async fn audits_probe_mcp_denied(state: State<'_, Probe>) -> Result<bool, String
             Ok(true)
         }
         Err(error) => Err(error.to_string()),
-        Ok(_) => Err("список тем оказался доступен MCP".into()),
+        Ok(_) => Err("очистка тем оказалась доступна MCP".into()),
     }
 }
 #[tauri::command]

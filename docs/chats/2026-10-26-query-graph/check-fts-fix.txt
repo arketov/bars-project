@@ -1,0 +1,71 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.42
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+
+=== cargo fmt --check ===
+
+=== cargo clippy ===
+    Checking bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Checking bars-worker v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-worker)
+error: this `if` statement can be collapsed
+    --> crates\bars-worker\src\worker\mod.rs:1145:9
+     |
+1145 | /         if let Err(error) = worker.scan_with_priority(path, priority) {
+1146 | |             if !matches!(error, WorkerError::ConsentRequired(_)) {
+1147 | |                 if let Some(runtime) = lock(&self.projects).get_mut(path) {
+1148 | |                     runtime.status.last_error = Some(error.to_string());
+...    |
+1151 | |         }
+     | |_________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#collapsible_if
+     = note: `-D clippy::collapsible-if` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(clippy::collapsible_if)]`
+help: collapse nested if block
+     |
+1145 ~         if let Err(error) = worker.scan_with_priority(path, priority)
+1146 ~             && !matches!(error, WorkerError::ConsentRequired(_)) {
+1147 |                 if let Some(runtime) = lock(&self.projects).get_mut(path) {
+1148 |                     runtime.status.last_error = Some(error.to_string());
+1149 |                 }
+1150 ~             }
+     |
+
+error: this `if` statement can be collapsed
+    --> crates\bars-worker\src\worker\mod.rs:1146:13
+     |
+1146 | /             if !matches!(error, WorkerError::ConsentRequired(_)) {
+1147 | |                 if let Some(runtime) = lock(&self.projects).get_mut(path) {
+1148 | |                     runtime.status.last_error = Some(error.to_string());
+1149 | |                 }
+1150 | |             }
+     | |_____________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+1146 ~             if !matches!(error, WorkerError::ConsentRequired(_))
+1147 ~                 && let Some(runtime) = lock(&self.projects).get_mut(path) {
+1148 |                     runtime.status.last_error = Some(error.to_string());
+1149 ~                 }
+     |
+
+error: could not compile `bars-worker` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error[E0609]: no field `code` on type `bars_protocol::ClientError`
+  --> crates\bars-worker\src\handler\tests.rs:60:23
+   |
+60 |     assert_eq!(denied.code, bars_protocol::METHOD_NOT_FOUND);
+   |                       ^^^^ unknown field
+
+For more information about this error, try `rustc --explain E0609`.
+error: could not compile `bars-worker` (lib test) due to 1 previous error
+
+Провалено: cargo clippy (код 101). Коммитить нельзя.
+
+Step              Code Seconds
+----              ---- -------
+cargo fmt --check    0       2
+cargo clippy       101      25
+

@@ -1,0 +1,227 @@
+[
+  {
+    "id": 49,
+    "scope": [
+      "m=;f=architecture/native/ai-hints-consumption.md"
+    ],
+    "observations": 2,
+    "first": 1792925709,
+    "last": 1793354919
+  },
+  {
+    "id": 50,
+    "scope": [
+      "m=;f=architecture/native/bot-return-policy.md"
+    ],
+    "observations": 2,
+    "first": 1792925710,
+    "last": 1793354919
+  },
+  {
+    "id": 51,
+    "scope": [
+      "m=;f=architecture/native/collision-reactive-behavior.md"
+    ],
+    "observations": 2,
+    "first": 1792925710,
+    "last": 1793354919
+  },
+  {
+    "id": 52,
+    "scope": [
+      "m=;f=architecture/native/controls-wheel-recorder.md"
+    ],
+    "observations": 2,
+    "first": 1792925711,
+    "last": 1793354920
+  },
+  {
+    "id": 53,
+    "scope": [
+      "m=;f=architecture/native/csp-handshake-features.md"
+    ],
+    "observations": 2,
+    "first": 1792925711,
+    "last": 1793354920
+  },
+  {
+    "id": 54,
+    "scope": [
+      "m=;f=architecture/native/game-shutdown.md"
+    ],
+    "observations": 2,
+    "first": 1792925711,
+    "last": 1793354921
+  },
+  {
+    "id": 55,
+    "scope": [
+      "m=;f=architecture/native/group-police.md"
+    ],
+    "observations": 2,
+    "first": 1792925712,
+    "last": 1793354921
+  },
+  {
+    "id": 56,
+    "scope": [
+      "m=;f=architecture/native/hold-motion-observation.md"
+    ],
+    "observations": 2,
+    "first": 1792925713,
+    "last": 1793354922
+  },
+  {
+    "id": 57,
+    "scope": [
+      "m=;f=architecture/native/memory-startup-configuration.md"
+    ],
+    "observations": 2,
+    "first": 1792925713,
+    "last": 1793354922
+  },
+  {
+    "id": 58,
+    "scope": [
+      "m=;f=architecture/native/native-admission.md"
+    ],
+    "observations": 2,
+    "first": 1792925714,
+    "last": 1793354922
+  },
+  {
+    "id": 59,
+    "scope": [
+      "m=;f=architecture/native/native-game-adapter.md"
+    ],
+    "observations": 2,
+    "first": 1792925715,
+    "last": 1793354923
+  },
+  {
+    "id": 60,
+    "scope": [
+      "m=;f=architecture/native/native-health-recovery.md"
+    ],
+    "observations": 2,
+    "first": 1792925715,
+    "last": 1793354923
+  },
+  {
+    "id": 61,
+    "scope": [
+      "m=;f=architecture/native/native-pit-lap-session.md"
+    ],
+    "observations": 2,
+    "first": 1792925716,
+    "last": 1793354923
+  },
+  {
+    "id": 62,
+    "scope": [
+      "m=;f=architecture/native/native-pit-return.md"
+    ],
+    "observations": 2,
+    "first": 1792925716,
+    "last": 1793354924
+  },
+  {
+    "id": 63,
+    "scope": [
+      "m=;f=architecture/native/native-plugin-loader.md"
+    ],
+    "observations": 2,
+    "first": 1792925717,
+    "last": 1793354924
+  },
+  {
+    "id": 64,
+    "scope": [
+      "m=;f=architecture/native/pit-drive-into-box.md"
+    ],
+    "observations": 2,
+    "first": 1792925719,
+    "last": 1793354925
+  },
+  {
+    "id": 65,
+    "scope": [
+      "m=;f=architecture/native/pit-service.md"
+    ],
+    "observations": 2,
+    "first": 1792925719,
+    "last": 1793354925
+  },
+  {
+    "id": 66,
+    "scope": [
+      "m=;f=architecture/native/pit-teleport.md"
+    ],
+    "observations": 2,
+    "first": 1792925719,
+    "last": 1793354925
+  },
+  {
+    "id": 67,
+    "scope": [
+      "m=;f=architecture/native/player-modes.md"
+    ],
+    "observations": 2,
+    "first": 1792925720,
+    "last": 1793354926
+  },
+  {
+    "id": 68,
+    "scope": [
+      "m=;f=architecture/native/police-aggression.md"
+    ],
+    "observations": 2,
+    "first": 1792925721,
+    "last": 1793354926
+  },
+  {
+    "id": 69,
+    "scope": [
+      "m=;f=architecture/native/police-solo.md"
+    ],
+    "observations": 2,
+    "first": 1792925721,
+    "last": 1793354926
+  },
+  {
+    "id": 70,
+    "scope": [
+      "m=;f=architecture/native/police-target-filter.md"
+    ],
+    "observations": 2,
+    "first": 1792925721,
+    "last": 1793354927
+  },
+  {
+    "id": 71,
+    "scope": [
+      "m=;f=architecture/native/scenario-service-continuation.md"
+    ],
+    "observations": 2,
+    "first": 1792925722,
+    "last": 1793354927
+  },
+  {
+    "id": 72,
+    "scope": [
+      "m=;f=architecture/native/track-placement.md"
+    ],
+    "observations": 2,
+    "first": 1792925723,
+    "last": 1793354928
+  },
+  {
+    "id": 73,
+    "scope": [
+      "m=;f=architecture/native/vehicle-systems-control.md"
+    ],
+    "observations": 2,
+    "first": 1792925724,
+    "last": 1793354928
+  }
+]

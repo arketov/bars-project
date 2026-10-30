@@ -1,0 +1,44 @@
+
+> bars-ui@0.0.0 check
+> svelte-check --tsconfig ./tsconfig.json
+
+Loading svelte-check in workspace: c:\Users\arketov\Desktop\bars-project\ui
+Getting Svelte diagnostics...
+
+c:\Users\arketov\Desktop\bars-project\ui\src\lib\mock.test.ts:5:10
+Error: Module '"./graph/query"' has no exported member 'buildQuerySlice'. 
+import { SliceStore, type ServerSlice } from "./graph/slice";
+import { buildQuerySlice } from "./graph/query";
+
+c:\Users\arketov\Desktop\bars-project\ui\src\lib\mock.test.ts:25:35
+Error: Parameter 'r' implicitly has an 'any' type. 
+  expect(query.info.results).toHaveLength(3);
+  expect(query.info.results.every(r => r.node !== null && r.status === "ready")).toBe(true);
+  expect(query.slice.edges.filter(e => e.kind === "query_result")).toHaveLength(3);
+
+c:\Users\arketov\Desktop\bars-project\ui\src\lib\mock.test.ts:26:35
+Error: Parameter 'e' implicitly has an 'any' type. 
+  expect(query.info.results.every(r => r.node !== null && r.status === "ready")).toBe(true);
+  expect(query.slice.edges.filter(e => e.kind === "query_result")).toHaveLength(3);
+});
+
+c:\Users\arketov\Desktop\bars-project\ui\src\spikes\graph-actions\PhysicalGraph.svelte:13:63
+Error: Module '"../../lib/graph/query"' has no exported member 'buildQuerySlice'. (ts)
+  import { INITIAL_LIMITS, PORTION, type Slice } from "../../lib/graph/slice";
+  import { DEFAULT_DEPTH, MAX_DEPTH, QUERY_BUDGET, QUERY_MAX, buildQuerySlice, shapeQuery, type QueryInfo, type QueryInput, type RetrievalKind, type ScoreKind } from "../../lib/graph/query";
+  import { draw, emptyOverlay, layoutLines, lineDistance, moduleColors, radiusOf, readPalette, toScreen, toWorld, type Camera, type Overlay, type Palette, type Scene, type Target } from "./draw";
+
+c:\Users\arketov\Desktop\bars-project\ui\src\spikes\graph-actions\PhysicalGraph.svelte:156:5
+Error: Property 'scope' is missing in type '{ id: string; text: string; hits: SearchHit[]; scoreKind: "rerank"; requested: "hybrid"; applied: "hybrid"; fallback: null; minScore: number; }' but required in type 'QueryInput'. (ts)
+      .map((x, k) => ({ path: x.d[1], module: x.d[3], title: x.d[0], heading_chain: x.d[0], first_line: 1, last_line: 12, text: "", score: Math.round((0.92 - k * 0.07) * 100) / 100 }) as unknown as SearchHit);
+    return { id: "stand-query", text: standQuery, hits, scoreKind: "rerank", requested: "hybrid", applied: "hybrid", fallback: null, minScore: 0.18 };
+  }
+
+c:\Users\arketov\Desktop\bars-project\ui\src\spikes\graph-actions\PhysicalGraph.svelte:170:104
+Error: Expected 3 arguments, but got 6. (ts)
+  const modeKindsList = (m: Mode) => (m === "links" ? ["markdown_link"] : m === "meaning" ? ["document_similarity"] : m === "chunks" ? ["chunk_similarity"] : ["markdown_link", "document_similarity", "chunk_similarity"]);
+  const queryShape = $derived.by(() => (query ? shapeQuery(slice, query, modeKindsList(mode) as never, minS, queryDepth, queryBudget) : null));
+  function leaveQuery() {
+
+====================================
+svelte-check found 6 errors and 0 warnings in 2 files

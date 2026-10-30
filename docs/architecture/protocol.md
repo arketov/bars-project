@@ -57,13 +57,13 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | `graph_search` | параметры `search` плюс `mode` (`hybrid`/`mix`/`graph`), `graph_budgets`, `include_related`, `related_budget` | ответ `search` плюс `requested_mode`, `applied_mode`, `fallback_reason`, `related`, `graph_results` | MCP, CLI |
 | `graph_status` | `cwd`, `project` | состояние слоя графа: состояние, снимок, активное задание, число источников, ошибка, версия метода | MCP, CLI |
 | `graph_physical` | `cwd`, `project`, `request` (`PhysicalRequest`: `scope`, `limits`, `expanded`, `snapshot`) | `PhysicalGraphSlice` (`physical-v1`) — узлы, рёбра индексами узлов, состояния трёх слоёв, итоги области, усечение; ошибки те же, что у графа, устаревший `snapshot` — `snapshot_expired` | только окно |
-| `graph_query_slice` | `cwd`, `project`, `request` (`QuerySliceRequest`: завершённый поиск, область, глубина, fanout, порог, пределы, снимок) | `QueryGraphSlice` (`query-v1`) — результаты и их окружение из всей области, точный cosine, готовые списки режимов, состояния слоёв, fingerprint, усечение и размер всего ответа; устаревший снимок — `snapshot_expired` | только окно |
+| `graph_query_slice` | `cwd`, `project`, `request` (`QuerySliceRequest`: завершённый поиск, область, каналы и хеши источников, глубина, fanout, порог, пределы, снимок) | `QueryGraphSlice` (`query-v1`) — результаты и их окружение из всей области, точный cosine, готовые списки режимов, статусы источников и причины отсутствия на карте, состояния слоёв, fingerprint, усечение и размер всего ответа; устаревший снимок — `snapshot_expired` | только окно |
 | `graph_build` | `cwd`, `project` | `accepted: true` и `job_id`; ход виден в `graph_status` | CLI |
 | `graph_cancel` | `cwd`, `project`, `job_id` | `cancelled`: задание остановлено или уже не активно | CLI |
 | `install` | `client` (`claude-code` / `codex`) | какие файлы изменены, нужно ли одобрить хук в Codex | CLI |
 | `uninstall` | `client` | какие файлы изменены | CLI |
 
-`graph_query` и `graph_search` — общие для клиентов; MCP выставляет шесть read-only инструментов графа поверх `graph_query`, операцию выбирает имя инструмента. Записи графа (`graph_build`, `graph_cancel`) доступны CLI и окну, MCP их не получает; срез физического графа `graph_physical` — только окну ([проект физического графа, раздел «Срез, бюджеты и договор данных»](../features/graphrag/physical-graph.md)). DTO `GraphRequest`/`GraphReply` принадлежат `bars-graph` и реэкспортируются из `bars-protocol`; их версия (`schema_version`, сейчас 1) не связана с версией протокола. Без `mode` прежний `search` и его форма ответа не меняются. Поля, контракт операций и пределы — [tools.md](../features/graphrag/tools.md#фактический-контракт-v1), устройство слоя — [graph.md](graph.md).
+`graph_query` и `graph_search` — общие для клиентов; MCP выставляет шесть read-only инструментов графа поверх `graph_query`, операцию выбирает имя инструмента. Записи графа (`graph_build`, `graph_cancel`) доступны CLI и окну, MCP их не получает. Срезы `graph_physical` и `graph_query_slice` доступны только окну; их контракты описывают [проект физического графа](../features/graphrag/physical-graph.md), раздел «Срез, бюджеты и договор данных», и [граф запроса](../features/graphrag/query-graph.md), раздел «Что реализовано в окне и чем отличается от контракта». DTO `GraphRequest`/`GraphReply` принадлежат `bars-graph` и реэкспортируются из `bars-protocol`; их версия (`schema_version`, сейчас 1) не связана с версией протокола. Без `mode` поиск сохраняет обычную форму ответа; `SearchHit` дополнен полем `source_hash` — blake3 полного документа в том же read snapshot, что и фрагмент. Поле передаётся во всех каналах; проверка версии для графа запроса не меняет оценку и порядок поиска. Поля, контракт операций и пределы — [tools.md](../features/graphrag/tools.md#фактический-контракт-v1), устройство слоя — [graph.md](graph.md).
 
 Методы, у которых в колонке «Кто вызывает» нет MCP, для `bars-mcp` не существуют: воркер отвечает на них `-32601`. Первым вызовом на соединении должен быть `hello`; до него любой метод, даже неизвестный, получает `protocol_mismatch`.
 
@@ -119,9 +119,9 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | `check_all` | — | `accepted: true`; проверка всех проектов сейчас («Проверить сейчас» у пропавшего проекта) |
 | `project_delete` | абсолютный `project`, обязательный `confirmed: true` | `removed: true` после остановки заданий и очистки; без подтверждения — `invalid_params`. Только окно; [границы и ошибки](../features/projects/deletion.md) |
 
-## Методы новых тем (только окно)
+## Методы новых тем
 
-Все девять методов — аудитория `Window`; проект — абсолютный путь зарегистрированного проекта, относительный даёт `invalid_params`. Изменяющие методы принимают ожидаемую `revision` темы: несовпадение или удалённая тема — `stale_ref`, запись не происходит. Устройство и исходы — [новые темы](../features/new-topics/design.md#внутренний-api-окна).
+`new_topics_list/get` доступны по каналу (`All`), остальные методы — `Window`. Проект — абсолютный путь зарегистрированного проекта, относительный даёт `invalid_params`. Изменяющие методы принимают ожидаемую `revision` темы: несовпадение или удалённая тема — `stale_ref`, запись не происходит. Устройство и исходы — [новые темы](../features/new-topics/design.md).
 
 | Метод | Параметры | Ответ |
 |---|---|---|
@@ -137,7 +137,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | `links_of` | `project` (абсолютный путь), `path` (от корня проекта) | `known`, `outgoing` (`line`, `text`, `raw`, `kind`, `target`, `target_title`, `broken`), `incoming` (`path`, `title`, `lines`); читает индекс ссылок, сверяя его с диском, модель не нужна; только окно ([индекс ссылок](../features/knowledge-base/link-index.md)) |
 | `text_search` | `project`, `query`, регистр, regex, путь, `modules`/`files`, пределы; `path`/`offset`/`revision` для порции | документы с вхождениями, UTF-16 диапазоны, усечение, пропуски и время; читает диск без индекса и модели; только окно ([поиск в тексте](../features/search/text-search.md)) |
 
-Методы аудитов знаний — аудитория `Window`; проект — абсолютный путь, вид — `broken_links` или `duplicates` (иначе `invalid_params`). Аудит читает индекс ссылок и индекс чанков, файлы не меняет, модель не загружает. Устройство, очередь и хранилище — [аудиты](../features/knowledge-base/audits.md).
+Методы `audit_list/run/cancel/findings` доступны по каналу (`All`); `audit_schedule/ignore` — `Window`. Проект — абсолютный путь, вид — `broken_links`, `duplicates` или `contradictions` (иначе `invalid_params`). Аудит читает индекс ссылок и индекс чанков, файлы не меняет, модель не загружает. Устройство, очередь и хранилище — [аудиты](../features/knowledge-base/audits.md).
 
 | Метод | Параметры | Ответ |
 |---|---|---|

@@ -1,0 +1,2 @@
+failed to load the default window icon from the application icon resource: Can not load Image from icon resources: Указанный тип ресурса в файле образа отсутствует. (0x80070715)
+[1026/142153.561:ERROR:ui\gfx\win\window_impl.cc:172] Failed to unregister class Chrome_WidgetWin_0. Error = 1412

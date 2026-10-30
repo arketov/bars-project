@@ -1,0 +1,13 @@
+
+> bars-ui@0.0.0 test
+> vitest run --run src/lib/mock.test.ts src/lib/settings-safety.test.ts
+
+
+ RUN  v5.0.4 C:/Users/arketov/Desktop/bars-project/ui
+
+
+ Test Files  2 passed (2)
+      Tests  13 passed (13)
+   Start at  16:31:44
+   Duration  3.20s (environment 46%, tests 28%, transform 15%, import 11%)
+

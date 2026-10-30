@@ -1,0 +1,4028 @@
+[
+  {
+    "request": {
+      "id": "real-0",
+      "text": "Как сохранить правки при смене проекта?",
+      "scope": {
+        "modules": [],
+        "files": []
+      },
+      "hits": [
+        {
+          "source_hash": "aa4ef035457927a4af556fdefed803099566f579ef005de682d0f63d1d27160f",
+          "channel": "primary",
+          "path": "docs/chats/2026-10-26-project-switch/handoff.md",
+          "title": "Смена проекта и поиск без потери правок — итог шага 3.1.4",
+          "heading": "Смена проекта и поиск без потери правок — итог шага 3.1.4",
+          "first": 5,
+          "last": 13,
+          "score": 0.7893961071968079
+        },
+        {
+          "source_hash": "fcdd5f8de55fa64f8abc8752158a8ddbb2a227e0af08095473d2d790e5fe64d5",
+          "channel": "primary",
+          "path": "docs/features/knowledge-base/editor-design.md",
+          "title": "Редактор документа bars — устройство чтения, записи и конфликтов",
+          "heading": "Редактор документа bars — устройство чтения, записи и конфликтов/Модель конфликтов и несохранённого/Смена проекта и уход проекта из bars",
+          "first": 93,
+          "last": 97,
+          "score": 0.7648916244506836
+        },
+        {
+          "source_hash": "28cc2ebd467140ebdcf91d5de0257380e2ce1ac5e9f9028ce5c75bf87b778f6f",
+          "channel": "primary",
+          "path": "docs/manual/search.md",
+          "title": "Как искать в окне bars — запрос, область, результаты и проценты",
+          "heading": "Как искать в окне bars — запрос, область, результаты и проценты/Как найти что-нибудь в окне bars",
+          "first": 13,
+          "last": 25,
+          "score": 0.7426084280014038
+        },
+        {
+          "source_hash": "fcdd5f8de55fa64f8abc8752158a8ddbb2a227e0af08095473d2d790e5fe64d5",
+          "channel": "primary",
+          "path": "docs/features/knowledge-base/editor-design.md",
+          "title": "Редактор документа bars — устройство чтения, записи и конфликтов",
+          "heading": "Редактор документа bars — устройство чтения, записи и конфликтов/Модель конфликтов и несохранённого/Диалог несохранённого",
+          "first": 85,
+          "last": 91,
+          "score": 0.6008911728858948
+        },
+        {
+          "source_hash": "aa4ef035457927a4af556fdefed803099566f579ef005de682d0f63d1d27160f",
+          "channel": "primary",
+          "path": "docs/chats/2026-10-26-project-switch/handoff.md",
+          "title": "Смена проекта и поиск без потери правок — итог шага 3.1.4",
+          "heading": "Смена проекта и поиск без потери правок — итог шага 3.1.4/Не сделано",
+          "first": 15,
+          "last": 26,
+          "score": 0.5628374218940735
+        }
+      ],
+      "score_kind": "rerank",
+      "depth": 1,
+      "fanout": 4,
+      "min_strength": 0.8500000238418579,
+      "max_nodes": 200,
+      "max_edges": 800,
+      "max_bytes": 262144,
+      "snapshot": null
+    },
+    "slice": {
+      "physical": {
+        "schema_version": 1,
+        "method": "query-v1",
+        "snapshot": "d45034d0b4d6b49cf2e9f591cdd548fe0eb53159a329c1dda4eb803a60350610",
+        "scope": {
+          "modules": [],
+          "files": []
+        },
+        "nodes": [
+          {
+            "id": "9d74f23c021d7e24c2f992814172f837028d7be42d2217884552fb50f97bd97e",
+            "revision": "aa4ef035457927a4af556fdefed803099566f579ef005de682d0f63d1d27160f",
+            "kind": "document",
+            "label": "Смена проекта и поиск без потери правок — итог шага 3.1.4",
+            "path": "docs/chats/2026-10-26-project-switch/handoff.md",
+            "docs_path": "chats/2026-10-26-project-switch/handoff.md",
+            "module": "chats",
+            "owner": "9d74f23c021d7e24c2f992814172f837028d7be42d2217884552fb50f97bd97e",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "3f0a2104699457c81d97ab9765eaf519d406331917b105361eb8861697584e88",
+            "revision": "fcdd5f8de55fa64f8abc8752158a8ddbb2a227e0af08095473d2d790e5fe64d5",
+            "kind": "document",
+            "label": "Редактор документа bars — устройство чтения, записи и конфликтов",
+            "path": "docs/features/knowledge-base/editor-design.md",
+            "docs_path": "features/knowledge-base/editor-design.md",
+            "module": "features",
+            "owner": "3f0a2104699457c81d97ab9765eaf519d406331917b105361eb8861697584e88",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "df92e2728bb03eeed8c17ad4ec9938a7b9afa3a1137903326d03e06bfbdc38fa",
+            "revision": "28cc2ebd467140ebdcf91d5de0257380e2ce1ac5e9f9028ce5c75bf87b778f6f",
+            "kind": "document",
+            "label": "Как искать в окне bars — запрос, область, результаты и проценты",
+            "path": "docs/manual/search.md",
+            "docs_path": "manual/search.md",
+            "module": "manual",
+            "owner": "df92e2728bb03eeed8c17ad4ec9938a7b9afa3a1137903326d03e06bfbdc38fa",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "7c59f05be9c38ce2f8a43f2cf97cea76321aba353a1c0cb742beaca52e9c51d7",
+            "revision": "b9584c9b032bddb7d2ed86e9d18793320d9c61743a170c6cd523b717cd1142af",
+            "kind": "document",
+            "label": "Сборка bars — как собрать, проверить и что не проверяется",
+            "path": "docs/knowledge/build.md",
+            "docs_path": "knowledge/build.md",
+            "module": "knowledge",
+            "owner": "7c59f05be9c38ce2f8a43f2cf97cea76321aba353a1c0cb742beaca52e9c51d7",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "f202274dc506b0af4803f57ee593c4ea4b701320e86f409e73c2686dd9b406cc",
+            "revision": "125b86d54ad57d069cbf8a17ac0fb92bda8dfc13d019277ce3b3ac33860ff772",
+            "kind": "document",
+            "label": "Неполадки bars — частые проблемы, причины и что делать",
+            "path": "docs/manual/troubleshooting.md",
+            "docs_path": "manual/troubleshooting.md",
+            "module": "manual",
+            "owner": "f202274dc506b0af4803f57ee593c4ea4b701320e86f409e73c2686dd9b406cc",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "9a9cd94555035944b881313ac0bbaf59f284d6464333db61b5258001adb8c229",
+            "revision": "b5091f992c05e41af3011dc24d7fd2a9e5ded2a60f13c4f8cb54be582d2ff256",
+            "kind": "document",
+            "label": "Как устроено окно bars — оболочка Tauri, интерфейс на Svelte, трей",
+            "path": "docs/features/window/implementation.md",
+            "docs_path": "features/window/implementation.md",
+            "module": "features",
+            "owner": "9a9cd94555035944b881313ac0bbaf59f284d6464333db61b5258001adb8c229",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "36325bff5d765ed7fab5a7bbe955cdbbffbfef84150ecaff6bd7839b5944f2e4",
+            "revision": "c058881e78f45cf6b9da97ea756fdb9c2a0ae2553fff7c7d48d75ba587c48f3d",
+            "kind": "document",
+            "label": "Матрица сохранности правок и настроек bars 24-10-2026",
+            "path": "docs/knowledge/data-safety-matrix-2026-10-24.md",
+            "docs_path": "knowledge/data-safety-matrix-2026-10-24.md",
+            "module": "knowledge",
+            "owner": "36325bff5d765ed7fab5a7bbe955cdbbffbfef84150ecaff6bd7839b5944f2e4",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "129864a1e4b0aa725586d50320a0258a8403c8f568a5932146a4e4c86f92b2bb",
+            "revision": "81edfd87e861c7bbbf28903609b843e1e6d4fcff2400741bb41080e1f014f788",
+            "kind": "document",
+            "label": "Главный экран окна bars — проекты, дерево документов, поиск и выдача",
+            "path": "docs/features/window/main-window.md",
+            "docs_path": "features/window/main-window.md",
+            "module": "features",
+            "owner": "129864a1e4b0aa725586d50320a0258a8403c8f568a5932146a4e4c86f92b2bb",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "37ff7c5a3f4a1a3e8f409b7dcc67e708d32c5f89fc90f81c71a98f99c5b4054d",
+            "revision": "f2e9180a45f6f41241a9786f84cfd6b60c86c2fe021ae2d34a8a13f499d93f6e",
+            "kind": "document",
+            "label": "Индекс ссылок bars — исходящие, входящие, битые и правка ссылок при переименовании",
+            "path": "docs/features/knowledge-base/link-index.md",
+            "docs_path": "features/knowledge-base/link-index.md",
+            "module": "features",
+            "owner": "37ff7c5a3f4a1a3e8f409b7dcc67e708d32c5f89fc90f81c71a98f99c5b4054d",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "147171244d751869538c2e5280785f8bbc7636137fb8e2cc66bc8b7650bd679e",
+            "revision": "1167deb4d06b104e5321e0901ad0e81141d79bfd060ddeb4d572e20c593f19af",
+            "kind": "document",
+            "label": "Бенч качества поиска — умолчания IDEA-06 (18-10-2026) и нарезка реестров (24-10-2026)",
+            "path": "docs/knowledge/search-quality.md",
+            "docs_path": "knowledge/search-quality.md",
+            "module": "knowledge",
+            "owner": "147171244d751869538c2e5280785f8bbc7636137fb8e2cc66bc8b7650bd679e",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "15b1033a7823a986afe9ac8ecc98f9407999ee0570c13291c927cf07bfec2490",
+            "revision": "7928f6965a2eb33403cce28946d2b85d9b02aa3cf32dff8cf3e6b4ef9a48f98d",
+            "kind": "document",
+            "label": "Как устроен bars простыми словами — индекс, куски, поиск по словам и смыслу",
+            "path": "docs/manual/how-it-works.md",
+            "docs_path": "manual/how-it-works.md",
+            "module": "manual",
+            "owner": "15b1033a7823a986afe9ac8ecc98f9407999ee0570c13291c927cf07bfec2490",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          }
+        ],
+        "edges": [
+          {
+            "kind": "markdown_link",
+            "from": 0,
+            "to": 1,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              9
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 2,
+            "to": 1,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              25
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 0,
+            "to": 3,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              21
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 3,
+            "to": 1,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              74
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 2,
+            "to": 4,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              167
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 4,
+            "to": 2,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              37
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 0,
+            "to": 5,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              10
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 3,
+            "to": 5,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              78
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 5,
+            "to": 1,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              23
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 5,
+            "to": 3,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              55
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 1,
+            "to": 6,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              73
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 6,
+            "to": 1,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              7,
+              11,
+              72
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 2,
+            "to": 7,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              7
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 7,
+            "to": 1,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              115
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 1,
+            "to": 8,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              134
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 2,
+            "to": 8,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              83
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 8,
+            "to": 1,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              7
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 2,
+            "to": 9,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              60
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 10,
+            "to": 2,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              7
+            ]
+          },
+          {
+            "kind": "document_similarity",
+            "from": 10,
+            "to": 4,
+            "raw": 0.8670862913131714,
+            "strength": 0.8670862913131714,
+            "lines": []
+          },
+          {
+            "kind": "document_similarity",
+            "from": 10,
+            "to": 2,
+            "raw": 0.857498049736023,
+            "strength": 0.857498049736023,
+            "lines": []
+          }
+        ],
+        "layers": {
+          "markdown_link": {
+            "state": "partial",
+            "note": "Настоящий готовый индекс; полнота не утверждается"
+          },
+          "document_similarity": {
+            "state": "partial",
+            "note": "Настоящий готовый индекс; полнота не утверждается"
+          },
+          "chunk_similarity": {
+            "state": "not_built",
+            "note": "Вид документов; расчёт чанков — отдельная проекция"
+          }
+        },
+        "totals": {
+          "documents": 554,
+          "chunks": 0,
+          "links": 1398,
+          "document_pairs": 0
+        },
+        "shown": {
+          "documents": 11,
+          "chunks": 0,
+          "edges": 21
+        },
+        "applied": {
+          "max_documents": 200,
+          "max_chunks": 1,
+          "max_edges": 800,
+          "max_bytes": 262144
+        },
+        "truncated": false,
+        "limit_reasons": [],
+        "warnings": [],
+        "used_bytes": 0
+      },
+      "fingerprint": "5b1e93c04fa7c1b57772954ac8561503fa9b1bf02ca944f76b1c63f2f16df2d3",
+      "query_node": {
+        "id": "query:real-0",
+        "label": "Как сохранить правки при смене проекта?"
+      },
+      "query_edges": [
+        {
+          "to": 0,
+          "raw_score": 0.7893961071968079,
+          "score_kind": "rerank",
+          "strength": 0.7893961071968079,
+          "neutral": false
+        },
+        {
+          "to": 1,
+          "raw_score": 0.7648916244506836,
+          "score_kind": "rerank",
+          "strength": 0.7648916244506836,
+          "neutral": false
+        },
+        {
+          "to": 2,
+          "raw_score": 0.7426084280014038,
+          "score_kind": "rerank",
+          "strength": 0.7426084280014038,
+          "neutral": false
+        }
+      ],
+      "id": "real-0",
+      "text": "Как сохранить правки при смене проекта?",
+      "score_kind": "rerank",
+      "results": [
+        {
+          "channel": "primary",
+          "status": "ready",
+          "map_reason": null,
+          "path": "docs/chats/2026-10-26-project-switch/handoff.md",
+          "title": "Смена проекта и поиск без потери правок — итог шага 3.1.4",
+          "rank": 1,
+          "node": 0,
+          "score": 0.7893961071968079,
+          "fragments": [
+            {
+              "source_hash": "aa4ef035457927a4af556fdefed803099566f579ef005de682d0f63d1d27160f",
+              "channel": "primary",
+              "path": "docs/chats/2026-10-26-project-switch/handoff.md",
+              "title": "Смена проекта и поиск без потери правок — итог шага 3.1.4",
+              "heading": "Смена проекта и поиск без потери правок — итог шага 3.1.4",
+              "first": 5,
+              "last": 13,
+              "score": 0.7893961071968079
+            },
+            {
+              "source_hash": "aa4ef035457927a4af556fdefed803099566f579ef005de682d0f63d1d27160f",
+              "channel": "primary",
+              "path": "docs/chats/2026-10-26-project-switch/handoff.md",
+              "title": "Смена проекта и поиск без потери правок — итог шага 3.1.4",
+              "heading": "Смена проекта и поиск без потери правок — итог шага 3.1.4/Не сделано",
+              "first": 15,
+              "last": 26,
+              "score": 0.5628374218940735
+            }
+          ]
+        },
+        {
+          "channel": "primary",
+          "status": "ready",
+          "map_reason": null,
+          "path": "docs/features/knowledge-base/editor-design.md",
+          "title": "Редактор документа bars — устройство чтения, записи и конфликтов",
+          "rank": 2,
+          "node": 1,
+          "score": 0.7648916244506836,
+          "fragments": [
+            {
+              "source_hash": "fcdd5f8de55fa64f8abc8752158a8ddbb2a227e0af08095473d2d790e5fe64d5",
+              "channel": "primary",
+              "path": "docs/features/knowledge-base/editor-design.md",
+              "title": "Редактор документа bars — устройство чтения, записи и конфликтов",
+              "heading": "Редактор документа bars — устройство чтения, записи и конфликтов/Модель конфликтов и несохранённого/Смена проекта и уход проекта из bars",
+              "first": 93,
+              "last": 97,
+              "score": 0.7648916244506836
+            },
+            {
+              "source_hash": "fcdd5f8de55fa64f8abc8752158a8ddbb2a227e0af08095473d2d790e5fe64d5",
+              "channel": "primary",
+              "path": "docs/features/knowledge-base/editor-design.md",
+              "title": "Редактор документа bars — устройство чтения, записи и конфликтов",
+              "heading": "Редактор документа bars — устройство чтения, записи и конфликтов/Модель конфликтов и несохранённого/Диалог несохранённого",
+              "first": 85,
+              "last": 91,
+              "score": 0.6008911728858948
+            }
+          ]
+        },
+        {
+          "channel": "primary",
+          "status": "ready",
+          "map_reason": null,
+          "path": "docs/manual/search.md",
+          "title": "Как искать в окне bars — запрос, область, результаты и проценты",
+          "rank": 3,
+          "node": 2,
+          "score": 0.7426084280014038,
+          "fragments": [
+            {
+              "source_hash": "28cc2ebd467140ebdcf91d5de0257380e2ce1ac5e9f9028ce5c75bf87b778f6f",
+              "channel": "primary",
+              "path": "docs/manual/search.md",
+              "title": "Как искать в окне bars — запрос, область, результаты и проценты",
+              "heading": "Как искать в окне bars — запрос, область, результаты и проценты/Как найти что-нибудь в окне bars",
+              "first": 13,
+              "last": 25,
+              "score": 0.7426084280014038
+            }
+          ]
+        }
+      ],
+      "views": {
+        "all": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "chunks": [
+          0,
+          1,
+          2
+        ],
+        "links": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "meaning": [
+          0,
+          1,
+          2,
+          10
+        ]
+      },
+      "depth_of": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "anchor_of": [
+        0,
+        1,
+        2,
+        0,
+        2,
+        0,
+        1,
+        2,
+        1,
+        2,
+        2
+      ],
+      "known_nodes": 12,
+      "known_edges": 24,
+      "used_bytes": 12638
+    },
+    "elapsed_ms": 49,
+    "bundle": null
+  },
+  {
+    "request": {
+      "id": "real-1",
+      "text": "Как очередь документов откладывает обновление индекса после правки?",
+      "scope": {
+        "modules": [],
+        "files": []
+      },
+      "hits": [
+        {
+          "source_hash": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5",
+          "channel": "primary",
+          "path": "docs/features/indexing/document-queue.md",
+          "title": "Очередь документов bars — состояния, пауза перед embed и приоритеты",
+          "heading": "Очередь документов bars — состояния, пауза перед embed и приоритеты/Обнаружение и обработка расхождений",
+          "first": 62,
+          "last": 70,
+          "score": 0.9224823713302612
+        },
+        {
+          "source_hash": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5",
+          "channel": "primary",
+          "path": "docs/features/indexing/document-queue.md",
+          "title": "Очередь документов bars — состояния, пауза перед embed и приоритеты",
+          "heading": "Очередь документов bars — состояния, пауза перед embed и приоритеты/Пауза",
+          "first": 37,
+          "last": 42,
+          "score": 0.8229018449783325
+        },
+        {
+          "source_hash": "67c85d13165aa3cd5ffc5f78a862c6ba4878b69098eb3247a4759eed47549bc8",
+          "channel": "primary",
+          "path": "docs/chats/2026-10-23-document-queue/verification.md",
+          "title": "Проверка продолжения очереди документов 3.2.1",
+          "heading": "Проверка продолжения очереди документов 3.2.1",
+          "first": 5,
+          "last": 15,
+          "score": 0.744841992855072
+        },
+        {
+          "source_hash": "2db1881540b80f49e0f682b5e7656e67be29f215212895983b5420263f90a88f",
+          "channel": "primary",
+          "path": "docs/features/window/indexing-progress.md",
+          "title": "Ход индексации в окне bars — очередь, прогресс, ошибка файла, трей",
+          "heading": "Ход индексации в окне bars — очередь, прогресс, ошибка файла, трей/Обычное обновление не блокирует поиск",
+          "first": 31,
+          "last": 33,
+          "score": 0.7325918078422546
+        },
+        {
+          "source_hash": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5",
+          "channel": "primary",
+          "path": "docs/features/indexing/document-queue.md",
+          "title": "Очередь документов bars — состояния, пауза перед embed и приоритеты",
+          "heading": "Очередь документов bars — состояния, пауза перед embed и приоритеты/Запись очереди",
+          "first": 19,
+          "last": 35,
+          "score": 0.7324004769325256
+        },
+        {
+          "source_hash": "c9d0be3dfea98da835d73bb9cce3156481f33e7ab38151363923e854a2217f74",
+          "channel": "related",
+          "path": "docs/features/indexing/Index.md",
+          "title": "Индексация bars — оглавление",
+          "heading": "",
+          "first": 0,
+          "last": 0,
+          "score": null
+        },
+        {
+          "source_hash": "0900de45d6cfb7578a1a9fe73658dbf1172dad74118c7b5f422b1b052a2ba9ee",
+          "channel": "related",
+          "path": "docs/chats/2026-10-22-document-queue/handoff.md",
+          "title": "Передача — очередь документов и пауза перед embed (3.2.1)",
+          "heading": "",
+          "first": 0,
+          "last": 0,
+          "score": null
+        },
+        {
+          "source_hash": "23ed0ff8d66dc061e4109a04f0849c1c00be7616a78603b3db450cab9bf5fd8e",
+          "channel": "related",
+          "path": "docs/features/settings/settings.md",
+          "title": "Настройки bars — ключи settings.toml и config.toml, значения по умолчанию",
+          "heading": "",
+          "first": 0,
+          "last": 0,
+          "score": null
+        },
+        {
+          "source_hash": "27b279bcc7946d0fd2a339ed543c19487772e7214e2a38edfcefc09e440f7768",
+          "channel": "related",
+          "path": "docs/manual/settings.md",
+          "title": "Настройки bars — что меняет каждая вкладка и когда это нужно",
+          "heading": "",
+          "first": 0,
+          "last": 0,
+          "score": null
+        },
+        {
+          "source_hash": "a46151bf653847ceb542407a699522a2d60e50fdce4bd2410bcbb1f4c67d9536",
+          "channel": "related",
+          "path": "docs/knowledge/indexing-defaults.md",
+          "title": "Умолчания индексации — пауза перед embed и стоимость фоновой проверки",
+          "heading": "",
+          "first": 0,
+          "last": 0,
+          "score": null
+        }
+      ],
+      "score_kind": "rerank",
+      "depth": 1,
+      "fanout": 4,
+      "min_strength": 0.8500000238418579,
+      "max_nodes": 200,
+      "max_edges": 800,
+      "max_bytes": 262144,
+      "snapshot": null
+    },
+    "slice": {
+      "physical": {
+        "schema_version": 1,
+        "method": "query-v1",
+        "snapshot": "d45034d0b4d6b49cf2e9f591cdd548fe0eb53159a329c1dda4eb803a60350610",
+        "scope": {
+          "modules": [],
+          "files": []
+        },
+        "nodes": [
+          {
+            "id": "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5",
+            "kind": "document",
+            "label": "Очередь документов bars — состояния, пауза перед embed и приоритеты",
+            "path": "docs/features/indexing/document-queue.md",
+            "docs_path": "features/indexing/document-queue.md",
+            "module": "features",
+            "owner": "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "bd548f5b7aa2d7a1db3a1cd999709a63dedca66a970f3a7b2598de5822a23908",
+            "revision": "67c85d13165aa3cd5ffc5f78a862c6ba4878b69098eb3247a4759eed47549bc8",
+            "kind": "document",
+            "label": "Проверка продолжения очереди документов 3.2.1",
+            "path": "docs/chats/2026-10-23-document-queue/verification.md",
+            "docs_path": "chats/2026-10-23-document-queue/verification.md",
+            "module": "chats",
+            "owner": "bd548f5b7aa2d7a1db3a1cd999709a63dedca66a970f3a7b2598de5822a23908",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "681efda7dd576349ec7ef23b7c716c63a6e9ddd8cfc379ecbb5e76c0b4dda039",
+            "revision": "2db1881540b80f49e0f682b5e7656e67be29f215212895983b5420263f90a88f",
+            "kind": "document",
+            "label": "Ход индексации в окне bars — очередь, прогресс, ошибка файла, трей",
+            "path": "docs/features/window/indexing-progress.md",
+            "docs_path": "features/window/indexing-progress.md",
+            "module": "features",
+            "owner": "681efda7dd576349ec7ef23b7c716c63a6e9ddd8cfc379ecbb5e76c0b4dda039",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "31fa4ff2084e5093f74805060f39fe44799672e15df920fab7a5ec499cc7f53f",
+            "revision": "0900de45d6cfb7578a1a9fe73658dbf1172dad74118c7b5f422b1b052a2ba9ee",
+            "kind": "document",
+            "label": "Передача — очередь документов и пауза перед embed (3.2.1)",
+            "path": "docs/chats/2026-10-22-document-queue/handoff.md",
+            "docs_path": "chats/2026-10-22-document-queue/handoff.md",
+            "module": "chats",
+            "owner": "31fa4ff2084e5093f74805060f39fe44799672e15df920fab7a5ec499cc7f53f",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "453d9c462a9360fe252d70ae7d32d2f70575a2b9df1378520b8c9914b4a75985",
+            "revision": "23ed0ff8d66dc061e4109a04f0849c1c00be7616a78603b3db450cab9bf5fd8e",
+            "kind": "document",
+            "label": "Настройки bars — ключи settings.toml и config.toml, значения по умолчанию",
+            "path": "docs/features/settings/settings.md",
+            "docs_path": "features/settings/settings.md",
+            "module": "features",
+            "owner": "453d9c462a9360fe252d70ae7d32d2f70575a2b9df1378520b8c9914b4a75985",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "7560c2cb322f4e7bf0cec9db2f4d047dd90fac2c4e8ea4aaed09ed1bf4d5310a",
+            "revision": "a46151bf653847ceb542407a699522a2d60e50fdce4bd2410bcbb1f4c67d9536",
+            "kind": "document",
+            "label": "Умолчания индексации — пауза перед embed и стоимость фоновой проверки",
+            "path": "docs/knowledge/indexing-defaults.md",
+            "docs_path": "knowledge/indexing-defaults.md",
+            "module": "knowledge",
+            "owner": "7560c2cb322f4e7bf0cec9db2f4d047dd90fac2c4e8ea4aaed09ed1bf4d5310a",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "6ffbe6fea56d38307012bb1c10e70f283916b6d362bc3d20215b38359dcd2504",
+            "revision": "8f10f288a958a73276b8fc75fe478ba677c052c2f80c677d97962cb55cac730a",
+            "kind": "document",
+            "label": "Передача — продолжение очереди документов 3.2.1",
+            "path": "docs/chats/2026-10-23-document-queue/handoff.md",
+            "docs_path": "chats/2026-10-23-document-queue/handoff.md",
+            "module": "chats",
+            "owner": "6ffbe6fea56d38307012bb1c10e70f283916b6d362bc3d20215b38359dcd2504",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "7c59f05be9c38ce2f8a43f2cf97cea76321aba353a1c0cb742beaca52e9c51d7",
+            "revision": "b9584c9b032bddb7d2ed86e9d18793320d9c61743a170c6cd523b717cd1142af",
+            "kind": "document",
+            "label": "Сборка bars — как собрать, проверить и что не проверяется",
+            "path": "docs/knowledge/build.md",
+            "docs_path": "knowledge/build.md",
+            "module": "knowledge",
+            "owner": "7c59f05be9c38ce2f8a43f2cf97cea76321aba353a1c0cb742beaca52e9c51d7",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "15f4bdcf597e9b26fcf124faf41d6eb4bcc7b2c9e6b7d96b6596df6a80183bfc",
+            "revision": "3558c93fd8496eda5c8d45670baa83b1158c1f1a9778027c6de672085f7f51fd",
+            "kind": "document",
+            "label": "Диалог согласия на переиндексацию в окне bars (Т-25)",
+            "path": "docs/features/window/reindex-consent.md",
+            "docs_path": "features/window/reindex-consent.md",
+            "module": "features",
+            "owner": "15f4bdcf597e9b26fcf124faf41d6eb4bcc7b2c9e6b7d96b6596df6a80183bfc",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "7768697a34ec3f749a89f865944371e010ef35a376a5addc7ddf099a04167778",
+            "revision": "4ce1f9010a8ad56371ec6dc6c02e77876cd599dbb3e0ec5ce82607339636549b",
+            "kind": "document",
+            "label": "Снижение нагрузки bars без потери качества",
+            "path": "docs/knowledge/resource-efficiency.md",
+            "docs_path": "knowledge/resource-efficiency.md",
+            "module": "knowledge",
+            "owner": "7768697a34ec3f749a89f865944371e010ef35a376a5addc7ddf099a04167778",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "fd26056edc406d385f30c05b2eeadf918867019bdc23fec4897b2756311fde7f",
+            "revision": "b300c76c6c1ab7930791f1dc8a79fdb7e3ff90ece46fd5dd55ffa17a0415aaa6",
+            "kind": "document",
+            "label": "Продолжение очереди документов — находки",
+            "path": "docs/chats/2026-10-23-document-queue/log.md",
+            "docs_path": "chats/2026-10-23-document-queue/log.md",
+            "module": "chats",
+            "owner": "fd26056edc406d385f30c05b2eeadf918867019bdc23fec4897b2756311fde7f",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "91061900d736f64836462790f2e179621e7b9d21dc1c5e15b71688b206a7880d",
+            "revision": "7f2216fb1d5f2fff219109fc3e78d6a225a03671bbbc890410c13cdfadb6169a",
+            "kind": "document",
+            "label": "Экраны ошибок окна bars — воркер, модель, провайдер, проект, переиндексация",
+            "path": "docs/features/window/error-states.md",
+            "docs_path": "features/window/error-states.md",
+            "module": "features",
+            "owner": "91061900d736f64836462790f2e179621e7b9d21dc1c5e15b71688b206a7880d",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "28a034d8876f654307408472696be634c1ed592cd95b2a148c1ccd41cb1698d9",
+            "revision": "c3c9b4eb4da1eed5d5e65f4d8ab77a8f30a1df1143e53f1a613383838dbba816",
+            "kind": "document",
+            "label": "Протокол канала bars — методы, параметры, ошибки",
+            "path": "docs/architecture/protocol.md",
+            "docs_path": "architecture/protocol.md",
+            "module": "architecture",
+            "owner": "28a034d8876f654307408472696be634c1ed592cd95b2a148c1ccd41cb1698d9",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "5ad1684284dbdd47cdcf8ba4263545761ccf38cbce130fce5a995786397deb7b",
+            "revision": "27b279bcc7946d0fd2a339ed543c19487772e7214e2a38edfcefc09e440f7768",
+            "kind": "document",
+            "label": "Настройки bars — что меняет каждая вкладка и когда это нужно",
+            "path": "docs/manual/settings.md",
+            "docs_path": "manual/settings.md",
+            "module": "manual",
+            "owner": "5ad1684284dbdd47cdcf8ba4263545761ccf38cbce130fce5a995786397deb7b",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "92832c8bfe23dab9341c065f84115a77350914ac513da000a811a496220f30d4",
+            "revision": "a2eb3f03beb5da60dbca25b38a313cd2774597476012786dc39e47fa665e74c7",
+            "kind": "document",
+            "label": "handoff",
+            "path": "docs/chats/2026-10-24-edit-pause/handoff.md",
+            "docs_path": "chats/2026-10-24-edit-pause/handoff.md",
+            "module": "chats",
+            "owner": "92832c8bfe23dab9341c065f84115a77350914ac513da000a811a496220f30d4",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          }
+        ],
+        "edges": [
+          {
+            "kind": "markdown_link",
+            "from": 1,
+            "to": 0,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              7
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 0,
+            "to": 2,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              9,
+              56
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 2,
+            "to": 0,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              27
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 3,
+            "to": 0,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              9
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 3,
+            "to": 2,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              10
+            ]
+          },
+          {
+            "kind": "document_similarity",
+            "from": 0,
+            "to": 3,
+            "raw": 0.9032946228981018,
+            "strength": 0.9032946228981018,
+            "lines": []
+          },
+          {
+            "kind": "markdown_link",
+            "from": 0,
+            "to": 4,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              39
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 3,
+            "to": 4,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              10
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 4,
+            "to": 0,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              95
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 0,
+            "to": 5,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              39
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 4,
+            "to": 5,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              103
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 5,
+            "to": 0,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              7
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 5,
+            "to": 4,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              7
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 6,
+            "to": 0,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              9
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 6,
+            "to": 1,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              11
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 1,
+            "to": 7,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              43
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 2,
+            "to": 8,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              18
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 8,
+            "to": 2,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              39
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 9,
+            "to": 5,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              58
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 10,
+            "to": 0,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              7
+            ]
+          },
+          {
+            "kind": "document_similarity",
+            "from": 1,
+            "to": 10,
+            "raw": 0.8952423930168152,
+            "strength": 0.8952423930168152,
+            "lines": []
+          },
+          {
+            "kind": "markdown_link",
+            "from": 2,
+            "to": 11,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              29
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 8,
+            "to": 11,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              35
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 11,
+            "to": 2,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              41,
+              58
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 11,
+            "to": 8,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              53
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 0,
+            "to": 12,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              56
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 3,
+            "to": 12,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              10
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 4,
+            "to": 12,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              7,
+              140
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 7,
+            "to": 12,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              17
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 8,
+            "to": 12,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              13
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 11,
+            "to": 12,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              7
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 12,
+            "to": 0,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              95
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 12,
+            "to": 4,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              110
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 13,
+            "to": 4,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              7
+            ]
+          },
+          {
+            "kind": "document_similarity",
+            "from": 4,
+            "to": 13,
+            "raw": 0.8541892766952515,
+            "strength": 0.8541892766952515,
+            "lines": []
+          },
+          {
+            "kind": "markdown_link",
+            "from": 14,
+            "to": 5,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              4
+            ]
+          }
+        ],
+        "layers": {
+          "markdown_link": {
+            "state": "partial",
+            "note": "Настоящий готовый индекс; полнота не утверждается"
+          },
+          "document_similarity": {
+            "state": "partial",
+            "note": "Настоящий готовый индекс; полнота не утверждается"
+          },
+          "chunk_similarity": {
+            "state": "not_built",
+            "note": "Вид документов; расчёт чанков — отдельная проекция"
+          }
+        },
+        "totals": {
+          "documents": 554,
+          "chunks": 0,
+          "links": 1398,
+          "document_pairs": 0
+        },
+        "shown": {
+          "documents": 15,
+          "chunks": 0,
+          "edges": 36
+        },
+        "applied": {
+          "max_documents": 200,
+          "max_chunks": 1,
+          "max_edges": 800,
+          "max_bytes": 262144
+        },
+        "truncated": false,
+        "limit_reasons": [],
+        "warnings": [],
+        "used_bytes": 0
+      },
+      "fingerprint": "6b3bba7b08ea3a7ca1a19d4777e75b2d981efd8c82bfffb8b53daac5dfb237df",
+      "query_node": {
+        "id": "query:real-1",
+        "label": "Как очередь документов откладывает обновление индекса после правки?"
+      },
+      "query_edges": [
+        {
+          "to": 0,
+          "raw_score": 0.9224823713302612,
+          "score_kind": "rerank",
+          "strength": 0.9224823713302612,
+          "neutral": false
+        },
+        {
+          "to": 1,
+          "raw_score": 0.744841992855072,
+          "score_kind": "rerank",
+          "strength": 0.744841992855072,
+          "neutral": false
+        },
+        {
+          "to": 2,
+          "raw_score": 0.7325918078422546,
+          "score_kind": "rerank",
+          "strength": 0.7325918078422546,
+          "neutral": false
+        }
+      ],
+      "id": "real-1",
+      "text": "Как очередь документов откладывает обновление индекса после правки?",
+      "score_kind": "rerank",
+      "results": [
+        {
+          "channel": "primary",
+          "status": "ready",
+          "map_reason": null,
+          "path": "docs/features/indexing/document-queue.md",
+          "title": "Очередь документов bars — состояния, пауза перед embed и приоритеты",
+          "rank": 1,
+          "node": 0,
+          "score": 0.9224823713302612,
+          "fragments": [
+            {
+              "source_hash": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5",
+              "channel": "primary",
+              "path": "docs/features/indexing/document-queue.md",
+              "title": "Очередь документов bars — состояния, пауза перед embed и приоритеты",
+              "heading": "Очередь документов bars — состояния, пауза перед embed и приоритеты/Обнаружение и обработка расхождений",
+              "first": 62,
+              "last": 70,
+              "score": 0.9224823713302612
+            },
+            {
+              "source_hash": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5",
+              "channel": "primary",
+              "path": "docs/features/indexing/document-queue.md",
+              "title": "Очередь документов bars — состояния, пауза перед embed и приоритеты",
+              "heading": "Очередь документов bars — состояния, пауза перед embed и приоритеты/Пауза",
+              "first": 37,
+              "last": 42,
+              "score": 0.8229018449783325
+            },
+            {
+              "source_hash": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5",
+              "channel": "primary",
+              "path": "docs/features/indexing/document-queue.md",
+              "title": "Очередь документов bars — состояния, пауза перед embed и приоритеты",
+              "heading": "Очередь документов bars — состояния, пауза перед embed и приоритеты/Запись очереди",
+              "first": 19,
+              "last": 35,
+              "score": 0.7324004769325256
+            }
+          ]
+        },
+        {
+          "channel": "primary",
+          "status": "ready",
+          "map_reason": null,
+          "path": "docs/chats/2026-10-23-document-queue/verification.md",
+          "title": "Проверка продолжения очереди документов 3.2.1",
+          "rank": 3,
+          "node": 1,
+          "score": 0.744841992855072,
+          "fragments": [
+            {
+              "source_hash": "67c85d13165aa3cd5ffc5f78a862c6ba4878b69098eb3247a4759eed47549bc8",
+              "channel": "primary",
+              "path": "docs/chats/2026-10-23-document-queue/verification.md",
+              "title": "Проверка продолжения очереди документов 3.2.1",
+              "heading": "Проверка продолжения очереди документов 3.2.1",
+              "first": 5,
+              "last": 15,
+              "score": 0.744841992855072
+            }
+          ]
+        },
+        {
+          "channel": "primary",
+          "status": "ready",
+          "map_reason": null,
+          "path": "docs/features/window/indexing-progress.md",
+          "title": "Ход индексации в окне bars — очередь, прогресс, ошибка файла, трей",
+          "rank": 4,
+          "node": 2,
+          "score": 0.7325918078422546,
+          "fragments": [
+            {
+              "source_hash": "2db1881540b80f49e0f682b5e7656e67be29f215212895983b5420263f90a88f",
+              "channel": "primary",
+              "path": "docs/features/window/indexing-progress.md",
+              "title": "Ход индексации в окне bars — очередь, прогресс, ошибка файла, трей",
+              "heading": "Ход индексации в окне bars — очередь, прогресс, ошибка файла, трей/Обычное обновление не блокирует поиск",
+              "first": 31,
+              "last": 33,
+              "score": 0.7325918078422546
+            }
+          ]
+        },
+        {
+          "channel": "related",
+          "status": "ready",
+          "map_reason": "Без физической связи с результатами",
+          "path": "docs/features/indexing/Index.md",
+          "title": "Индексация bars — оглавление",
+          "rank": 6,
+          "node": null,
+          "score": null,
+          "fragments": [
+            {
+              "source_hash": "c9d0be3dfea98da835d73bb9cce3156481f33e7ab38151363923e854a2217f74",
+              "channel": "related",
+              "path": "docs/features/indexing/Index.md",
+              "title": "Индексация bars — оглавление",
+              "heading": "",
+              "first": 0,
+              "last": 0,
+              "score": null
+            }
+          ]
+        },
+        {
+          "channel": "related",
+          "status": "ready",
+          "map_reason": null,
+          "path": "docs/chats/2026-10-22-document-queue/handoff.md",
+          "title": "Передача — очередь документов и пауза перед embed (3.2.1)",
+          "rank": 7,
+          "node": 3,
+          "score": null,
+          "fragments": [
+            {
+              "source_hash": "0900de45d6cfb7578a1a9fe73658dbf1172dad74118c7b5f422b1b052a2ba9ee",
+              "channel": "related",
+              "path": "docs/chats/2026-10-22-document-queue/handoff.md",
+              "title": "Передача — очередь документов и пауза перед embed (3.2.1)",
+              "heading": "",
+              "first": 0,
+              "last": 0,
+              "score": null
+            }
+          ]
+        },
+        {
+          "channel": "related",
+          "status": "ready",
+          "map_reason": null,
+          "path": "docs/features/settings/settings.md",
+          "title": "Настройки bars — ключи settings.toml и config.toml, значения по умолчанию",
+          "rank": 8,
+          "node": 4,
+          "score": null,
+          "fragments": [
+            {
+              "source_hash": "23ed0ff8d66dc061e4109a04f0849c1c00be7616a78603b3db450cab9bf5fd8e",
+              "channel": "related",
+              "path": "docs/features/settings/settings.md",
+              "title": "Настройки bars — ключи settings.toml и config.toml, значения по умолчанию",
+              "heading": "",
+              "first": 0,
+              "last": 0,
+              "score": null
+            }
+          ]
+        },
+        {
+          "channel": "related",
+          "status": "ready",
+          "map_reason": null,
+          "path": "docs/manual/settings.md",
+          "title": "Настройки bars — что меняет каждая вкладка и когда это нужно",
+          "rank": 9,
+          "node": 13,
+          "score": null,
+          "fragments": [
+            {
+              "source_hash": "27b279bcc7946d0fd2a339ed543c19487772e7214e2a38edfcefc09e440f7768",
+              "channel": "related",
+              "path": "docs/manual/settings.md",
+              "title": "Настройки bars — что меняет каждая вкладка и когда это нужно",
+              "heading": "",
+              "first": 0,
+              "last": 0,
+              "score": null
+            }
+          ]
+        },
+        {
+          "channel": "related",
+          "status": "ready",
+          "map_reason": null,
+          "path": "docs/knowledge/indexing-defaults.md",
+          "title": "Умолчания индексации — пауза перед embed и стоимость фоновой проверки",
+          "rank": 10,
+          "node": 5,
+          "score": null,
+          "fragments": [
+            {
+              "source_hash": "a46151bf653847ceb542407a699522a2d60e50fdce4bd2410bcbb1f4c67d9536",
+              "channel": "related",
+              "path": "docs/knowledge/indexing-defaults.md",
+              "title": "Умолчания индексации — пауза перед embed и стоимость фоновой проверки",
+              "heading": "",
+              "first": 0,
+              "last": 0,
+              "score": null
+            }
+          ]
+        }
+      ],
+      "views": {
+        "all": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          10,
+          11
+        ],
+        "chunks": [
+          0,
+          1,
+          2
+        ],
+        "links": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          11
+        ],
+        "meaning": [
+          0,
+          1,
+          2,
+          3,
+          10
+        ]
+      },
+      "depth_of": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "anchor_of": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        1,
+        1,
+        2,
+        5,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "known_nodes": 16,
+      "known_edges": 39,
+      "used_bytes": 18630
+    },
+    "elapsed_ms": 88,
+    "bundle": {
+      "layers": {
+        "semantic": {
+          "stale_reason": null,
+          "freshness": "current",
+          "completeness": "unknown",
+          "availability": "enabled",
+          "coverage": {
+            "unit": "documents",
+            "processed": 554,
+            "total": 554,
+            "missing": 0,
+            "comparisons": 0,
+            "reason": null
+          },
+          "source_revisions": {
+            "docs/chats/2026-10-22-document-queue/handoff.md": "0900de45d6cfb7578a1a9fe73658dbf1172dad74118c7b5f422b1b052a2ba9ee",
+            "docs/features/indexing/Index.md": "c9d0be3dfea98da835d73bb9cce3156481f33e7ab38151363923e854a2217f74",
+            "docs/features/indexing/document-queue.md": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5",
+            "docs/features/settings/settings.md": "23ed0ff8d66dc061e4109a04f0849c1c00be7616a78603b3db450cab9bf5fd8e",
+            "docs/knowledge/indexing-defaults.md": "a46151bf653847ceb542407a699522a2d60e50fdce4bd2410bcbb1f4c67d9536",
+            "docs/manual/settings.md": "27b279bcc7946d0fd2a339ed543c19487772e7214e2a38edfcefc09e440f7768"
+          },
+          "state": "partial",
+          "generation": "cac0257168a8ec792f8271d2a16d6d12387ea561fa560302d5a8a6e26adf0f62",
+          "fingerprint": "explicit-markdown-v6",
+          "processed": 554,
+          "total": 554,
+          "failed": 0
+        },
+        "similarity": {
+          "stale_reason": null,
+          "freshness": "current",
+          "completeness": "complete",
+          "availability": "enabled",
+          "coverage": {
+            "unit": "chunks",
+            "processed": 2442,
+            "total": 2442,
+            "missing": 0,
+            "comparisons": 2186031,
+            "reason": null
+          },
+          "source_revisions": {
+            "docs/chats/2026-10-22-document-queue/handoff.md": "0900de45d6cfb7578a1a9fe73658dbf1172dad74118c7b5f422b1b052a2ba9ee",
+            "docs/features/indexing/Index.md": "c9d0be3dfea98da835d73bb9cce3156481f33e7ab38151363923e854a2217f74",
+            "docs/features/indexing/document-queue.md": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5",
+            "docs/features/settings/settings.md": "23ed0ff8d66dc061e4109a04f0849c1c00be7616a78603b3db450cab9bf5fd8e",
+            "docs/knowledge/indexing-defaults.md": "a46151bf653847ceb542407a699522a2d60e50fdce4bd2410bcbb1f4c67d9536",
+            "docs/manual/settings.md": "27b279bcc7946d0fd2a339ed543c19487772e7214e2a38edfcefc09e440f7768"
+          },
+          "state": "ready",
+          "generation": "332152e993583c74c78c1b518875be5216afb8cb2a874b79440d1538df840223",
+          "fingerprint": "exact-pairs-f64-v1:k5:tau0.5",
+          "processed": 554,
+          "total": 554,
+          "failed": 0
+        },
+        "structure": {
+          "stale_reason": null,
+          "freshness": "current",
+          "completeness": "complete",
+          "availability": "enabled",
+          "coverage": {
+            "unit": "documents",
+            "processed": 554,
+            "total": 554,
+            "missing": 0,
+            "comparisons": 0,
+            "reason": null
+          },
+          "source_revisions": {
+            "docs/chats/2026-10-22-document-queue/handoff.md": "0900de45d6cfb7578a1a9fe73658dbf1172dad74118c7b5f422b1b052a2ba9ee",
+            "docs/features/indexing/Index.md": "c9d0be3dfea98da835d73bb9cce3156481f33e7ab38151363923e854a2217f74",
+            "docs/features/indexing/document-queue.md": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5",
+            "docs/features/settings/settings.md": "23ed0ff8d66dc061e4109a04f0849c1c00be7616a78603b3db450cab9bf5fd8e",
+            "docs/knowledge/indexing-defaults.md": "a46151bf653847ceb542407a699522a2d60e50fdce4bd2410bcbb1f4c67d9536",
+            "docs/manual/settings.md": "27b279bcc7946d0fd2a339ed543c19487772e7214e2a38edfcefc09e440f7768"
+          },
+          "state": "ready",
+          "generation": "28c2e2e4a194589183389c7242910dc472e8fea725cbb0a62b8639fb91887ede",
+          "fingerprint": "markdown-structure-v1",
+          "processed": 554,
+          "total": 554,
+          "failed": 0
+        }
+      },
+      "schema_version": 1,
+      "operation": "graph",
+      "scope": {
+        "modules": [],
+        "files": []
+      },
+      "snapshot": "d45034d0b4d6b49cf2e9f591cdd548fe0eb53159a329c1dda4eb803a60350610",
+      "generations": {
+        "method": "explicit-markdown-v6",
+        "semantic": "cac0257168a8ec792f8271d2a16d6d12387ea561fa560302d5a8a6e26adf0f62",
+        "similarity": "332152e993583c74c78c1b518875be5216afb8cb2a874b79440d1538df840223",
+        "structure": "28c2e2e4a194589183389c7242910dc472e8fea725cbb0a62b8639fb91887ede",
+        "text_structure": "d45034d0b4d6b49cf2e9f591cdd548fe0eb53159a329c1dda4eb803a60350610"
+      },
+      "layer_state": "partial",
+      "layer_states": {
+        "semantic": "partial",
+        "similarity": "ready",
+        "structure": "ready"
+      },
+      "coverage": {
+        "indexed": 554,
+        "processed": 554,
+        "failed": 0,
+        "denominator": 554,
+        "method": "indexed_source_documents; semantic completeness unknown",
+        "semantic_completeness": null
+      },
+      "requested": {
+        "operation": "graph",
+        "scope": {
+          "modules": [],
+          "files": []
+        },
+        "budgets": {
+          "max_depth": 4,
+          "max_nodes": null,
+          "max_edges": null,
+          "max_fanout": null,
+          "max_paths": 20,
+          "timeout_ms": null,
+          "max_bytes": null
+        },
+        "limit": 20,
+        "snapshot": null,
+        "cursor": null,
+        "query": null,
+        "entity_ref": null,
+        "from": null,
+        "to": null,
+        "roots": [
+          {
+            "kind": "chunk",
+            "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+          },
+          {
+            "kind": "chunk",
+            "id": "4c3a621e57c54ac9ef3688dc80aa1c70d59e7fda27e5198e89adda9b11823507",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+          },
+          {
+            "kind": "chunk",
+            "id": "25aa9bdade6d26e50f473ea50bcf29195c2301d47f9e08a843442d878f199448",
+            "revision": "2db1881540b80f49e0f682b5e7656e67be29f215212895983b5420263f90a88f"
+          }
+        ],
+        "predicates": [],
+        "direction": "both",
+        "polarity": null,
+        "qualifiers": {},
+        "view": "mixed",
+        "local": true,
+        "include_paths": true,
+        "path_kind": "mixed",
+        "max_hops": null,
+        "max_paths": null,
+        "topic": null,
+        "whole_scope": false,
+        "analysis": "topics",
+        "grouping": "communities",
+        "roles": [],
+        "task_profile": null,
+        "token_budget": null,
+        "tokenizer_id": null,
+        "change_description": null
+      },
+      "applied": {
+        "max_depth": 4,
+        "max_nodes": 250,
+        "max_edges": 1000,
+        "max_fanout": 50,
+        "max_paths": 20,
+        "timeout_ms": 1000,
+        "max_bytes": 262144
+      },
+      "applied_limit": 20,
+      "clamped": false,
+      "items": [
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "0e965c2e0a7c975ccde28a4b6a36165a89d95175f46e3419dde82ee23dbed70a",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "012c941bc08b717f6f4010926657b322431f9b98b84e3b3368d0160142f3544f",
+                "reversed": false
+              }
+            ],
+            "evidence": [
+              "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+              "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5"
+            ],
+            "complete": true
+          }
+        },
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "aa5c84637b4cd0b564d1341cf75030ddb03cc6dcf221dd1075287c7655b33642",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "0db679edd8f820a915c0c581aa37afeb3edc7452ff17ca9ea63501b74e774fa6",
+                "reversed": false
+              }
+            ],
+            "evidence": [
+              "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+              "8185e99d334d2f15580a7fd5fd752b37729f7c079f1ce2e0fa8bf008980443e6"
+            ],
+            "complete": true
+          }
+        },
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "00e16d0a188693b877a249c27cd6b11967ca7ea2eac3f831ccfdebf215f2ba4f",
+                "revision": "0900de45d6cfb7578a1a9fe73658dbf1172dad74118c7b5f422b1b052a2ba9ee"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "124ec5012bf7e2cde808f58ef8c08506caa9e68eb9302afc6365a6b817903894",
+                "reversed": true
+              }
+            ],
+            "evidence": [
+              "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+              "6543aa60190ffd2bae0e1b73d853d84682646f0ab66e8581247e9ccb9503dcd9"
+            ],
+            "complete": true
+          }
+        },
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "0d62da40b196733342772b99e2e38d64b8923ecaaaaafc02c3534a66d5906fc6",
+                "revision": "23ed0ff8d66dc061e4109a04f0849c1c00be7616a78603b3db450cab9bf5fd8e"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "16d8ebc75f10695f9858ad7224185d7c81715ce93148a247ab9b797060844307",
+                "reversed": true
+              }
+            ],
+            "evidence": [
+              "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+              "67e8834927e587f819bc4f6e33184b52323f2424866671d7f6c733998eee4d47"
+            ],
+            "complete": true
+          }
+        },
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "e6b6a6f65ee8abcba87c329c12f90725c8b917283e00750675c54d20565606b3",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "1f9023f6f4f050931f8d9d32844488bec4d0c5a1ba0e81f00334007efaa0ccd5",
+                "reversed": true
+              }
+            ],
+            "evidence": [
+              "05e0854b9a18086ca9525920b95199d23bbe135bd1e6a77702da993692533fb9",
+              "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30"
+            ],
+            "complete": true
+          }
+        },
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "006083d13b0da09ca8f8040ca59256bc7289deb4ef045e2f0ce3bab576e8002d",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "271483052764b4c17a649befce8eb21196db9458cbdbf1c7e539f349fd564bc3",
+                "reversed": false
+              }
+            ],
+            "evidence": [
+              "a5b0af032d85d220369a29b67b0597aecb1bfdcad1bb8a87a37df2186805647a"
+            ],
+            "complete": true
+          }
+        },
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "cd8e530fe0c4165005b2e158ac40a5a091229493b03b52dfdab295326faea91e",
+                "revision": "a46151bf653847ceb542407a699522a2d60e50fdce4bd2410bcbb1f4c67d9536"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "4859a21638108364b2b615632af81ae835ee75a6a2f6e53c8c7deaad8cd028a2",
+                "reversed": true
+              }
+            ],
+            "evidence": [
+              "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+              "466dfc4922112c3fcdfba2e7e6c0f119873e83ee6b1715a670b37578071f47c0"
+            ],
+            "complete": true
+          }
+        },
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "0e965c2e0a7c975ccde28a4b6a36165a89d95175f46e3419dde82ee23dbed70a",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "72a72f59ef4458abc5908800eac823d2a38af980582eb20d0a647b47f0e3d75d",
+                "reversed": true
+              }
+            ],
+            "evidence": [
+              "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+              "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5"
+            ],
+            "complete": true
+          }
+        },
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "a4d8bb1da47da7d3dfb9fa5174ad88e4443c8e20044f0798f7703df2d4802967",
+                "revision": "27b279bcc7946d0fd2a339ed543c19487772e7214e2a38edfcefc09e440f7768"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "7b57ee26da3f18d4814c46e5125763eefbff483e8717545d2ad9588bda159541",
+                "reversed": true
+              }
+            ],
+            "evidence": [
+              "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+              "2b9a5c73b90da249dc95e4877827133ae95de2194a7f23cb6a2f0b4ce5caaf59"
+            ],
+            "complete": true
+          }
+        },
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "00e16d0a188693b877a249c27cd6b11967ca7ea2eac3f831ccfdebf215f2ba4f",
+                "revision": "0900de45d6cfb7578a1a9fe73658dbf1172dad74118c7b5f422b1b052a2ba9ee"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "b7035e39616a453bea10f789a43059fbbe2eeca6c0760a89e8be7fe90abe93ca",
+                "reversed": false
+              }
+            ],
+            "evidence": [
+              "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+              "6543aa60190ffd2bae0e1b73d853d84682646f0ab66e8581247e9ccb9503dcd9"
+            ],
+            "complete": true
+          }
+        },
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "e6b6a6f65ee8abcba87c329c12f90725c8b917283e00750675c54d20565606b3",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "d0de5aad84aae8f64c142cc756f2bd5077303a554b37b867db670b2b992e8bcd",
+                "reversed": false
+              }
+            ],
+            "evidence": [
+              "05e0854b9a18086ca9525920b95199d23bbe135bd1e6a77702da993692533fb9",
+              "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30"
+            ],
+            "complete": true
+          }
+        },
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "aa5c84637b4cd0b564d1341cf75030ddb03cc6dcf221dd1075287c7655b33642",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "dd349ada5a37adc183ab84c9ef8aafb43b6e8704012b0935ada665bcd6d77080",
+                "reversed": true
+              }
+            ],
+            "evidence": [
+              "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30"
+            ],
+            "complete": true
+          }
+        },
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "cd8e530fe0c4165005b2e158ac40a5a091229493b03b52dfdab295326faea91e",
+                "revision": "a46151bf653847ceb542407a699522a2d60e50fdce4bd2410bcbb1f4c67d9536"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "e29c086dc1e469dc9c0ea65ec6eea04bba1c21f32c8fcaefdee2073c6cf6206c",
+                "reversed": false
+              }
+            ],
+            "evidence": [
+              "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+              "466dfc4922112c3fcdfba2e7e6c0f119873e83ee6b1715a670b37578071f47c0"
+            ],
+            "complete": true
+          }
+        },
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "0e965c2e0a7c975ccde28a4b6a36165a89d95175f46e3419dde82ee23dbed70a",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "4c3a621e57c54ac9ef3688dc80aa1c70d59e7fda27e5198e89adda9b11823507",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "012c941bc08b717f6f4010926657b322431f9b98b84e3b3368d0160142f3544f",
+                "reversed": false
+              },
+              {
+                "edge": "22ab061912adb5911c59b93f1a27b7a285d1e34808881fd8a085ac8fa327e69c",
+                "reversed": true
+              }
+            ],
+            "evidence": [
+              "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+              "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5",
+              "cdf5d53aa70d09df61a873500b8361fcbb88a484acc805187773fa6b07813852"
+            ],
+            "complete": true
+          }
+        },
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "0e965c2e0a7c975ccde28a4b6a36165a89d95175f46e3419dde82ee23dbed70a",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "7e05a94e7c5883c24c01947a1389a8c2a27bcfad53962d4902b2472f44473303",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "012c941bc08b717f6f4010926657b322431f9b98b84e3b3368d0160142f3544f",
+                "reversed": false
+              },
+              {
+                "edge": "283461b71a1d551e9d1d26c7656c1ee65849feb1ad163b9d6d8b145046247235",
+                "reversed": true
+              }
+            ],
+            "evidence": [
+              "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+              "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5",
+              "c185ad7b606c63f98e88d6b7a5d2c4c569ab878c42b9484ee47ebeeda80c263d"
+            ],
+            "complete": true
+          }
+        },
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "0e965c2e0a7c975ccde28a4b6a36165a89d95175f46e3419dde82ee23dbed70a",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "e9220700c0e890e5e32ce29c78f6e497b6862b88ab8c9cf91e39ae32620be946",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "012c941bc08b717f6f4010926657b322431f9b98b84e3b3368d0160142f3544f",
+                "reversed": false
+              },
+              {
+                "edge": "60384b36cba7ed5b0dbbf63f46db1f4f6ddca51eeb0fe12df10e3290b7bb5be7",
+                "reversed": true
+              }
+            ],
+            "evidence": [
+              "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+              "45a4177c71bcec5baadbec13aa1e696126e962f69d0a6b4a8ea779fb460d9a71",
+              "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5"
+            ],
+            "complete": true
+          }
+        },
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "0e965c2e0a7c975ccde28a4b6a36165a89d95175f46e3419dde82ee23dbed70a",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "c045644b476351ec1adf459356e13e43b518c10fba60e21b91dd30bdb6637d95",
+                "revision": "c9d0be3dfea98da835d73bb9cce3156481f33e7ab38151363923e854a2217f74"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "012c941bc08b717f6f4010926657b322431f9b98b84e3b3368d0160142f3544f",
+                "reversed": false
+              },
+              {
+                "edge": "640a58f6d92c0f77c8b9e04741088edbc9048de6c074be18a1308d3617193c38",
+                "reversed": true
+              }
+            ],
+            "evidence": [
+              "0ee16e235c71fef9cfeb581991ea5190544c4353d5282f0236577c8777e3f002",
+              "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+              "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5"
+            ],
+            "complete": true
+          }
+        },
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "0e965c2e0a7c975ccde28a4b6a36165a89d95175f46e3419dde82ee23dbed70a",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "beb4a4fb0d4c998f6fcb4174ce1d1bb26c8328f5a05caf664fff7027967fc5af",
+                "revision": "0900de45d6cfb7578a1a9fe73658dbf1172dad74118c7b5f422b1b052a2ba9ee"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "012c941bc08b717f6f4010926657b322431f9b98b84e3b3368d0160142f3544f",
+                "reversed": false
+              },
+              {
+                "edge": "772cef56b99cef6f1904482bb0268d032cc05c4ec82959e4ac1f131d9d21bf06",
+                "reversed": true
+              }
+            ],
+            "evidence": [
+              "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+              "7c0e7e7dacc9111374b1461a3a1a383879eaf9db269e0012f0ff35491907de0d",
+              "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5"
+            ],
+            "complete": true
+          }
+        },
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "0e965c2e0a7c975ccde28a4b6a36165a89d95175f46e3419dde82ee23dbed70a",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "aa5c84637b4cd0b564d1341cf75030ddb03cc6dcf221dd1075287c7655b33642",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "012c941bc08b717f6f4010926657b322431f9b98b84e3b3368d0160142f3544f",
+                "reversed": false
+              },
+              {
+                "edge": "7face7b0bc0a760cb17226e306f61a917b94a68156d03feae441995f1c9bef94",
+                "reversed": false
+              }
+            ],
+            "evidence": [
+              "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+              "8185e99d334d2f15580a7fd5fd752b37729f7c079f1ce2e0fa8bf008980443e6",
+              "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5"
+            ],
+            "complete": true
+          }
+        },
+        {
+          "type": "path",
+          "path": {
+            "nodes": [
+              {
+                "kind": "chunk",
+                "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "0e965c2e0a7c975ccde28a4b6a36165a89d95175f46e3419dde82ee23dbed70a",
+                "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+              },
+              {
+                "kind": "chunk",
+                "id": "00e16d0a188693b877a249c27cd6b11967ca7ea2eac3f831ccfdebf215f2ba4f",
+                "revision": "0900de45d6cfb7578a1a9fe73658dbf1172dad74118c7b5f422b1b052a2ba9ee"
+              }
+            ],
+            "steps": [
+              {
+                "edge": "012c941bc08b717f6f4010926657b322431f9b98b84e3b3368d0160142f3544f",
+                "reversed": false
+              },
+              {
+                "edge": "a306c09ed614e4852ad2d106f830b661d6581d7291b08f1b8d1a81e73939ec38",
+                "reversed": false
+              }
+            ],
+            "evidence": [
+              "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+              "6543aa60190ffd2bae0e1b73d853d84682646f0ab66e8581247e9ccb9503dcd9",
+              "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5"
+            ],
+            "complete": true
+          }
+        }
+      ],
+      "nodes": [
+        {
+          "reference": {
+            "kind": "chunk",
+            "id": "006083d13b0da09ca8f8040ca59256bc7289deb4ef045e2f0ce3bab576e8002d",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+          },
+          "label": "Очередь документов bars — состояния, пауза перед embed и приоритеты/Приоритеты",
+          "namespace": "features/indexing/document-queue.md",
+          "aliases": [],
+          "source_ids": [
+            "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7"
+          ],
+          "evidence": [
+            "a5b0af032d85d220369a29b67b0597aecb1bfdcad1bb8a87a37df2186805647a"
+          ],
+          "roles": [],
+          "parent": "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7"
+        },
+        {
+          "reference": {
+            "kind": "chunk",
+            "id": "00e16d0a188693b877a249c27cd6b11967ca7ea2eac3f831ccfdebf215f2ba4f",
+            "revision": "0900de45d6cfb7578a1a9fe73658dbf1172dad74118c7b5f422b1b052a2ba9ee"
+          },
+          "label": "Передача — очередь документов и пауза перед embed (3.2.1)",
+          "namespace": "chats/2026-10-22-document-queue/handoff.md",
+          "aliases": [],
+          "source_ids": [
+            "31fa4ff2084e5093f74805060f39fe44799672e15df920fab7a5ec499cc7f53f"
+          ],
+          "evidence": [
+            "6543aa60190ffd2bae0e1b73d853d84682646f0ab66e8581247e9ccb9503dcd9"
+          ],
+          "roles": [],
+          "parent": "31fa4ff2084e5093f74805060f39fe44799672e15df920fab7a5ec499cc7f53f"
+        },
+        {
+          "reference": {
+            "kind": "chunk",
+            "id": "0d62da40b196733342772b99e2e38d64b8923ecaaaaafc02c3534a66d5906fc6",
+            "revision": "23ed0ff8d66dc061e4109a04f0849c1c00be7616a78603b3db450cab9bf5fd8e"
+          },
+          "label": "Настройки bars — ключи settings.toml и config.toml, значения по умолчанию/Параметры нарезки в settings.toml",
+          "namespace": "features/settings/settings.md",
+          "aliases": [],
+          "source_ids": [
+            "453d9c462a9360fe252d70ae7d32d2f70575a2b9df1378520b8c9914b4a75985"
+          ],
+          "evidence": [
+            "67e8834927e587f819bc4f6e33184b52323f2424866671d7f6c733998eee4d47"
+          ],
+          "roles": [],
+          "parent": "453d9c462a9360fe252d70ae7d32d2f70575a2b9df1378520b8c9914b4a75985"
+        },
+        {
+          "reference": {
+            "kind": "chunk",
+            "id": "0e965c2e0a7c975ccde28a4b6a36165a89d95175f46e3419dde82ee23dbed70a",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+          },
+          "label": "Очередь документов bars — состояния, пауза перед embed и приоритеты/Проверка",
+          "namespace": "features/indexing/document-queue.md",
+          "aliases": [],
+          "source_ids": [
+            "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7"
+          ],
+          "evidence": [
+            "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5"
+          ],
+          "roles": [],
+          "parent": "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7"
+        },
+        {
+          "reference": {
+            "kind": "chunk",
+            "id": "4c3a621e57c54ac9ef3688dc80aa1c70d59e7fda27e5198e89adda9b11823507",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+          },
+          "label": "Очередь документов bars — состояния, пауза перед embed и приоритеты/Обнаружение и обработка расхождений",
+          "namespace": "features/indexing/document-queue.md",
+          "aliases": [],
+          "source_ids": [
+            "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7"
+          ],
+          "evidence": [
+            "cdf5d53aa70d09df61a873500b8361fcbb88a484acc805187773fa6b07813852"
+          ],
+          "roles": [],
+          "parent": "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7"
+        },
+        {
+          "reference": {
+            "kind": "chunk",
+            "id": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+          },
+          "label": "Очередь документов bars — состояния, пауза перед embed и приоритеты/Пауза",
+          "namespace": "features/indexing/document-queue.md",
+          "aliases": [],
+          "source_ids": [
+            "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7"
+          ],
+          "evidence": [
+            "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30"
+          ],
+          "roles": [],
+          "parent": "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7"
+        },
+        {
+          "reference": {
+            "kind": "chunk",
+            "id": "7e05a94e7c5883c24c01947a1389a8c2a27bcfad53962d4902b2472f44473303",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+          },
+          "label": "Очередь документов bars — состояния, пауза перед embed и приоритеты",
+          "namespace": "features/indexing/document-queue.md",
+          "aliases": [],
+          "source_ids": [
+            "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7"
+          ],
+          "evidence": [
+            "c185ad7b606c63f98e88d6b7a5d2c4c569ab878c42b9484ee47ebeeda80c263d"
+          ],
+          "roles": [],
+          "parent": "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7"
+        },
+        {
+          "reference": {
+            "kind": "chunk",
+            "id": "a4d8bb1da47da7d3dfb9fa5174ad88e4443c8e20044f0798f7703df2d4802967",
+            "revision": "27b279bcc7946d0fd2a339ed543c19487772e7214e2a38edfcefc09e440f7768"
+          },
+          "label": "Настройки bars — что меняет каждая вкладка и когда это нужно/Вкладка «Индексация»",
+          "namespace": "manual/settings.md",
+          "aliases": [],
+          "source_ids": [
+            "5ad1684284dbdd47cdcf8ba4263545761ccf38cbce130fce5a995786397deb7b"
+          ],
+          "evidence": [
+            "2b9a5c73b90da249dc95e4877827133ae95de2194a7f23cb6a2f0b4ce5caaf59"
+          ],
+          "roles": [],
+          "parent": "5ad1684284dbdd47cdcf8ba4263545761ccf38cbce130fce5a995786397deb7b"
+        },
+        {
+          "reference": {
+            "kind": "chunk",
+            "id": "aa5c84637b4cd0b564d1341cf75030ddb03cc6dcf221dd1075287c7655b33642",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+          },
+          "label": "Очередь документов bars — состояния, пауза перед embed и приоритеты/Запись очереди",
+          "namespace": "features/indexing/document-queue.md",
+          "aliases": [],
+          "source_ids": [
+            "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7"
+          ],
+          "evidence": [
+            "8185e99d334d2f15580a7fd5fd752b37729f7c079f1ce2e0fa8bf008980443e6"
+          ],
+          "roles": [],
+          "parent": "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7"
+        },
+        {
+          "reference": {
+            "kind": "chunk",
+            "id": "beb4a4fb0d4c998f6fcb4174ce1d1bb26c8328f5a05caf664fff7027967fc5af",
+            "revision": "0900de45d6cfb7578a1a9fe73658dbf1172dad74118c7b5f422b1b052a2ba9ee"
+          },
+          "label": "Передача — очередь документов и пауза перед embed (3.2.1)/Сложности",
+          "namespace": "chats/2026-10-22-document-queue/handoff.md",
+          "aliases": [],
+          "source_ids": [
+            "31fa4ff2084e5093f74805060f39fe44799672e15df920fab7a5ec499cc7f53f"
+          ],
+          "evidence": [
+            "7c0e7e7dacc9111374b1461a3a1a383879eaf9db269e0012f0ff35491907de0d"
+          ],
+          "roles": [],
+          "parent": "31fa4ff2084e5093f74805060f39fe44799672e15df920fab7a5ec499cc7f53f"
+        },
+        {
+          "reference": {
+            "kind": "chunk",
+            "id": "c045644b476351ec1adf459356e13e43b518c10fba60e21b91dd30bdb6637d95",
+            "revision": "c9d0be3dfea98da835d73bb9cce3156481f33e7ab38151363923e854a2217f74"
+          },
+          "label": "Индексация",
+          "namespace": "features/indexing/Index.md",
+          "aliases": [],
+          "source_ids": [
+            "21e46bf2d60b30868952df0bbc414d9c0536aa6133fdd40f1c303c9f80ceaf9b"
+          ],
+          "evidence": [
+            "0ee16e235c71fef9cfeb581991ea5190544c4353d5282f0236577c8777e3f002"
+          ],
+          "roles": [],
+          "parent": "21e46bf2d60b30868952df0bbc414d9c0536aa6133fdd40f1c303c9f80ceaf9b"
+        },
+        {
+          "reference": {
+            "kind": "chunk",
+            "id": "cd8e530fe0c4165005b2e158ac40a5a091229493b03b52dfdab295326faea91e",
+            "revision": "a46151bf653847ceb542407a699522a2d60e50fdce4bd2410bcbb1f4c67d9536"
+          },
+          "label": "Умолчания индексации — пауза перед embed и стоимость фоновой проверки",
+          "namespace": "knowledge/indexing-defaults.md",
+          "aliases": [],
+          "source_ids": [
+            "7560c2cb322f4e7bf0cec9db2f4d047dd90fac2c4e8ea4aaed09ed1bf4d5310a"
+          ],
+          "evidence": [
+            "466dfc4922112c3fcdfba2e7e6c0f119873e83ee6b1715a670b37578071f47c0"
+          ],
+          "roles": [],
+          "parent": "7560c2cb322f4e7bf0cec9db2f4d047dd90fac2c4e8ea4aaed09ed1bf4d5310a"
+        },
+        {
+          "reference": {
+            "kind": "chunk",
+            "id": "e6b6a6f65ee8abcba87c329c12f90725c8b917283e00750675c54d20565606b3",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+          },
+          "label": "Очередь документов bars — состояния, пауза перед embed и приоритеты/Настройка паузы и трей",
+          "namespace": "features/indexing/document-queue.md",
+          "aliases": [],
+          "source_ids": [
+            "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7"
+          ],
+          "evidence": [
+            "05e0854b9a18086ca9525920b95199d23bbe135bd1e6a77702da993692533fb9"
+          ],
+          "roles": [],
+          "parent": "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7"
+        },
+        {
+          "reference": {
+            "kind": "chunk",
+            "id": "e9220700c0e890e5e32ce29c78f6e497b6862b88ab8c9cf91e39ae32620be946",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+          },
+          "label": "Очередь документов bars — состояния, пауза перед embed и приоритеты/Память и нагрузка",
+          "namespace": "features/indexing/document-queue.md",
+          "aliases": [],
+          "source_ids": [
+            "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7"
+          ],
+          "evidence": [
+            "45a4177c71bcec5baadbec13aa1e696126e962f69d0a6b4a8ea779fb460d9a71"
+          ],
+          "roles": [],
+          "parent": "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7"
+        }
+      ],
+      "sources": [
+        {
+          "reference": {
+            "kind": "document",
+            "id": "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+          },
+          "path": "docs/features/indexing/document-queue.md",
+          "docs_path": "features/indexing/document-queue.md",
+          "module": "features",
+          "title": "Очередь документов bars — состояния, пауза перед embed и приоритеты",
+          "hash": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+        },
+        {
+          "reference": {
+            "kind": "document",
+            "id": "21e46bf2d60b30868952df0bbc414d9c0536aa6133fdd40f1c303c9f80ceaf9b",
+            "revision": "c9d0be3dfea98da835d73bb9cce3156481f33e7ab38151363923e854a2217f74"
+          },
+          "path": "docs/features/indexing/Index.md",
+          "docs_path": "features/indexing/Index.md",
+          "module": "features",
+          "title": "Индексация bars — оглавление",
+          "hash": "c9d0be3dfea98da835d73bb9cce3156481f33e7ab38151363923e854a2217f74"
+        },
+        {
+          "reference": {
+            "kind": "document",
+            "id": "31fa4ff2084e5093f74805060f39fe44799672e15df920fab7a5ec499cc7f53f",
+            "revision": "0900de45d6cfb7578a1a9fe73658dbf1172dad74118c7b5f422b1b052a2ba9ee"
+          },
+          "path": "docs/chats/2026-10-22-document-queue/handoff.md",
+          "docs_path": "chats/2026-10-22-document-queue/handoff.md",
+          "module": "chats",
+          "title": "Передача — очередь документов и пауза перед embed (3.2.1)",
+          "hash": "0900de45d6cfb7578a1a9fe73658dbf1172dad74118c7b5f422b1b052a2ba9ee"
+        },
+        {
+          "reference": {
+            "kind": "document",
+            "id": "453d9c462a9360fe252d70ae7d32d2f70575a2b9df1378520b8c9914b4a75985",
+            "revision": "23ed0ff8d66dc061e4109a04f0849c1c00be7616a78603b3db450cab9bf5fd8e"
+          },
+          "path": "docs/features/settings/settings.md",
+          "docs_path": "features/settings/settings.md",
+          "module": "features",
+          "title": "Настройки bars — ключи settings.toml и config.toml, значения по умолчанию",
+          "hash": "23ed0ff8d66dc061e4109a04f0849c1c00be7616a78603b3db450cab9bf5fd8e"
+        },
+        {
+          "reference": {
+            "kind": "document",
+            "id": "5ad1684284dbdd47cdcf8ba4263545761ccf38cbce130fce5a995786397deb7b",
+            "revision": "27b279bcc7946d0fd2a339ed543c19487772e7214e2a38edfcefc09e440f7768"
+          },
+          "path": "docs/manual/settings.md",
+          "docs_path": "manual/settings.md",
+          "module": "manual",
+          "title": "Настройки bars — что меняет каждая вкладка и когда это нужно",
+          "hash": "27b279bcc7946d0fd2a339ed543c19487772e7214e2a38edfcefc09e440f7768"
+        },
+        {
+          "reference": {
+            "kind": "document",
+            "id": "7560c2cb322f4e7bf0cec9db2f4d047dd90fac2c4e8ea4aaed09ed1bf4d5310a",
+            "revision": "a46151bf653847ceb542407a699522a2d60e50fdce4bd2410bcbb1f4c67d9536"
+          },
+          "path": "docs/knowledge/indexing-defaults.md",
+          "docs_path": "knowledge/indexing-defaults.md",
+          "module": "knowledge",
+          "title": "Умолчания индексации — пауза перед embed и стоимость фоновой проверки",
+          "hash": "a46151bf653847ceb542407a699522a2d60e50fdce4bd2410bcbb1f4c67d9536"
+        }
+      ],
+      "assertions": [
+        {
+          "id": "012c941bc08b717f6f4010926657b322431f9b98b84e3b3368d0160142f3544f",
+          "from": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+          "to": "0e965c2e0a7c975ccde28a4b6a36165a89d95175f46e3419dde82ee23dbed70a",
+          "predicate": "similar_to",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "similarity",
+          "evidence": [
+            "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+            "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5"
+          ],
+          "score": 0.8776267170906067
+        },
+        {
+          "id": "0db679edd8f820a915c0c581aa37afeb3edc7452ff17ca9ea63501b74e774fa6",
+          "from": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+          "to": "aa5c84637b4cd0b564d1341cf75030ddb03cc6dcf221dd1075287c7655b33642",
+          "predicate": "similar_to",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "similarity",
+          "evidence": [
+            "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+            "8185e99d334d2f15580a7fd5fd752b37729f7c079f1ce2e0fa8bf008980443e6"
+          ],
+          "score": 0.8274658918380737
+        },
+        {
+          "id": "124ec5012bf7e2cde808f58ef8c08506caa9e68eb9302afc6365a6b817903894",
+          "from": "00e16d0a188693b877a249c27cd6b11967ca7ea2eac3f831ccfdebf215f2ba4f",
+          "to": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+          "predicate": "similar_to",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "similarity",
+          "evidence": [
+            "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+            "6543aa60190ffd2bae0e1b73d853d84682646f0ab66e8581247e9ccb9503dcd9"
+          ],
+          "score": 0.9066703915596008
+        },
+        {
+          "id": "16d8ebc75f10695f9858ad7224185d7c81715ce93148a247ab9b797060844307",
+          "from": "0d62da40b196733342772b99e2e38d64b8923ecaaaaafc02c3534a66d5906fc6",
+          "to": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+          "predicate": "similar_to",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "similarity",
+          "evidence": [
+            "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+            "67e8834927e587f819bc4f6e33184b52323f2424866671d7f6c733998eee4d47"
+          ],
+          "score": 0.8075700402259827
+        },
+        {
+          "id": "1f9023f6f4f050931f8d9d32844488bec4d0c5a1ba0e81f00334007efaa0ccd5",
+          "from": "e6b6a6f65ee8abcba87c329c12f90725c8b917283e00750675c54d20565606b3",
+          "to": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+          "predicate": "similar_to",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "similarity",
+          "evidence": [
+            "05e0854b9a18086ca9525920b95199d23bbe135bd1e6a77702da993692533fb9",
+            "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30"
+          ],
+          "score": 0.8826160430908203
+        },
+        {
+          "id": "22ab061912adb5911c59b93f1a27b7a285d1e34808881fd8a085ac8fa327e69c",
+          "from": "4c3a621e57c54ac9ef3688dc80aa1c70d59e7fda27e5198e89adda9b11823507",
+          "to": "0e965c2e0a7c975ccde28a4b6a36165a89d95175f46e3419dde82ee23dbed70a",
+          "predicate": "similar_to",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "similarity",
+          "evidence": [
+            "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5",
+            "cdf5d53aa70d09df61a873500b8361fcbb88a484acc805187773fa6b07813852"
+          ],
+          "score": 0.8654069304466248
+        },
+        {
+          "id": "271483052764b4c17a649befce8eb21196db9458cbdbf1c7e539f349fd564bc3",
+          "from": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+          "to": "006083d13b0da09ca8f8040ca59256bc7289deb4ef045e2f0ce3bab576e8002d",
+          "predicate": "next_chunk",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "structural",
+          "evidence": [
+            "a5b0af032d85d220369a29b67b0597aecb1bfdcad1bb8a87a37df2186805647a"
+          ]
+        },
+        {
+          "id": "283461b71a1d551e9d1d26c7656c1ee65849feb1ad163b9d6d8b145046247235",
+          "from": "7e05a94e7c5883c24c01947a1389a8c2a27bcfad53962d4902b2472f44473303",
+          "to": "0e965c2e0a7c975ccde28a4b6a36165a89d95175f46e3419dde82ee23dbed70a",
+          "predicate": "similar_to",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "similarity",
+          "evidence": [
+            "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5",
+            "c185ad7b606c63f98e88d6b7a5d2c4c569ab878c42b9484ee47ebeeda80c263d"
+          ],
+          "score": 0.8806179761886597
+        },
+        {
+          "id": "4859a21638108364b2b615632af81ae835ee75a6a2f6e53c8c7deaad8cd028a2",
+          "from": "cd8e530fe0c4165005b2e158ac40a5a091229493b03b52dfdab295326faea91e",
+          "to": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+          "predicate": "similar_to",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "similarity",
+          "evidence": [
+            "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+            "466dfc4922112c3fcdfba2e7e6c0f119873e83ee6b1715a670b37578071f47c0"
+          ],
+          "score": 0.8270627856254578
+        },
+        {
+          "id": "60384b36cba7ed5b0dbbf63f46db1f4f6ddca51eeb0fe12df10e3290b7bb5be7",
+          "from": "e9220700c0e890e5e32ce29c78f6e497b6862b88ab8c9cf91e39ae32620be946",
+          "to": "0e965c2e0a7c975ccde28a4b6a36165a89d95175f46e3419dde82ee23dbed70a",
+          "predicate": "similar_to",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "similarity",
+          "evidence": [
+            "45a4177c71bcec5baadbec13aa1e696126e962f69d0a6b4a8ea779fb460d9a71",
+            "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5"
+          ],
+          "score": 0.8382947444915771
+        },
+        {
+          "id": "640a58f6d92c0f77c8b9e04741088edbc9048de6c074be18a1308d3617193c38",
+          "from": "c045644b476351ec1adf459356e13e43b518c10fba60e21b91dd30bdb6637d95",
+          "to": "0e965c2e0a7c975ccde28a4b6a36165a89d95175f46e3419dde82ee23dbed70a",
+          "predicate": "similar_to",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "similarity",
+          "evidence": [
+            "0ee16e235c71fef9cfeb581991ea5190544c4353d5282f0236577c8777e3f002",
+            "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5"
+          ],
+          "score": 0.7621106505393982
+        },
+        {
+          "id": "72a72f59ef4458abc5908800eac823d2a38af980582eb20d0a647b47f0e3d75d",
+          "from": "0e965c2e0a7c975ccde28a4b6a36165a89d95175f46e3419dde82ee23dbed70a",
+          "to": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+          "predicate": "similar_to",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "similarity",
+          "evidence": [
+            "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+            "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5"
+          ],
+          "score": 0.8776267170906067
+        },
+        {
+          "id": "772cef56b99cef6f1904482bb0268d032cc05c4ec82959e4ac1f131d9d21bf06",
+          "from": "beb4a4fb0d4c998f6fcb4174ce1d1bb26c8328f5a05caf664fff7027967fc5af",
+          "to": "0e965c2e0a7c975ccde28a4b6a36165a89d95175f46e3419dde82ee23dbed70a",
+          "predicate": "similar_to",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "similarity",
+          "evidence": [
+            "7c0e7e7dacc9111374b1461a3a1a383879eaf9db269e0012f0ff35491907de0d",
+            "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5"
+          ],
+          "score": 0.7299782633781433
+        },
+        {
+          "id": "7b57ee26da3f18d4814c46e5125763eefbff483e8717545d2ad9588bda159541",
+          "from": "a4d8bb1da47da7d3dfb9fa5174ad88e4443c8e20044f0798f7703df2d4802967",
+          "to": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+          "predicate": "similar_to",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "similarity",
+          "evidence": [
+            "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+            "2b9a5c73b90da249dc95e4877827133ae95de2194a7f23cb6a2f0b4ce5caaf59"
+          ],
+          "score": 0.7597205638885498
+        },
+        {
+          "id": "7face7b0bc0a760cb17226e306f61a917b94a68156d03feae441995f1c9bef94",
+          "from": "0e965c2e0a7c975ccde28a4b6a36165a89d95175f46e3419dde82ee23dbed70a",
+          "to": "aa5c84637b4cd0b564d1341cf75030ddb03cc6dcf221dd1075287c7655b33642",
+          "predicate": "similar_to",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "similarity",
+          "evidence": [
+            "8185e99d334d2f15580a7fd5fd752b37729f7c079f1ce2e0fa8bf008980443e6",
+            "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5"
+          ],
+          "score": 0.9028997421264648
+        },
+        {
+          "id": "a306c09ed614e4852ad2d106f830b661d6581d7291b08f1b8d1a81e73939ec38",
+          "from": "0e965c2e0a7c975ccde28a4b6a36165a89d95175f46e3419dde82ee23dbed70a",
+          "to": "00e16d0a188693b877a249c27cd6b11967ca7ea2eac3f831ccfdebf215f2ba4f",
+          "predicate": "similar_to",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "similarity",
+          "evidence": [
+            "6543aa60190ffd2bae0e1b73d853d84682646f0ab66e8581247e9ccb9503dcd9",
+            "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5"
+          ],
+          "score": 0.8876595497131348
+        },
+        {
+          "id": "b7035e39616a453bea10f789a43059fbbe2eeca6c0760a89e8be7fe90abe93ca",
+          "from": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+          "to": "00e16d0a188693b877a249c27cd6b11967ca7ea2eac3f831ccfdebf215f2ba4f",
+          "predicate": "similar_to",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "similarity",
+          "evidence": [
+            "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+            "6543aa60190ffd2bae0e1b73d853d84682646f0ab66e8581247e9ccb9503dcd9"
+          ],
+          "score": 0.9066703915596008
+        },
+        {
+          "id": "d0de5aad84aae8f64c142cc756f2bd5077303a554b37b867db670b2b992e8bcd",
+          "from": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+          "to": "e6b6a6f65ee8abcba87c329c12f90725c8b917283e00750675c54d20565606b3",
+          "predicate": "similar_to",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "similarity",
+          "evidence": [
+            "05e0854b9a18086ca9525920b95199d23bbe135bd1e6a77702da993692533fb9",
+            "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30"
+          ],
+          "score": 0.8826160430908203
+        },
+        {
+          "id": "dd349ada5a37adc183ab84c9ef8aafb43b6e8704012b0935ada665bcd6d77080",
+          "from": "aa5c84637b4cd0b564d1341cf75030ddb03cc6dcf221dd1075287c7655b33642",
+          "to": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+          "predicate": "next_chunk",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "structural",
+          "evidence": [
+            "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30"
+          ]
+        },
+        {
+          "id": "e29c086dc1e469dc9c0ea65ec6eea04bba1c21f32c8fcaefdee2073c6cf6206c",
+          "from": "7a2713883ff2402f20c04ac7fa61d03febcd42aa145c8bc29ed53374bbaf480b",
+          "to": "cd8e530fe0c4165005b2e158ac40a5a091229493b03b52dfdab295326faea91e",
+          "predicate": "similar_to",
+          "polarity": "positive",
+          "qualifiers": {},
+          "origin": "similarity",
+          "evidence": [
+            "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+            "466dfc4922112c3fcdfba2e7e6c0f119873e83ee6b1715a670b37578071f47c0"
+          ],
+          "score": 0.8270627856254578
+        }
+      ],
+      "evidence": [
+        {
+          "id": "05e0854b9a18086ca9525920b95199d23bbe135bd1e6a77702da993692533fb9",
+          "document": {
+            "kind": "document",
+            "id": "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+          },
+          "span": {
+            "start": 15685,
+            "end": 16640,
+            "first_line": 79,
+            "last_line": 81
+          },
+          "quote": "## Настройка паузы и трей\n\nНастройка паузы доступна в разделе «Индексация» окна: целое число 0…3600 секунд, сохраняется существующим методом настроек, без переиндексации. Новое значение применяется к следующим правкам; уже назначенное ожидание не меняется. Переопределение проекта сохраняется. Трей показывает отдельное число документов, ждущих паузы, и переход на страницу соответствующего проекта даже без работающего задания; документ с ошибкой сохраняет состояние «нужно внимание» после следующей фоновой проверки.",
+          "source_hash": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5",
+          "method": "chunk-source-v1"
+        },
+        {
+          "id": "0ee16e235c71fef9cfeb581991ea5190544c4353d5282f0236577c8777e3f002",
+          "document": {
+            "kind": "document",
+            "id": "21e46bf2d60b30868952df0bbc414d9c0536aa6133fdd40f1c303c9f80ceaf9b",
+            "revision": "c9d0be3dfea98da835d73bb9cce3156481f33e7ab38151363923e854a2217f74"
+          },
+          "span": {
+            "start": 67,
+            "end": 819,
+            "first_line": 5,
+            "last_line": 13
+          },
+          "quote": "# Индексация\n\nКак документы проекта попадают в индекс и как индекс остаётся актуальным.\n\n| Файл | Когда читать |\n|---|---|\n| `chunking.md` | Разбор Markdown, дерево разделов, нарезка, склейка, текст для эмбеддинга |\n| `updates.md` | Часовая проверка, активность MCP и окон, очередь обновления, исключения и полная переиндексация |\n| `document-queue.md` | Очередь документов: состояния, пауза перед embed, приоритеты, страница индексации; реализовано в 3.2.1 |",
+          "source_hash": "c9d0be3dfea98da835d73bb9cce3156481f33e7ab38151363923e854a2217f74",
+          "method": "chunk-source-v1"
+        },
+        {
+          "id": "13efd6ce7288bb393653286e92529126556bb0f5f525bfbae85447bd2e9f3a30",
+          "document": {
+            "kind": "document",
+            "id": "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+          },
+          "span": {
+            "start": 5278,
+            "end": 7086,
+            "first_line": 37,
+            "last_line": 42
+          },
+          "quote": "## Пауза\n\n- Умолчание — 30 с (Т-41); настройка `[indexing] edit_pause_seconds` в `settings.toml` и, как у остальных числовых параметров, переопределение в `.bars/config.toml` ([настройки](../settings/settings.md)); `0` — без паузы (запись сразу `queued`). Замер умолчания на потоке правок агентов — [умолчания индексации](../../knowledge/indexing-defaults.md): почти вся экономия набирается к 15 с, смена умолчания — OQ-183.\n- Пауза применяется к изменениям, пришедшим как **правка**: из окна (`document_write`, операции дерева) и из слежения. Документы, найденные проверкой при старте, хуком, периодической проверкой или явной командой, паузы не ждут: это не свежая правка, а накопленное расхождение (OQ-135).\n- Максимума ожидания нет: непрерывный поток правок (агент пишет файл каждые 20 с) откладывает embed этого документа, пока поток не стихнет. Это согласовано с автосохранением редактора (OQ-124), и состояние «ждёт паузы» видно с оставшимся временем.\n- Время — монотонные часы воркера; перезапуск воркера паузу не хранит: после старта проверка находит расхождения и ставит их без паузы.",
+          "source_hash": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5",
+          "method": "chunk-source-v1"
+        },
+        {
+          "id": "2b9a5c73b90da249dc95e4877827133ae95de2194a7f23cb6a2f0b4ce5caaf59",
+          "document": {
+            "kind": "document",
+            "id": "5ad1684284dbdd47cdcf8ba4263545761ccf38cbce130fce5a995786397deb7b",
+            "revision": "27b279bcc7946d0fd2a339ed543c19487772e7214e2a38edfcefc09e440f7768"
+          },
+          "span": {
+            "start": 4109,
+            "end": 4849,
+            "first_line": 43,
+            "last_line": 45
+          },
+          "quote": "## Вкладка «Индексация»\n\n«Пауза, секунд» — сколько bars ждёт после последней правки перед обновлением поиска по смыслу. По умолчанию 30 секунд; допустимо от 0 до 3600, `0` отключает ожидание. Новая правка запускает паузу заново. После «Сохранить» значение действует для следующих правок, уже начавшееся ожидание остаётся прежним. Настройка отдельного проекта может перекрыть общую. Переиндексация не требуется.",
+          "source_hash": "27b279bcc7946d0fd2a339ed543c19487772e7214e2a38edfcefc09e440f7768",
+          "method": "chunk-source-v1"
+        },
+        {
+          "id": "45a4177c71bcec5baadbec13aa1e696126e962f69d0a6b4a8ea779fb460d9a71",
+          "document": {
+            "kind": "document",
+            "id": "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+          },
+          "span": {
+            "start": 10404,
+            "end": 11145,
+            "first_line": 58,
+            "last_line": 60
+          },
+          "quote": "## Память и нагрузка\n\nЗаписей не больше числа документов проекта (ключ уникален); запись — путь и несколько чисел. Массовое изменение (агент переложил сотни файлов, потеря событий `notify`) идёт как сейчас: событие без путей или `Rescan` ставит проверку проекта целиком, результат проверки (список найденных расхождений) превращается в записи с источником `periodic`/`watch` без паузы, чтобы проект не ждал паузы лишний раз.",
+          "source_hash": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5",
+          "method": "chunk-source-v1"
+        },
+        {
+          "id": "466dfc4922112c3fcdfba2e7e6c0f119873e83ee6b1715a670b37578071f47c0",
+          "document": {
+            "kind": "document",
+            "id": "7560c2cb322f4e7bf0cec9db2f4d047dd90fac2c4e8ea4aaed09ed1bf4d5310a",
+            "revision": "a46151bf653847ceb542407a699522a2d60e50fdce4bd2410bcbb1f4c67d9536"
+          },
+          "span": {
+            "start": 142,
+            "end": 1194,
+            "first_line": 5,
+            "last_line": 7
+          },
+          "quote": "# Умолчания индексации — пауза перед embed и стоимость фоновой проверки\n\nСтатус (26-10-2026): замер шага 6.1.1 выполнен 24-10-2026; числа описывают прежний путь проверки через очередь и не измеряют нынешний `scan`. Автор выбрал часовой интервал и слежение только при активности MCP/UI (OQ-206). Автор также выбрал паузу перед embed 15 с (OQ-183); реализация выделена отдельно, этот замер не подтверждает изменение константы. Пауза — Т-41 и [очередь документов](../features/indexing/document-queue.md), ключ `[indexing] edit_pause_seconds` — [настройки](../features/settings/settings.md), действующая политика проверок — [обновление индекса](../features/indexing/updates.md).",
+          "source_hash": "a46151bf653847ceb542407a699522a2d60e50fdce4bd2410bcbb1f4c67d9536",
+          "method": "chunk-source-v1"
+        },
+        {
+          "id": "6543aa60190ffd2bae0e1b73d853d84682646f0ab66e8581247e9ccb9503dcd9",
+          "document": {
+            "kind": "document",
+            "id": "31fa4ff2084e5093f74805060f39fe44799672e15df920fab7a5ec499cc7f53f",
+            "revision": "0900de45d6cfb7578a1a9fe73658dbf1172dad74118c7b5f422b1b052a2ba9ee"
+          },
+          "span": {
+            "start": 112,
+            "end": 1789,
+            "first_line": 5,
+            "last_line": 12
+          },
+          "quote": "# Передача — очередь документов и пауза перед embed (3.2.1)\n\n## Сделано\n\n- Проект и отличия от него — [очередь документов](../../features/indexing/document-queue.md). Запись на документ, пауза Т-41 после правки, приоритет правки Т-42, пропуск ждущих документов проверкой, явная команда без паузы, удаление без паузы, записи не создаются в `reindex_required`.\n- Ключ `[indexing] edit_pause_seconds` — [настройки](../../features/settings/settings.md). `activity.documents` и `index_retry` — [протокол](../../architecture/protocol.md); раздел «Документы» — [страница индексации](../../features/window/indexing-progress.md); [руководство](../../manual/activity.md) и [устройство воркера](../../architecture/worker.md) поправлены.\n- Код: `crates/bars-worker/src/worker/doc_queue.rs`, `mod.rs`, `control.rs`, `queue.rs`; `crates/bars-core/src/indexing/indexer.rs`, `settings/`; `crates/bars-protocol/src/methods.rs`; `crates/bars-app/src/commands.rs` (`document_write` сообщает воркеру); `ui/src/lib/IndexingPage.svelte`, `app.svelte.ts`, `types.ts`, `mock.ts`.\n- Тесты: `bars-worker --lib` 258 ок, `bars-core` (пропуск документа, настройки) ок, `bars-protocol` ок, `bars-cli` и `bars-mcp` ок, UI 432 ок. Сборка — через `vcvars64`, `CMAKE_GENERATOR=Ninja`, `CARGO_TARGET_DIR=C:/bars-build`.",
+          "source_hash": "0900de45d6cfb7578a1a9fe73658dbf1172dad74118c7b5f422b1b052a2ba9ee",
+          "method": "chunk-source-v1"
+        },
+        {
+          "id": "67e8834927e587f819bc4f6e33184b52323f2424866671d7f6c733998eee4d47",
+          "document": {
+            "kind": "document",
+            "id": "453d9c462a9360fe252d70ae7d32d2f70575a2b9df1378520b8c9914b4a75985",
+            "revision": "23ed0ff8d66dc061e4109a04f0849c1c00be7616a78603b3db450cab9bf5fd8e"
+          },
+          "span": {
+            "start": 11776,
+            "end": 13990,
+            "first_line": 84,
+            "last_line": 103
+          },
+          "quote": "## Параметры нарезки в settings.toml\n\nТаблица `[chunking]` (Т-18, Т-23):\n\n| Ключ | По умолчанию | Значение |\n|---|---|---|\n| `min_chars` | `250` | раздел короче склеивается со следующим |\n| `max_chars` | `6000` | раздел длиннее режется на несколько чанков |\n\n## Пауза перед индексацией правки в settings.toml\n\nТаблица `[indexing]` (Т-41, [очередь документов](../indexing/document-queue.md)):\n\n| Ключ | По умолчанию | Значение |\n|---|---|---|\n| `edit_pause_seconds` | `30` | сколько секунд после последней правки документа bars ждёт, прежде чем пересчитывать его; `0` — без паузы |\n\nБольше 3600 секунд (час) — ошибка чтения: для «не ждать» есть `0`. Пауза относится к правкам из окна и событиям слежения за файлами; проверки при старте, раз в час и явные команды её не ждут. В окне — раздел «Индексация», поле «Пауза, секунд», применение кнопкой «Сохранить». Воркер подхватывает новое значение при следующей правке; уже назначенное ожидание не пересчитывается.\n\nУмолчание 30 секунд задано Т-41. Замер на 8 тысячах правок агентов за шесть недель ([умолчания индексации](../../knowledge/indexing-defaults.md)): пауза 30 с убирает 44 % вызовов embed, 15 с — 42 %, 10 с — 40 %, 5 с — 33 %. Правка ждёт embed не дольше 50 с в 90 % случаев при 30 с и 29 с при 15 с. На число заданий индексации пауза почти не влияет. Предложение снизить умолчание до 15 с — OQ-183, до ответа автора действует 30 с.",
+          "source_hash": "23ed0ff8d66dc061e4109a04f0849c1c00be7616a78603b3db450cab9bf5fd8e",
+          "method": "chunk-source-v1"
+        },
+        {
+          "id": "7c0e7e7dacc9111374b1461a3a1a383879eaf9db269e0012f0ff35491907de0d",
+          "document": {
+            "kind": "document",
+            "id": "31fa4ff2084e5093f74805060f39fe44799672e15df920fab7a5ec499cc7f53f",
+            "revision": "0900de45d6cfb7578a1a9fe73658dbf1172dad74118c7b5f422b1b052a2ba9ee"
+          },
+          "span": {
+            "start": 2404,
+            "end": 3033,
+            "first_line": 21,
+            "last_line": 28
+          },
+          "quote": "## Сложности\n\n- Чужие незавершённые правки (`audits`, `tree_io`) временно ломали сборку воркера; в `bars-app` падает `tree_io_tests::t03_names_and_paths_are_checked` — не из этой сессии.\n- Поздняя запись `waiting` от эха слежения после явной проверки (см. журнал).\n\n## Дальше\n\n3.2.2 — замер паузы на настоящем потоке правок; затем 3.3 (дерево по диску) использует `documents_edited` для операций с файлами.",
+          "source_hash": "0900de45d6cfb7578a1a9fe73658dbf1172dad74118c7b5f422b1b052a2ba9ee",
+          "method": "chunk-source-v1"
+        },
+        {
+          "id": "8185e99d334d2f15580a7fd5fd752b37729f7c079f1ce2e0fa8bf008980443e6",
+          "document": {
+            "kind": "document",
+            "id": "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+          },
+          "span": {
+            "start": 3050,
+            "end": 5276,
+            "first_line": 19,
+            "last_line": 35
+          },
+          "quote": "## Запись очереди\n\nКлюч — проект и путь документа; одна запись на ключ (Т-42: повторная правка не создаёт вторую).\n\n| Поле | Значение |\n|---|---|\n| `state` | `waiting` — ждёт паузы · `queued` — готов, ждёт своей очереди · `indexing` — идёт эмбеддинг · `error` — не проиндексирован после повторов |\n| `source` | откуда пришло изменение: `explicit`, `edit` (правка в bars), `watch`, `periodic` |\n| `due_at` | у `waiting` — когда закончится пауза |\n| `error` | текст последней ошибки без ключей |\n\nПереходы:\n\n1. **Событие** (правка в bars, слежение): записи нет — создаётся `waiting` с `due_at = сейчас + пауза`; запись `waiting` или `queued` — остаётся одна, `due_at` сдвигается (правка снова перезапускает ожидание), источник берётся старший; запись `indexing` — помечается «изменён заново», по окончании снова `waiting`; запись `error` — снова `waiting`.\n2. **Пауза истекла** — `queued`; воркер собирает все `queued` одного проекта в одну пачку `Scope::Files` (одна загрузка индекса на пачку, а не на файл).\n3. **Задание взяло документ** — `indexing`; **успех** — запись удаляется; **ошибка после повторов** — `error` с причиной (повторы и пропуск документа — как в [обновлении индекса](updates.md), «Порядок проверки проекта»).\n4. **Документ удалён с диска** — запись остаётся до удаления из индекса и исчезает; пауза удалению не нужна: пропавший документ из выдачи убирается без ожидания.",
+          "source_hash": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5",
+          "method": "chunk-source-v1"
+        },
+        {
+          "id": "87ea7ff60edbf4b5e9d80dd26aa9501d3ef2eb668bf6c8b31f3bc4fb5537e0a5",
+          "document": {
+            "kind": "document",
+            "id": "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+          },
+          "span": {
+            "start": 17185,
+            "end": 19864,
+            "first_line": 87,
+            "last_line": 102
+          },
+          "quote": "## Проверка\n\n| № | Сценарий |\n|---|---|\n| Q-01 | Пять правок одного документа с интервалом 2 с — один embed через паузу после последней (Т-41); число вызовов embed равно числу изменившихся чанков |\n| Q-02 | Правка во время `indexing` — документ индексируется снова один раз после паузы |\n| Q-03 | Две записи одного документа не бывает: повторная правка в `waiting`, `queued`, `error` |\n| Q-04 | Порядок: явная команда обгоняет правку, правка — слежение, слежение — периодическую |\n| Q-05 | Поиск окна и вызов MCP отвечают во время пачки; медиана не хуже замера [поиска во время индексации](../../knowledge/search-during-indexing.md) |\n| Q-06 | `reindex_required`: записи не создаются; после согласия новая полная проверка находит всё |\n| Q-07 | Страница индексации: состояния, оставшееся время, ошибка, «Повторить» |\n| Q-08 | Остановка и удаление проекта снимают записи; перезапуск воркера не оставляет «призраков» |\n| Q-09 | Независимый `scan` при общей паузе показывает найденные документы как `queued`/`explicit` без вызова модели; отменённый или устаревший scan их не публикует |\n| Q-10 | Фоновая проверка, в том числе после смены нарезки, не повторяет `error`; «Повторить» восстанавливает документ и завершает применение нарезки |\n| Q-11 | Уже переданные текущему проходу документы не ставятся повторно; новая правка завершённого документа сохраняется для следующего прохода; правка во время embed будит таймер после завершения документа |\n| Q-12 | Пауза в окне: `0` и `3600` сохраняются, `3601`, дробное, отрицательное и пустое значение отклоняются; существующее переопределение проекта не меняется |",
+          "source_hash": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5",
+          "method": "chunk-source-v1"
+        },
+        {
+          "id": "a5b0af032d85d220369a29b67b0597aecb1bfdcad1bb8a87a37df2186805647a",
+          "document": {
+            "kind": "document",
+            "id": "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+          },
+          "span": {
+            "start": 7088,
+            "end": 8100,
+            "first_line": 44,
+            "last_line": 46
+          },
+          "quote": "## Приоритеты\n\nПорядок выбора следующей пачки (Т-42): явная команда → правка в bars → слежение → периодическая проверка (`Periodic < Watch < Edit < Explicit`). Документы внутри прохода сортируются по источнику; равный приоритет сохраняет порядок обхода. Список окна внутри уровня сортируется по сроку ожидания и порядку появления. Запрос поиска и вызов MCP стоят выше всей индексации (замок модели). Голодание нижних уровней при непрерывных правках допустимо: пачка берёт готовые записи любого уровня одного проекта, а выбранный проект определяется старшей готовой записью.",
+          "source_hash": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5",
+          "method": "chunk-source-v1"
+        },
+        {
+          "id": "c185ad7b606c63f98e88d6b7a5d2c4c569ab878c42b9484ee47ebeeda80c263d",
+          "document": {
+            "kind": "document",
+            "id": "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+          },
+          "span": {
+            "start": 133,
+            "end": 1565,
+            "first_line": 5,
+            "last_line": 9
+          },
+          "quote": "# Очередь документов bars — состояния, пауза перед embed и приоритеты\n\nСтатус: реализация 3.2.1 завершена, пункт полностью закрыт по прямому решению автора 23-10-2026; рекомендации OQ-135 приняты автором 22-10-2026. Очередь, пауза и список документов дополнены обнаружением расхождений полной проверкой, состояниями обработки, настройкой в окне и счётчиком в трее. Проверки продолжения описаны в разделе «Проверка»; установленное окно и настоящая модель не проверены, это ограничение доказательств не удерживает пункт открытым по решению автора. Очередь заданий по проектам по-прежнему одна запись на проект ([воркер](../../architecture/worker.md), «Реализация очереди и состояния воркера»).\n\nОсновано на: [требования Т-41 и Т-42](../knowledge-base/requirements.md), [обновление индекса](updates.md), [ход индексации в окне](../window/indexing-progress.md).",
+          "source_hash": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5",
+          "method": "chunk-source-v1"
+        },
+        {
+          "id": "cdf5d53aa70d09df61a873500b8361fcbb88a484acc805187773fa6b07813852",
+          "document": {
+            "kind": "document",
+            "id": "0e4d8032975512fd6bf5d1f02befbd1915141b913e377e9a6451d83b6ac42cb7",
+            "revision": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5"
+          },
+          "span": {
+            "start": 11147,
+            "end": 14012,
+            "first_line": 62,
+            "last_line": 70
+          },
+          "quote": "## Обнаружение и обработка расхождений\n\nНезависимая команда `scan` передаёт найденные пути после успешного завершения проверки и проверки актуальности проекта. Эти документы видны как `queued` с источником `explicit` до начала обновления индекса, в том числе при общей паузе индексации. Отменённый или устаревший scan записей не создаёт.\n\nИндексатор передаёт наблюдателю список расхождений после обхода и проверки метаданных, до обработки документов. Воркер добавляет отсутствующие записи без паузы с источником задания (`explicit`, `edit`, `watch`, `periodic`); существующие `waiting` и `error` фоновая проверка не сбрасывает. Явная команда разрешает повтор ошибок и снимает ожидание в своей области. Документы внутри прохода упорядочены по источнику очереди. Обнаружение расхождения не считается новой правкой и не перезапускает паузу.\n\nНачало обработки переводит одну запись в `indexing`; завершение обычного обновления снимает её либо сохраняет ошибку чтения/эмбеддинга. При полной перестройке успешные записи сохраняются до применения нового индекса. Прерванный проход возвращает необработанные документы в очередь. Удаление учитывается без паузы. Событие массового изменения и хвостовая проверка используют тот же механизм обнаружения.\n\nСмена нарезки не разрешает фоновый повтор ошибки. Пока ошибочный документ пропущен, новая схема нарезки не отмечается применённой ко всему индексу. Документы, уже переданные текущему проходу, остаются видны как `queued`, но соседнее событие не ставит их повторно. Если во время обработки пришла новая правка, завершение документа будит таймер её паузы сразу.",
+          "source_hash": "c2846170922a40716b33803887254200bc63966d3f9a1d6779c3e4ad78caf3a5",
+          "method": "chunk-source-v1"
+        }
+      ],
+      "truncated": true,
+      "limit_reasons": [
+        "limit",
+        "max_edges",
+        "max_paths"
+      ],
+      "next_cursor": null,
+      "warnings": [
+        "Явные правила не гарантируют полноту смысловых отношений; отсутствие связи не доказывает отсутствие проверки или зависимости"
+      ],
+      "method": "explicit-markdown-v6",
+      "elapsed_ms": 241,
+      "resolution": "resolved",
+      "candidates": [],
+      "missing_roles": [],
+      "budget_mode": "bytes",
+      "used_bytes": 68574
+    }
+  },
+  {
+    "request": {
+      "id": "real-2",
+      "text": "Какие требования и решения связаны с графом?",
+      "scope": {
+        "modules": [],
+        "files": []
+      },
+      "hits": [
+        {
+          "source_hash": "8a8c4697d16d761d90291dc4ddf2c0ccfb2fb74a6e1894d057c26399476dce2c",
+          "channel": "graph",
+          "path": "docs/features/window/global-search-design.md",
+          "title": "Глобальный поиск — дизайн окна и переходов",
+          "heading": "",
+          "first": 0,
+          "last": 0,
+          "score": null
+        }
+      ],
+      "score_kind": "none",
+      "depth": 1,
+      "fanout": 4,
+      "min_strength": 0.8500000238418579,
+      "max_nodes": 200,
+      "max_edges": 800,
+      "max_bytes": 262144,
+      "snapshot": null
+    },
+    "slice": {
+      "physical": {
+        "schema_version": 1,
+        "method": "query-v1",
+        "snapshot": "d45034d0b4d6b49cf2e9f591cdd548fe0eb53159a329c1dda4eb803a60350610",
+        "scope": {
+          "modules": [],
+          "files": []
+        },
+        "nodes": [
+          {
+            "id": "c579682a28dfd545e0e56be3f4c207461e9a0621651f3e590439f08f3f96e421",
+            "revision": "8a8c4697d16d761d90291dc4ddf2c0ccfb2fb74a6e1894d057c26399476dce2c",
+            "kind": "document",
+            "label": "Глобальный поиск — дизайн окна и переходов",
+            "path": "docs/features/window/global-search-design.md",
+            "docs_path": "features/window/global-search-design.md",
+            "module": "features",
+            "owner": "c579682a28dfd545e0e56be3f4c207461e9a0621651f3e590439f08f3f96e421",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "037782009a31c2135ba21bf3e0010d1eaa1a2f8eef59f1592a5c6ac00ae0394d",
+            "revision": "d800dca4b1404e17c9b4ab9a8919fe98e33ecf9156178db76b825721964bca4b",
+            "kind": "document",
+            "label": "Макет каркаса рабочей области bars",
+            "path": "docs/features/window/workspace-design.md",
+            "docs_path": "features/window/workspace-design.md",
+            "module": "features",
+            "owner": "037782009a31c2135ba21bf3e0010d1eaa1a2f8eef59f1592a5c6ac00ae0394d",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "58ab6637f3a2603ca05e29951d0d5b76eaccc07a3364ffba221031e78725e1e1",
+            "revision": "1e256a7520a81a701416c9f29dd543c615a0306868079be5de4fb1f18fae6579",
+            "kind": "document",
+            "label": "Рабочая область bars — проект панелей, поиска и управления",
+            "path": "docs/features/window/requirements.md",
+            "docs_path": "features/window/requirements.md",
+            "module": "features",
+            "owner": "58ab6637f3a2603ca05e29951d0d5b76eaccc07a3364ffba221031e78725e1e1",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "9a9cd94555035944b881313ac0bbaf59f284d6464333db61b5258001adb8c229",
+            "revision": "b5091f992c05e41af3011dc24d7fd2a9e5ded2a60f13c4f8cb54be582d2ff256",
+            "kind": "document",
+            "label": "Как устроено окно bars — оболочка Tauri, интерфейс на Svelte, трей",
+            "path": "docs/features/window/implementation.md",
+            "docs_path": "features/window/implementation.md",
+            "module": "features",
+            "owner": "9a9cd94555035944b881313ac0bbaf59f284d6464333db61b5258001adb8c229",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          },
+          {
+            "id": "1c75689042ac1e1e8f6aad31b92e490eb7dc07d86f5fd62b67da7e1afeb8d9f8",
+            "revision": "32a580c31d4a461d9f0a97d2be73c07bb56a04b16f8fc4cf543c562eca06fd7d",
+            "kind": "document",
+            "label": "Сочетания клавиш bars — действия, умолчания и конфликты",
+            "path": "docs/features/window/keyboard-design.md",
+            "docs_path": "features/window/keyboard-design.md",
+            "module": "features",
+            "owner": "1c75689042ac1e1e8f6aad31b92e490eb7dc07d86f5fd62b67da7e1afeb8d9f8",
+            "chunks": 0,
+            "ordinal": null,
+            "first_line": 1,
+            "last_line": 1
+          }
+        ],
+        "edges": [
+          {
+            "kind": "markdown_link",
+            "from": 0,
+            "to": 1,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              7
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 1,
+            "to": 0,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              9
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 0,
+            "to": 2,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              9
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 1,
+            "to": 2,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              11
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 2,
+            "to": 0,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              59
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 2,
+            "to": 1,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              7,
+              45,
+              100
+            ]
+          },
+          {
+            "kind": "document_similarity",
+            "from": 1,
+            "to": 2,
+            "raw": 0.8510951399803162,
+            "strength": 0.8510951399803162,
+            "lines": []
+          },
+          {
+            "kind": "markdown_link",
+            "from": 0,
+            "to": 3,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              61
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 2,
+            "to": 3,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              13
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 3,
+            "to": 0,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              21
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 0,
+            "to": 4,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              7
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 2,
+            "to": 4,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              67,
+              96
+            ]
+          },
+          {
+            "kind": "markdown_link",
+            "from": 4,
+            "to": 2,
+            "raw": null,
+            "strength": 1.0,
+            "lines": [
+              13
+            ]
+          }
+        ],
+        "layers": {
+          "markdown_link": {
+            "state": "partial",
+            "note": "Настоящий готовый индекс; полнота не утверждается"
+          },
+          "document_similarity": {
+            "state": "partial",
+            "note": "Настоящий готовый индекс; полнота не утверждается"
+          },
+          "chunk_similarity": {
+            "state": "not_built",
+            "note": "Вид документов; расчёт чанков — отдельная проекция"
+          }
+        },
+        "totals": {
+          "documents": 554,
+          "chunks": 0,
+          "links": 1398,
+          "document_pairs": 0
+        },
+        "shown": {
+          "documents": 5,
+          "chunks": 0,
+          "edges": 13
+        },
+        "applied": {
+          "max_documents": 200,
+          "max_chunks": 1,
+          "max_edges": 800,
+          "max_bytes": 262144
+        },
+        "truncated": false,
+        "limit_reasons": [],
+        "warnings": [],
+        "used_bytes": 0
+      },
+      "fingerprint": "c89e68771d6ff61dcd2995ca6ff10390f1bdee38a0c2e30a0796074dac1fbfec",
+      "query_node": {
+        "id": "query:real-2",
+        "label": "Какие требования и решения связаны с графом?"
+      },
+      "query_edges": [
+        {
+          "to": 0,
+          "raw_score": null,
+          "score_kind": "none",
+          "strength": 0.5,
+          "neutral": true
+        }
+      ],
+      "id": "real-2",
+      "text": "Какие требования и решения связаны с графом?",
+      "score_kind": "none",
+      "results": [
+        {
+          "channel": "graph",
+          "status": "ready",
+          "map_reason": null,
+          "path": "docs/features/window/global-search-design.md",
+          "title": "Глобальный поиск — дизайн окна и переходов",
+          "rank": 1,
+          "node": 0,
+          "score": null,
+          "fragments": [
+            {
+              "source_hash": "8a8c4697d16d761d90291dc4ddf2c0ccfb2fb74a6e1894d057c26399476dce2c",
+              "channel": "graph",
+              "path": "docs/features/window/global-search-design.md",
+              "title": "Глобальный поиск — дизайн окна и переходов",
+              "heading": "",
+              "first": 0,
+              "last": 0,
+              "score": null
+            }
+          ]
+        }
+      ],
+      "views": {
+        "all": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "chunks": [
+          0
+        ],
+        "links": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "meaning": [
+          0
+        ]
+      },
+      "depth_of": [
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "anchor_of": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "known_nodes": 6,
+      "known_edges": 14,
+      "used_bytes": 5690
+    },
+    "elapsed_ms": 32,
+    "bundle": {
+      "layers": {
+        "semantic": {
+          "stale_reason": null,
+          "freshness": "current",
+          "completeness": "unknown",
+          "availability": "enabled",
+          "coverage": {
+            "unit": "documents",
+            "processed": 554,
+            "total": 554,
+            "missing": 0,
+            "comparisons": 0,
+            "reason": null
+          },
+          "source_revisions": {
+            "docs/features/window/global-search-design.md": "8a8c4697d16d761d90291dc4ddf2c0ccfb2fb74a6e1894d057c26399476dce2c"
+          },
+          "state": "partial",
+          "generation": "cac0257168a8ec792f8271d2a16d6d12387ea561fa560302d5a8a6e26adf0f62",
+          "fingerprint": "explicit-markdown-v6",
+          "processed": 554,
+          "total": 554,
+          "failed": 0
+        },
+        "similarity": {
+          "stale_reason": null,
+          "freshness": "current",
+          "completeness": "complete",
+          "availability": "enabled",
+          "coverage": {
+            "unit": "chunks",
+            "processed": 2442,
+            "total": 2442,
+            "missing": 0,
+            "comparisons": 2186031,
+            "reason": null
+          },
+          "source_revisions": {
+            "docs/features/window/global-search-design.md": "8a8c4697d16d761d90291dc4ddf2c0ccfb2fb74a6e1894d057c26399476dce2c"
+          },
+          "state": "ready",
+          "generation": "332152e993583c74c78c1b518875be5216afb8cb2a874b79440d1538df840223",
+          "fingerprint": "exact-pairs-f64-v1:k5:tau0.5",
+          "processed": 554,
+          "total": 554,
+          "failed": 0
+        },
+        "structure": {
+          "stale_reason": null,
+          "freshness": "current",
+          "completeness": "complete",
+          "availability": "enabled",
+          "coverage": {
+            "unit": "documents",
+            "processed": 554,
+            "total": 554,
+            "missing": 0,
+            "comparisons": 0,
+            "reason": null
+          },
+          "source_revisions": {
+            "docs/features/window/global-search-design.md": "8a8c4697d16d761d90291dc4ddf2c0ccfb2fb74a6e1894d057c26399476dce2c"
+          },
+          "state": "ready",
+          "generation": "28c2e2e4a194589183389c7242910dc472e8fea725cbb0a62b8639fb91887ede",
+          "fingerprint": "markdown-structure-v1",
+          "processed": 554,
+          "total": 554,
+          "failed": 0
+        }
+      },
+      "schema_version": 1,
+      "operation": "relations",
+      "scope": {
+        "modules": [],
+        "files": []
+      },
+      "snapshot": "d45034d0b4d6b49cf2e9f591cdd548fe0eb53159a329c1dda4eb803a60350610",
+      "generations": {
+        "method": "explicit-markdown-v6",
+        "semantic": "cac0257168a8ec792f8271d2a16d6d12387ea561fa560302d5a8a6e26adf0f62",
+        "similarity": "332152e993583c74c78c1b518875be5216afb8cb2a874b79440d1538df840223",
+        "structure": "28c2e2e4a194589183389c7242910dc472e8fea725cbb0a62b8639fb91887ede",
+        "text_structure": "d45034d0b4d6b49cf2e9f591cdd548fe0eb53159a329c1dda4eb803a60350610"
+      },
+      "layer_state": "partial",
+      "layer_states": {
+        "semantic": "partial",
+        "similarity": "ready",
+        "structure": "ready"
+      },
+      "coverage": {
+        "indexed": 554,
+        "processed": 554,
+        "failed": 0,
+        "denominator": 554,
+        "method": "indexed_source_documents; semantic completeness unknown",
+        "semantic_completeness": null
+      },
+      "requested": {
+        "operation": "relations",
+        "scope": {
+          "modules": [],
+          "files": []
+        },
+        "budgets": {
+          "max_depth": null,
+          "max_nodes": null,
+          "max_edges": null,
+          "max_fanout": null,
+          "max_paths": null,
+          "timeout_ms": null,
+          "max_bytes": null
+        },
+        "limit": 5,
+        "snapshot": null,
+        "cursor": null,
+        "query": "Какие требования и решения связаны с графом?",
+        "entity_ref": null,
+        "from": null,
+        "to": null,
+        "roots": [],
+        "predicates": [],
+        "direction": "both",
+        "polarity": null,
+        "qualifiers": {},
+        "view": "documents",
+        "local": false,
+        "include_paths": false,
+        "path_kind": "semantic",
+        "max_hops": null,
+        "max_paths": null,
+        "topic": null,
+        "whole_scope": false,
+        "analysis": "topics",
+        "grouping": "communities",
+        "roles": [],
+        "task_profile": null,
+        "token_budget": null,
+        "tokenizer_id": null,
+        "change_description": null
+      },
+      "applied": {
+        "max_depth": 2,
+        "max_nodes": 250,
+        "max_edges": 1000,
+        "max_fanout": 50,
+        "max_paths": 5,
+        "timeout_ms": 1000,
+        "max_bytes": 262144
+      },
+      "applied_limit": 5,
+      "clamped": false,
+      "items": [
+        {
+          "type": "relation",
+          "assertion": {
+            "id": "a616c58401a04727884241deb6d3066d6a9e036d5bd292c624bbe0bc6241b71b",
+            "from": "e4d8e4edc3e81298585bfef1adc4598906a3489df98a01b4359840982f2ebd6e",
+            "to": "b43df59803142b6a79cf956dc9fb661cb8de58912f652cd3f2c450f8a2a049a1",
+            "predicate": "depends_on",
+            "polarity": "positive",
+            "qualifiers": {
+              "kind": "precondition"
+            },
+            "origin": "explicit_rule",
+            "evidence": [
+              "d2ee31a199106ef70eda78636d4eb98db202ccb4fba66d3d5e72ccfabbe17766"
+            ]
+          }
+        }
+      ],
+      "nodes": [
+        {
+          "reference": {
+            "kind": "entity",
+            "id": "b43df59803142b6a79cf956dc9fb661cb8de58912f652cd3f2c450f8a2a049a1",
+            "revision": "5567259bda5225cda8cd6c907eb76734112f995015230421080ad36c3ebe59e1"
+          },
+          "label": "отдельного разрешения OQ-106/OQ-113",
+          "namespace": "//?/C:/Users/arketov/Desktop/bars-project:features/window/global-search-design.md",
+          "aliases": [],
+          "source_ids": [
+            "c579682a28dfd545e0e56be3f4c207461e9a0621651f3e590439f08f3f96e421"
+          ],
+          "evidence": [
+            "d2ee31a199106ef70eda78636d4eb98db202ccb4fba66d3d5e72ccfabbe17766"
+          ],
+          "roles": []
+        },
+        {
+          "reference": {
+            "kind": "entity",
+            "id": "e4d8e4edc3e81298585bfef1adc4598906a3489df98a01b4359840982f2ebd6e",
+            "revision": "5567259bda5225cda8cd6c907eb76734112f995015230421080ad36c3ebe59e1"
+          },
+          "label": "установленное приложение",
+          "namespace": "//?/C:/Users/arketov/Desktop/bars-project:features/window/global-search-design.md",
+          "aliases": [],
+          "source_ids": [
+            "c579682a28dfd545e0e56be3f4c207461e9a0621651f3e590439f08f3f96e421"
+          ],
+          "evidence": [
+            "d2ee31a199106ef70eda78636d4eb98db202ccb4fba66d3d5e72ccfabbe17766"
+          ],
+          "roles": []
+        }
+      ],
+      "sources": [
+        {
+          "reference": {
+            "kind": "document",
+            "id": "c579682a28dfd545e0e56be3f4c207461e9a0621651f3e590439f08f3f96e421",
+            "revision": "8a8c4697d16d761d90291dc4ddf2c0ccfb2fb74a6e1894d057c26399476dce2c"
+          },
+          "path": "docs/features/window/global-search-design.md",
+          "docs_path": "features/window/global-search-design.md",
+          "module": "features",
+          "title": "Глобальный поиск — дизайн окна и переходов",
+          "hash": "8a8c4697d16d761d90291dc4ddf2c0ccfb2fb74a6e1894d057c26399476dce2c"
+        }
+      ],
+      "assertions": [
+        {
+          "id": "a616c58401a04727884241deb6d3066d6a9e036d5bd292c624bbe0bc6241b71b",
+          "from": "e4d8e4edc3e81298585bfef1adc4598906a3489df98a01b4359840982f2ebd6e",
+          "to": "b43df59803142b6a79cf956dc9fb661cb8de58912f652cd3f2c450f8a2a049a1",
+          "predicate": "depends_on",
+          "polarity": "positive",
+          "qualifiers": {
+            "kind": "precondition"
+          },
+          "origin": "explicit_rule",
+          "evidence": [
+            "d2ee31a199106ef70eda78636d4eb98db202ccb4fba66d3d5e72ccfabbe17766"
+          ]
+        }
+      ],
+      "evidence": [
+        {
+          "id": "d2ee31a199106ef70eda78636d4eb98db202ccb4fba66d3d5e72ccfabbe17766",
+          "document": {
+            "kind": "document",
+            "id": "c579682a28dfd545e0e56be3f4c207461e9a0621651f3e590439f08f3f96e421",
+            "revision": "8a8c4697d16d761d90291dc4ddf2c0ccfb2fb74a6e1894d057c26399476dce2c"
+          },
+          "span": {
+            "start": 12591,
+            "end": 12711,
+            "first_line": 57,
+            "last_line": 57
+          },
+          "quote": " установленное приложение требует отдельного разрешения OQ-106/OQ-113.",
+          "source_hash": "8a8c4697d16d761d90291dc4ddf2c0ccfb2fb74a6e1894d057c26399476dce2c",
+          "method": "explicit-markdown-v6"
+        }
+      ],
+      "truncated": false,
+      "limit_reasons": [],
+      "next_cursor": null,
+      "warnings": [
+        "Явные правила не гарантируют полноту смысловых отношений; отсутствие связи не доказывает отсутствие проверки или зависимости"
+      ],
+      "method": "explicit-markdown-v6",
+      "elapsed_ms": 84,
+      "resolution": "resolved",
+      "candidates": [],
+      "missing_roles": [],
+      "budget_mode": "bytes",
+      "used_bytes": 6726
+    }
+  }
+]

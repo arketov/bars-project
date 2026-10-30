@@ -72,11 +72,11 @@ title: Аудиты знаний bars — запуск, расписание, н
 
 ## Т-37
 
-Аудиты — функции, которые у агента есть в виде инструментов: `get_duplicates` (MCP `bars_get_duplicates`), структура и связи графа (`bars_explore`), `bars_relations`. В таблицу «инструмент MCP → действие пользователя» ([агентные инструменты](../agent-tools/mcp-tools.md)) аудиты записываются строками: дубли — «Аудит дублей», `bars_explore` `conflict_candidates` — «Аудит противоречий». Это закрывает Т-37 для этих инструментов; остальные строки — этап 3.7.1.
+Агент читает те же результаты через `bars_audit_list` и `bars_audit_findings`, запускает и останавливает проверку через `bars_audit_run/cancel`. Соответствия окну — [таблица функций](../agent-tools/window-parity.md). `bars_get_duplicates` выполняет отдельный поиск дублей, а GraphRAG `conflict_candidates` не заменяет сохранённый числовой аудит.
 
 ## Реализация
 
-1. Каркас: `audits.sqlite3` (`bars-core::audits`), запуск и очередь одного аудита на проект (`bars-worker::audits`), методы окна `audit_list`, `audit_run`, `audit_cancel`, `audit_findings` (постраничный курсор), `audit_schedule`, `audit_ignore` (аудитория `Window`, [протокол](../../architecture/protocol.md)), расписание. Центр уведомлений получает прирост новых неигнорируемых находок и переход к аудитам проекта.
+1. Каркас: `audits.sqlite3` (`bars-core::audits`), запуск и очередь одного аудита на проект (`bars-worker::audits`), методы `audit_list`, `audit_run`, `audit_cancel`, `audit_findings` (постраничный курсор) доступны окну и MCP; `audit_schedule`, `audit_ignore` остаются в окне ([протокол](../../architecture/protocol.md)), расписание. Центр уведомлений получает прирост новых неигнорируемых находок и переход к аудитам проекта.
 2. Готово 22-10-2026. `broken_links` — самый дешёвый вид: индекс ссылок сверяется с диском, затем берутся битые ссылки.
 3. Готово 22-10-2026. `duplicates` поверх ядра `get_duplicates` с предельным числом повторов 5000 за запуск.
 4. Готово 23-10-2026: `contradictions` по [исследованию 3.8.1](../../knowledge/contradictions.md), вместе с игнорированием всех видов и возвратом находки (OQ-143).

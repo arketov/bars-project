@@ -1,0 +1,21 @@
+**********************************************************************
+** Visual Studio 2022 Developer PowerShell v17.14.42
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+
+=== cargo fmt --check ===
+
+=== cargo clippy ===
+    Blocking waiting for file lock on build directory
+    Checking bars-core v0.1.0 (C:\Users\arketov\Desktop\bars-project\crates\bars-core)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 8m 11s
+
+=== cargo build ===
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on build directory
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5m 07s
+
+=== cargo test ===
+    Blocking waiting for file lock on build directory

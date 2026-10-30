@@ -1,0 +1,41 @@
+
+> bars-ui@0.0.0 test
+> vitest run src/lib/graph/query.test.ts src/lib/graph/PhysicalGraph.test.ts src/lib/graph/physics.test.ts src/lib/GraphPage.test.ts
+
+
+ RUN  v5.0.4 C:/Users/arketov/Desktop/bars-project/ui
+
+ ❯ src/lib/graph/query.test.ts (6 tests | 1 failed) 33ms
+   × нейтральная связь без оценки и результат вне снимка остаются честными 11ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/graph/query.test.ts > нейтральная связь без оценки и результат вне снимка остаются честными
+AssertionError: expected { channel: 'primary', …(9) } to match object { node: null, …(1) }
+(8 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "node": null,
+-   "status": "no_graph_object",
++   "status": "ready",
+  }
+
+ ❯ src/lib/graph/query.test.ts:28:35
+     26|   server.query_edges = [];
+     27|   const missing = acceptQuerySlice(server,q);
+     28|   expect(missing.info.results[0]).toMatchObject({node:null,status:"no_…
+       |                                   ^
+     29|   expect(missing.slice.edges.some(e=>e.kind==="query_result")).toBe(fa…
+     30| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 49 passed (50)
+   Start at  16:32:13
+   Duration  6.63s (tests 55%, environment 32%, transform 7%, import 6%)
+

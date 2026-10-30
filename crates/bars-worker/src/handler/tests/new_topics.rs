@@ -724,9 +724,9 @@ async fn delete_clear_and_rename_do_not_resurrect_data() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-async fn topic_methods_are_window_only_and_need_an_exact_project() {
+async fn topic_mutations_are_window_only_and_reads_need_an_exact_project() {
     let project = "C:/проект";
-    let calls = [
+    let reads = [
         Call::NewTopicsList(NewTopicsListParams {
             project: project.into(),
         }),
@@ -734,6 +734,12 @@ async fn topic_methods_are_window_only_and_need_an_exact_project() {
             project: project.into(),
             id: 1,
         }),
+    ];
+    for call in reads {
+        assert!(call.allowed_for(bars_protocol::ClientKind::Mcp));
+        assert!(call.allowed_for(bars_protocol::ClientKind::Cli));
+    }
+    let calls = [
         Call::NewTopicsMarkMissing(NewTopicsMarkMissingParams {
             project: project.into(),
             request_id: "r".into(),

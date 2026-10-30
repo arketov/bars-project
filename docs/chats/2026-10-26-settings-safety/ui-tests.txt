@@ -1,0 +1,68 @@
+
+> bars-ui@0.0.0 test
+> vitest run
+
+
+ RUN  v5.0.4 C:/Users/arketov/Desktop/bars-project/ui
+
+ ❯ src/lib/mock.test.ts (4 tests | 1 failed) 927ms
+   × Save/Get accepts a proxy-backed settings draft and keeps devices independent 25ms
+ ❯ src/lib/Workspace.test.ts (28 tests | 1 failed) 6281ms
+   × сброс раскладки: отмена сохраняет конфликт и зоны, подтверждение возвращает один центр 307ms
+ ❯ src/lib/graph/PhysicalGraph.test.ts (20 tests | 1 failed) 8560ms
+   × явная карточка выбирает результат именно в срезе запроса 274ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/mock.test.ts > Save/Get accepts a proxy-backed settings draft and keeps devices independent
+TypeError: Cannot convert undefined or null to object
+ ❯ mockCall src/lib/mock.ts:486:41
+    484|       const base = params.base as Record<string, Record<string, unknow…
+    485|       const conflicts = [];
+    486|       for (const [path, mine] of Object.entries(params.changes as Reco…
+       |                                         ^
+    487|         const [section, key] = path.split('.');
+    488|         const disk = next[section][key];
+
+ Test Files  3 failed | 69 passed (72)
+      Tests  3 failed | 561 passed (564)
+   Start at  16:28:27
+   Duration  30.50s (environment 55%, import 25%, tests 16%, transform 3%, setup 1%)
+
+Environment  jsdom was created 72 times · 169.34s total, 55% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+ ❯ src/lib/mock.test.ts:63:9
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/lib/Workspace.test.ts > сброс раскладки: отмена сохраняет конфликт и зоны, подтверждение возвращает один центр
+TypeError: Cannot read properties of undefined (reading 'click')
+ ❯ openFromMenu src/lib/Workspace.test.ts:299:103
+    297| const openFromMenu = async (title: string) => {
+    298|   [...document.querySelectorAll<HTMLButtonElement>('button')].find(b =…
+    299|   [...document.querySelectorAll<HTMLButtonElement>('.menu button')].fi…
+       |                                                                                                       ^
+    300| };
+    301| it("настройки — отдельный экран, а не вкладка; вкладка «Логи» настроек…
+ ❯ src/lib/Workspace.test.ts:395:9
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/lib/graph/PhysicalGraph.test.ts > явная карточка выбирает результат именно в срезе запроса
+AssertionError: expected 'Выберите узел или связь' to contain 'Документ 7'
+
+Expected: "Документ 7"
+Received: "Выберите узел или связь"
+
+ ❯ src/lib/graph/PhysicalGraph.test.ts:428:62
+    426|   await settle();
+    427|   expect(app.graphFocus).toBeNull();
+    428|   expect(target.querySelector(".inspector h3")?.textContent).toContain…
+       |                                                              ^
+    429| });
+    430|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+

@@ -19,6 +19,139 @@ use serde_json::{Value, json};
 use tempfile::TempDir;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader, DuplexStream, ReadHalf, WriteHalf};
 
+#[tokio::test(flavor = "multi_thread")]
+async fn maintenance_tools_read_shared_results_and_keep_topic_mutations_closed() {
+    use bars_core::new_topics::{Observation, Reason, Source, TopicStore};
+    let harness = Harness::new("maintenance");
+    let root = harness.project("maintenance");
+    fs::write(
+        root.join("docs/broken.md"),
+        "# Ссылки\n\n[Один](missing-one.md)\n\n[Два](missing-two.md)\n",
+    )
+    .unwrap();
+    {
+        let mut store = TopicStore::open(&root).unwrap();
+        store
+            .record(&Observation {
+                event_id: "fixture".into(),
+                generation: 0,
+                text: "Как восстановить отсутствующие знания?".into(),
+                scope: "project".into(),
+                source: Source::Mcp,
+                reason: Reason::EmptyResult,
+                params: "{}".into(),
+                index_stamp: None,
+                vector: None,
+                at: 100,
+            })
+            .unwrap();
+    }
+    let mut mcp = harness.connect(harness.env(&root));
+    mcp.initialize().await;
+    assert!(!mcp.tool("bars_projects", json!({})).await.0);
+    harness.register(&root).await;
+    wait_status(&mut mcp, "индекс", indexed).await;
+    let project = root.display().to_string();
+    let (error, body) = mcp
+        .tool("bars_new_topics_list", json!({"project":project}))
+        .await;
+    assert!(!error, "{body}");
+    let list: Value = serde_json::from_str(&body).unwrap();
+    let id = &list["topics"][0]["id"];
+    assert!(id.is_number(), "{list}");
+    let (error, body) = mcp
+        .tool("bars_new_topics_get", json!({"project":project,"id":id}))
+        .await;
+    assert!(!error, "{body}");
+    let detail: Value = serde_json::from_str(&body).unwrap();
+    assert_eq!(
+        detail["variants_list"][0]["text"],
+        "Как восстановить отсутствующие знания?"
+    );
+    assert_eq!(detail["observations"], 1);
+    let (error, body) = mcp
+        .tool(
+            "bars_audit_run",
+            json!({"project":project,"kind":"broken_links"}),
+        )
+        .await;
+    assert!(!error, "{body}");
+    let deadline = Instant::now() + Duration::from_secs(30);
+    loop {
+        let (error, body) = mcp
+            .tool("bars_audit_list", json!({"project":project}))
+            .await;
+        assert!(!error, "{body}");
+        let list: Value = serde_json::from_str(&body).unwrap();
+        let audit = list["audits"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|a| a["kind"] == "broken_links")
+            .unwrap();
+        if audit["state"] == "complete" {
+            break;
+        }
+        assert!(Instant::now() < deadline, "{body}");
+        tokio::time::sleep(Duration::from_millis(20)).await;
+    }
+    let mut cursor = Value::Null;
+    let mut subjects = Vec::new();
+    for _ in 0..3 {
+        let (error, body) = mcp
+            .tool(
+                "bars_audit_findings",
+                json!({"project":project,"kind":"broken_links","limit":1,"cursor":cursor}),
+            )
+            .await;
+        assert!(!error, "{body}");
+        let page: Value = serde_json::from_str(&body).unwrap();
+        assert_eq!(page["total"], 2);
+        assert!(page["run_id"].is_number());
+        subjects.push(page["items"][0]["detail"].clone());
+        cursor = page["next"].clone();
+        if cursor.is_null() {
+            break;
+        }
+    }
+    assert_eq!(subjects.len(), 2);
+    assert_ne!(subjects[0], subjects[1]);
+    for kind in ["duplicates", "contradictions"] {
+        let (error, body) = mcp
+            .tool(
+                "bars_audit_findings",
+                json!({"project":project,"kind":kind}),
+            )
+            .await;
+        assert!(!error, "{body}");
+        let page: Value = serde_json::from_str(&body).unwrap();
+        assert!(page["run_id"].is_null());
+    }
+    let (error, body) = mcp
+        .tool(
+            "bars_audit_cancel",
+            json!({"project":project,"kind":"broken_links"}),
+        )
+        .await;
+    assert!(!error, "{body}");
+    for name in ["bars_audit_list", "bars_new_topics_list"] {
+        assert!(mcp.tool(name, json!({"project":"relative"})).await.0);
+    }
+    let mut client = Client::connect(&harness.endpoint, ClientKind::Mcp)
+        .await
+        .unwrap();
+    let denied = client
+        .call(&bars_protocol::NewTopicsClearParams {
+            project,
+            confirmed: true,
+        })
+        .await
+        .unwrap_err();
+    assert!(
+        matches!(denied, bars_protocol::ClientError::Rpc(e) if e.code == bars_protocol::METHOD_NOT_FOUND)
+    );
+}
+
 const GUIDE: &str = "---\ntitle: Руководство\n---\n# Руководство\n\nВведение.\n\n## Индексация\n\n\
     Индексация документов идёт в очереди воркера.\n\n### Слежение\n\nСлежение за файлами.\n\n\
     ## Поиск\n\nПоиск работает по индексу.\n";
@@ -250,6 +383,10 @@ async fn initialize_and_tool_list_do_not_touch_the_worker() {
     assert_eq!(
         names,
         [
+            "bars_audit_cancel",
+            "bars_audit_findings",
+            "bars_audit_list",
+            "bars_audit_run",
             "bars_context",
             "bars_explore",
             "bars_get_duplicates",
@@ -257,6 +394,8 @@ async fn initialize_and_tool_list_do_not_touch_the_worker() {
             "bars_graph",
             "bars_impact",
             "bars_links",
+            "bars_new_topics_get",
+            "bars_new_topics_list",
             "bars_outline",
             "bars_paths",
             "bars_projects",
@@ -1068,7 +1207,7 @@ async fn real_binary_answers_initialize_without_a_worker_and_exits_on_eof() {
         started.elapsed()
     );
     let tools = mcp.request("tools/list", json!({})).await;
-    assert_eq!(tools["result"]["tools"].as_array().unwrap().len(), 16);
+    assert_eq!(tools["result"]["tools"].as_array().unwrap().len(), 22);
 
     drop(mcp);
     let status = tokio::time::timeout(Duration::from_secs(10), child.wait())
