@@ -1,0 +1,10 @@
+{
+  "tool_count": 23,
+  "diagnostic": true,
+  "topic_check": true,
+  "required": [
+    "project",
+    "id",
+    "revision"
+  ]
+}
