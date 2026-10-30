@@ -317,7 +317,8 @@ impl WorkerHandler {
         // «Новые темы»: допуск и область определяются до поиска, чтобы очистка списка во время
         // поиска отклонила запоздавшее наблюдение. Диагностика и CLI спроса не создают.
         let context = crate::new_topics::current_context();
-        let collecting = context.purpose == crate::new_topics::Purpose::Request
+        let collecting = !params.diagnostic
+            && context.purpose == crate::new_topics::Purpose::Request
             && matches!(
                 context.origin,
                 crate::new_topics::Origin::Window | crate::new_topics::Origin::Mcp

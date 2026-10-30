@@ -62,6 +62,7 @@ async fn main() {
         project: None,
     };
     let query = SearchParams {
+        diagnostic: true,
         target: target.clone(),
         query: "Как проверить индексацию документов?".into(),
         modules: vec![],

@@ -69,7 +69,7 @@ try {
   assert.ok([...init.result.instructions].length <= 2000);
   mcp.stdin.write(JSON.stringify({jsonrpc:'2.0',method:'notifications/initialized'})+'\n');
   const list = await request('tools/list',{});
-  assert.equal(list.result.tools.length,22);
+  assert.equal(list.result.tools.length,23);
   for (const name of ['bars_text_search','bars_links']) {
     const schema = list.result.tools.find(t=>t.name===name).inputSchema;
     assert.equal(schema.additionalProperties,false);
@@ -87,7 +87,7 @@ try {
   fs.writeFileSync(path.join(project,'docs/a.md'),'# А\nсохранено позже\n[нет](missing.md)\n');
   assert.equal((await tool('bars_text_search',{query:'сохранено позже'})).documents[0].path,'docs/a.md');
   assert.equal((await tool('bars_links',{path:'docs/a.md'})).items[0].broken,true);
-  evidenceResult.checks.push('initialize <=2000','22 schemas','stdio tools/call','UTF-16','fresh text','fresh links');
+  evidenceResult.checks.push('initialize <=2000','23 schemas','stdio tools/call','UTF-16','fresh text','fresh links');
   mcp.stdin.end();
   assert.equal(await exited(mcp),0,mcpError);
   fs.writeFileSync(path.join(home,'stop'),'');

@@ -107,6 +107,7 @@ impl WorkerHandler {
                 scope["cursor_present"] = json!(p.cursor.is_some());
             }
             Call::GraphSearch(p) => {
+                scope["diagnostic"] = json!(p.search.diagnostic);
                 scope["modules"] = json!(p.search.modules);
                 scope["files"] = json!(p.search.files);
                 scope["mode"] = json!(p.mode);
@@ -115,6 +116,7 @@ impl WorkerHandler {
                 scope["details"] = json!("not_recorded");
             }
             Call::Search(p) => {
+                scope["diagnostic"] = json!(p.diagnostic);
                 scope["modules"] = json!(p.modules);
                 scope["files"] = json!(p.files);
             }

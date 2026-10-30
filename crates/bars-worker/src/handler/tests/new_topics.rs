@@ -734,6 +734,12 @@ async fn topic_mutations_are_window_only_and_reads_need_an_exact_project() {
             project: project.into(),
             id: 1,
         }),
+        Call::NewTopicsCheck(NewTopicsCheckParams {
+            project: project.into(),
+            id: 1,
+            revision: 1,
+            expand: false,
+        }),
     ];
     for call in reads {
         assert!(call.allowed_for(bars_protocol::ClientKind::Mcp));
@@ -746,12 +752,6 @@ async fn topic_mutations_are_window_only_and_reads_need_an_exact_project() {
             query: "q".into(),
             modules: vec![],
             files: vec![],
-        }),
-        Call::NewTopicsCheck(NewTopicsCheckParams {
-            project: project.into(),
-            id: 1,
-            revision: 1,
-            expand: false,
         }),
         Call::NewTopicsSetStatus(NewTopicsSetStatusParams {
             project: project.into(),

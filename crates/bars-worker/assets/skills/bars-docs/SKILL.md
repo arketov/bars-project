@@ -9,6 +9,8 @@ bars splits Markdown by headings and searches by section, so the shape of a docu
 
 ## bars tools: what each one is for
 
+Check saved topics with `bars_new_topics_check` (project, id, revision; expand only deliberately), not by replaying them as regular searches. For search diagnostics, query comparisons or service sweeps use `bars_rag_search` with `diagnostic:true` to avoid creating demand. Read known files directly; do not send one generic query across a file list. Empty retrieval is not proof of missing documentation.
+
 Tools support `format` (`txt` default, `json`). Most use optional `project` (session project by default); duplicates require a project, audits and new topics require its registered absolute path. Audit run/cancel and reindex change background jobs, not Markdown.
 
 For the window's audit results, use `bars_audit_list`, then `bars_audit_findings` for `broken_links`, `duplicates` or `contradictions`. Follow `next` as `cursor`; restart if `run_id` changes. Check result dates and incomplete runs. Use `bars_audit_run/cancel` to refresh or stop a check. Graph conflict candidates are not the saved numerical audit.

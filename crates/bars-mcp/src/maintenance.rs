@@ -59,8 +59,45 @@ fn render<T: Serialize>(output: &T) -> String {
     )
 }
 
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct TopicCheckArgs {
+    /// Абсолютный путь зарегистрированного проекта.
+    pub project: String,
+    /// ID сохранённой темы.
+    pub id: i64,
+    /// Актуальная ревизия из bars_new_topics_list/get.
+    pub revision: i64,
+    /// Явно расширить проверку на весь проект; по умолчанию исходные области.
+    #[serde(default)]
+    pub expand: bool,
+    pub format: Option<Format>,
+}
+
 #[tool_router(router = maintenance_tool_router)]
 impl BarsMcp {
+    #[tool(
+        name = "bars_new_topics_check",
+        description = "Проверить сохранённую тему текущим поиском без нового спроса. Используй вместо повторения вопроса через rag_search. Сохраняет результат проверки, не закрывает и не удаляет тему. Нужны id и revision из list/get; expand=true явно расширяет область на весь проект."
+    )]
+    async fn bars_new_topics_check(
+        &self,
+        original: observation::Original,
+        Parameters(a): Parameters<TopicCheckArgs>,
+    ) -> CallToolResult {
+        let p = bars_protocol::NewTopicsCheckParams {
+            project: a.project,
+            id: a.id,
+            revision: a.revision,
+            expand: a.expand,
+        };
+        finish(
+            self.call_observed(&p, Some(&original.0)).await,
+            a.format,
+            render,
+        )
+    }
+
     #[tool(
         name = "bars_audit_list",
         description = "Состояния аудитов окна: битые ссылки, дубли, числовые расхождения. Проверяйте result_run_id/result_at, last_status, indexing: старый полный результат может сохраняться после неполного запуска."

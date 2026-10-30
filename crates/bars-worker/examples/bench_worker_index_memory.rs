@@ -168,6 +168,7 @@ async fn exercise(
     let params: Vec<_> = queries
         .iter()
         .map(|query| SearchParams {
+            diagnostic: true,
             target: Target {
                 cwd: root.display().to_string(),
                 project: None,

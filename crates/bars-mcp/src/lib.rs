@@ -1,4 +1,4 @@
-//! `bars-mcp` как библиотека: stdio-MCP с двадцатью двумя инструментами (Т-2, Т-19).
+//! `bars-mcp` как библиотека: stdio-MCP с двадцатью тремя инструментами (Т-2, Т-19).
 //!
 //! Каждый инструмент — один вызов метода протокола ([`bars_protocol`]); индекса и моделей здесь нет
 //! (НФТ-3). Ответ на `initialize` и список инструментов отдаются сразу, не подключаясь к воркеру;
@@ -112,6 +112,9 @@ pub struct NoArgs {
 
 #[derive(Debug, Deserialize, Serialize, schemars::JsonSchema)]
 pub struct SearchArgs {
+    /// true для диагностики, сравнения запросов и служебного обхода: не создавать новые темы и не увеличивать спрос. Для сохранённой темы — bars_new_topics_check.
+    #[serde(default)]
+    pub diagnostic: bool,
     /// Явный hybrid/mix/graph. Без поля — прежний поиск и прежняя форма ответа.
     pub mode: Option<bars_graph::RetrievalMode>,
     #[serde(default)]
@@ -478,6 +481,7 @@ impl BarsMcp {
         let include_related = args.include_related.unwrap_or(true);
         let related_budget = args.related_budget;
         let params = SearchParams {
+            diagnostic: args.diagnostic,
             target: self.target(args.project),
             query: args.query,
             modules: args.modules,

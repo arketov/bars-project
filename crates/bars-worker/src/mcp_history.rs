@@ -536,6 +536,7 @@ pub fn requested(tool: &str, source: &Value) -> Value {
             "limit",
             "candidates",
             "min_score",
+            "diagnostic",
         ],
         "bars_get_duplicates" => &["format", "project", "modules", "limit"],
         "bars_get_similar" => &["format", "project", "chunk_id", "modules", "limit"],
@@ -576,7 +577,9 @@ pub fn requested(tool: &str, source: &Value) -> Value {
                     "limit" | "candidates" | "under_line" | "limit_docs" | "limit_hits"
                     | "offset" => v.as_u64().is_some(),
                     "min_score" => v.is_number(),
-                    "full" | "regex" | "case_sensitive" | "cursor_present" => v.is_boolean(),
+                    "full" | "regex" | "case_sensitive" | "cursor_present" | "diagnostic" => {
+                        v.is_boolean()
+                    }
                     "modules" | "files" => {
                         v.as_array().is_some_and(|a| a.iter().all(Value::is_string))
                     }

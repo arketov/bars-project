@@ -196,6 +196,7 @@ fn target(cwd: &Path) -> Target {
 
 fn search(cwd: &Path, query: &str) -> SearchParams {
     SearchParams {
+        diagnostic: false,
         target: target(cwd),
         query: query.into(),
         modules: vec![],

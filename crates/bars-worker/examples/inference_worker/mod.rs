@@ -65,6 +65,7 @@ fn copy_tree(src: &Path, dst: &Path) -> Result<()> {
 }
 fn request(project: &str, query: &str) -> SearchParams {
     SearchParams {
+        diagnostic: true,
         target: Target {
             cwd: project.into(),
             project: Some(project.into()),

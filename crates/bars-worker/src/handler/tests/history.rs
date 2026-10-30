@@ -80,6 +80,7 @@ async fn mcp_history_worker_restart_leaves_interrupted_ipc_unknown_and_repeat_is
     let gate = worker.gate(project.path()).unwrap().write_owned().await;
     let target = target(project.path());
     let params = SearchParams {
+        diagnostic: false,
         target: target.clone(),
         query: "Поиск".into(),
         modules: vec![],

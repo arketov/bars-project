@@ -128,7 +128,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | `new_topics_list` | `project` | `enabled`, `generation`, `topics` (ID, ревизия, название, статус, даты, число обращений, источники, основания, число вариантов), `store_path`, `losses`, `loss_reason`; проект без `.bars` даёт пустой список, повреждённая или более новая БД — ошибку |
 | `new_topics_get` | `project`, `id` | та же строка, `variants_list` (текст, область, `original_params` — JSON параметров первого обращения) и до двух проверок: исходы по вариантам, причины неполноты, метки индекса, найденные фрагменты, `conclusive`; `params.variants` хранит `variant_id`, `applied`, `rerank_error` каждого выполненного поиска |
 | `new_topics_mark_missing` | `project`, `request_id`, `query`, `modules`, `files` | `topic_id`, `created`; повтор того же `request_id` идемпотентен; выключенный сбор — `invalid_params` |
-| `new_topics_check` | `project`, `id`, `revision`, `expand` | карточка темы после проверки; спроса не создаёт |
+| `new_topics_check` | `project`, `id`, `revision`, `expand` | окно и канал MCP/CLI; карточка темы после проверки, спроса не создаёт; решения и удаление остаются только в окне |
 | `new_topics_set_status` | `project`, `id`, `revision`, `status` (`resolved` или `open`) | новая `revision` |
 | `new_topics_rename` | `project`, `id`, `revision`, `title` (1–300 знаков) | новая `revision` |
 | `new_topics_delete` | `project`, `id`, `revision` | `accepted: true` |

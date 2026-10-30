@@ -283,6 +283,7 @@ impl WorkerHandler {
                 (variant.scope.clone(), modules, files)
             };
             let search = SearchParams {
+                diagnostic: true,
                 target: Target {
                     cwd: project.display().to_string(),
                     project: Some(project.display().to_string()),

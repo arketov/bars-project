@@ -465,6 +465,7 @@ async fn execute(
         Command::Search(args) => {
             let mode = args.mode;
             let params = SearchParams {
+                diagnostic: false,
                 target,
                 query: args.query.join(" "),
                 modules: args.modules,

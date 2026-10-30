@@ -65,6 +65,9 @@ pub struct SearchParams {
     #[serde(flatten)]
     pub target: Target,
     pub query: String,
+    /// Служебная проверка: результаты обычные, спрос в «Новых темах» не записывается.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub diagnostic: bool,
     /// Модули (корневой — `.`), по которым искать; пусто — весь проект.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub modules: Vec<String>,
@@ -1126,7 +1129,7 @@ methods! {
     NewTopicsList: crate::NewTopicsListParams => crate::NewTopicsListOutput, "new_topics_list", All;
     NewTopicsGet: crate::NewTopicsGetParams => crate::NewTopicDetail, "new_topics_get", All;
     NewTopicsMarkMissing: crate::NewTopicsMarkMissingParams => crate::NewTopicsMarkMissingOutput, "new_topics_mark_missing", Window;
-    NewTopicsCheck: crate::NewTopicsCheckParams => crate::NewTopicDetail, "new_topics_check", Window;
+    NewTopicsCheck: crate::NewTopicsCheckParams => crate::NewTopicDetail, "new_topics_check", All;
     NewTopicsSetStatus: crate::NewTopicsSetStatusParams => crate::NewTopicsChangedOutput, "new_topics_set_status", Window;
     NewTopicsRename: crate::NewTopicsRenameParams => crate::NewTopicsChangedOutput, "new_topics_rename", Window;
     NewTopicsMerge: crate::NewTopicsMergeParams => crate::NewTopicsChangedOutput, "new_topics_merge", Window;
@@ -1259,6 +1262,7 @@ mod tests {
                 project: Some("bars".into()),
             },
             query: "настройки поиска".into(),
+            diagnostic: true,
             modules: vec![".".into(), "search".into()],
             files: vec!["a/b.md".into()],
             limit: Some(3),
@@ -1349,6 +1353,7 @@ mod tests {
         let search = SearchParams {
             target: target(),
             query: "q".into(),
+            diagnostic: false,
             modules: vec![],
             files: vec![],
             limit: None,

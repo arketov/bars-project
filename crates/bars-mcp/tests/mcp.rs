@@ -69,6 +69,32 @@ async fn maintenance_tools_read_shared_results_and_keep_topic_mutations_closed()
         "Как восстановить отсутствующие знания?"
     );
     assert_eq!(detail["observations"], 1);
+    let before = detail;
+    let mut revision = before["revision"].clone();
+    for expand in [false, true] {
+        let (error, body) = mcp
+            .tool(
+                "bars_new_topics_check",
+                json!({"project":project,"id":id,"revision":revision,"expand":expand}),
+            )
+            .await;
+        assert!(!error, "{body}");
+        let checked: Value = serde_json::from_str(&body).unwrap();
+        assert_eq!(checked["observations"], before["observations"]);
+        assert_eq!(checked["first_seen"], before["first_seen"]);
+        assert_eq!(checked["last_seen"], before["last_seen"]);
+        assert_eq!(checked["variants_list"], before["variants_list"]);
+        assert_eq!(checked["checks"][0]["expanded"], expand);
+        assert_ne!(checked["status"], "resolved");
+        revision = checked["revision"].clone();
+    }
+    let (error, body) = mcp
+        .tool(
+            "bars_new_topics_check",
+            json!({"project":project,"id":id,"revision":0}),
+        )
+        .await;
+    assert!(error && body.contains("stale_ref"), "{body}");
     let (error, body) = mcp
         .tool(
             "bars_audit_run",
@@ -150,6 +176,73 @@ async fn maintenance_tools_read_shared_results_and_keep_topic_mutations_closed()
     assert!(
         matches!(denied, bars_protocol::ClientError::Rpc(e) if e.code == bars_protocol::METHOD_NOT_FOUND)
     );
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn diagnostic_mcp_searches_do_not_create_or_refresh_topics() {
+    let harness = Harness::new("diagnostic-search");
+    let root = harness.projects.path().join("empty");
+    fs::create_dir_all(root.join("docs")).unwrap();
+    let mut mcp = harness.connect(harness.env(&root));
+    mcp.initialize().await;
+    assert!(!mcp.tool("bars_projects", json!({})).await.0);
+    harness.register(&root).await;
+    wait_status(&mut mcp, "пустой индекс", |s| {
+        s["state"] == "ready" && s["pending"] == 0
+    })
+    .await;
+    let project = root.display().to_string();
+    let query = "Как устроен механизм проверки?";
+    assert!(!mcp.tool("bars_rag_search", json!({"query":query})).await.0);
+    let deadline = Instant::now() + Duration::from_secs(10);
+    let before = loop {
+        let (error, body) = mcp
+            .tool("bars_new_topics_list", json!({"project":project}))
+            .await;
+        assert!(!error, "{body}");
+        let value: Value = serde_json::from_str(&body).unwrap();
+        if value["topics"].as_array().unwrap().len() == 1 {
+            break value["topics"][0].clone();
+        }
+        assert!(Instant::now() < deadline, "{body}");
+        tokio::time::sleep(Duration::from_millis(20)).await;
+    };
+    for mode in [None, Some("hybrid"), Some("mix")] {
+        for text in [query, "Другой диагностический вопрос"] {
+            let mut args = json!({"query":text,"diagnostic":true});
+            if let Some(mode) = mode {
+                args["mode"] = json!(mode);
+            }
+            let (error, body) = mcp.tool("bars_rag_search", args).await;
+            assert!(!error, "{body}");
+            let result: Value = serde_json::from_str(&body).unwrap();
+            assert_eq!(result["results"], json!([]));
+        }
+    }
+    // A regular request after diagnostics is a writer-queue barrier and must still count.
+    assert!(!mcp.tool("bars_rag_search", json!({"query":query})).await.0);
+    let deadline = Instant::now() + Duration::from_secs(10);
+    loop {
+        let (error, body) = mcp
+            .tool("bars_new_topics_list", json!({"project":project}))
+            .await;
+        assert!(!error, "{body}");
+        let value: Value = serde_json::from_str(&body).unwrap();
+        let topics = value["topics"].as_array().unwrap();
+        assert_eq!(topics.len(), 1, "diagnostics created a topic: {body}");
+        let count = topics[0]["observations"].as_i64().unwrap();
+        assert!(count <= 2, "diagnostics added demand: {body}");
+        if count == 2 {
+            assert_eq!(topics[0]["id"], before["id"]);
+            assert_eq!(
+                topics[0]["revision"].as_i64().unwrap(),
+                before["revision"].as_i64().unwrap() + 1
+            );
+            break;
+        }
+        assert!(Instant::now() < deadline, "{body}");
+        tokio::time::sleep(Duration::from_millis(20)).await;
+    }
 }
 
 const GUIDE: &str = "---\ntitle: Руководство\n---\n# Руководство\n\nВведение.\n\n## Индексация\n\n\
@@ -394,6 +487,7 @@ async fn initialize_and_tool_list_do_not_touch_the_worker() {
             "bars_graph",
             "bars_impact",
             "bars_links",
+            "bars_new_topics_check",
             "bars_new_topics_get",
             "bars_new_topics_list",
             "bars_outline",
@@ -1207,7 +1301,7 @@ async fn real_binary_answers_initialize_without_a_worker_and_exits_on_eof() {
         started.elapsed()
     );
     let tools = mcp.request("tools/list", json!({})).await;
-    assert_eq!(tools["result"]["tools"].as_array().unwrap().len(), 22);
+    assert_eq!(tools["result"]["tools"].as_array().unwrap().len(), 23);
 
     drop(mcp);
     let status = tokio::time::timeout(Duration::from_secs(10), child.wait())
