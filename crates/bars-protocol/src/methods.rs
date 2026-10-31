@@ -105,6 +105,9 @@ pub struct SearchHit {
     pub title: String,
     /// Цепочка заголовков в виде `Заголовок 1/Заголовок 2`.
     pub heading_chain: String,
+    /// Заголовки разделов, приклеенных к чанку после первого, строками `## Заголовок` (ISS-28).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub sections: Vec<String>,
     pub first_line: u32,
     pub last_line: u32,
     pub text: String,
@@ -779,6 +782,13 @@ pub struct IndexingDoc {
     pub edit_pause_seconds: u32,
 }
 
+/// Таблица `[mcp]`: что `bars-mcp` показывает агентам.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct McpDoc {
+    /// Показывать ли шесть графовых инструментов; по умолчанию скрыты (OQ-162).
+    pub graph_tools: bool,
+}
+
 /// Настройки пользователя (`~/.bars/settings.toml`) целиком, с умолчаниями на месте пропущенного.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SettingsDoc {
@@ -787,6 +797,8 @@ pub struct SettingsDoc {
     pub search: SearchDoc,
     pub chunking: ChunkingDoc,
     pub indexing: IndexingDoc,
+    #[serde(default)]
+    pub mcp: McpDoc,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -875,6 +887,10 @@ pub struct ModelInfo {
     /// Безопасное сообщение последней ошибки ручного скачивания.
     #[serde(default)]
     pub download_error: Option<String>,
+    /// Вид ошибки встроенной embed-модели: `network`, `files_missing`, `out_of_memory`, `runtime`.
+    /// У rerank-модели вида нет (OQ-218).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub download_error_reason: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -912,6 +928,12 @@ pub struct ModelsRuntime {
 pub struct ModelDownloadParams {
     pub id: String,
 }
+
+/// Кнопка «Повторить» на экране ошибки модели: снимает паузу перед повтором фоновой загрузки
+/// всех моделей, следующий поиск загружает модель сразу
+/// (`docs/features/models/local-models.md`, ISS-71).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ModelRetryParams {}
 
 /// Запись ключа провайдера в хранилище ОС. Значение никогда не попадает в лог и в `Debug`.
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1120,6 +1142,7 @@ methods! {
     SettingsSave: SettingsSaveParams => SettingsSaveOutput, "settings_save", Window;
     ModelsInfo: ModelsInfoParams => ModelsInfoOutput, "models_info", Window;
     ModelDownload: ModelDownloadParams => AcceptedOutput, "model_download", Window;
+    ModelRetry: ModelRetryParams => AcceptedOutput, "model_retry", Window;
     SecretSet: SecretSetParams => SecretOutput, "secret_set", Window;
     SecretStatus: SecretStatusParams => SecretOutput, "secret_status", Window;
     ClientsStatus: ClientsStatusParams => ClientsStatusOutput, "clients_status", Window;
@@ -1137,6 +1160,7 @@ methods! {
     NewTopicsClear: crate::NewTopicsClearParams => crate::NewTopicsGenerationOutput, "new_topics_clear", Window;
     NewTopicsSettings: crate::NewTopicsSettingsParams => crate::NewTopicsSettingsOutput, "new_topics_settings", Window;
     LinksOf: crate::LinksOfParams => crate::LinksOfOutput, "links_of", Window;
+    LinksInto: crate::LinksIntoParams => crate::LinksIntoOutput, "links_into", Window;
     TextSearch: crate::TextSearchParams => crate::TextSearchOutput, "text_search", Window;
     DiskText: crate::DiskTextParams => crate::DiskTextOutput, "disk_text", All;
     DiskLinks: crate::DiskLinksParams => crate::DiskLinksOutput, "disk_links", All;
@@ -1239,6 +1263,7 @@ mod tests {
         SettingsSave(SettingsSaveParams),
         ModelsInfo(ModelsInfoParams),
         ModelDownload(ModelDownloadParams),
+        ModelRetry(ModelRetryParams),
         SecretSet(SecretSetParams),
         SecretStatus(SecretStatusParams),
         ClientsStatus(ClientsStatusParams),
@@ -1327,6 +1352,7 @@ mod tests {
             Call::from(SettingsGetParams {}),
             Call::from(ModelsInfoParams {}),
             Call::from(ModelDownloadParams { id: "m".into() }),
+            Call::from(ModelRetryParams {}),
             Call::from(SecretSetParams {
                 name: "n".into(),
                 value: "v".into(),
@@ -1490,6 +1516,7 @@ mod tests {
                 module: ".".into(),
                 title: "A".into(),
                 heading_chain: "A/Б".into(),
+                sections: vec!["## В".into()],
                 first_line: 3,
                 last_line: 9,
                 text: "текст".into(),

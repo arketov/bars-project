@@ -303,6 +303,7 @@ let paused = false;
 const secrets = new Set<string>();
 let savedSettings: SettingsDoc = {
   indexing: { edit_pause_seconds: 30 },
+  mcp: { graph_tools: false },
   embed: { accelerator: "auto", source: "builtin", model: "BAAI/bge-m3", base_url: null, api_key_name: null, api_key_env: null, batch_size: 32, unload_after_minutes: 15 },
   rerank: { accelerator: "cpu", enabled: false, source: "builtin", model: "BAAI/bge-reranker-v2-m3", base_url: null, api_key_name: null, api_key_env: null, unload_after_minutes: 5 },
   search: {
@@ -505,6 +506,7 @@ export async function mockCall(method: string, params: Record<string, unknown>):
         models_dir: "C:\\Users\\me\\.bars\\models",
       };
     case "model_download":
+    case "model_retry":
       return { accepted: true };
     case "secret_status":
       return { present: secrets.has(String(params.name)) };

@@ -217,6 +217,27 @@ async fn graph_search_fallback_is_explicit_and_hybrid_shape_unchanged() {
             .unwrap()
             .contains("include_related=false")
     );
+    // ISS-88: пакет не помещается даже пустым — выдача без него и причина о related_budget.
+    let tiny = cli
+        .call(&bars_protocol::GraphSearchParams {
+            search: search(&root, "поиск"),
+            mode: bars_core::graph::RetrievalMode::Mix,
+            graph_budgets: Default::default(),
+            include_related: true,
+            related_budget: Some(1),
+        })
+        .await
+        .unwrap();
+    assert_eq!(tiny.applied_mode, bars_core::graph::RetrievalMode::Hybrid);
+    assert!(tiny.related.is_none());
+    assert!(
+        tiny.fallback_reason
+            .as_deref()
+            .is_some_and(|reason| reason.contains("related_budget")),
+        "{:?}",
+        tiny.fallback_reason
+    );
+    assert_eq!(tiny.search.results, before.results);
     for (mode, include_related, related_budget) in [
         (bars_core::graph::RetrievalMode::Mix, true, Some(0)),
         (bars_core::graph::RetrievalMode::Graph, false, None),

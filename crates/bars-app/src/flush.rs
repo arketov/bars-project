@@ -2,7 +2,8 @@
 //!
 //! Окно отвечает командой `flush_reply`: `clean` — писать нечего или всё записано; `asking` — остались
 //! документы, которые не записались (конфликт, ошибка), окно спрашивает пользователя; `proceed` — пользователь
-//! согласился закрыть без записи; `cancel` — остаться.
+//! согласился закрыть без записи; `cancel` — остаться. Окно с изменённым или записывающимся документом сначала
+//! отвечает `writing`: пока оно пишет, процесс ждёт окончания записи до `WRITING` (OQ-174, ISS-93).
 
 use std::collections::HashSet;
 use std::sync::{Mutex, PoisonError};
@@ -15,6 +16,8 @@ use crate::commands::Shared;
 
 /// Сколько ждать первого ответа окна: окна может не быть или оно ещё не загрузилось.
 const QUICK: Duration = Duration::from_secs(3);
+/// Сколько ждать окончания записи после ответа окна «writing».
+const WRITING: Duration = Duration::from_secs(60);
 /// Сколько ждать решения пользователя в диалоге.
 const PATIENT: Duration = Duration::from_secs(3600);
 
@@ -48,35 +51,82 @@ impl Flush {
     }
 }
 
-/// Ждёт ответы окон из `pending`. `true` — можно выходить: все ответили `clean`/`proceed` либо молчат за
-/// `quick` и ни одно не задало вопрос; молчание после вопроса пользователю за `patient` — нельзя.
+/// Чем кончилось ожидание окон.
+#[derive(Debug, PartialEq, Eq)]
+enum Outcome {
+    /// Можно выходить.
+    Proceed,
+    /// Пользователь отказался или не ответил на вопрос.
+    Stay,
+    /// Окно ответило «writing», но запись не кончилась за отведённое время.
+    StillWriting,
+}
+
+/// Сроки ожидания ответов окон.
+#[derive(Clone, Copy)]
+struct Limits {
+    /// Первого слова окна: окна может не быть или оно ещё не загрузилось.
+    quick: Duration,
+    /// Окончания записи после «writing».
+    writing: Duration,
+    /// Решения пользователя после вопроса.
+    patient: Duration,
+}
+
+const LIMITS: Limits = Limits {
+    quick: QUICK,
+    writing: WRITING,
+    patient: PATIENT,
+};
+
+/// Ждёт ответы окон из `pending`. `Proceed` — все ответили `clean`/`proceed` либо молчат за `quick` и ни одно не
+/// задало вопрос и не пишет; молчание после вопроса за `patient` — `Stay`, после «writing» за `writing` — `StillWriting`.
 async fn wait(
     rx: &mut UnboundedReceiver<Reply>,
     mut pending: HashSet<String>,
-    quick: Duration,
-    patient: Duration,
+    limits: Limits,
     mut on_asking: impl FnMut(&str),
-) -> bool {
+) -> Outcome {
     let mut asked: HashSet<String> = HashSet::new();
+    let mut writing: HashSet<String> = HashSet::new();
     while !pending.is_empty() {
-        let limit = if asked.is_empty() { quick } else { patient };
+        let limit = if !asked.is_empty() {
+            limits.patient
+        } else if !writing.is_empty() {
+            limits.writing
+        } else {
+            limits.quick
+        };
         match tokio::time::timeout(limit, rx.recv()).await {
             Ok(Some((label, state))) => match state.as_str() {
                 "clean" | "proceed" => {
                     pending.remove(&label);
                     asked.remove(&label);
+                    writing.remove(&label);
                 }
-                "cancel" => return false,
+                "cancel" => return Outcome::Stay,
+                "writing" => {
+                    writing.insert(label);
+                }
                 "asking" => {
+                    writing.remove(&label);
                     asked.insert(label.clone());
                     on_asking(&label);
                 }
                 _ => {}
             },
-            Ok(None) | Err(_) => return asked.is_empty(),
+            Ok(None) | Err(_) => {
+                return if !asked.is_empty() {
+                    Outcome::Stay
+                } else if !writing.is_empty() {
+                    Outcome::StillWriting
+                } else {
+                    Outcome::Proceed
+                };
+            }
         }
     }
-    true
+    Outcome::Proceed
 }
 
 /// Просит все окна записать несохранённые документы. `false` — пользователь или ошибка записи просят остаться.
@@ -90,7 +140,7 @@ pub async fn request(app: &AppHandle) -> bool {
     }
     let pending: HashSet<String> = app.webview_windows().into_keys().collect();
     let shown = app.clone();
-    let proceed = wait(&mut rx, pending, QUICK, PATIENT, move |label| {
+    let outcome = wait(&mut rx, pending, LIMITS, move |label| {
         if let Some(window) = shown.get_webview_window(label) {
             let _ = window.show();
             let _ = window.unminimize();
@@ -99,7 +149,11 @@ pub async fn request(app: &AppHandle) -> bool {
     })
     .await;
     state.flush.end();
-    proceed
+    if outcome == Outcome::StillWriting {
+        // Выход отменён: окно сообщает пользователю, что документ ещё записывается.
+        let _ = app.emit("bars://flush-still-writing", ());
+    }
+    outcome == Outcome::Proceed
 }
 
 /// Перед переименованием все окна подтверждают запись; молчание запрещает операцию.
@@ -134,6 +188,11 @@ mod tests {
     use super::*;
 
     const SHORT: Duration = Duration::from_millis(60);
+    const TEST: Limits = Limits {
+        quick: SHORT,
+        writing: Duration::from_millis(400),
+        patient: SHORT,
+    };
 
     fn replies(states: &[(&str, &str)]) -> UnboundedReceiver<Reply> {
         let (tx, rx) = unbounded_channel();
@@ -150,42 +209,53 @@ mod tests {
         labels.iter().map(|label| (*label).to_string()).collect()
     }
 
+    async fn outcome(states: &[(&str, &str)], labels: &[&str]) -> Outcome {
+        wait(&mut replies(states), windows(labels), TEST, |_| {}).await
+    }
+
     #[tokio::test]
     async fn clean_window_lets_the_process_exit() {
-        let mut rx = replies(&[("main", "clean")]);
-        assert!(wait(&mut rx, windows(&["main"]), SHORT, SHORT, |_| {}).await);
+        assert_eq!(
+            outcome(&[("main", "clean")], &["main"]).await,
+            Outcome::Proceed
+        );
     }
 
     #[tokio::test]
     async fn silent_window_does_not_block_exit() {
-        let mut rx = replies(&[]);
-        assert!(wait(&mut rx, windows(&["main"]), SHORT, SHORT, |_| {}).await);
+        assert_eq!(outcome(&[], &["main"]).await, Outcome::Proceed);
     }
 
     #[tokio::test]
     async fn user_can_discard_or_stay_after_the_window_asked() {
         let mut asked = Vec::new();
         let mut rx = replies(&[("main", "asking"), ("main", "proceed")]);
-        assert!(
-            wait(&mut rx, windows(&["main"]), SHORT, SHORT, |label| asked
-                .push(label.to_string()))
-            .await
-        );
+        let result = wait(&mut rx, windows(&["main"]), TEST, |label| {
+            asked.push(label.to_string());
+        })
+        .await;
+        assert_eq!(result, Outcome::Proceed);
         assert_eq!(asked, ["main"]);
-        let mut rx = replies(&[("main", "asking"), ("main", "cancel")]);
-        assert!(!wait(&mut rx, windows(&["main"]), SHORT, SHORT, |_| {}).await);
+        assert_eq!(
+            outcome(&[("main", "asking"), ("main", "cancel")], &["main"]).await,
+            Outcome::Stay
+        );
     }
 
     #[tokio::test]
     async fn unanswered_question_keeps_the_process_running() {
-        let mut rx = replies(&[("main", "asking")]);
-        assert!(!wait(&mut rx, windows(&["main"]), SHORT, SHORT, |_| {}).await);
+        assert_eq!(
+            outcome(&[("main", "asking")], &["main"]).await,
+            Outcome::Stay
+        );
     }
 
     #[tokio::test]
     async fn unknown_replies_are_ignored() {
-        let mut rx = replies(&[("main", "???"), ("main", "clean")]);
-        assert!(wait(&mut rx, windows(&["main"]), SHORT, SHORT, |_| {}).await);
+        assert_eq!(
+            outcome(&[("main", "???"), ("main", "clean")], &["main"]).await,
+            Outcome::Proceed
+        );
     }
 
     #[tokio::test]
@@ -193,19 +263,55 @@ mod tests {
         // Отдельное окно отвечает «спрашиваю» после того, как основное уже ответило «чисто».
         let mut asked = Vec::new();
         let mut rx = replies(&[("main", "clean"), ("doc-1", "asking")]);
-        assert!(
-            !wait(
-                &mut rx,
-                windows(&["main", "doc-1"]),
-                SHORT,
-                SHORT,
-                |label| asked.push(label.to_string())
-            )
-            .await
-        );
+        let result = wait(&mut rx, windows(&["main", "doc-1"]), TEST, |label| {
+            asked.push(label.to_string());
+        })
+        .await;
+        assert_eq!(result, Outcome::Stay);
         assert_eq!(asked, ["doc-1"]);
-        let mut rx = replies(&[("main", "clean"), ("doc-1", "asking"), ("doc-1", "proceed")]);
-        assert!(wait(&mut rx, windows(&["main", "doc-1"]), SHORT, SHORT, |_| {}).await);
+        assert_eq!(
+            outcome(
+                &[("main", "clean"), ("doc-1", "asking"), ("doc-1", "proceed")],
+                &["main", "doc-1"]
+            )
+            .await,
+            Outcome::Proceed
+        );
+    }
+
+    #[tokio::test]
+    async fn exit_waits_for_a_window_that_is_writing() {
+        // Запись дольше первых слов окна (QUICK): процесс не уходит, пока окно не сказало «clean».
+        let (tx, mut rx) = unbounded_channel();
+        tx.send(("main".to_string(), "writing".to_string()))
+            .unwrap();
+        let late = tokio::spawn(async move {
+            tokio::time::sleep(SHORT * 3).await;
+            tx.send(("main".to_string(), "clean".to_string())).unwrap();
+        });
+        let result = wait(&mut rx, windows(&["main"]), TEST, |_| {}).await;
+        late.await.unwrap();
+        assert_eq!(result, Outcome::Proceed);
+    }
+
+    #[tokio::test]
+    async fn writing_that_never_ends_cancels_the_exit() {
+        assert_eq!(
+            outcome(&[("main", "writing")], &["main"]).await,
+            Outcome::StillWriting
+        );
+    }
+
+    #[tokio::test]
+    async fn writing_window_that_fails_asks_the_user() {
+        assert_eq!(
+            outcome(
+                &[("main", "writing"), ("main", "asking"), ("main", "proceed")],
+                &["main"]
+            )
+            .await,
+            Outcome::Proceed
+        );
     }
 
     #[test]

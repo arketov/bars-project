@@ -181,6 +181,9 @@ pub fn to_doc(user: &UserSettings) -> SettingsDoc {
         indexing: bars_protocol::IndexingDoc {
             edit_pause_seconds: user.indexing.edit_pause_seconds,
         },
+        mcp: bars_protocol::McpDoc {
+            graph_tools: user.mcp.graph_tools,
+        },
     }
 }
 
@@ -471,9 +474,16 @@ fn write_user_settings(
         old.indexing.edit_pause_seconds,
     );
 
+    set_flag(
+        table(&mut doc, "mcp"),
+        "graph_tools",
+        settings.mcp.graph_tools,
+        old.mcp.graph_tools,
+    );
+
     // Пустые таблицы, которые мы сами завели, в файле не нужны.
     for name in [
-        "embed", "rerank", "search", "device", "chunking", "indexing",
+        "embed", "rerank", "search", "device", "chunking", "indexing", "mcp",
     ] {
         if doc
             .get(name)
@@ -756,6 +766,25 @@ mod tests {
         doc.indexing.edit_pause_seconds = 3600;
         assert!(save_user_settings(home.path(), &doc).unwrap());
         assert_eq!(current(home.path()).indexing.edit_pause_seconds, 3600);
+    }
+
+    #[test]
+    fn graph_tools_flag_roundtrips_and_leaves_no_empty_table() {
+        let home = home();
+        let file = user_settings_path(home.path());
+        let mut doc = current(home.path());
+        assert!(!doc.mcp.graph_tools);
+        assert!(!save_user_settings(home.path(), &doc).unwrap());
+        assert!(!file.exists(), "умолчание файл не создаёт");
+
+        doc.mcp.graph_tools = true;
+        assert!(save_user_settings(home.path(), &doc).unwrap());
+        assert!(fs::read_to_string(&file).unwrap().contains("[mcp]"));
+        assert!(current(home.path()).mcp.graph_tools);
+
+        doc.mcp.graph_tools = false;
+        assert!(save_user_settings(home.path(), &doc).unwrap());
+        assert!(!current(home.path()).mcp.graph_tools);
     }
 
     #[test]

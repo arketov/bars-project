@@ -1,0 +1,24 @@
+files: n=190 med=2 p90=14 max=51 sum=1030
+logEntries: n=146 med=3 p90=6 max=14 sum=461
+logLines: n=146 med=3 p90=6 max=15 sum=532
+logChars: n=146 med=607 p90=1362 max=3672 sum=111516
+maxEntry: n=146 med=254 p90=490 max=2115 sum=48130
+longEntries: n=146 med=0 p90=0 max=1 sum=12
+hLines: n=189 med=12 p90=17 max=30 sum=2454
+hChars: n=189 med=1781 p90=2613 max=7739 sum=350181
+hLinks: n=189 med=2 p90=4 max=12 sum=398
+sections сд/не/слож/дал {
+  '1001': 1,
+  '1010': 1,
+  '1011': 2,
+  '1100': 1,
+  '1101': 27,
+  '1110': 1,
+  '1111': 153,
+  '0000': 3
+}
+handoff refs prev session 3
+per day {"2026-10-15":1,"2026-10-16":7,"2026-10-18":41,"2026-10-19":11,"2026-10-20":18,"2026-10-21":8,"2026-10-22":19,"2026-10-23":24,"2026-10-24":19,"2026-10-25":8,"2026-10-26":16,"2026-10-28":18}
+top handoffs by chars 2026-10-18-stage33-implementation:7739/24 2026-10-18-memory-research:4431/21 2026-10-22-editor-design:4169/30 2026-10-22-graph-implementation:3362/19 2026-10-20-workspace-design:3344/12 2026-10-24-registry-search:3215/21
+top logs by entries 2026-10-18-memory-research:14/3672 2026-10-23-lmstudio-support:11/2581 2026-10-22-editor-design:10/2264 2026-10-23-indexing-memory:10/3514 2026-10-23-external-inference:9/2125 2026-10-20-graph-quality:7/1533
+logs with 0 entries 

@@ -225,7 +225,7 @@
           <div class="ch"><h2>Очередь индексации</h2><span class="badge">{rows.length} {plural(rows.length, ["задание", "задания", "заданий"])}</span></div>
           <div>
             {#each rows as row, index (`${row.running ? "running" : "queued"}:${row.project}`)}
-              <div class="q" class:now={row.running}>
+              <div class="q" class:now={row.running} data-menu-kind="row" data-menu-row="indexing">
                 <span class="n">{index + 1}</span>
                 <div class="grow"><b>{row.name}</b><div class="why">{jobReason(row.kind, row.priority, row.files)}</div></div>
                 {#if row.running}<span class="badge acc">{paused ? "пауза" : "идёт"}</span>{:else}<span class="badge">ждёт</span>{/if}
@@ -244,7 +244,7 @@
             <div class="hrow">
               <span class="muted">Сейчас ничего не индексируется. {documents(app.documentsOf(project))} в индексе.</span>
               <span class="sp"></span>
-              <button class="btn sm" onclick={() => app.reindexCheck(project.path)}>Проверить сейчас</button>
+              <button class="btn sm" disabled={app.checking} onclick={() => app.reindexCheck(project.path)}>{app.checking ? "Проверяем…" : "Проверить сейчас"}</button>
             </div>
             <p class="muted small none">bars сверяет документы с индексом сам: по правке файла и каждые 15 минут. Кнопка запускает проверку этого проекта немедленно.</p>
           </div>

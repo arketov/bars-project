@@ -4,7 +4,7 @@ use std::io;
 
 use bars_core::doc_path::DocPathError;
 use bars_core::indexing::walk::ReadError;
-use bars_core::models::EmbedError;
+use bars_core::models::{EmbedError, ModelFailure};
 use bars_core::outline::OutlineError;
 use bars_core::search::SearchError;
 use bars_protocol::{ErrorKind, INTERNAL_ERROR, RpcError};
@@ -57,6 +57,13 @@ pub fn model_loading(percent: u8) -> RpcError {
     RpcError::bars_with(ErrorKind::ModelLoading, message, extra)
 }
 
+/// Ошибка фоновой загрузки встроенной embed-модели: вид в `data.reason` выбирает экран окна.
+pub fn builtin_model_error(failure: ModelFailure) -> RpcError {
+    let mut extra = serde_json::Map::new();
+    extra.insert("reason".to_string(), failure.kind.as_str().into());
+    RpcError::bars_with(ErrorKind::ProviderError, failure.message, extra)
+}
+
 pub fn embed_error(error: EmbedError) -> RpcError {
     RpcError::bars(ErrorKind::ProviderError, error.to_string())
 }
@@ -75,7 +82,7 @@ pub fn search_error(error: SearchError) -> RpcError {
 
 pub fn doc_path_error(error: DocPathError) -> RpcError {
     let kind = match error {
-        DocPathError::NotMarkdown(_) => ErrorKind::InvalidParams,
+        DocPathError::NotMarkdown(_) | DocPathError::OutsideProject(_) => ErrorKind::InvalidParams,
         DocPathError::NotFound(_) => ErrorKind::FileNotFound,
     };
     RpcError::bars(kind, error.to_string())

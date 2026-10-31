@@ -1,9 +1,24 @@
 ---
 name: bars-docs
-description: "Use bars tools to search and read project documentation; create, edit or move documentation."
+description: "Use bars tools to search and read project documentation; create, edit or move documentation. Load before reading, updating, writing or checking any project documentation: the first step is always bars_rag_search or bars_read, never guessing from memory."
 ---
 
 # Documentation for bars
+
+## Required first step
+
+Before you read, update, write, move or judge documentation, and before you answer a question about what the project documents, call bars. Do not rely on memory, on file names, or on a plain Read/Grep over `docs/`.
+
+- Updating documentation after a change: the project may hold hundreds of files, so a single search or a guessed file list is never enough. Build the full list of places to change first, from four sources, and edit only after it is complete:
+  1. **By meaning**: `bars_rag_search` once per module that can describe the subject (`bars_projects` lists them: features, architecture, adr, knowledge, backlog, chats), each with a concrete question phrased several ways (the behaviour, the old and the new value, the term, the requirement or bug ID). Run one more project-wide search to catch modules you did not think of. Then `bars_get_similar` on every relevant hit: it finds the other copies of the same description.
+  2. **By exact text**: `bars_text_search` for IDs, names, option and field names, old values; semantic search misses them.
+  3. **By links**: `bars_links` with `direction: incoming` on each document you will change, so documents that link to it are re-checked.
+  4. **By the graph**: `bars_impact` on the changed object (what describes, depends on or verifies it), `bars_relations` for explicit dependencies, `bars_context` for the requirement, decision, behaviour and check around the task, and `bars_explore` for contradiction candidates. The graph is incomplete: an empty answer proves nothing, and on `graph_not_ready` rely on the first three sources.
+  Then read what you found (`bars_read`, `bars_outline`), write the list of documents with what changes in each, and update all of them in the same change. A stale copy left in another module is the failure this procedure exists to prevent.
+- Writing a new document: `bars_rag_search` and `bars_get_similar` first, to see whether the description already exists; extend it instead of duplicating it.
+- Context you do not already have: `bars_rag_search`. A known document: `bars_read`.
+- Do the search again when the subject changes during the task, not once per session.
+- Skipping the search because the file name looks obvious is the failure this rule exists to prevent.
 
 bars splits Markdown by headings and searches by section, so the shape of a document affects search quality. The full rules are in `BARS_INSTRUCTION.md` in the documentation root; read it before a larger change. Write documents and search queries in the user's language, following explicit project language rules. English is only for agent instruction documents; it does not set the language of generated documents, queries or UI.
 
@@ -23,12 +38,12 @@ For knowledge gaps, use `bars_new_topics_list`, then `bars_new_topics_get` for o
 | `bars_text_search` | Find a literal or regex in saved Markdown, including a recent edit. | `query`, `case_sensitive`, `regex`, `path_filter`, `modules`, `files` | Disk, no embed. First five hits per document; continue one document with its project-relative `path`, `offset`, `revision`. On `stale_revision`, restart. Truncated totals are lower bounds; narrow scope, no global document pagination. |
 | `bars_links` | Inspect fresh incoming or outgoing links of one saved document. | project-relative `path`, `direction`, `limit`, `cursor` | Refreshes the link index, not GraphRAG. Follow `next_cursor`; on `stale_cursor`, restart. Check `known`, `has_more`, `limit_reasons`; clipped display fields are not the full source. |
 | `bars_outline` | You need the structure of a known document or one part of it before reading. | `path`, `levels`, `under` / `under_line` | Headings with line numbers; cheaper than `bars_read` for long files. |
-| `bars_rag_search` | The context is unknown: «where is X described», requirements, decisions, past sessions. | `query`, `modules`, `files`, `limit`, `mode` | Ask a concrete question in the user's language. `mode=mix` adds related sources from the graph, `mode=graph` returns relations; without `mode` the plain hybrid search runs. Each hit has an `id`. |
+| `bars_rag_search` | The context is unknown: «where is X described», requirements, decisions, past sessions. | `query`, `modules`, `files`, `limit`, `mode` | Ask a concrete question in the user's language. `mode=mix` adds related sources from the graph and can return tens of kilobytes: set `related_budget`. `mode=graph` returns relations; without `mode` the plain hybrid search runs. Each hit has an `id`. |
 | `bars_get_similar` | Before adding text: does a description already exist? Before editing: which other sections say the same? | `chunk_id` from a search hit, `modules`, `limit` | Closeness is not duplication; read both sections. An ID goes stale when its document changes (`chunk_not_found`): search again. |
 | `bars_get_duplicates` | Auditing a project's docs: repeated descriptions, diverged copies, which source to keep. | `project` (required), `modules`, `limit` | Kinds: exact, near (with changed words, numbers, negations), contained, partial, semantic. Semantic is only a hint; `repeated_block` is probably a template. Read both sections before merging; nothing is changed for you. |
 | `bars_projects` | You do not know project names or module names. | none | Registered projects, documentation roots, first-level modules with document counts. |
 | `bars_status` | Results look empty or incomplete; check the index before blaming the query. | `project` | Last update, indexing in progress, pending documents, model, `reindex_required`, last error. While indexing, results are incomplete. |
-| `bars_reindex` | The status says the index is stale or a document was changed outside the editor and is missing from results. | `project`, `full` | Returns at once; watch `bars_status`. After a model change it fails with `reindex_needs_consent`: tell the user and do not retry. |
+| `bars_reindex` | `bars_status` shows `reindex_required`, or a file changed while bars was not running and stays missing after the normal pause. | `project`, `full` | Returns at once; watch `bars_status`. After a model change it fails with `reindex_needs_consent`: tell the user and do not retry. |
 | `bars_relations` | What does X depend on, use, implement, verify or supersede? Exact statements with evidence. | `query` or `entity_ref`, `predicates`, `direction`, `polarity` | Ambiguous names return candidates, not a guess. |
 | `bars_paths` | How are two things connected? | `from`, `to`, `path_kind`, `max_hops` | A shortest path is a link, not a causal explanation. No path is not proof of no link. |
 | `bars_impact` | I am changing X: which documents describe, depend on or verify it? | `roots` (object refs from other graph results) | Result means «re-check these descriptions», not «something is broken». Hyperlinks are not dependencies. |
@@ -41,9 +56,10 @@ For knowledge gaps, use `bars_new_topics_list`, then `bars_new_topics_get` for o
 1. Know the document → `bars_read` (or `bars_outline` first for a long one). No search needed, even for an unindexed plan.
 2. Do not know where the answer lives → `bars_rag_search` with a subject question. Narrow with `modules` (first-level folders from `bars_projects`: `backlog` for wishes, `chats` for session results) or `files` (already chosen indexed documents, paths from the documentation root). A cross-layer task needs no filter.
 3. Need related material around a hit → `bars_get_similar` for same-topic text, `bars_relations` / `bars_paths` for explicit links, `bars_context` for a role-grouped bundle for a task.
-4. About to change something → `bars_impact` on the object, then `bars_get_similar` on the section you will edit.
+4. About to change something → `bars_rag_search` for the descriptions of the object, `bars_links` with `direction: incoming` on its document, then `bars_get_similar` on the section you will edit. `bars_impact` adds typed dependencies when the graph has them; an empty impact proves nothing.
 5. Reviewing the documentation as a whole → `bars_explore`, then `bars_graph` to inspect a finding.
 6. Zero or odd results → check subject, project and filters, then `bars_status`; reformulate or read the primary source. An empty answer does not prove a requirement is absent, and is not a reason to reindex.
+7. Need an ID (Т-N, OQ-N, ISS-N) or an exact phrase → `bars_text_search`, then `bars_read` the found place. A path printed in a result starts at the project root (`docs/...`); for `files`, drop the documentation-root prefix.
 
 Graph tools read a prebuilt graph; the semantic layer is incomplete, so a missing relation proves nothing. Check `partial`, `coverage` and `evidence` in every answer, and treat similarity as a hint, never as a dependency. Graph results need the graph to be built; on `graph_not_ready` fall back to `bars_rag_search`.
 
@@ -117,8 +133,8 @@ Feature-only requirements stay in the feature's `requirements.md`, not in the ma
 
 | Document kind | Recommended location | Content and example |
 |---|---|---|
-| Session event | `chats/<YYYY-MM-DD>-<topic>/log.md` | Finding, failed approach, plan change or risky step; at most three lines appended without rereading. Example: why an experiment changed. |
-| Handoff | `chats/<YYYY-MM-DD>-<topic>/handoff.md` | Done, Not done, Difficulties, Next; at most a screen. Example: where the next session starts. |
+| Session event | `chats/<YYYY-MM-DD>-<topic>/log.md` | Finding, failed approach, plan change or risky step; up to about 400 characters appended without rereading. Example: why an experiment changed. |
+| Handoff | `chats/<YYYY-MM-DD>-<topic>/handoff.md` | Done, Not done, Difficulties (omit when none), Next, headed in the user's language; at most a screen. Example: where the next session starts. |
 | Index | The folder's `Index.md` | Every file/subfolder by name with when to read it, no links; update together with contents. Individual session folders are exempt. |
 
 For a mixed task, link the bug register, research, feature description and accepted ADR; do not copy the same fact among them. The journal records session history, not the only copy of a bug or enduring knowledge. Unaccepted proposals remain labelled in research or plans.

@@ -1,8 +1,9 @@
 //! Трей: иконка по состоянию воркера, меню, выход (Т-1, `docs/features/window/indexing-progress.md`).
 
+use std::sync::Mutex;
 use std::time::Duration;
 
-use bars_worker::worker::{Health, Summary};
+use bars_worker::worker::{Health, Line, Summary};
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Manager};
@@ -17,6 +18,29 @@ struct Items {
     index: MenuItem<tauri::Wry>,
     attention: MenuItem<tauri::Wry>,
     projects: MenuItem<tauri::Wry>,
+    /// Проекты, на которые указывают строки состояния сейчас (ISS-43).
+    targets: Mutex<Targets>,
+}
+
+/// Что в последний раз показано: иконка, подсказка и строки меню.
+type Shown = (Health, bool, String, Option<Line>, Option<Line>);
+
+#[derive(Default)]
+struct Targets {
+    index: Option<String>,
+    attention: Option<String>,
+}
+
+/// Экран и проект, которые открывает пункт меню; `None` — пункт окна не касается.
+fn route(id: &str, targets: &Targets) -> Option<(&'static str, Option<String>)> {
+    match id {
+        "open" => Some(("main", None)),
+        "projects" => Some(("projects", None)),
+        "settings" => Some(("settings", None)),
+        "state-index" => Some(("indexing", targets.index.clone())),
+        "state-attention" => Some(("main", targets.attention.clone())),
+        _ => None,
+    }
 }
 
 pub fn build(app: &AppHandle) -> tauri::Result<()> {
@@ -45,13 +69,19 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
         .tooltip("bars")
         .menu(&menu)
         .show_menu_on_left_click(false)
-        .on_menu_event(|app, event| match event.id().as_ref() {
-            "open" | "projects" => window::navigate(app, "main", None),
-            "settings" => window::navigate(app, "settings", None),
-            "state-index" => window::navigate(app, "indexing", None),
-            "state-attention" => window::navigate(app, "main", None),
-            "quit" => quit_app(app),
-            _ => {}
+        .on_menu_event(|app, event| {
+            let id = event.id().as_ref();
+            if id == "quit" {
+                quit_app(app);
+                return;
+            }
+            let target = app.try_state::<Items>().and_then(|items| {
+                let targets = items.targets.lock().unwrap_or_else(|e| e.into_inner());
+                route(id, &targets)
+            });
+            if let Some((view, project)) = target {
+                window::navigate(app, view, project.as_deref());
+            }
         })
         .on_tray_icon_event(|tray, event| {
             // Двойной клик по иконке открывает окно (Т-1).
@@ -73,6 +103,7 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
         index,
         attention,
         projects,
+        targets: Mutex::new(Targets::default()),
     });
     Ok(())
 }
@@ -96,7 +127,7 @@ pub fn quit_app(app: &AppHandle) {
 pub fn spawn_status_loop(app: AppHandle) {
     tauri::async_runtime::spawn(async move {
         let mut phase = false;
-        let mut last: Option<(Health, bool, String)> = None;
+        let mut last: Option<Shown> = None;
         loop {
             tokio::time::sleep(TICK).await;
             let Some(handler) = app.state::<Shared>().get() else {
@@ -105,7 +136,13 @@ pub fn spawn_status_loop(app: AppHandle) {
             let summary = handler.worker().summary();
             phase = !phase;
             let lit = summary.health != Health::Busy || phase;
-            let state = (summary.health, lit, summary.tooltip.clone());
+            let state = (
+                summary.health,
+                lit,
+                summary.tooltip.clone(),
+                summary.indexing.clone(),
+                summary.attention.clone(),
+            );
             if last.as_ref() != Some(&state) {
                 apply(&app, &summary, lit);
                 last = Some(state);
@@ -121,6 +158,10 @@ fn apply(app: &AppHandle, summary: &Summary, lit: bool) {
         let _ = tray.set_tooltip(Some(&summary.tooltip));
     }
     if let Some(items) = app.try_state::<Items>() {
+        *items.targets.lock().unwrap_or_else(|e| e.into_inner()) = Targets {
+            index: summary.indexing.as_ref().map(|line| line.project.clone()),
+            attention: summary.attention.as_ref().map(|line| line.project.clone()),
+        };
         let index = summary
             .indexing
             .as_ref()
@@ -140,5 +181,37 @@ fn apply(app: &AppHandle, summary: &Summary, lit: bool) {
         let _ = items
             .projects
             .set_text(format!("Проекты ({})", summary.projects));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn targets() -> Targets {
+        Targets {
+            index: Some("C:/a".into()),
+            attention: Some("C:/b".into()),
+        }
+    }
+
+    #[test]
+    fn status_rows_open_their_own_project() {
+        let t = targets();
+        assert_eq!(
+            route("state-index", &t),
+            Some(("indexing", Some("C:/a".into())))
+        );
+        assert_eq!(
+            route("state-attention", &t),
+            Some(("main", Some("C:/b".into())))
+        );
+    }
+
+    #[test]
+    fn projects_row_opens_the_project_menu_without_switching() {
+        assert_eq!(route("projects", &targets()), Some(("projects", None)));
+        assert_eq!(route("open", &targets()), Some(("main", None)));
+        assert_eq!(route("quit", &targets()), None);
     }
 }

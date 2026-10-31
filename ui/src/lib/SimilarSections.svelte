@@ -52,7 +52,7 @@
     {#if stale}<button onclick={onrefresh}>Обновить поиск</button>
     {:else}<button onclick={() => retry++}>Повторить</button>{/if}
   {:else if reply && validLimit}
-    <div class="source"><b>Исходный отрывок</b><button class="path" onclick={() => onopen(reply!.source)}>{reply.source.path}:{reply.source.first_line}–{reply.source.last_line} · {reply.source.heading_chain}</button>
+    <div class="source" data-document-path={reply.source.path} data-document-line={reply.source.first_line} data-menu-kind="file" data-menu-place="card"><b>Исходный отрывок</b><button class="path" onclick={() => onopen(reply!.source)}>{reply.source.path}:{reply.source.first_line}–{reply.source.last_line} · {reply.source.heading_chain}</button>
       <details><summary>Текст исходного отрывка</summary><div class="text">{@html renderChunk(reply.source.text)}</div></details>
     </div>
     <p class="note" role="status">Показано {visible.length} из {reply.results.length}; лимит {reply.limit}{reply.clamped ? " (ограничен настройками)" : ""}. Порог применяется к полученным соседям.</p>
@@ -60,7 +60,7 @@
     {#if !reply.results.length}<p>Других разделов в выбранной области нет.</p>
     {:else if validThreshold && !visible.length}<p>Нет соседей выше выбранного порога. Уменьшите порог.</p>{/if}
     {#each visible as hit}
-      <article>
+      <article data-document-path={hit.path} data-document-line={hit.first_line} data-menu-kind="file" data-menu-place="card">
         <b>{hit.heading_chain || hit.title}</b>
         <small>{hit.path}:{hit.first_line}–{hit.last_line} · {moduleLabel(hit.module)} · косинус {decimal(hit.score)}</small>
         <div class="text">{@html renderChunk(hit.text)}</div>

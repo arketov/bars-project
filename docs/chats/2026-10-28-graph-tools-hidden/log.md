@@ -1,0 +1,2 @@
+- Рабочее дерево с моими правками откатил чужой `git pull --rebase --autostash`; состояние вернул из висячего autostash-коммита (`git fsck --lost-found`), общие файлы types.ts и mock.ts пересобраны от HEAD без перевода строк.
+- `scripts/check.ps1`: Rust-часть и 84 из 85 файлов тестов окна зелёные; `npm run check` и `screen-menu.test.ts` падают на чужом незавершённом файле (меню, другая сессия).

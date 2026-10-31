@@ -1004,7 +1004,7 @@ pub fn main() -> Result<()> {
             let result = bars_core::models::download_onnx_artifacts(Path::new(&a[1]), bars_core::models::BGE_M3_FP16_ID);
             monitor.stop()?;
             native.emit("end", "artifact_only", json!({"ok":result.is_ok(),"ready":bars_core::models::is_downloaded(Path::new(&a[1]), bars_core::models::BGE_M3_FP16_ID)}));
-            result.map_err(Into::into)
+            result.map_err(|failure| failure.message.into())
         },
         Some("embed-fingerprint") if a.len()==2=>{
             let fp=match a[1].as_str(){"fp16"=>bars_core::models::bge_m3_fp16_fingerprint(),"int8"=>bars_core::models::bge_m3_int8_fingerprint(),_=>return Err("unknown precision".into())};

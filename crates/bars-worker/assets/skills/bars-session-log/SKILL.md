@@ -13,8 +13,8 @@ Follow the project's own rules and locations first. Otherwise, use `chats/<YYYY-
 
 | Content | Recommended location | Example and writing rule |
 |---|---|---|
-| Session event | Session `log.md` | Failed experiment or changed approach; at most three lines, append without rereading. |
-| Session handoff | Session `handoff.md` | Done, Not done, Difficulties, Next; at most a screen. |
+| Session event | Session `log.md` | Failed experiment or changed approach; up to about 400 characters, append without rereading. |
+| Session handoff | Session `handoff.md` | Done, Not done, Difficulties (omit when none), Next, headed in the user's language; at most a screen. |
 | Enduring research or measurement | `knowledge/<topic>.md` | Method, evidence, findings and limits; a journal entry links to it. A measurement is not a shipped change. |
 | Accepted rationale | `adr/NNNN-<topic>.md` | Owner-selected architecture, dated decision and consequences; a proposal is not an accepted ADR. |
 | Bug | `backlog/issues.md` | ID, source/date, symptom, known steps, expected/actual, status, verification; do not invent a cause. A log entry is not the bug's only record. |
@@ -26,7 +26,7 @@ Update existing documents before creating duplicates. Current behaviour and feat
 
 For a just-saved handoff, read it from disk with `bars_read`; embedding may still be queued. Use `bars_text_search` for an exact phrase in saved session files. Neither tool reads unsaved editor buffers. Do not force reindex to make a recent journal entry searchable.
 
-Identify the task subject before looking for its history; resolve a stage number through the known project plan/register first. Find the latest `handoff.md` on that topic in `docs/chats/`. If the path is known, call `bars_read` directly, or `bars_outline` for headings; no preliminary search is required. Open `log.md` only when you need detailed history.
+Identify the task subject before looking for its history; resolve a stage number through the known project plan/register first. Find the latest `handoff.md` on that topic: session folders are named `<YYYY-MM-DD>-<topic>`, so list the `chats/` folder with your file tools and pick the newest matching topic; search ranks by meaning, not by date. If the path is known, call `bars_read` directly, or `bars_outline` for headings; no preliminary search is required. Open `log.md` only when you need detailed history.
 
 If the handoff is unknown, search session history, for example `bars_rag_search({query:"Последние результаты проверки устройств моделей",modules:["chats"]})`. Use the project's actual first-level module name; discover it with `bars_projects` when needed. For cross-cutting current contracts, use a broader scope instead of restricting every query to history.
 
@@ -45,7 +45,7 @@ Do not write the ordinary course of work, code, command output or what the diff 
 
 Saving tokens:
 
-- an entry is at most three lines;
+- an entry is at most about 400 characters: a Markdown paragraph is one line of any length, so count characters, not lines;
 - append to the end of the file without reading it, for example with `>>`;
 - a decision with reasons goes to `adr/`, a durable finding to `knowledge/`; the journal keeps one line with a link.
 
@@ -55,7 +55,11 @@ Write it at the end, and on large milestones of a long session. When the user en
 
 - **Done** — what is ready and where it lies: links to the main resulting documents, other changed documents by name, code files and commits in backticks.
 - **Not done** — what is left of the task.
-- **Difficulties** — what failed, what took the time, what is broken.
+- **Difficulties** — what failed, what took the time, what is broken; omit the section when there were none.
 - **Next** — where the next session starts.
+
+Section headings are written in the user's language (in Russian: «Сделано», «Не сделано», «Сложности», «Дальше»). When the session continues an earlier one on the same topic, the first line after the title links to that session's handoff: «Предыдущая сессия: [handoff](../<folder>/handoff.md)».
+
+Browser profiles, caches, temporary databases and tool dumps are not committed; raw measurement data needed later goes to `knowledge/<topic>-<date>/` next to the research.
 
 No keys, tokens, passwords or personal data in the journal, even in command output.

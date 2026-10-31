@@ -1,6 +1,6 @@
 import { afterEach, expect, it } from "vitest";
 import { createDockview, type DockviewApi } from "dockview-core";
-import { decodeLayout, defaultLayout, documentId, encodeLayout, layoutKey, legacyLayoutKey, rightZoneWidth, WorkspaceZones } from "./workspace-layout";
+import { decodeLayout, defaultLayout, documentId, dropCell, encodeLayout, layoutKey, legacyLayoutKey, rightZoneWidth, WorkspaceZones } from "./workspace-layout";
 let api: DockviewApi, zones: WorkspaceZones;
 const sidebar = { width: 300, graph: 200 };
 afterEach(() => { api?.dispose(); document.body.replaceChildren(); });
@@ -122,4 +122,46 @@ it("суммарная ширина двух правых колонок пер�
   api.layout(1500,800); sync(); sync();
   expect(zones.state.rightWidth).toBe(remembered);
   expect(p.group.width+logs.group.width).toBe(remembered);
+});
+
+it("полоса 48 px: справа открывает зону, в углу выигрывает верх/низ, мало места — в группу", () => {
+  const center = { role: "center" as const, open: true };
+  expect(dropCell(1160, 400, 1200, 800, 480, center)).toBe("right");
+  expect(dropCell(1100, 400, 1200, 800, 480, center)).toBe("center");
+  expect(dropCell(1160, 10, 1200, 800, 480, center)).toBe("top");
+  expect(dropCell(1160, 790, 1200, 800, 480, center)).toBe("bottom");
+  expect(dropCell(1160, 400, 1200, 800, 480, { role: "center", open: false })).toBe("center");
+  expect(dropCell(1160, 400, 600, 800, 480, center)).toBe("center");
+  expect(dropCell(10, 10, 1200, 230, 480, center)).toBe("left");
+  expect(dropCell(10, 400, 300, 800, 480, center)).toBe("center");
+  const right = { role: "right" as const, open: false };
+  expect(dropCell(400, 790, 480, 800, 480, right)).toBe("bottom");
+  expect(dropCell(470, 400, 480, 800, 480, right)).toBe("center");
+  expect(dropCell(10, 400, 480, 800, 480, right)).toBe("center");
+  expect(dropCell(400, 10, 480, 230, 480, right)).toBe("center");
+});
+it("клетка сброса: зона предлагается только центру без зоны, на всю высоту, у края окна", () => {
+  create(); const search = api.getPanel("search")!.group;
+  expect(zones.cell(search, 1190, 400, 1200, 800)).toBe("right");
+  const p = doc(); sync();
+  expect(zones.cell(search, 700, 400, 700, 800)).toBe("center");
+  expect(zones.cell(p.group, 400, 790, 480, 800)).toBe("bottom");
+  p.api.close(); sync();
+  const below = api.addPanel({ id: "graph", component: "workspace", params: { kind: "graph" }, position: { referencePanel: "search", direction: "below" } }); sync();
+  expect(zones.cell(below.group, 1190, 200, 1200, 400)).toBe("center");
+});
+it("зона, появившаяся сбросом, получает размер превью, а не половину группы", () => {
+  create();
+  const graph = api.addPanel({ id: "graph", component: "workspace", params: { kind: "graph" }, position: { referencePanel: "search", direction: "right" } });
+  expect(graph.group.width).toBe(600); sync();
+  expect(graph.group.width).toBe(zones.previewWidth()); expect(zones.previewWidth()).toBe(480);
+  expect(zones.state.rightWidth).toBeUndefined();
+  graph.group.api.setSize({ width: 540 }); sync(); expect(zones.state.rightWidth).toBe(540);
+});
+it("служебная вкладка открывается в центре, даже когда «Поиск» перенесён вправо (ISS-44)", () => {
+  create(); const p = doc(); sync();
+  api.getPanel("search")!.api.moveTo({ group: p.group, position: "center" }); sync();
+  const audits = api.addPanel({ id: "audits", component: "workspace", params: { kind: "audits" }, position: { referenceGroup: zones.serviceGroup()!, direction: "within" } }); sync();
+  expect(zones.state.roles[audits.group.id]).toBe("center"); expect(audits.group).not.toBe(p.group);
+  expect(doc("docs/b.md").group).toBe(p.group);
 });

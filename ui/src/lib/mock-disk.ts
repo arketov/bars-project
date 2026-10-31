@@ -1,7 +1,7 @@
 // Диск для просмотра окна в браузере (вне Tauri): те же операции с файлами и папками, что у команд
 // `tree_read`/`entry_*`, но над копией документов мока в памяти. В тестах выключен: дерево строится по индексу.
 
-import type { DiskTreeOutput, EntryResult } from "./api";
+import type { DeletePlan, DiskTreeOutput, EntryResult } from "./api";
 import { mockCall } from "./mock";
 import type { TreeOutput } from "./types";
 
@@ -104,4 +104,23 @@ export async function mockEntry(op: string, project: string, args: Record<string
     return { status: "ok", path: args.path };
   }
   return failure("io", `Неизвестная операция ${op}`);
+}
+
+/** План удаления для просмотра в браузере: входящие ссылки берутся из мока `links_of`. */
+export async function mockPlanDelete(project: string, path: string): Promise<DeletePlan> {
+  if (!enabled()) return { status: "ok", folder: false, documents: 1, links_checked: true, links: 0, sources: [] };
+  const disk = await diskOf(project);
+  const documents = [...disk.files].filter((file) => file === path || file.startsWith(path + "/")).sort();
+  const sources = new Map<string, { path: string; title?: string; links: { line: number; text: string }[] }>();
+  for (const document of documents) {
+    const found = (await mockCall("links_of", { project, path: document })) as { incoming: { path: string; title?: string; lines: number[] }[] };
+    for (const link of found.incoming) {
+      if (documents.includes(link.path)) continue;
+      const source = sources.get(link.path) ?? { path: link.path, title: link.title, links: [] };
+      source.links.push(...link.lines.map((line) => ({ line, text: base(document) })));
+      sources.set(link.path, source);
+    }
+  }
+  const list = [...sources.values()];
+  return { status: "ok", folder: disk.dirs.has(path), documents: documents.length, links_checked: true, links: list.reduce((sum, s) => sum + s.links.length, 0), sources: list };
 }

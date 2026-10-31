@@ -1181,3 +1181,99 @@ fn a_deferred_document_keeps_its_old_version_until_the_next_check() {
     let report = updated(dir.path(), &mut index, &mut FakeEmbedder::new("m"));
     assert_eq!((report.deferred, report.changed), (0, 1));
 }
+
+fn touch_index_files(base: &Path, suffixes: &[&str]) {
+    for suffix in suffixes {
+        std::fs::write(with_suffix(base, suffix), suffix).unwrap();
+    }
+}
+
+#[test]
+fn recovery_drops_old_when_the_swap_finished_and_always_drops_new() {
+    let dir = tempfile::tempdir().unwrap();
+    let index = dir.path().join("index.sqlite");
+    touch_index_files(&index, &["", ".old", ".old-wal", ".new", ".new-shm"]);
+
+    recover_index_files(&index).unwrap();
+
+    assert_eq!(std::fs::read_to_string(&index).unwrap(), "");
+    for suffix in [".old", ".old-wal", ".new", ".new-shm"] {
+        assert!(!with_suffix(&index, suffix).exists(), "{suffix}");
+    }
+}
+
+#[test]
+fn recovery_returns_old_when_the_index_is_missing() {
+    let dir = tempfile::tempdir().unwrap();
+    let index = dir.path().join("index.sqlite");
+    touch_index_files(&index, &["-wal", ".old", ".new"]);
+    std::fs::write(with_suffix(&index, ".old"), "прежний").unwrap();
+
+    recover_index_files(&index).unwrap();
+
+    assert_eq!(std::fs::read_to_string(&index).unwrap(), "прежний");
+    assert!(!with_suffix(&index, ".old").exists());
+    assert!(!with_suffix(&index, ".new").exists());
+    assert!(!with_suffix(&index, "-wal").exists());
+}
+
+#[test]
+fn recovery_without_old_keeps_index_and_ignores_missing_files() {
+    let dir = tempfile::tempdir().unwrap();
+    let index = dir.path().join("index.sqlite");
+    recover_index_files(&index).unwrap();
+    assert!(!index.exists());
+    touch_index_files(&index, &[""]);
+    recover_index_files(&index).unwrap();
+    assert!(index.exists());
+}
+
+#[test]
+fn failed_rollback_reports_both_causes() {
+    let dir = tempfile::tempdir().unwrap();
+    let index = dir.path().join("index.sqlite");
+    let new = with_suffix(&index, ".new");
+    let old = with_suffix(&index, ".old");
+    touch_index_files(&index, &["", ".new"]);
+    let error = swap_with(&index, &new, &old, |from, to| {
+        // Прежний индекс уходит в `.old`, новый не встаёт, и возврат тоже не удаётся.
+        if from == index && to == old {
+            std::fs::rename(from, to)
+        } else if from == new {
+            Err(io::Error::other("не встал"))
+        } else {
+            Err(io::Error::other("не вернулся"))
+        }
+    })
+    .unwrap_err();
+
+    let IndexingError::Swap { cause, rollback } = &error else {
+        panic!("ожидалась ошибка подмены")
+    };
+    assert!(cause.to_string().contains("не встал"));
+    assert!(
+        rollback
+            .as_ref()
+            .unwrap()
+            .to_string()
+            .contains("не вернулся")
+    );
+    assert!(error.to_string().contains("не возвращён"));
+    assert!(old.exists() && !index.exists());
+}
+
+#[test]
+fn rollback_success_keeps_the_old_index_in_place() {
+    let dir = tempfile::tempdir().unwrap();
+    let index = dir.path().join("index.sqlite");
+    let new = with_suffix(&index, ".new");
+    let old = with_suffix(&index, ".old");
+    touch_index_files(&index, &[""]);
+    // Нового файла нет: установка не удалась, откат проходит.
+    let error = swap(&index, &new, &old).unwrap_err();
+    let IndexingError::Swap { rollback, .. } = &error else {
+        panic!("ожидалась ошибка подмены")
+    };
+    assert!(rollback.is_none());
+    assert!(index.exists() && !old.exists());
+}

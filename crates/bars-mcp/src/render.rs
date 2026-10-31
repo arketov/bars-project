@@ -36,6 +36,9 @@ fn result_block(text: &mut String, n: usize, total: usize, hit: &SearchHit) {
     let _ = writeln!(text, "module: {}", hit.module);
     let _ = writeln!(text, "title: {}", hit.title);
     let _ = writeln!(text, "heading: {}", hit.heading_chain);
+    if !hit.sections.is_empty() {
+        let _ = writeln!(text, "sections: {}", hit.sections.join("; "));
+    }
     let _ = writeln!(
         text,
         "score: {:.3} ({})",
@@ -55,7 +58,8 @@ pub fn search(output: &SearchOutput) -> String {
     }
     let applied = &output.applied;
     let _ = writeln!(text, "=== APPLIED PARAMETERS ===");
-    let _ = writeln!(text, "results: {}", applied.results);
+    let _ = writeln!(text, "limit: {}", applied.results);
+    let _ = writeln!(text, "returned: {total}");
     let _ = writeln!(text, "candidates: {}", applied.candidates);
     let _ = writeln!(
         text,
@@ -94,7 +98,8 @@ pub fn similar(output: &SimilarOutput) -> String {
         result_block(&mut text, index + 1, total, hit);
     }
     let _ = writeln!(text, "=== APPLIED PARAMETERS ===");
-    let _ = writeln!(text, "results: {}", output.limit);
+    let _ = writeln!(text, "limit: {}", output.limit);
+    let _ = writeln!(text, "returned: {total}");
     let _ = writeln!(
         text,
         "score: cosine similarity to the source chunk; closeness does not prove duplication"
@@ -184,7 +189,8 @@ pub fn duplicates(output: &DuplicatesOutput) -> String {
         let _ = writeln!(text, "=== END ITEM ===");
     }
     let _ = writeln!(text, "=== APPLIED PARAMETERS ===");
-    let _ = writeln!(text, "results: {}", output.limit);
+    let _ = writeln!(text, "limit: {}", output.limit);
+    let _ = writeln!(text, "returned: {shown}");
     let _ = writeln!(
         text,
         "found: exact {}, near {}, contained {}, partial {}, semantic {}",
@@ -383,11 +389,16 @@ mod tests {
         assert!(text.contains("=== RESULT 10 of 10 ===\n"));
         assert!(text.contains("=== END RESULT 10 ===\n=== APPLIED PARAMETERS ===\n"));
         assert!(text.contains("--- text ---\nРусский текст\n"));
-        assert!(text.contains("title: Поиск\nheading: Поиск/Порог\n"));
+        assert!(text.contains("title: Поиск\nheading: Поиск/Порог\nscore: "));
+        assert!(text.contains("=== APPLIED PARAMETERS ===\nlimit: 10\nreturned: 10\n"));
         assert!(text.contains("rerank_error: Ошибка провайдера\n"));
         assert!(
             text.ends_with("Indexing in progress: results may be incomplete.\n=== END SEARCH ===")
         );
+        output.results[0].sections = vec!["## Б".into(), "### В".into()];
+        assert!(search(&output).contains("heading: Поиск/Порог\nsections: ## Б; ### В\nscore: "));
+        output.results.truncate(3);
+        assert!(search(&output).contains("limit: 10\nreturned: 3\n"));
         output.results.clear();
         assert!(
             search(&output).starts_with("=== SEARCH: results 0 ===\n=== APPLIED PARAMETERS ===\n")

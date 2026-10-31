@@ -13,8 +13,8 @@ title: Внутренняя база знаний bars
 | Файл | Когда читать |
 |---|---|
 | `resource-efficiency.md` | Снижение CPU, чтения и памяти без потери качества: повторная загрузка графа, кванты, опрос окон, приоритеты и границы доказательств |
-| `lmstudio.md` | LM Studio: OpenAI embed, GPU-проба, отсутствие rerank и серверное усечение длинного входа |
-| `ollama.md` | Нативный embed API Ollama, кандидаты Qwen3 и отсутствие штатного rerank |
+| `lmstudio.md` | LM Studio: OpenAI embed, GPU-проба, серверное усечение длинного входа, logprobs для rerank только в `/v1/responses` |
+| `ollama.md` | Нативный embed API Ollama, кандидаты Qwen3; rerank по logprobs yes/no без штатного API — запрос, оценка, риски |
 | `external-inference.md` | Отбор llama.cpp, Infinity, TEI и vLLM для внешних embedding/rerank; несовместимость нативного TEI с Cohere |
 | `rerank-speed.md` | Устройство, потоки CPU, K и длина rerank: проверенные архивы, ограничения ноутбука и рецепт нового прогона |
 | `rerank-speed-2026-10-23.json` | Replay 39 хешей и 774 строк 28 серий; пересчитанные n/median/p95, сохранённые контрпримеры качества |
@@ -55,9 +55,11 @@ title: Внутренняя база знаний bars
 |---|---|
 | [inference-speed.md](inference-speed.md) | Скорость инференса: FP16 rerank против FP32, worker и конкуренция, отклонённые методы, протокол замеров |
 | [inference-2026-10-18/](inference-2026-10-18/Index.md) | Сырые данные этапа 11: GPU/CPU-сетки, полный retrieval, worker, индексация |
-| [inference-devices.md](inference-devices.md) | CPU, GPU и NPU, ограничения DirectML, диагностика неверных оценок rerank, кандидаты EP и библиотек |
+| [inference-devices.md](inference-devices.md) | CPU, GPU и NPU, ограничения DirectML, диагностика неверных оценок rerank, кандидаты EP и библиотек; CUDA в сборке bars — llama.cpp `dynamic-backends`, CUDA EP ORT 1.28, обнаружение CUDA и cuDNN, откат на Vulkan и DirectML |
 | [gguf-models.md](gguf-models.md) | Qwen3 GGUF и llama.cpp: качество против bge-m3, память, сборка Windows/Vulkan |
 | [gguf-2026-10-18/](gguf-2026-10-18/Index.md) | Сырые данные этапа 22: сводка и строки измерений |
+| [rerank-gguf.md](rerank-gguf.md) | Rerank-модели в GGUF для встроенного llama.cpp: Qwen3-Reranker, bge в GGUF, режим Rank в llama-cpp-2, пригодные конверсии |
+| `rerank-gguf-2026-10-28.jsonl` | Заголовки GGUF кандидатов: метаданные, тензоры головы, размеры и SHA-256 файлов |
 | [memory.md](memory.md) | Память bars: метрики, причины пиков, FP16 rerank и выгрузка, FP16/INT8 embed, подкачка |
 | `memory-2026-10-23/` | Доказательства 4.2.1: профиль ORT/VM/GPU, два полных FP16 lifecycle, 1200 поисков в 12 конфигурациях, 10 полных процессов и два защитных выхода |
 | [memory-acceptance-2026-10-20/](memory-acceptance-2026-10-20/Index.md) | Продолжение приёмки: парные процессы, baseline окна, свежие FP16-индексы и контроль индексатора |
@@ -97,8 +99,12 @@ title: Внутренняя база знаний bars
 | `new-topics-threshold-2026-10-19.md` | Пороги «Новых тем»: bge-m3 0,68, Qwen3 4B 0,75; измерения, реальные пропуски, ложные слияния и границы косинуса |
 | [new-topics-threshold-2026-10-19/](new-topics-threshold-2026-10-19/Index.md) | Сырые данные калибровки: пары, анализ, проверки, векторы |
 | [local-documentation-tools.md](local-documentation-tools.md) | 14 идей быстрых локальных инструментов документации, сравнение с аналогами, источники |
+| [session-journals.md](session-journals.md) | Проверка соглашения о журналах `docs/chats/` (шаг 6.4.1): записи `log.md`, читают ли handoff, вес `chats` в поиске и в git, предложения OQ-223 |
+| [session-journals-2026-10-28/](session-journals-2026-10-28/Index.md) | Скрипты и счётчики этой проверки |
 | [agent-tool-usage-2026-10-18.md](agent-tool-usage-2026-10-18.md) | Как агенты вызывают bars и как выбирать область поиска |
 | [agent-tool-usage-2026-10-18/](agent-tool-usage-2026-10-18/Index.md) | Сырые частоты, ручные оценки и пробы фильтров |
 | `agent-texts-run-2026-10-24.md` | 14 задач аудита агентами Sonnet со старыми и новыми текстами bars: вызовы, объём, правильность, какие правила брать в свод правил агента |
 | `graph-load-2026-10-24.md` | Стоимость загрузки графа на каждый запрос и построения по слоям на 5 000 чанков (ISS-77): загрузка 3,2 с против бюджета 1 с |
 | `graph-load-2026-10-24/` | Сырые данные замера загрузки и построения графа |
+| `window-poll-2026-10-28.md` | Нагрузка опроса окон на воркер (шаг 3.5.5): стоимость методов и CPU при видимом, спрятанном и четырёх окнах, вывод о событиях |
+| `window-poll-2026-10-28/` | Сырые данные замера опроса окон |

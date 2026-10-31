@@ -10,14 +10,16 @@ mod catalog;
 mod embed_artifact;
 mod embedder;
 mod execution;
+mod failure;
 mod gguf;
 mod gguf_artifact;
+pub use failure::{ModelErrorKind, ModelFailure, is_out_of_memory, library_kind};
 pub use gguf::GgufEmbedder;
 /// Скачивает и проверяет GGUF без создания модели и её KV-cache.
-pub fn download_gguf_artifact(dir: &std::path::Path, id: &str) -> Result<(), String> {
+pub fn download_gguf_artifact(dir: &std::path::Path, id: &str) -> Result<(), ModelFailure> {
     gguf_artifact::ensure(dir, id)
         .map(|_| ())
-        .map_err(|e| e.to_string())
+        .map_err(|e| e.failure())
 }
 pub use execution::ExecutionInfo;
 mod remote;

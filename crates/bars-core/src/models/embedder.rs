@@ -60,6 +60,12 @@ pub trait Embedder {
 pub enum EmbedError {
     #[error("модель не загрузилась: {0}")]
     Load(String),
+    /// Файлы модели не получены по сети (huggingface.co).
+    #[error("модель не загрузилась: {0}")]
+    Network(String),
+    /// Нет нужных файлов, файл пуст, не сошёлся размер или хеш.
+    #[error("модель не загрузилась: {0}")]
+    Files(String),
     #[error("provider rejected document: {0}")]
     Rejected(String),
     #[error("эмбеддинг не удался: {0}")]
@@ -68,4 +74,17 @@ pub enum EmbedError {
     Count { expected: usize, got: usize },
     #[error("размерность вектора {got}, а у модели {expected}")]
     Dimension { expected: usize, got: usize },
+}
+
+impl EmbedError {
+    /// Вид ошибки встроенной модели: типы `Network` и `Files` задаёт проверка bars, остальное
+    /// разбирается по тексту библиотеки.
+    pub fn failure(&self) -> super::ModelFailure {
+        use super::{ModelErrorKind, ModelFailure};
+        match self {
+            Self::Network(_) => ModelFailure::new(ModelErrorKind::Network, self.to_string()),
+            Self::Files(_) => ModelFailure::new(ModelErrorKind::FilesMissing, self.to_string()),
+            other => ModelFailure::from_library(other.to_string()),
+        }
+    }
 }

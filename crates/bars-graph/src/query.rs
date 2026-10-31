@@ -3,6 +3,11 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::time::{Duration, Instant};
 
+/// Ошибка бюджета, в который не помещается даже пустой ответ; поиск mix по ней отвечает без пакета
+/// связанных источников (ISS-88).
+pub const ENVELOPE_DOES_NOT_FIT: &str =
+    "max_bytes/token_budget: не помещается даже envelope ответа";
+
 #[derive(Serialize, Deserialize)]
 struct Cursor {
     snapshot: String,
@@ -56,30 +61,27 @@ fn allowed<'a>(
 }
 
 pub fn validate_scope(data: &Dataset, scope: &Scope) -> Result<(), GraphError> {
-    for module in &scope.modules {
-        if !data
-            .sources
+    let metas = || {
+        data.sources
             .iter()
             .map(|s| &s.meta)
             .chain(data.failed_sources.iter())
-            .any(|s| &s.module == module)
-        {
-            return Err(GraphError::InvalidParams(format!(
-                "неизвестный модуль `{module}`"
-            )));
+    };
+    for module in &scope.modules {
+        if !metas().any(|s| &s.module == module) {
+            let docs: Vec<(&str, &str)> = metas()
+                .map(|s| (s.module.as_str(), s.docs_path.as_str()))
+                .collect();
+            return Err(GraphError::InvalidParams(
+                crate::hints::unknown_module_message(module, &docs),
+            ));
         }
     }
     for file in &scope.files {
-        if !data
-            .sources
-            .iter()
-            .map(|s| &s.meta)
-            .chain(data.failed_sources.iter())
-            .any(|s| s.docs_path == file.replace('\\', "/"))
-        {
-            return Err(GraphError::InvalidParams(format!(
-                "неизвестный файл `{file}`"
-            )));
+        if !metas().any(|s| crate::model::file_matches(file, s)) {
+            return Err(GraphError::InvalidParams(
+                crate::hints::unknown_file_message(metas().map(|s| s.docs_path.as_str()), file),
+            ));
         }
     }
     Ok(())
@@ -1371,9 +1373,7 @@ pub fn execute_overlay(
             false
         };
         if !trimmed_role && reply.items.pop().is_none() && reply.candidates.pop().is_none() {
-            return Err(GraphError::InvalidParams(
-                "max_bytes/token_budget: не помещается даже envelope ответа".into(),
-            ));
+            return Err(GraphError::InvalidParams(ENVELOPE_DOES_NOT_FIT.into()));
         }
         reply.truncated = true;
         if !reply.limit_reasons.iter().any(|r| r == reason) {

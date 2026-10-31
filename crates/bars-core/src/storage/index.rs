@@ -118,6 +118,12 @@ impl Index {
         Ok(index)
     }
 
+    /// Разбор текста для FTS изменился с момента записи индекса: читатель его не чинит,
+    /// FTS пересоберёт первый писатель при открытии (`docs/architecture/worker.md`).
+    pub fn stem_outdated(&self) -> Result<bool, StorageError> {
+        Ok(self.meta("stem_version")?.as_deref() != Some(STEM_VERSION))
+    }
+
     /// Соединение для чтения: им пользуются поиск и тесты.
     pub fn conn(&self) -> &Connection {
         &self.conn

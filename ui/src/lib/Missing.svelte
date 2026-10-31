@@ -17,7 +17,7 @@
       возобновится сам.
     </p>
     <div class="acts">
-      <button class="btn" onclick={() => app.recheck()}>Проверить сейчас</button>
+      <button class="btn" disabled={app.checking} onclick={() => app.recheck()}>{app.checking ? "Проверяем…" : "Проверить сейчас"}</button>
       <button class="ghost" onclick={() => app.relocateProject(project)}>Добавить проект на новом месте…</button>
       <button class="ghost danger" onclick={() => app.removeProject(project.path)}>Убрать из bars</button>
     </div>

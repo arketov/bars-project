@@ -489,6 +489,50 @@ pub async fn entry_trash(
     .map_err(|e| e.to_string())
 }
 
+/// Перед удалением считает документы узла и входящие ссылки на них из документов, которые останутся.
+/// Индекс ссылок недоступен — `links_checked: false`: удаление идёт в корзину и остаётся возможным.
+#[tauri::command]
+pub async fn entry_plan_delete(
+    state: State<'_, Shared>,
+    project: String,
+    path: String,
+) -> Result<Value, String> {
+    let (root, docs_root) = document_roots(&state, &project)?;
+    let plan = {
+        let (root, docs_root, path) = (root.clone(), docs_root.clone(), path.clone());
+        tauri::async_runtime::spawn_blocking(move || {
+            crate::tree_io::plan_delete(&root, &docs_root, &path)
+        })
+        .await
+        .map_err(|e| e.to_string())?
+    };
+    let plan = match plan {
+        Ok(plan) => plan,
+        Err(error) => return Ok(tree_failure(&error)),
+    };
+    let handler = state.get().ok_or("воркер ещё запускается")?;
+    let call = Call::LinksInto(bars_protocol::LinksIntoParams {
+        project: root.display().to_string(),
+        paths: plan.documents.clone(),
+    });
+    let sources = match handler.dispatch(call).await {
+        Ok(value) => serde_json::from_value::<bars_protocol::LinksIntoOutput>(value)
+            .ok()
+            .map(|out| out.sources),
+        Err(_) => None,
+    };
+    let mut result = serde_json::json!({
+        "status": "ok",
+        "folder": plan.folder,
+        "documents": plan.documents.len(),
+        "links_checked": sources.is_some(),
+    });
+    let sources = sources.unwrap_or_default();
+    result["links"] = serde_json::json!(sources.iter().map(|s| s.links.len()).sum::<usize>());
+    result["sources"] = serde_json::json!(sources);
+    Ok(result)
+}
+
 /// Цвета и иконки проекта (Т-38). Отказы приходят как `status: "error"` с `kind`.
 fn appearance_json(appearance: &crate::appearance::Appearance) -> Value {
     let section = |entries: &std::collections::BTreeMap<String, crate::appearance::Entry>| {

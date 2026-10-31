@@ -166,6 +166,14 @@ impl Default for IndexingParams {
     }
 }
 
+/// Таблица `[mcp]`: что `bars-mcp` показывает агентам (`docs/features/agent-tools/mcp-tools.md`).
+/// Только в `settings.toml`: проект её не перекрывает.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct McpParams {
+    /// Показывать ли шесть графовых инструментов; по умолчанию скрыты (OQ-162).
+    pub graph_tools: bool,
+}
+
 /// Настройки пользователя: всё содержимое `settings.toml` с умолчаниями на месте пропущенного.
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct UserSettings {
@@ -175,6 +183,7 @@ pub struct UserSettings {
     pub search: SearchSettings,
     pub chunking: ChunkingParams,
     pub indexing: IndexingParams,
+    pub mcp: McpParams,
 }
 
 /// Настройки проекта: только то, что `.bars/config.toml` может перекрыть (Т-5, Т-7).

@@ -17,6 +17,7 @@
   });
   const reason = (buffer: EditorBuffer) =>
     buffer.status === "conflict" ? buffer.message || "Файл изменён на диске"
+      : buffer.status === "deleted" ? "Файл удалён с диска"
       : buffer.status === "error" ? `Не записано: ${buffer.message}`
       : "Правки не записаны";
   function keydown(event: KeyboardEvent) {

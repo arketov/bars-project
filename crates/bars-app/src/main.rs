@@ -73,6 +73,7 @@ fn main() -> anyhow::Result<()> {
             commands::entry_create_dir,
             commands::entry_move,
             commands::entry_plan_move,
+            commands::entry_plan_delete,
             commands::entry_trash,
             commands::appearance_read,
             commands::appearance_set,

@@ -20,3 +20,29 @@ it("перед переносом записывает только проект
   expect(invoke).toHaveBeenLastCalledWith("flush_reply",{reply:"cancel"});
   stop(); flush.mockRestore();
 });
+
+it("выход при идущей записи: окно сразу отвечает «writing», а «clean» — только после записи (ISS-93)", async () => {
+  invoke.mockClear();
+  let finish!: () => void;
+  const writing = new Promise<never[]>((resolve) => { finish = () => resolve([]); });
+  const unsaved = vi.spyOn(editors, "unsaved", "get").mockReturnValue([{}] as never);
+  const flush = vi.spyOn(editors, "flush").mockReturnValue(writing);
+  const stop = await startFlushListener();
+  const handled = listeners.get("bars://flush-request")!({ payload: "" });
+  await vi.waitFor(() => expect(invoke).toHaveBeenCalledWith("flush_reply", { reply: "writing" }));
+  expect(invoke).not.toHaveBeenCalledWith("flush_reply", { reply: "clean" });
+  finish();
+  await handled;
+  expect(invoke.mock.calls.map((call) => call[1].reply)).toEqual(["writing", "clean"]);
+  unsaved.mockRestore(); flush.mockRestore(); stop();
+});
+
+it("выход без изменённых документов отвечает «clean» без «writing»", async () => {
+  invoke.mockClear();
+  const unsaved = vi.spyOn(editors, "unsaved", "get").mockReturnValue([]);
+  const flush = vi.spyOn(editors, "flush").mockResolvedValue([]);
+  const stop = await startFlushListener();
+  await listeners.get("bars://flush-request")!({ payload: "" });
+  expect(invoke.mock.calls.map((call) => call[1].reply)).toEqual(["clean"]);
+  unsaved.mockRestore(); flush.mockRestore(); stop();
+});

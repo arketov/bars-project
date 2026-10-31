@@ -2,11 +2,13 @@
 
 import type { BarsError } from "./types";
 
+/** Вид ошибки встроенной модели: значения `data.reason` у `provider_error` (error-states.md). */
+export type BuiltinReason = "network" | "files_missing" | "out_of_memory" | "runtime";
+
 export type ErrorScreen =
   | { kind: "loading"; title: string; hint: string }
   | { kind: "provider"; title: string; hint: string }
-  | { kind: "model-files"; title: string; hint: string }
-  | { kind: "model-download"; title: string; hint: string }
+  | { kind: "builtin"; reason: BuiltinReason; title: string; hint: string }
   | { kind: "other"; title: string; hint: string };
 
 /** Источник embed-модели по отпечатку из `status`: `builtin:BAAI/bge-m3` → `builtin`. */
@@ -33,19 +35,33 @@ export function explainProvider(message: string): string {
   return "Проверьте адрес и ключ провайдера в настройках, на вкладке «Модели».";
 }
 
-/** Ошибка встроенной модели: нет связи с huggingface.co или файлов нет (OQ-48: оба случая приходят как `provider_error`). */
-export function explainBuiltin(message: string): { kind: "model-download" | "model-files"; hint: string } {
-  const text = message.toLowerCase();
-  if (/huggingface|скача|загруз|download|network|сет[ьи]|соединени/.test(text)) {
-    return {
-      kind: "model-download",
-      hint: "Нет связи с huggingface.co. Проверьте сеть и повторите; уже скачанная часть сохранена.",
-    };
-  }
-  return {
-    kind: "model-files",
-    hint: "В ~/.bars/models нет нужных файлов или не сходится размер. Скачайте модель заново.",
-  };
+/** Вид ошибки по `data.reason` воркера; пустое и неизвестное значение читается как `runtime`, а не как «файлов нет». */
+export function builtinReason(reason: string | null | undefined): BuiltinReason {
+  return reason === "network" || reason === "files_missing" || reason === "out_of_memory" ? reason : "runtime";
+}
+
+const BUILTIN_SCREENS: Record<BuiltinReason, { title: string; hint: string }> = {
+  network: {
+    title: "Не удалось скачать модель поиска",
+    hint: "Нет связи с huggingface.co. Проверьте сеть и скачайте снова; уже скачанная часть сохранена.",
+  },
+  files_missing: {
+    title: "Файлы модели не найдены или повреждены",
+    hint: "В папке моделей нет нужных файлов или не сходится размер. Скачайте модель заново.",
+  },
+  out_of_memory: {
+    title: "Модели не хватило памяти",
+    hint: "Закройте тяжёлые программы или посчитайте модель на процессоре: выберите другое устройство в настройках.",
+  },
+  runtime: {
+    title: "Встроенная модель не отработала",
+    hint: "Повторите поиск или выберите другую модель. Подробности — в тексте ошибки ниже.",
+  },
+};
+
+/** Идентификатор встроенной модели проекта по отпечатку: `builtin:BAAI/bge-m3` → `BAAI/bge-m3`. */
+export function builtinModelId(fingerprint: string | undefined | null): string | null {
+  return fingerprint?.startsWith("builtin:") ? fingerprint.slice("builtin:".length) || null : null;
 }
 
 /** Экран для ошибки поиска. `source` — откуда берётся embed-модель проекта. */
@@ -60,12 +76,8 @@ export function screenFor(error: BarsError, source: ReturnType<typeof sourceOf>)
   }
   if (error.kind === "provider_error") {
     if (source === "builtin") {
-      const builtin = explainBuiltin(error.message);
-      return {
-        kind: builtin.kind,
-        title: builtin.kind === "model-download" ? "Не удалось скачать embed-модель" : "Файлы модели не найдены или повреждены",
-        hint: builtin.hint,
-      };
+      const reason = builtinReason(error.data?.reason);
+      return { kind: "builtin", reason, ...BUILTIN_SCREENS[reason] };
     }
     return {
       kind: "provider",

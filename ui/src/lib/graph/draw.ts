@@ -162,8 +162,12 @@ export interface Scene {
   modules: Map<string, string>;
   /** Назначенный цвет документа или папки по Т-38 (идентификатор палитры); чанк берёт цвет документа. */
   assigned?: (node: GNode) => string | null;
-  /** Документ в центре локального графа мини-панели. */
+  /** Документ в центре локального графа. */
   focus?: number | null;
+  /** Наложение действия (путь по карте, входящие ссылки): карта не двигается, выделенные узлы подписаны значком (номер шага или пусто), остальное приглушено. */
+  overlay?: { nodes: Map<number, string>; edges: Set<number>; /** Узлы со слабым смыслом (косвенное влияние, ссылки-соседи): пунктирное кольцо цвета подписи вместо сплошного акцента. */ weak?: Set<number> };
+  /** Узлы подграфа — набор для «Искать в подграфе»: тонкое кольцо и квадрат-галочка. */
+  subgraph?: ReadonlySet<number>;
 }
 
 /** До стольких узлов локальный граф мини-панели подписан целиком. */
@@ -232,7 +236,7 @@ export function draw(ctx: CanvasRenderingContext2D, scene: Scene): void {
   const hoverNode = hovered?.type === "node" ? hovered.index : null;
   const around = hoverNode !== null ? neighbours(scene.links, scene.kinds, hoverNode) : null;
   const centre = hoverNode ?? (selected?.type === "node" ? selected.index : null);
-  const dimOthers = around !== null || scene.related.size > 0 || selected?.type === "edge";
+  const dimOthers = !!scene.overlay || around !== null || scene.related.size > 0 || selected?.type === "edge";
 
   // Группы раскрытых документов — контейнер владельца, не ребро.
   const byIndex = new Map(scene.nodes.map((n) => [n.index, n]));
@@ -263,7 +267,7 @@ export function draw(ctx: CanvasRenderingContext2D, scene: Scene): void {
   for (const d of lines) {
     const l = d.link;
     const kind = l.edge.kind;
-    const emphasised = incident(d) || chosenEdge(d) || d.ids.some(id => scene.highlighted?.has(id));
+    const emphasised = incident(d) || chosenEdge(d) || d.ids.some(id => scene.highlighted?.has(id) || scene.overlay?.edges.has(id));
     const faded = dimOthers && !emphasised;
     const s = l.edge.neutral ? 0.5 : drawStrength(l.edge);
     const [ax, ay, bx, by] = lineEnds(d, cam);
@@ -300,6 +304,7 @@ export function draw(ctx: CanvasRenderingContext2D, scene: Scene): void {
   // Узлы: цвет назначенный по Т-38 или цвет модуля, размер по числу связей.
   const isRelated = (n: PNode) => {
     if (!dimOthers) return true;
+    if (scene.overlay?.nodes.has(n.index)) return true;
     if (around) return around.has(n.index);
     if (selected?.type === "node") return n.index === selected.index || scene.related.has(n.index);
     return scene.related.has(n.index);
@@ -351,6 +356,46 @@ export function draw(ctx: CanvasRenderingContext2D, scene: Scene): void {
       ctx.fillStyle = palette.accent;
       ctx.fillRect(sx + r - 1, sy - r - 4, 4, 4);
     }
+    if (scene.subgraph?.has(n.index)) {
+      ctx.globalAlpha = 1;
+      ctx.beginPath();
+      ctx.arc(sx, sy, r + 6, 0, Math.PI * 2);
+      ctx.strokeStyle = palette.accent;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.fillStyle = palette.accent;
+      ctx.fillRect(sx + r + 2, sy + r - 1, 5, 5);
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(sx + r + 3, sy + r + 1.5);
+      ctx.lineTo(sx + r + 4.3, sy + r + 3);
+      ctx.lineTo(sx + r + 6, sy + r + 0.5);
+      ctx.stroke();
+    }
+    const badge = scene.overlay?.nodes.get(n.index);
+    if (badge !== undefined) {
+      ctx.globalAlpha = 1;
+      ctx.beginPath();
+      ctx.arc(sx, sy, r + 3.5, 0, Math.PI * 2);
+      const weak = scene.overlay?.weak?.has(n.index) ?? false;
+      ctx.strokeStyle = weak ? palette.muted : palette.accent;
+      ctx.lineWidth = 2;
+      ctx.setLineDash(weak ? [3, 2.5] : []);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      if (badge) {
+        ctx.beginPath();
+        ctx.arc(sx + r + 4, sy - r - 4, 7, 0, Math.PI * 2);
+        ctx.fillStyle = palette.accent;
+        ctx.fill();
+        ctx.fillStyle = "#fff";
+        ctx.font = 'bold 9px "Segoe UI Variable Text","Segoe UI",system-ui,sans-serif';
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(badge, sx + r + 4, sy - r - 3.5);
+      }
+    }
   }
   ctx.globalAlpha = 1;
   labels(ctx, scene, around);
@@ -388,7 +433,7 @@ function labels(ctx: CanvasRenderingContext2D, scene: Scene, around: Set<number>
     if (selected?.type === "node" && selected.index === n.index) return 1e9;
     if (hovered?.type === "node" && hovered.index === n.index) return 9.8e8;
     if (n.node.kind === "query") return 9.5e8;
-    if (scene.focus === n.index) return 9.2e8;
+    if (scene.focus === n.index || scene.overlay?.nodes.has(n.index)) return 9.2e8;
     if (near(n)) return 5e8 + n.degree;
     if (n.pinned) return 4e8;
     return n.degree + (n.node.kind === "document" ? 0.5 : 0);

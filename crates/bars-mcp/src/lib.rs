@@ -1,4 +1,4 @@
-//! `bars-mcp` как библиотека: stdio-MCP с двадцатью тремя инструментами (Т-2, Т-19).
+//! `bars-mcp`: 17 основных инструментов и шесть графовых по настройке (Т-2, Т-19).
 //!
 //! Каждый инструмент — один вызов метода протокола ([`bars_protocol`]); индекса и моделей здесь нет
 //! (НФТ-3). Ответ на `initialize` и список инструментов отдаются сразу, не подключаясь к воркеру;
@@ -13,6 +13,7 @@ mod instructions;
 mod maintenance;
 mod observation;
 mod render;
+mod settings;
 
 use std::io;
 use std::path::{Path, PathBuf};
@@ -32,7 +33,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tokio::sync::Mutex;
 
-pub use instructions::INSTRUCTIONS;
+pub use instructions::{INSTRUCTIONS, instructions};
 
 /// Сколько прокси ждёт ответа воркера на один вызов. Первый поиск может ждать загрузки модели.
 pub const CALL_TIMEOUT: Duration = Duration::from_secs(120);
@@ -63,6 +64,9 @@ pub struct Env {
     pub call_timeout: Duration,
     /// Сколько повторять вызов, пока модель загружается ([`MODEL_WAIT`]).
     pub model_wait: Duration,
+    /// Папка `~/.bars`: из её `settings.toml` прокси узнаёт, показывать ли графовые инструменты.
+    /// `None` — не читать, инструменты скрыты.
+    pub bars_home: Option<PathBuf>,
 }
 
 impl Env {
@@ -74,6 +78,7 @@ impl Env {
             launch: Launch::Worker,
             call_timeout: CALL_TIMEOUT,
             model_wait: MODEL_WAIT,
+            bars_home: bars_protocol::user_home().map(|home| home.join(".bars")),
         })
     }
 }
@@ -91,6 +96,8 @@ pub struct BarsMcp {
     env: Env,
     client: Arc<Mutex<Option<Client>>>,
     tool_router: ToolRouter<Self>,
+    /// Показаны ли шесть графовых инструментов; решается при создании сессии (OQ-162).
+    graph_tools: bool,
 }
 
 /// Вид ответа инструмента.
@@ -115,13 +122,14 @@ pub struct SearchArgs {
     /// true для диагностики, сравнения запросов и служебного обхода: не создавать новые темы и не увеличивать спрос. Для сохранённой темы — bars_new_topics_check.
     #[serde(default)]
     pub diagnostic: bool,
-    /// Явный hybrid/mix/graph. Без поля — прежний поиск и прежняя форма ответа.
+    /// hybrid — обычный поиск, та же выдача, что без поля, в форме ответа с mode; mix — плюс связанные источники графа (объёмно, задай related_budget); graph — отношения вместо фрагментов. Без поля — обычный поиск с блоками RESULT.
     pub mode: Option<bars_graph::RetrievalMode>,
+    /// Только для mix и graph: пределы обхода графа.
     #[serde(default)]
     pub graph_budgets: bars_graph::Budgets,
-    /// В mix: отключить расширение и пакеты оснований; без поля включено.
+    /// Только для mix: false — без связанных источников; по умолчанию true.
     pub include_related: Option<bool>,
-    /// В mix: предел байт пакета оснований, не увеличивает graph_budgets.max_bytes.
+    /// Только для mix: предел байт пакета связанных источников, не больше graph_budgets.max_bytes. Слишком малый — выдача без пакета с fallback_reason.
     pub related_budget: Option<u32>,
     /// Предметный вопрос на языке пользователя после определения задачи; не шаблон «этап N требования ошибки пожелания».
     pub query: String,
@@ -221,64 +229,105 @@ pub struct OutlineArgs {
 impl BarsMcp {
     #[tool(
         name = "bars_relations",
-        description = "Явные отношения с исходными доказательствами. Ровно один query/entity_ref; отрицания и условия сохраняются. Неоднозначное имя возвращает кандидатов. Только чтение готового графа."
+        description = "Что с чем связано явным утверждением («от чего зависит», «что заменяет»): \
+                       факты с основанием. Вход — одно из query (имя) и entity_ref; отрицания и \
+                       условия сохраняются, неоднозначное имя даёт кандидатов. Пустой ответ не \
+                       доказывает, что отношений нет."
     )]
     async fn bars_relations(
         &self,
-        Parameters(args): Parameters<graph::GraphArgs>,
+        original: observation::Original,
+        Parameters(args): Parameters<graph::RelationsArgs>,
     ) -> CallToolResult {
-        self.graph_call(args, bars_graph::Operation::Relations)
-            .await
+        self.graph_call(original, args.into_call()).await
     }
 
     #[tool(
         name = "bars_paths",
-        description = "Ограниченные пути между from/to: ObjectRef либо label/kind/namespace. По умолчанию смысловые рёбра; structural/mixed выбираются явно. Evidence каждого шага, partial и scope; без построения графа."
+        description = "Как связаны два объекта from и to: пути с основанием каждого шага. По умолчанию \
+                       смысловые рёбра; structural и mixed — в path_kind. Путь — связь, а не \
+                       объяснение причины; отсутствие пути не доказывает отсутствия связи."
     )]
-    async fn bars_paths(&self, Parameters(args): Parameters<graph::GraphArgs>) -> CallToolResult {
-        self.graph_call(args, bars_graph::Operation::Paths).await
+    async fn bars_paths(
+        &self,
+        original: observation::Original,
+        Parameters(args): Parameters<graph::PathsArgs>,
+    ) -> CallToolResult {
+        self.graph_call(original, args.into_call()).await
     }
 
     #[tool(
         name = "bars_impact",
-        description = "Документированное влияние изменения roots: обратные зависимости и полные пути с evidence. Гиперссылки не означают зависимости, результат не доказывает дефект кода. Только чтение."
+        description = "Какие документы перепроверить после правки объекта: зависимости и проверки с \
+                       основанием. Вход — roots из ответа другой графовой операции. Пустой ответ не \
+                       значит, что зависимостей нет; гиперссылки сюда не входят — их даёт \
+                       bars_links с direction=incoming."
     )]
-    async fn bars_impact(&self, Parameters(args): Parameters<graph::GraphArgs>) -> CallToolResult {
-        self.graph_call(args, bars_graph::Operation::Impact).await
+    async fn bars_impact(
+        &self,
+        original: observation::Original,
+        Parameters(args): Parameters<graph::ImpactArgs>,
+    ) -> CallToolResult {
+        self.graph_call(original, args.into_call()).await
     }
 
     #[tool(
         name = "bars_context",
-        description = "Контекст query по ролям requirement/decision/behavior/architecture/constraint/verification. Первичные источники, общий byte/token budget, missing_roles. Без генерации ответа и скрытого обогащения."
+        description = "Собрать первичные источники к задаче query по ролям: требование, решение, \
+                       поведение, устройство, ограничение, проверка (roles, task_profile). Не \
+                       готовый ответ, а список для чтения в пределах token_budget; смотри \
+                       missing_roles."
     )]
-    async fn bars_context(&self, Parameters(args): Parameters<graph::GraphArgs>) -> CallToolResult {
-        self.graph_call(args, bars_graph::Operation::Context).await
+    async fn bars_context(
+        &self,
+        original: observation::Original,
+        Parameters(args): Parameters<graph::ContextArgs>,
+    ) -> CallToolResult {
+        self.graph_call(original, args.into_call()).await
     }
 
     #[tool(
         name = "bars_explore",
-        description = "Обзор темы topic либо whole_scope=true: topics/connectivity/coverage/conflict_candidates. Структурные дефекты отдельно от кандидатов смысловых пробелов; неполнота extraction видна. Только чтение."
+        description = "Обзор темы (topic) или всего проекта (whole_scope=true) для аудита: analysis=topics \
+                       — темы, connectivity — изоляты и битые связи, coverage — пробелы, \
+                       conflict_candidates — кандидаты в противоречия. Кандидат — повод прочитать \
+                       оба места, не вывод."
     )]
-    async fn bars_explore(&self, Parameters(args): Parameters<graph::GraphArgs>) -> CallToolResult {
-        self.graph_call(args, bars_graph::Operation::Explore).await
+    async fn bars_explore(
+        &self,
+        original: observation::Original,
+        Parameters(args): Parameters<graph::ExploreArgs>,
+    ) -> CallToolResult {
+        self.graph_call(original, args.into_call()).await
     }
 
     #[tool(
         name = "bars_graph",
-        description = "Общий/локальный граф documents/sections/chunks/entities/mixed. Local требует roots; depth ограничен budgets.max_depth. Связи типизированы, поколения и scope фиксированы; курсор только того же запроса. Граф не строится вызовом чтения."
+        description = "Подграф документов, разделов, чанков или сущностей (view), например чтобы \
+                       проверить находку bars_explore. local=true с roots — окрестность на глубину \
+                       max_depth. Ответ объёмный: задавай limit. Только читает готовый граф."
     )]
-    async fn bars_graph(&self, Parameters(args): Parameters<graph::GraphArgs>) -> CallToolResult {
-        self.graph_call(args, bars_graph::Operation::Graph).await
+    async fn bars_graph(
+        &self,
+        original: observation::Original,
+        Parameters(args): Parameters<graph::GraphViewArgs>,
+    ) -> CallToolResult {
+        self.graph_call(original, args.into_call()).await
     }
 
+    /// Сессия MCP. Графовые инструменты попадают в список, только если `settings.toml` включает их
+    /// (`[mcp] graph_tools`); скрытый инструмент вызвать нельзя — клиент получит «неизвестный».
     pub fn new(env: Env) -> Self {
+        let graph_tools = settings::graph_tools_enabled(env.bars_home.as_deref());
+        let mut tool_router = Self::tool_router() + disk_read::router() + maintenance::router();
+        if graph_tools {
+            tool_router += Self::graph_tool_router();
+        }
         Self {
             env,
             client: Arc::new(Mutex::new(None)),
-            tool_router: Self::tool_router()
-                + Self::graph_tool_router()
-                + disk_read::router()
-                + maintenance::router(),
+            tool_router,
+            graph_tools,
         }
     }
 
@@ -306,18 +355,16 @@ impl BarsMcp {
     /// Вызывает метод воркера. Соединение открывается при первом вызове; оборванное (воркер
     /// перезапустили) открывается заново, и вызов повторяется один раз. После таймаута или сбоя канала
     /// соединение сбрасывается: ответ мог прийти позже и сбить порядок вызовов.
-    async fn call<M: Method>(&self, params: &M) -> Result<M::Output, ClientError> {
-        self.call_observed(params, None).await
-    }
     /// Пока модель загружается, вызов повторяется до `model_wait`: агент получает ответ, а не
-    /// совет повторить позже.
+    /// совет повторить позже. `context` — исходный вход для истории, с номером попытки прокси.
     async fn call_observed<M: Method>(
         &self,
         params: &M,
         context: Option<&Value>,
     ) -> Result<M::Output, ClientError> {
-        wait_for_model(self.env.model_wait, MODEL_POLL, || {
-            self.call_once(params, context)
+        wait_for_model(self.env.model_wait, MODEL_POLL, |attempt| async move {
+            let context = context.map(|context| with_attempt(context, attempt));
+            self.call_once(params, context.as_ref()).await
         })
         .await
     }
@@ -363,19 +410,21 @@ impl BarsMcp {
 }
 
 /// Повторяет `call`, пока воркер отвечает `model_loading` и не вышло время `wait`; последний ответ
-/// возвращается как есть.
+/// возвращается как есть. `call` получает номер попытки с единицы.
 async fn wait_for_model<T, F, Fut>(
     wait: Duration,
     poll: Duration,
     mut call: F,
 ) -> Result<T, ClientError>
 where
-    F: FnMut() -> Fut,
+    F: FnMut(u32) -> Fut,
     Fut: std::future::Future<Output = Result<T, ClientError>>,
 {
     let deadline = tokio::time::Instant::now() + wait;
+    let mut attempt = 0;
     loop {
-        match call().await {
+        attempt += 1;
+        match call(attempt).await {
             Err(ClientError::Rpc(rpc))
                 if rpc.kind() == Some(ErrorKind::ModelLoading)
                     && tokio::time::Instant::now() + poll <= deadline =>
@@ -385,6 +434,15 @@ where
             other => return other,
         }
     }
+}
+
+/// Исходный вход с номером попытки прокси: история отличает повтор прокси от повтора агента (ISS-31).
+fn with_attempt(context: &Value, attempt: u32) -> Value {
+    let mut context = context.clone();
+    if let Some(fields) = context.as_object_mut() {
+        fields.insert("proxy_attempt".into(), Value::from(attempt));
+    }
+    context
 }
 
 /// Значение `project`: путь (с разделителем или точкой в начале) приводится к абсолютному от рабочей
@@ -517,7 +575,13 @@ impl BarsMcp {
 
     #[tool(
         name = "bars_get_similar",
-        description = "Похожие чанки по ID чанка из выдачи bars_rag_search (поле id): перед правкой —                        найти похожие описания и разделы для проверки, перед добавлением текста —                        существующее описание. Возвращает ближайшие чанки выбранной области (modules),                        исключая исходный; оценка — косинусная близость к исходному чанку. Близость не                        доказывает дублирование, согласие или зависимость документов: читай найденное.                        ID действует, пока не изменился документ чанка; при chunk_not_found найди чанк                        поиском заново. Без project — проект сессии."
+        description = "Похожие разделы по ID чанка из выдачи bars_rag_search (поле id). Перед правкой — \
+                       найти другие места с тем же описанием; перед добавлением текста — проверить, \
+                       нет ли его уже. Возвращает ближайшие чанки области modules без исходного; \
+                       оценка — косинусная близость к исходному чанку. Близость не доказывает \
+                       дублирование, согласие или зависимость документов: читай оба раздела. ID \
+                       устаревает при изменении документа: при chunk_not_found найди раздел поиском \
+                       заново. Без project — проект сессии."
     )]
     async fn bars_get_similar(
         &self,
@@ -678,7 +742,7 @@ impl BarsMcp {
 impl ServerHandler for BarsMcp {
     fn get_info(&self) -> ServerConfig {
         ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
-            .with_instructions(INSTRUCTIONS)
+            .with_instructions(instructions(self.graph_tools))
     }
 }
 
@@ -701,7 +765,7 @@ mod tests {
         let result = wait_for_model(
             Duration::from_secs(5),
             Duration::from_millis(10),
-            || async {
+            |_| async {
                 match calls.fetch_add(1, Ordering::SeqCst) {
                     0 | 1 => Err(loading()),
                     _ => Ok(42),
@@ -714,12 +778,38 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn every_retry_carries_its_proxy_attempt_number() {
+        let seen = std::sync::Mutex::new(Vec::new());
+        let original = serde_json::json!({"query": "запрос"});
+        let result = wait_for_model(
+            Duration::from_secs(5),
+            Duration::from_millis(10),
+            |attempt| {
+                let context = with_attempt(&original, attempt);
+                seen.lock().unwrap().push(context);
+                async move { if attempt < 3 { Err(loading()) } else { Ok(()) } }
+            },
+        )
+        .await;
+        assert!(result.is_ok());
+        let seen = seen.into_inner().unwrap();
+        let attempts: Vec<_> = seen.iter().map(|c| c["proxy_attempt"].clone()).collect();
+        assert_eq!(attempts, [1, 2, 3]);
+        assert!(seen.iter().all(|c| c["query"] == "запрос"));
+        assert_eq!(
+            original.get("proxy_attempt"),
+            None,
+            "исходный вход не меняется"
+        );
+    }
+
+    #[tokio::test]
     async fn model_loading_past_the_wait_is_returned_to_the_agent() {
         let calls = AtomicUsize::new(0);
         let result: Result<(), _> = wait_for_model(
             Duration::from_millis(50),
             Duration::from_millis(20),
-            || async {
+            |_| async {
                 calls.fetch_add(1, Ordering::SeqCst);
                 Err(loading())
             },
@@ -737,7 +827,7 @@ mod tests {
         let result: Result<(), _> = wait_for_model(
             Duration::from_secs(5),
             Duration::from_millis(10),
-            || async {
+            |_| async {
                 calls.fetch_add(1, Ordering::SeqCst);
                 Err(ClientError::Rpc(RpcError::bars(
                     ErrorKind::ProviderError,

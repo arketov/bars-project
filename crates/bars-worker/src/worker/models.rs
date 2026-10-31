@@ -15,8 +15,9 @@ use resident::{Resident, take_idle};
 
 use bars_core::models::{
     Accelerator, BGE_RERANKER_V2_M3_ID, BuiltinReranker, EmbedError, Embedder, HttpEmbedder,
-    HttpReranker, ModelFingerprint, RemoteTarget, RerankError, Reranker, builtin_model,
-    download_percent, load_builtin_embedder, prepare_environment, remote_fingerprint,
+    HttpReranker, ModelFailure, ModelFingerprint, RemoteTarget, RerankError, Reranker,
+    builtin_model, download_percent, load_builtin_embedder, prepare_environment,
+    remote_fingerprint,
 };
 use bars_core::secrets::{KeyRef, OsSecrets, SecretStore};
 use bars_core::settings::{EmbedSettings, ModelSource, RerankSettings, Settings};
@@ -115,7 +116,7 @@ pub trait ModelProvider: Send + Sync {
     }
 
     /// Получает файлы; провайдер без отдельного artifact API использует свой loader.
-    fn download(&self, settings: &Settings, reranker: bool) -> Result<(), String> {
+    fn download(&self, settings: &Settings, reranker: bool) -> Result<(), ModelFailure> {
         download_with_loader(self, settings, reranker)
     }
 }
@@ -124,14 +125,14 @@ fn download_with_loader<P: ModelProvider + ?Sized>(
     provider: &P,
     settings: &Settings,
     reranker: bool,
-) -> Result<(), String> {
+) -> Result<(), ModelFailure> {
     if reranker {
         provider
             .load_reranker(settings)
             .map(drop)
-            .map_err(|e| e.to_string())
+            .map_err(|e| ModelFailure::from_library(e.to_string()))
     } else {
-        provider.load(settings).map(drop).map_err(|e| e.to_string())
+        provider.load(settings).map(drop).map_err(|e| e.failure())
     }
 }
 
@@ -195,7 +196,7 @@ impl ConfiguredProvider {
 }
 
 impl ModelProvider for ConfiguredProvider {
-    fn download(&self, settings: &Settings, reranker: bool) -> Result<(), String> {
+    fn download(&self, settings: &Settings, reranker: bool) -> Result<(), ModelFailure> {
         if !reranker
             && settings.embed.source == ModelSource::Builtin
             && builtin_model(&settings.embed.model)
@@ -344,8 +345,28 @@ fn loaded<M>(slot: &Mutex<Resident<M>>, runtime: &Mutex<SlotRuntime>) -> bool {
 #[derive(Default)]
 struct Loads {
     gate: Mutex<()>,
-    active: Mutex<HashSet<String>>,
-    failed: Mutex<HashMap<String, String>>,
+    /// Сколько загрузок и заявок на фоновую загрузку числится у модели.
+    active: Mutex<HashMap<String, usize>>,
+    failed: Mutex<HashMap<String, LoadFailure>>,
+}
+
+/// Последняя неудача загрузки модели и срок, до которого фоновая загрузка не повторяется (ISS-71).
+struct LoadFailure {
+    failure: ModelFailure,
+    /// Неудач подряд: растёт пауза; успех и «Повторить» обнуляют.
+    attempts: u32,
+    retry_at: Instant,
+}
+
+/// Пауза перед повтором фоновой загрузки после первой неудачи и её предел
+/// (`docs/features/models/local-models.md`, «Пауза перед повтором загрузки»).
+const RETRY_PAUSE_FIRST: Duration = Duration::from_secs(30);
+const RETRY_PAUSE_MAX: Duration = Duration::from_secs(300);
+
+/// Пауза после `attempts`-й неудачи подряд: 30 с, 60 с, 120 с, 240 с, дальше 5 минут.
+fn retry_pause(attempts: u32) -> Duration {
+    let doublings = attempts.saturating_sub(1).min(16);
+    (RETRY_PAUSE_FIRST * (1u32 << doublings)).min(RETRY_PAUSE_MAX)
 }
 
 /// Снимает модель с перечня «грузится» при выходе, в том числе при панике загрузчика.
@@ -356,15 +377,55 @@ struct ActiveGuard<'a> {
 
 impl Drop for ActiveGuard<'_> {
     fn drop(&mut self) {
-        lock(&self.loads.active).remove(self.id);
+        self.loads.release(self.id);
+    }
+}
+
+/// Заявка на фоновую загрузку: держит модель в перечне «грузится» от проверки до конца потока.
+struct LoadClaim {
+    loads: Arc<Loads>,
+    id: String,
+}
+
+impl Drop for LoadClaim {
+    fn drop(&mut self) {
+        self.loads.release(&self.id);
     }
 }
 
 impl Loads {
+    fn acquire(&self, id: &str) {
+        *lock(&self.active).entry(id.to_string()).or_insert(0) += 1;
+    }
+
+    fn release(&self, id: &str) {
+        let mut active = lock(&self.active);
+        if let Some(count) = active.get_mut(id) {
+            *count -= 1;
+            if *count == 0 {
+                active.remove(id);
+            }
+        }
+    }
+
+    /// Проверка «никто не грузит» и запись заявки идут под одним замком: два одновременных
+    /// поиска не запускают два потока загрузки (ISS-71).
+    fn claim(loads: &Arc<Self>, id: &str) -> Option<LoadClaim> {
+        let mut active = lock(&loads.active);
+        if active.contains_key(id) {
+            return None;
+        }
+        active.insert(id.to_string(), 1);
+        Some(LoadClaim {
+            loads: Arc::clone(loads),
+            id: id.to_string(),
+        })
+    }
+
     /// Выполняет загрузку модели `id` под общим замком. Модель числится загружаемой и пока ждёт
     /// замок: поиск отвечает `model_loading`, а не стоит в очереди.
     fn run<T>(&self, id: &str, load: impl FnOnce() -> T) -> T {
-        lock(&self.active).insert(id.to_string());
+        self.acquire(id);
         let _active = ActiveGuard { loads: self, id };
         let _gate = lock(&self.gate);
         load()
@@ -378,17 +439,38 @@ impl Loads {
         }
     }
 
-    fn is_active(&self, id: &str) -> bool {
-        lock(&self.active).contains(id)
+    fn fail(&self, id: &str, failure: ModelFailure) {
+        self.fail_at(id, failure, Instant::now());
     }
 
-    fn fail(&self, id: &str, message: String) {
-        lock(&self.failed).insert(id.to_string(), message);
+    fn fail_at(&self, id: &str, failure: ModelFailure, now: Instant) {
+        let mut failed = lock(&self.failed);
+        let attempts = failed.get(id).map_or(1, |last| last.attempts + 1);
+        failed.insert(
+            id.to_string(),
+            LoadFailure {
+                failure,
+                attempts,
+                retry_at: now + retry_pause(attempts),
+            },
+        );
     }
 
-    /// Ошибка последней фоновой загрузки; отдаётся один раз, после неё поиск пробует снова.
-    fn take_failure(&self, id: &str) -> Option<String> {
-        lock(&self.failed).remove(id)
+    /// Неудача, пока длится пауза перед повтором: поиск получает её снова и загрузку не запускает.
+    /// После паузы запись остаётся (растёт счёт неудач), но поиск запускает загрузку заново.
+    fn pending_failure(&self, id: &str) -> Option<ModelFailure> {
+        self.pending_failure_at(id, Instant::now())
+    }
+
+    fn pending_failure_at(&self, id: &str, now: Instant) -> Option<ModelFailure> {
+        let failed = lock(&self.failed);
+        let last = failed.get(id)?;
+        (now < last.retry_at).then(|| last.failure.clone())
+    }
+
+    /// Успешная загрузка и кнопка «Повторить» снимают запись вместе с паузой и счётом.
+    fn clear_failure(&self, id: &str) {
+        lock(&self.failed).remove(id);
     }
 }
 
@@ -400,8 +482,8 @@ pub enum Readiness {
     Loading {
         percent: u8,
     },
-    /// Фоновая загрузка не удалась.
-    Failed(String),
+    /// Фоновая загрузка не удалась; вид ошибки выбирает экран окна.
+    Failed(ModelFailure),
 }
 
 type Loader = Box<dyn Fn() -> Result<Box<dyn Embedder + Send>, EmbedError> + Send + Sync>;
@@ -716,7 +798,7 @@ impl Models {
         } else {
             &settings.embed.model
         };
-        drop(self.loads.take_failure(id));
+        self.loads.clear_failure(id);
         let state = if reranker {
             self.rerank_readiness(settings)
         } else {
@@ -730,6 +812,11 @@ impl Models {
                 Err("Не удалось начать подготовку; проверьте настройки модели".into())
             }
         }
+    }
+    /// «Повторить» на экране ошибки: паузы перед повтором загрузки снимаются, счёт неудач
+    /// обнуляется, следующий поиск загружает модель сразу (ISS-71).
+    pub fn reset_pauses(&self) {
+        lock(&self.loads.failed).clear();
     }
     pub(super) fn operation_percent(&self, settings: &Settings, reranker: bool) -> Option<u8> {
         self.provider.download_percent(
@@ -892,8 +979,8 @@ impl Models {
                     })
                 });
                 match &result {
-                    Ok(_) => drop(loads.take_failure(&owned.embed.model)),
-                    Err(error) => loads.fail(&owned.embed.model, error.to_string()),
+                    Ok(_) => loads.clear_failure(&owned.embed.model),
+                    Err(error) => loads.fail(&owned.embed.model, error.failure()),
                 }
                 finish_model(&operations, id, result.is_ok());
                 result
@@ -914,7 +1001,7 @@ impl Models {
 
     /// Скачивает файлы встроенной модели (кнопка «Скачать»), под общим load-gate.
     /// Блокирующий вызов; ошибка достаётся и следующему поиску по этой модели.
-    pub fn download(&self, settings: &Settings, reranker: bool) -> Result<(), String> {
+    pub fn download(&self, settings: &Settings, reranker: bool) -> Result<(), ModelFailure> {
         self.download_operation(settings, reranker, None)
     }
 
@@ -923,7 +1010,7 @@ impl Models {
         settings: &Settings,
         reranker: bool,
         operation: Option<u64>,
-    ) -> Result<(), String> {
+    ) -> Result<(), ModelFailure> {
         let id = if reranker {
             &settings.rerank.model
         } else {
@@ -936,15 +1023,15 @@ impl Models {
             self.provider.download(settings, reranker)
         });
         match &result {
-            Ok(()) => drop(self.loads.take_failure(id)),
-            Err(message) => self.loads.fail(id, message.clone()),
+            Ok(()) => self.loads.clear_failure(id),
+            Err(failure) => self.loads.fail(id, failure.clone()),
         }
         result
     }
 
     /// Встроенные модели, которые скачиваются или грузятся сейчас.
     pub fn loading_ids(&self) -> HashSet<String> {
-        lock(&self.loads.active).clone()
+        lock(&self.loads.active).keys().cloned().collect()
     }
 
     /// Готова ли embed-модель к поиску. Если загрузка долгая (`background_load`) и модель не
@@ -955,11 +1042,12 @@ impl Models {
             return Ok(Readiness::Ready);
         }
         let id = settings.embed.model.clone();
-        if let Some(message) = self.loads.take_failure(&id) {
-            return Ok(Readiness::Failed(message));
+        if let Some(failure) = self.loads.pending_failure(&id) {
+            return Ok(Readiness::Failed(failure));
         }
-        if !self.loads.is_active(&id) {
+        if let Some(claim) = Loads::claim(&self.loads, &id) {
             std::thread::spawn(move || {
+                let _claim = claim;
                 let _ = embedder.prepare();
             });
         }
@@ -975,11 +1063,12 @@ impl Models {
             return Readiness::Ready;
         }
         let id = settings.rerank.model.clone();
-        if let Some(message) = self.loads.take_failure(&id) {
-            return Readiness::Failed(message);
+        if let Some(failure) = self.loads.pending_failure(&id) {
+            return Readiness::Failed(failure);
         }
-        if !self.loads.is_active(&id) {
+        if let Some(claim) = Loads::claim(&self.loads, &id) {
             std::thread::spawn(move || {
+                let _claim = claim;
                 let _ = reranker.prepare();
             });
         }
@@ -1013,8 +1102,11 @@ impl Models {
                     provider.load_reranker(&owned)
                 });
                 match &result {
-                    Ok(_) => drop(loads.take_failure(&owned.rerank.model)),
-                    Err(error) => loads.fail(&owned.rerank.model, error.to_string()),
+                    Ok(_) => loads.clear_failure(&owned.rerank.model),
+                    Err(error) => loads.fail(
+                        &owned.rerank.model,
+                        ModelFailure::from_library(error.to_string()),
+                    ),
                 }
                 finish_model(&operations, id, result.is_ok());
                 result
@@ -1098,6 +1190,8 @@ pub mod fake {
         pub texts: AtomicUsize,
         pub max_batch: AtomicUsize,
         pub rerank_loads: AtomicUsize,
+        /// Попытки загрузки embed, в том числе неудачные.
+        pub load_attempts: AtomicUsize,
     }
 
     pub struct FakeProvider {
@@ -1208,6 +1302,7 @@ pub mod fake {
         }
 
         fn load(&self, _settings: &Settings) -> Result<Box<dyn Embedder + Send>, EmbedError> {
+            self.counters.load_attempts.fetch_add(1, Ordering::SeqCst);
             if self.fail_load {
                 return Err(EmbedError::Load("нет файлов модели".into()));
             }
@@ -1297,7 +1392,7 @@ mod tests {
             fn load(&self, _: &Settings) -> Result<Box<dyn Embedder + Send>, EmbedError> {
                 panic!("artifact download must not create a model")
             }
-            fn download(&self, _: &Settings, _: bool) -> Result<(), String> {
+            fn download(&self, _: &Settings, _: bool) -> Result<(), ModelFailure> {
                 Ok(())
             }
         }
@@ -1805,6 +1900,92 @@ mod tests {
                 Readiness::Failed(_)
             )
         });
+    }
+
+    fn failing_provider() -> Arc<FakeProvider> {
+        Arc::new(FakeProvider {
+            background: true,
+            fail_load: true,
+            ..FakeProvider::plain("m1")
+        })
+    }
+
+    #[test]
+    fn failed_load_is_not_retried_during_the_pause_and_retry_resets_it() {
+        // ISS-71: ответы не чередуются `provider_error` / `model_loading`, а загрузка не
+        // запускается заново, пока длится пауза.
+        let provider = failing_provider();
+        let models = Models::new(provider.clone());
+        let attempts = || provider.counters.load_attempts.load(Ordering::SeqCst);
+        assert!(matches!(
+            models.embed_readiness(&settings()).unwrap(),
+            Readiness::Loading { .. }
+        ));
+        wait_until(|| !models.loading_ids().contains("BAAI/bge-m3") && attempts() == 1);
+        for _ in 0..5 {
+            assert!(matches!(
+                models.embed_readiness(&settings()).unwrap(),
+                Readiness::Failed(_)
+            ));
+        }
+        assert_eq!(attempts(), 1);
+        assert!(models.loading_ids().is_empty());
+
+        // «Повторить»: следующий поиск грузит сразу.
+        models.reset_pauses();
+        assert!(matches!(
+            models.embed_readiness(&settings()).unwrap(),
+            Readiness::Loading { .. }
+        ));
+        wait_until(|| attempts() == 2 && models.loading_ids().is_empty());
+    }
+
+    #[test]
+    fn pause_grows_with_each_failure_and_expires() {
+        let loads = Loads::default();
+        let begin = Instant::now();
+        let failure = || ModelFailure::from_library("нет файлов модели".to_string());
+        let secs = Duration::from_secs;
+        assert_eq!(
+            [1, 2, 3, 4, 5, 6, 40].map(retry_pause),
+            [30, 60, 120, 240, 300, 300, 300].map(secs)
+        );
+
+        loads.fail_at("m", failure(), begin);
+        assert!(loads.pending_failure_at("m", begin + secs(29)).is_some());
+        assert!(loads.pending_failure_at("m", begin + secs(30)).is_none());
+        // Вторая неудача подряд — пауза 60 с от её момента.
+        loads.fail_at("m", failure(), begin + secs(31));
+        assert!(loads.pending_failure_at("m", begin + secs(90)).is_some());
+        assert!(loads.pending_failure_at("m", begin + secs(91)).is_none());
+        // Успех или «Повторить» обнуляют счёт: пауза снова 30 с.
+        loads.clear_failure("m");
+        loads.fail_at("m", failure(), begin + secs(100));
+        assert!(loads.pending_failure_at("m", begin + secs(129)).is_some());
+        assert!(loads.pending_failure_at("m", begin + secs(130)).is_none());
+    }
+
+    #[test]
+    fn simultaneous_searches_start_one_background_load() {
+        let loads = Arc::new(Loads::default());
+        let barrier = Arc::new(std::sync::Barrier::new(8));
+        let claims: Vec<_> = (0..8)
+            .map(|_| {
+                let (loads, barrier) = (Arc::clone(&loads), Arc::clone(&barrier));
+                std::thread::spawn(move || {
+                    barrier.wait();
+                    Loads::claim(&loads, "m")
+                })
+            })
+            .collect();
+        let claims: Vec<_> = claims
+            .into_iter()
+            .filter_map(|claim| claim.join().unwrap())
+            .collect();
+        assert_eq!(claims.len(), 1);
+        assert!(lock(&loads.active).contains_key("m"));
+        drop(claims);
+        assert!(lock(&loads.active).is_empty());
     }
 
     #[test]

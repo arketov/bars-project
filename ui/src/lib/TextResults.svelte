@@ -3,7 +3,20 @@
   import { type TextHit, type TextDocument } from './text-search.svelte';
   const store = app.textSearch;
   function open(doc: TextDocument, hit: TextHit) {
-    void app.openDocument({path:doc.path, title:doc.title, first_line:hit.line, last_line:hit.line, column:hit.column, length:hit.length});
+    void app.openDocument({path:doc.path, title:doc.title, first_line:hit.line, last_line:hit.line, column:hit.column, length:hit.length, fromSearch:true});
+  }
+  // Строка выводится один раз: между отметками — обычный текст, вхождения — <mark> (ISS-35).
+  function pieces(text: string, ranges: [number, number][]): { text: string; mark: boolean }[] {
+    const out: { text: string; mark: boolean }[] = [];
+    let at = 0;
+    for (const [a, b] of [...ranges].sort((x, y) => x[0] - y[0])) {
+      if (a < at) continue;
+      if (a > at) out.push({ text: text.slice(at, a), mark: false });
+      out.push({ text: text.slice(a, b) || '▏', mark: true });
+      at = b;
+    }
+    if (at < text.length) out.push({ text: text.slice(at), mark: false });
+    return out;
   }
 </script>
 
@@ -17,8 +30,8 @@
         <article>
           <h3>{doc.title}</h3><div class="path">{doc.path}</div>
           {#each doc.hits as hit, index (`${hit.line}:${hit.column}:${index}`)}
-            <button class="occurrence" onclick={() => open(doc, hit)} title={`Открыть строку ${hit.line}, столбец ${hit.column}`}>
-              <span class="line">{hit.line}</span><span class="snippet">{#each hit.ranges as [a,b]}{hit.text.slice(0,a)}<mark>{hit.text.slice(a,b) || '▏'}</mark>{hit.text.slice(b)}{/each}</span>
+            <button class="occurrence" data-document-path={doc.path} data-document-line={hit.line} data-menu-kind="file" data-menu-place="card" onclick={() => open(doc, hit)} title={`Открыть строку ${hit.line}, столбец ${hit.column}`}>
+              <span class="line">{hit.line}</span><span class="snippet">{#each pieces(hit.text, hit.ranges) as piece}{#if piece.mark}<mark>{piece.text}</mark>{:else}{piece.text}{/if}{/each}</span>
             </button>
           {/each}
           {#if doc.has_more}<button class="link more" disabled={store.more.length > 0} onclick={() => store.loadMore(doc.path)}>{store.more.includes(doc.path) ? 'Загружаем…' : 'Показать ещё'}</button>{/if}

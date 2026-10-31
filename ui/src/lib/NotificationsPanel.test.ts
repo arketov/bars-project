@@ -53,3 +53,14 @@ it("reads only intersecting cards and traps Tab within the panel", async () => {
   window.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", shiftKey: true, cancelable: true }));
   expect(document.activeElement).toBe(buttons[buttons.length - 1]);
 });
+
+it("называет проект именем, а путь оставляет в подсказке (ISS-51)", async () => {
+  app.projects = [{ path: "C:\work\ai-bots", name: "ai-bots" } as never];
+  app.notifications = [{ id: "p", title: "Проверка", text: "В работе", active: true, bad: false, unread: false, percent: null, project: "C:\work\ai-bots" }];
+  const target = document.createElement("div"); document.body.append(target);
+  components.push(mount(Notifications, { target })); flushSync();
+  target.querySelector("button")!.click(); await tick(); flushSync();
+  const subject = target.querySelector<HTMLElement>(".subject")!;
+  expect(subject.textContent).toBe("ai-bots");
+  expect(subject.title).toBe("C:\work\ai-bots");
+});

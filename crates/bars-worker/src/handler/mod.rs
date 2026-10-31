@@ -28,7 +28,7 @@ use bars_core::search::{
     DuplicatesRequest, SearchRequest, SimilarRequest, duplicates, search, similar,
 };
 use bars_core::settings::Settings;
-use bars_core::storage::{Index, Journal, index_path};
+use bars_core::storage::{Index, index_path};
 use bars_protocol::{
     AcceptedOutput, ActivityOutput, AppliedParams, AutostartGetParams, AutostartOutput,
     AutostartSetParams, Call, CancelOutput, CheckAllParams, ClientKind, ClientStatus,
@@ -192,7 +192,7 @@ impl WorkerHandler {
         let gate = project_gate.clone().read_owned().await;
         let response = tokio::task::spawn_blocking(move || {
             let _gate = gate;
-            let index = Index::open(&index_path(&project), Journal::Wal)?;
+            let index = Index::open_read_only(&index_path(&project))?;
             similar(&index, &search_settings, &request)
         })
         .await
@@ -229,7 +229,7 @@ impl WorkerHandler {
             .await;
         let response = tokio::task::spawn_blocking(move || {
             let _gate = gate;
-            let index = Index::open(&index_path(&project), Journal::Wal)?;
+            let index = Index::open_read_only(&index_path(&project))?;
             duplicates(&index, &search_settings, &request)
         })
         .await
@@ -296,9 +296,7 @@ impl WorkerHandler {
         {
             Readiness::Ready => {}
             Readiness::Loading { percent } => return Err(errors::model_loading(percent)),
-            Readiness::Failed(message) => {
-                return Err(RpcError::bars(ErrorKind::ProviderError, message));
-            }
+            Readiness::Failed(failure) => return Err(errors::builtin_model_error(failure)),
         }
         let mut embedder = self
             .worker
@@ -362,12 +360,12 @@ impl WorkerHandler {
                         "rerank-модель ещё скачивается или грузится ({percent} %): выдача без rerank"
                     ));
                 }
-                Readiness::Failed(message) => {
+                Readiness::Failed(failure) => {
                     history::applied_field(
                         "rerank_fallback_reason",
                         serde_json::json!("model_unavailable"),
                     );
-                    skipped_rerank = Some(message);
+                    skipped_rerank = Some(failure.message);
                 }
             }
         }
@@ -406,7 +404,7 @@ impl WorkerHandler {
                 match loaded {
                     Ok(data) => {
                         let mut expand = |index: &Index, seeds: &[i64], limit: usize| {
-                            let (ids, reply) = bars_core::graph::retrieval::expand_timed(
+                            match bars_core::graph::retrieval::expand_timed(
                                 index,
                                 &data,
                                 &request,
@@ -414,9 +412,27 @@ impl WorkerHandler {
                                 limit,
                                 budgets.clone(),
                                 load_elapsed,
-                            )?;
-                            related = Some(reply);
-                            Ok(ids)
+                            ) {
+                                Ok((ids, reply)) => {
+                                    related = Some(reply);
+                                    Ok(ids)
+                                }
+                                // Пакет не помещается даже пустым: выдача без него (ISS-88).
+                                Err(bars_core::search::SearchError::InvalidParams(message))
+                                    if message.contains(
+                                        bars_core::graph::query::ENVELOPE_DOES_NOT_FIT,
+                                    ) =>
+                                {
+                                    fallback = Some(
+                                        "Связанные источники не выданы: пакет не помещается в \
+                                         related_budget (или graph_budgets.max_bytes) даже пустым; \
+                                         увеличьте related_budget"
+                                            .into(),
+                                    );
+                                    Ok(Vec::new())
+                                }
+                                Err(error) => Err(error),
+                            }
                         };
                         bars_core::search::search_expanded(
                             &index,
@@ -582,7 +598,7 @@ impl WorkerHandler {
         let project = project.to_path_buf();
         tokio::task::spawn_blocking(move || {
             let _gate = gate;
-            let index = Index::open(&index_path(&project), Journal::Wal).ok()?;
+            let index = Index::open_read_only(&index_path(&project)).ok()?;
             let mut statement = index
                 .conn()
                 .prepare("SELECT module, count(*) FROM documents GROUP BY module ORDER BY module")
@@ -872,7 +888,7 @@ impl WorkerHandler {
                 .await;
             tokio::task::spawn_blocking(move || {
                 let _gate = gate;
-                let index = Index::open(&index_path(&project), Journal::Wal)?;
+                let index = Index::open_read_only(&index_path(&project))?;
                 let mut statement = index.conn().prepare(
                     "SELECT d.path, d.module, d.title, \
                             (SELECT count(*) FROM chunks c WHERE c.document_id = d.id) \
@@ -958,7 +974,13 @@ impl WorkerHandler {
             } else {
                 bars_core::models::download_percent(&dir, id)
             },
-            download_error: download_errors.get(id).cloned(),
+            download_error: download_errors
+                .get(id)
+                .map(|failure| failure.message.clone()),
+            download_error_reason: download_errors
+                .get(id)
+                .filter(|_| id != bars_core::models::BGE_RERANKER_V2_M3_ID)
+                .map(|failure| failure.kind.as_str().to_string()),
         };
         ModelsInfoOutput {
             runtime,
@@ -1239,6 +1261,10 @@ impl WorkerHandler {
             Call::ModelDownload(params) => {
                 self.model_download(params).map(|out| output_value(&out))
             }
+            Call::ModelRetry(_) => {
+                self.worker.models().reset_pauses();
+                Ok(output_value(&AcceptedOutput { accepted: true }))
+            }
             Call::SecretSet(params) => self.secret_set(params).map(|out| output_value(&out)),
             Call::SecretStatus(params) => self.secret_status(params).map(|out| output_value(&out)),
             Call::ClientsStatus(_) => self.clients_status().map(|out| output_value(&out)),
@@ -1286,6 +1312,7 @@ impl WorkerHandler {
                 .await
                 .map(|out| output_value(&out)),
             Call::LinksOf(params) => self.links_of(params).await.map(|out| output_value(&out)),
+            Call::LinksInto(params) => self.links_into(params).await.map(|out| output_value(&out)),
             Call::DiskText(params) => self.disk_text(params).await.map(|out| output_value(&out)),
             Call::DiskLinks(params) => self.disk_links(params).await.map(|out| output_value(&out)),
             Call::TextSearch(params) => {
@@ -1413,6 +1440,7 @@ fn hit(hit: bars_core::search::SearchHit) -> SearchHit {
         path: hit.path,
         module: hit.module,
         title: hit.title,
+        sections: merged_sections(&hit.text),
         heading_chain: hit.heading_chain,
         first_line: to_u32(hit.first_line),
         last_line: to_u32(hit.last_line),
@@ -1420,6 +1448,24 @@ fn hit(hit: bars_core::search::SearchHit) -> SearchHit {
         score: hit.score,
         score_kind: score_kind(hit.score_kind),
     }
+}
+
+/// Заголовки разделов, приклеенных к чанку после первого (ISS-28): заголовки в тексте чанка до
+/// списка `other headers:`, по правилам нарезки — ATX вне блоков кода.
+fn merged_sections(text: &str) -> Vec<String> {
+    let own = if text.starts_with("other headers:") {
+        ""
+    } else {
+        text.split("\nother headers:").next().unwrap_or(text)
+    };
+    outline(own, &OutlineQuery::default())
+        .map(|headings| {
+            headings
+                .into_iter()
+                .map(|h| format!("{} {}", "#".repeat(h.level), h.text))
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
 fn duplicate_item(item: bars_core::search::DuplicateItem) -> DuplicateItem {

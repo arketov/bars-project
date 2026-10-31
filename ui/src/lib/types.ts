@@ -186,7 +186,7 @@ export class BarsError extends Error {
     message: string,
     readonly kind: string | null = null,
     readonly code: number = -32603,
-    readonly data: { percent?: number } | null = null,
+    readonly data: { percent?: number; reason?: string } | null = null,
   ) {
     super(message);
   }
@@ -239,6 +239,8 @@ export interface SettingsDoc {
   rerank: RerankDoc;
   search: SearchDoc;
   chunking: { min_chars: number; max_chars: number };
+  /** Таблица `[mcp]`: что MCP показывает агентам. */
+  mcp: { graph_tools: boolean };
 }
 
 export interface SettingsOutput {
@@ -260,6 +262,8 @@ export interface ModelInfo {
   downloading: boolean;
   download_percent?: number | null;
   download_error?: string | null;
+  /** Вид ошибки встроенной embed-модели; у rerank-модели не задаётся (OQ-218). */
+  download_error_reason?: string | null;
 }
 
 export interface ModelsInfoOutput {

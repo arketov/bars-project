@@ -1,10 +1,10 @@
 ---
-title: Устройства, DirectML и библиотеки инференса — обзор вариантов
+title: Устройства, DirectML, CUDA и библиотеки инференса — обзор вариантов
 ---
 
 # Устройства, DirectML и библиотеки инференса
 
-← База знаний. Обзор первичных источников на 18-10-2026. Это каталог кандидатов и ограничений, а не решение расширить стек: действующий контракт — Т-3, Т-17; закреплённые зависимости workspace — fastembed `=7.1.1`, ort `=2.0.0-rc.13`, candle-core `0.11`, llama-cpp-2 `0.1.160`. Текущие upstream-функции не считаются доступными этой сборке автоматически. Измерения i7-11700KF / RTX 3090 и выбранный FP16 rerank — [inference-speed.md](inference-speed.md); других аппаратных платформ в замерах нет, рекомендации для них — гипотезы. Какие устройства и precision используются в продукте — [встроенные модели](../features/models/local-models.md).
+← База знаний. Обзор первичных источников на 18-10-2026, раздел «CUDA в сборке bars» — на 28-10-2026. Это каталог кандидатов и ограничений, а не решение расширить стек: действующий контракт — Т-3, Т-17; закреплённые зависимости workspace — fastembed `=7.1.1`, ort `=2.0.0-rc.13`, candle-core `0.11`, llama-cpp-2 `0.1.160`. Текущие upstream-функции не считаются доступными этой сборке автоматически. Измерения i7-11700KF / RTX 3090 и выбранный FP16 rerank — [inference-speed.md](inference-speed.md); других аппаратных платформ в замерах нет, рекомендации для них — гипотезы. Какие устройства и precision используются в продукте — [встроенные модели](../features/models/local-models.md).
 
 ## Выбор устройства зависит от нагрузки
 
@@ -45,7 +45,7 @@ DirectML — GPU API поверх DirectX 12. Индекс адаптера сл
 
 ## Другие GPU и EP
 
-- **NVIDIA.** Первый кандидат — [CUDA EP](https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html): зависит от совместимых CUDA/cuDNN; CUDA Graphs требуют соблюдения ограничений по формам и адресам. [TensorRT EP](https://onnxruntime.ai/docs/execution-providers/TensorRT-ExecutionProvider.html) — после CUDA baseline: компиляция engine, profiles min/opt/max для динамических форм, cache, VRAM и поставка runtime; выигрыш считают с учётом холодного старта.
+- **NVIDIA.** Первый кандидат — [CUDA EP](https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html): зависит от совместимых CUDA/cuDNN, что это значит для закреплённой сборки — раздел «CUDA в сборке bars»; CUDA Graphs требуют соблюдения ограничений по формам и адресам. [TensorRT EP](https://onnxruntime.ai/docs/execution-providers/TensorRT-ExecutionProvider.html) — после CUDA baseline: компиляция engine, profiles min/opt/max для динамических форм, cache, VRAM и поставка runtime; выигрыш считают с учётом холодного старта.
 - **AMD Windows.** Для широкого набора GPU остаётся кандидатом DirectML; [MIGraphX](https://onnxruntime.ai/docs/execution-providers/MIGraphX-ExecutionProvider.html) требует собственной платформенной матрицы и не универсален.
 - **Intel.** Стоит сравнить DirectML и OpenVINO GPU при одинаковых модели, длинах и precision. ORT помечает встроенный OpenVINO EP deprecated и рекомендует [отдельный Plugin EP](https://github.com/onnxruntime/onnxruntime-ep-openvino/blob/main/docs/QuickStart.md): пересборка ORT перестала быть единственным путём, но загрузку плагина в статический runtime bars нужно проверять (версия C API, регистрация, архитектура, native libraries); DLL разных ABI в одном процессе не смешивать.
 - **Apple.** [CoreML EP](https://onnxruntime.ai/docs/execution-providers/CoreML-ExecutionProvider.html) позволяет выбирать compute units (CPU, CPU+GPU, CPU+NeuralEngine, ALL); разрешение ANE не гарантирует размещение каждого узла на нём, динамические формы ухудшают скорость. Проверять compute plan и версию macOS; macOS в bars не проверена.
@@ -83,6 +83,72 @@ Windows ML — слой поставки и выбора hardware EP повер�
 
 **Перед добавлением зависимости:** закрепить релиз/commit, проверить актуальность releases, лицензию, advisory и поддержку платформы; собрать минимальный пример, проверить один реальный bge/Qwen граф и полный бенч качества ([search-quality.md](search-quality.md)). Сравнительных чисел быстродействия библиотек для bars нет; точные версии кандидатов выбираются при спайке.
 
+## CUDA в сборке bars
+
+Исследование 28-10-2026 для этапа 8.1: можно ли считать на NVIDIA через CUDA, установленную пользователем, и без неё оставаться на Vulkan (GGUF) и DirectML (ONNX), как решено в OQ-209. Метод — чтение исходников закреплённых крейтов в кэше cargo (llama-cpp-sys-2 0.1.160: `build.rs`, `ggml/src/ggml-backend-reg.cpp`, `ggml/src/ggml-backend-dl.cpp`, `src/llama.cpp`, `ggml/src/ggml-cuda/CMakeLists.txt`; llama-cpp-2 0.1.160; ort-sys 2.0.0-rc.13: `build/download/dist.tsv`, `resolve.rs`, `main.rs`; fastembed 7.1.1) и первичной документации. Машина исследования — Intel Arc без карты NVIDIA и без CUDA Toolkit: с CUDA ничего не собиралось и не запускалось. Поведение ниже выведено из кода; проверка на RTX 3090 — замеры этапа 8.1 и реализация.
+
+### llama.cpp: статическая сборка с CUDA не запустится без CUDA
+
+Сейчас llama.cpp вшит в `bars` статически с фичей `vulkan`. Фича `cuda` при статической сборке на Windows линкует import-библиотеки `cudart`, `cublas`, `cublasLt` и `cuda` (`build.rs`: статических cuBLAS для Windows NVIDIA не поставляет). Исполняемый файл тогда зависит от `cudart64_NN.dll`, `cublas64_NN.dll`, `cublasLt64_NN.dll` и `nvcuda.dll` уже при загрузке: без CUDA загрузчик Windows не запустит процесс вовсе, и до отката на Vulkan дело не дойдёт. Значит, статический путь несовместим с «без CUDA — Vulkan».
+
+Рабочий путь — фича `dynamic-backends` (включает `dynamic-link`, `GGML_BACKEND_DL` и `GGML_CPU_ALL_VARIANTS`). `llama.dll`, `ggml.dll` и `ggml-base.dll` лежат рядом с exe, backend'ы — отдельными модулями: `ggml-cuda.dll`, `ggml-vulkan.dll`, варианты `ggml-cpu-*.dll`. До `LlamaBackend::init` вызывается `llama_cpp_2::load_backends_from_path(dir)`, то есть `ggml_backend_load_all_from_path`:
+
+- модули перебираются по списку, CUDA раньше Vulkan, CPU последним;
+- каждый модуль грузится `LoadLibraryW` с `SEM_FAILCRITICALERRORS`, поэтому системного окна об отсутствующей DLL нет. Если зависимости `ggml-cuda.dll` (cudart, cuBLAS, nvcuda) не нашлись, модуль пропускается, а Vulkan и CPU грузятся дальше. Модуль, у которого `ggml_backend_score()` вернул 0, тоже отбрасывается;
+- `LoadLibraryW` с полным путём ищет зависимые DLL обычным порядком Windows: каталог exe, System32, каталог Windows, текущий каталог, `PATH`. Поэтому DLL CUDA берутся из `PATH`. Если bars сам нашёл каталог CUDA, он может добавить его в `PATH` своего процесса до загрузки модулей.
+
+Побочный выигрыш `GGML_CPU_ALL_VARIANTS` — CPU-вариант llama.cpp выбирается по процессору при запуске. Цена — поставка набора DLL рядом с exe вместо одного статического файла: меняются установщик, `scripts/check.ps1` и [стек](../architecture/stack.md).
+
+**Одна карта в двух backend'ах.** CUDA и Vulkan видят одну и ту же RTX 3090. При сборке списка GPU llama.cpp пропускает устройство с уже встреченным `device_id` (оба backend'а записывают туда PCI bus id) и пишет в лог «skipping device … already using device … with the same id». CUDA регистрируется первой, поэтому модель встаёт на `CUDA0`, а `Vulkan0` той же карты пропускается. Встроенная GPU (тип `IGPU`) добавляется, только если дискретных GPU нет. Вторая дискретная карта другого вендора попадёт в список, и `LlamaModelParams::default()` разложит слои по всем GPU. Нынешний `GgufEmbedder::load` устройств не задаёт. В llama-cpp-2 есть `with_devices` и `with_main_gpu`, поэтому устройство можно выбирать явно. Фактический backend виден по имени устройства (`CUDA0`, `Vulkan0`) через `list_llama_ggml_backend_devices`; `supports_gpu_offload()` говорит только, что GPU есть.
+
+**Сборка.** На машине сборки нужен CUDA Toolkit с `nvcc`; GPU не нужен, если архитектуры заданы явно. Без `native` `ggml-cuda/CMakeLists.txt` для CUDA 13 берёт `75-virtual 80-virtual 86-real 89-real 90-virtual 120a-real 121a-real`; 50/61/70 добавляются только для CUDA младше 13. Готовый архив llama.cpp b11953 `bin-win-cuda-13.4-x64` весит 157 МиБ, отдельный архив его CUDA runtime — 404 МиБ (bars его не поставляет: CUDA ставит пользователь). Размер `ggml-cuda.dll` в сборке bars и время сборки не измерены.
+
+### ONNX Runtime: CUDA EP при статическом ORT
+
+ort-sys 2.0.0-rc.13 качает готовый ONNX Runtime 1.28.0 от pyke. Для `x86_64-pc-windows-msvc` в `dist.tsv` есть наборы `directml` (архив 31 МБ, используется сейчас), `webgpu`, `nvrtx,directml` и `cuda13,tensorrt,nvrtx,directml` (архив 62 МБ). Фичи `cuda` + `directml` выбирают последний как надмножество. Сборки под CUDA 12 нет: при `ORT_CUDA_VERSION=12` `resolve.rs` запросит `cuda12`, которого в таблице нет, и сборка упадёт. При закреплённом ort возможна только CUDA 13.
+
+Ядро ORT остаётся статическим (`onnxruntime.lib`). CUDA EP в ORT устроен отдельным интерфейсом и [собирается динамическими библиотеками](https://ort.pyke.io/perf/execution-providers). По устройству ORT это `onnxruntime_providers_shared.dll` и `onnxruntime_providers_cuda.dll`; содержимое архива 1.28.0 не распаковывалось. Эти DLL должны лежать рядом с exe; фича ort `copy-dylibs` кладёт их в `target`, а установщику нужно забрать их оттуда. DirectML в том же наборе остаётся, поэтому одна сборка пробует CUDA и откатывается на DirectML.
+
+Требования к установленному у пользователя:
+
+- по ort — CUDA ≥ 13.2 и cuDNN ≥ 9.23, обе в `PATH`;
+- по ORT — сборки 1.28 рассчитаны на CUDA 13 и cuDNN 9, а сборки под cuDNN 8 и 9 не взаимозаменяемы ([ORT CUDA EP](https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html));
+- по карте — CUDA 13 убрала Maxwell, Pascal и Volta, минимум — Turing, compute capability 7.5. Карты до Turing CUDA EP не получат и остаются на Vulkan и DirectML.
+
+**Откат и причина.** Если регистрация EP не удалась, ort по умолчанию молча продолжает на CPU. Список `[CUDA, DirectML]` без `error_on_failure` у CUDA перейдёт на DirectML незаметно, и причины не будет. Сейчас bars регистрирует DirectML с `error_on_failure` и сам держит причину отката GPU→CPU. Для CUDA тот же приём: регистрация с `error_on_failure`, при ошибке — новая сессия с DirectML и сохранённая причина. `ExecutionProvider::is_available()` в ort спрашивает `GetAvailableProviders`, то есть есть ли EP в сборке ORT; установленную CUDA он не подтверждает. fastembed 7.1.1 принимает `with_execution_providers` для embed и rerank, поэтому менять fastembed не нужно. FP16 embed сейчас требует DirectML (`builtin.rs`). Работает ли он на CUDA, проверяется замерами.
+
+**Один процесс, одна CUDA.** `ggml-cuda.dll` и CUDA EP грузят cudart той major-версии, под которую собраны (`cudart64_13.dll`). Разные major возможны, у них разные имена DLL, но тогда у пользователя должны стоять обе версии CUDA. Поэтому llama.cpp тоже собирается под CUDA 13. Runtime API в одном процессе использует один primary context на устройство, а видеопамять делят обе модели: arena CUDA EP растёт, пока её не ограничить (`gpu_mem_limit`). Её объём проверяется замерами.
+
+### Обнаружение установленных CUDA и cuDNN
+
+| Что | Где искать | Версия и условие |
+|---|---|---|
+| Драйвер NVIDIA | `nvcuda.dll` в System32, ставится драйвером; нет — значит нет и драйвера CUDA | `cuDriverGetVersion` — максимальная CUDA драйвера, например 13020 = 13.2; нужно ≥ требуемой CUDA |
+| Карта | `cuInit`, `cuDeviceGetCount`, `cuDeviceGetAttribute` из `nvcuda.dll` | compute capability ≥ 7.5 для CUDA 13; PCI bus id для сопоставления с Vulkan/DXGI |
+| CUDA runtime и cuBLAS | `CUDA_PATH` (ставит установщик toolkit, по умолчанию `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.x`), затем `PATH`; файлы `cudart64_13.dll`, `cublas64_13.dll`, `cublasLt64_13.dll` в `bin`. Есть ли у CUDA 13 подкаталог `bin\x64`, первичным источником не подтверждено (такая раскладка есть у pip-колёс CUDA 13), поэтому проверять оба | `cudaRuntimeGetVersion` из загруженной cudart. С CUDA 13.1 драйвер в toolkit не входит |
+| cuDNN | `PATH`, затем `C:\Program Files\NVIDIA\CUDNN\v9.*\bin` с подкаталогами. Для zip-архива NVIDIA велит добавить `bin` в `PATH` вручную; раскладку графического установщика (несколько вариантов под разные CUDA в одном пакете) [документация](https://docs.nvidia.com/cudnn/installation/backend/windows) не описывает. Файлы `cudnn64_9.dll` и соседние `cudnn_*64_9.dll` | `cudnnGetVersion` (92300 = 9.23.0) и `cudnnGetCudartVersion` — под какую CUDA major собран |
+
+Отсутствие `nvidia-smi` в `PATH` ничего не доказывает. Проверку стоит делать через `LoadLibraryExW` с подавлением системных окон и чтение экспортов — это те же DLL, которые затем возьмут `ggml-cuda.dll` и CUDA EP. Итог проверки — конкретная причина для окна: «драйвер NVIDIA не найден», «драйвер поддерживает CUDA 12.4, нужна 13.2», «CUDA Toolkit не найден», «cuDNN не найден» или «карта 6.1 не поддерживается CUDA 13». Лог ggml о пропущенном модуле такой причины не даёт.
+
+### Откат на Vulkan и DirectML
+
+| Модели | Путь CUDA | Когда откат | Куда |
+|---|---|---|---|
+| GGUF (llama.cpp) | `ggml-cuda.dll` загрузился и видит устройство | модуль не загрузился, CUDA-устройств нет или ошибка загрузки модели на CUDA | Vulkan той же карты, затем CPU |
+| ONNX (fastembed/ORT) | CUDA EP зарегистрирован с `error_on_failure` | регистрация или первая сессия упали | DirectML, затем CPU |
+
+Откат во время работы уже есть у GGUF (GPU→CPU в `GgufEmbedder::one`). Для CUDA→Vulkan нужна повторная загрузка модели с явно выбранным Vulkan-устройством: выгруженный модуль CUDA останется в списке устройств процесса.
+
+### Выводы для проектирования CUDA
+
+1. llama.cpp — только через `dynamic-backends`; статический `cuda` ломает запуск без CUDA.
+2. ONNX — фича `cuda` у закреплённого ort: те же бинарники ORT 1.28.0, CUDA ≥ 13.2, cuDNN ≥ 9.23, карты от Turing.
+3. Обе части собираются под одну major-версию, CUDA 13.
+4. bars сам проверяет драйвер, CUDA и cuDNN до загрузки, ради причины отката в окне и пути в `PATH` процесса.
+5. Устройство GGUF выбирается явно, а не «все GPU».
+
+Вопросы к автору для проектирования — OQ-224 (только CUDA 13 и Turing+) и OQ-225 (поставка llama.cpp набором DLL).
+
 ## Что не доказано для bars
 
-Нет измеренного выигрыша buckets, binding или OpenVINO над текущим DirectML; не установлено размещение всех операторов bge-графов; не проверены изменения API сессии через fastembed 7.1.1. Критерии результата — latency, память, качество и фактическое устройство по [протоколу замеров](inference-speed.md#протокол-воспроизведения-замеров). Таблица устройств — инженерные ожидания, а не результаты сравнительного теста bars.
+Нет измеренного выигрыша buckets, binding или OpenVINO над текущим DirectML; не установлено размещение всех операторов bge-графов; не проверены изменения API сессии через fastembed 7.1.1. CUDA в bars не собиралась и не запускалась: загрузка `ggml-cuda.dll` без CUDA, дедупликация CUDA0/Vulkan0, содержимое архива ORT `cuda13` и раскладка CUDA 13 и cuDNN 9 на диске выведены из кода и документации, а не проверены. Критерии результата — latency, память, качество и фактическое устройство по [протоколу замеров](inference-speed.md#протокол-воспроизведения-замеров). Таблица устройств — инженерные ожидания, а не результаты сравнительного теста bars.

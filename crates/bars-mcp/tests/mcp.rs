@@ -9,7 +9,7 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::{Duration, Instant};
 
-use bars_mcp::{BarsMcp, CALL_TIMEOUT, Env, INSTRUCTIONS, Launch, MODEL_WAIT};
+use bars_mcp::{BarsMcp, CALL_TIMEOUT, Env, INSTRUCTIONS, Launch, MODEL_WAIT, instructions};
 use bars_protocol::{Client, ClientKind, Endpoint, RegisterParams};
 use bars_worker::serve::serve;
 use bars_worker::worker::WorkerConfig;
@@ -403,7 +403,17 @@ impl Harness {
             })),
             call_timeout: CALL_TIMEOUT,
             model_wait: MODEL_WAIT,
+            bars_home: Some(self.home.path().to_path_buf()),
         }
+    }
+
+    /// Включает графовые инструменты, как человек в окне: ключ `[mcp] graph_tools` в `settings.toml`.
+    fn show_graph_tools(&self) {
+        fs::write(
+            self.home.path().join("settings.toml"),
+            "[mcp]\ngraph_tools = true\n",
+        )
+        .unwrap();
     }
 
     /// MCP-сервер в памяти и сырой клиент к нему.
@@ -449,23 +459,217 @@ fn indexed(status: &Value) -> bool {
     status["state"] == "ready" && !status["updated_at"].is_null() && status["pending"] == 0
 }
 
+const GRAPH_TOOLS: [&str; 6] = [
+    "bars_context",
+    "bars_explore",
+    "bars_graph",
+    "bars_impact",
+    "bars_paths",
+    "bars_relations",
+];
+
+async fn tool_names(mcp: &mut Pipe) -> Vec<String> {
+    let tools = mcp.request("tools/list", json!({})).await;
+    let mut names: Vec<_> = tools["result"]["tools"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|tool| tool["name"].as_str().unwrap().to_string())
+        .collect();
+    names.sort();
+    names
+}
+
+/// OQ-162: без ключа `[mcp] graph_tools` шесть графовых инструментов не в списке и не вызываются,
+/// в инструкции о них ни слова; ключ возвращает их со следующей сессией.
+#[tokio::test(flavor = "multi_thread")]
+async fn graph_tools_are_hidden_until_settings_show_them() {
+    let harness = Harness::new("graph-hidden");
+    let root = harness.project("proj");
+    let mut hidden = harness.connect(harness.env(&root));
+    let init = hidden.initialize().await;
+    let text = init["result"]["instructions"].as_str().unwrap();
+    assert_eq!(text, INSTRUCTIONS);
+    assert_eq!(text, instructions(false));
+    assert!(!text.contains("графовых"), "{text}");
+    let names = tool_names(&mut hidden).await;
+    assert_eq!(names.len(), 17, "{names:?}");
+    assert!(
+        GRAPH_TOOLS
+            .iter()
+            .all(|tool| !names.contains(&tool.to_string()))
+    );
+    let answer = hidden
+        .request(
+            "tools/call",
+            json!({ "name": "bars_graph", "arguments": {"view":"mixed"} }),
+        )
+        .await;
+    assert!(
+        answer["result"].is_null() && answer["error"]["message"] == "tool not found",
+        "скрытый инструмент не вызывается: {answer}"
+    );
+    assert_eq!(
+        harness.launches.load(Ordering::SeqCst),
+        0,
+        "до воркера вызов не дошёл"
+    );
+
+    harness.show_graph_tools();
+    let mut shown = harness.connect(harness.env(&root));
+    let init = shown.initialize().await;
+    let text = init["result"]["instructions"].as_str().unwrap();
+    assert_eq!(text, instructions(true));
+    assert!(text.contains("Шесть графовых инструментов"), "{text}");
+    assert!(
+        text.chars().count() <= 2000,
+        "Т-27: не длиннее 2 000 знаков"
+    );
+    let names = tool_names(&mut shown).await;
+    assert_eq!(names.len(), 23, "{names:?}");
+    assert!(
+        GRAPH_TOOLS
+            .iter()
+            .all(|tool| names.contains(&tool.to_string()))
+    );
+
+    let mut still_hidden = harness.connect(Env {
+        bars_home: None,
+        ..harness.env(&root)
+    });
+    still_hidden.initialize().await;
+    assert_eq!(tool_names(&mut still_hidden).await.len(), 17);
+}
+
+/// ISS-23: у каждой графовой операции своя схема — только свои поля и общие; шесть схем вместе
+/// не больше 14 КБ (контракт ответа графа, 4.3.2).
+#[tokio::test(flavor = "multi_thread")]
+async fn every_graph_tool_lists_only_its_own_parameters() {
+    let harness = Harness::new("graph-schemas");
+    let root = harness.project("proj");
+    harness.show_graph_tools();
+    let mut mcp = harness.connect(harness.env(&root));
+    mcp.initialize().await;
+    let common = ["project", "format", "modules", "files", "timeout_ms"];
+    let own: [(&str, &[&str]); 6] = [
+        (
+            "bars_relations",
+            &[
+                "query",
+                "entity_ref",
+                "predicates",
+                "direction",
+                "polarity",
+                "qualifiers",
+                "limit",
+                "cursor",
+            ],
+        ),
+        (
+            "bars_paths",
+            &[
+                "from",
+                "to",
+                "path_kind",
+                "max_hops",
+                "max_paths",
+                "predicates",
+            ],
+        ),
+        (
+            "bars_impact",
+            &["roots", "predicates", "max_depth", "limit", "cursor"],
+        ),
+        (
+            "bars_context",
+            &["query", "task_profile", "roles", "token_budget"],
+        ),
+        (
+            "bars_explore",
+            &[
+                "topic",
+                "whole_scope",
+                "analysis",
+                "grouping",
+                "limit",
+                "cursor",
+            ],
+        ),
+        (
+            "bars_graph",
+            &[
+                "view",
+                "local",
+                "roots",
+                "predicates",
+                "direction",
+                "max_depth",
+                "include_paths",
+                "limit",
+                "cursor",
+            ],
+        ),
+    ];
+    let tools = mcp.request("tools/list", json!({})).await;
+    let tools = tools["result"]["tools"].as_array().unwrap();
+    let mut total = 0;
+    for (name, fields) in own {
+        let tool = tools.iter().find(|t| t["name"] == name).unwrap();
+        total += tool.to_string().len();
+        let mut listed: Vec<_> = tool["inputSchema"]["properties"]
+            .as_object()
+            .unwrap()
+            .keys()
+            .cloned()
+            .collect();
+        listed.sort();
+        let mut expected: Vec<String> = common
+            .iter()
+            .chain(fields.iter())
+            .map(|f| f.to_string())
+            .collect();
+        expected.sort();
+        assert_eq!(listed, expected, "{name}");
+        assert!(
+            tool["description"].as_str().unwrap().chars().count() <= 400,
+            "{name}: описание не длиннее 400 знаков"
+        );
+    }
+    assert!(total <= 14 * 1024, "шесть схем: {total} байт");
+    let (error, text) = mcp.tool("bars_paths", json!({"query":"Т-1"})).await;
+    assert!(error, "поле чужой операции отклоняется: {text}");
+}
+
 #[tokio::test(flavor = "multi_thread")]
 async fn initialize_and_tool_list_do_not_touch_the_worker() {
     let harness = Harness::new("init");
     let root = harness.project("proj");
+    harness.show_graph_tools();
     let mut mcp = harness.connect(harness.env(&root));
 
     let init = mcp.initialize().await;
-    let instructions = init["result"]["instructions"]
+    let text = init["result"]["instructions"]
         .as_str()
         .expect("instructions в ответе на initialize (Т-27)");
-    assert_eq!(instructions, INSTRUCTIONS);
+    assert_eq!(text, instructions(true));
     assert!(
-        instructions.chars().count() <= 2000,
+        text.chars().count() <= 2000,
+        "Т-27: не длиннее 2 000 знаков"
+    );
+    assert!(
+        INSTRUCTIONS.chars().count() <= 2000,
         "Т-27: не длиннее 2 000 знаков"
     );
 
     let tools = mcp.request("tools/list", json!({})).await;
+    // ISS-27: перенос строки в описании без `\` приносит модели серии пробелов.
+    for tool in tools["result"]["tools"].as_array().unwrap() {
+        let listed = tool.to_string();
+        assert!(
+            !listed.contains("  "),
+            "двойной пробел в описании: {listed}"
+        );
+    }
     let mut names: Vec<_> = tools["result"]["tools"]
         .as_array()
         .unwrap()
@@ -511,6 +715,7 @@ async fn initialize_and_tool_list_do_not_touch_the_worker() {
 #[tokio::test(flavor = "multi_thread")]
 async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
     let harness = Harness::new("graph-tools");
+    harness.show_graph_tools();
     let root = harness.project("graph");
     fs::write(
         root.join("docs/requirements.md"),
@@ -594,6 +799,26 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
     let tools = mcp.request("tools/list", json!({})).await;
     assert!(!tools.to_string().contains("graph_build"));
     assert!(!tools.to_string().contains("graph_cancel"));
+    // ISS-31: история хранит аргументы графовых операций и номер попытки прокси.
+    let page = bars_worker::mcp_history::History::new(harness.home.path().into())
+        .page(&bars_worker::mcp_history::Filter {
+            limit: Some(100),
+            ..Default::default()
+        })
+        .unwrap();
+    let record = |tool: &str| {
+        page.records
+            .iter()
+            .find(|a| a.tool == tool)
+            .unwrap_or_else(|| panic!("{tool} в истории"))
+    };
+    assert_eq!(record("bars_relations").requested["query"], "Т-1");
+    assert_eq!(record("bars_paths").requested["to"]["label"], "Т-3");
+    assert_eq!(record("bars_impact").requested["roots"], json!([root]));
+    assert_eq!(record("bars_explore").requested["whole_scope"], true);
+    assert_eq!(record("bars_graph").requested["view"], "mixed");
+    assert_eq!(record("bars_graph").applied["operation"], "graph");
+    assert!(page.records.iter().all(|a| a.applied["proxy_attempt"] == 1));
 }
 
 #[tokio::test(flavor = "multi_thread")]
@@ -1282,7 +1507,10 @@ async fn default_format_is_text_with_explicit_delimiters() {
 /// клиент закрывает stdin.
 #[tokio::test(flavor = "multi_thread")]
 async fn real_binary_answers_initialize_without_a_worker_and_exits_on_eof() {
+    // Настоящий exe читает `~/.bars/settings.toml`: домашняя папка подменена пустой, как в проверках клиентов.
+    let home = TempDir::new().unwrap();
     let mut child = tokio::process::Command::new(env!("CARGO_BIN_EXE_bars-mcp"))
+        .env(bars_protocol::USER_HOME_VAR, home.path())
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
@@ -1301,7 +1529,11 @@ async fn real_binary_answers_initialize_without_a_worker_and_exits_on_eof() {
         started.elapsed()
     );
     let tools = mcp.request("tools/list", json!({})).await;
-    assert_eq!(tools["result"]["tools"].as_array().unwrap().len(), 23);
+    assert_eq!(
+        tools["result"]["tools"].as_array().unwrap().len(),
+        17,
+        "без настройки графовых инструментов нет (OQ-162)"
+    );
 
     drop(mcp);
     let status = tokio::time::timeout(Duration::from_secs(10), child.wait())

@@ -1,7 +1,7 @@
 //! `links_of`: ссылки документа читаются с диска без модели и без готового индекса поиска.
 
 use bars_core::secrets::MemorySecrets;
-use bars_protocol::{LinksOfOutput, LinksOfParams};
+use bars_protocol::{LinksIntoOutput, LinksIntoParams, LinksOfOutput, LinksOfParams};
 
 use super::*;
 use crate::autostart::MemoryAutostart;
@@ -62,4 +62,53 @@ async fn links_of_reads_fresh_files_and_rejects_relative_project() {
         .unwrap_err();
     assert!(error.message.contains("абсолютный путь"));
     worker.shutdown().await;
+}
+
+#[tokio::test]
+async fn links_into_lists_sources_outside_the_set_without_model() {
+    let (_home, worker, handler) = handler();
+    let projects = TempDir::new().unwrap();
+    let root = projects.path().join("proj");
+    fs::create_dir_all(root.join("docs/dir")).unwrap();
+    fs::write(
+        root.join("docs/a.md"),
+        "---\ntitle: Альфа\n---\n[бета](dir/b.md)\n",
+    )
+    .unwrap();
+    fs::write(root.join("docs/dir/b.md"), "# Бета\n\n[[c]]\n").unwrap();
+    fs::write(root.join("docs/dir/c.md"), "# Це\n").unwrap();
+    worker.register(&root).unwrap();
+
+    let params = |paths: &[&str]| LinksIntoParams {
+        project: root.display().to_string(),
+        paths: paths.iter().map(|p| p.to_string()).collect(),
+    };
+    let both = ["docs/dir/b.md", "docs/dir/c.md"];
+    let out: LinksIntoOutput = serde_json::from_value(
+        handler
+            .dispatch(Call::LinksInto(params(&both)))
+            .await
+            .unwrap(),
+    )
+    .unwrap();
+    // b → c внутри набора не считается; a → b снаружи считается.
+    assert_eq!(out.sources.len(), 1);
+    assert_eq!(out.sources[0].path, "docs/a.md");
+    assert_eq!(out.sources[0].title.as_deref(), Some("Альфа"));
+    assert_eq!(
+        (
+            out.sources[0].links[0].line,
+            out.sources[0].links[0].text.as_str()
+        ),
+        (4, "бета")
+    );
+
+    let error = handler
+        .dispatch(Call::LinksInto(LinksIntoParams {
+            project: "proj".into(),
+            paths: vec![],
+        }))
+        .await
+        .unwrap_err();
+    assert!(error.message.contains("абсолютный путь"));
 }

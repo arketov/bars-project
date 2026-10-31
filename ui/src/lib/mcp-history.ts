@@ -67,6 +67,9 @@ const labels: Record<string, string> = {
   state: "Состояние", updated_at: "Обновлено", index_model: "Модель индекса",
   settings_model: "Модель настроек", has_problem: "Есть проблема", operation_id: "ID задания",
   merged: "Объединено с заданием", chunk_id: "ID чанка", source_chunk: "Исходный чанк", job_kind: "Тип задания", anchor: "Найденный раздел", mode: "Режим",
+  proxy_attempt: "Попытка прокси", operation: "Операция графа", topic: "Тема", roots: "Корни",
+  analysis: "Анализ", budgets: "Пределы графа", include_related: "Связанные источники",
+  related_budget: "Предел связанных (байт)",
 };
 export function parameters(a: Attempt) {
   const requested = a.requested ?? {};

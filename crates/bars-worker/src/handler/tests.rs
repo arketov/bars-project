@@ -497,6 +497,17 @@ async fn explicit_project_by_name_and_wrong_calls() {
     assert_eq!(missing.kind(), Some(ErrorKind::FileNotFound));
     let not_md = rpc(cli.call(&by_name("guide.txt")).await);
     assert_eq!(not_md.kind(), Some(ErrorKind::InvalidParams));
+    // Чтение не выходит за корень проекта (OQ-169, ISS-89): ни `..`, ни абсолютный путь снаружи.
+    let outside_file = harness.projects.path().join("outside.md");
+    std::fs::write(&outside_file, "# вне проекта\n").unwrap();
+    for path in [
+        "../outside.md",
+        "../../outside.md",
+        outside_file.to_str().unwrap(),
+    ] {
+        let refused = rpc(cli.call(&by_name(path)).await);
+        assert_eq!(refused.kind(), Some(ErrorKind::InvalidParams), "{path}");
+    }
     let unknown = rpc(cli
         .call(&ReadParams {
             target: Target {
@@ -863,6 +874,37 @@ async fn search_answers_model_loading_while_the_model_loads_and_works_after() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn a_failed_background_load_answers_provider_error_with_the_error_kind() {
+    let provider = Arc::new(FakeProvider {
+        background: true,
+        fail_load: true,
+        ..FakeProvider::plain("m1")
+    });
+    let harness = Harness::start("failed-load", provider).await;
+    let mut cli = harness.client(ClientKind::Cli).await;
+    let root = harness.project("broken", &[("a.md", "# Борщ\n\nСвёкла и капуста.\n")]);
+    cli.call(&RegisterParams {
+        path: root.display().to_string(),
+    })
+    .await
+    .unwrap();
+
+    let deadline = Instant::now() + Duration::from_secs(10);
+    let error = loop {
+        let error = rpc(cli.call(&search(&root, "борщ")).await);
+        if error.kind() != Some(ErrorKind::ModelLoading) {
+            break error;
+        }
+        assert!(Instant::now() < deadline, "ошибка загрузки не пришла");
+        tokio::time::sleep(Duration::from_millis(20)).await;
+    };
+    assert_eq!(error.kind(), Some(ErrorKind::ProviderError));
+    let data = error.data.expect("data с видом ошибки");
+    // Текст библиотеки без признаков нехватки памяти даёт `runtime`, а не «файлов нет».
+    assert_eq!(data["reason"], "runtime", "{data}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn window_methods_are_closed_on_the_channel() {
     let harness = Harness::start("window-closed", FakeProvider::new("m1")).await;
     let mut cli = harness.client(ClientKind::Cli).await;
@@ -965,3 +1007,17 @@ mod graph;
 mod links;
 mod new_topics;
 mod window;
+
+/// ISS-28: заголовки приклеенных разделов видны в результате, а список `other headers:` и
+/// строки в блоках кода в них не попадают.
+#[test]
+fn merged_sections_list_glued_headings_only() {
+    assert_eq!(
+        super::merged_sections(
+            "текст\n\n## Б\nещё\n```\n# не заголовок\n```\n\n### В\nи ещё\nother headers:\n## Г"
+        ),
+        ["## Б", "### В"]
+    );
+    assert!(super::merged_sections("текст без заголовков").is_empty());
+    assert!(super::merged_sections("other headers:\n## Б").is_empty());
+}

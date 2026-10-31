@@ -1,14 +1,18 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
   import { app } from "./app.svelte";
-  import { call, copyText, documentAction, documentEditors, folderTarget, folderAction, type FolderTarget } from "./api";
-  import { documentAt, documentItems, folderAt, folderItems, itemsFor, place, projectAt, projectItems, run, textField, topicAt, treeEntryAt, type MenuItem } from "./contextmenu";
+  import { call, copyText, documentEditors, folderTarget, folderAction, type FolderTarget } from "./api";
+  import { documentAt, folderAt, folderItems, itemsFor, place, projectAt, projectItems, run, textField, topicAt, treeEntryAt, type MenuItem } from "./contextmenu";
   import type { TopicDetail } from "./new-topics";
   import AppearancePicker from "./AppearancePicker.svelte";
   import { canStyleFolder, keyOf } from "./appearance";
-  import { findNode, relativeToDocs } from "./tree";
-  import { editorMenu, menuTargetAt, treeMenu } from "./menu-model";
+  import { findDocumentNode, findNode, relativeToDocs } from "./tree";
+  import { documentMenu, documentPlaces, editorMenu, groupMenu, headingMenu, linkMenu, menuTargetAt, nestedEditors, panelTabMenu, rowKinds, rowMenu, topicMenu, treeMenu, type DocumentPlace, type ModelItem, type RowKind, type TextCommand } from "./menu-model";
   import { executeTreeCommand, type TreeCommandTarget } from "./tree-commands";
+  import { editorHostOf, executeDocumentCommand, type DocumentCommandTarget } from "./document-commands";
+  import { executeLinkCommand, resolveLink, type LinkCommandTarget } from "./link-commands";
+  import { adapterFor, runAdapter } from "./command-adapters";
+  import { tabHost } from "./workspace-tabs";
   import { keybindings } from "./keybindings.svelte";
   const menuId = $props.id();
 
@@ -28,7 +32,13 @@
   // Т-38: цель выбора цвета и иконки, найденная при открытии меню, и открытая панель выбора.
   let styleTarget: { kind: "folder" | "document"; path: string; label: string } | null = null;
   let picker = $state<{ project: string; kind: "folder" | "document"; path: string; label: string; x: number; y: number } | null>(null);
-  let submenu = $state(false);
+  // Действие пункта, чьё подменю открыто: «Открыть в …» или «Документ ▸»; глубина одна.
+  let submenu = $state<string | null>(null);
+  let documentTarget = $state<DocumentCommandTarget | null>(null);
+  // Шаг 3.3.7: ссылка, строка экрана или заголовок с обработчиками команд и вкладка служебной панели.
+  let linkTarget: LinkCommandTarget | null = null;
+  let rowTarget: { project: string; element: HTMLElement } | null = null;
+  let panelTarget: { project: string; panelId: string } | null = null;
   let generation = 0;
   let origin = { x: 0, y: 0 };
   // Меню внутри showModal должно принадлежать тому же верхнему слою WebView.
@@ -43,6 +53,7 @@
     if (topic && (current !== topic.project || !app.topicsOpen || !app.topics.topics.some(t => t.id === topic?.id))) close();
     if (pendingFolder && (current !== pendingFolder.project || app.docsRoot !== pendingFolder.docsRoot)) close();
     if (document && current !== document.project) close();
+    if ((linkTarget && current !== linkTarget.project) || (rowTarget && current !== rowTarget.project) || (panelTarget && current !== panelTarget.project)) close();
     if (picker && current !== picker.project) picker = null;
     if (folder && (current !== folder.project || app.docsRoot !== folder.docsRoot || !app.projects.some(p => p.path === folder?.project))) close();
     if (project && (current !== openedCurrent || !app.projects.some(p => p.path === project))) close();
@@ -61,7 +72,11 @@
     treeTarget = null;
     reason = '';
     styleTarget = null;
-    submenu = false;
+    submenu = null;
+    documentTarget = null;
+    linkTarget = null;
+    rowTarget = null;
+    panelTarget = null;
     generation++;
   }
 
@@ -87,9 +102,7 @@
     if (row && current && app.topicsOpen && app.topics.topics.some(t => t.id === row.id)) {
       topic = { project: current, id: row.id };
       returnFocus = row.element;
-      found.splice(0, found.length,
-        { action: "copyTopic", label: "Скопировать" },
-        { action: "closeTopic", label: "Закрыть", disabled: app.topics.busy });
+      found.splice(0, found.length, ...topicMenu(app.topics.busy));
     }
     const nearest = menuTargetAt(event.target);
     const directory = !textField(event.target) && nearest?.hasAttribute("data-folder-path") && folderAt(event.target);
@@ -123,13 +136,61 @@
     const file = !folder && !project && !textField(event.target) && nearest?.hasAttribute('data-document-path') && documentAt(nearest);
     if (file && app.current) {
       document = { ...file, project: app.current };
-      if (!entry) found.unshift(...documentItems());
       const key = keyOf(relativeToDocs(file.path, docsRoot));
       styleTarget = { kind: "document", path: key, label: key.split("/").pop() ?? key };
-      if (!entry) found.push({ action: "appearance", label: "Цвет…" });
+      if (!entry && nearest) {
+        // Вкладка, шапка, карточка, рендер и редактор — один набор групп; цвет документа задаётся только в дереве.
+        const where = nearest.dataset.menuPlace as DocumentPlace | undefined;
+        const documentPlace = where && documentPlaces.includes(where) ? where : "card";
+        const panelId = documentPlace === "card" ? undefined : tabHost()?.panelAt(nearest);
+        const text: Partial<Record<TextCommand, string>> = {};
+        if (documentPlace === "editor") {
+          for (const command of ["undo", "redo", "cut", "copy", "paste", "selectAll"] as const) {
+            const adapter = adapterFor(`text.${command}`, editorHostOf(nearest));
+            const why = adapter ? adapter.reason() : "Редактор ещё не готов";
+            if (why) text[command] = why;
+          }
+        }
+        documentTarget = { project: app.current, docsRoot, path: file.path, line: file.line, place: documentPlace, panelId, element: nearest };
+        found.splice(0, found.length, ...documentMenu({
+          path: file.path, place: documentPlace, state: app.project?.state ?? "starting", workerDown: !!app.workerDown,
+          mac: /Mac/.test(navigator.platform), inTree: !!findDocumentNode(app.tree, file.path),
+          tab: panelId ? tabHost()?.state(panelId) : undefined,
+          copySelection: found.some(entryItem => entryItem.action === "copy"), text,
+        }, id => ["tab.close", "tab.closeOthers", "tab.closeRight", "tab.move", "document.newWindow"].includes(id) && keybindings.binding(id) ? keybindings.hint(id) : ""));
+      }
+    }
+    const kind = !folder && !project && !topic && !entry && !textField(event.target) ? nearest?.dataset.menuKind : undefined;
+    if (current && nearest && kind && kind !== 'file' && kind !== 'editor') {
+      const mac = /Mac/.test(navigator.platform), copySelection = found.some(entryItem => entryItem.action === 'copy');
+      const hint = (id: string) => keybindings.binding(id) ? keybindings.hint(id) : '';
+      // Обработчик команды на строке: нет — пункта нет, есть — серый с причиной или доступный.
+      const handler = (id: string) => { const adapter = adapterFor(id, nearest); return adapter ? adapter.reason() : null; };
+      let built: ModelItem[] = [];
+      if (kind === 'link') {
+        const raw = nearest.dataset.wikiLink ?? nearest.dataset.docLink;
+        const source = nearest.closest<HTMLElement>('[data-document-path]')?.dataset.documentPath;
+        if (raw !== undefined && source) {
+          const wiki = nearest.dataset.wikiLink !== undefined, known = nearest.dataset.linkTarget || undefined;
+          const resolved = resolveLink(source, raw, wiki, known);
+          linkTarget = { project: current, docsRoot, source, raw, wiki, known, text: (nearest.dataset.linkText ?? nearest.textContent ?? '').trim() };
+          built = linkMenu({ resolved: !!resolved.target, canCreate: !!resolved.create, workerDown: !!app.workerDown, copySelection, mac });
+        }
+      } else if (kind === 'heading') {
+        rowTarget = { project: current, element: nearest };
+        built = headingMenu(handler, hint, copySelection, mac);
+      } else if (kind === 'row' && rowKinds.includes(nearest.dataset.menuRow as RowKind)) {
+        rowTarget = { project: current, element: nearest };
+        built = rowMenu(nearest.dataset.menuRow as RowKind, handler, hint, copySelection, mac);
+      } else if (kind === 'panel-tab') {
+        const panelId = tabHost()?.panelAt(nearest), state = panelId ? tabHost()?.state(panelId) : undefined;
+        if (panelId && state) { panelTarget = { project: current, panelId }; built = panelTabMenu(state, hint); }
+      }
+      if (built.length) { found.splice(0, found.length, ...built); returnFocus = nearest; }
+      else { linkTarget = null; rowTarget = null; panelTarget = null; }
     }
     if (entry && current && nearest) {
-      treeTarget = { project: current, docsRoot, path: entry.path, element: nearest, pinned: folder ?? undefined };
+      treeTarget ={ project: current, docsRoot, path: entry.path, element: nearest, pinned: folder ?? undefined };
       returnFocus = nearest;
       found.splice(0, found.length, ...treeMenu({ ...entry, state: app.project?.state ?? 'starting',
         workerDown: !!app.workerDown, missing: folder?.missing, canStyle: !!styleTarget,
@@ -145,22 +206,48 @@
     box?.querySelector<HTMLButtonElement>('button:not([aria-disabled="true"]):not(.danger)')?.focus({ preventScroll: true });
   }
 
-  async function showEditors() {
-    if (!document) return;
+  /** Открывает подменю пункта: список программ читается при открытии; «Документ ▸» добавляет их плоско. */
+  async function openSub(action: string) {
+    const owner = items.find(item => item.action === action);
+    if (!document || !owner || owner.disabled) return;
     const version = generation;
-    try {
-      const found = await documentEditors();
-      if (version !== generation) return;
-      items = items.map(item => item.action === 'editors' ? { ...item, children: editorMenu(found) } : item);
-      submenu = true;
-      await position();
-      box?.querySelector<HTMLButtonElement>(".sub button")?.focus({ preventScroll: true });
-    } catch (error) { app.flash(String(error), true); }
+    let found: { id: string; label: string }[] = [];
+    try { found = await documentEditors(); } catch (error) {
+      app.flash(String(error), true);
+      if (action === "editors") return;
+    }
+    if (version !== generation) return;
+    items = items.map(item => item.action === "editors" ? { ...item, children: editorMenu(found) }
+      : item.action === "documentSub" ? { ...item, children: groupMenu([...((item.children ?? []) as ModelItem[]).filter(child => child.action !== "editor"), ...nestedEditors(found)]) } : item);
+    submenu = action;
+    await position();
+    box?.querySelector<HTMLButtonElement>(".sub button:not([aria-disabled=\"true\"])")?.focus({ preventScroll: true });
   }
 
   async function pick(item: MenuItem) {
     if (item.disabled) return;
-    if (item.action === "editors") { await showEditors(); return; }
+    if (item.action === "editors" || item.action === "documentSub") { await openSub(item.action); return; }
+    if (documentTarget && item.id && !(item.action === "copy" && documentTarget.place !== "editor")) {
+      const captured = documentTarget;
+      close(true);
+      try { await executeDocumentCommand(item.id, captured, item.editor); }
+      catch (error) { app.flash(String(error instanceof Error ? error.message : error), true); }
+      return;
+    }
+    if (item.action !== 'copy' && item.id && (linkTarget || rowTarget || panelTarget)) {
+      const [link, row, panel] = [linkTarget, rowTarget, panelTarget];
+      close(true);
+      try {
+        if (link) await executeLinkCommand(item.id, link);
+        else if (row) await runAdapter(item.id, row.element);
+        else if (panel) {
+          const host = tabHost();
+          if (!host || panel.project !== app.current) throw new Error('Вкладка уже закрыта');
+          await host.run(item.id, panel.panelId);
+        }
+      } catch (error) { app.flash(String(error instanceof Error ? error.message : error), true); }
+      return;
+    }
     if (treeTarget && (item.id || item.action === 'editor') && item.action !== 'copy') {
       const captured = treeTarget;
       close(true);
@@ -175,7 +262,6 @@
       return;
     }
     const where = target;
-    const file = document;
     const directory = folder;
     const projectPath = project;
     const selectedTopic = topic;
@@ -205,19 +291,6 @@
         if (!app.projects.some(p => p.path === projectPath)) return;
         await call("reindex", { cwd: projectPath, project: projectPath });
         app.flash("Проверка проекта поставлена в очередь");
-      } else if (file && ["open", "newWindow", "editor", "reveal", "path", "check"].includes(item.action)) {
-        if (app.current !== file.project) return;
-        if (item.action === "newWindow") {
-          await app.openInNewWindow(file.path);
-        } else if (item.action === "open") {
-          const hit = app.results?.results.find(hit => hit.path === file.path && hit.first_line === file.line);
-          await app.openDocument(hit ?? { path: file.path, title: file.path, first_line: 0, last_line: 0 });
-        } else {
-          const action = item.action === "editor" ? "open" : item.action as "path" | "check" | "reveal";
-          const path = await documentAction(file.project, file.path, action, item.editor);
-          if (action === "path") { await copyText(path); app.flash("Путь скопирован"); }
-          if (action === "check") app.flash("Проверка документа поставлена в очередь");
-        }
       } else {
         const problem = await run(item.action, where);
         if (problem) app.flash(problem, true);
@@ -227,14 +300,14 @@
 
   function navigate(event: KeyboardEvent) {
     if (event.key === 'Escape' && submenu) {
-      event.preventDefault(); submenu = false;
+      event.preventDefault(); submenu = null;
       box?.querySelector<HTMLButtonElement>('[aria-haspopup="menu"]')?.focus(); void position(); return;
     }
     if (event.key === "Escape" && (returnFocus || items.length)) { event.preventDefault(); close(true); return; }
     if (event.key === "Tab" && returnFocus && !items.length) { close(); return; }
     if ((event.shiftKey && event.key === "F10") || event.key === "ContextMenu") {
       const element = globalThis.document.activeElement;
-      if (element instanceof HTMLElement && (projectAt(element) || folderAt(element) || documentAt(element) || topicAt(element))) {
+      if (element instanceof HTMLElement && (projectAt(element) || folderAt(element) || documentAt(element) || topicAt(element) || menuTargetAt(element))) {
         event.preventDefault();
         const rect = element.getBoundingClientRect();
         element.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: rect.left, clientY: rect.bottom }));
@@ -245,11 +318,12 @@
     if (event.key === "Escape" || event.key === "Tab") { event.preventDefault(); close(true); return; }
     if (event.key === "ArrowRight" && globalThis.document.activeElement?.getAttribute('aria-haspopup') === 'menu') {
       event.preventDefault();
-      if (globalThis.document.activeElement.getAttribute('aria-disabled') !== 'true') void showEditors();
+      const owner = globalThis.document.activeElement;
+      if (owner.getAttribute('aria-disabled') !== 'true' && owner.getAttribute('data-action')) void openSub(owner.getAttribute('data-action')!);
       return;
     }
     if (event.key === "ArrowLeft" && submenu) {
-      event.preventDefault(); submenu = false;
+      event.preventDefault(); submenu = null;
       box.querySelector<HTMLButtonElement>('[aria-haspopup="menu"]')?.focus();
       void position(); return;
     }
@@ -269,7 +343,7 @@
       const opening = open({ target: captured.element, preventDefault() {}, clientX: rect.left, clientY: rect.bottom });
       const version = generation;
       await opening;
-      if (version === generation && treeTarget?.project === captured.project && treeTarget.path === captured.path) await showEditors();
+      if (version === generation && treeTarget?.project === captured.project && treeTarget.path === captured.path) await openSub('editors');
     };
     const style = (event: Event) => {
       const target = (event as CustomEvent<TreeCommandTarget>).detail;
@@ -327,22 +401,23 @@
     style="left: {at.left}px; top: {at.top}px"
     onmousedown={(event) => event.preventDefault()}
   >
+    {#snippet row(item: MenuItem, index: number, list: MenuItem[], scope: string)}
+      {@const parent = item.action === "editors" || item.action === "documentSub"}
+      {#if index > 0 && item.group && item.group !== list[index - 1].group}<div class="separator" role="separator"></div>{/if}
+      <button role="menuitem" data-action={item.action} class:danger={item.danger} aria-disabled={item.disabled ? 'true' : undefined} aria-describedby={item.disabled ? `${menuId}-${scope}${index}` : undefined} title={item.hint}
+        aria-haspopup={parent ? "menu" : undefined} aria-expanded={parent ? submenu === item.action : undefined}
+        onfocus={() => reason = item.disabled ? item.hint ?? '' : ''} onmouseenter={() => reason = item.disabled ? item.hint ?? '' : ''} onmouseleave={() => reason = ''}
+        onclick={() => pick(item)}><span>{item.label}{#if item.hint && !item.disabled}<small>{item.hint}</small>{/if}</span><span class="shortcut">{item.shortcut ?? ''}{parent ? " ▸" : ''}</span></button>
+      {#if item.disabled && item.hint}<span class="sr-only" id={`${menuId}-${scope}${index}`}>{item.hint}</span>{/if}
+    {/snippet}
     <div class="primary" role="menu" aria-label="Действия">
-      {#each items as item, index (item.action)}
-        {#if index > 0 && item.group && item.group !== items[index - 1].group}<div class="separator" role="separator"></div>{/if}
-        <button role="menuitem" class:danger={item.danger} aria-disabled={item.disabled ? 'true' : undefined} aria-describedby={item.disabled ? `${menuId}-${index}` : undefined} title={item.hint}
-          aria-haspopup={item.action === "editors" ? "menu" : undefined} aria-expanded={item.action === "editors" ? submenu : undefined}
-          onfocus={() => reason = item.disabled ? item.hint ?? '' : ''} onmouseenter={() => reason = item.disabled ? item.hint ?? '' : ''} onmouseleave={() => reason = ''}
-          onclick={() => pick(item)}><span>{item.label}{#if item.hint && !item.disabled}<small>{item.hint}</small>{/if}</span><span class="shortcut">{item.shortcut ?? ''}{item.action === "editors" ? " ▸" : ''}</span></button>
-        {#if item.disabled && item.hint}<span class="sr-only" id={`${menuId}-${index}`}>{item.hint}</span>{/if}
-      {/each}
+      {#each items as item, index (item.action)}{@render row(item, index, items, "")}{/each}
       {#if reason}<div class="reason">Недоступно: {reason}</div>{/if}
     </div>
     {#if submenu}
-      <div class="sub" role="menu" aria-label="Открыть в редакторе">
-        {#each items.find(item => item.action === 'editors')?.children ?? [] as editor (editor.editor)}
-          <button role="menuitem" onclick={() => pick(editor)}>{editor.label}</button>
-        {/each}
+      {@const owner = items.find(item => item.action === submenu)}
+      <div class="sub" role="menu" aria-label={owner?.label ?? "Подменю"}>
+        {#each owner?.children ?? [] as child, index (child.editor ?? child.action)}{@render row(child, index, owner?.children ?? [], "s")}{/each}
       </div>
     {/if}
   </div>

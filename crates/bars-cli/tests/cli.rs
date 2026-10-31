@@ -233,7 +233,7 @@ async fn register_search_outline_read_scenario() {
     assert!(found.out.contains("1. docs/guide.md:"), "{}", found.out);
     assert!(found.out.contains("Руководство — "), "{}", found.out);
     assert!(
-        found.out.contains("Применено: результатов"),
+        found.out.contains("Применено: предел результатов"),
         "{}",
         found.out
     );

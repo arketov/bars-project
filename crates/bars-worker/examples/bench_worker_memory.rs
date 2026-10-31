@@ -193,7 +193,7 @@ async fn exercise(
     loop {
         match worker.models().rerank_readiness(settings) {
             Readiness::Ready => break,
-            Readiness::Failed(message) => return Err(message.into()),
+            Readiness::Failed(message) => return Err(message.message.into()),
             Readiness::Loading { .. } => {
                 tokio::time::sleep(std::time::Duration::from_millis(20)).await
             }

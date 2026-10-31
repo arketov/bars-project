@@ -102,12 +102,12 @@ it("конфликт не перезаписывает файл, останав�
   expect(buffer.text).toBe("ещё правка");
 });
 
-it("удалённый файл при правках — конфликт с пояснением", async () => {
+it("запись, которой файл не нашла, переводит буфер в «файл удалён»", async () => {
   const buffer = await loaded();
   vi.mocked(documentWrite).mockResolvedValue({ status: "conflict", revision: null });
   buffer.edit("x");
   await vi.advanceTimersByTimeAsync(AUTOSAVE_MS);
-  expect([buffer.status, buffer.message]).toEqual(["conflict", "Файл удалён с диска."]);
+  expect([buffer.status, buffer.message, buffer.text]).toEqual(["deleted", "Файл удалён с диска.", "x"]);
 });
 
 it("ошибка записи оставляет черновик и повторяется кнопкой, а не по таймеру", async () => {
@@ -171,12 +171,85 @@ it("проверка диска: буфер с правками уходит в 
   expect(documentWrite).not.toHaveBeenCalled();
 });
 
-it("проверка диска: удалённый файл при правках — конфликт «удалён»", async () => {
+it("проверка диска: удалённый файл при правках — «файл удалён», правка цела", async () => {
   const buffer = await loaded();
   buffer.edit("моя правка");
   disk(null);
   await buffer.checkDisk();
-  expect([buffer.status, buffer.message]).toEqual(["conflict", "Файл удалён с диска."]);
+  expect([buffer.status, buffer.message, buffer.text, buffer.dirty]).toEqual(["deleted", "Файл удалён с диска.", "моя правка", true]);
+});
+
+it("проверка диска: удалённый файл при чистом буфере не стирает текст (M-05)", async () => {
+  const buffer = await loaded();
+  disk(null);
+  await buffer.checkDisk();
+  expect([buffer.status, buffer.text, buffer.dirty, buffer.notice]).toEqual(["deleted", "# а\n", false, ""]);
+  // Новое чтение отсутствующего файла тоже не опустошает документ.
+  vi.mocked(documentRead).mockResolvedValue(read({ text: "", revision: null }));
+  await buffer.load();
+  expect([buffer.status, buffer.text]).toEqual(["deleted", "# а\n"]);
+});
+
+it("в состоянии «файл удалён» правка не запускает автосохранение, файл не воскресает молча", async () => {
+  const buffer = await loaded();
+  disk(null);
+  await buffer.checkDisk();
+  buffer.edit("набранный символ");
+  await vi.advanceTimersByTimeAsync(AUTOSAVE_MS * 3);
+  expect(documentWrite).not.toHaveBeenCalled();
+  expect([buffer.status, buffer.text]).toEqual(["deleted", "набранный символ"]);
+  expect(await editors.flush()).toEqual([]);
+});
+
+it("«Записать заново» создаёт файл с base_revision = null и делает буфер чистым, даже без правок", async () => {
+  const buffer = await loaded();
+  disk(null);
+  await buffer.checkDisk();
+  vi.mocked(documentWrite).mockResolvedValueOnce(saved("r7"));
+  await buffer.restore();
+  expect(documentWrite).toHaveBeenCalledWith("C:/p", "docs/a.md", "# а\n", null, "lf", false);
+  expect([buffer.status, buffer.revision, buffer.dirty]).toEqual(["saved", "r7", false]);
+});
+
+it("«Записать заново»: ошибка записи оставляет повтор рабочим для чистого буфера", async () => {
+  const buffer = await loaded();
+  disk(null);
+  await buffer.checkDisk();
+  vi.mocked(documentWrite).mockResolvedValueOnce({ status: "error", kind: "parent_missing", message: "Папки документа нет" });
+  await buffer.restore();
+  expect([buffer.status, buffer.message]).toEqual(["error", "Папки документа нет"]);
+  vi.mocked(documentWrite).mockResolvedValueOnce(saved("r8"));
+  await buffer.retry();
+  expect([buffer.status, buffer.revision]).toEqual(["saved", "r8"]);
+});
+
+it("файл вернулся на место: чистый буфер перечитывается, буфер с правками уходит в конфликт", async () => {
+  const buffer = await loaded();
+  disk(null);
+  await buffer.checkDisk();
+  vi.mocked(documentRead).mockResolvedValue(read({ text: "вернулся", revision: "r1" }));
+  disk("r1");
+  await buffer.checkDisk();
+  expect([buffer.status, buffer.text]).toEqual(["clean", "вернулся"]);
+  const edited = await loaded();
+  edited.edit("моя");
+  disk(null);
+  await edited.checkDisk();
+  disk("r5");
+  await edited.checkDisk();
+  expect([edited.status, edited.diskRevision]).toEqual(["conflict", "r5"]);
+});
+
+it("удаление в корзину bars: чистые буферы возвращаются на закрытие вкладок, изменённые получают «файл удалён»", async () => {
+  vi.mocked(documentRead).mockResolvedValue(read());
+  const clean = editors.attach("trash-p", "docs/t/clean.md", "");
+  const dirty = editors.attach("trash-p", "docs/t/dirty.md", "");
+  const other = editors.attach("trash-p", "docs/tt/other.md", "");
+  await vi.advanceTimersByTimeAsync(0);
+  dirty.edit("правка");
+  expect(editors.trashed("trash-p", "docs/t").sort()).toEqual(["docs/t/clean.md"]);
+  expect([clean.status, dirty.status, dirty.text, other.status]).toEqual(["deleted", "deleted", "правка", "clean"]);
+  [clean, dirty, other].forEach((buffer) => editors.discard(buffer));
 });
 
 it("«Оставить мою версию» пишет поверх ревизии, которую увидел конфликт", async () => {

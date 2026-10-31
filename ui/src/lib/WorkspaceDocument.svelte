@@ -1,6 +1,8 @@
 <script lang="ts">
   import { tick } from "svelte";
-  import { call } from "./api";
+  import { call, copyText } from "./api";
+  import { commandAdapter } from "./command-adapters";
+  import { headingLinkText } from "./link-commands";
   import Icon from "./Icon.svelte";
   import Editor from "./Editor.svelte";
   import { editors, type EditorBuffer } from "./editors.svelte";
@@ -42,6 +44,11 @@
     const hint = keybindings.hint(id);
     return `${catalog.find(c => c.id === id)?.title ?? id}${hint && hint !== "Не назначено" ? ` (${hint})` : ""}`;
   };
+  /** «Закрыть вкладку» / «Отбросить правки» удалённого документа: буфер отбрасывается, вкладку закрывает окно. */
+  function closeDeleted() {
+    if (buffer) editors.discard(buffer);
+    section?.dispatchEvent(new CustomEvent("bars:close-document", { bubbles: true }));
+  }
   function helper(id: string) { editor?.run(id); editor?.focus(); }
   function statusLabel(b: EditorBuffer): string {
     switch (b.status) {
@@ -49,6 +56,7 @@
       case "saving": return "Запись…";
       case "saved": return b.savedAt ? `Записано в ${new Date(b.savedAt).toLocaleTimeString("ru-RU")}` : "Записано";
       case "conflict": return "Конфликт версий";
+      case "deleted": return "Файл удалён";
       case "error": return "Не записано";
       case "readonly": return "Только чтение";
       default: return "";
@@ -119,30 +127,53 @@
     event.preventDefault();
     void documentLink.open(project, hit.path, link.dataset.wikiLink ?? link.dataset.docLink ?? "", link.dataset.wikiLink !== undefined);
   }
+  /** Закрывает свою вкладку тем же крестиком, что и мышь: проверка правок и список переполнения Dockview работают как обычно. */
+  function closeTab() {
+    document.querySelector<HTMLElement>(`[data-workspace-panel][data-document-path="${CSS.escape(hit.path)}"] .dv-default-tab-action`)?.click();
+  }
+  /** Файла нет — открываем пустой черновик; на диске он появится при первой правке (editor-design.md, Т-32). */
+  function createFile() {
+    if (doc) doc = { ...doc, text: "", missing: false };
+  }
   function scroll(line: number) {
     if (source) { if (line > 0) editor?.scrollToLine(line); return; }
     body?.querySelector("#hit")?.scrollIntoView({ block: "center" });
   }
+  function goToHeading(line: number) { source = true; void tick().then(() => scroll(line)); }
+  /** Команды строки структуры (меню и список действий): переход и ссылка `[[Документ#Заголовок]]`. */
+  const headingCommands = (heading: { line: number; label: string }) => ({
+    "heading.goTo": { run: () => goToHeading(heading.line) },
+    "heading.copyLink": {
+      run: async () => {
+        const link = headingLinkText(hit.path, heading.label);
+        if (!link) throw new Error("Документа нет в дереве проекта");
+        await copyText(link); app.flash("Ссылка на заголовок скопирована");
+      },
+      reason: () => headingLinkText(hit.path, heading.label) ? undefined : "Документа нет в дереве проекта",
+    },
+  });
   // Прокрутка к отрывку при открытии, смене режима и нового отрывка; правки текста её не двигают.
   $effect(() => { void source; void hit.first_line; void doc; void tick().then(() => scroll(hit.first_line)); });
 </script>
 
-<section class="document" bind:this={section} aria-label={hit.title} data-document-path={hit.path}>
-  <header data-document-path={hit.path}><div><b>{doc?.title ?? hit.title}</b><small>{hit.path}</small></div>
+<section class="document" bind:this={section} aria-label={hit.title} data-document-path={hit.path} data-menu-kind="file" data-menu-place="render">
+  <header data-document-path={hit.path} data-menu-kind="file" data-menu-place="header"><div><b>{doc?.title ?? hit.title}</b><small>{hit.path}</small></div>
     {#if status}<span class="status" role="status" data-status={buffer?.status}>{status}</span>{/if}
     {#if source && buffer && buffer.status !== "readonly"}<button class="tool-toggle" title="Панель разметки" aria-label="Панель разметки" aria-pressed={toolbar} onclick={toggleToolbar}>Aa</button>{/if}
     <button title={source ? "Показать рендер" : "Показать исходник"} aria-label="Исходник / рендер" aria-pressed={source} onclick={() => { source = !source; void buffer?.save(); }}><Icon name="eye" size={15} /></button>
   </header>
   {#if error}<p role="alert">Не удалось прочитать документ: {error}</p>
   {:else if !doc}<p role="status">Чтение…</p>
-  {:else if doc.missing}<p role="alert">Файл не найден, возможно, его удалили.</p><button onclick={() => { app.openSearch(); void app.search(); }}>Обновить выдачу</button>
+  {:else if doc.missing}<p role="alert">Файл не найден, возможно, его удалили.</p>
+    {#if hit.fromSearch}<button onclick={() => { app.openSearch(); void app.search(); }}>Обновить выдачу</button>
+    {:else}<button onclick={closeTab}>Закрыть вкладку</button> <button onclick={createFile} title="Пустой документ; файл появится на диске при первой правке">Создать файл</button>{/if}
   {:else}
-    {#if buffer && (buffer.status === "error" || buffer.status === "conflict" || buffer.status === "readonly")}
+    {#if buffer && (buffer.status === "error" || buffer.status === "conflict" || buffer.status === "deleted" || buffer.status === "readonly")}
       <p class="banner" role="alert" data-status={buffer.status}>{buffer.message}
         {#if buffer.status === "error"} Черновик остался в окне, он не записан. <button onclick={() => void buffer?.retry()}>Повторить</button>
-        {:else if buffer.status === "conflict" && buffer.diskRevision === null} Правки остались в окне, пока вы не выберете.
-          <button onclick={() => void buffer?.keepMine()}>Записать заново</button>
-          <button onclick={() => void buffer?.takeDisk()}>Отбросить правки</button>
+        {:else if buffer.status === "deleted"} {buffer.dirty ? "Правки остались в окне, пока вы не выберете." : "Текст остался в окне."}
+          <button onclick={() => void buffer?.restore()}>Записать заново</button>
+          <button onclick={closeDeleted}>{buffer.dirty ? "Отбросить правки" : "Закрыть вкладку"}</button>
         {:else if buffer.status === "conflict"} Правки в окне не записываются, пока вы не выберете версию.
           <button onclick={() => void buffer?.keepMine()}>Оставить мою версию</button>
           <button onclick={() => void buffer?.takeDisk()}>Взять версию с диска</button>
@@ -157,7 +188,7 @@
       </div>
       {#if cheat}<div class="cheat" role="note"><code># Заголовок</code> · <code>**жирный**</code> · <code>*курсив*</code> · <code>`код`</code> · <code>- пункт</code> · <code>1. пункт</code> · <code>- [ ] задача</code> · <code>&gt; цитата</code> · <code>[текст](путь.md)</code> · <code>| а | б |</code> — таблица; <code>Tab</code> переходит по ячейкам, <code>Enter</code> продолжает список.</div>{/if}
     {/if}
-    <div class="body" class:editing={source} bind:this={body}>
+    <div class="body" class:editing={source} bind:this={body} data-document-path={hit.path} data-menu-kind={source ? "editor" : "file"} data-menu-place={source ? "editor" : "render"}>
       {#if source}<Editor bind:this={editor} text={text} historyVersion={buffer?.historyVersion ?? 0} links={() => linkTargets(app.tree, app.docsRoot)} semantic={semanticLinks} readonly={!buffer || buffer.status === "readonly" || buffer.status === "loading"} hit={range} oninput={(value) => buffer?.edit(value)} />
       {:else}<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions --><div class="md" onclick={followLink}>{@html html}</div>{/if}
     </div>
@@ -171,10 +202,10 @@
         {:else if !backlinks.known}<p class="bl-note">Документа нет среди файлов проекта на диске.</p>
         {:else}
           <h4 class="bl-group">Ссылаются на этот документ</h4>
-          {#if backlinks.incoming.length}<ul>{#each backlinks.incoming as item (item.path)}<li><button onclick={() => openIncoming(item)} title={item.path}><span class="bl-title">{linkTitle(item.title, item.path)}</span><small>{item.path}{item.lines.length ? ` · строки ${item.lines.join(", ")}` : ""}</small></button></li>{/each}</ul>
+          {#if backlinks.incoming.length}<ul>{#each backlinks.incoming as item (item.path)}<li data-document-path={item.path} data-document-line={item.lines[0] ?? 0} data-menu-kind="file" data-menu-place="card"><button onclick={() => openIncoming(item)} title={item.path}><span class="bl-title">{linkTitle(item.title, item.path)}</span><small>{item.path}{item.lines.length ? ` · строки ${item.lines.join(", ")}` : ""}</small></button></li>{/each}</ul>
           {:else}<p class="bl-note">На этот документ никто не ссылается.</p>{/if}
           <h4 class="bl-group">Этот документ ссылается</h4>
-          {#if backlinks.outgoing.length}<ul>{#each backlinks.outgoing as item (item.line + item.raw + item.kind)}<li>
+          {#if backlinks.outgoing.length}<ul>{#each backlinks.outgoing as item (item.line + item.raw + item.kind)}<li data-menu-kind="link" data-doc-link={item.kind === "wiki" ? undefined : item.raw} data-wiki-link={item.kind === "wiki" ? item.raw : undefined} data-link-text={item.text} data-link-target={item.target}>
             {#if item.broken}<button class="bl-broken" onclick={() => openOutgoing(item)} title="Создать документ «{item.raw}»"><span class="bl-title">{item.text || item.raw}</span><small>ссылка в никуда · строка {item.line}</small></button>
             {:else}<button onclick={() => openOutgoing(item)} title={item.target}><span class="bl-title">{linkTitle(item.target_title, item.target ?? item.raw)}</span><small>{item.target} · строка {item.line}</small></button>{/if}
           </li>{/each}</ul>
@@ -182,7 +213,7 @@
         {/if}
       </div>{/if}
     </footer>
-    {#if outline}<nav class="outline" aria-label="Структура документа"><button class="close" aria-label="Скрыть структуру" onclick={() => outline = false}>×</button>{#each headings as h}<button onclick={() => { source = true; void tick().then(() => scroll(h.line)); }}>{h.label}</button>{/each}</nav>
+    {#if outline}<nav class="outline" aria-label="Структура документа"><button class="close" aria-label="Скрыть структуру" onclick={() => outline = false}>×</button>{#each headings as h (`${h.line}:${h.label}`)}<button data-menu-kind="heading" use:commandAdapter={headingCommands(h)} onclick={() => goToHeading(h.line)}>{h.label}</button>{/each}</nav>
     {:else}<button class="outline-open" title="Показать структуру" onclick={() => outline = true}>☷</button>{/if}
   {/if}
 </section>

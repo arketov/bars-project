@@ -8,13 +8,21 @@
   import WorkspaceDocument from "./WorkspaceDocument.svelte";
   import { confirmClose, startFlushListener } from "./unsaved.svelte";
   import { moved, movedPath } from "./moved.svelte";
+  import { editors } from "./editors.svelte";
+  const TREE_SYNC_MS = 1500;
   let { project, path }: { project: string; path: string } = $props();
+  let main = $state<HTMLElement>();
   const title = $derived(path.split("/").pop() ?? path);
   $effect(() => { document.title = `${title} — bars`; });
   onMount(() => {
     let disposed = false;
     const stops: (() => void)[] = [];
-    stops.push(moved.subscribe(event => { if (event.project === project) path = movedPath(path, event.from, event.to); }));
+    // Дерево для `[[` читается при открытии и затем только по событиям переноса и записи, с паузой на серию событий.
+    let treeTimer: ReturnType<typeof setTimeout> | undefined;
+    const syncTree = () => { clearTimeout(treeTimer); treeTimer = setTimeout(() => void app.syncTree(), TREE_SYNC_MS); };
+    stops.push(() => clearTimeout(treeTimer));
+    stops.push(moved.subscribe(event => { if (event.project === project) { path = movedPath(path, event.from, event.to); syncTree(); } }));
+    stops.push(editors.subscribeSaved(message => { if (message.project === project) syncTree(); }));
     const keep = (stop: () => void) => { if (disposed) stop(); else stops.push(stop); };
     void app.bindDocumentWindow(project);
     void startFlushListener().then(keep).catch((error) => app.flash(String(error), true));
@@ -24,11 +32,14 @@
           if (await confirmClose(project, path)) await documentWindowClose();
         }).then(keep)).catch((error) => app.flash(String(error), true));
     }
-    return () => { disposed = true; stops.forEach((stop) => stop()); };
+    // «Закрыть вкладку» удалённого документа закрывает окно документа.
+    const closeDeleted = () => void documentWindowClose();
+    main?.addEventListener("bars:close-document", closeDeleted);
+    return () => { disposed = true; stops.forEach((stop) => stop()); main?.removeEventListener("bars:close-document", closeDeleted); };
   });
 </script>
 
-<main class="document-window" aria-label={title}>
+<main class="document-window" aria-label={title} bind:this={main}>
   <WorkspaceDocument {project} hit={{ path, title, first_line: 0, last_line: 0 }} />
 </main>
 <UnsavedDialog />

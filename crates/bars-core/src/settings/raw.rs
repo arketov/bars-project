@@ -26,6 +26,15 @@ pub(super) struct UserFile {
     device: Option<DeviceTable>,
     pub(super) chunking: Option<ChunkingOverrides>,
     pub(super) indexing: Option<IndexingOverrides>,
+    mcp: Option<McpTable>,
+    #[serde(flatten)]
+    unknown: Unknown,
+}
+
+/// Таблица `[mcp]`.
+#[derive(Debug, Default, Deserialize)]
+struct McpTable {
+    graph_tools: Option<bool>,
     #[serde(flatten)]
     unknown: Unknown,
 }
@@ -340,6 +349,9 @@ impl UserFile {
         if let Some(indexing) = &self.indexing {
             indexing.apply(&mut settings.indexing);
         }
+        if let Some(value) = self.mcp.as_ref().and_then(|table| table.graph_tools) {
+            settings.mcp.graph_tools = value;
+        }
         settings
     }
 
@@ -370,6 +382,9 @@ impl UserFile {
         }
         if let Some(indexing) = &self.indexing {
             indexing.note_unknown(file, &mut warnings);
+        }
+        if let Some(mcp) = &self.mcp {
+            note_unknown(&mcp.unknown, "mcp", file, &mut warnings);
         }
         warnings
     }

@@ -541,6 +541,40 @@ fn file_filter_is_relative_to_the_docs_root() {
 }
 
 #[test]
+fn file_filter_accepts_the_path_printed_in_results() {
+    let (_dir, index, mut embedder) = project();
+    let mut req = request("поиск");
+    req.files = vec!["docs/search/hybrid.md".into(), ".\\docs\\root.md".into()];
+
+    let response = run(&index, &mut embedder, &req).unwrap();
+
+    let mut found = paths(&response);
+    found.sort_unstable();
+    assert_eq!(found, ["docs/root.md", "docs/search/hybrid.md"]);
+}
+
+#[test]
+fn unknown_scope_errors_say_how_to_fix_them() {
+    let (_dir, index, mut embedder) = project();
+    let mut module = request("поиск");
+    module.modules = vec!["nope".into()];
+    let mut file = request("поиск");
+    file.files = vec!["hybrid.md".into()];
+
+    let Err(SearchError::InvalidParams(message)) = run(&index, &mut embedder, &module) else {
+        panic!("ожидалась ошибка модуля");
+    };
+    assert!(
+        message.contains("есть: ") && message.contains("models"),
+        "{message}"
+    );
+    let Err(SearchError::InvalidParams(message)) = run(&index, &mut embedder, &file) else {
+        panic!("ожидалась ошибка файла");
+    };
+    assert!(message.contains("возможно: search/hybrid.md"), "{message}");
+}
+
+#[test]
 fn modules_and_files_are_united() {
     let (_dir, index, mut embedder) = project();
     let mut req = request("поиск");

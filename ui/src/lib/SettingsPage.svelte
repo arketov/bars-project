@@ -365,6 +365,15 @@
           </div>
         </div>
 
+        {#if draft}
+          <div class="group">
+            <div class="ghead">
+              <div class="grow"><h2>Графовые инструменты</h2><p>Шесть инструментов GraphRAG (<span class="mono">bars_relations</span>, <span class="mono">bars_paths</span>, <span class="mono">bars_impact</span>, <span class="mono">bars_context</span>, <span class="mono">bars_explore</span>, <span class="mono">bars_graph</span>) по умолчанию скрыты от агентов: их качество ещё не принято, а описания занимают много места в контексте. Поиск с режимами <span class="mono">mix</span> и <span class="mono">graph</span> остаётся. Выбор действует для новых сессий агента: уже запущенные клиенты список не обновляют.</p></div>
+              <button class="switch" class:on={draft.mcp.graph_tools} role="switch" aria-checked={draft.mcp.graph_tools} aria-label="Показывать агентам графовые инструменты" onclick={() => (draft.mcp.graph_tools = !draft.mcp.graph_tools)}></button>
+            </div>
+          </div>
+        {/if}
+
         <div class="group">
           <div class="ghead">
             <div class="grow"><h2>Инструкция для агента</h2><p>Передайте агенту — он подключит bars сам.</p></div>

@@ -4,7 +4,7 @@
   import { onMount, untrack } from "svelte";
   import { Annotation, Compartment, EditorState, StateEffect, StateField, Transaction } from "@codemirror/state";
   import { Decoration, EditorView, keymap, type DecorationSet } from "@codemirror/view";
-  import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+  import { defaultKeymap, history, historyKeymap, redo, redoDepth, selectAll, undo, undoDepth } from "@codemirror/commands";
   import { autocompletion, closeBrackets, closeBracketsKeymap, startCompletion, type CompletionContext } from "@codemirror/autocomplete";
   import { markdown, markdownKeymap, markdownLanguage } from "@codemirror/lang-markdown";
   import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
@@ -161,10 +161,37 @@
     return linkResult(context, before, options, 1000);
   }
 
-  const adapter = Object.fromEntries(Object.keys(editorCommands).map((id) => [id, {
-    run: () => { run(id); },
-    reason: () => (readonly ? "Документ только для чтения" : undefined),
-  }]));
+  const READONLY = "Документ только для чтения";
+  const NO_SELECTION = "Нет выделенного текста";
+  const selected = () => view ? view.state.selection.ranges.filter((range) => !range.empty).map((range) => view!.state.sliceDoc(range.from, range.to)).join("\n") : "";
+  // Правка текста для меню документа (ISS-57): сочетания остаются штатными, команды лишь дублируют их пунктами.
+  const textCommands = {
+    "text.undo": { reason: () => readonly ? READONLY : view && undoDepth(view.state) ? undefined : "Нечего отменять", run: () => { if (view) { undo(view); view.focus(); } } },
+    "text.redo": { reason: () => readonly ? READONLY : view && redoDepth(view.state) ? undefined : "Нечего повторять", run: () => { if (view) { redo(view); view.focus(); } } },
+    "text.cut": { reason: () => readonly ? READONLY : selected() ? undefined : NO_SELECTION, run: async () => {
+      const text = selected();
+      if (!view || !text) return;
+      await navigator.clipboard.writeText(text);
+      view.dispatch(view.state.replaceSelection(""), { userEvent: "delete.cut", scrollIntoView: true });
+      view.focus();
+    } },
+    "text.copy": { reason: () => selected() ? undefined : NO_SELECTION, run: async () => { await navigator.clipboard.writeText(selected()); view?.focus(); } },
+    "text.paste": { reason: () => readonly ? READONLY : undefined, run: async () => {
+      if (!view) return;
+      let text: string;
+      try { text = await navigator.clipboard.readText(); } catch { throw new Error("Не удалось прочитать буфер обмена — вставьте клавишами Ctrl+V"); }
+      view.dispatch({ ...view.state.replaceSelection(text), userEvent: "input.paste", scrollIntoView: true });
+      view.focus();
+    } },
+    "text.selectAll": { reason: () => undefined, run: () => { if (view) { selectAll(view); view.focus(); } } },
+  };
+  const adapter = {
+    ...Object.fromEntries(Object.keys(editorCommands).map((id) => [id, {
+      run: () => { run(id); },
+      reason: () => (readonly ? "Документ только для чтения" : undefined),
+    }])),
+    ...textCommands,
+  };
 
   function showHit(next: { first: number; last: number; column?: number; length?: number } | null): void {
     if (!view) return;

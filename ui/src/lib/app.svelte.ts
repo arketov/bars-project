@@ -23,6 +23,8 @@ import {
   type ReadOutput,
   type SearchHit,
   type SearchOutput,
+  type SettingsDoc,
+  type SettingsOutput,
   type StatusOutput,
   type TreeOutput,
 } from "./types";
@@ -37,7 +39,7 @@ export interface ViewedDocument {
   missing: boolean;
 }
 
-export type DocumentReference = Pick<SearchHit, "path" | "title" | "first_line" | "last_line"> & { column?: number; length?: number; expectedRevision?: string };
+export type DocumentReference = Pick<SearchHit, "path" | "title" | "first_line" | "last_line"> & { column?: number; length?: number; expectedRevision?: string; /** Открыт из выдачи или «В тексте»: только такой вкладке уместно «Обновить выдачу». */ fromSearch?: boolean };
 
 const PROJECT_KEY = "bars-project";
 const POLL_MS = 1000;
@@ -113,7 +115,8 @@ class App {
   activeDocument = $state<string | null>(null);
   /** Число результатов на этот запрос; `null` — по умолчанию из настроек. */
   count = $state<number | null>(null);
-  defaultCount = $state(5);
+  /** Настройки поиска из settings.toml: умолчание «Результатов» и их предел; `null` — ещё не прочитаны. */
+  searchSettings = $state<{ results: number; resultsReranked: number; maxResults: number; rerank: boolean } | null>(null);
   results = $state<SearchOutput | null>(null);
   searchedQuery = $state("");
   searching = $state(false);
@@ -153,6 +156,9 @@ class App {
   #auditNoticeAttempt = 0;
   #refreshing = false;
   #refreshAgain = false;
+  #refreshWaiters: Array<() => void> = [];
+  /** Идёт ручная проверка («Проверить сейчас»): кнопки показывают «Проверяем…» до конца обновления. */
+  checking = $state(false);
   #lastHiddenPoll = 0;
   #treeSignature = "";
   #treeSyncing = false;
@@ -249,8 +255,29 @@ class App {
     return searchScope(this.tree, this.selected);
   }
 
+  /** Умолчание «Результатов» с rerank или без него (Т-18); до чтения настроек — 5. */
+  get defaultCount(): number {
+    const s = this.searchSettings;
+    return s ? (s.rerank ? s.resultsReranked : s.results) : 5;
+  }
+
+  /** Верхний предел степпера — `search.max_results`; до чтения настроек — 20. */
+  get maxCount(): number {
+    return this.searchSettings?.maxResults ?? 20;
+  }
+
   get shownCount(): number {
-    return this.count ?? this.results?.applied.results ?? this.defaultCount;
+    return Math.min(this.count ?? this.results?.applied.results ?? this.defaultCount, this.maxCount);
+  }
+
+  applySearchSettings(doc: SettingsDoc): void {
+    this.searchSettings = { results: doc.search.results, resultsReranked: doc.search.results_reranked, maxResults: doc.search.max_results, rerank: doc.rerank.enabled };
+  }
+
+  async loadSearchSettings(): Promise<void> {
+    try {
+      this.applySearchSettings((await call<SettingsOutput>("settings_get")).settings);
+    } catch { /* остаются умолчания; настройки перечитаются при открытии экрана настроек */ }
   }
 
   /** Проекты, которым нужна переиндексация (Т-25). */
@@ -275,6 +302,7 @@ class App {
     }
     if (this.#timer || this.documentWindow) return;
     document.addEventListener("visibilitychange", this.#visible);
+    void this.loadSearchSettings();
     void this.refresh(true);
     this.#timer = setInterval(() => void this.refresh(false), POLL_MS);
   }
@@ -359,7 +387,12 @@ class App {
       }
     } finally {
       this.#refreshing = false;
-      if (this.#refreshAgain) { this.#refreshAgain = false; void this.refresh(true); }
+      if (this.#refreshAgain) {
+        this.#refreshAgain = false;
+        const waiters = this.#refreshWaiters;
+        this.#refreshWaiters = [];
+        void this.refresh(true).finally(() => waiters.forEach(resolve => resolve()));
+      }
     }
   }
 
@@ -531,6 +564,12 @@ class App {
       this.searchUnsaved = unsaved.map(b => ({ path: b.path, reason: b.message || "Правки не записаны" }));
       this.searchedQuery = query;
       textTask = this.textSearch.search(textParams);
+      if (project.state === "reindex_required") {
+        // Поиск по смыслу ждёт согласия на переиндексацию (error-states.md): воркеру не звоним, «В тексте» читает файлы.
+        this.#notifications.resolve(`search:${project.path}`);
+        this.publishNotifications();
+        return;
+      }
       const { modules, files } = semanticScope;
       const output = await call<SearchOutput|GraphSearchOutput>(mode==='hybrid'?"search":"graph_search", {
         cwd: project.path,
@@ -563,7 +602,8 @@ class App {
       this.displayed = null;
       this.graphSearch = null;
       this.searchError = error instanceof BarsError ? error : new BarsError(String(error));
-      if (this.searchError.kind !== "model_loading") {
+      // `reindex_required` — гонка с обновлением списка проектов: баннер переиндексации появится сам, уведомление не нужно.
+      if (this.searchError.kind !== "model_loading" && this.searchError.kind !== "reindex_required") {
         this.#notifications.error(`search:${project.path}`, `Ошибка поиска · ${project.name}`, this.searchError.message);
         this.publishNotifications();
       }
@@ -609,6 +649,16 @@ class App {
   }
 
   /** «Искать по всему проекту» и «Порог N для этого запроса» из пустой выдачи. */
+  /** «Повторить» на экране ошибки модели: воркер снимает паузу перед повтором загрузки (ISS-71), затем поиск. */
+  async retryModelSearch(): Promise<void> {
+    try {
+      await call("model_retry", {});
+    } catch {
+      // Без сброса поиск всё равно повторяется: воркер сам вернёт ошибку.
+    }
+    await this.search();
+  }
+
   async searchWhole(): Promise<void> {
     this.clearSelection();
     await this.search();
@@ -797,11 +847,15 @@ class App {
   }
 
   async reindexCheck(path: string): Promise<void> {
+    if (this.checking) return;
+    this.checking = true;
     try {
       await call("reindex", { cwd: path, project: path });
       await this.refresh(true);
     } catch (error) {
       this.flash(error instanceof Error ? error.message : String(error), true);
+    } finally {
+      this.checking = false;
     }
   }
 
@@ -846,11 +900,15 @@ class App {
 
   /** «Проверить сейчас»: ставит на проверку все проекты, пропавшие возвращаются в работу, если папка на месте. */
   async recheck(): Promise<void> {
+    if (this.checking) return;
+    this.checking = true;
     try {
       await call("check_all");
       await this.refresh(true);
     } catch (error) {
       this.flash(error instanceof Error ? error.message : String(error), true);
+    } finally {
+      this.checking = false;
     }
   }
 
@@ -909,6 +967,14 @@ class App {
     this.navigationVersion++;
     this.view = "indexing";
     void this.loadIndexingHistory();
+  }
+
+  /** Счётчик запросов открыть меню проектов в боковой панели (пункт «Проекты» трея, ISS-43). */
+  projectsMenuRequest = $state(0);
+
+  openProjectsMenu(): void {
+    this.openSearch();
+    this.projectsMenuRequest++;
   }
 
   openSearch(): void {

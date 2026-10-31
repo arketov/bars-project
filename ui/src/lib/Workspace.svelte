@@ -140,7 +140,11 @@
     if (kind === "topics") app.topicsOpen = true;
     if (kind === "audits") app.auditsOpen = true;
     let panel = api.getPanel(kind);
-    if (!panel) panel = api.addPanel({ id: kind, component: "workspace", title: panelTitles[kind], params: { kind }, position: api.getPanel("search") ? { referencePanel: "search", direction: "within" } : api.groups[0] ? { referenceGroup: api.groups[0], direction: "within" } : undefined });
+    if (!panel) {
+      // Новая служебная вкладка — в центре (Т-43, ISS-44), а не рядом с «Поиском», даже если он перенесён вправо.
+      const target = zones.serviceGroup() ?? api.groups[0];
+      panel = api.addPanel({ id: kind, component: "workspace", title: panelTitles[kind], params: { kind }, position: target ? { referenceGroup: target, direction: "within" } : undefined });
+    }
     panel.api.setActive();
     menu = false;
   }
@@ -229,12 +233,24 @@
       // HTML5 drag-and-drop в WebView2 перехватывает обработчик файлов Tauri (ISS-21).
       dndStrategy: "pointer",
       closeEmptyGroups: true,
+      // 3.2.5: полосы 48 px и превью задаёт приложение; корневая полоса (без «center») не участвует.
+      dropPositionResolver: { resolve: ({ x, y, width, height, zones: accepted, event }) => {
+        if (!accepted.has("center") || !zones) return null;
+        const under = document.elementFromPoint(event.clientX, event.clientY);
+        const group = under && api.groups.find(g => g.element.contains(under));
+        if (!group) return null;
+        const position = zones.cell(group, x, y, width, height);
+        if (position === "right") host.style.setProperty("--zone-preview", `${zones.previewWidth()}px`);
+        return { position };
+      } },
       defaultTabComponent: "workspace-tab",
       createTabComponent: () => {
         const tab = new DefaultTab();
         let stopDot: (() => void) | undefined;
         return { element: tab.element, init(params) {
           tab.init(params); tab.element.dataset.workspacePanel = params.api.id;
+          // Вкладка служебной панели — цель без документа; у вкладки документа ниже вид «file».
+          tab.element.dataset.menuKind = "panel-tab"; tab.element.dataset.menuPlace = "tab";
           // Средняя кнопка повторяет крестик, включая проверку правок и закрытие списка переполнения.
           tab.element.addEventListener("mousedown", event => {
             if (event.button === 1) event.preventDefault();
@@ -247,6 +263,7 @@
           if (params.params.kind !== "document") return;
           const path: string = params.params.hit.path;
           tab.element.dataset.documentPath = path;
+          tab.element.dataset.menuKind = "file"; tab.element.dataset.menuPlace = "tab";
           // Т-38: цветная точка вкладки документа — цвет документа или его папки.
           const dot = document.createElement("span");
           dot.className = "tab-color"; dot.setAttribute("aria-hidden", "true");
@@ -269,7 +286,7 @@
         const model = $state<PanelModel>({ params: { kind: "search" }, foreground: false, attach });
         let id: string;
         return { element,
-          init: ({ params, api: panel }) => { id = panel.id; models.set(id, model); model.params = params as unknown as PanelParams; model.initial = incoming; model.foreground = id === foreground; component = mount(WorkspacePanel, { target: element, props: { model } }); },
+          init: ({ params, api: panel }) => { id = panel.id; element.addEventListener("bars:close-document", () => panel.close()); models.set(id, model); model.params = params as unknown as PanelParams; model.initial = incoming; model.foreground = id === foreground; component = mount(WorkspacePanel, { target: element, props: { model } }); },
           update: ({ params }) => { model.params = params as unknown as PanelParams; model.initial = incoming; },
           dispose: () => { models.delete(id); if (component) void unmount(component); },
         };
@@ -292,6 +309,13 @@
       if (app.activeDocument) app.activeDocument = movedPath(app.activeDocument, event.from, event.to);
       persist();
     });
+    const stopTrashed = moved.subscribeTrashed(event => {
+      if (event.project !== current) return;
+      for (const panel of [...api.panels]) {
+        const params = panel.params as PanelParams;
+        if (params.kind === "document" && params.hit && event.closed.includes(params.hit.path)) panel.api.close();
+      }
+    });
     const subscriptions = [api.onDidRemoveGroup(group => { if (!restoring) zones.removed(group); }), api.onDidLayoutChange(() => {
       if (!restoring && !normalizing) {
         normalizing = true;
@@ -310,7 +334,7 @@
     })];
     ready = true;
     void tick().then(() => { if (!disposed) commands = workspaceCommands({ api, host, open: navigate, search: () => globalSearch.open(), reset, palette, resize: resizeGroup }); });
-    return () => { disposed = true; stopMoved(); stopKeys?.(); stopFlush?.(); commands?.dispose(); palette.close(false); globalSearch.close(false); ready = false; persist(); subscriptions.forEach(s => s.dispose()); api.dispose(); app.indexingOpen = false; };
+    return () => { disposed = true; stopMoved(); stopTrashed(); stopKeys?.(); stopFlush?.(); commands?.dispose(); palette.close(false); globalSearch.close(false); ready = false; persist(); subscriptions.forEach(s => s.dispose()); api.dispose(); app.indexingOpen = false; };
   });
 </script>
 
@@ -406,6 +430,13 @@
     --dv-tab-font-size: 12px; --dv-drag-over-background-color: var(--accent-soft); --dv-drag-over-border-color: var(--accent);
   }
   .dock :global(.dv-tab) { font-style: italic; }
+  /* Превью переноса: размер справа равен будущей зоне, подпись — место открытия (Т-43). */
+  .dock :global(.dv-drop-target-selection.dv-drop-target-right) { left: auto !important; right: 0; width: var(--zone-preview, 50%) !important; }
+  .dock :global(.dv-drop-target-selection)::after { position: absolute; inset: 0; display: grid; place-items: center; color: var(--accent-text); font-size: 12px; font-style: italic; pointer-events: none; }
+  .dock :global(.dv-drop-target-selection.dv-drop-target-right)::after { content: "Откроется справа"; }
+  .dock :global(.dv-drop-target-selection.dv-drop-target-left)::after { content: "Откроется слева"; }
+  .dock :global(.dv-drop-target-selection.dv-drop-target-top)::after { content: "Откроется сверху"; }
+  .dock :global(.dv-drop-target-selection.dv-drop-target-bottom)::after { content: "Откроется снизу"; }
   .narrow-documents { display: none; }
   @media (max-width: 1100px) {
     /* Overlay Dockview содержит contain:layout paint: расширять нужно его, а не вложенный документ. */

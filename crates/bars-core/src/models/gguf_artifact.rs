@@ -104,7 +104,7 @@ pub(super) fn percent(dir: &Path, id: &str) -> Option<u8> {
 }
 fn verify(a: &Artifact, path: &Path) -> Result<(), EmbedError> {
     if signature(a, path).is_none() {
-        return Err(EmbedError::Load("GGUF: неверная длина файла".into()));
+        return Err(EmbedError::Files("GGUF: неверная длина файла".into()));
     }
     let mut file = fs::File::open(path).map_err(load_error)?;
     let mut hash = Sha256::new();
@@ -117,7 +117,7 @@ fn verify(a: &Artifact, path: &Path) -> Result<(), EmbedError> {
         hash.update(&buffer[..n]);
     }
     if format!("{:x}", hash.finalize()) != a.sha256 {
-        return Err(EmbedError::Load("GGUF: SHA-256 не совпал".into()));
+        return Err(EmbedError::Files("GGUF: SHA-256 не совпал".into()));
     }
     Ok(())
 }
@@ -154,7 +154,9 @@ fn mark(a: &Artifact, dir: &Path, path: &Path) -> Result<(), EmbedError> {
 pub(super) fn ensure(dir: &Path, id: &str) -> Result<PathBuf, EmbedError> {
     let a = artifact(id).ok_or_else(|| load_error("неизвестная GGUF-модель"))?;
     if ready(a, dir) {
-        return a.path(dir).ok_or_else(|| load_error("GGUF исчез из кэша"));
+        return a
+            .path(dir)
+            .ok_or_else(|| EmbedError::Files("GGUF исчез из кэша".into()));
     }
     let path = if let Some(path) = a.path(dir) {
         path
@@ -167,7 +169,7 @@ pub(super) fn ensure(dir: &Path, id: &str) -> Result<PathBuf, EmbedError> {
             .map_err(load_error)?
             .repo(a.repo())
             .get(a.file)
-            .map_err(load_error)?
+            .map_err(super::failure::hub_embed_error)?
     };
     // Даже полный файл не считается готовым до проверки опубликованного хеша.
     let before = signature(a, &path);

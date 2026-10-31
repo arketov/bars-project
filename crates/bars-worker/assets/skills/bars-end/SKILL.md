@@ -72,7 +72,7 @@ Keep the scope to what the session touched and its stale repeats. A full audit o
 
 ## 5. Write the handoff
 
-Write or update `handoff.md` by `bars-session-log`: Done, Not done, Difficulties, Next. In Difficulties, list the nuances of the session and how each was solved, with a link to the document where the lasting knowledge now lives. At most a screen.
+Write or update `handoff.md` by `bars-session-log`: Done, Not done, Difficulties, Next, headed in the user's language (in Russian: «Сделано», «Не сделано», «Сложности», «Дальше»), with a link to the previous handoff when the session continues a topic. In Difficulties, list the nuances of the session and how each was solved, with a link to the document where the lasting knowledge now lives. At most a screen.
 
 ## 6. Report to the user
 

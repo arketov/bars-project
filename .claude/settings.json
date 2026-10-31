@@ -2,7 +2,7 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Read|Grep|Glob|Bash|PowerShell|mcp__bars__.*|mcp__semble__.*|mcp__serena__.*",
+        "matcher": "Read|Grep|Glob|Bash|PowerShell|mcp__semble__.*|mcp__serena__.*",
         "hooks": [
           {
             "type": "command",

@@ -744,6 +744,34 @@ pub fn trash_entry(project: &Path, docs_root: &str, path: &str) -> Result<(), Tr
     recycle(&plain(&real)).map_err(TreeError::TrashUnavailable)
 }
 
+/// Что уйдёт в корзину: документы узла (для файла — он сам) для подсчёта входящих ссылок.
+pub struct DeletePlan {
+    pub folder: bool,
+    /// Документы удаляемого набора, пути от корня проекта.
+    pub documents: Vec<String>,
+}
+
+/// Допуск и состав набора до удаления; на диске ничего не меняет.
+pub fn plan_delete(project: &Path, docs_root: &str, path: &str) -> Result<DeletePlan, TreeError> {
+    let roots = roots(project, docs_root)?;
+    let (real, folder) = existing_entry(&roots, path)?;
+    let own = roots.project_path(&real);
+    let documents = if folder {
+        let inside = format!("{own}/");
+        let mut files: Vec<String> = read_tree(project, docs_root)?
+            .files
+            .into_iter()
+            .map(|file| file.path)
+            .filter(|file| file.starts_with(&inside))
+            .collect();
+        files.sort();
+        files
+    } else {
+        vec![own]
+    };
+    Ok(DeletePlan { folder, documents })
+}
+
 #[cfg(not(windows))]
 fn recycle(path: &Path) -> Result<(), String> {
     trash::delete(path).map_err(|error| error.to_string())

@@ -8,12 +8,17 @@
   import { appearance } from "../appearance.svelte";
   import { documentColor, keyOf } from "../appearance";
   import type { GraphStatus } from "../graph";
-  import { graphDataLabel, completenessLabels, jobLabels } from "../graph";
+  import { graphDataLabel, completenessLabels, jobLabels, roleLabels } from "../graph";
   import { BarsError } from "../types";
   import { draw, layoutLines, lineDistance, moduleColors, radiusOf, readPalette, toScreen, toWorld, type Camera, type Palette, type Scene, type Target } from "./draw";
   import { DEFAULT_FORCES, Layout, type Forces, type PNode } from "./layout";
   import { EDGE_KINDS, KIND_TITLE, brightnessOf, drawStrength, springOf, widthOf, type EdgeKind, type GEdge, type GNode, type Mode, type SliceKind } from "./model";
-  import { graphStatus, loadPhysical, loadQuery, toggleGraphBuild } from "./physical-api";
+  import { graphStatus, loadPhysical, loadQuery, semanticQuery, startGraphBuild, stopGraphBuild } from "./physical-api";
+  import { CONTEXT_BUDGETS, DEFAULT_BUDGET, PROFILES, auditRequests, contextRequest, digestAudit, digestContext, digestImpact, digestMeaningPaths, digestTopics, emptyImpact, entitiesRequest, entityRoots, impactRequest, meaningPathRequest, pathDocuments, semanticError, topicsRequest, type AuditPass, type AuditSection, type AuditView, type ContextView, type Grouping, type ImpactEntry, type ImpactView, type MeaningPathView, type Proof, type Scope, type SemanticKind, type TaskProfile, type Topic, type TopicsView } from "./semantic";
+  import { GRAPH_ACTIONS, NO_SELECTION_TEXT, actionState, buildControls, type ActionId } from "./entry";
+  import { LOCAL_LIMITS, LOCAL_MAX_DEPTH, PATH_MAX_HOPS, adjacency, localGraph, mapPaths, type MapPath } from "./navigation";
+  import { linkTitle, loadLinks, type IncomingLink } from "../document-links";
+  import { graphScope } from "../graph-scope.svelte";
   import { FORCE_RANGE, defaultSettings, loadSettings, saveSettings, type PanelKind, type PanelSettings } from "./settings";
   import { INITIAL_LIMITS, MAX_LIMITS, PORTION, SliceStore, emptySlice, type Limits, type Slice } from "./slice";
   import { DEFAULT_DEPTH, MAX_DEPTH, QUERY_BUDGET, QUERY_MAX, SEARCH_MODE, acceptQuerySlice, queryRequest, fallbackText, shapeQuery, type QueryBuild, type QueryInfo, type QueryInput, type RetrievalKind, type ScoreKind } from "./query";
@@ -57,6 +62,8 @@
   let queryLoading = $state(false);
   let queryRequestKey = "";
   let loaded = $state(false);
+  /** Вкладка уже открылась на объекте (или решила не открываться): повторно выбор по активному документу не выставляется. */
+  let openedOnObject = false;
   let loading = $state(false);
   let loadError = $state("");
   let loadErrorKind = $state("");
@@ -79,7 +86,7 @@
   let findText = $state("");
   let legendOpen = $state(false);
   /** Открытое меню: настройки раскладки. */
-  let popover = $state<"settings" | "more" | null>(null);
+  let popover = $state<"settings" | "more" | "analysis" | null>(null);
   let notice = $state("");
   let rendererError = $state("");
   let revision = $state(0);
@@ -117,30 +124,56 @@
     const n = base.nodes.find((x) => x.kind === "document" && x.path === path && base.visibleDocs.has(x.index));
     return n ? n.index : null;
   });
-  /** Мини-панель показывает локальный граф документа; вид запроса после поиска важнее. */
-  const isLocal = () => mini && !query && focusIndex !== null;
-
-  /** Документ и его соседи по видимым связям режима на глубину `depth`; ссылки — в обе стороны. */
-  function localDocs(): Set<number> {
-    const set = new Set<number>([focusIndex!]);
-    let frontier = new Set<number>(set);
-    for (let step = 0; step < settings.depth && frontier.size; step++) {
-      const next = new Set<number>();
-      for (const e of slice.edges) {
-        if (!kinds[e.kind] || e.kind === "chunk_similarity" || !passes(e)) continue;
-        if (frontier.has(e.a) && !set.has(e.b) && slice.visibleDocs.has(e.b)) next.add(e.b);
-        if (frontier.has(e.b) && !set.has(e.a) && slice.visibleDocs.has(e.a)) next.add(e.a);
-      }
-      for (const index of next) set.add(index);
-      frontier = next;
-    }
-    return set;
+  /** Локальный вид полной панели («Что рядом», 2.3.6): центр, глубина 1–3 и ступень пределов 200/800 → 350/1400 → 500/2000. */
+  let localView = $state<{ center: number; depth: number; step: number } | null>(null);
+  /** Наложения действий — путь по карте и входящие ссылки: карта не двигается, выделенное подписано, остальное приглушено. */
+  let pathView = $state<{ from: number; to: number | null; directed: boolean; index: number } | null>(null);
+  let inboundView = $state<{ center: number; state: "loading" | "ready" | "error"; sources: IncomingLink[]; known: boolean; error: string } | null>(null);
+  let inboundEpoch = 0;
+  /** Действие смыслового слоя (2.3.8): влияние, смысловой путь, контекст, обзор тем, аудит. Накладывается на карту, как путь и входящие; одно за раз. */
+  interface SemanticState {
+    kind: SemanticKind;
+    /** Документ действия (влияние) или начало пути. */
+    center: number | null;
+    to: number | null;
+    state: "form" | "loading" | "ready" | "error";
+    error: string;
+    /** Вариант смыслового пути. */
+    index: number;
+    structural: boolean;
+    grouping: Grouping;
+    /** Выделенная тема (номер) или все темы. */
+    topic: number | null;
+    section: AuditSection["id"];
+    impact?: ImpactView;
+    meaning?: MeaningPathView;
+    context?: ContextView;
+    topics?: TopicsView;
+    audit?: AuditView;
   }
+  let sem = $state.raw<SemanticState | null>(null);
+  let semEpoch = 0;
+  let ctxQuery = $state("");
+  let ctxProfile = $state<TaskProfile>("implementation");
+  let ctxBudget = $state(DEFAULT_BUDGET);
+  let ctxSubgraph = $state(false);
+  /** Подграф (2.3.7): узлы, отмеченные для «Искать в подграфе»; Shift+щелчок, «В подграф» и «Выбрать весь локальный граф». */
+  let marks = $state.raw<ReadonlySet<number>>(new Set());
+
+  const localCenter = () => (mini ? focusIndex : (localView?.center ?? null));
+  const localDepth = () => (mini ? settings.depth : (localView?.depth ?? 1));
+  /** Локальный граф: мини-панель — документ открытой вкладки, полная панель — выбранное действие; вид запроса после поиска важнее. */
+  const isLocal = () => !query && localCenter() !== null;
+
+  /** Связи между документами в текущем режиме: основа локального графа и пути по карте. */
+  const navEdges = $derived(slice.edges.filter((e) => kinds[e.kind] && (e.kind === "markdown_link" || e.kind === "document_similarity") && passes(e) && slice.visibleDocs.has(e.a) && slice.visibleDocs.has(e.b)));
+  /** Документ и его соседи по видимым связям режима на глубину `depth`; ссылки — в обе стороны. У мини-панели предела нет. */
+  const localShape = $derived.by(() => (isLocal() ? localGraph(adjacency(navEdges), localCenter()!, localDepth(), mini ? undefined : LOCAL_LIMITS[localView!.step]) : null));
 
   function visibleNodes() {
     if (queryShape) return queryShape.nodes.map((index) => slice.nodes[index]);
-    if (isLocal()) {
-      const docs = localDocs();
+    if (localShape) {
+      const docs = localShape.depthOf;
       return slice.nodes.filter((n) => n.kind === "document" && docs.has(n.index));
     }
     const nodes = slice.nodes.filter((n) => n.kind === "document" && slice.visibleDocs.has(n.index));
@@ -218,8 +251,15 @@
     }
   }
 
+  /** Запоминает общий вид (места узлов, камеру, выбор): к нему возвращает «Общий вид». Уже запомненный не перезаписывается. */
+  function saveGeneral() {
+    if (!generalState && layout) generalState = { positions: layout.save(), camera: { ...cam }, w: size.w, h: size.h, selection: selected ? { ...selected } : null, expanded: { ...expanded }, stopped };
+  }
+
   function enterQuery() {
-    if (!query && !generalState && layout) generalState = { positions: layout.save(), camera: { ...cam }, w: size.w, h: size.h, selection: selected ? { ...selected } : null, expanded: { ...expanded }, stopped };
+    if (!query) saveGeneral();
+    localView = null;
+    dropOverlay();
     expanded = {};
     packageIndex = app.graphPackage;
     app.graphPackage = null;
@@ -325,7 +365,7 @@
 
   function visibleEdges(nodes = visibleNodes()): GEdge[] {
     const set = new Set(nodes.map((n) => n.index));
-    return slice.edges.filter((e) => kinds[e.kind] && passes(e) && !(mini && e.kind === "chunk_similarity") && set.has(e.a) && set.has(e.b) && (!queryShape?.edgeIds || e.kind === "query_result" || queryShape.edgeIds.has(e.id)));
+    return slice.edges.filter((e) => kinds[e.kind] && passes(e) && !(mini && e.kind === "chunk_similarity") && set.has(e.a) && set.has(e.b) && (!queryShape?.edgeIds || e.kind === "query_result" || queryShape.edgeIds.has(e.id)) && (!localShape || localShape.edgeIds.has(e.id)));
   }
 
   /** `fresh` — переложить с нуля (смена режима или первая загрузка): расположение определяют только текущие связи. */
@@ -460,7 +500,7 @@
     const groups = Object.entries(expanded).map(([o, shown]) => ({ owner: Number(o), shown, total: slice.nodes[Number(o)]?.chunks ?? shown }));
     const scene: Scene = {
       w: size.w, h: size.h, dpr: window.devicePixelRatio || 1, cam, nodes: layout.nodes, links: layout.links, palette, kinds,
-      highlighted: packageEdges(), selected, hovered, related: related(), marked: markedNodes(), groups, mini, modules: moduleMap, assigned, focus: isLocal() ? focusIndex : null,
+      highlighted: packageEdges(), selected, hovered, related: related(), marked: markedNodes(), groups, mini, modules: moduleMap, assigned, focus: isLocal() ? localCenter() : null, overlay, subgraph: marks,
     };
     draw(ctx, scene);
   }
@@ -474,7 +514,7 @@
     const raw = layout.bounds();
     if (!raw) return;
     // Локальный граф: документ в центре карты, как в Obsidian; границы симметричны вокруг него.
-    const centre = isLocal() && focusIndex !== null ? layout.get(focusIndex) : undefined;
+    const centre = isLocal() && localCenter() !== null ? layout.get(localCenter()!) : undefined;
     const b = centre
       ? (() => {
           const rx = Math.max(centre.x - raw.x0, raw.x1 - centre.x);
@@ -512,7 +552,7 @@
   }
 
   async function toggleExpand(index: number) {
-    if (mini || query) return;
+    if (mini || query || localView) return;
     const n = slice.nodes[index];
     if (n.kind !== "document" || !n.chunks) return;
     if (expanded[index]) {
@@ -581,6 +621,11 @@
   const atMaximum = $derived(slice.applied.max_documents >= MAX_LIMITS.max_documents && slice.applied.max_edges >= MAX_LIMITS.max_edges);
 
   function select(target: Target) {
+    // Пока выбирается вторая вершина пути, щелчок по документу выбирает её, а пустое место выбор не снимает.
+    if (pathView && pathView.to === null) {
+      if (target?.type === "node") pickPathEnd(target.index);
+      return;
+    }
     selected = target;
     if (target?.type === "node") notice = "";
     schedule();
@@ -617,7 +662,7 @@
     return edge ? { type: "edge", id: edge.id } : null;
   }
 
-  let drag: { mode: "pan" | "node"; index: number; sx: number; sy: number; cam: Camera; moved: boolean; target: Target } | null = null;
+  let drag: { mode: "pan" | "node"; index: number; sx: number; sy: number; cam: Camera; moved: boolean; target: Target; shift: boolean } | null = null;
 
   function onDown(event: PointerEvent) {
     if (event.button !== 0 || !canvas) return;
@@ -625,7 +670,7 @@
     canvas.focus({ preventScroll: true });
     const [sx, sy] = pointer(event);
     const target = hit(sx, sy);
-    drag = target?.type === "node" ? { mode: "node", index: target.index, sx, sy, cam, moved: false, target } : { mode: "pan", index: -1, sx, sy, cam, moved: false, target };
+    drag = target?.type === "node" ? { mode: "node", index: target.index, sx, sy, cam, moved: false, target, shift: event.shiftKey } : { mode: "pan", index: -1, sx, sy, cam, moved: false, target, shift: event.shiftKey };
   }
 
   function onMove(event: PointerEvent) {
@@ -666,7 +711,10 @@
     const d = drag;
     drag = null;
     if (d.mode === "node") layout?.dragEnd(d.index);
-    if (!d.moved) select(d.target);
+    if (!d.moved) {
+      if (d.shift && !mini && d.target?.type === "node") toggleMark(d.target.index);
+      else select(d.target);
+    }
     schedule();
   }
 
@@ -721,11 +769,25 @@
       }
       const next = neighbourInDirection(selected.index, ...arrows[event.key]);
       if (next !== null) select({ type: "node", index: next });
-    } else if (event.key === "Escape") select(null);
+    } else if (event.key === "Escape") {
+      if (pathView && pathView.to === null) dropOverlay();
+      else select(null);
+    } else if (!mini && event.code === "KeyL" && selectedNode?.kind === "document") startLocal(selectedNode.index);
+    else if (!mini && event.code === "KeyP" && selectedNode?.kind === "document") startPath(selectedNode.index);
+    else if (!mini && event.code === "KeyI" && selectedNode?.kind === "document") startImpact(selectedNode.index);
+    else if (!mini && pathView && !sem && event.code === "BracketLeft") shiftVariant(-1);
+    else if (!mini && pathView && !sem && event.code === "BracketRight") shiftVariant(1);
+    else if (!mini && sem?.kind === "meaning-path" && event.code === "BracketLeft") shiftMeaning(-1);
+    else if (!mini && sem?.kind === "meaning-path" && event.code === "BracketRight") shiftMeaning(1);
+    else if (!mini && event.key === "Backspace" && (localView || pathView || inboundView || sem)) {
+      event.preventDefault();
+      goGeneral();
+    }
     else if (event.key === "Enter" && selected?.type === "node") void toggleExpand(selected.index);
     else if (event.key === " " && selected?.type === "node") {
       event.preventDefault();
-      pin(selected.index);
+      if (event.shiftKey && !mini) toggleMark(selected.index);
+      else pin(selected.index);
     } else if (event.key.toLowerCase() === "m" || event.key.toLowerCase() === "ь") cycleMode();
     else if (event.key === "+" || event.key === "=") zoomAt(1.25);
     else if (event.key === "-") zoomAt(0.8);
@@ -733,6 +795,402 @@
     else return;
     event.stopPropagation();
   }
+
+  // ---------- Действия навигации (2.3.6): «Что рядом», «Кто ссылается», «Путь до…».
+
+  const isDocument = (index: number) => slice.nodes[index]?.kind === "document";
+
+  /** Снимает наложение действия; запрос, ещё не вернувшийся из индекса ссылок, отбрасывается. */
+  function dropOverlay() {
+    pathView = null;
+    inboundView = null;
+    inboundEpoch++;
+    sem = null;
+    semEpoch++;
+  }
+
+  /** «Общий вид»: убирает наложение и локальный вид и возвращает прежние места узлов, камеру и выбор (OQ-144). */
+  function goGeneral() {
+    dropOverlay();
+    if (localView) {
+      localView = null;
+      restoreGeneral();
+      announce("Общий вид проекта");
+    } else schedule();
+  }
+
+  /** «Что рядом»: карта перекладывается вокруг документа; прежний общий вид или вид запроса остаются доступны возвратом. */
+  function startLocal(index: number) {
+    if (mini || !isDocument(index)) return;
+    dropOverlay();
+    if (query) leaveQuery();
+    saveGeneral();
+    expanded = {};
+    localView = { center: index, depth: 1, step: 0 };
+    selected = { type: "node", index };
+    rebuild(0.9, true);
+    announce(`Локальный граф «${label(index)}»: соседи, глубина 1`);
+  }
+
+  function setLocalDepth(depth: number) {
+    if (!localView || depth === localView.depth) return;
+    localView.depth = depth;
+    rebuild(0.6);
+    autoFitSince = performance.now();
+    lastAutoFit = 0;
+  }
+
+  function moreLocal() {
+    if (!localView || localView.step >= LOCAL_LIMITS.length - 1) return;
+    localView.step++;
+    notice = "Показано больше узлов и связей: камера и позиции сохранены.";
+    rebuild(0.5);
+  }
+
+  /** «Путь до…»: вторая вершина выбирается щелчком, в поиске узла или в списке; карта не двигается. */
+  function startPath(index: number) {
+    if (mini || !isDocument(index)) return;
+    dropOverlay();
+    pathView = { from: index, to: null, directed: false, index: 0 };
+    announce(`Путь от «${label(index)}»: выберите вторую вершину`);
+    schedule();
+  }
+
+  function pickPathEnd(index: number) {
+    if (!pathView || pathView.to !== null) return;
+    if (!isDocument(index)) {
+      notice = "Путь строится между документами: выберите документ.";
+      return;
+    }
+    if (index === pathView.from) {
+      notice = "Выберите другой документ: начало пути уже выбрано.";
+      return;
+    }
+    notice = "";
+    pathView.to = index;
+    pathView.index = 0;
+    schedule();
+  }
+
+  function shiftVariant(delta: number) {
+    if (!pathView || paths.length < 2) return;
+    pathView.index = (pathView.index + delta + paths.length) % paths.length;
+    schedule();
+  }
+
+  /** «Кто ссылается»: свежий индекс ссылок воркера; ошибка чтения не превращается в «никто не ссылается». */
+  async function startInbound(index: number) {
+    const path = project();
+    if (mini || !path || !isDocument(index)) return;
+    dropOverlay();
+    const id = ++inboundEpoch;
+    inboundView = { center: index, state: "loading", sources: [], known: true, error: "" };
+    schedule();
+    try {
+      const reply = await loadLinks(path, slice.nodes[index].path);
+      if (id !== inboundEpoch || path !== project()) return;
+      inboundView = { center: index, state: "ready", sources: reply.incoming, known: reply.known, error: "" };
+    } catch (error) {
+      if (id !== inboundEpoch || path !== project()) return;
+      inboundView = { center: index, state: "error", sources: [], known: true, error: error instanceof Error ? error.message : String(error) };
+    }
+    schedule();
+  }
+
+  /** В подграф и из подграфа: запрос и неразрешённая ссылка подграфом не становятся. */
+  function toggleMark(index: number) {
+    if (mini || slice.nodes[index]?.kind === "query" || slice.nodes[index]?.ghost) return;
+    const next = new Set(marks);
+    if (next.has(index)) next.delete(index);
+    else next.add(index);
+    marks = next;
+    schedule();
+  }
+
+  function clearMarks() {
+    marks = new Set();
+    schedule();
+  }
+
+  /** «Выбрать весь локальный граф»: отмечает документы показанного локального вида. */
+  function markLocal() {
+    if (!localShape) return;
+    marks = new Set([...marks, ...localShape.depthOf.keys()]);
+    schedule();
+  }
+
+  /** Документы подграфа: чанк сводится к владельцу, повторы убираются (пути от корня проекта). */
+  const subgraphDocs = $derived.by(() => {
+    const found = new Set<string>();
+    for (const index of marks) {
+      const n = slice.nodes[index];
+      if (!n || n.kind === "query" || n.ghost) continue;
+      const owner = n.kind === "chunk" ? slice.nodes[n.owner] : n;
+      if (owner?.path) found.add(owner.path);
+    }
+    return [...found];
+  });
+
+  /** Документы подграфа в путях от корня документации: область «Контекста задачи». */
+  const subgraphFiles = $derived.by(() => {
+    const found = new Set<string>();
+    for (const index of marks) {
+      const n = slice.nodes[index];
+      if (!n || n.kind === "query" || n.ghost) continue;
+      const owner = n.kind === "chunk" ? slice.nodes[n.owner] : n;
+      if (owner?.docsPath) found.add(owner.docsPath);
+    }
+    return [...found];
+  });
+
+  /** «Искать в подграфе»: область поиска заменяется документами подграфа, фокус уходит в поле поиска; поиск не запускается. */
+  function searchInSubgraph() {
+    const result = graphScope.apply(subgraphDocs);
+    if (!result.ok) {
+      notice = result.reason;
+      return;
+    }
+    app.flash(`Область поиска: ${result.documents} документов из графа${result.skipped ? `; ${result.skipped} исключено: удалены или вне проекта` : ""}`);
+  }
+
+  function runAction(id: ActionId) {
+    const n = selectedNode;
+    if (!n || n.kind !== "document") return;
+    if (id === "nearby") startLocal(n.index);
+    else if (id === "inbound") void startInbound(n.index);
+    else if (id === "path") startPath(n.index);
+    else if (id === "impact") startImpact(n.index);
+  }
+
+  // ---------- Действия смыслового слоя (2.3.8): «Что затронет правка», «Смысловой путь», «Анализ».
+
+  const semBase = (kind: SemanticKind): SemanticState => ({ kind, center: null, to: null, state: "loading", error: "", index: 0, structural: false, grouping: "communities", topic: null, section: "isolates" });
+  const scopeNow = (): Scope => ({ modules: [...app.scope.modules], files: [...app.scope.files] });
+  const docIndex = (id: string): number | null => {
+    const i = store.indexOf(id);
+    return i !== undefined && slice.visibleDocs.has(i) ? i : null;
+  };
+
+  /** Запускает действие: старый ответ, пришедший после нового действия или смены проекта, отбрасывается. */
+  async function runSem(next: SemanticState, job: () => Promise<Partial<SemanticState>>) {
+    const path = project();
+    if (!path) return;
+    const id = ++semEpoch;
+    sem = { ...next, state: "loading", error: "" };
+    schedule();
+    try {
+      const patch = await job();
+      if (id !== semEpoch || path !== project() || !sem) return;
+      sem = { ...sem, ...patch, state: "ready", error: "" };
+    } catch (error) {
+      if (id !== semEpoch || path !== project() || !sem) return;
+      sem = { ...sem, state: "error", error: semanticError(error) };
+    }
+    schedule();
+  }
+
+  /** «Что затронет правка»: сначала сущности документа в смысловом слое, затем документированные зависимости от них; ссылки-соседи — отдельной группой, без смысловой оценки. */
+  function startImpact(index: number) {
+    const path = project();
+    const n = slice.nodes[index];
+    if (mini || !path || !isDocument(index)) return;
+    dropOverlay();
+    void runSem({ ...semBase("impact"), center: index }, async () => {
+      const roots = entityRoots(await semanticQuery(path, entitiesRequest(n.docsPath)));
+      if (!roots.length) return { impact: emptyImpact() };
+      return { impact: digestImpact(await semanticQuery(path, impactRequest(roots, scopeNow())), n.id, roots.length) };
+    });
+  }
+
+  /** «Смысловой путь» между двумя выбранными документами; карта путей по ссылкам остаётся под ним и возвращается кнопкой. */
+  function startMeaning(structural = false) {
+    const path = project();
+    const view = pathView;
+    if (mini || !path || !view || view.to === null) return;
+    const from = slice.nodes[view.from];
+    const to = slice.nodes[view.to];
+    void runSem({ ...semBase("meaning-path"), center: view.from, to: view.to, structural }, async () => ({ meaning: digestMeaningPaths(await semanticQuery(path, meaningPathRequest(from, to, structural, scopeNow()))) }));
+  }
+
+  function backToMapPath() {
+    semEpoch++;
+    sem = null;
+    schedule();
+  }
+
+  function shiftMeaning(delta: number) {
+    const count = sem?.meaning?.paths.length ?? 0;
+    if (!sem || count < 2) return;
+    sem = { ...sem, index: (sem.index + delta + count) % count };
+    schedule();
+  }
+
+  /** «Контекст задачи»: форма в инспекторе; область — поиска или подграф (передаётся областью документов, `context.roots` в контракте v1 нет). */
+  function openContext(fromSubgraph = false) {
+    if (mini) return;
+    dropOverlay();
+    popover = null;
+    ctxSubgraph = fromSubgraph && subgraphFiles.length > 0;
+    if (!ctxQuery.trim()) ctxQuery = app.query.trim();
+    sem = { ...semBase("context"), state: "form" };
+    schedule();
+  }
+
+  function runContext() {
+    const path = project();
+    const current = sem;
+    if (!path || !current || current.kind !== "context" || !ctxQuery.trim()) return;
+    const scope: Scope = ctxSubgraph && subgraphFiles.length ? { modules: [], files: subgraphFiles } : scopeNow();
+    void runSem(current, async () => ({ context: digestContext(await semanticQuery(path, contextRequest(ctxQuery, ctxProfile, ctxBudget, scope))) }));
+  }
+
+  /** «Обзор тем»: темы проекта наложением номеров на документы; перекладка карты в свёрнутые группы не делается. */
+  function openTopics(grouping: Grouping = "communities") {
+    const path = project();
+    if (mini || !path) return;
+    dropOverlay();
+    popover = null;
+    void runSem({ ...semBase("topics"), grouping }, async () => ({ topics: digestTopics(await semanticQuery(path, topicsRequest(grouping, scopeNow())), grouping) }));
+  }
+
+  function pickTopic(topic: number | null) {
+    if (!sem) return;
+    sem = { ...sem, topic: sem.topic === topic ? null : topic };
+    schedule();
+  }
+
+  function markTopic(topic: Topic) {
+    const found = topic.members.map(docIndex).filter((i): i is number => i !== null);
+    if (!found.length) {
+      notice = "Документов этой темы нет на карте: сузьте или расширьте область поиска.";
+      return;
+    }
+    marks = new Set([...marks, ...found]);
+    schedule();
+  }
+
+  /** Хабы считаются по числу ссылок на карте: структура, а не важность. */
+  function hubDocs(): { id: string; label: string; links: number }[] {
+    const degree = new Map<number, number>();
+    for (const e of slice.edges) {
+      if (e.kind !== "markdown_link") continue;
+      degree.set(e.a, (degree.get(e.a) ?? 0) + 1);
+      degree.set(e.b, (degree.get(e.b) ?? 0) + 1);
+    }
+    return [...degree].filter(([i, d]) => d >= 3 && isDocument(i)).sort((a, b) => b[1] - a[1] || a[0] - b[0]).slice(0, 5).map(([i, d]) => ({ id: slice.nodes[i].id, label: slice.nodes[i].label, links: d }));
+  }
+
+  /** «Аудит связей»: три прохода `explore`; находки одного прохода не пропадают из-за ошибки другого. Это не экран аудитов (Т-36). */
+  function openAudit() {
+    const path = project();
+    if (mini || !path) return;
+    dropOverlay();
+    popover = null;
+    void runSem(semBase("audit"), async () => {
+      const passes: AuditPass[] = await Promise.all(
+        auditRequests(scopeNow()).map(async (request): Promise<AuditPass> => {
+          try {
+            return { ok: true, reply: await semanticQuery(path, request) };
+          } catch (error) {
+            return { ok: false, error: semanticError(error) };
+          }
+        }),
+      );
+      const failed = passes.find((p) => !p.ok);
+      if (failed && passes.every((p) => !p.ok)) throw new Error(failed.ok ? "" : failed.error);
+      return { audit: digestAudit(passes, hubDocs()) };
+    });
+  }
+
+  /** «Повторить» после ошибки или устаревшего ответа: то же действие с теми же параметрами. */
+  function retrySem() {
+    const s = sem;
+    if (!s) return;
+    if (s.kind === "impact" && s.center !== null) startImpact(s.center);
+    else if (s.kind === "meaning-path") startMeaning(s.structural);
+    else if (s.kind === "context") runContext();
+    else if (s.kind === "topics") openTopics(s.grouping);
+    else if (s.kind === "audit") openAudit();
+  }
+
+  function selectDocument(id: string) {
+    const i = docIndex(id);
+    if (i === null) notice = "Документа нет на карте: он вне области поиска или не показан.";
+    else select({ type: "node", index: i });
+  }
+
+  function pickAuditSection(id: AuditSection["id"]) {
+    if (!sem) return;
+    sem = { ...sem, section: id };
+    schedule();
+  }
+
+  /** Основание ответа: документ открывается на строках цитаты, если не изменился после снимка графа. */
+  function openProof(proof: Proof) {
+    if (!proof.path) return;
+    void app.openDocument({ path: proof.path, title: proof.title, first_line: proof.firstLine, last_line: proof.lastLine, expectedRevision: proof.revision });
+  }
+
+  /** Ссылки-соседи документа влияния: документы карты, связанные с ним явной ссылкой в любую сторону; зависимостью не считаются. */
+  const impactNeighbours = $derived.by(() => {
+    const s = sem;
+    if (s?.kind !== "impact" || s.center === null) return [] as number[];
+    const center = s.center;
+    const found = new Set<number>();
+    for (const e of slice.edges) {
+      if (e.kind !== "markdown_link") continue;
+      if (e.a === center) found.add(e.b);
+      else if (e.b === center) found.add(e.a);
+    }
+    const affected = new Set([...(s.impact?.documents.keys() ?? [])].map(docIndex));
+    return [...found].filter((i) => slice.visibleDocs.has(i) && isDocument(i) && !affected.has(i)).sort((a, b) => label(a).localeCompare(label(b)));
+  });
+
+  /** Наложение действия на карту: подписи на документах, слабые (косвенные, соседи) — пунктирным кольцом. Пустое наложение не включается: оно приглушило бы всю карту. */
+  function semanticOverlay(): { nodes: Map<number, string>; edges: Set<number>; weak: Set<number> } | undefined {
+    const s = sem;
+    if (!s || s.state !== "ready") return undefined;
+    const nodes = new Map<number, string>();
+    const weak = new Set<number>();
+    const put = (id: string, badge: string, isWeak = false) => {
+      const i = docIndex(id);
+      if (i === null) return;
+      if (!nodes.has(i)) nodes.set(i, badge);
+      if (isWeak) weak.add(i);
+    };
+    if (s.kind === "impact" && s.impact && s.center !== null) {
+      nodes.set(s.center, "");
+      for (const [id, depth] of s.impact.documents) put(id, String(depth), depth > 1);
+      for (const i of impactNeighbours) if (!nodes.has(i)) {
+        nodes.set(i, "");
+        weak.add(i);
+      }
+    } else if (s.kind === "meaning-path" && s.meaning) {
+      const path = s.meaning.paths[Math.min(s.index, s.meaning.paths.length - 1)];
+      if (path) for (const [id, step] of pathDocuments(path)) put(id, step);
+    } else if (s.kind === "context" && s.context) {
+      for (const [id, badge] of s.context.documents) put(id, badge);
+    } else if (s.kind === "topics" && s.topics) {
+      for (const t of s.topics.topics) if (s.topic === null || s.topic === t.number) for (const id of t.members) put(id, String(t.number));
+    } else if (s.kind === "audit" && s.audit) {
+      const section = s.audit.sections.find((x) => x.id === s.section);
+      const counts = new Map<string, number>();
+      for (const f of section?.findings ?? []) for (const id of f.documents) counts.set(id, (counts.get(id) ?? 0) + 1);
+      for (const [id, count] of counts) put(id, section?.id === "unresolved" ? String(count) : "");
+    }
+    return nodes.size ? { nodes, edges: new Set<number>(), weak } : undefined;
+  }
+
+  /** Строка списка «Кто ссылается»: источник открывается на строке ссылки, в том числе вне карты. */
+  function openInbound(source: IncomingLink) {
+    const line = source.lines[0] ?? 0;
+    void app.openDocument({ path: source.path, title: linkTitle(source.title, source.path), first_line: line, last_line: line });
+  }
+
+  const onMapIndex = (path: string): number | null => {
+    const found = visibleNodes().find((n) => n.kind === "document" && n.path === path);
+    return found ? found.index : null;
+  };
 
   function pin(index: number) {
     const on = layout?.togglePin(index);
@@ -758,12 +1216,27 @@
     app.view = "graph";
   }
 
-  async function rebuildGraph() {
+  /** «Обновить граф» / «Продолжить» / «Повторить»: запуск построения выбранного слоя. */
+  async function startBuild() {
     const path = project();
     if (!path) return;
     try {
-      await toggleGraphBuild(path, status?.active_job ?? null, buildLayer);
-      app.flash(status?.active_job ? "Остановка запрошена; исход появится в состоянии графа" : "Задание графа принято");
+      await startGraphBuild(path, buildLayer);
+      app.flash("Задание графа принято");
+      await refreshStatus();
+    } catch (error) {
+      app.flash(error instanceof Error ? error.message : String(error), true);
+    }
+  }
+
+  /** «Остановить построение»: останавливает только идущее задание, автообновление будущих изменений не выключается (OQ-190). */
+  async function stopBuild() {
+    const path = project();
+    const job = status?.active_job;
+    if (!path || !job) return;
+    try {
+      await stopGraphBuild(path, job);
+      app.flash("Остановка запрошена; исход появится в состоянии графа");
       await refreshStatus();
     } catch (error) {
       app.flash(error instanceof Error ? error.message : String(error), true);
@@ -774,6 +1247,11 @@
     if (event.key !== "Enter") return;
     const q = findText.trim().toLowerCase();
     const found = layout?.nodes.filter((n) => n.node.label.toLowerCase().includes(q)) ?? [];
+    if (pathView && pathView.to === null) {
+      const doc = found.find((n) => n.node.kind === "document" && n.index !== pathView!.from);
+      if (doc) pickPathEnd(doc.index);
+      return;
+    }
     if (found.length) select({ type: "node", index: found[0].index });
   }
 
@@ -799,6 +1277,11 @@
       loaded = true;
       loadError = "";
       loadErrorKind = "";
+      // Документ локального вида, пути или входящих мог исчезнуть из области: такое действие снимается.
+      if (localView && !slice.visibleDocs.has(localView.center)) { localView = null; generalState = null; }
+      if (pathView && (!slice.visibleDocs.has(pathView.from) || (pathView.to !== null && !slice.visibleDocs.has(pathView.to)))) pathView = null;
+      if (inboundView && !slice.visibleDocs.has(inboundView.center)) dropOverlay();
+      if (sem && ((sem.center !== null && !slice.visibleDocs.has(sem.center)) || (sem.to !== null && !slice.visibleDocs.has(sem.to)))) dropOverlay();
       // Раскрытый документ мог исчезнуть из области или потерять чанки: раскрытие без узлов не держим.
       const alive = Object.fromEntries(Object.entries(expanded).filter(([index]) => chunksOfDoc(Number(index)).length > 0 && slice.visibleDocs.has(Number(index))));
       if (Object.keys(alive).length !== Object.keys(expanded).length) expanded = alive;
@@ -863,8 +1346,12 @@
     queryKey = "";
     queryOff = "";
     expanded = {};
+    localView = null;
+    marks = new Set();
+    dropOverlay();
     selected = null;
     loaded = false;
+    openedOnObject = false;
     loading = false;
     loadError = "";
     loadErrorKind = "";
@@ -878,6 +1365,32 @@
   }
 
   // Данные для разметки.
+  /** Пути ищутся по связям, которые сейчас видны: режим, порог и (в локальном виде) показанные узлы. */
+  const pathEdges = $derived.by(() => {
+    const shown = new Set(visibleNodes().map((n) => n.index));
+    return navEdges.filter((e) => shown.has(e.a) && shown.has(e.b) && (!localShape || localShape.edgeIds.has(e.id)));
+  });
+  const paths = $derived.by<MapPath[]>(() => (pathView && pathView.to !== null ? mapPaths(adjacency(pathEdges, pathView.directed), pathView.from, pathView.to) : []));
+  const currentPath = $derived(paths.length && pathView ? paths[Math.min(pathView.index, paths.length - 1)] : null);
+  const stepWord = (n: number) => (n % 10 === 1 && n % 100 !== 11 ? "шаг" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? "шага" : "шагов");
+  const overlay = $derived.by<{ nodes: Map<number, string>; edges: Set<number>; weak?: Set<number> } | undefined>(() => {
+    if (sem) return semanticOverlay();
+    if (pathView) {
+      if (pathView.to === null) return { nodes: new Map([[pathView.from, ""]]), edges: new Set() };
+      if (!currentPath) return undefined;
+      return { nodes: new Map(currentPath.nodes.map((n, i) => [n, String(i + 1)])), edges: new Set(currentPath.steps.map((s) => s.edge.id)) };
+    }
+    if (inboundView?.state === "ready") {
+      const nodes = new Map<number, string>([[inboundView.center, ""]]);
+      for (const s of inboundView.sources) {
+        const index = onMapIndex(s.path);
+        if (index !== null) nodes.set(index, "");
+      }
+      const edges = new Set(navEdges.filter((e) => e.kind === "markdown_link" && e.b === inboundView!.center && nodes.has(e.a)).map((e) => e.id));
+      return { nodes, edges };
+    }
+    return undefined;
+  });
   const selectedNode = $derived(selected?.type === "node" ? slice.nodes[selected.index] : null);
   const selectedEdge = $derived(selected?.type === "edge" ? slice.edges[selected.id] : null);
   const connections = $derived.by(() => {
@@ -962,8 +1475,10 @@
     return layout?.links.length ?? 0;
   });
   const graphNotReady = $derived(loadErrorKind === "graph_not_ready");
-  const building = $derived(!!status?.active_job || status?.state === "building");
+  const controls = $derived(buildControls(status));
+  const building = $derived(controls.building);
   let buildLayer = $state("all");
+  const selectedKind = $derived(selectedNode ? selectedNode.kind : null);
 
   onMount(() => {
     mini = !!host.closest(".mini");
@@ -1055,6 +1570,28 @@
       schedule();
     });
   });
+  // Открытие вкладки на объекте: если есть открытый документ и нет ни завершённого поиска, ни перехода из мини-графа,
+  // полный граф один раз выбирает этот документ и центрирует камеру. Вид запроса и «Общий вид» остаются прежними (OQ-204).
+  $effect(() => {
+    void revision;
+    if (mini || !loaded || loadError || openedOnObject || loading || queryLoading) return;
+    untrack(() => {
+      if (app.graphFocus || app.graphShowQuery || queryInput() || query) { openedOnObject = true; return; }
+      const path = app.activeDocument;
+      const index = path ? base.nodes.find((n) => n.kind === "document" && n.path === path && base.visibleDocs.has(n.index))?.index : undefined;
+      if (index !== undefined && !layout?.get(index)) return;
+      openedOnObject = true;
+      if (index === undefined) return;
+      selected = { type: "node", index };
+      const p = layout!.get(index)!;
+      const k = Math.max(cam.k, 1.1);
+      autoFitSince = 0;
+      camTarget = null;
+      fitted = true;
+      if (size.w > 1) cam = { k, x: size.w / 2 - p.x * k, y: size.h / 2 - p.y * k };
+      schedule();
+    });
+  });
   // Мини-граф: другой активный документ или другая глубина — локальный граф раскладывается с нуля и вписывается.
   $effect(() => {
     void focusIndex;
@@ -1097,6 +1634,43 @@
   });
 </script>
 
+{#snippet proofList(proofs: Proof[])}
+  {#each proofs as p (p.id)}
+    <div class="proof">
+      <q>{p.quote}</q>
+      <small>{p.path ? `${p.path}, ` : ""}строки {p.firstLine}–{p.lastLine}</small>
+      {#if p.path}<button class="inline" onclick={() => openProof(p)}>Открыть основание</button>{/if}
+    </div>
+  {/each}
+{/snippet}
+{#snippet semNotes(lines: string[])}
+  {#each lines as line (line)}<p class="hint">{line}</p>{/each}
+{/snippet}
+{#snippet semStatus()}
+  {#if sem?.state === "loading"}
+    <p class="hint" role="status">Читаем смысловой слой…</p>
+  {:else if sem?.state === "error"}
+    <p class="hint" role="alert">{sem.error}</p>
+    <div class="actions"><button class="act" onclick={retrySem}>Повторить</button></div>
+  {/if}
+{/snippet}
+{#snippet impactGroup(title: string, entries: ImpactEntry[])}
+  {#if entries.length}
+    <h4>{title} · {entries.length}</h4>
+    <ul class="conns rich">
+      {#each entries as e, i (`${title}${i}`)}
+        <li>
+          <span class="name" title={e.label}>{e.label}</span>
+          <small>{e.steps.join(" · ")}</small>
+          {#each e.conditions as c, k (k)}<small>условие: {c}</small>{/each}
+          {@render proofList(e.proofs)}
+          <small>проверить описание</small>
+        </li>
+      {/each}
+    </ul>
+  {/if}
+{/snippet}
+
 {#snippet forcesForm()}
   {#if mini}
     <h4>Локальный граф</h4>
@@ -1115,6 +1689,22 @@
   <label class="opt slider" title="Расстояние между связанными документами: меняет масштаб всей карты"><span>Длина связи</span><input type="range" min={FORCE_RANGE.length.min} max={FORCE_RANGE.length.max} step={FORCE_RANGE.length.step} aria-label="Длина связи" bind:value={settings.forces.length} oninput={applyForces} /><b>{forces.length}</b></label>
   <button class="reset" onclick={resetForces}>По умолчанию</button>
   <p class="hint">Меняет движение узлов, а не силу связи: толщина, яркость и значения s прежние.</p>
+  {#if !mini}
+    <h4>Обновление графа</h4>
+    <label class="opt" title="Какой слой перестраивает кнопка «Обновить граф»"><span>Слой</span><select aria-label="Слой для обновления" bind:value={buildLayer} disabled={building}><option value="all">Все слои</option><option value="structure">Структура</option><option value="semantic">Отношения</option><option value="similarity">Близость</option></select></label>
+    <button class="reset" aria-expanded={legendOpen} onclick={() => { legendOpen = !legendOpen; popover = null; }}>Легенда и шкала силы</button>
+    <details class="facts">
+      <summary>Сведения</summary>
+      <table aria-label="Сведения о графе">
+        <tbody>
+          <tr><th>Документов</th><td>{slice.docCount} из {slice.totals.documents}</td></tr>
+          <tr><th>Чанков раскрыто</th><td>{shownChunks} из {slice.totals.chunks}</td></tr>
+          <tr><th>Снимок графа</th><td title={slice.snapshot}>{slice.snapshot.slice(0, 8) || "—"}</td></tr>
+          {#each EDGE_KINDS as kind (kind)}<tr><th>{KIND_TITLE[kind]}</th><td>{kind === "chunk_similarity" && !shownChunks ? "при раскрытии" : counts[kind]}{totalCounts[kind] > counts[kind] ? ` из ${totalCounts[kind]}` : ""} · слой {STATE_TEXT[slice.layers[kind].state]}</td></tr>{/each}
+        </tbody>
+      </table>
+    </details>
+  {/if}
 {/snippet}
 
 <div class="pgw" bind:this={host}>
@@ -1122,6 +1712,7 @@
 {#if queryError}<p role="alert">{queryError}</p>{/if}
 <div class="pg" class:mini role="region" aria-label={mini ? "Мини-граф" : "Физический граф проекта"} data-mode={mode} data-motion={motion} data-nodes={nodeCount} data-links={linkCount} data-loaded={loaded}>
   {#if !mini}
+    <div class="top">
     <div class="bar" role="toolbar" aria-label="Управление графом">
       <label class="find">
         <Icon name="search" size={13} width={1.8} />
@@ -1140,7 +1731,7 @@
               {#if m === "links"}<path d="M21 6l-5-3v6z" fill={palette?.kindCss.markdown_link ?? "currentColor"} />{/if}
             </svg>
             {MODE_NAME[m]}
-            <b>{m === "chunks" && !shownChunks ? "—" : modeCount(m)}</b>{#if m !== "links" && modeCount(m) < modeTotal(m) && (m !== "chunks" || shownChunks)}<small>из {modeTotal(m)}</small>{/if}
+            <b>{m === "chunks" && !shownChunks ? "—" : modeCount(m)}</b>
             {#if issue}<span class="state {issue.layer.state}">{STATE_TEXT[issue.layer.state]}</span>{/if}
           </button>
         {/each}
@@ -1154,13 +1745,145 @@
         <button aria-label={view === "list" ? "Показать карту" : "Показать списком"} aria-pressed={view === "list"} title={view === "list" ? "Показать карту" : "Показать списком"} onclick={() => (view = view === "list" ? "map" : "list")}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" /></svg>
         </button>
-        <button aria-label="Настройки раскладки" aria-expanded={popover === "settings"} title="Настройки раскладки" onclick={() => (popover = popover === "settings" ? null : "settings")}><Icon name="gear" size={14} width={1.8} /></button>
-        <button aria-label="Легенда и шкала силы" aria-expanded={legendOpen} title="Легенда и шкала силы" onclick={() => (legendOpen = !legendOpen)}><Icon name="info" size={14} width={1.8} /></button>
-        <select aria-label="Слой для обновления" title="Слой для обновления всего проекта" bind:value={buildLayer} disabled={building}><option value="all">Все слои</option><option value="structure">Структура</option><option value="semantic">Отношения</option><option value="similarity">Близость</option></select>
-        <button aria-label={building ? "Остановить построение графа" : "Обновить граф"} title={building ? "Остановить построение графа" : "Обновить граф: перестроить выбранный слой"} onclick={() => void rebuildGraph()}><Icon name="refresh" size={14} width={1.8} /></button>
+        <button aria-label="Настройки графа" aria-expanded={popover === "settings"} title="Настройки графа: раскладка, порог, слои, легенда, сведения" onclick={() => (popover = popover === "settings" ? null : "settings")}><Icon name="gear" size={14} width={1.8} /></button>
+        <button class="analysis-menu" aria-haspopup="menu" aria-expanded={popover === "analysis"} title="Контекст задачи, обзор тем и аудит связей" onclick={() => (popover = popover === "analysis" ? null : "analysis")}>Анализ ▾</button>
         <button class="more-menu" aria-label="Ещё" title="Ещё" aria-haspopup="menu" aria-expanded={popover === "more"} onclick={() => (popover = popover === "more" ? null : "more")}>⋯</button>
       </div>
     </div>
+    <div class="entry-actions" role="group" aria-label="Действия над документом">
+      {#if selectedNode}
+        <b class="entry-title" title={selectedNode.label}>{selectedNode.label}</b>
+        {#each GRAPH_ACTIONS as action (action.id)}
+          {@const state = actionState(action, selectedKind)}
+          <button class="act" data-action={action.id} disabled={!state.enabled} title={state.reason} onclick={() => runAction(action.id)}>{action.label}</button>
+        {/each}
+      {:else}
+        <span class="entry-hint">{NO_SELECTION_TEXT}</span>
+        {#each GRAPH_ACTIONS as action (action.id)}
+          <button class="act" data-action={action.id} disabled title={actionState(action, null).reason}>{action.label}</button>
+        {/each}
+      {/if}
+    </div>
+    {#if localView || pathView || inboundView || marks.size || sem}
+      <div class="qstack">
+      {#if localView && localShape}
+        <div class="qbar" role="region" aria-label="Локальный граф">
+          <b class="qtext" title={label(localView.center)}>Локальный граф «{label(localView.center)}»</b>
+          <span class="depth" role="radiogroup" aria-label="Глубина локального графа">Глубина
+            {#each Array.from({ length: LOCAL_MAX_DEPTH }, (_, i) => i + 1) as d (d)}
+              <button role="radio" aria-checked={localView.depth === d} class:on={localView.depth === d} disabled={localShape.truncated && d > localView.depth} title={localShape.truncated && d > localView.depth ? "Достигнут предел обхода: следующий шаг недоступен" : `Соседи на ${d} шаг${d > 1 ? "а" : ""}`} onclick={() => setLocalDepth(d)}>{d}</button>
+            {/each}
+          </span>
+          <span>связи: {MODE_NAME[mode].toLowerCase()} · узлов {localShape.depthOf.size} · связей {localShape.edgeIds.size}</span>
+          <button class="more ghost" onclick={markLocal} title="Отметить все документы локального графа для поиска в подграфе">Выбрать весь локальный граф</button>
+          <button class="more" onclick={goGeneral}>Общий вид</button>
+        </div>
+        {#if localShape.truncated}
+          <div class="banner" role="status">
+            <span><b>Достигнут предел обхода:</b> показано {localShape.depthOf.size} из {localShape.known.nodes} узлов, {localShape.edgeIds.size} из {localShape.known.edges} связей.</span>
+            {#if localView.step < LOCAL_LIMITS.length - 1}<button class="more" onclick={moreLocal}>Показать ещё</button>{:else}<span>Максимум вида: уменьшите глубину или выберите другой режим связей.</span>{/if}
+          </div>
+        {:else if localShape.depthOf.size <= 1}
+          <div class="banner" role="status"><span>В режиме «{MODE_NAME[mode]}» у документа связей не найдено. Документ остаётся на карте; другой режим может показать соседей.</span></div>
+        {/if}
+      {/if}
+      {#if pathView && sem?.kind !== "meaning-path"}
+        <div class="qbar" role="region" aria-label="Путь по карте">
+          {#if pathView.to === null}
+            <b class="qtext" title={label(pathView.from)}>Путь от «{label(pathView.from)}»</b>
+            <span>выберите вторую вершину щелчком, в поиске узла или в списке</span>
+            <button class="more" onclick={dropOverlay}>Отмена</button>
+          {:else if currentPath}
+            <b class="qtext" title="{label(pathView.from)} → {label(pathView.to)}">Путь по карте: {label(pathView.from)} → {label(pathView.to)}</b>
+            <span>{currentPath.steps.length} {stepWord(currentPath.steps.length)}</span>
+            <span class="depth">вариант {Math.min(pathView.index, paths.length - 1) + 1} из {paths.length}
+              <button aria-label="Предыдущий вариант пути" title="Предыдущий вариант ([)" disabled={paths.length < 2} onclick={() => shiftVariant(-1)}>◀</button>
+              <button aria-label="Следующий вариант пути" title="Следующий вариант (])" disabled={paths.length < 2} onclick={() => shiftVariant(1)}>▶</button>
+            </span>
+            <label class="chk"><input type="checkbox" checked={pathView.directed} onchange={(e) => { pathView!.directed = e.currentTarget.checked; pathView!.index = 0; }} /> по направлению ссылок</label>
+            <button class="more ghost" data-semantic="meaning-path" title="Путь по утверждениям смыслового слоя с основанием каждого шага" onclick={() => startMeaning()}>Смысловой путь</button>
+            <button class="more" onclick={goGeneral}>Общий вид</button>
+          {:else}
+            <b class="qtext">Путь: {label(pathView.from)} → {label(pathView.to)}</b>
+            <span>В режиме «{MODE_NAME[mode]}»{pathView.directed ? " по направлению ссылок" : ""} пути не длиннее {PATH_MAX_HOPS} шагов нет</span>
+            {#if mode !== "all"}<button class="more ghost" onclick={() => setMode("all")}>Искать во всех связях</button>{/if}
+            {#if pathView.directed}<button class="more ghost" onclick={() => { pathView!.directed = false; }}>Не учитывать направление</button>{/if}
+            <button class="more ghost" data-semantic="meaning-path" title="Путь по утверждениям смыслового слоя с основанием каждого шага" onclick={() => startMeaning()}>Смысловой путь</button>
+            <button class="more" onclick={goGeneral}>Общий вид</button>
+          {/if}
+        </div>
+        {#if currentPath}
+          <div class="banner" role="status"><span>Путь по карте показывает соседство на карте, а не зависимость.</span></div>
+        {/if}
+      {/if}
+      {#if marks.size}
+        <div class="qbar" role="region" aria-label="Подграф">
+          <b>Подграф: {marks.size} узлов · {subgraphDocs.length} документов</b>
+          <button class="more ghost" disabled={!subgraphDocs.length} title={subgraphDocs.length ? "Заменить область поиска документами подграфа" : "В подграфе нет документов"} onclick={searchInSubgraph}>Искать в подграфе</button>
+          <button class="more ghost" disabled={!subgraphFiles.length} title={subgraphFiles.length ? "Собрать контекст задачи по документам подграфа: подграф передаётся областью документов" : "В подграфе нет документов"} onclick={() => openContext(true)}>Собрать контекст</button>
+          <button class="more" onclick={clearMarks}>Очистить</button>
+        </div>
+      {/if}
+      {#if inboundView}
+        <div class="qbar" role="region" aria-label="Кто ссылается">
+          <b class="qtext" title={label(inboundView.center)}>Кто ссылается на «{label(inboundView.center)}»</b>
+          <span>{inboundView.state === "loading" ? "читаем индекс ссылок…" : inboundView.state === "error" ? "не удалось прочитать" : `${inboundView.sources.length} документов`}</span>
+          <button class="more" onclick={goGeneral}>Общий вид</button>
+        </div>
+      {/if}
+      {#if sem}
+        {@const wait = sem.state === "loading" ? "читаем смысловой слой…" : sem.state === "error" ? "не удалось выполнить" : ""}
+        {#if sem.kind === "impact" && sem.center !== null}
+          <div class="qbar" role="region" aria-label="Влияние изменения">
+            <b class="qtext" title={label(sem.center)}>Что затронет правка «{label(sem.center)}»</b>
+            <span>{#if sem.impact}прямое {sem.impact.direct.length} · косвенное {sem.impact.indirect.length} · ссылки-соседи {impactNeighbours.length}{:else}{wait}{/if}</span>
+            <button class="more" onclick={goGeneral}>Общий вид</button>
+          </div>
+          {#if sem.impact}<div class="banner" role="status"><span>Результат означает «проверить описание», а не «сломано». Ссылки-соседи — не доказанная зависимость.</span></div>{/if}
+        {:else if sem.kind === "meaning-path" && sem.center !== null && sem.to !== null}
+          {@const mp = sem.meaning}
+          <div class="qbar" role="region" aria-label="Смысловой путь">
+            <b class="qtext" title="{label(sem.center)} → {label(sem.to)}">Смысловой путь: {label(sem.center)} → {label(sem.to)}</b>
+            {#if mp && mp.paths.length}
+              <span>{mp.paths.length} {mp.paths.length === 1 ? "вариант" : "вариантов"}</span>
+              <span class="depth">вариант {Math.min(sem.index, mp.paths.length - 1) + 1} из {mp.paths.length}
+                <button aria-label="Предыдущий смысловой путь" title="Предыдущий вариант ([)" disabled={mp.paths.length < 2} onclick={() => shiftMeaning(-1)}>◀</button>
+                <button aria-label="Следующий смысловой путь" title="Следующий вариант (])" disabled={mp.paths.length < 2} onclick={() => shiftMeaning(1)}>▶</button>
+              </span>
+            {:else if mp}<span>{mp.resolution === "ambiguous" ? "имя неоднозначно" : "смысловых путей не найдено"}</span>
+            {:else}<span>{wait}</span>{/if}
+            <label class="chk"><input type="checkbox" checked={sem.structural} onchange={(e) => startMeaning(e.currentTarget.checked)} /> со структурными шагами</label>
+            <button class="more ghost" onclick={backToMapPath}>Путь по карте</button>
+            <button class="more" onclick={goGeneral}>Общий вид</button>
+          </div>
+        {:else if sem.kind === "context"}
+          <div class="qbar" role="region" aria-label="Контекст задачи">
+            <b class="qtext" title={ctxQuery}>Контекст «{ctxQuery.trim() || "…"}»</b>
+            {#if sem.context}
+              <span>{PROFILES.find((p) => p.id === ctxProfile)?.label.toLowerCase()} · {sem.context.covered} из {sem.context.total} ролей · {(sem.context.usedBytes / 1024).toFixed(1)}{sem.context.maxBytes ? ` из ${(sem.context.maxBytes / 1024).toFixed(0)}` : ""} КБ</span>
+            {:else}<span>{sem.state === "form" ? "заполните задачу в инспекторе" : wait}</span>{/if}
+            <button class="more" onclick={goGeneral}>Общий вид</button>
+          </div>
+        {:else if sem.kind === "topics"}
+          <div class="qbar" role="region" aria-label="Обзор тем">
+            <b>Обзор тем</b>
+            <span>{sem.topics ? `${sem.topics.topics.length} тем · ${sem.topics.documents.size} документов` : wait}</span>
+            <span class="depth" role="radiogroup" aria-label="Группировка тем">
+              <button role="radio" aria-checked={sem.grouping === "communities"} class:on={sem.grouping === "communities"} class="wide" onclick={() => openTopics("communities")}>Сообщества</button>
+              <button role="radio" aria-checked={sem.grouping === "modules"} class:on={sem.grouping === "modules"} class="wide" onclick={() => openTopics("modules")}>Модули</button>
+            </span>
+            <button class="more" onclick={goGeneral}>Общий вид</button>
+          </div>
+        {:else if sem.kind === "audit"}
+          <div class="qbar" role="region" aria-label="Аудит связей">
+            <b>Аудит связей</b>
+            <span>{sem.audit ? `${sem.audit.sections.reduce((n, s) => n + s.findings.length, 0)} находок · ${sem.audit.documents.size} документов` : wait}</span>
+            <button class="more" onclick={goGeneral}>Общий вид</button>
+          </div>
+        {/if}
+      {/if}
+      </div>
+    {/if}
     {#if query}
       <div class="qstack">
       <div class="qbar" role="region" aria-label="Вид запроса">
@@ -1191,9 +1914,11 @@
       </div>
     {/if}
     {#if status}
-      <div class="banner" role="status">
-        <span>{graphDataLabel(status)} · {completenessLabels[status.completeness ?? "unknown"]} · {jobLabels[status.job_state ?? "idle"]}</span>
-        {#if status.job_state === "stopped"}<button class="more" onclick={() => void rebuildGraph()}>Продолжить</button>{/if}
+      <div class="banner state" role="status" aria-label="Состояние графа">
+        <span>{graphDataLabel(status)} · {completenessLabels[status.completeness ?? "unknown"]}{jobLabels[status.job_state ?? "idle"] ? ` · ${jobLabels[status.job_state ?? "idle"]}` : ""}</span>
+        {#if controls.staleReason}<span>Ждёт обновления: {controls.staleReason}</span>{/if}
+        <button class="more" disabled={!controls.updateEnabled} title={controls.updateReason} onclick={() => void startBuild()}>{controls.updateLabel}</button>
+        <button class="more ghost" disabled={!controls.stopEnabled} title={controls.stopReason} onclick={() => void stopBuild()}>Остановить построение</button>
         {#if building && status.progress}<span>{({ structure: "Разбор документов", similarity: "Расчёт близости", similarity_pairs: "Сравнено пар", publish: "Публикация" } as Record<string, string>)[status.progress.phase] ?? "Построение"}: {status.progress.processed}{status.progress.total === null ? "" : ` / ${status.progress.total}`} · {(status.progress.elapsed_ms / 1000).toFixed(1)} с</span>{/if}
         {#if status.file_errors_total}<details><summary>Файлов с ошибками: {status.file_errors_total}</summary>{#each status.file_errors ?? [] as error}<div>{error.path}: {error.message}</div>{/each}</details>{/if}
         {#if status.error}<span>{status.error}</span>{/if}
@@ -1202,7 +1927,6 @@
     {#if layerIssues.length}
       <div class="banner" role="status">
         {#each layerIssues as kind (kind)}<span><b>{KIND_TITLE[kind]}:</b> {slice.layers[kind].note}.</span>{/each}
-        <button class="more" onclick={() => void rebuildGraph()}>{building ? "Остановить построение" : "Обновить граф"}</button>
       </div>
     {/if}
     {#if loaded && !loadError && slice.truncated}
@@ -1211,6 +1935,7 @@
         {#if atMaximum}<span>Достигнут максимум среза: сузьте область в дереве.</span>{:else}<button class="more" onclick={() => void continueSlice()} disabled={loading}>Показать ещё</button>{/if}
       </div>
     {/if}
+    </div>
   {/if}
 
   <div class="stage" bind:this={stage}>
@@ -1223,7 +1948,7 @@
         <div class="empty" role="alert">
           <b>{graphNotReady ? (building ? "Граф строится" : "Граф ещё не построен или устарел") : "Граф недоступен"}</b>
           <span>{loadError}</span>
-          {#if graphNotReady}<button class="act" onclick={() => void rebuildGraph()}>{building ? "Остановить построение" : "Обновить граф"}</button>{/if}
+          {#if graphNotReady && !building}<button class="act" disabled={!controls.updateEnabled} title={controls.updateReason} onclick={() => void startBuild()}>{controls.updateLabel}</button>{/if}
         </div>
       {:else if slice.docCount === 0}
         <div class="empty" role="status"><b>В выбранной области нет документов</b><span>Измените область в дереве или в фильтре документов.</span></div>
@@ -1251,6 +1976,8 @@
           {#if !mini}{MOTION_TEXT[motion]} · {/if}<b>Запрос: {queryResultCount} результатов</b>{#if queryRelatedCount} · {queryRelatedCount} связанных источников{/if} · узлов {queryShape?.shown.nodes ?? 0}{#if !mini} · связей {queryShape?.shown.edges ?? 0}{/if} · {MODE_NAME[mode].toLowerCase()}
         {:else if mini && isLocal() && focusIndex !== null}
           <b>Локальный граф</b> · <span class="lt" title={slice.nodes[focusIndex].label}>{slice.nodes[focusIndex].label}</span>{#if nodeCount <= 1} · нет связей в режиме «{MODE_NAME[mode]}»{:else} · {MODE_NAME[mode].toLowerCase()}{/if}
+        {:else if !mini && localView && localShape}
+          {MOTION_TEXT[motion]} · <b>Локальный граф: {localShape.depthOf.size} из {slice.docCount} документов</b> · глубина {localView.depth}
         {:else if mini}
           <b>Документы {slice.docCount}</b> · {MODE_NAME[mode].toLowerCase()}
         {:else}
@@ -1294,7 +2021,14 @@
         {/if}
       {/if}
       {#if popover === "settings" && !mini}
-        <section class="pop full" aria-label="Настройки раскладки">{@render forcesForm()}</section>
+        <section class="pop full" aria-label="Настройки графа">{@render forcesForm()}</section>
+      {/if}
+      {#if popover === "analysis" && !mini}
+        <div class="pop menu" role="menu" aria-label="Анализ" tabindex="-1" onkeydown={(e) => { if (e.key === "Escape") { e.stopPropagation(); popover = null; } }}>
+          <button role="menuitem" data-analysis="context" onclick={() => openContext(marks.size > 0)}>Контекст задачи<small>источники по ролям под задачу</small></button>
+          <button role="menuitem" data-analysis="topics" onclick={() => openTopics()}>Обзор тем<small>темы проекта и их представители</small></button>
+          <button role="menuitem" data-analysis="audit" onclick={openAudit}>Аудит связей<small>изоляты, неразрешённые ссылки, кандидаты</small></button>
+        </div>
       {/if}
       {#if popover === "more" && !mini}
         <div class="pop menu" role="menu" aria-label="Ещё" tabindex="-1" onkeydown={(e) => { if (e.key === "Escape") { e.stopPropagation(); popover = null; } }}>
@@ -1348,6 +2082,188 @@
 
   {#if !mini}
     <aside class="inspector" aria-label="Инспектор графа">
+      {#if sem}
+        {#if sem.kind === "impact" && sem.center !== null}
+          <section class="viewbox" aria-label="Влияние изменения">
+            <h4>Что затронет правка «{label(sem.center)}»</h4>
+            {@render semStatus()}
+            {#if sem.impact}
+              {@const im = sem.impact}
+              {#if !im.direct.length && !im.indirect.length}
+                <p class="hint" role="status">Документированных зависимостей не найдено{im.notes.semanticIncomplete ? "; смысловой слой неполон — это не доказывает, что правка ничего не затронет" : " в обработанных отношениях"}.</p>
+              {/if}
+              {#if im.entities}<p class="hint">Проверено сущностей документа в смысловом слое: {im.entities}.</p>{/if}
+              {@render impactGroup("Прямое", im.direct)}
+              {@render impactGroup("Косвенное", im.indirect)}
+              <h4>Ссылки-соседи · {impactNeighbours.length}</h4>
+              {#if impactNeighbours.length}
+                <p class="hint">Ссылаются друг на друга. Это явные ссылки в тексте, а не доказанная зависимость.</p>
+                <ul class="conns">
+                  {#each impactNeighbours as i (i)}
+                    <li><button onclick={() => select({ type: "node", index: i })} title={slice.nodes[i].path}><span class="name">{label(i)}</span><small>{slice.nodes[i].path}</small></button></li>
+                  {/each}
+                </ul>
+              {:else}
+                <p class="hint">У документа нет явных ссылок на карте.</p>
+              {/if}
+              {@render semNotes(im.notes.lines)}
+            {/if}
+          </section>
+        {:else if sem.kind === "meaning-path" && sem.center !== null && sem.to !== null}
+          <section class="viewbox" aria-label="Шаги смыслового пути">
+            <h4>Смысловой путь «{label(sem.center)}» → «{label(sem.to)}»</h4>
+            {@render semStatus()}
+            {#if sem.meaning}
+              {@const mp = sem.meaning}
+              {#if mp.resolution === "ambiguous" || mp.resolution === "not_found"}
+                <p class="hint" role="status">{mp.resolution === "ambiguous" ? "Имя конца пути неоднозначно: путь не угадывается." : "Конец пути не найден в смысловом слое."}</p>
+                <ul class="conns">{#each mp.candidates as c, i (i)}<li><span class="name" title={c}>{c}</span></li>{/each}</ul>
+              {:else if !mp.paths.length}
+                <p class="hint" role="status">Смысловых путей {sem.structural ? "со структурными шагами " : ""}в области не найдено{mp.notes.semanticIncomplete ? "; смысловой слой неполон — отсутствие пути не доказывает отсутствие связи" : ""}.{sem.structural ? "" : " Структурные шаги (ссылки) можно включить галочкой в полосе."}</p>
+              {:else}
+                {@const path = mp.paths[Math.min(sem.index, mp.paths.length - 1)]}
+                <ol class="conns steps">
+                  {#each path.steps as step, i (i)}
+                    <li>
+                      <span class="name" title={step.sentence}>{i + 1}. {step.sentence}</span>
+                      <small>{step.forward ? "ход по направлению утверждения" : "ход против направления утверждения"}{step.negative ? " · в источнике отрицание" : ""}</small>
+                      {#each step.conditions as c, k (k)}<small>условие: {c}</small>{/each}
+                      {@render proofList(step.proofs)}
+                    </li>
+                  {/each}
+                </ol>
+                {#if !path.complete}<p class="hint">Путь неполный: обход остановлен пределом.</p>{/if}
+                <p class="hint">Кратчайший путь не объясняет причину: проверьте основания шагов.</p>
+              {/if}
+              {@render semNotes(mp.notes.lines)}
+            {/if}
+          </section>
+        {:else if sem.kind === "context"}
+          <section class="viewbox" aria-label="Контекст задачи">
+            <h4>Контекст задачи</h4>
+            <div class="form">
+              <label>Задача<textarea rows="3" bind:value={ctxQuery} aria-label="Задача для контекста" placeholder="Что нужно сделать или выяснить?"></textarea></label>
+              <label>Профиль<select bind:value={ctxProfile} aria-label="Профиль задачи">{#each PROFILES as p (p.id)}<option value={p.id}>{p.label}</option>{/each}</select></label>
+              <label>Бюджет<select bind:value={ctxBudget} aria-label="Бюджет контекста">{#each CONTEXT_BUDGETS as b (b)}<option value={b}>{b} токенов</option>{/each}</select></label>
+              <label class="chk"><input type="checkbox" bind:checked={ctxSubgraph} disabled={!subgraphFiles.length} /> Только документы подграфа ({subgraphFiles.length})</label>
+              <button class="act" onclick={runContext} disabled={!ctxQuery.trim() || sem.state === "loading"}>Собрать контекст</button>
+            </div>
+            {#if ctxSubgraph && subgraphFiles.length}<p class="hint">Подграф передан областью документов: отдельного входа по узлам в контракте v1 нет.</p>{/if}
+            {#if sem.state !== "form"}{@render semStatus()}{/if}
+            {#if sem.context}
+              {@const cx = sem.context}
+              {#each cx.groups as g (g.role)}
+                <h4>{g.label} · {g.proofs.length}</h4>
+                {@render proofList(g.proofs)}
+              {/each}
+              {#if !cx.groups.length}<p class="hint" role="status">Источников по ролям не найдено для этой задачи в выбранной области.</p>{/if}
+              {#if cx.missing.length}<p class="hint" role="status">Непокрытые роли: {cx.missing.map((r) => roleLabels[r] ?? r).join(", ")}. Это значит «не найдено в обработанных отношениях», а не «их нет».</p>{/if}
+              <p class="hint">Бюджет {cx.budgetMode === "estimated" ? "оценочный (по размеру ответа, не токены вашей модели)" : "точный"}: использовано {(cx.usedBytes / 1024).toFixed(1)} КБ{cx.maxBytes ? ` из ${(cx.maxBytes / 1024).toFixed(0)}` : ""}.</p>
+              {@render semNotes(cx.notes.lines)}
+            {/if}
+          </section>
+        {:else if sem.kind === "topics"}
+          <section class="viewbox" aria-label="Темы проекта">
+            <h4>Темы проекта{sem.topics ? ` · ${sem.topics.topics.length}` : ""}</h4>
+            {@render semStatus()}
+            {#if sem.topics}
+              {@const tv = sem.topics}
+              <p class="hint">Группировка: {tv.grouping === "modules" ? "по модулям" : "сообщества по связям документов"}. Названия собраны из заголовков представителей, а не придуманы. Темы показаны номерами на документах карты.</p>
+              {#if !tv.topics.length}<p class="hint" role="status">Тем не найдено: в области нет сгруппированных документов.</p>{/if}
+              <ul class="conns topics">
+                {#each tv.topics as t (t.id)}
+                  <li class:on={sem.topic === t.number}>
+                    <span class="name" title={t.label}><b>{t.number}.</b> {t.label}</span>
+                    <small>{t.members.length} документов</small>
+                    <span class="row-actions">
+                      <button class="inline" aria-pressed={sem.topic === t.number} onclick={() => pickTopic(t.number)}>{sem.topic === t.number ? "Показать все темы" : "Показать на карте"}</button>
+                      <button class="inline" onclick={() => markTopic(t)}>В подграф</button>
+                    </span>
+                    {#if t.representatives.length}<span class="row-actions">Представители: {#each t.representatives as r (r.id)}<button class="inline" onclick={() => selectDocument(r.id)}>{r.title}</button>{/each}</span>{/if}
+                  </li>
+                {/each}
+              </ul>
+              {@render semNotes(tv.notes.lines)}
+            {/if}
+          </section>
+        {:else if sem.kind === "audit"}
+          <section class="viewbox" aria-label="Аудит связей">
+            <h4>Аудит связей</h4>
+            {@render semStatus()}
+            {#if sem.audit}
+              {@const au = sem.audit}
+              {@const current = au.sections.find((s) => s.id === sem!.section) ?? au.sections[0]}
+              <div class="tabs" role="group" aria-label="Разделы аудита">
+                {#each au.sections as s (s.id)}<button class="act" aria-pressed={current.id === s.id} onclick={() => pickAuditSection(s.id)}>{s.title} · {s.error ? "!" : s.findings.length}</button>{/each}
+              </div>
+              <p class="hint">{current.caution}</p>
+              {#if current.error}
+                <p class="hint" role="alert">{current.error}</p>
+                <div class="actions"><button class="act" onclick={openAudit}>Повторить аудит</button></div>
+              {:else if !current.findings.length}
+                <p class="hint" role="status">Не найдено{current.truncated ? ", но обход усечён" : ""}. Это не доказательство, что проблем нет.</p>
+              {:else}
+                <ul class="conns rich">
+                  {#each current.findings.slice(0, 40) as f, i (i)}
+                    <li>
+                      <span class="name" title={f.label}>{f.label || "Без названия"}</span>
+                      <small>{f.detail}</small>
+                      {@render proofList(f.proofs)}
+                      {#if f.documents.length}<button class="inline" onclick={() => selectDocument(f.documents[0])}>На карте</button>{/if}
+                    </li>
+                  {/each}
+                </ul>
+                {#if current.findings.length > 40}<p class="trunc">Показаны 40 из {current.findings.length}.</p>{/if}
+              {/if}
+              {@render semNotes(au.notes)}
+            {/if}
+          </section>
+        {/if}
+      {/if}
+      {#if pathView && currentPath && sem?.kind !== "meaning-path"}
+        <section class="viewbox" aria-label="Шаги пути">
+          <h4>Шаги пути · {currentPath.steps.length}</h4>
+          <ol class="conns steps">
+            {#each currentPath.steps as step, i (i)}
+              <li>
+                <span class="name" title="{label(currentPath.nodes[i])} — {label(currentPath.nodes[i + 1])}">{i + 1}. {label(currentPath.nodes[i])} {step.edge.kind === "markdown_link" ? (step.forward ? "→" : "←") : "—"} {label(currentPath.nodes[i + 1])}</span>
+                <small>{KIND_TITLE[step.edge.kind]} · {step.edge.kind === "markdown_link" ? linesText(step.edge) : `cosine ${step.edge.raw === null ? "—" : step.edge.raw.toFixed(2)}`}</small>
+                {#if step.edge.kind === "markdown_link" && step.edge.lines.length}<button class="inline" onclick={() => openSource(step.edge.a, step.edge.lines[0])}>Открыть основание</button>{/if}
+              </li>
+            {/each}
+          </ol>
+          <p class="hint">Показано соседство на карте в режиме «{MODE_NAME[mode]}», а не зависимость. Путь по утверждениям с основаниями — кнопка «Смысловой путь» в полосе.</p>
+        </section>
+      {/if}
+      {#if inboundView}
+        <section class="viewbox" aria-label="Кто ссылается">
+          <h4>Кто ссылается на «{label(inboundView.center)}»</h4>
+          {#if inboundView.state === "loading"}
+            <p class="hint" role="status">Читаем индекс ссылок…</p>
+          {:else if inboundView.state === "error"}
+            <p class="hint" role="alert">Не удалось прочитать ссылки: {inboundView.error}. Это не значит, что ссылок нет.</p>
+            <div class="actions"><button class="act" onclick={() => void startInbound(inboundView!.center)}>Повторить</button></div>
+          {:else if !inboundView.known}
+            <p class="hint" role="status">Документа ещё нет в индексе ссылок: он появится после сохранения на диск.</p>
+          {:else if !inboundView.sources.length}
+            <p class="hint" role="status">Ни один документ не ссылается на «{label(inboundView.center)}» по индексу ссылок на диске.</p>
+          {:else}
+            <p class="hint">Ссылаются {inboundView.sources.length}. Это явные ссылки в тексте, а не доказанные зависимости; открытие источника область поиска не меняет.</p>
+            <ul class="conns">
+              {#each inboundView.sources as source (source.path)}
+                {@const onMap = onMapIndex(source.path)}
+                <li>
+                  <button onclick={() => openInbound(source)} title="Открыть «{source.path}» на строке ссылки">
+                    <span class="name">{linkTitle(source.title, source.path)}</span>
+                    <small>{source.path} · {source.lines.length ? `строки ${source.lines.slice(0, 6).join(", ")}${source.lines.length > 6 ? "…" : ""}` : "строки неизвестны"}{onMap === null ? " · вне карты" : ""}</small>
+                  </button>
+                  {#if onMap !== null}<button class="inline" onclick={() => { selected = { type: "node", index: onMap }; schedule(); }}>На карте</button>{/if}
+                </li>
+              {/each}
+            </ul>
+          {/if}
+        </section>
+      {/if}
       {#if selectedNode}
         <header>
           <span class="kind">{selectedNode.kind === "document" ? "Документ" : selectedNode.kind === "query" ? "Запрос" : "Чанк"}</span>
@@ -1361,6 +2277,14 @@
             <button class="act" onclick={() => void toggleExpand(selectedNode.index)} disabled={loading}>{expanded[selectedNode.index] ? "Свернуть чанки" : `Раскрыть чанки (${selectedNode.chunks})`}</button>
           {/if}
           <button class="act" onclick={() => pin(selectedNode.index)} aria-pressed={pinnedSel}>{pinnedSel ? "Открепить" : "Закрепить"}</button>
+          {#if selectedNode.kind !== "query" && !selectedNode.ghost}
+            <button class="act" aria-pressed={marks.has(selectedNode.index)} title="Отметить для «Искать в подграфе» (Shift+щелчок, Shift+пробел)" onclick={() => toggleMark(selectedNode.index)}>{marks.has(selectedNode.index) ? "Из подграфа" : "В подграф"}</button>
+          {/if}
+          {#if selectedNode.kind === "document"}
+            {#each GRAPH_ACTIONS as action (action.id)}
+              <button class="act" data-inspector-action={action.id} title={action.hint} onclick={() => runAction(action.id)}>{action.label}</button>
+            {/each}
+          {/if}
         </div>
         {#if selectedNode.kind === "document" && expanded[selectedNode.index] && expanded[selectedNode.index] < selectedNode.chunks}
           <p class="trunc" role="status">Показано {expanded[selectedNode.index]} из {selectedNode.chunks} чанков. <button class="inline" onclick={() => void moreChunks(selectedNode.index)} disabled={loading}>Ещё {Math.min(PORTION, selectedNode.chunks - expanded[selectedNode.index])}</button></p>
@@ -1431,17 +2355,19 @@
           {#if selectedEdge.kind === "markdown_link" && selectedEdge.lines.length}<button class="act" onclick={() => openSource(selectedEdge.a, selectedEdge.lines[0])}><Icon name="doc" size={13} width={1.8} /> Источник ссылки</button>{/if}
         </div>
       {:else}
-        <header><span class="kind">Граф проекта</span><h3>Выберите узел или связь</h3></header>
-        <p class="hint">Инспектор показывает тип, происхождение и числа связи, ведёт к источнику. Движение камеры область поиска не меняет.</p>
-        <table aria-label="Состав среза">
-          <tbody>
-            <tr><th>Документов</th><td>{slice.docCount} из {slice.totals.documents}</td></tr>
-            <tr><th>Чанков раскрыто</th><td>{shownChunks} из {slice.totals.chunks}</td></tr>
-            <tr><th>Снимок графа</th><td title={slice.snapshot}>{slice.snapshot.slice(0, 8) || "—"}</td></tr>
-            {#each EDGE_KINDS as kind (kind)}<tr><th>{KIND_TITLE[kind]}</th><td>{kind === "chunk_similarity" && !shownChunks ? "при раскрытии" : counts[kind]} · слой {STATE_TEXT[slice.layers[kind].state]}</td></tr>{/each}
-          </tbody>
-        </table>
-        <p class="keys"><kbd>←↑↓→</kbd> соседний узел <kbd>M</kbd> режим связей <kbd>Enter</kbd> раскрыть <kbd>Пробел</kbd> закрепить <kbd>F</kbd> вписать <kbd>Esc</kbd> снять</p>
+        <header><span class="kind">Граф проекта</span><h3>Выберите документ</h3></header>
+        <p class="hint">Щёлкните узел или найдите документ по названию — граф покажет, что с ним связано, и откроет источник. Движение камеры область поиска не меняет.</p>
+        <details class="key-help">
+          <summary>Как управлять картой с клавиатуры</summary>
+          <dl>
+            <dt>Стрелки</dt><dd>Выбрать соседний узел</dd>
+            <dt>M</dt><dd>Следующий режим связей</dd>
+            <dt>Enter</dt><dd>Раскрыть чанки документа</dd>
+            <dt>Пробел</dt><dd>Закрепить или открепить</dd>
+            <dt>F</dt><dd>Вписать карту</dd>
+            <dt>Esc</dt><dd>Снять выбор</dd>
+          </dl>
+        </details>
       {/if}
       {#if query?.bundle}
         <GraphSearchBundle graph={query.bundle} states={Object.fromEntries(query.results.map(r => [r.path,r.status]))} related={query.applied === "mix"} embedded selected={packageIndex} onselect={(index) => { packageIndex = index; schedule(); }} />
@@ -1454,8 +2380,21 @@
 
 <style>
   .pgw { display: flex; flex: 1; min-width: 0; min-height: 0; height: 100%; container-type: inline-size; }
-  .pg { position: relative; flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: auto auto auto auto minmax(0, 1fr); flex: 1; min-height: 0; min-width: 0; height: 100%; background: var(--panel); font-size: 12px; color: var(--text); overflow: hidden; }
+  .pg { position: relative; flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: auto minmax(0, 1fr); flex: 1; min-height: 0; min-width: 0; height: 100%; background: var(--panel); font-size: 12px; color: var(--text); overflow: hidden; }
   .pg.mini { display: flex; flex-direction: column; }
+  .top { grid-column: 1 / -1; grid-row: 1; display: flex; flex-direction: column; min-width: 0; }
+  .entry-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 4px 10px; border-bottom: 1px solid var(--line); font-size: 11.5px; }
+  .entry-title { max-width: 32ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .entry-hint { flex: 1 1 260px; color: var(--muted); }
+  .banner.state .ghost { background: transparent; }
+  .banner .more:disabled { opacity: 0.5; cursor: default; }
+  .facts { margin-top: 6px; font-size: 11px; }
+  .facts summary { cursor: pointer; color: var(--muted); }
+  .key-help { margin-top: 8px; font-size: 11px; color: var(--muted); }
+  .key-help summary { cursor: pointer; }
+  .key-help dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 6px 0 0; }
+  .key-help dt { font-weight: 600; color: var(--text); }
+  .key-help dd { margin: 0; }
   .bar { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
   .banner { grid-column: 1 / -1; display: flex; gap: 8px 14px; align-items: center; flex-wrap: wrap; padding: 4px 10px; background: var(--mid-soft); color: var(--text); border-bottom: 1px solid var(--line); font-size: 11.5px; }
   .qstack { grid-column: 1 / -1; display: flex; flex-direction: column; }
@@ -1472,7 +2411,7 @@
   .qplate button { white-space: nowrap; }
   .qplate .qt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .banner .more { border: 1px solid var(--line-2); background: var(--panel); border-radius: 5px; padding: 1px 8px; font-size: 11.5px; }
-  .stage { grid-column: 1; grid-row: 5; position: relative; min-width: 0; min-height: 0; overflow: hidden; background: var(--panel); }
+  .stage { grid-column: 1; grid-row: 2; position: relative; min-width: 0; min-height: 0; overflow: hidden; background: var(--panel); }
   .pg.mini .stage { flex: 1; }
   canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; outline: none; }
   canvas.hide { visibility: hidden; }
@@ -1487,7 +2426,6 @@
   .mode[aria-checked="true"] { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); position: relative; z-index: 1; }
   .mode:disabled { opacity: 0.5; cursor: default; }
   .mode b { font-weight: 600; }
-  .mode small { color: var(--faint); font-size: 10px; }
   .mode .state { font-size: 10px; padding: 0 5px; border-radius: 8px; background: var(--mid-soft); color: var(--mid); }
   .mode .state.failed { background: var(--bad-soft); color: var(--bad); }
   .toast { position: absolute; left: 6px; top: 6px; max-width: calc(100% - 150px); padding: 4px 10px; border-radius: 8px; background: var(--text); color: var(--panel); font-size: 11.5px; line-height: 1.35; box-shadow: var(--shadow); pointer-events: none; z-index: 6; animation: toast-in 0.18s ease-out; }
@@ -1528,6 +2466,7 @@
   .pop.menu button:hover { background: var(--accent-soft); color: var(--accent-text); }
   .pop.menu small { font-size: 10.5px; color: var(--muted); }
   .tools .more-menu { font-size: 14px; line-height: 1; }
+  .tools .analysis-menu { width: auto; padding: 0 8px; font-size: 11.5px; color: var(--text); border: 1px solid var(--line-2); }
   .pop h4 { margin: 0 0 4px; font-size: 10.5px; color: var(--muted); font-weight: 600; }
   .opt { display: flex; align-items: center; gap: 6px; margin: 3px 0; font-size: 11px; }
   .opt span { flex: 1; min-width: 0; }
@@ -1541,8 +2480,24 @@
   .legend small { margin-left: auto; color: var(--faint); font-size: 10.5px; }
   .legend .scale { display: flex; gap: 8px; }
   .legend .scale div { display: grid; justify-items: center; font-size: 10.5px; color: var(--muted); }
+  .viewbox { margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  .viewbox .form { display: flex; flex-direction: column; gap: 6px; margin: 4px 0; }
+  .viewbox .form label { display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: var(--muted); }
+  .viewbox .form label.chk { flex-direction: row; align-items: center; }
+  .viewbox .form textarea, .viewbox .form select { font: inherit; font-size: 11.5px; padding: 3px 6px; border: 1px solid var(--line-2); border-radius: 5px; background: var(--panel); color: var(--text); resize: vertical; }
+  .viewbox .proof { display: flex; flex-direction: column; gap: 1px; margin: 2px 0 2px 4px; padding-left: 6px; border-left: 2px solid var(--line-2); font-size: 11px; }
+  .viewbox .proof q { quotes: "«" "»"; color: var(--text); }
+  .viewbox .tabs { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0; }
+  .viewbox .conns.rich li, .viewbox .conns.topics li { flex-direction: column; align-items: flex-start; }
+  .viewbox .conns.topics li.on { background: var(--accent-soft); border-radius: 5px; }
+  .viewbox .row-actions { display: flex; flex-wrap: wrap; gap: 2px 10px; font-size: 10.5px; color: var(--muted); }
+  .qbar .depth button.wide { width: auto; padding: 0 8px; }
+  .viewbox .steps { padding-left: 0; }
+  .viewbox li { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; padding: 2px 4px; font-size: 11.5px; }
+  .viewbox li small { color: var(--muted); font-size: 10.5px; }
+  .qbar .chk { display: inline-flex; align-items: center; gap: 4px; }
   .hint { margin: 4px 0; color: var(--muted); font-size: 11px; line-height: 1.4; }
-  .inspector { grid-column: 2; grid-row: 5; min-height: 0; overflow: auto; padding: 8px 10px; border-left: 1px solid var(--line); background: var(--panel); }
+  .inspector { grid-column: 2; grid-row: 2; min-height: 0; overflow: auto; padding: 8px 10px; border-left: 1px solid var(--line); background: var(--panel); }
   .inspector header { margin-bottom: 6px; }
   .inspector .kind { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--accent-text); font-weight: 600; }
   .inspector h3 { margin: 1px 0 2px; font-size: 13px; line-height: 1.3; overflow-wrap: anywhere; }
@@ -1563,7 +2518,6 @@
   tr + tr { border-top: 1px solid var(--line); }
   .trunc { margin: 4px 0; padding: 3px 6px; border-radius: 5px; background: var(--mid-soft); font-size: 11px; }
   .notice { margin: 8px 0 0; padding: 4px 6px; border-radius: 5px; background: var(--accent-soft); color: var(--accent-text); font-size: 11px; }
-  .keys { color: var(--muted); font-size: 10.5px; line-height: 2; }
   .list { position: absolute; inset: 0; display: flex; flex-direction: column; min-height: 0; }
   .list-tools { display: flex; gap: 8px; align-items: center; padding: 6px 8px; border-bottom: 1px solid var(--line); }
   .list-tools input[type="search"] { flex: 1; height: 24px; border: 1px solid var(--line-2); border-radius: 6px; padding: 0 6px; background: transparent; font-size: 11px; }
@@ -1575,9 +2529,9 @@
   .glyph { width: 8px; height: 8px; flex: none; background: var(--muted); border-radius: 50%; }
   .glyph.chunk { border-radius: 1px; transform: rotate(45deg) scale(0.8); background: var(--faint); }
   @container (max-width: 640px) {
-    .pg:not(.mini) { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto minmax(0, 1fr) minmax(0, 38%); }
+    .pg:not(.mini) { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) minmax(0, 38%); }
     .stage { grid-column: 1; }
-    .inspector { grid-column: 1; grid-row: 6; border-left: 0; border-top: 1px solid var(--line); }
+    .inspector { grid-column: 1; grid-row: 3; border-left: 0; border-top: 1px solid var(--line); }
     .find input { width: 90px; }
   }
 </style>

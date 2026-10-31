@@ -17,10 +17,13 @@
     newDir: () => `Новая папка в ${where}`,
     rename: () => `Переименовать ${folder ? "папку" : "документ"} «${node?.label}»`,
     move: () => `Переместить ${folder ? "папку" : "документ"} «${node?.label}»`,
-    trash: () => `Удалить ${folder ? "папку" : "документ"} «${node?.label}»?`,
+    trash: () => `Удалить в корзину: ${node?.label}?`,
   } as const;
-  const submitLabel = { newDoc: "Создать", newDir: "Создать", rename: "Переименовать", move: "Переместить", trash: "В корзину" } as const;
-  const warnsAboutLinks = $derived(!!request && request.action !== "newDoc" && request.action !== "newDir" && request.docs > 0);
+  const submitLabel = { newDoc: "Создать", newDir: "Создать", rename: "Переименовать", move: "Переместить", trash: "Удалить в корзину" } as const;
+  const warnsAboutLinks = $derived(!!request && (request.action === "rename" || request.action === "move") && request.docs > 0);
+  const plan = $derived(entries.deletePlan);
+  const deleting = $derived(request?.action === "trash");
+  let cancelButton = $state<HTMLButtonElement>();
   const unchanged = $derived(
     !!request && ((request.action === "rename" && (value.trim() === "" || value.trim() === request.name)) ||
       ((request.action === "newDoc" || request.action === "newDir") && value.trim() === "") ||
@@ -32,7 +35,8 @@
     value = request.action === "rename" ? request.name : request.action === "move" ? parentNodePath(request.node) : "";
     dialog?.showModal();
     queueMicrotask(() => {
-      field?.focus();
+      if (request.action === "trash") cancelButton?.focus();
+      else field?.focus();
       if (field instanceof HTMLInputElement && request.action === "rename") field.setSelectionRange(0, request.name.replace(/\.md$/i, "").length);
     });
   });
@@ -67,10 +71,28 @@
           </select>
         </label>
       {:else}
-        <p>{folder ? `Папка вместе с документами внутри (${request.docs}) попадёт` : "Документ попадёт"} в корзину. Достать его можно из корзины Windows.</p>
+        {#if folder}<p class="hint">Документов внутри: {plan?.documents ?? request.docs}.</p>{/if}
+        {#if entries.deleteState === "loading"}
+          <p class="hint" role="status">Считаю входящие ссылки…</p>
+        {:else if entries.deleteState === "unchecked" || !plan}
+          <p class="hint warn" role="status">Ссылки не проверены: индекс ссылок сейчас недоступен. Удаление возможно, {folder ? "папка" : "файл"} уйдёт в корзину.</p>
+        {:else if plan.sources.length === 0}
+          <p role="status">Входящих ссылок нет.</p>
+        {:else}
+          <p role="status"><b>Входящих ссылок: {plan.links}, в документах: {plan.sources.length}.</b> Они станут битыми.</p>
+          <details>
+            <summary>Показать ссылки</summary>
+            <ul class="refs">
+              {#each plan.sources as source (source.path)}
+                <li><b>{source.title ?? source.path}</b><small>{source.path}</small>{#each source.links as link}<small>строка {link.line}: «{link.text}»</small>{/each}</li>
+              {/each}
+            </ul>
+          </details>
+        {/if}
+        <p class="hint">{folder ? "Папка попадёт" : "Файл попадёт"} в корзину ОС, его можно восстановить оттуда.</p>
       {/if}
       {#if !entries.report && warnsAboutLinks}
-        <p class="hint warn">{request.action === "trash" ? "Ссылки на удалённые документы станут битыми." : "Перед перемещением bars покажет план обновления ссылок."}</p>
+        <p class="hint warn">Перед перемещением bars покажет план обновления ссылок.</p>
       {/if}
       {#if !entries.report && entries.preview && entries.previewValue === value}
         <p role="status">Документов с правками ссылок: {entries.preview.documents.length}.</p>
@@ -79,8 +101,8 @@
       {/if}
       {#if entries.error}<p role="alert" class="error">{entries.error}</p>{/if}
       <footer>
-        <button type="button" class="ghost" disabled={entries.busy} onclick={() => entries.cancel()}>{entries.report ? "Закрыть" : "Отмена"}</button>
-        {#if !entries.report}<button type="submit" class="btn" class:danger={request.action === "trash"} disabled={entries.busy || unchanged}>{(request.action === "rename" || request.action === "move") && (!entries.preview || entries.previewValue !== value) ? "Проверить ссылки" : submitLabel[request.action]}</button>{/if}
+        <button type="button" class="ghost" bind:this={cancelButton} disabled={entries.busy} onclick={() => entries.cancel()}>{entries.report ? "Закрыть" : "Отмена"}</button>
+        {#if !entries.report}<button type="submit" class="btn" class:danger={request.action === "trash"} disabled={entries.busy || unchanged || (deleting && entries.deleteState === "loading")}>{(request.action === "rename" || request.action === "move") && (!entries.preview || entries.previewValue !== value) ? "Проверить ссылки" : submitLabel[request.action]}</button>{/if}
       </footer>
     </form>
   </dialog>
@@ -99,5 +121,9 @@
   .error { color: var(--bad); }
   ul { font-size: 12px; padding-left: 20px; max-height: 220px; overflow: auto; overflow-wrap: anywhere; }
   footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  .refs { list-style: none; padding-left: 0; }
+  .refs li { display: grid; gap: 1px; margin: 6px 0; }
+  .refs small { color: var(--muted); font-size: 11.5px; }
+  summary { cursor: pointer; font-size: 12.5px; margin-top: 6px; }
   .btn.danger { background: var(--bad); color: white; }
 </style>

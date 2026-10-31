@@ -646,3 +646,21 @@ fn edit_pause_over_an_hour_is_an_error_and_unknown_indexing_keys_warn() {
     assert_eq!(warned.warnings[0].key, "indexing.edit_pause");
     assert_eq!(warned.value.indexing.edit_pause_seconds, 30);
 }
+
+#[test]
+fn graph_tools_are_hidden_by_default_and_shown_by_the_mcp_key() {
+    assert!(!UserSettings::default().mcp.graph_tools);
+    assert!(!user("").value.mcp.graph_tools);
+    let shown = user("[mcp]\ngraph_tools = true\n");
+    assert!(shown.warnings.is_empty());
+    assert!(shown.value.mcp.graph_tools);
+    assert!(!user("[mcp]\ngraph_tools = false\n").value.mcp.graph_tools);
+    assert!(matches!(
+        user_err("[mcp]\ngraph_tools = \"yes\"\n"),
+        SettingsError::Parse { .. }
+    ));
+    let warned = user("[mcp]\ngraph = true\n");
+    assert_eq!(warned.warnings.len(), 1);
+    assert_eq!(warned.warnings[0].key, "mcp.graph");
+    assert!(!warned.value.mcp.graph_tools);
+}

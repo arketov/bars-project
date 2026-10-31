@@ -4,7 +4,7 @@ use std::fs;
 use std::path::Path;
 
 use crate::tree_io::{
-    TreeError, check_name, create_dir, create_doc, move_entry, read_tree, trash_entry,
+    TreeError, check_name, create_dir, create_doc, move_entry, plan_delete, read_tree, trash_entry,
 };
 
 fn project() -> tempfile::TempDir {
@@ -345,6 +345,29 @@ fn t08_trash_removes_the_node_or_refuses_without_deleting() {
         trash_entry(dir.path(), "docs", "docs/nothing.md"),
         Err(TreeError::NotFound)
     );
+}
+
+#[test]
+fn t08_delete_plan_lists_the_documents_and_changes_nothing() {
+    let dir = project();
+    fs::write(dir.path().join("docs/a/y.md"), "# y").unwrap();
+    fs::write(dir.path().join("docs/a/skip.txt"), "не документ").unwrap();
+    fs::write(dir.path().join("docs/ab.md"), "# ab").unwrap();
+    let folder = plan_delete(dir.path(), "docs", "docs/a").unwrap();
+    assert!(folder.folder);
+    assert_eq!(folder.documents, vec!["docs/a/x.md", "docs/a/y.md"]);
+    let file = plan_delete(dir.path(), "docs", "docs/ab.md").unwrap();
+    assert!(!file.folder);
+    assert_eq!(file.documents, vec!["docs/ab.md"]);
+    assert_eq!(
+        plan_delete(dir.path(), "docs", "docs/nothing.md").err(),
+        Some(TreeError::NotFound)
+    );
+    assert_eq!(
+        plan_delete(dir.path(), "docs", "docs/a/skip.txt").err(),
+        Some(TreeError::InvalidPath)
+    );
+    assert!(dir.path().join("docs/a/x.md").exists());
 }
 
 #[test]

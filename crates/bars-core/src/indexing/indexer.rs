@@ -155,8 +155,13 @@ pub enum IndexingError {
     /// Индексацию остановил пользователь (OQ-55).
     #[error("индексация остановлена")]
     Cancelled,
-    #[error("не удалось подменить индекс, старый остался на месте: {0}")]
-    Swap(io::Error),
+    /// Подмена не удалась. `rollback` — ошибка возврата старого индекса: если она есть, проект
+    /// остался без `index.sqlite`, а прежний индекс лежит в `index.sqlite.old` до восстановления.
+    #[error("{}", swap_message(.cause, .rollback))]
+    Swap {
+        cause: io::Error,
+        rollback: Option<io::Error>,
+    },
 }
 
 /// Проверяет актуальность индекса и приводит его в соответствие с диском.
@@ -796,26 +801,70 @@ fn remove_if_exists(path: &Path) -> io::Result<()> {
     }
 }
 
-/// Подменяет `index_path` готовым `new_path`. Старый индекс уходит в `old_path` и удаляется
-/// только после успеха; при ошибке на любом шаге он возвращается на место.
 fn swap(index_path: &Path, new_path: &Path, old_path: &Path) -> Result<(), IndexingError> {
+    swap_with(index_path, new_path, old_path, |from, to| {
+        fs::rename(from, to)
+    })
+}
+
+/// Подмена с заменяемым переименованием: тесты проверяют на нём неудачный откат.
+fn swap_with(
+    index_path: &Path,
+    new_path: &Path,
+    old_path: &Path,
+    rename: impl Fn(&Path, &Path) -> io::Result<()>,
+) -> Result<(), IndexingError> {
     let had_old = index_path.exists();
     if had_old {
         // Занятый файл на Windows не переименовывается: подмена не начинается.
-        fs::rename(index_path, old_path).map_err(IndexingError::Swap)?;
+        rename(index_path, old_path).map_err(|cause| IndexingError::Swap {
+            cause,
+            rollback: None,
+        })?;
     }
-    let installed = clear_sidecars(index_path).and_then(|()| fs::rename(new_path, index_path));
-    if let Err(error) = installed {
-        if had_old {
-            let _ = fs::rename(old_path, index_path);
-        }
-        return Err(IndexingError::Swap(error));
+    let installed = clear_sidecars(index_path).and_then(|()| rename(new_path, index_path));
+    if let Err(cause) = installed {
+        let rollback = if had_old {
+            rename(old_path, index_path).err()
+        } else {
+            None
+        };
+        return Err(IndexingError::Swap { cause, rollback });
     }
     if had_old {
         // Старый индекс уже не нужен; не удалился — остаётся мусор, но не ошибка.
         let _ = remove_index_files(old_path);
     }
     Ok(())
+}
+
+fn swap_message(cause: &io::Error, rollback: &Option<io::Error>) -> String {
+    match rollback {
+        None => format!("не удалось подменить индекс, старый остался на месте: {cause}"),
+        Some(rollback) => format!(
+            "подмена индекса не удалась ({cause}), прежний индекс не возвращён ({rollback})"
+        ),
+    }
+}
+
+/// Приводит `index.sqlite`, `index.sqlite.old` и `index.sqlite.new` к одному индексу
+/// (`docs/architecture/worker.md`, «Восстановление файлов индекса при старте»).
+///
+/// Подмена дошла до конца — лишний `.old` удаляется; прервана или откат не удался — `.old`
+/// возвращается на место. Недописанный `.new` удаляется всегда. Звать только при старте воркера
+/// или под замком задания проекта: идущая переиндексация этим файлом пользуется.
+pub fn recover_index_files(index_path: &Path) -> io::Result<()> {
+    let old_path = with_suffix(index_path, ".old");
+    remove_index_files(&with_suffix(index_path, ".new"))?;
+    if !old_path.exists() {
+        return Ok(());
+    }
+    if index_path.exists() {
+        return remove_index_files(&old_path);
+    }
+    clear_sidecars(index_path)?;
+    fs::rename(&old_path, index_path)?;
+    remove_index_files(&old_path)
 }
 
 /// Журнал WAL привязан к имени файла: остаток журнала старого индекса испортил бы новый.

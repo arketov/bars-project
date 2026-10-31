@@ -73,7 +73,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 
 ## Ответы методов bars
 
-- `search` — `results` (путь от корня проекта, `module`, `title`, `heading_chain` строкой `Заголовок 1/Заголовок 2`, `first_line`, `last_line`, `text`, `score`, `score_kind`), `applied` (число результатов, кандидатов, кандидатов реранка, порог, вид оценки, `clamped`), `indexing`, `pending` и, если rerank не отработал, `rerank_error`.
+- `search` — `results` (путь от корня проекта, `module`, `title`, `heading_chain` строкой `Заголовок 1/Заголовок 2`, `sections` — заголовки разделов, приклеенных к чанку после первого, в виде строк `## Заголовок`, поле пропускается, если их нет, `first_line`, `last_line`, `text`, `score`, `score_kind`), `applied` (число результатов, кандидатов, кандидатов реранка, порог, вид оценки, `clamped`), `indexing`, `pending` и, если rerank не отработал, `rerank_error`.
 - `outline` — `headings`: номер строки, уровень, текст. Строку `7 ## Стадия` из заголовка собирает функция крейта `bars-protocol`, общая для MCP и CLI.
 - `read` — `title` и `text` как есть. Номера строк ставит функция `number_lines` крейта `bars-protocol`: у MCP и CLI вывод одинаковый (Т-20).
 - `status` — поля из таблицы в [worker.md](worker.md) и `path` проекта; время — RFC 3339.
@@ -109,8 +109,9 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 |---|---|---|
 | `settings_get` | — | `file`, `revision` (`размер-хеш blake3` байтов файла, `null` — файла нет), `settings` (таблицы с умолчаниями: `embed`, `rerank`, `search`, `chunking`, `indexing`) и `warnings`. Снимок и ревизия из одного чтения. `indexing.edit_pause_seconds`: целое 0…3600 |
 | `settings_save` | `base` — исходные настройки окна, `changes` — объект `таблица.ключ → значение` только изменённых полей, `expected_revision` — строка или `null` | `status: saved/conflict`, `conflicts` (ключ, `base`, `disk`, `mine`), `file`, `revision`, `settings`, `warnings`. При конфликте ни одного поля не пишет. Независимые внешние поля сливаются; TOML проверяется и записывается атомарно. Неизвестное поле или неверное значение — `invalid_params`. Успех ставит проекты на проверку по Т-25. Правила выбора версии — [настройки](../features/settings/settings.md) |
-| `models_info` | — | встроенные embed-модели каталога и rerank-модель: размерность, бэкенд (`onnx` или `candle`), предупреждения, `downloaded`, `downloading`, `download_percent` (0…100 или null), `download_error` (безопасная ошибка ручного скачивания или null); папка моделей; `runtime.embed` и `runtime.rerank` с model/source/requested/state/backend/actual/fallback_reason и необязательными precision/revision фактической сессии, без загрузки модели и ожидания инференса |
+| `models_info` | — | встроенные embed-модели каталога и rerank-модель: размерность, бэкенд (`onnx` или `candle`), предупреждения, `downloaded`, `downloading`, `download_percent` (0…100 или null), `download_error` (безопасная ошибка ручного скачивания или null) и `download_error_reason` (вид ошибки встроенной модели, те же значения, что `data.reason`, или null); папка моделей; `runtime.embed` и `runtime.rerank` с model/source/requested/state/backend/actual/fallback_reason и необязательными precision/revision фактической сессии, без загрузки модели и ожидания инференса |
 | `model_download` | `id` | `accepted`; модель скачивается в фоне. Явный итог — в `operation_events`; `downloading` и полный комплект файлов в `models_info` не доказывают готовность сессии |
+| `model_retry` | — | `accepted`; снимает паузу перед повтором фоновой загрузки моделей ([встроенные модели](../features/models/local-models.md), «Пауза перед повтором загрузки»); окно зовёт его кнопкой «Повторить» на экране ошибки модели |
 | `secret_set` | `name`, `value` | `present: true`; ключ уходит в хранилище ОС ([secrets.md](secrets.md)); значение не попадает ни в лог, ни в `Debug` |
 | `secret_status` | `name` | `present`: есть ли запись; сам ключ окну не отдаётся |
 | `clients_status` | — | по клиенту (`claude-code`, `codex`): `installed`, `stale` (записи указывают не на текущие `bars-mcp` и `bars-cli`), файлы, которые bars правит, `needs_hook_approval` |
@@ -134,6 +135,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | `new_topics_delete` | `project`, `id`, `revision` | `accepted: true` |
 | `new_topics_clear` | `project`, обязательный `confirmed: true` | `generation` |
 | `new_topics_settings` | `project`, `enabled` | `enabled`, `generation` |
+| `links_into` | `project` (абсолютный путь), `paths` (документы удаляемого набора от корня проекта) | `sources` (`path`, `title`, `links` — `line`, `text`): входящие ссылки на набор из документов вне набора; индекс ссылок, модель не нужна; только окно ([индекс ссылок](../features/knowledge-base/link-index.md)) |
 | `links_of` | `project` (абсолютный путь), `path` (от корня проекта) | `known`, `outgoing` (`line`, `text`, `raw`, `kind`, `target`, `target_title`, `broken`), `incoming` (`path`, `title`, `lines`); читает индекс ссылок, сверяя его с диском, модель не нужна; только окно ([индекс ссылок](../features/knowledge-base/link-index.md)) |
 | `text_search` | `project`, `query`, регистр, regex, путь, `modules`/`files`, пределы; `path`/`offset`/`revision` для порции | документы с вхождениями, UTF-16 диапазоны, усечение, пропуски и время; читает диск без индекса и модели; только окно ([поиск в тексте](../features/search/text-search.md)) |
 
@@ -182,7 +184,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | -32005 | `reindex_needs_consent` | `reindex` по проекту в состоянии `reindex_required` без согласия пользователя (Т-25) |
 | -32006 | `file_not_found` | нет файла для `read` или `outline` |
 | -32007 | `invalid_params` | параметр вне допустимого: неизвестный модуль, `limit` меньше 1 |
-| -32008 | `provider_error` | внешняя модель не ответила; текст без ключей ([secrets.md](secrets.md)) |
+| -32008 | `provider_error` | модель не ответила; текст без ключей ([secrets.md](secrets.md)). У встроенной модели `data.reason` — `network`, `files_missing`, `out_of_memory` или `runtime` ([экраны ошибок](../features/window/error-states.md), «Виды ошибок встроенной модели»); у внешней `reason` нет |
 | -32009 | `model_loading` | встроенная модель ещё скачивается или загружается; в `data.percent` — ход скачивания в процентах, 100 — файлы на месте, модель грузится в память |
 | -32010 | `graph_not_ready` | нужный слой графа не построен или отстаёт; в `mix` вместо ошибки идёт возврат к `hybrid` с причиной |
 | -32011 | `graph_capability_unavailable` | запрошенная возможность графа не поддержана (например `change_description` у `impact`, `roots` у `context`) |

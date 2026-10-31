@@ -12,6 +12,7 @@ export type EditorStatus =
   | "saved"     // записано
   | "error"     // запись не удалась, черновик в памяти
   | "conflict"  // диск изменился при несохранённых правках
+  | "deleted"   // файла на диске больше нет; текст остаётся в окне, автосохранение стоит
   | "readonly"; // не UTF-8, слишком большой или файл только для чтения
 
 /** Т-29: запись через 1 с после последнего изменения. */
@@ -54,6 +55,8 @@ export class EditorBuffer {
   #timer: ReturnType<typeof setTimeout> | undefined;
   #writing: Promise<void> | null = null;
   #generation = 0;
+  /** «Записать заново» чистого буфера: запись нужна, хотя текст не менялся. */
+  #force = false;
 
   constructor(project: string, path: string, seed: string) {
     this.project = project;
@@ -81,6 +84,12 @@ export class EditorBuffer {
       this.message = read.message;
       return;
     }
+    // Файл, который у буфера уже был, а теперь отсутствует, не стирает текст пустым документом.
+    if (read.revision === null && this.revision !== null) {
+      this.markDeleted();
+      return;
+    }
+    this.#force = false;
     this.text = read.text;
     this.historyVersion++;
     this.#saved = read.text;
@@ -100,7 +109,7 @@ export class EditorBuffer {
   edit(text: string): void {
     if (this.status === "readonly" || this.status === "loading" || text === this.text) return;
     this.text = text;
-    if (this.status === "conflict") return;
+    if (this.status === "conflict" || this.status === "deleted") return;
     this.status = this.dirty ? "dirty" : "clean";
     clearTimeout(this.#timer);
     if (this.status === "dirty") this.#timer = setTimeout(() => void this.save(), AUTOSAVE_MS);
@@ -110,7 +119,7 @@ export class EditorBuffer {
   save(): Promise<void> {
     clearTimeout(this.#timer);
     if (this.#writing) return this.#writing;
-    if (!this.dirty || this.status === "readonly" || this.status === "loading" || this.status === "conflict") return Promise.resolve();
+    if ((!this.dirty && !this.#force) || ["readonly", "loading", "conflict", "deleted"].includes(this.status)) return Promise.resolve();
     this.#writing = this.#write().finally(() => { this.#writing = null; });
     return this.#writing;
   }
@@ -122,15 +131,19 @@ export class EditorBuffer {
     if (result.status === "saved") {
       this.revision = result.revision;
       this.#saved = snapshot;
+      this.#force = false;
       this.savedAt = Date.now();
       this.message = "";
       this.onSaved?.(result.revision);
       // Правки пришли во время записи: следующая запись начнётся сразу после этой, не через секунду.
       this.status = this.dirty ? "dirty" : "saved";
     } else if (result.status === "conflict") {
-      this.status = "conflict";
       this.diskRevision = result.revision;
-      this.message = result.revision === null ? "Файл удалён с диска." : "Файл изменён на диске.";
+      if (result.revision === null) this.markDeleted();
+      else {
+        this.status = "conflict";
+        this.message = "Файл изменён на диске.";
+      }
     } else {
       this.status = "error";
       this.message = result.message;
@@ -154,9 +167,16 @@ export class EditorBuffer {
   async checkDisk(): Promise<void> {
     if (["loading", "saving", "conflict", "error"].includes(this.status) || this.#writing) return;
     const state = await documentRevision(this.project, this.path).catch(() => null);
-    if (!state || state.status !== "ok" || state.revision === this.revision) return;
+    if (!state || state.status !== "ok") return;
+    const gone = state.revision === null;
+    // Удалённый документ молчит, пока файла нет; если файл вернулся (даже тем же текстом) — это уже не удаление.
+    if (this.status === "deleted" ? gone : state.revision === this.revision) return;
     // За время запроса буфер мог начать запись или конфликт: решает уже не эта проверка.
     if (this.#writing || ["loading", "saving", "conflict"].includes(this.status)) return;
+    if (gone) {
+      this.markDeleted();
+      return;
+    }
     if (!this.dirty) {
       await this.load();
       if (this.status !== "error") this.notice = "Обновлено с диска";
@@ -165,7 +185,25 @@ export class EditorBuffer {
     clearTimeout(this.#timer);
     this.status = "conflict";
     this.diskRevision = state.revision;
-    this.message = state.revision === null ? "Файл удалён с диска." : "Файл изменён на диске.";
+    this.message = "Файл изменён на диске.";
+  }
+
+  /** Файл документа исчез: текст остаётся в окне, автосохранение стоит до решения пользователя (OQ-171). */
+  markDeleted(): void {
+    clearTimeout(this.#timer);
+    this.diskRevision = null;
+    this.status = "deleted";
+    this.message = "Файл удалён с диска.";
+  }
+
+  /** «Записать заново»: файл создаётся с `base_revision = null`; после успеха буфер чистый. */
+  restore(): Promise<void> {
+    if (this.status !== "deleted") return Promise.resolve();
+    this.revision = null;
+    this.message = "";
+    this.#force = true;
+    this.status = "dirty";
+    return this.save();
   }
 
   /** «Оставить мою версию» и «Записать заново»: пишет буфер поверх того, что сейчас на диске. */
@@ -236,12 +274,16 @@ export class Editors {
   #buffers = new Map<string, EditorBuffer>();
   #key = (project: string, path: string) => `${project}\n${path}`;
   #bus: Bus | undefined;
+  #savedListeners = new Set<(message: SavedMessage) => void>();
   /** Подпись окна в сообщениях: свою запись окно не принимает за чужую. */
   readonly id = Math.random().toString(36).slice(2);
 
   constructor(bus?: Bus) {
     this.#bus = bus ?? (typeof window !== "undefined" && inTauri() ? tauriBus() : undefined);
-    this.#bus?.listen((message) => this.#remoteSaved(message));
+    this.#bus?.listen((message) => {
+      if (message.origin !== this.id) this.#savedListeners.forEach((handler) => handler(message));
+      this.#remoteSaved(message);
+    });
     if (typeof window === "undefined") return;
     // Потеря фокуса и сворачивание в трей пишут сразу (Т-29); возвращение фокуса сверяет диск.
     window.addEventListener("focus", () => void this.checkAll());
@@ -256,6 +298,12 @@ export class Editors {
     if (buffer && buffer.revision !== message.revision) void buffer.checkDisk();
   }
 
+  /** Запись документа в этом или другом окне: окно документа по ней обновляет дерево для `[[` без опроса. */
+  subscribeSaved(handler: (message: SavedMessage) => void): () => void {
+    this.#savedListeners.add(handler);
+    return () => this.#savedListeners.delete(handler);
+  }
+
   get(project: string, path: string): EditorBuffer | undefined {
     return this.#buffers.get(this.#key(project, path));
   }
@@ -267,7 +315,11 @@ export class Editors {
     if (!buffer) {
       buffer = new EditorBuffer(project, path, seed);
       const attached = buffer;
-      buffer.onSaved = (revision) => this.#bus?.emit({ project, path: attached.path, revision, origin: this.id });
+      buffer.onSaved = (revision) => {
+        const message = { project, path: attached.path, revision, origin: this.id };
+        this.#savedListeners.forEach((handler) => handler(message));
+        this.#bus?.emit(message);
+      };
       this.#buffers.set(key, buffer);
       if (inTauri()) void buffer.load();
       else buffer.status = "clean";
@@ -287,6 +339,22 @@ export class Editors {
       buffer.dispose();
       this.#buffers.delete(this.#key(buffer.project, buffer.path));
     }
+  }
+
+  /**
+   * Документы удалены самим bars (корзина): буферы под путём переходят в «файл удалён».
+   * Возвращает пути буферов без правок — окно закрывает их вкладки (OQ-171).
+   */
+  trashed(project: string, path: string): string[] {
+    const clean: string[] = [];
+    for (const buffer of this.#buffers.values()) {
+      if (buffer.project !== project || !(buffer.path === path || buffer.path.startsWith(path + "/"))) continue;
+      const wasDirty = buffer.dirty || buffer.status === "saving";
+      // Идущая запись сама закончится конфликтом «файла нет» и переведёт буфер в «файл удалён».
+      if (buffer.status !== "saving") buffer.markDeleted();
+      if (!wasDirty) clean.push(buffer.path);
+    }
+    return clean;
   }
 
   /** Закрытие без записи: буфер и его правки удаляются. */

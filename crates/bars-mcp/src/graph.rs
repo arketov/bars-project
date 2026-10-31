@@ -1,90 +1,406 @@
 use super::*;
 use bars_graph::{
-    Analysis, Budgets, Direction, Endpoint as GraphEndpoint, GraphRequest, ObjectRef, Operation,
-    PathKind, Polarity, Predicate, Role, Scope, View,
+    Analysis, Budgets, Direction, Endpoint as GraphEndpoint, GraphRequest, Grouping, ObjectRef,
+    Operation, PathKind, Polarity, Predicate, Role, Scope, TaskProfile, View,
 };
 use std::collections::BTreeMap;
 
-#[derive(Debug, Default, Deserialize, Serialize, schemars::JsonSchema)]
-#[serde(default, deny_unknown_fields)]
-pub struct GraphArgs {
-    pub project: Option<String>,
-    pub format: Option<Format>,
-    /// Вопрос на языке пользователя; обязателен для context и один из входов relations.
-    pub query: Option<String>,
-    pub entity_ref: Option<ObjectRef>,
-    pub from: Option<GraphEndpoint>,
-    pub to: Option<GraphEndpoint>,
-    pub roots: Vec<ObjectRef>,
-    /// Область как у rag_search: существующие модули и/или файлы от docs-root.
-    pub modules: Vec<String>,
-    pub files: Vec<String>,
-    pub snapshot: Option<String>,
-    pub cursor: Option<String>,
-    pub budgets: Budgets,
-    pub limit: Option<u32>,
-    pub predicates: Vec<Predicate>,
-    pub direction: Direction,
-    pub polarity: Option<Polarity>,
-    pub qualifiers: BTreeMap<String, String>,
-    pub view: View,
-    pub local: bool,
-    pub include_paths: bool,
-    pub path_kind: PathKind,
-    pub max_hops: Option<u32>,
-    pub max_paths: Option<u32>,
-    pub topic: Option<String>,
-    pub whole_scope: bool,
-    pub analysis: Analysis,
-    pub grouping: bars_graph::Grouping,
-    pub roles: Vec<Role>,
-    pub task_profile: Option<bars_graph::TaskProfile>,
-    pub token_budget: Option<u32>,
-    pub tokenizer_id: Option<String>,
-    pub change_description: Option<String>,
+/// Время графовой операции в MCP по умолчанию, мс; воркер прижимает любое значение к тому же пределу (OQ-219).
+const GRAPH_TIMEOUT_MS: u32 = 5000;
+
+/// Схема без служебного шума: `default`, `uint32`, `minimum: 0` и `["x","null"]` не помогают
+/// агенту, а шесть схем списка инструментов держат в 14 КБ (контракт ответа графа, 4.3.2).
+fn slim(schema: &mut schemars::Schema) {
+    fn walk(value: &mut serde_json::Value) {
+        match value {
+            serde_json::Value::Object(map) => {
+                map.remove("default");
+                if map.get("format").is_some_and(|v| v == "uint32") {
+                    map.remove("format");
+                }
+                if map.get("minimum").is_some_and(|v| v == 0) {
+                    map.remove("minimum");
+                }
+                if let Some(serde_json::Value::Array(kinds)) = map.get("type") {
+                    let rest: Vec<_> = kinds.iter().filter(|k| *k != "null").cloned().collect();
+                    if rest.len() == 1 {
+                        map.insert("type".into(), rest[0].clone());
+                    }
+                }
+                map.values_mut().for_each(walk);
+            }
+            serde_json::Value::Array(items) => items.iter_mut().for_each(walk),
+            _ => {}
+        }
+    }
+    if let Some(map) = schema.as_object_mut() {
+        let mut value = serde_json::Value::Object(std::mem::take(map));
+        walk(&mut value);
+        if let serde_json::Value::Object(slim) = value {
+            *map = slim;
+        }
+    }
 }
-impl BarsMcp {
-    pub(super) async fn graph_call(&self, args: GraphArgs, operation: Operation) -> CallToolResult {
-        let format = args.format;
-        let target = self.target(args.project);
-        let request = GraphRequest {
+
+/// `format` без отдельного определения Format: оно ещё раз повторяло бы описания в каждой схеме.
+fn format_schema(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
+    schemars::json_schema!({
+        "description": "По умолчанию `txt`.",
+        "type": "string",
+        "enum": ["txt", "json"]
+    })
+}
+
+/// Объект графа как в другом ответе: `kind`, `id`, `revision` без изменений.
+fn object_ref_schema(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
+    schemars::json_schema!({
+        "description": "Объект из ответа графа: kind, id, revision как получены.",
+        "type": "object",
+        "properties": {
+            "kind": {"type": "string"},
+            "id": {"type": "string"},
+            "revision": {"type": "string"}
+        },
+        "required": ["kind", "id", "revision"]
+    })
+}
+
+/// Массив объектов графа для `roots`.
+fn object_refs_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+    schemars::json_schema!({
+        "description": "Объекты из ответа графа.",
+        "type": "array",
+        "items": object_ref_schema(generator)
+    })
+}
+
+/// Список предикатов связи по именам, без определения с описаниями вариантов.
+fn predicates_schema(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
+    schemars::json_schema!({
+        "description": "Только эти предикаты.",
+        "type": "array",
+        "items": {
+            "type": "string",
+            "enum": [
+                "contains", "covers", "next_chunk", "links_to", "mentions", "depends_on", "uses",
+                "implements", "verifies", "supersedes", "requires", "similar_to", "co_occurs",
+                "member_of"
+            ]
+        }
+    })
+}
+
+/// Структура аргументов одной операции: общие поля и поля операции. Своя структура на операцию даёт
+/// схему без чужих полей (ISS-23); `deny_unknown_fields` отклоняет поле другой операции, а не глотает.
+macro_rules! graph_args {
+    ($(#[$meta:meta])* $name:ident { $($(#[$fmeta:meta])* $field:ident: $ty:ty,)* }) => {
+        $(#[$meta])*
+        #[derive(Debug, Default, Deserialize, Serialize, schemars::JsonSchema)]
+        #[serde(default, deny_unknown_fields)]
+        #[schemars(transform = slim)]
+        pub struct $name {
+            /// Путь или имя проекта; по умолчанию проект сессии.
+            pub project: Option<String>,
+            #[schemars(schema_with = "format_schema")]
+            pub format: Option<Format>,
+            /// Область: папки первого уровня docs-root.
+            pub modules: Vec<String>,
+            /// Область: документы, пути от docs-root.
+            pub files: Vec<String>,
+            /// Время, мс: по умолчанию и максимум 5000.
+            pub timeout_ms: Option<u32>,
+            $($(#[$fmeta])* pub $field: $ty,)*
+        }
+    };
+}
+
+graph_args!(RelationsArgs {
+    /// Имя или вопрос; вместо `entity_ref`.
+    query: Option<String>,
+    #[schemars(schema_with = "object_ref_schema")]
+    entity_ref: Option<ObjectRef>,
+    #[schemars(schema_with = "predicates_schema")]
+    predicates: Vec<Predicate>,
+    /// Направление связей; по умолчанию `both`.
+    direction: Direction,
+    /// `positive`, `negative` или `any`: утверждение или «связи нет» в тексте.
+    polarity: Option<Polarity>,
+    /// Только с этими условиями: `condition`, `platform`, `version`, `kind`.
+    qualifiers: BTreeMap<String, String>,
+    /// Сколько фактов вернуть.
+    limit: Option<u32>,
+    /// `next_cursor` прошлого ответа.
+    cursor: Option<String>,
+});
+
+graph_args!(PathsArgs {
+    /// Начало пути: объект из ответа графа или `{"label":"…"}` с необязательным `kind`.
+    from: Option<GraphEndpoint>,
+    /// Конец пути в той же форме.
+    to: Option<GraphEndpoint>,
+    /// `semantic` (по умолчанию), `structural` или `mixed`.
+    path_kind: PathKind,
+    /// Не длиннее стольких шагов.
+    max_hops: Option<u32>,
+    /// Не больше стольких путей (максимум 20).
+    max_paths: Option<u32>,
+    #[schemars(schema_with = "predicates_schema")]
+    predicates: Vec<Predicate>,
+});
+
+graph_args!(ImpactArgs {
+    #[schemars(schema_with = "object_refs_schema")]
+    roots: Vec<ObjectRef>,
+    #[schemars(schema_with = "predicates_schema")]
+    predicates: Vec<Predicate>,
+    /// Глубина обхода зависимостей (по умолчанию 2, максимум 6).
+    max_depth: Option<u32>,
+    /// Сколько документов вернуть.
+    limit: Option<u32>,
+    /// `next_cursor` прошлого ответа.
+    cursor: Option<String>,
+});
+
+graph_args!(ContextArgs {
+    /// Задача или вопрос на языке пользователя; обязателен.
+    query: Option<String>,
+    /// `implementation`, `investigation` или `decision`: какие роли нужны задаче.
+    task_profile: Option<TaskProfile>,
+    /// Только эти роли вместо набора профиля.
+    roles: Vec<Role>,
+    /// Размер ответа в токенах (оценка: токен — 3 байта).
+    token_budget: Option<u32>,
+});
+
+graph_args!(ExploreArgs {
+    /// Тема обзора; вместо `whole_scope`.
+    topic: Option<String>,
+    /// `true` — весь проект или выбранная область; вместо `topic`.
+    whole_scope: bool,
+    /// `topics`, `connectivity`, `coverage` или `conflict_candidates`.
+    analysis: Analysis,
+    /// Группировка тем: `communities` или `modules`.
+    grouping: Grouping,
+    /// Сколько элементов вернуть.
+    limit: Option<u32>,
+    /// `next_cursor` прошлого ответа.
+    cursor: Option<String>,
+});
+
+graph_args!(GraphViewArgs {
+    /// Что показывать; по умолчанию `documents`.
+    view: View,
+    /// `true` — окрестность `roots`; иначе общий граф.
+    local: bool,
+    #[schemars(schema_with = "object_refs_schema")]
+    roots: Vec<ObjectRef>,
+    #[schemars(schema_with = "predicates_schema")]
+    predicates: Vec<Predicate>,
+    /// Направление связей от корней; по умолчанию `both`.
+    direction: Direction,
+    /// Глубина окрестности для `local` (по умолчанию 2, максимум 6).
+    max_depth: Option<u32>,
+    /// Добавить пути между найденными узлами.
+    include_paths: bool,
+    /// Сколько рёбер и узлов вернуть.
+    limit: Option<u32>,
+    /// `next_cursor` прошлого ответа.
+    cursor: Option<String>,
+});
+
+/// Готовый вызов графовой операции: проект, формат и запрос воркеру.
+pub(super) struct Call {
+    project: Option<String>,
+    format: Option<Format>,
+    request: GraphRequest,
+}
+
+fn call(
+    operation: Operation,
+    project: Option<String>,
+    format: Option<Format>,
+    scope: Scope,
+    timeout_ms: Option<u32>,
+) -> Call {
+    Call {
+        project,
+        format,
+        request: GraphRequest {
             operation,
-            scope: Scope {
-                modules: args.modules,
-                files: args.files,
+            scope,
+            budgets: Budgets {
+                timeout_ms: Some(timeout_ms.unwrap_or(GRAPH_TIMEOUT_MS)),
+                ..Budgets::default()
             },
-            budgets: args.budgets,
-            limit: args.limit,
-            snapshot: args.snapshot,
-            cursor: args.cursor,
-            query: args.query,
-            entity_ref: args.entity_ref,
-            from: args.from,
-            to: args.to,
-            roots: args.roots,
-            predicates: args.predicates,
-            direction: args.direction,
-            polarity: args.polarity,
-            qualifiers: args.qualifiers,
-            view: args.view,
-            local: args.local,
-            include_paths: args.include_paths,
-            path_kind: args.path_kind,
-            max_hops: args.max_hops,
-            max_paths: args.max_paths,
-            topic: args.topic,
-            whole_scope: args.whole_scope,
-            analysis: args.analysis,
-            grouping: args.grouping,
-            roles: args.roles,
-            task_profile: args.task_profile,
-            token_budget: args.token_budget,
-            tokenizer_id: args.tokenizer_id,
-            change_description: args.change_description,
+            ..GraphRequest::default()
+        },
+    }
+}
+
+impl RelationsArgs {
+    pub(super) fn into_call(self) -> Call {
+        let scope = Scope {
+            modules: self.modules,
+            files: self.files,
         };
+        let mut c = call(
+            Operation::Relations,
+            self.project,
+            self.format,
+            scope,
+            self.timeout_ms,
+        );
+        let r = &mut c.request;
+        r.query = self.query;
+        r.entity_ref = self.entity_ref;
+        r.predicates = self.predicates;
+        r.direction = self.direction;
+        r.polarity = self.polarity;
+        r.qualifiers = self.qualifiers;
+        r.limit = self.limit;
+        r.cursor = self.cursor;
+        c
+    }
+}
+
+impl PathsArgs {
+    pub(super) fn into_call(self) -> Call {
+        let scope = Scope {
+            modules: self.modules,
+            files: self.files,
+        };
+        let mut c = call(
+            Operation::Paths,
+            self.project,
+            self.format,
+            scope,
+            self.timeout_ms,
+        );
+        let r = &mut c.request;
+        r.from = self.from;
+        r.to = self.to;
+        r.path_kind = self.path_kind;
+        r.max_hops = self.max_hops;
+        r.max_paths = self.max_paths;
+        r.predicates = self.predicates;
+        c
+    }
+}
+
+impl ImpactArgs {
+    pub(super) fn into_call(self) -> Call {
+        let scope = Scope {
+            modules: self.modules,
+            files: self.files,
+        };
+        let mut c = call(
+            Operation::Impact,
+            self.project,
+            self.format,
+            scope,
+            self.timeout_ms,
+        );
+        let r = &mut c.request;
+        r.roots = self.roots;
+        r.predicates = self.predicates;
+        r.budgets.max_depth = self.max_depth;
+        r.limit = self.limit;
+        r.cursor = self.cursor;
+        c
+    }
+}
+
+impl ContextArgs {
+    pub(super) fn into_call(self) -> Call {
+        let scope = Scope {
+            modules: self.modules,
+            files: self.files,
+        };
+        let mut c = call(
+            Operation::Context,
+            self.project,
+            self.format,
+            scope,
+            self.timeout_ms,
+        );
+        let r = &mut c.request;
+        r.query = self.query;
+        r.task_profile = self.task_profile;
+        r.roles = self.roles;
+        r.token_budget = self.token_budget;
+        c
+    }
+}
+
+impl ExploreArgs {
+    pub(super) fn into_call(self) -> Call {
+        let scope = Scope {
+            modules: self.modules,
+            files: self.files,
+        };
+        let mut c = call(
+            Operation::Explore,
+            self.project,
+            self.format,
+            scope,
+            self.timeout_ms,
+        );
+        let r = &mut c.request;
+        r.topic = self.topic;
+        r.whole_scope = self.whole_scope;
+        r.analysis = self.analysis;
+        r.grouping = self.grouping;
+        r.limit = self.limit;
+        r.cursor = self.cursor;
+        c
+    }
+}
+
+impl GraphViewArgs {
+    pub(super) fn into_call(self) -> Call {
+        let scope = Scope {
+            modules: self.modules,
+            files: self.files,
+        };
+        let mut c = call(
+            Operation::Graph,
+            self.project,
+            self.format,
+            scope,
+            self.timeout_ms,
+        );
+        let r = &mut c.request;
+        r.view = self.view;
+        r.local = self.local;
+        r.roots = self.roots;
+        r.predicates = self.predicates;
+        r.direction = self.direction;
+        r.budgets.max_depth = self.max_depth;
+        r.include_paths = self.include_paths;
+        r.limit = self.limit;
+        r.cursor = self.cursor;
+        c
+    }
+}
+
+impl BarsMcp {
+    pub(super) async fn graph_call(
+        &self,
+        original: observation::Original,
+        call: Call,
+    ) -> CallToolResult {
+        let Call {
+            project,
+            format,
+            request,
+        } = call;
+        let target = self.target(project);
         finish(
-            self.call(&bars_protocol::GraphQueryParams { target, request })
-                .await,
+            self.call_observed(
+                &bars_protocol::GraphQueryParams { target, request },
+                Some(&original.0),
+            )
+            .await,
             format,
             |out| {
                 format!(

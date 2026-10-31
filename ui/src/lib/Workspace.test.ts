@@ -141,6 +141,8 @@ it("чтение из слоя завершает переход докумен�
   app.viewer = { hit: hit('docs/deleted.md'), title: 'Удалён', text: '', missing: true }; flushSync(); await settle();
   expect(document.querySelector<HTMLDialogElement>('dialog[aria-label="Глобальный поиск"]')!.open).toBe(false);
   expect(document.activeElement?.closest('.document')?.textContent).toContain('Файл не найден');
+  const missing = document.activeElement?.closest('.document')?.textContent ?? '';
+  expect(missing).toContain('Закрыть вкладку'); expect(missing).toContain('Создать файл'); expect(missing).not.toContain('Обновить выдачу');
 });
 
 it("слой сохраняет общие режимы, показывает ошибку и передаёт согласие на переиндексацию", async () => {

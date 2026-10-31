@@ -1,4 +1,5 @@
-import type { DockviewApi } from 'dockview-core';
+import type { DockviewApi, IDockviewPanel } from 'dockview-core';
+import { noOtherTabs, noRightTabs, registerTabHost, type TabState } from './workspace-tabs';
 import { tick } from 'svelte';
 import { app } from './app.svelte';
 import { catalog } from './keybindings';
@@ -46,8 +47,23 @@ export function workspaceCommands(options:WorkspaceCommands) {
     if (id.startsWith('project.')) return app.current?undefined:'Проект не выбран';
     if (['file.create','folder.create','target.rename','target.move','target.delete','target.style','target.checkIndex','target.openExternal'].includes(id)) return 'Выберите строку дерева';
     if (id.startsWith('target.')) return target.path&&(!target.folder||id!=='target.open')?undefined:'Выберите файл или папку';
+    if (id==='tab.closeOthers'||id==='tab.closeRight') {
+      const tab=target.panel?tabState(target.panel):undefined; if(!tab) return 'Нет активной вкладки';
+      return id==='tab.closeOthers'?(tab.others?undefined:noOtherTabs):(tab.right?undefined:noRightTabs);
+    }
     if (['panel.next','panel.previous','tab.next','tab.previous','tab.close','tab.move','panel.resize'].includes(id)) return target.panel?undefined:'Нет активной вкладки';
     return 'Выберите соответствующую строку или панель';
+  }
+  function tabState(id:string):TabState|undefined {
+    const panel=api.getPanel(id); if(!panel) return;
+    const panels=panel.group.panels, index=panels.indexOf(panel);
+    return {others:panels.length-1,right:panels.length-1-index,canMove:api.groups.length>1||panels.length>1};
+  }
+  /** НФТ-5: вкладка с несохранёнными правками закрывается только после записи или решения пользователя. */
+  async function closePanel(panel:IDockviewPanel):Promise<boolean> {
+    const params=panel.params as {kind?:string;hit?:{path:string}}|undefined;
+    if(params?.kind==='document'&&params.hit&&!(await confirmClose(app.current,params.hit.path))) return false;
+    panel.api.close(); return true;
   }
   function focus(id:string) {
     const panel=api.getPanel(id); if(!panel) return;
@@ -103,10 +119,13 @@ export function workspaceCommands(options:WorkspaceCommands) {
     }
     if(id==='tab.next'||id==='tab.previous') {const tabs=panel.group.panels;focus(tabs[(tabs.indexOf(panel)+(id==='tab.next'?1:-1)+tabs.length)%tabs.length].id);return;}
     if(id==='tab.close') {
-      const params=panel.params as {kind?:string;hit?:{path:string}}|undefined;
-      // НФТ-5: вкладка с несохранёнными правками закрывается только после записи или решения пользователя.
-      if(params?.kind==='document'&&params.hit&&!(await confirmClose(app.current,params.hit.path)))return;
-      panel.api.close();if(api.activePanel)focus(api.activePanel.id);return;
+      if(!(await closePanel(panel)))return;
+      if(api.activePanel)focus(api.activePanel.id);return;
+    }
+    if(id==='tab.closeOthers'||id==='tab.closeRight') {
+      const panels=[...panel.group.panels], index=panels.indexOf(panel);
+      for(const other of id==='tab.closeOthers'?panels.filter(p=>p!==panel):panels.slice(index+1)) if(!(await closePanel(other)))break;
+      if(api.activePanel)focus(api.activePanel.id);return;
     }
     if(id==='panel.resize') {options.resize(panel.id);return;}
     if(id==='tab.move') {
@@ -133,5 +152,14 @@ export function workspaceCommands(options:WorkspaceCommands) {
     event.preventDefault();event.stopImmediatePropagation();void execute(command.id,target).catch(e=>app.flash(String(e),true));
   }
   window.addEventListener('keydown',route);window.addEventListener('compositionstart',start);window.addEventListener('compositionend',end);
-  return { execute,show,dispose:()=>{window.removeEventListener('keydown',route);window.removeEventListener('compositionstart',start);window.removeEventListener('compositionend',end);} };
+  const unregister=registerTabHost({
+    // Содержимое панели при рендерере «always» лежит вне элемента группы: ищем панель по её собственным элементам.
+    panelAt:element=>{
+      const own=element.closest<HTMLElement>('[data-workspace-panel]')?.dataset.workspacePanel;
+      return own&&api.getPanel(own)?own:api.panels.find(panel=>panel.view.content.element.contains(element))?.id;
+    },
+    state:tabState,
+    run:(id,panelId)=>execute(id,{...capture(),panel:panelId}),
+  });
+  return { execute,show,dispose:()=>{unregister();window.removeEventListener('keydown',route);window.removeEventListener('compositionstart',start);window.removeEventListener('compositionend',end);} };
 }
