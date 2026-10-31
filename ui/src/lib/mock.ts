@@ -373,6 +373,7 @@ function status(path: string): StatusOutput {
 }
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const projectNames = new Map<string, string>();
 
 export async function mockCall(method: string, params: Record<string, unknown>): Promise<unknown> {
   if (method === "project_observe") return { saved: true };
@@ -401,7 +402,15 @@ export async function mockCall(method: string, params: Record<string, unknown>):
   if (scene() === "worker-down") throw new BarsError("нет связи с воркером", null, -32603);
   switch (method) {
     case "projects":
-      return { projects: projects() };
+      return { projects: projects().map(p => ({ ...p, name: projectNames.get(p.path) ?? p.name })) };
+    case "project_rename": {
+      const name = String(params.name ?? "").trim();
+      if (!name || /[\x00-\x1f\x7f-\x9f]/.test(name)) throw new Error("Введите имя проекта без управляющих символов");
+      const project = projects().find(p => p.path === params.project);
+      if (!project) throw new Error("Проект не зарегистрирован");
+      projectNames.set(project.path, name);
+      return { saved: true };
+    }
     case "status":
       return status(String(params.project ?? params.cwd));
     case "tree": {

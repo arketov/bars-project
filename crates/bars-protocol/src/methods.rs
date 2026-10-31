@@ -430,6 +430,12 @@ pub struct ProjectObserveParams {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ProjectRenameParams {
+    pub project: String,
+    pub name: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RegisterOutput {
     pub project: ProjectInfo,
 }
@@ -1129,6 +1135,7 @@ methods! {
     Unregister: UnregisterParams => UnregisterOutput, "unregister", Cli;
     ProjectDelete: ProjectDeleteParams => UnregisterOutput, "project_delete", Window;
     ProjectObserve: ProjectObserveParams => SavedOutput, "project_observe", Window;
+    ProjectRename: ProjectRenameParams => SavedOutput, "project_rename", Window;
     SessionStart: SessionStartParams => AcceptedOutput, "session_start", Cli;
     Install: InstallParams => InstallOutput, "install", Cli;
     Uninstall: UninstallParams => UninstallOutput, "uninstall", Cli;

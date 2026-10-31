@@ -285,6 +285,8 @@
         const result = await folderAction(directory.id, action);
         if (action === "path") { await copyText(result.absolute); app.flash(result.missing ? "Путь скопирован; папка отсутствует" : "Путь скопирован"); }
         if (action === "check") app.flash(`Проверка проекта в очереди · №${result.operation_id}`);
+      } else if (projectPath && item.action === "renameProject") {
+        app.requestRenameProject(projectPath);
       } else if (projectPath && item.action === "deleteProject") {
         app.requestDeleteProject(projectPath);
       } else if (projectPath && item.action === "checkProject") {

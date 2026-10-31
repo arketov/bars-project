@@ -1,7 +1,7 @@
 //! Реестр проектов: `~/.bars/projects.toml` и поиск корня проекта (`docs/architecture/projects.md`,
 //! Т-5, Т-15).
 //!
-//! Реестр хранит только пути и время регистрации. Что с проектом происходит дальше — пропал он
+//! Реестр хранит пути, отображаемые имена и время регистрации. Что с проектом происходит дальше — пропал он
 //! или вернулся, — решает воркер.
 
 use std::fs;
@@ -32,8 +32,18 @@ pub enum RegistryError {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProjectEntry {
     pub path: PathBuf,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// RFC 3339, UTC.
     pub registered_at: String,
+}
+
+impl ProjectEntry {
+    pub fn display_name(&self) -> String {
+        self.name
+            .clone()
+            .unwrap_or_else(|| project_name(&self.path))
+    }
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
@@ -108,6 +118,7 @@ impl Registry {
         }
         self.projects.push(ProjectEntry {
             path,
+            name: None,
             registered_at: rfc3339(SystemTime::now()),
         });
         if let Err(error) = self.save() {
@@ -135,7 +146,28 @@ impl Registry {
         Ok(true)
     }
 
-    /// Проект по пути или по имени папки. Путь точнее имени и выигрывает.
+    /// Меняет только имя; сбой записи откатывает изменение в памяти.
+    pub fn rename(&mut self, path: &Path, name: String) -> Result<(), RegistryError> {
+        let key = path_key(path);
+        let Some(position) = self
+            .projects
+            .iter()
+            .position(|entry| path_key(&entry.path) == key)
+        else {
+            return Err(RegistryError::Parse {
+                file: self.file.clone(),
+                message: "проект не зарегистрирован".into(),
+            });
+        };
+        let previous = self.projects[position].name.replace(name);
+        if let Err(error) = self.save() {
+            self.projects[position].name = previous;
+            return Err(error);
+        }
+        Ok(())
+    }
+
+    /// Проект по пути или отображаемому имени. Путь точнее имени и выигрывает.
     pub fn resolve(&self, selector: &str) -> Result<&ProjectEntry, ResolveError> {
         let as_path = Path::new(selector);
         if as_path.is_absolute()
@@ -146,7 +178,7 @@ impl Registry {
         let named: Vec<&ProjectEntry> = self
             .projects
             .iter()
-            .filter(|entry| project_name(&entry.path) == selector)
+            .filter(|entry| entry.display_name() == selector)
             .collect();
         match named.as_slice() {
             [] => Err(ResolveError::NotFound(selector.to_string())),
@@ -160,10 +192,13 @@ impl Registry {
 
     /// Имя носят несколько проектов: окно и `projects` показывают такие с путём.
     pub fn has_duplicate_name(&self, path: &Path) -> bool {
-        let name = project_name(path);
+        let Some(entry) = self.find(path) else {
+            return false;
+        };
+        let name = entry.display_name();
         self.projects
             .iter()
-            .filter(|entry| project_name(&entry.path) == name)
+            .filter(|entry| entry.display_name() == name)
             .count()
             > 1
     }
@@ -401,6 +436,50 @@ mod tests {
             registry.resolve("beta"),
             Err(ResolveError::NotFound(_))
         ));
+    }
+
+    #[test]
+    fn rename_persists_without_changing_identity_and_recomputes_duplicates() {
+        let home = TempDir::new().unwrap();
+        let first = dir(&home, "one/repo");
+        let second = dir(&home, "two/repo");
+        let mut registry = Registry::load(home.path()).unwrap();
+        registry.add(&first).unwrap();
+        registry.add(&second).unwrap();
+        let registered_at = registry.find(&first).unwrap().registered_at.clone();
+        assert!(registry.has_duplicate_name(&first));
+        registry.rename(&first, "Мой проект".into()).unwrap();
+        let mut registry = Registry::load(home.path()).unwrap();
+        assert_eq!(registry.resolve("Мой проект").unwrap().path, first);
+        assert_eq!(registry.resolve("repo").unwrap().path, second);
+        assert_eq!(
+            registry
+                .resolve(&first.to_string_lossy())
+                .unwrap()
+                .registered_at,
+            registered_at
+        );
+        assert!(first.is_dir());
+        assert!(!registry.has_duplicate_name(&second));
+        registry.rename(&second, "Мой проект".into()).unwrap();
+        assert!(registry.has_duplicate_name(&first));
+        assert!(matches!(
+            registry.resolve("Мой проект"),
+            Err(ResolveError::Ambiguous { .. })
+        ));
+    }
+
+    #[test]
+    fn failed_rename_keeps_previous_name_in_memory() {
+        let home = TempDir::new().unwrap();
+        let project = dir(&home, "repo");
+        let mut registry = Registry::load(home.path()).unwrap();
+        registry.add(&project).unwrap();
+        registry.file = home.path().join("missing/parent/projects.toml");
+        fs::write(home.path().join("missing"), "not a directory").unwrap();
+        assert!(registry.rename(&project, "Новое имя".into()).is_err());
+        assert_eq!(registry.resolve("repo").unwrap().path, project);
+        assert!(registry.resolve("Новое имя").is_err());
     }
 
     #[test]

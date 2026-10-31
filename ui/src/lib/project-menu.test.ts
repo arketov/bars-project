@@ -91,6 +91,16 @@ it("исчезновение целевого проекта закрывает 
   expect(document.querySelector(".cmenu")).toBeNull(); expect(api.call).not.toHaveBeenCalled();
 });
 
+it("переименование из списка относится к нажатому проекту без переключения", async () => {
+  document.querySelector<HTMLButtonElement>(".proj")!.click(); flushSync();
+  await open(document.querySelectorAll(".pitem b")[1]);
+  item("Переименовать…").click(); await settle();
+  expect(app.renamingProject?.path).toBe(second.path);
+  expect(app.current).toBe(first.path);
+  expect(api.call).not.toHaveBeenCalled();
+  app.cancelRenameProject();
+});
+
 it("пункт «Проекты» трея открывает список проектов, не переключая проект (ISS-43)", async () => {
   expect(document.querySelector(".projmenu")).toBeNull();
   app.view = "settings";

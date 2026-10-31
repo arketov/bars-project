@@ -59,7 +59,7 @@ use doc_queue::DocQueue;
 pub use doc_queue::{DocCounts, DocSource, DocState, DocView};
 use job::{JobEnv, Outcome};
 use queue::{Job, JobQueue};
-use registry::{has_markdown, normalize, project_name};
+use registry::{has_markdown, normalize};
 use watcher::{DEBOUNCE, ProjectWatcher, Sink, WatchEvent};
 
 /// Как часто воркер проверяет все проекты (Т-10). Слежение за файлами может молчать, поэтому
@@ -536,8 +536,15 @@ impl Worker {
         })
     }
 
-    /// Снимает проект с регистрации: убирает из `projects.toml`, останавливает слежение, снимает
-    /// с очереди. `.bars/` и документы проекта остаются (Т-5).
+    /// Меняет отображаемое имя, сохраняя путь и состояние проекта.
+    pub fn rename_project(&self, selector: &str, name: String) -> Result<(), WorkerError> {
+        let mut registry = lock(&self.inner.registry);
+        let path = registry.resolve(selector)?.path.clone();
+        registry.rename(&path, name)?;
+        Ok(())
+    }
+
+    /// Снимает проект с регистрации, сохраняя `.bars/` и документы (Т-5).
     pub fn unregister(&self, selector: &str) -> Result<PathBuf, WorkerError> {
         let _request = self.inner.requests.try_read().map_err(|_| {
             io::Error::other("идёт удаление проекта; повторите снятие регистрации позже")
@@ -618,7 +625,7 @@ impl Worker {
                     },
                 );
                 ProjectSnapshot {
-                    name: project_name(&entry.path),
+                    name: entry.display_name(),
                     duplicate_name,
                     docs_root: self.inner.docs_root_of(&entry.path),
                     registered_at: entry.registered_at,

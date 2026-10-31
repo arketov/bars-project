@@ -1184,6 +1184,19 @@ impl WorkerHandler {
                     .map_err(graph::graph_error)
             }
             Call::ProjectDelete(_) => unreachable!(),
+            Call::ProjectRename(params) => {
+                let name = params.name.trim();
+                if name.is_empty() || name.chars().any(char::is_control) {
+                    return Err(RpcError::bars(
+                        ErrorKind::InvalidParams,
+                        "введите имя проекта без управляющих символов",
+                    ));
+                }
+                self.worker
+                    .rename_project(&params.project, name.to_string())
+                    .map_err(worker_error)?;
+                Ok(output_value(&SavedOutput { saved: true }))
+            }
             Call::ProjectObserve(params) => {
                 if params.window.is_empty() || params.window.len() > 128 {
                     return Err(RpcError::standard(

@@ -776,6 +776,46 @@ class App {
     if (project) await openPath(joinPath(project.path, path));
   }
 
+  renamingProject = $state<ProjectInfo | null>(null);
+  renameBusy = $state(false);
+  renameError = $state<string | null>(null);
+
+  requestRenameProject(path: string): void {
+    if (this.renameBusy) return;
+    const project = this.projects.find(p => p.path === path);
+    if (!project) return;
+    this.renameError = null;
+    this.renamingProject = { ...project };
+  }
+
+  cancelRenameProject(): void {
+    if (this.renameBusy) return;
+    this.renamingProject = null;
+    this.renameError = null;
+  }
+
+  async renameProject(name: string): Promise<void> {
+    const project = this.renamingProject;
+    if (!project || this.renameBusy) return;
+    name = name.trim();
+    if (!name || /[\x00-\x1f\x7f-\x9f]/.test(name)) {
+      this.renameError = "Введите имя проекта без управляющих символов";
+      return;
+    }
+    this.renameBusy = true;
+    this.renameError = null;
+    try {
+      await call("project_rename", { project: project.path, name });
+      this.projects = this.projects.map(p => p.path === project.path ? { ...p, name } : p);
+      this.renamingProject = null;
+      this.flash(`Проект переименован в «${name}»`);
+    } catch (error) {
+      this.renameError = error instanceof Error ? error.message : String(error);
+    } finally {
+      this.renameBusy = false;
+    }
+  }
+
   async addProject(): Promise<void> {
     const path = await pickFolder();
     if (!path) return;

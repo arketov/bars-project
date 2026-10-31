@@ -1,7 +1,7 @@
 /** Логика контекстного меню окна (ISS-07): какие пункты показать и как их выполнить. */
 
 export type EntryMenuAction = "newDoc" | "newDir" | "rename" | "move" | "trash";
-export type MenuAction = EntryMenuAction | "copy" | "paste" | "selectAll" | "undo" | "redo" | "cut" | "closeTab" | "closeOthers" | "closeRight" | "moveTab" | "documentSub" | "open" | "newWindow" | "editors" | "editor" | "reveal" | "path" | "check" | "appearance" | "deleteProject" | "checkProject" | "copyTopic" | "closeTopic" | "copyLink" | "createTarget" | "goHeading" | "copyHeading" | "details" | "retry" | "copyLog";
+export type MenuAction = EntryMenuAction | "copy" | "paste" | "selectAll" | "undo" | "redo" | "cut" | "closeTab" | "closeOthers" | "closeRight" | "moveTab" | "documentSub" | "open" | "newWindow" | "editors" | "editor" | "reveal" | "path" | "check" | "appearance" | "deleteProject" | "renameProject" | "checkProject" | "copyTopic" | "closeTopic" | "copyLink" | "createTarget" | "goHeading" | "copyHeading" | "details" | "retry" | "copyLog";
 
 export function topicAt(target: EventTarget | null): { id: number; element: HTMLElement } | null {
   const element = target instanceof Element ? target.closest<HTMLElement>("[data-new-topic-id]") : null;
@@ -30,6 +30,7 @@ export function projectAt(target: EventTarget | null): string | null {
 export function projectItems(): MenuItem[] {
   return [
     { action: "deleteProject", label: "Удалить проект" },
+    { action: "renameProject", label: "Переименовать…" },
     { action: "checkProject", label: "Проверить индекс" },
   ];
 }

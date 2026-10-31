@@ -274,6 +274,41 @@ async fn project_deletion_requires_confirmation_and_is_window_only() {
     env.worker.shutdown().await;
 }
 
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn project_rename_updates_tools_without_changing_path_or_index() {
+    use bars_protocol::{ProjectRenameParams, ProjectsOutput, ProjectsParams, SavedOutput};
+    let env = Window::new();
+    let project = env.project("repo", "docs");
+    env.worker.register(&project).unwrap();
+    env.idle().await;
+    let index = project.join(".bars/index.sqlite");
+    let before = fs::read(&index).unwrap();
+    let params = ProjectRenameParams {
+        project: project.display().to_string(),
+        name: "  Мои знания  ".into(),
+    };
+    assert!(Call::ProjectRename(params.clone()).window_only());
+    let saved: SavedOutput = env.call(Call::ProjectRename(params.clone())).await;
+    assert!(saved.saved);
+    let output: ProjectsOutput = env.call(Call::Projects(ProjectsParams {})).await;
+    assert_eq!(output.projects[0].name, "Мои знания");
+    assert_eq!(output.projects[0].path, params.project);
+    assert_eq!(env.worker.resolve("Мои знания").unwrap(), project);
+    assert!(env.worker.resolve("repo").is_err());
+    assert_eq!(fs::read(&index).unwrap(), before);
+    for name in ["  ", "имя\nпроекта"] {
+        let error = env
+            .error(Call::ProjectRename(ProjectRenameParams {
+                name: name.into(),
+                ..params.clone()
+            }))
+            .await;
+        assert_eq!(error.kind(), Some(ErrorKind::InvalidParams));
+    }
+    assert_eq!(env.worker.projects()[0].name, "Мои знания");
+    env.worker.shutdown().await;
+}
+
 struct Window {
     home: TempDir,
     projects: TempDir,

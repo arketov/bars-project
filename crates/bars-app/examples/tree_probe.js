@@ -20,6 +20,24 @@
   try {
     const row = await wait(() => document.querySelector('[data-folder-path="Пустая"]'), 'пустая папка');
     const project = document.querySelector('[data-project-path]').dataset.projectPath;
+    for (const theme of ['light', 'dark']) {
+      document.documentElement.dataset.theme = theme;
+      document.querySelector('.proj').dispatchEvent(new MouseEvent('contextmenu', {bubbles:true, cancelable:true, clientX:60, clientY:90}));
+      const rename = await wait(() => [...document.querySelectorAll('[role=menuitem]')].find(item => item.textContent.startsWith('Переименовать…')), 'переименование проекта в меню');
+      rename.click();
+      const form = await wait(() => document.querySelector('dialog[open] form'), 'диалог имени проекта');
+      const input = form.querySelector('input');
+      assert(document.activeElement === input && input.selectionEnd === input.value.length, `фокус имени проекта: ${theme}`);
+      assert(form.textContent.includes('Папка и путь останутся прежними'), `подсказка переименования: ${theme}`);
+      const name = `Мои знания ${theme}`;
+      input.value = name; input.dispatchEvent(new Event('input', {bubbles:true}));
+      await new Promise(resolve => setTimeout(resolve, 0));
+      form.requestSubmit();
+      await wait(() => !document.querySelector('dialog[open]'), 'сохранение имени проекта');
+      await wait(() => document.querySelector('.proj b')?.textContent === name, 'новое имя проекта');
+      const output = await invoke('bars_call', {method:'projects',params:{}});
+      assert(output.projects[0].name === name && output.projects[0].path === project, `настоящее имя и неизменный путь: ${theme}`);
+    }
     assert(!!row.querySelector('input[type=checkbox]'), 'пустая папка видна до индексации с галочкой');
     row.dispatchEvent(new MouseEvent('contextmenu', {bubbles:true, cancelable:true, clientX:40, clientY:100}));
     await wait(() => document.querySelector('[role=menuitem]'), 'меню пустой папки');
