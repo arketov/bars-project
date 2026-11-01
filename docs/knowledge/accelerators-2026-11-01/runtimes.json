@@ -1,0 +1,229 @@
+[
+  {
+    "file": "cuda.artifact.json",
+    "value": {
+      "kind": "cuda",
+      "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11953/llama-b11953-bin-win-cuda-12.4-x64.zip",
+      "sha256": "45d9b8169c0ca8592df639f9462e4091f466fe63238bd748be16c636fbc3406d",
+      "bytes": 279733477
+    }
+  },
+  {
+    "file": "cudnn-loader/artifact.json",
+    "value": {
+      "manifestUrl": "https://developer.download.nvidia.com/compute/cudnn/redist/redistrib_9.23.0.json",
+      "url": "https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/windows-x86_64/cudnn-windows-x86_64-9.23.0.39_cuda12-archive.zip",
+      "archive_manifest_sha256": "495fa625573ec022fab3330d2eeaef62ffaa87b5af6e6ae0d6980f27760f7eee",
+      "whole_archive_verified": false,
+      "entry": {
+        "name": "cudnn-windows-x86_64-9.23.0.39_cuda12-archive/bin/x64/cudnn64_9.dll",
+        "method": 8,
+        "compressed": 117092,
+        "bytes": 265840,
+        "offset": 10516
+      },
+      "sha256": "9fc5a9779f770c0cb14b4aad9e3f17b9cff339bf68486079e0818727239e6927",
+      "note": "Range extraction; verify NVIDIA Authenticode signature before loading"
+    }
+  },
+  {
+    "file": "cudnn-loader/cudnn_graph64_9.dll.artifact.json",
+    "value": {
+      "manifestUrl": "https://developer.download.nvidia.com/compute/cudnn/redist/redistrib_9.23.0.json",
+      "url": "https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/windows-x86_64/cudnn-windows-x86_64-9.23.0.39_cuda12-archive.zip",
+      "archive_manifest_sha256": "495fa625573ec022fab3330d2eeaef62ffaa87b5af6e6ae0d6980f27760f7eee",
+      "whole_archive_verified": false,
+      "entry": {
+        "name": "cudnn-windows-x86_64-9.23.0.39_cuda12-archive/bin/x64/cudnn_graph64_9.dll",
+        "method": 8,
+        "compressed": 39100050,
+        "bytes": 99882608,
+        "offset": 540427916
+      },
+      "sha256": "f0f5998d0711ea225b0549c5b802309c79cf859ef9d4723c9ebca186e27fc90a",
+      "note": "Range extraction; verify NVIDIA Authenticode signature before loading"
+    }
+  },
+  {
+    "file": "cudnn-loader/graph-signature.json",
+    "value": {
+      "status": "Valid",
+      "signer": "CN=NVIDIA Corporation, OU=2008B9F, O=NVIDIA Corporation, L=Santa Clara, S=California, C=US",
+      "thumbprint": "B66776FC8E70C58ED98199E8391264C827AAC534"
+    }
+  },
+  {
+    "file": "cudnn-loader/signature.json",
+    "value": {
+      "status": "Valid",
+      "signer": "CN=NVIDIA Corporation, OU=2008B9F, O=NVIDIA Corporation, L=Santa Clara, S=California, C=US",
+      "thumbprint": "B66776FC8E70C58ED98199E8391264C827AAC534"
+    }
+  },
+  {
+    "file": "onnx.artifact.json",
+    "value": {
+      "sha256": "6b7bf16d6d30180db7f386fb179aa4e4f1313f0924531a2879b7b090b56518c1",
+      "kind": "onnx",
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.28.0/onnxruntime-win-x64-gpu_cuda12-1.28.0.zip",
+      "bytes": 455344532
+    }
+  },
+  {
+    "file": "onnx124.artifact.json",
+    "value": {
+      "url": "https://github.com/microsoft/onnxruntime/releases/download/v1.24.4/onnxruntime-win-x64-gpu-1.24.4.zip",
+      "sha256": "ef3337a0b8184eb8beec310f7c83bd50376b3eefc43aab84ac8e452f6987df0a",
+      "kind": "onnx124",
+      "bytes": 280958859
+    }
+  },
+  {
+    "file": "tensorrt/nvinfer_10.dll.artifact.json",
+    "value": {
+      "url": "https://developer.download.nvidia.com/compute/machine-learning/tensorrt/10.16.1/zip/TensorRT-10.16.1.11.Windows.amd64.cuda-12.9.zip",
+      "archive_bytes": 2237920590,
+      "whole_archive_verified": false,
+      "entry": {
+        "name": "TensorRT-10.16.1.11/bin/nvinfer_10.dll",
+        "method": 8,
+        "compressed": 210025951,
+        "bytes": 414579824,
+        "offset": 192133273
+      },
+      "sha256": "8760df9f4591a7da50bffc12920c745a5efb16aaf603dc33e44ef67dba0b171d",
+      "note": "Range extraction; verify NVIDIA Authenticode signature before loading"
+    }
+  },
+  {
+    "file": "tensorrt/nvinfer_builder_resource_sm86_10.dll.artifact.json",
+    "value": {
+      "url": "https://developer.download.nvidia.com/compute/machine-learning/tensorrt/10.16.1/zip/TensorRT-10.16.1.11.Windows.amd64.cuda-12.9.zip",
+      "archive_bytes": 2237920590,
+      "whole_archive_verified": false,
+      "entry": {
+        "name": "TensorRT-10.16.1.11/bin/nvinfer_builder_resource_sm86_10.dll",
+        "method": 8,
+        "compressed": 165270417,
+        "bytes": 249851504,
+        "offset": 1290718024
+      },
+      "sha256": "a571c968f39ac1c000432a5855f67bf28e160091c25c3c61d97d1e54071148a7",
+      "note": "Range extraction; verify NVIDIA Authenticode signature before loading"
+    }
+  },
+  {
+    "file": "tensorrt/nvinfer_plugin_10.dll.artifact.json",
+    "value": {
+      "url": "https://developer.download.nvidia.com/compute/machine-learning/tensorrt/10.16.1/zip/TensorRT-10.16.1.11.Windows.amd64.cuda-12.9.zip",
+      "archive_bytes": 2237920590,
+      "whole_archive_verified": false,
+      "entry": {
+        "name": "TensorRT-10.16.1.11/bin/nvinfer_plugin_10.dll",
+        "method": 8,
+        "compressed": 17900619,
+        "bytes": 48430192,
+        "offset": 1272282016
+      },
+      "sha256": "4a848f437b735960516eebb5158df517e3829775b5802a1537ba942a17bd3923",
+      "note": "Range extraction; verify NVIDIA Authenticode signature before loading"
+    }
+  },
+  {
+    "file": "tensorrt/nvonnxparser_10.dll.artifact.json",
+    "value": {
+      "url": "https://developer.download.nvidia.com/compute/machine-learning/tensorrt/10.16.1/zip/TensorRT-10.16.1.11.Windows.amd64.cuda-12.9.zip",
+      "archive_bytes": 2237920590,
+      "whole_archive_verified": false,
+      "entry": {
+        "name": "TensorRT-10.16.1.11/bin/nvonnxparser_10.dll",
+        "method": 8,
+        "compressed": 1346651,
+        "bytes": 3268208,
+        "offset": 2222823376
+      },
+      "sha256": "1fb85c875bb5f6eb27d22d211aac6b29eb4e2678fd699ce71decce813df9f3ac",
+      "note": "Range extraction; verify NVIDIA Authenticode signature before loading"
+    }
+  },
+  {
+    "file": "tensorrt/signatures.json",
+    "value": [
+      {
+        "name": "nvinfer_10.dll",
+        "status": "Valid",
+        "signer": "CN=NVIDIA Corporation, OU=2008B9F, O=NVIDIA Corporation, L=Santa Clara, S=California, C=US",
+        "thumbprint": "B66776FC8E70C58ED98199E8391264C827AAC534"
+      },
+      {
+        "name": "nvinfer_plugin_10.dll",
+        "status": "Valid",
+        "signer": "CN=NVIDIA Corporation, OU=2008B9F, O=NVIDIA Corporation, L=Santa Clara, S=California, C=US",
+        "thumbprint": "B66776FC8E70C58ED98199E8391264C827AAC534"
+      },
+      {
+        "name": "nvonnxparser_10.dll",
+        "status": "Valid",
+        "signer": "CN=NVIDIA Corporation, OU=2008B9F, O=NVIDIA Corporation, L=Santa Clara, S=California, C=US",
+        "thumbprint": "B66776FC8E70C58ED98199E8391264C827AAC534"
+      }
+    ]
+  },
+  {
+    "file": "tensorrt/sm86-signature.json",
+    "value": {
+      "status": "Valid",
+      "signer": "CN=NVIDIA Corporation, OU=2008B9F, O=NVIDIA Corporation, L=Santa Clara, S=California, C=US",
+      "thumbprint": "B66776FC8E70C58ED98199E8391264C827AAC534"
+    }
+  },
+  {
+    "file": "vulkan.artifact.json",
+    "value": {
+      "sha256": "31bc36c55e7f10939d3129fd671c4da8b4dacb0276892aaf573c7d4ab5d512eb",
+      "bytes": 37316103,
+      "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11953/llama-b11953-bin-win-vulkan-x64.zip",
+      "kind": "vulkan"
+    }
+  },
+  {
+    "file": "directml-1.24.4.nupkg",
+    "value": {
+      "source": "https://api.nuget.org/v3-flatcontainer/microsoft.ml.onnxruntime.directml/1.24.4/microsoft.ml.onnxruntime.directml.1.24.4.nupkg",
+      "sha256": "57e9f11b73437bef7a309496135d4c1f96b1a8e9ddba60013fa27bfc1d788681",
+      "bytes": 12458649
+    }
+  },
+  {
+    "file": "npm-lock",
+    "value": {
+      "name": "fixture-node",
+      "lockfileVersion": 3,
+      "requires": true,
+      "packages": {
+        "": {
+          "dependencies": {
+            "@huggingface/tokenizers": "0.2.0",
+            "koffi": "2.14.1"
+          }
+        },
+        "node_modules/@huggingface/tokenizers": {
+          "version": "0.2.0",
+          "resolved": "https://registry.npmjs.org/@huggingface/tokenizers/-/tokenizers-0.2.0.tgz",
+          "integrity": "sha512-LidMHe1FpcSYH4vcSjXooda34pC0M8m1gmDOv7SQi6Iv+ib1zX7J3sHBCC9/3FPCkn2k1b55FneVqMRxrr99pg==",
+          "license": "Apache-2.0"
+        },
+        "node_modules/koffi": {
+          "version": "2.14.1",
+          "resolved": "https://registry.npmjs.org/koffi/-/koffi-2.14.1.tgz",
+          "integrity": "sha512-IMFL3IbRDXacSIjs7pPbPxgNlJ2hUtawQXU2QPdr6iw38jmv5AesAUG8HPX00xl0PPA2BbEa3noTw1YdHY+gHg==",
+          "hasInstallScript": true,
+          "license": "MIT",
+          "funding": {
+            "url": "https://buymeacoffee.com/koromix"
+          }
+        }
+      }
+    }
+  }
+]

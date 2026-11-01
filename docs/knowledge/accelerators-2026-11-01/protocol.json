@@ -1,0 +1,1189 @@
+{
+  "vector_format": "IEEE754 f32 little-endian; vector_offset_f32 counts scalar elements, not bytes",
+  "timing_valid_for_causal_ranking": false,
+  "reason": "varying background load and repeated-baseline drift",
+  "configs": [
+    {
+      "name": "gguf-CUDA-off-f16-controlled",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-CUDA-off-f16-controlled",
+        "kind": "gguf",
+        "backend": "CUDA",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-CUDA-off-f16-repeat-controlled",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-CUDA-off-f16-repeat-controlled",
+        "kind": "gguf",
+        "backend": "CUDA",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-CUDA-off-f16-repeat-serial",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-CUDA-off-f16-repeat-serial",
+        "kind": "gguf",
+        "backend": "CUDA",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-CUDA-off-f16-serial",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-CUDA-off-f16-serial",
+        "kind": "gguf",
+        "backend": "CUDA",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-CUDA-on-b128-controlled",
+      "config": {
+        "repeats": 5,
+        "batch": 128,
+        "flash": true,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-CUDA-on-b128-controlled",
+        "kind": "gguf",
+        "backend": "CUDA",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-CUDA-on-b128-serial",
+      "config": {
+        "repeats": 5,
+        "batch": 128,
+        "flash": true,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-CUDA-on-b128-serial",
+        "kind": "gguf",
+        "backend": "CUDA",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-CUDA-on-b2048-controlled",
+      "config": {
+        "repeats": 5,
+        "batch": 2048,
+        "flash": true,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-CUDA-on-b2048-controlled",
+        "kind": "gguf",
+        "backend": "CUDA",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-CUDA-on-b2048-serial",
+      "config": {
+        "repeats": 5,
+        "batch": 2048,
+        "flash": true,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-CUDA-on-b2048-serial",
+        "kind": "gguf",
+        "backend": "CUDA",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-CUDA-on-f16-controlled",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": true,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-CUDA-on-f16-controlled",
+        "kind": "gguf",
+        "backend": "CUDA",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-CUDA-on-f16-serial",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": true,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-CUDA-on-f16-serial",
+        "kind": "gguf",
+        "backend": "CUDA",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-CUDA-on-q4-controlled",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": true,
+        "kv": "q4_0",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-CUDA-on-q4-controlled",
+        "kind": "gguf",
+        "backend": "CUDA",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-CUDA-on-q4-serial",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": true,
+        "kv": "q4_0",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-CUDA-on-q4-serial",
+        "kind": "gguf",
+        "backend": "CUDA",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-CUDA-on-q8-controlled",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": true,
+        "kv": "q8_0",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-CUDA-on-q8-controlled",
+        "kind": "gguf",
+        "backend": "CUDA",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-CUDA-on-q8-serial",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": true,
+        "kv": "q8_0",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-CUDA-on-q8-serial",
+        "kind": "gguf",
+        "backend": "CUDA",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-Vulkan-off-f16-controlled",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-Vulkan-off-f16-controlled",
+        "kind": "gguf",
+        "backend": "Vulkan",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-Vulkan-off-f16-repeat-controlled",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-Vulkan-off-f16-repeat-controlled",
+        "kind": "gguf",
+        "backend": "Vulkan",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-Vulkan-off-f16-repeat-serial",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-Vulkan-off-f16-repeat-serial",
+        "kind": "gguf",
+        "backend": "Vulkan",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-Vulkan-off-f16-serial",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-Vulkan-off-f16-serial",
+        "kind": "gguf",
+        "backend": "Vulkan",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-Vulkan-on-b128-controlled",
+      "config": {
+        "repeats": 5,
+        "batch": 128,
+        "flash": true,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-Vulkan-on-b128-controlled",
+        "kind": "gguf",
+        "backend": "Vulkan",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-Vulkan-on-b128-serial",
+      "config": {
+        "repeats": 5,
+        "batch": 128,
+        "flash": true,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-Vulkan-on-b128-serial",
+        "kind": "gguf",
+        "backend": "Vulkan",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-Vulkan-on-b2048-controlled",
+      "config": {
+        "repeats": 5,
+        "batch": 2048,
+        "flash": true,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-Vulkan-on-b2048-controlled",
+        "kind": "gguf",
+        "backend": "Vulkan",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-Vulkan-on-b2048-serial",
+      "config": {
+        "repeats": 5,
+        "batch": 2048,
+        "flash": true,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-Vulkan-on-b2048-serial",
+        "kind": "gguf",
+        "backend": "Vulkan",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-Vulkan-on-f16-controlled",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": true,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-Vulkan-on-f16-controlled",
+        "kind": "gguf",
+        "backend": "Vulkan",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-Vulkan-on-f16-serial",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": true,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-Vulkan-on-f16-serial",
+        "kind": "gguf",
+        "backend": "Vulkan",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-Vulkan-on-q4-controlled",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": true,
+        "kv": "q4_0",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-Vulkan-on-q4-controlled",
+        "kind": "gguf",
+        "backend": "Vulkan",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-Vulkan-on-q4-serial",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": true,
+        "kv": "q4_0",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-Vulkan-on-q4-serial",
+        "kind": "gguf",
+        "backend": "Vulkan",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-Vulkan-on-q8-controlled",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": true,
+        "kv": "q8_0",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-Vulkan-on-q8-controlled",
+        "kind": "gguf",
+        "backend": "Vulkan",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "gguf-Vulkan-on-q8-serial",
+      "config": {
+        "repeats": 5,
+        "batch": 512,
+        "flash": true,
+        "kv": "q8_0",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "gguf-Vulkan-on-q8-serial",
+        "kind": "gguf",
+        "backend": "Vulkan",
+        "model": "Qwen3-Embedding-4B-Q4_K_M.gguf",
+        "inputs": "gguf-inputs.json",
+        "tokenizer": null,
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-cuda-b1-v2",
+      "config": {
+        "repeats": 3,
+        "batch": 1,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "onnx-cuda-b1-v2",
+        "kind": "onnx",
+        "backend": "cuda",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-cuda-b1",
+      "config": {
+        "repeats": 3,
+        "batch": 1,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "onnx-cuda-b1",
+        "kind": "onnx",
+        "backend": "cuda",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-cuda-b16-repeat-v2",
+      "config": {
+        "repeats": 3,
+        "batch": 16,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "onnx-cuda-b16-repeat-v2",
+        "kind": "onnx",
+        "backend": "cuda",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-cuda-b16-repeat",
+      "config": {
+        "repeats": 3,
+        "batch": 16,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "onnx-cuda-b16-repeat",
+        "kind": "onnx",
+        "backend": "cuda",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-cuda-b16-v2",
+      "config": {
+        "repeats": 3,
+        "batch": 16,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "onnx-cuda-b16-v2",
+        "kind": "onnx",
+        "backend": "cuda",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-cuda-b16",
+      "config": {
+        "repeats": 3,
+        "batch": 16,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "onnx-cuda-b16",
+        "kind": "onnx",
+        "backend": "cuda",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-cuda-b4-v2",
+      "config": {
+        "repeats": 3,
+        "batch": 4,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "onnx-cuda-b4-v2",
+        "kind": "onnx",
+        "backend": "cuda",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-cuda-b4",
+      "config": {
+        "repeats": 3,
+        "batch": 4,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "onnx-cuda-b4",
+        "kind": "onnx",
+        "backend": "cuda",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-cuda-binding-v2",
+      "config": {
+        "repeats": 3,
+        "batch": 16,
+        "flash": false,
+        "kv": "f16",
+        "binding": true,
+        "graph": false,
+        "fixed": false,
+        "name": "onnx-cuda-binding-v2",
+        "kind": "onnx",
+        "backend": "cuda",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-cuda-binding",
+      "config": {
+        "repeats": 3,
+        "batch": 16,
+        "flash": false,
+        "kv": "f16",
+        "binding": true,
+        "graph": false,
+        "fixed": false,
+        "name": "onnx-cuda-binding",
+        "kind": "onnx",
+        "backend": "cuda",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-cuda-fixed-binding-v2",
+      "config": {
+        "repeats": 3,
+        "batch": 4,
+        "flash": false,
+        "kv": "f16",
+        "binding": true,
+        "graph": false,
+        "fixed": true,
+        "name": "onnx-cuda-fixed-binding-v2",
+        "kind": "onnx",
+        "backend": "cuda",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "fixed-inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-cuda-fixed-binding",
+      "config": {
+        "repeats": 3,
+        "batch": 4,
+        "flash": false,
+        "kv": "f16",
+        "binding": true,
+        "graph": false,
+        "fixed": true,
+        "name": "onnx-cuda-fixed-binding",
+        "kind": "onnx",
+        "backend": "cuda",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "fixed-inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-cuda-fixed-v2",
+      "config": {
+        "repeats": 3,
+        "batch": 4,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": true,
+        "name": "onnx-cuda-fixed-v2",
+        "kind": "onnx",
+        "backend": "cuda",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "fixed-inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-cuda-fixed",
+      "config": {
+        "repeats": 3,
+        "batch": 4,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": true,
+        "name": "onnx-cuda-fixed",
+        "kind": "onnx",
+        "backend": "cuda",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "fixed-inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-cuda-graph-profile",
+      "config": {
+        "repeats": 3,
+        "batch": 4,
+        "flash": false,
+        "kv": "f16",
+        "binding": true,
+        "graph": true,
+        "fixed": true,
+        "name": "onnx-cuda-graph-profile",
+        "kind": "onnx",
+        "backend": "cuda",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "fixed-inputs.json",
+        "profile": true,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-cuda-graph-v2",
+      "config": {
+        "repeats": 3,
+        "batch": 4,
+        "flash": false,
+        "kv": "f16",
+        "binding": true,
+        "graph": true,
+        "fixed": true,
+        "name": "onnx-cuda-graph-v2",
+        "kind": "onnx",
+        "backend": "cuda",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "fixed-inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-cuda-graph",
+      "config": {
+        "repeats": 3,
+        "batch": 4,
+        "flash": false,
+        "kv": "f16",
+        "binding": true,
+        "graph": true,
+        "fixed": true,
+        "name": "onnx-cuda-graph",
+        "kind": "onnx",
+        "backend": "cuda",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "fixed-inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-cuda-profile-v2",
+      "config": {
+        "repeats": 3,
+        "batch": 4,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": true,
+        "name": "onnx-cuda-profile-v2",
+        "kind": "onnx",
+        "backend": "cuda",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "fixed-inputs.json",
+        "profile": true,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-cuda-profile",
+      "config": {
+        "repeats": 3,
+        "batch": 4,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": true,
+        "name": "onnx-cuda-profile",
+        "kind": "onnx",
+        "backend": "cuda",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "fixed-inputs.json",
+        "profile": true,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-directml-b1",
+      "config": {
+        "repeats": 3,
+        "batch": 1,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "onnx-directml-b1",
+        "kind": "onnx",
+        "backend": "directml",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-directml-b16-repeat",
+      "config": {
+        "repeats": 3,
+        "batch": 16,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "onnx-directml-b16-repeat",
+        "kind": "onnx",
+        "backend": "directml",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-directml-b16",
+      "config": {
+        "repeats": 3,
+        "batch": 16,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "onnx-directml-b16",
+        "kind": "onnx",
+        "backend": "directml",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-directml-b4",
+      "config": {
+        "repeats": 3,
+        "batch": 4,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "onnx-directml-b4",
+        "kind": "onnx",
+        "backend": "directml",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-directml-binding",
+      "config": {
+        "repeats": 3,
+        "batch": 16,
+        "flash": false,
+        "kv": "f16",
+        "binding": true,
+        "graph": false,
+        "fixed": false,
+        "name": "onnx-directml-binding",
+        "kind": "onnx",
+        "backend": "directml",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-directml-fixed-binding",
+      "config": {
+        "repeats": 3,
+        "batch": 4,
+        "flash": false,
+        "kv": "f16",
+        "binding": true,
+        "graph": false,
+        "fixed": true,
+        "name": "onnx-directml-fixed-binding",
+        "kind": "onnx",
+        "backend": "directml",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "fixed-inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-directml-fixed-v2",
+      "config": {
+        "repeats": 3,
+        "batch": 4,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": true,
+        "name": "onnx-directml-fixed-v2",
+        "kind": "onnx",
+        "backend": "directml",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "fixed-inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-directml-fixed",
+      "config": {
+        "repeats": 3,
+        "batch": 4,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": true,
+        "name": "onnx-directml-fixed",
+        "kind": "onnx",
+        "backend": "directml",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "fixed-inputs.json",
+        "profile": null,
+        "cache": null
+      }
+    },
+    {
+      "name": "onnx-tensorrt-v2",
+      "config": {
+        "repeats": 3,
+        "batch": 16,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "onnx-tensorrt-v2",
+        "kind": "onnx",
+        "backend": "tensorrt",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "inputs.json",
+        "cache": "owned trt-cache",
+        "profile": null
+      }
+    },
+    {
+      "name": "onnx-tensorrt-v3",
+      "config": {
+        "repeats": 3,
+        "batch": 16,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "onnx-tensorrt-v3",
+        "kind": "onnx",
+        "backend": "tensorrt",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "inputs.json",
+        "cache": "owned trt-cache",
+        "profile": null
+      }
+    },
+    {
+      "name": "onnx-tensorrt",
+      "config": {
+        "repeats": 3,
+        "batch": 16,
+        "flash": false,
+        "kv": "f16",
+        "binding": false,
+        "graph": false,
+        "fixed": false,
+        "name": "onnx-tensorrt",
+        "kind": "onnx",
+        "backend": "tensorrt",
+        "model": "bge-reranker-v2-m3 FP16",
+        "tokenizer": "rozgo/bge-reranker-v2-m3 tokenizer.json",
+        "inputs": "inputs.json",
+        "cache": "owned trt-cache",
+        "profile": null
+      }
+    }
+  ],
+  "source_hashes_at_archive": {
+    "analyze.mjs": "35c1482eac3f8914e9cee5e9cedcf9a85ea6623570a7ea2f66fa8560a052ae67",
+    "cudnn-loader.mjs": "d045e369b8d327d40e9ae5f00c3b1f0711600a1cc82f203a89098f2211151758",
+    "freeze-inputs.mjs": "070c9fa8836bb30176e224f1f9b47883ad49c32328b3f7c85e46cc46618790a8",
+    "ort-api-layout.json": "2e13d09ed85c6d0ee19045252b35ee9d43a1f692840081e89c56a787b9888a52",
+    "prebuilt-gguf.mjs": "998f947e615b3ba95533714bfed4942e184a7d1b1ee062b47970cfb34f6e8b97",
+    "prebuilt-onnx.mjs": "6afa48b4afd3debf4714099c4bc83c67c3fe5f82c7cf40de7ee7631da47bbbb5",
+    "run-onnx.mjs": "c740fd68fdd4b6fe31e26230e35f5359b8f1cd0455fd0667a631f41373060cb4",
+    "setup-runs.mjs": "ed5104e4912a93915ae3401d6683a2b233b1e401198e29a2bd668d6529cb9a57",
+    "tensorrt-runtime.mjs": "5c37a67a4931a59823d0e2c4a0c032964e73c2ef5a894bd8e4e8a0d859accece"
+  },
+  "refusals": [
+    {
+      "name": "onnx-cuda-b16-ort128",
+      "at": "2026-11-01T18:15:22.330Z",
+      "available_ram": 6672158720,
+      "commit_headroom": 2674790400,
+      "minimum_ram": 4294967296,
+      "minimum_commit": 6442450944,
+      "started": false
+    }
+  ]
+}

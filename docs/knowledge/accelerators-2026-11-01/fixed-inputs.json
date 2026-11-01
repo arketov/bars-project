@@ -1,0 +1,668 @@
+[
+  {
+    "id": "bars-01",
+    "query": "как bars режет документы на чанки по заголовкам",
+    "split": "regression",
+    "gold_count": 1,
+    "hits": [
+      {
+        "id": 161,
+        "path": "docs/features/indexing/chunking.md",
+        "heading": "Нарезка документа на чанки",
+        "first": 5,
+        "last": 13,
+        "score": 0.9886244535446167,
+        "relevant": [
+          0
+        ],
+        "document_relevant": true
+      },
+      {
+        "id": 462,
+        "path": "docs/overview.md",
+        "heading": "Что такое bars — назначение и возможности проекта/Какие документы ищет bars",
+        "first": 15,
+        "last": 19,
+        "score": 0.9647224545478821,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 148,
+        "path": "docs/features/docs-convention/bars-instruction.md",
+        "heading": "BARS_INSTRUCTION.md/О чём инструкция",
+        "first": 16,
+        "last": 26,
+        "score": 0.934155285358429,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 201,
+        "path": "docs/features/search/hybrid-search.md",
+        "heading": "Гибридный поиск/Кандидаты из двух поисков",
+        "first": 15,
+        "last": 19,
+        "score": 0.7929456830024719,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 164,
+        "path": "docs/features/indexing/chunking.md",
+        "heading": "Нарезка документа на чанки/Большой раздел: дорезка по абзацам",
+        "first": 39,
+        "last": 47,
+        "score": 0.774071455001831,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 546,
+        "path": "docs/MAIN_IDEA.md",
+        "heading": "bars — локальный RAG по документации проектов для людей и агентов/Уроки образца",
+        "first": 168,
+        "last": 183,
+        "score": 0.6386099457740784,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 163,
+        "path": "docs/features/indexing/chunking.md",
+        "heading": "Нарезка документа на чанки/Один раздел — один чанк",
+        "first": 21,
+        "last": 37,
+        "score": 0.5895982384681702,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 165,
+        "path": "docs/features/indexing/chunking.md",
+        "heading": "Нарезка документа на чанки/Маленький раздел: склейка",
+        "first": 49,
+        "last": 55,
+        "score": 0.5814219117164612,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 162,
+        "path": "docs/features/indexing/chunking.md",
+        "heading": "Нарезка документа на чанки/Дерево разделов документа",
+        "first": 15,
+        "last": 19,
+        "score": 0.5587182641029358,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 122,
+        "path": "docs/features/agent-tools/mcp-tools.md",
+        "heading": "MCP-инструменты bars/bars_outline — структура документа",
+        "first": 33,
+        "last": 51,
+        "score": 0.5384371876716614,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 545,
+        "path": "docs/MAIN_IDEA.md",
+        "heading": "bars — локальный RAG по документации проектов для людей и агентов/Затронутое",
+        "first": 147,
+        "last": 166,
+        "score": 0.38041362166404724,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 557,
+        "path": "docs/MAIN_IDEA.md",
+        "heading": "bars — локальный RAG по документации проектов для людей и агентов/Журнал раундов/Раунд 11 — 14-10-2026",
+        "first": 290,
+        "last": 297,
+        "score": 0.3279910683631897,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 542,
+        "path": "docs/MAIN_IDEA.md",
+        "heading": "bars — локальный RAG по документации проектов для людей и агентов/Требования",
+        "first": 108,
+        "last": 121,
+        "score": 0.25608712434768677,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 549,
+        "path": "docs/MAIN_IDEA.md",
+        "heading": "bars — локальный RAG по документации проектов для людей и агентов/Критерии приёмки",
+        "first": 207,
+        "last": 236,
+        "score": 0.18877220153808594,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 541,
+        "path": "docs/MAIN_IDEA.md",
+        "heading": "bars — локальный RAG по документации проектов для людей и агентов/Требования",
+        "first": 59,
+        "last": 106,
+        "score": 0.048405956476926804,
+        "relevant": [],
+        "document_relevant": false
+      }
+    ],
+    "documents": [
+      "docs/features/indexing/chunking.md\nНарезка документа на чанки\nКак bars превращает Markdown-файл в чанки по требованию Т-23. Размеры по умолчанию — из Т-18: минимум 250, максимум 6000 символов. Размер считается в символах Unicode, а не в байтах. Если минимум выше максимума, минимум прижимается к максимуму.\n\n## Разбор документа перед нарезкой\n1. Файл читается как UTF-8; BOM отбрасывается. Переводы строк `CRLF` и `CR` приводятся к `LF` до любого разбора (урок 1 образца). Номера строк при этом не меняются: одна строка остаётся одной строкой.\n2. Frontmatter в начале файла (`---` … `---`) отрезается. Из него читается только `title` документа (Т-11); значение в кавычках берётся без кавычек. Номера строк считаются по исходному файлу, вместе с frontmatter.\n3. Заголовки — только ATX: строки `#`…`######` с пробелом после решёток и непустым текстом. Строки внутри огороженных блоков кода (```` ``` ```` и `~~~`) заголовками не считаются. Setext-заголовки (текст с подчёркиванием `===` или `---`) bars не распознаёт; `BARS_INSTRUCTION.md` просит их не использовать.",
+      "docs/overview.md\nЧто такое bars — назначение и возможности проекта/Какие документы ищет bars\nbars индексирует `.md` внутри корня документации зарегистрированного проекта; по умолчанию это `docs/`. Подпапки первого уровня образуют модули, например `features`, `architecture`, `knowledge`. Файлы прямо в `docs/` относятся к модулю `.`. Поиск ограничен одним проектом; внутри проекта можно выбирать модули и файлы.\n\nДокумент режется по заголовкам на chunks — фрагменты, пригодные для отдельной выдачи. Для поиска важны `title` во frontmatter, содержательные заголовки и понятный без соседей раздел. Правила нарезки — [chunking.md](features/indexing/chunking.md), исключения обхода — [updates.md](features/indexing/updates.md), оформление — [соглашение о документации](features/docs-convention/Index.md).",
+      "docs/features/docs-convention/bars-instruction.md\nBARS_INSTRUCTION.md/О чём инструкция\nТекст инструкции на английском (решение автора 16.10.2026); документы проекта пишутся на языке проекта. Правила следуют из того, как bars режет документы ([features/indexing/chunking.md](../indexing/chunking.md)):\n\n- **Формат файла:** `title` во frontmatter (Т-11), один `#` равный `title`, только ATX-заголовки, относительные ссылки, никаких секретов.\n- **Разделы:** раздел понятен сам по себе, заголовки называют предмет, средний размер, одна тема — один файл, статус проверки в начале файла темы, ссылка вместо копии.\n- **Текущее состояние, а не история:** устаревшее правится или удаляется; история живёт только в `adr/` и `chats/`.\n- **Раскладка:** модуль — подпапка первого уровня (Т-7); `Index.md` в каждой папке со ссылкой назад и таблицей «файл — когда читать»; правила `knowledge/`, `adr/` (дословное решение, раздел «Где применено», ссылка из тем вместо повтора), `features/`, `chats/` (`log.md` по поводу, `handoff.md` в конце).\n- **Чек-лист** перед завершением правки документации.\n\nЭто просьба, а не правило: bars индексирует любую структуру (Т-7, Т-8). Подробности раскладки — [layout.md](layout.md), журнал — [session-log.md](session-log.md).",
+      "docs/features/search/hybrid-search.md\nГибридный поиск/Кандидаты из двух поисков\n- **Полнотекстовый:** FTS5 по цепочке заголовков и тексту чанков, ранжирование `bm25`, первые 30. У FTS5 нет русской морфологии, поэтому текст чанков при индексации и слова запроса при поиске проходят один и тот же стемминг Snowball для русского и английского (`rust-stemmers`): «настройки» и «настройка» дают одну основу. Слова, которые стеммер не меняет (числа, латиница в коде), ищутся как есть. Слова запроса соединяются через `OR`: `bm25` сам поднимает чанки, где совпало больше слов. На корпусе bars стемминг ставил нужный раздел первым чаще префиксного поиска ([knowledge/spike-search.md](../../knowledge/spike-search.md)).\n- **Идентификаторы в запросе.** Токенайзер режет `some_option_name` на слова `some`, `option`, `name`, а они общие: по `OR` документ с этими словами порознь обгоняет документ с самим идентификатором. Поэтому слово запроса, которое стемминг разрезал на несколько, идёт в FTS ещё и фразой: `\"some option name\"` ищет эти слова подряд.\n- **Векторный:** запрос эмбеддится моделью проекта (с префиксом запроса, если он у модели есть); точный перебор по косинусной близости, первые 30 ([architecture/vector-search.md](../../architecture/vector-search.md))."
+    ],
+    "dataset": "bars"
+  },
+  {
+    "id": "bars-07",
+    "query": "как воркер ставит проекты в очередь индексации",
+    "split": "regression",
+    "gold_count": 1,
+    "hits": [
+      {
+        "id": 570,
+        "path": "docs/architecture/worker.md",
+        "heading": "Воркер bars/Очередь индексации воркера bars",
+        "first": 42,
+        "last": 47,
+        "score": 0.9878996014595032,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 569,
+        "path": "docs/architecture/worker.md",
+        "heading": "Воркер bars/Задачи внутри воркера bars",
+        "first": 26,
+        "last": 40,
+        "score": 0.957833468914032,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 568,
+        "path": "docs/architecture/worker.md",
+        "heading": "Воркер bars",
+        "first": 5,
+        "last": 24,
+        "score": 0.9527502655982971,
+        "relevant": [
+          0
+        ],
+        "document_relevant": true
+      },
+      {
+        "id": 572,
+        "path": "docs/architecture/worker.md",
+        "heading": "Воркер bars/Индекс проекта в воркере bars",
+        "first": 59,
+        "last": 65,
+        "score": 0.9490118622779846,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 43,
+        "path": "docs/architecture/ipc.md",
+        "heading": "Локальный канал bars/Поиск во время индексации",
+        "first": 67,
+        "last": 69,
+        "score": 0.9355823397636414,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 575,
+        "path": "docs/architecture/worker.md",
+        "heading": "Воркер bars/Пауза, остановка и ход индексации",
+        "first": 95,
+        "last": 104,
+        "score": 0.8778960704803467,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 574,
+        "path": "docs/architecture/worker.md",
+        "heading": "Воркер bars/Обработчики методов воркера bars",
+        "first": 81,
+        "last": 93,
+        "score": 0.8750414252281189,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 573,
+        "path": "docs/architecture/worker.md",
+        "heading": "Воркер bars/Реализация очереди и состояния воркера",
+        "first": 67,
+        "last": 79,
+        "score": 0.8721297383308411,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 169,
+        "path": "docs/features/indexing/updates.md",
+        "heading": "Обновление индекса/Слежение, которое теряет события",
+        "first": 37,
+        "last": 45,
+        "score": 0.8621196746826172,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 236,
+        "path": "docs/features/window/indexing-progress.md",
+        "heading": "Ход индексации в окне bars/Страница индексации проекта",
+        "first": 16,
+        "last": 26,
+        "score": 0.8483450412750244,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 571,
+        "path": "docs/architecture/worker.md",
+        "heading": "Воркер bars/Модели в памяти воркера",
+        "first": 49,
+        "last": 57,
+        "score": 0.3316606879234314,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 235,
+        "path": "docs/features/window/indexing-progress.md",
+        "heading": "Ход индексации в окне bars",
+        "first": 5,
+        "last": 14,
+        "score": 0.3090237081050873,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 30,
+        "path": "docs/architecture/Index.md",
+        "heading": "Архитектура",
+        "first": 5,
+        "last": 17,
+        "score": 0.3002324104309082,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 578,
+        "path": "docs/architecture/worker.md",
+        "heading": "Воркер bars/Состояние проекта в воркере bars",
+        "first": 127,
+        "last": 138,
+        "score": 0.22017472982406616,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 478,
+        "path": "docs/issue.md",
+        "heading": "Известные проблемы bars/ISS-09: Проверить, что индексация не мешает запросам RAG",
+        "first": 73,
+        "last": 80,
+        "score": 0.10176784545183182,
+        "relevant": [],
+        "document_relevant": false
+      }
+    ],
+    "documents": [
+      "docs/architecture/worker.md\nВоркер bars/Очередь индексации воркера bars\n- В очереди — проекты, у каждого пометка: проверить целиком или только перечисленные файлы. Повторное задание на проект, который уже ждёт, сливается с ним.\n- Приоритет: явная переиндексация и хук начала сессии → события слежения → проверка при старте и периодическая.\n- Порядок проверки проекта описан в [features/indexing/updates.md](../features/indexing/updates.md).\n- Ход индексации — число обработанных и оставшихся документов — виден в `status` и в окне.",
+      "docs/architecture/worker.md\nВоркер bars/Задачи внутри воркера bars\nВоркер — один процесс на tokio, внутри работают независимые задачи:\n\n| Задача | Что делает |\n|---|---|\n| Сервер канала | принимает соединения `bars-mcp` и `bars-cli`, на каждое соединение — своя задача |\n| Окно и трей | Tauri; команды окна вызывают те же обработчики, что и канал ([protocol.md](protocol.md)) |\n| Очередь индексации | одна задача, индексирует по одному проекту за раз |\n| Слежение за файлами | `notify` по корню документации каждого проекта; события копятся 500 мс и превращаются в задания очереди |\n| Таймер | раз в 15 минут ставит в очередь проверку всех проектов |\n| Чтение настроек | `settings.toml` и `.bars/config.toml` перечитываются при обработке заданий и запросов; отдельного слежения за этими файлами нет |\n| Менеджер моделей | загружает модели, держит их в памяти, выгружает |\n\nПоиск выполняется в задаче соединения, которое его запросило. Он не стоит в очереди индексации и не ждёт её.",
+      "docs/architecture/worker.md\nВоркер bars\nКак устроен процесс `bars`: единственный процесс, который читает и пишет индексы и загружает модели (Т-1, НФТ-3). Решение агента, 14-10-2026.\n\n## Запуск воркера bars\n| Как запущен | Что происходит |\n|---|---|\n| `bars` — пользователь открыл приложение | воркер стартует и показывает окно |\n| `bars --background` — запустил `bars-mcp` или `bars-cli` ([ipc.md](ipc.md)) | воркер стартует только с иконкой в трее |\n| второй запуск, когда воркер уже работает | `tauri-plugin-single-instance` передаёт запуск работающему воркеру; тот показывает окно, если запуск был без `--background`, а новый процесс завершается (Т-1) |\n\nПорядок старта:\n\n1. Логи, затем `~/.bars/settings.toml` и `~/.bars/projects.toml` ([architecture/files.md](files.md)).\n2. Открывается канал. Воркер принимает вызовы сразу, ещё до проверки проектов: клиент, который его запустил, не ждёт индексации.\n3. Для каждого зарегистрированного проекта: проверяется, что папка на месте ([projects.md](../features/projects/projects.md)); открывается индекс; запускается слежение за корнем документации; проект ставится в очередь проверки при старте (Т-10).\n4. Запускается таймер проверки всех проектов раз в 15 минут (Т-10).\n\nМодели при старте не загружаются: embed-модель грузится при первом эмбеддинге, rerank — при первом реранке.",
+      "docs/architecture/worker.md\nВоркер bars/Индекс проекта в воркере bars\n- Индекс открывается в режиме WAL: поиск читает, пока очередь индексации пишет.\n- Пишет в индекс только задача очереди. Каждый документ записывается одной транзакцией ([features/indexing/updates.md](../features/indexing/updates.md)).\n- Поиск открывает соединение только для чтения. Каждое соединение поиска своё и короткое.\n\nПолная переиндексация строит индекс в `index.sqlite.new`. В конце воркер ненадолго закрывает доступ к проекту на запись и чтение: новые поиски ждут, текущие дочитывают. Затем воркер закрывает все соединения со старым файлом и подменяет его новым. Без закрытия соединений подмена не сработает: на Windows нельзя переименовать файл поверх открытого."
+    ],
+    "dataset": "bars"
+  },
+  {
+    "id": "bars-13",
+    "query": "порядок настроек и файл settings.toml",
+    "split": "regression",
+    "gold_count": 1,
+    "hits": [
+      {
+        "id": 498,
+        "path": "docs/features/settings/settings.md",
+        "heading": "Настройки bars",
+        "first": 5,
+        "last": 7,
+        "score": 0.8806945085525513,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 482,
+        "path": "docs/architecture/files.md",
+        "heading": "Файлы bars на диске/Порядок настроек bars",
+        "first": 32,
+        "last": 36,
+        "score": 0.7709825038909912,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 565,
+        "path": "docs/architecture/stack.md",
+        "heading": "Стек bars/Документы и файлы bars",
+        "first": 53,
+        "last": 61,
+        "score": 0.6389479041099548,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 503,
+        "path": "docs/features/settings/settings.md",
+        "heading": "Настройки bars/Параметры нарезки в settings.toml",
+        "first": 67,
+        "last": 83,
+        "score": 0.6087685227394104,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 577,
+        "path": "docs/architecture/worker.md",
+        "heading": "Воркер bars/Настройки, ключи и модели из окна",
+        "first": 118,
+        "last": 125,
+        "score": 0.5597714185714722,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 504,
+        "path": "docs/features/settings/settings.md",
+        "heading": "Настройки bars/Как bars читает файлы настроек",
+        "first": 85,
+        "last": 101,
+        "score": 0.5345214009284973,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 254,
+        "path": "docs/features/window/settings-window.md",
+        "heading": "Экран настроек окна bars",
+        "first": 5,
+        "last": 7,
+        "score": 0.5182262063026428,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 481,
+        "path": "docs/architecture/files.md",
+        "heading": "Файлы bars на диске/Папка .bars пользователя",
+        "first": 21,
+        "last": 30,
+        "score": 0.5084754228591919,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 281,
+        "path": "docs/knowledge/installer.md",
+        "heading": "Установщик bars: исследование и проверка/Что проверено руками",
+        "first": 40,
+        "last": 55,
+        "score": 0.38237205147743225,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 502,
+        "path": "docs/features/settings/settings.md",
+        "heading": "Настройки bars/Устройство для встроенных моделей в settings.toml",
+        "first": 57,
+        "last": 65,
+        "score": 0.36184096336364746,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 569,
+        "path": "docs/architecture/worker.md",
+        "heading": "Воркер bars/Задачи внутри воркера bars",
+        "first": 26,
+        "last": 40,
+        "score": 0.2896730303764343,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 499,
+        "path": "docs/features/settings/settings.md",
+        "heading": "Настройки bars/Embed-модель в settings.toml",
+        "first": 9,
+        "last": 20,
+        "score": 0.20386600494384766,
+        "relevant": [
+          0
+        ],
+        "document_relevant": true
+      },
+      {
+        "id": 258,
+        "path": "docs/features/window/settings-window.md",
+        "heading": "Экран настроек окна bars/Вкладка «Запуск» в настройках",
+        "first": 46,
+        "last": 52,
+        "score": 0.19147881865501404,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 500,
+        "path": "docs/features/settings/settings.md",
+        "heading": "Настройки bars/Rerank-модель в settings.toml",
+        "first": 22,
+        "last": 32,
+        "score": 0.15040279924869537,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 135,
+        "path": "docs/features/distribution/autostart.md",
+        "heading": "Автозапуск bars при входе в систему/Где живёт состояние автозапуска",
+        "first": 15,
+        "last": 19,
+        "score": 0.12549345195293427,
+        "relevant": [],
+        "document_relevant": false
+      }
+    ],
+    "documents": [
+      "docs/features/settings/settings.md\nНастройки bars\nКакие настройки есть у bars, где они лежат и что делает их изменение (Т-16, Т-18, Т-24). Где лежат файлы и в каком порядке берутся значения — [files.md](../../architecture/files.md). Окно правит эти же файлы через воркер (методы `settings_get` и `settings_save`, [architecture/protocol.md](../../architecture/protocol.md); как именно воркер пишет файл — [architecture/worker.md](../../architecture/worker.md)). Ручная правка допустима: значения перечитываются при обработке заданий и запросов, отдельного слежения за файлами настроек нет. Окно пишет в `settings.toml` только пользовательские ключи; `.bars/config.toml` оно правит единственным ключом `docs_root` («Выбрать другую папку документации…»). Тема окна ключом настроек не является: она хранится в самом окне ([features/window/implementation.md](../window/implementation.md)). Автозапуск при входе в систему тоже не ключ: это запись в ОС, её читает и пишет воркер ([features/distribution/autostart.md](../distribution/autostart.md)).\nother headers:\n## Embed-модель в settings.toml\n## Rerank-модель в settings.toml\n## Параметры поиска в settings.toml\n## Устройство для встроенных моделей в settings.toml\n## Параметры нарезки в settings.toml\n## Настройки проекта в .bars/config.toml\n## Как bars читает файлы настроек\n## Что происходит при изменении настроек bars",
+      "docs/architecture/files.md\nФайлы bars на диске/Порядок настроек bars\nФайловые логи в `~/.bars/logs/` пока не реализованы; текущая диагностика идёт в stderr ([worker.md](worker.md)).\n\nЗначение параметра берётся по первому найденному: вызов агента (в пределах Т-24 для порога) → `config.toml` проекта → `settings.toml` пользователя → заводское значение (Т-18).",
+      "docs/architecture/stack.md\nСтек bars/Документы и файлы bars\n| Что | Крейт | Версия | Зачем |\n|---|---|---|---|\n| Разбор Markdown | свой построчный разбор | — | [features/indexing/chunking.md](../features/indexing/chunking.md); `pulldown-cmark` 0.13 — только в тестах как эталон |\n| Frontmatter | `serde-saphyr` | 2.0 | `title` документа (Т-11); чистый Rust |\n| Слежение за файлами | `notify` + `notify-debouncer-full` | 8.2 / 0.7 | Т-10 |\n| Пути пользователя | `dirs` | 7.0 | `<домашняя папка>/.bars/` |\n| Чтение `settings.toml` и `.bars/config.toml` | `toml` + `serde` | 1.1 / 1.0 | [features/settings/settings.md](../features/settings/settings.md); только чтение, запись из окна — `toml_edit` ниже |",
+      "docs/features/settings/settings.md\nНастройки bars/Параметры нарезки в settings.toml\nТаблица `[chunking]` (Т-18, Т-23):\n\n| Ключ | По умолчанию | Значение |\n|---|---|---|\n| `min_chars` | `250` | раздел короче склеивается со следующим |\n| `max_chars` | `6000` | раздел длиннее режется на несколько чанков |\n\n## Настройки проекта в .bars/config.toml\n| Ключ | По умолчанию | Значение |\n|---|---|---|\n| `docs_root` | `docs` | корень документации относительно корня проекта (Т-7) |\n| `[search]`, `[chunking]` | — | любые ключи этих таблиц из `settings.toml`; перекрывают их для проекта |\n\nМодели задаются только в `settings.toml`, для всех проектов сразу (Т-16)."
+    ],
+    "dataset": "bars"
+  },
+  {
+    "id": "bars-19",
+    "query": "как установить bars в Claude Code и Codex",
+    "split": "regression",
+    "gold_count": 1,
+    "hits": [
+      {
+        "id": 126,
+        "path": "docs/features/clients/clients.md",
+        "heading": "Подключение bars к агентским клиентам/Claude Code",
+        "first": 16,
+        "last": 32,
+        "score": 0.9945730566978455,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 458,
+        "path": "docs/getting-started.md",
+        "heading": "Первый запуск bars — установка, проект, поиск и MCP/Подключение bars к агенту через MCP",
+        "first": 38,
+        "last": 49,
+        "score": 0.9936856627464294,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 150,
+        "path": "docs/features/docs-convention/delivery.md",
+        "heading": "Как соглашение доходит до агента/Skills bars",
+        "first": 22,
+        "last": 33,
+        "score": 0.9888849258422852,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 257,
+        "path": "docs/features/window/settings-window.md",
+        "heading": "Экран настроек окна bars/Вкладка «Нарезка» в настройках",
+        "first": 30,
+        "last": 44,
+        "score": 0.9723097085952759,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 117,
+        "path": "docs/features/agent-tools/cli.md",
+        "heading": "Команды bars-cli/Установка и удаление",
+        "first": 49,
+        "last": 55,
+        "score": 0.9571978449821472,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 131,
+        "path": "docs/features/clients/clients.md",
+        "heading": "Подключение bars к агентским клиентам/Формат записей bars",
+        "first": 65,
+        "last": 73,
+        "score": 0.9319595694541931,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 399,
+        "path": "docs/knowledge/stack-research.md",
+        "heading": "Исследование стека bars/Хуки и MCP в Claude Code и Codex",
+        "first": 104,
+        "last": 116,
+        "score": 0.9193534255027771,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 130,
+        "path": "docs/features/clients/clients.md",
+        "heading": "Подключение bars к агентским клиентам/Skills в клиентах",
+        "first": 54,
+        "last": 63,
+        "score": 0.9165588617324829,
+        "relevant": [],
+        "document_relevant": true
+      },
+      {
+        "id": 114,
+        "path": "docs/features/agent-tools/cli.md",
+        "heading": "Команды bars-cli/Список команд bars-cli",
+        "first": 15,
+        "last": 30,
+        "score": 0.8812065720558167,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 540,
+        "path": "docs/MAIN_IDEA.md",
+        "heading": "bars — локальный RAG по документации проектов для людей и агентов/Границы",
+        "first": 41,
+        "last": 57,
+        "score": 0.8161134123802185,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 124,
+        "path": "docs/features/clients/Index.md",
+        "heading": "Подключение к агентским клиентам",
+        "first": 5,
+        "last": 9,
+        "score": 0.799755334854126,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 555,
+        "path": "docs/MAIN_IDEA.md",
+        "heading": "bars — локальный RAG по документации проектов для людей и агентов/Журнал раундов/Раунд 9 — 14-10-2026",
+        "first": 272,
+        "last": 276,
+        "score": 0.7774689197540283,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 554,
+        "path": "docs/MAIN_IDEA.md",
+        "heading": "bars — локальный RAG по документации проектов для людей и агентов/Журнал раундов/Раунд 7 — 14-10-2026",
+        "first": 265,
+        "last": 270,
+        "score": 0.7747538685798645,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 477,
+        "path": "docs/issue.md",
+        "heading": "Известные проблемы bars/ISS-07: Правый клик показывает меню webview",
+        "first": 59,
+        "last": 71,
+        "score": 0.5228874683380127,
+        "relevant": [],
+        "document_relevant": false
+      },
+      {
+        "id": 542,
+        "path": "docs/MAIN_IDEA.md",
+        "heading": "bars — локальный RAG по документации проектов для людей и агентов/Требования",
+        "first": 108,
+        "last": 121,
+        "score": 0.08137363940477371,
+        "relevant": [],
+        "document_relevant": false
+      }
+    ],
+    "documents": [
+      "docs/features/clients/clients.md\nПодключение bars к агентским клиентам/Claude Code\n| Запись | Файл |\n|---|---|\n| MCP-сервер | `~/.claude.json`, раздел `mcpServers.bars` (уровень пользователя) |\n| Хук | `~/.claude/settings.json`, `hooks.SessionStart`, срабатывает на `startup` и `resume` |\n\n## Codex\n| Запись | Файл |\n|---|---|\n| MCP-сервер | `~/.codex/config.toml`, таблица `[mcp_servers.bars]` |\n| Хук | `~/.codex/hooks.json`, событие `SessionStart`, срабатывает на `startup` и `resume`; формат записи тот же, что у Claude Code |\n\nCodex не запускает новый или изменённый хук, пока пользователь не одобрит его командой `/hooks` в Codex; одобрение привязано к хешу записи. Поэтому после установки в Codex и после каждого её обновления bars сообщает пользователю (в окне и в выводе `bars-cli install`), что хук нужно одобрить. Пока хук не одобрен, MCP работает, а проект регистрируется окном или CLI.\n\nПроектный `.codex/` bars не использует: Codex грузит его только для доверенных проектов.",
+      "docs/getting-started.md\nПервый запуск bars — установка, проект, поиск и MCP/Подключение bars к агенту через MCP\nПользователь подключает нужный клиент в окне bars или командой:\n\n```powershell\nbars-cli install --client codex\n# Для Claude Code вместо codex укажите claude-code.\n```\n\nУстановка добавляет MCP-сервер, хук начала сессии и skills bars. В Codex пользователь одобряет новый или изменённый хук командой `/hooks`; MCP доступен и без одобренного хука, но проект тогда регистрируется окном или CLI. Другой stdio-MCP-клиент можно настроить вручную. Форматы записей и пути — [clients.md](features/clients/clients.md).\n\nАгент начинает с `bars_rag_search`, затем уточняет структуру через `bars_outline` и читает нужный документ через `bars_read`. Список проектов и модулей — `bars_projects`, состояние — `bars_status`. Если выбор проекта по рабочей папке неоднозначен, укажите `project` явно. Параметры инструментов — [mcp-tools.md](features/agent-tools/mcp-tools.md).",
+      "docs/features/docs-convention/delivery.md\nКак соглашение доходит до агента/Skills bars\nУстановка в Claude Code и Codex (Т-21) ставит skills, удаление их убирает (Т-28). Skill загружается в контекст только когда нужен, поэтому подробные правила живут здесь, а не в стартовой инструкции.\n\n- `bars-docs` — как вести документацию: раскладка ([layout.md](layout.md)), оформление для индексации ([bars-instruction.md](bars-instruction.md)), ADR, жизненный цикл фичи.\n- `bars-session-log` — журнал сессии ([session-log.md](session-log.md)): когда и как писать `log.md`, как писать `handoff.md`, как начать с последнего handoff.\n\nSkills ставятся в пользовательскую папку клиента, а не в проект: bars не пишет в репозиторий ничего, кроме `.bars` и `BARS_INSTRUCTION.md` (Т-5, Т-8). Установка и удаление трогают только папки skills с именами bars. Папка skills: Claude Code — `~/.claude/skills`, Codex — `~/.agents/skills` ([clients.md](../clients/clients.md)). Тексты skills лежат в `bars-worker/assets/skills/` и зашиты в bars.\n\n## BARS_INSTRUCTION.md\nПолный текст правил в проекте, для людей и для агентов без MCP и skills ([bars-instruction.md](bars-instruction.md)). Он перезаписывается при каждой новой версии bars, поэтому правки проекта в нём не сохраняются (Т-8).",
+      "docs/features/window/settings-window.md\nЭкран настроек окна bars/Вкладка «Нарезка» в настройках\nМинимальный и максимальный размер чанка в знаках (Т-18, Т-23).\n\n## Вкладка «Клиенты» в настройках\nУстановка bars в агентские клиенты из окна (Т-21, [features/clients/clients.md](../clients/clients.md)). По строке на клиента:\n\n- **Claude Code** и **Codex** — состояние («установлено», «не установлено», «хук ждёт одобрения»), файлы, которые bars правит, и кнопки «Установить» или «Переустановить» и «Удалить».\n- Для Codex с неодобренным хуком — предупреждение выполнить `/hooks` в Codex.\n- **Другой MCP-клиент** — «Копировать конфиг» для ручного подключения без хука.\n\nНиже — блок «Инструкция для агента» с текстом установки и кнопкой «Копировать».\n\nЧисло в метке вкладки «Клиенты» — сколько клиентов требуют действия пользователя."
+    ],
+    "dataset": "bars"
+  }
+]

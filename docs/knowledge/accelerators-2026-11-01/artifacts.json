@@ -1,0 +1,20 @@
+[
+  {
+    "role": "gguf",
+    "file": "C:\\Users\\arketov\\.bars\\models\\models--Qwen--Qwen3-Embedding-4B-GGUF\\blobs\\2b0cf8f17b4c723c27303015383c27ec4bf2d8314bb677d05e920dd70bb0f16b",
+    "sha256": "2b0cf8f17b4c723c27303015383c27ec4bf2d8314bb677d05e920dd70bb0f16b",
+    "bytes": 2496703776
+  },
+  {
+    "role": "onnx",
+    "file": "C:\\Users\\arketov\\.bars\\models\\models--onnx-community--bge-reranker-v2-m3-ONNX\\snapshots\\6f5ff65298512715a1e669753bc754d2bc8f367b\\onnx\\model_fp16.onnx",
+    "sha256": "9b26f9185d2d26051f724c9fc3565e5d9614a9dd459b784c806c246232a70fe3",
+    "bytes": 1136209678
+  },
+  {
+    "role": "tokenizer",
+    "file": "C:\\Users\\arketov\\.bars\\models\\models--rozgo--bge-reranker-v2-m3\\snapshots\\fbd57b17b4db111a9d16813bb08b4c804fac18e9\\tokenizer.json",
+    "sha256": "8bf8afbfd11306bd872018c53bfdf2e160a56f8edbcf49933324404791c148d3",
+    "bytes": 17082900
+  }
+]

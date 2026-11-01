@@ -57,7 +57,8 @@ title: Внутренняя база знаний bars
 | Файл | Когда читать |
 |---|---|
 | `model-hardware-presets-2026-11-01.md` | Исследование 8.3.1: LM Studio, Ollama, Jan, GPT4All и игровые пресеты; рекомендация, слайдер, ручной выбор и ограничения переноса в bars |
-| [inference-speed.md](inference-speed.md) | Скорость инференса: FP16 rerank против FP32, worker и конкуренция, отклонённые методы, протокол замеров |
+| `inference-speed.md` | RTX 3090: отбор FA/KV/пачек/IO binding/CUDA Graphs/TensorRT, численные отклонения и ограничения скорости; прежнее FP16-ускорение worker |
+| `accelerators-2026-11-01/` | Сырые scores и векторы, аппаратные профили, память, отказы ресурсов, runtime и SHA-256 исследования 8.1.2 |
 | [inference-2026-10-18/](inference-2026-10-18/Index.md) | Сырые данные этапа 11: GPU/CPU-сетки, полный retrieval, worker, индексация |
 | [inference-devices.md](inference-devices.md) | CPU, GPU и NPU, ограничения DirectML, диагностика неверных оценок rerank, кандидаты EP и библиотек; CUDA в сборке bars — llama.cpp `dynamic-backends`, CUDA EP ORT 1.28, обнаружение CUDA и cuDNN, откат на Vulkan и DirectML |
 | [gguf-models.md](gguf-models.md) | Qwen3 GGUF и llama.cpp: качество против bge-m3, память, сборка Windows/Vulkan |
