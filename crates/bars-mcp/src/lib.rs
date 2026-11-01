@@ -258,10 +258,9 @@ impl BarsMcp {
     #[tool(
         name = "bars_relations",
         annotations(read_only_hint = true),
-        description = "Что с чем связано явным утверждением («от чего зависит», «что заменяет»): \
-                       факты с основанием. Вход — одно из query (имя) и entity_ref; отрицания и \
-                       условия сохраняются, неоднозначное имя даёт кандидатов. Пустой ответ не \
-                       доказывает, что отношений нет."
+        description = "Явные связи с основанием. Вход — query (имя) или \
+                       entity_ref; отрицания и условия сохранены, неоднозначное имя даёт кандидатов. \
+                       Пустота не доказывает отсутствия связей."
     )]
     async fn bars_relations(
         &self,
@@ -289,10 +288,9 @@ impl BarsMcp {
     #[tool(
         name = "bars_impact",
         annotations(read_only_hint = true),
-        description = "Какие документы перепроверить после правки объекта: зависимости и проверки с \
-                       основанием. Вход — documents (пути) или roots из ответа графа. Пустой ответ не \
-                       значит, что зависимостей нет; гиперссылки сюда не входят — их даёт \
-                       bars_links с direction=incoming."
+        description = "Документы для перепроверки после правки: зависимости и проверки с основанием. \
+                       Вход — documents (пути) или roots из графа. Пустота не доказывает отсутствия \
+                       зависимостей. Гиперссылки — bars_links с direction=incoming."
     )]
     async fn bars_impact(
         &self,
@@ -305,10 +303,10 @@ impl BarsMcp {
     #[tool(
         name = "bars_context",
         annotations(read_only_hint = true),
-        description = "Собрать первичные источники к задаче query по ролям: требование, решение, \
-                       поведение, устройство, ограничение, проверка (roles, task_profile). Не \
-                       готовый ответ, а список для чтения в пределах token_budget; смотри \
-                       missing_roles. documents/roots сужают окрестность, query ранжирует внутри неё."
+        description = "Первичные источники к задаче query по ролям: требование, решение, поведение, \
+                       устройство, ограничение, проверка (roles, task_profile). Список для чтения \
+                       в token_budget; смотри missing_roles. documents/roots сужают окрестность, \
+                       query ранжирует внутри неё."
     )]
     async fn bars_context(
         &self,

@@ -51,29 +51,6 @@ pub(super) fn graph_error(error: GraphError) -> RpcError {
         },
     )
 }
-#[cfg(test)]
-mod readiness_tests {
-    use super::*;
-
-    #[test]
-    fn graph_not_ready_preserves_reason_and_explains_recovery() {
-        let error = graph_error(GraphError::NotReady("нет структурного слоя".into()));
-        assert_eq!(error.kind(), Some(ErrorKind::GraphNotReady));
-        for part in [
-            "нет структурного слоя",
-            "автоматически",
-            "bars-cli graph build",
-            "bars_reindex не заменяет",
-            "bars_rag_search без mode",
-            "bars_status",
-        ] {
-            assert!(error.message.contains(part), "{}", error.message);
-        }
-        let other = graph_error(GraphError::InvalidParams("неверная область".into()));
-        assert_eq!(other.kind(), Some(ErrorKind::InvalidParams));
-        assert!(!other.message.contains("bars_reindex"));
-    }
-}
 
 impl WorkerHandler {
     pub(super) async fn graph_search(
@@ -435,5 +412,29 @@ impl WorkerHandler {
         })
         .await
         .map_err(internal)?
+    }
+}
+
+#[cfg(test)]
+mod readiness_tests {
+    use super::*;
+
+    #[test]
+    fn graph_not_ready_preserves_reason_and_explains_recovery() {
+        let error = graph_error(GraphError::NotReady("нет структурного слоя".into()));
+        assert_eq!(error.kind(), Some(ErrorKind::GraphNotReady));
+        for part in [
+            "нет структурного слоя",
+            "автоматически",
+            "bars-cli graph build",
+            "bars_reindex не заменяет",
+            "bars_rag_search без mode",
+            "bars_status",
+        ] {
+            assert!(error.message.contains(part), "{}", error.message);
+        }
+        let other = graph_error(GraphError::InvalidParams("неверная область".into()));
+        assert_eq!(other.kind(), Some(ErrorKind::InvalidParams));
+        assert!(!other.message.contains("bars_reindex"));
     }
 }

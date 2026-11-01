@@ -757,18 +757,21 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
     assert!(!error, "{text}");
     let graph: Value = serde_json::from_str(&text).unwrap();
     for (tool, args) in [
-        ("bars_impact", json!({"documents":["requirements.md"]})),
+        (
+            "bars_impact",
+            json!({"documents":["requirements.md"],"format":"txt"}),
+        ),
         (
             "bars_context",
-            json!({"documents":["docs/requirements.md"],"query":"Т-1 зависит"}),
+            json!({"documents":["docs/requirements.md"],"query":"Т-1 зависит","format":"txt"}),
         ),
         (
             "bars_graph",
-            json!({"documents":["requirements.md"],"local":true}),
+            json!({"documents":["requirements.md"],"local":true,"format":"txt"}),
         ),
         (
             "bars_paths",
-            json!({"from":{"document":"requirements.md"},"to":{"document":"requirements.md"},"path_kind":"structural"}),
+            json!({"from":{"document":"requirements.md"},"to":{"document":"requirements.md"},"path_kind":"structural","format":"txt"}),
         ),
     ] {
         let (error, text) = mcp.tool(tool, args).await;
@@ -882,7 +885,18 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
     assert_eq!(record("bars_paths").requested["to"]["label"], "Т-3");
     assert_eq!(record("bars_impact").requested["roots"], json!([root]));
     assert_eq!(record("bars_explore").requested["whole_scope"], true);
-    assert_eq!(record("bars_graph").requested["view"], "mixed");
+    // История идёт от новых вызовов: локальный граф был запрошен после общего mixed.
+    assert_eq!(record("bars_graph").requested["local"], true);
+    assert_eq!(
+        record("bars_graph").requested["documents"],
+        json!(["requirements.md"])
+    );
+    assert!(record("bars_graph").requested.get("view").is_none());
+    assert!(
+        page.records
+            .iter()
+            .any(|a| a.tool == "bars_graph" && a.requested["view"] == "mixed")
+    );
     assert_eq!(record("bars_graph").applied["operation"], "graph");
     assert!(page.records.iter().all(|a| a.applied["proxy_attempt"] == 1));
 }
@@ -1247,8 +1261,8 @@ async fn history_preserves_original_missing_null_zero_and_excludes_payloads() {
         .filter(|a| a.tool == "bars_projects")
         .collect();
     assert_eq!(projects.len(), 2);
-    assert_eq!(projects[0].requested, json!({"format":null}));
-    assert_eq!(projects[1].requested, json!({}));
+    assert_eq!(projects[0].requested, json!({"all":true,"format":null}));
+    assert_eq!(projects[1].requested, json!({"all":true}));
     assert_eq!(projects[1].result["count"], 0);
     assert!(page.records.iter().any(|a| a.tool == "bars_read"
         && a.outcome == "success"

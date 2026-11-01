@@ -54,7 +54,7 @@ fn format_schema(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
 /// Объект графа как в другом ответе: `kind`, `id`, `revision` без изменений.
 fn object_ref_schema(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
     schemars::json_schema!({
-        "description": "Объект из ответа графа: kind, id, revision как получены.",
+        "description": "kind, id, revision из ответа.",
         "type": "object",
         "properties": {
             "kind": {"type": "string"},
@@ -68,7 +68,7 @@ fn object_ref_schema(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
 /// Массив объектов графа для `roots`.
 fn object_refs_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
     schemars::json_schema!({
-        "description": "Объекты из ответа графа.",
+        "description": "Корни из ответа.",
         "type": "array",
         "items": object_ref_schema(generator)
     })
@@ -77,7 +77,7 @@ fn object_refs_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Sc
 /// Список предикатов связи по именам, без определения с описаниями вариантов.
 fn predicates_schema(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
     schemars::json_schema!({
-        "description": "Только эти предикаты.",
+        "description": "Типы связей.",
         "type": "array",
         "items": {
             "type": "string",
@@ -99,15 +99,15 @@ macro_rules! graph_args {
         #[serde(default, deny_unknown_fields)]
         #[schemars(transform = slim)]
         pub struct $name {
-            /// Путь или имя проекта; по умолчанию проект сессии.
+            /// Проект; иначе проект сессии.
             pub project: Option<String>,
             #[schemars(schema_with = "format_schema")]
             pub format: Option<Format>,
-            /// Область: папки первого уровня docs-root.
+            /// Папки первого уровня docs-root.
             pub modules: Vec<String>,
-            /// Область: документы, пути от docs-root.
+            /// Документы от docs-root.
             pub files: Vec<String>,
-            /// Время, мс: по умолчанию и максимум 5000.
+            /// Мс; умолчание и максимум 5000.
             pub timeout_ms: Option<u32>,
             $($(#[$fmeta])* pub $field: $ty,)*
         }
@@ -134,7 +134,7 @@ graph_args!(RelationsArgs {
 });
 
 graph_args!(PathsArgs {
-    /// Начало пути: объект из ответа графа или `{"label":"…"}` с необязательным `kind`.
+    /// Начало: ObjectRef, {document:путь} или {label,kind?,namespace?}.
     from: Option<GraphEndpoint>,
     /// Конец пути в той же форме.
     to: Option<GraphEndpoint>,
@@ -149,7 +149,7 @@ graph_args!(PathsArgs {
 });
 
 graph_args!(ImpactArgs {
-    /// Пути документов от docs-root или проекта; до 20, объединяются с roots.
+    /// Документы от docs-root или проекта; до 20, вместе с roots.
     documents: Vec<String>,
     #[schemars(schema_with = "object_refs_schema")]
     roots: Vec<ObjectRef>,
@@ -164,13 +164,13 @@ graph_args!(ImpactArgs {
 });
 
 graph_args!(ContextArgs {
-    /// Корни контекста по путям документов; до 20. Query ранжирует в их окрестности.
+    /// Документы (до 20); query ранжирует окрестность.
     documents: Vec<String>,
     #[schemars(schema_with = "object_refs_schema")]
     roots: Vec<ObjectRef>,
     /// Задача или вопрос на языке пользователя; обязателен.
     query: Option<String>,
-    /// `implementation`, `investigation` или `decision`: какие роли нужны задаче.
+    /// Профиль: `implementation`, `investigation` или `decision`.
     task_profile: Option<TaskProfile>,
     /// Только эти роли вместо набора профиля.
     roles: Vec<Role>,
@@ -194,7 +194,7 @@ graph_args!(ExploreArgs {
 });
 
 graph_args!(GraphViewArgs {
-    /// Корни локального графа по путям документов; до 20, вместе с roots.
+    /// Документы локального графа; до 20, вместе с roots.
     documents: Vec<String>,
     /// Что показывать; по умолчанию `documents`.
     view: View,
