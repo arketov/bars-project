@@ -455,7 +455,7 @@ fn unit(view: &View<'_>, item: &Item, n: usize, citations: &mut Citations) -> St
             for r in representatives {
                 let _ = writeln!(
                     text,
-                    "   representative: {}; name from heading of this source",
+                    "   representative: {}",
                     view.label(&r.id)
                 );
                 if let Some(node) = view.nodes.get(r.id.as_str()) {
