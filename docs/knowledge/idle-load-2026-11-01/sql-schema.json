@@ -1,0 +1,826 @@
+[
+  {
+    "utc": "2026-11-01T19:00:09.031Z",
+    "project": "C:/Users/arketov/Desktop/bars-project",
+    "tables": [
+      {
+        "name": "graph_meta",
+        "count": 22
+      },
+      {
+        "name": "graph_sources",
+        "count": 798
+      },
+      {
+        "name": "graph_nodes",
+        "count": 9791
+      },
+      {
+        "name": "graph_edges",
+        "count": 40276
+      },
+      {
+        "name": "graph_evidence",
+        "count": 19866
+      },
+      {
+        "name": "graph_edge_evidence",
+        "count": 60738
+      },
+      {
+        "name": "graph_node_sources",
+        "count": 9791
+      }
+    ],
+    "metadata": [
+      {
+        "key": "active_job",
+        "bytes": 0
+      },
+      {
+        "key": "auto_completed",
+        "bytes": 64
+      },
+      {
+        "key": "auto_retry",
+        "bytes": 0
+      },
+      {
+        "key": "auto_stopped",
+        "bytes": 0
+      },
+      {
+        "key": "error",
+        "bytes": 0
+      },
+      {
+        "key": "file_errors",
+        "bytes": 2
+      },
+      {
+        "key": "file_errors_total",
+        "bytes": 1
+      },
+      {
+        "key": "job_state",
+        "bytes": 6
+      },
+      {
+        "key": "knn_complete",
+        "bytes": 2478272
+      },
+      {
+        "key": "knn_input_epoch",
+        "bytes": 32
+      },
+      {
+        "key": "knn_input_revision",
+        "bytes": 5
+      },
+      {
+        "key": "layers",
+        "bytes": 298331
+      },
+      {
+        "key": "manifest",
+        "bytes": 99038
+      },
+      {
+        "key": "method",
+        "bytes": 20
+      },
+      {
+        "key": "paused",
+        "bytes": 5
+      },
+      {
+        "key": "progress",
+        "bytes": 65
+      },
+      {
+        "key": "read_epoch",
+        "bytes": 32
+      },
+      {
+        "key": "read_revision",
+        "bytes": 8
+      },
+      {
+        "key": "schema_version",
+        "bytes": 1
+      },
+      {
+        "key": "similarity_inputs",
+        "bytes": 64
+      },
+      {
+        "key": "snapshot",
+        "bytes": 64
+      },
+      {
+        "key": "state",
+        "bytes": 7
+      }
+    ],
+    "schema": [
+      {
+        "name": "graph_meta",
+        "sql": "CREATE TABLE graph_meta(key TEXT PRIMARY KEY,value TEXT NOT NULL) WITHOUT ROWID"
+      },
+      {
+        "name": "graph_sources",
+        "sql": "CREATE TABLE graph_sources(path TEXT PRIMARY KEY,revision TEXT NOT NULL,data TEXT NOT NULL) WITHOUT ROWID"
+      },
+      {
+        "name": "graph_nodes",
+        "sql": "CREATE TABLE graph_nodes(id TEXT PRIMARY KEY,kind TEXT NOT NULL,revision TEXT NOT NULL,data TEXT NOT NULL) WITHOUT ROWID"
+      },
+      {
+        "name": "graph_evidence",
+        "sql": "CREATE TABLE graph_evidence(id TEXT PRIMARY KEY,source_path TEXT NOT NULL REFERENCES graph_sources(path) ON DELETE CASCADE,data TEXT NOT NULL) WITHOUT ROWID"
+      },
+      {
+        "name": "graph_edges",
+        "sql": "CREATE TABLE graph_edges(id TEXT PRIMARY KEY,from_id TEXT NOT NULL REFERENCES graph_nodes(id) ON DELETE CASCADE,to_id TEXT NOT NULL REFERENCES graph_nodes(id) ON DELETE CASCADE,predicate TEXT NOT NULL,data TEXT NOT NULL) WITHOUT ROWID"
+      },
+      {
+        "name": "graph_edges_from",
+        "sql": "CREATE INDEX graph_edges_from ON graph_edges(from_id,predicate)"
+      },
+      {
+        "name": "graph_edges_to",
+        "sql": "CREATE INDEX graph_edges_to ON graph_edges(to_id,predicate)"
+      },
+      {
+        "name": "graph_edge_evidence",
+        "sql": "CREATE TABLE graph_edge_evidence(edge_id TEXT NOT NULL REFERENCES graph_edges(id) ON DELETE CASCADE,evidence_id TEXT NOT NULL REFERENCES graph_evidence(id) ON DELETE CASCADE,PRIMARY KEY(edge_id,evidence_id)) WITHOUT ROWID"
+      },
+      {
+        "name": "graph_node_sources",
+        "sql": "CREATE TABLE graph_node_sources(node_id TEXT NOT NULL REFERENCES graph_nodes(id) ON DELETE CASCADE,source_path TEXT NOT NULL REFERENCES graph_sources(path) ON DELETE CASCADE,PRIMARY KEY(node_id,source_path)) WITHOUT ROWID"
+      },
+      {
+        "name": "graph_aux",
+        "sql": "CREATE TABLE graph_aux(key TEXT PRIMARY KEY,data TEXT NOT NULL) WITHOUT ROWID"
+      },
+      {
+        "name": "graph_documents_insert",
+        "sql": "CREATE TRIGGER graph_documents_insert AFTER INSERT ON documents BEGIN\n                INSERT INTO graph_meta VALUES('state','stale') ON CONFLICT(key) DO UPDATE SET value='stale'; END"
+      },
+      {
+        "name": "graph_documents_delete",
+        "sql": "CREATE TRIGGER graph_documents_delete AFTER DELETE ON documents BEGIN\n                INSERT INTO graph_meta VALUES('state','stale') ON CONFLICT(key) DO UPDATE SET value='stale'; END"
+      },
+      {
+        "name": "graph_documents_change",
+        "sql": "CREATE TRIGGER graph_documents_change AFTER UPDATE OF hash,path ON documents WHEN OLD.hash<>NEW.hash OR OLD.path<>NEW.path BEGIN\n                INSERT INTO graph_meta VALUES('state','stale') ON CONFLICT(key) DO UPDATE SET value='stale'; END"
+      },
+      {
+        "name": "graph_read_graph_meta_INSERT",
+        "sql": "CREATE TRIGGER graph_read_graph_meta_INSERT AFTER INSERT ON graph_meta WHEN NEW.key NOT IN ('read_revision','read_epoch','knn_prepared','knn_checkpoint','knn_complete','knn_input_revision','knn_input_epoch') BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_meta_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_graph_meta_UPDATE AFTER UPDATE ON graph_meta WHEN NEW.key NOT IN ('read_revision','read_epoch','knn_prepared','knn_checkpoint','knn_complete','knn_input_revision','knn_input_epoch') BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_meta_DELETE",
+        "sql": "CREATE TRIGGER graph_read_graph_meta_DELETE AFTER DELETE ON graph_meta WHEN OLD.key NOT IN ('read_revision','read_epoch','knn_prepared','knn_checkpoint','knn_complete','knn_input_revision','knn_input_epoch') BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_sources_INSERT",
+        "sql": "CREATE TRIGGER graph_read_graph_sources_INSERT AFTER INSERT ON graph_sources  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_sources_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_graph_sources_UPDATE AFTER UPDATE ON graph_sources  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_sources_DELETE",
+        "sql": "CREATE TRIGGER graph_read_graph_sources_DELETE AFTER DELETE ON graph_sources  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_nodes_INSERT",
+        "sql": "CREATE TRIGGER graph_read_graph_nodes_INSERT AFTER INSERT ON graph_nodes  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_nodes_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_graph_nodes_UPDATE AFTER UPDATE ON graph_nodes  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_nodes_DELETE",
+        "sql": "CREATE TRIGGER graph_read_graph_nodes_DELETE AFTER DELETE ON graph_nodes  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_edges_INSERT",
+        "sql": "CREATE TRIGGER graph_read_graph_edges_INSERT AFTER INSERT ON graph_edges  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_edges_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_graph_edges_UPDATE AFTER UPDATE ON graph_edges  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_edges_DELETE",
+        "sql": "CREATE TRIGGER graph_read_graph_edges_DELETE AFTER DELETE ON graph_edges  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_evidence_INSERT",
+        "sql": "CREATE TRIGGER graph_read_graph_evidence_INSERT AFTER INSERT ON graph_evidence  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_evidence_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_graph_evidence_UPDATE AFTER UPDATE ON graph_evidence  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_evidence_DELETE",
+        "sql": "CREATE TRIGGER graph_read_graph_evidence_DELETE AFTER DELETE ON graph_evidence  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_aux_INSERT",
+        "sql": "CREATE TRIGGER graph_read_graph_aux_INSERT AFTER INSERT ON graph_aux  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_aux_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_graph_aux_UPDATE AFTER UPDATE ON graph_aux  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_aux_DELETE",
+        "sql": "CREATE TRIGGER graph_read_graph_aux_DELETE AFTER DELETE ON graph_aux  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_documents_INSERT",
+        "sql": "CREATE TRIGGER graph_read_documents_INSERT AFTER INSERT ON documents  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_documents_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_documents_UPDATE AFTER UPDATE ON documents  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_documents_DELETE",
+        "sql": "CREATE TRIGGER graph_read_documents_DELETE AFTER DELETE ON documents  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_chunks_INSERT",
+        "sql": "CREATE TRIGGER graph_read_chunks_INSERT AFTER INSERT ON chunks  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_chunks_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_chunks_UPDATE AFTER UPDATE ON chunks  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_chunks_DELETE",
+        "sql": "CREATE TRIGGER graph_read_chunks_DELETE AFTER DELETE ON chunks  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_vectors_INSERT",
+        "sql": "CREATE TRIGGER graph_read_vectors_INSERT AFTER INSERT ON vectors  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_vectors_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_vectors_UPDATE AFTER UPDATE ON vectors  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_vectors_DELETE",
+        "sql": "CREATE TRIGGER graph_read_vectors_DELETE AFTER DELETE ON vectors  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_meta_INSERT",
+        "sql": "CREATE TRIGGER graph_read_meta_INSERT AFTER INSERT ON meta  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_meta_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_meta_UPDATE AFTER UPDATE ON meta  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_meta_DELETE",
+        "sql": "CREATE TRIGGER graph_read_meta_DELETE AFTER DELETE ON meta  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      }
+    ],
+    "deletes": [
+      {
+        "name": "graph_sources",
+        "plan": [
+          {
+            "id": 3,
+            "parent": 0,
+            "notused": 215,
+            "detail": "SCAN graph_sources"
+          },
+          {
+            "id": 16,
+            "parent": 0,
+            "notused": 215,
+            "detail": "SCAN graph_node_sources"
+          },
+          {
+            "id": 23,
+            "parent": 0,
+            "notused": 215,
+            "detail": "SCAN graph_evidence"
+          }
+        ]
+      },
+      {
+        "name": "graph_nodes",
+        "plan": [
+          {
+            "id": 3,
+            "parent": 0,
+            "notused": 216,
+            "detail": "SCAN graph_nodes"
+          },
+          {
+            "id": 16,
+            "parent": 0,
+            "notused": 56,
+            "detail": "SEARCH graph_node_sources USING PRIMARY KEY (node_id=?)"
+          },
+          {
+            "id": 24,
+            "parent": 0,
+            "notused": 62,
+            "detail": "SEARCH graph_edges USING INDEX graph_edges_to (to_id=?)"
+          },
+          {
+            "id": 34,
+            "parent": 0,
+            "notused": 62,
+            "detail": "SEARCH graph_edges USING INDEX graph_edges_from (from_id=?)"
+          }
+        ]
+      },
+      {
+        "name": "graph_edges",
+        "plan": [
+          {
+            "id": 4,
+            "parent": 0,
+            "notused": 214,
+            "detail": "SCAN graph_edges USING INDEX graph_edges_to"
+          },
+          {
+            "id": 39,
+            "parent": 0,
+            "notused": 56,
+            "detail": "SEARCH graph_edge_evidence USING PRIMARY KEY (edge_id=?)"
+          }
+        ]
+      },
+      {
+        "name": "graph_evidence",
+        "plan": [
+          {
+            "id": 3,
+            "parent": 0,
+            "notused": 215,
+            "detail": "SCAN graph_evidence"
+          },
+          {
+            "id": 25,
+            "parent": 0,
+            "notused": 215,
+            "detail": "SCAN graph_edge_evidence"
+          }
+        ]
+      },
+      {
+        "name": "graph_edge_evidence",
+        "plan": [
+          {
+            "id": 3,
+            "parent": 0,
+            "notused": 215,
+            "detail": "SCAN graph_edge_evidence"
+          }
+        ]
+      },
+      {
+        "name": "graph_node_sources",
+        "plan": [
+          {
+            "id": 3,
+            "parent": 0,
+            "notused": 215,
+            "detail": "SCAN graph_node_sources"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "utc": "2026-11-01T19:00:25.536Z",
+    "project": "C:/Users/arketov/Desktop/cyberProject/ai-mutiplayer-bots",
+    "tables": [
+      {
+        "name": "graph_meta",
+        "count": 24
+      },
+      {
+        "name": "graph_sources",
+        "count": 937
+      },
+      {
+        "name": "graph_nodes",
+        "count": 12709
+      },
+      {
+        "name": "graph_edges",
+        "count": 56830
+      },
+      {
+        "name": "graph_evidence",
+        "count": 31221
+      },
+      {
+        "name": "graph_edge_evidence",
+        "count": 85979
+      },
+      {
+        "name": "graph_node_sources",
+        "count": 12709
+      }
+    ],
+    "metadata": [
+      {
+        "key": "active_job",
+        "bytes": 9
+      },
+      {
+        "key": "auto_completed",
+        "bytes": 64
+      },
+      {
+        "key": "auto_retry",
+        "bytes": 108
+      },
+      {
+        "key": "auto_stopped",
+        "bytes": 0
+      },
+      {
+        "key": "error",
+        "bytes": 0
+      },
+      {
+        "key": "file_errors",
+        "bytes": 2
+      },
+      {
+        "key": "file_errors_total",
+        "bytes": 1
+      },
+      {
+        "key": "job_state",
+        "bytes": 9
+      },
+      {
+        "key": "knn_checkpoint",
+        "bytes": 3413607
+      },
+      {
+        "key": "knn_complete",
+        "bytes": 3412977
+      },
+      {
+        "key": "knn_input_epoch",
+        "bytes": 32
+      },
+      {
+        "key": "knn_input_revision",
+        "bytes": 5
+      },
+      {
+        "key": "knn_prepared",
+        "bytes": 53998830
+      },
+      {
+        "key": "layers",
+        "bytes": 332307
+      },
+      {
+        "key": "manifest",
+        "bytes": 110363
+      },
+      {
+        "key": "method",
+        "bytes": 20
+      },
+      {
+        "key": "paused",
+        "bytes": 5
+      },
+      {
+        "key": "progress",
+        "bytes": 65
+      },
+      {
+        "key": "read_epoch",
+        "bytes": 32
+      },
+      {
+        "key": "read_revision",
+        "bytes": 8
+      },
+      {
+        "key": "schema_version",
+        "bytes": 1
+      },
+      {
+        "key": "similarity_inputs",
+        "bytes": 64
+      },
+      {
+        "key": "snapshot",
+        "bytes": 64
+      },
+      {
+        "key": "state",
+        "bytes": 5
+      }
+    ],
+    "schema": [
+      {
+        "name": "graph_meta",
+        "sql": "CREATE TABLE graph_meta(key TEXT PRIMARY KEY,value TEXT NOT NULL) WITHOUT ROWID"
+      },
+      {
+        "name": "graph_sources",
+        "sql": "CREATE TABLE graph_sources(path TEXT PRIMARY KEY,revision TEXT NOT NULL,data TEXT NOT NULL) WITHOUT ROWID"
+      },
+      {
+        "name": "graph_nodes",
+        "sql": "CREATE TABLE graph_nodes(id TEXT PRIMARY KEY,kind TEXT NOT NULL,revision TEXT NOT NULL,data TEXT NOT NULL) WITHOUT ROWID"
+      },
+      {
+        "name": "graph_evidence",
+        "sql": "CREATE TABLE graph_evidence(id TEXT PRIMARY KEY,source_path TEXT NOT NULL REFERENCES graph_sources(path) ON DELETE CASCADE,data TEXT NOT NULL) WITHOUT ROWID"
+      },
+      {
+        "name": "graph_edges",
+        "sql": "CREATE TABLE graph_edges(id TEXT PRIMARY KEY,from_id TEXT NOT NULL REFERENCES graph_nodes(id) ON DELETE CASCADE,to_id TEXT NOT NULL REFERENCES graph_nodes(id) ON DELETE CASCADE,predicate TEXT NOT NULL,data TEXT NOT NULL) WITHOUT ROWID"
+      },
+      {
+        "name": "graph_edges_from",
+        "sql": "CREATE INDEX graph_edges_from ON graph_edges(from_id,predicate)"
+      },
+      {
+        "name": "graph_edges_to",
+        "sql": "CREATE INDEX graph_edges_to ON graph_edges(to_id,predicate)"
+      },
+      {
+        "name": "graph_edge_evidence",
+        "sql": "CREATE TABLE graph_edge_evidence(edge_id TEXT NOT NULL REFERENCES graph_edges(id) ON DELETE CASCADE,evidence_id TEXT NOT NULL REFERENCES graph_evidence(id) ON DELETE CASCADE,PRIMARY KEY(edge_id,evidence_id)) WITHOUT ROWID"
+      },
+      {
+        "name": "graph_node_sources",
+        "sql": "CREATE TABLE graph_node_sources(node_id TEXT NOT NULL REFERENCES graph_nodes(id) ON DELETE CASCADE,source_path TEXT NOT NULL REFERENCES graph_sources(path) ON DELETE CASCADE,PRIMARY KEY(node_id,source_path)) WITHOUT ROWID"
+      },
+      {
+        "name": "graph_aux",
+        "sql": "CREATE TABLE graph_aux(key TEXT PRIMARY KEY,data TEXT NOT NULL) WITHOUT ROWID"
+      },
+      {
+        "name": "graph_documents_insert",
+        "sql": "CREATE TRIGGER graph_documents_insert AFTER INSERT ON documents BEGIN\n                INSERT INTO graph_meta VALUES('state','stale') ON CONFLICT(key) DO UPDATE SET value='stale'; END"
+      },
+      {
+        "name": "graph_documents_delete",
+        "sql": "CREATE TRIGGER graph_documents_delete AFTER DELETE ON documents BEGIN\n                INSERT INTO graph_meta VALUES('state','stale') ON CONFLICT(key) DO UPDATE SET value='stale'; END"
+      },
+      {
+        "name": "graph_documents_change",
+        "sql": "CREATE TRIGGER graph_documents_change AFTER UPDATE OF hash,path ON documents WHEN OLD.hash<>NEW.hash OR OLD.path<>NEW.path BEGIN\n                INSERT INTO graph_meta VALUES('state','stale') ON CONFLICT(key) DO UPDATE SET value='stale'; END"
+      },
+      {
+        "name": "graph_read_graph_meta_INSERT",
+        "sql": "CREATE TRIGGER graph_read_graph_meta_INSERT AFTER INSERT ON graph_meta WHEN NEW.key NOT IN ('read_revision','read_epoch','knn_prepared','knn_checkpoint','knn_complete','knn_input_revision','knn_input_epoch') BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_meta_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_graph_meta_UPDATE AFTER UPDATE ON graph_meta WHEN NEW.key NOT IN ('read_revision','read_epoch','knn_prepared','knn_checkpoint','knn_complete','knn_input_revision','knn_input_epoch') BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_meta_DELETE",
+        "sql": "CREATE TRIGGER graph_read_graph_meta_DELETE AFTER DELETE ON graph_meta WHEN OLD.key NOT IN ('read_revision','read_epoch','knn_prepared','knn_checkpoint','knn_complete','knn_input_revision','knn_input_epoch') BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_sources_INSERT",
+        "sql": "CREATE TRIGGER graph_read_graph_sources_INSERT AFTER INSERT ON graph_sources  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_sources_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_graph_sources_UPDATE AFTER UPDATE ON graph_sources  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_sources_DELETE",
+        "sql": "CREATE TRIGGER graph_read_graph_sources_DELETE AFTER DELETE ON graph_sources  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_nodes_INSERT",
+        "sql": "CREATE TRIGGER graph_read_graph_nodes_INSERT AFTER INSERT ON graph_nodes  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_nodes_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_graph_nodes_UPDATE AFTER UPDATE ON graph_nodes  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_nodes_DELETE",
+        "sql": "CREATE TRIGGER graph_read_graph_nodes_DELETE AFTER DELETE ON graph_nodes  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_edges_INSERT",
+        "sql": "CREATE TRIGGER graph_read_graph_edges_INSERT AFTER INSERT ON graph_edges  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_edges_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_graph_edges_UPDATE AFTER UPDATE ON graph_edges  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_edges_DELETE",
+        "sql": "CREATE TRIGGER graph_read_graph_edges_DELETE AFTER DELETE ON graph_edges  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_evidence_INSERT",
+        "sql": "CREATE TRIGGER graph_read_graph_evidence_INSERT AFTER INSERT ON graph_evidence  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_evidence_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_graph_evidence_UPDATE AFTER UPDATE ON graph_evidence  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_evidence_DELETE",
+        "sql": "CREATE TRIGGER graph_read_graph_evidence_DELETE AFTER DELETE ON graph_evidence  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_aux_INSERT",
+        "sql": "CREATE TRIGGER graph_read_graph_aux_INSERT AFTER INSERT ON graph_aux  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_aux_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_graph_aux_UPDATE AFTER UPDATE ON graph_aux  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_graph_aux_DELETE",
+        "sql": "CREATE TRIGGER graph_read_graph_aux_DELETE AFTER DELETE ON graph_aux  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_documents_INSERT",
+        "sql": "CREATE TRIGGER graph_read_documents_INSERT AFTER INSERT ON documents  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_documents_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_documents_UPDATE AFTER UPDATE ON documents  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_documents_DELETE",
+        "sql": "CREATE TRIGGER graph_read_documents_DELETE AFTER DELETE ON documents  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_chunks_INSERT",
+        "sql": "CREATE TRIGGER graph_read_chunks_INSERT AFTER INSERT ON chunks  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_chunks_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_chunks_UPDATE AFTER UPDATE ON chunks  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_chunks_DELETE",
+        "sql": "CREATE TRIGGER graph_read_chunks_DELETE AFTER DELETE ON chunks  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_vectors_INSERT",
+        "sql": "CREATE TRIGGER graph_read_vectors_INSERT AFTER INSERT ON vectors  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_vectors_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_vectors_UPDATE AFTER UPDATE ON vectors  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_vectors_DELETE",
+        "sql": "CREATE TRIGGER graph_read_vectors_DELETE AFTER DELETE ON vectors  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_meta_INSERT",
+        "sql": "CREATE TRIGGER graph_read_meta_INSERT AFTER INSERT ON meta  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_meta_UPDATE",
+        "sql": "CREATE TRIGGER graph_read_meta_UPDATE AFTER UPDATE ON meta  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      },
+      {
+        "name": "graph_read_meta_DELETE",
+        "sql": "CREATE TRIGGER graph_read_meta_DELETE AFTER DELETE ON meta  BEGIN\n                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END"
+      }
+    ],
+    "deletes": [
+      {
+        "name": "graph_sources",
+        "plan": [
+          {
+            "id": 3,
+            "parent": 0,
+            "notused": 215,
+            "detail": "SCAN graph_sources"
+          },
+          {
+            "id": 16,
+            "parent": 0,
+            "notused": 215,
+            "detail": "SCAN graph_node_sources"
+          },
+          {
+            "id": 23,
+            "parent": 0,
+            "notused": 215,
+            "detail": "SCAN graph_evidence"
+          }
+        ]
+      },
+      {
+        "name": "graph_nodes",
+        "plan": [
+          {
+            "id": 3,
+            "parent": 0,
+            "notused": 216,
+            "detail": "SCAN graph_nodes"
+          },
+          {
+            "id": 16,
+            "parent": 0,
+            "notused": 56,
+            "detail": "SEARCH graph_node_sources USING PRIMARY KEY (node_id=?)"
+          },
+          {
+            "id": 24,
+            "parent": 0,
+            "notused": 62,
+            "detail": "SEARCH graph_edges USING INDEX graph_edges_to (to_id=?)"
+          },
+          {
+            "id": 34,
+            "parent": 0,
+            "notused": 62,
+            "detail": "SEARCH graph_edges USING INDEX graph_edges_from (from_id=?)"
+          }
+        ]
+      },
+      {
+        "name": "graph_edges",
+        "plan": [
+          {
+            "id": 4,
+            "parent": 0,
+            "notused": 214,
+            "detail": "SCAN graph_edges USING INDEX graph_edges_to"
+          },
+          {
+            "id": 39,
+            "parent": 0,
+            "notused": 56,
+            "detail": "SEARCH graph_edge_evidence USING PRIMARY KEY (edge_id=?)"
+          }
+        ]
+      },
+      {
+        "name": "graph_evidence",
+        "plan": [
+          {
+            "id": 3,
+            "parent": 0,
+            "notused": 215,
+            "detail": "SCAN graph_evidence"
+          },
+          {
+            "id": 25,
+            "parent": 0,
+            "notused": 215,
+            "detail": "SCAN graph_edge_evidence"
+          }
+        ]
+      },
+      {
+        "name": "graph_edge_evidence",
+        "plan": [
+          {
+            "id": 3,
+            "parent": 0,
+            "notused": 215,
+            "detail": "SCAN graph_edge_evidence"
+          }
+        ]
+      },
+      {
+        "name": "graph_node_sources",
+        "plan": [
+          {
+            "id": 3,
+            "parent": 0,
+            "notused": 215,
+            "detail": "SCAN graph_node_sources"
+          }
+        ]
+      }
+    ]
+  }
+]

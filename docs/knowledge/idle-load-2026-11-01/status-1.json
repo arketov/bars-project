@@ -1,0 +1,86 @@
+[
+  {
+    "utc": "2026-11-01T18:55:43.3750661Z",
+    "project": "C:\\Users\\arketov\\Desktop\\bars-project",
+    "state": "ready",
+    "pending": 1,
+    "watching": true,
+    "graph": {
+      "freshness": "stale",
+      "completeness": "unknown",
+      "job_state": "running",
+      "state": "stale",
+      "active_job": "graph:1194",
+      "progress": {
+        "phase": "publish",
+        "processed": 798,
+        "total": 798,
+        "elapsed_ms": 1317
+      },
+      "error": null
+    }
+  },
+  {
+    "utc": "2026-11-01T18:55:45.4743635Z",
+    "project": "C:\\Users\\arketov\\Desktop\\cyberProject\\ai-mutiplayer-bots",
+    "state": "ready",
+    "pending": 57,
+    "watching": true,
+    "graph": {
+      "freshness": "stale",
+      "completeness": "unknown",
+      "job_state": "running",
+      "state": "stale",
+      "active_job": "graph:590",
+      "progress": {
+        "phase": "publish",
+        "processed": 937,
+        "total": 937,
+        "elapsed_ms": 1507
+      },
+      "error": null
+    }
+  },
+  {
+    "utc": "2026-11-01T18:55:45.7705254Z",
+    "project": "C:\\Users\\arketov\\Desktop\\cyberProject",
+    "state": "ready",
+    "pending": 0,
+    "watching": false,
+    "graph": {
+      "freshness": "current",
+      "completeness": "unknown",
+      "job_state": "idle",
+      "state": "ready",
+      "active_job": null,
+      "progress": {
+        "phase": "publish",
+        "processed": 47,
+        "total": 47,
+        "elapsed_ms": 1340
+      },
+      "error": null
+    }
+  },
+  {
+    "utc": "2026-11-01T18:55:45.7989430Z",
+    "project": "C:\\Users\\arketov\\Ouroboros\\repo",
+    "state": "ready",
+    "pending": 0,
+    "watching": true,
+    "graph": {
+      "freshness": "current",
+      "completeness": "unknown",
+      "job_state": "idle",
+      "state": "ready",
+      "active_job": null,
+      "progress": {
+        "phase": "publish",
+        "processed": 57,
+        "total": 57,
+        "elapsed_ms": 296
+      },
+      "error": null
+    }
+  }
+]

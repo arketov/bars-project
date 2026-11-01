@@ -24,10 +24,6 @@ The examples assume the suggested layout; use the target project's actual module
 
 ## Saved files and index freshness
 
-`bars_projects` returns the session project with module counts and purposes from its module Index.md titles. Use `project` for another registered project (name/path), `all=true` only to request the entire registry. Never infer a module purpose when its title is missing.
-
-Check `bars_status` before `bars_reindex`. Reindexing is not a remedy for `model_loading`, `graph_not_ready`, zero hits or queued edits. Wait for the model; graph updates automatically after indexing, or the user builds it in the window / `bars-cli graph build`. Use ordinary search/read while the graph is unavailable. A model change requiring reindexing needs the user; never retry `reindex_needs_consent`.
-
 `bars_read`, `bars_outline`, `bars_text_search` and `bars_links` read saved disk content, never an unsaved window editor buffer. Use text_search for exact literals/regex and links for incoming/outgoing links of a project-relative document. Respect continuation revisions/cursors and truncation; a stale revision/cursor requires restarting the request.
 
 Semantic search, similar and duplicates use the embed index. Saved edits may wait for a pause and the document queue; `pending` does not explain why, and `ready` does not prove every file is current. Do not force reindex to bypass normal waiting. GraphRAG has separate generations and may be stale/partial; it is not the window's physical graph or its fresh link panel. Agents edit files through their own file tools; MCP does not save or move them.

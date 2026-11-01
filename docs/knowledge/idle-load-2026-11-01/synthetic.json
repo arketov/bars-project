@@ -1,0 +1,41 @@
+[
+  {
+    "mode": "large-without-rowid",
+    "rows": 100,
+    "ms": 23756.940000000002,
+    "cpu": {
+      "user": 2687000,
+      "system": 12797000
+    },
+    "revision": "100",
+    "read_bytes": 10864222216,
+    "read_ops": 2652400,
+    "sqlite": "3.53.0"
+  },
+  {
+    "mode": "small-without-rowid",
+    "rows": 100,
+    "ms": 6.1259000000000015,
+    "cpu": {
+      "user": 0,
+      "system": 0
+    },
+    "revision": "100",
+    "read_bytes": 8,
+    "read_ops": 2,
+    "sqlite": "3.53.0"
+  },
+  {
+    "mode": "large-rowid",
+    "rows": 100,
+    "ms": 55.5474999999999,
+    "cpu": {
+      "user": 0,
+      "system": 0
+    },
+    "revision": "100",
+    "read_bytes": 8,
+    "read_ops": 3,
+    "sqlite": "3.53.0"
+  }
+]

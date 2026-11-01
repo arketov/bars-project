@@ -1,0 +1,65 @@
+[
+  {
+    "time": "2026-11-01T18:54:18Z",
+    "pid": 8944,
+    "level": "info",
+    "target": "bars_worker::worker",
+    "message": "Начата индексация: C:\\Users\\arketov\\Desktop\\bars-project"
+  },
+  {
+    "time": "2026-11-01T18:54:19Z",
+    "pid": 8944,
+    "level": "info",
+    "target": "bars_worker::worker",
+    "message": "Индексация завершена: C:\\Users\\arketov\\Desktop\\bars-project; добавлено 0, изменено 0, удалено 0"
+  },
+  {
+    "time": "2026-11-01T18:54:20Z",
+    "pid": 8944,
+    "level": "info",
+    "target": "bars_worker::worker",
+    "message": "Начата индексация: C:\\Users\\arketov\\Desktop\\bars-project"
+  },
+  {
+    "time": "2026-11-01T18:54:20Z",
+    "pid": 8944,
+    "level": "info",
+    "target": "bars_worker::worker",
+    "message": "Индексация завершена: C:\\Users\\arketov\\Desktop\\bars-project; добавлено 0, изменено 0, удалено 0"
+  },
+  {
+    "time": "2026-11-01T18:54:33Z",
+    "pid": 8944,
+    "level": "info",
+    "target": "bars_worker::worker",
+    "message": "Начата индексация: C:\\Users\\arketov\\Desktop\\bars-project"
+  },
+  {
+    "time": "2026-11-01T18:54:33Z",
+    "pid": 8944,
+    "level": "info",
+    "target": "bars_worker::worker",
+    "message": "Индексация завершена: C:\\Users\\arketov\\Desktop\\bars-project; добавлено 0, изменено 0, удалено 0"
+  },
+  {
+    "time": "2026-11-01T18:54:43Z",
+    "pid": 8944,
+    "level": "info",
+    "target": "bars_worker::worker",
+    "message": "Начата индексация: C:\\Users\\arketov\\Desktop\\bars-project"
+  },
+  {
+    "time": "2026-11-01T18:54:43Z",
+    "pid": 8944,
+    "level": "info",
+    "target": "bars_worker::worker",
+    "message": "Индексация завершена: C:\\Users\\arketov\\Desktop\\bars-project; добавлено 0, изменено 1, удалено 0"
+  },
+  {
+    "time": "2026-11-01T18:54:56Z",
+    "pid": 8944,
+    "level": "info",
+    "target": "bars_worker::handler::audits",
+    "message": "Аудит broken_links: complete (69 находок, 0 новых)"
+  }
+]

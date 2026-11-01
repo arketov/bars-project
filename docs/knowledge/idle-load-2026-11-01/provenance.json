@@ -1,0 +1,310 @@
+{
+  "captured_utc": "2026-11-01T19:06:31.3579493Z",
+  "logical_processors": 16,
+  "checkout": "C:\\Users\\arketov\\Desktop\\bars-project",
+  "head": "a80b4ab54e251bec60dae64456ef85c6cd688ef9",
+  "branch": "main",
+  "installed_executable_sha256": "44F8FF25987668411D9BD7C7E8AF7B730EDACAF597D75F85821F7AA0FE5A96C1",
+  "release_executable_sha256": "60D964615B0BDE9C307C652976575E3C1D87886EEAF9A431FA6FD555AA5EA677",
+  "processes": [
+    {
+      "ProcessId": 11780,
+      "ParentProcessId": 11232,
+      "Name": "msedgewebview2.exe",
+      "CreationDate": "2026-10-31T15:15:58.993527+05:00",
+      "webview_host": "SearchHost.exe"
+    },
+    {
+      "ProcessId": 12228,
+      "ParentProcessId": 11780,
+      "Name": "msedgewebview2.exe",
+      "CreationDate": "2026-10-31T15:15:59.11886+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 12676,
+      "ParentProcessId": 11780,
+      "Name": "msedgewebview2.exe",
+      "CreationDate": "2026-10-31T15:15:59.500053+05:00",
+      "webview_host": "SearchHost.exe"
+    },
+    {
+      "ProcessId": 12688,
+      "ParentProcessId": 11780,
+      "Name": "msedgewebview2.exe",
+      "CreationDate": "2026-10-31T15:15:59.500593+05:00",
+      "webview_host": "SearchHost.exe"
+    },
+    {
+      "ProcessId": 12840,
+      "ParentProcessId": 11780,
+      "Name": "msedgewebview2.exe",
+      "CreationDate": "2026-10-31T15:15:59.561032+05:00",
+      "webview_host": "SearchHost.exe"
+    },
+    {
+      "ProcessId": 13204,
+      "ParentProcessId": 11780,
+      "Name": "msedgewebview2.exe",
+      "CreationDate": "2026-10-31T15:15:59.674952+05:00",
+      "webview_host": "SearchHost.exe"
+    },
+    {
+      "ProcessId": 8944,
+      "ParentProcessId": 48464,
+      "Name": "bars.exe",
+      "CreationDate": "2026-11-01T17:46:20.407261+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 39360,
+      "ParentProcessId": 2012,
+      "Name": "Ouroboros.exe",
+      "CreationDate": "2026-11-01T22:29:51.95763+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 27724,
+      "ParentProcessId": 39360,
+      "Name": "msedgewebview2.exe",
+      "CreationDate": "2026-11-01T22:30:12.369079+05:00",
+      "webview_host": "Ouroboros.exe"
+    },
+    {
+      "ProcessId": 62824,
+      "ParentProcessId": 27724,
+      "Name": "msedgewebview2.exe",
+      "CreationDate": "2026-11-01T22:30:13.146528+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 63396,
+      "ParentProcessId": 27724,
+      "Name": "msedgewebview2.exe",
+      "CreationDate": "2026-11-01T22:30:13.98399+05:00",
+      "webview_host": "Ouroboros.exe"
+    },
+    {
+      "ProcessId": 50236,
+      "ParentProcessId": 27724,
+      "Name": "msedgewebview2.exe",
+      "CreationDate": "2026-11-01T22:30:13.984088+05:00",
+      "webview_host": "Ouroboros.exe"
+    },
+    {
+      "ProcessId": 43512,
+      "ParentProcessId": 27724,
+      "Name": "msedgewebview2.exe",
+      "CreationDate": "2026-11-01T22:30:14.000793+05:00",
+      "webview_host": "Ouroboros.exe"
+    },
+    {
+      "ProcessId": 41112,
+      "ParentProcessId": 27724,
+      "Name": "msedgewebview2.exe",
+      "CreationDate": "2026-11-01T22:30:14.066048+05:00",
+      "webview_host": "Ouroboros.exe"
+    },
+    {
+      "ProcessId": 34760,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T22:30:31.400864+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 8360,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T22:30:44.137704+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 59200,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T22:30:50.281302+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 16652,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T22:30:54.347355+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 23832,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T22:30:59.154191+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 31144,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T22:31:03.140067+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 18752,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T22:31:11.059567+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 52168,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T22:31:28.463372+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 43924,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T22:31:32.895292+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 24632,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T22:31:36.310647+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 31724,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T22:31:40.820316+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 57836,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T22:31:44.735548+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 37280,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T22:32:08.156982+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 55832,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T22:36:41.964216+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 18436,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T22:36:58.561576+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 22660,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T22:44:34.089937+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 15528,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T22:57:54.854863+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 60452,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T23:14:11.986423+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 31044,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T23:17:11.491869+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 52384,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T23:21:07.052226+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 14860,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T23:27:56.418124+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 49296,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T23:33:57.94434+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 51376,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T23:45:15.207964+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 49364,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T23:50:18.84409+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 23204,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T23:50:35.707056+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 13028,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T23:50:44.228503+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 30912,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-01T23:52:03.439372+05:00",
+      "webview_host": ""
+    },
+    {
+      "ProcessId": 18912,
+      "ParentProcessId": 33772,
+      "Name": "bars-mcp.exe",
+      "CreationDate": "2026-11-02T00:02:05.192719+05:00",
+      "webview_host": ""
+    }
+  ],
+  "wpr_error": "0xc5585011: Failed to enable the policy to profile system performance",
+  "live_databases_modified_by_investigation": false,
+  "worker_restarted": false,
+  "window_initially_visible": false,
+  "window_finally_visible": false
+}
