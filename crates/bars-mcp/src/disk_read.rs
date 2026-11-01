@@ -54,6 +54,7 @@ pub struct LinksArgs {
 impl BarsMcp {
     #[tool(
         name = "bars_text_search",
+        annotations(read_only_hint = true),
         description = "Точные вхождения в сохранённых .md с диска: литерал/regex, регистр, область. Не требует embed; не видит несохранённый редактор. До пяти вхождений на документ; продолжение одного документа через path/offset/revision. При усечении totals — нижняя граница; общей пагинации документов нет, сузьте область. Смысловой поиск — bars_rag_search."
     )]
     async fn bars_text_search(
@@ -84,6 +85,7 @@ impl BarsMcp {
 
     #[tool(
         name = "bars_links",
+        annotations(read_only_hint = true),
         description = "Свежая страница исходящих или входящих ссылок одного .md после сверки диска. Общий индекс панели ссылок, без embed; не GraphRAG. path — от корня проекта. Проверяйте known, has_more, next_cursor и limit_reasons; stale_cursor требует начать сначала. Исходные файлы не меняются; внешние URL не открываются."
     )]
     async fn bars_links(

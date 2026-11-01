@@ -343,6 +343,8 @@ type Pipe = Rpc<ReadHalf<DuplexStream>, WriteHalf<DuplexStream>>;
 mod disk_read;
 #[path = "support/module_scope.rs"]
 mod module_scope;
+#[path = "support/pool.rs"]
+mod pool;
 #[path = "support/project_catalog.rs"]
 mod project_catalog;
 

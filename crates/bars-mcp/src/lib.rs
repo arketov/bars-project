@@ -2,7 +2,7 @@
 //!
 //! Каждый инструмент — один вызов метода протокола ([`bars_protocol`]); индекса и моделей здесь нет
 //! (НФТ-3). `initialize` читает метаданные проекта с общим сроком 3 с; без воркера отвечает
-//! статичной инструкцией. Подключение для обычных вызовов живёт всю сессию
+//! статичной инструкцией. Пул до четырёх каналов для обычных вызовов живёт всю сессию
 //! (`docs/architecture/ipc.md`). Контракт инструментов — `docs/features/agent-tools/mcp-tools.md`.
 //! Права MCP на стороне воркера задаёт `bars_protocol::Session`: `accept_model_change` от MCP
 //! сбрасывается в `false`, а прокси его и не передаёт.
@@ -12,6 +12,7 @@ mod graph;
 mod instructions;
 mod maintenance;
 mod observation;
+mod pool;
 mod render;
 mod settings;
 
@@ -35,8 +36,8 @@ use tokio::sync::Mutex;
 
 pub use instructions::{INSTRUCTIONS, instructions};
 
-/// Сколько прокси ждёт ответа воркера на один вызов. Первый поиск может ждать загрузки модели.
-pub const CALL_TIMEOUT: Duration = Duration::from_secs(120);
+/// Общий срок вызова, короче стандартного клиентского предела 60 с (OQ-182).
+pub const CALL_TIMEOUT: Duration = Duration::from_secs(55);
 
 /// Сколько прокси сам повторяет вызов, пока воркер отвечает `model_loading`: агенту нечем ждать,
 /// а загрузка уже скачанной модели в память обычно занимает секунды (ISS-18).
@@ -76,11 +77,26 @@ impl Env {
             endpoint: Endpoint::current()?,
             cwd: std::env::current_dir()?,
             launch: Launch::Worker,
-            call_timeout: CALL_TIMEOUT,
+            call_timeout: configured_timeout()?,
             model_wait: MODEL_WAIT,
             bars_home: bars_protocol::user_home().map(|home| home.join(".bars")),
         })
     }
+}
+
+fn configured_timeout() -> anyhow::Result<Duration> {
+    let mut timeout = CALL_TIMEOUT;
+    for name in ["BARS_MCP_CALL_TIMEOUT_MS", "MCP_TOOL_TIMEOUT"] {
+        if let Some(value) = std::env::var_os(name) {
+            let millis = value
+                .to_str()
+                .and_then(|s| s.parse::<u64>().ok())
+                .filter(|n| *n > 0)
+                .ok_or_else(|| anyhow::anyhow!("{name}: нужно положительное число миллисекунд"))?;
+            timeout = timeout.min(Duration::from_millis(millis));
+        }
+    }
+    Ok(timeout)
 }
 
 /// Запускает MCP-сервер на stdin/stdout и работает до закрытия соединения клиентом.
@@ -90,11 +106,11 @@ pub async fn run_stdio(env: Env) -> anyhow::Result<()> {
     Ok(())
 }
 
-/// MCP-сервер bars. Соединение с воркером держится всю сессию и открывается при первом вызове.
+/// MCP-сервер bars. Каналы пула открываются по требованию и переиспользуются после ответа.
 #[derive(Clone)]
 pub struct BarsMcp {
     env: Env,
-    client: Arc<Mutex<Option<Client>>>,
+    pool: Arc<pool::Pool>,
     tool_router: ToolRouter<Self>,
     /// Показаны ли шесть графовых инструментов; решается при создании сессии (OQ-162).
     graph_tools: bool,
@@ -241,6 +257,7 @@ pub struct OutlineArgs {
 impl BarsMcp {
     #[tool(
         name = "bars_relations",
+        annotations(read_only_hint = true),
         description = "Что с чем связано явным утверждением («от чего зависит», «что заменяет»): \
                        факты с основанием. Вход — одно из query (имя) и entity_ref; отрицания и \
                        условия сохраняются, неоднозначное имя даёт кандидатов. Пустой ответ не \
@@ -256,6 +273,7 @@ impl BarsMcp {
 
     #[tool(
         name = "bars_paths",
+        annotations(read_only_hint = true),
         description = "Как связаны два объекта from и to: пути с основанием каждого шага. По умолчанию \
                        смысловые рёбра; structural и mixed — в path_kind. Путь — связь, а не \
                        объяснение причины; отсутствие пути не доказывает отсутствия связи."
@@ -270,6 +288,7 @@ impl BarsMcp {
 
     #[tool(
         name = "bars_impact",
+        annotations(read_only_hint = true),
         description = "Какие документы перепроверить после правки объекта: зависимости и проверки с \
                        основанием. Вход — roots из ответа другой графовой операции. Пустой ответ не \
                        значит, что зависимостей нет; гиперссылки сюда не входят — их даёт \
@@ -285,6 +304,7 @@ impl BarsMcp {
 
     #[tool(
         name = "bars_context",
+        annotations(read_only_hint = true),
         description = "Собрать первичные источники к задаче query по ролям: требование, решение, \
                        поведение, устройство, ограничение, проверка (roles, task_profile). Не \
                        готовый ответ, а список для чтения в пределах token_budget; смотри \
@@ -300,6 +320,7 @@ impl BarsMcp {
 
     #[tool(
         name = "bars_explore",
+        annotations(read_only_hint = true),
         description = "Обзор темы (topic) или всего проекта (whole_scope=true) для аудита: analysis=topics \
                        — темы, connectivity — изоляты и битые связи, coverage — пробелы, \
                        conflict_candidates — кандидаты в противоречия. Кандидат — повод прочитать \
@@ -315,6 +336,7 @@ impl BarsMcp {
 
     #[tool(
         name = "bars_graph",
+        annotations(read_only_hint = true),
         description = "Подграф документов, разделов, чанков или сущностей (view), например чтобы \
                        проверить находку bars_explore. local=true с roots — окрестность на глубину \
                        max_depth. Ответ объёмный: задавай limit. Только читает готовый граф."
@@ -337,7 +359,7 @@ impl BarsMcp {
         }
         Self {
             env,
-            client: Arc::new(Mutex::new(None)),
+            pool: Arc::new(pool::Pool::default()),
             tool_router,
             graph_tools,
             session_info: Arc::new(Mutex::new(SessionMetadata::default())),
@@ -393,9 +415,9 @@ impl BarsMcp {
         state.project.clone()
     }
 
-    /// Вызывает метод воркера. Соединение открывается при первом вызове; оборванное (воркер
-    /// перезапустили) открывается заново, и вызов повторяется один раз. После таймаута или сбоя канала
-    /// соединение сбрасывается: ответ мог прийти позже и сбить порядок вызовов.
+    /// Вызывает метод воркера через пул. После обрыва чтение повторяется один раз; запись
+    /// не повторяется, поскольку могла выполниться до обрыва. Незавершённый канал закрывается:
+    /// поздний ответ не должен сбить порядок вызовов. Общий срок и отмена — в `call_tool`.
     /// Пока модель загружается, вызов повторяется до `model_wait`: агент получает ответ, а не
     /// совет повторить позже. `context` — исходный вход для истории, с номером попытки прокси.
     async fn call_observed<M: Method>(
@@ -415,34 +437,38 @@ impl BarsMcp {
         params: &M,
         context: Option<&Value>,
     ) -> Result<M::Output, ClientError> {
-        let mut slot = self.client.lock().await;
+        let mut lease = self.pool.acquire().await;
         for attempt in 0..2 {
-            if slot.is_none() {
+            if lease.client.is_none() {
+                let _connect = self.pool.connect.lock().await;
                 let client = self.connect().await?;
                 if let Some(warning) = client.build_warning() {
                     // stdout занят протоколом MCP; stderr клиент складывает в журнал сервера.
                     eprintln!("bars-mcp: предупреждение: {warning}");
                 }
-                *slot = Some(client);
+                lease.client = Some(client);
             }
-            let client = slot.as_mut().expect("соединение открыто выше");
-            match tokio::time::timeout(self.env.call_timeout, client.call_observed(params, context))
-                .await
-            {
-                Ok(Ok(output)) => return Ok(output),
-                Ok(Err(error @ (ClientError::Io(_) | ClientError::BadReply(_)))) => {
-                    *slot = None;
-                    if attempt == 1 {
+            let client = lease.client.as_mut().expect("соединение открыто выше");
+            match client.call_observed(params, context).await {
+                Ok(output) => {
+                    lease.recycle();
+                    return Ok(output);
+                }
+                Err(error @ (ClientError::Io(_) | ClientError::BadReply(_))) => {
+                    lease.client = None;
+                    // Запись могла выполниться до обрыва: автоматически её не повторяем.
+                    if attempt == 1
+                        || matches!(
+                            M::NAME,
+                            "reindex" | "audit_run" | "audit_cancel" | "new_topics_check"
+                        )
+                    {
                         return Err(error);
                     }
                 }
-                Ok(Err(error)) => return Err(error),
-                Err(_) => {
-                    *slot = None;
-                    return Err(ClientError::Io(io::Error::new(
-                        io::ErrorKind::TimedOut,
-                        format!("воркер не ответил за {} с", self.env.call_timeout.as_secs()),
-                    )));
+                Err(error) => {
+                    lease.recycle();
+                    return Err(error);
                 }
             }
         }
@@ -555,6 +581,7 @@ fn finish<T: Serialize>(
 impl BarsMcp {
     #[tool(
         name = "bars_rag_search",
+        annotations(read_only_hint = true),
         description = "Поиск неизвестного контекста после определения предмета задачи; для известного \
                        документа можно сразу bars_read/bars_outline. Гибридный поиск возвращает \
                        фрагменты с источниками, строками и оценкой. Выбери modules по виду знания: \
@@ -619,6 +646,7 @@ impl BarsMcp {
 
     #[tool(
         name = "bars_get_similar",
+        annotations(read_only_hint = true),
         description = "Похожие разделы по ID чанка из выдачи bars_rag_search (поле id). Перед правкой — \
                        найти другие места с тем же описанием; перед добавлением текста — проверить, \
                        нет ли его уже. Возвращает ближайшие чанки области modules без исходного; \
@@ -647,6 +675,7 @@ impl BarsMcp {
 
     #[tool(
         name = "bars_get_duplicates",
+        annotations(read_only_hint = true),
         description = "Аудит дублей проекта: повторяющиеся и разошедшиеся описания, чтобы выбрать основной источник и заменить повторы ссылками. Без исходного чанка; project обязателен, modules ограничивает область. Виды: exact — одинаковый текст; near — почти одинаковые копии (с различиями слов, чисел и отрицаний); contained — один раздел внутри другого; partial — скопирована заметная часть; semantic — близки по смыслу, только повод прочитать оба. Наиболее явные первыми; одинаковый блок в четырёх и больше разделах помечен repeated_block (скорее шаблон). Ничего не удаляет и не объединяет. Короткие разделы (меньше 15 слов) не сравниваются."
     )]
     async fn bars_get_duplicates(
@@ -668,6 +697,7 @@ impl BarsMcp {
 
     #[tool(
         name = "bars_projects",
+        annotations(read_only_hint = true),
         description = "Проект сессии и модули первого уровня: число документов и назначение из Index.md. \
                        Другой проект — project (имя или путь), все проекты — только all=true. \
                        Используй для выбора project/modules; вложенная папка не отдельный модуль."
@@ -694,6 +724,7 @@ impl BarsMcp {
 
     #[tool(
         name = "bars_status",
+        annotations(read_only_hint = true),
         description = "Состояние индекса проекта: когда обновлён, идёт ли индексация, сколько \
                        документов ждёт, модель индекса, нужна ли переиндексация, последняя ошибка."
     )]
@@ -714,6 +745,7 @@ impl BarsMcp {
 
     #[tool(
         name = "bars_reindex",
+        annotations(read_only_hint = false),
         description = "Переиндексация проекта: проверка актуальности или, с full, полная. \
                        Сначала bars_status: reindex_required требует пользователя; после внешней правки \
                        проверяй индекс, только если документ остаётся вне поиска после нормальной паузы. \
@@ -742,6 +774,7 @@ impl BarsMcp {
 
     #[tool(
         name = "bars_read",
+        annotations(read_only_hint = true),
         description = "Прочитать известный документ `.md` целиком с номерами строк и title, без \
                        обязательного предварительного поиска. Подходит для плана/реестра, чтобы \
                        определить предмет этапа. Читает с диска, включая файлы вне индекса; path — \
@@ -766,6 +799,7 @@ impl BarsMcp {
 
     #[tool(
         name = "bars_outline",
+        annotations(read_only_hint = true),
         description = "Заголовки известного `.md` с номерами строк; можно вызвать сразу без поиска, \
                        например для определения предмета этапа по плану. Читается с диска, включая \
                        файлы вне индекса; path — от корня документации или проекта. \
@@ -795,6 +829,31 @@ impl BarsMcp {
 
 #[tool_handler(router = self.tool_router)]
 impl ServerHandler for BarsMcp {
+    async fn call_tool(
+        &self,
+        request: rmcp::model::CallToolRequestParams,
+        context: rmcp::service::RequestContext<rmcp::RoleServer>,
+    ) -> Result<rmcp::model::CallToolResponse, rmcp::ErrorData> {
+        let cancelled = context.ct.clone();
+        let timeout = self.env.call_timeout.min(CALL_TIMEOUT);
+        let call = self
+            .tool_router
+            .call(rmcp::handler::server::tool::ToolCallContext::new(
+                self, request, context,
+            ));
+        tokio::select! {
+            biased;
+            _ = cancelled.cancelled() => Err(rmcp::ErrorData::internal_error("Вызов bars отменён клиентом", None)),
+            result = tokio::time::timeout(timeout, call) => match result {
+                Ok(result) => result,
+                Err(_) => Ok(failure(&ClientError::Io(io::Error::new(
+                    io::ErrorKind::TimedOut,
+                    format!("истёк общий срок вызова bars: {} мс", timeout.as_millis()),
+                ))).into()),
+            },
+        }
+    }
+
     async fn initialize(
         &self,
         request: rmcp::model::InitializeRequestParams,
