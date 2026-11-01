@@ -1,0 +1,709 @@
+{
+  "attempts": {
+    "searches": 1201,
+    "sessions": 274,
+    "scopes": {
+      "broad": 248,
+      "modules": 789,
+      "files": 161,
+      "both": 3,
+      "unknown": 0
+    },
+    "outcomes": {
+      "success": 1177,
+      "unknown": 7,
+      "error": 17
+    },
+    "withModules": {
+      "numerator": 792,
+      "denominator": 1201,
+      "percent": 65.94504579517069
+    },
+    "withModulesKnown": {
+      "numerator": 792,
+      "denominator": 1201,
+      "percent": 65.94504579517069
+    },
+    "withFiles": {
+      "numerator": 164,
+      "denominator": 1201,
+      "percent": 13.655287260616154
+    },
+    "sessionsWithProjects": {
+      "numerator": 102,
+      "denominator": 274,
+      "percent": 37.22627737226277
+    },
+    "sessionsWithModules": {
+      "numerator": 156,
+      "denominator": 274,
+      "percent": 56.934306569343065
+    },
+    "sessionsWithFiles": {
+      "numerator": 97,
+      "denominator": 274,
+      "percent": 35.4014598540146
+    },
+    "sessionsWithoutObservedScope": 39,
+    "sessionsWithUnknownScope": 0,
+    "projectsSessionsWithoutObservedModules": 11,
+    "firstObservedWithModules": {
+      "numerator": 92,
+      "denominator": 274,
+      "percent": 33.57664233576642
+    },
+    "firstObservedWithoutFilter": 106
+  },
+  "withoutMarkedProxyRetries": {
+    "searches": 1193,
+    "sessions": 274,
+    "scopes": {
+      "broad": 240,
+      "modules": 789,
+      "files": 161,
+      "both": 3,
+      "unknown": 0
+    },
+    "outcomes": {
+      "success": 1175,
+      "unknown": 7,
+      "error": 11
+    },
+    "withModules": {
+      "numerator": 792,
+      "denominator": 1193,
+      "percent": 66.3872590108969
+    },
+    "withModulesKnown": {
+      "numerator": 792,
+      "denominator": 1193,
+      "percent": 66.3872590108969
+    },
+    "withFiles": {
+      "numerator": 164,
+      "denominator": 1193,
+      "percent": 13.74685666387259
+    },
+    "sessionsWithProjects": {
+      "numerator": 102,
+      "denominator": 274,
+      "percent": 37.22627737226277
+    },
+    "sessionsWithModules": {
+      "numerator": 156,
+      "denominator": 274,
+      "percent": 56.934306569343065
+    },
+    "sessionsWithFiles": {
+      "numerator": 97,
+      "denominator": 274,
+      "percent": 35.4014598540146
+    },
+    "sessionsWithoutObservedScope": 39,
+    "sessionsWithUnknownScope": 0,
+    "projectsSessionsWithoutObservedModules": 11,
+    "firstObservedWithModules": {
+      "numerator": 92,
+      "denominator": 274,
+      "percent": 33.57664233576642
+    },
+    "firstObservedWithoutFilter": 106
+  },
+  "removedProxyRetries": 8,
+  "unmarkedAttempts": 1142,
+  "byProject": {
+    "bars-project": {
+      "searches": 62,
+      "sessions": 24,
+      "scopes": {
+        "broad": 34,
+        "modules": 23,
+        "files": 4,
+        "both": 1,
+        "unknown": 0
+      },
+      "outcomes": {
+        "success": 62
+      },
+      "withModules": {
+        "numerator": 24,
+        "denominator": 62,
+        "percent": 38.70967741935484
+      },
+      "withModulesKnown": {
+        "numerator": 24,
+        "denominator": 62,
+        "percent": 38.70967741935484
+      },
+      "withFiles": {
+        "numerator": 5,
+        "denominator": 62,
+        "percent": 8.064516129032258
+      },
+      "sessionsWithProjects": {
+        "numerator": 4,
+        "denominator": 24,
+        "percent": 16.666666666666668
+      },
+      "sessionsWithModules": {
+        "numerator": 8,
+        "denominator": 24,
+        "percent": 33.333333333333336
+      },
+      "sessionsWithFiles": {
+        "numerator": 5,
+        "denominator": 24,
+        "percent": 20.833333333333332
+      },
+      "sessionsWithoutObservedScope": 13,
+      "sessionsWithUnknownScope": 0,
+      "projectsSessionsWithoutObservedModules": 0,
+      "firstObservedWithModules": {
+        "numerator": 4,
+        "denominator": 24,
+        "percent": 16.666666666666668
+      },
+      "firstObservedWithoutFilter": 20
+    },
+    "none": {
+      "searches": 1,
+      "sessions": 1,
+      "scopes": {
+        "broad": 1,
+        "modules": 0,
+        "files": 0,
+        "both": 0,
+        "unknown": 0
+      },
+      "outcomes": {
+        "error": 1
+      },
+      "withModules": {
+        "numerator": 0,
+        "denominator": 1,
+        "percent": 0
+      },
+      "withModulesKnown": {
+        "numerator": 0,
+        "denominator": 1,
+        "percent": 0
+      },
+      "withFiles": {
+        "numerator": 0,
+        "denominator": 1,
+        "percent": 0
+      },
+      "sessionsWithProjects": {
+        "numerator": 1,
+        "denominator": 1,
+        "percent": 100
+      },
+      "sessionsWithModules": {
+        "numerator": 0,
+        "denominator": 1,
+        "percent": 0
+      },
+      "sessionsWithFiles": {
+        "numerator": 0,
+        "denominator": 1,
+        "percent": 0
+      },
+      "sessionsWithoutObservedScope": 1,
+      "sessionsWithUnknownScope": 0,
+      "projectsSessionsWithoutObservedModules": 1,
+      "firstObservedWithModules": {
+        "numerator": 0,
+        "denominator": 1,
+        "percent": 0
+      },
+      "firstObservedWithoutFilter": 1
+    },
+    "other": {
+      "searches": 9,
+      "sessions": 4,
+      "scopes": {
+        "broad": 9,
+        "modules": 0,
+        "files": 0,
+        "both": 0,
+        "unknown": 0
+      },
+      "outcomes": {
+        "error": 5,
+        "success": 4
+      },
+      "withModules": {
+        "numerator": 0,
+        "denominator": 9,
+        "percent": 0
+      },
+      "withModulesKnown": {
+        "numerator": 0,
+        "denominator": 9,
+        "percent": 0
+      },
+      "withFiles": {
+        "numerator": 0,
+        "denominator": 9,
+        "percent": 0
+      },
+      "sessionsWithProjects": {
+        "numerator": 0,
+        "denominator": 4,
+        "percent": 0
+      },
+      "sessionsWithModules": {
+        "numerator": 0,
+        "denominator": 4,
+        "percent": 0
+      },
+      "sessionsWithFiles": {
+        "numerator": 0,
+        "denominator": 4,
+        "percent": 0
+      },
+      "sessionsWithoutObservedScope": 4,
+      "sessionsWithUnknownScope": 0,
+      "projectsSessionsWithoutObservedModules": 0,
+      "firstObservedWithModules": {
+        "numerator": 0,
+        "denominator": 4,
+        "percent": 0
+      },
+      "firstObservedWithoutFilter": 4
+    },
+    "overdrive-bots": {
+      "searches": 1129,
+      "sessions": 246,
+      "scopes": {
+        "broad": 204,
+        "modules": 766,
+        "files": 157,
+        "both": 2,
+        "unknown": 0
+      },
+      "outcomes": {
+        "success": 1111,
+        "unknown": 7,
+        "error": 11
+      },
+      "withModules": {
+        "numerator": 768,
+        "denominator": 1129,
+        "percent": 68.02480070859167
+      },
+      "withModulesKnown": {
+        "numerator": 768,
+        "denominator": 1129,
+        "percent": 68.02480070859167
+      },
+      "withFiles": {
+        "numerator": 159,
+        "denominator": 1129,
+        "percent": 14.08325952170062
+      },
+      "sessionsWithProjects": {
+        "numerator": 98,
+        "denominator": 246,
+        "percent": 39.83739837398374
+      },
+      "sessionsWithModules": {
+        "numerator": 148,
+        "denominator": 246,
+        "percent": 60.16260162601626
+      },
+      "sessionsWithFiles": {
+        "numerator": 92,
+        "denominator": 246,
+        "percent": 37.39837398373984
+      },
+      "sessionsWithoutObservedScope": 22,
+      "sessionsWithUnknownScope": 0,
+      "projectsSessionsWithoutObservedModules": 11,
+      "firstObservedWithModules": {
+        "numerator": 88,
+        "denominator": 246,
+        "percent": 35.77235772357724
+      },
+      "firstObservedWithoutFilter": 82
+    }
+  },
+  "byDay": {
+    "2026-10-25": {
+      "searches": 394,
+      "sessions": 32,
+      "scopes": {
+        "broad": 42,
+        "modules": 285,
+        "files": 64,
+        "both": 3,
+        "unknown": 0
+      },
+      "outcomes": {
+        "success": 387,
+        "unknown": 7
+      },
+      "withModules": {
+        "numerator": 288,
+        "denominator": 394,
+        "percent": 73.09644670050761
+      },
+      "withModulesKnown": {
+        "numerator": 288,
+        "denominator": 394,
+        "percent": 73.09644670050761
+      },
+      "withFiles": {
+        "numerator": 67,
+        "denominator": 394,
+        "percent": 17.00507614213198
+      },
+      "sessionsWithProjects": {
+        "numerator": 25,
+        "denominator": 32,
+        "percent": 78.125
+      },
+      "sessionsWithModules": {
+        "numerator": 30,
+        "denominator": 32,
+        "percent": 93.75
+      },
+      "sessionsWithFiles": {
+        "numerator": 5,
+        "denominator": 32,
+        "percent": 15.625
+      },
+      "sessionsWithoutObservedScope": 2,
+      "sessionsWithUnknownScope": 0,
+      "projectsSessionsWithoutObservedModules": 0,
+      "firstObservedWithModules": {
+        "numerator": 17,
+        "denominator": 32,
+        "percent": 53.125
+      },
+      "firstObservedWithoutFilter": 15
+    },
+    "2026-10-26": {
+      "searches": 243,
+      "sessions": 54,
+      "scopes": {
+        "broad": 90,
+        "modules": 145,
+        "files": 8,
+        "both": 0,
+        "unknown": 0
+      },
+      "outcomes": {
+        "success": 240,
+        "error": 3
+      },
+      "withModules": {
+        "numerator": 145,
+        "denominator": 243,
+        "percent": 59.67078189300412
+      },
+      "withModulesKnown": {
+        "numerator": 145,
+        "denominator": 243,
+        "percent": 59.67078189300412
+      },
+      "withFiles": {
+        "numerator": 8,
+        "denominator": 243,
+        "percent": 3.292181069958848
+      },
+      "sessionsWithProjects": {
+        "numerator": 33,
+        "denominator": 54,
+        "percent": 61.111111111111114
+      },
+      "sessionsWithModules": {
+        "numerator": 36,
+        "denominator": 54,
+        "percent": 66.66666666666667
+      },
+      "sessionsWithFiles": {
+        "numerator": 7,
+        "denominator": 54,
+        "percent": 12.962962962962964
+      },
+      "sessionsWithoutObservedScope": 15,
+      "sessionsWithUnknownScope": 0,
+      "projectsSessionsWithoutObservedModules": 4,
+      "firstObservedWithModules": {
+        "numerator": 17,
+        "denominator": 54,
+        "percent": 31.48148148148148
+      },
+      "firstObservedWithoutFilter": 37
+    },
+    "2026-10-28": {
+      "searches": 205,
+      "sessions": 29,
+      "scopes": {
+        "broad": 57,
+        "modules": 137,
+        "files": 11,
+        "both": 0,
+        "unknown": 0
+      },
+      "outcomes": {
+        "error": 6,
+        "success": 199
+      },
+      "withModules": {
+        "numerator": 137,
+        "denominator": 205,
+        "percent": 66.82926829268293
+      },
+      "withModulesKnown": {
+        "numerator": 137,
+        "denominator": 205,
+        "percent": 66.82926829268293
+      },
+      "withFiles": {
+        "numerator": 11,
+        "denominator": 205,
+        "percent": 5.365853658536586
+      },
+      "sessionsWithProjects": {
+        "numerator": 26,
+        "denominator": 29,
+        "percent": 89.65517241379311
+      },
+      "sessionsWithModules": {
+        "numerator": 19,
+        "denominator": 29,
+        "percent": 65.51724137931035
+      },
+      "sessionsWithFiles": {
+        "numerator": 7,
+        "denominator": 29,
+        "percent": 24.137931034482758
+      },
+      "sessionsWithoutObservedScope": 9,
+      "sessionsWithUnknownScope": 0,
+      "projectsSessionsWithoutObservedModules": 7,
+      "firstObservedWithModules": {
+        "numerator": 3,
+        "denominator": 29,
+        "percent": 10.344827586206897
+      },
+      "firstObservedWithoutFilter": 25
+    },
+    "2026-10-29": {
+      "searches": 29,
+      "sessions": 2,
+      "scopes": {
+        "broad": 6,
+        "modules": 23,
+        "files": 0,
+        "both": 0,
+        "unknown": 0
+      },
+      "outcomes": {
+        "success": 26,
+        "error": 3
+      },
+      "withModules": {
+        "numerator": 23,
+        "denominator": 29,
+        "percent": 79.3103448275862
+      },
+      "withModulesKnown": {
+        "numerator": 23,
+        "denominator": 29,
+        "percent": 79.3103448275862
+      },
+      "withFiles": {
+        "numerator": 0,
+        "denominator": 29,
+        "percent": 0
+      },
+      "sessionsWithProjects": {
+        "numerator": 2,
+        "denominator": 2,
+        "percent": 100
+      },
+      "sessionsWithModules": {
+        "numerator": 2,
+        "denominator": 2,
+        "percent": 100
+      },
+      "sessionsWithFiles": {
+        "numerator": 0,
+        "denominator": 2,
+        "percent": 0
+      },
+      "sessionsWithoutObservedScope": 0,
+      "sessionsWithUnknownScope": 0,
+      "projectsSessionsWithoutObservedModules": 0,
+      "firstObservedWithModules": {
+        "numerator": 1,
+        "denominator": 2,
+        "percent": 50
+      },
+      "firstObservedWithoutFilter": 1
+    },
+    "2026-10-30": {
+      "searches": 248,
+      "sessions": 143,
+      "scopes": {
+        "broad": 29,
+        "modules": 142,
+        "files": 77,
+        "both": 0,
+        "unknown": 0
+      },
+      "outcomes": {
+        "success": 248
+      },
+      "withModules": {
+        "numerator": 142,
+        "denominator": 248,
+        "percent": 57.25806451612903
+      },
+      "withModulesKnown": {
+        "numerator": 142,
+        "denominator": 248,
+        "percent": 57.25806451612903
+      },
+      "withFiles": {
+        "numerator": 77,
+        "denominator": 248,
+        "percent": 31.048387096774192
+      },
+      "sessionsWithProjects": {
+        "numerator": 10,
+        "denominator": 143,
+        "percent": 6.993006993006993
+      },
+      "sessionsWithModules": {
+        "numerator": 61,
+        "denominator": 143,
+        "percent": 42.65734265734266
+      },
+      "sessionsWithFiles": {
+        "numerator": 77,
+        "denominator": 143,
+        "percent": 53.84615384615385
+      },
+      "sessionsWithoutObservedScope": 7,
+      "sessionsWithUnknownScope": 0,
+      "projectsSessionsWithoutObservedModules": 0,
+      "firstObservedWithModules": {
+        "numerator": 51,
+        "denominator": 143,
+        "percent": 35.66433566433567
+      },
+      "firstObservedWithoutFilter": 17
+    },
+    "2026-10-31": {
+      "searches": 11,
+      "sessions": 6,
+      "scopes": {
+        "broad": 11,
+        "modules": 0,
+        "files": 0,
+        "both": 0,
+        "unknown": 0
+      },
+      "outcomes": {
+        "success": 6,
+        "error": 5
+      },
+      "withModules": {
+        "numerator": 0,
+        "denominator": 11,
+        "percent": 0
+      },
+      "withModulesKnown": {
+        "numerator": 0,
+        "denominator": 11,
+        "percent": 0
+      },
+      "withFiles": {
+        "numerator": 0,
+        "denominator": 11,
+        "percent": 0
+      },
+      "sessionsWithProjects": {
+        "numerator": 0,
+        "denominator": 6,
+        "percent": 0
+      },
+      "sessionsWithModules": {
+        "numerator": 0,
+        "denominator": 6,
+        "percent": 0
+      },
+      "sessionsWithFiles": {
+        "numerator": 0,
+        "denominator": 6,
+        "percent": 0
+      },
+      "sessionsWithoutObservedScope": 6,
+      "sessionsWithUnknownScope": 0,
+      "projectsSessionsWithoutObservedModules": 0,
+      "firstObservedWithModules": {
+        "numerator": 0,
+        "denominator": 6,
+        "percent": 0
+      },
+      "firstObservedWithoutFilter": 6
+    },
+    "2026-11-01": {
+      "searches": 71,
+      "sessions": 8,
+      "scopes": {
+        "broad": 13,
+        "modules": 57,
+        "files": 1,
+        "both": 0,
+        "unknown": 0
+      },
+      "outcomes": {
+        "success": 71
+      },
+      "withModules": {
+        "numerator": 57,
+        "denominator": 71,
+        "percent": 80.28169014084507
+      },
+      "withModulesKnown": {
+        "numerator": 57,
+        "denominator": 71,
+        "percent": 80.28169014084507
+      },
+      "withFiles": {
+        "numerator": 1,
+        "denominator": 71,
+        "percent": 1.408450704225352
+      },
+      "sessionsWithProjects": {
+        "numerator": 6,
+        "denominator": 8,
+        "percent": 75
+      },
+      "sessionsWithModules": {
+        "numerator": 8,
+        "denominator": 8,
+        "percent": 100
+      },
+      "sessionsWithFiles": {
+        "numerator": 1,
+        "denominator": 8,
+        "percent": 12.5
+      },
+      "sessionsWithoutObservedScope": 0,
+      "sessionsWithUnknownScope": 0,
+      "projectsSessionsWithoutObservedModules": 0,
+      "firstObservedWithModules": {
+        "numerator": 3,
+        "denominator": 8,
+        "percent": 37.5
+      },
+      "firstObservedWithoutFilter": 5
+    }
+  }
+}
