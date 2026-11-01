@@ -37,7 +37,7 @@ it("меню выбранного проекта: подтверждение у�
   expect(app.deletingProject?.path).toBe(first.path);
   app.cancelDeletion();
   await open(document.querySelector(".proj b")!);
-  item("Проверить индекс").click(); await settle();
+  item("Проверить проект").click(); await settle();
   expect(api.call).toHaveBeenCalledExactlyOnceWith("reindex", { cwd: first.path, project: first.path });
   expect(app.current).toBe(first.path); expect(app.query).toBe("исходный запрос");
   expect([...app.selected]).toEqual(["сохранить"]);
@@ -48,7 +48,7 @@ it("одинаковые имена в переключателе: провер�
   document.querySelector<HTMLButtonElement>(".proj")!.click(); flushSync();
   await open(document.querySelectorAll(".pitem b")[1]);
   expect(app.current).toBe(first.path);
-  item("Проверить индекс").click(); await settle();
+  item("Проверить проект").click(); await settle();
   expect(api.call).toHaveBeenCalledExactlyOnceWith("reindex", { cwd: second.path, project: second.path });
   expect(app.current).toBe(first.path);
 });
@@ -57,7 +57,7 @@ it("меню пропавшего проекта в списке; ошибка �
   app.projects = [first, { ...second, state: "unavailable" }]; app.current = second.path; flushSync();
   await open(document.querySelectorAll(".litem b")[1]);
   api.call.mockRejectedValueOnce(new Error("Папка проекта не найдена"));
-  item("Проверить индекс").click(); await settle();
+  item("Проверить проект").click(); await settle();
   expect(app.toast).toEqual({ text: "Папка проекта не найдена", bad: true });
   expect(api.call).toHaveBeenCalledExactlyOnceWith("reindex", { cwd: second.path, project: second.path });
 });
@@ -66,7 +66,7 @@ it("Shift+F10 и стрелки обходят пункты; Escape/Tab закр
   const project = document.querySelector<HTMLButtonElement>(".proj")!;
   for (const key of ["Escape", "Tab"]) {
     project.focus(); project.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "F10", shiftKey: true })); await settle();
-    for (const [arrow, label] of [["ArrowUp", "Проверить индекс"], ["ArrowDown", "Удалить проект"], ["Home", "Удалить проект"], ["End", "Проверить индекс"]]) {
+    for (const [arrow, label] of [["ArrowUp", "Проверить проект"], ["ArrowDown", "Удалить проект"], ["Home", "Удалить проект"], ["End", "Проверить проект"]]) {
       window.dispatchEvent(new KeyboardEvent("keydown", { key: arrow }));
       expect(document.activeElement).toBe(item(label));
     }

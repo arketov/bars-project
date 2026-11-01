@@ -1,3 +1,4 @@
+import { label as uiLabel } from "./labels";
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 export type Fields = Record<string, Json>;
 export interface Attempt {
@@ -48,7 +49,7 @@ export function value(v: Json | undefined): string {
   if (v === false) return "Нет";
   if (v === "not_recorded") return "Не сохранён";
   if (v === "whole_document") return "Документ целиком";
-  const meanings: Record<string, string> = { cosine: "Косинусная близость", rerank: "Оценка rerank", model_loading: "Модель загружается", model_unavailable: "Модель недоступна", rerank_execution_failed: "Ошибка выполнения rerank", ready: "Готов", indexing: "Индексация", missing: "Проект недоступен", rebuild: "Полная индексация", check: "Проверка изменений" };
+  const meanings: Record<string, string> = { cosine: uiLabel("score", "cosine").text, rerank: uiLabel("score", "rerank").text, model_loading: "Модель загружается", model_unavailable: "Модель недоступна", rerank_execution_failed: "Ошибка оценки моделью", ready: "Готов", indexing: "Индексация", missing: "Проект недоступен", rebuild: "Полная индексация", check: "Проверка изменений" };
   if (typeof v === "string" && meanings[v]) return meanings[v];
   if (Array.isArray(v)) return v.length ? v.map(value).join("; ") : "Пустой список";
   if (typeof v === "object") return Object.entries(v).map(([k, x]) => `${labels[k] ?? k}: ${value(x)}`).join("; ");
@@ -59,11 +60,11 @@ const labels: Record<string, string> = {
   limit: "Фрагментов (limit)", candidates: "Кандидатов", min_score: "Порог", path: "Путь",
   levels: "Уровни", under: "Раздел", under_line: "Строка раздела", full: "Полная проверка",
   range: "Диапазон", cwd: "Рабочая папка", resolved_project: "Разрешённый проект",
-  resolved_project_name: "Имя проекта", rerank_performed: "Rerank выполнен",
-  rerank_fallback: "Fallback rerank", rerank_fallback_reason: "Причина fallback",
-  models: "Модели", embed: "Embed", rerank: "Rerank", rerank_requested: "Rerank запрошен",
+  resolved_project_name: "Имя проекта", rerank_performed: "Оценка моделью выполнена",
+  rerank_fallback: "Запасной способ оценки", rerank_fallback_reason: "Причина смены способа оценки",
+  models: "Модели", embed: "Embed", rerank: "Оценка моделью", rerank_requested: "Оценка моделью запрошена",
   score_kind: "Шкала", indexing: "Индексация", pending: "Ожидают документы",
-  watching: "Слежение за файлами", model: "Модель", accepted: "Принято в очередь", rerank_candidates: "Кандидатов rerank", clamped: "Значения ограничены", details: "Подробности",
+  watching: "Слежение за файлами", model: "Модель", accepted: "Принято в очередь", rerank_candidates: "Кандидатов для оценки моделью", clamped: "Значения ограничены", details: "Подробности",
   state: "Состояние", updated_at: "Обновлено", index_model: "Модель индекса",
   settings_model: "Модель настроек", has_problem: "Есть проблема", operation_id: "ID задания",
   merged: "Объединено с заданием", chunk_id: "ID чанка", source_chunk: "Исходный чанк", job_kind: "Тип задания", anchor: "Найденный раздел", mode: "Режим",

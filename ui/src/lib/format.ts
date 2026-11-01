@@ -1,5 +1,6 @@
 // Подписи окна: имена для людей, оценка результата, числа и время по-русски.
 
+import { label } from "./labels";
 import type { JobKind, JobPriority, ProjectInfo, ProjectState, ProjectProblems, ScoreKind } from "./types";
 
 /** `hybrid-search.md` → «Hybrid search»; служебные имена вроде «(корень)» не трогаем. */
@@ -20,13 +21,13 @@ export type Fit = { cls: "f-good" | "f-mid" | "f-low" | "f-cosine"; label: strin
 export function fit(score: number, kind: ScoreKind): Fit {
   const percent = Math.round(Math.max(0, Math.min(1, score)) * 100);
   if (kind === "cosine") return {
-    cls: "f-cosine", label: "Косинусная близость", percent,
+    cls: "f-cosine", label: label("score", kind).text, percent,
     explanation: "Смысловая близость, а не вероятность правильного ответа. Гибридный порядок учитывает также совпадения слов и точные идентификаторы; близость может возрастать вниз по списку.",
   };
   return {
     cls: score >= 0.75 ? "f-good" : score >= 0.5 ? "f-mid" : "f-low",
-    label: "Оценка rerank", percent,
-    explanation: "Оценка модели rerank, а не вероятность правильного ответа. Результаты упорядочены по этой оценке.",
+    label: label("score", kind).text, percent,
+    explanation: "Оценка модели, а не вероятность правильного ответа. Результаты упорядочены по этой оценке.",
   };
 }
 
@@ -75,7 +76,6 @@ export function baseName(path: string): string {
   return parts[parts.length - 1] ?? path;
 }
 
-export const SCORE_LABEL: Record<ScoreKind, string> = { rerank: "rerank", cosine: "cosine" };
 
 export function jobReason(kind: JobKind, priority: JobPriority, files: number): string {
   if (kind === "rebuild") return "полная переиндексация по согласию";

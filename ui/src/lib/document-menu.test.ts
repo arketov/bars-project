@@ -52,7 +52,7 @@ describe("Меню документа на карточке, вкладке и �
     const card = host(); card.dataset.documentPath = "docs/a.md"; card.dataset.menuKind = "file"; card.dataset.menuPlace = "card";
     components.push(mount(ContextMenu, { target: host() })); flushSync();
     await rightClick(card);
-    expect(labels()).toEqual(["Открыть", "Открыть в новом окне", "Открыть в …", "Переименовать…", "Переместить…", "Показать в Проводнике", "Скопировать путь", "Проверить индекс", "Удалить…"]);
+    expect(labels()).toEqual(["Открыть", "Открыть в новом окне", "Открыть в …", "Переименовать…", "Переместить…", "Показать в Проводнике", "Скопировать путь", "Проверить документ", "Удалить…"]);
     expect(document.querySelectorAll('[role="separator"]')).toHaveLength(4);
     expect(items().at(-1)!.classList.contains("danger")).toBe(true);
     expect(document.querySelector('[aria-haspopup="menu"]')?.textContent).toContain("Открыть в …");
@@ -183,7 +183,7 @@ describe("Меню редактора: правка текста и подмен
     const sub = document.querySelector(".sub")!;
     const names = Array.from(sub.querySelectorAll('[role="menuitem"]')).map(name);
     expect(names).toEqual(["Закрыть", "Закрыть другие", "Закрыть справа", "Переместить вкладку…", "Открыть в новом окне",
-      "Открыть в программе по умолчанию", "Открыть в VS Code", "Переименовать…", "Переместить…", "Показать в Проводнике", "Скопировать путь", "Проверить индекс", "Удалить…"]);
+      "Открыть в программе по умолчанию", "Открыть в VS Code", "Переименовать…", "Переместить…", "Показать в Проводнике", "Скопировать путь", "Проверить документ", "Удалить…"]);
     expect(sub.querySelector('[aria-haspopup]')).toBeNull();
     expect(document.activeElement).toBe(sub.querySelector("button"));
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); await settle();

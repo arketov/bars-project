@@ -891,6 +891,190 @@ fn changed_chunking_rechunks_everything_but_reuses_vectors() {
 }
 
 #[test]
+fn changed_registry_algorithm_rechunks_unchanged_files_and_reuses_vectors() {
+    let dir = tempfile::tempdir().unwrap();
+    write(dir.path(), "docs/a.md", &doc("A", &["альфа", "бета"]));
+    let mut index = open(dir.path());
+    let mut model = FakeEmbedder::new("m");
+    updated(dir.path(), &mut index, &mut model);
+    let calls = model.calls;
+    index
+        .conn()
+        .execute("DELETE FROM meta WHERE key='chunking_version'", [])
+        .unwrap();
+
+    let snapshot = ScanSnapshot::read(Some(&index)).unwrap();
+    let scan = scan_index(dir.path(), &snapshot, &settings(), &NoObserver).unwrap();
+    assert!(scan.full_check);
+    let report = updated(dir.path(), &mut index, &mut model);
+    assert!(report.full_check);
+    assert_eq!((report.changed, report.unchanged), (1, 0));
+    assert_eq!(report.chunks_embedded, 0);
+    assert_eq!(report.chunks_reused, index.chunk_count().unwrap());
+    assert_eq!(model.calls, calls);
+    assert_eq!(index.stored_layout().unwrap(), Some(settings().layout()));
+    assert!(!updated(dir.path(), &mut index, &mut model).full_check);
+}
+
+#[test]
+fn registry_migration_replaces_legacy_table_during_scoped_update() {
+    use crate::indexing::chunking::Chunk;
+    let dir = tempfile::tempdir().unwrap();
+    let mut body = String::from("| ID | Описание |\n|---|---|\n");
+    for i in 0..25 {
+        body.push_str(&format!("| ISS-{i} | {} |\n", "строка ".repeat(23)));
+    }
+    body.pop();
+    let source = format!("# Реестр\n{body}");
+    write(dir.path(), "docs/registry.md", &source);
+    write(dir.path(), "docs/a.md", &doc("A", &["альфа", "бета"]));
+    let mut index = open(dir.path());
+    let mut model = FakeEmbedder::new("m");
+    updated(dir.path(), &mut index, &mut model);
+    let stored = index
+        .documents()
+        .unwrap()
+        .into_iter()
+        .find(|d| d.path == "docs/registry.md")
+        .unwrap();
+    let embed_text = format!("path: docs/registry.md\nРеестр\n{body}");
+    let hash = blake3::hash(embed_text.as_bytes()).to_hex().to_string();
+    let vector = model.embed(&[&embed_text]).unwrap().remove(0);
+    let chunks = [Chunk {
+        ordinal: 0,
+        heading_chain: "Реестр".into(),
+        first_line: 1,
+        last_line: source.lines().count(),
+        text: body,
+        embed_text,
+        embed_hash: hash.clone(),
+    }];
+    index
+        .replace_document(
+            &DocumentRecord {
+                path: &stored.path,
+                module: ".",
+                title: "registry",
+                size: stored.size,
+                modified_ns: stored.modified_ns,
+                hash: &stored.hash,
+                chunks: &chunks,
+            },
+            &[(&hash, &vector)],
+        )
+        .unwrap();
+    index.remove_orphan_vectors().unwrap();
+    index.set_meta("chunking_version", "older").unwrap();
+    let expected = chunk_document("docs/registry.md", &source, &settings().chunking);
+    assert!(expected.chunks.len() > 1);
+    // Список путей не должен скрыть старый реестр, когда меняется алгоритм всего индекса.
+    let selected = HashSet::from(["docs/a.md".to_string()]);
+    let UpdateOutcome::Updated(report) = update_index_paths_observed(
+        dir.path(),
+        &mut index,
+        &settings(),
+        &mut model,
+        &NoObserver,
+        Some(&selected),
+    )
+    .unwrap() else {
+        panic!()
+    };
+    assert!(report.full_check);
+    assert_eq!(report.changed, 2);
+    assert_eq!(report.chunks_embedded, expected.chunks.len());
+    assert!(report.chunks_reused > 0);
+    let mut stmt = index.conn().prepare("SELECT c.embed_hash FROM chunks c JOIN documents d ON d.id=c.document_id WHERE d.path='docs/registry.md' ORDER BY c.ordinal").unwrap();
+    let actual: Vec<String> = stmt
+        .query_map([], |r| r.get(0))
+        .unwrap()
+        .collect::<Result<_, _>>()
+        .unwrap();
+    assert_eq!(
+        actual,
+        expected
+            .chunks
+            .into_iter()
+            .map(|c| c.embed_hash)
+            .collect::<Vec<_>>()
+    );
+}
+
+#[cfg(windows)]
+#[test]
+fn registry_migration_waits_for_old_unreadable_document() {
+    use std::os::windows::fs::OpenOptionsExt;
+    let dir = tempfile::tempdir().unwrap();
+    write(dir.path(), "docs/a.md", &doc("A", &["альфа", "бета"]));
+    let mut index = open(dir.path());
+    let mut model = FakeEmbedder::new("m");
+    updated(dir.path(), &mut index, &mut model);
+    index.set_meta("chunking_version", "older").unwrap();
+    let locked = std::fs::OpenOptions::new()
+        .read(true)
+        .share_mode(0)
+        .open(dir.path().join("docs/a.md"))
+        .unwrap();
+    let report = updated(dir.path(), &mut index, &mut model);
+    assert!(report.full_check);
+    assert!(
+        report
+            .problems
+            .iter()
+            .any(|p| p.path == "docs/a.md" && p.previous_version)
+    );
+    assert_eq!(index.stored_layout().unwrap(), None);
+    drop(locked);
+    assert!(updated(dir.path(), &mut index, &mut model).full_check);
+    assert_eq!(index.stored_layout().unwrap(), Some(settings().layout()));
+    assert!(!updated(dir.path(), &mut index, &mut model).full_check);
+}
+
+#[test]
+fn registry_migration_waits_for_old_unvisited_subdirectory() {
+    let dir = tempfile::tempdir().unwrap();
+    write(
+        dir.path(),
+        "docs/hidden/a.md",
+        &doc("A", &["альфа", "бета"]),
+    );
+    let mut index = open(dir.path());
+    let mut model = FakeEmbedder::new("m");
+    updated(dir.path(), &mut index, &mut model);
+    index.set_meta("chunking_version", "older").unwrap();
+    let stored = index
+        .documents()
+        .unwrap()
+        .into_iter()
+        .map(|d| (d.path.clone(), d))
+        .collect();
+    let walk = Walk {
+        problems: vec![WalkProblem {
+            path: "docs/hidden".into(),
+            reason: "нет доступа".into(),
+        }],
+        ..Default::default()
+    };
+    let mut report = UpdateReport {
+        full_check: true,
+        ..Default::default()
+    };
+    finish_update(
+        &mut index,
+        &walk,
+        &stored,
+        &settings().layout(),
+        &mut report,
+        &NoObserver,
+    )
+    .unwrap();
+    assert_eq!(index.stored_layout().unwrap(), None);
+    assert_eq!(index.documents().unwrap().len(), 1);
+    assert!(updated(dir.path(), &mut index, &mut model).full_check);
+    assert_eq!(index.stored_layout().unwrap(), Some(settings().layout()));
+}
+
+#[test]
 fn invalid_utf8_is_reported_and_dropped_from_the_index() {
     let dir = tempfile::tempdir().unwrap();
     write(dir.path(), "docs/good.md", &doc("G", &["альфа"]));
@@ -1078,7 +1262,7 @@ impl IndexObserver for StopAfter {
         self.done.set(documents_done);
     }
 
-    fn should_stop(&self) -> bool {
+    fn cancel_requested(&self) -> bool {
         self.done.get() >= self.limit
     }
 }
@@ -1128,6 +1312,119 @@ fn cancelled_rebuild_keeps_the_old_index_and_leaves_no_new_file() {
     let index = Index::open(&path, Journal::Wal).unwrap();
     assert_eq!(index.document_count().unwrap(), 2);
     assert_eq!(index.stored_fingerprint().unwrap().unwrap().model, "old");
+}
+
+#[test]
+fn cancellation_after_the_last_document_keeps_the_old_rebuild() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = built_project(dir.path());
+    let error = rebuild_index_observed(
+        dir.path(),
+        &path,
+        &settings(),
+        &mut FakeEmbedder::new("new"),
+        &StopAfter::new(2),
+        || panic!("остановленный проход не должен ждать подмену"),
+    )
+    .unwrap_err();
+    assert!(matches!(cause(&error), IndexingError::Cancelled));
+    assert!(!with_suffix(&path, ".new").exists());
+    let index = Index::open_read_only(&path).unwrap();
+    assert_eq!(index.stored_fingerprint().unwrap().unwrap().model, "old");
+    assert_eq!(index.document_count().unwrap(), 2);
+}
+
+#[test]
+fn cancelled_fresh_update_and_rebuild_do_not_prepare_the_model() {
+    struct NoPrepare(FakeEmbedder);
+    impl Embedder for NoPrepare {
+        fn fingerprint(&self) -> &ModelFingerprint {
+            self.0.fingerprint()
+        }
+        fn prepare(&mut self) -> Result<(), EmbedError> {
+            panic!("отменённый проход не должен загружать модель");
+        }
+        fn embed(&mut self, _: &[&str]) -> Result<Vec<Vec<f32>>, EmbedError> {
+            panic!("отменённый проход не должен считать embed");
+        }
+    }
+    let dir = tempfile::tempdir().unwrap();
+    write(dir.path(), "docs/a.md", "# Документ\n");
+    let mut index = open(dir.path());
+    let mut embedder = NoPrepare(FakeEmbedder::new("m"));
+    let error = update_index_observed(
+        dir.path(),
+        &mut index,
+        &settings(),
+        &mut embedder,
+        &StopAfter::new(0),
+    )
+    .unwrap_err();
+    assert!(matches!(cause(&error), IndexingError::Cancelled));
+    assert!(index.stored_fingerprint().unwrap().is_none());
+    index.close().unwrap();
+    let path = index_path(dir.path());
+    let before = fs::read(&path).unwrap();
+    let error = rebuild_index_observed(
+        dir.path(),
+        &path,
+        &settings(),
+        &mut embedder,
+        &StopAfter::new(0),
+        || panic!("отменённый проход не подменяет индекс"),
+    )
+    .unwrap_err();
+    assert!(matches!(cause(&error), IndexingError::Cancelled));
+    assert!(!with_suffix(&path, ".new").exists());
+    assert_eq!(fs::read(&path).unwrap(), before);
+}
+
+#[test]
+fn cancellation_while_waiting_for_swap_keeps_the_old_index() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = built_project(dir.path());
+    let observer = StopAfter::new(usize::MAX);
+    let error = rebuild_index_observed(
+        dir.path(),
+        &path,
+        &settings(),
+        &mut FakeEmbedder::new("new"),
+        &observer,
+        || observer.done.set(usize::MAX),
+    )
+    .unwrap_err();
+    assert!(matches!(cause(&error), IndexingError::Cancelled));
+    assert!(!with_suffix(&path, ".new").exists());
+    let index = Index::open_read_only(&path).unwrap();
+    assert_eq!(index.stored_fingerprint().unwrap().unwrap().model, "old");
+}
+
+#[test]
+fn rebuild_never_waits_for_pause_under_the_swap_guard() {
+    struct Observer(std::cell::Cell<bool>);
+    impl IndexObserver for Observer {
+        fn should_stop(&self) -> bool {
+            assert!(
+                !self.0.get(),
+                "ожидание паузы не допускается под write gate"
+            );
+            false
+        }
+    }
+    let dir = tempfile::tempdir().unwrap();
+    let path = built_project(dir.path());
+    let observer = Observer(std::cell::Cell::new(false));
+    rebuild_index_observed(
+        dir.path(),
+        &path,
+        &settings(),
+        &mut FakeEmbedder::new("new"),
+        &observer,
+        || observer.0.set(true),
+    )
+    .unwrap();
+    let index = Index::open_read_only(&path).unwrap();
+    assert_eq!(index.stored_fingerprint().unwrap().unwrap().model, "new");
 }
 
 struct Deferring(&'static str);

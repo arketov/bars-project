@@ -10,7 +10,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use rusqlite::{Connection, OptionalExtension, params};
 
 use super::stem::{STEM_VERSION, TextStemmer};
-use crate::indexing::chunking::{Chunk, ChunkingParams};
+use crate::indexing::chunking::{CHUNKING_VERSION, Chunk, ChunkingParams};
 use crate::models::ModelFingerprint;
 
 /// Версия схемы, которую создаёт и читает эта версия bars.
@@ -304,6 +304,9 @@ impl Index {
     /// Параметры нарезки и корень документации, которыми построен индекс; `None`, если запись
     /// не дошла до конца или индекс новый.
     pub fn stored_layout(&self) -> Result<Option<Layout>, StorageError> {
+        if self.meta("chunking_version")?.as_deref() != Some(CHUNKING_VERSION) {
+            return Ok(None);
+        }
         let (Some(min_chars), Some(max_chars), Some(docs_root)) = (
             self.meta_usize("chunk_min_chars")?,
             self.meta_usize("chunk_max_chars")?,
@@ -333,6 +336,7 @@ impl Index {
             &layout.chunking.max_chars.to_string(),
         )?;
         set_meta(&tx, "docs_root", &layout.docs_root)?;
+        set_meta(&tx, "chunking_version", CHUNKING_VERSION)?;
         tx.commit()?;
         Ok(())
     }
@@ -762,6 +766,16 @@ mod tests {
             },
             docs_root: "docs".into(),
         };
+        index.write_layout(&layout).unwrap();
+        assert_eq!(index.stored_layout().unwrap(), Some(layout.clone()));
+        index
+            .conn()
+            .execute("DELETE FROM meta WHERE key='chunking_version'", [])
+            .unwrap();
+        assert_eq!(index.stored_layout().unwrap(), None);
+        index.write_layout(&layout).unwrap();
+        index.set_meta("chunking_version", "older").unwrap();
+        assert_eq!(index.stored_layout().unwrap(), None);
         index.write_layout(&layout).unwrap();
         assert_eq!(index.stored_layout().unwrap(), Some(layout));
     }

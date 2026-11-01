@@ -20,6 +20,7 @@ mod doc_queue;
 mod folders;
 mod graph;
 mod operations;
+mod shutdown;
 
 struct Env {
     home: TempDir,

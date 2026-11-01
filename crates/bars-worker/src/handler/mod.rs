@@ -11,6 +11,7 @@ pub(crate) mod graph_cache;
 mod history;
 mod links;
 mod query_slice;
+mod session_info;
 mod text_search;
 mod topics;
 
@@ -312,6 +313,10 @@ impl WorkerHandler {
             rerank_candidates: None,
             min_score: params.min_score,
         };
+        let scope = bars_protocol::SearchScope {
+            modules: request.modules.clone(),
+            files: request.files.clone(),
+        };
         // «Новые темы»: допуск и область определяются до поиска, чтобы очистка списка во время
         // поиска отклонила запоздавшее наблюдение. Диагностика и CLI спроса не создают.
         let context = crate::new_topics::current_context();
@@ -465,9 +470,23 @@ impl WorkerHandler {
         }
         let query_vector = response.query_vector.take();
         let rerank_error = response.rerank_error.or(skipped_rerank);
+        let mut by_module = bars_protocol::ModuleBreakdown {
+            candidates: response
+                .candidate_modules
+                .into_iter()
+                .map(|(name, n)| (name, to_u32(n)))
+                .collect(),
+            results: Default::default(),
+        };
+        for result in &response.hits {
+            *by_module.results.entry(result.module.clone()).or_default() += 1;
+        }
+        let mut applied = applied(response.applied);
+        applied.scope = scope;
         let output = SearchOutput {
             results: response.hits.into_iter().map(hit).collect(),
-            applied: applied(response.applied),
+            applied,
+            by_module,
             indexing: status.state == ProjectState::Indexing || status.queued,
             pending: to_u32(status.pending),
             rerank_error,
@@ -1243,6 +1262,10 @@ impl WorkerHandler {
             Call::Outline(params) => self.outline(params).map(|out| output_value(&out)),
             Call::Read(params) => self.read(params).map(|out| output_value(&out)),
             Call::Projects(_) => self.projects().await.map(|out| output_value(&out)),
+            Call::SessionInfo(params) => self
+                .session_info(params)
+                .await
+                .map(|out| output_value(&out)),
             Call::Status(params) => {
                 let graph = self
                     .graph_status(bars_protocol::GraphStatusParams {
@@ -1538,5 +1561,6 @@ fn applied(applied: bars_core::search::AppliedParams) -> AppliedParams {
         min_score: applied.min_score,
         score_kind: score_kind(applied.score_kind),
         clamped: applied.clamped,
+        scope: Default::default(),
     }
 }

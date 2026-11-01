@@ -49,7 +49,7 @@
   {#if project}
     <div class="page">
       <h1>{project.name}</h1>
-      {#if app.workerDown}<Banner kind="warn" title="Нет связи с воркером" text="{app.workerDown}. Сохранён последний снимок хода индексации; данные могут быть устаревшими." />{/if}
+      {#if app.workerDown}<Banner kind="warn" title="Нет связи с воркером" text="{app.workerDown}. Показаны последние известные данные; данные могут быть устаревшими." />{/if}
       <p class="lead">
         {#if rebuilding}
           Полная переиндексация по вашему согласию: индекс строится заново в отдельном файле.
@@ -91,8 +91,8 @@
             </div>
             <div class="pbar" class:stripe={!paused} class:paused style="margin-top:10px"><i style="width:{percent}%"></i></div>
             <div class="stats">
-              <div class="stat"><small>Чанков обработано</small><b>{running.chunks_done}</b></div>
-              <div class="stat"><small>Скорость</small><b>{decimal(running.chunks_per_second, 1)} чанка/с</b></div>
+              <div class="stat"><small>Разделов обработано</small><b>{running.chunks_done}</b></div>
+              <div class="stat"><small>Скорость</small><b>{decimal(running.chunks_per_second, 1)} раздела/с</b></div>
               <div class="stat"><small>Устройство embed · текущее задание</small><b>{running.embed_device === "directml" ? "DirectML" : running.embed_device === "cpu" ? "CPU" : "Пока неизвестно"}</b></div>
             </div>
             <dl class="kv">
@@ -166,7 +166,7 @@
           <div class="ch"><h2>Последний проход</h2>{#if last}<span class="badge" class:bad={last.state === "error"} class:warn={last.state === "partial" || last.state === "cancelled"}>{resultState[last.state] ?? "Исход неизвестен"}</span>{/if}</div>
           <div class="cb">
             {#if app.indexingHistoryError}
-              <p role="alert">Не удалось обновить итог: {app.indexingHistoryError}. Сохранён последний снимок.</p>
+              <p role="alert">Не удалось обновить итог: {app.indexingHistoryError}. Показаны последние известные данные.</p>
               <button class="ghost sm" onclick={() => app.openIndexing()}>Повторить чтение</button>
             {:else if app.indexingHistoryLoading}
               <p role="status">Получаем итог последнего прохода…</p>

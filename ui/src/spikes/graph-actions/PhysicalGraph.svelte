@@ -1,6 +1,6 @@
 <script lang="ts">
   // Панель графа — стенд дизайна 2.3.1 (docs/features/graphrag/graph-actions-design.md). Подменяет продуктовую
-  // lib/graph/PhysicalGraph.svelte и GraphPage только в конфигурации vite.graph-actions.config.ts. Основа — продуктовая панель
+  // lib/graph/PhysicalGraph.svelte только в конфигурации vite.graph-actions.config.ts. Основа — продуктовая панель
   // 22-10-2026 (2.1.5–2.2.3 и незавершённый 2.1.6); добавлены уровни, инспектор оснований, временные виды, подграф,
   // фильтры, клавиатура и сценарии состояний GR-05. Данные — записанный снимок (data.ts), не воркер.
   import { onDestroy, onMount, untrack } from "svelte";

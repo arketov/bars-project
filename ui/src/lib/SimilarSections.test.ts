@@ -32,7 +32,7 @@ it("uses the source project and ID; defaults are the entire project and worker l
   expect(host.textContent).toContain("Исходный отрывок");
   expect(host.querySelectorAll("article")).toHaveLength(2);
   click("Открыть документ"); expect(onopen).toHaveBeenCalledWith(hit("near", 0.9));
-  expect(host.textContent).toContain("косинус");
+  expect(host.textContent).toContain("оценка по близости");
 });
 it("continues from a neighbor and returns to the original source", async () => {
   show(); await settle(); click("Похожие"); await settle();

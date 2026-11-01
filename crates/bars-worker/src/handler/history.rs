@@ -248,6 +248,8 @@ fn complete_attempt(
                     json!({"count":out["items"].as_array().map(Vec::len),"unit":"links","has_more":out["has_more"],"limit_reasons":out["limit_reasons"]})
                 }
                 "bars_rag_search" => {
+                    applied["scope"] = out["applied"]["scope"].clone();
+                    applied["by_module"] = out["by_module"].clone();
                     if out.get("applied_mode").is_some() {
                         applied["mode"] = out["applied_mode"].clone();
                     }

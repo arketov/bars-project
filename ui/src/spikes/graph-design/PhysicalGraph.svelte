@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Панель физического графа — стенд дизайна 2.1.4. Заменяет GraphPage внутри настоящего окна (см. vite.graph-design.config.ts):
+  // Панель физического графа — стенд дизайна 2.1.4. Заменяет продуктовую панель внутри настоящего окна (см. vite.graph-design.config.ts):
   // мини-граф под навигацией и полный граф вкладкой используют один и тот же компонент.
   import { onDestroy, onMount, untrack } from "svelte";
   import Icon from "../../lib/Icon.svelte";

@@ -147,7 +147,7 @@ pub struct ModelUnload {
 }
 
 /// Сколько секунд после правки документа bars ждёт, прежде чем пересчитывать его (Т-41).
-pub const DEFAULT_EDIT_PAUSE_SECONDS: u32 = 30;
+pub const DEFAULT_EDIT_PAUSE_SECONDS: u32 = 15;
 /// Наибольшая пауза, секунд (час); «без паузы» — это `0`.
 pub const MAX_EDIT_PAUSE_SECONDS: u32 = 3_600;
 

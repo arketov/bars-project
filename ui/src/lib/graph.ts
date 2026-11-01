@@ -149,13 +149,6 @@ export function graphDataLabel(status: GraphStatus): string {
   if (status.freshness === "current") return "Граф актуален";
   return "Граф ещё не построен";
 }
-export const completenessLabels: Record<string, string> = {
-  complete: "Расчёт завершён полностью", partial: "Есть известные пропуски", unknown: "Полнота отношений не установлена",
-};
-export const jobLabels: Record<string, string> = {
-  idle: "", queued: "Ожидает выполнения", running: "Обновляется",
-  stopped: "Построение остановлено · После новых изменений граф обновится автоматически", failed: "Не удалось обновить граф",
-};
 export type RetrievalMode = "hybrid" | "mix" | "graph";
 export interface GraphSearchOutput extends SearchOutput {
   requested_mode: RetrievalMode;
@@ -164,39 +157,6 @@ export interface GraphSearchOutput extends SearchOutput {
   related: GraphReply | null;
   graph_results: GraphReply | null;
 }
-export const operationLabels: Record<GraphOperation, string> = {
-  graph: "Карта",
-  relations: "Связи",
-  paths: "Путь",
-  impact: "Влияние",
-  context: "Контекст",
-  explore: "Обзор",
-};
-export const stateLabels: Record<string, string> = {
-  disabled: "Выключен",
-  not_built: "Не построен",
-  building: "Строится",
-  ready: "Готов",
-  partial: "Частичный",
-  stale: "Устарел",
-  failed: "Ошибка",
-  cancelled: "Отменён",
-};
-export const kindLabels: Record<ObjectKind, string> = {
-  document: "Документ",
-  section: "Раздел",
-  chunk: "Чанк",
-  entity: "Сущность",
-  community: "Тема",
-};
-export const roleLabels: Record<string, string> = {
-  requirement: "Требования",
-  decision: "Решения",
-  behavior: "Поведение",
-  architecture: "Архитектура",
-  constraint: "Ограничения",
-  verification: "Проверки",
-};
 export function sameRef(a: ObjectRef, b: ObjectRef): boolean {
   return a.id === b.id && a.revision === b.revision && a.kind === b.kind;
 }

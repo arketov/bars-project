@@ -49,7 +49,7 @@ it("называет режимы поиска по-русски и сообща
   flushSync();
   const info = document.querySelector(".graph-search-info")!;
   expect(info.textContent).toContain("Запрошен режим «Со связями», применён «Обычный»");
-  expect(info.textContent).toContain("«Добавлять связанные источники» выключено");
+  expect(info.textContent).toContain("Связанные источники выключены");
   expect(info.textContent).not.toContain("include_related");
   expect(info.textContent).not.toMatch(/\b(mix|hybrid)\b/);
   app.results = null;

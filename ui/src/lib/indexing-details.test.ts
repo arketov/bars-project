@@ -8,7 +8,6 @@ import { app } from "./app.svelte";
 import type { Operation, OperationEventsOutput } from "./types";
 
 vi.mock("./api", async original => ({ ...await original<typeof import("./api")>(), call: vi.fn(), joinPath: vi.fn(), openPath: vi.fn(), pickFolder: vi.fn() }));
-vi.mock("./graph-renderer", () => ({ GraphRenderer: class { set() {} destroy() {} } }));
 import { call } from "./api";
 const invoke = vi.mocked(call);
 const project = { path: "C:/проект", name: "Проект", docs_root: "docs", state: "ready" as const, modules: [{ name: "manual", documents: 10 }] };

@@ -105,10 +105,14 @@ pub trait IndexObserver {
     fn defer(&self, _path: &str, _full_check: bool) -> bool {
         false
     }
+    /// Неблокирующая проверка отмены: допустима под замком подмены индекса.
+    fn cancel_requested(&self) -> bool {
+        false
+    }
     /// Вызывается перед каждым документом. Может ждать, пока снята пауза. `true` — остановить
     /// индексацию: уже записанные документы остаются, при полной переиндексации старый индекс цел.
     fn should_stop(&self) -> bool {
-        false
+        self.cancel_requested()
     }
 }
 
@@ -207,6 +211,9 @@ pub fn update_index_paths_observed(
             ));
         }
         Compatibility::Fresh => {
+            if observer.should_stop() {
+                return Err(IndexingError::Cancelled);
+            }
             embedder.prepare()?;
             index.write_fingerprint(&embedder.fingerprint().clone())?;
         }
@@ -272,7 +279,16 @@ pub fn rebuild_index_observed<G>(
             Err(IndexingError::Incomplete(Box::new(report)))
         }
         Ok(report) => {
+            if observer.should_stop() {
+                let _ = remove_index_files(&new_path);
+                return Err(IndexingError::Cancelled);
+            }
             let _guard = before_swap();
+            // Остановка во время последнего документа или ожидания читателей запрещает подмену.
+            if observer.cancel_requested() {
+                let _ = remove_index_files(&new_path);
+                return Err(IndexingError::Cancelled);
+            }
             swap(index_path, &new_path, &old_path)?;
             Ok(report)
         }
@@ -295,6 +311,9 @@ fn build_new(
     observer: &dyn IndexObserver,
 ) -> Result<UpdateReport, IndexingError> {
     let mut index = Index::open(new_path, Journal::Delete)?;
+    if observer.should_stop() {
+        return Err(IndexingError::Cancelled);
+    }
     embedder.prepare()?;
     index.write_fingerprint(&embedder.fingerprint().clone())?;
     let report = run_update(project_root, &mut index, settings, embedder, observer, None)?;
@@ -480,6 +499,7 @@ fn process_file(
             report.problems.push(Problem {
                 path: file.path.clone(),
                 reason: error.to_string(),
+                previous_version: known.is_some(),
                 ..Problem::default()
             });
             return Ok(());
@@ -516,12 +536,19 @@ fn finish_update(
     report: &mut UpdateReport,
     observer: &dyn IndexObserver,
 ) -> Result<(), IndexingError> {
+    // Граница есть и после последнего документа: не публикуем итог прерванного прохода.
+    if observer.should_stop() {
+        return Err(IndexingError::Cancelled);
+    }
     let on_disk: HashSet<&str> = walk.files.iter().map(|file| file.path.as_str()).collect();
     for path in stored.keys() {
-        if !on_disk.contains(path.as_str())
-            && !is_covered_by_problem(path, &walk.problems)
-            && index.delete_document(path)?
-        {
+        if on_disk.contains(path.as_str()) || is_covered_by_problem(path, &walk.problems) {
+            continue;
+        }
+        if observer.should_stop() {
+            return Err(IndexingError::Cancelled);
+        }
+        if index.delete_document(path)? {
             observer.file(path);
             report.removed += 1;
             observer.document_done(path, None);
@@ -531,7 +558,9 @@ fn finish_update(
     index.remove_orphan_vectors()?;
     if report.full_check
         && report.deferred == 0
-        && !report.problems.iter().any(|p| p.stage == "embedding")
+        && !report.problems.iter().any(|p| p.stage == "embedding" || p.previous_version)
+        // Пропущенный старый документ всё ещё требует новой нарезки после восстановления доступа.
+        && !stored.keys().any(|path| is_covered_by_problem(path, &walk.problems))
     {
         index.write_layout(layout)?;
     }

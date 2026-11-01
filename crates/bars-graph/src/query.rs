@@ -37,6 +37,87 @@ fn decode(value: &str) -> Result<Cursor, GraphError> {
     serde_json::from_slice(&bytes?).map_err(|_| GraphError::CursorMismatch)
 }
 
+/// Сокращает уже отобранную страницу под текст; курсор продолжает с первого скрытого элемента.
+pub fn truncate_text_page(reply: &mut GraphReply, keep: usize) -> Result<(), GraphError> {
+    if keep >= reply.items.len() {
+        return Ok(());
+    }
+    let old_len = reply.items.len();
+    let resumable = !matches!(
+        reply.operation,
+        Operation::Paths | Operation::Impact | Operation::Context
+    ) && reply
+        .limit_reasons
+        .iter()
+        .all(|r| matches!(r.as_str(), "limit" | "max_bytes" | "text_limit"));
+    let cursor = if resumable && keep > 0 {
+        if let Some(value) = &reply.next_cursor {
+            let mut cursor = decode(value)?;
+            cursor.offset = cursor.offset.saturating_sub(old_len) + keep;
+            Some(encode(&cursor)?)
+        } else {
+            let mut request = reply.requested.clone();
+            request.cursor = None;
+            request.snapshot = None;
+            let scores = BTreeMap::<String, f32>::new();
+            let query = blake3::hash(&serde_json::to_vec(&(&request, &scores))?)
+                .to_hex()
+                .to_string();
+            let offset = reply
+                .requested
+                .cursor
+                .as_deref()
+                .map(decode)
+                .transpose()?
+                .map_or(0, |c| c.offset);
+            Some(encode(&Cursor {
+                snapshot: reply.snapshot.clone(),
+                query,
+                offset: offset + keep,
+            })?)
+        }
+    } else {
+        None
+    };
+    reply.items.truncate(keep);
+    reply.next_cursor = cursor;
+    reply.truncated = true;
+    if !reply.limit_reasons.iter().any(|r| r == "text_limit") {
+        reply.limit_reasons.push("text_limit".into());
+    }
+    Ok(())
+}
+
+/// Пересобирает справочники после текстового отбора из уже разрешённого ответа, без чтения Dataset.
+pub fn rematerialize_text_reply(reply: &mut GraphReply) {
+    let sources = std::mem::take(&mut reply.sources);
+    let view = Allowed {
+        sources: sources
+            .iter()
+            .map(|s| (s.reference.id.clone(), s))
+            .collect(),
+        nodes: std::mem::take(&mut reply.nodes)
+            .into_iter()
+            .map(|n| (n.reference.id.clone(), n))
+            .collect(),
+        edges: std::mem::take(&mut reply.assertions),
+        evidence: std::mem::take(&mut reply.evidence)
+            .into_iter()
+            .map(|e| (e.id.clone(), e))
+            .collect(),
+        adjacency: BTreeMap::new(),
+    };
+    materialize(reply, &view);
+    reply.used_bytes = 0;
+    for _ in 0..4 {
+        let size = serde_json::to_vec(reply).expect("DTO сериализуется").len();
+        if size == reply.used_bytes {
+            break;
+        }
+        reply.used_bytes = size;
+    }
+}
+
 struct Allowed<'a> {
     nodes: BTreeMap<String, Node>,
     edges: Vec<Edge>,

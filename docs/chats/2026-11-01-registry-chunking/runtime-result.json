@@ -1,0 +1,34 @@
+{
+  "success": true,
+  "checks": [
+    "Реестр записан через продуктовую команду редактора",
+    "Все части реестра укладываются в окно вместе с шапкой",
+    "Хвост старого длинного чанка доступен в поиске",
+    "Строки продолжений указывают на собственные данные",
+    "Шапка и строки чанка отрисованы таблицей в собранном WebView2"
+  ],
+  "model": "FakeProvider",
+  "native": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+  "parts": [
+    {
+      "first_line": 11,
+      "last_line": 17,
+      "chars": 1337
+    },
+    {
+      "first_line": 25,
+      "last_line": 28,
+      "chars": 770
+    },
+    {
+      "first_line": 1,
+      "last_line": 10,
+      "chars": 1333
+    },
+    {
+      "first_line": 18,
+      "last_line": 24,
+      "chars": 1340
+    }
+  ]
+}

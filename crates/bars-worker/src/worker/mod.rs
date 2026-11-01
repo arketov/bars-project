@@ -308,7 +308,7 @@ struct Inner {
     /// Задание вынуто из очереди и ещё выполняется.
     busy: AtomicBool,
     wake: Notify,
-    stop: AtomicBool,
+    stop: Arc<AtomicBool>,
     stop_wake: Notify,
     models: Models,
     handle: Handle,
@@ -394,7 +394,7 @@ impl Worker {
             doc_wake: Arc::new(Notify::new()),
             busy: AtomicBool::new(false),
             wake: Notify::new(),
-            stop: AtomicBool::new(false),
+            stop: Arc::new(AtomicBool::new(false)),
             models: Models::new(provider),
             handle: Handle::current(),
             tasks: Mutex::new(Vec::new()),
@@ -468,20 +468,17 @@ impl Worker {
             .collect()
     }
 
-    /// Перестаёт брать задания, дожидается текущего, снимает слежение.
+    /// Останавливает индексацию на границе документа, снимает слежение и выгружает модели.
     pub async fn shutdown(&self) {
         self.inner.stop.store(true, Ordering::SeqCst);
         self.inner.stop_wake.notify_waiters();
         self.inner.graph_cache.clear();
         self.inner.model_wake.notify_one();
-        // Задание на паузе иначе не закончится никогда: его останавливают, остальные дописываются.
-        if self.inner.pause.is_paused() {
-            self.inner.cancel_current();
-            self.inner.pause.set(false);
-        }
+        self.inner.cancel_current();
+        self.inner.pause.set(false);
         self.inner.wake.notify_one();
         let tasks: Vec<_> = lock(&self.inner.tasks).drain(..).collect();
-        // Первая — очередь: она дописывает текущее задание сама. Вторая — таймер, он ждёт часами;
+        // Первая — очередь: она дописывает текущий документ. Вторая — таймер, он ждёт часами;
         // третья — таймер пауз документов, он тоже не нужен после остановки.
         for (position, task) in tasks.into_iter().enumerate() {
             if position == 1 || position == 2 {
@@ -597,6 +594,16 @@ impl Worker {
     /// Короткое действие окна не должно пересечь удаление/смену настроек проекта.
     pub async fn folder_action_guard(&self) -> tokio::sync::OwnedRwLockWriteGuard<()> {
         Arc::clone(&self.inner.requests).write_owned().await
+    }
+
+    /// Имя и docs_root только одного канонического проекта, без обхода чужих настроек.
+    pub(crate) fn project_metadata(&self, path: &Path) -> Option<(String, String)> {
+        let name = lock(&self.inner.registry)
+            .entries()
+            .iter()
+            .find(|entry| entry.path == path)?
+            .display_name();
+        Some((name, self.inner.docs_root_of(path)))
     }
 
     /// Все проекты реестра с состоянием, в порядке регистрации.
@@ -720,7 +727,9 @@ impl Worker {
         accept_model_change: bool,
     ) -> Result<(u64, bool, JobKind), WorkerError> {
         let path = self.registered(path)?;
-        let state = lock(&self.inner.projects)
+        let key = self.inner.operation_settings_key(&path);
+        let projects = lock(&self.inner.projects);
+        let state = projects
             .get(&path)
             .map(|runtime| runtime.status.state)
             .ok_or_else(|| WorkerError::NotRegistered(path.clone()))?;
@@ -736,9 +745,8 @@ impl Worker {
         } else {
             Job::check(Priority::Explicit)
         };
-        let projects = lock(&self.inner.projects);
         self.inner
-            .enqueue_receipt(&path, job, &projects)
+            .enqueue_receipt(&path, job, &projects, key)
             .ok_or(WorkerError::NotRegistered(path))
     }
 
@@ -1083,12 +1091,26 @@ impl Inner {
     }
 
     fn enqueue(&self, project: &Path, job: Job) {
+        let key = self.operation_settings_key(project);
         let projects = lock(&self.projects);
-        self.enqueue_for(project, job, &projects);
+        self.enqueue_for(project, job, &projects, key);
     }
 
-    fn enqueue_for(&self, project: &Path, job: Job, projects: &HashMap<PathBuf, Runtime>) {
-        self.enqueue_receipt(project, job, projects);
+    fn operation_settings_key(&self, project: &Path) -> u64 {
+        Settings::load(&self.config.bars_home, project)
+            .ok()
+            .map(|settings| operations::settings_key(&settings.value))
+            .unwrap_or(0)
+    }
+
+    fn enqueue_for(
+        &self,
+        project: &Path,
+        job: Job,
+        projects: &HashMap<PathBuf, Runtime>,
+        key: u64,
+    ) {
+        self.enqueue_receipt(project, job, projects, key);
     }
 
     fn enqueue_receipt(
@@ -1096,6 +1118,7 @@ impl Inner {
         project: &Path,
         mut job: Job,
         projects: &HashMap<PathBuf, Runtime>,
+        key: u64,
     ) -> Option<(u64, bool, JobKind)> {
         if !projects
             .get(project)
@@ -1110,9 +1133,6 @@ impl Inner {
             .get(project)
             .map(|job| job.operation_id)
             .unwrap_or_else(|| {
-                let settings = Settings::load(&self.config.bars_home, project)
-                    .ok()
-                    .map(|s| s.value);
                 journal.begin(
                     "check",
                     "explicit",
@@ -1121,7 +1141,7 @@ impl Inner {
                     None,
                     None,
                     false,
-                    settings.as_ref().map(operations::settings_key).unwrap_or(0),
+                    key,
                 )
             });
         let id = job.operation_id;
@@ -1625,15 +1645,19 @@ impl Inner {
             Priority::Watch => DocSource::Watch,
             Priority::Periodic => DocSource::Periodic,
         };
-        let mut observer = JobObserver::new(Arc::clone(&self.pause), Arc::clone(&cell))
-            .with_documents(Arc::new(doc_queue::Observer {
-                docs: Arc::clone(&self.docs),
-                project: path.clone(),
-                source,
-                taken: Arc::clone(&taken),
-                wake: Arc::clone(&self.doc_wake),
-                rebuild,
-            }));
+        let mut observer = JobObserver::new(
+            Arc::clone(&self.pause),
+            Arc::clone(&cell),
+            Arc::clone(&self.stop),
+        )
+        .with_documents(Arc::new(doc_queue::Observer {
+            docs: Arc::clone(&self.docs),
+            project: path.clone(),
+            source,
+            taken: Arc::clone(&taken),
+            wake: Arc::clone(&self.doc_wake),
+            rebuild,
+        }));
         if !rebuild {
             let docs = Arc::clone(&self.docs);
             let owner = path.clone();
@@ -1774,7 +1798,9 @@ impl Inner {
                         ProjectState::Ready
                     };
                     status.last_report = Some(report);
-                    status.last_error = if cancelled { None } else { Some(message) };
+                    if !cancelled {
+                        status.last_error = Some(message);
+                    }
                 }
                 Outcome::Unavailable => {
                     status.state = ProjectState::Unavailable;

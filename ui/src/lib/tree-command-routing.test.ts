@@ -9,7 +9,6 @@ import { keybindings } from './keybindings.svelte';
 import { call } from './api';
 
 vi.mock('./api', async original => ({...await original<typeof import('./api')>(), call:vi.fn()}));
-vi.mock('./graph-renderer', () => ({GraphRenderer:class {set() {} destroy() {}}}));
 const mounted: ReturnType<typeof mount>[] = [];
 const settle = async () => { await new Promise(resolve => setTimeout(resolve, 0)); flushSync(); };
 const send = (code:string) => window.dispatchEvent(new KeyboardEvent('keydown',{key:code,code,bubbles:true,cancelable:true}));

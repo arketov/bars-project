@@ -484,6 +484,7 @@ async fn execute(
                 let result = call(
                     &mut client,
                     &bars_protocol::GraphSearchParams {
+                        text: !json,
                         search: params,
                         mode,
                         graph_budgets: Default::default(),
@@ -492,9 +493,12 @@ async fn execute(
                     },
                 )
                 .await?;
-                return emit(out, json, &result, |r| {
-                    serde_json::to_string_pretty(r).expect("DTO сериализуется")
-                });
+                return emit(
+                    out,
+                    json,
+                    &result,
+                    bars_protocol::graph_text::render_graph_search_text,
+                );
             }
             emit(
                 out,

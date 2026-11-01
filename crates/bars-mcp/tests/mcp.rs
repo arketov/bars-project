@@ -341,6 +341,8 @@ impl<R: tokio::io::AsyncRead + Unpin, W: tokio::io::AsyncWrite + Unpin> Rpc<R, W
 type Pipe = Rpc<ReadHalf<DuplexStream>, WriteHalf<DuplexStream>>;
 #[path = "support/disk_read.rs"]
 mod disk_read;
+#[path = "support/module_scope.rs"]
+mod module_scope;
 
 struct Harness {
     home: TempDir,
@@ -489,7 +491,7 @@ async fn graph_tools_are_hidden_until_settings_show_them() {
     let mut hidden = harness.connect(harness.env(&root));
     let init = hidden.initialize().await;
     let text = init["result"]["instructions"].as_str().unwrap();
-    assert_eq!(text, INSTRUCTIONS);
+    assert!(text.starts_with(INSTRUCTIONS));
     assert_eq!(text, instructions(false));
     assert!(!text.contains("графовых"), "{text}");
     let names = tool_names(&mut hidden).await;
@@ -511,8 +513,8 @@ async fn graph_tools_are_hidden_until_settings_show_them() {
     );
     assert_eq!(
         harness.launches.load(Ordering::SeqCst),
-        0,
-        "до воркера вызов не дошёл"
+        1,
+        "метаданные запустили воркер; скрытый инструмент новый не запускает"
     );
 
     harness.show_graph_tools();
@@ -520,7 +522,7 @@ async fn graph_tools_are_hidden_until_settings_show_them() {
     let init = shown.initialize().await;
     let text = init["result"]["instructions"].as_str().unwrap();
     assert_eq!(text, instructions(true));
-    assert!(text.contains("Шесть графовых инструментов"), "{text}");
+    assert!(text.contains("GraphRAG — не карта окна"), "{text}");
     assert!(
         text.chars().count() <= 2000,
         "Т-27: не длиннее 2 000 знаков"
@@ -641,7 +643,7 @@ async fn every_graph_tool_lists_only_its_own_parameters() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
-async fn initialize_and_tool_list_do_not_touch_the_worker() {
+async fn initialize_and_tool_list_query_metadata_without_registering_project() {
     let harness = Harness::new("init");
     let root = harness.project("proj");
     harness.show_graph_tools();
@@ -707,8 +709,8 @@ async fn initialize_and_tool_list_do_not_touch_the_worker() {
     );
     assert_eq!(
         harness.launches.load(Ordering::SeqCst),
-        0,
-        "воркер не запускался"
+        1,
+        "метаданные запускают один воркер, но не регистрируют проект"
     );
 }
 
@@ -778,7 +780,21 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
         assert!(!error, "{mode}: {text}");
         let out: Value = serde_json::from_str(&text).unwrap();
         assert_eq!(out["requested_mode"], mode);
+        let (error, text) = mcp
+            .tool(
+                "bars_rag_search",
+                json!({"query":"Т-1 зависит","mode":mode}),
+            )
+            .await;
+        assert!(!error, "{text}");
+        assert!(text.contains("=== SEARCH:"), "{text}");
+        assert!(!text.contains("\"requested_mode\""));
+        assert!(text.chars().count() <= bars_protocol::graph_text::MAX_TEXT_CHARS);
     }
+    let (error, text) = mcp.tool("bars_relations", json!({"query":"Т-1"})).await;
+    assert!(!error, "{text}");
+    assert!(text.contains("=== GRAPH relations ==="), "{text}");
+    assert!(text.contains("requirements.md:"), "{text}");
     let (error, text) = mcp
         .tool(
             "bars_rag_search",
@@ -1503,13 +1519,21 @@ async fn default_format_is_text_with_explicit_delimiters() {
     assert!(reindex.contains("accepted: true"), "{reindex}");
 }
 
-/// НФТ-3 и Т-2 на настоящем exe: `initialize` отвечает сразу, без воркера, и процесс выходит, когда
+/// НФТ-3 и Т-2 на настоящем exe: `initialize` отвечает без воркера, и процесс выходит, когда
 /// клиент закрывает stdin.
 #[tokio::test(flavor = "multi_thread")]
 async fn real_binary_answers_initialize_without_a_worker_and_exits_on_eof() {
     // Настоящий exe читает `~/.bars/settings.toml`: домашняя папка подменена пустой, как в проверках клиентов.
     let home = TempDir::new().unwrap();
-    let mut child = tokio::process::Command::new(env!("CARGO_BIN_EXE_bars-mcp"))
+    // Рядом нет bars.exe: запрос метаданных не запустит настоящий фоновой процесс теста.
+    let exe = home.path().join(if cfg!(windows) {
+        "bars-mcp.exe"
+    } else {
+        "bars-mcp"
+    });
+    fs::copy(env!("CARGO_BIN_EXE_bars-mcp"), &exe).unwrap();
+    let mut child = tokio::process::Command::new(exe)
+        .current_dir(home.path())
         .env(bars_protocol::USER_HOME_VAR, home.path())
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())

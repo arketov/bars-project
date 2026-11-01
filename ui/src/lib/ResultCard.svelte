@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { label as uiLabel } from "./labels";
   import { app } from "./app.svelte";
   import { commandAdapter } from './command-adapters';
   import { copyText } from "./api";
@@ -25,8 +26,6 @@
   const title = $derived(hit.heading_chain.split("/").pop() || hit.title);
 
   function showInGraph() {
-    app.graphAnalysis = false;
-    app.graphPreview = null;
     app.graphFocus = hit.path;
     app.graphShowQuery = true;
     app.view = "graph";
@@ -68,7 +67,7 @@
         <button class="ghost" onclick={showInGraph}>В графе</button>
         <button class="ghost" onclick={copy}><Icon name="copy" size={14} />Копировать путь:строку</button>
         <button class="ghost" disabled={!hit.chunk_id || !project} title={hit.chunk_id ? "Найти соседей по смыслу" : "ID раздела отсутствует. Обновите воркер и повторите поиск."} aria-expanded={similarOpen} onclick={() => similarOpen = !similarOpen}>Похожие разделы</button>
-        <span class="nums">строки {hit.first_line}–{hit.last_line} · {hit.score_kind} {decimal(hit.score)}</span>
+        <span class="nums">строки {hit.first_line}–{hit.last_line} · <span title={uiLabel("score", hit.score_kind).hint}>{uiLabel("score", hit.score_kind).text}</span> {decimal(hit.score)}</span>
       </div>
       {#if similarOpen && project && hit.chunk_id}
         {#key project + ":" + hit.chunk_id}<SimilarSections {project} sourceId={hit.chunk_id} modules={app.project?.modules ?? []} onopen={(neighbor) => { if (app.current === project) void app.openDocument(neighbor); }} onrefresh={() => { similarOpen = false; void app.search(); }} />{/key}

@@ -9,7 +9,6 @@ import { keybindings } from "./keybindings.svelte";
 import { tabHost } from "./workspace-tabs";
 
 vi.mock("./api", async original => ({ ...await original<typeof import("./api")>(), call: vi.fn() }));
-vi.mock("./graph-renderer", () => ({ GraphRenderer: class { set() {} destroy() {} } }));
 const project = { path: "C:/А", name: "А", docs_root: "docs", state: "ready" as const, modules: [{ name: "manual", documents: 1 }] };
 const hit = (path: string) => ({ path, title: path, first_line: 3, last_line: 4 });
 const settle = async () => { await new Promise(resolve => setTimeout(resolve, 0)); flushSync(); };

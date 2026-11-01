@@ -240,20 +240,6 @@ impl Worker {
                 op.queue_position = Some(position + usize::from(current.is_some()))
             });
         }
-        let progress: Vec<_> = journal
-            .model_settings
-            .iter()
-            .map(|(&id, settings)| {
-                (
-                    id,
-                    self.models()
-                        .operation_percent(settings, journal.active[&id].reranker),
-                )
-            })
-            .collect();
-        for (id, percent) in progress {
-            journal.edit(id, |op| op.percent = percent);
-        }
         if let Some(cell) = current.as_ref() {
             let progress = cell.progress();
             journal.edit(cell.operation_id, |op| {
@@ -273,6 +259,25 @@ impl Worker {
             });
         }
         let mut output = journal.snapshot(params);
+        let keys = journal.keys.clone();
+        let model_settings = journal.model_settings.clone();
+        // Доступность регистрации относится к тому же снимку, что epoch/cursor.
+        for op in output.active.iter_mut().chain(output.completed.iter_mut()) {
+            if let Some(path) = &op.project {
+                op.target_available = projects
+                    .get(std::path::Path::new(path))
+                    .is_some_and(|r| !r.deleting && r.generation == op.generation);
+            }
+        }
+        drop(journal);
+        drop(current);
+        drop(projects);
+        // Файлы и provider могут ждать диск; замки воркера здесь уже свободны.
+        for op in &mut output.active {
+            if let Some(settings) = model_settings.get(&op.id) {
+                op.percent = self.models().operation_percent(settings, op.reranker);
+            }
+        }
         let mut project_settings = HashMap::new();
         let global_settings = bars_core::settings::UserSettings::load(self.bars_home())
             .ok()
@@ -280,11 +285,6 @@ impl Worker {
         for op in output.active.iter_mut().chain(output.completed.iter_mut()) {
             if op.project.is_some() && op.state == "queued" && self.is_paused() {
                 op.state = "queue_paused".into();
-            }
-            if let Some(path) = &op.project {
-                op.target_available = projects
-                    .get(std::path::Path::new(path))
-                    .is_some_and(|r| !r.deleting && r.generation == op.generation);
             }
             let settings = if let Some(path) = &op.project {
                 project_settings
@@ -305,7 +305,7 @@ impl Worker {
                 })
             };
             op.target_available &= settings.as_ref().is_some_and(|settings| {
-                journal.keys.get(&op.id)
+                keys.get(&op.id)
                     == Some(&if op.project.is_some() {
                         settings_key(settings)
                     } else {
@@ -347,6 +347,9 @@ impl Worker {
         };
         if let Some(path) = op.project {
             let path = std::path::PathBuf::from(path);
+            let settings = bars_core::settings::Settings::load(self.bars_home(), &path)
+                .map_err(|_| std::io::Error::other("Не удалось прочитать настройки проекта"))?
+                .value;
             let projects = lock(&self.inner.projects);
             if !projects
                 .get(&path)
@@ -357,9 +360,6 @@ impl Worker {
                 )
                 .into());
             }
-            let settings = bars_core::settings::Settings::load(self.bars_home(), &path)
-                .map_err(|_| std::io::Error::other("Не удалось прочитать настройки проекта"))?
-                .value;
             if settings_key(&settings) != key {
                 return Err(std::io::Error::other(
                     "Настройки изменились; запустите проверку из проекта",
@@ -386,7 +386,7 @@ impl Worker {
             } else {
                 super::queue::Job::check(super::Priority::Explicit)
             };
-            self.inner.enqueue_for(&path, job, &projects);
+            self.inner.enqueue_for(&path, job, &projects, key);
         } else {
             let settings = bars_core::settings::UserSettings::load(self.bars_home())
                 .map_err(|_| std::io::Error::other("Не удалось прочитать настройки моделей"))?

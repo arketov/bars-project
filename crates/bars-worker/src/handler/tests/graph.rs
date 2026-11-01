@@ -41,6 +41,7 @@ async fn graph_real_ipc_auto_update_refs_scope_and_read_only_mcp() {
     let mut mcp = harness.client(ClientKind::Mcp).await;
     let graph = mcp
         .call(&GraphQueryParams {
+            text: false,
             target: target(&root),
             request: GraphRequest {
                 operation: Operation::Graph,
@@ -66,6 +67,7 @@ async fn graph_real_ipc_auto_update_refs_scope_and_read_only_mcp() {
         .clone();
     let path = mcp
         .call(&GraphQueryParams {
+            text: false,
             target: target(&root),
             request: GraphRequest {
                 operation: Operation::Paths,
@@ -106,6 +108,7 @@ async fn graph_real_ipc_auto_update_refs_scope_and_read_only_mcp() {
         search.min_score = Some(0.0);
         let result = mcp
             .call(&bars_protocol::GraphSearchParams {
+                text: false,
                 search,
                 mode,
                 graph_budgets: Default::default(),
@@ -145,6 +148,7 @@ async fn graph_real_ipc_auto_update_refs_scope_and_read_only_mcp() {
     }
     let stale = rpc(mcp
         .call(&GraphQueryParams {
+            text: false,
             target: target(&root),
             request: GraphRequest {
                 operation: Operation::Relations,
@@ -156,6 +160,7 @@ async fn graph_real_ipc_auto_update_refs_scope_and_read_only_mcp() {
     assert_eq!(stale.kind(), Some(ErrorKind::StaleRef));
     let expired = rpc(mcp
         .call(&GraphQueryParams {
+            text: false,
             target: target(&root),
             request: GraphRequest {
                 snapshot: Some(old),
@@ -186,6 +191,7 @@ async fn graph_search_fallback_is_explicit_and_hybrid_shape_unchanged() {
     let before = cli.call(&search(&root, "поиск")).await.unwrap();
     let hybrid = cli
         .call(&bars_protocol::GraphSearchParams {
+            text: false,
             search: search(&root, "поиск"),
             mode: bars_core::graph::RetrievalMode::Hybrid,
             graph_budgets: Default::default(),
@@ -197,6 +203,7 @@ async fn graph_search_fallback_is_explicit_and_hybrid_shape_unchanged() {
     assert_eq!(before, hybrid.search);
     let disabled = cli
         .call(&bars_protocol::GraphSearchParams {
+            text: false,
             search: search(&root, "поиск"),
             mode: bars_core::graph::RetrievalMode::Mix,
             graph_budgets: Default::default(),
@@ -220,6 +227,7 @@ async fn graph_search_fallback_is_explicit_and_hybrid_shape_unchanged() {
     // ISS-88: пакет не помещается даже пустым — выдача без него и причина о related_budget.
     let tiny = cli
         .call(&bars_protocol::GraphSearchParams {
+            text: false,
             search: search(&root, "поиск"),
             mode: bars_core::graph::RetrievalMode::Mix,
             graph_budgets: Default::default(),
@@ -245,6 +253,7 @@ async fn graph_search_fallback_is_explicit_and_hybrid_shape_unchanged() {
     ] {
         let error = rpc(cli
             .call(&bars_protocol::GraphSearchParams {
+                text: false,
                 search: search(&root, "поиск"),
                 mode,
                 graph_budgets: Default::default(),
@@ -268,6 +277,7 @@ async fn graph_search_fallback_is_explicit_and_hybrid_shape_unchanged() {
     bars_core::graph::store::set_state(db.conn(), LayerState::Stale, None, None).unwrap();
     let out = cli
         .call(&bars_protocol::GraphSearchParams {
+            text: false,
             search: search(&root, "поиск"),
             mode: bars_core::graph::RetrievalMode::Mix,
             graph_budgets: Default::default(),
@@ -281,6 +291,7 @@ async fn graph_search_fallback_is_explicit_and_hybrid_shape_unchanged() {
     assert_eq!(out.search.results, before.results);
     let previous = cli
         .call(&bars_protocol::GraphSearchParams {
+            text: false,
             search: search(&root, "поиск"),
             mode: bars_core::graph::RetrievalMode::Graph,
             graph_budgets: Default::default(),
@@ -302,6 +313,7 @@ async fn graph_search_fallback_is_explicit_and_hybrid_shape_unchanged() {
         .unwrap();
     let error = rpc(cli
         .call(&GraphQueryParams {
+            text: false,
             target: target(&root),
             request: GraphRequest {
                 operation: Operation::Context,
@@ -368,6 +380,7 @@ async fn stale_snapshot_status_and_context_share_revision_rules_over_ipc() {
     assert_eq!(status.state, LayerState::Stale);
     let old = cli
         .call(&GraphQueryParams {
+            text: false,
             target: target(&root),
             request: GraphRequest::default(),
         })
@@ -377,6 +390,7 @@ async fn stale_snapshot_status_and_context_share_revision_rules_over_ipc() {
     assert!(old.warnings.iter().any(|w| w.contains("Граф устарел")));
     let context = cli
         .call(&GraphQueryParams {
+            text: false,
             target: target(&root),
             request: GraphRequest {
                 operation: Operation::Context,

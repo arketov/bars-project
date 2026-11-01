@@ -8,6 +8,57 @@ fn since(epoch: &str, after: u64) -> OperationEventsParams {
     }
 }
 
+#[tokio::test]
+async fn progress_io_releases_worker_locks_and_keeps_the_original_cursor() {
+    use bars_core::models::{EmbedError, Embedder, ModelFingerprint};
+    use std::sync::{Mutex, Weak};
+    struct ProgressProbe(Mutex<Weak<Inner>>);
+    impl ModelProvider for ProgressProbe {
+        fn fingerprint(&self, _: &Settings) -> Result<ModelFingerprint, EmbedError> {
+            Ok(bars_core::models::bge_m3_fingerprint())
+        }
+        fn load(&self, _: &Settings) -> Result<Box<dyn Embedder + Send>, EmbedError> {
+            panic!("опрос не загружает модель")
+        }
+        fn download_percent(&self, _: &str, _: &Settings) -> Option<u8> {
+            let inner = lock(&self.0).upgrade().unwrap();
+            assert!(inner.projects.try_lock().is_ok());
+            assert!(inner.current.try_lock().is_ok());
+            assert!(inner.queue.try_lock().is_ok());
+            let mut journal = inner
+                .models
+                .operations
+                .try_lock()
+                .expect("журнал свободен при I/O");
+            let id = journal.snapshot(&Default::default()).active[0].id;
+            journal.finish(id, "success", None, None);
+            Some(73)
+        }
+    }
+    let env = Env::new();
+    let provider = Arc::new(ProgressProbe(Mutex::new(Weak::new())));
+    let worker = Worker::start(env.config(), provider.clone()).unwrap();
+    *lock(&provider.0) = Arc::downgrade(&worker.inner);
+    let settings = Settings::resolve(&Default::default(), &Default::default());
+    let id = super::super::models::begin_model(
+        &worker.inner.models.operations,
+        &settings,
+        false,
+        "prepare",
+    );
+    let first = worker.operation_events(&Default::default());
+    assert_eq!(first.cursor, 0);
+    assert_eq!(first.active[0].id, id);
+    assert_eq!(first.active[0].percent, Some(73));
+    assert!(first.completed.is_empty());
+    let next = worker.operation_events(&since(&first.epoch, first.cursor));
+    assert!(next.active.is_empty());
+    assert_eq!(next.completed[0].id, id);
+    assert_eq!(next.completed[0].state, "success");
+    assert_eq!(next.cursor, 1);
+    worker.shutdown().await;
+}
+
 #[tokio::test(flavor = "multi_thread")]
 async fn operation_short_job_delivers_its_own_applied_report_and_next_attempt_id() {
     let env = Env::new();

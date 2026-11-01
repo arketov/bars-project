@@ -13,7 +13,6 @@ import { settings } from "./settings.svelte";
 import { BarsError, type SettingsOutput } from "./types";
 import { keybindings } from './keybindings.svelte';
 vi.mock("./api", async original => ({ ...await original<typeof import("./api")>(), call: vi.fn() }));
-vi.mock("./graph-renderer", () => ({ GraphRenderer: class { set() {} destroy() {} } }));
 let component: ReturnType<typeof mount> | undefined;
 const project = { path: "C:/А", name: "А", docs_root: "docs", state: "ready" as const, modules: [{ name: "manual", documents: 1 }] };
 const hit = (path: string) => ({ path, title: path, first_line: 3, last_line: 4 });

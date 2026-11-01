@@ -14,7 +14,6 @@ vi.mock("./api", async (original) => ({
   ...(await original<typeof import("./api")>()),
   call: vi.fn(), documentRead: vi.fn(), documentRevision: vi.fn(), documentWrite: vi.fn(), openInMainWindow: vi.fn(), inTauri: () => true,
 }));
-vi.mock("./graph-renderer", () => ({ GraphRenderer: class { set() {} destroy() {} } }));
 vi.mock("@tauri-apps/api/event", () => ({ listen: vi.fn(async () => () => {}), emit: vi.fn(async () => {}) }));
 
 const read = (text: string, revision: string): DocumentRead => ({ status: "ok", text, revision, eol: "lf", bom: false, size: 5, read_only: null });

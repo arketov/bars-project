@@ -1,8 +1,8 @@
 //! `bars-mcp`: 17 основных инструментов и шесть графовых по настройке (Т-2, Т-19).
 //!
 //! Каждый инструмент — один вызов метода протокола ([`bars_protocol`]); индекса и моделей здесь нет
-//! (НФТ-3). Ответ на `initialize` и список инструментов отдаются сразу, не подключаясь к воркеру;
-//! подключение и запуск воркера происходят при первом вызове инструмента
+//! (НФТ-3). `initialize` читает метаданные проекта с общим сроком 3 с; без воркера отвечает
+//! статичной инструкцией. Подключение для обычных вызовов живёт всю сессию
 //! (`docs/architecture/ipc.md`). Контракт инструментов — `docs/features/agent-tools/mcp-tools.md`.
 //! Права MCP на стороне воркера задаёт `bars_protocol::Session`: `accept_model_change` от MCP
 //! сбрасывается в `false`, а прокси его и не передаёт.
@@ -98,6 +98,13 @@ pub struct BarsMcp {
     tool_router: ToolRouter<Self>,
     /// Показаны ли шесть графовых инструментов; решается при создании сессии (OQ-162).
     graph_tools: bool,
+    session_info: Arc<Mutex<SessionMetadata>>,
+}
+
+#[derive(Default)]
+struct SessionMetadata {
+    attempts: u8,
+    project: Option<bars_protocol::SessionProjectInfo>,
 }
 
 /// Вид ответа инструмента.
@@ -135,10 +142,10 @@ pub struct SearchArgs {
     pub query: String,
     /// Проект: путь к корню или имя. Без него — проект сессии.
     pub project: Option<String>,
-    /// Существующие папки первого уровня docs-root из bars_projects; `.` — корневой. Примеры: ["backlog"] для пожеланий, ["chats"] для истории. Для межслойной задачи можно не ограничивать.
+    /// Папки первого уровня docs-root, `.` — корневой. Выбери по виду знания: features — контракты, architecture — устройство, adr — решения, chats — история. Несколько видов или место неясно — весь проект; слабая выдача — расширь область. Реальные имена — из инструкции или bars_projects; квоты нет.
     #[serde(default)]
     pub modules: Vec<String>,
-    /// Уже выбранные индексируемые документы, пути от docs-root, без docs/ при корне docs. Пример сверки: ["features/models/local-models.md", "features/settings/settings.md"]. Не угадывать; для целого документа — bars_read.
+    /// Уже выбранные индексируемые документы, пути от docs-root или проекта, как в выдаче. Пример: ["features/models/local-models.md", "features/settings/settings.md"]. Не угадывать; для целого документа — bars_read.
     #[serde(default)]
     pub files: Vec<String>,
     /// Сколько результатов вернуть.
@@ -157,7 +164,7 @@ pub struct SimilarArgs {
     pub chunk_id: String,
     /// Проект: путь к корню или имя. Без него — проект сессии.
     pub project: Option<String>,
-    /// Существующие папки первого уровня docs-root; `.` — корневой. Ограничивает область кандидатов, исходный чанк может быть в другом модуле. Без поля — весь проект.
+    /// Папки первого уровня docs-root; `.` — корневой. Сужает кандидатов, исходный чанк может быть в другом модуле. Имена — из инструкции или bars_projects; без поля — весь проект.
     #[serde(default)]
     pub modules: Vec<String>,
     /// Сколько похожих чанков вернуть.
@@ -170,7 +177,7 @@ pub struct SimilarArgs {
 pub struct DuplicatesArgs {
     /// Проект: путь к корню или имя. Обязателен: аудит читает весь проект.
     pub project: String,
-    /// Существующие папки первого уровня docs-root; `.` — корневой. Без поля — весь проект.
+    /// Папки первого уровня docs-root; `.` — корневой. Для явно заданного project проверь его имена в bars_projects; без поля — весь проект.
     #[serde(default)]
     pub modules: Vec<String>,
     /// Сколько записей вернуть.
@@ -328,6 +335,7 @@ impl BarsMcp {
             client: Arc::new(Mutex::new(None)),
             tool_router,
             graph_tools,
+            session_info: Arc::new(Mutex::new(SessionMetadata::default())),
         }
     }
 
@@ -339,17 +347,45 @@ impl BarsMcp {
     }
 
     async fn connect(&self) -> Result<Client, ClientError> {
+        self.connect_with_deadline(LAUNCH_DEADLINE).await
+    }
+
+    async fn connect_with_deadline(&self, deadline: Duration) -> Result<Client, ClientError> {
         let launch = self.env.launch.clone();
         connect_or_launch_with(
             &self.env.endpoint,
             ClientKind::Mcp,
-            LAUNCH_DEADLINE,
+            deadline,
             move || match launch {
                 Launch::Worker => spawn_worker(&worker_exe()?),
                 Launch::With(start) => start(),
             },
         )
         .await
+    }
+
+    async fn session_metadata(
+        &self,
+        max_attempts: u8,
+    ) -> Option<bars_protocol::SessionProjectInfo> {
+        let mut state = self.session_info.lock().await;
+        if state.project.is_none() && state.attempts < max_attempts {
+            state.attempts += 1;
+            // Отдельный клиент: отменённый запрос не оставит поздний ответ в канале инструментов.
+            let result = tokio::time::timeout(Duration::from_secs(3), async {
+                let mut client = self.connect_with_deadline(Duration::from_secs(3)).await?;
+                client
+                    .call(&bars_protocol::SessionInfoParams {
+                        cwd: self.env.cwd.display().to_string(),
+                    })
+                    .await
+            })
+            .await;
+            if let Ok(Ok(output)) = result {
+                state.project = output.project;
+            }
+        }
+        state.project.clone()
     }
 
     /// Вызывает метод воркера. Соединение открывается при первом вызове; оборванное (воркер
@@ -516,12 +552,14 @@ impl BarsMcp {
         name = "bars_rag_search",
         description = "Поиск неизвестного контекста после определения предмета задачи; для известного \
                        документа можно сразу bars_read/bars_outline. Гибридный поиск возвращает \
-                       фрагменты с источниками, строками и оценкой. modules выбирает существующие \
-                       папки первого уровня: например, [\"backlog\"] для пожеланий или [\"chats\"] \
-                       для истории. files — уже выбранные индексируемые документы: например, \
+                       фрагменты с источниками, строками и оценкой. Выбери modules по виду знания: \
+                       features — контракты, architecture — устройство, adr — решения, chats — история; \
+                       реальные имена — из инструкции или bars_projects. Несколько видов или место \
+                       неясно — весь проект; слабая выдача — расширь область. Квоты нет. \
+                       files — уже выбранные индексируемые документы: например, \
                        [\"features/models/local-models.md\",\"features/settings/settings.md\"] для \
-                       сверки устройства rerank; пути от docs-root. Не угадывать список файлов; \
-                       межслойную задачу можно искать без фильтров. Без project — проект сессии."
+                       сверки устройства rerank; пути от docs-root или проекта. Не угадывать список \
+                       файлов. Без project — проект сессии."
     )]
     async fn bars_rag_search(
         &self,
@@ -552,6 +590,7 @@ impl BarsMcp {
             finish(
                 self.call_observed(
                     &bars_protocol::GraphSearchParams {
+                        text: !matches!(args.format, Some(Format::Json)),
                         search: params,
                         mode,
                         graph_budgets,
@@ -562,7 +601,7 @@ impl BarsMcp {
                 )
                 .await,
                 args.format,
-                |out| format!("=== GRAPH SEARCH ===\n{}\n=== END SEARCH ===", json(out)),
+                bars_protocol::graph_text::render_graph_search_text,
             )
         } else {
             finish(
@@ -740,6 +779,75 @@ impl BarsMcp {
 
 #[tool_handler(router = self.tool_router)]
 impl ServerHandler for BarsMcp {
+    async fn initialize(
+        &self,
+        request: rmcp::model::InitializeRequestParams,
+        context: rmcp::service::RequestContext<rmcp::RoleServer>,
+    ) -> Result<rmcp::model::InitializeResult, rmcp::ErrorData> {
+        context.peer.set_peer_info(request.clone());
+        let mut result = self.negotiate_initialize(&request)?;
+        let project = self.session_metadata(1).await;
+        result.instructions = Some(instructions::session_instructions(
+            self.graph_tools,
+            project.as_ref(),
+        ));
+        Ok(result)
+    }
+
+    async fn list_tools(
+        &self,
+        _request: Option<rmcp::model::PaginatedRequestParams>,
+        _context: rmcp::service::RequestContext<rmcp::RoleServer>,
+    ) -> Result<rmcp::model::ListToolsResult, rmcp::ErrorData> {
+        let project = self.session_metadata(2).await;
+        let mut tools = self.tool_router.list_all();
+        if let Some(project) = project {
+            let mut modules = project.modules;
+            modules.sort_by(|a, b| a.name.cmp(&b.name));
+            let details = modules
+                .iter()
+                .map(|module| {
+                    let name = instructions::clean(&module.name, usize::MAX);
+                    let title = module
+                        .title
+                        .as_deref()
+                        .map(|t| instructions::clean(t, 60))
+                        .filter(|t| !t.is_empty());
+                    format!(
+                        "{name} ({}){}",
+                        module.documents,
+                        title.map(|t| format!(" — {t}")).unwrap_or_default()
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join("; ");
+            let note = format!(
+                " Модули проекта сессии {}: {details}. Для другого project — bars_projects; список не ограничивает новые модули.",
+                instructions::clean(&project.name, 60)
+            );
+            for tool in &mut tools {
+                if matches!(
+                    tool.name.as_ref(),
+                    "bars_rag_search" | "bars_get_similar" | "bars_get_duplicates"
+                ) {
+                    let schema = Arc::make_mut(&mut tool.input_schema);
+                    if let Some(description) = schema
+                        .get_mut("properties")
+                        .and_then(|p| p.get_mut("modules"))
+                        .and_then(|m| m.get_mut("description"))
+                    {
+                        let text = format!("{}{note}", description.as_str().unwrap_or_default());
+                        *description = Value::String(text);
+                    }
+                }
+            }
+        }
+        Ok(rmcp::model::ListToolsResult {
+            tools,
+            ..Default::default()
+        })
+    }
+
     fn get_info(&self) -> ServerConfig {
         ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
             .with_instructions(instructions(self.graph_tools))

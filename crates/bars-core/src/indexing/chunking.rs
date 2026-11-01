@@ -3,6 +3,11 @@
 //! Чистая функция: текст файла и параметры на входе, чанки на выходе. Ни диска,
 //! ни базы, ни модели.
 
+mod registry;
+
+/// Версия алгоритма: старые индексы проходят повторную нарезку без смены модели.
+pub(crate) const CHUNKING_VERSION: &str = "registry-b-1";
+
 /// Заголовок списка подзаголовков в конце чанка родительского раздела.
 const OTHER_HEADERS: &str = "other headers:";
 
@@ -365,33 +370,48 @@ fn char_len(text: &str) -> usize {
 }
 
 /// Текст раздела одним куском или несколькими, если он длиннее максимума.
-fn split_section(section: &Section, max: usize) -> Vec<Piece> {
+fn split_section(section: &Section, max: usize) -> (Vec<Piece>, usize) {
     let Some(&(last_line, _)) = section.body.last() else {
-        return vec![Piece {
-            source_spans: section
-                .heading_source
-                .map(source_range)
-                .into_iter()
-                .collect(),
-            first_line: section.first_line,
-            last_line: section.first_line,
-            text: String::new(),
-        }];
+        return (
+            vec![Piece {
+                source_spans: section
+                    .heading_source
+                    .map(source_range)
+                    .into_iter()
+                    .collect(),
+                first_line: section.first_line,
+                last_line: section.first_line,
+                text: String::new(),
+            }],
+            max,
+        );
     };
+    if let Some(mut pieces) = registry::split(&section.body, max) {
+        if let Some(first) = pieces.first_mut() {
+            first.first_line = section.first_line;
+            if let Some(heading) = section.heading_source {
+                first.source_spans.insert(0, source_range(heading));
+            }
+        }
+        return (pieces, max.min(registry::WINDOW));
+    }
     let whole = join_lines(&section.body);
     if char_len(&whole) <= max {
-        return vec![Piece {
-            source_spans: section
-                .heading_source
-                .into_iter()
-                .chain(section.body.iter().map(|(_, line)| *line))
-                .filter(|line| !line.is_empty())
-                .map(source_range)
-                .collect(),
-            first_line: section.first_line,
-            last_line,
-            text: whole,
-        }];
+        return (
+            vec![Piece {
+                source_spans: section
+                    .heading_source
+                    .into_iter()
+                    .chain(section.body.iter().map(|(_, line)| *line))
+                    .filter(|line| !line.is_empty())
+                    .map(source_range)
+                    .collect(),
+                first_line: section.first_line,
+                last_line,
+                text: whole,
+            }],
+            max,
+        );
     }
     let mut pieces = pack(atoms(&section.body, max), max);
     if let Some(first) = pieces.first_mut() {
@@ -400,7 +420,7 @@ fn split_section(section: &Section, max: usize) -> Vec<Piece> {
             first.source_spans.insert(0, source_range(heading));
         }
     }
-    pieces
+    (pieces, max)
 }
 
 fn join_lines(lines: &[(usize, &str)]) -> String {
@@ -512,6 +532,8 @@ fn pack(atoms: Vec<Atom>, max: usize) -> Vec<Piece> {
 
 /// Чанк до приклейки списка подзаголовков.
 struct Draft {
+    /// Реестр не склеивается с соседями за пределы своего окна.
+    limit: usize,
     source_spans: Vec<std::ops::Range<usize>>,
     chain: String,
     /// Строка заголовка первого раздела; у вступления пустая.
@@ -543,7 +565,7 @@ impl Draft {
     /// Помещается ли `addition` после текста чанка в максимум.
     fn fits(&self, addition: &str, max: usize) -> bool {
         let separator = if self.body.is_empty() { 0 } else { BLANK.len() };
-        self.len() + separator + char_len(addition) <= max
+        self.len() + separator + char_len(addition) <= max.min(self.limit)
     }
 
     fn absorb(&mut self, addition: &str, last_line: usize, ranges: &[std::ops::Range<usize>]) {
@@ -592,12 +614,13 @@ fn assemble(sections: &[Section], min: usize, max: usize) -> Vec<Draft> {
     let mut pending: Option<Draft> = None;
 
     for section in sections {
-        let pieces = split_section(section, max);
+        let (pieces, limit) = split_section(section, max);
 
         if let Some(mut current) = pending.take() {
             if let [piece] = pieces.as_slice() {
                 let addition = with_heading(&section.heading_text(), &piece.text);
-                if current.fits(&addition, max) {
+                if current.fits(&addition, limit) {
+                    current.limit = current.limit.min(limit);
                     current.absorb(&addition, piece.last_line, &piece.source_spans);
                     if current.len() >= min {
                         out.push(current);
@@ -615,6 +638,7 @@ fn assemble(sections: &[Section], min: usize, max: usize) -> Vec<Draft> {
         for (index, piece) in pieces.into_iter().enumerate() {
             let is_last = index + 1 == count;
             let draft = Draft {
+                limit,
                 source_spans: piece.source_spans,
                 chain: section.chain.clone(),
                 heading: section.heading_text(),
@@ -641,9 +665,10 @@ fn assemble(sections: &[Section], min: usize, max: usize) -> Vec<Draft> {
         let addition = with_heading(&current.heading, &current.body);
         if out
             .last()
-            .is_some_and(|previous| previous.fits(&addition, max))
+            .is_some_and(|previous| previous.fits(&addition, current.limit))
         {
             if let Some(previous) = out.last_mut() {
+                previous.limit = previous.limit.min(current.limit);
                 previous.absorb(&addition, current.last_line, &current.source_spans);
             }
         } else {
@@ -657,6 +682,8 @@ fn assemble(sections: &[Section], min: usize, max: usize) -> Vec<Draft> {
 /// Добирает чанк до `min` символов копией хвоста текста предыдущих чанков.
 /// Если выше текста нет или его не хватает, чанк остаётся короче.
 fn pad_from_above(current: &mut Draft, above: &[Draft], min: usize, max: usize) {
+    let max = max.min(current.limit);
+    let min = min.min(max);
     let own_separator = if current.body.is_empty() {
         0
     } else {

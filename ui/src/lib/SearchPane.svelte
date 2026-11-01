@@ -9,7 +9,7 @@
   import GraphSearchBundle from './GraphSearchBundle.svelte';
   import { touchedModules, searchScope } from "./tree";
   import { graphScope } from "./graph-scope.svelte";
-  import { SEARCH_MODE, fallbackText } from "./graph/query";
+  import { label as uiLabel, labels, explanation } from "./labels";
 
   const project = $derived(app.project);
   const blocked = $derived(project?.state === "reindex_required");
@@ -93,7 +93,7 @@
         <div class="search-options">
         <label class="retrieval-mode">
           <span>Поиск</span>
-          <span class="mode-control"><select aria-label="Режим поиска" disabled={blocked || app.searching} bind:value={app.retrievalMode}>{#each Object.entries(SEARCH_MODE) as [mode, name] (mode)}<option value={mode}>{name}</option>{/each}</select><Icon name="chevron-down" size={12} /></span>
+          <span class="mode-control"><select aria-label="Режим поиска" disabled={blocked || app.searching} bind:value={app.retrievalMode}>{#each Object.entries(labels.searchMode) as [mode, name] (mode)}<option value={mode} title={uiLabel("searchMode", mode).hint}>{name.text}</option>{/each}</select><Icon name="chevron-down" size={12} /></span>
         </label>
         <div class="count" title="Сколько результатов вернуть. По умолчанию — из настроек">
           Результатов
@@ -158,7 +158,7 @@
         {:else if results}
           {#if app.graphSearch}
             {#if app.graphSearch.requested_mode !== app.graphSearch.applied_mode}
-              <div class="graph-search-info" role="status">Запрошен режим «{SEARCH_MODE[app.graphSearch.requested_mode]}», применён «{SEARCH_MODE[app.graphSearch.applied_mode]}».{#if app.graphSearch.fallback_reason}<p>Причина: {fallbackText(app.graphSearch.fallback_reason)}</p>{/if}</div>
+              <div class="graph-search-info" role="status">Запрошен режим «{uiLabel("searchMode", app.graphSearch.requested_mode).text}», применён «{uiLabel("searchMode", app.graphSearch.applied_mode).text}».{#if app.graphSearch.fallback_reason}<p>Причина: <span title={app.graphSearch.fallback_reason}>{explanation("fallback", app.graphSearch.fallback_reason).text}</span></p>{/if}</div>
             {/if}
             {#each [app.graphSearch.related,app.graphSearch.graph_results].filter(Boolean) as graph}
               {#if graph}<GraphSearchBundle {graph} related={graph === app.graphSearch.related} />{/if}
@@ -167,16 +167,16 @@
           {#if results.rerank_error}
             <Banner
               kind="warn"
-              title="Rerank не отработал — выдача без него"
-              text="{results.rerank_error}. Оценка теперь по косинусу, порог для неё другой ({decimal(results.applied.min_score)})."
+              title="Оценка моделью не выполнена — выдача по близости"
+              text="{results.rerank_error}. Оценка теперь по близости, порог для неё другой ({decimal(results.applied.min_score)})."
             >
-              <button class="ghost sm" onclick={() => app.search()}>Повторить с rerank</button>
+              <button class="ghost sm" onclick={() => app.search()}>Повторить оценку моделью</button>
             </Banner>
           {/if}
           {#if results.results.length}
             <div class="meta">
               <span><b>{results.results.length}</b> {resultsWord(results.results.length)}</span>
-              <span>{results.applied.score_kind === "rerank" ? "Порядок: по оценке rerank" : "Порядок: гибридный"}</span>
+              <span>{results.applied.score_kind === "rerank" ? "Порядок: по оценке модели" : "Порядок: гибридный"}</span>
               <span>порог <b>{decimal(results.applied.min_score)}</b></span>
               <span>{app.elapsedMs} мс</span>
               {#if app.displayed}
@@ -191,9 +191,9 @@
             </div>
             <p class="score-help muted">
               {#if results.applied.score_kind === "cosine"}
-                Полоски показывают косинусную близость, а не вероятность правильного ответа. Гибридный порядок учитывает также совпадения слов и точные идентификаторы; близость может возрастать вниз по списку.
+                Полоски показывают смысловую близость, а не вероятность правильного ответа. Гибридный порядок учитывает также совпадения слов и точные идентификаторы; близость может возрастать вниз по списку.
               {:else}
-                Полоски показывают оценки модели rerank, а не вероятность правильного ответа.
+                Полоски показывают оценки модели, а не вероятность правильного ответа.
               {/if}
             </p>
             {#each results.results as hit, index (hit.path + ":" + hit.first_line)}
@@ -218,10 +218,10 @@
               <h1>Ничего не найдено</h1>
               <p>
                 {#if app.emptyInfo?.best != null}
-                  Подходящие чанки есть, но их оценка ниже порога — <b>{decimal(results.applied.min_score)}</b>.
+                  Подходящие разделы есть, но их оценка ниже порога — <b>{decimal(results.applied.min_score)}</b>.
                   Лучший кандидат получил {decimal(app.emptyInfo.best)}.
                 {:else}
-                  Ни один чанк не набрал порог — <b>{decimal(results.applied.min_score)}</b>.
+                  Ни один раздел не набрал порог — <b>{decimal(results.applied.min_score)}</b>.
                 {/if}
               </p>
               <ul>
@@ -242,7 +242,7 @@
                 {/if}
               </div>
               <p class="faint applied">
-                Применено: {results.applied.results} {resultsWord(results.applied.results)} · порог {decimal(results.applied.min_score)} · {results.applied.score_kind === "rerank" ? "реранк" : "без реранка"} · {app.elapsedMs} мс
+                Применено: {results.applied.results} {resultsWord(results.applied.results)} · порог {decimal(results.applied.min_score)} · {results.applied.score_kind === "rerank" ? uiLabel("score", "rerank").text : uiLabel("score", "cosine").text} · {app.elapsedMs} мс
               </p>
             </div>
           {/if}

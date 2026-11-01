@@ -54,7 +54,7 @@ For knowledge gaps, use `bars_new_topics_list`, then `bars_new_topics_get` for o
 ### Choosing a tool
 
 1. Know the document → `bars_read` (or `bars_outline` first for a long one). No search needed, even for an unindexed plan.
-2. Do not know where the answer lives → `bars_rag_search` with a subject question. Narrow with `modules` (first-level folders from `bars_projects`: `backlog` for wishes, `chats` for session results) or `files` (already chosen indexed documents, paths from the documentation root). A cross-layer task needs no filter.
+2. Do not know where the answer lives → `bars_rag_search` with a subject question. Choose `modules` by knowledge kind: `features` for contracts, `architecture` for structure, `adr` for decisions, `knowledge` for research, `backlog` for bugs/ideas, `chats` for history. Use the whole project for several kinds or an unclear location; widen weak or empty scoped results. No filtering quota. Names come from the session instruction, parameter descriptions or `bars_projects` for another project.
 3. Need related material around a hit → `bars_get_similar` for same-topic text, `bars_relations` / `bars_paths` for explicit links, `bars_context` for a role-grouped bundle for a task.
 4. About to change something → `bars_rag_search` for the descriptions of the object, `bars_links` with `direction: incoming` on its document, then `bars_get_similar` on the section you will edit. `bars_impact` adds typed dependencies when the graph has them; an empty impact proves nothing.
 5. Reviewing the documentation as a whole → `bars_explore`, then `bars_graph` to inspect a finding.
@@ -71,11 +71,11 @@ Read/outline/text_search/links read saved disk content, never the window's unsav
 
 Identify the task subject first. Resolve a stage number through the known project plan/register. For a known document use `bars_read` directly; use `bars_outline` for headings. A preliminary search is not required, including for an unindexed Markdown plan read from disk.
 
-For unknown context, search with a concrete question in the user's language. A cross-cutting task may need project-wide search. `modules` selects actual first-level documentation folders, discovered with `bars_projects` when needed, not nested topics. Examples: `bars_rag_search({query:"Какие пожелания есть к обновлению индекса?",modules:["backlog"]})`; `bars_rag_search({query:"Последние результаты проверки устройств моделей",modules:["chats"]})`.
+For unknown context, search with a concrete question in the user's language. Choose actual first-level modules by knowledge kind, not nested topics; several kinds or an unclear location allow the whole project. Examples for this layout: `bars_rag_search({query:"Как работает поиск?",modules:["features"]})`; `bars_rag_search({query:"Как устроен воркер?",modules:["architecture"]})`; `bars_rag_search({query:"Почему выбран SQLite?",modules:["adr"]})`. `applied.scope` shows the area; `by_module` shows candidates before rerank and returned results. Use that evidence to refine scope.
 
-Use `files` for already selected indexed sources: `bars_rag_search({query:"Как выбирается устройство rerank?",files:["features/models/local-models.md","features/settings/settings.md"]})`. Paths are relative to the documentation root; omit `docs/` when that root is `docs`. Read/outline accepts broader disk paths; do not copy them blindly into `files` or infer index membership from disk existence. Examples assume the suggested layout; use known paths in the target project. An early guessed file list may exclude the direct answer.
+Use `files` for already selected indexed sources: `bars_rag_search({query:"Как выбирается устройство rerank?",files:["features/models/local-models.md","features/settings/settings.md"]})`. Both documentation-root and project-root forms are accepted, including paths from results. Disk existence does not imply index membership. Examples assume the suggested layout; use known paths in the target project. An early guessed file list may exclude the direct answer.
 
-After zero results, check the subject, project and filters, then reformulate or read a known primary source. Do not infer that a requirement is absent or reindex because of an empty answer. Filtering is optional; choose it for the information needed.
+After zero results, check subject, project and filters; if `modules` was set, try the whole project, then reformulate or read a primary source. Do not infer absence or reindex because of an empty answer. No mandatory filtering frequency.
 
 ## File format
 

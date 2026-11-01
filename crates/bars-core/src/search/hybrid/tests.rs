@@ -10,6 +10,43 @@ use crate::storage::Journal;
 const DIM: usize = 32;
 
 #[test]
+fn module_candidates_count_the_unique_pool_before_threshold_and_limit() {
+    let (_dir, index, mut embedder) = project();
+    let mut r = request("поиск");
+    r.results = Some(1);
+    r.min_score = Some(0.1);
+    let expected = [(".".into(), 1), ("models".into(), 1), ("search".into(), 2)].into();
+    let reranked = search(
+        &index,
+        &mut embedder,
+        Some(&mut KeywordReranker),
+        &SearchSettings::default(),
+        &r,
+    )
+    .unwrap();
+    assert_eq!(reranked.candidate_modules, expected);
+    assert_eq!(reranked.hits.len(), 1);
+    assert_eq!(reranked.hits[0].module, ".");
+    let fallback = search(
+        &index,
+        &mut embedder,
+        Some(&mut BrokenReranker),
+        &SearchSettings::default(),
+        &r,
+    )
+    .unwrap();
+    assert_eq!(fallback.candidate_modules, expected);
+    assert!(fallback.rerank_error.is_some());
+    r.modules = vec!["models".into()];
+    r.files = vec!["root.md".into()];
+    let scoped = run(&index, &mut embedder, &r).unwrap();
+    assert_eq!(
+        scoped.candidate_modules,
+        [(".".into(), 1), ("models".into(), 1)].into()
+    );
+}
+
+#[test]
 fn search_pins_snapshot_before_lazy_fts_open_during_schema_publication() {
     use rusqlite::hooks::{AuthAction, AuthContext, Authorization};
     use std::sync::{

@@ -125,12 +125,28 @@ pub struct AppliedParams {
     pub score_kind: ScoreKind,
     /// Хотя бы одно значение из вызова вышло за пределы и прижато.
     pub clamped: bool,
+    #[serde(default)]
+    pub scope: SearchScope,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SearchScope {
+    pub modules: Vec<String>,
+    pub files: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ModuleBreakdown {
+    pub candidates: std::collections::BTreeMap<String, u32>,
+    pub results: std::collections::BTreeMap<String, u32>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SearchOutput {
     pub results: Vec<SearchHit>,
     pub applied: AppliedParams,
+    #[serde(default)]
+    pub by_module: ModuleBreakdown,
     /// Проект индексируется: выдача может быть неполной (Т-19).
     pub indexing: bool,
     /// Сколько документов ждёт индексации.
@@ -364,6 +380,30 @@ pub struct ProjectInfo {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProjectsOutput {
     pub projects: Vec<ProjectInfo>,
+}
+
+/// Лёгкие метаданные проекта сессии для initialize; модели и индексация не нужны.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SessionInfoParams {
+    pub cwd: String,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SessionInfoOutput {
+    pub project: Option<SessionProjectInfo>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SessionProjectInfo {
+    pub name: String,
+    pub modules: Vec<SessionModuleInfo>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SessionModuleInfo {
+    pub name: String,
+    pub documents: u32,
+    pub title: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1133,6 +1173,7 @@ methods! {
     Outline: OutlineParams => OutlineOutput, "outline", All;
     Read: ReadParams => ReadOutput, "read", All;
     Projects: ProjectsParams => ProjectsOutput, "projects", All;
+    SessionInfo: SessionInfoParams => SessionInfoOutput, "session_info", All;
     Status: StatusParams => StatusOutput, "status", All;
     Reindex: ReindexParams => AcceptedOutput, "reindex", All;
     Register: RegisterParams => RegisterOutput, "register", Cli;
@@ -1541,6 +1582,14 @@ mod tests {
                 min_score: 0.3,
                 score_kind: ScoreKind::Cosine,
                 clamped: true,
+                scope: SearchScope {
+                    modules: vec!["features".into()],
+                    files: vec![],
+                },
+            },
+            by_module: ModuleBreakdown {
+                candidates: [("features".into(), 7)].into(),
+                results: [("features".into(), 1)].into(),
             },
             indexing: true,
             pending: 4,

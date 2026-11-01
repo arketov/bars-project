@@ -42,6 +42,64 @@ fn doc(title: &str) -> String {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn q01_default_pause_embeds_five_edits_once_after_fifteen_seconds() {
+    let env = Env::new();
+    let project = env.project("alpha", &[("a.md", DOC)]);
+    let mut config = env.config();
+    config.edit_pause = None;
+    config.tail_delay = Duration::from_secs(60);
+    let worker = Worker::start(config, env.provider.clone()).unwrap();
+    worker.register(&project).unwrap();
+    idle(&worker).await;
+    let before = embed_calls(&env);
+    let file = project.join("docs/a.md");
+    for version in 1..=5 {
+        if version > 1 {
+            tokio::time::sleep(Duration::from_secs(2)).await;
+        }
+        fs::write(&file, doc(&format!("Правка {version}"))).unwrap();
+        worker
+            .documents_edited(&project, vec![file.clone()])
+            .unwrap();
+        assert_eq!(embed_calls(&env), before, "серия правок ещё не закончена");
+    }
+    let (items, counts) = worker.doc_queue(&project, 10).unwrap();
+    assert_eq!(counts.waiting, 1);
+    assert!(
+        items[0]
+            .due_in
+            .is_some_and(|left| left <= Duration::from_secs(15))
+    );
+    idle(&worker).await;
+    assert_eq!(embed_calls(&env), before + 1);
+    assert_eq!(titles(&project), ["Правка 5"]);
+    assert!(worker.doc_queue(&project, 10).unwrap().0.is_empty());
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn edit_pause_uses_the_default_on_invalid_settings_and_keeps_overrides() {
+    let env = Env::new();
+    let project = env.project("alpha", &[("a.md", DOC)]);
+    let mut config = env.config();
+    config.edit_pause = None;
+    let worker = Worker::start(config, env.provider.clone()).unwrap();
+    worker.register(&project).unwrap();
+    idle(&worker).await;
+    assert_eq!(worker.inner.edit_pause(&project), Duration::from_secs(15));
+    let settings = env.home.path().join("settings.toml");
+    fs::write(&settings, "[indexing]\nedit_pause_seconds = 30\n").unwrap();
+    assert_eq!(worker.inner.edit_pause(&project), Duration::from_secs(30));
+    fs::create_dir_all(project.join(".bars")).unwrap();
+    let config = project.join(".bars/config.toml");
+    fs::write(&config, "[indexing]\nedit_pause_seconds = 0\n").unwrap();
+    assert_eq!(worker.inner.edit_pause(&project), Duration::ZERO);
+    fs::write(&config, "[indexing]\nedit_pause_seconds = 3601\n").unwrap();
+    assert_eq!(worker.inner.edit_pause(&project), Duration::from_secs(15));
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn a_stream_of_edits_embeds_the_document_once_after_the_pause() {
     let env = Env::new();
     let project = env.project("alpha", &[("a.md", DOC)]);

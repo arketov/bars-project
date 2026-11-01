@@ -48,9 +48,20 @@ fn is_bars_hook(entry: &Table) -> bool {
 
 /// Массив `[[hooks]]`; отсутствующий ключ создаётся. Другой тип у существующего ключа — ошибка.
 fn hooks_array<'a>(file: &Path, doc: &'a mut DocumentMut) -> Result<&'a mut ArrayOfTables> {
-    doc.entry("hooks")
-        .or_insert_with(|| Item::ArrayOfTables(ArrayOfTables::new()))
-        .as_array_of_tables_mut()
+    let item = doc
+        .entry("hooks")
+        .or_insert_with(|| Item::ArrayOfTables(ArrayOfTables::new()));
+    // TOML допускает также пустой массив и массив inline-таблиц.
+    if item.as_array().is_some_and(|array| array.is_empty()) {
+        *item = Item::ArrayOfTables(ArrayOfTables::new());
+    } else if item.is_array() {
+        *item = Item::ArrayOfTables(
+            item.clone()
+                .into_array_of_tables()
+                .map_err(|_| parse_error(file, "«hooks» должен быть массивом таблиц"))?,
+        );
+    }
+    item.as_array_of_tables_mut()
         .ok_or_else(|| parse_error(file, "«hooks» должен быть массивом таблиц [[hooks]]"))
 }
 
@@ -80,33 +91,34 @@ pub fn install_hook(file: &Path, command: &str) -> Result<bool> {
 
 pub fn uninstall_hook(file: &Path) -> Result<bool> {
     update(file, |doc| {
-        let emptied = match doc.get_mut("hooks").and_then(Item::as_array_of_tables_mut) {
-            Some(hooks) => {
-                hooks.retain(|entry| !is_bars_hook(entry));
-                hooks.is_empty()
-            }
-            None => false,
-        };
-        if emptied {
-            doc.as_table_mut().remove("hooks");
+        if !doc.contains_key("hooks") {
+            return Ok(());
         }
+        let mut normalized = doc.clone();
+        let hooks = hooks_array(file, &mut normalized)?;
+        if !hooks.iter().any(is_bars_hook) {
+            return Ok(());
+        }
+        hooks.retain(|entry| !is_bars_hook(entry));
+        let emptied = hooks.is_empty();
+        if emptied {
+            normalized.as_table_mut().remove("hooks");
+        }
+        *doc = normalized;
         Ok(())
     })
 }
 
 /// Команды хуков bars в `[[hooks]]`; файл без ключа `hooks` даёт пустой список.
 pub fn hook_commands(file: &Path) -> Result<Vec<String>> {
-    let doc = load(file)?;
-    Ok(doc
-        .get("hooks")
-        .and_then(Item::as_array_of_tables)
-        .map(|hooks| {
-            hooks
-                .iter()
-                .filter(|entry| is_bars_hook(entry))
-                .filter_map(|entry| entry.get("command").and_then(Item::as_str))
-                .map(str::to_string)
-                .collect()
-        })
-        .unwrap_or_default())
+    let mut doc = load(file)?;
+    if !doc.contains_key("hooks") {
+        return Ok(Vec::new());
+    }
+    Ok(hooks_array(file, &mut doc)?
+        .iter()
+        .filter(|entry| is_bars_hook(entry))
+        .filter_map(|entry| entry.get("command").and_then(Item::as_str))
+        .map(str::to_string)
+        .collect())
 }

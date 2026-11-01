@@ -114,6 +114,25 @@ const impactReply = () => sreply("impact", {
 // Сначала сущности документа (`graph`, вид сущностей, область — файл), затем влияние от них.
 const impactHandler = (impact: () => unknown) => (request: Record<string, any>) => (request.operation === "graph" ? sreply("graph", { nodes: [sentity("ent-0", "Порог", ["doc-4"])] }) : impact());
 
+it("неизвестные предикат и ограничение влияния остаются в подсказках (ISS-59)", async () => {
+  semantic(impactHandler(() => {
+    const raw = impactReply();
+    (raw.assertions as ReturnType<typeof sedge>[])[0].predicate = "future_relation";
+    return { ...raw, truncated: true, limit_reasons: ["future_limit"] };
+  }));
+  app.activeDocument = "docs/features/doc-04.md";
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  await act("impact");
+  const box = target.querySelector<HTMLElement>('.viewbox[aria-label="Влияние изменения"]')!;
+  expect(box.textContent).toContain("связано с");
+  expect(box.textContent).toContain("причина ограничения не определена");
+  expect(box.textContent).not.toMatch(/future_relation|future_limit/);
+  const hints = [...box.querySelectorAll("[title]")].map(el => el.getAttribute("title")).join(" ");
+  expect(hints).toContain("future_relation");
+  expect(hints).toContain("future_limit");
+});
+
 it("«Что затронет правка»: запрос по документу, прямое влияние с основанием и условием, ссылки-соседи отдельно, «Общий вид» снимает вид", async () => {
   semantic(impactHandler(impactReply));
   app.activeDocument = "docs/features/doc-04.md";
@@ -315,6 +334,18 @@ it("«Обзор тем»: темы номерами на документах, 
   await settle();
   expect(queries().at(-1)).toMatchObject({ grouping: "modules" });
   expect(strip("Обзор тем")?.textContent).toContain("1 тем");
+});
+
+it("аудит сохраняет техническое предупреждение вместе с причиной усечения (ISS-59)", async () => {
+  semantic(() => sreply("explore", { truncated: true, limit_reasons: ["max_bytes"], warnings: ["Диагностика future_code"] }));
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  await analysis("audit");
+  const box = target.querySelector<HTMLElement>('.viewbox[aria-label="Аудит связей"]')!;
+  expect(box.textContent).not.toContain("future_code");
+  const hints = [...box.querySelectorAll("[title]")].map(el => el.getAttribute("title")).join(" ");
+  expect(hints).toContain("future_code");
+  expect(hints).toContain("max_bytes");
 });
 
 it("«Аудит связей»: три прохода, разделы с оговорками, ошибка одного прохода не стирает остальные, хабы по числу ссылок", async () => {

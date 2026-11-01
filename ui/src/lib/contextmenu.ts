@@ -1,3 +1,4 @@
+import { label as uiLabel, labels } from "./labels";
 /** Логика контекстного меню окна (ISS-07): какие пункты показать и как их выполнить. */
 
 export type EntryMenuAction = "newDoc" | "newDir" | "rename" | "move" | "trash";
@@ -31,7 +32,7 @@ export function projectItems(): MenuItem[] {
   return [
     { action: "deleteProject", label: "Удалить проект" },
     { action: "renameProject", label: "Переименовать…" },
-    { action: "checkProject", label: "Проверить индекс" },
+    { action: "checkProject", label: uiLabel("action", "checkProject").text },
   ];
 }
 
@@ -47,11 +48,11 @@ export function treeEntryAt(target: EventTarget | null): { path: string; kind: "
 }
 
 export function folderItems(state: string, missing = false): MenuItem[] {
-  const reason = state === "unavailable" ? "Проект недоступен" : state === "reindex_required" ? "Нужно согласие на смену модели" : "Проверяется весь проект";
+  const reason = state === "unavailable" ? "Проект недоступен" : state === "reindex_required" ? "Нужно согласие на смену модели" : labels.action.checkProject.hint;
   return [
     { action: "reveal", label: /Mac/.test(navigator.platform) ? "Открыть в Finder" : "Открыть в Проводнике", disabled: missing, hint: missing ? "Папка не найдена" : undefined },
     { action: "path", label: "Скопировать путь", hint: missing ? "Папка отсутствует; последний путь" : undefined },
-    { action: "checkProject", label: "Проверить индекс проекта", disabled: state === "unavailable" || state === "reindex_required", hint: reason },
+    { action: "checkProject", label: uiLabel("action", "checkProject").text, disabled: state === "unavailable" || state === "reindex_required", hint: reason },
   ];
 }
 

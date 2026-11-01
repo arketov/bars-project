@@ -7,6 +7,9 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GraphQueryParams {
+    /// Внутренний выбор текстового предела; JSON и окно по умолчанию без него.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub text: bool,
     #[serde(flatten)]
     pub target: Target,
     pub request: GraphRequest,
@@ -51,6 +54,8 @@ pub struct GraphAcceptedOutput {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GraphSearchParams {
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub text: bool,
     #[serde(flatten)]
     pub search: crate::SearchParams,
     #[serde(default)]

@@ -57,13 +57,6 @@ export interface GEdge {
 
 export const EDGE_KINDS: SliceKind[] = ["markdown_link", "document_similarity", "chunk_similarity"];
 
-export const KIND_TITLE: Record<EdgeKind, string> = {
-  markdown_link: "Ссылка",
-  document_similarity: "Близость документов",
-  chunk_similarity: "Близость чанков",
-  query_result: "Связь с запросом",
-};
-
 /** Окно cosine, в котором модель даёт значимые пары; допущенные пары документов лежат в 0,61–0,92 (решение OQ-118). */
 export const WINDOW = { lo: 0.6, hi: 0.95 };
 

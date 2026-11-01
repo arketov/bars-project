@@ -3,6 +3,7 @@
   import { commandAdapter } from './command-adapters';
   import { copyText } from './api';
   import { onMount } from "svelte";
+  import { label as uiLabel } from "./labels";
   import { app } from "./app.svelte";
   import Banner from "./Banner.svelte";
   import { decimal, plural } from "./format";
@@ -131,16 +132,16 @@
         <p class="muted small">Исходный поиск: {original ? appliedParams({ ...check, params: original }) || "параметры не сохранены" : "параметры не сохранены"}</p>
         <p class="muted small">Эта проверка: {appliedParams({ ...check, params: current.params }) || "параметры не сохранены"}</p>
         {#if scoreKindChanged(original, current.params)}
-          <p class="notice warn">Способ оценки изменился: rerank → cosine. Эти совпадения не подтверждают появление знаний. Причина перехода: {current.rerankError ?? "не сохранена"}.</p>
+          <p class="notice warn">Оценка модели заменена оценкой по близости. Эти совпадения не подтверждают появление знаний. Причина перехода: {current.rerankError ?? "не сохранена"}.</p>
         {:else if current.rerankError}
-          <p class="notice warn">Поиск выполнен без rerank: {current.rerankError}</p>
+          <p class="notice warn">Поиск выполнен без оценки моделью: {current.rerankError}</p>
         {/if}
         {#each result.hits as hit (hit.path + ":" + hit.first_line)}
           <div class="source">
             <strong>{hit.title}</strong>
             <code>{hit.path}:{linesLabel(hit)}</code>
             {#if hit.heading_chain}<span class="muted small">{hit.heading_chain.split("/").join(" / ")}</span>{/if}
-            <span class="muted small">оценка {decimal(hit.score)} · {hit.score_kind}</span>
+            <span class="muted small"><span title={uiLabel("score", hit.score_kind).hint}>{uiLabel("score", hit.score_kind).text}</span> {decimal(hit.score)}</span>
             <button class="ghost sm" onclick={() => app.openDocument({ path: hit.path, title: hit.title, first_line: hit.first_line, last_line: hit.last_line })}>
               <Icon name="doc" size={13} />Открыть документ
             </button>

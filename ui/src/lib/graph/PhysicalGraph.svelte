@@ -4,15 +4,16 @@
   import { onDestroy, onMount, untrack } from "svelte";
   import GraphSearchBundle from "../GraphSearchBundle.svelte";
   import Icon from "../Icon.svelte";
+  import { label as uiLabel, explanation, limitText, graphNote } from "../labels";
   import { app } from "../app.svelte";
   import { appearance } from "../appearance.svelte";
   import { documentColor, keyOf } from "../appearance";
   import type { GraphStatus } from "../graph";
-  import { graphDataLabel, completenessLabels, jobLabels, roleLabels } from "../graph";
+  import { graphDataLabel } from "../graph";
   import { BarsError } from "../types";
   import { draw, layoutLines, lineDistance, moduleColors, radiusOf, readPalette, toScreen, toWorld, type Camera, type Palette, type Scene, type Target } from "./draw";
   import { DEFAULT_FORCES, Layout, type Forces, type PNode } from "./layout";
-  import { EDGE_KINDS, KIND_TITLE, brightnessOf, drawStrength, springOf, widthOf, type EdgeKind, type GEdge, type GNode, type Mode, type SliceKind } from "./model";
+  import { EDGE_KINDS, brightnessOf, drawStrength, springOf, widthOf, type EdgeKind, type GEdge, type GNode, type Mode, type SliceKind } from "./model";
   import { graphStatus, loadPhysical, loadQuery, semanticQuery, startGraphBuild, stopGraphBuild } from "./physical-api";
   import { CONTEXT_BUDGETS, DEFAULT_BUDGET, PROFILES, auditRequests, contextRequest, digestAudit, digestContext, digestImpact, digestMeaningPaths, digestTopics, emptyImpact, entitiesRequest, entityRoots, impactRequest, meaningPathRequest, pathDocuments, semanticError, topicsRequest, type AuditPass, type AuditSection, type AuditView, type ContextView, type Grouping, type ImpactEntry, type ImpactView, type MeaningPathView, type Proof, type Scope, type SemanticKind, type TaskProfile, type Topic, type TopicsView } from "./semantic";
   import { GRAPH_ACTIONS, NO_SELECTION_TEXT, actionState, buildControls, type ActionId } from "./entry";
@@ -21,7 +22,7 @@
   import { graphScope } from "../graph-scope.svelte";
   import { FORCE_RANGE, defaultSettings, loadSettings, saveSettings, type PanelKind, type PanelSettings } from "./settings";
   import { INITIAL_LIMITS, MAX_LIMITS, PORTION, SliceStore, emptySlice, type Limits, type Slice } from "./slice";
-  import { DEFAULT_DEPTH, MAX_DEPTH, QUERY_BUDGET, QUERY_MAX, SEARCH_MODE, acceptQuerySlice, queryRequest, fallbackText, shapeQuery, type QueryBuild, type QueryInfo, type QueryInput, type RetrievalKind, type ScoreKind } from "./query";
+  import { DEFAULT_DEPTH, MAX_DEPTH, QUERY_BUDGET, QUERY_MAX, acceptQuerySlice, queryRequest, shapeQuery, type QueryBuild, type QueryInfo, type QueryInput, type RetrievalKind, type ScoreKind } from "./query";
 
   const reduced = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -86,7 +87,7 @@
   let findText = $state("");
   let legendOpen = $state(false);
   /** Открытое меню: настройки раскладки. */
-  let popover = $state<"settings" | "more" | "analysis" | null>(null);
+  let popover = $state<"settings" | "analysis" | null>(null);
   let notice = $state("");
   let rendererError = $state("");
   let revision = $state(0);
@@ -340,7 +341,6 @@
   const queryRelatedCount = $derived(query?.results.filter(r => r.channel === "related").length ?? 0);
   const queryMissing = $derived(query ? query.results.filter((r) => r.status !== "ready" || r.node === null).length : 0);
   const SOURCE_TEXT = { ready: "Актуален", no_graph_object: "Связи для версии выдачи недоступны", changed_since_search: "Документ изменён после поиска", deleted_since_search: "Документ удалён после поиска", unavailable: "Текущий файл недоступен" };
-  const SCORE_TEXT: Record<ScoreKind, string> = { rerank: "оценка rerank", cosine: "оценка — косинус (rerank не выполнялся)", none: "оценки нет" };
 
   function applyForces() {
     if (!layout) return;
@@ -469,7 +469,7 @@
     const found = new Set<number>();
     const bundle = query?.bundle;
     if (!bundle || packageIndex === null) return found;
-    const item = bundle.items.filter(i => ["path", "impact", "relation", "edge"].includes(i.type))[packageIndex];
+    const item = bundle.items[packageIndex];
     if (!item) return found;
     const assertions = item.type === "path" || item.type === "impact" ? item.path.steps.flatMap(step => bundle.assertions.filter(e => e.id === step.edge)) : item.type === "relation" ? [item.assertion] : item.type === "edge" ? [item.edge] : [];
     const ownerPath = (id: string) => {
@@ -573,7 +573,6 @@
     await load("expand");
   }
 
-  const MODE_NAME: Record<Mode, string> = { links: "Ссылки", meaning: "По смыслу", chunks: "По смыслу · чанки", all: "Все связи" };
   const MODES: Mode[] = ["links", "meaning", "chunks", "all"];
   const modeNote = (m: Mode) =>
     m === "links"
@@ -701,7 +700,7 @@
     if (target?.type === "node") tip = { text: `${label(target.index)} · ${slice.nodes[target.index].kind === "document" ? "документ" : slice.nodes[target.index].kind === "query" ? "запрос" : "чанк"}`, x: sx, y: sy };
     else if (target?.type === "edge") {
       const e = slice.edges[target.id];
-      tip = { text: `${KIND_TITLE[e.kind]} · ${edgeTitle(e)}`, x: sx, y: sy };
+      tip = { text: `${uiLabel("edgeKind", e.kind).text} · ${edgeTitle(e)}`, x: sx, y: sy };
     } else tip = null;
     schedule();
   }
@@ -1435,8 +1434,6 @@
       .sort((a, b) => b.degree - a.degree || a.node.label.localeCompare(b.node.label));
   });
   const layerIssues = $derived(loaded && !loadError ? EDGE_KINDS.filter((k) => slice.layers[k].state !== "ready" && (k !== "chunk_similarity" || shownChunks > 0)) : []);
-  const STATE_TEXT: Record<string, string> = { ready: "готов", building: "строится", partial: "частично", stale: "устарел", failed: "ошибка", cancelled: "отменён", not_built: "не построен", disabled: "выключен" };
-  const MOTION_TEXT = { running: "Движение идёт", idle: "Раскладка в покое", stopped: "Остановлено вами", reduced: "Без движения (reduced motion)" };
 
   const sampleS = [0.5, 0.65, 0.8, 0.95];
   const dash = (kind: EdgeKind) => (kind === "chunk_similarity" ? "5 3" : "0");
@@ -1643,8 +1640,8 @@
     </div>
   {/each}
 {/snippet}
-{#snippet semNotes(lines: string[])}
-  {#each lines as line (line)}<p class="hint">{line}</p>{/each}
+{#snippet semNotes(lines: string[], hint = "")}
+  {#each lines as line (line)}<p class="hint" title={[hint, line].filter(Boolean).join(" · ")}>{graphNote(line).text}</p>{/each}
 {/snippet}
 {#snippet semStatus()}
   {#if sem?.state === "loading"}
@@ -1661,7 +1658,7 @@
       {#each entries as e, i (`${title}${i}`)}
         <li>
           <span class="name" title={e.label}>{e.label}</span>
-          <small>{e.steps.join(" · ")}</small>
+          <small title={e.stepHints.join(" · ")}>{e.steps.join(" · ")}</small>
           {#each e.conditions as c, k (k)}<small>условие: {c}</small>{/each}
           {@render proofList(e.proofs)}
           <small>проверить описание</small>
@@ -1698,9 +1695,9 @@
       <table aria-label="Сведения о графе">
         <tbody>
           <tr><th>Документов</th><td>{slice.docCount} из {slice.totals.documents}</td></tr>
-          <tr><th>Чанков раскрыто</th><td>{shownChunks} из {slice.totals.chunks}</td></tr>
-          <tr><th>Снимок графа</th><td title={slice.snapshot}>{slice.snapshot.slice(0, 8) || "—"}</td></tr>
-          {#each EDGE_KINDS as kind (kind)}<tr><th>{KIND_TITLE[kind]}</th><td>{kind === "chunk_similarity" && !shownChunks ? "при раскрытии" : counts[kind]}{totalCounts[kind] > counts[kind] ? ` из ${totalCounts[kind]}` : ""} · слой {STATE_TEXT[slice.layers[kind].state]}</td></tr>{/each}
+          <tr><th>Разделов раскрыто</th><td>{shownChunks} из {slice.totals.chunks}</td></tr>
+          <tr><th>Версия графа</th><td title={slice.snapshot}>{slice.snapshot ? "Получена" : "Ещё не получена"}</td></tr>
+          {#each EDGE_KINDS as kind (kind)}<tr><th>{uiLabel("edgeKind", kind).text}</th><td>{kind === "chunk_similarity" && !shownChunks ? "при раскрытии" : counts[kind]}{totalCounts[kind] > counts[kind] ? ` из ${totalCounts[kind]}` : ""} · <span title={uiLabel("layerState", slice.layers[kind].state).hint}>{uiLabel("layerState", slice.layers[kind].state).text}</span></td></tr>{/each}
         </tbody>
       </table>
     </details>
@@ -1723,16 +1720,16 @@
         {#each MODES as m (m)}
           {@const issue = modeLayer(m)}
           {@const on = modeKinds(m).filter((k) => k !== "chunk_similarity" || m === "chunks" || shownChunks > 0)}
-          <button class="mode" role="radio" aria-checked={mode === m} disabled={m === "chunks" && !shownChunks} title={m === "chunks" && !shownChunks ? "Раскройте чанки документа, чтобы увидеть близость чанков" : `${issue ? issue.layer.note : MODE_NAME[m]}. Клавиша M — следующий режим`} onclick={() => setMode(m)}>
+          <button class="mode" role="radio" aria-checked={mode === m} disabled={m === "chunks" && !shownChunks} title={m === "chunks" && !shownChunks ? "Раскройте разделы документа, чтобы увидеть близость разделов" : `${issue ? issue.layer.note : uiLabel("graphMode", m).text}. Клавиша M — следующий режим`} onclick={() => setMode(m)}>
             <svg width="22" height="12" viewBox="0 0 22 12" aria-hidden="true">
               {#each on as kind, i (kind)}
                 <line x1="1" y1={on.length === 1 ? 6 : 3 + i * 3} x2="18" y2={on.length === 1 ? 6 : 3 + i * 3} stroke={palette?.kindCss[kind] ?? "currentColor"} stroke-width="2" stroke-dasharray={dash(kind)} />
               {/each}
               {#if m === "links"}<path d="M21 6l-5-3v6z" fill={palette?.kindCss.markdown_link ?? "currentColor"} />{/if}
             </svg>
-            {MODE_NAME[m]}
+            {uiLabel("graphMode", m).text}
             <b>{m === "chunks" && !shownChunks ? "—" : modeCount(m)}</b>
-            {#if issue}<span class="state {issue.layer.state}">{STATE_TEXT[issue.layer.state]}</span>{/if}
+            {#if issue}<span class="state {issue.layer.state}" title={uiLabel("layerState", issue.layer.state).hint}>{uiLabel("layerState", issue.layer.state).text}</span>{/if}
           </button>
         {/each}
       </div>
@@ -1747,7 +1744,6 @@
         </button>
         <button aria-label="Настройки графа" aria-expanded={popover === "settings"} title="Настройки графа: раскладка, порог, слои, легенда, сведения" onclick={() => (popover = popover === "settings" ? null : "settings")}><Icon name="gear" size={14} width={1.8} /></button>
         <button class="analysis-menu" aria-haspopup="menu" aria-expanded={popover === "analysis"} title="Контекст задачи, обзор тем и аудит связей" onclick={() => (popover = popover === "analysis" ? null : "analysis")}>Анализ ▾</button>
-        <button class="more-menu" aria-label="Ещё" title="Ещё" aria-haspopup="menu" aria-expanded={popover === "more"} onclick={() => (popover = popover === "more" ? null : "more")}>⋯</button>
       </div>
     </div>
     <div class="entry-actions" role="group" aria-label="Действия над документом">
@@ -1774,7 +1770,7 @@
               <button role="radio" aria-checked={localView.depth === d} class:on={localView.depth === d} disabled={localShape.truncated && d > localView.depth} title={localShape.truncated && d > localView.depth ? "Достигнут предел обхода: следующий шаг недоступен" : `Соседи на ${d} шаг${d > 1 ? "а" : ""}`} onclick={() => setLocalDepth(d)}>{d}</button>
             {/each}
           </span>
-          <span>связи: {MODE_NAME[mode].toLowerCase()} · узлов {localShape.depthOf.size} · связей {localShape.edgeIds.size}</span>
+          <span>связи: {uiLabel("graphMode", mode).text.toLowerCase()} · узлов {localShape.depthOf.size} · связей {localShape.edgeIds.size}</span>
           <button class="more ghost" onclick={markLocal} title="Отметить все документы локального графа для поиска в подграфе">Выбрать весь локальный граф</button>
           <button class="more" onclick={goGeneral}>Общий вид</button>
         </div>
@@ -1784,7 +1780,7 @@
             {#if localView.step < LOCAL_LIMITS.length - 1}<button class="more" onclick={moreLocal}>Показать ещё</button>{:else}<span>Максимум вида: уменьшите глубину или выберите другой режим связей.</span>{/if}
           </div>
         {:else if localShape.depthOf.size <= 1}
-          <div class="banner" role="status"><span>В режиме «{MODE_NAME[mode]}» у документа связей не найдено. Документ остаётся на карте; другой режим может показать соседей.</span></div>
+          <div class="banner" role="status"><span>В режиме «{uiLabel("graphMode", mode).text}» у документа связей не найдено. Документ остаётся на карте; другой режим может показать соседей.</span></div>
         {/if}
       {/if}
       {#if pathView && sem?.kind !== "meaning-path"}
@@ -1805,7 +1801,7 @@
             <button class="more" onclick={goGeneral}>Общий вид</button>
           {:else}
             <b class="qtext">Путь: {label(pathView.from)} → {label(pathView.to)}</b>
-            <span>В режиме «{MODE_NAME[mode]}»{pathView.directed ? " по направлению ссылок" : ""} пути не длиннее {PATH_MAX_HOPS} шагов нет</span>
+            <span>В режиме «{uiLabel("graphMode", mode).text}»{pathView.directed ? " по направлению ссылок" : ""} пути не длиннее {PATH_MAX_HOPS} шагов нет</span>
             {#if mode !== "all"}<button class="more ghost" onclick={() => setMode("all")}>Искать во всех связях</button>{/if}
             {#if pathView.directed}<button class="more ghost" onclick={() => { pathView!.directed = false; }}>Не учитывать направление</button>{/if}
             <button class="more ghost" data-semantic="meaning-path" title="Путь по утверждениям смыслового слоя с основанием каждого шага" onclick={() => startMeaning()}>Смысловой путь</button>
@@ -1891,7 +1887,7 @@
         <b class="qtext" title={query.text}>Запрос «{query.text}»</b>
         <span>{queryResultCount} результатов{#if queryRelatedCount} · {queryRelatedCount} связанных источников{/if}</span>
         <button class="more" disabled={queryLoading} onclick={() => void requestQuery(false, true)}>Проверить источники</button>
-        <span>{SEARCH_MODE[query.applied]}{query.requested !== query.applied ? ` (запрошен «${SEARCH_MODE[query.requested]}»)` : ""} · {SCORE_TEXT[query.scoreKind]}</span>
+        <span>{uiLabel("searchMode", query.applied).text}{query.requested !== query.applied ? ` (запрошен «${uiLabel("searchMode", query.requested).text}»)` : ""} · {uiLabel("score", query.scoreKind).text}</span>
         <span class="depth" role="radiogroup" aria-label="Окружение результатов">Окружение
           {#each Array.from({ length: MAX_DEPTH + 1 }, (_, i) => i) as d (d)}<button role="radio" aria-checked={queryDepth === d} class:on={queryDepth === d} onclick={() => setDepth(d)}>{d}</button>{/each}
         </span>
@@ -1899,7 +1895,7 @@
       </div>
       {#if query.fallback || queryMissing || query.changedSnapshot || !query.results.length}
         <div class="banner" role="status">
-          {#if query.fallback}<span><b>Режим поиска изменён:</b> {fallbackText(query.fallback)}</span>{/if}
+          {#if query.fallback}<span title={query.fallback}><b>Режим поиска изменён:</b> {explanation("fallback", query.fallback).text}</span>{/if}
           {#if query.changedSnapshot}<span>Граф обновлён после поиска; выдача и её оценки сохранены.</span>{/if}
           {#if queryMissing}<span><b>Граф неполон:</b> {queryMissing} источников изменены, недоступны или вне карты — причины в инспекторе запроса.</span>{/if}
           {#if !query.results.length}<span><b>Ничего не найдено:</b> порог {query.minScore.toFixed(2)}.</span>{/if}
@@ -1915,7 +1911,7 @@
     {/if}
     {#if status}
       <div class="banner state" role="status" aria-label="Состояние графа">
-        <span>{graphDataLabel(status)} · {completenessLabels[status.completeness ?? "unknown"]}{jobLabels[status.job_state ?? "idle"] ? ` · ${jobLabels[status.job_state ?? "idle"]}` : ""}</span>
+        <span title={`${status.completeness ?? "unknown"} · ${status.job_state ?? "idle"}`}>{graphDataLabel(status)} · {uiLabel("completeness", status.completeness ?? "unknown").text}{uiLabel("graphJob", status.job_state ?? "idle").text ? ` · ${uiLabel("graphJob", status.job_state ?? "idle").text}` : ""}</span>
         {#if controls.staleReason}<span>Ждёт обновления: {controls.staleReason}</span>{/if}
         <button class="more" disabled={!controls.updateEnabled} title={controls.updateReason} onclick={() => void startBuild()}>{controls.updateLabel}</button>
         <button class="more ghost" disabled={!controls.stopEnabled} title={controls.stopReason} onclick={() => void stopBuild()}>Остановить построение</button>
@@ -1926,12 +1922,12 @@
     {/if}
     {#if layerIssues.length}
       <div class="banner" role="status">
-        {#each layerIssues as kind (kind)}<span><b>{KIND_TITLE[kind]}:</b> {slice.layers[kind].note}.</span>{/each}
+        {#each layerIssues as kind (kind)}<span><b>{uiLabel("edgeKind", kind).text}:</b> <span title={slice.layers[kind].note}>{graphNote(slice.layers[kind].note).text}</span>.</span>{/each}
       </div>
     {/if}
     {#if loaded && !loadError && slice.truncated}
       <div class="banner" role="status">
-        <span><b>Граф усечён:</b> {slice.limitReasons.join("; ")}. Связи между показанными узлами полны; остальное не потеряно.</span>
+        <span title={slice.limitReasons.join("; ")}><b>Граф усечён:</b> {limitText(slice.limitReasons)}. Связи между показанными узлами полны; остальное не потеряно.</span>
         {#if atMaximum}<span>Достигнут максимум среза: сузьте область в дереве.</span>{:else}<button class="more" onclick={() => void continueSlice()} disabled={loading}>Показать ещё</button>{/if}
       </div>
     {/if}
@@ -1957,7 +1953,7 @@
         bind:this={canvas}
         class:hide={slice.docCount === 0 || !!loadError || !loaded}
         tabindex="0"
-        aria-label="Карта графа. Стрелки — выбор соседнего узла, M — режим связей, Enter — раскрыть чанки, пробел — закрепить, F — вписать, Escape — снять выбор"
+        aria-label="Карта графа. Стрелки — выбор соседнего узла, M — режим связей, Enter — раскрыть разделы, пробел — закрепить, F — вписать, Escape — снять выбор"
         onpointerdown={onDown}
         onpointermove={onMove}
         onpointerup={onUp}
@@ -1971,17 +1967,17 @@
       {#if loaded && !loadError && slice.docCount > 0 && slice.edges.length === 0}<p class="note" role="status">У документов области нет допущенных связей: порог близости не пройден, ссылок нет.</p>{/if}
       {#if toast}<div class="toast" role="status" aria-live="polite">{toast}</div>{/if}
       <div class="status" role="status">
-        <span class="dot {motion}" title={MOTION_TEXT[motion]}></span>
+        <span class="dot {motion}" title={uiLabel("motion", motion).text}></span>
         {#if query}
-          {#if !mini}{MOTION_TEXT[motion]} · {/if}<b>Запрос: {queryResultCount} результатов</b>{#if queryRelatedCount} · {queryRelatedCount} связанных источников{/if} · узлов {queryShape?.shown.nodes ?? 0}{#if !mini} · связей {queryShape?.shown.edges ?? 0}{/if} · {MODE_NAME[mode].toLowerCase()}
+          {#if !mini}{uiLabel("motion", motion).text} · {/if}<b>Запрос: {queryResultCount} результатов</b>{#if queryRelatedCount} · {queryRelatedCount} связанных источников{/if} · узлов {queryShape?.shown.nodes ?? 0}{#if !mini} · связей {queryShape?.shown.edges ?? 0}{/if} · {uiLabel("graphMode", mode).text.toLowerCase()}
         {:else if mini && isLocal() && focusIndex !== null}
-          <b>Локальный граф</b> · <span class="lt" title={slice.nodes[focusIndex].label}>{slice.nodes[focusIndex].label}</span>{#if nodeCount <= 1} · нет связей в режиме «{MODE_NAME[mode]}»{:else} · {MODE_NAME[mode].toLowerCase()}{/if}
+          <b>Локальный граф</b> · <span class="lt" title={slice.nodes[focusIndex].label}>{slice.nodes[focusIndex].label}</span>{#if nodeCount <= 1} · нет связей в режиме «{uiLabel("graphMode", mode).text}»{:else} · {uiLabel("graphMode", mode).text.toLowerCase()}{/if}
         {:else if !mini && localView && localShape}
-          {MOTION_TEXT[motion]} · <b>Локальный граф: {localShape.depthOf.size} из {slice.docCount} документов</b> · глубина {localView.depth}
+          {uiLabel("motion", motion).text} · <b>Локальный граф: {localShape.depthOf.size} из {slice.docCount} документов</b> · глубина {localView.depth}
         {:else if mini}
-          <b>Документы {slice.docCount}</b> · {MODE_NAME[mode].toLowerCase()}
+          <b>Документы {slice.docCount}</b> · {uiLabel("graphMode", mode).text.toLowerCase()}
         {:else}
-          {MOTION_TEXT[motion]} · <b>Документы {slice.docCount} из {slice.totals.documents}</b>{#if shownChunks} · чанков {shownChunks} из {slice.totals.chunks}{/if}{#if isolates} · <button class="inline" onclick={() => (isolatesOnly = !isolatesOnly)} aria-pressed={isolatesOnly}>без связей: {isolates}</button>{/if}
+          {uiLabel("motion", motion).text} · <b>Документы {slice.docCount} из {slice.totals.documents}</b>{#if shownChunks} · разделов {shownChunks} из {slice.totals.chunks}{/if}{#if isolates} · <button class="inline" onclick={() => (isolatesOnly = !isolatesOnly)} aria-pressed={isolatesOnly}>без связей: {isolates}</button>{/if}
         {/if}
       </div>
       {#if mini && query}
@@ -1994,7 +1990,7 @@
         <div class="mini-tools">
           <button aria-label="Вписать" title="Вписать" onclick={() => fit()}><Icon name="fit" size={13} width={1.8} /></button>
           <button aria-label={stopped ? "Запустить движение" : "Остановить движение"} title={stopped ? "Запустить движение" : "Остановить движение"} onclick={() => setStopped(!stopped)} disabled={reduced}><Icon name={stopped ? "play" : "pause"} size={13} width={1.8} /></button>
-          <button class="mode-btn" aria-label="Режим связей: {MODE_NAME[mode]}. Переключить" title="Связи: {MODE_NAME[mode]} (клик — следующий режим)" onclick={cycleMode}>
+          <button class="mode-btn" aria-label="Режим связей: {uiLabel("graphMode", mode).text}. Переключить" title="Связи: {uiLabel("graphMode", mode).text} (клик — следующий режим)" onclick={cycleMode}>
             {#if mode === "links"}
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" /></svg>
             {:else if mode === "all"}
@@ -2030,19 +2026,14 @@
           <button role="menuitem" data-analysis="audit" onclick={openAudit}>Аудит связей<small>изоляты, неразрешённые ссылки, кандидаты</small></button>
         </div>
       {/if}
-      {#if popover === "more" && !mini}
-        <div class="pop menu" role="menu" aria-label="Ещё" tabindex="-1" onkeydown={(e) => { if (e.key === "Escape") { e.stopPropagation(); popover = null; } }}>
-          <button role="menuitem" onclick={() => { popover = null; app.graphAnalysis = true; }}>Анализ связей<small>прежний экран: пути, влияние, контекст</small></button>
-        </div>
-      {/if}
       {#if legendOpen && !mini}
         <section class="legend" aria-label="Легенда графа">
           <h4>Виды связей</h4>
           {#each EDGE_KINDS as kind (kind)}
-            <div class="row"><svg width="34" height="12" viewBox="0 0 34 12" aria-hidden="true"><line x1="1" y1="6" x2="29" y2="6" stroke={palette?.kindCss[kind] ?? "currentColor"} stroke-width="2.2" stroke-dasharray={dash(kind)} />{#if kind === "markdown_link"}<path d="M33 6l-6-3.5v7z" fill={palette?.kindCss[kind] ?? "currentColor"} />{/if}</svg>{KIND_TITLE[kind]}<small>{kind === "markdown_link" ? "стрелка на конце «куда ссылаются»" : kind === "chunk_similarity" ? "штрих, без стрелки" : "сплошная, без стрелки"}</small></div>
+            <div class="row"><svg width="34" height="12" viewBox="0 0 34 12" aria-hidden="true"><line x1="1" y1="6" x2="29" y2="6" stroke={palette?.kindCss[kind] ?? "currentColor"} stroke-width="2.2" stroke-dasharray={dash(kind)} />{#if kind === "markdown_link"}<path d="M33 6l-6-3.5v7z" fill={palette?.kindCss[kind] ?? "currentColor"} />{/if}</svg>{uiLabel("edgeKind", kind).text}<small>{kind === "markdown_link" ? "стрелка на конце «куда ссылаются»" : kind === "chunk_similarity" ? "штрих, без стрелки" : "сплошная, без стрелки"}</small></div>
           {/each}
           {#if query}
-            <div class="row"><svg width="34" height="12" viewBox="0 0 34 12" aria-hidden="true"><line x1="1" y1="6" x2="29" y2="6" stroke={palette?.kindCss.query_result ?? "currentColor"} stroke-width="2.2" /></svg>{KIND_TITLE.query_result}<small>оценка поиска; без оценки — пунктир</small></div>
+            <div class="row"><svg width="34" height="12" viewBox="0 0 34 12" aria-hidden="true"><line x1="1" y1="6" x2="29" y2="6" stroke={palette?.kindCss.query_result ?? "currentColor"} stroke-width="2.2" /></svg>{uiLabel("edgeKind", "query_result").text}<small>оценка поиска; без оценки — пунктир</small></div>
           {/if}
           <p class="hint">Взаимные ссылки — одна линия со стрелками на обоих концах. В покое линии серые и тонкие; цвет вида — у связей выбранного или наведённого узла. Размер узла — число связей, цвет — модуль.</p>
           <h4>Сила связи (s)</h4>
@@ -2050,12 +2041,12 @@
           <div class="scale">
             {#each sampleS as s (s)}
               {@const e = { kind: "document_similarity" as EdgeKind, s, raw: s }}
-              <div><svg width="40" height="8" viewBox="0 0 40 8" aria-hidden="true"><line x1="2" y1="4" x2="38" y2="4" stroke={palette?.kindCss.document_similarity} stroke-opacity={brightnessOf(drawStrength(e))} stroke-width={widthOf(drawStrength(e))} /></svg><span>cos {s.toFixed(2)}</span></div>
+              <div><svg width="40" height="8" viewBox="0 0 40 8" aria-hidden="true"><line x1="2" y1="4" x2="38" y2="4" stroke={palette?.kindCss.document_similarity} stroke-opacity={brightnessOf(drawStrength(e))} stroke-width={widthOf(drawStrength(e))} /></svg><span title="cosine">Близость {s.toFixed(2)}</span></div>
             {/each}
           </div>
           <p class="hint">Значения разных видов не сопоставимы как мера зависимости. Близость — не доказанная зависимость.</p>
           <h4>Узлы</h4>
-          <div class="row"><svg width="34" height="12" viewBox="0 0 34 12" aria-hidden="true"><circle cx="8" cy="6" r="4.5" fill="var(--muted)" /><path d="M24 0.5l5.5 5.5-5.5 5.5-5.5-5.5z" fill="var(--faint)" /></svg>документ · чанк</div>
+          <div class="row"><svg width="34" height="12" viewBox="0 0 34 12" aria-hidden="true"><circle cx="8" cy="6" r="4.5" fill="var(--muted)" /><path d="M24 0.5l5.5 5.5-5.5 5.5-5.5-5.5z" fill="var(--faint)" /></svg>документ · раздел</div>
           <div class="row"><svg width="34" height="12" viewBox="0 0 34 12" aria-hidden="true"><circle cx="8" cy="6" r="4.5" fill="none" stroke="var(--accent)" stroke-width="2" /><rect x="22" y="1" width="4" height="4" fill="var(--accent)" /></svg>выбран · закреплён</div>
         </section>
       {/if}
@@ -2106,7 +2097,7 @@
               {:else}
                 <p class="hint">У документа нет явных ссылок на карте.</p>
               {/if}
-              {@render semNotes(im.notes.lines)}
+              {@render semNotes(im.notes.lines, im.notes.hint)}
             {/if}
           </section>
         {:else if sem.kind === "meaning-path" && sem.center !== null && sem.to !== null}
@@ -2125,7 +2116,7 @@
                 <ol class="conns steps">
                   {#each path.steps as step, i (i)}
                     <li>
-                      <span class="name" title={step.sentence}>{i + 1}. {step.sentence}</span>
+                      <span class="name" title={step.hint}>{i + 1}. {step.sentence}</span>
                       <small>{step.forward ? "ход по направлению утверждения" : "ход против направления утверждения"}{step.negative ? " · в источнике отрицание" : ""}</small>
                       {#each step.conditions as c, k (k)}<small>условие: {c}</small>{/each}
                       {@render proofList(step.proofs)}
@@ -2135,7 +2126,7 @@
                 {#if !path.complete}<p class="hint">Путь неполный: обход остановлен пределом.</p>{/if}
                 <p class="hint">Кратчайший путь не объясняет причину: проверьте основания шагов.</p>
               {/if}
-              {@render semNotes(mp.notes.lines)}
+              {@render semNotes(mp.notes.lines, mp.notes.hint)}
             {/if}
           </section>
         {:else if sem.kind === "context"}
@@ -2153,13 +2144,13 @@
             {#if sem.context}
               {@const cx = sem.context}
               {#each cx.groups as g (g.role)}
-                <h4>{g.label} · {g.proofs.length}</h4>
+                <h4 title={uiLabel("role", g.role).hint}>{g.label} · {g.proofs.length}</h4>
                 {@render proofList(g.proofs)}
               {/each}
               {#if !cx.groups.length}<p class="hint" role="status">Источников по ролям не найдено для этой задачи в выбранной области.</p>{/if}
-              {#if cx.missing.length}<p class="hint" role="status">Непокрытые роли: {cx.missing.map((r) => roleLabels[r] ?? r).join(", ")}. Это значит «не найдено в обработанных отношениях», а не «их нет».</p>{/if}
+              {#if cx.missing.length}<p class="hint" role="status" title={cx.missing.join(", ")}>Непокрытые роли: {cx.missing.map((r) => uiLabel("role", r).text).join(", ")}. Это значит «не найдено в обработанных отношениях», а не «их нет».</p>{/if}
               <p class="hint">Бюджет {cx.budgetMode === "estimated" ? "оценочный (по размеру ответа, не токены вашей модели)" : "точный"}: использовано {(cx.usedBytes / 1024).toFixed(1)} КБ{cx.maxBytes ? ` из ${(cx.maxBytes / 1024).toFixed(0)}` : ""}.</p>
-              {@render semNotes(cx.notes.lines)}
+              {@render semNotes(cx.notes.lines, cx.notes.hint)}
             {/if}
           </section>
         {:else if sem.kind === "topics"}
@@ -2183,7 +2174,7 @@
                   </li>
                 {/each}
               </ul>
-              {@render semNotes(tv.notes.lines)}
+              {@render semNotes(tv.notes.lines, tv.notes.hint)}
             {/if}
           </section>
         {:else if sem.kind === "audit"}
@@ -2215,7 +2206,7 @@
                 </ul>
                 {#if current.findings.length > 40}<p class="trunc">Показаны 40 из {current.findings.length}.</p>{/if}
               {/if}
-              {@render semNotes(au.notes)}
+              {@render semNotes(au.notes, au.hint)}
             {/if}
           </section>
         {/if}
@@ -2227,12 +2218,12 @@
             {#each currentPath.steps as step, i (i)}
               <li>
                 <span class="name" title="{label(currentPath.nodes[i])} — {label(currentPath.nodes[i + 1])}">{i + 1}. {label(currentPath.nodes[i])} {step.edge.kind === "markdown_link" ? (step.forward ? "→" : "←") : "—"} {label(currentPath.nodes[i + 1])}</span>
-                <small>{KIND_TITLE[step.edge.kind]} · {step.edge.kind === "markdown_link" ? linesText(step.edge) : `cosine ${step.edge.raw === null ? "—" : step.edge.raw.toFixed(2)}`}</small>
+                <small>{uiLabel("edgeKind", step.edge.kind).text} · {step.edge.kind === "markdown_link" ? linesText(step.edge) : `Оценка по близости ${step.edge.raw === null ? "—" : step.edge.raw.toFixed(2)}`}</small>
                 {#if step.edge.kind === "markdown_link" && step.edge.lines.length}<button class="inline" onclick={() => openSource(step.edge.a, step.edge.lines[0])}>Открыть основание</button>{/if}
               </li>
             {/each}
           </ol>
-          <p class="hint">Показано соседство на карте в режиме «{MODE_NAME[mode]}», а не зависимость. Путь по утверждениям с основаниями — кнопка «Смысловой путь» в полосе.</p>
+          <p class="hint">Показано соседство на карте в режиме «{uiLabel("graphMode", mode).text}», а не зависимость. Путь по утверждениям с основаниями — кнопка «Смысловой путь» в полосе.</p>
         </section>
       {/if}
       {#if inboundView}
@@ -2266,7 +2257,7 @@
       {/if}
       {#if selectedNode}
         <header>
-          <span class="kind">{selectedNode.kind === "document" ? "Документ" : selectedNode.kind === "query" ? "Запрос" : "Чанк"}</span>
+          <span class="kind">{uiLabel("nodeKind", selectedNode.kind).text}</span>
           <h3>{selectedNode.label}</h3>
           {#if selectedNode.kind !== "query"}<p class="path">{selectedNode.path} · модуль {selectedNode.module}{#if selectedNode.kind === "chunk"} · строки {selectedNode.firstLine}–{selectedNode.lastLine}{/if}</p>{/if}
           {#if selectedNode.kind === "chunk"}<p class="path">Владелец: <button class="inline" onclick={() => select({ type: "node", index: selectedNode.owner })}>{label(selectedNode.owner)}</button></p>{/if}
@@ -2274,7 +2265,7 @@
         <div class="actions">
           {#if selectedNode.kind !== "query"}<button class="act" disabled={query?.results.some(r => r.node === selectedNode.index && (r.status === "deleted_since_search" || r.status === "unavailable"))} onclick={() => openSource(selectedNode.index)}><Icon name="doc" size={13} width={1.8} /> {selectedNode.kind === "document" ? "Открыть" : "Открыть диапазон"}</button>{/if}
           {#if selectedNode.kind === "document" && selectedNode.chunks && !query}
-            <button class="act" onclick={() => void toggleExpand(selectedNode.index)} disabled={loading}>{expanded[selectedNode.index] ? "Свернуть чанки" : `Раскрыть чанки (${selectedNode.chunks})`}</button>
+            <button class="act" onclick={() => void toggleExpand(selectedNode.index)} disabled={loading}>{expanded[selectedNode.index] ? "Свернуть разделы" : `Раскрыть разделы (${selectedNode.chunks})`}</button>
           {/if}
           <button class="act" onclick={() => pin(selectedNode.index)} aria-pressed={pinnedSel}>{pinnedSel ? "Открепить" : "Закрепить"}</button>
           {#if selectedNode.kind !== "query" && !selectedNode.ghost}
@@ -2287,10 +2278,10 @@
           {/if}
         </div>
         {#if selectedNode.kind === "document" && expanded[selectedNode.index] && expanded[selectedNode.index] < selectedNode.chunks}
-          <p class="trunc" role="status">Показано {expanded[selectedNode.index]} из {selectedNode.chunks} чанков. <button class="inline" onclick={() => void moreChunks(selectedNode.index)} disabled={loading}>Ещё {Math.min(PORTION, selectedNode.chunks - expanded[selectedNode.index])}</button></p>
+          <p class="trunc" role="status">Показано {expanded[selectedNode.index]} из {selectedNode.chunks} разделов. <button class="inline" onclick={() => void moreChunks(selectedNode.index)} disabled={loading}>Ещё {Math.min(PORTION, selectedNode.chunks - expanded[selectedNode.index])}</button></p>
         {/if}
         {#if selectedNode.kind === "query" && query}
-          <p class="origin">Запрос поиска. Режим «{SEARCH_MODE[query.applied]}», {SCORE_TEXT[query.scoreKind]}. Граф по тексту запроса ничего не ищет: на карте документы выдачи и их окружение по ссылкам и по смыслу.</p>
+          <p class="origin">Запрос поиска. Режим «{uiLabel("searchMode", query.applied).text}», {uiLabel("score", query.scoreKind).text}. Граф по тексту запроса ничего не ищет: на карте документы выдачи и их окружение по ссылкам и по смыслу.</p>
           <h4>Результаты · {query.results.length}</h4>
           <ul class="conns">
             {#each query.results as r (r.rank)}
@@ -2304,7 +2295,7 @@
         {:else if selectedNode.qrole && query}
           {@const found = query.results.find((x) => x.node === selectedNode.index)}
           {#if found}
-            <p class="origin">{SOURCE_TEXT[found.status]} · {found.channel === "related" ? "Связанный источник без оценки запроса" : `Результат поиска №${found.rank}`}{found.score !== null ? ` · ${SCORE_TEXT[found.kind]} ${found.score.toFixed(2)}` : ""}. Совпавших фрагментов: {found.fragments.length}.</p>
+            <p class="origin">{SOURCE_TEXT[found.status]} · {found.channel === "related" ? "Связанный источник без оценки запроса" : `Результат поиска №${found.rank}`}{found.score !== null ? ` · ${uiLabel("score", found.kind).text} ${found.score.toFixed(2)}` : ""}. Совпавших фрагментов: {found.fragments.length}.</p>
             <ul class="conns">
               {#each found.fragments as f, i (i)}<li><span class="name" title={f.heading}>{f.heading || "без заголовка"}</span><small>строки {f.first}–{f.last} · {f.score === null ? "оценки нет" : f.score.toFixed(2)}</small></li>{/each}
             </ul>
@@ -2314,7 +2305,7 @@
         {#each CONN_KINDS as kind (kind)}
           {@const items = connections.filter((c) => c.edge.kind === kind)}
           {#if items.length}
-            <h5>{KIND_TITLE[kind]} · {items.length}</h5>
+            <h5>{uiLabel("edgeKind", kind).text} · {items.length}</h5>
             <ul class="conns">
               {#each items.slice(0, 40) as c (c.edge.id)}
                 {@const line = edgeLine(c.edge)}
@@ -2333,13 +2324,13 @@
         {#if !connections.length}<p class="hint">У узла нет связей в выбранных видах и области. Он остаётся в списке.</p>{/if}
       {:else if selectedEdge}
         <header>
-          <span class="kind">{KIND_TITLE[selectedEdge.kind]}</span>
+          <span class="kind">{uiLabel("edgeKind", selectedEdge.kind).text}</span>
           <h3>{edgeTitle(selectedEdge)}</h3>
         </header>
         <p class="origin">{originText(selectedEdge)}</p>
         <table aria-label="Числа связи">
           <tbody>
-            <tr><th>{selectedEdge.kind === "query_result" ? "Оценка поиска" : "Исходный cosine"}</th><td>{selectedEdge.raw === null ? (selectedEdge.kind === "query_result" ? "нет" : "нет (ссылка)") : selectedEdge.raw.toFixed(3)}</td></tr>
+            <tr><th>{selectedEdge.kind === "query_result" ? "Оценка поиска" : "Исходная близость"}</th><td>{selectedEdge.raw === null ? (selectedEdge.kind === "query_result" ? "нет" : "нет (ссылка)") : selectedEdge.raw.toFixed(3)}</td></tr>
             {#if selectedEdge.kind === "markdown_link"}<tr><th>Строки в тексте</th><td>{linesText(selectedEdge)}</td></tr>{/if}
             <tr><th>Сила s</th><td>{selectedEdge.s.toFixed(3)}{selectedEdge.kind === "markdown_link" ? " (факт наличия)" : ""}</td></tr>
             <tr><th>Толщина</th><td>{widthOf(drawStrength(selectedEdge)).toFixed(2)} px</td></tr>
@@ -2348,7 +2339,7 @@
             <tr><th>Пружина после ограничения</th><td>{springOfSelected === null ? "—" : springOfSelected.toFixed(3)}</td></tr>
           </tbody>
         </table>
-        <p class="hint">{selectedEdge.kind === "markdown_link" ? "Все ссылки имеют одну силу: частота не показывает важность." : selectedEdge.kind === "query_result" ? "Оценка поиска — не вероятность правильного ответа; rerank и косинус не сопоставимы." : "Близость не доказывает зависимость и не заменяет ссылку."} Значения разных видов не сопоставимы.</p>
+        <p class="hint">{selectedEdge.kind === "markdown_link" ? "Все ссылки имеют одну силу: частота не показывает важность." : selectedEdge.kind === "query_result" ? "Оценка поиска — не вероятность правильного ответа; оценка модели и оценка по близости не сопоставимы." : "Близость не доказывает зависимость и не заменяет ссылку."} Значения разных видов не сопоставимы.</p>
         <div class="actions">
           <button class="act" onclick={() => select({ type: "node", index: selectedEdge.a })}>Узел: {label(selectedEdge.a).slice(0, 22)}</button>
           <button class="act" onclick={() => select({ type: "node", index: selectedEdge.b })}>Узел: {label(selectedEdge.b).slice(0, 22)}</button>
@@ -2362,7 +2353,7 @@
           <dl>
             <dt>Стрелки</dt><dd>Выбрать соседний узел</dd>
             <dt>M</dt><dd>Следующий режим связей</dd>
-            <dt>Enter</dt><dd>Раскрыть чанки документа</dd>
+            <dt>Enter</dt><dd>Раскрыть разделы документа</dd>
             <dt>Пробел</dt><dd>Закрепить или открепить</dd>
             <dt>F</dt><dd>Вписать карту</dd>
             <dt>Esc</dt><dd>Снять выбор</dd>
@@ -2465,7 +2456,6 @@
   .pop.menu button { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 5px 8px; border: 0; border-radius: 5px; background: transparent; color: var(--text); font-size: 12px; text-align: left; }
   .pop.menu button:hover { background: var(--accent-soft); color: var(--accent-text); }
   .pop.menu small { font-size: 10.5px; color: var(--muted); }
-  .tools .more-menu { font-size: 14px; line-height: 1; }
   .tools .analysis-menu { width: auto; padding: 0 8px; font-size: 11.5px; color: var(--text); border: 1px solid var(--line-2); }
   .pop h4 { margin: 0 0 4px; font-size: 10.5px; color: var(--muted); font-weight: 600; }
   .opt { display: flex; align-items: center; gap: 6px; margin: 3px 0; font-size: 11px; }

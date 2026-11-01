@@ -33,6 +33,18 @@ async function render() { component = mount(SettingsPage, { target: document.bod
 function button(label: string) { return [...document.querySelectorAll("button")].find(node => node.textContent.trim() === label)!; }
 function reply(saved: boolean): SettingsSaveOutput { return { ...clone(disk), status: saved ? "saved" : "conflict", conflicts: saved ? [] : [{ key: "search.results", base: 5, disk: disk.settings.search.results, mine: 9 }] }; }
 
+it("пауза в окне: умолчание 15 секунд и явно сохранённые 30", async () => {
+  app.settingsTab = "indexing";
+  await render();
+  expect((document.querySelector("#edit-pause") as HTMLInputElement).value).toBe("15");
+  expect(settings.dirty).toBe(false);
+  await unmount(component!); component = undefined;
+  disk.settings.indexing.edit_pause_seconds = 30;
+  await render();
+  expect((document.querySelector("#edit-pause") as HTMLInputElement).value).toBe("30");
+  expect(settings.dirty).toBe(false);
+});
+
 it("повторное открытие перечитывает настройки; фокус с грязным черновиком сохраняет независимые правки", async () => {
   await render(); expect(settings.draft!.search.results).toBe(5);
   await unmount(component!); component = undefined;

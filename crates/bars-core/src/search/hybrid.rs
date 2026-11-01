@@ -1,7 +1,7 @@
 //! Гибридный поиск: полнотекстовый и векторный кандидаты, слияние RRF, реранк, порог
 //! (`docs/features/search/hybrid-search.md`, Т-12…Т-14, Т-18, Т-24, Т-25).
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use rusqlite::params_from_iter;
 use rusqlite::types::Value;
@@ -63,6 +63,8 @@ pub struct SearchHit {
 pub struct SearchResponse {
     pub hits: Vec<SearchHit>,
     pub applied: AppliedParams,
+    /// Уникальный пул до rerank и порога, без загрузки текстов кандидатов.
+    pub candidate_modules: BTreeMap<String, usize>,
     /// Причина, по которой rerank включён, но выдача вернулась без него.
     pub rerank_error: Option<String>,
     /// Нормализованный вектор запроса, если он вычислялся (при пустом корпусе — `None`). Внутренний
@@ -115,6 +117,7 @@ pub fn search_expanded(
         return Ok(SearchResponse {
             hits: Vec::new(),
             applied: planned,
+            candidate_modules: BTreeMap::new(),
             rerank_error: None,
             query_vector: None,
         });
@@ -166,6 +169,7 @@ pub fn search_expanded(
         fused = exact_first(&exact_ids, fused);
     }
 
+    let candidate_modules = count_candidate_modules(index, &fused)?;
     let mut rerank_error = None;
     if let Some(reranker) = reranker {
         match rerank(index, reranker, request, &planned, &fused) {
@@ -173,6 +177,7 @@ pub fn search_expanded(
                 return Ok(SearchResponse {
                     hits: threshold_and_cut(hits, &planned),
                     applied: planned,
+                    candidate_modules,
                     rerank_error: None,
                     query_vector: Some(query_vector),
                 });
@@ -200,9 +205,28 @@ pub fn search_expanded(
     Ok(SearchResponse {
         hits,
         applied,
+        candidate_modules,
         rerank_error,
         query_vector: Some(query_vector),
     })
+}
+
+fn count_candidate_modules(
+    index: &Index,
+    ids: &[i64],
+) -> Result<BTreeMap<String, usize>, SearchError> {
+    if ids.is_empty() {
+        return Ok(BTreeMap::new());
+    }
+    let placeholders = vec!["?"; ids.len()].join(",");
+    let mut statement = index.conn().prepare(&format!(
+        "SELECT d.module, count(*) FROM chunks c JOIN documents d ON d.id = c.document_id \
+         WHERE c.id IN ({placeholders}) GROUP BY d.module"
+    ))?;
+    let rows = statement.query_map(params_from_iter(ids), |row| {
+        Ok((row.get(0)?, row.get::<_, i64>(1)? as usize))
+    })?;
+    Ok(rows.collect::<Result<_, _>>()?)
 }
 
 /// Диагностика первого этапа для бенча IDEA-06: FTS, векторы, слияние.

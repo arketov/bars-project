@@ -169,16 +169,18 @@ type DeferCheck = Arc<dyn Fn(&str, bool) -> bool + Send + Sync>;
 pub struct JobObserver {
     pause: Arc<Pause>,
     cell: Arc<JobCell>,
+    stop: Arc<AtomicBool>,
     /// Документ ждёт паузы после правки: проверка его пропускает (Т-41).
     defer: Option<DeferCheck>,
     documents: Option<Arc<dyn IndexObserver + Send + Sync>>,
 }
 
 impl JobObserver {
-    pub fn new(pause: Arc<Pause>, cell: Arc<JobCell>) -> Self {
+    pub fn new(pause: Arc<Pause>, cell: Arc<JobCell>, stop: Arc<AtomicBool>) -> Self {
         Self {
             pause,
             cell,
+            stop,
             defer: None,
             documents: None,
         }
@@ -196,6 +198,9 @@ impl JobObserver {
 }
 
 impl IndexObserver for JobObserver {
+    fn cancel_requested(&self) -> bool {
+        self.stop.load(Ordering::SeqCst) || self.cell.cancel_requested()
+    }
     fn discovered(&self, paths: &[String]) {
         if let Some(documents) = &self.documents {
             documents.discovered(paths);
@@ -244,7 +249,8 @@ impl IndexObserver for JobObserver {
 
     fn should_stop(&self) -> bool {
         loop {
-            if self.cell.cancel.load(Ordering::SeqCst) {
+            // Общий stop закрывает гонку: shutdown мог ещё не увидеть новое current.
+            if self.cancel_requested() {
                 self.cell.paused.store(false, Ordering::SeqCst);
                 return true;
             }
@@ -253,7 +259,7 @@ impl IndexObserver for JobObserver {
                 .store(self.pause.is_paused(), Ordering::SeqCst);
             if self.pause.wait(PAUSE_POLL) {
                 self.cell.paused.store(false, Ordering::SeqCst);
-                return self.cell.cancel.load(Ordering::SeqCst);
+                return self.cancel_requested();
             }
         }
     }
@@ -270,15 +276,49 @@ mod tests {
 
     #[test]
     fn without_pause_nothing_blocks_or_stops() {
-        let observer = JobObserver::new(Arc::new(Pause::default()), cell());
+        let observer = JobObserver::new(
+            Arc::new(Pause::default()),
+            cell(),
+            Arc::new(AtomicBool::new(false)),
+        );
         assert!(!observer.should_stop());
+    }
+
+    #[test]
+    fn worker_stop_is_seen_by_a_job_created_after_shutdown() {
+        let stop = Arc::new(AtomicBool::new(true));
+        let cell = cell();
+        assert!(!cell.cancel_requested());
+        let observer = JobObserver::new(Arc::new(Pause::default()), cell, stop);
+        assert!(observer.should_stop());
+    }
+
+    #[test]
+    fn worker_stop_is_seen_when_a_paused_job_resumes() {
+        let pause = Arc::new(Pause::default());
+        pause.set(true);
+        let cell = cell();
+        let stop = Arc::new(AtomicBool::new(false));
+        let observer = JobObserver::new(Arc::clone(&pause), Arc::clone(&cell), Arc::clone(&stop));
+        let waiting = thread::spawn(move || observer.should_stop());
+        let deadline = Instant::now() + Duration::from_secs(5);
+        while !cell.paused() {
+            assert!(Instant::now() < deadline);
+            thread::yield_now();
+        }
+        stop.store(true, Ordering::SeqCst);
+        pause.set(false);
+        assert!(waiting.join().unwrap());
+        assert!(!cell.paused());
+        assert!(!cell.cancel_requested());
     }
 
     #[test]
     fn pause_blocks_until_resume() {
         let pause = Arc::new(Pause::default());
         pause.set(true);
-        let observer = JobObserver::new(Arc::clone(&pause), cell());
+        let observer =
+            JobObserver::new(Arc::clone(&pause), cell(), Arc::new(AtomicBool::new(false)));
         let waiting = thread::spawn(move || observer.should_stop());
         thread::sleep(Duration::from_millis(300));
         assert!(!waiting.is_finished());
@@ -291,7 +331,7 @@ mod tests {
         let pause = Arc::new(Pause::default());
         pause.set(true);
         let cell = cell();
-        let observer = JobObserver::new(pause, Arc::clone(&cell));
+        let observer = JobObserver::new(pause, Arc::clone(&cell), Arc::new(AtomicBool::new(false)));
         let waiting = thread::spawn(move || observer.should_stop());
         thread::sleep(Duration::from_millis(100));
         cell.cancel();
@@ -301,7 +341,11 @@ mod tests {
     #[test]
     fn progress_follows_the_observer() {
         let cell = cell();
-        let observer = JobObserver::new(Arc::new(Pause::default()), Arc::clone(&cell));
+        let observer = JobObserver::new(
+            Arc::new(Pause::default()),
+            Arc::clone(&cell),
+            Arc::new(AtomicBool::new(false)),
+        );
         observer.begin(10);
         observer.file("docs/a.md");
         observer.progress(4, 12);

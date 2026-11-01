@@ -353,6 +353,66 @@ fn kimi_install_is_idempotent_and_updates_moved_paths_without_duplicates() {
 }
 
 #[test]
+fn kimi_inline_hooks_are_read_updated_and_removed() {
+    for initial in [
+        "hooks = []\n",
+        "hooks = [{ event = 'Notification', command = 'notify' }]\n",
+    ] {
+        let home = TempDir::new().unwrap();
+        let env = env(&home);
+        let config = home.path().join(".kimi-code/config.toml");
+        write(&config, initial);
+        assert!(uninstall(&env, InstallClient::KimiCode).unwrap().is_empty());
+        assert_eq!(fs::read_to_string(&config).unwrap(), initial);
+        assert!(!config.with_extension("toml.bars-backup").exists());
+    }
+    for initial in [
+        "hooks = []\n",
+        "hooks = [{ event = 'Notification', command = 'notify' }, { event = 'SessionStart', command = 'old/bars-cli hook session-start' }]\n",
+    ] {
+        let home = TempDir::new().unwrap();
+        let env = env(&home);
+        let config = home.path().join(".kimi-code/config.toml");
+        write(&config, initial);
+        let foreign = initial.contains("notify");
+        assert_eq!(
+            super::hook_commands(InstallClient::KimiCode, &config)
+                .unwrap()
+                .len(),
+            usize::from(foreign)
+        );
+        install(&env, InstallClient::KimiCode).unwrap();
+        assert_eq!(
+            super::hook_commands(InstallClient::KimiCode, &config).unwrap(),
+            [env.hook_command()]
+        );
+        assert!(
+            install(&env, InstallClient::KimiCode)
+                .unwrap()
+                .changed_files
+                .is_empty()
+        );
+        uninstall(&env, InstallClient::KimiCode).unwrap();
+        assert_eq!(
+            fs::read_to_string(&config).unwrap().contains("notify"),
+            foreign
+        );
+        // Удаление должно распознавать inline-хук и без предшествующей установки.
+        write(&config, initial);
+        uninstall(&env, InstallClient::KimiCode).unwrap();
+        assert!(
+            super::hook_commands(InstallClient::KimiCode, &config)
+                .unwrap()
+                .is_empty()
+        );
+        assert_eq!(
+            fs::read_to_string(&config).unwrap().contains("notify"),
+            foreign
+        );
+    }
+}
+
+#[test]
 fn kimi_uninstall_removes_only_bars() {
     let home = TempDir::new().unwrap();
     let env = env(&home);

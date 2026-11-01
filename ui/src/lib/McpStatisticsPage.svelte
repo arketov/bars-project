@@ -159,7 +159,7 @@
           <p class="muted small">Время на worker, без IPC, форматирования и записи истории. Сессия — соединение MCP, не чат. Доставка клиенту неизвестна.</p>
           <h3>Результат</h3><div class="result-box"><b class:bad={selected.outcome === "error"}>{status(selected)} · {quantity(selected)}</b>
             {#if selected.result?.queued}<p>Задание принято в очередь; это не завершение индексации.</p>{/if}
-            {#if selected.result?.warning || selected.applied?.rerank_fallback}<p class="warning">Rerank: применён fallback. Причина: {value(selected.applied?.rerank_fallback_reason)}. Фактическая шкала — в применённых параметрах.</p>{/if}
+            {#if selected.result?.warning || selected.applied?.rerank_fallback}<p class="warning">Уточнение порядка не выполнено, использован запасной способ. Причина: {value(selected.applied?.rerank_fallback_reason)}. Фактическая шкала — в применённых параметрах.</p>{/if}
             {#if selected.error}<p class="bad">{value(selected.error.message)} · {value(selected.error.kind)} · код {value(selected.error.code)} · этап {value(selected.error.stage)}</p>{/if}
           </div>
           {#if selected.incomplete.length}<p class="warning">Неполная запись; скрыто, усечено или недоступно: {selected.incomplete.map(incompleteness).join("; ")}. Отсутствующие значения не восстанавливаются.</p>{/if}

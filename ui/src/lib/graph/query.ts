@@ -11,10 +11,6 @@ export const DEFAULT_DEPTH = 1;
 export const MAX_DEPTH = 2;
 export type ScoreKind = "rerank" | "cosine" | "none";
 export type RetrievalKind = "hybrid" | "mix" | "graph";
-export const SEARCH_MODE: Record<RetrievalKind, string> = { hybrid: "Обычный", mix: "Со связями", graph: "Отношения и пути" };
-export function fallbackText(reason: string): string {
-  return reason.replace("include_related=false", "«Добавлять связанные источники» выключено");
-}
 export interface QueryInput {
   id: string;
   text: string;

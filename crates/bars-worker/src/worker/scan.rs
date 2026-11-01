@@ -211,6 +211,9 @@ impl Worker {
             })
             .await;
             let mut check_graph = false;
+            let fresh_settings = Settings::load(&inner.config.bars_home, &path)
+                .ok()
+                .map(|settings| settings.value);
             {
                 let mut projects = lock(&inner.projects);
                 let priority = *lock(&scan_priority);
@@ -220,8 +223,9 @@ impl Worker {
                 let valid = current.is_some()
                     && !stopped.load(Ordering::SeqCst)
                     && !inner.stop.load(Ordering::SeqCst)
-                    && Settings::load(&inner.config.bars_home, &path)
-                        .is_ok_and(|s| operations::settings_key(&s.value) == key);
+                    && fresh_settings
+                        .as_ref()
+                        .is_some_and(|settings| operations::settings_key(settings) == key);
                 if !valid {
                     lock(&inner.models.operations).finish(
                     id,
@@ -242,7 +246,13 @@ impl Worker {
                         stem_outdated,
                     }) => {
                         // Т-8 сохраняется и при проверке без задания обновления индекса.
-                        let _ = bars_core::instruction::sync(&path, &inner.docs_root_of(&path));
+                        let _ = bars_core::instruction::sync(
+                            &path,
+                            &fresh_settings
+                                .as_ref()
+                                .expect("настройки сверены")
+                                .docs_root,
+                        );
                         if let Some(runtime) = current {
                             runtime.status.last_error = None;
                         }
@@ -296,7 +306,7 @@ impl Worker {
                                 )
                             };
                             job.reconciled = true;
-                            inner.enqueue_for(&path, job, &projects);
+                            inner.enqueue_for(&path, job, &projects, key);
                         }
                         lock(&inner.models.operations).finish(
                             id,

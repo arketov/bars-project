@@ -1,5 +1,5 @@
 use super::*;
-use bars_protocol::graph_types::{Endpoint as GraphEndpoint, GraphReply, GraphRequest, Operation};
+use bars_protocol::graph_types::{Endpoint as GraphEndpoint, GraphRequest, Operation};
 use bars_protocol::{GraphBuildParams, GraphCancelParams, GraphQueryParams, GraphStatusParams};
 
 #[derive(Debug, Args)]
@@ -157,8 +157,21 @@ pub(super) async fn query(
     if let Some(profile) = args.task_profile {
         request.task_profile = Some(enum_value(&profile)?);
     }
-    let result = call(client, &GraphQueryParams { target, request }).await?;
-    emit(out, json, &result, render)
+    let result = call(
+        client,
+        &GraphQueryParams {
+            target,
+            request,
+            text: !json,
+        },
+    )
+    .await?;
+    emit(
+        out,
+        json,
+        &result,
+        bars_protocol::graph_text::render_graph_text,
+    )
 }
 pub(super) async fn action(
     client: &mut Client,
@@ -274,15 +287,4 @@ pub(super) async fn action(
             },
         ),
     }
-}
-fn render(reply: &GraphReply) -> String {
-    // JSON сохраняет все типы/доказательства и в текстовом режиме; человек видит границы и partial.
-    format!(
-        "Граф {} · {} · элементов {} · усечён: {}\n{}",
-        reply.operation.label(),
-        reply.layer_state.label(),
-        reply.items.len(),
-        reply.truncated,
-        serde_json::to_string_pretty(reply).expect("DTO сериализуется")
-    )
 }

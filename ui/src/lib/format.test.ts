@@ -33,16 +33,16 @@ describe("format", () => {
     expect(bars.map(bar => bar.percent)).toEqual([63, 60, 62]);
     for (const bar of bars) {
       expect(bar.cls).toBe("f-cosine");
-      expect(bar.label).toBe("Косинусная близость");
+      expect(bar.label).toBe("Оценка по близости");
       expect(bar.explanation).toContain("близость может возрастать вниз по списку");
     }
   });
 
   it("вид оценки меняется при возврате без rerank", () => {
-    expect(fit(0.87, "rerank")).toMatchObject({ cls: "f-good", label: "Оценка rerank", percent: 87 });
+    expect(fit(0.87, "rerank")).toMatchObject({ cls: "f-good", label: "Оценка модели", percent: 87 });
     expect(fit(0.6, "rerank").cls).toBe("f-mid");
     expect(fit(0.18, "rerank").cls).toBe("f-low");
-    expect(fit(0.18, "cosine").label).toBe("Косинусная близость");
+    expect(fit(0.18, "cosine").label).toBe("Оценка по близости");
     expect(fit(0.18, "rerank").explanation).toContain("а не вероятность правильного ответа");
     expect(fit(1.4, "cosine").percent).toBe(100);
     expect(fit(-0.2, "cosine").percent).toBe(0);

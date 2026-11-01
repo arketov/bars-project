@@ -3,7 +3,8 @@
 // Правила — docs/features/graphrag/graph-actions-design.md, разделы «Влияние изменения», «Смысловой путь», «Меню «Анализ»».
 // Все различия контракта v1 и его будущих схем (4.3) держатся здесь: окно получает только модели `*View`.
 import { BarsError } from "../types";
-import { roleLabels, type Evidence, type GraphEdge, type GraphNode, type GraphReply, type ObjectRef } from "../graph";
+import { label, limitText } from "../labels";
+import { type Evidence, type GraphEdge, type GraphNode, type GraphReply, type ObjectRef } from "../graph";
 
 export type SemanticKind = "impact" | "meaning-path" | "context" | "topics" | "audit";
 export type TaskProfile = "implementation" | "investigation" | "decision";
@@ -26,8 +27,8 @@ export const IMPACT_DEPTH = 3;
 export const PATH_DEPTH = 4;
 
 const SHORT_ROLE: Record<string, string> = { requirement: "Т", decision: "Р", behavior: "П", architecture: "А", constraint: "О", verification: "Пр" };
-export const roleShort = (role: string): string => SHORT_ROLE[role] ?? role.slice(0, 2);
-export const roleName = (role: string): string => roleLabels[role] ?? role;
+export const roleShort = (role: string): string => Object.hasOwn(SHORT_ROLE, role) ? SHORT_ROLE[role] : "?";
+export const roleName = (role: string): string => label("role", role).text;
 
 const documentRef = (node: { id: string; revision?: string }): ObjectRef => ({ kind: "document", id: node.id, revision: node.revision ?? "" });
 
@@ -62,23 +63,6 @@ export function auditRequests(scope: Scope): Record<string, unknown>[] {
 }
 
 // ---------- общие помощники разбора ----------
-
-const LIMIT_TEXT: Record<string, string> = {
-  limit: "достигнут предел числа результатов",
-  timeout_ms: "вышло время запроса",
-  max_nodes: "достигнут предел числа узлов",
-  max_edges: "достигнут предел числа связей",
-  max_depth: "достигнута предельная глубина",
-  max_paths: "достигнут предел числа путей",
-  max_fanout: "у некоторых узлов слишком много соседей",
-  max_bytes: "достигнут предел размера ответа",
-};
-
-const PREDICATE_TEXT: Record<string, string> = {
-  depends_on: "зависит от", uses: "использует", implements: "реализует", verifies: "проверяет", supersedes: "заменяет",
-  links_to: "ссылается на", mentions: "упоминает", contains: "содержит", covers: "покрывает", next_chunk: "следует за",
-  similar_to: "похож на", co_occurs: "встречается рядом с", member_of: "входит в",
-};
 
 export interface Proof {
   id: string;
@@ -136,7 +120,7 @@ class Reply {
   /** Утверждение словами: «A зависит от B»; отрицание — «A не зависит от B». */
   sentence(edge: GraphEdge): string {
     const name = (id: string) => this.nodes.get(id)?.label ?? `${id.slice(0, 8)}…`;
-    const word = PREDICATE_TEXT[edge.predicate] ?? edge.predicate;
+    const word = label("predicate", edge.predicate).text;
     return `${name(edge.from)} ${edge.polarity === "negative" ? "не " : ""}${word} ${name(edge.to)}`;
   }
 }
@@ -144,6 +128,7 @@ class Reply {
 export interface ReplyNotes {
   /** Что пользователь обязан знать о полноте ответа: слой, пределы, предупреждения воркера. */
   lines: string[];
+  hint?: string;
   truncated: boolean;
   /** Смысловой слой не завершён или устарел: пустой ответ не доказывает отсутствия зависимости. */
   semanticIncomplete: boolean;
@@ -156,10 +141,10 @@ export function replyNotes(raw: GraphReply, semantic = true): ReplyNotes {
   const incomplete = semantic && (layer ? layer.completeness !== "complete" || layer.freshness !== "current" : state !== "ready");
   if (semantic && layer?.freshness === "stale") lines.push("Смысловой слой устарел: ответ построен по прежнему снимку.");
   if (incomplete) lines.push("Смысловой слой неполон: отсутствие результата не доказывает отсутствие связи.");
-  if (raw.truncated) lines.push(`Ответ усечён: ${[...new Set(raw.limit_reasons)].map((r) => LIMIT_TEXT[r] ?? r).join("; ") || "достигнут предел"}.`);
-  else if (raw.limit_reasons?.length) lines.push(`Обход остановлен: ${[...new Set(raw.limit_reasons)].map((r) => LIMIT_TEXT[r] ?? r).join("; ")}.`);
+  if (raw.truncated) lines.push(`Ответ усечён: ${limitText(raw.limit_reasons) || "достигнут предел"}.`);
+  else if (raw.limit_reasons?.length) lines.push(`Обход остановлен: ${limitText(raw.limit_reasons)}.`);
   for (const w of raw.warnings ?? []) if (!lines.includes(w)) lines.push(w);
-  return { lines, truncated: raw.truncated, semanticIncomplete: incomplete };
+  return { lines, hint: [...(raw.limit_reasons ?? []), ...(raw.warnings ?? [])].join(" · "), truncated: raw.truncated, semanticIncomplete: incomplete };
 }
 
 /** Ошибка воркера словами пользователя: «слой не построен» и «документ изменился» — не «ничего не найдено». */
@@ -184,6 +169,7 @@ export interface ImpactEntry {
   documents: string[];
   /** Путь словами: какое утверждение связывает шаг с прежним. */
   steps: string[];
+  stepHints: string[];
   conditions: string[];
   proofs: Proof[];
 }
@@ -215,6 +201,7 @@ export function digestImpact(raw: GraphReply, rootDocument: string, entities: nu
       depth: item.path.steps.length,
       documents: reply.documents(item.node).filter((id) => id !== rootDocument),
       steps: steps.map((e) => reply.sentence(e)),
+      stepHints: steps.map(e => label("predicate", e.predicate).hint),
       conditions: steps.map((e) => e.qualifiers?.condition).filter((c): c is string => !!c),
       proofs: reply.proofs(item.path.evidence),
     });
@@ -232,6 +219,7 @@ export interface MeaningStep {
   /** Ход по направлению предиката утверждения. */
   forward: boolean;
   predicate: string;
+  hint: string;
   conditions: string[];
   negative: boolean;
   proofs: Proof[];
@@ -264,7 +252,8 @@ export function digestMeaningPaths(raw: GraphReply): MeaningPathView {
         return {
           sentence: edge ? reply.sentence(edge) : "связь не найдена в справочнике ответа",
           forward: !s.reversed,
-          predicate: edge ? (PREDICATE_TEXT[edge.predicate] ?? edge.predicate) : "",
+          predicate: edge ? label("predicate", edge.predicate).text : "",
+          hint: edge ? label("predicate", edge.predicate).hint : "",
           conditions: edge?.qualifiers?.condition ? [edge.qualifiers.condition] : [],
           negative: edge?.polarity === "negative",
           proofs: edge ? reply.proofs(edge.evidence, 3) : [],
@@ -399,6 +388,7 @@ export interface AuditView {
   /** Документы всех находок: отметки на карте. */
   documents: Set<string>;
   notes: string[];
+  hint: string;
 }
 
 /** Документы находки: владельцы объекта и документы его оснований — раздел или сущность в ответе может не быть описана справочником узлов. */
@@ -457,5 +447,5 @@ export function digestAudit(passes: AuditPass[], hubs: { id: string; label: stri
   );
   const documents = new Set<string>();
   for (const s of sections) for (const f of s.findings) for (const id of f.documents) documents.add(id);
-  return { sections, documents, notes };
+  return { sections, documents, notes, hint: [connectivity, coverage, conflicts].flatMap(pass => pass.ok ? [...(pass.reply.limit_reasons ?? []), ...(pass.reply.assertions ?? []).map(e => e.predicate)] : []).join(" · ") };
 }

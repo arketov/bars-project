@@ -397,18 +397,16 @@ impl BarsMcp {
         let target = self.target(project);
         finish(
             self.call_observed(
-                &bars_protocol::GraphQueryParams { target, request },
+                &bars_protocol::GraphQueryParams {
+                    target,
+                    request,
+                    text: !matches!(format, Some(Format::Json)),
+                },
                 Some(&original.0),
             )
             .await,
             format,
-            |out| {
-                format!(
-                    "=== GRAPH: {:?} ===\n{}\n=== END GRAPH ===",
-                    out.operation,
-                    json(out)
-                )
-            },
+            bars_protocol::graph_text::render_graph_text,
         )
     }
 }

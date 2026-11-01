@@ -1,3 +1,4 @@
+import { label as uiLabel, labels } from "./labels";
 import type { MenuAction, MenuItem } from './contextmenu';
 import { cannotMoveTab, noOtherTabs, noRightTabs } from './workspace-tabs';
 
@@ -71,7 +72,7 @@ export function treeMenu(target: TreeMenuTarget, hint: (id: string) => string = 
   add('reveal', target.mac ? 'Показать в Finder' : 'Показать в Проводнике', busy || (target.missing ? 'Папка не найдена' : undefined));
   add('path', 'Скопировать путь', busy, target.missing ? 'Папка отсутствует; последний путь' : undefined);
   if (target.canStyle && target.path !== '.') add('appearance', file ? 'Цвет…' : 'Цвет и иконка…');
-  add(file ? 'check' : 'checkProject', file ? 'Проверить индекс' : 'Проверить индекс проекта', index, file ? undefined : 'Проверяется весь проект');
+  add(file ? 'check' : 'checkProject', uiLabel("action", file ? "checkDocument" : "checkProject").text, index, labels.action[file ? "checkDocument" : "checkProject"].hint);
   if (target.path !== '.') add('trash', 'Удалить…', busy);
   return groupMenu(out);
 }
@@ -146,7 +147,7 @@ export function documentMenu(target: DocumentMenuTarget, hint: (id: string) => s
   out.push(item('rename', 'Переименовать…', { reason: change }), item('move', 'Переместить…', { reason: change }),
     item('reveal', target.mac ? 'Показать в Finder' : 'Показать в Проводнике', { reason: busy }),
     item('path', 'Скопировать путь', { reason: busy }),
-    item('check', 'Проверить индекс', { reason: index }),
+    item('check', uiLabel("action", "checkDocument").text, { reason: index, explanation: labels.action.checkDocument.hint }),
     item('trash', 'Удалить…', { reason: change }));
   return groupMenu(out);
 }

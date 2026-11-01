@@ -36,6 +36,10 @@ impl WorkerHandler {
             )));
         }
         if requested == RetrievalMode::Graph {
+            let scope = bars_protocol::SearchScope {
+                modules: params.search.modules.clone(),
+                files: params.search.files.clone(),
+            };
             let status = self
                 .worker
                 .status(&self.usable(&params.search.target)?)
@@ -53,11 +57,12 @@ impl WorkerHandler {
             };
             let graph_results = self
                 .graph_query(GraphQueryParams {
+                    text: false,
                     target: params.search.target,
                     request,
                 })
                 .await?;
-            return Ok(bars_protocol::GraphSearchOutput {
+            let mut output = bars_protocol::GraphSearchOutput {
                 search: SearchOutput {
                     results: vec![],
                     applied: AppliedParams {
@@ -67,7 +72,9 @@ impl WorkerHandler {
                         min_score: 0.0,
                         score_kind: ScoreKind::Cosine,
                         clamped: false,
+                        scope,
                     },
+                    by_module: Default::default(),
                     indexing: status.state == ProjectState::Indexing,
                     pending: to_u32(status.pending),
                     rerank_error: None,
@@ -77,7 +84,12 @@ impl WorkerHandler {
                 fallback_reason: None,
                 related: None,
                 graph_results: Some(graph_results),
-            });
+            };
+            if params.text {
+                bars_protocol::graph_text::prepare_graph_search_text(&mut output)
+                    .map_err(graph_error)?;
+            }
+            return Ok(output);
         }
         let budgets = if requested == RetrievalMode::Mix && params.include_related {
             let mut budgets = params.graph_budgets;
@@ -103,14 +115,19 @@ impl WorkerHandler {
         } else {
             requested
         };
-        Ok(bars_protocol::GraphSearchOutput {
+        let mut output = bars_protocol::GraphSearchOutput {
             search,
             requested_mode: requested,
             applied_mode,
             fallback_reason,
             related,
             graph_results: None,
-        })
+        };
+        if params.text {
+            bars_protocol::graph_text::prepare_graph_search_text(&mut output)
+                .map_err(graph_error)?;
+        }
+        Ok(output)
     }
     pub(super) async fn graph_query(
         &self,
@@ -174,7 +191,9 @@ impl WorkerHandler {
                     }
                 }else{overlay.warnings.push("Контекст: локальная embed-модель не загружена; использован текстовый отбор без загрузки модели".into());}
             }
-            query::execute_overlay(&data,&params.request,&scores,started.elapsed(),&overlay,||false).map_err(graph_error)
+            let mut reply = query::execute_overlay(&data,&params.request,&scores,started.elapsed(),&overlay,||false).map_err(graph_error)?;
+            if params.text { bars_protocol::graph_text::prepare_graph_text(&mut reply, bars_protocol::graph_text::MAX_TEXT_CHARS).map_err(graph_error)?; }
+            Ok(reply)
         }).await.map_err(internal)?
     }
     pub(super) async fn graph_status(

@@ -2,7 +2,7 @@
   import Sidebar from "../../lib/Sidebar.svelte";
   import SearchPane from "../../lib/SearchPane.svelte";
   import Viewer from "../../lib/Viewer.svelte";
-  import GraphPage from "../../lib/GraphPage.svelte";
+  import GraphTab from "../../lib/GraphTab.svelte";
   let { kind }: { kind: string } = $props();
   let draft = $state("Проверка сохранности ввода при переносе");
 </script>
@@ -11,7 +11,7 @@
   {#if kind === "tree"}<Sidebar />
   {:else if kind === "search"}<SearchPane />
   {:else if kind === "document"}<Viewer />
-  {:else if kind === "graph"}<GraphPage />
+  {:else if kind === "graph"}<GraphTab />
   {:else}<label>Черновик стенда (без записи файла)<textarea bind:value={draft}></textarea></label>{/if}
 </div>
 

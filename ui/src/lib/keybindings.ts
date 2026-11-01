@@ -1,3 +1,4 @@
+import { label as uiLabel } from "./labels";
 import { panelTitles } from './workspace-layout';
 export type Platform = 'windows' | 'macos';
 export type Context = 'window' | 'panel' | 'document' | 'editor' | 'graph' | 'target' | 'result' | 'topics' | 'notification' | 'mcp' | 'logs' | 'indexing';
@@ -38,7 +39,7 @@ add('target', 'Файл и папка', [['target.open', 'Открыть док�
 add('target', 'Файл и папка', [
   ['file.create', 'Создать файл'], ['folder.create', 'Создать папку'],
   ['target.rename', 'Переименовать', 'F2'], ['target.move', 'Переместить'], ['target.delete', 'Удалить', 'Delete'],
-  ['target.style', 'Цвет и иконка'], ['target.checkIndex', 'Проверить индекс'], ['target.openExternal', 'Открыть в программе…'],
+  ['target.style', 'Цвет и иконка'], ['target.checkIndex', uiLabel("action", "checkProject").text], ['target.openExternal', 'Открыть в программе…'],
 ]);
 add('window', 'Проект', [['project.create', 'Создать проект', '', 'Этап 3.3.2']]);
 add('topics', 'Новые темы', [['topics.copyQuery', 'Скопировать исходный запрос'], ['topics.rename', 'Переименовать тему'], ['topics.delete', 'Удалить тему']]);

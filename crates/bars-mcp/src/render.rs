@@ -58,6 +58,7 @@ pub fn search(output: &SearchOutput) -> String {
     }
     let applied = &output.applied;
     let _ = writeln!(text, "=== APPLIED PARAMETERS ===");
+    text.push_str(&bars_protocol::search_scope_text(output, true));
     let _ = writeln!(text, "limit: {}", applied.results);
     let _ = writeln!(text, "returned: {total}");
     let _ = writeln!(text, "candidates: {}", applied.candidates);
@@ -390,7 +391,7 @@ mod tests {
         assert!(text.contains("=== END RESULT 10 ===\n=== APPLIED PARAMETERS ===\n"));
         assert!(text.contains("--- text ---\nРусский текст\n"));
         assert!(text.contains("title: Поиск\nheading: Поиск/Порог\nscore: "));
-        assert!(text.contains("=== APPLIED PARAMETERS ===\nlimit: 10\nreturned: 10\n"));
+        assert!(text.contains("=== APPLIED PARAMETERS ===\nscope: whole project\nby_module: candidates none; results none\nlimit: 10\nreturned: 10\n"));
         assert!(text.contains("rerank_error: Ошибка провайдера\n"));
         assert!(
             text.ends_with("Indexing in progress: results may be incomplete.\n=== END SEARCH ===")
@@ -400,6 +401,12 @@ mod tests {
         output.results.truncate(3);
         assert!(search(&output).contains("limit: 10\nreturned: 3\n"));
         output.results.clear();
+        output.applied.scope.modules = vec!["features".into()];
+        assert!(
+            search(&output).contains("No results in the selected modules; try the whole project.")
+        );
+        output.applied.scope.modules.clear();
+        assert!(!search(&output).contains("No results in the selected modules"));
         assert!(
             search(&output).starts_with("=== SEARCH: results 0 ===\n=== APPLIED PARAMETERS ===\n")
         );

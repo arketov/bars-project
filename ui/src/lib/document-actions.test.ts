@@ -90,7 +90,7 @@ describe("Документы этапа 18", () => {
     expect(api.documentAction).toHaveBeenLastCalledWith(project.path, "docs/Тема.md", "open", "code");
     await open(); button("Скопировать путь").click(); await settle();
     expect(api.copyText).toHaveBeenCalledWith("C:/проект с пробелами/docs/Тема.md");
-    await open(); button("Проверить индекс").click(); await settle();
+    await open(); button("Проверить документ").click(); await settle();
     expect(api.documentAction).toHaveBeenLastCalledWith(project.path, "docs/Тема.md", "check", undefined);
     await open(); window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); await settle();
     expect(document.querySelector('[role="menu"]')).toBeNull();

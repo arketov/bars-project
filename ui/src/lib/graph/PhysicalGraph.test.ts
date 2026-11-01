@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { flushSync, mount, tick, unmount } from "svelte";
 import PhysicalGraph from "./PhysicalGraph.svelte";
+import GraphTab from "../GraphTab.svelte";
 import { app } from "../app.svelte";
 import { BarsError } from "../types";
 import { physicalFixture as buildPhysicalFixture } from "../mock-physical";
@@ -113,6 +114,31 @@ it("загружает срез проекта с начальными пред�
   expect(Number(panel().dataset.links)).toBeGreaterThan(0);
 });
 
+it("словарь графа скрывает хеш и неизвестные коды в подсказках (ISS-59)", async () => {
+  rpc.mockImplementation(async (method: string, params: Record<string, unknown>) => {
+    if (method === "graph_status") return { state: "ready", snapshot: "mock-snapshot-0001", active_job: null, method: "x" };
+    if (method === "graph_physical") {
+      const value = physicalFixture(params);
+      value.truncated = true;
+      value.limit_reasons = ["nodes", "future_limit"];
+      value.layers.markdown_link.state = "future_state" as typeof value.layers.markdown_link.state;
+      value.layers.markdown_link.note = "Some(FutureState)";
+      return value;
+    }
+    return {};
+  });
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  expect(target.textContent).toContain("достигнут предел числа узлов");
+  expect(target.textContent).toContain("причина ограничения не определена");
+  expect(target.textContent).toContain("состояние не определено");
+  expect(target.textContent).not.toMatch(/mock-snapshot|future_limit|future_state|Some\(FutureState\)|reduced motion/);
+  target.querySelector<HTMLButtonElement>('[aria-label="Настройки графа"]')!.click();
+  await settle();
+  expect(target.textContent).toContain("Версия графа");
+  expect(target.querySelector('[title="mock-snapshot-0001"]')).not.toBeNull();
+});
+
 it("мини-граф при открытом документе показывает его локальный граф: документ и соседей по ссылкам (Т-43, раунд 27)", async () => {
   const slice = await physicalFixture({ request: { scope: { modules: [], files: [] }, limits: { max_documents: 500, max_chunks: 500, max_edges: 4000, max_bytes: 1 << 20 }, expanded: [], snapshot: null } });
   const links = slice.edges.filter((e) => e.kind === "markdown_link");
@@ -151,18 +177,18 @@ it("раскрытие документа запрашивает его чанк
   const row = [...target.querySelectorAll<HTMLButtonElement>(".list li button")].find((b) => b.textContent!.includes("Документ 7:"))!;
   row.click();
   await settle();
-  button("Раскрыть чанки (120)")!.click();
+  button("Раскрыть разделы (120)")!.click();
   await settle();
   let request = physicalCalls().at(-1)!;
   expect(request.expanded).toEqual([{ document: "doc-7", shown: 50 }]);
   expect(request.snapshot).toBe("mock-snapshot-0001");
-  expect(target.textContent).toContain("Показано 50 из 120 чанков");
-  expect(target.textContent).toMatch(/По смыслу · чанки\s*\d+/);
+  expect(target.textContent).toContain("Показано 50 из 120 разделов");
+  expect(target.textContent).toMatch(/По смыслу · разделы\s*\d+/);
   button("Ещё 50")!.click();
   await settle();
   request = physicalCalls().at(-1)!;
   expect(request.expanded).toEqual([{ document: "doc-7", shown: 100 }]);
-  button("Свернуть чанки")!.click();
+  button("Свернуть разделы")!.click();
   await settle();
   expect(target.textContent).not.toContain("Показано 100 из 120 чанков");
 });
@@ -199,7 +225,7 @@ it("устаревший снимок при раскрытии приводит
   await settle();
   [...target.querySelectorAll<HTMLButtonElement>(".list li button")].find((b) => b.textContent!.includes("Документ 7:"))!.click();
   await settle();
-  button("Раскрыть чанки (120)")!.click();
+  button("Раскрыть разделы (120)")!.click();
   await settle();
   const sent = physicalCalls();
   expect(sent.at(-2)!.snapshot).toBe("mock-snapshot-0001");
@@ -269,7 +295,7 @@ it("вид запроса: после поиска граф перестраив
   expect(target.querySelector(".qbar")).not.toBeNull();
   expect(target.querySelector(".qbar")!.textContent).toContain("Запрос «как работает граф»");
   expect(target.querySelector(".qbar")!.textContent).toContain("3 результатов");
-  expect(target.querySelector(".qbar")!.textContent).toContain("оценка rerank");
+  expect(target.querySelector(".qbar")!.textContent).toContain("Оценка модели");
   // Запрос, три результата и их окружение; не весь проект.
   const nodes = Number(panel().dataset.nodes);
   expect(nodes).toBeGreaterThanOrEqual(4);
@@ -304,22 +330,21 @@ it("вид запроса: после поиска граф перестраив
   app.searching = false;
 });
 
-it("вход в прежний экран «Анализ связей» лежит в меню «Ещё» с пометкой «прежний экран» (ISS-55)", async () => {
-  component = mount(PhysicalGraph, { target });
+it("вкладка графа показывает единую панель с анализом без прежнего экрана (ISS-55)", async () => {
+  component = mount(GraphTab, { target });
   await settle();
-  expect(target.querySelector('[aria-label="Анализ связей: пути, влияние, контекст"]')).toBeNull();
-  expect(target.querySelector('[role="menu"]')).toBeNull();
-  target.querySelector<HTMLButtonElement>('[aria-label="Ещё"]')!.click();
+  expect(panel()).not.toBeNull();
+  expect(target.querySelector('[aria-label="Ещё"]')).toBeNull();
+  const analysis = button("Анализ")!;
+  analysis.click();
   await settle();
-  const item = target.querySelector<HTMLButtonElement>('[role="menuitem"]')!;
-  expect(item.textContent).toContain("Анализ связей");
-  expect(item.textContent).toContain("прежний экран");
-  app.graphAnalysis = false;
-  item.click();
-  await settle();
-  expect(app.graphAnalysis).toBe(true);
-  expect(target.querySelector('[role="menu"]')).toBeNull();
-  app.graphAnalysis = false;
+  expect([...target.querySelectorAll('[role="menuitem"]')].map(item => item.textContent?.trim())).toEqual([
+    "Контекст задачиисточники по ролям под задачу",
+    "Обзор темтемы проекта и их представители",
+    "Аудит связейизоляты, неразрешённые ссылки, кандидаты",
+  ]);
+  expect(target.textContent).not.toContain("прежний экран");
+  expect(target.textContent).not.toContain("← Карта графа");
 });
 
 it("«Открыть связи и основания» из выдачи включает вид запроса, даже если из него вышли в общий вид (ISS-55)", async () => {
@@ -335,7 +360,6 @@ it("«Открыть связи и основания» из выдачи вкл
   await settle();
   expect(target.querySelector(".qbar")).not.toBeNull();
   expect(app.graphShowQuery).toBe(false);
-  expect(app.graphAnalysis).toBe(false);
   app.results = null;
   app.displayed = null;
   await settle();
@@ -485,12 +509,12 @@ it("«Обновить граф» и «Остановить построение
 it("служебные сведения и слой обновления лежат в настройках графа, а не на первом экране", async () => {
   component = mount(PhysicalGraph, { target });
   await settle();
-  expect(target.textContent).not.toContain("Снимок графа");
+  expect(target.textContent).not.toContain("Версия графа");
   expect(target.querySelector('[aria-label="Слой для обновления"]')).toBeNull();
   target.querySelector<HTMLButtonElement>('[aria-label="Настройки графа"]')!.click();
   await settle();
   expect(target.querySelector('[aria-label="Настройки графа"].pop, section[aria-label="Настройки графа"]')).not.toBeNull();
-  expect(target.querySelector(".facts")?.textContent).toContain("Снимок графа");
+  expect(target.querySelector(".facts")?.textContent).toContain("Версия графа");
   expect(target.querySelector('[aria-label="Слой для обновления"]')).not.toBeNull();
 });
 

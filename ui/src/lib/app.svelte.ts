@@ -5,7 +5,7 @@ import { call, documentWindowOpen, joinPath, openInMainWindow, openPath, pickFol
 import { TextSearchStore } from './text-search.svelte';
 import { editors } from './editors.svelte';
 import { confirmProjectLeave } from './unsaved.svelte';
-import type { GraphReply,GraphSearchOutput,RetrievalMode } from './graph';
+import type { GraphSearchOutput,RetrievalMode } from './graph';
 import { documentsIn } from "./format";
 import { AuditsStore } from "./audits.svelte";
 import { NewTopicsStore } from "./new-topics.svelte";
@@ -103,9 +103,6 @@ class App {
   retrievalMode = $state<RetrievalMode>('hybrid');
   includeRelated = $state(true);
   graphSearch = $state<GraphSearchOutput|null>(null);
-  graphPreview = $state<GraphReply|null>(null);
-  /** Вкладка «Граф» показывает анализ связей (пути, влияние, контекст), а не физическую карту. */
-  graphAnalysis = $state(false);
   /** Узел, который полный граф выберет после открытия вкладки («В графе» из мини-графа). */
   graphFocus = $state<string | null>(null);
   /** Вкладка «Граф» открывается на виде запроса последнего поиска, даже если пользователь вышел из него в общий вид. */
@@ -486,7 +483,7 @@ class App {
     }
     this.searchUnsaved = [];
     this.textSearch.reset();
-    this.graphSearch=null;this.graphPreview=null;
+    this.graphSearch=null;
     this.#selectionVersion++;
     this.#searchId++;
     this.searching = false;
@@ -553,7 +550,6 @@ class App {
     this.searchError = null;
     this.results = null;
     this.graphSearch = null;
-    this.graphPreview = null;
     this.displayed = null;
     this.emptyInfo = null;
     const started = performance.now();
@@ -590,7 +586,7 @@ class App {
       this.markedRequest = null;
       this.graphSearch='requested_mode' in output?output as GraphSearchOutput:null;
       this.#notifications.resolve(`search:${project.path}`);
-      if (output.rerank_error) this.#notifications.error(`rerank:${project.path}`, `Ошибка rerank · ${project.name}`, "Поиск выполнен без rerank. Проверьте модель и подключение.", "models");
+      if (output.rerank_error) this.#notifications.error(`rerank:${project.path}`, `Ошибка оценки моделью · ${project.name}`, "Поиск выполнен без оценки моделью. Проверьте модель и подключение.", "models");
       else this.#notifications.resolve(`rerank:${project.path}`);
       this.publishNotifications();
       this.searchedQuery = query;

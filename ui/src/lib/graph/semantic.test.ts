@@ -35,7 +35,7 @@ it("влияние: прямое и косвенное разделены, до�
   expect(view.notes.semanticIncomplete).toBe(true);
   expect(view.notes.lines.join(" ")).toContain("Смысловой слой неполон");
   expect(view.notes.truncated).toBe(true);
-  expect(view.notes.lines.join(" ")).toContain("предельная глубина");
+  expect(view.notes.lines.join(" ")).toContain("предел глубины");
 });
 
 it("пустое влияние не превращается в «ничего не затронет»: ответ без элементов даёт пустые группы и оговорку о слое", () => {

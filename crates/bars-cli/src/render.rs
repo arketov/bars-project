@@ -206,6 +206,51 @@ pub fn search(output: &SearchOutput) -> String {
         hit_lines(&mut text, index + 1, hit);
     }
     let applied = &output.applied;
+    let mut filters = Vec::new();
+    if !applied.scope.modules.is_empty() {
+        filters.push(format!("модули {}", applied.scope.modules.join(", ")));
+    }
+    if !applied.scope.files.is_empty() {
+        filters.push(format!("файлы {}", applied.scope.files.join(", ")));
+    }
+    let whole = filters.is_empty();
+    let _ = writeln!(
+        text,
+        "Область: {}.",
+        if whole {
+            "весь проект".into()
+        } else {
+            filters.join("; ")
+        }
+    );
+    let counts = |map: &std::collections::BTreeMap<String, u32>| {
+        if map.is_empty() {
+            "нет".into()
+        } else {
+            map.iter()
+                .map(|(name, n)| format!("{name} {n}"))
+                .collect::<Vec<_>>()
+                .join(", ")
+        }
+    };
+    let _ = writeln!(
+        text,
+        "По модулям: кандидаты {}; результаты {}.",
+        counts(&output.by_module.candidates),
+        counts(&output.by_module.results)
+    );
+    if whole && output.by_module.results.len() > 1 {
+        let _ = writeln!(
+            text,
+            "Результаты из нескольких модулей; область можно сузить через modules."
+        );
+    }
+    if output.results.is_empty() && !applied.scope.modules.is_empty() {
+        let _ = writeln!(
+            text,
+            "В выбранных модулях ничего не найдено; попробуйте весь проект. Ноль не доказывает отсутствия."
+        );
+    }
     let _ = write!(
         text,
         "Применено: предел результатов {}, выдано {}, кандидатов {}, порог {} ({}){}",

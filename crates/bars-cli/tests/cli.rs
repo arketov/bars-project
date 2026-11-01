@@ -88,7 +88,17 @@ async fn graph_cli_operations_and_search_modes_match_worker_json() {
             serde_json::from_str::<Value>(&result.out).unwrap()["requested_mode"],
             mode
         );
+        let text = bars(&env, &["search", "Т-1 зависит", "--mode", mode]).await;
+        assert_eq!(text.code, 0, "{}", text.err);
+        assert!(text.out.contains("=== SEARCH:"), "{}", text.out);
+        assert!(!text.out.contains("\"requested_mode\""), "{}", text.out);
+        assert!(text.out.chars().count() <= bars_protocol::graph_text::MAX_TEXT_CHARS + 1);
     }
+    let text = bars(&env, &["relations", "Т-1"]).await;
+    assert_eq!(text.code, 0, "{}", text.err);
+    assert!(text.out.contains("=== GRAPH relations ==="));
+    assert!(text.out.contains("requirements.md:"));
+    assert!(text.out.contains("depends_on"));
     let result = bars(
         &env,
         &[

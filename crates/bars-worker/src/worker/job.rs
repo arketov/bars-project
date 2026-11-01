@@ -74,6 +74,14 @@ pub fn describe(fingerprint: &ModelFingerprint) -> String {
 }
 
 pub fn run(env: &JobEnv<'_>, project: &Path, job: &Job) -> JobResult {
+    // shutdown мог завершить проверку current до появления этого задания.
+    if env.observer.should_stop() {
+        return JobResult {
+            outcome: Outcome::Cancelled,
+            index_model: None,
+            settings_model: None,
+        };
+    }
     if !project.is_dir() {
         return JobResult {
             outcome: Outcome::Unavailable,

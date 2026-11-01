@@ -542,6 +542,29 @@ mod tests {
     }
 
     #[test]
+    fn q01_default_pause_releases_one_document_fifteen_seconds_after_the_last_edit() {
+        let base = Instant::now();
+        let mut queue = DocQueue::new();
+        let pause = Duration::from_secs(u64::from(bars_core::settings::DEFAULT_EDIT_PAUSE_SECONDS));
+        for second in [0, 2, 4, 6, 8] {
+            queue.touch(&project(), "a.md", DocSource::Edit, pause, at(base, second));
+            assert!(queue.promote_due(at(base, second)).is_empty());
+            assert_eq!(queue.len(), 1);
+        }
+        let deadline = at(base, 23);
+        assert_eq!(queue.next_due(), Some(deadline));
+        assert!(
+            queue
+                .promote_due(deadline - Duration::from_nanos(1))
+                .is_empty()
+        );
+        let ready = queue.promote_due(deadline);
+        assert_eq!(ready.len(), 1);
+        assert_eq!(ready[0].paths, BTreeSet::from(["a.md".to_owned()]));
+        assert!(queue.promote_due(at(base, 38)).is_empty());
+    }
+
+    #[test]
     fn zero_pause_makes_the_record_ready_at_once() {
         let mut queue = DocQueue::new();
         queue.touch(

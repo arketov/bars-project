@@ -12,6 +12,10 @@ use std::time::{Duration, Instant};
 
 mod resident;
 use resident::{Resident, take_idle};
+mod retirement;
+use retirement::Retirement;
+#[cfg(test)]
+mod retirement_tests;
 
 use bars_core::models::{
     Accelerator, BGE_RERANKER_V2_M3_ID, BuiltinReranker, EmbedError, Embedder, HttpEmbedder,
@@ -490,6 +494,7 @@ type Loader = Box<dyn Fn() -> Result<Box<dyn Embedder + Send>, EmbedError> + Sen
 
 /// Одна модель за мьютексом.
 pub struct ModelSlot {
+    retirement: Arc<Retirement>,
     fingerprint: ModelFingerprint,
     batch_size: usize,
     batch_chars: Option<usize>,
@@ -499,6 +504,14 @@ pub struct ModelSlot {
     /// он не честный, и без этого пачки индексации идут подряд, а запрос не доходит до модели.
     waiting_queries: AtomicUsize,
     runtime: Mutex<SlotRuntime>,
+}
+
+impl Drop for ModelSlot {
+    fn drop(&mut self) {
+        if let Some(model) = lock(&self.model).model.take() {
+            self.retirement.release(model);
+        }
+    }
 }
 
 /// Как часто индексация проверяет, что запросов поиска у модели не осталось.
@@ -688,9 +701,18 @@ type RerankLoader = Box<dyn Fn() -> Result<Box<dyn Reranker + Send>, RerankError
 
 /// Одна rerank-модель за мьютексом.
 pub struct RerankSlot {
+    retirement: Arc<Retirement>,
     loader: RerankLoader,
     model: Mutex<Resident<Box<dyn Reranker + Send>>>,
     runtime: Mutex<SlotRuntime>,
+}
+
+impl Drop for RerankSlot {
+    fn drop(&mut self) {
+        if let Some(model) = lock(&self.model).model.take() {
+            self.retirement.release(model);
+        }
+    }
 }
 
 impl RerankSlot {
@@ -775,6 +797,7 @@ struct CurrentRerank {
 
 /// Менеджер моделей воркера.
 pub struct Models {
+    retirement: Arc<Retirement>,
     pub(super) operations: Arc<Mutex<super::operations::Journal>>,
     provider: Arc<dyn ModelProvider>,
     current: Mutex<Option<Current>>,
@@ -834,6 +857,7 @@ impl Models {
         let rerank = lock(&self.current_rerank).take();
         drop(embed);
         drop(rerank);
+        self.retirement.flush();
     }
 
     /// Освобождает только свободные встроенные сессии. Старые Arc и HTTP не затрагивает.
@@ -922,12 +946,15 @@ impl Models {
         })
     }
     pub fn new(provider: Arc<dyn ModelProvider>) -> Self {
+        let loads = Arc::default();
+        let retirement = Arc::new(Retirement::new(Arc::clone(&loads)));
         Self {
+            retirement,
             operations: Arc::default(),
             provider,
             current: Mutex::new(None),
             current_rerank: Mutex::new(None),
-            loads: Arc::default(),
+            loads,
         }
     }
 
@@ -964,13 +991,19 @@ impl Models {
         let key = load_key(settings.embed.source, &settings.embed.model);
         let owned = settings.clone();
         let operations = Arc::clone(&self.operations);
+        let retirement = Arc::clone(&self.retirement);
         let slot = Arc::new(ModelSlot {
+            retirement: Arc::clone(&self.retirement),
             fingerprint: fingerprint.clone(),
             batch_size: self.provider.batch_size(settings).max(1),
             batch_chars: self.provider.batch_chars(settings),
             loader: Box::new(move || {
                 let id = begin_model(&operations, &owned, false, "prepare");
                 let _attempt = ModelAttempt(Arc::clone(&operations), id);
+                // Очередь drop должна опередить constructor, иначе живы обе сессии.
+                if key.is_some() {
+                    retirement.flush();
+                }
                 let result = loads.run_keyed(key.as_deref(), || {
                     lock(&operations).edit(id, |op| op.state = "running".into());
                     provider.load(&owned).and_then(|mut model| {
@@ -1011,6 +1044,7 @@ impl Models {
         reranker: bool,
         operation: Option<u64>,
     ) -> Result<(), ModelFailure> {
+        self.retirement.flush();
         let id = if reranker {
             &settings.rerank.model
         } else {
@@ -1093,10 +1127,15 @@ impl Models {
         let key = load_key(settings.rerank.source, &settings.rerank.model);
         let owned = settings.clone();
         let operations = Arc::clone(&self.operations);
+        let retirement = Arc::clone(&self.retirement);
         let slot = Arc::new(RerankSlot {
+            retirement: Arc::clone(&self.retirement),
             loader: Box::new(move || {
                 let id = begin_model(&operations, &owned, true, "prepare");
                 let _attempt = ModelAttempt(Arc::clone(&operations), id);
+                if key.is_some() {
+                    retirement.flush();
+                }
                 let result = loads.run_keyed(key.as_deref(), || {
                     lock(&operations).edit(id, |op| op.state = "running".into());
                     provider.load_reranker(&owned)
@@ -1543,6 +1582,7 @@ mod tests {
         let counter = loads.clone();
         let mut rerank = SharedReranker {
             slot: Arc::new(RerankSlot {
+                retirement: Arc::new(Retirement::new(Arc::default())),
                 loader: Box::new(move || {
                     if counter.fetch_add(1, Ordering::SeqCst) == 1 {
                         Err(RerankError::Load("injected reload failure".into()))

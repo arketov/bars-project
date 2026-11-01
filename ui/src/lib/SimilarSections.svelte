@@ -42,7 +42,7 @@
   </details>
   <div class="controls">
     <label>Лимит <input aria-label="Лимит похожих разделов" type="number" min="1" step="1" placeholder="Из настроек" bind:value={limit} /></label>
-    <label>Косинус от <input aria-label="Порог похожих разделов" type="number" min="0" max="1" step="0.01" bind:value={threshold} /></label>
+    <label>Близость от <input aria-label="Порог похожих разделов" type="number" min="0" max="1" step="0.01" bind:value={threshold} /></label>
     {#if neighbor}<button onclick={() => neighbor = null}>К исходному отрывку</button>{/if}
   </div>
   {#if !validLimit}<p role="alert">Лимит — целое число от 1 до 4294967295.</p>{/if}
@@ -62,7 +62,7 @@
     {#each visible as hit}
       <article data-document-path={hit.path} data-document-line={hit.first_line} data-menu-kind="file" data-menu-place="card">
         <b>{hit.heading_chain || hit.title}</b>
-        <small>{hit.path}:{hit.first_line}–{hit.last_line} · {moduleLabel(hit.module)} · косинус {decimal(hit.score)}</small>
+        <small>{hit.path}:{hit.first_line}–{hit.last_line} · {moduleLabel(hit.module)} · оценка по близости {decimal(hit.score)}</small>
         <div class="text">{@html renderChunk(hit.text)}</div>
         <button onclick={() => onopen(hit)}>Открыть документ</button>
         {#if hit.chunk_id}<button onclick={() => neighbor = hit.chunk_id!}>Похожие</button>{/if}

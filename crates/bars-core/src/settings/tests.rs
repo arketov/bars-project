@@ -620,8 +620,18 @@ base_url = \"http://localhost:8081\"
 }
 
 #[test]
-fn edit_pause_defaults_to_thirty_seconds_and_project_overrides_it() {
-    assert_eq!(UserSettings::default().indexing.edit_pause_seconds, 30);
+fn edit_pause_defaults_to_fifteen_seconds_and_preserves_explicit_values() {
+    assert_eq!(UserSettings::default().indexing.edit_pause_seconds, 15);
+    for text in ["", "[indexing]\n", "[search]\nresults = 8\n"] {
+        let loaded = user(text);
+        let resolved = Settings::resolve(&loaded.value, &ProjectConfig::default());
+        assert_eq!(resolved.indexing.edit_pause_seconds, 15);
+    }
+    for seconds in [0, 5, 30, 3600] {
+        let loaded = user(&format!("[indexing]\nedit_pause_seconds = {seconds}\n"));
+        let resolved = Settings::resolve(&loaded.value, &ProjectConfig::default());
+        assert_eq!(resolved.indexing.edit_pause_seconds, seconds);
+    }
     let user = user("[indexing]\nedit_pause_seconds = 5\n");
     assert!(user.warnings.is_empty());
     assert_eq!(user.value.indexing.edit_pause_seconds, 5);
@@ -644,7 +654,7 @@ fn edit_pause_over_an_hour_is_an_error_and_unknown_indexing_keys_warn() {
     let warned = user("[indexing]\nedit_pause = 5\n");
     assert_eq!(warned.warnings.len(), 1);
     assert_eq!(warned.warnings[0].key, "indexing.edit_pause");
-    assert_eq!(warned.value.indexing.edit_pause_seconds, 30);
+    assert_eq!(warned.value.indexing.edit_pause_seconds, 15);
 }
 
 #[test]

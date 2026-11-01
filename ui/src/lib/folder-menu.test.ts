@@ -43,7 +43,7 @@ describe("Меню папок этапа 31", () => {
     const menu = document.querySelector('.primary')!;
     expect([...menu.querySelectorAll('[role="menuitem"]')].map(b => b.textContent?.trim())).toEqual([
       'Новый документ…','Новая папка…','Переименовать…F2','Переместить…','Показать в Проводнике',
-      'Скопировать путь','Цвет и иконка…','Проверить индекс проектаПроверяется весь проект','Удалить…Delete',
+      'Скопировать путь','Цвет и иконка…','Проверить проектСверит документы с поиском и обновит изменившиеся','Удалить…Delete',
     ]);
     expect(menu.querySelectorAll('[role="separator"]')).toHaveLength(5);
     expect(menu.firstElementChild?.getAttribute('role')).toBe('menuitem');
@@ -58,7 +58,7 @@ describe("Меню папок этапа 31", () => {
     app.projects = [{...project,state:'unavailable'}];
     const el = host(); mounted.push(mount(TreeRow, {target:el,props:{node:app.tree[0]}})); flushSync();
     await open(el.querySelector('.row')!);
-    const check = button('Проверить индекс проекта');
+    const check = button('Проверить проект');
     expect(check.getAttribute('aria-disabled')).toBe('true'); expect(check.title).toContain('недоступен');
     expect(document.getElementById(check.getAttribute('aria-describedby')!)?.textContent).toContain('недоступен');
     window.dispatchEvent(new KeyboardEvent('keydown',{key:'End',cancelable:true}));
@@ -97,7 +97,7 @@ describe("Меню папок этапа 31", () => {
     expect(api.folderTarget).toHaveBeenCalledWith(project.path, project.docs_root, "модуль");
     expect(app.selected.size).toBe(0); expect(app.current).toBe(project.path);
     expect(el.querySelector(".kids")).toBeNull();
-    expect(button("Проверить индекс проекта").textContent).toContain("Проверяется весь проект");
+    expect(button("Проверить проект").textContent).toContain("Сверит документы с поиском и обновит изменившиеся");
     expect(button("Открыть в …")).toBeUndefined();
     // Т-33: над папкой доступны создание, переименование, перенос и удаление.
     for (const label of ["Новый документ…", "Новая папка…", "Переименовать…", "Переместить…", "Удалить…"]) expect(button(label)).toBeDefined();
@@ -133,7 +133,7 @@ describe("Меню папок этапа 31", () => {
     const el = host(); el.innerHTML = '<div data-folder-path="." data-folder-kind="Корневые документы"></div>';
     await open(el.firstElementChild!); button("Скопировать путь").click(); await settle();
     expect(api.folderAction).toHaveBeenCalledWith("42", "path"); expect(api.copyText).toHaveBeenCalledWith("C:/Проект/manual/docs/модуль");
-    await open(el.firstElementChild!); button("Проверить индекс проекта").click(); await settle();
+    await open(el.firstElementChild!); button("Проверить проект").click(); await settle();
     expect(api.folderAction).toHaveBeenCalledWith("42", "check"); expect(app.toast?.text).toBe("Проверка проекта в очереди · №7");
   });
   it("ошибка буфера содержит исходную цель и не даёт успеха", async () => {
