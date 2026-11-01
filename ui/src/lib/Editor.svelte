@@ -3,7 +3,7 @@
   // здесь только вид: подсветка CommonMark и GFM, продолжение списков, автопары, подсветка найденного отрывка.
   import { onMount, untrack } from "svelte";
   import { Annotation, Compartment, EditorState, StateEffect, StateField, Transaction } from "@codemirror/state";
-  import { Decoration, EditorView, keymap, type DecorationSet } from "@codemirror/view";
+  import { Decoration, EditorView, keymap, WidgetType, type DecorationSet } from "@codemirror/view";
   import { defaultKeymap, history, historyKeymap, redo, redoDepth, selectAll, undo, undoDepth } from "@codemirror/commands";
   import { autocompletion, closeBrackets, closeBracketsKeymap, startCompletion, type CompletionContext } from "@codemirror/autocomplete";
   import { markdown, markdownKeymap, markdownLanguage } from "@codemirror/lang-markdown";
@@ -37,18 +37,36 @@
   const undoHistory = new Compartment();
   const editable = new Compartment();
   const setHit = StateEffect.define<{ from: number; to: number; exact?: boolean } | null>();
+  class FoundLabel extends WidgetType {
+    readonly first: number;
+    readonly last: number;
+    constructor(first: number, last: number) { super(); this.first = first; this.last = last; }
+    eq(other: FoundLabel) { return this.first === other.first && this.last === other.last; }
+    toDOM() {
+      const node = document.createElement('div');
+      node.className = 'cm-found-label';
+      node.textContent = this.first === this.last ? 'строка ' + this.first + ' · найдено' : 'строки ' + this.first + '–' + this.last + ' · найдено';
+      return node;
+    }
+  }
   const hitField = StateField.define<DecorationSet>({
     create: () => Decoration.none,
     update(value, tr) {
       for (const effect of tr.effects) {
         if (!effect.is(setHit)) continue;
         if (!effect.value) return Decoration.none;
-        const marks = [];
-        if (effect.value.exact && effect.value.to > effect.value.from) return Decoration.set([Decoration.mark({class:'cm-hit'}).range(effect.value.from,effect.value.to)]);
-        for (let n = tr.state.doc.lineAt(effect.value.from).number; n <= tr.state.doc.lineAt(effect.value.to).number; n++) {
-          marks.push(Decoration.line({ class: "cm-hit" }).range(tr.state.doc.line(n).from));
+        const first = tr.state.doc.lineAt(effect.value.from);
+        const last = tr.state.doc.lineAt(effect.value.to);
+        const marks = [Decoration.widget({ widget: new FoundLabel(first.number, last.number), block: true, side: -1 }).range(first.from)];
+        if (effect.value.exact) {
+          marks.push(Decoration.line({ class: effect.value.to === effect.value.from ? 'cm-hit cm-found-line' : 'cm-found-line' }).range(first.from));
+          if (effect.value.to > effect.value.from) marks.push(Decoration.mark({ class: 'cm-hit' }).range(effect.value.from, effect.value.to));
+          return Decoration.set(marks, true);
         }
-        return Decoration.set(marks);
+        for (let n = first.number; n <= last.number; n++) {
+          marks.push(Decoration.line({ class: "cm-hit cm-found-line" }).range(tr.state.doc.line(n).from));
+        }
+        return Decoration.set(marks, true);
       }
       return tr.docChanged ? Decoration.none : value;
     },
@@ -76,6 +94,8 @@
     ".cm-cursor": { borderLeftColor: "var(--accent)" },
     ".cm-selectionBackground, &.cm-focused .cm-selectionBackground": { background: "var(--accent-soft)" },
     ".cm-hit": { background: "var(--accent-soft)" },
+    ".cm-found-line": { borderLeft: "2px solid var(--accent)" },
+    ".cm-found-label": { fontFamily: "var(--sans)", fontSize: "11px", color: "var(--accent-text)", padding: "3px 8px", borderLeft: "2px solid var(--accent)", background: "var(--accent-soft)" },
   });
 
   const placement = (pos: number) => EditorView.scrollIntoView(pos, { y: "center" });

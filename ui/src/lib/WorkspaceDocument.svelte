@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { tick } from "svelte";
+  import { tick, untrack } from "svelte";
   import { call, copyText } from "./api";
   import { commandAdapter } from "./command-adapters";
   import { headingLinkText } from "./link-commands";
@@ -22,7 +22,11 @@
   let editor = $state<ReturnType<typeof Editor>>();
   let buffer = $state<EditorBuffer | null>(null);
   const text = $derived(buffer?.text ?? doc?.text ?? "");
-  const range = $derived(hit.first_line > 0 ? { first: hit.first_line, last: hit.last_line, column: hit.column, length: hit.length } : null);
+  let found = $state.raw<{ reference: DocumentReference; text: string } | null>(null);
+  // Диапазон относится к версии текста при переходе; после правки не оживает при смене режима или отмене.
+  $effect(() => { const reference = hit, current = doc; found = current ? { reference, text: untrack(() => text) } : null; });
+  $effect(() => { if (found && text !== found.text) found = null; });
+  const range = $derived(found && found.reference === hit && hit.first_line > 0 ? { first: hit.first_line, last: hit.last_line, column: hit.column, length: hit.length } : null);
   const html = $derived(doc && !source ? renderDocument(text, range ?? undefined) : "");
   const headings = $derived(documentHeadings(text));
   const status = $derived(buffer ? statusLabel(buffer) : "");
@@ -189,7 +193,7 @@
       {#if cheat}<div class="cheat" role="note"><code># Заголовок</code> · <code>**жирный**</code> · <code>*курсив*</code> · <code>`код`</code> · <code>- пункт</code> · <code>1. пункт</code> · <code>- [ ] задача</code> · <code>&gt; цитата</code> · <code>[текст](путь.md)</code> · <code>| а | б |</code> — таблица; <code>Tab</code> переходит по ячейкам, <code>Enter</code> продолжает список.</div>{/if}
     {/if}
     <div class="body" class:editing={source} bind:this={body} data-document-path={hit.path} data-menu-kind={source ? "editor" : "file"} data-menu-place={source ? "editor" : "render"}>
-      {#if source}<Editor bind:this={editor} text={text} historyVersion={buffer?.historyVersion ?? 0} links={() => linkTargets(app.tree, app.docsRoot)} semantic={semanticLinks} readonly={!buffer || buffer.status === "readonly" || buffer.status === "loading"} hit={range} oninput={(value) => buffer?.edit(value)} />
+      {#if source}<Editor bind:this={editor} text={text} historyVersion={buffer?.historyVersion ?? 0} links={() => linkTargets(app.tree, app.docsRoot)} semantic={semanticLinks} readonly={!buffer || buffer.status === "readonly" || buffer.status === "loading"} hit={range} oninput={(value) => { found = null; buffer?.edit(value); }} />
       {:else}<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions --><div class="md" onclick={followLink}>{@html html}</div>{/if}
     </div>
     <footer class="backlinks" aria-label="Ссылки документа">

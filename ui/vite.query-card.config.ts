@@ -1,16 +1,13 @@
 import { defineConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import { queryCardDesign } from "./src/spikes/query-card/transform";
 
-// Изменения представления существуют только в стенде согласования 3.4.7.
+// Стенд использует продуктовые компоненты 3.4.8; подменяются только ответы поиска.
 export default defineConfig({
   plugins: [{
     name: "bars-query-card-design",
     enforce: "pre",
     transform(source, id) {
       const path = id.replaceAll("\\", "/");
-      if (path.endsWith("/src/lib/SearchPane.svelte")) return queryCardDesign(source, "search");
-      if (path.endsWith("/src/lib/Editor.svelte")) return queryCardDesign(source, "editor");
       if (path.endsWith("/src/lib/mock.ts")) {
         const original = "if (method === 'text_search') return {documents:[],docs_total:0,hits_total:0,truncated:null,skipped:[],elapsed_ms:0};";
         if (source.split(original).length !== 2) throw new Error("Макет карточки: изменился mock text_search");

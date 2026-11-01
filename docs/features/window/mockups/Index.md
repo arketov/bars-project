@@ -6,7 +6,7 @@ title: Макеты окна bars
 
 | Файл | Когда читать |
 |---|---|
-| Стенд карточки запроса | Макет 3.4.7: `ui/query-card-design.html`, `ui/vite.query-card.config.ts`, `ui/src/spikes/query-card/`; запуск и сценарии в `features/window/query-card-design.md` |
+| Стенд карточки запроса | Продуктовые компоненты 3.4.8 с фикстурами: `ui/query-card-design.html`, `ui/vite.query-card.config.ts`, `ui/src/spikes/query-card/`; запуск и сценарии в `features/window/query-card-design.md` |
 | `graph-entry.html` | Пункт 2.3.4: вход в стенд существующей панели на двух корпусах, обе темы, состояния и отдельный режим проверки панели; согласование ожидается |
 | `global-search.html` | Пункт 1.2.1: вход в отдельный Vite-стенд на настоящих компонентах ui/global-search-design.html; требуется запущенный сервер 127.0.0.1:4180. Первая самостоятельная версия отклонена автором |
 | `workspace.html`, `workspace.css`, `workspace.js` | Пункт 1.1.3: целевые редактор и вкладки, дерево/index.md, два раздела поиска, панели и обе темы при прежнем оформлении; демонстрационные документы в памяти, OQ-112 |

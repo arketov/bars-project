@@ -37,7 +37,7 @@
           {#if doc.has_more}<button class="link more" disabled={store.more.length > 0} onclick={() => store.loadMore(doc.path)}>{store.more.includes(doc.path) ? 'Загружаем…' : 'Показать ещё'}</button>{/if}
         </article>
       {/each}
-      {#if !store.output.documents.length}<p class="muted">Вхождений в файлах не найдено.</p>{/if}
+      {#if !store.output.documents.length && !store.output.docs_total && !store.output.hits_total && !store.loading && !store.error && !store.output.truncated && !store.output.skipped.length}<p class="muted">Вхождений в файлах не найдено.</p>{/if}
       {#if store.output.truncated && store.output.truncated !== 'page'}<p class="muted">Показана часть вхождений. Уточните запрос или область.</p>{/if}
       {#if store.output.skipped.length}<details><summary>Не прочитано: {store.output.skipped.length}</summary>{#each store.output.skipped as skipped}<p>{skipped.path}: {skipped.reason}</p>{/each}</details>{/if}
     {/if}

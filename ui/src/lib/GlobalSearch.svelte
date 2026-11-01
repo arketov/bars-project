@@ -21,7 +21,7 @@
   }
   function trap(event: KeyboardEvent) {
     if (event.key !== 'Tab') return;
-    const items = [...dialog.querySelectorAll<HTMLElement>('button,input,select,textarea,[tabindex="0"],a[href]')].filter(node => !node.matches(':disabled') && !!node.getClientRects().length);
+    const items = [...dialog.querySelectorAll<HTMLElement>('button,input,select,textarea,summary,[tabindex="0"],a[href]')].filter(node => !node.matches(':disabled') && !!node.getClientRects().length);
     if (event.shiftKey && document.activeElement === items[0]) { event.preventDefault(); items.at(-1)?.focus(); }
     else if (!event.shiftKey && document.activeElement === items.at(-1)) { event.preventDefault(); items[0]?.focus(); }
   }

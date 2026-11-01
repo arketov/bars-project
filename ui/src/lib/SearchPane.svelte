@@ -58,6 +58,17 @@
     }
   }
 
+  const parameterSummary = $derived([
+    app.retrievalMode !== 'hybrid' ? uiLabel('searchMode', app.retrievalMode).text : '',
+    app.retrievalMode === 'mix' && !app.includeRelated ? 'без связанных источников' : '',
+    app.count !== null ? app.shownCount + ' рез.' : '',
+    app.textSearch.caseSensitive ? 'регистр' : '',
+    app.textSearch.regex ? 'выражение' : '',
+    app.textSearch.pathFilter.trim() ? 'путь' : '',
+  ].filter(Boolean).join(' · '));
+  const emptyText = $derived(!!app.textSearch.output && !app.textSearch.loading && !app.textSearch.error
+    && !app.textSearch.output.documents.length && app.textSearch.output.docs_total === 0 && app.textSearch.output.hits_total === 0
+    && !app.textSearch.output.skipped.length && !app.textSearch.output.truncated);
   const resultsWord = (n: number) => plural(n, ["результат", "результата", "результатов"]);
 </script>
 
@@ -82,28 +93,13 @@
       ></textarea>
       <div class="askbar">
         <div class="scope">
-          {#if blocked}
-            По смыслу: нужна переиндексация
+          {#if fromGraph}
+            Искать в: <b>подграфе из графа</b>
           {:else if touched.length}
-            {#if fromGraph}Искать в: <b>подграфе из графа</b>{:else}Искать в: <b>{scopeLabel()}</b>{/if}
+            Искать в: <b>{scopeLabel()}</b>
           {:else}
             Искать во <b>всём проекте</b>
           {/if}
-        </div>
-        <div class="search-options">
-        <label class="retrieval-mode">
-          <span>Поиск</span>
-          <span class="mode-control"><select aria-label="Режим поиска" disabled={blocked || app.searching} bind:value={app.retrievalMode}>{#each Object.entries(labels.searchMode) as [mode, name] (mode)}<option value={mode} title={uiLabel("searchMode", mode).hint}>{name.text}</option>{/each}</select><Icon name="chevron-down" size={12} /></span>
-        </label>
-        <div class="count" title="Сколько результатов вернуть. По умолчанию — из настроек">
-          Результатов
-          <span class="stepper">
-            <button onclick={() => step(-1)} aria-label="Меньше">−</button><b>{app.shownCount}</b><button onclick={() => step(1)} aria-label="Больше">+</button>
-          </span>
-          {#if app.count !== null}
-            <button class="link reset" onclick={() => (app.count = null)}>по умолчанию</button>
-          {/if}
-        </div>
         </div>
         {#if !app.viewer}
           <span class="sep"></span>
@@ -113,12 +109,32 @@
           Найти <Icon name="arrow-right" size={15} width={2.4} />
         </button>
       </div>
-      {#if app.retrievalMode === 'mix'}<label class="related-option"><input type="checkbox" bind:checked={app.includeRelated} />Добавлять связанные источники</label>{/if}
-      <div class="text-options">
-        <button class="ghost sm" aria-label="Учитывать регистр" aria-pressed={app.textSearch.caseSensitive} onclick={() => app.textSearch.caseSensitive = !app.textSearch.caseSensitive}>Aa</button>
-        <button class="ghost sm" aria-label="Регулярное выражение" aria-pressed={app.textSearch.regex} onclick={() => app.textSearch.regex = !app.textSearch.regex}>.*</button>
-        <input aria-label="Фильтр пути текстового поиска" placeholder="Путь: features/ или features/*.md" bind:value={app.textSearch.pathFilter} onkeydown={onKey} />
-      </div>
+      <details class="query-parameters">
+        <summary>Параметры{#if parameterSummary}{' · '}{parameterSummary}{/if}</summary>
+        <div class="search-options">
+          <label class="retrieval-mode">
+            <span>Поиск</span>
+            <span class="mode-control"><select aria-label="Режим поиска" disabled={blocked || app.searching} bind:value={app.retrievalMode}>{#each Object.entries(labels.searchMode) as [mode, name] (mode)}<option value={mode} title={uiLabel("searchMode", mode).hint}>{name.text}</option>{/each}</select><Icon name="chevron-down" size={12} /></span>
+          </label>
+          <div class="count" title="Сколько результатов вернуть. По умолчанию — из настроек">
+            Результатов
+            <span class="stepper">
+              <button onclick={() => step(-1)} aria-label="Меньше">−</button><b>{app.shownCount}</b><button onclick={() => step(1)} aria-label="Больше">+</button>
+            </span>
+            {#if app.count !== null}
+              <button class="link reset" onclick={() => (app.count = null)}>по умолчанию</button>
+            {/if}
+          </div>
+        </div>
+        {#if app.retrievalMode === 'mix'}<label class="related-option"><input type="checkbox" bind:checked={app.includeRelated} />Добавлять связанные источники</label>{/if}
+        {#if app.retrievalMode === 'mix'}<p class="parameter-caption">Эксперимент: улучшение порядка результатов не подтверждено.</p>{/if}
+        <p class="parameter-caption">Только в тексте: регистр, выражение и путь</p>
+        <div class="text-options">
+          <button class="ghost sm" aria-label="Учитывать регистр" aria-pressed={app.textSearch.caseSensitive} onclick={() => app.textSearch.caseSensitive = !app.textSearch.caseSensitive}>Aa</button>
+          <button class="ghost sm" aria-label="Регулярное выражение" aria-pressed={app.textSearch.regex} onclick={() => app.textSearch.regex = !app.textSearch.regex}>.*</button>
+          <input aria-label="Фильтр пути текстового поиска" placeholder="Путь: features/ или features/*.md" bind:value={app.textSearch.pathFilter} onkeydown={onKey} />
+        </div>
+      </details>
     </div>
   </div>
 
@@ -130,7 +146,7 @@
           {#each app.searchUnsaved as item}<p>Не записано: <button class="link" onclick={() => app.openSearchUnsaved(item.path)}>{item.path}</button> — {item.reason}{item.reason.endsWith(".") ? "" : "."} Результаты по записанной версии.</p>{/each}
         </div>
       {/if}
-      <TextResults />
+      {#if !emptyText}<TextResults />{/if}
       {#if app.searchedQuery}<h2 class="semantic-title">По смыслу</h2>{/if}
       {#if app.searching}<p role="status">Ищем…</p>{/if}
       {#if blocked && project}
@@ -254,6 +270,7 @@
           </div>
         {/if}
       {/if}
+      {#if emptyText}<p class="text-empty" role="status">В тексте: вхождений не найдено</p>{/if}
     </div>
   </div>
 </main>
@@ -273,8 +290,8 @@
   textarea::placeholder { color: var(--faint); }
   .askbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; padding: 2px 0; }
   .askbar > :not(.scope) { flex-shrink: 0; }
-  .scope { flex: 1 0 80px; color: var(--muted); font-size: 12.5px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .search-options { display: flex; flex-wrap: nowrap; align-items: center; gap: 12px; }
+  .scope { flex: 1 1 180px; color: var(--muted); font-size: 12.5px; min-width: 0; overflow-wrap: anywhere; }
+  .search-options { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
   .retrieval-mode { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12.5px; }
   .mode-control { position: relative; display: flex; align-items: center; }
   .mode-control :global(svg) { position: absolute; right: 8px; pointer-events: none; }
@@ -310,4 +327,10 @@
     .top { padding: 16px 12px 12px; }
     .results { padding: 4px 12px 64px; }
   }
+  .query-parameters { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 7px; font-size: 12px; }
+  .query-parameters summary { cursor: pointer; color: var(--muted); overflow-wrap: anywhere; }
+  .query-parameters summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .query-parameters .search-options { margin-top: 10px; }
+  .parameter-caption { font-size: 11px; color: var(--muted); margin: 10px 0 4px; }
+  .text-empty { font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
 </style>
