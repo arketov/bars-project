@@ -1,0 +1,60 @@
+{
+  "date": "2026-11-01",
+  "algorithm": "registry-b-1",
+  "baseline_revision": "5aff3a4",
+  "product_revision": "ac52757",
+  "method": "Один снимок Markdown-файлов каждого корпуса в памяти; старый chunking.rs из HEAD против новой нарезки; UTF-8 границы и одинаковое покрытие всех собственных непробельных символов; rustc -O и настоящий blake3 из общего Cargo-кэша.",
+  "limitations": [
+    "Параллельная нагрузка; не строгий бенч скорости",
+    "Без embed, rerank, IPC и поиска",
+    "Снимки корпусов и полный манифест файлов не сохранены; не воспроизводит бенч качества 24-10-2026"
+  ],
+  "corpora": [
+    {
+      "project": "bars-project",
+      "documents": 656,
+      "bytes": 5081256,
+      "changed_documents": 127,
+      "chunks_before": 2758,
+      "chunks_after": 3178,
+      "coverage": "ok",
+      "old_ms": [
+        67.4111,
+        80.628,
+        84.6339,
+        46.3964,
+        45.0163
+      ],
+      "new_ms": [
+        99.7671,
+        92.5832,
+        72.6679,
+        57.5181,
+        51.6362
+      ]
+    },
+    {
+      "project": "ai-mutiplayer-bots",
+      "documents": 921,
+      "bytes": 10054417,
+      "changed_documents": 198,
+      "chunks_before": 4873,
+      "chunks_after": 5535,
+      "coverage": "ok",
+      "old_ms": [
+        88.1518,
+        80.1953,
+        89.8002,
+        91.7534,
+        95.9767
+      ],
+      "new_ms": [
+        94.1524,
+        89.5871,
+        107.4894,
+        81.1509,
+        102.4544
+      ]
+    }
+  ]
+}
