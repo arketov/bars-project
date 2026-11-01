@@ -8,6 +8,8 @@ title: Команды bars-cli
 
 ## Общие правила bars-cli
 
+В исходниках 4.3.5 (`e633ba4`) `impact`, `context` и `graph show --local` принимают повторяемый `--document <путь.md>`: до 20 путей; воркер объединяет `documents` с `roots`. Явный CLI-флаг заменяет соответствующее поле JSON `--input`, а не дописывает его. Например: `bars-cli impact --document features/search/hybrid-search.md`. Параметры `--from`/`--to` также принимают JSON `{"document":"<путь.md>"}`. Финальные тесты, сборка и доставка установленной версии этого среза не проверены по указанию автора 01-11-2026.
+
 GraphRAG: `relations`, `paths`, `impact`, `context`, `explore`, `graph show/status/build/cancel`; чтение использует общий DTO, `--input` — GraphRequest JSON с переопределением явными флагами. Примеры: `paths --from Т-1 --to Т-3`, `context "устройство индекса" --task-profile investigation`, `explore --whole-scope`. `graph build` не переиндексирует embeddings; accepted/job ID не означает завершения, отмена подтверждается статусом. Search: `--mode hybrid|mix|graph`, в mix — `--no-related` и `--related-budget N`. Без mode прежний поиск/ответ. Точные поля/открытая приёмка — [GraphRAG v1](../graphrag/tools.md#фактический-контракт-v1).
 
 - Проект по умолчанию — ближайшая к текущей папке зарегистрированная папка; `--project <путь>` задаёт его явно.
