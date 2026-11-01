@@ -24,6 +24,8 @@ const DOC: SettingsDoc = {
     api_key_name: null,
     api_key_env: null,
     unload_after_minutes: 5,
+    parallel_requests: 4,
+    context_tokens: 32768,
   },
   search: {
     candidates: 30,
@@ -41,7 +43,7 @@ const DOC: SettingsDoc = {
 };
 
 describe("settings-logic", () => {
-  it("validates LM Studio identity and disallows enabled rerank", () => {
+  it("validates LM Studio embed and independent rerank", () => {
     const draft = clone(DOC);
     draft.embed.source = "lmstudio";
     draft.embed.model = "text-embedding-qwen3-embedding-0.6b";
@@ -51,11 +53,13 @@ describe("settings-logic", () => {
     expect(parseFingerprint("lmstudio:model")).toEqual({source:"lmstudio",model:"model"});
     draft.rerank.source = "lmstudio";
     draft.rerank.enabled = true;
-    expect(validate(draft)["rerank.source"]).toContain("LM Studio");
+    draft.rerank.model = "qwen3-reranker-0.6b";
+    draft.rerank.base_url = "http://127.0.0.1:1234";
+    expect(validate(draft)).toEqual({});
     draft.rerank.enabled = false;
     expect(validate(draft)["rerank.source"]).toBeUndefined();
   });
-  it("supports Ollama embed identity but rejects enabled Ollama rerank", () => {
+  it("supports Ollama embed and logprob rerank settings", () => {
     const draft = clone(DOC);
     draft.embed.source = "ollama";
     draft.embed.model = "qwen3-embedding:0.6b";
@@ -65,7 +69,13 @@ describe("settings-logic", () => {
     expect(parseFingerprint("ollama:qwen3-embedding:0.6b")).toEqual({ source: "ollama", model: "qwen3-embedding:0.6b" });
     draft.rerank.enabled = true;
     draft.rerank.source = "ollama";
-    expect(validate(draft)["rerank.source"]).toContain("Ollama");
+    draft.rerank.model = "qwen3-reranker:0.6b";
+    draft.rerank.base_url = "http://127.0.0.1:11434";
+    expect(validate(draft)).toEqual({});
+    draft.rerank.parallel_requests = 17;
+    draft.rerank.context_tokens = 511;
+    expect(validate(draft)["rerank.parallel_requests"]).toBeTruthy();
+    expect(validate(draft)["rerank.context_tokens"]).toBeTruthy();
     draft.rerank.enabled = false;
     expect(validate(draft)["rerank.source"]).toBeUndefined();
   });

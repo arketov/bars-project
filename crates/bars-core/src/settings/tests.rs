@@ -36,7 +36,7 @@ fn lmstudio_embed_settings_and_independent_rerank() {
     assert!(
         user_err("[rerank]\nenabled=true\nsource='lmstudio'\n")
             .to_string()
-            .contains("LM Studio")
+            .contains("rerank.model")
     );
 }
 
@@ -48,10 +48,30 @@ fn ollama_embed_settings_and_independent_rerank() {
     assert_eq!(loaded.value.embed.source, ModelSource::Ollama);
     assert_eq!(loaded.value.embed.source.as_str(), "ollama");
     assert_eq!(loaded.value.rerank.source, ModelSource::Builtin);
-    let error = user_err(
+    let rerank = user(
         "[rerank]\nenabled = true\nsource = 'ollama'\nmodel = 'reranker'\nbase_url = 'http://127.0.0.1:11434'\n",
     );
-    assert!(error.to_string().contains("Ollama"));
+    assert_eq!(rerank.value.rerank.source, ModelSource::Ollama);
+    assert_eq!(rerank.value.rerank.parallel_requests, 4);
+    assert_eq!(rerank.value.rerank.context_tokens, 32768);
+}
+
+#[test]
+fn external_rerank_tuning_defaults_bounds_and_overrides() {
+    let loaded = user(
+        "[rerank]\nenabled=true\nsource='lmstudio'\nmodel='Qwen3-Reranker-0.6B'\nbase_url='http://127.0.0.1:1234'\nparallel_requests=2\ncontext_tokens=8192\n",
+    );
+    assert_eq!(loaded.value.rerank.parallel_requests, 2);
+    assert_eq!(loaded.value.rerank.context_tokens, 8192);
+    assert!(loaded.warnings.is_empty());
+    for text in [
+        "[rerank]\nparallel_requests=0",
+        "[rerank]\nparallel_requests=17",
+        "[rerank]\ncontext_tokens=511",
+        "[rerank]\ncontext_tokens=131073",
+    ] {
+        assert!(user_err(text).to_string().contains("rerank."));
+    }
 }
 
 fn user(text: &str) -> Loaded<UserSettings> {

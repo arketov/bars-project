@@ -1,0 +1,27 @@
+{
+  "date": "2026-11-01",
+  "scope": "Partial direct HTTP probe before the owner stopped tests and builds; not product acceptance",
+  "hardware": "NVIDIA GeForce RTX 3090, 24576 MiB",
+  "weights": "ggml-org/Qwen3-Reranker-0.6B-Q8_0-GGUF/qwen3-reranker-0.6b-q8_0.gguf",
+  "query": "Столица Франции?",
+  "document": "Париж — столица Франции.",
+  "lmstudio": {
+    "endpoint": "/v1/responses",
+    "loaded_context_length": 32768,
+    "input_tokens": 90,
+    "output_tokens": 1,
+    "yes_logprob": -0.20604397356510162,
+    "no_logprob": -4.057918548583984,
+    "requested_truncation": "disabled",
+    "echoed_truncation": "auto",
+    "requested_frequency_penalty": 0,
+    "echoed_frequency_penalty": 1.1
+  },
+  "reference": {
+    "server": "llama.cpp b11669 Vulkan, same weights, --reranking",
+    "score": 0.9759264588356018,
+    "irrelevant_document": "Для борща нужны свёкла и капуста.",
+    "irrelevant_score": 0.000010575087799225003
+  },
+  "not_verified": ["Ollama generation", "full bars search", "15/50 candidates", "long input", "server template", "repeat penalty effect", "built and installed UI"]
+}

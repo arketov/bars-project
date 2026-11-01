@@ -65,11 +65,8 @@ export function validate(doc: SettingsDoc): Record<string, string> {
     }
   }
   const rerank = doc.rerank;
-  if (rerank.enabled && rerank.source === "lmstudio") {
-    errors["rerank.source"] = "LM Studio не поддерживает штатный API rerank; выберите другой источник";
-  }
-  if (rerank.enabled && rerank.source === "ollama") {
-    errors["rerank.source"] = "Ollama не поддерживает API rerank; выберите другой источник";
+  for (const [key, value, min, max] of [["parallel_requests", rerank.parallel_requests, 1, 16], ["context_tokens", rerank.context_tokens, 512, 131072]] as const) {
+    if (!Number.isInteger(value) || value < min || value > max) errors[`rerank.${key}`] = `Целое число от ${min} до ${max}`;
   }
   if (rerank.enabled && rerank.source !== "builtin") {
     if (!rerank.model.trim()) errors["rerank.model"] = "Укажите модель провайдера";

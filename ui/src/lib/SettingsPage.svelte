@@ -96,7 +96,7 @@
       }
       if (source === "ollama") {
         cfg.base_url = "http://127.0.0.1:11434";
-        cfg.model = "qwen3-embedding:0.6b";
+        cfg.model = kind === "embed" ? "qwen3-embedding:0.6b" : "";
       }
       if (source === "lmstudio") {
         cfg.base_url = "http://127.0.0.1:1234";
@@ -240,7 +240,7 @@
           </div>
           <div class="gbody" class:dim={!draft.rerank.enabled}>
             <div class="seg">
-              {#each SOURCES.filter(([id]) => id !== "ollama" && id !== "lmstudio") as [id, title] (id)}
+              {#each SOURCES as [id, title] (id)}
                 <button class:on={draft.rerank.source === id} onclick={() => setSource("rerank", id)}>{title}</button>
               {/each}
             </div>
@@ -257,6 +257,10 @@
               <div class="note info"><Icon name="info" size={16} /><span>Встроенный rerank тратит секунды на запрос; быстрый rerank даёт внешний по API.</span></div>
             {:else}
               <ProviderFields bind:cfg={draft.rerank} kind="rerank" />
+              {#if draft.rerank.source === "ollama" || draft.rerank.source === "lmstudio"}
+                <div class="field"><div class="lbl"><b>Параллельных запросов</b><small>Одна пара на запрос; общий лимит ожидания — 60 секунд</small></div><div><input class="inp" aria-label="Параллельных запросов rerank" type="number" min="1" max="16" bind:value={draft.rerank.parallel_requests} />{#if errors["rerank.parallel_requests"]}<small class="err">{errors["rerank.parallel_requests"]}</small>{/if}</div></div>
+                <div class="field"><div class="lbl"><b>Контекст rerank, токенов</b><small>Должен помещаться в контекст модели на сервере</small></div><div><input class="inp" aria-label="Контекст rerank, токенов" type="number" min="512" max="131072" bind:value={draft.rerank.context_tokens} />{#if errors["rerank.context_tokens"]}<small class="err">{errors["rerank.context_tokens"]}</small>{/if}</div></div>
+              {/if}
             {/if}
           </div>
         </div>

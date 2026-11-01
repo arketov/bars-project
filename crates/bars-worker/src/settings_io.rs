@@ -157,6 +157,8 @@ pub fn to_doc(user: &UserSettings) -> SettingsDoc {
             base_url: rerank.base_url.clone(),
             api_key_name: rerank.api_key_name.clone(),
             api_key_env: rerank.api_key_env.clone(),
+            parallel_requests: count(rerank.parallel_requests),
+            context_tokens: count(rerank.context_tokens),
             unload_after_minutes: user
                 .unload
                 .rerank_minutes
@@ -356,6 +358,18 @@ fn write_user_settings(
         &old.rerank.source,
     );
     set_text(rerank, "model", &settings.rerank.model, &old.rerank.model);
+    set_count(
+        rerank,
+        "parallel_requests",
+        settings.rerank.parallel_requests,
+        old.rerank.parallel_requests,
+    );
+    set_count(
+        rerank,
+        "context_tokens",
+        settings.rerank.context_tokens,
+        old.rerank.context_tokens,
+    );
     if settings.rerank.source != "builtin" && !rerank.contains_key("model") {
         rerank.insert("model", value(&settings.rerank.model));
     }
@@ -722,7 +736,7 @@ mod tests {
     }
 
     #[test]
-    fn ollama_settings_roundtrip_and_reject_rerank_without_writing() {
+    fn ollama_and_lmstudio_embed_rerank_roundtrip_and_validate_without_writing() {
         external_settings_roundtrip("ollama");
         external_settings_roundtrip("lmstudio");
     }
@@ -735,9 +749,16 @@ mod tests {
         doc.embed.base_url = Some("http://127.0.0.1:11434".into());
         assert!(save_user_settings(home.path(), &doc).unwrap());
         assert_eq!(current(home.path()), doc);
-        let before = fs::read_to_string(user_settings_path(home.path())).unwrap();
         doc.rerank.enabled = true;
         doc.rerank.source = source.into();
+        doc.rerank.model = "Qwen3-Reranker-0.6B".into();
+        doc.rerank.base_url = doc.embed.base_url.clone();
+        doc.rerank.parallel_requests = 2;
+        doc.rerank.context_tokens = 16384;
+        assert!(save_user_settings(home.path(), &doc).unwrap());
+        assert_eq!(current(home.path()), doc);
+        let before = fs::read_to_string(user_settings_path(home.path())).unwrap();
+        doc.rerank.parallel_requests = 17;
         assert!(save_user_settings(home.path(), &doc).is_err());
         assert_eq!(
             fs::read_to_string(user_settings_path(home.path())).unwrap(),

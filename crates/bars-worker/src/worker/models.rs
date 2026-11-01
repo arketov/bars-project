@@ -19,8 +19,8 @@ mod retirement_tests;
 
 use bars_core::models::{
     Accelerator, BGE_RERANKER_V2_M3_ID, BuiltinReranker, EmbedError, Embedder, HttpEmbedder,
-    HttpReranker, ModelFailure, ModelFingerprint, RemoteTarget, RerankError, Reranker,
-    builtin_model, download_percent, load_builtin_embedder, prepare_environment,
+    HttpReranker, LogprobReranker, ModelFailure, ModelFingerprint, RemoteTarget, RerankError,
+    Reranker, builtin_model, download_percent, load_builtin_embedder, prepare_environment,
     remote_fingerprint,
 };
 use bars_core::secrets::{KeyRef, OsSecrets, SecretStore};
@@ -286,12 +286,6 @@ impl ModelProvider for ConfiguredProvider {
     fn load_reranker(&self, settings: &Settings) -> Result<Box<dyn Reranker + Send>, RerankError> {
         let rerank = &settings.rerank;
         match rerank.source {
-            ModelSource::Lmstudio => Err(RerankError::Load(
-                "LM Studio не поддерживает штатный API rerank; выберите другой источник".into(),
-            )),
-            ModelSource::Ollama => Err(RerankError::Load(
-                "Ollama не поддерживает API rerank; выберите другой источник".into(),
-            )),
             ModelSource::Builtin => {
                 if rerank.model != BGE_RERANKER_V2_M3_ID {
                     return Err(RerankError::Load(format!(
@@ -314,7 +308,15 @@ impl ModelProvider for ConfiguredProvider {
                         rerank.api_key_env.as_deref(),
                     )
                     .map_err(RerankError::Load)?;
-                Ok(Box::new(HttpReranker::new(target)))
+                if matches!(source, ModelSource::Ollama | ModelSource::Lmstudio) {
+                    Ok(Box::new(LogprobReranker::new(
+                        target,
+                        rerank.parallel_requests,
+                        rerank.context_tokens,
+                    )))
+                } else {
+                    Ok(Box::new(HttpReranker::new(target)))
+                }
             }
         }
     }

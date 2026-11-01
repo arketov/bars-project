@@ -22,7 +22,9 @@ pub fn download_gguf_artifact(dir: &std::path::Path, id: &str) -> Result<(), Mod
         .map_err(|e| e.failure())
 }
 pub use execution::ExecutionInfo;
+mod logprob_rerank;
 mod remote;
+pub use logprob_rerank::LogprobReranker;
 mod rerank_artifact;
 mod reranker;
 #[cfg(any(test, feature = "test-support"))]

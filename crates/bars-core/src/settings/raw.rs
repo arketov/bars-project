@@ -74,6 +74,8 @@ struct RerankTable {
     api_key_name: Option<String>,
     api_key_env: Option<String>,
     unload_after_minutes: Option<u32>,
+    parallel_requests: Option<usize>,
+    context_tokens: Option<usize>,
     #[serde(flatten)]
     unknown: Unknown,
 }
@@ -550,22 +552,28 @@ impl EmbedTable {
 impl RerankTable {
     /// Выключенный rerank не проверяется: окно может сохранять таблицу по шагам.
     fn validate(&self, file: &Path) -> Result<(), SettingsError> {
+        if self
+            .parallel_requests
+            .is_some_and(|n| !(1..=16).contains(&n))
+        {
+            return Err(invalid(
+                file,
+                "rerank.parallel_requests",
+                "целое число от 1 до 16",
+            ));
+        }
+        if self
+            .context_tokens
+            .is_some_and(|n| !(512..=131072).contains(&n))
+        {
+            return Err(invalid(
+                file,
+                "rerank.context_tokens",
+                "целое число от 512 до 131072",
+            ));
+        }
         if self.enabled != Some(true) {
             return Ok(());
-        }
-        if self.source == Some(ModelSource::Ollama) {
-            return Err(invalid(
-                file,
-                "rerank.source",
-                "Ollama не поддерживает API rerank; выберите встроенную модель или совместимый сервер",
-            ));
-        }
-        if self.source == Some(ModelSource::Lmstudio) {
-            return Err(invalid(
-                file,
-                "rerank.source",
-                "LM Studio не поддерживает штатный API rerank; выберите встроенную модель или совместимый сервер",
-            ));
         }
         ProviderFields {
             table: "rerank",
@@ -587,6 +595,12 @@ impl RerankTable {
     }
 
     fn apply(self, target: &mut RerankSettings) {
+        if let Some(value) = self.parallel_requests {
+            target.parallel_requests = value;
+        }
+        if let Some(value) = self.context_tokens {
+            target.context_tokens = value;
+        }
         if let Some(value) = self.enabled {
             target.enabled = value;
         }

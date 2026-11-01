@@ -780,7 +780,7 @@ impl AcceleratorDoc {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EmbedDoc {
     pub accelerator: AcceleratorDoc,
-    /// `builtin`, `remote`, `local-openai`, `tei`; `ollama`/`lmstudio` только embed.
+    /// `builtin`, `remote`, `local-openai`, `tei`, `ollama`, `lmstudio`.
     pub source: String,
     pub model: String,
     #[serde(default)]
@@ -807,8 +807,19 @@ pub struct RerankDoc {
     pub api_key_name: Option<String>,
     #[serde(default)]
     pub api_key_env: Option<String>,
+    #[serde(default = "default_rerank_parallel")]
+    pub parallel_requests: u32,
+    #[serde(default = "default_rerank_context")]
+    pub context_tokens: u32,
     /// Минут простоя до выгрузки встроенной модели, `0` — не выгружать.
     pub unload_after_minutes: u32,
+}
+
+fn default_rerank_parallel() -> u32 {
+    4
+}
+fn default_rerank_context() -> u32 {
+    32768
 }
 
 /// Таблица `[search]`.

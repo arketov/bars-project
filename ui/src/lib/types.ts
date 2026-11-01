@@ -216,6 +216,8 @@ export interface RerankDoc {
   base_url: string | null;
   api_key_name: string | null;
   api_key_env: string | null;
+  parallel_requests: number;
+  context_tokens: number;
   /** Минут простоя до выгрузки встроенной модели, 0 — не выгружать. */
   unload_after_minutes: number;
 }

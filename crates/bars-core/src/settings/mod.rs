@@ -50,9 +50,9 @@ pub enum ModelSource {
     Remote,
     /// Локальный OpenAI-совместимый адрес.
     LocalOpenai,
-    /// Нативный API Ollama (только embedding).
+    /// Нативный API Ollama.
     Ollama,
-    /// OpenAI API LM Studio (только embedding).
+    /// OpenAI API LM Studio.
     Lmstudio,
     /// Нативные API Hugging Face Text Embeddings Inference.
     Tei,
@@ -113,6 +113,8 @@ pub struct RerankSettings {
     pub base_url: Option<String>,
     pub api_key_name: Option<String>,
     pub api_key_env: Option<String>,
+    pub parallel_requests: usize,
+    pub context_tokens: usize,
 }
 
 impl Default for RerankSettings {
@@ -125,6 +127,8 @@ impl Default for RerankSettings {
             base_url: None,
             api_key_name: None,
             api_key_env: None,
+            parallel_requests: 4,
+            context_tokens: 32768,
         }
     }
 }

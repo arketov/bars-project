@@ -15,10 +15,31 @@ afterEach(() => {
   document.body.innerHTML = "";
 });
 
+it.each(["ollama", "lmstudio"] as const)("selects %s for rerank without reindexing embed", async (source) => {
+  const output = await mockCall("settings_get", {}) as SettingsOutput;
+  settings.saved = clone(output.settings);
+  settings.draft = clone(output.settings);
+  settings.draft.rerank.enabled = true;
+  app.settingsTab = "models";
+  component = mount(SettingsPage, { target: document.body, props: { embedded: true } });
+  flushSync();
+  const label = source === "ollama" ? "Ollama" : "LM Studio";
+  [...document.querySelectorAll("button")].filter(b => b.textContent.trim() === label)[1].click();
+  flushSync();
+  expect(settings.draft.rerank.source).toBe(source);
+  expect(settings.draft.embed).toEqual(output.settings.embed);
+  expect(settings.willReindex).toBe(false);
+  expect(settings.errors["rerank.model"]).toBeTruthy();
+  settings.draft.rerank.model = "Qwen3-Reranker-0.6B";
+  flushSync();
+  expect(settings.errors).toEqual({});
+  expect(document.querySelector('input[aria-label="Параллельных запросов rerank"]')).not.toBeNull();
+});
+
 it.each([
   ["ollama", "Ollama", "http://127.0.0.1:11434", "qwen3-embedding:0.6b"],
   ["lmstudio", "LM Studio", "http://127.0.0.1:1234", ""],
-] as const)("selects %s only for embed, clears inherited keys and restores saved source", async (source, label, url, model) => {
+] as const)("selects %s independently for embed, clears inherited keys and restores saved source", async (source, label, url, model) => {
   const output = await mockCall("settings_get", {}) as SettingsOutput;
   const saved = clone(output.settings);
   saved.embed.source = "remote";
@@ -33,7 +54,7 @@ it.each([
   flushSync();
   const buttons = () => [...document.querySelectorAll("button")];
   const ollama = buttons().filter(b => b.textContent.trim() === label);
-  expect(ollama).toHaveLength(1);
+  expect(ollama).toHaveLength(2);
   ollama[0].click();
   flushSync();
   expect(settings.draft?.embed.source).toBe(source);
