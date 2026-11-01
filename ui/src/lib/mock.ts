@@ -532,6 +532,8 @@ export async function mockCall(method: string, params: Record<string, unknown>):
         clients: [
           { client: "claude-code", installed: true, stale: false, files: ["~/.claude.json", "~/.claude/settings.json"], needs_hook_approval: false },
           { client: "codex", installed: true, stale: false, files: ["~/.codex/config.toml", "~/.codex/hooks.json"], needs_hook_approval: true },
+          { client: "kimi-code", installed: true, stale: false, files: ["~/.kimi-code/mcp.json", "~/.kimi-code/config.toml"], needs_hook_approval: false },
+          { client: "ouroboros", installed: false, stale: false, files: ["~/Ouroboros/data/settings.json"], needs_hook_approval: false },
         ],
       };
     case "instruction":

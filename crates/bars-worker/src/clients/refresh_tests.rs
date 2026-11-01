@@ -61,11 +61,19 @@ fn absent_clients_and_skills_only_are_never_installed() {
     );
     write(&home.path().join(".codex/config.toml"), "model = 'test'\n");
     write(
+        &home.path().join(".kimi-code/config.toml"),
+        "model = 'test'\n",
+    );
+    write(
         &home.path().join(".agents/skills/bars-docs/SKILL.md"),
         "custom",
     );
     write(
         &home.path().join(".claude/skills/bars-docs/SKILL.md"),
+        "custom",
+    );
+    write(
+        &home.path().join(".kimi-code/skills/bars-docs/SKILL.md"),
         "custom",
     );
     let before = snapshot(home.path());
@@ -74,14 +82,22 @@ fn absent_clients_and_skills_only_are_never_installed() {
 }
 
 #[test]
-fn mcp_or_hook_alone_repairs_both_clients() {
-    for client in [InstallClient::ClaudeCode, InstallClient::Codex] {
+fn mcp_or_hook_alone_repairs_all_clients() {
+    for client in [
+        InstallClient::ClaudeCode,
+        InstallClient::Codex,
+        InstallClient::KimiCode,
+    ] {
         for hook_only in [false, true] {
             let home = TempDir::new().unwrap();
             let env = env(&home);
             let paths = layout(&env, client);
             if hook_only {
-                write(&paths.hooks, &json!({"hooks":{"SessionStart":[{"matcher":"old", "hooks":[{"type":"prompt", "command":"bars-cli hook session-start"}]}]}}).to_string());
+                let text = match client {
+                    InstallClient::KimiCode => "[[hooks]]\nevent = \"SessionStart\"\nmatcher = \"old\"\ncommand = \"old/bars-cli hook session-start\"\n".to_string(),
+                    _ => json!({"hooks":{"SessionStart":[{"matcher":"old", "hooks":[{"type":"prompt", "command":"bars-cli hook session-start"}]}]}}).to_string(),
+                };
+                write(&paths.hooks, &text);
             } else {
                 write(
                     &paths.mcp,
@@ -97,7 +113,7 @@ fn mcp_or_hook_alone_repairs_both_clients() {
             assert_eq!(done.needs_hook_approval, client == InstallClient::Codex);
             assert!(state(&env, client).installed);
             assert_eq!(
-                json::hook_commands(&paths.hooks).unwrap(),
+                hook_commands(client, &paths.hooks).unwrap(),
                 [env.hook_command()]
             );
             let before = snapshot(home.path());
@@ -179,9 +195,29 @@ fn invalid_config_preflight_prevents_partial_writes_and_continues_other_client()
         let outcomes = refresh(&env);
         assert!(outcomes[0].result.is_err());
         assert!(outcomes[1].result.as_ref().unwrap().is_some());
+        assert!(
+            outcomes[2].result.as_ref().unwrap().is_none(),
+            "Kimi не установлен"
+        );
         assert_eq!(fs::read(home.path().join(".claude.json")).unwrap(), before);
         assert!(!home.path().join(".claude.json.bars-backup").exists());
     }
+
+    // Сломанный `config.toml` Kimi: ошибка только его, чужие файлы не пишутся.
+    let home = TempDir::new().unwrap();
+    let env = env(&home);
+    write(
+        &home.path().join(".kimi-code/mcp.json"),
+        r#"{"mcpServers":{"bars":{"command":"old"}}}"#,
+    );
+    let kimi_config = home.path().join(".kimi-code/config.toml");
+    write(&kimi_config, "[broken");
+    let outcomes = refresh(&env);
+    assert!(outcomes[0].result.as_ref().unwrap().is_none());
+    assert!(outcomes[1].result.as_ref().unwrap().is_none());
+    assert!(outcomes[2].result.is_err());
+    assert_eq!(fs::read_to_string(&kimi_config).unwrap(), "[broken");
+    assert!(!home.path().join(".kimi-code/mcp.json.bars-backup").exists());
 }
 
 #[test]
@@ -193,7 +229,10 @@ fn partial_write_report_survives_late_error_and_retry_finishes() {
     // Каталог вместо SKILL.md: одинаково воспроизводимый отказ чтения на всех ОС.
     let blocked = paths.skills.join("bars-docs/SKILL.md");
     fs::create_dir_all(&blocked).unwrap();
-    let outcome = refresh(&env).pop().unwrap();
+    let outcome = refresh(&env)
+        .into_iter()
+        .find(|r| r.client == InstallClient::Codex)
+        .unwrap();
     let Err(ClientsError::Partial { done, .. }) = outcome.result else {
         panic!("нужен частичный отчёт");
     };

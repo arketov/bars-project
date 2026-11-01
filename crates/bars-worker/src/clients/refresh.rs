@@ -19,31 +19,37 @@ pub struct RefreshResult {
 }
 
 pub fn refresh(env: &InstallEnv) -> Vec<RefreshResult> {
-    [InstallClient::ClaudeCode, InstallClient::Codex]
-        .into_iter()
-        .map(|client| {
-            let _guard = lock();
-            let result = refresh_locked(env, client);
-            RefreshResult { client, result }
-        })
-        .collect()
+    [
+        InstallClient::ClaudeCode,
+        InstallClient::Codex,
+        InstallClient::KimiCode,
+        InstallClient::Ouroboros,
+    ]
+    .into_iter()
+    .map(|client| {
+        let _guard = lock();
+        let result = refresh_locked(env, client);
+        RefreshResult { client, result }
+    })
+    .collect()
 }
 
 pub(super) fn refresh_locked(env: &InstallEnv, client: InstallClient) -> Result<Option<Installed>> {
     if !present(env, client)? {
         return Ok(None);
     }
-    install_locked(env, client).map(Some)
+    install_locked(env, client, false).map(Some)
 }
 
 fn present(env: &InstallEnv, client: InstallClient) -> Result<bool> {
     let paths = layout(env, client);
     // Обе проверки выполняются до любых записей; ошибка не означает отсутствие.
     let mcp = match client {
-        InstallClient::ClaudeCode => json::has_mcp(&paths.mcp)?,
+        InstallClient::ClaudeCode | InstallClient::KimiCode => json::has_mcp(&paths.mcp)?,
         InstallClient::Codex => codex_toml::has_mcp(&paths.mcp)?,
+        InstallClient::Ouroboros => ouroboros::has_mcp(&paths.mcp)?,
     };
-    let hook = !json::hook_commands(&paths.hooks)?.is_empty();
+    let hook = !super::hook_commands(client, &paths.hooks)?.is_empty();
     Ok(mcp || hook)
 }
 
@@ -64,6 +70,8 @@ pub(crate) fn report(client: InstallClient, action: &str, result: &Result<Option
     let title = match client {
         InstallClient::ClaudeCode => "Claude Code",
         InstallClient::Codex => "Codex",
+        InstallClient::KimiCode => "Kimi Code",
+        InstallClient::Ouroboros => "Ouroboros",
     };
     let done = match result {
         Ok(Some(done)) => Some(done),

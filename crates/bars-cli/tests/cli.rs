@@ -491,6 +491,44 @@ async fn install_and_uninstall_edit_client_files_in_temp_home() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn install_and_uninstall_kimi_code_edit_files_in_temp_home() {
+    let harness = Harness::new("install-kimi");
+    let env = harness.env.clone();
+    let client_home = harness.home.path().join("client-home");
+
+    let installed = bars(&env, &["--json", "install", "--client", "kimi-code"]).await;
+    let value = json(&installed);
+    assert_eq!(value["needs_hook_approval"], false);
+    assert!(
+        value["changed_files"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|file| file.as_str().unwrap().ends_with("mcp.json"))
+    );
+    let mcp: Value =
+        serde_json::from_str(&fs::read_to_string(client_home.join(".kimi-code/mcp.json")).unwrap())
+            .unwrap();
+    assert_eq!(mcp["mcpServers"]["bars"]["command"], "/opt/bars/bars-mcp");
+    let config = fs::read_to_string(client_home.join(".kimi-code/config.toml")).unwrap();
+    assert!(config.contains("[[hooks]]"), "{config}");
+    assert!(config.contains("hook session-start"), "{config}");
+    assert!(!config.contains("/hooks"), "{config}");
+
+    let human = bars(&env, &["install", "--client", "kimi-code"]).await;
+    assert_eq!(human.code, 0, "stderr: {}", human.err);
+    assert!(human.out.contains("уже установлен"), "{}", human.out);
+    assert!(!human.out.contains("/hooks"), "{}", human.out);
+
+    let removed = json(&bars(&env, &["--json", "uninstall", "--client", "kimi-code"]).await);
+    assert!(!removed["changed_files"].as_array().unwrap().is_empty());
+    let mcp: Value =
+        serde_json::from_str(&fs::read_to_string(client_home.join(".kimi-code/mcp.json")).unwrap())
+            .unwrap();
+    assert!(mcp["mcpServers"].get("bars").is_none());
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn print_instruction_needs_no_worker() {
     let harness = Harness::new("instruction");
     let out = bars(&harness.env, &["install", "--print-instruction"]).await;

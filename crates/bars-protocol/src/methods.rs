@@ -473,6 +473,10 @@ pub enum InstallClient {
     ClaudeCode,
     #[serde(rename = "codex")]
     Codex,
+    #[serde(rename = "kimi-code")]
+    KimiCode,
+    #[serde(rename = "ouroboros")]
+    Ouroboros,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

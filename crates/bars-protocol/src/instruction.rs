@@ -11,7 +11,11 @@ pub fn agent_install_text(cli: &str, mcp: &str) -> String {
          1. Run one command for your client:\n\
          \x20  \"{cli}\" install --client claude-code\n\
          \x20  \"{cli}\" install --client codex\n\
-         \x20  It registers the bars MCP server, the session-start hook and the bars skills; before\n\
+         \x20  \"{cli}\" install --client kimi-code\n\
+         \x20  \"{cli}\" install --client ouroboros\n\
+         \x20  Ouroboros: local MCP only, no hook or skills. Register\n\
+         \x20  projects in bars or with bars-cli register. Custom OUROBOROS_* paths are unsupported.\n\
+         \x20  Other listed clients also receive the session-start hook and bars skills; before\n\
          \x20  editing other configs it makes a copy named `<file>.bars-backup`.\n\
          2. If the client is Codex, tell the user to run /hooks in Codex and approve the bars hook:\n\
          \x20  without approval the hook does not run (the MCP server already works).\n\
@@ -42,6 +46,7 @@ mod tests {
     fn text_names_both_executables_and_forbids_consent() {
         let text = agent_install_text("/opt/bars/bars-cli", "/opt/bars/bars-mcp");
         assert!(text.contains("/opt/bars/bars-cli\" install --client codex"));
+        assert!(text.contains("/opt/bars/bars-cli\" install --client kimi-code"));
         assert!(text.contains("command /opt/bars/bars-mcp"));
         assert!(text.contains("Forbidden: never pass"));
     }

@@ -98,8 +98,10 @@ function Wait-Until([scriptblock]$predicate) {
 }
 function Get-Snapshot {
     $files = @('.claude.json','.claude/settings.json','.codex/config.toml','.codex/hooks.json',
+        '.kimi-code/mcp.json','.kimi-code/config.toml',
         '.claude/skills/bars-docs/SKILL.md','.claude/skills/bars-session-log/SKILL.md','.claude/skills/bars-end/SKILL.md',
-        '.agents/skills/bars-docs/SKILL.md','.agents/skills/bars-session-log/SKILL.md','.agents/skills/bars-end/SKILL.md')
+        '.agents/skills/bars-docs/SKILL.md','.agents/skills/bars-session-log/SKILL.md','.agents/skills/bars-end/SKILL.md',
+        '.kimi-code/skills/bars-docs/SKILL.md','.kimi-code/skills/bars-session-log/SKILL.md','.kimi-code/skills/bars-end/SKILL.md')
     $snapshot = [ordered]@{}
     foreach ($file in $files) {
         foreach ($suffix in @('', '.bars-backup')) {
@@ -129,7 +131,9 @@ try {
     Write-Fixture (Join-Path $fixtureHome '.claude/settings.json') $oldHook
     Write-Fixture (Join-Path $fixtureHome '.codex/config.toml') "# foreign comment`n[mcp_servers.other]`ncommand = 'other'`n[mcp_servers.bars]`ncommand = 'old/bars-mcp'`n"
     Write-Fixture (Join-Path $fixtureHome '.codex/hooks.json') $oldHook
-    foreach ($base in @('.agents/skills','.claude/skills')) {
+    Write-Fixture (Join-Path $fixtureHome '.kimi-code/mcp.json') '{"mcpServers":{"other":{"command":"other"},"bars":{"command":"old/bars-mcp"}},"foreign":42}'
+    Write-Fixture (Join-Path $fixtureHome '.kimi-code/config.toml') "# kimi settings`ndefault_model = 'k3'`n`n[[hooks]]`nevent = 'Notification'`nmatcher = 'task.completed'`ncommand = 'notify'`n`n[[hooks]]`nevent = 'SessionStart'`nmatcher = 'old'`ncommand = 'old/bars-cli hook session-start'`n"
+    foreach ($base in @('.agents/skills','.claude/skills','.kimi-code/skills')) {
         foreach ($skill in @('bars-docs','bars-session-log','bars-end')) {
             Write-Fixture (Join-Path $fixtureHome "$base/$skill/SKILL.md") 'old skill text'
         }
@@ -139,7 +143,7 @@ try {
     Wait-Until {
         foreach ($skill in @('bars-docs','bars-session-log','bars-end')) {
             $expected = [IO.File]::ReadAllText((Join-Path $repo "crates/bars-worker/assets/skills/$skill/SKILL.md"))
-            foreach ($base in @('.agents/skills','.claude/skills')) {
+            foreach ($base in @('.agents/skills','.claude/skills','.kimi-code/skills')) {
                 $path = Join-Path $fixtureHome "$base/$skill/SKILL.md"
                 if (-not (Test-Path -LiteralPath $path) -or [IO.File]::ReadAllText($path) -cne $expected) { return $false }
             }
@@ -148,7 +152,7 @@ try {
     }
     foreach ($skill in @('bars-docs','bars-session-log','bars-end')) {
         $expected = [IO.File]::ReadAllText((Join-Path $repo "crates/bars-worker/assets/skills/$skill/SKILL.md"))
-        foreach ($base in @('.agents/skills','.claude/skills')) {
+        foreach ($base in @('.agents/skills','.claude/skills','.kimi-code/skills')) {
             Assert-That ([IO.File]::ReadAllText((Join-Path $fixtureHome "$base/$skill/SKILL.md")) -ceq $expected) "Skill mismatch: $base/$skill"
         }
     }
@@ -157,6 +161,11 @@ try {
     $hooks = Get-Content -Raw (Join-Path $fixtureHome '.codex/hooks.json') | ConvertFrom-Json -AsHashtable
     Assert-That ($hooks.hooks.SessionStart.Count -eq 2) 'Duplicate hooks remain'
     Assert-That ($hooks.hooks.SessionStart[0].matcher -eq 'clear' -and $hooks.hooks.SessionStart[0].hooks[0].command -eq 'foreign') 'Foreign hook changed'
+    $kimiMcp = Get-Content -Raw (Join-Path $fixtureHome '.kimi-code/mcp.json') | ConvertFrom-Json -AsHashtable
+    Assert-That ($kimiMcp.foreign -eq 42 -and $kimiMcp.mcpServers.other.command -eq 'other' -and $kimiMcp.mcpServers.bars.command -eq $mcpExe) 'Kimi MCP lost'
+    $kimiConfig = Get-Content -Raw (Join-Path $fixtureHome '.kimi-code/config.toml')
+    Assert-That ($kimiConfig -match "default_model = 'k3'" -and $kimiConfig -match "command = 'notify'") 'Kimi foreign config lost'
+    Assert-That ($kimiConfig -match 'startup\|resume' -and $kimiConfig -match 'hook session-start' -and $kimiConfig -notmatch "matcher = 'old'") 'Kimi hook not normalized'
     $codex = Get-Command codex -ErrorAction SilentlyContinue
     if ($codex) {
         $codexRead = Invoke-Child $codex.Source @('mcp','get','bars','--json')
@@ -191,6 +200,7 @@ try {
     $active = Start-Session '03-uninstall'
     $null = Invoke-Child $cliExe @('uninstall','--client','claude-code','--json')
     $null = Invoke-Child $cliExe @('uninstall','--client','codex','--json')
+    $null = Invoke-Child $cliExe @('uninstall','--client','kimi-code','--json')
     $null = Stop-Session $active; $active = $null
     $before = Get-Snapshot
     $active = Start-Session '04-after-uninstall'
@@ -210,7 +220,7 @@ try {
     New-Item -ItemType Directory -Path $emptyHome | Out-Null
     $active = Start-Session '06-empty' $emptyHome
     $log = Stop-Session $active; $active = $null
-    Assert-That (-not (Test-Path (Join-Path $emptyHome '.codex')) -and -not (Test-Path (Join-Path $emptyHome '.claude'))) 'Empty client installed'
+    Assert-That (-not (Test-Path (Join-Path $emptyHome '.codex')) -and -not (Test-Path (Join-Path $emptyHome '.claude')) -and -not (Test-Path (Join-Path $emptyHome '.kimi-code'))) 'Empty client installed'
     $summary = @{ sessions = 6; passed = $true; codex_config_read = [bool]$codex; mcp_stdio = $true; skills_junction = $true; evidence = $EvidenceDir }
     $summary | ConvertTo-Json | Tee-Object -FilePath (Join-Path $EvidenceDir 'summary.json')
 } finally {

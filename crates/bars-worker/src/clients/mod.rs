@@ -1,6 +1,7 @@
-//! Установка bars в Claude Code и Codex и удаление оттуда (Т-21, Т-28, `docs/features/clients/clients.md`).
+//! Установка bars в Claude Code, Codex, Kimi Code и Ouroboros и удаление оттуда (Т-21, Т-28,
+//! `docs/features/clients/clients.md`).
 //!
-//! Прописываются две записи `bars` — MCP-сервер и хук начала сессии — и skills. Чужие конфиги
+//! Прописываются MCP-сервер bars, а у поддерживающих их клиентов — хук и skills. Чужие конфиги
 //! правятся осторожно: копия `<файл>.bars-backup`, запись через временный файл и переименование,
 //! только записи `bars`. Файл, который не разбирается, не меняется (ошибка). Ничего не пишется,
 //! если файл и так в нужном виде: повторная установка идемпотентна.
@@ -8,6 +9,8 @@
 mod codex_toml;
 mod fsx;
 mod json;
+mod kimi_toml;
+mod ouroboros;
 mod project_gate;
 mod refresh;
 
@@ -143,16 +146,28 @@ fn layout(env: &InstallEnv, client: InstallClient) -> Layout {
             hooks: env.home.join(".codex").join("hooks.json"),
             skills: env.home.join(".agents").join("skills"),
         },
+        // Хуки Kimi Code живут в общем `config.toml`, MCP — в отдельном `mcp.json`.
+        InstallClient::KimiCode => Layout {
+            mcp: env.home.join(".kimi-code").join("mcp.json"),
+            hooks: env.home.join(".kimi-code").join("config.toml"),
+            skills: env.home.join(".kimi-code").join("skills"),
+        },
+        // hooks и skills для этого клиента не используются.
+        InstallClient::Ouroboros => Layout {
+            mcp: env.home.join("Ouroboros/data/settings.json"),
+            hooks: env.home.join("Ouroboros/data/settings.json"),
+            skills: env.home.join("Ouroboros/data/skills"),
+        },
     }
 }
 
 /// Подключает bars к клиенту: MCP-сервер, хук и skills.
 pub fn install(env: &InstallEnv, client: InstallClient) -> Result<Installed> {
     let _guard = lock();
-    install_locked(env, client)
+    install_locked(env, client, true)
 }
 
-fn install_locked(env: &InstallEnv, client: InstallClient) -> Result<Installed> {
+fn install_locked(env: &InstallEnv, client: InstallClient, activate: bool) -> Result<Installed> {
     let layout = layout(env, client);
     let mut done = Installed {
         changed_files: Vec::new(),
@@ -162,23 +177,48 @@ fn install_locked(env: &InstallEnv, client: InstallClient) -> Result<Installed> 
     let result = (|| {
         // Полный разбор обоих конфигов до первой записи.
         match client {
-            InstallClient::ClaudeCode => json::validate_mcp(&layout.mcp, &env.mcp_exe)?,
+            InstallClient::ClaudeCode | InstallClient::KimiCode => {
+                json::validate_mcp(&layout.mcp, &env.mcp_exe)?
+            }
             InstallClient::Codex => codex_toml::validate_mcp(&layout.mcp, &env.mcp_exe)?,
+            InstallClient::Ouroboros => ouroboros::validate_mcp(&layout.mcp)?,
         }
-        json::validate_hook(&layout.hooks, &env.hook_command())?;
+        match client {
+            InstallClient::ClaudeCode | InstallClient::Codex => {
+                json::validate_hook(&layout.hooks, &env.hook_command())?
+            }
+            InstallClient::KimiCode => {
+                kimi_toml::validate_hook(&layout.hooks, &env.hook_command())?
+            }
+            InstallClient::Ouroboros => {}
+        }
         let mcp_changed = match client {
-            InstallClient::ClaudeCode => json::install_mcp(&layout.mcp, &env.mcp_exe)?,
+            InstallClient::ClaudeCode | InstallClient::KimiCode => {
+                json::install_mcp(&layout.mcp, &env.mcp_exe)?
+            }
             InstallClient::Codex => codex_toml::install_mcp(&layout.mcp, &env.mcp_exe)?,
+            InstallClient::Ouroboros => {
+                ouroboros::install_mcp(&layout.mcp, &env.mcp_exe, activate)?
+            }
         };
         if mcp_changed {
             done.changed_files.push(layout.mcp.clone());
         }
-        done.hook_changed = json::install_hook(&layout.hooks, &env.hook_command())?;
+        done.hook_changed = match client {
+            InstallClient::ClaudeCode | InstallClient::Codex => {
+                json::install_hook(&layout.hooks, &env.hook_command())?
+            }
+            InstallClient::KimiCode => kimi_toml::install_hook(&layout.hooks, &env.hook_command())?,
+            InstallClient::Ouroboros => false,
+        };
         done.needs_hook_approval = client == InstallClient::Codex && done.hook_changed;
         if done.hook_changed {
             done.changed_files.push(layout.hooks.clone());
         }
-        for (name, text) in SKILLS {
+        for (name, text) in SKILLS
+            .into_iter()
+            .filter(|_| client != InstallClient::Ouroboros)
+        {
             let file = layout.skills.join(name).join("SKILL.md");
             if fsx::read_text(&file)?.as_deref() != Some(text) {
                 write_atomic(&file, text, false)?;
@@ -200,15 +240,25 @@ fn install_locked(env: &InstallEnv, client: InstallClient) -> Result<Installed> 
 fn is_stale(env: &InstallEnv, client: InstallClient) -> Result<bool> {
     let layout = layout(env, client);
     let mcp = match client {
-        InstallClient::ClaudeCode => json::mcp_command(&layout.mcp)?,
+        InstallClient::ClaudeCode | InstallClient::KimiCode => json::mcp_command(&layout.mcp)?,
         InstallClient::Codex => codex_toml::mcp_command(&layout.mcp)?,
+        InstallClient::Ouroboros => ouroboros::mcp_command(&layout.mcp)?,
     };
     let mcp_stale = mcp.is_some_and(|command| command != env.mcp_exe.display().to_string());
     let hook = env.hook_command();
-    let hook_stale = json::hook_commands(&layout.hooks)?
+    let hook_stale = hook_commands(client, &layout.hooks)?
         .iter()
         .any(|command| *command != hook);
     Ok(mcp_stale || hook_stale)
+}
+
+/// Команды хука bars из конфига клиента.
+fn hook_commands(client: InstallClient, file: &Path) -> Result<Vec<String>> {
+    match client {
+        InstallClient::ClaudeCode | InstallClient::Codex => json::hook_commands(file),
+        InstallClient::KimiCode => kimi_toml::hook_commands(file),
+        InstallClient::Ouroboros => Ok(Vec::new()),
+    }
 }
 
 /// Состояние установки bars в клиенте: то, что показывает вкладка «Клиенты».
@@ -227,13 +277,22 @@ pub struct ClientState {
 pub fn state(env: &InstallEnv, client: InstallClient) -> ClientState {
     let layout = layout(env, client);
     let mcp = match client {
-        InstallClient::ClaudeCode => json::mcp_command(&layout.mcp),
+        InstallClient::ClaudeCode | InstallClient::KimiCode => json::mcp_command(&layout.mcp),
         InstallClient::Codex => codex_toml::mcp_command(&layout.mcp),
+        InstallClient::Ouroboros => ouroboros::mcp_command(&layout.mcp),
     };
     ClientState {
-        installed: matches!(mcp, Ok(Some(_))),
+        installed: if client == InstallClient::Ouroboros {
+            ouroboros::has_mcp(&layout.mcp).unwrap_or(false)
+        } else {
+            matches!(mcp, Ok(Some(_)))
+        },
         stale: is_stale(env, client).unwrap_or(false),
-        files: vec![layout.mcp, layout.hooks, layout.skills],
+        files: if client == InstallClient::Ouroboros {
+            vec![layout.mcp]
+        } else {
+            vec![layout.mcp, layout.hooks, layout.skills]
+        },
     }
 }
 
@@ -253,28 +312,44 @@ fn uninstall_locked(env: &InstallEnv, client: InstallClient) -> Result<Vec<PathB
     let result = (|| {
         // Не удалять MCP перед обнаружением неразбираемого hooks-файла.
         match client {
-            InstallClient::ClaudeCode => {
+            InstallClient::ClaudeCode | InstallClient::KimiCode => {
                 json::has_mcp(&layout.mcp)?;
             }
             InstallClient::Codex => {
                 codex_toml::has_mcp(&layout.mcp)?;
             }
+            InstallClient::Ouroboros => {
+                ouroboros::has_mcp(&layout.mcp)?;
+            }
         }
-        json::hook_commands(&layout.hooks)?;
+        hook_commands(client, &layout.hooks)?;
         let mcp_changed = match client {
-            InstallClient::ClaudeCode => json::uninstall_mcp(&layout.mcp)?,
+            InstallClient::ClaudeCode | InstallClient::KimiCode => {
+                json::uninstall_mcp(&layout.mcp)?
+            }
             InstallClient::Codex => codex_toml::uninstall_mcp(&layout.mcp)?,
+            InstallClient::Ouroboros => ouroboros::uninstall_mcp(&layout.mcp)?,
         };
         if mcp_changed {
             done.changed_files.push(layout.mcp.clone());
         }
-        if json::uninstall_hook(&layout.hooks)? {
+        let hook_removed = match client {
+            InstallClient::ClaudeCode | InstallClient::Codex => {
+                json::uninstall_hook(&layout.hooks)?
+            }
+            InstallClient::KimiCode => kimi_toml::uninstall_hook(&layout.hooks)?,
+            InstallClient::Ouroboros => false,
+        };
+        if hook_removed {
             done.changed_files.push(layout.hooks.clone());
         }
         if client == InstallClient::ClaudeCode {
             done.changed_files.extend(project_gate::remove_all(env));
         }
-        for (name, _) in SKILLS {
+        for (name, _) in SKILLS
+            .into_iter()
+            .filter(|_| client != InstallClient::Ouroboros)
+        {
             let dir = layout.skills.join(name);
             if remove_dir(&dir)? {
                 done.changed_files.push(dir);

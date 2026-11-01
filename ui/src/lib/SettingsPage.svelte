@@ -51,6 +51,8 @@
   const CLIENT_NAMES: Record<InstallClientName, [string, string]> = {
     "claude-code": ["CC", "Claude Code"],
     codex: ["Cx", "Codex"],
+    "kimi-code": ["Ki", "Kimi Code"],
+    ouroboros: ["Oo", "Ouroboros"],
   };
 
   const draft = $derived(settings.draft);
@@ -334,7 +336,7 @@
         </div>
       {:else if tab === "clients"}
         <h1>Клиенты</h1>
-        <p class="lead">Установка прописывает MCP-сервер <span class="mono">bars</span> и хук начала сессии. Чужие записи не трогаются, перед правкой файла рядом остаётся копия <span class="mono">.bars-backup</span>.</p>
+        <p class="lead">Установка подключает MCP-сервер <span class="mono">bars</span>; в поддерживающих их клиентах добавляет хук начала сессии и skills. Чужие записи не трогаются, перед правкой файла рядом остаётся копия <span class="mono">.bars-backup</span>.</p>
         <div class="group">
           {#each settings.clients as client (client.client)}
             {@const badge = clientBadge(client)}
@@ -349,6 +351,9 @@
                 <button class="ghost" disabled={settings.busy === client.client} onclick={() => settings.install(client.client)}>{client.installed ? "Переустановить" : "Установить"}</button>
                 {#if client.installed}<button class="ghost danger" disabled={settings.busy === client.client} onclick={() => settings.uninstall(client.client)}>Удалить</button>{/if}
               </div>
+              {#if client.client === "ouroboros"}
+                <div class="note"><span>Локальный Ouroboros с обычной папкой ~/Ouroboros/data/: MCP без хука и skills. Проекты добавляются в окне bars или через CLI.</span></div>
+              {/if}
               {#if client.stale}
                 <div class="note warn"><Icon name="warn" size={16} /><span>Записи указывают на старое расположение bars (приложение переехало или обновилось). Нажмите «Переустановить».</span></div>
               {:else if client.needs_hook_approval}

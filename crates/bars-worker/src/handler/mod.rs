@@ -1049,20 +1049,25 @@ impl WorkerHandler {
 
     fn clients_status(&self) -> Result<ClientsStatusOutput, RpcError> {
         let env = self.install_env()?;
-        let clients = [InstallClient::ClaudeCode, InstallClient::Codex]
-            .into_iter()
-            .map(|client| {
-                let state = clients::state(env, client);
-                ClientStatus {
-                    client,
-                    installed: state.installed,
-                    stale: state.stale,
-                    files: paths(state.files),
-                    // Одобрен ли хук в Codex, bars не знает: напоминание остаётся, пока установлено.
-                    needs_hook_approval: client == InstallClient::Codex && state.installed,
-                }
-            })
-            .collect();
+        let clients = [
+            InstallClient::ClaudeCode,
+            InstallClient::Codex,
+            InstallClient::KimiCode,
+            InstallClient::Ouroboros,
+        ]
+        .into_iter()
+        .map(|client| {
+            let state = clients::state(env, client);
+            ClientStatus {
+                client,
+                installed: state.installed,
+                stale: state.stale,
+                files: paths(state.files),
+                // Одобрен ли хук в Codex, bars не знает: напоминание остаётся, пока установлено.
+                needs_hook_approval: client == InstallClient::Codex && state.installed,
+            }
+        })
+        .collect();
         Ok(ClientsStatusOutput { clients })
     }
 

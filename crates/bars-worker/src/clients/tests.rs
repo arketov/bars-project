@@ -216,28 +216,162 @@ fn unparsable_file_is_not_written() {
         ClientsError::Parse { .. }
     ));
     assert_eq!(fs::read_to_string(&config).unwrap(), "[broken");
+
+    let kimi_config = home.path().join(".kimi-code/config.toml");
+    write(&kimi_config, "[broken");
+    assert!(matches!(
+        install(&env, InstallClient::KimiCode).unwrap_err(),
+        ClientsError::Parse { .. }
+    ));
+    assert_eq!(fs::read_to_string(&kimi_config).unwrap(), "[broken");
+    assert!(!home.path().join(".kimi-code/mcp.json").exists());
 }
 
 #[test]
 fn stale_reports_only_installed_clients_with_old_paths() {
     let stale = |env: &InstallEnv| {
-        [InstallClient::ClaudeCode, InstallClient::Codex]
-            .into_iter()
-            .filter(|&client| super::state(env, client).stale)
-            .collect::<Vec<_>>()
+        [
+            InstallClient::ClaudeCode,
+            InstallClient::Codex,
+            InstallClient::KimiCode,
+        ]
+        .into_iter()
+        .filter(|&client| super::state(env, client).stale)
+        .collect::<Vec<_>>()
     };
     let home = TempDir::new().unwrap();
     let mut env = env(&home);
     assert!(stale(&env).is_empty(), "ничего не установлено");
     install(&env, InstallClient::ClaudeCode).unwrap();
     install(&env, InstallClient::Codex).unwrap();
+    install(&env, InstallClient::KimiCode).unwrap();
     assert!(stale(&env).is_empty());
 
     env.cli_exe = PathBuf::from("/new/bars-cli");
     assert_eq!(
         stale(&env),
-        [InstallClient::ClaudeCode, InstallClient::Codex]
+        [
+            InstallClient::ClaudeCode,
+            InstallClient::Codex,
+            InstallClient::KimiCode
+        ]
     );
     install(&env, InstallClient::ClaudeCode).unwrap();
+    install(&env, InstallClient::KimiCode).unwrap();
     assert_eq!(stale(&env), [InstallClient::Codex]);
+}
+
+#[test]
+fn kimi_install_edits_mcp_json_and_config_toml_keeping_everything_else() {
+    let home = TempDir::new().unwrap();
+    let env = env(&home);
+    let mcp = home.path().join(".kimi-code/mcp.json");
+    let config = home.path().join(".kimi-code/config.toml");
+    write(
+        &config,
+        "# мои настройки\ndefault_model = \"k3\"\n\n[providers.kimi]\ntype = \"kimi\"\napi_key = \"secret\"\n\n[[permission.rules]]\ndecision = \"allow\"\npattern = \"Read\"\n\n[[hooks]]\nevent = \"Notification\"\nmatcher = \"task\\\\.completed\"\ncommand = \"notify-send done\"\n",
+    );
+
+    let done = install(&env, InstallClient::KimiCode).unwrap();
+    assert!(!done.needs_hook_approval);
+    assert_eq!(done.changed_files.len(), 5, "{:?}", done.changed_files);
+
+    let value = read_json(&mcp);
+    assert_eq!(value["mcpServers"]["bars"]["command"], "/opt/bars/bars-mcp");
+    assert_eq!(value["mcpServers"]["bars"]["type"], "stdio");
+    assert_eq!(value["mcpServers"]["bars"]["args"], json!([]));
+
+    let text = fs::read_to_string(&config).unwrap();
+    assert!(
+        text.starts_with("# мои настройки\ndefault_model = \"k3\""),
+        "{text}"
+    );
+    assert!(text.contains("api_key = \"secret\""), "{text}");
+    let parsed: toml::Table = text.parse().unwrap();
+    assert_eq!(parsed["default_model"].as_str(), Some("k3"));
+    assert_eq!(
+        parsed["permission"]["rules"][0]["pattern"].as_str(),
+        Some("Read")
+    );
+    let hooks = parsed["hooks"].as_array().unwrap();
+    assert_eq!(hooks.len(), 2, "чужой хук сохранён, bars добавлен");
+    assert_eq!(hooks[0]["event"].as_str(), Some("Notification"));
+    assert_eq!(hooks[0]["command"].as_str(), Some("notify-send done"));
+    assert_eq!(hooks[1]["event"].as_str(), Some("SessionStart"));
+    assert_eq!(hooks[1]["matcher"].as_str(), Some("startup|resume"));
+    assert_eq!(
+        hooks[1]["command"].as_str(),
+        Some("\"/opt/bars/bars-cli\" hook session-start")
+    );
+    assert!(
+        !hooks[1].as_table().unwrap().contains_key("timeout"),
+        "только разрешённые Kimi поля"
+    );
+    assert!(
+        home.path()
+            .join(".kimi-code/config.toml.bars-backup")
+            .exists()
+    );
+    for name in ["bars-docs", "bars-session-log", "bars-end"] {
+        assert!(
+            home.path()
+                .join(".kimi-code/skills")
+                .join(name)
+                .join("SKILL.md")
+                .exists()
+        );
+    }
+}
+
+#[test]
+fn kimi_install_is_idempotent_and_updates_moved_paths_without_duplicates() {
+    let home = TempDir::new().unwrap();
+    let mut env = env(&home);
+    install(&env, InstallClient::KimiCode).unwrap();
+    let config = home.path().join(".kimi-code/config.toml");
+    let first = fs::read_to_string(&config).unwrap();
+
+    let again = install(&env, InstallClient::KimiCode).unwrap();
+    assert!(again.changed_files.is_empty(), "{:?}", again.changed_files);
+    assert_eq!(fs::read_to_string(&config).unwrap(), first);
+
+    env.mcp_exe = PathBuf::from("/new/bars-mcp");
+    env.cli_exe = PathBuf::from("/new/bars-cli");
+    let moved = install(&env, InstallClient::KimiCode).unwrap();
+    assert_eq!(moved.changed_files.len(), 2);
+    let parsed: toml::Table = fs::read_to_string(&config).unwrap().parse().unwrap();
+    let hooks = parsed["hooks"].as_array().unwrap();
+    assert_eq!(hooks.len(), 1, "дублей нет");
+    assert_eq!(
+        hooks[0]["command"].as_str(),
+        Some("\"/new/bars-cli\" hook session-start")
+    );
+    assert_eq!(
+        read_json(&home.path().join(".kimi-code/mcp.json"))["mcpServers"]["bars"]["command"],
+        "/new/bars-mcp"
+    );
+}
+
+#[test]
+fn kimi_uninstall_removes_only_bars() {
+    let home = TempDir::new().unwrap();
+    let env = env(&home);
+    let mcp = home.path().join(".kimi-code/mcp.json");
+    let config = home.path().join(".kimi-code/config.toml");
+    write(
+        &config,
+        "default_model = \"k3\"\n\n[[hooks]]\nevent = \"Notification\"\nmatcher = \"x\"\ncommand = \"notify\"\n",
+    );
+    install(&env, InstallClient::KimiCode).unwrap();
+
+    let removed = uninstall(&env, InstallClient::KimiCode).unwrap();
+    assert_eq!(removed.len(), 5);
+    assert_eq!(read_json(&mcp), json!({"mcpServers": {}}));
+    let parsed: toml::Table = fs::read_to_string(&config).unwrap().parse().unwrap();
+    assert_eq!(parsed["default_model"].as_str(), Some("k3"));
+    let hooks = parsed["hooks"].as_array().unwrap();
+    assert_eq!(hooks.len(), 1);
+    assert_eq!(hooks[0]["command"].as_str(), Some("notify"));
+    assert!(!home.path().join(".kimi-code/skills/bars-docs").exists());
+    assert!(uninstall(&env, InstallClient::KimiCode).unwrap().is_empty());
 }

@@ -139,6 +139,8 @@ pub enum AutostartAction {
 pub enum ClientArg {
     ClaudeCode,
     Codex,
+    KimiCode,
+    Ouroboros,
 }
 
 impl From<ClientArg> for InstallClient {
@@ -146,6 +148,8 @@ impl From<ClientArg> for InstallClient {
         match client {
             ClientArg::ClaudeCode => Self::ClaudeCode,
             ClientArg::Codex => Self::Codex,
+            ClientArg::KimiCode => Self::KimiCode,
+            ClientArg::Ouroboros => Self::Ouroboros,
         }
     }
 }

@@ -28,8 +28,8 @@ GraphRAG: `relations`, `paths`, `impact`, `context`, `explore`, `graph show/stat
 | `bars-cli reindex [--full] [--accept-model-change]` | переиндексация; `--accept-model-change` — согласие пользователя после смены модели (Т-25, [architecture/protocol.md](../../architecture/protocol.md)) | `bars_reindex` |
 | `bars-cli register [путь]` | регистрация проекта (Т-6) | пункт «Добавить проект» в окне |
 | `bars-cli unregister` | снять проект с регистрации ([features/projects/projects.md](../projects/projects.md)) | кнопка «Убрать из bars» в окне |
-| `bars-cli install --client claude-code\|codex` | подключить bars к клиенту (Т-21) | пункт «Установить» в окне |
-| `bars-cli uninstall --client claude-code\|codex` | убрать bars из клиента | пункт «Удалить» в окне |
+| `bars-cli install --client claude-code\|codex\|kimi-code\|ouroboros` | подключить bars к клиенту (Т-21) | пункт «Установить» в окне |
+| `bars-cli uninstall --client claude-code\|codex\|kimi-code\|ouroboros` | убрать bars из клиента | пункт «Удалить» в окне |
 | `bars-cli autostart [status\|on\|off]` | автозапуск bars при входе в систему; без аргумента — состояние | галочка во вкладке «Запуск» ([distribution/autostart.md](../distribution/autostart.md)) |
 | `bars-cli hook session-start` | команда для хука начала сессии | — |
 | `bars-cli hook pre-tool-use [--docs-root <папка>]` | команда для хука перед вызовом инструмента: гейт чтения документации | — |
@@ -65,6 +65,6 @@ GraphRAG: `relations`, `paths`, `impact`, `context`, `explore`, `graph show/stat
 
 Решения агента, 15-10-2026.
 
-- `bars-cli install --client claude-code|codex` и `bars-cli uninstall --client …` — один вызов `install` / `uninstall` воркера ([clients.md](../clients/clients.md)). Вывод — список изменённых файлов, напоминание про `/hooks` для Codex и про перезапуск клиента; `--json` — ответ метода.
+- `bars-cli install --client claude-code|codex|kimi-code|ouroboros` и `bars-cli uninstall --client …` — один вызов `install` / `uninstall` воркера ([clients.md](../clients/clients.md)). Вывод — список изменённых файлов, напоминание про `/hooks` для Codex и про перезапуск клиента; `--json` — ответ метода. Ouroboros получает только локальный MCP.
 - `bars-cli install --print-instruction` печатает текст для агента и не обращается к воркеру. Пути к `bars-cli` и `bars-mcp` берутся от расположения exe самого `bars-cli`. В тексте — команды установки, шаг одобрения хука в Codex, ручное подключение другим MCP-клиентам и запрет на `--accept-model-change`.
 - `--client` и `--print-instruction` взаимоисключающие; без обоих команда — ошибка аргументов.

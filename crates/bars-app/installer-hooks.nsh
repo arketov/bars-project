@@ -79,6 +79,10 @@
     Pop $0
     nsExec::Exec '"$INSTDIR\bars-cli.exe" uninstall --client codex'
     Pop $0
+    nsExec::Exec '"$INSTDIR\bars-cli.exe" uninstall --client kimi-code'
+    Pop $0
+    nsExec::Exec '"$INSTDIR\bars-cli.exe" uninstall --client ouroboros'
+    Pop $0
     !insertmacro BarsStopApp 0
   ${Else}
     !insertmacro BarsStopApp 1

@@ -573,7 +573,7 @@ async fn clients_status_follows_install_and_instruction_names_the_exes() {
     let before: ClientsStatusOutput = window
         .call(Call::ClientsStatus(ClientsStatusParams {}))
         .await;
-    assert_eq!(before.clients.len(), 2);
+    assert_eq!(before.clients.len(), 4);
     assert!(before.clients.iter().all(|c| !c.installed && !c.stale));
 
     window
@@ -596,6 +596,12 @@ async fn clients_status_follows_install_and_instruction_names_the_exes() {
         .find(|c| c.client == InstallClient::ClaudeCode)
         .unwrap();
     assert!(!claude.installed && !claude.needs_hook_approval);
+    let kimi = after
+        .clients
+        .iter()
+        .find(|c| c.client == InstallClient::KimiCode)
+        .unwrap();
+    assert!(!kimi.installed && !kimi.needs_hook_approval);
 
     let instruction: InstructionOutput = window.call(Call::Instruction(InstructionParams {})).await;
     assert!(instruction.text.contains("/opt/bars/bars-cli"));
