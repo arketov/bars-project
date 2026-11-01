@@ -14,8 +14,43 @@ pub(super) fn graph_error(error: GraphError) -> RpcError {
         GraphError::TimedOut => ErrorKind::GraphTimeout,
         _ => return RpcError::standard(INTERNAL_ERROR, error.to_string()),
     };
-    RpcError::bars(kind, error.to_string())
+    let message = if kind == ErrorKind::GraphNotReady {
+        format!(
+            "{error}; граф обновляется автоматически после обновления индекса; \
+            ручной запуск — из окна или bars-cli graph build. \
+            bars_reindex не заменяет построение графа и не помогает при model_loading. \
+            Пока используйте обычный bars_rag_search без mode или bars_read; \
+            состояние — bars_status"
+        )
+    } else {
+        error.to_string()
+    };
+    RpcError::bars(kind, message)
 }
+#[cfg(test)]
+mod readiness_tests {
+    use super::*;
+
+    #[test]
+    fn graph_not_ready_preserves_reason_and_explains_recovery() {
+        let error = graph_error(GraphError::NotReady("нет структурного слоя".into()));
+        assert_eq!(error.kind(), Some(ErrorKind::GraphNotReady));
+        for part in [
+            "нет структурного слоя",
+            "автоматически",
+            "bars-cli graph build",
+            "bars_reindex не заменяет",
+            "bars_rag_search без mode",
+            "bars_status",
+        ] {
+            assert!(error.message.contains(part), "{}", error.message);
+        }
+        let other = graph_error(GraphError::InvalidParams("неверная область".into()));
+        assert_eq!(other.kind(), Some(ErrorKind::InvalidParams));
+        assert!(!other.message.contains("bars_reindex"));
+    }
+}
+
 impl WorkerHandler {
     pub(super) async fn graph_search(
         &self,

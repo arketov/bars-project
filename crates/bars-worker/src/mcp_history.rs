@@ -562,6 +562,7 @@ pub fn requested(tool: &str, source: &Value) -> Value {
             "roles",
             "task_profile",
         ],
+        "bars_projects" => &["format", "project", "all"],
         "bars_get_duplicates" => &["format", "project", "modules", "limit"],
         "bars_get_similar" => &["format", "project", "chunk_id", "modules", "limit"],
         "bars_read" => &["format", "project", "path"],
@@ -601,8 +602,8 @@ pub fn requested(tool: &str, source: &Value) -> Value {
                     "limit" | "candidates" | "under_line" | "limit_docs" | "limit_hits"
                     | "offset" | "related_budget" => v.as_u64().is_some(),
                     "min_score" => v.is_number(),
-                    "full" | "regex" | "case_sensitive" | "cursor_present" | "include_related"
-                    | "diagnostic" | "whole_scope" | "local" => v.is_boolean(),
+                    "all" | "full" | "regex" | "case_sensitive" | "cursor_present"
+                    | "include_related" | "diagnostic" | "whole_scope" | "local" => v.is_boolean(),
                     "modules" | "files" | "roles" => {
                         v.as_array().is_some_and(|a| a.iter().all(Value::is_string))
                     }

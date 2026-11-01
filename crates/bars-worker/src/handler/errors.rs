@@ -54,7 +54,11 @@ pub fn model_loading(percent: u8) -> RpcError {
     };
     let mut extra = serde_json::Map::new();
     extra.insert("percent".to_string(), percent.into());
-    RpcError::bars_with(ErrorKind::ModelLoading, message, extra)
+    RpcError::bars_with(
+        ErrorKind::ModelLoading,
+        format!("{message}; bars_reindex не ускоряет загрузку модели"),
+        extra,
+    )
 }
 
 /// Ошибка фоновой загрузки встроенной embed-модели: вид в `data.reason` выбирает экран окна.

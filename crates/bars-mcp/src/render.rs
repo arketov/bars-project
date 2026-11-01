@@ -251,7 +251,13 @@ fn project_block(text: &mut String, index: usize, total: usize, info: &ProjectIn
     let modules = info
         .modules
         .iter()
-        .map(|module| format!("{} ({})", module.name, module.documents))
+        .map(|module| {
+            let mut text = format!("{} ({})", module.name, module.documents);
+            if let Some(title) = &module.title {
+                let _ = write!(text, " — {}", super::instructions::clean(title, 160));
+            }
+            text
+        })
         .collect::<Vec<_>>()
         .join(", ");
     let _ = writeln!(text, "modules: {modules}");
@@ -299,6 +305,9 @@ pub fn status(output: &StatusOutput) -> String {
         );
     }
     if let Some(graph) = &output.graph {
+        if graph.completeness == bars_protocol::graph_types::Completeness::Partial {
+            text.push_str("\nGraph partial: coverage is incomplete, not necessarily stale. Missing relations do not prove absence; check layers and evidence. Reindexing does not complete graph coverage.");
+        }
         let _ = write!(
             text,
             "\nGraph data: {}; completeness: {}; availability: {}; job_state: {}",
@@ -372,6 +381,27 @@ pub fn reindex(output: &AcceptedOutput) -> String {
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[test]
+    fn partial_graph_status_explains_coverage_separately_from_freshness() {
+        let output: StatusOutput = serde_json::from_value(json!({
+            "path":"p", "state":"ready", "updated_at":null, "pending":0,
+            "model":{"index":"m", "settings":"m"}, "last_error":null, "watching":false,
+            "graph":{"freshness":"current", "completeness":"partial", "availability":"enabled",
+                "job_state":"idle", "state":"partial", "snapshot":"s", "active_job":null,
+                "source_count":4, "error":null, "method":"test"}
+        }))
+        .unwrap();
+        let text = status(&output);
+        assert!(
+            text.contains("coverage is incomplete, not necessarily stale"),
+            "{text}"
+        );
+        assert!(
+            text.contains("Missing relations do not prove absence"),
+            "{text}"
+        );
+    }
 
     #[test]
     fn english_search_framing_preserves_source_language() {

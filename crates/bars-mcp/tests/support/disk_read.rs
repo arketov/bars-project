@@ -12,7 +12,7 @@ async fn disk_reads_freshness_continuation_scope_and_history() {
     let root = harness.project("disk");
     let mut mcp = harness.connect(harness.env(&root));
     mcp.initialize().await;
-    mcp.tool("bars_projects", json!({})).await;
+    mcp.tool("bars_projects", json!({"all":true})).await;
     harness.register(&root).await;
     fs::write(
         root.join("docs/fresh.md"),
@@ -138,7 +138,7 @@ async fn disk_reads_bounded_skips_and_parallel_clients() {
     let root = harness.project("parallel");
     let mut a = harness.connect(harness.env(&root));
     a.initialize().await;
-    a.tool("bars_projects", json!({})).await;
+    a.tool("bars_projects", json!({"all":true})).await;
     harness.register(&root).await;
     for n in 0..30 {
         fs::write(root.join(format!("docs/bad{n}.md")), [0xff, 0xfe]).unwrap();

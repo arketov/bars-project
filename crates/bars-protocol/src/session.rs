@@ -97,7 +97,7 @@ mod tests {
     #[test]
     fn any_method_before_hello_is_protocol_mismatch() {
         let mut session = Session::new();
-        let projects = ProjectsParams {}.request(Id::Number(1));
+        let projects = ProjectsParams::default().request(Id::Number(1));
         let error = session.admit(&projects).unwrap_err();
         assert_eq!(error.kind(), Some(ErrorKind::ProtocolMismatch));
 
@@ -125,7 +125,7 @@ mod tests {
             .admit(&hello(PROTOCOL_VERSION, ClientKind::Mcp))
             .unwrap();
         assert_eq!(session.client(), Some(ClientKind::Mcp));
-        let projects = ProjectsParams {}.request(Id::Number(2));
+        let projects = ProjectsParams::default().request(Id::Number(2));
         assert!(matches!(session.admit(&projects), Ok(Call::Projects(_))));
     }
 

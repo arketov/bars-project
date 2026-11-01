@@ -556,7 +556,7 @@ async fn execute(
         Command::Projects => emit(
             out,
             json,
-            &call(&mut client, &ProjectsParams {}).await?,
+            &call(&mut client, &ProjectsParams::default()).await?,
             render::projects,
         ),
         Command::Status => {

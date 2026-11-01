@@ -42,7 +42,7 @@ impl WorkerHandler {
             Call::Outline(p) => ("bars_outline", Some(&p.target), output_value(p)),
             Call::Status(p) => ("bars_status", Some(&p.target), output_value(p)),
             Call::Reindex(p) => ("bars_reindex", Some(&p.target), output_value(p)),
-            Call::Projects(p) => ("bars_projects", None, output_value(p)),
+            Call::Projects(p) => ("bars_projects", p.target.as_ref(), output_value(p)),
             _ => return self.handle_plain(client, call).await,
         };
         let preparation = std::time::Instant::now();
@@ -56,13 +56,9 @@ impl WorkerHandler {
             .as_ref()
             .map(|p| p.display().to_string())
             .unwrap_or_default();
-        let name = project.as_ref().and_then(|p| {
-            self.worker
-                .projects()
-                .into_iter()
-                .find(|s| s.path == *p)
-                .map(|s| s.name)
-        });
+        let name = project
+            .as_ref()
+            .and_then(|p| self.worker.project_metadata(p).map(|(name, _)| name));
         let complete = original.is_some();
         let requested = crate::mcp_history::requested(tool, original.as_ref().unwrap_or(&input));
         let history = self.history.clone();
@@ -301,6 +297,7 @@ fn complete_attempt(
                     json!({"count":out["headings"].as_array().map(Vec::len),"unit":"headings"})
                 }
                 "bars_projects" => {
+                    applied["all"] = json!(input.get("target").is_none());
                     json!({"count":out["projects"].as_array().map(Vec::len),"unit":"projects"})
                 }
                 "bars_status" => {

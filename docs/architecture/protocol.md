@@ -51,7 +51,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | `duplicates` | `cwd`, `project`, `modules`, `limit` | записи о повторах (`kind`, чанки с ID, `score`, `shared`, `differences`, `repeated_block`), `counts`, `total`, применённый `limit` и `clamped`, `chunks_checked`, `chunks_skipped_short` ([features/search/maintenance-tools.md](../features/search/maintenance-tools.md#get_duplicates-аудит-дублей-проекта)) | MCP, CLI |
 | `outline` | `cwd`, `project`, `path`, `levels`, `under` (цепочка заголовков) или `under_line` | заголовки с номерами строк (Т-26) | MCP, CLI |
 | `read` | `cwd`, `project`, `path` | исходный `text` и `title`; номера строк добавляет клиент | MCP, CLI |
-| `projects` | — | проекты: путь, имя, корень документации, состояние, модули с числом документов | MCP, CLI |
+| `projects` | необязательный `target: {cwd, project?}`; без target — весь реестр | проекты: путь, имя, корень документации, состояние, модули с числом документов и необязательным `title` своего оглавления; MCP передаёт target по умолчанию, весь реестр только по `all=true` | MCP, CLI |
 | `session_info` | `cwd` | необязательный проект сессии: имя, модули (`name`, `documents`, `title` оглавления); без моделей и индексации | внутренний запрос MCP при initialize/list_tools |
 | `status` | `cwd`, `project` | состояние индекса проекта ([worker.md](worker.md)) | MCP, CLI |
 | `reindex` | `cwd`, `project`, `full`, `accept_model_change` | `accepted: true`; без `full` и подтверждения смены модели — независимый `scan` файлов и отдельная очередь обновления; ход виден в `status`, итог проверки в операциях окна | MCP, CLI |
@@ -191,7 +191,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | -32007 | `invalid_params` | параметр вне допустимого: неизвестный модуль, `limit` меньше 1 |
 | -32008 | `provider_error` | модель не ответила; текст без ключей ([secrets.md](secrets.md)). У встроенной модели `data.reason` — `network`, `files_missing`, `out_of_memory` или `runtime` ([экраны ошибок](../features/window/error-states.md), «Виды ошибок встроенной модели»); у внешней `reason` нет |
 | -32009 | `model_loading` | встроенная модель ещё скачивается или загружается; в `data.percent` — ход скачивания в процентах, 100 — файлы на месте, модель грузится в память |
-| -32010 | `graph_not_ready` | нужный слой графа не построен или отстаёт; в `mix` вместо ошибки идёт возврат к `hybrid` с причиной |
+| -32010 | `graph_not_ready` | нужный слой графа не построен или отстаёт; причина и следующий шаг: обычный поиск/чтение, автоматическое обновление после индекса или окно / `bars-cli graph build`; переиндексация не заменяет построение графа. В `mix` вместо ошибки идёт возврат к `hybrid` с причиной |
 | -32011 | `graph_capability_unavailable` | запрошенная возможность графа не поддержана (например `change_description` у `impact`, `roots` у `context`) |
 | -32012 | `stale_ref` | ref или endpoint устаревшей ревизии; похожий объект не подбирается |
 | -32013 | `snapshot_expired` | снимок прежнего поколения больше недоступен; запрос нужно повторить |

@@ -348,8 +348,12 @@ pub struct ReadOutput {
 
 // --- projects, status ---
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct ProjectsParams {}
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ProjectsParams {
+    /// Без target — весь реестр (контракт CLI); MCP передаёт проект сессии явно.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target: Option<Target>,
+}
 
 /// Состояние проекта в воркере.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -366,6 +370,9 @@ pub struct ModuleInfo {
     /// Имя подпапки; корневой модуль — `.`.
     pub name: String,
     pub documents: u32,
+    /// Title собственного оглавления модуля; отсутствие не заменяется догадкой.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1357,7 +1364,7 @@ mod tests {
             target: target(),
             path: "a.md".into(),
         });
-        roundtrip(ProjectsParams {});
+        roundtrip(ProjectsParams::default());
         roundtrip(StatusParams { target: target() });
         roundtrip(ReindexParams {
             target: target(),
@@ -1423,7 +1430,7 @@ mod tests {
             assert!(!call.allowed_for(ClientKind::Mcp), "{}", call.method());
             assert!(!call.allowed_for(ClientKind::Cli), "{}", call.method());
         }
-        assert!(!Call::from(ProjectsParams {}).window_only());
+        assert!(!Call::from(ProjectsParams::default()).window_only());
     }
 
     #[test]
@@ -1455,7 +1462,7 @@ mod tests {
         };
         assert_eq!(
             Call::from_request(&request).unwrap(),
-            Call::Projects(ProjectsParams {})
+            Call::Projects(ProjectsParams::default())
         );
     }
 
@@ -1519,7 +1526,7 @@ mod tests {
             Call::from(UninstallParams {
                 client: InstallClient::Codex,
             }),
-            Call::from(ProjectsParams {}),
+            Call::from(ProjectsParams::default()),
             Call::from(SimilarParams {
                 target: target(),
                 chunk_id: "1-00000000".into(),

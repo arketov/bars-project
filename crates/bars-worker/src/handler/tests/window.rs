@@ -290,7 +290,7 @@ async fn project_rename_updates_tools_without_changing_path_or_index() {
     assert!(Call::ProjectRename(params.clone()).window_only());
     let saved: SavedOutput = env.call(Call::ProjectRename(params.clone())).await;
     assert!(saved.saved);
-    let output: ProjectsOutput = env.call(Call::Projects(ProjectsParams {})).await;
+    let output: ProjectsOutput = env.call(Call::Projects(ProjectsParams::default())).await;
     assert_eq!(output.projects[0].name, "Мои знания");
     assert_eq!(output.projects[0].path, params.project);
     assert_eq!(env.worker.resolve("Мои знания").unwrap(), project);

@@ -72,7 +72,7 @@ async fn mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion() {
     })
     .await
     .unwrap();
-    cli.call(&ProjectsParams {}).await.unwrap();
+    cli.call(&ProjectsParams::default()).await.unwrap();
     assert!(
         crate::mcp_statistics::snapshot(harness.home.path())
             .unwrap()
@@ -103,7 +103,7 @@ async fn mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion() {
     })
     .await
     .unwrap_err();
-    a.call(&ProjectsParams {}).await.unwrap();
+    a.call(&ProjectsParams::default()).await.unwrap();
     let mut b = harness.client(ClientKind::Mcp).await;
     b.call(&ReadParams {
         target: explicit,
@@ -141,7 +141,7 @@ async fn mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion() {
     // Занятый writer воспроизводит отказ записи без изменения файла пользователя.
     let db = rusqlite::Connection::open(path).unwrap();
     db.execute_batch("BEGIN IMMEDIATE").unwrap();
-    b.call(&ProjectsParams {}).await.unwrap();
+    b.call(&ProjectsParams::default()).await.unwrap();
     db.execute_batch("ROLLBACK").unwrap();
 }
 
@@ -336,7 +336,7 @@ async fn cli_works_with_a_project_end_to_end() {
     assert_eq!(read.title, "Руководство");
     assert_eq!(read.text, GUIDE);
 
-    let projects = cli.call(&ProjectsParams {}).await.unwrap().projects;
+    let projects = cli.call(&ProjectsParams::default()).await.unwrap().projects;
     assert_eq!(projects.len(), 1);
     assert_eq!(projects[0].state, ProjectState::Ready);
     let modules: Vec<(&str, u32)> = projects[0]
@@ -368,7 +368,7 @@ async fn cli_works_with_a_project_end_to_end() {
     assert_eq!(error.kind(), Some(ErrorKind::ProjectNotFound));
     assert!(error.message.contains("register"));
     assert!(
-        cli.call(&ProjectsParams {})
+        cli.call(&ProjectsParams::default())
             .await
             .unwrap()
             .projects
@@ -608,7 +608,7 @@ async fn vanished_project_folder_is_unavailable() {
     assert_eq!(search_error.kind(), Some(ErrorKind::ProjectUnavailable));
     let reindex_error = rpc(cli.call(&params).await);
     assert_eq!(reindex_error.kind(), Some(ErrorKind::ProjectUnavailable));
-    let projects = cli.call(&ProjectsParams {}).await.unwrap().projects;
+    let projects = cli.call(&ProjectsParams::default()).await.unwrap().projects;
     assert_eq!(projects[0].state, ProjectState::Unavailable);
 }
 
@@ -628,7 +628,7 @@ async fn mcp_reads_but_cannot_register_or_consent() {
     assert_eq!(error.code, METHOD_NOT_FOUND);
     let found = mcp.call(&search(&root, "индексация")).await.unwrap();
     assert!(!found.results.is_empty());
-    assert!(mcp.call(&ProjectsParams {}).await.is_ok());
+    assert!(mcp.call(&ProjectsParams::default()).await.is_ok());
 
     // Смена модели: проверка переводит проект в `reindex_required`.
     provider.set_model("m2");
@@ -702,7 +702,7 @@ async fn session_start_registers_a_project_with_docs() {
         .await
         .unwrap();
     assert!(accepted.accepted);
-    let projects = cli.call(&ProjectsParams {}).await.unwrap().projects;
+    let projects = cli.call(&ProjectsParams::default()).await.unwrap().projects;
     assert_eq!(projects.len(), 1);
     wait_status(&mut cli, &root, "индексация по хуку", indexed).await;
 }
@@ -779,7 +779,7 @@ async fn client_launches_the_worker_on_demand() {
     .unwrap();
     assert!(
         client
-            .call(&ProjectsParams {})
+            .call(&ProjectsParams::default())
             .await
             .unwrap()
             .projects

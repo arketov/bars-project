@@ -119,7 +119,12 @@ pub enum Format {
 }
 
 #[derive(Debug, Deserialize, Serialize, schemars::JsonSchema)]
-pub struct NoArgs {
+pub struct ProjectsArgs {
+    /// Другой зарегистрированный проект: имя или абсолютный путь. Без него — проект сессии.
+    pub project: Option<String>,
+    /// true — явно запросить все проекты; нельзя вместе с project. По умолчанию false.
+    #[serde(default)]
+    pub all: bool,
     /// Вид ответа: `txt` (по умолчанию) или `json`.
     pub format: Option<Format>,
 }
@@ -663,18 +668,25 @@ impl BarsMcp {
 
     #[tool(
         name = "bars_projects",
-        description = "Зарегистрированные проекты: путь, корень документации, состояние и существующие \
-                       модули первого уровня с числом документов. Используй для выбора project и \
-                       modules, когда их имена неизвестны; вложенная папка не отдельный модуль."
+        description = "Проект сессии и модули первого уровня: число документов и назначение из Index.md. \
+                       Другой проект — project (имя или путь), все проекты — только all=true. \
+                       Используй для выбора project/modules; вложенная папка не отдельный модуль."
     )]
     async fn bars_projects(
         &self,
         original: observation::Original,
-        Parameters(args): Parameters<NoArgs>,
+        Parameters(args): Parameters<ProjectsArgs>,
     ) -> CallToolResult {
+        if args.all && args.project.is_some() {
+            return CallToolResult::error(vec![ContentBlock::text(
+                "invalid_params: all=true нельзя вместе с project",
+            )]);
+        }
+        let params = ProjectsParams {
+            target: (!args.all).then(|| self.target(args.project)),
+        };
         finish(
-            self.call_observed(&ProjectsParams {}, Some(&original.0))
-                .await,
+            self.call_observed(&params, Some(&original.0)).await,
             args.format,
             render::projects,
         )
@@ -703,8 +715,12 @@ impl BarsMcp {
     #[tool(
         name = "bars_reindex",
         description = "Переиндексация проекта: проверка актуальности или, с full, полная. \
-                       Возвращается сразу, ход виден в bars_status. После смены модели переиндексацию \
-                       запускает только пользователь: инструмент ответит ошибкой reindex_needs_consent."
+                       Сначала bars_status: reindex_required требует пользователя; после внешней правки \
+                       проверяй индекс, только если документ остаётся вне поиска после нормальной паузы. \
+                       Не помогает при model_loading или graph_not_ready: модель нужно дождаться, \
+                       граф обновляется сам после индекса или из окна / bars-cli graph build. \
+                       Пустая выдача и ожидание очереди — не повод. Возвращается сразу, ход в bars_status. \
+                       После смены модели — reindex_needs_consent, согласие даёт только пользователь."
     )]
     async fn bars_reindex(
         &self,

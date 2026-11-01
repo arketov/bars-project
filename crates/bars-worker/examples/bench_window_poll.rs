@@ -58,7 +58,7 @@ impl Ctx {
                 after: None,
             }),
             "models_info" => Call::ModelsInfo(ModelsInfoParams {}),
-            "projects" => Call::Projects(ProjectsParams {}),
+            "projects" => Call::Projects(ProjectsParams::default()),
             "status" => Call::Status(StatusParams {
                 target: self.target(),
             }),

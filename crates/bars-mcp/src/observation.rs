@@ -65,6 +65,7 @@ impl<S> FromContextPart<ToolCallContext<'_, S>> for Original {
             "bars_links" => &["format", "project", "path", "direction", "limit"],
             "bars_outline" => &["format", "project", "path", "levels", "under", "under_line"],
             "bars_status" => &["format", "project"],
+            "bars_projects" => &["format", "project", "all"],
             "bars_reindex" => &["format", "project", "full"],
             _ => &["format"],
         };

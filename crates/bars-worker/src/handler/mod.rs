@@ -145,13 +145,7 @@ impl WorkerHandler {
         );
         history::applied_field(
             "resolved_project_name",
-            serde_json::json!(
-                self.worker
-                    .projects()
-                    .into_iter()
-                    .find(|p| p.path == path)
-                    .map(|p| p.name)
-            ),
+            serde_json::json!(self.worker.project_metadata(&path).map(|(name, _)| name)),
         );
         Ok(path)
     }
@@ -585,8 +579,47 @@ impl WorkerHandler {
         })
     }
 
-    async fn projects(&self) -> Result<ProjectsOutput, RpcError> {
+    async fn projects(
+        &self,
+        params: bars_protocol::ProjectsParams,
+    ) -> Result<ProjectsOutput, RpcError> {
+        let selected = params
+            .target
+            .as_ref()
+            .map(|target| self.resolve(target))
+            .transpose()
+            .map_err(|mut error| {
+                if error.kind() == Some(ErrorKind::ProjectNotFound) {
+                    error
+                        .message
+                        .push_str("; список всех проектов — bars_projects(all=true)");
+                }
+                error
+            })?;
         let mut projects = Vec::new();
+        if let Some(path) = selected {
+            let (name, docs_root) = self.worker.project_metadata(&path).ok_or_else(|| {
+                RpcError::bars(
+                    ErrorKind::ProjectNotFound,
+                    "проект удалён из реестра; повторите выбор проекта",
+                )
+            })?;
+            let state = self.worker.status(&path).map_err(worker_error)?.state;
+            let modules = if state == ProjectState::Unavailable {
+                Vec::new()
+            } else {
+                self.modules(&path, &docs_root).await?
+            };
+            return Ok(ProjectsOutput {
+                projects: vec![ProjectInfo {
+                    path: path.display().to_string(),
+                    name,
+                    docs_root,
+                    state,
+                    modules,
+                }],
+            });
+        }
         for snapshot in self.worker.projects() {
             projects.push(self.project_info(snapshot).await);
         }
@@ -597,7 +630,9 @@ impl WorkerHandler {
         let modules = if snapshot.state == ProjectState::Unavailable {
             Vec::new()
         } else {
-            self.modules(&snapshot.path).await.unwrap_or_default()
+            self.modules(&snapshot.path, &snapshot.docs_root)
+                .await
+                .unwrap_or_default()
         };
         ProjectInfo {
             path: snapshot.path.display().to_string(),
@@ -609,32 +644,49 @@ impl WorkerHandler {
     }
 
     /// Модули проекта и число документов в индексе. Проект без индекса — без модулей.
-    async fn modules(&self, project: &Path) -> Option<Vec<ModuleInfo>> {
+    async fn modules(&self, project: &Path, docs_root: &str) -> Result<Vec<ModuleInfo>, RpcError> {
         if !index_path(project).exists() {
-            return None;
+            return Ok(Vec::new());
         }
-        let gate = self.worker.gate(project).ok()?.read_owned().await;
+        let gate = self
+            .worker
+            .gate(project)
+            .map_err(worker_error)?
+            .read_owned()
+            .await;
         let project = project.to_path_buf();
+        let docs_root = docs_root.replace('\\', "/");
+        let docs_root = docs_root.trim_end_matches('/');
+        let prefix = if docs_root == "." || docs_root.is_empty() {
+            String::new()
+        } else {
+            format!("{docs_root}/")
+        };
         tokio::task::spawn_blocking(move || {
             let _gate = gate;
-            let index = Index::open_read_only(&index_path(&project)).ok()?;
+            let index = Index::open_read_only(&index_path(&project)).map_err(internal)?;
             let mut statement = index
                 .conn()
-                .prepare("SELECT module, count(*) FROM documents GROUP BY module ORDER BY module")
-                .ok()?;
+                // Один проход метаданных; вложенный Index не задаёт назначение родителя.
+                .prepare(
+                    "SELECT module, count(*), MAX(CASE WHEN lower(path) = lower(?1 || \
+                    CASE WHEN module = '.' THEN '' ELSE module || '/' END || 'index.md') \
+                    THEN title END) FROM documents GROUP BY module ORDER BY module",
+                )
+                .map_err(internal)?;
             let rows = statement
-                .query_map([], |row| {
+                .query_map([prefix], |row| {
                     Ok(ModuleInfo {
                         name: row.get(0)?,
                         documents: row.get(1)?,
+                        title: row.get(2)?,
                     })
                 })
-                .ok()?;
-            rows.collect::<Result<Vec<_>, _>>().ok()
+                .map_err(internal)?;
+            rows.collect::<Result<Vec<_>, _>>().map_err(internal)
         })
         .await
-        .ok()
-        .flatten()
+        .map_err(internal)?
     }
 
     fn status(&self, params: StatusParams) -> Result<StatusOutput, RpcError> {
@@ -1261,7 +1313,7 @@ impl WorkerHandler {
             Call::Duplicates(params) => self.duplicates(params).await.map(|out| output_value(&out)),
             Call::Outline(params) => self.outline(params).map(|out| output_value(&out)),
             Call::Read(params) => self.read(params).map(|out| output_value(&out)),
-            Call::Projects(_) => self.projects().await.map(|out| output_value(&out)),
+            Call::Projects(params) => self.projects(params).await.map(|out| output_value(&out)),
             Call::SessionInfo(params) => self
                 .session_info(params)
                 .await

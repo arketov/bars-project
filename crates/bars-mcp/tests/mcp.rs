@@ -48,7 +48,7 @@ async fn maintenance_tools_read_shared_results_and_keep_topic_mutations_closed()
     }
     let mut mcp = harness.connect(harness.env(&root));
     mcp.initialize().await;
-    assert!(!mcp.tool("bars_projects", json!({})).await.0);
+    assert!(!mcp.tool("bars_projects", json!({"all":true})).await.0);
     harness.register(&root).await;
     wait_status(&mut mcp, "индекс", indexed).await;
     let project = root.display().to_string();
@@ -185,7 +185,7 @@ async fn diagnostic_mcp_searches_do_not_create_or_refresh_topics() {
     fs::create_dir_all(root.join("docs")).unwrap();
     let mut mcp = harness.connect(harness.env(&root));
     mcp.initialize().await;
-    assert!(!mcp.tool("bars_projects", json!({})).await.0);
+    assert!(!mcp.tool("bars_projects", json!({"all":true})).await.0);
     harness.register(&root).await;
     wait_status(&mut mcp, "пустой индекс", |s| {
         s["state"] == "ready" && s["pending"] == 0
@@ -343,6 +343,8 @@ type Pipe = Rpc<ReadHalf<DuplexStream>, WriteHalf<DuplexStream>>;
 mod disk_read;
 #[path = "support/module_scope.rs"]
 mod module_scope;
+#[path = "support/project_catalog.rs"]
+mod project_catalog;
 
 struct Harness {
     home: TempDir,
@@ -726,7 +728,7 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
     .unwrap();
     let mut mcp = harness.connect(harness.env(&root));
     mcp.initialize().await;
-    assert!(!mcp.tool("bars_projects", json!({})).await.0);
+    assert!(!mcp.tool("bars_projects", json!({"all":true})).await.0);
     harness.register(&root).await;
     wait_status(&mut mcp, "автоматический граф", |s| {
         indexed(s) && s["graph"]["freshness"] == "current"
@@ -847,7 +849,7 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
     mcp.initialize().await;
 
     // Т-2: воркер не запущен, первый вызов запускает его и возвращает результат.
-    let (is_error, projects) = mcp.tool("bars_projects", json!({})).await;
+    let (is_error, projects) = mcp.tool("bars_projects", json!({"all":true})).await;
     assert!(!is_error, "{projects}");
     assert_eq!(harness.launches.load(Ordering::SeqCst), 1);
     assert_eq!(
@@ -870,7 +872,7 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
         "второй воркер не нужен"
     );
 
-    let (_, projects) = mcp.tool("bars_projects", json!({})).await;
+    let (_, projects) = mcp.tool("bars_projects", json!({"all":true})).await;
     let projects: Value = serde_json::from_str(&projects).unwrap();
     assert_eq!(projects["projects"][0]["docs_root"], "docs");
     assert!(
@@ -1120,11 +1122,14 @@ async fn history_preserves_original_missing_null_zero_and_excludes_payloads() {
     let mut mcp = harness.connect(harness.env(&root));
     mcp.default_format = None;
     mcp.initialize().await;
-    assert!(!mcp.tool("bars_projects", json!({})).await.0);
+    assert!(!mcp.tool("bars_projects", json!({"all":true})).await.0);
     assert!(
-        !mcp.tool("bars_projects", json!({"format":null,"unknown":"SECRET"}))
-            .await
-            .0
+        !mcp.tool(
+            "bars_projects",
+            json!({"all":true,"format":null,"unknown":"SECRET"})
+        )
+        .await
+        .0
     );
     harness.register(&root).await;
     wait_status(&mut mcp, "индекс для истории", indexed).await;
@@ -1248,7 +1253,7 @@ async fn history_parallel_connections_repeat_and_collection_controls() {
     let q = harness.project("q");
     let mut a = harness.connect(harness.env(&p));
     a.initialize().await;
-    a.tool("bars_projects", json!({})).await;
+    a.tool("bars_projects", json!({"all":true})).await;
     harness.register(&p).await;
     harness.register(&q).await;
     let mut b = harness.connect(harness.env(&q));
@@ -1312,7 +1317,7 @@ async fn project_is_resolved_by_session_cwd_and_explicit_project_wins() {
     // Сессия в подпапке первого проекта: проект находится вверх по дереву.
     let mut mcp = harness.connect(harness.env(&first.join("docs").join("api")));
     mcp.initialize().await;
-    mcp.tool("bars_projects", json!({})).await;
+    mcp.tool("bars_projects", json!({"all":true})).await;
     harness.register(&first).await;
     harness.register(&second).await;
     wait_status(&mut mcp, "индексация первого", indexed).await;
@@ -1352,7 +1357,7 @@ async fn agent_cannot_consent_to_reindex_after_model_change() {
     let root = harness.project("proj");
     let mut mcp = harness.connect(harness.env(&root));
     mcp.initialize().await;
-    mcp.tool("bars_projects", json!({})).await;
+    mcp.tool("bars_projects", json!({"all":true})).await;
     harness.register(&root).await;
     wait_status(&mut mcp, "первая индексация", indexed).await;
 
@@ -1412,7 +1417,7 @@ async fn unreachable_worker_is_a_readable_tool_error() {
     let mut mcp = harness.connect(env);
     mcp.initialize().await;
 
-    let (is_error, text) = mcp.tool("bars_projects", json!({})).await;
+    let (is_error, text) = mcp.tool("bars_projects", json!({"all":true})).await;
     assert!(is_error);
     assert!(text.contains("нет bars"), "{text}");
     assert!(text.contains("Повторите"), "{text}");
@@ -1424,9 +1429,9 @@ async fn connection_to_the_worker_lives_across_calls() {
     let root = harness.project("proj");
     let mut mcp = harness.connect(harness.env(&root));
     mcp.initialize().await;
-    let (is_error, _) = mcp.tool("bars_projects", json!({})).await;
+    let (is_error, _) = mcp.tool("bars_projects", json!({"all":true})).await;
     assert!(!is_error);
-    let (is_error, _) = mcp.tool("bars_projects", json!({})).await;
+    let (is_error, _) = mcp.tool("bars_projects", json!({"all":true})).await;
     assert!(!is_error);
     assert_eq!(harness.launches.load(Ordering::SeqCst), 1);
     let rows = bars_worker::mcp_statistics::snapshot(harness.home.path()).unwrap();
@@ -1446,12 +1451,12 @@ async fn two_test_workers_with_same_label_have_separate_registries() {
     let mut right = second.connect(second.env(&b));
     left.initialize().await;
     right.initialize().await;
-    assert!(!left.tool("bars_projects", json!({})).await.0);
-    assert!(!right.tool("bars_projects", json!({})).await.0);
+    assert!(!left.tool("bars_projects", json!({"all":true})).await.0);
+    assert!(!right.tool("bars_projects", json!({"all":true})).await.0);
     first.register(&a).await;
     second.register(&b).await;
-    let (_, left_projects) = left.tool("bars_projects", json!({})).await;
-    let (_, right_projects) = right.tool("bars_projects", json!({})).await;
+    let (_, left_projects) = left.tool("bars_projects", json!({"all":true})).await;
+    let (_, right_projects) = right.tool("bars_projects", json!({"all":true})).await;
     let left_projects: Value = serde_json::from_str(&left_projects).unwrap();
     let right_projects: Value = serde_json::from_str(&right_projects).unwrap();
     assert_eq!(
@@ -1482,7 +1487,7 @@ async fn default_format_is_text_with_explicit_delimiters() {
     let mut mcp = harness.connect(harness.env(&root));
     mcp.default_format = None;
     mcp.initialize().await;
-    mcp.tool("bars_projects", json!({})).await;
+    mcp.tool("bars_projects", json!({"all":true})).await;
     harness.register(&root).await;
     wait_status(&mut mcp, "первая индексация", indexed).await;
 
@@ -1490,7 +1495,7 @@ async fn default_format_is_text_with_explicit_delimiters() {
     assert!(status.starts_with("=== INDEX STATUS ==="), "{status}");
     assert!(status.contains("\nstate: ready\n"), "{status}");
 
-    let (_, projects) = mcp.tool("bars_projects", json!({})).await;
+    let (_, projects) = mcp.tool("bars_projects", json!({"all":true})).await;
     assert!(projects.starts_with("=== PROJECTS: 1 ==="), "{projects}");
     assert!(projects.contains("=== PROJECT 1 of 1 ==="), "{projects}");
     assert!(projects.contains("api (1)"), "{projects}");

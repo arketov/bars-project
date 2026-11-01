@@ -70,10 +70,13 @@ async fn blocked_refresh_does_not_delay_ipc_and_shutdown_waits_for_it() {
         let mut client = Client::connect_with_retry(&endpoint, kind, Duration::from_secs(5))
             .await
             .unwrap();
-        let result = tokio::time::timeout(Duration::from_secs(2), client.call(&ProjectsParams {}))
-            .await
-            .unwrap()
-            .unwrap();
+        let result = tokio::time::timeout(
+            Duration::from_secs(2),
+            client.call(&ProjectsParams::default()),
+        )
+        .await
+        .unwrap()
+        .unwrap();
         assert!(result.projects.is_empty());
     }
     // Второй процесс/сервер не начинает собственный проход.

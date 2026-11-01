@@ -123,7 +123,7 @@ mod tests {
         let mut client = Client::connect(&endpoint, ClientKind::Cli).await.unwrap();
         assert_eq!(client.worker_version(), env!("CARGO_PKG_VERSION"));
         assert_eq!(client.build_warning(), None, "клиент и воркер одной сборки");
-        let out = client.call(&ProjectsParams {}).await.unwrap();
+        let out = client.call(&ProjectsParams::default()).await.unwrap();
         assert!(out.projects.is_empty());
         let error = client
             .call(&RegisterParams { path: "x".into() })
@@ -201,7 +201,7 @@ mod tests {
             Client::connect_with_retry(&endpoint, ClientKind::Cli, Duration::from_secs(5))
                 .await
                 .unwrap();
-        client.call(&ProjectsParams {}).await.unwrap();
+        client.call(&ProjectsParams::default()).await.unwrap();
     }
 
     #[tokio::test]
@@ -215,7 +215,7 @@ mod tests {
             tasks.push(tokio::spawn(async move {
                 let mut client = Client::connect(&endpoint, ClientKind::Cli).await.unwrap();
                 for _ in 0..5 {
-                    client.call(&ProjectsParams {}).await.unwrap();
+                    client.call(&ProjectsParams::default()).await.unwrap();
                 }
             }));
         }
