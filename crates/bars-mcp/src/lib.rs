@@ -275,7 +275,7 @@ impl BarsMcp {
         name = "bars_paths",
         annotations(read_only_hint = true),
         description = "Как связаны два объекта from и to: пути с основанием каждого шага. По умолчанию \
-                       смысловые рёбра; structural и mixed — в path_kind. Путь — связь, а не \
+                       смысловые рёбра; концы принимают {document:путь}. structural и mixed — в path_kind. Путь — связь, а не \
                        объяснение причины; отсутствие пути не доказывает отсутствия связи."
     )]
     async fn bars_paths(
@@ -290,7 +290,7 @@ impl BarsMcp {
         name = "bars_impact",
         annotations(read_only_hint = true),
         description = "Какие документы перепроверить после правки объекта: зависимости и проверки с \
-                       основанием. Вход — roots из ответа другой графовой операции. Пустой ответ не \
+                       основанием. Вход — documents (пути) или roots из ответа графа. Пустой ответ не \
                        значит, что зависимостей нет; гиперссылки сюда не входят — их даёт \
                        bars_links с direction=incoming."
     )]
@@ -308,7 +308,7 @@ impl BarsMcp {
         description = "Собрать первичные источники к задаче query по ролям: требование, решение, \
                        поведение, устройство, ограничение, проверка (roles, task_profile). Не \
                        готовый ответ, а список для чтения в пределах token_budget; смотри \
-                       missing_roles."
+                       missing_roles. documents/roots сужают окрестность, query ранжирует внутри неё."
     )]
     async fn bars_context(
         &self,
@@ -338,7 +338,7 @@ impl BarsMcp {
         name = "bars_graph",
         annotations(read_only_hint = true),
         description = "Подграф документов, разделов, чанков или сущностей (view), например чтобы \
-                       проверить находку bars_explore. local=true с roots — окрестность на глубину \
+                       проверить находку bars_explore. local=true с documents или roots — окрестность на глубину \
                        max_depth. Ответ объёмный: задавай limit. Только читает готовый граф."
     )]
     async fn bars_graph(

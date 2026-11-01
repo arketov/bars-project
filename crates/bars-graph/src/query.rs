@@ -106,6 +106,7 @@ pub fn rematerialize_text_reply(reply: &mut GraphReply) {
             .map(|e| (e.id.clone(), e))
             .collect(),
         adjacency: BTreeMap::new(),
+        project_root: None,
     };
     materialize(reply, &view);
     reply.used_bytes = 0;
@@ -119,6 +120,7 @@ pub fn rematerialize_text_reply(reply: &mut GraphReply) {
 }
 
 struct Allowed<'a> {
+    project_root: Option<&'a str>,
     nodes: BTreeMap<String, Node>,
     edges: Vec<Edge>,
     evidence: BTreeMap<String, Evidence>,
@@ -183,11 +185,23 @@ fn allowed_sources<'a>(
         })
         .map(|e| (e.id.clone(), e.clone()))
         .collect();
+    let namespace_prefix = format!("{}:", data.namespace);
     let nodes = data
         .nodes
         .iter()
         .filter_map(|n| {
             let mut n = n.clone();
+            n.namespace = if n.reference.kind == Kind::Document {
+                sources
+                    .get(&n.reference.id)
+                    .map(|s| s.docs_path.clone())
+                    .unwrap_or_default()
+            } else {
+                n.namespace
+                    .strip_prefix(&namespace_prefix)
+                    .unwrap_or(&n.namespace)
+                    .to_string()
+            };
             n.source_ids.retain(|id| sources.contains_key(id));
             n.evidence.retain(|id| evidence.contains_key(id));
             if n.source_ids.is_empty() {
@@ -229,6 +243,7 @@ fn allowed_sources<'a>(
         }
     }
     Ok(Allowed {
+        project_root: Some(&data.namespace),
         nodes,
         edges,
         evidence,
@@ -239,6 +254,15 @@ fn allowed_sources<'a>(
 
 fn resolve(endpoint: &Endpoint, view: &Allowed<'_>) -> Result<Vec<Node>, GraphError> {
     match endpoint {
+        Endpoint::Document { document } => {
+            let source = resolve_document(document, view)?;
+            Ok(view
+                .nodes
+                .get(&source.reference.id)
+                .cloned()
+                .into_iter()
+                .collect())
+        }
         Endpoint::Ref(reference) => {
             let node = view
                 .nodes
@@ -264,7 +288,7 @@ fn resolve(endpoint: &Endpoint, view: &Allowed<'_>) -> Result<Vec<Node>, GraphEr
                     kind.is_none_or(|k| n.reference.kind == k)
                         && namespace.as_ref().is_none_or(|ns| &n.namespace == ns)
                         && ((if n.reference.kind == Kind::Entity
-                            && n.namespace.ends_with(":technical")
+                            && (n.namespace == "technical" || n.namespace.ends_with(":technical"))
                         {
                             n.label == exact_label
                         } else {
@@ -275,6 +299,213 @@ fn resolve(endpoint: &Endpoint, view: &Allowed<'_>) -> Result<Vec<Node>, GraphEr
                 .collect())
         }
     }
+}
+
+fn resolve_document<'a>(input: &str, view: &'a Allowed<'_>) -> Result<&'a SourceMeta, GraphError> {
+    let normalize = crate::hints::normalize_document_input;
+    let path = normalize(input)
+        .ok_or_else(|| GraphError::InvalidParams("documents: путь вне проекта".into()))?;
+    if !path.to_lowercase().ends_with(".md") {
+        return Err(GraphError::InvalidParams(
+            "documents: нужен путь .md внутри проекта".into(),
+        ));
+    }
+    // Сначала docs-root, затем project-root; абсолютные пути сравниваются только с известными источниками.
+    let source = view
+        .sources
+        .values()
+        .find(|s| Some(&path) == normalize(&s.docs_path).as_ref())
+        .or_else(|| {
+            view.sources.values().find(|s| {
+                Some(&path) == normalize(&s.path).as_ref()
+                    || view.project_root.is_some_and(|root| Some(&path) == normalize(&format!("{root}/{}", s.path)).as_ref())
+                    // Только пересборка уже разрешённого ответа: Dataset больше недоступен.
+                    || (view.project_root.is_none()
+                        && normalize(&s.path).is_some_and(|saved| path.ends_with(&format!("/{saved}"))))
+            })
+        });
+    source.copied().ok_or_else(|| {
+        let wanted = path.rsplit('/').next().unwrap_or("");
+        let mut suggestions: Vec<_> = view.sources.values().map(|s| {
+            let name = s.docs_path.rsplit('/').next().unwrap_or("").to_lowercase();
+            let prefix = name.chars().zip(wanted.chars()).take_while(|(a,b)| a==b).count();
+            let suffix = name.chars().rev().zip(wanted.chars().rev()).take_while(|(a,b)| a==b).count();
+            (std::cmp::Reverse(prefix + suffix), &s.docs_path)
+        }).collect();
+        suggestions.sort();
+        let shown = suggestions.iter().take(5).map(|(_,path)| path.as_str()).collect::<Vec<_>>().join(", ");
+        GraphError::InvalidParams(format!("documents: неизвестный документ в выбранной области; ближайшие пути: {shown}; next: bars_text_search по имени документа или bars_projects для проверки проекта"))
+    })
+}
+
+fn root_nodes(
+    request: &GraphRequest,
+    view: &Allowed<'_>,
+    budget: &AppliedBudgets,
+    state: &mut WalkState,
+    cancelled: &mut impl FnMut() -> bool,
+) -> Result<BTreeSet<String>, GraphError> {
+    let mut roots = BTreeSet::new();
+    let mut documents = BTreeSet::new();
+    for reference in &request.roots {
+        let node = resolve(&Endpoint::Ref(reference.clone()), view)?.remove(0);
+        roots.insert(node.reference.id.clone());
+        if node.reference.kind == Kind::Document {
+            documents.insert(node.reference.id);
+        }
+    }
+    for path in &request.documents {
+        let source = resolve_document(path, view)?;
+        documents.insert(source.reference.id.clone());
+        roots.insert(source.reference.id.clone());
+    }
+    for node in view.nodes.values().filter(|_| !documents.is_empty()) {
+        if cancelled() {
+            return Err(GraphError::Cancelled);
+        }
+        if state.stop(budget) {
+            break;
+        }
+        if (node.reference.kind != Kind::Entity || request.operation == Operation::Impact)
+            && node.source_ids.iter().any(|id| documents.contains(id))
+        {
+            roots.insert(node.reference.id.clone());
+        }
+        if roots.len() > budget.max_nodes as usize {
+            state.reasons.insert("max_nodes".into());
+            break;
+        }
+    }
+    if roots.len() > budget.max_nodes as usize {
+        roots = roots.into_iter().take(budget.max_nodes as usize).collect();
+        state.reasons.insert("max_nodes".into());
+    }
+    Ok(roots)
+}
+
+fn context_neighborhood(
+    mut ids: BTreeSet<String>,
+    view: &Allowed<'_>,
+    budget: &AppliedBudgets,
+    state: &mut WalkState,
+    cancelled: &mut impl FnMut() -> bool,
+) -> Result<BTreeSet<String>, GraphError> {
+    let mut frontier = ids.clone();
+    for _ in 0..budget.max_depth {
+        let mut next = BTreeSet::new();
+        for id in &frontier {
+            let mut fanout = 0;
+            for index in view.adjacency.get(id).into_iter().flatten() {
+                if cancelled() {
+                    return Err(GraphError::Cancelled);
+                }
+                if state.stop(budget) {
+                    break;
+                }
+                state.edges += 1;
+                let edge = &view.edges[*index];
+                if edge.polarity == Polarity::Negative
+                    || !(edge.predicate.semantic()
+                        || matches!(
+                            edge.predicate,
+                            Predicate::Contains
+                                | Predicate::Covers
+                                | Predicate::NextChunk
+                                | Predicate::LinksTo
+                                | Predicate::Mentions
+                        ))
+                {
+                    continue;
+                }
+                fanout += 1;
+                if fanout > budget.max_fanout {
+                    state.reasons.insert("max_fanout".into());
+                    break;
+                }
+                let other = if edge.from == *id {
+                    &edge.to
+                } else {
+                    &edge.from
+                };
+                if !ids.contains(other) {
+                    if ids.len() + next.len() >= budget.max_nodes as usize {
+                        state.reasons.insert("max_nodes".into());
+                        break;
+                    }
+                    next.insert(other.clone());
+                }
+            }
+        }
+        if next.is_empty() {
+            break;
+        }
+        ids.extend(next.iter().cloned());
+        frontier = next;
+    }
+    Ok(ids)
+}
+
+/// Область поиска модели для rooted context: top-K выбирается уже внутри окрестности.
+pub fn context_source_files(
+    data: &Dataset,
+    request: &GraphRequest,
+    current: Option<&BTreeMap<String, String>>,
+) -> Result<(BTreeSet<String>, bool), GraphError> {
+    let view = allowed(data, &request.scope, current)?;
+    let budget = request.budgets.resolve()?.0;
+    let mut state = WalkState {
+        visits: 0,
+        edges: 0,
+        start: Instant::now(),
+        reasons: BTreeSet::new(),
+    };
+    let roots = root_nodes(request, &view, &budget, &mut state, &mut || false)?;
+    let ids = context_neighborhood(roots, &view, &budget, &mut state, &mut || false)?;
+    let sources: BTreeSet<_> = ids
+        .iter()
+        .filter_map(|id| view.nodes.get(id))
+        .flat_map(|n| n.source_ids.iter())
+        .collect();
+    Ok((
+        view.sources
+            .values()
+            .filter(|s| sources.contains(&s.reference.id))
+            .map(|s| s.docs_path.clone())
+            .collect(),
+        !state.reasons.is_empty(),
+    ))
+}
+
+fn name_candidates(endpoint: &Endpoint, view: &Allowed<'_>) -> Vec<Node> {
+    let Endpoint::Name {
+        label,
+        kind,
+        namespace,
+    } = endpoint
+    else {
+        return vec![];
+    };
+    let label = label.trim().to_lowercase();
+    let mut candidates: Vec<_> = view
+        .nodes
+        .values()
+        .filter(|n| {
+            kind.is_none_or(|k| k == n.reference.kind)
+                && namespace.as_ref().is_none_or(|ns| ns == &n.namespace)
+                && std::iter::once(&n.label)
+                    .chain(n.aliases.iter())
+                    .any(|value| {
+                        let value = value.to_lowercase();
+                        value.contains(&label) || label.contains(&value)
+                    })
+        })
+        .collect();
+    candidates.sort_by(|a, b| {
+        a.label
+            .cmp(&b.label)
+            .then(a.reference.id.cmp(&b.reference.id))
+    });
+    candidates.into_iter().take(5).cloned().collect()
 }
 
 fn relevant(text: &str, query: &str) -> usize {
@@ -454,17 +685,27 @@ fn walk(
 
 pub fn validate_request(request: &GraphRequest) -> Result<(), GraphError> {
     request.budgets.resolve()?;
+    if !request.documents.is_empty()
+        && !matches!(
+            request.operation,
+            Operation::Impact | Operation::Context | Operation::Graph
+        )
+    {
+        return Err(GraphError::InvalidParams(
+            "documents применимо к impact, context и local graph".into(),
+        ));
+    }
+    if request.operation == Operation::Graph && !request.local && !request.documents.is_empty() {
+        return Err(GraphError::InvalidParams(
+            "documents требует local=true".into(),
+        ));
+    }
     if request.limit == Some(0) {
         return Err(GraphError::InvalidParams(
             "limit должен быть положительным".into(),
         ));
     }
     if request.operation == Operation::Context {
-        if !request.roots.is_empty() {
-            return Err(GraphError::CapabilityUnavailable(
-                "context roots: отбор по корням пока не реализован".into(),
-            ));
-        }
         if request.context_roles().is_empty() {
             return Err(GraphError::InvalidParams(
                 "roles не пересекаются с task_profile".into(),
@@ -476,6 +717,8 @@ pub fn validate_request(request: &GraphRequest) -> Result<(), GraphError> {
         ));
     }
     if request.roots.len() > 2000
+        || request.documents.len() > 20
+        || request.documents.iter().any(|p| p.len() > 4096)
         || request.scope.files.len() > 500
         || request.scope.modules.len() > 500
         || request.qualifiers.len() > 32
@@ -529,8 +772,8 @@ pub fn validate_request(request: &GraphRequest) -> Result<(), GraphError> {
         Operation::Paths if request.from.is_none() || request.to.is_none() => {
             return Err(GraphError::InvalidParams("paths: нужны from и to".into()));
         }
-        Operation::Impact if request.roots.is_empty() => {
-            return Err(GraphError::InvalidParams("impact: нужны roots".into()));
+        Operation::Impact if request.roots.is_empty() && request.documents.is_empty() => {
+            return Err(GraphError::InvalidParams("impact: нужны documents или roots из ответа графа; next: documents:[\"features/search/hybrid-search.md\"]".into()));
         }
         Operation::Context if !nonempty(&request.query) => {
             return Err(GraphError::InvalidParams("context: нужен query".into()));
@@ -540,8 +783,10 @@ pub fn validate_request(request: &GraphRequest) -> Result<(), GraphError> {
                 "explore: topic либо whole_scope=true".into(),
             ));
         }
-        Operation::Graph if request.local && request.roots.is_empty() => {
-            return Err(GraphError::InvalidParams("local graph: нужны roots".into()));
+        Operation::Graph
+            if request.local && request.roots.is_empty() && request.documents.is_empty() =>
+        {
+            return Err(GraphError::InvalidParams("local graph: нужны documents или roots; next: documents:[\"features/search/hybrid-search.md\"]".into()));
         }
         _ => {}
     }
@@ -965,8 +1210,24 @@ pub fn execute_overlay(
                     });
                 }
             }
+            if items.is_empty()
+                && selected.is_empty()
+                && reply.resolution != "ambiguous"
+                && let Some(label) = &request.query
+            {
+                reply.resolution = "not_found".into();
+                reply.candidates = name_candidates(
+                    &Endpoint::Name {
+                        label: label.clone(),
+                        kind: Some(Kind::Entity),
+                        namespace: None,
+                    },
+                    &view,
+                );
+            }
         }
         Operation::Paths => {
+            // Не разрешать близкое имя молча: кандидаты — только следующий явный вызов.
             let from = resolve(request.from.as_ref().unwrap(), &view)?;
             let to = resolve(request.to.as_ref().unwrap(), &view)?;
             if from.len() != 1 || to.len() != 1 {
@@ -976,7 +1237,24 @@ pub fn execute_overlay(
                     "ambiguous"
                 }
                 .into();
-                reply.candidates = from.into_iter().chain(to).collect();
+                reply.candidates = from.iter().chain(&to).cloned().collect();
+                if from.is_empty() {
+                    reply
+                        .candidates
+                        .extend(name_candidates(request.from.as_ref().unwrap(), &view));
+                }
+                if to.is_empty() {
+                    reply
+                        .candidates
+                        .extend(name_candidates(request.to.as_ref().unwrap(), &view));
+                }
+                reply
+                    .candidates
+                    .sort_by(|a, b| a.reference.id.cmp(&b.reference.id));
+                reply
+                    .candidates
+                    .dedup_by(|a, b| a.reference.id == b.reference.id);
+                reply.candidates.truncate(5);
             } else {
                 items.extend(
                     walk(
@@ -995,8 +1273,10 @@ pub fn execute_overlay(
             }
         }
         Operation::Impact => {
-            for root in &request.roots {
-                resolve(&Endpoint::Ref(root.clone()), &view)?;
+            let roots = root_nodes(request, &view, &budget, &mut state, &mut cancelled)?;
+            let mut seen = BTreeSet::new();
+            for id in &roots {
+                let root = &view.nodes[id].reference;
                 for path in walk(
                     &view,
                     request,
@@ -1007,6 +1287,10 @@ pub fn execute_overlay(
                     &mut state,
                     &mut cancelled,
                 )? {
+                    let key: Vec<_> = path.steps.iter().map(|s| (&s.edge, s.reversed)).collect();
+                    if !seen.insert(serde_json::to_string(&key)?) {
+                        continue;
+                    }
                     items.push(Item::Impact {
                         node: path.nodes.last().unwrap().clone(),
                         direct: path.steps.len() == 1,
@@ -1016,14 +1300,19 @@ pub fn execute_overlay(
             }
         }
         Operation::Graph => {
+            let roots = if request.local {
+                root_nodes(request, &view, &budget, &mut state, &mut cancelled)?
+            } else {
+                BTreeSet::new()
+            };
             if request.include_paths {
                 if !request.local {
                     return Err(GraphError::InvalidParams(
                         "include_paths требует local=true и roots".into(),
                     ));
                 }
-                for root in &request.roots {
-                    resolve(&Endpoint::Ref(root.clone()), &view)?;
+                for id in &roots {
+                    let root = &view.nodes[id].reference;
                     for path in walk(
                         &view,
                         request,
@@ -1039,11 +1328,7 @@ pub fn execute_overlay(
                 }
             } else {
                 let mut ids: BTreeSet<String> = if request.local {
-                    request
-                        .roots
-                        .iter()
-                        .map(|r| resolve(&Endpoint::Ref(r.clone()), &view).map(|_| r.id.clone()))
-                        .collect::<Result<_, _>>()?
+                    roots
                 } else {
                     view.nodes.keys().cloned().collect()
                 };
@@ -1160,12 +1445,29 @@ pub fn execute_overlay(
             }
         }
         Operation::Context => {
+            let neighborhood = if request.roots.is_empty() && request.documents.is_empty() {
+                None
+            } else {
+                let roots = root_nodes(request, &view, &budget, &mut state, &mut cancelled)?;
+                Some(context_neighborhood(
+                    roots,
+                    &view,
+                    &budget,
+                    &mut state,
+                    &mut cancelled,
+                )?)
+            };
             let roles = request.context_roles();
             let query = request.query.as_ref().unwrap();
             let mut scanned = Vec::new();
             for node in view
                 .nodes
                 .values()
+                .filter(|n| {
+                    neighborhood
+                        .as_ref()
+                        .is_none_or(|ids| ids.contains(&n.reference.id))
+                })
                 .filter(|n| n.roles.iter().any(|role| roles.contains(role)))
             {
                 if cancelled() {
@@ -1391,8 +1693,8 @@ pub fn execute_overlay(
     let total = items.len();
     let cap = (limit as usize).min(budget.max_nodes as usize);
     reply.items = items.into_iter().skip(offset).take(cap).collect();
-    if reply.candidates.len() > cap {
-        reply.candidates.truncate(cap);
+    if reply.candidates.len() > cap.min(5) {
+        reply.candidates.truncate(cap.min(5));
         reply.limit_reasons.push("max_nodes".into());
     }
     if total > offset + reply.items.len() {
@@ -1484,6 +1786,15 @@ pub fn execute_overlay(
 
 fn materialize(reply: &mut GraphReply, view: &Allowed<'_>) {
     let mut nodes = BTreeSet::new();
+    nodes.extend(reply.requested.roots.iter().map(|r| r.id.clone()));
+    nodes.extend(
+        reply
+            .requested
+            .documents
+            .iter()
+            .filter_map(|path| resolve_document(path, view).ok())
+            .map(|s| s.reference.id.clone()),
+    );
     let mut edges = BTreeMap::new();
     let mut proof = BTreeSet::new();
     let mut add_path = |path: &GraphPath| {

@@ -11,6 +11,7 @@ const GRAPH: &[&str] = &[
     "from",
     "to",
     "roots",
+    "documents",
     "modules",
     "files",
     "topic",

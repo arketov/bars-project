@@ -25,7 +25,31 @@ pub(super) fn graph_error(error: GraphError) -> RpcError {
     } else {
         error.to_string()
     };
-    RpcError::bars(kind, message)
+    let next = match &error {
+        GraphError::NotReady(_) => "next: bars_rag_search без mode",
+        GraphError::StaleRef(_) => {
+            "next: повторите исходную операцию без cursor и возьмите новый ObjectRef; старую revision не заменять вручную"
+        }
+        GraphError::SnapshotExpired | GraphError::CursorMismatch => {
+            "next: повторите операцию без cursor и snapshot"
+        }
+        GraphError::TimedOut => {
+            "next: сузьте modules/files или roles; timeout_ms можно увеличить до 5000"
+        }
+        GraphError::CapabilityUnavailable(_) => {
+            "Поддержаны documents/roots, query и estimated budget у context, roots/documents у impact. next: уберите указанное неподдерживаемое поле"
+        }
+        GraphError::Cancelled => "next: повторите операцию, если результат ещё нужен",
+        _ => "next: исправьте указанный параметр и повторите операцию",
+    };
+    RpcError::bars(
+        kind,
+        if message.contains("next:") {
+            message
+        } else {
+            format!("{message}\n{next}")
+        },
+    )
 }
 #[cfg(test)]
 mod readiness_tests {

@@ -708,13 +708,69 @@ fn render_graph(reply: &GraphReply, related: bool) -> String {
     };
     if !reply.candidates.is_empty() {
         let _ = writeln!(text, "resolved: {}", short(&reply.resolution, 100));
-        for node in reply.candidates.iter().take(5) {
+        for (i, node) in reply.candidates.iter().take(5).enumerate() {
+            let matches_from =
+                reply
+                    .requested
+                    .from
+                    .as_ref()
+                    .is_some_and(|endpoint| match endpoint {
+                        crate::graph_types::Endpoint::Ref(reference) => {
+                            reference == &node.reference
+                        }
+                        crate::graph_types::Endpoint::Name {
+                            label,
+                            kind,
+                            namespace,
+                        } => {
+                            let label = label.to_lowercase();
+                            kind.is_none_or(|kind| kind == node.reference.kind)
+                                && namespace
+                                    .as_ref()
+                                    .is_none_or(|namespace| namespace == &node.namespace)
+                                && std::iter::once(&node.label).chain(node.aliases.iter()).any(
+                                    |value| {
+                                        let value = value.to_lowercase();
+                                        value.contains(&label) || label.contains(&value)
+                                    },
+                                )
+                        }
+                        crate::graph_types::Endpoint::Document { .. } => {
+                            node.reference.kind == Kind::Document
+                        }
+                    });
+            let field = if reply.operation == Operation::Paths {
+                if matches_from { "from" } else { "to" }
+            } else {
+                "entity_ref"
+            };
             let _ = writeln!(
                 text,
-                "   «{}» ({})",
+                "{}. «{}» ({}, {} documents) → {}:{}",
+                i + 1,
                 view.label(&node.reference.id),
-                name(node.reference.kind)
+                name(node.reference.kind),
+                node.source_ids.len(),
+                field,
+                serde_json::to_string(&node.reference).expect("ObjectRef сериализуется")
             );
+        }
+    }
+    if !reply.requested.documents.is_empty() || !reply.requested.roots.is_empty() {
+        for source in &reply.sources {
+            if reply.requested.roots.iter().any(|r| r == &source.reference)
+                || reply.requested.documents.iter().any(|p| {
+                    let normalize = crate::graph_types::hints::normalize_document_input;
+                    normalize(p).is_some_and(|path| {
+                        Some(&path) == normalize(&source.docs_path).as_ref()
+                            || Some(&path) == normalize(&source.path).as_ref()
+                            || normalize(&source.path)
+                                .is_some_and(|saved| path.ends_with(&format!("/{saved}")))
+                    })
+                })
+            {
+                let _ = writeln!(text, "resolved: document {}", source.docs_path);
+            }
         }
     }
     if reply.operation == Operation::Graph {
@@ -750,6 +806,20 @@ fn render_graph(reply: &GraphReply, related: bool) -> String {
     }
     text.push_str(&status(reply));
     if reply.truncated {
+        if reply.limit_reasons.iter().any(|r| r == "timeout_ms") {
+            let _ = writeln!(
+                text,
+                "state: timeout after {} ms; found {} items; missing roles: {}",
+                reply.elapsed_ms,
+                reply.items.len(),
+                reply
+                    .missing_roles
+                    .iter()
+                    .map(name)
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            );
+        }
         let _ = writeln!(
             text,
             "truncated: shown {} items; limits: {}",
@@ -765,7 +835,14 @@ fn render_graph(reply: &GraphReply, related: bool) -> String {
         }
     }
     if reply.items.is_empty() {
-        text.push_str("state: в выбранной области и пределах результата нет; отсутствие связей не доказано\nnext: bars_rag_search без mode или bars_text_search по точной фразе\n");
+        let _ = writeln!(
+            text,
+            "state: {}: в выбранной области и пределах результата нет; покрыто {} из {} документов, полнота смысловых связей неизвестна; отсутствие зависимости не доказано",
+            reply.resolution, reply.coverage.processed, reply.coverage.indexed
+        );
+        if !reply.truncated {
+            text.push_str(if reply.operation == Operation::Impact { "next: bars_links с direction=incoming для документа и bars_rag_search по его названию\n" } else if reply.resolution == "ambiguous" { "next: повторите вызов с ObjectRef выбранного кандидата\n" } else { "next: bars_rag_search без mode или bars_text_search по точной фразе\n" });
+        }
     }
     text.push_str(if related {
         "=== END RELATED ==="

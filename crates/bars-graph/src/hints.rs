@@ -13,6 +13,25 @@ pub fn normalize_file(input: &str) -> String {
         .join("/")
 }
 
+/// Лексическая форма входа документа; сравнение с известными источниками не обращается к диску.
+pub fn normalize_document_input(input: &str) -> Option<String> {
+    let normalized = normalize_file(input);
+    let mut parts = Vec::new();
+    for part in normalized.trim_start_matches("?/").split('/') {
+        if part == ".." {
+            parts.pop()?;
+        } else {
+            parts.push(part);
+        }
+    }
+    let result = parts.join("/");
+    Some(if cfg!(windows) {
+        result.to_lowercase()
+    } else {
+        result
+    })
+}
+
 /// До трёх документов, путь которых оканчивается на введённый или совпадает с ним по имени файла.
 pub fn suggest_files<'a>(
     docs_paths: impl IntoIterator<Item = &'a str>,

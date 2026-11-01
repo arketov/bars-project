@@ -69,6 +69,203 @@ fn graph(text: &str) -> Dataset {
 }
 
 #[test]
+fn document_inputs_expand_roots_without_turning_links_into_dependencies() {
+    let data = build(
+        "C:/repo",
+        "docs",
+        vec![
+            doc("target.md", ".", "# Требования\n\nТ-2 использует Т-3."),
+            doc("dependent.md", ".", "# Требования\n\nТ-1 зависит от Т-2."),
+            doc("link.md", ".", "# Ссылки\n\n[Документ](target.md)"),
+        ],
+    )
+    .unwrap();
+    let root = data
+        .sources
+        .iter()
+        .find(|s| s.meta.docs_path == "target.md")
+        .unwrap()
+        .meta
+        .reference
+        .clone();
+    for input in [
+        "target.md",
+        "./target.md",
+        "docs/target.md",
+        "C:/repo/docs/target.md",
+        "\\\\?\\C:\\repo\\docs\\target.md",
+    ] {
+        let request = GraphRequest {
+            operation: Operation::Impact,
+            documents: vec![input.into()],
+            ..Default::default()
+        };
+        let result = execute(&data, &request, || false).unwrap();
+        assert!(!result.items.is_empty(), "{input}");
+        assert!(result.nodes.iter().any(|n| n.label == "Т-1"));
+        assert!(result.assertions.iter().all(|e| e.predicate.impact()));
+        assert!(result.nodes.iter().all(|n| !n.namespace.contains("C:/")));
+        let both = execute(
+            &data,
+            &GraphRequest {
+                roots: vec![root.clone()],
+                ..request.clone()
+            },
+            || false,
+        )
+        .unwrap();
+        assert_eq!(result.items.len(), both.items.len());
+    }
+    let r = GraphRequest {
+        operation: Operation::Impact,
+        roots: vec![root.clone()],
+        ..Default::default()
+    };
+    assert!(!execute(&data, &r, || false).unwrap().items.is_empty());
+    let mut stale = root;
+    stale.revision = "obsolete".into();
+    assert!(matches!(
+        execute(
+            &data,
+            &GraphRequest {
+                roots: vec![stale],
+                documents: vec!["target.md".into()],
+                ..r
+            },
+            || false
+        ),
+        Err(GraphError::StaleRef(_))
+    ));
+}
+
+#[test]
+fn context_document_scope_is_intersected_before_ranking_and_honors_depth() {
+    let data = build(
+        "fixture",
+        "docs",
+        vec![
+            doc(
+                "target.md",
+                ".",
+                "# Требования\n\nХранение локальное, требуется индекс.",
+            ),
+            doc(
+                "other.md",
+                "other",
+                "# Требования\n\nХранение другого проекта требует индекс.",
+            ),
+        ],
+    )
+    .unwrap();
+    let request = GraphRequest {
+        operation: Operation::Context,
+        query: Some("Хранение индекс".into()),
+        documents: vec!["target.md".into()],
+        budgets: Budgets {
+            max_depth: Some(0),
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+    let result = execute(&data, &request, || false).unwrap();
+    assert!(!result.items.is_empty());
+    assert!(result.sources.iter().all(|s| s.docs_path == "target.md"));
+    let (files, limited) = query::context_source_files(&data, &request, None).unwrap();
+    assert_eq!(
+        files,
+        std::collections::BTreeSet::from(["target.md".into()])
+    );
+    assert!(!limited);
+    let outside = GraphRequest {
+        scope: Scope {
+            modules: vec!["other".into()],
+            files: vec![],
+        },
+        ..request
+    };
+    assert!(matches!(
+        execute(&data, &outside, || false),
+        Err(GraphError::InvalidParams(_))
+    ));
+}
+
+#[test]
+fn document_endpoints_candidates_and_validation_are_actionable() {
+    let data =
+        graph("# Требования\n\n`Worker` зависит от `Index`.\n\n`WorkerPool` использует `Index`.");
+    let request = GraphRequest {
+        operation: Operation::Paths,
+        from: Some(Endpoint::Document {
+            document: "requirements.md".into(),
+        }),
+        to: Some(Endpoint::Document {
+            document: "docs/requirements.md".into(),
+        }),
+        path_kind: PathKind::Structural,
+        ..Default::default()
+    };
+    assert!(!execute(&data, &request, || false).unwrap().items.is_empty());
+    let request = GraphRequest {
+        from: Some(Endpoint::Name {
+            label: "Work".into(),
+            kind: Some(Kind::Entity),
+            namespace: None,
+        }),
+        to: Some(Endpoint::Name {
+            label: "Index".into(),
+            kind: Some(Kind::Entity),
+            namespace: None,
+        }),
+        ..request
+    };
+    let result = execute(&data, &request, || false).unwrap();
+    assert_eq!(result.resolution, "not_found");
+    assert!(result.items.is_empty());
+    assert!(result.candidates.iter().any(|n| n.label == "Worker"));
+    assert!(result.candidates.len() <= 5);
+    let root = result
+        .candidates
+        .iter()
+        .find(|n| n.label == "Worker")
+        .unwrap()
+        .reference
+        .clone();
+    let retried = execute(
+        &data,
+        &GraphRequest {
+            from: Some(Endpoint::Ref(root)),
+            ..request
+        },
+        || false,
+    )
+    .unwrap();
+    assert!(!retried.items.is_empty());
+    for path in ["outside.txt", "../requirements.md", "missing.md"] {
+        let result = execute(
+            &data,
+            &GraphRequest {
+                operation: Operation::Impact,
+                documents: vec![path.into()],
+                ..Default::default()
+            },
+            || false,
+        );
+        assert!(
+            matches!(result, Err(GraphError::InvalidParams(_))),
+            "{path}"
+        );
+    }
+    assert!(
+        query::validate_request(&GraphRequest {
+            operation: Operation::Impact,
+            documents: vec!["x.md".into(); 21],
+            ..Default::default()
+        })
+        .is_err()
+    );
+}
+
+#[test]
 fn uncertain_operands_abstain_without_losing_source_evidence() {
     for sentence in [
         "Она сама проверяет актуальность по проектам.",
@@ -128,10 +325,7 @@ fn context_profiles_select_roles_and_reject_silent_ignored_inputs() {
     ));
     r.roles.clear();
     r.roots = vec![data.nodes[0].reference.clone()];
-    assert!(matches!(
-        execute(&data, &r, || false),
-        Err(GraphError::CapabilityUnavailable(_))
-    ));
+    assert!(execute(&data, &r, || false).is_ok());
     r.roots.clear();
     r.operation = Operation::Graph;
     assert!(matches!(

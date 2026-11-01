@@ -550,6 +550,7 @@ pub fn requested(tool: &str, source: &Value) -> Value {
             "from",
             "to",
             "roots",
+            "documents",
             "modules",
             "files",
             "topic",
@@ -604,7 +605,7 @@ pub fn requested(tool: &str, source: &Value) -> Value {
                     "min_score" => v.is_number(),
                     "all" | "full" | "regex" | "case_sensitive" | "cursor_present"
                     | "include_related" | "diagnostic" | "whole_scope" | "local" => v.is_boolean(),
-                    "modules" | "files" | "roles" => {
+                    "modules" | "files" | "roles" | "documents" => {
                         v.as_array().is_some_and(|a| a.iter().all(Value::is_string))
                     }
                     "levels" => v

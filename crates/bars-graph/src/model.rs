@@ -662,6 +662,9 @@ pub enum RetrievalMode {
 #[serde(untagged)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum Endpoint {
+    Document {
+        document: String,
+    },
     Ref(ObjectRef),
     Name {
         label: String,
@@ -684,6 +687,7 @@ pub struct GraphRequest {
     pub from: Option<Endpoint>,
     pub to: Option<Endpoint>,
     pub roots: Vec<ObjectRef>,
+    pub documents: Vec<String>,
     pub predicates: Vec<Predicate>,
     pub direction: Direction,
     pub polarity: Option<Polarity>,

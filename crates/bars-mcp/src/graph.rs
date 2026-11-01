@@ -149,6 +149,8 @@ graph_args!(PathsArgs {
 });
 
 graph_args!(ImpactArgs {
+    /// Пути документов от docs-root или проекта; до 20, объединяются с roots.
+    documents: Vec<String>,
     #[schemars(schema_with = "object_refs_schema")]
     roots: Vec<ObjectRef>,
     #[schemars(schema_with = "predicates_schema")]
@@ -162,6 +164,10 @@ graph_args!(ImpactArgs {
 });
 
 graph_args!(ContextArgs {
+    /// Корни контекста по путям документов; до 20. Query ранжирует в их окрестности.
+    documents: Vec<String>,
+    #[schemars(schema_with = "object_refs_schema")]
+    roots: Vec<ObjectRef>,
     /// Задача или вопрос на языке пользователя; обязателен.
     query: Option<String>,
     /// `implementation`, `investigation` или `decision`: какие роли нужны задаче.
@@ -188,6 +194,8 @@ graph_args!(ExploreArgs {
 });
 
 graph_args!(GraphViewArgs {
+    /// Корни локального графа по путям документов; до 20, вместе с roots.
+    documents: Vec<String>,
     /// Что показывать; по умолчанию `documents`.
     view: View,
     /// `true` — окрестность `roots`; иначе общий граф.
@@ -302,6 +310,7 @@ impl ImpactArgs {
         );
         let r = &mut c.request;
         r.roots = self.roots;
+        r.documents = self.documents;
         r.predicates = self.predicates;
         r.budgets.max_depth = self.max_depth;
         r.limit = self.limit;
@@ -325,6 +334,8 @@ impl ContextArgs {
         );
         let r = &mut c.request;
         r.query = self.query;
+        r.documents = self.documents;
+        r.roots = self.roots;
         r.task_profile = self.task_profile;
         r.roles = self.roles;
         r.token_budget = self.token_budget;
@@ -373,6 +384,7 @@ impl GraphViewArgs {
         r.view = self.view;
         r.local = self.local;
         r.roots = self.roots;
+        r.documents = self.documents;
         r.predicates = self.predicates;
         r.direction = self.direction;
         r.budgets.max_depth = self.max_depth;

@@ -46,6 +46,13 @@ pub fn evidence_scores_current(
         .and_then(|_| bars_graph::query::validate_scope(data, &request.scope))
         .map_err(|error| SearchError::InvalidParams(error.to_string()))?;
     let start = Instant::now();
+    let rooted = !request.roots.is_empty() || !request.documents.is_empty();
+    let (root_files, root_limited) = if rooted {
+        bars_graph::query::context_source_files(data, request, current)
+            .map_err(|error| SearchError::InvalidParams(error.to_string()))?
+    } else {
+        (BTreeSet::new(), false)
+    };
     let budget = request
         .budgets
         .resolve()
@@ -73,6 +80,7 @@ pub fn evidence_scores_current(
             .sources
             .iter()
             .filter(|s| request.scope.allows(&s.meta) && ids.contains(&s.meta.reference.id))
+            .filter(|s| !rooted || root_files.contains(&s.meta.docs_path))
             .filter(|s| current.is_none_or(|m| m.get(&s.meta.path) == Some(&s.meta.hash)))
             .map(|s| s.meta.docs_path.clone())
             .collect::<Vec<_>>();
@@ -105,5 +113,5 @@ pub fn evidence_scores_current(
             }
         }
     }
-    Ok((scores, false))
+    Ok((scores, root_limited))
 }

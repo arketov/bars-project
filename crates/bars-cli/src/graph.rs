@@ -16,6 +16,9 @@ pub struct GraphArgs {
     /// ObjectRef JSON из предыдущего ответа; можно повторять.
     #[arg(long = "root")]
     pub roots: Vec<String>,
+    /// Корень по пути документа; можно повторять (до 20).
+    #[arg(long = "document")]
+    pub documents: Vec<String>,
     #[arg(long)]
     pub entity_ref: Option<String>,
     #[arg(long = "module")]
@@ -96,6 +99,9 @@ pub(super) async fn query(
         Default::default()
     };
     request.operation = operation;
+    if !args.documents.is_empty() {
+        request.documents = args.documents;
+    }
     if !args.query.is_empty() {
         if operation == Operation::Explore {
             request.topic = Some(args.query.join(" "));

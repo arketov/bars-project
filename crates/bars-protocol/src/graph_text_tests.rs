@@ -18,6 +18,59 @@ fn dataset() -> Dataset {
 }
 
 #[test]
+fn empty_document_impact_and_name_candidates_offer_a_usable_next_call() {
+    let data = dataset();
+    let r = query::execute(
+        &data,
+        &GraphRequest {
+            operation: Operation::Impact,
+            documents: vec!["a.md".into()],
+            predicates: vec![Predicate::Verifies],
+            ..Default::default()
+        },
+        || false,
+    )
+    .unwrap();
+    let text = render_graph_text(&r);
+    assert!(text.contains("resolved: document a.md"), "{text}");
+    assert!(text.contains("next: bars_links"), "{text}");
+    assert!(
+        text.contains("полнота смысловых связей неизвестна"),
+        "{text}"
+    );
+    let r = query::execute(
+        &data,
+        &GraphRequest {
+            operation: Operation::Paths,
+            from: Some(Endpoint::Name {
+                label: "A_missing".into(),
+                kind: Some(Kind::Entity),
+                namespace: None,
+            }),
+            to: Some(Endpoint::Name {
+                label: "C".into(),
+                kind: Some(Kind::Entity),
+                namespace: None,
+            }),
+            ..Default::default()
+        },
+        || false,
+    )
+    .unwrap();
+    let text = render_graph_text(&r);
+    assert!(text.contains("not_found"), "{text}");
+    assert!(text.contains("\"revision\":"), "{text}");
+    assert!(text.contains("next:"), "{text}");
+    let mut r = r;
+    r.truncated = true;
+    r.limit_reasons = vec!["timeout_ms".into()];
+    r.elapsed_ms = 5000;
+    let text = render_graph_text(&r);
+    assert!(text.contains("timeout after 5000 ms"), "{text}");
+    assert_eq!(text.matches("next:").count(), 1, "{text}");
+}
+
+#[test]
 fn scoped_graph_with_relations_does_not_claim_empty_search_results() {
     let mut output = GraphSearchOutput {
         search: serde_json::from_value(serde_json::json!({

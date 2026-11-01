@@ -584,11 +584,25 @@ async fn every_graph_tool_lists_only_its_own_parameters() {
         ),
         (
             "bars_impact",
-            &["roots", "predicates", "max_depth", "limit", "cursor"],
+            &[
+                "documents",
+                "roots",
+                "predicates",
+                "max_depth",
+                "limit",
+                "cursor",
+            ],
         ),
         (
             "bars_context",
-            &["query", "task_profile", "roles", "token_budget"],
+            &[
+                "documents",
+                "roots",
+                "query",
+                "task_profile",
+                "roles",
+                "token_budget",
+            ],
         ),
         (
             "bars_explore",
@@ -606,6 +620,7 @@ async fn every_graph_tool_lists_only_its_own_parameters() {
             &[
                 "view",
                 "local",
+                "documents",
                 "roots",
                 "predicates",
                 "direction",
@@ -741,6 +756,35 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
         .await;
     assert!(!error, "{text}");
     let graph: Value = serde_json::from_str(&text).unwrap();
+    for (tool, args) in [
+        ("bars_impact", json!({"documents":["requirements.md"]})),
+        (
+            "bars_context",
+            json!({"documents":["docs/requirements.md"],"query":"Т-1 зависит"}),
+        ),
+        (
+            "bars_graph",
+            json!({"documents":["requirements.md"],"local":true}),
+        ),
+        (
+            "bars_paths",
+            json!({"from":{"document":"requirements.md"},"to":{"document":"requirements.md"},"path_kind":"structural"}),
+        ),
+    ] {
+        let (error, text) = mcp.tool(tool, args).await;
+        assert!(!error, "{tool}: {text}");
+        assert!(text.contains("=== GRAPH"), "{text}");
+        assert!(!text.contains("//?/"), "{text}");
+    }
+    let (error, text) = mcp.tool("bars_impact", json!({})).await;
+    assert!(
+        error && text.contains("documents") && text.contains("next:"),
+        "{text}"
+    );
+    let (error, text) = mcp
+        .tool("bars_impact", json!({"documents":["absent.md"]}))
+        .await;
+    assert!(error && text.contains("next:"), "{text}");
     let root = graph["nodes"]
         .as_array()
         .unwrap()
