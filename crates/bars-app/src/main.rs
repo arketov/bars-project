@@ -23,6 +23,7 @@ mod tree_io;
 #[cfg(test)]
 mod tree_io_tests;
 mod window;
+mod window_updates;
 
 use std::sync::Arc;
 
@@ -69,6 +70,8 @@ fn main() -> anyhow::Result<()> {
             commands::document_write,
             commands::document_revision,
             commands::tree_read,
+            commands::window_observe,
+            commands::window_snapshot,
             commands::entry_create_doc,
             commands::entry_create_dir,
             commands::entry_move,

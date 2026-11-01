@@ -7,8 +7,15 @@ import { call, documentRead, documentRevision, documentWindowClose, documentWrit
 import { editors } from "./editors.svelte";
 import { unsavedPrompt } from "./unsaved.svelte";
 import { moved } from "./moved.svelte";
+import type { Change } from "./window-updates";
 
-const listeners = new Map<string, () => Promise<void>>();
+const listeners = new Map<string, (event?: {payload:Change}) => void | Promise<void>>();
+let snapshotRevision = 0;
+vi.mock("@tauri-apps/api/core", () => ({ invoke: vi.fn(async (command: string, args: Record<string,unknown>) => {
+  if (command === "window_observe") return args.project ? {project:args.project,subscription:args.project,epoch:1} : null;
+  if (command === "window_snapshot") return {project:"C:/p",subscription:args.subscription,epoch:1,revisions:[++snapshotRevision,snapshotRevision,0],parts:{index:{revision:snapshotRevision,state:"ready",value:await call("tree",{project:"C:/p",cwd:"C:/p"})}}};
+  return null;
+}) }));
 vi.mock("@tauri-apps/api/event", () => ({
   listen: vi.fn(async (name: string, handler: () => Promise<void>) => { listeners.set(name, handler); return () => listeners.delete(name); }),
   emit: vi.fn(async () => {}),
@@ -24,8 +31,9 @@ let component: ReturnType<typeof mount> | undefined;
 
 beforeEach(async () => {
   listeners.clear();
+  snapshotRevision = 0;
   vi.mocked(call).mockReset();
-  vi.mocked(call).mockImplementation(async (method: string) => method === "read" ? ({ title: "А", text: "# а\n" } as never) : new Promise(() => {}));
+  vi.mocked(call).mockImplementation(async (method: string) => method === "read" ? ({ title: "А", text: "# а\n" } as never) : method === "tree" ? ({docs_root:"docs",documents:[]} as never) : method === "project_observe" ? ({saved:true} as never) : new Promise(() => {}));
   vi.mocked(documentRead).mockResolvedValue(read("# а\n", "r1"));
   vi.mocked(documentWrite).mockReset(); vi.mocked(documentRevision).mockReset(); vi.mocked(documentWindowClose).mockReset();
   vi.mocked(documentWindowClose).mockResolvedValue(undefined);
@@ -33,6 +41,7 @@ beforeEach(async () => {
   flushSync(); await settle(); await settle();
 });
 afterEach(() => {
+  app.stop();
   if (component) unmount(component); component = undefined; document.body.innerHTML = "";
   unsavedPrompt.pending?.resolve("cancel");
   const buffer = editors.get("C:/p", "docs/a.md"); if (buffer) editors.discard(buffer);
@@ -80,8 +89,8 @@ it("«Закрыть без записи» закрывает окно и отб
   expect(editors.get("C:/p", "docs/a.md")).toBeUndefined();
 });
 
-it("дерево для `[[` читается по переносу и записи, а не по таймеру (ISS-38)", async () => {
-  vi.mocked(call).mockImplementation(async (method: string) => method === "tree" ? ({ docs_root: "docs", documents: [] } as never) : new Promise(() => {}));
+it("дерево для `[[` обновляется по ревизии воркера, без локального debounce или опроса (3.5.7)", async () => {
+  vi.mocked(call).mockImplementation(async (method: string) => method === "tree" ? ({ docs_root: "docs", documents: [] } as never) : method === "project_observe" ? ({saved:true} as never) : new Promise(() => {}));
   vi.mocked(documentRevision).mockResolvedValue({ status: "ok", revision: "r1" } as never);
   const trees = () => vi.mocked(call).mock.calls.filter(([method]) => method === "tree").length;
   const before = trees();
@@ -92,11 +101,17 @@ it("дерево для `[[` читается по переносу и запи�
     await moved.accept({ project: "C:/p", from: "docs/x.md", to: "docs/y.md" });
     await moved.accept({ project: "C:/p", from: "docs/y.md", to: "docs/z.md" });
     await vi.advanceTimersByTimeAsync(2000);
+    expect(trees()).toBe(before);
+    await listeners.get("bars://project-changed")!({payload:{project:"C:/p",subscription:"C:/p",epoch:1,revisions:[2,2,0]}});
+    await vi.advanceTimersByTimeAsync(10);
     expect(trees()).toBe(before + 1);
     vi.mocked(documentWrite).mockResolvedValue({ status: "saved", revision: "r2" });
     editors.get("C:/p", "docs/a.md")!.edit("# а\nправка\n");
     await editors.flush();
     await vi.advanceTimersByTimeAsync(2000);
+    expect(trees()).toBe(before + 1);
+    await listeners.get("bars://project-changed")!({payload:{project:"C:/p",subscription:"C:/p",epoch:1,revisions:[3,3,0]}});
+    await vi.advanceTimersByTimeAsync(10);
     expect(trees()).toBe(before + 2);
   } finally { vi.useRealTimers(); }
 });

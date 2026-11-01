@@ -1,0 +1,570 @@
+{
+  "success": true,
+  "scenario_seconds": 60,
+  "samples": [
+    {
+      "scenario": "one",
+      "sample": 0,
+      "wall_seconds": 60.797,
+      "main_rpc": {
+        "operation_events": 61,
+        "status": 61,
+        "tree": 61,
+        "tree_read": 61,
+        "activity": 60,
+        "graph_status": 30,
+        "projects": 12,
+        "new_topics_list": 12,
+        "audit_list": 4,
+        "project_observe": 6
+      },
+      "main_json_bytes": 95889374,
+      "main_rpc_p95_ms": 136.59999999403954,
+      "native": {
+        "cpu_seconds": 13.8125,
+        "logical_read_bytes": 115003971,
+        "private_bytes": 65228800,
+        "working_set_bytes": 96280576,
+        "new_processes": []
+      },
+      "webviews": {
+        "cpu_seconds": 2.90625,
+        "logical_read_bytes": 98095811,
+        "private_bytes": 358887424,
+        "working_set_bytes": 494985216,
+        "new_processes": []
+      },
+      "coordinator_before": {
+        "builds": [
+          0,
+          0,
+          0
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "coordinator_after": {
+        "builds": [
+          0,
+          0,
+          0
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "corpus_hash": "7d8379f4ccaf65dac34603d65fa8390353c4ed91789d6ae0c88d77d906864a43",
+      "concurrent_compilers": [],
+      "exited_processes": []
+    },
+    {
+      "scenario": "one",
+      "sample": 1,
+      "wall_seconds": 60.811,
+      "main_rpc": {
+        "tree": 61,
+        "tree_read": 61,
+        "activity": 60,
+        "operation_events": 60,
+        "status": 60,
+        "graph_status": 30,
+        "project_observe": 6,
+        "projects": 12,
+        "new_topics_list": 12,
+        "audit_list": 4
+      },
+      "main_json_bytes": 94318404,
+      "main_rpc_p95_ms": 124.79999999701975,
+      "native": {
+        "cpu_seconds": 12.765625,
+        "logical_read_bytes": 115002101,
+        "private_bytes": 67350528,
+        "working_set_bytes": 97914880,
+        "new_processes": []
+      },
+      "webviews": {
+        "cpu_seconds": 2.3125,
+        "logical_read_bytes": 96306200,
+        "private_bytes": 355155968,
+        "working_set_bytes": 491352064,
+        "new_processes": []
+      },
+      "coordinator_before": {
+        "builds": [
+          0,
+          0,
+          0
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "coordinator_after": {
+        "builds": [
+          0,
+          0,
+          0
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "corpus_hash": "7d8379f4ccaf65dac34603d65fa8390353c4ed91789d6ae0c88d77d906864a43",
+      "concurrent_compilers": [],
+      "exited_processes": []
+    },
+    {
+      "scenario": "one",
+      "sample": 2,
+      "wall_seconds": 60.774,
+      "main_rpc": {
+        "operation_events": 61,
+        "status": 61,
+        "tree": 61,
+        "tree_read": 61,
+        "activity": 60,
+        "project_observe": 6,
+        "projects": 12,
+        "new_topics_list": 12,
+        "audit_list": 4,
+        "graph_status": 30
+      },
+      "main_json_bytes": 95889374,
+      "main_rpc_p95_ms": 128.70000000298023,
+      "native": {
+        "cpu_seconds": 13.15625,
+        "logical_read_bytes": 115039436,
+        "private_bytes": 66211840,
+        "working_set_bytes": 97374208,
+        "new_processes": []
+      },
+      "webviews": {
+        "cpu_seconds": 1.9375,
+        "logical_read_bytes": 97911216,
+        "private_bytes": 354877440,
+        "working_set_bytes": 491339776,
+        "new_processes": []
+      },
+      "coordinator_before": {
+        "builds": [
+          0,
+          0,
+          0
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "coordinator_after": {
+        "builds": [
+          0,
+          0,
+          0
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "corpus_hash": "7d8379f4ccaf65dac34603d65fa8390353c4ed91789d6ae0c88d77d906864a43",
+      "concurrent_compilers": [],
+      "exited_processes": []
+    },
+    {
+      "scenario": "hidden",
+      "sample": 0,
+      "wall_seconds": 60.796,
+      "main_rpc": {
+        "operation_events": 61,
+        "status": 61,
+        "tree": 61,
+        "tree_read": 61,
+        "activity": 60,
+        "graph_status": 30,
+        "project_observe": 6,
+        "projects": 12,
+        "new_topics_list": 12,
+        "audit_list": 4
+      },
+      "main_json_bytes": 95889435,
+      "main_rpc_p95_ms": 125.70000000298025,
+      "native": {
+        "cpu_seconds": 12.4375,
+        "logical_read_bytes": 115002355,
+        "private_bytes": 62582784,
+        "working_set_bytes": 96714752,
+        "new_processes": []
+      },
+      "webviews": {
+        "cpu_seconds": 2.4375,
+        "logical_read_bytes": 97943008,
+        "private_bytes": 341934080,
+        "working_set_bytes": 480858112,
+        "new_processes": []
+      },
+      "coordinator_before": {
+        "builds": [
+          0,
+          0,
+          0
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "coordinator_after": {
+        "builds": [
+          0,
+          0,
+          0
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "corpus_hash": "7d8379f4ccaf65dac34603d65fa8390353c4ed91789d6ae0c88d77d906864a43",
+      "concurrent_compilers": [],
+      "exited_processes": []
+    },
+    {
+      "scenario": "hidden",
+      "sample": 1,
+      "wall_seconds": 60.738,
+      "main_rpc": {
+        "tree": 61,
+        "tree_read": 61,
+        "activity": 60,
+        "operation_events": 60,
+        "status": 60,
+        "project_observe": 6,
+        "projects": 12,
+        "new_topics_list": 12,
+        "graph_status": 30,
+        "audit_list": 4
+      },
+      "main_json_bytes": 95888705,
+      "main_rpc_p95_ms": 134.30000001192093,
+      "native": {
+        "cpu_seconds": 13.375,
+        "logical_read_bytes": 115038745,
+        "private_bytes": 62267392,
+        "working_set_bytes": 96378880,
+        "new_processes": []
+      },
+      "webviews": {
+        "cpu_seconds": 2.53125,
+        "logical_read_bytes": 97834808,
+        "private_bytes": 326811648,
+        "working_set_bytes": 466649088,
+        "new_processes": []
+      },
+      "coordinator_before": {
+        "builds": [
+          0,
+          0,
+          0
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "coordinator_after": {
+        "builds": [
+          0,
+          0,
+          0
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "corpus_hash": "7d8379f4ccaf65dac34603d65fa8390353c4ed91789d6ae0c88d77d906864a43",
+      "concurrent_compilers": [],
+      "exited_processes": []
+    },
+    {
+      "scenario": "hidden",
+      "sample": 2,
+      "wall_seconds": 60.76,
+      "main_rpc": {
+        "tree": 61,
+        "tree_read": 61,
+        "activity": 60,
+        "operation_events": 60,
+        "projects": 12,
+        "status": 60,
+        "new_topics_list": 12,
+        "graph_status": 30,
+        "project_observe": 6,
+        "audit_list": 4
+      },
+      "main_json_bytes": 95888705,
+      "main_rpc_p95_ms": 136.79999999701977,
+      "native": {
+        "cpu_seconds": 13.09375,
+        "logical_read_bytes": 115039079,
+        "private_bytes": 62578688,
+        "working_set_bytes": 96714752,
+        "new_processes": []
+      },
+      "webviews": {
+        "cpu_seconds": 2.640625,
+        "logical_read_bytes": 97839680,
+        "private_bytes": 315326464,
+        "working_set_bytes": 455360512,
+        "new_processes": []
+      },
+      "coordinator_before": {
+        "builds": [
+          0,
+          0,
+          0
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "coordinator_after": {
+        "builds": [
+          0,
+          0,
+          0
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "corpus_hash": "7d8379f4ccaf65dac34603d65fa8390353c4ed91789d6ae0c88d77d906864a43",
+      "concurrent_compilers": [],
+      "exited_processes": []
+    },
+    {
+      "scenario": "four",
+      "sample": 0,
+      "wall_seconds": 60.942,
+      "main_rpc": {
+        "operation_events": 61,
+        "status": 61,
+        "tree": 61,
+        "tree_read": 61,
+        "activity": 60,
+        "projects": 12,
+        "new_topics_list": 12,
+        "graph_status": 30,
+        "audit_list": 4,
+        "project_observe": 6
+      },
+      "main_json_bytes": 95889374,
+      "main_rpc_p95_ms": 150.90000000596046,
+      "native": {
+        "cpu_seconds": 14.3125,
+        "logical_read_bytes": 115041696,
+        "private_bytes": 70213632,
+        "working_set_bytes": 104902656,
+        "new_processes": []
+      },
+      "webviews": {
+        "cpu_seconds": 3.921875,
+        "logical_read_bytes": 98058941,
+        "private_bytes": 887345152,
+        "working_set_bytes": 1527832576,
+        "new_processes": []
+      },
+      "coordinator_before": {
+        "builds": [
+          0,
+          0,
+          0
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "coordinator_after": {
+        "builds": [
+          0,
+          0,
+          0
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "corpus_hash": "7d8379f4ccaf65dac34603d65fa8390353c4ed91789d6ae0c88d77d906864a43",
+      "concurrent_compilers": [],
+      "exited_processes": []
+    },
+    {
+      "scenario": "four",
+      "sample": 1,
+      "wall_seconds": 60.89,
+      "main_rpc": {
+        "projects": 13,
+        "status": 61,
+        "tree": 61,
+        "tree_read": 61,
+        "new_topics_list": 13,
+        "activity": 60,
+        "operation_events": 60,
+        "graph_status": 30,
+        "audit_list": 4,
+        "project_observe": 6
+      },
+      "main_json_bytes": 95892917,
+      "main_rpc_p95_ms": 123.19999998807909,
+      "native": {
+        "cpu_seconds": 12.90625,
+        "logical_read_bytes": 115208819,
+        "private_bytes": 70008832,
+        "working_set_bytes": 104267776,
+        "new_processes": []
+      },
+      "webviews": {
+        "cpu_seconds": 3.03125,
+        "logical_read_bytes": 98048837,
+        "private_bytes": 879304704,
+        "working_set_bytes": 1526362112,
+        "new_processes": []
+      },
+      "coordinator_before": {
+        "builds": [
+          0,
+          0,
+          0
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "coordinator_after": {
+        "builds": [
+          0,
+          0,
+          0
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "corpus_hash": "7d8379f4ccaf65dac34603d65fa8390353c4ed91789d6ae0c88d77d906864a43",
+      "concurrent_compilers": [],
+      "exited_processes": []
+    },
+    {
+      "scenario": "four",
+      "sample": 2,
+      "wall_seconds": 60.926,
+      "main_rpc": {
+        "tree": 61,
+        "tree_read": 61,
+        "graph_status": 30,
+        "activity": 60,
+        "operation_events": 60,
+        "status": 60,
+        "projects": 12,
+        "new_topics_list": 12,
+        "audit_list": 4,
+        "project_observe": 6
+      },
+      "main_json_bytes": 94318404,
+      "main_rpc_p95_ms": 123.70000000298025,
+      "native": {
+        "cpu_seconds": 13.078125,
+        "logical_read_bytes": 115005650,
+        "private_bytes": 73920512,
+        "working_set_bytes": 107794432,
+        "new_processes": []
+      },
+      "webviews": {
+        "cpu_seconds": 2.8125,
+        "logical_read_bytes": 97377662,
+        "private_bytes": 863129600,
+        "working_set_bytes": 1510965248,
+        "new_processes": []
+      },
+      "coordinator_before": {
+        "builds": [
+          0,
+          0,
+          0
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "coordinator_after": {
+        "builds": [
+          0,
+          0,
+          0
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "corpus_hash": "7d8379f4ccaf65dac34603d65fa8390353c4ed91789d6ae0c88d77d906864a43",
+      "concurrent_compilers": [],
+      "exited_processes": []
+    }
+  ],
+  "rpc_scope": "main WebView; CPU/IO/memory include native and all WebViews",
+  "bytes_kind": "UTF8 re-encoded JSON response bodies, excluding headers; encoding instrumentation included in WebView CPU",
+  "runtime": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+  "documents": 10000,
+  "detected_ui": "polling",
+  "search": {
+    "scenario": "four",
+    "provider": "FakeProvider; fixed query, 3 warmups + 20 calls",
+    "query": {
+      "query": "Текст контрольного корпуса 42",
+      "modules": [],
+      "files": [],
+      "limit": 5,
+      "min_score": 0,
+      "_window": {
+        "purpose": "diagnostic"
+      }
+    },
+    "applied": {
+      "results": 5,
+      "candidates": 30,
+      "rerank_candidates": 15,
+      "min_score": 0,
+      "score_kind": "cosine",
+      "clamped": false,
+      "scope": {
+        "modules": [],
+        "files": []
+      }
+    },
+    "settings_rerank_enabled": false,
+    "milliseconds": [
+      75.69999998807907,
+      76.6000000089407,
+      78.29999999701977,
+      76.70000000298023,
+      78.8999999910593,
+      76.20000000298023,
+      78.20000000298023,
+      78.79999999701977,
+      80.70000000298023,
+      72.90000000596046,
+      101.19999998807909,
+      81.1000000089407,
+      78,
+      76.09999999403954,
+      77.20000000298023,
+      78.40000000596046,
+      74.19999998807907,
+      75.40000000596046,
+      86.29999999701977,
+      80.70000000298023
+    ],
+    "p50_ms": 78,
+    "p95_ms": 86.29999999701977,
+    "results": [
+      {
+        "path": "docs/m000/d00001.md",
+        "source_hash": "711aa0547f76f870b26a64143064b85ff4121024db9a23caeb7744825ce12daa"
+      },
+      {
+        "path": "docs/m000/d00002.md",
+        "source_hash": "17d0dc076ecf26274593b91a197098aee23ea1176b79c23e81e93fc74fd18fcc"
+      },
+      {
+        "path": "docs/m000/d00003.md",
+        "source_hash": "9f5ab413f0985943bd0951ac28aa7fb9d13c77cb2b17c9283224e52d2560c7e6"
+      },
+      {
+        "path": "docs/m000/d00004.md",
+        "source_hash": "88ebc83a760005f68ad4dbff715f6baffda96879fbaa766161c0cab61be08c1a"
+      },
+      {
+        "path": "docs/m000/d00005.md",
+        "source_hash": "0c862aca8da55287d21e2cafa99824906baf293b36158bee9acbb9f5d385c9b9"
+      }
+    ]
+  }
+}

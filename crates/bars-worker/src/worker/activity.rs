@@ -97,6 +97,7 @@ impl Inner {
                 break;
             }
             self.expire_observers(Instant::now());
+            self.updates.retain(&lock(&self.registry).paths());
         }
     }
 }

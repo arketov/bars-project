@@ -30,12 +30,14 @@ it("does not reload model files on ordinary idle ticks", async () => {
 });
 
 it("document windows retain the main project and have no general poll", async () => {
+  vi.useFakeTimers();
   localStorage.setItem("bars-project", "main-project");
   await app.bindDocumentWindow("document-project");
-  invoke.mockClear(); vi.useFakeTimers();
+  await vi.advanceTimersByTimeAsync(0);
+  invoke.mockClear();
   app.start(); await app.refresh(true); await app.loadProjects();
   await vi.advanceTimersByTimeAsync(20_000);
-  expect(invoke.mock.calls.map(([method]) => method)).toEqual(["project_observe", "project_observe", "project_observe"]);
+  expect(invoke.mock.calls.map(([method]) => method)).toEqual(["project_observe", "project_observe"]);
   expect(app.current).toBe("document-project");
   expect(localStorage.getItem("bars-project")).toBe("main-project");
 });
@@ -54,6 +56,8 @@ it("the interval timer of a hidden window reads only notifications and showing i
   invoke.mockClear();
   await vi.advanceTimersByTimeAsync(9_000);
   const methods = () => invoke.mock.calls.map(([method]) => method).filter(method => method !== "project_observe");
+  expect(methods()).toEqual([]);
+  await vi.advanceTimersByTimeAsync(1_000);
   expect(methods()).toEqual(["activity", "operation_events"]);
   invoke.mockClear();
   hidden.mockReturnValue(false);
@@ -95,19 +99,64 @@ it("a second manual check is ignored while one is running", async () => {
   expect(invoke.mock.calls.filter(([method]) => method === "check_all")).toHaveLength(1);
 });
 
-it("window observation follows project selection, survives hiding and releases on stop", async () => {
+it("window observation follows project selection, releases while hidden and on stop", async () => {
   vi.useFakeTimers();
   await app.bindDocumentWindow("one");
   app.start();
+  await vi.advanceTimersByTimeAsync(0);
   const initial = invoke.mock.calls.find(([method]) => method === "project_observe")![1]!;
   expect(initial.project).toBe("one");
   invoke.mockClear();
   vi.spyOn(document, "hidden", "get").mockReturnValue(true);
   await app.select("two");
-  expect(invoke).toHaveBeenCalledWith("project_observe", { window: initial.window, project: "two" });
+  expect(invoke.mock.calls.some(([method, params]) => method === "project_observe" && params?.project === "two")).toBe(false);
   invoke.mockClear();
   await vi.advanceTimersByTimeAsync(10_000);
-  expect(invoke).toHaveBeenCalledWith("project_observe", { window: initial.window, project: "two" });
+  expect(invoke).toHaveBeenCalledWith("project_observe", { window: initial.window, project: null });
   app.stop();
+  await vi.advanceTimersByTimeAsync(0);
   expect(invoke).toHaveBeenLastCalledWith("project_observe", { window: initial.window, project: null });
+});
+
+it("heartbeat restores a host subscription lost during JS suspension without visibilitychange", async () => {
+  vi.useFakeTimers();
+  await app.bindDocumentWindow("one");
+  const trees=()=>invoke.mock.calls.filter(([method])=>method==="tree").length;
+  const before=trees();
+  invoke.mockImplementation(async method=>{
+    if(method==="project_observe")return {accepted:true,snapshot_observed:false};
+    if(method==="tree")return {docs_root:"docs",documents:[]};
+    return {};
+  });
+  await vi.advanceTimersByTimeAsync(10_000);
+  expect(trees()).toBeGreaterThan(before);
+  expect(app.current).toBe("one");
+});
+
+it("native show restores the document snapshot before the next heartbeat without visibilitychange", async () => {
+  vi.useFakeTimers();
+  await app.bindDocumentWindow("one");
+  app.windowVisibility(false);
+  await vi.advanceTimersByTimeAsync(0);
+  invoke.mockClear();
+  app.windowVisibility(true);
+  await vi.advanceTimersByTimeAsync(0);
+  expect(invoke.mock.calls.some(([method]) => method === "tree")).toBe(true);
+  expect(invoke.mock.calls.some(([method]) => method === "activity")).toBe(false);
+  expect(app.current).toBe("one");
+});
+
+it("native hiding throttles notifications even when document.hidden stays false", async () => {
+  vi.useFakeTimers();
+  app.start();
+  await vi.advanceTimersByTimeAsync(0);
+  app.windowVisibility(false);
+  await vi.advanceTimersByTimeAsync(1000);
+  invoke.mockClear();
+  await vi.advanceTimersByTimeAsync(9000);
+  expect(invoke.mock.calls.some(([method]) => method === "activity")).toBe(false);
+  await vi.advanceTimersByTimeAsync(1000);
+  expect(invoke.mock.calls.filter(([method]) => method === "activity")).toHaveLength(1);
+  expect(invoke.mock.calls.some(([method]) => method === "tree")).toBe(false);
+  expect(app.windowVisible).toBe(false);
 });

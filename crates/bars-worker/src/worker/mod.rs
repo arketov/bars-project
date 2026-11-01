@@ -19,6 +19,7 @@ mod registry;
 mod scan;
 mod summary;
 mod timefmt;
+pub mod updates;
 mod watcher;
 
 #[cfg(test)]
@@ -296,6 +297,7 @@ impl Runtime {
 }
 
 struct Inner {
+    updates: updates::Updates,
     requests: Arc<RwLock<()>>,
     config: WorkerConfig,
     registry: Mutex<Registry>,
@@ -385,6 +387,7 @@ impl Worker {
         let registry = Registry::load(&config.bars_home)?;
         let paths = registry.paths();
         let inner = Arc::new(Inner {
+            updates: Default::default(),
             requests: Arc::new(RwLock::new(())),
             config,
             registry: Mutex::new(registry),
@@ -514,6 +517,7 @@ impl Worker {
                 io::Error::other("идёт удаление проекта; повторите регистрацию позже")
             })?;
         let path = normalize(path)?;
+        let _publication = self.inner.updates.after(&path, updates::ALL);
         if !path.is_dir() {
             return Err(WorkerError::NotADirectory(path));
         }
@@ -547,6 +551,7 @@ impl Worker {
             io::Error::other("идёт удаление проекта; повторите снятие регистрации позже")
         })?;
         let path = self.resolve(selector)?;
+        let _publication = self.inner.updates.after(&path, updates::ALL);
         lock(&self.inner.registry).remove(&path)?;
         let runtime = lock(&self.inner.projects).remove(&path);
         self.inner.graph_cache.remove(&path);
@@ -727,6 +732,7 @@ impl Worker {
         accept_model_change: bool,
     ) -> Result<(u64, bool, JobKind), WorkerError> {
         let path = self.registered(path)?;
+        let _publication = self.inner.updates.after(&path, updates::STATUS);
         let key = self.inner.operation_settings_key(&path);
         let projects = lock(&self.inner.projects);
         let state = projects
@@ -905,6 +911,7 @@ impl Worker {
     /// проект ставится на полную проверку (нарезка и корень в индексе записаны, воркер увидит
     /// расхождение). Согласие не нужно: модель та же.
     pub fn set_docs_root(&self, path: &Path, docs_root: &str) -> Result<(), WorkerError> {
+        let _publication = self.inner.updates.after(path, updates::ALL);
         let _request = self.inner.requests.try_read().map_err(|_| {
             io::Error::other("идёт удаление проекта; повторите изменение настроек позже")
         })?;
@@ -1091,6 +1098,7 @@ impl Inner {
     }
 
     fn enqueue(&self, project: &Path, job: Job) {
+        let _publication = self.updates.after(project, updates::STATUS);
         let key = self.operation_settings_key(project);
         let projects = lock(&self.projects);
         self.enqueue_for(project, job, &projects, key);
@@ -1240,6 +1248,7 @@ impl Inner {
         let Some(generation) = generation else {
             return;
         };
+        let _publication = self.updates.after(path, updates::STATUS);
         let weak: Weak<Inner> = Arc::downgrade(self);
         let key = path.to_path_buf();
         let sink: Sink = Arc::new(move |event| {
@@ -1285,6 +1294,14 @@ impl Inner {
         if self.stop.load(Ordering::SeqCst) {
             return;
         }
+        if matches!(event, WatchEvent::Tree) {
+            self.updates.changed(project, updates::DISK, false);
+            return;
+        }
+        let _publication = self.updates.after(project, updates::STATUS);
+        if matches!(event, WatchEvent::Failed(_) | WatchEvent::Rescan) {
+            self.updates.changed(project, updates::ALL, true);
+        }
         if !project.is_dir() {
             if let Some(watcher) = self.mark_unavailable(project) {
                 std::thread::spawn(move || drop(watcher));
@@ -1295,6 +1312,7 @@ impl Inner {
             runtime.watch_events = runtime.watch_events.saturating_add(1);
         }
         match event {
+            WatchEvent::Tree => unreachable!(),
             WatchEvent::Files(files) => self.touch_files(project, files, DocSource::Watch),
             WatchEvent::Failed(message) => {
                 if let Some(runtime) = lock(&self.projects).get_mut(project) {
@@ -1333,6 +1351,7 @@ impl Inner {
     /// документов (Т-41, Т-42); пропавшие файлы, папки и проект, ждущий переиндексации, ставятся
     /// заданием сразу: удалению пауза не нужна, а в `reindex_required` записи не создаются.
     fn touch_files(&self, project: &Path, files: Vec<PathBuf>, source: DocSource) {
+        let _publication = self.updates.after(project, updates::DISK | updates::STATUS);
         let reindex = lock(&self.projects)
             .get(project)
             .is_some_and(|runtime| runtime.status.state == ProjectState::ReindexRequired);
@@ -1510,6 +1529,7 @@ impl Inner {
     /// Папки проекта нет: проект `unavailable`, с очереди он снимается. Возвращает слежение,
     /// которое надо остановить вне блокировок.
     fn mark_unavailable(&self, path: &Path) -> Option<ProjectWatcher> {
+        let _publication = self.updates.after(path, updates::ALL);
         let watcher = {
             let mut projects = lock(&self.projects);
             let runtime = projects
@@ -1614,6 +1634,7 @@ impl Inner {
             *lock(&self.current) = Some(Arc::clone(&cell));
             (Arc::clone(&runtime.gate), previous)
         };
+        self.updates.changed(&path, updates::STATUS, false);
 
         // Документы очереди, которые задание разберёт, и те, что остаются ждать паузы (Т-41).
         let taken = {
@@ -1651,6 +1672,7 @@ impl Inner {
             Arc::clone(&self.stop),
         )
         .with_documents(Arc::new(doc_queue::Observer {
+            updates: self.updates.clone(),
             docs: Arc::clone(&self.docs),
             project: path.clone(),
             source,
@@ -1770,6 +1792,15 @@ impl Inner {
         generation_gate: &Arc<tokio::sync::Mutex<()>>,
         result: job::JobResult,
     ) {
+        let _publication = self.updates.after(
+            path,
+            updates::STATUS
+                | if matches!(&result.outcome, Outcome::Updated(_)) {
+                    updates::INDEX
+                } else {
+                    0
+                },
+        );
         let mut stopped = None;
         {
             let mut projects = lock(&self.projects);

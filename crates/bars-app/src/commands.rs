@@ -47,6 +47,7 @@ pub fn keybindings_save(
 /// Обработчик воркера: появляется, когда воркер поднят, и до того окну отвечает «запускается».
 #[derive(Default)]
 pub struct Shared {
+    pub updates: crate::window_updates::Coordinator,
     handler: Mutex<Option<WorkerHandler>>,
     pub folders: crate::folders::Targets,
     pub flush: crate::flush::Flush,
@@ -55,6 +56,7 @@ pub struct Shared {
 
 impl Shared {
     pub fn set(&self, handler: WorkerHandler) {
+        self.updates.reset();
         *self.handler.lock().unwrap_or_else(PoisonError::into_inner) = Some(handler);
     }
 
@@ -84,6 +86,9 @@ pub async fn bars_call(
         // Закрытие главного окна скрывает WebView, но его JS продолжает работать.
         if !window.is_visible().unwrap_or(false) {
             params.insert("project".into(), Value::Null);
+        }
+        if params.get("project").is_none_or(Value::is_null) {
+            state.updates.release(window.label());
         }
     }
     // Служебное поле `_window` (назначение поиска, ID обращения) в протокол не попадает.
@@ -116,7 +121,12 @@ pub async fn bars_call(
     } else {
         None
     };
-    let result = handler.dispatch_with_context(call, context).await;
+    let mut result = handler.dispatch_with_context(call, context).await;
+    if method == "project_observe"
+        && let Ok(value) = &mut result
+    {
+        value["snapshot_observed"] = serde_json::json!(state.updates.observed(window.label()));
+    }
     if let (Some((root, identity)), Ok(output)) = (tree_binding, &result)
         && handler.worker().folder_identity(&root).ok().as_ref() == Some(&identity)
         && let Ok(tree) = serde_json::from_value::<bars_protocol::TreeOutput>(output.clone())
@@ -124,6 +134,78 @@ pub async fn bars_call(
         state.folders.remember(root, identity, tree);
     }
     result
+}
+
+#[tauri::command]
+pub fn window_observe(
+    app: AppHandle,
+    window: tauri::WebviewWindow,
+    state: State<'_, Shared>,
+    project: Option<String>,
+    parts: Vec<String>,
+) -> Result<Value, String> {
+    use tauri::{Emitter, Manager};
+    let handler = state.get().ok_or("Воркер ещё запускается")?;
+    state.updates.start(
+        handler.clone(),
+        std::sync::Arc::new(move |label, value| {
+            let _ = app.emit_to(label, "bars://project-changed", value);
+        }),
+        {
+            let app = window.app_handle().clone();
+            std::sync::Arc::new(move |label| {
+                app.get_webview_window(label).is_some_and(|window| {
+                    window.is_visible().unwrap_or(false) && !window.is_minimized().unwrap_or(false)
+                })
+            })
+        },
+    );
+    if project.is_none()
+        || !window.is_visible().unwrap_or(false)
+        || window.is_minimized().unwrap_or(false)
+    {
+        state.updates.release(window.label());
+        handler
+            .worker()
+            .observe_window(window.label(), None)
+            .map_err(|e| e.to_string())?;
+        return Ok(Value::Null);
+    }
+    state.updates.observe(
+        &handler,
+        window.label(),
+        project.as_deref().unwrap_or_default(),
+        crate::window_updates::parts(&parts)?,
+    )
+}
+
+#[tauri::command]
+pub async fn window_snapshot(
+    window: tauri::WebviewWindow,
+    state: State<'_, Shared>,
+    subscription: String,
+    known: Value,
+    force: bool,
+) -> Result<Value, String> {
+    let handler = state.get().ok_or("Воркер ещё запускается")?;
+    if !window.is_visible().unwrap_or(false) || window.is_minimized().unwrap_or(false) {
+        state.updates.release(window.label());
+        return Err("Окно скрыто".into());
+    }
+    let value = state
+        .updates
+        .snapshot(&handler, window.label(), &subscription, known, force)
+        .await?;
+    if let Some(tree) = value.pointer("/parts/index/value")
+        && let Ok(tree) = serde_json::from_value::<bars_protocol::TreeOutput>(tree.clone())
+        && let Some(project) = value["project"].as_str()
+        && let Ok(root) = handler.worker().resolve(project)
+        && let Ok(identity) = handler.worker().folder_identity(&root)
+        && value["identity"].as_str() == Some(&identity)
+    {
+        state.folders.remember(root, identity, tree);
+    }
+    Ok(value)
 }
 
 /// Диалог выбора папки; `None` — пользователь отказался.
@@ -359,6 +441,12 @@ pub async fn entry_create_doc(
     name: String,
 ) -> Result<Value, String> {
     let (root, docs_root) = document_roots(&state, &project)?;
+    let _publication = state.get().map(|handler| {
+        handler
+            .worker()
+            .window_updates()
+            .after(&root, bars_worker::worker::updates::DISK)
+    });
     tauri::async_runtime::spawn_blocking(move || {
         match crate::tree_io::create_doc(&root, &docs_root, &parent, &name) {
             Ok(path) => serde_json::json!({ "status": "ok", "path": path }),
@@ -378,6 +466,12 @@ pub async fn entry_create_dir(
     name: String,
 ) -> Result<Value, String> {
     let (root, docs_root) = document_roots(&state, &project)?;
+    let _publication = state.get().map(|handler| {
+        handler
+            .worker()
+            .window_updates()
+            .after(&root, bars_worker::worker::updates::DISK)
+    });
     tauri::async_runtime::spawn_blocking(move || {
         match crate::tree_io::create_dir(&root, &docs_root, &parent, &name) {
             Ok(created) => match created.index_error {
@@ -440,6 +534,12 @@ pub async fn entry_move(
         );
     }
     let (root, docs_root) = document_roots(&state, &project)?;
+    let _publication = state.get().map(|handler| {
+        handler
+            .worker()
+            .window_updates()
+            .after(&root, bars_worker::worker::updates::DISK)
+    });
     tauri::async_runtime::spawn_blocking(move || {
         match crate::tree_io::move_with_links(&root, &docs_root, &from, &to_parent, &name, &token) {
             Ok(mut result) => {
@@ -479,6 +579,12 @@ pub async fn entry_trash(
     path: String,
 ) -> Result<Value, String> {
     let (root, docs_root) = document_roots(&state, &project)?;
+    let _publication = state.get().map(|handler| {
+        handler
+            .worker()
+            .window_updates()
+            .after(&root, bars_worker::worker::updates::DISK)
+    });
     tauri::async_runtime::spawn_blocking(move || {
         match crate::tree_io::trash_entry(&root, &docs_root, &path) {
             Ok(()) => serde_json::json!({ "status": "ok" }),

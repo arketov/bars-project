@@ -20,6 +20,8 @@ mod folders;
 mod tree_io;
 #[path = "../src/window.rs"]
 mod window;
+#[path = "../src/window_updates.rs"]
+mod window_updates;
 
 use bars_worker::{
     handler::WorkerHandler,

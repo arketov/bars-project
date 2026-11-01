@@ -1,7 +1,9 @@
 // Состояние окна: проекты, дерево, поиск, просмотр документа, ход индексации.
 // Всё, что знает воркер, спрашивается у него; окно хранит только выбор пользователя.
 
-import { call, documentWindowOpen, joinPath, openInMainWindow, openPath, pickFolder, treeRead } from "./api";
+import { call, documentWindowOpen, joinPath, openInMainWindow, openPath, pickFolder } from "./api";
+import type { DiskTreeOutput } from "./api";
+import { ProjectUpdates, type Snapshot } from "./window-updates";
 import { TextSearchStore } from './text-search.svelte';
 import { editors } from './editors.svelte';
 import { confirmProjectLeave } from './unsaved.svelte';
@@ -46,8 +48,6 @@ const POLL_MS = 1000;
 const HIDDEN_POLL_MS = 10_000;
 /** Список проектов читает индексы, поэтому без перемен обновляется реже, чем ход. */
 const PROJECTS_EVERY = 5;
-/** Дерево с диска перечитывается раз в несколько тиков: обход каталогов дешевле индексации, но не бесплатен. */
-const TREE_EVERY = 1;
 /** Состояния аудитов читаются раз в 15 тиков: вид идёт минуты, расписание — раз в минуту. */
 const AUDITS_EVERY = 15;
 
@@ -65,10 +65,18 @@ function remembered(): string | null {
 }
 
 class App {
+  #nativeVisible = $state(true);
+  get windowVisible(): boolean { return this.#nativeVisible && !document.hidden; }
   #windowId = crypto.randomUUID();
   #watchTimer: ReturnType<typeof setInterval> | null = null;
-  #watch = (): void => { void call("project_observe", { window: this.#windowId, project: this.current }).catch(() => {}); };
-  #releaseWatch = (): void => { void call("project_observe", { window: this.#windowId, project: null }).catch(() => {}); };
+  #watch = (): void => {
+    const project = this.current;
+    void this.#updates.lease(async () => {
+      const result = await call<{ snapshot_observed?: boolean }>("project_observe", { window: this.#windowId, project: this.windowVisible ? project : null });
+      if (result.snapshot_observed === false && project === this.current && this.windowVisible && this.#watchTimer) void this.#updates.reconnect();
+    }).catch(() => {});
+  };
+  #releaseWatch = (): void => { void this.#updates.lease(async () => { await call("project_observe", { window: this.#windowId, project: null }); }).catch(() => {}); };
   private currentView = $state<View>("main");
   settingsLeave: (() => boolean | Promise<boolean>) | null = null;
   get view(): View { return this.currentView; }
@@ -158,8 +166,11 @@ class App {
   checking = $state(false);
   #lastHiddenPoll = 0;
   #treeSignature = "";
-  #treeSyncing = false;
-  #treeRequest = 0;
+  #updates = new ProjectUpdates(snapshot => this.applySnapshot(snapshot), error => { this.treeProblems = [{ path: "", reason: `Сохранён последний снимок: ${error}` }]; }, undefined, () => this.windowVisible);
+  #disk: DiskTreeOutput | null = null;
+  #index: TreeOutput | null = null;
+  #snapshotKey = "";
+  #snapshotEpochKey = "";
   treeProblems = $state<{ path: string; reason: string }[]>([]);
   #modelsPending: Promise<void> | null = null;
   #actionAttempt = 0;
@@ -296,15 +307,17 @@ class App {
       this.#watch();
       this.#watchTimer = setInterval(this.#watch, 10_000);
       window.addEventListener("pagehide", this.#releaseWatch);
+      document.addEventListener("visibilitychange", this.#visible);
+      void this.#updates.ensure(this.current, this.documentWindow);
     }
     if (this.#timer || this.documentWindow) return;
-    document.addEventListener("visibilitychange", this.#visible);
     void this.loadSearchSettings();
-    void this.refresh(true);
+    void this.refresh(this.windowVisible);
     this.#timer = setInterval(() => void this.refresh(false), POLL_MS);
   }
 
   stop(): void {
+    this.#updates.stop();
     if (this.#watchTimer) {
       clearInterval(this.#watchTimer);
       this.#watchTimer = null;
@@ -318,8 +331,16 @@ class App {
 
   #visible = (): void => {
     this.#watch();
-    if (!document.hidden) void this.refresh(true);
+    if (!this.windowVisible) this.#updates.stop();
+    else void this.#updates.bind(this.current, this.documentWindow);
+    if (this.windowVisible) void this.refresh(true);
   };
+
+  windowVisibility(visible: boolean): void {
+    if (this.#nativeVisible === visible) return;
+    this.#nativeVisible = visible;
+    if (this.#watchTimer) this.#visible();
+  }
 
   flash(text: string, bad = false): void {
     if (bad) {
@@ -334,8 +355,12 @@ class App {
 
   async refresh(force: boolean): Promise<void> {
     if (this.documentWindow) return;
-    if (this.#refreshing) { this.#refreshAgain ||= force; return; }
-    const hidden = document.hidden && !force;
+    if (this.#refreshing) {
+      this.#refreshAgain ||= force;
+      if (force) return new Promise(resolve => this.#refreshWaiters.push(resolve));
+      return;
+    }
+    const hidden = !this.windowVisible && !force;
     if (hidden && Date.now() - this.#lastHiddenPoll < HIDDEN_POLL_MS) return;
     if (hidden) this.#lastHiddenPoll = Date.now();
     this.#refreshing = true;
@@ -369,8 +394,7 @@ class App {
       this.#notifications.resolve("worker");
       if (hidden) return;
       if (force || changed || this.#tick % PROJECTS_EVERY === 0) await this.loadProjects();
-      if (this.current) await this.loadStatus();
-      if (this.current && (force || this.#tick % TREE_EVERY === 0) && !document.hidden) void this.syncTree();
+      if (force && this.current) await this.#updates.request(this.current, this.documentWindow, true);
       this.syncTopics(force);
     } catch (error) {
       if (epoch !== this.#epoch) return;
@@ -417,14 +441,7 @@ class App {
   }
 
   async loadStatus(): Promise<void> {
-    if (!this.current) return;
-    const path = this.current, epoch = this.#epoch;
-    try {
-      const status = await call<StatusOutput>("status", { cwd: path, project: path });
-      if (path === this.current && epoch === this.#epoch) this.status = status;
-    } catch {
-      if (path === this.current && epoch === this.#epoch) this.status = null;
-    }
+    await this.#updates.request(this.current, this.documentWindow, true);
   }
 
   async loadTree(): Promise<void> {
@@ -432,28 +449,29 @@ class App {
       this.tree = [];
       return;
     }
-    const path = this.current, epoch = this.#epoch;
-    try {
-      await this.readTree(path, epoch, true);
-    } catch (error) {
-      if (path === this.current && epoch === this.#epoch) this.treeProblems = [{ path: "", reason: String(error) }];
-    }
+    await this.#updates.request(this.current, this.documentWindow, true);
   }
 
   /** Дерево идёт по диску (Т-33), сведения индекса подмешиваются по пути; без диска — только индекс. */
-  private async readTree(path: string, epoch: number, force: boolean): Promise<void> {
-    const request = ++this.#treeRequest;
-    const inputs = await Promise.all([call<TreeOutput>("tree", { cwd: path, project: path }), treeRead(path)]).catch(error => {
-      if (request !== this.#treeRequest) return null;
-      throw error;
-    });
-    if (!inputs) return;
-    const [output, disk] = inputs;
-    if (request !== this.#treeRequest || path !== this.current || epoch !== this.#epoch) return;
-    this.treeProblems = disk?.problems ?? [];
+  private applySnapshot(snapshot: Snapshot): void {
+    if (snapshot.project !== this.current) return;
+    const key = `${snapshot.project}:${snapshot.subscription}:${snapshot.epoch}`;
+    if (key !== this.#snapshotKey) { this.#snapshotKey = key; this.#treeSignature = ""; }
+    const epochKey = `${snapshot.project}:${snapshot.epoch}`;
+    if (epochKey !== this.#snapshotEpochKey) { this.#snapshotEpochKey = epochKey; this.#disk = null; this.#index = null; }
+    const { disk: diskPart, index: indexPart, status: statusPart } = snapshot.parts;
+    if (diskPart && !diskPart.unchanged && diskPart.value) this.#disk = diskPart.value as DiskTreeOutput;
+    if (indexPart && !indexPart.unchanged && indexPart.value) this.#index = indexPart.value as TreeOutput;
+    if (statusPart && !statusPart.unchanged && statusPart.value) this.status = statusPart.value as StatusOutput;
+    const errors = Object.values(snapshot.parts).flatMap(part => part.error ? [{ path: "", reason: `Сохранён последний снимок: ${part.error}` }] : []);
+    const disk = this.#disk, output = this.#index;
+    this.treeProblems = [...(disk?.problems ?? []), ...errors];
+    // При новой идентичности показываем прежнее дерево целиком с ошибкой, не смешивая части.
+    if ((!disk && diskPart?.error) || (!output && indexPart?.error)) return;
+    if (!output) return;
     const docsRoot = disk?.docs_root ?? output.docs_root;
     const signature = `${docsRoot}:${treeSignature(output.documents, disk?.revision)}`;
-    if (!force && signature === this.#treeSignature) return;
+    if (signature === this.#treeSignature) return;
     this.#treeSignature = signature;
     this.docsRoot = docsRoot;
     this.tree = buildTree(output.documents, docsRoot, disk ? { files: disk.files.map((file) => file.path), dirs: disk.dirs } : undefined);
@@ -461,17 +479,7 @@ class App {
 
   /** Подхватывает изменения вне bars (Проводник, агент) и новые документы индекса: перестраивает дерево, только если оно изменилось. */
   async syncTree(): Promise<void> {
-    const path = this.current;
-    if (!path || this.#treeSyncing || this.project?.state === "unavailable") return;
-    this.#treeSyncing = true;
-    try {
-      await this.readTree(path, this.#epoch, false);
-    } catch (error) {
-      // Сбой одного опроса оставляет прежнее дерево.
-      if (path === this.current) this.treeProblems = [{ path: "", reason: String(error) }];
-    } finally {
-      this.#treeSyncing = false;
-    }
+    await this.loadTree();
   }
 
   async select(path: string | null): Promise<void> {
@@ -492,6 +500,7 @@ class App {
     this.tree = [];
     this.treeProblems = [];
     this.#treeSignature = "";
+    this.#disk = null; this.#index = null;
     try {
       if (path) localStorage.setItem(PROJECT_KEY, path);
       else localStorage.removeItem(PROJECT_KEY);
@@ -515,8 +524,7 @@ class App {
     this.audits.bind(path);
     this.auditsOpen = false;
     if (path) void this.topics.load(true);
-    await this.loadTree();
-    if (path) await this.loadStatus();
+    await this.#updates.bind(path, this.documentWindow);
   }
 
   toggleNode(path: string, checked: boolean): void {
@@ -712,8 +720,10 @@ class App {
     this.#epoch += 1;
     this.documentWindow = true;
     this.current = project;
+    this.#disk = null; this.#index = null; this.#treeSignature = "";
     this.topics.bind(project);
-    await this.loadTree();
+    await this.#updates.bind(project, true);
+    this.start();
   }
 
   /** Открывает документ в отдельном окне bars; уже открытое окно выводится вперёд. */

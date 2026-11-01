@@ -438,6 +438,7 @@ impl DocQueue {
 
 /// Адаптер событий индексатора: снимок расхождений и фактическая обработка документов.
 pub(super) struct Observer {
+    pub updates: super::updates::Updates,
     pub docs: std::sync::Arc<std::sync::Mutex<DocQueue>>,
     pub project: PathBuf,
     pub source: DocSource,
@@ -474,6 +475,14 @@ impl bars_core::indexing::indexer::IndexObserver for Observer {
     }
 
     fn document_done(&self, path: &str, error: Option<&str>) {
+        let _publication = self.updates.after(
+            &self.project,
+            if error.is_none() && !self.rebuild {
+                super::updates::INDEX | super::updates::STATUS
+            } else {
+                super::updates::STATUS
+            },
+        );
         if self.rebuild && error.is_none() {
             return;
         }
@@ -772,6 +781,7 @@ mod tests {
         let docs = std::sync::Arc::new(std::sync::Mutex::new(DocQueue::new()));
         let taken = std::sync::Arc::new(std::sync::Mutex::new(BTreeSet::new()));
         let observer = Observer {
+            updates: Default::default(),
             docs: docs.clone(),
             project: project_dir.path().to_path_buf(),
             source: DocSource::Periodic,
@@ -812,6 +822,7 @@ mod tests {
         let docs = std::sync::Arc::new(std::sync::Mutex::new(DocQueue::new()));
         let wake = std::sync::Arc::new(tokio::sync::Notify::new());
         let observer = Observer {
+            updates: Default::default(),
             docs: docs.clone(),
             project: project_dir.path().to_path_buf(),
             source: DocSource::Periodic,

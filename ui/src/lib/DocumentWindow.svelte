@@ -8,8 +8,6 @@
   import WorkspaceDocument from "./WorkspaceDocument.svelte";
   import { confirmClose, startFlushListener } from "./unsaved.svelte";
   import { moved, movedPath } from "./moved.svelte";
-  import { editors } from "./editors.svelte";
-  const TREE_SYNC_MS = 1500;
   let { project, path }: { project: string; path: string } = $props();
   let main = $state<HTMLElement>();
   const title = $derived(path.split("/").pop() ?? path);
@@ -17,12 +15,7 @@
   onMount(() => {
     let disposed = false;
     const stops: (() => void)[] = [];
-    // Дерево для `[[` читается при открытии и затем только по событиям переноса и записи, с паузой на серию событий.
-    let treeTimer: ReturnType<typeof setTimeout> | undefined;
-    const syncTree = () => { clearTimeout(treeTimer); treeTimer = setTimeout(() => void app.syncTree(), TREE_SYNC_MS); };
-    stops.push(() => clearTimeout(treeTimer));
-    stops.push(moved.subscribe(event => { if (event.project === project) { path = movedPath(path, event.from, event.to); syncTree(); } }));
-    stops.push(editors.subscribeSaved(message => { if (message.project === project) syncTree(); }));
+    stops.push(moved.subscribe(event => { if (event.project === project) path = movedPath(path, event.from, event.to); }));
     const keep = (stop: () => void) => { if (disposed) stop(); else stops.push(stop); };
     void app.bindDocumentWindow(project);
     void startFlushListener().then(keep).catch((error) => app.flash(String(error), true));

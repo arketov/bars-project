@@ -31,21 +31,29 @@
     const stops: (() => void)[] = [];
     let disposed = false;
     const keep = (stop: () => void) => { if (disposed) stop(); else stops.push(stop); };
+    const visibilityReady = inTauri() ? (async () => {
+      const { getCurrentWindow } = await import("@tauri-apps/api/window");
+      const window = getCurrentWindow();
+      let version = 0;
+      keep(await window.listen<boolean>("bars://window-visibility", ({ payload }) => {
+        if (disposed) return;
+        version++;
+        app.windowVisibility(payload);
+      }));
+      const before = version;
+      const [visible, minimized] = await Promise.all([window.isVisible(), window.isMinimized()]);
+      if (!disposed && before === version) app.windowVisibility(visible && !minimized);
+    })().catch(error => console.error("Не удалось прочитать видимость окна", error)) : Promise.resolve();
     const start = (found: typeof target) => {
-      if (disposed) return;
-      target = found;
-      if (found === null) app.start();
+      void visibilityReady.then(() => {
+        if (disposed) return;
+        target = found;
+        if (found === null) app.start();
+      });
     };
     if (inTauri()) void documentWindowTarget().then(start).catch(() => start(null));
     else start(target);
-    const refreshTree = ({ payload }: { payload: { project: string } }) => {
-      if (payload.project === app.current) void app.syncTree();
-    };
     if (inTauri()) {
-      void import("@tauri-apps/api/event").then(async ({ listen }) => {
-        keep(await listen("bars://document-saved", refreshTree));
-        keep(await listen("bars://entry-moved", refreshTree));
-      });
       void import("@tauri-apps/api/event").then(({ listen }) =>
         listen<{ view: string; project: string | null }>("bars://navigate", async ({ payload }) => {
           if (payload.project) await app.select(payload.project);

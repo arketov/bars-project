@@ -104,6 +104,7 @@
   let camTarget: Camera | null = null;
   let raf = 0;
   let hidden = false;
+  let intersecting = true;
   let hovered: Target = null;
   let hostObserver: ResizeObserver | null = null;
   let themeObserver: MutationObserver | null = null;
@@ -391,12 +392,12 @@
   }
 
   function schedule() {
-    if (!raf && canvas) raf = requestAnimationFrame(frame);
+    if (!hidden && !raf && canvas) raf = requestAnimationFrame(frame);
   }
 
   function frame() {
     raf = 0;
-    if (!layout || !canvas) return;
+    if (hidden || !layout || !canvas) return;
     if (camTarget) {
       const t = camTarget;
       const near = Math.abs(t.k - cam.k) < 0.002 * t.k && Math.abs(t.x - cam.x) < 0.6 && Math.abs(t.y - cam.y) < 0.6;
@@ -1310,6 +1311,7 @@
   }
 
   async function refreshStatus() {
+    if (!app.windowVisible) return;
     const path = project();
     if (!path) return;
     try {
@@ -1335,6 +1337,7 @@
     queryLoading = false;
     layout?.destroy();
     layout = new Layout();
+    layout.hold(hidden);
     layout.paced = true;
     layout.onPositions = onPositions;
     layout.setForces($state.snapshot(settings.forces) as Forces);
@@ -1505,9 +1508,8 @@
     });
     themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-mode"] });
     io = typeof IntersectionObserver === "undefined" ? null : new IntersectionObserver(([entry]) => {
-      hidden = !entry.isIntersecting || document.hidden;
-      layout?.hold(hidden);
-      if (!hidden) schedule();
+      intersecting = entry.isIntersecting;
+      onVisibility();
     });
     io?.observe(host);
     document.addEventListener("visibilitychange", onVisibility);
@@ -1515,10 +1517,16 @@
   });
 
   function onVisibility() {
-    hidden = document.hidden;
+    hidden = !intersecting || !app.windowVisible;
     layout?.hold(hidden);
+    if (hidden && raf) { cancelAnimationFrame(raf); raf = 0; }
     if (!hidden) schedule();
   }
+
+  $effect(() => {
+    void app.windowVisible;
+    untrack(onVisibility);
+  });
 
   onDestroy(() => {
     epoch++;

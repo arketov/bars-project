@@ -1,0 +1,15 @@
+{
+  "base_commit": "1c9ca96b95613340e4465212ebf697622fbbed24",
+  "test": "tree_io_tests::measure_tree_10000_documents",
+  "profile": "debug",
+  "documents": 10000,
+  "milliseconds": [
+    178,
+    44,
+    47,
+    75,
+    69
+  ],
+  "tree_io_source_sha256": "69ACE681E0F9FC459F28F96BFE0A5292057276827365042FC70ED890A5C3993C",
+  "note": "Standalone ignored test, same unchanged tree_io source; original test exe checksum not captured"
+}

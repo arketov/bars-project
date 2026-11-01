@@ -45,7 +45,7 @@ impl Targets {
             .find(|(_, (owner, doc))| owner == project && doc == path)
             .map(|(label, _)| label.clone())
     }
-    fn set(&self, label: &str, project: &str, path: &str) {
+    pub(crate) fn set(&self, label: &str, project: &str, path: &str) {
         self.0
             .lock()
             .unwrap_or_else(PoisonError::into_inner)
@@ -128,6 +128,10 @@ pub fn open(app: &AppHandle, targets: &Targets, project: &str, path: &str) -> Re
         WindowEvent::Destroyed => {
             if let Some(shared) = handle.try_state::<crate::commands::Shared>() {
                 shared.documents.remove(&id);
+                shared.updates.release(&id);
+                if let Some(handler) = shared.get() {
+                    let _ = handler.worker().observe_window(&id, None);
+                }
             }
         }
         _ => {}

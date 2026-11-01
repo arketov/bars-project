@@ -20,6 +20,8 @@ const INSTRUCTION_FILE: &str = "BARS_INSTRUCTION.md";
 /// Что слежение сообщает воркеру.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WatchEvent {
+    /// Дисковое дерево могло измениться; сигнал до фильтра индексации, включая пустые папки.
+    Tree,
     /// Изменились эти файлы (или папки: удаление и переименование папки приходит без списка файлов).
     Files(Vec<PathBuf>),
     /// `notify` сообщил об ошибке: события могли потеряться, проект надо проверить целиком.
@@ -62,10 +64,24 @@ impl ProjectWatcher {
                         {
                             sink(WatchEvent::Rescan);
                         }
+                        if events.iter().any(|event| {
+                            event
+                                .paths
+                                .iter()
+                                .any(|path| event_relevant(&filter_dir, path, &event.kind))
+                        }) {
+                            sink(WatchEvent::Tree);
+                        }
                         let mut paths: Vec<PathBuf> = events
                             .into_iter()
-                            .flat_map(|event| event.event.paths.clone())
-                            .filter(|path| is_relevant(&filter_dir, path))
+                            .flat_map(|event| {
+                                event
+                                    .paths
+                                    .iter()
+                                    .filter(|path| event_relevant(&filter_dir, path, &event.kind))
+                                    .cloned()
+                                    .collect::<Vec<_>>()
+                            })
                             .collect();
                         paths.sort();
                         paths.dedup();
@@ -109,13 +125,43 @@ pub fn is_relevant(docs_dir: &Path, path: &Path) -> bool {
     {
         return false;
     }
-    if folders.is_empty() && last.as_os_str() == INSTRUCTION_FILE {
+    if folders.is_empty()
+        && last
+            .as_os_str()
+            .to_string_lossy()
+            .eq_ignore_ascii_case(INSTRUCTION_FILE)
+    {
         return false;
     }
     match Path::new(last.as_os_str()).extension() {
         Some(extension) => extension.eq_ignore_ascii_case("md"),
         None => true,
     }
+}
+
+/// Исчезнувшую папку нельзя отличить по расширению или is_dir; тип события — без IO.
+fn event_relevant(docs: &Path, path: &Path, kind: &EventKind) -> bool {
+    if is_relevant(docs, path) {
+        return true;
+    }
+    use notify::event::{CreateKind, ModifyKind, RemoveKind};
+    if matches!(
+        kind,
+        EventKind::Create(CreateKind::File)
+            | EventKind::Remove(RemoveKind::File)
+            | EventKind::Modify(ModifyKind::Data(_) | ModifyKind::Metadata(_))
+    ) {
+        return false;
+    }
+    let Ok(relative) = path.strip_prefix(docs) else {
+        return false;
+    };
+    !relative
+        .components()
+        .any(|part| part.as_os_str().to_string_lossy().starts_with('.'))
+        && !relative
+            .to_string_lossy()
+            .eq_ignore_ascii_case(INSTRUCTION_FILE)
 }
 
 #[cfg(test)]
@@ -164,6 +210,32 @@ mod tests {
         assert!(is_relevant(&docs, &docs.join("module")));
         // BARS_INSTRUCTION.md в подпапке — обычный документ.
         assert!(is_relevant(&docs, &docs.join("sub").join(INSTRUCTION_FILE)));
+    }
+
+    #[test]
+    fn structural_events_keep_dotted_and_deleted_directories_without_following_paths() {
+        use notify::event::{CreateKind, ModifyKind, RemoveKind, RenameMode};
+        let root = docs();
+        let folder = root.join("module.v2");
+        for kind in [
+            EventKind::Create(CreateKind::Folder),
+            EventKind::Remove(RemoveKind::Folder),
+            EventKind::Modify(ModifyKind::Name(RenameMode::Both)),
+            EventKind::Any,
+        ] {
+            assert!(event_relevant(&root, &folder, &kind));
+            assert!(!event_relevant(
+                &root,
+                &root.join(".hidden").join("module.v2"),
+                &kind
+            ));
+        }
+        assert!(!event_relevant(
+            &root,
+            &root.join("image.png"),
+            &EventKind::Create(CreateKind::File)
+        ));
+        assert!(!is_relevant(&root, &root.join("bars_instruction.MD")));
     }
 
     fn collect(rx: &mpsc::Receiver<WatchEvent>, wanted: &Path) -> bool {
@@ -250,6 +322,7 @@ mod tests {
                     );
                 }
                 Ok(WatchEvent::Rescan | WatchEvent::Failed(_)) => lost = true,
+                Ok(WatchEvent::Tree) => {}
                 Err(_) => break,
             }
         }

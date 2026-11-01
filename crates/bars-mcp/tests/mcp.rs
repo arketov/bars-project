@@ -783,7 +783,7 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
         let (error, text) = mcp
             .tool(
                 "bars_rag_search",
-                json!({"query":"Т-1 зависит","mode":mode}),
+                json!({"query":"Т-1 зависит","mode":mode,"format":"txt"}),
             )
             .await;
         assert!(!error, "{text}");
@@ -791,7 +791,9 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
         assert!(!text.contains("\"requested_mode\""));
         assert!(text.chars().count() <= bars_protocol::graph_text::MAX_TEXT_CHARS);
     }
-    let (error, text) = mcp.tool("bars_relations", json!({"query":"Т-1"})).await;
+    let (error, text) = mcp
+        .tool("bars_relations", json!({"query":"Т-1","format":"txt"}))
+        .await;
     assert!(!error, "{text}");
     assert!(text.contains("=== GRAPH relations ==="), "{text}");
     assert!(text.contains("requirements.md:"), "{text}");

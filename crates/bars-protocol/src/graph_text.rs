@@ -453,11 +453,7 @@ fn unit(view: &View<'_>, item: &Item, n: usize, citations: &mut Citations) -> St
                 members.len()
             );
             for r in representatives {
-                let _ = writeln!(
-                    text,
-                    "   representative: {}",
-                    view.label(&r.id)
-                );
+                let _ = writeln!(text, "   representative: {}", view.label(&r.id));
                 if let Some(node) = view.nodes.get(r.id.as_str()) {
                     text.push_str(&citations.render(view, &node.evidence, n, true));
                 }

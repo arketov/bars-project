@@ -78,7 +78,7 @@ describe("обновление дерева", () => {
     app.tree = [];
     app.treeProblems = [];
   });
-  afterEach(() => { vi.restoreAllMocks(); vi.clearAllMocks(); app.current = null; });
+  afterEach(() => { app.stop(); vi.restoreAllMocks(); vi.clearAllMocks(); app.current = null; });
   const snapshot = (revision: string, files: string[] = []) => ({ docs_root: "docs", revision, files: files.map(path => ({ path })), dirs: [], problems: [] });
 
   it("пустое дерево подхватывает новый файл, затем новый заголовок без изменения числа чанков", async () => {
@@ -100,9 +100,10 @@ describe("обновление дерева", () => {
     api.treeRead.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
     const older = app.syncTree();
     api.treeRead.mockResolvedValue(snapshot("new", ["docs/new.md"]));
-    await app.loadTree();
+    const explicit = app.loadTree();
+    await vi.waitFor(() => expect(finish).toBeTypeOf("function"));
     finish(snapshot("old"));
-    await older;
+    await Promise.all([older, explicit]);
     expect(app.tree[0].children[0].documentPath).toBe("docs/new.md");
   });
 

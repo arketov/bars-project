@@ -18,6 +18,7 @@ struct Cleanup {
 }
 impl Drop for Cleanup {
     fn drop(&mut self) {
+        let _publication = self.inner.updates.after(&self.path, updates::STATUS);
         let mut scans = lock(&self.inner.scans);
         if scans.get(&self.path).is_some_and(|s| s.id == self.id) {
             scans.remove(&self.path);
@@ -72,6 +73,7 @@ impl Worker {
         priority: Priority,
     ) -> Result<(u64, bool, JobKind), WorkerError> {
         let path = self.registered(path)?;
+        let _publication = self.inner.updates.after(&path, updates::STATUS);
         let settings = Settings::load(self.bars_home(), &path)
             .map_err(|e| io::Error::other(e.to_string()))?
             .value;

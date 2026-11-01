@@ -1,0 +1,530 @@
+{
+  "success": true,
+  "scenario_seconds": 60,
+  "samples": [
+    {
+      "scenario": "one",
+      "sample": 0,
+      "wall_seconds": 60.708,
+      "main_rpc": {
+        "operation_events": 61,
+        "activity": 60,
+        "graph_status": 30,
+        "project_observe": 6,
+        "projects": 12,
+        "new_topics_list": 12,
+        "audit_list": 4
+      },
+      "main_json_bytes": 65723,
+      "main_rpc_p95_ms": 4.5,
+      "native": {
+        "cpu_seconds": 0.875,
+        "logical_read_bytes": 6871846,
+        "private_bytes": 45854720,
+        "working_set_bytes": 80441344,
+        "new_processes": []
+      },
+      "webviews": {
+        "cpu_seconds": 0.65625,
+        "logical_read_bytes": 1023328,
+        "private_bytes": 240390144,
+        "working_set_bytes": 405098496,
+        "new_processes": []
+      },
+      "coordinator_before": {
+        "builds": [
+          16,
+          16,
+          17
+        ],
+        "projects": 1,
+        "cache_bytes": 9731827
+      },
+      "coordinator_after": {
+        "builds": [
+          18,
+          18,
+          19
+        ],
+        "projects": 1,
+        "cache_bytes": 9731827
+      },
+      "corpus_hash": "7d8379f4ccaf65dac34603d65fa8390353c4ed91789d6ae0c88d77d906864a43",
+      "concurrent_compilers": [],
+      "exited_processes": []
+    },
+    {
+      "scenario": "one",
+      "sample": 1,
+      "wall_seconds": 61.137,
+      "main_rpc": {
+        "activity": 60,
+        "operation_events": 60,
+        "project_observe": 6,
+        "projects": 12,
+        "new_topics_list": 12,
+        "audit_list": 4,
+        "graph_status": 30
+      },
+      "main_json_bytes": 65634,
+      "main_rpc_p95_ms": 6.5,
+      "native": {
+        "cpu_seconds": 1.21875,
+        "logical_read_bytes": 6908797,
+        "private_bytes": 61296640,
+        "working_set_bytes": 95821824,
+        "new_processes": []
+      },
+      "webviews": {
+        "cpu_seconds": 1.015625,
+        "logical_read_bytes": 3229836,
+        "private_bytes": 243421184,
+        "working_set_bytes": 406740992,
+        "new_processes": []
+      },
+      "coordinator_before": {
+        "builds": [
+          18,
+          18,
+          19
+        ],
+        "projects": 1,
+        "cache_bytes": 9731827
+      },
+      "coordinator_after": {
+        "builds": [
+          20,
+          20,
+          21
+        ],
+        "projects": 1,
+        "cache_bytes": 9731827
+      },
+      "corpus_hash": "7d8379f4ccaf65dac34603d65fa8390353c4ed91789d6ae0c88d77d906864a43",
+      "concurrent_compilers": [],
+      "exited_processes": []
+    },
+    {
+      "scenario": "one",
+      "sample": 2,
+      "wall_seconds": 60.782,
+      "main_rpc": {
+        "operation_events": 61,
+        "projects": 13,
+        "new_topics_list": 13,
+        "audit_list": 5,
+        "activity": 60,
+        "graph_status": 30,
+        "project_observe": 6
+      },
+      "main_json_bytes": 69888,
+      "main_rpc_p95_ms": 4.700000002980232,
+      "native": {
+        "cpu_seconds": 1.03125,
+        "logical_read_bytes": 7090939,
+        "private_bytes": 46718976,
+        "working_set_bytes": 82640896,
+        "new_processes": []
+      },
+      "webviews": {
+        "cpu_seconds": 0.34375,
+        "logical_read_bytes": 1097504,
+        "private_bytes": 243183616,
+        "working_set_bytes": 406851584,
+        "new_processes": []
+      },
+      "coordinator_before": {
+        "builds": [
+          20,
+          20,
+          21
+        ],
+        "projects": 1,
+        "cache_bytes": 9731827
+      },
+      "coordinator_after": {
+        "builds": [
+          22,
+          22,
+          23
+        ],
+        "projects": 1,
+        "cache_bytes": 9731827
+      },
+      "corpus_hash": "7d8379f4ccaf65dac34603d65fa8390353c4ed91789d6ae0c88d77d906864a43",
+      "concurrent_compilers": [],
+      "exited_processes": []
+    },
+    {
+      "scenario": "hidden",
+      "sample": 0,
+      "wall_seconds": 60.737,
+      "main_rpc": {
+        "project_observe": 6,
+        "activity": 6,
+        "operation_events": 6
+      },
+      "main_json_bytes": 1200,
+      "main_rpc_p95_ms": 3.300000011920929,
+      "native": {
+        "cpu_seconds": 0.15625,
+        "logical_read_bytes": 8713,
+        "private_bytes": 24612864,
+        "working_set_bytes": 60870656,
+        "new_processes": []
+      },
+      "webviews": {
+        "cpu_seconds": 0.234375,
+        "logical_read_bytes": 8305108,
+        "private_bytes": 242970624,
+        "working_set_bytes": 407302144,
+        "new_processes": []
+      },
+      "coordinator_before": {
+        "builds": [
+          22,
+          22,
+          23
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "coordinator_after": {
+        "builds": [
+          22,
+          22,
+          23
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "corpus_hash": "7d8379f4ccaf65dac34603d65fa8390353c4ed91789d6ae0c88d77d906864a43",
+      "concurrent_compilers": [],
+      "exited_processes": []
+    },
+    {
+      "scenario": "hidden",
+      "sample": 1,
+      "wall_seconds": 60.726,
+      "main_rpc": {
+        "activity": 5,
+        "operation_events": 5,
+        "project_observe": 6
+      },
+      "main_json_bytes": 1040,
+      "main_rpc_p95_ms": 2.700000002980232,
+      "native": {
+        "cpu_seconds": 0.0625,
+        "logical_read_bytes": 7898,
+        "private_bytes": 25505792,
+        "working_set_bytes": 60915712,
+        "new_processes": []
+      },
+      "webviews": {
+        "cpu_seconds": 0.171875,
+        "logical_read_bytes": 423727,
+        "private_bytes": 245895168,
+        "working_set_bytes": 418729984,
+        "new_processes": []
+      },
+      "coordinator_before": {
+        "builds": [
+          22,
+          22,
+          23
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "coordinator_after": {
+        "builds": [
+          22,
+          22,
+          23
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "corpus_hash": "7d8379f4ccaf65dac34603d65fa8390353c4ed91789d6ae0c88d77d906864a43",
+      "concurrent_compilers": [],
+      "exited_processes": []
+    },
+    {
+      "scenario": "hidden",
+      "sample": 2,
+      "wall_seconds": 60.749,
+      "main_rpc": {
+        "project_observe": 6,
+        "activity": 5,
+        "operation_events": 5
+      },
+      "main_json_bytes": 1040,
+      "main_rpc_p95_ms": 2.5999999940395355,
+      "native": {
+        "cpu_seconds": 0.0625,
+        "logical_read_bytes": 7569,
+        "private_bytes": 25509888,
+        "working_set_bytes": 60928000,
+        "new_processes": []
+      },
+      "webviews": {
+        "cpu_seconds": 0.140625,
+        "logical_read_bytes": 35551571,
+        "private_bytes": 246284288,
+        "working_set_bytes": 418877440,
+        "new_processes": []
+      },
+      "coordinator_before": {
+        "builds": [
+          22,
+          22,
+          23
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "coordinator_after": {
+        "builds": [
+          22,
+          22,
+          23
+        ],
+        "projects": 0,
+        "cache_bytes": 0
+      },
+      "corpus_hash": "7d8379f4ccaf65dac34603d65fa8390353c4ed91789d6ae0c88d77d906864a43",
+      "concurrent_compilers": [],
+      "exited_processes": []
+    },
+    {
+      "scenario": "four",
+      "sample": 0,
+      "wall_seconds": 60.969,
+      "main_rpc": {
+        "operation_events": 61,
+        "activity": 60,
+        "projects": 12,
+        "new_topics_list": 12,
+        "graph_status": 30,
+        "audit_list": 4,
+        "project_observe": 6
+      },
+      "main_json_bytes": 65723,
+      "main_rpc_p95_ms": 6.899999991059303,
+      "native": {
+        "cpu_seconds": 3.875,
+        "logical_read_bytes": 15817664,
+        "private_bytes": 75497472,
+        "working_set_bytes": 110325760,
+        "new_processes": []
+      },
+      "webviews": {
+        "cpu_seconds": 1.5625,
+        "logical_read_bytes": 1503740,
+        "private_bytes": 808513536,
+        "working_set_bytes": 1517813760,
+        "new_processes": []
+      },
+      "coordinator_before": {
+        "builds": [
+          25,
+          25,
+          26
+        ],
+        "projects": 1,
+        "cache_bytes": 9731827
+      },
+      "coordinator_after": {
+        "builds": [
+          27,
+          27,
+          28
+        ],
+        "projects": 1,
+        "cache_bytes": 9731827
+      },
+      "corpus_hash": "7d8379f4ccaf65dac34603d65fa8390353c4ed91789d6ae0c88d77d906864a43",
+      "concurrent_compilers": [],
+      "exited_processes": []
+    },
+    {
+      "scenario": "four",
+      "sample": 1,
+      "wall_seconds": 60.935,
+      "main_rpc": {
+        "operation_events": 61,
+        "projects": 13,
+        "new_topics_list": 13,
+        "graph_status": 30,
+        "activity": 60,
+        "audit_list": 4,
+        "project_observe": 6
+      },
+      "main_json_bytes": 69363,
+      "main_rpc_p95_ms": 5.299999997019768,
+      "native": {
+        "cpu_seconds": 1.1875,
+        "logical_read_bytes": 7049254,
+        "private_bytes": 73064448,
+        "working_set_bytes": 106971136,
+        "new_processes": []
+      },
+      "webviews": {
+        "cpu_seconds": 0.90625,
+        "logical_read_bytes": 4097892,
+        "private_bytes": 794275840,
+        "working_set_bytes": 1510289408,
+        "new_processes": []
+      },
+      "coordinator_before": {
+        "builds": [
+          27,
+          27,
+          28
+        ],
+        "projects": 1,
+        "cache_bytes": 9731827
+      },
+      "coordinator_after": {
+        "builds": [
+          29,
+          29,
+          30
+        ],
+        "projects": 1,
+        "cache_bytes": 9731827
+      },
+      "corpus_hash": "7d8379f4ccaf65dac34603d65fa8390353c4ed91789d6ae0c88d77d906864a43",
+      "concurrent_compilers": [],
+      "exited_processes": []
+    },
+    {
+      "scenario": "four",
+      "sample": 2,
+      "wall_seconds": 60.898,
+      "main_rpc": {
+        "activity": 60,
+        "operation_events": 60,
+        "graph_status": 30,
+        "projects": 12,
+        "new_topics_list": 12,
+        "audit_list": 4,
+        "project_observe": 6
+      },
+      "main_json_bytes": 65634,
+      "main_rpc_p95_ms": 4.799999997019768,
+      "native": {
+        "cpu_seconds": 1.203125,
+        "logical_read_bytes": 6883041,
+        "private_bytes": 70770688,
+        "working_set_bytes": 105676800,
+        "new_processes": []
+      },
+      "webviews": {
+        "cpu_seconds": 0.796875,
+        "logical_read_bytes": 13704652,
+        "private_bytes": 790294528,
+        "working_set_bytes": 1506521088,
+        "new_processes": []
+      },
+      "coordinator_before": {
+        "builds": [
+          29,
+          29,
+          30
+        ],
+        "projects": 1,
+        "cache_bytes": 9731827
+      },
+      "coordinator_after": {
+        "builds": [
+          31,
+          31,
+          32
+        ],
+        "projects": 1,
+        "cache_bytes": 9731827
+      },
+      "corpus_hash": "7d8379f4ccaf65dac34603d65fa8390353c4ed91789d6ae0c88d77d906864a43",
+      "concurrent_compilers": [],
+      "exited_processes": []
+    }
+  ],
+  "rpc_scope": "main WebView; CPU/IO/memory include native and all WebViews",
+  "bytes_kind": "UTF8 re-encoded JSON response bodies, excluding headers; encoding instrumentation included in WebView CPU",
+  "runtime": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+  "documents": 10000,
+  "search": {
+    "scenario": "four",
+    "provider": "FakeProvider; fixed query, 3 warmups + 20 calls",
+    "query": {
+      "query": "Текст контрольного корпуса 42",
+      "modules": [],
+      "files": [],
+      "limit": 5,
+      "min_score": 0,
+      "_window": {
+        "purpose": "diagnostic"
+      }
+    },
+    "applied": {
+      "results": 5,
+      "candidates": 30,
+      "rerank_candidates": 15,
+      "min_score": 0,
+      "score_kind": "cosine",
+      "clamped": false,
+      "scope": {
+        "modules": [],
+        "files": []
+      }
+    },
+    "settings_rerank_enabled": false,
+    "milliseconds": [
+      73.6000000089407,
+      73.59999999403954,
+      76.20000000298023,
+      74.20000000298023,
+      75,
+      74.79999999701977,
+      74.3999999910593,
+      73.40000000596046,
+      75.40000000596046,
+      72.59999999403954,
+      74.29999999701977,
+      74,
+      73.20000000298023,
+      75.09999999403954,
+      74.40000000596046,
+      78.20000000298023,
+      79.3999999910593,
+      76,
+      74.70000000298023,
+      75.1000000089407
+    ],
+    "p50_ms": 74.40000000596046,
+    "p95_ms": 78.20000000298023,
+    "results": [
+      {
+        "path": "docs/m000/d00001.md",
+        "source_hash": "711aa0547f76f870b26a64143064b85ff4121024db9a23caeb7744825ce12daa"
+      },
+      {
+        "path": "docs/m000/d00002.md",
+        "source_hash": "17d0dc076ecf26274593b91a197098aee23ea1176b79c23e81e93fc74fd18fcc"
+      },
+      {
+        "path": "docs/m000/d00003.md",
+        "source_hash": "9f5ab413f0985943bd0951ac28aa7fb9d13c77cb2b17c9283224e52d2560c7e6"
+      },
+      {
+        "path": "docs/m000/d00004.md",
+        "source_hash": "88ebc83a760005f68ad4dbff715f6baffda96879fbaa766161c0cab61be08c1a"
+      },
+      {
+        "path": "docs/m000/d00005.md",
+        "source_hash": "0c862aca8da55287d21e2cafa99824906baf293b36158bee9acbb9f5d385c9b9"
+      }
+    ]
+  }
+}

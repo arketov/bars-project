@@ -8,6 +8,7 @@ import { physicalFixture as buildPhysicalFixture } from "../mock-physical";
 import { queryFixture } from "../mock-query";
 import { buildTree } from "../tree";
 import { graphScope } from "../graph-scope.svelte";
+import { Layout } from "./layout";
 
 // Большой набор нужен только проверкам порций и пределов, не браузерному макету.
 const modules = ["adr", "features", "manual"];
@@ -70,6 +71,23 @@ afterEach(async () => {
   target.remove();
   app.current = null;
   app.projects = [];
+  app.windowVisibility(true);
+  vi.restoreAllMocks();
+});
+
+it("native hiding pauses layout and status without document.visibilitychange", async () => {
+  const hold = vi.spyOn(Layout.prototype, "hold");
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  app.windowVisibility(false);
+  flushSync();
+  expect(hold).toHaveBeenLastCalledWith(true);
+  rpc.mockClear();
+  await new Promise(resolve => setTimeout(resolve, 2100));
+  expect(rpc.mock.calls.some(([method]) => method === "graph_status")).toBe(false);
+  app.windowVisibility(true);
+  flushSync();
+  expect(hold).toHaveBeenLastCalledWith(false);
 });
 
 it("показывает остановку и ошибки файлов, продолжает явным построением", async () => {

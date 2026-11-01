@@ -6,6 +6,12 @@ use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder, Windo
 pub const LABEL: &str = "main";
 /// Событие окну: открыть экран (`view`: `main`, `settings`, `indexing`) и, если нужно, проект.
 pub const NAVIGATE: &str = "bars://navigate";
+pub const VISIBILITY: &str = "bars://window-visibility";
+
+pub fn publish_visibility(window: &tauri::WebviewWindow) {
+    let visible = window.is_visible().unwrap_or(false) && !window.is_minimized().unwrap_or(false);
+    let _ = window.emit_to(window.label(), VISIBILITY, visible);
+}
 
 /// Создаёт окно. С `visible = false` оно загружается скрытым: так `bars --background` держит трей,
 /// а показ окна потом не ждёт загрузки интерфейса.
@@ -25,10 +31,12 @@ pub fn create(app: &AppHandle, visible: bool) -> tauri::Result<()> {
         if let WindowEvent::CloseRequested { api, .. } = event {
             api.prevent_close();
             let _ = hidden.hide();
+            publish_visibility(&hidden);
             if let Some(state) = hidden.try_state::<crate::commands::Shared>()
                 && let Some(handler) = state.get()
             {
                 let _ = handler.worker().observe_window(hidden.label(), None);
+                state.updates.release(hidden.label());
             }
         }
     });
@@ -37,6 +45,13 @@ pub fn create(app: &AppHandle, visible: bool) -> tauri::Result<()> {
 
 /// Единая host-политика продукта и изолированного стенда.
 pub fn configure_shortcuts(window: &tauri::WebviewWindow) -> tauri::Result<()> {
+    let focused = window.clone();
+    window.on_window_event(move |event| {
+        // WebView2 не всегда сообщает visibilitychange после показа или восстановления.
+        if matches!(event, WindowEvent::Focused(_) | WindowEvent::Resized(_)) {
+            publish_visibility(&focused);
+        }
+    });
     #[cfg(all(windows, not(debug_assertions)))]
     window.with_webview(|webview| {
         use webview2_com::Microsoft::Web::WebView2::Win32::ICoreWebView2Settings3;
@@ -65,6 +80,7 @@ pub fn show(app: &AppHandle) {
             let _ = window.show();
             let _ = window.unminimize();
             let _ = window.set_focus();
+            publish_visibility(&window);
         }
         None => {
             let _ = create(app, true);
