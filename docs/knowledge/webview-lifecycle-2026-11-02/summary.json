@@ -1,0 +1,2095 @@
+{
+  "installed": {
+    "groups": [
+      {
+        "instrumented": false,
+        "visible": false,
+        "count": 3,
+        "cpu_percent_core_median": {
+          "native": 134.67796137831547,
+          "browser": 0.051227828595783745,
+          "crashpad-handler": 0,
+          "gpu-process": 0.051227828595783745,
+          "utility": 0,
+          "renderer": 0.0513625456099405
+        }
+      },
+      {
+        "instrumented": false,
+        "visible": true,
+        "count": 2,
+        "cpu_percent_core_median": {
+          "native": 131.9914878571917,
+          "browser": 0.7172673981405524,
+          "crashpad-handler": 0,
+          "gpu-process": 3.4814350759958073,
+          "utility": 0.10245405500865919,
+          "renderer": 8.728934164501869
+        }
+      }
+    ],
+    "samples": [
+      {
+        "round": 1,
+        "visible": false,
+        "instrumented": false,
+        "valid": true,
+        "seconds": 30.501,
+        "roles": {
+          "native": {
+            "cpu_seconds": 41.078125,
+            "cpu_percent_core": 134.67796137831547,
+            "logical_read_bytes": 8310670426,
+            "private_bytes": 9063702528,
+            "working_bytes": 4940816384
+          },
+          "browser": {
+            "cpu_seconds": 0.015625,
+            "cpu_percent_core": 0.051227828595783745,
+            "logical_read_bytes": 27664,
+            "private_bytes": 34795520,
+            "working_bytes": 112033792
+          },
+          "crashpad-handler": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 2875392,
+            "working_bytes": 12623872
+          },
+          "gpu-process": {
+            "cpu_seconds": 0.015625,
+            "cpu_percent_core": 0.051227828595783745,
+            "logical_read_bytes": 27808,
+            "private_bytes": 79269888,
+            "working_bytes": 63909888
+          },
+          "utility": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 21200,
+            "private_bytes": 19038208,
+            "working_bytes": 56827904
+          },
+          "renderer": {
+            "cpu_seconds": 0.03125,
+            "cpu_percent_core": 0.10245565719156749,
+            "logical_read_bytes": 10688,
+            "private_bytes": 55644160,
+            "working_bytes": 90865664
+          }
+        },
+        "new_processes": [],
+        "exited_processes": [],
+        "compilers": []
+      },
+      {
+        "round": 1,
+        "visible": true,
+        "instrumented": false,
+        "valid": true,
+        "seconds": 30.528,
+        "roles": {
+          "native": {
+            "cpu_seconds": 38.484375,
+            "cpu_percent_core": 126.06254913522014,
+            "logical_read_bytes": 12629477489,
+            "private_bytes": 9038168064,
+            "working_bytes": 4916379648
+          },
+          "browser": {
+            "cpu_seconds": 0.1875,
+            "cpu_percent_core": 0.6141902515723271,
+            "logical_read_bytes": 12537979,
+            "private_bytes": 36044800,
+            "working_bytes": 117817344
+          },
+          "crashpad-handler": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 2871296,
+            "working_bytes": 12619776
+          },
+          "gpu-process": {
+            "cpu_seconds": 1.765625,
+            "cpu_percent_core": 5.783624868972747,
+            "logical_read_bytes": 5167552,
+            "private_bytes": 96014336,
+            "working_bytes": 79429632
+          },
+          "utility": {
+            "cpu_seconds": 0.03125,
+            "cpu_percent_core": 0.10236504192872117,
+            "logical_read_bytes": 209424,
+            "private_bytes": 19271680,
+            "working_bytes": 57139200
+          },
+          "renderer": {
+            "cpu_seconds": 4.515625,
+            "cpu_percent_core": 14.79174855870021,
+            "logical_read_bytes": 243232,
+            "private_bytes": 207822848,
+            "working_bytes": 249729024
+          }
+        },
+        "new_processes": [],
+        "exited_processes": [],
+        "compilers": [
+          {
+            "ProcessId": 44052,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 53712,
+            "Name": "rustc.exe"
+          }
+        ]
+      },
+      {
+        "round": 2,
+        "visible": false,
+        "instrumented": false,
+        "valid": true,
+        "seconds": 30.421,
+        "roles": {
+          "native": {
+            "cpu_seconds": 20.125,
+            "cpu_percent_core": 66.15495874560337,
+            "logical_read_bytes": 5879848858,
+            "private_bytes": 8919531520,
+            "working_bytes": 4787232768
+          },
+          "browser": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 26992,
+            "private_bytes": 36052992,
+            "working_bytes": 117932032
+          },
+          "crashpad-handler": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 2871296,
+            "working_bytes": 12681216
+          },
+          "gpu-process": {
+            "cpu_seconds": 2.703125,
+            "cpu_percent_core": 8.885720390519706,
+            "logical_read_bytes": 48572560,
+            "private_bytes": 83636224,
+            "working_bytes": 74784768
+          },
+          "utility": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 21200,
+            "private_bytes": 19189760,
+            "working_bytes": 57061376
+          },
+          "renderer": {
+            "cpu_seconds": 0.015625,
+            "cpu_percent_core": 0.0513625456099405,
+            "logical_read_bytes": 982288,
+            "private_bytes": 192643072,
+            "working_bytes": 236335104
+          }
+        },
+        "new_processes": [],
+        "exited_processes": [],
+        "compilers": []
+      },
+      {
+        "round": 2,
+        "visible": true,
+        "instrumented": false,
+        "valid": true,
+        "seconds": 30.475,
+        "roles": {
+          "native": {
+            "cpu_seconds": 42.03125,
+            "cpu_percent_core": 137.92042657916323,
+            "logical_read_bytes": 10143633446,
+            "private_bytes": 9158545408,
+            "working_bytes": 5033185280
+          },
+          "browser": {
+            "cpu_seconds": 0.25,
+            "cpu_percent_core": 0.8203445447087776,
+            "logical_read_bytes": 12597915,
+            "private_bytes": 38215680,
+            "working_bytes": 120193024
+          },
+          "crashpad-handler": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 2871296,
+            "working_bytes": 12681216
+          },
+          "gpu-process": {
+            "cpu_seconds": 0.359375,
+            "cpu_percent_core": 1.1792452830188678,
+            "logical_read_bytes": 1912872,
+            "private_bytes": 94621696,
+            "working_bytes": 89305088
+          },
+          "utility": {
+            "cpu_seconds": 0.03125,
+            "cpu_percent_core": 0.1025430680885972,
+            "logical_read_bytes": 229776,
+            "private_bytes": 19271680,
+            "working_bytes": 57180160
+          },
+          "renderer": {
+            "cpu_seconds": 0.8125,
+            "cpu_percent_core": 2.6661197703035273,
+            "logical_read_bytes": 165200,
+            "private_bytes": 141320192,
+            "working_bytes": 194560000
+          }
+        },
+        "new_processes": [],
+        "exited_processes": [],
+        "compilers": []
+      },
+      {
+        "round": 3,
+        "visible": false,
+        "instrumented": false,
+        "valid": true,
+        "seconds": 30.436,
+        "roles": {
+          "native": {
+            "cpu_seconds": 41.640625,
+            "cpu_percent_core": 136.81372387961625,
+            "logical_read_bytes": 14263065222,
+            "private_bytes": 8993116160,
+            "working_bytes": 4873695232
+          },
+          "browser": {
+            "cpu_seconds": 0.03125,
+            "cpu_percent_core": 0.10267446444999342,
+            "logical_read_bytes": 36080,
+            "private_bytes": 36065280,
+            "working_bytes": 118104064
+          },
+          "crashpad-handler": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 2871296,
+            "working_bytes": 12681216
+          },
+          "gpu-process": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 1456,
+            "private_bytes": 94597120,
+            "working_bytes": 89280512
+          },
+          "utility": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 15120,
+            "private_bytes": 19210240,
+            "working_bytes": 57118720
+          },
+          "renderer": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 7328,
+            "private_bytes": 138854400,
+            "working_bytes": 192458752
+          }
+        },
+        "new_processes": [],
+        "exited_processes": [],
+        "compilers": []
+      },
+      {
+        "round": 3,
+        "visible": true,
+        "instrumented": false,
+        "valid": false,
+        "seconds": 30.403,
+        "roles": {
+          "native": {
+            "cpu_seconds": 28.078125,
+            "cpu_percent_core": 92.35313949281321,
+            "logical_read_bytes": 7860523325,
+            "private_bytes": 8896364544,
+            "working_bytes": 4143915008
+          },
+          "browser": {
+            "cpu_seconds": 0.015625,
+            "cpu_percent_core": 0.05139295464263395,
+            "logical_read_bytes": 25504,
+            "private_bytes": 36118528,
+            "working_bytes": 118132736
+          },
+          "crashpad-handler": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 2871296,
+            "working_bytes": 12451840
+          },
+          "gpu-process": {
+            "cpu_seconds": 8.34375,
+            "cpu_percent_core": 27.443837779166532,
+            "logical_read_bytes": 49084992,
+            "private_bytes": 85544960,
+            "working_bytes": 89247744
+          },
+          "utility": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 22424,
+            "private_bytes": 19206144,
+            "working_bytes": 56901632
+          },
+          "renderer": {
+            "cpu_seconds": 2.078125,
+            "cpu_percent_core": 6.835262967470316,
+            "logical_read_bytes": 992032,
+            "private_bytes": 146157568,
+            "working_bytes": 200302592
+          }
+        },
+        "new_processes": [],
+        "exited_processes": [],
+        "compilers": []
+      }
+    ],
+    "excluded": [
+      {
+        "round": 3,
+        "visible": true,
+        "reason": "HWND visibility/minimized mismatch at boundary"
+      }
+    ],
+    "restoration": {
+      "visible": true,
+      "minimized": false
+    }
+  },
+  "isolated": {
+    "groups": [
+      {
+        "instrumented": false,
+        "visible": false,
+        "count": 3,
+        "cpu_percent_core_median": {
+          "native": 0.09868317175608678,
+          "browser": 0.09868317175608678,
+          "crashpad-handler": 0,
+          "gpu-process": 0,
+          "utility": 0,
+          "renderer": 0.04873218351370739
+        }
+      },
+      {
+        "instrumented": false,
+        "visible": true,
+        "count": 3,
+        "cpu_percent_core_median": {
+          "native": 1.3667603873789442,
+          "browser": 0.6345673227116526,
+          "crashpad-handler": 0,
+          "gpu-process": 0,
+          "utility": 0.04844811013611981,
+          "renderer": 0.5857544517338332
+        }
+      },
+      {
+        "instrumented": true,
+        "visible": false,
+        "count": 3,
+        "cpu_percent_core_median": {
+          "native": 0.09886737534801315,
+          "browser": 0,
+          "crashpad-handler": 0,
+          "gpu-process": 0,
+          "utility": 0,
+          "renderer": 0.04927001545107684
+        }
+      },
+      {
+        "instrumented": true,
+        "visible": true,
+        "count": 3,
+        "cpu_percent_core_median": {
+          "native": 1.3355923924657327,
+          "browser": 0.47699728302347594,
+          "crashpad-handler": 0,
+          "gpu-process": 0,
+          "utility": 0.09909938479101922,
+          "renderer": 0.24545997235138872
+        }
+      }
+    ],
+    "samples": [
+      {
+        "round": 1,
+        "visible": true,
+        "instrumented": false,
+        "valid": true,
+        "seconds": 32.01,
+        "roles": {
+          "native": {
+            "cpu_seconds": 0.4375,
+            "cpu_percent_core": 1.3667603873789442,
+            "logical_read_bytes": 5607804,
+            "private_bytes": 15060992,
+            "working_bytes": 57257984
+          },
+          "browser": {
+            "cpu_seconds": 0.203125,
+            "cpu_percent_core": 0.6345673227116526,
+            "logical_read_bytes": 731656,
+            "private_bytes": 41103360,
+            "working_bytes": 124477440
+          },
+          "crashpad-handler": {
+            "cpu_seconds": 0.03125,
+            "cpu_percent_core": 0.09762574195563888,
+            "logical_read_bytes": 0,
+            "private_bytes": 3391488,
+            "working_bytes": 19537920
+          },
+          "gpu-process": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 90894336,
+            "working_bytes": 78684160
+          },
+          "utility": {
+            "cpu_seconds": 0.03125,
+            "cpu_percent_core": 0.09762574195563888,
+            "logical_read_bytes": 186584,
+            "private_bytes": 20123648,
+            "working_bytes": 62021632
+          },
+          "renderer": {
+            "cpu_seconds": 0.1875,
+            "cpu_percent_core": 0.5857544517338332,
+            "logical_read_bytes": 91096,
+            "private_bytes": 65941504,
+            "working_bytes": 115912704
+          }
+        },
+        "new_processes": [],
+        "exited_processes": [],
+        "compilers": [
+          {
+            "ProcessId": 5180,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 24796,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 56000,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 28756,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 18044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 33620,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 19720,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 15676,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 43704,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 56000,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 28756,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 18044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 33620,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 19720,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 15676,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 38036,
+            "Name": "rustc.exe"
+          }
+        ],
+        "cdp_durations": {
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0,
+          "ScriptDuration": 0.02019600000000002,
+          "TaskDuration": 0.15643000000000007
+        }
+      },
+      {
+        "round": 1,
+        "visible": false,
+        "instrumented": false,
+        "valid": true,
+        "seconds": 32.397,
+        "roles": {
+          "native": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 3656,
+            "private_bytes": 14139392,
+            "working_bytes": 56532992
+          },
+          "browser": {
+            "cpu_seconds": 0.0625,
+            "cpu_percent_core": 0.19291909744729452,
+            "logical_read_bytes": 38819,
+            "private_bytes": 41353216,
+            "working_bytes": 135639040
+          },
+          "crashpad-handler": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 36,
+            "private_bytes": 3047424,
+            "working_bytes": 13574144
+          },
+          "gpu-process": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 89796608,
+            "working_bytes": 78000128
+          },
+          "utility": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 20288,
+            "private_bytes": 19681280,
+            "working_bytes": 61939712
+          },
+          "renderer": {
+            "cpu_seconds": 0.015625,
+            "cpu_percent_core": 0.04822977436182363,
+            "logical_read_bytes": 8736,
+            "private_bytes": 66183168,
+            "working_bytes": 116588544
+          }
+        },
+        "new_processes": [],
+        "exited_processes": [],
+        "compilers": [
+          {
+            "ProcessId": 56000,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 28756,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 18044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 33620,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 19720,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 15676,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 59228,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 56000,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 28756,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 19720,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 15676,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 50692,
+            "Name": "cargo.exe"
+          }
+        ],
+        "cdp_durations": {
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0,
+          "ScriptDuration": 0.002463999999999994,
+          "TaskDuration": 0.019804000000000044
+        }
+      },
+      {
+        "round": 2,
+        "visible": true,
+        "instrumented": false,
+        "valid": true,
+        "seconds": 32.251,
+        "roles": {
+          "native": {
+            "cpu_seconds": 0.390625,
+            "cpu_percent_core": 1.2112027534029954,
+            "logical_read_bytes": 5558764,
+            "private_bytes": 15388672,
+            "working_bytes": 57487360
+          },
+          "browser": {
+            "cpu_seconds": 0.25,
+            "cpu_percent_core": 0.775169762177917,
+            "logical_read_bytes": 863381,
+            "private_bytes": 41697280,
+            "working_bytes": 136626176
+          },
+          "crashpad-handler": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 36,
+            "private_bytes": 2953216,
+            "working_bytes": 13520896
+          },
+          "gpu-process": {
+            "cpu_seconds": 0.109375,
+            "cpu_percent_core": 0.3391367709528387,
+            "logical_read_bytes": 370112,
+            "private_bytes": 92979200,
+            "working_bytes": 84246528
+          },
+          "utility": {
+            "cpu_seconds": 0.015625,
+            "cpu_percent_core": 0.04844811013611981,
+            "logical_read_bytes": 183168,
+            "private_bytes": 19795968,
+            "working_bytes": 62078976
+          },
+          "renderer": {
+            "cpu_seconds": 0.203125,
+            "cpu_percent_core": 0.6298254317695576,
+            "logical_read_bytes": 115328,
+            "private_bytes": 67719168,
+            "working_bytes": 119095296
+          }
+        },
+        "new_processes": [],
+        "exited_processes": [],
+        "compilers": [
+          {
+            "ProcessId": 4044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 6592,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 45260,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 52200,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 10388,
+            "Name": "cargo.exe"
+          }
+        ],
+        "cdp_durations": {
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0.0016240000000000004,
+          "ScriptDuration": 0.019765000000000033,
+          "TaskDuration": 0.14960300000000004
+        }
+      },
+      {
+        "round": 2,
+        "visible": false,
+        "instrumented": false,
+        "valid": true,
+        "seconds": 31.667,
+        "roles": {
+          "native": {
+            "cpu_seconds": 0.03125,
+            "cpu_percent_core": 0.09868317175608678,
+            "logical_read_bytes": 3432,
+            "private_bytes": 14389248,
+            "working_bytes": 56864768
+          },
+          "browser": {
+            "cpu_seconds": 0.03125,
+            "cpu_percent_core": 0.09868317175608678,
+            "logical_read_bytes": 26104,
+            "private_bytes": 41832448,
+            "working_bytes": 137056256
+          },
+          "crashpad-handler": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 2953216,
+            "working_bytes": 13520896
+          },
+          "gpu-process": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 92979200,
+            "working_bytes": 84246528
+          },
+          "utility": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 19968,
+            "private_bytes": 19673088,
+            "working_bytes": 62107648
+          },
+          "renderer": {
+            "cpu_seconds": 0.015625,
+            "cpu_percent_core": 0.04934158587804339,
+            "logical_read_bytes": 8672,
+            "private_bytes": 68100096,
+            "working_bytes": 119382016
+          }
+        },
+        "new_processes": [],
+        "exited_processes": [],
+        "compilers": [
+          {
+            "ProcessId": 45260,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 52200,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 6840,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 26876,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 50392,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 50392,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 38420,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 2964,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 31268,
+            "Name": "rustc.exe"
+          }
+        ],
+        "cdp_durations": {
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0,
+          "ScriptDuration": 0.0019839999999999858,
+          "TaskDuration": 0.012437000000000031
+        }
+      },
+      {
+        "round": 3,
+        "visible": true,
+        "instrumented": false,
+        "valid": true,
+        "seconds": 34.337,
+        "roles": {
+          "native": {
+            "cpu_seconds": 0.5625,
+            "cpu_percent_core": 1.638174563881527,
+            "logical_read_bytes": 6213612,
+            "private_bytes": 15433728,
+            "working_bytes": 57802752
+          },
+          "browser": {
+            "cpu_seconds": 0.15625,
+            "cpu_percent_core": 0.45504848996709085,
+            "logical_read_bytes": 786456,
+            "private_bytes": 41791488,
+            "working_bytes": 137121792
+          },
+          "crashpad-handler": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 2953216,
+            "working_bytes": 13520896
+          },
+          "gpu-process": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 79933440,
+            "working_bytes": 82743296
+          },
+          "utility": {
+            "cpu_seconds": 0.015625,
+            "cpu_percent_core": 0.045504848996709084,
+            "logical_read_bytes": 191088,
+            "private_bytes": 19795968,
+            "working_bytes": 62189568
+          },
+          "renderer": {
+            "cpu_seconds": 0.171875,
+            "cpu_percent_core": 0.5005533389637999,
+            "logical_read_bytes": 92152,
+            "private_bytes": 70369280,
+            "working_bytes": 121454592
+          }
+        },
+        "new_processes": [],
+        "exited_processes": [],
+        "compilers": [
+          {
+            "ProcessId": 50392,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 38420,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 31268,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 21620,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 50392,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 38420,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 5504,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 39756,
+            "Name": "rustc.exe"
+          }
+        ],
+        "cdp_durations": {
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0,
+          "ScriptDuration": 0.012469999999999981,
+          "TaskDuration": 0.09075000000000011
+        }
+      },
+      {
+        "round": 3,
+        "visible": false,
+        "instrumented": false,
+        "valid": true,
+        "seconds": 32.063,
+        "roles": {
+          "native": {
+            "cpu_seconds": 0.046875,
+            "cpu_percent_core": 0.14619655054112216,
+            "logical_read_bytes": 3432,
+            "private_bytes": 14667776,
+            "working_bytes": 57331712
+          },
+          "browser": {
+            "cpu_seconds": 0.015625,
+            "cpu_percent_core": 0.04873218351370739,
+            "logical_read_bytes": 85880,
+            "private_bytes": 41746432,
+            "working_bytes": 137584640
+          },
+          "crashpad-handler": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 2990080,
+            "working_bytes": 13660160
+          },
+          "gpu-process": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 79978496,
+            "working_bytes": 82976768
+          },
+          "utility": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 19968,
+            "private_bytes": 19931136,
+            "working_bytes": 62472192
+          },
+          "renderer": {
+            "cpu_seconds": 0.015625,
+            "cpu_percent_core": 0.04873218351370739,
+            "logical_read_bytes": 8768,
+            "private_bytes": 70729728,
+            "working_bytes": 122142720
+          }
+        },
+        "new_processes": [],
+        "exited_processes": [],
+        "compilers": [
+          {
+            "ProcessId": 50392,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 38420,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 39756,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 63352,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 52192,
+            "Name": "link.exe"
+          },
+          {
+            "ProcessId": 50392,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 38420,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 39756,
+            "Name": "rustc.exe"
+          }
+        ],
+        "cdp_durations": {
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0,
+          "ScriptDuration": 0.0018080000000000318,
+          "TaskDuration": 0.012289999999999912
+        }
+      },
+      {
+        "round": 1,
+        "visible": true,
+        "instrumented": true,
+        "valid": true,
+        "seconds": 31.534,
+        "roles": {
+          "native": {
+            "cpu_seconds": 0.421875,
+            "cpu_percent_core": 1.3378416946787595,
+            "logical_read_bytes": 5254604,
+            "private_bytes": 15679488,
+            "working_bytes": 58163200
+          },
+          "browser": {
+            "cpu_seconds": 0.40625,
+            "cpu_percent_core": 1.2882920022832498,
+            "logical_read_bytes": 8871408,
+            "private_bytes": 42393600,
+            "working_bytes": 139202560
+          },
+          "crashpad-handler": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 36,
+            "private_bytes": 2990080,
+            "working_bytes": 13660160
+          },
+          "gpu-process": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 672,
+            "private_bytes": 97673216,
+            "working_bytes": 83406848
+          },
+          "utility": {
+            "cpu_seconds": 0.03125,
+            "cpu_percent_core": 0.09909938479101922,
+            "logical_read_bytes": 176552,
+            "private_bytes": 20152320,
+            "working_bytes": 62664704
+          },
+          "renderer": {
+            "cpu_seconds": 0.0625,
+            "cpu_percent_core": 0.19819876958203844,
+            "logical_read_bytes": 87144,
+            "private_bytes": 70569984,
+            "working_bytes": 120717312
+          }
+        },
+        "new_processes": [],
+        "exited_processes": [],
+        "compilers": [
+          {
+            "ProcessId": 50392,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 38420,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 39756,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 35000,
+            "Name": "link.exe"
+          },
+          {
+            "ProcessId": 38420,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 54532,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 12292,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 8684,
+            "Name": "rustc.exe"
+          }
+        ],
+        "dom_hidden": {
+          "before": false,
+          "after": false
+        },
+        "frames": 0,
+        "rpc": {
+          "appearance_read": 0,
+          "document_window_target": 0,
+          "plugin:event|listen": 0,
+          "plugin:window|is_visible": 0,
+          "plugin:window|is_minimized": 0,
+          "settings_get": 0,
+          "activity": 30,
+          "window_observe": 0,
+          "operation_events": 30,
+          "keybindings_get": 0,
+          "window_snapshot": 0,
+          "projects": 6,
+          "graph_physical": 0,
+          "graph_status": 15,
+          "new_topics_list": 6,
+          "audit_list": 2,
+          "project_observe": 3
+        },
+        "worker_sent": {
+          "hold": 0,
+          "forces": 0,
+          "ack": 0,
+          "graph": 0,
+          "place": 0,
+          "settle": 0,
+          "heat": 0
+        },
+        "worker_received": {
+          "pos": 0
+        },
+        "timers": [
+          {
+            "kind": "setInterval",
+            "delay": 10000,
+            "fires": 3,
+            "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:70796)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+          },
+          {
+            "kind": "setInterval",
+            "delay": 1000,
+            "fires": 30,
+            "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:71074)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+          },
+          {
+            "kind": "setInterval",
+            "delay": 2000,
+            "fires": 15,
+            "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:115:119032\n    at Hi (http://tauri.localhost/assets/index-B_QZoswO.js:2:25373)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:3:8093\n    at Pi (http://tauri.localhost/assets/index-B_QZoswO.js:2:23085)\n    at Ri (http://tauri.localhost/assets/index-B_QZoswO.js:2:24260)"
+          },
+          {
+            "kind": "setTimeout",
+            "delay": 0,
+            "fires": 1,
+            "stack": "    at HTMLDivElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)"
+          }
+        ],
+        "cdp_durations": {
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0,
+          "ScriptDuration": 0.014024000000000036,
+          "TaskDuration": 0.12569700000000017
+        }
+      },
+      {
+        "round": 1,
+        "visible": false,
+        "instrumented": true,
+        "valid": true,
+        "seconds": 31.713,
+        "roles": {
+          "native": {
+            "cpu_seconds": 0.046875,
+            "cpu_percent_core": 0.14781004635323053,
+            "logical_read_bytes": 3880,
+            "private_bytes": 14856192,
+            "working_bytes": 57561088
+          },
+          "browser": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 25976,
+            "private_bytes": 42094592,
+            "working_bytes": 138997760
+          },
+          "crashpad-handler": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 2961408,
+            "working_bytes": 13647872
+          },
+          "gpu-process": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 97632256,
+            "working_bytes": 83382272
+          },
+          "utility": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 22432,
+            "private_bytes": 19877888,
+            "working_bytes": 62590976
+          },
+          "renderer": {
+            "cpu_seconds": 0.015625,
+            "cpu_percent_core": 0.04927001545107684,
+            "logical_read_bytes": 8608,
+            "private_bytes": 71000064,
+            "working_bytes": 121176064
+          }
+        },
+        "new_processes": [],
+        "exited_processes": [],
+        "compilers": [
+          {
+            "ProcessId": 38420,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 54532,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 8360,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 36092,
+            "Name": "link.exe"
+          },
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 54532,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 58228,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 31384,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 32128,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 36732,
+            "Name": "rustc.exe"
+          }
+        ],
+        "dom_hidden": {
+          "before": false,
+          "after": false
+        },
+        "frames": 0,
+        "rpc": {
+          "appearance_read": 0,
+          "document_window_target": 0,
+          "plugin:event|listen": 0,
+          "plugin:window|is_visible": 0,
+          "plugin:window|is_minimized": 0,
+          "settings_get": 0,
+          "activity": 3,
+          "window_observe": 0,
+          "operation_events": 3,
+          "keybindings_get": 0,
+          "window_snapshot": 0,
+          "projects": 0,
+          "graph_physical": 0,
+          "graph_status": 0,
+          "new_topics_list": 0,
+          "audit_list": 0,
+          "project_observe": 3,
+          "plugin:event|unlisten": 0
+        },
+        "worker_sent": {
+          "hold": 0,
+          "forces": 0,
+          "ack": 0,
+          "graph": 0,
+          "place": 0,
+          "settle": 0,
+          "heat": 0
+        },
+        "worker_received": {
+          "pos": 0
+        },
+        "timers": [
+          {
+            "kind": "setInterval",
+            "delay": 10000,
+            "fires": 3,
+            "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:70796)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+          },
+          {
+            "kind": "setInterval",
+            "delay": 1000,
+            "fires": 30,
+            "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:71074)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+          },
+          {
+            "kind": "setInterval",
+            "delay": 2000,
+            "fires": 15,
+            "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:115:119032\n    at Hi (http://tauri.localhost/assets/index-B_QZoswO.js:2:25373)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:3:8093\n    at Pi (http://tauri.localhost/assets/index-B_QZoswO.js:2:23085)\n    at Ri (http://tauri.localhost/assets/index-B_QZoswO.js:2:24260)"
+          }
+        ],
+        "cdp_durations": {
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0,
+          "ScriptDuration": 0.0019609999999999905,
+          "TaskDuration": 0.011578000000000088
+        }
+      },
+      {
+        "round": 2,
+        "visible": true,
+        "instrumented": true,
+        "valid": true,
+        "seconds": 31.828,
+        "roles": {
+          "native": {
+            "cpu_seconds": 0.390625,
+            "cpu_percent_core": 1.2272998617569435,
+            "logical_read_bytes": 5556588,
+            "private_bytes": 16662528,
+            "working_bytes": 59240448
+          },
+          "browser": {
+            "cpu_seconds": 0.109375,
+            "cpu_percent_core": 0.3436439612919442,
+            "logical_read_bytes": 811336,
+            "private_bytes": 42610688,
+            "working_bytes": 139997184
+          },
+          "crashpad-handler": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 2961408,
+            "working_bytes": 13647872
+          },
+          "gpu-process": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 224,
+            "private_bytes": 81211392,
+            "working_bytes": 84086784
+          },
+          "utility": {
+            "cpu_seconds": 0.03125,
+            "cpu_percent_core": 0.0981839889405555,
+            "logical_read_bytes": 175848,
+            "private_bytes": 20099072,
+            "working_bytes": 63750144
+          },
+          "renderer": {
+            "cpu_seconds": 0.078125,
+            "cpu_percent_core": 0.24545997235138872,
+            "logical_read_bytes": 85272,
+            "private_bytes": 76660736,
+            "working_bytes": 126869504
+          }
+        },
+        "new_processes": [],
+        "exited_processes": [],
+        "compilers": [
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 54532,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 58228,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 35912,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 58228,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 28956,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 46656,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 52348,
+            "Name": "link.exe"
+          }
+        ],
+        "dom_hidden": {
+          "before": false,
+          "after": false
+        },
+        "frames": 0,
+        "rpc": {
+          "appearance_read": 0,
+          "document_window_target": 0,
+          "plugin:event|listen": 0,
+          "plugin:window|is_visible": 0,
+          "plugin:window|is_minimized": 0,
+          "settings_get": 0,
+          "activity": 29,
+          "window_observe": 0,
+          "operation_events": 29,
+          "keybindings_get": 0,
+          "window_snapshot": 0,
+          "projects": 6,
+          "graph_physical": 0,
+          "graph_status": 15,
+          "new_topics_list": 6,
+          "audit_list": 2,
+          "project_observe": 3,
+          "plugin:event|unlisten": 0
+        },
+        "worker_sent": {
+          "hold": 0,
+          "forces": 0,
+          "ack": 0,
+          "graph": 0,
+          "place": 0,
+          "settle": 0,
+          "heat": 0
+        },
+        "worker_received": {
+          "pos": 0
+        },
+        "timers": [
+          {
+            "kind": "setInterval",
+            "delay": 10000,
+            "fires": 3,
+            "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:70796)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+          },
+          {
+            "kind": "setInterval",
+            "delay": 1000,
+            "fires": 30,
+            "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:71074)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+          },
+          {
+            "kind": "setInterval",
+            "delay": 2000,
+            "fires": 15,
+            "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:115:119032\n    at Hi (http://tauri.localhost/assets/index-B_QZoswO.js:2:25373)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:3:8093\n    at Pi (http://tauri.localhost/assets/index-B_QZoswO.js:2:23085)\n    at Ri (http://tauri.localhost/assets/index-B_QZoswO.js:2:24260)"
+          }
+        ],
+        "cdp_durations": {
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0,
+          "ScriptDuration": 0.011278999999999928,
+          "TaskDuration": 0.08554400000000006
+        }
+      },
+      {
+        "round": 2,
+        "visible": false,
+        "instrumented": true,
+        "valid": true,
+        "seconds": 31.643,
+        "roles": {
+          "native": {
+            "cpu_seconds": 0.03125,
+            "cpu_percent_core": 0.09875801915115508,
+            "logical_read_bytes": 3432,
+            "private_bytes": 15896576,
+            "working_bytes": 58638336
+          },
+          "browser": {
+            "cpu_seconds": 0.0625,
+            "cpu_percent_core": 0.19751603830231015,
+            "logical_read_bytes": 25992,
+            "private_bytes": 42397696,
+            "working_bytes": 139829248
+          },
+          "crashpad-handler": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 2961408,
+            "working_bytes": 13647872
+          },
+          "gpu-process": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 81014784,
+            "working_bytes": 83865600
+          },
+          "utility": {
+            "cpu_seconds": 0.015625,
+            "cpu_percent_core": 0.04937900957557754,
+            "logical_read_bytes": 19968,
+            "private_bytes": 20140032,
+            "working_bytes": 63741952
+          },
+          "renderer": {
+            "cpu_seconds": 0.03125,
+            "cpu_percent_core": 0.09875801915115508,
+            "logical_read_bytes": 8608,
+            "private_bytes": 76980224,
+            "working_bytes": 127062016
+          }
+        },
+        "new_processes": [],
+        "exited_processes": [],
+        "compilers": [
+          {
+            "ProcessId": 28956,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 41200,
+            "Name": "rustc.exe"
+          }
+        ],
+        "dom_hidden": {
+          "before": false,
+          "after": false
+        },
+        "frames": 0,
+        "rpc": {
+          "appearance_read": 0,
+          "document_window_target": 0,
+          "plugin:event|listen": 0,
+          "plugin:window|is_visible": 0,
+          "plugin:window|is_minimized": 0,
+          "settings_get": 0,
+          "activity": 3,
+          "window_observe": 0,
+          "operation_events": 3,
+          "keybindings_get": 0,
+          "window_snapshot": 0,
+          "projects": 0,
+          "graph_physical": 0,
+          "graph_status": 0,
+          "new_topics_list": 0,
+          "audit_list": 0,
+          "project_observe": 3,
+          "plugin:event|unlisten": 0
+        },
+        "worker_sent": {
+          "hold": 0,
+          "forces": 0,
+          "ack": 0,
+          "graph": 0,
+          "place": 0,
+          "settle": 0,
+          "heat": 0
+        },
+        "worker_received": {
+          "pos": 0
+        },
+        "timers": [
+          {
+            "kind": "setInterval",
+            "delay": 10000,
+            "fires": 3,
+            "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:70796)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+          },
+          {
+            "kind": "setInterval",
+            "delay": 1000,
+            "fires": 30,
+            "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:71074)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+          },
+          {
+            "kind": "setInterval",
+            "delay": 2000,
+            "fires": 16,
+            "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:115:119032\n    at Hi (http://tauri.localhost/assets/index-B_QZoswO.js:2:25373)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:3:8093\n    at Pi (http://tauri.localhost/assets/index-B_QZoswO.js:2:23085)\n    at Ri (http://tauri.localhost/assets/index-B_QZoswO.js:2:24260)"
+          }
+        ],
+        "cdp_durations": {
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0,
+          "ScriptDuration": 0.001954999999999929,
+          "TaskDuration": 0.011620000000000186
+        }
+      },
+      {
+        "round": 3,
+        "visible": true,
+        "instrumented": true,
+        "valid": true,
+        "seconds": 32.757,
+        "roles": {
+          "native": {
+            "cpu_seconds": 0.4375,
+            "cpu_percent_core": 1.3355923924657327,
+            "logical_read_bytes": 5862028,
+            "private_bytes": 15990784,
+            "working_bytes": 58695680
+          },
+          "browser": {
+            "cpu_seconds": 0.15625,
+            "cpu_percent_core": 0.47699728302347594,
+            "logical_read_bytes": 761992,
+            "private_bytes": 42635264,
+            "working_bytes": 140111872
+          },
+          "crashpad-handler": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 2908160,
+            "working_bytes": 13619200
+          },
+          "gpu-process": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 63184,
+            "private_bytes": 82079744,
+            "working_bytes": 84729856
+          },
+          "utility": {
+            "cpu_seconds": 0.046875,
+            "cpu_percent_core": 0.1430991849070428,
+            "logical_read_bytes": 191080,
+            "private_bytes": 20127744,
+            "working_bytes": 63819776
+          },
+          "renderer": {
+            "cpu_seconds": 0.28125,
+            "cpu_percent_core": 0.8585951094422567,
+            "logical_read_bytes": 95088,
+            "private_bytes": 75943936,
+            "working_bytes": 126795776
+          }
+        },
+        "new_processes": [],
+        "exited_processes": [],
+        "compilers": [
+          {
+            "ProcessId": 28204,
+            "Name": "cargo.exe"
+          }
+        ],
+        "dom_hidden": {
+          "before": false,
+          "after": false
+        },
+        "frames": 1,
+        "rpc": {
+          "appearance_read": 0,
+          "document_window_target": 0,
+          "plugin:event|listen": 0,
+          "plugin:window|is_visible": 0,
+          "plugin:window|is_minimized": 0,
+          "settings_get": 0,
+          "activity": 30,
+          "window_observe": 0,
+          "operation_events": 30,
+          "keybindings_get": 0,
+          "window_snapshot": 0,
+          "projects": 6,
+          "graph_physical": 0,
+          "graph_status": 15,
+          "new_topics_list": 6,
+          "audit_list": 2,
+          "project_observe": 3,
+          "plugin:event|unlisten": 0
+        },
+        "worker_sent": {
+          "hold": 0,
+          "forces": 0,
+          "ack": 0,
+          "graph": 0,
+          "place": 0,
+          "settle": 0,
+          "heat": 0
+        },
+        "worker_received": {
+          "pos": 0
+        },
+        "timers": [
+          {
+            "kind": "setInterval",
+            "delay": 10000,
+            "fires": 3,
+            "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:70796)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+          },
+          {
+            "kind": "setInterval",
+            "delay": 1000,
+            "fires": 30,
+            "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:71074)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+          },
+          {
+            "kind": "setInterval",
+            "delay": 2000,
+            "fires": 15,
+            "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:115:119032\n    at Hi (http://tauri.localhost/assets/index-B_QZoswO.js:2:25373)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:3:8093\n    at Pi (http://tauri.localhost/assets/index-B_QZoswO.js:2:23085)\n    at Ri (http://tauri.localhost/assets/index-B_QZoswO.js:2:24260)"
+          },
+          {
+            "kind": "setTimeout",
+            "delay": 0,
+            "fires": 1,
+            "stack": "    at HTMLDivElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)"
+          },
+          {
+            "kind": "setTimeout",
+            "delay": 0,
+            "fires": 1,
+            "stack": "    at HTMLCanvasElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)\n    at HTMLCanvasElement.i (http://tauri.localhost/assets/index-B_QZoswO.js:2:26405)"
+          }
+        ],
+        "cdp_durations": {
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0.0008380000000000054,
+          "ScriptDuration": 0.018775000000000097,
+          "TaskDuration": 0.16245999999999983
+        }
+      },
+      {
+        "round": 3,
+        "visible": false,
+        "instrumented": true,
+        "valid": true,
+        "seconds": 31.608,
+        "roles": {
+          "native": {
+            "cpu_seconds": 0.03125,
+            "cpu_percent_core": 0.09886737534801315,
+            "logical_read_bytes": 4104,
+            "private_bytes": 15818752,
+            "working_bytes": 58593280
+          },
+          "browser": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 29464,
+            "private_bytes": 42237952,
+            "working_bytes": 139714560
+          },
+          "crashpad-handler": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 2908160,
+            "working_bytes": 13619200
+          },
+          "gpu-process": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 0,
+            "private_bytes": 81649664,
+            "working_bytes": 84361216
+          },
+          "utility": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 24240,
+            "private_bytes": 20103168,
+            "working_bytes": 63778816
+          },
+          "renderer": {
+            "cpu_seconds": 0,
+            "cpu_percent_core": 0,
+            "logical_read_bytes": 9664,
+            "private_bytes": 75972608,
+            "working_bytes": 126590976
+          }
+        },
+        "new_processes": [],
+        "exited_processes": [],
+        "compilers": [
+          {
+            "ProcessId": 7764,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 45372,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 7764,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 45372,
+            "Name": "cargo.exe"
+          }
+        ],
+        "dom_hidden": {
+          "before": false,
+          "after": false
+        },
+        "frames": 0,
+        "rpc": {
+          "appearance_read": 0,
+          "document_window_target": 0,
+          "plugin:event|listen": 0,
+          "plugin:window|is_visible": 0,
+          "plugin:window|is_minimized": 0,
+          "settings_get": 0,
+          "activity": 3,
+          "window_observe": 0,
+          "operation_events": 3,
+          "keybindings_get": 0,
+          "window_snapshot": 0,
+          "projects": 0,
+          "graph_physical": 0,
+          "graph_status": 0,
+          "new_topics_list": 0,
+          "audit_list": 0,
+          "project_observe": 3,
+          "plugin:event|unlisten": 0
+        },
+        "worker_sent": {
+          "hold": 0,
+          "forces": 0,
+          "ack": 0,
+          "graph": 0,
+          "place": 0,
+          "settle": 0,
+          "heat": 0
+        },
+        "worker_received": {
+          "pos": 0
+        },
+        "timers": [
+          {
+            "kind": "setInterval",
+            "delay": 10000,
+            "fires": 3,
+            "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:70796)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+          },
+          {
+            "kind": "setInterval",
+            "delay": 1000,
+            "fires": 30,
+            "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:71074)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+          },
+          {
+            "kind": "setInterval",
+            "delay": 2000,
+            "fires": 15,
+            "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:115:119032\n    at Hi (http://tauri.localhost/assets/index-B_QZoswO.js:2:25373)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:3:8093\n    at Pi (http://tauri.localhost/assets/index-B_QZoswO.js:2:23085)\n    at Ri (http://tauri.localhost/assets/index-B_QZoswO.js:2:24260)"
+          }
+        ],
+        "cdp_durations": {
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0,
+          "ScriptDuration": 0.0019439999999999458,
+          "TaskDuration": 0.012504999999999988
+        }
+      }
+    ],
+    "excluded": [],
+    "restoration": null,
+    "fault_injection": {
+      "kind": "CDP Browser.crash; only this isolated browser",
+      "before": {
+        "utc": "2026-11-02T10:11:02.8616530Z",
+        "time": 1793614262863,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 6.4375,
+            "logical_read": 78860746,
+            "private": 16506880,
+            "working": 59224064
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 4.25,
+            "logical_read": 66970512,
+            "private": 42147840,
+            "working": 139624448
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6710,
+            "private": 2981888,
+            "working": 13672448
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 6.15625,
+            "logical_read": 45455373,
+            "private": 88072192,
+            "working": 85831680
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.75,
+            "logical_read": 3074039,
+            "private": 12234752,
+            "working": 42426368
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 30072,
+            "private": 7880704,
+            "working": 21331968
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 7.015625,
+            "logical_read": 2528647,
+            "private": 78344192,
+            "working": 129306624
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 39588,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 32308,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 42384,
+            "Name": "rustc.exe"
+          }
+        ]
+      },
+      "after": {
+        "utc": "2026-11-02T10:11:09.3120522Z",
+        "time": 1793614269314,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 6.484375,
+            "logical_read": 78860746,
+            "private": 16441344,
+            "working": 59109376
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 39588,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 32308,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 41064,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 30368,
+            "Name": "link.exe"
+          }
+        ]
+      },
+      "host_survived": true
+    }
+  }
+}

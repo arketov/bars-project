@@ -7,13 +7,14 @@ import { createHash } from 'node:crypto';
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(directory, '../../..');
-const root = path.join(repo, '.bars/webview-361');
-const output = path.join(directory, 'isolated.json');
+const faultOnly = process.argv.includes('--fault-only');
+const root = path.join(repo, faultOnly ? '.bars/webview-361-fault' : '.bars/webview-361');
+const output = path.join(directory, faultOnly ? 'fault.json' : 'isolated.json');
 const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 const sha = data => createHash('sha256').update(data).digest('hex');
 await mkdir(root, { recursive: true });
 const executable = path.join(root, 'workspace_probe.exe');
-await copyFile('C:/bt/bars/debug/examples/workspace_probe.exe', executable);
+await copyFile(faultOnly ? path.join(repo, '.bars/webview-361/workspace_probe.exe') : 'C:/bt/bars/debug/examples/workspace_probe.exe', executable);
 await writeFile(path.join(root, 'ready.js'), 'window.__researchReady=true;');
 const port = await new Promise(resolve => {
   const server = createServer();
@@ -24,11 +25,13 @@ const child = spawn(executable, [root, path.join(root, 'ready.js')], {
   env: { ...process.env, BARS_USER_HOME: path.join(root, 'home'), BARS_PROBE_DOCUMENTS: '100', BARS_PROBE_TIMEOUT: '1800', BARS_PROBE_RETAIN: '1', WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${port} --remote-debugging-address=127.0.0.1` },
 });
 const report = { success: false, root_pid: child.pid, exe_sha256: sha(await readFile(executable)), source_commit: spawnSync('git', ['rev-parse', 'HEAD'], { cwd: repo, encoding: 'utf8' }).stdout.trim(), documents: 100, profile: 'debug/FakeProvider; own loopback CDP', samples: [] };
+report.source_commit_is_exact = false;
+report.source_note = 'Checkout HEAD at launch; shared dirty tree. Executable and loaded JS SHA-256 identify the measured artifacts.';
 let socket, nextId = 1;
 const pending = new Map();
 const save = () => writeFile(output, JSON.stringify(report, null, 2));
-const metrics = () => {
-  const result = spawnSync('pwsh', ['-NoProfile', '-File', path.join(directory, 'metrics.ps1'), '-RootId', String(child.pid), '-ExpectedPath', executable], { encoding: 'utf8', windowsHide: true });
+const metrics = (known = []) => {
+  const result = spawnSync('pwsh', ['-NoProfile', '-File', path.join(directory, 'metrics.ps1'), '-RootId', String(child.pid), '-ExpectedPath', executable, '-KnownInstancesJson', JSON.stringify(known)], { encoding: 'utf8', windowsHide: true });
   if (result.status !== 0) throw Error(result.stderr);
   return JSON.parse(result.stdout);
 };
@@ -83,7 +86,7 @@ try {
   await waitFor(async () => !(await call('graph_status')).active_job, 'graph idle');
   report.corpus_hash = (await invoke('workspace_probe_metrics')).corpus_hash;
   report.fixture = { tree_documents: (await call('tree')).documents.length };
-  for (const instrumented of [false, true]) {
+  for (const instrumented of (faultOnly ? [] : [false, true])) {
     if (instrumented) {
       const source = await readFile(path.join(directory, 'instrument.js'), 'utf8');
       report.instrument_sha256 = sha(source);
@@ -112,7 +115,7 @@ try {
   report.cpu_profiles = [];
   await send('Profiler.enable');
   await send('Profiler.setSamplingInterval', { interval: 1000 });
-  for (const visible of [true, false]) {
+  for (const visible of (faultOnly ? [] : [true, false])) {
     await invoke('workspace_probe_windows', { count: 1, visible });
     await sleep(5000);
     await send('Profiler.start');
@@ -132,10 +135,16 @@ try {
   // Intentional failure of the owned fixture. No working-profile process is touched.
   void send('Browser.crash').then(result => { report.fault_injection.response = result; }).catch(error => { report.fault_injection.error = String(error); });
   await sleep(5000);
-  report.fault_injection.after = metrics();
-  report.fault_injection.host_survived = child.exitCode === null;
+  report.fault_injection.after = metrics(report.fault_injection.before.processes);
+  report.fault_injection.host_survived = report.fault_injection.after.native_alive;
+  report.fault_injection.expected_failure_observed = report.fault_injection.before.processes.some(row => row.role === 'browser')
+    && report.fault_injection.before.processes.some(row => row.role === 'renderer')
+    && report.fault_injection.after.known_instances.filter(row => row.role !== 'native').every(row => !row.same_instance)
+    && report.fault_injection.after.known_instances.some(row => row.role === 'native' && row.same_instance);
+  report.success &&= report.fault_injection.after.known_instances.length === report.fault_injection.before.processes.length;
+  report.success_means = 'Measurement completed; fault outcome and host survival are reported separately.';
   await save();
-} catch (error) { report.error = String(error); await save(); throw error; }
+} catch (error) { report.success = false; report.error = String(error); report.host_exit_code = child.exitCode; await save(); throw error; }
 finally {
   if (socket?.readyState === WebSocket.OPEN && !report.fault_injection) {
     try { await invoke('workspace_probe_finish', { result: { success: false } }); } catch { /* Собственный host завершится ниже. */ }
@@ -146,5 +155,15 @@ finally {
   if (child.exitCode === null) {
     await Promise.race([new Promise(resolve => child.once('exit', resolve)), sleep(3000)]);
     if (child.exitCode === null) child.kill();
+  }
+  if (report.fault_injection?.before) {
+    try {
+      for (let attempt = 0; attempt < 10; attempt++) {
+        await sleep(1000);
+        report.cleanup = metrics(report.fault_injection.before.processes);
+        if (report.cleanup.known_instances.every(row => !row.same_instance)) break;
+      }
+    } catch (error) { report.cleanup_error = String(error); }
+    await save();
   }
 }

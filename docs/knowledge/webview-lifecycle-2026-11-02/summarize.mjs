@@ -4,11 +4,11 @@ import { fileURLToPath } from 'node:url';
 const directory = path.dirname(fileURLToPath(import.meta.url));
 const read = async name => JSON.parse((await readFile(path.join(directory, name), 'utf8')).replace(/^\uFEFF/, ''));
 const deltaMap = (before, after) => Object.fromEntries(Object.keys(after).map(key => [key, after[key] - (before[key] ?? 0)]));
-const median = values => [...values].sort((a, b) => a - b)[Math.floor(values.length / 2)];
+const median = values => { const sorted = [...values].sort((a, b) => a - b); return (sorted[Math.floor((sorted.length - 1) / 2)] + sorted[Math.floor(sorted.length / 2)]) / 2; };
 const reports = {};
 for (const name of ['installed', 'isolated']) {
   const report = await read(`${name}.json`);
-  if (!report.success || (name === 'installed' && !report.restored)) throw Error(`${name}: incomplete/restoration failed`);
+  if (!report.success) throw Error(`${name}: incomplete`);
   const samples = report.samples.map(sample => {
     const seconds = (sample.after.time - sample.before.time) / 1000;
     const roles = {};
@@ -19,7 +19,8 @@ for (const name of ['installed', 'isolated']) {
       role.private_bytes += row.private; role.working_bytes += row.working;
     }
     const same = (a, b) => a.pid === b.pid && a.start_utc === b.start_utc;
-    const result = { round: sample.round, visible: sample.visible, instrumented: sample.instrumented ?? false, seconds, roles,
+    const valid = [sample.before, sample.after].every(point => point.windows.some(window => window.Title.startsWith('bars') && window.Visible === sample.visible && (!sample.visible || !window.Minimized)));
+    const result = { round: sample.round, visible: sample.visible, instrumented: sample.instrumented ?? false, valid, seconds, roles,
       new_processes: sample.after.processes.filter(row => !sample.before.processes.some(old => same(row, old))).map(row => row.pid),
       exited_processes: sample.before.processes.filter(row => !sample.after.processes.some(after => same(row, after))).map(row => row.pid),
       compilers: [...sample.before.compilers, ...sample.after.compilers] };
@@ -41,11 +42,15 @@ for (const name of ['installed', 'isolated']) {
   const groups = [];
   for (const instrumented of [...new Set(samples.map(row => row.instrumented))]) {
     for (const visible of [false, true]) {
-      const selected = samples.filter(row => row.instrumented === instrumented && row.visible === visible);
+      const selected = samples.filter(row => row.valid && row.instrumented === instrumented && row.visible === visible);
+      if (!selected.length) continue;
       groups.push({ instrumented, visible, count: selected.length, cpu_percent_core_median: Object.fromEntries(Object.keys(selected[0].roles).map(role => [role, median(selected.map(row => row.roles[role]?.cpu_percent_core ?? 0))])) });
     }
   }
-  reports[name] = { groups, samples, restored: report.restored, fault_injection: report.fault_injection };
+  const windowState = point => point?.windows.find(window => window.Title === 'bars');
+  const initial = windowState(report.initial), final = windowState(report.final);
+  reports[name] = { groups, samples, excluded: samples.filter(row => !row.valid).map(row => ({ round: row.round, visible: row.visible, reason: 'HWND visibility/minimized mismatch at boundary' })),
+    restoration: initial && final ? { visible: initial.Visible === final.Visible, minimized: initial.Minimized === final.Minimized } : null, fault_injection: report.fault_injection };
 }
 await writeFile(path.join(directory, 'summary.json'), JSON.stringify(reports, null, 2));
 for (const [name, report] of Object.entries(reports)) console.log(name, JSON.stringify(report.groups));

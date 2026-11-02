@@ -1,5 +1,5 @@
 {
-  "success": false,
+  "success": true,
   "root_pid": 35504,
   "exe_sha256": "0da5a2289fea443132e0e6cafb196930283325ff8032a10bdc9479a79a8183f0",
   "source_commit": "58770e552ceb8b804737d198d64c8503056cb3f4",
@@ -2220,6 +2220,5160 @@
           }
         ]
       }
+    },
+    {
+      "instrumented": false,
+      "round": 3,
+      "visible": true,
+      "before": {
+        "utc": "2026-11-02T10:04:13.3235901Z",
+        "time": 1793613853325,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 2.625,
+            "logical_read": 37583127,
+            "private": 15114240,
+            "working": 57606144
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 2.484375,
+            "logical_read": 13190813,
+            "private": 42115072,
+            "working": 137424896
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6602,
+            "private": 2953216,
+            "working": 13520896
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 3.0625,
+            "logical_read": 17997565,
+            "private": 80289792,
+            "working": 82984960
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.421875,
+            "logical_read": 1512271,
+            "private": 12320768,
+            "working": 41840640
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 28712,
+            "private": 7630848,
+            "working": 20451328
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 3.359375,
+            "logical_read": 1171927,
+            "private": 68849664,
+            "working": 119873536
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 50392,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 38420,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 31268,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 21620,
+            "Name": "rustc.exe"
+          }
+        ]
+      },
+      "after": {
+        "utc": "2026-11-02T10:04:47.6610403Z",
+        "time": 1793613887662,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 3.1875,
+            "logical_read": 43796739,
+            "private": 15433728,
+            "working": 57802752
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 2.640625,
+            "logical_read": 13977269,
+            "private": 41791488,
+            "working": 137121792
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6602,
+            "private": 2953216,
+            "working": 13520896
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 3.0625,
+            "logical_read": 17997565,
+            "private": 79933440,
+            "working": 82743296
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.4375,
+            "logical_read": 1703359,
+            "private": 12165120,
+            "working": 41738240
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 28712,
+            "private": 7630848,
+            "working": 20451328
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 3.53125,
+            "logical_read": 1264079,
+            "private": 70369280,
+            "working": 121454592
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 50392,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 38420,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 5504,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 39756,
+            "Name": "rustc.exe"
+          }
+        ]
+      },
+      "start": {
+        "hidden": false,
+        "body": 356,
+        "animations": [],
+        "stats": null
+      },
+      "end": {
+        "hidden": false,
+        "body": 356,
+        "animations": [],
+        "stats": null
+      },
+      "performanceBefore": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174350.365871
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 131
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 267
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1231
+          },
+          {
+            "name": "Resources",
+            "value": 63
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 125
+          },
+          {
+            "name": "LayoutCount",
+            "value": 20
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 375
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.044509
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.038454
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.036876
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.293771
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 1.209808
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 0.796198
+          },
+          {
+            "name": "ThreadTime",
+            "value": 1.208387
+          },
+          {
+            "name": "ProcessTime",
+            "value": 2.841919
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 7102596
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 11010048
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174129.815009
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174129.560499
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174126.530444
+          }
+        ]
+      },
+      "performanceAfter": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174380.3734
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 131
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 267
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1231
+          },
+          {
+            "name": "Resources",
+            "value": 155
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 309
+          },
+          {
+            "name": "LayoutCount",
+            "value": 20
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 375
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.044509
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.038454
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.036976
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.306241
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 1.300558
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 0.874378
+          },
+          {
+            "name": "ThreadTime",
+            "value": 1.302505
+          },
+          {
+            "name": "ProcessTime",
+            "value": 2.95743
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 7629080
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 11534336
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174129.815009
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174129.560499
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174126.530444
+          }
+        ]
+      }
+    },
+    {
+      "instrumented": false,
+      "round": 3,
+      "visible": false,
+      "before": {
+        "utc": "2026-11-02T10:05:04.9157304Z",
+        "time": 1793613904917,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 3.234375,
+            "logical_read": 43801639,
+            "private": 14602240,
+            "working": 57102336
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 2.703125,
+            "logical_read": 16219101,
+            "private": 41521152,
+            "working": 136949760
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6638,
+            "private": 2949120,
+            "working": 13516800
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 3.0625,
+            "logical_read": 17997565,
+            "private": 79933440,
+            "working": 82743296
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.4375,
+            "logical_read": 1729735,
+            "private": 12308480,
+            "working": 41795584
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 28712,
+            "private": 7630848,
+            "working": 20451328
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 3.53125,
+            "logical_read": 1274191,
+            "private": 70397952,
+            "working": 121638912
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 50392,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 38420,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 39756,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 63352,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 52192,
+            "Name": "link.exe"
+          }
+        ]
+      },
+      "after": {
+        "utc": "2026-11-02T10:05:36.9772960Z",
+        "time": 1793613936980,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 3.28125,
+            "logical_read": 43805071,
+            "private": 14667776,
+            "working": 57331712
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 2.71875,
+            "logical_read": 16304981,
+            "private": 41746432,
+            "working": 137584640
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6638,
+            "private": 2990080,
+            "working": 13660160
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 3.0625,
+            "logical_read": 17997565,
+            "private": 79978496,
+            "working": 82976768
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.4375,
+            "logical_read": 1749703,
+            "private": 12169216,
+            "working": 41848832
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 28712,
+            "private": 7761920,
+            "working": 20623360
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 3.546875,
+            "logical_read": 1282959,
+            "private": 70729728,
+            "working": 122142720
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 50392,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 38420,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 39756,
+            "Name": "rustc.exe"
+          }
+        ]
+      },
+      "start": {
+        "hidden": false,
+        "body": 356,
+        "animations": [],
+        "stats": null
+      },
+      "end": {
+        "hidden": false,
+        "body": 356,
+        "animations": [],
+        "stats": null
+      },
+      "performanceBefore": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174401.945904
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 131
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 267
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1231
+          },
+          {
+            "name": "Resources",
+            "value": 174
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 347
+          },
+          {
+            "name": "LayoutCount",
+            "value": 20
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 375
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.044509
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.038454
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.038384
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.309272
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 1.324486
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 0.893867
+          },
+          {
+            "name": "ThreadTime",
+            "value": 1.326858
+          },
+          {
+            "name": "ProcessTime",
+            "value": 2.985813
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 7932632
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 11796480
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174129.815009
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174129.560499
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174126.530444
+          }
+        ]
+      },
+      "performanceAfter": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174431.960181
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 131
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 267
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1231
+          },
+          {
+            "name": "Resources",
+            "value": 183
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 365
+          },
+          {
+            "name": "LayoutCount",
+            "value": 20
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 375
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.044509
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.038454
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.038467
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.31108
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 1.336776
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 0.904266
+          },
+          {
+            "name": "ThreadTime",
+            "value": 1.340868
+          },
+          {
+            "name": "ProcessTime",
+            "value": 3.003214
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 8053792
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 11796480
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174129.815009
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174129.560499
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174126.530444
+          }
+        ]
+      }
+    },
+    {
+      "instrumented": true,
+      "round": 1,
+      "visible": true,
+      "before": {
+        "utc": "2026-11-02T10:05:54.0748485Z",
+        "time": 1793613954076,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 3.859375,
+            "logical_read": 48063314,
+            "private": 16740352,
+            "working": 58605568
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 2.96875,
+            "logical_read": 19071145,
+            "private": 41824256,
+            "working": 138018816
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6638,
+            "private": 2990080,
+            "working": 13660160
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 3.296875,
+            "logical_read": 23565101,
+            "private": 98136064,
+            "working": 84017152
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.484375,
+            "logical_read": 1956687,
+            "private": 12230656,
+            "working": 41943040
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 29736,
+            "private": 7770112,
+            "working": 20656128
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 5.234375,
+            "logical_read": 1600711,
+            "private": 93011968,
+            "working": 141770752
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 50392,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 38420,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 39756,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 35000,
+            "Name": "link.exe"
+          }
+        ]
+      },
+      "after": {
+        "utc": "2026-11-02T10:06:25.6091791Z",
+        "time": 1793613985610,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 4.28125,
+            "logical_read": 53317918,
+            "private": 15679488,
+            "working": 58163200
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 3.375,
+            "logical_read": 27942553,
+            "private": 42393600,
+            "working": 139202560
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6674,
+            "private": 2990080,
+            "working": 13660160
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 3.296875,
+            "logical_read": 23565773,
+            "private": 97673216,
+            "working": 83406848
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.515625,
+            "logical_read": 2133239,
+            "private": 12394496,
+            "working": 42020864
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 29736,
+            "private": 7757824,
+            "working": 20643840
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 5.296875,
+            "logical_read": 1687855,
+            "private": 70569984,
+            "working": 120717312
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 38420,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 54532,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 12292,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 8684,
+            "Name": "rustc.exe"
+          }
+        ]
+      },
+      "start": {
+        "hidden": false,
+        "body": 339,
+        "animations": [],
+        "stats": {
+          "timers": [
+            {
+              "kind": "setInterval",
+              "delay": 10000,
+              "fires": 1,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:70796)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 1000,
+              "fires": 16,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:71074)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 500,
+              "fires": 1,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:104:125543\n    at http://tauri.localhost/assets/index-B_QZoswO.js:104:22458\n    at <anonymous>:13:99"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 2000,
+              "fires": 8,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:115:119032\n    at Hi (http://tauri.localhost/assets/index-B_QZoswO.js:2:25373)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:3:8093\n    at Pi (http://tauri.localhost/assets/index-B_QZoswO.js:2:23085)\n    at Ri (http://tauri.localhost/assets/index-B_QZoswO.js:2:24260)"
+            }
+          ],
+          "frames": 329,
+          "rpc": {
+            "appearance_read": 2,
+            "document_window_target": 1,
+            "plugin:event|listen": 11,
+            "plugin:window|is_visible": 1,
+            "plugin:window|is_minimized": 1,
+            "settings_get": 1,
+            "activity": 18,
+            "window_observe": 2,
+            "operation_events": 18,
+            "keybindings_get": 1,
+            "window_snapshot": 2,
+            "projects": 4,
+            "graph_physical": 1,
+            "graph_status": 9,
+            "new_topics_list": 4,
+            "audit_list": 2,
+            "project_observe": 1
+          },
+          "workers": {
+            "sent": {
+              "hold": 2,
+              "forces": 1,
+              "ack": 312,
+              "graph": 1,
+              "place": 1,
+              "settle": 1,
+              "heat": 1
+            },
+            "received": {
+              "pos": 312
+            }
+          }
+        }
+      },
+      "end": {
+        "hidden": false,
+        "body": 339,
+        "animations": [],
+        "stats": {
+          "timers": [
+            {
+              "kind": "setInterval",
+              "delay": 10000,
+              "fires": 4,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:70796)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 1000,
+              "fires": 46,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:71074)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 500,
+              "fires": 1,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:104:125543\n    at http://tauri.localhost/assets/index-B_QZoswO.js:104:22458\n    at <anonymous>:13:99"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 2000,
+              "fires": 23,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:115:119032\n    at Hi (http://tauri.localhost/assets/index-B_QZoswO.js:2:25373)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:3:8093\n    at Pi (http://tauri.localhost/assets/index-B_QZoswO.js:2:23085)\n    at Ri (http://tauri.localhost/assets/index-B_QZoswO.js:2:24260)"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 0,
+              "fires": 1,
+              "stack": "    at HTMLDivElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)"
+            }
+          ],
+          "frames": 329,
+          "rpc": {
+            "appearance_read": 2,
+            "document_window_target": 1,
+            "plugin:event|listen": 11,
+            "plugin:window|is_visible": 1,
+            "plugin:window|is_minimized": 1,
+            "settings_get": 1,
+            "activity": 48,
+            "window_observe": 2,
+            "operation_events": 48,
+            "keybindings_get": 1,
+            "window_snapshot": 2,
+            "projects": 10,
+            "graph_physical": 1,
+            "graph_status": 24,
+            "new_topics_list": 10,
+            "audit_list": 4,
+            "project_observe": 4
+          },
+          "workers": {
+            "sent": {
+              "hold": 2,
+              "forces": 1,
+              "ack": 312,
+              "graph": 1,
+              "place": 1,
+              "settle": 1,
+              "heat": 1
+            },
+            "received": {
+              "pos": 312
+            }
+          }
+        }
+      },
+      "performanceBefore": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174451.109498
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 4
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 134
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 422
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 2745
+          },
+          {
+            "name": "Resources",
+            "value": 69
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 22
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 5
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 1
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 778
+          },
+          {
+            "name": "LayoutCount",
+            "value": 40
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 738
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.050733
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.118249
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.043196
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.53314
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 1.997534
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 1.252216
+          },
+          {
+            "name": "ThreadTime",
+            "value": 1.993352
+          },
+          {
+            "name": "ProcessTime",
+            "value": 4.458196
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 10136792
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 18612224
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174434.398142
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174434.177697
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174434.040595
+          }
+        ]
+      },
+      "performanceAfter": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174481.125432
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 132
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 262
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1220
+          },
+          {
+            "name": "Resources",
+            "value": 54
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 113
+          },
+          {
+            "name": "LayoutCount",
+            "value": 40
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 738
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.050733
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.118249
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.043305
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.547164
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 2.123231
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 1.36378
+          },
+          {
+            "name": "ThreadTime",
+            "value": 2.115455
+          },
+          {
+            "name": "ProcessTime",
+            "value": 4.654719
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 6454968
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 8650752
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174434.398142
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174434.177697
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174434.040595
+          }
+        ]
+      }
+    },
+    {
+      "instrumented": true,
+      "round": 1,
+      "visible": false,
+      "before": {
+        "utc": "2026-11-02T10:06:42.1983180Z",
+        "time": 1793614002200,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 4.34375,
+            "logical_read": 53675434,
+            "private": 14917632,
+            "working": 57593856
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 3.390625,
+            "logical_read": 28058753,
+            "private": 42475520,
+            "working": 139386880
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6674,
+            "private": 2990080,
+            "working": 13660160
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 3.296875,
+            "logical_read": 23565773,
+            "private": 97673216,
+            "working": 83406848
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.515625,
+            "logical_read": 2166167,
+            "private": 12288000,
+            "working": 42029056
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 29736,
+            "private": 7729152,
+            "working": 20631552
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 5.3125,
+            "logical_read": 1700847,
+            "private": 71086080,
+            "working": 121090048
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 38420,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 54532,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 8360,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 36092,
+            "Name": "link.exe"
+          }
+        ]
+      },
+      "after": {
+        "utc": "2026-11-02T10:07:13.9121166Z",
+        "time": 1793614033913,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 4.390625,
+            "logical_read": 53679314,
+            "private": 14856192,
+            "working": 57561088
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 3.390625,
+            "logical_read": 28084729,
+            "private": 42094592,
+            "working": 138997760
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6674,
+            "private": 2961408,
+            "working": 13647872
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 3.296875,
+            "logical_read": 23565773,
+            "private": 97632256,
+            "working": 83382272
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.515625,
+            "logical_read": 2188599,
+            "private": 12197888,
+            "working": 41955328
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 29736,
+            "private": 7680000,
+            "working": 20635648
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 5.328125,
+            "logical_read": 1709455,
+            "private": 71000064,
+            "working": 121176064
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 54532,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 58228,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 31384,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 32128,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 36732,
+            "Name": "rustc.exe"
+          }
+        ]
+      },
+      "start": {
+        "hidden": false,
+        "body": 339,
+        "animations": [],
+        "stats": {
+          "timers": [
+            {
+              "kind": "setInterval",
+              "delay": 10000,
+              "fires": 6,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:70796)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 1000,
+              "fires": 65,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:71074)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 500,
+              "fires": 1,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:104:125543\n    at http://tauri.localhost/assets/index-B_QZoswO.js:104:22458\n    at <anonymous>:13:99"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 2000,
+              "fires": 32,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:115:119032\n    at Hi (http://tauri.localhost/assets/index-B_QZoswO.js:2:25373)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:3:8093\n    at Pi (http://tauri.localhost/assets/index-B_QZoswO.js:2:23085)\n    at Ri (http://tauri.localhost/assets/index-B_QZoswO.js:2:24260)"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 0,
+              "fires": 1,
+              "stack": "    at HTMLDivElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)"
+            }
+          ],
+          "frames": 329,
+          "rpc": {
+            "appearance_read": 2,
+            "document_window_target": 1,
+            "plugin:event|listen": 11,
+            "plugin:window|is_visible": 1,
+            "plugin:window|is_minimized": 1,
+            "settings_get": 1,
+            "activity": 52,
+            "window_observe": 3,
+            "operation_events": 52,
+            "keybindings_get": 1,
+            "window_snapshot": 2,
+            "projects": 11,
+            "graph_physical": 1,
+            "graph_status": 25,
+            "new_topics_list": 11,
+            "audit_list": 4,
+            "project_observe": 6,
+            "plugin:event|unlisten": 1
+          },
+          "workers": {
+            "sent": {
+              "hold": 3,
+              "forces": 1,
+              "ack": 312,
+              "graph": 1,
+              "place": 1,
+              "settle": 1,
+              "heat": 1
+            },
+            "received": {
+              "pos": 312
+            }
+          }
+        }
+      },
+      "end": {
+        "hidden": false,
+        "body": 339,
+        "animations": [],
+        "stats": {
+          "timers": [
+            {
+              "kind": "setInterval",
+              "delay": 10000,
+              "fires": 9,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:70796)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 1000,
+              "fires": 95,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:71074)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 500,
+              "fires": 1,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:104:125543\n    at http://tauri.localhost/assets/index-B_QZoswO.js:104:22458\n    at <anonymous>:13:99"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 2000,
+              "fires": 47,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:115:119032\n    at Hi (http://tauri.localhost/assets/index-B_QZoswO.js:2:25373)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:3:8093\n    at Pi (http://tauri.localhost/assets/index-B_QZoswO.js:2:23085)\n    at Ri (http://tauri.localhost/assets/index-B_QZoswO.js:2:24260)"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 0,
+              "fires": 1,
+              "stack": "    at HTMLDivElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)"
+            }
+          ],
+          "frames": 329,
+          "rpc": {
+            "appearance_read": 2,
+            "document_window_target": 1,
+            "plugin:event|listen": 11,
+            "plugin:window|is_visible": 1,
+            "plugin:window|is_minimized": 1,
+            "settings_get": 1,
+            "activity": 55,
+            "window_observe": 3,
+            "operation_events": 55,
+            "keybindings_get": 1,
+            "window_snapshot": 2,
+            "projects": 11,
+            "graph_physical": 1,
+            "graph_status": 25,
+            "new_topics_list": 11,
+            "audit_list": 4,
+            "project_observe": 9,
+            "plugin:event|unlisten": 1
+          },
+          "workers": {
+            "sent": {
+              "hold": 3,
+              "forces": 1,
+              "ack": 312,
+              "graph": 1,
+              "place": 1,
+              "settle": 1,
+              "heat": 1
+            },
+            "received": {
+              "pos": 312
+            }
+          }
+        }
+      },
+      "performanceBefore": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174499.227221
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 132
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 262
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1220
+          },
+          {
+            "name": "Resources",
+            "value": 70
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 145
+          },
+          {
+            "name": "LayoutCount",
+            "value": 40
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 738
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.050733
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.118249
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.044974
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.549501
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 2.141604
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 1.378147
+          },
+          {
+            "name": "ThreadTime",
+            "value": 2.135282
+          },
+          {
+            "name": "ProcessTime",
+            "value": 4.678311
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 6709244
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 8912896
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174434.398142
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174434.177697
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174434.040595
+          }
+        ]
+      },
+      "performanceAfter": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174529.239651
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 132
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 262
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1220
+          },
+          {
+            "name": "Resources",
+            "value": 79
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 163
+          },
+          {
+            "name": "LayoutCount",
+            "value": 40
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 738
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.050733
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.118249
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.045067
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.551462
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 2.153182
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 1.387671
+          },
+          {
+            "name": "ThreadTime",
+            "value": 2.148298
+          },
+          {
+            "name": "ProcessTime",
+            "value": 4.693187
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 6827384
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 8912896
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174434.398142
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174434.177697
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174434.040595
+          }
+        ]
+      }
+    },
+    {
+      "instrumented": true,
+      "round": 2,
+      "visible": true,
+      "before": {
+        "utc": "2026-11-02T10:07:30.8962806Z",
+        "time": 1793614050898,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 4.734375,
+            "logical_read": 57589289,
+            "private": 16343040,
+            "working": 58777600
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 3.484375,
+            "logical_read": 28572097,
+            "private": 42790912,
+            "working": 139714560
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6674,
+            "private": 2961408,
+            "working": 13647872
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 4.828125,
+            "logical_read": 29351981,
+            "private": 81424384,
+            "working": 83771392
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.53125,
+            "logical_read": 2311743,
+            "private": 12283904,
+            "working": 42037248
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 29736,
+            "private": 7675904,
+            "working": 20631552
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 5.875,
+            "logical_read": 1874447,
+            "private": 74448896,
+            "working": 124526592
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 54532,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 58228,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 35912,
+            "Name": "rustc.exe"
+          }
+        ]
+      },
+      "after": {
+        "utc": "2026-11-02T10:08:02.7244390Z",
+        "time": 1793614082726,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 5.125,
+            "logical_read": 63145877,
+            "private": 16662528,
+            "working": 59240448
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 3.59375,
+            "logical_read": 29383433,
+            "private": 42610688,
+            "working": 139997184
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6674,
+            "private": 2961408,
+            "working": 13647872
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 4.828125,
+            "logical_read": 29352205,
+            "private": 81211392,
+            "working": 84086784
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.5625,
+            "logical_read": 2487367,
+            "private": 12283904,
+            "working": 42446848
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 29960,
+            "private": 7815168,
+            "working": 21303296
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 5.953125,
+            "logical_read": 1959719,
+            "private": 76660736,
+            "working": 126869504
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 58228,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 28956,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 46656,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 52348,
+            "Name": "link.exe"
+          }
+        ]
+      },
+      "start": {
+        "hidden": false,
+        "body": 339,
+        "animations": [],
+        "stats": {
+          "timers": [
+            {
+              "kind": "setInterval",
+              "delay": 10000,
+              "fires": 11,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:70796)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 1000,
+              "fires": 113,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:71074)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 500,
+              "fires": 1,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:104:125543\n    at http://tauri.localhost/assets/index-B_QZoswO.js:104:22458\n    at <anonymous>:13:99"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 2000,
+              "fires": 56,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:115:119032\n    at Hi (http://tauri.localhost/assets/index-B_QZoswO.js:2:25373)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:3:8093\n    at Pi (http://tauri.localhost/assets/index-B_QZoswO.js:2:23085)\n    at Ri (http://tauri.localhost/assets/index-B_QZoswO.js:2:24260)"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 0,
+              "fires": 1,
+              "stack": "    at HTMLDivElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)"
+            }
+          ],
+          "frames": 332,
+          "rpc": {
+            "appearance_read": 3,
+            "document_window_target": 1,
+            "plugin:event|listen": 12,
+            "plugin:window|is_visible": 1,
+            "plugin:window|is_minimized": 1,
+            "settings_get": 1,
+            "activity": 73,
+            "window_observe": 4,
+            "operation_events": 73,
+            "keybindings_get": 1,
+            "window_snapshot": 4,
+            "projects": 15,
+            "graph_physical": 1,
+            "graph_status": 33,
+            "new_topics_list": 15,
+            "audit_list": 6,
+            "project_observe": 11,
+            "plugin:event|unlisten": 1
+          },
+          "workers": {
+            "sent": {
+              "hold": 4,
+              "forces": 1,
+              "ack": 312,
+              "graph": 1,
+              "place": 1,
+              "settle": 1,
+              "heat": 1
+            },
+            "received": {
+              "pos": 312
+            }
+          }
+        }
+      },
+      "end": {
+        "hidden": false,
+        "body": 339,
+        "animations": [],
+        "stats": {
+          "timers": [
+            {
+              "kind": "setInterval",
+              "delay": 10000,
+              "fires": 14,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:70796)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 1000,
+              "fires": 143,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:71074)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 500,
+              "fires": 1,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:104:125543\n    at http://tauri.localhost/assets/index-B_QZoswO.js:104:22458\n    at <anonymous>:13:99"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 2000,
+              "fires": 71,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:115:119032\n    at Hi (http://tauri.localhost/assets/index-B_QZoswO.js:2:25373)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:3:8093\n    at Pi (http://tauri.localhost/assets/index-B_QZoswO.js:2:23085)\n    at Ri (http://tauri.localhost/assets/index-B_QZoswO.js:2:24260)"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 0,
+              "fires": 1,
+              "stack": "    at HTMLDivElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)"
+            }
+          ],
+          "frames": 332,
+          "rpc": {
+            "appearance_read": 3,
+            "document_window_target": 1,
+            "plugin:event|listen": 12,
+            "plugin:window|is_visible": 1,
+            "plugin:window|is_minimized": 1,
+            "settings_get": 1,
+            "activity": 102,
+            "window_observe": 4,
+            "operation_events": 102,
+            "keybindings_get": 1,
+            "window_snapshot": 4,
+            "projects": 21,
+            "graph_physical": 1,
+            "graph_status": 48,
+            "new_topics_list": 21,
+            "audit_list": 8,
+            "project_observe": 14,
+            "plugin:event|unlisten": 1
+          },
+          "workers": {
+            "sent": {
+              "hold": 4,
+              "forces": 1,
+              "ack": 312,
+              "graph": 1,
+              "place": 1,
+              "settle": 1,
+              "heat": 1
+            },
+            "received": {
+              "pos": 312
+            }
+          }
+        }
+      },
+      "performanceBefore": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174547.952446
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 132
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 266
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1220
+          },
+          {
+            "name": "Resources",
+            "value": 141
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 288
+          },
+          {
+            "name": "LayoutCount",
+            "value": 42
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 743
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.050929
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.118644
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.047337
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.561127
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 2.228103
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 1.450066
+          },
+          {
+            "name": "ThreadTime",
+            "value": 2.235731
+          },
+          {
+            "name": "ProcessTime",
+            "value": 4.939048
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 7302204
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 9437184
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174434.398142
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174434.177697
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174434.040595
+          }
+        ]
+      },
+      "performanceAfter": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174577.960287
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 132
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 266
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1220
+          },
+          {
+            "name": "Resources",
+            "value": 231
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 468
+          },
+          {
+            "name": "LayoutCount",
+            "value": 42
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 743
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.050929
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.118644
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.047439
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.572406
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 2.313647
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 1.524229
+          },
+          {
+            "name": "ThreadTime",
+            "value": 2.325355
+          },
+          {
+            "name": "ProcessTime",
+            "value": 5.053757
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 8155512
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 10223616
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174434.398142
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174434.177697
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174434.040595
+          }
+        ]
+      }
+    },
+    {
+      "instrumented": true,
+      "round": 2,
+      "visible": false,
+      "before": {
+        "utc": "2026-11-02T10:08:19.3614044Z",
+        "time": 1793614099363,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 5.15625,
+            "logical_read": 63150777,
+            "private": 15896576,
+            "working": 58638336
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 3.6875,
+            "logical_read": 64862592,
+            "private": 42401792,
+            "working": 139833344
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6710,
+            "private": 2961408,
+            "working": 13647872
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 4.828125,
+            "logical_read": 29352205,
+            "private": 81018880,
+            "working": 83869696
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.59375,
+            "logical_read": 2513743,
+            "private": 12402688,
+            "working": 42504192
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 29960,
+            "private": 7741440,
+            "working": 21241856
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 5.953125,
+            "logical_read": 1969959,
+            "private": 76685312,
+            "working": 126894080
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 28956,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 41200,
+            "Name": "rustc.exe"
+          }
+        ]
+      },
+      "after": {
+        "utc": "2026-11-02T10:08:51.0044981Z",
+        "time": 1793614131006,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 5.1875,
+            "logical_read": 63154209,
+            "private": 15896576,
+            "working": 58638336
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 3.75,
+            "logical_read": 64888584,
+            "private": 42397696,
+            "working": 139829248
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6710,
+            "private": 2961408,
+            "working": 13647872
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 4.828125,
+            "logical_read": 29352205,
+            "private": 81014784,
+            "working": 83865600
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.609375,
+            "logical_read": 2533711,
+            "private": 12398592,
+            "working": 42500096
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 29960,
+            "private": 7741440,
+            "working": 21241856
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 5.984375,
+            "logical_read": 1978567,
+            "private": 76980224,
+            "working": 127062016
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": []
+      },
+      "start": {
+        "hidden": false,
+        "body": 339,
+        "animations": [],
+        "stats": {
+          "timers": [
+            {
+              "kind": "setInterval",
+              "delay": 10000,
+              "fires": 16,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:70796)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 1000,
+              "fires": 162,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:71074)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 500,
+              "fires": 1,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:104:125543\n    at http://tauri.localhost/assets/index-B_QZoswO.js:104:22458\n    at <anonymous>:13:99"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 2000,
+              "fires": 80,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:115:119032\n    at Hi (http://tauri.localhost/assets/index-B_QZoswO.js:2:25373)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:3:8093\n    at Pi (http://tauri.localhost/assets/index-B_QZoswO.js:2:23085)\n    at Ri (http://tauri.localhost/assets/index-B_QZoswO.js:2:24260)"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 0,
+              "fires": 1,
+              "stack": "    at HTMLDivElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)"
+            }
+          ],
+          "frames": 332,
+          "rpc": {
+            "appearance_read": 3,
+            "document_window_target": 1,
+            "plugin:event|listen": 12,
+            "plugin:window|is_visible": 1,
+            "plugin:window|is_minimized": 1,
+            "settings_get": 1,
+            "activity": 106,
+            "window_observe": 5,
+            "operation_events": 106,
+            "keybindings_get": 1,
+            "window_snapshot": 4,
+            "projects": 21,
+            "graph_physical": 1,
+            "graph_status": 49,
+            "new_topics_list": 21,
+            "audit_list": 8,
+            "project_observe": 16,
+            "plugin:event|unlisten": 2
+          },
+          "workers": {
+            "sent": {
+              "hold": 5,
+              "forces": 1,
+              "ack": 312,
+              "graph": 1,
+              "place": 1,
+              "settle": 1,
+              "heat": 1
+            },
+            "received": {
+              "pos": 312
+            }
+          }
+        }
+      },
+      "end": {
+        "hidden": false,
+        "body": 339,
+        "animations": [],
+        "stats": {
+          "timers": [
+            {
+              "kind": "setInterval",
+              "delay": 10000,
+              "fires": 19,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:70796)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 1000,
+              "fires": 192,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:71074)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 500,
+              "fires": 1,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:104:125543\n    at http://tauri.localhost/assets/index-B_QZoswO.js:104:22458\n    at <anonymous>:13:99"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 2000,
+              "fires": 96,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:115:119032\n    at Hi (http://tauri.localhost/assets/index-B_QZoswO.js:2:25373)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:3:8093\n    at Pi (http://tauri.localhost/assets/index-B_QZoswO.js:2:23085)\n    at Ri (http://tauri.localhost/assets/index-B_QZoswO.js:2:24260)"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 0,
+              "fires": 1,
+              "stack": "    at HTMLDivElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)"
+            }
+          ],
+          "frames": 332,
+          "rpc": {
+            "appearance_read": 3,
+            "document_window_target": 1,
+            "plugin:event|listen": 12,
+            "plugin:window|is_visible": 1,
+            "plugin:window|is_minimized": 1,
+            "settings_get": 1,
+            "activity": 109,
+            "window_observe": 5,
+            "operation_events": 109,
+            "keybindings_get": 1,
+            "window_snapshot": 4,
+            "projects": 21,
+            "graph_physical": 1,
+            "graph_status": 49,
+            "new_topics_list": 21,
+            "audit_list": 8,
+            "project_observe": 19,
+            "plugin:event|unlisten": 2
+          },
+          "workers": {
+            "sent": {
+              "hold": 5,
+              "forces": 1,
+              "ack": 312,
+              "graph": 1,
+              "place": 1,
+              "settle": 1,
+              "heat": 1
+            },
+            "received": {
+              "pos": 312
+            }
+          }
+        }
+      },
+      "performanceBefore": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174596.384922
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 132
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 266
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1220
+          },
+          {
+            "name": "Resources",
+            "value": 245
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 496
+          },
+          {
+            "name": "LayoutCount",
+            "value": 42
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 743
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.050929
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.118644
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.049086
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.574115
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 2.328191
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 1.535417
+          },
+          {
+            "name": "ThreadTime",
+            "value": 2.341134
+          },
+          {
+            "name": "ProcessTime",
+            "value": 5.072564
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 8361764
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 10223616
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174434.398142
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174434.177697
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174434.040595
+          }
+        ]
+      },
+      "performanceAfter": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174626.391158
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 132
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 266
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1220
+          },
+          {
+            "name": "Resources",
+            "value": 254
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 514
+          },
+          {
+            "name": "LayoutCount",
+            "value": 42
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 743
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.050929
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.118644
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.049182
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.57607
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 2.339811
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 1.544986
+          },
+          {
+            "name": "ThreadTime",
+            "value": 2.354401
+          },
+          {
+            "name": "ProcessTime",
+            "value": 5.08752
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 8479832
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 10485760
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174434.398142
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174434.177697
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174434.040595
+          }
+        ]
+      }
+    },
+    {
+      "instrumented": true,
+      "round": 3,
+      "visible": true,
+      "before": {
+        "utc": "2026-11-02T10:09:07.7420700Z",
+        "time": 1793614147743,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 5.484375,
+            "logical_read": 67062916,
+            "private": 17293312,
+            "working": 59383808
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 3.859375,
+            "logical_read": 65367672,
+            "private": 42663936,
+            "working": 140120064
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6710,
+            "private": 2957312,
+            "working": 13643776
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 5.9375,
+            "logical_read": 36748813,
+            "private": 81506304,
+            "working": 84283392
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.625,
+            "logical_read": 2650223,
+            "private": 12386304,
+            "working": 42577920
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 29960,
+            "private": 7741440,
+            "working": 21241856
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 6.109375,
+            "logical_read": 2169959,
+            "private": 77500416,
+            "working": 127840256
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": []
+      },
+      "after": {
+        "utc": "2026-11-02T10:09:40.4978897Z",
+        "time": 1793614180500,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 5.921875,
+            "logical_read": 72924944,
+            "private": 15990784,
+            "working": 58695680
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 4.015625,
+            "logical_read": 66129664,
+            "private": 42635264,
+            "working": 140111872
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6710,
+            "private": 2908160,
+            "working": 13619200
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 5.9375,
+            "logical_read": 36811997,
+            "private": 82079744,
+            "working": 84729856
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.671875,
+            "logical_read": 2841303,
+            "private": 12386304,
+            "working": 42577920
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 29960,
+            "private": 7741440,
+            "working": 21241856
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 6.390625,
+            "logical_read": 2265047,
+            "private": 75943936,
+            "working": 126795776
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 28204,
+            "Name": "cargo.exe"
+          }
+        ]
+      },
+      "start": {
+        "hidden": false,
+        "body": 339,
+        "animations": [],
+        "stats": {
+          "timers": [
+            {
+              "kind": "setInterval",
+              "delay": 10000,
+              "fires": 21,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:70796)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 1000,
+              "fires": 210,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:71074)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 500,
+              "fires": 1,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:104:125543\n    at http://tauri.localhost/assets/index-B_QZoswO.js:104:22458\n    at <anonymous>:13:99"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 2000,
+              "fires": 105,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:115:119032\n    at Hi (http://tauri.localhost/assets/index-B_QZoswO.js:2:25373)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:3:8093\n    at Pi (http://tauri.localhost/assets/index-B_QZoswO.js:2:23085)\n    at Ri (http://tauri.localhost/assets/index-B_QZoswO.js:2:24260)"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 0,
+              "fires": 1,
+              "stack": "    at HTMLDivElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)"
+            }
+          ],
+          "frames": 335,
+          "rpc": {
+            "appearance_read": 4,
+            "document_window_target": 1,
+            "plugin:event|listen": 13,
+            "plugin:window|is_visible": 1,
+            "plugin:window|is_minimized": 1,
+            "settings_get": 1,
+            "activity": 127,
+            "window_observe": 6,
+            "operation_events": 127,
+            "keybindings_get": 1,
+            "window_snapshot": 6,
+            "projects": 25,
+            "graph_physical": 1,
+            "graph_status": 58,
+            "new_topics_list": 25,
+            "audit_list": 10,
+            "project_observe": 21,
+            "plugin:event|unlisten": 2
+          },
+          "workers": {
+            "sent": {
+              "hold": 6,
+              "forces": 1,
+              "ack": 312,
+              "graph": 1,
+              "place": 1,
+              "settle": 1,
+              "heat": 1
+            },
+            "received": {
+              "pos": 312
+            }
+          }
+        }
+      },
+      "end": {
+        "hidden": false,
+        "body": 339,
+        "animations": [],
+        "stats": {
+          "timers": [
+            {
+              "kind": "setInterval",
+              "delay": 10000,
+              "fires": 24,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:70796)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 1000,
+              "fires": 240,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:71074)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 500,
+              "fires": 1,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:104:125543\n    at http://tauri.localhost/assets/index-B_QZoswO.js:104:22458\n    at <anonymous>:13:99"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 2000,
+              "fires": 120,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:115:119032\n    at Hi (http://tauri.localhost/assets/index-B_QZoswO.js:2:25373)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:3:8093\n    at Pi (http://tauri.localhost/assets/index-B_QZoswO.js:2:23085)\n    at Ri (http://tauri.localhost/assets/index-B_QZoswO.js:2:24260)"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 0,
+              "fires": 1,
+              "stack": "    at HTMLDivElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 0,
+              "fires": 1,
+              "stack": "    at HTMLDivElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 0,
+              "fires": 1,
+              "stack": "    at HTMLCanvasElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)\n    at HTMLCanvasElement.i (http://tauri.localhost/assets/index-B_QZoswO.js:2:26405)"
+            }
+          ],
+          "frames": 336,
+          "rpc": {
+            "appearance_read": 4,
+            "document_window_target": 1,
+            "plugin:event|listen": 13,
+            "plugin:window|is_visible": 1,
+            "plugin:window|is_minimized": 1,
+            "settings_get": 1,
+            "activity": 157,
+            "window_observe": 6,
+            "operation_events": 157,
+            "keybindings_get": 1,
+            "window_snapshot": 6,
+            "projects": 31,
+            "graph_physical": 1,
+            "graph_status": 73,
+            "new_topics_list": 31,
+            "audit_list": 12,
+            "project_observe": 24,
+            "plugin:event|unlisten": 2
+          },
+          "workers": {
+            "sent": {
+              "hold": 6,
+              "forces": 1,
+              "ack": 312,
+              "graph": 1,
+              "place": 1,
+              "settle": 1,
+              "heat": 1
+            },
+            "received": {
+              "pos": 312
+            }
+          }
+        }
+      },
+      "performanceBefore": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174644.750666
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 132
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 270
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1220
+          },
+          {
+            "name": "Resources",
+            "value": 317
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 641
+          },
+          {
+            "name": "LayoutCount",
+            "value": 44
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 748
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.051144
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.119211
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.051296
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.585594
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 2.418584
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 1.611339
+          },
+          {
+            "name": "ThreadTime",
+            "value": 2.447232
+          },
+          {
+            "name": "ProcessTime",
+            "value": 5.360697
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 9224340
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 10223616
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174434.398142
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174434.177697
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174434.040595
+          }
+        ]
+      },
+      "performanceAfter": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174674.793514
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 132
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 262
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1220
+          },
+          {
+            "name": "Resources",
+            "value": 62
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 129
+          },
+          {
+            "name": "LayoutCount",
+            "value": 44
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 754
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.051144
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.120049
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.051407
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.604369
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 2.581044
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 1.754075
+          },
+          {
+            "name": "ThreadTime",
+            "value": 2.600514
+          },
+          {
+            "name": "ProcessTime",
+            "value": 5.566079
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 6353928
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 10223616
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174434.398142
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174434.177697
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174434.040595
+          }
+        ]
+      }
+    },
+    {
+      "instrumented": true,
+      "round": 3,
+      "visible": false,
+      "before": {
+        "utc": "2026-11-02T10:09:57.5775712Z",
+        "time": 1793614197579,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 5.9375,
+            "logical_read": 72979220,
+            "private": 15753216,
+            "working": 58544128
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 4.03125,
+            "logical_read": 66163640,
+            "private": 42237952,
+            "working": 139714560
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6710,
+            "private": 2908160,
+            "working": 13619200
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 5.953125,
+            "logical_read": 36811997,
+            "private": 81649664,
+            "working": 84361216
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.703125,
+            "logical_read": 2869159,
+            "private": 12386304,
+            "working": 42577920
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 29960,
+            "private": 7741440,
+            "working": 21241856
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 6.4375,
+            "logical_read": 2276279,
+            "private": 75956224,
+            "working": 126808064
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 7764,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 45372,
+            "Name": "cargo.exe"
+          }
+        ]
+      },
+      "after": {
+        "utc": "2026-11-02T10:10:29.1858553Z",
+        "time": 1793614229187,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 5.96875,
+            "logical_read": 72983324,
+            "private": 15818752,
+            "working": 58593280
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 4.03125,
+            "logical_read": 66193104,
+            "private": 42237952,
+            "working": 139714560
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6710,
+            "private": 2908160,
+            "working": 13619200
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 5.953125,
+            "logical_read": 36811997,
+            "private": 81649664,
+            "working": 84361216
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.703125,
+            "logical_read": 2893399,
+            "private": 12361728,
+            "working": 42536960
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 29960,
+            "private": 7741440,
+            "working": 21241856
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 6.4375,
+            "logical_read": 2285943,
+            "private": 75972608,
+            "working": 126590976
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 7764,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 45372,
+            "Name": "cargo.exe"
+          }
+        ]
+      },
+      "start": {
+        "hidden": false,
+        "body": 339,
+        "animations": [],
+        "stats": {
+          "timers": [
+            {
+              "kind": "setInterval",
+              "delay": 10000,
+              "fires": 26,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:70796)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 1000,
+              "fires": 260,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:71074)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 500,
+              "fires": 1,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:104:125543\n    at http://tauri.localhost/assets/index-B_QZoswO.js:104:22458\n    at <anonymous>:13:99"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 2000,
+              "fires": 130,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:115:119032\n    at Hi (http://tauri.localhost/assets/index-B_QZoswO.js:2:25373)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:3:8093\n    at Pi (http://tauri.localhost/assets/index-B_QZoswO.js:2:23085)\n    at Ri (http://tauri.localhost/assets/index-B_QZoswO.js:2:24260)"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 0,
+              "fires": 1,
+              "stack": "    at HTMLDivElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 0,
+              "fires": 1,
+              "stack": "    at HTMLDivElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 0,
+              "fires": 1,
+              "stack": "    at HTMLCanvasElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)\n    at HTMLCanvasElement.i (http://tauri.localhost/assets/index-B_QZoswO.js:2:26405)"
+            }
+          ],
+          "frames": 336,
+          "rpc": {
+            "appearance_read": 4,
+            "document_window_target": 1,
+            "plugin:event|listen": 13,
+            "plugin:window|is_visible": 1,
+            "plugin:window|is_minimized": 1,
+            "settings_get": 1,
+            "activity": 162,
+            "window_observe": 7,
+            "operation_events": 162,
+            "keybindings_get": 1,
+            "window_snapshot": 6,
+            "projects": 32,
+            "graph_physical": 1,
+            "graph_status": 74,
+            "new_topics_list": 32,
+            "audit_list": 12,
+            "project_observe": 26,
+            "plugin:event|unlisten": 3
+          },
+          "workers": {
+            "sent": {
+              "hold": 7,
+              "forces": 1,
+              "ack": 312,
+              "graph": 1,
+              "place": 1,
+              "settle": 1,
+              "heat": 1
+            },
+            "received": {
+              "pos": 312
+            }
+          }
+        }
+      },
+      "end": {
+        "hidden": false,
+        "body": 339,
+        "animations": [],
+        "stats": {
+          "timers": [
+            {
+              "kind": "setInterval",
+              "delay": 10000,
+              "fires": 29,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:70796)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 1000,
+              "fires": 290,
+              "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:71074)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 500,
+              "fires": 1,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:104:125543\n    at http://tauri.localhost/assets/index-B_QZoswO.js:104:22458\n    at <anonymous>:13:99"
+            },
+            {
+              "kind": "setInterval",
+              "delay": 2000,
+              "fires": 145,
+              "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:115:119032\n    at Hi (http://tauri.localhost/assets/index-B_QZoswO.js:2:25373)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:3:8093\n    at Pi (http://tauri.localhost/assets/index-B_QZoswO.js:2:23085)\n    at Ri (http://tauri.localhost/assets/index-B_QZoswO.js:2:24260)"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 0,
+              "fires": 1,
+              "stack": "    at HTMLDivElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 0,
+              "fires": 1,
+              "stack": "    at HTMLDivElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)"
+            },
+            {
+              "kind": "setTimeout",
+              "delay": 0,
+              "fires": 1,
+              "stack": "    at HTMLCanvasElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)\n    at HTMLCanvasElement.i (http://tauri.localhost/assets/index-B_QZoswO.js:2:26405)"
+            }
+          ],
+          "frames": 336,
+          "rpc": {
+            "appearance_read": 4,
+            "document_window_target": 1,
+            "plugin:event|listen": 13,
+            "plugin:window|is_visible": 1,
+            "plugin:window|is_minimized": 1,
+            "settings_get": 1,
+            "activity": 165,
+            "window_observe": 7,
+            "operation_events": 165,
+            "keybindings_get": 1,
+            "window_snapshot": 6,
+            "projects": 32,
+            "graph_physical": 1,
+            "graph_status": 74,
+            "new_topics_list": 32,
+            "audit_list": 12,
+            "project_observe": 29,
+            "plugin:event|unlisten": 3
+          },
+          "workers": {
+            "sent": {
+              "hold": 7,
+              "forces": 1,
+              "ack": 312,
+              "graph": 1,
+              "place": 1,
+              "settle": 1,
+              "heat": 1
+            },
+            "received": {
+              "pos": 312
+            }
+          }
+        }
+      },
+      "performanceBefore": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174694.624367
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 132
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 262
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1220
+          },
+          {
+            "name": "Resources",
+            "value": 80
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 165
+          },
+          {
+            "name": "LayoutCount",
+            "value": 44
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 754
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.051144
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.120049
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.053742
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.60785
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 2.608915
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 1.77613
+          },
+          {
+            "name": "ThreadTime",
+            "value": 2.628236
+          },
+          {
+            "name": "ProcessTime",
+            "value": 5.59811
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 6636248
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 10485760
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174434.398142
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174434.177697
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174434.040595
+          }
+        ]
+      },
+      "performanceAfter": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174724.637001
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 132
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 262
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1220
+          },
+          {
+            "name": "Resources",
+            "value": 89
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 183
+          },
+          {
+            "name": "LayoutCount",
+            "value": 44
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 754
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.051144
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.120049
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.053826
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.609794
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 2.62142
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 1.786607
+          },
+          {
+            "name": "ThreadTime",
+            "value": 2.642263
+          },
+          {
+            "name": "ProcessTime",
+            "value": 5.614666
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 6491436
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 11010048
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174434.398142
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174434.177697
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174434.040595
+          }
+        ]
+      }
     }
   ],
   "runtime": {
@@ -2254,5 +7408,429 @@
   "corpus_hash": "704ea107bdc5dc42dabf2802ccd72aa6cd6e639c7603071fdd8811d691b09434",
   "fixture": {
     "tree_documents": 100
-  }
+  },
+  "instrument_sha256": "438056d375dbbeaff27f3b937c2d1cfbc8944f3f4c443d35dd82518a5de7ff85",
+  "cpu_profiles": [
+    {
+      "visible": true,
+      "file": "cpu-visible.cpuprofile",
+      "samples": 6525,
+      "top": [
+        {
+          "frame": {
+            "functionName": "(idle)",
+            "scriptId": "0",
+            "url": "",
+            "lineNumber": -1,
+            "columnNumber": -1
+          },
+          "samples": 6505
+        },
+        {
+          "frame": {
+            "functionName": "(program)",
+            "scriptId": "0",
+            "url": "",
+            "lineNumber": -1,
+            "columnNumber": -1
+          },
+          "samples": 11
+        },
+        {
+          "frame": {
+            "functionName": "n",
+            "scriptId": "14",
+            "url": "http://tauri.localhost/assets/index-B_QZoswO.js",
+            "lineNumber": 114,
+            "columnNumber": 162938
+          },
+          "samples": 3
+        },
+        {
+          "frame": {
+            "functionName": "Pi",
+            "scriptId": "14",
+            "url": "http://tauri.localhost/assets/index-B_QZoswO.js",
+            "lineNumber": 1,
+            "columnNumber": 22887
+          },
+          "samples": 1
+        },
+        {
+          "frame": {
+            "functionName": "window.fetch",
+            "scriptId": "47",
+            "url": "",
+            "lineNumber": 22,
+            "columnNumber": 17
+          },
+          "samples": 1
+        },
+        {
+          "frame": {
+            "functionName": "uid",
+            "scriptId": "8",
+            "url": "",
+            "lineNumber": 247,
+            "columnNumber": 14
+          },
+          "samples": 1
+        },
+        {
+          "frame": {
+            "functionName": "json",
+            "scriptId": "0",
+            "url": "",
+            "lineNumber": -1,
+            "columnNumber": -1
+          },
+          "samples": 1
+        },
+        {
+          "frame": {
+            "functionName": "",
+            "scriptId": "14",
+            "url": "http://tauri.localhost/assets/index-B_QZoswO.js",
+            "lineNumber": 2,
+            "columnNumber": 11190
+          },
+          "samples": 1
+        },
+        {
+          "frame": {
+            "functionName": "(garbage collector)",
+            "scriptId": "0",
+            "url": "",
+            "lineNumber": -1,
+            "columnNumber": -1
+          },
+          "samples": 1
+        },
+        {
+          "frame": {
+            "functionName": "(root)",
+            "scriptId": "0",
+            "url": "",
+            "lineNumber": -1,
+            "columnNumber": -1
+          },
+          "samples": 0
+        },
+        {
+          "frame": {
+            "functionName": "",
+            "scriptId": "14",
+            "url": "http://tauri.localhost/assets/index-B_QZoswO.js",
+            "lineNumber": 1,
+            "columnNumber": 5797
+          },
+          "samples": 0
+        },
+        {
+          "frame": {
+            "functionName": "",
+            "scriptId": "14",
+            "url": "http://tauri.localhost/assets/index-B_QZoswO.js",
+            "lineNumber": 1,
+            "columnNumber": 12856
+          },
+          "samples": 0
+        }
+      ]
+    },
+    {
+      "visible": false,
+      "file": "cpu-hidden.cpuprofile",
+      "samples": 6538,
+      "top": [
+        {
+          "frame": {
+            "functionName": "(idle)",
+            "scriptId": "0",
+            "url": "",
+            "lineNumber": -1,
+            "columnNumber": -1
+          },
+          "samples": 6535
+        },
+        {
+          "frame": {
+            "functionName": "(program)",
+            "scriptId": "0",
+            "url": "",
+            "lineNumber": -1,
+            "columnNumber": -1
+          },
+          "samples": 3
+        },
+        {
+          "frame": {
+            "functionName": "(root)",
+            "scriptId": "0",
+            "url": "",
+            "lineNumber": -1,
+            "columnNumber": -1
+          },
+          "samples": 0
+        }
+      ]
+    }
+  ],
+  "returned": {
+    "hidden": false,
+    "body": 339,
+    "stats": {
+      "timers": [
+        {
+          "kind": "setInterval",
+          "delay": 10000,
+          "fires": 32,
+          "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:70796)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+        },
+        {
+          "kind": "setInterval",
+          "delay": 1000,
+          "fires": 324,
+          "stack": "    at Object.start (http://tauri.localhost/assets/index-B_QZoswO.js:3:71074)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:118:29391"
+        },
+        {
+          "kind": "setTimeout",
+          "delay": 500,
+          "fires": 1,
+          "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:104:125543\n    at http://tauri.localhost/assets/index-B_QZoswO.js:104:22458\n    at <anonymous>:13:99"
+        },
+        {
+          "kind": "setInterval",
+          "delay": 2000,
+          "fires": 161,
+          "stack": "    at http://tauri.localhost/assets/index-B_QZoswO.js:115:119032\n    at Hi (http://tauri.localhost/assets/index-B_QZoswO.js:2:25373)\n    at http://tauri.localhost/assets/index-B_QZoswO.js:3:8093\n    at Pi (http://tauri.localhost/assets/index-B_QZoswO.js:2:23085)\n    at Ri (http://tauri.localhost/assets/index-B_QZoswO.js:2:24260)"
+        },
+        {
+          "kind": "setTimeout",
+          "delay": 0,
+          "fires": 1,
+          "stack": "    at HTMLDivElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)"
+        },
+        {
+          "kind": "setTimeout",
+          "delay": 0,
+          "fires": 1,
+          "stack": "    at HTMLDivElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)"
+        },
+        {
+          "kind": "setTimeout",
+          "delay": 0,
+          "fires": 1,
+          "stack": "    at HTMLCanvasElement.ta (http://tauri.localhost/assets/index-B_QZoswO.js:2:27061)\n    at HTMLCanvasElement.i (http://tauri.localhost/assets/index-B_QZoswO.js:2:26405)"
+        }
+      ],
+      "frames": 342,
+      "rpc": {
+        "appearance_read": 6,
+        "document_window_target": 1,
+        "plugin:event|listen": 15,
+        "plugin:window|is_visible": 1,
+        "plugin:window|is_minimized": 1,
+        "settings_get": 1,
+        "activity": 186,
+        "window_observe": 10,
+        "operation_events": 186,
+        "keybindings_get": 1,
+        "window_snapshot": 10,
+        "projects": 38,
+        "graph_physical": 1,
+        "graph_status": 83,
+        "new_topics_list": 38,
+        "audit_list": 15,
+        "project_observe": 32,
+        "plugin:event|unlisten": 4
+      },
+      "workers": {
+        "sent": {
+          "hold": 10,
+          "forces": 1,
+          "ack": 312,
+          "graph": 1,
+          "place": 1,
+          "settle": 1,
+          "heat": 1
+        },
+        "received": {
+          "pos": 312
+        }
+      }
+    }
+  },
+  "fault_injection": {
+    "kind": "CDP Browser.crash; only this isolated browser",
+    "before": {
+      "utc": "2026-11-02T10:11:02.8616530Z",
+      "time": 1793614262863,
+      "logical_processors": 16,
+      "processes": [
+        {
+          "pid": 35504,
+          "parent": 30936,
+          "role": "native",
+          "start_utc": "2026-11-02T10:00:27.7496496Z",
+          "cpu": 6.4375,
+          "logical_read": 78860746,
+          "private": 16506880,
+          "working": 59224064
+        },
+        {
+          "pid": 55004,
+          "parent": 35504,
+          "role": "browser",
+          "start_utc": "2026-11-02T10:00:29.2327681Z",
+          "cpu": 4.25,
+          "logical_read": 66970512,
+          "private": 42147840,
+          "working": 139624448
+        },
+        {
+          "pid": 48280,
+          "parent": 55004,
+          "role": "crashpad-handler",
+          "start_utc": "2026-11-02T10:00:29.2608291Z",
+          "cpu": 0.046875,
+          "logical_read": 6710,
+          "private": 2981888,
+          "working": 13672448
+        },
+        {
+          "pid": 32716,
+          "parent": 55004,
+          "role": "gpu-process",
+          "start_utc": "2026-11-02T10:00:29.4077019Z",
+          "cpu": 6.15625,
+          "logical_read": 45455373,
+          "private": 88072192,
+          "working": 85831680
+        },
+        {
+          "pid": 38344,
+          "parent": 55004,
+          "role": "utility",
+          "start_utc": "2026-11-02T10:00:29.4112885Z",
+          "cpu": 0.75,
+          "logical_read": 3074039,
+          "private": 12234752,
+          "working": 42426368
+        },
+        {
+          "pid": 40836,
+          "parent": 55004,
+          "role": "utility",
+          "start_utc": "2026-11-02T10:00:29.4641880Z",
+          "cpu": 0.09375,
+          "logical_read": 30072,
+          "private": 7880704,
+          "working": 21331968
+        },
+        {
+          "pid": 29416,
+          "parent": 55004,
+          "role": "renderer",
+          "start_utc": "2026-11-02T10:00:29.5892621Z",
+          "cpu": 7.015625,
+          "logical_read": 2528647,
+          "private": 78344192,
+          "working": 129306624
+        }
+      ],
+      "windows": [
+        {
+          "Handle": 16651554,
+          "Title": "bars - �஢�ઠ �த�⮢�� �������",
+          "Visible": true,
+          "Minimized": false
+        },
+        {
+          "Handle": 27073100,
+          "Title": "MSCTFIME UI",
+          "Visible": false,
+          "Minimized": false
+        },
+        {
+          "Handle": 23467594,
+          "Title": "Default IME",
+          "Visible": false,
+          "Minimized": false
+        }
+      ],
+      "compilers": [
+        {
+          "ProcessId": 39588,
+          "Name": "cargo.exe"
+        },
+        {
+          "ProcessId": 32308,
+          "Name": "rustc.exe"
+        },
+        {
+          "ProcessId": 42384,
+          "Name": "rustc.exe"
+        }
+      ]
+    },
+    "after": {
+      "utc": "2026-11-02T10:11:09.3120522Z",
+      "time": 1793614269314,
+      "logical_processors": 16,
+      "processes": [
+        {
+          "pid": 35504,
+          "parent": 30936,
+          "role": "native",
+          "start_utc": "2026-11-02T10:00:27.7496496Z",
+          "cpu": 6.484375,
+          "logical_read": 78860746,
+          "private": 16441344,
+          "working": 59109376
+        }
+      ],
+      "windows": [
+        {
+          "Handle": 16651554,
+          "Title": "bars - �஢�ઠ �த�⮢�� �������",
+          "Visible": true,
+          "Minimized": false
+        },
+        {
+          "Handle": 23467594,
+          "Title": "Default IME",
+          "Visible": false,
+          "Minimized": false
+        },
+        {
+          "Handle": 27073100,
+          "Title": "MSCTFIME UI",
+          "Visible": false,
+          "Minimized": false
+        }
+      ],
+      "compilers": [
+        {
+          "ProcessId": 39588,
+          "Name": "cargo.exe"
+        },
+        {
+          "ProcessId": 32308,
+          "Name": "rustc.exe"
+        },
+        {
+          "ProcessId": 41064,
+          "Name": "rustc.exe"
+        },
+        {
+          "ProcessId": 30368,
+          "Name": "link.exe"
+        }
+      ]
+    },
+    "host_survived": true
+  },
+  "source_commit_is_exact": false,
+  "source_note": "Checkout HEAD at launch; shared dirty tree. Executable and loaded JS SHA-256 identify the measured artifacts."
 }

@@ -1,0 +1,159 @@
+{
+  "success": true,
+  "root_pid": 20928,
+  "exe_sha256": "0da5a2289fea443132e0e6cafb196930283325ff8032a10bdc9479a79a8183f0",
+  "source_commit": "69b967b5267a31a50fea3838acf2c8d61e106394",
+  "documents": 100,
+  "profile": "debug/FakeProvider; own loopback CDP",
+  "samples": [],
+  "source_commit_is_exact": false,
+  "source_note": "Checkout HEAD at launch; shared dirty tree. Executable and loaded JS SHA-256 identify the measured artifacts.",
+  "runtime": {
+    "protocolVersion": "1.3",
+    "product": "Edg/156.0.4314.58",
+    "revision": "@7806b68d20d1c1273d5b07b4f4de18e8f5852581",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+    "jsVersion": "15.6.12.10"
+  },
+  "loaded_assets": [
+    {
+      "url": "http://tauri.localhost/assets/dist-qcFAPh7Z.js",
+      "sha256": "2ba9a208d48bb70320e821ea35a86c05af88950c0da1a6e6d75dd617e029a9fd"
+    },
+    {
+      "url": "http://tauri.localhost/assets/window-cY2cn3Cx.js",
+      "sha256": "2e2a5102c3799e6d5063dfdbc89a2d80737661a00fff43f2caa95110de27948d"
+    },
+    {
+      "url": "http://tauri.localhost/assets/index-B_QZoswO.js",
+      "sha256": "e0f56c1389090b2ea8b951391cd3559e6502da2154c1dfbff18940ce673696f5"
+    },
+    {
+      "url": "http://tauri.localhost/assets/core-CwBWH9_g.js",
+      "sha256": "747d7aa5e025963e2a521eb55b61b9c50bcda50475e4f9cc12cc251a9b0c9f64"
+    },
+    {
+      "url": "http://tauri.localhost/assets/event-D6iU7675.js",
+      "sha256": "17d4e57039ce527e03499c30bfbedb133bd71d51c46b0ce235bc8ce5a44ba015"
+    }
+  ],
+  "corpus_hash": "704ea107bdc5dc42dabf2802ccd72aa6cd6e639c7603071fdd8811d691b09434",
+  "fixture": {
+    "tree_documents": 100
+  },
+  "cpu_profiles": [],
+  "returned": {
+    "hidden": false,
+    "body": 360
+  },
+  "fault_injection": {
+    "kind": "CDP Browser.crash; only this isolated browser",
+    "before": {
+      "utc": "2026-11-02T10:22:25.1598256Z",
+      "time": 1793614945161,
+      "logical_processors": 16,
+      "processes": [
+        {
+          "pid": 20928,
+          "parent": 41836,
+          "role": "native",
+          "start_utc": "2026-11-02T10:22:14.6215603Z",
+          "cpu": 1.0625,
+          "logical_read": 14614038,
+          "private": 16478208,
+          "working": 57921536
+        },
+        {
+          "pid": 53888,
+          "parent": 20928,
+          "role": "browser",
+          "start_utc": "2026-11-02T10:22:14.9251198Z",
+          "cpu": 1.015625,
+          "logical_read": 6687293,
+          "private": 41299968,
+          "working": 122507264
+        },
+        {
+          "pid": 24140,
+          "parent": 53888,
+          "role": "crashpad-handler",
+          "start_utc": "2026-11-02T10:22:14.9804282Z",
+          "cpu": 0,
+          "logical_read": 6450,
+          "private": 2473984,
+          "working": 10518528
+        },
+        {
+          "pid": 56464,
+          "parent": 53888,
+          "role": "gpu-process",
+          "start_utc": "2026-11-02T10:22:15.3288773Z",
+          "cpu": 1.890625,
+          "logical_read": 3957802,
+          "private": 103436288,
+          "working": 83718144
+        },
+        {
+          "pid": 14988,
+          "parent": 53888,
+          "role": "utility",
+          "start_utc": "2026-11-02T10:22:15.3290036Z",
+          "cpu": 0.171875,
+          "logical_read": 641657,
+          "private": 12615680,
+          "working": 41623552
+        },
+        {
+          "pid": 16604,
+          "parent": 53888,
+          "role": "utility",
+          "start_utc": "2026-11-02T10:22:15.3607257Z",
+          "cpu": 0.03125,
+          "logical_read": 28589,
+          "private": 7671808,
+          "working": 20336640
+        },
+        {
+          "pid": 8112,
+          "parent": 53888,
+          "role": "renderer",
+          "start_utc": "2026-11-02T10:22:15.4686835Z",
+          "cpu": 1.046875,
+          "logical_read": 458677,
+          "private": 78286848,
+          "working": 126996480
+        }
+      ],
+      "known_instances": [],
+      "windows": [
+        {
+          "Handle": 1052430,
+          "Title": "bars — проверка продуктовых панелей",
+          "Visible": true,
+          "Minimized": false
+        },
+        {
+          "Handle": 11405088,
+          "Title": "Default IME",
+          "Visible": false,
+          "Minimized": false
+        },
+        {
+          "Handle": 35982112,
+          "Title": "MSCTFIME UI",
+          "Visible": false,
+          "Minimized": false
+        }
+      ],
+      "compilers": [
+        {
+          "ProcessId": 54012,
+          "Name": "cargo.exe"
+        }
+      ]
+    }
+  },
+  "error": "Error: Get-Process: C:\\Users\\arketov\\Desktop\\bars-project\\docs\\knowledge\\webview-lifecycle-2026-11-02\\metrics.ps1:19\r\nLine |\r\n  19 |  $root=Get-Process -Id $RootId\r\n     |        ~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Не удается найти процесс с идентификатором 20928.\r\n",
+  "valid": false,
+  "legacy_success_flag_scope": "Set before the failed post-crash census; not a completed measurement."
+}

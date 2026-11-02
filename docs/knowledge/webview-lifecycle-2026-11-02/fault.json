@@ -1,0 +1,392 @@
+{
+  "success": true,
+  "root_pid": 15064,
+  "exe_sha256": "0da5a2289fea443132e0e6cafb196930283325ff8032a10bdc9479a79a8183f0",
+  "source_commit": "fdfea7395471ee11b1eae628bd861a491a6b256c",
+  "documents": 100,
+  "profile": "debug/FakeProvider; own loopback CDP",
+  "samples": [],
+  "source_commit_is_exact": false,
+  "source_note": "Checkout HEAD at launch; shared dirty tree. Executable and loaded JS SHA-256 identify the measured artifacts.",
+  "runtime": {
+    "protocolVersion": "1.3",
+    "product": "Edg/156.0.4314.58",
+    "revision": "@7806b68d20d1c1273d5b07b4f4de18e8f5852581",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+    "jsVersion": "15.6.12.10"
+  },
+  "loaded_assets": [
+    {
+      "url": "http://tauri.localhost/assets/dist-qcFAPh7Z.js",
+      "sha256": "2ba9a208d48bb70320e821ea35a86c05af88950c0da1a6e6d75dd617e029a9fd"
+    },
+    {
+      "url": "http://tauri.localhost/assets/window-cY2cn3Cx.js",
+      "sha256": "2e2a5102c3799e6d5063dfdbc89a2d80737661a00fff43f2caa95110de27948d"
+    },
+    {
+      "url": "http://tauri.localhost/assets/index-B_QZoswO.js",
+      "sha256": "e0f56c1389090b2ea8b951391cd3559e6502da2154c1dfbff18940ce673696f5"
+    },
+    {
+      "url": "http://tauri.localhost/assets/core-CwBWH9_g.js",
+      "sha256": "747d7aa5e025963e2a521eb55b61b9c50bcda50475e4f9cc12cc251a9b0c9f64"
+    },
+    {
+      "url": "http://tauri.localhost/assets/event-D6iU7675.js",
+      "sha256": "17d4e57039ce527e03499c30bfbedb133bd71d51c46b0ce235bc8ce5a44ba015"
+    }
+  ],
+  "corpus_hash": "704ea107bdc5dc42dabf2802ccd72aa6cd6e639c7603071fdd8811d691b09434",
+  "fixture": {
+    "tree_documents": 100
+  },
+  "cpu_profiles": [],
+  "returned": {
+    "hidden": false,
+    "body": 360
+  },
+  "fault_injection": {
+    "kind": "CDP Browser.crash; only this isolated browser",
+    "before": {
+      "utc": "2026-11-02T10:27:17.4392517Z",
+      "time": 1793615237440,
+      "native_alive": true,
+      "logical_processors": 16,
+      "processes": [
+        {
+          "pid": 15064,
+          "parent": 29084,
+          "role": "native",
+          "start_utc": "2026-11-02T10:27:01.4132363Z",
+          "cpu": 1.34375,
+          "logical_read": 14664446,
+          "private": 14942208,
+          "working": 56995840
+        },
+        {
+          "pid": 45768,
+          "parent": 15064,
+          "role": "browser",
+          "start_utc": "2026-11-02T10:27:02.0846791Z",
+          "cpu": 1.109375,
+          "logical_read": 6667002,
+          "private": 40202240,
+          "working": 118108160
+        },
+        {
+          "pid": 12940,
+          "parent": 45768,
+          "role": "crashpad-handler",
+          "start_utc": "2026-11-02T10:27:02.1193947Z",
+          "cpu": 0.015625,
+          "logical_read": 6691,
+          "private": 2469888,
+          "working": 10514432
+        },
+        {
+          "pid": 47308,
+          "parent": 45768,
+          "role": "gpu-process",
+          "start_utc": "2026-11-02T10:27:02.3507240Z",
+          "cpu": 1.078125,
+          "logical_read": 3948448,
+          "private": 105771008,
+          "working": 83447808
+        },
+        {
+          "pid": 60888,
+          "parent": 45768,
+          "role": "utility",
+          "start_utc": "2026-11-02T10:27:02.3547987Z",
+          "cpu": 0.1875,
+          "logical_read": 637613,
+          "private": 12414976,
+          "working": 39960576
+        },
+        {
+          "pid": 41532,
+          "parent": 45768,
+          "role": "utility",
+          "start_utc": "2026-11-02T10:27:02.4469521Z",
+          "cpu": 0.0625,
+          "logical_read": 28892,
+          "private": 7680000,
+          "working": 20353024
+        },
+        {
+          "pid": 12320,
+          "parent": 45768,
+          "role": "renderer",
+          "start_utc": "2026-11-02T10:27:02.7309387Z",
+          "cpu": 1.28125,
+          "logical_read": 463885,
+          "private": 75440128,
+          "working": 124497920
+        }
+      ],
+      "known_instances": [],
+      "windows": [
+        {
+          "Handle": 1578386,
+          "Title": "bars — проверка продуктовых панелей",
+          "Visible": true,
+          "Minimized": false
+        },
+        {
+          "Handle": 4331298,
+          "Title": "MSCTFIME UI",
+          "Visible": false,
+          "Minimized": false
+        },
+        {
+          "Handle": 2167104,
+          "Title": "Default IME",
+          "Visible": false,
+          "Minimized": false
+        }
+      ],
+      "compilers": [
+        {
+          "ProcessId": 49768,
+          "Name": "cargo.exe"
+        },
+        {
+          "ProcessId": 31572,
+          "Name": "cargo.exe"
+        },
+        {
+          "ProcessId": 43156,
+          "Name": "cargo.exe"
+        },
+        {
+          "ProcessId": 35504,
+          "Name": "rustc.exe"
+        },
+        {
+          "ProcessId": 62076,
+          "Name": "link.exe"
+        },
+        {
+          "ProcessId": 60156,
+          "Name": "cargo.exe"
+        }
+      ]
+    },
+    "after": {
+      "utc": "2026-11-02T10:27:23.9832536Z",
+      "time": 1793615243985,
+      "native_alive": true,
+      "logical_processors": 16,
+      "processes": [
+        {
+          "pid": 15064,
+          "parent": 29084,
+          "role": "native",
+          "start_utc": "2026-11-02T10:27:01.4132363Z",
+          "cpu": 1.40625,
+          "logical_read": 14665366,
+          "private": 15007744,
+          "working": 57012224
+        },
+        {
+          "pid": 12940,
+          "parent": 45768,
+          "role": "crashpad-handler",
+          "start_utc": "2026-11-02T10:27:02.1193947Z",
+          "cpu": 0.609375,
+          "logical_read": 8504660,
+          "private": 5914624,
+          "working": 28094464
+        }
+      ],
+      "known_instances": [
+        {
+          "pid": 15064,
+          "role": "native",
+          "expected_start_utc": "2026-11-02T10:27:01.4132363Z",
+          "pid_exists": true,
+          "same_instance": true,
+          "observed_start_utc": "2026-11-02T10:27:01.4132363Z"
+        },
+        {
+          "pid": 45768,
+          "role": "browser",
+          "expected_start_utc": "2026-11-02T10:27:02.0846791Z",
+          "pid_exists": false,
+          "same_instance": false,
+          "observed_start_utc": null
+        },
+        {
+          "pid": 12940,
+          "role": "crashpad-handler",
+          "expected_start_utc": "2026-11-02T10:27:02.1193947Z",
+          "pid_exists": true,
+          "same_instance": true,
+          "observed_start_utc": "2026-11-02T10:27:02.1193947Z"
+        },
+        {
+          "pid": 47308,
+          "role": "gpu-process",
+          "expected_start_utc": "2026-11-02T10:27:02.350724Z",
+          "pid_exists": false,
+          "same_instance": false,
+          "observed_start_utc": null
+        },
+        {
+          "pid": 60888,
+          "role": "utility",
+          "expected_start_utc": "2026-11-02T10:27:02.3547987Z",
+          "pid_exists": false,
+          "same_instance": false,
+          "observed_start_utc": null
+        },
+        {
+          "pid": 41532,
+          "role": "utility",
+          "expected_start_utc": "2026-11-02T10:27:02.4469521Z",
+          "pid_exists": false,
+          "same_instance": false,
+          "observed_start_utc": null
+        },
+        {
+          "pid": 12320,
+          "role": "renderer",
+          "expected_start_utc": "2026-11-02T10:27:02.7309387Z",
+          "pid_exists": false,
+          "same_instance": false,
+          "observed_start_utc": null
+        }
+      ],
+      "windows": [
+        {
+          "Handle": 1578386,
+          "Title": "bars — проверка продуктовых панелей",
+          "Visible": true,
+          "Minimized": false
+        },
+        {
+          "Handle": 4331298,
+          "Title": "MSCTFIME UI",
+          "Visible": false,
+          "Minimized": false
+        },
+        {
+          "Handle": 2167104,
+          "Title": "Default IME",
+          "Visible": false,
+          "Minimized": false
+        }
+      ],
+      "compilers": [
+        {
+          "ProcessId": 49768,
+          "Name": "cargo.exe"
+        },
+        {
+          "ProcessId": 31572,
+          "Name": "cargo.exe"
+        },
+        {
+          "ProcessId": 43156,
+          "Name": "cargo.exe"
+        },
+        {
+          "ProcessId": 35504,
+          "Name": "rustc.exe"
+        },
+        {
+          "ProcessId": 62076,
+          "Name": "link.exe"
+        },
+        {
+          "ProcessId": 60156,
+          "Name": "cargo.exe"
+        }
+      ]
+    },
+    "host_survived": true,
+    "expected_failure_observed": false
+  },
+  "success_means": "Measurement completed; fault outcome and host survival are reported separately.",
+  "cleanup": {
+    "utc": "2026-11-02T10:29:11.3406085Z",
+    "time": 1793615351344,
+    "native_alive": false,
+    "logical_processors": 16,
+    "processes": [],
+    "known_instances": [
+      {
+        "pid": 15064,
+        "role": "native",
+        "expected_start_utc": "2026-11-02T10:27:01.4132363Z",
+        "pid_exists": false,
+        "same_instance": false,
+        "observed_start_utc": null
+      },
+      {
+        "pid": 45768,
+        "role": "browser",
+        "expected_start_utc": "2026-11-02T10:27:02.0846791Z",
+        "pid_exists": false,
+        "same_instance": false,
+        "observed_start_utc": null
+      },
+      {
+        "pid": 12940,
+        "role": "crashpad-handler",
+        "expected_start_utc": "2026-11-02T10:27:02.1193947Z",
+        "pid_exists": false,
+        "same_instance": false,
+        "observed_start_utc": null
+      },
+      {
+        "pid": 47308,
+        "role": "gpu-process",
+        "expected_start_utc": "2026-11-02T10:27:02.350724Z",
+        "pid_exists": false,
+        "same_instance": false,
+        "observed_start_utc": null
+      },
+      {
+        "pid": 60888,
+        "role": "utility",
+        "expected_start_utc": "2026-11-02T10:27:02.3547987Z",
+        "pid_exists": false,
+        "same_instance": false,
+        "observed_start_utc": null
+      },
+      {
+        "pid": 41532,
+        "role": "utility",
+        "expected_start_utc": "2026-11-02T10:27:02.4469521Z",
+        "pid_exists": false,
+        "same_instance": false,
+        "observed_start_utc": null
+      },
+      {
+        "pid": 12320,
+        "role": "renderer",
+        "expected_start_utc": "2026-11-02T10:27:02.7309387Z",
+        "pid_exists": false,
+        "same_instance": false,
+        "observed_start_utc": null
+      }
+    ],
+    "windows": [],
+    "compilers": [
+      {
+        "ProcessId": 60156,
+        "Name": "cargo.exe"
+      },
+      {
+        "ProcessId": 42976,
+        "Name": "cargo.exe"
+      },
+      {
+        "ProcessId": 6092,
+        "Name": "rustc.exe"
+      }
+    ]
+  }
+}

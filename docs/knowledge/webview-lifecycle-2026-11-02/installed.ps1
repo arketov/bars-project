@@ -7,7 +7,8 @@ $before=Snapshot
 $main=@($before.windows|Where-Object Title -eq 'bars')
 if($main.Count -ne 1 -or $main[0].Minimized){throw 'Неоднозначное/минимизированное исходное окно'}
 $initialVisible=$main[0].Visible
-$report=[ordered]@{root=$RootId;exe_sha256=(Get-FileHash -LiteralPath $exe).Hash;initial=$before;samples=@();success=$false}
+$initialMinimized=$main[0].Minimized
+$report=[ordered]@{schema_version=2;root=$RootId;exe_sha256=(Get-FileHash -LiteralPath $exe).Hash;initial=$before;samples=@();success=$false}
 try{
  foreach($round in 1..3){foreach($visible in @($false,$true)){
   $state=Snapshot $(if($visible){'Show'}else{'Hide'})
@@ -16,13 +17,19 @@ try{
   $start=Snapshot
   Start-Sleep -Seconds $Seconds
   $end=Snapshot
-  $report.samples+=@{round=$round;visible=$visible;before=$start;after=$end}
+  $valid=$true
+  foreach($point in @($start,$end)){
+   if(@($point.windows|Where-Object {$_.Title -eq 'bars' -and $_.Visible -eq $visible -and (-not $visible -or -not $_.Minimized)}).Count -ne 1){$valid=$false}
+  }
+  $report.samples+=@{round=$round;visible=$visible;valid=$valid;before=$start;after=$end}
   $report|ConvertTo-Json -Depth 12|Set-Content -LiteralPath $Output -Encoding utf8
  }}
  $report.success=$true
 }finally{
  $report.final=Snapshot $(if($initialVisible){'Show'}else{'Hide'})
- $report.restored=(@($report.final.windows|Where-Object {$_.Title -eq 'bars' -and $_.Visible -eq $initialVisible}).Count -eq 1)
+ $report.restored_visibility=(@($report.final.windows|Where-Object {$_.Title -eq 'bars' -and $_.Visible -eq $initialVisible}).Count -eq 1)
+ $report.restored_minimized=(@($report.final.windows|Where-Object {$_.Title -eq 'bars' -and $_.Minimized -eq $initialMinimized}).Count -eq 1)
+ $report.restored=$report.restored_visibility -and $report.restored_minimized
  $report|ConvertTo-Json -Depth 12|Set-Content -LiteralPath $Output -Encoding utf8
 }
 $since=(Get-Date).AddDays(-3)

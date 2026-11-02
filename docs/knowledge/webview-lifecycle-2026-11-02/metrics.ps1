@@ -1,5 +1,6 @@
-param([Parameter(Mandatory)][int]$RootId, [ValidateSet('Snapshot','Show','Hide')][string]$Action='Snapshot', [string]$ExpectedPath='')
+param([Parameter(Mandatory)][int]$RootId, [ValidateSet('Snapshot','Show','Hide')][string]$Action='Snapshot', [string]$ExpectedPath='', [string]$KnownInstancesJson='[]')
 $ErrorActionPreference='Stop'
+[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
 Add-Type @'
 using System;using System.Collections.Generic;using System.Runtime.InteropServices;using System.Text;
 public static class ResearchWindows {
@@ -15,8 +16,9 @@ public static class ResearchWindows {
  public static void Hide(int pid){foreach(var row in List(pid)){if(row.Title=="bars"&&row.Visible){IntPtr result;SendMessageTimeout(new IntPtr(row.Handle),0x10,IntPtr.Zero,IntPtr.Zero,2,2000,out result);}}}
 }
 '@
-$root=Get-Process -Id $RootId
-if($ExpectedPath -and $root.Path -ne $ExpectedPath){throw 'Путь процесса изменился'}
+$root=Get-Process -Id $RootId -ErrorAction SilentlyContinue
+if(-not $root -and ($Action -ne 'Snapshot' -or $KnownInstancesJson -eq '[]')){throw 'Нет исходного процесса'}
+if($root -and $ExpectedPath -and $root.Path -ne $ExpectedPath){throw 'Путь процесса изменился'}
 if($Action -ne 'Snapshot'){
  if(-not $ExpectedPath -or $root.ProcessName -ne 'bars'){throw 'Показ/скрытие разрешены только проверенному bars'}
  if($Action -eq 'Show'){Start-Process -FilePath $ExpectedPath -WindowStyle Hidden}
@@ -33,4 +35,12 @@ $rows=@($all|Where-Object {$_.ProcessId -in $ids -and ($_.ProcessId -eq $RootId 
   [pscustomobject]@{pid=$proc.Id;parent=$_.ParentProcessId;role=$role;start_utc=$proc.StartTime.ToUniversalTime().ToString('o');cpu=$proc.TotalProcessorTime.TotalSeconds;logical_read=[double]$_.ReadTransferCount;private=$proc.PrivateMemorySize64;working=$proc.WorkingSet64}
  }
 })
-[pscustomobject]@{utc=[DateTime]::UtcNow.ToString('o');time=[DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds();logical_processors=[Environment]::ProcessorCount;processes=$rows;windows=@([ResearchWindows]::List($RootId));compilers=@($all|Where-Object {$_.Name -in @('cargo.exe','rustc.exe','link.exe','cl.exe')}|Select-Object ProcessId,Name)}|ConvertTo-Json -Depth 5 -Compress
+$known=@($KnownInstancesJson|ConvertFrom-Json)
+$census=@($known|ForEach-Object {
+ $expected=$_
+ $found=Get-Process -Id $expected.pid -ErrorAction SilentlyContinue
+ # ConvertFrom-Json уже может вернуть DateTime: повторный Parse через строку теряет доли секунды.
+ $same=$found -and ($found.StartTime.ToUniversalTime().Ticks -eq ([DateTime]$expected.start_utc).ToUniversalTime().Ticks)
+ [pscustomobject]@{pid=$expected.pid;role=$expected.role;expected_start_utc=$expected.start_utc;pid_exists=($null -ne $found);same_instance=[bool]$same;observed_start_utc=$(if($found){$found.StartTime.ToUniversalTime().ToString('o')}else{$null})}
+})
+[pscustomobject]@{utc=[DateTime]::UtcNow.ToString('o');time=[DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds();native_alive=($null -ne $root);logical_processors=[Environment]::ProcessorCount;processes=$rows;known_instances=$census;windows=@([ResearchWindows]::List($RootId));compilers=@($all|Where-Object {$_.Name -in @('cargo.exe','rustc.exe','link.exe','cl.exe')}|Select-Object ProcessId,Name)}|ConvertTo-Json -Depth 5 -Compress
