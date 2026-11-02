@@ -256,7 +256,7 @@ Embed через Ollama и LM Studio уже работает; пользоват
 
 - [x] 8.1.1 Исследование: CUDA в сборке bars — llama.cpp с CUDA и Vulkan в одном процессе, CUDA EP при статическом ONNX Runtime, обнаружение установленных CUDA и cuDNN и их версий, откат на Vulkan → docs/knowledge/inference-devices.md. Выполнено 28-10-2026, коммит `45929e7`, итог — docs/chats/2026-10-28-cuda-research/handoff.md.
 - [x] 8.1.2 Исследование: ускорители на RTX 3090 — flash attention, квант KV-cache, пачки, CUDA Graphs, TensorRT, IO binding; скорость, память и совпадение оценок против Vulkan и DirectML → docs/knowledge/inference-speed.md.
-- [ ] 8.1.3 Проектирование: устройство CUDA — требования к установленной CUDA, откат с причиной, включённые ускорители, показ в окне, правка Т-3 через автора → local-models.md и settings.md; проект подготовлен, ожидает согласования OQ-224/225/241.
+- [x] 8.1.3 Проектирование: устройство CUDA 12 и 13 — требования к установленной CUDA, откат с причиной, включённые ускорители, показ в окне, правка Т-3 через автора → local-models.md и settings.md, согласование.
 - 8.1.4 Реализация: CUDA для GGUF и ONNX при установленной CUDA, откат на Vulkan, выбранные ускорители.
 
 ### Этап 8.2. Новые rerank-модели через llama.cpp
