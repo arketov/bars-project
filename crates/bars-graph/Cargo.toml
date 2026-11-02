@@ -22,5 +22,9 @@ schema = ["dep:schemars"]
 name = "storage"
 required-features = ["storage"]
 
+[[example]]
+name = "checkpoint_probe"
+required-features = ["storage"]
+
 [dev-dependencies]
 tempfile.workspace = true

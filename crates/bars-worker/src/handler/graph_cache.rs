@@ -141,11 +141,11 @@ impl GraphCache {
         let entry = entry.as_mut().expect("initialized cache slot");
         let db = Connection::open_with_flags(&path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)?;
         db.busy_timeout(deadline.saturating_duration_since(Instant::now()))?;
-        let stamp = || -> Result<Option<String>, rusqlite::Error> {
-            db.query_row("SELECT (SELECT value FROM graph_meta WHERE key='read_epoch') || ':' || (SELECT value FROM graph_meta WHERE key='read_revision') || ':' || (SELECT schema_version FROM pragma_schema_version)", [], |r| r.get(0))
+        let stamp = || -> Result<Option<String>, GraphError> {
+            Ok(store::revision_stamp(&db)?.map(|s| s.read))
         };
         // Старый индекс без метки не кэшируется; обычная загрузка проверяет его схему.
-        let version: Option<String> = stamp().unwrap_or_default();
+        let version = stamp()?;
         if version.is_some()
             && version == entry.version
             && let Some(data) = &entry.data
@@ -392,6 +392,20 @@ mod tests {
                 .unwrap()
                 .contains_key(Path::new("active"))
         );
+    }
+
+    #[test]
+    fn payload_keeps_cached_arc_and_corrupt_stamp_never_returns_it() {
+        let dir = tempfile::tempdir().unwrap();
+        let db = fixture(dir.path(), "# A\n\nТ-1 зависит от Т-2.");
+        let cache = GraphCache::default();
+        let gate = Arc::new(RwLock::new(()));
+        let load = || cache.load(dir.path(), &gate, Instant::now() + Duration::from_secs(5));
+        let first = load().unwrap();
+        store::write_payload(&db, store::PayloadKey::Prepared, &"x".repeat(1024 * 1024)).unwrap();
+        assert!(Arc::ptr_eq(&first, &load().unwrap()));
+        db.execute("DELETE FROM graph_revisions", []).unwrap();
+        assert!(load().is_err());
     }
 
     #[test]

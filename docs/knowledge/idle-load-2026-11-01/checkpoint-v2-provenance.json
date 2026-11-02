@@ -1,0 +1,13 @@
+{
+  "cache_kib": 2000,
+  "binary_sha256": "D8CFB7E47C237B0AFD90F93A95C2C00E6D1737CFB9F1DACEE5FF9E41D7D8C5E5",
+  "utc": "2026-11-02T10:37:53.7025399Z",
+  "repetitions": 5,
+  "page_size": 4096,
+  "sqlite": "bundled rusqlite",
+  "journal": "WAL",
+  "scope": "isolated synthetic and generated corpus; no user indexes",
+  "complete": false,
+  "samples": 52,
+  "stop_reason": "Остановлено автором; большие публикации имеют только одну пару, итоговая приёмка не завершена"
+}

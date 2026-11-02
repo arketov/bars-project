@@ -58,6 +58,7 @@ pub fn build_index_graph_step_with_state(
     job::ensure_revision(index)?;
     let status = bars_graph::store::status(index.conn())?;
     if status.job_state == bars_graph::JobState::Idle
+        && !index.conn().query_row("SELECT EXISTS(SELECT 1 FROM graph_payload WHERE key IN ('knn_prepared','knn_checkpoint'))",[],|r|r.get::<_,bool>(0))?
         && layer == bars_graph::BuildLayer::All
         && matches!(status.state, LayerState::Ready | LayerState::Partial)
         && status.file_errors_total == 0
@@ -122,6 +123,7 @@ fn build_graph(
         .stored_layout()
         .map_err(|e| GraphError::InvalidData(e.to_string()))?
         .ok_or_else(|| GraphError::NotReady("индекс ещё не имеет параметров нарезки".into()))?;
+    let preparation_key = job::input_key(index)?;
     let expected = bars_graph::store::document_manifest(index.conn())?;
     let previous = match bars_graph::store::load_previous(index.conn()) {
         Ok(data) => Some(data),
@@ -341,20 +343,32 @@ fn build_graph(
         }
     } else {
         let prepared = job::Prepared {
-            key: job::input_key(index)?,
+            key: preparation_key,
             layer,
             data,
             vectors,
             expected,
             errors,
         };
-        index
-            .conn()
-            .execute("DELETE FROM graph_meta WHERE key='knn_checkpoint'", [])?;
-        job::save(index, "knn_prepared", &prepared)?;
+        let serialized = serde_json::to_string(&prepared)?;
+        let tx = index
+            .conn_mut()
+            .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
+        if job::input_key_db(&tx)? != prepared.key {
+            return Err(GraphError::StaleRef(
+                "входы изменились при подготовке".into(),
+            ));
+        }
+        bars_graph::store::write_payload(
+            &tx,
+            bars_graph::store::PayloadKey::Prepared,
+            &serialized,
+        )?;
+        bars_graph::store::delete_payload(&tx, bars_graph::store::PayloadKey::Checkpoint)?;
+        tx.commit()?;
         return job::run(index, prepared, state, &mut cancelled);
     }
-    finish_graph(index, data, expected, errors, &mut cancelled).map(Some)
+    finish_graph(index, data, expected, errors, None, &mut cancelled).map(Some)
 }
 
 fn finish_graph(
@@ -362,6 +376,7 @@ fn finish_graph(
     mut data: bars_graph::Dataset,
     expected: std::collections::BTreeMap<String, String>,
     errors: Vec<bars_graph::GraphFileError>,
+    completion: Option<(&str, &str)>,
     mut cancelled: impl FnMut() -> bool,
 ) -> Result<bars_graph::store::GraphStatus, GraphError> {
     for error in &errors {
@@ -412,6 +427,25 @@ fn finish_graph(
     if cancelled() {
         return Err(GraphError::Cancelled);
     }
-    bars_graph::store::publish_with_errors(index.conn_mut(), &data, &expected, &errors)?;
+    bars_graph::store::validate(&data)?;
+    let tx = index
+        .conn_mut()
+        .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
+    if let Some((key, _)) = completion
+        && job::input_key_db(&tx)? != key
+    {
+        return Err(GraphError::StaleRef("входы kNN изменились".into()));
+    }
+    bars_graph::store::publish_in_transaction(&tx, &data, &expected, &errors)?;
+    if let Some((_, checkpoint)) = completion {
+        use bars_graph::store::{PayloadKey, delete_payload, write_payload};
+        write_payload(&tx, PayloadKey::Complete, checkpoint)?;
+        delete_payload(&tx, PayloadKey::Prepared)?;
+        delete_payload(&tx, PayloadKey::Checkpoint)?;
+    }
+    if cancelled() {
+        return Err(GraphError::Cancelled);
+    }
+    tx.commit()?;
     bars_graph::store::status(index.conn())
 }

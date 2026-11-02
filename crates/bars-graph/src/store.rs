@@ -2,7 +2,9 @@ use crate::*;
 use rusqlite::{Connection, OptionalExtension, params};
 use std::collections::{BTreeMap, BTreeSet};
 
-pub const GRAPH_SCHEMA_VERSION: u32 = 1;
+pub const GRAPH_SCHEMA_VERSION: u32 = 2;
+mod schema;
+pub use schema::{RevisionStamp, revision_stamp};
 
 pub use crate::GraphStatus;
 
@@ -21,84 +23,47 @@ fn set_meta(db: &Connection, key: &str, value: &str) -> Result<(), GraphError> {
     Ok(())
 }
 
-/// Добавочная схема графа; meta/schema_version embeddings не изменяется.
-pub fn ensure_schema(db: &mut Connection) -> Result<(), GraphError> {
-    db.pragma_update(None, "foreign_keys", "ON")?;
-    let tx = db.transaction()?;
-    tx.execute_batch("CREATE TABLE IF NOT EXISTS graph_meta(key TEXT PRIMARY KEY,value TEXT NOT NULL) WITHOUT ROWID;")?;
-    if let Some(version) = meta(&tx, "schema_version")?
-        && version.parse::<u32>().ok() != Some(GRAPH_SCHEMA_VERSION)
-    {
-        return Err(GraphError::InvalidData(format!(
-            "схема графа {version} не поддерживается"
-        )));
+#[derive(Clone, Copy)]
+pub enum PayloadKey {
+    Prepared,
+    Checkpoint,
+    Complete,
+}
+impl PayloadKey {
+    fn name(self) -> &'static str {
+        match self {
+            Self::Prepared => "knn_prepared",
+            Self::Checkpoint => "knn_checkpoint",
+            Self::Complete => "knn_complete",
+        }
     }
-    tx.execute_batch("CREATE TABLE IF NOT EXISTS graph_sources(path TEXT PRIMARY KEY,revision TEXT NOT NULL,data TEXT NOT NULL) WITHOUT ROWID;
-        CREATE TABLE IF NOT EXISTS graph_nodes(id TEXT PRIMARY KEY,kind TEXT NOT NULL,revision TEXT NOT NULL,data TEXT NOT NULL) WITHOUT ROWID;
-        CREATE TABLE IF NOT EXISTS graph_evidence(id TEXT PRIMARY KEY,source_path TEXT NOT NULL REFERENCES graph_sources(path) ON DELETE CASCADE,data TEXT NOT NULL) WITHOUT ROWID;
-        CREATE TABLE IF NOT EXISTS graph_edges(id TEXT PRIMARY KEY,from_id TEXT NOT NULL REFERENCES graph_nodes(id) ON DELETE CASCADE,to_id TEXT NOT NULL REFERENCES graph_nodes(id) ON DELETE CASCADE,predicate TEXT NOT NULL,data TEXT NOT NULL) WITHOUT ROWID;
-        CREATE INDEX IF NOT EXISTS graph_edges_from ON graph_edges(from_id,predicate);
-        CREATE INDEX IF NOT EXISTS graph_edges_to ON graph_edges(to_id,predicate);
-        CREATE TABLE IF NOT EXISTS graph_edge_evidence(edge_id TEXT NOT NULL REFERENCES graph_edges(id) ON DELETE CASCADE,evidence_id TEXT NOT NULL REFERENCES graph_evidence(id) ON DELETE CASCADE,PRIMARY KEY(edge_id,evidence_id)) WITHOUT ROWID;
-        CREATE TABLE IF NOT EXISTS graph_node_sources(node_id TEXT NOT NULL REFERENCES graph_nodes(id) ON DELETE CASCADE,source_path TEXT NOT NULL REFERENCES graph_sources(path) ON DELETE CASCADE,PRIMARY KEY(node_id,source_path)) WITHOUT ROWID;
-        CREATE TABLE IF NOT EXISTS graph_aux(key TEXT PRIMARY KEY,data TEXT NOT NULL) WITHOUT ROWID;")?;
-    let documents: bool = tx.query_row(
-        "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='documents')",
-        [],
-        |r| r.get(0),
-    )?;
-    if documents {
-        tx.execute_batch("CREATE TRIGGER IF NOT EXISTS graph_documents_insert AFTER INSERT ON documents BEGIN
-                INSERT INTO graph_meta VALUES('state','stale') ON CONFLICT(key) DO UPDATE SET value='stale'; END;
-            CREATE TRIGGER IF NOT EXISTS graph_documents_delete AFTER DELETE ON documents BEGIN
-                INSERT INTO graph_meta VALUES('state','stale') ON CONFLICT(key) DO UPDATE SET value='stale'; END;
-            CREATE TRIGGER IF NOT EXISTS graph_documents_change AFTER UPDATE OF hash,path ON documents WHEN OLD.hash<>NEW.hash OR OLD.path<>NEW.path BEGIN
-                INSERT INTO graph_meta VALUES('state','stale') ON CONFLICT(key) DO UPDATE SET value='stale'; END;")?;
-    }
-    set_meta(&tx, "schema_version", &GRAPH_SCHEMA_VERSION.to_string())?;
-    if meta(&tx, "state")?.is_none() {
-        set_meta(&tx, "state", "not_built")?;
-    }
-    // Счётчик живёт в файле: кэш не удерживает SQLite-handle, мешающий подмене на Windows.
-    tx.execute_batch(
-        "INSERT OR IGNORE INTO graph_meta VALUES('read_epoch',hex(randomblob(16)));
-        INSERT OR IGNORE INTO graph_meta VALUES('read_revision','0');",
-    )?;
-    for table in [
-        "graph_meta",
-        "graph_sources",
-        "graph_nodes",
-        "graph_edges",
-        "graph_evidence",
-        "graph_aux",
-        "documents",
-        "chunks",
-        "vectors",
-        "meta",
-    ] {
-        let exists: bool = tx.query_row(
-            "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name=?1)",
-            [table],
+}
+pub fn read_payload(db: &Connection, key: PayloadKey) -> Result<Option<String>, GraphError> {
+    let table = if schema::version(db)? == Some(1) {
+        "graph_meta"
+    } else {
+        "graph_payload"
+    };
+    Ok(db
+        .query_row(
+            &format!("SELECT value FROM {table} WHERE key=?1"),
+            [key.name()],
             |r| r.get(0),
-        )?;
-        if !exists {
-            continue;
-        }
-        for event in ["INSERT", "UPDATE", "DELETE"] {
-            let row = if event == "DELETE" { "OLD" } else { "NEW" };
-            let filter = if table == "graph_meta" {
-                format!(
-                    "WHEN {row}.key NOT IN ('read_revision','read_epoch','knn_prepared','knn_checkpoint','knn_complete','knn_input_revision','knn_input_epoch')"
-                )
-            } else {
-                String::new()
-            };
-            tx.execute_batch(&format!("CREATE TRIGGER IF NOT EXISTS graph_read_{table}_{event} AFTER {event} ON {table} {filter} BEGIN
-                UPDATE graph_meta SET value=CAST(value AS INTEGER)+1 WHERE key='read_revision'; END;"))?;
-        }
-    }
-    tx.commit()?;
+        )
+        .optional()?)
+}
+pub fn write_payload(db: &Connection, key: PayloadKey, value: &str) -> Result<(), GraphError> {
+    db.execute("INSERT INTO graph_payload(key,value) VALUES(?1,?2) ON CONFLICT(key) DO UPDATE SET value=excluded.value", [key.name(),value])?;
     Ok(())
+}
+pub fn delete_payload(db: &Connection, key: PayloadKey) -> Result<(), GraphError> {
+    db.execute("DELETE FROM graph_payload WHERE key=?1", [key.name()])?;
+    Ok(())
+}
+
+/// Добавочная схема графа; embeddings не изменяются.
+pub fn ensure_schema(db: &mut Connection) -> Result<(), GraphError> {
+    schema::ensure(db)
 }
 
 pub fn document_manifest(db: &Connection) -> Result<BTreeMap<String, String>, GraphError> {
@@ -222,8 +187,20 @@ pub fn publish_with_errors(
     errors: &[GraphFileError],
 ) -> Result<(), GraphError> {
     validate(data)?;
-    let tx = db.transaction()?;
-    if &document_manifest(&tx)? != expected {
+    let tx = db.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
+    publish_in_transaction(&tx, data, expected, errors)?;
+    tx.commit()?;
+    Ok(())
+}
+
+/// Владелец транзакции также фиксирует checkpoint и очистку временных payload.
+pub fn publish_in_transaction(
+    tx: &rusqlite::Transaction<'_>,
+    data: &Dataset,
+    expected: &BTreeMap<String, String>,
+    errors: &[GraphFileError],
+) -> Result<(), GraphError> {
+    if &document_manifest(tx)? != expected {
         return Err(GraphError::StaleRef(
             "исходники изменились во время построения".into(),
         ));
@@ -338,16 +315,16 @@ pub fn publish_with_errors(
     ] {
         tx.execute("INSERT INTO graph_aux VALUES(?1,?2)", params![key, value])?;
     }
-    set_meta(&tx, "snapshot", &data.snapshot)?;
-    set_meta(&tx, "manifest", &serde_json::to_string(expected)?)?;
+    set_meta(tx, "snapshot", &data.snapshot)?;
+    set_meta(tx, "manifest", &serde_json::to_string(expected)?)?;
     set_meta(
-        &tx,
+        tx,
         "file_errors",
         &serde_json::to_string(&errors.iter().take(100).collect::<Vec<_>>())?,
     )?;
-    set_meta(&tx, "file_errors_total", &errors.len().to_string())?;
-    set_meta(&tx, "method", METHOD_VERSION)?;
-    set_meta(&tx, "similarity_inputs", &similarity_inputs(&tx)?)?;
+    set_meta(tx, "file_errors_total", &errors.len().to_string())?;
+    set_meta(tx, "method", METHOD_VERSION)?;
+    set_meta(tx, "similarity_inputs", &similarity_inputs(tx)?)?;
     let mut layers = BTreeMap::new();
     for (name, origin, fingerprint, state) in [
         (
@@ -462,9 +439,9 @@ pub fn publish_with_errors(
             },
         );
     }
-    set_meta(&tx, "layers", &serde_json::to_string(&layers)?)?;
+    set_meta(tx, "layers", &serde_json::to_string(&layers)?)?;
     set_meta(
-        &tx,
+        tx,
         "state",
         if data.semantic_state == LayerState::Ready {
             "ready"
@@ -472,10 +449,12 @@ pub fn publish_with_errors(
             "partial"
         },
     )?;
-    set_meta(&tx, "active_job", "")?;
-    set_meta(&tx, "job_state", "\"idle\"")?;
-    set_meta(&tx, "error", "")?;
-    tx.commit()?;
+    set_meta(tx, "active_job", "")?;
+    set_meta(tx, "job_state", "\"idle\"")?;
+    set_meta(tx, "error", "")?;
+    if let Some(stamp) = revision_stamp(tx)? {
+        set_meta(tx, "published_input_stamp", &stamp.input)?;
+    }
     Ok(())
 }
 
@@ -515,6 +494,9 @@ fn status_snapshot(db: &Connection) -> Result<GraphStatus, GraphError> {
             paused: false,
         });
     }
+    if schema::version(db)? == Some(2) {
+        schema::validate(db)?;
+    }
     let mut state: LayerState = serde_json::from_str(&format!(
         "\"{}\"",
         meta(db, "state")?.unwrap_or_else(|| "not_built".into())
@@ -546,10 +528,16 @@ fn status_snapshot(db: &Connection) -> Result<GraphStatus, GraphError> {
             .map(|m| document_manifest(db).map(|current| &current != m))
             .transpose()?
             .unwrap_or(false);
-    let similarity_changed = match meta(db, "similarity_inputs")? {
-        Some(saved) => similarity_inputs(db)? != saved,
-        None => true,
+    let stamp_changed = if let Some(stamp) = revision_stamp(db)? {
+        meta(db, "published_input_stamp")?.as_deref() != Some(&stamp.input)
+    } else {
+        false
     };
+    let similarity_changed = stamp_changed
+        || match meta(db, "similarity_inputs")? {
+            Some(saved) => similarity_inputs(db)? != saved,
+            None => true,
+        };
     for (name, layer) in &mut layers {
         // Старые сохранённые поколения: полнота смысла неизвестна даже после прохода.
         if layer.coverage.unit.is_empty() {
@@ -607,7 +595,8 @@ fn status_snapshot(db: &Connection) -> Result<GraphStatus, GraphError> {
         if name == "similarity" && layer.generation.is_some() && similarity_changed {
             layer.freshness = Freshness::Stale;
             layer.state = LayerState::Stale;
-            layer.stale_reason = Some("Изменилась модель или доступность векторов; у прежнего графа fingerprint векторов может отсутствовать".into());
+            layer.stale_reason =
+                Some("Изменились входы графа, модель или векторы; требуется обновление".into());
         }
     }
     let mut file_errors: Vec<GraphFileError> = meta(db, "file_errors")?
@@ -758,12 +747,13 @@ fn load_snapshot(
     check_deadline(deadline)?;
     let tx = db.unchecked_transaction()?;
     let state = status(&tx)?;
-    if meta(&tx, "schema_version")?.and_then(|v| v.parse::<u32>().ok())
-        != Some(GRAPH_SCHEMA_VERSION)
-    {
+    if !matches!(schema::version(&tx)?, Some(1 | 2)) {
         return Err(GraphError::NotReady(
             "Несовместимая схема графа; обновите граф".into(),
         ));
+    }
+    if schema::version(&tx)? == Some(2) {
+        revision_stamp(&tx)?;
     }
     if state.method != METHOD_VERSION {
         return Err(GraphError::NotReady(
