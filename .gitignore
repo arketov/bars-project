@@ -54,3 +54,6 @@ crates/bars-app/gen/
 # Стенды проверок в журналах сессий: профили WebView2, временные базы и копии проектов (OQ-223)
 docs/chats/**/fixture-*/
 /docs/chats/2026-11-01-rtx-accelerators/fixture-*.log
+
+# Локальные хуки Codex
+/.codex/
