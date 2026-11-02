@@ -91,6 +91,12 @@ pub fn truncate_text_page(reply: &mut GraphReply, keep: usize) -> Result<(), Gra
 /// Пересобирает справочники после текстового отбора из уже разрешённого ответа, без чтения Dataset.
 pub fn rematerialize_text_reply(reply: &mut GraphReply) {
     let sources = std::mem::take(&mut reply.sources);
+    let edges = std::mem::take(&mut reply.assertions);
+    let edge_index = edges
+        .iter()
+        .enumerate()
+        .map(|(i, e)| (e.id.clone(), i))
+        .collect();
     let view = Allowed {
         sources: sources
             .iter()
@@ -100,12 +106,13 @@ pub fn rematerialize_text_reply(reply: &mut GraphReply) {
             .into_iter()
             .map(|n| (n.reference.id.clone(), n))
             .collect(),
-        edges: std::mem::take(&mut reply.assertions),
+        edges,
         evidence: std::mem::take(&mut reply.evidence)
             .into_iter()
             .map(|e| (e.id.clone(), e))
             .collect(),
         adjacency: BTreeMap::new(),
+        edge_index,
         project_root: None,
     };
     materialize(reply, &view);
@@ -126,6 +133,7 @@ struct Allowed<'a> {
     evidence: BTreeMap<String, Evidence>,
     sources: BTreeMap<String, &'a SourceMeta>,
     adjacency: BTreeMap<String, Vec<usize>>,
+    edge_index: BTreeMap<String, usize>,
 }
 fn allowed<'a>(
     data: &'a Dataset,
@@ -245,6 +253,11 @@ fn allowed_sources<'a>(
     Ok(Allowed {
         project_root: Some(&data.namespace),
         nodes,
+        edge_index: edges
+            .iter()
+            .enumerate()
+            .map(|(i, e)| (e.id.clone(), i))
+            .collect(),
         edges,
         evidence,
         sources,
@@ -613,19 +626,7 @@ fn walk(
                 continue;
             }
         }
-        if path.steps.len() >= depth as usize {
-            if view.edges.iter().any(|e| {
-                matches(e, request)
-                    && (e.from == last.id || e.to == last.id)
-                    && !path
-                        .nodes
-                        .iter()
-                        .any(|n| &n.id == if e.from == last.id { &e.to } else { &e.from })
-            }) {
-                state.reasons.insert("max_depth".into());
-            }
-            continue;
-        }
+        let at_depth = path.steps.len() >= depth as usize;
         let mut candidates = Vec::new();
         for index in view.adjacency.get(&last.id).into_iter().flatten() {
             let edge = &view.edges[*index];
@@ -647,7 +648,10 @@ fn walk(
                     continue;
                 }
             } else if (request.path_kind == PathKind::Semantic && !edge.predicate.semantic())
-                || (request.path_kind == PathKind::Structural && edge.predicate.semantic())
+                || (request.path_kind == PathKind::Structural && edge.origin != Origin::Structural)
+                || (edge.predicate.semantic()
+                    && edge.polarity == Polarity::Negative
+                    && request.polarity.is_none())
             {
                 continue;
             }
@@ -662,12 +666,22 @@ fn walk(
             if path.nodes.iter().any(|n| &n.id == id) {
                 continue;
             }
+            if at_depth {
+                state.reasons.insert("max_depth".into());
+                break;
+            }
+            if candidates.len() >= budget.max_fanout as usize {
+                state.reasons.insert("max_fanout".into());
+                continue;
+            }
             candidates.push((edge, reversed, id));
         }
-        if candidates.len() > budget.max_fanout as usize {
-            state.reasons.insert("max_fanout".into());
-        }
-        for (edge, reversed, id) in candidates.into_iter().take(budget.max_fanout as usize) {
+        for (edge, reversed, id) in candidates {
+            // Очередь хранит пути; число ещё не посещённых путей тоже входит в max_nodes.
+            if state.visits as usize + queue.len() >= budget.max_nodes as usize {
+                state.reasons.insert("max_nodes".into());
+                break;
+            }
             let mut next = path.clone();
             next.nodes.push(view.nodes[id].reference.clone());
             next.steps.push(Traversal {
@@ -1276,11 +1290,17 @@ pub fn execute_overlay(
             let roots = root_nodes(request, &view, &budget, &mut state, &mut cancelled)?;
             let mut seen = BTreeSet::new();
             for id in &roots {
+                if items.len() >= budget.max_paths as usize {
+                    state.reasons.insert("max_paths".into());
+                    break;
+                }
                 let root = &view.nodes[id].reference;
+                let mut remaining = budget.clone();
+                remaining.max_paths -= items.len() as u32;
                 for path in walk(
                     &view,
                     request,
-                    &budget,
+                    &remaining,
                     root,
                     None,
                     true,
@@ -1801,7 +1821,11 @@ fn materialize(reply: &mut GraphReply, view: &Allowed<'_>) {
         nodes.extend(path.nodes.iter().map(|r| r.id.clone()));
         proof.extend(path.evidence.iter().cloned());
         for step in &path.steps {
-            if let Some(edge) = view.edges.iter().find(|e| e.id == step.edge) {
+            if let Some(edge) = view
+                .edge_index
+                .get(&step.edge)
+                .and_then(|i| view.edges.get(*i))
+            {
                 edges.insert(edge.id.clone(), edge.clone());
             }
         }

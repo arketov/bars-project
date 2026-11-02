@@ -16,7 +16,8 @@ title: Внутренняя база знаний bars
 | `external-rerank-2026-11-01.json` | Частичная прямая проба Qwen3-Reranker в LM Studio/llama-server на RTX 3090; не приёмка продуктового пути |
 | `registry-chunking-2026-11-01/` | Данные проверки продуктового варианта B: покрытие исходника, число чанков и время чистой нарезки двух корпусов |
 | `worker-shutdown.md` | Границы отмены индексатора: пауза под замком подмены, позднее задание до prepare, сохранение ошибки и способ перепроверки |
-| `resource-efficiency.md` | Снижение CPU, чтения и памяти без потери качества: повторная загрузка графа, кванты, опрос окон, приоритеты и границы доказательств |
+| `resource-efficiency.md` | Снижение CPU, чтения и памяти без потери качества: граф, опрос окон, исследование WebView2 3.6.1 и границы доказательств |
+| `webview-lifecycle-2026-11-02/` | Метод и сырые счётчики CPU/таймеров WebView2: рабочий экземпляр и изолированный стенд |
 | `lmstudio.md` | LM Studio: OpenAI embed, GPU-проба, серверное усечение длинного входа, logprobs для rerank только в `/v1/responses` |
 | `ollama.md` | Нативный embed API Ollama, кандидаты Qwen3; rerank по logprobs yes/no без штатного API — запрос, оценка, риски |
 | `external-inference.md` | Отбор llama.cpp, Infinity, TEI и vLLM для внешних embedding/rerank; несовместимость нативного TEI с Cohere |
@@ -58,6 +59,8 @@ title: Внутренняя база знаний bars
 | Файл | Когда читать |
 |---|---|
 | `model-hardware-presets-2026-11-01.md` | Исследование 8.3.1: LM Studio, Ollama, Jan, GPT4All и игровые пресеты; рекомендация, слайдер, ручной выбор и ограничения переноса в bars |
+| `hardware-discovery-2026-11-02.md` | Исследование 8.3.2: Rust и API Windows/macOS, RAM/VRAM/UMA, NPU, драйвер и Toolkit, стоимость и границы обнаружения |
+| `hardware-discovery-2026-11-02/` | Двадцать Windows-снимков, независимая WMI/NVIDIA-сверка, SHA-256 и время стадий |
 | `inference-speed.md` | RTX 3090: отбор FA/KV/пачек/IO binding/CUDA Graphs/TensorRT, численные отклонения и ограничения скорости; прежнее FP16-ускорение worker |
 | `accelerators-2026-11-01/` | Сырые scores и векторы, аппаратные профили, память, отказы ресурсов, runtime и SHA-256 исследования 8.1.2 |
 | [inference-2026-10-18/](inference-2026-10-18/Index.md) | Сырые данные этапа 11: GPU/CPU-сетки, полный retrieval, worker, индексация |

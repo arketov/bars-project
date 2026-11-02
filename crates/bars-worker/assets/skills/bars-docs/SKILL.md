@@ -16,6 +16,7 @@ Before you read, update, write, move or judge documentation, and before you answ
   4. **By the graph**: `bars_impact` on the changed object (what describes, depends on or verifies it), `bars_relations` for explicit dependencies, `bars_context` for the requirement, decision, behaviour and check around the task, and `bars_explore` for contradiction candidates. The graph is incomplete: an empty answer proves nothing, and on `graph_not_ready` rely on the first three sources.
   Then read what you found (`bars_read`, `bars_outline`), write the list of documents with what changes in each, and update all of them in the same change. A stale copy left in another module is the failure this procedure exists to prevent.
 - Writing a new document: `bars_rag_search` and `bars_get_similar` first, to see whether the description already exists; extend it instead of duplicating it.
+- Long document, plan or register: call `bars_outline`, then `bars_read` with `lines:"98-104"` (also `98`, `98-`) or `under:"Heading/Subheading"`. Choose one; `under` includes the heading, descendants and every repeated chain. Parts retain original line numbers and show their range; do not read a long register whole for one entry.
 - Context you do not already have: `bars_rag_search`. A known document: `bars_read`.
 - Do the search again when the subject changes during the task, not once per session.
 - Skipping the search because the file name looks obvious is the failure this rule exists to prevent.
@@ -34,7 +35,7 @@ For knowledge gaps, use `bars_new_topics_list`, then `bars_new_topics_get` for o
 
 | Tool | Use it when | Key inputs | Notes |
 |---|---|---|---|
-| `bars_read` | The document is known (plan, register, contract, a path from a search hit). | `path` | Whole `.md` with line numbers; reads from disk, also files outside the index. |
+| `bars_read` | The document is known (plan, register, contract, a path from a search hit). | `path`, `lines` or `under` | Whole `.md` or a marked part with original line numbers; saved disk, including unindexed files. |
 | `bars_text_search` | Find a literal or regex in saved Markdown, including a recent edit. | `query`, `case_sensitive`, `regex`, `path_filter`, `modules`, `files` | Disk, no embed. First five hits per document; continue one document with its project-relative `path`, `offset`, `revision`. On `stale_revision`, restart. Truncated totals are lower bounds; narrow scope, no global document pagination. |
 | `bars_links` | Inspect fresh incoming or outgoing links of one saved document. | project-relative `path`, `direction`, `limit`, `cursor` | Refreshes the link index, not GraphRAG. Follow `next_cursor`; on `stale_cursor`, restart. Check `known`, `has_more`, `limit_reasons`; clipped display fields are not the full source. |
 | `bars_outline` | You need the structure of a known document or one part of it before reading. | `path`, `levels`, `under` / `under_line` | Headings with line numbers; cheaper than `bars_read` for long files. |

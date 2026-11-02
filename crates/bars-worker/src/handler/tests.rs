@@ -44,6 +44,8 @@ async fn mcp_request_starts_observation_while_cli_status_does_not() {
     assert!(!cli.call(&params).await.unwrap().watching);
     let mut mcp = harness.client(ClientKind::Mcp).await;
     mcp.call(&ReadParams {
+        lines: None,
+        under: None,
         target: target(&root),
         path: "guide.md".into(),
     })
@@ -80,6 +82,8 @@ async fn mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion() {
     );
     let mut a = harness.client(ClientKind::Mcp).await;
     a.call(&ReadParams {
+        lines: None,
+        under: None,
         target: target(&root),
         path: "guide.md".into(),
     })
@@ -90,6 +94,8 @@ async fn mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion() {
         project: Some(root.display().to_string()),
     };
     a.call(&ReadParams {
+        lines: None,
+        under: None,
         target: explicit.clone(),
         path: "absent.md".into(),
     })
@@ -106,6 +112,8 @@ async fn mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion() {
     a.call(&ProjectsParams::default()).await.unwrap();
     let mut b = harness.client(ClientKind::Mcp).await;
     b.call(&ReadParams {
+        lines: None,
+        under: None,
         target: explicit,
         path: "guide.md".into(),
     })
@@ -328,6 +336,8 @@ async fn cli_works_with_a_project_end_to_end() {
 
     let read = cli
         .call(&ReadParams {
+            lines: None,
+            under: None,
             target: target(&cwd),
             path: "guide.md".into(),
         })
@@ -482,6 +492,8 @@ async fn explicit_project_by_name_and_wrong_calls() {
     let root = ready_project(&harness, &mut cli).await;
     let elsewhere = harness.projects.path().to_path_buf();
     let by_name = |path: &str| ReadParams {
+        lines: None,
+        under: None,
         target: Target {
             cwd: elsewhere.display().to_string(),
             project: Some("proj".into()),
@@ -510,6 +522,8 @@ async fn explicit_project_by_name_and_wrong_calls() {
     }
     let unknown = rpc(cli
         .call(&ReadParams {
+            lines: None,
+            under: None,
             target: Target {
                 cwd: elsewhere.display().to_string(),
                 project: Some("нет-такого".into()),

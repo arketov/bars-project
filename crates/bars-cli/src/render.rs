@@ -7,7 +7,7 @@ use bars_protocol::{
     AcceptedOutput, AutostartOutput, ClientError, DuplicateKind, DuplicatesOutput, ErrorKind,
     Heading, InstallOutput, OutlineOutput, ProjectInfo, ProjectState, ProjectsOutput, ReadOutput,
     RegisterOutput, ScoreKind, SearchHit, SearchOutput, SimilarOutput, StatusOutput,
-    UninstallOutput, UnregisterOutput, number_lines,
+    UninstallOutput, UnregisterOutput,
 };
 use serde_json::json;
 
@@ -288,7 +288,7 @@ pub fn outline(output: &OutlineOutput) -> String {
 }
 
 pub fn read(output: &ReadOutput) -> String {
-    format!("{}\n\n{}", output.title, number_lines(&output.text))
+    format!("{}\n\n{}", output.title, bars_protocol::read_text(output))
 }
 
 fn state_name(state: ProjectState) -> &'static str {

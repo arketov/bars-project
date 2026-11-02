@@ -69,10 +69,16 @@ pub enum Command {
     Duplicates(DuplicatesArgs),
     /// Структура документа: заголовки с номерами строк.
     Outline(OutlineArgs),
-    /// Документ целиком, с номерами строк.
+    /// Документ целиком или часть, с исходными номерами строк.
     Read {
         /// Путь от корня документации или от корня проекта.
         path: String,
+        /// Диапазон N, N-M или N- (с единицы, включительно).
+        #[arg(long, conflicts_with = "under")]
+        lines: Option<String>,
+        /// Полная цепочка заголовков; раздел с вложенными и все повторы.
+        #[arg(long, conflicts_with = "lines")]
+        under: Option<String>,
     },
     /// Зарегистрированные проекты и их модули.
     Projects,
@@ -549,8 +555,13 @@ async fn execute(
                 render::outline,
             )
         }
-        Command::Read { path } => {
-            let params = ReadParams { target, path };
+        Command::Read { path, lines, under } => {
+            let params = ReadParams {
+                target,
+                path,
+                lines,
+                under,
+            };
             emit(out, json, &call(&mut client, &params).await?, render::read)
         }
         Command::Projects => emit(

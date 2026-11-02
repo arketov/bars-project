@@ -76,7 +76,7 @@ const GRAPH_NOTE: &str = "\nGraphRAG — не карта окна; провер�
 pub const INSTRUCTIONS: &str = r#"bars — локальная база Markdown-документации проекта.
 
 Предмет задачи — сначала; этап уточни по известному плану/реестру.
-- Известный .md: bars_read — текст, bars_outline — заголовки, без поиска.
+- .md: bars_read; длинный план/реестр — bars_outline, затем lines/under.
 - Контекст неизвестен: bars_rag_search, вопрос на языке пользователя. Выбери modules по виду знания: features — контракты, architecture — устройство, adr — решения, knowledge — исследования, backlog — баги/идеи, chats — история. Имена — из проекта. Несколько видов или место неясно — весь проект; слабая/пустая выдача — расширь область. Квоты нет.
 - modules — папки первого уровня docs-root, не вложенные темы; другой проект — bars_projects. files — выбранные индексируемые документы, не угадывай список. Пути — от docs-root или проекта, как в выдаче.
 - bars_text_search — литерал/regex на диске; продолжение path/offset/revision. bars_links — ссылки, project-relative path, next_cursor. stale_revision/stale_cursor — начать заново.

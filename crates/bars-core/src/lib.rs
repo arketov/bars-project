@@ -7,6 +7,7 @@
 
 pub mod audits;
 pub mod doc_path;
+pub mod document_read;
 pub mod graph;
 pub mod indexing;
 pub mod instruction;

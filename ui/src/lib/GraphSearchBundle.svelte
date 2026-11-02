@@ -90,7 +90,10 @@
                         показывают направление утверждений.
                     </p>{/if}
             {/if}
-            {#each assertions(item) as edge}
+            {#each assertions(item) as edge, stepIndex}
+                {#if item.type === "path" || item.type === "impact"}
+                    <p>Шаг {stepIndex + 1}: {item.path.steps[stepIndex]?.reversed ? "против направления утверждения" : "по направлению утверждения"}</p>
+                {/if}
                 <p class="assertion">
                     {label(edge.from)} → {edge.polarity === "negative"
                         ? "НЕ "
@@ -103,7 +106,7 @@
                           ? "Структурная связь документации"
                           : "Явное правило извлечения; проверьте основание"}
                 </p>
-                {#each Object.entries(edge.qualifiers) as [key, value]}<details><summary>Условие связи</summary><p>{key}: {value}</p></details>{/each}
+                {#each Object.entries(edge.qualifiers) as [key, value]}<p>Условие связи: {key}: {value}</p>{/each}
                 <details>
                     <summary>Основания перехода: {edge.evidence.length}</summary
                     >

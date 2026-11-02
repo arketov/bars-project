@@ -230,6 +230,10 @@ pub struct ReindexArgs {
 pub struct ReadArgs {
     /// Путь к `.md`: от корня документации, затем от корня проекта.
     pub path: String,
+    /// Часть по исходным строкам: N, N-M или N-. С единицы, включительно; несовместимо с under.
+    pub lines: Option<String>,
+    /// Полная цепочка заголовков из outline/поиска; раздел с вложенными, все повторы. Несовместимо с lines.
+    pub under: Option<String>,
     /// Проект: путь к корню или имя. Без него — проект сессии.
     pub project: Option<String>,
     /// Вид ответа: `txt` (по умолчанию) или `json`.
@@ -773,10 +777,11 @@ impl BarsMcp {
     #[tool(
         name = "bars_read",
         annotations(read_only_hint = true),
-        description = "Прочитать известный документ `.md` целиком с номерами строк и title, без \
-                       обязательного предварительного поиска. Подходит для плана/реестра, чтобы \
-                       определить предмет этапа. Читает с диска, включая файлы вне индекса; path — \
-                       от корня документации или проекта (как в выдаче). Для заголовков — bars_outline."
+        description = "Прочитать известный .md или часть с исходными номерами строк и title, без поиска. \
+                       Длинный план/реестр: bars_outline, затем lines (N, N-M, N-) или under \
+                       (полная цепочка заголовков, раздел с вложенными и все повторы). Выбор один; \
+                       часть явно помечена. Сохранённый диск, включая файлы вне индекса; \
+                       path — от корня документации или проекта."
     )]
     async fn bars_read(
         &self,
@@ -786,6 +791,8 @@ impl BarsMcp {
         let params = ReadParams {
             target: self.target(args.project),
             path: args.path,
+            lines: args.lines,
+            under: args.under,
         };
         let path = params.path.clone();
         finish(

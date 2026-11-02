@@ -1,0 +1,72 @@
+{
+  "utc": "2026-11-02T09:57:40.0393358Z",
+  "head": "58770e552ceb8b804737d198d64c8503056cb3f4",
+  "os": {
+    "Caption": "Майкрософт Windows 11 Pro",
+    "Version": "10.0.26300",
+    "TotalVisibleMemorySize": 33439780
+  },
+  "cpu": {
+    "Name": "11th Gen Intel(R) Core(TM) i7-11700KF @ 3.60GHz",
+    "NumberOfLogicalProcessors": 16
+  },
+  "sources": [
+    {
+      "file": "ui/src/lib/app.svelte.ts",
+      "sha256": "AD4367A2DABCCAA36FD780EC44A2327BFB30AAA3CA019DC434BC57269657C461"
+    },
+    {
+      "file": "ui/src/lib/graph/PhysicalGraph.svelte",
+      "sha256": "EBB2A9C918C81B8509BB95AF33537940A13723263D4660F8DE3D91C3EC0006D1"
+    },
+    {
+      "file": "ui/src/lib/graph/physics-host.ts",
+      "sha256": "A4DDEBD945B0A5B2D8BE72D77BB2D5E9DB11A86FB939A27F7C3D5158CDBAD569"
+    },
+    {
+      "file": "crates/bars-app/src/window.rs",
+      "sha256": "CBF240CCE47CD0B74D835659187EB1EB691DCEF91F5AD3188E1A03B59C29C9AB"
+    },
+    {
+      "file": "crates/bars-app/examples/workspace_probe.rs",
+      "sha256": "C9E4F98A0AE8D153626DA4BD0E072863A560A9C01C6DD81CC0A0D7F3454B0E4E"
+    },
+    {
+      "file": "Cargo.lock",
+      "sha256": "821D96A8A56B0169B0BA52F25B28795CAF659C4D5D210E4E077A0D3A9F3F422B"
+    }
+  ],
+  "ui": [
+    {
+      "file": "index-B_QZoswO.js",
+      "sha256": "E0F56C1389090B2EA8B951391CD3559E6502DA2154C1DFBFF18940CE673696F5"
+    },
+    {
+      "file": "index-DFhYxjIq.css",
+      "sha256": "DB56F032203498E6F8A93585E12A40C34957898D92D45B82557DFC7C767518B7"
+    },
+    {
+      "file": "physics.worker-k6szTsVV.js",
+      "sha256": "43AE99BE9985B0C46A9D6B38FD473211E87EDBDAF0BDD32EE899AC0FDE7EDE09"
+    }
+  ],
+  "events": {
+    "since_utc": "2026-10-30T09:57:39.3181744Z",
+    "matching": [],
+    "query_count": 40
+  },
+  "crashpad": {
+    "reports": [],
+    "exists": true
+  },
+  "runtimes": [
+    {
+      "created_utc": "2026-10-28T16:15:51.4970847Z",
+      "version": "156.0.4314.50"
+    },
+    {
+      "created_utc": "2026-11-01T16:19:55.0474930Z",
+      "version": "156.0.4314.58"
+    }
+  ]
+}

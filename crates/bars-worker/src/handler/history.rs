@@ -291,7 +291,32 @@ fn complete_attempt(
                     json!({"count":out["results"].as_array().map(Vec::len),"unit":"fragments","warning":false})
                 }
                 "bars_read" => {
-                    json!({"count":out["text"].as_str().map(|s|s.lines().count()),"unit":"lines"})
+                    for key in ["lines_total", "range", "sections"] {
+                        if let Some(value) = out.get(key) {
+                            applied[key] = value.clone();
+                        }
+                    }
+                    let count = if let Some(range) = out.get("range") {
+                        range["to"]
+                            .as_u64()
+                            .zip(range["from"].as_u64())
+                            .map(|(to, from)| to - from + 1)
+                    } else if let Some(sections) = out["sections"].as_array() {
+                        Some(
+                            sections
+                                .iter()
+                                .map(|s| {
+                                    s["to"].as_u64().unwrap_or(0) - s["from"].as_u64().unwrap_or(0)
+                                        + 1
+                                })
+                                .sum(),
+                        )
+                    } else {
+                        out["text"]
+                            .as_str()
+                            .map(|s| bars_protocol::count_lines(s) as u64)
+                    };
+                    json!({"count":count,"unit":"lines"})
                 }
                 "bars_outline" => {
                     json!({"count":out["headings"].as_array().map(Vec::len),"unit":"headings"})

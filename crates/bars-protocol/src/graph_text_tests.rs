@@ -18,6 +18,78 @@ fn dataset() -> Dataset {
 }
 
 #[test]
+fn every_step_prints_its_own_quote_even_when_spans_share_a_line() {
+    let mut data = dataset();
+    for proof in &mut data.evidence {
+        proof.span.first_line = 3;
+        proof.span.last_line = 3;
+    }
+    let endpoint = |label: &str| {
+        Endpoint::Ref(
+            data.nodes
+                .iter()
+                .find(|n| n.reference.kind == Kind::Entity && n.label == label)
+                .unwrap()
+                .reference
+                .clone(),
+        )
+    };
+    let reply = query::execute(
+        &data,
+        &GraphRequest {
+            operation: Operation::Paths,
+            from: Some(endpoint("A")),
+            to: Some(endpoint("C")),
+            direction: Direction::Outgoing,
+            ..Default::default()
+        },
+        || false,
+    )
+    .unwrap();
+    assert_eq!(reply.items.len(), 1);
+    let text = render_graph_text(&reply);
+    let step1 = text
+        .split("step 1:")
+        .nth(1)
+        .unwrap()
+        .split("step 2:")
+        .next()
+        .unwrap();
+    let step2 = text.split("step 2:").nth(1).unwrap();
+    assert!(step1.contains("«`A` зависит от `B`.»"), "{text}");
+    assert!(step2.contains("«`B` зависит от `C`.»"), "{text}");
+    assert!(
+        step1.contains("a.md:3-3") && step2.contains("a.md:3-3"),
+        "{text}"
+    );
+}
+
+#[test]
+fn relation_keeps_the_exact_quote_instead_of_a_larger_neighbouring_proof() {
+    let mut reply = reply(Operation::Relations);
+    let edge = reply.assertions[0].clone();
+    let exact = reply
+        .evidence
+        .iter()
+        .find(|p| edge.evidence.contains(&p.id))
+        .unwrap()
+        .clone();
+    let mut neighbour = exact.clone();
+    neighbour.id = "unrelated-longer-neighbour".into();
+    neighbour.quote =
+        "Совсем другое утверждение на той же строке; оно не подтверждает данное отношение.".into();
+    reply.evidence.push(neighbour.clone());
+    let mut other_edge = edge.clone();
+    other_edge.id = "other-edge".into();
+    other_edge.evidence = vec![neighbour.id];
+    reply.assertions.push(other_edge);
+    reply.items = vec![Item::Relation { assertion: edge }];
+    let text = render_graph_text(&reply);
+    assert!(text.contains(&format!("«{}»", exact.quote)), "{text}");
+    assert!(!text.contains("Совсем другое утверждение"), "{text}");
+}
+
+#[test]
 fn empty_document_impact_and_name_candidates_offer_a_usable_next_call() {
     let data = dataset();
     let r = query::execute(
@@ -401,7 +473,7 @@ fn oversized_structural_unit_fails_explicitly_without_consuming_its_tail() {
 }
 
 #[test]
-fn global_dedup_includes_node_topic_and_extra_path_quotes() {
+fn exact_relation_proof_is_not_replaced_by_a_containing_node_topic_or_path_quote() {
     let mut r = reply(Operation::Graph);
     let mut narrow = r.evidence[0].clone();
     narrow.span.first_line = 10;
@@ -448,7 +520,8 @@ fn global_dedup_includes_node_topic_and_extra_path_quotes() {
             item,
         ];
         let text = render_graph_text(&r);
-        assert_eq!(text.matches("«Общий").count(), 1, "{text}");
+        assert_eq!(text.matches("«Общий").count(), 2, "{text}");
+        assert!(text.contains("10-12 «Общий текст»"), "{text}");
         assert!(text.contains("10-20"));
     }
 }

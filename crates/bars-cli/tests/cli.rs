@@ -30,6 +30,49 @@ struct Outcome {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn partial_read_cli_returns_original_lines_and_metadata() {
+    let harness = Harness::new("partial-cli");
+    let root = harness.project("parts");
+    let env = harness.env_in(&root);
+    assert_eq!(
+        bars(&env, &["register", root.to_str().unwrap()]).await.code,
+        0
+    );
+    fs::write(
+        root.join("docs/parts.md"),
+        "# А\n## Б\nодин\n### В\nдва\n## Конец\nне выдавать\n## Б\nтри",
+    )
+    .unwrap();
+    let lines = bars(&env, &["read", "parts.md", "--lines", "3-5"]).await;
+    assert_eq!(lines.code, 0, "{}", lines.err);
+    assert!(
+        lines
+            .out
+            .contains("lines: 3-5 of 9\n3 один\n4 ### В\n5 два"),
+        "{}",
+        lines.out
+    );
+    let sections = bars(&env, &["--json", "read", "parts.md", "--under", "А/Б"]).await;
+    let sections = json(&sections);
+    assert_eq!(sections["sections"][1]["from"], 8);
+    assert_eq!(sections["text"], "## Б\nодин\n### В\nдва\n## Б\nтри");
+    let text = bars(&env, &["read", "parts.md", "--under", "А/Б"]).await;
+    assert!(text.out.contains("=== PART 2 of 2 ==="), "{}", text.out);
+    assert!(text.out.contains("8 ## Б\n9 три"), "{}", text.out);
+    assert!(!text.out.contains("не выдавать"));
+    assert_ne!(
+        bars(&env, &["read", "parts.md", "--lines", "0"]).await.code,
+        0
+    );
+    assert!(
+        Cli::try_parse_from([
+            "bars-cli", "read", "parts.md", "--lines", "1", "--under", "А"
+        ])
+        .is_err()
+    );
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn graph_cli_operations_and_search_modes_match_worker_json() {
     let harness = Harness::new("graph-cli");
     let root = harness.project("graph");

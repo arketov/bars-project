@@ -123,6 +123,19 @@ class Reply {
     const word = label("predicate", edge.predicate).text;
     return `${name(edge.from)} ${edge.polarity === "negative" ? "не " : ""}${word} ${name(edge.to)}`;
   }
+
+  step(step: { edge: string; reversed: boolean }): MeaningStep {
+    const edge = this.edges.get(step.edge);
+    return {
+      sentence: edge ? this.sentence(edge) : "связь не найдена в справочнике ответа",
+      forward: !step.reversed,
+      predicate: edge ? label("predicate", edge.predicate).text : "",
+      hint: edge ? label("predicate", edge.predicate).hint : "",
+      conditions: Object.entries(edge?.qualifiers ?? {}).map(([key, value]) => key === "condition" ? value : `${key}: ${value}`),
+      negative: edge?.polarity === "negative",
+      proofs: edge ? this.proofs(edge.evidence, Infinity) : [],
+    };
+  }
 }
 
 export interface ReplyNotes {
@@ -168,10 +181,7 @@ export interface ImpactEntry {
   depth: number;
   documents: string[];
   /** Путь словами: какое утверждение связывает шаг с прежним. */
-  steps: string[];
-  stepHints: string[];
-  conditions: string[];
-  proofs: Proof[];
+  steps: MeaningStep[];
 }
 
 export interface ImpactView {
@@ -194,16 +204,12 @@ export function digestImpact(raw: GraphReply, rootDocument: string, entities: nu
   const entries: ImpactEntry[] = [];
   for (const item of raw.items ?? []) {
     if (item.type !== "impact") continue;
-    const steps = item.path.steps.map((s) => reply.edges.get(s.edge)).filter((e): e is GraphEdge => !!e);
     entries.push({
       label: reply.label(item.node),
       direct: item.direct,
       depth: item.path.steps.length,
       documents: reply.documents(item.node).filter((id) => id !== rootDocument),
-      steps: steps.map((e) => reply.sentence(e)),
-      stepHints: steps.map(e => label("predicate", e.predicate).hint),
-      conditions: steps.map((e) => e.qualifiers?.condition).filter((c): c is string => !!c),
-      proofs: reply.proofs(item.path.evidence),
+      steps: item.path.steps.map((step) => reply.step(step)),
     });
   }
   entries.sort((a, b) => a.depth - b.depth || a.label.localeCompare(b.label));
@@ -247,18 +253,7 @@ export function digestMeaningPaths(raw: GraphReply): MeaningPathView {
     paths.push({
       complete: item.path.complete,
       nodes: item.path.nodes.map((ref) => ({ label: reply.label(ref), kind: ref.kind, documents: reply.documents(ref) })),
-      steps: item.path.steps.map((s) => {
-        const edge = reply.edges.get(s.edge);
-        return {
-          sentence: edge ? reply.sentence(edge) : "связь не найдена в справочнике ответа",
-          forward: !s.reversed,
-          predicate: edge ? label("predicate", edge.predicate).text : "",
-          hint: edge ? label("predicate", edge.predicate).hint : "",
-          conditions: edge?.qualifiers?.condition ? [edge.qualifiers.condition] : [],
-          negative: edge?.polarity === "negative",
-          proofs: edge ? reply.proofs(edge.evidence, 3) : [],
-        };
-      }),
+      steps: item.path.steps.map((step) => reply.step(step)),
     });
   }
   return { paths, resolution: raw.resolution ?? "resolved", candidates: (raw.candidates ?? []).map((n) => `${n.label} (${n.namespace || n.reference.kind})`), notes: replyNotes(raw) };

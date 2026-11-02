@@ -28,7 +28,7 @@ it("влияние: прямое и косвенное разделены, до�
   const items = raw.items.filter((i) => i.type === "impact");
   expect(view.direct.length + view.indirect.length).toBe(items.length);
   expect(view.direct.every((e) => e.depth === 1) && view.indirect.every((e) => e.depth > 1)).toBe(true);
-  expect(view.direct[0].steps[0]).toMatch(/зависит от|требует|использует|реализует|проверяет/);
+  expect(view.direct[0].steps[0].sentence).toMatch(/зависит от|требует|использует|реализует|проверяет/);
   expect(view.documents.has(root)).toBe(false);
   expect(view.documents.size).toBeGreaterThan(0);
   for (const depth of view.documents.values()) expect(depth).toBeGreaterThan(0);
@@ -48,6 +48,26 @@ it("пустое влияние не превращается в «ничего 
   expect(view.indirect).toEqual([]);
   expect(view.documents.size).toBe(0);
   expect(view.notes.semanticIncomplete).toBe(true);
+});
+
+it("влияние и путь сохраняют все основания и квалификаторы отдельно для каждого шага", () => {
+  const raw = reply("impact");
+  const item = raw.items.find((item) => item.type === "impact")!;
+  if (item.type !== "impact") throw Error("нужна фикстура влияния");
+  const edge = raw.assertions.find((edge) => edge.id === item.path.steps[0].edge)!;
+  const proof = raw.evidence.find((proof) => edge.evidence.includes(proof.id))!;
+  const ids = Array.from({ length: 6 }, (_, i) => `step-proof-${i}`);
+  raw.evidence.push(...ids.map((id) => ({ ...proof, id, quote: id })));
+  edge.evidence = ids;
+  edge.qualifiers = { platform: "Windows", version: "v2", condition: "если выбран CPU" };
+  raw.items = [item];
+  const impact = digestImpact(raw, "root", 1);
+  const step = [...impact.direct, ...impact.indirect][0].steps[0];
+  expect(step.proofs.map((proof) => proof.id)).toEqual(ids);
+  expect(step.conditions).toEqual(["platform: Windows", "version: v2", "если выбран CPU"]);
+  expect(step.forward).toBe(!item.path.steps[0].reversed);
+  raw.items = [{ type: "path", path: item.path }];
+  expect(digestMeaningPaths(raw).paths[0].steps[0]).toEqual(step);
 });
 
 it("корни влияния — сущности документа из ответа графа; документ без сущностей не запрашивает влияние и не обещает «ничего не затронет»", () => {

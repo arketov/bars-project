@@ -1,0 +1,25 @@
+{
+  "captured_at": "2026-11-02T09:55:43.0694417+00:00",
+  "os": {
+    "Caption": "Майкрософт Windows 11 Pro",
+    "Version": "10.0.26300",
+    "BuildNumber": "26300"
+  },
+  "cpu": {
+    "Name": "11th Gen Intel(R) Core(TM) i7-11700KF @ 3.60GHz"
+  },
+  "installed_ram_bytes": 34359738368.0,
+  "wmi_gpu": [
+    {
+      "Name": "NVIDIA GeForce RTX 3090",
+      "AdapterRAM": 4293918720,
+      "DriverVersion": "32.0.16.1692"
+    }
+  ],
+  "nvidia_smi": "NVIDIA GeForce RTX 3090, 24576 MiB, 616.92",
+  "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)",
+  "probe_sha256": "8bc1f0158854ef3fa083b577ee80b130f4173c234cfea86a4c04debb2eae38b0",
+  "source_sha256": "d732a2b127e6aea16097755f5cba798c6a646ac18523befdcf583bea527926f3",
+  "manifest_sha256": "1d0838e1ae2562cb660d62e80e1ea9f8f51ed1b3ff02d78d8a631b6fc626fbd8",
+  "lock_sha256": "896556d9196aa0d94d5e6cf2b1af2702e60b0f78ecdc2393cf51d59856314aad"
+}

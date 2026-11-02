@@ -1,0 +1,50 @@
+[
+  {
+    "stage": "total",
+    "runs": 20,
+    "min_ms": 233.89,
+    "median_ms": 246.05200000000002,
+    "p95_ms": 257.815,
+    "max_ms": 356.556
+  },
+  {
+    "stage": "ram",
+    "runs": 20,
+    "min_ms": 0.045,
+    "median_ms": 0.047,
+    "p95_ms": 0.053,
+    "max_ms": 0.086
+  },
+  {
+    "stage": "dxgi",
+    "runs": 20,
+    "min_ms": 220.351,
+    "median_ms": 231.13799999999998,
+    "p95_ms": 244.138,
+    "max_ms": 342.812
+  },
+  {
+    "stage": "dxcore",
+    "runs": 20,
+    "min_ms": 0.03,
+    "median_ms": 0.031,
+    "p95_ms": 0.034,
+    "max_ms": 0.052
+  },
+  {
+    "stage": "cuda",
+    "runs": 20,
+    "min_ms": 10.556,
+    "median_ms": 11.3885,
+    "p95_ms": 12.393,
+    "max_ms": 13.023
+  },
+  {
+    "stage": "toolkits",
+    "runs": 20,
+    "min_ms": 0.635,
+    "median_ms": 0.6795,
+    "p95_ms": 1.18,
+    "max_ms": 2.955
+  }
+]

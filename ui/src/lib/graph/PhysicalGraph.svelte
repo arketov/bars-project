@@ -1666,9 +1666,12 @@
       {#each entries as e, i (`${title}${i}`)}
         <li>
           <span class="name" title={e.label}>{e.label}</span>
-          <small title={e.stepHints.join(" · ")}>{e.steps.join(" · ")}</small>
-          {#each e.conditions as c, k (k)}<small>условие: {c}</small>{/each}
-          {@render proofList(e.proofs)}
+          {#each e.steps as step, j (j)}
+            <small title={step.hint}>Шаг {j + 1}: {step.sentence}</small>
+            <small>{step.forward ? "ход по направлению утверждения" : "ход против направления утверждения"}{step.negative ? " · в источнике отрицание" : ""}</small>
+            {#each step.conditions as c, k (k)}<small>условие: {c}</small>{/each}
+            {@render proofList(step.proofs)}
+          {/each}
           <small>проверить описание</small>
         </li>
       {/each}

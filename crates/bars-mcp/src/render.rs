@@ -6,7 +6,7 @@ use std::fmt::Write as _;
 use bars_protocol::{
     AcceptedOutput, DuplicateKind, DuplicatesOutput, Heading, OutlineOutput, ProjectInfo,
     ProjectState, ProjectsOutput, ReadOutput, ScoreKind, SearchHit, SearchOutput, SimilarOutput,
-    StatusOutput, number_lines,
+    StatusOutput,
 };
 
 fn score_kind(kind: ScoreKind) -> &'static str {
@@ -238,7 +238,7 @@ pub fn read(path: &str, output: &ReadOutput) -> String {
     format!(
         "=== DOCUMENT {path} ===\ntitle: {}\n--- text (with line numbers) ---\n{}\n=== END DOCUMENT ===",
         output.title,
-        number_lines(&output.text)
+        bars_protocol::read_text(output)
     )
 }
 
@@ -450,7 +450,8 @@ mod tests {
                 &ReadOutput {
                     revision: String::new(),
                     title: "Документ".into(),
-                    text: "# Заголовок\nТекст".into()
+                    text: "# Заголовок\nТекст".into(),
+                    ..ReadOutput::default()
                 }
             ),
             "=== DOCUMENT документ.md ===\ntitle: Документ\n--- text (with line numbers) ---\n1 # Заголовок\n2 Текст\n=== END DOCUMENT ==="

@@ -1,0 +1,2258 @@
+{
+  "success": false,
+  "root_pid": 35504,
+  "exe_sha256": "0da5a2289fea443132e0e6cafb196930283325ff8032a10bdc9479a79a8183f0",
+  "source_commit": "58770e552ceb8b804737d198d64c8503056cb3f4",
+  "documents": 100,
+  "profile": "debug/FakeProvider; own loopback CDP",
+  "samples": [
+    {
+      "instrumented": false,
+      "round": 1,
+      "visible": true,
+      "before": {
+        "utc": "2026-11-02T10:00:55.4711771Z",
+        "time": 1793613655473,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 1.171875,
+            "logical_read": 18210021,
+            "private": 15732736,
+            "working": 57364480
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 1.03125,
+            "logical_read": 7041197,
+            "private": 41095168,
+            "working": 123527168
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.015625,
+            "logical_read": 6350,
+            "private": 2478080,
+            "working": 10526720
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 0.84375,
+            "logical_read": 3996117,
+            "private": 90890240,
+            "working": 78778368
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.28125,
+            "logical_read": 717087,
+            "private": 12533760,
+            "working": 41648128
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 28712,
+            "private": 7675904,
+            "working": 20324352
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 2.0625,
+            "logical_read": 537023,
+            "private": 74153984,
+            "working": 124485632
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 5180,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 24796,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 56000,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 28756,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 18044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 33620,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 19720,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 15676,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 43704,
+            "Name": "rustc.exe"
+          }
+        ]
+      },
+      "after": {
+        "utc": "2026-11-02T10:01:27.4812078Z",
+        "time": 1793613687483,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 1.609375,
+            "logical_read": 23817825,
+            "private": 15060992,
+            "working": 57257984
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 1.234375,
+            "logical_read": 7772853,
+            "private": 41103360,
+            "working": 124477440
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6350,
+            "private": 3391488,
+            "working": 19537920
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 0.84375,
+            "logical_read": 3996117,
+            "private": 90894336,
+            "working": 78684160
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.3125,
+            "logical_read": 903671,
+            "private": 12447744,
+            "working": 41697280
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 28712,
+            "private": 7675904,
+            "working": 20324352
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 2.25,
+            "logical_read": 628119,
+            "private": 65941504,
+            "working": 115912704
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 56000,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 28756,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 18044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 33620,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 19720,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 15676,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 38036,
+            "Name": "rustc.exe"
+          }
+        ]
+      },
+      "start": {
+        "hidden": false,
+        "body": 356,
+        "animations": [],
+        "stats": null
+      },
+      "end": {
+        "hidden": false,
+        "body": 356,
+        "animations": [],
+        "stats": null
+      },
+      "performanceBefore": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174152.508087
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 4
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 296
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 545
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1619
+          },
+          {
+            "name": "Resources",
+            "value": 101
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 18
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 2
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 5
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 1
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 830
+          },
+          {
+            "name": "LayoutCount",
+            "value": 13
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 325
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.04241
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.03297
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.025787
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.210719
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 0.574835
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 0.262949
+          },
+          {
+            "name": "ThreadTime",
+            "value": 0.536908
+          },
+          {
+            "name": "ProcessTime",
+            "value": 1.541757
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 9201616
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 13369344
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174129.815009
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174129.560499
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174126.530444
+          }
+        ]
+      },
+      "performanceAfter": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174182.518976
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 131
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 265
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1227
+          },
+          {
+            "name": "Resources",
+            "value": 74
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 151
+          },
+          {
+            "name": "LayoutCount",
+            "value": 13
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 325
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.04241
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.03297
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.025879
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.230915
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 0.731265
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 0.399091
+          },
+          {
+            "name": "ThreadTime",
+            "value": 0.694851
+          },
+          {
+            "name": "ProcessTime",
+            "value": 1.788893
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 6596528
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 8650752
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174129.815009
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174129.560499
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174126.530444
+          }
+        ]
+      }
+    },
+    {
+      "instrumented": false,
+      "round": 1,
+      "visible": false,
+      "before": {
+        "utc": "2026-11-02T10:01:45.3043537Z",
+        "time": 1793613705308,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 1.625,
+            "logical_read": 23822365,
+            "private": 14139392,
+            "working": 56532992
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 1.6875,
+            "logical_read": 8393403,
+            "private": 41832448,
+            "working": 135987200
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6386,
+            "private": 3047424,
+            "working": 13574144
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 0.890625,
+            "logical_read": 3997461,
+            "private": 89800704,
+            "working": 78004224
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.34375,
+            "logical_read": 942039,
+            "private": 12263424,
+            "working": 41607168
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 28712,
+            "private": 7639040,
+            "working": 20459520
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 2.265625,
+            "logical_read": 637639,
+            "private": 66183168,
+            "working": 116568064
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 56000,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 28756,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 18044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 33620,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 19720,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 15676,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 59228,
+            "Name": "rustc.exe"
+          }
+        ]
+      },
+      "after": {
+        "utc": "2026-11-02T10:02:17.7018889Z",
+        "time": 1793613737705,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 1.625,
+            "logical_read": 23826021,
+            "private": 14139392,
+            "working": 56532992
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 1.75,
+            "logical_read": 8432222,
+            "private": 41353216,
+            "working": 135639040
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6422,
+            "private": 3047424,
+            "working": 13574144
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 0.890625,
+            "logical_read": 3997461,
+            "private": 89796608,
+            "working": 78000128
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.34375,
+            "logical_read": 962327,
+            "private": 12050432,
+            "working": 41488384
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 28712,
+            "private": 7630848,
+            "working": 20451328
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 2.28125,
+            "logical_read": 646375,
+            "private": 66183168,
+            "working": 116588544
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 56000,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 28756,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 19720,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 15676,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 50692,
+            "Name": "cargo.exe"
+          }
+        ]
+      },
+      "start": {
+        "hidden": false,
+        "body": 356,
+        "animations": [],
+        "stats": null
+      },
+      "end": {
+        "hidden": false,
+        "body": 356,
+        "animations": [],
+        "stats": null
+      },
+      "performanceBefore": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174202.463832
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 131
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 265
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1227
+          },
+          {
+            "name": "Resources",
+            "value": 90
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 183
+          },
+          {
+            "name": "LayoutCount",
+            "value": 13
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 325
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.04241
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.03297
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.028668
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.2351
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 0.765184
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 0.426036
+          },
+          {
+            "name": "ThreadTime",
+            "value": 0.72799
+          },
+          {
+            "name": "ProcessTime",
+            "value": 1.830178
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 6604252
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 8388608
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174129.815009
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174129.560499
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174126.530444
+          }
+        ]
+      },
+      "performanceAfter": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174232.475562
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 131
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 265
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1227
+          },
+          {
+            "name": "Resources",
+            "value": 99
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 201
+          },
+          {
+            "name": "LayoutCount",
+            "value": 13
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 325
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.04241
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.03297
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.028814
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.237564
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 0.784988
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 0.44323
+          },
+          {
+            "name": "ThreadTime",
+            "value": 0.748138
+          },
+          {
+            "name": "ProcessTime",
+            "value": 1.852945
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 6725152
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 8388608
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174129.815009
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174129.560499
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174126.530444
+          }
+        ]
+      }
+    },
+    {
+      "instrumented": false,
+      "round": 2,
+      "visible": true,
+      "before": {
+        "utc": "2026-11-02T10:02:34.7965342Z",
+        "time": 1793613754799,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 1.8125,
+            "logical_read": 27735960,
+            "private": 15429632,
+            "working": 57384960
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 1.96875,
+            "logical_read": 8959932,
+            "private": 42041344,
+            "working": 136724480
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6494,
+            "private": 3047424,
+            "working": 13574144
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 1.875,
+            "logical_read": 10925909,
+            "private": 87760896,
+            "working": 83329024
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.375,
+            "logical_read": 1082127,
+            "private": 12021760,
+            "working": 41549824
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 28712,
+            "private": 7630848,
+            "working": 20451328
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 2.6875,
+            "logical_read": 852247,
+            "private": 62504960,
+            "working": 114044928
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": []
+      },
+      "after": {
+        "utc": "2026-11-02T10:03:07.0471298Z",
+        "time": 1793613787050,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 2.203125,
+            "logical_read": 33294724,
+            "private": 15388672,
+            "working": 57487360
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 2.21875,
+            "logical_read": 9823313,
+            "private": 41697280,
+            "working": 136626176
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6530,
+            "private": 2953216,
+            "working": 13520896
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 1.984375,
+            "logical_read": 11296021,
+            "private": 92979200,
+            "working": 84246528
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.390625,
+            "logical_read": 1265295,
+            "private": 12165120,
+            "working": 41627648
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 28712,
+            "private": 7630848,
+            "working": 20451328
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 2.890625,
+            "logical_read": 967575,
+            "private": 67719168,
+            "working": 119095296
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 4044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 6592,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 45260,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 52200,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 10388,
+            "Name": "cargo.exe"
+          }
+        ]
+      },
+      "start": {
+        "hidden": false,
+        "body": 356,
+        "animations": [],
+        "stats": null
+      },
+      "end": {
+        "hidden": false,
+        "body": 356,
+        "animations": [],
+        "stats": null
+      },
+      "performanceBefore": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174251.852684
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 131
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 277
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1235
+          },
+          {
+            "name": "Resources",
+            "value": 162
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 328
+          },
+          {
+            "name": "LayoutCount",
+            "value": 18
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 355
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.043944
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.036184
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.032143
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.258111
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 0.933199
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 0.562817
+          },
+          {
+            "name": "ThreadTime",
+            "value": 0.913772
+          },
+          {
+            "name": "ProcessTime",
+            "value": 2.272069
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 7449480
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 8912896
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174129.815009
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174129.560499
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174126.530444
+          }
+        ]
+      },
+      "performanceAfter": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174281.868282
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 131
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 277
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1235
+          },
+          {
+            "name": "Resources",
+            "value": 254
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 512
+          },
+          {
+            "name": "LayoutCount",
+            "value": 18
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 370
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.043944
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.037808
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.03254
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.277876
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 1.082802
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 0.690634
+          },
+          {
+            "name": "ThreadTime",
+            "value": 1.067713
+          },
+          {
+            "name": "ProcessTime",
+            "value": 2.492615
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 8308688
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 9699328
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174129.815009
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174129.560499
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174126.530444
+          }
+        ]
+      }
+    },
+    {
+      "instrumented": false,
+      "round": 2,
+      "visible": false,
+      "before": {
+        "utc": "2026-11-02T10:03:24.2031293Z",
+        "time": 1793613804205,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 2.234375,
+            "logical_read": 33668948,
+            "private": 14376960,
+            "working": 56864768
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 2.265625,
+            "logical_read": 10721297,
+            "private": 43130880,
+            "working": 138350592
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6566,
+            "private": 2953216,
+            "working": 13520896
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 1.984375,
+            "logical_read": 11296021,
+            "private": 92979200,
+            "working": 84246528
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.390625,
+            "logical_read": 1367695,
+            "private": 12525568,
+            "working": 42045440
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 28712,
+            "private": 7630848,
+            "working": 20451328
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 2.890625,
+            "logical_read": 981335,
+            "private": 67907584,
+            "working": 119238656
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 45260,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 52200,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 6840,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 26876,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 50392,
+            "Name": "cargo.exe"
+          }
+        ]
+      },
+      "after": {
+        "utc": "2026-11-02T10:03:55.8708565Z",
+        "time": 1793613835872,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 35504,
+            "parent": 30936,
+            "role": "native",
+            "start_utc": "2026-11-02T10:00:27.7496496Z",
+            "cpu": 2.265625,
+            "logical_read": 33672380,
+            "private": 14389248,
+            "working": 56864768
+          },
+          {
+            "pid": 55004,
+            "parent": 35504,
+            "role": "browser",
+            "start_utc": "2026-11-02T10:00:29.2327681Z",
+            "cpu": 2.296875,
+            "logical_read": 10747401,
+            "private": 41832448,
+            "working": 137056256
+          },
+          {
+            "pid": 48280,
+            "parent": 55004,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T10:00:29.2608291Z",
+            "cpu": 0.046875,
+            "logical_read": 6566,
+            "private": 2953216,
+            "working": 13520896
+          },
+          {
+            "pid": 32716,
+            "parent": 55004,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T10:00:29.4077019Z",
+            "cpu": 1.984375,
+            "logical_read": 11296021,
+            "private": 92979200,
+            "working": 84246528
+          },
+          {
+            "pid": 38344,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4112885Z",
+            "cpu": 0.390625,
+            "logical_read": 1387663,
+            "private": 12042240,
+            "working": 41656320
+          },
+          {
+            "pid": 40836,
+            "parent": 55004,
+            "role": "utility",
+            "start_utc": "2026-11-02T10:00:29.4641880Z",
+            "cpu": 0.09375,
+            "logical_read": 28712,
+            "private": 7630848,
+            "working": 20451328
+          },
+          {
+            "pid": 29416,
+            "parent": 55004,
+            "role": "renderer",
+            "start_utc": "2026-11-02T10:00:29.5892621Z",
+            "cpu": 2.90625,
+            "logical_read": 990007,
+            "private": 68100096,
+            "working": 119382016
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 16651554,
+            "Title": "bars - �஢�ઠ �த�⮢�� �������",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 27073100,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 23467594,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 50392,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 38420,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 10044,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 2964,
+            "Name": "rustc.exe"
+          },
+          {
+            "ProcessId": 31268,
+            "Name": "rustc.exe"
+          }
+        ]
+      },
+      "start": {
+        "hidden": false,
+        "body": 356,
+        "animations": [],
+        "stats": null
+      },
+      "end": {
+        "hidden": false,
+        "body": 356,
+        "animations": [],
+        "stats": null
+      },
+      "performanceBefore": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174301.24931
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 131
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 277
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1235
+          },
+          {
+            "name": "Resources",
+            "value": 271
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 546
+          },
+          {
+            "name": "LayoutCount",
+            "value": 18
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 370
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.043944
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.037808
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.034751
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.281023
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 1.10805
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 0.710524
+          },
+          {
+            "name": "ThreadTime",
+            "value": 1.093788
+          },
+          {
+            "name": "ProcessTime",
+            "value": 2.524879
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 8590816
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 9699328
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174129.815009
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174129.560499
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174126.530444
+          }
+        ]
+      },
+      "performanceAfter": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 174331.250323
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 2
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 131
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 277
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 1235
+          },
+          {
+            "name": "Resources",
+            "value": 280
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 10
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 1
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 1
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 2
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 564
+          },
+          {
+            "name": "LayoutCount",
+            "value": 18
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 370
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0.043944
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0.037808
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.034853
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0.283007
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 1.120487
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 0.720875
+          },
+          {
+            "name": "ThreadTime",
+            "value": 1.107613
+          },
+          {
+            "name": "ProcessTime",
+            "value": 2.540991
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 8713432
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 9699328
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 174129.815009
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 174129.560499
+          },
+          {
+            "name": "NavigationStart",
+            "value": 174126.530444
+          }
+        ]
+      }
+    }
+  ],
+  "runtime": {
+    "protocolVersion": "1.3",
+    "product": "Edg/156.0.4314.58",
+    "revision": "@7806b68d20d1c1273d5b07b4f4de18e8f5852581",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+    "jsVersion": "15.6.12.10"
+  },
+  "loaded_assets": [
+    {
+      "url": "http://tauri.localhost/assets/dist-qcFAPh7Z.js",
+      "sha256": "2ba9a208d48bb70320e821ea35a86c05af88950c0da1a6e6d75dd617e029a9fd"
+    },
+    {
+      "url": "http://tauri.localhost/assets/window-cY2cn3Cx.js",
+      "sha256": "2e2a5102c3799e6d5063dfdbc89a2d80737661a00fff43f2caa95110de27948d"
+    },
+    {
+      "url": "http://tauri.localhost/assets/index-B_QZoswO.js",
+      "sha256": "e0f56c1389090b2ea8b951391cd3559e6502da2154c1dfbff18940ce673696f5"
+    },
+    {
+      "url": "http://tauri.localhost/assets/core-CwBWH9_g.js",
+      "sha256": "747d7aa5e025963e2a521eb55b61b9c50bcda50475e4f9cc12cc251a9b0c9f64"
+    },
+    {
+      "url": "http://tauri.localhost/assets/event-D6iU7675.js",
+      "sha256": "17d4e57039ce527e03499c30bfbedb133bd71d51c46b0ce235bc8ce5a44ba015"
+    }
+  ],
+  "corpus_hash": "704ea107bdc5dc42dabf2802ccd72aa6cd6e639c7603071fdd8811d691b09434",
+  "fixture": {
+    "tree_documents": 100
+  }
+}

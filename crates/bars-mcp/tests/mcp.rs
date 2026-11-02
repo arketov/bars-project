@@ -20,6 +20,102 @@ use tempfile::TempDir;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader, DuplexStream, ReadHalf, WriteHalf};
 
 #[tokio::test(flavor = "multi_thread")]
+async fn partial_read_keeps_disk_lines_revision_and_all_matching_sections() {
+    let harness = Harness::new("partial-read");
+    let root = harness.project("partial");
+    let source = "---\r\ntitle: Части\r\n---\r\n# А\r\n## Б\r\nодин\r\n### В\r\nвложенный\r\n## Конец\r\nне выдавать\r\n## Б\r\nдва";
+    fs::write(root.join("docs/part.md"), source).unwrap();
+    let mut mcp = harness.connect(harness.env(&root));
+    let initialized = mcp.initialize().await;
+    assert!(
+        initialized["result"]["instructions"]
+            .as_str()
+            .unwrap()
+            .contains("lines/under")
+    );
+    harness.register(&root).await;
+    let list = mcp.request("tools/list", json!({})).await;
+    let schema = list["result"]["tools"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|t| t["name"] == "bars_read")
+        .unwrap();
+    assert!(schema["inputSchema"]["properties"]["lines"].is_object());
+    assert!(schema["inputSchema"]["properties"]["under"].is_object());
+    let (error, whole) = mcp
+        .tool("bars_read", json!({"path":"part.md","format":"json"}))
+        .await;
+    assert!(!error, "{whole}");
+    let whole: Value = serde_json::from_str(&whole).unwrap();
+    assert_eq!(whole["text"], source);
+    assert!(whole.get("lines_total").is_none());
+    let (error, part) = mcp
+        .tool(
+            "bars_read",
+            json!({"path":"docs/part.md","lines":"6-8","format":"json"}),
+        )
+        .await;
+    assert!(!error, "{part}");
+    let part: Value = serde_json::from_str(&part).unwrap();
+    assert_eq!(part["text"], "один\r\n### В\r\nвложенный\r\n");
+    assert_eq!(part["range"], json!({"from":6,"to":8}));
+    assert_eq!(part["lines_total"], 12);
+    assert_eq!(part["revision"], whole["revision"]);
+    assert_eq!(part["title"], "Части");
+    let (error, sections) = mcp
+        .tool(
+            "bars_read",
+            json!({"path":"part.md","under":"А/Б","format":"json"}),
+        )
+        .await;
+    assert!(!error, "{sections}");
+    let sections: Value = serde_json::from_str(&sections).unwrap();
+    assert_eq!(
+        sections["sections"],
+        json!([
+            {"from":5,"to":8,"heading_chain":"А/Б"}, {"from":11,"to":12,"heading_chain":"А/Б"}
+        ])
+    );
+    assert_eq!(
+        sections["text"],
+        "## Б\r\nодин\r\n### В\r\nвложенный\r\n## Б\r\nдва"
+    );
+    let (error, text) = mcp
+        .tool(
+            "bars_read",
+            json!({"path":"part.md","under":"А/Б","format":"txt"}),
+        )
+        .await;
+    assert!(!error, "{text}");
+    assert!(
+        text.contains("=== PART 2 of 2 ===\nheading: А/Б\nlines: 11-12 of 12\n11 ## Б\n12 два"),
+        "{text}"
+    );
+    assert!(!text.contains("не выдавать"));
+    for args in [
+        json!({"lines":"0"}),
+        json!({"lines":"13-"}),
+        json!({"lines":"1","under":"А"}),
+        json!({"under":"Б"}),
+    ] {
+        let mut args = args;
+        args["path"] = json!("part.md");
+        let (error, text) = mcp.tool("bars_read", args).await;
+        assert!(error && text.contains("invalid_params"), "{text}");
+    }
+    fs::write(root.join("docs/part.md"), "# Новый\nс диска\n").unwrap();
+    let (error, text) = mcp
+        .tool(
+            "bars_read",
+            json!({"path":"part.md","lines":"2-999","format":"txt"}),
+        )
+        .await;
+    assert!(!error, "{text}");
+    assert!(text.contains("lines: 2-2 of 2\n2 с диска"), "{text}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn maintenance_tools_read_shared_results_and_keep_topic_mutations_closed() {
     use bars_core::new_topics::{Observation, Reason, Source, TopicStore};
     let harness = Harness::new("maintenance");

@@ -1,0 +1,1497 @@
+{
+  "root": 63148,
+  "exe_sha256": "A46458B8DD4E102F875FF8F8360407A0D33A4CD2783CE8C2BF76FDBA5B2F1B8C",
+  "initial": {
+    "utc": "2026-11-02T09:52:20.8202861Z",
+    "time": 1793613140825,
+    "logical_processors": 16,
+    "processes": [
+      {
+        "pid": 63148,
+        "parent": 49432,
+        "role": "native",
+        "start_utc": "2026-11-02T08:42:19.2852679Z",
+        "cpu": 1577.984375,
+        "logical_read": 505746487852.0,
+        "private": 8885252096,
+        "working": 5366472704
+      },
+      {
+        "pid": 21764,
+        "parent": 63148,
+        "role": "browser",
+        "start_utc": "2026-11-02T08:42:19.5260871Z",
+        "cpu": 3.203125,
+        "logical_read": 15738489.0,
+        "private": 34725888,
+        "working": 111996928
+      },
+      {
+        "pid": 45560,
+        "parent": 21764,
+        "role": "crashpad-handler",
+        "start_utc": "2026-11-02T08:42:19.5812014Z",
+        "cpu": 0.03125,
+        "logical_read": 1676.0,
+        "private": 2842624,
+        "working": 12607488
+      },
+      {
+        "pid": 62584,
+        "parent": 21764,
+        "role": "gpu-process",
+        "start_utc": "2026-11-02T08:42:19.9408694Z",
+        "cpu": 3.890625,
+        "logical_read": 5714696.0,
+        "private": 80834560,
+        "working": 64917504
+      },
+      {
+        "pid": 44404,
+        "parent": 21764,
+        "role": "utility",
+        "start_utc": "2026-11-02T08:42:19.9409487Z",
+        "cpu": 0.59375,
+        "logical_read": 3329904.0,
+        "private": 11321344,
+        "working": 36593664
+      },
+      {
+        "pid": 14372,
+        "parent": 21764,
+        "role": "utility",
+        "start_utc": "2026-11-02T08:42:19.9612572Z",
+        "cpu": 0.03125,
+        "logical_read": 117022.0,
+        "private": 7712768,
+        "working": 20230144
+      },
+      {
+        "pid": 8848,
+        "parent": 21764,
+        "role": "renderer",
+        "start_utc": "2026-11-02T08:42:20.0211021Z",
+        "cpu": 2.4375,
+        "logical_read": 1500275.0,
+        "private": 55185408,
+        "working": 90484736
+      }
+    ],
+    "windows": [
+      {
+        "Handle": 49088784,
+        "Title": "bars",
+        "Visible": false,
+        "Minimized": false
+      },
+      {
+        "Handle": 30874782,
+        "Title": "io.github.arketov.bars-siw",
+        "Visible": true,
+        "Minimized": false
+      },
+      {
+        "Handle": 661842,
+        "Title": "MSCTFIME UI",
+        "Visible": false,
+        "Minimized": false
+      },
+      {
+        "Handle": 17238044,
+        "Title": "Default IME",
+        "Visible": false,
+        "Minimized": false
+      }
+    ],
+    "compilers": []
+  },
+  "samples": [
+    {
+      "after": {
+        "utc": "2026-11-02T09:53:05.5812866Z",
+        "time": 1793613185581,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 63148,
+            "parent": 49432,
+            "role": "native",
+            "start_utc": "2026-11-02T08:42:19.2852679Z",
+            "cpu": 1634.421875,
+            "logical_read": 517772336940.0,
+            "private": 9063702528,
+            "working": 4940816384
+          },
+          {
+            "pid": 21764,
+            "parent": 63148,
+            "role": "browser",
+            "start_utc": "2026-11-02T08:42:19.5260871Z",
+            "cpu": 3.21875,
+            "logical_read": 15775569.0,
+            "private": 34795520,
+            "working": 112033792
+          },
+          {
+            "pid": 45560,
+            "parent": 21764,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T08:42:19.5812014Z",
+            "cpu": 0.03125,
+            "logical_read": 1676.0,
+            "private": 2875392,
+            "working": 12623872
+          },
+          {
+            "pid": 62584,
+            "parent": 21764,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T08:42:19.9408694Z",
+            "cpu": 3.90625,
+            "logical_read": 5751736.0,
+            "private": 79269888,
+            "working": 63909888
+          },
+          {
+            "pid": 44404,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9409487Z",
+            "cpu": 0.59375,
+            "logical_read": 3358984.0,
+            "private": 11325440,
+            "working": 36597760
+          },
+          {
+            "pid": 14372,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9612572Z",
+            "cpu": 0.03125,
+            "logical_read": 117022.0,
+            "private": 7712768,
+            "working": 20230144
+          },
+          {
+            "pid": 8848,
+            "parent": 21764,
+            "role": "renderer",
+            "start_utc": "2026-11-02T08:42:20.0211021Z",
+            "cpu": 2.46875,
+            "logical_read": 1514467.0,
+            "private": 55644160,
+            "working": 90865664
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 49088784,
+            "Title": "bars",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 30874782,
+            "Title": "io.github.arketov.bars-siw",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 661842,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 17238044,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": []
+      },
+      "round": 1,
+      "before": {
+        "utc": "2026-11-02T09:52:35.080555Z",
+        "time": 1793613155080,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 63148,
+            "parent": 49432,
+            "role": "native",
+            "start_utc": "2026-11-02T08:42:19.2852679Z",
+            "cpu": 1593.34375,
+            "logical_read": 509461666514.0,
+            "private": 8904769536,
+            "working": 5388058624
+          },
+          {
+            "pid": 21764,
+            "parent": 63148,
+            "role": "browser",
+            "start_utc": "2026-11-02T08:42:19.5260871Z",
+            "cpu": 3.203125,
+            "logical_read": 15747905.0,
+            "private": 34795520,
+            "working": 112033792
+          },
+          {
+            "pid": 45560,
+            "parent": 21764,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T08:42:19.5812014Z",
+            "cpu": 0.03125,
+            "logical_read": 1676.0,
+            "private": 2875392,
+            "working": 12623872
+          },
+          {
+            "pid": 62584,
+            "parent": 21764,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T08:42:19.9408694Z",
+            "cpu": 3.890625,
+            "logical_read": 5723928.0,
+            "private": 80363520,
+            "working": 64856064
+          },
+          {
+            "pid": 44404,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9409487Z",
+            "cpu": 0.59375,
+            "logical_read": 3337784.0,
+            "private": 11325440,
+            "working": 36597760
+          },
+          {
+            "pid": 14372,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9612572Z",
+            "cpu": 0.03125,
+            "logical_read": 117022.0,
+            "private": 7712768,
+            "working": 20230144
+          },
+          {
+            "pid": 8848,
+            "parent": 21764,
+            "role": "renderer",
+            "start_utc": "2026-11-02T08:42:20.0211021Z",
+            "cpu": 2.4375,
+            "logical_read": 1503779.0,
+            "private": 55566336,
+            "working": 90828800
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 49088784,
+            "Title": "bars",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 30874782,
+            "Title": "io.github.arketov.bars-siw",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 661842,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 17238044,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": []
+      },
+      "visible": false
+    },
+    {
+      "after": {
+        "utc": "2026-11-02T09:53:49.2290057Z",
+        "time": 1793613229229,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 63148,
+            "parent": 49432,
+            "role": "native",
+            "start_utc": "2026-11-02T08:42:19.2852679Z",
+            "cpu": 1704.40625,
+            "logical_read": 541735682790.0,
+            "private": 9038168064,
+            "working": 4916379648
+          },
+          {
+            "pid": 21764,
+            "parent": 63148,
+            "role": "browser",
+            "start_utc": "2026-11-02T08:42:19.5260871Z",
+            "cpu": 3.625,
+            "logical_read": 35608437.0,
+            "private": 36044800,
+            "working": 117817344
+          },
+          {
+            "pid": 45560,
+            "parent": 21764,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T08:42:19.5812014Z",
+            "cpu": 0.03125,
+            "logical_read": 1676.0,
+            "private": 2871296,
+            "working": 12619776
+          },
+          {
+            "pid": 62584,
+            "parent": 21764,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T08:42:19.9408694Z",
+            "cpu": 7.875,
+            "logical_read": 21522448.0,
+            "private": 96014336,
+            "working": 79429632
+          },
+          {
+            "pid": 44404,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9409487Z",
+            "cpu": 0.65625,
+            "logical_read": 3695880.0,
+            "private": 11558912,
+            "working": 36892672
+          },
+          {
+            "pid": 14372,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9612572Z",
+            "cpu": 0.03125,
+            "logical_read": 117246.0,
+            "private": 7712768,
+            "working": 20246528
+          },
+          {
+            "pid": 8848,
+            "parent": 21764,
+            "role": "renderer",
+            "start_utc": "2026-11-02T08:42:20.0211021Z",
+            "cpu": 14.5625,
+            "logical_read": 2106179.0,
+            "private": 207822848,
+            "working": 249729024
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 49088784,
+            "Title": "bars",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 30874782,
+            "Title": "io.github.arketov.bars-siw",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 661842,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 17238044,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": [
+          {
+            "ProcessId": 44052,
+            "Name": "cargo.exe"
+          },
+          {
+            "ProcessId": 53712,
+            "Name": "rustc.exe"
+          }
+        ]
+      },
+      "round": 1,
+      "before": {
+        "utc": "2026-11-02T09:53:18.7013251Z",
+        "time": 1793613198701,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 63148,
+            "parent": 49432,
+            "role": "native",
+            "start_utc": "2026-11-02T08:42:19.2852679Z",
+            "cpu": 1665.921875,
+            "logical_read": 529106205301.0,
+            "private": 9106657280,
+            "working": 4981780480
+          },
+          {
+            "pid": 21764,
+            "parent": 63148,
+            "role": "browser",
+            "start_utc": "2026-11-02T08:42:19.5260871Z",
+            "cpu": 3.4375,
+            "logical_read": 23070458.0,
+            "private": 38985728,
+            "working": 120639488
+          },
+          {
+            "pid": 45560,
+            "parent": 21764,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T08:42:19.5812014Z",
+            "cpu": 0.03125,
+            "logical_read": 1676.0,
+            "private": 2875392,
+            "working": 12623872
+          },
+          {
+            "pid": 62584,
+            "parent": 21764,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T08:42:19.9408694Z",
+            "cpu": 6.109375,
+            "logical_read": 16354896.0,
+            "private": 91660288,
+            "working": 75780096
+          },
+          {
+            "pid": 44404,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9409487Z",
+            "cpu": 0.625,
+            "logical_read": 3486456.0,
+            "private": 11505664,
+            "working": 36847616
+          },
+          {
+            "pid": 14372,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9612572Z",
+            "cpu": 0.03125,
+            "logical_read": 117246.0,
+            "private": 7712768,
+            "working": 20246528
+          },
+          {
+            "pid": 8848,
+            "parent": 21764,
+            "role": "renderer",
+            "start_utc": "2026-11-02T08:42:20.0211021Z",
+            "cpu": 10.046875,
+            "logical_read": 1862947.0,
+            "private": 243445760,
+            "working": 282906624
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 49088784,
+            "Title": "bars",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 30874782,
+            "Title": "io.github.arketov.bars-siw",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 661842,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 17238044,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": []
+      },
+      "visible": true
+    },
+    {
+      "after": {
+        "utc": "2026-11-02T09:54:32.5748516Z",
+        "time": 1793613272574,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 63148,
+            "parent": 49432,
+            "role": "native",
+            "start_utc": "2026-11-02T08:42:19.2852679Z",
+            "cpu": 1726.703125,
+            "logical_read": 548459454832.0,
+            "private": 8919531520,
+            "working": 4787232768
+          },
+          {
+            "pid": 21764,
+            "parent": 63148,
+            "role": "browser",
+            "start_utc": "2026-11-02T08:42:19.5260871Z",
+            "cpu": 3.640625,
+            "logical_read": 35659317.0,
+            "private": 36052992,
+            "working": 117932032
+          },
+          {
+            "pid": 45560,
+            "parent": 21764,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T08:42:19.5812014Z",
+            "cpu": 0.03125,
+            "logical_read": 1676.0,
+            "private": 2871296,
+            "working": 12681216
+          },
+          {
+            "pid": 62584,
+            "parent": 21764,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T08:42:19.9408694Z",
+            "cpu": 15.078125,
+            "logical_read": 90923112.0,
+            "private": 83636224,
+            "working": 74784768
+          },
+          {
+            "pid": 44404,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9409487Z",
+            "cpu": 0.65625,
+            "logical_read": 3735232.0,
+            "private": 11476992,
+            "working": 36814848
+          },
+          {
+            "pid": 14372,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9612572Z",
+            "cpu": 0.03125,
+            "logical_read": 117246.0,
+            "private": 7712768,
+            "working": 20246528
+          },
+          {
+            "pid": 8848,
+            "parent": 21764,
+            "role": "renderer",
+            "start_utc": "2026-11-02T08:42:20.0211021Z",
+            "cpu": 15.515625,
+            "logical_read": 3516347.0,
+            "private": 192643072,
+            "working": 236335104
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 49088784,
+            "Title": "bars",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 30874782,
+            "Title": "io.github.arketov.bars-siw",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 661842,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 17238044,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": []
+      },
+      "round": 2,
+      "before": {
+        "utc": "2026-11-02T09:54:02.1535324Z",
+        "time": 1793613242153,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 63148,
+            "parent": 49432,
+            "role": "native",
+            "start_utc": "2026-11-02T08:42:19.2852679Z",
+            "cpu": 1706.578125,
+            "logical_read": 542579605974.0,
+            "private": 9042817024,
+            "working": 4916432896
+          },
+          {
+            "pid": 21764,
+            "parent": 63148,
+            "role": "browser",
+            "start_utc": "2026-11-02T08:42:19.5260871Z",
+            "cpu": 3.640625,
+            "logical_read": 35632325.0,
+            "private": 35962880,
+            "working": 117739520
+          },
+          {
+            "pid": 45560,
+            "parent": 21764,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T08:42:19.5812014Z",
+            "cpu": 0.03125,
+            "logical_read": 1676.0,
+            "private": 2871296,
+            "working": 12619776
+          },
+          {
+            "pid": 62584,
+            "parent": 21764,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T08:42:19.9408694Z",
+            "cpu": 12.375,
+            "logical_read": 42350552.0,
+            "private": 89042944,
+            "working": 74891264
+          },
+          {
+            "pid": 44404,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9409487Z",
+            "cpu": 0.65625,
+            "logical_read": 3714032.0,
+            "private": 11558912,
+            "working": 36896768
+          },
+          {
+            "pid": 14372,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9612572Z",
+            "cpu": 0.03125,
+            "logical_read": 117246.0,
+            "private": 7712768,
+            "working": 20246528
+          },
+          {
+            "pid": 8848,
+            "parent": 21764,
+            "role": "renderer",
+            "start_utc": "2026-11-02T08:42:20.0211021Z",
+            "cpu": 15.5,
+            "logical_read": 2534059.0,
+            "private": 193183744,
+            "working": 236920832
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 49088784,
+            "Title": "bars",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 30874782,
+            "Title": "io.github.arketov.bars-siw",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 661842,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 17238044,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": []
+      },
+      "visible": false
+    },
+    {
+      "after": {
+        "utc": "2026-11-02T09:55:15.8551966Z",
+        "time": 1793613315855,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 63148,
+            "parent": 49432,
+            "role": "native",
+            "start_utc": "2026-11-02T08:42:19.2852679Z",
+            "cpu": 1773.484375,
+            "logical_read": 559231124889.0,
+            "private": 9158545408,
+            "working": 5033185280
+          },
+          {
+            "pid": 21764,
+            "parent": 63148,
+            "role": "browser",
+            "start_utc": "2026-11-02T08:42:19.5260871Z",
+            "cpu": 3.96875,
+            "logical_read": 53983787.0,
+            "private": 38215680,
+            "working": 120193024
+          },
+          {
+            "pid": 45560,
+            "parent": 21764,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T08:42:19.5812014Z",
+            "cpu": 0.03125,
+            "logical_read": 1676.0,
+            "private": 2871296,
+            "working": 12681216
+          },
+          {
+            "pid": 62584,
+            "parent": 21764,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T08:42:19.9408694Z",
+            "cpu": 16.109375,
+            "logical_read": 95069680.0,
+            "private": 94621696,
+            "working": 89305088
+          },
+          {
+            "pid": 44404,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9409487Z",
+            "cpu": 0.71875,
+            "logical_read": 4076088.0,
+            "private": 11558912,
+            "working": 36925440
+          },
+          {
+            "pid": 14372,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9612572Z",
+            "cpu": 0.03125,
+            "logical_read": 117246.0,
+            "private": 7712768,
+            "working": 20254720
+          },
+          {
+            "pid": 8848,
+            "parent": 21764,
+            "role": "renderer",
+            "start_utc": "2026-11-02T08:42:20.0211021Z",
+            "cpu": 18.96875,
+            "logical_read": 3804691.0,
+            "private": 141320192,
+            "working": 194560000
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 49088784,
+            "Title": "bars",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 30874782,
+            "Title": "io.github.arketov.bars-siw",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 661842,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 17238044,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": []
+      },
+      "round": 2,
+      "before": {
+        "utc": "2026-11-02T09:54:45.3802268Z",
+        "time": 1793613285380,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 63148,
+            "parent": 49432,
+            "role": "native",
+            "start_utc": "2026-11-02T08:42:19.2852679Z",
+            "cpu": 1731.453125,
+            "logical_read": 549087491443.0,
+            "private": 8923062272,
+            "working": 4791738368
+          },
+          {
+            "pid": 21764,
+            "parent": 63148,
+            "role": "browser",
+            "start_utc": "2026-11-02T08:42:19.5260871Z",
+            "cpu": 3.71875,
+            "logical_read": 41385872.0,
+            "private": 38379520,
+            "working": 120352768
+          },
+          {
+            "pid": 45560,
+            "parent": 21764,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T08:42:19.5812014Z",
+            "cpu": 0.03125,
+            "logical_read": 1676.0,
+            "private": 2871296,
+            "working": 12681216
+          },
+          {
+            "pid": 62584,
+            "parent": 21764,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T08:42:19.9408694Z",
+            "cpu": 15.75,
+            "logical_read": 93156808.0,
+            "private": 134053888,
+            "working": 88006656
+          },
+          {
+            "pid": 44404,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9409487Z",
+            "cpu": 0.6875,
+            "logical_read": 3846312.0,
+            "private": 11558912,
+            "working": 36921344
+          },
+          {
+            "pid": 14372,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9612572Z",
+            "cpu": 0.03125,
+            "logical_read": 117246.0,
+            "private": 7712768,
+            "working": 20254720
+          },
+          {
+            "pid": 8848,
+            "parent": 21764,
+            "role": "renderer",
+            "start_utc": "2026-11-02T08:42:20.0211021Z",
+            "cpu": 18.15625,
+            "logical_read": 3639491.0,
+            "private": 209821696,
+            "working": 264413184
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 49088784,
+            "Title": "bars",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 30874782,
+            "Title": "io.github.arketov.bars-siw",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 661842,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 17238044,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": []
+      },
+      "visible": true
+    },
+    {
+      "after": {
+        "utc": "2026-11-02T09:55:59.4728222Z",
+        "time": 1793613359472,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 63148,
+            "parent": 49432,
+            "role": "native",
+            "start_utc": "2026-11-02T08:42:19.2852679Z",
+            "cpu": 1841.25,
+            "logical_read": 582508950617.0,
+            "private": 8993116160,
+            "working": 4873695232
+          },
+          {
+            "pid": 21764,
+            "parent": 63148,
+            "role": "browser",
+            "start_utc": "2026-11-02T08:42:19.5260871Z",
+            "cpu": 4.015625,
+            "logical_read": 54040531.0,
+            "private": 36065280,
+            "working": 118104064
+          },
+          {
+            "pid": 45560,
+            "parent": 21764,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T08:42:19.5812014Z",
+            "cpu": 0.03125,
+            "logical_read": 1676.0,
+            "private": 2871296,
+            "working": 12681216
+          },
+          {
+            "pid": 62584,
+            "parent": 21764,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T08:42:19.9408694Z",
+            "cpu": 16.109375,
+            "logical_read": 95072704.0,
+            "private": 94597120,
+            "working": 89280512
+          },
+          {
+            "pid": 44404,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9409487Z",
+            "cpu": 0.734375,
+            "logical_read": 4108784.0,
+            "private": 11497472,
+            "working": 36864000
+          },
+          {
+            "pid": 14372,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9612572Z",
+            "cpu": 0.03125,
+            "logical_read": 117246.0,
+            "private": 7712768,
+            "working": 20254720
+          },
+          {
+            "pid": 8848,
+            "parent": 21764,
+            "role": "renderer",
+            "start_utc": "2026-11-02T08:42:20.0211021Z",
+            "cpu": 18.984375,
+            "logical_read": 3819331.0,
+            "private": 138854400,
+            "working": 192458752
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 49088784,
+            "Title": "bars",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 30874782,
+            "Title": "io.github.arketov.bars-siw",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 661842,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 17238044,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": []
+      },
+      "round": 3,
+      "before": {
+        "utc": "2026-11-02T09:55:29.0365612Z",
+        "time": 1793613329036,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 63148,
+            "parent": 49432,
+            "role": "native",
+            "start_utc": "2026-11-02T08:42:19.2852679Z",
+            "cpu": 1799.609375,
+            "logical_read": 568245885395.0,
+            "private": 9107431424,
+            "working": 4984627200
+          },
+          {
+            "pid": 21764,
+            "parent": 63148,
+            "role": "browser",
+            "start_utc": "2026-11-02T08:42:19.5260871Z",
+            "cpu": 3.984375,
+            "logical_read": 54004451.0,
+            "private": 36163584,
+            "working": 118194176
+          },
+          {
+            "pid": 45560,
+            "parent": 21764,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T08:42:19.5812014Z",
+            "cpu": 0.03125,
+            "logical_read": 1676.0,
+            "private": 2871296,
+            "working": 12681216
+          },
+          {
+            "pid": 62584,
+            "parent": 21764,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T08:42:19.9408694Z",
+            "cpu": 16.109375,
+            "logical_read": 95071248.0,
+            "private": 94609408,
+            "working": 89292800
+          },
+          {
+            "pid": 44404,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9409487Z",
+            "cpu": 0.734375,
+            "logical_read": 4093664.0,
+            "private": 11497472,
+            "working": 36864000
+          },
+          {
+            "pid": 14372,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9612572Z",
+            "cpu": 0.03125,
+            "logical_read": 117246.0,
+            "private": 7712768,
+            "working": 20254720
+          },
+          {
+            "pid": 8848,
+            "parent": 21764,
+            "role": "renderer",
+            "start_utc": "2026-11-02T08:42:20.0211021Z",
+            "cpu": 18.984375,
+            "logical_read": 3812003.0,
+            "private": 139575296,
+            "working": 193134592
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 49088784,
+            "Title": "bars",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 30874782,
+            "Title": "io.github.arketov.bars-siw",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 661842,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 17238044,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": []
+      },
+      "visible": false
+    },
+    {
+      "after": {
+        "utc": "2026-11-02T09:56:42.8938802Z",
+        "time": 1793613402893,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 63148,
+            "parent": 49432,
+            "role": "native",
+            "start_utc": "2026-11-02T08:42:19.2852679Z",
+            "cpu": 1880.640625,
+            "logical_read": 593152116288.0,
+            "private": 8896364544,
+            "working": 4143915008
+          },
+          {
+            "pid": 21764,
+            "parent": 63148,
+            "role": "browser",
+            "start_utc": "2026-11-02T08:42:19.5260871Z",
+            "cpu": 4.21875,
+            "logical_read": 58094190.0,
+            "private": 36118528,
+            "working": 118132736
+          },
+          {
+            "pid": 45560,
+            "parent": 21764,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T08:42:19.5812014Z",
+            "cpu": 0.03125,
+            "logical_read": 1676.0,
+            "private": 2871296,
+            "working": 12451840
+          },
+          {
+            "pid": 62584,
+            "parent": 21764,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T08:42:19.9408694Z",
+            "cpu": 26.546875,
+            "logical_read": 160639480.0,
+            "private": 85544960,
+            "working": 89247744
+          },
+          {
+            "pid": 44404,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9409487Z",
+            "cpu": 0.734375,
+            "logical_read": 4206136.0,
+            "private": 11493376,
+            "working": 36802560
+          },
+          {
+            "pid": 14372,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9612572Z",
+            "cpu": 0.03125,
+            "logical_read": 117246.0,
+            "private": 7712768,
+            "working": 20099072
+          },
+          {
+            "pid": 8848,
+            "parent": 21764,
+            "role": "renderer",
+            "start_utc": "2026-11-02T08:42:20.0211021Z",
+            "cpu": 22.0625,
+            "logical_read": 5202147.0,
+            "private": 146157568,
+            "working": 200302592
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 30874782,
+            "Title": "io.github.arketov.bars-siw",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 49088784,
+            "Title": "bars",
+            "Visible": true,
+            "Minimized": true
+          },
+          {
+            "Handle": 661842,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 17238044,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": []
+      },
+      "round": 3,
+      "before": {
+        "utc": "2026-11-02T09:56:12.4909424Z",
+        "time": 1793613372490,
+        "logical_processors": 16,
+        "processes": [
+          {
+            "pid": 63148,
+            "parent": 49432,
+            "role": "native",
+            "start_utc": "2026-11-02T08:42:19.2852679Z",
+            "cpu": 1852.5625,
+            "logical_read": 585291592963.0,
+            "private": 8925298688,
+            "working": 4168798208
+          },
+          {
+            "pid": 21764,
+            "parent": 63148,
+            "role": "browser",
+            "start_utc": "2026-11-02T08:42:19.5260871Z",
+            "cpu": 4.203125,
+            "logical_read": 58068686.0,
+            "private": 39620608,
+            "working": 121626624
+          },
+          {
+            "pid": 45560,
+            "parent": 21764,
+            "role": "crashpad-handler",
+            "start_utc": "2026-11-02T08:42:19.5812014Z",
+            "cpu": 0.03125,
+            "logical_read": 1676.0,
+            "private": 2871296,
+            "working": 12451840
+          },
+          {
+            "pid": 62584,
+            "parent": 21764,
+            "role": "gpu-process",
+            "start_utc": "2026-11-02T08:42:19.9408694Z",
+            "cpu": 18.203125,
+            "logical_read": 111554488.0,
+            "private": 85540864,
+            "working": 89243648
+          },
+          {
+            "pid": 44404,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9409487Z",
+            "cpu": 0.734375,
+            "logical_read": 4183712.0,
+            "private": 11509760,
+            "working": 36818944
+          },
+          {
+            "pid": 14372,
+            "parent": 21764,
+            "role": "utility",
+            "start_utc": "2026-11-02T08:42:19.9612572Z",
+            "cpu": 0.03125,
+            "logical_read": 117246.0,
+            "private": 7712768,
+            "working": 20099072
+          },
+          {
+            "pid": 8848,
+            "parent": 21764,
+            "role": "renderer",
+            "start_utc": "2026-11-02T08:42:20.0211021Z",
+            "cpu": 19.984375,
+            "logical_read": 4210115.0,
+            "private": 148045824,
+            "working": 202207232
+          }
+        ],
+        "windows": [
+          {
+            "Handle": 30874782,
+            "Title": "io.github.arketov.bars-siw",
+            "Visible": true,
+            "Minimized": false
+          },
+          {
+            "Handle": 49088784,
+            "Title": "bars",
+            "Visible": true,
+            "Minimized": true
+          },
+          {
+            "Handle": 661842,
+            "Title": "MSCTFIME UI",
+            "Visible": false,
+            "Minimized": false
+          },
+          {
+            "Handle": 17238044,
+            "Title": "Default IME",
+            "Visible": false,
+            "Minimized": false
+          }
+        ],
+        "compilers": []
+      },
+      "visible": true
+    }
+  ],
+  "success": true,
+  "final": {
+    "utc": "2026-11-02T09:56:45.3046213Z",
+    "time": 1793613405304,
+    "logical_processors": 16,
+    "processes": [
+      {
+        "pid": 63148,
+        "parent": 49432,
+        "role": "native",
+        "start_utc": "2026-11-02T08:42:19.2852679Z",
+        "cpu": 1881.921875,
+        "logical_read": 593499941749.0,
+        "private": 8933130240,
+        "working": 4175683584
+      },
+      {
+        "pid": 21764,
+        "parent": 63148,
+        "role": "browser",
+        "start_utc": "2026-11-02T08:42:19.5260871Z",
+        "cpu": 4.21875,
+        "logical_read": 58094526.0,
+        "private": 36118528,
+        "working": 118132736
+      },
+      {
+        "pid": 45560,
+        "parent": 21764,
+        "role": "crashpad-handler",
+        "start_utc": "2026-11-02T08:42:19.5812014Z",
+        "cpu": 0.03125,
+        "logical_read": 1676.0,
+        "private": 2871296,
+        "working": 12451840
+      },
+      {
+        "pid": 62584,
+        "parent": 21764,
+        "role": "gpu-process",
+        "start_utc": "2026-11-02T08:42:19.9408694Z",
+        "cpu": 26.546875,
+        "logical_read": 164528728.0,
+        "private": 85536768,
+        "working": 89239552
+      },
+      {
+        "pid": 44404,
+        "parent": 21764,
+        "role": "utility",
+        "start_utc": "2026-11-02T08:42:19.9409487Z",
+        "cpu": 0.734375,
+        "logical_read": 4206136.0,
+        "private": 11493376,
+        "working": 36802560
+      },
+      {
+        "pid": 14372,
+        "parent": 21764,
+        "role": "utility",
+        "start_utc": "2026-11-02T08:42:19.9612572Z",
+        "cpu": 0.03125,
+        "logical_read": 117246.0,
+        "private": 7712768,
+        "working": 20099072
+      },
+      {
+        "pid": 8848,
+        "parent": 21764,
+        "role": "renderer",
+        "start_utc": "2026-11-02T08:42:20.0211021Z",
+        "cpu": 22.0625,
+        "logical_read": 5280435.0,
+        "private": 146157568,
+        "working": 200302592
+      }
+    ],
+    "windows": [
+      {
+        "Handle": 30874782,
+        "Title": "io.github.arketov.bars-siw",
+        "Visible": true,
+        "Minimized": false
+      },
+      {
+        "Handle": 49088784,
+        "Title": "bars",
+        "Visible": false,
+        "Minimized": true
+      },
+      {
+        "Handle": 661842,
+        "Title": "MSCTFIME UI",
+        "Visible": false,
+        "Minimized": false
+      },
+      {
+        "Handle": 17238044,
+        "Title": "Default IME",
+        "Visible": false,
+        "Minimized": false
+      }
+    ],
+    "compilers": []
+  },
+  "restored": true
+}

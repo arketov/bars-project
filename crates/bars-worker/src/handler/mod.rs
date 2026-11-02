@@ -21,7 +21,7 @@ mod tests;
 use std::path::{Path, PathBuf};
 
 use bars_core::doc_path::resolve_doc_path;
-use bars_core::indexing::chunking::chunk_document;
+use bars_core::indexing::chunking::document_title;
 use bars_core::indexing::walk::read_utf8_path;
 use bars_core::models::Reranker;
 use bars_core::outline::{OutlineQuery, Under, outline};
@@ -569,14 +569,50 @@ impl WorkerHandler {
     }
 
     fn read(&self, params: ReadParams) -> Result<ReadOutput, RpcError> {
-        let (text, settings) = self.document(&params.target, &params.path)?;
-        let title = chunk_document(&params.path, &text, &settings.chunking).title;
+        let (text, _) = self.document(&params.target, &params.path)?;
+        let selection = if params.lines.is_some() || params.under.is_some() {
+            Some(
+                bars_core::document_read::select(
+                    &text,
+                    params.lines.as_deref(),
+                    params.under.as_deref(),
+                )
+                .map_err(|e| RpcError::bars(ErrorKind::InvalidParams, e))?,
+            )
+        } else {
+            None
+        };
+        let title = document_title(&params.path, &text);
         let revision = blake3::hash(text.as_bytes()).to_hex().to_string();
-        Ok(ReadOutput {
+        let mut output = ReadOutput {
             title,
-            text,
             revision,
-        })
+            ..ReadOutput::default()
+        };
+        if let Some(selection) = selection {
+            output.lines_total = Some(selection.lines_total);
+            for part in selection.parts {
+                output.text.push_str(&text[part.bytes]);
+                if let Some(heading_chain) = part.heading_chain {
+                    output.sections.push(bars_protocol::ReadSection {
+                        from: part.from,
+                        to: part.to,
+                        heading_chain,
+                    });
+                } else {
+                    output.range = Some(bars_protocol::ReadRange {
+                        from: part.from,
+                        to: part.to,
+                    });
+                }
+            }
+        } else {
+            output.text = text;
+        }
+        if !output.sections.is_empty() {
+            history::applied_field("range", serde_json::json!("sections"));
+        }
+        Ok(output)
     }
 
     async fn projects(

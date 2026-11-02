@@ -235,6 +235,8 @@ mod tests {
         tokio::spawn(serve_connection(server, h));
         let mut client = crate::Client::over(client, ClientKind::Mcp).await.unwrap();
         let mut params = crate::ReadParams {
+            lines: None,
+            under: None,
             target: crate::Target {
                 cwd: "/p".into(),
                 project: None,

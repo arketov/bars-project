@@ -50,7 +50,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | `similar` | `cwd`, `project`, `chunk_id`, `modules`, `limit` | исходный чанк, ближайшие чанки с косинусной близостью и применённый `limit` ([features/search/maintenance-tools.md](../features/search/maintenance-tools.md)); неизвестный или устаревший ID — `chunk_not_found` | MCP, CLI |
 | `duplicates` | `cwd`, `project`, `modules`, `limit` | записи о повторах (`kind`, чанки с ID, `score`, `shared`, `differences`, `repeated_block`), `counts`, `total`, применённый `limit` и `clamped`, `chunks_checked`, `chunks_skipped_short` ([features/search/maintenance-tools.md](../features/search/maintenance-tools.md#get_duplicates-аудит-дублей-проекта)) | MCP, CLI |
 | `outline` | `cwd`, `project`, `path`, `levels`, `under` (цепочка заголовков) или `under_line` | заголовки с номерами строк (Т-26) | MCP, CLI |
-| `read` | `cwd`, `project`, `path` | исходный `text` и `title`; номера строк добавляет клиент | MCP, CLI |
+| `read` | `cwd`, `project`, `path`, необязательные взаимоисключающие `lines` / `under` | исходный `text`, `title`, `revision`; у части — `lines_total` и `range` / `sections` | MCP, CLI |
 | `projects` | необязательный `target: {cwd, project?}`; без target — весь реестр | проекты: путь, имя, корень документации, состояние, модули с числом документов и необязательным `title` своего оглавления; MCP передаёт target по умолчанию, весь реестр только по `all=true` | MCP, CLI |
 | `session_info` | `cwd` | необязательный проект сессии: имя, модули (`name`, `documents`, `title` оглавления); без моделей и индексации | внутренний запрос MCP при initialize/list_tools |
 | `status` | `cwd`, `project` | состояние индекса проекта ([worker.md](worker.md)) | MCP, CLI |
@@ -80,7 +80,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 
 - `search` — `results` (путь от корня проекта, `module`, `title`, `heading_chain` строкой `Заголовок 1/Заголовок 2`, `sections` — заголовки разделов, приклеенных к чанку после первого, в виде строк `## Заголовок`, поле пропускается, если их нет, `first_line`, `last_line`, `text`, `score`, `score_kind`), `applied` (число результатов, кандидатов, кандидатов реранка, порог, вид оценки, `clamped`), `indexing`, `pending` и, если rerank не отработал, `rerank_error`.
 - `outline` — `headings`: номер строки, уровень, текст. Строку `7 ## Стадия` из заголовка собирает функция крейта `bars-protocol`, общая для MCP и CLI.
-- `read` — `title` и `text` как есть. Номера строк ставит функция `number_lines` крейта `bars-protocol`: у MCP и CLI вывод одинаковый (Т-20).
+- `read` — `title`, `revision` полного документа и `text` как есть. Без выбора части формат прежний; у части добавляются `lines_total` и `range` (`from`, `to`) либо `sections` (`from`, `to`, `heading_chain`). `text` содержит только выбранные строки, повторяющиеся разделы — в порядке документа. Общий рендерер `bars-protocol` сохраняет исходные номера строк и метки частей для MCP/CLI (Т-20); границы и ошибки — в контракте `bars_read`.
 - `status` — поля из таблицы в [worker.md](worker.md) и `path` проекта; время — RFC 3339.
 - `projects` и `register` — описание проекта: путь, имя, корень документации, состояние, модули с `name`, `documents` и необязательным `title` собственного оглавления. У `projects` параметр `target` ограничивает чтение одним проектом; отсутствие `target` сохраняет полный список для CLI. MCP передаёт проект сессии по умолчанию, а полный список запрашивает только через `all=true`.
 

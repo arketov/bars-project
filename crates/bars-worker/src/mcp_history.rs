@@ -566,7 +566,7 @@ pub fn requested(tool: &str, source: &Value) -> Value {
         "bars_projects" => &["format", "project", "all"],
         "bars_get_duplicates" => &["format", "project", "modules", "limit"],
         "bars_get_similar" => &["format", "project", "chunk_id", "modules", "limit"],
-        "bars_read" => &["format", "project", "path"],
+        "bars_read" => &["format", "project", "path", "lines", "under"],
         "bars_text_search" => &[
             "format",
             "project",

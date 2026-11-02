@@ -12,6 +12,8 @@ async fn mcp_history_ui_real_ipc_record_has_readable_input_and_result() {
     let response = mcp
         .call_observed(
             &ReadParams {
+                lines: None,
+                under: None,
                 target: target(&root),
                 path: "guide.md".into(),
             },
@@ -37,6 +39,30 @@ async fn mcp_history_ui_real_ipc_record_has_readable_input_and_result() {
         "C:/temporary-bars-project",
     );
     println!("MCP_UI_EVIDENCE={safe}");
+
+    let partial_input = serde_json::json!({"path":"guide.md","lines":"2-4","format":"json"});
+    mcp.call_observed(
+        &ReadParams {
+            target: target(&root),
+            path: "guide.md".into(),
+            lines: Some("2-4".into()),
+            under: None,
+        },
+        Some(&partial_input),
+    )
+    .await
+    .unwrap();
+    let page = history.page(&Default::default()).unwrap();
+    let partial = page
+        .records
+        .iter()
+        .find(|a| a.requested == partial_input)
+        .unwrap();
+    assert_eq!(
+        partial.applied["range"],
+        serde_json::json!({"from":2,"to":4})
+    );
+    assert_eq!(partial.result["count"], 3);
 }
 
 async fn connection(

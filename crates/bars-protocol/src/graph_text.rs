@@ -249,6 +249,25 @@ struct Citations {
     seen: BTreeMap<String, Vec<(usize, usize, usize, bool)>>,
 }
 impl Citations {
+    // Основания ребра нельзя склеивать с соседним фактом на той же строке.
+    fn assertion(view: &View<'_>, ids: &[String], quote: bool) -> String {
+        let mut text = String::new();
+        let mut seen = BTreeSet::new();
+        for (i, proof) in ids
+            .iter()
+            .filter_map(|id| view.evidence.get(id.as_str()))
+            .filter(|proof| seen.insert(proof.id.as_str()))
+            .enumerate()
+        {
+            let _ = write!(text, "   {}", view.location(proof));
+            if quote && i < 3 {
+                let _ = write!(text, " «{}»", short(&proof.quote, view.quote_chars));
+            }
+            text.push('\n');
+        }
+        text
+    }
+
     fn render(&mut self, view: &View<'_>, ids: &[String], number: usize, quote: bool) -> String {
         self.render_quotes(view, ids, number, quote, 3)
     }
@@ -390,10 +409,9 @@ fn path_text(view: &View<'_>, path: &GraphPath, n: usize, citations: &mut Citati
                     ""
                 }
             );
-            text.push_str(&citations.render(
+            text.push_str(&Citations::assertion(
                 view,
                 &edge.evidence,
-                n,
                 edge.origin == Origin::ExplicitRule,
             ));
         } else {
@@ -418,7 +436,12 @@ fn path_text(view: &View<'_>, path: &GraphPath, n: usize, citations: &mut Citati
 
 fn unit(view: &View<'_>, item: &Item, n: usize, citations: &mut Citations) -> String {
     match item {
-        Item::Relation { assertion: edge } | Item::Edge { edge } => format!(
+        Item::Relation { assertion: edge } => format!(
+            "{n}. {}\n{}",
+            edge_text(view, edge),
+            Citations::assertion(view, &edge.evidence, edge.origin == Origin::ExplicitRule)
+        ),
+        Item::Edge { edge } => format!(
             "{n}. {}\n{}",
             edge_text(view, edge),
             citations.render(view, &edge.evidence, n, edge.origin == Origin::ExplicitRule)

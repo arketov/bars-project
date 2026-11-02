@@ -118,6 +118,36 @@ fn headings(source: &str) -> Vec<Node> {
     nodes
 }
 
+/// Разделы с самим заголовком и вложенными; границы — исходные строки, включительно.
+pub fn section_ranges(
+    source: &str,
+    chain: &str,
+    lines_total: usize,
+) -> Result<Vec<(usize, usize, String)>, OutlineError> {
+    let nodes = headings(source);
+    let mut ends = vec![lines_total; nodes.len()];
+    let mut open: Vec<usize> = Vec::new();
+    for (i, node) in nodes.iter().enumerate() {
+        while open
+            .last()
+            .is_some_and(|&j| nodes[j].heading.level >= node.heading.level)
+        {
+            ends[open.pop().unwrap()] = node.heading.line - 1;
+        }
+        open.push(i);
+    }
+    let selected: Vec<_> = nodes
+        .into_iter()
+        .zip(ends)
+        .filter(|(node, _)| node.chain == chain.trim())
+        .map(|(node, end)| (node.heading.line, end, node.chain))
+        .collect();
+    if selected.is_empty() {
+        return Err(OutlineError::HeadingNotFound(chain.trim().to_owned()));
+    }
+    Ok(selected)
+}
+
 /// Индексы заголовков внутри каждого заголовка, подошедшего под `under` (OQ-36, OQ-37).
 fn descendants(nodes: &[Node], under: &Under) -> Result<BTreeSet<usize>, OutlineError> {
     let targets: Vec<usize> = match under {

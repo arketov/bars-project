@@ -51,7 +51,7 @@ pub use operations::*;
 pub use search_scope::search_scope_text;
 pub use server::{Handler, serve_connection};
 pub use session::Session;
-pub use text::number_lines;
+pub use text::{count_lines, number_lines, read_text};
 pub use text_search::*;
 
 /// Версия протокола. Клиент и воркер сверяют её в `hello`; любое несовместимое изменение методов

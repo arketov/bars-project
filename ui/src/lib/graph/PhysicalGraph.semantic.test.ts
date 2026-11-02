@@ -163,6 +163,37 @@ it("«Что затронет правка»: запрос по документ
   expect(target.querySelector('.viewbox[aria-label="Влияние изменения"]')).toBeNull();
 });
 
+it("косвенное влияние показывает основание каждого шага и открывает шестой источник без скрытого лимита", async () => {
+  semantic(impactHandler(() => {
+    const raw = impactReply();
+    const proofs = Array.from({ length: 6 }, (_, i) => sproof(`second-${i}`, 6, `Основание второго шага ${i}`, 20 + i));
+    return { ...raw,
+      nodes: [...raw.nodes, sentity("ent-2", "Приёмка", ["doc-6"])],
+      sources: [...raw.sources, sdoc(6)],
+      assertions: [...raw.assertions, sedge("a2", "ent-2", "ent-1", "verifies", proofs.map(p => p.id), { platform: "Windows" })],
+      evidence: [...raw.evidence, ...proofs],
+      items: [{ type: "impact", node: sref("entity", "ent-2"), direct: false,
+        path: { nodes: [sref("entity", "ent-0"), sref("entity", "ent-1"), sref("entity", "ent-2")],
+          steps: [{ edge: "a1", reversed: true }, { edge: "a2", reversed: true }], evidence: ["ev1", ...proofs.map(p => p.id)], complete: true } }],
+    };
+  }));
+  app.activeDocument = "docs/features/doc-04.md";
+  const open = vi.spyOn(app, "openDocument").mockResolvedValue(undefined);
+  component = mount(PhysicalGraph, { target });
+  await settle();
+  await act("impact");
+  const box = target.querySelector<HTMLElement>('.viewbox[aria-label="Влияние изменения"]')!;
+  expect(box.textContent).toContain("Шаг 1: Показ связей зависит от Порог");
+  expect(box.textContent).toContain("Шаг 2: Приёмка проверяет Показ связей");
+  expect(box.textContent).toContain("platform: Windows");
+  expect(box.textContent).toContain("Основание второго шага 5");
+  const buttons = [...box.querySelectorAll<HTMLButtonElement>("button")].filter(b => b.textContent === "Открыть основание");
+  expect(buttons).toHaveLength(7);
+  buttons[6].click();
+  expect(open).toHaveBeenCalledWith({ path: "docs/adr/doc-06.md", title: "Документ 6: adr", first_line: 25, last_line: 25, expectedRevision: "h6" });
+  open.mockRestore();
+});
+
 it("«Что затронет правка»: ошибка слоя — ошибка с «Повторить»; пустой ответ не доказывает «ничего не затронет», ссылки-соседи остаются", async () => {
   let fail = true;
   semantic(impactHandler(() => {

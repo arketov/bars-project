@@ -335,15 +335,38 @@ pub struct ReadParams {
     #[serde(flatten)]
     pub target: Target,
     pub path: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lines: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub under: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ReadOutput {
     #[serde(default)]
     pub revision: String,
     pub title: String,
     /// Текст документа как есть; номера строк клиенты ставят одной функцией `number_lines`.
     pub text: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lines_total: Option<usize>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub range: Option<ReadRange>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub sections: Vec<ReadSection>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ReadRange {
+    pub from: usize,
+    pub to: usize,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ReadSection {
+    pub from: usize,
+    pub to: usize,
+    pub heading_chain: String,
 }
 
 // --- projects, status ---
@@ -1372,6 +1395,8 @@ mod tests {
             under_line: None,
         });
         roundtrip(ReadParams {
+            lines: None,
+            under: None,
             target: target(),
             path: "a.md".into(),
         });

@@ -67,6 +67,28 @@ pub fn chunk_document(path: &str, source: &str, params: &ChunkingParams) -> Chun
     chunk_document_with_spans(path, source, params).document
 }
 
+/// Метаданные чтения: те же правила title, без нарезки, хеширования и embed-текста чанков.
+pub fn document_title(path: &str, source: &str) -> String {
+    let source = source.strip_prefix('\u{feff}').unwrap_or(source);
+    let mut source_lines = source.split(['\r', '\n']);
+    if source_lines
+        .next()
+        .is_none_or(|line| line.trim_end() != "---")
+    {
+        return file_stem(path);
+    }
+    let mut lines = vec!["---"];
+    for line in source_lines {
+        lines.push(line);
+        if matches!(line.trim_end(), "---" | "...") {
+            break;
+        }
+    }
+    split_frontmatter(&lines)
+        .0
+        .unwrap_or_else(|| file_stem(path))
+}
+
 /// Исходные диапазоны каждого чанка: без padding и списка служебных заголовков.
 pub struct MappedDocument {
     pub document: ChunkedDocument,

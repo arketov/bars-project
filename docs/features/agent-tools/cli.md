@@ -25,7 +25,7 @@ GraphRAG: `relations`, `paths`, `impact`, `context`, `explore`, `graph show/stat
 | `bars-cli similar <ID чанка> [--module M]… [--limit N]` | похожие чанки по ID из выдачи поиска | `bars_get_similar` |
 | `bars-cli duplicates [--module M]… [--limit N]` | аудит дублей проекта: точные, близкие, частичные и смысловые повторы | `bars_get_duplicates` |
 | `bars-cli outline <путь> [--levels 2,3] [--under "A/B" \| --under-line N]` | структура документа | `bars_outline` (Т-26) |
-| `bars-cli read <путь>` | документ целиком | `bars_read` |
+| `bars-cli read <путь> [--lines 98-104 \| --under "A/B"]` | документ целиком или часть с исходными номерами строк | `bars_read` |
 | `bars-cli projects` | проекты и модули | `bars_projects` |
 | `bars-cli status` | состояние индекса | `bars_status` |
 | `bars-cli reindex [--full] [--accept-model-change]` | переиндексация; `--accept-model-change` — согласие пользователя после смены модели (Т-25, [architecture/protocol.md](../../architecture/protocol.md)) | `bars_reindex` |

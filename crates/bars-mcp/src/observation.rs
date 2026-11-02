@@ -47,7 +47,7 @@ impl<S> FromContextPart<ToolCallContext<'_, S>> for Original {
             | "bars_graph" => GRAPH,
             "bars_get_similar" => &["format", "project", "chunk_id", "modules", "limit"],
             "bars_get_duplicates" => &["format", "project", "modules", "limit"],
-            "bars_read" => &["format", "project", "path"],
+            "bars_read" => &["format", "project", "path", "lines", "under"],
             "bars_text_search" => &[
                 "format",
                 "project",
