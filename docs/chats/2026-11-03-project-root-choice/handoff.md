@@ -13,19 +13,18 @@ title: Выбор корня документации при добавлени�
 - **CLI.** `bars-cli register [путь] --root docs|all`; без флага — умолчание (`docs/`, если есть, иначе вся папка). Только для проекта без `config.toml`.
 - **Окно.** Tauri-команды `project_root_suggest` и `project_root_prepare` (`bars-app/src/commands.rs`, `main.rs`), диалог `ui/src/lib/ProjectRootDialog.svelte` («Что считать документацией?»), состояние и методы `rootChoice`, `askRoot`, `confirmRoot`, `cancelRoot` в `app.svelte.ts`; тот же диалог у «Добавить проект на новом месте…».
 - **Создание проекта (Т-35).** `create_project`: корень (папка `docs/` только при выборе `docs/`), `index.md` (если нет файла с таким именем в любом регистре), `config.toml`; отказ, если `config.toml` уже есть. В окне и CLI отдельной команды «создать» пока нет — функция готова для неё.
+- **Воркер (после закрытия 1.1.1, с разрешения автора).** `register` вместо `ensure_project_config` вызывает `bars_protocol::prepare_project(path, None)`; `session_start` для проекта без `config.toml` проверяет `has_markdown` по корню `RootChoice::suggested` (`docs/` или вся папка). `ensure_project_config` и неиспользуемый `use std::fs` удалены из `worker/mod.rs`. Тест `session_start_without_docs_registers_the_whole_folder` в `worker/tests.rs`.
 - **Тесты (написаны, не запускались).** Юнит-тесты в `project_root.rs`; `register_root_choice_is_written_before_registration` в `crates/bars-cli/tests/cli.rs`; `ui/src/lib/project-root.test.ts`.
 - Уже зарегистрированные проекты не меняются: запись идёт только при отсутствии `config.toml`.
 
 ## Не сделано
 
-- **Умолчание хука.** Хук начала сессии проходит через `Worker::session_start` (`crates/bars-worker/src/worker/mod.rs`), чужой файл шага 1.1.1. Сейчас он проверяет `has_markdown(root, docs_root_of(root))`, где без `config.toml` корень `docs`, а `ensure_project_config` пишет закомментированный `# docs_root = "docs"`. Нужна правка в воркере: в `session_start` до проверки взять `RootChoice::suggested(&root)` и, если `config.toml` нет, проверять `has_markdown` по его корню; в `register` (когда `config.toml` нет) писать `docs_root` через `bars_protocol::prepare_project(path, None)` вместо `ensure_project_config`. Тогда папка заметок без `docs/` регистрируется хуком с корнем «вся папка». Пока этого нет, хук ведёт себя как раньше (только `docs/`), а `register` без выбора в воркере по-прежнему не пишет `docs_root`. Контракт в документе уже описывает целевое поведение.
 - Обновление экрана «документации не найдено» (`docs/features/window/empty-states.md`, `NoDocs.svelte`): он называет корень `docs` по умолчанию — для старых проектов верно.
 - Отдельная команда или пункт окна «Создать проект» (Т-35): вызывающего кода нет.
-- Корректировка `docs/features/window/*` и `docs/features/indexing/updates.md` не делалась.
 
 ## Сложности
 
-- `Worker::register`, `session_start` и `ensure_project_config` лежат в файлах других сессий, поэтому выбор записывается клиентом.
+- Выбор записывается клиентом, потому что воркер был занят шагом 1.1.1; теперь воркер сам пишет умолчание.
 - Побочное решение: `bars-cli` теперь трогает диск (пишет `config.toml`) — заголовок `lib.rs` обновлён.
 
 ## Риски (для проверки)
@@ -37,6 +36,7 @@ title: Выбор корня документации при добавлени�
 
 ## Файлы кода, ждущие общей проверки (не закоммичены)
 
+- `crates/bars-worker/src/worker/mod.rs`, `crates/bars-worker/src/worker/tests.rs` (в них могут быть и чужие правки)
 - `crates/bars-protocol/src/project_root.rs` (новый), `crates/bars-protocol/src/lib.rs`
 - `crates/bars-cli/src/lib.rs`, `crates/bars-cli/tests/cli.rs`
 - `crates/bars-app/src/commands.rs`, `crates/bars-app/src/main.rs`
@@ -46,6 +46,5 @@ title: Выбор корня документации при добавлени�
 
 ## Дальше
 
-1. Решить по хуку и умолчанию воркера (см. «Не сделано»); при согласии — правка `worker/mod.rs` после закрытия шага 1.1.1.
-2. Общая проверка `scripts/check.ps1`, затем коммит кода.
-3. Шаг 3.1.2 (тексты окна и подсказки модулей) и 3.1.3 (`BARS_INSTRUCTION.md`).
+1. Общая проверка `scripts/check.ps1`, затем коммит кода.
+2. Шаг 3.1.2 (тексты окна и подсказки модулей) и 3.1.3 (`BARS_INSTRUCTION.md`).
