@@ -1,0 +1,3423 @@
+{
+ "made": "2026-11-03T11:13:14.732Z",
+ "variants": {
+  "cli": {
+   "overall": {
+    "n": 168,
+    "first": 0.625,
+    "hit3": 0.875,
+    "mrr10": 0.7471797052154194,
+    "ndcg10": 0.788415149070583,
+    "notFound10": 0.08333333333333337,
+    "chatsTop3": 0.03968253968253967,
+    "secDup5": 0.041666666666666664,
+    "docDup5": 0.7202380952380952,
+    "bothInTop10": 1
+   },
+   "byGroup": {
+    "question": {
+     "n": 63,
+     "first": 0.6507936507936508,
+     "hit3": 0.9047619047619048,
+     "mrr10": 0.7751322751322751,
+     "ndcg10": 0.8199648824212832,
+     "notFound10": 0.04761904761904767,
+     "chatsTop3": 0.015873015873015872,
+     "secDup5": 0.047619047619047616,
+     "docDup5": 0.746031746031746
+    },
+    "identifier": {
+     "n": 12,
+     "first": 0.4166666666666667,
+     "hit3": 0.8333333333333334,
+     "mrr10": 0.611111111111111,
+     "ndcg10": 0.668643251190486,
+     "notFound10": 0.16666666666666663,
+     "chatsTop3": 0.19444444444444442,
+     "secDup5": 0,
+     "docDup5": 0.3333333333333333
+    },
+    "where": {
+     "n": 11,
+     "first": 0.7272727272727273,
+     "hit3": 1,
+     "mrr10": 0.8636363636363636,
+     "ndcg10": 0.8993444782467612,
+     "notFound10": 0,
+     "chatsTop3": 0.0303030303030303,
+     "secDup5": 0.18181818181818182,
+     "docDup5": 0.6363636363636364
+    },
+    "guide-vs-journals": {
+     "n": 14,
+     "first": 0.8571428571428571,
+     "hit3": 0.9285714285714286,
+     "mrr10": 0.8928571428571429,
+     "ndcg10": 0.902209268112247,
+     "notFound10": 0.0714285714285714,
+     "chatsTop3": 0.047619047619047616,
+     "secDup5": 0,
+     "docDup5": 0.7857142857142857
+    },
+    "bag": {
+     "n": 7,
+     "first": 0.7142857142857143,
+     "hit3": 0.8571428571428571,
+     "mrr10": 0.8142857142857143,
+     "ndcg10": 0.8596832229722856,
+     "notFound10": 0,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.7142857142857143
+    },
+    "synonym": {
+     "n": 11,
+     "first": 0.45454545454545453,
+     "hit3": 0.7272727272727273,
+     "mrr10": 0.5606060606060606,
+     "ndcg10": 0.6028117957792234,
+     "notFound10": 0.2727272727272727,
+     "chatsTop3": 0.0303030303030303,
+     "secDup5": 0,
+     "docDup5": 0.6363636363636364
+    },
+    "agent-bag": {
+     "n": 14,
+     "first": 0.14285714285714285,
+     "hit3": 0.5714285714285714,
+     "mrr10": 0.3625850340136054,
+     "ndcg10": 0.4483604948220364,
+     "notFound10": 0.2857142857142857,
+     "chatsTop3": 0.09523809523809523,
+     "secDup5": 0,
+     "docDup5": 0.5714285714285714
+    },
+    "number": {
+     "n": 9,
+     "first": 0.6666666666666666,
+     "hit3": 1,
+     "mrr10": 0.8148148148148148,
+     "ndcg10": 0.8624288341269906,
+     "notFound10": 0,
+     "chatsTop3": 0.037037037037037035,
+     "secDup5": 0.2222222222222222,
+     "docDup5": 0.8888888888888888
+    },
+    "mixed": {
+     "n": 6,
+     "first": 0.8333333333333334,
+     "hit3": 0.8333333333333334,
+     "mrr10": 0.8333333333333334,
+     "ndcg10": 0.8333333333333334,
+     "notFound10": 0.16666666666666663,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.8333333333333334
+    },
+    "twopart": {
+     "n": 6,
+     "first": 0.8333333333333334,
+     "hit3": 1,
+     "mrr10": 0.9166666666666666,
+     "ndcg10": 0.8947274347500578,
+     "notFound10": 0,
+     "chatsTop3": 0.05555555555555555,
+     "secDup5": 0,
+     "docDup5": 1,
+     "bothInTop10": 1
+    },
+    "term": {
+     "n": 5,
+     "first": 0.6,
+     "hit3": 0.8,
+     "mrr10": 0.75,
+     "ndcg10": 0.8123212623289702,
+     "notFound10": 0,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.8
+    },
+    "typo": {
+     "n": 5,
+     "first": 0.6,
+     "hit3": 1,
+     "mrr10": 0.7666666666666666,
+     "ndcg10": 0.8261859507142916,
+     "notFound10": 0,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.8
+    },
+    "morphology": {
+     "n": 5,
+     "first": 1,
+     "hit3": 1,
+     "mrr10": 1,
+     "ndcg10": 1,
+     "notFound10": 0,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 1
+    }
+   },
+   "byProject": {
+    "bars-project": {
+     "n": 42,
+     "first": 0.42857142857142855,
+     "hit3": 0.7380952380952381,
+     "mrr10": 0.5797619047619048,
+     "ndcg10": 0.6321914105520821,
+     "notFound10": 0.19047619047619047,
+     "chatsTop3": 0.055555555555555546,
+     "secDup5": 0.047619047619047616,
+     "docDup5": 0.6190476190476191,
+     "bothInTop10": 1
+    },
+    "overdrive-bots": {
+     "n": 40,
+     "first": 0.7,
+     "hit3": 0.9,
+     "mrr10": 0.8056547619047618,
+     "ndcg10": 0.8435753704113187,
+     "notFound10": 0.050000000000000044,
+     "chatsTop3": 0.1,
+     "secDup5": 0,
+     "docDup5": 0.75,
+     "bothInTop10": 1
+    },
+    "RoleGPT": {
+     "n": 32,
+     "first": 0.65625,
+     "hit3": 0.90625,
+     "mrr10": 0.7734375,
+     "ndcg10": 0.8113293950396478,
+     "notFound10": 0.0625,
+     "chatsTop3": 0.010416666666666666,
+     "secDup5": 0.03125,
+     "docDup5": 0.6875,
+     "bothInTop10": 1
+    },
+    "agaugu": {
+     "n": 30,
+     "first": 0.8666666666666667,
+     "hit3": 0.9,
+     "mrr10": 0.89,
+     "ndcg10": 0.9005927520268666,
+     "notFound10": 0.06666666666666665,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.8666666666666667
+    },
+    "tmc-opovechenie": {
+     "n": 24,
+     "first": 0.5,
+     "hit3": 1,
+     "mrr10": 0.7291666666666666,
+     "ndcg10": 0.7990986575892967,
+     "notFound10": 0,
+     "chatsTop3": 0,
+     "secDup5": 0.16666666666666666,
+     "docDup5": 0.7083333333333334
+    }
+   }
+  },
+  "fts-or": {
+   "overall": {
+    "n": 168,
+    "first": 0.5238095238095238,
+    "hit3": 0.75,
+    "mrr10": 0.653125,
+    "ndcg10": 0.7102023324153617,
+    "notFound10": 0.10119047619047616,
+    "chatsTop3": 0.047619047619047616,
+    "secDup5": 0.017857142857142856,
+    "docDup5": 0.8095238095238095,
+    "bothInTop10": 1
+   },
+   "byGroup": {
+    "question": {
+     "n": 63,
+     "first": 0.5396825396825397,
+     "hit3": 0.7936507936507936,
+     "mrr10": 0.671050642479214,
+     "ndcg10": 0.7284494602057646,
+     "notFound10": 0.09523809523809523,
+     "chatsTop3": 0.026455026455026454,
+     "secDup5": 0.031746031746031744,
+     "docDup5": 0.8412698412698413
+    },
+    "identifier": {
+     "n": 12,
+     "first": 0.4166666666666667,
+     "hit3": 0.5,
+     "mrr10": 0.5432539682539682,
+     "ndcg10": 0.6501437831068779,
+     "notFound10": 0,
+     "chatsTop3": 0.27777777777777773,
+     "secDup5": 0,
+     "docDup5": 0.4166666666666667
+    },
+    "where": {
+     "n": 11,
+     "first": 0.7272727272727273,
+     "hit3": 0.8181818181818182,
+     "mrr10": 0.7840909090909091,
+     "ndcg10": 0.8133086027597443,
+     "notFound10": 0.09090909090909094,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.8181818181818182
+    },
+    "guide-vs-journals": {
+     "n": 14,
+     "first": 0.7857142857142857,
+     "hit3": 1,
+     "mrr10": 0.880952380952381,
+     "ndcg10": 0.9115613933673511,
+     "notFound10": 0,
+     "chatsTop3": 0.023809523809523808,
+     "secDup5": 0,
+     "docDup5": 0.9285714285714286
+    },
+    "bag": {
+     "n": 7,
+     "first": 0.5714285714285714,
+     "hit3": 0.8571428571428571,
+     "mrr10": 0.7142857142857143,
+     "ndcg10": 0.7516942153061308,
+     "notFound10": 0.1428571428571429,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.8571428571428571
+    },
+    "synonym": {
+     "n": 11,
+     "first": 0.36363636363636365,
+     "hit3": 0.6363636363636364,
+     "mrr10": 0.5295454545454545,
+     "ndcg10": 0.5995551767940585,
+     "notFound10": 0.18181818181818177,
+     "chatsTop3": 0,
+     "secDup5": 0.09090909090909091,
+     "docDup5": 0.9090909090909091
+    },
+    "agent-bag": {
+     "n": 14,
+     "first": 0.07142857142857142,
+     "hit3": 0.35714285714285715,
+     "mrr10": 0.23639455782312924,
+     "ndcg10": 0.3183247111873596,
+     "notFound10": 0.4285714285714286,
+     "chatsTop3": 0.14285714285714285,
+     "secDup5": 0,
+     "docDup5": 0.5714285714285714
+    },
+    "number": {
+     "n": 9,
+     "first": 0.5555555555555556,
+     "hit3": 0.7777777777777778,
+     "mrr10": 0.6842592592592592,
+     "ndcg10": 0.7592497152879698,
+     "notFound10": 0,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 1
+    },
+    "mixed": {
+     "n": 6,
+     "first": 0.5,
+     "hit3": 0.6666666666666666,
+     "mrr10": 0.6071428571428571,
+     "ndcg10": 0.6607105144841318,
+     "notFound10": 0.16666666666666663,
+     "chatsTop3": 0.05555555555555555,
+     "secDup5": 0,
+     "docDup5": 0.6666666666666666
+    },
+    "twopart": {
+     "n": 6,
+     "first": 0.5,
+     "hit3": 1,
+     "mrr10": 0.75,
+     "ndcg10": 0.7402451088591523,
+     "notFound10": 0,
+     "chatsTop3": 0.05555555555555555,
+     "secDup5": 0,
+     "docDup5": 0.8333333333333334,
+     "bothInTop10": 1
+    },
+    "term": {
+     "n": 5,
+     "first": 0.6,
+     "hit3": 1,
+     "mrr10": 0.8,
+     "ndcg10": 0.8523719014285831,
+     "notFound10": 0,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.8
+    },
+    "typo": {
+     "n": 5,
+     "first": 0.4,
+     "hit3": 0.4,
+     "mrr10": 0.5071428571428571,
+     "ndcg10": 0.619468644948012,
+     "notFound10": 0,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 1
+    },
+    "morphology": {
+     "n": 5,
+     "first": 1,
+     "hit3": 1,
+     "mrr10": 1,
+     "ndcg10": 1,
+     "notFound10": 0,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 1
+    }
+   },
+   "byProject": {
+    "bars-project": {
+     "n": 42,
+     "first": 0.35714285714285715,
+     "hit3": 0.6190476190476191,
+     "mrr10": 0.5151643990929704,
+     "ndcg10": 0.5969765428489962,
+     "notFound10": 0.1428571428571429,
+     "chatsTop3": 0.07936507936507937,
+     "secDup5": 0.023809523809523808,
+     "docDup5": 0.6904761904761905,
+     "bothInTop10": 1
+    },
+    "overdrive-bots": {
+     "n": 40,
+     "first": 0.45,
+     "hit3": 0.75,
+     "mrr10": 0.6167559523809524,
+     "ndcg10": 0.6874780960232106,
+     "notFound10": 0.07499999999999996,
+     "chatsTop3": 0.09999999999999999,
+     "secDup5": 0,
+     "docDup5": 0.8,
+     "bothInTop10": 1
+    },
+    "RoleGPT": {
+     "n": 32,
+     "first": 0.4375,
+     "hit3": 0.71875,
+     "mrr10": 0.5963541666666666,
+     "ndcg10": 0.6498634489475178,
+     "notFound10": 0.15625,
+     "chatsTop3": 0.020833333333333332,
+     "secDup5": 0,
+     "docDup5": 0.75,
+     "bothInTop10": 1
+    },
+    "agaugu": {
+     "n": 30,
+     "first": 0.8333333333333334,
+     "hit3": 0.8666666666666667,
+     "mrr10": 0.8614285714285714,
+     "ndcg10": 0.8783705298046445,
+     "notFound10": 0.06666666666666665,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.9333333333333333
+    },
+    "tmc-opovechenie": {
+     "n": 24,
+     "first": 0.6666666666666666,
+     "hit3": 0.875,
+     "mrr10": 0.7704861111111111,
+     "ndcg10": 0.8164627893639436,
+     "notFound10": 0.04166666666666663,
+     "chatsTop3": 0,
+     "secDup5": 0.08333333333333333,
+     "docDup5": 0.9583333333333334
+    }
+   }
+  },
+  "fts-head5": {
+   "overall": {
+    "n": 168,
+    "first": 0.5476190476190477,
+    "hit3": 0.7857142857142857,
+    "mrr10": 0.6737481103552533,
+    "ndcg10": 0.724367590794514,
+    "notFound10": 0.10119047619047616,
+    "chatsTop3": 0.04563492063492063,
+    "secDup5": 0.02976190476190476,
+    "docDup5": 0.8095238095238095,
+    "bothInTop10": 0.8333333333333334
+   },
+   "byGroup": {
+    "question": {
+     "n": 63,
+     "first": 0.5873015873015873,
+     "hit3": 0.8412698412698413,
+     "mrr10": 0.7132275132275132,
+     "ndcg10": 0.7610611495056941,
+     "notFound10": 0.09523809523809523,
+     "chatsTop3": 0.026455026455026454,
+     "secDup5": 0.047619047619047616,
+     "docDup5": 0.8412698412698413
+    },
+    "identifier": {
+     "n": 12,
+     "first": 0.4166666666666667,
+     "hit3": 0.5,
+     "mrr10": 0.5404761904761904,
+     "ndcg10": 0.6475899814296681,
+     "notFound10": 0,
+     "chatsTop3": 0.25,
+     "secDup5": 0,
+     "docDup5": 0.3333333333333333
+    },
+    "where": {
+     "n": 11,
+     "first": 0.8181818181818182,
+     "hit3": 0.9090909090909091,
+     "mrr10": 0.8484848484848484,
+     "ndcg10": 0.8636363636363636,
+     "notFound10": 0.09090909090909094,
+     "chatsTop3": 0.0303030303030303,
+     "secDup5": 0,
+     "docDup5": 0.9090909090909091
+    },
+    "guide-vs-journals": {
+     "n": 14,
+     "first": 0.9285714285714286,
+     "hit3": 1,
+     "mrr10": 0.9642857142857143,
+     "ndcg10": 0.9736378395408184,
+     "notFound10": 0,
+     "chatsTop3": 0.023809523809523808,
+     "secDup5": 0,
+     "docDup5": 0.9285714285714286
+    },
+    "bag": {
+     "n": 7,
+     "first": 0.7142857142857143,
+     "hit3": 0.8571428571428571,
+     "mrr10": 0.7857142857142857,
+     "ndcg10": 0.804418536224494,
+     "notFound10": 0.1428571428571429,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.8571428571428571
+    },
+    "synonym": {
+     "n": 11,
+     "first": 0.36363636363636365,
+     "hit3": 0.7272727272727273,
+     "mrr10": 0.5584415584415584,
+     "ndcg10": 0.6233683952381058,
+     "notFound10": 0.18181818181818177,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.8181818181818182
+    },
+    "agent-bag": {
+     "n": 14,
+     "first": 0.07142857142857142,
+     "hit3": 0.35714285714285715,
+     "mrr10": 0.23333333333333334,
+     "ndcg10": 0.33125392022458244,
+     "notFound10": 0.3571428571428571,
+     "chatsTop3": 0.14285714285714285,
+     "secDup5": 0,
+     "docDup5": 0.6428571428571429
+    },
+    "number": {
+     "n": 9,
+     "first": 0.6666666666666666,
+     "hit3": 0.7777777777777778,
+     "mrr10": 0.75,
+     "ndcg10": 0.8096537494646017,
+     "notFound10": 0,
+     "chatsTop3": 0,
+     "secDup5": 0.2222222222222222,
+     "docDup5": 1
+    },
+    "mixed": {
+     "n": 6,
+     "first": 0.3333333333333333,
+     "hit3": 0.6666666666666666,
+     "mrr10": 0.5185185185185185,
+     "ndcg10": 0.5938149171344828,
+     "notFound10": 0.16666666666666663,
+     "chatsTop3": 0.05555555555555555,
+     "secDup5": 0,
+     "docDup5": 0.6666666666666666
+    },
+    "twopart": {
+     "n": 6,
+     "first": 0.8333333333333334,
+     "hit3": 1,
+     "mrr10": 0.9166666666666666,
+     "ndcg10": 0.8097878527673091,
+     "notFound10": 0,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.8333333333333334,
+     "bothInTop10": 0.8333333333333334
+    },
+    "term": {
+     "n": 5,
+     "first": 0.4,
+     "hit3": 1,
+     "mrr10": 0.6333333333333333,
+     "ndcg10": 0.7261859507142916,
+     "notFound10": 0,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.8
+    },
+    "typo": {
+     "n": 5,
+     "first": 0,
+     "hit3": 0.6,
+     "mrr10": 0.3,
+     "ndcg10": 0.4236133388501875,
+     "notFound10": 0.19999999999999996,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 1
+    },
+    "morphology": {
+     "n": 5,
+     "first": 0.6,
+     "hit3": 1,
+     "mrr10": 0.8,
+     "ndcg10": 0.8523719014285831,
+     "notFound10": 0,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 1
+    }
+   },
+   "byProject": {
+    "bars-project": {
+     "n": 42,
+     "first": 0.47619047619047616,
+     "hit3": 0.6666666666666666,
+     "mrr10": 0.5935752078609221,
+     "ndcg10": 0.6519024245778938,
+     "notFound10": 0.1428571428571429,
+     "chatsTop3": 0.055555555555555546,
+     "secDup5": 0.047619047619047616,
+     "docDup5": 0.6904761904761905,
+     "bothInTop10": 1
+    },
+    "overdrive-bots": {
+     "n": 40,
+     "first": 0.625,
+     "hit3": 0.8,
+     "mrr10": 0.7144047619047619,
+     "ndcg10": 0.749742193231946,
+     "notFound10": 0.09999999999999998,
+     "chatsTop3": 0.11666666666666665,
+     "secDup5": 0,
+     "docDup5": 0.775,
+     "bothInTop10": 0
+    },
+    "RoleGPT": {
+     "n": 32,
+     "first": 0.40625,
+     "hit3": 0.75,
+     "mrr10": 0.5729166666666666,
+     "ndcg10": 0.6350266528270081,
+     "notFound10": 0.15625,
+     "chatsTop3": 0.020833333333333332,
+     "secDup5": 0,
+     "docDup5": 0.78125,
+     "bothInTop10": 1
+    },
+    "agaugu": {
+     "n": 30,
+     "first": 0.5666666666666667,
+     "hit3": 0.9,
+     "mrr10": 0.7333333333333333,
+     "ndcg10": 0.7844858323083714,
+     "notFound10": 0.06666666666666665,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.9333333333333333
+    },
+    "tmc-opovechenie": {
+     "n": 24,
+     "first": 0.7083333333333334,
+     "hit3": 0.875,
+     "mrr10": 0.80625,
+     "ndcg10": 0.8528640763422365,
+     "notFound10": 0,
+     "chatsTop3": 0,
+     "secDup5": 0.125,
+     "docDup5": 0.9583333333333334
+    }
+   }
+  },
+  "fts-and": {
+   "overall": {
+    "n": 168,
+    "first": 0.22023809523809523,
+    "hit3": 0.27380952380952384,
+    "mrr10": 0.25394227135298564,
+    "ndcg10": 0.2702465842222976,
+    "notFound10": 0.6785714285714286,
+    "chatsTop3": 0.024801587301587304,
+    "secDup5": 0,
+    "docDup5": 0.15476190476190477,
+    "bothInTop10": 0
+   },
+   "byGroup": {
+    "question": {
+     "n": 63,
+     "first": 0.19047619047619047,
+     "hit3": 0.20634920634920634,
+     "mrr10": 0.1984126984126984,
+     "ndcg10": 0.20049094846938822,
+     "notFound10": 0.7936507936507937,
+     "chatsTop3": 0.007936507936507936,
+     "secDup5": 0,
+     "docDup5": 0.1111111111111111
+    },
+    "identifier": {
+     "n": 12,
+     "first": 0.4166666666666667,
+     "hit3": 0.5,
+     "mrr10": 0.5363425925925925,
+     "ndcg10": 0.6434089985782551,
+     "notFound10": 0,
+     "chatsTop3": 0.27777777777777773,
+     "secDup5": 0,
+     "docDup5": 0.3333333333333333
+    },
+    "where": {
+     "n": 11,
+     "first": 0.18181818181818182,
+     "hit3": 0.2727272727272727,
+     "mrr10": 0.22727272727272727,
+     "ndcg10": 0.2391754321428598,
+     "notFound10": 0.7272727272727273,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.09090909090909091
+    },
+    "guide-vs-journals": {
+     "n": 14,
+     "first": 0.5,
+     "hit3": 0.6428571428571429,
+     "mrr10": 0.5714285714285714,
+     "ndcg10": 0.5901328219387797,
+     "notFound10": 0.3571428571428571,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.5714285714285714
+    },
+    "bag": {
+     "n": 7,
+     "first": 0.5714285714285714,
+     "hit3": 0.5714285714285714,
+     "mrr10": 0.5714285714285714,
+     "ndcg10": 0.5714285714285714,
+     "notFound10": 0.4285714285714286,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0
+    },
+    "synonym": {
+     "n": 11,
+     "first": 0,
+     "hit3": 0,
+     "mrr10": 0,
+     "ndcg10": 0,
+     "notFound10": 1,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0
+    },
+    "agent-bag": {
+     "n": 14,
+     "first": 0,
+     "hit3": 0.07142857142857142,
+     "mrr10": 0.023809523809523808,
+     "ndcg10": 0.03571428571428571,
+     "notFound10": 0.9285714285714286,
+     "chatsTop3": 0.023809523809523808,
+     "secDup5": 0,
+     "docDup5": 0
+    },
+    "number": {
+     "n": 9,
+     "first": 0.3333333333333333,
+     "hit3": 0.4444444444444444,
+     "mrr10": 0.43253968253968256,
+     "ndcg10": 0.4883266272197982,
+     "notFound10": 0.33333333333333337,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.3333333333333333
+    },
+    "mixed": {
+     "n": 6,
+     "first": 0,
+     "hit3": 0,
+     "mrr10": 0,
+     "ndcg10": 0,
+     "notFound10": 1,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0
+    },
+    "twopart": {
+     "n": 6,
+     "first": 0,
+     "hit3": 0,
+     "mrr10": 0,
+     "ndcg10": 0,
+     "notFound10": 1,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0,
+     "bothInTop10": 0
+    },
+    "term": {
+     "n": 5,
+     "first": 0.6,
+     "hit3": 1,
+     "mrr10": 0.8,
+     "ndcg10": 0.8523719014285831,
+     "notFound10": 0,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.6
+    },
+    "typo": {
+     "n": 5,
+     "first": 0,
+     "hit3": 0,
+     "mrr10": 0,
+     "ndcg10": 0,
+     "notFound10": 1,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0
+    },
+    "morphology": {
+     "n": 5,
+     "first": 0.2,
+     "hit3": 0.2,
+     "mrr10": 0.2,
+     "ndcg10": 0.2,
+     "notFound10": 0.8,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0
+    }
+   },
+   "byProject": {
+    "bars-project": {
+     "n": 42,
+     "first": 0.16666666666666666,
+     "hit3": 0.21428571428571427,
+     "mrr10": 0.19609788359788358,
+     "ndcg10": 0.2167531384078379,
+     "notFound10": 0.7142857142857143,
+     "chatsTop3": 0.047619047619047616,
+     "secDup5": 0,
+     "docDup5": 0.09523809523809523,
+     "bothInTop10": 0
+    },
+    "overdrive-bots": {
+     "n": 40,
+     "first": 0.2,
+     "hit3": 0.3,
+     "mrr10": 0.25708333333333333,
+     "ndcg10": 0.28025796565055766,
+     "notFound10": 0.65,
+     "chatsTop3": 0.05416666666666666,
+     "secDup5": 0,
+     "docDup5": 0.2,
+     "bothInTop10": 0
+    },
+    "RoleGPT": {
+     "n": 32,
+     "first": 0.125,
+     "hit3": 0.15625,
+     "mrr10": 0.1484375,
+     "ndcg10": 0.15817519723890158,
+     "notFound10": 0.8125,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.09375,
+     "bothInTop10": 0
+    },
+    "agaugu": {
+     "n": 30,
+     "first": 0.43333333333333335,
+     "hit3": 0.43333333333333335,
+     "mrr10": 0.43333333333333335,
+     "ndcg10": 0.43333333333333335,
+     "notFound10": 0.5666666666666667,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.2
+    },
+    "tmc-opovechenie": {
+     "n": 24,
+     "first": 0.20833333333333334,
+     "hit3": 0.2916666666666667,
+     "mrr10": 0.2663690476190476,
+     "ndcg10": 0.29274455827290174,
+     "notFound10": 0.625,
+     "chatsTop3": 0,
+     "secDup5": 0,
+     "docDup5": 0.20833333333333334
+    }
+   }
+  }
+ },
+ "warnings": [],
+ "groups": {
+  "term": "короткие термины",
+  "number": "номера и даты",
+  "identifier": "идентификаторы",
+  "question": "вопросы обычным языком",
+  "bag": "длинный набор слов",
+  "agent-bag": "настоящие запросы агентов",
+  "typo": "опечатки",
+  "morphology": "словоформы",
+  "synonym": "синонимы и перефразировка",
+  "mixed": "смешанные ru/en",
+  "where": "«где описано»",
+  "twopart": "ответ в двух кусках раздела",
+  "guide-vs-journals": "руководство среди журналов"
+ },
+ "queries": [
+  {
+   "id": "bp-01",
+   "project": "bars-project",
+   "group": "question",
+   "query": "почему bars использует Qwen3 через llama.cpp, а не отдельный llama-server",
+   "golds": 1,
+   "reranked": true,
+   "ms": 17066,
+   "rank": {
+    "cli": 0,
+    "fts-or": 3,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-02",
+   "project": "bars-project",
+   "group": "question",
+   "query": "какая библиотека выбрана для docking окон",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4630,
+   "rank": {
+    "cli": 2,
+    "fts-or": 10,
+    "fts-head5": 0,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-03",
+   "project": "bars-project",
+   "group": "question",
+   "query": "на чём считается физика графа и чем рисуется",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4532,
+   "rank": {
+    "cli": 0,
+    "fts-or": 0,
+    "fts-head5": 0,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-04",
+   "project": "bars-project",
+   "group": "question",
+   "query": "какой редактор Markdown выбран и почему",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4635,
+   "rank": {
+    "cli": 6,
+    "fts-or": 7,
+    "fts-head5": 3,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-05",
+   "project": "bars-project",
+   "group": "question",
+   "query": "как считается оценка rerank по yes no logprobs",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4426,
+   "rank": {
+    "cli": 3,
+    "fts-or": 3,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-06",
+   "project": "bars-project",
+   "group": "question",
+   "query": "по какой формуле сливаются кандидаты двух поисков",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4552,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-07",
+   "project": "bars-project",
+   "group": "question",
+   "query": "сколько кандидатов переоценивает rerank по умолчанию",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4080,
+   "rank": {
+    "cli": 1,
+    "fts-or": 2,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-08",
+   "project": "bars-project",
+   "group": "identifier",
+   "query": "source_hash",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4098,
+   "rank": {
+    "cli": 1,
+    "fts-or": 5,
+    "fts-head5": 5,
+    "fts-and": 8
+   }
+  },
+  {
+   "id": "bp-09",
+   "project": "bars-project",
+   "group": "where",
+   "query": "где описан порог оценки результата для rerank и косинуса",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4301,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-10",
+   "project": "bars-project",
+   "group": "question",
+   "query": "как bars режет большой раздел на несколько чанков",
+   "golds": 1,
+   "reranked": true,
+   "ms": 13709,
+   "rank": {
+    "cli": 4,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-11",
+   "project": "bars-project",
+   "group": "question",
+   "query": "что происходит с очень маленьким разделом при нарезке",
+   "golds": 1,
+   "reranked": true,
+   "ms": 3926,
+   "rank": {
+    "cli": 1,
+    "fts-or": 4,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-12",
+   "project": "bars-project",
+   "group": "question",
+   "query": "что именно попадает в эмбеддинг чанка",
+   "golds": 1,
+   "reranked": true,
+   "ms": 3873,
+   "rank": {
+    "cli": 2,
+    "fts-or": 4,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-13",
+   "project": "bars-project",
+   "group": "guide-vs-journals",
+   "query": "bars не находит из-за опечатки в запросе",
+   "golds": 1,
+   "reranked": true,
+   "ms": 3912,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "bp-14",
+   "project": "bars-project",
+   "group": "guide-vs-journals",
+   "query": "что значит ответ «модель загружается, повторите позже»",
+   "golds": 1,
+   "reranked": true,
+   "ms": 12791,
+   "rank": {
+    "cli": 0,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-15",
+   "project": "bars-project",
+   "group": "guide-vs-journals",
+   "query": "почему проценты в результатах растут вниз по списку",
+   "golds": 1,
+   "reranked": true,
+   "ms": 13807,
+   "rank": {
+    "cli": 2,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-16",
+   "project": "bars-project",
+   "group": "guide-vs-journals",
+   "query": "сколько результатов показывает bars по умолчанию",
+   "golds": 1,
+   "reranked": true,
+   "ms": 13603,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "bp-17",
+   "project": "bars-project",
+   "group": "guide-vs-journals",
+   "query": "ищет ли bars пока идёт индексация",
+   "golds": 1,
+   "reranked": true,
+   "ms": 17248,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "bp-18",
+   "project": "bars-project",
+   "group": "guide-vs-journals",
+   "query": "что значат проценты в результатах поиска",
+   "golds": 1,
+   "reranked": true,
+   "ms": 13140,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-19",
+   "project": "bars-project",
+   "group": "question",
+   "query": "что будет, если сменить embed-модель",
+   "golds": 1,
+   "reranked": true,
+   "ms": 13028,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 2
+   }
+  },
+  {
+   "id": "bp-20",
+   "project": "bars-project",
+   "group": "question",
+   "query": "какая вкладка настроек подключает Claude Code и Codex",
+   "golds": 1,
+   "reranked": true,
+   "ms": 13176,
+   "rank": {
+    "cli": 0,
+    "fts-or": 0,
+    "fts-head5": 0,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-21",
+   "project": "bars-project",
+   "group": "question",
+   "query": "где лежат настройки проекта и можно ли править файлы руками",
+   "golds": 1,
+   "reranked": true,
+   "ms": 17828,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-22",
+   "project": "bars-project",
+   "group": "question",
+   "query": "минимальный и максимальный размер куска нарезки",
+   "golds": 1,
+   "reranked": true,
+   "ms": 5018,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "bp-23",
+   "project": "bars-project",
+   "group": "bag",
+   "query": "жёлтая точка поле запроса недоступно переиндексация после смены embed-модели",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4459,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "bp-24",
+   "project": "bars-project",
+   "group": "synonym",
+   "query": "проект помечен серым, папку перенесли или диск отключён",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4726,
+   "rank": {
+    "cli": 3,
+    "fts-or": 2,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-25",
+   "project": "bars-project",
+   "group": "question",
+   "query": "что показывает красный баннер, когда внешний провайдер не отвечает",
+   "golds": 1,
+   "reranked": true,
+   "ms": 14844,
+   "rank": {
+    "cli": 2,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-26",
+   "project": "bars-project",
+   "group": "question",
+   "query": "жёлтый баннер «Оценка моделью не выполнена» что значит",
+   "golds": 1,
+   "reranked": true,
+   "ms": 22695,
+   "rank": {
+    "cli": 2,
+    "fts-or": 2,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-27",
+   "project": "bars-project",
+   "group": "agent-bag",
+   "query": "вкладка «Клиенты» в настройках: что показывает, установка в Claude Code и Codex",
+   "golds": 1,
+   "reranked": true,
+   "ms": 11914,
+   "rank": {
+    "cli": 3,
+    "fts-or": 0,
+    "fts-head5": 6,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-28",
+   "project": "bars-project",
+   "group": "agent-bag",
+   "query": "ISS-59 внутренние слова в подписях окна, идентификаторы в интерфейсе",
+   "golds": 2,
+   "reranked": true,
+   "ms": 4747,
+   "rank": {
+    "cli": 2,
+    "fts-or": 3,
+    "fts-head5": 3,
+    "fts-and": 3
+   }
+  },
+  {
+   "id": "bp-29",
+   "project": "bars-project",
+   "group": "agent-bag",
+   "query": "ISS-36 ошибка загрузки модели виды ошибок нет файлов нет сети нехватка памяти кнопка действия",
+   "golds": 2,
+   "reranked": true,
+   "ms": 15733,
+   "rank": {
+    "cli": 1,
+    "fts-or": 4,
+    "fts-head5": 4,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-30",
+   "project": "bars-project",
+   "group": "agent-bag",
+   "query": "словарь подписей окна правило идентификатор только в подсказке и в отчёте",
+   "golds": 1,
+   "reranked": true,
+   "ms": 10917,
+   "rank": {
+    "cli": 10,
+    "fts-or": 0,
+    "fts-head5": 0,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-31",
+   "project": "bars-project",
+   "group": "agent-bag",
+   "query": "FP16 вариант модели переиндексация bge-m3 почему нужна",
+   "golds": 1,
+   "reranked": true,
+   "ms": 13037,
+   "rank": {
+    "cli": 0,
+    "fts-or": 0,
+    "fts-head5": 0,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-32",
+   "project": "bars-project",
+   "group": "agent-bag",
+   "query": "число результатов по умолчанию, порог min_score и откуда берётся оценка",
+   "golds": 2,
+   "reranked": true,
+   "ms": 4659,
+   "rank": {
+    "cli": 2,
+    "fts-or": 2,
+    "fts-head5": 3,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-33",
+   "project": "bars-project",
+   "group": "agent-bag",
+   "query": "миграция схемы индекса новая колонка documents, пересборка индекса при смене версии схемы",
+   "golds": 1,
+   "reranked": true,
+   "ms": 14193,
+   "rank": {
+    "cli": 0,
+    "fts-or": 0,
+    "fts-head5": 0,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-34",
+   "project": "bars-project",
+   "group": "identifier",
+   "query": "ISS-23",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4432,
+   "rank": {
+    "cli": 3,
+    "fts-or": 5,
+    "fts-head5": 6,
+    "fts-and": 6
+   }
+  },
+  {
+   "id": "bp-35",
+   "project": "bars-project",
+   "group": "identifier",
+   "query": "ISS-36",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4417,
+   "rank": {
+    "cli": 0,
+    "fts-or": 7,
+    "fts-head5": 7,
+    "fts-and": 9
+   }
+  },
+  {
+   "id": "bp-36",
+   "project": "bars-project",
+   "group": "number",
+   "query": "сколько тестов прошла нарезка реестров 01-11-2026",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4564,
+   "rank": {
+    "cli": 2,
+    "fts-or": 3,
+    "fts-head5": 4,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-37",
+   "project": "bars-project",
+   "group": "mixed",
+   "query": "autostart: как включить запуск bars при входе в систему",
+   "golds": 1,
+   "reranked": true,
+   "ms": 12600,
+   "rank": {
+    "cli": 0,
+    "fts-or": 7,
+    "fts-head5": 9,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-38",
+   "project": "bars-project",
+   "group": "synonym",
+   "query": "агент получает ошибку что модель ещё грузится, прокси повторяет вызов",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4538,
+   "rank": {
+    "cli": 2,
+    "fts-or": 8,
+    "fts-head5": 7,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-39",
+   "project": "bars-project",
+   "group": "bag",
+   "query": "FTS5 токенизатор unicode61 стемминг Snowball слова через OR bm25 без весов",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4819,
+   "rank": {
+    "cli": 1,
+    "fts-or": 2,
+    "fts-head5": 2,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "bp-40",
+   "project": "bars-project",
+   "group": "twopart",
+   "query": "rerank через Ollama и LM Studio: на каком решении автора основано и что меняется",
+   "golds": 2,
+   "reranked": true,
+   "ms": 15592,
+   "rank": {
+    "cli": 1,
+    "fts-or": 2,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-41",
+   "project": "bars-project",
+   "group": "twopart",
+   "query": "нарезка: один раздел один чанк и что делать с большим разделом",
+   "golds": 2,
+   "reranked": true,
+   "ms": 15316,
+   "rank": {
+    "cli": 1,
+    "fts-or": 2,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "bp-42",
+   "project": "bars-project",
+   "group": "question",
+   "query": "как найти похожие разделы к результату",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4863,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ob-01",
+   "project": "overdrive-bots",
+   "group": "question",
+   "query": "когда бот считается застрявшим и возвращается в боксы",
+   "golds": 2,
+   "reranked": true,
+   "ms": 15949,
+   "rank": {
+    "cli": 2,
+    "fts-or": 2,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-02",
+   "project": "overdrive-bots",
+   "group": "question",
+   "query": "зачем хранить неактуальные пароли серверов",
+   "golds": 1,
+   "reranked": true,
+   "ms": 27539,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ob-03",
+   "project": "overdrive-bots",
+   "group": "question",
+   "query": "как сопоставляются комплекты резины при смене машины",
+   "golds": 1,
+   "reranked": true,
+   "ms": 8951,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-04",
+   "project": "overdrive-bots",
+   "group": "question",
+   "query": "кого игнорирует штатный AI в режиме Police",
+   "golds": 1,
+   "reranked": true,
+   "ms": 7578,
+   "rank": {
+    "cli": 1,
+    "fts-or": 2,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-05",
+   "project": "overdrive-bots",
+   "group": "question",
+   "query": "почему групповая Police приостановлена",
+   "golds": 1,
+   "reranked": true,
+   "ms": 16344,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-06",
+   "project": "overdrive-bots",
+   "group": "question",
+   "query": "почему решили линейно снижать скорость заезда в боксы и какой минимум",
+   "golds": 1,
+   "reranked": true,
+   "ms": 37064,
+   "rank": {
+    "cli": 1,
+    "fts-or": 2,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-07",
+   "project": "overdrive-bots",
+   "group": "question",
+   "query": "когда автоматически менять шины по износу",
+   "golds": 1,
+   "reranked": true,
+   "ms": 8751,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-08",
+   "project": "overdrive-bots",
+   "group": "question",
+   "query": "какой режим обслуживания стоит по умолчанию",
+   "golds": 1,
+   "reranked": true,
+   "ms": 12613,
+   "rank": {
+    "cli": 4,
+    "fts-or": 6,
+    "fts-head5": 3,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-09",
+   "project": "overdrive-bots",
+   "group": "synonym",
+   "query": "игра и боты ходят на один сервер по разным адресам, привязка игрока в панели",
+   "golds": 1,
+   "reranked": true,
+   "ms": 17916,
+   "rank": {
+    "cli": 1,
+    "fts-or": 2,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-10",
+   "project": "overdrive-bots",
+   "group": "question",
+   "query": "что делать с командой, если игра переключила AI-линию и назначение потеряно",
+   "golds": 1,
+   "reranked": true,
+   "ms": 13534,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-11",
+   "project": "overdrive-bots",
+   "group": "where",
+   "query": "где решено телепортировать машины только на основную дорогу",
+   "golds": 1,
+   "reranked": true,
+   "ms": 13912,
+   "rank": {
+    "cli": 2,
+    "fts-or": 8,
+    "fts-head5": 3,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-12",
+   "project": "overdrive-bots",
+   "group": "question",
+   "query": "вырезан ли разворот ботов и остался ли задний ход",
+   "golds": 1,
+   "reranked": true,
+   "ms": 10049,
+   "rank": {
+    "cli": 2,
+    "fts-or": 2,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-13",
+   "project": "overdrive-bots",
+   "group": "question",
+   "query": "почему два полицейских рядом тормозят друг друга и не едут",
+   "golds": 1,
+   "reranked": true,
+   "ms": 15748,
+   "rank": {
+    "cli": 3,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-14",
+   "project": "overdrive-bots",
+   "group": "question",
+   "query": "почему бот на своей линии разгоняется медленно, ограничение разгона",
+   "golds": 1,
+   "reranked": true,
+   "ms": 18222,
+   "rank": {
+    "cli": 1,
+    "fts-or": 5,
+    "fts-head5": 4,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-15",
+   "project": "overdrive-bots",
+   "group": "term",
+   "query": "ADR-0003 «В боксы» мгновенный перенос",
+   "golds": 1,
+   "reranked": true,
+   "ms": 6019,
+   "rank": {
+    "cli": 1,
+    "fts-or": 2,
+    "fts-head5": 1,
+    "fts-and": 2
+   }
+  },
+  {
+   "id": "ob-16",
+   "project": "overdrive-bots",
+   "group": "identifier",
+   "query": "AI+0xCC",
+   "golds": 2,
+   "reranked": true,
+   "ms": 5961,
+   "rank": {
+    "cli": 2,
+    "fts-or": 3,
+    "fts-head5": 3,
+    "fts-and": 3
+   }
+  },
+  {
+   "id": "ob-17",
+   "project": "overdrive-bots",
+   "group": "identifier",
+   "query": "requested_gear shifter_supported",
+   "golds": 1,
+   "reranked": true,
+   "ms": 5325,
+   "rank": {
+    "cli": 0,
+    "fts-or": 7,
+    "fts-head5": 7,
+    "fts-and": 5
+   }
+  },
+  {
+   "id": "ob-18",
+   "project": "overdrive-bots",
+   "group": "identifier",
+   "query": "StartPlayerModeManyAsync",
+   "golds": 1,
+   "reranked": true,
+   "ms": 5515,
+   "rank": {
+    "cli": 1,
+    "fts-or": 4,
+    "fts-head5": 4,
+    "fts-and": 4
+   }
+  },
+  {
+   "id": "ob-19",
+   "project": "overdrive-bots",
+   "group": "agent-bag",
+   "query": "Когда в строке бота вместо места показывается прочерк при потере порядка",
+   "golds": 2,
+   "reranked": true,
+   "ms": 16627,
+   "rank": {
+    "cli": 7,
+    "fts-or": 3,
+    "fts-head5": 3,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-20",
+   "project": "overdrive-bots",
+   "group": "agent-bag",
+   "query": "команда «Ремонт» в менеджере и панели в игре: что делает с ботом, останавливает ли, мгновенный ремонт на ходу",
+   "golds": 2,
+   "reranked": true,
+   "ms": 14567,
+   "rank": {
+    "cli": 2,
+    "fts-or": 7,
+    "fts-head5": 10,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-21",
+   "project": "overdrive-bots",
+   "group": "agent-bag",
+   "query": "Как работает групповая полиция?",
+   "golds": 2,
+   "reranked": true,
+   "ms": 4572,
+   "rank": {
+    "cli": 0,
+    "fts-or": 0,
+    "fts-head5": 0,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-22",
+   "project": "overdrive-bots",
+   "group": "guide-vs-journals",
+   "query": "что делать, если боты подключены, но не едут",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4594,
+   "rank": {
+    "cli": 1,
+    "fts-or": 2,
+    "fts-head5": 1,
+    "fts-and": 2
+   }
+  },
+  {
+   "id": "ob-23",
+   "project": "overdrive-bots",
+   "group": "guide-vs-journals",
+   "query": "как стереть сохранённый пароль сервера",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4958,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ob-24",
+   "project": "overdrive-bots",
+   "group": "guide-vs-journals",
+   "query": "сколько ботов проверено на одном компьютере",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4756,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-25",
+   "project": "overdrive-bots",
+   "group": "guide-vs-journals",
+   "query": "почему бот не подключился, где причина ошибки",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4757,
+   "rank": {
+    "cli": 1,
+    "fts-or": 3,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-26",
+   "project": "overdrive-bots",
+   "group": "guide-vs-journals",
+   "query": "как считаются места для ботов на сервере",
+   "golds": 1,
+   "reranked": true,
+   "ms": 8380,
+   "rank": {
+    "cli": 1,
+    "fts-or": 2,
+    "fts-head5": 1,
+    "fts-and": 2
+   }
+  },
+  {
+   "id": "ob-27",
+   "project": "overdrive-bots",
+   "group": "where",
+   "query": "где лежат файлы join-diagnostics для разработчика",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4700,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ob-28",
+   "project": "overdrive-bots",
+   "group": "guide-vs-journals",
+   "query": "как работает автовозврат после поломки двигателя",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4847,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ob-29",
+   "project": "overdrive-bots",
+   "group": "guide-vs-journals",
+   "query": "как поменять шины боту",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4766,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ob-30",
+   "project": "overdrive-bots",
+   "group": "guide-vs-journals",
+   "query": "как быстро бот реагирует на команду Стоп",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4583,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ob-31",
+   "project": "overdrive-bots",
+   "group": "bag",
+   "query": "порты игры TCP UDP 9600 получено с сервера вручную",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4523,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ob-32",
+   "project": "overdrive-bots",
+   "group": "synonym",
+   "query": "бот долго не заходит после переподключения, сервер держит прошлое место",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4705,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-33",
+   "project": "overdrive-bots",
+   "group": "question",
+   "query": "можно ли сменить сервер, когда боты уже подключены",
+   "golds": 1,
+   "reranked": true,
+   "ms": 10340,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-34",
+   "project": "overdrive-bots",
+   "group": "question",
+   "query": "сколько памяти ест один бот",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4784,
+   "rank": {
+    "cli": 1,
+    "fts-or": 2,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-35",
+   "project": "overdrive-bots",
+   "group": "typo",
+   "query": "самобслуживание бота в боксах ремонт заправка",
+   "golds": 1,
+   "reranked": true,
+   "ms": 5011,
+   "rank": {
+    "cli": 1,
+    "fts-or": 7,
+    "fts-head5": 0,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-36",
+   "project": "overdrive-bots",
+   "group": "question",
+   "query": "как ограничить максимум ботов",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4929,
+   "rank": {
+    "cli": 2,
+    "fts-or": 0,
+    "fts-head5": 0,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-37",
+   "project": "overdrive-bots",
+   "group": "where",
+   "query": "где сказано что программа сама не запускает acServer",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4951,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-38",
+   "project": "overdrive-bots",
+   "group": "question",
+   "query": "что значит сообщение «Файл настроек повреждён»",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4679,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ob-39",
+   "project": "overdrive-bots",
+   "group": "twopart",
+   "query": "самообслуживание: что это и как настроить режимы ремонта, заправки и шин",
+   "golds": 2,
+   "reranked": true,
+   "ms": 14910,
+   "rank": {
+    "cli": 2,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ob-40",
+   "project": "overdrive-bots",
+   "group": "mixed",
+   "query": "как работает reconnect бота и ожидание освобождения slot на сервере",
+   "golds": 1,
+   "reranked": true,
+   "ms": 15463,
+   "rank": {
+    "cli": 1,
+    "fts-or": 0,
+    "fts-head5": 0,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-01",
+   "project": "RoleGPT",
+   "group": "question",
+   "query": "где хранятся лимиты вызовов инструментов и субагентов",
+   "golds": 1,
+   "reranked": true,
+   "ms": 5039,
+   "rank": {
+    "cli": 1,
+    "fts-or": 0,
+    "fts-head5": 0,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-02",
+   "project": "RoleGPT",
+   "group": "identifier",
+   "query": "owner_agent_mode",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4476,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "rg-03",
+   "project": "RoleGPT",
+   "group": "identifier",
+   "query": "generation_presets",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4471,
+   "rank": {
+    "cli": 2,
+    "fts-or": 4,
+    "fts-head5": 4,
+    "fts-and": 4
+   }
+  },
+  {
+   "id": "rg-04",
+   "project": "RoleGPT",
+   "group": "question",
+   "query": "почему продолжение сообщения не использует prefill провайдера",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4457,
+   "rank": {
+    "cli": 3,
+    "fts-or": 2,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-05",
+   "project": "RoleGPT",
+   "group": "term",
+   "query": "ToolSet по умолчанию у нового персонажа",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4790,
+   "rank": {
+    "cli": 4,
+    "fts-or": 2,
+    "fts-head5": 3,
+    "fts-and": 2
+   }
+  },
+  {
+   "id": "rg-06",
+   "project": "RoleGPT",
+   "group": "question",
+   "query": "когда модель должна писать в память чата",
+   "golds": 1,
+   "reranked": true,
+   "ms": 5549,
+   "rank": {
+    "cli": 2,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-07",
+   "project": "RoleGPT",
+   "group": "question",
+   "query": "какие вкладки в правой панели чата",
+   "golds": 1,
+   "reranked": true,
+   "ms": 5143,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 3,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "rg-08",
+   "project": "RoleGPT",
+   "group": "synonym",
+   "query": "завершение сессии ролевой игры сохраняет итог для следующего чата",
+   "golds": 1,
+   "reranked": true,
+   "ms": 21144,
+   "rank": {
+    "cli": 0,
+    "fts-or": 0,
+    "fts-head5": 0,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-09",
+   "project": "RoleGPT",
+   "group": "question",
+   "query": "что хранится в model_usage у трассы выполнения",
+   "golds": 1,
+   "reranked": true,
+   "ms": 24419,
+   "rank": {
+    "cli": 1,
+    "fts-or": 3,
+    "fts-head5": 3,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-10",
+   "project": "RoleGPT",
+   "group": "where",
+   "query": "где решено что чат хранится одним json-файлом",
+   "golds": 1,
+   "reranked": true,
+   "ms": 13862,
+   "rank": {
+    "cli": 2,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-11",
+   "project": "RoleGPT",
+   "group": "question",
+   "query": "в каком файле лежит память пары персонаж и персона",
+   "golds": 1,
+   "reranked": true,
+   "ms": 11747,
+   "rank": {
+    "cli": 1,
+    "fts-or": 3,
+    "fts-head5": 3,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-12",
+   "project": "RoleGPT",
+   "group": "question",
+   "query": "что происходит с длинным текстом в отчёте критика",
+   "golds": 1,
+   "reranked": true,
+   "ms": 13811,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-13",
+   "project": "RoleGPT",
+   "group": "question",
+   "query": "попадает ли в контекст модели сохранённый неудачный ответ",
+   "golds": 1,
+   "reranked": true,
+   "ms": 7761,
+   "rank": {
+    "cli": 3,
+    "fts-or": 0,
+    "fts-head5": 0,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-14",
+   "project": "RoleGPT",
+   "group": "number",
+   "query": "ADR-0063 правила провайдеров RouterAI",
+   "golds": 1,
+   "reranked": true,
+   "ms": 16396,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "rg-15",
+   "project": "RoleGPT",
+   "group": "morphology",
+   "query": "переключение режимов восстанавливает предпочтения каждого режима",
+   "golds": 1,
+   "reranked": true,
+   "ms": 9145,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "rg-16",
+   "project": "RoleGPT",
+   "group": "typo",
+   "query": "стриминг окна уточненя поверх интерфейса",
+   "golds": 1,
+   "reranked": true,
+   "ms": 9451,
+   "rank": {
+    "cli": 3,
+    "fts-or": 4,
+    "fts-head5": 3,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-17",
+   "project": "RoleGPT",
+   "group": "mixed",
+   "query": "continue endpoint для messages и swipes одинаковый chat lock",
+   "golds": 1,
+   "reranked": true,
+   "ms": 10720,
+   "rank": {
+    "cli": 1,
+    "fts-or": 2,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-18",
+   "project": "RoleGPT",
+   "group": "question",
+   "query": "можно ли отключить агента в конкретной истории, не теряя накопленное знание",
+   "golds": 1,
+   "reranked": true,
+   "ms": 19849,
+   "rank": {
+    "cli": 1,
+    "fts-or": 6,
+    "fts-head5": 6,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-19",
+   "project": "RoleGPT",
+   "group": "bag",
+   "query": "LangGraph граф хода ephemeral immutable proposals application-owned persistence",
+   "golds": 1,
+   "reranked": true,
+   "ms": 10900,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-20",
+   "project": "RoleGPT",
+   "group": "synonym",
+   "query": "имя персонажа нельзя менять после создания, идентификатор остаётся прежним",
+   "golds": 1,
+   "reranked": true,
+   "ms": 9655,
+   "rank": {
+    "cli": 1,
+    "fts-or": 2,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-21",
+   "project": "RoleGPT",
+   "group": "where",
+   "query": "где описано что автосохранение не сбрасывает фокус в поле",
+   "golds": 1,
+   "reranked": true,
+   "ms": 19109,
+   "rank": {
+    "cli": 1,
+    "fts-or": 0,
+    "fts-head5": 0,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-22",
+   "project": "RoleGPT",
+   "group": "question",
+   "query": "как применить один выбранный текстовый блок профиля ко всем встроенным ассистентам",
+   "golds": 1,
+   "reranked": true,
+   "ms": 21154,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-23",
+   "project": "RoleGPT",
+   "group": "question",
+   "query": "сколько вызовов агентов делает режим assistant_only",
+   "golds": 1,
+   "reranked": true,
+   "ms": 10801,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-24",
+   "project": "RoleGPT",
+   "group": "question",
+   "query": "каким скриптом переносят старые расходы сообщений",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4928,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-25",
+   "project": "RoleGPT",
+   "group": "question",
+   "query": "почему глобальная память персонажа без персоны отклонена",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4536,
+   "rank": {
+    "cli": 1,
+    "fts-or": 2,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-26",
+   "project": "RoleGPT",
+   "group": "twopart",
+   "query": "продолжение сообщения: как реализовано и какие альтернативы отклонены",
+   "golds": 2,
+   "reranked": true,
+   "ms": 4470,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-27",
+   "project": "RoleGPT",
+   "group": "twopart",
+   "query": "глобальные run budgets: значения по умолчанию и что это даёт для персонажей",
+   "golds": 2,
+   "reranked": true,
+   "ms": 12972,
+   "rank": {
+    "cli": 1,
+    "fts-or": 2,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-28",
+   "project": "RoleGPT",
+   "group": "twopart",
+   "query": "правая панель чата: почему шесть вкладок заменены тремя",
+   "golds": 2,
+   "reranked": true,
+   "ms": 13259,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-29",
+   "project": "RoleGPT",
+   "group": "agent-bag",
+   "query": "Как сохраняется флаг apply_to_builtin отдельного текстового блока промпт-профиля и попадает ли этот блок в промпт агентов?",
+   "golds": 4,
+   "reranked": true,
+   "ms": 33757,
+   "rank": {
+    "cli": 2,
+    "fts-or": 2,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-30",
+   "project": "RoleGPT",
+   "group": "agent-bag",
+   "query": "Scene повторный plan_reply после замечаний критиков: когда необходим новый план и черновик, send_answer и блокирующие замечания",
+   "golds": 1,
+   "reranked": true,
+   "ms": 7596,
+   "rank": {
+    "cli": 0,
+    "fts-or": 0,
+    "fts-head5": 0,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-31",
+   "project": "RoleGPT",
+   "group": "agent-bag",
+   "query": "Память Chat.memories хранение, принадлежность чату, удаление и RAG",
+   "golds": 3,
+   "reranked": true,
+   "ms": 13451,
+   "rank": {
+    "cli": 2,
+    "fts-or": 4,
+    "fts-head5": 4,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "rg-32",
+   "project": "RoleGPT",
+   "group": "agent-bag",
+   "query": "В каких спецификациях описаны generation-параметры моделей подключений и добавление max_reasoning_tokens для RouterAI?",
+   "golds": 2,
+   "reranked": true,
+   "ms": 24089,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ag-01",
+   "project": "agaugu",
+   "group": "question",
+   "query": "как выбрать схему декларирования",
+   "golds": 1,
+   "reranked": true,
+   "ms": 15645,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ag-02",
+   "project": "agaugu",
+   "group": "synonym",
+   "query": "товар из нескольких компонентов, как определить основной",
+   "golds": 1,
+   "reranked": true,
+   "ms": 9811,
+   "rank": {
+    "cli": 0,
+    "fts-or": 0,
+    "fts-head5": 0,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ag-03",
+   "project": "agaugu",
+   "group": "typo",
+   "query": "проверить покрытие или прапитку ткани",
+   "golds": 1,
+   "reranked": true,
+   "ms": 10316,
+   "rank": {
+    "cli": 1,
+    "fts-or": 7,
+    "fts-head5": 6,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ag-04",
+   "project": "agaugu",
+   "group": "where",
+   "query": "где описана проверка криптографии и радиочасти при импорте",
+   "golds": 1,
+   "reranked": true,
+   "ms": 8480,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ag-05",
+   "project": "agaugu",
+   "group": "morphology",
+   "query": "определять преобладающее волокно в ткани",
+   "golds": 1,
+   "reranked": true,
+   "ms": 8300,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ag-06",
+   "project": "agaugu",
+   "group": "term",
+   "query": "ОПИ 6 субпозиции",
+   "golds": 1,
+   "reranked": true,
+   "ms": 26254,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 3,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ag-07",
+   "project": "agaugu",
+   "group": "question",
+   "query": "Как отделить чистое вещество от смеси при подборе кода?",
+   "golds": 1,
+   "reranked": true,
+   "ms": 18556,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ag-08",
+   "project": "agaugu",
+   "group": "identifier",
+   "query": "DEMO-DEC-02",
+   "golds": 1,
+   "reranked": true,
+   "ms": 12458,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ag-09",
+   "project": "agaugu",
+   "group": "identifier",
+   "query": "SYN-DEC-STEP-13",
+   "golds": 1,
+   "reranked": true,
+   "ms": 11063,
+   "rank": {
+    "cli": 2,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ag-10",
+   "project": "agaugu",
+   "group": "identifier",
+   "query": "DEMO-SGR-03",
+   "golds": 1,
+   "reranked": true,
+   "ms": 18193,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ag-11",
+   "project": "agaugu",
+   "group": "number",
+   "query": "Шаг 16 сверить весь пакет с инвойсом",
+   "golds": 1,
+   "reranked": true,
+   "ms": 22394,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ag-12",
+   "project": "agaugu",
+   "group": "bag",
+   "query": "подготовка образцов для сертификации отбор программа испытаний область аккредитации органа",
+   "golds": 3,
+   "reranked": true,
+   "ms": 7384,
+   "rank": {
+    "cli": 1,
+    "fts-or": 2,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ag-13",
+   "project": "agaugu",
+   "group": "synonym",
+   "query": "рецептура и происхождение сырья для регистрации косметики",
+   "golds": 1,
+   "reranked": true,
+   "ms": 9898,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ag-14",
+   "project": "agaugu",
+   "group": "mixed",
+   "query": "customs HS code для набора kit главный характер",
+   "golds": 1,
+   "reranked": true,
+   "ms": 8421,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ag-15",
+   "project": "agaugu",
+   "group": "question",
+   "query": "что запрашивать у поставщика по товару электроинструмент",
+   "golds": 1,
+   "reranked": true,
+   "ms": 10542,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ag-16",
+   "project": "agaugu",
+   "group": "where",
+   "query": "где проверяются нетарифные ограничения",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4783,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ag-17",
+   "project": "agaugu",
+   "group": "term",
+   "query": "ветеринарные фитосанитарные меры",
+   "golds": 1,
+   "reranked": true,
+   "ms": 9052,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 2,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ag-18",
+   "project": "agaugu",
+   "group": "question",
+   "query": "Как проверить электронную регистрацию декларации?",
+   "golds": 1,
+   "reranked": true,
+   "ms": 9117,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 2,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ag-19",
+   "project": "agaugu",
+   "group": "typo",
+   "query": "проверить проэкт сертификата",
+   "golds": 1,
+   "reranked": true,
+   "ms": 13684,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ag-20",
+   "project": "agaugu",
+   "group": "morphology",
+   "query": "применяя ОПИ 1 до остальных правил",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4145,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ag-21",
+   "project": "agaugu",
+   "group": "synonym",
+   "query": "незавершённое изделие недокомплект правило 2",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4204,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ag-22",
+   "project": "agaugu",
+   "group": "where",
+   "query": "где описано разделение ткани и трикотажа",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4247,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ag-23",
+   "project": "agaugu",
+   "group": "bag",
+   "query": "материалы обуви верх подошва как определить код",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4134,
+   "rank": {
+    "cli": 5,
+    "fts-or": 0,
+    "fts-head5": 0,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ag-24",
+   "project": "agaugu",
+   "group": "number",
+   "query": "Шаг 14 электроника функция многофункциональной машины",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4114,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ag-25",
+   "project": "agaugu",
+   "group": "mixed",
+   "query": "роль firmware и ПО при классификации электроники",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4156,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ag-26",
+   "project": "agaugu",
+   "group": "question",
+   "query": "Как отделить часть от законченного устройства?",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4271,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ag-27",
+   "project": "agaugu",
+   "group": "question",
+   "query": "как определить слоистую структуру композита",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4448,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 2,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "ag-28",
+   "project": "agaugu",
+   "group": "question",
+   "query": "какие технические регламенты применимы к декларируемому товару",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4312,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ag-29",
+   "project": "agaugu",
+   "group": "morphology",
+   "query": "сопоставление электрических параметров устройства",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4865,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "ag-30",
+   "project": "agaugu",
+   "group": "synonym",
+   "query": "сверить категорию косметики или бытовой химии для регистрации",
+   "golds": 1,
+   "reranked": true,
+   "ms": 10553,
+   "rank": {
+    "cli": 0,
+    "fts-or": 5,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "tm-01",
+   "project": "tmc-opovechenie",
+   "group": "question",
+   "query": "в какой срок нужно уведомить об инциденте на значимом объекте КИИ",
+   "golds": 1,
+   "reranked": true,
+   "ms": 3896,
+   "rank": {
+    "cli": 2,
+    "fts-or": 3,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "tm-02",
+   "project": "tmc-opovechenie",
+   "group": "term",
+   "query": "классы СКЗИ КС1 КС2 КС3",
+   "golds": 1,
+   "reranked": true,
+   "ms": 3856,
+   "rank": {
+    "cli": 2,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "tm-03",
+   "project": "tmc-opovechenie",
+   "group": "question",
+   "query": "какой класс средств защиты нужен для объекта второй категории",
+   "golds": 1,
+   "reranked": true,
+   "ms": 3979,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "tm-04",
+   "project": "tmc-opovechenie",
+   "group": "question",
+   "query": "что даёт пометка ДСП для класса защищённости системы",
+   "golds": 1,
+   "reranked": true,
+   "ms": 3925,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "tm-05",
+   "project": "tmc-opovechenie",
+   "group": "question",
+   "query": "можно ли найти в приказе ФСТЭК 117 требования к шифрованию трафика",
+   "golds": 1,
+   "reranked": true,
+   "ms": 10301,
+   "rank": {
+    "cli": 1,
+    "fts-or": 0,
+    "fts-head5": 10,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "tm-06",
+   "project": "tmc-opovechenie",
+   "group": "question",
+   "query": "за сколько надо устранить критическую уязвимость",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4058,
+   "rank": {
+    "cli": 2,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "tm-07",
+   "project": "tmc-opovechenie",
+   "group": "number",
+   "query": "325-ФЗ от 31.07.2025 порог контроля 50 процентов",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4442,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "tm-08",
+   "project": "tmc-opovechenie",
+   "group": "question",
+   "query": "какие штрафы по КоАП за нарушение требований безопасности КИИ",
+   "golds": 1,
+   "reranked": true,
+   "ms": 12865,
+   "rank": {
+    "cli": 2,
+    "fts-or": 3,
+    "fts-head5": 4,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "tm-09",
+   "project": "tmc-opovechenie",
+   "group": "morphology",
+   "query": "штрафы юридических лиц за утечки персональных данных",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4760,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "tm-10",
+   "project": "tmc-opovechenie",
+   "group": "number",
+   "query": "указ 250 запрет иностранных средств защиты с 01.01.2025",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4629,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "tm-11",
+   "project": "tmc-opovechenie",
+   "group": "question",
+   "query": "в какой срок направляют сведения о категорировании во ФСТЭК",
+   "golds": 1,
+   "reranked": true,
+   "ms": 12705,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "tm-12",
+   "project": "tmc-opovechenie",
+   "group": "question",
+   "query": "какой приказ устанавливает форму сведений о категорировании",
+   "golds": 1,
+   "reranked": true,
+   "ms": 13502,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "tm-13",
+   "project": "tmc-opovechenie",
+   "group": "number",
+   "query": "приказ ФСТЭК № 137 от 08.05.2026",
+   "golds": 1,
+   "reranked": true,
+   "ms": 5177,
+   "rank": {
+    "cli": 1,
+    "fts-or": 5,
+    "fts-head5": 6,
+    "fts-and": 4
+   }
+  },
+  {
+   "id": "tm-14",
+   "project": "tmc-opovechenie",
+   "group": "synonym",
+   "query": "риск что систему отнесут к мониторингу и срок наступит раньше",
+   "golds": 1,
+   "reranked": true,
+   "ms": 5522,
+   "rank": {
+    "cli": 3,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "tm-15",
+   "project": "tmc-opovechenie",
+   "group": "question",
+   "query": "когда подавать заявку в реестр российского ПО относительно первого внедрения",
+   "golds": 1,
+   "reranked": true,
+   "ms": 5390,
+   "rank": {
+    "cli": 3,
+    "fts-or": 2,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "tm-16",
+   "project": "tmc-opovechenie",
+   "group": "number",
+   "query": "13.12.2 КоАП 77-ФЗ",
+   "golds": 1,
+   "reranked": true,
+   "ms": 5380,
+   "rank": {
+    "cli": 2,
+    "fts-or": 2,
+    "fts-head5": 1,
+    "fts-and": 2
+   }
+  },
+  {
+   "id": "tm-17",
+   "project": "tmc-opovechenie",
+   "group": "number",
+   "query": "58-ФЗ от 07.04.2025",
+   "golds": 1,
+   "reranked": true,
+   "ms": 5417,
+   "rank": {
+    "cli": 3,
+    "fts-or": 8,
+    "fts-head5": 3,
+    "fts-and": 7
+   }
+  },
+  {
+   "id": "tm-18",
+   "project": "tmc-opovechenie",
+   "group": "identifier",
+   "query": "0001202512300064",
+   "golds": 1,
+   "reranked": true,
+   "ms": 13902,
+   "rank": {
+    "cli": 2,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "tm-19",
+   "project": "tmc-opovechenie",
+   "group": "where",
+   "query": "где описана путаница с двумя приказами номер 117",
+   "golds": 1,
+   "reranked": true,
+   "ms": 5169,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "tm-20",
+   "project": "tmc-opovechenie",
+   "group": "where",
+   "query": "что перепроверить в первую очередь по нормативной базе",
+   "golds": 1,
+   "reranked": true,
+   "ms": 5033,
+   "rank": {
+    "cli": 2,
+    "fts-or": 2,
+    "fts-head5": 1,
+    "fts-and": 2
+   }
+  },
+  {
+   "id": "tm-21",
+   "project": "tmc-opovechenie",
+   "group": "question",
+   "query": "что в ГосСОПКА делает заказчик, а что мы",
+   "golds": 1,
+   "reranked": true,
+   "ms": 12743,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "tm-22",
+   "project": "tmc-opovechenie",
+   "group": "bag",
+   "query": "определение критически важного объекта потеря управления нарушение функционирования закон о защите населения",
+   "golds": 1,
+   "reranked": true,
+   "ms": 11970,
+   "rank": {
+    "cli": 2,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 1
+   }
+  },
+  {
+   "id": "tm-23",
+   "project": "tmc-opovechenie",
+   "group": "typo",
+   "query": "пересмотр катигории значимого объекта как часто",
+   "golds": 1,
+   "reranked": true,
+   "ms": 4400,
+   "rank": {
+    "cli": 2,
+    "fts-or": 1,
+    "fts-head5": 2,
+    "fts-and": 0
+   }
+  },
+  {
+   "id": "tm-24",
+   "project": "tmc-opovechenie",
+   "group": "mixed",
+   "query": "SLA на fix critical vulnerability 24 часа оператор",
+   "golds": 1,
+   "reranked": true,
+   "ms": 11815,
+   "rank": {
+    "cli": 1,
+    "fts-or": 1,
+    "fts-head5": 1,
+    "fts-and": 0
+   }
+  }
+ ]
+}

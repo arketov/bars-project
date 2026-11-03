@@ -1,0 +1,1346 @@
+[
+ {
+  "id": "bp-01",
+  "project": "bars-project",
+  "group": "question",
+  "query": "почему bars использует Qwen3 через llama.cpp, а не отдельный llama-server",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "bp-02",
+  "project": "bars-project",
+  "group": "question",
+  "query": "какая библиотека выбрана для docking окон",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "bp-03",
+  "project": "bars-project",
+  "group": "question",
+  "query": "на чём считается физика графа и чем рисуется",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "bp-04",
+  "project": "bars-project",
+  "group": "question",
+  "query": "какой редактор Markdown выбран и почему",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "bp-05",
+  "project": "bars-project",
+  "group": "question",
+  "query": "как считается оценка rerank по yes no logprobs",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "bp-06",
+  "project": "bars-project",
+  "group": "question",
+  "query": "по какой формуле сливаются кандидаты двух поисков",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "bp-07",
+  "project": "bars-project",
+  "group": "question",
+  "query": "сколько кандидатов переоценивает rerank по умолчанию",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "bp-08",
+  "project": "bars-project",
+  "group": "identifier",
+  "query": "source_hash",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "bp-09",
+  "project": "bars-project",
+  "group": "where",
+  "query": "где описан порог оценки результата для rerank и косинуса",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "bp-10",
+  "project": "bars-project",
+  "group": "question",
+  "query": "как bars режет большой раздел на несколько чанков",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "bp-11",
+  "project": "bars-project",
+  "group": "question",
+  "query": "что происходит с очень маленьким разделом при нарезке",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "bp-12",
+  "project": "bars-project",
+  "group": "question",
+  "query": "что именно попадает в эмбеддинг чанка",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "bp-13",
+  "project": "bars-project",
+  "group": "guide-vs-journals",
+  "query": "bars не находит из-за опечатки в запросе",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "bp-14",
+  "project": "bars-project",
+  "group": "guide-vs-journals",
+  "query": "что значит ответ «модель загружается, повторите позже»",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "bp-15",
+  "project": "bars-project",
+  "group": "guide-vs-journals",
+  "query": "почему проценты в результатах растут вниз по списку",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "bp-16",
+  "project": "bars-project",
+  "group": "guide-vs-journals",
+  "query": "сколько результатов показывает bars по умолчанию",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "bp-17",
+  "project": "bars-project",
+  "group": "guide-vs-journals",
+  "query": "ищет ли bars пока идёт индексация",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "bp-18",
+  "project": "bars-project",
+  "group": "guide-vs-journals",
+  "query": "что значат проценты в результатах поиска",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "bp-19",
+  "project": "bars-project",
+  "group": "question",
+  "query": "что будет, если сменить embed-модель",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "bp-20",
+  "project": "bars-project",
+  "group": "question",
+  "query": "какая вкладка настроек подключает Claude Code и Codex",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "bp-21",
+  "project": "bars-project",
+  "group": "question",
+  "query": "где лежат настройки проекта и можно ли править файлы руками",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "bp-22",
+  "project": "bars-project",
+  "group": "question",
+  "query": "минимальный и максимальный размер куска нарезки",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "bp-23",
+  "project": "bars-project",
+  "group": "bag",
+  "query": "жёлтая точка поле запроса недоступно переиндексация после смены embed-модели",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "bp-24",
+  "project": "bars-project",
+  "group": "synonym",
+  "query": "проект помечен серым, папку перенесли или диск отключён",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "bp-25",
+  "project": "bars-project",
+  "group": "question",
+  "query": "что показывает красный баннер, когда внешний провайдер не отвечает",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "bp-26",
+  "project": "bars-project",
+  "group": "question",
+  "query": "жёлтый баннер «Оценка моделью не выполнена» что значит",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "bp-27",
+  "project": "bars-project",
+  "group": "agent-bag",
+  "query": "вкладка «Клиенты» в настройках: что показывает, установка в Claude Code и Codex",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "bp-28",
+  "project": "bars-project",
+  "group": "agent-bag",
+  "query": "ISS-59 внутренние слова в подписях окна, идентификаторы в интерфейсе",
+  "golds": 2,
+  "split": "test"
+ },
+ {
+  "id": "bp-29",
+  "project": "bars-project",
+  "group": "agent-bag",
+  "query": "ISS-36 ошибка загрузки модели виды ошибок нет файлов нет сети нехватка памяти кнопка действия",
+  "golds": 2,
+  "split": "tune"
+ },
+ {
+  "id": "bp-30",
+  "project": "bars-project",
+  "group": "agent-bag",
+  "query": "словарь подписей окна правило идентификатор только в подсказке и в отчёте",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "bp-31",
+  "project": "bars-project",
+  "group": "agent-bag",
+  "query": "FP16 вариант модели переиндексация bge-m3 почему нужна",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "bp-32",
+  "project": "bars-project",
+  "group": "agent-bag",
+  "query": "число результатов по умолчанию, порог min_score и откуда берётся оценка",
+  "golds": 2,
+  "split": "test"
+ },
+ {
+  "id": "bp-33",
+  "project": "bars-project",
+  "group": "agent-bag",
+  "query": "миграция схемы индекса новая колонка documents, пересборка индекса при смене версии схемы",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "bp-34",
+  "project": "bars-project",
+  "group": "identifier",
+  "query": "ISS-23",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "bp-35",
+  "project": "bars-project",
+  "group": "identifier",
+  "query": "ISS-36",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "bp-36",
+  "project": "bars-project",
+  "group": "number",
+  "query": "сколько тестов прошла нарезка реестров 01-11-2026",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "bp-37",
+  "project": "bars-project",
+  "group": "mixed",
+  "query": "autostart: как включить запуск bars при входе в систему",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "bp-38",
+  "project": "bars-project",
+  "group": "synonym",
+  "query": "агент получает ошибку что модель ещё грузится, прокси повторяет вызов",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "bp-39",
+  "project": "bars-project",
+  "group": "bag",
+  "query": "FTS5 токенизатор unicode61 стемминг Snowball слова через OR bm25 без весов",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "bp-40",
+  "project": "bars-project",
+  "group": "twopart",
+  "query": "rerank через Ollama и LM Studio: на каком решении автора основано и что меняется",
+  "golds": 2,
+  "split": "test"
+ },
+ {
+  "id": "bp-41",
+  "project": "bars-project",
+  "group": "twopart",
+  "query": "нарезка: один раздел один чанк и что делать с большим разделом",
+  "golds": 2,
+  "split": "tune"
+ },
+ {
+  "id": "bp-42",
+  "project": "bars-project",
+  "group": "question",
+  "query": "как найти похожие разделы к результату",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ob-01",
+  "project": "overdrive-bots",
+  "group": "question",
+  "query": "когда бот считается застрявшим и возвращается в боксы",
+  "golds": 2,
+  "split": "tune"
+ },
+ {
+  "id": "ob-02",
+  "project": "overdrive-bots",
+  "group": "question",
+  "query": "зачем хранить неактуальные пароли серверов",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ob-03",
+  "project": "overdrive-bots",
+  "group": "question",
+  "query": "как сопоставляются комплекты резины при смене машины",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ob-04",
+  "project": "overdrive-bots",
+  "group": "question",
+  "query": "кого игнорирует штатный AI в режиме Police",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ob-05",
+  "project": "overdrive-bots",
+  "group": "question",
+  "query": "почему групповая Police приостановлена",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ob-06",
+  "project": "overdrive-bots",
+  "group": "question",
+  "query": "почему решили линейно снижать скорость заезда в боксы и какой минимум",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ob-07",
+  "project": "overdrive-bots",
+  "group": "question",
+  "query": "когда автоматически менять шины по износу",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ob-08",
+  "project": "overdrive-bots",
+  "group": "question",
+  "query": "какой режим обслуживания стоит по умолчанию",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ob-09",
+  "project": "overdrive-bots",
+  "group": "synonym",
+  "query": "игра и боты ходят на один сервер по разным адресам, привязка игрока в панели",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ob-10",
+  "project": "overdrive-bots",
+  "group": "question",
+  "query": "что делать с командой, если игра переключила AI-линию и назначение потеряно",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ob-11",
+  "project": "overdrive-bots",
+  "group": "where",
+  "query": "где решено телепортировать машины только на основную дорогу",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ob-12",
+  "project": "overdrive-bots",
+  "group": "question",
+  "query": "вырезан ли разворот ботов и остался ли задний ход",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ob-13",
+  "project": "overdrive-bots",
+  "group": "question",
+  "query": "почему два полицейских рядом тормозят друг друга и не едут",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ob-14",
+  "project": "overdrive-bots",
+  "group": "question",
+  "query": "почему бот на своей линии разгоняется медленно, ограничение разгона",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ob-15",
+  "project": "overdrive-bots",
+  "group": "term",
+  "query": "ADR-0003 «В боксы» мгновенный перенос",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ob-16",
+  "project": "overdrive-bots",
+  "group": "identifier",
+  "query": "AI+0xCC",
+  "golds": 2,
+  "split": "test"
+ },
+ {
+  "id": "ob-17",
+  "project": "overdrive-bots",
+  "group": "identifier",
+  "query": "requested_gear shifter_supported",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ob-18",
+  "project": "overdrive-bots",
+  "group": "identifier",
+  "query": "StartPlayerModeManyAsync",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ob-19",
+  "project": "overdrive-bots",
+  "group": "agent-bag",
+  "query": "Когда в строке бота вместо места показывается прочерк при потере порядка",
+  "golds": 2,
+  "split": "tune"
+ },
+ {
+  "id": "ob-20",
+  "project": "overdrive-bots",
+  "group": "agent-bag",
+  "query": "команда «Ремонт» в менеджере и панели в игре: что делает с ботом, останавливает ли, мгновенный ремонт на ходу",
+  "golds": 2,
+  "split": "test"
+ },
+ {
+  "id": "ob-21",
+  "project": "overdrive-bots",
+  "group": "agent-bag",
+  "query": "Как работает групповая полиция?",
+  "golds": 2,
+  "split": "tune"
+ },
+ {
+  "id": "ob-22",
+  "project": "overdrive-bots",
+  "group": "guide-vs-journals",
+  "query": "что делать, если боты подключены, но не едут",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ob-23",
+  "project": "overdrive-bots",
+  "group": "guide-vs-journals",
+  "query": "как стереть сохранённый пароль сервера",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ob-24",
+  "project": "overdrive-bots",
+  "group": "guide-vs-journals",
+  "query": "сколько ботов проверено на одном компьютере",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ob-25",
+  "project": "overdrive-bots",
+  "group": "guide-vs-journals",
+  "query": "почему бот не подключился, где причина ошибки",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ob-26",
+  "project": "overdrive-bots",
+  "group": "guide-vs-journals",
+  "query": "как считаются места для ботов на сервере",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ob-27",
+  "project": "overdrive-bots",
+  "group": "where",
+  "query": "где лежат файлы join-diagnostics для разработчика",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ob-28",
+  "project": "overdrive-bots",
+  "group": "guide-vs-journals",
+  "query": "как работает автовозврат после поломки двигателя",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ob-29",
+  "project": "overdrive-bots",
+  "group": "guide-vs-journals",
+  "query": "как поменять шины боту",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ob-30",
+  "project": "overdrive-bots",
+  "group": "guide-vs-journals",
+  "query": "как быстро бот реагирует на команду Стоп",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ob-31",
+  "project": "overdrive-bots",
+  "group": "bag",
+  "query": "порты игры TCP UDP 9600 получено с сервера вручную",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ob-32",
+  "project": "overdrive-bots",
+  "group": "synonym",
+  "query": "бот долго не заходит после переподключения, сервер держит прошлое место",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ob-33",
+  "project": "overdrive-bots",
+  "group": "question",
+  "query": "можно ли сменить сервер, когда боты уже подключены",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ob-34",
+  "project": "overdrive-bots",
+  "group": "question",
+  "query": "сколько памяти ест один бот",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ob-35",
+  "project": "overdrive-bots",
+  "group": "typo",
+  "query": "самобслуживание бота в боксах ремонт заправка",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ob-36",
+  "project": "overdrive-bots",
+  "group": "question",
+  "query": "как ограничить максимум ботов",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ob-37",
+  "project": "overdrive-bots",
+  "group": "where",
+  "query": "где сказано что программа сама не запускает acServer",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ob-38",
+  "project": "overdrive-bots",
+  "group": "question",
+  "query": "что значит сообщение «Файл настроек повреждён»",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ob-39",
+  "project": "overdrive-bots",
+  "group": "twopart",
+  "query": "самообслуживание: что это и как настроить режимы ремонта, заправки и шин",
+  "golds": 2,
+  "split": "tune"
+ },
+ {
+  "id": "ob-40",
+  "project": "overdrive-bots",
+  "group": "mixed",
+  "query": "как работает reconnect бота и ожидание освобождения slot на сервере",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "rg-01",
+  "project": "RoleGPT",
+  "group": "question",
+  "query": "где хранятся лимиты вызовов инструментов и субагентов",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "rg-02",
+  "project": "RoleGPT",
+  "group": "identifier",
+  "query": "owner_agent_mode",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "rg-03",
+  "project": "RoleGPT",
+  "group": "identifier",
+  "query": "generation_presets",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "rg-04",
+  "project": "RoleGPT",
+  "group": "question",
+  "query": "почему продолжение сообщения не использует prefill провайдера",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "rg-05",
+  "project": "RoleGPT",
+  "group": "term",
+  "query": "ToolSet по умолчанию у нового персонажа",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "rg-06",
+  "project": "RoleGPT",
+  "group": "question",
+  "query": "когда модель должна писать в память чата",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "rg-07",
+  "project": "RoleGPT",
+  "group": "question",
+  "query": "какие вкладки в правой панели чата",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "rg-08",
+  "project": "RoleGPT",
+  "group": "synonym",
+  "query": "завершение сессии ролевой игры сохраняет итог для следующего чата",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "rg-09",
+  "project": "RoleGPT",
+  "group": "question",
+  "query": "что хранится в model_usage у трассы выполнения",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "rg-10",
+  "project": "RoleGPT",
+  "group": "where",
+  "query": "где решено что чат хранится одним json-файлом",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "rg-11",
+  "project": "RoleGPT",
+  "group": "question",
+  "query": "в каком файле лежит память пары персонаж и персона",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "rg-12",
+  "project": "RoleGPT",
+  "group": "question",
+  "query": "что происходит с длинным текстом в отчёте критика",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "rg-13",
+  "project": "RoleGPT",
+  "group": "question",
+  "query": "попадает ли в контекст модели сохранённый неудачный ответ",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "rg-14",
+  "project": "RoleGPT",
+  "group": "number",
+  "query": "ADR-0063 правила провайдеров RouterAI",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "rg-15",
+  "project": "RoleGPT",
+  "group": "morphology",
+  "query": "переключение режимов восстанавливает предпочтения каждого режима",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "rg-16",
+  "project": "RoleGPT",
+  "group": "typo",
+  "query": "стриминг окна уточненя поверх интерфейса",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "rg-17",
+  "project": "RoleGPT",
+  "group": "mixed",
+  "query": "continue endpoint для messages и swipes одинаковый chat lock",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "rg-18",
+  "project": "RoleGPT",
+  "group": "question",
+  "query": "можно ли отключить агента в конкретной истории, не теряя накопленное знание",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "rg-19",
+  "project": "RoleGPT",
+  "group": "bag",
+  "query": "LangGraph граф хода ephemeral immutable proposals application-owned persistence",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "rg-20",
+  "project": "RoleGPT",
+  "group": "synonym",
+  "query": "имя персонажа нельзя менять после создания, идентификатор остаётся прежним",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "rg-21",
+  "project": "RoleGPT",
+  "group": "where",
+  "query": "где описано что автосохранение не сбрасывает фокус в поле",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "rg-22",
+  "project": "RoleGPT",
+  "group": "question",
+  "query": "как применить один выбранный текстовый блок профиля ко всем встроенным ассистентам",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "rg-23",
+  "project": "RoleGPT",
+  "group": "question",
+  "query": "сколько вызовов агентов делает режим assistant_only",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "rg-24",
+  "project": "RoleGPT",
+  "group": "question",
+  "query": "каким скриптом переносят старые расходы сообщений",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "rg-25",
+  "project": "RoleGPT",
+  "group": "question",
+  "query": "почему глобальная память персонажа без персоны отклонена",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "rg-26",
+  "project": "RoleGPT",
+  "group": "twopart",
+  "query": "продолжение сообщения: как реализовано и какие альтернативы отклонены",
+  "golds": 2,
+  "split": "test"
+ },
+ {
+  "id": "rg-27",
+  "project": "RoleGPT",
+  "group": "twopart",
+  "query": "глобальные run budgets: значения по умолчанию и что это даёт для персонажей",
+  "golds": 2,
+  "split": "tune"
+ },
+ {
+  "id": "rg-28",
+  "project": "RoleGPT",
+  "group": "twopart",
+  "query": "правая панель чата: почему шесть вкладок заменены тремя",
+  "golds": 2,
+  "split": "test"
+ },
+ {
+  "id": "rg-29",
+  "project": "RoleGPT",
+  "group": "agent-bag",
+  "query": "Как сохраняется флаг apply_to_builtin отдельного текстового блока промпт-профиля и попадает ли этот блок в промпт агентов?",
+  "golds": 4,
+  "split": "tune"
+ },
+ {
+  "id": "rg-30",
+  "project": "RoleGPT",
+  "group": "agent-bag",
+  "query": "Scene повторный plan_reply после замечаний критиков: когда необходим новый план и черновик, send_answer и блокирующие замечания",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "rg-31",
+  "project": "RoleGPT",
+  "group": "agent-bag",
+  "query": "Память Chat.memories хранение, принадлежность чату, удаление и RAG",
+  "golds": 3,
+  "split": "tune"
+ },
+ {
+  "id": "rg-32",
+  "project": "RoleGPT",
+  "group": "agent-bag",
+  "query": "В каких спецификациях описаны generation-параметры моделей подключений и добавление max_reasoning_tokens для RouterAI?",
+  "golds": 2,
+  "split": "test"
+ },
+ {
+  "id": "ag-01",
+  "project": "agaugu",
+  "group": "question",
+  "query": "как выбрать схему декларирования",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ag-02",
+  "project": "agaugu",
+  "group": "synonym",
+  "query": "товар из нескольких компонентов, как определить основной",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ag-03",
+  "project": "agaugu",
+  "group": "typo",
+  "query": "проверить покрытие или прапитку ткани",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ag-04",
+  "project": "agaugu",
+  "group": "where",
+  "query": "где описана проверка криптографии и радиочасти при импорте",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ag-05",
+  "project": "agaugu",
+  "group": "morphology",
+  "query": "определять преобладающее волокно в ткани",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ag-06",
+  "project": "agaugu",
+  "group": "term",
+  "query": "ОПИ 6 субпозиции",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ag-07",
+  "project": "agaugu",
+  "group": "question",
+  "query": "Как отделить чистое вещество от смеси при подборе кода?",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ag-08",
+  "project": "agaugu",
+  "group": "identifier",
+  "query": "DEMO-DEC-02",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ag-09",
+  "project": "agaugu",
+  "group": "identifier",
+  "query": "SYN-DEC-STEP-13",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ag-10",
+  "project": "agaugu",
+  "group": "identifier",
+  "query": "DEMO-SGR-03",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ag-11",
+  "project": "agaugu",
+  "group": "number",
+  "query": "Шаг 16 сверить весь пакет с инвойсом",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ag-12",
+  "project": "agaugu",
+  "group": "bag",
+  "query": "подготовка образцов для сертификации отбор программа испытаний область аккредитации органа",
+  "golds": 3,
+  "split": "test"
+ },
+ {
+  "id": "ag-13",
+  "project": "agaugu",
+  "group": "synonym",
+  "query": "рецептура и происхождение сырья для регистрации косметики",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ag-14",
+  "project": "agaugu",
+  "group": "mixed",
+  "query": "customs HS code для набора kit главный характер",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ag-15",
+  "project": "agaugu",
+  "group": "question",
+  "query": "что запрашивать у поставщика по товару электроинструмент",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ag-16",
+  "project": "agaugu",
+  "group": "where",
+  "query": "где проверяются нетарифные ограничения",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ag-17",
+  "project": "agaugu",
+  "group": "term",
+  "query": "ветеринарные фитосанитарные меры",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ag-18",
+  "project": "agaugu",
+  "group": "question",
+  "query": "Как проверить электронную регистрацию декларации?",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ag-19",
+  "project": "agaugu",
+  "group": "typo",
+  "query": "проверить проэкт сертификата",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ag-20",
+  "project": "agaugu",
+  "group": "morphology",
+  "query": "применяя ОПИ 1 до остальных правил",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ag-21",
+  "project": "agaugu",
+  "group": "synonym",
+  "query": "незавершённое изделие недокомплект правило 2",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ag-22",
+  "project": "agaugu",
+  "group": "where",
+  "query": "где описано разделение ткани и трикотажа",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ag-23",
+  "project": "agaugu",
+  "group": "bag",
+  "query": "материалы обуви верх подошва как определить код",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ag-24",
+  "project": "agaugu",
+  "group": "number",
+  "query": "Шаг 14 электроника функция многофункциональной машины",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ag-25",
+  "project": "agaugu",
+  "group": "mixed",
+  "query": "роль firmware и ПО при классификации электроники",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ag-26",
+  "project": "agaugu",
+  "group": "question",
+  "query": "Как отделить часть от законченного устройства?",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ag-27",
+  "project": "agaugu",
+  "group": "question",
+  "query": "как определить слоистую структуру композита",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ag-28",
+  "project": "agaugu",
+  "group": "question",
+  "query": "какие технические регламенты применимы к декларируемому товару",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "ag-29",
+  "project": "agaugu",
+  "group": "morphology",
+  "query": "сопоставление электрических параметров устройства",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "ag-30",
+  "project": "agaugu",
+  "group": "synonym",
+  "query": "сверить категорию косметики или бытовой химии для регистрации",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "tm-01",
+  "project": "tmc-opovechenie",
+  "group": "question",
+  "query": "в какой срок нужно уведомить об инциденте на значимом объекте КИИ",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "tm-02",
+  "project": "tmc-opovechenie",
+  "group": "term",
+  "query": "классы СКЗИ КС1 КС2 КС3",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "tm-03",
+  "project": "tmc-opovechenie",
+  "group": "question",
+  "query": "какой класс средств защиты нужен для объекта второй категории",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "tm-04",
+  "project": "tmc-opovechenie",
+  "group": "question",
+  "query": "что даёт пометка ДСП для класса защищённости системы",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "tm-05",
+  "project": "tmc-opovechenie",
+  "group": "question",
+  "query": "можно ли найти в приказе ФСТЭК 117 требования к шифрованию трафика",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "tm-06",
+  "project": "tmc-opovechenie",
+  "group": "question",
+  "query": "за сколько надо устранить критическую уязвимость",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "tm-07",
+  "project": "tmc-opovechenie",
+  "group": "number",
+  "query": "325-ФЗ от 31.07.2025 порог контроля 50 процентов",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "tm-08",
+  "project": "tmc-opovechenie",
+  "group": "question",
+  "query": "какие штрафы по КоАП за нарушение требований безопасности КИИ",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "tm-09",
+  "project": "tmc-opovechenie",
+  "group": "morphology",
+  "query": "штрафы юридических лиц за утечки персональных данных",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "tm-10",
+  "project": "tmc-opovechenie",
+  "group": "number",
+  "query": "указ 250 запрет иностранных средств защиты с 01.01.2025",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "tm-11",
+  "project": "tmc-opovechenie",
+  "group": "question",
+  "query": "в какой срок направляют сведения о категорировании во ФСТЭК",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "tm-12",
+  "project": "tmc-opovechenie",
+  "group": "question",
+  "query": "какой приказ устанавливает форму сведений о категорировании",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "tm-13",
+  "project": "tmc-opovechenie",
+  "group": "number",
+  "query": "приказ ФСТЭК № 137 от 08.05.2026",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "tm-14",
+  "project": "tmc-opovechenie",
+  "group": "synonym",
+  "query": "риск что систему отнесут к мониторингу и срок наступит раньше",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "tm-15",
+  "project": "tmc-opovechenie",
+  "group": "question",
+  "query": "когда подавать заявку в реестр российского ПО относительно первого внедрения",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "tm-16",
+  "project": "tmc-opovechenie",
+  "group": "number",
+  "query": "13.12.2 КоАП 77-ФЗ",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "tm-17",
+  "project": "tmc-opovechenie",
+  "group": "number",
+  "query": "58-ФЗ от 07.04.2025",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "tm-18",
+  "project": "tmc-opovechenie",
+  "group": "identifier",
+  "query": "0001202512300064",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "tm-19",
+  "project": "tmc-opovechenie",
+  "group": "where",
+  "query": "где описана путаница с двумя приказами номер 117",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "tm-20",
+  "project": "tmc-opovechenie",
+  "group": "where",
+  "query": "что перепроверить в первую очередь по нормативной базе",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "tm-21",
+  "project": "tmc-opovechenie",
+  "group": "question",
+  "query": "что в ГосСОПКА делает заказчик, а что мы",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "tm-22",
+  "project": "tmc-opovechenie",
+  "group": "bag",
+  "query": "определение критически важного объекта потеря управления нарушение функционирования закон о защите населения",
+  "golds": 1,
+  "split": "test"
+ },
+ {
+  "id": "tm-23",
+  "project": "tmc-opovechenie",
+  "group": "typo",
+  "query": "пересмотр катигории значимого объекта как часто",
+  "golds": 1,
+  "split": "tune"
+ },
+ {
+  "id": "tm-24",
+  "project": "tmc-opovechenie",
+  "group": "mixed",
+  "query": "SLA на fix critical vulnerability 24 часа оператор",
+  "golds": 1,
+  "split": "test"
+ }
+]
