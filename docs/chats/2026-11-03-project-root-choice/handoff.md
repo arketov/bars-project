@@ -13,7 +13,7 @@ title: Выбор корня документации при добавлени�
 - **CLI.** `bars-cli register [путь] --root docs|all`; без флага — умолчание (`docs/`, если есть, иначе вся папка). Только для проекта без `config.toml`.
 - **Окно.** Tauri-команды `project_root_suggest` и `project_root_prepare` (`bars-app/src/commands.rs`, `main.rs`), диалог `ui/src/lib/ProjectRootDialog.svelte` («Что считать документацией?»), состояние и методы `rootChoice`, `askRoot`, `confirmRoot`, `cancelRoot` в `app.svelte.ts`; тот же диалог у «Добавить проект на новом месте…».
 - **Создание проекта (Т-35).** `create_project`: корень (папка `docs/` только при выборе `docs/`), `index.md` (если нет файла с таким именем в любом регистре), `config.toml`; отказ, если `config.toml` уже есть. В окне и CLI отдельной команды «создать» пока нет — функция готова для неё.
-- **Воркер (после закрытия 1.1.1, с разрешения автора).** `register` вместо `ensure_project_config` вызывает `bars_protocol::prepare_project(path, None)`; `session_start` для проекта без `config.toml` проверяет `has_markdown` по корню `RootChoice::suggested` (`docs/` или вся папка). `ensure_project_config` и неиспользуемый `use std::fs` удалены из `worker/mod.rs`. Тест `session_start_without_docs_registers_the_whole_folder` в `worker/tests.rs`.
+- **Воркер.** `register` вместо `ensure_project_config` вызывает `bars_protocol::prepare_project(path, None)`. По решению автора OQ-253 (раунд 34) `session_start` регистрирует папку только при `.bars/config.toml` или `docs/`, иначе `None`; корень проверки — `docs_root` из `config.toml` или `docs`. `ensure_project_config` и ненужный `use std::fs` удалены из `worker/mod.rs`. Тест `session_start_skips_a_folder_without_docs_or_config` в `worker/tests.rs`: папка заметок хуком не регистрируется, явная регистрация даёт корень `.`, проект с `config.toml` регистрируется.
 - **Тесты (написаны, не запускались).** Юнит-тесты в `project_root.rs`; `register_root_choice_is_written_before_registration` в `crates/bars-cli/tests/cli.rs`; `ui/src/lib/project-root.test.ts`.
 - Уже зарегистрированные проекты не меняются: запись идёт только при отсутствии `config.toml`.
 
@@ -30,7 +30,7 @@ title: Выбор корня документации при добавлени�
 ## Риски (для проверки)
 
 - **Обход при «вся папка».** `walk_docs` пропускает папки с точки (`.bars`, `.git`) и симлинки, `BARS_INSTRUCTION.md` в корне не индексирует; watcher (`worker/watcher.rs::is_relevant`) игнорирует события внутри папок с точки. **Не исключаются** `node_modules`, `target`, `vendor`, `dist`: `.md` из них попадут в индекс репозитория, выбранного как «вся папка». Для кода предложена `docs/`; решение о списке исключений или `.gitignore` — за автором. Событие самой папки `.bars` (без расширения) watcher считает значимым: возможна лишняя проверка, задание без изменений не создаётся (НФТ-7).
-- **Умолчание «вся папка» для хука** при чужих `.md` в рабочей папке (например, сессия в Downloads с `.md`) зарегистрирует её. Нужно решение автора: ограничить хук, например, только папками с git или `.bars/`.
+- Риск «хук регистрирует любую папку с `.md`» снят решением OQ-253: хук требует `docs/` или `.bars/`.
 - Существующие тесты, регистрирующие папки без `docs/` через CLI, теперь получат корень `.`: проверить при общей проверке.
 - В `ProjectRootDialog.svelte` нет Escape-теста; `project-root.test.ts` написан без запуска.
 
