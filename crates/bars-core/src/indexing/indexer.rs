@@ -564,7 +564,10 @@ fn finish_update(
     {
         index.write_layout(layout)?;
     }
-    index.touch_updated_at()?;
+    // Проверка без изменений ничего не пишет: иначе сбрасывается кэш графа (ISS-103).
+    if report.added + report.changed + report.removed > 0 || index.meta("updated_at")?.is_none() {
+        index.touch_updated_at()?;
+    }
     Ok(())
 }
 

@@ -71,6 +71,13 @@ pub const PERIODIC_INTERVAL: Duration = Duration::from_secs(60 * 60);
 /// `notify` потерял при переполнении буфера (ISS-06).
 pub const TAIL_DELAY: Duration = Duration::from_secs(5);
 
+/// Тишина после последней правки, после которой начинается автоматическая подготовка графа
+/// (НФТ-7, ISS-104).
+pub const GRAPH_QUIET: Duration = Duration::from_secs(90);
+
+/// Не чаще одного автоматического прохода графа на проект за это время.
+pub const GRAPH_MIN_INTERVAL: Duration = Duration::from_secs(300);
+
 /// Безопасный текст ошибки скачивания по виду: ответ провайдера, URL и токены в окно не уходят.
 fn download_error_text(kind: ModelErrorKind) -> &'static str {
     match kind {
@@ -121,6 +128,10 @@ pub struct WorkerConfig {
     /// Пауза после правки до embed документа; `None` — из настроек (`[indexing]
     /// edit_pause_seconds`, Т-41). Тесты задают короткую.
     pub edit_pause: Option<Duration>,
+    /// Тишина без новых правок проекта, после которой начинается автоматическая подготовка графа.
+    pub graph_quiet: Duration,
+    /// Наименьший промежуток между началами автоматических проходов графа одного проекта.
+    pub graph_min_interval: Duration,
     /// Куда установка и автообновление пишут записи клиентов; `None` — запись отключена.
     /// Приложение включает явно; тесты передают временный профиль.
     pub install_env: Option<InstallEnv>,
@@ -152,6 +163,8 @@ impl WorkerConfig {
             debounce: DEBOUNCE,
             tail_delay: TAIL_DELAY,
             edit_pause: None,
+            graph_quiet: GRAPH_QUIET,
+            graph_min_interval: GRAPH_MIN_INTERVAL,
             install_env: None,
             secrets: Arc::new(OsSecrets::default()),
             autostart: Arc::new(NoAutostart),
@@ -324,6 +337,11 @@ struct Inner {
     downloads: Mutex<HashSet<String>>,
     download_errors: Mutex<HashMap<String, ModelFailure>>,
     graph_jobs: Mutex<HashMap<PathBuf, graph::GraphJob>>,
+    /// Начало последнего автоматического прохода графа проекта: предел частоты.
+    graph_last_start: Mutex<HashMap<PathBuf, std::time::Instant>>,
+    /// Сколько раз начинался новый проход графа (для проверок планировщика).
+    #[cfg(test)]
+    graph_passes: std::sync::atomic::AtomicUsize,
     graph_cache: Arc<crate::handler::graph_cache::GraphCache>,
     scans: Mutex<HashMap<PathBuf, scan::ScanJob>>,
 }
@@ -408,6 +426,9 @@ impl Worker {
             downloads: Mutex::new(HashSet::new()),
             download_errors: Mutex::new(HashMap::new()),
             graph_jobs: Mutex::new(HashMap::new()),
+            graph_last_start: Mutex::new(HashMap::new()),
+            #[cfg(test)]
+            graph_passes: std::sync::atomic::AtomicUsize::new(0),
             graph_cache: Default::default(),
             scans: Mutex::new(HashMap::new()),
         });
@@ -1764,9 +1785,12 @@ impl Inner {
             let worker = Worker {
                 inner: self.clone(),
             };
-            if let Err(error) = worker.graph_start(&path, false).await {
-                log::warn!("Граф проекта не поставлен на обновление: {error}");
-            }
+            // Индексация без добавленных, изменённых и удалённых документов граф не трогает.
+            let changed = match &outcome {
+                Outcome::Updated(report) => report.added + report.changed + report.removed > 0,
+                _ => true,
+            };
+            worker.graph_signal(&path, changed).await;
         }
         // Публикация итога только после применения состояния проекта.
         self.apply(&path, previous, &job_gate, result);

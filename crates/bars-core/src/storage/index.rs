@@ -497,7 +497,8 @@ impl Index {
 fn set_meta(conn: &Connection, key: &str, value: &str) -> rusqlite::Result<()> {
     conn.execute(
         "INSERT INTO meta(key, value) VALUES (?1, ?2)
-         ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value
+         WHERE value IS NOT excluded.value",
         params![key, value],
     )?;
     Ok(())

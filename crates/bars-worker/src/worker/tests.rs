@@ -41,6 +41,8 @@ impl Env {
         let mut config = WorkerConfig::new(self.home.path().to_path_buf());
         config.debounce = Duration::from_millis(100);
         config.edit_pause = Some(Duration::ZERO);
+        config.graph_quiet = Duration::ZERO;
+        config.graph_min_interval = Duration::ZERO;
         config
     }
 

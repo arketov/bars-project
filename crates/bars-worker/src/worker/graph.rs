@@ -1,6 +1,7 @@
 use super::*;
 use bars_core::graph::{BuildLayer, GraphError, LayerState, store};
 use bars_core::storage::{Compatibility, Index, Journal, index_path};
+use std::time::Instant;
 
 mod inputs;
 
@@ -13,12 +14,21 @@ pub(super) struct GraphJob {
     target: String,
     wake: Arc<Notify>,
     pub(super) waiting_retry: bool,
+    /// Время последней правки, давшей сигнал; `None` — правок не было, пауза не нужна.
+    last_change: Option<Instant>,
+    /// Явный запуск или «Проверить»: пауза и предел частоты пропускаются.
+    urgent: bool,
+    /// Первый проход задания, ещё не начинавшийся: подчиняется паузе и пределу.
+    first: bool,
+    /// Задание ждёт тишины или предела частоты, не держа замков: это не работа.
+    quiet: bool,
     #[cfg(test)]
     pub(super) finish_hook: Option<(Arc<Notify>, Arc<Notify>)>,
 }
 impl GraphJob {
     pub(super) fn idle(&self) -> bool {
-        self.waiting_retry && !self.pending && !self.cancel.load(Ordering::Acquire)
+        (self.quiet || (self.waiting_retry && !self.pending))
+            && !self.cancel.load(Ordering::Acquire)
     }
 }
 struct Cleanup {
@@ -48,19 +58,39 @@ impl Worker {
     ) -> Result<bars_protocol::GraphAcceptedOutput, GraphError> {
         self.graph_start_layer(project, true, true, layer).await
     }
+    #[cfg(test)]
     pub(super) async fn graph_start(
         &self,
         project: &Path,
         explicit: bool,
     ) -> Result<bars_protocol::GraphAcceptedOutput, GraphError> {
-        self.graph_start_layer(project, explicit, explicit, BuildLayer::All)
+        self.graph_start_layer(project, explicit, explicit, BuildLayer::All, !explicit)
             .await
+    }
+    /// Автоматический сигнал после индексации или проверки. Без изменений и при текущем
+    /// графе задание не ставится: ничего не читается и не пишется (НФТ-7, ISS-103).
+    pub(super) async fn graph_signal(&self, project: &Path, changed: bool) {
+        if !changed {
+            let root = project.to_path_buf();
+            let current = tokio::task::spawn_blocking(move || graph_is_current(&root))
+                .await
+                .unwrap_or(false);
+            if current {
+                return;
+            }
+        }
+        if let Err(error) = self
+            .graph_start_layer(project, false, false, BuildLayer::All, changed)
+            .await
+        {
+            log::warn!("Граф проекта не поставлен на обновление: {error}");
+        }
     }
     pub(super) async fn graph_checked(
         &self,
         project: &Path,
     ) -> Result<bars_protocol::GraphAcceptedOutput, GraphError> {
-        self.graph_start_layer(project, false, true, BuildLayer::All)
+        self.graph_start_layer(project, false, true, BuildLayer::All, false)
             .await
     }
     async fn graph_start_layer(
@@ -69,7 +99,10 @@ impl Worker {
         explicit: bool,
         resume: bool,
         layer: BuildLayer,
+        changed: bool,
     ) -> Result<bars_protocol::GraphAcceptedOutput, GraphError> {
+        let urgent = explicit || resume;
+        let change = changed.then(Instant::now);
         let guard = if explicit {
             Some(self.request_guard().await)
         } else {
@@ -108,9 +141,16 @@ impl Worker {
                 if explicit && job.layer != layer {
                     return Err(GraphError::InvalidParams("у проекта уже выполняется задание другого слоя; дождитесь его или остановите".into()));
                 }
+                if urgent {
+                    job.urgent = true;
+                    job.wake.notify_one();
+                }
                 if !explicit || job.waiting_retry {
                     job.pending = true;
                     job.resume |= resume;
+                    if change.is_some() {
+                        job.last_change = change;
+                    }
                     job.wake.notify_one();
                 }
                 return Ok(bars_protocol::GraphAcceptedOutput {
@@ -129,6 +169,10 @@ impl Worker {
                     target,
                     wake: wake.clone(),
                     waiting_retry: false,
+                    last_change: change,
+                    urgent,
+                    first: true,
+                    quiet: false,
                     #[cfg(test)]
                     finish_hook: None,
                 },
@@ -159,6 +203,9 @@ impl Worker {
                     tokio::time::sleep(Duration::from_millis(10)).await;
                     continue;
                 }
+                if !quiet_wait(&inner, &project, &wake).await {
+                    return;
+                }
                 let job_guard = job_gate.clone().lock_owned().await;
                 if inner.stop.load(Ordering::Acquire)
                     || !lock(&inner.projects)
@@ -173,9 +220,17 @@ impl Worker {
                     let Some(job) = jobs.get_mut(&project) else {
                         return;
                     };
+                    if job.pending || job.first {
+                        lock(&inner.graph_last_start).insert(project.clone(), Instant::now());
+                        #[cfg(test)]
+                        inner.graph_passes.fetch_add(1, Ordering::SeqCst);
+                    }
                     if !job.cancel.load(Ordering::Acquire) {
                         job.pending = false;
                     }
+                    job.first = false;
+                    job.urgent = false;
+                    job.quiet = false;
                     job.waiting_retry = false;
                     (
                         job.cancel.clone(),
@@ -313,6 +368,70 @@ impl Worker {
             .map(|j| j.id.clone())
     }
 }
+/// Граф уже текущий: слои построены и свежи, задание не идёт. Ошибка чтения — не текущий.
+fn graph_is_current(project: &Path) -> bool {
+    let Ok(index) = Index::open_read_only(&index_path(project)) else {
+        return false;
+    };
+    store::status(index.conn()).is_ok_and(|status| {
+        status.job_state == bars_core::graph::JobState::Idle
+            && status.layers.len() == 3
+            && status
+                .layers
+                .values()
+                .all(|l| matches!(l.state, LayerState::Ready | LayerState::Partial))
+            && matches!(status.state, LayerState::Ready | LayerState::Partial)
+    })
+}
+
+/// Сколько ещё ждать до начала прохода: тишина после последней правки и предел частоты.
+/// Нулевая задержка — проходить можно. Продолжение кванта, повтор после сбоя, явный запуск
+/// и проверка паузе не подчиняются.
+fn start_delay(inner: &Inner, project: &Path) -> Duration {
+    let mut jobs = lock(&inner.graph_jobs);
+    let Some(job) = jobs.get_mut(project) else {
+        return Duration::ZERO;
+    };
+    if job.urgent || !(job.pending || job.first) || job.cancel.load(Ordering::Acquire) {
+        job.quiet = false;
+        return Duration::ZERO;
+    }
+    let quiet = job.last_change.map_or(Duration::ZERO, |changed| {
+        inner.config.graph_quiet.saturating_sub(changed.elapsed())
+    });
+    let interval = lock(&inner.graph_last_start)
+        .get(project)
+        .map_or(Duration::ZERO, |started| {
+            inner
+                .config
+                .graph_min_interval
+                .saturating_sub(started.elapsed())
+        });
+    let delay = quiet.max(interval);
+    job.quiet = !delay.is_zero();
+    delay
+}
+
+/// Ждёт паузы в правках, не держа замков; `false` — воркер останавливается или задания нет.
+async fn quiet_wait(inner: &Inner, project: &Path, wake: &Notify) -> bool {
+    loop {
+        if inner.stop.load(Ordering::Acquire) {
+            return false;
+        }
+        if !lock(&inner.graph_jobs).contains_key(project) {
+            return false;
+        }
+        let delay = start_delay(inner, project);
+        if delay.is_zero() {
+            return true;
+        }
+        tokio::select! {
+            _ = wake.notified() => {},
+            _ = tokio::time::sleep(delay.min(Duration::from_millis(100))) => {},
+        }
+    }
+}
+
 struct Attempt<'a> {
     inner: &'a Inner,
     project: &'a Path,
@@ -452,6 +571,7 @@ impl Attempt<'_> {
                 } else if !stopped && let Some(job) = lock(&inner.graph_jobs).get_mut(project) {
                     // Состав ошибочных файлов тоже мог измениться во время расчёта.
                     job.pending = true;
+                    job.last_change = Some(Instant::now());
                 }
                 inputs::put(&index, "auto_retry", "")?;
                 // Прогрев опубликованного снимка отдельно от бюджета первого читателя.
@@ -480,8 +600,10 @@ impl Attempt<'_> {
                 log::warn!("Задание графа не завершено: {error}");
                 if matches!(error, GraphError::StaleRef(_)) && inputs::key(project, &index)? != key
                 {
+                    // Правка во время подготовки: ждём новой тишины и начинаем один раз.
                     if let Some(job) = lock(&inner.graph_jobs).get_mut(project) {
                         job.pending = true;
+                        job.last_change = Some(Instant::now());
                     }
                     return Ok(AttemptResult::Done);
                 }

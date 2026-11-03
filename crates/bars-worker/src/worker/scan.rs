@@ -351,13 +351,13 @@ impl Worker {
                 let worker = Worker {
                     inner: inner.clone(),
                 };
-                let result = if priority == Priority::Explicit {
-                    worker.graph_checked(&path).await
+                if priority == Priority::Explicit {
+                    if let Err(error) = worker.graph_checked(&path).await {
+                        log::warn!("Граф после проверки не поставлен на обновление: {error}");
+                    }
                 } else {
-                    worker.graph_start(&path, false).await
-                };
-                if let Err(error) = result {
-                    log::warn!("Граф после проверки не поставлен на обновление: {error}");
+                    // Найденные изменения обновит индексация; здесь — только нетекущий граф.
+                    worker.graph_signal(&path, false).await;
                 }
             }
         });

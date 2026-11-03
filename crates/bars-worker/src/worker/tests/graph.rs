@@ -554,3 +554,142 @@ async fn graph_late_cancel_with_new_file_error_does_not_restart_same_inputs() {
     drop(index);
     worker.shutdown().await;
 }
+
+fn read_revision(project: &Path) -> i64 {
+    let index = Index::open_read_only(&index_path(project)).unwrap();
+    index
+        .conn()
+        .query_row(
+            "SELECT read_revision FROM graph_revisions WHERE id=1",
+            [],
+            |row| row.get(0),
+        )
+        .unwrap()
+}
+
+fn passes(worker: &Worker) -> usize {
+    worker.inner.graph_passes.load(Ordering::SeqCst)
+}
+
+/// Воркер с настоящей паузой графа; индексация и слежение не мешают.
+fn waiting_worker(env: &Env, quiet_for: Duration) -> Worker {
+    let mut config = env.config();
+    config.graph_quiet = quiet_for;
+    Worker::start(config, env.provider.clone()).unwrap()
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn empty_check_starts_no_graph_job_and_keeps_graph_cache_key() {
+    let env = Env::new();
+    let project = env.project("graph-empty", &[("a.md", "# A\n\nТ-1 зависит от Т-2.")]);
+    let worker = env.start();
+    worker.register(&project).unwrap();
+    idle(&worker).await;
+    quiet(&worker, &project);
+    let status = store::status(
+        Index::open(&index_path(&project), Journal::Wal)
+            .unwrap()
+            .conn(),
+    )
+    .unwrap();
+    assert_eq!(status.state, LayerState::Ready);
+    let (revision, before, started) = (
+        read_revision(&project),
+        worker.status(&project).unwrap().updated_at,
+        passes(&worker),
+    );
+    for _ in 0..2 {
+        worker.reindex(&project, false, false).unwrap();
+        idle(&worker).await;
+    }
+    assert!(worker.status(&project).unwrap().updated_at > before);
+    assert_eq!(read_revision(&project), revision);
+    assert_eq!(passes(&worker), started);
+    assert!(worker.active_graph_job(&project).is_none());
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn series_of_edits_gives_one_graph_pass_after_quiet() {
+    let env = Env::new();
+    let project = env.project("graph-quiet", &[("a.md", "# A\n\nТ-1 зависит от Т-2.")]);
+    let quiet_for = Duration::from_millis(600);
+    let worker = waiting_worker(&env, quiet_for);
+    worker.register(&project).unwrap();
+    wait_until("первое построение", || passes(&worker) == 1).await;
+    graph_idle(&worker, &project).await;
+    quiet(&worker, &project);
+    let mut last = Instant::now();
+    for _ in 0..4 {
+        worker.graph_signal(&project, true).await;
+        last = Instant::now();
+        tokio::time::sleep(Duration::from_millis(150)).await;
+        assert_eq!(passes(&worker), 1, "пауза не выдержана");
+    }
+    assert!(worker.is_idle(), "ожидание паузы не считается работой");
+    graph_idle(&worker, &project).await;
+    assert_eq!(passes(&worker), 2);
+    let started = lock(&worker.inner.graph_last_start)[&project];
+    assert!(started.duration_since(last) >= quiet_for - Duration::from_millis(50));
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn edit_during_graph_pass_waits_for_quiet_and_restarts_once() {
+    let env = Env::new();
+    let project = env.project(
+        "graph-edit-during",
+        &[("a.md", "# A\n\nТ-1 зависит от Т-2.")],
+    );
+    let quiet_for = Duration::from_millis(500);
+    let worker = waiting_worker(&env, quiet_for);
+    worker.register(&project).unwrap();
+    wait_until("первое построение", || passes(&worker) == 1).await;
+    graph_idle(&worker, &project).await;
+    quiet(&worker, &project);
+    worker.graph_signal(&project, true).await;
+    let (reached, release) = (Arc::new(Notify::new()), Arc::new(Notify::new()));
+    lock(&worker.inner.graph_jobs)
+        .get_mut(&project)
+        .unwrap()
+        .finish_hook = Some((reached.clone(), release.clone()));
+    tokio::time::timeout(Duration::from_secs(10), reached.notified())
+        .await
+        .unwrap();
+    assert_eq!(passes(&worker), 2);
+    worker.graph_signal(&project, true).await;
+    let edited = Instant::now();
+    release.notify_one();
+    tokio::time::sleep(Duration::from_millis(200)).await;
+    assert_eq!(passes(&worker), 2, "повтор начался без паузы");
+    graph_idle(&worker, &project).await;
+    assert_eq!(passes(&worker), 3);
+    let started = lock(&worker.inner.graph_last_start)[&project];
+    assert!(started.duration_since(edited) >= quiet_for - Duration::from_millis(50));
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn graph_passes_keep_minimum_interval_and_explicit_build_skips_it() {
+    let env = Env::new();
+    let project = env.project("graph-interval", &[("a.md", "# A\n\nТ-1 зависит от Т-2.")]);
+    let mut config = env.config();
+    config.graph_min_interval = Duration::from_millis(700);
+    let worker = Worker::start(config, env.provider.clone()).unwrap();
+    worker.register(&project).unwrap();
+    wait_until("первое построение", || passes(&worker) == 1).await;
+    graph_idle(&worker, &project).await;
+    quiet(&worker, &project);
+    let first = lock(&worker.inner.graph_last_start)[&project];
+    worker.graph_signal(&project, true).await;
+    tokio::time::sleep(Duration::from_millis(200)).await;
+    assert_eq!(passes(&worker), 1, "предел частоты не выдержан");
+    worker.graph_build(&project).await.unwrap();
+    graph_idle(&worker, &project).await;
+    assert!(passes(&worker) >= 2);
+    assert!(
+        lock(&worker.inner.graph_last_start)[&project].duration_since(first)
+            < Duration::from_millis(700)
+    );
+    worker.shutdown().await;
+}
