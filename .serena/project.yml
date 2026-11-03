@@ -83,7 +83,19 @@ ignore_all_files_in_gitignore: true
 # Maps the language key to the options.
 # The settings are considered only if the project is trusted (see global configuration to define trusted projects).
 # See https://oraios.github.io/serena/02-usage/050_configuration.html#language-server-specific-settings
-ls_specific_settings: {}
+# bars: rust-analyzer must not compile the workspace (llama.cpp build scripts, flycheck) —
+# the author's request 03-11-2026. `initialization_options_override` is read by a local patch
+# of serena's `solidlsp/language_servers/rust_analyzer.py`; without the patch it is ignored.
+ls_specific_settings:
+  rust:
+    initialization_options_override:
+      checkOnSave: false
+      procMacro:
+        enable: false
+      cargo:
+        autoreload: false
+        buildScripts:
+          enable: false
 
 # list of workspace folder paths (LSP backend only).
 # These folders will be used to build up Serena's symbol index.
