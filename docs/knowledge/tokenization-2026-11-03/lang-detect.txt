@@ -1,0 +1,22 @@
+
+одно слово (21)
+письменность+буквы     19/21 11 мкс/текст  ошибки: uk→cyr?:налаштування; ja→zh:設定
+tinyld                 10/21 166 мкс/текст  ошибки: uk→be:налаштування; en→no:settings; en→??:indexing; en→pt:tokenizer; en→??:typo; de→is:einstellungen; de→nl:suchmaschine; de→tk:konformitätserklärung
+franc-min              11/21 137 мкс/текст  ошибки: ru→bg:настройки; ru→bg:индексация; ru→bg:опечатка; uk→be:налаштування; uk→ru:їжак; en→zlm:settings; en→nld:indexing; en→nld:tokenizer
+
+фраза из 2+ слов (25)
+письменность+буквы     22/25 4 мкс/текст  ошибки: uk→cyr?:як налаштувати пошук п; uk→cyr?:режим роботи воркера; uk→cyr?:митний союз
+tinyld                 22/25 162 мкс/текст  ошибки: uk→ru:митний союз; en→da:startup error after up; en→??:search engine
+franc-min              14/25 89 мкс/текст  ошибки: ru→bg:застревание процесса п; ru→bg:сертификат соответстви; ru→uk:режим работы воркера; ru→bg:декларирование товаров; ru→bg:ошибка при запуске при; en→por:how to configure docum; en→jav:process hangs during i; en→nld:worker mode
+
+смешанные фразы (ru/en в одной строке, ожидается основной язык)
+письменность+буквы     6/7 11 мкс/текст  ошибки: ru→lat?:сборка через cargo bui
+tinyld                 6/7 441 мкс/текст  ошибки: ru→en:сборка через cargo bui
+franc-min              4/7 123 мкс/текст  ошибки: ru→sun:ошибка model_loading п; ru→en:индексатор падает на S; ru→run:сборка через cargo bui
+bars-project {"lat":90908,"cyr":299829,"num":36010,"other":11,"mix-script":28}
+agaugu {"cyr":87271,"lat":4558,"num":1525}
+bars-project документов 685 {"ru":616,"hi":48,"en":11,"vo":1,"ber":6,"cs":2,"sk":1}
+overdrive-bots документов 1092 {"ru":1012,"hu":3,"hi":30,"en":42,"pl":2,"de":1,"vo":1,"cs":1}
+RoleGPT документов 123 {"hi":4,"ru":112,"en":5,"cs":1,"ber":1}
+agaugu документов 9 {"ru":8,"be":1}
+tmc-opovechenie документов 12 {"ru":12}
