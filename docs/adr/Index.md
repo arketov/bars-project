@@ -14,3 +14,4 @@ title: Решения bars (ADR) — оглавление
 - [0004-graph-physics-renderer.md](0004-graph-physics-renderer.md) — proposed, 21-10-2026: d3-force в worker + Canvas2D для новой реализации графа; замеры обоих корпусов, условия пересмотра.
 - [0005-editor-codemirror.md](0005-editor-codemirror.md) — proposed, 22-10-2026: редактор Markdown на CodeMirror 6; замер и устройство — исследование и проект редактора.
 - [0006-rerank-yes-no-logprobs.md](0006-rerank-yes-no-logprobs.md) — accepted, 28-10-2026: rerank через Ollama и LM Studio по logprobs yes/no с Qwen3-Reranker; без частичного rerank, 4 параллельных запроса.
+- [0007-one-search-scores.md](0007-one-search-scores.md) — accepted, 03-11-2026: один поиск для окна, агента и CLI — сумма баллов сигналов с весами по бенчу, операторы запроса, без раздела «В тексте» и графовых режимов в окне.
