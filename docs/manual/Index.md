@@ -9,7 +9,7 @@ title: Руководство пользователя bars — оглавлен
 ## С чего начать пользоваться bars
 
 1. Установите bars (`manual/install.md`) и откройте его.
-2. Добавьте проект (`manual/projects.md`) — папку, где лежит `docs/` с Markdown.
+2. Добавьте проект (`manual/projects.md`) — любую папку с Markdown: вся папка или её `docs/`.
 3. Дождитесь индексации и ищите (`manual/search.md`).
 4. По желанию подключите агента (`manual/agents.md`) — Claude Code или Codex.
 

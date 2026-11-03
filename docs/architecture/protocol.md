@@ -55,7 +55,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | `session_info` | `cwd` | необязательный проект сессии: имя, модули (`name`, `documents`, `title` оглавления); без моделей и индексации | внутренний запрос MCP при initialize/list_tools |
 | `status` | `cwd`, `project` | состояние индекса проекта ([worker.md](worker.md)) | MCP, CLI |
 | `reindex` | `cwd`, `project`, `full`, `accept_model_change` | `accepted: true`; без `full` и подтверждения смены модели — независимый `scan` файлов и отдельная очередь обновления; ход виден в `status`, итог проверки в операциях окна | MCP, CLI |
-| `register` | `path` | проект после регистрации | CLI |
+| `register` | `path` | проект после регистрации; выбор корня документации записывается клиентом в `.bars/config.toml` до вызова, параметра корня нет ([projects.md](../features/projects/projects.md)) | CLI |
 | `unregister` | `cwd`, `project` | `removed: true` | CLI |
 | `session_start` | `cwd`, `source` | `accepted: true`; ответ сразу, проверка идёт в очереди | CLI (хук) |
 | `graph_query` | `cwd`, `project`, `request` (`GraphRequest`: `operation`, `scope`, `budgets`, `limit`, `snapshot`, `cursor` и поля операции) | `GraphReply` — узлы, источники, утверждения, evidence, покрытие, усечение | MCP, CLI |
