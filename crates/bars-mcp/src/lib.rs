@@ -619,6 +619,7 @@ impl BarsMcp {
             limit: args.limit,
             candidates: args.candidates,
             min_score: args.min_score,
+            wait_models: None,
         };
         if let Some(mode) = mode {
             finish(

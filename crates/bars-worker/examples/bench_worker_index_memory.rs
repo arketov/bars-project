@@ -179,6 +179,7 @@ async fn exercise(
             limit: Some(5),
             candidates: Some(30),
             min_score: Some(0.0),
+            wait_models: None,
         })
         .collect();
     let expected_kind = if rerank {

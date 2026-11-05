@@ -46,7 +46,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | Метод | Параметры | Ответ | Кто вызывает |
 |---|---|---|---|
 | `hello` | `protocol`, `client` (`mcp` / `cli`), `client_version` | `protocol`, `worker_version`, `worker_build` | все |
-| `search` | `cwd`, `project`, `query`, `modules`, `files`, `limit`, `candidates`, `min_score` | результаты и применённые параметры ([features/search/hybrid-search.md](../features/search/hybrid-search.md)) | MCP, CLI |
+| `search` | `cwd`, `project`, `query`, `modules`, `files`, `limit`, `candidates`, `min_score`, `wait_models` (необязательное; `false` — не ждать загрузку моделей, шлёт только окно: [ожидание моделей](../features/search/hybrid-search.md#ожидание-моделей)) | результаты и применённые параметры ([features/search/hybrid-search.md](../features/search/hybrid-search.md)) | MCP, CLI |
 | `similar` | `cwd`, `project`, `chunk_id`, `modules`, `limit` | исходный чанк, ближайшие чанки с косинусной близостью и применённый `limit` ([features/search/maintenance-tools.md](../features/search/maintenance-tools.md)); неизвестный или устаревший ID — `chunk_not_found` | MCP, CLI |
 | `duplicates` | `cwd`, `project`, `modules`, `limit` | записи о повторах (`kind`, чанки с ID, `score`, `shared`, `differences`, `repeated_block`), `counts`, `total`, применённый `limit` и `clamped`, `chunks_checked`, `chunks_skipped_short` ([features/search/maintenance-tools.md](../features/search/maintenance-tools.md#get_duplicates-аудит-дублей-проекта)) | MCP, CLI |
 | `outline` | `cwd`, `project`, `path`, `levels`, `under` (цепочка заголовков) или `under_line` | заголовки с номерами строк (Т-26) | MCP, CLI |
@@ -190,7 +190,7 @@ JSON-RPC 2.0, одно сообщение на строку, UTF-8. На одн�
 | -32006 | `file_not_found` | нет файла для `read` или `outline` |
 | -32007 | `invalid_params` | параметр вне допустимого: неизвестный модуль, `limit` меньше 1 |
 | -32008 | `provider_error` | модель не ответила; текст без ключей ([secrets.md](secrets.md)). У встроенной модели `data.reason` — `network`, `files_missing`, `out_of_memory` или `runtime` ([экраны ошибок](../features/window/error-states.md), «Виды ошибок встроенной модели»); у внешней `reason` нет |
-| -32009 | `model_loading` | встроенная модель ещё скачивается или загружается; в `data.percent` — ход скачивания в процентах, 100 — файлы на месте, модель грузится в память (при 100 `search` ошибку не отдаёт: ждёт загрузку до предела); сообщение предлагает подождать и поясняет, что `bars_reindex` загрузку не ускоряет |
+| -32009 | `model_loading` | встроенная модель ещё скачивается или загружается; в `data.percent` — ход скачивания в процентах, 100 — файлы на месте, модель грузится в память (при 100 `search` ошибку не отдаёт: ждёт загрузку до предела, а с `wait_models: false` отвечает сразу по словам); сообщение предлагает подождать и поясняет, что `bars_reindex` загрузку не ускоряет |
 | -32010 | `graph_not_ready` | нужный слой графа не построен или отстаёт; причина и следующий шаг: обычный поиск/чтение, автоматическое обновление после индекса или окно / `bars-cli graph build`; переиндексация не заменяет построение графа. В `mix` вместо ошибки идёт возврат к `hybrid` с причиной |
 | -32011 | `graph_capability_unavailable` | запрошенная возможность графа не поддержана (например `change_description` у `impact`, `tokenizer_id` у `context`); сообщение называет поддержанные входы и следующий шаг |
 | -32012 | `stale_ref` | ref или endpoint устаревшей ревизии; похожий объект не подбирается |

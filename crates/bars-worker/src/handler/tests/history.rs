@@ -114,6 +114,7 @@ async fn mcp_history_worker_restart_leaves_interrupted_ipc_unknown_and_repeat_is
         limit: None,
         candidates: None,
         min_score: None,
+        wait_models: None,
     };
     let request = params.clone();
     let call = tokio::spawn(async move { client.call(&request).await });

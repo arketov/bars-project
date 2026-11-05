@@ -131,6 +131,7 @@ mod bench {
             limit: None,
             candidates: None,
             min_score: None,
+            wait_models: None,
         }
     }
     fn counts(path: &Path) -> Result<(usize, usize)> {

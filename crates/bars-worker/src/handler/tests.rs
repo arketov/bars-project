@@ -212,6 +212,7 @@ fn search(cwd: &Path, query: &str) -> SearchParams {
         limit: None,
         candidates: None,
         min_score: None,
+        wait_models: None,
     }
 }
 

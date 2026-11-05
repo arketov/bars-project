@@ -76,6 +76,7 @@ fn request(project: &str, query: &str) -> SearchParams {
         limit: Some(15),
         candidates: Some(30),
         min_score: Some(0.),
+        wait_models: None,
     }
 }
 #[tokio::main(flavor = "multi_thread", worker_threads = 4)]

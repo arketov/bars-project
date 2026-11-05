@@ -493,6 +493,7 @@ async fn execute(
                 limit: args.limit,
                 candidates: args.candidates,
                 min_score: args.min_score,
+                wait_models: None,
             };
             if let Some(mode) = mode {
                 let mode = serde_json::from_value(serde_json::Value::String(mode))

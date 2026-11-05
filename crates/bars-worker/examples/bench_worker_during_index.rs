@@ -70,6 +70,7 @@ async fn main() {
         limit: Some(3),
         candidates: None,
         min_score: Some(0.0),
+        wait_models: None,
     };
     let mut client = Client::connect(&endpoint, ClientKind::Mcp).await.unwrap();
     // Прогрев rerank, если он ещё загружается в фоне.

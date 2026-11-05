@@ -294,6 +294,7 @@ impl WorkerHandler {
                 limit: None,
                 candidates: None,
                 min_score: None,
+                wait_models: None,
             };
             let outcome = CONTEXT
                 .scope(context.clone(), self.search_with_graph(search, None, true))

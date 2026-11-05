@@ -304,8 +304,15 @@ impl WorkerHandler {
         // Скачивание встроенной модели поиск не ждёт: он сразу отвечает `model_loading`. Загрузку
         // уже скачанной модели в память (после выгрузки по таймеру) он ждёт до `model_wait`, дальше
         // идёт без смысловой части (ISS-105). Одновременные поиски делят одну заявку на загрузку
-        // (`Loads::claim`), а ожидание асинхронное и воркер не блокирует.
-        let deadline = tokio::time::Instant::now() + self.model_wait;
+        // (`Loads::claim`), а ожидание асинхронное и воркер не блокирует. `wait_models: false`
+        // («Искать по словам сейчас», OQ-280) — предел нулевой: грузящаяся модель не ждётся ни
+        // embed, ни rerank, ответ идёт сразу с той же пометкой, что и по истечении предела.
+        let wait = if params.wait_models == Some(false) {
+            std::time::Duration::ZERO
+        } else {
+            self.model_wait
+        };
+        let deadline = tokio::time::Instant::now() + wait;
         let mut semantic = true;
         let mut rerank_requested = false;
         loop {

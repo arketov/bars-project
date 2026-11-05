@@ -80,6 +80,11 @@ pub struct SearchParams {
     pub candidates: Option<u32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub min_score: Option<f32>,
+    /// Ждать ли загрузку моделей до предела воркера. Нет поля — ждать; `false` — «Искать по словам
+    /// сейчас»: ответ сразу, без смысловой части и rerank, с `semantic_error`
+    /// (`docs/features/search/hybrid-search.md`, «Ожидание моделей»).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wait_models: Option<bool>,
 }
 
 /// Вид опоры оценки результата: к ней применяется порог.
@@ -1494,6 +1499,7 @@ mod tests {
             limit: Some(3),
             candidates: Some(20),
             min_score: Some(0.25),
+            wait_models: Some(false),
         });
         roundtrip(OutlineParams {
             target: target(),
@@ -1588,12 +1594,27 @@ mod tests {
             limit: None,
             candidates: None,
             min_score: None,
+            wait_models: None,
         };
         let value = serde_json::to_value(&search).unwrap();
         assert_eq!(value, json!({ "cwd": "C:\\work\\proj", "query": "q" }));
 
         let reindex: ReindexParams = serde_json::from_value(json!({ "cwd": "c" })).unwrap();
         assert!(!reindex.full && !reindex.accept_model_change);
+    }
+
+    #[test]
+    fn search_wait_models_defaults_to_waiting_and_reads_false() {
+        // Нет поля — ждать модель как раньше; `false` — «Искать по словам сейчас» (OQ-280).
+        let waiting: SearchParams =
+            serde_json::from_value(json!({ "cwd": "c", "query": "q" })).unwrap();
+        assert_eq!(waiting.wait_models, None);
+        let now: SearchParams =
+            serde_json::from_value(json!({ "cwd": "c", "query": "q", "wait_models": false }))
+                .unwrap();
+        assert_eq!(now.wait_models, Some(false));
+        let value = serde_json::to_value(&now).unwrap();
+        assert_eq!(value["wait_models"], json!(false));
     }
 
     #[test]

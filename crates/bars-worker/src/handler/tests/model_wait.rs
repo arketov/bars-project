@@ -3,7 +3,7 @@
 
 use std::sync::atomic::Ordering;
 
-use bars_protocol::SearchOutput;
+use bars_protocol::{SearchOutput, SearchParams};
 
 use super::*;
 use crate::autostart::MemoryAutostart;
@@ -74,6 +74,17 @@ impl Env {
     async fn search(&self) -> SearchOutput {
         self.handler
             .search(search(&self.root, "индексацию"))
+            .await
+            .unwrap()
+    }
+
+    /// «Искать по словам сейчас»: `wait_models: false` (OQ-280).
+    async fn search_now(&self) -> SearchOutput {
+        self.handler
+            .search(SearchParams {
+                wait_models: Some(false),
+                ..search(&self.root, "индексацию")
+            })
             .await
             .unwrap()
     }
@@ -172,5 +183,61 @@ async fn rerank_slower_than_the_wait_is_skipped_after_the_honest_wait() {
     assert!(found.rerank_error.is_some());
     assert!(found.semantic_error.is_none());
     assert_eq!(found.applied.score_kind, bars_protocol::ScoreKind::Cosine);
+    env.worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn wait_models_false_answers_at_once_by_text_with_the_same_note() {
+    // Предел 10 с и загрузка 2,5 с: без `wait_models: false` поиск ждал бы модель.
+    let provider = FakeProvider {
+        load_delay: Duration::from_millis(2500),
+        ..FakeProvider::plain("m1")
+    };
+    let env = Env::unloaded(provider, false, Duration::from_secs(10)).await;
+    let started = Instant::now();
+    let found = env.search_now().await;
+    assert!(
+        started.elapsed() < Duration::from_millis(1500),
+        "ждал модель: {:?}",
+        started.elapsed()
+    );
+    let note = found.semantic_error.expect("пометка о смысловой части");
+    assert!(note.contains("смысловая близость не учтена"), "{note}");
+    assert_eq!(found.results[0].path, "docs/a.md");
+    assert_eq!(found.applied.min_score, 0.0);
+    env.worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn wait_models_false_marks_both_unloaded_models_as_skipped_without_waiting() {
+    let provider = FakeProvider {
+        rerank_load_delay: Duration::from_millis(2500),
+        ..FakeProvider::plain("m1")
+    };
+    let env = Env::unloaded(provider, true, Duration::from_secs(10)).await;
+    let started = Instant::now();
+    let found = env.search_now().await;
+    assert!(
+        started.elapsed() < Duration::from_millis(1500),
+        "ждал модель: {:?}",
+        started.elapsed()
+    );
+    assert!(found.semantic_error.is_some());
+    assert!(found.rerank_error.is_some());
+    assert_eq!(found.applied.score_kind, bars_protocol::ScoreKind::None);
+    assert_eq!(found.results[0].path, "docs/a.md");
+    env.worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn wait_models_false_does_not_degrade_a_search_with_loaded_models() {
+    let env = Env::unloaded(FakeProvider::plain("m1"), false, Duration::from_secs(10)).await;
+    // Обычный поиск ждёт загрузку и оставляет модель в памяти: «сейчас» отвечает полностью.
+    let waited = env.search().await;
+    assert!(waited.semantic_error.is_none(), "{:?}", waited.semantic_error);
+    let found = env.search_now().await;
+    assert!(found.semantic_error.is_none(), "{:?}", found.semantic_error);
+    assert_eq!(found.applied.score_kind, bars_protocol::ScoreKind::Cosine);
+    assert_eq!(found.results[0].path, "docs/a.md");
     env.worker.shutdown().await;
 }
