@@ -114,3 +114,10 @@ fn phrase_becomes_an_exact_column_condition_and_exclusion_a_not_over_stem_and_ex
 fn filter_without_conditions_wraps_the_expression_and_nothing_else() {
     assert_eq!(parse("кот").filter().apply("X"), "(X)");
 }
+
+#[test]
+fn phrase_with_an_identifier_is_built_from_words_only() {
+    // Целая форма идентификатора лежит в конце токенов чанка: в фразу она не входит (OQ-285).
+    let applied = parse("\"BARS_MCP_CALL_TIMEOUT_MS\"").filter().apply("X");
+    assert_eq!(applied, "((X) AND (exact : \"bars mcp call timeout ms\"))");
+}

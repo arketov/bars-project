@@ -195,10 +195,12 @@ pub fn pack_hits(hits: &[SearchHit], case: &Case) -> Vec<Hit> {
                 })
                 .collect(),
             document_relevant: case.gold.iter().any(|g| g.path == h.path),
-            operators_ok: case
-                .operators
-                .as_ref()
-                .map(|ops| operators_ok(ops, &h.path, &h.text)),
+            // Фраза ищется в колонке точной формы, где название, заголовки и текст одним списком:
+            // совпадение в заголовке раздела законно.
+            operators_ok: case.operators.as_ref().map(|ops| {
+                let whole = format!("{} {} {}", h.title, h.heading_chain, h.text);
+                operators_ok(ops, &h.path, &whole)
+            }),
         })
         .collect()
 }

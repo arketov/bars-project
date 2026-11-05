@@ -169,7 +169,9 @@ fn has_content(value: &str) -> bool {
 
 /// Фраза FTS5 из токенов точной формы: слова подряд, без стемминга. `None`, если токенов нет.
 fn exact_phrase(stemmer: &TextStemmer, text: &str) -> Option<String> {
-    phrase_of(&stemmer.exact_text(text))
+    // Только слова: целые формы идентификаторов лежат в конце списка токенов чанка, фраза с ними
+    // подряд нигде не стоит (OQ-285).
+    phrase_of(&stemmer.exact_words(text))
 }
 
 fn phrase_of(tokens: &str) -> Option<String> {

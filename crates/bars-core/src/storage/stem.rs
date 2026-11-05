@@ -56,16 +56,16 @@ impl TextStemmer {
     /// Точная форма текста через пробел: слова без стемминга (регистр и `ё` не важны), CJK-биграммы
     /// и целые формы идентификаторов (`rag_query`, `274_1`, `58_фз`) после слов.
     pub fn exact_text(&self, text: &str) -> String {
-        let mut tokens = Vec::new();
-        for piece in pieces(text) {
-            if piece.cjk {
-                push_bigrams(&piece.text, &mut tokens);
-            } else {
-                tokens.push(fold(&piece.text));
-            }
-        }
+        let mut tokens = exact_tokens(text);
         tokens.extend(identifier_forms(text));
         tokens.join(" ")
+    }
+
+    /// Только слова точной формы, без целых форм идентификаторов: так слова стоят в тексте подряд.
+    /// По ним строится фраза оператора `"…"`: целые формы `exact_text` дописывает в конец списка
+    /// токенов, и фраза вместе с ними подряд нигде не стоит (OQ-285).
+    pub fn exact_words(&self, text: &str) -> String {
+        exact_tokens(text).join(" ")
     }
 
     fn stem_word(&self, raw: &str) -> String {
@@ -85,6 +85,19 @@ impl TextStemmer {
             lower
         }
     }
+}
+
+/// Слова точной формы: без стемминга, регистр и `ё` не важны, CJK-биграммы.
+fn exact_tokens(text: &str) -> Vec<String> {
+    let mut tokens = Vec::new();
+    for piece in pieces(text) {
+        if piece.cjk {
+            push_bigrams(&piece.text, &mut tokens);
+        } else {
+            tokens.push(fold(&piece.text));
+        }
+    }
+    tokens
 }
 
 /// Целые формы идентификаторов текста: слово с `_`, `.`, `/` или `-` внутри даёт токен из частей,
@@ -277,6 +290,11 @@ mod tests {
             "настройки rag query rag_query"
         );
         assert_eq!(stemmer.exact_text("Т-12, 274_1."), "т 12 274 1 т_12 274_1");
+        // Для фразы оператора — только слова, без целых форм (OQ-285).
+        assert_eq!(
+            stemmer.exact_words("BARS_MCP_CALL_TIMEOUT_MS"),
+            "bars mcp call timeout ms"
+        );
         // Дефисное слово и имя файла тоже дают целую форму.
         assert_eq!(identifier_forms("по-русски"), ["по_русски"]);
         assert_eq!(identifier_forms("см. settings.toml,"), ["settings_toml"]);
