@@ -1,13 +1,23 @@
 ---
 name: bars-docs
-description: "Use bars tools to search and read project documentation; create, edit or move documentation. Load before reading, updating, writing or checking any project documentation: the first step is always bars_rag_search or bars_read, never guessing from memory."
+description: "Use bars tools for every lookup in project documentation during the whole task, not only the first step: searching, reading, editing, moving or checking documentation, and investigating a bug, code or a finding whose behaviour is documented. bars_rag_search, bars_text_search and bars_read replace Grep and Read on documentation Markdown; bars working files are read through bars tools, never directly."
 ---
 
 # Documentation for bars
 
-## Required first step
+## bars for the whole task, not only the first step
 
-Before you read, update, write, move or judge documentation, and before you answer a question about what the project documents, call bars. Do not rely on memory, on file names, or on a plain Read/Grep over `docs/`.
+Before you read, update, write, move or judge documentation, and before you answer a question about what the project documents, call bars. Do not rely on memory, on file names, or on a plain Read/Grep over the documentation.
+
+The first call is not the end of it. The documentation gate unlocks after one bars call; that is not permission to go back to file tools. For the rest of the task:
+
+- **Every lookup in the documentation goes through bars**, also when the task is about a bug, code, data or an audit finding: «where is X described» → `bars_rag_search`; a literal, ID, option name or old value → `bars_text_search`, not Grep, `rg` or `Select-String`; a known `.md` → `bars_read` or `bars_outline`, not Read or `cat`. Grep and Read stay for code, configuration and files outside the documentation root.
+- **Investigating a bug or a feature starts with its description.** Before reading code, `bars_rag_search` the modules that hold behaviour, research and known problems (real names from `bars_projects`): the feature document says what should happen, research says what was measured and under which limits, the issue register says whether the problem is known.
+- **A new subject means a new search.** When the task moves to another behaviour, document or term, search again instead of reusing the first result or guessing a path.
+- **Do not read bars working files** (`.bars/*.sqlite3`, `.bars/config.toml`). Audits, new topics and the index are read through `bars_audit_*`, `bars_new_topics_*` and `bars_status`. When a tool lacks what you need, such as a summary over hundreds of findings, page through it and say in the report what was missing instead of bypassing it.
+- **Check yourself before reporting or editing.** If a documentation lookup in this task went through Grep, Read or a shell command, redo it through bars. Before an edit, the list of places to change below must be complete.
+
+How to use bars for each kind of work:
 
 - Updating documentation after a change: the project may hold hundreds of files, so a single search or a guessed file list is never enough. Build the full list of places to change first, from four sources, and edit only after it is complete:
   1. **By meaning**: `bars_rag_search` once per module that can describe the subject (`bars_projects` lists the project's real folders), each with a concrete question phrased several ways (the behaviour, the old and the new value, the term, the requirement or bug ID). Run one more project-wide search to catch modules you did not think of. Then `bars_get_similar` on every relevant hit: it finds the other copies of the same description.

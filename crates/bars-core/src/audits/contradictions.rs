@@ -15,9 +15,13 @@ pub struct Chunk {
 
 #[derive(Debug, PartialEq)]
 struct Number {
+    /// Значение в основной единице семейства: секунды, байты; без единицы — как написано.
     value: f64,
+    /// Семейство единицы («время», «размер», «%»…), пусто без единицы.
     unit: String,
     key: String,
+    /// Число с единицей, как в тексте: показывается в находке.
+    raw: String,
 }
 struct Statement {
     chunk: usize,
@@ -26,6 +30,94 @@ struct Statement {
     ids: BTreeSet<String>,
     nums: Vec<Number>,
 }
+
+/// Слова перед номером, а не величиной: «раунд 16», «ответ 5», «table 3», «fixes 5». Сравниваются по корню `stem`.
+const LABELS: &[&str] = &[
+    "раунд",
+    "ответ",
+    "наблю",
+    "пункт",
+    "шаг",
+    "этап",
+    "срез",
+    "блок",
+    "вариа",
+    "решен",
+    "табли",
+    "рисун",
+    "глава",
+    "главе",
+    "разде",
+    "строк",
+    "верси",
+    "сцена",
+    "задач",
+    "round",
+    "step",
+    "steps",
+    "stage",
+    "table",
+    "figur",
+    "secti",
+    "chapt",
+    "claus",
+    "fix",
+    "fixes",
+    "item",
+    "items",
+    "issue",
+    "run",
+    "versi",
+    "line",
+    "lines",
+    "page",
+    "phase",
+    "optio",
+    "case",
+    "no",
+    "part",
+    "pr",
+];
+/// Месяц перед числом делает его датой: «Jul 28», «28 октября» здесь не ловится, но и не мешает.
+const MONTHS: &[&str] = &[
+    "янв",
+    "фев",
+    "мар",
+    "апр",
+    "мая",
+    "июн",
+    "июл",
+    "авг",
+    "сен",
+    "сент",
+    "окт",
+    "ноя",
+    "дек",
+    "jan",
+    "feb",
+    "mar",
+    "apr",
+    "may",
+    "jun",
+    "jul",
+    "aug",
+    "sep",
+    "sept",
+    "oct",
+    "nov",
+    "dec",
+    "january",
+    "february",
+    "march",
+    "april",
+    "june",
+    "july",
+    "august",
+    "september",
+    "october",
+    "november",
+    "december",
+];
 
 fn stem(word: &str) -> String {
     word.chars().take(5).collect()
@@ -64,67 +156,76 @@ fn tokens(text: &str) -> Vec<String> {
         .map(str::to_owned)
         .collect()
 }
-fn unit(word: &str) -> &str {
-    match word {
-        "с" | "сек" => "сек",
-        "мс" => "мс",
-        "мин" => "мин",
-        "ч" => "час",
-        "день" | "сутки" | "суток" => "дн",
-        "мб" | "mb" => "мб",
-        "гб" | "gb" => "гб",
-        "кб" | "kb" => "кб",
-        "%" => "%",
-        "шт" => "шт",
-        "раз" | "раза" => "раз",
-        _ => [
-            "миллисекунд",
-            "секунд",
-            "минут",
-            "час",
-            "дн",
-            "мбайт",
-            "мегабайт",
-            "гбайт",
-            "гигабайт",
-            "кбайт",
-            "слов",
-            "знак",
-            "символ",
-            "байт",
-            "строк",
-            "штук",
-            "чанк",
-            "документ",
-            "пар",
-            "измерен",
+
+/// Единица после числа: семейство и множитель к основной единице семейства.
+/// Единицы одного семейства сравниваются между собой: «120 мс» и «0,12 с» согласованы.
+fn unit(word: &str) -> Option<(&'static str, f64)> {
+    const KIB: f64 = 1024.0;
+    let exact = match word {
+        "мс" | "ms" => Some(("время", 0.001)),
+        "с" | "сек" | "s" | "sec" | "secs" => Some(("время", 1.0)),
+        "мин" | "min" | "mins" => Some(("время", 60.0)),
+        "ч" | "h" | "hr" | "hrs" => Some(("время", 3600.0)),
+        "день" | "сутки" | "суток" | "day" | "days" => Some(("время", 86400.0)),
+        "кб" | "kb" | "киб" | "kib" => Some(("размер", KIB)),
+        "мб" | "mb" | "миб" | "mib" => Some(("размер", KIB * KIB)),
+        "гб" | "gb" | "гиб" | "gib" => Some(("размер", KIB * KIB * KIB)),
+        "%" => Some(("%", 1.0)),
+        "шт" => Some(("шт", 1.0)),
+        "раз" | "раза" | "times" => Some(("раз", 1.0)),
+        "char" | "chars" => Some(("знак", 1.0)),
+        _ => None,
+    };
+    exact.or_else(|| {
+        [
+            ("миллисекунд", "время", 0.001),
+            ("millisecond", "время", 0.001),
+            ("секунд", "время", 1.0),
+            ("second", "время", 1.0),
+            ("минут", "время", 60.0),
+            ("minute", "время", 60.0),
+            ("час", "время", 3600.0),
+            ("hour", "время", 3600.0),
+            ("дн", "время", 86400.0),
+            ("кбайт", "размер", KIB),
+            ("килобайт", "размер", KIB),
+            ("мбайт", "размер", KIB * KIB),
+            ("мегабайт", "размер", KIB * KIB),
+            ("гбайт", "размер", KIB * KIB * KIB),
+            ("гигабайт", "размер", KIB * KIB * KIB),
+            ("байт", "размер", 1.0),
+            ("byte", "размер", 1.0),
+            ("слов", "слов", 1.0),
+            ("word", "слов", 1.0),
+            ("знак", "знак", 1.0),
+            ("символ", "знак", 1.0),
+            ("character", "знак", 1.0),
+            ("строк", "строк", 1.0),
+            ("line", "строк", 1.0),
+            ("штук", "шт", 1.0),
+            ("чанк", "чанк", 1.0),
+            ("chunk", "чанк", 1.0),
+            ("документ", "док", 1.0),
+            ("document", "док", 1.0),
+            ("токен", "токен", 1.0),
+            ("token", "токен", 1.0),
+            ("пар", "пар", 1.0),
+            ("измерен", "изм", 1.0),
         ]
         .into_iter()
-        .zip([
-            "мс",
-            "сек",
-            "мин",
-            "час",
-            "дн",
-            "мб",
-            "мб",
-            "гб",
-            "гб",
-            "кб",
-            "слов",
-            "знак",
-            "знак",
-            "байт",
-            "строк",
-            "шт",
-            "чанк",
-            "док",
-            "пар",
-            "изм",
-        ])
-        .find(|(prefix, _)| word.starts_with(prefix))
-        .map_or("", |(_, u)| u),
-    }
+        .find(|(prefix, _, _)| word.starts_with(prefix))
+        .map(|(_, family, factor)| (family, factor))
+    })
+}
+
+/// «18.10» — день и месяц, а не дробь; дробь в русском тексте пишется через запятую.
+fn day_month(raw: &str) -> bool {
+    raw.split_once('.').is_some_and(|(day, month)| {
+        day.len() <= 2
+            && month.len() == 2
+            && day.parse::<u32>().is_ok_and(|d| (1..=31).contains(&d))
+            && month.parse::<u32>().is_ok_and(|m| (1..=12).contains(&m))
+    })
 }
 
 fn numbers(text: &str) -> Vec<Number> {
@@ -152,7 +253,8 @@ fn numbers(text: &str) -> Vec<Number> {
             }
         }
         let end = i;
-        let forbidden = |c: char| c.is_alphanumeric() || "_.-:/#`\\".contains(c);
+        // Буква или знак вплотную перед числом: идентификатор, путь, хеш, номер (`№36`), сумма (`5+6`).
+        let forbidden = |c: char| c.is_alphanumeric() || "_.-:/#`\\№+".contains(c);
         if start > 0 && forbidden(chars[start - 1].1)
             || i + 1 < chars.len()
                 && "-:/.,".contains(chars[i].1)
@@ -162,10 +264,29 @@ fn numbers(text: &str) -> Vec<Number> {
         }
         let byte = chars[start].0;
         let end_byte = chars.get(end).map_or(text.len(), |c| c.0);
-        let Ok(value) = text[byte..end_byte].replace(',', ".").parse::<f64>() else {
+        let raw = &text[byte..end_byte];
+        if day_month(raw) {
+            continue;
+        }
+        let Ok(value) = raw.replace(',', ".").parse::<f64>() else {
             continue;
         };
         if value >= 10_000_000.0 {
+            continue;
+        }
+        let head = text[..byte].trim_end_matches([' ', '\u{a0}']);
+        let prev: String = {
+            let reversed: Vec<char> = head
+                .chars()
+                .rev()
+                .take_while(|c| c.is_alphabetic())
+                .collect();
+            reversed.into_iter().rev().collect()
+        };
+        if head.ends_with('№')
+            || !prev.is_empty()
+                && (LABELS.contains(&stem(&prev).as_str()) || MONTHS.contains(&prev.as_str()))
+        {
             continue;
         }
         let before: Vec<_> = text[..byte]
@@ -180,15 +301,27 @@ fn numbers(text: &str) -> Vec<Number> {
             .map(|w| stem(w))
             .collect::<Vec<_>>()
             .join(" ");
-        let after = text[end_byte..].trim_start();
-        let name: String = after
+        let rest = &text[end_byte..];
+        let name: String = rest
+            .trim_start()
             .chars()
             .take_while(|c| c.is_alphabetic() || *c == '%')
             .collect();
+        let found = unit(&name);
+        // Буквы вплотную после числа без известной единицы: хеш `1b9dad6`, модель `4b`, время `7pm`.
+        if rest.starts_with(char::is_alphabetic) && found.is_none() {
+            continue;
+        }
+        let (family, factor) = found.unwrap_or(("", 1.0));
         result.push(Number {
-            value,
+            value: value * factor,
             key,
-            unit: unit(&name).to_owned(),
+            unit: family.to_owned(),
+            raw: if family.is_empty() {
+                raw.to_owned()
+            } else {
+                format!("{raw} {name}")
+            },
         });
     }
     result
@@ -197,56 +330,143 @@ fn numbers(text: &str) -> Vec<Number> {
 fn close(a: f64, b: f64) -> bool {
     (a - b).abs() <= 0.02 * a.abs().max(b.abs())
 }
-fn disjoint(a: &[f64], b: &[f64]) -> bool {
-    !a.is_empty() && !b.is_empty() && a.iter().all(|x| b.iter().all(|y| !close(*x, *y)))
+fn disjoint(a: &[&Number], b: &[&Number]) -> bool {
+    !a.is_empty() && !b.is_empty() && a.iter().all(|x| b.iter().all(|y| !close(x.value, y.value)))
 }
-fn values(nums: &[Number], key: impl Fn(&Number) -> bool) -> Vec<f64> {
-    nums.iter().filter(|n| key(n)).map(|n| n.value).collect()
-}
-fn display(values: &[f64]) -> String {
+fn display(values: &[&Number]) -> String {
     values
         .iter()
-        .map(|n| n.to_string())
+        .map(|n| n.raw.as_str())
         .collect::<Vec<_>>()
         .join(", ")
-        .replace('.', ",")
+}
+fn field(n: &Number, by_unit: bool) -> &str {
+    if by_unit { &n.unit } else { &n.key }
 }
 
-fn conflict(a: &[Number], b: &[Number]) -> Option<(String, String)> {
+struct Conflict {
+    tag: &'static str,
+    reason: String,
+    /// Сколько значений разошлось на стороне, где их больше.
+    changed: usize,
+}
+
+fn conflict(a: &[Number], b: &[Number]) -> Option<Conflict> {
     for (tag, by_unit) in [("num", true), ("slot", false)] {
-        let keys: BTreeSet<_> = a
+        let keys: BTreeSet<&str> = a
             .iter()
-            .map(|n| if by_unit { &n.unit } else { &n.key })
+            .map(|n| field(n, by_unit))
             .filter(|k| !k.is_empty())
             .collect();
         for key in keys {
-            let matches = |n: &Number| {
-                if by_unit {
-                    &n.unit == key
-                } else {
-                    &n.key == key
-                }
-            };
-            let av = values(a, matches);
-            let bv = values(b, matches);
+            let av: Vec<&Number> = a.iter().filter(|n| field(n, by_unit) == key).collect();
+            let bv: Vec<&Number> = b.iter().filter(|n| field(n, by_unit) == key).collect();
             if disjoint(&av, &bv) {
-                return Some((
-                    tag.into(),
-                    format!("{key}: {} ↔ {}", display(&av), display(&bv)),
-                ));
+                return Some(Conflict {
+                    tag,
+                    reason: format!("{key}: {} ↔ {}", display(&av), display(&bv)),
+                    changed: av.len().max(bv.len()),
+                });
             }
         }
     }
-    let av = values(a, |n| b.iter().all(|m| !close(n.value, m.value)));
-    let bv = values(b, |n| a.iter().all(|m| !close(n.value, m.value)));
-    if !av.is_empty() && !bv.is_empty() {
-        Some((
-            "swap".into(),
-            format!("Значения: {} ↔ {}", display(&av), display(&bv)),
-        ))
-    } else {
-        None
+    let av: Vec<&Number> = a
+        .iter()
+        .filter(|n| b.iter().all(|m| !close(n.value, m.value)))
+        .collect();
+    let bv: Vec<&Number> = b
+        .iter()
+        .filter(|n| a.iter().all(|m| !close(n.value, m.value)))
+        .collect();
+    (!av.is_empty() && !bv.is_empty()).then(|| Conflict {
+        tag: "swap",
+        reason: format!("Значения: {} ↔ {}", display(&av), display(&bv)),
+        changed: av.len().max(bv.len()),
+    })
+}
+
+/// Дата `2026-07-26`, `26-07-2026` или `26.07.2026` в пути или заголовке.
+fn has_date(s: &str) -> bool {
+    let b = s.as_bytes();
+    let digits =
+        |i: usize, n: usize| i + n <= b.len() && b[i..i + n].iter().all(u8::is_ascii_digit);
+    (0..b.len()).any(|i| {
+        (i == 0 || !b[i - 1].is_ascii_digit())
+            && (digits(i, 4)
+                && b.get(i + 4) == Some(&b'-')
+                && digits(i + 5, 2)
+                && b.get(i + 7) == Some(&b'-')
+                && digits(i + 8, 2)
+                || digits(i, 2)
+                    && matches!(b.get(i + 2), Some(b'-' | b'.'))
+                    && digits(i + 3, 2)
+                    && b.get(i + 5) == b.get(i + 2)
+                    && digits(i + 6, 4))
+    })
+}
+
+/// История, а не текущее состояние: журналы `chats`, решения `adr`, датированные снимки
+/// (дата в пути, выгрузки `*.out.md`) и разделы-записи с датой в заголовке (журналы прогонов, changelog).
+fn history(c: &Chunk) -> bool {
+    matches!(c.module.as_str(), "chats" | "adr")
+        || c.path.ends_with(".out.md")
+        || has_date(&c.path)
+        || has_date(&c.heading)
+}
+
+fn strip_marker(line: &str) -> &str {
+    let digits = line.chars().take_while(char::is_ascii_digit).count();
+    let rest = &line[digits..];
+    match rest.strip_prefix(". ").or_else(|| rest.strip_prefix(") ")) {
+        Some(item) if (1..=3).contains(&digits) => item,
+        _ => line,
     }
+}
+
+/// HTML-теги с атрибутами и адреса ссылок `](…)` — разметка, а не утверждения.
+fn strip_markup(line: &str) -> String {
+    let mut out = String::with_capacity(line.len());
+    let mut chars = line.chars().peekable();
+    while let Some(c) = chars.next() {
+        let tag = c == '<'
+            && chars
+                .peek()
+                .is_some_and(|n| n.is_ascii_alphabetic() || matches!(n, '/' | '!'));
+        let target = c == ']' && chars.peek() == Some(&'(');
+        if tag || target {
+            if target {
+                out.push(']');
+            }
+            let close = if tag { '>' } else { ')' };
+            for n in chars.by_ref() {
+                if n == close {
+                    break;
+                }
+            }
+            out.push(' ');
+            continue;
+        }
+        out.push(c);
+    }
+    out
+}
+
+/// Цифры заменены на `#`: строки одного шаблона с разными номерами совпадают.
+fn mask(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut in_number = false;
+    for c in text.chars() {
+        if c.is_ascii_digit() {
+            if !in_number {
+                out.push('#');
+            }
+            in_number = true;
+        } else if !(in_number && matches!(c, '.' | ',')) {
+            out.push(c);
+            in_number = false;
+        }
+    }
+    out
 }
 
 /// Пределы защищают фоновую очередь; неполный расчёт не публикуется вместо полного.
@@ -254,20 +474,28 @@ pub fn find(chunks: &[Chunk], cancel: &AtomicBool) -> Result<Vec<NewFinding>, St
     let mut all = Vec::new();
     let mut df: HashMap<String, usize> = HashMap::new();
     for (ci, c) in chunks.iter().enumerate() {
-        if matches!(c.module.as_str(), "chats" | "adr") {
+        if history(c) {
             continue;
         }
         let body = c.text.split("\nother headers:").next().unwrap_or(&c.text);
         if body.split_whitespace().count() < 15 {
             continue;
         }
-        for line in body.lines() {
+        let mut code = false;
+        for raw_line in body.lines() {
             if cancel.load(Ordering::Relaxed) {
                 return Err("Запуск остановлен".into());
             }
-            if line.trim_start().starts_with('#') {
+            let trimmed = raw_line.trim_start();
+            if trimmed.starts_with("```") || trimmed.starts_with("~~~") {
+                code = !code;
                 continue;
             }
+            if code || trimmed.starts_with('#') {
+                continue;
+            }
+            let clean = strip_markup(strip_marker(trimmed));
+            let line = clean.as_str();
             // Сохраняем пунктуацию до разбора чисел: версии и идентификаторы не становятся числами.
             let mut start = 0;
             let mut pieces = Vec::new();
@@ -327,8 +555,27 @@ pub fn find(chunks: &[Chunk], cancel: &AtomicBool) -> Result<Vec<NewFinding>, St
             }
         }
     }
-    let mut inv: BTreeMap<&str, Vec<usize>> = BTreeMap::new();
+    // Одна строка с разными номерами в трёх и более местах — шаблон («таблица 1…19»), а не утверждение.
+    let masks: Vec<String> = all.iter().map(|s| mask(&s.text)).collect();
+    let mut shapes: HashMap<&str, BTreeSet<&str>> = HashMap::new();
     for (i, s) in all.iter().enumerate().filter(|(_, s)| !s.nums.is_empty()) {
+        shapes
+            .entry(masks[i].as_str())
+            .or_default()
+            .insert(s.text.as_str());
+    }
+    let usable: Vec<bool> = all
+        .iter()
+        .enumerate()
+        .map(|(i, s)| {
+            !s.nums.is_empty()
+                && !shapes
+                    .get(masks[i].as_str())
+                    .is_some_and(|texts| texts.len() >= 3)
+        })
+        .collect();
+    let mut inv: BTreeMap<&str, Vec<usize>> = BTreeMap::new();
+    for (i, s) in all.iter().enumerate().filter(|(i, _)| usable[*i]) {
         for w in &s.words {
             if df[w] <= 40 {
                 inv.entry(w).or_default().push(i);
@@ -336,7 +583,7 @@ pub fn find(chunks: &[Chunk], cancel: &AtomicBool) -> Result<Vec<NewFinding>, St
         }
     }
     let mut pairs: BTreeMap<(usize, usize), u16> = BTreeMap::new();
-    for (i, s) in all.iter().enumerate().filter(|(_, s)| !s.nums.is_empty()) {
+    for (i, s) in all.iter().enumerate().filter(|(i, _)| usable[*i]) {
         for id in &s.ids {
             inv.entry(id).or_default().push(i);
         }
@@ -350,7 +597,8 @@ pub fn find(chunks: &[Chunk], cancel: &AtomicBool) -> Result<Vec<NewFinding>, St
         }
         for (p, &i) in list.iter().enumerate() {
             for &j in &list[p + 1..] {
-                if all[i].chunk == all[j].chunk {
+                // Одна тема — один файл: внутри документа сравниваются разные записи и замеры, а не копии.
+                if chunks[all[i].chunk].path == chunks[all[j].chunk].path {
                     continue;
                 }
                 *pairs.entry((i, j)).or_default() += 1;
@@ -380,9 +628,13 @@ pub fn find(chunks: &[Chunk], cancel: &AtomicBool) -> Result<Vec<NewFinding>, St
         if score < 0.4 {
             continue;
         }
-        let Some((tag, reason)) = conflict(&a.nums, &b.nums) else {
+        let Some(found) = conflict(&a.nums, &b.nums) else {
             continue;
         };
+        // Без общей единицы и ключа — только почти копия, где разошлось одно значение.
+        if found.tag == "swap" && (found.changed > 1 || score < 0.6) {
+            continue;
+        }
         let subjects = [a, b]
             .map(|s| {
                 let c = &chunks[s.chunk];
@@ -403,9 +655,9 @@ pub fn find(chunks: &[Chunk], cancel: &AtomicBool) -> Result<Vec<NewFinding>, St
         keys.sort();
         findings.push(NewFinding {
             fingerprint: fingerprint(&["contradictions", &keys[0], &keys[1]]),
-            tag,
+            tag: found.tag.into(),
             group: "main".into(),
-            reason: format!("Возможное расхождение — {reason}"),
+            reason: format!("Возможное расхождение — {}", found.reason),
             score: Some(score as f32),
             subjects,
             detail: format!("{}\n↔\n{}", a.text, b.text),
@@ -432,7 +684,6 @@ mod tests {
             ),
         }
     }
-    #[test]
     fn numbers_exclude_versions_dates_ids_and_large_values() {
         let n = numbers(
             "Т-36 OQ-143 22-10-2026 1.2.3 file-100.md 12345678 задержка 30 секунд, порог силы 0,82",
@@ -441,8 +692,26 @@ mod tests {
             n.iter().map(|n| n.value).collect::<Vec<_>>(),
             vec![30.0, 0.82]
         );
-        assert_eq!(n[0].unit, "сек");
-        assert_eq!(numbers("Задержка `30с`")[0].unit, "сек");
+        assert_eq!(n[0].unit, "время");
+        assert_eq!(n[0].raw, "30 секунд");
+        assert_eq!(numbers("Задержка `30с`")[0].unit, "время");
+    }
+
+    #[test]
+    fn numbers_skip_ordinals_hashes_day_month_and_glued_letters() {
+        // Номера пунктов, раундов и таблиц, хеши коммитов, даты «18.10» и «Jul 28», время «7pm» — не величины.
+        let n = numbers(
+            "раунд 16, ответ 5, table 3, №36, № 4, fixes 5+6, коммит 1b9dad6, 18.10, resets 7pm, Jul 28, модель 4B",
+        );
+        assert!(n.is_empty(), "{n:?}");
+        // Единицы одного семейства приводятся к основной: часы и секунды сравнимы.
+        let n = numbers("таймаут `8h`, бюджет 30000 s, порог 0,5");
+        assert_eq!(
+            n.iter().map(|n| n.value).collect::<Vec<_>>(),
+            vec![28_800.0, 30_000.0, 0.5]
+        );
+        assert_eq!(n[0].unit, "время");
+        assert_eq!(n[2].unit, "");
     }
 
     #[test]
@@ -474,7 +743,6 @@ mod tests {
             "числовые правила исходного исследования, до фильтра близости"
         );
     }
-    #[test]
     fn numeric_conflict_has_sources_and_stable_identity() {
         let mut c = vec![
             chunk("a.md", "features", "30 с"),
@@ -482,7 +750,11 @@ mod tests {
         ];
         let f = find(&c, &AtomicBool::new(false)).unwrap();
         assert_eq!(f.len(), 1);
-        assert!(f[0].reason.contains("30 ↔ 60"));
+        assert!(
+            f[0].reason.contains("время: 30 с ↔ 60 секунд"),
+            "{}",
+            f[0].reason
+        );
         assert_eq!(
             (f[0].subjects[0].first_line, f[0].subjects[0].last_line),
             (10, 20)
@@ -499,26 +771,56 @@ mod tests {
             f[0].fingerprint
         );
     }
-    #[test]
     fn controls_history_rounding_equivalent_units_and_cancel() {
-        for (value, module) in [
-            ("30 секунд", "manual"),
-            ("30,1 с", "manual"),
-            ("60 с", "chats"),
-            ("60 с", "adr"),
+        for (path, module, value) in [
+            ("b.md", "manual", "30 секунд"),
+            ("b.md", "manual", "30,1 с"),
+            ("b.md", "manual", "0,5 мин"),
+            ("b.md", "manual", "30000 мс"),
+            ("b.md", "chats", "60 с"),
+            ("b.md", "adr", "60 с"),
+            // Датированный снимок, выгрузка замера и тот же документ — не текущее состояние другой темы.
+            ("knowledge/run-2026-11-05/report.md", "knowledge", "60 с"),
+            ("knowledge/final.out.md", "knowledge", "60 с"),
+            ("a.md", "features", "60 с"),
+            // Значение только внутри HTML-атрибута — разметка, а не утверждение.
+            ("b.md", "manual", "<span data-delay=\"60 с\"></span>30 с"),
         ] {
             assert!(
                 find(
                     &[
                         chunk("a.md", "features", "30 с"),
-                        chunk("b.md", module, value)
+                        chunk(path, module, value)
                     ],
                     &AtomicBool::new(false)
                 )
                 .unwrap()
-                .is_empty()
+                .is_empty(),
+                "{path} {value}"
             );
         }
         assert!(find(&[chunk("a.md", "features", "30 с")], &AtomicBool::new(true)).is_err());
+    }
+
+    #[test]
+    fn dated_log_sections_and_numbered_templates_are_not_candidates() {
+        // Раздел журнала прогонов: дата в заголовке.
+        let mut log = chunk("bot-runs/feed.md", "bot-runs", "60 с");
+        log.heading = "Журнал прогонов/2026-07-26 — прогон 019f9e47".into();
+        assert!(
+            find(
+                &[chunk("a.md", "features", "30 с"), log],
+                &AtomicBool::new(false)
+            )
+            .unwrap()
+            .is_empty()
+        );
+        // Одна строка с разными номерами в трёх документах — шаблон («таблица 1…3»).
+        let template = [
+            chunk("a.md", "features", "1 с"),
+            chunk("b.md", "features", "2 с"),
+            chunk("c.md", "features", "3 с"),
+        ];
+        assert!(find(&template, &AtomicBool::new(false)).unwrap().is_empty());
     }
 }
