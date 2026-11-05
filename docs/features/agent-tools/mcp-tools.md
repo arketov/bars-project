@@ -154,7 +154,7 @@ GraphRAG имеет свои поколения и признаки stale/partia
 
 ## Базовые параметры поиска
 
-Параметры: `query`; `project`; `modules` и `files` — область поиска (Т-14); `limit`, `candidates`, `min_score` — переопределения (Т-18, Т-24). Ответ — по [features/search/hybrid-search.md](../search/hybrid-search.md).
+Параметры: `query`; `project`; `modules` и `files` — область поиска (Т-14); `limit`, `candidates`, `min_score` — переопределения (Т-18, Т-24). В `query` работают операторы `"фраза"`, `-слово`, `-"фраза"`, `path:папка` / `папка:папка` ([операторы](../search/hybrid-search.md#схема-баллов-операторы-запроса)); `path:` сужает `modules`/`files`, запрос из одних исключений или фильтра — `invalid_params`. `limit` считает разделы: куски одного раздела свёрнуты в один результат. `min_score` — порог опоры оценки (rerank, а без него косинус). Ответ — по [features/search/hybrid-search.md](../search/hybrid-search.md): в блоке результата строки `signals:` и `parts:`, в `APPLIED PARAMETERS` — `understood:`, `signals:`, `weights:`.
 
 Сначала агент определяет предмет задачи. Если нужный документ известен, можно сразу вызвать `bars_read` или `bars_outline`; предварительный поиск не требуется. Для неизвестного контекста задаётся предметный вопрос: весь проект для межслойной задачи, `modules:["backlog"]` для пожеланий или `modules:["chats"]` для итогов сессий. Модули — только существующие папки первого уровня docs-root; вложенный `models` не становится отдельным модулем внутри `features`.
 
