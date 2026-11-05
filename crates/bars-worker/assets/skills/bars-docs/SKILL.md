@@ -1,6 +1,6 @@
 ---
 name: bars-docs
-description: "Use bars tools for every lookup in project documentation during the whole task, not only the first step: searching, reading, editing, moving or checking documentation, and investigating a bug, code or a finding whose behaviour is documented. bars_rag_search, bars_text_search and bars_read replace Grep and Read on documentation Markdown; bars working files are read through bars tools, never directly."
+description: "Use bars tools for every lookup in project documentation during the whole task, not only the first step: searching, reading, editing, moving or checking documentation, and investigating a bug, code or a finding whose behaviour is documented. bars_rag_search, the one universal search (meaning, words, exact names and IDs together), replaces Grep on documentation Markdown and bars_read replaces Read; bars working files are read through bars tools, never directly."
 ---
 
 # Documentation for bars
@@ -11,7 +11,7 @@ Before you read, update, write, move or judge documentation, and before you answ
 
 The first call is not the end of it. The documentation gate unlocks after one bars call; that is not permission to go back to file tools. For the rest of the task:
 
-- **Every lookup in the documentation goes through bars**, also when the task is about a bug, code, data or an audit finding: «where is X described» → `bars_rag_search`; a literal, ID, option name or old value → `bars_text_search`, not Grep, `rg` or `Select-String`; a known `.md` → `bars_read` or `bars_outline`, not Read or `cat`. Grep and Read stay for code, configuration and files outside the documentation root.
+- **Every lookup in the documentation goes through `bars_rag_search`, the one universal search**, also when the task is about a bug, code, data or an audit finding. It scores meaning, words, exact names and identifiers together, so a question, a term, an option name, an ID or an old value all go there; narrow it with operators in the query: `"exact phrase"`, `-word`, `path:folder`. Not Grep, `rg`, `Select-String`, Read or `cat`. A known `.md` → `bars_read` or `bars_outline`. `bars_text_search` is only for every occurrence of a string on disk (a rename, a complete list) or text saved moments ago that the index has not taken yet. Grep and Read stay for code, configuration and files outside the documentation root.
 - **Investigating a bug or a feature starts with its description.** Before reading code, `bars_rag_search` the modules that hold behaviour, research and known problems (real names from `bars_projects`): the feature document says what should happen, research says what was measured and under which limits, the issue register says whether the problem is known.
 - **A new subject means a new search.** When the task moves to another behaviour, document or term, search again instead of reusing the first result or guessing a path.
 - **Do not read bars working files** (`.bars/*.sqlite3`, `.bars/config.toml`). Audits, new topics and the index are read through `bars_audit_*`, `bars_new_topics_*` and `bars_status`. When a tool lacks what you need, such as a summary over hundreds of findings, page through it and say in the report what was missing instead of bypassing it.
@@ -21,7 +21,7 @@ How to use bars for each kind of work:
 
 - Updating documentation after a change: the project may hold hundreds of files, so a single search or a guessed file list is never enough. Build the full list of places to change first, from four sources, and edit only after it is complete:
   1. **By meaning**: `bars_rag_search` once per module that can describe the subject (`bars_projects` lists the project's real folders), each with a concrete question phrased several ways (the behaviour, the old and the new value, the term, the requirement or bug ID). Run one more project-wide search to catch modules you did not think of. Then `bars_get_similar` on every relevant hit: it finds the other copies of the same description.
-  2. **By exact text**: `bars_text_search` for IDs, names, option and field names, old values; semantic search misses them.
+  2. **By exact text**: `bars_rag_search` with the ID, name, option or old value in quotes (`"some_option"`); then `bars_text_search` for the complete list of its occurrences on disk, so no copy is left unchanged.
   3. **By links**: `bars_links` with `direction: incoming` on each document you will change, so documents that link to it are re-checked.
   4. **By the graph**: `bars_impact` on the changed object (what describes, depends on or verifies it), `bars_relations` for explicit dependencies, `bars_context` for the requirement, decision, behaviour and check around the task, and `bars_explore` for contradiction candidates. The graph is incomplete: an empty answer proves nothing, and on `graph_not_ready` rely on the first three sources.
   Then read what you found (`bars_read`, `bars_outline`), write the list of documents with what changes in each, and update all of them in the same change. A stale copy left in another module is the failure this procedure exists to prevent.
@@ -70,7 +70,7 @@ For knowledge gaps, use `bars_new_topics_list`, then `bars_new_topics_get` for o
 4. About to change something → `bars_rag_search` for the descriptions of the object, `bars_links` with `direction: incoming` on its document, then `bars_get_similar` on the section you will edit. `bars_impact` adds typed dependencies when the graph has them; an empty impact proves nothing.
 5. Reviewing the documentation as a whole → `bars_explore`, then `bars_graph` to inspect a finding.
 6. Zero or odd results → check subject, project and filters, then `bars_status`; reformulate or read the primary source. An empty answer does not prove a requirement is absent, and is not a reason to reindex.
-7. Need an ID (Т-N, OQ-N, ISS-N) or an exact phrase → `bars_text_search`, then `bars_read` the found place. A path printed in a result starts at the project root (`docs/...`); for `files`, drop the documentation-root prefix.
+7. Need an ID (Т-N, OQ-N, ISS-N) or an exact phrase → `bars_rag_search` with it in quotes, then `bars_read` the found place. When the definition is not among the results, or you need every occurrence, `bars_text_search` lists them on disk. A path printed in a result starts at the project root (`docs/...`); for `files`, drop the documentation-root prefix.
 
 Graph tools read a prebuilt graph; the semantic layer is incomplete, so a missing relation proves nothing. Check `partial`, `coverage` and `evidence` in every answer, and treat similarity as a hint, never as a dependency. Graph results need the graph to be built; on `graph_not_ready` fall back to `bars_rag_search`.
 
