@@ -50,6 +50,29 @@ Codex не запускает новый или изменённый хук, п�
 
 Источники формата и поведения: [MCP-клиент Ouroboros](https://github.com/razzant/ouroboros/blob/ouroboros/ouroboros/mcp_client.py), [корни данных](https://github.com/razzant/ouroboros/blob/ouroboros/ouroboros/launch_roots.py), [конфигурация](https://github.com/razzant/ouroboros/blob/ouroboros/docs/architecture/07-configuration.md).
 
+## iterion
+
+Клиент `iterion` подключает bars к [iterion](https://github.com/SocialGouv/iterion) — оркестратору агентских workflow (решения автора 05-11-2026, OQ-286…OQ-291, «Принять все»). Статус: проект, не реализовано; реализация — шаги плана «клиент iterion» (отнесение worktree к основному checkout и установщик клиента). Сам iterion не запускался, контракт составлен по чтению его кода.
+
+**Почему плагин.** iterion запускает Claude Code со `--strict-mcp-config` и передаёт MCP только через `--mcp-config`, поэтому запись `bars` из `~/.claude.json` в узлы workflow не попадает (`pkg/backend/delegate/claude_code.go`). Пользовательские skills узлы по умолчанию не видят: iterion грузит только проектный уровень настроек, пользовательский — при `ambient: all` или `operator` (`claude_code_ambient.go`). Плагин (`pkg/plugin/manifest.go`) доставляет MCP и skills во все запуски разом и не требует правки каждого `.bot`; bars не правит общий `plugins.yaml` (OQ-286). Плагины видят бэкенды `claw`, `claude_code` и `pi`; `codex`, `kimi` и `grok` не видят.
+
+| Запись | Файл |
+|---|---|
+| Манифест плагина | `<корень>/plugins/bars/plugin.yaml` |
+| Skill | файл `bars-docs` рядом с манифестом, в папке `plugins/bars/` |
+
+Корень — `ITERION_HOME`, а без неё `~/.iterion`. bars пишет только папку `plugins/bars/`, общий `plugins.yaml` не трогает; удаление — убрать папку `plugins/bars`.
+
+Манифест: `name: bars`, `default_enabled: true` (плагин включён без правки `plugins.yaml`), `contributes.mcp_servers` — одна запись `name: bars`, `transport: stdio`, абсолютный `command` к `bars-mcp`, пустой `args`; `contributes.skills` — только `bars-docs`. iterion копирует skills включённых плагинов в `.claude/skills/<имя>/SKILL.md` рабочей папки каждого запуска (`pkg/runtime/plugin_skills.go`). `bars-session-log` и `bars-end` не ставятся (OQ-287): в запуске нет человека, который завершает сессию, а журнал `docs/chats/` в рабочей копии запуска не к месту; они появятся, когда будет сценарий.
+
+**Только без песочницы.** При `sandbox: auto` и установленных Docker или Podman запуск идёт в контейнере, где stdio-сервер с путём на хосте недоступен: контейнеру доступны только `http` и `sse` (`wireUserMCP` в `claude_code_hooks.go`). Первая версия поддерживает запуски без песочницы (`sandbox: none` или без Docker); сетевой транспорт `bars-mcp` — отдельная фича по отдельному решению автора (OQ-288).
+
+**Хука и `lifecycle` нет**, как у Ouroboros (OQ-290): хуки плагина вливаются в `.claude/settings.json` рабочей копии запуска, а `lifecycle.index` выполняется перед каждым запуском, и каждая временная копия стала бы проектом. Проект регистрируется окном или `bars-cli register`.
+
+**Как MCP находит проект.** Рабочая копия запуска лежит в `~/.iterion/projects/<ключ>/worktrees/<run-id>` — вне репозитория (`pkg/runtime/worktree.go`, `pkg/store/storedir.go`), и ближайшая зарегистрированная папка вверх от неё не находится. Поэтому git worktree относится к проекту основного checkout, а хук такую копию не регистрирует (OQ-289, OQ-291): правило описано в [реестре проектов](../projects/projects.md). Цена: правки документов в рабочей копии не видны поиску до слияния. В репозитории с управляемой папкой `.iterion/` копия лежит внутри него и проект находится по обычному правилу.
+
+Окно, CLI и фоновое обновление работают с клиентом как с остальными; детали признака установки — при реализации.
+
 ## Ручное подключение других клиентов
 
 Любой клиент, который умеет запускать stdio-MCP (например, чат Claude Desktop через `claude_desktop_config.json`), подключает `bars-mcp` вручную по текстовой инструкции. Хука у таких клиентов нет: проект регистрируется в окне или через CLI, а актуальность держит воркер (Т-10).
