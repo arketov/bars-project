@@ -164,6 +164,7 @@ impl Harness {
         // Клиенты живут во временной папке: настоящие ~/.claude и ~/.codex тесты не трогают.
         config.install_env = Some(InstallEnv {
             home: home.path().join("client-home"),
+            iterion_home: None,
             mcp_exe: PathBuf::from("/opt/bars/bars-mcp"),
             cli_exe: PathBuf::from("/opt/bars/bars-cli"),
         });

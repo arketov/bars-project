@@ -152,6 +152,7 @@ pub enum ClientArg {
     Codex,
     KimiCode,
     Ouroboros,
+    Iterion,
 }
 
 impl From<ClientArg> for InstallClient {
@@ -161,6 +162,7 @@ impl From<ClientArg> for InstallClient {
             ClientArg::Codex => Self::Codex,
             ClientArg::KimiCode => Self::KimiCode,
             ClientArg::Ouroboros => Self::Ouroboros,
+            ClientArg::Iterion => Self::Iterion,
         }
     }
 }

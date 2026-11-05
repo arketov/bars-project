@@ -8,6 +8,7 @@
 
 mod codex_toml;
 mod fsx;
+mod iterion;
 mod json;
 mod kimi_toml;
 mod ouroboros;
@@ -55,6 +56,8 @@ pub(crate) const GATE_MATCHER: &str = "Read|Grep|Glob|Bash|PowerShell|mcp__bars_
 pub struct InstallEnv {
     /// Домашняя папка пользователя: в ней `.claude.json`, `.claude/`, `.codex/`, `.agents/`.
     pub home: PathBuf,
+    /// Корень iterion (`ITERION_HOME`); `None` — `<home>/.iterion`.
+    pub iterion_home: Option<PathBuf>,
     /// Абсолютный путь к `bars-mcp`.
     pub mcp_exe: PathBuf,
     /// Абсолютный путь к `bars-cli`.
@@ -69,6 +72,9 @@ impl InstallEnv {
         let name = |base: &str| dir.join(format!("{base}{}", std::env::consts::EXE_SUFFIX));
         Some(Self {
             home: bars_protocol::user_home()?,
+            iterion_home: std::env::var_os("ITERION_HOME")
+                .filter(|value| !value.is_empty())
+                .map(PathBuf::from),
             mcp_exe: name("bars-mcp"),
             cli_exe: name("bars-cli"),
         })
@@ -158,7 +164,23 @@ fn layout(env: &InstallEnv, client: InstallClient) -> Layout {
             hooks: env.home.join("Ouroboros/data/settings.json"),
             skills: env.home.join("Ouroboros/data/skills"),
         },
+        // Манифест плагина; skill лежит в `plugins/bars/skills/`, хука нет.
+        InstallClient::Iterion => Layout {
+            mcp: iterion::manifest_file(env),
+            hooks: iterion::manifest_file(env),
+            skills: iterion::plugin_dir(env).join("skills"),
+        },
     }
+}
+
+/// Skills, которые установка кладёт клиенту: iterion получает только `bars-docs`, Ouroboros — ни
+/// одного (OQ-287).
+fn client_skills(client: InstallClient) -> impl Iterator<Item = (&'static str, &'static str)> {
+    SKILLS.into_iter().filter(move |(name, _)| match client {
+        InstallClient::Ouroboros => false,
+        InstallClient::Iterion => *name == "bars-docs",
+        _ => true,
+    })
 }
 
 /// Подключает bars к клиенту: MCP-сервер, хук и skills.
@@ -182,6 +204,8 @@ fn install_locked(env: &InstallEnv, client: InstallClient, activate: bool) -> Re
             }
             InstallClient::Codex => codex_toml::validate_mcp(&layout.mcp, &env.mcp_exe)?,
             InstallClient::Ouroboros => ouroboros::validate_mcp(&layout.mcp)?,
+            // Манифест bars перезаписывается целиком: разбирать нечего.
+            InstallClient::Iterion => {}
         }
         match client {
             InstallClient::ClaudeCode | InstallClient::Codex => {
@@ -190,7 +214,7 @@ fn install_locked(env: &InstallEnv, client: InstallClient, activate: bool) -> Re
             InstallClient::KimiCode => {
                 kimi_toml::validate_hook(&layout.hooks, &env.hook_command())?
             }
-            InstallClient::Ouroboros => {}
+            InstallClient::Ouroboros | InstallClient::Iterion => {}
         }
         let mcp_changed = match client {
             InstallClient::ClaudeCode | InstallClient::KimiCode => {
@@ -200,6 +224,7 @@ fn install_locked(env: &InstallEnv, client: InstallClient, activate: bool) -> Re
             InstallClient::Ouroboros => {
                 ouroboros::install_mcp(&layout.mcp, &env.mcp_exe, activate)?
             }
+            InstallClient::Iterion => iterion::install_mcp(&layout.mcp, &env.mcp_exe)?,
         };
         if mcp_changed {
             done.changed_files.push(layout.mcp.clone());
@@ -209,16 +234,13 @@ fn install_locked(env: &InstallEnv, client: InstallClient, activate: bool) -> Re
                 json::install_hook(&layout.hooks, &env.hook_command())?
             }
             InstallClient::KimiCode => kimi_toml::install_hook(&layout.hooks, &env.hook_command())?,
-            InstallClient::Ouroboros => false,
+            InstallClient::Ouroboros | InstallClient::Iterion => false,
         };
         done.needs_hook_approval = client == InstallClient::Codex && done.hook_changed;
         if done.hook_changed {
             done.changed_files.push(layout.hooks.clone());
         }
-        for (name, text) in SKILLS
-            .into_iter()
-            .filter(|_| client != InstallClient::Ouroboros)
-        {
+        for (name, text) in client_skills(client) {
             let file = layout.skills.join(name).join("SKILL.md");
             if fsx::read_text(&file)?.as_deref() != Some(text) {
                 write_atomic(&file, text, false)?;
@@ -243,6 +265,7 @@ fn is_stale(env: &InstallEnv, client: InstallClient) -> Result<bool> {
         InstallClient::ClaudeCode | InstallClient::KimiCode => json::mcp_command(&layout.mcp)?,
         InstallClient::Codex => codex_toml::mcp_command(&layout.mcp)?,
         InstallClient::Ouroboros => ouroboros::mcp_command(&layout.mcp)?,
+        InstallClient::Iterion => iterion::mcp_command(&layout.mcp)?,
     };
     let mcp_stale = mcp.is_some_and(|command| command != env.mcp_exe.display().to_string());
     let hook = env.hook_command();
@@ -257,7 +280,7 @@ fn hook_commands(client: InstallClient, file: &Path) -> Result<Vec<String>> {
     match client {
         InstallClient::ClaudeCode | InstallClient::Codex => json::hook_commands(file),
         InstallClient::KimiCode => kimi_toml::hook_commands(file),
-        InstallClient::Ouroboros => Ok(Vec::new()),
+        InstallClient::Ouroboros | InstallClient::Iterion => Ok(Vec::new()),
     }
 }
 
@@ -280,16 +303,19 @@ pub fn state(env: &InstallEnv, client: InstallClient) -> ClientState {
         InstallClient::ClaudeCode | InstallClient::KimiCode => json::mcp_command(&layout.mcp),
         InstallClient::Codex => codex_toml::mcp_command(&layout.mcp),
         InstallClient::Ouroboros => ouroboros::mcp_command(&layout.mcp),
+        InstallClient::Iterion => iterion::mcp_command(&layout.mcp),
     };
     ClientState {
-        installed: if client == InstallClient::Ouroboros {
-            ouroboros::has_mcp(&layout.mcp).unwrap_or(false)
-        } else {
-            matches!(mcp, Ok(Some(_)))
+        installed: match client {
+            InstallClient::Ouroboros => ouroboros::has_mcp(&layout.mcp).unwrap_or(false),
+            InstallClient::Iterion => iterion::has_mcp(&layout.mcp).unwrap_or(false),
+            _ => matches!(mcp, Ok(Some(_))),
         },
         stale: is_stale(env, client).unwrap_or(false),
         files: if client == InstallClient::Ouroboros {
             vec![layout.mcp]
+        } else if client == InstallClient::Iterion {
+            vec![iterion::plugin_dir(env)]
         } else {
             vec![layout.mcp, layout.hooks, layout.skills]
         },
@@ -321,6 +347,9 @@ fn uninstall_locked(env: &InstallEnv, client: InstallClient) -> Result<Vec<PathB
             InstallClient::Ouroboros => {
                 ouroboros::has_mcp(&layout.mcp)?;
             }
+            InstallClient::Iterion => {
+                iterion::has_mcp(&layout.mcp)?;
+            }
         }
         hook_commands(client, &layout.hooks)?;
         let mcp_changed = match client {
@@ -329,6 +358,13 @@ fn uninstall_locked(env: &InstallEnv, client: InstallClient) -> Result<Vec<PathB
             }
             InstallClient::Codex => codex_toml::uninstall_mcp(&layout.mcp)?,
             InstallClient::Ouroboros => ouroboros::uninstall_mcp(&layout.mcp)?,
+            // Плагин убирается папкой целиком, вместе со skill.
+            InstallClient::Iterion => {
+                if let Some(dir) = iterion::uninstall(env)? {
+                    done.changed_files.push(dir);
+                }
+                false
+            }
         };
         if mcp_changed {
             done.changed_files.push(layout.mcp.clone());
@@ -338,7 +374,7 @@ fn uninstall_locked(env: &InstallEnv, client: InstallClient) -> Result<Vec<PathB
                 json::uninstall_hook(&layout.hooks)?
             }
             InstallClient::KimiCode => kimi_toml::uninstall_hook(&layout.hooks)?,
-            InstallClient::Ouroboros => false,
+            InstallClient::Ouroboros | InstallClient::Iterion => false,
         };
         if hook_removed {
             done.changed_files.push(layout.hooks.clone());
@@ -346,10 +382,7 @@ fn uninstall_locked(env: &InstallEnv, client: InstallClient) -> Result<Vec<PathB
         if client == InstallClient::ClaudeCode {
             done.changed_files.extend(project_gate::remove_all(env));
         }
-        for (name, _) in SKILLS
-            .into_iter()
-            .filter(|_| client != InstallClient::Ouroboros)
-        {
+        for (name, _) in client_skills(client) {
             let dir = layout.skills.join(name);
             if remove_dir(&dir)? {
                 done.changed_files.push(dir);

@@ -12,6 +12,7 @@ use super::{ClientsError, InstallEnv, install, uninstall};
 fn env(home: &TempDir) -> InstallEnv {
     InstallEnv {
         home: home.path().to_path_buf(),
+        iterion_home: None,
         mcp_exe: PathBuf::from("/opt/bars/bars-mcp"),
         cli_exe: PathBuf::from("/opt/bars/bars-cli"),
     }
@@ -434,4 +435,90 @@ fn kimi_uninstall_removes_only_bars() {
     assert_eq!(hooks[0]["command"].as_str(), Some("notify"));
     assert!(!home.path().join(".kimi-code/skills/bars-docs").exists());
     assert!(uninstall(&env, InstallClient::KimiCode).unwrap().is_empty());
+}
+
+#[test]
+fn iterion_install_writes_plugin_manifest_and_bars_docs_only() {
+    let home = TempDir::new().unwrap();
+    let env = env(&home);
+    let plugin = home.path().join(".iterion/plugins/bars");
+    let plugins_yaml = home.path().join(".iterion/plugins.yaml");
+    write(&plugins_yaml, "enabled: {}\n");
+
+    let done = install(&env, InstallClient::Iterion).unwrap();
+
+    assert!(!done.hook_changed && !done.needs_hook_approval);
+    let manifest = fs::read_to_string(plugin.join("plugin.yaml")).unwrap();
+    for line in [
+        "schema_version: 1",
+        "name: bars",
+        "default_enabled: true",
+        "      transport: stdio",
+        "      command: \"/opt/bars/bars-mcp\"",
+        "      args: []",
+        "    - skills/bars-docs/SKILL.md",
+    ] {
+        assert!(manifest.lines().any(|l| l == line), "нет строки {line}");
+    }
+    assert!(!manifest.contains("lifecycle") && !manifest.contains("hooks"));
+    assert_eq!(
+        fs::read_to_string(plugin.join("skills/bars-docs/SKILL.md")).unwrap(),
+        super::SKILLS[0].1
+    );
+    assert!(!plugin.join("skills/bars-session-log").exists());
+    assert!(!plugin.join("skills/bars-end").exists());
+    // Общий plugins.yaml и профиль других клиентов не тронуты.
+    assert_eq!(fs::read_to_string(&plugins_yaml).unwrap(), "enabled: {}\n");
+    assert!(!home.path().join(".claude.json").exists());
+    assert!(!home.path().join(".claude").exists());
+}
+
+#[test]
+fn iterion_install_is_idempotent_and_updates_moved_path() {
+    let home = TempDir::new().unwrap();
+    let env = env(&home);
+    let manifest = home.path().join(".iterion/plugins/bars/plugin.yaml");
+    install(&env, InstallClient::Iterion).unwrap();
+
+    let again = install(&env, InstallClient::Iterion).unwrap();
+    assert!(again.changed_files.is_empty());
+    assert!(!super::state(&env, InstallClient::Iterion).stale);
+
+    let mut moved = env.clone();
+    moved.mcp_exe = PathBuf::from("/new/bars-mcp");
+    assert!(super::state(&moved, InstallClient::Iterion).stale);
+    let done = install(&moved, InstallClient::Iterion).unwrap();
+    assert_eq!(done.changed_files, vec![manifest.clone()]);
+    assert!(
+        fs::read_to_string(&manifest)
+            .unwrap()
+            .contains("command: \"/new/bars-mcp\"")
+    );
+}
+
+#[test]
+fn iterion_uses_iterion_home_and_uninstall_removes_only_plugin_dir() {
+    let home = TempDir::new().unwrap();
+    let mut env = env(&home);
+    env.iterion_home = Some(home.path().join("custom"));
+    let plugins = home.path().join("custom/plugins");
+    write(&plugins.join("plugins.yaml"), "enabled: {}\n");
+    write(&plugins.join("other/plugin.yaml"), "name: other\n");
+
+    install(&env, InstallClient::Iterion).unwrap();
+    assert!(plugins.join("bars/plugin.yaml").exists());
+    assert!(!home.path().join(".iterion").exists());
+    assert!(super::state(&env, InstallClient::Iterion).installed);
+
+    let removed = uninstall(&env, InstallClient::Iterion).unwrap();
+    assert_eq!(removed, vec![plugins.join("bars")]);
+    assert!(!plugins.join("bars").exists());
+    assert!(plugins.join("plugins.yaml").exists());
+    assert!(plugins.join("other/plugin.yaml").exists());
+    assert!(!super::state(&env, InstallClient::Iterion).installed);
+    assert!(
+        uninstall(&env, InstallClient::Iterion)
+            .unwrap()
+            .is_empty()
+    );
 }

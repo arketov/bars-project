@@ -53,6 +53,7 @@
     codex: ["Cx", "Codex"],
     "kimi-code": ["Ki", "Kimi Code"],
     ouroboros: ["Oo", "Ouroboros"],
+    iterion: ["It", "iterion"],
   };
 
   const draft = $derived(settings.draft);
@@ -372,6 +373,9 @@
               </div>
               {#if client.client === "ouroboros"}
                 <div class="note"><span>Локальный Ouroboros с обычной папкой ~/Ouroboros/data/: MCP без хука и skills. Проекты добавляются в окне bars или через CLI.</span></div>
+              {/if}
+              {#if client.client === "iterion"}
+                <div class="note"><span>Плагин iterion (~/.iterion/plugins/bars): MCP и skill bars-docs, без хука. Работает только для запусков без песочницы. Проекты добавляются в окне bars или через CLI.</span></div>
               {/if}
               {#if client.stale}
                 <div class="note warn"><Icon name="warn" size={16} /><span>Записи указывают на старое расположение bars (приложение переехало или обновилось). Нажмите «Переустановить».</span></div>

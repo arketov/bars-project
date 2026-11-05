@@ -9,6 +9,7 @@ use tempfile::TempDir;
 fn env(home: &TempDir) -> InstallEnv {
     InstallEnv {
         home: home.path().to_path_buf(),
+        iterion_home: None,
         mcp_exe: "/current/bars-mcp".into(),
         cli_exe: "/current/bars-cli".into(),
     }
@@ -299,4 +300,50 @@ fn uninstall_and_refresh_share_the_lock_in_both_orders() {
         assert!(refresh(&env).iter().all(|r| matches!(r.result, Ok(None))));
         assert!(!state(&env, InstallClient::Codex).installed);
     }
+}
+
+#[test]
+fn iterion_refresh_needs_existing_manifest_and_repairs_it() {
+    let home = TempDir::new().unwrap();
+    let env = env(&home);
+    let plugin = home.path().join(".iterion/plugins/bars");
+
+    // Одна папка iterion или чужие плагины установку не запускают.
+    write(
+        &home.path().join(".iterion/plugins/other/plugin.yaml"),
+        "name: other\n",
+    );
+    write(&plugin.join("skills/bars-docs/SKILL.md"), "old");
+    assert!(
+        refresh(&env)
+            .iter()
+            .all(|r| matches!(r.result, Ok(None)))
+    );
+    assert!(!plugin.join("plugin.yaml").exists());
+
+    // Есть манифест со старым путём: он и skill приводятся к текущим.
+    write(
+        &plugin.join("plugin.yaml"),
+        "name: bars\ncontributes:\n  mcp_servers:\n    - name: bars\n      command: \"/old/bars-mcp\"\n",
+    );
+    let results = refresh(&env);
+    let iterion = results
+        .iter()
+        .find(|r| r.client == InstallClient::Iterion)
+        .unwrap();
+    assert!(matches!(&iterion.result, Ok(Some(done)) if !done.changed_files.is_empty()));
+    assert!(
+        fs::read_to_string(plugin.join("plugin.yaml"))
+            .unwrap()
+            .contains("command: \"/current/bars-mcp\"")
+    );
+    assert_ne!(
+        fs::read_to_string(plugin.join("skills/bars-docs/SKILL.md")).unwrap(),
+        "old"
+    );
+
+    // Повторный проход ничего не пишет.
+    let before = snapshot(home.path());
+    refresh(&env);
+    assert_eq!(snapshot(home.path()), before);
 }

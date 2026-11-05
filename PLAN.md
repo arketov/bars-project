@@ -67,7 +67,7 @@ bars подключается к iterion плагином: MCP и skill `bars-do
 
 - ✅ 4.1.1 Документ: раздел iterion в docs/features/clients/clients.md и docs/manual/agents.md по OQ-286…OQ-291. — сделано.
 - ✅ 4.1.2 Реализация: `bars-mcp` и хук начала сессии относят git worktree к проекту основного checkout (OQ-289, OQ-291). — сделано, не проверено сборкой.
-- 4.1.3 Реализация: клиент `iterion` — плагин `plugins/bars` с MCP и `bars-docs`, установка, удаление, автообновление в окне и CLI (OQ-286…OQ-288, OQ-290).
+- ✅ 4.1.3 Реализация: клиент `iterion` — плагин `plugins/bars` с MCP и `bars-docs`, установка, удаление, автообновление в окне и CLI (OQ-286…OQ-288, OQ-290). — сделано, не проверено сборкой.
 
 ## Отложено
 

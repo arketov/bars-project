@@ -40,9 +40,9 @@ bars-cli install --client kimi-code
 
 bars добавляет свой MCP-сервер в `settings.json` и включает MCP. Перед изменением сохраняет `.bars-backup`; другие серверы и настройки сохраняются. Хук и skills в Ouroboros не устанавливаются: добавьте проект в окне bars или командой `bars-cli register <папка>`. Общий MCP и выключенная запись не включаются повторно фоновым обновлением. Нестандартные пути `OUROBOROS_*`, удалённые и контейнерные установки пока не поддерживаются; путь к локальному `bars-mcp` должен быть доступен Ouroboros. Формат описан в [контракте подключения клиентов](../features/clients/clients.md).
 
-## Подключение iterion (пока не реализовано)
+## Подключение iterion
 
-Клиент `iterion` — проект, в программе его ещё нет. После реализации: «Настройки» → «Клиенты» → iterion → «Установить» или `bars-cli install --client iterion` (удаление — `bars-cli uninstall --client iterion`).
+Клиент `iterion` реализован без проверки сборкой. «Настройки» → «Клиенты» → iterion → «Установить» или `bars-cli install --client iterion` (удаление — `bars-cli uninstall --client iterion`).
 
 bars положит в папку `plugins/bars/` в `~/.iterion` (или в `ITERION_HOME`) плагин: он подключает MCP-сервер `bars` и skill `bars-docs`. Общий `plugins.yaml` bars не трогает. Другие два skills (`bars-session-log`, `bars-end`) в iterion не ставятся. Плагин нужен потому, что iterion запускает Claude Code только со своим списком MCP-серверов и записи из `~/.claude.json` не видит. Работает с узлами `claude_code`, `claw` и `pi`; узлы `codex`, `kimi` и `grok` плагины не видят.
 

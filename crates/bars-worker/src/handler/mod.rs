@@ -1258,6 +1258,7 @@ impl WorkerHandler {
             InstallClient::Codex,
             InstallClient::KimiCode,
             InstallClient::Ouroboros,
+            InstallClient::Iterion,
         ]
         .into_iter()
         .map(|client| {

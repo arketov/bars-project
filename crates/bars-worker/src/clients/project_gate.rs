@@ -87,6 +87,7 @@ mod tests {
     fn env(home: &TempDir) -> InstallEnv {
         InstallEnv {
             home: home.path().to_path_buf(),
+            iterion_home: None,
             mcp_exe: PathBuf::from("/opt/bars/bars-mcp"),
             cli_exe: PathBuf::from("/opt/bars/bars-cli"),
         }

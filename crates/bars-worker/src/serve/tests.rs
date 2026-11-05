@@ -36,6 +36,7 @@ async fn blocked_refresh_does_not_delay_ipc_and_shutdown_waits_for_it() {
     let mut config = WorkerConfig::new(home.path().join(".bars")).without_graph_pause();
     let env = crate::clients::InstallEnv {
         home: home.path().to_path_buf(),
+        iterion_home: None,
         mcp_exe: "/new/bars-mcp".into(),
         cli_exe: "/new/bars-cli".into(),
     };

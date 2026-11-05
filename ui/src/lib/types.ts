@@ -319,7 +319,7 @@ export interface ModelRuntime {
   revision?: string;
 }
 
-export type InstallClientName = "claude-code" | "codex" | "kimi-code" | "ouroboros";
+export type InstallClientName = "claude-code" | "codex" | "kimi-code" | "ouroboros" | "iterion";
 
 export interface ClientStatus {
   client: InstallClientName;

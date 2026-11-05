@@ -324,6 +324,7 @@ impl Window {
         let mut config = WorkerConfig::new(home.path().to_path_buf()).without_graph_pause();
         config.install_env = Some(InstallEnv {
             home: home.path().join("client-home"),
+            iterion_home: None,
             mcp_exe: PathBuf::from("/opt/bars/bars-mcp"),
             cli_exe: PathBuf::from("/opt/bars/bars-cli"),
         });

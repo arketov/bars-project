@@ -31,6 +31,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .to_path_buf();
     config.install_env = Some(bars_worker::clients::InstallEnv {
         home: home.clone(),
+        iterion_home: None,
         mcp_exe: bin.join(format!("bars-mcp{}", std::env::consts::EXE_SUFFIX)),
         cli_exe: bin.join(format!("bars-cli{}", std::env::consts::EXE_SUFFIX)),
     });

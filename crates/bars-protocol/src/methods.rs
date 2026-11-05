@@ -655,6 +655,8 @@ pub enum InstallClient {
     KimiCode,
     #[serde(rename = "ouroboros")]
     Ouroboros,
+    #[serde(rename = "iterion")]
+    Iterion,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
