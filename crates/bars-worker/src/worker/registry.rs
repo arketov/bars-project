@@ -203,16 +203,19 @@ impl Registry {
             > 1
     }
 
-    /// Ближайший зарегистрированный проект от `cwd` вверх по дереву (Т-15): вложенные проекты и
-    /// worktree внутри проекта попадают в него.
     pub fn project_for_cwd(&self, cwd: &Path) -> Option<&ProjectEntry> {
-        cwd.ancestors().find_map(|dir| self.find(dir))
+        cwd.ancestors()
+            .find_map(|dir| self.find(dir))
+            .or_else(|| self.project_of_worktree(cwd))
     }
 
-    /// Корень проекта для `cwd`, когда известна только рабочая папка агента (хук начала сессии).
-    ///
-    /// Порядок из `docs/architecture/projects.md`: ближайшая вверх папка, которая зарегистрирована
-    /// или содержит `.bars/` проекта; иначе корень git-репозитория; иначе сама `cwd`.
+    /// Проект основного checkout для `cwd` внутри git worktree вне проекта: корень рабочей копии
+    /// — ближайшая вверх папка с файлом `.git`, основной checkout — по его `gitdir:` (OQ-289).
+    fn project_of_worktree(&self, cwd: &Path) -> Option<&ProjectEntry> {
+        let main = main_checkout_of_worktree(cwd)?;
+        main.ancestors().find_map(|dir| self.find(dir))
+    }
+
     pub fn discover_root(&self, cwd: &Path) -> Discovered {
         for dir in cwd.ancestors() {
             if self.contains(dir) {
@@ -222,11 +225,25 @@ impl Registry {
                 };
             }
             if has_project_bars(dir) {
-                return Discovered {
-                    root: dir.to_path_buf(),
-                    registered: false,
-                };
+                // Git worktree вне проекта не регистрируется отдельно, если основной checkout
+                // уже в реестре (OQ-289, OQ-291).
+                return self.project_of_worktree(cwd).map_or_else(
+                    || Discovered {
+                        root: dir.to_path_buf(),
+                        registered: false,
+                    },
+                    |found| Discovered {
+                        root: found.path.clone(),
+                        registered: true,
+                    },
+                );
             }
+        }
+        if let Some(found) = self.project_of_worktree(cwd) {
+            return Discovered {
+                root: found.path.clone(),
+                registered: true,
+            };
         }
         let root = cwd
             .ancestors()
@@ -283,6 +300,34 @@ pub fn project_name(path: &Path) -> String {
 fn has_project_bars(dir: &Path) -> bool {
     let bars = dir.join(".bars");
     bars.join("config.toml").is_file() || bars.join("index.sqlite").is_file()
+}
+
+/// Основной checkout для `cwd` в git worktree: ближайшая вверх папка с файлом `.git` (не папкой)
+/// с `gitdir: <путь>`, а путь ведёт в `<репозиторий>/.git/worktrees/<имя>`. Относительный `gitdir`
+/// считается от корня рабочей копии; `commondir` уточняет общий каталог git. Подмодуль, bare-репозиторий
+/// и битый файл дают `None`.
+fn main_checkout_of_worktree(cwd: &Path) -> Option<PathBuf> {
+    let work = cwd.ancestors().find(|dir| dir.join(".git").is_file())?;
+    let text = fs::read_to_string(work.join(".git")).ok()?;
+    let target = text
+        .lines()
+        .find_map(|line| line.trim().strip_prefix("gitdir:"))?
+        .trim();
+    if target.is_empty() {
+        return None;
+    }
+    let gitdir = normalize(&work.join(target)).ok()?;
+    if gitdir.parent()?.file_name()? != "worktrees" {
+        return None;
+    }
+    let common = match fs::read_to_string(gitdir.join("commondir")) {
+        Ok(text) => normalize(&gitdir.join(text.trim())).ok()?,
+        Err(_) => gitdir.parent()?.parent()?.to_path_buf(),
+    };
+    if common.file_name()? != ".git" {
+        return None;
+    }
+    Some(common.parent()?.to_path_buf())
 }
 
 /// Есть ли под корнем документации хоть один `.md`: без него хук проект не регистрирует.
@@ -518,6 +563,103 @@ mod tests {
         registry.add(&inner).unwrap();
         assert_eq!(registry.project_for_cwd(&deep).unwrap().path, inner);
         assert!(registry.project_for_cwd(home.path()).is_none());
+    }
+
+    /// Основной checkout с `.git/worktrees/<имя>` и рабочая копия вне него.
+    fn linked_worktree(home: &TempDir, main: &str, outside: &str, relative: bool) -> PathBuf {
+        let admin = dir(home, &format!("{main}/.git/worktrees/wt"));
+        let work = dir(home, outside);
+        let target = if relative {
+            "../main/.git/worktrees/wt".to_string()
+        } else {
+            admin.to_string_lossy().replace('\\', "/")
+        };
+        fs::write(work.join(".git"), format!("gitdir: {target}\n")).unwrap();
+        fs::write(admin.join("commondir"), "../..\n").unwrap();
+        work
+    }
+
+    #[test]
+    fn worktree_outside_project_belongs_to_its_main_checkout() {
+        let home = TempDir::new().unwrap();
+        let work = linked_worktree(&home, "main", "runs/wt", false);
+        let cwd = dir(&home, "runs/wt/src/deep");
+        let main = home.path().join("main");
+        let mut registry = Registry::load(home.path()).unwrap();
+
+        assert!(registry.project_for_cwd(&cwd).is_none());
+        registry.add(&main).unwrap();
+        assert_eq!(registry.project_for_cwd(&work).unwrap().path, main);
+        assert_eq!(registry.project_for_cwd(&cwd).unwrap().path, main);
+        assert_eq!(
+            registry.discover_root(&cwd),
+            Discovered {
+                root: main,
+                registered: true
+            }
+        );
+    }
+
+    #[test]
+    fn worktree_with_relative_gitdir_finds_its_main_checkout() {
+        let home = TempDir::new().unwrap();
+        let work = linked_worktree(&home, "main", "wt-rel", true);
+        let main = home.path().join("main");
+        let mut registry = Registry::load(home.path()).unwrap();
+        registry.add(&main).unwrap();
+
+        assert_eq!(registry.project_for_cwd(&work).unwrap().path, main);
+    }
+
+    #[test]
+    fn worktree_of_unregistered_main_checkout_keeps_old_rules() {
+        let home = TempDir::new().unwrap();
+        let work = linked_worktree(&home, "main", "runs/wt", false);
+        let registry = Registry::load(home.path()).unwrap();
+
+        assert!(registry.project_for_cwd(&work).is_none());
+        assert_eq!(
+            registry.discover_root(&work),
+            Discovered {
+                root: work,
+                registered: false
+            }
+        );
+    }
+
+    #[test]
+    fn worktree_with_project_bars_is_not_registered_separately() {
+        let home = TempDir::new().unwrap();
+        let work = linked_worktree(&home, "main", "runs/wt", false);
+        fs::create_dir_all(work.join(".bars")).unwrap();
+        fs::write(work.join(".bars/config.toml"), "").unwrap();
+        let main = home.path().join("main");
+        let mut registry = Registry::load(home.path()).unwrap();
+        registry.add(&main).unwrap();
+
+        assert_eq!(
+            registry.discover_root(&work),
+            Discovered {
+                root: main,
+                registered: true
+            }
+        );
+    }
+
+    #[test]
+    fn broken_or_foreign_git_file_is_not_a_worktree() {
+        let home = TempDir::new().unwrap();
+        let mut registry = Registry::load(home.path()).unwrap();
+        registry.add(&dir(&home, "main")).unwrap();
+
+        let garbage = dir(&home, "garbage");
+        fs::write(garbage.join(".git"), "not a gitdir line").unwrap();
+        // Подмодуль: `gitdir` ведёт в `.git/modules/<имя>`, а не в `.git/worktrees/<имя>`.
+        let submodule = dir(&home, "sub");
+        fs::write(submodule.join(".git"), "gitdir: ../main/.git/modules/sub").unwrap();
+
+        assert!(registry.project_for_cwd(&garbage).is_none());
+        assert!(registry.project_for_cwd(&submodule).is_none());
     }
 
     #[test]
