@@ -959,6 +959,7 @@ fn registry_migration_replaces_legacy_table_during_scoped_update() {
                 modified_ns: stored.modified_ns,
                 hash: &stored.hash,
                 chunks: &chunks,
+                text: None,
             },
             &[(&hash, &vector)],
         )

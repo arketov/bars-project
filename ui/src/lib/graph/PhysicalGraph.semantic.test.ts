@@ -60,7 +60,6 @@ beforeEach(() => {
   app.activeDocument = null;
   app.results = null;
   app.displayed = null;
-  app.graphSearch = null;
   app.searching = false;
   app.searchError = null;
   rpc.mockImplementation(async (method: string, params: Record<string, unknown>) => {

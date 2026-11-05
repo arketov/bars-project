@@ -138,7 +138,7 @@ async fn graph_bad_utf8_is_partial_and_recovery_reuses_index_vectors() {
     worker.shutdown().await;
     let mut index = Index::open(&index_path(&project), Journal::Wal).unwrap();
     let original = store::load(index.conn()).unwrap().snapshot;
-    fs::write(project.join("docs/a.md"), [0xff, 0xfe]).unwrap();
+    break_file_on_disk(&project, "a.md");
     store::set_state(index.conn(), LayerState::Stale, None, None).unwrap();
     let status = bars_core::graph::build_index_graph(&project, &mut index, || false).unwrap();
     assert_eq!(status.file_errors_total, 1);
@@ -336,7 +336,7 @@ async fn graph_unchanged_file_error_skips_calculation_and_same_hash_recovery_reb
     idle(&worker).await;
     quiet(&worker, &project);
     let calls = env.provider.counters.embed_calls.load(Ordering::SeqCst);
-    fs::write(project.join("docs/a.md"), [0xff, 0xfe]).unwrap();
+    break_file_on_disk(&project, "a.md");
     worker.graph_build(&project).await.unwrap();
     graph_idle(&worker, &project).await;
     let index = Index::open(&index_path(&project), Journal::Wal).unwrap();
@@ -529,7 +529,7 @@ async fn graph_late_cancel_with_new_file_error_does_not_restart_same_inputs() {
     worker.register(&project).unwrap();
     idle(&worker).await;
     quiet(&worker, &project);
-    fs::write(project.join("docs/a.md"), [0xff, 0xfe]).unwrap();
+    break_file_on_disk(&project, "a.md");
     let gate = lock(&worker.inner.projects)[&project].job_gate.clone();
     let held = gate.lock_owned().await;
     let job = worker.graph_build(&project).await.unwrap();
@@ -692,4 +692,28 @@ async fn graph_passes_keep_minimum_interval_and_explicit_build_skips_it() {
             < Duration::from_millis(700)
     );
     worker.shutdown().await;
+}
+
+/// Портит файл на диске так, чтобы граф его прочёл: текст документа убирается из индекса
+/// (`document_sources`) и из прежнего поколения графа, иначе сборка возьмёт текст оттуда и диск
+/// не прочтёт (подготовка из индекса, docs/architecture/graph.md, OQ-258).
+fn break_file_on_disk(project: &Path, name: &str) {
+    let index = Index::open(&index_path(project), Journal::Wal).unwrap();
+    let path = format!("docs/{name}");
+    index
+        .conn()
+        .execute(
+            "DELETE FROM document_sources WHERE document_id IN (SELECT id FROM documents WHERE path = ?1)",
+            [&path],
+        )
+        .unwrap();
+    index
+        .conn()
+        .execute(
+            "UPDATE graph_sources SET revision = 'hidden-' || revision WHERE path = ?1",
+            [&path],
+        )
+        .unwrap();
+    drop(index);
+    fs::write(project.join(&path), [0xff, 0xfe]).unwrap();
 }

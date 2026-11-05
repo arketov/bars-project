@@ -11,8 +11,12 @@ const GRAPH_TABLES: &[&str] = &[
     "graph_aux",
     "graph_edge_evidence",
     "graph_node_sources",
+    // Схема v3: части документов; в v2 таблицы нет.
+    "graph_parts",
 ];
 const INPUT_TABLES: &[&str] = &["documents", "chunks", "vectors", "meta"];
+/// Служебный ключ `graph_meta` внутри транзакции публикации: триггеры графа молчат.
+pub(super) const PUBLISHING: &str = "publishing";
 
 fn exists(db: &Connection, name: &str) -> Result<bool, GraphError> {
     Ok(db.query_row(
@@ -33,6 +37,7 @@ pub(super) fn version(db: &Connection) -> Result<Option<u32>, GraphError> {
     match meta(db, "schema_version")?.as_deref() {
         Some("1") => Ok(Some(1)),
         Some("2") => Ok(Some(2)),
+        Some("3") => Ok(Some(3)),
         _ => Err(invalid("неподдерживаемая или неполная схема графа")),
     }
 }
@@ -104,6 +109,24 @@ fn create_meta(db: &Connection, name: &str) -> Result<(), GraphError> {
     Ok(())
 }
 
+/// Таблица частей документов и версия схемы 3. Триггеры чтения ставятся заново: повторный вызов
+/// на частично переведённой базе не падает.
+fn add_parts(db: &Connection) -> Result<(), GraphError> {
+    db.execute_batch(
+        "CREATE TABLE IF NOT EXISTS graph_parts(source_path TEXT NOT NULL REFERENCES graph_sources(path) ON DELETE CASCADE,kind TEXT NOT NULL,key TEXT NOT NULL,data TEXT NOT NULL,PRIMARY KEY(source_path,kind,key)) WITHOUT ROWID;
+        CREATE INDEX IF NOT EXISTS graph_parts_kind_key ON graph_parts(kind,key);
+        CREATE INDEX IF NOT EXISTS graph_edge_evidence_evidence ON graph_edge_evidence(evidence_id);",
+    )?;
+    for event in ["INSERT", "UPDATE", "DELETE"] {
+        db.execute_batch(&format!(
+            "DROP TRIGGER IF EXISTS graph_read_graph_parts_{event}"
+        ))?;
+    }
+    triggers_for(db, true, Some("graph_parts"))?;
+    set_meta(db, "schema_version", "3")?;
+    Ok(())
+}
+
 fn create_special(db: &Connection) -> Result<(), GraphError> {
     db.execute_batch(&format!("CREATE TABLE graph_payload(key TEXT NOT NULL PRIMARY KEY CHECK(key IN ({PAYLOAD})),value TEXT NOT NULL);
         CREATE TABLE graph_revisions(id INTEGER PRIMARY KEY CHECK(id=1),read_epoch TEXT NOT NULL CHECK(length(read_epoch)=32 AND read_epoch NOT GLOB '*[^0-9A-Fa-f]*'),read_revision INTEGER NOT NULL CHECK(typeof(read_revision)='integer' AND read_revision>=0),knn_input_epoch TEXT NOT NULL CHECK(length(knn_input_epoch)=32 AND knn_input_epoch NOT GLOB '*[^0-9A-Fa-f]*'),knn_input_revision INTEGER NOT NULL CHECK(typeof(knn_input_revision)='integer' AND knn_input_revision>=0));
@@ -133,7 +156,12 @@ fn check_trigger(db: &Connection, sql: &str, install: bool) -> Result<(), GraphE
 }
 
 fn triggers(db: &Connection, install: bool) -> Result<(), GraphError> {
-    if exists(db, "documents")? {
+    triggers_for(db, install, None)
+}
+
+/// `only` — только триггеры чтения одной таблицы графа (добавление `graph_parts` при переходе на v3).
+fn triggers_for(db: &Connection, install: bool, only: Option<&str>) -> Result<(), GraphError> {
+    if only.is_none() && exists(db, "documents")? {
         for sql in [
             "CREATE TRIGGER graph_documents_insert AFTER INSERT ON documents BEGIN INSERT INTO graph_meta VALUES('state','stale') ON CONFLICT(key) DO UPDATE SET value='stale'; END;",
             "CREATE TRIGGER graph_documents_delete AFTER DELETE ON documents BEGIN INSERT INTO graph_meta VALUES('state','stale') ON CONFLICT(key) DO UPDATE SET value='stale'; END;",
@@ -143,17 +171,33 @@ fn triggers(db: &Connection, install: bool) -> Result<(), GraphError> {
         }
     }
     for table in GRAPH_TABLES.iter().chain(INPUT_TABLES) {
-        if !exists(db, table)? {
+        if only.is_some_and(|t| t != *table) || !exists(db, table)? {
             continue;
         }
         for event in ["INSERT", "UPDATE", "DELETE"] {
-            check_trigger(db,&format!("CREATE TRIGGER graph_read_{table}_{event} AFTER {event} ON {table} BEGIN
+            // Публикация графа ставит ключ `publishing` и увеличивает ревизию один раз сама.
+            let filter = if GRAPH_TABLES.contains(table) {
+                let idle = format!("NOT EXISTS(SELECT 1 FROM graph_meta WHERE key='{PUBLISHING}')");
+                if *table == "graph_meta" {
+                    let row = match event {
+                        "INSERT" => format!("NEW.key<>'{PUBLISHING}'"),
+                        "DELETE" => format!("OLD.key<>'{PUBLISHING}'"),
+                        _ => format!("OLD.key<>'{PUBLISHING}' AND NEW.key<>'{PUBLISHING}'"),
+                    };
+                    format!("WHEN {row} AND {idle}")
+                } else {
+                    format!("WHEN {idle}")
+                }
+            } else {
+                String::new()
+            };
+            check_trigger(db,&format!("CREATE TRIGGER graph_read_{table}_{event} AFTER {event} ON {table} {filter} BEGIN
                 SELECT CASE WHEN NOT EXISTS(SELECT 1 FROM graph_revisions WHERE id=1) THEN RAISE(ABORT,'missing graph revisions') END;
                 UPDATE graph_revisions SET read_revision=read_revision+1 WHERE id=1; END;"),install)?;
         }
     }
     for table in INPUT_TABLES {
-        if !exists(db, table)? {
+        if only.is_some() || !exists(db, table)? {
             continue;
         }
         for event in ["INSERT", "UPDATE", "DELETE"] {
@@ -182,11 +226,12 @@ fn triggers(db: &Connection, install: bool) -> Result<(), GraphError> {
 }
 
 pub(super) fn validate(db: &Connection) -> Result<(), GraphError> {
+    let v3 = meta(db, "schema_version")?.as_deref() == Some("3");
     for name in GRAPH_TABLES
         .iter()
         .chain(["graph_payload", "graph_revisions"].iter())
     {
-        if !exists(db, name)? {
+        if (*name != "graph_parts" || v3) && !exists(db, name)? {
             return Err(invalid("неполная схема графа v2"));
         }
     }
@@ -207,8 +252,16 @@ pub(super) fn ensure(db: &mut Connection) -> Result<(), GraphError> {
     db.pragma_update(None, "foreign_keys", "ON")?;
     let tx = db.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
     let version = version(&tx)?;
-    if version == Some(2) {
+    if version == Some(3) {
         validate(&tx)?;
+        tx.commit()?;
+        return Ok(());
+    }
+    if version == Some(2) {
+        // Переход v2 → v3: только таблица частей и её триггеры; граф не пересчитывается.
+        // Признака `delta_base` нет, поэтому первое обновление будет полным (OQ-259).
+        validate(&tx)?;
+        add_parts(&tx)?;
         tx.commit()?;
         return Ok(());
     }
@@ -232,6 +285,7 @@ pub(super) fn ensure(db: &mut Connection) -> Result<(), GraphError> {
     }
     triggers(&tx, true)?;
     set_meta(&tx, "schema_version", "2")?;
+    add_parts(&tx)?;
     if version == Some(1)
         && meta(&tx, "snapshot")?.is_some()
         && meta(&tx, "published_input_stamp")?.is_none()
@@ -295,7 +349,7 @@ pub fn revision_stamp(db: &Connection) -> Result<Option<RevisionStamp>, GraphErr
         return Err(invalid("отсутствуют метки графа"));
     };
     let epoch = |s: &str| s.len() == 32 && s.bytes().all(|b| b.is_ascii_hexdigit());
-    if version != "2"
+    if !matches!(version.as_str(), "2" | "3")
         || !epoch(&read)
         || !epoch(&input)
         || rt != "integer"

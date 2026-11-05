@@ -86,8 +86,7 @@ export function validate(doc: SettingsDoc): Record<string, string> {
   positive("search.max_candidates", search.max_candidates, "Предел кандидатов");
   positive("search.max_rerank_candidates", search.max_rerank_candidates, "Предел кандидатов на реранк");
   for (const [key, value] of [
-    ["search.min_score_rerank", search.min_score_rerank],
-    ["search.min_score_vector", search.min_score_vector],
+    ["search.min_score", search.min_score],
   ] as const) {
     if (!(value >= 0 && value <= 1)) errors[key] = "Оценка лежит от 0 до 1";
   }

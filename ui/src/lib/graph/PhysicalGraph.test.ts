@@ -52,7 +52,6 @@ beforeEach(() => {
   app.activeDocument = null;
   app.results = null;
   app.displayed = null;
-  app.graphSearch = null;
   app.searching = false;
   app.searchError = null;
   rpc.mockImplementation(async (method: string, params: Record<string, unknown>) => {
@@ -299,7 +298,7 @@ const finishSearch = (id: string, query: string, docs: number[]) => {
   app.searching = false;
   app.searchError = null;
   app.results = { results: docs.map((d, i) => searchHit(d, 0.95 - i * 0.1)), applied: { results: docs.length, candidates: 50, rerank_candidates: 50, min_score: 0.1, score_kind: "rerank", clamped: false }, indexing: false, pending: 0 };
-  app.displayed = { requestId: id, project: "C:/a", query, modules: [], files: [], mode: "hybrid", includeRelated: true, limit: null, minScore: null };
+  app.displayed = { requestId: id, project: "C:/a", query, modules: [], files: [], limit: null };
 };
 
 it("вид запроса: после поиска граф перестраивается вокруг запроса, «Общий вид» возвращает проект, новый поиск включает вид снова", async () => {

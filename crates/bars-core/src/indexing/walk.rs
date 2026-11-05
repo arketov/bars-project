@@ -87,6 +87,45 @@ pub fn walk_docs_bounded(
     keep_going: impl Fn() -> bool,
     problem_limit: usize,
 ) -> Result<Walk, WalkError> {
+    walk_docs_excluding(project_root, docs_root, keep_going, problem_limit, &[])
+}
+
+/// Обход для индекса, ссылок и дерева: области вложенных проектов, опубликованные воркером для
+/// `project_root` ([`super::nested`]), не обходятся. Без вложенных проектов равен [`walk_docs`].
+pub fn walk_docs_indexed(project_root: &Path, docs_root: &Path) -> Result<Walk, WalkError> {
+    walk_docs_excluding(
+        project_root,
+        docs_root,
+        || true,
+        usize::MAX,
+        &super::nested::excluded(project_root),
+    )
+}
+
+/// То же с кооперативной остановкой, как [`walk_docs_indexed`].
+pub fn walk_docs_indexed_while(
+    project_root: &Path,
+    docs_root: &Path,
+    keep_going: impl Fn() -> bool,
+) -> Result<Walk, WalkError> {
+    walk_docs_excluding(
+        project_root,
+        docs_root,
+        keep_going,
+        usize::MAX,
+        &super::nested::excluded(project_root),
+    )
+}
+
+/// Обход с исключёнными папками: `excluded` — пути от корня проекта через `/`. Папка из списка
+/// остаётся в `dirs` (дерево показывает её пометкой), но внутрь не заходят: её файлов нет в `files`.
+pub fn walk_docs_excluding(
+    project_root: &Path,
+    docs_root: &Path,
+    keep_going: impl Fn() -> bool,
+    problem_limit: usize,
+    excluded: &[String],
+) -> Result<Walk, WalkError> {
     let docs_prefix = docs_prefix(docs_root)?;
     let start = project_root.join(docs_root);
     let unavailable =
@@ -96,6 +135,10 @@ pub fn walk_docs_bounded(
     }
 
     let mut walk = Walk::default();
+    // Весь корень документации лежит в области вложенного проекта: внешнему индексировать нечего.
+    if !docs_prefix.is_empty() && super::nested::is_excluded(&docs_prefix, excluded) {
+        return Ok(walk);
+    }
     // Папка на диске и её путь внутри корня документации (пустой для самого корня).
     let mut pending = vec![(start, String::new())];
     while let Some((dir, inner)) = pending.pop() {
@@ -162,8 +205,12 @@ pub fn walk_docs_bounded(
             }
             if kind.is_dir() {
                 if !name.starts_with('.') {
-                    walk.dirs.push(project_path(&name));
-                    pending.push((entry.path(), join(&inner, &name)));
+                    let path = project_path(&name);
+                    let skipped = super::nested::is_excluded(&path, excluded);
+                    walk.dirs.push(path);
+                    if !skipped {
+                        pending.push((entry.path(), join(&inner, &name)));
+                    }
                 }
             } else if kind.is_file() && is_indexed_name(&name, inner.is_empty()) {
                 walk.files.push(DocFile {
@@ -426,6 +473,37 @@ mod tests {
 
         assert_eq!(walk.files[0].size, 5);
         assert!(walk.files[0].modified.is_some());
+    }
+
+    #[test]
+    fn excluded_area_is_not_entered_but_its_folder_and_siblings_stay() {
+        let dir = tempfile::tempdir().unwrap();
+        for path in ["x/docs/a.md", "x/README.md", "y.md"] {
+            touch(dir.path(), path, b"# t");
+        }
+        let excluded = vec!["x/docs".to_string()];
+        let walk = walk_docs_excluding(dir.path(), Path::new("."), || true, usize::MAX, &excluded)
+            .unwrap();
+
+        assert_eq!(paths(&walk), ["x/README.md", "y.md"]);
+        assert_eq!(walk.dirs, ["x", "x/docs"]);
+    }
+
+    #[test]
+    fn docs_root_inside_an_excluded_area_walks_nothing() {
+        let dir = tempfile::tempdir().unwrap();
+        touch(dir.path(), "x/docs/a.md", b"# t");
+        let excluded = vec!["x".to_string()];
+        let walk = walk_docs_excluding(
+            dir.path(),
+            Path::new("x/docs"),
+            || true,
+            usize::MAX,
+            &excluded,
+        )
+        .unwrap();
+
+        assert!(walk.files.is_empty() && walk.dirs.is_empty());
     }
 
     #[test]

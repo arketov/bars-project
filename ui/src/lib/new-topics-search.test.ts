@@ -20,7 +20,7 @@ beforeEach(() => {
   app.topics.bind(project.path);
   app.tree = [];
   app.selected = new Set();
-  app.retrievalMode = 'hybrid'; app.count = null; app.minScore = null;
+  app.count = null;
   invoke.mockImplementation(async (method) => {
     if (method === "search") return found;
     if (method === "new_topics_mark_missing") return { topic_id: 1, created: true };

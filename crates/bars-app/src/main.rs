@@ -63,6 +63,8 @@ fn main() -> anyhow::Result<()> {
             commands::keybindings_get,
             commands::keybindings_save,
             commands::pick_folder,
+            commands::project_root_suggest,
+            commands::project_root_prepare,
             commands::open_path,
             commands::document_action,
             commands::document_editors,

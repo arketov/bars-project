@@ -17,7 +17,7 @@ async fn fixture() -> (tempfile::TempDir, WorkerHandler, Coordinator, String) {
     std::fs::create_dir_all(project.join("docs/module.v2")).unwrap();
     std::fs::write(project.join("docs/module.v2/a.md"), "# Альфа\n\nТекст.").unwrap();
     let worker = Worker::start(
-        WorkerConfig::new(temp.path().join("home")),
+        WorkerConfig::new(temp.path().join("home")).without_graph_pause(),
         FakeProvider::new("snapshots"),
     )
     .unwrap();

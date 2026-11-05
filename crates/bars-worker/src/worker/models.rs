@@ -1244,6 +1244,10 @@ pub mod fake {
         pub background: bool,
         /// Сколько «грузится» модель.
         pub load_delay: std::time::Duration,
+        /// Файлы «на диске»: ход скачивания 100 %, модель только грузится в память.
+        pub files_on_disk: bool,
+        /// Сколько «грузится» rerank-модель сверх `load_delay`.
+        pub rerank_load_delay: std::time::Duration,
     }
 
     impl FakeProvider {
@@ -1258,6 +1262,8 @@ pub mod fake {
                 fail_load: false,
                 background: false,
                 load_delay: std::time::Duration::ZERO,
+                files_on_disk: false,
+                rerank_load_delay: std::time::Duration::ZERO,
             }
         }
 
@@ -1326,6 +1332,10 @@ pub mod fake {
             self.background
         }
 
+        fn download_percent(&self, _id: &str, _settings: &Settings) -> Option<u8> {
+            self.files_on_disk.then_some(100)
+        }
+
         fn load_reranker(
             &self,
             _settings: &Settings,
@@ -1333,7 +1343,7 @@ pub mod fake {
             if self.fail_load {
                 return Err(RerankError::Load("нет файлов модели".into()));
             }
-            std::thread::sleep(self.load_delay);
+            std::thread::sleep(self.load_delay + self.rerank_load_delay);
             self.counters.rerank_loads.fetch_add(1, Ordering::SeqCst);
             Ok(Box::new(FakeReranker))
         }

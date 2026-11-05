@@ -55,19 +55,25 @@
     {:else}
       <span class="spacer"></span>
     {/if}
-    <label {title} class:directory={isDir}>
-      <input
-        type="checkbox"
-        aria-label={title}
-        checked={check === "all"}
-        indeterminate={check === "some"}
-        onchange={(event) => app.toggleNode(node.path, event.currentTarget.checked)}
-      />
+    <label {title} class:directory={isDir} class:nested-folder={!!node.nested}>
+      {#if !node.nested}
+        <input
+          type="checkbox"
+          aria-label={title}
+          checked={check === "all"}
+          indeterminate={check === "some"}
+          onchange={(event) => app.toggleNode(node.path, event.currentTarget.checked)}
+        />
+      {/if}
       {#if isDir}<span class="fi" style:color={color}><FolderIcon name={icon} size={14} /></span><!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions: клавиатура — Enter на строке. --><span class="nm folder" onclick={folderClick}>{node.path === "." ? "Корневые документы" : node.label}</span>{/if}
     </label>
     {#if !isDir && node.documentPath}
       {#if color}<span class="dot" style:background={color} aria-hidden="true"></span>{/if}
       <button class="nm filename" title={node.documentPath} onclick={() => app.openDocument({ path: node.documentPath!, title: node.label, first_line: 0, last_line: 0 })}>{node.label}</button>
+    {/if}
+    {#if node.nested}
+      <span class="nested-mark" data-testid="nested-mark">вложенный проект</span>
+      <button class="nested-open" onclick={() => void app.select(node.nested!.path)}>Открыть проект</button>
     {/if}
     <span class="ct" title={node.indexed === false ? "Ещё не в индексе" : undefined}>{node.indexed === false ? "—" : node.chunks}</span>
   </div>
@@ -99,4 +105,8 @@
   .ct { color: var(--faint); font-size: 11.5px; font-variant-numeric: tabular-nums; }
   .kids { margin-left: 15px; padding-left: 6px; border-left: 1px solid var(--line); }
   .spacer { width: 18px; flex: none; }
+  .nested-mark { color: var(--faint); font-size: 11.5px; flex: none; }
+  label.nested-folder .nm { color: var(--faint); }
+  .nested-open { border: 0; background: none; padding: 0 4px; color: var(--accent-text); font-size: 11.5px; cursor: pointer; flex: none; }
+  .nested-open:hover { text-decoration: underline; }
 </style>

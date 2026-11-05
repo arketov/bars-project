@@ -1,7 +1,8 @@
 // Типы ответов воркера: зеркало `crates/bars-protocol/src/methods.rs` (docs/architecture/protocol.md).
 
 export type ProjectState = "ready" | "indexing" | "reindex_required" | "unavailable";
-export type ScoreKind = "rerank" | "cosine";
+/** `none` — опоры нет (ни rerank, ни embed): порядок по словам, оценка не рисуется. */
+export type ScoreKind = "rerank" | "cosine" | "none";
 export type JobKind = "rebuild" | "check" | "files";
 export type JobPriority = "explicit" | "edit" | "watch" | "periodic";
 
@@ -45,6 +46,31 @@ export interface SearchHit {
   text: string;
   score: number;
   score_kind: ScoreKind;
+  /** Баллы лучшего куска раздела по сигналам (есть у результатов поиска, у `similar` нет). */
+  signals?: HitSignals;
+  /** Кусков в разделе и сколько из них нашлось; окно их не показывает. */
+  parts?: number;
+  parts_found?: number;
+}
+
+/** Баллы сигналов до весов: отсутствующий сигнал — его не было в этом поиске. */
+export interface HitSignals {
+  rerank?: number;
+  cosine?: number;
+  fulltext: number;
+  exact: number;
+  links?: number;
+}
+
+export interface ScoreWeights { cosine: number; fulltext: number; exact: number; links: number; fold_bonus: number }
+
+/** Как воркер понял запрос; есть только при операторах. */
+export interface UnderstoodQuery {
+  text?: string;
+  phrases?: string[];
+  excluded_words?: string[];
+  excluded_phrases?: string[];
+  paths?: string[];
 }
 
 export interface AppliedParams {
@@ -54,14 +80,20 @@ export interface AppliedParams {
   min_score: number;
   score_kind: ScoreKind;
   clamped: boolean;
+  weights?: ScoreWeights;
+  /** Какие сигналы посчитаны в этом поиске. */
+  signals?: string[];
 }
 
 export interface SearchOutput {
   results: SearchHit[];
   applied: AppliedParams;
+  understood?: UnderstoodQuery;
   indexing: boolean;
   pending: number;
   rerank_error?: string;
+  /** Смысловая часть не учтена: embed-модель не успела загрузиться, выдача только по словам. */
+  semantic_error?: string;
 }
 
 export interface ReadOutput {
@@ -227,8 +259,8 @@ export interface SearchDoc {
   rerank_candidates: number;
   results: number;
   results_reranked: number;
-  min_score_vector: number;
-  min_score_rerank: number;
+  /** Один порог на опорный сигнал (Т-24, OQ-266). */
+  min_score: number;
   agent_min_score: [number, number];
   max_results: number;
   max_candidates: number;

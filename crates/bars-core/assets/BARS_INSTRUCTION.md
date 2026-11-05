@@ -100,7 +100,6 @@ docs/
     requirements.md
     plan.md
   chats/<YYYY-MM-DD>-<topic>/   journal of one session
-    log.md
     handoff.md
 ```
 
@@ -131,7 +130,6 @@ Use the project's existing registers when provided; otherwise `backlog/` is the 
 
 | Document kind | Recommended location | What to write and example |
 |---|---|---|
-| Session event | `chats/<YYYY-MM-DD>-<topic>/log.md` | Up to about 400 characters for a finding, failed approach, changed plan or risky step; append without rereading. Example: why an experiment changed. |
 | Session handoff | `chats/<YYYY-MM-DD>-<topic>/handoff.md` | Done, Not done, Difficulties (omit when none), Next, headed in the user's language; at most a screen. Example: the check the next session should run. |
 | Folder index | That folder's `Index.md` | Each file/subfolder by name with when to read it, no links; update together with contents. Individual session folders are exempt. |
 
@@ -182,9 +180,9 @@ A feature is what the product can do from the user's point of view: «search», 
 
 A session the user talks to keeps a folder `docs/chats/<YYYY-MM-DD>-<topic>/`. The topic is 2–4 words in Latin letters joined by hyphens. Subagents do not keep a journal: their result goes to the journal of the main session.
 
-- **Start of a session**: find the latest `handoff.md` on your topic and read only it. Session folders are named `<YYYY-MM-DD>-<topic>`: list `chats/` with your file tools and take the newest folder on the topic; search ranks by meaning, not by date. Open `log.md` only when you need the detailed history.
-- **`log.md` — only for a reason**: a non-obvious finding that affects further work, an approach that did not work (what was tried and why abandoned), a change of plan, a risky step (deletion, migration, rewriting many files). At most about 400 characters per entry (a Markdown paragraph is one line of any length, so count characters, not lines), appended to the end of the file without reading it (for example with `>>`). Do not write the course of the work, code, command output or what the diff shows. A decision with reasons goes to `adr/`, a durable finding to `knowledge/`; the log keeps one line with a link.
-- **`handoff.md` — at the end of a session**, and on large milestones of a long one. Not longer than a screen. Sections: **Done** (what is ready and where it lies: files, commits), **Not done** (what is left of the task), **Difficulties** (what failed, what took the time, what is broken; omit when there were none), **Next** (where the next session starts). Section headings are written in the user's language (in Russian: «Сделано», «Не сделано», «Сложности», «Дальше»). When the session continues an earlier one on the same topic, the first line after the title links to that session's handoff: «Предыдущая сессия: [handoff](../<folder>/handoff.md)».
+- **Start of a session**: find the latest `handoff.md` on your topic and read only it. Session folders are named `<YYYY-MM-DD>-<topic>`: list `chats/` with your file tools and take the newest folder on the topic; search ranks by meaning, not by date.
+- **No `log.md`**: the journal of a session is one file, `handoff.md` (decision of the owner, 03-11-2026). A non-obvious finding that affects further work, an approach that did not work (what was tried and why abandoned), a change of plan and a risky step (deletion, migration, rewriting many files) go into its Difficulties. Do not write the course of the work, code, command output or what the diff shows. A decision with reasons goes to `adr/`, a durable finding to `knowledge/`; the handoff keeps one line with a link.
+- **`handoff.md` — at the end of a session**, on large milestones of a long one and when you find something non-obvious or abandon an approach, so the record survives an interrupted session. Not longer than a screen. Sections: **Done** (what is ready and where it lies: files, commits), **Not done** (what is left of the task), **Difficulties** (what failed, what took the time, what is broken, non-obvious findings, abandoned approaches with the reason; omit when there were none), **Next** (where the next session starts). Section headings are written in the user's language (in Russian: «Сделано», «Не сделано», «Сложности», «Дальше»). When the session continues an earlier one on the same topic, the first line after the title links to that session's handoff: «Предыдущая сессия: [handoff](../<folder>/handoff.md)».
 - Browser profiles, caches, temporary databases and tool dumps are not committed; raw measurement data needed later goes to `knowledge/<topic>-<date>/` next to the research.
 - The journal is history, not a description of the product. Search the `chats` module only when looking for what was done before and why.
 - No keys, tokens, passwords or personal data in the journal, even in command output.

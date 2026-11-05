@@ -1,26 +1,31 @@
 <script lang="ts">
   import { app } from "./app.svelte";
   import Banner from "./Banner.svelte";
-  import { decimal, documents, moduleLabel, plural, singleLine } from "./format";
+  import { documents, moduleLabel, plural, singleLine } from "./format";
   import Icon from "./Icon.svelte";
   import ResultCard from "./ResultCard.svelte";
   import SearchError from "./SearchError.svelte";
-  import TextResults from './TextResults.svelte';
-  import GraphSearchBundle from './GraphSearchBundle.svelte';
+  import { decimal } from "./format";
   import { touchedModules, searchScope } from "./tree";
   import { graphScope } from "./graph-scope.svelte";
-  import { label as uiLabel, labels, explanation } from "./labels";
+  import { dropToken, groupHits, hasOperators, markerFor, parseQuery, sectionsWord, withoutOperators } from "./search-results";
 
   const project = $derived(app.project);
   const blocked = $derived(project?.state === "reindex_required");
   const touched = $derived(touchedModules(app.tree, app.selected));
-  const running = $derived(app.activity?.running);
   const updating = $derived(
     !!project && project.state !== "reindex_required" && app.waitingOf(project.path) > 0 && app.documentsOf(project) > 0,
   );
   const percent = $derived(project ? app.progressOf(project.path) : null);
   const results = $derived(app.results);
+  const cards = $derived(groupHits(results?.results ?? []));
+  const sectionCount = $derived(results?.results.length ?? 0);
+  const marker = $derived(markerFor(app.searchedQuery, results?.understood));
+  const tokens = $derived(parseQuery(app.query));
+  const operators = $derived(tokens.filter((t) => t.kind !== "word"));
   let field = $state<HTMLTextAreaElement | null>(null);
+  let mirror = $state<HTMLDivElement | null>(null);
+  let helpOpen = $state(false);
   /** Область, пришедшая из графа («Искать в подграфе»): над поиском видна, пока галочки дерева не тронуты вручную. */
   const fromGraph = $derived(graphScope.active);
   /** Выдача на экране считана в другой области, чем действует сейчас. */
@@ -44,33 +49,54 @@
   }
 
   function onKey(event: KeyboardEvent) {
+    if (event.key === "Escape" && helpOpen) { helpOpen = false; return; }
     if (event.key !== "Enter" || event.isComposing || event.keyCode === 229) return;
     event.preventDefault();
     if (!event.isComposing && app.query.trim()) void app.search();
   }
 
   function onInput(event: Event) {
-    const field = event.currentTarget as HTMLTextAreaElement;
-    const clean = singleLine(field.value);
-    if (clean !== field.value) {
-      field.value = clean;
+    const input = event.currentTarget as HTMLTextAreaElement;
+    const clean = singleLine(input.value);
+    if (clean !== input.value) {
+      input.value = clean;
       app.query = clean;
     }
   }
 
+  /** Поле рисует операторы поверх прозрачного текста: фраза, исключение, папка — цветом и жирностью. */
+  const painted = $derived.by(() => {
+    const parts: { text: string; kind: string }[] = [];
+    let pos = 0;
+    for (const token of tokens) {
+      if (token.start > pos) parts.push({ text: app.query.slice(pos, token.start), kind: "word" });
+      parts.push({ text: token.text, kind: token.kind });
+      pos = token.end;
+    }
+    if (pos < app.query.length) parts.push({ text: app.query.slice(pos), kind: "word" });
+    return parts;
+  });
+  const syncScroll = () => { if (mirror && field) mirror.scrollLeft = field.scrollLeft; };
+  const CHIP_LABEL: Record<string, string> = { phrase: "фраза", exclude: "исключить", path: "в папке" };
+
   const parameterSummary = $derived([
-    app.retrievalMode !== 'hybrid' ? uiLabel('searchMode', app.retrievalMode).text : '',
-    app.retrievalMode === 'mix' && !app.includeRelated ? 'без связанных источников' : '',
-    app.count !== null ? app.shownCount + ' рез.' : '',
-    app.textSearch.caseSensitive ? 'регистр' : '',
-    app.textSearch.regex ? 'выражение' : '',
-    app.textSearch.pathFilter.trim() ? 'путь' : '',
-  ].filter(Boolean).join(' · '));
-  const emptyText = $derived(!!app.textSearch.output && !app.textSearch.loading && !app.textSearch.error
-    && !app.textSearch.output.documents.length && app.textSearch.output.docs_total === 0 && app.textSearch.output.hits_total === 0
-    && !app.textSearch.output.skipped.length && !app.textSearch.output.truncated);
-  const resultsWord = (n: number) => plural(n, ["результат", "результата", "результатов"]);
+    app.count !== null ? app.shownCount + " рез." : "",
+    app.showScores ? "баллы" : "",
+  ].filter(Boolean).join(" · "));
+  const docsWord = (n: number) => plural(n, ["документ", "документа", "документов"]);
+  const ranBy = $derived(results ? (results.applied.score_kind === "rerank" ? "оценка модели" : results.applied.score_kind === "cosine" ? "близость по смыслу" : "только слова запроса") : "");
+  const emptyHasPhrase = $derived(hasOperators(app.searchedQuery, "phrase"));
+  const emptyHasExclude = $derived(hasOperators(app.searchedQuery, "exclude"));
+  const emptyHasPath = $derived(hasOperators(app.searchedQuery, "path"));
+  const emptyScope = $derived(touched.length ? `в области «${scopeLabel()}»` : emptyHasPath ? "в указанной папке" : "во всём проекте");
+
+  function wholeProject() {
+    if (emptyHasPath) app.query = withoutOperators(app.searchedQuery, ["path"]);
+    void app.searchWhole();
+  }
 </script>
+
+<svelte:window onclick={(event) => { if (helpOpen && !(event.target as Element).closest?.(".help")) helpOpen = false; }} />
 
 <main>
   <div class="top">
@@ -81,41 +107,60 @@
       </div>
     {/if}
     <div class="ask">
-      <textarea
-        bind:this={field}
-        aria-label="Поисковый запрос"
-        rows="1"
-        wrap="off"
-        placeholder="Что найти в документации — например, «как считается порог релевантности»"
-        bind:value={app.query}
-        onkeydown={onKey}
-        oninput={onInput}
-      ></textarea>
-      <div class="askbar">
-        <div class="scope">
-          {#if fromGraph}
-            Искать в: <b>подграфе из графа</b>
-          {:else if touched.length}
-            Искать в: <b>{scopeLabel()}</b>
-          {:else}
-            Искать во <b>всём проекте</b>
-          {/if}
+      <div class="qrow">
+        <div class="qfield" class:empty-q={!app.query}>
+          <div class="mirror" bind:this={mirror} aria-hidden="true">{#each painted as part, i (i)}<span class={"tok-" + part.kind}>{part.text}</span>{/each}</div>
+          <textarea
+            bind:this={field}
+            aria-label="Поисковый запрос"
+            rows="1"
+            wrap="off"
+            spellcheck="false"
+            placeholder={'Спросите словами или уточните: "точная фраза", -слово, папка:инструкции'}
+            bind:value={app.query}
+            onkeydown={onKey}
+            oninput={onInput}
+            onscroll={syncScroll}
+          ></textarea>
         </div>
-        {#if !app.viewer}
-          <span class="sep"></span>
-          <span class="kbdhint"><kbd>Enter</kbd></span>
-        {/if}
+        <span class="help">
+          <button class="ghost sm iconbtn" aria-label="Как уточнить запрос" title="Как уточнить запрос" aria-expanded={helpOpen} onclick={() => (helpOpen = !helpOpen)}>?</button>
+          {#if helpOpen}
+            <div class="pop" role="dialog" aria-label="Как уточнить запрос">
+              <b>Уточнить запрос</b>
+              <table><tbody>
+                <tr><td><code>"возврат средств"</code></td><td>слова именно в таком порядке; в выдаче только разделы с этой фразой</td></tr>
+                <tr><td><code>-скидка</code></td><td>исключить разделы со словом (или <code>-"фраза"</code>)</td></tr>
+                <tr><td><code>папка:инструкции</code></td><td>искать только в папке; то же <code>path:</code>. С пробелом — в кавычках</td></tr>
+              </tbody></table>
+              <p>Всё остальное — обычные слова: можно писать вопрос как есть. Дефис в слове («по-русски», «274-ФЗ») и «-5» операторами не считаются. <code>папка:</code> сужает то, что отмечено в дереве, а не расширяет.</p>
+            </div>
+          {/if}
+        </span>
         <button class="btn go" disabled={!app.query.trim()} onclick={() => app.search()}>
           Найти <Icon name="arrow-right" size={15} width={2.4} />
         </button>
       </div>
+      <div class="qmeta">
+        {#if operators.length}
+          <span>Понято как:</span>
+          {#each operators as token (token.start)}
+            <span class="chip {token.kind}">{CHIP_LABEL[token.kind]}: {token.value} <button aria-label="Убрать из запроса" title="Убрать из запроса" onclick={() => void app.searchAs(dropToken(app.query, token))}>×</button></span>
+          {/each}
+          <span class="sp"></span><span>Остальное — слова вопроса</span>
+        {:else}
+          <span class="scope">
+            {#if fromGraph}Искать в: <b>подграфе из графа</b>
+            {:else if touched.length}Искать в: <b>{scopeLabel()}</b>
+            {:else}Искать во <b>всём проекте</b>{/if}
+          </span>
+          <span class="sp"></span>
+          <span class="muted">Подсказка: <span class="mono">"фраза"</span> · <span class="mono">-слово</span> · <span class="mono">папка:имя</span></span>
+        {/if}
+      </div>
       <details class="query-parameters">
         <summary>Параметры{#if parameterSummary}{' · '}{parameterSummary}{/if}</summary>
         <div class="search-options">
-          <label class="retrieval-mode">
-            <span>Поиск</span>
-            <span class="mode-control"><select aria-label="Режим поиска" disabled={blocked || app.searching} bind:value={app.retrievalMode}>{#each Object.entries(labels.searchMode) as [mode, name] (mode)}<option value={mode} title={uiLabel("searchMode", mode).hint}>{name.text}</option>{/each}</select><Icon name="chevron-down" size={12} /></span>
-          </label>
           <div class="count" title="Сколько результатов вернуть. По умолчанию — из настроек">
             Результатов
             <span class="stepper">
@@ -125,14 +170,7 @@
               <button class="link reset" onclick={() => (app.count = null)}>по умолчанию</button>
             {/if}
           </div>
-        </div>
-        {#if app.retrievalMode === 'mix'}<label class="related-option"><input type="checkbox" bind:checked={app.includeRelated} />Добавлять связанные источники</label>{/if}
-        {#if app.retrievalMode === 'mix'}<p class="parameter-caption">Эксперимент: улучшение порядка результатов не подтверждено.</p>{/if}
-        <p class="parameter-caption">Только в тексте: регистр, выражение и путь</p>
-        <div class="text-options">
-          <button class="ghost sm" aria-label="Учитывать регистр" aria-pressed={app.textSearch.caseSensitive} onclick={() => app.textSearch.caseSensitive = !app.textSearch.caseSensitive}>Aa</button>
-          <button class="ghost sm" aria-label="Регулярное выражение" aria-pressed={app.textSearch.regex} onclick={() => app.textSearch.regex = !app.textSearch.regex}>.*</button>
-          <input aria-label="Фильтр пути текстового поиска" placeholder="Путь: features/ или features/*.md" bind:value={app.textSearch.pathFilter} onkeydown={onKey} />
+          <label class="toggle"><input type="checkbox" checked={app.showScores} onchange={(event) => app.setShowScores(event.currentTarget.checked)} /> показать баллы</label>
         </div>
       </details>
     </div>
@@ -146,14 +184,11 @@
           {#each app.searchUnsaved as item}<p>Не записано: <button class="link" onclick={() => app.openSearchUnsaved(item.path)}>{item.path}</button> — {item.reason}{item.reason.endsWith(".") ? "" : "."} Результаты по записанной версии.</p>{/each}
         </div>
       {/if}
-      {#if !emptyText}<TextResults />{/if}
-      {#if app.searchedQuery}<h2 class="semantic-title">По смыслу</h2>{/if}
-      {#if app.searching}<p role="status">Ищем…</p>{/if}
       {#if blocked && project}
         <Banner
           kind="warn"
           title="Проект {project.name} нужно переиндексировать"
-          text="Индекс построен моделью {app.status?.model.index ?? '—'}, а в настройках — {app.status?.model.settings ?? '—'}. Поиск по смыслу ждёт переиндексации; «В тексте» читает файлы и доступен."
+          text="Индекс построен моделью {app.status?.model.index ?? '—'}, а в настройках — {app.status?.model.settings ?? '—'}. Поиск ждёт переиндексации."
         >
           <button class="btn sm" onclick={() => (app.consentOpen = true)}>Переиндексировать…</button>
         </Banner>
@@ -169,32 +204,46 @@
             <button class="ghost sm" onclick={() => app.openIndexing()}>Подробнее</button>
           </Banner>
         {/if}
-        {#if app.searchError}
+        {#if app.searching}
+          {#if app.waitingModel}
+            <Banner
+              kind="acc"
+              title="Загружается модель поиска"
+              text="Поиск подождёт её — обычно несколько секунд, самое долгое — 20. Если не дождётся, найдёт по словам и скажет об этом."
+            >
+              <button class="ghost sm" onclick={() => app.searchWords()}>Искать по словам сейчас</button>
+            </Banner>
+            <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+          {:else}
+            <p role="status" class="muted">Ищем…</p>
+          {/if}
+        {:else if app.searchError}
           <SearchError error={app.searchError} />
         {:else if results}
-          {#if app.graphSearch}
-            {#if app.graphSearch.requested_mode !== app.graphSearch.applied_mode}
-              <div class="graph-search-info" role="status">Запрошен режим «{uiLabel("searchMode", app.graphSearch.requested_mode).text}», применён «{uiLabel("searchMode", app.graphSearch.applied_mode).text}».{#if app.graphSearch.fallback_reason}<p>Причина: <span title={app.graphSearch.fallback_reason}>{explanation("fallback", app.graphSearch.fallback_reason).text}</span></p>{/if}</div>
-            {/if}
-            {#each [app.graphSearch.related,app.graphSearch.graph_results].filter(Boolean) as graph}
-              {#if graph}<GraphSearchBundle {graph} related={graph === app.graphSearch.related} />{/if}
-            {/each}
+          {#if results.semantic_error}
+            <Banner
+              kind="warn"
+              title="Результаты только по словам запроса"
+              text="Модель поиска не успела загрузиться, поэтому смысл вопроса не учтён: порядок мог бы быть точнее. Операторы работают."
+            >
+              <button class="ghost sm" onclick={() => app.search()}>Повторить с моделью</button>
+            </Banner>
           {/if}
           {#if results.rerank_error}
             <Banner
               kind="warn"
-              title="Оценка моделью не выполнена — выдача по близости"
-              text="{results.rerank_error}. Оценка теперь по близости, порог для неё другой ({decimal(results.applied.min_score)})."
+              title="Оценка моделью не выполнена — порядок по близости"
+              text="{results.rerank_error}."
             >
               <button class="ghost sm" onclick={() => app.search()}>Повторить оценку моделью</button>
             </Banner>
           {/if}
-          {#if results.results.length}
-            <div class="meta">
-              <span><b>{results.results.length}</b> {resultsWord(results.results.length)}</span>
-              <span>{results.applied.score_kind === "rerank" ? "Порядок: по оценке модели" : "Порядок: гибридный"}</span>
-              <span>порог <b>{decimal(results.applied.min_score)}</b></span>
-              <span>{app.elapsedMs} мс</span>
+          {#if cards.length}
+            <div class="summary">
+              <b>{cards.length} {docsWord(cards.length)}, {sectionCount} {sectionsWord(sectionCount)}</b>
+              {#if app.showScores}
+                <span class="tech">{results.applied.score_kind === "none" ? "без опоры · порога нет" : `порог ${decimal(results.applied.min_score)} · опора: ${ranBy}`} · {app.elapsedMs} мс</span>
+              {/if}
               {#if app.displayed}
                 <span class="missing">
                   {#if app.markedRequest === app.displayed.requestId}
@@ -205,22 +254,9 @@
                 </span>
               {/if}
             </div>
-            <p class="score-help muted">
-              {#if results.applied.score_kind === "cosine"}
-                Полоски показывают смысловую близость, а не вероятность правильного ответа. Гибридный порядок учитывает также совпадения слов и точные идентификаторы; близость может возрастать вниз по списку.
-              {:else}
-                Полоски показывают оценки модели, а не вероятность правильного ответа.
-              {/if}
-            </p>
-            {#each results.results as hit, index (hit.path + ":" + hit.first_line)}
-              <ResultCard {hit} rank={index + 1} startOpen={index === 0} />
+            {#each cards as card (card.path)}
+              <ResultCard {card} {marker} />
             {/each}
-          {:else if app.graphSearch?.applied_mode === 'graph'}
-            {#if app.graphSearch.graph_results?.resolution === 'ambiguous'}
-              <p>Имя неоднозначно. Выберите объект и источник в графе.</p>
-            {:else if !app.graphSearch.graph_results?.items.length}
-              <p>Связи в выбранной области и пределах не найдены. Смысловой слой частичный; отсутствие связи не доказано.</p>
-            {/if}
           {:else if results.indexing && project && app.documentsOf(project) === 0}
             <div class="empty">
               <div class="art"><Icon name="search" size={30} width={2} /></div>
@@ -231,38 +267,25 @@
           {:else}
             <div class="empty none">
               <div class="art low"><Icon name="search" size={30} width={2} /></div>
-              <h1>Ничего не найдено</h1>
-              <p>
-                {#if app.emptyInfo?.best != null}
-                  Подходящие разделы есть, но их оценка ниже порога — <b>{decimal(results.applied.min_score)}</b>.
-                  Лучший кандидат получил {decimal(app.emptyInfo.best)}.
-                {:else}
-                  Ни один раздел не набрал порог — <b>{decimal(results.applied.min_score)}</b>.
-                {/if}
-              </p>
+              <h1>Ничего не нашлось</h1>
+              <p>По запросу <b>«{app.searchedQuery}»</b> {emptyScope} совпадений нет.</p>
               <ul>
-                {#if touched.length}
-                  <li><b>Снимите галочки с модулей</b> — сейчас поиск идёт только по {touched.length} из {app.tree.length}.</li>
-                {/if}
+                {#if emptyHasPhrase}<li>Уберите кавычки: без них слова ищутся не обязательно подряд.</li>{/if}
+                {#if emptyHasExclude}<li>Уберите исключение: оно могло вычеркнуть нужный раздел.</li>{/if}
+                {#if touched.length || emptyHasPath}<li>Расширьте область: сейчас поиск идёт не по всему проекту.</li>{/if}
                 <li>Переформулируйте запрос: назовите термин, как он записан в документах.</li>
-                {#if app.emptyInfo?.lowest != null}
-                  <li>Понизьте порог для этого запроса — появятся результаты с меньшей оценкой.</li>
-                {/if}
               </ul>
               <div class="acts">
-                {#if touched.length}<button class="btn" onclick={() => app.searchWhole()}>Искать по всему проекту</button>{/if}
-                {#if app.emptyInfo?.lowest != null}
-                  <button class="ghost" onclick={() => app.searchWithThreshold(app.emptyInfo!.lowest!)}>
-                    Порог {decimal(app.emptyInfo.lowest)} для этого запроса
-                  </button>
-                {/if}
+                {#if emptyHasPhrase}<button class="ghost" onclick={() => app.searchAs(withoutOperators(app.searchedQuery, ["phrase"]))}>Без кавычек</button>{/if}
+                {#if emptyHasExclude}<button class="ghost" onclick={() => app.searchAs(withoutOperators(app.searchedQuery, ["exclude"]))}>Без исключения</button>{/if}
+                {#if touched.length || emptyHasPath}<button class="ghost" onclick={wholeProject}>Весь проект</button>{/if}
               </div>
-              <p class="faint applied">
-                Применено: {results.applied.results} {resultsWord(results.applied.results)} · порог {decimal(results.applied.min_score)} · {results.applied.score_kind === "rerank" ? uiLabel("score", "rerank").text : uiLabel("score", "cosine").text} · {app.elapsedMs} мс
-              </p>
+              {#if app.showScores}
+                <p class="faint applied">Применено: порог {decimal(results.applied.min_score)} · {ranBy} · {app.elapsedMs} мс</p>
+              {/if}
             </div>
           {/if}
-        {:else if !app.searching}
+        {:else}
           <div class="start muted">
             {#if project && app.documentsOf(project) > 0}
               В проекте {documents(app.documentsOf(project))}. Введите запрос и нажмите «Найти».
@@ -270,7 +293,6 @@
           </div>
         {/if}
       {/if}
-      {#if emptyText}<p class="text-empty" role="status">В тексте: вхождений не найдено</p>{/if}
     </div>
   </div>
 </main>
@@ -278,36 +300,47 @@
 <style>
   .save-warning { border: 1px solid var(--mid); border-radius: 6px; padding: 8px 10px; margin-bottom: 10px; font-size: 12px; overflow-wrap: anywhere; }
   .save-warning p { margin: 0; }
-  .text-options {display:flex; gap:4px; align-items:center; margin-top:6px;}
-  .text-options button[aria-pressed="true"] {background:var(--accent-soft); color:var(--accent-text);}
-  .text-options input {min-width:0; flex:1; font-size:12px; padding:3px 6px; border:1px solid var(--line); border-radius:4px; background:var(--panel-2); color:var(--text);}
-  .semantic-title {font-size:13px; margin:8px 0;}
   main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
   .top { padding: 8px 12px; width: 100%; max-width: 664px; margin: 0 auto; }
   .ask { max-width: 920px; margin: 0 auto; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); padding: 12px 12px 10px 16px; transition: border-color .15s, box-shadow .15s; }
   .ask:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow); }
-  textarea { width: 100%; border: 0; outline: none; background: transparent; resize: none; overflow: hidden; font-size: 16px; line-height: 1.5; min-height: 26px; display: block; }
+  .qrow { display: flex; gap: 10px; align-items: center; }
+  .qfield { position: relative; flex: 1; min-width: 0; height: 26px; }
+  .mirror, textarea { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; font: 16px/26px var(--font, inherit); white-space: pre; overflow: hidden; letter-spacing: normal; }
+  .mirror { color: var(--text); pointer-events: none; }
+  textarea { background: transparent; outline: none; resize: none; color: transparent; caret-color: var(--text); display: block; }
   textarea::placeholder { color: var(--faint); }
-  .askbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; padding: 2px 0; }
-  .askbar > :not(.scope) { flex-shrink: 0; }
-  .scope { flex: 1 1 180px; color: var(--muted); font-size: 12.5px; min-width: 0; overflow-wrap: anywhere; }
-  .search-options { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-  .retrieval-mode { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12.5px; }
-  .mode-control { position: relative; display: flex; align-items: center; }
-  .mode-control :global(svg) { position: absolute; right: 8px; pointer-events: none; }
-  .mode-control select { appearance: none; background: var(--panel-2); color: var(--text); border: 1px solid var(--line-2); border-radius: 8px; padding: 3px 26px 3px 9px; max-width: 100%; cursor: pointer; }
-  .mode-control select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .related-option { display: flex; align-items: center; gap: 7px; margin-top: 10px; color: var(--muted); font-size: 12.5px; }
+  .qfield.empty-q .mirror { display: none; }
+  .tok-exclude { color: var(--bad); font-weight: 600; }
+  .tok-phrase { color: var(--accent-text); font-weight: 600; }
+  .tok-path { color: var(--good); font-weight: 600; }
+  .qmeta { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); font-size: 12.5px; color: var(--muted); }
+  .sp { flex: 1; }
+  .scope { min-width: 0; overflow-wrap: anywhere; }
   .scope b { color: var(--text); font-weight: 600; }
-  .kbdhint { color: var(--faint); font-size: 12px; white-space: nowrap; }
-  .go { padding: 9px 18px; border-radius: 10px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 20px; border: 1px solid var(--line); background: var(--panel-2); font-size: 12px; font-weight: 600; color: var(--muted); }
+  .chip.exclude { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
+  .chip.phrase { background: var(--accent-soft); color: var(--accent-text); border-color: transparent; }
+  .chip.path { background: var(--good-soft); color: var(--good); border-color: transparent; }
+  .chip button { border: 0; background: none; padding: 0; color: inherit; line-height: 1; font-size: 14px; }
+  .help { position: relative; }
+  .iconbtn { width: 28px; height: 28px; border-radius: 50%; padding: 0; font-weight: 700; }
+  .pop { position: absolute; right: 0; top: calc(100% + 8px); width: 420px; max-width: calc(100vw - 40px); background: var(--panel); border: 1px solid var(--line-2); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.2); padding: 12px 14px; z-index: 30; font-size: 13px; color: var(--text); text-align: left; }
+  .pop table { width: 100%; border-collapse: collapse; }
+  .pop td { padding: 5px 6px; border-bottom: 1px dashed var(--line); vertical-align: top; }
+  .pop tr:last-child td { border: 0; }
+  .pop code { font: 12px var(--mono); background: var(--panel-2); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; white-space: nowrap; }
+  .pop p { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+  .go { padding: 9px 18px; border-radius: 10px; flex-shrink: 0; }
+  .search-options { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 10px; }
+  .toggle { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--muted); cursor: pointer; user-select: none; }
   .graph-scope { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 0 0 6px; padding: 5px 10px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--accent-soft); font-size: 12px; }
   .graph-scope .link { margin-left: auto; }
   .results { flex: 1; overflow-y: auto; padding: 4px 12px 60px; min-height: 0; }
   .wrap { max-width: 640px; margin: 0 auto; }
-  .score-help { font-size: 12px; line-height: 1.5; margin: -6px 2px 14px; }
-  .meta { color: var(--muted); font-size: 12.5px; margin: 6px 2px 14px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
-  .meta b { color: var(--text); font-weight: 600; }
+  .summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 16px 2px 8px; color: var(--muted); font-size: 12.5px; }
+  .summary b { color: var(--text); font-size: 13px; }
+  .tech { font-family: var(--mono); font-size: 11.5px; color: var(--faint); }
   .missing { margin-left: auto; }
   .marked { display: inline-flex; align-items: center; gap: 5px; color: var(--good); }
   .missing .link { font-size: 12.5px; }
@@ -317,12 +350,13 @@
   .stepper button:hover { color: var(--accent-text); }
   .stepper b { min-width: 18px; text-align: center; color: var(--text); font-variant-numeric: tabular-nums; }
   .reset { color: var(--faint); font-size: 11.5px; }
-  .sep { width: 1px; height: 20px; background: var(--line); }
   .hint { font-size: 12.5px; }
   .mini { font-size: 12.5px; }
   .start { padding: 40px 0; text-align: center; }
   .empty.none { padding-top: 44px; }
   .applied { margin-top: 14px; font-size: 12.5px; }
+  .skeleton { height: 78px; border-radius: var(--radius); background: linear-gradient(90deg, var(--panel) 25%, var(--panel-2) 50%, var(--panel) 75%); background-size: 200% 100%; border: 1px solid var(--line); margin-bottom: 10px; animation: shimmer 1.4s linear infinite; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
   @media (max-width: 760px) {
     .top { padding: 16px 12px 12px; }
     .results { padding: 4px 12px 64px; }
@@ -330,7 +364,4 @@
   .query-parameters { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 7px; font-size: 12px; }
   .query-parameters summary { cursor: pointer; color: var(--muted); overflow-wrap: anywhere; }
   .query-parameters summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .query-parameters .search-options { margin-top: 10px; }
-  .parameter-caption { font-size: 11px; color: var(--muted); margin: 10px 0 4px; }
-  .text-empty { font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
 </style>

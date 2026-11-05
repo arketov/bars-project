@@ -110,6 +110,8 @@ pub(super) struct SearchOverrides {
     rerank_candidates: Option<usize>,
     results: Option<usize>,
     results_reranked: Option<usize>,
+    min_score: Option<f32>,
+    /// Прежние пороги: читаются при обновлении и переносятся в `min_score` (ADR-0007, OQ-266).
     min_score_vector: Option<f32>,
     min_score_rerank: Option<f32>,
     agent_min_score: Option<[f32; 2]>,
@@ -211,6 +213,7 @@ impl SearchOverrides {
         ] {
             positive(file, key, value)?;
         }
+        score(file, "search.min_score", self.min_score)?;
         score(file, "search.min_score_vector", self.min_score_vector)?;
         score(file, "search.min_score_rerank", self.min_score_rerank)?;
         if let Some([low, high]) = self.agent_min_score {
@@ -224,7 +227,17 @@ impl SearchOverrides {
         Ok(())
     }
 
-    pub(super) fn apply(&self, target: &mut SearchSettings) {
+    /// Единый порог: `min_score`; без него — прежний порог того вида оценки, который сейчас в ходу
+    /// (rerank включён — `min_score_rerank`, иначе `min_score_vector`), затем другой из двух.
+    fn threshold(&self, rerank_enabled: bool) -> Option<f32> {
+        self.min_score.or(if rerank_enabled {
+            self.min_score_rerank.or(self.min_score_vector)
+        } else {
+            self.min_score_vector.or(self.min_score_rerank)
+        })
+    }
+
+    pub(super) fn apply(&self, target: &mut SearchSettings, rerank_enabled: bool) {
         macro_rules! set {
             ($($field:ident),*) => {$(
                 if let Some(value) = self.$field {
@@ -237,12 +250,13 @@ impl SearchOverrides {
             rerank_candidates,
             results,
             results_reranked,
-            min_score_vector,
-            min_score_rerank,
             max_results,
             max_candidates,
             max_rerank_candidates
         );
+        if let Some(value) = self.threshold(rerank_enabled) {
+            target.min_score = value;
+        }
         if let Some([low, high]) = self.agent_min_score {
             target.agent_min_score = (low, high);
         }
@@ -343,7 +357,7 @@ impl UserFile {
             rerank.apply(&mut settings.rerank);
         }
         if let Some(search) = &self.search {
-            search.apply(&mut settings.search);
+            search.apply(&mut settings.search, settings.rerank.enabled);
         }
         if let Some(chunking) = &self.chunking {
             chunking.apply(&mut settings.chunking);

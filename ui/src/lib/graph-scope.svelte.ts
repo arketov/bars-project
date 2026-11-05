@@ -9,11 +9,7 @@ interface SavedSearch {
   query: string;
   results: typeof app.results;
   displayed: typeof app.displayed;
-  graphSearch: typeof app.graphSearch;
   searchedQuery: string;
-  emptyInfo: typeof app.emptyInfo;
-  text: typeof app.textSearch.output;
-  textError: string;
   scroll: number;
 }
 
@@ -72,11 +68,7 @@ class GraphScope {
     app.query = p.query;
     app.results = p.results;
     app.displayed = p.displayed;
-    app.graphSearch = p.graphSearch;
     app.searchedQuery = p.searchedQuery;
-    app.emptyInfo = p.emptyInfo;
-    app.textSearch.output = p.text;
-    app.textSearch.error = p.textError;
     const host = this.scrollHost;
     if (host) requestAnimationFrame(() => { host.scrollTop = p.scroll; });
     this.focusTick++;
@@ -88,11 +80,7 @@ class GraphScope {
       query: app.query,
       results: app.results,
       displayed: app.displayed,
-      graphSearch: app.graphSearch,
       searchedQuery: app.searchedQuery,
-      emptyInfo: app.emptyInfo,
-      text: app.textSearch.output,
-      textError: app.textSearch.error,
       scroll: this.scrollHost?.scrollTop ?? 0,
     };
   }

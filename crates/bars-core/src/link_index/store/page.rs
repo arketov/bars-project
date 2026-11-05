@@ -81,7 +81,7 @@ impl LinkIndex {
             .keys()
             .map(|p| (relative_to_docs(p, &prefix).to_owned(), p.clone()))
             .collect();
-        let set = DocSet::new(by_docs.keys().cloned());
+        let set = DocSet::new(by_docs.keys().cloned()).with_excluded(self.excluded_areas()?);
         let own = relative_to_docs(path, &prefix);
         let sql = if incoming {
             "SELECT src,line,start,end,kind,raw_target,text,fragment FROM links ORDER BY src,line,start,id"

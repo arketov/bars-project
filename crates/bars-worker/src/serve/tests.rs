@@ -7,7 +7,7 @@ use tempfile::TempDir;
 #[tokio::test]
 async fn default_worker_does_not_enable_client_profile_writes() {
     let home = TempDir::new().unwrap();
-    let config = WorkerConfig::new(home.path().join(".bars"));
+    let config = WorkerConfig::new(home.path().join(".bars")).without_graph_pause();
     // Проверка до serve: старая версия не должна успеть записать настоящий профиль.
     assert!(config.install_env.is_none());
     let endpoint = Endpoint::named("default-worker-no-client-profile");
@@ -33,7 +33,7 @@ async fn default_worker_does_not_enable_client_profile_writes() {
 #[allow(clippy::await_holding_lock)] // Барьер намеренно удерживает фоновую запись во время IPC.
 async fn blocked_refresh_does_not_delay_ipc_and_shutdown_waits_for_it() {
     let home = TempDir::new().unwrap();
-    let mut config = WorkerConfig::new(home.path().join(".bars"));
+    let mut config = WorkerConfig::new(home.path().join(".bars")).without_graph_pause();
     let env = crate::clients::InstallEnv {
         home: home.path().to_path_buf(),
         mcp_exe: "/new/bars-mcp".into(),

@@ -111,7 +111,7 @@ pub struct TreeOut {
 /// Дерево с диска: те же файлы, что видит индексатор, и папки (в том числе пустые).
 pub fn read_tree(project: &Path, docs_root: &str) -> Result<TreeOut, TreeError> {
     roots(project, docs_root)?;
-    let walk = bars_core::indexing::walk::walk_docs(project, Path::new(docs_root))
+    let walk = bars_core::indexing::walk::walk_docs_indexed(project, Path::new(docs_root))
         .map_err(|_| TreeError::DocsRootUnavailable)?;
     let files: Vec<TreeFile> = walk
         .files

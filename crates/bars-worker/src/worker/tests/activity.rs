@@ -116,6 +116,52 @@ async fn inactive_checks_do_not_queue_unchanged_projects_or_embed() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn window_registration_does_not_place_the_instruction_but_agent_work_does() {
+    let env = Env::new();
+    let project = env.project("window", &[("a.md", DOC)]);
+    let file = project.join("docs/BARS_INSTRUCTION.md");
+    let worker = env.start();
+    // Окно и CLI: регистрация и полная проверка файл не создают (Т-8, OQ-252).
+    worker.register(&project).unwrap();
+    idle(&worker).await;
+    assert!(!file.exists());
+    // Первый вызов MCP по проекту (или хук сессии) кладёт файл.
+    worker.observe_mcp(&project).unwrap();
+    assert_eq!(
+        fs::read_to_string(&file).unwrap(),
+        bars_core::instruction::INSTRUCTION_TEXT
+    );
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn session_start_places_the_instruction_and_existing_files_keep_hash_sync() {
+    let env = Env::new();
+    let project = env.project("hooked", &[("a.md", DOC)]);
+    let old = env.project("old", &[("b.md", DOC)]);
+    let old_file = old.join("docs/BARS_INSTRUCTION.md");
+    fs::write(&old_file, "старая инструкция").unwrap();
+    let worker = env.start();
+    // Без `.git` корень проекта — сам `cwd`: сессия начинается в корне, где лежит `docs/`.
+    assert_eq!(
+        worker.session_start(&project).unwrap(),
+        Some(project.clone())
+    );
+    assert_eq!(
+        fs::read_to_string(project.join("docs/BARS_INSTRUCTION.md")).unwrap(),
+        bars_core::instruction::INSTRUCTION_TEXT
+    );
+    // Проект, где файл уже есть, сверяется по хешу при проверке, без вызова агента.
+    worker.register(&old).unwrap();
+    idle(&worker).await;
+    assert_eq!(
+        fs::read_to_string(&old_file).unwrap(),
+        bars_core::instruction::INSTRUCTION_TEXT
+    );
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn mcp_renews_one_hour_without_scanning_each_request() {
     let env = Env::new();
     let project = env.project("mcp", &[("a.md", DOC)]);

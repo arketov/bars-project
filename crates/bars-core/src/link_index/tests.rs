@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::fs;
 use std::path::Path;
 
@@ -332,4 +333,67 @@ fn limits_ten_thousand_documents() {
         "размер файла: {} байт",
         fs::metadata(store_path(dir.path())).unwrap().len()
     );
+}
+
+fn set(paths: &[&str]) -> HashSet<String> {
+    paths.iter().map(|path| path.to_string()).collect()
+}
+
+fn strings(paths: &[&str]) -> Vec<String> {
+    paths.iter().map(|path| path.to_string()).collect()
+}
+
+#[test]
+fn linked_documents_follow_links_in_both_directions() {
+    let dir = project();
+    let index = index(&dir);
+    let all = strings(&[
+        "docs/Index.md",
+        "docs/a/one.md",
+        "docs/a/two.md",
+        "docs/b/three.md",
+    ]);
+
+    // `two` ссылается на `one`; на `two` ссылается `one`.
+    let from_two = index
+        .linked_documents(&strings(&["docs/a/two.md"]), &all)
+        .unwrap();
+    assert_eq!(from_two, set(&["docs/a/one.md"]));
+
+    // `one` ссылается на `two` и `three`, а `two` и `three` ссылаются на `one`; сам с собой — нет.
+    let from_one = index
+        .linked_documents(&strings(&["docs/a/one.md"]), &all)
+        .unwrap();
+    assert_eq!(from_one, set(&["docs/a/two.md", "docs/b/three.md"]));
+}
+
+#[test]
+fn linked_documents_of_an_anchor_set_include_anchors_linked_to_each_other() {
+    let dir = project();
+    let index = index(&dir);
+
+    let found = index
+        .linked_documents(
+            &strings(&["docs/a/one.md", "docs/a/two.md"]),
+            &strings(&["docs/a/one.md", "docs/a/two.md", "docs/Index.md"]),
+        )
+        .unwrap();
+
+    assert_eq!(found, set(&["docs/a/one.md", "docs/a/two.md"]));
+}
+
+#[test]
+fn linked_documents_ignore_unlinked_documents_and_empty_sets() {
+    let dir = project();
+    let index = index(&dir);
+    let all = strings(&["docs/a/one.md", "docs/b/three.md"]);
+
+    assert!(
+        index
+            .linked_documents(&strings(&["docs/Index.md"]), &all)
+            .unwrap()
+            .is_empty()
+    );
+    assert!(index.linked_documents(&[], &all).unwrap().is_empty());
+    assert!(index.linked_documents(&all, &[]).unwrap().is_empty());
 }

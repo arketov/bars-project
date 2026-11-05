@@ -124,7 +124,7 @@ pub fn target(
         return Err("Скрытая папка отсутствует в дереве проекта".into());
     }
     let disk_folder = || {
-        bars_core::indexing::walk::walk_docs(project, Path::new(docs_root))
+        bars_core::indexing::walk::walk_docs_indexed(project, Path::new(docs_root))
             .is_ok_and(|walk| walk.dirs.iter().any(|dir| project.join(dir) == path))
     };
     if !relative_folder.as_os_str().is_empty()

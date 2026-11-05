@@ -49,12 +49,11 @@ it("сцена переиндексации без задания возвращ
   expect(status.state).toBe("reindex_required");
   expect(status.model.index).not.toBe(status.model.settings);
   expect((await mockCall("activity", {}) as ActivityOutput).running).toBeNull();
-  for (const method of ["search", "graph_search"]) {
+  for (const method of ["search"]) {
     await expect(mockCall(method, { project, query: "порог", mode: "mix" })).rejects.toMatchObject({ kind: "reindex_required" });
   }
   const ready = await mockCall("search", { project: "C:\\work\\tmc-region", query: "порог" }) as SearchOutput;
   expect(ready.results).toHaveLength(3);
-  expect(await mockCall("text_search", { project, query: "порог" })).toMatchObject({ documents: [] });
 });
 
 it("Save/Get accepts a proxy-backed settings draft and keeps devices independent", async () => {

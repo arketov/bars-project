@@ -75,6 +75,7 @@ impl WorkerHandler {
             let scope = bars_protocol::SearchScope {
                 modules: params.search.modules.clone(),
                 files: params.search.files.clone(),
+                excluded_projects: Vec::new(),
             };
             let status = self
                 .worker
@@ -109,11 +110,15 @@ impl WorkerHandler {
                         score_kind: ScoreKind::Cosine,
                         clamped: false,
                         scope,
+                        weights: Default::default(),
+                        signals: Vec::new(),
                     },
                     by_module: Default::default(),
                     indexing: status.state == ProjectState::Indexing,
                     pending: to_u32(status.pending),
                     rerank_error: None,
+                    semantic_error: None,
+                    understood: None,
                 },
                 requested_mode: requested,
                 applied_mode: requested,

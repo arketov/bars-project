@@ -1,13 +1,11 @@
 // Состояние окна: проекты, дерево, поиск, просмотр документа, ход индексации.
 // Всё, что знает воркер, спрашивается у него; окно хранит только выбор пользователя.
 
-import { call, documentWindowOpen, joinPath, openInMainWindow, openPath, pickFolder } from "./api";
+import { call, documentWindowOpen, joinPath, openInMainWindow, openPath, pickFolder, projectRootPrepare, projectRootSuggest, type RootChoice, type RootSuggestion } from "./api";
 import type { DiskTreeOutput } from "./api";
 import { ProjectUpdates, type Snapshot } from "./window-updates";
-import { TextSearchStore } from './text-search.svelte';
 import { editors } from './editors.svelte';
 import { confirmProjectLeave } from './unsaved.svelte';
-import type { GraphSearchOutput,RetrievalMode } from './graph';
 import { documentsIn } from "./format";
 import { AuditsStore } from "./audits.svelte";
 import { NewTopicsStore } from "./new-topics.svelte";
@@ -41,9 +39,15 @@ export interface ViewedDocument {
   missing: boolean;
 }
 
-export type DocumentReference = Pick<SearchHit, "path" | "title" | "first_line" | "last_line"> & { column?: number; length?: number; expectedRevision?: string; /** Открыт из выдачи или «В тексте»: только такой вкладке уместно «Обновить выдачу». */ fromSearch?: boolean };
+export type DocumentReference = Pick<SearchHit, "path" | "title" | "first_line" | "last_line"> & { column?: number; length?: number; expectedRevision?: string; /** Открыт из выдачи или «В тексте»: только такой вкладке уместно «Обновить выдачу». */ fromSearch?: boolean; /** Слова и фразы запроса: «Открыть раздел» подсвечивает их в тексте раздела. */ terms?: { words: string[]; phrases: string[] } };
 
 const PROJECT_KEY = "bars-project";
+const SCORES_KEY = "bars-search-scores";
+/** Через сколько поиск считается ждущим модель и показывает баннер с кнопкой «по словам». */
+const MODEL_WAIT_BANNER_MS = 2500;
+function readFlag(key: string): boolean {
+  try { return localStorage.getItem(key) === "1"; } catch { return false; }
+}
 const POLL_MS = 1000;
 const HIDDEN_POLL_MS = 10_000;
 /** Список проектов читает индексы, поэтому без перемен обновляется реже, чем ход. */
@@ -107,10 +111,10 @@ class App {
   filter = $state("");
 
   query = $state("");
-  textSearch = new TextSearchStore();
-  retrievalMode = $state<RetrievalMode>('hybrid');
-  includeRelated = $state(true);
-  graphSearch = $state<GraphSearchOutput|null>(null);
+  /** Баллы по сигналам в выдаче: переключатель «показать баллы» в параметрах поиска, выключен по умолчанию и запоминается. */
+  showScores = $state(readFlag(SCORES_KEY));
+  /** Поиск ждёт загрузку модели дольше обычного: баннер с кнопкой «Искать по словам сейчас». */
+  waitingModel = $state(false);
   /** Узел, который полный граф выберет после открытия вкладки («В графе» из мини-графа). */
   graphFocus = $state<string | null>(null);
   /** Вкладка «Граф» открывается на виде запроса последнего поиска, даже если пользователь вышел из него в общий вид. */
@@ -127,10 +131,6 @@ class App {
   searching = $state(false);
   searchError = $state<BarsError | null>(null);
   elapsedMs = $state(0);
-  /** Порог на один запрос (empty-states.md, «Нет результатов поиска»). */
-  minScore = $state<number | null>(null);
-  /** Что нашлось ниже порога: лучшая оценка и самый низкий порог, который можно задать (empty-states.md). */
-  emptyInfo = $state<{ best: number | null; lowest: number | null } | null>(null);
   viewer = $state<ViewedDocument | null>(null);
   /** «Новые темы» текущего проекта: счётчик строки дерева и экран. */
   topics = new NewTopicsStore((text, bad) => this.flash(text, bad));
@@ -144,7 +144,7 @@ class App {
   auditsOpen = $state(false);
   auditsVersion = $state(0);
   /** Контекст отображённой выдачи для ручной отметки «Не хватило знаний» (NT-02): не поле ввода, а то, что искали. */
-  displayed = $state<{ requestId: string; project: string; query: string; modules: string[]; files: string[]; mode: RetrievalMode; includeRelated: boolean; limit: number | null; minScore: number | null } | null>(null);
+  displayed = $state<{ requestId: string; project: string; query: string; modules: string[]; files: string[]; limit: number | null } | null>(null);
   /** ID обращения, которое пользователь уже отметил; повторная отметка идемпотентна и не нужна. */
   markedRequest = $state<string | null>(null);
   consentOpen = $state(false);
@@ -474,7 +474,7 @@ class App {
     if (signature === this.#treeSignature) return;
     this.#treeSignature = signature;
     this.docsRoot = docsRoot;
-    this.tree = buildTree(output.documents, docsRoot, disk ? { files: disk.files.map((file) => file.path), dirs: disk.dirs } : undefined);
+    this.tree = buildTree(output.documents, docsRoot, disk ? { files: disk.files.map((file) => file.path), dirs: disk.dirs, nested: disk.nested } : undefined);
   }
 
   /** Подхватывает изменения вне bars (Проводник, агент) и новые документы индекса: перестраивает дерево, только если оно изменилось. */
@@ -490,8 +490,6 @@ class App {
       finally { this.#leavingProject = false; }
     }
     this.searchUnsaved = [];
-    this.textSearch.reset();
-    this.graphSearch=null;
     this.#selectionVersion++;
     this.#searchId++;
     this.searching = false;
@@ -512,13 +510,12 @@ class App {
     this.filter = "";
     this.results = null;
     this.searchedQuery = "";
-    this.emptyInfo = null;
+    this.waitingModel = false;
     this.searchError = null;
     this.displayed = null;
     this.markedRequest = null;
     this.closeViewer();
     this.topicsOpen = false;
-    this.minScore = null;
     this.status = null;
     this.topics.bind(path);
     this.audits.bind(path);
@@ -543,68 +540,60 @@ class App {
     this.activeDocument = path;
   }
 
-  async search(): Promise<void> {
+  /** Поиск. `wordsOnly` — «Искать по словам сейчас»: воркер не ждёт загрузку модели и ищет по словам запроса. */
+  async search(options: { wordsOnly?: boolean } = {}): Promise<void> {
     const project = this.project;
     const query = this.query.trim();
     if (!project || !query) return;
     const searchId = ++this.#searchId;
     const requestId = newRequestId();
-    const textParams = {project:project.path, query, ...this.scope, case_sensitive:this.textSearch.caseSensitive, regex:this.textSearch.regex, path_filter:this.textSearch.pathFilter, request_id:requestId};
-    const semanticScope = this.scope;
-    const mode=this.retrievalMode, includeRelated=this.includeRelated, limit=this.count, minScore=this.minScore;
-    this.textSearch.reset();
+    const scope = this.scope;
+    const limit = this.count;
     this.searching = true;
+    this.waitingModel = false;
     this.searchUnsaved = [];
     this.searchError = null;
     this.results = null;
-    this.graphSearch = null;
     this.displayed = null;
-    this.emptyInfo = null;
     const started = performance.now();
-    let textTask: Promise<void> | undefined;
+    // Загрузка выгруженной модели занимает секунды: после паузы выдача показывает ожидание и кнопку «по словам».
+    const waitTimer = setTimeout(() => { if (searchId === this.#searchId) this.waitingModel = true; }, MODEL_WAIT_BANNER_MS);
     try {
       const unsaved = editors.unsaved.some(b => b.project === project.path) ? await editors.flush(project.path) : [];
       if (searchId !== this.#searchId || this.current !== project.path) return;
       this.searchUnsaved = unsaved.map(b => ({ path: b.path, reason: b.message || "Правки не записаны" }));
       this.searchedQuery = query;
-      textTask = this.textSearch.search(textParams);
       if (project.state === "reindex_required") {
-        // Поиск по смыслу ждёт согласия на переиндексацию (error-states.md): воркеру не звоним, «В тексте» читает файлы.
+        // Поиск ждёт согласия на переиндексацию (error-states.md): воркеру не звоним.
         this.#notifications.resolve(`search:${project.path}`);
         this.publishNotifications();
         return;
       }
-      const { modules, files } = semanticScope;
-      const output = await call<SearchOutput|GraphSearchOutput>(mode==='hybrid'?"search":"graph_search", {
+      const { modules, files } = scope;
+      const output = await call<SearchOutput>("search", {
         cwd: project.path,
         project: project.path,
         query,
         modules,
         files,
-        ...(mode==='hybrid'?{}:{mode}),
-        ...(mode==='mix'?{include_related:includeRelated}:{}),
         ...(limit === null ? {} : { limit }),
-        ...(minScore === null ? {} : { min_score: minScore }),
+        ...(options.wordsOnly ? { wait_models: false } : {}),
         // Служебное поле окна: ID отображаемого обращения. Воркер считает по нему спрос на тему, ручная отметка опирается на него же.
         _window: { request_id: requestId },
       });
       if (searchId !== this.#searchId || this.current !== project.path) return;
       this.results = output;
-      this.displayed = { requestId, project: project.path, query, modules, files, mode, includeRelated, limit, minScore };
+      this.displayed = { requestId, project: project.path, query, modules, files, limit };
       this.markedRequest = null;
-      this.graphSearch='requested_mode' in output?output as GraphSearchOutput:null;
       this.#notifications.resolve(`search:${project.path}`);
       if (output.rerank_error) this.#notifications.error(`rerank:${project.path}`, `Ошибка оценки моделью · ${project.name}`, "Поиск выполнен без оценки моделью. Проверьте модель и подключение.", "models");
       else this.#notifications.resolve(`rerank:${project.path}`);
       this.publishNotifications();
       this.searchedQuery = query;
-      const emptyInfo = output.results.length === 0&&mode!=='graph' ? await this.diagnoseEmpty(project.path, modules, files, query) : null;
-      if (searchId === this.#searchId && this.current === project.path) this.emptyInfo = emptyInfo;
     } catch (error) {
       if (searchId !== this.#searchId || this.current !== project.path) return;
       this.results = null;
       this.displayed = null;
-      this.graphSearch = null;
       this.searchError = error instanceof BarsError ? error : new BarsError(String(error));
       // `reindex_required` — гонка с обновлением списка проектов: баннер переиндексации появится сам, уведомление не нужно.
       if (this.searchError.kind !== "model_loading" && this.searchError.kind !== "reindex_required") {
@@ -613,12 +602,18 @@ class App {
       }
       if (this.searchError.kind === "model_loading") this.retrySearchLater(project.path, query);
     } finally {
-      await textTask;
+      clearTimeout(waitTimer);
       if (searchId === this.#searchId) {
+        this.waitingModel = false;
         this.elapsedMs = Math.round(performance.now() - started);
         this.searching = false;
       }
     }
+  }
+
+  /** «Искать по словам сейчас»: ожидающий поиск бросается, тот же запрос идёт без ожидания модели. */
+  async searchWords(): Promise<void> {
+    await this.search({ wordsOnly: true });
   }
 
   /** Пока воркер отвечает `model_loading`, тот же поиск повторяется раз в две секунды (error-states.md). */
@@ -629,30 +624,6 @@ class App {
     }, 2000);
   }
 
-  /**
-   * Пустая выдача: ещё один запрос с порогом 0 показывает, что воркер прижмёт к нижнему пределу
-   * настроек, и лучшего кандидата. Окно не обходит порог — оно только объясняет пользователю, почему пусто.
-   */
-  async diagnoseEmpty(path: string, modules: string[], files: string[], query: string): Promise<{ best: number | null; lowest: number | null }> {
-    try {
-      const probe = await call<SearchOutput>("search", {
-        cwd: path,
-        project: path,
-        query,
-        modules,
-        files,
-        limit: 1,
-        min_score: 0,
-        // Служебное поле окна: диагностика объясняет пустую выдачу и спроса на тему не создаёт (NT-03).
-        _window: { purpose: "diagnostic" },
-      });
-      return { best: probe.results[0]?.score ?? null, lowest: probe.applied.min_score };
-    } catch {
-      return { best: null, lowest: null };
-    }
-  }
-
-  /** «Искать по всему проекту» и «Порог N для этого запроса» из пустой выдачи. */
   /** «Повторить» на экране ошибки модели: воркер снимает паузу перед повтором загрузки (ISS-71), затем поиск. */
   async retryModelSearch(): Promise<void> {
     try {
@@ -663,15 +634,22 @@ class App {
     await this.search();
   }
 
+  /** «Весь проект» из пустой выдачи. */
   async searchWhole(): Promise<void> {
     this.clearSelection();
     await this.search();
   }
 
-  async searchWithThreshold(minScore: number): Promise<void> {
-    this.minScore = minScore;
+  /** «Без кавычек», «Без исключения» и чип «×»: запрос заменяется и ищется заново. */
+  async searchAs(query: string): Promise<void> {
+    this.query = query;
     await this.search();
-    this.minScore = null;
+  }
+
+  /** Переключатель «показать баллы»: выбор запоминается. */
+  setShowScores(on: boolean): void {
+    this.showScores = on;
+    try { localStorage.setItem(SCORES_KEY, on ? "1" : "0"); } catch { /* хранилище недоступно: выбор живёт до закрытия окна */ }
   }
 
   /** «Не хватило знаний»: тема по отображённой выдаче (NT-02). Повторная отметка того же обращения идемпотентна. */
@@ -822,15 +800,48 @@ class App {
     }
   }
 
+  /** Выбор корня документации новой папки (Т-7); `null` — диалог закрыт. */
+  rootChoice = $state<{ path: string; suggested: RootChoice; hasDocs: boolean; moved: ProjectInfo | null; inside: RootSuggestion["inside"]; nested: NonNullable<RootSuggestion["nested"]> } | null>(null);
+  rootBusy = $state(false);
+
   async addProject(): Promise<void> {
+    await this.askRoot(null);
+  }
+
+  /** Диалог «Что считать документацией?» для выбранной папки; `moved` — проект, который переезжает сюда. */
+  private async askRoot(moved: ProjectInfo | null): Promise<void> {
     const path = await pickFolder();
     if (!path) return;
     try {
-      await call("register", { path });
-      await this.loadProjects();
-      await this.select(path);
+      const { has_docs, suggested, inside, nested } = await projectRootSuggest(path);
+      this.rootChoice = { path, suggested, hasDocs: has_docs, moved, inside: inside ?? null, nested: nested ?? [] };
     } catch (error) {
       this.flash(error instanceof Error ? error.message : String(error), true);
+    }
+  }
+
+  cancelRoot(): void {
+    if (this.rootBusy) return;
+    this.rootChoice = null;
+  }
+
+  /** Записывает выбранный корень, регистрирует папку и открывает проект. */
+  async confirmRoot(root: RootChoice): Promise<void> {
+    const pending = this.rootChoice;
+    if (!pending || this.rootBusy) return;
+    this.rootBusy = true;
+    try {
+      await projectRootPrepare(pending.path, root);
+      await call("register", { path: pending.path });
+      if (pending.moved) await call("unregister", { cwd: pending.moved.path, project: pending.moved.path });
+      this.rootChoice = null;
+      await this.loadProjects();
+      await this.select(pending.path);
+    } catch (error) {
+      this.rootChoice = null;
+      this.flash(error instanceof Error ? error.message : String(error), true);
+    } finally {
+      this.rootBusy = false;
     }
   }
 
@@ -979,16 +990,7 @@ class App {
 
   /** Проект переехал: регистрируем новое место и снимаем старое (`.bars/` подхватывается как есть). */
   async relocateProject(project: ProjectInfo): Promise<void> {
-    const folder = await pickFolder();
-    if (!folder) return;
-    try {
-      await call("register", { path: folder });
-      await call("unregister", { cwd: project.path, project: project.path });
-      await this.loadProjects();
-      await this.select(folder);
-    } catch (error) {
-      this.flash(error instanceof Error ? error.message : String(error), true);
-    }
+    await this.askRoot(project);
   }
 
   documentsOf(project: ProjectInfo): number {

@@ -64,6 +64,8 @@ impl Worker {
             Ok(_) => {
                 lock(&self.inner.projects).remove(&path);
                 self.inner.cancel_queued(&path);
+                // Удалённый вложенный проект больше не исключается из внешнего.
+                self.inner.refresh_nested();
                 Ok(path)
             }
             Err(error) => {

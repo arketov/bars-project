@@ -137,6 +137,27 @@ fn resolves_paths_names_and_broken() {
 }
 
 #[test]
+fn link_into_an_excluded_area_is_not_broken_but_a_missing_sibling_is() {
+    let set = DocSet::new(["a.md".to_string()]).with_excluded(vec!["b/docs".to_string()]);
+    let link = |target: &str| ParsedLink {
+        line: 1,
+        start: 0,
+        end: 0,
+        kind: LinkKind::Inline,
+        raw_target: target.to_string(),
+        text: "t".into(),
+        fragment: None,
+    };
+
+    assert_eq!(
+        set.resolve("a.md", &link("b/docs/x.md")),
+        Resolved::NotALink
+    );
+    assert_eq!(set.resolve("a.md", &link("b/other.md")), Resolved::Broken);
+    assert_eq!(set.resolve("a.md", &link("b/docs2/x.md")), Resolved::Broken);
+}
+
+#[test]
 fn percent_encoded_paths_resolve() {
     let set = docs(&["папка/файл с пробелом.md"]);
     let link = &parse_links(

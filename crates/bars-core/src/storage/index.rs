@@ -80,7 +80,27 @@ pub struct DocumentRecord<'a> {
     /// Хеш blake3 содержимого файла, шестнадцатеричный.
     pub hash: &'a str,
     pub chunks: &'a [Chunk],
+    /// Исходный текст, по которому посчитан `hash`; пишется в той же транзакции, что хеш и чанки,
+    /// и служит источником для построения графа (`document_sources`). `None` — без текста.
+    pub text: Option<&'a str>,
 }
+
+/// Тексты документов: хеш в `documents` и текст записываются одной транзакцией индексации.
+const DOCUMENT_SOURCES_SQL: &str = "CREATE TABLE IF NOT EXISTS document_sources (
+    document_id INTEGER PRIMARY KEY REFERENCES documents(id) ON DELETE CASCADE,
+    text TEXT NOT NULL
+);";
+
+/// Полнотекстовая таблица: название документа с именем файла, цепочка заголовков, текст и точная
+/// форма всех трёх (`docs/features/search/fulltext.md`). Колонки уже разобраны `TextStemmer`,
+/// поэтому токенайзер только режет по пробелам; `tokenchars '_'` сохраняет формы идентификаторов
+/// (`rag_query`) целыми токенами. `chunks_fts_vocab` читает словарь индекса для исправления
+/// опечаток.
+const FTS_SQL: &str = "CREATE VIRTUAL TABLE chunks_fts USING fts5(
+    name, heading_chain, body, exact,
+    tokenize = \"unicode61 remove_diacritics 2 tokenchars '_'\"
+);
+CREATE VIRTUAL TABLE chunks_fts_vocab USING fts5vocab(chunks_fts, 'row');";
 
 pub struct Index {
     conn: Connection,
@@ -116,6 +136,27 @@ impl Index {
         };
         index.ensure_schema()?;
         Ok(index)
+    }
+
+    /// Исходный текст документа вместе с хешем, под которым он записан; `None`, если текста нет
+    /// (документ проиндексирован до появления таблицы) или таблицы нет в файле для чтения.
+    pub fn document_source(&self, path: &str) -> Result<Option<(String, String)>, StorageError> {
+        let exists: bool = self.conn.query_row(
+            "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='document_sources')",
+            [],
+            |row| row.get(0),
+        )?;
+        if !exists {
+            return Ok(None);
+        }
+        Ok(self
+            .conn
+            .query_row(
+                "SELECT d.hash, s.text FROM documents d JOIN document_sources s ON s.document_id = d.id WHERE d.path = ?1",
+                [path],
+                |row| Ok((row.get(0)?, row.get(1)?)),
+            )
+            .optional()?)
     }
 
     /// Разбор текста для FTS изменился с момента записи индекса: читатель его не чинит,
@@ -156,6 +197,8 @@ impl Index {
                 supported: SCHEMA_VERSION,
             });
         }
+        // Таблица текстов добавлена без смены версии индекса и без пересчёта embeddings.
+        self.conn.execute_batch(DOCUMENT_SOURCES_SQL)?;
         if found == SCHEMA_VERSION && self.meta("stem_version")?.as_deref() != Some(STEM_VERSION) {
             self.rebuild_fts()?;
         }
@@ -191,15 +234,13 @@ impl Index {
                 UNIQUE (document_id, ordinal)
             );
             CREATE INDEX chunks_embed_hash ON chunks(embed_hash);
-            CREATE VIRTUAL TABLE chunks_fts USING fts5(
-                heading_chain, body,
-                tokenize = 'unicode61 remove_diacritics 2'
-            );
             CREATE TABLE vectors (
                 embed_hash TEXT PRIMARY KEY,
                 vector BLOB NOT NULL
             ) WITHOUT ROWID;",
         )?;
+        tx.execute_batch(FTS_SQL)?;
+        tx.execute_batch(DOCUMENT_SOURCES_SQL)?;
         set_meta(&tx, "schema_version", &SCHEMA_VERSION.to_string())?;
         set_meta(&tx, "stem_version", STEM_VERSION)?;
         set_meta(&tx, "bars_version", env!("CARGO_PKG_VERSION"))?;
@@ -207,20 +248,34 @@ impl Index {
         Ok(())
     }
 
-    /// Пересобирает `chunks_fts` из `chunks.text`: разбор текста для FTS изменился.
+    /// Пересоздаёт `chunks_fts` и заполняет её из `chunks.text`: разбор текста для FTS или набор
+    /// колонок изменился. Векторы и чанки не трогаются.
     fn rebuild_fts(&mut self) -> Result<(), StorageError> {
-        let rows: Vec<(i64, String, String)> = {
-            let mut statement = self
-                .conn
-                .prepare("SELECT id, heading_chain, text FROM chunks")?;
-            let rows =
-                statement.query_map([], |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)))?;
+        type Row = (i64, String, String, String, String);
+        let rows: Vec<Row> = {
+            let mut statement = self.conn.prepare(
+                "SELECT c.id, d.title, d.path, c.heading_chain, c.text
+                 FROM chunks c JOIN documents d ON d.id = c.document_id",
+            )?;
+            let rows = statement.query_map([], |row| {
+                Ok((
+                    row.get(0)?,
+                    row.get(1)?,
+                    row.get(2)?,
+                    row.get(3)?,
+                    row.get(4)?,
+                ))
+            })?;
             rows.collect::<Result<_, _>>()?
         };
         let tx = self.conn.transaction()?;
-        tx.execute("DELETE FROM chunks_fts", [])?;
-        for (id, chain, text) in rows {
-            insert_fts(&tx, &self.stemmer, id, &chain, &text)?;
+        tx.execute_batch(
+            "DROP TABLE IF EXISTS chunks_fts_vocab;
+             DROP TABLE IF EXISTS chunks_fts;",
+        )?;
+        tx.execute_batch(FTS_SQL)?;
+        for (id, title, path, chain, text) in rows {
+            insert_fts(&tx, &self.stemmer, id, &title, &path, &chain, &text)?;
         }
         set_meta(&tx, "stem_version", STEM_VERSION)?;
         tx.commit()?;
@@ -414,6 +469,12 @@ impl Index {
             ],
         )?;
         let document_id = tx.last_insert_rowid();
+        if let Some(text) = record.text {
+            tx.execute(
+                "INSERT INTO document_sources(document_id, text) VALUES (?1, ?2)",
+                params![document_id, text],
+            )?;
+        }
         {
             let mut insert = tx.prepare_cached(
                 "INSERT INTO chunks(document_id, ordinal, first_line, last_line, heading_chain, text, embed_hash)
@@ -434,6 +495,8 @@ impl Index {
                     &tx,
                     &self.stemmer,
                     chunk_id,
+                    record.title,
+                    record.path,
                     &chunk.heading_chain,
                     &chunk.text,
                 )?;
@@ -504,19 +567,33 @@ fn set_meta(conn: &Connection, key: &str, value: &str) -> rusqlite::Result<()> {
     Ok(())
 }
 
+/// Имя файла без папок и расширения: `docs/features/search/hybrid-search.md` → `hybrid-search`.
+fn file_stem(path: &str) -> &str {
+    let name = path.rsplit('/').next().unwrap_or(path);
+    name.rsplit_once('.').map_or(name, |(stem, _)| stem)
+}
+
+/// Пишет строку `chunks_fts` чанка: название документа вместе с именем файла, цепочка заголовков
+/// и текст — основами слов; точная форма всех трёх — без стемминга.
 fn insert_fts(
     conn: &Connection,
     stemmer: &TextStemmer,
     chunk_id: i64,
+    title: &str,
+    path: &str,
     heading_chain: &str,
     text: &str,
 ) -> rusqlite::Result<()> {
+    let name = format!("{title} {}", file_stem(path));
+    let all = format!("{name} {heading_chain} {text}");
     conn.execute(
-        "INSERT INTO chunks_fts(rowid, heading_chain, body) VALUES (?1, ?2, ?3)",
+        "INSERT INTO chunks_fts(rowid, name, heading_chain, body, exact) VALUES (?1, ?2, ?3, ?4, ?5)",
         params![
             chunk_id,
+            stemmer.stem_text(&name),
             stemmer.stem_text(heading_chain),
-            stemmer.stem_text(text)
+            stemmer.stem_text(text),
+            stemmer.exact_text(&all)
         ],
     )?;
     Ok(())
@@ -537,6 +614,7 @@ fn delete_document(conn: &Connection, path: &str) -> rusqlite::Result<bool> {
         "DELETE FROM chunks_fts WHERE rowid IN (SELECT id FROM chunks WHERE document_id = ?1)",
         [id],
     )?;
+    conn.execute("DELETE FROM document_sources WHERE document_id = ?1", [id])?;
     conn.execute("DELETE FROM documents WHERE id = ?1", [id])?;
     Ok(true)
 }
@@ -588,6 +666,7 @@ mod tests {
             modified_ns: Some(5),
             hash: "h",
             chunks,
+            text: None,
         }
     }
 
@@ -645,6 +724,73 @@ mod tests {
         // Стемминг: в индексе «настройки», ищем «настройка».
         assert_eq!(fts_count(&index, "настройк*"), 1);
         assert!(index.has_vector(&hash).unwrap());
+    }
+
+    #[test]
+    fn document_source_is_written_with_the_hash_replaced_and_removed_with_the_document() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut index = open(&dir);
+        let params = ChunkingParams::default();
+        let doc = chunk_document(
+            "docs/a.md",
+            "# A
+
+текст
+",
+            &params,
+        );
+        // Без текста источника нет: документ проиндексирован до появления таблицы.
+        index
+            .replace_document(&record("docs/a.md", &doc.chunks), &[])
+            .unwrap();
+        assert_eq!(index.document_source("docs/a.md").unwrap(), None);
+        let mut with_text = record("docs/a.md", &doc.chunks);
+        with_text.text = Some(
+            "# A
+
+текст
+",
+        );
+        index.replace_document(&with_text, &[]).unwrap();
+        assert_eq!(
+            index.document_source("docs/a.md").unwrap(),
+            Some((
+                "h".to_string(),
+                "# A
+
+текст
+"
+                .to_string()
+            ))
+        );
+        // Новая версия заменяет текст вместе с хешем, а не дописывает второй.
+        let mut newer = record("docs/a.md", &doc.chunks);
+        newer.text = Some(
+            "# A
+
+новое
+",
+        );
+        index.replace_document(&newer, &[]).unwrap();
+        let rows: i64 = index
+            .conn()
+            .query_row("SELECT count(*) FROM document_sources", [], |r| r.get(0))
+            .unwrap();
+        assert_eq!(rows, 1);
+        assert_eq!(
+            index.document_source("docs/a.md").unwrap().unwrap().1,
+            "# A
+
+новое
+"
+        );
+        assert!(index.delete_document("docs/a.md").unwrap());
+        assert_eq!(index.document_source("docs/a.md").unwrap(), None);
+        let rows: i64 = index
+            .conn()
+            .query_row("SELECT count(*) FROM document_sources", [], |r| r.get(0))
+            .unwrap();
+        assert_eq!(rows, 0);
     }
 
     #[test]
@@ -819,5 +965,49 @@ mod tests {
             Some(STEM_VERSION)
         );
         assert_eq!(fts_count(&index, "настройк*"), 1);
+    }
+
+    #[test]
+    fn old_two_column_fts_is_recreated_with_name_and_exact_columns() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("index.sqlite");
+        let mut index = Index::open(&path, Journal::Wal).unwrap();
+        let doc = chunk_document(
+            "docs/hybrid-search.md",
+            "# A\n\nнастройки rag_query\n",
+            &ChunkingParams::default(),
+        );
+        index
+            .replace_document(&record("docs/hybrid-search.md", &doc.chunks), &[])
+            .unwrap();
+        // Возвращаем таблицу прежней схемы из двух колонок и версию разбора 1.
+        index
+            .conn()
+            .execute_batch(
+                "DROP TABLE chunks_fts_vocab; DROP TABLE chunks_fts;
+                 CREATE VIRTUAL TABLE chunks_fts USING fts5(heading_chain, body,
+                     tokenize = 'unicode61 remove_diacritics 2');",
+            )
+            .unwrap();
+        index.set_meta("stem_version", "1").unwrap();
+        assert!(index.stem_outdated().unwrap());
+        index.close().unwrap();
+
+        let index = Index::open(&path, Journal::Wal).unwrap();
+        assert!(!index.stem_outdated().unwrap());
+        // Название документа и имя файла — в колонке `name`, формы идентификаторов — в `exact`.
+        assert_eq!(fts_count(&index, "name : hybrid"), 1);
+        assert_eq!(fts_count(&index, "name : t"), 1);
+        assert_eq!(fts_count(&index, "exact : rag_query"), 1);
+        assert_eq!(fts_count(&index, "body : настройк"), 1);
+        let vocab: i64 = index
+            .conn()
+            .query_row(
+                "SELECT count(*) FROM chunks_fts_vocab WHERE term = 'rag_query'",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
+        assert_eq!(vocab, 1);
     }
 }

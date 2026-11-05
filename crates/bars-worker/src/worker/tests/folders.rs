@@ -22,7 +22,11 @@ async fn folder_native_fixture() {
     ] {
         fs::write(project.join("manual/docs").join(name), DOC).unwrap();
     }
-    let worker = Worker::start(WorkerConfig::new(home), FakeProvider::new("m1")).unwrap();
+    let worker = Worker::start(
+        WorkerConfig::new(home).without_graph_pause(),
+        FakeProvider::new("m1"),
+    )
+    .unwrap();
     worker.register(&project).unwrap();
     idle(&worker).await;
     assert_eq!(documents(&project), 3);

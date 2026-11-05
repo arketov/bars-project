@@ -494,7 +494,7 @@ impl Harness {
             cwd: cwd.to_path_buf(),
             launch: Launch::With(Arc::new(move || {
                 launches.fetch_add(1, Ordering::SeqCst);
-                let config = WorkerConfig::new(home.clone());
+                let config = WorkerConfig::new(home.clone()).without_graph_pause();
                 assert!(
                     config.install_env.is_none(),
                     "MCP tests must not access client profiles"

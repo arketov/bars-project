@@ -1,5 +1,5 @@
 // Заглушка воркера для просмотра интерфейса в браузере (`npm run dev`) и для проверок без Tauri.
-// Сцена выбирается параметром адреса: `?scene=empty|indexing|consent|reindex-required|worker-down|provider|missing|cosine|rerank-failed`.
+// Сцена выбирается параметром адреса: `?scene=empty|indexing|consent|reindex-required|worker-down|provider|missing|cosine|rerank-failed|no-signal`.
 
 import { BarsError } from "./types";
 import { clone } from "./settings-logic";
@@ -136,8 +136,7 @@ title: Гибридный поиск
 
 Порог применяется к оценке, у которой есть абсолютный смысл. Оценка RRF его не имеет:
 
-- **С реранком** — оценка реранка, порог \`min_score_rerank\`.
-- **Без реранка** — косинусная близость чанка к запросу, порог \`min_score_vector\`.
+Порог — одна настройка \`min_score\`: он относится к оценке модели, без модели — к косинусной близости.
 
 ## Состав результата
 
@@ -307,7 +306,7 @@ let savedSettings: SettingsDoc = {
   embed: { accelerator: "auto", source: "builtin", model: "BAAI/bge-m3", base_url: null, api_key_name: null, api_key_env: null, batch_size: 32, unload_after_minutes: 15 },
   rerank: { accelerator: "cpu", enabled: false, source: "builtin", model: "BAAI/bge-reranker-v2-m3", base_url: null, api_key_name: null, api_key_env: null, unload_after_minutes: 5, parallel_requests: 4, context_tokens: 32768 },
   search: {
-    candidates: 30, rerank_candidates: 15, results: 5, results_reranked: 3, min_score_vector: 0, min_score_rerank: 0.1,
+    candidates: 30, rerank_candidates: 15, results: 5, results_reranked: 3, min_score: 0.1,
     agent_min_score: [0, 1], max_results: 20, max_candidates: 100, max_rerank_candidates: 50,
   },
   chunking: { min_chars: 250, max_chars: 6000 },
@@ -377,8 +376,6 @@ const projectNames = new Map<string, string>();
 
 export async function mockCall(method: string, params: Record<string, unknown>): Promise<unknown> {
   if (method === "project_observe") return { saved: true };
-  // Браузерный стенд не имеет доступа к диску; не выдаём смысловые фикстуры за текстовый поиск.
-  if (method === 'text_search') return {documents:[],docs_total:0,hits_total:0,truncated:null,skipped:[],elapsed_ms:0};
   if(method==='graph_query_slice'){
     const project = String(params.project ?? params.cwd);
     return (await import('./mock-query')).queryFixture(params, (DOCS_BY_PROJECT[project] ??= docs("docs")));
@@ -466,12 +463,25 @@ export async function mockCall(method: string, params: Record<string, unknown>):
       const query = String(params.query ?? "").toLowerCase();
       const limit = Number(params.limit ?? 3);
       const cosine = scene() === "cosine" || scene() === "rerank-failed";
-      const hits = cosine ? HITS.map((hit, i) => ({ ...hit, score: [0.63, 0.60, 0.62][i], score_kind: "cosine" as const })) : HITS;
+      const none = scene() === "no-signal";
+      const hits = cosine ? HITS.map((hit, i) => ({ ...hit, score: [0.63, 0.60, 0.62][i], score_kind: "cosine" as const })) : none ? HITS.map((hit) => ({ ...hit, score: 0, score_kind: "none" as const })) : HITS;
       const found = query.includes("нет") ? [] : hits.slice(0, limit);
+      const kind = none ? "none" : cosine ? "cosine" : "rerank";
+      // Операторы разобраны как в воркере: слова без операторов, фразы, исключения, пути.
+      const tokens = (await import("./search-results")).parseQuery(String(params.query ?? ""));
+      const operators = tokens.some((t) => t.kind !== "word");
+      const understood = operators ? {
+        text: tokens.filter((t) => t.kind === "word" || t.kind === "phrase").map((t) => (t.kind === "phrase" ? t.value : t.text)).join(" "),
+        phrases: tokens.filter((t) => t.kind === "phrase").map((t) => t.value),
+        excluded_words: tokens.filter((t) => t.kind === "exclude").map((t) => t.value),
+        paths: tokens.filter((t) => t.kind === "path").map((t) => t.value),
+      } : undefined;
       return {
-        results: found.map(hit => ({ ...hit, chunk_id: `fixture-${HITS.findIndex(item => item.path === hit.path)}` })),
-        applied: { results: limit, candidates: 30, rerank_candidates: 15, min_score: cosine ? 0 : 0.3, score_kind: cosine ? "cosine" : "rerank", clamped: false },
+        results: found.map(hit => ({ ...hit, chunk_id: `fixture-${HITS.findIndex(item => item.path === hit.path)}`, parts: 1, parts_found: 1, signals: none ? { fulltext: 0.4, exact: 0 } : { ...(cosine ? {} : { rerank: hit.score }), cosine: 0.55, fulltext: 0.3, exact: 0 } })),
+        applied: { results: limit, candidates: 30, rerank_candidates: 15, min_score: none || cosine ? 0.1 : 0.3, score_kind: kind, clamped: false, weights: { cosine: 0, fulltext: 0.1, exact: 0.1, links: 0, fold_bonus: 0 }, signals: none ? ["fulltext", "exact"] : cosine ? ["cosine", "fulltext", "exact"] : ["rerank", "cosine", "fulltext", "exact"] },
+        ...(understood ? { understood } : {}),
         rerank_error: scene() === "rerank-failed" ? "Test fixture: rerank unavailable" : null,
+        semantic_error: none ? "смысловая близость не учтена: модель загружается" : null,
         indexing: scene() === "indexing",
         pending: scene() === "indexing" ? 118 : 0,
       };

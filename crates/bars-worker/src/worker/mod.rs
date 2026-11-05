@@ -170,6 +170,14 @@ impl WorkerConfig {
             autostart: Arc::new(NoAutostart),
         }
     }
+
+    /// Граф начинается сразу после индексации, без паузы в правках и предела частоты.
+    /// Для тестов и стендов, которые ждут автоматический граф; пауза проверяется отдельно.
+    pub fn without_graph_pause(mut self) -> Self {
+        self.graph_quiet = Duration::ZERO;
+        self.graph_min_interval = Duration::ZERO;
+        self
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -275,6 +283,8 @@ struct Runtime {
     windows: HashMap<String, Instant>,
     /// `notify` сообщил об ошибке или папка пропадала: слежение надо поднять заново.
     watch_failed: bool,
+    /// Папки корня документации нет на диске: слежение не запускается и об этом уже записано в журнал.
+    docs_root_missing: bool,
     /// Сколько сообщений слежения пришло с начала последней полной проверки. Проверка нашла
     /// изменения, а сообщений не было — слежение молчит, его надо перезапустить.
     watch_events: u32,
@@ -302,6 +312,7 @@ impl Runtime {
             mcp_until: None,
             windows: HashMap::new(),
             watch_failed: false,
+            docs_root_missing: false,
             watch_events: 0,
             tail_armed: false,
             gate: Arc::new(RwLock::new(())),
@@ -436,6 +447,8 @@ impl Worker {
         for path in &paths {
             recover_project_index(path);
         }
+        // До первой проверки: внешние проекты исключают области вложенных.
+        inner.refresh_nested();
         let queue_task = tokio::spawn(Arc::clone(&inner).run_queue());
         let timer_task = tokio::spawn(Arc::clone(&inner).run_timer());
         let doc_task = tokio::spawn(Arc::clone(&inner).run_doc_timer());
@@ -542,7 +555,8 @@ impl Worker {
         if !path.is_dir() {
             return Err(WorkerError::NotADirectory(path));
         }
-        ensure_project_config(&path)?;
+        // Корень документации нового проекта: умолчание Т-7, если клиент ничего не записал.
+        bars_protocol::prepare_project(&path, None)?;
         let (canonical, added) = {
             let mut registry = lock(&self.inner.registry);
             let added = registry.add(&path)?;
@@ -551,6 +565,8 @@ impl Worker {
                 .map_or_else(|| path.clone(), |entry| entry.path.clone());
             (canonical, added)
         };
+        // Новый вложенный проект уходит из индекса внешнего, внешний новый — исключает вложенные.
+        self.inner.refresh_nested();
         self.inner.activate(&canonical, Priority::Explicit);
         Ok(Registered {
             path: canonical,
@@ -580,6 +596,8 @@ impl Worker {
         self.inner.cancel_scan(&path);
         // Слежение останавливается вне блокировок: поток `notify` может ждать их.
         drop(runtime);
+        // Снятый вложенный проект возвращается во внешний: тот получает проверку.
+        self.inner.refresh_nested();
         Ok(path)
     }
 
@@ -632,6 +650,48 @@ impl Worker {
         Some((name, self.inner.docs_root_of(path)))
     }
 
+    /// Вложенные проекты, чья область исключена из индекса `project` (Т-7). `count` добавляет число
+    /// `.md` в области по диску: для предупреждения в окне; иначе поле 0.
+    pub fn nested_projects(
+        &self,
+        project: &Path,
+        count: bool,
+    ) -> Vec<bars_protocol::NestedProjectInfo> {
+        bars_core::indexing::nested::areas(project)
+            .into_iter()
+            .map(|area| {
+                let name = lock(&self.inner.registry)
+                    .entries()
+                    .iter()
+                    .find(|entry| entry.path == area.project)
+                    .map_or_else(
+                        || {
+                            area.project
+                                .file_name()
+                                .map_or_else(String::new, |n| n.to_string_lossy().into_owned())
+                        },
+                        ProjectEntry::display_name,
+                    );
+                let documents = if count {
+                    let docs_root = self.inner.docs_root_of(&area.project);
+                    bars_core::indexing::walk::walk_docs(&area.project, Path::new(&docs_root))
+                        .map_or(0, |walk| {
+                            u32::try_from(walk.files.len()).unwrap_or(u32::MAX)
+                        })
+                } else {
+                    0
+                };
+                bars_protocol::NestedProjectInfo {
+                    name,
+                    path: area.project.display().to_string(),
+                    dir: area.project_dir,
+                    area: area.dir,
+                    documents,
+                }
+            })
+            .collect()
+    }
+
     /// Все проекты реестра с состоянием, в порядке регистрации.
     pub fn projects(&self) -> Vec<ProjectSnapshot> {
         let entries: Vec<(ProjectEntry, bool)> = {
@@ -681,9 +741,16 @@ impl Worker {
             self.sync_project_gates(Some(&discovered.root));
             return Ok(Some(discovered.root));
         }
-        if !discovered.root.is_dir()
-            || !has_markdown(&discovered.root, &self.inner.docs_root_of(&discovered.root))
-        {
+        // Хук сам регистрирует только папку с настроенным проектом (`.bars/config.toml`) или с
+        // `docs/`; папку без них регистрирует лишь явный выбор человека (Т-6, Т-7, OQ-253).
+        let docs_root = if project_config_path(&discovered.root).exists() {
+            self.inner.docs_root_of(&discovered.root)
+        } else if discovered.root.join(DEFAULT_DOCS_ROOT).is_dir() {
+            DEFAULT_DOCS_ROOT.to_string()
+        } else {
+            return Ok(None);
+        };
+        if !discovered.root.is_dir() || !has_markdown(&discovered.root, &docs_root) {
             return Ok(None);
         }
         let root = self.register(&discovered.root)?.path;
@@ -956,6 +1023,8 @@ impl Worker {
         drop(old);
         self.inner.ensure_watching(&path);
         self.inner.enqueue(&path, Job::check(Priority::Explicit));
+        // Новая область вложенного проекта меняет исключения внешних.
+        self.inner.refresh_nested();
         Ok(())
     }
 
@@ -1249,11 +1318,50 @@ impl Inner {
         }
     }
 
+    /// Пересчитывает области вложенных проектов по реестру и `docs_root` каждого проекта и ставит
+    /// проверку проектам, у которых список исключений изменился: ушедшие в область вложенного
+    /// файлы удаляются из индекса по путям, вернувшиеся добавляются (Т-7, Т-22). Пропавший
+    /// проект остаётся исключённым, пока запись в реестре есть.
+    fn refresh_nested(&self) {
+        let paths = lock(&self.registry).paths();
+        let projects: Vec<(PathBuf, String)> = paths
+            .into_iter()
+            .map(|path| {
+                let docs_root = self.docs_root_of(&path);
+                (path, docs_root)
+            })
+            .collect();
+        for project in bars_core::indexing::nested::publish(&projects) {
+            self.enqueue(&project, Job::check(Priority::Explicit));
+        }
+    }
+
     fn check_all(self: &Arc<Self>) {
         let paths = lock(&self.registry).paths();
         for path in paths {
             self.activate(&path, Priority::Periodic);
         }
+    }
+
+    /// Запоминает, есть ли у проекта папка корня документации; возвращает её наличие. Запись в
+    /// журнал — один раз при исчезновении папки, возврат папки сбрасывает пометку.
+    fn note_docs_root(&self, path: &Path, present: bool) -> bool {
+        let first_missing = {
+            let mut projects = lock(&self.projects);
+            let Some(runtime) = projects.get_mut(path) else {
+                return present;
+            };
+            let first_missing = !present && !runtime.docs_root_missing;
+            runtime.docs_root_missing = !present;
+            first_missing
+        };
+        if first_missing {
+            log::warn!(
+                "Нет папки корня документации, слежение не запускается, пока она не появится: {}",
+                path.display()
+            );
+        }
+        present
     }
 
     /// Поднимает слежение, если его нет или оно сломалось.
@@ -1269,6 +1377,12 @@ impl Inner {
         let Some(generation) = generation else {
             return;
         };
+        // Без папки корня документации запускать нечего: одна проверка существования, журнал
+        // пишется только при переходе в это состояние (ISS-106).
+        let root_present = path.join(self.docs_root_of(path)).is_dir();
+        if !self.note_docs_root(path, root_present) {
+            return;
+        }
         let _publication = self.updates.after(path, updates::STATUS);
         let weak: Weak<Inner> = Arc::downgrade(self);
         let key = path.to_path_buf();
@@ -1334,7 +1448,23 @@ impl Inner {
         }
         match event {
             WatchEvent::Tree => unreachable!(),
-            WatchEvent::Files(files) => self.touch_files(project, files, DocSource::Watch),
+            WatchEvent::Files(files) => {
+                // Событие внутри области вложенного проекта не ставит задание внешнему.
+                let excluded = bars_core::indexing::nested::excluded(project);
+                let files: Vec<PathBuf> = files
+                    .into_iter()
+                    .filter(|file| {
+                        !file.strip_prefix(project).is_ok_and(|relative| {
+                            let relative = relative.to_string_lossy().replace('\\', "/");
+                            bars_core::indexing::nested::is_excluded(&relative, &excluded)
+                        })
+                    })
+                    .collect();
+                if files.is_empty() {
+                    return;
+                }
+                self.touch_files(project, files, DocSource::Watch)
+            }
             WatchEvent::Failed(message) => {
                 if let Some(runtime) = lock(&self.projects).get_mut(project) {
                     runtime.watch_failed = true;
@@ -1528,7 +1658,8 @@ impl Inner {
             let Some(runtime) = projects.get_mut(path) else {
                 return;
             };
-            let silent = runtime.watch_events == 0;
+            // Ненаблюдаемому проекту слежение не нужно: тревога только у наблюдаемого (ISS-106).
+            let silent = runtime.watch_events == 0 && runtime.observed(Instant::now());
             if silent && periodic && runtime.watcher.is_some() {
                 runtime.watch_failed = true;
             }
@@ -1893,22 +2024,6 @@ impl Inner {
         }
         drop(stopped);
     }
-}
-
-/// Создаёт `.bars/config.toml`, если его нет; существующий файл не трогает (Т-5).
-fn ensure_project_config(project: &Path) -> io::Result<()> {
-    let file = project_config_path(project);
-    if file.exists() {
-        return Ok(());
-    }
-    if let Some(parent) = file.parent() {
-        fs::create_dir_all(parent)?;
-    }
-    fs::write(
-        file,
-        "# Настройки проекта bars. Что можно задать — docs/storage/settings.md.\n\
-         # docs_root = \"docs\"\n",
-    )
 }
 
 /// Недописанная подмена прошлого запуска оставляет `index.sqlite.new` или `index.sqlite.old`;

@@ -717,3 +717,171 @@ fn vector_model_change_marks_similarity_and_aggregate_stale() {
             .any(|w| w.contains("Граф устарел"))
     );
 }
+
+fn read_revision(db: &Connection) -> i64 {
+    db.query_row(
+        "SELECT read_revision FROM graph_revisions WHERE id=1",
+        [],
+        |r| r.get(0),
+    )
+    .unwrap()
+}
+
+fn cache_size(db: &Connection) -> i64 {
+    db.query_row("PRAGMA cache_size", [], |r| r.get(0)).unwrap()
+}
+
+fn has_object(db: &Connection, name: &str) -> bool {
+    db.query_row(
+        "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE name=?1)",
+        [name],
+        |r| r.get(0),
+    )
+    .unwrap()
+}
+
+#[test]
+fn publication_raises_read_revision_exactly_once_and_cache_sees_it() {
+    let (mut db, data, manifest) = setup();
+    let before = read_revision(&db);
+    let stamp = store::revision_stamp(&db).unwrap().unwrap();
+    store::publish(&mut db, &data, &manifest).unwrap();
+    assert_eq!(read_revision(&db), before + 1);
+    assert_ne!(
+        store::revision_stamp(&db).unwrap().unwrap().read,
+        stamp.read
+    );
+    // Повторная публикация того же набора тоже даёт одно приращение.
+    let again = read_revision(&db);
+    store::publish(&mut db, &data, &manifest).unwrap();
+    assert_eq!(read_revision(&db), again + 1);
+    assert!(!has_publishing_key(&db));
+}
+
+fn has_publishing_key(db: &Connection) -> bool {
+    db.query_row(
+        "SELECT EXISTS(SELECT 1 FROM graph_meta WHERE key='publishing')",
+        [],
+        |r| r.get(0),
+    )
+    .unwrap()
+}
+
+#[test]
+fn publication_keeps_data_and_graph_triggers_work_outside_it() {
+    let (mut db, data, manifest) = setup();
+    store::publish(&mut db, &data, &manifest).unwrap();
+    let loaded = store::load(&db).unwrap();
+    assert_eq!(loaded.snapshot, data.snapshot);
+    assert_eq!(loaded.nodes.len(), data.nodes.len());
+    assert_eq!(loaded.edges.len(), data.edges.len());
+    assert_eq!(loaded.evidence.len(), data.evidence.len());
+    assert_eq!(loaded.sources.len(), data.sources.len());
+    // Индексы рёбер пересозданы после массовой вставки.
+    assert!(has_object(&db, "graph_edges_from"));
+    assert!(has_object(&db, "graph_edges_to"));
+    // Вне публикации триггеры по-прежнему считают каждую запись.
+    let before = read_revision(&db);
+    db.execute("INSERT INTO graph_aux VALUES('probe','{}')", [])
+        .unwrap();
+    assert_eq!(read_revision(&db), before + 1);
+}
+
+#[test]
+fn publication_restores_cache_size_and_failed_one_leaves_no_trace() {
+    let (mut db, data, manifest) = setup();
+    store::publish(&mut db, &data, &manifest).unwrap();
+    let cache = cache_size(&db);
+    let revision = read_revision(&db);
+    let mut broken = data.clone();
+    broken.evidence[0].quote.push_str("wrong");
+    assert!(store::publish(&mut db, &broken, &manifest).is_err());
+    assert_eq!(cache_size(&db), cache);
+    assert_eq!(read_revision(&db), revision);
+    assert!(!has_publishing_key(&db));
+    // Откат транзакции возвращает прежнее поколение вместе с индексами.
+    let tx = db.transaction().unwrap();
+    store::publish_in_transaction(&tx, &data, &manifest, &[]).unwrap();
+    drop(tx);
+    assert_eq!(read_revision(&db), revision);
+    assert!(!has_publishing_key(&db));
+    assert!(has_object(&db, "graph_edges_from"));
+    assert_eq!(store::load(&db).unwrap().snapshot, data.snapshot);
+    // Явный подъём кэша возвращает прежнее значение.
+    let boost = store::CacheBoost::raise(&db).unwrap();
+    assert_ne!(cache_size(&db), cache);
+    boost.restore(&db).unwrap();
+    assert_eq!(cache_size(&db), cache);
+}
+
+fn parts_count(db: &Connection) -> i64 {
+    db.query_row("SELECT count(*) FROM graph_parts", [], |r| r.get(0))
+        .unwrap()
+}
+
+#[test]
+fn publication_writes_parts_and_the_delta_base_marker() {
+    let (mut db, data, manifest) = setup();
+    assert!(!data.parts.is_empty());
+    store::publish(&mut db, &data, &manifest).unwrap();
+    assert_eq!(parts_count(&db), data.parts.len() as i64);
+    assert_eq!(
+        db.query_row(
+            "SELECT value FROM graph_meta WHERE key='delta_base'",
+            [],
+            |r| r.get::<_, String>(0)
+        )
+        .unwrap(),
+        "1"
+    );
+    // Части удаляются вместе с источником (каскад), а не копятся.
+    db.execute("DELETE FROM graph_sources WHERE path='docs/a.md'", [])
+        .unwrap();
+    assert!(parts_count(&db) < data.parts.len() as i64);
+}
+
+#[test]
+fn schema_v2_moves_to_v3_without_touching_the_graph_and_without_delta_base() {
+    let (mut db, data, manifest) = setup();
+    store::publish(&mut db, &data, &manifest).unwrap();
+    let nodes: i64 = db
+        .query_row("SELECT count(*) FROM graph_nodes", [], |r| r.get(0))
+        .unwrap();
+    // Состояние схемы v2: нет таблицы частей, её триггеров и признака.
+    db.execute_batch(
+        "DROP TRIGGER graph_read_graph_parts_INSERT; DROP TRIGGER graph_read_graph_parts_UPDATE; DROP TRIGGER graph_read_graph_parts_DELETE;
+         DROP TABLE graph_parts; DROP INDEX graph_edge_evidence_evidence;
+         DELETE FROM graph_meta WHERE key='delta_base';
+         UPDATE graph_meta SET value='2' WHERE key='schema_version';",
+    )
+    .unwrap();
+    assert!(store::status(&db).is_ok());
+    store::ensure_schema(&mut db).unwrap();
+    assert_eq!(
+        db.query_row(
+            "SELECT value FROM graph_meta WHERE key='schema_version'",
+            [],
+            |r| r.get::<_, String>(0)
+        )
+        .unwrap(),
+        "3"
+    );
+    assert_eq!(parts_count(&db), 0);
+    assert_eq!(
+        db.query_row("SELECT count(*) FROM graph_nodes", [], |r| r
+            .get::<_, i64>(0))
+            .unwrap(),
+        nodes
+    );
+    assert!(store::delta_base(&db).unwrap().is_none());
+    // Повторное открытие ничего не меняет, а триггер чтения на новой таблице работает.
+    let stamp = store::revision_stamp(&db).unwrap();
+    store::ensure_schema(&mut db).unwrap();
+    assert_eq!(stamp, store::revision_stamp(&db).unwrap());
+    db.execute(
+        "INSERT INTO graph_parts VALUES('docs/a.md','anchor','x','y')",
+        [],
+    )
+    .unwrap();
+    assert_ne!(stamp, store::revision_stamp(&db).unwrap());
+}

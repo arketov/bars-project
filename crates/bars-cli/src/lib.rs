@@ -1,6 +1,7 @@
 //! `bars-cli` как библиотека: разбор команд, вызов воркера и вывод (Т-20).
 //!
 //! Каждая команда — один вызов метода протокола ([`bars_protocol`]); ядра `bars-core` здесь нет.
+//! Единственное обращение к диску — запись выбора корня перед `register` (Т-7).
 //! Контракт — `docs/agent-tools/cli.md` и `docs/architecture/protocol.md`. Исполняемый файл
 //! (`main.rs`) только разбирает аргументы и вызывает [`run`]; тесты вызывают [`run`] со своим
 //! каналом и своим способом запуска воркера.
@@ -19,9 +20,9 @@ use std::sync::Arc;
 use bars_protocol::{
     AutostartGetParams, AutostartSetParams, Client, ClientError, ClientKind, DuplicatesParams,
     EXIT_FAILURE, Endpoint, InstallClient, InstallParams, LAUNCH_DEADLINE, Method, OutlineParams,
-    ProjectsParams, ReadParams, RegisterParams, ReindexParams, SearchParams, SimilarParams,
-    StatusParams, Target, UninstallParams, UnregisterParams, connect_or_launch_with, spawn_worker,
-    worker_exe,
+    ProjectsParams, ReadParams, RegisterParams, ReindexParams, RootChoice, SearchParams,
+    SimilarParams, StatusParams, Target, UninstallParams, UnregisterParams, connect_or_launch_with,
+    prepare_project, spawn_worker, worker_exe,
 };
 use clap::{Args, Parser, Subcommand};
 
@@ -97,6 +98,10 @@ pub enum Command {
     Register {
         /// Папка проекта; по умолчанию — `--project`, иначе текущая.
         path: Option<PathBuf>,
+        /// Корень документации нового проекта: `docs` — папка `docs/`, `all` — вся папка. Без
+        /// флага: `docs/`, если она есть, иначе вся папка. Настроенный проект не меняется.
+        #[arg(long, value_name = "docs|all", value_parser = parse_root)]
+        root: Option<RootChoice>,
     },
     /// Снять проект с регистрации (файлы и индекс не удаляются).
     Unregister,
@@ -196,7 +201,7 @@ pub struct SearchArgs {
     /// Сколько кандидатов брать до реранка.
     #[arg(long)]
     pub candidates: Option<u32>,
-    /// Порог оценки результата.
+    /// Порог опоры оценки результата (rerank, а без него косинус), 0…1.
     #[arg(long)]
     pub min_score: Option<f32>,
 }
@@ -346,6 +351,11 @@ fn project_arg(value: &str, cwd: &Path) -> String {
     } else {
         value.to_string()
     }
+}
+
+/// Значение `--root` команды `register`: `docs` или `all`.
+fn parse_root(value: &str) -> Result<RootChoice, String> {
+    RootChoice::parse(value).ok_or_else(|| "допустимо `docs` или `all`".to_string())
 }
 
 /// Абсолютный путь от `cwd` без `.` и `..`: клиент не ходит на диск, проверяет путь воркер.
@@ -595,12 +605,16 @@ async fn execute(
                 render::reindex,
             )
         }
-        Command::Register { path } => {
+        Command::Register { path, root } => {
             let path = match (path, cli.project) {
                 (Some(path), _) => absolute(&path, &env.cwd),
                 (None, Some(project)) => project_arg(&project, &env.cwd),
                 (None, None) => absolute(Path::new("."), &env.cwd),
             };
+            // Выбор корня записывается до регистрации (Т-7); не папка — ошибку даст воркер.
+            if Path::new(&path).is_dir() {
+                prepare_project(Path::new(&path), root)?;
+            }
             let params = RegisterParams { path };
             emit(
                 out,

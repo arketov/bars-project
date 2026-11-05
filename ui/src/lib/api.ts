@@ -72,6 +72,29 @@ export async function pickFolder(): Promise<string | null> {
   return shell<string | null>("pick_folder");
 }
 
+/** Корень документации нового проекта: `docs` — папка `docs/`, `all` — вся папка (Т-7). */
+export type RootChoice = "docs" | "all";
+
+/** Что предложить при добавлении папки: есть ли в ней `docs/` и какой корень отмечен по умолчанию. */
+export interface RootSuggestion {
+  has_docs: boolean;
+  suggested: RootChoice;
+  /** Проект, внутри которого лежит папка, и сколько его файлов уйдёт из его индекса при выборе корня. */
+  inside?: { name: string; path: string; all: number; docs: number } | null;
+  /** Зарегистрированные проекты внутри папки: они исключаются из нового проекта. */
+  nested?: { name: string; path: string }[];
+}
+
+export async function projectRootSuggest(path: string): Promise<RootSuggestion> {
+  if (!inTauri()) return { has_docs: false, suggested: "all" };
+  return (await shell<RootSuggestion>("project_root_suggest", { path }))!;
+}
+
+/** Записывает выбор корня в `.bars/config.toml` до регистрации; настроенный проект не меняется. */
+export async function projectRootPrepare(path: string, root: RootChoice | null): Promise<void> {
+  await shell("project_root_prepare", { path, root });
+}
+
 /** Открывает файл или папку программой ОС. */
 export async function openPath(path: string): Promise<void> {
   await shell("open_path", { path });
@@ -187,6 +210,8 @@ export interface DiskTreeOutput {
   dirs: string[];
   files: { path: string; size: number; modified: number }[];
   problems: { path: string; reason: string }[];
+  /** Вложенные проекты, исключённые из индекса этого проекта (Т-7). */
+  nested?: { name: string; path: string; dir: string; area: string; documents: number }[];
 }
 
 /** Ответ операции с файлом или папкой: `partial` — папка создана, а её `index.md` нет. */

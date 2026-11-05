@@ -55,7 +55,7 @@
       assert(true, `редактор после создания: ${theme}`);
       assert(document.querySelectorAll('.tree input[type=checkbox]').length >= 2, `галочки при открытом документе: ${theme}`);
     }
-    click('Новая папка (модуль)');
+    click('Новая папка верхнего уровня');
     await submit('Созданная');
     await wait(() => document.querySelector('[data-folder-path="Созданная"]'), 'созданная папка');
     const index = await invoke('document_read', {project, path:'docs/Созданная/index.md'});

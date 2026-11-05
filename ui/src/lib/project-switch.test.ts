@@ -59,18 +59,18 @@ it("ошибка копии оставляет диалог; успешная к
   await unsavedPrompt.saveBeside(); await switching;
   expect(app.current).toBe("C:/b"); expect(documentWrite).toHaveBeenLastCalledWith("C:/a",expect.stringContaining("(конфликт"),"черновик",null,"lf",false);
 });
-it("поиск проходит при конфликте своего проекта и чужом буфере; предупреждение выше обоих разделов", async () => {
+it("поиск проходит при конфликте своего проекта и чужом буфере; предупреждение в выдаче", async () => {
   const a = dirty(); a.status = "conflict"; a.message = "Файл изменён на диске";
   const b = dirty("C:/b"); b.status = "conflict";
   app.query = "правки";
   vi.mocked(call).mockRejectedValue(Error("модель недоступна"));
   await app.search();
-  expect(vi.mocked(call).mock.calls.map(c=>c[0])).toEqual(["text_search","search"]);
+  expect(vi.mocked(call).mock.calls.map(c=>c[0])).toEqual(["search"]);
   expect(app.searchUnsaved).toEqual([{path:a.path,reason:a.message}]);
   component = mount(SearchPane,{target:document.body}); flushSync();
   const alert = document.querySelector('[role="alert"]')!;
   expect(alert.textContent).toContain("Результаты по записанной версии");
-  expect(alert.compareDocumentPosition(document.querySelector('.semantic-title')!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(alert.closest('.wrap')).not.toBeNull();
   alert.querySelector<HTMLButtonElement>('button')!.click();
   expect(app.viewer?.hit.path).toBe(a.path); expect(app.viewer?.text).toBe("черновик");
 });

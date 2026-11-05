@@ -144,28 +144,26 @@ it("чтение из слоя завершает переход докумен�
   expect(missing).toContain('Закрыть вкладку'); expect(missing).toContain('Создать файл'); expect(missing).not.toContain('Обновить выдачу');
 });
 
-it("слой сохраняет общие режимы, показывает ошибку и передаёт согласие на переиндексацию", async () => {
+it("слой сохраняет общий запрос, показывает ошибку и передаёт согласие на переиндексацию", async () => {
   component = mount(Workspace, { target: document.body }); flushSync(); await settle();
   document.querySelector<HTMLButtonElement>('[aria-label="Глобальный поиск"]')!.click(); flushSync();
   const modal = document.querySelector<HTMLDialogElement>('dialog[aria-label="Глобальный поиск"]')!;
-  const mode = modal.querySelector<HTMLSelectElement>('[aria-label="Режим поиска"]')!;
-  mode.value = 'mix'; mode.dispatchEvent(new Event('change', { bubbles: true })); flushSync();
-  modal.querySelector<HTMLInputElement>('.related-option input')!.click(); flushSync();
-  const includeRelated = app.includeRelated;
+  const stepper = modal.querySelector<HTMLButtonElement>('[aria-label="Больше"]')!;
+  stepper.click(); flushSync();
+  const count = app.count;
   modal.querySelector<HTMLButtonElement>('[aria-label="Закрыть поиск"]')!.click(); flushSync();
-  expect(app.retrievalMode).toBe('mix'); expect(app.includeRelated).toBe(includeRelated);
+  expect(app.count).toBe(count);
   app.searchError = new BarsError('Провайдер недоступен', 'provider_error'); flushSync();
   document.querySelector<HTMLButtonElement>('[aria-label="Глобальный поиск"]')!.click(); flushSync();
   expect(modal.textContent).toContain('Embed-провайдер не ответил');
   expect(modal.textContent).toContain('provider_error');
   app.projects = [{ ...project, state: 'reindex_required' }]; flushSync();
   expect(modal.querySelector<HTMLTextAreaElement>('textarea')!.disabled).toBe(false);
-  expect(modal.querySelector<HTMLSelectElement>('[aria-label="Режим поиска"]')!.disabled).toBe(true);
-  expect(modal.textContent).toContain('«В тексте» читает файлы и доступен');
+  expect(modal.textContent).toContain('Поиск ждёт переиндексации');
   expect(vi.mocked(call).mock.calls.some(([method]) => method === 'reindex')).toBe(false);
   [...modal.querySelectorAll<HTMLButtonElement>('button')].find(b => b.textContent === 'Переиндексировать…')!.click(); flushSync();
   expect(app.consentOpen).toBe(true); expect(modal.open).toBe(false);
-  app.retrievalMode = 'hybrid'; app.includeRelated = true;
+  app.count = null;
 });
 afterEach(async () => { if (component) await unmount(component); component = undefined; document.body.replaceChildren(); app.viewer = null; app.current = null; settings.draft = null; settings.saved = null; vi.restoreAllMocks(); });
 it("несколько документов справа, подсветка и режим вкладки сохраняются при переключении", async () => {

@@ -305,6 +305,9 @@ pub struct DocSet {
     paths: std::collections::BTreeSet<String>,
     /// Имя файла без `.md` в нижнем регистре → пути с этим именем.
     by_name: std::collections::HashMap<String, Vec<String>>,
+    /// Папки (от корня документации) в областях вложенных проектов: ссылка внутрь них ведёт за
+    /// пределы индекса проекта и не считается битой.
+    excluded: Vec<String>,
 }
 
 fn stem_of(lower_path: &str) -> &str {
@@ -321,6 +324,20 @@ impl DocSet {
             set.paths.insert(path);
         }
         set
+    }
+
+    /// Задаёт исключённые папки (от корня документации через `/`): ссылки внутрь них не битые.
+    #[must_use]
+    pub fn with_excluded(mut self, excluded: Vec<String>) -> Self {
+        self.excluded = excluded;
+        self
+    }
+
+    fn is_excluded(&self, path: &str) -> bool {
+        self.excluded.iter().any(|dir| {
+            path.strip_prefix(dir.as_str())
+                .is_some_and(|rest| rest.is_empty() || rest.starts_with('/'))
+        })
     }
 
     pub fn contains(&self, path: &str) -> bool {
@@ -377,6 +394,7 @@ impl DocSet {
                 Some(path) if !is_markdown(&path) => Resolved::NotALink,
                 Some(path) => match self.paths.get(&path) {
                     Some(found) => Resolved::Found(found.as_str()),
+                    None if self.is_excluded(&path) => Resolved::NotALink,
                     None => Resolved::Broken,
                 },
             },

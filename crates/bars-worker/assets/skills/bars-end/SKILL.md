@@ -18,7 +18,7 @@ Sources, all of them:
 
 - this conversation, from the first message;
 - `git status`, `git diff` (staged and unstaged) and `git log` of the commits made during the session;
-- the session `log.md`, if there is one.
+- the session `handoff.md`, if one was already written on a milestone.
 
 Write a private inventory, one line per fact:
 

@@ -89,7 +89,7 @@
     </label>
     <button class="reset-scope" aria-label="Сбросить область поиска" title={(touched.length ? `Отмечено модулей: ${touched.length} из ${app.tree.length}` : "Ничего не отмечено — весь проект") + ". Сбросить область поиска"} onclick={() => app.clearSelection()}><Icon name="refresh" size={13} /></button>
     <button class="reset-scope" aria-label="Новый документ в корне документации" title="Новый документ в корне документации" onclick={() => entries.open("newDoc", ".")}><Icon name="doc" size={13} /></button>
-    <button class="reset-scope" aria-label="Новая папка (модуль)" title="Новая папка в корне документации — новый модуль" onclick={() => entries.open("newDir", ".")}><Icon name="folder" size={13} /></button></div>
+    <button class="reset-scope" aria-label="Новая папка верхнего уровня" title="Новая папка в корне документации — папка верхнего уровня (модуль)" onclick={() => entries.open("newDir", ".")}><Icon name="folder" size={13} /></button></div>
 
     <div class="tree" role="tree" aria-label="Документы проекта">
       {#each app.treeProblems as problem}<p class="none" role="status">{problem.path}{problem.path ? ": " : ""}{problem.reason}</p>{/each}

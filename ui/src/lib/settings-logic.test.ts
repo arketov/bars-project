@@ -32,8 +32,7 @@ const DOC: SettingsDoc = {
     rerank_candidates: 15,
     results: 5,
     results_reranked: 3,
-    min_score_vector: 0,
-    min_score_rerank: 0.1,
+    min_score: 0.1,
     agent_min_score: [0, 1],
     max_results: 20,
     max_candidates: 100,
@@ -169,14 +168,14 @@ describe("settings-logic", () => {
   it("числа и оценки", () => {
     const draft = clone(DOC);
     draft.search.candidates = 0;
-    draft.search.min_score_rerank = 1.5;
+    draft.search.min_score = 1.5;
     draft.search.agent_min_score = [0.8, 0.2];
     draft.chunking.max_chars = 2.5;
     expect(Object.keys(validate(draft)).sort()).toEqual([
       "chunking.max_chars",
       "search.agent_min_score",
       "search.candidates",
-      "search.min_score_rerank",
+      "search.min_score",
     ]);
     expect(parseScore("0,30")).toBe(0.3);
     expect(parseScore("abc")).toBeNaN();

@@ -321,7 +321,7 @@ impl Window {
     fn new() -> Self {
         let home = TempDir::new().unwrap();
         let provider = FakeProvider::new("m1");
-        let mut config = WorkerConfig::new(home.path().to_path_buf());
+        let mut config = WorkerConfig::new(home.path().to_path_buf()).without_graph_pause();
         config.install_env = Some(InstallEnv {
             home: home.path().join("client-home"),
             mcp_exe: PathBuf::from("/opt/bars/bars-mcp"),
@@ -613,6 +613,10 @@ async fn clients_status_follows_install_and_instruction_names_the_exes() {
 async fn another_docs_root_is_written_and_indexed() {
     let window = Window::new();
     let root = window.project("alpha", "documentation");
+    // Корень выбран `docs/`, документы лежат в `documentation/`; без выбора корнем стала бы
+    // вся папка (Т-7).
+    fs::create_dir_all(root.join(".bars")).unwrap();
+    fs::write(root.join(".bars/config.toml"), "docs_root = \"docs\"\n").unwrap();
     window.worker.register(&root).unwrap();
     window.idle().await;
     assert!(
@@ -683,7 +687,7 @@ async fn autostart_is_off_by_default_and_toggles() {
 #[tokio::test(flavor = "multi_thread")]
 async fn autostart_set_is_refused_where_the_os_has_none() {
     let home = TempDir::new().unwrap();
-    let config = WorkerConfig::new(home.path().to_path_buf());
+    let config = WorkerConfig::new(home.path().to_path_buf()).without_graph_pause();
     let worker = Worker::start(config, FakeProvider::new("m1")).unwrap();
     let handler = WorkerHandler::new(worker.clone());
     let state: AutostartOutput = serde_json::from_value(

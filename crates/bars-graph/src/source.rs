@@ -1,7 +1,8 @@
 use crate::links::{self, LinkKind, decode_percent, resolve_path, wikilink_name};
 use crate::*;
 use pulldown_cmark::{Event, Options, Parser, Tag, TagEnd};
-use std::collections::{BTreeMap, BTreeSet};
+use serde::{Deserialize, Serialize};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::ops::Range;
 
 mod entities;
@@ -391,6 +392,199 @@ struct Heading {
     node: String,
 }
 
+/// Ссылка документа, которую разрешают после разбора всех документов проекта.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PendingLink {
+    /// Узел-владелец: раздел с заголовком выше ссылки или сам документ.
+    pub owner: String,
+    pub proof: String,
+    pub target: String,
+    pub wiki: bool,
+}
+
+/// Результат разбора одного документа: всё, что зависит только от его текста и чанков.
+pub struct DocParse {
+    pub source: SourceDocument,
+    /// Узлы, рёбра и доказательства документа; сущности — вклад этого документа.
+    pub data: Dataset,
+    /// Сначала обычные ссылки в порядке текста, затем вики-ссылки.
+    pub links: Vec<PendingLink>,
+}
+
+/// Исход разрешения одной ссылки.
+pub enum LinkOutcome {
+    /// Ссылка не даёт ни ребра, ни битой ссылки (внутри документа, внешняя).
+    Nothing,
+    Edge(String),
+    Broken(BrokenLink),
+}
+
+/// Что нужно знать о проекте, чтобы разрешить ссылку.
+pub struct LinkContext<'a> {
+    /// Путь от корня документации → id документа, для всех документов графа.
+    pub docs: &'a BTreeMap<String, String>,
+    /// (путь документа-цели, якорь) → id раздела.
+    pub anchor: &'a dyn Fn(&str, &str) -> Option<String>,
+}
+
+/// Путь адресата обычной ссылки (пустой — за корнем документации) и якорь; `None` — внешняя.
+fn link_target_path(docs_path: &str, target: &str) -> Option<(String, Option<String>)> {
+    if target.contains(':') || target.starts_with("//") {
+        return None;
+    }
+    let (file, fragment) = target
+        .split_once('#')
+        .map_or((target, None), |(p, a)| (p, Some(a.to_string())));
+    let path = if file.is_empty() {
+        docs_path.to_string()
+    } else {
+        resolve_path(docs_path, file).unwrap_or_default()
+    };
+    Some((path, fragment))
+}
+
+pub fn resolve_link(ctx: &LinkContext<'_>, docs_path: &str, link: &PendingLink) -> LinkOutcome {
+    if link.wiki {
+        // `[[#раздел]]` — ссылка внутри документа, ребра не даёт.
+        let Some(name) = wikilink_name(&link.target) else {
+            return LinkOutcome::Nothing;
+        };
+        return match links::resolve_wikilink(
+            ctx.docs.iter().map(|(p, id)| (p.as_str(), id.clone())),
+            docs_path,
+            &name,
+        ) {
+            Some(id) => LinkOutcome::Edge(id),
+            None => LinkOutcome::Broken(BrokenLink {
+                source: link.owner.clone(),
+                evidence: link.proof.clone(),
+                target: format!("[[{}]]", link.target),
+                reason: "target_not_indexed".into(),
+            }),
+        };
+    }
+    let Some((path, fragment)) = link_target_path(docs_path, &link.target) else {
+        return LinkOutcome::Nothing;
+    };
+    let target_path = (!path.is_empty()).then_some(path);
+    let target_id = target_path.as_ref().and_then(|p| ctx.docs.get(p));
+    let resolved = target_id.and_then(|id| match fragment {
+        Some(fragment) => {
+            let fragment = decode_percent(&fragment)?;
+            (ctx.anchor)(target_path.as_deref()?, &fragment)
+        }
+        None => Some(id.clone()),
+    });
+    match resolved {
+        Some(id) => LinkOutcome::Edge(id),
+        None => LinkOutcome::Broken(BrokenLink {
+            source: link.owner.clone(),
+            evidence: link.proof.clone(),
+            target: link.target.clone(),
+            reason: if target_path.is_none() {
+                "outside_docs_root"
+            } else if target_id.is_some() {
+                "anchor_missing"
+            } else {
+                "target_not_indexed"
+            }
+            .into(),
+        }),
+    }
+}
+
+/// Разделитель адресата и номера в ключе части «link».
+pub const PART_KEY_SEPARATOR: char = '\u{1f}';
+
+fn seq_key(seq: usize) -> String {
+    format!("{seq:06}")
+}
+
+/// Части документа для таблицы `graph_parts`: сущности, якоря, ссылки. Битые ссылки добавляет
+/// разрешение (`broken_part`).
+pub fn parts_for(parse: &DocParse) -> Vec<Part> {
+    let path = &parse.source.meta.path;
+    let docs_path = &parse.source.meta.docs_path;
+    let mut parts = Vec::new();
+    for node in &parse.data.nodes {
+        match node.reference.kind {
+            Kind::Entity => parts.push(Part {
+                source_path: path.clone(),
+                kind: "entity".into(),
+                key: node.reference.id.clone(),
+                data: serde_json::to_string(node).expect("узел сериализуется"),
+            }),
+            Kind::Section => {
+                if let Some(anchor) = &node.anchor {
+                    parts.push(Part {
+                        source_path: path.clone(),
+                        kind: "anchor".into(),
+                        key: anchor.clone(),
+                        data: node.reference.id.clone(),
+                    });
+                }
+            }
+            _ => {}
+        }
+    }
+    for (seq, link) in parse.links.iter().enumerate() {
+        let (kind, key) = if link.wiki {
+            ("wiki", seq_key(seq))
+        } else if let Some((target, _)) = link_target_path(docs_path, &link.target) {
+            (
+                "link",
+                format!("{target}{PART_KEY_SEPARATOR}{}", seq_key(seq)),
+            )
+        } else {
+            continue;
+        };
+        parts.push(Part {
+            source_path: path.clone(),
+            kind: kind.into(),
+            key,
+            data: serde_json::to_string(link).expect("ссылка сериализуется"),
+        });
+    }
+    parts
+}
+
+pub fn broken_part(source_path: &str, seq: usize, broken: &BrokenLink) -> Part {
+    Part {
+        source_path: source_path.into(),
+        kind: "broken".into(),
+        key: seq_key(seq),
+        data: serde_json::to_string(broken).expect("битая ссылка сериализуется"),
+    }
+}
+
+/// Номер ссылки из ключа части «link»/«wiki».
+pub fn part_seq(key: &str) -> usize {
+    key.rsplit(PART_KEY_SEPARATOR)
+        .next()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(0)
+}
+
+/// Слияние вкладов документов в один узел сущности: порядок вкладов не важен.
+pub fn merge_entity(contributions: &[Node]) -> Option<Node> {
+    let mut merged = contributions.first()?.clone();
+    for node in &contributions[1..] {
+        merged.source_ids.extend(node.source_ids.iter().cloned());
+        merged.evidence.extend(node.evidence.iter().cloned());
+        merged.aliases.extend(node.aliases.iter().cloned());
+    }
+    merged.source_ids.sort();
+    merged.source_ids.dedup();
+    merged.evidence.sort();
+    merged.evidence.dedup();
+    merged.aliases.sort();
+    merged.aliases.dedup();
+    merged.reference.revision = blake3::hash(&serde_json::to_vec(&merged.evidence).expect("json"))
+        .to_hex()
+        .to_string();
+    Some(merged)
+}
+
 pub fn build(
     namespace: &str,
     docs_root: &str,
@@ -402,362 +596,423 @@ pub fn build(
 pub fn build_cancellable(
     namespace: &str,
     docs_root: &str,
-    mut inputs: Vec<InputDocument>,
+    inputs: Vec<InputDocument>,
     mut cancelled: impl FnMut() -> bool,
 ) -> Result<Dataset, GraphError> {
-    inputs.sort_by(|a, b| a.docs_path.cmp(&b.docs_path));
-    let entities = Entities::collect(&inputs, &mut cancelled)?;
-    let mut data = Dataset::empty(namespace, docs_root);
-    let mut pending = Vec::new();
-    let mut seen = BTreeSet::new();
+    let mut parses = Vec::with_capacity(inputs.len());
     for input in inputs {
         if cancelled() {
             return Err(GraphError::Cancelled);
         }
-        if input.docs_path.is_empty()
-            || input.docs_path.starts_with('/')
-            || input.docs_path.split('/').any(|s| s == "..")
-            || !seen.insert(input.docs_path.clone())
-        {
-            return Err(GraphError::InvalidData(
-                "неверный/повторный путь документа".into(),
-            ));
-        }
-        let hash = blake3::hash(input.text.as_bytes()).to_hex().to_string();
-        let reference = object_ref(namespace, Kind::Document, &input.docs_path, &hash);
-        let source = SourceDocument {
-            meta: SourceMeta {
-                reference: reference.clone(),
-                path: input.path,
-                docs_path: input.docs_path,
-                module: input.module,
-                title: input.title.clone(),
-                hash: hash.clone(),
-            },
-            text: input.text,
-        };
-        let doc_id = reference.id.clone();
-        let start = links::body_start(&source.text);
-        let mut headings: Vec<Heading> = Vec::new();
-        let mut paragraphs = Vec::new();
-        let mut current: Option<(Range<usize>, u8, String)> = None;
-        for (event, range) in Parser::new_ext(
-            &source.text[start..],
-            Options::ENABLE_TABLES | Options::ENABLE_STRIKETHROUGH,
-        )
-        .into_offset_iter()
-        {
-            if cancelled() {
-                return Err(GraphError::Cancelled);
-            }
-            let range = range.start + start..range.end + start;
-            match event {
-                Event::Start(Tag::Heading { level, .. })
-                    if source.text[range.clone()].trim_start().starts_with('#') =>
-                {
-                    current = Some((range, level as u8, String::new()));
-                }
-                Event::Text(text) | Event::Code(text) => {
-                    if let Some((_, _, title)) = &mut current {
-                        title.push_str(&text);
-                    }
-                }
-                Event::End(TagEnd::Heading(_)) => {
-                    if let Some((range, level, text)) = current.take() {
-                        let key = format!("{}:{}", source.meta.docs_path, range.start);
-                        let node = object_ref(namespace, Kind::Section, &key, &hash).id;
-                        headings.push(Heading {
-                            start: range.start,
-                            end: range.end,
-                            level,
-                            text,
-                            node,
-                        });
-                    }
-                }
-                Event::Start(Tag::Paragraph) => paragraphs.push(range),
-                _ => {}
-            }
-        }
-        let doc_range = headings.first().map_or(start..start, |h| h.start..h.end);
-        let proof = evidence(&mut data, &source, doc_range, "markdown-source-v1")?;
-        data.nodes.push(Node {
+        parses.push(parse_document(namespace, docs_root, input, &mut cancelled)?);
+    }
+    assemble(namespace, docs_root, parses, &mut cancelled)
+}
+
+/// Разбор одного документа. Псевдонимы сущностей действуют только внутри документа, поэтому
+/// результат не зависит от остальных документов проекта.
+pub fn parse_document(
+    namespace: &str,
+    docs_root: &str,
+    input: InputDocument,
+    cancelled: &mut impl FnMut() -> bool,
+) -> Result<DocParse, GraphError> {
+    if input.docs_path.is_empty()
+        || input.docs_path.starts_with('/')
+        || input.docs_path.split('/').any(|s| s == "..")
+    {
+        return Err(GraphError::InvalidData(
+            "неверный/повторный путь документа".into(),
+        ));
+    }
+    let entities = Entities::collect(std::slice::from_ref(&input), cancelled)?;
+    let mut data = Dataset::empty(namespace, docs_root);
+    let mut pending = Vec::new();
+    let hash = blake3::hash(input.text.as_bytes()).to_hex().to_string();
+    let reference = object_ref(namespace, Kind::Document, &input.docs_path, &hash);
+    let source = SourceDocument {
+        meta: SourceMeta {
             reference: reference.clone(),
-            label: input.title,
-            namespace: namespace.into(),
+            path: input.path,
+            docs_path: input.docs_path,
+            module: input.module,
+            title: input.title.clone(),
+            hash: hash.clone(),
+        },
+        text: input.text,
+    };
+    let doc_id = reference.id.clone();
+    let start = links::body_start(&source.text);
+    let mut headings: Vec<Heading> = Vec::new();
+    let mut paragraphs = Vec::new();
+    let mut current: Option<(Range<usize>, u8, String)> = None;
+    for (event, range) in Parser::new_ext(
+        &source.text[start..],
+        Options::ENABLE_TABLES | Options::ENABLE_STRIKETHROUGH,
+    )
+    .into_offset_iter()
+    {
+        if cancelled() {
+            return Err(GraphError::Cancelled);
+        }
+        let range = range.start + start..range.end + start;
+        match event {
+            Event::Start(Tag::Heading { level, .. })
+                if source.text[range.clone()].trim_start().starts_with('#') =>
+            {
+                current = Some((range, level as u8, String::new()));
+            }
+            Event::Text(text) | Event::Code(text) => {
+                if let Some((_, _, title)) = &mut current {
+                    title.push_str(&text);
+                }
+            }
+            Event::End(TagEnd::Heading(_)) => {
+                if let Some((range, level, text)) = current.take() {
+                    let key = format!("{}:{}", source.meta.docs_path, range.start);
+                    let node = object_ref(namespace, Kind::Section, &key, &hash).id;
+                    headings.push(Heading {
+                        start: range.start,
+                        end: range.end,
+                        level,
+                        text,
+                        node,
+                    });
+                }
+            }
+            Event::Start(Tag::Paragraph) => paragraphs.push(range),
+            _ => {}
+        }
+    }
+    let doc_range = headings.first().map_or(start..start, |h| h.start..h.end);
+    let proof = evidence(&mut data, &source, doc_range, "markdown-source-v1")?;
+    data.nodes.push(Node {
+        reference: reference.clone(),
+        label: input.title,
+        namespace: namespace.into(),
+        aliases: vec![],
+        source_ids: vec![doc_id.clone()],
+        evidence: vec![proof],
+        roles: roles(&source.meta.docs_path, ""),
+        parent: None,
+        anchor: None,
+    });
+    let mut stack: Vec<&Heading> = vec![];
+    let mut anchors = BTreeMap::<String, usize>::new();
+    for heading in &headings {
+        while stack.last().is_some_and(|h| h.level >= heading.level) {
+            stack.pop();
+        }
+        let parent = stack.last().map_or(doc_id.as_str(), |h| h.node.as_str());
+        let proof = evidence(
+            &mut data,
+            &source,
+            heading.start..heading.end,
+            "markdown-source-v1",
+        )?;
+        let base = anchor(&heading.text);
+        let count = anchors.entry(base.clone()).or_default();
+        let anchor = if *count == 0 {
+            base
+        } else {
+            format!("{base}-{count}")
+        };
+        *count += 1;
+        data.nodes.push(Node {
+            reference: ObjectRef {
+                kind: Kind::Section,
+                id: heading.node.clone(),
+                revision: hash.clone(),
+            },
+            label: heading.text.clone(),
+            namespace: source.meta.docs_path.clone(),
             aliases: vec![],
             source_ids: vec![doc_id.clone()],
-            evidence: vec![proof],
-            roles: roles(&source.meta.docs_path, ""),
-            parent: None,
-            anchor: None,
+            evidence: vec![proof.clone()],
+            roles: roles(&source.meta.docs_path, &heading.text),
+            parent: Some(parent.into()),
+            anchor: Some(anchor),
         });
-        let mut stack: Vec<&Heading> = vec![];
-        let mut anchors = BTreeMap::<String, usize>::new();
-        for heading in &headings {
-            while stack.last().is_some_and(|h| h.level >= heading.level) {
-                stack.pop();
-            }
-            let parent = stack.last().map_or(doc_id.as_str(), |h| h.node.as_str());
-            let proof = evidence(
+        edge(
+            &mut data,
+            parent,
+            &heading.node,
+            Predicate::Contains,
+            Polarity::Positive,
+            BTreeMap::new(),
+            Origin::Structural,
+            &proof,
+        )?;
+        stack.push(heading);
+    }
+    let owner = |offset: usize| {
+        headings
+            .iter()
+            .rev()
+            .find(|h| h.start <= offset)
+            .map_or(doc_id.as_str(), |h| h.node.as_str())
+    };
+    for range in paragraphs {
+        let proof = evidence(&mut data, &source, range.clone(), "markdown-source-v1")?;
+        let owner_id = owner(range.start);
+        if let Some(node) = data.nodes.iter_mut().find(|n| n.reference.id == owner_id) {
+            node.evidence.push(proof);
+        }
+        assertions(&entities, &mut data, &source, owner_id, range)?;
+    }
+    let parsed = links::parse_links(&source.text);
+    for wiki in [false, true] {
+        for link in parsed.iter().filter(|l| (l.kind == LinkKind::Wiki) == wiki) {
+            let proof = evidence(&mut data, &source, link.start..link.end, "markdown-link-v1")?;
+            pending.push(PendingLink {
+                owner: owner(link.start).to_string(),
+                proof,
+                target: link.raw_target.clone(),
+                wiki,
+            });
+        }
+    }
+    let mut previous: Option<String> = None;
+    for chunk in input.chunks {
+        let reference = object_ref(
+            namespace,
+            Kind::Chunk,
+            &format!("{}:{}", source.meta.docs_path, chunk.key),
+            &hash,
+        );
+        let mut proofs = Vec::new();
+        for range in &chunk.spans {
+            proofs.push(evidence(
                 &mut data,
                 &source,
-                heading.start..heading.end,
-                "markdown-source-v1",
-            )?;
-            let base = anchor(&heading.text);
-            let count = anchors.entry(base.clone()).or_default();
-            let anchor = if *count == 0 {
-                base
-            } else {
-                format!("{base}-{count}")
-            };
-            *count += 1;
-            data.nodes.push(Node {
-                reference: ObjectRef {
-                    kind: Kind::Section,
-                    id: heading.node.clone(),
-                    revision: hash.clone(),
-                },
-                label: heading.text.clone(),
-                namespace: source.meta.docs_path.clone(),
-                aliases: vec![],
-                source_ids: vec![doc_id.clone()],
-                evidence: vec![proof.clone()],
-                roles: roles(&source.meta.docs_path, &heading.text),
-                parent: Some(parent.into()),
-                anchor: Some(anchor),
-            });
+                range.clone(),
+                "chunk-source-v1",
+            )?);
+        }
+        data.nodes.push(Node {
+            reference: reference.clone(),
+            label: chunk.label,
+            namespace: source.meta.docs_path.clone(),
+            aliases: vec![],
+            source_ids: vec![doc_id.clone()],
+            evidence: proofs.clone(),
+            roles: roles(&source.meta.docs_path, ""),
+            parent: Some(doc_id.clone()),
+            anchor: None,
+        });
+        for proof in &proofs {
             edge(
                 &mut data,
-                parent,
-                &heading.node,
+                &doc_id,
+                &reference.id,
                 Predicate::Contains,
                 Polarity::Positive,
                 BTreeMap::new(),
                 Origin::Structural,
-                &proof,
+                proof,
             )?;
-            stack.push(heading);
-        }
-        let owner = |offset: usize| {
-            headings
+            let ev = data
+                .evidence
                 .iter()
-                .rev()
-                .find(|h| h.start <= offset)
-                .map_or(doc_id.as_str(), |h| h.node.as_str())
-        };
-        for range in paragraphs {
-            let proof = evidence(&mut data, &source, range.clone(), "markdown-source-v1")?;
-            let owner_id = owner(range.start);
-            if let Some(node) = data.nodes.iter_mut().find(|n| n.reference.id == owner_id) {
-                node.evidence.push(proof);
-            }
-            assertions(&entities, &mut data, &source, owner_id, range)?;
-        }
-        let parsed = links::parse_links(&source.text);
-        for link in parsed.iter().filter(|l| l.kind != LinkKind::Wiki) {
-            let proof = evidence(&mut data, &source, link.start..link.end, "markdown-link-v1")?;
-            pending.push((
-                source.meta.docs_path.clone(),
-                owner(link.start).to_string(),
-                proof,
-                link.raw_target.clone(),
-                false,
-            ));
-        }
-        for link in parsed.iter().filter(|l| l.kind == LinkKind::Wiki) {
-            let proof = evidence(&mut data, &source, link.start..link.end, "markdown-link-v1")?;
-            pending.push((
-                source.meta.docs_path.clone(),
-                owner(link.start).to_string(),
-                proof,
-                link.raw_target.clone(),
-                true,
-            ));
-        }
-        let mut previous: Option<String> = None;
-        for chunk in input.chunks {
-            let reference = object_ref(
-                namespace,
-                Kind::Chunk,
-                &format!("{}:{}", source.meta.docs_path, chunk.key),
-                &hash,
-            );
-            let mut proofs = Vec::new();
-            for range in &chunk.spans {
-                proofs.push(evidence(
-                    &mut data,
-                    &source,
-                    range.clone(),
-                    "chunk-source-v1",
-                )?);
-            }
-            data.nodes.push(Node {
-                reference: reference.clone(),
-                label: chunk.label,
-                namespace: source.meta.docs_path.clone(),
-                aliases: vec![],
-                source_ids: vec![doc_id.clone()],
-                evidence: proofs.clone(),
-                roles: roles(&source.meta.docs_path, ""),
-                parent: Some(doc_id.clone()),
-                anchor: None,
-            });
-            for proof in &proofs {
-                edge(
-                    &mut data,
-                    &doc_id,
-                    &reference.id,
-                    Predicate::Contains,
-                    Polarity::Positive,
-                    BTreeMap::new(),
-                    Origin::Structural,
-                    proof,
-                )?;
-                let ev = data
-                    .evidence
-                    .iter()
-                    .find(|e| &e.id == proof)
-                    .unwrap()
-                    .span
-                    .clone();
-                for (i, h) in headings.iter().enumerate() {
-                    let end = headings
-                        .get(i + 1)
-                        .map_or(source.text.len(), |next| next.start);
-                    if ev.start < end && ev.end > h.start {
-                        edge(
-                            &mut data,
-                            &reference.id,
-                            &h.node,
-                            Predicate::Covers,
-                            Polarity::Positive,
-                            BTreeMap::new(),
-                            Origin::Structural,
-                            proof,
-                        )?;
-                    }
-                }
-            }
-            if let (Some(prev), Some(proof)) = (previous, proofs.first()) {
-                edge(
-                    &mut data,
-                    &prev,
-                    &reference.id,
-                    Predicate::NextChunk,
-                    Polarity::Positive,
-                    BTreeMap::new(),
-                    Origin::Structural,
-                    proof,
-                )?;
-            }
-            previous = Some(reference.id);
-        }
-        data.sources.push(source);
-    }
-    for (path, owner, proof, target, wiki) in pending {
-        if cancelled() {
-            return Err(GraphError::Cancelled);
-        }
-        if wiki {
-            match wikilink_name(&target) {
-                // `[[#раздел]]` — ссылка внутри документа, ребра не даёт.
-                None => {}
-                Some(name) => match links::resolve_wikilink(
-                    data.sources
-                        .iter()
-                        .map(|s| (s.meta.docs_path.as_str(), s.meta.reference.id.clone())),
-                    &path,
-                    &name,
-                ) {
-                    Some(id) => edge(
+                .find(|e| &e.id == proof)
+                .unwrap()
+                .span
+                .clone();
+            for (i, h) in headings.iter().enumerate() {
+                let end = headings
+                    .get(i + 1)
+                    .map_or(source.text.len(), |next| next.start);
+                if ev.start < end && ev.end > h.start {
+                    edge(
                         &mut data,
-                        &owner,
-                        &id,
-                        Predicate::LinksTo,
+                        &reference.id,
+                        &h.node,
+                        Predicate::Covers,
                         Polarity::Positive,
                         BTreeMap::new(),
                         Origin::Structural,
-                        &proof,
-                    )?,
-                    None => data.broken_links.push(BrokenLink {
-                        source: owner,
-                        evidence: proof,
-                        target: format!("[[{target}]]"),
-                        reason: "target_not_indexed".into(),
-                    }),
-                },
+                        proof,
+                    )?;
+                }
             }
-            continue;
         }
-        if target.contains(':') || target.starts_with("//") {
-            continue;
-        }
-        let (file, fragment) = target
-            .split_once('#')
-            .map_or((target.as_str(), None), |(p, a)| (p, Some(a)));
-        let target_path = if file.is_empty() {
-            Some(path.clone())
-        } else {
-            resolve_path(&path, file)
-        };
-        let target_source = target_path
-            .as_ref()
-            .and_then(|p| data.sources.iter().find(|s| &s.meta.docs_path == p));
-        let resolved = target_source.and_then(|source| {
-            if let Some(fragment) = fragment {
-                let fragment = decode_percent(fragment)?;
-                data.nodes
-                    .iter()
-                    .find(|n| {
-                        n.reference.kind == Kind::Section
-                            && n.source_ids.contains(&source.meta.reference.id)
-                            && n.anchor.as_ref() == Some(&fragment)
-                    })
-                    .map(|n| n.reference.id.clone())
-            } else {
-                Some(source.meta.reference.id.clone())
-            }
-        });
-        if let Some(id) = resolved {
+        if let (Some(prev), Some(proof)) = (previous, proofs.first()) {
             edge(
                 &mut data,
-                &owner,
-                &id,
-                Predicate::LinksTo,
+                &prev,
+                &reference.id,
+                Predicate::NextChunk,
                 Polarity::Positive,
                 BTreeMap::new(),
                 Origin::Structural,
-                &proof,
+                proof,
             )?;
-        } else {
-            data.broken_links.push(BrokenLink {
-                source: owner,
-                evidence: proof,
-                target,
-                reason: if target_path.is_none() {
-                    "outside_docs_root"
-                } else if target_source.is_some() {
-                    "anchor_missing"
-                } else {
-                    "target_not_indexed"
+        }
+        previous = Some(reference.id);
+    }
+    Ok(DocParse {
+        source,
+        data,
+        links: pending,
+    })
+}
+
+/// Слияние ребра в набор по его id: доказательства дописываются без повторов.
+fn merge_edge(data: &mut Dataset, at: &mut HashMap<String, usize>, edge: Edge) {
+    match at.get(&edge.id) {
+        Some(&i) => {
+            for proof in edge.evidence {
+                if !data.edges[i].evidence.contains(&proof) {
+                    data.edges[i].evidence.push(proof);
                 }
-                .into(),
-            });
+            }
+        }
+        None => {
+            at.insert(edge.id.clone(), data.edges.len());
+            data.edges.push(edge);
         }
     }
-    for node in data
-        .nodes
+}
+
+/// Идентификатор ребра: хеш (от, к, предикат, полярность, квалификаторы).
+pub fn edge_id(
+    from: &str,
+    to: &str,
+    predicate: Predicate,
+    polarity: Polarity,
+    qualifiers: &BTreeMap<String, String>,
+) -> String {
+    let key = serde_json::to_vec(&(from, to, predicate, polarity, qualifiers))
+        .expect("ребро сериализуется");
+    blake3::hash(&key).to_hex().to_string()
+}
+
+/// Ребро `links_to` владельца ссылки с одним доказательством.
+pub fn links_to_edge(owner: &str, to: &str, proof: &str) -> Edge {
+    let qualifiers = BTreeMap::new();
+    Edge {
+        id: edge_id(
+            owner,
+            to,
+            Predicate::LinksTo,
+            Polarity::Positive,
+            &qualifiers,
+        ),
+        from: owner.into(),
+        to: to.into(),
+        predicate: Predicate::LinksTo,
+        polarity: Polarity::Positive,
+        qualifiers,
+        origin: Origin::Structural,
+        evidence: vec![proof.into()],
+        score: None,
+    }
+}
+
+/// Сборка проекта из разборов документов: слияние общих сущностей и рёбер, разрешение ссылок.
+/// Источники сортируются по пути, доказательства рёбер правил — по идентификатору, поэтому
+/// результат не зависит от порядка разбора и совпадает с частичным обновлением по тем же разборам.
+pub fn assemble(
+    namespace: &str,
+    docs_root: &str,
+    mut parses: Vec<DocParse>,
+    cancelled: &mut impl FnMut() -> bool,
+) -> Result<Dataset, GraphError> {
+    parses.sort_by(|a, b| a.source.meta.docs_path.cmp(&b.source.meta.docs_path));
+    let mut data = Dataset::empty(namespace, docs_root);
+    let mut seen = BTreeSet::new();
+    let mut edge_at: HashMap<String, usize> = HashMap::new();
+    let mut entities: BTreeMap<String, Vec<Node>> = BTreeMap::new();
+    let mut pending: Vec<(String, String, usize, PendingLink)> = Vec::new();
+    let mut anchors: HashMap<(String, String), String> = HashMap::new();
+    let mut docs: BTreeMap<String, String> = BTreeMap::new();
+    for parse in parses {
+        if cancelled() {
+            return Err(GraphError::Cancelled);
+        }
+        if !seen.insert(parse.source.meta.docs_path.clone()) {
+            return Err(GraphError::InvalidData(
+                "неверный/повторный путь документа".into(),
+            ));
+        }
+        data.parts.extend(parts_for(&parse));
+        let DocParse {
+            source,
+            data: part,
+            links,
+        } = parse;
+        data.evidence.extend(part.evidence);
+        for node in part.nodes {
+            match node.reference.kind {
+                Kind::Entity => entities
+                    .entry(node.reference.id.clone())
+                    .or_default()
+                    .push(node),
+                _ => {
+                    if node.reference.kind == Kind::Section
+                        && let Some(anchor) = &node.anchor
+                    {
+                        anchors.insert(
+                            (source.meta.docs_path.clone(), anchor.clone()),
+                            node.reference.id.clone(),
+                        );
+                    }
+                    data.nodes.push(node);
+                }
+            }
+        }
+        for edge in part.edges {
+            merge_edge(&mut data, &mut edge_at, edge);
+        }
+        docs.insert(
+            source.meta.docs_path.clone(),
+            source.meta.reference.id.clone(),
+        );
+        for (seq, link) in links.into_iter().enumerate() {
+            pending.push((
+                source.meta.docs_path.clone(),
+                source.meta.path.clone(),
+                seq,
+                link,
+            ));
+        }
+        data.sources.push(source);
+    }
+    for contributions in entities.values() {
+        data.nodes.extend(merge_entity(contributions));
+    }
+    let anchor_of = |path: &str, fragment: &str| {
+        anchors
+            .get(&(path.to_string(), fragment.to_string()))
+            .cloned()
+    };
+    let context = LinkContext {
+        docs: &docs,
+        anchor: &anchor_of,
+    };
+    for (docs_path, path, seq, link) in pending {
+        if cancelled() {
+            return Err(GraphError::Cancelled);
+        }
+        match resolve_link(&context, &docs_path, &link) {
+            LinkOutcome::Nothing => {}
+            LinkOutcome::Edge(to) => {
+                let edge = links_to_edge(&link.owner, &to, &link.proof);
+                merge_edge(&mut data, &mut edge_at, edge);
+            }
+            LinkOutcome::Broken(broken) => {
+                data.parts.push(broken_part(&path, seq, &broken));
+                data.broken_links.push(broken);
+            }
+        }
+    }
+    for edge in data
+        .edges
         .iter_mut()
-        .filter(|n| n.reference.kind == Kind::Entity)
+        .filter(|e| e.origin == Origin::ExplicitRule)
     {
-        let mut proof = node.evidence.clone();
-        proof.sort();
-        proof.dedup();
-        node.reference.revision = blake3::hash(&serde_json::to_vec(&proof)?)
-            .to_hex()
-            .to_string();
+        edge.evidence.sort();
+        edge.evidence.dedup();
     }
     data.warnings.push("Явные правила не гарантируют полноту смысловых отношений; отсутствие связи не доказывает отсутствие проверки или зависимости".into());
     data.fingerprint();

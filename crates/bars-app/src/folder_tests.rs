@@ -25,7 +25,7 @@ impl Fixture {
         )
         .unwrap();
         let worker = Worker::start(
-            WorkerConfig::new(temp.path().join("home")),
+            WorkerConfig::new(temp.path().join("home")).without_graph_pause(),
             FakeProvider::new("m1"),
         )
         .unwrap();

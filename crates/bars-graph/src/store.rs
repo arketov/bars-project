@@ -1,9 +1,11 @@
 use crate::*;
 use rusqlite::{Connection, OptionalExtension, params};
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 
-pub const GRAPH_SCHEMA_VERSION: u32 = 2;
+pub const GRAPH_SCHEMA_VERSION: u32 = 3;
+mod delta;
 mod schema;
+pub use delta::{DeltaInput, SimilarityDelta, apply_delta, delta_base};
 pub use schema::{RevisionStamp, revision_stamp};
 
 pub use crate::GraphStatus;
@@ -64,6 +66,21 @@ pub fn delete_payload(db: &Connection, key: PayloadKey) -> Result<(), GraphError
 /// Добавочная схема графа; embeddings не изменяются.
 pub fn ensure_schema(db: &mut Connection) -> Result<(), GraphError> {
     schema::ensure(db)
+}
+
+/// Исходный текст документа из опубликованного графа, если хеш совпадает с `hash`.
+pub fn source_text(db: &Connection, path: &str, hash: &str) -> Result<Option<String>, GraphError> {
+    if schema::version(db)?.is_none() {
+        return Ok(None);
+    }
+    db.query_row(
+        "SELECT data FROM graph_sources WHERE path=?1 AND revision=?2",
+        [path, hash],
+        |r| r.get::<_, String>(0),
+    )
+    .optional()?
+    .map(|data| Ok(serde_json::from_str::<SourceDocument>(&data)?.text))
+    .transpose()
 }
 
 pub fn document_manifest(db: &Connection) -> Result<BTreeMap<String, String>, GraphError> {
@@ -187,13 +204,20 @@ pub fn publish_with_errors(
     errors: &[GraphFileError],
 ) -> Result<(), GraphError> {
     validate(data)?;
-    let tx = db.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
-    publish_in_transaction(&tx, data, expected, errors)?;
-    tx.commit()?;
-    Ok(())
+    let boost = CacheBoost::raise(db)?;
+    let result = (|| -> Result<(), GraphError> {
+        let tx = db.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
+        publish_in_transaction(&tx, data, expected, errors)?;
+        tx.commit()?;
+        Ok(())
+    })();
+    let restored = boost.restore(db);
+    result.and(restored)
 }
 
 /// Владелец транзакции также фиксирует checkpoint и очистку временных payload.
+/// Ревизия чтения увеличивается один раз в конце; владельцу стоит заранее поднять
+/// кэш страниц через `CacheBoost::raise` и вернуть прежний после COMMIT.
 pub fn publish_in_transaction(
     tx: &rusqlite::Transaction<'_>,
     data: &Dataset,
@@ -233,68 +257,105 @@ pub fn publish_in_transaction(
             "граф не покрывает снимок индексированных документов".into(),
         ));
     }
-    tx.execute_batch("DELETE FROM graph_edge_evidence; DELETE FROM graph_node_sources; DELETE FROM graph_edges; DELETE FROM graph_evidence; DELETE FROM graph_nodes; DELETE FROM graph_sources; DELETE FROM graph_aux;")?;
-    for source in &data.sources {
-        tx.execute(
-            "INSERT INTO graph_sources VALUES(?1,?2,?3)",
-            params![
+    // Триггеры ревизии молчат до конца транзакции; ключ откатывается вместе с ней.
+    tx.execute(
+        "INSERT INTO graph_meta VALUES(?1,'1') ON CONFLICT(key) DO UPDATE SET value='1'",
+        [schema::PUBLISHING],
+    )?;
+    tx.execute_batch("DELETE FROM graph_parts; DELETE FROM graph_edge_evidence; DELETE FROM graph_node_sources; DELETE FROM graph_edges; DELETE FROM graph_evidence; DELETE FROM graph_nodes; DELETE FROM graph_sources; DELETE FROM graph_aux; DROP INDEX IF EXISTS graph_edges_from; DROP INDEX IF EXISTS graph_edges_to; DROP INDEX IF EXISTS graph_edge_evidence_evidence;")?;
+    // Вставка в порядке ключа таблицы (WITHOUT ROWID): сортируем ссылки, не данные.
+    let source_path: HashMap<&str, &str> = data
+        .sources
+        .iter()
+        .map(|s| (s.meta.reference.id.as_str(), s.meta.path.as_str()))
+        .collect();
+    let mut sources: Vec<_> = data.sources.iter().collect();
+    sources.sort_unstable_by(|a, b| a.meta.path.cmp(&b.meta.path));
+    {
+        let mut insert = tx.prepare_cached("INSERT INTO graph_sources VALUES(?1,?2,?3)")?;
+        for source in sources {
+            insert.execute(params![
                 source.meta.path,
                 source.meta.hash,
                 serde_json::to_string(source)?
-            ],
-        )?;
+            ])?;
+        }
     }
-    for node in &data.nodes {
-        tx.execute(
-            "INSERT INTO graph_nodes VALUES(?1,?2,?3,?4)",
-            params![
+    let mut parts: Vec<_> = data.parts.iter().collect();
+    parts.sort_unstable_by(|a, b| {
+        (&a.source_path, &a.kind, &a.key).cmp(&(&b.source_path, &b.kind, &b.key))
+    });
+    {
+        let mut insert = tx.prepare_cached("INSERT INTO graph_parts VALUES(?1,?2,?3,?4)")?;
+        for part in parts {
+            insert.execute(params![part.source_path, part.kind, part.key, part.data])?;
+        }
+    }
+    let mut nodes: Vec<_> = data.nodes.iter().collect();
+    nodes.sort_unstable_by(|a, b| a.reference.id.cmp(&b.reference.id));
+    let mut node_sources: Vec<(&str, &str)> = Vec::new();
+    {
+        let mut insert = tx.prepare_cached("INSERT INTO graph_nodes VALUES(?1,?2,?3,?4)")?;
+        for node in nodes {
+            insert.execute(params![
                 node.reference.id,
                 serde_json::to_string(&node.reference.kind)?,
                 node.reference.revision,
                 serde_json::to_string(node)?
-            ],
-        )?;
-        for id in &node.source_ids {
-            let source = data
-                .sources
-                .iter()
-                .find(|s| s.meta.reference.id == *id)
-                .unwrap();
-            tx.execute(
-                "INSERT INTO graph_node_sources VALUES(?1,?2)",
-                params![node.reference.id, source.meta.path],
-            )?;
+            ])?;
+            for id in &node.source_ids {
+                let path = source_path.get(id.as_str()).ok_or_else(|| {
+                    GraphError::InvalidData("узел ссылается на неизвестный источник".into())
+                })?;
+                node_sources.push((node.reference.id.as_str(), path));
+            }
         }
     }
-    for ev in &data.evidence {
-        let source = data
-            .sources
-            .iter()
-            .find(|s| s.meta.reference.id == ev.document.id)
-            .unwrap();
-        tx.execute(
-            "INSERT INTO graph_evidence VALUES(?1,?2,?3)",
-            params![ev.id, source.meta.path, serde_json::to_string(ev)?],
-        )?;
+    node_sources.sort_unstable();
+    {
+        let mut insert = tx.prepare_cached("INSERT INTO graph_node_sources VALUES(?1,?2)")?;
+        for (node, path) in node_sources {
+            insert.execute(params![node, path])?;
+        }
     }
-    for edge in &data.edges {
-        tx.execute(
-            "INSERT INTO graph_edges VALUES(?1,?2,?3,?4,?5)",
-            params![
+    let mut evidence: Vec<_> = data.evidence.iter().collect();
+    evidence.sort_unstable_by(|a, b| a.id.cmp(&b.id));
+    {
+        let mut insert = tx.prepare_cached("INSERT INTO graph_evidence VALUES(?1,?2,?3)")?;
+        for ev in evidence {
+            let path = source_path.get(ev.document.id.as_str()).ok_or_else(|| {
+                GraphError::InvalidData("доказательство ссылается на неизвестный источник".into())
+            })?;
+            insert.execute(params![ev.id, path, serde_json::to_string(ev)?])?;
+        }
+    }
+    let mut edges: Vec<_> = data.edges.iter().collect();
+    edges.sort_unstable_by(|a, b| a.id.cmp(&b.id));
+    let mut edge_evidence: Vec<(&str, &str)> = Vec::new();
+    {
+        let mut insert = tx.prepare_cached("INSERT INTO graph_edges VALUES(?1,?2,?3,?4,?5)")?;
+        for edge in edges {
+            insert.execute(params![
                 edge.id,
                 edge.from,
                 edge.to,
                 serde_json::to_string(&edge.predicate)?,
                 serde_json::to_string(edge)?
-            ],
-        )?;
-        for ev in &edge.evidence {
-            tx.execute(
-                "INSERT INTO graph_edge_evidence VALUES(?1,?2)",
-                params![edge.id, ev],
-            )?;
+            ])?;
+            for ev in &edge.evidence {
+                edge_evidence.push((edge.id.as_str(), ev.as_str()));
+            }
         }
     }
+    edge_evidence.sort_unstable();
+    {
+        let mut insert = tx.prepare_cached("INSERT INTO graph_edge_evidence VALUES(?1,?2)")?;
+        for (edge, ev) in edge_evidence {
+            insert.execute(params![edge, ev])?;
+        }
+    }
+    // Индексы строятся одной сортировкой после массовой вставки.
+    tx.execute_batch("CREATE INDEX graph_edges_from ON graph_edges(from_id,predicate); CREATE INDEX graph_edges_to ON graph_edges(to_id,predicate); CREATE INDEX graph_edge_evidence_evidence ON graph_edge_evidence(evidence_id);")?;
     for (key, value) in [
         ("namespace", serde_json::to_string(&data.namespace)?),
         ("docs_root", serde_json::to_string(&data.docs_root)?),
@@ -324,6 +385,16 @@ pub fn publish_in_transaction(
     )?;
     set_meta(tx, "file_errors_total", &errors.len().to_string())?;
     set_meta(tx, "method", METHOD_VERSION)?;
+    // Части записаны разбором документов: от этой публикации возможны частичные обновления.
+    set_meta(
+        tx,
+        "delta_base",
+        if !data.parts.is_empty() || data.sources.is_empty() {
+            "1"
+        } else {
+            ""
+        },
+    )?;
     set_meta(tx, "similarity_inputs", &similarity_inputs(tx)?)?;
     let mut layers = BTreeMap::new();
     for (name, origin, fingerprint, state) in [
@@ -455,7 +526,41 @@ pub fn publish_in_transaction(
     if let Some(stamp) = revision_stamp(tx)? {
         set_meta(tx, "published_input_stamp", &stamp.input)?;
     }
+    tx.execute("DELETE FROM graph_meta WHERE key=?1", [schema::PUBLISHING])?;
+    // Одна ревизия на всю публикацию; отсутствующая строка — ошибка, а не тихий пропуск.
+    let bumped = tx.execute(
+        "UPDATE graph_revisions SET read_revision=read_revision+1 WHERE id=1",
+        [],
+    )?;
+    if bumped != 1 {
+        return Err(GraphError::InvalidData("отсутствуют метки графа".into()));
+    }
     Ok(())
+}
+
+/// Размер кэша страниц SQLite на время публикации: −KiB, то есть 256 МиБ.
+/// Поколение крупного проекта занимает ≈206 МБ страниц; пока они помещаются в кэш,
+/// каждая изменённая страница пишется в WAL при COMMIT один раз, а не вытесняется
+/// и переписывается многократно при кэше по умолчанию (2 МБ).
+const PUBLISH_CACHE_KIB: i64 = -262_144;
+
+/// Прежний размер кэша соединения; `restore` возвращает его после COMMIT или ошибки.
+pub struct CacheBoost(i64);
+
+impl CacheBoost {
+    /// Поднимает `cache_size` соединения до значения публикации.
+    pub fn raise(db: &Connection) -> Result<Self, GraphError> {
+        let previous = db.query_row("PRAGMA cache_size", [], |r| r.get(0))?;
+        db.pragma_update(None, "cache_size", PUBLISH_CACHE_KIB)?;
+        Ok(Self(previous))
+    }
+
+    /// Возвращает прежний размер кэша; ошибку возврата не скрываем, но она не страшна:
+    /// значение действует только до закрытия соединения.
+    pub fn restore(self, db: &Connection) -> Result<(), GraphError> {
+        db.pragma_update(None, "cache_size", self.0)?;
+        Ok(())
+    }
 }
 
 pub fn status(db: &Connection) -> Result<GraphStatus, GraphError> {
@@ -494,7 +599,7 @@ fn status_snapshot(db: &Connection) -> Result<GraphStatus, GraphError> {
             paused: false,
         });
     }
-    if schema::version(db)? == Some(2) {
+    if matches!(schema::version(db)?, Some(2 | 3)) {
         schema::validate(db)?;
     }
     let mut state: LayerState = serde_json::from_str(&format!(
@@ -747,12 +852,12 @@ fn load_snapshot(
     check_deadline(deadline)?;
     let tx = db.unchecked_transaction()?;
     let state = status(&tx)?;
-    if !matches!(schema::version(&tx)?, Some(1 | 2)) {
+    if !matches!(schema::version(&tx)?, Some(1..=3)) {
         return Err(GraphError::NotReady(
             "Несовместимая схема графа; обновите граф".into(),
         ));
     }
-    if schema::version(&tx)? == Some(2) {
+    if matches!(schema::version(&tx)?, Some(2 | 3)) {
         revision_stamp(&tx)?;
     }
     if state.method != METHOD_VERSION {
@@ -831,6 +936,7 @@ fn load_snapshot(
             .map(|s| serde_json::from_str(&s))
             .transpose()?
             .unwrap_or(LayerState::Partial),
+        parts: vec![],
     };
     let expected: BTreeMap<String, String> = if let Some(manifest) = meta(&tx, "manifest")? {
         serde_json::from_str(&manifest)?

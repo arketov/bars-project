@@ -8,6 +8,8 @@ async fn deletion_cleans_project_and_keeps_documents_other_projects_and_shared_s
     let worker = env.start();
     worker.register(&project).unwrap();
     worker.register(&other).unwrap();
+    // Файл инструкции кладёт работа агента, а не регистрация (Т-8).
+    worker.observe_mcp(&project).unwrap();
     idle(&worker).await;
     worker.pause();
     let instruction = fs::read(project.join("docs/BARS_INSTRUCTION.md")).unwrap();
@@ -174,7 +176,7 @@ async fn deletion_rejects_shared_user_home() {
     let env = Env::new();
     let project = env.project("home", &[("a.md", DOC)]);
     let worker = Worker::start(
-        WorkerConfig::new(project.join(".bars")),
+        WorkerConfig::new(project.join(".bars")).without_graph_pause(),
         env.provider.clone(),
     )
     .unwrap();

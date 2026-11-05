@@ -355,9 +355,11 @@ async fn file_change_reaches_the_index_without_manual_actions() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn hourly_check_finds_changes_the_watcher_missed() {
     let env = Env::new();
-    // Корня документации нет: слежение не стартует, первая проверка кончается ошибкой.
+    // Корень документации `docs/` выбран, но папки ещё нет: слежение не стартует, первая
+    // проверка кончается ошибкой. Без выбора корнем стала бы вся папка (Т-7).
     let root = env.projects.path().join("late");
-    fs::create_dir_all(&root).unwrap();
+    fs::create_dir_all(root.join(".bars")).unwrap();
+    fs::write(root.join(".bars/config.toml"), "docs_root = \"docs\"\n").unwrap();
     let mut config = env.config();
     config.periodic_interval = Duration::from_millis(200);
     let worker = Worker::start(config, env.provider.clone()).unwrap();
@@ -449,6 +451,67 @@ async fn deaf_watcher_is_restarted_by_the_periodic_check() {
         || worker.is_idle() && documents(&project) == 3,
     )
     .await;
+    worker.shutdown().await;
+}
+
+/// ISS-106: без папки корня документации слежение не запускается и не повторяет попыток,
+/// а когда папка вернулась, поднимается при ближайшем подтверждении.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn missing_docs_root_does_not_retry_watching_and_recovers() {
+    let env = Env::new();
+    let project = env.project("noroot", &[("a.md", DOC)]);
+    let worker = Worker::start(env.config(), env.provider.clone()).unwrap();
+    let path = worker.register(&project).unwrap().path;
+    idle(&worker).await;
+
+    fs::remove_dir_all(project.join("docs")).unwrap();
+    worker.observe_mcp(&path).unwrap();
+    worker.observe_mcp(&path).unwrap();
+    {
+        let projects = lock(&worker.inner.projects);
+        let runtime = projects.get(&path).unwrap();
+        assert!(runtime.docs_root_missing);
+        assert!(runtime.watcher.is_none());
+        assert!(!runtime.watch_failed);
+    }
+
+    fs::create_dir_all(project.join("docs")).unwrap();
+    fs::write(project.join("docs/a.md"), DOC).unwrap();
+    worker.observe_mcp(&path).unwrap();
+    assert!(worker.status(&path).unwrap().watching);
+    assert!(
+        !lock(&worker.inner.projects)
+            .get(&path)
+            .unwrap()
+            .docs_root_missing
+    );
+    worker.shutdown().await;
+}
+
+/// ISS-106: у ненаблюдаемого проекта периодическая проверка не объявляет слежение умершим.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn silent_watcher_of_unobserved_project_is_left_alone() {
+    let env = Env::new();
+    let project = env.project("unseen", &[("a.md", DOC)]);
+    let worker = Worker::start(env.config(), env.provider.clone()).unwrap();
+    let path = worker.register(&project).unwrap().path;
+    idle(&worker).await;
+
+    let stray = ProjectWatcher::start(
+        &project,
+        "docs",
+        Duration::from_millis(100),
+        Arc::new(|_| {}),
+    )
+    .unwrap();
+    lock(&worker.inner.projects).get_mut(&path).unwrap().watcher = Some(stray);
+    worker.inner.after_full_check(&path, true);
+    assert!(
+        !lock(&worker.inner.projects)
+            .get(&path)
+            .unwrap()
+            .watch_failed
+    );
     worker.shutdown().await;
 }
 
@@ -644,6 +707,60 @@ async fn unregister_stops_everything_and_keeps_project_files() {
     worker.shutdown().await;
 }
 
+/// Приёмка Т-7: область вложенного проекта уходит из индекса внешнего без пересборки и
+/// возвращается после снятия вложенного; `bars_text_search` и чтение по диску не ограничены.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn nested_project_area_leaves_the_outer_index_and_returns_when_it_is_unregistered() {
+    let env = Env::new();
+    let outer = env.project("outer", &[("a.md", DOC)]);
+    let inner = outer.join("docs/inner");
+    fs::create_dir_all(&inner).unwrap();
+    fs::write(inner.join("x.md"), DOC).unwrap();
+    let worker = env.start();
+    worker.register(&outer).unwrap();
+    idle(&worker).await;
+    assert_eq!(documents(&outer), 2);
+
+    worker.register(&inner).unwrap();
+    idle(&worker).await;
+    assert_eq!(documents(&outer), 1);
+    assert_eq!(documents(&inner), 1);
+    let nested = worker.nested_projects(&outer, true);
+    assert_eq!(nested.len(), 1);
+    assert_eq!(nested[0].dir, "docs/inner");
+    assert_eq!(nested[0].documents, 1);
+    assert!(inner.join("x.md").is_file());
+
+    fs::write(inner.join("y.md"), DOC).unwrap();
+    worker.unregister(&inner.display().to_string()).unwrap();
+    idle(&worker).await;
+    assert_eq!(documents(&outer), 3);
+    assert!(worker.nested_projects(&outer, false).is_empty());
+    worker.shutdown().await;
+}
+
+/// Приёмка Т-7: пропавший вложенный проект остаётся исключённым, пока есть запись в реестре.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn unavailable_nested_project_stays_excluded_until_it_is_removed() {
+    let env = Env::new();
+    let outer = env.project("outer", &[("a.md", DOC)]);
+    let inner = outer.join("docs/inner");
+    fs::create_dir_all(&inner).unwrap();
+    fs::write(inner.join("x.md"), DOC).unwrap();
+    let worker = env.start();
+    worker.register(&outer).unwrap();
+    worker.register(&inner).unwrap();
+    idle(&worker).await;
+    assert_eq!(documents(&outer), 1);
+
+    fs::remove_dir_all(&inner).unwrap();
+    worker.check_all();
+    idle(&worker).await;
+    assert_eq!(documents(&outer), 1);
+    assert_eq!(worker.nested_projects(&outer, false).len(), 1);
+    worker.shutdown().await;
+}
+
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn session_start_finds_the_root_and_registers_only_real_documentation() {
     let env = Env::new();
@@ -668,6 +785,32 @@ async fn session_start_finds_the_root_and_registers_only_real_documentation() {
     fs::create_dir_all(&lone).unwrap();
     assert_eq!(worker.session_start(&lone).unwrap(), None);
     assert_eq!(worker.projects().len(), 1);
+    worker.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn session_start_skips_a_folder_without_docs_or_config() {
+    let env = Env::new();
+    let worker = env.start();
+
+    // Папка заметок без `docs/` и `.bars/`: хук её не регистрирует (Т-6, OQ-253).
+    let notes = env.projects.path().join("notes");
+    fs::create_dir_all(notes.join("clients")).unwrap();
+    fs::write(notes.join("clients/script.md"), DOC).unwrap();
+    assert_eq!(worker.session_start(&notes).unwrap(), None);
+    assert!(worker.projects().is_empty());
+
+    // Явный выбор человека (регистрация) работает: корень по умолчанию — вся папка.
+    worker.register(&notes).unwrap();
+    let config = fs::read_to_string(notes.join(".bars/config.toml")).unwrap();
+    assert!(config.contains("docs_root = \".\""), "{config}");
+
+    // Проект с `.bars/config.toml` и своим корнем хук регистрирует.
+    let manual = env.projects.path().join("manual");
+    fs::create_dir_all(manual.join(".bars")).unwrap();
+    fs::write(manual.join(".bars/config.toml"), "docs_root = \".\"\n").unwrap();
+    fs::write(manual.join("guide.md"), DOC).unwrap();
+    assert_eq!(worker.session_start(&manual).unwrap(), Some(manual.clone()));
     worker.shutdown().await;
 }
 

@@ -15,6 +15,7 @@ fn score_kind(kind: ScoreKind) -> &'static str {
     match kind {
         ScoreKind::Rerank => "rerank",
         ScoreKind::Cosine => "cosine",
+        ScoreKind::None => "без опоры",
     }
 }
 
@@ -35,6 +36,25 @@ fn hit_lines(text: &mut String, number: usize, hit: &SearchHit) {
         let _ = writeln!(text, "   id: {}", hit.chunk_id);
     }
     let _ = writeln!(text, "   {} — {}", hit.title, hit.heading_chain);
+    if hit.parts > 1 {
+        let _ = writeln!(
+            text,
+            "   кусков раздела: найдено {} из {}",
+            hit.parts_found, hit.parts
+        );
+    }
+    if let Some(signals) = &hit.signals {
+        let mut parts = Vec::new();
+        if let Some(rerank) = signals.rerank {
+            parts.push(format!("rerank {rerank:.3}"));
+        }
+        if let Some(cosine) = signals.cosine {
+            parts.push(format!("близость {cosine:.3}"));
+        }
+        parts.push(format!("слова {:.3}", signals.fulltext));
+        parts.push(format!("точное совпадение {:.3}", signals.exact));
+        let _ = writeln!(text, "   баллы: {}", parts.join("; "));
+    }
     if !hit.sections.is_empty() {
         let _ = writeln!(text, "   и разделы: {}", hit.sections.join("; "));
     }
@@ -213,6 +233,27 @@ pub fn search(output: &SearchOutput) -> String {
     if !applied.scope.files.is_empty() {
         filters.push(format!("файлы {}", applied.scope.files.join(", ")));
     }
+    if let Some(understood) = &output.understood {
+        let mut parts = Vec::new();
+        for phrase in &understood.phrases {
+            parts.push(format!("фраза «{phrase}»"));
+        }
+        for word in &understood.excluded_words {
+            parts.push(format!("без слова «{word}»"));
+        }
+        for phrase in &understood.excluded_phrases {
+            parts.push(format!("без фразы «{phrase}»"));
+        }
+        for path in &understood.paths {
+            parts.push(format!("папка {path}"));
+        }
+        let _ = writeln!(
+            text,
+            "Понято как: слова «{}»; {}.",
+            understood.text,
+            parts.join("; ")
+        );
+    }
     let whole = filters.is_empty();
     let _ = writeln!(
         text,
@@ -274,6 +315,9 @@ pub fn search(output: &SearchOutput) -> String {
     }
     if let Some(error) = &output.rerank_error {
         let _ = write!(text, "\nRerank не отработал, выдача без него: {error}");
+    }
+    if let Some(error) = &output.semantic_error {
+        let _ = write!(text, "\nВнимание: {error}");
     }
     text
 }

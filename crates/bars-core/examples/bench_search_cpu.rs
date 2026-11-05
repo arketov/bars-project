@@ -319,6 +319,7 @@ fn prepare(corpus: &Corpus, inputs: &Inputs, output: &str, models: &Path, cpu: b
                 modified_ns: None,
                 hash: &doc.hash,
                 chunks: &chunked.chunks,
+                text: None,
             },
             &refs,
         )?;

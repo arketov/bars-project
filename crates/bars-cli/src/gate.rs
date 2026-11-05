@@ -21,8 +21,8 @@ const POWERSHELL_READERS: [&str; 3] = ["get-content", "select-string", "type"];
 pub const DENY_MESSAGE: &str = "Use bars before reading this project's documentation. \
 For a known document call bars_read (text) or bars_outline (headings); for unknown context call \
 bars_rag_search with a concrete question in the user's language. Choose actual first-level \
-modules from the session instruction or bars_projects: features for contracts, architecture \
-for structure, adr for decisions, chats for history in the suggested layout. Several kinds \
+modules from the session instruction or bars_projects (real folders of the project, not a \
+fixed layout); for current state leave out logs and archives. Several kinds \
 or unclear location allow the whole project; widen weak/empty scoped results. No filtering \
 quota. files selects known indexed documents (docs-root or project-root paths). The bars tool \
 schemas may be deferred: load them with ToolSearch query \
@@ -193,7 +193,7 @@ mod tests {
     fn skips_chats_code_and_other_sessions() {
         let dir = tempfile::tempdir().unwrap();
         for (tool, args) in [
-            ("Read", json!({"file_path": "/p/docs/chats/x/log.md"})),
+            ("Read", json!({"file_path": "/p/docs/chats/x/handoff.md"})),
             ("Read", json!({"file_path": "/p/src/main.rs"})),
             ("Read", json!({"file_path": "/p/README.md"})),
             ("Grep", json!({"pattern": "x", "path": "/p/docs/chats"})),

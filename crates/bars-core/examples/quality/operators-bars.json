@@ -1,0 +1,788 @@
+[
+  {
+    "id": "bo-01",
+    "split": "tune",
+    "category": "operator-phrase",
+    "query": "что будет, если нажать \"крестик окна\"",
+    "gold": [
+      {
+        "path": "docs/manual/install.md",
+        "heading": "Как запустить bars и где он живёт после закрытия окна",
+        "evidence": "**Крестик окна не выключает bars.** Окно прячется",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "крестик окна"
+      ]
+    }
+  },
+  {
+    "id": "bo-02",
+    "split": "test",
+    "category": "operator-phrase",
+    "query": "Windows пишет \"неизвестный издатель\" при установке",
+    "gold": [
+      {
+        "path": "docs/manual/install.md",
+        "heading": "Как установить bars на Windows",
+        "evidence": "Windows может показать синее окно SmartScreen «неизвестный издатель»",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      },
+      {
+        "path": "docs/manual/troubleshooting.md",
+        "heading": "Windows предупреждает об установщике",
+        "evidence": "SmartScreen пишет «неизвестный издатель», потому что установщик не подписан",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "неизвестный издатель"
+      ]
+    }
+  },
+  {
+    "id": "bo-03",
+    "split": "tune",
+    "category": "operator-phrase",
+    "query": "автозапуск галочка \"запускать при входе в систему\"",
+    "gold": [
+      {
+        "path": "docs/manual/install.md",
+        "heading": "Как включить запуск bars вместе с Windows",
+        "evidence": "галочка «Запускать при входе в систему»",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "запускать при входе в систему"
+      ]
+    }
+  },
+  {
+    "id": "bo-04",
+    "split": "test",
+    "category": "operator-phrase",
+    "query": "какой процессор нужен \"Intel Haswell\"",
+    "gold": [
+      {
+        "path": "docs/manual/install.md",
+        "heading": "Какой компьютер нужен для bars",
+        "evidence": "Intel Haswell (примерно 2013 год) и новее",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "intel haswell"
+      ]
+    }
+  },
+  {
+    "id": "bo-05",
+    "split": "tune",
+    "category": "operator-phrase",
+    "query": "что делает выход из bars во время индексации \"ждёт текущий документ\"",
+    "gold": [
+      {
+        "path": "docs/manual/install.md",
+        "heading": "Как запустить bars и где он живёт после закрытия окна",
+        "evidence": "«Выход» ждёт текущий документ, затем завершает bars",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "ждет текущий документ"
+      ]
+    }
+  },
+  {
+    "id": "bo-06",
+    "split": "test",
+    "category": "operator-phrase",
+    "query": "что такое индекс \"заранее подготовленная выжимка\"",
+    "gold": [
+      {
+        "path": "docs/manual/how-it-works.md",
+        "heading": "Что такое индекс проекта",
+        "evidence": "Индекс — это заранее подготовленная выжимка документации",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "заранее подготовленная выжимка"
+      ]
+    }
+  },
+  {
+    "id": "bo-07",
+    "split": "tune",
+    "category": "operator-phrase",
+    "query": "как bars понимает формы слов \"сводятся к основе\"",
+    "gold": [
+      {
+        "path": "docs/manual/how-it-works.md",
+        "heading": "Как bars ищет: по словам и по смыслу",
+        "evidence": "Русские и английские слова сводятся к основе",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "сводятся к основе"
+      ]
+    }
+  },
+  {
+    "id": "bo-08",
+    "split": "test",
+    "category": "operator-phrase",
+    "query": "порог поиска \"меньше мусора\"",
+    "gold": [
+      {
+        "path": "docs/manual/how-it-works.md",
+        "heading": "Что такое порог в поиске bars",
+        "evidence": "выше — меньше мусора, но теряются и правильные ответы",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "меньше мусора"
+      ]
+    }
+  },
+  {
+    "id": "bo-09",
+    "split": "tune",
+    "category": "operator-phrase",
+    "query": "как работает rerank \"перечитывает каждый\"",
+    "gold": [
+      {
+        "path": "docs/manual/how-it-works.md",
+        "heading": "Что такое rerank",
+        "evidence": "перечитывает каждый вместе с запросом, как внимательный человек",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "перечитывает каждый"
+      ]
+    }
+  },
+  {
+    "id": "bo-10",
+    "split": "test",
+    "category": "operator-phrase",
+    "query": "ссылки на папки \"bars по ним не ходит\"",
+    "gold": [
+      {
+        "path": "docs/manual/how-it-works.md",
+        "heading": "Какие файлы bars не индексирует",
+        "evidence": "ярлыки-ссылки на папки (symlink, junction) — bars по ним не ходит",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "bars по ним не ходит"
+      ]
+    }
+  },
+  {
+    "id": "bo-11",
+    "split": "tune",
+    "category": "operator-phrase",
+    "query": "куда пишутся ключи внешних провайдеров \"хранилище Windows\"",
+    "gold": [
+      {
+        "path": "docs/manual/how-it-works.md",
+        "heading": "Где bars хранит свои данные",
+        "evidence": "| хранилище Windows | ключи внешних провайдеров |",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "хранилище windows"
+      ]
+    }
+  },
+  {
+    "id": "bo-12",
+    "split": "test",
+    "category": "operator-phrase",
+    "query": "как работает \"grah\"",
+    "gold": [
+      {
+        "path": "docs/manual/troubleshooting.md",
+        "heading": "bars не находит из-за опечатки в запросе",
+        "evidence": "но «grah» не станет «graph»",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "grah"
+      ]
+    }
+  },
+  {
+    "id": "bo-13",
+    "split": "tune",
+    "category": "operator-phrase",
+    "query": "что делать, если появилась кнопка \"Перезапустить воркер\"",
+    "gold": [
+      {
+        "path": "docs/manual/troubleshooting.md",
+        "heading": "bars не отвечает или окно говорит «нет связи с воркером»",
+        "evidence": "Окно покажет экран с кнопками «Перезапустить воркер», «Открыть лог»",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "перезапустить воркер"
+      ]
+    }
+  },
+  {
+    "id": "bo-14",
+    "split": "test",
+    "category": "operator-phrase",
+    "query": "таймаут вызова агента \"BARS_MCP_CALL_TIMEOUT_MS\"",
+    "gold": [
+      {
+        "path": "docs/manual/troubleshooting.md",
+        "heading": "Короткое чтение у агента ждёт поиск или вызов превышает время",
+        "evidence": "передайте серверу `BARS_MCP_CALL_TIMEOUT_MS` в миллисекундах",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "bars_mcp_call_timeout_ms"
+      ]
+    }
+  },
+  {
+    "id": "bo-15",
+    "split": "tune",
+    "category": "operator-phrase",
+    "query": "жёлтый баннер \"Оценка моделью не выполнена\"",
+    "gold": [
+      {
+        "path": "docs/manual/troubleshooting.md",
+        "heading": "Rerank не отработал",
+        "evidence": "Жёлтый баннер «Оценка моделью не выполнена — выдача по близости»",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "оценка моделью не выполнена"
+      ]
+    }
+  },
+  {
+    "id": "bo-16",
+    "split": "test",
+    "category": "operator-phrase",
+    "query": "что появится при смене модели \"диалог согласия\"",
+    "gold": [
+      {
+        "path": "docs/manual/models.md",
+        "heading": "Что будет, если сменить embed-модель",
+        "evidence": "После «Сохранить» откроется **диалог согласия**",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "диалог согласия"
+      ]
+    }
+  },
+  {
+    "id": "bo-17",
+    "split": "tune",
+    "category": "operator-phrase",
+    "query": "сколько ставить \"файл подкачки\" для моделей",
+    "gold": [
+      {
+        "path": "docs/manual/models.md",
+        "heading": "Файл подкачки и нехватка памяти",
+        "evidence": "bars не меняет подкачку и настройки ОС",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "файл подкачки"
+      ]
+    }
+  },
+  {
+    "id": "bo-18",
+    "split": "test",
+    "category": "operator-phrase",
+    "query": "какая видеокарта подойдёт \"DirectX 12\"",
+    "gold": [
+      {
+        "path": "docs/manual/models.md",
+        "heading": "Видеокарта или процессор для моделей bars",
+        "evidence": "На Windows подходит любая видеокарта с DirectX 12, включая встроенную Intel",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "directx 12"
+      ]
+    }
+  },
+  {
+    "id": "bo-19",
+    "split": "tune",
+    "category": "operator-phrase",
+    "query": "серая папка в дереве \"вложенный проект\"",
+    "gold": [
+      {
+        "path": "docs/manual/projects.md",
+        "heading": "Вложенные проекты",
+        "evidence": "такая папка серая, с пометкой «вложенный проект», без галочки",
+        "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "вложенный проект"
+      ]
+    }
+  },
+  {
+    "id": "bo-20",
+    "split": "test",
+    "category": "operator-exclude",
+    "query": "как удалить bars -macOS",
+    "gold": [
+      {
+        "path": "docs/manual/install.md",
+        "heading": "Как удалить bars и что останется на диске",
+        "evidence": "папка `~/.bars` (настройки, список проектов, скачанные модели",
+        "reason": "Исключённое слово в разделе-ответе не встречается, раздел должен остаться в выдаче."
+      }
+    ],
+    "operators": {
+      "forbid": [
+        "macos"
+      ]
+    }
+  },
+  {
+    "id": "bo-21",
+    "split": "tune",
+    "category": "operator-exclude",
+    "query": "обновление bars до новой версии -macOS",
+    "gold": [
+      {
+        "path": "docs/manual/install.md",
+        "heading": "Как обновить bars до новой версии",
+        "evidence": "установщик сам попросит работающий bars закрыться",
+        "reason": "Исключённое слово в разделе-ответе не встречается, раздел должен остаться в выдаче."
+      }
+    ],
+    "operators": {
+      "forbid": [
+        "macos"
+      ]
+    }
+  },
+  {
+    "id": "bo-22",
+    "split": "test",
+    "category": "operator-exclude",
+    "query": "модель не скачивается -rerank",
+    "gold": [
+      {
+        "path": "docs/manual/troubleshooting.md",
+        "heading": "Не скачивается модель",
+        "evidence": "нет связи с huggingface.co. Проверьте интернет и прокси",
+        "reason": "Исключённое слово в разделе-ответе не встречается, раздел должен остаться в выдаче."
+      }
+    ],
+    "operators": {
+      "forbid": [
+        "rerank"
+      ]
+    }
+  },
+  {
+    "id": "bo-23",
+    "split": "tune",
+    "category": "operator-exclude",
+    "query": "как bars режет документ на куски -граф",
+    "gold": [
+      {
+        "path": "docs/manual/how-it-works.md",
+        "heading": "Как bars режет документ на куски",
+        "evidence": "каждый раздел (заголовок `#`…`######` и текст до следующего заголовка) — отдельный кусок",
+        "reason": "Исключённое слово в разделе-ответе не встречается, раздел должен остаться в выдаче."
+      }
+    ],
+    "operators": {
+      "forbid": [
+        "граф"
+      ]
+    }
+  },
+  {
+    "id": "bo-24",
+    "split": "test",
+    "category": "operator-exclude",
+    "query": "где bars хранит настройки и модели -агент",
+    "gold": [
+      {
+        "path": "docs/manual/how-it-works.md",
+        "heading": "Где bars хранит свои данные",
+        "evidence": "| `~/.bars/models/` | скачанные модели |",
+        "reason": "Исключённое слово в разделе-ответе не встречается, раздел должен остаться в выдаче."
+      }
+    ],
+    "operators": {
+      "forbid": [
+        "агент"
+      ]
+    }
+  },
+  {
+    "id": "bo-25",
+    "split": "tune",
+    "category": "operator-exclude",
+    "query": "окно говорит нет связи с воркером -MCP",
+    "gold": [
+      {
+        "path": "docs/manual/troubleshooting.md",
+        "heading": "bars не отвечает или окно говорит «нет связи с воркером»",
+        "evidence": "Индексы на диске при этом целы",
+        "reason": "Исключённое слово в разделе-ответе не встречается, раздел должен остаться в выдаче."
+      }
+    ],
+    "operators": {
+      "forbid": [
+        "mcp"
+      ]
+    }
+  },
+  {
+    "id": "bo-26",
+    "split": "test",
+    "category": "operator-exclude",
+    "query": "rerank включить в настройках -порог",
+    "gold": [
+      {
+        "path": "docs/manual/how-it-works.md",
+        "heading": "Что такое rerank",
+        "evidence": "Поэтому rerank **выключен по умолчанию**. Включается в настройках",
+        "reason": "Исключённое слово в разделе-ответе не встречается, раздел должен остаться в выдаче."
+      }
+    ],
+    "operators": {
+      "forbid": [
+        "порог"
+      ]
+    }
+  },
+  {
+    "id": "bo-27",
+    "split": "tune",
+    "category": "operator-exclude",
+    "query": "что значит жёлтая иконка bars -агент",
+    "gold": [
+      {
+        "path": "docs/manual/install.md",
+        "heading": "Что показывает иконка bars в трее",
+        "evidence": "жёлтая | нужно ваше внимание: переиндексация после смены модели",
+        "reason": "Исключённое слово в разделе-ответе не встречается, раздел должен остаться в выдаче."
+      }
+    ],
+    "operators": {
+      "forbid": [
+        "агент"
+      ]
+    }
+  },
+  {
+    "id": "bo-28",
+    "split": "test",
+    "category": "operator-exclude",
+    "query": "bars не находит документ -опечатка",
+    "gold": [
+      {
+        "path": "docs/manual/troubleshooting.md",
+        "heading": "bars не находит документ, который точно есть",
+        "evidence": "Пустая выдача не доказывает, что сведений нет",
+        "reason": "Исключённое слово в разделе-ответе не встречается, раздел должен остаться в выдаче."
+      }
+    ],
+    "operators": {
+      "forbid": [
+        "опечатк"
+      ]
+    }
+  },
+  {
+    "id": "bo-29",
+    "split": "tune",
+    "category": "operator-path",
+    "query": "path:adr почему выбран CodeMirror 6 для редактора",
+    "gold": [
+      {
+        "path": "docs/adr/0005-editor-codemirror.md",
+        "heading": "Решение",
+        "evidence": "Использовать CodeMirror 6: `@codemirror/state`, `view`, `commands`",
+        "reason": "Раздел-ответ лежит в указанной папке; выдача не выходит за неё."
+      }
+    ],
+    "operators": {
+      "paths": [
+        "adr"
+      ]
+    }
+  },
+  {
+    "id": "bo-30",
+    "split": "test",
+    "category": "operator-path",
+    "query": "папка:adr на чём считается физика графа",
+    "gold": [
+      {
+        "path": "docs/adr/0004-graph-physics-renderer.md",
+        "heading": "Предлагаемое решение",
+        "evidence": "Первую новую реализацию строить на d3-force в отдельном Web Worker и Canvas2D",
+        "reason": "Раздел-ответ лежит в указанной папке; выдача не выходит за неё."
+      }
+    ],
+    "operators": {
+      "paths": [
+        "adr"
+      ]
+    }
+  },
+  {
+    "id": "bo-31",
+    "split": "tune",
+    "category": "operator-path",
+    "query": "path:adr dockview раскладка панелей окна",
+    "gold": [
+      {
+        "path": "docs/adr/0003-window-docking.md",
+        "heading": "Предлагаемый выбор для каркаса",
+        "evidence": "Рекомендованы `dockview-core@8.6.1` с прямым lifecycle-адаптером Svelte 5",
+        "reason": "Раздел-ответ лежит в указанной папке; выдача не выходит за неё."
+      }
+    ],
+    "operators": {
+      "paths": [
+        "adr"
+      ]
+    }
+  },
+  {
+    "id": "bo-32",
+    "split": "test",
+    "category": "operator-path",
+    "query": "папка:adr почему не отдельный llama-server",
+    "gold": [
+      {
+        "path": "docs/adr/0002-qwen-gguf.md",
+        "heading": "Отклонённые варианты GGUF",
+        "evidence": "Отдельный llama-server — не соответствует решению о встроенном воркере",
+        "reason": "Раздел-ответ лежит в указанной папке; выдача не выходит за неё."
+      }
+    ],
+    "operators": {
+      "paths": [
+        "adr"
+      ]
+    }
+  },
+  {
+    "id": "bo-33",
+    "split": "tune",
+    "category": "operator-path",
+    "query": "path:adr оценка rerank через yes no logprobs",
+    "gold": [
+      {
+        "path": "docs/adr/0006-rerank-yes-no-logprobs.md",
+        "heading": "Обоснование и альтернативы",
+        "evidence": "Qwen3-Reranker обучен именно на ответ yes/no",
+        "reason": "Раздел-ответ лежит в указанной папке; выдача не выходит за неё."
+      }
+    ],
+    "operators": {
+      "paths": [
+        "adr"
+      ]
+    }
+  },
+  {
+    "id": "bo-34",
+    "split": "test",
+    "category": "operator-path",
+    "query": "path:manual как подключить внешнюю модель Ollama",
+    "gold": [
+      {
+        "path": "docs/manual/models.md",
+        "heading": "Как подключить внешнюю модель через API",
+        "evidence": "**Ollama** — отдельный вариант для embed и rerank",
+        "reason": "Раздел-ответ лежит в указанной папке; выдача не выходит за неё."
+      }
+    ],
+    "operators": {
+      "paths": [
+        "manual"
+      ]
+    }
+  },
+  {
+    "id": "bo-35",
+    "split": "tune",
+    "category": "operator-path",
+    "query": "path:manual/models что будет если сменить embed-модель",
+    "gold": [
+      {
+        "path": "docs/manual/models.md",
+        "heading": "Что будет, если сменить embed-модель",
+        "evidence": "Векторы разных моделей несовместимы. Поэтому после смены embed-модели",
+        "reason": "Раздел-ответ лежит в указанной папке; выдача не выходит за неё."
+      }
+    ],
+    "operators": {
+      "paths": [
+        "manual/models"
+      ]
+    }
+  },
+  {
+    "id": "bo-36",
+    "split": "test",
+    "category": "operator-path",
+    "query": "path:docs/manual вложенные проекты",
+    "gold": [
+      {
+        "path": "docs/manual/projects.md",
+        "heading": "Вложенные проекты",
+        "evidence": "Документы вложенного проекта живут в его собственном индексе",
+        "reason": "Раздел-ответ лежит в указанной папке; выдача не выходит за неё."
+      }
+    ],
+    "operators": {
+      "paths": [
+        "docs/manual"
+      ]
+    }
+  },
+  {
+    "id": "bo-37",
+    "split": "tune",
+    "category": "operator-path",
+    "query": "path:manual/install path:manual/troubleshooting SmartScreen предупреждение установщика",
+    "gold": [
+      {
+        "path": "docs/manual/install.md",
+        "heading": "Как установить bars на Windows",
+        "evidence": "Windows может показать синее окно SmartScreen «неизвестный издатель»",
+        "reason": "Раздел-ответ лежит в указанной папке; выдача не выходит за неё."
+      },
+      {
+        "path": "docs/manual/troubleshooting.md",
+        "heading": "Windows предупреждает об установщике",
+        "evidence": "SmartScreen пишет «неизвестный издатель», потому что установщик не подписан",
+        "reason": "Раздел-ответ лежит в указанной папке; выдача не выходит за неё."
+      }
+    ],
+    "operators": {
+      "paths": [
+        "manual/install",
+        "manual/troubleshooting"
+      ]
+    }
+  },
+  {
+    "id": "bo-38",
+    "split": "test",
+    "category": "operator-path",
+    "query": "папка:manual \"всегда хранить на этом устройстве\"",
+    "gold": [
+      {
+        "path": "docs/manual/troubleshooting.md",
+        "heading": "Серая точка: проект не найден",
+        "evidence": "держите папку проекта «Всегда хранить на этом устройстве»",
+        "reason": "Раздел-ответ лежит в указанной папке; выдача не выходит за неё."
+      }
+    ],
+    "operators": {
+      "phrases": [
+        "всегда хранить на этом устройстве"
+      ],
+      "paths": [
+        "manual"
+      ]
+    }
+  },
+  {
+    "id": "bo-39",
+    "split": "tune",
+    "category": "negative",
+    "query": "порог поиска \"семьдесят процентов\"",
+    "gold": [],
+    "operators": {
+      "phrases": [
+        "семьдесят процентов"
+      ]
+    }
+  },
+  {
+    "id": "bo-40",
+    "split": "test",
+    "category": "negative",
+    "query": "как установить bars \"на Linux\"",
+    "gold": [],
+    "operators": {
+      "phrases": [
+        "на linux"
+      ]
+    }
+  },
+  {
+    "id": "bo-41",
+    "split": "tune",
+    "category": "negative",
+    "query": "rerank \"полностью бесплатная модель\"",
+    "gold": [],
+    "operators": {
+      "phrases": [
+        "полностью бесплатная модель"
+      ]
+    }
+  },
+  {
+    "id": "bo-42",
+    "split": "test",
+    "category": "negative",
+    "query": "хранение индекса \"в облаке Яндекса\"",
+    "gold": [],
+    "operators": {
+      "phrases": [
+        "в облаке яндекса"
+      ]
+    }
+  }
+]

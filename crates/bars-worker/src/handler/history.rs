@@ -254,6 +254,7 @@ fn complete_attempt(
                     applied["pending"] = out["pending"].clone();
                     applied["rerank_performed"] = json!(out["applied"]["score_kind"] == "rerank");
                     applied["rerank_fallback"] = json!(out.get("rerank_error").is_some());
+                    applied["semantic_fallback"] = json!(out.get("semantic_error").is_some());
                     let mut sources = serde_json::Map::new();
                     for (request, effective) in [
                         ("limit", "results"),
@@ -274,7 +275,7 @@ fn complete_attempt(
                     if out.get("applied_mode").is_some_and(|v| v == "graph") {
                         json!({"count":out["graph_results"]["items"].as_array().map(Vec::len),"unit":"graph_items"})
                     } else {
-                        json!({"count":out["results"].as_array().map(Vec::len),"unit":"fragments","warning":out.get("rerank_error").is_some()})
+                        json!({"count":out["results"].as_array().map(Vec::len),"unit":"fragments","warning":out.get("rerank_error").is_some() || out.get("semantic_error").is_some()})
                     }
                 }
                 "bars_get_similar" => {

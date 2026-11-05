@@ -748,6 +748,29 @@ impl WorkerHandler {
         }
     }
 
+    /// Есть ли у проекта папка корня документации. Без неё расписание проект пропускает; в журнал
+    /// идёт одна запись при переходе в это состояние, возврат папки сбрасывает пометку (ISS-106).
+    pub(super) fn schedule_docs_root_present(
+        &self,
+        project: &Path,
+        docs_root: Option<&str>,
+    ) -> bool {
+        let present = docs_root.is_some_and(|docs| project.join(docs).is_dir());
+        let mut blocked = self
+            .schedule_blocked
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
+        if present {
+            blocked.remove(project);
+        } else if blocked.insert(project.to_path_buf()) {
+            log::warn!(
+                "Расписание аудитов пропускает {}: нет папки корня документации",
+                project.display()
+            );
+        }
+        present
+    }
+
     /// Одна проверка расписания: вид запускается, если его режим включён и пришло время.
     pub async fn audit_schedule_tick(&self) {
         if self.worker.is_stopping() {
@@ -766,6 +789,9 @@ impl WorkerHandler {
             }
             let root = project.clone();
             let docs_root = self.worker.docs_root(&project).ok();
+            if !self.schedule_docs_root_present(&project, docs_root.as_deref()) {
+                continue;
+            }
             let due = tokio::task::spawn_blocking(move || {
                 let store = match AuditStore::open(&root) {
                     Ok(store) => store,

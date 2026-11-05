@@ -13,6 +13,7 @@ fn score_kind(kind: ScoreKind) -> &'static str {
     match kind {
         ScoreKind::Rerank => "rerank",
         ScoreKind::Cosine => "cosine",
+        ScoreKind::None => "none",
     }
 }
 
@@ -45,6 +46,12 @@ fn result_block(text: &mut String, n: usize, total: usize, hit: &SearchHit) {
         hit.score,
         score_kind(hit.score_kind)
     );
+    if let Some(line) = bars_protocol::hit_signals_line(hit) {
+        let _ = writeln!(text, "{line}");
+    }
+    if let Some(line) = bars_protocol::hit_parts_line(hit) {
+        let _ = writeln!(text, "{line}");
+    }
     let _ = writeln!(text, "--- text ---");
     let _ = writeln!(text, "{}", hit.text.trim_end());
     let _ = writeln!(text, "=== END RESULT {n} ===");
@@ -69,10 +76,14 @@ pub fn search(output: &SearchOutput) -> String {
         score_kind(applied.score_kind)
     );
     let _ = writeln!(text, "clamped: {}", applied.clamped);
+    text.push_str(&bars_protocol::applied_signal_lines(output));
     let _ = writeln!(text, "indexing: {}", output.indexing);
     let _ = writeln!(text, "pending: {}", output.pending);
     if let Some(error) = &output.rerank_error {
         let _ = writeln!(text, "rerank_error: {error}");
+    }
+    if let Some(error) = &output.semantic_error {
+        let _ = writeln!(text, "semantic_error: {error}");
     }
     if output.indexing {
         let _ = writeln!(text, "Indexing in progress: results may be incomplete.");
@@ -261,6 +272,9 @@ fn project_block(text: &mut String, index: usize, total: usize, info: &ProjectIn
         .collect::<Vec<_>>()
         .join(", ");
     let _ = writeln!(text, "modules: {modules}");
+    if let Some(line) = bars_protocol::excluded_projects_line(&info.nested) {
+        let _ = writeln!(text, "{line}");
+    }
     let _ = writeln!(text, "=== END PROJECT {index} ===");
 }
 

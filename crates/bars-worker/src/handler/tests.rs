@@ -160,7 +160,7 @@ impl Harness {
             "handler-{name}-{}",
             home.path().file_name().unwrap().to_string_lossy()
         ));
-        let mut config = WorkerConfig::new(home.path().to_path_buf());
+        let mut config = WorkerConfig::new(home.path().to_path_buf()).without_graph_pause();
         // Клиенты живут во временной папке: настоящие ~/.claude и ~/.codex тесты не трогают.
         config.install_env = Some(InstallEnv {
             home: home.path().join("client-home"),
@@ -756,7 +756,7 @@ async fn second_worker_on_the_same_channel_gives_way() {
     let _client = harness.client(ClientKind::Cli).await;
     let home = TempDir::new().unwrap();
     let outcome = serve(
-        WorkerConfig::new(home.path().to_path_buf()),
+        WorkerConfig::new(home.path().to_path_buf()).without_graph_pause(),
         &harness.endpoint,
         FakeProvider::new("m1"),
     )
@@ -775,7 +775,7 @@ async fn client_launches_the_worker_on_demand() {
         "handler-launch-{}",
         home.path().file_name().unwrap().to_string_lossy()
     ));
-    let config = WorkerConfig::new(home.path().to_path_buf());
+    let config = WorkerConfig::new(home.path().to_path_buf()).without_graph_pause();
     let served = endpoint.clone();
     let mut client = bars_protocol::connect_or_launch_with(
         &endpoint,
@@ -942,7 +942,7 @@ async fn window_gets_activity_tree_and_pause_from_the_handler() {
     )
     .unwrap();
     let worker = crate::worker::Worker::start(
-        WorkerConfig::new(home.path().to_path_buf()),
+        WorkerConfig::new(home.path().to_path_buf()).without_graph_pause(),
         FakeProvider::new("m1"),
     )
     .unwrap();
@@ -1019,6 +1019,7 @@ mod concurrency;
 mod external_models;
 mod graph;
 mod links;
+mod model_wait;
 mod new_topics;
 mod window;
 

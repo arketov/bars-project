@@ -93,11 +93,6 @@ pub async fn bars_call(
     }
     // Служебное поле `_window` (назначение поиска, ID обращения) в протокол не попадает.
     let context = bars_worker::new_topics::SearchContext::take_from(&mut params);
-    if method == "text_search"
-        && let Some(params) = params.as_object_mut()
-    {
-        params.insert("window_id".into(), Value::String(window.label().to_owned()));
-    }
     let request = Request::new(Id::Number(0), &method, params);
     let call = Call::from_request(&request)?;
     let tree_binding = if let Call::Tree(params) = &call {
@@ -403,6 +398,21 @@ pub async fn document_revision(
     .map_err(|e| e.to_string())
 }
 
+/// Вложенные проекты для дерева и диалогов окна: папка проекта и область от корня внешнего.
+pub fn nested_json(nested: &[bars_protocol::NestedProjectInfo]) -> Value {
+    Value::Array(
+        nested
+            .iter()
+            .map(|item| {
+                serde_json::json!({
+                    "name": item.name, "path": item.path, "dir": item.dir,
+                    "area": item.area, "documents": item.documents,
+                })
+            })
+            .collect(),
+    )
+}
+
 fn tree_failure(error: &crate::tree_io::TreeError) -> Value {
     serde_json::json!({ "status": "error", "kind": error.kind(), "message": error.message() })
 }
@@ -411,12 +421,17 @@ fn tree_failure(error: &crate::tree_io::TreeError) -> Value {
 #[tauri::command]
 pub async fn tree_read(state: State<'_, Shared>, project: String) -> Result<Value, String> {
     let (root, docs_root) = document_roots(&state, &project)?;
+    let nested = state
+        .get()
+        .map(|handler| nested_json(&handler.worker().nested_projects(&root, false)))
+        .unwrap_or_else(|| serde_json::json!([]));
     tauri::async_runtime::spawn_blocking(move || {
         match crate::tree_io::read_tree(&root, &docs_root) {
             Ok(tree) => serde_json::json!({
                 "status": "ok",
                 "docs_root": tree.docs_root,
                 "revision": tree.revision,
+                "nested": nested,
                 "dirs": tree.dirs,
                 "files": tree.files.iter().map(|f| serde_json::json!({
                     "path": f.path, "size": f.size, "modified": f.modified_ms,
@@ -826,6 +841,90 @@ pub(crate) async fn execute_folder(
     Ok(
         serde_json::json!({ "absolute": absolute, "missing": missing, "operation_id": operation_id }),
     )
+}
+
+/// Что предложить при добавлении папки (Т-7): есть ли в ней `docs/` и какой корень отмечен.
+#[tauri::command]
+pub fn project_root_suggest(state: State<'_, Shared>, path: String) -> Result<Value, String> {
+    let folder = std::path::Path::new(&path);
+    if !folder.is_dir() {
+        return Err("папка не найдена".to_string());
+    }
+    let suggested = bars_protocol::RootChoice::suggested(folder);
+    let (inside, nested) = state
+        .get()
+        .map_or((Value::Null, Value::Array(Vec::new())), |handler| {
+            nesting_of_folder(&handler, folder)
+        });
+    Ok(serde_json::json!({
+        "has_docs": folder.join("docs").is_dir(),
+        "suggested": if suggested == bars_protocol::RootChoice::DocsFolder { "docs" } else { "all" },
+        "inside": inside,
+        "nested": nested,
+    }))
+}
+
+/// Вложенность новой папки среди проектов реестра (Т-7, OQ-256): в каком проекте она лежит и
+/// сколько его файлов уйдёт из его индекса при каждом выборе корня; какие зарегистрированные
+/// проекты лежат внутри неё и будут исключены.
+fn nesting_of_folder(handler: &WorkerHandler, folder: &std::path::Path) -> (Value, Value) {
+    let worker = handler.worker();
+    let projects = worker.projects();
+    let mut inside = Value::Null;
+    if let Some(outer) = worker
+        .project_for_cwd(folder)
+        .filter(|outer| outer != folder)
+    {
+        let docs_root = worker.docs_root(&outer).unwrap_or_else(|_| ".".into());
+        if let (Ok(relative), Ok(walk)) = (
+            folder.strip_prefix(&outer),
+            bars_core::indexing::walk::walk_docs_indexed(&outer, std::path::Path::new(&docs_root)),
+        ) {
+            let base = relative.to_string_lossy().replace('\\', "/");
+            let count = |prefix: String| {
+                walk.files
+                    .iter()
+                    .filter(|f| f.path.starts_with(&prefix))
+                    .count()
+            };
+            let name = projects
+                .iter()
+                .find(|project| project.path == outer)
+                .map_or_else(String::new, |project| project.name.clone());
+            inside = serde_json::json!({
+                "name": name,
+                "path": outer.display().to_string(),
+                "all": count(format!("{base}/")),
+                "docs": count(format!("{base}/docs/")),
+            });
+        }
+    }
+    let nested = projects
+        .iter()
+        .filter(|project| project.path != folder && project.path.starts_with(folder))
+        .map(|project| serde_json::json!({ "name": project.name, "path": project.path.display().to_string() }))
+        .collect();
+    (inside, Value::Array(nested))
+}
+
+/// Записывает выбранный корень в `.bars/config.toml` до регистрации (Т-7). `root` — `docs` или
+/// `all`; пустой — умолчание. Настроенный проект не меняется.
+#[tauri::command]
+pub fn project_root_prepare(path: String, root: Option<String>) -> Result<(), String> {
+    let choice = match root.as_deref() {
+        None => None,
+        Some(text) => Some(
+            bars_protocol::RootChoice::parse(text)
+                .ok_or_else(|| "корень документации: допустимо `docs` или `all`".to_string())?,
+        ),
+    };
+    let folder = std::path::Path::new(&path);
+    if !folder.is_dir() {
+        return Err("папка не найдена".to_string());
+    }
+    bars_protocol::prepare_project(folder, choice)
+        .map(|_| ())
+        .map_err(|error| format!("не удалось записать настройки проекта: {error}"))
 }
 
 /// Домашняя папка bars (`~/.bars`).

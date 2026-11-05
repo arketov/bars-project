@@ -6,7 +6,7 @@ use bars_graph::links::{DocSet, LinkKind, ParsedLink, Resolved, parse_links};
 use rusqlite::{Connection, TransactionBehavior, params};
 
 use crate::indexing::chunking::split_frontmatter;
-use crate::indexing::walk::{WalkError, read_utf8_path, walk_docs};
+use crate::indexing::walk::{WalkError, read_utf8_path, walk_docs_indexed};
 mod page;
 pub use page::LinkPage;
 
@@ -209,6 +209,17 @@ impl LinkIndex {
         Ok(rows.next()?.map(|row| row.get(0)).transpose()?)
     }
 
+    /// Области вложенных проектов от корня документации, записанные последней сверкой.
+    fn excluded_areas(&self) -> Result<Vec<String>, LinkIndexError> {
+        Ok(self
+            .meta("excluded")?
+            .unwrap_or_default()
+            .lines()
+            .filter(|line| !line.is_empty())
+            .map(str::to_string)
+            .collect())
+    }
+
     /// Сверяет индекс с файлами на диске: изменившиеся разбирает, пропавшие удаляет. Без модели и без чанков.
     pub fn refresh(
         &mut self,
@@ -234,7 +245,7 @@ impl LinkIndex {
         strict: bool,
     ) -> Result<RefreshStats, LinkIndexError> {
         let prefix = docs_prefix(docs_root)?;
-        let walk = walk_docs(project_root, docs_root)?;
+        let walk = walk_docs_indexed(project_root, docs_root)?;
         if strict && !walk.problems.is_empty() {
             return Err(LinkIndexError::Refresh("не все папки прочитаны".into()));
         }
@@ -307,7 +318,19 @@ impl LinkIndex {
             parsed: changed.len(),
             removed: gone.len(),
         };
-        if !reset && changed.is_empty() && touched.is_empty() && gone.is_empty() {
+        // Области вложенных проектов от корня документации: ссылки внутрь них не считаются битыми.
+        let excluded: Vec<String> = crate::indexing::nested::excluded(project_root)
+            .iter()
+            .map(|dir| relative_to_docs(dir, &prefix).to_string())
+            .collect();
+        let excluded = excluded.join("\n");
+        let excluded_changed = self.meta("excluded")?.unwrap_or_default() != excluded;
+        if !reset
+            && !excluded_changed
+            && changed.is_empty()
+            && touched.is_empty()
+            && gone.is_empty()
+        {
             return Ok(stats);
         }
         let tx = self
@@ -322,6 +345,12 @@ impl LinkIndex {
             tx.execute(
                 "INSERT OR REPLACE INTO meta(key,value) VALUES('docs_prefix',?1)",
                 [&prefix],
+            )?;
+        }
+        if excluded_changed {
+            tx.execute(
+                "INSERT OR REPLACE INTO meta(key,value) VALUES('excluded',?1)",
+                [&excluded],
             )?;
         }
         for path in &gone {
@@ -379,7 +408,7 @@ impl LinkIndex {
             .keys()
             .map(|doc| (relative_to_docs(doc, &prefix).to_string(), doc.clone()))
             .collect();
-        let set = DocSet::new(by_docs_path.keys().cloned());
+        let set = DocSet::new(by_docs_path.keys().cloned()).with_excluded(self.excluded_areas()?);
 
         let mut statement = self.db.prepare(
             "SELECT src, line, start, end, kind, raw_target, text, fragment FROM links ORDER BY src, start",
@@ -463,7 +492,8 @@ impl LinkIndex {
             titles
                 .keys()
                 .map(|doc| relative_to_docs(doc, &prefix).to_string()),
-        );
+        )
+        .with_excluded(self.excluded_areas()?);
         let inside: HashSet<&str> = paths.iter().map(String::as_str).collect();
         let inside_docs: HashSet<&str> = paths
             .iter()
@@ -515,6 +545,76 @@ impl LinkIndex {
         Ok(found)
     }
 
+    /// Какие документы из `others` связаны ссылкой с каким-нибудь документом из `anchors` (пути от
+    /// корня проекта): ссылка в любую сторону, документ с самим собой не считается. Один проход по
+    /// таблице ссылок на весь вызов — сигнал `l` поиска (`docs/features/search/hybrid-search.md`).
+    /// Документ, который есть в обоих наборах, попадает в ответ, когда связан с другим документом
+    /// из `anchors`.
+    pub fn linked_documents(
+        &self,
+        anchors: &[String],
+        others: &[String],
+    ) -> Result<HashSet<String>, LinkIndexError> {
+        let mut found = HashSet::new();
+        if anchors.is_empty() || others.is_empty() {
+            return Ok(found);
+        }
+        let prefix = self.meta("docs_prefix")?.unwrap_or_default();
+        let mut docs: Vec<String> = Vec::new();
+        {
+            let mut statement = self.db.prepare("SELECT path FROM docs")?;
+            let rows = statement.query_map([], |r| r.get::<_, String>(0))?;
+            for row in rows {
+                docs.push(row?);
+            }
+        }
+        // Путь от корня документации → путь от корня проекта.
+        let by_docs_path: HashMap<String, &String> = docs
+            .iter()
+            .map(|doc| (relative_to_docs(doc, &prefix).to_string(), doc))
+            .collect();
+        let set = DocSet::new(by_docs_path.keys().cloned()).with_excluded(self.excluded_areas()?);
+        let anchor_set: HashSet<&str> = anchors.iter().map(String::as_str).collect();
+        let other_set: HashSet<&str> = others.iter().map(String::as_str).collect();
+        let mut statement = self.db.prepare(
+            "SELECT src, line, start, end, kind, raw_target, text, fragment FROM links ORDER BY src, start",
+        )?;
+        let rows = statement.query_map([], |r| {
+            Ok((
+                r.get::<_, String>(0)?,
+                ParsedLink {
+                    line: r.get(1)?,
+                    start: r.get::<_, i64>(2)? as usize,
+                    end: r.get::<_, i64>(3)? as usize,
+                    kind: LinkKind::parse(&r.get::<_, String>(4)?).unwrap_or(LinkKind::Inline),
+                    raw_target: r.get(5)?,
+                    text: r.get(6)?,
+                    fragment: r.get(7)?,
+                },
+            ))
+        })?;
+        for row in rows {
+            let (src, link) = row?;
+            let Resolved::Found(target) = set.resolve(relative_to_docs(&src, &prefix), &link)
+            else {
+                continue;
+            };
+            let Some(target) = by_docs_path.get(target).map(|path| path.as_str()) else {
+                continue;
+            };
+            if target == src {
+                continue;
+            }
+            if anchor_set.contains(src.as_str()) && other_set.contains(target) {
+                found.insert(target.to_string());
+            }
+            if anchor_set.contains(target) && other_set.contains(src.as_str()) {
+                found.insert(src);
+            }
+        }
+        Ok(found)
+    }
+
     /// Все битые ссылки проекта: источник, строка, текст и адресат как написан. Порядок — по
     /// документу и позиции в тексте.
     pub fn broken_links(&self) -> Result<Vec<BrokenLink>, LinkIndexError> {
@@ -530,7 +630,8 @@ impl LinkIndex {
         let set = DocSet::new(
             docs.iter()
                 .map(|doc| relative_to_docs(doc, &prefix).to_string()),
-        );
+        )
+        .with_excluded(self.excluded_areas()?);
         let mut statement = self.db.prepare(
             "SELECT src, line, start, end, kind, raw_target, text, fragment FROM links ORDER BY src, start",
         )?;

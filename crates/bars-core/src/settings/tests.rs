@@ -169,7 +169,7 @@ fn user_file_overrides_only_the_keys_it_sets() {
 
         [search]
         results = 7
-        min_score_rerank = 0.25
+        min_score = 0.25
         agent_min_score = [0.2, 0.8]
 
         [device]
@@ -192,7 +192,7 @@ fn user_file_overrides_only_the_keys_it_sets() {
     assert!(settings.rerank.enabled);
     assert_eq!(settings.rerank.model, "BAAI/bge-reranker-v2-m3");
     assert_eq!(settings.search.results, 7);
-    assert_eq!(settings.search.min_score_rerank, 0.25);
+    assert_eq!(settings.search.min_score, 0.25);
     assert_eq!(settings.search.agent_min_score, (0.2, 0.8));
     assert_eq!(settings.search.results_reranked, 3);
     assert_eq!(settings.embed.accelerator, Accelerator::Cpu);
@@ -212,8 +212,8 @@ fn local_openai_source_is_read_from_its_kebab_name() {
 
 #[test]
 fn integers_are_accepted_where_scores_are_floats() {
-    let settings = user("[search]\nmin_score_vector = 0\nagent_min_score = [0, 1]\n").value;
-    assert_eq!(settings.search.min_score_vector, 0.0);
+    let settings = user("[search]\nmin_score = 0\nagent_min_score = [0, 1]\n").value;
+    assert_eq!(settings.search.min_score, 0.0);
     assert_eq!(settings.search.agent_min_score, (0.0, 1.0));
 }
 
@@ -296,7 +296,7 @@ fn unknown_keys_are_warned_about_and_ignored() {
         future = 1
         [search]
         results = 6
-        min_score = 0.5
+        min_scor = 0.5
         [chunking]
         min_char = 10
         [embed]
@@ -319,7 +319,7 @@ fn unknown_keys_are_warned_about_and_ignored() {
             "embed.colour",
             "future",
             "rerank.speed",
-            "search.min_score",
+            "search.min_scor",
         ]
     );
     assert!(loaded.warnings.iter().all(|w| w.file == Path::new(USER)));
@@ -391,6 +391,7 @@ fn zero_counts_and_sizes_are_invalid() {
 #[test]
 fn scores_outside_zero_to_one_are_invalid() {
     for (text, key) in [
+        ("[search]\nmin_score = 1.5\n", "search.min_score"),
         (
             "[search]\nmin_score_vector = 1.5\n",
             "search.min_score_vector",
@@ -693,4 +694,22 @@ fn graph_tools_are_hidden_by_default_and_shown_by_the_mcp_key() {
     assert_eq!(warned.warnings.len(), 1);
     assert_eq!(warned.warnings[0].key, "mcp.graph");
     assert!(!warned.value.mcp.graph_tools);
+}
+
+#[test]
+fn legacy_thresholds_move_into_the_single_min_score() {
+    // Без rerank — прежний порог косинуса, с rerank — прежний порог rerank; `min_score` важнее обоих.
+    let vector = user("[rerank]\nenabled = false\n[search]\nmin_score_vector = 0.3\nmin_score_rerank = 0.2\n");
+    assert_eq!(vector.value.search.min_score, 0.3);
+    let rerank = user("[rerank]\nenabled = true\n[search]\nmin_score_vector = 0.3\nmin_score_rerank = 0.2\n");
+    assert_eq!(rerank.value.search.min_score, 0.2);
+    let explicit = user("[rerank]\nenabled = true\n[search]\nmin_score = 0.15\nmin_score_rerank = 0.2\n");
+    assert_eq!(explicit.value.search.min_score, 0.15);
+    // Прежние ключи — не неизвестные: предупреждения о них нет.
+    assert!(vector.warnings.is_empty(), "{:?}", vector.warnings);
+}
+
+#[test]
+fn default_min_score_is_one_tenth() {
+    assert_eq!(user("").value.search.min_score, 0.1);
 }

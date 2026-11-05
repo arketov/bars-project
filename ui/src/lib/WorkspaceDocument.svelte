@@ -11,6 +11,7 @@
   import { app, type DocumentReference, type ViewedDocument } from "./app.svelte";
   import { BarsError, type ReadOutput, type SearchOutput } from "./types";
   import { documentHeadings, renderDocument } from "./markdown";
+  import { markTerms } from "./search-results";
   import { linkTitle, loadLinks, type DocumentLinks, type IncomingLink, type OutgoingLink } from "./document-links";
   import { linkTargets } from "./link-picker";
   import { followLink as documentLink } from "./follow-link.svelte";
@@ -156,6 +157,8 @@
       reason: () => headingLinkText(hit.path, heading.label) ? undefined : "Документа нет в дереве проекта",
     },
   });
+  // «Открыть раздел» из выдачи: слова запроса подсвечиваются в отрисованном разделе (в исходнике подсвечиваются строки).
+  $effect(() => { void html; const terms = hit.terms; if (terms) void tick().then(() => { const section = body?.querySelector("#hit"); if (section) markTerms(section, terms); }); });
   // Прокрутка к отрывку при открытии, смене режима и нового отрывка; правки текста её не двигают.
   $effect(() => { void source; void hit.first_line; void doc; void tick().then(() => scroll(hit.first_line)); });
 </script>
@@ -240,6 +243,7 @@
   .md :global(span.a) { text-decoration: none; }
   .md :global(a.a) { cursor: pointer; }
   .md :global(pre) { overflow: auto; background: var(--panel-2); padding: 8px; } .md :global(table) { border-collapse: collapse; } .md :global(td), .md :global(th) { border: 1px solid var(--line); padding: 4px; }
+  .md :global(mark) { background: var(--accent-soft); color: inherit; border-radius: 3px; box-shadow: inset 0 -2px 0 var(--accent); }
   .md :global(.hit) { background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 4px 8px; } .md :global(.hitlabel) { font-size: 10px; color: var(--accent-text); }
   .backlinks { border-top: 1px solid var(--line); background: var(--panel); position: relative; padding: 0 10px; }
   .bl-list { overflow: auto; padding-bottom: 6px; }

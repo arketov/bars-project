@@ -28,7 +28,7 @@ impl Env {
 
     fn with_provider(provider: Arc<dyn crate::worker::ModelProvider>) -> Self {
         let home = TempDir::new().unwrap();
-        let mut config = WorkerConfig::new(home.path().to_path_buf());
+        let mut config = WorkerConfig::new(home.path().to_path_buf()).without_graph_pause();
         config.secrets = Arc::new(MemorySecrets::default());
         config.autostart = Arc::new(MemoryAutostart::new("\"/opt/bars/bars\"", None));
         let worker = Worker::start(config, provider).unwrap();

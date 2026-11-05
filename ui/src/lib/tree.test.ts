@@ -129,3 +129,24 @@ describe("фильтр", () => {
     expect(filterTree(tree(), "  ")).toHaveLength(4);
   });
 });
+
+describe("buildTree: вложенные проекты (Т-7)", () => {
+  const nested = [{ name: "B", path: "/w/A/docs/b", dir: "docs/b", area: "docs/b/docs" }];
+  const disk = { files: ["docs/a.md", "docs/b/README.md"], dirs: ["docs/b", "docs/b/docs"], nested };
+
+  it("помечает папку вложенного проекта и его области; обычные папки не помечены", () => {
+    const modules = buildTree([doc("docs/a.md")], "docs", { ...disk, dirs: [...disk.dirs, "docs/c"] });
+    const find = (name: string) => modules.find((m) => m.path === name);
+
+    expect(find("b")?.nested).toEqual({ name: "B", path: "/w/A/docs/b" });
+    expect(find("b")?.children.find((c) => c.path === "b/docs")?.nested?.name).toBe("B");
+    expect(find("c")?.nested).toBeUndefined();
+    expect(find(".")?.nested).toBeUndefined();
+  });
+
+  it("без вложенных проектов пометок нет", () => {
+    const modules = buildTree([doc("docs/a.md")], "docs", { files: disk.files, dirs: disk.dirs });
+
+    expect(modules.every((m) => !m.nested)).toBe(true);
+  });
+});

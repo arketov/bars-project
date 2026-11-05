@@ -1,3 +1,4 @@
+mod delta;
 mod job;
 use crate::indexing::chunking::chunk_document_with_spans;
 use crate::storage::Index;
@@ -119,6 +120,14 @@ fn build_graph(
     if let Some(prepared) = job::load(project, index, layer)? {
         return job::run(index, prepared, state, &mut cancelled);
     }
+    // Автоматическое обновление после правки: только затронутые документы (НФТ-7); явное
+    // построение остаётся полным (OQ-260), как и любой случай, где дельта неприменима.
+    if state.delta
+        && layer == bars_graph::BuildLayer::All
+        && let Some(status) = delta::try_delta(project, index, &mut cancelled)?
+    {
+        return Ok(Some(status));
+    }
     let layout = index
         .stored_layout()
         .map_err(|e| GraphError::InvalidData(e.to_string()))?
@@ -159,66 +168,13 @@ fn build_graph(
         if cancelled() {
             return Err(GraphError::Cancelled);
         }
-        let physical = match project.join(path).canonicalize() {
-            Ok(path) => path,
-            Err(_) => {
-                errors.push(bars_graph::GraphFileError {
-                    path: path.clone(),
-                    code: "unreadable".into(),
-                    message: "Файл недоступен".into(),
-                });
-                continue;
-            }
+        let (text, relative) = match indexed_source(index, &layout.docs_root, path, hash) {
+            Some(found) => found,
+            None => match disk_source(project, &docs, path, hash, &mut errors)? {
+                Some(found) => found,
+                None => continue,
+            },
         };
-        let relative = physical
-            .strip_prefix(&docs)
-            .map_err(|_| {
-                GraphError::InvalidData(
-                    "индексированный файл за пределами корня документации".into(),
-                )
-            })?
-            .to_string_lossy()
-            .replace('\\', "/");
-        if std::fs::metadata(&physical).is_ok_and(|m| m.len() > 16 * 1024 * 1024) {
-            errors.push(bars_graph::GraphFileError {
-                path: path.clone(),
-                code: "too_large".into(),
-                message: "Файл превышает предел графа 16 МиБ".into(),
-            });
-            continue;
-        }
-        let read_text = || -> Result<String, std::io::Error> {
-            let mut bytes = Vec::new();
-            std::fs::File::open(&physical)?
-                .take(16 * 1024 * 1024 + 1)
-                .read_to_end(&mut bytes)?;
-            if bytes.len() > 16 * 1024 * 1024 {
-                return Err(std::io::Error::other("too_large"));
-            }
-            String::from_utf8(bytes)
-                .map_err(|_| std::io::Error::from(std::io::ErrorKind::InvalidData))
-        };
-        let text = match read_text() {
-            Ok(text) => text,
-            Err(error) => {
-                let (code, message) = if error.kind() == std::io::ErrorKind::InvalidData {
-                    ("invalid_utf8", "Файл не является UTF-8")
-                } else if error.to_string() == "too_large" {
-                    ("too_large", "Файл превышает предел графа 16 МиБ")
-                } else {
-                    ("unreadable", "Файл недоступен")
-                };
-                errors.push(bars_graph::GraphFileError {
-                    path: path.clone(),
-                    code: code.into(),
-                    message: message.into(),
-                });
-                continue;
-            }
-        };
-        if blake3::hash(text.as_bytes()).to_hex().as_str() != hash {
-            return Err(GraphError::StaleRef(path.clone()));
-        }
         let (module, title): (String, String) = index.conn().query_row(
             "SELECT module,title FROM documents WHERE path=?1",
             [path],
@@ -371,6 +327,94 @@ fn build_graph(
     finish_graph(index, data, expected, errors, None, &mut cancelled).map(Some)
 }
 
+/// Путь документа от корня документации по пути индекса (`docs/a.md` при корне `docs` → `a.md`).
+pub(super) fn relative_path(docs_root: &str, path: &str) -> Option<String> {
+    let root = docs_root.replace('\\', "/");
+    let root = root.trim_matches('/');
+    let path = path.replace('\\', "/");
+    if root.is_empty() || root == "." {
+        return Some(path);
+    }
+    path.strip_prefix(root)
+        .and_then(|rest| rest.strip_prefix('/'))
+        .map(str::to_string)
+}
+
+/// Текст документа из индекса или из прежнего поколения графа с тем же хешем: без чтения диска
+/// и без гонки с правками (текст записан индексатором вместе с хешем).
+fn indexed_source(
+    index: &Index,
+    docs_root: &str,
+    path: &str,
+    hash: &str,
+) -> Option<(String, String)> {
+    let relative = relative_path(docs_root, path)?;
+    let text = match index.document_source(path) {
+        Ok(Some((stored, text))) if stored == hash => Some(text),
+        _ => bars_graph::store::source_text(index.conn(), path, hash)
+            .ok()
+            .flatten(),
+    }?;
+    (text.len() <= 16 * 1024 * 1024).then_some((text, relative))
+}
+
+/// Запасной путь для документов без текста в индексе: чтение с диска со сверкой хеша.
+/// `None` — файл исключён из графа, ошибка записана в `errors`.
+fn disk_source(
+    project: &Path,
+    docs: &Path,
+    path: &str,
+    hash: &str,
+    errors: &mut Vec<bars_graph::GraphFileError>,
+) -> Result<Option<(String, String)>, GraphError> {
+    let mut fail = |code: &str, message: &str| {
+        errors.push(bars_graph::GraphFileError {
+            path: path.to_string(),
+            code: code.into(),
+            message: message.into(),
+        });
+        Ok(None)
+    };
+    let physical = match project.join(path).canonicalize() {
+        Ok(path) => path,
+        Err(_) => return fail("unreadable", "Файл недоступен"),
+    };
+    let relative = physical
+        .strip_prefix(docs)
+        .map_err(|_| {
+            GraphError::InvalidData("индексированный файл за пределами корня документации".into())
+        })?
+        .to_string_lossy()
+        .replace('\\', "/");
+    if std::fs::metadata(&physical).is_ok_and(|m| m.len() > 16 * 1024 * 1024) {
+        return fail("too_large", "Файл превышает предел графа 16 МиБ");
+    }
+    let read_text = || -> Result<String, std::io::Error> {
+        let mut bytes = Vec::new();
+        std::fs::File::open(&physical)?
+            .take(16 * 1024 * 1024 + 1)
+            .read_to_end(&mut bytes)?;
+        if bytes.len() > 16 * 1024 * 1024 {
+            return Err(std::io::Error::other("too_large"));
+        }
+        String::from_utf8(bytes).map_err(|_| std::io::Error::from(std::io::ErrorKind::InvalidData))
+    };
+    let text = match read_text() {
+        Ok(text) => text,
+        Err(error) if error.kind() == std::io::ErrorKind::InvalidData => {
+            return fail("invalid_utf8", "Файл не является UTF-8");
+        }
+        Err(error) if error.to_string() == "too_large" => {
+            return fail("too_large", "Файл превышает предел графа 16 МиБ");
+        }
+        Err(_) => return fail("unreadable", "Файл недоступен"),
+    };
+    if blake3::hash(text.as_bytes()).to_hex().as_str() != hash {
+        return Err(GraphError::StaleRef(path.to_string()));
+    }
+    Ok(Some((text, relative)))
+}
+
 fn finish_graph(
     index: &mut Index,
     mut data: bars_graph::Dataset,
@@ -428,24 +472,31 @@ fn finish_graph(
         return Err(GraphError::Cancelled);
     }
     bars_graph::store::validate(&data)?;
-    let tx = index
-        .conn_mut()
-        .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
-    if let Some((key, _)) = completion
-        && job::input_key_db(&tx)? != key
-    {
-        return Err(GraphError::StaleRef("входы kNN изменились".into()));
-    }
-    bars_graph::store::publish_in_transaction(&tx, &data, &expected, &errors)?;
-    if let Some((_, checkpoint)) = completion {
-        use bars_graph::store::{PayloadKey, delete_payload, write_payload};
-        write_payload(&tx, PayloadKey::Complete, checkpoint)?;
-        delete_payload(&tx, PayloadKey::Prepared)?;
-        delete_payload(&tx, PayloadKey::Checkpoint)?;
-    }
-    if cancelled() {
-        return Err(GraphError::Cancelled);
-    }
-    tx.commit()?;
+    let boost = bars_graph::store::CacheBoost::raise(index.conn())?;
+    let result = (|| -> Result<(), GraphError> {
+        let tx = index
+            .conn_mut()
+            .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
+        if let Some((key, _)) = completion
+            && job::input_key_db(&tx)? != key
+        {
+            return Err(GraphError::StaleRef("входы kNN изменились".into()));
+        }
+        bars_graph::store::publish_in_transaction(&tx, &data, &expected, &errors)?;
+        if let Some((_, checkpoint)) = completion {
+            use bars_graph::store::{PayloadKey, delete_payload, write_payload};
+            write_payload(&tx, PayloadKey::Complete, checkpoint)?;
+            delete_payload(&tx, PayloadKey::Prepared)?;
+            delete_payload(&tx, PayloadKey::Checkpoint)?;
+        }
+        if cancelled() {
+            return Err(GraphError::Cancelled);
+        }
+        tx.commit()?;
+        Ok(())
+    })();
+    let restored = boost.restore(index.conn());
+    result?;
+    restored?;
     bars_graph::store::status(index.conn())
 }

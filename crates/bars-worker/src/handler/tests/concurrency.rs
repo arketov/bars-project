@@ -82,8 +82,11 @@ async fn full_rebuild_keeps_status_window_controls_and_full_ipc_search_responsiv
         )
         .unwrap();
     }
-    let worker =
-        crate::worker::Worker::start(WorkerConfig::new(home.path().into()), provider).unwrap();
+    let worker = crate::worker::Worker::start(
+        WorkerConfig::new(home.path().into()).without_graph_pause(),
+        provider,
+    )
+    .unwrap();
     let handler = crate::handler::WorkerHandler::new(worker.clone());
     let endpoint = Endpoint::named("iss16-concurrency");
     let server = tokio::spawn(crate::ipc::run_server(

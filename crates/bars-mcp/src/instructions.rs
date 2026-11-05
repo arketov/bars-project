@@ -39,16 +39,26 @@ fn module_line(project: Option<&SessionProjectInfo>, budget: usize) -> String {
     let entry = |m: &bars_protocol::SessionModuleInfo| {
         format!("{} ({})", clean(&m.name, usize::MAX), m.documents)
     };
-    let full = format!(
-        "{prefix}{}",
-        modules
-            .iter()
-            .map(|m| entry(m))
-            .collect::<Vec<_>>()
-            .join(", ")
-    );
-    if full.chars().count() <= budget {
-        return full;
+    let titled =
+        |m: &bars_protocol::SessionModuleInfo| match m.title.as_deref().map(|t| clean(t, 40)) {
+            Some(title) if !title.is_empty() => format!("{} — {title}", entry(m)),
+            _ => entry(m),
+        };
+    for describe in [
+        &titled as &dyn Fn(&bars_protocol::SessionModuleInfo) -> String,
+        &entry,
+    ] {
+        let full = format!(
+            "{prefix}{}",
+            modules
+                .iter()
+                .map(|m| describe(m))
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
+        if full.chars().count() <= budget {
+            return full;
+        }
     }
     modules.sort_by(|a, b| b.documents.cmp(&a.documents).then(a.name.cmp(&b.name)));
     let mut selected = Vec::new();
@@ -77,7 +87,7 @@ pub const INSTRUCTIONS: &str = r#"bars — локальная база Markdown-
 
 Предмет задачи — сначала; этап уточни по известному плану/реестру.
 - .md: bars_read; длинный план/реестр — bars_outline, затем lines/under.
-- Контекст неизвестен: bars_rag_search, вопрос на языке пользователя. Выбери modules по виду знания: features — контракты, architecture — устройство, adr — решения, knowledge — исследования, backlog — баги/идеи, chats — история. Имена — из проекта. Несколько видов или место неясно — весь проект; слабая/пустая выдача — расширь область. Квоты нет.
+- Контекст неизвестен: bars_rag_search, вопрос на языке пользователя. Выбери modules по виду знания среди папок проекта (список ниже, имена не угадывай). Ищешь текущее состояние — не бери журналы и архивы; нужна история — бери её папку. Несколько видов или место неясно — весь проект; слабая/пустая выдача — расширь область. Квоты нет.
 - modules — папки первого уровня docs-root, не вложенные темы; другой проект — bars_projects. files — выбранные индексируемые документы, не угадывай список. Пути — от docs-root или проекта, как в выдаче.
 - bars_text_search — литерал/regex на диске; продолжение path/offset/revision. bars_links — ссылки, project-relative path, next_cursor. stale_revision/stale_cursor — начать заново.
 Без project — проект сессии. Ноль не доказывает отсутствия: проверь предмет/проект/область.
@@ -113,6 +123,13 @@ mod tests {
             );
             assert!(session_instructions(graph, None).chars().count() <= 2000);
         }
+        let mut titled = project.clone();
+        titled.modules.truncate(2);
+        titled.modules[0].title = Some("Рабочие инструкции".into());
+        let text = session_instructions(false, Some(&titled));
+        assert!(text.contains("— Рабочие инструкции"), "{text}");
+        assert!(!text.contains("features — контракты"));
+        assert!(text.chars().count() <= 2000);
         project.name = "bars".into();
         project.modules.truncate(2);
         project.modules[0].name = "z".into();

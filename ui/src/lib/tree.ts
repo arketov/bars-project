@@ -22,12 +22,26 @@ export interface TreeNode {
   indexPath?: string;
   /** Документ есть на диске, но ещё не в индексе (Т-33): число чанков неизвестно. */
   indexed?: false;
+  /** Папка вложенного проекта или его области (Т-7): без галочки, с пометкой и действием «Открыть проект». */
+  nested?: { name: string; path: string };
+}
+
+/** Вложенный зарегистрированный проект, область которого исключена из индекса внешнего. */
+export interface NestedProject {
+  name: string;
+  /** Корень вложенного проекта. */
+  path: string;
+  /** Его папка от корня внешнего проекта. */
+  dir: string;
+  /** Его исключённая область от корня внешнего проекта. */
+  area: string;
 }
 
 /** Дерево с диска (`tree_read`): пути от корня проекта; пустые папки видны, документы без индекса тоже. */
 export interface DiskTree {
   files: string[];
   dirs: string[];
+  nested?: NestedProject[];
 }
 
 export type CheckState = "all" | "some" | "none";
@@ -129,6 +143,22 @@ export function buildTree(documents: TreeDocument[], docsRoot: string, disk?: Di
       }
       node = child;
     }
+  }
+  // Вложенные проекты (Т-7): папка проекта и папка его области — пометка вместо галочки.
+  if (disk?.nested?.length) {
+    const marks = new Map<string, { name: string; path: string }>();
+    for (const item of disk.nested) {
+      marks.set(item.dir, { name: item.name, path: item.path });
+      marks.set(item.area, { name: item.name, path: item.path });
+    }
+    const mark = (nodes: TreeNode[]) => {
+      for (const node of nodes) {
+        const found = node.kind === "file" ? undefined : marks.get(projectPathOf(node.path, docsRoot));
+        if (found) node.nested = found;
+        mark(node.children);
+      }
+    };
+    mark([...modules.values()]);
   }
   const sortNodes = (nodes: TreeNode[]) => {
     // Папки раньше файлов, внутри — по имени; `Index.md` первым среди файлов.

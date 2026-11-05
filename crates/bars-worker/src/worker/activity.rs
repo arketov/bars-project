@@ -26,6 +26,9 @@ impl Worker {
         };
         self.inner.ensure_watching(&project);
         if first {
+            // Т-8: с проектом работает агент (хук сессии или первый вызов MCP) — кладём
+            // `BARS_INSTRUCTION.md`. Окно и CLI этого пути не проходят. Сбой записи вызов не ломает.
+            let _ = bars_core::instruction::place(&project, &self.inner.docs_root_of(&project));
             self.inner.activate(&project, Priority::Watch);
         }
         Ok(())

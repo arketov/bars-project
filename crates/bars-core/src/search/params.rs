@@ -11,10 +11,10 @@ pub struct SearchSettings {
     pub results: usize,
     /// Результатов с реранком.
     pub results_reranked: usize,
-    /// Порог по косинусной близости без реранка.
-    pub min_score_vector: f32,
-    /// Порог по оценке реранка.
-    pub min_score_rerank: f32,
+    /// Единый порог по опоре оценки: по оценке rerank, а без rerank — по косинусу (ADR-0007).
+    pub min_score: f32,
+    /// Веса добавок к опоре и свёртка разделов (схема баллов).
+    pub weights: ScoreWeights,
     /// Пределы, в которых агент может задать свой порог: от и до.
     pub agent_min_score: (f32, f32),
     pub max_results: usize,
@@ -29,8 +29,8 @@ impl Default for SearchSettings {
             rerank_candidates: 15,
             results: 5,
             results_reranked: 3,
-            min_score_vector: 0.0,
-            min_score_rerank: 0.1,
+            min_score: 0.1,
+            weights: ScoreWeights::default(),
             agent_min_score: (0.0, 1.0),
             max_results: 20,
             max_candidates: 100,
@@ -39,13 +39,45 @@ impl Default for SearchSettings {
     }
 }
 
-/// Вид оценки результата: у неё есть абсолютный смысл, поэтому к ней применяется порог.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// Веса схемы баллов `S = a + w_c·c + w_f·f + w_p·p + w_l·l` (`docs/features/search/hybrid-search.md`,
+/// ADR-0007). Стартовые значения; подбор по бенчу — шаг 2.3.7. В `settings.toml` не выставляются:
+/// бенч задаёт их кодом.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ScoreWeights {
+    /// `w_c`: вес косинуса, когда опора — rerank; без rerank косинус сам опора.
+    pub cosine: f32,
+    /// `w_f`: слова запроса по полям (составной `bm25`, нормирован на лучший балл списка).
+    pub fulltext: f32,
+    /// `w_p`: точное совпадение (идентификаторы, фраза, пары слов подряд).
+    pub exact: f32,
+    /// `w_l`: связи документов (сигнал `l`); 0 — сигнал не считается.
+    pub links: f32,
+    /// Бонус разделу за каждый найденный кусок сверх лучшего (`fold_bonus`).
+    pub fold_bonus: f32,
+}
+
+impl Default for ScoreWeights {
+    fn default() -> Self {
+        Self {
+            cosine: 0.0,
+            fulltext: 0.1,
+            exact: 0.1,
+            links: 0.0,
+            fold_bonus: 0.0,
+        }
+    }
+}
+
+/// Вид оценки результата: у опоры есть абсолютный смысл, поэтому к ней применяется порог.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum ScoreKind {
     /// Оценка rerank-модели.
     Rerank,
     /// Косинусная близость вектора чанка к вектору запроса.
+    #[default]
     Cosine,
+    /// Опоры нет (ни rerank, ни embed): порядок по словам и точному совпадению, порога нет.
+    None,
 }
 
 /// Запрос на поиск: то, что передают окно, агент или CLI. Пустые поля — значения из настроек.
@@ -73,6 +105,10 @@ pub struct AppliedParams {
     pub score_kind: ScoreKind,
     /// Хотя бы одно значение из вызова вышло за пределы и прижато.
     pub clamped: bool,
+    /// Веса, с которыми сложены баллы.
+    pub weights: ScoreWeights,
+    /// Сигналы, посчитанные для ответа: `rerank`, `cosine`, `fulltext`, `exact`, `links`.
+    pub signals: Vec<&'static str>,
 }
 
 impl SearchSettings {
@@ -101,12 +137,7 @@ impl SearchSettings {
             .map_or(self.rerank_candidates, |value| {
                 limit(value, self.max_rerank_candidates)
             });
-        let default_min = if reranked {
-            self.min_score_rerank
-        } else {
-            self.min_score_vector
-        };
-        let min_score = request.min_score.map_or(default_min, |value| {
+        let min_score = request.min_score.map_or(self.min_score, |value| {
             let (low, high) = self.agent_min_score;
             let applied = value.clamp(low, high);
             clamped |= applied != value;
@@ -123,6 +154,8 @@ impl SearchSettings {
                 ScoreKind::Cosine
             },
             clamped,
+            weights: self.weights,
+            signals: Vec::new(),
         }
     }
 }
@@ -136,13 +169,13 @@ mod tests {
         let applied = SearchSettings::default().resolve(&SearchRequest::default(), false);
         assert_eq!(applied.results, 5);
         assert_eq!(applied.candidates, 30);
-        assert_eq!(applied.min_score, 0.0);
+        assert_eq!(applied.min_score, 0.1);
         assert_eq!(applied.score_kind, ScoreKind::Cosine);
         assert!(!applied.clamped);
     }
 
     #[test]
-    fn rerank_changes_result_count_threshold_and_score_kind() {
+    fn rerank_changes_result_count_and_score_kind_but_not_the_single_threshold() {
         let applied = SearchSettings::default().resolve(&SearchRequest::default(), true);
         assert_eq!(applied.results, 3);
         assert_eq!(applied.min_score, 0.1);
@@ -226,7 +259,7 @@ mod tests {
     #[test]
     fn users_own_threshold_is_not_clamped() {
         let settings = SearchSettings {
-            min_score_vector: 0.9,
+            min_score: 0.9,
             agent_min_score: (0.0, 0.5),
             ..SearchSettings::default()
         };

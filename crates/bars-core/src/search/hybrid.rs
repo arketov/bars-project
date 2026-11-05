@@ -1,19 +1,23 @@
-//! Гибридный поиск: полнотекстовый и векторный кандидаты, слияние RRF, реранк, порог
-//! (`docs/features/search/hybrid-search.md`, Т-12…Т-14, Т-18, Т-24, Т-25).
+//! Один поиск на баллах сигналов: полнотекстовые и векторные кандидаты, сложение баллов
+//! `S = a + w_c·c + w_f·f + w_p·p + w_l·l`, rerank, единый порог по опоре, операторы запроса,
+//! свёртка кусков раздела (`docs/features/search/hybrid-search.md`, ADR-0007, Т-12…Т-14, Т-18, Т-24,
+//! Т-25).
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 
 use rusqlite::params_from_iter;
 use rusqlite::types::Value;
 
-use super::params::{AppliedParams, ScoreKind, SearchRequest, SearchSettings};
+use super::fulltext::{BM25, ExactProbe, FtsQuery, f_signal, fts_plan_for, p_signal};
+use super::operators::{OperatorFilter, ParsedQuery};
+use super::params::{AppliedParams, ScoreKind, ScoreWeights, SearchRequest, SearchSettings};
 use super::vector_top::VectorTop;
 use crate::models::{EmbedError, Embedder, RerankError, Reranker};
-use crate::storage::stem::TextStemmer;
 use crate::storage::{Compatibility, Index, StorageError};
 
-/// Константа Reciprocal Rank Fusion: оценка кандидата — сумма `1 / (RRF_K + место)` по спискам.
-const RRF_K: f32 = 60.0;
+/// Во сколько раз полный перебор векторов берёт больше кандидатов, когда в запросе есть фразы или
+/// исключения: часть векторных кандидатов отсеют операторы.
+const OPERATOR_OVERFETCH: usize = 3;
 
 #[derive(Debug, thiserror::Error)]
 pub enum SearchError {
@@ -23,6 +27,9 @@ pub enum SearchError {
     /// Индекс построен другой моделью или старой схемой (Т-25): искать в нём нельзя.
     #[error("нужна переиндексация: индекс построен другой моделью или старой схемой")]
     ReindexRequired,
+    /// Полнотекстовая таблица записана прежним разбором: её пересоздаёт первое задание обновления.
+    #[error("полнотекстовый индекс перестраивается после обновления bars: повторите запрос позже")]
+    FtsRebuilding,
     #[error(transparent)]
     Embed(#[from] EmbedError),
     #[error(transparent)]
@@ -55,8 +62,32 @@ pub struct SearchHit {
     pub first_line: usize,
     pub last_line: usize,
     pub text: String,
+    /// `min(1, S)` раздела: итоговая оценка лучшего куска плюс бонус свёртки.
     pub score: f32,
+    /// Вид опоры оценки.
     pub score_kind: ScoreKind,
+    /// Баллы лучшего куска по сигналам.
+    pub signals: HitSignals,
+    /// Сколько кусков в разделе (в `chunks` документа с той же цепочкой заголовков).
+    pub parts: usize,
+    /// Сколько из них нашлось (дошло до выдачи свёрнутым).
+    pub parts_found: usize,
+}
+
+/// Баллы результата по сигналам схемы баллов (`None` — сигнала не было).
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+pub struct HitSignals {
+    /// `r` — оценка rerank-модели.
+    pub rerank: Option<f32>,
+    /// `c` — косинус; `None`, когда embed-модель не успела загрузиться.
+    pub cosine: Option<f32>,
+    /// `f` — слова запроса по полям, 0…1.
+    pub fulltext: f32,
+    /// `p` — точное совпадение, 0…1.
+    pub exact: f32,
+    /// `l` — связи, 0 или 1; `None`, когда сигнал не считался (вес `w_l` равен 0, источника ссылок
+    /// нет или он не ответил).
+    pub links: Option<f32>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -70,6 +101,8 @@ pub struct SearchResponse {
     /// Нормализованный вектор запроса, если он вычислялся (при пустом корпусе — `None`). Внутренний
     /// сигнал для воркера («Новые темы»), в публичную выдачу не попадает.
     pub query_vector: Option<Vec<f32>>,
+    /// Запрос после разбора операторов («понято как»).
+    pub understood: ParsedQuery,
 }
 
 /// Ищет в индексе одного проекта. Реранк идёт, если передан `reranker`; если он не отработал,
@@ -93,7 +126,52 @@ pub fn search_expanded(
     reranker: Option<&mut dyn Reranker>,
     settings: &SearchSettings,
     request: &SearchRequest,
-    mut expansion: Option<&mut CandidateExpansion<'_>>,
+    expansion: Option<&mut CandidateExpansion<'_>>,
+) -> Result<SearchResponse, SearchError> {
+    search_with_signals(
+        index, embedder, reranker, settings, request, expansion, true,
+    )
+}
+
+/// То же, но с выбором смысловой части. При `semantic = false` embed-модель не вызывается
+/// (воркер не дождался её загрузки): выдача строится по полнотекстовому списку, косинуса нет,
+/// порог косинуса не применяется, расширение кандидатов не вызывается. Отпечаток модели нужен
+/// только для проверки совместимости индекса (Т-25) и загрузки не требует.
+pub fn search_with_signals(
+    index: &Index,
+    embedder: &mut dyn Embedder,
+    reranker: Option<&mut dyn Reranker>,
+    settings: &SearchSettings,
+    request: &SearchRequest,
+    expansion: Option<&mut CandidateExpansion<'_>>,
+    semantic: bool,
+) -> Result<SearchResponse, SearchError> {
+    search_with_links(
+        index, embedder, reranker, settings, request, expansion, semantic, None,
+    )
+}
+
+/// Источник сигнала `l`: по путям якорей (документы трёх лучших результатов) и путям документов
+/// выдачи отвечает, какие из вторых связаны ссылкой с якорями (`LinkIndex::linked_documents`).
+/// Ошибка источника не ломает поиск: сигнал просто не считается.
+pub type LinkedDocuments<'a> =
+    dyn FnMut(&[String], &[String]) -> Result<HashSet<String>, SearchError> + 'a;
+
+/// Количество лучших результатов, документы которых служат якорями сигнала `l`.
+const LINK_ANCHORS: usize = 3;
+
+/// То же, что `search_with_signals`, плюс сигнал связей `l`. Он считается, только если передан
+/// `links` и вес `w_l` больше нуля.
+#[allow(clippy::too_many_arguments)]
+pub fn search_with_links(
+    index: &Index,
+    embedder: &mut dyn Embedder,
+    reranker: Option<&mut dyn Reranker>,
+    settings: &SearchSettings,
+    request: &SearchRequest,
+    expansion: Option<&mut CandidateExpansion<'_>>,
+    semantic: bool,
+    links: Option<&mut LinkedDocuments<'_>>,
 ) -> Result<SearchResponse, SearchError> {
     // FTS открывает служебные таблицы лениво: смена схемы между чтениями ломает xConnect.
     // Сохраняем транзакцию вызывающего кода, если поиск уже работает в его снимке.
@@ -102,15 +180,19 @@ pub fn search_expanded(
     } else {
         None
     };
-    let match_query = fts_query(&request.query)
-        .ok_or_else(|| SearchError::InvalidParams("в запросе нет ни одного слова".to_string()))?;
     if matches!(
         index.compatibility(embedder.fingerprint())?,
         Compatibility::ModelChanged | Compatibility::SchemaOutdated
     ) {
         return Err(SearchError::ReindexRequired);
     }
-    let scope = Scope::build(index, request)?;
+    // Колонки `chunks_fts` пересоздаёт первый писатель при открытии индекса; читатель их не чинит
+    // и старую таблицу с другими колонками не читает.
+    if index.stem_outdated()? {
+        return Err(SearchError::FtsRebuilding);
+    }
+    let plan = QueryPlan::build(index, &request.query)?;
+    let scope = Scope::build_with_paths(index, request, &plan.parsed.paths)?;
 
     let planned = settings.resolve(request, reranker.is_some());
     if scope.chunk_count(index)? == 0 {
@@ -120,95 +202,491 @@ pub fn search_expanded(
             candidate_modules: BTreeMap::new(),
             rerank_error: None,
             query_vector: None,
+            understood: plan.parsed,
         });
     }
 
-    let mut query_vector = embedder.embed_query(&request.query)?;
-    let expected = embedder.fingerprint().dim;
-    if query_vector.len() != expected {
-        return Err(EmbedError::Dimension {
-            expected,
-            got: query_vector.len(),
+    let query_vector = if semantic {
+        let mut vector = embedder.embed_query(&plan.parsed.text)?;
+        let expected = embedder.fingerprint().dim;
+        if vector.len() != expected {
+            return Err(EmbedError::Dimension {
+                expected,
+                got: vector.len(),
+            }
+            .into());
         }
-        .into());
-    }
-    normalize(&mut query_vector);
-
-    let candidates = planned.candidates;
-    let text_ids = scope.text_candidates(index, &match_query.all, candidates)?;
-    let exact_ids = match &match_query.identifiers {
-        Some(identifiers) => scope.text_candidates(index, identifiers, candidates)?,
-        None => Vec::new(),
+        normalize(&mut vector);
+        Some(vector)
+    } else {
+        None
     };
-    let mut cosines = scope.cosines(index, &query_vector, candidates, &text_ids, &exact_ids)?;
-    let vector_ids = top_by_score(&cosines, candidates);
-    let mut fused = exact_first(&exact_ids, fuse(&text_ids, &vector_ids));
-    if let Some(expansion) = expansion.as_mut().filter(|_| !fused.is_empty()) {
-        let additional = expansion(index, &fused, candidates)?
-            .into_iter()
-            .take(candidates)
-            .collect::<Vec<_>>();
-        // Принудительно посчитать cosine добавленных кандидатов, сохранив исходный scope.
-        let scores = scope.cosines(index, &query_vector, 0, &additional, &[])?;
-        let additional = additional
-            .into_iter()
-            .filter(|id| scores.contains_key(id))
-            .collect::<Vec<_>>();
-        cosines.extend(scores);
-        let original = fused.clone();
-        let mut seen = HashSet::new();
-        fused.clear();
-        // Чередование до окончательного rerank; исходные точные identifiers остаются первыми.
-        for i in 0..original.len().max(additional.len()) {
-            for id in [original.get(i), additional.get(i)].into_iter().flatten() {
-                if seen.insert(*id) {
-                    fused.push(*id);
-                }
-            }
-        }
-        fused = exact_first(&exact_ids, fused);
-    }
 
-    let candidate_modules = count_candidate_modules(index, &fused)?;
+    let gathered = gather(
+        index,
+        &scope,
+        &plan,
+        query_vector.as_deref(),
+        planned.candidates,
+        &planned.weights,
+        expansion,
+    )?;
+    let candidate_modules = count_candidate_modules(index, &gathered.ids())?;
+
     let mut rerank_error = None;
+    let mut rerank_scores = None;
     if let Some(reranker) = reranker {
-        match rerank(index, reranker, request, &planned, &fused) {
-            Ok(hits) => {
-                return Ok(SearchResponse {
-                    hits: threshold_and_cut(hits, &planned),
-                    applied: planned,
-                    candidate_modules,
-                    rerank_error: None,
-                    query_vector: Some(query_vector),
-                });
-            }
+        match rerank_scores_of(
+            index,
+            reranker,
+            &plan.parsed.text,
+            &gathered,
+            planned.rerank_candidates,
+        ) {
+            Ok(scores) => rerank_scores = Some(scores),
             Err(error) => rerank_error = Some(error.to_string()),
         }
     }
 
-    let applied = if rerank_error.is_some() {
+    let mut applied = if rerank_error.is_some() {
         settings.resolve(request, false)
     } else {
         planned
     };
-    let ids: Vec<i64> = fused
-        .iter()
-        .copied()
-        .filter(|id| cosine_of(&cosines, *id) >= applied.min_score)
-        .take(applied.results)
-        .collect();
-    let mut hits = load_hits(index, &ids)?;
-    for hit in &mut hits {
-        hit.score = cosine_of(&cosines, hit.chunk_id);
-        hit.score_kind = ScoreKind::Cosine;
+    applied.score_kind = if rerank_scores.is_some() {
+        ScoreKind::Rerank
+    } else if query_vector.is_some() {
+        ScoreKind::Cosine
+    } else {
+        ScoreKind::None
+    };
+    // Опоры нет (ни rerank, ни косинуса): порог применять не к чему, порядок остаётся словесным.
+    if applied.score_kind == ScoreKind::None {
+        applied.min_score = 0.0;
     }
+
+    let mut ranked = rank(&gathered, rerank_scores.as_ref(), &applied);
+    load_documents(index, &mut ranked)?;
+    let linked = match links {
+        Some(links) if applied.weights.links > 0.0 => {
+            apply_links(&mut ranked, applied.weights.links, links)
+        }
+        _ => false,
+    };
+    applied.signals = used_signals(&applied, query_vector.is_some(), linked);
+    let hits = fold_sections(index, ranked, &applied)?;
     Ok(SearchResponse {
         hits,
         applied,
         candidate_modules,
         rerank_error,
-        query_vector: Some(query_vector),
+        query_vector,
+        understood: plan.parsed,
     })
+}
+
+/// Сигналы, посчитанные для этого ответа (в `applied.signals`).
+fn used_signals(applied: &AppliedParams, cosine: bool, linked: bool) -> Vec<&'static str> {
+    let mut signals = Vec::new();
+    if applied.score_kind == ScoreKind::Rerank {
+        signals.push("rerank");
+    }
+    if cosine {
+        signals.push("cosine");
+    }
+    signals.push("fulltext");
+    signals.push("exact");
+    if linked {
+        signals.push("links");
+    }
+    signals
+}
+
+/// Запрос после разбора: слова для FTS5 и сигнала `p`, условия операторов.
+pub(super) struct QueryPlan {
+    pub(super) parsed: ParsedQuery,
+    match_query: FtsQuery,
+    probe: ExactProbe,
+    filter: OperatorFilter,
+}
+
+impl QueryPlan {
+    /// Разбирает операторы и собирает выражения FTS5 с исправлением опечаток. Запрос, в котором
+    /// после снятия операторов не осталось слов, — `invalid_params`.
+    pub(super) fn build(index: &Index, query: &str) -> Result<Self, SearchError> {
+        let parsed = ParsedQuery::parse(query);
+        let (match_query, probe) = fts_plan_for(index.conn(), &parsed.text)?.ok_or_else(|| {
+            SearchError::InvalidParams("в запросе нет ни одного слова".to_string())
+        })?;
+        let filter = parsed.filter();
+        Ok(Self {
+            parsed,
+            match_query,
+            probe,
+            filter,
+        })
+    }
+}
+
+/// Кандидат с баллами сигналов; опорных `r` и `a` у него ещё нет.
+struct Candidate {
+    id: i64,
+    /// Косинус; `None`, если запрос без вектора.
+    cosine: Option<f32>,
+    fulltext: f32,
+    exact: f32,
+}
+
+impl Candidate {
+    /// Предварительная оценка `S0 = c + w_f·f + w_p·p` (без embed — `f + w_p·p`): по ней кандидаты
+    /// уходят в rerank.
+    fn preliminary(&self, weights: &ScoreWeights) -> f32 {
+        match self.cosine {
+            Some(cosine) => cosine + weights.fulltext * self.fulltext + weights.exact * self.exact,
+            None => self.fulltext + weights.exact * self.exact,
+        }
+    }
+}
+
+/// Пул кандидатов запроса, по убыванию предварительной оценки.
+struct Gathered {
+    pool: Vec<Candidate>,
+    /// Первые кандидаты полнотекстового списка и векторного (для диагностики бенча).
+    text_ids: Vec<i64>,
+    vector_ids: Vec<i64>,
+}
+
+impl Gathered {
+    fn ids(&self) -> Vec<i64> {
+        self.pool.iter().map(|candidate| candidate.id).collect()
+    }
+}
+
+/// Собирает пул: первые `candidates` по составному `bm25`, первые `candidates` по косинусу и
+/// слова-идентификаторы; операторы отсекают лишнее; считает `f` и `p`; упорядочивает по `S0`.
+fn gather(
+    index: &Index,
+    scope: &Scope,
+    plan: &QueryPlan,
+    query_vector: Option<&[f32]>,
+    candidates: usize,
+    weights: &ScoreWeights,
+    mut expansion: Option<&mut CandidateExpansion<'_>>,
+) -> Result<Gathered, SearchError> {
+    let conn = index.conn();
+    let text_scored = scope.text_scored(
+        index,
+        &plan.filter.apply(&plan.match_query.all),
+        candidates,
+    )?;
+    let text_ids: Vec<i64> = text_scored.iter().map(|(id, _)| *id).collect();
+    let exact_ids = match &plan.match_query.identifiers {
+        Some(identifiers) => {
+            scope.text_candidates(index, &plan.filter.apply(identifiers), candidates)?
+        }
+        None => Vec::new(),
+    };
+    let overfetch = if plan.filter.is_empty() {
+        candidates
+    } else {
+        candidates * OPERATOR_OVERFETCH
+    };
+    let mut cosines = match query_vector {
+        Some(vector) => scope.cosines(index, vector, overfetch, &text_ids, &exact_ids)?,
+        None => HashMap::new(),
+    };
+    let mut vector_ids = top_by_score(&cosines, overfetch);
+    plan.filter.retain(conn, &mut vector_ids)?;
+    vector_ids.truncate(candidates);
+
+    let mut pool: Vec<i64> = Vec::new();
+    let mut seen: HashSet<i64> = HashSet::new();
+    for id in text_ids.iter().chain(&exact_ids).chain(&vector_ids) {
+        if seen.insert(*id) {
+            pool.push(*id);
+        }
+    }
+    if let (Some(expansion), Some(query_vector)) = (
+        expansion.as_mut().filter(|_| !pool.is_empty()),
+        query_vector,
+    ) {
+        let mut additional: Vec<i64> = expansion(index, &pool, candidates)?
+            .into_iter()
+            .take(candidates)
+            .collect();
+        // Косинус добавленных кандидатов считается принудительно, исходная область сохраняется.
+        let scores = scope.cosines(index, query_vector, 0, &additional, &[])?;
+        additional.retain(|id| scores.contains_key(id));
+        plan.filter.retain(conn, &mut additional)?;
+        cosines.extend(scores);
+        for id in additional {
+            if seen.insert(id) {
+                pool.push(id);
+            }
+        }
+    }
+
+    let fulltext = f_signal(conn, &plan.match_query.all, &text_scored, &pool)?;
+    let exact = p_signal(conn, &plan.probe, &pool)?;
+    let mut candidates: Vec<Candidate> = pool
+        .into_iter()
+        .map(|id| Candidate {
+            id,
+            cosine: query_vector.map(|_| cosine_of(&cosines, id)),
+            fulltext: fulltext.get(&id).copied().unwrap_or(0.0),
+            exact: exact.get(&id).copied().unwrap_or(0.0),
+        })
+        .collect();
+    candidates.sort_by(|a, b| {
+        b.preliminary(weights)
+            .total_cmp(&a.preliminary(weights))
+            .then(b.fulltext.total_cmp(&a.fulltext))
+            .then(a.id.cmp(&b.id))
+    });
+    Ok(Gathered {
+        pool: candidates,
+        text_ids,
+        vector_ids,
+    })
+}
+
+/// Оценки rerank первых `rerank_candidates` кандидатов пула (по `S0`), по id чанка. Ей уходят путь,
+/// цепочка заголовков и текст; модель читает первые 512 токенов вместе с запросом.
+fn rerank_scores_of(
+    index: &Index,
+    reranker: &mut dyn Reranker,
+    query: &str,
+    gathered: &Gathered,
+    rerank_candidates: usize,
+) -> Result<HashMap<i64, f32>, RerankError> {
+    let ids: Vec<i64> = gathered
+        .pool
+        .iter()
+        .take(rerank_candidates)
+        .map(|candidate| candidate.id)
+        .collect();
+    let hits = load_hits(index, &ids).map_err(|error| RerankError::Rerank(error.to_string()))?;
+    if hits.is_empty() {
+        return Ok(HashMap::new());
+    }
+    let documents: Vec<String> = hits
+        .iter()
+        .map(|hit| format!("{}\n{}\n{}", hit.path, hit.heading_chain, hit.text))
+        .collect();
+    let refs: Vec<&str> = documents.iter().map(String::as_str).collect();
+    let scores = reranker.rerank(query, &refs)?;
+    if scores.len() != hits.len() {
+        return Err(RerankError::Count {
+            expected: hits.len(),
+            got: scores.len(),
+        });
+    }
+    Ok(ids
+        .into_iter()
+        .zip(scores)
+        .map(|(id, score)| (id, score.clamp(0.0, 1.0)))
+        .collect())
+}
+
+/// Кусок с итоговой оценкой, до свёртки раздела.
+struct Ranked {
+    id: i64,
+    /// `S` куска.
+    score: f32,
+    signals: HitSignals,
+    document_id: i64,
+    path: String,
+    heading_chain: String,
+    ordinal: i64,
+}
+
+/// Итоговая оценка `S = a + w_c·c + w_f·f + w_p·p` каждого кусочка пула. Опора `a` — оценка rerank,
+/// без неё — косинус, без обоих — нет (порядок `f + w_p·p`). Порог относится к опоре, а не к `S`.
+/// С rerank остаются только кандидаты, ушедшие в него.
+fn rank(
+    gathered: &Gathered,
+    rerank: Option<&HashMap<i64, f32>>,
+    applied: &AppliedParams,
+) -> Vec<Ranked> {
+    let weights = &applied.weights;
+    let mut ranked = Vec::new();
+    for candidate in &gathered.pool {
+        let (anchor, score) = match rerank {
+            Some(scores) => {
+                let Some(&r) = scores.get(&candidate.id) else {
+                    continue;
+                };
+                let cosine = weights.cosine * candidate.cosine.unwrap_or(0.0);
+                (
+                    Some(r),
+                    r + cosine
+                        + weights.fulltext * candidate.fulltext
+                        + weights.exact * candidate.exact,
+                )
+            }
+            None => match candidate.cosine {
+                Some(c) => (
+                    Some(c),
+                    c + weights.fulltext * candidate.fulltext + weights.exact * candidate.exact,
+                ),
+                None => (None, candidate.fulltext + weights.exact * candidate.exact),
+            },
+        };
+        if anchor.is_some_and(|anchor| anchor < applied.min_score) {
+            continue;
+        }
+        ranked.push(Ranked {
+            id: candidate.id,
+            score,
+            signals: HitSignals {
+                rerank: rerank.and(anchor),
+                cosine: candidate.cosine,
+                fulltext: candidate.fulltext,
+                exact: candidate.exact,
+                links: None,
+            },
+            document_id: 0,
+            path: String::new(),
+            heading_chain: String::new(),
+            ordinal: 0,
+        });
+    }
+    ranked
+}
+
+/// Дописывает кускам документ, цепочку заголовков и номер: по ним идут свёртка и сигнал `l`.
+fn load_documents(index: &Index, ranked: &mut [Ranked]) -> Result<(), SearchError> {
+    let mut statement = index.conn().prepare_cached(
+        "SELECT c.document_id, d.path, c.heading_chain, c.ordinal
+         FROM chunks c JOIN documents d ON d.id = c.document_id WHERE c.id = ?1",
+    )?;
+    for item in ranked {
+        let (document_id, path, heading_chain, ordinal) = statement.query_row([item.id], |row| {
+            Ok((
+                row.get::<_, i64>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?,
+                row.get::<_, i64>(3)?,
+            ))
+        })?;
+        item.document_id = document_id;
+        item.path = path;
+        item.heading_chain = heading_chain;
+        item.ordinal = ordinal;
+    }
+    Ok(())
+}
+
+/// Сигнал `l`: 1, если документ куска связан ссылкой (в любую сторону) с документом одного из трёх
+/// лучших результатов — разделов по `S` без `l` — и это не он сам; иначе 0. К `S` добавляется
+/// `w_l·l`. Один запрос к источнику ссылок на весь пул. Возвращает, посчитан ли сигнал: когда
+/// источник не ответил, оценки и `signals.links` не меняются.
+fn apply_links(ranked: &mut [Ranked], weight: f32, links: &mut LinkedDocuments<'_>) -> bool {
+    let mut order: Vec<usize> = (0..ranked.len()).collect();
+    order.sort_by(|&a, &b| {
+        let (a, b) = (&ranked[a], &ranked[b]);
+        b.score
+            .total_cmp(&a.score)
+            .then(b.signals.fulltext.total_cmp(&a.signals.fulltext))
+            .then_with(|| a.path.cmp(&b.path))
+            .then(a.ordinal.cmp(&b.ordinal))
+    });
+    let mut anchors: Vec<String> = Vec::new();
+    {
+        let mut sections: HashSet<(i64, &str)> = HashSet::new();
+        for &position in &order {
+            let item = &ranked[position];
+            if sections.len() == LINK_ANCHORS {
+                break;
+            }
+            if sections.insert((item.document_id, item.heading_chain.as_str()))
+                && !anchors.contains(&item.path)
+            {
+                anchors.push(item.path.clone());
+            }
+        }
+    }
+    let mut paths: Vec<String> = ranked.iter().map(|item| item.path.clone()).collect();
+    paths.sort_unstable();
+    paths.dedup();
+    let Ok(linked) = links(&anchors, &paths) else {
+        return false;
+    };
+    for item in ranked {
+        let l = if linked.contains(&item.path) { 1.0 } else { 0.0 };
+        item.score += weight * l;
+        item.signals.links = Some(l);
+    }
+    true
+}
+
+/// Куски одного раздела (один документ, одна цепочка заголовков) дают один результат: `S` раздела —
+/// `S` лучшего куска плюс `fold_bonus` за каждый найденный кусок сверх лучшего. Порог уже применён к
+/// кускам; результатов — `applied.results` разделов. Равные `S` — по `f`, пути документа и номеру
+/// куска.
+fn fold_sections(
+    index: &Index,
+    mut ranked: Vec<Ranked>,
+    applied: &AppliedParams,
+) -> Result<Vec<SearchHit>, SearchError> {
+    ranked.sort_by(|a, b| {
+        b.score
+            .total_cmp(&a.score)
+            .then(b.signals.fulltext.total_cmp(&a.signals.fulltext))
+            .then_with(|| a.path.cmp(&b.path))
+            .then(a.ordinal.cmp(&b.ordinal))
+    });
+
+    // Раздел -> (позиция лучшего куска, сколько кусков нашлось); порядок — по убыванию `S`.
+    let mut order: Vec<(i64, String)> = Vec::new();
+    let mut sections: HashMap<(i64, String), (usize, usize)> = HashMap::new();
+    for (position, item) in ranked.iter().enumerate() {
+        let key = (item.document_id, item.heading_chain.clone());
+        match sections.get_mut(&key) {
+            Some((_, found)) => *found += 1,
+            None => {
+                order.push(key.clone());
+                sections.insert(key, (position, 1));
+            }
+        }
+    }
+    let bonus = applied.weights.fold_bonus;
+    let mut folded: Vec<(f32, usize, usize)> = order
+        .iter()
+        .map(|key| {
+            let (best, found) = sections[key];
+            let extra = found.saturating_sub(1) as f32;
+            (ranked[best].score + bonus * extra, best, found)
+        })
+        .collect();
+    if bonus != 0.0 {
+        // Бонус может переставить разделы; позиция лучшего куска — запасной порядок.
+        folded.sort_by(|a, b| b.0.total_cmp(&a.0).then(a.1.cmp(&b.1)));
+    }
+    folded.truncate(applied.results);
+
+    let mut hits = Vec::with_capacity(folded.len());
+    for (score, best, found) in folded {
+        let item = &ranked[best];
+        let mut hit = load_hits(index, &[item.id])?
+            .pop()
+            .ok_or_else(|| SearchError::ChunkNotFound(item.id.to_string()))?;
+        let (parts, first_line, last_line): (i64, i64, i64) = index.conn().query_row(
+            "SELECT count(*), min(first_line), max(last_line) FROM chunks
+             WHERE document_id = ?1 AND heading_chain = ?2",
+            rusqlite::params![item.document_id, item.heading_chain],
+            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+        )?;
+        hit.first_line = first_line as usize;
+        hit.last_line = last_line as usize;
+        hit.score = score.min(1.0);
+        hit.score_kind = applied.score_kind;
+        hit.signals = item.signals;
+        hit.parts = parts as usize;
+        hit.parts_found = found;
+        hits.push(hit);
+    }
+    Ok(hits)
 }
 
 fn count_candidate_modules(
@@ -229,8 +707,8 @@ fn count_candidate_modules(
     Ok(rows.collect::<Result<_, _>>()?)
 }
 
-/// Диагностика первого этапа для бенча IDEA-06: FTS, векторы, слияние.
-/// Использует те же операции, что `search`, до порогов и отсечения результатов.
+/// Диагностика первого этапа для бенча IDEA-06: полнотекстовый список, векторный, пул по `S0`.
+/// Использует те же операции, что `search`, до rerank, порога и свёртки.
 #[doc(hidden)]
 pub fn candidate_trace(
     index: &Index,
@@ -238,23 +716,29 @@ pub fn candidate_trace(
     request: &SearchRequest,
     candidates: usize,
 ) -> Result<[Vec<SearchHit>; 3], SearchError> {
-    let query = fts_query(&request.query)
-        .ok_or_else(|| SearchError::InvalidParams("в запросе нет ни одного слова".into()))?;
-    let scope = Scope::build(index, request)?;
+    let plan = QueryPlan::build(index, &request.query)?;
+    let scope = Scope::build_with_paths(index, request, &plan.parsed.paths)?;
     let mut vector = query_vector.to_vec();
     normalize(&mut vector);
-    let text = scope.text_candidates(index, &query.all, candidates)?;
-    let exact = match query.identifiers {
-        Some(ref identifiers) => scope.text_candidates(index, identifiers, candidates)?,
-        None => Vec::new(),
-    };
-    let cosines = scope.cosines(index, &vector, candidates, &text, &exact)?;
-    let vector = top_by_score(&cosines, candidates);
-    let fused = exact_first(&exact, fuse(&text, &vector));
+    let weights = ScoreWeights::default();
+    let gathered = gather(
+        index,
+        &scope,
+        &plan,
+        Some(&vector),
+        candidates,
+        &weights,
+        None,
+    )?;
+    let cosines: HashMap<i64, f32> = gathered
+        .pool
+        .iter()
+        .filter_map(|candidate| candidate.cosine.map(|cosine| (candidate.id, cosine)))
+        .collect();
     let mut lists = [
-        load_hits(index, &text)?,
-        load_hits(index, &vector)?,
-        load_hits(index, &fused)?,
+        load_hits(index, &gathered.text_ids)?,
+        load_hits(index, &gathered.vector_ids)?,
+        load_hits(index, &gathered.ids())?,
     ];
     for hits in &mut lists {
         for hit in hits {
@@ -262,70 +746,6 @@ pub fn candidate_trace(
         }
     }
     Ok(lists)
-}
-
-/// Запросы к FTS5 по одному запросу пользователя.
-#[derive(Debug, PartialEq, Eq)]
-struct FtsQuery {
-    /// Слова запроса после стемминга, каждое в кавычках, через `OR` (`bm25` сам поднимает чанки
-    /// с большим числом совпавших слов). Слово запроса, которое стемминг разрезал на несколько
-    /// (`agent_min_score`, `по-русски`), идёт ещё и фразой.
-    all: String,
-    /// Только фразы-идентификаторы: слова запроса с `_`, `.` или `/` внутри. `None`, если таких нет.
-    identifiers: Option<String>,
-}
-
-/// `None`, если в запросе нет ни одного слова.
-fn fts_query(query: &str) -> Option<FtsQuery> {
-    let stemmer = TextStemmer::new();
-    let mut phrases: Vec<String> = Vec::new();
-    let mut identifiers: Vec<String> = Vec::new();
-    for raw in query.split_whitespace() {
-        let stemmed = stemmer.stem_text(raw);
-        if stemmed.split_whitespace().count() < 2 {
-            continue;
-        }
-        let phrase = format!("\"{stemmed}\"");
-        if is_identifier(raw) && !identifiers.contains(&phrase) {
-            identifiers.push(phrase.clone());
-        }
-        if !phrases.contains(&phrase) {
-            phrases.push(phrase);
-        }
-    }
-    let mut parts = phrases;
-    for term in stemmer.stem_text(query).split_whitespace() {
-        let term = format!("\"{term}\"");
-        if !parts.contains(&term) {
-            parts.push(term);
-        }
-    }
-    if parts.is_empty() {
-        return None;
-    }
-    Some(FtsQuery {
-        all: parts.join(" OR "),
-        identifiers: (!identifiers.is_empty()).then(|| identifiers.join(" OR ")),
-    })
-}
-
-/// Слово запроса похоже на идентификатор или имя файла: `agent_min_score`, `settings.toml`,
-/// `a/x.md`. Знаки по краям (точка в конце предложения, скобки) не в счёт.
-fn is_identifier(raw: &str) -> bool {
-    raw.trim_matches(|c: char| !c.is_alphanumeric())
-        .contains(['_', '.', '/'])
-}
-
-/// Чанки, в которых есть идентификатор из запроса, идут первыми: точное совпадение идентификатора
-/// должно находиться первым без реранка (Т-12), а в слиянии RRF его легко обгоняет чанк, который
-/// просто второй в обоих списках. Внутри групп порядок слияния сохраняется.
-fn exact_first(exact: &[i64], fused: Vec<i64>) -> Vec<i64> {
-    let position: HashMap<i64, usize> = fused.iter().enumerate().map(|(p, id)| (*id, p)).collect();
-    let mut head = exact.to_vec();
-    head.sort_by_key(|id| position.get(id).copied().unwrap_or(usize::MAX));
-    let exact_set: HashSet<i64> = head.iter().copied().collect();
-    head.extend(fused.into_iter().filter(|id| !exact_set.contains(id)));
-    head
 }
 
 fn normalize(vector: &mut [f32]) {
@@ -347,78 +767,6 @@ pub(super) fn top_by_score(scores: &HashMap<i64, f32>, limit: usize) -> Vec<i64>
     let mut all: Vec<(i64, f32)> = scores.iter().map(|(id, score)| (*id, *score)).collect();
     all.sort_by(|a, b| b.1.total_cmp(&a.1).then(a.0.cmp(&b.0)));
     all.into_iter().take(limit).map(|(id, _)| id).collect()
-}
-
-/// Reciprocal Rank Fusion двух списков; лучшие — первыми. При равной оценке выше тот, кто стоит
-/// выше в полнотекстовом списке: точное совпадение идентификатора поднимает именно он (Т-12),
-/// а симметричные места «первый и второй» в двух списках дают ровно равные суммы.
-fn fuse(text_ids: &[i64], vector_ids: &[i64]) -> Vec<i64> {
-    let mut scores: HashMap<i64, f32> = HashMap::new();
-    for list in [text_ids, vector_ids] {
-        for (place, id) in list.iter().enumerate() {
-            *scores.entry(*id).or_insert(0.0) += 1.0 / (RRF_K + place as f32 + 1.0);
-        }
-    }
-    let text_place: HashMap<i64, usize> = text_ids
-        .iter()
-        .enumerate()
-        .map(|(place, id)| (*id, place))
-        .collect();
-    let place_of = |id: &i64| text_place.get(id).copied().unwrap_or(usize::MAX);
-    let mut fused: Vec<i64> = scores.keys().copied().collect();
-    fused.sort_by(|a, b| {
-        scores[b]
-            .total_cmp(&scores[a])
-            .then_with(|| place_of(a).cmp(&place_of(b)))
-            .then(a.cmp(b))
-    });
-    fused
-}
-
-/// Переоценивает лучших слитых кандидатов; результат упорядочен по оценке реранка.
-fn rerank(
-    index: &Index,
-    reranker: &mut dyn Reranker,
-    request: &SearchRequest,
-    applied: &AppliedParams,
-    fused: &[i64],
-) -> Result<Vec<SearchHit>, RerankError> {
-    let pool: Vec<i64> = fused
-        .iter()
-        .copied()
-        .take(applied.rerank_candidates)
-        .collect();
-    let mut hits =
-        load_hits(index, &pool).map_err(|error| RerankError::Rerank(error.to_string()))?;
-    if hits.is_empty() {
-        return Ok(hits);
-    }
-    // Rerank-модель видит путь, цепочку заголовков и текст: они входят в начало документа.
-    let documents: Vec<String> = hits
-        .iter()
-        .map(|hit| format!("{}\n{}\n{}", hit.path, hit.heading_chain, hit.text))
-        .collect();
-    let refs: Vec<&str> = documents.iter().map(String::as_str).collect();
-    let scores = reranker.rerank(&request.query, &refs)?;
-    if scores.len() != hits.len() {
-        return Err(RerankError::Count {
-            expected: hits.len(),
-            got: scores.len(),
-        });
-    }
-    for (hit, score) in hits.iter_mut().zip(scores) {
-        hit.score = score.clamp(0.0, 1.0);
-        hit.score_kind = ScoreKind::Rerank;
-    }
-    hits.sort_by(|a, b| b.score.total_cmp(&a.score));
-    Ok(hits)
-}
-
-fn threshold_and_cut(hits: Vec<SearchHit>, applied: &AppliedParams) -> Vec<SearchHit> {
-    hits.into_iter()
-        .filter(|hit| hit.score >= applied.min_score)
-        .take(applied.results)
-        .collect()
 }
 
 /// Чанки с документами; порядок — как в `ids`. Оценку проставляет вызывающий.
@@ -454,6 +802,9 @@ pub(super) fn load_hits(index: &Index, ids: &[i64]) -> Result<Vec<SearchHit>, Se
                 text: row.get(6)?,
                 score: 0.0,
                 score_kind: ScoreKind::Cosine,
+                signals: HitSignals::default(),
+                parts: 1,
+                parts_found: 1,
             })
         })?;
         hits.push(hit);
@@ -485,9 +836,19 @@ pub(super) struct Scope {
 }
 
 impl Scope {
-    /// Строит отбор и проверяет, что каждый модуль и файл есть в индексе. Модули и файлы
-    /// объединяются; пустой отбор — весь проект.
+    /// Отбор без операторов `path:`.
     pub(super) fn build(index: &Index, request: &SearchRequest) -> Result<Self, SearchError> {
+        Self::build_with_paths(index, request, &[])
+    }
+
+    /// Строит отбор и проверяет, что каждый модуль и файл есть в индексе. Модули и файлы
+    /// объединяются; пустой отбор — весь проект. Префиксы `path:` из запроса **сужают** этот отбор
+    /// (пересечение, а не объединение): документ должен лежать под одним из префиксов.
+    pub(super) fn build_with_paths(
+        index: &Index,
+        request: &SearchRequest,
+        paths: &[String],
+    ) -> Result<Self, SearchError> {
         let mut parts = Vec::new();
         let mut params = Vec::new();
 
@@ -547,11 +908,21 @@ impl Scope {
             params.extend(stored_paths.into_iter().map(Value::from));
         }
 
-        let clause = if parts.is_empty() {
+        let mut clause = if parts.is_empty() {
             "1".to_string()
         } else {
             format!("({})", parts.join(" OR "))
         };
+        if !paths.is_empty() {
+            let stored = path_prefixes(index, paths)?;
+            let conditions =
+                vec!["(d.path = ? OR d.path LIKE ? ESCAPE '\\')"; stored.len()].join(" OR ");
+            clause = format!("{clause} AND ({conditions})");
+            for prefix in stored {
+                params.push(Value::from(prefix.clone()));
+                params.push(Value::from(format!("{}/%", escape_like(&prefix))));
+            }
+        }
         Ok(Self { clause, params })
     }
 
@@ -565,20 +936,35 @@ impl Scope {
             .query_row(&sql, params_from_iter(&self.params), |row| row.get(0))?)
     }
 
-    /// Первые `limit` чанков по `bm25`. Слова запроса и текст чанков прошли один стемминг.
+    /// Первые `limit` чанков по составному `bm25`. Слова запроса и текст чанков прошли один разбор.
     fn text_candidates(
         &self,
         index: &Index,
         match_query: &str,
         limit: usize,
     ) -> Result<Vec<i64>, SearchError> {
+        Ok(self
+            .text_scored(index, match_query, limit)?
+            .into_iter()
+            .map(|(id, _)| id)
+            .collect())
+    }
+
+    /// То же с сырым баллом `-bm25` (больше — лучше), по убыванию: вход сигнала `f`
+    /// (`fulltext::f_signal`).
+    pub(super) fn text_scored(
+        &self,
+        index: &Index,
+        match_query: &str,
+        limit: usize,
+    ) -> Result<Vec<(i64, f32)>, SearchError> {
         let sql = format!(
-            "SELECT chunks_fts.rowid
+            "SELECT chunks_fts.rowid, {BM25}
              FROM chunks_fts
              JOIN chunks c ON c.id = chunks_fts.rowid
              JOIN documents d ON d.id = c.document_id
              WHERE chunks_fts MATCH ? AND {}
-             ORDER BY bm25(chunks_fts)
+             ORDER BY {BM25}
              LIMIT ?",
             self.clause
         );
@@ -586,10 +972,15 @@ impl Scope {
         params.extend(self.params.iter().cloned());
         params.push(Value::Integer(limit as i64));
         let mut statement = index.conn().prepare(&sql)?;
-        let ids = statement
-            .query_map(params_from_iter(params), |row| row.get(0))?
+        let rows = statement
+            .query_map(params_from_iter(params), |row| {
+                Ok((
+                    row.get::<_, i64>(0)?,
+                    super::fulltext::raw_score(row.get(1)?),
+                ))
+            })?
             .collect::<Result<_, _>>()?;
-        Ok(ids)
+        Ok(rows)
     }
 
     /// Косинусная близость запроса ко всем чанкам области: точный перебор. Векторы в индексе и
@@ -651,6 +1042,70 @@ impl Scope {
             scores.push(id, dot);
         }
         Ok(scores.finish())
+    }
+}
+
+/// Экранирует `%`, `_` и обратную косую черту в префиксе для `LIKE ... ESCAPE`: в именах папок бывает `_`.
+fn escape_like(prefix: &str) -> String {
+    let mut escaped = String::with_capacity(prefix.len());
+    for c in prefix.chars() {
+        if matches!(c, '%' | '_' | '\\') {
+            escaped.push('\\');
+        }
+        escaped.push(c);
+    }
+    escaped
+}
+
+/// Префиксы `path:` в виде путей индекса (от корня проекта). Префикс задаётся от корня документации
+/// или проекта, как у `files`; подходит тот вариант, под которым в индексе есть документ (сам файл
+/// или папка с документами). Путь, под которым документов нет, — `invalid_params` с подсказкой.
+fn path_prefixes(index: &Index, paths: &[String]) -> Result<Vec<String>, SearchError> {
+    let docs_root = index
+        .stored_layout()?
+        .map(|layout| layout.docs_root)
+        .unwrap_or_default();
+    let mut found = Vec::new();
+    for path in paths {
+        let mut chosen = None;
+        for candidate in crate::doc_path::stored_candidates(&docs_root, path) {
+            let known = index
+                .conn()
+                .prepare_cached(
+                    "SELECT EXISTS(SELECT 1 FROM documents
+                     WHERE path = ?1 OR path LIKE ?2 ESCAPE '\\')",
+                )?
+                .query_row(
+                    [candidate.clone(), format!("{}/%", escape_like(&candidate))],
+                    |row| row.get::<_, bool>(0),
+                )?;
+            if known {
+                chosen = Some(candidate);
+                break;
+            }
+        }
+        let Some(stored) = chosen else {
+            let mut statement = index.conn().prepare("SELECT path FROM documents")?;
+            let known = statement
+                .query_map([], |row| row.get::<_, String>(0))?
+                .collect::<Result<Vec<_>, _>>()?;
+            return Err(SearchError::InvalidParams(format!(
+                "path:{path} — в индексе нет документов под этим путём. {}",
+                crate::doc_path::unknown_file_message(
+                    &docs_root,
+                    known.iter().map(String::as_str),
+                    path,
+                )
+            )));
+        };
+        push_path(&mut found, stored);
+    }
+    Ok(found)
+}
+
+fn push_path(list: &mut Vec<String>, item: String) {
+    if !list.contains(&item) {
+        list.push(item);
     }
 }
 

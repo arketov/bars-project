@@ -901,11 +901,16 @@ fn search_text(output: &SearchOutput, max_chars: usize, primary_search: bool) ->
         if !hit.sections.is_empty() {
             let _ = writeln!(block, "sections: {}", hit.sections.join("; "));
         }
+        let _ = writeln!(block, "score: {:.3} ({})", hit.score, name(hit.score_kind));
+        if let Some(line) = crate::hit_signals_line(hit) {
+            let _ = writeln!(block, "{line}");
+        }
+        if let Some(line) = crate::hit_parts_line(hit) {
+            let _ = writeln!(block, "{line}");
+        }
         let _ = writeln!(
             block,
-            "score: {:.3} ({})\n--- text ---\n{}\n=== END RESULT {} ===",
-            hit.score,
-            name(hit.score_kind),
+            "--- text ---\n{}\n=== END RESULT {} ===",
             hit.text.trim_end(),
             i + 1
         );
@@ -930,8 +935,12 @@ fn search_text(output: &SearchOutput, max_chars: usize, primary_search: bool) ->
         output.pending
     );
     text.push_str(&scope_summary);
+    text.push_str(&crate::applied_signal_lines(output));
     if let Some(error) = &output.rerank_error {
         let _ = writeln!(text, "rerank_error: {}", short(error, 300));
+    }
+    if let Some(error) = &output.semantic_error {
+        let _ = writeln!(text, "semantic_error: {}", short(error, 300));
     }
     if output.indexing {
         text.push_str("Indexing in progress: results may be incomplete.\n");

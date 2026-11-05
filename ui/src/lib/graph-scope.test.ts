@@ -10,7 +10,7 @@ vi.mock("./api", () => ({ call: vi.fn(async () => ({})), inTauri: () => true, jo
 
 const documents = ["adr/a.md", "adr/b.md", "features/c.md", "features/d.md"].map((p) => ({ path: `docs/${p}`, module: p.split("/")[0], title: p, chunks: 2 }));
 const output = { results: [], applied: { score_kind: "cosine", min_score: 0.3 } } as unknown as SearchOutput;
-const displayed = (modules: string[]) => ({ requestId: "r1", project: "C:/a", query: "очередь", modules, files: [], mode: "hybrid" as const, includeRelated: true, limit: null, minScore: null });
+const displayed = (modules: string[]) => ({ requestId: "r1", project: "C:/a", query: "очередь", modules, files: [], limit: null });
 
 let component: ReturnType<typeof mount> | null = null;
 let target: HTMLDivElement;

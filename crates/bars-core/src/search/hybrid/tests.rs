@@ -2,10 +2,13 @@ use std::fs;
 use std::path::Path;
 
 use super::*;
+use crate::search::ScoreWeights;
+use crate::search::fulltext::{fts_query, is_identifier};
 use crate::indexing::chunking::ChunkingParams;
 use crate::indexing::indexer::{IndexSettings, UpdateOutcome, update_index};
 use crate::models::ModelFingerprint;
 use crate::storage::Journal;
+use crate::storage::stem::TextStemmer;
 
 const DIM: usize = 32;
 
@@ -268,12 +271,33 @@ fn request(query: &str) -> SearchRequest {
     }
 }
 
+/// Настройки без порога: у косинуса мешка слов абсолютного смысла нет, тесты проверяют порядок.
+fn open_settings() -> SearchSettings {
+    SearchSettings {
+        min_score: 0.0,
+        ..SearchSettings::default()
+    }
+}
+
+/// Настройки без порога и без добавок `f` и `p`: итоговая оценка равна опоре.
+fn anchor_only_settings() -> SearchSettings {
+    SearchSettings {
+        min_score: 0.0,
+        weights: ScoreWeights {
+            fulltext: 0.0,
+            exact: 0.0,
+            ..ScoreWeights::default()
+        },
+        ..SearchSettings::default()
+    }
+}
+
 fn run(
     index: &Index,
     embedder: &mut BagEmbedder,
     request: &SearchRequest,
 ) -> Result<SearchResponse, SearchError> {
-    search(index, embedder, None, &SearchSettings::default(), request)
+    search(index, embedder, None, &open_settings(), request)
 }
 
 fn paths(response: &SearchResponse) -> Vec<&str> {
@@ -301,7 +325,7 @@ fn graph_expansion_precedes_rerank_and_keeps_scope_and_threshold() {
     .unwrap();
     assert_eq!(out.hits.len(), 1);
     assert_eq!(out.hits[0].path, "docs/root.md");
-    assert_eq!(out.hits[0].score, 0.9);
+    assert_eq!(out.hits[0].signals.rerank, Some(0.9));
     r.min_score = Some(0.95);
     assert!(
         search_expanded(
@@ -706,7 +730,7 @@ fn explicit_result_count_is_honoured_and_default_comes_from_settings() {
     assert_eq!(run(&index, &mut embedder, &two).unwrap().hits.len(), 2);
     let settings = SearchSettings {
         results: 3,
-        ..SearchSettings::default()
+        ..open_settings()
     };
     let by_default = search(&index, &mut embedder, None, &settings, &request("поиск")).unwrap();
     assert_eq!(by_default.hits.len(), 3);
@@ -729,7 +753,7 @@ fn agent_threshold_outside_the_limits_is_clamped() {
     let (_dir, index, mut embedder) = project();
     let settings = SearchSettings {
         agent_min_score: (0.0, 0.5),
-        ..SearchSettings::default()
+        ..open_settings()
     };
     let mut req = request("поиск");
     req.min_score = Some(0.99);
@@ -746,17 +770,11 @@ fn rerank_orders_by_its_score_and_labels_it() {
     let (_dir, index, mut embedder) = project();
     let mut req = request("поиск");
     req.results = Some(4);
-    let plain = run(&index, &mut embedder, &req).unwrap();
+    let settings = anchor_only_settings();
+    let plain = search(&index, &mut embedder, None, &settings, &req).unwrap();
     let mut reranker = ReversingReranker;
 
-    let reranked = search(
-        &index,
-        &mut embedder,
-        Some(&mut reranker),
-        &SearchSettings::default(),
-        &req,
-    )
-    .unwrap();
+    let reranked = search(&index, &mut embedder, Some(&mut reranker), &settings, &req).unwrap();
 
     assert_eq!(reranked.hits.len(), 4);
     assert_eq!(reranked.hits[0].path, plain.hits[3].path);
@@ -787,7 +805,8 @@ fn rerank_threshold_filters_and_default_count_is_the_reranked_one() {
 
     // Порог реранка 0.1 оставляет единственный документ с оценкой 0.9.
     assert_eq!(paths(&response), ["docs/root.md"]);
-    assert_eq!(response.hits[0].score, 0.9);
+    assert_eq!(response.hits[0].signals.rerank, Some(0.9));
+    assert!(response.hits[0].score >= 0.9);
     assert_eq!(response.applied.min_score, 0.1);
     assert_eq!(response.applied.results, 3);
 }
@@ -804,7 +823,7 @@ fn failed_rerank_falls_back_to_cosine_and_says_why() {
             &index,
             &mut embedder,
             Some(reranker),
-            &SearchSettings::default(),
+            &open_settings(),
             &request("поиск"),
         )
         .unwrap();
@@ -823,16 +842,24 @@ fn failed_rerank_falls_back_to_cosine_and_says_why() {
 }
 
 #[test]
-fn identifier_goes_to_fts_both_as_a_phrase_and_as_words() {
+fn identifier_goes_to_fts_as_a_phrase_words_and_a_whole_exact_form() {
     let query = fts_query("zq_widget_limit").unwrap();
     assert_eq!(
         query.all,
-        "\"zq widget limit\" OR \"zq\" OR \"widget\" OR \"limit\""
+        "{name heading_chain body} : (\"zq widget limit\" OR \"zq\" OR \"widget\" OR \"limit\")          OR exact : (\"zq\" OR \"widget\" OR \"limit\" OR \"zq_widget_limit\")"
     );
-    assert_eq!(query.identifiers.as_deref(), Some("\"zq widget limit\""));
+    assert_eq!(
+        query.identifiers.as_deref(),
+        Some(
+            "{name heading_chain body} : (\"zq widget limit\")              OR exact : (\"zq_widget_limit\")"
+        )
+    );
     // Обычные слова и повтор слов фразы не порождают.
     let plain = fts_query("настройки поиска настройки").unwrap();
-    assert_eq!(plain.all, "\"настройк\" OR \"поиск\"");
+    assert_eq!(
+        plain.all,
+        "{name heading_chain body} : (\"настройк\" OR \"поиск\")          OR exact : (\"настройки\" OR \"поиска\")"
+    );
     assert_eq!(plain.identifiers, None);
     assert_eq!(fts_query("?! --"), None);
 }
@@ -848,37 +875,413 @@ fn only_words_with_inner_separators_count_as_identifiers() {
     }
     // Дефисное слово идёт в FTS фразой, но первым не поднимается.
     let query = fts_query("по-русски").unwrap();
-    assert!(query.all.starts_with("\"по русск\""));
+    assert!(query.all.starts_with("{name heading_chain body} : (\"по русск\""));
     assert_eq!(query.identifiers, None);
 }
 
-#[test]
-fn chunks_with_the_identifier_go_first_and_keep_their_order() {
-    // 5 и 9 содержат идентификатор; 9 выше в слиянии. 2 и 7 — без него.
-    let fused = vec![2, 9, 7, 5];
-    assert_eq!(exact_first(&[5, 9], fused), [9, 5, 2, 7]);
-    // Совпадение, которого нет среди слитых кандидатов, не теряется и идёт после слитых точных.
-    assert_eq!(exact_first(&[8, 9], vec![2, 9]), [9, 8, 2]);
-    assert_eq!(exact_first(&[], vec![2, 9]), [2, 9]);
+/// Проект из своих файлов (корень документации — `docs`) с заданной нарезкой.
+fn project_from(
+    files: &[(&str, &str)],
+    chunking: ChunkingParams,
+) -> (tempfile::TempDir, Index, BagEmbedder) {
+    let dir = tempfile::tempdir().unwrap();
+    for (relative, content) in files {
+        write(dir.path(), relative, content);
+    }
+    let mut index = Index::open(&dir.path().join("index.sqlite"), Journal::Wal).unwrap();
+    let mut embedder = BagEmbedder::new("bag");
+    let settings = IndexSettings {
+        chunking,
+        docs_root: "docs".into(),
+    };
+    let outcome = update_index(dir.path(), &mut index, &settings, &mut embedder).unwrap();
+    assert!(matches!(outcome, UpdateOutcome::Updated(_)), "{outcome:?}");
+    (dir, index, embedder)
+}
+
+fn animals() -> (tempfile::TempDir, Index, BagEmbedder) {
+    project_from(
+        &[
+            (
+                "docs/search/order.md",
+                "# Порядок слов\n\nСначала белый кот, потом чёрный пёс.\n",
+            ),
+            (
+                "docs/search/swap.md",
+                "# Другой порядок\n\nКот белый, а пёс чёрный.\n",
+            ),
+            (
+                "docs/models/cat.md",
+                "# Кошка\n\nКот спит дома и никого не трогает.\n",
+            ),
+        ],
+        ChunkingParams::default(),
+    )
 }
 
 #[test]
-fn fusion_rewards_agreement_between_the_two_lists() {
-    // 7 есть в обоих списках, 1 и 3 — по одному.
-    let fused = fuse(&[1, 7, 2], &[3, 7, 4]);
+fn identifier_in_the_exact_column_gives_the_whole_exact_signal() {
+    let (_dir, index, mut embedder) = project();
 
-    assert_eq!(fused[0], 7);
-    assert_eq!(fused.len(), 5);
-    // Из одиночных выше те, что стоят первыми в своём списке; при равенстве — тот, кто в
-    // полнотекстовом списке.
-    assert_eq!(&fused[1..3], [1, 3]);
+    let response = run(&index, &mut embedder, &request("zq_widget_limit")).unwrap();
+
+    assert_eq!(response.hits[0].path, "docs/search/identifier.md");
+    assert_eq!(response.hits[0].signals.exact, 1.0);
+    assert_eq!(response.hits[0].signals.fulltext, 1.0);
+    assert!(response.hits[0].signals.cosine.is_some());
+    assert!(response.hits[0].signals.rerank.is_none());
 }
 
 #[test]
-fn equal_fusion_scores_are_decided_by_the_full_text_place() {
-    // Оба в обоих списках, места зеркальны: суммы равны. Номер чанка 10 меньше, но 20 первый в
-    // полнотекстовом списке.
-    assert_eq!(fuse(&[20, 10], &[10, 20]), [20, 10]);
+fn score_is_the_anchor_plus_weighted_additions_and_is_capped_at_one() {
+    let (_dir, index, mut embedder) = project();
+    let req = request("zq_widget_limit");
+
+    let plain = search(&index, &mut embedder, None, &anchor_only_settings(), &req).unwrap();
+    let summed = search(&index, &mut embedder, None, &open_settings(), &req).unwrap();
+
+    let hit = &plain.hits[0];
+    assert_eq!(hit.score, hit.signals.cosine.unwrap().min(1.0));
+    let with_additions = &summed.hits[0];
+    let expected = with_additions.signals.cosine.unwrap()
+        + 0.1 * with_additions.signals.fulltext
+        + 0.1 * with_additions.signals.exact;
+    assert!((with_additions.score - expected.min(1.0)).abs() < 1e-5);
+    assert!(with_additions.score <= 1.0);
+}
+
+#[test]
+fn applied_params_report_weights_and_calculated_signals() {
+    let (_dir, index, mut embedder) = project();
+
+    let plain = run(&index, &mut embedder, &request("поиск")).unwrap();
+    let reranked = search(
+        &index,
+        &mut embedder,
+        Some(&mut KeywordReranker),
+        &SearchSettings::default(),
+        &request("поиск"),
+    )
+    .unwrap();
+
+    assert_eq!(plain.applied.weights, ScoreWeights::default());
+    assert_eq!(plain.applied.signals, ["cosine", "fulltext", "exact"]);
+    assert_eq!(
+        reranked.applied.signals,
+        ["rerank", "cosine", "fulltext", "exact"]
+    );
+}
+
+#[test]
+fn threshold_belongs_to_the_anchor_and_additions_cannot_lift_a_result_over_it() {
+    let (_dir, index, mut embedder) = project();
+    let settings = SearchSettings {
+        // Вес `w_f` огромен: порог всё равно смотрит на опору, а не на сумму.
+        weights: ScoreWeights {
+            fulltext: 5.0,
+            ..ScoreWeights::default()
+        },
+        ..SearchSettings::default()
+    };
+    let mut req = request("поиск");
+    req.min_score = Some(0.95);
+
+    let response = search(&index, &mut embedder, None, &settings, &req).unwrap();
+
+    assert!(response.hits.is_empty());
+}
+
+#[test]
+fn one_min_score_is_applied_to_cosine_and_to_rerank() {
+    let (_dir, index, mut embedder) = project();
+    let settings = SearchSettings {
+        min_score: 0.07,
+        ..SearchSettings::default()
+    };
+
+    let cosine = search(&index, &mut embedder, None, &settings, &request("поиск")).unwrap();
+    let reranked = search(
+        &index,
+        &mut embedder,
+        Some(&mut KeywordReranker),
+        &settings,
+        &request("поиск"),
+    )
+    .unwrap();
+
+    assert_eq!(cosine.applied.min_score, 0.07);
+    assert_eq!(reranked.applied.min_score, 0.07);
+    // KeywordReranker даёт 0,05 всем, кроме корня: порог 0,07 их отсекает.
+    assert_eq!(paths(&reranked), ["docs/root.md"]);
+}
+
+#[test]
+fn phrase_in_quotes_is_a_required_condition() {
+    let (_dir, index, mut embedder) = animals();
+
+    let response = run(&index, &mut embedder, &request("\"белый кот\"")).unwrap();
+
+    assert_eq!(paths(&response), ["docs/search/order.md"]);
+    assert_eq!(response.understood.phrases, ["белый кот"]);
+    // Без кавычек те же слова находят оба документа.
+    let plain = run(&index, &mut embedder, &request("белый кот")).unwrap();
+    assert!(paths(&plain).contains(&"docs/search/swap.md"));
+}
+
+#[test]
+fn excluded_word_drops_chunks_with_its_stem() {
+    let (_dir, index, mut embedder) = animals();
+
+    let response = run(&index, &mut embedder, &request("кот -пёс")).unwrap();
+
+    assert_eq!(paths(&response), ["docs/models/cat.md"]);
+    assert_eq!(response.understood.excluded_words, ["пёс"]);
+}
+
+#[test]
+fn excluded_phrase_drops_only_chunks_with_the_whole_phrase() {
+    let (_dir, index, mut embedder) = animals();
+
+    let response = run(&index, &mut embedder, &request("кот -\"белый кот\"")).unwrap();
+
+    let found = paths(&response);
+    assert!(!found.contains(&"docs/search/order.md"));
+    assert!(found.contains(&"docs/search/swap.md"));
+    assert_eq!(response.understood.excluded_phrases, ["белый кот"]);
+}
+
+#[test]
+fn vector_candidates_are_checked_against_the_operators() {
+    // «Кошка» входит в пул по вектору, но не по фразе: условие проверяет и её.
+    let (_dir, index, mut embedder) = animals();
+
+    let required = run(&index, &mut embedder, &request("\"белый кот\" пёс")).unwrap();
+    let excluded = run(&index, &mut embedder, &request("кот -спит")).unwrap();
+
+    assert_eq!(paths(&required), ["docs/search/order.md"]);
+    assert!(!paths(&excluded).contains(&"docs/models/cat.md"));
+}
+
+#[test]
+fn path_operator_narrows_the_scope() {
+    let (_dir, index, mut embedder) = animals();
+
+    for query in ["кот path:search", "кот папка:search", "кот path:\"search\""] {
+        let response = run(&index, &mut embedder, &request(query)).unwrap();
+        let found = paths(&response);
+        assert!(!found.is_empty(), "{query}");
+        assert!(
+            found.iter().all(|path| path.starts_with("docs/search/")),
+            "{query}"
+        );
+    }
+    let single = run(&index, &mut embedder, &request("кот path:search/swap.md")).unwrap();
+    assert_eq!(paths(&single), ["docs/search/swap.md"]);
+}
+
+#[test]
+fn path_operator_intersects_with_modules_and_files() {
+    let (_dir, index, mut embedder) = animals();
+    let mut req = request("кот path:models");
+    req.modules = vec!["search".into()];
+
+    let response = run(&index, &mut embedder, &req).unwrap();
+
+    // Оператор сужает отмеченное, а не расширяет его.
+    assert!(response.hits.is_empty());
+    let mut both = request("кот path:search");
+    both.modules = vec!["search".into()];
+    assert!(!run(&index, &mut embedder, &both).unwrap().hits.is_empty());
+}
+
+#[test]
+fn several_paths_are_united_and_an_unknown_path_is_invalid_params() {
+    let (_dir, index, mut embedder) = animals();
+
+    let both = run(
+        &index,
+        &mut embedder,
+        &request("кот path:search path:models"),
+    )
+    .unwrap();
+    let modules: HashSet<&str> = both.hits.iter().map(|hit| hit.module.as_str()).collect();
+    assert_eq!(modules, HashSet::from(["search", "models"]));
+
+    let error = run(&index, &mut embedder, &request("кот path:nowhere")).unwrap_err();
+    assert!(
+        matches!(&error, SearchError::InvalidParams(text) if text.contains("nowhere")),
+        "{error:?}"
+    );
+}
+
+#[test]
+fn query_of_only_exclusions_and_filters_is_invalid_params() {
+    let (_dir, index, mut embedder) = animals();
+
+    for query in ["-пёс", "path:search", "-\"белый кот\" path:search", "-пёс -кот"] {
+        let result = run(&index, &mut embedder, &request(query));
+        assert!(
+            matches!(&result, Err(SearchError::InvalidParams(text)) if text.contains("ни одного слова")),
+            "{query}: {result:?}"
+        );
+    }
+    // Фраза в кавычках считается словами.
+    assert!(run(&index, &mut embedder, &request("\"белый кот\"")).is_ok());
+}
+
+#[test]
+fn hyphens_digits_and_lone_quotes_are_plain_characters() {
+    let (_dir, index, mut embedder) = animals();
+
+    for query in ["кот -5", "по-русски кот", "кот 274-ФЗ", "кот \"белый", "кот' пёс"] {
+        let response = run(&index, &mut embedder, &request(query)).unwrap();
+        assert!(!response.understood.has_operators(), "{query}");
+        assert!(!response.hits.is_empty(), "{query}");
+    }
+}
+
+#[test]
+fn chunks_of_one_section_fold_into_one_result_with_the_section_lines() {
+    let paragraph = |n: usize| {
+        format!(
+            "Абзац {n} про уникальныйтермин: индексация проходит в фоне, пока автор пишет текст документа."
+        )
+    };
+    let body = (1..=6).map(paragraph).collect::<Vec<_>>().join("\n\n");
+    let (_dir, index, mut embedder) = project_from(
+        &[("docs/guide.md", &format!("# Руководство\n\n{body}\n"))],
+        ChunkingParams {
+            min_chars: 60,
+            max_chars: 200,
+        },
+    );
+    let chunks: i64 = index
+        .conn()
+        .query_row("SELECT count(*) FROM chunks", [], |row| row.get(0))
+        .unwrap();
+    assert!(chunks >= 3, "нарезка должна разрезать раздел: {chunks}");
+
+    let response = run(&index, &mut embedder, &request("уникальныйтермин")).unwrap();
+
+    assert_eq!(response.hits.len(), 1);
+    let hit = &response.hits[0];
+    assert_eq!(hit.parts as i64, chunks);
+    assert!(hit.parts_found >= 2 && hit.parts_found <= hit.parts);
+    // Строки — всего раздела, а не одного куска: заголовок, пустая строка и шесть абзацев через пустую.
+    assert_eq!(hit.first_line, 1);
+    assert!(hit.last_line >= 2 + 6 * 2 - 1);
+}
+
+#[test]
+fn sections_of_one_document_stay_separate_results() {
+    let (_dir, index, mut embedder) = project_from(
+        &[(
+            "docs/two.md",
+            "# Два раздела\n\n## Первый\n\nГорячий чай полезен зимой.\n\n## Второй\n\nГорячий чай подают к обеду.\n",
+        )],
+        ChunkingParams {
+            min_chars: 10,
+            max_chars: 6000,
+        },
+    );
+
+    let response = run(&index, &mut embedder, &request("горячий чай")).unwrap();
+
+    let chains: HashSet<&str> = response
+        .hits
+        .iter()
+        .map(|hit| hit.heading_chain.as_str())
+        .collect();
+    assert_eq!(chains.len(), response.hits.len());
+    assert!(response.hits.len() >= 2);
+}
+
+#[test]
+fn fold_bonus_zero_keeps_the_best_chunk_score_and_a_bonus_adds_to_it() {
+    let paragraph = |n: usize| format!("Абзац {n} про редкийтермин и ничего больше сюда не входит.");
+    let body = (1..=5).map(paragraph).collect::<Vec<_>>().join("\n\n");
+    let (_dir, index, mut embedder) = project_from(
+        &[("docs/g.md", &format!("# Г\n\n{body}\n"))],
+        ChunkingParams {
+            min_chars: 40,
+            max_chars: 120,
+        },
+    );
+    let req = request("редкийтермин");
+
+    let flat = search(&index, &mut embedder, None, &open_settings(), &req).unwrap();
+    let boosted = search(
+        &index,
+        &mut embedder,
+        None,
+        &SearchSettings {
+            weights: ScoreWeights {
+                fold_bonus: 0.05,
+                ..ScoreWeights::default()
+            },
+            ..open_settings()
+        },
+        &req,
+    )
+    .unwrap();
+
+    assert_eq!(flat.hits.len(), 1);
+    assert!(boosted.hits[0].score >= flat.hits[0].score);
+}
+
+#[test]
+fn result_count_is_counted_in_sections_after_the_fold() {
+    let (_dir, index, mut embedder) = project();
+    let mut req = request("поиск");
+    req.results = Some(2);
+
+    let response = run(&index, &mut embedder, &req).unwrap();
+
+    assert_eq!(response.hits.len(), 2);
+    assert!(
+        response
+            .hits
+            .iter()
+            .all(|hit| hit.parts >= 1 && hit.parts_found >= 1)
+    );
+}
+
+#[test]
+fn without_embed_and_rerank_there_is_no_anchor_and_no_threshold() {
+    struct NoEmbed(BagEmbedder);
+    impl Embedder for NoEmbed {
+        fn fingerprint(&self) -> &ModelFingerprint {
+            self.0.fingerprint()
+        }
+        fn embed(&mut self, _texts: &[&str]) -> Result<Vec<Vec<f32>>, EmbedError> {
+            panic!("embed не должен вызываться без смысловой части");
+        }
+        fn embed_query(&mut self, _text: &str) -> Result<Vec<f32>, EmbedError> {
+            panic!("embed_query не должен вызываться без смысловой части");
+        }
+    }
+    let (_dir, index, embedder) = project();
+    let mut embedder = NoEmbed(embedder);
+    let mut req = request("zq_widget_limit");
+    req.min_score = Some(0.9);
+
+    let out = search_with_signals(
+        &index,
+        &mut embedder,
+        None,
+        &SearchSettings::default(),
+        &req,
+        None,
+        false,
+    )
+    .unwrap();
+
+    assert_eq!(out.applied.score_kind, ScoreKind::None);
+    assert_eq!(out.applied.min_score, 0.0);
+    assert_eq!(out.applied.signals, ["fulltext", "exact"]);
+    assert_eq!(out.hits[0].path, "docs/search/identifier.md");
+    assert_eq!(out.hits[0].score_kind, ScoreKind::None);
+    assert!(out.hits[0].signals.cosine.is_none());
 }
 
 mod similar_chunks {
@@ -1062,4 +1465,186 @@ mod similar_chunks {
         assert_ne!(fresh, stale);
         assert!(ask(&index, &fresh).is_ok());
     }
+}
+
+#[test]
+fn search_without_semantics_uses_text_only_and_never_embeds_the_query() {
+    struct NoEmbed(BagEmbedder);
+    impl Embedder for NoEmbed {
+        fn fingerprint(&self) -> &ModelFingerprint {
+            self.0.fingerprint()
+        }
+        fn embed(&mut self, _texts: &[&str]) -> Result<Vec<Vec<f32>>, EmbedError> {
+            panic!("embed не должен вызываться без смысловой части");
+        }
+        fn embed_query(&mut self, _text: &str) -> Result<Vec<f32>, EmbedError> {
+            panic!("embed_query не должен вызываться без смысловой части");
+        }
+    }
+    let (_dir, index, embedder) = project();
+    let mut embedder = NoEmbed(embedder);
+    let mut r = request("zq_widget_limit");
+    r.min_score = Some(0.9);
+    let out = search_with_signals(
+        &index,
+        &mut embedder,
+        None,
+        &SearchSettings::default(),
+        &r,
+        None,
+        false,
+    )
+    .unwrap();
+    // Порога косинуса нет: даже высокий агентский порог не отсекает полнотекстовое совпадение.
+    assert_eq!(out.hits[0].path, "docs/search/identifier.md");
+    assert_eq!(out.applied.min_score, 0.0);
+    assert!(out.query_vector.is_none());
+    assert!(out.rerank_error.is_none());
+}
+
+#[test]
+fn search_without_semantics_still_reranks_and_keeps_the_rerank_threshold() {
+    let (_dir, index, mut embedder) = project();
+    let mut r = request("поиск");
+    r.min_score = Some(0.1);
+    let out = search_with_signals(
+        &index,
+        &mut embedder,
+        Some(&mut KeywordReranker),
+        &SearchSettings::default(),
+        &r,
+        None,
+        false,
+    )
+    .unwrap();
+    assert!(out.query_vector.is_none());
+    assert!(
+        out.hits
+            .iter()
+            .all(|hit| hit.score_kind == ScoreKind::Rerank)
+    );
+    assert!(out.hits.iter().all(|hit| hit.score >= 0.1));
+}
+
+fn link_settings(weight: f32) -> SearchSettings {
+    SearchSettings {
+        weights: ScoreWeights {
+            links: weight,
+            ..ScoreWeights::default()
+        },
+        ..open_settings()
+    }
+}
+
+#[test]
+fn links_are_not_calculated_at_zero_weight() {
+    let (_dir, index, mut embedder) = animals();
+    let mut calls = 0;
+    let mut source = |_: &[String], _: &[String]| {
+        calls += 1;
+        Ok(HashSet::new())
+    };
+
+    let response = search_with_links(
+        &index,
+        &mut embedder,
+        None,
+        &link_settings(0.0),
+        &request("кот"),
+        None,
+        true,
+        Some(&mut source),
+    )
+    .unwrap();
+
+    assert_eq!(calls, 0);
+    assert!(response.hits.iter().all(|hit| hit.signals.links.is_none()));
+    assert!(!response.applied.signals.contains(&"links"));
+}
+
+#[test]
+fn link_signal_is_one_for_a_linked_document_and_adds_its_weight() {
+    let (_dir, index, mut embedder) = animals();
+    let req = request("кот");
+    let plain = search(&index, &mut embedder, None, &link_settings(0.0), &req).unwrap();
+    let mut source = |_: &[String], _: &[String]| Ok(HashSet::from(["docs/models/cat.md".to_string()]));
+
+    let linked = search_with_links(
+        &index,
+        &mut embedder,
+        None,
+        &link_settings(0.05),
+        &req,
+        None,
+        true,
+        Some(&mut source),
+    )
+    .unwrap();
+
+    assert_eq!(linked.applied.signals.last(), Some(&"links"));
+    assert_eq!(linked.applied.weights.links, 0.05);
+    for hit in &linked.hits {
+        let base = plain.hits.iter().find(|p| p.path == hit.path).unwrap();
+        if hit.path == "docs/models/cat.md" {
+            assert_eq!(hit.signals.links, Some(1.0));
+            assert!((hit.score - (base.score + 0.05).min(1.0)).abs() < 1e-5);
+        } else {
+            assert_eq!(hit.signals.links, Some(0.0));
+            assert!((hit.score - base.score).abs() < 1e-5);
+        }
+    }
+}
+
+#[test]
+fn link_source_gets_one_call_with_anchors_of_the_three_best_sections() {
+    let (_dir, index, mut embedder) = animals();
+    let req = request("кот пёс");
+    let plain = search(&index, &mut embedder, None, &link_settings(0.0), &req).unwrap();
+    let mut calls: Vec<(Vec<String>, Vec<String>)> = Vec::new();
+    let mut source = |anchors: &[String], pool: &[String]| {
+        calls.push((anchors.to_vec(), pool.to_vec()));
+        Ok(HashSet::new())
+    };
+
+    search_with_links(
+        &index,
+        &mut embedder,
+        None,
+        &link_settings(0.1),
+        &req,
+        None,
+        true,
+        Some(&mut source),
+    )
+    .unwrap();
+
+    assert_eq!(calls.len(), 1);
+    let (anchors, pool) = &calls[0];
+    let best: Vec<&str> = plain.hits.iter().take(3).map(|hit| hit.path.as_str()).collect();
+    assert_eq!(anchors.iter().map(String::as_str).collect::<Vec<_>>(), best);
+    assert!(anchors.iter().all(|anchor| pool.contains(anchor)));
+}
+
+#[test]
+fn failing_link_source_leaves_scores_untouched() {
+    let (_dir, index, mut embedder) = animals();
+    let req = request("кот");
+    let plain = search(&index, &mut embedder, None, &link_settings(0.0), &req).unwrap();
+    let mut source = |_: &[String], _: &[String]| Err(SearchError::InvalidParams("нет".into()));
+
+    let response = search_with_links(
+        &index,
+        &mut embedder,
+        None,
+        &link_settings(0.3),
+        &req,
+        None,
+        true,
+        Some(&mut source),
+    )
+    .unwrap();
+
+    assert_eq!(paths(&response), paths(&plain));
+    assert!(response.hits.iter().all(|hit| hit.signals.links.is_none()));
+    assert!(!response.applied.signals.contains(&"links"));
 }

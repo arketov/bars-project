@@ -56,7 +56,8 @@ impl Worker {
         project: &Path,
         layer: BuildLayer,
     ) -> Result<bars_protocol::GraphAcceptedOutput, GraphError> {
-        self.graph_start_layer(project, true, true, layer).await
+        self.graph_start_layer(project, true, true, layer, false)
+            .await
     }
     #[cfg(test)]
     pub(super) async fn graph_start(
@@ -537,6 +538,8 @@ impl Attempt<'_> {
             }
         }
         store::set_state(index.conn(), LayerState::Building, Some(id), None)?;
+        // Частичное обновление — только автоматическим заданиям; явное построение полное (OQ-260).
+        build_state.delta = !force;
         let result = bars_core::graph::build_index_graph_step_with_state(
             project,
             &mut index,

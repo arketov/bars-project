@@ -6,6 +6,7 @@
   import ConsentDialog from "./lib/ConsentDialog.svelte";
   import DeleteProjectDialog from "./lib/DeleteProjectDialog.svelte";
   import RenameProjectDialog from "./lib/RenameProjectDialog.svelte";
+  import ProjectRootDialog from "./lib/ProjectRootDialog.svelte";
   import EntryDialog from "./lib/EntryDialog.svelte";
   import MissingLinkDialog from "./lib/MissingLinkDialog.svelte";
   import { followLink } from "./lib/follow-link.svelte";
@@ -92,6 +93,7 @@
 {#if app.consentOpen}<ConsentDialog />{/if}
 {#if app.deletingProject}<DeleteProjectDialog />{/if}
 {#if app.renamingProject}<RenameProjectDialog />{/if}
+{#if app.rootChoice}<ProjectRootDialog />{/if}
 {#if entries.request}<EntryDialog />{/if}
 {/if}
 

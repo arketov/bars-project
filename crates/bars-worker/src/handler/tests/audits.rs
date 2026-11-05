@@ -33,7 +33,7 @@ async fn audit_scheduler_is_joined_by_worker_shutdown() {
 impl Env {
     fn new() -> Self {
         let home = TempDir::new().unwrap();
-        let mut config = WorkerConfig::new(home.path().to_path_buf());
+        let mut config = WorkerConfig::new(home.path().to_path_buf()).without_graph_pause();
         config.secrets = Arc::new(MemorySecrets::default());
         config.autostart = Arc::new(MemoryAutostart::new("\"/opt/bars/bars\"", None));
         let worker = Worker::start(config, FakeProvider::new("m1")).unwrap();
@@ -448,5 +448,29 @@ async fn deleting_a_project_removes_the_audit_store_and_keeps_foreign_files() {
         .unwrap();
     assert!(!store.exists());
     assert!(root.join(".bars/foreign.txt").is_file());
+    env.worker.shutdown().await;
+}
+
+/// ISS-106: проект без папки корня документации расписание пропускает, пометка о пропуске ставится
+/// один раз и снимается, когда папка вернулась.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn schedule_skips_project_without_docs_root_and_notes_it_once() {
+    let env = Env::new();
+    let root = env.project(&[("a.md", "# А\n\nТекст про аудиты.\n")]).await;
+    assert!(env.handler.schedule_docs_root_present(&root, Some("docs")));
+    assert!(env.handler.schedule_blocked.lock().unwrap().is_empty());
+
+    assert!(
+        !env.handler
+            .schedule_docs_root_present(&root, Some("нет-такой"))
+    );
+    assert!(
+        !env.handler
+            .schedule_docs_root_present(&root, Some("нет-такой"))
+    );
+    assert_eq!(env.handler.schedule_blocked.lock().unwrap().len(), 1);
+
+    assert!(env.handler.schedule_docs_root_present(&root, Some("docs")));
+    assert!(env.handler.schedule_blocked.lock().unwrap().is_empty());
     env.worker.shutdown().await;
 }

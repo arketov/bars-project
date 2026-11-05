@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 use std::time::UNIX_EPOCH;
 
 use super::chunking::{ChunkingParams, chunk_document};
-use super::walk::{DocFile, ReadError, Walk, WalkError, WalkProblem, read_utf8, walk_docs};
+use super::walk::{DocFile, ReadError, Walk, WalkError, WalkProblem, read_utf8, walk_docs_indexed};
 use crate::models::{EmbedError, Embedder};
 use crate::storage::{
     Compatibility, DocumentRecord, Index, Journal, Layout, StorageError, StoredDocument,
@@ -329,7 +329,7 @@ fn run_update(
     observer: &dyn IndexObserver,
     paths: Option<&HashSet<String>>,
 ) -> Result<UpdateReport, IndexingError> {
-    let mut walk = walk_docs(project_root, Path::new(&settings.docs_root))?;
+    let mut walk = walk_docs_indexed(project_root, Path::new(&settings.docs_root))?;
     let layout = settings.layout();
     let mut report = UpdateReport {
         full_check: index.stored_layout()?.as_ref() != Some(&layout),
@@ -617,6 +617,7 @@ fn index_document(
         modified_ns: modified_ns(file),
         hash,
         chunks: &chunked.chunks,
+        text: Some(text),
     };
     index.replace_document(&record, &new_vectors)?;
 
@@ -752,7 +753,7 @@ pub fn scan_index(
     if observer.should_stop() {
         return Err(IndexingError::Cancelled);
     }
-    let walk = walk_docs(project, Path::new(&settings.docs_root))?;
+    let walk = walk_docs_indexed(project, Path::new(&settings.docs_root))?;
     let mut report = UpdateReport {
         full_check,
         ..Default::default()

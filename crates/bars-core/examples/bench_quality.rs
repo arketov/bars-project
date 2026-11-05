@@ -9,7 +9,11 @@ use bars_core::models::{
     Accelerator, BuiltinEmbedder, BuiltinReranker, EmbedError, Embedder, ModelFingerprint,
     RerankError, Reranker,
 };
-use bars_core::search::{SearchRequest, SearchSettings, candidate_trace, search};
+use bars_core::link_index::LinkIndex;
+use bars_core::search::{
+    ParsedQuery, ScoreWeights, SearchError, SearchRequest, SearchSettings, candidate_trace, search,
+    search_with_links,
+};
 use bars_core::storage::{DocumentRecord, Index, Journal};
 use quality::{Row, digest, file_digest, load_cases, pack_hits, validate_cases};
 use serde_json::json;
@@ -175,6 +179,7 @@ fn prepare(
                     modified_ns: doc.modified_ns,
                     hash: &doc.hash,
                     chunks: &chunks,
+                    text: None,
                 },
                 &new_vectors,
             )?;
@@ -310,11 +315,20 @@ fn run(a: &[String]) -> Result<()> {
         }
     }
     fs::create_dir_all(out)?;
+    // Вес сигнала связей `w_l` задаётся переменной `BARS_BENCH_W_L` (шаг 2.3.7); без неё — 0, сигнал
+    // не считается. Ссылки берутся из индекса ссылок снимка проекта.
+    let link_weight: f32 = match std::env::var("BARS_BENCH_W_L") {
+        Ok(value) => value.parse()?,
+        Err(_) => 0.0,
+    };
     let mut config = json!({"dataset":file_digest(cases_path)?,"manifest":digest(&manifest_bytes),"binary":file_digest(&std::env::current_exe()?)?,
         "split":split,"candidates":counts,"depths":depths,"repeats":repeats,"accelerator":a[9],"threshold":0,"models":model_manifest(models)?});
     // Без области в конфигурации остаются старые прогоны: их можно продолжить.
     if scope != "all" {
         config["scope"] = json!(scope);
+    }
+    if link_weight != 0.0 {
+        config["w_l"] = json!(link_weight);
     }
     let cfg = out.join("config.json");
     if cfg.exists() {
@@ -350,9 +364,20 @@ fn run(a: &[String]) -> Result<()> {
         results_reranked: 100,
         max_results: 200,
         max_rerank_candidates: 100,
-        min_score_vector: 0.0,
-        min_score_rerank: 0.0,
+        min_score: 0.0,
+        weights: ScoreWeights {
+            links: link_weight,
+            ..Default::default()
+        },
         ..Default::default()
+    };
+    let project_root = workspace.join("project");
+    let mut link_index = LinkIndex::open(&project_root)?;
+    link_index.refresh(&project_root, Path::new("docs"))?;
+    let mut linked = |anchors: &[String], pool: &[String]| {
+        link_index
+            .linked_documents(anchors, pool)
+            .map_err(|error| SearchError::InvalidParams(error.to_string()))
     };
     let warm = SearchRequest {
         query: "порядок запуска ботов".into(),
@@ -396,7 +421,11 @@ fn run(a: &[String]) -> Result<()> {
                         && ["fts", "vector", "fused"].iter().any(|mode| {
                             !completed.contains(&format!("{}:{count}:0:0:{mode}", case.id))
                         });
-                    if search_done && !trace_needed {
+                    // Запрос с операторами идёт ещё раз без них («парный запрос»): так сравнивается
+                    // полнота при операторе (`docs/knowledge/search-quality.md`, шаг 2.3.7).
+                    let paired_key = format!("{}:{count}:{k}:{repeat}:paired", case.id);
+                    let paired_needed = case.operators.is_some() && !completed.contains(&paired_key);
+                    if search_done && !trace_needed && !paired_needed {
                         continue;
                     }
                     let mut embed = TimedEmbed {
@@ -411,12 +440,15 @@ fn run(a: &[String]) -> Result<()> {
                     let mut req = request.clone();
                     req.rerank_candidates = Some(k.max(1));
                     let started = Instant::now();
-                    let response = search(
+                    let response = search_with_links(
                         &index,
                         &mut embed,
                         if k == 0 { None } else { Some(&mut rerank) },
                         &settings,
                         &req,
+                        None,
+                        true,
+                        Some(&mut linked),
                     )?;
                     let total = started.elapsed().as_secs_f64();
                     if let Some(error) = response.rerank_error {
@@ -438,11 +470,10 @@ fn run(a: &[String]) -> Result<()> {
                     }
                     if trace_needed {
                         let lists = candidate_trace(&index, &embed.vector, &req, count)?;
-                        if lists[2]
-                            .iter()
-                            .map(|h| h.chunk_id)
-                            .ne(response.hits.iter().map(|h| h.chunk_id))
-                        {
+                        // Поиск без rerank отдаёт лучшие куски разделов из того же пула: каждый
+                        // из них обязан быть в пуле трассы.
+                        let pool: HashSet<i64> = lists[2].iter().map(|h| h.chunk_id).collect();
+                        if response.hits.iter().any(|h| !pool.contains(&h.chunk_id)) {
                             return Err("trace не совпадает с search".into());
                         }
                         for (mode, hits) in ["fts", "vector", "fused"].into_iter().zip(lists) {
@@ -458,6 +489,47 @@ fn run(a: &[String]) -> Result<()> {
                                 },
                             )?;
                         }
+                    }
+                    if paired_needed {
+                        let mut paired_embed = TimedEmbed {
+                            inner: &mut model,
+                            seconds: 0.0,
+                            vector: Vec::new(),
+                        };
+                        let mut paired_rerank = TimedRerank {
+                            inner: &mut rr,
+                            seconds: 0.0,
+                        };
+                        let mut paired_request = req.clone();
+                        paired_request.query = ParsedQuery::parse(&case.query).text;
+                        let started = Instant::now();
+                        let paired = search_with_links(
+                            &index,
+                            &mut paired_embed,
+                            if k == 0 { None } else { Some(&mut paired_rerank) },
+                            &settings,
+                            &paired_request,
+                            None,
+                            true,
+                            Some(&mut linked),
+                        )?;
+                        if let Some(error) = paired.rerank_error {
+                            return Err(format!("{} paired K={k}: {error}", case.id).into());
+                        }
+                        append(
+                            &mut output,
+                            &Row {
+                                id: case.id.clone(),
+                                candidates: count,
+                                k,
+                                repeat,
+                                mode: "paired".into(),
+                                total: started.elapsed().as_secs_f64(),
+                                embed: paired_embed.seconds,
+                                rerank: paired_rerank.seconds,
+                                hits: pack_hits(&paired.hits, case),
+                            },
+                        )?;
                     }
                     eprintln!(
                         "{} {}/{} {} C={count} K={k} repeat={} {:.3}s",

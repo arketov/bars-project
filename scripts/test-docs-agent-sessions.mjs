@@ -95,7 +95,6 @@ async function run(mode, scenario) {
     decision: all.some(x => /^docs\/adr\/\d{4}-.+\.md$/.test(x)),
     requirements: exists('docs/features/export/requirements.md') && /Т-1/.test(read('docs/features/export/requirements.md')),
     current: /SQLite|\]\(\.\.\/adr\//.test(read('docs/architecture/storage.md')) && !/выбор хранилища ещё не записан/.test(read('docs/architecture/storage.md')),
-    log: all.some(x => /^docs\/chats\/.+\/log.md$/.test(x)),
     handoff: all.some(x => /^docs\/chats\/.+\/handoff.md$/.test(x)),
     one_source: !all.includes('docs/MAIN_IDEA.md') && !all.includes('docs/requirements.md') && !/export|экспорт/i.test(read('SPEC.md')),
   } : {

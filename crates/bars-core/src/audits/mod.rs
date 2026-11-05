@@ -36,7 +36,7 @@ pub fn docs_stamp(
     project_root: &Path,
     docs_root: &Path,
 ) -> Result<String, crate::indexing::walk::WalkError> {
-    let walk = crate::indexing::walk::walk_docs(project_root, docs_root)?;
+    let walk = crate::indexing::walk::walk_docs_indexed(project_root, docs_root)?;
     let mut entries: Vec<String> = walk
         .files
         .iter()

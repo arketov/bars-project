@@ -82,12 +82,64 @@ pub struct SearchParams {
     pub min_score: Option<f32>,
 }
 
-/// Вид оценки результата: к нему применяется порог.
+/// Вид опоры оценки результата: к ней применяется порог.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ScoreKind {
     Rerank,
     Cosine,
+    /// Опоры нет (ни rerank, ни embed не отработали): порядок по словам, порога нет.
+    None,
+}
+
+/// Баллы результата по сигналам схемы баллов (`docs/features/search/hybrid-search.md`). Сигнал,
+/// которого не было, не отдаётся: `rerank`, `cosine` и `links` отсутствуют.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
+pub struct HitSignals {
+    /// Оценка rerank-модели, 0…1.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rerank: Option<f32>,
+    /// Косинусная близость, 0…1.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cosine: Option<f32>,
+    /// Слова запроса по полям, 0…1.
+    #[serde(default)]
+    pub fulltext: f32,
+    /// Точное совпадение (идентификаторы, фраза, пары слов подряд), 0…1.
+    #[serde(default)]
+    pub exact: f32,
+    /// Связи документов; пока не считается.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub links: Option<f32>,
+}
+
+/// Веса, с которыми сложены баллы: `S = a + w_c·c + w_f·f + w_p·p + w_l·l`.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
+pub struct ScoreWeights {
+    pub cosine: f32,
+    pub fulltext: f32,
+    pub exact: f32,
+    pub links: f32,
+    pub fold_bonus: f32,
+}
+
+/// Запрос после разбора операторов («понято как»); отдаётся, только если операторы есть.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct UnderstoodQuery {
+    /// Слова запроса без операторов (и слова фраз).
+    pub text: String,
+    /// Фразы в кавычках.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub phrases: Vec<String>,
+    /// Исключённые слова.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub excluded_words: Vec<String>,
+    /// Исключённые фразы.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub excluded_phrases: Vec<String>,
+    /// Префиксы `path:` / `папка:`, сузившие область.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub paths: Vec<String>,
 }
 
 /// Один результат поиска (Т-13).
@@ -108,11 +160,27 @@ pub struct SearchHit {
     /// Заголовки разделов, приклеенных к чанку после первого, строками `## Заголовок` (ISS-28).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub sections: Vec<String>,
+    /// Строки всего раздела (у `similar` — куска).
     pub first_line: u32,
     pub last_line: u32,
+    /// Текст лучшего куска раздела.
     pub text: String,
+    /// `min(1, S)` раздела.
     pub score: f32,
     pub score_kind: ScoreKind,
+    /// Баллы лучшего куска по сигналам; у `similar` нет.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub signals: Option<HitSignals>,
+    /// Сколько кусков в разделе; 0 — не раздел (результат `similar`).
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub parts: u32,
+    /// Сколько из них нашлось.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub parts_found: u32,
+}
+
+fn is_zero(value: &u32) -> bool {
+    *value == 0
 }
 
 /// Параметры, с которыми поиск выполнен на самом деле (Т-24).
@@ -127,12 +195,37 @@ pub struct AppliedParams {
     pub clamped: bool,
     #[serde(default)]
     pub scope: SearchScope,
+    /// Веса, с которыми сложены баллы.
+    #[serde(default)]
+    pub weights: ScoreWeights,
+    /// Сигналы, посчитанные для ответа: `rerank`, `cosine`, `fulltext`, `exact`.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub signals: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SearchScope {
     pub modules: Vec<String>,
     pub files: Vec<String>,
+    /// Вложенные проекты, чья область исключена из индекса этого проекта (Т-7, Т-15, OQ-256).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub excluded_projects: Vec<NestedProjectInfo>,
+}
+
+/// Вложенный зарегистрированный проект, область которого исключена из индекса внешнего.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct NestedProjectInfo {
+    /// Отображаемое имя: им выбирается проект параметром `project`.
+    pub name: String,
+    /// Корень вложенного проекта.
+    pub path: String,
+    /// Папка вложенного проекта от корня внешнего через `/`.
+    pub dir: String,
+    /// Исключённая область (`docs_root` вложенного) от корня внешнего через `/`.
+    pub area: String,
+    /// Сколько `.md` лежит в области на диске; 0, если папка недоступна.
+    #[serde(default)]
+    pub documents: u32,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -154,6 +247,13 @@ pub struct SearchOutput {
     /// Причина, по которой rerank включён, но выдача вернулась без него.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub rerank_error: Option<String>,
+    /// Смысловая часть не учтена: embed-модель не успела загрузиться за предел ожидания, выдача
+    /// только по полнотекстовому списку, оценки близости нет (ISS-105).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub semantic_error: Option<String>,
+    /// Запрос, разобранный на операторы; есть, только если в запросе были операторы.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub understood: Option<UnderstoodQuery>,
 }
 
 // --- similar ---
@@ -405,6 +505,9 @@ pub struct ProjectInfo {
     pub docs_root: String,
     pub state: ProjectState,
     pub modules: Vec<ModuleInfo>,
+    /// Исключённые вложенные проекты (Т-7, Т-15): ответ называет их, чтобы агент выбрал `project`.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub nested: Vec<NestedProjectInfo>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -838,6 +941,9 @@ pub struct RerankDoc {
     pub unload_after_minutes: u32,
 }
 
+fn default_min_score() -> f32 {
+    0.1
+}
 fn default_rerank_parallel() -> u32 {
     4
 }
@@ -852,8 +958,10 @@ pub struct SearchDoc {
     pub rerank_candidates: u32,
     pub results: u32,
     pub results_reranked: u32,
-    pub min_score_vector: f32,
-    pub min_score_rerank: f32,
+    /// Единый порог по опоре оценки (rerank или косинус); заменил `min_score_vector` и
+    /// `min_score_rerank` (ADR-0007).
+    #[serde(default = "default_min_score")]
+    pub min_score: f32,
     pub agent_min_score: [f32; 2],
     pub max_results: u32,
     pub max_candidates: u32,
@@ -1617,6 +1725,14 @@ mod tests {
                 text: "текст".into(),
                 score: 0.5,
                 score_kind: ScoreKind::Cosine,
+                signals: Some(HitSignals {
+                    cosine: Some(0.4),
+                    fulltext: 1.0,
+                    exact: 0.5,
+                    ..HitSignals::default()
+                }),
+                parts: 3,
+                parts_found: 2,
             }],
             applied: AppliedParams {
                 results: 5,
@@ -1628,7 +1744,16 @@ mod tests {
                 scope: SearchScope {
                     modules: vec!["features".into()],
                     files: vec![],
+                    excluded_projects: vec![],
                 },
+                weights: ScoreWeights {
+                    cosine: 0.0,
+                    fulltext: 0.1,
+                    exact: 0.1,
+                    links: 0.0,
+                    fold_bonus: 0.0,
+                },
+                signals: vec!["cosine".into(), "fulltext".into(), "exact".into()],
             },
             by_module: ModuleBreakdown {
                 candidates: [("features".into(), 7)].into(),
@@ -1637,10 +1762,22 @@ mod tests {
             indexing: true,
             pending: 4,
             rerank_error: None,
+            semantic_error: None,
+            understood: Some(UnderstoodQuery {
+                text: "белый кот".into(),
+                phrases: vec!["белый кот".into()],
+                ..UnderstoodQuery::default()
+            }),
         };
         let value = output_value(&output);
         assert_eq!(value["results"][0]["score_kind"], "cosine");
+        assert_eq!(value["results"][0]["signals"]["exact"], 0.5);
+        assert!(value["results"][0]["signals"].get("rerank").is_none());
+        assert_eq!(value["results"][0]["parts_found"], 2);
+        assert_eq!(value["applied"]["signals"][0], "cosine");
+        assert_eq!(value["understood"]["phrases"][0], "белый кот");
         assert!(value.get("rerank_error").is_none());
+        assert!(value.get("semantic_error").is_none());
         let back: SearchOutput = serde_json::from_value(value).unwrap();
         assert_eq!(back, output);
     }

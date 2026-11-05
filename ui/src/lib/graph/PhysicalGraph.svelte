@@ -191,11 +191,10 @@
     const shown = app.displayed;
     if (!results || !shown || shown.project !== project()) return null;
     if (JSON.stringify({ modules: shown.modules, files: shown.files }) !== JSON.stringify(app.scope)) return null;
-    const graph = app.graphSearch;
-    const requested = shown.mode as RetrievalKind;
-    const applied = (graph?.applied_mode ?? requested) as RetrievalKind;
-    const scoreKind: ScoreKind = applied === "graph" ? "none" : results.applied.score_kind;
-    return { id: shown.requestId, text: shown.query, hits: results.results, bundle: graph?.related ?? graph?.graph_results, scope: { modules: shown.modules, files: shown.files }, scoreKind, requested, applied, fallback: graph?.fallback_reason ?? null, minScore: results.applied.min_score };
+    // Поиск окна — один список (режимов «со связями» и «отношения» в нём нет): граф рисует вид запроса по его разделам.
+    const requested: RetrievalKind = "hybrid";
+    const scoreKind: ScoreKind = results.applied.score_kind;
+    return { id: shown.requestId, text: shown.query, hits: results.results, bundle: undefined, scope: { modules: shown.modules, files: shown.files }, scoreKind, requested, applied: requested, fallback: null, minScore: results.applied.min_score };
   }
 
   /** Рисуемый срез: общий или вид запроса, смотря что включено. */

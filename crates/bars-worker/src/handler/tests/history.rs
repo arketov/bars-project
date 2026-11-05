@@ -85,7 +85,7 @@ async fn mcp_history_worker_restart_leaves_interrupted_ipc_unknown_and_repeat_is
     fs::create_dir(project.path().join("docs")).unwrap();
     fs::write(project.path().join("docs/a.md"), "# Документ\n\nПоиск.\n").unwrap();
     let worker = Worker::start(
-        WorkerConfig::new(home.path().into()),
+        WorkerConfig::new(home.path().into()).without_graph_pause(),
         FakeProvider::new("m1"),
     )
     .unwrap();
@@ -134,7 +134,7 @@ async fn mcp_history_worker_restart_leaves_interrupted_ipc_unknown_and_repeat_is
     worker.shutdown().await;
     drop(handler);
     let restarted = Worker::start(
-        WorkerConfig::new(home.path().into()),
+        WorkerConfig::new(home.path().into()).without_graph_pause(),
         FakeProvider::new("m1"),
     )
     .unwrap();

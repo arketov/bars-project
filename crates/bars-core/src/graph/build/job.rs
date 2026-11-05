@@ -9,6 +9,9 @@ use std::time::{Duration, Instant};
 #[derive(Default)]
 pub struct GraphBuildState {
     active: Option<Active>,
+    /// Автоматическое обновление после правки может обновить граф частично; явное построение —
+    /// всегда полное (OQ-260). Воркер ставит признак для автоматических заданий.
+    pub delta: bool,
 }
 
 pub(super) struct Active {
@@ -29,6 +32,14 @@ fn revision(index: &Index) -> Result<String, GraphError> {
         .input)
 }
 impl GraphBuildState {
+    /// Состояние автоматического задания: обновление после правки может быть частичным.
+    pub fn automatic() -> Self {
+        Self {
+            active: None,
+            delta: true,
+        }
+    }
+
     pub(super) fn take_current(
         &mut self,
         project: &Path,
@@ -71,7 +82,7 @@ pub(super) fn save(
 ) -> Result<(), GraphError> {
     bars_graph::store::write_payload(index.conn(), key, &serde_json::to_string(value)?)
 }
-fn config(index: &Index) -> Result<String, GraphError> {
+pub(super) fn config(index: &Index) -> Result<String, GraphError> {
     let mut stmt = index.conn().prepare("SELECT key,value FROM meta WHERE key LIKE 'model_%' OR key IN ('docs_root','chunk_min_chars','chunk_max_chars') ORDER BY key")?;
     let meta = stmt
         .query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))?
@@ -555,6 +566,7 @@ mod tests {
                         modified_ns: None,
                         hash: &blake3::hash(text.as_bytes()).to_hex(),
                         chunks: &mapped.chunks,
+                        text: Some(&text),
                     },
                     &vectors,
                 )

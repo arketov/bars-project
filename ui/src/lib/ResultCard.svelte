@@ -1,111 +1,162 @@
 <script lang="ts">
-  import { label as uiLabel } from "./labels";
   import { app } from "./app.svelte";
   import { commandAdapter } from './command-adapters';
   import { copyText } from "./api";
-  import { decimal, fit, moduleLabel } from "./format";
+  import { decimal, moduleLabel } from "./format";
   import Icon from "./Icon.svelte";
   import { appearance } from "./appearance.svelte";
   import { colorVar, documentColor, keyOf } from "./appearance";
   import { relativeToDocs } from "./tree";
-  import { plainText, renderChunk } from "./markdown";
+  import { renderChunk, plainText } from "./markdown";
+  import { highlight, markTerms, sectionChain, sectionsWord, VISIBLE_SECTIONS, type DocumentCard, type Marker } from "./search-results";
   import type { SearchHit } from "./types";
   import SimilarSections from "./SimilarSections.svelte";
 
-  let { hit, rank, startOpen = false }: { hit: SearchHit; rank: number; startOpen?: boolean } = $props();
+  // Карточка документа: название, папка и разделы под ним; лучший раздел раскрыт, второй виден строкой,
+  // остальные — под «Ещё N разделов» (global-search-design.md, «Проект выдачи: один список»).
+  let { card, marker }: { card: DocumentCard; marker: Marker } = $props();
 
-  // Раскрытость — выбор пользователя; пока он не трогал карточку, первая раскрыта (main-window.md).
-  let toggled = $state<boolean | null>(null);
-  const open = $derived(toggled ?? startOpen);
-  let similarOpen = $state(false);
+  // Раскрытость раздела — выбор пользователя; пока он не трогал строку, раскрыт только лучший.
+  let toggled = $state<Record<number, boolean>>({});
+  let allShown = $state(false);
+  let similarFor = $state<number | null>(null);
   const project = $derived(app.displayed?.project ?? app.current);
-  const f = $derived(fit(hit.score, hit.score_kind));
-  const dot = $derived(colorVar(documentColor(appearance.data, keyOf(relativeToDocs(hit.path, app.docsRoot || "")))));
-  const shown = $derived(app.viewer?.hit.path === hit.path && app.viewer.hit.first_line === hit.first_line);
-  const crumbs = $derived(hit.heading_chain.split("/").join(" / "));
-  const title = $derived(hit.heading_chain.split("/").pop() || hit.title);
+  const best = $derived(card.sections[0]);
+  const visible = $derived(allShown ? card.sections : card.sections.slice(0, VISIBLE_SECTIONS));
+  const hidden = $derived(card.sections.length - VISIBLE_SECTIONS);
+  const dot = $derived(colorVar(documentColor(appearance.data, keyOf(relativeToDocs(card.path, app.docsRoot || "")))));
+  const showScores = $derived(app.showScores);
+  const results = $derived(app.results);
+  const hasScore = (hit: SearchHit) => hit.score_kind !== "none";
+  const isOpen = (index: number) => toggled[index] ?? index === 0;
+  const flip = (index: number) => { toggled = { ...toggled, [index]: !isOpen(index) }; };
 
+  const SIGNALS: { key: "rerank" | "cosine" | "fulltext" | "exact" | "links"; name: string }[] = [
+    { key: "rerank", name: "оценка модели (rerank)" },
+    { key: "cosine", name: "близость по смыслу" },
+    { key: "fulltext", name: "слова запроса" },
+    { key: "exact", name: "точное совпадение" },
+    { key: "links", name: "связи документов" },
+  ];
+  /** Строка разбора: число или причина, почему его нет. */
+  function signalText(hit: SearchHit, key: (typeof SIGNALS)[number]["key"]): { text: string; na: boolean } {
+    const value = hit.signals?.[key];
+    if (value !== undefined) return { text: decimal(value), na: false };
+    if (key === "links") return { text: "не используется", na: true };
+    const used = results?.applied.signals?.includes(key);
+    if (used) return { text: "нет сигнала", na: true };
+    return { text: results?.semantic_error || results?.rerank_error ? "модель недоступна" : "не использовался", na: true };
+  }
+
+  /** Подсветка слов запроса внутри отрисованного раздела. */
+  function marks(node: HTMLElement) {
+    markTerms(node, marker);
+  }
+
+  function openSection(hit: SearchHit) {
+    void app.openDocument({ path: hit.path, title: hit.title, first_line: hit.first_line, last_line: hit.last_line, fromSearch: true, terms: { words: marker.words, phrases: marker.phrases } });
+  }
+  function openDocument() {
+    void app.openDocument({ path: card.path, title: card.title, first_line: 0, last_line: 0, fromSearch: true });
+  }
   function showInGraph() {
-    app.graphFocus = hit.path;
+    app.graphFocus = card.path;
     app.graphShowQuery = true;
     app.view = "graph";
   }
-
-  async function copy() {
+  async function copy(hit: SearchHit) {
     await copyText(`${hit.path}:${hit.first_line}`);
     app.flash("Путь скопирован");
   }
 </script>
 
-<div class="card" class:open class:shown data-document-path={hit.path} data-document-line={hit.first_line} use:commandAdapter={{ 'result.graph': { run: showInGraph }, 'result.open': { run: () => app.openDocument({ ...hit, fromSearch: true }) }, 'result.expand': { run: () => { toggled = !open; } } }}>
-  <div
-    class="chead"
-    role="button"
-    tabindex="0"
-    onclick={() => (toggled = !open)}
-    onkeydown={(event) => (event.key === "Enter" || event.key === " ") && (toggled = !open)}
-  >
-    <div class="rank" class:first={rank === 1}>{rank}</div>
-    <div class="head">
-      <div class="ctitle">{title}</div>
-      <div class="crumbs"><span class="mono">{hit.path}:{hit.first_line}</span> · {crumbs}</div>
-      <div class="badges">{#if dot}<span class="dot" style:background={dot} title="Цвет документа" aria-hidden="true"></span>{/if}<span class="badge acc">{moduleLabel(hit.module)}</span><span class="badge">{hit.title}</span></div>
-      {#if !open}<div class="snippet">{plainText(hit.text)}</div>{/if}
-    </div>
-    <div class="fit {f.cls}" title={f.explanation}>
-      <div class="pct">{f.percent}<small>%</small></div>
-      <div class="flabel">{f.label}</div>
-      <div class="sbar" role="meter" aria-label={f.label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={f.percent}><i style="width:{f.percent}%"></i></div>
-    </div>
-    <div class="chev"><Icon name="chevron-down" size={16} /></div>
+<article class="doc" data-document-path={card.path} data-document-line={best.first_line} use:commandAdapter={{ 'result.graph': { run: showInGraph }, 'result.open': { run: () => openSection(best) }, 'result.expand': { run: () => flip(0) } }}>
+  <div class="dh">
+    {#if dot}<span class="dot" style:background={dot} title="Цвет документа" aria-hidden="true"></span>{/if}
+    <h3><button class="link title" onclick={openDocument} title="Открыть документ">{card.title}</button></h3>
+    <span class="sp"></span>
+    {#if showScores && hasScore(best)}<span class="score" title="Оценка лучшего раздела">{decimal(best.score)}<span class="bar"><i style="width:{Math.round(Math.min(1, best.score) * 100)}%"></i></span></span>{/if}
   </div>
-  {#if open}
-    <div class="cin">
-      <div class="text">{@html renderChunk(hit.text)}</div>
-      <div class="cfoot">
-        <button class="btn" onclick={() => app.openDocument({ ...hit, fromSearch: true })}><Icon name="doc" size={14} />Открыть документ</button>
-        <button class="ghost" onclick={showInGraph}>В графе</button>
-        <button class="ghost" onclick={copy}><Icon name="copy" size={14} />Копировать путь:строку</button>
-        <button class="ghost" disabled={!hit.chunk_id || !project} title={hit.chunk_id ? "Найти соседей по смыслу" : "ID раздела отсутствует. Обновите воркер и повторите поиск."} aria-expanded={similarOpen} onclick={() => similarOpen = !similarOpen}>Похожие разделы</button>
-        <span class="nums">строки {hit.first_line}–{hit.last_line} · <span title={uiLabel("score", hit.score_kind).hint}>{uiLabel("score", hit.score_kind).text}</span> {decimal(hit.score)}</span>
-      </div>
-      {#if similarOpen && project && hit.chunk_id}
-        {#key project + ":" + hit.chunk_id}<SimilarSections {project} sourceId={hit.chunk_id} modules={app.project?.modules ?? []} onopen={(neighbor) => { if (app.current === project) void app.openDocument(neighbor); }} onrefresh={() => { similarOpen = false; void app.search(); }} />{/key}
+  <div class="dpath" title={card.path}>{card.folder || moduleLabel(card.module)}</div>
+  {#each visible as hit, index (hit.first_line + ":" + hit.chunk_id)}
+    {@const open = isOpen(index)}
+    {@const chain = sectionChain(hit)}
+    <div class="sec" class:open class:minor={index >= VISIBLE_SECTIONS} data-document-line={hit.first_line}>
+      <button class="srow" aria-expanded={open} onclick={() => flip(index)}>
+        <span class="caret"><Icon name="chevron-right" size={12} width={2.4} /></span>
+        <span class="stxt">
+          <span class="shead">{#each chain as part, i (i)}{#if i}<i>›</i>{/if}{part}{/each}</span>
+          {#if !open}<span class="snip">{#each highlight(plainText(hit.text), marker) as piece}{#if piece.mark}<mark>{piece.text}</mark>{:else}{piece.text}{/if}{/each}</span>{/if}
+        </span>
+        {#if showScores}
+          {#if hasScore(hit)}<span class="score">{decimal(hit.score)}<span class="bar"><i style="width:{Math.round(Math.min(1, hit.score) * 100)}%"></i></span></span>
+          {:else}<span class="score" title="Оценки нет: нет опорного сигнала">—</span>{/if}
+        {/if}
+      </button>
+      {#if open}
+        <div class="sbody">
+          <div class="text" use:marks>{@html renderChunk(hit.text)}</div>
+          {#if showScores && hit.signals}
+            <div class="sig"><table><tbody>
+              {#each SIGNALS as signal (signal.key)}
+                {@const value = signalText(hit, signal.key)}
+                <tr class:na={value.na}><td>{signal.name}</td><td>{value.text}</td></tr>
+              {/each}
+            </tbody></table></div>
+          {/if}
+          <div class="acts">
+            <button class="btn sm" onclick={() => openSection(hit)}><Icon name="doc" size={14} />Открыть раздел</button>
+            <button class="ghost sm" title="Скопировать путь и строку раздела" onclick={() => copy(hit)}><Icon name="copy" size={14} />Копировать ссылку</button>
+            <button class="ghost sm" onclick={showInGraph}>В графе</button>
+            <button class="ghost sm" disabled={!hit.chunk_id || !project} title={hit.chunk_id ? "Найти соседей по смыслу" : "ID раздела отсутствует. Обновите воркер и повторите поиск."} aria-expanded={similarFor === index} onclick={() => similarFor = similarFor === index ? null : index}>Похожие разделы</button>
+          </div>
+          {#if similarFor === index && project && hit.chunk_id}
+            {#key project + ":" + hit.chunk_id}<SimilarSections {project} sourceId={hit.chunk_id} modules={app.project?.modules ?? []} onopen={(neighbor) => { if (app.current === project) void app.openDocument(neighbor); }} onrefresh={() => { similarFor = null; void app.search(); }} />{/key}
+          {/if}
+        </div>
       {/if}
     </div>
+  {/each}
+  {#if hidden > 0}
+    <button class="more" aria-expanded={allShown} onclick={() => allShown = !allShown}>{allShown ? "Свернуть ▴" : `Ещё ${hidden} ${sectionsWord(hidden)} в этом документе ▾`}</button>
   {/if}
-</div>
+</article>
 
 <style>
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 12px; box-shadow: var(--shadow); overflow: hidden; transition: border-color .15s; }
-  .card:hover { border-color: var(--line-2); }
-  .card.shown { border-color: var(--accent); }
-  .chead { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto 16px; gap: 8px; align-items: center; padding: 8px 10px; cursor: pointer; }
-  .rank { width: 30px; height: 30px; border-radius: 9px; background: var(--panel-2); border: 1px solid var(--line); display: grid; place-items: center; font-weight: 700; color: var(--muted); font-size: 13px; }
-  .rank.first { background: var(--accent-soft); border-color: transparent; color: var(--accent-text); }
-  .head { min-width: 0; }
-  .ctitle { font-weight: 600; font-size: 13px; line-height: 1.3; }
-  .crumbs { color: var(--muted); font-size: 12.5px; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .crumbs .mono { color: var(--accent-text); font-size: 12px; }
+  .doc { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 10px; overflow: hidden; }
+  .doc:hover { border-color: var(--line-2); }
+  .dh { display: flex; gap: 10px; align-items: baseline; padding: 12px 16px 0; }
+  .dh h3 { margin: 0; font-size: 15.5px; font-weight: 650; letter-spacing: -.1px; min-width: 0; }
+  .title { font: inherit; text-align: left; color: var(--text); }
+  .title:hover { color: var(--accent-text); text-decoration: underline; }
+  .sp { flex: 1; }
   .dot { width: 8px; height: 8px; border-radius: 50%; align-self: center; flex: none; }
-  .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
-  .snippet { color: var(--muted); margin-top: 8px; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 13.5px; }
-  .fit { text-align: right; min-width: 80px; }
-  .pct { font-size: 18px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-  .pct small { font-size: 13px; font-weight: 600; margin-left: 1px; }
-  .flabel { font-size: 11.5px; font-weight: 600; margin-top: 4px; }
-  .sbar { height: 5px; background: var(--low-soft); border-radius: 5px; margin-top: 7px; overflow: hidden; }
-  .sbar i { display: block; height: 100%; border-radius: 5px; }
-  .f-good .pct, .f-good .flabel { color: var(--good); } .f-good .sbar i { background: var(--good); }
-  .f-mid .pct, .f-mid .flabel { color: var(--mid); } .f-mid .sbar i { background: var(--mid); }
-  .f-low .pct, .f-low .flabel { color: var(--low); } .f-low .sbar i { background: var(--low); }
-  .f-cosine .pct, .f-cosine .flabel { color: var(--accent-text); } .f-cosine .sbar i { background: var(--accent); }
-  .chev { color: var(--faint); transition: transform .2s; display: grid; place-items: center; }
-  .open .chev { transform: rotate(180deg); }
-  .cin { padding: 4px 12px 10px 42px; }
-  .text { font-size: 12px; line-height: 1.65; }
+  .dpath { padding: 0 16px; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sec { border-top: 1px solid var(--line); margin-top: 10px; }
+  .sec:first-of-type { border-top: 0; margin-top: 4px; }
+  .srow { display: flex; gap: 8px; align-items: flex-start; width: 100%; padding: 9px 16px; border: 0; background: none; text-align: left; color: var(--text); }
+  .srow:hover { background: var(--panel-2); }
+  .caret { flex: none; margin-top: 3px; color: var(--faint); transition: transform .12s; display: grid; }
+  .sec.open .caret { transform: rotate(90deg); }
+  .stxt { flex: 1; min-width: 0; }
+  .shead { font-size: 12.5px; font-weight: 600; color: var(--accent-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+  .shead i { font-style: normal; color: var(--faint); font-weight: 400; margin: 0 4px; }
+  .sec.minor:not(.open) .snip { display: none; }
+  .sec.minor .shead { color: var(--text); font-weight: 500; }
+  .snip { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--text); font-size: 13.5px; line-height: 1.5; margin-top: 2px; }
+  mark, .text :global(mark) { background: var(--accent-soft); color: inherit; border-radius: 3px; padding: 0 1px; box-shadow: inset 0 -2px 0 var(--accent); }
+  .sbody { padding: 0 16px 12px 38px; }
+  .text { font-size: 13px; line-height: 1.6; }
   .text :global(p) { margin: 0 0 .75em; } .text :global(ul) { margin: 0 0 .75em; padding-left: 1.3em; } .text :global(li) { margin: .2em 0; }
   .text :global(code) { font: 12.5px var(--mono); background: var(--panel-2); border: 1px solid var(--line); padding: 1px 5px; border-radius: 5px; }
-  .cfoot { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line); }
-  .nums { color: var(--faint); font-size: 12px; margin-left: auto; font-variant-numeric: tabular-nums; }
+  .acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .score { flex: none; display: inline-flex; align-items: center; gap: 6px; font: 600 12px var(--mono); color: var(--muted); }
+  .bar { width: 44px; height: 6px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--accent); }
+  .sig { margin-top: 8px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel-2); padding: 6px 10px; font-size: 12px; }
+  .sig table { width: 100%; border-collapse: collapse; }
+  .sig td { padding: 2px 4px; } .sig td:last-child { text-align: right; font: 12px var(--mono); }
+  .sig tr.na td { color: var(--faint); }
+  .more { display: block; width: 100%; border: 0; border-top: 1px solid var(--line); background: var(--panel-2); color: var(--muted); font-size: 12.5px; padding: 7px 16px; text-align: left; font-weight: 600; }
+  .more:hover { color: var(--text); }
 </style>

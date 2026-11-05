@@ -237,7 +237,7 @@ fn prepare(workspace: &Path, cases_path: &Path, models: &Path, out: &Path) -> Re
     let settings = SearchSettings {
         results: 100,
         max_results: 100,
-        min_score_vector: 0.,
+        min_score: 0.,
         ..Default::default()
     };
     let mut inputs = Vec::new();
@@ -644,7 +644,7 @@ fn full(data: &Path, models: &Path, config: &Path, out: &Path, staged_quality: b
         results: 100,
         results_reranked: 100,
         max_results: 100,
-        min_score_rerank: 0.,
+        min_score: 0.,
         ..Default::default()
     };
     let load = load.elapsed().as_secs_f64();

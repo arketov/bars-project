@@ -73,6 +73,37 @@ async fn partial_read_cli_returns_original_lines_and_metadata() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn register_root_choice_is_written_before_registration() {
+    let harness = Harness::new("root-choice");
+    let config = |root: &Path| fs::read_to_string(root.join(".bars/config.toml")).unwrap();
+
+    // Папка заметок без `docs/`: умолчание — вся папка.
+    let notes = harness.projects.path().join("notes");
+    fs::create_dir_all(&notes).unwrap();
+    fs::write(notes.join("manual.md"), "# Инструкция\n\nШаги работы.\n").unwrap();
+    let env = harness.env_in(&notes);
+    let registered = bars(&env, &["register"]).await;
+    assert_eq!(registered.code, 0, "{}", registered.err);
+    assert!(config(&notes).contains("docs_root = \".\""));
+
+    // Репозиторий с `docs/`: умолчание — `docs/`, явный `--root all` — вся папка.
+    let repo = harness.project("repo");
+    let default = bars(&harness.env_in(&repo), &["register"]).await;
+    assert_eq!(default.code, 0, "{}", default.err);
+    assert!(config(&repo).contains("docs_root = \"docs\""));
+    let chosen = harness.project("repo-all");
+    let all = bars(&harness.env_in(&chosen), &["register", "--root", "all"]).await;
+    assert_eq!(all.code, 0, "{}", all.err);
+    assert!(config(&chosen).contains("docs_root = \".\""));
+
+    // Настроенный проект не меняется, неверное значение отклоняется.
+    let again = bars(&harness.env_in(&repo), &["register", "--root", "all"]).await;
+    assert_eq!(again.code, 0, "{}", again.err);
+    assert!(config(&repo).contains("docs_root = \"docs\""));
+    assert!(Cli::try_parse_from(["bars-cli", "register", "--root", "x"]).is_err());
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn graph_cli_operations_and_search_modes_match_worker_json() {
     let harness = Harness::new("graph-cli");
     let root = harness.project("graph");
@@ -178,7 +209,7 @@ impl Harness {
                 Arc::clone(&provider),
             );
             Launch::With(Arc::new(move || {
-                let mut config = WorkerConfig::new(home.clone());
+                let mut config = WorkerConfig::new(home.clone()).without_graph_pause();
                 // Настоящие ~/.claude и ~/.codex не трогаются: клиенты живут во временной папке.
                 config.install_env = Some(InstallEnv {
                     home: home.join("client-home"),
@@ -611,7 +642,7 @@ async fn session_start_hook_registers_project_and_never_fails() {
     wait_status(&harness.env_in(&root), "индексация после хука", indexed).await;
     let projects = json(&bars(&env, &["--json", "projects"]).await);
     assert_eq!(projects["projects"].as_array().unwrap().len(), 1);
-    // BARS_INSTRUCTION.md появляется после проверки актуальности (Т-8).
+    // BARS_INSTRUCTION.md кладёт хук сессии — работа агента с проектом (Т-8).
     assert!(root.join("docs/BARS_INSTRUCTION.md").exists());
 
     // Мусор на входе: код выхода всё равно 0.

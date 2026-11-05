@@ -224,7 +224,7 @@ impl Settings {
     pub fn resolve(user: &UserSettings, project: &ProjectConfig) -> Self {
         let mut search = user.search.clone();
         if let Some(overrides) = &project.search {
-            overrides.apply(&mut search);
+            overrides.apply(&mut search, user.rerank.enabled);
         }
         let mut chunking = user.chunking;
         if let Some(overrides) = &project.chunking {

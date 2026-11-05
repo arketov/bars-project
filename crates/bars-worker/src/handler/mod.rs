@@ -26,7 +26,7 @@ use bars_core::indexing::walk::read_utf8_path;
 use bars_core::models::Reranker;
 use bars_core::outline::{OutlineQuery, Under, outline};
 use bars_core::search::{
-    DuplicatesRequest, SearchRequest, SimilarRequest, duplicates, search, similar,
+    DuplicatesRequest, SearchRequest, SimilarRequest, duplicates, search_with_signals, similar,
 };
 use bars_core::settings::Settings;
 use bars_core::storage::{Index, index_path};
@@ -54,9 +54,22 @@ use crate::settings_io::{self, SaveError};
 use crate::worker::{JobKind, Priority, ProjectSnapshot, Readiness, Worker, index_token, rfc3339};
 use errors::{doc_path_error, outline_error, read_error, search_error, worker_error};
 
+/// Сколько поиск ждёт загрузки обеих встроенных моделей в память вместе (ISS-105). Замер: bge-m3
+/// грузится 3,5 с, rerank 5,6 с, загрузки идут по очереди, вместе около 9 с; предел оставляет
+/// двукратный запас на холодный диск и инициализацию GPU и короче срока вызова MCP (55 с).
+const MODEL_WAIT: std::time::Duration = std::time::Duration::from_secs(20);
+
+/// Как часто поиск смотрит, загрузилась ли модель.
+const MODEL_POLL: std::time::Duration = std::time::Duration::from_millis(50);
+
+/// Пометка выдачи без смысловой части: embed-модель не успела загрузиться за предел ожидания.
+const SEMANTIC_UNAVAILABLE: &str = "смысловая близость не учтена: модель загружается; результаты подобраны только по совпадению слов, оценки близости и порога нет. Повторите поиск через несколько секунд";
+
 /// Выполняет вызовы канала на воркере.
 #[derive(Clone)]
 pub struct WorkerHandler {
+    /// Предел ожидания загрузки моделей поиском; в тестах короче.
+    model_wait: std::time::Duration,
     pub keybindings: crate::keybindings::Store,
     worker: Worker,
     history: crate::mcp_history::History,
@@ -66,6 +79,10 @@ pub struct WorkerHandler {
     text_searches: text_search::ActiveSearches,
     /// Очередь запусков аудитов знаний: один аудит на проект.
     audits: crate::audits::Audits,
+    /// Проекты, для которых расписание аудитов уже записало в журнал, что корня документации нет:
+    /// запись одна на смену состояния (ISS-106).
+    schedule_blocked:
+        std::sync::Arc<std::sync::Mutex<std::collections::HashSet<std::path::PathBuf>>>,
     /// Близость документов последнего среза физического графа: проект, снимок графа, результат.
     physical_similarity: PhysicalSimilarityCache,
     document_representations: query_slice::RepresentationCache,
@@ -88,6 +105,7 @@ impl WorkerHandler {
         let history = crate::mcp_history::History::new(worker.bars_home().to_path_buf());
         history.start_maintenance();
         Self {
+            model_wait: MODEL_WAIT,
             keybindings: crate::keybindings::Store::default(),
             worker,
             history,
@@ -95,6 +113,7 @@ impl WorkerHandler {
             links_lock: Default::default(),
             text_searches: Default::default(),
             audits: Default::default(),
+            schedule_blocked: Default::default(),
             physical_similarity: Default::default(),
             document_representations: Default::default(),
             graph_cache,
@@ -194,8 +213,8 @@ impl WorkerHandler {
         .map_err(internal)?
         .map_err(search_error)?;
         Ok(SimilarOutput {
-            source: hit(response.source),
-            results: response.hits.into_iter().map(hit).collect(),
+            source: similar_hit(response.source),
+            results: response.hits.into_iter().map(similar_hit).collect(),
             limit: to_u32(response.results),
             clamped: response.clamped,
             indexing: status.state == ProjectState::Indexing || status.queued,
@@ -282,16 +301,42 @@ impl WorkerHandler {
             "models",
             serde_json::json!({"embed":settings.embed.model,"rerank":settings.rerank.model,"rerank_requested":settings.rerank.enabled}),
         );
-        // Скачивание и загрузка встроенной модели поиск не ждёт: он сразу отвечает `model_loading`.
-        match self
-            .worker
-            .models()
-            .embed_readiness(&settings)
-            .map_err(errors::embed_error)?
-        {
-            Readiness::Ready => {}
-            Readiness::Loading { percent } => return Err(errors::model_loading(percent)),
-            Readiness::Failed(failure) => return Err(errors::builtin_model_error(failure)),
+        // Скачивание встроенной модели поиск не ждёт: он сразу отвечает `model_loading`. Загрузку
+        // уже скачанной модели в память (после выгрузки по таймеру) он ждёт до `model_wait`, дальше
+        // идёт без смысловой части (ISS-105). Одновременные поиски делят одну заявку на загрузку
+        // (`Loads::claim`), а ожидание асинхронное и воркер не блокирует.
+        let deadline = tokio::time::Instant::now() + self.model_wait;
+        let mut semantic = true;
+        let mut rerank_requested = false;
+        loop {
+            match self
+                .worker
+                .models()
+                .embed_readiness(&settings)
+                .map_err(errors::embed_error)?
+            {
+                Readiness::Ready => break,
+                Readiness::Failed(failure) => return Err(errors::builtin_model_error(failure)),
+                Readiness::Loading { percent } if percent < 100 => {
+                    return Err(errors::model_loading(percent));
+                }
+                Readiness::Loading { .. } => {
+                    // Загрузка rerank-модели стартует вместе с embed, а не после неё.
+                    if settings.rerank.enabled && !rerank_requested {
+                        rerank_requested = true;
+                        let _ = self.worker.models().rerank_readiness(&settings);
+                    }
+                    if tokio::time::Instant::now() >= deadline {
+                        semantic = false;
+                        history::applied_field(
+                            "semantic_fallback_reason",
+                            serde_json::json!("model_loading"),
+                        );
+                        break;
+                    }
+                    tokio::time::sleep(MODEL_POLL).await;
+                }
+            }
         }
         let mut embedder = self
             .worker
@@ -310,7 +355,44 @@ impl WorkerHandler {
         let scope = bars_protocol::SearchScope {
             modules: request.modules.clone(),
             files: request.files.clone(),
+            excluded_projects: self.worker.nested_projects(&project, false),
         };
+        // Rerank-модель, пока она скачивается, поиск не ждёт: выдача идёт без неё. Ожидание идёт
+        // до замка проекта, чтобы не держать его и не задерживать подмену индекса.
+        let mut skipped_rerank = None;
+        let mut reranker = None;
+        if settings.rerank.enabled {
+            // Как и embed: скачанную модель, которая грузится в память, ждём до общего предела.
+            let readiness = loop {
+                match self.worker.models().rerank_readiness(&settings) {
+                    Readiness::Loading { percent }
+                        if percent >= 100 && tokio::time::Instant::now() < deadline =>
+                    {
+                        tokio::time::sleep(MODEL_POLL).await;
+                    }
+                    other => break other,
+                }
+            };
+            match readiness {
+                Readiness::Ready => reranker = Some(self.worker.models().reranker(&settings)),
+                Readiness::Loading { percent } => {
+                    history::applied_field(
+                        "rerank_fallback_reason",
+                        serde_json::json!("model_loading"),
+                    );
+                    skipped_rerank = Some(format!(
+                        "rerank-модель ещё скачивается или грузится ({percent} %): выдача без rerank"
+                    ));
+                }
+                Readiness::Failed(failure) => {
+                    history::applied_field(
+                        "rerank_fallback_reason",
+                        serde_json::json!("model_unavailable"),
+                    );
+                    skipped_rerank = Some(failure.message);
+                }
+            }
+        }
         // «Новые темы»: допуск и область определяются до поиска, чтобы очистка списка во время
         // поиска отклонила запоздавшее наблюдение. Диагностика и CLI спроса не создают.
         let context = crate::new_topics::current_context();
@@ -344,30 +426,7 @@ impl WorkerHandler {
         // пока поиски дочитают (`worker.md`, «Индекс проекта в воркере»).
         let project_gate = self.worker.gate(&project).map_err(worker_error)?;
         let gate = project_gate.clone().read_owned().await;
-        // Rerank-модель, пока она скачивается или грузится, поиск тоже не ждёт: выдача идёт без неё.
-        let mut skipped_rerank = None;
-        let mut reranker = None;
-        if settings.rerank.enabled {
-            match self.worker.models().rerank_readiness(&settings) {
-                Readiness::Ready => reranker = Some(self.worker.models().reranker(&settings)),
-                Readiness::Loading { percent } => {
-                    history::applied_field(
-                        "rerank_fallback_reason",
-                        serde_json::json!("model_loading"),
-                    );
-                    skipped_rerank = Some(format!(
-                        "rerank-модель ещё скачивается или грузится ({percent} %): выдача без rerank"
-                    ));
-                }
-                Readiness::Failed(failure) => {
-                    history::applied_field(
-                        "rerank_fallback_reason",
-                        serde_json::json!("model_unavailable"),
-                    );
-                    skipped_rerank = Some(failure.message);
-                }
-            }
-        }
+        let graph_requested = graph_budgets.is_some();
         let datasets = self.graph_cache.clone();
         let response = tokio::task::spawn_blocking(move || {
             let _gate = gate;
@@ -376,7 +435,8 @@ impl WorkerHandler {
             let reranker = reranker.as_mut().map(|model| model as &mut dyn Reranker);
             let mut related = None;
             let mut fallback = None;
-            let result = if let Some(budgets) = graph_budgets {
+            // Без вектора запроса связанные источники не добавляются (нет косинуса кандидатов).
+            let result = if let Some(budgets) = graph_budgets.filter(|_| semantic) {
                 let graph_started = std::time::Instant::now();
                 let timeout = budgets
                     .resolve()
@@ -433,22 +493,45 @@ impl WorkerHandler {
                                 Err(error) => Err(error),
                             }
                         };
-                        bars_core::search::search_expanded(
+                        search_with_signals(
                             &index,
                             &mut embedder,
                             reranker,
                             &settings.search,
                             &request,
                             Some(&mut expand),
+                            true,
                         )
                     }
                     Err(error) => {
                         fallback = Some(error.to_string());
-                        search(&index, &mut embedder, reranker, &settings.search, &request)
+                        search_with_signals(
+                            &index,
+                            &mut embedder,
+                            reranker,
+                            &settings.search,
+                            &request,
+                            None,
+                            true,
+                        )
                     }
                 }
             } else {
-                search(&index, &mut embedder, reranker, &settings.search, &request)
+                if graph_requested {
+                    fallback = Some(
+                        "Связанные источники не выданы: смысловая близость не учтена, модель загружается"
+                            .into(),
+                    );
+                }
+                search_with_signals(
+                    &index,
+                    &mut embedder,
+                    reranker,
+                    &settings.search,
+                    &request,
+                    None,
+                    semantic,
+                )
             };
             result.map(|result| (result, related, fallback))
         })
@@ -479,15 +562,19 @@ impl WorkerHandler {
         applied.scope = scope;
         let output = SearchOutput {
             results: response.hits.into_iter().map(hit).collect(),
+            understood: understood(response.understood),
             applied,
             by_module,
             indexing: status.state == ProjectState::Indexing || status.queued,
             pending: to_u32(status.pending),
             rerank_error,
+            semantic_error: (!semantic).then(|| SEMANTIC_UNAVAILABLE.to_string()),
         };
         // Только успешный поиск с нулём результатов при готовом индексе без известной ошибки обновления
         // (NT-02): индексация, очередь и техническая ошибка пробелом не считаются.
+        // Выдача без смысловой части пробелом знаний не считается: пустой результат мог дать вектор.
         if let Some((generation, event_id, space, text, scope, project)) = topic_source
+            && semantic
             && output.results.is_empty()
             && related.is_none()
             && status.state == ProjectState::Ready
@@ -646,6 +733,7 @@ impl WorkerHandler {
             } else {
                 self.modules(&path, &docs_root).await?
             };
+            let nested = self.worker.nested_projects(&path, false);
             return Ok(ProjectsOutput {
                 projects: vec![ProjectInfo {
                     path: path.display().to_string(),
@@ -653,6 +741,7 @@ impl WorkerHandler {
                     docs_root,
                     state,
                     modules,
+                    nested,
                 }],
             });
         }
@@ -676,6 +765,7 @@ impl WorkerHandler {
             docs_root: snapshot.docs_root,
             state: snapshot.state,
             modules,
+            nested: self.worker.nested_projects(&snapshot.path, false),
         }
     }
 
@@ -1559,6 +1649,17 @@ fn score_kind(kind: bars_core::search::ScoreKind) -> ScoreKind {
     match kind {
         bars_core::search::ScoreKind::Rerank => ScoreKind::Rerank,
         bars_core::search::ScoreKind::Cosine => ScoreKind::Cosine,
+        bars_core::search::ScoreKind::None => ScoreKind::None,
+    }
+}
+
+/// Результат `similar`: кусок без баллов по сигналам и без счёта кусков раздела.
+fn similar_hit(found: bars_core::search::SearchHit) -> SearchHit {
+    SearchHit {
+        signals: None,
+        parts: 0,
+        parts_found: 0,
+        ..hit(found)
     }
 }
 
@@ -1576,6 +1677,15 @@ fn hit(hit: bars_core::search::SearchHit) -> SearchHit {
         text: hit.text,
         score: hit.score,
         score_kind: score_kind(hit.score_kind),
+        signals: Some(bars_protocol::HitSignals {
+            rerank: hit.signals.rerank,
+            cosine: hit.signals.cosine,
+            fulltext: hit.signals.fulltext,
+            exact: hit.signals.exact,
+            links: hit.signals.links,
+        }),
+        parts: to_u32(hit.parts),
+        parts_found: to_u32(hit.parts_found),
     }
 }
 
@@ -1650,5 +1760,30 @@ fn applied(applied: bars_core::search::AppliedParams) -> AppliedParams {
         score_kind: score_kind(applied.score_kind),
         clamped: applied.clamped,
         scope: Default::default(),
+        weights: bars_protocol::ScoreWeights {
+            cosine: applied.weights.cosine,
+            fulltext: applied.weights.fulltext,
+            exact: applied.weights.exact,
+            links: applied.weights.links,
+            fold_bonus: applied.weights.fold_bonus,
+        },
+        signals: applied
+            .signals
+            .iter()
+            .map(|name| (*name).to_string())
+            .collect(),
     }
+}
+
+/// «Понято как»: запрос, разобранный на операторы; без операторов — `None`.
+fn understood(parsed: bars_core::search::ParsedQuery) -> Option<bars_protocol::UnderstoodQuery> {
+    parsed
+        .has_operators()
+        .then(|| bars_protocol::UnderstoodQuery {
+            text: parsed.text,
+            phrases: parsed.phrases,
+            excluded_words: parsed.excluded_words,
+            excluded_phrases: parsed.excluded_phrases,
+            paths: parsed.paths,
+        })
 }

@@ -441,6 +441,16 @@ pub struct BrokenLink {
     pub reason: String,
 }
 
+/// Часть документа для частичного обновления графа (схема v3, `graph_parts`): ссылка, якорь,
+/// вклад в узел сущности, битая ссылка. Хранится с источником и удаляется вместе с ним.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Part {
+    pub source_path: String,
+    pub kind: String,
+    pub key: String,
+    pub data: String,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Dataset {
     pub namespace: String,
@@ -459,6 +469,9 @@ pub struct Dataset {
     #[serde(default = "legacy_similarity_state")]
     pub similarity_state: LayerState,
     pub warnings: Vec<String>,
+    /// Части документов; заполняет сборка, читатели набора их не загружают.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub parts: Vec<Part>,
 }
 
 impl Dataset {
@@ -477,6 +490,7 @@ impl Dataset {
             semantic_state: LayerState::Partial,
             similarity_state: LayerState::NotBuilt,
             warnings: vec![],
+            parts: vec![],
         }
     }
     pub fn fingerprint(&mut self) {

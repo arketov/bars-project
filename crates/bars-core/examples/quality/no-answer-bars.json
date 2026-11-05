@@ -1,0 +1,240 @@
+[
+  {
+    "id": "bn-01",
+    "split": "tune",
+    "category": "negative",
+    "query": "рецепт борща с говядиной и свёклой",
+    "gold": []
+  },
+  {
+    "id": "bn-02",
+    "split": "test",
+    "category": "negative",
+    "query": "как оформить возврат товара в интернет-магазине",
+    "gold": []
+  },
+  {
+    "id": "bn-03",
+    "split": "tune",
+    "category": "negative",
+    "query": "расписание электричек до Твери по выходным",
+    "gold": []
+  },
+  {
+    "id": "bn-04",
+    "split": "test",
+    "category": "negative",
+    "query": "чем лечить простуду у ребёнка без температуры",
+    "gold": []
+  },
+  {
+    "id": "bn-05",
+    "split": "tune",
+    "category": "negative",
+    "query": "курс доллара к рублю на сегодня",
+    "gold": []
+  },
+  {
+    "id": "bn-06",
+    "split": "test",
+    "category": "negative",
+    "query": "почему не печатает принтер после обновления Windows",
+    "gold": []
+  },
+  {
+    "id": "bn-07",
+    "split": "tune",
+    "category": "negative",
+    "query": "правила дорожного движения для велосипедистов",
+    "gold": []
+  },
+  {
+    "id": "bn-08",
+    "split": "test",
+    "category": "negative",
+    "query": "тарифы на электричество для юридических лиц",
+    "gold": []
+  },
+  {
+    "id": "bn-09",
+    "split": "tune",
+    "category": "negative",
+    "query": "прогноз погоды в Казани на выходные",
+    "gold": []
+  },
+  {
+    "id": "bn-10",
+    "split": "test",
+    "category": "negative",
+    "query": "как написать резюме для собеседования",
+    "gold": []
+  },
+  {
+    "id": "bn-11",
+    "split": "tune",
+    "category": "negative",
+    "query": "рекомендации по уходу за кактусами зимой",
+    "gold": []
+  },
+  {
+    "id": "bn-12",
+    "split": "test",
+    "category": "negative",
+    "query": "как получить налоговый вычет за лечение зубов",
+    "gold": []
+  },
+  {
+    "id": "bn-13",
+    "split": "tune",
+    "category": "negative",
+    "query": "как составить договор аренды квартиры",
+    "gold": []
+  },
+  {
+    "id": "bn-14",
+    "split": "test",
+    "category": "negative",
+    "query": "сколько витамина D нужно взрослому в день",
+    "gold": []
+  },
+  {
+    "id": "bn-15",
+    "split": "tune",
+    "category": "negative",
+    "query": "как сварить гречку рассыпчатой",
+    "gold": []
+  },
+  {
+    "id": "bn-16",
+    "split": "test",
+    "category": "negative",
+    "query": "какая ставка по ипотеке у банков сейчас",
+    "gold": []
+  },
+  {
+    "id": "bn-17",
+    "split": "tune",
+    "category": "negative",
+    "query": "какие документы нужны для визы в Испанию",
+    "gold": []
+  },
+  {
+    "id": "bn-18",
+    "split": "test",
+    "category": "negative",
+    "query": "лучшие фильмы про космос за последние годы",
+    "gold": []
+  },
+  {
+    "id": "bn-19",
+    "split": "tune",
+    "category": "negative",
+    "query": "как подключить bars к Telegram-боту для уведомлений",
+    "gold": []
+  },
+  {
+    "id": "bn-20",
+    "split": "test",
+    "category": "negative",
+    "query": "как включить двухфакторную аутентификацию в bars",
+    "gold": []
+  },
+  {
+    "id": "bn-21",
+    "split": "tune",
+    "category": "negative",
+    "query": "голосовой ввод запросов в поиске",
+    "gold": []
+  },
+  {
+    "id": "bn-22",
+    "split": "test",
+    "category": "negative",
+    "query": "одновременная правка одного документа несколькими людьми",
+    "gold": []
+  },
+  {
+    "id": "bn-23",
+    "split": "tune",
+    "category": "negative",
+    "query": "автоответчик для входящих писем в почте",
+    "gold": []
+  },
+  {
+    "id": "bn-24",
+    "split": "test",
+    "category": "negative",
+    "query": "как bars хранит данные в MongoDB",
+    "gold": []
+  },
+  {
+    "id": "bn-25",
+    "split": "tune",
+    "category": "negative",
+    "query": "кэширование поисковых запросов через Redis",
+    "gold": []
+  },
+  {
+    "id": "bn-26",
+    "split": "test",
+    "category": "negative",
+    "query": "интеграция bars с Jira и Slack",
+    "gold": []
+  },
+  {
+    "id": "bn-27",
+    "split": "tune",
+    "category": "negative",
+    "query": "синхронизация заметок с Google Календарём",
+    "gold": []
+  },
+  {
+    "id": "bn-28",
+    "split": "test",
+    "category": "negative",
+    "query": "горячая линия поддержки bars по телефону",
+    "gold": []
+  },
+  {
+    "id": "bn-29",
+    "split": "tune",
+    "category": "negative",
+    "query": "как посмотреть зарплату сотрудника в отчёте",
+    "gold": []
+  },
+  {
+    "id": "bn-30",
+    "split": "test",
+    "category": "negative",
+    "query": "где купить авиабилеты подешевле",
+    "gold": []
+  },
+  {
+    "id": "bn-31",
+    "split": "tune",
+    "category": "negative",
+    "query": "результаты вчерашнего матча по футболу",
+    "gold": []
+  },
+  {
+    "id": "bn-32",
+    "split": "test",
+    "category": "negative",
+    "query": "история изменений документа как в Git",
+    "gold": []
+  },
+  {
+    "id": "bn-33",
+    "split": "tune",
+    "category": "negative",
+    "query": "перевод документов машинным переводчиком в реальном времени",
+    "gold": []
+  },
+  {
+    "id": "bn-34",
+    "split": "test",
+    "category": "negative",
+    "query": "схема GraphQL API для bars",
+    "gold": []
+  }
+]

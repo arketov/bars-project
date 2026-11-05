@@ -308,6 +308,21 @@
         <div class="group">
           <div class="ghead"><div class="grow"><h2>Порог релевантности</h2><p>Результаты с оценкой ниже порога не попадают в выдачу — ни окну, ни агенту, ни CLI.</p></div></div>
           <div class="gbody">
+            <div class="field"><div class="lbl"><b>Порог</b><small>Один порог на главный сигнал — оценку модели, без неё близость <code>min_score</code></small></div><div><ScoreInput bind:value={draft.search.min_score} label="Порог релевантности" />{#if errors["search.min_score"]}<small class="err">{errors["search.min_score"]}</small>{/if}</div></div>
+            <div class="field">
+              <div class="lbl"><b>Пределы для агента</b><small>Больше агент запросить не может <code>max_results · max_candidates · max_rerank_candidates</code></small></div>
+              <div class="pair">
+                <input class="inp" type="number" min="1" aria-label="max_results" bind:value={draft.search.max_results} /> ·
+                <input class="inp" type="number" min="1" aria-label="max_candidates" bind:value={draft.search.max_candidates} /> ·
+                <input class="inp" type="number" min="1" aria-label="max_rerank_candidates" bind:value={draft.search.max_rerank_candidates} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="ghead"><div class="grow"><h2>Порог релевантности</h2><p>Результаты с оценкой ниже порога не попадают в выдачу — ни окну, ни агенту, ни CLI.</p></div></div>
+          <div class="gbody">
             <div class="field"><div class="lbl"><b>С реранком</b><small>Оценка реранка <code>min_score_rerank</code></small></div><div><ScoreInput bind:value={draft.search.min_score_rerank} label="Порог с реранком" />{#if errors["search.min_score_rerank"]}<small class="err">{errors["search.min_score_rerank"]}</small>{/if}</div></div>
             <div class="field"><div class="lbl"><b>Без реранка</b><small>Косинусная близость <code>min_score_vector</code></small></div><div><ScoreInput bind:value={draft.search.min_score_vector} label="Порог без реранка" />{#if errors["search.min_score_vector"]}<small class="err">{errors["search.min_score_vector"]}</small>{/if}</div></div>
             <div class="field">

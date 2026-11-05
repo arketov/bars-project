@@ -169,8 +169,7 @@ pub fn to_doc(user: &UserSettings) -> SettingsDoc {
             rerank_candidates: count(search.rerank_candidates),
             results: count(search.results),
             results_reranked: count(search.results_reranked),
-            min_score_vector: search.min_score_vector,
-            min_score_rerank: search.min_score_rerank,
+            min_score: search.min_score,
             agent_min_score: [search.agent_min_score.0, search.agent_min_score.1],
             max_results: count(search.max_results),
             max_candidates: count(search.max_candidates),
@@ -414,18 +413,15 @@ fn write_user_settings(
         new.results_reranked,
         was.results_reranked,
     );
-    set_score(
-        search,
-        "min_score_vector",
-        new.min_score_vector,
-        was.min_score_vector,
-    );
-    set_score(
-        search,
-        "min_score_rerank",
-        new.min_score_rerank,
-        was.min_score_rerank,
-    );
+    // Прежние пороги переносятся в единый `min_score`: при сохранении ключи убираются, а значение,
+    // которое загрузка уже вывела из них, записывается явно.
+    if search.contains_key("min_score_vector") || search.contains_key("min_score_rerank") {
+        search.insert("min_score", value(round4(new.min_score)));
+        search.remove("min_score_vector");
+        search.remove("min_score_rerank");
+    } else {
+        set_score(search, "min_score", new.min_score, was.min_score);
+    }
     if new.agent_min_score != was.agent_min_score {
         let mut range = toml_edit::Array::new();
         range.push(round4(new.agent_min_score[0]));
@@ -814,14 +810,14 @@ mod tests {
         let file = user_settings_path(home.path());
         fs::write(&file, "# мои заметки\n[search]\nresults = 7 # люблю семь\n").unwrap();
         let mut doc = current(home.path());
-        doc.search.min_score_rerank = 0.35;
+        doc.search.min_score = 0.35;
         doc.rerank.enabled = true;
         assert!(save_user_settings(home.path(), &doc).unwrap());
 
         let text = fs::read_to_string(&file).unwrap();
         assert!(text.contains("# мои заметки"));
         assert!(text.contains("results = 7 # люблю семь"));
-        assert!(text.contains("min_score_rerank = 0.35"), "{text}");
+        assert!(text.contains("min_score = 0.35"), "{text}");
         assert!(text.contains("enabled = true"));
         assert!(
             !text.contains("candidates"),
