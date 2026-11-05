@@ -15,13 +15,16 @@ title: Передача — аудит противоречий без шума 
   - шаблоны, повторённые в трёх местах и больше.
   Единицы времени и размера приводятся к основной. `swap` срабатывает, только когда разошлось одно значение и близость ≥ 0,6. Тесты обновлены и добавлены. Решения автора: OQ-292 (сузить; эвристика без настроек), OQ-293 (исключать пары внутри документа).
 - Документы: `features/knowledge-base/audits.md`, `manual/audits.md`, `knowledge/contradictions.md`, ISS-108.
-- Skill `bars-docs` (`crates/bars-worker/assets/skills/bars-docs/SKILL.md`): раздел «bars for the whole task, not only the first step» и новое описание. Правило записано в свод П-18 (`features/docs-convention/bars-instruction.md`) и в `delivery.md`; ISS-109.
+- Skill `bars-docs` (`crates/bars-worker/assets/skills/bars-docs/SKILL.md`): раздел «bars for the whole task, not only the first step» и новое описание. Правило записано в свод П-18 (`features/docs-convention/bars-instruction.md`) и в `delivery.md`; ISS-109. По слову автора поиск у bars один — `bars_rag_search`: скиллы `bars-docs` и `bars-end`, обе копии `BARS_INSTRUCTION.md` и П-6 больше не отправляют за словами, именами и номерами в `bars_text_search`.
+- `bars_text_search` принимает только узкий запрос (`crates/bars-worker/src/text_search/breadth.rs`, разбор AST `regex-syntax`): литерал от 3 знаков, regex до 256 байт, до 4 веток `|`, группы до 2 уровней, без повтора в повторе, до 2 неограниченных повторов, счётчик до 64, обязательный кусок от 3 знаков в каждой ветке. Иначе — ошибка `too_broad` с отсылкой к `bars_rag_search`; MCP показывает вид из `data.kind`. Пределы спроектировал субагент-архитектор (Opus) по поручению автора; контракт — `features/agent-tools/mcp-tools.md`.
 
 ## Не сделано
 
 - Сборка, `cargo test`, clippy и `check.ps1` не запускались (запрет автора). Проверены только форматирование и разбор файла `rustfmt --check`.
 - Повторный запуск аудита на bars, overdrive-bots и iterion не сделан: в установленной версии старый код.
-- П-18 есть только в `bars-docs`: в `BARS_INSTRUCTION.md`, `initialize` и гейте его нет; гейт по-прежнему снимается первым вызовом bars.
+- П-18 нет в `initialize` и гейте; гейт по-прежнему снимается первым вызовом bars.
+- Тесты `breadth_*`, обновлённые тесты аудита и MCP-сценарий `too_broad` написаны, но не запускались; `Cargo.lock` поправлен вручную (строка `regex-syntax` у `bars-worker`).
+- `docs/BARS_INSTRUCTION.md` в рабочей копии перезаписывает установленный воркер своей старой версией; новая версия закоммичена через индекс git и появится на диске после установки новой сборки.
 
 ## Сложности
 
@@ -30,4 +33,5 @@ title: Передача — аудит противоречий без шума 
 ## Дальше
 
 - После разрешения на сборку прогнать тесты `audits::contradictions` и перезапустить аудит противоречий на трёх проектах. Ожидание: единицы находок вместо сотен.
-- Решить, нужна ли П-18 в `initialize`, BI или гейте, и нужна ли сводка в `bars_audit_findings`.
+- Решить, нужна ли П-18 в `initialize` или гейте, и нужна ли сводка в `bars_audit_findings`.
+- Архитектор отметил: `features/search/hybrid-search.md` («точное определение требования ищется через `bars_text_search`») расходится с ADR-0007 — поправить отдельно.

@@ -13,6 +13,7 @@ test-support = []
 log.workspace = true
 blake3.workspace = true
 regex.workspace = true
+regex-syntax.workspace = true
 rayon.workspace = true
 bars-core.workspace = true
 bars-protocol.workspace = true

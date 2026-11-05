@@ -62,6 +62,8 @@ impl WorkerHandler {
         if let Some(path) = &p.path {
             document_path(path)?;
         }
+        // Агенту — только одна конкретная строка; широкий шаблон уходит в bars_rag_search (ISS-109).
+        crate::text_search::breadth::check(&p.query, p.regex)?;
         let project = self.resolve(&p.target)?;
         let docs = self.worker.docs_root(&project).map_err(worker_error)?;
         let continued = p

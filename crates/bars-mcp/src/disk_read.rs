@@ -9,7 +9,7 @@ pub(super) fn router() -> ToolRouter<BarsMcp> {
 pub struct TextArgs {
     pub project: Option<String>,
     pub format: Option<Format>,
-    /// Литерал или регулярное выражение; поиск по сохранённым .md без модели.
+    /// Одна конкретная строка: литерал или узкий regex; широкий поиск — bars_rag_search.
     pub query: String,
     #[serde(default)]
     pub case_sensitive: bool,
@@ -55,7 +55,7 @@ impl BarsMcp {
     #[tool(
         name = "bars_text_search",
         annotations(read_only_hint = true),
-        description = "Точные вхождения в сохранённых .md с диска: литерал/regex, регистр, область. Не требует embed; не видит несохранённый редактор. До пяти вхождений на документ; продолжение одного документа через path/offset/revision. При усечении totals — нижняя граница; общей пагинации документов нет, сузьте область. Смысловой поиск — bars_rag_search."
+        description = "Все вхождения одной конкретной строки в сохранённых .md с диска: переименование, полный список, текст до индексации; без embed, не видит несохранённый редактор. Литерал от 3 знаков с буквой или цифрой; regex до 256 байт: до 4 веток |, группы до 2 уровней, без повтора в повторе, до 2 из * + {n,}, счётчик до 64, в каждой ветке кусок от 3 знаков. Иначе too_broad: широкий поиск — bars_rag_search (\"фраза\", -слово, path:). До 5 вхождений на документ; продолжение path/offset/revision; при усечении totals — нижняя граница."
     )]
     async fn bars_text_search(
         &self,

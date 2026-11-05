@@ -100,8 +100,23 @@ async fn disk_reads_freshness_continuation_scope_and_history() {
             .await
             .0
     );
+    let (bad, bad_text) = mcp
+        .tool("bars_text_search", json!({"query":"[","regex":true}))
+        .await;
+    assert!(bad && bad_text.contains("invalid_regex"), "{bad_text}");
+    // Широкий шаблон — ошибка too_broad с отсылкой к единому поиску (ISS-109).
+    let (broad, broad_text) = mcp
+        .tool(
+            "bars_text_search",
+            json!({"query":"foo|bar|baz|qux|quux","regex":true}),
+        )
+        .await;
     assert!(
-        mcp.tool("bars_text_search", json!({"query":"[","regex":true}))
+        broad && broad_text.contains("too_broad") && broad_text.contains("bars_rag_search"),
+        "{broad_text}"
+    );
+    assert!(
+        !mcp.tool("bars_text_search", json!({"query":r"свеж\w+","regex":true}))
             .await
             .0
     );

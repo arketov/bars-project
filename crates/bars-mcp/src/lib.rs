@@ -540,7 +540,16 @@ fn json<T: Serialize>(output: &T) -> String {
 fn failure(error: &ClientError) -> CallToolResult {
     let mut message = match error {
         ClientError::Rpc(rpc) => match rpc.kind() {
-            Some(kind) => format!("Ошибка bars ({}): {}", kind.name(), rpc.message),
+            // Уточнённый вид из `data.kind` (`too_broad`, `invalid_regex`) говорит агенту больше кода.
+            Some(kind) => format!(
+                "Ошибка bars ({}): {}",
+                rpc.data
+                    .as_ref()
+                    .and_then(|d| d.get("kind"))
+                    .and_then(serde_json::Value::as_str)
+                    .unwrap_or(kind.name()),
+                rpc.message
+            ),
             None => format!("Ошибка bars: {}", rpc.message),
         },
         other => format!("Ошибка bars: {other}"),

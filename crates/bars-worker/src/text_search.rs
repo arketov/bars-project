@@ -1,4 +1,6 @@
 //! Т-39: ограниченный поиск по свежим файлам. Нет доступа к индексу или моделям.
+pub mod breadth;
+
 use bars_core::indexing::walk::{DocFile, read_utf8};
 use bars_protocol::{
     ErrorKind, RpcError, TextDocument, TextHit, TextSearchOutput, TextSearchParams, TextSkipped,

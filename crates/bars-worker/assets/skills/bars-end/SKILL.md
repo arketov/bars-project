@@ -55,10 +55,10 @@ Rows marked «propose only» are not edited without the user's yes in this conve
 
 For each fact:
 
-1. Find the document that owns the topic: `bars_rag_search` with a subject question, `bars_text_search` for an exact name, number or value, `bars_read` or `bars_outline` for a known path.
+1. Find the document that owns the topic: `bars_rag_search` with a subject question or the exact name, number or value in quotes, `bars_read` or `bars_outline` for a known path.
 2. Before adding text, check that the description does not already exist elsewhere (`bars_get_similar` on a hit). Edit the owner; create a new file only for a new topic, and list it in its folder's `Index.md`.
 3. The document describes the current state: replace outdated statements, do not append corrections. Update the status line at the top: what is verified and how, what is not.
-4. Search the whole documentation for old names, values and claims the session made obsolete (`bars_text_search` first, then a subject search). Fix or delete every stale repeat, or link to the owner instead of repeating it.
+4. Search the whole documentation for old names, values and claims the session made obsolete (`bars_rag_search` with the old name or value in quotes, then `bars_text_search` for the complete list of its occurrences). Fix or delete every stale repeat, or link to the owner instead of repeating it.
 
 Keep the scope to what the session touched and its stale repeats. A full audit of the project documentation is a separate task; suggest it if you saw many problems.
 
