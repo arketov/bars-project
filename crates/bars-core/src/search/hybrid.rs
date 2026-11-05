@@ -748,6 +748,134 @@ pub fn candidate_trace(
     Ok(lists)
 }
 
+/// Кандидат пула с сырыми баллами сигналов: вход подбора весов схемы баллов (шаг 2.3.7).
+#[doc(hidden)]
+#[derive(Debug, Clone)]
+pub struct PoolCandidate {
+    /// Чанк с документом; `score` и `signals` не заполнены.
+    pub hit: SearchHit,
+    /// `c`; `None`, когда вектора запроса нет.
+    pub cosine: Option<f32>,
+    /// `f`.
+    pub fulltext: f32,
+    /// `p`.
+    pub exact: f32,
+    /// `r`: rerank оценивает весь пул, а не первые `rerank_candidates`; `None` — без rerank или
+    /// при его ошибке.
+    pub rerank: Option<f32>,
+    /// Место (с нуля) в полнотекстовом списке пула; `None` — кандидата в нём не было.
+    pub text_rank: Option<usize>,
+    /// Место (с нуля) в векторном списке пула.
+    pub vector_rank: Option<usize>,
+}
+
+/// Пул кандидатов запроса со всеми сырыми сигналами, до порога, свёртки и сложения баллов.
+#[doc(hidden)]
+#[derive(Debug, Clone)]
+pub struct PoolDump {
+    /// По убыванию предварительной оценки `S0` с весами из настроек.
+    pub candidates: Vec<PoolCandidate>,
+    pub rerank_error: Option<String>,
+    pub understood: ParsedQuery,
+}
+
+/// Те же шаги, что у `search_with_links` до сложения баллов, но rerank получает весь пул: по этим
+/// данным бенч подбирает веса вне поиска и воспроизводит выбор первых `rerank_candidates` при любых
+/// весах. Используется только бенчем.
+#[doc(hidden)]
+pub fn scored_pool(
+    index: &Index,
+    embedder: &mut dyn Embedder,
+    reranker: Option<&mut dyn Reranker>,
+    settings: &SearchSettings,
+    request: &SearchRequest,
+) -> Result<PoolDump, SearchError> {
+    let _snapshot = if index.conn().is_autocommit() {
+        Some(index.conn().unchecked_transaction()?)
+    } else {
+        None
+    };
+    if matches!(
+        index.compatibility(embedder.fingerprint())?,
+        Compatibility::ModelChanged | Compatibility::SchemaOutdated
+    ) {
+        return Err(SearchError::ReindexRequired);
+    }
+    if index.stem_outdated()? {
+        return Err(SearchError::FtsRebuilding);
+    }
+    let plan = QueryPlan::build(index, &request.query)?;
+    let scope = Scope::build_with_paths(index, request, &plan.parsed.paths)?;
+    let planned = settings.resolve(request, reranker.is_some());
+    if scope.chunk_count(index)? == 0 {
+        return Ok(PoolDump {
+            candidates: Vec::new(),
+            rerank_error: None,
+            understood: plan.parsed,
+        });
+    }
+    let mut vector = embedder.embed_query(&plan.parsed.text)?;
+    let expected = embedder.fingerprint().dim;
+    if vector.len() != expected {
+        return Err(EmbedError::Dimension {
+            expected,
+            got: vector.len(),
+        }
+        .into());
+    }
+    normalize(&mut vector);
+    let gathered = gather(
+        index,
+        &scope,
+        &plan,
+        Some(&vector),
+        planned.candidates,
+        &planned.weights,
+        None,
+    )?;
+    let mut rerank_error = None;
+    let mut rerank_scores = HashMap::new();
+    if let Some(reranker) = reranker {
+        match rerank_scores_of(
+            index,
+            reranker,
+            &plan.parsed.text,
+            &gathered,
+            gathered.pool.len(),
+        ) {
+            Ok(scores) => rerank_scores = scores,
+            Err(error) => rerank_error = Some(error.to_string()),
+        }
+    }
+    let rank_in = |ids: &[i64]| -> HashMap<i64, usize> {
+        ids.iter()
+            .enumerate()
+            .map(|(place, id)| (*id, place))
+            .collect()
+    };
+    let (text_rank, vector_rank) = (rank_in(&gathered.text_ids), rank_in(&gathered.vector_ids));
+    let hits = load_hits(index, &gathered.ids())?;
+    let candidates = gathered
+        .pool
+        .iter()
+        .zip(hits)
+        .map(|(candidate, hit)| PoolCandidate {
+            cosine: candidate.cosine,
+            fulltext: candidate.fulltext,
+            exact: candidate.exact,
+            rerank: rerank_scores.get(&candidate.id).copied(),
+            text_rank: text_rank.get(&candidate.id).copied(),
+            vector_rank: vector_rank.get(&candidate.id).copied(),
+            hit,
+        })
+        .collect();
+    Ok(PoolDump {
+        candidates,
+        rerank_error,
+        understood: plan.parsed,
+    })
+}
+
 fn normalize(vector: &mut [f32]) {
     let norm = vector.iter().map(|x| x * x).sum::<f32>().sqrt();
     if norm > 0.0 {

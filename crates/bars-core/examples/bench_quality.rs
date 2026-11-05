@@ -11,13 +11,13 @@ use bars_core::models::{
 };
 use bars_core::link_index::LinkIndex;
 use bars_core::search::{
-    ParsedQuery, ScoreWeights, SearchError, SearchRequest, SearchSettings, candidate_trace, search,
-    search_with_links,
+    ParsedQuery, ScoreWeights, SearchError, SearchRequest, SearchSettings, candidate_trace,
+    scored_pool, search, search_with_links,
 };
 use bars_core::storage::{DocumentRecord, Index, Journal};
 use quality::{Row, digest, file_digest, load_cases, pack_hits, validate_cases};
 use serde_json::json;
-use std::collections::{BTreeSet, HashSet};
+use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fs::{self, File, OpenOptions};
 use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
@@ -38,8 +38,9 @@ fn main() -> Result<()> {
             eprintln!("валидно вопросов: {}",cases.len()); Ok(())
         }
         Some("run") if a.len()==10 || a.len()==11 => run(&a),
+        Some("dump") if a.len() == 7 || a.len() == 8 => dump(&a),
         Some("verify") if a.len()==3 => verify_vectors(Path::new(&a[1]), Path::new(&a[2])),
-        _ => Err("prepare <source-project> <new-workspace> <models> [A|B|C|D] [seed-index|-] | validate <snapshot-project> <cases.json> | verify <workspace> <models> | run <workspace> <cases.json> <models> <output-dir> <split> <candidates-csv> <K-csv> <repeats> <auto|cpu> [all|gold|first|nochats]".into())
+        _ => Err("prepare <source-project> <new-workspace> <models> [A|B|C|D] [seed-index|-] | validate <snapshot-project> <cases.json> | verify <workspace> <models> | dump <workspace> <cases.json> <models> <out.jsonl> <auto|cpu> <tag> [paths] | run <workspace> <cases.json> <models> <output-dir> <split> <candidates-csv> <K-csv> <repeats> <auto|cpu> [all|gold|first|nochats]".into())
     }
 }
 
@@ -542,6 +543,183 @@ fn run(a: &[String]) -> Result<()> {
                     );
                 }
             }
+        }
+    }
+    Ok(())
+}
+
+/// Шаг 2.3.7. По каждому запросу набора пишет в `<out.jsonl>` пул кандидатов со всеми сырыми
+/// сигналами (rerank оценивает весь пул), соответствие эталону, связи документов пула и время
+/// моделей; веса и порог схемы баллов подбираются по этому файлу вне поиска
+/// (`docs/knowledge/search-scores.md`). Запрос с операторами идёт ещё раз без них (`paired`).
+/// Рабочий каталог — как у `run`: `index.sqlite` и `project/` со снимком документов. Без слова
+/// `paths` в строках нет путей и заголовков (документы закрытых проектов). Запись дописывается,
+/// выполненные запросы пропускаются.
+fn dump(a: &[String]) -> Result<()> {
+    let workspace = Path::new(&a[1]);
+    let cases = load_cases(Path::new(&a[2]))?;
+    let models = Path::new(&a[3]);
+    let out_path = Path::new(&a[4]);
+    let accelerator = match a[5].as_str() {
+        "cpu" => Accelerator::Cpu,
+        "auto" => Accelerator::Auto,
+        _ => return Err("устройство: auto/cpu".into()),
+    };
+    let tag = &a[6];
+    let with_paths = a.get(7).is_some_and(|word| word == "paths");
+    let index = Index::open(&workspace.join("index.sqlite"), Journal::Delete)?;
+    let mut completed = HashSet::new();
+    if out_path.exists() {
+        for line in BufReader::new(File::open(out_path)?).lines() {
+            let row: serde_json::Value = serde_json::from_str(&line?)?;
+            completed.insert(format!(
+                "{}:{}",
+                row["id"].as_str().unwrap_or_default(),
+                row["mode"].as_str().unwrap_or_default()
+            ));
+        }
+    }
+    let mut output = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(out_path)?;
+    let mut model = BuiltinEmbedder::bge_m3(models, accelerator)?;
+    let mut rr = BuiltinReranker::bge_reranker_v2_m3(models, accelerator)?;
+    let project_root = workspace.join("project");
+    let mut link_index = LinkIndex::open(&project_root)?;
+    link_index.refresh(&project_root, Path::new("docs"))?;
+    let settings = SearchSettings::default();
+    for (number, case) in cases.iter().enumerate() {
+        let mut runs = vec![("search", case.query.clone())];
+        if case.operators.is_some() {
+            runs.push(("paired", ParsedQuery::parse(&case.query).text));
+        }
+        for (mode, query) in runs {
+            if completed.contains(&format!("{}:{mode}", case.id)) {
+                continue;
+            }
+            let request = SearchRequest {
+                query,
+                ..Default::default()
+            };
+            let mut embed = TimedEmbed {
+                inner: &mut model,
+                seconds: 0.0,
+                vector: Vec::new(),
+            };
+            let mut rerank = TimedRerank {
+                inner: &mut rr,
+                seconds: 0.0,
+            };
+            let started = Instant::now();
+            let pool = match scored_pool(&index, &mut embed, Some(&mut rerank), &settings, &request)
+            {
+                Ok(pool) => pool,
+                Err(SearchError::InvalidParams(message)) => {
+                    // Например, `path:` с папкой, которой нет в этом индексе: строка с ошибкой.
+                    let row = json!({"tag":tag,"id":case.id,"mode":mode,"error":message});
+                    serde_json::to_writer(&mut output, &row)?;
+                    writeln!(output)?;
+                    output.flush()?;
+                    continue;
+                }
+                Err(error) => return Err(error.into()),
+            };
+            if let Some(error) = &pool.rerank_error {
+                return Err(format!("{} {mode}: {error}", case.id).into());
+            }
+            let seconds = started.elapsed().as_secs_f64();
+            let hits: Vec<_> = pool.candidates.iter().map(|c| c.hit.clone()).collect();
+            let mut packed = pack_hits(&hits, case);
+            // Опора эталона сверяется без различия в пробелах и переводах строк: чанк хранит текст
+            // как в файле, а опоры набора 03-11-2026 записаны с нормализованными пробелами.
+            let squeeze = |text: &str| text.split_whitespace().collect::<Vec<_>>().join(" ");
+            let evidence: Vec<String> = case.gold.iter().map(|g| squeeze(&g.evidence)).collect();
+            for (hit, packed_hit) in hits.iter().zip(packed.iter_mut()) {
+                let text = squeeze(&hit.text);
+                packed_hit.relevant = case
+                    .gold
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(i, g)| {
+                        (hit.path == g.path && text.contains(&evidence[i])).then_some(i)
+                    })
+                    .collect();
+            }
+            let mut docs: Vec<&str> = Vec::new();
+            let mut doc_of: HashMap<&str, usize> = HashMap::new();
+            let mut section_of: HashMap<(usize, &str), usize> = HashMap::new();
+            let mut places = Vec::new();
+            for candidate in &pool.candidates {
+                let path = candidate.hit.path.as_str();
+                let doc = *doc_of.entry(path).or_insert_with(|| {
+                    docs.push(path);
+                    docs.len() - 1
+                });
+                let next = section_of.len();
+                let section = *section_of
+                    .entry((doc, candidate.hit.heading_chain.as_str()))
+                    .or_insert(next);
+                places.push((doc, section));
+            }
+            let paths: Vec<String> = docs.iter().map(|path| path.to_string()).collect();
+            let mut pairs = BTreeSet::new();
+            for (i, path) in paths.iter().enumerate() {
+                let found = link_index
+                    .linked_documents(std::slice::from_ref(path), &paths)
+                    .map_err(|error| error.to_string())?;
+                for (j, other) in paths.iter().enumerate() {
+                    if i != j && found.contains(other) {
+                        pairs.insert((i.min(j), i.max(j)));
+                    }
+                }
+            }
+            let rows: Vec<serde_json::Value> = pool
+                .candidates
+                .iter()
+                .zip(&packed)
+                .zip(&places)
+                .map(|((c, hit), (doc, section))| {
+                    let mut row = json!({"i":c.hit.chunk_id,"d":doc,"s":section,"c":c.cosine,
+                        "f":c.fulltext,"p":c.exact,"r":c.rerank,"tr":c.text_rank,"vr":c.vector_rank,
+                        "rel":hit.relevant,"dr":hit.document_relevant,"ok":hit.operators_ok,
+                        "ln":[c.hit.first_line,c.hit.last_line]});
+                    if with_paths {
+                        row["h"] = json!(c.hit.heading_chain);
+                    }
+                    row
+                })
+                .collect();
+            let doc_rows: Vec<serde_json::Value> = docs
+                .iter()
+                .zip(&paths)
+                .map(|(_, path)| {
+                    let module = pool
+                        .candidates
+                        .iter()
+                        .find(|c| &c.hit.path == path)
+                        .map_or("", |c| c.hit.module.as_str());
+                    if with_paths {
+                        json!({"m":module,"path":path})
+                    } else {
+                        json!({"m":module})
+                    }
+                })
+                .collect();
+            let row = json!({"tag":tag,"id":case.id,"mode":mode,"candidates":settings.candidates,
+                "embed":embed.seconds,"rerank":rerank.seconds,"total":seconds,
+                "docs":doc_rows,"pool":rows,"links":pairs});
+            serde_json::to_writer(&mut output, &row)?;
+            writeln!(output)?;
+            output.flush()?;
+            eprintln!(
+                "{tag} {}/{} {} {mode} пул {} rerank {:.2}s",
+                number + 1,
+                cases.len(),
+                case.id,
+                pool.candidates.len(),
+                rerank.seconds
+            );
         }
     }
     Ok(())

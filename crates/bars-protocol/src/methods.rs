@@ -946,8 +946,9 @@ pub struct RerankDoc {
     pub unload_after_minutes: u32,
 }
 
+/// Как `SearchSettings::default().min_score` (замер 2.3.7).
 fn default_min_score() -> f32 {
-    0.1
+    0.2
 }
 fn default_rerank_parallel() -> u32 {
     4

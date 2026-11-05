@@ -803,11 +803,11 @@ fn rerank_threshold_filters_and_default_count_is_the_reranked_one() {
     )
     .unwrap();
 
-    // Порог реранка 0.1 оставляет единственный документ с оценкой 0.9.
+    // Порог реранка 0.2 оставляет единственный документ с оценкой 0.9.
     assert_eq!(paths(&response), ["docs/root.md"]);
     assert_eq!(response.hits[0].signals.rerank, Some(0.9));
     assert!(response.hits[0].score >= 0.9);
-    assert_eq!(response.applied.min_score, 0.1);
+    assert_eq!(response.applied.min_score, 0.2);
     assert_eq!(response.applied.results, 3);
 }
 

@@ -223,7 +223,7 @@
       {
         "path": "docs/manual/troubleshooting.md",
         "heading": "bars не находит из-за опечатки в запросе",
-        "evidence": "но «grah» не станет «graph»",
+        "evidence": "Запрос «Как работает grah» найдёт",
         "reason": "Фраза в кавычках обязательна: раздел содержит её дословно."
       }
     ],
@@ -655,7 +655,7 @@
     "id": "bo-35",
     "split": "tune",
     "category": "operator-path",
-    "query": "path:manual/models что будет если сменить embed-модель",
+    "query": "path:manual/models.md что будет если сменить embed-модель",
     "gold": [
       {
         "path": "docs/manual/models.md",
@@ -666,7 +666,7 @@
     ],
     "operators": {
       "paths": [
-        "manual/models"
+        "manual/models.md"
       ]
     }
   },
@@ -693,7 +693,7 @@
     "id": "bo-37",
     "split": "tune",
     "category": "operator-path",
-    "query": "path:manual/install path:manual/troubleshooting SmartScreen предупреждение установщика",
+    "query": "path:manual/install.md path:manual/troubleshooting.md SmartScreen предупреждение установщика",
     "gold": [
       {
         "path": "docs/manual/install.md",
@@ -710,8 +710,8 @@
     ],
     "operators": {
       "paths": [
-        "manual/install",
-        "manual/troubleshooting"
+        "manual/install.md",
+        "manual/troubleshooting.md"
       ]
     }
   },

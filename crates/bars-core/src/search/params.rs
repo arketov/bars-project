@@ -29,7 +29,10 @@ impl Default for SearchSettings {
             rerank_candidates: 15,
             results: 5,
             results_reranked: 3,
-            min_score: 0.1,
+            // Измерено шагом 2.3.7 (docs/knowledge/search-scores.md): с rerank 0,2 снижает долю
+            // ложных ответов на запросах без ответа с 15 до 9 % ценой одного запроса в Hit@3;
+            // косинус при этом пороге не режет ничего (до 0,4 почти ничего не отделяет: 87 % ложных ответов).
+            min_score: 0.2,
             weights: ScoreWeights::default(),
             agent_min_score: (0.0, 1.0),
             max_results: 20,
@@ -40,8 +43,9 @@ impl Default for SearchSettings {
 }
 
 /// Веса схемы баллов `S = a + w_c·c + w_f·f + w_p·p + w_l·l` (`docs/features/search/hybrid-search.md`,
-/// ADR-0007). Стартовые значения; подбор по бенчу — шаг 2.3.7. В `settings.toml` не выставляются:
-/// бенч задаёт их кодом.
+/// ADR-0007). Значения проверены бенчем шага 2.3.7 (`docs/knowledge/search-scores.md`): сетки
+/// весов и перекрёстная проверка не нашли схемы лучше этих на запросах, которых подбор не видел;
+/// это константы продукта (OQ-278). В `settings.toml` не выставляются: бенч задаёт их кодом.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ScoreWeights {
     /// `w_c`: вес косинуса, когда опора — rerank; без rerank косинус сам опора.
@@ -169,7 +173,7 @@ mod tests {
         let applied = SearchSettings::default().resolve(&SearchRequest::default(), false);
         assert_eq!(applied.results, 5);
         assert_eq!(applied.candidates, 30);
-        assert_eq!(applied.min_score, 0.1);
+        assert_eq!(applied.min_score, 0.2);
         assert_eq!(applied.score_kind, ScoreKind::Cosine);
         assert!(!applied.clamped);
     }
@@ -178,7 +182,7 @@ mod tests {
     fn rerank_changes_result_count_and_score_kind_but_not_the_single_threshold() {
         let applied = SearchSettings::default().resolve(&SearchRequest::default(), true);
         assert_eq!(applied.results, 3);
-        assert_eq!(applied.min_score, 0.1);
+        assert_eq!(applied.min_score, 0.2);
         assert_eq!(applied.score_kind, ScoreKind::Rerank);
     }
 

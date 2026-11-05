@@ -710,6 +710,6 @@ fn legacy_thresholds_move_into_the_single_min_score() {
 }
 
 #[test]
-fn default_min_score_is_one_tenth() {
-    assert_eq!(user("").value.search.min_score, 0.1);
+fn default_min_score_is_two_tenths() {
+    assert_eq!(user("").value.search.min_score, 0.2);
 }
