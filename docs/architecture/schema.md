@@ -13,7 +13,8 @@ title: Схема индекса bars — таблицы SQLite проекта
 | `meta` | пары «ключ — значение»: версия схемы, версия bars, отпечаток модели ([features/models/local-models.md](../features/models/local-models.md)), параметры и версия алгоритма нарезки (`chunking_version`), корень документации, которыми построен индекс ([settings.md](../features/settings/settings.md)), время последнего обновления |
 | `documents` | путь от корня проекта, модуль, `title`, размер, время изменения, хеш blake3 содержимого |
 | `chunks` | документ, порядковый номер, строки начала и конца, цепочка заголовков, исходный текст чанка для выдачи, хеш blake3 текста для эмбеддинга |
-| `chunks_fts` | FTS5 по стеммированным цепочке заголовков и тексту чанка; токенайзер `unicode61` с `remove_diacritics 2` |
+| `chunks_fts` | FTS5 по четырём колонкам: название документа с именем файла, цепочка заголовков, текст чанка (основы слов) и точная форма всех трёх; токенайзер `unicode61` с `remove_diacritics 2` и `tokenchars '_'` ([полнотекстовые сигналы](../features/search/fulltext.md)) |
+| `chunks_fts_vocab` | словарь `chunks_fts` (`fts5vocab`, тип `row`): слова и число чанков с ними; нужен для исправления опечаток, места не занимает |
 | `vectors` | хеш текста для эмбеддинга → нормализованный вектор: BLOB из `float32` little-endian длиной в размерность модели |
 | `document_sources` | исходный текст документа, по которому посчитан его хеш; пишется в той же транзакции, что `documents` и `chunks`; по нему строится граф, не читая диск (шаг 1.1.4, OQ-258) |
 
@@ -30,12 +31,13 @@ title: Схема индекса bars — таблицы SQLite проекта
 | `meta` | `key` TEXT, `value` TEXT | первичный ключ `key` |
 | `documents` | `id` INTEGER, `path` TEXT, `module` TEXT, `title` TEXT, `size` INTEGER, `modified_ns` INTEGER (может быть пустым), `hash` TEXT | первичный ключ `id`; `path` уникален; индекс по `module` |
 | `chunks` | `id` INTEGER, `document_id` INTEGER, `ordinal` INTEGER, `first_line` INTEGER, `last_line` INTEGER, `heading_chain` TEXT, `text` TEXT, `embed_hash` TEXT | первичный ключ `id`; внешний ключ на `documents` с каскадным удалением; `(document_id, ordinal)` уникальна; индекс по `embed_hash` |
-| `chunks_fts` | колонки `heading_chain` и `body` | `rowid` равен `chunks.id` |
+| `chunks_fts` | колонки `name`, `heading_chain`, `body`, `exact` | `rowid` равен `chunks.id` |
+| `chunks_fts_vocab` | виртуальная таблица над `chunks_fts`: `term`, `doc`, `cnt` | читает индекс `chunks_fts` |
 | `vectors` | `embed_hash` TEXT, `vector` BLOB | первичный ключ `embed_hash` |
 | `document_sources` | `document_id` INTEGER, `text` TEXT | первичный ключ `document_id`; внешний ключ на `documents` с каскадным удалением |
 
 - `modified_ns` — время изменения файла в наносекундах от начала эпохи Unix. Пусто, если файловая система его не отдаёт; такой файл при каждой проверке сверяется по хешу.
-- `chunks.text` — текст для выдачи, а `chunks_fts.body` — тот же текст после стемминга. Выдача не читает `chunks_fts`.
+- `chunks.text` — текст для выдачи, а `chunks_fts.body` — тот же текст после стемминга; `name` берёт `documents.title` и имя файла из `documents.path`. Выдача не читает `chunks_fts`.
 - Ключи `meta`: `schema_version`, `bars_version`, `model_source`, `model_id`, `model_dim`, `model_doc_prefix`, `chunk_min_chars`, `chunk_max_chars`, `docs_root`, `stem_version`, `updated_at` (секунды Unix). Первые четыре ключа модели вместе — отпечаток модели.
 - Между `chunks` и `vectors` внешнего ключа нет: вектор появляется раньше чанка, а осиротевшие векторы убирает уборка ([features/indexing/updates.md](../features/indexing/updates.md)).
 - Вектор нормализуется до длины 1 при записи; длина BLOB должна быть равна `model_dim * 4`.
@@ -43,13 +45,13 @@ title: Схема индекса bars — таблицы SQLite проекта
 
 ## Стемминг для FTS5
 
-Текст в `chunks_fts` проходит стемминг Snowball ([features/search/hybrid-search.md](../features/search/hybrid-search.md)). Решение агента, как он устроен:
+Текст в `chunks_fts` проходит разбор слов ([features/search/fulltext.md](../features/search/fulltext.md), по исследованию [токенизации](../knowledge/tokenization.md)):
 
-1. Текст приводится к нижнему регистру и режется на слова по любым символам, кроме букв и цифр Unicode.
-2. Слово только из кириллических букв идёт в русский стеммер, слово только из латинских — в английский. Остальные слова (числа, цифры с буквами, смесь алфавитов) остаются как есть.
-3. Основы соединяются пробелами.
+1. Текст режется на слова по любым символам, кроме букв и цифр Unicode; регистр снимается, `ё` приводится к `е`. Сплошные китайские и японские отрезки режутся на пары знаков.
+2. Слово только из кириллических букв без `іїєґ` идёт в русский стеммер Snowball, слово только из латинских — в английский. Не стеммятся слова ПРОПИСНЫМИ, короче четырёх знаков, с цифрой и остальные (смесь алфавитов, другое письмо).
+3. Основы соединяются пробелами и пишутся в `name`, `heading_chain` и `body`; точная форма (слова без стемминга и целые формы идентификаторов вроде `rag_query`) — в `exact`.
 
-Тот же разбор применяется к словам запроса. Версия разбора записана в `meta` как `stem_version`: если она изменилась, текст `chunks_fts` пересобирается из `chunks.text` без нового эмбеддинга.
+Тот же разбор применяется к словам запроса. Версия разбора записана в `meta` как `stem_version` (сейчас 2): если она изменилась, `chunks_fts` и `chunks_fts_vocab` пересоздаются из `chunks` и `documents` без нового эмбеддинга и без согласия по Т-25.
 
 ## Режим журнала и подмена файла
 
