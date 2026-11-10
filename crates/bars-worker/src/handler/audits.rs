@@ -470,6 +470,13 @@ impl WorkerHandler {
         let limit = params
             .limit
             .map_or(PAGE_DEFAULT, |value| i64::from(value).clamp(1, PAGE_MAX));
+        let docs_root = self.worker.docs_root(&project).map_err(worker_error)?;
+        // Обе формы пути (от корня документации и от корня проекта) — OQ-169.
+        let prefixes: Vec<String> = params
+            .paths
+            .iter()
+            .flat_map(|path| bars_core::doc_path::stored_candidates(&docs_root, path))
+            .collect();
         let page = tokio::task::spawn_blocking(move || {
             let store = AuditStore::open(&project)?;
             let Some(run) = store.latest_complete(kind)? else {
@@ -480,6 +487,7 @@ impl WorkerHandler {
                 params.group.as_deref(),
                 params.include_gone,
                 params.include_ignored,
+                &prefixes,
                 offset,
                 limit,
             )?;

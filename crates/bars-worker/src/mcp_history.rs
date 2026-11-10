@@ -527,17 +527,18 @@ pub fn bounded(v: Value, field: &str, budget: &mut usize, notes: &mut Vec<String
 /// пределов (`roots`, `entity_ref`, `from`, `to`, `budgets`), объём режет [`bounded`].
 pub fn requested(tool: &str, source: &Value) -> Value {
     let fields: &[&str] = match tool {
-        "bars_rag_search" => &[
-            "format",
-            "mode",
+        "bars_search" => &[
             "project",
             "query",
-            "modules",
-            "files",
+            "like",
+            "occurrences",
+            "in",
             "limit",
-            "candidates",
-            "min_score",
+            "cursor",
+            "detail",
             "diagnostic",
+            "mode",
+            "graph_budgets",
             "include_related",
             "related_budget",
         ],
@@ -563,36 +564,11 @@ pub fn requested(tool: &str, source: &Value) -> Value {
             "roles",
             "task_profile",
         ],
-        "bars_projects" => &["format", "project", "all"],
-        "bars_get_duplicates" => &["format", "project", "modules", "limit"],
-        "bars_get_similar" => &["format", "project", "chunk_id", "modules", "limit"],
-        "bars_read" => &["format", "project", "path", "lines", "under"],
-        "bars_text_search" => &[
-            "format",
-            "project",
-            "query",
-            "case_sensitive",
-            "regex",
-            "path_filter",
-            "modules",
-            "files",
-            "limit_docs",
-            "limit_hits",
-            "path",
-            "offset",
-            "revision",
+        "bars_read" => &["project", "path", "lines", "under", "view", "direction", "cursor"],
+        "bars_status" => &["project", "all", "refresh"],
+        "bars_audit" => &[
+            "project", "kind", "action", "id", "revision", "in", "cursor", "limit", "show",
         ],
-        "bars_links" => &[
-            "format",
-            "project",
-            "path",
-            "direction",
-            "limit",
-            "cursor_present",
-        ],
-        "bars_outline" => &["format", "project", "path", "levels", "under", "under_line"],
-        "bars_status" => &["format", "project"],
-        "bars_reindex" => &["format", "project", "full"],
         _ => &["format"],
     };
     let mut out = serde_json::Map::new();
@@ -601,11 +577,13 @@ pub fn requested(tool: &str, source: &Value) -> Value {
             let valid = v.is_null()
                 || match *key {
                     "limit" | "candidates" | "under_line" | "limit_docs" | "limit_hits"
-                    | "offset" | "related_budget" => v.as_u64().is_some(),
+                    | "offset" | "related_budget" | "id" | "revision" => v.as_u64().is_some(),
+                    "cursor" => v.is_string() || v.as_u64().is_some(),
                     "min_score" => v.is_number(),
                     "all" | "full" | "regex" | "case_sensitive" | "cursor_present"
-                    | "include_related" | "diagnostic" | "whole_scope" | "local" => v.is_boolean(),
-                    "modules" | "files" | "roles" | "documents" => {
+                    | "include_related" | "diagnostic" | "whole_scope" | "local"
+                    | "occurrences" | "refresh" => v.is_boolean(),
+                    "modules" | "files" | "roles" | "documents" | "in" | "show" => {
                         v.as_array().is_some_and(|a| a.iter().all(Value::is_string))
                     }
                     "levels" => v

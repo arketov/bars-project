@@ -1,6 +1,6 @@
 //! Узкий запрос `bars_text_search` (ISS-109, ADR-0007): инструмент ищет все вхождения одной
 //! конкретной строки на диске. Широкий шаблон отклоняется ошибкой `too_broad` с отсылкой
-//! к единому поиску `bars_rag_search`. Проверяется только агентский путь `disk_text`.
+//! к единому поиску `bars_search`. Проверяется только агентский путь `disk_text`.
 use bars_protocol::{ErrorKind, RpcError};
 use regex_syntax::ast::{Ast, RepetitionKind, RepetitionRange, parse::Parser};
 use serde_json::{Map, json};
@@ -147,11 +147,11 @@ pub fn check(query: &str, regex: bool) -> Result<(), RpcError> {
     if let Some(actual) = broad.actual() {
         extra.insert("actual".into(), json!(actual));
     }
-    extra.insert("use".into(), json!("bars_rag_search"));
+    extra.insert("use".into(), json!("bars_search"));
     Err(RpcError::bars_with(
         ErrorKind::InvalidParams,
         format!(
-            "Слишком широкий запрос для bars_text_search: {}. bars_text_search находит все вхождения одной конкретной строки на диске: переименование, полный список мест, только что записанный текст. Для широкого поиска используйте bars_rag_search — смысл, слова, имена и номера вместе, операторы \"фраза\", -слово, path:папка. Не дробите запрос на серию узких вызовов.",
+            "Слишком широкий запрос для точного поиска: {}. Режим occurrences находит все вхождения одной конкретной строки на диске: переименование, полный список мест, только что записанный текст. Для широкого поиска используйте bars_search — смысл, слова, имена и номера вместе, операторы \"фраза\", -слово, path:папка. Не дробите запрос на серию узких вызовов.",
             broad.reason()
         ),
         extra,
@@ -357,8 +357,8 @@ mod tests {
         assert_eq!(data["reason"], "too_many_branches");
         assert_eq!(data["limit"], 4);
         assert_eq!(data["actual"], 5);
-        assert_eq!(data["use"], "bars_rag_search");
-        for part in ["bars_rag_search", "\"фраза\"", "path:"] {
+        assert_eq!(data["use"], "bars_search");
+        for part in ["bars_search", "\"фраза\"", "path:"] {
             assert!(error.message.contains(part), "{}", error.message);
         }
         let no_actual = check(".*", true).unwrap_err().data.unwrap();

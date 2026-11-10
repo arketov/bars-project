@@ -216,6 +216,9 @@ pub struct AppliedParams {
 pub struct SearchScope {
     pub modules: Vec<String>,
     pub files: Vec<String>,
+    /// Пути-префиксы области (`in` агента): объединены между собой.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub paths: Vec<String>,
     /// Вложенные проекты, чья область исключена из индекса этого проекта (Т-7, Т-15, OQ-256).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub excluded_projects: Vec<NestedProjectInfo>,

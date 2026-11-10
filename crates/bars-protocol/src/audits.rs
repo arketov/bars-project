@@ -105,6 +105,9 @@ pub struct AuditFindingsParams {
     pub cursor: Option<i64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub limit: Option<u32>,
+    /// Сужение находок по путям первых предметов (префиксы папок или файлы).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub paths: Vec<String>,
 }
 
 /// Сводка находок вида: числа по файлам, причинам и видам; узнать масштаб проблемы без

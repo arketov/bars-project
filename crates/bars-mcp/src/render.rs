@@ -1,13 +1,18 @@
-//! Текстовый вид ответов инструментов (`format=txt`, по умолчанию): блоки `=== … ===` с полями
-//! `ключ: значение`, чтобы агент однозначно находил границы результатов и текста документов.
+//! Текстовый вид ответов инструментов: блоки `=== … ===` с полями `ключ: значение` и строками,
+//! чтобы агент однозначно находил границы результатов и текста документов. Время печатается
+//! датой (ISS-113); сырый JSON агенту не отдаётся.
 
 use std::fmt::Write as _;
 
 use bars_protocol::{
-    AcceptedOutput, DuplicateKind, DuplicatesOutput, Heading, OutlineOutput, ProjectInfo,
-    ProjectState, ProjectsOutput, ReadOutput, ScoreKind, SearchHit, SearchOutput, SimilarOutput,
-    StatusOutput,
+    AcceptedOutput, AuditCancelOutput, AuditFindingsOutput, AuditListOutput, AuditRunOutput,
+    AuditSummaryOutput, ClientError, DiskLinksOutput, DiskTextOutput, Heading, LikeOutput,
+    NewTopicDetail, NewTopicsListOutput, OutlineOutput, ProjectInfo, ProjectState, ProjectsOutput,
+    ReadOutput, ScoreKind, SearchHit, SearchOutput, StatusOutput,
 };
+
+use crate::WorkerBuild;
+use crate::tools::Detail;
 
 fn score_kind(kind: ScoreKind) -> &'static str {
     match kind {
@@ -26,38 +31,30 @@ fn state_name(state: ProjectState) -> &'static str {
     }
 }
 
-/// Один результат: общий вид у поиска и у похожих чанков.
-fn result_block(text: &mut String, n: usize, total: usize, hit: &SearchHit) {
-    let _ = writeln!(text, "=== RESULT {n} of {total} ===");
-    if !hit.chunk_id.is_empty() {
-        let _ = writeln!(text, "id: {}", hit.chunk_id);
+/// Дата из секунд Unix без зависимостей: `2026-11-09` (алгоритм Говарда Хиннанта).
+pub fn date_of_unix(secs: i64) -> String {
+    fn civil_from_days(z: i64) -> (i64, u32, u32) {
+        let z = z + 719_468;
+        let era = z.div_euclid(146_097);
+        let doe = z - era * 146_097;
+        let yoe = (doe - doe / 1_460 + doe / 36_524 - doe / 146_096) / 365;
+        let y = yoe + era * 400;
+        let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+        let mp = (5 * doy + 2) / 153;
+        let d = doy - (153 * mp + 2) / 5 + 1;
+        let m = if mp < 10 { mp + 3 } else { mp - 9 };
+        (y + i64::from(m <= 2), m as u32, d as u32)
     }
-    let _ = writeln!(text, "path: {}", hit.path);
-    let _ = writeln!(text, "lines: {}-{}", hit.first_line, hit.last_line);
-    let _ = writeln!(text, "module: {}", hit.module);
-    let _ = writeln!(text, "title: {}", hit.title);
-    let _ = writeln!(text, "heading: {}", hit.heading_chain);
-    if !hit.sections.is_empty() {
-        let _ = writeln!(text, "sections: {}", hit.sections.join("; "));
-    }
-    let _ = writeln!(
-        text,
-        "score: {:.3} ({})",
-        hit.score,
-        score_kind(hit.score_kind)
-    );
-    if let Some(line) = bars_protocol::hit_signals_line(hit) {
-        let _ = writeln!(text, "{line}");
-    }
-    if let Some(line) = bars_protocol::hit_parts_line(hit) {
-        let _ = writeln!(text, "{line}");
-    }
-    let _ = writeln!(text, "--- text ---");
-    let _ = writeln!(text, "{}", hit.text.trim_end());
-    let _ = writeln!(text, "=== END RESULT {n} ===");
+    let (year, month, day) = civil_from_days(secs.div_euclid(86_400));
+    format!("{year:04}-{month:02}-{day:02}")
 }
 
-pub fn search(output: &SearchOutput) -> String {
+/// Дата из RFC 3339 — первые десять знаков; неразбираемый вид возвращается как есть.
+fn date_of_rfc(value: &str) -> &str {
+    value.get(..10).unwrap_or(value)
+}
+
+pub fn search(output: &SearchOutput, detail: Detail) -> String {
     let total = output.results.len();
     let kind = output.applied.score_kind;
     let mut text = format!(
@@ -68,7 +65,12 @@ pub fn search(output: &SearchOutput) -> String {
     for (index, hit) in output.results.iter().enumerate() {
         let support = support(hit, kind);
         let _ = writeln!(text, "{}", result_line(index + 1, hit, support));
-        if stage_full(index, kind, support) {
+        let full = match detail {
+            Detail::Auto => stage_full(index, kind, support),
+            Detail::Full => true,
+            Detail::Brief => false,
+        };
+        if full {
             text.push_str(&limit_other_headers(
                 &hit.text,
                 &output.query_words,
@@ -162,6 +164,9 @@ fn scope_label(output: &SearchOutput) -> String {
     if !scope.files.is_empty() {
         filters.push(format!("files {}", scope.files.join(", ")));
     }
+    if !scope.paths.is_empty() {
+        filters.push(format!("in {}", scope.paths.join(", ")));
+    }
     if filters.is_empty() {
         "whole project".into()
     } else {
@@ -174,7 +179,7 @@ fn scope_label(output: &SearchOutput) -> String {
 fn tail(output: &SearchOutput) -> String {
     let mut tail = String::new();
     let scope = &output.applied.scope;
-    let whole = scope.modules.is_empty() && scope.files.is_empty();
+    let whole = scope.modules.is_empty() && scope.files.is_empty() && scope.paths.is_empty();
     if output.results.is_empty() || output.by_module.results.len() > 1 {
         let counts = |map: &std::collections::BTreeMap<String, u32>| {
             if map.is_empty() {
@@ -196,7 +201,7 @@ fn tail(output: &SearchOutput) -> String {
     if whole && output.by_module.results.len() > 1 {
         let _ = writeln!(
             tail,
-            "Results span several modules; pass modules to narrow the scope."
+            "Results span several modules; narrow the scope with in."
         );
     }
     if let Some(line) = bars_protocol::excluded_projects_line(&scope.excluded_projects) {
@@ -233,10 +238,10 @@ fn tail(output: &SearchOutput) -> String {
     if let Some(error) = &output.semantic_error {
         let _ = writeln!(tail, "semantic unavailable: {error}");
     }
-    if output.results.is_empty() && !scope.modules.is_empty() {
+    if output.results.is_empty() && !whole {
         let _ = writeln!(
             tail,
-            "No results in the selected modules; try the whole project. Zero results do not prove absence."
+            "No results in the selected scope; try the whole project. Zero results do not prove absence."
         );
     }
     tail
@@ -409,143 +414,144 @@ fn limit_other_headers(text: &str, words: &[String], max: usize) -> String {
     out.trim_end_matches('\n').to_string()
 }
 
-pub fn similar(output: &SimilarOutput) -> String {
-    let total = output.results.len();
-    let source = &output.source;
+/// Агентский `like`: исходный раздел, похожие разделы других документов и входящие ссылки.
+pub fn like(output: &LikeOutput) -> String {
     let mut text = format!(
-        "=== SIMILAR: results {total} ===
-"
+        "=== LIKE {}:{}-{} · {} similar in other documents, linked from {} documents ===\n",
+        output.source.path,
+        output.source.first_line,
+        output.source.last_line,
+        output.results.len(),
+        output.linked_from.len()
     );
-    let _ = writeln!(text, "=== SOURCE ===");
-    let _ = writeln!(text, "id: {}", source.chunk_id);
-    let _ = writeln!(text, "path: {}", source.path);
-    let _ = writeln!(text, "lines: {}-{}", source.first_line, source.last_line);
-    let _ = writeln!(text, "module: {}", source.module);
-    let _ = writeln!(text, "heading: {}", source.heading_chain);
-    let _ = writeln!(text, "=== END SOURCE ===");
     for (index, hit) in output.results.iter().enumerate() {
-        result_block(&mut text, index + 1, total, hit);
+        let _ = writeln!(text, "{}", result_line(index + 1, hit, Some(hit.score)));
+        text.push_str(&limit_other_headers(
+            &hit.text,
+            &[],
+            OTHER_HEADERS_MAX,
+        ));
+        text.push('\n');
     }
-    let _ = writeln!(text, "=== APPLIED PARAMETERS ===");
-    let _ = writeln!(text, "limit: {}", output.limit);
-    let _ = writeln!(text, "returned: {total}");
-    let _ = writeln!(
-        text,
-        "score: cosine similarity to the source chunk; closeness does not prove duplication"
-    );
-    let _ = writeln!(text, "clamped: {}", output.clamped);
-    let _ = writeln!(text, "indexing: {}", output.indexing);
-    let _ = writeln!(text, "pending: {}", output.pending);
+    if !output.linked_from.is_empty() {
+        let _ = writeln!(text, "linked from:");
+        for path in &output.linked_from {
+            let _ = writeln!(text, "- {path}");
+        }
+    }
     if output.indexing {
         let _ = writeln!(text, "Indexing in progress: results may be incomplete.");
     }
-    text.push_str("=== END SIMILAR ===");
+    text.push_str("=== END LIKE ===");
     text
 }
 
-fn duplicate_kind(kind: DuplicateKind) -> &'static str {
-    match kind {
-        DuplicateKind::Exact => "exact",
-        DuplicateKind::Near => "near",
-        DuplicateKind::Contained => "contained",
-        DuplicateKind::Partial => "partial",
-        DuplicateKind::Semantic => "semantic",
+/// Агентский `occurrences`: каждое вхождение строкой `путь:строка:колонка`, продолжение курсором.
+pub fn occurrences(output: &DiskTextOutput) -> String {
+    let mut text = String::from("=== OCCURRENCES ===\n");
+    for doc in &output.result.documents {
+        for hit in &doc.hits {
+            let _ = writeln!(text, "{}:{}:{}: {}", doc.path, hit.line, hit.column, hit.text);
+        }
     }
-}
-
-pub fn duplicates(output: &DuplicatesOutput) -> String {
-    let shown = output.results.len();
-    let mut text = format!("=== DUPLICATES: items {shown} of {} ===\n", output.total);
-    for (index, item) in output.results.iter().enumerate() {
-        let _ = writeln!(text, "=== ITEM {} of {shown} ===", index + 1);
-        let _ = writeln!(text, "kind: {}", duplicate_kind(item.kind));
-        let _ = writeln!(text, "score: {:.3}", item.score);
-        if item.repeated_block {
+    let truncated = output.result.truncated.is_some();
+    if truncated {
+        let _ = writeln!(
+            text,
+            "totals: documents {}, hits {} (lower bound — the list was truncated)",
+            output.result.docs_total, output.result.hits_total
+        );
+    } else {
+        let _ = writeln!(
+            text,
+            "totals: documents {}, hits {}",
+            output.result.docs_total, output.result.hits_total
+        );
+    }
+    if output.result.skipped_total > 0 {
+        let _ = writeln!(
+            text,
+            "skipped: {} files or folders were not read; absence is not confirmed",
+            output.result.skipped_total
+        );
+    }
+    if output.clamped {
+        let _ = writeln!(text, "clamped: a limit exceeded the maximum");
+    }
+    for doc in &output.result.documents {
+        if doc.has_more {
+            let cursor = serde_json::json!({
+                "path": doc.path,
+                "offset": doc.hits.len(),
+                "revision": doc.revision,
+            });
             let _ = writeln!(
                 text,
-                "repeated_block: true (identical text in {} sections: probably a template)",
-                item.chunks.len()
+                "more in {}: repeat with cursor {}",
+                doc.path,
+                serde_json::to_string(&cursor).expect("курсор сериализуется")
             );
         }
-        for (number, chunk) in item.chunks.iter().enumerate() {
-            let _ = writeln!(text, "=== CHUNK {} ===", number + 1);
-            let _ = writeln!(text, "id: {}", chunk.chunk_id);
-            let _ = writeln!(text, "path: {}", chunk.path);
-            let _ = writeln!(text, "lines: {}-{}", chunk.first_line, chunk.last_line);
-            let _ = writeln!(text, "module: {}", chunk.module);
-            let _ = writeln!(text, "heading: {}", chunk.heading_chain);
-            let _ = writeln!(text, "=== END CHUNK ===");
-        }
-        for fragment in &item.shared {
-            let _ = writeln!(text, "shared: {fragment}");
-        }
-        if let Some(differences) = &item.differences {
-            for change in &differences.changes {
-                let _ = writeln!(
-                    text,
-                    "changed: \"{}\" -> \"{}\"",
-                    change.first, change.second
-                );
-            }
-            if differences.changes_truncated {
-                let _ = writeln!(
-                    text,
-                    "changed: more differences than shown (or text too long to compare)"
-                );
-            }
-            if !differences.numbers_only_first.is_empty() {
-                let _ = writeln!(
-                    text,
-                    "numbers only in chunk 1: {}",
-                    differences.numbers_only_first.join(", ")
-                );
-            }
-            if !differences.numbers_only_second.is_empty() {
-                let _ = writeln!(
-                    text,
-                    "numbers only in chunk 2: {}",
-                    differences.numbers_only_second.join(", ")
-                );
-            }
-            if differences.negations_first != differences.negations_second {
-                let _ = writeln!(
-                    text,
-                    "negation words: chunk 1 has {}, chunk 2 has {}",
-                    differences.negations_first, differences.negations_second
-                );
-            }
-        }
-        let _ = writeln!(text, "=== END ITEM ===");
     }
-    let _ = writeln!(text, "=== APPLIED PARAMETERS ===");
-    let _ = writeln!(text, "limit: {}", output.limit);
-    let _ = writeln!(text, "returned: {shown}");
-    let _ = writeln!(
-        text,
-        "found: exact {}, near {}, contained {}, partial {}, semantic {}",
-        output.counts.exact,
-        output.counts.near,
-        output.counts.contained,
-        output.counts.partial,
-        output.counts.semantic
+    text.push_str("=== END OCCURRENCES ===");
+    text
+}
+
+/// Ссылки документа (агентский `view=links`): строки, а не JSON (ISS-113).
+pub fn links(output: &DiskLinksOutput) -> String {
+    let mut text = format!(
+        "=== LINKS · {} · {} ===\n",
+        output.direction,
+        if output.known { "known document" } else { "unknown document" }
     );
-    let _ = writeln!(
-        text,
-        "score: exact 1; near Jaccard of shared 5-word windows; contained/partial share of the smaller chunk; semantic cosine. Semantic items are only a hint to read both chunks; a copy with changed numbers or negation is not proof of a contradiction."
-    );
-    let _ = writeln!(text, "clamped: {}", output.clamped);
-    let _ = writeln!(text, "chunks_checked: {}", output.chunks_checked);
-    let _ = writeln!(
-        text,
-        "chunks_skipped_short: {}",
-        output.chunks_skipped_short
-    );
-    let _ = writeln!(text, "indexing: {}", output.indexing);
-    let _ = writeln!(text, "pending: {}", output.pending);
-    if output.indexing {
-        let _ = writeln!(text, "Indexing in progress: results may be incomplete.");
+    for item in &output.items {
+        if output.direction == "incoming" {
+            let source = item["source"].as_str().unwrap_or("?");
+            let title = item["title"].as_str().map(|title| format!(" · {title}"));
+            let line = item["line"].as_u64().map(|line| format!(":{line}")).unwrap_or_default();
+            let cut = item["fields_truncated"].as_bool() == Some(true);
+            let _ = writeln!(
+                text,
+                "{source}{line}{} → this document{}",
+                title.unwrap_or_default(),
+                if cut { " (fields truncated)" } else { "" }
+            );
+        } else {
+            let line = item["line"].as_u64().unwrap_or(0);
+            let label = item["text"]
+                .as_str()
+                .filter(|text| !text.is_empty())
+                .or(item["raw"].as_str())
+                .unwrap_or("?");
+            let target = item["target"]
+                .as_str()
+                .map(|target| target.to_string())
+                .unwrap_or_else(|| item["raw"].as_str().unwrap_or("?").to_string());
+            let broken = item["broken"].as_bool() == Some(true);
+            let cut = item["fields_truncated"].as_bool() == Some(true);
+            let _ = writeln!(
+                text,
+                "{line}: {label} → {target}{}{}{}",
+                if broken { " BROKEN" } else { "" },
+                if cut { " (fields truncated)" } else { "" },
+                ""
+            );
+        }
     }
-    text.push_str("=== END DUPLICATES ===");
+    if output.has_more {
+        let reasons = if output.limit_reasons.is_empty() {
+            String::new()
+        } else {
+            format!(" ({})", output.limit_reasons.join(", "))
+        };
+        let _ = writeln!(
+            text,
+            "has_more{}; continue: cursor {}",
+            reasons,
+            output.next_cursor.as_deref().unwrap_or("none")
+        );
+    }
+    text.push_str("=== END LINKS ===");
     text
 }
 
@@ -563,6 +569,21 @@ pub fn outline(path: &str, output: &OutlineOutput) -> String {
 }
 
 pub fn read(path: &str, output: &ReadOutput) -> String {
+    if let Some(headings) = &output.headings {
+        // Автоматический режим: документ длиннее max_lines отдан структурой с подсказкой.
+        let lines = headings
+            .iter()
+            .map(Heading::to_line)
+            .collect::<Vec<_>>()
+            .join("\n");
+        let total = output.lines_total.unwrap_or(0);
+        return format!(
+            "=== DOCUMENT {path} (outline) ===\ntitle: {}\nlines_total: {total}\n\
+             this document is long: read a part with lines (N, N-M, N-) or under a heading, or \
+             the whole text with view \"text\"\n{lines}\n=== END DOCUMENT ===",
+            output.title,
+        );
+    }
     format!(
         "=== DOCUMENT {path} ===\ntitle: {}\n--- text (with line numbers) ---\n{}\n=== END DOCUMENT ===",
         output.title,
@@ -608,14 +629,14 @@ pub fn projects(output: &ProjectsOutput) -> String {
     text
 }
 
+/// Часть INDEX сводки `bars_status`.
 pub fn status(output: &StatusOutput) -> String {
-    let mut text = String::from("=== INDEX STATUS ===\n");
-    let _ = writeln!(text, "path: {}", output.path);
+    let mut text = String::from("=== INDEX ===\n");
     let _ = writeln!(text, "state: {}", state_name(output.state));
     let _ = writeln!(
         text,
         "updated_at: {}",
-        output.updated_at.as_deref().unwrap_or("none")
+        output.updated_at.as_deref().map(date_of_rfc).unwrap_or("none")
     );
     let _ = writeln!(text, "pending: {}", output.pending);
     let _ = writeln!(
@@ -636,76 +657,336 @@ pub fn status(output: &StatusOutput) -> String {
         );
     }
     if let Some(graph) = &output.graph {
-        if graph.completeness == bars_protocol::graph_types::Completeness::Partial {
-            text.push_str("\nGraph partial: coverage is incomplete, not necessarily stale. Missing relations do not prove absence; check layers and evidence. Reindexing does not complete graph coverage.");
-        }
-        let _ = write!(
-            text,
-            "\nGraph data: {}; completeness: {}; availability: {}; job_state: {}",
-            serde_json::to_value(graph.freshness)
-                .unwrap()
-                .as_str()
-                .unwrap(),
-            serde_json::to_value(graph.completeness)
-                .unwrap()
-                .as_str()
-                .unwrap(),
-            serde_json::to_value(graph.availability)
-                .unwrap()
-                .as_str()
-                .unwrap(),
-            serde_json::to_value(graph.job_state)
-                .unwrap()
-                .as_str()
-                .unwrap()
-        );
-        for (name, layer) in &graph.layers {
-            if let Some(reason) = &layer.stale_reason {
-                let _ = write!(text, "\nGraph layer {name} stale_reason: {reason}");
-            }
-            let _ = write!(
-                text,
-                "\nGraph layer {name}: freshness={}; completeness={}; coverage={}/{} {}; missing={}; comparisons={}; reason={}",
-                serde_json::to_value(layer.freshness)
-                    .unwrap()
-                    .as_str()
-                    .unwrap(),
-                serde_json::to_value(layer.completeness)
-                    .unwrap()
-                    .as_str()
-                    .unwrap(),
-                layer.coverage.processed,
-                layer.coverage.total,
-                layer.coverage.unit,
-                layer.coverage.missing,
-                layer.coverage.comparisons,
-                layer.coverage.reason.as_deref().unwrap_or("none")
-            );
-        }
-        let state = serde_json::to_value(graph.state).expect("graph state serializes");
-        let _ = write!(
-            text,
-            "\nGraph: {}; sources: {}; job: {}; error: {}",
-            state.as_str().expect("graph state is a string"),
-            graph.source_count,
-            graph.active_job.as_deref().unwrap_or("none"),
-            graph.error.as_deref().unwrap_or("none")
-        );
+        text.push_str(&graph_part(graph));
     }
-    text.push_str("\n=== END STATUS ===");
+    text.push_str("=== END INDEX ===");
     text
 }
 
-pub fn reindex(output: &AcceptedOutput) -> String {
-    let note = if output.accepted {
-        "Reindexing accepted. Check bars_status for progress."
-    } else {
-        "Reindexing not accepted."
+/// Часть GRAPH сводки `bars_status` и блок графа внутри части INDEX.
+pub fn graph_part(graph: &bars_protocol::GraphStatus) -> String {
+    let mut text = String::new();
+    if graph.completeness == bars_protocol::graph_types::Completeness::Partial {
+        text.push_str("\nGraph partial: coverage is incomplete, not necessarily stale. Missing relations do not prove absence; check layers and evidence. Reindexing does not complete graph coverage.");
+    }
+    let _ = write!(
+        text,
+        "\nGraph data: {}; completeness: {}; availability: {}; job_state: {}",
+        serde_json::to_value(graph.freshness)
+            .unwrap()
+            .as_str()
+            .unwrap(),
+        serde_json::to_value(graph.completeness)
+            .unwrap()
+            .as_str()
+            .unwrap(),
+        serde_json::to_value(graph.availability)
+            .unwrap()
+            .as_str()
+            .unwrap(),
+        serde_json::to_value(graph.job_state)
+            .unwrap()
+            .as_str()
+            .unwrap()
+    );
+    for (name, layer) in &graph.layers {
+        if let Some(reason) = &layer.stale_reason {
+            let _ = write!(text, "\nGraph layer {name} stale_reason: {reason}");
+        }
+        let _ = write!(
+            text,
+            "\nGraph layer {name}: freshness={}; completeness={}; coverage={}/{} {}; missing={}; comparisons={}; reason={}",
+            serde_json::to_value(layer.freshness)
+                .unwrap()
+                .as_str()
+                .unwrap(),
+            serde_json::to_value(layer.completeness)
+                .unwrap()
+                .as_str()
+                .unwrap(),
+            layer.coverage.processed,
+            layer.coverage.total,
+            layer.coverage.unit,
+            layer.coverage.missing,
+            layer.coverage.comparisons,
+            layer.coverage.reason.as_deref().unwrap_or("none")
+        );
+    }
+    let state = serde_json::to_value(graph.state).expect("graph state serializes");
+    let _ = write!(
+        text,
+        "\nGraph: {}; sources: {}; job: {}; error: {}",
+        state.as_str().expect("graph state is a string"),
+        graph.source_count,
+        graph.active_job.as_deref().unwrap_or("none"),
+        graph.error.as_deref().unwrap_or("none")
+    );
+    text
+}
+
+/// Часть VERSIONS сводки `bars_status`: версии и сборки прокси и воркера, предупреждение при
+/// расхождении сборок (ISS-117).
+pub fn versions(proxy_version: &str, proxy_build: &str, worker: Option<WorkerBuild>) -> String {
+    let mut text = String::from("=== VERSIONS ===\n");
+    let _ = writeln!(text, "proxy: {proxy_version} (build {proxy_build})");
+    match worker {
+        Some(worker) => {
+            let _ = writeln!(text, "worker: {}", worker.version);
+            if let Some(warning) = worker.build_warning {
+                let _ = writeln!(text, "WARNING: {warning}");
+            }
+        }
+        None => {
+            let _ = writeln!(text, "worker: unknown (no connection yet)");
+        }
+    }
+    text.push_str("=== END VERSIONS ===");
+    text
+}
+
+/// Часть AUDITS сводки `bars_status`: вид, состояние, дата словами, число находок.
+pub fn audits_state(output: &AuditListOutput) -> String {
+    let mut text = String::from("=== AUDITS ===\n");
+    for audit in &output.audits {
+        let mut line = format!("{}: {}", audit.kind, audit.state);
+        if let Some(since) = audit.running_since {
+            let _ = write!(line, " (since {})", date_of_unix(since));
+        }
+        if audit.state == "complete" || audit.state == "partial" {
+            if let Some(at) = audit.result_at.or(audit.last_run_at) {
+                let _ = write!(line, " {}", date_of_unix(at));
+            }
+            let _ = write!(
+                line,
+                " · {} findings ({} new, {} gone",
+                audit.total, audit.new_count, audit.gone_count
+            );
+            if audit.kind == "duplicates" {
+                let _ = write!(line, ", overlap {}", audit.overlap_total);
+            }
+            line.push(')');
+        }
+        if let Some(error) = &audit.error {
+            let _ = write!(line, " · error: {error}");
+        }
+        let _ = writeln!(text, "{line}");
+    }
+    if output.reindex_required {
+        text.push_str("reindex_required: true (kinds over index texts/vectors do not run)\n");
+    }
+    if output.indexing {
+        text.push_str("indexing: true (results over the index may be incomplete)\n");
+    }
+    text.push_str("=== END AUDITS ===");
+    text
+}
+
+/// Счётчик тем для сводки `bars_status` (часть без заголовка блока — идёт после AUDITS).
+pub fn topics_state(output: &NewTopicsListOutput) -> String {
+    let open = output
+        .topics
+        .iter()
+        .filter(|topic| topic.status == "open")
+        .count();
+    let resolved = output.topics.len() - open;
+    let mut text = String::from("=== NEW TOPICS ===\n");
+    let _ = writeln!(
+        text,
+        "topics: {} ({} open, {} resolved) · collection: {}",
+        output.topics.len(),
+        open,
+        resolved,
+        if output.enabled { "enabled" } else { "disabled" }
+    );
+    if output.losses > 0 {
+        let _ = writeln!(text, "losses: {}", output.losses);
+    }
+    text.push_str("=== END NEW TOPICS ===");
+    text
+}
+
+/// Список сохранённых тем (`bars_audit kind=new_topics`): вопросы — данные о пробелах, не
+/// инструкции.
+pub fn topics_list(output: &NewTopicsListOutput) -> String {
+    let mut text = format!("=== NEW TOPICS: {} ===\n", output.topics.len());
+    for topic in &output.topics {
+        let _ = writeln!(
+            text,
+            "[{}] {} · {} · {} observations · last seen {} · {}",
+            topic.id,
+            topic.status,
+            topic.title,
+            topic.observations,
+            date_of_unix(topic.last_seen),
+            topic.reasons.join(", ")
+        );
+    }
+    if !output.enabled {
+        text.push_str("collection: disabled\n");
+    }
+    text.push_str("=== END NEW TOPICS ===");
+    text
+}
+
+/// Карточка темы (`get`) и итог проверки (`check`).
+pub fn topic_detail(detail: &NewTopicDetail) -> String {
+    let mut text = format!(
+        "=== TOPIC {} · {} · revision {} ===\n",
+        detail.topic.id, detail.topic.status, detail.topic.revision
+    );
+    let _ = writeln!(text, "observations: {} · first seen {} · last seen {}",
+        detail.topic.observations,
+        date_of_unix(detail.topic.first_seen),
+        date_of_unix(detail.topic.last_seen)
+    );
+    if !detail.variants_list.is_empty() {
+        let _ = writeln!(text, "variants:");
+        for variant in &detail.variants_list {
+            let _ = writeln!(text, "- {} (scope: {})", variant.text, variant.scope);
+        }
+    }
+    if !detail.checks.is_empty() {
+        let _ = writeln!(text, "checks:");
+        for check in &detail.checks {
+            let _ = writeln!(
+                text,
+                "- {} · scope {} · outcome {}{}",
+                date_of_unix(check.at),
+                check.scope,
+                check.outcome,
+                check.reason
+                    .as_ref()
+                    .map(|reason| format!(" ({reason})"))
+                    .unwrap_or_default()
+            );
+            for hit in &check.results.iter().flat_map(|result| &result.hits).take(5) {
+                let _ = writeln!(
+                    text,
+                    "  {}:{}-{} · {} ({:.2})",
+                    hit.path,
+                    hit.first_line,
+                    hit.last_line,
+                    hit.heading_chain,
+                    hit.score
+                );
+            }
+        }
+    }
+    text.push_str("=== END TOPIC ===");
+    text
+}
+
+/// Страница находок аудита: строки, а не JSON (ISS-113).
+pub fn findings(output: &AuditFindingsOutput) -> String {
+    let kind_line = match (output.run_id, output.finished) {
+        (Some(run), Some(finished)) => {
+            format!("run {run} · {} · {} total", date_of_unix(finished), output.total)
+        }
+        _ => "no complete run yet".to_string(),
     };
+    let mut text = format!("=== FINDINGS · {kind_line} ===\n");
+    for (index, item) in output.items.iter().enumerate() {
+        let subjects = item
+            .subjects
+            .iter()
+            .map(|subject| format!("{}:{}-{}", subject.path, subject.first_line, subject.last_line))
+            .collect::<Vec<_>>()
+            .join("; ");
+        let _ = writeln!(
+            text,
+            "[{}] {} · {} · {}{}",
+            index + 1,
+            item.standing,
+            item.tag,
+            subjects,
+            if item.ignored { " · ignored" } else { "" }
+        );
+        let _ = writeln!(text, "    reason: {}", item.reason);
+        if !item.detail.is_empty() {
+            for line in item.detail.lines().take(2) {
+                let _ = writeln!(text, "    {line}");
+            }
+        }
+    }
+    if output.items.is_empty() {
+        text.push_str("no findings\n");
+    }
+    if let Some(next) = output.next {
+        let _ = writeln!(text, "next: {next}");
+    }
+    text.push_str("=== END FINDINGS ===");
+    text
+}
+
+/// Сводка находок: числа по файлам, причинам и видам.
+pub fn audit_summary(output: &AuditSummaryOutput) -> String {
+    let head = match (output.run_id, output.finished) {
+        (Some(run), Some(finished)) => {
+            format!("run {run} · {} · {} findings", date_of_unix(finished), output.total)
+        }
+        _ => "no complete run yet".to_string(),
+    };
+    let mut text = format!("=== SUMMARY · {head} ===\n");
+    let join = |counts: &[(String, i64)]| -> String {
+        if counts.is_empty() {
+            "none".to_string()
+        } else {
+            counts
+                .iter()
+                .map(|(name, count)| format!("{name} {count}"))
+                .collect::<Vec<_>>()
+                .join("; ")
+        }
+    };
+    // Протокольные списки агрегатов приводим к парам для join.
+    let files: Vec<(String, i64)> = output.files.iter().map(|f| (f.path.clone(), f.count)).collect();
+    let reasons: Vec<(String, i64)> = output
+        .reasons
+        .iter()
+        .map(|r| (r.reason.clone(), r.count))
+        .collect();
+    let tags: Vec<(String, i64)> = output.tags.iter().map(|t| (t.tag.clone(), t.count)).collect();
+    let _ = writeln!(text, "files: {}", join(&files));
+    let _ = writeln!(text, "reasons: {}", join(&reasons));
+    let _ = writeln!(text, "tags: {}", join(&tags));
+    text.push_str("=== END SUMMARY ===");
+    text
+}
+
+pub fn audit_run(output: &AuditRunOutput) -> String {
     format!(
-        "=== REINDEX ===\naccepted: {}\n{note}\n=== END ===",
-        output.accepted
+        "=== AUDIT RUN ===\naccepted: {} · already: {} · queued: {}\n{}=== END AUDIT RUN ===",
+        output.accepted,
+        output.already,
+        output.queued,
+        if output.queued {
+            "the audit waits for another audit of the project\n"
+        } else {
+            ""
+        }
     )
+}
+
+pub fn audit_cancel(output: &AuditCancelOutput) -> String {
+    format!(
+        "=== AUDIT CANCEL ===\ncancelled: {}\n=== END AUDIT CANCEL ===",
+        output.cancelled
+    )
+}
+
+/// Принятие проверки актуальности индекса (`refresh=true` у `bars_status`).
+pub fn refresh(output: &AcceptedOutput) -> String {
+    let note = if output.accepted {
+        "freshness check accepted. Watch the INDEX part of bars_status for progress."
+    } else {
+        "freshness check not accepted."
+    };
+    format!("=== REFRESH ===\naccepted: {}\n{note}\n=== END REFRESH ===", output.accepted)
+}
+
+/// Часть сводки с ошибкой: ошибка одной части не отменяет остальные (ISS-110).
+pub fn error_part(name: &str, error: &ClientError) -> String {
+    format!("=== {name} ===\nerror: {error}\n=== END {name} ===")
 }
 
 #[cfg(test)]
@@ -839,7 +1120,7 @@ mod tests {
         ];
         let mut found = output(hits, ScoreKind::Rerank);
         found.query_words = vec!["слова".into()];
-        let text = search(&found);
+        let text = search(&found, Detail::Auto);
         assert!(
             text.starts_with("4 of 30 · scope: whole project\n"),
             "{text}"
@@ -866,6 +1147,13 @@ mod tests {
         assert!(!text.contains("by_module"), "{text}");
         assert!(!text.contains("indexing"), "{text}");
         assert!(!text.contains("1.000"), "{text}");
+        // detail=full печатает все тексты, brief — ни одного.
+        let full = search(&found, Detail::Full);
+        assert!(full.contains("ХВОСТ-МЕТКА-3"), "{full}");
+        assert!(full.contains("ХВОСТ-МЕТКА-4"), "{full}");
+        let brief = search(&found, Detail::Brief);
+        assert!(!brief.contains("Полный текст раздела"), "{brief}");
+        assert!(brief.contains("[1] 0.92 docs/a.md:120-129 · Порог\n"), "{brief}");
     }
 
     #[test]
@@ -884,7 +1172,7 @@ mod tests {
         ];
         let mut found = output(hits, ScoreKind::Rerank);
         found.query_words = vec!["порог".into()];
-        let text = search(&found);
+        let text = search(&found, Detail::Auto);
         let excerpt = text
             .split("[2] 0.50 docs/b.md:10-20 · B\n")
             .nth(1)
@@ -909,7 +1197,7 @@ mod tests {
         ];
         let mut no_match = output(hits, ScoreKind::Rerank);
         no_match.query_words = vec!["порог".into()];
-        let head = search(&no_match);
+        let head = search(&no_match, Detail::Auto);
         let excerpt = head
             .split("[2] 0.50 docs/b.md:10-20 · B\n")
             .nth(1)
@@ -943,7 +1231,7 @@ mod tests {
         let found = hit("docs/a.md", "A", &text, Some(0.95), (1, 2));
         let mut found = output(vec![found], ScoreKind::Rerank);
         found.query_words = vec!["порог".into()];
-        let text = search(&found);
+        let text = search(&found, Detail::Auto);
         let block = text.split("other headers:\n").nth(1).unwrap();
         let shown: Vec<&str> = block
             .lines()
@@ -954,7 +1242,7 @@ mod tests {
         assert!(block.contains("(+2 more)"), "{block}");
         // Не больше восьми заголовков даже без слов запроса.
         found.query_words = vec!["неттакогослова".into()];
-        let text = search(&found);
+        let text = search(&found, Detail::Auto);
         let block = text.split("other headers:\n").nth(1).unwrap();
         let shown: Vec<&str> = block
             .lines()
@@ -988,7 +1276,7 @@ mod tests {
             cosine_hit("docs/c.md", "C", &long_text("метка-cos"), 0.44, (5, 6)),
         ];
         let found = output(hits, ScoreKind::Cosine);
-        let text = search(&found);
+        let text = search(&found, Detail::Auto);
         assert!(
             text.contains("[1] 0.66 docs/a.md:1-2 · A\nПолный один\n"),
             "{text}"
@@ -1006,7 +1294,7 @@ mod tests {
             hit("docs/c.md", "C", &long_text("метка-none"), None, (5, 6)),
         ];
         let found = output(hits, ScoreKind::None);
-        let text = search(&found);
+        let text = search(&found, Detail::Auto);
         assert!(
             text.contains("[1] docs/a.md:1-2 · A\nПолный один\n"),
             "{text}"
@@ -1033,7 +1321,7 @@ mod tests {
         ];
         let mut found = output(hits, ScoreKind::Rerank);
         found.query_words = vec!["порог".into()];
-        let text = search(&found);
+        let text = search(&found, Detail::Auto);
         let excerpt = text
             .split("[2] 0.50 docs/b.md:10-20 · B\n")
             .nth(1)
@@ -1065,7 +1353,7 @@ mod tests {
                 score: 0.05,
             },
         ];
-        let text = search(&empty);
+        let text = search(&empty, Detail::Auto);
         assert!(
             text.starts_with("0 of 30 · scope: whole project\n"),
             "{text}"
@@ -1083,12 +1371,12 @@ mod tests {
             text.contains("by_module: candidates none; results none\n"),
             "{text}"
         );
-        // Область-модуль без результатов предлагает весь проект.
-        empty.applied.scope.modules = vec!["features".into()];
-        let scoped = search(&empty);
-        assert!(scoped.contains("scope: modules features"), "{scoped}");
+        // Область без результатов предлагает весь проект.
+        empty.applied.scope.paths = vec!["features".into()];
+        let scoped = search(&empty, Detail::Auto);
+        assert!(scoped.contains("scope: in features"), "{scoped}");
         assert!(
-            scoped.contains("No results in the selected modules; try the whole project."),
+            scoped.contains("No results in the selected scope; try the whole project."),
             "{scoped}"
         );
     }
@@ -1099,13 +1387,13 @@ mod tests {
         let mut found = output(hits, ScoreKind::Rerank);
         // Несколько папок в результатах — by_module и подсказка.
         found.by_module.results = [("features".into(), 1), ("adr".into(), 1)].into();
-        let text = search(&found);
+        let text = search(&found, Detail::Auto);
         assert!(
             text.contains("by_module: candidates none; results adr 1, features 1\n"),
             "{text}"
         );
         assert!(
-            text.contains("Results span several modules; pass modules to narrow the scope."),
+            text.contains("Results span several modules; narrow the scope with in."),
             "{text}"
         );
         // Отклонения: индексация, очередь, прижатие, ошибки, операторы.
@@ -1121,7 +1409,7 @@ mod tests {
             excluded_phrases: vec![],
             paths: vec![],
         });
-        let text = search(&found);
+        let text = search(&found, Detail::Auto);
         assert!(
             text.contains("understood: words \"слова\"; phrase \"точная фраза\"; exclude лишнее\n"),
             "{text}"
@@ -1171,7 +1459,15 @@ mod tests {
         );
         assert!(projects(&ProjectsOutput { projects: vec![] }).is_ascii());
         for accepted in [true, false] {
-            assert!(reindex(&AcceptedOutput { accepted }).is_ascii());
+            assert!(refresh(&AcceptedOutput { accepted }).is_ascii());
         }
+        assert!(versions("0.1.0", "abc", None).is_ascii());
+    }
+
+    #[test]
+    fn dates_print_without_dependencies() {
+        assert_eq!(date_of_unix(1_762_656_000), "2025-11-09");
+        assert_eq!(date_of_unix(0), "1970-01-01");
+        assert_eq!(date_of_rfc("2026-11-09T12:00:00Z"), "2026-11-09");
     }
 }

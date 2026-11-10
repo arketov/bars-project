@@ -496,32 +496,66 @@ impl AuditStore {
     }
 
     /// Страница находок запуска. `group` — `main` или `overlap`; пусто — все. Исчезнувшие идут
-    /// последними и показываются только при `include_gone`.
+    /// последними и показываются только при `include_gone`. `path_prefixes` сужает находки по
+    /// пути первого предмета (префиксы в форме хранения, от корня проекта).
     pub fn findings(
         &self,
         run_id: i64,
         group: Option<&str>,
         include_gone: bool,
         include_ignored: bool,
+        path_prefixes: &[String],
         offset: i64,
         limit: i64,
     ) -> Result<FindingsPage, AuditError> {
         let ignored = "EXISTS (SELECT 1 FROM ignored i JOIN runs r ON r.kind=i.kind WHERE r.id=findings.run_id AND i.fingerprint=findings.fingerprint)";
+        let path_clause = if path_prefixes.is_empty() {
+            String::new()
+        } else {
+            let conditions = path_prefixes
+                .iter()
+                .map(|_| {
+                    "(json_extract(subjects, '$[0].path') = ? OR \
+                     json_extract(subjects, '$[0].path') LIKE ? ESCAPE '\\')"
+                })
+                .collect::<Vec<_>>()
+                .join(" OR ");
+            format!(" AND ({conditions})")
+        };
         let filter = format!(
-            "run_id=?1 AND (?2 IS NULL OR grp=?2) AND (?3 OR standing<>'gone') AND (?6 OR NOT {ignored})"
+            "run_id=?1 AND (?2 IS NULL OR grp=?2) AND (?3 OR standing<>'gone') AND (?6 OR NOT {ignored}){path_clause}"
         );
+        let mut bind: Vec<rusqlite::types::Value> = vec![
+            run_id.into(),
+            match group {
+                Some(group) => group.to_string().into(),
+                None => rusqlite::types::Value::Null,
+            },
+            include_gone.into(),
+            limit.into(),
+            offset.into(),
+            include_ignored.into(),
+        ];
+        for prefix in path_prefixes {
+            bind.push(prefix.clone().into());
+            bind.push(
+                format!(
+                    "{}/%",
+                    prefix.replace('\\', "\\\\").replace('%', "\\%").replace('_', "\\_")
+                )
+                .into(),
+            );
+        }
         let total: i64 = self.db.query_row(
             &format!("SELECT COUNT(*) FROM findings WHERE {filter}"),
-            params![run_id, group, include_gone, limit, offset, include_ignored],
+            rusqlite::params_from_iter(bind.iter()),
             |r| r.get(0),
         )?;
         let mut statement = self.db.prepare(&format!(
             "SELECT id, standing, fingerprint, tag, grp, reason, score, subjects, detail, {ignored} FROM findings
              WHERE {filter} ORDER BY (standing='gone'), ord LIMIT ?4 OFFSET ?5"
         ))?;
-        let rows = statement.query_map(
-            params![run_id, group, include_gone, limit, offset, include_ignored],
-            |r| {
+        let rows = statement.query_map(rusqlite::params_from_iter(bind.iter()), |r| {
                 Ok((
                     r.get::<_, i64>(0)?,
                     r.get::<_, String>(1)?,

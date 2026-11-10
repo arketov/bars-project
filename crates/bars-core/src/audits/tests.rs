@@ -32,7 +32,7 @@ fn ignore_survives_runs_pruning_and_reopen_and_counters_follow_it() {
             .total,
         1
     );
-    let all = store.findings(row.id, None, true, true, 0, 10).unwrap();
+    let all = store.findings(row.id, None, true, true, &[], 0, 10).unwrap();
     assert!(
         all.items
             .iter()
@@ -161,7 +161,7 @@ fn first_complete_run_has_no_new_findings_and_second_marks_new_known_gone() {
         (second.total, second.new_count, second.gone_count),
         (2, 1, 1)
     );
-    let page = store.findings(second.id, None, true, false, 0, 10).unwrap();
+    let page = store.findings(second.id, None, true, false, &[], 0, 10).unwrap();
     let standings: Vec<_> = page
         .items
         .iter()
@@ -256,12 +256,12 @@ fn paging_returns_a_cursor_until_the_end() {
     let mut store = AuditStore::open(dir.path()).unwrap();
     let items: Vec<_> = (0..5).map(|n| finding(&format!("f{n}"), "main")).collect();
     let row = run(&mut store, RunStatus::Complete, items);
-    let first = store.findings(row.id, None, true, false, 0, 2).unwrap();
+    let first = store.findings(row.id, None, true, false, &[], 0, 2).unwrap();
     assert_eq!(
         (first.items.len(), first.next, first.total),
         (2, Some(2), 5)
     );
-    let last = store.findings(row.id, None, true, false, 4, 2).unwrap();
+    let last = store.findings(row.id, None, true, false, &[], 4, 2).unwrap();
     assert_eq!((last.items.len(), last.next), (1, None));
 }
 

@@ -1,20 +1,20 @@
-//! `bars-mcp`: 17 основных инструментов и шесть графовых по настройке (Т-2, Т-19).
+//! `bars-mcp`: четыре агентских инструмента и шесть графовых по настройке (Т-2, Т-19, шаг 5.2.1).
 //!
 //! Каждый инструмент — один вызов метода протокола ([`bars_protocol`]); индекса и моделей здесь нет
-//! (НФТ-3). `initialize` читает метаданные проекта с общим сроком 3 с; без воркера отвечает
-//! статичной инструкцией. Пул до четырёх каналов для обычных вызовов живёт всю сессию
+//! (НФТ-3). Описания инструментов и стартовая инструкция `initialize` — на английском (НФТ-4).
+//! `initialize` читает метаданные проекта с общим сроком 3 с; без воркера отвечает статичной
+//! инструкцией. Пул до четырёх каналов для обычных вызовов живёт всю сессию
 //! (`docs/architecture/ipc.md`). Контракт инструментов — `docs/features/agent-tools/mcp-tools.md`.
 //! Права MCP на стороне воркера задаёт `bars_protocol::Session`: `accept_model_change` от MCP
 //! сбрасывается в `false`, а прокси его и не передаёт.
 
-mod disk_read;
 mod graph;
 mod instructions;
-mod maintenance;
 mod observation;
 mod pool;
 mod render;
 mod settings;
+mod tools;
 
 use std::io;
 use std::path::{Path, PathBuf};
@@ -22,15 +22,14 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use bars_protocol::{
-    Client, ClientError, ClientKind, DuplicatesParams, Endpoint, ErrorKind, LAUNCH_DEADLINE,
-    Method, OutlineParams, ProjectsParams, ReadParams, ReindexParams, SearchParams, SimilarParams,
-    StatusParams, Target, connect_or_launch_with, spawn_worker, worker_exe,
+    Client, ClientError, ClientKind, Endpoint, ErrorKind, LAUNCH_DEADLINE, Method,
+    connect_or_launch_with, spawn_worker, worker_exe,
 };
 use rmcp::handler::server::router::tool::ToolRouter;
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::{CallToolResult, ContentBlock, ServerCapabilities, ServerConfig};
 use rmcp::{ServerHandler, ServiceExt, schemars, tool, tool_handler, tool_router};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use serde_json::Value;
 use tokio::sync::Mutex;
 
@@ -106,6 +105,13 @@ pub async fn run_stdio(env: Env) -> anyhow::Result<()> {
     Ok(())
 }
 
+/// Версия и предупреждение о сборке воркера, увиденные прокси при последнем подключении.
+#[derive(Clone)]
+pub struct WorkerBuild {
+    pub version: String,
+    pub build_warning: Option<String>,
+}
+
 /// MCP-сервер bars. Каналы пула открываются по требованию и переиспользуются после ответа.
 #[derive(Clone)]
 pub struct BarsMcp {
@@ -115,146 +121,14 @@ pub struct BarsMcp {
     /// Показаны ли шесть графовых инструментов; решается при создании сессии (OQ-162).
     graph_tools: bool,
     session_info: Arc<Mutex<SessionMetadata>>,
+    /// Что прокси узнал о сборке воркера из `hello` последнего нового соединения (ISS-117).
+    worker_build: Arc<Mutex<Option<WorkerBuild>>>,
 }
 
 #[derive(Default)]
 struct SessionMetadata {
     attempts: u8,
     project: Option<bars_protocol::SessionProjectInfo>,
-}
-
-/// Вид ответа инструмента.
-#[derive(Debug, Clone, Copy, Default, Deserialize, Serialize, schemars::JsonSchema)]
-#[serde(rename_all = "lowercase")]
-pub enum Format {
-    /// Текст с явными границами блоков (по умолчанию).
-    #[default]
-    Txt,
-    /// JSON ответа воркера одной строкой.
-    Json,
-}
-
-#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema)]
-pub struct ProjectsArgs {
-    /// Другой зарегистрированный проект: имя или абсолютный путь. Без него — проект сессии.
-    pub project: Option<String>,
-    /// true — явно запросить все проекты; нельзя вместе с project. По умолчанию false.
-    #[serde(default)]
-    pub all: bool,
-    /// Вид ответа: `txt` (по умолчанию) или `json`.
-    pub format: Option<Format>,
-}
-
-#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema)]
-pub struct SearchArgs {
-    /// true для диагностики, сравнения запросов и служебного обхода: не создавать новые темы и не увеличивать спрос. Для сохранённой темы — bars_new_topics_check.
-    #[serde(default)]
-    pub diagnostic: bool,
-    /// hybrid — обычный поиск, та же выдача, что без поля, в форме ответа с mode; mix — плюс связанные источники графа (объёмно, задай related_budget); graph — отношения вместо фрагментов. Без поля — обычный поиск с блоками RESULT.
-    pub mode: Option<bars_graph::RetrievalMode>,
-    /// Только для mix и graph: пределы обхода графа.
-    #[serde(default)]
-    pub graph_budgets: bars_graph::Budgets,
-    /// Только для mix: false — без связанных источников; по умолчанию true.
-    pub include_related: Option<bool>,
-    /// Только для mix: предел байт пакета связанных источников, не больше graph_budgets.max_bytes. Слишком малый — выдача без пакета с fallback_reason.
-    pub related_budget: Option<u32>,
-    /// Предметный вопрос на языке пользователя после определения задачи; не шаблон «этап N требования ошибки пожелания». Операторы: "точная фраза" (слова подряд, обязательно), -слово и -"фраза" (исключить), path:папка или папка:папка (сузить область, вместе с modules/files — пересечение). `-5`, `по-русски`, `274-ФЗ` и одиночная кавычка — обычные символы. Запрос из одних исключений или фильтра — ошибка.
-    pub query: String,
-    /// Проект: путь к корню или имя. Без него — проект сессии.
-    pub project: Option<String>,
-    /// Папки первого уровня docs-root, `.` — корневой. Выбери по виду знания среди папок проекта; текущее состояние — без журналов и архивов, история — её папка. Несколько видов или место неясно — весь проект; слабая выдача — расширь область. Реальные имена — из инструкции или bars_projects; квоты нет.
-    #[serde(default)]
-    pub modules: Vec<String>,
-    /// Уже выбранные индексируемые документы, пути от docs-root или проекта, как в выдаче. Пример: ["instructions/refunds.md", "instructions/discounts.md"]. Не угадывать; для целого документа — bars_read.
-    #[serde(default)]
-    pub files: Vec<String>,
-    /// Сколько результатов вернуть.
-    pub limit: Option<u32>,
-    /// Сколько кандидатов брать до реранка.
-    pub candidates: Option<u32>,
-    /// Порог опоры оценки (rerank, а без него косинус), 0…1; добавки за слова и точное совпадение порог не обходят.
-    pub min_score: Option<f32>,
-    /// Вид ответа: `txt` (по умолчанию) или `json`.
-    pub format: Option<Format>,
-}
-
-#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema)]
-pub struct SimilarArgs {
-    /// ID чанка (поле `id` результата bars_rag_search или bars_get_similar); действует, пока не изменился документ чанка.
-    pub chunk_id: String,
-    /// Проект: путь к корню или имя. Без него — проект сессии.
-    pub project: Option<String>,
-    /// Папки первого уровня docs-root; `.` — корневой. Сужает кандидатов, исходный чанк может быть в другом модуле. Имена — из инструкции или bars_projects; без поля — весь проект.
-    #[serde(default)]
-    pub modules: Vec<String>,
-    /// Сколько похожих чанков вернуть.
-    pub limit: Option<u32>,
-    /// Вид ответа: `txt` (по умолчанию) или `json`.
-    pub format: Option<Format>,
-}
-
-#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema)]
-pub struct DuplicatesArgs {
-    /// Проект: путь к корню или имя. Обязателен: аудит читает весь проект.
-    pub project: String,
-    /// Папки первого уровня docs-root; `.` — корневой. Для явно заданного project проверь его имена в bars_projects; без поля — весь проект.
-    #[serde(default)]
-    pub modules: Vec<String>,
-    /// Сколько записей вернуть.
-    pub limit: Option<u32>,
-    /// Вид ответа: `txt` (по умолчанию) или `json`.
-    pub format: Option<Format>,
-}
-
-#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema)]
-pub struct ProjectArgs {
-    /// Проект: путь к корню или имя. Без него — проект сессии.
-    pub project: Option<String>,
-    /// Вид ответа: `txt` (по умолчанию) или `json`.
-    pub format: Option<Format>,
-}
-
-#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema)]
-pub struct ReindexArgs {
-    /// Проект: путь к корню или имя. Без него — проект сессии.
-    pub project: Option<String>,
-    /// Полная переиндексация вместо проверки актуальности.
-    #[serde(default)]
-    pub full: bool,
-    /// Вид ответа: `txt` (по умолчанию) или `json`.
-    pub format: Option<Format>,
-}
-
-#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema)]
-pub struct ReadArgs {
-    /// Путь к `.md`: от корня документации, затем от корня проекта.
-    pub path: String,
-    /// Часть по исходным строкам: N, N-M или N-. С единицы, включительно; несовместимо с under.
-    pub lines: Option<String>,
-    /// Полная цепочка заголовков из outline/поиска; раздел с вложенными, все повторы. Несовместимо с lines.
-    pub under: Option<String>,
-    /// Проект: путь к корню или имя. Без него — проект сессии.
-    pub project: Option<String>,
-    /// Вид ответа: `txt` (по умолчанию) или `json`.
-    pub format: Option<Format>,
-}
-
-#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema)]
-pub struct OutlineArgs {
-    /// Путь к `.md`: от корня документации, затем от корня проекта.
-    pub path: String,
-    /// Проект: путь к корню или имя. Без него — проект сессии.
-    pub project: Option<String>,
-    /// Какие уровни заголовков вернуть (1…6); по умолчанию все.
-    #[serde(default)]
-    pub levels: Vec<u8>,
-    /// Только заголовки внутри этого: цепочка `Заголовок 1/Заголовок 2`, как `heading_chain` в поиске.
-    pub under: Option<String>,
-    /// Только заголовки внутри заголовка на этой строке.
-    pub under_line: Option<u32>,
-    /// Вид ответа: `txt` (по умолчанию) или `json`.
-    pub format: Option<Format>,
 }
 
 #[tool_router(router=graph_tool_router)]
@@ -294,7 +168,7 @@ impl BarsMcp {
         annotations(read_only_hint = true),
         description = "Документы для перепроверки после правки: зависимости и проверки с основанием. \
                        Вход — documents (пути) или roots из графа. Пустота не доказывает отсутствия \
-                       зависимостей. Гиперссылки — bars_links с direction=incoming."
+                       зависимостей. Гиперссылки — bars_read view=links direction=incoming."
     )]
     async fn bars_impact(
         &self,
@@ -355,9 +229,10 @@ impl BarsMcp {
     /// (`[mcp] graph_tools`); скрытый инструмент вызвать нельзя — клиент получит «неизвестный».
     pub fn new(env: Env) -> Self {
         let graph_tools = settings::graph_tools_enabled(env.bars_home.as_deref());
-        let mut tool_router = Self::tool_router() + disk_read::router() + maintenance::router();
+        let mut tool_router = Self::tool_router() + tools::router();
         if graph_tools {
             tool_router += Self::graph_tool_router();
+            tool_router += tools::search::graph_router();
         }
         Self {
             env,
@@ -365,11 +240,12 @@ impl BarsMcp {
             tool_router,
             graph_tools,
             session_info: Arc::new(Mutex::new(SessionMetadata::default())),
+            worker_build: Arc::new(Mutex::new(None)),
         }
     }
 
-    fn target(&self, project: Option<String>) -> Target {
-        Target {
+    fn target(&self, project: Option<String>) -> bars_protocol::Target {
+        bars_protocol::Target {
             cwd: self.env.cwd.display().to_string(),
             project: project.map(|value| project_arg(&value, &self.env.cwd)),
         }
@@ -417,6 +293,11 @@ impl BarsMcp {
         state.project.clone()
     }
 
+    /// Сборка воркера из `hello` последнего нового соединения; до первого соединения — `None`.
+    async fn worker_build(&self) -> Option<WorkerBuild> {
+        self.worker_build.lock().await.clone()
+    }
+
     /// Вызывает метод воркера через пул. После обрыва чтение повторяется один раз; запись
     /// не повторяется, поскольку могла выполниться до обрыва. Незавершённый канал закрывается:
     /// поздний ответ не должен сбить порядок вызовов. Общий срок и отмена — в `call_tool`.
@@ -448,6 +329,11 @@ impl BarsMcp {
                     // stdout занят протоколом MCP; stderr клиент складывает в журнал сервера.
                     eprintln!("bars-mcp: предупреждение: {warning}");
                 }
+                let build = WorkerBuild {
+                    version: client.worker_version().to_string(),
+                    build_warning: client.build_warning().map(str::to_string),
+                };
+                *self.worker_build.lock().await = Some(build);
                 lease.client = Some(client);
             }
             let client = lease.client.as_mut().expect("соединение открыто выше");
@@ -462,7 +348,7 @@ impl BarsMcp {
                     if attempt == 1
                         || matches!(
                             M::NAME,
-                            "reindex" | "audit_run" | "audit_cancel" | "new_topics_check"
+                            "reindex" | "audit_run" | "audit_cancel" | "new_topics_check" | "like"
                         )
                     {
                         return Err(error);
@@ -530,9 +416,15 @@ fn text(content: String) -> CallToolResult {
     CallToolResult::success(vec![ContentBlock::text(content)])
 }
 
-/// Ответ метода как JSON — тот же, что печатает `bars-cli --json`.
-fn json<T: Serialize>(output: &T) -> String {
-    serde_json::to_string(output).expect("ответы методов сериализуются")
+/// Ответ инструмента: текстовый вид результата или понятная ошибка, а не ошибка протокола MCP.
+fn present<T: Serialize>(
+    result: Result<T, ClientError>,
+    render: impl FnOnce(&T) -> String,
+) -> CallToolResult {
+    match result {
+        Ok(output) => text(render(&output)),
+        Err(error) => failure(&error),
+    }
 }
 
 /// Ошибка воркера или канала — понятный ответ инструмента, а не ошибка протокола MCP: клиент
@@ -572,274 +464,6 @@ fn failure(error: &ClientError) -> CallToolResult {
         _ => {}
     }
     CallToolResult::error(vec![ContentBlock::text(message)])
-}
-
-fn finish<T: Serialize>(
-    result: Result<T, ClientError>,
-    format: Option<Format>,
-    render: impl FnOnce(&T) -> String,
-) -> CallToolResult {
-    match result {
-        Ok(output) => text(match format.unwrap_or_default() {
-            Format::Txt => render(&output),
-            Format::Json => json(&output),
-        }),
-        Err(error) => failure(&error),
-    }
-}
-
-#[tool_router]
-impl BarsMcp {
-    #[tool(
-        name = "bars_rag_search",
-        annotations(read_only_hint = true),
-        description = "Поиск неизвестного контекста после определения предмета задачи; для известного \
-                       документа можно сразу bars_read/bars_outline. Гибридный поиск возвращает \
-                       фрагменты с источниками, строками и оценкой. Выбери modules по виду знания среди папок проекта: \
-                       текущее состояние — без журналов и архивов, история — её папка; \
-                       реальные имена — из инструкции или bars_projects. Несколько видов или место \
-                       неясно — весь проект; слабая выдача — расширь область. Квоты нет. \
-                       files — уже выбранные индексируемые документы: например, \
-                       [\"instructions/refunds.md\",\"instructions/discounts.md\"] для \
-                       сверки двух правил; пути от docs-root или проекта. Не угадывать список \
-                       файлов. Без project — проект сессии."
-    )]
-    async fn bars_rag_search(
-        &self,
-        original: observation::Original,
-        Parameters(args): Parameters<SearchArgs>,
-    ) -> CallToolResult {
-        if args.mode.is_none() && (args.include_related.is_some() || args.related_budget.is_some())
-        {
-            return CallToolResult::error(vec![ContentBlock::text(
-                "include_related/related_budget требуют mode=mix",
-            )]);
-        }
-        let mode = args.mode;
-        let graph_budgets = args.graph_budgets;
-        let include_related = args.include_related.unwrap_or(true);
-        let related_budget = args.related_budget;
-        let params = SearchParams {
-            diagnostic: args.diagnostic,
-            target: self.target(args.project),
-            query: args.query,
-            modules: args.modules,
-            files: args.files,
-            limit: args.limit,
-            candidates: args.candidates,
-            min_score: args.min_score,
-            wait_models: None,
-        };
-        if let Some(mode) = mode {
-            finish(
-                self.call_observed(
-                    &bars_protocol::GraphSearchParams {
-                        text: !matches!(args.format, Some(Format::Json)),
-                        search: params,
-                        mode,
-                        graph_budgets,
-                        include_related,
-                        related_budget,
-                    },
-                    Some(&original.0),
-                )
-                .await,
-                args.format,
-                bars_protocol::graph_text::render_graph_search_text,
-            )
-        } else {
-            finish(
-                self.call_observed(&params, Some(&original.0)).await,
-                args.format,
-                render::search,
-            )
-        }
-    }
-
-    #[tool(
-        name = "bars_get_similar",
-        annotations(read_only_hint = true),
-        description = "Похожие разделы по ID чанка из выдачи bars_rag_search (поле id). Перед правкой — \
-                       найти другие места с тем же описанием; перед добавлением текста — проверить, \
-                       нет ли его уже. Возвращает ближайшие чанки области modules без исходного; \
-                       оценка — косинусная близость к исходному чанку. Близость не доказывает \
-                       дублирование, согласие или зависимость документов: читай оба раздела. ID \
-                       устаревает при изменении документа: при chunk_not_found найди раздел поиском \
-                       заново. Без project — проект сессии."
-    )]
-    async fn bars_get_similar(
-        &self,
-        original: observation::Original,
-        Parameters(args): Parameters<SimilarArgs>,
-    ) -> CallToolResult {
-        let params = SimilarParams {
-            target: self.target(args.project),
-            chunk_id: args.chunk_id,
-            modules: args.modules,
-            limit: args.limit,
-        };
-        finish(
-            self.call_observed(&params, Some(&original.0)).await,
-            args.format,
-            render::similar,
-        )
-    }
-
-    #[tool(
-        name = "bars_get_duplicates",
-        annotations(read_only_hint = true),
-        description = "Аудит дублей проекта: повторяющиеся и разошедшиеся описания, чтобы выбрать основной источник и заменить повторы ссылками. Без исходного чанка; project обязателен, modules ограничивает область. Виды: exact — одинаковый текст; near — почти одинаковые копии (с различиями слов, чисел и отрицаний); contained — один раздел внутри другого; partial — скопирована заметная часть; semantic — близки по смыслу, только повод прочитать оба. Наиболее явные первыми; одинаковый блок в четырёх и больше разделах помечен repeated_block (скорее шаблон). Ничего не удаляет и не объединяет. Короткие разделы (меньше 15 слов) не сравниваются."
-    )]
-    async fn bars_get_duplicates(
-        &self,
-        original: observation::Original,
-        Parameters(args): Parameters<DuplicatesArgs>,
-    ) -> CallToolResult {
-        let params = DuplicatesParams {
-            target: self.target(Some(args.project)),
-            modules: args.modules,
-            limit: args.limit,
-        };
-        finish(
-            self.call_observed(&params, Some(&original.0)).await,
-            args.format,
-            render::duplicates,
-        )
-    }
-
-    #[tool(
-        name = "bars_projects",
-        annotations(read_only_hint = true),
-        description = "Проект сессии и модули первого уровня: число документов и назначение из Index.md. \
-                       Другой проект — project (имя или путь), все проекты — только all=true. \
-                       Используй для выбора project/modules; вложенная папка не отдельный модуль."
-    )]
-    async fn bars_projects(
-        &self,
-        original: observation::Original,
-        Parameters(args): Parameters<ProjectsArgs>,
-    ) -> CallToolResult {
-        if args.all && args.project.is_some() {
-            return CallToolResult::error(vec![ContentBlock::text(
-                "invalid_params: all=true нельзя вместе с project",
-            )]);
-        }
-        let params = ProjectsParams {
-            target: (!args.all).then(|| self.target(args.project)),
-        };
-        finish(
-            self.call_observed(&params, Some(&original.0)).await,
-            args.format,
-            render::projects,
-        )
-    }
-
-    #[tool(
-        name = "bars_status",
-        annotations(read_only_hint = true),
-        description = "Состояние индекса проекта: когда обновлён, идёт ли индексация, сколько \
-                       документов ждёт, модель индекса, нужна ли переиндексация, последняя ошибка."
-    )]
-    async fn bars_status(
-        &self,
-        original: observation::Original,
-        Parameters(args): Parameters<ProjectArgs>,
-    ) -> CallToolResult {
-        let params = StatusParams {
-            target: self.target(args.project),
-        };
-        finish(
-            self.call_observed(&params, Some(&original.0)).await,
-            args.format,
-            render::status,
-        )
-    }
-
-    #[tool(
-        name = "bars_reindex",
-        annotations(read_only_hint = false),
-        description = "Переиндексация проекта: проверка актуальности или, с full, полная. \
-                       Сначала bars_status: reindex_required требует пользователя; после внешней правки \
-                       проверяй индекс, только если документ остаётся вне поиска после нормальной паузы. \
-                       Не помогает при model_loading или graph_not_ready: модель нужно дождаться, \
-                       граф обновляется сам после индекса или из окна / bars-cli graph build. \
-                       Пустая выдача и ожидание очереди — не повод. Возвращается сразу, ход в bars_status. \
-                       После смены модели — reindex_needs_consent, согласие даёт только пользователь."
-    )]
-    async fn bars_reindex(
-        &self,
-        original: observation::Original,
-        Parameters(args): Parameters<ReindexArgs>,
-    ) -> CallToolResult {
-        let params = ReindexParams {
-            target: self.target(args.project),
-            full: args.full,
-            // Согласие даёт человек (Т-25): прокси его не передаёт, а воркер от MCP всё равно сбросил бы.
-            accept_model_change: false,
-        };
-        finish(
-            self.call_observed(&params, Some(&original.0)).await,
-            args.format,
-            render::reindex,
-        )
-    }
-
-    #[tool(
-        name = "bars_read",
-        annotations(read_only_hint = true),
-        description = "Прочитать известный .md или часть с исходными номерами строк и title, без поиска. \
-                       Длинный план/реестр: bars_outline, затем lines (N, N-M, N-) или under \
-                       (полная цепочка заголовков, раздел с вложенными и все повторы). Выбор один; \
-                       часть явно помечена. Сохранённый диск, включая файлы вне индекса; \
-                       path — от корня документации или проекта."
-    )]
-    async fn bars_read(
-        &self,
-        original: observation::Original,
-        Parameters(args): Parameters<ReadArgs>,
-    ) -> CallToolResult {
-        let params = ReadParams {
-            target: self.target(args.project),
-            path: args.path,
-            lines: args.lines,
-            under: args.under,
-        };
-        let path = params.path.clone();
-        finish(
-            self.call_observed(&params, Some(&original.0)).await,
-            args.format,
-            |output| render::read(&path, output),
-        )
-    }
-
-    #[tool(
-        name = "bars_outline",
-        annotations(read_only_hint = true),
-        description = "Заголовки известного `.md` с номерами строк; можно вызвать сразу без поиска, \
-                       например для определения предмета этапа по плану. Читается с диска, включая \
-                       файлы вне индекса; path — от корня документации или проекта. \
-                       levels фильтрует уровни, under (цепочка заголовков) или under_line — только \
-                       вложенные в заголовок. Для полного текста — bars_read."
-    )]
-    async fn bars_outline(
-        &self,
-        original: observation::Original,
-        Parameters(args): Parameters<OutlineArgs>,
-    ) -> CallToolResult {
-        let params = OutlineParams {
-            target: self.target(args.project),
-            path: args.path,
-            levels: args.levels,
-            under: args.under,
-            under_line: args.under_line,
-        };
-        let path = params.path.clone();
-        finish(
-            self.call_observed(&params, Some(&original.0)).await,
-            args.format,
-            |output| render::outline(&path, output),
-        )
-    }
 }
 
 #[tool_handler(router = self.tool_router)]
@@ -889,51 +513,11 @@ impl ServerHandler for BarsMcp {
         _request: Option<rmcp::model::PaginatedRequestParams>,
         _context: rmcp::service::RequestContext<rmcp::RoleServer>,
     ) -> Result<rmcp::model::ListToolsResult, rmcp::ErrorData> {
-        let project = self.session_metadata(2).await;
-        let mut tools = self.tool_router.list_all();
-        if let Some(project) = project {
-            let mut modules = project.modules;
-            modules.sort_by(|a, b| a.name.cmp(&b.name));
-            let details = modules
-                .iter()
-                .map(|module| {
-                    let name = instructions::clean(&module.name, usize::MAX);
-                    let title = module
-                        .title
-                        .as_deref()
-                        .map(|t| instructions::clean(t, 60))
-                        .filter(|t| !t.is_empty());
-                    format!(
-                        "{name} ({}){}",
-                        module.documents,
-                        title.map(|t| format!(" — {t}")).unwrap_or_default()
-                    )
-                })
-                .collect::<Vec<_>>()
-                .join("; ");
-            let note = format!(
-                " Модули проекта сессии {}: {details}. Для другого project — bars_projects; список не ограничивает новые модули.",
-                instructions::clean(&project.name, 60)
-            );
-            for tool in &mut tools {
-                if matches!(
-                    tool.name.as_ref(),
-                    "bars_rag_search" | "bars_get_similar" | "bars_get_duplicates"
-                ) {
-                    let schema = Arc::make_mut(&mut tool.input_schema);
-                    if let Some(description) = schema
-                        .get_mut("properties")
-                        .and_then(|p| p.get_mut("modules"))
-                        .and_then(|m| m.get_mut("description"))
-                    {
-                        let text = format!("{}{note}", description.as_str().unwrap_or_default());
-                        *description = Value::String(text);
-                    }
-                }
-            }
-        }
+        // Список модулей проекта больше не подставляется в описания параметров: области поиска —
+        // произвольные пути (`in`), а модули с назначением живут в initialize и bars_status.
+        let _ = self.session_metadata(2).await;
         Ok(rmcp::model::ListToolsResult {
-            tools,
+            tools: self.tool_router.list_all(),
             ..Default::default()
         })
     }

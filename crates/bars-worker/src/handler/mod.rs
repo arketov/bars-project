@@ -443,6 +443,7 @@ impl WorkerHandler {
         let scope = bars_protocol::SearchScope {
             modules: request.modules.clone(),
             files: request.files.clone(),
+            paths: request.paths.clone(),
             excluded_projects: self.worker.nested_projects(&project, false),
         };
         // Rerank-модель, пока она скачивается, поиск не ждёт: выдача идёт без неё. Ожидание идёт
