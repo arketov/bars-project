@@ -38,12 +38,13 @@ impl BarsMcp {
             };
             let part = match self.call_observed(&params, Some(&original)).await {
                 Ok(output) => render::refresh(output),
-                Err(error) => render::error_part("REFRESH", &error),
+                Err(error) => return failure(&error),
             };
             text.push_str(&part);
             text.push('\n');
         }
-        // Проект: путь нужен частям аудитов и тем, у которых нет Target с cwd.
+        // Проект: путь нужен частям аудитов и тем, у которых нет Target с cwd. Неразрешимый
+        // проект — ошибка вызова: остальные части всё равно были бы про тот же проект.
         let projects_params = bars_protocol::ProjectsParams {
             target: (!args.all).then(|| target.clone()),
         };
@@ -59,10 +60,7 @@ impl BarsMcp {
                 text.push_str(&render::projects(&output));
                 path
             }
-            Err(error) => {
-                text.push_str(&render::error_part("PROJECT", &error));
-                None
-            }
+            Err(error) => return failure(&error),
         };
         let index = bars_protocol::StatusParams {
             target: target.clone(),
@@ -107,7 +105,10 @@ impl BarsMcp {
         }
         let graph = bars_protocol::GraphStatusParams { target };
         let part = match self.call_observed(&graph, Some(&original)).await {
-            Ok(output) => render::graph_part(&output),
+            Ok(output) => format!(
+                "=== GRAPH ==={}\n=== END GRAPH ===",
+                render::graph_part(&output)
+            ),
             Err(error) => render::error_part("GRAPH", &error),
         };
         text.push('\n');

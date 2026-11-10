@@ -123,6 +123,7 @@ impl Env {
             include_ignored: false,
             cursor: None,
             limit: None,
+            paths: Vec::new(),
         }))
         .await
     }
@@ -196,6 +197,7 @@ async fn contradictions_and_ignore_round_trip_without_changing_files() {
             include_ignored: true,
             cursor: None,
             limit: None,
+            paths: Vec::new(),
         }))
         .await;
     assert_eq!(all.total, 1);

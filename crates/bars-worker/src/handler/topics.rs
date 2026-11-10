@@ -286,6 +286,7 @@ impl WorkerHandler {
                 query: variant.text.clone(),
                 modules,
                 files,
+                paths: Vec::new(),
                 limit: None,
                 candidates: None,
                 min_score: None,

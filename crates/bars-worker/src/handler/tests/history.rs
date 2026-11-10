@@ -8,12 +8,13 @@ async fn mcp_history_ui_real_ipc_record_has_readable_input_and_result() {
     let mut cli = harness.client(ClientKind::Cli).await;
     let root = ready_project(&harness, &mut cli).await;
     let mut mcp = harness.client(ClientKind::Mcp).await;
-    let original = serde_json::json!({"path":"guide.md","format":"json"});
+    let original = serde_json::json!({"path":"guide.md","view":"text"});
     let response = mcp
         .call_observed(
             &ReadParams {
                 lines: None,
                 under: None,
+                max_lines: None,
                 target: target(&root),
                 path: "guide.md".into(),
             },
@@ -40,13 +41,14 @@ async fn mcp_history_ui_real_ipc_record_has_readable_input_and_result() {
     );
     println!("MCP_UI_EVIDENCE={safe}");
 
-    let partial_input = serde_json::json!({"path":"guide.md","lines":"2-4","format":"json"});
+    let partial_input = serde_json::json!({"path":"guide.md","lines":"2-4"});
     mcp.call_observed(
         &ReadParams {
             target: target(&root),
             path: "guide.md".into(),
             lines: Some("2-4".into()),
             under: None,
+            max_lines: None,
         },
         Some(&partial_input),
     )
@@ -111,6 +113,7 @@ async fn mcp_history_worker_restart_leaves_interrupted_ipc_unknown_and_repeat_is
         query: "Поиск".into(),
         modules: vec![],
         files: vec![],
+        paths: vec![],
         limit: None,
         candidates: None,
         min_score: None,

@@ -1,6 +1,6 @@
 //! Интеграционные тесты `bars-mcp`: сырой JSON-RPC по stdio-подобному каналу, настоящий воркер
 //! (канал, реестр, очередь, индекс) во временных папках, подделка embed-модели, запуск воркера
-//! «по требованию» из самого прокси.
+//! «по требованию» из самого прокси. Четыре агентских инструмента вместо семнадцати (5.2.1).
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -10,7 +10,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::{Duration, Instant};
 
 use bars_mcp::{BarsMcp, CALL_TIMEOUT, Env, INSTRUCTIONS, Launch, MODEL_WAIT, instructions};
-use bars_protocol::{Client, ClientKind, Endpoint, RegisterParams};
+use bars_protocol::{Client, ClientKind, Endpoint, RegisterParams, StatusParams, Target};
 use bars_worker::serve::serve;
 use bars_worker::worker::WorkerConfig;
 use bars_worker::worker::models::fake::FakeProvider;
@@ -31,7 +31,7 @@ async fn partial_read_keeps_disk_lines_revision_and_all_matching_sections() {
         initialized["result"]["instructions"]
             .as_str()
             .unwrap()
-            .contains("lines/under")
+            .contains("lines (N, N-M, N-)")
     );
     harness.register(&root).await;
     let list = mcp.request("tools/list", json!({})).await;
@@ -43,73 +43,64 @@ async fn partial_read_keeps_disk_lines_revision_and_all_matching_sections() {
         .unwrap();
     assert!(schema["inputSchema"]["properties"]["lines"].is_object());
     assert!(schema["inputSchema"]["properties"]["under"].is_object());
-    let (error, whole) = mcp
-        .tool("bars_read", json!({"path":"part.md","format":"json"}))
-        .await;
+    assert!(schema["inputSchema"]["properties"]["view"].is_object());
+    let (error, whole) = mcp.tool("bars_read", json!({"path":"part.md"})).await;
     assert!(!error, "{whole}");
-    let whole: Value = serde_json::from_str(&whole).unwrap();
-    assert_eq!(whole["text"], source);
-    assert!(whole.get("lines_total").is_none());
+    assert!(whole.starts_with("=== DOCUMENT part.md ===\ntitle: Части\n"), "{whole}");
+    assert!(whole.contains("5 ## Б\n6 один\n7 ### В\n8 вложенный"), "{whole}");
+    assert!(whole.ends_with("12 два\n=== END DOCUMENT ==="), "{whole}");
     let (error, part) = mcp
-        .tool(
-            "bars_read",
-            json!({"path":"docs/part.md","lines":"6-8","format":"json"}),
-        )
+        .tool("bars_read", json!({"path":"docs/part.md","lines":"6-8"}))
         .await;
     assert!(!error, "{part}");
-    let part: Value = serde_json::from_str(&part).unwrap();
-    assert_eq!(part["text"], "один\r\n### В\r\nвложенный\r\n");
-    assert_eq!(part["range"], json!({"from":6,"to":8}));
-    assert_eq!(part["lines_total"], 12);
-    assert_eq!(part["revision"], whole["revision"]);
-    assert_eq!(part["title"], "Части");
-    let (error, sections) = mcp
-        .tool(
-            "bars_read",
-            json!({"path":"part.md","under":"А/Б","format":"json"}),
-        )
-        .await;
-    assert!(!error, "{sections}");
-    let sections: Value = serde_json::from_str(&sections).unwrap();
-    assert_eq!(
-        sections["sections"],
-        json!([
-            {"from":5,"to":8,"heading_chain":"А/Б"}, {"from":11,"to":12,"heading_chain":"А/Б"}
-        ])
-    );
-    assert_eq!(
-        sections["text"],
-        "## Б\r\nодин\r\n### В\r\nвложенный\r\n## Б\r\nдва"
-    );
-    let (error, text) = mcp
-        .tool(
-            "bars_read",
-            json!({"path":"part.md","under":"А/Б","format":"txt"}),
-        )
-        .await;
-    assert!(!error, "{text}");
     assert!(
-        text.contains("=== PART 2 of 2 ===\nheading: А/Б\nlines: 11-12 of 12\n11 ## Б\n12 два"),
-        "{text}"
+        part.contains("lines: 6-8 of 12\n6 один\n7 ### В\n8 вложенный"),
+        "{part}"
     );
-    assert!(!text.contains("не выдавать"));
+    // under принимает полную цепочку и конец цепочки (ISS-112).
+    for under in ["А/Б", "Б"] {
+        let (error, sections) = mcp
+            .tool("bars_read", json!({"path":"part.md","under":under}))
+            .await;
+        assert!(!error, "{under}: {sections}");
+        assert!(
+            sections.contains("=== PART 1 of 2 ===\nheading: А/Б\nlines: 5-8 of 12"),
+            "{under}: {sections}"
+        );
+        assert!(
+            sections.contains("=== PART 2 of 2 ===\nheading: А/Б\nlines: 11-12 of 12\n11 ## Б\n12 два"),
+            "{under}: {sections}"
+        );
+        assert!(!sections.contains("не выдавать"), "{sections}");
+    }
+    // Несуществующий заголовок — ошибка со списком ближайших заголовков и их строк.
+    let (error, text) = mcp
+        .tool("bars_read", json!({"path":"part.md","under":"несуществует"}))
+        .await;
+    assert!(error, "{text}");
+    assert!(text.contains("invalid_params"), "{text}");
+    assert!(text.contains("Ближайшие заголовки"), "{text}");
     for args in [
         json!({"lines":"0"}),
         json!({"lines":"13-"}),
         json!({"lines":"1","under":"А"}),
-        json!({"under":"Б"}),
     ] {
         let mut args = args;
         args["path"] = json!("part.md");
         let (error, text) = mcp.tool("bars_read", args).await;
         assert!(error && text.contains("invalid_params"), "{text}");
     }
+    // Документ длиннее 400 строк без уточнений отдаётся структурой с подсказкой.
+    let long = "# Длинный\n\nстрока\n".repeat(250);
+    fs::write(root.join("docs/long.md"), long).unwrap();
+    let (error, text) = mcp.tool("bars_read", json!({"path":"long.md"})).await;
+    assert!(!error, "{text}");
+    assert!(text.contains("=== DOCUMENT long.md (outline) ==="), "{text}");
+    assert!(text.contains("lines_total: 501"), "{text}");
+    assert!(text.contains("this document is long"), "{text}");
     fs::write(root.join("docs/part.md"), "# Новый\nс диска\n").unwrap();
     let (error, text) = mcp
-        .tool(
-            "bars_read",
-            json!({"path":"part.md","lines":"2-999","format":"txt"}),
-        )
+        .tool("bars_read", json!({"path":"part.md","lines":"2-999"}))
         .await;
     assert!(!error, "{text}");
     assert!(text.contains("lines: 2-2 of 2\n2 с диска"), "{text}");
@@ -144,127 +135,118 @@ async fn maintenance_tools_read_shared_results_and_keep_topic_mutations_closed()
     }
     let mut mcp = harness.connect(harness.env(&root));
     mcp.initialize().await;
-    assert!(!mcp.tool("bars_projects", json!({"all":true})).await.0);
+    assert!(!mcp.tool("bars_status", json!({"all":true})).await.0);
     harness.register(&root).await;
-    wait_status(&mut mcp, "индекс", indexed).await;
-    let project = root.display().to_string();
+    wait_status(&harness, &root, "индекс", indexed).await;
+    // Новые темы: список, карточка, проверка по текущей ревизии.
     let (error, body) = mcp
-        .tool("bars_new_topics_list", json!({"project":project}))
+        .tool("bars_audit", json!({"kind":"new_topics","action":"list"}))
         .await;
     assert!(!error, "{body}");
-    let list: Value = serde_json::from_str(&body).unwrap();
-    let id = &list["topics"][0]["id"];
-    assert!(id.is_number(), "{list}");
+    assert!(body.starts_with("=== NEW TOPICS: 1 ==="), "{body}");
+    let id: i64 = body
+        .split('[')
+        .nth(1)
+        .and_then(|rest| rest.split(']').next())
+        .unwrap()
+        .parse()
+        .unwrap();
     let (error, body) = mcp
-        .tool("bars_new_topics_get", json!({"project":project,"id":id}))
+        .tool("bars_audit", json!({"kind":"new_topics","action":"get","id":id}))
         .await;
     assert!(!error, "{body}");
-    let detail: Value = serde_json::from_str(&body).unwrap();
-    assert_eq!(
-        detail["variants_list"][0]["text"],
-        "Как восстановить отсутствующие знания?"
-    );
-    assert_eq!(detail["observations"], 1);
-    let before = detail;
-    let mut revision = before["revision"].clone();
-    for expand in [false, true] {
+    assert!(body.contains(&format!("=== TOPIC {id}")), "{body}");
+    assert!(body.contains("Как восстановить отсутствующие знания?"), "{body}");
+    for _ in 0..2 {
         let (error, body) = mcp
             .tool(
-                "bars_new_topics_check",
-                json!({"project":project,"id":id,"revision":revision,"expand":expand}),
+                "bars_audit",
+                json!({"kind":"new_topics","action":"check","id":id}),
             )
             .await;
         assert!(!error, "{body}");
-        let checked: Value = serde_json::from_str(&body).unwrap();
-        assert_eq!(checked["observations"], before["observations"]);
-        assert_eq!(checked["first_seen"], before["first_seen"]);
-        assert_eq!(checked["last_seen"], before["last_seen"]);
-        assert_eq!(checked["variants_list"], before["variants_list"]);
-        assert_eq!(checked["checks"][0]["expanded"], expand);
-        assert_ne!(checked["status"], "resolved");
-        revision = checked["revision"].clone();
+        assert!(body.contains("checks:"), "{body}");
+        assert!(body.contains("outcome"), "{body}");
     }
+    // Проверка с устаревшей ревизией — ошибка stale_ref.
     let (error, body) = mcp
         .tool(
-            "bars_new_topics_check",
-            json!({"project":project,"id":id,"revision":0}),
+            "bars_audit",
+            json!({"kind":"new_topics","action":"check","id":id,"revision":0}),
         )
         .await;
     assert!(error && body.contains("stale_ref"), "{body}");
+    // Аудит битых ссылок: запуск, состояния, находки постранично, сводка.
     let (error, body) = mcp
         .tool(
-            "bars_audit_run",
-            json!({"project":project,"kind":"broken_links"}),
+            "bars_audit",
+            json!({"kind":"broken_links","action":"run"}),
         )
         .await;
     assert!(!error, "{body}");
+    assert!(body.contains("accepted: true"), "{body}");
     let deadline = Instant::now() + Duration::from_secs(30);
     loop {
-        let (error, body) = mcp
-            .tool("bars_audit_list", json!({"project":project}))
-            .await;
+        let (error, body) = mcp.tool("bars_audit", json!({})).await;
         assert!(!error, "{body}");
-        let list: Value = serde_json::from_str(&body).unwrap();
-        let audit = list["audits"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .find(|a| a["kind"] == "broken_links")
-            .unwrap();
-        if audit["state"] == "complete" {
+        if body.contains("broken_links: complete") {
             break;
         }
         assert!(Instant::now() < deadline, "{body}");
         tokio::time::sleep(Duration::from_millis(20)).await;
     }
+    let mut seen = Vec::new();
     let mut cursor = Value::Null;
-    let mut subjects = Vec::new();
     for _ in 0..3 {
-        let (error, body) = mcp
-            .tool(
-                "bars_audit_findings",
-                json!({"project":project,"kind":"broken_links","limit":1,"cursor":cursor}),
-            )
-            .await;
+        let mut args = json!({"kind":"broken_links","action":"findings","limit":1});
+        if !cursor.is_null() {
+            args["cursor"] = cursor.clone();
+        }
+        let (error, body) = mcp.tool("bars_audit", args).await;
         assert!(!error, "{body}");
-        let page: Value = serde_json::from_str(&body).unwrap();
-        assert_eq!(page["total"], 2);
-        assert!(page["run_id"].is_number());
-        subjects.push(page["items"][0]["detail"].clone());
-        cursor = page["next"].clone();
+        assert!(body.contains("run "), "{body}");
+        let detail = body
+            .lines()
+            .find(|line| line.contains("→"))
+            .unwrap()
+            .to_string();
+        seen.push(detail);
+        cursor = body
+            .lines()
+            .find_map(|line| line.strip_prefix("next: "))
+            .map(|next| json!(next.parse::<i64>().unwrap()))
+            .unwrap_or(Value::Null);
         if cursor.is_null() {
             break;
         }
     }
-    assert_eq!(subjects.len(), 2);
-    assert_ne!(subjects[0], subjects[1]);
-    for kind in ["duplicates", "contradictions"] {
-        let (error, body) = mcp
-            .tool(
-                "bars_audit_findings",
-                json!({"project":project,"kind":kind}),
-            )
-            .await;
-        assert!(!error, "{body}");
-        let page: Value = serde_json::from_str(&body).unwrap();
-        assert!(page["run_id"].is_null());
-    }
+    assert_eq!(seen.len(), 2, "{seen:?}");
+    assert_ne!(seen[0], seen[1]);
     let (error, body) = mcp
-        .tool(
-            "bars_audit_cancel",
-            json!({"project":project,"kind":"broken_links"}),
-        )
+        .tool("bars_audit", json!({"kind":"broken_links","action":"summary"}))
         .await;
     assert!(!error, "{body}");
-    for name in ["bars_audit_list", "bars_new_topics_list"] {
-        assert!(mcp.tool(name, json!({"project":"relative"})).await.0);
+    assert!(body.contains("files: docs/broken.md 2"), "{body}");
+    assert!(body.contains("tags: broken 2"), "{body}");
+    for kind in ["duplicates", "contradictions"] {
+        let (error, body) = mcp
+            .tool("bars_audit", json!({"kind":kind,"action":"findings"}))
+            .await;
+        assert!(!error, "{body}");
+        assert!(body.contains("no complete run yet"), "{body}");
     }
+    let (error, body) = mcp
+        .tool("bars_audit", json!({"kind":"broken_links","action":"cancel"}))
+        .await;
+    assert!(!error && body.contains("cancelled:"), "{body}");
+    let (error, body) = mcp.tool("bars_audit", json!({"project":"relative"})).await;
+    assert!(error && body.contains("project_not_found"), "{body}");
     let mut client = Client::connect(&harness.endpoint, ClientKind::Mcp)
         .await
         .unwrap();
     let denied = client
         .call(&bars_protocol::NewTopicsClearParams {
-            project,
+            project: root.display().to_string(),
             confirmed: true,
         })
         .await
@@ -281,64 +263,64 @@ async fn diagnostic_mcp_searches_do_not_create_or_refresh_topics() {
     fs::create_dir_all(root.join("docs")).unwrap();
     let mut mcp = harness.connect(harness.env(&root));
     mcp.initialize().await;
-    assert!(!mcp.tool("bars_projects", json!({"all":true})).await.0);
+    assert!(!mcp.tool("bars_status", json!({"all":true})).await.0);
     harness.register(&root).await;
-    wait_status(&mut mcp, "пустой индекс", |s| {
+    wait_status(&harness, &root, "пустой индекс", |s| {
         s["state"] == "ready" && s["pending"] == 0
     })
     .await;
     let project = root.display().to_string();
     let query = "Как устроен механизм проверки?";
-    assert!(!mcp.tool("bars_rag_search", json!({"query":query})).await.0);
+    assert!(!mcp.tool("bars_search", json!({"query":query})).await.0);
     let deadline = Instant::now() + Duration::from_secs(10);
     let before = loop {
-        let (error, body) = mcp
-            .tool("bars_new_topics_list", json!({"project":project}))
-            .await;
-        assert!(!error, "{body}");
-        let value: Value = serde_json::from_str(&body).unwrap();
-        if value["topics"].as_array().unwrap().len() == 1 {
-            break value["topics"][0].clone();
+        let topics = topics_via_client(&harness, &project).await;
+        if topics["topics"].as_array().unwrap().len() == 1 {
+            break topics["topics"][0].clone();
         }
-        assert!(Instant::now() < deadline, "{body}");
+        assert!(Instant::now() < deadline, "{topics}");
         tokio::time::sleep(Duration::from_millis(20)).await;
     };
-    for mode in [None, Some("hybrid"), Some("mix")] {
-        for text in [query, "Другой диагностический вопрос"] {
-            let mut args = json!({"query":text,"diagnostic":true});
-            if let Some(mode) = mode {
-                args["mode"] = json!(mode);
-            }
-            let (error, body) = mcp.tool("bars_rag_search", args).await;
-            assert!(!error, "{body}");
-            let result: Value = serde_json::from_str(&body).unwrap();
-            assert_eq!(result["results"], json!([]));
-        }
-    }
-    // A regular request after diagnostics is a writer-queue barrier and must still count.
-    assert!(!mcp.tool("bars_rag_search", json!({"query":query})).await.0);
-    let deadline = Instant::now() + Duration::from_secs(10);
-    loop {
+    for text in [query, "Другой диагностический вопрос"] {
         let (error, body) = mcp
-            .tool("bars_new_topics_list", json!({"project":project}))
+            .tool("bars_search", json!({"query":text,"diagnostic":true}))
             .await;
         assert!(!error, "{body}");
-        let value: Value = serde_json::from_str(&body).unwrap();
-        let topics = value["topics"].as_array().unwrap();
-        assert_eq!(topics.len(), 1, "diagnostics created a topic: {body}");
-        let count = topics[0]["observations"].as_i64().unwrap();
-        assert!(count <= 2, "diagnostics added demand: {body}");
+        assert!(body.starts_with("0 of "), "{body}");
+    }
+    // A regular request after diagnostics is a writer-queue barrier and must still count.
+    assert!(!mcp.tool("bars_search", json!({"query":query})).await.0);
+    let deadline = Instant::now() + Duration::from_secs(10);
+    loop {
+        let topics = topics_via_client(&harness, &project).await;
+        let list = topics["topics"].as_array().unwrap();
+        assert_eq!(list.len(), 1, "diagnostics created a topic: {topics}");
+        let count = list[0]["observations"].as_i64().unwrap();
+        assert!(count <= 2, "diagnostics added demand: {topics}");
         if count == 2 {
-            assert_eq!(topics[0]["id"], before["id"]);
+            assert_eq!(list[0]["id"], before["id"]);
             assert_eq!(
-                topics[0]["revision"].as_i64().unwrap(),
+                list[0]["revision"].as_i64().unwrap(),
                 before["revision"].as_i64().unwrap() + 1
             );
             break;
         }
-        assert!(Instant::now() < deadline, "{body}");
+        assert!(Instant::now() < deadline, "{topics}");
         tokio::time::sleep(Duration::from_millis(20)).await;
     }
+}
+
+async fn topics_via_client(harness: &Harness, project: &str) -> Value {
+    let mut client = Client::connect(&harness.endpoint, ClientKind::Cli)
+        .await
+        .unwrap();
+    let output = client
+        .call(&bars_protocol::NewTopicsListParams {
+            project: project.to_string(),
+        })
+        .await
+        .unwrap();
+    serde_json::to_value(output).unwrap()
 }
 
 const GUIDE: &str = "---\ntitle: Руководство\n---\n# Руководство\n\nВведение.\n\n## Индексация\n\n\
@@ -350,8 +332,6 @@ struct Rpc<R, W> {
     reader: BufReader<R>,
     writer: W,
     next_id: u64,
-    /// Формат, который `tool` подставляет, если его нет в аргументах.
-    default_format: Option<&'static str>,
 }
 
 impl<R: tokio::io::AsyncRead + Unpin, W: tokio::io::AsyncWrite + Unpin> Rpc<R, W> {
@@ -360,7 +340,6 @@ impl<R: tokio::io::AsyncRead + Unpin, W: tokio::io::AsyncWrite + Unpin> Rpc<R, W
             reader: BufReader::new(reader),
             writer,
             next_id: 1,
-            default_format: Some("json"),
         }
     }
 
@@ -408,10 +387,7 @@ impl<R: tokio::io::AsyncRead + Unpin, W: tokio::io::AsyncWrite + Unpin> Rpc<R, W
     }
 
     /// Вызывает инструмент: `(is_error, текст)`.
-    async fn tool(&mut self, name: &str, mut arguments: Value) -> (bool, String) {
-        if let (Some(format), Some(object)) = (self.default_format, arguments.as_object_mut()) {
-            object.entry("format").or_insert(json!(format));
-        }
+    async fn tool(&mut self, name: &str, arguments: Value) -> (bool, String) {
         let response = self
             .request(
                 "tools/call",
@@ -542,15 +518,30 @@ impl Harness {
     }
 }
 
-async fn wait_status(mcp: &mut Pipe, what: &str, condition: impl Fn(&Value) -> bool) -> Value {
+/// Ждёт состояние индекса напрямую у воркера: сводка `bars_status` текстовая.
+async fn wait_status(
+    harness: &Harness,
+    cwd: &Path,
+    what: &str,
+    condition: impl Fn(&Value) -> bool,
+) -> Value {
     let deadline = Instant::now() + Duration::from_secs(60);
+    let mut client = Client::connect(&harness.endpoint, ClientKind::Cli)
+        .await
+        .unwrap();
     loop {
-        let (is_error, text) = mcp.tool("bars_status", json!({ "format": "json" })).await;
-        if !is_error {
-            let status: Value = serde_json::from_str(&text).unwrap();
-            if condition(&status) {
-                return status;
-            }
+        let status = client
+            .call(&StatusParams {
+                target: Target {
+                    cwd: cwd.display().to_string(),
+                    project: None,
+                },
+            })
+            .await;
+        if let Ok(status) = &status
+            && condition(&serde_json::to_value(status).unwrap())
+        {
+            return serde_json::to_value(status).unwrap();
         }
         assert!(Instant::now() < deadline, "не дождались: {what}");
         tokio::time::sleep(Duration::from_millis(50)).await;
@@ -593,9 +584,9 @@ async fn graph_tools_are_hidden_until_settings_show_them() {
     let text = init["result"]["instructions"].as_str().unwrap();
     assert!(text.starts_with(INSTRUCTIONS));
     assert_eq!(text, instructions(false));
-    assert!(!text.contains("графовых"), "{text}");
+    assert!(!text.contains("GraphRAG"), "{text}");
     let names = tool_names(&mut hidden).await;
-    assert_eq!(names.len(), 17, "{names:?}");
+    assert_eq!(names.len(), 4, "{names:?}");
     assert!(
         GRAPH_TOOLS
             .iter()
@@ -622,13 +613,13 @@ async fn graph_tools_are_hidden_until_settings_show_them() {
     let init = shown.initialize().await;
     let text = init["result"]["instructions"].as_str().unwrap();
     assert_eq!(text, instructions(true));
-    assert!(text.contains("GraphRAG — не карта окна"), "{text}");
+    assert!(text.contains("GraphRAG tools are enabled"), "{text}");
     assert!(
         text.chars().count() <= 2000,
         "Т-27: не длиннее 2 000 знаков"
     );
     let names = tool_names(&mut shown).await;
-    assert_eq!(names.len(), 23, "{names:?}");
+    assert_eq!(names.len(), 10, "{names:?}");
     assert!(
         GRAPH_TOOLS
             .iter()
@@ -640,7 +631,7 @@ async fn graph_tools_are_hidden_until_settings_show_them() {
         ..harness.env(&root)
     });
     still_hidden.initialize().await;
-    assert_eq!(tool_names(&mut still_hidden).await.len(), 17);
+    assert_eq!(tool_names(&mut still_hidden).await.len(), 4);
 }
 
 /// ISS-23: у каждой графовой операции своя схема — только свои поля и общие; шесть схем вместе
@@ -797,29 +788,16 @@ async fn initialize_and_tool_list_query_metadata_without_registering_project() {
     assert_eq!(
         names,
         [
-            "bars_audit_cancel",
-            "bars_audit_findings",
-            "bars_audit_list",
-            "bars_audit_run",
+            "bars_audit",
             "bars_context",
             "bars_explore",
-            "bars_get_duplicates",
-            "bars_get_similar",
             "bars_graph",
             "bars_impact",
-            "bars_links",
-            "bars_new_topics_check",
-            "bars_new_topics_get",
-            "bars_new_topics_list",
-            "bars_outline",
             "bars_paths",
-            "bars_projects",
-            "bars_rag_search",
             "bars_read",
-            "bars_reindex",
             "bars_relations",
+            "bars_search",
             "bars_status",
-            "bars_text_search"
         ]
     );
     assert_eq!(
@@ -841,33 +819,33 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
     .unwrap();
     let mut mcp = harness.connect(harness.env(&root));
     mcp.initialize().await;
-    assert!(!mcp.tool("bars_projects", json!({"all":true})).await.0);
+    assert!(!mcp.tool("bars_status", json!({"all":true})).await.0);
     harness.register(&root).await;
-    wait_status(&mut mcp, "автоматический граф", |s| {
+    wait_status(&harness, &root, "автоматический граф", |s| {
         indexed(s) && s["graph"]["freshness"] == "current"
     })
     .await;
     let (error, text) = mcp
-        .tool("bars_graph", json!({"view":"mixed","format":"json"}))
+        .tool("bars_graph", json!({"view":"mixed"}))
         .await;
     assert!(!error, "{text}");
     let graph: Value = serde_json::from_str(&text).unwrap();
     for (tool, args) in [
         (
             "bars_impact",
-            json!({"documents":["requirements.md"],"format":"txt"}),
+            json!({"documents":["requirements.md"]}),
         ),
         (
             "bars_context",
-            json!({"documents":["docs/requirements.md"],"query":"Т-1 зависит","format":"txt"}),
+            json!({"documents":["docs/requirements.md"],"query":"Т-1 зависит"}),
         ),
         (
             "bars_graph",
-            json!({"documents":["requirements.md"],"local":true,"format":"txt"}),
+            json!({"documents":["requirements.md"],"local":true}),
         ),
         (
             "bars_paths",
-            json!({"from":{"document":"requirements.md"},"to":{"document":"requirements.md"},"path_kind":"structural","format":"txt"}),
+            json!({"from":{"document":"requirements.md"},"to":{"document":"requirements.md"},"path_kind":"structural"}),
         ),
     ] {
         let (error, text) = mcp.tool(tool, args).await;
@@ -892,17 +870,17 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
         .unwrap()["reference"]
         .clone();
     for (tool, args) in [
-        ("bars_relations", json!({"query":"Т-1","format":"json"})),
+        ("bars_relations", json!({"query":"Т-1"})),
         (
             "bars_paths",
-            json!({"from":{"label":"Т-1"},"to":{"label":"Т-3"},"format":"json"}),
+            json!({"from":{"label":"Т-1"},"to":{"label":"Т-3"}}),
         ),
-        ("bars_impact", json!({"roots":[root],"format":"json"})),
+        ("bars_impact", json!({"roots":[root]})),
         (
             "bars_context",
-            json!({"query":"Т-1 зависит","format":"json"}),
+            json!({"query":"Т-1 зависит"}),
         ),
-        ("bars_explore", json!({"whole_scope":true,"format":"json"})),
+        ("bars_explore", json!({"whole_scope":true})),
     ] {
         let (error, text) = mcp.tool(tool, args).await;
         assert!(!error, "{tool}: {text}");
@@ -917,11 +895,12 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
             out["used_bytes"].as_u64().unwrap() <= out["applied"]["max_bytes"].as_u64().unwrap()
         );
     }
+    // Графовая форма bars_search (настройка включена): mode=mix и mode=graph.
     for mode in ["hybrid", "mix", "graph"] {
         let (error, text) = mcp
             .tool(
-                "bars_rag_search",
-                json!({"query":"Т-1 зависит","mode":mode,"format":"json"}),
+                "bars_search",
+                json!({"query":"Т-1 зависит","mode":mode}),
             )
             .await;
         assert!(!error, "{mode}: {text}");
@@ -929,8 +908,8 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
         assert_eq!(out["requested_mode"], mode);
         let (error, text) = mcp
             .tool(
-                "bars_rag_search",
-                json!({"query":"Т-1 зависит","mode":mode,"format":"txt"}),
+                "bars_search",
+                json!({"query":"Т-1 зависит","mode":mode}),
             )
             .await;
         assert!(!error, "{text}");
@@ -939,15 +918,9 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
         assert!(text.chars().count() <= bars_protocol::graph_text::MAX_TEXT_CHARS);
     }
     let (error, text) = mcp
-        .tool("bars_relations", json!({"query":"Т-1","format":"txt"}))
-        .await;
-    assert!(!error, "{text}");
-    assert!(text.contains("=== GRAPH relations ==="), "{text}");
-    assert!(text.contains("requirements.md:"), "{text}");
-    let (error, text) = mcp
         .tool(
-            "bars_rag_search",
-            json!({"query":"Т-1 зависит","mode":"mix","include_related":false,"format":"json"}),
+            "bars_search",
+            json!({"query":"Т-1 зависит","mode":"mix","include_related":false}),
         )
         .await;
     assert!(!error, "{text}");
@@ -956,11 +929,11 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
     assert!(out["related"].is_null());
     let (error, _) = mcp
         .tool(
-            "bars_rag_search",
-            json!({"query":"Т-1 зависит","include_related":false}),
+            "bars_search",
+            json!({"query":"Т-1 зависит","mode":"mix","related_budget":10}),
         )
         .await;
-    assert!(error, "параметр mix не игнорируется в старом вызове");
+    assert!(error, "слишком малый related_budget даёт понятный ответ");
     let tools = mcp.request("tools/list", json!({})).await;
     assert!(!tools.to_string().contains("graph_build"));
     assert!(!tools.to_string().contains("graph_cancel"));
@@ -1005,13 +978,10 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
     mcp.initialize().await;
 
     // Т-2: воркер не запущен, первый вызов запускает его и возвращает результат.
-    let (is_error, projects) = mcp.tool("bars_projects", json!({"all":true})).await;
+    let (is_error, projects) = mcp.tool("bars_status", json!({"all":true})).await;
     assert!(!is_error, "{projects}");
     assert_eq!(harness.launches.load(Ordering::SeqCst), 1);
-    assert_eq!(
-        serde_json::from_str::<Value>(&projects).unwrap()["projects"],
-        json!([])
-    );
+    assert!(projects.contains("No projects"), "{projects}");
 
     // Проект из cwd сессии не зарегистрирован: понятная ошибка с подсказкой, а не сбой протокола.
     let (is_error, text) = mcp.tool("bars_status", json!({})).await;
@@ -1020,109 +990,74 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
     assert!(text.contains("register"), "{text}");
 
     harness.register(&root).await;
-    let status = wait_status(&mut mcp, "первая индексация", indexed).await;
-    assert!(status["updated_at"].is_string(), "{status}");
+    wait_status(&harness, &root, "первая индексация", indexed).await;
     assert_eq!(
         harness.launches.load(Ordering::SeqCst),
         1,
         "второй воркер не нужен"
     );
 
-    let (_, projects) = mcp.tool("bars_projects", json!({"all":true})).await;
-    let projects: Value = serde_json::from_str(&projects).unwrap();
-    assert_eq!(projects["projects"][0]["docs_root"], "docs");
-    assert!(
-        projects["projects"][0]["modules"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .any(|module| module["name"] == "api")
-    );
+    let (_, status) = mcp.tool("bars_status", json!({"all":true})).await;
+    assert!(status.contains("docs_root: docs"), "{status}");
+    assert!(status.contains("api (1)"), "{status}");
 
     let (is_error, found) = mcp
         .tool(
-            "bars_rag_search",
+            "bars_search",
             json!({ "query": "индексация документов" }),
         )
         .await;
     assert!(!is_error, "{found}");
-    let found: Value = serde_json::from_str(&found).unwrap();
-    assert_eq!(found["results"][0]["path"], "docs/guide.md");
-    assert!(found["applied"]["results"].as_u64().unwrap() >= 1);
+    // Ступенчатая выдача: шапка, строка результата, полный текст первого места.
+    assert!(found.starts_with("1 of "), "{found}");
+    assert!(found.contains("[1] "), "{found}");
+    assert!(found.contains("docs/guide.md:"), "{found}");
+    assert!(found.contains("Индексация документов идёт в очереди воркера."), "{found}");
+    assert!(!found.contains("=== SEARCH"), "{found}");
 
-    // Похожие чанки по ID из выдачи: JSON, текст, ошибки; вызовы попадают в статистику.
-    let chunk_id = found["results"][0]["chunk_id"]
-        .as_str()
-        .unwrap()
-        .to_string();
+    // like по «путь:строки» из строки результата: похожие разделы других документов.
+    let line = found
+        .lines()
+        .find(|line| line.starts_with("[1] "))
+        .unwrap();
+    let at = line.find("docs/guide.md:").unwrap();
+    let reference = line[at..].split(' ·').next().unwrap().to_string();
     let (is_error, similar) = mcp
-        .tool(
-            "bars_get_similar",
-            json!({ "chunk_id": chunk_id, "limit": 2 }),
-        )
+        .tool("bars_search", json!({ "like": reference, "limit": 2 }))
         .await;
     assert!(!is_error, "{similar}");
-    let similar: Value = serde_json::from_str(&similar).unwrap();
-    assert_eq!(similar["source"]["chunk_id"], chunk_id);
-    assert_eq!(similar["limit"], 2);
-    assert!(
-        similar["results"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .all(|hit| hit["chunk_id"] != chunk_id)
-    );
+    assert!(similar.starts_with(&format!("=== LIKE {reference} · ")), "{similar}");
+    assert!(similar.ends_with("=== END LIKE ==="), "{similar}");
     let (is_error, text) = mcp
-        .tool(
-            "bars_get_similar",
-            json!({ "chunk_id": chunk_id, "format": "txt" }),
-        )
-        .await;
-    assert!(!is_error, "{text}");
-    assert!(text.starts_with("=== SIMILAR: results "), "{text}");
-    assert!(
-        text.contains(&format!(
-            "id: {chunk_id}
-"
-        )),
-        "{text}"
-    );
-    assert!(text.ends_with("=== END SIMILAR ==="), "{text}");
-    let (is_error, text) = mcp
-        .tool("bars_get_similar", json!({ "chunk_id": "99999-00000000" }))
+        .tool("bars_search", json!({ "like": "99999-00000000" }))
         .await;
     assert!(is_error);
     assert!(text.contains("chunk_not_found"), "{text}");
 
-    // Сужение по модулю (Т-14) и ошибка параметра.
+    // Сужение по области `in`: вложенная папка работает, несуществующая — ошибка с подсказкой.
     let (is_error, narrowed) = mcp
         .tool(
-            "bars_rag_search",
-            json!({ "query": "протокола", "modules": ["api"], "limit": 1 }),
+            "bars_search",
+            json!({ "query": "протокола", "in": ["api"], "limit": 1 }),
         )
         .await;
     assert!(!is_error, "{narrowed}");
-    let narrowed: Value = serde_json::from_str(&narrowed).unwrap();
-    assert!(
-        narrowed["results"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .all(|hit| hit["module"] == "api")
-    );
+    assert!(narrowed.contains("scope: in api"), "{narrowed}");
+    assert!(narrowed.contains("docs/api/rest.md"), "{narrowed}");
     let (is_error, text) = mcp
         .tool(
-            "bars_rag_search",
-            json!({ "query": "x", "modules": ["нет"] }),
+            "bars_search",
+            json!({ "query": "x", "in": ["нет"] }),
         )
         .await;
     assert!(is_error);
     assert!(text.contains("invalid_params"), "{text}");
 
+    // Структура и ссылки одним инструментом.
     let (is_error, outline) = mcp
         .tool(
-            "bars_outline",
-            json!({ "path": "docs/guide.md", "levels": [2, 3], "format": "txt" }),
+            "bars_read",
+            json!({ "path": "docs/guide.md", "view": "outline" }),
         )
         .await;
     assert!(!is_error, "{outline}");
@@ -1138,14 +1073,22 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
     );
     let (_, under) = mcp
         .tool(
-            "bars_outline",
-            json!({ "path": "guide.md", "under": "Руководство/Индексация", "format": "txt" }),
+            "bars_read",
+            json!({ "path": "guide.md", "under": "Индексация" }),
         )
         .await;
     assert!(under.contains("\n12 ### Слежение\n"), "{under}");
+    let (is_error, links) = mcp
+        .tool(
+            "bars_read",
+            json!({ "path": "docs/api/rest.md", "view": "links", "direction": "in" }),
+        )
+        .await;
+    assert!(!is_error, "{links}");
+    assert!(links.starts_with("=== LINKS · incoming ==="), "{links}");
 
     let (is_error, document) = mcp
-        .tool("bars_read", json!({ "path": "guide.md", "format": "txt" }))
+        .tool("bars_read", json!({ "path": "guide.md" }))
         .await;
     assert!(!is_error, "{document}");
     assert!(
@@ -1158,13 +1101,11 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
     assert!(is_error);
     assert!(text.contains("file_not_found"), "{text}");
 
-    let (is_error, reindex) = mcp.tool("bars_reindex", json!({ "full": true })).await;
-    assert!(!is_error, "{reindex}");
-    assert_eq!(
-        serde_json::from_str::<Value>(&reindex).unwrap(),
-        json!({ "accepted": true })
-    );
-    wait_status(&mut mcp, "полная переиндексация", indexed).await;
+    // Проверка актуальности индекса — refresh у сводки (полная переиндексация из MCP ушла).
+    let (is_error, refresh) = mcp.tool("bars_status", json!({ "refresh": true })).await;
+    assert!(!is_error, "{refresh}");
+    assert!(refresh.contains("accepted: true"), "{refresh}");
+    wait_status(&harness, &root, "проверка актуальности", indexed).await;
 
     // Т-15: явный проект — путь; чужой путь — project_not_found.
     let (is_error, text) = mcp
@@ -1174,6 +1115,7 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
         )
         .await;
     assert!(!is_error, "{text}");
+    assert!(text.contains(&format!("path: {}", root.display())), "{text}");
     let (is_error, text) = mcp
         .tool(
             "bars_status",
@@ -1186,17 +1128,9 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
     let tools: std::collections::BTreeSet<_> = rows.iter().map(|r| r.tool.as_str()).collect();
     assert_eq!(
         tools,
-        [
-            "bars_get_similar",
-            "bars_outline",
-            "bars_projects",
-            "bars_rag_search",
-            "bars_read",
-            "bars_reindex",
-            "bars_status"
-        ]
-        .into_iter()
-        .collect()
+        ["bars_read", "bars_search", "bars_status"]
+            .into_iter()
+            .collect()
     );
     assert_eq!(
         rows.iter()
@@ -1218,13 +1152,9 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
         rows.iter().map(|r| r.calls as u64).sum::<u64>()
     );
     for tool in [
-        "bars_rag_search",
+        "bars_search",
         "bars_read",
-        "bars_outline",
-        "bars_projects",
         "bars_status",
-        "bars_reindex",
-        "bars_get_similar",
     ] {
         let a = page
             .records
@@ -1238,32 +1168,34 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
                 .iter()
                 .any(|s| s == "original_mcp_input_unavailable")
         );
-        assert!(a.requested.get("format").is_some());
         assert!(a.result.get("unit").is_some());
-        if matches!(tool, "bars_status" | "bars_reindex") {
+        if matches!(tool, "bars_status") {
             assert_eq!(a.result["unit"], "not_applicable");
             assert!(a.result["count"].is_null());
         }
-        if tool == "bars_reindex" {
-            assert!(a.applied["operation_id"].is_number());
-            assert!(a.applied["merged"].is_boolean());
-        }
-        if tool == "bars_get_similar" {
+        if tool == "bars_search" {
             assert_eq!(a.result["unit"], "fragments");
-            assert!(a.requested["chunk_id"].is_string());
-            assert!(a.applied["source_chunk"].is_string());
-            assert_eq!(a.applied["score_kind"], "cosine");
+            assert!(a.requested["query"].is_string());
+            assert!(a.applied["search"]["results"].is_number());
         }
     }
-    assert!(page.records.iter().any(|a| a.tool == "bars_get_similar"
-        && a.outcome == "error"
-        && a.error["kind"] == "chunk_not_found"));
-    let search = page
+    let like = page
         .records
         .iter()
-        .find(|a| a.tool == "bars_rag_search" && a.outcome == "success")
+        .find(|a| {
+            a.tool == "bars_search"
+                && a.outcome == "success"
+                && a.requested.get("like").is_some()
+        })
         .unwrap();
-    assert!(search.applied["search"]["results"].is_number());
+    assert_eq!(like.result["unit"], "fragments");
+    assert_eq!(like.applied["score_kind"], "cosine");
+    assert!(like.applied["linked_from"].is_array());
+    assert!(
+        page.records
+            .iter()
+            .any(|a| a.outcome == "error" && a.error["kind"] == "chunk_not_found")
+    );
     assert!(
         page.records
             .iter()
@@ -1276,27 +1208,26 @@ async fn history_preserves_original_missing_null_zero_and_excludes_payloads() {
     let harness = Harness::new("history-original");
     let root = harness.project("p");
     let mut mcp = harness.connect(harness.env(&root));
-    mcp.default_format = None;
     mcp.initialize().await;
-    assert!(!mcp.tool("bars_projects", json!({"all":true})).await.0);
+    assert!(!mcp.tool("bars_status", json!({"all":true})).await.0);
     assert!(
         !mcp.tool(
-            "bars_projects",
+            "bars_status",
             json!({"all":true,"format":null,"unknown":"SECRET"})
         )
         .await
         .0
     );
     harness.register(&root).await;
-    wait_status(&mut mcp, "индекс для истории", indexed).await;
+    wait_status(&harness, &root, "индекс для истории", indexed).await;
     fs::write(root.join("docs/empty.md"), "").unwrap();
     assert!(
-        !mcp.tool("bars_read", json!({"path":"empty.md","format":"json"}))
+        !mcp.tool("bars_read", json!({"path":"empty.md"}))
             .await
             .0
     );
     assert!(
-        !mcp.tool("bars_outline", json!({"path":"guide.md","levels":[6]}))
+        !mcp.tool("bars_read", json!({"path":"guide.md","view":"outline"}))
             .await
             .0
     );
@@ -1309,7 +1240,7 @@ async fn history_preserves_original_missing_null_zero_and_excludes_payloads() {
     .unwrap();
     assert!(
         !mcp.tool(
-            "bars_rag_search",
+            "bars_search",
             json!({"query":"первая проверка умолчаний","limit":null})
         )
         .await
@@ -1322,7 +1253,7 @@ async fn history_preserves_original_missing_null_zero_and_excludes_payloads() {
     .unwrap();
     assert!(
         !mcp.tool(
-            "bars_rag_search",
+            "bars_search",
             json!({"query":"вторая проверка умолчаний"})
         )
         .await
@@ -1330,16 +1261,16 @@ async fn history_preserves_original_missing_null_zero_and_excludes_payloads() {
     );
     assert!(
         !mcp.tool(
-            "bars_rag_search",
-            json!({"query":"проверка ограничения","limit":999,"candidates":99999})
+            "bars_search",
+            json!({"query":"проверка ограничения","limit":999})
         )
         .await
         .0
     );
     assert!(
         !mcp.tool(
-            "bars_rag_search",
-            json!({"query":"zzz18427 отсутствующий термин","min_score":1.0})
+            "bars_search",
+            json!({"query":"zzz18427 отсутствующий термин"})
         )
         .await
         .0
@@ -1351,22 +1282,22 @@ async fn history_preserves_original_missing_null_zero_and_excludes_payloads() {
             ..Default::default()
         })
         .unwrap();
-    let projects: Vec<_> = page
+    let statuses: Vec<_> = page
         .records
         .iter()
-        .filter(|a| a.tool == "bars_projects")
+        .filter(|a| a.tool == "bars_status" && a.requested.get("all") == Some(&json!(true)))
         .collect();
-    assert_eq!(projects.len(), 2);
-    assert_eq!(projects[0].requested, json!({"all":true,"format":null}));
-    assert_eq!(projects[1].requested, json!({"all":true}));
-    assert_eq!(projects[1].result["count"], 0);
+    assert_eq!(statuses.len(), 2);
+    assert_eq!(statuses[0].requested, json!({"all":true}));
+    assert_eq!(statuses[1].requested, json!({"all":true}));
+    assert_eq!(statuses[0].result["count"], 0);
     assert!(page.records.iter().any(|a| a.tool == "bars_read"
         && a.outcome == "success"
         && a.result["count"] == 0
         && a.result["unit"] == "lines"));
-    assert!(page.records.iter().any(|a| a.tool == "bars_outline"
+    assert!(page.records.iter().any(|a| a.tool == "bars_read"
         && a.outcome == "success"
-        && a.result["count"] == 0
+        && a.result["count"] == 3
         && a.result["unit"] == "headings"));
     let first = page
         .records
@@ -1380,7 +1311,7 @@ async fn history_preserves_original_missing_null_zero_and_excludes_payloads() {
         .unwrap();
     assert_eq!(first.applied["search"]["results"], 2);
     assert_eq!(second.applied["search"]["results"], 4);
-    assert!(first.requested.get("limit").is_some_and(Value::is_null));
+    assert!(first.requested.get("limit").is_some_and(|v| v.is_null()));
     assert!(second.requested.get("limit").is_none());
     let clamped = page
         .records
@@ -1388,7 +1319,6 @@ async fn history_preserves_original_missing_null_zero_and_excludes_payloads() {
         .find(|a| a.requested["query"] == "проверка ограничения")
         .unwrap();
     assert_eq!(clamped.applied["search"]["results"], 5);
-    assert_eq!(clamped.applied["search"]["candidates"], 10);
     assert_eq!(clamped.applied["sources"]["limit"], "clamped");
     let empty = page
         .records
@@ -1409,7 +1339,7 @@ async fn history_parallel_connections_repeat_and_collection_controls() {
     let q = harness.project("q");
     let mut a = harness.connect(harness.env(&p));
     a.initialize().await;
-    a.tool("bars_projects", json!({"all":true})).await;
+    a.tool("bars_status", json!({"all":true})).await;
     harness.register(&p).await;
     harness.register(&q).await;
     let mut b = harness.connect(harness.env(&q));
@@ -1473,15 +1403,14 @@ async fn project_is_resolved_by_session_cwd_and_explicit_project_wins() {
     // Сессия в подпапке первого проекта: проект находится вверх по дереву.
     let mut mcp = harness.connect(harness.env(&first.join("docs").join("api")));
     mcp.initialize().await;
-    mcp.tool("bars_projects", json!({"all":true})).await;
+    mcp.tool("bars_status", json!({"all":true})).await;
     harness.register(&first).await;
     harness.register(&second).await;
-    wait_status(&mut mcp, "индексация первого", indexed).await;
+    wait_status(&harness, &first, "индексация первого", indexed).await;
 
     let (_, status) = mcp.tool("bars_status", json!({})).await;
-    let status: Value = serde_json::from_str(&status).unwrap();
     assert!(
-        status["path"].as_str().unwrap().ends_with("first"),
+        status.contains(&format!("path: {}", first.display())),
         "{status}"
     );
 
@@ -1490,16 +1419,11 @@ async fn project_is_resolved_by_session_cwd_and_explicit_project_wins() {
     loop {
         let (_, found) = mcp
             .tool(
-                "bars_rag_search",
+                "bars_search",
                 json!({ "query": "бобров", "project": second.display().to_string() }),
             )
             .await;
-        // Пока второй проект не проиндексирован, воркер отвечает не JSON-ом, а
-        // текстом ошибки: это не провал, а повод подождать.
-        let parsed = serde_json::from_str::<Value>(&found);
-        if let Ok(parsed) = &parsed
-            && parsed["results"][0]["path"] == "docs/other.md"
-        {
+        if found.contains("docs/other.md") {
             break;
         }
         assert!(Instant::now() < deadline, "не нашли документ: {found}");
@@ -1513,9 +1437,9 @@ async fn agent_cannot_consent_to_reindex_after_model_change() {
     let root = harness.project("proj");
     let mut mcp = harness.connect(harness.env(&root));
     mcp.initialize().await;
-    mcp.tool("bars_projects", json!({"all":true})).await;
+    mcp.tool("bars_status", json!({"all":true})).await;
     harness.register(&root).await;
-    wait_status(&mut mcp, "первая индексация", indexed).await;
+    wait_status(&harness, &root, "первая индексация", indexed).await;
 
     // Модель в настройках сменилась: индекс построен другой.
     harness.provider.set_model("m2");
@@ -1532,30 +1456,46 @@ async fn agent_cannot_consent_to_reindex_after_model_change() {
             accept_model_change: false,
         })
         .await;
-    wait_status(&mut mcp, "состояние reindex_required", |status| {
+    wait_status(&harness, &root, "состояние reindex_required", |status| {
         status["state"] == "reindex_required"
     })
     .await;
 
-    let (is_error, text) = mcp.tool("bars_reindex", json!({ "full": true })).await;
-    assert!(is_error, "{text}");
-    assert!(text.contains("reindex_needs_consent"), "{text}");
+    // Полная переиндексация с согласием агента не принимается (решение за человеком, Т-25).
+    let denied = cli
+        .call(&bars_protocol::ReindexParams {
+            target: bars_protocol::Target {
+                cwd: root.display().to_string(),
+                project: None,
+            },
+            full: true,
+            accept_model_change: false,
+        })
+        .await
+        .unwrap_err();
     assert!(
-        text.contains("пользовател"),
-        "агенту сказано, что решает человек: {text}"
+        matches!(&denied, bars_protocol::ClientError::Rpc(e) if e.kind() == Some(bars_protocol::ErrorKind::ReindexNeedsConsent)),
+        "{denied}"
     );
 
     // Поиск в этом состоянии тоже не работает, и тоже понятным ответом.
     let (is_error, text) = mcp
-        .tool("bars_rag_search", json!({ "query": "поиск" }))
+        .tool("bars_search", json!({ "query": "поиск" }))
         .await;
     assert!(is_error);
     assert!(text.contains("reindex_required"), "{text}");
 
+    // Сводка показывает состояние и напоминает, что переиндексацию начинает человек.
+    let (_, status) = mcp.tool("bars_status", json!({})).await;
+    assert!(status.contains("state: reindex_required"), "{status}");
+    assert!(status.contains("started by the user"), "{status}");
+
     // Согласия не было: индекс остался прежним.
     tokio::time::sleep(Duration::from_millis(300)).await;
-    let (_, status) = mcp.tool("bars_status", json!({})).await;
-    let status: Value = serde_json::from_str(&status).unwrap();
+    let status = wait_status(&harness, &root, "индекс прежний", |status| {
+        status["state"] == "reindex_required"
+    })
+    .await;
     assert_eq!(status["state"], "reindex_required", "{status}");
 }
 
@@ -1573,7 +1513,7 @@ async fn unreachable_worker_is_a_readable_tool_error() {
     let mut mcp = harness.connect(env);
     mcp.initialize().await;
 
-    let (is_error, text) = mcp.tool("bars_projects", json!({"all":true})).await;
+    let (is_error, text) = mcp.tool("bars_status", json!({"all":true})).await;
     assert!(is_error);
     assert!(text.contains("нет bars"), "{text}");
     assert!(text.contains("Повторите"), "{text}");
@@ -1585,15 +1525,15 @@ async fn connection_to_the_worker_lives_across_calls() {
     let root = harness.project("proj");
     let mut mcp = harness.connect(harness.env(&root));
     mcp.initialize().await;
-    let (is_error, _) = mcp.tool("bars_projects", json!({"all":true})).await;
+    let (is_error, _) = mcp.tool("bars_status", json!({"all":true})).await;
     assert!(!is_error);
-    let (is_error, _) = mcp.tool("bars_projects", json!({"all":true})).await;
+    let (is_error, _) = mcp.tool("bars_status", json!({"all":true})).await;
     assert!(!is_error);
     assert_eq!(harness.launches.load(Ordering::SeqCst), 1);
     let rows = bars_worker::mcp_statistics::snapshot(harness.home.path()).unwrap();
     assert_eq!(rows.len(), 1);
     assert_eq!((rows[0].calls, rows[0].errors), (2, 0));
-    assert_eq!(rows[0].tool, "bars_projects");
+    assert_eq!(rows[0].tool, "bars_status");
 }
 
 /// Два одинаковых ярлыка фикстуры не должны подключать клиентов к чужому тестовому воркеру.
@@ -1607,63 +1547,57 @@ async fn two_test_workers_with_same_label_have_separate_registries() {
     let mut right = second.connect(second.env(&b));
     left.initialize().await;
     right.initialize().await;
-    assert!(!left.tool("bars_projects", json!({"all":true})).await.0);
-    assert!(!right.tool("bars_projects", json!({"all":true})).await.0);
+    assert!(!left.tool("bars_status", json!({"all":true})).await.0);
+    assert!(!right.tool("bars_status", json!({"all":true})).await.0);
     first.register(&a).await;
     second.register(&b).await;
-    let (_, left_projects) = left.tool("bars_projects", json!({"all":true})).await;
-    let (_, right_projects) = right.tool("bars_projects", json!({"all":true})).await;
-    let left_projects: Value = serde_json::from_str(&left_projects).unwrap();
-    let right_projects: Value = serde_json::from_str(&right_projects).unwrap();
-    assert_eq!(
-        left_projects["projects"].as_array().unwrap().len(),
-        1,
+    let (_, left_projects) = left.tool("bars_status", json!({"all":true})).await;
+    let (_, right_projects) = right.tool("bars_status", json!({"all":true})).await;
+    assert!(
+        left_projects.contains(&format!("path: {}", a.display())),
         "{left_projects}"
     );
-    assert_eq!(
-        right_projects["projects"].as_array().unwrap().len(),
-        1,
+    assert!(
+        !left_projects.contains(&format!("path: {}", b.display())),
+        "{left_projects}"
+    );
+    assert!(
+        right_projects.contains(&format!("path: {}", b.display())),
         "{right_projects}"
     );
-    assert_eq!(
-        left_projects["projects"][0]["path"],
-        a.display().to_string()
-    );
-    assert_eq!(
-        right_projects["projects"][0]["path"],
-        b.display().to_string()
+    assert!(
+        !right_projects.contains(&format!("path: {}", a.display())),
+        "{right_projects}"
     );
 }
 
-/// Текст по умолчанию: блоки с явными границами; `format=json` — JSON ответа воркера.
+/// Ответы текстовые по умолчанию: блоки сводки и ступенчатая выдача без служебных полей.
 #[tokio::test(flavor = "multi_thread")]
-async fn default_format_is_text() {
+async fn agent_answers_are_text() {
     let harness = Harness::new("txt");
     let root = harness.project("proj");
     let mut mcp = harness.connect(harness.env(&root));
-    mcp.default_format = None;
     mcp.initialize().await;
-    mcp.tool("bars_projects", json!({"all":true})).await;
+    mcp.tool("bars_status", json!({"all":true})).await;
     harness.register(&root).await;
-    wait_status(&mut mcp, "первая индексация", indexed).await;
+    wait_status(&harness, &root, "первая индексация", indexed).await;
 
-    let (_, status) = mcp.tool("bars_status", json!({ "format": "txt" })).await;
-    assert!(status.starts_with("=== INDEX STATUS ==="), "{status}");
+    let (_, status) = mcp.tool("bars_status", json!({})).await;
+    assert!(status.contains("=== PROJECT ==="), "{status}");
     assert!(status.contains("\nstate: ready\n"), "{status}");
-
-    let (_, projects) = mcp.tool("bars_projects", json!({"all":true})).await;
-    assert!(projects.starts_with("=== PROJECTS: 1 ==="), "{projects}");
-    assert!(projects.contains("=== PROJECT 1 of 1 ==="), "{projects}");
-    assert!(projects.contains("api (1)"), "{projects}");
+    assert!(status.contains("=== VERSIONS ===\nproxy: "), "{status}");
+    assert!(status.contains("worker: "), "{status}");
+    assert!(status.contains("=== AUDITS ==="), "{status}");
+    assert!(status.contains("=== NEW TOPICS ==="), "{status}");
+    assert!(status.contains("=== GRAPH ==="), "{status}");
 
     let (is_error, found) = mcp
         .tool(
-            "bars_rag_search",
+            "bars_search",
             json!({ "query": "индексация документов" }),
         )
         .await;
     assert!(!is_error, "{found}");
-    // Ступенчатая выдача: шапка, строка результата, полный текст первого места без блоков.
     assert!(found.starts_with("1 of "), "{found}");
     assert!(found.contains("[1] "), "{found}");
     assert!(found.contains("docs/guide.md:"), "{found}");
@@ -1676,16 +1610,8 @@ async fn default_format_is_text() {
     assert!(!found.contains("\npath:"), "{found}");
     assert!(!found.contains("--- text ---"), "{found}");
 
-    let (_, as_json) = mcp
-        .tool(
-            "bars_rag_search",
-            json!({ "query": "индексация документов", "format": "json" }),
-        )
-        .await;
-    assert!(serde_json::from_str::<Value>(&as_json).is_ok(), "{as_json}");
-
-    let (_, reindex) = mcp.tool("bars_reindex", json!({})).await;
-    assert!(reindex.contains("accepted: true"), "{reindex}");
+    let (_, refresh) = mcp.tool("bars_status", json!({ "refresh": true })).await;
+    assert!(refresh.contains("accepted: true"), "{refresh}");
 }
 
 /// НФТ-3 и Т-2 на настоящем exe: `initialize` отвечает без воркера, и процесс выходит, когда
@@ -1724,7 +1650,7 @@ async fn real_binary_answers_initialize_without_a_worker_and_exits_on_eof() {
     let tools = mcp.request("tools/list", json!({})).await;
     assert_eq!(
         tools["result"]["tools"].as_array().unwrap().len(),
-        17,
+        4,
         "без настройки графовых инструментов нет (OQ-162)"
     );
 

@@ -145,7 +145,7 @@ async fn pool_read_finishes_while_search_is_blocked_and_reuses_healthy_channel()
     send_tool(
         &mut rpc,
         100,
-        "bars_rag_search",
+        "bars_search",
         json!({"query":"hold-search"}),
     )
     .await;
@@ -273,10 +273,7 @@ async fn pool_read_annotations_include_graph_and_exclude_mutations() {
     let list = rpc.request("tools/list", json!({})).await;
     for tool in list["result"]["tools"].as_array().unwrap() {
         let name = tool["name"].as_str().unwrap();
-        let expected = !matches!(
-            name,
-            "bars_reindex" | "bars_audit_run" | "bars_audit_cancel" | "bars_new_topics_check"
-        );
+        let expected = !matches!(name, "bars_audit");
         assert_eq!(tool["annotations"]["readOnlyHint"], expected, "{name}");
     }
 }
@@ -289,7 +286,8 @@ async fn pool_bad_read_retries_once_but_ambiguous_write_never_replays() {
     let first = f.started().await;
     let second = f.started().await;
     assert_ne!(first.0, second.0);
-    assert!(rpc.tool("bars_reindex", json!({})).await.0);
+    // Запись теперь — refresh у сводки: неопределённый результат не повторяется.
+    assert!(rpc.tool("bars_status", json!({"refresh":true})).await.0);
     assert_eq!(f.started().await.1, "write");
     assert!(
         f.started.try_recv().is_err(),

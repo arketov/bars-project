@@ -46,7 +46,8 @@ async fn mcp_request_starts_observation_while_cli_status_does_not() {
     mcp.call(&ReadParams {
         lines: None,
         under: None,
-        target: target(&root),
+        max_lines: None,
+target: target(&root),
         path: "guide.md".into(),
     })
     .await
@@ -84,7 +85,8 @@ async fn mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion() {
     a.call(&ReadParams {
         lines: None,
         under: None,
-        target: target(&root),
+        max_lines: None,
+target: target(&root),
         path: "guide.md".into(),
     })
     .await
@@ -96,7 +98,8 @@ async fn mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion() {
     a.call(&ReadParams {
         lines: None,
         under: None,
-        target: explicit.clone(),
+        max_lines: None,
+target: explicit.clone(),
         path: "absent.md".into(),
     })
     .await
@@ -114,7 +117,8 @@ async fn mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion() {
     b.call(&ReadParams {
         lines: None,
         under: None,
-        target: explicit,
+        max_lines: None,
+target: explicit,
         path: "guide.md".into(),
     })
     .await
@@ -210,6 +214,7 @@ fn search(cwd: &Path, query: &str) -> SearchParams {
         query: query.into(),
         modules: vec![],
         files: vec![],
+        paths: vec![],
         limit: None,
         candidates: None,
         min_score: None,
@@ -316,7 +321,8 @@ async fn cli_works_with_a_project_end_to_end() {
             path: "guide.md".into(),
             levels: vec![2],
             under: None,
-            under_line: None,
+            max_lines: None,
+under_line: None,
         })
         .await
         .unwrap();
@@ -340,7 +346,8 @@ async fn cli_works_with_a_project_end_to_end() {
         .call(&ReadParams {
             lines: None,
             under: None,
-            target: target(&cwd),
+            max_lines: None,
+target: target(&cwd),
             path: "guide.md".into(),
         })
         .await
@@ -403,6 +410,8 @@ async fn similar_chunks_work_by_id_through_the_channel_for_cli_and_mcp() {
         target: target(&root),
         chunk_id: chunk_id.into(),
         modules: vec![],
+        paths: vec![],
+        exclude_document: false,
         limit: Some(2),
     };
     let mut mcp = harness.client(ClientKind::Mcp).await;
@@ -496,7 +505,8 @@ async fn explicit_project_by_name_and_wrong_calls() {
     let by_name = |path: &str| ReadParams {
         lines: None,
         under: None,
-        target: Target {
+        max_lines: None,
+target: Target {
             cwd: elsewhere.display().to_string(),
             project: Some("proj".into()),
         },
@@ -526,7 +536,8 @@ async fn explicit_project_by_name_and_wrong_calls() {
         .call(&ReadParams {
             lines: None,
             under: None,
-            target: Target {
+            max_lines: None,
+target: Target {
                 cwd: elsewhere.display().to_string(),
                 project: Some("нет-такого".into()),
             },
@@ -541,7 +552,8 @@ async fn explicit_project_by_name_and_wrong_calls() {
             path: "guide.md".into(),
             levels: vec![7],
             under: None,
-            under_line: None,
+            max_lines: None,
+under_line: None,
         })
         .await);
     assert_eq!(bad_level.kind(), Some(ErrorKind::InvalidParams));

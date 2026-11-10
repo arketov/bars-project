@@ -347,7 +347,7 @@ fn resolve_document<'a>(input: &str, view: &'a Allowed<'_>) -> Result<&'a Source
         }).collect();
         suggestions.sort();
         let shown = suggestions.iter().take(5).map(|(_,path)| path.as_str()).collect::<Vec<_>>().join(", ");
-        GraphError::InvalidParams(format!("documents: неизвестный документ в выбранной области; ближайшие пути: {shown}; next: bars_text_search по имени документа или bars_projects для проверки проекта"))
+        GraphError::InvalidParams(format!("documents: неизвестный документ в выбранной области; ближайшие пути: {shown}; next: bars_search occurrences по имени документа или bars_status для проверки проекта"))
     })
 }
 

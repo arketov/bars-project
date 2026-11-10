@@ -105,7 +105,7 @@ fn empty_document_impact_and_name_candidates_offer_a_usable_next_call() {
     .unwrap();
     let text = render_graph_text(&r);
     assert!(text.contains("resolved: document a.md"), "{text}");
-    assert!(text.contains("next: bars_links"), "{text}");
+    assert!(text.contains("next: bars_read view=links"), "{text}");
     assert!(
         text.contains("полнота смысловых связей неизвестна"),
         "{text}"

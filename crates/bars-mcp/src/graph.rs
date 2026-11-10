@@ -42,6 +42,15 @@ fn slim(schema: &mut schemars::Schema) {
     }
 }
 
+/// Вид ответа графовой операции.
+#[derive(Debug, Clone, Copy, Default, Deserialize, Serialize, schemars::JsonSchema)]
+#[serde(rename_all = "lowercase")]
+pub enum Format {
+    #[default]
+    Txt,
+    Json,
+}
+
 /// `format` без отдельного определения Format: оно ещё раз повторяло бы описания в каждой схеме.
 fn format_schema(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
     schemars::json_schema!({

@@ -492,6 +492,7 @@ async fn execute(
                 query: args.query.join(" "),
                 modules: args.modules,
                 files: args.files,
+                paths: Vec::new(),
                 limit: args.limit,
                 candidates: args.candidates,
                 min_score: args.min_score,
@@ -531,6 +532,8 @@ async fn execute(
                 target,
                 chunk_id: args.chunk_id,
                 modules: args.modules,
+                paths: Vec::new(),
+                exclude_document: false,
                 limit: args.limit,
             };
             emit(
@@ -574,6 +577,7 @@ async fn execute(
                 path,
                 lines,
                 under,
+                max_lines: None,
             };
             emit(out, json, &call(&mut client, &params).await?, render::read)
         }

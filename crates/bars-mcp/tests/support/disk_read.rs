@@ -1,38 +1,45 @@
 use super::*;
 
-async fn value(mcp: &mut Pipe, name: &str, args: Value) -> Value {
-    let (error, text) = mcp.tool(name, args).await;
-    assert!(!error, "{text}");
-    serde_json::from_str(&text).unwrap()
-}
-
 #[tokio::test(flavor = "multi_thread")]
 async fn disk_reads_freshness_continuation_scope_and_history() {
     let harness = Harness::new("disk-reads");
     let root = harness.project("disk");
     let mut mcp = harness.connect(harness.env(&root));
     mcp.initialize().await;
-    mcp.tool("bars_projects", json!({"all":true})).await;
+    mcp.tool("bars_status", json!({"all":true})).await;
     harness.register(&root).await;
     fs::write(
         root.join("docs/fresh.md"),
         "😀 свежий\n".repeat(12) + "[REST](api/rest.md) [нет](absent.md)\n",
     )
     .unwrap();
-    let first = value(
-        &mut mcp,
-        "bars_text_search",
-        json!({"query":"свежий","files":["fresh.md"]}),
-    )
-    .await;
-    assert_eq!(first["documents"][0]["hits"].as_array().unwrap().len(), 5);
-    assert_eq!(first["documents"][0]["hits"][0]["column"], 4);
-    assert_eq!(first["documents"][0]["path"], "docs/fresh.md");
-    assert_eq!(first["documents"][0]["has_more"], true);
-    let revision = first["documents"][0]["revision"].clone();
-    let next = value(&mut mcp,"bars_text_search",json!({"query":"свежий","path":"docs/fresh.md","offset":5,"revision":revision,"limit_hits":3})).await;
-    assert_eq!(next["documents"][0]["hits"].as_array().unwrap().len(), 3);
-    assert_eq!(next["documents"][0]["hits"][0]["line"], 6);
+    // occurrences: все вхождения строкой, пять на документ, продолжение курсором.
+    let (error, text) = mcp
+        .tool(
+            "bars_search",
+            json!({"query":"свежий","occurrences":true,"in":["fresh.md"]}),
+        )
+        .await;
+    assert!(!error, "{text}");
+    assert!(
+        text.contains("docs/fresh.md:1:4: 😀 свежий\n"),
+        "{text}"
+    );
+    assert!(text.contains("docs/fresh.md:5:4: 😀 свежий\n"), "{text}");
+    assert!(text.contains("totals: documents 1, hits 12"), "{text}");
+    let cursor = text
+        .lines()
+        .find_map(|line| line.strip_prefix("more in docs/fresh.md: repeat with cursor "))
+        .unwrap()
+        .to_string();
+    let (error, text) = mcp
+        .tool(
+            "bars_search",
+            json!({"query":"свежий","occurrences":true,"in":["fresh.md"],"cursor":cursor}),
+        )
+        .await;
+    assert!(!error, "{text}");
+    assert!(text.contains("docs/fresh.md:6:4: 😀 свежий"), "{text}");
     fs::write(
         root.join("docs/fresh.md"),
         "изменён свежий\n[REST](api/rest.md) [нет](absent.md)\n",
@@ -40,109 +47,104 @@ async fn disk_reads_freshness_continuation_scope_and_history() {
     .unwrap();
     let (error, text) = mcp
         .tool(
-            "bars_text_search",
-            json!({"query":"свежий","path":"docs/fresh.md","offset":5,"revision":revision}),
+            "bars_search",
+            json!({"query":"свежий","occurrences":true,"in":["fresh.md"],"cursor":cursor}),
         )
         .await;
     assert!(error && text.contains("stale_revision"), "{text}");
-    let links = value(
-        &mut mcp,
-        "bars_links",
-        json!({"path":"docs/fresh.md","limit":1}),
-    )
-    .await;
-    assert_eq!(links["items"][0]["target"], "docs/api/rest.md");
-    assert_eq!(links["has_more"], true);
-    let cursor = links["next_cursor"].clone();
-    let next = value(
-        &mut mcp,
-        "bars_links",
-        json!({"path":"docs/fresh.md","limit":1,"cursor":cursor}),
-    )
-    .await;
-    assert_eq!(next["items"][0]["broken"], true);
-    assert_eq!(next["has_more"], false);
-    assert!(
-        mcp.tool(
-            "bars_links",
-            json!({"path":"docs/api/rest.md","cursor":cursor})
+    // Ссылки документа — view=links, свежая сверка диска.
+    let (error, text) = mcp
+        .tool(
+            "bars_read",
+            json!({"path":"docs/fresh.md","view":"links"}),
         )
-        .await
-        .0
-    );
+        .await;
+    assert!(!error, "{text}");
+    assert!(text.contains("2: REST → docs/api/rest.md"), "{text}");
+    assert!(text.contains("2: нет → absent.md BROKEN"), "{text}");
     fs::write(root.join("docs/absent.md"), "# Теперь есть\n").unwrap();
     let (error, text) = mcp
         .tool(
-            "bars_links",
-            json!({"path":"docs/fresh.md","cursor":cursor}),
+            "bars_read",
+            json!({"path":"docs/fresh.md","view":"links"}),
         )
         .await;
-    assert!(error && text.contains("stale_cursor"), "{text}");
-    let fresh = value(&mut mcp, "bars_links", json!({"path":"docs/fresh.md"})).await;
-    assert_eq!(fresh["items"][1]["broken"], false);
-    let incoming = value(
-        &mut mcp,
-        "bars_links",
-        json!({"path":"docs/absent.md","direction":"incoming"}),
-    )
-    .await;
-    assert_eq!(incoming["items"][0]["source"], "docs/fresh.md");
+    assert!(!error, "{text}");
+    assert!(text.contains("2: REST → docs/api/rest.md"), "{text}");
+    assert!(text.contains("2: нет → docs/absent.md"), "{text}");
+    // Входящие ссылки.
+    let (error, text) = mcp
+        .tool(
+            "bars_read",
+            json!({"path":"docs/absent.md","view":"links","direction":"in"}),
+        )
+        .await;
+    assert!(!error, "{text}");
+    assert!(text.contains("docs/fresh.md:2"), "{text}");
     for path in [
         "../secret.md",
         "C:/secret.md",
         "docs/../../secret.md",
         "docs/file.txt",
     ] {
-        assert!(mcp.tool("bars_links", json!({"path":path})).await.0);
+        let (error, text) = mcp
+            .tool("bars_read", json!({"path":path,"view":"links"}))
+            .await;
+        assert!(error, "{path}: {text}");
     }
     assert!(
-        mcp.tool("bars_text_search", json!({"query":"x","limit_hits":0}))
-            .await
-            .0
+        mcp.tool(
+            "bars_search",
+            json!({"query":"x","occurrences":true,"limit":0})
+        )
+        .await
+        .0
     );
     let (bad, bad_text) = mcp
-        .tool("bars_text_search", json!({"query":"[","regex":true}))
+        .tool(
+            "bars_search",
+            json!({"query":"[","occurrences":true}),
+        )
         .await;
     assert!(bad && bad_text.contains("invalid_regex"), "{bad_text}");
     // Широкий шаблон — ошибка too_broad с отсылкой к единому поиску (ISS-109).
     let (broad, broad_text) = mcp
         .tool(
-            "bars_text_search",
-            json!({"query":"foo|bar|baz|qux|quux","regex":true}),
+            "bars_search",
+            json!({"query":"foo|bar|baz|qux|quux","occurrences":true}),
         )
         .await;
     assert!(
-        broad && broad_text.contains("too_broad") && broad_text.contains("bars_rag_search"),
+        broad && broad_text.contains("too_broad") && broad_text.contains("bars_search"),
         "{broad_text}"
     );
-    assert!(
-        !mcp.tool("bars_text_search", json!({"query":r"свеж\w+","regex":true}))
-            .await
-            .0
-    );
-    let invalid = mcp
-        .request(
-            "tools/call",
-            json!({"name":"bars_text_search","arguments":{"query":"x","window_id":"other"}}),
+    let (error, text) = mcp
+        .tool(
+            "bars_search",
+            json!({"query":"/свеж\\w+/","occurrences":true}),
         )
         .await;
-    assert!(invalid.get("error").is_some() || invalid["result"]["isError"] == true);
-    let clipped = value(
-        &mut mcp,
-        "bars_text_search",
-        json!({"query":"свежий","limit_docs":999,"limit_hits":999}),
-    )
-    .await;
-    assert_eq!(clipped["clamped"], true);
-    assert_eq!(clipped["applied"]["limit_docs"], 100);
-    let (_, txt) = mcp
-        .tool("bars_links", json!({"path":"docs/fresh.md","format":"txt"}))
+    assert!(!error && text.contains("изменён свежий"), "{text}");
+    // Неизвестные поля не роняют вызов: история хранит только известные аргументы.
+    let (error, _) = mcp
+        .tool(
+            "bars_search",
+            json!({"query":"свежий","occurrences":true,"window_id":"other"}),
+        )
         .await;
-    assert!(txt.contains("=== LINKS ===") && txt.contains("limit_reasons"));
+    assert!(!error);
+    let (error, text) = mcp
+        .tool(
+            "bars_search",
+            json!({"query":"свежий","occurrences":true,"limit":999}),
+        )
+        .await;
+    assert!(!error, "{text}");
+    assert!(text.contains("clamped"), "{text}");
     let history = bars_worker::mcp_history::History::new(harness.home.path().into());
     let records = history.page(&Default::default()).unwrap().records;
-    assert!(records.iter().any(|a| a.tool == "bars_text_search"));
-    assert!(records.iter().any(|a| a.tool == "bars_links"));
+    assert!(records.iter().any(|a| a.tool == "bars_search"));
+    assert!(records.iter().any(|a| a.tool == "bars_read"));
     let text = serde_json::to_string(&records).unwrap();
     assert!(!text.contains("raw_target") && !text.contains("😀"));
 }
@@ -153,7 +155,7 @@ async fn disk_reads_bounded_skips_and_parallel_clients() {
     let root = harness.project("parallel");
     let mut a = harness.connect(harness.env(&root));
     a.initialize().await;
-    a.tool("bars_projects", json!({"all":true})).await;
+    a.tool("bars_status", json!({"all":true})).await;
     harness.register(&root).await;
     for n in 0..30 {
         fs::write(root.join(format!("docs/bad{n}.md")), [0xff, 0xfe]).unwrap();
@@ -162,19 +164,27 @@ async fn disk_reads_bounded_skips_and_parallel_clients() {
     let mut b = harness.connect(harness.env(&root));
     b.initialize().await;
     let (x, y) = tokio::join!(
-        value(&mut a, "bars_text_search", json!({"query":"needle"})),
-        value(&mut b, "bars_text_search", json!({"query":"needle"}))
+        a.tool(
+            "bars_search",
+            json!({"query":"needle","occurrences":true})
+        ),
+        b.tool(
+            "bars_search",
+            json!({"query":"needle","occurrences":true})
+        )
     );
-    for out in [x, y] {
-        assert_eq!(out["skipped_total"], 30);
-        assert_eq!(out["skipped"].as_array().unwrap().len(), 20);
-        assert_eq!(out["skipped_truncated"], true);
-        assert_eq!(out["documents"][0]["path"], "docs/needle.md");
+    for (error, text) in [x, y] {
+        assert!(!error, "{text}");
+        assert!(text.contains("skipped: 30 files"), "{text}");
+        assert!(text.contains("docs/needle.md:1:1: needle"), "{text}");
     }
     assert!(
-        a.tool("bars_links", json!({"path":"docs/needle.md"}))
-            .await
-            .0,
+        a.tool(
+            "bars_read",
+            json!({"path":"docs/needle.md","view":"links"})
+        )
+        .await
+        .0,
         "неполная сверка ссылок должна дать ошибку"
     );
 }

@@ -1,7 +1,7 @@
 use super::*;
 
 #[tokio::test(flavor = "multi_thread")]
-async fn session_modules_reach_initialize_schemas_search_and_history() {
+async fn session_modules_reach_initialize_scopes_and_history() {
     let harness = Harness::new("session-modules");
     let root = harness.project("modules");
     fs::write(
@@ -24,7 +24,7 @@ async fn session_modules_reach_initialize_schemas_search_and_history() {
     let mut bootstrap = harness.connect(harness.env(&root));
     bootstrap.initialize().await;
     harness.register(&root).await;
-    wait_status(&mut bootstrap, "индекс модулей", indexed).await;
+    wait_status(&harness, &root, "индекс модулей", indexed).await;
     let loads = harness.provider.counters.loads.load(Ordering::SeqCst);
     let history = bars_worker::mcp_history::History::new(harness.home.path().into());
     let before = history.page(&Default::default()).unwrap().records.len();
@@ -32,35 +32,12 @@ async fn session_modules_reach_initialize_schemas_search_and_history() {
     let init = mcp.initialize().await;
     let text = init["result"]["instructions"].as_str().unwrap();
     assert!(
-        text.contains("Модули проекта modules: . (2), api (3)"),
+        text.contains("Project modules modules: . (2), api (3)"),
         "{text}"
     );
     assert!(text.chars().count() <= 2000);
-    for _ in 0..2 {
-        let list = mcp.request("tools/list", json!({})).await;
-        for name in ["bars_rag_search", "bars_get_similar", "bars_get_duplicates"] {
-            let tool = list["result"]["tools"]
-                .as_array()
-                .unwrap()
-                .iter()
-                .find(|t| t["name"] == name)
-                .unwrap();
-            let field = &tool["inputSchema"]["properties"]["modules"];
-            let description = field["description"].as_str().unwrap();
-            assert!(description.contains("Общее назначение"), "{description}");
-            assert!(
-                description.contains(&title.chars().take(60).collect::<String>()),
-                "{description}"
-            );
-            assert!(!description.contains("Вложенное назначение"));
-            assert!(field.get("enum").is_none());
-            assert!(field["items"].get("enum").is_none());
-            assert!(description.contains("другого project"));
-        }
-    }
-    assert_eq!(
-        harness.provider.counters.loads.load(Ordering::SeqCst),
-        loads,
+    assert!(
+        harness.provider.counters.loads.load(Ordering::SeqCst) == loads,
         "метаданные не загружают модели"
     );
     assert_eq!(
@@ -68,45 +45,47 @@ async fn session_modules_reach_initialize_schemas_search_and_history() {
         before,
         "метаданные не создают историю поиска"
     );
-    let (error, body) = mcp
+    // Широкий поиск печатает разбивку по модулям; область in — произвольные пути.
+    let (error, text) = mcp
         .tool(
-            "bars_rag_search",
-            json!({"query":"поиск", "limit":1, "min_score":0.0, "diagnostic":true}),
+            "bars_search",
+            json!({"query":"поиск", "limit":1, "diagnostic":true}),
         )
         .await;
-    assert!(!error, "{body}");
-    let output: Value = serde_json::from_str(&body).unwrap();
-    let candidates: u64 = output["by_module"]["candidates"]
-        .as_object()
-        .unwrap()
-        .values()
-        .map(|n| n.as_u64().unwrap())
-        .sum();
-    assert!(
-        candidates > output["results"].as_array().unwrap().len() as u64,
-        "{output}"
-    );
-    assert_eq!(output["applied"]["scope"], json!({"modules":[],"files":[]}));
-    let page = history
-        .page(&bars_worker::mcp_history::Filter {
-            tool: Some("bars_rag_search".into()),
-            ..Default::default()
-        })
-        .unwrap();
-    assert_eq!(page.records[0].applied["by_module"], output["by_module"]);
-    assert_eq!(page.records[0].applied["scope"], output["applied"]["scope"]);
-    let (error, text) = mcp.tool("bars_rag_search", json!({"query":"поиск", "limit":20, "min_score":0.0, "format":"txt", "diagnostic":true})).await;
     assert!(!error, "{text}");
     assert!(text.contains("scope: whole project"), "{text}");
     assert!(text.contains("by_module: candidates"), "{text}");
     assert!(text.contains("Results span several modules"), "{text}");
-    let (error, text) = mcp.tool("bars_rag_search", json!({"query":"поиск", "modules":["api"], "files":["docs/guide.md"], "format":"txt", "diagnostic":true})).await;
+    let (error, text) = mcp
+        .tool(
+            "bars_search",
+            json!({"query":"поиск", "in":["api", "docs/guide.md"], "diagnostic":true}),
+        )
+        .await;
     assert!(!error, "{text}");
     assert!(
-        text.contains("scope: modules api; files docs/guide.md"),
+        text.contains("scope: in api, docs/guide.md"),
         "{text}"
     );
     assert!(!text.contains("Results span several modules"));
+    let page = history
+        .page(&bars_worker::mcp_history::Filter {
+            tool: Some("bars_search".into()),
+            ..Default::default()
+        })
+        .unwrap();
+    let scoped = page
+        .records
+        .iter()
+        .find(|r| r.applied["scope"]["paths"] == json!(["api", "docs/guide.md"]))
+        .unwrap();
+    assert!(scoped.applied["by_module"].is_object());
+    let whole = page
+        .records
+        .iter()
+        .find(|r| r.applied["scope"]["paths"] == json!([]))
+        .unwrap();
+    assert!(whole.applied["by_module"]["candidates"].is_object());
 }
 
 #[tokio::test(flavor = "multi_thread")]
@@ -119,22 +98,19 @@ async fn tools_list_retries_missing_session_metadata_once() {
         !init["result"]["instructions"]
             .as_str()
             .unwrap()
-            .contains("Модули проекта later")
+            .contains("Project later modules:")
     );
     harness.register(&root).await;
-    wait_status(&mut mcp, "индекс позднего проекта", indexed).await;
-    let list = mcp.request("tools/list", json!({})).await;
-    let tool = list["result"]["tools"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|t| t["name"] == "bars_rag_search")
-        .unwrap();
+    wait_status(&harness, &root, "индекс позднего проекта", indexed).await;
+    // Метаданные подхватываются со второй попытки (tools/list) и новая сессия их видит.
+    mcp.request("tools/list", json!({})).await;
+    let mut fresh = harness.connect(harness.env(&root));
+    let init = fresh.initialize().await;
     assert!(
-        tool["inputSchema"]["properties"]["modules"]["description"]
+        init["result"]["instructions"]
             .as_str()
             .unwrap()
-            .contains("Модули проекта сессии later")
+            .contains("Project later modules:")
     );
 }
 
@@ -155,7 +131,7 @@ async fn stalled_worker_is_bounded_and_retried_only_once_by_tools_list() {
         init["result"]["instructions"]
             .as_str()
             .unwrap()
-            .contains("имена даёт bars_projects")
+            .contains("modules are top-level")
     );
     let started = Instant::now();
     mcp.request("tools/list", json!({})).await;

@@ -18,15 +18,15 @@ pub(super) fn graph_error(error: GraphError) -> RpcError {
         format!(
             "{error}; граф обновляется автоматически после обновления индекса; \
             ручной запуск — из окна или bars-cli graph build. \
-            bars_reindex не заменяет построение графа и не помогает при model_loading. \
-            Пока используйте обычный bars_rag_search без mode или bars_read; \
+            Переиндексация не заменяет построение графа и не помогает при model_loading. \
+            Пока используйте обычный bars_search без mode или bars_read; \
             состояние — bars_status"
         )
     } else {
         error.to_string()
     };
     let next = match &error {
-        GraphError::NotReady(_) => "next: bars_rag_search без mode",
+        GraphError::NotReady(_) => "next: bars_search без mode",
         GraphError::StaleRef(_) => {
             "next: повторите исходную операцию без cursor и возьмите новый ObjectRef; старую revision не заменять вручную"
         }
@@ -434,8 +434,8 @@ mod readiness_tests {
             "нет структурного слоя",
             "автоматически",
             "bars-cli graph build",
-            "bars_reindex не заменяет",
-            "bars_rag_search без mode",
+            "Переиндексация не заменяет",
+            "bars_search без mode",
             "bars_status",
         ] {
             assert!(error.message.contains(part), "{}", error.message);

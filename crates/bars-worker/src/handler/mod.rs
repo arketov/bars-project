@@ -839,7 +839,7 @@ impl WorkerHandler {
                 if error.kind() == Some(ErrorKind::ProjectNotFound) {
                     error
                         .message
-                        .push_str("; список всех проектов — bars_projects(all=true)");
+                        .push_str("; список всех проектов — bars_status(all=true)");
                 }
                 error
             })?;

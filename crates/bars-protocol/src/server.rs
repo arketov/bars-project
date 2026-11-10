@@ -237,6 +237,7 @@ mod tests {
         let mut params = crate::ReadParams {
             lines: None,
             under: None,
+            max_lines: None,
             target: crate::Target {
                 cwd: "/p".into(),
                 project: None,

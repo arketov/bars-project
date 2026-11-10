@@ -1577,6 +1577,7 @@ mod tests {
             diagnostic: true,
             modules: vec![".".into(), "search".into()],
             files: vec!["a/b.md".into()],
+            paths: vec!["features/search".into()],
             limit: Some(3),
             candidates: Some(20),
             min_score: Some(0.25),
@@ -1592,6 +1593,7 @@ mod tests {
         roundtrip(ReadParams {
             lines: None,
             under: None,
+            max_lines: None,
             target: target(),
             path: "a.md".into(),
         });
@@ -1672,6 +1674,7 @@ mod tests {
             diagnostic: false,
             modules: vec![],
             files: vec![],
+            paths: vec![],
             limit: None,
             candidates: None,
             min_score: None,
@@ -1747,12 +1750,21 @@ mod tests {
             "hello",
             "search",
             "similar",
+            "like",
             "duplicates",
             "outline",
             "read",
             "projects",
             "status",
             "reindex",
+            "audit_list",
+            "audit_summary",
+            "audit_run",
+            "audit_cancel",
+            "audit_findings",
+            "new_topics_list",
+            "new_topics_get",
+            "new_topics_check",
         ];
         let calls = [
             Call::from(HelloParams {
@@ -1777,6 +1789,8 @@ mod tests {
                 target: target(),
                 chunk_id: "1-00000000".into(),
                 modules: Vec::new(),
+                paths: Vec::new(),
+                exclude_document: false,
                 limit: None,
             }),
             Call::from(DuplicatesParams {

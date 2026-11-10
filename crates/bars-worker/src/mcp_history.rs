@@ -776,7 +776,7 @@ mod tests {
     #[test]
     fn allowlist_and_utf8_budget_do_not_capture_unrelated_payloads() {
         let source = json!({"query":"я".repeat(10000),"min_score":null,"files":["a"],"api_key":"SECRET","response":{"text":"BODY"},"project":{"token":"SECRET"}});
-        let v = requested("bars_rag_search", &source);
+        let v = requested("bars_search", &source);
         assert!(v.get("api_key").is_none());
         assert!(v.get("project").is_none());
         assert!(v.get("limit").is_none());
@@ -784,7 +784,7 @@ mod tests {
         let home = tempfile::tempdir().unwrap();
         let h = History::new(home.path().into());
         let a = h
-            .begin("s", "bars_rag_search", "p", None, v, true)
+            .begin("s", "bars_search", "p", None, v, true)
             .unwrap()
             .unwrap();
         assert_eq!(a.requested["query"].as_str().unwrap().len(), 8192);
@@ -869,7 +869,7 @@ mod tests {
             let mut a = h
                 .begin(
                     "s",
-                    "bars_rag_search",
+                    "bars_search",
                     "p",
                     None,
                     json!({"query":"Как работает локальный поиск?","limit":10,"format":"json"}),
@@ -912,10 +912,10 @@ mod tests {
         let mut a = h
             .begin(
                 "s",
-                "bars_rag_search",
+                "bars_search",
                 "p",
                 None,
-                requested("bars_rag_search", &large),
+                requested("bars_search", &large),
                 true,
             )
             .unwrap()

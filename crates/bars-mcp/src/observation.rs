@@ -29,46 +29,29 @@ pub struct Original(pub Value);
 impl<S> FromContextPart<ToolCallContext<'_, S>> for Original {
     fn from_context_part(context: &mut ToolCallContext<S>) -> Result<Self, rmcp::ErrorData> {
         let allowed: &[&str] = match context.name.as_ref() {
-            "bars_rag_search" => &[
-                "format",
+            "bars_search" => &[
                 "project",
                 "query",
-                "modules",
-                "files",
+                "like",
+                "occurrences",
+                "in",
                 "limit",
-                "candidates",
-                "min_score",
+                "cursor",
+                "detail",
                 "diagnostic",
                 "mode",
+                "graph_budgets",
                 "include_related",
                 "related_budget",
             ],
             "bars_relations" | "bars_paths" | "bars_impact" | "bars_context" | "bars_explore"
             | "bars_graph" => GRAPH,
-            "bars_get_similar" => &["format", "project", "chunk_id", "modules", "limit"],
-            "bars_get_duplicates" => &["format", "project", "modules", "limit"],
-            "bars_read" => &["format", "project", "path", "lines", "under"],
-            "bars_text_search" => &[
-                "format",
-                "project",
-                "query",
-                "case_sensitive",
-                "regex",
-                "path_filter",
-                "modules",
-                "files",
-                "limit_docs",
-                "limit_hits",
-                "path",
-                "offset",
-                "revision",
+            "bars_read" => &["project", "path", "lines", "under", "view", "direction", "cursor"],
+            "bars_status" => &["project", "all", "refresh"],
+            "bars_audit" => &[
+                "project", "kind", "action", "id", "revision", "in", "cursor", "limit", "show",
             ],
-            "bars_links" => &["format", "project", "path", "direction", "limit"],
-            "bars_outline" => &["format", "project", "path", "levels", "under", "under_line"],
-            "bars_status" => &["format", "project"],
-            "bars_projects" => &["format", "project", "all"],
-            "bars_reindex" => &["format", "project", "full"],
-            _ => &["format"],
+            _ => &[],
         };
         let mut fields: serde_json::Map<String, Value> = context
             .arguments
@@ -80,7 +63,7 @@ impl<S> FromContextPart<ToolCallContext<'_, S>> for Original {
                     .collect()
             })
             .unwrap_or_default();
-        if context.name.as_ref() == "bars_links" {
+        if context.name.as_ref() == "bars_read" {
             fields.insert(
                 "cursor_present".into(),
                 Value::Bool(

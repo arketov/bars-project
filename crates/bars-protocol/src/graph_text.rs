@@ -864,7 +864,7 @@ fn render_graph(reply: &GraphReply, related: bool) -> String {
             reply.resolution, reply.coverage.processed, reply.coverage.indexed
         );
         if !reply.truncated {
-            text.push_str(if reply.operation == Operation::Impact { "next: bars_links с direction=incoming для документа и bars_rag_search по его названию\n" } else if reply.resolution == "ambiguous" { "next: повторите вызов с ObjectRef выбранного кандидата\n" } else { "next: bars_rag_search без mode или bars_text_search по точной фразе\n" });
+            text.push_str(if reply.operation == Operation::Impact { "next: bars_read view=links direction=in для документа и bars_search по его названию\n" } else if reply.resolution == "ambiguous" { "next: повторите вызов с ObjectRef выбранного кандидата\n" } else { "next: bars_search без mode или occurrences по точной фразе\n" });
         }
     }
     text.push_str(if related {
