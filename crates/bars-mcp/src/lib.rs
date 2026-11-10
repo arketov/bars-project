@@ -419,6 +419,11 @@ fn text(content: String) -> CallToolResult {
     CallToolResult::success(vec![ContentBlock::text(content)])
 }
 
+/// Ответ метода как JSON — тот же, что печатает `bars-cli --json`.
+fn json<T: Serialize>(output: &T) -> String {
+    serde_json::to_string(output).expect("ответы методов сериализуются")
+}
+
 /// Ответ инструмента: текстовый вид результата или понятная ошибка, а не ошибка протокола MCP.
 fn present<T: Serialize>(
     result: Result<T, ClientError>,

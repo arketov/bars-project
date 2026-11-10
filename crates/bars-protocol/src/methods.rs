@@ -1860,6 +1860,7 @@ mod tests {
                 scope: SearchScope {
                     modules: vec!["features".into()],
                     files: vec![],
+                    paths: vec![],
                     excluded_projects: vec![],
                 },
                 weights: ScoreWeights {
