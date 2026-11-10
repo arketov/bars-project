@@ -159,6 +159,15 @@ impl BarsMcp {
     }
 
     async fn graph_search_impl(&self, args: GraphSearchArgs, original: Value) -> CallToolResult {
+        // Параметры mix при любом mode, кроме mix, отклоняются, а не игнорируются — в том
+        // числе без mode, где иначе делегация молча выбросила бы их.
+        if (args.include_related.is_some() || args.related_budget.is_some())
+            && args.mode != Some(bars_graph::RetrievalMode::Mix)
+        {
+            return CallToolResult::error(vec![ContentBlock::text(
+                "invalid_params: include_related/related_budget need mode=mix",
+            )]);
+        }
         if args.mode.is_none() {
             // Без mode графовая форма ведёт себя как обычная.
             return self
@@ -187,13 +196,6 @@ impl BarsMcp {
         if args.like.is_some() && (args.query.is_some() || args.occurrences) {
             return CallToolResult::error(vec![ContentBlock::text(
                 "invalid_params: pass either like, or query (optionally with occurrences=true)",
-            )]);
-        }
-        if (args.include_related.is_some() || args.related_budget.is_some())
-            && args.mode != Some(bars_graph::RetrievalMode::Mix)
-        {
-            return CallToolResult::error(vec![ContentBlock::text(
-                "invalid_params: include_related/related_budget need mode=mix",
             )]);
         }
         let Some(query) = args.query.clone() else {

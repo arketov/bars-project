@@ -74,8 +74,8 @@ fn t26_scenarios_on_a_real_document() {
 
     let outline_heading = all
         .iter()
-        .find(|h| h.text.starts_with("bars_read"))
-        .expect("раздел bars_read есть");
+        .find(|h| h.text.starts_with("Графовые инструменты"))
+        .expect("раздел графовых инструментов есть");
     let second = outline(
         &source,
         &OutlineQuery {

@@ -77,7 +77,11 @@ async fn session_modules_reach_initialize_scopes_and_history() {
     let whole = page
         .records
         .iter()
-        .find(|r| r.applied["scope"]["paths"] == json!([]))
+        .find(|r| {
+            r.applied["scope"]["paths"]
+                .as_array()
+                .is_none_or(|p| p.is_empty())
+        })
         .unwrap();
     assert!(whole.applied["by_module"]["candidates"].is_object());
 }

@@ -1128,7 +1128,8 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
         )
         .await;
     assert!(!is_error, "{links}");
-    assert!(links.starts_with("=== LINKS · incoming ==="), "{links}");
+    assert!(links.starts_with("=== LINKS · incoming"), "{links}");
+    assert!(links.contains("known document"), "{links}");
 
     let (is_error, document) = mcp.tool("bars_read", json!({ "path": "guide.md" })).await;
     assert!(!is_error, "{document}");
@@ -1328,7 +1329,7 @@ async fn history_preserves_original_missing_null_zero_and_excludes_payloads() {
         && a.result["unit"] == "lines"));
     assert!(page.records.iter().any(|a| a.tool == "bars_read"
         && a.outcome == "success"
-        && a.result["count"] == 3
+        && a.result["count"] == 4
         && a.result["unit"] == "headings"));
     let first = page
         .records

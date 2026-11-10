@@ -95,11 +95,12 @@ async fn disk_reads_freshness_continuation_scope_and_history() {
         .tool("bars_search", json!({"query":"/[/","occurrences":true}))
         .await;
     assert!(bad && bad_text.contains("invalid_regex"), "{bad_text}");
-    // Широкий шаблон — ошибка too_broad с отсылкой к единому поиску (ISS-109).
+    // Широкий шаблон — ошибка too_broad с отсылкой к единому поиску (ISS-109);
+    // ветки считаются у регулярного выражения, поэтому форма /…/.
     let (broad, broad_text) = mcp
         .tool(
             "bars_search",
-            json!({"query":"foo|bar|baz|qux|quux","occurrences":true}),
+            json!({"query":"/foo|bar|baz|qux|quux/","occurrences":true}),
         )
         .await;
     assert!(
