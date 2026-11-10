@@ -897,19 +897,17 @@ fn identifier_goes_to_fts_as_a_phrase_words_and_a_whole_exact_form() {
     let query = fts_query("zq_widget_limit").unwrap();
     assert_eq!(
         query.all,
-        "{name heading_chain body} : (\"zq widget limit\" OR \"zq\" OR \"widget\" OR \"limit\")          OR exact : (\"zq\" OR \"widget\" OR \"limit\" OR \"zq_widget_limit\")"
+        "{name heading_chain body} : (\"zq widget limit\" OR \"zq\" OR \"widget\" OR \"limit\") OR exact : (\"zq\" OR \"widget\" OR \"limit\" OR \"zq_widget_limit\")"
     );
     assert_eq!(
         query.identifiers.as_deref(),
-        Some(
-            "{name heading_chain body} : (\"zq widget limit\")              OR exact : (\"zq_widget_limit\")"
-        )
+        Some("{name heading_chain body} : (\"zq widget limit\") OR exact : (\"zq_widget_limit\")")
     );
     // Обычные слова и повтор слов фразы не порождают.
     let plain = fts_query("настройки поиска настройки").unwrap();
     assert_eq!(
         plain.all,
-        "{name heading_chain body} : (\"настройк\" OR \"поиск\")          OR exact : (\"настройки\" OR \"поиска\")"
+        "{name heading_chain body} : (\"настройк\" OR \"поиск\") OR exact : (\"настройки\" OR \"поиска\")"
     );
     assert_eq!(plain.identifiers, None);
     assert_eq!(fts_query("?! --"), None);
