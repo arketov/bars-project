@@ -498,6 +498,7 @@ impl AuditStore {
     /// Страница находок запуска. `group` — `main` или `overlap`; пусто — все. Исчезнувшие идут
     /// последними и показываются только при `include_gone`. `path_prefixes` сужает находки по
     /// пути первого предмета (префиксы в форме хранения, от корня проекта).
+    #[allow(clippy::too_many_arguments)]
     pub fn findings(
         &self,
         run_id: i64,
