@@ -277,9 +277,8 @@ fn complete_attempt(
                         }
                         applied["source_chunk"] = out["source"]["chunk_id"].clone();
                         applied["score_kind"] = json!("cosine");
-                        if let Some(linked) = out.get("linked_from") {
-                            applied["linked_from"] = linked.clone();
-                        }
+                        applied["linked_from"] =
+                            out.get("linked_from").cloned().unwrap_or_else(|| json!([]));
                         applied["sources"] = json!({"limit": match input.get("limit").filter(|v| !v.is_null()) {
                             None => "default",
                             Some(v) if *v == out["limit"] => "explicit",
