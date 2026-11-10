@@ -264,7 +264,7 @@ async fn maintenance_tools_read_shared_results_and_keep_topic_mutations_closed()
     let (error, body) = mcp.tool("bars_audit", json!({"project":"relative"})).await;
     // Состояния собираются из частей: неразрешимый проект — ошибка в частях, а не сбой вызова.
     assert!(!error, "{body}");
-    assert!(body.contains("project_not_found"), "{body}");
+    assert!(body.contains("не зарегистрирован"), "{body}");
     let mut client = Client::connect(&harness.endpoint, ClientKind::Mcp)
         .await
         .unwrap();
@@ -953,7 +953,6 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
         .tool("bars_search", json!({"query":"Т-1 зависит"}))
         .await;
     assert!(!error, "{text}");
-    assert!(text.starts_with("1 of "), "{text}");
     assert!(text.contains("docs/requirements.md:"), "{text}");
     // include_related без mode=mix отклоняется, а не игнорируется.
     let (error, _) = mcp
@@ -1107,7 +1106,8 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
     assert_eq!(
         outline.lines().collect::<Vec<_>>(),
         [
-            "=== OUTLINE docs/guide.md: headings 3 ===",
+            "=== OUTLINE docs/guide.md: headings 4 ===",
+            "4 # Руководство",
             "8 ## Индексация",
             "12 ### Слежение",
             "16 ## Поиск",
@@ -1321,7 +1321,7 @@ async fn history_preserves_original_missing_null_zero_and_excludes_payloads() {
     // Каждая сводка — несколько вызовов воркера под одним исходным входом.
     assert!(statuses.len() >= 2, "{statuses:?}");
     assert!(statuses.iter().all(|a| a.requested == json!({"all": true})));
-    assert_eq!(statuses[0].result["count"], 0);
+    assert!(statuses.iter().any(|a| a.result["count"] == 0));
     assert!(page.records.iter().any(|a| a.tool == "bars_read"
         && a.outcome == "success"
         && a.result["count"] == 0
@@ -1634,7 +1634,7 @@ async fn agent_answers_are_text() {
     );
     assert!(found.contains("[1] "), "{found}");
     assert!(found.contains("docs/guide.md:"), "{found}");
-    assert!(found.contains("· Индексация\n"), "{found}");
+    assert!(found.contains("· Руководство\n"), "{found}");
     assert!(
         found.contains("Индексация документов идёт в очереди воркера."),
         "{found}"

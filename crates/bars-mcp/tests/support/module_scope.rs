@@ -45,12 +45,9 @@ async fn session_modules_reach_initialize_scopes_and_history() {
         before,
         "метаданные не создают историю поиска"
     );
-    // Широкий поиск печатает разбивку по модулям; область in — произвольные пути.
+    // Широкий поиск без предела печатает разбивку по модулям; область in — произвольные пути.
     let (error, text) = mcp
-        .tool(
-            "bars_search",
-            json!({"query":"поиск", "limit":1, "diagnostic":true}),
-        )
+        .tool("bars_search", json!({"query":"поиск", "diagnostic":true}))
         .await;
     assert!(!error, "{text}");
     assert!(text.contains("scope: whole project"), "{text}");

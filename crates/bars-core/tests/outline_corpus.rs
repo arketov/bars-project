@@ -72,6 +72,10 @@ fn t26_scenarios_on_a_real_document() {
     let all = outline(&source, &OutlineQuery::default()).unwrap();
     assert_eq!(all[0].level, 1);
 
+    let outline_heading = all
+        .iter()
+        .find(|h| h.text.starts_with("bars_read"))
+        .expect("раздел bars_read есть");
     let second = outline(
         &source,
         &OutlineQuery {
@@ -81,10 +85,6 @@ fn t26_scenarios_on_a_real_document() {
     )
     .unwrap();
     assert!(second.iter().all(|h| h.level == 2));
-    let outline_heading = second
-        .iter()
-        .find(|h| h.text.starts_with("bars_read"))
-        .expect("раздел bars_read есть");
 
     let by_chain = Under::Chain(format!("{}/{}", all[0].text, outline_heading.text));
     let inside = |under| {

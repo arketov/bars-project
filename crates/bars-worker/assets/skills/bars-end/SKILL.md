@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 The user ends the session with this skill. Your job is to move everything the session did, decided and learned into the project documentation, so that the next session and the people on the project find it in its owning document, not only in this conversation. Write documents in the user's language, following explicit project language rules; this instruction is in English only because it is for agents.
 
-Project rules come first: its instruction files (`AGENTS.md`, `CLAUDE.md` and similar), its documentation layout, its question register and plan conventions. The layout below is advice. Use `bars-docs` for document kinds, format, links and `Index.md`; use `bars-session-log` for the journal.
+Project rules come first: its instruction files (`AGENTS.md`, `CLAUDE.md` and similar), its documentation layout, its question register and plan conventions. The layout below is advice. `BARS_INSTRUCTION.md` in the documentation root owns document kinds, format, links and `Index.md`; skill `bars-docs` covers searching and reading; use `bars-session-log` for the journal.
 
 Do not change code. Do not commit unless the user asked for a commit in this request or the project rules require it.
 
@@ -55,10 +55,10 @@ Rows marked «propose only» are not edited without the user's yes in this conve
 
 For each fact:
 
-1. Find the document that owns the topic: `bars_rag_search` with a subject question or the exact name, number or value in quotes, `bars_read` or `bars_outline` for a known path.
-2. Before adding text, check that the description does not already exist elsewhere (`bars_get_similar` on a hit). Edit the owner; create a new file only for a new topic, and list it in its folder's `Index.md`.
+1. Find the document that owns the topic: `bars_search` with a subject question or the exact name, number or value in quotes, `bars_read` for a known path (its `view:"outline"` returns headings).
+2. Before adding text, check that the description does not already exist elsewhere (`bars_search` with `like:"path:lines"` on a hit). Edit the owner; create a new file only for a new topic, and list it in its folder's `Index.md`.
 3. The document describes the current state: replace outdated statements, do not append corrections. Update the status line at the top: what is verified and how, what is not.
-4. Search the whole documentation for old names, values and claims the session made obsolete (`bars_rag_search` with the old name or value in quotes, then `bars_text_search` for the complete list of its occurrences). Fix or delete every stale repeat, or link to the owner instead of repeating it.
+4. Search the whole documentation for old names, values and claims the session made obsolete (`bars_search` with the old name or value in quotes, then `bars_search` with `occurrences=true` for the complete list of its occurrences). Fix or delete every stale repeat, or link to the owner instead of repeating it.
 
 Keep the scope to what the session touched and its stale repeats. A full audit of the project documentation is a separate task; suggest it if you saw many problems.
 
@@ -66,7 +66,7 @@ Keep the scope to what the session touched and its stale repeats. A full audit o
 
 - Every changed file has frontmatter `title` and self-contained sections.
 - Every new or renamed file is in its folder's `Index.md`.
-- Links are relative, point to existing files, and state a relation; check outgoing links of changed documents with `bars_links`.
+- Links are relative, point to existing files, and state a relation; check outgoing links of changed documents with `bars_read` (`view:"links"`).
 - No keys, tokens, passwords or personal data.
 - Reread the diff of the documentation once.
 

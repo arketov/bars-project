@@ -65,29 +65,31 @@ try {
     return new Promise(resolve => { const next=++id; pending.set(next,resolve); mcp.stdin.write(JSON.stringify({jsonrpc:'2.0',id:next,method,params})+'\n'); });
   }
   const init = await request('initialize',{protocolVersion:'2025-11-25',capabilities:{},clientInfo:{name:'disk-proof',version:'1'}});
-  assert.ok(init.result.instructions.includes('bars_text_search'));
+  assert.ok(init.result.instructions.includes('bars_search'));
   assert.ok([...init.result.instructions].length <= 2000);
   mcp.stdin.write(JSON.stringify({jsonrpc:'2.0',method:'notifications/initialized'})+'\n');
   const list = await request('tools/list',{});
-  assert.equal(list.result.tools.length,23);
-  for (const name of ['bars_text_search','bars_links']) {
+  assert.equal(list.result.tools.length,4);
+  for (const name of ['bars_search','bars_read']) {
     const schema = list.result.tools.find(t=>t.name===name).inputSchema;
     assert.equal(schema.additionalProperties,false);
     assert.ok(!schema.properties.window_id);
+    assert.ok(!schema.properties.format,'JSON остаётся у bars-cli --json');
   }
   async function tool(name,args) {
-    const reply = await request('tools/call',{name,arguments:{...args,format:'json'}});
+    const reply = await request('tools/call',{name,arguments:args});
     assert.ok(reply.result && !reply.result.isError,JSON.stringify(reply));
-    return JSON.parse(reply.result.content.find(c=>c.type==='text').text);
+    return reply.result.content.find(c=>c.type==='text').text;
   }
-  const found = await tool('bars_text_search',{query:'новая строка'});
-  assert.equal(found.documents[0].hits[0].column,4);
-  const links = await tool('bars_links',{path:'docs/a.md'});
-  assert.equal(links.items[0].target,'docs/b.md');
+  const found = await tool('bars_search',{query:'новая строка',occurrences:true});
+  assert.ok(found.includes('docs/a.md:2:4:'),found);
+  const links = await tool('bars_read',{path:'docs/a.md',view:'links'});
+  assert.ok(links.includes('b.md'),links);
   fs.writeFileSync(path.join(project,'docs/a.md'),'# А\nсохранено позже\n[нет](missing.md)\n');
-  assert.equal((await tool('bars_text_search',{query:'сохранено позже'})).documents[0].path,'docs/a.md');
-  assert.equal((await tool('bars_links',{path:'docs/a.md'})).items[0].broken,true);
-  evidenceResult.checks.push('initialize <=2000','23 schemas','stdio tools/call','UTF-16','fresh text','fresh links');
+  assert.ok((await tool('bars_search',{query:'сохранено позже',occurrences:true})).includes('docs/a.md'));
+  const fresh = await tool('bars_read',{path:'docs/a.md',view:'links'});
+  assert.ok(fresh.includes('missing.md') && fresh.includes('BROKEN'),fresh);
+  evidenceResult.checks.push('initialize <=2000','4 tools','stdio tools/call','UTF-16','fresh text','fresh links');
   mcp.stdin.end();
   assert.equal(await exited(mcp),0,mcpError);
   fs.writeFileSync(path.join(home,'stop'),'');

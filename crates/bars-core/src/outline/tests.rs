@@ -143,7 +143,7 @@ fn unknown_chain_and_non_heading_line_are_errors() {
     let result = outline(DOC, &query(&[], Some(suffix))).unwrap();
     assert_eq!(
         lines(&result),
-        ["16 ### Windows", "18 ### macOS", "20 #### Нюанс"]
+        ["13 ### Windows", "15 ### macOS", "17 #### Нюанс"]
     );
     // Неоднозначный конец цепочки — ошибка со списком совпадений.
     let ambiguous = "# A\n## Ввод\n# B\n## Ввод\n";

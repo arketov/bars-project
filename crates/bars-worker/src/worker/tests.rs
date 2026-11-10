@@ -708,7 +708,7 @@ async fn unregister_stops_everything_and_keeps_project_files() {
 }
 
 /// Приёмка Т-7: область вложенного проекта уходит из индекса внешнего без пересборки и
-/// возвращается после снятия вложенного; `bars_text_search` и чтение по диску не ограничены.
+/// возвращается после снятия вложенного; `bars_search` (occurrences) и чтение по диску не ограничены.
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn nested_project_area_leaves_the_outer_index_and_returns_when_it_is_unregistered() {
     let env = Env::new();
