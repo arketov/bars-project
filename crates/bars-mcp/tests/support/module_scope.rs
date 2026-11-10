@@ -32,7 +32,7 @@ async fn session_modules_reach_initialize_scopes_and_history() {
     let init = mcp.initialize().await;
     let text = init["result"]["instructions"].as_str().unwrap();
     assert!(
-        text.contains("Project modules modules: . (2), api (3)"),
+        text.contains("Project modules modules: . (2) — Общее назначение, api (3)"),
         "{text}"
     );
     assert!(text.chars().count() <= 2000);

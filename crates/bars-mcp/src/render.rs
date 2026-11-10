@@ -69,7 +69,7 @@ pub fn search(output: &SearchOutput, detail: Detail) -> String {
                 OTHER_HEADERS_MAX,
             ));
             text.push('\n');
-        } else {
+        } else if !matches!(detail, Detail::Brief) {
             let _ = writeln!(
                 text,
                 "{}",

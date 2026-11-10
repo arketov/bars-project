@@ -127,16 +127,31 @@ fn under_stops_at_a_heading_of_the_same_or_higher_level() {
 #[test]
 fn unknown_chain_and_non_heading_line_are_errors() {
     let missing = Under::Chain("bars/Нет такого".into());
-    assert_eq!(
-        outline(DOC, &query(&[], Some(missing))),
-        Err(OutlineError::HeadingNotFound("bars/Нет такого".into()))
+    let error = outline(DOC, &query(&[], Some(missing))).unwrap_err();
+    // Ошибка предлагает ближайшие заголовки с номерами строк (ISS-112).
+    let message = match error {
+        OutlineError::HeadingNotFound(message) => message,
+        other => panic!("неожиданная ошибка: {other:?}"),
+    };
+    assert!(
+        message.starts_with("заголовок не найден: bars/Нет такого"),
+        "{message}"
     );
-    // Цепочка полная: заголовок без родителя не находится.
-    let partial = Under::Chain("Установка".into());
-    assert!(matches!(
-        outline(DOC, &query(&[], Some(partial))),
-        Err(OutlineError::HeadingNotFound(_))
-    ));
+    assert!(message.contains("Ближайшие заголовки"), "{message}");
+    // Конец цепочки достаточно: «Установка» находит «bars/Установка».
+    let suffix = Under::Chain("Установка".into());
+    let result = outline(DOC, &query(&[], Some(suffix))).unwrap();
+    assert_eq!(
+        lines(&result),
+        ["16 ### Windows", "18 ### macOS", "20 #### Нюанс"]
+    );
+    // Неоднозначный конец цепочки — ошибка со списком совпадений.
+    let ambiguous = "# A\n## Ввод\n# B\n## Ввод\n";
+    let error = outline(ambiguous, &query(&[], Some(Under::Chain("Ввод".into())))).unwrap_err();
+    assert!(
+        matches!(error, OutlineError::HeadingNotFound(ref m) if m.contains("A/Ввод") && m.contains("B/Ввод")),
+        "{error:?}"
+    );
     assert_eq!(
         outline(DOC, &query(&[], Some(Under::Line(3)))),
         Err(OutlineError::NotAHeading(3))

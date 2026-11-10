@@ -163,13 +163,10 @@ fn scoped_graph_with_relations_does_not_claim_empty_search_results() {
     prepare_graph_search_text(&mut output).unwrap();
     let text = render_graph_search_text(&output);
     assert!(text.contains("scope: modules ."), "{text}");
-    assert!(
-        !text.contains("No results in the selected modules"),
-        "{text}"
-    );
+    assert!(!text.contains("No results in the selected scope"), "{text}");
     output.applied_mode = RetrievalMode::Mix;
     output.graph_results = None;
-    assert!(render_graph_search_text(&output).contains("No results in the selected modules"));
+    assert!(render_graph_search_text(&output).contains("No results in the selected scope"));
 }
 fn reply(operation: Operation) -> GraphReply {
     let request = GraphRequest {

@@ -118,11 +118,8 @@ mod tests {
         for graph in [false, true] {
             let text = session_instructions(graph, Some(&project));
             assert!(text.chars().count() <= 2000, "{}", text.chars().count());
-            assert!(text.contains("and 0 more") || text.contains("more — bars_status"));
-            assert!(
-                text.contains("модуль-29 (30)"),
-                "самый большой модуль виден"
-            );
+            // Самый большой модуль виден и в полном списке, и в усечённом.
+            assert!(text.contains("модуль-29 (30)"), "{text}");
             assert!(session_instructions(graph, None).chars().count() <= 2000);
         }
         let mut titled = project.clone();

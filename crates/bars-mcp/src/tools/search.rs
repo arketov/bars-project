@@ -75,10 +75,14 @@ pub struct GraphSearchArgs {
 
 impl BarsMcp {
     async fn search_impl(&self, args: SearchArgs, original: Value) -> CallToolResult {
-        let modes = args.query.is_some() as u8 + args.like.is_some() as u8 + args.occurrences as u8;
-        if modes != 1 || (args.occurrences && args.query.is_none()) {
+        if args.like.is_some() && (args.query.is_some() || args.occurrences) {
             return CallToolResult::error(vec![ContentBlock::text(
-                "invalid_params: pass exactly one of query, like, occurrences=true (occurrences needs query as the string)",
+                "invalid_params: pass either like, or query (optionally with occurrences=true)",
+            )]);
+        }
+        if args.like.is_none() && args.query.is_none() {
+            return CallToolResult::error(vec![ContentBlock::text(
+                "invalid_params: pass query, like, or occurrences=true with query as the string",
             )]);
         }
         let paths = match scope_paths(&args.r#in) {
@@ -180,10 +184,9 @@ impl BarsMcp {
                 return CallToolResult::error(vec![ContentBlock::text(message)]);
             }
         };
-        let modes = args.query.is_some() as u8 + args.like.is_some() as u8 + args.occurrences as u8;
-        if modes != 1 || (args.occurrences && args.query.is_none()) {
+        if args.like.is_some() && (args.query.is_some() || args.occurrences) {
             return CallToolResult::error(vec![ContentBlock::text(
-                "invalid_params: graph modes need exactly one of query, like, occurrences=true",
+                "invalid_params: pass either like, or query (optionally with occurrences=true)",
             )]);
         }
         if (args.include_related.is_some() || args.related_budget.is_some())

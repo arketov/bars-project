@@ -190,7 +190,11 @@ mod tests {
             [(6, 12), (13, 14)]
         );
         assert_eq!(&source[selection.parts[1].bytes.clone()], "## Б\nповтор\n");
-        for chain in ["Б", "А/fake", "fake", ""] {
+        // under принимает конец цепочки: «Б» достаёт оба повтора цепочки «А/Б» (ISS-112);
+        // промах и цепочка без заголовка — ошибка.
+        let suffix = select(source, None, Some("Б")).unwrap();
+        assert_eq!(suffix.parts.len(), 2);
+        for chain in ["А/fake", "fake", ""] {
             assert!(select(source, None, Some(chain)).is_err(), "{chain}");
         }
         let cr = "\u{feff}# А\r## Б\rтекст\r# Другой\r";

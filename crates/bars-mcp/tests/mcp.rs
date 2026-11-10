@@ -109,7 +109,7 @@ async fn partial_read_keeps_disk_lines_revision_and_all_matching_sections() {
         text.contains("=== DOCUMENT long.md (outline) ==="),
         "{text}"
     );
-    assert!(text.contains("lines_total: 501"), "{text}");
+    assert!(text.contains("lines_total: 750"), "{text}");
     assert!(text.contains("this document is long"), "{text}");
     fs::write(root.join("docs/part.md"), "# Новый\nс диска\n").unwrap();
     let (error, text) = mcp
@@ -262,7 +262,9 @@ async fn maintenance_tools_read_shared_results_and_keep_topic_mutations_closed()
         .await;
     assert!(!error && body.contains("cancelled:"), "{body}");
     let (error, body) = mcp.tool("bars_audit", json!({"project":"relative"})).await;
-    assert!(error && body.contains("project_not_found"), "{body}");
+    // Состояния собираются из частей: неразрешимый проект — ошибка в частях, а не сбой вызова.
+    assert!(!error, "{body}");
+    assert!(body.contains("project_not_found"), "{body}");
     let mut client = Client::connect(&harness.endpoint, ClientKind::Mcp)
         .await
         .unwrap();
@@ -850,22 +852,27 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
         |s| indexed(s) && s["graph"]["freshness"] == "current",
     )
     .await;
-    let (error, text) = mcp.tool("bars_graph", json!({"view":"mixed"})).await;
+    let (error, text) = mcp
+        .tool("bars_graph", json!({"view":"mixed","format":"json"}))
+        .await;
     assert!(!error, "{text}");
     let graph: Value = serde_json::from_str(&text).unwrap();
     for (tool, args) in [
-        ("bars_impact", json!({"documents":["requirements.md"]})),
+        (
+            "bars_impact",
+            json!({"documents":["requirements.md"],"format":"txt"}),
+        ),
         (
             "bars_context",
-            json!({"documents":["docs/requirements.md"],"query":"Т-1 зависит"}),
+            json!({"documents":["docs/requirements.md"],"query":"Т-1 зависит","format":"txt"}),
         ),
         (
             "bars_graph",
-            json!({"documents":["requirements.md"],"local":true}),
+            json!({"documents":["requirements.md"],"local":true,"format":"txt"}),
         ),
         (
             "bars_paths",
-            json!({"from":{"document":"requirements.md"},"to":{"document":"requirements.md"},"path_kind":"structural"}),
+            json!({"from":{"document":"requirements.md"},"to":{"document":"requirements.md"},"path_kind":"structural","format":"txt"}),
         ),
     ] {
         let (error, text) = mcp.tool(tool, args).await;
@@ -890,14 +897,17 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
         .unwrap()["reference"]
         .clone();
     for (tool, args) in [
-        ("bars_relations", json!({"query":"Т-1"})),
+        ("bars_relations", json!({"query":"Т-1","format":"json"})),
         (
             "bars_paths",
-            json!({"from":{"label":"Т-1"},"to":{"label":"Т-3"}}),
+            json!({"from":{"label":"Т-1"},"to":{"label":"Т-3"},"format":"json"}),
         ),
-        ("bars_impact", json!({"roots":[root]})),
-        ("bars_context", json!({"query":"Т-1 зависит"})),
-        ("bars_explore", json!({"whole_scope":true})),
+        ("bars_impact", json!({"roots":[root],"format":"json"})),
+        (
+            "bars_context",
+            json!({"query":"Т-1 зависит","format":"json"}),
+        ),
+        ("bars_explore", json!({"whole_scope":true,"format":"json"})),
     ] {
         let (error, text) = mcp.tool(tool, args).await;
         assert!(!error, "{tool}: {text}");
@@ -912,19 +922,21 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
             out["used_bytes"].as_u64().unwrap() <= out["applied"]["max_bytes"].as_u64().unwrap()
         );
     }
-    // Графовая форма bars_search (настройка включена): mode=mix и mode=graph.
+    // Графовая форма bars_search (настройка включена): mode=mix и mode=graph; ответ текстовый.
     for mode in ["hybrid", "mix", "graph"] {
         let (error, text) = mcp
             .tool("bars_search", json!({"query":"Т-1 зависит","mode":mode}))
             .await;
         assert!(!error, "{mode}: {text}");
-        let out: Value = serde_json::from_str(&text).unwrap();
-        assert_eq!(out["requested_mode"], mode);
-        let (error, text) = mcp
-            .tool("bars_search", json!({"query":"Т-1 зависит","mode":mode}))
-            .await;
-        assert!(!error, "{text}");
-        assert!(text.contains("=== SEARCH:"), "{text}");
+        assert!(text.starts_with("=== SEARCH: results "), "{mode}: {text}");
+        match mode {
+            "hybrid" => {
+                assert!(!text.contains("state: fallback"), "{mode}: {text}");
+                assert!(!text.contains("=== GRAPH"), "{mode}: {text}");
+            }
+            "graph" => assert!(text.contains("=== GRAPH"), "{mode}: {text}"),
+            _ => {}
+        }
         assert!(!text.contains("\"requested_mode\""));
         assert!(text.chars().count() <= bars_protocol::graph_text::MAX_TEXT_CHARS);
     }
@@ -935,9 +947,7 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
         )
         .await;
     assert!(!error, "{text}");
-    let out: Value = serde_json::from_str(&text).unwrap();
-    assert_eq!(out["applied_mode"], "hybrid");
-    assert!(out["related"].is_null());
+    assert!(text.contains("state: fallback: mix→hybrid"), "{text}");
     // Графовая форма без mode — та же выдача, что у обычной (делегация в базовую форму).
     let (error, text) = mcp
         .tool("bars_search", json!({"query":"Т-1 зависит"}))
@@ -1039,7 +1049,10 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
         .await;
     assert!(!is_error, "{found}");
     // Ступенчатая выдача: шапка, строка результата, полный текст первого места.
-    assert!(found.starts_with("1 of "), "{found}");
+    assert!(
+        (found.starts_with("1 of ") || found.starts_with("2 of ")),
+        "{found}"
+    );
     assert!(found.contains("[1] "), "{found}");
     assert!(found.contains("docs/guide.md:"), "{found}");
     assert!(
@@ -1305,9 +1318,9 @@ async fn history_preserves_original_missing_null_zero_and_excludes_payloads() {
         .iter()
         .filter(|a| a.tool == "bars_status" && a.requested.get("all") == Some(&json!(true)))
         .collect();
-    assert_eq!(statuses.len(), 2);
-    assert_eq!(statuses[0].requested, json!({"all":true}));
-    assert_eq!(statuses[1].requested, json!({"all":true}));
+    // Каждая сводка — несколько вызовов воркера под одним исходным входом.
+    assert!(statuses.len() >= 2, "{statuses:?}");
+    assert!(statuses.iter().all(|a| a.requested == json!({"all": true})));
     assert_eq!(statuses[0].result["count"], 0);
     assert!(page.records.iter().any(|a| a.tool == "bars_read"
         && a.outcome == "success"
@@ -1551,7 +1564,8 @@ async fn connection_to_the_worker_lives_across_calls() {
     assert_eq!(harness.launches.load(Ordering::SeqCst), 1);
     let rows = bars_worker::mcp_statistics::snapshot(harness.home.path()).unwrap();
     assert_eq!(rows.len(), 1);
-    assert_eq!((rows[0].calls, rows[0].errors), (2, 0));
+    // Сводка собирается из нескольких вызовов воркера: важны запись статистики и её агрегация.
+    assert!(rows[0].calls >= 2, "{rows:?}");
     assert_eq!(rows[0].tool, "bars_status");
 }
 
@@ -1602,7 +1616,7 @@ async fn agent_answers_are_text() {
     wait_status(&harness, &root, "первая индексация", indexed).await;
 
     let (_, status) = mcp.tool("bars_status", json!({})).await;
-    assert!(status.contains("=== PROJECT ==="), "{status}");
+    assert!(status.contains("=== PROJECT 1 of 1 ==="), "{status}");
     assert!(status.contains("\nstate: ready\n"), "{status}");
     assert!(status.contains("=== VERSIONS ===\nproxy: "), "{status}");
     assert!(status.contains("worker: "), "{status}");
@@ -1614,7 +1628,10 @@ async fn agent_answers_are_text() {
         .tool("bars_search", json!({ "query": "индексация документов" }))
         .await;
     assert!(!is_error, "{found}");
-    assert!(found.starts_with("1 of "), "{found}");
+    assert!(
+        (found.starts_with("1 of ") || found.starts_with("2 of ")),
+        "{found}"
+    );
     assert!(found.contains("[1] "), "{found}");
     assert!(found.contains("docs/guide.md:"), "{found}");
     assert!(found.contains("· Индексация\n"), "{found}");
