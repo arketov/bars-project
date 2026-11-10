@@ -73,6 +73,7 @@ fn request(project: &str, query: &str) -> SearchParams {
         query: query.into(),
         modules: vec![],
         files: vec![],
+        paths: vec![],
         limit: Some(15),
         candidates: Some(30),
         min_score: Some(0.),

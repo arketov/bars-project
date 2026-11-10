@@ -128,6 +128,7 @@ mod bench {
             query: query.into(),
             modules: vec![],
             files: vec![],
+            paths: vec![],
             limit: None,
             candidates: None,
             min_score: None,

@@ -67,6 +67,7 @@ async fn main() {
         query: "Как проверить индексацию документов?".into(),
         modules: vec![],
         files: vec![],
+        paths: vec![],
         limit: Some(3),
         candidates: None,
         min_score: Some(0.0),
