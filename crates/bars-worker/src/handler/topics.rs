@@ -3,7 +3,7 @@
 //! Методы помечены `Window` в `bars-protocol`: канал закрыт ими для агента и CLI. Здесь — проверка
 //! темы текущим поиском, ручная отметка и решения пользователя с ожидаемой ревизией.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use bars_core::new_topics::{
     Change, CheckRow, NewCheck, NewCheckResult, Observation, Reason, Recorded, Source, StoreError,

@@ -75,6 +75,7 @@ impl WorkerHandler {
             let scope = bars_protocol::SearchScope {
                 modules: params.search.modules.clone(),
                 files: params.search.files.clone(),
+                paths: params.search.paths.clone(),
                 excluded_projects: Vec::new(),
             };
             let status = self

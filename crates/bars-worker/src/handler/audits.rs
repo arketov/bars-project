@@ -305,6 +305,7 @@ impl WorkerHandler {
             .map_err(worker_error)?
             .read_owned()
             .await;
+        let project = project.to_path_buf();
         let docs_root = docs_root.to_string();
         tokio::task::spawn_blocking(move || {
             let _gate = gate;

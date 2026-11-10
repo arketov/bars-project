@@ -253,7 +253,9 @@ pub fn search_with_policy(
     // Агентская область `in`: префиксы в формах хранения (от корня проекта); файл входит, если
     // совпал с префиксом целиком или лежит под ним. Разделитель приписан один раз, а не на
     // каждую пару «файл × префикс».
-    let scope_prefixes: Vec<String> = stored_forms(&p.paths.iter().collect::<Vec<_>>());
+    let scope_prefixes: Vec<String> = stored_forms(&p.paths.iter().collect::<Vec<_>>())
+        .into_iter()
+        .collect();
     let scope_folders: Vec<String> = scope_prefixes
         .iter()
         .map(|prefix| format!("{prefix}/"))
