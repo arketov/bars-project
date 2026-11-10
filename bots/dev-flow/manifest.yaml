@@ -1,0 +1,21 @@
+name: dev-flow
+display_name: Dev flow
+icon: 🛠️
+version: 0.1.0
+description: |
+  Учебный flow разработки: planner строит план по задаче, implement правит
+  файлы в отдельной рабочей копии и коммитит, review одобряет изменение или
+  возвращает замечания (не больше трёх кругов). Все узлы — Sonnet 5.5.
+  Документацию узлы читают только через MCP-сервер bars.
+schema_version: 1
+
+## Карточка доски -> переменная task этого workflow.
+dispatch_vars:
+  task: |-
+    {{issue.title}}
+
+    {{issue.body}}
+
+## dsl: 2 в начале main.bot.
+requires:
+  iterion: ">= 3.141.0"

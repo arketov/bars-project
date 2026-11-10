@@ -75,7 +75,8 @@ export const KIND_LABEL: Record<AuditKind, string> = {
 export const KIND_HINT: Record<AuditKind, string> = {
   broken_links: "Ссылки на документы, которых нет в проекте",
   duplicates: "Повторяющиеся описания в разных разделах",
-  contradictions: "Возможные числовые расхождения в текущей документации; без журналов сессий и ADR",
+  contradictions:
+    "Почти одинаковые утверждения с разными значениями в разных документах; без журналов, датированных снимков и разделов с датой",
 };
 
 export const STATE_LABEL: Record<AuditState, string> = {

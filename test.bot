@@ -1,0 +1,25 @@
+dsl: 2
+
+prompt system_prompt:
+  You are a helpful assistant.
+
+prompt user_prompt:
+  {{input.query}}
+
+schema input:
+  query: string
+
+schema output:
+  response: string
+
+agent agent_1:
+  input: input
+  output: output
+  system: system_prompt
+  user: user_prompt
+
+workflow main:
+
+  entry: agent_1
+
+  agent_1 -> done
