@@ -674,6 +674,21 @@ impl WorkerHandler {
         // Только успешный поиск с нулём результатов при готовом индексе без известной ошибки обновления
         // (NT-02): индексация, очередь и техническая ошибка пробелом не считаются.
         // Выдача без смысловой части пробелом знаний не считается: пустой результат мог дать вектор.
+        eprintln!(
+            "NT-GATE: source={} semantic={} empty={} related={} state={:?} queued={} pending={} err={:?} collecting={:?} diagnostic={} origin={:?} purpose={:?}",
+            topic_source.is_some(),
+            semantic,
+            output.results.is_empty(),
+            related.is_none(),
+            status.state,
+            status.queued,
+            status.pending,
+            status.last_error,
+            collecting,
+            params.diagnostic,
+            context.origin,
+            context.purpose,
+        );
         if let Some((generation, event_id, space, text, scope, project)) = topic_source
             && semantic
             && output.results.is_empty()
