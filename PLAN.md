@@ -79,7 +79,7 @@ bars подключается к iterion плагином: MCP и skill `bars-do
 
 ### Этап 5.2. Четыре инструмента
 
-- 5.2.1 Реализация: `bars_search`, `bars_read`, `bars_status`, `bars_audit` с английскими описаниями и `initialize`, старые имена убраны (ISS-110…ISS-113, ISS-117).
+- ✅ 5.2.1 Реализация: `bars_search`, `bars_read`, `bars_status`, `bars_audit` с английскими описаниями и `initialize`, старые имена убраны (ISS-110…ISS-113, ISS-117). — сделано, не проверено сборкой.
 - 5.2.2 Реализация: skills и обе копии `BARS_INSTRUCTION.md` под новый набор, `bars-docs` разделён (ISS-116).
 
 ### Этап 5.3. Гейт по счётчику
