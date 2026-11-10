@@ -17,6 +17,10 @@ pub struct StatusArgs {
     pub refresh: bool,
 }
 
+pub(super) fn router() -> ToolRouter<BarsMcp> {
+    BarsMcp::status_tool_router()
+}
+
 impl BarsMcp {
     async fn status_impl(&self, args: StatusArgs, original: Value) -> CallToolResult {
         if args.all && args.project.is_some() {
@@ -25,7 +29,7 @@ impl BarsMcp {
             )]);
         }
         let target = self.target(args.project.clone());
-        let mut text = String::new();
+        let mut body = String::new();
         if args.refresh {
             let params = bars_protocol::ReindexParams {
                 target: target.clone(),
@@ -33,11 +37,11 @@ impl BarsMcp {
                 accept_model_change: false,
             };
             let part = match self.call_observed(&params, Some(&original)).await {
-                Ok(output) => render::refresh(output),
+                Ok(output) => render::refresh(&output),
                 Err(error) => render::error_part("REFRESH", &error),
             };
-            text.push_str(&part);
-            text.push('\n');
+            body.push_str(&part);
+            body.push('\n');
         }
         // Проект: путь нужен частям аудитов и тем, у которых нет Target с cwd. Неразрешимый
         // проект — ошибка вызова: остальные части всё равно были бы про тот же проект.
@@ -47,7 +51,7 @@ impl BarsMcp {
         let project_path = match self.call_observed(&projects_params, Some(&original)).await {
             Ok(output) => {
                 let path = output.projects.first().map(|project| project.path.clone());
-                text.push_str(&render::projects(&output));
+                body.push_str(&render::projects(&output));
                 path
             }
             Err(error) => return failure(&error),
@@ -59,10 +63,10 @@ impl BarsMcp {
             Ok(output) => render::status(&output),
             Err(error) => render::error_part("INDEX", &error),
         };
-        text.push('\n');
-        text.push_str(&part);
-        text.push('\n');
-        text.push_str(&render::versions(
+        body.push('\n');
+        body.push_str(&part);
+        body.push('\n');
+        body.push_str(&render::versions(
             env!("CARGO_PKG_VERSION"),
             bars_protocol::BUILD_ID,
             self.worker_build().await,
@@ -86,17 +90,17 @@ impl BarsMcp {
                 Ok(output) => render::audits_state(&output),
                 Err(error) => render::error_part("AUDITS", &error),
             };
-            text.push('\n');
-            text.push_str(&part);
+            body.push('\n');
+            body.push_str(&part);
             let params = bars_protocol::NewTopicsListParams { project };
             let part = match self.call_observed(&params, Some(&original)).await {
                 Ok(output) => render::topics_state(&output),
                 Err(error) => render::error_part("NEW TOPICS", &error),
             };
-            text.push('\n');
-            text.push_str(&part);
+            body.push('\n');
+            body.push_str(&part);
         } else {
-            text.push_str(
+            body.push_str(
                 "\n=== AUDITS ===\naudits and new topics need one project: repeat with project=, or drop all=true\n=== END AUDITS ===",
             );
         }
@@ -108,9 +112,9 @@ impl BarsMcp {
             ),
             Err(error) => render::error_part("GRAPH", &error),
         };
-        text.push('\n');
-        text.push_str(&part);
-        text(text)
+        body.push('\n');
+        body.push_str(&part);
+        text(body)
     }
 }
 

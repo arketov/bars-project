@@ -866,22 +866,29 @@ pub fn topic_detail(detail: &NewTopicDetail) -> String {
         for check in &detail.checks {
             let _ = writeln!(
                 text,
-                "- {} · scope {} · outcome {}{}",
+                "- {} · expanded={}",
                 date_of_unix(check.at),
-                check.scope,
-                check.outcome,
-                check
-                    .reason
-                    .as_ref()
-                    .map(|reason| format!(" ({reason})"))
-                    .unwrap_or_default()
+                check.expanded
             );
-            for hit in &check.results.iter().flat_map(|result| &result.hits).take(5) {
+            for result in &check.results {
                 let _ = writeln!(
                     text,
-                    "  {}:{}-{} · {} ({:.2})",
-                    hit.path, hit.first_line, hit.last_line, hit.heading_chain, hit.score
+                    "  scope {} · outcome {}{}",
+                    result.scope,
+                    result.outcome,
+                    result
+                        .reason
+                        .as_ref()
+                        .map(|reason| format!(" ({reason})"))
+                        .unwrap_or_default()
                 );
+                for hit in result.hits.iter().take(5) {
+                    let _ = writeln!(
+                        text,
+                        "    {}:{}-{} · {} ({:.2})",
+                        hit.path, hit.first_line, hit.last_line, hit.heading_chain, hit.score
+                    );
+                }
             }
         }
     }

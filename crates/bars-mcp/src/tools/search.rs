@@ -236,11 +236,11 @@ fn parse_cursor(cursor: &Option<String>) -> Result<OccurrencesCursor, CallToolRe
     })
 }
 
-pub(super) fn search_router() -> ToolRouter<BarsMcp> {
+pub(crate) fn search_router() -> ToolRouter<BarsMcp> {
     BarsMcp::search_tool_router()
 }
 
-pub(super) fn graph_router() -> ToolRouter<BarsMcp> {
+pub(crate) fn graph_router() -> ToolRouter<BarsMcp> {
     BarsMcp::graph_search_tool_router()
 }
 

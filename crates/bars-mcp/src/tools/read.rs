@@ -30,6 +30,10 @@ pub struct ReadArgs {
     pub project: Option<String>,
 }
 
+pub(super) fn router() -> ToolRouter<BarsMcp> {
+    BarsMcp::read_tool_router()
+}
+
 impl BarsMcp {
     async fn read_impl(&self, args: ReadArgs, original: Value) -> CallToolResult {
         let view = match args.view.as_deref() {

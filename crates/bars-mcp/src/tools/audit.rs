@@ -31,6 +31,10 @@ pub struct AuditArgs {
     pub project: Option<String>,
 }
 
+pub(super) fn router() -> ToolRouter<BarsMcp> {
+    BarsMcp::audit_tool_router()
+}
+
 fn invalid(message: String) -> CallToolResult {
     CallToolResult::error(vec![ContentBlock::text(format!(
         "invalid_params: {message}"
@@ -64,7 +68,7 @@ impl BarsMcp {
             &args.project.unwrap_or_else(|| ".".to_string()),
             &self.env.cwd,
         );
-        let mut text = match self
+        let mut body = match self
             .call_observed(
                 &bars_protocol::AuditListParams {
                     project: project.clone(),
@@ -76,7 +80,7 @@ impl BarsMcp {
             Ok(output) => render::audits_state(&output),
             Err(error) => render::error_part("AUDITS", &error),
         };
-        text.push('\n');
+        body.push('\n');
         let part = match self
             .call_observed(
                 &bars_protocol::NewTopicsListParams { project },
@@ -87,8 +91,8 @@ impl BarsMcp {
             Ok(output) => render::topics_state(&output),
             Err(error) => render::error_part("NEW TOPICS", &error),
         };
-        text.push_str(&part);
-        text(text)
+        body.push_str(&part);
+        text(body)
     }
 
     async fn topics_impl(&self, args: &AuditArgs, action: &str, original: Value) -> CallToolResult {
@@ -134,7 +138,7 @@ impl BarsMcp {
                         )
                         .await
                     {
-                        Ok(detail) => detail.revision,
+                        Ok(detail) => detail.topic.revision,
                         Err(error) => return failure(&error),
                     },
                 };

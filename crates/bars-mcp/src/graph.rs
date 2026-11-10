@@ -416,8 +416,8 @@ impl BarsMcp {
             request,
         } = call;
         let target = self.target(project);
-        finish(
-            self.call_observed(
+        let result = self
+            .call_observed(
                 &bars_protocol::GraphQueryParams {
                     target,
                     request,
@@ -425,9 +425,10 @@ impl BarsMcp {
                 },
                 Some(&original.0),
             )
-            .await,
-            format,
-            bars_protocol::graph_text::render_graph_text,
-        )
+            .await;
+        match format.unwrap_or_default() {
+            Format::Txt => present(result, bars_protocol::graph_text::render_graph_text),
+            Format::Json => present(result, |output| json(output)),
+        }
     }
 }
