@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import zlib from 'node:zlib';
 import assert from 'node:assert/strict';
 import {metrics} from '../../scripts/analyze-quality.mjs';
 import {read,write,sha} from './freeze.mjs';
@@ -16,6 +17,18 @@ export function validateRows(inputs,rows) {
     byId.set(row.id,row);
   }
   return byId;
+}
+export function validateEvents(inputs,events,name,inputHash) {
+  const one=event=>{const found=events.filter(e=>e.event===event);assert.equal(found.length,1,`One ${event}: ${name}`);return found[0];};
+  const start=one('start'),complete=one('complete'),exit=one('exit');
+  assert.equal(start.name,name,'Model start identity');assert.equal(complete.name,name,'Model completion identity');
+  if(name!=='onnx-directml-fp16')assert.equal(start.artifact?.name,name,'GGUF artifact identity');
+  assert.equal(start.inputs_sha256,inputHash,'Same input bytes');
+  assert.equal(exit.guard,null,'No guarded run may pass');
+  assert(exit.code===0||(exit.code===null&&exit.signal==='SIGTERM'),'Clean exit or owned shutdown');
+  assert(!events.some(e=>e.event==='error'),`No inference errors ${name}`);
+  assert.equal(complete.rows,inputs.length,'Completion row count');
+  return validateRows(inputs,events.filter(e=>e.event==='row'));
 }
 export function summarize(inputs,rows,threshold) {
   let positive=0,negative=0,loss=0,falseNonempty=0;
@@ -41,19 +54,18 @@ export function registryDiagnostics(inputs,rows,threshold) {
   const count=key=>cases.filter(c=>c[key]).length;
   return {cases,head_kept:count('head_kept'),tail_kept:count('tail_kept'),filler_kept:count('filler_kept'),tail_above_filler:count('tail_above_filler')};
 }
-export function analyze(out,names) {
-  const inputs=read(path.join(out,'inputs.json')),protocol=read(path.join(out,'protocol.json'));
-  assert.equal(sha(fs.readFileSync(path.join(out,'inputs.json'))),protocol.inputs_sha256);
+function bytes(file) { return fs.existsSync(file)?fs.readFileSync(file):zlib.gunzipSync(fs.readFileSync(file+'.gz')); }
+export function analyze(out,names,verify=false) {
+  const inputBytes=bytes(path.join(out,'inputs.json'));
+  const inputs=JSON.parse(inputBytes),protocol=read(path.join(out,'protocol.json'));
+  assert.equal(sha(inputBytes),protocol.inputs_sha256);
   const summaries=[];
   const reference=read(path.join(out,'historical-baseline.json'));
   const historicalInputs=inputs.filter(i=>i.suite==='retrieval');
   const datasets=[{name:'historical-bge',inputs:historicalInputs,rows:validateRows(historicalInputs,reference)}];
   for(const name of names) {
-    const events=fs.readFileSync(path.join(out,name+'.jsonl'),'utf8').trim().split('\n').map(JSON.parse);
-    assert.equal(events.filter(e=>e.event==='complete').length,1,`Complete run ${name}`);
-    assert(!events.some(e=>e.event==='error'),`No inference errors ${name}`);
-    assert.equal(events.find(e=>e.event==='start')?.inputs_sha256,protocol.inputs_sha256,'Same input bytes');
-    const rows=validateRows(inputs,events.filter(e=>e.event==='row'));
+    const events=bytes(path.join(out,name+'.jsonl')).toString('utf8').trim().split('\n').map(JSON.parse);
+    const rows=validateEvents(inputs,events,name,protocol.inputs_sha256);
     datasets.push({name,inputs,rows});
   }
   for(const dataset of datasets) {
@@ -69,14 +81,18 @@ export function analyze(out,names) {
       const entry={model:dataset.name,suite,selected_threshold:selected,tune:grid};
       entry.test=protocol.thresholds.map(threshold=>({threshold,...summarize(subset.filter(i=>i.split==='test'),dataset.rows,threshold)}));
       entry.test_at_selected=entry.test.find(r=>r.threshold===selected);
+      if(suite==='retrieval')entry.test_categories=Object.fromEntries([...new Set(subset.map(i=>i.category))].map(category=>[category,
+        summarize(subset.filter(i=>i.split==='test'&&i.category===category),dataset.rows,selected)]));
       if(suite==='controlled-registry')entry.tail_diagnostics=Object.fromEntries(['tune','test'].map(split=>[split,
         protocol.thresholds.map(threshold=>({threshold,...registryDiagnostics(subset.filter(i=>i.split===split),dataset.rows,threshold)}))]));
       summaries.push(entry);
     }
   }
-  write(path.join(out,'summary.json'),{inputs_sha256:protocol.inputs_sha256,models:names,summaries});
+  const result={inputs_sha256:protocol.inputs_sha256,models:names,summaries};
+  if(verify)assert.deepEqual(read(path.join(out,'summary.json')),result,'Frozen summary must reproduce');
+  else write(path.join(out,'summary.json'),result);
   console.log(JSON.stringify(summaries.filter(s=>s.suite==='retrieval').map(s=>({model:s.model,threshold:s.selected_threshold,...s.test_at_selected})),null,2));
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===path.resolve(import.meta.filename)) {
-  const [out,...names]=process.argv.slice(2);assert(out&&names.length);analyze(out,names);
+  const [out,...args]=process.argv.slice(2),names=args.filter(a=>a!=='--verify');assert(out&&names.length);analyze(out,names,args.includes('--verify'));
 }

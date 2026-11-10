@@ -1,0 +1,18 @@
+{
+  "date": "2026-11-02",
+  "cpu": "11th Gen Intel(R) Core(TM) i7-11700KF @ 3.60GHz",
+  "cores": 8,
+  "logical_processors": 16,
+  "ram_bytes": 34242334720,
+  "os": "Майкрософт Windows 11 Pro",
+  "os_version": "10.0.26300",
+  "os_build": "26300",
+  "gpu": "NVIDIA GeForce RTX 3090",
+  "vram_mib": 24576,
+  "nvidia_driver": "616.92",
+  "native_runtime": "llama.cpp b11953 a7af149a2 CUDA archive",
+  "onnx_runtime": "1.24.4 DirectML",
+  "tokenizer": "@huggingface/tokenizers 0.2.0",
+  "ffi": "koffi 2.14.1",
+  "conditions": "Shared machine; background workload varied; no latency comparison claimed"
+}

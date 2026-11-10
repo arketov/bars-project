@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "created": "2026-11-02T09:58:50.109Z",
+  "cases_sha256": "8d966917556299d5dc9b711cfd053c3921467ef6c70204e1ced0ac9fb5cd1e0f",
+  "sources": [
+    {
+      "file": "docs/knowledge/quality-2026-10-18/train-rows.jsonl.gz",
+      "sha256": "6554f00e1fe726ae93bac37f8799743ec9d74ec0cfd789584612459584d06777"
+    },
+    {
+      "file": "docs/knowledge/quality-2026-10-18/test-rows.jsonl.gz",
+      "sha256": "230ba63d8bffb02bf64c3487cd5262590950081e99f0604f27276630183bf4d4"
+    }
+  ],
+  "inputs_sha256": "86ca3e033e4e15e67387a45512ef9425a5e6287cf57722abd150bb5baf334e43",
+  "retrieval_cases": 100,
+  "controlled_registry_cases": 8,
+  "thresholds": [
+    0,
+    0.02,
+    0.05,
+    0.1,
+    0.3,
+    0.5,
+    0.7,
+    0.9
+  ],
+  "selection": "tune only: minimize false nonempty with zero top-3 losses; tie smallest threshold",
+  "caveats": [
+    "Known historical split, not blind holdout",
+    "Controlled registry pairs are not end-to-end retrieval",
+    "No fresh transformers reference",
+    "No product model/default changes"
+  ]
+}

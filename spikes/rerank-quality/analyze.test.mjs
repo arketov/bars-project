@@ -1,10 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {validateRows,summarize,registryDiagnostics} from './analyze.mjs';
+import {validateRows,validateEvents,summarize,registryDiagnostics} from './analyze.mjs';
 
 const inputs=[{id:'p',gold:[{}],documents:['noise','answer'],hits:[{id:1,relevant:[]},{id:2,relevant:[0]}]},
   {id:'n',gold:[],documents:['noise'],hits:[{id:3,relevant:[]}]}];
 const scores=[{id:'p',scores:[.2,.1]},{id:'n',scores:[.3]}];
+test('a complete run cannot masquerade as another model or hide a guarded/crashed exit',()=>{
+  const events=[{event:'start',name:'qwen',artifact:{name:'qwen'},inputs_sha256:'hash'},
+    ...scores.map(r=>({event:'row',...r})),{event:'complete',name:'qwen',rows:2},{event:'exit',code:null,signal:'SIGTERM',guard:null}];
+  assert.equal(validateEvents(inputs,events,'qwen','hash').size,2);
+  assert.throws(()=>validateEvents(inputs,events,'other-model','hash'));
+  assert.throws(()=>validateEvents(inputs,[...events,events[0]],'qwen','hash'));
+  assert.throws(()=>validateEvents(inputs,[...events.slice(0,-1),{event:'exit',code:1,guard:null}],'qwen','hash'));
+  assert.throws(()=>validateEvents(inputs,[...events.slice(0,-1),{event:'exit',code:null,signal:'SIGTERM',guard:'memory'}],'qwen','hash'));
+});
 test('missing, duplicate, unknown and malformed inference rows cannot pass as a run',()=>{
   for(const rows of [scores.slice(0,1),[scores[0],scores[0]],[scores[0],{id:'unknown',scores:[0]}],
     [scores[0],{id:'n',scores:[NaN]}],[scores[0],{id:'n',scores:[2]}],[scores[0],{id:'n',scores:[]}]]) {

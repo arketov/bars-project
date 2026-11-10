@@ -12,6 +12,7 @@ import {read,inside,sha} from './freeze.mjs';
 const [evidence,modelsFile,exe,name]=process.argv.slice(2);
 assert(evidence&&modelsFile&&exe&&name,'evidence models.json llama-server.exe model-name');
 assert(/^[a-z0-9-]+$/.test(name));
+assert.equal(process.argv.length,6,'GPU-only research runner: no extra execution mode');
 const out=inside(evidence),artifact=read(modelsFile).find(m=>m.name===name);
 assert(artifact,'Known model');
 const inputFile=path.join(out,'inputs.json'),bytes=fs.readFileSync(inputFile),protocol=read(path.join(out,'protocol.json'));
@@ -39,20 +40,29 @@ const emit=row=>fs.writeSync(fd,JSON.stringify(row)+'\n');
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 let child,exited=false,timer,abort,exit,log;
 try {
-  const host=state();
+  let host=state();
   emit({event:'preflight',...host});
+  const waitStart=performance.now();
+  const minimumCommit=(artifact.name==='qwen8-q4'?10:6)*2**30;
+  const loadable=s=>s.ram>=4*2**30&&s.commit>=minimumCommit&&s.gpu_free_mib*2**20>artifact.bytes+2*2**30;
+  while(!loadable(host)) {
+    assert(performance.now()-waitStart<120000,'Insufficient memory after bounded preflight wait');
+    emit({event:'preflight_wait',...host});await sleep(2000);host=state();
+  }
   assert(host.ram>=4*2**30&&host.commit>=6*2**30,'Insufficient RAM/commit');
   assert(host.gpu_free_mib*2**20>artifact.bytes+2*2**30,'Insufficient VRAM');
   const listener=net.createServer();
   await new Promise((resolve,reject)=>listener.once('error',reject).listen(0,'127.0.0.1',resolve));
   const port=listener.address().port;
   await new Promise(resolve=>listener.close(resolve));
+  // Causal Qwen can split computation without truncating a pair. Encoder Rank cannot.
+  const batch=artifact.name==='qwen8-q4'?128:artifact.name==='qwen4-q4'?512:4096;
   const args=['-m',artifact.path,'--host','127.0.0.1','--port',String(port),'--reranking','--pooling','rank',
-    '-c','4096','-b','4096','-ub','4096','-np','1','-ngl','99','-t','8','-tb','8','--flash-attn','off','--no-warmup'];
+    '-c','4096','-b',String(batch),'-ub',String(batch),'-np','1','-ngl','99','-t','8','-tb','8','--flash-attn','off','--fit','off','--no-warmup','--verbose'];
   log=fs.openSync(path.join(out,`${name}.server.log`),'wx');
   const runtime=[];
   for(const file of [path.resolve(exe),...fs.readdirSync(path.dirname(exe)).filter(f=>f.endsWith('.dll')).map(f=>path.resolve(path.dirname(exe),f))])runtime.push({file,sha256:await digest(file)});
-  emit({event:'start',name,artifact,exe:path.resolve(exe),runtime,args,inputs_sha256:sha(bytes),runner_sha256:sha(fs.readFileSync(import.meta.filename))});
+  emit({event:'start',name,artifact,execution_device:'gpu',exe:path.resolve(exe),runtime,args,inputs_sha256:sha(bytes),runner_sha256:sha(fs.readFileSync(import.meta.filename))});
   child=spawn(path.resolve(exe),args,{windowsHide:true,stdio:['ignore',log,log]});
   exit=new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',(code,signal)=>{exited=true;resolve({code,signal});});});
   // Attach rejection handler immediately; startup checks below still surface the error.

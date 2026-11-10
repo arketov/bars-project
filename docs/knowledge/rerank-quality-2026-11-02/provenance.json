@@ -1,0 +1,78 @@
+{
+  "status": "partial",
+  "expected_model_count": 7,
+  "completed_model_count": 6,
+  "unverified": [
+    {
+      "name": "qwen8-q4",
+      "reason": "No completed GPU series; owner prohibited CPU; OQ-242 unresolved"
+    }
+  ],
+  "inputs_sha256": "86ca3e033e4e15e67387a45512ef9425a5e6287cf57722abd150bb5baf334e43",
+  "code": [
+    {
+      "file": "spikes/rerank-quality/analyze.mjs",
+      "sha256": "6c345f4c9d09bc1860db70b30dac4f8434436e59c4977fd43c26c6bec1dacb69"
+    },
+    {
+      "file": "spikes/rerank-quality/analyze.test.mjs",
+      "sha256": "785d81cf2fadceda50aa85c337797ab3ea07ec2015345c16138ba5d91e195627"
+    },
+    {
+      "file": "spikes/rerank-quality/freeze.mjs",
+      "sha256": "ae4272de8f13efbbb15ec093e8efd3a97df38a74c66f956ccf920b5d4aec3f3a"
+    },
+    {
+      "file": "spikes/rerank-quality/lengths.mjs",
+      "sha256": "bf57d6eac964adced3fc12c0a3e012331819f3c7eef80e7d4b9423b75936aa7d"
+    },
+    {
+      "file": "spikes/rerank-quality/models.mjs",
+      "sha256": "7e688aa9cb0216ce37076ad2c1f886c38ae7cb3468186e565534920e79f93007"
+    },
+    {
+      "file": "spikes/rerank-quality/onnx.mjs",
+      "sha256": "7dd119fa5c6cd13d68834ddbd122eee9b6affc65d6104fa0fb3208150671b581"
+    },
+    {
+      "file": "spikes/rerank-quality/publish.mjs",
+      "sha256": "4b63c0cb8a716c00fb6778b58a488b8e5768a8c268f88a78f823468dc4cc0a8b"
+    },
+    {
+      "file": "spikes/rerank-quality/run.mjs",
+      "sha256": "fce52711d5e40cceafcc323969ae47f660eda1cdedb78eb3d39044a9a2f238dc"
+    }
+  ],
+  "runs": [
+    {
+      "name": "onnx-directml-fp16",
+      "source": ".bars/rerank-quality-822/runs/onnx-directml-fp16.jsonl",
+      "sha256": "1772005048a8ec3778ee11a614730b59d21b9b4b0bace23152bf76c947c6063a"
+    },
+    {
+      "name": "bge-q8",
+      "source": ".bars/rerank-quality-822/runs/bge-q8.jsonl",
+      "sha256": "81721a23fd77a7ed4f2657a0f1abf42729478190ea9b595f3cc8c46c85087030"
+    },
+    {
+      "name": "qwen06-q8",
+      "source": ".bars/rerank-quality-822/runs/qwen06-q8.jsonl",
+      "sha256": "d7934e3cb9274f4c9e626d2c79d9862af9d5042f7355e0b7d073ad7ff68f3b18"
+    },
+    {
+      "name": "qwen06-q8-voodisss",
+      "source": ".bars/rerank-quality-822/control-attempt2/qwen06-q8-voodisss.jsonl",
+      "sha256": "19b6e6649c86c4ade5ab0e08882264ac52b0591de47f3ef929a6a5e37ddf9615"
+    },
+    {
+      "name": "qwen06-q4",
+      "source": ".bars/rerank-quality-822/runs/qwen06-q4.jsonl",
+      "sha256": "8f34dbc5e09c1c4f034081addd0d3cd127db497ede7ae970936c16c2a65deb03"
+    },
+    {
+      "name": "qwen4-q4",
+      "source": ".bars/rerank-quality-822/large-attempt2/qwen4-q4.jsonl",
+      "sha256": "857c98a6fab46ddb8d5c24e537674a24d07baca63e027d35e639902be85771aa"
+    }
+  ]
+}
