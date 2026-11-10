@@ -574,7 +574,7 @@ async fn clients_status_follows_install_and_instruction_names_the_exes() {
     let before: ClientsStatusOutput = window
         .call(Call::ClientsStatus(ClientsStatusParams {}))
         .await;
-    assert_eq!(before.clients.len(), 4);
+    assert_eq!(before.clients.len(), 5);
     assert!(before.clients.iter().all(|c| !c.installed && !c.stale));
 
     window

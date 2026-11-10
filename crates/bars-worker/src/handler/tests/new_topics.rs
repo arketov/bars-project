@@ -724,7 +724,7 @@ async fn delete_clear_and_rename_do_not_resurrect_data() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-async fn topic_mutations_are_window_only_and_reads_need_an_exact_project() {
+async fn topic_mutations_are_window_only_and_reads_resolve_project_by_name_or_path() {
     let project = "C:/проект";
     let reads = [
         Call::NewTopicsList(NewTopicsListParams {
@@ -800,12 +800,13 @@ async fn topic_mutations_are_window_only_and_reads_need_an_exact_project() {
             call.method()
         );
     }
+    // ISS-111: имя или путь, как у остальных инструментов; неизвестное имя — project_not_found.
     let relative = env
         .window_error(Call::NewTopicsList(NewTopicsListParams {
-            project: "proj".into(),
+            project: "no-such-project".into(),
         }))
         .await;
-    assert_eq!(relative.kind(), Some(ErrorKind::InvalidParams));
+    assert_eq!(relative.kind(), Some(ErrorKind::ProjectNotFound));
     env.worker.shutdown().await;
 }
 

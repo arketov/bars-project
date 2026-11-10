@@ -4,7 +4,8 @@
 use bars_core::secrets::MemorySecrets;
 use bars_protocol::{
     AuditCancelParams, AuditFindingsOutput, AuditFindingsParams, AuditListOutput, AuditListParams,
-    AuditRunOutput, AuditRunParams, AuditScheduleParams, AuditSummary, ProjectDeleteParams,
+    AuditRunOutput, AuditRunParams, AuditScheduleParams, AuditSummary, ErrorKind,
+    ProjectDeleteParams,
 };
 
 use super::*;
@@ -409,17 +410,24 @@ async fn schedule_validates_modes_and_on_change_runs_only_after_changes() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-async fn window_methods_reject_relative_project_and_unknown_kind() {
+async fn window_methods_resolve_project_by_name_or_path_and_reject_unknown_kind() {
     let env = Env::new();
     let root = env.project(&[("a.md", "# Альфа\n")]).await;
+    // ISS-111: проект — имя или путь, как у остальных инструментов.
+    env.handler
+        .dispatch(Call::AuditList(AuditListParams {
+            project: root.display().to_string(),
+        }))
+        .await
+        .unwrap();
     let error = env
         .handler
         .dispatch(Call::AuditList(AuditListParams {
-            project: "proj".into(),
+            project: "no-such-project".into(),
         }))
         .await
         .unwrap_err();
-    assert!(error.message.contains("абсолютный путь"));
+    assert_eq!(error.kind(), Some(ErrorKind::ProjectNotFound));
     let error = env
         .handler
         .dispatch(Call::AuditRun(AuditRunParams {

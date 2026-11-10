@@ -261,8 +261,7 @@ pub fn search_with_policy(
         .map(|prefix| format!("{prefix}/"))
         .collect();
     let in_scope = |stored: &str| {
-        scope_prefixes.is_empty()
-            || scope_prefixes.iter().any(|prefix| stored == prefix)
+        scope_prefixes.iter().any(|prefix| stored == prefix)
             || scope_folders
                 .iter()
                 .any(|folder| stored.starts_with(folder.as_str()))
