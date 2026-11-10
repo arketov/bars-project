@@ -21,14 +21,14 @@ GraphRAG: `relations`, `paths`, `impact`, `context`, `explore`, `graph show/stat
 
 | Команда | Что делает | Соответствие |
 |---|---|---|
-| `bars-cli search <запрос> [--module M]… [--file F]… [--limit N] [--min-score S]` | поиск | `bars_rag_search` |
-| `bars-cli similar <ID чанка> [--module M]… [--limit N]` | похожие чанки по ID из выдачи поиска | `bars_get_similar` |
-| `bars-cli duplicates [--module M]… [--limit N]` | аудит дублей проекта: точные, близкие, частичные и смысловые повторы | `bars_get_duplicates` |
-| `bars-cli outline <путь> [--levels 2,3] [--under "A/B" \| --under-line N]` | структура документа | `bars_outline` (Т-26) |
+| `bars-cli search <запрос> [--module M]… [--file F]… [--limit N] [--min-score S]` | поиск | `bars_search` (вопрос) |
+| `bars-cli similar <ID чанка> [--module M]… [--limit N]` | похожие чанки по ID из выдачи поиска | `bars_search` (`like`) |
+| `bars-cli duplicates [--module M]… [--limit N]` | аудит дублей проекта: точные, близкие, частичные и смысловые повторы | `bars_audit` (`kind=duplicates`) |
+| `bars-cli outline <путь> [--levels 2,3] [--under "A/B" \| --under-line N]` | структура документа | `bars_read` (`view=outline`, Т-26) |
 | `bars-cli read <путь> [--lines 98-104 \| --under "A/B"]` | документ целиком или часть с исходными номерами строк | `bars_read` |
-| `bars-cli projects` | проекты и модули | `bars_projects` |
+| `bars-cli projects` | проекты и модули | `bars_status` |
 | `bars-cli status` | состояние индекса | `bars_status` |
-| `bars-cli reindex [--full] [--accept-model-change]` | переиндексация; `--accept-model-change` — согласие пользователя после смены модели (Т-25, [architecture/protocol.md](../../architecture/protocol.md)) | `bars_reindex` |
+| `bars-cli reindex [--full] [--accept-model-change]` | переиндексация; `--accept-model-change` — согласие пользователя после смены модели (Т-25, [architecture/protocol.md](../../architecture/protocol.md)) | у MCP нет: `refresh=true` у `bars_status`; у окна и CLI — `bars-cli reindex` |
 | `bars-cli register [путь] [--root docs\|all]` | регистрация проекта (Т-6); `--root` выбирает корень документации нового проекта — `docs` или `all` (вся папка), без флага `docs/`, если она есть, иначе вся папка ([features/projects/projects.md](../projects/projects.md), Т-7) | пункт «Добавить проект» в окне |
 | `bars-cli unregister` | снять проект с регистрации ([features/projects/projects.md](../projects/projects.md)) | кнопка «Убрать из bars» в окне |
 | `bars-cli install --client claude-code\|codex\|kimi-code\|ouroboros\|iterion` | подключить bars к клиенту (Т-21) | пункт «Установить» в окне |
