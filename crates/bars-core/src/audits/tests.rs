@@ -27,7 +27,7 @@ fn ignore_survives_runs_pruning_and_reopen_and_counters_follow_it() {
     assert_eq!(store.visible_counts(row.id).unwrap(), (0, 0, 0, 1));
     assert_eq!(
         store
-            .findings(row.id, None, true, false, 0, 10)
+            .findings(row.id, None, true, false, &[], 0, 10)
             .unwrap()
             .total,
         1
@@ -180,7 +180,7 @@ fn first_complete_run_has_no_new_findings_and_second_marks_new_known_gone() {
         ]
     );
     let without_gone = store
-        .findings(second.id, None, false, false, 0, 10)
+        .findings(second.id, None, false, false, &[], 0, 10)
         .unwrap();
     assert_eq!(without_gone.total, 2);
 }
@@ -200,7 +200,7 @@ fn overlap_group_is_counted_apart_and_never_new_in_the_headline() {
         (1, 0, 1)
     );
     let only_main = store
-        .findings(second.id, Some("main"), true, false, 0, 10)
+        .findings(second.id, Some("main"), true, false, &[], 0, 10)
         .unwrap();
     assert_eq!(only_main.total, 1);
 }
@@ -229,7 +229,7 @@ fn incomplete_runs_keep_the_previous_complete_result() {
     assert_eq!(kept.id, complete.id);
     assert_eq!(
         store
-            .findings(kept.id, None, true, false, 0, 10)
+            .findings(kept.id, None, true, false, &[], 0, 10)
             .unwrap()
             .total,
         1
