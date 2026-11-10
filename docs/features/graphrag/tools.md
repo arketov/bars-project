@@ -134,12 +134,12 @@ Search: без `mode` — прежний Search и прежняя форма о�
 
 ```text
 === GRAPH relations ===
-resolved: «bars_text_search» (entity)
-1. bars_text_search —implements→ Т-37 [positive]
+resolved: «bars_search» (entity)
+1. bars_search —implements→ Т-37 [positive]
    features/agent-tools/mcp-tools.md:35-37 «Основа — общий поиск «В тексте»…»
 2. …
 state: semantic layer partial (566 of 1766 files)
-next: for an exact phrase use bars_text_search
+next: for an exact phrase use bars_search with occurrences=true
 === END GRAPH ===
 ```
 
@@ -196,10 +196,10 @@ next: for an exact phrase use bars_text_search
 
 | Случай | Что печатается в `state:` и `next:` |
 |---|---|
-| `impact` без зависимостей | Сколько документов и строк покрыто смысловым слоем; отсутствие зависимости не доказано; `next:` — `bars_links` входящие ссылки документа и `bars_rag_search` по названию |
-| `relations`, `explore`, `context` без результата | Область и покрытие слоя; `next:` — `bars_rag_search` по тому же вопросу или `bars_text_search` по точной фразе |
+| `impact` без зависимостей | Сколько документов и строк покрыто смысловым слоем; отсутствие зависимости не доказано; `next:` — `bars_read` с `view=links`, `direction=in` для документа и `bars_search` по его названию |
+| `relations`, `explore`, `context` без результата | Область и покрытие слоя; `next:` — `bars_search` без `mode` или `occurrences` по точной фразе |
 | Срыв по времени | Сколько мс ушло, что успело найтись, какие роли пусты; `next:` — сузить область или роли; увеличить `timeout_ms` можно до 5000 |
-| `graph_not_ready` | Граф строится сам после обновления индекса; явно — из окна или `bars-cli graph build`; `bars_reindex` не поможет; `next:` — `bars_rag_search` без `mode` |
+| `graph_not_ready` | Граф строится сам после обновления индекса; явно — из окна или `bars-cli graph build`; `bars-cli reindex` не поможет; `next:` — `bars_search` без `mode` |
 | `graph_capability_unavailable` | Какая возможность недоступна, что поддержано |
 | Нет `documents` и `roots` | Одна из форм входа обязательна; пример `documents:["features/search/hybrid-search.md"]` |
 | Неизвестный путь документа | `invalid_params`, до пяти ближайших путей; путь печатается так же, как в остальных ответах ([пути, 4.2.2](../agent-tools/mcp-tools.md)) |

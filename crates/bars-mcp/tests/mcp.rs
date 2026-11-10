@@ -1171,9 +1171,10 @@ async fn first_tool_call_starts_the_worker_and_all_six_tools_answer() {
     assert!(text.contains("project_not_found"), "{text}");
     let rows = bars_worker::mcp_statistics::snapshot(harness.home.path()).unwrap();
     let tools: std::collections::BTreeSet<_> = rows.iter().map(|r| r.tool.as_str()).collect();
+    // Сводка bars_status сама звонит в аудиты и новые темы: четыре инструмента в статистике.
     assert_eq!(
         tools,
-        ["bars_read", "bars_search", "bars_status"]
+        ["bars_audit", "bars_read", "bars_search", "bars_status"]
             .into_iter()
             .collect()
     );
@@ -1357,6 +1358,7 @@ async fn history_preserves_original_missing_null_zero_and_excludes_payloads() {
         .iter()
         .find(|a| a.requested["query"] == "zzz18427 отсутствующий термин")
         .unwrap();
+    eprintln!("EMPTY-RECORD: {}", serde_json::to_string(&empty).unwrap());
     assert_eq!(empty.result["count"], 0);
     assert_eq!(empty.outcome, "success");
     let json = serde_json::to_string(&page).unwrap();
