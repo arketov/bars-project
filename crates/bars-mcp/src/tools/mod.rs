@@ -11,9 +11,7 @@ pub(super) mod status;
 /// Базовый набор: read, status, audit. Роутер `bars_search` выбирается в `BarsMcp::new`:
 /// с настройкой `[mcp] graph_tools` регистрируется графовая форма, без неё — обычная.
 pub(super) fn core_router() -> ToolRouter<BarsMcp> {
-    BarsMcp::read_tool_router()
-        + BarsMcp::status_tool_router()
-        + BarsMcp::audit_tool_router()
+    BarsMcp::read_tool_router() + BarsMcp::status_tool_router() + BarsMcp::audit_tool_router()
 }
 
 /// Вид выдачи поиска: ступенчатая автоматика, полный текст всех результатов или только строки.

@@ -550,20 +550,19 @@ impl AuditStore {
              WHERE {filter} ORDER BY (standing='gone'), ord LIMIT ?4 OFFSET ?5"
         ))?;
         let rows = statement.query_map(rusqlite::params_from_iter(bind.iter()), |r| {
-                Ok((
-                    r.get::<_, i64>(0)?,
-                    r.get::<_, String>(1)?,
-                    r.get::<_, String>(2)?,
-                    r.get::<_, String>(3)?,
-                    r.get::<_, String>(4)?,
-                    r.get::<_, String>(5)?,
-                    r.get::<_, Option<f64>>(6)?,
-                    r.get::<_, String>(7)?,
-                    r.get::<_, String>(8)?,
-                    r.get::<_, bool>(9)?,
-                ))
-            },
-        )?;
+            Ok((
+                r.get::<_, i64>(0)?,
+                r.get::<_, String>(1)?,
+                r.get::<_, String>(2)?,
+                r.get::<_, String>(3)?,
+                r.get::<_, String>(4)?,
+                r.get::<_, String>(5)?,
+                r.get::<_, Option<f64>>(6)?,
+                r.get::<_, String>(7)?,
+                r.get::<_, String>(8)?,
+                r.get::<_, bool>(9)?,
+            ))
+        })?;
         let mut items = Vec::new();
         for row in rows {
             let (id, standing, fingerprint, tag, group, reason, score, subjects, detail, ignored) =
@@ -624,11 +623,11 @@ impl AuditStore {
                 "SELECT {column}, COUNT(*) FROM findings WHERE {filter} \
                  GROUP BY {column} ORDER BY COUNT(*) DESC, {column} LIMIT {limit}"
             ))?;
-            let rows = statement.query_map(
-                rusqlite::params_from_iter(bind.iter()),
-                |r| Ok((r.get::<_, String>(0)?, r.get::<_, i64>(1)?)),
-            )?;
-            rows.collect::<Result<Vec<_>, _>>().map_err(AuditError::from)
+            let rows = statement.query_map(rusqlite::params_from_iter(bind.iter()), |r| {
+                Ok((r.get::<_, String>(0)?, r.get::<_, i64>(1)?))
+            })?;
+            rows.collect::<Result<Vec<_>, _>>()
+                .map_err(AuditError::from)
         };
         Ok(FindingsSummary {
             total,

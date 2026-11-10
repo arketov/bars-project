@@ -323,10 +323,7 @@ impl WorkerHandler {
                             statement.query_row(
                                 rusqlite::params![
                                     candidate,
-                                    format!(
-                                        "{}/%",
-                                        bars_core::doc_path::like_escape(candidate)
-                                    )
+                                    format!("{}/%", bars_core::doc_path::like_escape(candidate))
                                 ],
                                 |row| row.get::<_, bool>(0),
                             )
@@ -338,8 +335,10 @@ impl WorkerHandler {
                     }
                 }
                 if chosen.is_none() {
-                    let mut statement =
-                        index.conn().prepare("SELECT path FROM documents").map_err(internal)?;
+                    let mut statement = index
+                        .conn()
+                        .prepare("SELECT path FROM documents")
+                        .map_err(internal)?;
                     let known = statement
                         .query_map([], |row| row.get::<_, String>(0))
                         .and_then(|rows| rows.collect::<Result<Vec<_>, _>>())
@@ -482,7 +481,9 @@ impl WorkerHandler {
         let project = self.audits_project(&params.project)?;
         let kind = parse_kind(&params.kind)?;
         let docs_root = self.worker.docs_root(&project).map_err(worker_error)?;
-        let prefixes = self.checked_prefixes(&project, &docs_root, &params.paths).await?;
+        let prefixes = self
+            .checked_prefixes(&project, &docs_root, &params.paths)
+            .await?;
         let summary = tokio::task::spawn_blocking(move || {
             let store = AuditStore::open(&project)?;
             let Some(run) = store.latest_complete(kind)? else {
@@ -546,7 +547,9 @@ impl WorkerHandler {
             .limit
             .map_or(PAGE_DEFAULT, |value| i64::from(value).clamp(1, PAGE_MAX));
         let docs_root = self.worker.docs_root(&project).map_err(worker_error)?;
-        let prefixes = self.checked_prefixes(&project, &docs_root, &params.paths).await?;
+        let prefixes = self
+            .checked_prefixes(&project, &docs_root, &params.paths)
+            .await?;
         let page = tokio::task::spawn_blocking(move || {
             let store = AuditStore::open(&project)?;
             let Some(run) = store.latest_complete(kind)? else {

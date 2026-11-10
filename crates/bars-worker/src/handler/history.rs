@@ -46,22 +46,16 @@ impl WorkerHandler {
             Call::Reindex(p) => ("bars_status", Some(&p.target), output_value(p), None),
             Call::Projects(p) => ("bars_status", p.target.as_ref(), output_value(p), None),
             Call::AuditList(p) => ("bars_audit", None, output_value(p), Some(p.project.clone())),
-            Call::AuditSummary(p) => {
-                ("bars_audit", None, output_value(p), Some(p.project.clone()))
-            }
+            Call::AuditSummary(p) => ("bars_audit", None, output_value(p), Some(p.project.clone())),
             Call::AuditRun(p) => ("bars_audit", None, output_value(p), Some(p.project.clone())),
-            Call::AuditCancel(p) => {
-                ("bars_audit", None, output_value(p), Some(p.project.clone()))
-            }
+            Call::AuditCancel(p) => ("bars_audit", None, output_value(p), Some(p.project.clone())),
             Call::AuditFindings(p) => {
                 ("bars_audit", None, output_value(p), Some(p.project.clone()))
             }
             Call::NewTopicsList(p) => {
                 ("bars_audit", None, output_value(p), Some(p.project.clone()))
             }
-            Call::NewTopicsGet(p) => {
-                ("bars_audit", None, output_value(p), Some(p.project.clone()))
-            }
+            Call::NewTopicsGet(p) => ("bars_audit", None, output_value(p), Some(p.project.clone())),
             Call::NewTopicsCheck(p) => {
                 ("bars_audit", None, output_value(p), Some(p.project.clone()))
             }
@@ -301,7 +295,8 @@ fn complete_attempt(
                         applied["search"] = out["applied"].clone();
                         applied["indexing"] = out["indexing"].clone();
                         applied["pending"] = out["pending"].clone();
-                        applied["rerank_performed"] = json!(out["applied"]["score_kind"] == "rerank");
+                        applied["rerank_performed"] =
+                            json!(out["applied"]["score_kind"] == "rerank");
                         applied["rerank_fallback"] = json!(out.get("rerank_error").is_some());
                         applied["semantic_fallback"] = json!(out.get("semantic_error").is_some());
                         let mut sources = serde_json::Map::new();
@@ -353,7 +348,8 @@ fn complete_attempt(
                                 sections
                                     .iter()
                                     .map(|s| {
-                                        s["to"].as_u64().unwrap_or(0) - s["from"].as_u64().unwrap_or(0)
+                                        s["to"].as_u64().unwrap_or(0)
+                                            - s["from"].as_u64().unwrap_or(0)
                                             + 1
                                     })
                                     .sum(),

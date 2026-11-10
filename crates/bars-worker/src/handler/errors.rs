@@ -56,7 +56,9 @@ pub fn model_loading(percent: u8) -> RpcError {
     extra.insert("percent".to_string(), percent.into());
     RpcError::bars_with(
         ErrorKind::ModelLoading,
-        format!("{message}; проверка актуальности индекса (bars_status refresh=true) загрузку модели не ускоряет"),
+        format!(
+            "{message}; проверка актуальности индекса (bars_status refresh=true) загрузку модели не ускоряет"
+        ),
         extra,
     )
 }

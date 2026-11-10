@@ -47,7 +47,10 @@ async fn projects_default_to_session_and_expose_only_requested_catalog() {
     let loads = harness.provider.counters.loads.load(Ordering::SeqCst);
     let (error, text) = mcp.tool("bars_status", json!({})).await;
     assert!(!error, "{text}");
-    assert!(text.contains(&format!("path: {}", root.display())), "{text}");
+    assert!(
+        text.contains(&format!("path: {}", root.display())),
+        "{text}"
+    );
     assert!(text.contains("docs_root: docs"), "{text}");
     assert!(
         text.contains(". (2) — Общие правила, api (3) — Протокол проекта, without-index (1)"),
@@ -62,12 +65,21 @@ async fn projects_default_to_session_and_expose_only_requested_catalog() {
             text.contains(&format!("path: {}", other.display())),
             "{text}"
         );
-        assert!(!text.contains(&format!("path: {}", root.display())), "{text}");
+        assert!(
+            !text.contains(&format!("path: {}", root.display())),
+            "{text}"
+        );
     }
     let (error, text) = mcp.tool("bars_status", json!({"all":true})).await;
     assert!(!error, "{text}");
-    assert!(text.contains(&format!("path: {}", root.display())), "{text}");
-    assert!(text.contains(&format!("path: {}", other.display())), "{text}");
+    assert!(
+        text.contains(&format!("path: {}", root.display())),
+        "{text}"
+    );
+    assert!(
+        text.contains(&format!("path: {}", other.display())),
+        "{text}"
+    );
     assert_eq!(
         harness.provider.counters.loads.load(Ordering::SeqCst),
         loads
@@ -85,9 +97,7 @@ async fn projects_default_to_session_and_expose_only_requested_catalog() {
         .tool("bars_status", json!({"all":true,"project":"other"}))
         .await;
     assert!(error && text.contains("invalid_params"), "{text}");
-    let (error, text) = mcp
-        .tool("bars_status", json!({"project":"missing"}))
-        .await;
+    let (error, text) = mcp.tool("bars_status", json!({"project":"missing"})).await;
     assert!(error && text.contains("project_not_found"), "{text}");
     let mut outside = harness.connect(harness.env(harness.projects.path()));
     outside.initialize().await;

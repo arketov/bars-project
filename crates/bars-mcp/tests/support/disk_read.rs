@@ -21,10 +21,7 @@ async fn disk_reads_freshness_continuation_scope_and_history() {
         )
         .await;
     assert!(!error, "{text}");
-    assert!(
-        text.contains("docs/fresh.md:1:4: 😀 свежий\n"),
-        "{text}"
-    );
+    assert!(text.contains("docs/fresh.md:1:4: 😀 свежий\n"), "{text}");
     assert!(text.contains("docs/fresh.md:5:4: 😀 свежий\n"), "{text}");
     assert!(text.contains("totals: documents 1, hits 12"), "{text}");
     let cursor = text
@@ -54,20 +51,14 @@ async fn disk_reads_freshness_continuation_scope_and_history() {
     assert!(error && text.contains("stale_revision"), "{text}");
     // Ссылки документа — view=links, свежая сверка диска.
     let (error, text) = mcp
-        .tool(
-            "bars_read",
-            json!({"path":"docs/fresh.md","view":"links"}),
-        )
+        .tool("bars_read", json!({"path":"docs/fresh.md","view":"links"}))
         .await;
     assert!(!error, "{text}");
     assert!(text.contains("2: REST → docs/api/rest.md"), "{text}");
     assert!(text.contains("2: нет → absent.md BROKEN"), "{text}");
     fs::write(root.join("docs/absent.md"), "# Теперь есть\n").unwrap();
     let (error, text) = mcp
-        .tool(
-            "bars_read",
-            json!({"path":"docs/fresh.md","view":"links"}),
-        )
+        .tool("bars_read", json!({"path":"docs/fresh.md","view":"links"}))
         .await;
     assert!(!error, "{text}");
     assert!(text.contains("2: REST → docs/api/rest.md"), "{text}");
@@ -101,10 +92,7 @@ async fn disk_reads_freshness_continuation_scope_and_history() {
         .0
     );
     let (bad, bad_text) = mcp
-        .tool(
-            "bars_search",
-            json!({"query":"[","occurrences":true}),
-        )
+        .tool("bars_search", json!({"query":"[","occurrences":true}))
         .await;
     assert!(bad && bad_text.contains("invalid_regex"), "{bad_text}");
     // Широкий шаблон — ошибка too_broad с отсылкой к единому поиску (ISS-109).
@@ -164,14 +152,8 @@ async fn disk_reads_bounded_skips_and_parallel_clients() {
     let mut b = harness.connect(harness.env(&root));
     b.initialize().await;
     let (x, y) = tokio::join!(
-        a.tool(
-            "bars_search",
-            json!({"query":"needle","occurrences":true})
-        ),
-        b.tool(
-            "bars_search",
-            json!({"query":"needle","occurrences":true})
-        )
+        a.tool("bars_search", json!({"query":"needle","occurrences":true})),
+        b.tool("bars_search", json!({"query":"needle","occurrences":true}))
     );
     for (error, text) in [x, y] {
         assert!(!error, "{text}");
@@ -179,12 +161,9 @@ async fn disk_reads_bounded_skips_and_parallel_clients() {
         assert!(text.contains("docs/needle.md:1:1: needle"), "{text}");
     }
     assert!(
-        a.tool(
-            "bars_read",
-            json!({"path":"docs/needle.md","view":"links"})
-        )
-        .await
-        .0,
+        a.tool("bars_read", json!({"path":"docs/needle.md","view":"links"}))
+            .await
+            .0,
         "неполная сверка ссылок должна дать ошибку"
     );
 }

@@ -142,13 +142,7 @@ async fn cancel(rpc: &mut Pipe, id: u64) {
 async fn pool_read_finishes_while_search_is_blocked_and_reuses_healthy_channel() {
     let mut f = Fixture::new(Duration::from_secs(10));
     let mut rpc = f.connect().await;
-    send_tool(
-        &mut rpc,
-        100,
-        "bars_search",
-        json!({"query":"hold-search"}),
-    )
-    .await;
+    send_tool(&mut rpc, 100, "bars_search", json!({"query":"hold-search"})).await;
     let (search_session, _) = f.started().await;
     let read_started = Instant::now();
     send_tool(&mut rpc, 101, "bars_read", json!({"path":"quick"})).await;

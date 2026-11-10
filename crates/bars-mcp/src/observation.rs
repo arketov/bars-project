@@ -46,7 +46,15 @@ impl<S> FromContextPart<ToolCallContext<'_, S>> for Original {
             ],
             "bars_relations" | "bars_paths" | "bars_impact" | "bars_context" | "bars_explore"
             | "bars_graph" => GRAPH,
-            "bars_read" => &["project", "path", "lines", "under", "view", "direction", "cursor"],
+            "bars_read" => &[
+                "project",
+                "path",
+                "lines",
+                "under",
+                "view",
+                "direction",
+                "cursor",
+            ],
             "bars_status" => &["project", "all", "refresh"],
             "bars_audit" => &[
                 "project", "kind", "action", "id", "revision", "in", "cursor", "limit", "show",

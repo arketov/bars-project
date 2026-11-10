@@ -266,7 +266,9 @@ impl WorkerHandler {
                 limit: params.limit,
             })
             .await?;
-        let linked_from = self.linked_from(&params.target, &similar.source.path).await?;
+        let linked_from = self
+            .linked_from(&params.target, &similar.source.path)
+            .await?;
         Ok(bars_protocol::LikeOutput {
             source: similar.source,
             results: similar.results,
@@ -784,18 +786,15 @@ impl WorkerHandler {
             if total > max_lines {
                 output.lines_total = Some(total);
                 output.headings = Some(
-                    outline(
-                        &text,
-                        &bars_core::outline::OutlineQuery::default(),
-                    )
-                    .map_err(outline_error)?
-                    .into_iter()
-                    .map(|heading| Heading {
-                        line: to_u32(heading.line),
-                        level: heading.level as u8,
-                        text: heading.text,
-                    })
-                    .collect(),
+                    outline(&text, &bars_core::outline::OutlineQuery::default())
+                        .map_err(outline_error)?
+                        .into_iter()
+                        .map(|heading| Heading {
+                            line: to_u32(heading.line),
+                            level: heading.level as u8,
+                            text: heading.text,
+                        })
+                        .collect(),
                 );
                 history::applied_field("range", serde_json::json!("outline_only"));
                 return Ok(output);
@@ -1737,7 +1736,12 @@ fn like_path_line(source: &str) -> Option<(String, i64)> {
     if !well_formed {
         return None;
     }
-    let line: i64 = lines.split('-').next().expect("непустой хвост").parse().ok()?;
+    let line: i64 = lines
+        .split('-')
+        .next()
+        .expect("непустой хвост")
+        .parse()
+        .ok()?;
     (line > 0).then(|| (path.to_string(), line))
 }
 

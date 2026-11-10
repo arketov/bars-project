@@ -1091,7 +1091,7 @@ impl Scope {
     /// исходного документа (ISS-26).
     pub(super) fn exclude_path(&mut self, path: &str) {
         self.clause = format!("({}) AND d.path != ?", self.clause);
-        self.params.push(Value::from(path));
+        self.params.push(Value::from(path.to_string()));
     }
 
     /// Строит отбор и проверяет, что каждый модуль и файл есть в индексе. Модули и файлы

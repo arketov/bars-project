@@ -31,7 +31,8 @@ pub(super) fn clean(value: &str, limit: usize) -> String {
 }
 
 fn module_line(project: Option<&SessionProjectInfo>, budget: usize) -> String {
-    let fallback = "modules are top-level documentation folders; bars_status lists them with purposes.";
+    let fallback =
+        "modules are top-level documentation folders; bars_status lists them with purposes.";
     let Some(project) = project else {
         return fallback.to_owned();
     };

@@ -564,7 +564,15 @@ pub fn requested(tool: &str, source: &Value) -> Value {
             "roles",
             "task_profile",
         ],
-        "bars_read" => &["project", "path", "lines", "under", "view", "direction", "cursor"],
+        "bars_read" => &[
+            "project",
+            "path",
+            "lines",
+            "under",
+            "view",
+            "direction",
+            "cursor",
+        ],
         "bars_status" => &["project", "all", "refresh"],
         "bars_audit" => &[
             "project", "kind", "action", "id", "revision", "in", "cursor", "limit", "show",

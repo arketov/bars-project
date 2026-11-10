@@ -63,10 +63,7 @@ async fn session_modules_reach_initialize_scopes_and_history() {
         )
         .await;
     assert!(!error, "{text}");
-    assert!(
-        text.contains("scope: in api, docs/guide.md"),
-        "{text}"
-    );
+    assert!(text.contains("scope: in api, docs/guide.md"), "{text}");
     assert!(!text.contains("Results span several modules"));
     let page = history
         .page(&bars_worker::mcp_history::Filter {

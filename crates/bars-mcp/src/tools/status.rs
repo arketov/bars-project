@@ -44,15 +44,9 @@ impl BarsMcp {
         let projects_params = bars_protocol::ProjectsParams {
             target: (!args.all).then(|| target.clone()),
         };
-        let project_path = match self
-            .call_observed(&projects_params, Some(&original))
-            .await
-        {
+        let project_path = match self.call_observed(&projects_params, Some(&original)).await {
             Ok(output) => {
-                let path = output
-                    .projects
-                    .first()
-                    .map(|project| project.path.clone());
+                let path = output.projects.first().map(|project| project.path.clone());
                 text.push_str(&render::projects(&output));
                 path
             }
@@ -85,7 +79,9 @@ impl BarsMcp {
                 .map(|value| project_arg(&value, &self.env.cwd))
         };
         if let Some(project) = audit_project {
-            let params = bars_protocol::AuditListParams { project: project.clone() };
+            let params = bars_protocol::AuditListParams {
+                project: project.clone(),
+            };
             let part = match self.call_observed(&params, Some(&original)).await {
                 Ok(output) => render::audits_state(&output),
                 Err(error) => render::error_part("AUDITS", &error),

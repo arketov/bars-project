@@ -426,11 +426,7 @@ pub fn like(output: &LikeOutput) -> String {
     );
     for (index, hit) in output.results.iter().enumerate() {
         let _ = writeln!(text, "{}", result_line(index + 1, hit, Some(hit.score)));
-        text.push_str(&limit_other_headers(
-            &hit.text,
-            &[],
-            OTHER_HEADERS_MAX,
-        ));
+        text.push_str(&limit_other_headers(&hit.text, &[], OTHER_HEADERS_MAX));
         text.push('\n');
     }
     if !output.linked_from.is_empty() {
@@ -451,7 +447,11 @@ pub fn occurrences(output: &DiskTextOutput) -> String {
     let mut text = String::from("=== OCCURRENCES ===\n");
     for doc in &output.result.documents {
         for hit in &doc.hits {
-            let _ = writeln!(text, "{}:{}:{}: {}", doc.path, hit.line, hit.column, hit.text);
+            let _ = writeln!(
+                text,
+                "{}:{}:{}: {}",
+                doc.path, hit.line, hit.column, hit.text
+            );
         }
     }
     let truncated = output.result.truncated.is_some();
@@ -502,13 +502,20 @@ pub fn links(output: &DiskLinksOutput) -> String {
     let mut text = format!(
         "=== LINKS · {} · {} ===\n",
         output.direction,
-        if output.known { "known document" } else { "unknown document" }
+        if output.known {
+            "known document"
+        } else {
+            "unknown document"
+        }
     );
     for item in &output.items {
         if output.direction == "incoming" {
             let source = item["source"].as_str().unwrap_or("?");
             let title = item["title"].as_str().map(|title| format!(" · {title}"));
-            let line = item["line"].as_u64().map(|line| format!(":{line}")).unwrap_or_default();
+            let line = item["line"]
+                .as_u64()
+                .map(|line| format!(":{line}"))
+                .unwrap_or_default();
             let cut = item["fields_truncated"].as_bool() == Some(true);
             let _ = writeln!(
                 text,
@@ -635,7 +642,11 @@ pub fn status(output: &StatusOutput) -> String {
     let _ = writeln!(
         text,
         "updated_at: {}",
-        output.updated_at.as_deref().map(date_of_rfc).unwrap_or("none")
+        output
+            .updated_at
+            .as_deref()
+            .map(date_of_rfc)
+            .unwrap_or("none")
     );
     let _ = writeln!(text, "pending: {}", output.pending);
     let _ = writeln!(
@@ -795,7 +806,11 @@ pub fn topics_state(output: &NewTopicsListOutput) -> String {
         output.topics.len(),
         open,
         resolved,
-        if output.enabled { "enabled" } else { "disabled" }
+        if output.enabled {
+            "enabled"
+        } else {
+            "disabled"
+        }
     );
     if output.losses > 0 {
         let _ = writeln!(text, "losses: {}", output.losses);
@@ -833,7 +848,9 @@ pub fn topic_detail(detail: &NewTopicDetail) -> String {
         "=== TOPIC {} · {} · revision {} ===\n",
         detail.topic.id, detail.topic.status, detail.topic.revision
     );
-    let _ = writeln!(text, "observations: {} · first seen {} · last seen {}",
+    let _ = writeln!(
+        text,
+        "observations: {} · first seen {} · last seen {}",
         detail.topic.observations,
         date_of_unix(detail.topic.first_seen),
         date_of_unix(detail.topic.last_seen)
@@ -853,7 +870,8 @@ pub fn topic_detail(detail: &NewTopicDetail) -> String {
                 date_of_unix(check.at),
                 check.scope,
                 check.outcome,
-                check.reason
+                check
+                    .reason
                     .as_ref()
                     .map(|reason| format!(" ({reason})"))
                     .unwrap_or_default()
@@ -862,11 +880,7 @@ pub fn topic_detail(detail: &NewTopicDetail) -> String {
                 let _ = writeln!(
                     text,
                     "  {}:{}-{} · {} ({:.2})",
-                    hit.path,
-                    hit.first_line,
-                    hit.last_line,
-                    hit.heading_chain,
-                    hit.score
+                    hit.path, hit.first_line, hit.last_line, hit.heading_chain, hit.score
                 );
             }
         }
@@ -879,7 +893,11 @@ pub fn topic_detail(detail: &NewTopicDetail) -> String {
 pub fn findings(output: &AuditFindingsOutput) -> String {
     let kind_line = match (output.run_id, output.finished) {
         (Some(run), Some(finished)) => {
-            format!("run {run} · {} · {} total", date_of_unix(finished), output.total)
+            format!(
+                "run {run} · {} · {} total",
+                date_of_unix(finished),
+                output.total
+            )
         }
         _ => "no complete run yet".to_string(),
     };
@@ -888,7 +906,12 @@ pub fn findings(output: &AuditFindingsOutput) -> String {
         let subjects = item
             .subjects
             .iter()
-            .map(|subject| format!("{}:{}-{}", subject.path, subject.first_line, subject.last_line))
+            .map(|subject| {
+                format!(
+                    "{}:{}-{}",
+                    subject.path, subject.first_line, subject.last_line
+                )
+            })
             .collect::<Vec<_>>()
             .join("; ");
         let _ = writeln!(
@@ -921,7 +944,11 @@ pub fn findings(output: &AuditFindingsOutput) -> String {
 pub fn audit_summary(output: &AuditSummaryOutput) -> String {
     let head = match (output.run_id, output.finished) {
         (Some(run), Some(finished)) => {
-            format!("run {run} · {} · {} findings", date_of_unix(finished), output.total)
+            format!(
+                "run {run} · {} · {} findings",
+                date_of_unix(finished),
+                output.total
+            )
         }
         _ => "no complete run yet".to_string(),
     };
@@ -938,13 +965,21 @@ pub fn audit_summary(output: &AuditSummaryOutput) -> String {
         }
     };
     // Протокольные списки агрегатов приводим к парам для join.
-    let files: Vec<(String, i64)> = output.files.iter().map(|f| (f.path.clone(), f.count)).collect();
+    let files: Vec<(String, i64)> = output
+        .files
+        .iter()
+        .map(|f| (f.path.clone(), f.count))
+        .collect();
     let reasons: Vec<(String, i64)> = output
         .reasons
         .iter()
         .map(|r| (r.reason.clone(), r.count))
         .collect();
-    let tags: Vec<(String, i64)> = output.tags.iter().map(|t| (t.tag.clone(), t.count)).collect();
+    let tags: Vec<(String, i64)> = output
+        .tags
+        .iter()
+        .map(|t| (t.tag.clone(), t.count))
+        .collect();
     let _ = writeln!(text, "files: {}", join(&files));
     let _ = writeln!(text, "reasons: {}", join(&reasons));
     let _ = writeln!(text, "tags: {}", join(&tags));
@@ -980,7 +1015,10 @@ pub fn refresh(output: &AcceptedOutput) -> String {
     } else {
         "freshness check not accepted."
     };
-    format!("=== REFRESH ===\naccepted: {}\n{note}\n=== END REFRESH ===", output.accepted)
+    format!(
+        "=== REFRESH ===\naccepted: {}\n{note}\n=== END REFRESH ===",
+        output.accepted
+    )
 }
 
 /// Часть сводки с ошибкой: ошибка одной части не отменяет остальные (ISS-110).
@@ -1152,7 +1190,10 @@ mod tests {
         assert!(full.contains("ХВОСТ-МЕТКА-4"), "{full}");
         let brief = search(&found, Detail::Brief);
         assert!(!brief.contains("Полный текст раздела"), "{brief}");
-        assert!(brief.contains("[1] 0.92 docs/a.md:120-129 · Порог\n"), "{brief}");
+        assert!(
+            brief.contains("[1] 0.92 docs/a.md:120-129 · Порог\n"),
+            "{brief}"
+        );
     }
 
     #[test]

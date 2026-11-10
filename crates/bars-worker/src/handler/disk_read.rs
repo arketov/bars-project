@@ -34,7 +34,11 @@ fn document_path(path: &str) -> Result<(), RpcError> {
 
 /// Документ ссылок в форме индекса (от корня проекта). Файла нет на диске — первая форма пути:
 /// `known: false` остаётся ответом, а не ошибкой; выход за корень проекта — `invalid_params`.
-pub(super) fn links_document(project: &Path, docs_root: &str, path: &str) -> Result<String, RpcError> {
+pub(super) fn links_document(
+    project: &Path,
+    docs_root: &str,
+    path: &str,
+) -> Result<String, RpcError> {
     match bars_core::doc_path::project_relative_path(project, Path::new(docs_root), path) {
         Ok(stored) => Ok(stored),
         Err(bars_core::doc_path::DocPathError::NotFound(_)) => {

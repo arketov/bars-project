@@ -32,7 +32,9 @@ pub struct AuditArgs {
 }
 
 fn invalid(message: String) -> CallToolResult {
-    CallToolResult::error(vec![ContentBlock::text(format!("invalid_params: {message}"))])
+    CallToolResult::error(vec![ContentBlock::text(format!(
+        "invalid_params: {message}"
+    ))])
 }
 
 impl BarsMcp {
@@ -76,7 +78,10 @@ impl BarsMcp {
         };
         text.push('\n');
         let part = match self
-            .call_observed(&bars_protocol::NewTopicsListParams { project }, Some(&original))
+            .call_observed(
+                &bars_protocol::NewTopicsListParams { project },
+                Some(&original),
+            )
             .await
         {
             Ok(output) => render::topics_state(&output),
@@ -92,16 +97,14 @@ impl BarsMcp {
             &self.env.cwd,
         );
         match action {
-            "findings" | "list" => {
-                present(
-                    self.call_observed(
-                        &bars_protocol::NewTopicsListParams { project },
-                        Some(&original),
-                    )
-                    .await,
-                    render::topics_list,
+            "findings" | "list" => present(
+                self.call_observed(
+                    &bars_protocol::NewTopicsListParams { project },
+                    Some(&original),
                 )
-            }
+                .await,
+                render::topics_list,
+            ),
             "get" => {
                 let Some(id) = args.id else {
                     return invalid("get needs id".to_string());
@@ -123,7 +126,10 @@ impl BarsMcp {
                     Some(revision) => revision,
                     None => match self
                         .call_observed(
-                            &bars_protocol::NewTopicsGetParams { project: project.clone(), id },
+                            &bars_protocol::NewTopicsGetParams {
+                                project: project.clone(),
+                                id,
+                            },
                             Some(&original),
                         )
                         .await
@@ -170,7 +176,9 @@ impl BarsMcp {
                     .iter()
                     .find(|group| !matches!(group.as_str(), "ignored" | "gone" | "overlap"));
                 if let Some(group) = unknown {
-                    return invalid(format!("show groups are ignored, gone, overlap — not {group}"));
+                    return invalid(format!(
+                        "show groups are ignored, gone, overlap — not {group}"
+                    ));
                 }
                 let paths = match scope_paths(&args.r#in) {
                     Ok(paths) => paths,

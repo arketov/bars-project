@@ -155,7 +155,9 @@ pub fn section_ranges(
 /// несколько совпадений — ошибка со списком ближайших заголовков и их строк.
 fn matching_nodes(nodes: &[Node], input: &str) -> Result<Vec<usize>, OutlineError> {
     let input = input.trim();
-    let exact: Vec<usize> = (0..nodes.len()).filter(|&i| nodes[i].chain == input).collect();
+    let exact: Vec<usize> = (0..nodes.len())
+        .filter(|&i| nodes[i].chain == input)
+        .collect();
     if !exact.is_empty() {
         return Ok(exact);
     }
@@ -172,7 +174,9 @@ fn matching_nodes(nodes: &[Node], input: &str) -> Result<Vec<usize>, OutlineErro
     if chains.len() == 1 {
         return Ok(suffix_matches);
     }
-    Err(OutlineError::HeadingNotFound(with_suggestions(nodes, input)))
+    Err(OutlineError::HeadingNotFound(with_suggestions(
+        nodes, input,
+    )))
 }
 
 fn with_suggestions(nodes: &[Node], input: &str) -> String {
