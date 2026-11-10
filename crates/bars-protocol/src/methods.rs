@@ -74,6 +74,10 @@ pub struct SearchParams {
     /// Файлы относительно корня документации.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub files: Vec<String>,
+    /// Пути-префиксы области поиска (папка любой глубины или файл, от корня документации или
+    /// проекта); объединяются между собой — агентский параметр `in` инструмента `bars_search`.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub paths: Vec<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub limit: Option<u32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -294,6 +298,12 @@ pub struct SimilarParams {
     /// Модули (корневой — `.`), из которых брать похожие; пусто — весь проект.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub modules: Vec<String>,
+    /// Пути-префиксы области, откуда брать похожие; пусто — весь проект.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub paths: Vec<String>,
+    /// Не возвращать разделы того же документа, что исходный чанк (агентский `like`, ISS-26).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub exclude_document: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub limit: Option<u32>,
 }
@@ -307,6 +317,39 @@ pub struct SimilarOutput {
     /// Сколько результатов запрошено после ограничения пределом.
     pub limit: u32,
     pub clamped: bool,
+    pub indexing: bool,
+    pub pending: u32,
+}
+
+// --- like: похожие разделы других документов и входящие ссылки одним вызовом ---
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct LikeParams {
+    #[serde(flatten)]
+    pub target: Target,
+    /// Исходный раздел: `путь:строки` из выдачи поиска (`docs/a.md:12-30` или `docs/a.md:12`)
+    /// либо ID чанка.
+    pub source: String,
+    /// Пути-префиксы области, откуда брать похожие; пусто — весь проект.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub paths: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub limit: Option<u32>,
+}
+
+/// Разделы других документов, близкие к исходному, и документы, ссылающиеся на исходный.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct LikeOutput {
+    /// Исходный чанк (текст и положение).
+    pub source: SearchHit,
+    /// Похожие чанки; разделы исходного документа не входят (ISS-26).
+    pub results: Vec<SearchHit>,
+    /// Сколько результатов запрошено после ограничения пределом.
+    pub limit: u32,
+    pub clamped: bool,
+    /// Пути документов (от корня проекта), ссылающихся на исходный.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub linked_from: Vec<String>,
     pub indexing: bool,
     pub pending: u32,
 }
@@ -466,6 +509,10 @@ pub struct ReadParams {
     pub lines: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub under: Option<String>,
+    /// Автоматический режим агентского чтения: без `lines`/`under` документ длиннее этого числа
+    /// строк возвращается не текстом, а структурой (`headings`) с подсказкой прочитать часть.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_lines: Option<usize>,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -481,6 +528,10 @@ pub struct ReadOutput {
     pub range: Option<ReadRange>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub sections: Vec<ReadSection>,
+    /// Структура вместо текста: заполнено, когда документ длиннее `max_lines` (агентский
+    /// автоматический режим `bars_read`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub headings: Option<Vec<Heading>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1348,6 +1399,7 @@ methods! {
     Hello: HelloParams => HelloOutput, "hello", All;
     Search: SearchParams => SearchOutput, "search", All;
     Similar: SimilarParams => SimilarOutput, "similar", All;
+    Like: LikeParams => LikeOutput, "like", All;
     Duplicates: DuplicatesParams => DuplicatesOutput, "duplicates", All;
     Outline: OutlineParams => OutlineOutput, "outline", All;
     Read: ReadParams => ReadOutput, "read", All;
@@ -1396,6 +1448,7 @@ methods! {
     DiskText: crate::DiskTextParams => crate::DiskTextOutput, "disk_text", All;
     DiskLinks: crate::DiskLinksParams => crate::DiskLinksOutput, "disk_links", All;
     AuditList: crate::AuditListParams => crate::AuditListOutput, "audit_list", All;
+    AuditSummary: crate::AuditSummaryParams => crate::AuditSummaryOutput, "audit_summary", All;
     AuditRun: crate::AuditRunParams => crate::AuditRunOutput, "audit_run", All;
     AuditCancel: crate::AuditCancelParams => crate::AuditCancelOutput, "audit_cancel", All;
     AuditFindings: crate::AuditFindingsParams => crate::AuditFindingsOutput, "audit_findings", All;

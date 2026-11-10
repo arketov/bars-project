@@ -17,6 +17,10 @@ pub struct DiskTextParams {
     pub modules: Vec<String>,
     #[serde(default)]
     pub files: Vec<String>,
+    /// Пути-префиксы области (папка любой глубины или файл, от корня документации или проекта);
+    /// объединяются — агентский параметр `in` инструмента `bars_search`.
+    #[serde(default)]
+    pub paths: Vec<String>,
     pub limit_docs: Option<usize>,
     pub limit_hits: Option<usize>,
     pub path: Option<String>,

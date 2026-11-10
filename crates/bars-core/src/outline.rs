@@ -125,6 +125,7 @@ pub fn section_ranges(
     lines_total: usize,
 ) -> Result<Vec<(usize, usize, String)>, OutlineError> {
     let nodes = headings(source);
+    let selected_indexes = matching_nodes(&nodes, chain)?;
     let mut ends = vec![lines_total; nodes.len()];
     let mut open: Vec<usize> = Vec::new();
     for (i, node) in nodes.iter().enumerate() {
@@ -136,31 +137,71 @@ pub fn section_ranges(
         }
         open.push(i);
     }
-    let selected: Vec<_> = nodes
+    let ranges: Vec<_> = selected_indexes
         .into_iter()
-        .zip(ends)
-        .filter(|(node, _)| node.chain == chain.trim())
-        .map(|(node, end)| (node.heading.line, end, node.chain))
+        .map(|index| {
+            (
+                nodes[index].heading.line,
+                ends[index],
+                nodes[index].chain.clone(),
+            )
+        })
         .collect();
-    if selected.is_empty() {
-        return Err(OutlineError::HeadingNotFound(chain.trim().to_owned()));
-    }
-    Ok(selected)
+    Ok(ranges)
 }
 
-/// Индексы заголовков внутри каждого заголовка, подошедшего под `under` (OQ-36, OQ-37).
+/// Заголовки, подходящие под ввод `under`: точная цепочка — все её повторы; без точной —
+/// ровно одна цепочка, оканчивающаяся на введённый текст (конец цепочки, ISS-112). Ноль или
+/// несколько совпадений — ошибка со списком ближайших заголовков и их строк.
+fn matching_nodes(nodes: &[Node], input: &str) -> Result<Vec<usize>, OutlineError> {
+    let input = input.trim();
+    let exact: Vec<usize> = (0..nodes.len()).filter(|&i| nodes[i].chain == input).collect();
+    if !exact.is_empty() {
+        return Ok(exact);
+    }
+    let suffix = format!("/{input}");
+    let suffix_matches: Vec<usize> = (0..nodes.len())
+        .filter(|&i| nodes[i].chain.ends_with(&suffix))
+        .collect();
+    let mut chains: Vec<&str> = suffix_matches
+        .iter()
+        .map(|&i| nodes[i].chain.as_str())
+        .collect();
+    chains.sort();
+    chains.dedup();
+    if chains.len() == 1 {
+        return Ok(suffix_matches);
+    }
+    Err(OutlineError::HeadingNotFound(with_suggestions(nodes, input)))
+}
+
+fn with_suggestions(nodes: &[Node], input: &str) -> String {
+    let needle = input.to_lowercase();
+    let mut picked: Vec<&Node> = nodes
+        .iter()
+        .filter(|n| n.chain.to_lowercase().contains(&needle))
+        .collect();
+    if picked.is_empty() {
+        picked = nodes.iter().take(8).collect();
+    } else {
+        picked.truncate(8);
+    }
+    let suggestions = picked
+        .iter()
+        .map(|n| format!("«{}» (строка {})", n.chain, n.heading.line))
+        .collect::<Vec<_>>()
+        .join(", ");
+    if suggestions.is_empty() {
+        format!("заголовок не найден: {input}")
+    } else {
+        format!("заголовок не найден: {input}. Ближайшие заголовки: {suggestions}")
+    }
+}
+
+/// Индексы заголовков внутри каждого заголовка, подошедшего под `under` (OQ-36, OQ-37, ISS-112).
 fn descendants(nodes: &[Node], under: &Under) -> Result<BTreeSet<usize>, OutlineError> {
     let targets: Vec<usize> = match under {
-        Under::Chain(chain) => {
-            let chain = chain.trim();
-            let found: Vec<usize> = (0..nodes.len())
-                .filter(|&i| nodes[i].chain == chain)
-                .collect();
-            if found.is_empty() {
-                return Err(OutlineError::HeadingNotFound(chain.to_string()));
-            }
-            found
-        }
+        Under::Chain(chain) => matching_nodes(nodes, chain)?,
         Under::Line(line) => {
             let found = nodes.iter().position(|n| n.heading.line == *line);
             vec![found.ok_or(OutlineError::NotAHeading(*line))?]

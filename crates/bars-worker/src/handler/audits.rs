@@ -269,14 +269,9 @@ impl WorkerHandler {
         }
         Ok(bars_protocol::AuditIgnoreOutput { ignored })
     }
-    /// Проект окна: точный абсолютный путь зарегистрированного проекта.
+    /// Проект вызова: зарегистрированный корень по абсолютному пути или однозначному имени
+    /// (ISS-111: раньше принимался только абсолютный путь).
     fn audits_project(&self, project: &str) -> Result<PathBuf, RpcError> {
-        if !Path::new(project).is_absolute() {
-            return Err(RpcError::bars(
-                ErrorKind::InvalidParams,
-                "аудит относится к точному проекту: нужен абсолютный путь",
-            ));
-        }
         let root = self.worker.resolve(project).map_err(worker_error)?;
         if !root.is_dir() {
             return Err(RpcError::bars(
@@ -399,11 +394,68 @@ impl WorkerHandler {
         })
     }
 
+    /// Сводка находок вида: числа по файлам, причинам и видам без постраничного чтения
+    /// (агентский `bars_audit action=summary`).
+    pub(super) async fn audit_summary(
+        &self,
+        params: bars_protocol::AuditSummaryParams,
+    ) -> Result<bars_protocol::AuditSummaryOutput, RpcError> {
+        let project = self.audits_project(&params.project)?;
+        let kind = parse_kind(&params.kind)?;
+        let docs_root = self.worker.docs_root(&project).map_err(worker_error)?;
+        // Обе формы пути (от корня документации и от корня проекта) — OQ-169.
+        let prefixes: Vec<String> = params
+            .paths
+            .iter()
+            .flat_map(|path| bars_core::doc_path::stored_candidates(&docs_root, path))
+            .collect();
+        let summary = tokio::task::spawn_blocking(move || {
+            let store = AuditStore::open(&project)?;
+            let Some(run) = store.latest_complete(kind)? else {
+                return Ok(None);
+            };
+            let summary = store.findings_summary(run.id, &prefixes)?;
+            Ok::<_, bars_core::audits::AuditError>(Some((run, summary)))
+        })
+        .await
+        .map_err(internal)?
+        .map_err(audit_error)?;
+        let Some((run, summary)) = summary else {
+            return Ok(bars_protocol::AuditSummaryOutput {
+                run_id: None,
+                finished: None,
+                total: 0,
+                files: Vec::new(),
+                reasons: Vec::new(),
+                tags: Vec::new(),
+            });
+        };
+        Ok(bars_protocol::AuditSummaryOutput {
+            run_id: Some(run.id),
+            finished: Some(run.finished),
+            total: summary.total,
+            files: summary
+                .files
+                .into_iter()
+                .map(|(path, count)| bars_protocol::AuditFileCount { path, count })
+                .collect(),
+            reasons: summary
+                .reasons
+                .into_iter()
+                .map(|(reason, count)| bars_protocol::AuditReasonCount { reason, count })
+                .collect(),
+            tags: summary
+                .tags
+                .into_iter()
+                .map(|(tag, count)| bars_protocol::AuditTagCount { tag, count })
+                .collect(),
+        })
+    }
+
     pub(super) async fn audit_findings(
         &self,
         params: AuditFindingsParams,
-    ) -> Result<AuditFindingsOutput, RpcError> {
-        let project = self.audits_project(&params.project)?;
+    ) -> Result<AuditFindingsOutput, RpcError> {        let project = self.audits_project(&params.project)?;
         let kind = parse_kind(&params.kind)?;
         if let Some(group) = &params.group
             && group != "main"

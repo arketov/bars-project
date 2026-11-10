@@ -15,8 +15,8 @@ mod tests;
 
 pub use roles::document_role;
 pub use store::{
-    AuditError, AuditStore, FindingRow, FindingsPage, NewFinding, RunRow, RunStatus, ScheduleMode,
-    Standing, Subject, store_path,
+    AuditError, AuditStore, FindingRow, FindingsPage, FindingsSummary, NewFinding, RunRow,
+    RunStatus, ScheduleMode, Standing, Subject, store_path,
 };
 
 /// Отпечаток находки: хеш частей, не зависящих от номеров строк (путь, заголовок, текст ссылки), —

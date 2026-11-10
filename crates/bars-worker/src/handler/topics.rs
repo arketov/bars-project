@@ -3,7 +3,7 @@
 //! Методы помечены `Window` в `bars-protocol`: канал закрыт ими для агента и CLI. Здесь — проверка
 //! темы текущим поиском, ручная отметка и решения пользователя с ожидаемой ревизией.
 
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use bars_core::new_topics::{
     Change, CheckRow, NewCheck, NewCheckResult, Observation, Reason, Recorded, Source, StoreError,
@@ -128,14 +128,9 @@ fn detail(topic: &TopicRow) -> NewTopicDetail {
 }
 
 impl WorkerHandler {
-    /// Проект окна: точный абсолютный путь зарегистрированного проекта (как у `project_delete`).
+    /// Проект вызова: зарегистрированный корень по абсолютному пути или однозначному имени
+    /// (ISS-111: раньше принимался только абсолютный путь).
     fn topics_project(&self, project: &str) -> Result<PathBuf, RpcError> {
-        if !Path::new(project).is_absolute() {
-            return Err(RpcError::bars(
-                ErrorKind::InvalidParams,
-                "тема относится к точному проекту: нужен абсолютный путь",
-            ));
-        }
         self.worker
             .resolve(project)
             .map_err(super::errors::worker_error)

@@ -16,6 +16,10 @@ pub struct SimilarRequest {
     pub id: String,
     /// Модули (корневой — `.`), из которых брать кандидатов; пусто — весь проект.
     pub modules: Vec<String>,
+    /// Пути-префиксы области кандидатов (папка любой глубины или файл); пусто — весь проект.
+    pub paths: Vec<String>,
+    /// Не возвращать чанки исходного документа (агентский `like`; ISS-26).
+    pub exclude_document: bool,
     pub results: Option<usize>,
 }
 
@@ -67,6 +71,71 @@ fn parse(id: &str) -> Option<i64> {
     number.parse::<i64>().ok().filter(|number| *number > 0)
 }
 
+/// Публичный ID чанка документа, содержащего строку: разрешение агентского `путь:строки`
+/// (источник `like`) без поискового вызова. Путь — от корня документации или проекта.
+pub fn chunk_public_at_line(
+    index: &Index,
+    docs_root: &str,
+    path: &str,
+    line: i64,
+) -> Result<String, SearchError> {
+    let mut stored = None;
+    for candidate in crate::doc_path::stored_candidates(docs_root, path) {
+        let known = index
+            .conn()
+            .prepare_cached("SELECT EXISTS(SELECT 1 FROM documents WHERE path = ?1)")?
+            .query_row([&candidate], |row| row.get::<_, bool>(0))?;
+        if known {
+            stored = Some(candidate);
+            break;
+        }
+    }
+    let Some(stored) = stored else {
+        let mut statement = index.conn().prepare("SELECT path FROM documents")?;
+        let known = statement
+            .query_map([], |row| row.get::<_, String>(0))?
+            .collect::<Result<Vec<_>, _>>()?;
+        return Err(SearchError::InvalidParams(
+            crate::doc_path::unknown_file_message(
+                docs_root,
+                known.iter().map(String::as_str),
+                path,
+            ),
+        ));
+    };
+    let row = index
+        .conn()
+        .query_row(
+            "SELECT c.id, d.hash, d.path, c.ordinal, c.embed_hash
+             FROM chunks c JOIN documents d ON d.id = c.document_id
+             WHERE d.path = ?1 AND c.first_line <= ?2 AND c.last_line >= ?2
+             ORDER BY c.ordinal LIMIT 1",
+            rusqlite::params![stored, line],
+            |row| {
+                Ok((
+                    row.get::<_, i64>(0)?,
+                    row.get::<_, String>(1)?,
+                    row.get::<_, String>(2)?,
+                    row.get::<_, i64>(3)?,
+                    row.get::<_, String>(4)?,
+                ))
+            },
+        )
+        .optional()?;
+    let Some((id, hash, path, ordinal, embed_hash)) = row else {
+        let last: i64 = index.conn().query_row(
+            "SELECT COALESCE(MAX(c.last_line), 0)
+             FROM chunks c JOIN documents d ON d.id = c.document_id WHERE d.path = ?1",
+            [&stored],
+            |row| row.get(0),
+        )?;
+        return Err(SearchError::InvalidParams(format!(
+            "в документе {path} нет строки {line}: в нём {last} строк"
+        )));
+    };
+    Ok(public_id(id, &hash, &path, ordinal, &embed_hash))
+}
+
 /// Самые близкие по косинусу к чанку `request.id` чанки выбранной области, без самого чанка.
 /// Точный перебор готовых векторов; новый embed не нужен.
 pub fn similar(
@@ -100,13 +169,17 @@ pub fn similar(
         .vector(&embed_hash)?
         .ok_or_else(|| SearchError::MissingVector(request.id.clone()))?;
 
-    let scope = Scope::build(
+    let mut scope = Scope::build(
         index,
         &SearchRequest {
             modules: request.modules.clone(),
+            paths: request.paths.clone(),
             ..SearchRequest::default()
         },
     )?;
+    if request.exclude_document {
+        scope.exclude_path(&source.path);
+    }
     let max = settings.max_results.max(1);
     let results = request
         .results

@@ -1082,9 +1082,16 @@ pub(super) struct Scope {
 }
 
 impl Scope {
-    /// Отбор без операторов `path:`.
+    /// Строка отбора без операторов `path:`.
     pub(super) fn build(index: &Index, request: &SearchRequest) -> Result<Self, SearchError> {
         Self::build_with_paths(index, request, &[])
+    }
+
+    /// Исключает из области документ по пути (от корня проекта) — агентский `like` без разделов
+    /// исходного документа (ISS-26).
+    pub(super) fn exclude_path(&mut self, path: &str) {
+        self.clause = format!("({}) AND d.path != ?", self.clause);
+        self.params.push(Value::from(path));
     }
 
     /// Строит отбор и проверяет, что каждый модуль и файл есть в индексе. Модули и файлы
@@ -1152,6 +1159,18 @@ impl Scope {
             }
             parts.push(format!("d.path IN ({})", placeholders(stored_paths.len())));
             params.extend(stored_paths.into_iter().map(Value::from));
+        }
+
+        if !request.paths.is_empty() {
+            // Агентская область `in`: префиксы папок и файлов любой глубины, объединены между собой.
+            let stored = path_prefixes(index, &request.paths)?;
+            let conditions =
+                vec!["(d.path = ? OR d.path LIKE ? ESCAPE '\\')"; stored.len()].join(" OR ");
+            parts.push(format!("({conditions})"));
+            for prefix in stored {
+                params.push(Value::from(prefix.clone()));
+                params.push(Value::from(format!("{}/%", escape_like(&prefix))));
+            }
         }
 
         let mut clause = if parts.is_empty() {

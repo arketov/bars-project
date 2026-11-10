@@ -193,6 +193,15 @@ pub struct FindingsPage {
     pub next: Option<i64>,
 }
 
+/// Сводка находок запуска (`findings_summary`): числа по файлам, причинам и видам.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct FindingsSummary {
+    pub total: i64,
+    pub files: Vec<(String, i64)>,
+    pub reasons: Vec<(String, i64)>,
+    pub tags: Vec<(String, i64)>,
+}
+
 /// Строка прежней находки, переносимая в новый запуск как исчезнувшая: отпечаток, подвид, группа,
 /// причина, мера, субъекты (JSON), отрывок.
 type GoneRow = (String, String, String, String, Option<f64>, String, String);
@@ -547,6 +556,61 @@ impl AuditStore {
         let end = offset + items.len() as i64;
         let next = (end < total).then_some(end);
         Ok(FindingsPage { items, total, next })
+    }
+
+    /// Сводка находок полного запуска: числа по первому предмету (файлу), причинам и видам.
+    /// Умолчания экрана: без исчезнувших и игнорируемых. `path_prefixes` сужает счёт по пути
+    /// первого предмета (папка любой глубины или файл, от корня проекта).
+    pub fn findings_summary(
+        &self,
+        run_id: i64,
+        path_prefixes: &[String],
+    ) -> Result<FindingsSummary, AuditError> {
+        let ignored = "EXISTS (SELECT 1 FROM ignored i JOIN runs r ON r.kind=i.kind WHERE r.id=findings.run_id AND i.fingerprint=findings.fingerprint)";
+        let path_clause = if path_prefixes.is_empty() {
+            String::new()
+        } else {
+            let conditions = path_prefixes
+                .iter()
+                .map(|_| {
+                    "(json_extract(subjects, '$[0].path') = ? OR \
+                     json_extract(subjects, '$[0].path') LIKE ? ESCAPE '\\')"
+                })
+                .collect::<Vec<_>>()
+                .join(" OR ");
+            format!(" AND ({conditions})")
+        };
+        let filter = format!("run_id=?1 AND standing<>'gone' AND NOT {ignored}{path_clause}");
+        let mut bind: Vec<rusqlite::types::Value> = vec![run_id.into()];
+        for prefix in path_prefixes {
+            bind.push(prefix.clone().into());
+            bind.push(
+                format!("{}/%", prefix.replace('\\', "\\\\").replace('%', "\\%").replace('_', "\\_"))
+                    .into(),
+            );
+        }
+        let total: i64 = self.db.query_row(
+            &format!("SELECT COUNT(*) FROM findings WHERE {filter}"),
+            rusqlite::params_from_iter(bind.iter()),
+            |r| r.get(0),
+        )?;
+        let counts = |column: &str, limit: i64| -> Result<Vec<(String, i64)>, AuditError> {
+            let mut statement = self.db.prepare(&format!(
+                "SELECT {column}, COUNT(*) FROM findings WHERE {filter} \
+                 GROUP BY {column} ORDER BY COUNT(*) DESC, {column} LIMIT {limit}"
+            ))?;
+            let rows = statement.query_map(
+                rusqlite::params_from_iter(bind.iter()),
+                |r| Ok((r.get::<_, String>(0)?, r.get::<_, i64>(1)?)),
+            )?;
+            rows.collect::<Result<Vec<_>, _>>().map_err(AuditError::from)
+        };
+        Ok(FindingsSummary {
+            total,
+            files: counts("json_extract(subjects, '$[0].path')", 50)?,
+            reasons: counts("reason", 50)?,
+            tags: counts("tag", 50)?,
+        })
     }
 
     /// Игнор не связан внешним ключом с историей: переживает очистку старых запусков.

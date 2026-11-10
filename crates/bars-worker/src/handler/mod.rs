@@ -200,6 +200,8 @@ impl WorkerHandler {
         let request = SimilarRequest {
             id: params.chunk_id,
             modules: params.modules,
+            paths: params.paths,
+            exclude_document: params.exclude_document,
             results: params.limit.map(|value| value as usize),
         };
         let project_gate = self.worker.gate(&project).map_err(worker_error)?;
@@ -222,9 +224,87 @@ impl WorkerHandler {
         })
     }
 
-    /// Повторы в области проекта по готовым текстам и векторам индекса: модели не нужны.
-    async fn duplicates(&self, params: DuplicatesParams) -> Result<DuplicatesOutput, RpcError> {
+    /// Агентский `like`: похожие разделы других документов и входящие ссылки одним вызовом.
+    /// Источник — `путь:строки` из выдачи поиска или ID чанка.
+    async fn like(
+        &self,
+        params: bars_protocol::LikeParams,
+    ) -> Result<bars_protocol::LikeOutput, RpcError> {
         let project = self.usable(&params.target)?;
+        let status = self.worker.status(&project).map_err(worker_error)?;
+        if status.state == ProjectState::ReindexRequired {
+            return Err(errors::reindex_required());
+        }
+        let docs_root = self.settings(&project)?.docs_root;
+        let source = params.source.trim().to_string();
+        let chunk_id = match like_path_line(&source) {
+            Some((path, line)) => {
+                let gate = self
+                    .worker
+                    .gate(&project)
+                    .map_err(worker_error)?
+                    .read_owned()
+                    .await;
+                tokio::task::spawn_blocking(move || {
+                    let _gate = gate;
+                    let index = Index::open_read_only(&index_path(&project))?;
+                    bars_core::search::chunk_public_at_line(&index, &docs_root, &path, line)
+                })
+                .await
+                .map_err(internal)?
+                .map_err(search_error)?
+            }
+            None => source,
+        };
+        let similar = self
+            .similar(bars_protocol::SimilarParams {
+                target: params.target.clone(),
+                chunk_id,
+                modules: Vec::new(),
+                paths: params.paths,
+                exclude_document: true,
+                limit: params.limit,
+            })
+            .await?;
+        let linked_from = self.linked_from(&params.target, &similar.source.path).await?;
+        Ok(bars_protocol::LikeOutput {
+            source: similar.source,
+            results: similar.results,
+            limit: similar.limit,
+            clamped: similar.clamped,
+            linked_from,
+            indexing: similar.indexing,
+            pending: similar.pending,
+        })
+    }
+
+    /// Документы, ссылающиеся на документ (входящие ссылки свежей сверки) — для агентского `like`.
+    async fn linked_from(&self, target: &Target, path: &str) -> Result<Vec<String>, RpcError> {
+        let project = self.usable(target)?;
+        let docs = self.worker.docs_root(&project).map_err(worker_error)?;
+        let stored = disk_read::links_document(&project, &docs, path)?;
+        let lock = std::sync::Arc::clone(&self.links_lock);
+        let sources = tokio::task::spawn_blocking(move || {
+            let _guard = lock.lock().unwrap_or_else(|e| e.into_inner());
+            let mut index = bars_core::link_index::LinkIndex::open(&project).map_err(internal)?;
+            index
+                .refresh_checked(&project, Path::new(&docs))
+                .map_err(internal)?;
+            let page = index.page(&stored, true, 0, 200).map_err(internal)?;
+            Ok::<_, RpcError>(
+                page.items
+                    .iter()
+                    .filter_map(|item| item["source"].as_str().map(str::to_string))
+                    .collect::<std::collections::BTreeSet<_>>(),
+            )
+        })
+        .await
+        .map_err(internal)??;
+        Ok(sources.into_iter().collect())
+    }
+
+    /// Повторы в области проекта по готовым текстам и векторам индекса: модели не нужны.
+    async fn duplicates(&self, params: DuplicatesParams) -> Result<DuplicatesOutput, RpcError> {        let project = self.usable(&params.target)?;
         let status = self.worker.status(&project).map_err(worker_error)?;
         if status.state == ProjectState::ReindexRequired {
             return Err(errors::reindex_required());
@@ -354,6 +434,7 @@ impl WorkerHandler {
             query: params.query,
             modules: params.modules,
             files: params.files,
+            paths: params.paths,
             results: params.limit.map(|value| value as usize),
             candidates: params.candidates.map(|value| value as usize),
             rerank_candidates: None,
@@ -692,6 +773,32 @@ impl WorkerHandler {
             revision,
             ..ReadOutput::default()
         };
+        // Агентский автоматический режим: длинный документ отдаётся структурой с подсказкой
+        // прочитать часть или весь текст, а не текстом на тысячи строк.
+        if selection.is_none()
+            && let Some(max_lines) = params.max_lines
+        {
+            let total = bars_protocol::count_lines(&text);
+            if total > max_lines {
+                output.lines_total = Some(total);
+                output.headings = Some(
+                    outline(
+                        &text,
+                        &bars_core::outline::OutlineQuery::default(),
+                    )
+                    .map_err(outline_error)?
+                    .into_iter()
+                    .map(|heading| Heading {
+                        line: to_u32(heading.line),
+                        level: heading.level as u8,
+                        text: heading.text,
+                    })
+                    .collect(),
+                );
+                history::applied_field("range", serde_json::json!("outline_only"));
+                return Ok(output);
+            }
+        }
         if let Some(selection) = selection {
             output.lines_total = Some(selection.lines_total);
             for part in selection.parts {
@@ -1453,6 +1560,7 @@ impl WorkerHandler {
                 result.map(|out| output_value(&out))
             }
             Call::Similar(params) => self.similar(params).await.map(|out| output_value(&out)),
+            Call::Like(params) => self.like(params).await.map(|out| output_value(&out)),
             Call::Duplicates(params) => self.duplicates(params).await.map(|out| output_value(&out)),
             Call::Outline(params) => self.outline(params).map(|out| output_value(&out)),
             Call::Read(params) => self.read(params).map(|out| output_value(&out)),
@@ -1462,13 +1570,19 @@ impl WorkerHandler {
                 .await
                 .map(|out| output_value(&out)),
             Call::Status(params) => {
-                let graph = self
-                    .graph_status(bars_protocol::GraphStatusParams {
-                        target: params.target.clone(),
-                    })
-                    .await?;
+                // Ошибка графа не роняет сводку индекса (ISS-110): граф читается отдельным
+                // методом, а окно видит его состояние на своей странице графа.
+                let target = params.target.clone();
                 let mut out = self.status(params)?;
-                out.graph = Some(graph);
+                match self
+                    .graph_status(bars_protocol::GraphStatusParams { target })
+                    .await
+                {
+                    Ok(graph) => out.graph = Some(graph),
+                    Err(error) => {
+                        log::warn!("Статус графа не получен: {error}");
+                    }
+                }
                 Ok(output_value(&out))
             }
             Call::Reindex(params) => self.reindex(params).map(|out| output_value(&out)),
@@ -1555,6 +1669,10 @@ impl WorkerHandler {
                 self.text_search(params).await.map(|out| output_value(&out))
             }
             Call::AuditList(params) => self.audit_list(params).await.map(|out| output_value(&out)),
+            Call::AuditSummary(params) => self
+                .audit_summary(params)
+                .await
+                .map(|out| output_value(&out)),
             Call::AuditIgnore(params) => self
                 .audit_ignore(params)
                 .await
@@ -1603,10 +1721,27 @@ fn internal(error: impl std::fmt::Display) -> RpcError {
     RpcError::standard(INTERNAL_ERROR, error.to_string())
 }
 
+/// Источник агентского `like` в форме `путь:строки` или `путь:строка`: путь отделяется от
+/// строк последним `:` с числовым хвостом. Хвост с `-` (ID чанка вида `123-abcdef12`)
+/// сюда не попадает — у него нет `:`.
+fn like_path_line(source: &str) -> Option<(String, i64)> {
+    let (path, lines) = source.rsplit_once(':')?;
+    let well_formed = !path.is_empty()
+        && !lines.is_empty()
+        && !lines.starts_with('-')
+        && !lines.ends_with('-')
+        && lines.matches('-').count() <= 1
+        && lines.bytes().all(|b| b.is_ascii_digit() || b == b'-');
+    if !well_formed {
+        return None;
+    }
+    let line: i64 = lines.split('-').next().expect("непустой хвост").parse().ok()?;
+    (line > 0).then(|| (path.to_string(), line))
+}
+
 /// Каноническая область обращения для «Новых тем»: `project` без фильтров либо отсортированные
 /// модули и файлы. Запрос в области не становится запросом ко всему проекту.
-fn topic_scope(modules: &[String], files: &[String]) -> String {
-    if modules.is_empty() && files.is_empty() {
+fn topic_scope(modules: &[String], files: &[String]) -> String {    if modules.is_empty() && files.is_empty() {
         return "project".to_string();
     }
     let canonical = |items: &[String]| {

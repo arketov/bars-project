@@ -92,6 +92,9 @@ pub struct SearchRequest {
     pub modules: Vec<String>,
     /// Файлы относительно корня документации (Т-14).
     pub files: Vec<String>,
+    /// Пути-префиксы области (папка любой глубины или файл); объединяются с модулями и файлами —
+    /// агентский параметр `in`.
+    pub paths: Vec<String>,
     pub results: Option<usize>,
     pub candidates: Option<usize>,
     pub rerank_candidates: Option<usize>,

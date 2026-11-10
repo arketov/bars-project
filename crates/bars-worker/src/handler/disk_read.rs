@@ -34,7 +34,7 @@ fn document_path(path: &str) -> Result<(), RpcError> {
 
 /// Документ ссылок в форме индекса (от корня проекта). Файла нет на диске — первая форма пути:
 /// `known: false` остаётся ответом, а не ошибкой; выход за корень проекта — `invalid_params`.
-fn links_document(project: &Path, docs_root: &str, path: &str) -> Result<String, RpcError> {
+pub(super) fn links_document(project: &Path, docs_root: &str, path: &str) -> Result<String, RpcError> {
     match bars_core::doc_path::project_relative_path(project, Path::new(docs_root), path) {
         Ok(stored) => Ok(stored),
         Err(bars_core::doc_path::DocPathError::NotFound(_)) => {
@@ -76,7 +76,7 @@ impl WorkerHandler {
         let requested = json!({"limit_docs":p.limit_docs,"limit_hits":p.limit_hits});
         let applied = json!({"limit_docs":docs_limit,"limit_hits":hits_limit,"page_size":if p.path.is_some(){hits_limit.min(100)}else{5},"offset":p.offset,
             "path":p.path,"revision":p.revision,"case_sensitive":p.case_sensitive,"regex":p.regex,
-            "path_filter":p.path_filter,"modules":p.modules,"files":p.files});
+            "path_filter":p.path_filter,"modules":p.modules,"files":p.files,"paths":p.paths});
         let clamped =
             p.limit_docs.is_some_and(|n| n > 100) || p.limit_hits.is_some_and(|n| n > 500);
         let params = TextSearchParams {
@@ -87,6 +87,7 @@ impl WorkerHandler {
             path_filter: p.path_filter,
             modules: p.modules,
             files: p.files,
+            paths: p.paths,
             limit_docs: Some(docs_limit),
             limit_hits: Some(hits_limit),
             path: continued,

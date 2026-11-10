@@ -11,6 +11,9 @@ pub struct TextSearchParams {
     pub path_filter: String,
     pub modules: Vec<String>,
     pub files: Vec<String>,
+    /// Пути-префиксы области (папка любой глубины или файл, от корня документации или проекта);
+    /// объединяются — агентский параметр `in` дискового поиска MCP.
+    pub paths: Vec<String>,
     pub limit_hits: Option<usize>,
     pub limit_docs: Option<usize>,
     pub request_id: String,

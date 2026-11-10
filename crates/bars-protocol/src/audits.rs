@@ -107,6 +107,53 @@ pub struct AuditFindingsParams {
     pub limit: Option<u32>,
 }
 
+/// Сводка находок вида: числа по файлам, причинам и видам; узнать масштаб проблемы без
+/// постраничного чтения сотен находок (агентский `bars_audit action=summary`).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AuditSummaryParams {
+    pub project: String,
+    pub kind: String,
+    /// Сужение по путям предметов находок (префиксы папок или файлы).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub paths: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AuditFileCount {
+    /// Путь документа от корня проекта.
+    pub path: String,
+    pub count: i64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AuditReasonCount {
+    pub reason: String,
+    pub count: i64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AuditTagCount {
+    pub tag: String,
+    pub count: i64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AuditSummaryOutput {
+    /// Полный запуск, из которого взяты числа; нет, пока такого не было.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub run_id: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub finished: Option<i64>,
+    /// Находок под выбранный фильтр.
+    pub total: i64,
+    /// Файлы с числом находок, самые проблемные первыми.
+    pub files: Vec<AuditFileCount>,
+    /// Причины находок, самые частые первыми.
+    pub reasons: Vec<AuditReasonCount>,
+    /// Виды находок (broken, exact, near…), самые частые первыми.
+    pub tags: Vec<AuditTagCount>,
+}
+
 /// Документ и место в нём, к которым относится находка.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AuditSubject {
