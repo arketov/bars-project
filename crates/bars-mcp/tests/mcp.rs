@@ -298,6 +298,11 @@ async fn diagnostic_mcp_searches_do_not_create_or_refresh_topics() {
     let (search_error, search_body) = mcp.tool("bars_search", json!({"query":query})).await;
     assert!(!search_error, "{search_body}");
     eprintln!("DIAG-FIRST-SEARCH: {search_body}");
+    {
+        use bars_core::new_topics::TopicStore;
+        let store = TopicStore::open(&root).unwrap();
+        eprintln!("DIAG-STORE: settings={:?}", store.settings());
+    }
     let deadline = Instant::now() + Duration::from_secs(10);
     let before = loop {
         let topics = topics_via_client(&harness, &project).await;
