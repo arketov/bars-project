@@ -684,6 +684,7 @@ mod tests {
             ),
         }
     }
+    #[test]
     fn numbers_exclude_versions_dates_ids_and_large_values() {
         let n = numbers(
             "Т-36 OQ-143 22-10-2026 1.2.3 file-100.md 12345678 задержка 30 секунд, порог силы 0,82",
@@ -743,6 +744,7 @@ mod tests {
             "числовые правила исходного исследования, до фильтра близости"
         );
     }
+    #[test]
     fn numeric_conflict_has_sources_and_stable_identity() {
         let mut c = vec![
             chunk("a.md", "features", "30 с"),
@@ -771,6 +773,7 @@ mod tests {
             f[0].fingerprint
         );
     }
+    #[test]
     fn controls_history_rounding_equivalent_units_and_cancel() {
         for (path, module, value) in [
             ("b.md", "manual", "30 секунд"),
