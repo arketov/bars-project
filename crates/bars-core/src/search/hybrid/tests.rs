@@ -2,11 +2,11 @@ use std::fs;
 use std::path::Path;
 
 use super::*;
-use crate::search::ScoreWeights;
-use crate::search::fulltext::{fts_query, is_identifier};
 use crate::indexing::chunking::ChunkingParams;
 use crate::indexing::indexer::{IndexSettings, UpdateOutcome, update_index};
 use crate::models::ModelFingerprint;
+use crate::search::ScoreWeights;
+use crate::search::fulltext::{fts_query, is_identifier};
 use crate::storage::Journal;
 use crate::storage::stem::TextStemmer;
 
@@ -47,6 +47,57 @@ fn module_candidates_count_the_unique_pool_before_threshold_and_limit() {
         scoped.candidate_modules,
         [(".".into(), 1), ("models".into(), 1)].into()
     );
+}
+
+#[test]
+fn weak_sections_replace_empty_result_and_stay_below_threshold() {
+    let (_dir, index, mut embedder) = project();
+    // С rerank: «Корень» получает 0.9 и проходит порог 0.2 — weak не отдаётся.
+    let mut r = request("поиск");
+    r.min_score = Some(0.2);
+    let response = search(
+        &index,
+        &mut embedder,
+        Some(&mut KeywordReranker),
+        &SearchSettings::default(),
+        &r,
+    )
+    .unwrap();
+    assert!(!response.hits.is_empty());
+    assert!(response.weak.is_empty());
+
+    // Порог выше любой оценки rerank: выдача пуста, weak показывает ближайшие разделы без текстов.
+    r.min_score = Some(0.95);
+    let empty = search(
+        &index,
+        &mut embedder,
+        Some(&mut KeywordReranker),
+        &SearchSettings::default(),
+        &r,
+    )
+    .unwrap();
+    assert!(empty.hits.is_empty());
+    assert!(!empty.weak.is_empty());
+    assert!(empty.weak.len() <= WEAK_LIMIT);
+    for item in &empty.weak {
+        assert!(item.score < 0.95, "{item:?}");
+        assert!(!item.path.is_empty());
+        assert!(!item.heading_chain.is_empty());
+        assert!(item.first_line <= item.last_line);
+    }
+
+    // Без rerank опорой служит косинус: при недостижимом пороге weak тоже есть.
+    r.min_score = Some(2.0);
+    let cosine = run(&index, &mut embedder, &r).unwrap();
+    assert!(cosine.hits.is_empty());
+    assert!(!cosine.weak.is_empty());
+    assert!(cosine.weak.iter().all(|item| item.score < 2.0));
+
+    // Обязательная фраза, которой нет в документах: пул пуст, weak нечего показывать.
+    let phrase = request("\"несуществующая фраза для пустого пула\"");
+    let none = run(&index, &mut embedder, &phrase).unwrap();
+    assert!(none.hits.is_empty());
+    assert!(none.weak.is_empty());
 }
 
 #[test]
@@ -875,7 +926,11 @@ fn only_words_with_inner_separators_count_as_identifiers() {
     }
     // Дефисное слово идёт в FTS фразой, но первым не поднимается.
     let query = fts_query("по-русски").unwrap();
-    assert!(query.all.starts_with("{name heading_chain body} : (\"по русск\""));
+    assert!(
+        query
+            .all
+            .starts_with("{name heading_chain body} : (\"по русск\"")
+    );
     assert_eq!(query.identifiers, None);
 }
 
@@ -1118,7 +1173,12 @@ fn several_paths_are_united_and_an_unknown_path_is_invalid_params() {
 fn query_of_only_exclusions_and_filters_is_invalid_params() {
     let (_dir, index, mut embedder) = animals();
 
-    for query in ["-пёс", "path:search", "-\"белый кот\" path:search", "-пёс -кот"] {
+    for query in [
+        "-пёс",
+        "path:search",
+        "-\"белый кот\" path:search",
+        "-пёс -кот",
+    ] {
         let result = run(&index, &mut embedder, &request(query));
         assert!(
             matches!(&result, Err(SearchError::InvalidParams(text)) if text.contains("ни одного слова")),
@@ -1133,7 +1193,13 @@ fn query_of_only_exclusions_and_filters_is_invalid_params() {
 fn hyphens_digits_and_lone_quotes_are_plain_characters() {
     let (_dir, index, mut embedder) = animals();
 
-    for query in ["кот -5", "по-русски кот", "кот 274-ФЗ", "кот \"белый", "кот' пёс"] {
+    for query in [
+        "кот -5",
+        "по-русски кот",
+        "кот 274-ФЗ",
+        "кот \"белый",
+        "кот' пёс",
+    ] {
         let response = run(&index, &mut embedder, &request(query)).unwrap();
         assert!(!response.understood.has_operators(), "{query}");
         assert!(!response.hits.is_empty(), "{query}");
@@ -1198,7 +1264,8 @@ fn sections_of_one_document_stay_separate_results() {
 
 #[test]
 fn fold_bonus_zero_keeps_the_best_chunk_score_and_a_bonus_adds_to_it() {
-    let paragraph = |n: usize| format!("Абзац {n} про редкийтермин и ничего больше сюда не входит.");
+    let paragraph =
+        |n: usize| format!("Абзац {n} про редкийтермин и ничего больше сюда не входит.");
     let body = (1..=5).map(paragraph).collect::<Vec<_>>().join("\n\n");
     let (_dir, index, mut embedder) = project_from(
         &[("docs/g.md", &format!("# Г\n\n{body}\n"))],
@@ -1567,7 +1634,8 @@ fn link_signal_is_one_for_a_linked_document_and_adds_its_weight() {
     let (_dir, index, mut embedder) = animals();
     let req = request("кот");
     let plain = search(&index, &mut embedder, None, &link_settings(0.0), &req).unwrap();
-    let mut source = |_: &[String], _: &[String]| Ok(HashSet::from(["docs/models/cat.md".to_string()]));
+    let mut source =
+        |_: &[String], _: &[String]| Ok(HashSet::from(["docs/models/cat.md".to_string()]));
 
     let linked = search_with_links(
         &index,
@@ -1620,7 +1688,12 @@ fn link_source_gets_one_call_with_anchors_of_the_three_best_sections() {
 
     assert_eq!(calls.len(), 1);
     let (anchors, pool) = &calls[0];
-    let best: Vec<&str> = plain.hits.iter().take(3).map(|hit| hit.path.as_str()).collect();
+    let best: Vec<&str> = plain
+        .hits
+        .iter()
+        .take(3)
+        .map(|hit| hit.path.as_str())
+        .collect();
     assert_eq!(anchors.iter().map(String::as_str).collect::<Vec<_>>(), best);
     assert!(anchors.iter().all(|anchor| pool.contains(anchor)));
 }

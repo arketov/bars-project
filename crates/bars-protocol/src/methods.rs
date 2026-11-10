@@ -239,6 +239,21 @@ pub struct ModuleBreakdown {
     pub results: std::collections::BTreeMap<String, u32>,
 }
 
+/// Раздел пула ниже порога оценки (ступенчатая выдача агентского слоя): печатается строкой
+/// «слабые совпадения» без текста, когда основная выдача пуста. Отдаётся, только если порог
+/// отрезал все результаты.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct WeakHit {
+    /// Путь документа от корня проекта.
+    pub path: String,
+    /// Цепочка заголовков раздела.
+    pub heading_chain: String,
+    pub first_line: u32,
+    pub last_line: u32,
+    /// Опора оценки (rerank или косинус), ниже порога `min_score`.
+    pub score: f32,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SearchOutput {
     pub results: Vec<SearchHit>,
@@ -259,6 +274,13 @@ pub struct SearchOutput {
     /// Запрос, разобранный на операторы; есть, только если в запросе были операторы.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub understood: Option<UnderstoodQuery>,
+    /// Разделы пула ниже порога оценки; непусто только при пустой основной выдаче.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub weak: Vec<WeakHit>,
+    /// Слова запроса без операторов (словами фраз): отрывки выдачи строятся вокруг них, а в списке
+    /// `other headers` сначала идут совпавшие заголовки. Пусто у старого воркера.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub query_words: Vec<String>,
 }
 
 // --- similar ---
@@ -1792,6 +1814,14 @@ mod tests {
                 phrases: vec!["белый кот".into()],
                 ..UnderstoodQuery::default()
             }),
+            weak: vec![WeakHit {
+                path: "docs/b.md".into(),
+                heading_chain: "Слабый".into(),
+                first_line: 1,
+                last_line: 2,
+                score: 0.1,
+            }],
+            query_words: vec!["белый".into(), "кот".into()],
         };
         let value = output_value(&output);
         assert_eq!(value["results"][0]["score_kind"], "cosine");

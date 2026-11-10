@@ -1637,7 +1637,7 @@ async fn two_test_workers_with_same_label_have_separate_registries() {
 
 /// Текст по умолчанию: блоки с явными границами; `format=json` — JSON ответа воркера.
 #[tokio::test(flavor = "multi_thread")]
-async fn default_format_is_text_with_explicit_delimiters() {
+async fn default_format_is_text() {
     let harness = Harness::new("txt");
     let root = harness.project("proj");
     let mut mcp = harness.connect(harness.env(&root));
@@ -1663,12 +1663,18 @@ async fn default_format_is_text_with_explicit_delimiters() {
         )
         .await;
     assert!(!is_error, "{found}");
-    assert!(found.starts_with("=== SEARCH: results"), "{found}");
-    assert!(found.contains("=== RESULT 1 of "), "{found}");
-    assert!(found.contains("\npath: docs/guide.md\n"), "{found}");
-    assert!(found.contains("\n--- text ---\n"), "{found}");
-    assert!(found.contains("=== END RESULT 1 ==="), "{found}");
-    assert!(found.ends_with("=== END SEARCH ==="), "{found}");
+    // Ступенчатая выдача: шапка, строка результата, полный текст первого места без блоков.
+    assert!(found.starts_with("1 of "), "{found}");
+    assert!(found.contains("[1] "), "{found}");
+    assert!(found.contains("docs/guide.md:"), "{found}");
+    assert!(found.contains("· Индексация\n"), "{found}");
+    assert!(
+        found.contains("Индексация документов идёт в очереди воркера."),
+        "{found}"
+    );
+    assert!(!found.contains("=== SEARCH"), "{found}");
+    assert!(!found.contains("\npath:"), "{found}");
+    assert!(!found.contains("--- text ---"), "{found}");
 
     let (_, as_json) = mcp
         .tool(

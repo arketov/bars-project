@@ -93,6 +93,9 @@ pub struct HitSignals {
 #[derive(Debug, Clone, PartialEq)]
 pub struct SearchResponse {
     pub hits: Vec<SearchHit>,
+    /// Разделы пула ниже порога оценки: показываются строками «слабые совпадения» без текста,
+    /// когда основная выдача пуста (ступенчатая выдача агентского слоя).
+    pub weak: Vec<WeakHit>,
     pub applied: AppliedParams,
     /// Уникальный пул до rerank и порога, без загрузки текстов кандидатов.
     pub candidate_modules: BTreeMap<String, usize>,
@@ -103,6 +106,18 @@ pub struct SearchResponse {
     pub query_vector: Option<Vec<f32>>,
     /// Запрос после разбора операторов («понято как»).
     pub understood: ParsedQuery,
+}
+
+/// Раздел пула ниже порога оценки (ступенчатая выдача агентского слоя): строка «слабые совпадения»
+/// без текста. Тексты не загружаются — нужны только путь, строки и заголовок.
+#[derive(Debug, Clone, PartialEq)]
+pub struct WeakHit {
+    pub path: String,
+    pub heading_chain: String,
+    pub first_line: usize,
+    pub last_line: usize,
+    /// Опора оценки (rerank или косинус); ниже порога `min_score`.
+    pub score: f32,
 }
 
 /// Ищет в индексе одного проекта. Реранк идёт, если передан `reranker`; если он не отработал,
@@ -198,6 +213,7 @@ pub fn search_with_links(
     if scope.chunk_count(index)? == 0 {
         return Ok(SearchResponse {
             hits: Vec::new(),
+            weak: Vec::new(),
             applied: planned,
             candidate_modules: BTreeMap::new(),
             rerank_error: None,
@@ -275,8 +291,17 @@ pub fn search_with_links(
     };
     applied.signals = used_signals(&applied, query_vector.is_some(), linked);
     let hits = fold_sections(index, ranked, &applied)?;
+    // «Слабые совпадения» — только когда порог отрезал всё: агент видит, что было рядом.
+    // Ниже порога считаем лениво, чтобы обычная выдача не платила за проход по пулу.
+    let weak = if hits.is_empty() {
+        let mut below = below_threshold(&gathered, rerank_scores.as_ref(), &applied);
+        fold_weak(index, &mut below)?
+    } else {
+        Vec::new()
+    };
     Ok(SearchResponse {
         hits,
+        weak,
         applied,
         candidate_modules,
         rerank_error,
@@ -374,11 +399,8 @@ fn gather(
     mut expansion: Option<&mut CandidateExpansion<'_>>,
 ) -> Result<Gathered, SearchError> {
     let conn = index.conn();
-    let text_scored = scope.text_scored(
-        index,
-        &plan.filter.apply(&plan.match_query.all),
-        candidates,
-    )?;
+    let text_scored =
+        scope.text_scored(index, &plan.filter.apply(&plan.match_query.all), candidates)?;
     let text_ids: Vec<i64> = text_scored.iter().map(|(id, _)| *id).collect();
     let exact_ids = match &plan.match_query.identifiers {
         Some(identifiers) => {
@@ -501,7 +523,8 @@ struct Ranked {
 }
 
 /// Итоговая оценка `S = a + w_c·c + w_f·f + w_p·p` каждого кусочка пула. Опора `a` — оценка rerank,
-/// без неё — косинус, без обоих — нет (порядок `f + w_p·p`). Порог относится к опоре, а не к `S`.
+/// без неё — косинус, без обоих — нет (порядок `f + w_p·p`). Порог относится к опоре, а не к `S`;
+/// кандидаты ниже порога отсекает `below_threshold` (они идут в «слабые совпадения» пустой выдачи).
 /// С rerank остаются только кандидаты, ушедшие в него.
 fn rank(
     gathered: &Gathered,
@@ -554,6 +577,96 @@ fn rank(
     ranked
 }
 
+/// Кандидаты с опорой ниже порога `min_score` (те, что `rank` отсекает): «слабые совпадения» для
+/// пустой выдачи. Кандидат без опоры сюда не попадает — порог к нему не применяется и слабым он
+/// не считается. Порядок — как в пуле, по `S0`.
+fn below_threshold(
+    gathered: &Gathered,
+    rerank: Option<&HashMap<i64, f32>>,
+    applied: &AppliedParams,
+) -> Vec<Ranked> {
+    let mut below = Vec::new();
+    for candidate in &gathered.pool {
+        let anchor = match rerank {
+            Some(scores) => match scores.get(&candidate.id) {
+                Some(&r) => Some(r),
+                None => continue,
+            },
+            None => match candidate.cosine {
+                Some(cosine) => Some(cosine),
+                None => continue,
+            },
+        };
+        if anchor.is_some_and(|anchor| anchor >= applied.min_score) {
+            continue;
+        }
+        below.push(Ranked {
+            id: candidate.id,
+            score: candidate.preliminary(&applied.weights),
+            signals: HitSignals {
+                rerank: rerank.and(anchor),
+                cosine: candidate.cosine,
+                fulltext: candidate.fulltext,
+                exact: candidate.exact,
+                links: None,
+            },
+            document_id: 0,
+            path: String::new(),
+            heading_chain: String::new(),
+            ordinal: 0,
+        });
+    }
+    below
+}
+
+/// Сколько «слабых» разделов отдаётся при пустой выдаче (ступенчатая выдача агентского слоя).
+const WEAK_LIMIT: usize = 3;
+
+/// Сворачивает кандидатов ниже порога в разделы и берёт лучшие по опоре — без загрузки текстов.
+fn fold_weak(index: &Index, below: &mut [Ranked]) -> Result<Vec<WeakHit>, SearchError> {
+    if below.is_empty() {
+        return Ok(Vec::new());
+    }
+    load_documents(index, below)?;
+    below.sort_by(|a, b| {
+        anchor_of(b)
+            .unwrap_or(0.0)
+            .total_cmp(&anchor_of(a).unwrap_or(0.0))
+            .then(b.signals.fulltext.total_cmp(&a.signals.fulltext))
+            .then_with(|| a.path.cmp(&b.path))
+            .then(a.ordinal.cmp(&b.ordinal))
+    });
+    let mut seen: HashSet<(i64, &str)> = HashSet::new();
+    let mut weak = Vec::new();
+    for item in below.iter() {
+        if weak.len() == WEAK_LIMIT {
+            break;
+        }
+        if !seen.insert((item.document_id, item.heading_chain.as_str())) {
+            continue;
+        }
+        let (first_line, last_line): (i64, i64) = index.conn().query_row(
+            "SELECT min(first_line), max(last_line) FROM chunks
+             WHERE document_id = ?1 AND heading_chain = ?2",
+            rusqlite::params![item.document_id, item.heading_chain],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )?;
+        weak.push(WeakHit {
+            path: item.path.clone(),
+            heading_chain: item.heading_chain.clone(),
+            first_line: first_line as usize,
+            last_line: last_line as usize,
+            score: anchor_of(item).unwrap_or(0.0),
+        });
+    }
+    Ok(weak)
+}
+
+/// Опора кандидата: rerank, а без него — косинус.
+fn anchor_of(item: &Ranked) -> Option<f32> {
+    item.signals.rerank.or(item.signals.cosine)
+}
+
 /// Дописывает кускам документ, цепочку заголовков и номер: по ним идут свёртка и сигнал `l`.
 fn load_documents(index: &Index, ranked: &mut [Ranked]) -> Result<(), SearchError> {
     let mut statement = index.conn().prepare_cached(
@@ -561,14 +674,15 @@ fn load_documents(index: &Index, ranked: &mut [Ranked]) -> Result<(), SearchErro
          FROM chunks c JOIN documents d ON d.id = c.document_id WHERE c.id = ?1",
     )?;
     for item in ranked {
-        let (document_id, path, heading_chain, ordinal) = statement.query_row([item.id], |row| {
-            Ok((
-                row.get::<_, i64>(0)?,
-                row.get::<_, String>(1)?,
-                row.get::<_, String>(2)?,
-                row.get::<_, i64>(3)?,
-            ))
-        })?;
+        let (document_id, path, heading_chain, ordinal) =
+            statement.query_row([item.id], |row| {
+                Ok((
+                    row.get::<_, i64>(0)?,
+                    row.get::<_, String>(1)?,
+                    row.get::<_, String>(2)?,
+                    row.get::<_, i64>(3)?,
+                ))
+            })?;
         item.document_id = document_id;
         item.path = path;
         item.heading_chain = heading_chain;
@@ -613,7 +727,11 @@ fn apply_links(ranked: &mut [Ranked], weight: f32, links: &mut LinkedDocuments<'
         return false;
     };
     for item in ranked {
-        let l = if linked.contains(&item.path) { 1.0 } else { 0.0 };
+        let l = if linked.contains(&item.path) {
+            1.0
+        } else {
+            0.0
+        };
         item.score += weight * l;
         item.signals.links = Some(l);
     }

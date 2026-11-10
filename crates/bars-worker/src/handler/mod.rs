@@ -567,9 +567,18 @@ impl WorkerHandler {
         }
         let mut applied = applied(response.applied);
         applied.scope = scope;
+        // Слова запроса нужны прокси для отрывков и сортировки «other headers» в ступенчатой выдаче.
+        let query_words: Vec<String> = response
+            .understood
+            .text
+            .split_whitespace()
+            .map(str::to_string)
+            .collect();
         let output = SearchOutput {
             results: response.hits.into_iter().map(hit).collect(),
             understood: understood(response.understood),
+            weak: response.weak.into_iter().map(weak_hit).collect(),
+            query_words,
             applied,
             by_module,
             indexing: status.state == ProjectState::Indexing || status.queued,
@@ -1671,6 +1680,17 @@ fn similar_hit(found: bars_core::search::SearchHit) -> SearchHit {
     }
 }
 
+/// «Слабые совпадения» пустой выдачи: раздел ниже порога без текста.
+fn weak_hit(hit: bars_core::search::WeakHit) -> bars_protocol::WeakHit {
+    bars_protocol::WeakHit {
+        path: hit.path,
+        heading_chain: hit.heading_chain,
+        first_line: to_u32(hit.first_line),
+        last_line: to_u32(hit.last_line),
+        score: hit.score,
+    }
+}
+
 fn hit(hit: bars_core::search::SearchHit) -> SearchHit {
     SearchHit {
         source_hash: hit.source_hash,
@@ -1787,7 +1807,7 @@ fn applied(applied: bars_core::search::AppliedParams) -> AppliedParams {
 fn understood(parsed: bars_core::search::ParsedQuery) -> Option<bars_protocol::UnderstoodQuery> {
     parsed
         .has_operators()
-        .then(|| bars_protocol::UnderstoodQuery {
+        .then_some(bars_protocol::UnderstoodQuery {
             text: parsed.text,
             phrases: parsed.phrases,
             excluded_words: parsed.excluded_words,

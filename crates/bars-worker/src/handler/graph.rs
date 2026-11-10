@@ -119,6 +119,8 @@ impl WorkerHandler {
                     rerank_error: None,
                     semantic_error: None,
                     understood: None,
+                    weak: Vec::new(),
+                    query_words: Vec::new(),
                 },
                 requested_mode: requested,
                 applied_mode: requested,

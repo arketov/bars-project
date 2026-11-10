@@ -40,6 +40,21 @@ fn source_lines(mut text: &str) -> impl Iterator<Item = &str> {
     })
 }
 
+/// Разделяет текст чанка на собственный текст и блок `other headers:` — заголовки разделов,
+/// приклеенные к чанку после первого (ISS-28). Блок распознаётся по строке-маркеру в начале
+/// текста или после перевода строки. `None`, если блока нет; собственный текст без маркера
+/// возвращается как есть.
+pub fn split_other_headers(text: &str) -> (&str, Option<&str>) {
+    const MARK: &str = "other headers:";
+    if let Some(rest) = text.strip_prefix(MARK) {
+        ("", Some(rest.trim_start_matches('\n')))
+    } else if let Some(at) = text.find(&format!("\n{MARK}")) {
+        (&text[..at], Some(&text[at + 1 + MARK.len()..]))
+    } else {
+        (text, None)
+    }
+}
+
 /// Общий вывод текста read: части всегда помечены, нумерация — из исходного файла.
 pub fn read_text(output: &crate::ReadOutput) -> String {
     use std::fmt::Write;
