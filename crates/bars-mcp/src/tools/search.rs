@@ -174,6 +174,19 @@ impl BarsMcp {
             Ok(paths) => paths,
             Err(error) => return error,
         };
+        let modes = args.query.is_some() as u8 + args.like.is_some() as u8 + args.occurrences as u8;
+        if modes != 1 || (args.occurrences && args.query.is_none()) {
+            return CallToolResult::error(vec![ContentBlock::text(
+                "invalid_params: graph modes need exactly one of query, like, occurrences=true",
+            )]);
+        }
+        if (args.include_related.is_some() || args.related_budget.is_some())
+            && args.mode != Some(bars_graph::RetrievalMode::Mix)
+        {
+            return CallToolResult::error(vec![ContentBlock::text(
+                "invalid_params: include_related/related_budget need mode=mix",
+            )]);
+        }
         let Some(query) = args.query.clone() else {
             return CallToolResult::error(vec![ContentBlock::text(
                 "invalid_params: graph modes need query",

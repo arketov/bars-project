@@ -927,6 +927,28 @@ async fn all_graph_tools_and_explicit_search_modes_use_real_worker_dtos() {
     let out: Value = serde_json::from_str(&text).unwrap();
     assert_eq!(out["applied_mode"], "hybrid");
     assert!(out["related"].is_null());
+    // Графовая форма без mode — та же выдача, что у обычной (делегация в базовую форму).
+    let (error, text) = mcp
+        .tool("bars_search", json!({"query":"Т-1 зависит"}))
+        .await;
+    assert!(!error, "{text}");
+    assert!(text.starts_with("1 of "), "{text}");
+    assert!(text.contains("docs/requirements.md:"), "{text}");
+    // include_related без mode=mix отклоняется, а не игнорируется.
+    let (error, _) = mcp
+        .tool(
+            "bars_search",
+            json!({"query":"Т-1 зависит","include_related":false}),
+        )
+        .await;
+    assert!(error, "параметр mix не игнорируется");
+    let (error, _) = mcp
+        .tool(
+            "bars_search",
+            json!({"query":"Т-1 зависит","mode":"graph","like":"docs/requirements.md:3-3"}),
+        )
+        .await;
+    assert!(error, "режимы взаимоисключающие");
     let (error, _) = mcp
         .tool(
             "bars_search",

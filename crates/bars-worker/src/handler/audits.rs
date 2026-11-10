@@ -321,7 +321,13 @@ impl WorkerHandler {
                         )
                         .and_then(|mut statement| {
                             statement.query_row(
-                                rusqlite::params![candidate, format!("{}/%", candidate)],
+                                rusqlite::params![
+                                    candidate,
+                                    format!(
+                                        "{}/%",
+                                        bars_core::doc_path::like_escape(candidate)
+                                    )
+                                ],
                                 |row| row.get::<_, bool>(0),
                             )
                         })
