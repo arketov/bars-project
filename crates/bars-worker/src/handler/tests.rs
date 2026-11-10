@@ -47,7 +47,7 @@ async fn mcp_request_starts_observation_while_cli_status_does_not() {
         lines: None,
         under: None,
         max_lines: None,
-target: target(&root),
+        target: target(&root),
         path: "guide.md".into(),
     })
     .await
@@ -86,7 +86,7 @@ async fn mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion() {
         lines: None,
         under: None,
         max_lines: None,
-target: target(&root),
+        target: target(&root),
         path: "guide.md".into(),
     })
     .await
@@ -99,7 +99,7 @@ target: target(&root),
         lines: None,
         under: None,
         max_lines: None,
-target: explicit.clone(),
+        target: explicit.clone(),
         path: "absent.md".into(),
     })
     .await
@@ -118,7 +118,7 @@ target: explicit.clone(),
         lines: None,
         under: None,
         max_lines: None,
-target: explicit,
+        target: explicit,
         path: "guide.md".into(),
     })
     .await
@@ -321,8 +321,7 @@ async fn cli_works_with_a_project_end_to_end() {
             path: "guide.md".into(),
             levels: vec![2],
             under: None,
-            max_lines: None,
-under_line: None,
+            under_line: None,
         })
         .await
         .unwrap();
@@ -347,7 +346,7 @@ under_line: None,
             lines: None,
             under: None,
             max_lines: None,
-target: target(&cwd),
+            target: target(&cwd),
             path: "guide.md".into(),
         })
         .await
@@ -506,7 +505,7 @@ async fn explicit_project_by_name_and_wrong_calls() {
         lines: None,
         under: None,
         max_lines: None,
-target: Target {
+        target: Target {
             cwd: elsewhere.display().to_string(),
             project: Some("proj".into()),
         },
@@ -537,7 +536,7 @@ target: Target {
             lines: None,
             under: None,
             max_lines: None,
-target: Target {
+            target: Target {
                 cwd: elsewhere.display().to_string(),
                 project: Some("нет-такого".into()),
             },
@@ -552,8 +551,7 @@ target: Target {
             path: "guide.md".into(),
             levels: vec![7],
             under: None,
-            max_lines: None,
-under_line: None,
+            under_line: None,
         })
         .await);
     assert_eq!(bad_level.kind(), Some(ErrorKind::InvalidParams));

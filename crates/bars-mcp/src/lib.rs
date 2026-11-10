@@ -225,14 +225,17 @@ impl BarsMcp {
         self.graph_call(original, args.into_call()).await
     }
 
-    /// Сессия MCP. Графовые инструменты попадают в список, только если `settings.toml` включает их
-    /// (`[mcp] graph_tools`); скрытый инструмент вызвать нельзя — клиент получит «неизвестный».
+    /// Сессия MCP. Графовые инструменты и графовая форма `bars_search` попадают в список, только
+    /// если `settings.toml` включает их (`[mcp] graph_tools`); скрытый инструмент вызвать нельзя —
+    /// клиент получит «неизвестный».
     pub fn new(env: Env) -> Self {
         let graph_tools = settings::graph_tools_enabled(env.bars_home.as_deref());
-        let mut tool_router = Self::tool_router() + tools::router();
+        let mut tool_router = tools::core_router();
         if graph_tools {
             tool_router += Self::graph_tool_router();
             tool_router += tools::search::graph_router();
+        } else {
+            tool_router += tools::search::search_router();
         }
         Self {
             env,

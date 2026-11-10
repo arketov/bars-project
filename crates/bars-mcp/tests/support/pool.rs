@@ -286,8 +286,10 @@ async fn pool_bad_read_retries_once_but_ambiguous_write_never_replays() {
     let first = f.started().await;
     let second = f.started().await;
     assert_ne!(first.0, second.0);
-    // Запись теперь — refresh у сводки: неопределённый результат не повторяется.
-    assert!(rpc.tool("bars_status", json!({"refresh":true})).await.0);
+    // Запись теперь — refresh у сводки: неопределённый результат не повторяется,
+    // ошибка остаётся частью сводки, а не сбоем вызова.
+    let (error, body) = rpc.tool("bars_status", json!({"refresh":true})).await;
+    assert!(!error && body.contains("=== REFRESH ===\nerror:"), "{body}");
     assert_eq!(f.started().await.1, "write");
     assert!(
         f.started.try_recv().is_err(),

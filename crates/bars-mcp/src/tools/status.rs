@@ -17,10 +17,6 @@ pub struct StatusArgs {
     pub refresh: bool,
 }
 
-pub(super) fn router() -> ToolRouter<BarsMcp> {
-    BarsMcp::status_tool_router()
-}
-
 impl BarsMcp {
     async fn status_impl(&self, args: StatusArgs, original: Value) -> CallToolResult {
         if args.all && args.project.is_some() {
@@ -38,7 +34,7 @@ impl BarsMcp {
             };
             let part = match self.call_observed(&params, Some(&original)).await {
                 Ok(output) => render::refresh(output),
-                Err(error) => return failure(&error),
+                Err(error) => render::error_part("REFRESH", &error),
             };
             text.push_str(&part);
             text.push('\n');
@@ -78,11 +74,16 @@ impl BarsMcp {
             self.worker_build().await,
         ));
         // Аудиты и новые темы: явный project (имя или путь) или путь из части PROJECT.
-        let audit_project = args
-            .project
-            .clone()
-            .or_else(|| project_path.clone())
-            .map(|value| project_arg(&value, &self.env.cwd));
+        // При all=true часть PROJECT — реестр проектов: аудиты и темы за одним проектом
+        // под ней были бы произвольным выбором, поэтому не выводятся.
+        let audit_project = if args.all {
+            None
+        } else {
+            args.project
+                .clone()
+                .or_else(|| project_path.clone())
+                .map(|value| project_arg(&value, &self.env.cwd))
+        };
         if let Some(project) = audit_project {
             let params = bars_protocol::AuditListParams { project: project.clone() };
             let part = match self.call_observed(&params, Some(&original)).await {
@@ -100,7 +101,7 @@ impl BarsMcp {
             text.push_str(&part);
         } else {
             text.push_str(
-                "\n=== AUDITS ===\nproject unknown: pass project= to see audits and new topics\n=== END AUDITS ===",
+                "\n=== AUDITS ===\naudits and new topics need one project: repeat with project=, or drop all=true\n=== END AUDITS ===",
             );
         }
         let graph = bars_protocol::GraphStatusParams { target };

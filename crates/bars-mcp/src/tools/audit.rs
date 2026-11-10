@@ -31,10 +31,6 @@ pub struct AuditArgs {
     pub project: Option<String>,
 }
 
-pub(super) fn router() -> ToolRouter<BarsMcp> {
-    BarsMcp::audit_tool_router()
-}
-
 fn invalid(message: String) -> CallToolResult {
     CallToolResult::error(vec![ContentBlock::text(format!("invalid_params: {message}"))])
 }

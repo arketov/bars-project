@@ -589,7 +589,7 @@ pub fn requested(tool: &str, source: &Value) -> Value {
                     "levels" => v
                         .as_array()
                         .is_some_and(|a| a.iter().all(|v| v.as_u64().is_some())),
-                    "entity_ref" | "from" | "to" => v.is_object(),
+                    "entity_ref" | "from" | "to" | "graph_budgets" => v.is_object(),
                     "roots" => v.as_array().is_some_and(|a| a.iter().all(Value::is_object)),
                     "budgets" => v
                         .as_object()

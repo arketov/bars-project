@@ -1312,14 +1312,7 @@ impl Scope {
 
 /// Экранирует `%`, `_` и обратную косую черту в префиксе для `LIKE ... ESCAPE`: в именах папок бывает `_`.
 fn escape_like(prefix: &str) -> String {
-    let mut escaped = String::with_capacity(prefix.len());
-    for c in prefix.chars() {
-        if matches!(c, '%' | '_' | '\\') {
-            escaped.push('\\');
-        }
-        escaped.push(c);
-    }
-    escaped
+    crate::doc_path::like_escape(prefix)
 }
 
 /// Префиксы `path:` в виде путей индекса (от корня проекта). Префикс задаётся от корня документации

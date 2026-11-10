@@ -304,7 +304,8 @@ impl WorkerHandler {
     }
 
     /// Повторы в области проекта по готовым текстам и векторам индекса: модели не нужны.
-    async fn duplicates(&self, params: DuplicatesParams) -> Result<DuplicatesOutput, RpcError> {        let project = self.usable(&params.target)?;
+    async fn duplicates(&self, params: DuplicatesParams) -> Result<DuplicatesOutput, RpcError> {
+        let project = self.usable(&params.target)?;
         let status = self.worker.status(&project).map_err(worker_error)?;
         if status.state == ProjectState::ReindexRequired {
             return Err(errors::reindex_required());
@@ -1742,7 +1743,8 @@ fn like_path_line(source: &str) -> Option<(String, i64)> {
 
 /// Каноническая область обращения для «Новых тем»: `project` без фильтров либо отсортированные
 /// модули и файлы. Запрос в области не становится запросом ко всему проекту.
-fn topic_scope(modules: &[String], files: &[String]) -> String {    if modules.is_empty() && files.is_empty() {
+fn topic_scope(modules: &[String], files: &[String]) -> String {
+    if modules.is_empty() && files.is_empty() {
         return "project".to_string();
     }
     let canonical = |items: &[String]| {

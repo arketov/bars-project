@@ -531,10 +531,9 @@ pub fn links(output: &DiskLinksOutput) -> String {
             let cut = item["fields_truncated"].as_bool() == Some(true);
             let _ = writeln!(
                 text,
-                "{line}: {label} → {target}{}{}{}",
+                "{line}: {label} → {target}{}{}",
                 if broken { " BROKEN" } else { "" },
-                if cut { " (fields truncated)" } else { "" },
-                ""
+                if cut { " (fields truncated)" } else { "" }
             );
         }
     }

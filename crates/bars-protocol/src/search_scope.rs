@@ -50,7 +50,8 @@ pub fn search_scope_text(output: &SearchOutput, primary_search: bool) -> String 
         } else {
             filters.join("; ")
         }
-    );    let counts = |map: &std::collections::BTreeMap<String, u32>| {
+    );
+    let counts = |map: &std::collections::BTreeMap<String, u32>| {
         if map.is_empty() {
             "none".into()
         } else {

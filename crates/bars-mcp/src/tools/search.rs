@@ -41,10 +41,28 @@ pub struct SearchArgs {
 pub struct GraphSearchArgs {
     /// The task question in the user's language. Operators: "exact phrase" (required), -word
     /// (exclude). Graph modes keep the same hybrid scoring.
-    pub query: String,
+    pub query: Option<String>,
+    /// Similar sections of other documents plus documents linking to the source (see the base
+    /// bars_search description).
+    pub like: Option<String>,
+    /// true — every occurrence of one exact string on disk (see the base bars_search description).
+    #[serde(default)]
+    pub occurrences: bool,
+    /// Scope: path prefixes (see the base bars_search description).
+    #[serde(default)]
+    pub r#in: Vec<String>,
+    /// Result volume: auto (default), full or brief.
+    pub detail: Option<Detail>,
+    /// Opaque continuation from the previous answer (occurrences pages).
+    pub cursor: Option<String>,
+    /// Service check: usual results, demand is not recorded in New Topics.
+    #[serde(default)]
+    pub diagnostic: bool,
+    pub project: Option<String>,
     /// hybrid — plain search; mix — plus related sources from the graph (voluminous, set
-    /// related_budget); graph — relations instead of fragments.
-    pub mode: bars_graph::RetrievalMode,
+    /// related_budget); graph — relations instead of fragments. Without mode — the same three
+    /// queries as the base bars_search.
+    pub mode: Option<bars_graph::RetrievalMode>,
     /// Only for mix and graph: graph traversal budgets.
     #[serde(default)]
     pub graph_budgets: bars_graph::Budgets,
@@ -52,21 +70,15 @@ pub struct GraphSearchArgs {
     pub include_related: Option<bool>,
     /// Only for mix: byte budget of the related package.
     pub related_budget: Option<u32>,
-    /// Scope: path prefixes (see the base bars_search description).
-    #[serde(default)]
-    pub r#in: Vec<String>,
     pub limit: Option<u32>,
-    #[serde(default)]
-    pub diagnostic: bool,
-    pub project: Option<String>,
 }
 
 impl BarsMcp {
     async fn search_impl(&self, args: SearchArgs, original: Value) -> CallToolResult {
         let modes = args.query.is_some() as u8 + args.like.is_some() as u8 + args.occurrences as u8;
-        if modes != 1 {
+        if modes != 1 || (args.occurrences && args.query.is_none()) {
             return CallToolResult::error(vec![ContentBlock::text(
-                "invalid_params: pass exactly one of query, like, occurrences=true",
+                "invalid_params: pass exactly one of query, like, occurrences=true (occurrences needs query as the string)",
             )]);
         }
         let paths = match scope_paths(&args.r#in) {
@@ -86,7 +98,9 @@ impl BarsMcp {
             );
         }
         let Some(query) = args.query.clone() else {
-            unreachable!("occurrences checked above")
+            return CallToolResult::error(vec![ContentBlock::text(
+                "invalid_params: occurrences=true needs query as the string",
+            )]);
         };
         if args.occurrences {
             let cursor = match parse_cursor(&args.cursor) {
@@ -137,13 +151,37 @@ impl BarsMcp {
     }
 
     async fn graph_search_impl(&self, args: GraphSearchArgs, original: Value) -> CallToolResult {
+        if args.mode.is_none() {
+            // Без mode графовая форма ведёт себя как обычная.
+            return self
+                .search_impl(
+                    SearchArgs {
+                        query: args.query,
+                        like: args.like,
+                        occurrences: args.occurrences,
+                        r#in: args.r#in,
+                        limit: args.limit,
+                        cursor: args.cursor,
+                        detail: args.detail,
+                        diagnostic: args.diagnostic,
+                        project: args.project,
+                    },
+                    original,
+                )
+                .await;
+        }
         let paths = match scope_paths(&args.r#in) {
             Ok(paths) => paths,
             Err(error) => return error,
         };
+        let Some(query) = args.query.clone() else {
+            return CallToolResult::error(vec![ContentBlock::text(
+                "invalid_params: graph modes need query",
+            )]);
+        };
         let search = bars_protocol::SearchParams {
             target: self.target(args.project),
-            query: args.query,
+            query,
             diagnostic: args.diagnostic,
             modules: Vec::new(),
             files: Vec::new(),
@@ -156,7 +194,7 @@ impl BarsMcp {
         let params = bars_protocol::GraphSearchParams {
             text: true,
             search,
-            mode: args.mode,
+            mode: args.mode.expect("mode проверен выше"),
             graph_budgets: args.graph_budgets,
             include_related: args.include_related.unwrap_or(true),
             related_budget: args.related_budget,
@@ -227,9 +265,10 @@ impl BarsMcp {
         annotations(read_only_hint = true),
         description = "Search project documentation with this instead of Grep or Glob. \
                        Graph-enabled form: mode=mix adds related sources from the graph, \
-                       mode=graph returns relations instead of fragments. Scope with in: path \
-                       prefixes (features, features/search); empty — whole project. Zero \
-                       results do not prove absence: check subject, project, scope."
+                       mode=graph returns relations instead of fragments; without mode — the \
+                       same three queries as the base search (question, like, occurrences). \
+                       Scope with in: path prefixes (features, features/search); empty — whole \
+                       project. Zero results do not prove absence: check subject, project, scope."
     )]
     async fn bars_search_graph(
         &self,

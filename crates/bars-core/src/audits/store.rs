@@ -538,13 +538,7 @@ impl AuditStore {
         ];
         for prefix in path_prefixes {
             bind.push(prefix.clone().into());
-            bind.push(
-                format!(
-                    "{}/%",
-                    prefix.replace('\\', "\\\\").replace('%', "\\%").replace('_', "\\_")
-                )
-                .into(),
-            );
+            bind.push(format!("{}/%", crate::doc_path::like_escape(prefix)).into());
         }
         let total: i64 = self.db.query_row(
             &format!("SELECT COUNT(*) FROM findings WHERE {filter}"),
@@ -618,10 +612,7 @@ impl AuditStore {
         let mut bind: Vec<rusqlite::types::Value> = vec![run_id.into()];
         for prefix in path_prefixes {
             bind.push(prefix.clone().into());
-            bind.push(
-                format!("{}/%", prefix.replace('\\', "\\\\").replace('%', "\\%").replace('_', "\\_"))
-                    .into(),
-            );
+            bind.push(format!("{}/%", crate::doc_path::like_escape(prefix)).into());
         }
         let total: i64 = self.db.query_row(
             &format!("SELECT COUNT(*) FROM findings WHERE {filter}"),

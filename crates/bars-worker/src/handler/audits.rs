@@ -282,6 +282,79 @@ impl WorkerHandler {
         Ok(root)
     }
 
+    /// Префиксы области находок в формах хранения (от корня проекта). Обе формы пути принимаются
+    /// (OQ-169); путь, под которым нет документов, — `invalid_params` со списком ближайших,
+    /// как область `in` у поиска.
+    async fn checked_prefixes(
+        &self,
+        project: &Path,
+        docs_root: &str,
+        paths: &[String],
+    ) -> Result<Vec<String>, RpcError> {
+        if paths.is_empty() {
+            return Ok(Vec::new());
+        }
+        let inputs: Vec<String> = paths.to_vec();
+        let forms: Vec<Vec<String>> = paths
+            .iter()
+            .map(|path| bars_core::doc_path::stored_candidates(docs_root, path))
+            .collect();
+        let gate = self
+            .worker
+            .gate(project)
+            .map_err(worker_error)?
+            .read_owned()
+            .await;
+        let docs_root = docs_root.to_string();
+        tokio::task::spawn_blocking(move || {
+            let _gate = gate;
+            let index = Index::open_read_only(&index_path(&project)).map_err(internal)?;
+            let mut prefixes = Vec::new();
+            for (input, candidates) in inputs.iter().zip(&forms) {
+                let mut chosen = None;
+                for candidate in candidates {
+                    let known = index
+                        .conn()
+                        .prepare_cached(
+                            "SELECT EXISTS(SELECT 1 FROM documents \
+                             WHERE path = ?1 OR path LIKE ?2 ESCAPE '\\')",
+                        )
+                        .and_then(|mut statement| {
+                            statement.query_row(
+                                rusqlite::params![candidate, format!("{}/%", candidate)],
+                                |row| row.get::<_, bool>(0),
+                            )
+                        })
+                        .map_err(internal)?;
+                    if known {
+                        chosen = Some(candidate.clone());
+                        break;
+                    }
+                }
+                if chosen.is_none() {
+                    let mut statement =
+                        index.conn().prepare("SELECT path FROM documents").map_err(internal)?;
+                    let known = statement
+                        .query_map([], |row| row.get::<_, String>(0))
+                        .and_then(|rows| rows.collect::<Result<Vec<_>, _>>())
+                        .map_err(internal)?;
+                    return Err(RpcError::bars(
+                        ErrorKind::InvalidParams,
+                        bars_core::doc_path::unknown_file_message(
+                            &docs_root,
+                            known.iter().map(String::as_str),
+                            input,
+                        ),
+                    ));
+                }
+                prefixes.push(chosen.expect("проверено выше"));
+            }
+            Ok(prefixes)
+        })
+        .await
+        .map_err(internal)?
+    }
+
     pub(super) async fn audit_list(
         &self,
         params: AuditListParams,
@@ -403,12 +476,7 @@ impl WorkerHandler {
         let project = self.audits_project(&params.project)?;
         let kind = parse_kind(&params.kind)?;
         let docs_root = self.worker.docs_root(&project).map_err(worker_error)?;
-        // Обе формы пути (от корня документации и от корня проекта) — OQ-169.
-        let prefixes: Vec<String> = params
-            .paths
-            .iter()
-            .flat_map(|path| bars_core::doc_path::stored_candidates(&docs_root, path))
-            .collect();
+        let prefixes = self.checked_prefixes(&project, &docs_root, &params.paths).await?;
         let summary = tokio::task::spawn_blocking(move || {
             let store = AuditStore::open(&project)?;
             let Some(run) = store.latest_complete(kind)? else {
@@ -455,7 +523,8 @@ impl WorkerHandler {
     pub(super) async fn audit_findings(
         &self,
         params: AuditFindingsParams,
-    ) -> Result<AuditFindingsOutput, RpcError> {        let project = self.audits_project(&params.project)?;
+    ) -> Result<AuditFindingsOutput, RpcError> {
+        let project = self.audits_project(&params.project)?;
         let kind = parse_kind(&params.kind)?;
         if let Some(group) = &params.group
             && group != "main"
@@ -471,12 +540,7 @@ impl WorkerHandler {
             .limit
             .map_or(PAGE_DEFAULT, |value| i64::from(value).clamp(1, PAGE_MAX));
         let docs_root = self.worker.docs_root(&project).map_err(worker_error)?;
-        // Обе формы пути (от корня документации и от корня проекта) — OQ-169.
-        let prefixes: Vec<String> = params
-            .paths
-            .iter()
-            .flat_map(|path| bars_core::doc_path::stored_candidates(&docs_root, path))
-            .collect();
+        let prefixes = self.checked_prefixes(&project, &docs_root, &params.paths).await?;
         let page = tokio::task::spawn_blocking(move || {
             let store = AuditStore::open(&project)?;
             let Some(run) = store.latest_complete(kind)? else {

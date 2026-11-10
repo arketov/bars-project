@@ -178,6 +178,18 @@ fn docs_prefix(docs_root: &str) -> String {
         .join("/")
 }
 
+/// Экранирование значения для `LIKE ... ESCAPE '\'` в SQLite: `%`, `_` и сама `\`.
+pub fn like_escape(value: &str) -> String {
+    let mut escaped = String::with_capacity(value.len());
+    for c in value.chars() {
+        if matches!(c, '%' | '_' | '\\') {
+            escaped.push('\\');
+        }
+        escaped.push(c);
+    }
+    escaped
+}
+
 /// Формы пути, под которыми документ может лежать в индексе (от корня проекта), по порядку
 /// предпочтения: сначала корень документации, затем корень проекта. Пусто — путь выходит за корень.
 pub fn stored_candidates(docs_root: &str, input: &str) -> Vec<String> {
