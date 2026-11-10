@@ -83,7 +83,9 @@ impl BarsMcp {
         }
         let paths = match scope_paths(&args.r#in) {
             Ok(paths) => paths,
-            Err(error) => return error,
+            Err(message) => {
+                return CallToolResult::error(vec![ContentBlock::text(message)]);
+            }
         };
         if let Some(like) = args.like.clone() {
             let params = bars_protocol::LikeParams {
@@ -105,7 +107,9 @@ impl BarsMcp {
         if args.occurrences {
             let cursor = match parse_cursor(&args.cursor) {
                 Ok(cursor) => cursor,
-                Err(error) => return error,
+                Err(message) => {
+                    return CallToolResult::error(vec![ContentBlock::text(message)]);
+                }
             };
             let (needle, regex) = match strip_regex_slashes(&query) {
                 Some(pattern) => (pattern, true),
@@ -172,7 +176,9 @@ impl BarsMcp {
         }
         let paths = match scope_paths(&args.r#in) {
             Ok(paths) => paths,
-            Err(error) => return error,
+            Err(message) => {
+                return CallToolResult::error(vec![ContentBlock::text(message)]);
+            }
         };
         let modes = args.query.is_some() as u8 + args.like.is_some() as u8 + args.occurrences as u8;
         if modes != 1 || (args.occurrences && args.query.is_none()) {
@@ -225,14 +231,12 @@ fn strip_regex_slashes(query: &str) -> Option<String> {
     (!inner.is_empty() && !inner.contains('/')).then(|| inner.to_string())
 }
 
-fn parse_cursor(cursor: &Option<String>) -> Result<OccurrencesCursor, CallToolResult> {
+fn parse_cursor(cursor: &Option<String>) -> Result<OccurrencesCursor, &'static str> {
     let Some(cursor) = cursor else {
         return Ok(OccurrencesCursor::default());
     };
     serde_json::from_str(cursor).map_err(|_| {
-        CallToolResult::error(vec![ContentBlock::text(
-            "invalid_params: cursor is not from a previous occurrences answer; start without cursor",
-        )])
+        "invalid_params: cursor is not from a previous occurrences answer; start without cursor"
     })
 }
 

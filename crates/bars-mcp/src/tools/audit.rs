@@ -186,7 +186,9 @@ impl BarsMcp {
                 }
                 let paths = match scope_paths(&args.r#in) {
                     Ok(paths) => paths,
-                    Err(error) => return error,
+                    Err(message) => {
+                        return CallToolResult::error(vec![ContentBlock::text(message)]);
+                    }
                 };
                 present(
                     self.call_observed(
@@ -212,7 +214,9 @@ impl BarsMcp {
             "summary" => {
                 let paths = match scope_paths(&args.r#in) {
                     Ok(paths) => paths,
-                    Err(error) => return error,
+                    Err(message) => {
+                        return CallToolResult::error(vec![ContentBlock::text(message)]);
+                    }
                 };
                 present(
                     self.call_observed(

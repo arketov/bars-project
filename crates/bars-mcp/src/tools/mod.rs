@@ -35,12 +35,10 @@ pub struct OccurrencesCursor {
 }
 
 /// Проверяет, что префиксы области — непустые строки.
-pub(super) fn scope_paths(r#in: &[String]) -> Result<Vec<String>, CallToolResult> {
+pub(super) fn scope_paths(r#in: &[String]) -> Result<Vec<String>, &'static str> {
     let paths: Vec<String> = r#in.iter().map(|path| path.trim().to_string()).collect();
     if paths.iter().any(|path| path.is_empty()) {
-        return Err(CallToolResult::error(vec![ContentBlock::text(
-            "invalid_params: in contains an empty path",
-        )]));
+        return Err("invalid_params: in contains an empty path");
     }
     Ok(paths)
 }

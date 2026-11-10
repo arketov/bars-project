@@ -14,14 +14,6 @@ use bars_protocol::{
 use crate::WorkerBuild;
 use crate::tools::Detail;
 
-fn score_kind(kind: ScoreKind) -> &'static str {
-    match kind {
-        ScoreKind::Rerank => "rerank",
-        ScoreKind::Cosine => "cosine",
-        ScoreKind::None => "none",
-    }
-}
-
 fn state_name(state: ProjectState) -> &'static str {
     match state {
         ProjectState::Ready => "ready",

@@ -428,7 +428,7 @@ impl BarsMcp {
             .await;
         match format.unwrap_or_default() {
             Format::Txt => present(result, bars_protocol::graph_text::render_graph_text),
-            Format::Json => present(result, |output| json(output)),
+            Format::Json => present(result, json),
         }
     }
 }
