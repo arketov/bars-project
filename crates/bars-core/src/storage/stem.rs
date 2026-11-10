@@ -272,7 +272,10 @@ mod tests {
     #[test]
     fn yo_is_folded_to_ye_in_both_forms() {
         let stemmer = TextStemmer::new();
-        assert_eq!(stemmer.stem_text("Ёлка тёмный"), stemmer.stem_text("елка темный"));
+        assert_eq!(
+            stemmer.stem_text("Ёлка тёмный"),
+            stemmer.stem_text("елка темный")
+        );
         assert_eq!(stemmer.exact_text("ёлка"), "елка");
     }
 

@@ -221,11 +221,7 @@ fn chinese_and_japanese_text_is_found_by_bigrams() {
 #[test]
 fn f_signal_divides_by_the_best_listed_score_and_scores_outsiders_by_rowid() {
     let (_dir, index) = index_with(&[
-        (
-            "docs/a.md",
-            "Зебры",
-            "# Зебры\n\nzebra zebra zebra рядом\n",
-        ),
+        ("docs/a.md", "Зебры", "# Зебры\n\nzebra zebra zebra рядом\n"),
         ("docs/b.md", "Прочее", "# Прочее\n\nодна zebra здесь\n"),
         ("docs/c.md", "Пусто", "# Пусто\n\nничего подходящего\n"),
     ]);

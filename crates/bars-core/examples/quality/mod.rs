@@ -252,7 +252,11 @@ mod tests {
             paths: vec!["docs/manual".into()],
         };
         assert!(operators_ok(&ops, "docs/manual/a.md", "Тут Точная Фраза."));
-        assert!(!operators_ok(&ops, "docs/manual/a.md", "точная фраза и лишнее"));
+        assert!(!operators_ok(
+            &ops,
+            "docs/manual/a.md",
+            "точная фраза и лишнее"
+        ));
         assert!(!operators_ok(&ops, "docs/adr/a.md", "точная фраза"));
         assert!(!operators_ok(&ops, "docs/manual/a.md", "другой текст"));
         assert!(under_path("docs/manual/a.md", "manual"));

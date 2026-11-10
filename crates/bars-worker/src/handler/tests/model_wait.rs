@@ -234,7 +234,11 @@ async fn wait_models_false_does_not_degrade_a_search_with_loaded_models() {
     let env = Env::unloaded(FakeProvider::plain("m1"), false, Duration::from_secs(10)).await;
     // Обычный поиск ждёт загрузку и оставляет модель в памяти: «сейчас» отвечает полностью.
     let waited = env.search().await;
-    assert!(waited.semantic_error.is_none(), "{:?}", waited.semantic_error);
+    assert!(
+        waited.semantic_error.is_none(),
+        "{:?}",
+        waited.semantic_error
+    );
     let found = env.search_now().await;
     assert!(found.semantic_error.is_none(), "{:?}", found.semantic_error);
     assert_eq!(found.applied.score_kind, bars_protocol::ScoreKind::Cosine);

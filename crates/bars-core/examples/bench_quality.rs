@@ -5,11 +5,11 @@ mod registry;
 
 use bars_core::indexing::chunking::{ChunkingParams, chunk_document};
 use bars_core::indexing::indexer::{IndexSettings, UpdateOutcome, update_index};
+use bars_core::link_index::LinkIndex;
 use bars_core::models::{
     Accelerator, BuiltinEmbedder, BuiltinReranker, EmbedError, Embedder, ModelFingerprint,
     RerankError, Reranker,
 };
-use bars_core::link_index::LinkIndex;
 use bars_core::search::{
     ParsedQuery, ScoreWeights, SearchError, SearchRequest, SearchSettings, candidate_trace,
     scored_pool, search, search_with_links,
@@ -425,7 +425,8 @@ fn run(a: &[String]) -> Result<()> {
                     // Запрос с операторами идёт ещё раз без них («парный запрос»): так сравнивается
                     // полнота при операторе (`docs/knowledge/search-quality.md`, шаг 2.3.7).
                     let paired_key = format!("{}:{count}:{k}:{repeat}:paired", case.id);
-                    let paired_needed = case.operators.is_some() && !completed.contains(&paired_key);
+                    let paired_needed =
+                        case.operators.is_some() && !completed.contains(&paired_key);
                     if search_done && !trace_needed && !paired_needed {
                         continue;
                     }
@@ -507,7 +508,11 @@ fn run(a: &[String]) -> Result<()> {
                         let paired = search_with_links(
                             &index,
                             &mut paired_embed,
-                            if k == 0 { None } else { Some(&mut paired_rerank) },
+                            if k == 0 {
+                                None
+                            } else {
+                                Some(&mut paired_rerank)
+                            },
                             &settings,
                             &paired_request,
                             None,

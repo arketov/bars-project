@@ -516,9 +516,5 @@ fn iterion_uses_iterion_home_and_uninstall_removes_only_plugin_dir() {
     assert!(plugins.join("plugins.yaml").exists());
     assert!(plugins.join("other/plugin.yaml").exists());
     assert!(!super::state(&env, InstallClient::Iterion).installed);
-    assert!(
-        uninstall(&env, InstallClient::Iterion)
-            .unwrap()
-            .is_empty()
-    );
+    assert!(uninstall(&env, InstallClient::Iterion).unwrap().is_empty());
 }

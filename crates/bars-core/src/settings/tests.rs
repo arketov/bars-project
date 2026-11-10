@@ -699,11 +699,16 @@ fn graph_tools_are_hidden_by_default_and_shown_by_the_mcp_key() {
 #[test]
 fn legacy_thresholds_move_into_the_single_min_score() {
     // Без rerank — прежний порог косинуса, с rerank — прежний порог rerank; `min_score` важнее обоих.
-    let vector = user("[rerank]\nenabled = false\n[search]\nmin_score_vector = 0.3\nmin_score_rerank = 0.2\n");
+    let vector = user(
+        "[rerank]\nenabled = false\n[search]\nmin_score_vector = 0.3\nmin_score_rerank = 0.2\n",
+    );
     assert_eq!(vector.value.search.min_score, 0.3);
-    let rerank = user("[rerank]\nenabled = true\n[search]\nmin_score_vector = 0.3\nmin_score_rerank = 0.2\n");
+    let rerank = user(
+        "[rerank]\nenabled = true\n[search]\nmin_score_vector = 0.3\nmin_score_rerank = 0.2\n",
+    );
     assert_eq!(rerank.value.search.min_score, 0.2);
-    let explicit = user("[rerank]\nenabled = true\n[search]\nmin_score = 0.15\nmin_score_rerank = 0.2\n");
+    let explicit =
+        user("[rerank]\nenabled = true\n[search]\nmin_score = 0.15\nmin_score_rerank = 0.2\n");
     assert_eq!(explicit.value.search.min_score, 0.15);
     // Прежние ключи — не неизвестные: предупреждения о них нет.
     assert!(vector.warnings.is_empty(), "{:?}", vector.warnings);

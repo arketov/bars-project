@@ -203,7 +203,10 @@ pub fn f_signal(
     listed: &[(i64, f32)],
     ids: &[i64],
 ) -> rusqlite::Result<HashMap<i64, f32>> {
-    let best = listed.iter().map(|(_, score)| *score).fold(0.0_f32, f32::max);
+    let best = listed
+        .iter()
+        .map(|(_, score)| *score)
+        .fold(0.0_f32, f32::max);
     let mut known: HashMap<i64, f32> = listed.iter().copied().collect();
     let missing: Vec<i64> = ids
         .iter()
@@ -357,9 +360,8 @@ pub fn typo_corrections(conn: &Connection, stems: &[String]) -> rusqlite::Result
         let Some(next) = char::from_u32(first as u32 + 1) else {
             continue;
         };
-        let mut statement = conn.prepare(
-            "SELECT term, doc FROM chunks_fts_vocab WHERE term >= ?1 AND term < ?2",
-        )?;
+        let mut statement =
+            conn.prepare("SELECT term, doc FROM chunks_fts_vocab WHERE term >= ?1 AND term < ?2")?;
         let rows = statement.query_map([first.to_string(), next.to_string()], |row| {
             Ok((row.get::<_, String>(0)?, row.get::<_, i64>(1)?))
         })?;

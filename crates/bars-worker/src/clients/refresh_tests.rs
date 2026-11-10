@@ -314,11 +314,7 @@ fn iterion_refresh_needs_existing_manifest_and_repairs_it() {
         "name: other\n",
     );
     write(&plugin.join("skills/bars-docs/SKILL.md"), "old");
-    assert!(
-        refresh(&env)
-            .iter()
-            .all(|r| matches!(r.result, Ok(None)))
-    );
+    assert!(refresh(&env).iter().all(|r| matches!(r.result, Ok(None))));
     assert!(!plugin.join("plugin.yaml").exists());
 
     // Есть манифест со старым путём: он и skill приводятся к текущим.

@@ -63,7 +63,10 @@ fn hyphens_digits_and_lone_quotes_are_plain_characters() {
     ] {
         let parsed = parse(query);
         assert!(!parsed.has_operators(), "{query}: {parsed:?}");
-        assert_eq!(parsed.text, query.split_whitespace().collect::<Vec<_>>().join(" "));
+        assert_eq!(
+            parsed.text,
+            query.split_whitespace().collect::<Vec<_>>().join(" ")
+        );
     }
 }
 
@@ -105,7 +108,10 @@ fn phrase_becomes_an_exact_column_condition_and_exclusion_a_not_over_stem_and_ex
         applied.starts_with("(((X) AND (exact : \"белый кот\")) NOT ("),
         "{applied}"
     );
-    assert!(applied.contains("{name heading_chain body} : ("), "{applied}");
+    assert!(
+        applied.contains("{name heading_chain body} : ("),
+        "{applied}"
+    );
     assert!(applied.contains(" OR exact : ("), "{applied}");
     assert!(applied.ends_with(")))"), "{applied}");
 }
