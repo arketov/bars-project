@@ -65,23 +65,23 @@
 ; занятого файла — переименовывает в `name.old`, `name.old1` … `name.old9` (запущенный exe нельзя
 ; перезаписать, но можно переименовать). В `$3` остаётся новый путь занятого файла, иначе пусто.
 ; Старые `name.old*` стираются, пока они не заняты: занятые остаются от процессов прежних обновлений.
-!macro BarsSetAside name
+!macro BarsSetAsideIn dir name
   StrCpy $3 ""
-  Delete "$INSTDIR\${name}.old*"
+  Delete "${dir}\${name}.old*"
   ClearErrors
-  ${If} ${FileExists} "$INSTDIR\${name}"
-    Delete "$INSTDIR\${name}"
-    ${If} ${FileExists} "$INSTDIR\${name}"
+  ${If} ${FileExists} "${dir}\${name}"
+    Delete "${dir}\${name}"
+    ${If} ${FileExists} "${dir}\${name}"
       ClearErrors
-      Rename "$INSTDIR\${name}" "$INSTDIR\${name}.old"
+      Rename "${dir}\${name}" "${dir}\${name}.old"
       ${IfNot} ${Errors}
-        StrCpy $3 "$INSTDIR\${name}.old"
+        StrCpy $3 "${dir}\${name}.old"
       ${Else}
         ${For} $2 1 9
           ClearErrors
-          Rename "$INSTDIR\${name}" "$INSTDIR\${name}.old$2"
+          Rename "${dir}\${name}" "${dir}\${name}.old$2"
           ${IfNot} ${Errors}
-            StrCpy $3 "$INSTDIR\${name}.old$2"
+            StrCpy $3 "${dir}\${name}.old$2"
             ${ExitFor}
           ${EndIf}
         ${Next}
@@ -89,6 +89,69 @@
     ${EndIf}
   ${EndIf}
   ClearErrors
+!macroend
+
+!macro BarsSetAside name
+  !insertmacro BarsSetAsideIn "$INSTDIR" "${name}"
+!macroend
+
+; Копии файлов установки в пакетах MSIX (ISS-107). Программа из упакованного приложения (Claude
+; Desktop и его оболочка, сессии агентов) видит %LOCALAPPDATA% через виртуализацию: всё, что она
+; записала в папку установки, лежит копией в %LOCALAPPDATA%\Packages\<пакет>\LocalCache\Local\<тот же
+; путь> и закрывает настоящий файл для процессов пакета. Установщик, запущенный обычным способом,
+; пишет в настоящую папку и копий не видит, поэтому агент продолжает запускать старые bars-mcp и
+; bars-cli. Здесь копии убираются так же, как файлы установки: стираются, занятые переименовываются
+; (процесс доработает на старом файле, новые запуски увидят настоящий). Работает, только если папка
+; установки внутри %LOCALAPPDATA%: виртуализация касается AppData. `fatal` равно 1 — копия exe,
+; оставшаяся на месте, прерывает установку с путём (деинсталлятор не прерывается). Регистры
+; $5…$9 и $R0 сохраняются, чтобы не портить значения шаблона Tauri.
+!macro BarsClearPackageShadows fatal id
+  Push $5
+  Push $6
+  Push $7
+  Push $8
+  Push $9
+  Push $R0
+  StrLen $5 "$LOCALAPPDATA"
+  StrCpy $6 "$INSTDIR" $5
+  ${If} $6 == "$LOCALAPPDATA"
+    StrCpy $7 "$INSTDIR" "" $5
+    FindFirst $8 $9 "$LOCALAPPDATA\Packages\*"
+    bars_shadow_loop_${id}:
+      StrCmp $9 "" bars_shadow_done_${id}
+      ${If} $9 != "."
+      ${AndIf} $9 != ".."
+        StrCpy $R0 "$LOCALAPPDATA\Packages\$9\LocalCache\Local$7"
+        ${If} ${FileExists} "$R0\*.*"
+          !insertmacro BarsSetAsideIn "$R0" "bars.exe"
+          !insertmacro BarsSetAsideIn "$R0" "bars-mcp.exe"
+          !insertmacro BarsSetAsideIn "$R0" "bars-cli.exe"
+          !insertmacro BarsSetAsideIn "$R0" "vulkan-1.dll"
+          !if "${fatal}" == "1"
+            ${If} ${FileExists} "$R0\bars.exe"
+              !insertmacro BarsFail "${id}a" "Не удалось убрать копию $R0\bars.exe, которую видят программы из пакета MSIX (например Claude Desktop): они запускали бы старый файл. Закройте эти программы и запустите установку снова."
+            ${EndIf}
+            ${If} ${FileExists} "$R0\bars-mcp.exe"
+              !insertmacro BarsFail "${id}b" "Не удалось убрать копию $R0\bars-mcp.exe, которую видят программы из пакета MSIX (например Claude Desktop): агенты запускали бы старый файл. Закройте эти программы и запустите установку снова."
+            ${EndIf}
+            ${If} ${FileExists} "$R0\bars-cli.exe"
+              !insertmacro BarsFail "${id}c" "Не удалось убрать копию $R0\bars-cli.exe, которую видят программы из пакета MSIX (например Claude Desktop): агенты запускали бы старый файл. Закройте эти программы и запустите установку снова."
+            ${EndIf}
+          !endif
+        ${EndIf}
+      ${EndIf}
+      FindNext $8 $9
+      Goto bars_shadow_loop_${id}
+    bars_shadow_done_${id}:
+    FindClose $8
+  ${EndIf}
+  ClearErrors
+  Pop $R0
+  Pop $9
+  Pop $8
+  Pop $7
+  Pop $6
+  Pop $5
 !macroend
 
 ; Работает ли bars.exe: код возврата 0 — работает.
@@ -152,6 +215,8 @@
   ; сессия упала бы. Сессия доработает на старом файле, новые сессии берут новый.
   !insertmacro BarsSetAside "bars-mcp.exe"
   !insertmacro BarsSetAside "bars-cli.exe"
+  ; Копии в пакетах MSIX закрывают настоящие файлы для агентов Claude Desktop (ISS-107).
+  !insertmacro BarsClearPackageShadows 1 "shpre"
   ; Не освободили — не продолжаем: иначе установка молча оставила бы старую версию.
   !insertmacro BarsRequireFree "bars.exe" "free1"
   !insertmacro BarsRequireFree "bars-mcp.exe" "free2"
@@ -198,6 +263,7 @@
   ${EndIf}
   !insertmacro BarsSetAside "bars-mcp.exe"
   !insertmacro BarsSetAside "bars-cli.exe"
+  !insertmacro BarsClearPackageShadows 0 "shun"
 !macroend
 
 !macro NSIS_HOOK_POSTUNINSTALL
