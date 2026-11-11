@@ -180,9 +180,9 @@ try {
         $initialized = Read-Mcp $mcp
         Assert-That ($initialized.id -eq 1 -and $null -ne $initialized.result) 'MCP initialize failed'
         $mcp.StandardInput.WriteLine('{"jsonrpc":"2.0","method":"notifications/initialized"}')
-        $mcp.StandardInput.WriteLine('{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"bars_projects","arguments":{"all":true}}}')
+        $mcp.StandardInput.WriteLine('{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"bars_status","arguments":{"all":true}}}')
         $projects = Read-Mcp $mcp
-        Assert-That ($projects.id -eq 2 -and $null -ne $projects.result -and -not $projects.result.isError) 'MCP bars_projects failed'
+        Assert-That ($projects.id -eq 2 -and $null -ne $projects.result -and -not $projects.result.isError) 'MCP bars_status failed'
         Write-Fixture (Join-Path $EvidenceDir 'mcp-projects.json') ($projects | ConvertTo-Json -Depth 15)
         $mcp.StandardInput.Close()
         Assert-That ($mcp.WaitForExit(10000)) 'MCP did not close'
