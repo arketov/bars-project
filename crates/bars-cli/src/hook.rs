@@ -30,7 +30,7 @@ pub fn pre_tool_use(env: &Env, docs_root: &str, out: &mut dyn Write, err: &mut d
         },
     };
     if let Some(reason) = gate::decide(&input, docs_root, &std::env::temp_dir()) {
-        let _ = writeln!(out, "{}", gate::deny_output(reason));
+        let _ = writeln!(out, "{}", gate::deny_output(&reason));
     }
     0
 }
