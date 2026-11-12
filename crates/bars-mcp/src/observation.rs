@@ -6,6 +6,7 @@ use serde_json::Value;
 const GRAPH: &[&str] = &[
     "format",
     "project",
+    "wt",
     "query",
     "entity_ref",
     "from",
@@ -31,6 +32,7 @@ impl<S> FromContextPart<ToolCallContext<'_, S>> for Original {
         let allowed: &[&str] = match context.name.as_ref() {
             "bars_search" => &[
                 "project",
+                "wt",
                 "query",
                 "like",
                 "occurrences",
@@ -48,6 +50,7 @@ impl<S> FromContextPart<ToolCallContext<'_, S>> for Original {
             | "bars_graph" => GRAPH,
             "bars_read" => &[
                 "project",
+                "wt",
                 "path",
                 "lines",
                 "under",
@@ -55,9 +58,9 @@ impl<S> FromContextPart<ToolCallContext<'_, S>> for Original {
                 "direction",
                 "cursor",
             ],
-            "bars_status" => &["project", "all", "refresh", "filter"],
+            "bars_status" => &["project", "wt", "all", "refresh", "filter"],
             "bars_audit" => &[
-                "project", "kind", "action", "id", "revision", "in", "cursor", "limit", "show",
+                "project", "wt", "kind", "action", "id", "revision", "in", "cursor", "limit", "show",
             ],
             _ => &[],
         };

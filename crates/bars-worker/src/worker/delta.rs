@@ -734,6 +734,15 @@ impl Worker {
             .request_delta(project, name, Priority::Explicit, None)
     }
 
+    /// Явная сверка вида (`bars-cli reindex --wt`, `bars_status refresh=true wt=…`): ставит в
+    /// очередь сверку всех документов вида, даже если дельта готова; без дельты это её первое
+    /// построение. `false` — worktree не найден или владелец не готов, как у
+    /// [`Worker::ensure_worktree_delta`].
+    pub fn resync_worktree(&self, project: &Path, name: &str) -> bool {
+        self.inner
+            .request_delta(project, name, Priority::Explicit, None)
+    }
+
     /// Пересверка перечисленных путей дельты (пути от корня проекта через `/`); без готовой
     /// дельты ставится полная сверка. Шов для слежения за W и изменений владельца (шаг 6.3.4).
     pub fn resync_worktree_paths(

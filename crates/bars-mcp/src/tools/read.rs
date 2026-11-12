@@ -31,6 +31,10 @@ pub struct ReadArgs {
     /// by date newest first.
     pub order: Option<String>,
     pub project: Option<String>,
+    /// Worktree of the project: a name from `.git/worktrees/<name>` or an absolute path; "." —
+    /// the main checkout. Default: the worktree of the session's cwd. The path is read from that
+    /// worktree's files; view=links answers from the main checkout with a note.
+    pub wt: Option<String>,
 }
 
 pub(super) fn router() -> ToolRouter<BarsMcp> {
@@ -52,7 +56,7 @@ impl BarsMcp {
                 )]);
             }
             let params = bars_protocol::ReadParams {
-                target: self.target(args.project),
+                target: self.target(args.project, args.wt),
                 path: args.path.clone(),
                 lines: None,
                 under: None,
@@ -93,20 +97,20 @@ impl BarsMcp {
                 }
             };
             let params = bars_protocol::DiskLinksParams {
-                target: self.target(args.project),
+                target: self.target(args.project, args.wt),
                 path: args.path,
                 direction: direction.to_string(),
                 limit: None,
                 cursor: args.cursor,
             };
-            return present(
-                self.call_observed(&params, Some(&original)).await,
+            return present_noted(
+                self.call_noted(&params, Some(&original)).await,
                 render::links,
             );
         }
         if view == Some("outline") {
             let params = bars_protocol::OutlineParams {
-                target: self.target(args.project),
+                target: self.target(args.project, args.wt),
                 path: args.path.clone(),
                 levels: Vec::new(),
                 under: args.under,
@@ -120,7 +124,7 @@ impl BarsMcp {
         }
         let auto = args.lines.is_none() && args.under.is_none() && view.is_none();
         let params = bars_protocol::ReadParams {
-            target: self.target(args.project),
+            target: self.target(args.project, args.wt),
             path: args.path.clone(),
             lines: args.lines,
             under: args.under,
@@ -154,7 +158,9 @@ impl BarsMcp {
                        an error with the nearest headings and their lines. view=outline returns \
                        headings with line numbers; view=links returns the document's links \
                        (direction in|out, continue with cursor) — check them before editing. \
-                       Reads saved disk, not the window's unsaved buffer."
+                       Reads saved disk, not the window's unsaved buffer. wt reads from a git \
+                       worktree of the project (default: the worktree of the session's cwd; \
+                       wt=\".\" — the main checkout)."
     )]
     async fn bars_read(
         &self,

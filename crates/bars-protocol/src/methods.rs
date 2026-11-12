@@ -736,6 +736,13 @@ pub struct ProjectsOutput {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SessionInfoParams {
     pub cwd: String,
+    /// Явный проект (как `Target.project`): проверка цели вызова без побочных эффектов, нужна
+    /// аудитам с `wt` (у них нет `Target`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub project: Option<String>,
+    /// Явный вид (как `Target.wt`); неизвестный — `worktree_not_found`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wt: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -747,6 +754,45 @@ pub struct SessionInfoOutput {
 pub struct SessionProjectInfo {
     pub name: String,
     pub modules: Vec<SessionModuleInfo>,
+    /// Вид вызова — worktree проекта; нет — основной checkout.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub worktree: Option<SessionWorktreeInfo>,
+}
+
+/// Worktree сессии или вызова в `session_info`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SessionWorktreeInfo {
+    pub name: String,
+    /// `None` — `detached`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub branch: Option<String>,
+}
+
+/// Строка пометки для графа, ссылок и аудитов по виду worktree: у вида этих данных нет
+/// (`docs/features/projects/worktrees.md`, «Чего в worktree нет»).
+pub fn owner_only_note(name: &str) -> String {
+    format!(
+        "worktree `{name}`: граф, аудиты и ссылки есть только у основного checkout; \
+         показан основной checkout"
+    )
+}
+
+/// Значение `wt` без пустой строки и пробелов; `None` — не задано.
+pub fn wt_value(value: Option<&str>) -> Option<&str> {
+    value.map(str::trim).filter(|value| !value.is_empty())
+}
+
+/// Worktree, по которому ответил `status`: с явным `wt` — единственный в списке (воркер оставил
+/// только его), `wt="."` — никакой, без `wt` — worktree сессии (`current`).
+pub fn view_worktree<'a>(
+    wt: Option<&str>,
+    items: &'a [WorktreeStatus],
+) -> Option<&'a WorktreeStatus> {
+    match wt_value(wt) {
+        Some(".") => None,
+        Some(_) => items.first(),
+        None => items.iter().find(|item| item.current),
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

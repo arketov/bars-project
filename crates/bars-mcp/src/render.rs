@@ -55,6 +55,16 @@ pub fn search(output: &SearchOutput, detail: Detail) -> String {
         output.applied.candidates,
         scope_label(output)
     );
+    // Пометка вида worktree («индекс строится…», «ошибка…», «N документов пересчитываются»).
+    if let Some(note) = output
+        .applied
+        .scope
+        .worktree
+        .as_ref()
+        .and_then(|worktree| worktree.note.as_deref())
+    {
+        let _ = writeln!(text, "note: {note}");
+    }
     for (index, hit) in output.results.iter().enumerate() {
         let support = support(hit, kind);
         let _ = writeln!(text, "{}", result_line(index + 1, hit, support));
@@ -160,10 +170,25 @@ fn scope_label(output: &SearchOutput) -> String {
     if !scope.paths.is_empty() {
         filters.push(format!("in {}", scope.paths.join(", ")));
     }
-    if filters.is_empty() {
-        "whole project".into()
+    let base = if filters.is_empty() {
+        "whole project".to_string()
     } else {
         filters.join("; ")
+    };
+    // Поиск по виду worktree: имя, ветка и состояние дельты видны в шапке.
+    match &scope.worktree {
+        Some(worktree) => format!(
+            "{base}; worktree {} ({}, delta {})",
+            worktree.name,
+            worktree.branch.as_deref().unwrap_or("detached"),
+            match worktree.state {
+                bars_protocol::DeltaState::None => "none",
+                bars_protocol::DeltaState::Building => "building",
+                bars_protocol::DeltaState::Ready => "ready",
+                bars_protocol::DeltaState::Error => "error",
+            }
+        ),
+        None => base,
     }
 }
 

@@ -219,6 +219,16 @@ pub fn duplicates(output: &DuplicatesOutput) -> String {
 
 pub fn search(output: &SearchOutput) -> String {
     let mut text = String::new();
+    // Пометка вида worktree («индекс строится…», «ошибка…») — строкой над результатами.
+    if let Some(note) = output
+        .applied
+        .scope
+        .worktree
+        .as_ref()
+        .and_then(|worktree| worktree.note.as_deref())
+    {
+        let _ = writeln!(text, "{note}");
+    }
     if output.results.is_empty() {
         text.push_str("Ничего не найдено.\n");
     }
@@ -255,15 +265,26 @@ pub fn search(output: &SearchOutput) -> String {
         );
     }
     let whole = filters.is_empty();
-    let _ = writeln!(
-        text,
-        "Область: {}.",
-        if whole {
-            "весь проект".into()
-        } else {
-            filters.join("; ")
-        }
-    );
+    let mut area = if whole {
+        "весь проект".to_string()
+    } else {
+        filters.join("; ")
+    };
+    if let Some(worktree) = &applied.scope.worktree {
+        let state = match worktree.state {
+            bars_protocol::DeltaState::None => "нет",
+            bars_protocol::DeltaState::Building => "строится",
+            bars_protocol::DeltaState::Ready => "готова",
+            bars_protocol::DeltaState::Error => "ошибка",
+        };
+        let _ = write!(
+            area,
+            "; worktree {} ({}, дельта: {state})",
+            worktree.name,
+            worktree.branch.as_deref().unwrap_or("detached")
+        );
+    }
+    let _ = writeln!(text, "Область: {area}.");
     let counts = |map: &std::collections::BTreeMap<String, u32>| {
         if map.is_empty() {
             "нет".into()

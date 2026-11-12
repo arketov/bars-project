@@ -247,12 +247,58 @@ impl BarsMcp {
         }
     }
 
-    fn target(&self, project: Option<String>) -> bars_protocol::Target {
+    /// Цель вызова: `project` — путь или имя, `wt` — worktree (`"."`, имя или абсолютный путь);
+    /// значение `wt` уходит воркеру как есть: он один знает список worktree проекта.
+    fn target(&self, project: Option<String>, wt: Option<String>) -> bars_protocol::Target {
         bars_protocol::Target {
             cwd: self.env.cwd.display().to_string(),
             project: project.map(|value| project_arg(&value, &self.env.cwd)),
-            wt: None,
+            wt: bars_protocol::wt_value(wt.as_deref()).map(str::to_string),
         }
+    }
+
+    /// Пометка «граф и аудиты — у основного checkout» для вызовов, у которых нет `Target`
+    /// (аудиты и «Новые темы»): цель проверяется воркером (`session_info` с `project` и `wt`,
+    /// без записи в историю), так что неизвестный `wt` даёт `worktree_not_found`. Нет worktree
+    /// (`wt="."`, основной checkout) — `None`.
+    async fn audit_worktree_note(
+        &self,
+        project: Option<&str>,
+        wt: Option<&str>,
+    ) -> Result<Option<String>, ClientError> {
+        let wt = bars_protocol::wt_value(wt);
+        if wt == Some(".") {
+            return Ok(None);
+        }
+        let params = bars_protocol::SessionInfoParams {
+            cwd: self.env.cwd.display().to_string(),
+            project: project.map(|value| project_arg(value, &self.env.cwd)),
+            wt: wt.map(str::to_string),
+        };
+        let mut lease = self.pool.acquire().await;
+        if lease.client.is_none() {
+            let _connect = self.pool.connect.lock().await;
+            lease.client = Some(self.connect().await?);
+        }
+        let client = lease.client.as_mut().expect("соединение открыто выше");
+        let output = match client.call(&params).await {
+            Ok(output) => {
+                lease.recycle();
+                output
+            }
+            Err(error) => {
+                if matches!(error, ClientError::Rpc(_)) {
+                    lease.recycle();
+                } else {
+                    lease.client = None;
+                }
+                return Err(error);
+            }
+        };
+        Ok(output
+            .project
+            .and_then(|project| project.worktree)
+            .map(|worktree| bars_protocol::owner_only_note(&worktree.name)))
     }
 
     async fn connect(&self) -> Result<Client, ClientError> {
@@ -286,6 +332,8 @@ impl BarsMcp {
                 client
                     .call(&bars_protocol::SessionInfoParams {
                         cwd: self.env.cwd.display().to_string(),
+                        project: None,
+                        wt: None,
                     })
                     .await
             })
@@ -312,18 +360,38 @@ impl BarsMcp {
         params: &M,
         context: Option<&Value>,
     ) -> Result<M::Output, ClientError> {
-        wait_for_model(self.env.model_wait, MODEL_POLL, |attempt| async move {
+        self.call_noted(params, context)
+            .await
+            .map(|(output, _)| output)
+    }
+
+    /// То же, что [`Self::call_observed`], плюс строка пометки worktree (`worktree_note`),
+    /// которую воркер дописывает в ответы графа, ссылок и статуса графа по виду worktree: типа
+    /// такого поля у ответов нет, поэтому она читается из ответа как есть.
+    async fn call_noted<M: Method>(
+        &self,
+        params: &M,
+        context: Option<&Value>,
+    ) -> Result<(M::Output, Option<String>), ClientError> {
+        let value = wait_for_model(self.env.model_wait, MODEL_POLL, |attempt| async move {
             let context = context.map(|context| with_attempt(context, attempt));
             self.call_once(params, context.as_ref()).await
         })
-        .await
+        .await?;
+        let note = value
+            .get("worktree_note")
+            .and_then(Value::as_str)
+            .map(str::to_string);
+        let output = serde_json::from_value(value)
+            .map_err(|error| ClientError::BadReply(error.to_string()))?;
+        Ok((output, note))
     }
 
     async fn call_once<M: Method>(
         &self,
         params: &M,
         context: Option<&Value>,
-    ) -> Result<M::Output, ClientError> {
+    ) -> Result<Value, ClientError> {
         let mut lease = self.pool.acquire().await;
         for attempt in 0..2 {
             if lease.client.is_none() {
@@ -341,7 +409,7 @@ impl BarsMcp {
                 lease.client = Some(client);
             }
             let client = lease.client.as_mut().expect("соединение открыто выше");
-            match client.call_observed(params, context).await {
+            match client.call_value(params, context).await {
                 Ok(output) => {
                     lease.recycle();
                     return Ok(output);
@@ -435,6 +503,25 @@ fn present<T: Serialize>(
     match result {
         Ok(output) => text(render(&output)),
         Err(error) => failure(&error),
+    }
+}
+
+/// Как [`present`], но с пометкой worktree строкой над ответом.
+fn present_noted<T: Serialize>(
+    result: Result<(T, Option<String>), ClientError>,
+    render: impl FnOnce(&T) -> String,
+) -> CallToolResult {
+    match result {
+        Ok((output, note)) => text(with_note(note.as_deref(), render(&output))),
+        Err(error) => failure(&error),
+    }
+}
+
+/// Строка пометки worktree над текстом ответа; без пометки текст не меняется.
+fn with_note(note: Option<&str>, body: String) -> String {
+    match note {
+        Some(note) if !note.trim().is_empty() => format!("{note}\n{body}"),
+        _ => body,
     }
 }
 

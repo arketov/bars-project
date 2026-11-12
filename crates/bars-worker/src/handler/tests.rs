@@ -1053,6 +1053,7 @@ mod links;
 mod model_wait;
 mod new_topics;
 mod window;
+mod worktree_mcp;
 mod worktree_search;
 mod worktrees;
 

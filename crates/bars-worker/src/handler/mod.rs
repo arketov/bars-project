@@ -1199,7 +1199,38 @@ impl WorkerHandler {
     }
 
     fn reindex(&self, params: ReindexParams) -> Result<AcceptedOutput, RpcError> {
-        let project = self.resolve(&params.target)?;
+        let (project, view) = self.resolve_view(&params.target)?;
+        if let ViewSelector::Worktree(item) = &view {
+            // Вид worktree: проверка актуальности — сверка дельты (первое обращение, если дельты
+            // нет). Полная переиндексация и смена модели у дельты не бывают: достаточно удалить
+            // worktree или сменить модель владельца.
+            if params.full || params.accept_model_change {
+                let mut extra = serde_json::Map::new();
+                extra.insert("kind".into(), serde_json::json!("worktree_unsupported"));
+                extra.insert("worktree".into(), serde_json::json!(item.name));
+                return Err(RpcError::bars_with(
+                    ErrorKind::InvalidParams,
+                    format!(
+                        "полная переиндексация не работает по worktree «{}»: у дельты есть только \
+                         сверка (reindex --wt). Полная переиндексация — у основного checkout, wt=\".\"",
+                        item.name
+                    ),
+                    extra,
+                ));
+            }
+            if !self.worker.resync_worktree(&project, &item.name) {
+                return Err(RpcError::bars(
+                    ErrorKind::ProjectUnavailable,
+                    format!(
+                        "сверка worktree «{}» не поставлена: проект-владелец не готов (индекс \
+                         строится, нужна переиндексация или папка недоступна)",
+                        item.name
+                    ),
+                ));
+            }
+            history::applied_field("job_kind", serde_json::json!("worktree_delta"));
+            return Ok(AcceptedOutput { accepted: true });
+        }
         let rebuild = params.full || params.accept_model_change;
         let (id, merged, kind) = if rebuild {
             self.worker

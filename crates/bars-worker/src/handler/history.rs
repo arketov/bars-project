@@ -62,8 +62,13 @@ impl WorkerHandler {
             _ => return self.handle_plain(client, call).await,
         };
         let preparation = std::time::Instant::now();
-        let project = target
-            .and_then(|t| self.resolve(t).ok())
+        let resolved = target.and_then(|t| self.resolve_view(t).ok());
+        if let Some((owner, ViewSelector::Worktree(item))) = &resolved {
+            // Агент работает с worktree (явно или по cwd): аренда слежения на час (Т-10).
+            self.worker.observe_worktree_mcp(owner, &item.name);
+        }
+        let project = resolved
+            .map(|(path, _)| path)
             .or_else(|| explicit_project.and_then(|p| self.worker.resolve(&p).ok()));
         if let Some(project) = &project {
             // Пассивные вызовы не будят ленивый подпроект: первое обращение — любой другой

@@ -8,6 +8,10 @@ use super::*;
 pub struct StatusArgs {
     /// Project: root path or registered name. Default: the session project.
     pub project: Option<String>,
+    /// Worktree of the project: a name from `.git/worktrees/<name>` or an absolute path; "." —
+    /// the main checkout. Default: the worktree of the session's cwd. With a worktree the
+    /// WORKTREES part lists only it; refresh=true checks its delta (the first access builds it).
+    pub wt: Option<String>,
     /// true — the whole registry of projects instead of one project.
     #[serde(default)]
     pub all: bool,
@@ -33,6 +37,13 @@ impl BarsMcp {
                 "invalid_params: all=true cannot be combined with project",
             )]);
         }
+        if bars_protocol::wt_value(args.wt.as_deref()).is_some()
+            && (args.all || bars_protocol::filter_text(args.filter.as_deref()).is_some())
+        {
+            return CallToolResult::error(vec![ContentBlock::text(
+                "invalid_params: wt applies to one project; drop all or filter",
+            )]);
+        }
         // Пустой и пробельный filter — как без filter.
         let filter = bars_protocol::filter_text(args.filter.as_deref()).map(str::to_string);
         if let Some(text) = &filter {
@@ -48,7 +59,7 @@ impl BarsMcp {
             }
             return self.status_filtered(text, &original).await;
         }
-        let target = self.target(args.project.clone());
+        let target = self.target(args.project.clone(), args.wt.clone());
         let mut body = String::new();
         if args.refresh {
             let params = bars_protocol::ReindexParams {
@@ -88,9 +99,12 @@ impl BarsMcp {
             target: target.clone(),
         };
         let mut worktrees = None;
+        let mut view_note = None;
         let part = match self.call_observed(&index, Some(&original)).await {
             Ok(output) => {
                 worktrees = render::worktrees_part(&output.worktrees);
+                view_note = bars_protocol::view_worktree(args.wt.as_deref(), &output.worktrees)
+                    .map(|item| bars_protocol::owner_only_note(&item.name));
                 render::status(&output)
             }
             Err(error) => render::error_part("INDEX", &error),
@@ -125,6 +139,11 @@ impl BarsMcp {
                 .or_else(|| project_path.clone())
                 .map(|value| project_arg(&value, &self.env.cwd))
         };
+        // Аудиты, новые темы и граф есть только у основного checkout: вид worktree — пометка.
+        if let Some(note) = &view_note {
+            body.push('\n');
+            body.push_str(note);
+        }
         if let Some(project) = audit_project {
             let params = bars_protocol::AuditListParams {
                 project: project.clone(),
@@ -195,7 +214,9 @@ impl BarsMcp {
                        queue, models, errors), VERSIONS (proxy and worker builds with a warning \
                        when they differ), AUDITS (kind, state, date, finding counts), NEW TOPICS, \
                        GRAPH. An error in one part is printed in that part and does not cancel \
-                       the rest. refresh=true starts an index freshness check first. \
+                       the rest. refresh=true starts an index freshness check first (with wt, \
+                       a check of that git worktree: the first access builds its index delta). \
+                       WORKTREES lists the project's git worktrees; wt narrows it to one. \
                        all=true lists all registered projects. \
                        filter=text lists only registry projects whose name or path contains the \
                        text (subprojects and worktrees included). When the index needs reindexing \

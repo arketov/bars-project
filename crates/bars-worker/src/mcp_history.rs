@@ -529,6 +529,7 @@ pub fn requested(tool: &str, source: &Value) -> Value {
     let fields: &[&str] = match tool {
         "bars_search" => &[
             "project",
+            "wt",
             "query",
             "like",
             "occurrences",
@@ -546,6 +547,7 @@ pub fn requested(tool: &str, source: &Value) -> Value {
         | "bars_graph" => &[
             "format",
             "project",
+            "wt",
             "query",
             "entity_ref",
             "from",
@@ -566,6 +568,7 @@ pub fn requested(tool: &str, source: &Value) -> Value {
         ],
         "bars_read" => &[
             "project",
+            "wt",
             "path",
             "lines",
             "under",
@@ -573,9 +576,9 @@ pub fn requested(tool: &str, source: &Value) -> Value {
             "direction",
             "cursor",
         ],
-        "bars_status" => &["project", "all", "refresh"],
+        "bars_status" => &["project", "wt", "all", "refresh"],
         "bars_audit" => &[
-            "project", "kind", "action", "id", "revision", "in", "cursor", "limit", "show",
+            "project", "wt", "kind", "action", "id", "revision", "in", "cursor", "limit", "show",
         ],
         _ => &["format"],
     };

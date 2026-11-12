@@ -36,7 +36,19 @@ fn module_line(project: Option<&SessionProjectInfo>, budget: usize) -> String {
     let Some(project) = project else {
         return fallback.to_owned();
     };
-    let prefix = format!("Project {} modules: ", clean(&project.name, 60));
+    // Сессия в worktree: имя проекта дополняется worktree; модули — владельца, у вида те же.
+    let worktree = project
+        .worktree
+        .as_ref()
+        .map(|worktree| {
+            let branch = match &worktree.branch {
+                Some(branch) => format!("branch {}", clean(branch, 60)),
+                None => "detached".to_string(),
+            };
+            format!(", worktree `{}` ({branch})", clean(&worktree.name, 60))
+        })
+        .unwrap_or_default();
+    let prefix = format!("Project {}{worktree} modules: ", clean(&project.name, 60));
     let mut modules: Vec<_> = project.modules.iter().collect();
     modules.sort_by(|a, b| a.name.cmp(&b.name));
     let entry = |m: &bars_protocol::SessionModuleInfo| {
@@ -114,6 +126,7 @@ mod tests {
                     title: None,
                 })
                 .collect(),
+            worktree: None,
         };
         for graph in [false, true] {
             let text = session_instructions(graph, Some(&project));
@@ -135,5 +148,29 @@ mod tests {
         project.modules[1].name = ".".into();
         let text = session_instructions(false, Some(&project));
         assert!(text.ends_with("Project bars modules: . (2), z (1)"));
+    }
+
+    #[test]
+    fn session_in_a_worktree_names_it_after_the_project() {
+        let mut project = SessionProjectInfo {
+            name: "bars".into(),
+            modules: vec![SessionModuleInfo {
+                name: "docs".into(),
+                documents: 3,
+                title: None,
+            }],
+            worktree: Some(bars_protocol::SessionWorktreeInfo {
+                name: "feat-x".into(),
+                branch: Some("feat/x".into()),
+            }),
+        };
+        let text = session_instructions(false, Some(&project));
+        assert!(
+            text.ends_with("Project bars, worktree `feat-x` (branch feat/x) modules: docs (3)"),
+            "{text}"
+        );
+        project.worktree.as_mut().unwrap().branch = None;
+        let text = session_instructions(false, Some(&project));
+        assert!(text.contains("worktree `feat-x` (detached) modules:"), "{text}");
     }
 }

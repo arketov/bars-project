@@ -9,7 +9,7 @@ use bars_protocol::{DeltaState, DiskLinksParams, DiskTextParams, GraphStatusPara
 
 /// Основной checkout `main` и worktree `feat-x` вне проекта: `docs/guide.md` у обоих разный,
 /// `docs/only-wt.md` есть только в worktree.
-fn repo_with_worktree(projects: &Path) -> (PathBuf, PathBuf) {
+pub(super) fn repo_with_worktree(projects: &Path) -> (PathBuf, PathBuf) {
     let main = projects.join("main");
     fs::create_dir_all(main.join("docs")).unwrap();
     fs::write(main.join("docs/guide.md"), "# Руководство\n\nТекст основного.\n").unwrap();
@@ -42,13 +42,13 @@ fn repo_with_worktree(projects: &Path) -> (PathBuf, PathBuf) {
     (main, work)
 }
 
-fn handler(home: &TempDir) -> WorkerHandler {
+pub(super) fn handler(home: &TempDir) -> WorkerHandler {
     let config = WorkerConfig::new(home.path().to_path_buf()).without_graph_pause();
     let worker = Worker::start(config, FakeProvider::new("m1")).unwrap();
     WorkerHandler::new(worker)
 }
 
-fn target_wt(cwd: &Path, wt: Option<&str>) -> Target {
+pub(super) fn target_wt(cwd: &Path, wt: Option<&str>) -> Target {
     Target {
         cwd: cwd.display().to_string(),
         project: None,
@@ -56,7 +56,7 @@ fn target_wt(cwd: &Path, wt: Option<&str>) -> Target {
     }
 }
 
-async fn wait_idle(worker: &Worker) {
+pub(super) async fn wait_idle(worker: &Worker) {
     let deadline = Instant::now() + Duration::from_secs(30);
     while !worker.is_idle() {
         assert!(Instant::now() < deadline, "очередь не опустела");
@@ -64,7 +64,7 @@ async fn wait_idle(worker: &Worker) {
     }
 }
 
-async fn wait_delta(worker: &Worker, main: &Path) {
+pub(super) async fn wait_delta(worker: &Worker, main: &Path) {
     let deadline = Instant::now() + Duration::from_secs(30);
     while worker.worktree_delta_status(main, "feat-x").state != DeltaState::Ready
         || !worker.is_idle()

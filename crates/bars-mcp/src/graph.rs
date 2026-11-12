@@ -110,6 +110,9 @@ macro_rules! graph_args {
         pub struct $name {
             /// Проект; иначе проект сессии.
             pub project: Option<String>,
+            /// Worktree: `.git/worktrees/<name>`, an absolute path or "." (main checkout); the
+            /// graph is the main checkout's.
+            pub wt: Option<String>,
             #[schemars(schema_with = "format_schema")]
             pub format: Option<Format>,
             /// Папки первого уровня docs-root.
@@ -228,19 +231,21 @@ graph_args!(GraphViewArgs {
 /// Готовый вызов графовой операции: проект, формат и запрос воркеру.
 pub(super) struct Call {
     project: Option<String>,
+    wt: Option<String>,
     format: Option<Format>,
     request: GraphRequest,
 }
 
 fn call(
     operation: Operation,
-    project: Option<String>,
+    (project, wt): (Option<String>, Option<String>),
     format: Option<Format>,
     scope: Scope,
     timeout_ms: Option<u32>,
 ) -> Call {
     Call {
         project,
+        wt,
         format,
         request: GraphRequest {
             operation,
@@ -262,7 +267,7 @@ impl RelationsArgs {
         };
         let mut c = call(
             Operation::Relations,
-            self.project,
+            (self.project, self.wt),
             self.format,
             scope,
             self.timeout_ms,
@@ -288,7 +293,7 @@ impl PathsArgs {
         };
         let mut c = call(
             Operation::Paths,
-            self.project,
+            (self.project, self.wt),
             self.format,
             scope,
             self.timeout_ms,
@@ -312,7 +317,7 @@ impl ImpactArgs {
         };
         let mut c = call(
             Operation::Impact,
-            self.project,
+            (self.project, self.wt),
             self.format,
             scope,
             self.timeout_ms,
@@ -336,7 +341,7 @@ impl ContextArgs {
         };
         let mut c = call(
             Operation::Context,
-            self.project,
+            (self.project, self.wt),
             self.format,
             scope,
             self.timeout_ms,
@@ -360,7 +365,7 @@ impl ExploreArgs {
         };
         let mut c = call(
             Operation::Explore,
-            self.project,
+            (self.project, self.wt),
             self.format,
             scope,
             self.timeout_ms,
@@ -384,7 +389,7 @@ impl GraphViewArgs {
         };
         let mut c = call(
             Operation::Graph,
-            self.project,
+            (self.project, self.wt),
             self.format,
             scope,
             self.timeout_ms,
@@ -412,12 +417,13 @@ impl BarsMcp {
     ) -> CallToolResult {
         let Call {
             project,
+            wt,
             format,
             request,
         } = call;
-        let target = self.target(project);
+        let target = self.target(project, wt);
         let result = self
-            .call_observed(
+            .call_noted(
                 &bars_protocol::GraphQueryParams {
                     target,
                     request,
@@ -427,8 +433,19 @@ impl BarsMcp {
             )
             .await;
         match format.unwrap_or_default() {
-            Format::Txt => present(result, bars_protocol::graph_text::render_graph_text),
-            Format::Json => present(result, json),
+            Format::Txt => present_noted(result, bars_protocol::graph_text::render_graph_text),
+            // JSON — ответ воркера: пометка остаётся полем `worktree_note`, строка сломала бы разбор.
+            Format::Json => present(
+                result.map(|(output, note)| {
+                    let mut value = serde_json::to_value(&output)
+                        .expect("ответы методов сериализуются");
+                    if let (Some(map), Some(note)) = (value.as_object_mut(), note) {
+                        map.insert("worktree_note".into(), serde_json::Value::String(note));
+                    }
+                    value
+                }),
+                json,
+            ),
         }
     }
 }

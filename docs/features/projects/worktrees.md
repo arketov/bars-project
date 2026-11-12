@@ -331,6 +331,15 @@ Linked worktree — вторая рабочая копия того же git-р�
 
 `--wt <имя|путь|.>` у каждой команды `bars-cli`, у которой есть `--project` (`search`, `read`, `outline`, `status`, `reindex`, команды графа и аудитов); смысл тот же, что у `wt`; `reindex --wt` проверяет вид (сверка дельты), `reindex --full --wt` не принимается (`invalid_params`: дельта полной переиндексации не знает, достаточно удалить worktree или сменить модель). `register --wt` не существует: worktree проектом не регистрируется. `--json` печатает ответ метода как есть.
 
+### Как это устроено в MCP и CLI (шаг 6.3.5)
+
+Написано без проверки сборкой.
+
+- **Протокол.** `wt_value` (пустая строка и пробелы — нет значения), `owner_only_note(имя)` — строка пометки для графа, ссылок и аудитов, `view_worktree(wt, worktrees)` — какой worktree назвал ответ `status` (явный `wt` — единственный в списке; `"."` — никакой; без `wt` — отмеченный `current`). `SessionInfoParams` получили необязательные `project` и `wt` (проверка цели без записи в историю; неизвестный `wt` — `worktree_not_found`), `SessionProjectInfo.worktree` — `{name, branch}`.
+- **MCP.** `wt` — рядом с `project` у `bars_search` (обе формы), `bars_read`, `bars_status`, `bars_audit` и шести графовых инструментов; значение уходит воркеру как есть (`"."` — не путь от `cwd`, в отличие от `project`). Ответы, к которым воркер дописывает `worktree_note` (граф, `view=links`, `graph_status`), читаются через `call_noted`: текстовый вид получает строку пометки над ответом, JSON графа — поле `worktree_note`. У аудитов и «Новых тем» `Target` нет, поэтому пометку и проверку `wt` даёт `session_info` с `project` и `wt` (без записи в историю); с `wt="."` проверки нет. Шапка текстового поиска — `scope: … ; worktree <имя> (<ветка>, delta <состояние>)`, строка `note: …` из `applied.scope.worktree.note` идёт сразу под шапкой. `bars_status` с `wt` не сочетается с `all` и `filter`; `refresh=true` с `wt` — `ReindexParams` с тем же `wt`; пометка о графе и аудитах стоит перед частью AUDITS.
+- **Воркер.** `reindex` с видом worktree ставит сверку всех документов вида (`Worker::resync_worktree`, `Explicit`; у ленивого владельца сначала его индекс); `full` и `accept_model_change` — `invalid_params`, `data.kind = worktree_unsupported`; владелец не готов — `project_unavailable`. Вызов MCP с видом worktree (явным или из `cwd`) продлевает аренду слежения `observe_worktree_mcp` (час, Т-10). В историю MCP `wt` входит в разрешённые поля `requested` у всех инструментов; применённые `resolved_wt` и `wt_source` пишет разрешение цели (6.3.1).
+- **CLI.** `--wt` — глобальный флаг рядом с `--project`; у `register`, `unregister`, `projects`, `install`, `uninstall`, `autostart` он отклоняется `invalid_params` до обращения к воркеру (`projects --filter` несовместим с ним на уровне разбора аргументов). `reindex --wt` печатает «Сверка worktree принята…». Строка `worktree_note` ответа печатается над текстом; `--json` печатает ответ как есть. `worktree_not_found` — код выхода 1.
+
 ### bars_status: часть WORKTREES
 
 У проекта-владельца ответ получает часть **[новое]** `WORKTREES` (как PROJECT, INDEX и остальные, со своей ошибкой при сбое):

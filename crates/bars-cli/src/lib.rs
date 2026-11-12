@@ -41,6 +41,11 @@ pub struct Cli {
     /// текущей папки.
     #[arg(long, global = true, value_name = "ПУТЬ")]
     pub project: Option<String>,
+    /// Worktree проекта: имя из `.git/worktrees/<имя>`, абсолютный путь или `.` (основной
+    /// checkout). Без флага — worktree текущей папки, если она внутри него. У `reindex` флаг
+    /// запускает сверку worktree; `reindex --full` с ним не принимается.
+    #[arg(long, global = true, value_name = "ИМЯ|ПУТЬ|.")]
+    pub wt: Option<String>,
     #[command(subcommand)]
     pub command: Command,
 }
@@ -92,7 +97,7 @@ pub enum Command {
         /// Только записи реестра, в имени, составном имени (главный/путь) или пути которых есть
         /// этот текст (без учёта регистра, `\` равен `/`); подпроекты и worktree входят.
         /// Несовместим с `--project`.
-        #[arg(long, value_name = "ТЕКСТ", conflicts_with = "project")]
+        #[arg(long, value_name = "ТЕКСТ", conflicts_with_all = ["project", "wt"])]
         filter: Option<String>,
     },
     /// Состояние индекса проекта.
@@ -413,7 +418,16 @@ fn emit<T>(
         // Ответ воркера как есть: поля, которых клиент не знает, не теряются.
         serde_json::to_string_pretty(&reply.raw).expect("ответ воркера сериализуется")
     } else {
-        human(&reply.typed)
+        // Пометка worktree («граф и аудиты — у основного checkout») — строкой над ответом.
+        match reply
+            .raw
+            .get("worktree_note")
+            .and_then(serde_json::Value::as_str)
+            .filter(|note| !note.trim().is_empty())
+        {
+            Some(note) => format!("{note}\n{}", human(&reply.typed)),
+            None => human(&reply.typed),
+        }
     };
     writeln!(out, "{text}")?;
     Ok(())
@@ -424,6 +438,33 @@ async fn call<M: Method>(client: &mut Client, params: &M) -> Result<Reply<M::Out
     let typed = serde_json::from_value(raw.clone())
         .map_err(|error| ClientError::BadReply(error.to_string()))?;
     Ok(Reply { typed, raw })
+}
+
+/// `--wt` у команд, которым вид worktree не нужен: worktree проектом не регистрируется, снятие
+/// и установка не про вид, реестр и автозапуск — не про проект. Тихо игнорировать флаг нельзя:
+/// агент решил бы, что команда выполнена по worktree.
+fn reject_unsupported_wt(command: &Command, target: &Target) -> Result<(), ClientError> {
+    let name = match command {
+        Command::Register { .. } => "register",
+        Command::Unregister => "unregister",
+        Command::Projects { .. } => "projects",
+        Command::Install(_) => "install",
+        Command::Uninstall { .. } => "uninstall",
+        Command::Autostart { .. } => "autostart",
+        _ => return Ok(()),
+    };
+    if target.wt.is_none() {
+        return Ok(());
+    }
+    let hint = if name == "register" {
+        "worktree проектом не регистрируется: его документы видны через проект-владелец и --wt"
+    } else {
+        "флаг относится к командам поиска, чтения, status и reindex"
+    };
+    Err(ClientError::Rpc(bars_protocol::RpcError::bars(
+        bars_protocol::ErrorKind::InvalidParams,
+        format!("--wt не применяется к команде {name}: {hint}"),
+    )))
 }
 
 async fn execute(
@@ -439,8 +480,9 @@ async fn execute(
             .project
             .as_deref()
             .map(|value| project_arg(value, &env.cwd)),
-        wt: None,
+        wt: bars_protocol::wt_value(cli.wt.as_deref()).map(str::to_string),
     };
+    reject_unsupported_wt(&cli.command, &target)?;
     let mut client = connect(env).await?;
     if let Some(warning) = client.build_warning() {
         let _ = writeln!(err, "bars-cli: предупреждение: {warning}");
@@ -631,6 +673,9 @@ async fn execute(
             full,
             accept_model_change,
         } => {
+            // С `--wt` (не `.`) — сверка worktree; `--full` и согласие на смену модели воркер
+            // с worktree отклоняет (`invalid_params`).
+            let worktree = target.wt.as_deref().is_some_and(|wt| wt != ".");
             let params = ReindexParams {
                 target,
                 full,
@@ -640,7 +685,13 @@ async fn execute(
                 out,
                 json,
                 &call(&mut client, &params).await?,
-                render::reindex,
+                |output| {
+                    if worktree && output.accepted {
+                        "Сверка worktree принята. Ход — в bars-cli status --wt <имя>.".to_string()
+                    } else {
+                        render::reindex(output)
+                    }
+                },
             )
         }
         Command::Register { path, root } => {

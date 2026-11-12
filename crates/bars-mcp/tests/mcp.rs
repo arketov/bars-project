@@ -450,6 +450,8 @@ mod module_scope;
 mod pool;
 #[path = "support/project_catalog.rs"]
 mod project_catalog;
+#[path = "support/worktree.rs"]
+mod worktree;
 
 struct Harness {
     home: TempDir,
@@ -675,7 +677,7 @@ async fn every_graph_tool_lists_only_its_own_parameters() {
     harness.show_graph_tools();
     let mut mcp = harness.connect(harness.env(&root));
     mcp.initialize().await;
-    let common = ["project", "format", "modules", "files", "timeout_ms"];
+    let common = ["project", "wt", "format", "modules", "files", "timeout_ms"];
     let own: [(&str, &[&str]); 6] = [
         (
             "bars_relations",

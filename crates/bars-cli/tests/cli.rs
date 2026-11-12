@@ -681,3 +681,115 @@ async fn session_start_hook_registers_project_and_never_fails() {
     };
     assert_eq!(bars(&dead, &["hook", "session-start"]).await.code, 0);
 }
+
+/// Основной checkout `main` и worktree `feat-x` вне проекта (`docs/features/projects/worktrees.md`):
+/// `docs/only-wt.md` есть только в worktree.
+fn repo_with_worktree(projects: &Path) -> (PathBuf, PathBuf) {
+    let main = projects.join("main");
+    fs::create_dir_all(main.join("docs")).unwrap();
+    fs::write(main.join("docs/guide.md"), "# Руководство\n\nТекст основного.\n").unwrap();
+    let admin = main.join(".git/worktrees/feat-x");
+    fs::create_dir_all(&admin).unwrap();
+    let work = projects.join("runs").join("feat-x");
+    fs::create_dir_all(work.join("docs")).unwrap();
+    fs::write(work.join("docs/guide.md"), "# Руководство\n\nТекст worktree.\n").unwrap();
+    fs::write(
+        work.join("docs/only-wt.md"),
+        "# Только в worktree\n\nzqonlyworktreeword\n",
+    )
+    .unwrap();
+    fs::write(admin.join("HEAD"), "ref: refs/heads/feat/x\n").unwrap();
+    fs::write(admin.join("commondir"), "../..\n").unwrap();
+    fs::write(
+        admin.join("gitdir"),
+        work.join(".git").to_string_lossy().replace('\', "/"),
+    )
+    .unwrap();
+    fs::write(
+        work.join(".git"),
+        format!("gitdir: {}\n", admin.to_string_lossy().replace('\', "/")),
+    )
+    .unwrap();
+    (main, work)
+}
+
+/// `--wt` доходит до цели вызова: status показывает только этот worktree, неизвестный — код 1
+/// со списком worktree, `reindex --wt` — сверка, `reindex --full --wt` — `invalid_params`,
+/// `register --wt` не существует. Тест не запускался: сборка запрещена в этом шаге.
+#[tokio::test(flavor = "multi_thread")]
+async fn wt_parameter_reaches_target() {
+    let harness = Harness::new("wt-target");
+    let (main, _work) = repo_with_worktree(harness.projects.path());
+    let env = harness.env_in(&main);
+    assert_eq!(bars(&env, &["register"]).await.code, 0);
+    wait_status(&env, "первая индексация", indexed).await;
+
+    // Часть WORKTREES: без `--wt` — все живые worktree, с `--wt` — только выбранный.
+    let all = json(&bars(&env, &["--json", "status"]).await);
+    assert_eq!(all["worktrees"].as_array().unwrap().len(), 1);
+    let one = json(&bars(&env, &["--json", "status", "--wt", "feat-x"]).await);
+    assert_eq!(one["worktrees"][0]["name"], "feat-x");
+    assert_eq!(one["worktrees"][0]["branch"], "feat/x");
+    assert_eq!(one["worktrees"][0]["delta"]["state"], "none", "status дельту не строит");
+
+    // Основной checkout явно.
+    let main_only = bars(&env, &["search", "--wt", ".", "zqonlyworktreeword"]).await;
+    assert_eq!(main_only.code, 0, "{}", main_only.err);
+    assert!(!main_only.out.contains("only-wt.md"), "{}", main_only.out);
+
+    // Неизвестный `wt`: код 1, в ошибке названы worktree проекта с ветками.
+    let unknown = bars(&env, &["--json", "read", "docs/guide.md", "--wt", "nope"]).await;
+    assert_eq!(unknown.code, 1);
+    let error: Value = serde_json::from_str(&unknown.err).unwrap();
+    assert_eq!(error["error"]["kind"], "worktree_not_found");
+    assert!(
+        error["error"]["message"].as_str().unwrap().contains("feat/x"),
+        "{}",
+        unknown.err
+    );
+
+    // Чтение по диску worktree без дельты.
+    let read = bars(&env, &["read", "docs/guide.md", "--wt", "feat-x"]).await;
+    assert_eq!(read.code, 0, "{}", read.err);
+    assert!(read.out.contains("Текст worktree."), "{}", read.out);
+
+    // Сверка вида: первое обращение строит дельту; `--full` с `--wt` не принимается.
+    let sync = bars(&env, &["reindex", "--wt", "feat-x"]).await;
+    assert_eq!(sync.code, 0, "{}", sync.err);
+    assert!(sync.out.contains("worktree"), "{}", sync.out);
+    let deadline = Instant::now() + Duration::from_secs(60);
+    loop {
+        let status = json(&bars(&env, &["--json", "status", "--wt", "feat-x"]).await);
+        if status["worktrees"][0]["delta"]["state"] == "ready" {
+            break;
+        }
+        assert!(Instant::now() < deadline, "дельта не построена");
+        tokio::time::sleep(Duration::from_millis(50)).await;
+    }
+    let found = bars(&env, &["search", "--wt", "feat-x", "zqonlyworktreeword"]).await;
+    assert_eq!(found.code, 0, "{}", found.err);
+    assert!(found.out.contains("only-wt.md"), "{}", found.out);
+    assert!(found.out.contains("worktree feat-x"), "область названа: {}", found.out);
+
+    let full = bars(&env, &["--json", "reindex", "--full", "--wt", "feat-x"]).await;
+    assert_eq!(full.code, 1);
+    let error: Value = serde_json::from_str(&full.err).unwrap();
+    assert_eq!(error["error"]["kind"], "invalid_params");
+
+    // Команды без вида worktree флаг отклоняют, а не игнорируют.
+    let register = bars(&env, &["register", "--wt", "feat-x"]).await;
+    assert_eq!(register.code, 1, "{}", register.out);
+    assert!(register.err.contains("--wt"), "{}", register.err);
+}
+
+/// `projects --filter` с `--wt` не разбирается: фильтр ищет по всему реестру.
+#[test]
+fn wt_flag_is_checked_before_the_worker_is_called() {
+    let parse = |args: &[&str]| {
+        Cli::try_parse_from(std::iter::once("bars-cli").chain(args.iter().copied()))
+    };
+    assert!(parse(&["projects", "--filter", "x", "--wt", "a"]).is_err());
+    let cli = parse(&["status", "--wt", "feat-x"]).unwrap();
+    assert_eq!(cli.wt.as_deref(), Some("feat-x"));
+    assert!(parse(&["--wt", ".", "search", "q"]).is_ok());
+}

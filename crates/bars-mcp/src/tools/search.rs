@@ -35,6 +35,10 @@ pub struct SearchArgs {
     #[serde(default)]
     pub diagnostic: bool,
     pub project: Option<String>,
+    /// Worktree of the project: a name from `.git/worktrees/<name>` or an absolute path; "." —
+    /// the main checkout. Default: the worktree of the session's cwd. Searches that worktree's
+    /// files; like is not available there.
+    pub wt: Option<String>,
 }
 
 #[derive(Debug, Deserialize, schemars::JsonSchema)]
@@ -59,6 +63,10 @@ pub struct GraphSearchArgs {
     #[serde(default)]
     pub diagnostic: bool,
     pub project: Option<String>,
+    /// Worktree of the project: a name from `.git/worktrees/<name>` or an absolute path; "." —
+    /// the main checkout. Default: the worktree of the session's cwd. Graph modes answer from the
+    /// main checkout with a note.
+    pub wt: Option<String>,
     /// hybrid — plain search; mix — plus related sources from the graph (voluminous, set
     /// related_budget); graph — relations instead of fragments. Without mode — the same three
     /// queries as the base bars_search.
@@ -93,7 +101,7 @@ impl BarsMcp {
         };
         if let Some(like) = args.like.clone() {
             let params = bars_protocol::LikeParams {
-                target: self.target(args.project),
+                target: self.target(args.project, args.wt),
                 source: like,
                 paths,
                 limit: args.limit,
@@ -120,7 +128,7 @@ impl BarsMcp {
                 None => (query, false),
             };
             let params = bars_protocol::DiskTextParams {
-                target: self.target(args.project),
+                target: self.target(args.project, args.wt),
                 query: needle,
                 case_sensitive: false,
                 regex,
@@ -140,7 +148,7 @@ impl BarsMcp {
             );
         }
         let params = bars_protocol::SearchParams {
-            target: self.target(args.project),
+            target: self.target(args.project, args.wt),
             query,
             diagnostic: args.diagnostic,
             modules: Vec::new(),
@@ -182,6 +190,7 @@ impl BarsMcp {
                         detail: args.detail,
                         diagnostic: args.diagnostic,
                         project: args.project,
+                        wt: args.wt,
                     },
                     original,
                 )
@@ -204,7 +213,7 @@ impl BarsMcp {
             )]);
         };
         let search = bars_protocol::SearchParams {
-            target: self.target(args.project),
+            target: self.target(args.project, args.wt),
             query,
             diagnostic: args.diagnostic,
             modules: Vec::new(),
@@ -223,8 +232,8 @@ impl BarsMcp {
             include_related: args.include_related.unwrap_or(true),
             related_budget: args.related_budget,
         };
-        present(
-            self.call_observed(&params, Some(&original)).await,
+        present_noted(
+            self.call_noted(&params, Some(&original)).await,
             bars_protocol::graph_text::render_graph_search_text,
         )
     }
@@ -268,8 +277,10 @@ impl BarsMcp {
                        for regex), paginated by cursor. Narrow the scope with in: path prefixes \
                        (features, features/search, adr/0007.md); nested folders work, several \
                        prefixes union; unclear kind of knowledge — search the whole project and \
-                       widen after weak results. Zero results do not prove absence: check \
-                       subject, project, scope."
+                       widen after weak results. wt searches a git worktree of the project \
+                       instead of the main checkout (default: the worktree of the session's \
+                       cwd; wt=\".\" — the main checkout). Zero results do not prove absence: \
+                       check subject, project, scope."
     )]
     async fn bars_search(
         &self,
@@ -290,7 +301,8 @@ impl BarsMcp {
                        mode=graph returns relations instead of fragments; without mode — the \
                        same three queries as the base search (question, like, occurrences). \
                        Scope with in: path prefixes (features, features/search); empty — whole \
-                       project. Zero results do not prove absence: check subject, project, scope."
+                       project. wt selects a git worktree (wt=\".\" — the main checkout). Zero \
+                       results do not prove absence: check subject, project, scope."
     )]
     async fn bars_search_graph(
         &self,
