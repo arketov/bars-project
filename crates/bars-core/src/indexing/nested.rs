@@ -313,7 +313,11 @@ mod tests {
         ]);
         let dirs = [
             // Папка без точки рядом с подпроектом: исключается из внешнего, не только у владельца.
-            worktree("worker-wt", "/wt-areas/a/backend/worker", "/wt-areas/a/backend/worker-wt"),
+            worktree(
+                "worker-wt",
+                "/wt-areas/a/backend/worker",
+                "/wt-areas/a/backend/worker-wt",
+            ),
             worktree("wt-foo", "/wt-areas/a", "/wt-areas/a/wt-foo"),
             // Папка вне проекта ему не мешает.
             worktree("away", "/wt-areas/solo", "/wt-areas/elsewhere/away"),

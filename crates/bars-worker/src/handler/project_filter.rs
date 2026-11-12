@@ -170,7 +170,7 @@ mod tests {
         // Имя, ветка и путь worktree; регистр и `\` не важны.
         assert_eq!(matching(&all, "api-avatar"), [0]);
         assert_eq!(matching(&all, "AVATAR-UPLOAD"), [0]);
-        assert_eq!(matching(&all, "runs\api"), [0]);
+        assert_eq!(matching(&all, r"runs\api"), [0]);
         assert!(matching(&all, "quorum").is_empty());
         let found = worktree_matches(&all[0], "feat/avatar");
         assert_eq!(found.len(), 1);

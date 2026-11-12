@@ -60,7 +60,8 @@ impl<S> FromContextPart<ToolCallContext<'_, S>> for Original {
             ],
             "bars_status" => &["project", "wt", "all", "refresh", "filter"],
             "bars_audit" => &[
-                "project", "wt", "kind", "action", "id", "revision", "in", "cursor", "limit", "show",
+                "project", "wt", "kind", "action", "id", "revision", "in", "cursor", "limit",
+                "show",
             ],
             _ => &[],
         };

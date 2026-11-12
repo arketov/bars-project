@@ -268,9 +268,11 @@ pub async fn document_action(
     let absolute = crate::documents::indexed_path(&root, &path)?;
     if action == "check" {
         match &view.wt {
-            Some(name) => handler
-                .worker()
-                .edit_worktree_files(&view.owner, name, vec![absolute.clone()]),
+            Some(name) => {
+                handler
+                    .worker()
+                    .edit_worktree_files(&view.owner, name, vec![absolute.clone()])
+            }
             None => handler
                 .worker()
                 .check_files(&root, vec![absolute.clone()])
@@ -315,7 +317,9 @@ pub fn worktree_observe(
     }
     handler.worker().observe_worktree_window(
         window.label(),
-        shown.as_ref().map(|(owner, name)| (owner.as_path(), name.as_str())),
+        shown
+            .as_ref()
+            .map(|(owner, name)| (owner.as_path(), name.as_str())),
     );
     Ok(())
 }
@@ -350,7 +354,9 @@ pub struct ViewRoots {
 /// Нет такого worktree — отказ с текстом; вид без папки на диске даёт отказ чтения позже.
 pub fn view_roots(state: &Shared, project: &str, wt: Option<&str>) -> Result<ViewRoots, String> {
     let (owner, docs_root) = document_roots(state, project)?;
-    let wanted = wt.map(str::trim).filter(|value| !value.is_empty() && *value != ".");
+    let wanted = wt
+        .map(str::trim)
+        .filter(|value| !value.is_empty() && *value != ".");
     let Some(wanted) = wanted else {
         return Ok(ViewRoots {
             root: owner.clone(),

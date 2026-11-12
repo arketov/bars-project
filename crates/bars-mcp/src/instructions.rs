@@ -171,6 +171,9 @@ mod tests {
         );
         project.worktree.as_mut().unwrap().branch = None;
         let text = session_instructions(false, Some(&project));
-        assert!(text.contains("worktree `feat-x` (detached) modules:"), "{text}");
+        assert!(
+            text.contains("worktree `feat-x` (detached) modules:"),
+            "{text}"
+        );
     }
 }

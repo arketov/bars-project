@@ -38,9 +38,7 @@ pub fn worker_error(error: WorkerError) -> RpcError {
         ),
         WorkerError::Resolve(ResolveError::Ambiguous { .. })
         | WorkerError::NotADirectory(_)
-        | WorkerError::Registry(
-            RegistryError::NotAbsolute(_) | RegistryError::DiscoveredRename,
-        ) => {
+        | WorkerError::Registry(RegistryError::NotAbsolute(_) | RegistryError::DiscoveredRename) => {
             RpcError::bars(ErrorKind::InvalidParams, text)
         }
         WorkerError::Unavailable(_) => RpcError::bars(ErrorKind::ProjectUnavailable, text),
@@ -132,10 +130,10 @@ pub fn worktree_not_found(
         let list = available
             .iter()
             .map(|item| {
-                let branch = item
-                    .branch
-                    .as_deref()
-                    .map_or_else(|| "detached".to_string(), |branch| format!("ветка {branch}"));
+                let branch = item.branch.as_deref().map_or_else(
+                    || "detached".to_string(),
+                    |branch| format!("ветка {branch}"),
+                );
                 format!("«{}» ({branch}, {})", item.name, item.path.display())
             })
             .collect::<Vec<_>>()

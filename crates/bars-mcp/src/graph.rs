@@ -437,8 +437,8 @@ impl BarsMcp {
             // JSON — ответ воркера: пометка остаётся полем `worktree_note`, строка сломала бы разбор.
             Format::Json => present(
                 result.map(|(output, note)| {
-                    let mut value = serde_json::to_value(&output)
-                        .expect("ответы методов сериализуются");
+                    let mut value =
+                        serde_json::to_value(&output).expect("ответы методов сериализуются");
                     if let (Some(map), Some(note)) = (value.as_object_mut(), note) {
                         map.insert("worktree_note".into(), serde_json::Value::String(note));
                     }

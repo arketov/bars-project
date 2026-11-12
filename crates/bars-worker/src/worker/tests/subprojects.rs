@@ -4,7 +4,9 @@ use super::*;
 
 /// Репозиторий: каталог `.git` и, при `docs`, `docs/x.md`.
 fn repo(root: &Path, rel: &str, docs: bool) -> PathBuf {
-    let path = rel.split('/').fold(root.to_path_buf(), |dir, part| dir.join(part));
+    let path = rel
+        .split('/')
+        .fold(root.to_path_buf(), |dir, part| dir.join(part));
     fs::create_dir_all(path.join(".git")).unwrap();
     if docs {
         fs::create_dir_all(path.join("docs")).unwrap();
@@ -159,7 +161,10 @@ async fn opening_a_lazy_subproject_in_a_window_wakes_it() {
     let (worker, main) = discovered(&env).await;
     let api = api_of(&main);
     worker.observe_window("main", Some(&main)).unwrap();
-    assert!(entry(&worker, &api).unwrap().lazy, "главный не будит подпроекты");
+    assert!(
+        entry(&worker, &api).unwrap().lazy,
+        "главный не будит подпроекты"
+    );
     worker.observe_window("main", Some(&api)).unwrap();
     assert!(!entry(&worker, &api).unwrap().lazy);
     assert!(api.join(".bars").join("config.toml").is_file());
@@ -301,7 +306,11 @@ async fn removing_the_main_project_removes_its_discovered_subprojects_only() {
     idle(&worker).await;
     worker.unregister(&main.display().to_string()).unwrap();
     let left: Vec<PathBuf> = lock(&worker.inner.registry).paths();
-    assert_eq!(left, vec![web.clone()], "найденные ушли, самостоятельный остался");
+    assert_eq!(
+        left,
+        vec![web.clone()],
+        "найденные ушли, самостоятельный остался"
+    );
     assert!(web.join(".bars").is_dir());
     assert!(!lock(&worker.inner.projects).contains_key(&api_of(&main)));
     worker.shutdown().await;
@@ -378,7 +387,9 @@ async fn registered_nested_projects_are_not_reindexed_or_rewritten_by_discovery(
     // Доступен и своим именем, и составным.
     assert_eq!(worker.resolve("web-angular").unwrap(), web);
     assert_eq!(
-        worker.resolve("tmc-opovechenie/frontend/web-angular").unwrap(),
+        worker
+            .resolve("tmc-opovechenie/frontend/web-angular")
+            .unwrap(),
         web
     );
     worker.shutdown().await;

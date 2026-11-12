@@ -10,9 +10,7 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 
 use rusqlite::params_from_iter;
 
-use super::{
-    Scope, SearchError, SearchHit, escape_like, load_hits_numbered, placeholders,
-};
+use super::{Scope, SearchError, SearchHit, escape_like, load_hits_numbered, placeholders};
 use crate::search::fulltext::{ExactProbe, f_signal, p_signal};
 use crate::search::operators::OperatorFilter;
 use crate::storage::Index;
@@ -139,10 +137,11 @@ impl<'a> IndexView<'a> {
         limit: usize,
     ) -> Result<Vec<(i64, f32)>, SearchError> {
         let owner_scope = self.owner_scope(scope);
-        let mut rows = owner_scope
-            .as_ref()
-            .unwrap_or(scope)
-            .text_scored(self.owner, match_query, limit)?;
+        let mut rows =
+            owner_scope
+                .as_ref()
+                .unwrap_or(scope)
+                .text_scored(self.owner, match_query, limit)?;
         if let Some(delta) = self.delta {
             rows.extend(
                 scope
@@ -380,9 +379,9 @@ fn exists(index: &Index, sql: &str, params: &[&str]) -> Result<bool, SearchError
 }
 
 fn pairs(index: &Index, condition: &str) -> Result<Vec<(String, String)>, SearchError> {
-    let mut statement = index
-        .conn()
-        .prepare(&format!("SELECT module, path FROM documents WHERE {condition}"))?;
+    let mut statement = index.conn().prepare(&format!(
+        "SELECT module, path FROM documents WHERE {condition}"
+    ))?;
     let rows = statement
         .query_map([], |row| {
             Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))

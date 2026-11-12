@@ -18,14 +18,14 @@ mod folders;
 mod icons;
 #[cfg(test)]
 mod link_move_tests;
-#[cfg(test)]
-mod worktree_view_tests;
 mod tray;
 mod tree_io;
 #[cfg(test)]
 mod tree_io_tests;
 mod window;
 mod window_updates;
+#[cfg(test)]
+mod worktree_view_tests;
 
 use std::sync::Arc;
 

@@ -1730,7 +1730,6 @@ mod tests {
         assert!(call.window_only());
         assert!(!call.allowed_for(ClientKind::Cli));
         assert!(!call.allowed_for(ClientKind::Mcp));
-        wt: None,
         let missing = Request::new(
             Id::Number(2),
             "project_delete",
@@ -1743,6 +1742,7 @@ mod tests {
         Target {
             cwd: "C:\\work\\proj".to_string(),
             project: None,
+            wt: None,
         }
     }
 
@@ -1802,7 +1802,6 @@ mod tests {
         AutostartGet(AutostartGetParams),
         AutostartSet(AutostartSetParams)
     );
-    wt: None,
 
     #[test]
     fn every_method_roundtrips_through_a_request() {
@@ -1815,6 +1814,7 @@ mod tests {
             target: Target {
                 cwd: "c".into(),
                 project: Some("bars".into()),
+                wt: None,
             },
             query: "настройки поиска".into(),
             diagnostic: true,

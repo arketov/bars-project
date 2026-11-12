@@ -510,10 +510,7 @@ impl Inner {
                         Ok(true) => added.push(path.clone()),
                         Ok(false) => {}
                         Err(error) => {
-                            log::warn!(
-                                "Подпроект {} не записан в реестр: {error}",
-                                path.display()
-                            );
+                            log::warn!("Подпроект {} не записан в реестр: {error}", path.display());
                             break;
                         }
                     }
@@ -765,7 +762,11 @@ mod tests {
         let result = relative(&main, &found(&main, "docs", &[api.clone()]));
         assert_eq!(
             result,
-            ["backend/worker", "frontend/web-angular", "frontend/web-design"]
+            [
+                "backend/worker",
+                "frontend/web-angular",
+                "frontend/web-design"
+            ]
         );
     }
 
@@ -832,7 +833,10 @@ mod tests {
     fn rule_needs_git_directory_markdown_and_a_place_inside_the_main_project() {
         let (temp, main) = opovechenie();
         assert!(matches_rule(&main, "docs", &main.join("backend/api")));
-        assert!(!matches_rule(&main, "docs", &main.join("deploy")), "нет docs/");
+        assert!(
+            !matches_rule(&main, "docs", &main.join("deploy")),
+            "нет docs/"
+        );
         assert!(
             !matches_rule(&main, "docs", &main.join("backend/api-wt-quorum")),
             "файл .git"
@@ -889,6 +893,9 @@ mod tests {
                 target.display()
             );
         }
-        assert_eq!(candidate_on_path(&main, ".", &main.join("backend/api")), None);
+        assert_eq!(
+            candidate_on_path(&main, ".", &main.join("backend/api")),
+            None
+        );
     }
 }

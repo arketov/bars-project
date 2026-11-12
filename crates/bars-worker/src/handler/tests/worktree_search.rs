@@ -12,7 +12,11 @@ use bars_protocol::{DeltaState, DiskLinksParams, DiskTextParams, GraphStatusPara
 pub(super) fn repo_with_worktree(projects: &Path) -> (PathBuf, PathBuf) {
     let main = projects.join("main");
     fs::create_dir_all(main.join("docs")).unwrap();
-    fs::write(main.join("docs/guide.md"), "# Руководство\n\nТекст основного.\n").unwrap();
+    fs::write(
+        main.join("docs/guide.md"),
+        "# Руководство\n\nТекст основного.\n",
+    )
+    .unwrap();
     let admin = main.join(".git/worktrees/feat-x");
     fs::create_dir_all(&admin).unwrap();
     let work = projects.join("runs").join("feat-x");
@@ -136,13 +140,21 @@ async fn search_while_building_answers_from_owner_with_note() {
     assert_eq!(info.branch.as_deref(), Some("feat/x"));
     assert_ne!(info.state, DeltaState::Ready);
     let note = info.note.as_deref().expect("пометка над результатами");
-    assert!(note.contains("feat-x") && note.contains("основному checkout"), "{note}");
+    assert!(
+        note.contains("feat-x") && note.contains("основному checkout"),
+        "{note}"
+    );
     assert!(
         output.results.iter().any(|hit| hit.path == "docs/guide.md"),
         "ответ идёт по владельцу"
     );
     // Версии worktree в ответе владельца нет.
-    assert!(output.results.iter().all(|hit| !hit.text.contains("Раздел worktree")));
+    assert!(
+        output
+            .results
+            .iter()
+            .all(|hit| !hit.text.contains("Раздел worktree"))
+    );
 
     // Дельта достроилась: слияние, пометки нет, новый документ виден только с `wt`.
     handler.index_resume();
@@ -152,14 +164,27 @@ async fn search_while_building_answers_from_owner_with_note() {
     let merged = handler.search(only).await.unwrap();
     let info = merged.applied.scope.worktree.as_ref().unwrap();
     assert_eq!(info.state, DeltaState::Ready);
-    assert!(info.delta_documents >= 2, "guide.md изменён, only-wt.md новый: {info:?}");
-    assert!(merged.results.iter().any(|hit| hit.path == "docs/only-wt.md"));
+    assert!(
+        info.delta_documents >= 2,
+        "guide.md изменён, only-wt.md новый: {info:?}"
+    );
+    assert!(
+        merged
+            .results
+            .iter()
+            .any(|hit| hit.path == "docs/only-wt.md")
+    );
     let from_main = handler
         .search(search(&main, "zqonlyworktreeword"))
         .await
         .unwrap();
     assert!(from_main.applied.scope.worktree.is_none());
-    assert!(from_main.results.iter().all(|hit| hit.path != "docs/only-wt.md"));
+    assert!(
+        from_main
+            .results
+            .iter()
+            .all(|hit| hit.path != "docs/only-wt.md")
+    );
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -174,10 +199,15 @@ async fn read_outline_occurrences_use_worktree_disk_without_delta() {
     let wt = target_wt(&main, Some("feat-x"));
 
     // Чтение: текст и ревизия — из файла W, и документ, которого у владельца нет.
-    let read = handler.read(read_params(wt.clone(), "docs/guide.md")).unwrap();
+    let read = handler
+        .read(read_params(wt.clone(), "docs/guide.md"))
+        .unwrap();
     assert!(read.text.contains("Текст worktree"), "{}", read.text);
     let disk = fs::read_to_string(work.join("docs/guide.md")).unwrap();
-    assert_eq!(read.revision, blake3::hash(disk.as_bytes()).to_hex().to_string());
+    assert_eq!(
+        read.revision,
+        blake3::hash(disk.as_bytes()).to_hex().to_string()
+    );
     let only = handler.read(read_params(wt.clone(), "only-wt.md")).unwrap();
     assert!(only.text.contains("zqonlyworktreeword"));
     // Основной checkout читает свой файл.
@@ -202,7 +232,12 @@ async fn read_outline_occurrences_use_worktree_disk_without_delta() {
             under_line: None,
         })
         .unwrap();
-    assert!(outline.headings.iter().any(|heading| heading.text == "Раздел worktree"));
+    assert!(
+        outline
+            .headings
+            .iter()
+            .any(|heading| heading.text == "Раздел worktree")
+    );
 
     // Точный поиск обходит корень вида.
     let found = handler
@@ -233,7 +268,11 @@ async fn read_outline_occurrences_use_worktree_disk_without_delta() {
         .unwrap()
         .folder
         .unwrap();
-    let names: Vec<&str> = listing.entries.iter().map(|entry| entry.name.as_str()).collect();
+    let names: Vec<&str> = listing
+        .entries
+        .iter()
+        .map(|entry| entry.name.as_str())
+        .collect();
     assert!(names.contains(&"only-wt.md"), "{names:?}");
     assert!(names.contains(&"guide.md"), "{names:?}");
 
@@ -263,7 +302,10 @@ async fn graph_audit_links_answer_from_owner_with_note() {
         .await
         .unwrap();
     let note = graph["worktree_note"].as_str().expect("пометка у графа");
-    assert!(note.contains("feat-x") && note.contains("только у основного checkout"), "{note}");
+    assert!(
+        note.contains("feat-x") && note.contains("только у основного checkout"),
+        "{note}"
+    );
     let links = handler
         .dispatch(Call::DiskLinks(DiskLinksParams {
             target: target_wt(&main, Some("feat-x")),
@@ -358,7 +400,6 @@ trait UnwrapErrOrDefault {
 
 impl UnwrapErrOrDefault for Result<(), RpcError> {
     fn unwrap_err_or_default(self) -> RpcError {
-        self.err()
-            .unwrap_or_else(|| RpcError::standard(0, "успех"))
+        self.err().unwrap_or_else(|| RpcError::standard(0, "успех"))
     }
 }

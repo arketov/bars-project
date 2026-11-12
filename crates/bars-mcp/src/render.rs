@@ -776,9 +776,7 @@ pub fn worktrees_part(items: &[bars_protocol::WorktreeStatus]) -> Option<String>
         }
         let delta = &item.delta;
         let state = match delta.state {
-            bars_protocol::DeltaState::None => {
-                "delta: none (built on first use)".to_string()
-            }
+            bars_protocol::DeltaState::None => "delta: none (built on first use)".to_string(),
             bars_protocol::DeltaState::Building => match (delta.done, delta.total) {
                 (Some(done), Some(total)) => format!("delta: building {done} of {total}"),
                 _ => "delta: building".to_string(),
@@ -1692,9 +1690,17 @@ mod tests {
             projects: vec![main, found, own],
             registry_total: None,
         });
-        assert!(text.contains("name: main/backend/api\nsubproject_of: main\norigin: discovered\n"), "{text}");
+        assert!(
+            text.contains("name: main/backend/api\nsubproject_of: main\norigin: discovered\n"),
+            "{text}"
+        );
         assert!(text.contains("modules: none (not indexed yet)"), "{text}");
-        assert!(text.contains("name: main/web\nalso_named: web-angular\nsubproject_of: main\norigin: registered\n"), "{text}");
+        assert!(
+            text.contains(
+                "name: main/web\nalso_named: web-angular\nsubproject_of: main\norigin: registered\n"
+            ),
+            "{text}"
+        );
         assert!(
             text.contains("subprojects: main/backend/api (lazy, excluded from this index)"),
             "{text}"
@@ -1720,7 +1726,11 @@ mod tests {
         assert_eq!(date_of_rfc("2026-11-09T12:00:00Z"), "2026-11-09");
     }
 
-    fn worktree(name: &str, branch: Option<&str>, state: bars_protocol::DeltaState) -> bars_protocol::WorktreeStatus {
+    fn worktree(
+        name: &str,
+        branch: Option<&str>,
+        state: bars_protocol::DeltaState,
+    ) -> bars_protocol::WorktreeStatus {
         bars_protocol::WorktreeStatus {
             name: name.into(),
             path: format!("C:/runs/{name}"),
@@ -1741,7 +1751,11 @@ mod tests {
     #[test]
     fn worktrees_part_lists_branch_lock_delta_and_session() {
         assert_eq!(worktrees_part(&[]), None);
-        let mut first = worktree("quorum", Some("feat/quorum"), bars_protocol::DeltaState::Ready);
+        let mut first = worktree(
+            "quorum",
+            Some("feat/quorum"),
+            bars_protocol::DeltaState::Ready,
+        );
         first.current = true;
         let mut second = worktree("api-avatar", None, bars_protocol::DeltaState::None);
         second.locked = Some("на флешке".into());

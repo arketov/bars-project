@@ -159,7 +159,12 @@ async fn lazy_subproject_owner_has_visible_worktrees_without_an_index() {
     fs::write(worker_repo.join("docs/x.md"), DOC).unwrap();
     git_dir(&worker_repo);
     let work = main.join("backend").join("worker-wt-quorum");
-    add_worktree(&worker_repo, "worker-wt-quorum", &work, "ref: refs/heads/q\n");
+    add_worktree(
+        &worker_repo,
+        "worker-wt-quorum",
+        &work,
+        "ref: refs/heads/q\n",
+    );
     let runtime = env.start();
     runtime.register(&main).unwrap();
     idle(&runtime).await;
@@ -169,7 +174,10 @@ async fn lazy_subproject_owner_has_visible_worktrees_without_an_index() {
     assert!(runtime.inner.is_lazy(&worker_repo));
     let linked = runtime.linked_worktrees(&worker_repo);
     assert_eq!(linked.len(), 1, "worktree ленивого владельца обнаружены");
-    assert!(runtime.linked_worktrees(&main).is_empty(), "внешний их не получает");
+    assert!(
+        runtime.linked_worktrees(&main).is_empty(),
+        "внешний их не получает"
+    );
     assert!(!worker_repo.join(".bars").exists(), "заданий и индекса нет");
     runtime.shutdown().await;
 }

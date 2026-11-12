@@ -129,7 +129,9 @@ async fn status_filter_lists_only_matching_registry_projects() {
     );
     assert!(text.contains("=== PROJECTS: 1 ==="), "{text}");
     assert!(
-        text.contains("per-project parts need one project: repeat with project=<name from this list>"),
+        text.contains(
+            "per-project parts need one project: repeat with project=<name from this list>"
+        ),
         "{text}"
     );
     assert!(text.contains("=== VERSIONS"), "{text}");
@@ -155,7 +157,9 @@ async fn status_filter_lists_only_matching_registry_projects() {
         .tool("bars_status", json!({"filter":"other","project":"other"}))
         .await;
     assert!(
-        error && text.contains("invalid_params") && text.contains("filter cannot be combined with project"),
+        error
+            && text.contains("invalid_params")
+            && text.contains("filter cannot be combined with project"),
         "{text}"
     );
     let (error, text) = mcp
@@ -163,7 +167,9 @@ async fn status_filter_lists_only_matching_registry_projects() {
         .await;
     assert!(error && text.contains("invalid_params"), "{text}");
     // Пустой результат называет размер реестра.
-    let (error, text) = mcp.tool("bars_status", json!({"filter":"no-such-project-zz"})).await;
+    let (error, text) = mcp
+        .tool("bars_status", json!({"filter":"no-such-project-zz"}))
+        .await;
     assert!(!error, "{text}");
     assert!(
         text.contains("no project matches `no-such-project-zz`; the registry has 2 projects (bars_status(all=true) lists them)"),

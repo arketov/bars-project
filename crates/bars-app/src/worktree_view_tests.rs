@@ -23,7 +23,14 @@ fn editor_write_in_view_goes_to_worktree_file() {
     let file = resolve(view.path(), "docs", "docs/a/item.md").unwrap();
     assert!(file.starts_with(view.path().canonicalize().unwrap()));
     let revision = read(&file).unwrap().revision;
-    let outcome = write(&file, "# Правка в worktree\n", Some(&revision), Eol::Lf, false).unwrap();
+    let outcome = write(
+        &file,
+        "# Правка в worktree\n",
+        Some(&revision),
+        Eol::Lf,
+        false,
+    )
+    .unwrap();
     assert!(matches!(outcome, WriteOutcome::Saved { .. }));
     assert_eq!(
         fs::read_to_string(view.path().join("docs/a/item.md")).unwrap(),
@@ -49,10 +56,18 @@ fn path_admission_is_counted_from_the_view_root() {
 #[test]
 fn rename_in_view_moves_the_file_and_leaves_links_alone() {
     let (_owner, view) = owner_and_view();
-    let plan = plan_move_without_links(view.path(), "docs", "docs/a/item.md", "docs/b", "new").unwrap();
+    let plan =
+        plan_move_without_links(view.path(), "docs", "docs/a/item.md", "docs/b", "new").unwrap();
     assert!(plan.updates.is_empty() && plan.warnings.is_empty());
-    let result =
-        move_without_links(view.path(), "docs", "docs/a/item.md", "docs/b", "new", &plan.token).unwrap();
+    let result = move_without_links(
+        view.path(),
+        "docs",
+        "docs/a/item.md",
+        "docs/b",
+        "new",
+        &plan.token,
+    )
+    .unwrap();
     assert_eq!(result.path, "docs/b/new.md");
     assert!(result.updated.is_empty());
     assert!(view.path().join("docs/b/new.md").is_file());
@@ -67,10 +82,18 @@ fn rename_in_view_moves_the_file_and_leaves_links_alone() {
 #[test]
 fn move_in_view_refuses_a_stale_token() {
     let (_owner, view) = owner_and_view();
-    let plan = plan_move_without_links(view.path(), "docs", "docs/a/item.md", "docs/b", "new").unwrap();
+    let plan =
+        plan_move_without_links(view.path(), "docs", "docs/a/item.md", "docs/b", "new").unwrap();
     assert!(
-        move_without_links(view.path(), "docs", "docs/a/item.md", "docs/b", "other", &plan.token)
-            .is_err()
+        move_without_links(
+            view.path(),
+            "docs",
+            "docs/a/item.md",
+            "docs/b",
+            "other",
+            &plan.token
+        )
+        .is_err()
     );
     assert!(view.path().join("docs/a/item.md").is_file());
 }

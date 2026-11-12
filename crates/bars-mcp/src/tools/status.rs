@@ -80,21 +80,20 @@ impl BarsMcp {
             target: (!args.all).then(|| target.clone()),
             filter: None,
         };
-        let mut lazy = false;
-        let project_path = match self.call_observed(&projects_params, Some(&original)).await {
-            Ok(output) => {
-                let path = output.projects.first().map(|project| project.path.clone());
-                // Подпроект, которого ещё не требовали: индекса нет, остальные части не зовутся.
-                lazy = !args.all
-                    && output
-                        .projects
-                        .first()
-                        .is_some_and(|project| project.state == bars_protocol::ProjectState::Lazy);
-                body.push_str(&render::projects(&output));
-                path
-            }
-            Err(error) => return failure(&error),
-        };
+        let (project_path, lazy) =
+            match self.call_observed(&projects_params, Some(&original)).await {
+                Ok(output) => {
+                    let path = output.projects.first().map(|project| project.path.clone());
+                    // Подпроект, которого ещё не требовали: индекса нет, остальные части не зовутся.
+                    let lazy = !args.all
+                        && output.projects.first().is_some_and(|project| {
+                            project.state == bars_protocol::ProjectState::Lazy
+                        });
+                    body.push_str(&render::projects(&output));
+                    (path, lazy)
+                }
+                Err(error) => return failure(&error),
+            };
         let index = bars_protocol::StatusParams {
             target: target.clone(),
         };

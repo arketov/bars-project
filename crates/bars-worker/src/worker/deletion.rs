@@ -210,8 +210,10 @@ fn delta_directories(deltas: &Path) -> io::Result<Vec<PathBuf>> {
 
 fn remove_empty_dir(folder: &Path) -> io::Result<()> {
     match fs::read_dir(folder) {
-        Ok(mut entries) if entries.next().is_none() => fs::remove_dir(folder),
-        Ok(_) => Ok(()),
+        Ok(mut entries) => match entries.next() {
+            None => fs::remove_dir(folder),
+            Some(_) => Ok(()),
+        },
         Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(()),
         Err(error) => Err(error),
     }

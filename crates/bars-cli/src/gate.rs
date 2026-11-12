@@ -136,7 +136,10 @@ fn load(path: &Path) -> State {
     };
     let mut lines = text.lines();
     State {
-        count: lines.next().and_then(|n| n.trim().parse().ok()).unwrap_or(0),
+        count: lines
+            .next()
+            .and_then(|n| n.trim().parse().ok())
+            .unwrap_or(0),
         denied: lines.next().unwrap_or_default().trim().to_string(),
     }
 }
@@ -343,7 +346,10 @@ mod tests {
             ("Glob", json!({"pattern": "**/*.md"})),
             ("Glob", json!({"pattern": "docs/**/*.md"})),
             ("Grep", json!({"pattern": "x", "glob": "*.md"})),
-            ("Grep", json!({"pattern": "x", "path": "/p/docs", "glob": "*.md"})),
+            (
+                "Grep",
+                json!({"pattern": "x", "path": "/p/docs", "glob": "*.md"}),
+            ),
         ] {
             let call = input(tool, args);
             let reason = decide(&call, "docs", dir.path()).expect("broad is denied");
@@ -363,7 +369,10 @@ mod tests {
             ("Grep", json!({"pattern": "x", "path": "/p/src"})),
             ("Glob", json!({"pattern": "crates/**/*.md"})),
             ("Glob", json!({"pattern": "*.md", "path": "/p/crates"})),
-            ("Grep", json!({"pattern": "x", "path": "/p/src", "glob": "*.md"})),
+            (
+                "Grep",
+                json!({"pattern": "x", "path": "/p/src", "glob": "*.md"}),
+            ),
             ("Bash", json!({"command": "cat docs/a.md"})),
             ("Bash", json!({"command": "git log -- docs/a.md | head"})),
             ("Edit", json!({"file_path": "/p/docs/a.md"})),
@@ -385,7 +394,10 @@ mod tests {
             input("Grep", json!({"pattern": "a", "path": "/p/docs/chats"})),
             input("Bash", json!({"command": "rg foo docs"})),
             input("Bash", json!({"command": "grep -r foo docs/features"})),
-            input("PowerShell", json!({"command": "Select-String -Path 'docs\\*' -Pattern x"})),
+            input(
+                "PowerShell",
+                json!({"command": "Select-String -Path 'docs\\*' -Pattern x"}),
+            ),
             input("PowerShell", json!({"command": "findstr /s x docs\\a.md"})),
             input("Grep", json!({"pattern": "b", "path": "/p/docs/adr"})),
         ];

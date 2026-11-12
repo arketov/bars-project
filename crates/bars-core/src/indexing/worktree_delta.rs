@@ -151,7 +151,10 @@ impl OwnerView for IndexOwner<'_> {
 /// `delta_version`, `worktree_name`.
 pub fn open_delta(owner: &Path, name: &str) -> Result<Index, DeltaError> {
     let delta = Index::open(&delta_path(owner, name), Journal::Wal)?;
-    delta.conn().execute_batch(WT_FILES_SQL)?;
+    delta
+        .conn()
+        .execute_batch(WT_FILES_SQL)
+        .map_err(StorageError::from)?;
     if delta.meta("delta_version")?.is_none() {
         delta.set_meta("delta_version", &DELTA_VERSION.to_string())?;
     }
@@ -384,11 +387,13 @@ fn pass(
         .iter()
         .map(|problem| problem.path.clone())
         .collect();
-    report.problems.extend(walk.problems.iter().map(|problem| Problem {
-        path: problem.path.clone(),
-        reason: problem.reason.clone(),
-        ..Problem::default()
-    }));
+    report
+        .problems
+        .extend(walk.problems.iter().map(|problem| Problem {
+            path: problem.path.clone(),
+            reason: problem.reason.clone(),
+            ..Problem::default()
+        }));
 
     let mut known = read_wt_files(delta)?;
     let mut delta_documents: HashMap<String, StoredDocument> = delta

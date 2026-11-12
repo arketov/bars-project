@@ -275,9 +275,7 @@ impl DocQueue {
     pub fn discover(&mut self, project: impl Into<DocTarget>, path: &str, source: DocSource) {
         let project = project.into();
         self.found(&project, path, source);
-        if let Some(entry) = self
-            .entries
-            .get_mut(&(project.clone(), path.to_string()))
+        if let Some(entry) = self.entries.get_mut(&(project.clone(), path.to_string()))
             && entry.state == DocState::Queued
         {
             entry.claimed = true;
@@ -300,9 +298,7 @@ impl DocQueue {
 
     pub fn start(&mut self, project: impl Into<DocTarget>, path: &str) {
         let project = project.into();
-        if let Some(entry) = self
-            .entries
-            .get_mut(&(project.clone(), path.to_string()))
+        if let Some(entry) = self.entries.get_mut(&(project.clone(), path.to_string()))
             && entry.state == DocState::Queued
         {
             entry.state = DocState::Indexing;
@@ -400,10 +396,7 @@ impl DocQueue {
     /// «Повторить»: документ с ошибкой снова готов. `false` — такой записи нет.
     pub fn retry(&mut self, project: impl Into<DocTarget>, path: &str) -> bool {
         let project = project.into();
-        match self
-            .entries
-            .get_mut(&(project.clone(), path.to_string()))
-        {
+        match self.entries.get_mut(&(project.clone(), path.to_string())) {
             Some(entry) if entry.state == DocState::Error => {
                 entry.state = DocState::Queued;
                 entry.error = None;
@@ -952,9 +945,19 @@ mod tests {
         let mut queue = DocQueue::new();
         queue.touch(&project(), "a.md", DocSource::Watch, PAUSE, now);
         queue.touch(&worktree(), "a.md", DocSource::Watch, PAUSE, now);
-        queue.touch(&DocTarget::worktree(&project(), "other"), "a.md", DocSource::Watch, PAUSE, now);
+        queue.touch(
+            &DocTarget::worktree(&project(), "other"),
+            "a.md",
+            DocSource::Watch,
+            PAUSE,
+            now,
+        );
         assert_eq!(queue.len(), 3);
-        assert_eq!(queue.counts(&project()).waiting, 1, "сводка проекта не считает worktree");
+        assert_eq!(
+            queue.counts(&project()).waiting,
+            1,
+            "сводка проекта не считает worktree"
+        );
         assert_eq!(queue.counts(&worktree()).waiting, 1);
     }
 
@@ -963,7 +966,13 @@ mod tests {
         let base = Instant::now();
         let mut queue = DocQueue::new();
         for second in [0, 3, 6] {
-            queue.touch(&worktree(), "a.md", DocSource::Watch, PAUSE, at(base, second));
+            queue.touch(
+                &worktree(),
+                "a.md",
+                DocSource::Watch,
+                PAUSE,
+                at(base, second),
+            );
         }
         queue.touch(&worktree(), "a.md", DocSource::Edit, PAUSE, at(base, 7));
         assert_eq!(queue.len(), 1);
@@ -985,16 +994,31 @@ mod tests {
         let ready = queue.promote_due(at(base, 30));
         assert_eq!(ready.len(), 2);
         let of_worktree = ready.iter().find(|item| item.target == worktree()).unwrap();
-        assert_eq!(of_worktree.paths, BTreeSet::from(["b.md".into(), "c.md".into()]));
+        assert_eq!(
+            of_worktree.paths,
+            BTreeSet::from(["b.md".into(), "c.md".into()])
+        );
     }
 
     #[test]
     fn take_ready_removes_only_the_worktree_records_that_are_ready() {
         let base = Instant::now();
         let mut queue = DocQueue::new();
-        queue.touch(&worktree(), "ready.md", DocSource::Watch, Duration::ZERO, base);
+        queue.touch(
+            &worktree(),
+            "ready.md",
+            DocSource::Watch,
+            Duration::ZERO,
+            base,
+        );
         queue.touch(&worktree(), "waits.md", DocSource::Watch, PAUSE, base);
-        queue.touch(&project(), "ready.md", DocSource::Watch, Duration::ZERO, base);
+        queue.touch(
+            &project(),
+            "ready.md",
+            DocSource::Watch,
+            Duration::ZERO,
+            base,
+        );
         let taken = queue.take_ready(&worktree()).unwrap();
         assert_eq!(taken.paths, BTreeSet::from(["ready.md".into()]));
         assert_eq!(queue.len(), 2, "ждущая запись и запись проекта на месте");
@@ -1009,8 +1033,18 @@ mod tests {
         let mut queue = DocQueue::new();
         queue.touch(&project(), "a.md", DocSource::Watch, PAUSE, now);
         queue.touch(&worktree(), "a.md", DocSource::Watch, PAUSE, now);
-        queue.touch(&DocTarget::worktree(Path::new("other"), "feat-x"), "a.md", DocSource::Watch, PAUSE, now);
-        assert_eq!(queue.remove_project(&project()), 1, "worktree не трогает remove_project");
+        queue.touch(
+            &DocTarget::worktree(Path::new("other"), "feat-x"),
+            "a.md",
+            DocSource::Watch,
+            PAUSE,
+            now,
+        );
+        assert_eq!(
+            queue.remove_project(&project()),
+            1,
+            "worktree не трогает remove_project"
+        );
         assert_eq!(queue.remove_worktrees(&project()), 1);
         assert_eq!(queue.len(), 1, "worktree другого владельца остался");
         assert_eq!(queue.remove_worktree(Path::new("other"), "feat-x"), 1);

@@ -135,7 +135,8 @@ impl BarsMcp {
             &self.env.cwd,
         );
         match action {
-            "findings" | "list" => noted(&note, 
+            "findings" | "list" => noted(
+                &note,
                 self.call_observed(
                     &bars_protocol::NewTopicsListParams { project },
                     Some(&original),
@@ -147,7 +148,8 @@ impl BarsMcp {
                 let Some(id) = args.id else {
                     return invalid("get needs id".to_string());
                 };
-                noted(&note, 
+                noted(
+                    &note,
                     self.call_observed(
                         &bars_protocol::NewTopicsGetParams { project, id },
                         Some(&original),
@@ -176,7 +178,8 @@ impl BarsMcp {
                         Err(error) => return failure(&error),
                     },
                 };
-                noted(&note, 
+                noted(
+                    &note,
                     self.call_observed(
                         &bars_protocol::NewTopicsCheckParams {
                             project,
@@ -225,7 +228,8 @@ impl BarsMcp {
                         return CallToolResult::error(vec![ContentBlock::text(message)]);
                     }
                 };
-                noted(&note, 
+                noted(
+                    &note,
                     self.call_observed(
                         &bars_protocol::AuditFindingsParams {
                             project,
@@ -253,7 +257,8 @@ impl BarsMcp {
                         return CallToolResult::error(vec![ContentBlock::text(message)]);
                     }
                 };
-                noted(&note, 
+                noted(
+                    &note,
                     self.call_observed(
                         &bars_protocol::AuditSummaryParams {
                             project,
@@ -266,7 +271,8 @@ impl BarsMcp {
                     render::audit_summary,
                 )
             }
-            "run" => noted(&note, 
+            "run" => noted(
+                &note,
                 self.call_observed(
                     &bars_protocol::AuditRunParams { project, kind },
                     Some(&original),
@@ -274,7 +280,8 @@ impl BarsMcp {
                 .await,
                 render::audit_run,
             ),
-            "cancel" => noted(&note, 
+            "cancel" => noted(
+                &note,
                 self.call_observed(
                     &bars_protocol::AuditCancelParams { project, kind },
                     Some(&original),

@@ -1,8 +1,6 @@
 //! Актуальность дельты worktree: слежение за W, пауза Т-41, изменения владельца, перезапуск и
 //! отмена проекта (`docs/features/projects/worktrees.md`, Т-10, Т-41, Т-48, шаг 6.3.4).
 
-use std::sync::atomic::Ordering;
-
 use bars_core::indexing::worktree_delta::{self as delta, OwnerSnapshot};
 use bars_protocol::DeltaState;
 
@@ -15,7 +13,10 @@ const EDITED: &str = "# Заголовок\n\nНовый текст раздел
 fn repo_with_worktree(env: &Env) -> (PathBuf, PathBuf) {
     let main = env.project(
         "main",
-        &[("a.md", DOC), ("b.md", "# Другой\n\nРаздел про слежение.\n")],
+        &[
+            ("a.md", DOC),
+            ("b.md", "# Другой\n\nРаздел про слежение.\n"),
+        ],
     );
     fs::create_dir_all(main.join(".git")).unwrap();
     let work = env.projects.path().join("runs").join("feat-x");
@@ -168,9 +169,10 @@ async fn owner_edit_missing_in_worktree_does_not_change_view() {
     worker
         .check_files(&main, vec![main.join("docs/a.md")])
         .unwrap();
-    wait_until("документ вида попал в дельту", || {
-        delta_documents(&worker, &main) == 1 && worker.is_idle()
-    })
+    wait_until(
+        "документ вида попал в дельту",
+        || delta_documents(&worker, &main) == 1 && worker.is_idle(),
+    )
     .await;
     assert_eq!(
         fs::read_to_string(work.join("docs/a.md")).unwrap(),
@@ -203,9 +205,10 @@ async fn owner_edit_without_lease_resyncs_the_delta_with_periodic_priority() {
     worker
         .check_files(&main, vec![main.join("docs/a.md")])
         .unwrap();
-    wait_until("дельта пересверена по владельцу", || {
-        delta_documents(&worker, &main) == 1 && worker.is_idle()
-    })
+    wait_until(
+        "дельта пересверена по владельцу",
+        || delta_documents(&worker, &main) == 1 && worker.is_idle(),
+    )
     .await;
     worker.shutdown().await;
 }
@@ -234,9 +237,10 @@ async fn restart_with_changed_owner_digest_resyncs_the_delta() {
         let index = Index::open_read_only(&index_path(&main)).unwrap();
         OwnerSnapshot::read(&index).unwrap().digest
     };
-    wait_until("подпись владельца записана в дельту", || {
-        stored(&main).as_deref() == Some(owner_digest().as_str()) && worker.is_idle()
-    })
+    wait_until(
+        "подпись владельца записана в дельту",
+        || stored(&main).as_deref() == Some(owner_digest().as_str()) && worker.is_idle(),
+    )
     .await;
     assert_ne!(stored(&main), before);
     assert_eq!(delta_state(&worker, &main), DeltaState::Ready);

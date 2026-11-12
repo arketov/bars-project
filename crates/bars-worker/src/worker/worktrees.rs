@@ -156,7 +156,10 @@ impl Inner {
 
     /// Живые worktree владельца из памяти.
     pub(super) fn linked_of(&self, owner: &Path) -> Vec<LinkedWorktree> {
-        lock(&self.worktrees).get(owner).cloned().unwrap_or_default()
+        lock(&self.worktrees)
+            .get(owner)
+            .cloned()
+            .unwrap_or_default()
     }
 }
 

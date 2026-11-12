@@ -212,7 +212,11 @@ fn document_deleted_in_worktree_is_not_found_with_wt() {
     remove(&mut fixture, "docs/b.md");
 
     let view = in_view(&fixture, &request("gammaword")).unwrap();
-    assert!(!paths_of(&view).contains(&"docs/b.md"), "{:?}", paths_of(&view));
+    assert!(
+        !paths_of(&view).contains(&"docs/b.md"),
+        "{:?}",
+        paths_of(&view)
+    );
     let main = in_owner(&fixture, &request("gammaword")).unwrap();
     assert!(paths_of(&main).contains(&"docs/b.md"));
 }
@@ -244,7 +248,12 @@ fn unrelated_edit_does_not_change_scores_of_other_documents() {
             .iter()
             .find(|hit| hit.path == before.path && hit.first_line == before.first_line)
             .unwrap_or_else(|| panic!("{} пропал из выдачи вида", before.path));
-        assert_eq!(after.score.to_bits(), before.score.to_bits(), "{}", before.path);
+        assert_eq!(
+            after.score.to_bits(),
+            before.score.to_bits(),
+            "{}",
+            before.path
+        );
         assert_eq!(after.signals, before.signals, "{}", before.path);
     }
 }
@@ -277,16 +286,24 @@ fn merged_pool_has_no_chunk_id_collision() {
         .iter()
         .find(|hit| hit.chunk_id < DELTA_ID_OFFSET)
         .expect("в выдаче есть чанк владельца");
-    assert_ne!(owner_hit.path, "docs/a.md", "версию a.md даёт только дельта");
+    assert_ne!(
+        owner_hit.path, "docs/a.md",
+        "версию a.md даёт только дельта"
+    );
 
     // Слой отдаёт чанк из нужной базы.
     let excluded = excluded_paths(&fixture.index, &fixture.delta).unwrap();
     let layer = IndexView::worktree(&fixture.index, &fixture.delta, &excluded.paths).unwrap();
-    let loaded = layer.load_hits(&[from_delta.chunk_id, owner_hit.chunk_id]).unwrap();
+    let loaded = layer
+        .load_hits(&[from_delta.chunk_id, owner_hit.chunk_id])
+        .unwrap();
     assert_eq!(loaded[0].path, "docs/a.md");
     assert_eq!(loaded[0].text, from_delta.text);
     assert_eq!(loaded[1].path, owner_hit.path);
-    assert_eq!(layer.source(from_delta.chunk_id).1, from_delta.chunk_id - DELTA_ID_OFFSET);
+    assert_eq!(
+        layer.source(from_delta.chunk_id).1,
+        from_delta.chunk_id - DELTA_ID_OFFSET
+    );
 }
 
 #[test]
@@ -301,17 +318,26 @@ fn in_modules_files_resolve_over_union_of_owner_and_delta() {
     // Модуль, файл и префикс `in` существуют только в дельте.
     let mut by_module = request("zqfreshword");
     by_module.modules = vec!["fresh".into()];
-    assert_eq!(in_view(&fixture, &by_module).unwrap().hits[0].path, "docs/fresh/x.md");
+    assert_eq!(
+        in_view(&fixture, &by_module).unwrap().hits[0].path,
+        "docs/fresh/x.md"
+    );
     assert!(matches!(
         in_owner(&fixture, &by_module),
         Err(SearchError::InvalidParams(_))
     ));
     let mut by_file = request("zqfreshword");
     by_file.files = vec!["fresh/x.md".into()];
-    assert_eq!(in_view(&fixture, &by_file).unwrap().hits[0].path, "docs/fresh/x.md");
+    assert_eq!(
+        in_view(&fixture, &by_file).unwrap().hits[0].path,
+        "docs/fresh/x.md"
+    );
     let mut by_path = request("zqfreshword");
     by_path.paths = vec!["docs/fresh".into()];
-    assert_eq!(in_view(&fixture, &by_path).unwrap().hits[0].path, "docs/fresh/x.md");
+    assert_eq!(
+        in_view(&fixture, &by_path).unwrap().hits[0].path,
+        "docs/fresh/x.md"
+    );
 
     // Модуль владельца остаётся доступным, а исключённый документ владельца в область не входит.
     let mut owner_module = request("alphaword");

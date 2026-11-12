@@ -15,7 +15,10 @@ pub fn filter_text(filter: Option<&str>) -> Option<&str> {
 /// составное имя, путь; `\` равен `/`. Пустой текст подходит всем.
 pub fn project_matches_filter(fields: &[&str], text: &str) -> bool {
     let needle = normalize(text.trim());
-    needle.is_empty() || fields.iter().any(|field| normalize(field).contains(&needle))
+    needle.is_empty()
+        || fields
+            .iter()
+            .any(|field| normalize(field).contains(&needle))
 }
 
 #[cfg(test)]

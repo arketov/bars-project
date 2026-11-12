@@ -81,7 +81,11 @@ async fn wt_dot_is_main_checkout_and_unknown_wt_lists_worktrees() {
         .unwrap_err();
     assert_eq!(error.kind(), Some(ErrorKind::WorktreeNotFound));
     assert_eq!(error.code, -32020);
-    assert!(error.message.contains("«feat-x» (ветка feat/x,"), "{}", error.message);
+    assert!(
+        error.message.contains("«feat-x» (ветка feat/x,"),
+        "{}",
+        error.message
+    );
     assert!(error.message.contains("wt=\".\""), "{}", error.message);
     let listed = &error.data.as_ref().unwrap()["worktrees"][0];
     assert_eq!(listed["name"], "feat-x");
@@ -102,8 +106,15 @@ async fn project_without_worktrees_says_so_and_names_main_checkout() {
         .resolve_view(&target_with(&plain, None, Some("x")))
         .unwrap_err();
     assert_eq!(error.kind(), Some(ErrorKind::WorktreeNotFound));
-    assert!(error.message.contains("нет worktree; основной checkout — wt=\".\""));
-    assert_eq!(error.data.as_ref().unwrap()["worktrees"], serde_json::json!([]));
+    assert!(
+        error
+            .message
+            .contains("нет worktree; основной checkout — wt=\".\"")
+    );
+    assert_eq!(
+        error.data.as_ref().unwrap()["worktrees"],
+        serde_json::json!([])
+    );
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -123,7 +134,11 @@ async fn explicit_project_other_than_owner_gives_no_view_and_same_owner_keeps_vi
         .resolve_view(&target_with(&cwd, Some(&other), None))
         .unwrap();
     assert_eq!(project, other);
-    assert_eq!(view, ViewSelector::Main, "чужой проект неявного вида не даёт");
+    assert_eq!(
+        view,
+        ViewSelector::Main,
+        "чужой проект неявного вида не даёт"
+    );
     let (project, view) = handler
         .resolve_view(&target_with(&cwd, Some(&main), None))
         .unwrap();
@@ -229,7 +244,9 @@ async fn search_from_a_worktree_requests_the_delta() {
 
     // Поиск из cwd в worktree — первое обращение к виду: дельта строится лениво. Сам поиск по
     // виду — шаг 6.3.3, здесь важен только запрос на построение.
-    let _ = handler.search(search(&work.join("docs"), "руководство")).await;
+    let _ = handler
+        .search(search(&work.join("docs"), "руководство"))
+        .await;
     while state(worker) != bars_protocol::DeltaState::Ready || !worker.is_idle() {
         assert!(Instant::now() < deadline, "дельта не построена");
         tokio::time::sleep(Duration::from_millis(25)).await;

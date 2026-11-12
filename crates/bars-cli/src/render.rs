@@ -493,7 +493,11 @@ pub fn status(output: &StatusOutput) -> String {
                 }
                 bars_protocol::DeltaState::Error => "ошибка".to_string(),
             };
-            let _ = write!(text, "\n  {} · {branch} · {} · {delta}", item.name, item.path);
+            let _ = write!(
+                text,
+                "\n  {} · {branch} · {} · {delta}",
+                item.name, item.path
+            );
             if let Some(reason) = &item.locked {
                 let _ = write!(text, " · заблокирован: {reason}");
             }

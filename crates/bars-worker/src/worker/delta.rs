@@ -32,7 +32,10 @@ const POLL: Duration = Duration::from_millis(500);
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum Phase {
     /// Первое построение: сколько документов вида просмотрено из скольких.
-    Building { done: usize, total: usize },
+    Building {
+        done: usize,
+        total: usize,
+    },
     Ready,
     Error(String),
 }
@@ -62,6 +65,16 @@ pub(super) struct Deltas {
 }
 
 impl Deltas {
+    /// Есть ли у worktree состояние дельты (не «нет»).
+    pub(super) fn contains(&self, key: &DeltaKey) -> bool {
+        self.entries.contains_key(key)
+    }
+
+    /// Ключи дельт с известным состоянием.
+    pub(super) fn keys(&self) -> impl Iterator<Item = &DeltaKey> {
+        self.entries.keys()
+    }
+
     /// Ничего не ждёт и не выполняется.
     pub(super) fn idle(&self) -> bool {
         self.queue.is_empty() && self.running.is_none()
@@ -70,7 +83,9 @@ impl Deltas {
 
 /// Итог задания дельты.
 enum Outcome {
-    Done { documents: usize },
+    Done {
+        documents: usize,
+    },
     /// Worktree исчез, дельта удалена или несовместима: состояние «нет».
     Dropped,
     /// Сверять не с чем или нельзя (владелец без индекса, в `reindex_required`, не готов).
@@ -160,14 +175,18 @@ impl IndexObserver for Observer {
 
     fn begin(&self, documents: usize) {
         if self.building(|_, total| *total = documents) {
-            self.inner.updates.changed(&self.key.0, updates::STATUS, false);
+            self.inner
+                .updates
+                .changed(&self.key.0, updates::STATUS, false);
         }
     }
 
     fn progress(&self, documents_done: usize, _: usize) {
         let publish = self.building(|done, _| *done = documents_done);
         if publish && documents_done % 25 == 0 {
-            self.inner.updates.changed(&self.key.0, updates::STATUS, false);
+            self.inner
+                .updates
+                .changed(&self.key.0, updates::STATUS, false);
         }
     }
 }
@@ -253,9 +272,8 @@ impl Inner {
     /// Задание, которое можно взять сейчас: индексация владельцев тише и главнее; одна сверка
     /// за раз. `None` — ждать.
     fn take_delta_job(&self) -> Option<(DeltaKey, Queued, Arc<AtomicBool>)> {
-        let main_busy = |inner: &Self| {
-            !lock(&inner.queue).is_empty() || inner.busy.load(Ordering::SeqCst)
-        };
+        let main_busy =
+            |inner: &Self| !lock(&inner.queue).is_empty() || inner.busy.load(Ordering::SeqCst);
         if main_busy(self) {
             return None;
         }
@@ -382,7 +400,12 @@ impl Inner {
 
     /// Блокирующее тело задания: сверка с владельцем. Метаданные, не совпавшие с владельцем,
     /// удаляют дельту (она производная) и ведут к состоянию «нет».
-    fn delta_job(self: &Arc<Self>, key: &DeltaKey, job: &Queued, cancel: &Arc<AtomicBool>) -> Outcome {
+    fn delta_job(
+        self: &Arc<Self>,
+        key: &DeltaKey,
+        job: &Queued,
+        cancel: &Arc<AtomicBool>,
+    ) -> Outcome {
         let (owner, name) = key;
         let Some(linked) = self
             .linked_of(owner)

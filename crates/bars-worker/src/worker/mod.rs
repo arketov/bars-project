@@ -57,14 +57,14 @@ pub use queue::Priority;
 pub use registry::{
     CwdTarget, Discovered, ProjectEntry, Registry, RegistryError, ResolveError, WorktreeRef,
 };
-pub use worktrees::{ViewSelector, WtSelector, WtSource};
 pub use summary::{Health, Line, Summary};
 pub use timefmt::{index_token, rfc3339};
+pub use worktrees::{ViewSelector, WtSelector, WtSource};
 
 use control::{JobCell, JobObserver, Pause};
 pub use control::{Kind as JobKind, Progress as JobProgress};
-use doc_queue::{DocQueue, DocTarget};
 pub use doc_queue::{DocCounts, DocSource, DocState, DocView};
+use doc_queue::{DocQueue, DocTarget};
 use job::{JobEnv, Outcome};
 use queue::{Job, JobQueue};
 use registry::{has_markdown, normalize};
@@ -499,13 +499,7 @@ impl Worker {
         let doc_task = tokio::spawn(Arc::clone(&inner).run_doc_timer());
         let activity_task = tokio::spawn(Arc::clone(&inner).run_activity_timer());
         let model_task = tokio::spawn(Arc::clone(&inner).run_model_maintenance());
-        lock(&inner.tasks).extend([
-            queue_task,
-            timer_task,
-            doc_task,
-            model_task,
-            activity_task,
-        ]);
+        lock(&inner.tasks).extend([queue_task, timer_task, doc_task, model_task, activity_task]);
         for path in paths {
             inner.activate(&path, Priority::Periodic);
         }
@@ -761,11 +755,9 @@ impl Worker {
             .map(|area| {
                 // Вложенный проект — подпроект: агент выбирает его составным именем (Т-49).
                 let registry = lock(&self.inner.registry);
-                let known = registry.qualified_name(&area.project).or_else(|| {
-                    registry
-                        .find(&area.project)
-                        .map(ProjectEntry::display_name)
-                });
+                let known = registry
+                    .qualified_name(&area.project)
+                    .or_else(|| registry.find(&area.project).map(ProjectEntry::display_name));
                 drop(registry);
                 let name = known.unwrap_or_else(|| {
                     area.project

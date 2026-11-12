@@ -144,7 +144,10 @@ pub(super) fn worktree_unsupported(name: &str, what: &str) -> RpcError {
 }
 
 /// Дописывает в объект ответа строку пометки (`worktree_note`); не объект — без изменений.
-pub(super) fn with_note(result: Result<Value, RpcError>, note: Option<String>) -> Result<Value, RpcError> {
+pub(super) fn with_note(
+    result: Result<Value, RpcError>,
+    note: Option<String>,
+) -> Result<Value, RpcError> {
     match (result, note) {
         (Ok(Value::Object(mut map)), Some(note)) => {
             map.insert("worktree_note".to_string(), Value::String(note));
@@ -156,9 +159,7 @@ pub(super) fn with_note(result: Result<Value, RpcError>, note: Option<String>) -
 
 /// Документы базы индекса (владельца или дельты) для дерева окна: путь, модуль, заголовок и число
 /// чанков.
-pub(super) fn tree_documents(
-    db: &Path,
-) -> Result<Vec<bars_protocol::TreeDocument>, StorageError> {
+pub(super) fn tree_documents(db: &Path) -> Result<Vec<bars_protocol::TreeDocument>, StorageError> {
     let index = Index::open_read_only(db)?;
     let mut statement = index.conn().prepare(
         "SELECT d.path, d.module, d.title, \
@@ -173,7 +174,8 @@ pub(super) fn tree_documents(
             chunks: row.get(3)?,
         })
     })?;
-    rows.collect::<Result<Vec<_>, _>>().map_err(StorageError::from)
+    rows.collect::<Result<Vec<_>, _>>()
+        .map_err(StorageError::from)
 }
 
 /// Корень вида: корень проекта или корень worktree.

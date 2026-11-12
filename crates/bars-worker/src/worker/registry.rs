@@ -333,7 +333,9 @@ impl Registry {
             .iter()
             .filter(|entry| {
                 (self.has_selector_name(entry) && entry.display_name() == selector)
-                    || self.qualified_name(&entry.path).is_some_and(|name| name == key)
+                    || self
+                        .qualified_name(&entry.path)
+                        .is_some_and(|name| name == key)
             })
             .collect();
         match named.as_slice() {
@@ -592,7 +594,10 @@ pub fn normalize(path: &Path) -> Result<PathBuf, RegistryError> {
 
 /// Селектор как составное имя: `\` равен `/`, хвостовые `/` отбрасываются.
 fn selector_key(selector: &str) -> String {
-    selector.replace('\\', "/").trim_end_matches('/').to_string()
+    selector
+        .replace('\\', "/")
+        .trim_end_matches('/')
+        .to_string()
 }
 
 /// Ключ сравнения путей: на Windows регистр букв не различается.
@@ -1232,11 +1237,16 @@ mod tests {
     fn unknown_name_under_a_main_lists_its_subprojects() {
         let home = TempDir::new().unwrap();
         let (registry, _, _, _) = tree(&home);
-        let error = registry.resolve("tmc-opovechenie/backend/nope").unwrap_err();
+        let error = registry
+            .resolve("tmc-opovechenie/backend/nope")
+            .unwrap_err();
         let text = error.to_string();
         assert!(matches!(error, ResolveError::UnknownSubproject { .. }));
         assert!(text.contains("tmc-opovechenie/backend/api"), "{text}");
-        assert!(text.contains("tmc-opovechenie/frontend/web-angular"), "{text}");
+        assert!(
+            text.contains("tmc-opovechenie/frontend/web-angular"),
+            "{text}"
+        );
         // Префикса нет среди главных: прежняя ошибка.
         assert!(matches!(
             registry.resolve("nobody/backend/api"),
@@ -1256,7 +1266,10 @@ mod tests {
                 .unwrap();
         }
         let text = registry.resolve("main/zzz").unwrap_err().to_string();
-        assert!(text.contains("main/s09") && !text.contains("main/s10"), "{text}");
+        assert!(
+            text.contains("main/s09") && !text.contains("main/s10"),
+            "{text}"
+        );
         assert!(text.contains("и ещё 2"), "{text}");
     }
 

@@ -445,7 +445,10 @@ impl WorkerHandler {
             ViewSelector::Worktree(item) => Some(self.plan_worktree_search(&project, item)),
             ViewSelector::Main => None,
         };
-        let wt_merge = wt_plan.as_ref().filter(|plan| plan.merge).map(|plan| plan.info.name.clone());
+        let wt_merge = wt_plan
+            .as_ref()
+            .filter(|plan| plan.merge)
+            .map(|plan| plan.info.name.clone());
         // Графа у вида нет: связанные источники по слиянию не добавляются.
         let graph_budgets = graph_budgets.filter(|_| wt_merge.is_none());
         let mut settings = self.settings(&project)?;
@@ -1160,9 +1163,7 @@ impl WorkerHandler {
             .map(|reference| reference.name);
         // С явным `wt` — только этот worktree; без него и с `wt="."` — все живые.
         let only = match (&view, params.target.wt()) {
-            (ViewSelector::Worktree(item), Some(value)) if value != "." => {
-                Some(item.name.clone())
-            }
+            (ViewSelector::Worktree(item), Some(value)) if value != "." => Some(item.name.clone()),
             _ => None,
         };
         let worktrees = self
@@ -1493,7 +1494,10 @@ impl WorkerHandler {
         };
         if let ViewSelector::Worktree(item) = &view {
             self.worker.ensure_worktree_delta(&project, &item.name);
-            let state = self.worker.worktree_delta_status(&project, &item.name).state;
+            let state = self
+                .worker
+                .worktree_delta_status(&project, &item.name)
+                .state;
             if state == bars_protocol::DeltaState::Ready {
                 let db = bars_core::indexing::worktree_delta::delta_path(&project, &item.name);
                 // Дельта производная: недоступная (ещё не открылась, удаляется) — дерево по владельцу.

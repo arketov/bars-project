@@ -114,7 +114,10 @@ async fn wt_parameter_reaches_target() {
     let mut mcp = connect(env).await;
 
     let (error, _) = mcp
-        .tool("bars_read", json!({"path": "docs/guide.md", "wt": "feat-x"}))
+        .tool(
+            "bars_read",
+            json!({"path": "docs/guide.md", "wt": "feat-x"}),
+        )
         .await;
     assert!(!error);
     // `.` — основной checkout — уходит воркеру как есть, а не путём `cwd/.`.
@@ -187,7 +190,9 @@ async fn wt_parameter_is_described_in_english_for_every_tool() {
             "{name}: описание wt: {description}"
         );
         assert!(
-            !description.chars().any(|c| ('а'..='я').contains(&c.to_ascii_lowercase())),
+            !description
+                .chars()
+                .any(|c| ('а'..='я').contains(&c.to_ascii_lowercase())),
             "{name}: описание wt — на английском (НФТ-4): {description}"
         );
     }

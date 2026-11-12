@@ -243,10 +243,7 @@ fn delta_hash_matches_indexer_hash() {
 #[test]
 fn edit_created_and_removed_documents_and_return_to_owner_version() {
     let a = doc("A", &["alpha"]);
-    let fixture = fixture(&[
-        ("docs/a.md", a.clone()),
-        ("docs/b.md", doc("B", &["beta"])),
-    ]);
+    let fixture = fixture(&[("docs/a.md", a.clone()), ("docs/b.md", doc("B", &["beta"]))]);
     let mut delta = open_delta(&fixture.owner, "wt").unwrap();
     let mut model = FakeEmbedder::new("m");
 

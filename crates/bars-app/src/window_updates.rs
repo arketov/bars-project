@@ -651,8 +651,7 @@ async fn read_part(
                 .docs_root(path)
                 .map_err(|e| e.to_string())?;
             let path = path.to_owned();
-            let nested =
-                crate::commands::tree_nested_json(handler.worker(), &path);
+            let nested = crate::commands::tree_nested_json(handler.worker(), &path);
             tokio::task::spawn_blocking(move || crate::tree_io::read_tree(&path,&docs_root).map(|tree|json!({"docs_root":tree.docs_root,"revision":tree.revision,"dirs":tree.dirs,"files":tree.files.iter().map(|f|json!({"path":f.path,"size":f.size,"modified":f.modified_ms})).collect::<Vec<_>>(),"problems":tree.problems.iter().map(|(path,reason)|json!({"path":path,"reason":reason})).collect::<Vec<_>>(),"nested":nested})).map_err(|e|e.message())).await.map_err(|e|e.to_string())?
         }
         1 => handler

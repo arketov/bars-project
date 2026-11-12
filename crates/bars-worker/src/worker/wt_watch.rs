@@ -54,7 +54,7 @@ impl Inner {
 
     /// Есть ли у worktree состояние дельты (не «нет»).
     fn delta_exists(&self, key: &DeltaKey) -> bool {
-        lock(&self.deltas).entries.contains_key(key)
+        lock(&self.deltas).contains(key)
     }
 
     /// Поднимает слежение за корнем вида, если у worktree есть дельта и аренда, а слежения нет или
@@ -227,7 +227,6 @@ impl Inner {
             return;
         }
         let keys: Vec<DeltaKey> = lock(&self.deltas)
-            .entries
             .keys()
             .filter(|(of, _)| of == owner)
             .cloned()

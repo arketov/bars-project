@@ -389,7 +389,12 @@ async fn register_search_outline_read_scenario() {
     );
     assert!(
         Cli::try_parse_from([
-            "bars-cli", "--project", "proj", "projects", "--filter", "proj"
+            "bars-cli",
+            "--project",
+            "proj",
+            "projects",
+            "--filter",
+            "proj"
         ])
         .is_err()
     );
@@ -687,12 +692,20 @@ async fn session_start_hook_registers_project_and_never_fails() {
 fn repo_with_worktree(projects: &Path) -> (PathBuf, PathBuf) {
     let main = projects.join("main");
     fs::create_dir_all(main.join("docs")).unwrap();
-    fs::write(main.join("docs/guide.md"), "# Руководство\n\nТекст основного.\n").unwrap();
+    fs::write(
+        main.join("docs/guide.md"),
+        "# Руководство\n\nТекст основного.\n",
+    )
+    .unwrap();
     let admin = main.join(".git/worktrees/feat-x");
     fs::create_dir_all(&admin).unwrap();
     let work = projects.join("runs").join("feat-x");
     fs::create_dir_all(work.join("docs")).unwrap();
-    fs::write(work.join("docs/guide.md"), "# Руководство\n\nТекст worktree.\n").unwrap();
+    fs::write(
+        work.join("docs/guide.md"),
+        "# Руководство\n\nТекст worktree.\n",
+    )
+    .unwrap();
     fs::write(
         work.join("docs/only-wt.md"),
         "# Только в worktree\n\nzqonlyworktreeword\n",
@@ -702,12 +715,12 @@ fn repo_with_worktree(projects: &Path) -> (PathBuf, PathBuf) {
     fs::write(admin.join("commondir"), "../..\n").unwrap();
     fs::write(
         admin.join("gitdir"),
-        work.join(".git").to_string_lossy().replace('\', "/"),
+        work.join(".git").to_string_lossy().replace('\\', "/"),
     )
     .unwrap();
     fs::write(
         work.join(".git"),
-        format!("gitdir: {}\n", admin.to_string_lossy().replace('\', "/")),
+        format!("gitdir: {}\n", admin.to_string_lossy().replace('\\', "/")),
     )
     .unwrap();
     (main, work)
@@ -730,7 +743,10 @@ async fn wt_parameter_reaches_target() {
     let one = json(&bars(&env, &["--json", "status", "--wt", "feat-x"]).await);
     assert_eq!(one["worktrees"][0]["name"], "feat-x");
     assert_eq!(one["worktrees"][0]["branch"], "feat/x");
-    assert_eq!(one["worktrees"][0]["delta"]["state"], "none", "status дельту не строит");
+    assert_eq!(
+        one["worktrees"][0]["delta"]["state"], "none",
+        "status дельту не строит"
+    );
 
     // Основной checkout явно.
     let main_only = bars(&env, &["search", "--wt", ".", "zqonlyworktreeword"]).await;
@@ -743,7 +759,10 @@ async fn wt_parameter_reaches_target() {
     let error: Value = serde_json::from_str(&unknown.err).unwrap();
     assert_eq!(error["error"]["kind"], "worktree_not_found");
     assert!(
-        error["error"]["message"].as_str().unwrap().contains("feat/x"),
+        error["error"]["message"]
+            .as_str()
+            .unwrap()
+            .contains("feat/x"),
         "{}",
         unknown.err
     );
@@ -769,7 +788,11 @@ async fn wt_parameter_reaches_target() {
     let found = bars(&env, &["search", "--wt", "feat-x", "zqonlyworktreeword"]).await;
     assert_eq!(found.code, 0, "{}", found.err);
     assert!(found.out.contains("only-wt.md"), "{}", found.out);
-    assert!(found.out.contains("worktree feat-x"), "область названа: {}", found.out);
+    assert!(
+        found.out.contains("worktree feat-x"),
+        "область названа: {}",
+        found.out
+    );
 
     let full = bars(&env, &["--json", "reindex", "--full", "--wt", "feat-x"]).await;
     assert_eq!(full.code, 1);

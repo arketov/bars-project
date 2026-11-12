@@ -736,8 +736,8 @@ mod project_arg_tests {
             "tmc-opovechenie/backend/api"
         );
         assert_eq!(
-            project_arg("tmc-opovechenie\backend\api", cwd.path()),
-            "tmc-opovechenie\backend\api"
+            project_arg(r"tmc-opovechenie\backend\api", cwd.path()),
+            r"tmc-opovechenie\backend\api"
         );
         assert_eq!(project_arg("plain-name", cwd.path()), "plain-name");
     }

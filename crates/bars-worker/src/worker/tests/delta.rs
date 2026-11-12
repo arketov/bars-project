@@ -73,7 +73,10 @@ async fn first_session_in_worktree_builds_delta_without_embedding() {
     built(&worker, &main).await;
 
     let status = worker.worktree_delta_status(&main, "feat-x");
-    assert_eq!(status.documents, 0, "вид без правок: документов в дельте нет");
+    assert_eq!(
+        status.documents, 0,
+        "вид без правок: документов в дельте нет"
+    );
     assert!(delta_file(&main).is_file());
     let index = Index::open_read_only(&delta_file(&main)).unwrap();
     assert!(delta::is_ready(&index).unwrap());
@@ -171,7 +174,10 @@ async fn model_change_deletes_deltas() {
     assert_eq!(state(&worker, &main), ProjectState::ReindexRequired);
     assert!(!worker.resync_worktree_paths(&main, "feat-x", Priority::Edit, BTreeSet::new()));
     check_deltas(&worker).await;
-    assert!(delta_file(&main).is_file(), "до переиндексации дельту не трогают");
+    assert!(
+        delta_file(&main).is_file(),
+        "до переиндексации дельту не трогают"
+    );
 
     // Владелец переиндексирован новой моделью: отпечаток дельты не совпал — дельта удалена.
     worker.reindex(&main, true, true).unwrap();

@@ -100,7 +100,13 @@ pub fn read_entries(repo: &Path) -> Vec<WorktreeEntry> {
     let mut entries: Vec<WorktreeEntry> = items
         .flatten()
         .filter(|item| item.file_type().is_ok_and(|kind| kind.is_dir()))
-        .map(|item| read_entry(repo, &item.path(), item.file_name().to_string_lossy().into_owned()))
+        .map(|item| {
+            read_entry(
+                repo,
+                &item.path(),
+                item.file_name().to_string_lossy().into_owned(),
+            )
+        })
         .collect();
     entries.sort_by(|a, b| a.name.cmp(&b.name));
     entries
@@ -349,10 +355,28 @@ mod tests {
         let first = dir(&root, "wt-branch");
         let second = dir(&root, "wt-detached");
         let third = dir(&root, "wt-other-ref");
-        let admin = add_worktree(&main, "wt-branch", &first, "ref: refs/heads/feat/quorum\n", false);
+        let admin = add_worktree(
+            &main,
+            "wt-branch",
+            &first,
+            "ref: refs/heads/feat/quorum\n",
+            false,
+        );
         fs::write(admin.join("locked"), "на флешке\n").unwrap();
-        add_worktree(&main, "wt-detached", &second, "0123456789abcdef0123456789abcdef01234567\n", true);
-        add_worktree(&main, "wt-other-ref", &third, "ref: refs/remotes/origin/x\n", false);
+        add_worktree(
+            &main,
+            "wt-detached",
+            &second,
+            "0123456789abcdef0123456789abcdef01234567\n",
+            true,
+        );
+        add_worktree(
+            &main,
+            "wt-other-ref",
+            &third,
+            "ref: refs/remotes/origin/x\n",
+            false,
+        );
 
         let entries = read_entries(&main);
         let names: Vec<_> = entries.iter().map(|e| e.name.as_str()).collect();
@@ -438,9 +462,16 @@ mod tests {
             format!("gitdir: {}\n", admin.display()).replace('\\', "/"),
         )
         .unwrap();
-        fs::write(admin.join("gitdir"), work.join(".git").to_string_lossy().replace('\\', "/")).unwrap();
+        fs::write(
+            admin.join("gitdir"),
+            work.join(".git").to_string_lossy().replace('\\', "/"),
+        )
+        .unwrap();
         assert!(locate(&work).is_none());
-        assert!(read_entries(&bare).is_empty(), "у bare нет `.git/worktrees`");
+        assert!(
+            read_entries(&bare).is_empty(),
+            "у bare нет `.git/worktrees`"
+        );
         assert!(read_entries(&main).is_empty());
     }
 

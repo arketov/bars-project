@@ -8,9 +8,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use bars_core::doc_path::{docs_relative, stored_candidates, unknown_file_message};
 use bars_core::storage::{Index, index_path};
-use bars_protocol::{
-    ErrorKind, FolderEntry, FolderListing, ReadOutput, ReadParams, RpcError,
-};
+use bars_protocol::{ErrorKind, FolderEntry, FolderListing, ReadOutput, ReadParams, RpcError};
 
 use super::errors::worker_error;
 use super::{WorkerHandler, internal, to_u32};
