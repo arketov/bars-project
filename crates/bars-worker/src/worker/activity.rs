@@ -1,8 +1,8 @@
 //! Слежение только за проектами с активным MCP или открытым окном (OQ-206).
 use super::*;
 
-const MCP_LEASE: Duration = Duration::from_secs(3600);
-const WINDOW_LEASE: Duration = Duration::from_secs(30);
+pub(super) const MCP_LEASE: Duration = Duration::from_secs(3600);
+pub(super) const WINDOW_LEASE: Duration = Duration::from_secs(30);
 
 impl Runtime {
     pub(super) fn observed(&self, now: Instant) -> bool {
@@ -112,6 +112,7 @@ impl Inner {
         };
         // notify может ждать projects; остановка всегда вне блокировки.
         drop(stopped);
+        self.expire_wt_observers(now);
     }
 
     pub(super) async fn run_activity_timer(self: Arc<Self>) {

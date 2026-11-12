@@ -24,6 +24,7 @@ mod timefmt;
 pub mod updates;
 mod watcher;
 mod worktrees;
+mod wt_watch;
 
 #[cfg(test)]
 mod tests;
@@ -62,7 +63,7 @@ pub use timefmt::{index_token, rfc3339};
 
 use control::{JobCell, JobObserver, Pause};
 pub use control::{Kind as JobKind, Progress as JobProgress};
-use doc_queue::DocQueue;
+use doc_queue::{DocQueue, DocTarget};
 pub use doc_queue::{DocCounts, DocSource, DocState, DocView};
 use job::{JobEnv, Outcome};
 use queue::{Job, JobQueue};
@@ -390,6 +391,8 @@ struct Inner {
     delta_wake: Notify,
     /// Сверка дельты идёт: очередь проектов ждёт (индексация идёт по одному заданию).
     delta_busy: AtomicBool,
+    /// Слежение и аренды worktree (`wt_watch.rs`): те же правила Т-10, что у проектов.
+    wt_watch: Mutex<wt_watch::WtWatches>,
 }
 
 struct DownloadCleanup {
@@ -482,6 +485,7 @@ impl Worker {
             deltas: Mutex::new(delta::Deltas::default()),
             delta_wake: Notify::new(),
             delta_busy: AtomicBool::new(false),
+            wt_watch: Mutex::new(HashMap::new()),
         });
         // Очередь ещё не идёт: никто не держит файлы индекса, восстановление безопасно.
         for path in &paths {
@@ -1027,6 +1031,9 @@ impl Worker {
         };
         let scanning = self.inner.cancel_scan(&path);
         let queued = self.inner.cancel_queued(&path);
+        // Остановка проекта останавливает и сверки дельт его worktree, и слежение за W: состояния
+        // вернутся проверкой старта или следующим обращением.
+        self.inner.cancel_deltas(&path);
         Ok(running || queued || scanning)
     }
 
@@ -1723,7 +1730,12 @@ impl Inner {
             }
             let ready = lock(&self.docs).promote_due(Instant::now());
             for item in ready {
-                self.submit_docs(&item.project, item.paths, item.source);
+                match &item.target {
+                    DocTarget::Project(project) => {
+                        self.submit_docs(project, item.paths, item.source);
+                    }
+                    DocTarget::Worktree { owner, name } => self.submit_worktree_docs(owner, name),
+                }
             }
         }
     }
@@ -1988,6 +2000,8 @@ impl Inner {
         let project = path.clone();
         lock(&self.models.operations).edit(operation_id, |op| op.state = "running".into());
         let taken = Arc::new(Mutex::new(taken.into_iter().collect()));
+        // Документы, которые задание запишет в индекс или удалит: их увидят дельты worktree.
+        let written = Arc::new(Mutex::new(std::collections::BTreeSet::new()));
         let source = match job.priority {
             Priority::Explicit => DocSource::Explicit,
             Priority::Edit => DocSource::Edit,
@@ -2005,6 +2019,7 @@ impl Inner {
             project: path.clone(),
             source,
             taken: Arc::clone(&taken),
+            written: Arc::clone(&written),
             wake: Arc::clone(&self.doc_wake),
             rebuild,
         }));
@@ -2101,6 +2116,20 @@ impl Inner {
         }
         // Публикация итога только после применения состояния проекта.
         self.apply(&path, previous, &job_gate, result);
+        // Индекс владельца изменился: живые дельты его worktree сверяют затронутые пути. После
+        // полной переиндексации или смены нарезки — весь вид; прерванная переиндексация индекс
+        // не подменила.
+        let changed_paths = match &outcome {
+            Outcome::Updated(report) if rebuild || report.full_check => Some(None),
+            Outcome::Updated(_) | Outcome::Interrupted { .. } if !rebuild => {
+                let written = std::mem::take(&mut *lock(&written));
+                (!written.is_empty()).then_some(Some(written))
+            }
+            _ => None,
+        };
+        if let Some(paths) = changed_paths {
+            self.owner_changed(&path, paths);
+        }
         {
             let mut journal = lock(&self.models.operations);
             journal.edit(operation_id, |op| {

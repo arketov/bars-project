@@ -88,10 +88,51 @@ impl DocCounts {
     }
 }
 
+/// Чьи документы стоят в очереди: проект или worktree проекта (Т-48). Очередь одна; ключ записи —
+/// цель и путь, пауза Т-41, одна запись на ключ и приоритеты Т-42 действуют для обеих целей.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum DocTarget {
+    /// Документ проекта: его индексирует задание очереди проектов.
+    Project(PathBuf),
+    /// Документ вида worktree `name` проекта-владельца `owner`: его сверяет дельта.
+    Worktree { owner: PathBuf, name: String },
+}
+
+impl DocTarget {
+    pub fn project(path: &Path) -> Self {
+        Self::Project(path.to_path_buf())
+    }
+
+    pub fn worktree(owner: &Path, name: &str) -> Self {
+        Self::Worktree {
+            owner: owner.to_path_buf(),
+            name: name.to_string(),
+        }
+    }
+}
+
+impl From<&Path> for DocTarget {
+    fn from(path: &Path) -> Self {
+        Self::project(path)
+    }
+}
+
+impl From<&PathBuf> for DocTarget {
+    fn from(path: &PathBuf) -> Self {
+        Self::project(path)
+    }
+}
+
+impl From<&DocTarget> for DocTarget {
+    fn from(target: &DocTarget) -> Self {
+        target.clone()
+    }
+}
+
 /// Документы, которые стали готовыми после паузы.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Ready {
-    pub project: PathBuf,
+    pub target: DocTarget,
     /// Пути от корня проекта.
     pub paths: BTreeSet<String>,
     pub source: DocSource,
@@ -99,7 +140,7 @@ pub struct Ready {
 
 #[derive(Debug, Default)]
 pub struct DocQueue {
-    entries: BTreeMap<(PathBuf, String), DocEntry>,
+    entries: BTreeMap<(DocTarget, String), DocEntry>,
     next_seq: u64,
 }
 
@@ -113,15 +154,16 @@ impl DocQueue {
     /// Пауза `0` — запись сразу готова.
     pub fn touch(
         &mut self,
-        project: &Path,
+        project: impl Into<DocTarget>,
         path: &str,
         source: DocSource,
         pause: Duration,
         now: Instant,
     ) {
+        let project = project.into();
         let due = now + pause;
         let ready = pause.is_zero();
-        let key = (project.to_path_buf(), path.to_string());
+        let key = (project.clone(), path.to_string());
         match self.entries.get_mut(&key) {
             Some(entry) => {
                 entry.source = entry.source.max(source);
@@ -174,13 +216,13 @@ impl DocQueue {
 
     /// Переводит документы с истёкшей паузой в готовые; возвращает их по проектам.
     pub fn promote_due(&mut self, now: Instant) -> Vec<Ready> {
-        let mut ready: BTreeMap<PathBuf, Ready> = BTreeMap::new();
+        let mut ready: BTreeMap<DocTarget, Ready> = BTreeMap::new();
         for ((project, path), entry) in &mut self.entries {
             if entry.state == DocState::Waiting && entry.due_at.is_some_and(|due| due <= now) {
                 entry.state = DocState::Queued;
                 entry.due_at = None;
                 let item = ready.entry(project.clone()).or_insert_with(|| Ready {
-                    project: project.clone(),
+                    target: project.clone(),
                     paths: BTreeSet::new(),
                     source: entry.source,
                 });
@@ -192,14 +234,15 @@ impl DocQueue {
     }
 
     /// Готовые документы проекта (`Queued`), если они есть.
-    pub fn ready_of(&self, project: &Path) -> Option<Ready> {
+    pub fn ready_of(&self, project: impl Into<DocTarget>) -> Option<Ready> {
+        let project = project.into();
         let mut ready: Option<Ready> = None;
         for ((owner, path), entry) in &self.entries {
-            if owner != project || entry.state != DocState::Queued || entry.claimed {
+            if *owner != project || entry.state != DocState::Queued || entry.claimed {
                 continue;
             }
             let item = ready.get_or_insert_with(|| Ready {
-                project: project.to_path_buf(),
+                target: project.clone(),
                 paths: BTreeSet::new(),
                 source: entry.source,
             });
@@ -210,50 +253,56 @@ impl DocQueue {
     }
 
     /// Документ ждёт паузы: проверка проекта его пропускает.
-    pub fn is_waiting(&self, project: &Path, path: &str) -> bool {
+    pub fn is_waiting(&self, project: impl Into<DocTarget>, path: &str) -> bool {
+        let project = project.into();
         self.entries
-            .get(&(project.to_path_buf(), path.to_string()))
+            .get(&(project.clone(), path.to_string()))
             .is_some_and(|entry| entry.state == DocState::Waiting)
     }
 
     /// Проверка обнаружила расхождение; это не новая правка и не сдвиг паузы.
-    pub fn found(&mut self, project: &Path, path: &str, source: DocSource) {
+    pub fn found(&mut self, project: impl Into<DocTarget>, path: &str, source: DocSource) {
+        let project = project.into();
         if !self
             .entries
-            .contains_key(&(project.to_path_buf(), path.to_string()))
+            .contains_key(&(project.clone(), path.to_string()))
         {
             self.touch(project, path, source, Duration::ZERO, Instant::now());
         }
     }
 
     /// Текущий проход забирает найденный документ.
-    pub fn discover(&mut self, project: &Path, path: &str, source: DocSource) {
-        self.found(project, path, source);
+    pub fn discover(&mut self, project: impl Into<DocTarget>, path: &str, source: DocSource) {
+        let project = project.into();
+        self.found(&project, path, source);
         if let Some(entry) = self
             .entries
-            .get_mut(&(project.to_path_buf(), path.to_string()))
+            .get_mut(&(project.clone(), path.to_string()))
             && entry.state == DocState::Queued
         {
             entry.claimed = true;
         }
     }
 
-    pub fn is_error(&self, project: &Path, path: &str) -> bool {
+    pub fn is_error(&self, project: impl Into<DocTarget>, path: &str) -> bool {
+        let project = project.into();
         self.entries
-            .get(&(project.to_path_buf(), path.to_string()))
+            .get(&(project.clone(), path.to_string()))
             .is_some_and(|entry| entry.state == DocState::Error)
     }
 
-    pub fn priority(&self, project: &Path, path: &str) -> u8 {
+    pub fn priority(&self, project: impl Into<DocTarget>, path: &str) -> u8 {
+        let project = project.into();
         self.entries
-            .get(&(project.to_path_buf(), path.to_string()))
+            .get(&(project.clone(), path.to_string()))
             .map_or(0, |entry| entry.source as u8)
     }
 
-    pub fn start(&mut self, project: &Path, path: &str) {
+    pub fn start(&mut self, project: impl Into<DocTarget>, path: &str) {
+        let project = project.into();
         if let Some(entry) = self
             .entries
-            .get_mut(&(project.to_path_buf(), path.to_string()))
+            .get_mut(&(project.clone(), path.to_string()))
             && entry.state == DocState::Queued
         {
             entry.state = DocState::Indexing;
@@ -266,13 +315,14 @@ impl DocQueue {
     /// взятые пути.
     pub fn begin(
         &mut self,
-        project: &Path,
+        project: impl Into<DocTarget>,
         explicit: Option<Option<&BTreeSet<String>>>,
         selected: Option<&BTreeSet<String>>,
     ) -> Vec<String> {
+        let project = project.into();
         let mut taken = Vec::new();
         for ((owner, path), entry) in &mut self.entries {
-            if owner != project {
+            if *owner != project {
                 continue;
             }
             if selected.is_some_and(|paths| {
@@ -317,13 +367,14 @@ impl DocQueue {
     /// успешно разобраны и записи снимаются. Документ, изменённый во время работы, снова ждёт паузы.
     pub fn finish(
         &mut self,
-        project: &Path,
+        project: impl Into<DocTarget>,
         taken: &[String],
         failed: &BTreeMap<String, String>,
         keep: bool,
     ) {
+        let project = project.into();
         for path in taken {
-            let key = (project.to_path_buf(), path.clone());
+            let key = (project.clone(), path.clone());
             let Some(entry) = self.entries.get_mut(&key) else {
                 continue;
             };
@@ -347,10 +398,11 @@ impl DocQueue {
     }
 
     /// «Повторить»: документ с ошибкой снова готов. `false` — такой записи нет.
-    pub fn retry(&mut self, project: &Path, path: &str) -> bool {
+    pub fn retry(&mut self, project: impl Into<DocTarget>, path: &str) -> bool {
+        let project = project.into();
         match self
             .entries
-            .get_mut(&(project.to_path_buf(), path.to_string()))
+            .get_mut(&(project.clone(), path.to_string()))
         {
             Some(entry) if entry.state == DocState::Error => {
                 entry.state = DocState::Queued;
@@ -365,14 +417,44 @@ impl DocQueue {
     /// Снимает все записи проекта (остановка, удаление, смена модели).
     pub fn remove_project(&mut self, project: &Path) -> usize {
         let before = self.entries.len();
-        self.entries.retain(|(owner, _), _| owner != project);
+        let target = DocTarget::project(project);
+        self.entries.retain(|(owner, _), _| *owner != target);
         before - self.entries.len()
     }
 
-    pub fn counts(&self, project: &Path) -> DocCounts {
+    /// Снимает записи всех worktree проекта-владельца (отмена проекта, слежение за W кончилось).
+    pub fn remove_worktrees(&mut self, owner: &Path) -> usize {
+        let before = self.entries.len();
+        self.entries.retain(|(target, _), _| {
+            !matches!(target, DocTarget::Worktree { owner: of, .. } if of == owner)
+        });
+        before - self.entries.len()
+    }
+
+    /// Снимает записи одного worktree.
+    pub fn remove_worktree(&mut self, owner: &Path, name: &str) -> usize {
+        let before = self.entries.len();
+        let target = DocTarget::worktree(owner, name);
+        self.entries.retain(|(of, _), _| *of != target);
+        before - self.entries.len()
+    }
+
+    /// Готовые документы цели уходят из очереди совсем: сверку дельты ведёт её собственная
+    /// очередь, а правка во время сверки даст новую запись с новой паузой.
+    pub fn take_ready(&mut self, target: impl Into<DocTarget>) -> Option<Ready> {
+        let target = target.into();
+        let ready = self.ready_of(&target)?;
+        for path in &ready.paths {
+            self.entries.remove(&(target.clone(), path.clone()));
+        }
+        Some(ready)
+    }
+
+    pub fn counts(&self, project: impl Into<DocTarget>) -> DocCounts {
+        let project = project.into();
         let mut counts = DocCounts::default();
         for ((owner, _), entry) in &self.entries {
-            if owner != project {
+            if *owner != project {
                 continue;
             }
             match entry.state {
@@ -387,11 +469,17 @@ impl DocQueue {
 
     /// Записи проекта в порядке выполнения: идущие, готовые, ждущие паузы, с ошибкой. Внутри
     /// группы — по источнику (старший раньше), затем по порядку появления.
-    pub fn snapshot(&self, project: &Path, now: Instant, limit: usize) -> Vec<DocView> {
+    pub fn snapshot(
+        &self,
+        project: impl Into<DocTarget>,
+        now: Instant,
+        limit: usize,
+    ) -> Vec<DocView> {
+        let project = project.into();
         let mut items: Vec<(&String, &DocEntry)> = self
             .entries
             .iter()
-            .filter(|((owner, _), _)| owner == project)
+            .filter(|((owner, _), _)| *owner == project)
             .map(|((_, path), entry)| (path, entry))
             .collect();
         let rank = |state: DocState| match state {
@@ -443,6 +531,9 @@ pub(super) struct Observer {
     pub project: PathBuf,
     pub source: DocSource,
     pub taken: std::sync::Arc<std::sync::Mutex<BTreeSet<String>>>,
+    /// Документы, которые задание записало в индекс или удалило из него: их публикуют живым
+    /// дельтам worktree проекта (6.3.4).
+    pub written: std::sync::Arc<std::sync::Mutex<BTreeSet<String>>>,
     pub wake: std::sync::Arc<tokio::sync::Notify>,
     pub rebuild: bool,
 }
@@ -483,6 +574,9 @@ impl bars_core::indexing::indexer::IndexObserver for Observer {
                 super::updates::STATUS
             },
         );
+        if error.is_none() {
+            super::lock(&self.written).insert(path.to_string());
+        }
         if self.rebuild && error.is_none() {
             return;
         }
@@ -786,6 +880,7 @@ mod tests {
             project: project_dir.path().to_path_buf(),
             source: DocSource::Periodic,
             taken: taken.clone(),
+            written: Default::default(),
             wake: std::sync::Arc::new(tokio::sync::Notify::new()),
             rebuild: false,
         };
@@ -827,6 +922,7 @@ mod tests {
             project: project_dir.path().to_path_buf(),
             source: DocSource::Periodic,
             taken: std::sync::Arc::new(std::sync::Mutex::new(BTreeSet::new())),
+            written: Default::default(),
             wake: wake.clone(),
             rebuild: false,
         };
@@ -844,5 +940,102 @@ mod tests {
             .await
             .expect("таймер должен проснуться до конца прохода");
         assert!(super::super::lock(&docs).is_waiting(project_dir.path(), "a.md"));
+    }
+
+    fn worktree() -> DocTarget {
+        DocTarget::worktree(&project(), "feat-x")
+    }
+
+    #[test]
+    fn project_and_worktree_with_the_same_path_are_different_records() {
+        let now = Instant::now();
+        let mut queue = DocQueue::new();
+        queue.touch(&project(), "a.md", DocSource::Watch, PAUSE, now);
+        queue.touch(&worktree(), "a.md", DocSource::Watch, PAUSE, now);
+        queue.touch(&DocTarget::worktree(&project(), "other"), "a.md", DocSource::Watch, PAUSE, now);
+        assert_eq!(queue.len(), 3);
+        assert_eq!(queue.counts(&project()).waiting, 1, "сводка проекта не считает worktree");
+        assert_eq!(queue.counts(&worktree()).waiting, 1);
+    }
+
+    #[test]
+    fn worktree_edits_keep_one_record_per_key_and_restart_the_pause() {
+        let base = Instant::now();
+        let mut queue = DocQueue::new();
+        for second in [0, 3, 6] {
+            queue.touch(&worktree(), "a.md", DocSource::Watch, PAUSE, at(base, second));
+        }
+        queue.touch(&worktree(), "a.md", DocSource::Edit, PAUSE, at(base, 7));
+        assert_eq!(queue.len(), 1);
+        assert_eq!(queue.next_due(), Some(at(base, 37)));
+        assert!(queue.promote_due(at(base, 36)).is_empty());
+        let ready = queue.promote_due(at(base, 37));
+        assert_eq!(ready.len(), 1);
+        assert_eq!(ready[0].target, worktree());
+        assert_eq!(ready[0].source, DocSource::Edit, "источник берётся старший");
+    }
+
+    #[test]
+    fn promote_due_groups_ready_documents_by_target() {
+        let base = Instant::now();
+        let mut queue = DocQueue::new();
+        queue.touch(&project(), "a.md", DocSource::Watch, PAUSE, base);
+        queue.touch(&worktree(), "b.md", DocSource::Watch, PAUSE, base);
+        queue.touch(&worktree(), "c.md", DocSource::Edit, PAUSE, base);
+        let ready = queue.promote_due(at(base, 30));
+        assert_eq!(ready.len(), 2);
+        let of_worktree = ready.iter().find(|item| item.target == worktree()).unwrap();
+        assert_eq!(of_worktree.paths, BTreeSet::from(["b.md".into(), "c.md".into()]));
+    }
+
+    #[test]
+    fn take_ready_removes_only_the_worktree_records_that_are_ready() {
+        let base = Instant::now();
+        let mut queue = DocQueue::new();
+        queue.touch(&worktree(), "ready.md", DocSource::Watch, Duration::ZERO, base);
+        queue.touch(&worktree(), "waits.md", DocSource::Watch, PAUSE, base);
+        queue.touch(&project(), "ready.md", DocSource::Watch, Duration::ZERO, base);
+        let taken = queue.take_ready(&worktree()).unwrap();
+        assert_eq!(taken.paths, BTreeSet::from(["ready.md".into()]));
+        assert_eq!(queue.len(), 2, "ждущая запись и запись проекта на месте");
+        assert!(queue.is_waiting(&worktree(), "waits.md"));
+        assert_eq!(queue.counts(&project()).queued, 1);
+        assert!(queue.take_ready(&worktree()).is_none());
+    }
+
+    #[test]
+    fn project_cancellation_removes_its_worktree_records_and_no_others() {
+        let now = Instant::now();
+        let mut queue = DocQueue::new();
+        queue.touch(&project(), "a.md", DocSource::Watch, PAUSE, now);
+        queue.touch(&worktree(), "a.md", DocSource::Watch, PAUSE, now);
+        queue.touch(&DocTarget::worktree(Path::new("other"), "feat-x"), "a.md", DocSource::Watch, PAUSE, now);
+        assert_eq!(queue.remove_project(&project()), 1, "worktree не трогает remove_project");
+        assert_eq!(queue.remove_worktrees(&project()), 1);
+        assert_eq!(queue.len(), 1, "worktree другого владельца остался");
+        assert_eq!(queue.remove_worktree(Path::new("other"), "feat-x"), 1);
+        assert_eq!(queue.len(), 0);
+    }
+
+    #[test]
+    fn document_done_publishes_written_paths_but_not_failed_ones() {
+        use bars_core::indexing::indexer::IndexObserver;
+        let written = std::sync::Arc::new(std::sync::Mutex::new(BTreeSet::new()));
+        let observer = Observer {
+            updates: Default::default(),
+            docs: std::sync::Arc::new(std::sync::Mutex::new(DocQueue::new())),
+            project: project(),
+            source: DocSource::Watch,
+            taken: Default::default(),
+            written: written.clone(),
+            wake: std::sync::Arc::new(tokio::sync::Notify::new()),
+            rebuild: false,
+        };
+        observer.document_done("ok.md", None);
+        observer.document_done("bad.md", Some("embedding failed"));
+        assert_eq!(
+            *super::super::lock(&written),
+            BTreeSet::from(["ok.md".to_string()])
+        );
     }
 }

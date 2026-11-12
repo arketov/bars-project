@@ -24,6 +24,7 @@ mod operations;
 mod shutdown;
 mod subprojects;
 mod worktrees;
+mod wt_watch;
 
 struct Env {
     home: TempDir,

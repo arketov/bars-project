@@ -235,7 +235,7 @@ impl Inner {
                 }
             }
             // Готовая дельта остаётся готовой, пока её пересверяют; без неё — «строится».
-            let entry = deltas.entries.entry(key).or_insert(Entry {
+            let entry = deltas.entries.entry(key.clone()).or_insert(Entry {
                 phase: Phase::Building { done: 0, total: 0 },
                 documents: 0,
             });
@@ -245,6 +245,8 @@ impl Inner {
         }
         self.updates.changed(owner, updates::STATUS, false);
         self.delta_wake.notify_one();
+        // Дельта появилась: слежение за W поднимается, если у worktree уже есть аренда.
+        self.ensure_wt_watching(&key);
         true
     }
 
@@ -320,6 +322,7 @@ impl Inner {
             tokio::task::spawn_blocking(move || inner.delta_job(&worker_key, &job, &cancel)).await;
         let outcome = result
             .unwrap_or_else(|error| Outcome::Failed(format!("внутренняя ошибка воркера: {error}")));
+        let mut dropped = false;
         {
             let mut deltas = lock(&self.deltas);
             deltas.running = None;
@@ -350,6 +353,7 @@ impl Inner {
                 }
                 Outcome::Dropped | Outcome::Skipped => {
                     deltas.entries.remove(&key);
+                    dropped = true;
                 }
                 Outcome::Cancelled => {
                     // Остановка оставляет готовую дельту готовой; недостроенная возвращается к «нет».
@@ -365,6 +369,11 @@ impl Inner {
             }
         }
         self.delta_busy.store(false, Ordering::SeqCst);
+        if dropped {
+            // Состояние «нет»: события W отбрасываются, слежение не нужно.
+            self.drop_wt_watcher(&key);
+            lock(&self.docs).remove_worktree(&key.0, &key.1);
+        }
         self.updates.changed(&key.0, updates::STATUS, false);
         // Очередь проектов ждала конца сверки.
         self.wake.notify_one();
@@ -631,6 +640,8 @@ impl Inner {
             deltas.queue.retain(|(queued, _)| *queued != key);
             deltas.entries.remove(&key);
         }
+        self.drop_wt_watcher(&key);
+        lock(&self.docs).remove_worktree(owner, name);
         log::info!(
             "Дельта worktree «{name}» проекта {} удалена: {reason}",
             owner.display()
@@ -644,7 +655,8 @@ impl Inner {
         self.updates.changed(owner, updates::STATUS, false);
     }
 
-    /// Владелец снят, остановлен или удаляется: сверки его дельт отменяются, состояния забываются.
+    /// Владелец снят, остановлен или удаляется: сверки его дельт отменяются, состояния забываются,
+    /// слежение за его worktree и их записи в очереди документов снимаются.
     pub(super) fn cancel_deltas(&self, owner: &Path) {
         let mut deltas = lock(&self.deltas);
         deltas.queue.retain(|((queued, _), _)| queued != owner);
@@ -654,6 +666,9 @@ impl Inner {
         {
             cancel.store(true, Ordering::SeqCst);
         }
+        drop(deltas);
+        // Слежение за W и записи очереди документов тех же worktree.
+        self.cancel_wt_watching(owner);
     }
 
     /// Идёт ли сверка дельты этого владельца.
