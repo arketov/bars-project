@@ -55,7 +55,7 @@ export interface SwitcherOptions {
 
 /** Ключ проекта в карте раскрытия: путь с `/` без хвостового разделителя, без учёта регистра. */
 export function pathKey(path: string): string {
-  return path.replace(/\/g, "/").replace(/\/+$/, "").toLowerCase();
+  return path.replace(/\\/g, "/").replace(/\/+$/, "").toLowerCase();
 }
 
 /** Верхний уровень: проекты без предка и самостоятельные подпроекты; найденные подпроекты — только под предком. */
@@ -69,8 +69,8 @@ export function topLevelProjects<T extends SwitcherProject>(projects: readonly T
 
 /** Путь подпроекта от его непосредственного родителя (`backend/api`); не вложен по пути — собственное имя. */
 function relativeLabel(project: SwitcherProject, parent: SwitcherProject): string {
-  const base = parent.path.replace(/\/g, "/").replace(/\/+$/, "");
-  const full = project.path.replace(/\/g, "/").replace(/\/+$/, "");
+  const base = parent.path.replace(/\\/g, "/").replace(/\/+$/, "");
+  const full = project.path.replace(/\\/g, "/").replace(/\/+$/, "");
   return full.toLowerCase().startsWith(`${base.toLowerCase()}/`) ? full.slice(base.length + 1) : project.name;
 }
 

@@ -567,7 +567,10 @@ impl bars_core::indexing::indexer::IndexObserver for Observer {
                 super::updates::STATUS
             },
         );
-        if error.is_none() {
+        // Обход вызывает итог и для неизменённых файлов: дельтам публикуются только расхождения,
+        // найденные этим заданием (`discovered` кладёт их в `taken`), иначе каждая проверка
+        // владельца ставила бы живым дельтам сверку всех документов (НТР-3).
+        if error.is_none() && super::lock(&self.taken).contains(path) {
             super::lock(&self.written).insert(path.to_string());
         }
         if self.rebuild && error.is_none() {
@@ -1065,8 +1068,11 @@ mod tests {
             wake: std::sync::Arc::new(tokio::sync::Notify::new()),
             rebuild: false,
         };
+        observer.discovered(&["ok.md".to_string(), "bad.md".to_string()]);
         observer.document_done("ok.md", None);
         observer.document_done("bad.md", Some("embedding failed"));
+        // Неизменённый файл обход тоже завершает, но дельтам он не публикуется.
+        observer.document_done("same.md", None);
         assert_eq!(
             *super::super::lock(&written),
             BTreeSet::from(["ok.md".to_string()])

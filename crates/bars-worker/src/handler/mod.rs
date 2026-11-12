@@ -1501,11 +1501,23 @@ impl WorkerHandler {
             if state == bars_protocol::DeltaState::Ready {
                 let db = bars_core::indexing::worktree_delta::delta_path(&project, &item.name);
                 // Дельта производная: недоступная (ещё не открылась, удаляется) — дерево по владельцу.
-                if let Ok(Ok(own)) =
-                    tokio::task::spawn_blocking(move || worktree_view::tree_documents(&db)).await
+                if let Ok(Ok((own, in_view))) = tokio::task::spawn_blocking(move || {
+                    let own = worktree_view::tree_documents(&db)?;
+                    let delta = bars_core::storage::Index::open_read_only(&db)?;
+                    let in_view: std::collections::BTreeSet<String> =
+                        bars_core::indexing::worktree_delta::view_files(&delta)?
+                            .into_iter()
+                            .map(|file| file.path)
+                            .collect();
+                    Ok::<_, bars_core::storage::StorageError>((own, in_view))
+                })
+                .await
                 {
+                    // Документы владельца, которых в worktree нет (удалены в его ветке), в дерево
+                    // вида не попадают.
                     let mut merged: std::collections::BTreeMap<String, TreeDocument> = documents
                         .into_iter()
+                        .filter(|document| in_view.contains(&document.path))
                         .map(|document| (document.path.clone(), document))
                         .collect();
                     for document in own {

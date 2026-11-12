@@ -576,7 +576,7 @@ pub fn requested(tool: &str, source: &Value) -> Value {
             "direction",
             "cursor",
         ],
-        "bars_status" => &["project", "wt", "all", "refresh"],
+        "bars_status" => &["project", "wt", "all", "refresh", "filter"],
         "bars_audit" => &[
             "project", "wt", "kind", "action", "id", "revision", "in", "cursor", "limit", "show",
         ],

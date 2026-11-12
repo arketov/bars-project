@@ -464,6 +464,11 @@ impl Inner {
             if let Err(error) = remove_delta(owner, name) {
                 return Outcome::Failed(format!("дельта не удалена: {error}"));
             }
+            // Сверку поставило изменение владельца или проверка, а не обращение к worktree:
+            // несовместимая дельта только удаляется и строится заново при обращении (ТР-6).
+            if matches!(job.priority, Priority::Watch | Priority::Periodic) {
+                return Outcome::Dropped;
+            }
         }
         let mut embedder = match self.models.embedder(&settings) {
             Ok(embedder) => embedder,

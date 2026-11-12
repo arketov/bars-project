@@ -10,12 +10,12 @@ const api = vi.hoisted(() => ({ call: vi.fn() }));
 vi.mock("./api", () => ({ ...api, joinPath: vi.fn(), openPath: vi.fn(), pickFolder: vi.fn(), copyText: vi.fn(), documentAction: vi.fn(), documentEditors: vi.fn(), inTauri: () => false }));
 
 const base = { docs_root: "docs", modules: [] };
-const main: ProjectInfo = { ...base, name: "tmc", path: "C:\w\tmc", state: "ready" };
-const worker: ProjectInfo = { ...base, name: "worker", path: "C:\w\tmc\backend\worker", state: "lazy", parent: main.path, qualified_name: "tmc/backend/worker", discovered: true };
-const api1: ProjectInfo = { ...base, name: "api", path: "C:\w\tmc\backend\api", state: "lazy", parent: main.path, qualified_name: "tmc/backend/api", discovered: true };
-const vendor: ProjectInfo = { ...base, name: "x", path: "C:\w\tmc\backend\api\vendor\x", state: "lazy", parent: api1.path, qualified_name: "tmc/backend/api/vendor/x", discovered: true };
-const angular: ProjectInfo = { ...base, name: "web-angular", path: "C:\w\tmc\frontend\web-angular", state: "ready", parent: main.path, qualified_name: "tmc/frontend/web-angular", discovered: false };
-const other: ProjectInfo = { ...base, name: "bars", path: "C:\w\bars", state: "ready" };
+const main: ProjectInfo = { ...base, name: "tmc", path: String.raw`C:\w\tmc`, state: "ready" };
+const worker: ProjectInfo = { ...base, name: "worker", path: String.raw`C:\w\tmc\backend\worker`, state: "lazy", parent: main.path, qualified_name: "tmc/backend/worker", discovered: true };
+const api1: ProjectInfo = { ...base, name: "api", path: String.raw`C:\w\tmc\backend\api`, state: "lazy", parent: main.path, qualified_name: "tmc/backend/api", discovered: true };
+const vendor: ProjectInfo = { ...base, name: "x", path: String.raw`C:\w\tmc\backend\api\vendor\x`, state: "lazy", parent: api1.path, qualified_name: "tmc/backend/api/vendor/x", discovered: true };
+const angular: ProjectInfo = { ...base, name: "web-angular", path: String.raw`C:\w\tmc\frontend\web-angular`, state: "ready", parent: main.path, qualified_name: "tmc/frontend/web-angular", discovered: false };
+const other: ProjectInfo = { ...base, name: "bars", path: String.raw`C:\w\bars`, state: "ready" };
 // В реестре подпроекты идут не по порядку пути: сортировка под предком — по пути.
 const registry = [main, worker, other, angular, vendor, api1];
 
@@ -41,7 +41,7 @@ afterEach(async () => {
   vi.clearAllMocks();
 });
 
-const open = (...paths: string[]) => new Map(paths.map(p => [p.toLowerCase().replace(/\/g, "/"), true]));
+const open = (...paths: string[]) => new Map(paths.map(p => [p.toLowerCase().replace(/\\/g, "/"), true]));
 
 it("buildSwitcher: верхний уровень без найденных, самостоятельный подпроект дважды, сортировка по пути, подпись от родителя", () => {
   const all = buildSwitcher(registry, { overrides: open(main.path, api1.path) });

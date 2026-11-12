@@ -307,15 +307,17 @@ pub fn sync(
             problems.extend(std::mem::take(&mut report.problems));
             continue;
         }
+        // Подпись — того снимка, с которым сверяли: если владелец менялся и повторы кончились,
+        // расхождение с его текущей подписью поставит следующую сверку (`restore_delta`).
         if matches!(request.scope, SyncScope::All) {
-            delta.set_meta("owner_digest", &after.digest)?;
+            delta.set_meta("owner_digest", &snapshot.digest)?;
             delta.set_meta("synced_at", &unix_seconds().to_string())?;
             delta.set_meta("ready", "1")?;
         }
         problems.extend(std::mem::take(&mut report.problems));
         report.problems = problems;
         report.restarts = restarts;
-        report.owner_digest = after.digest;
+        report.owner_digest = snapshot.digest;
         report.delta_documents = delta.document_count()?;
         return Ok(report);
     }

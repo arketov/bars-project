@@ -226,7 +226,7 @@ mod tests {
         let names: Vec<&str> = listing.entries.iter().map(|e| e.name.as_str()).collect();
         assert_eq!(names, ["adr/", "chats/", "Index.md"]);
         let chats = &listing.entries[1];
-        assert_eq!((chats.documents, chats.title.as_str()), (5, "Журнал"));
+        assert_eq!((chats.documents, chats.title.as_str()), (4, "Журнал"));
     }
 
     #[test]

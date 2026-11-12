@@ -217,9 +217,20 @@ fn one_section_edit_embeds_only_that_section() {
     assert_eq!(report.chunks_copied, new_hashes.len() - changed);
     // Вектор неизменившегося раздела — тот же, что у владельца.
     let shared = new_hashes.intersection(&old_hashes).next().unwrap();
-    assert_eq!(
-        delta.vector(shared).unwrap(),
-        fixture.index.vector(shared).unwrap()
+    // Копия проходит повторную нормализацию в `replace_document`: совпадение до округления f32.
+    let copied = delta.vector(shared).unwrap().expect("вектор скопирован");
+    let original = fixture
+        .index
+        .vector(shared)
+        .unwrap()
+        .expect("вектор владельца");
+    assert_eq!(copied.len(), original.len());
+    assert!(
+        copied
+            .iter()
+            .zip(&original)
+            .all(|(a, b)| (a - b).abs() < 1e-5),
+        "{copied:?} != {original:?}"
     );
     assert_eq!(report.removed, 0);
 }

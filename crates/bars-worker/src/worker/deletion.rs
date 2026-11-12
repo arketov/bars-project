@@ -69,6 +69,8 @@ impl Worker {
             Ok(_) => {
                 lock(&self.inner.projects).remove(&path);
                 self.inner.cancel_queued(&path);
+                // Папки его worktree больше не исключаются из охватывающих проектов (Т-48).
+                self.inner.forget_worktrees(&path);
                 // Найденные подпроекты удалённого предка уходят с ним (Т-49).
                 self.inner.remove_orphans();
                 // Удалённый вложенный проект больше не исключается из внешнего.
