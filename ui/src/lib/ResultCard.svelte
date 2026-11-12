@@ -27,6 +27,9 @@
   const dot = $derived(colorVar(documentColor(appearance.data, keyOf(relativeToDocs(card.path, app.docsRoot || "")))));
   const showScores = $derived(app.showScores);
   const results = $derived(app.results);
+  /** Выдача по worktree: плашка с именем, граф и «похожие» есть только у основного checkout (worktrees.md, «Чего в worktree нет»). */
+  const wtName = $derived(results?.applied.scope?.worktree?.name);
+  const wtOnly = "только у основного checkout";
   const hasScore = (hit: SearchHit) => hit.score_kind !== "none";
   const isOpen = (index: number) => toggled[index] ?? index === 0;
   const flip = (index: number) => { toggled = { ...toggled, [index]: !isOpen(index) }; };
@@ -54,12 +57,13 @@
   }
 
   function openSection(hit: SearchHit) {
-    void app.openDocument({ path: hit.path, title: hit.title, first_line: hit.first_line, last_line: hit.last_line, fromSearch: true, terms: { words: marker.words, phrases: marker.phrases } });
+    void app.openDocument({ path: hit.path, title: hit.title, first_line: hit.first_line, last_line: hit.last_line, fromSearch: true, terms: { words: marker.words, phrases: marker.phrases }, ...(wtName ? { wt: wtName } : {}) });
   }
   function openDocument() {
-    void app.openDocument({ path: card.path, title: card.title, first_line: 0, last_line: 0, fromSearch: true });
+    void app.openDocument({ path: card.path, title: card.title, first_line: 0, last_line: 0, fromSearch: true, ...(wtName ? { wt: wtName } : {}) });
   }
   function showInGraph() {
+    if (wtName) return;
     app.graphFocus = card.path;
     app.graphShowQuery = true;
     app.view = "graph";
@@ -74,6 +78,7 @@
   <div class="dh">
     {#if dot}<span class="dot" style:background={dot} title="Цвет документа" aria-hidden="true"></span>{/if}
     <h3><button class="link title" onclick={openDocument} title="Открыть документ">{card.title}</button></h3>
+    {#if wtName}<span class="wt-plate" data-testid="worktree-plate" title="Результат worktree">worktree · {wtName}</span>{/if}
     <span class="sp"></span>
     {#if showScores && hasScore(best)}<span class="score" title="Оценка лучшего раздела">{decimal(best.score)}<span class="bar"><i style="width:{Math.round(Math.min(1, best.score) * 100)}%"></i></span></span>{/if}
   </div>
@@ -107,8 +112,8 @@
           <div class="acts">
             <button class="btn sm" onclick={() => openSection(hit)}><Icon name="doc" size={14} />Открыть раздел</button>
             <button class="ghost sm" title="Скопировать путь и строку раздела" onclick={() => copy(hit)}><Icon name="copy" size={14} />Копировать ссылку</button>
-            <button class="ghost sm" onclick={showInGraph}>В графе</button>
-            <button class="ghost sm" disabled={!hit.chunk_id || !project} title={hit.chunk_id ? "Найти соседей по смыслу" : "ID раздела отсутствует. Обновите воркер и повторите поиск."} aria-expanded={similarFor === index} onclick={() => similarFor = similarFor === index ? null : index}>Похожие разделы</button>
+            <button class="ghost sm" disabled={!!wtName} title={wtName ? wtOnly : undefined} onclick={showInGraph}>В графе</button>
+            <button class="ghost sm" disabled={!hit.chunk_id || !project || !!wtName} title={wtName ? wtOnly : hit.chunk_id ? "Найти соседей по смыслу" : "ID раздела отсутствует. Обновите воркер и повторите поиск."} aria-expanded={similarFor === index} onclick={() => similarFor = similarFor === index ? null : index}>Похожие разделы</button>
           </div>
           {#if similarFor === index && project && hit.chunk_id}
             {#key project + ":" + hit.chunk_id}<SimilarSections {project} sourceId={hit.chunk_id} modules={app.project?.modules ?? []} onopen={(neighbor) => { if (app.current === project) void app.openDocument(neighbor); }} onrefresh={() => { similarFor = null; void app.search(); }} />{/key}
@@ -123,6 +128,7 @@
 </article>
 
 <style>
+  .wt-plate { margin-left: 8px; padding: 0 6px; border: 1px solid var(--accent); border-radius: 999px; background: var(--accent-soft); color: var(--accent-text); font-size: 11px; line-height: 18px; white-space: nowrap; }
   .doc { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 10px; overflow: hidden; }
   .doc:hover { border-color: var(--line-2); }
   .dh { display: flex; gap: 10px; align-items: baseline; padding: 12px 16px 0; }

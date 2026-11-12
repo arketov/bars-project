@@ -8,12 +8,15 @@
   import { checkState, type TreeNode } from "./tree";
   import TreeRow from "./TreeRow.svelte";
 
-  let { node, forceOpen = false }: { node: TreeNode; forceOpen?: boolean } = $props();
+  /** `wt` — имя worktree, если строка в дереве вида worktree; `null` — основной checkout. */
+  let { node, forceOpen = false, wt = null }: { node: TreeNode; forceOpen?: boolean; wt?: string | null } = $props();
+  const NO_SELECTION: ReadonlySet<string> = new Set();
 
   let opened = $state(false);
   const isDir = $derived(node.kind !== "file");
   const open = $derived(forceOpen || opened);
-  const check = $derived(checkState(node, app.selected));
+  /** Галочки стоят только в виде, которому принадлежит выбор (`selectionView`): в чужом виде строка пуста. */
+  const check = $derived(checkState(node, app.selectionView === wt ? app.selected : NO_SELECTION));
   /** Т-38: цвет и иконка из `.bars/appearance.toml`; у документа цвет — свой или ближайшей папки. */
   const styleKey = $derived(keyOf(node.path));
   const color = $derived(colorVar(isDir ? folderColor(appearance.data, styleKey) : documentColor(appearance.data, styleKey)));
@@ -21,7 +24,7 @@
   const title = $derived(node.path === "." ? "корень документации" : isDir ? `${node.path}/` : node.path.replace(/^\.\//, ""));
   /** Т-32: имя папки работает как файл — открывает её Index.md и раскрывает папку; клик по чекбоксу отмечает область поиска. */
   function openFolder() {
-    if (node.indexPath) void app.openDocument({ path: node.indexPath, title: node.label, first_line: 0, last_line: 0 }, true);
+    if (node.indexPath) void app.openDocument({ path: node.indexPath, title: node.label, first_line: 0, last_line: 0, ...(wt ? { wt } : {}) }, true);
     if (!open) opened = true;
   }
   function folderClick(event: MouseEvent) {
@@ -40,14 +43,14 @@
       event.preventDefault(); if (!open) opened=true; else row.parentElement?.querySelector<HTMLElement>('.kids .row')?.focus();
     } else if (event.key === 'ArrowLeft') {
       event.preventDefault(); if (isDir && open && !forceOpen) opened=false; else row.parentElement?.parentElement?.closest('.node')?.querySelector<HTMLElement>(':scope > .row')?.focus();
-    } else if (event.key === ' ') { event.preventDefault(); app.toggleNode(node.path,check!=='all'); }
-    else if (event.key === 'Enter') { event.preventDefault(); if (isDir) { if (node.indexPath) openFolder(); else opened=!opened; } else if (node.documentPath) void app.openDocument({path:node.documentPath,title:node.label,first_line:0,last_line:0}); }
+    } else if (event.key === ' ') { event.preventDefault(); app.toggleNode(node.path,check!=='all',wt); }
+    else if (event.key === 'Enter') { event.preventDefault(); if (isDir) { if (node.indexPath) openFolder(); else opened=!opened; } else if (node.documentPath) void app.openDocument({path:node.documentPath,title:node.label,first_line:0,last_line:0,...(wt?{wt}:{})}); }
   }
 </script>
 
 <div class="node {node.kind}" class:open>
   <!-- svelte-ignore a11y_no_noninteractive_tabindex: строка получает фокус для ContextMenu/Shift+F10. -->
-  <div class="row" use:treeCommandAdapter={node.path} data-menu-kind={isDir ? "folder" : "file"} data-menu-place="tree" data-document-path={node.documentPath} data-folder-path={isDir ? node.path : undefined} data-tree-node={node.path} data-tree-kind={node.kind} data-folder-kind={node.path === "." ? "Корневые документы" : node.kind === "module" ? "Модуль" : "Папка"} tabindex="0" role="treeitem" aria-selected={!!node.documentPath && app.viewer?.hit.path === node.documentPath} aria-expanded={isDir ? open : undefined} aria-label={title} onkeydown={keyboard}>
+  <div class="row" use:treeCommandAdapter={node.path} data-menu-kind={wt ? undefined : isDir ? "folder" : "file"} data-menu-place={wt ? undefined : "tree"} data-document-path={node.documentPath} data-folder-path={isDir ? node.path : undefined} data-tree-node={node.path} data-tree-kind={node.kind} data-folder-kind={node.path === "." ? "Корневые документы" : node.kind === "module" ? "Модуль" : "Папка"} tabindex="0" role="treeitem" aria-selected={!!node.documentPath && app.viewer?.hit.path === node.documentPath} aria-expanded={isDir ? open : undefined} aria-label={title} onkeydown={keyboard}>
     {#if isDir}
       <button class="caret" aria-label={open ? "Свернуть" : "Развернуть"} onclick={() => (opened = !opened)}>
         <Icon name="chevron-right" size={10} width={2} />
@@ -62,25 +65,30 @@
           aria-label={title}
           checked={check === "all"}
           indeterminate={check === "some"}
-          onchange={(event) => app.toggleNode(node.path, event.currentTarget.checked)}
+          onchange={(event) => app.toggleNode(node.path, event.currentTarget.checked, wt)}
         />
       {/if}
       {#if isDir}<span class="fi" style:color={color}><FolderIcon name={icon} size={14} /></span><!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions: клавиатура — Enter на строке. --><span class="nm folder" onclick={folderClick}>{node.path === "." ? "Корневые документы" : node.label}</span>{/if}
     </label>
     {#if !isDir && node.documentPath}
       {#if color}<span class="dot" style:background={color} aria-hidden="true"></span>{/if}
-      <button class="nm filename" title={node.documentPath} onclick={() => app.openDocument({ path: node.documentPath!, title: node.label, first_line: 0, last_line: 0 })}>{node.label}</button>
+      <button class="nm filename" title={node.documentPath} onclick={() => app.openDocument({ path: node.documentPath!, title: node.label, first_line: 0, last_line: 0, ...(wt ? { wt } : {}) })}>{node.label}</button>
     {/if}
     {#if node.nested}
-      <span class="nested-mark" data-testid="nested-mark">вложенный проект</span>
-      <button class="nested-open" onclick={() => void app.select(node.nested!.path)}>Открыть проект</button>
+      {#if node.nested.kind === "worktree"}
+        <!-- Папка git worktree внутри проекта: исключена из индекса, её документы — в папке «worktree». -->
+        <span class="nested-mark" data-testid="worktree-mark" title={`Документы — в папке «worktree», вид «${node.nested.name}»`}>worktree</span>
+      {:else}
+        <span class="nested-mark" data-testid="nested-mark">вложенный проект</span>
+        <button class="nested-open" onclick={() => void app.select(node.nested!.path)}>Открыть проект</button>
+      {/if}
     {/if}
     <span class="ct" title={node.indexed === false ? "Ещё не в индексе" : undefined}>{node.indexed === false ? "—" : node.chunks}</span>
   </div>
   {#if isDir && open}
     <div class="kids">
       {#each node.children as child (child.path)}
-        <TreeRow node={child} {forceOpen} />
+        <TreeRow node={child} {forceOpen} {wt} />
       {/each}
     </div>
   {/if}

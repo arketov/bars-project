@@ -18,6 +18,8 @@ mod folders;
 mod icons;
 #[cfg(test)]
 mod link_move_tests;
+#[cfg(test)]
+mod worktree_view_tests;
 mod tray;
 mod tree_io;
 #[cfg(test)]
@@ -71,6 +73,7 @@ fn main() -> anyhow::Result<()> {
             commands::document_read,
             commands::document_write,
             commands::document_revision,
+            commands::worktree_observe,
             commands::tree_read,
             commands::window_observe,
             commands::window_snapshot,

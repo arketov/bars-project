@@ -3,6 +3,7 @@
   import { appearance } from "./appearance.svelte";
   import { colorVar, documentColor, keyOf } from "./appearance";
   import { relativeToDocs } from "./tree";
+  import { splitView, viewKey } from "./view-key";
   import { createDockview, DefaultTab, themeLight, themeDark, type DockviewApi, type IDockviewPanel } from "dockview-core";
   import "dockview/dist/styles/dockview.css";
   import { app, type ViewedDocument } from "./app.svelte";
@@ -159,9 +160,11 @@
     if (!current) return;
     incoming = doc;
     // В раскладку попадает только адрес фрагмента; SearchHit может содержать текст документа.
-    const { path, title, first_line, last_line, column, length } = doc.hit;
-    const baseId = documentId(path), params: PanelParams = { kind: "document", project: current, hit: { path, title, first_line, last_line, column, length } };
-    let panel = api.panels.find(p => p.params?.kind === "document" && p.params?.hit?.path === path);
+    // Документ worktree — своя вкладка: `project` вкладки — ключ вида, id получает суффикс `:wt:имя`.
+    const { path, title, first_line, last_line, column, length, wt } = doc.hit;
+    const viewProject = viewKey(current, wt);
+    const baseId = wt ? `${documentId(path)}:wt:${wt}` : documentId(path), params: PanelParams = { kind: "document", project: viewProject, hit: { path, title, first_line, last_line, column, length, ...(wt ? { wt } : {}) } };
+    let panel = api.panels.find(p => p.params?.kind === "document" && p.params?.hit?.path === path && p.params?.project === viewProject);
     if (panel) panel.api.updateParameters(params);
     else {
       let id = baseId, suffix = 0;
@@ -262,8 +265,17 @@
           });
           if (params.params.kind !== "document") return;
           const path: string = params.params.hit.path;
+          const tabView = splitView(String(params.params.project ?? ""));
           tab.element.dataset.documentPath = path;
-          tab.element.dataset.menuKind = "file"; tab.element.dataset.menuPlace = "tab";
+          if (tabView.wt) {
+            // Пометка вкладки документа из worktree: сохраняется в файл рабочей копии.
+            tab.element.dataset.worktree = tabView.wt;
+            const mark = document.createElement("span");
+            mark.className = "tab-wt"; mark.textContent = `worktree · ${tabView.wt}`;
+            tab.element.prepend(mark);
+          }
+          // Меню файла (перенос, удаление, граф) работает по дереву основного checkout: у вкладки worktree оно служебное.
+          if (!tabView.wt) { tab.element.dataset.menuKind = "file"; tab.element.dataset.menuPlace = "tab"; }
           // Т-38: цветная точка вкладки документа — цвет документа или его папки.
           const dot = document.createElement("span");
           dot.className = "tab-color"; dot.setAttribute("aria-hidden", "true");
@@ -276,7 +288,7 @@
           tab.element.querySelector(".dv-default-tab-action")?.addEventListener("click", (event) => {
             // DefaultTab учитывает defaultPrevented; всплытие нужно Dockview для закрытия списка.
             event.preventDefault();
-            void confirmClose(app.current, path).then(ok => { if (ok) params.api.close(); });
+            void confirmClose(String(params.params.project ?? app.current), path).then(ok => { if (ok) params.api.close(); });
           }, true);
         }, dispose() { stopDot?.(); tab.dispose(); } };
       },
@@ -419,6 +431,7 @@
   .dock { flex: 1; min-height: 0; min-width: 0; }
   .panels-menu { position: relative; } .menu { position: absolute; top: 24px; left: 0; z-index: 50; min-width: 190px; padding: 5px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); box-shadow: var(--shadow); }
   .menu button { display: block; width: 100%; padding: 4px 8px; text-align: left; font-style: normal; } .menu button:hover { background: var(--accent-soft); }
+  .dock :global(.tab-wt) { flex: none; margin-right: 6px; padding: 0 6px; border: 1px solid var(--accent); border-radius: 999px; background: var(--accent-soft); color: var(--accent-text); font-size: 11px; line-height: 16px; font-style: normal; align-self: center; }
   .dock :global(.tab-color) { width: 8px; height: 8px; border-radius: 50%; flex: none; margin-right: 6px; align-self: center; }
   .dock :global(.dockview-theme-light), .dock :global(.dockview-theme-dark) {
     --dv-background-color: var(--bg); --dv-group-view-background-color: var(--panel); --dv-tabs-and-actions-container-background-color: var(--panel-2);

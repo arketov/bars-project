@@ -9,6 +9,7 @@
   import { badgeText } from "./new-topics";
   import { filterTree, touchedModules } from "./tree";
   import TreeRow from "./TreeRow.svelte";
+  import WorktreeFolder from "./WorktreeFolder.svelte";
 
   let menuOpen = $state(false);
   let seenMenuRequest = app.projectsMenuRequest;
@@ -239,6 +240,7 @@
     <button class="reset-scope" aria-label="Новый документ в корне документации" title="Новый документ в корне документации" onclick={() => entries.open("newDoc", ".")}><Icon name="doc" size={13} /></button>
     <button class="reset-scope" aria-label="Новая папка верхнего уровня" title="Новая папка в корне документации — папка верхнего уровня (модуль)" onclick={() => entries.open("newDir", ".")}><Icon name="folder" size={13} /></button></div>
 
+    {#if app.selectionHint}<p class="hint" role="status" data-testid="selection-hint">{app.selectionHint}</p>{/if}
     <div class="tree" role="tree" aria-label="Документы проекта">
       {#each app.treeProblems as problem}<p class="none" role="status">{problem.path}{problem.path ? ": " : ""}{problem.reason}</p>{/each}
       <button
@@ -268,6 +270,7 @@
       {#each shown as node (node.path)}
         <TreeRow {node} forceOpen={app.filter.trim() !== ""} />
       {/each}
+      {#if app.worktrees.length}<WorktreeFolder />{/if}
       {#if app.tree.length === 0}
         <p class="none">В папке документации пока нет документов и папок.</p>
       {:else if shown.length === 0}
@@ -348,6 +351,7 @@
   .reset-scope { display: grid; place-items: center; flex: none; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 4px; background: transparent; color: var(--muted); } .reset-scope:hover { background: var(--accent-soft); color: var(--accent-text); }
   .tree { flex: 1; overflow-y: auto; padding: 2px 8px 10px; min-height: 0; }
   .none { color: var(--muted); font-size: 12.5px; padding: 8px 10px; margin: 0; }
+  .hint { margin: 0 10px 5px; padding: 4px 8px; border-radius: 6px; background: var(--mid-soft); color: var(--mid); font-size: 11.5px; }
   .plist { padding: 0 8px; flex: 1; overflow-y: auto; min-height: 0; }
   .plabel { font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--faint); padding: 6px 10px 4px; }
   .litem { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; cursor: pointer; }

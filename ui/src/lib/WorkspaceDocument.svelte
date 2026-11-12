@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tick, untrack } from "svelte";
   import { call, copyText } from "./api";
+  import { splitView } from "./view-key";
   import { commandAdapter } from "./command-adapters";
   import { headingLinkText } from "./link-commands";
   import Icon from "./Icon.svelte";
@@ -16,6 +17,8 @@
   import { linkTargets } from "./link-picker";
   import { followLink as documentLink } from "./follow-link.svelte";
   let { project, hit, initial }: { project: string; hit: DocumentReference; initial?: ViewedDocument } = $props();
+  /** `project` — ключ вида: проект и, для документа worktree, имя worktree (worktrees.md, «Окно»). */
+  const view = $derived(splitView(project));
   let doc = $state<ViewedDocument | null>(null), error = $state("");
   // Т-29: документ открывается в редакторе исходного Markdown; глаз переключает его на рендер.
   let source = $state(true), outline = $state(true);
@@ -81,7 +84,7 @@
     if (seed && seed.hit.path === reference.path) doc = seed;
     else {
       doc = null;
-      void call<ReadOutput>("read", { cwd: path, project: path, path: `./${reference.path}` }).then(result => {
+      void call<ReadOutput>("read", { cwd: view.project, project: view.project, ...(view.wt ? { wt: view.wt } : {}), path: `./${reference.path}` }).then(result => {
         if (!cancelled) doc = { hit: reference, title: result.title, text: result.text, missing: false };
       }).catch(e => {
         if (cancelled) return;
@@ -113,15 +116,17 @@
     void buffer?.savedAt;
     let cancelled = false;
     backlinksError = "";
+    // У вида worktree индекса ссылок нет: список ссылок показывает только основной checkout.
+    if (view.wt) { backlinks = null; return; }
     void loadLinks(root, path).then(result => { if (!cancelled) backlinks = result; }).catch(e => { if (!cancelled) backlinksError = e instanceof Error ? e.message : String(e); });
     return () => { cancelled = true; };
   });
-  const openPath = (path: string, title: string | undefined, line = 0) => void app.openDocument({ path, title: linkTitle(title, path), first_line: line, last_line: line });
+  const openPath = (path: string, title: string | undefined, line = 0) => void app.openDocument({ path, title: linkTitle(title, path), first_line: line, last_line: line, ...(view.wt ? { wt: view.wt } : {}) });
   const openIncoming = (item: IncomingLink) => openPath(item.path, item.title, item.lines[0] ?? 0);
-  const openOutgoing = (item: OutgoingLink) => { if (item.target) openPath(item.target, item.target_title); else void documentLink.open(project, hit.path, item.raw, item.kind === "wiki"); };
+  const openOutgoing = (item: OutgoingLink) => { if (item.target) openPath(item.target, item.target_title); else void documentLink.open(view.project, hit.path, item.raw, item.kind === "wiki"); };
   /** Документы проекта из того же поиска, что и в главном окне (по смыслу), для выбора по `[[`; порядок — как в выдаче. */
   async function semanticLinks(query: string) {
-    const output = await call<SearchOutput>("search", { cwd: project, project, query, modules: [], files: [], limit: 10 });
+    const output = await call<SearchOutput>("search", { cwd: view.project, project: view.project, ...(view.wt ? { wt: view.wt } : {}), query, modules: [], files: [], limit: 10 });
     const byPath = new Map(linkTargets(app.tree, app.docsRoot).map((target) => [target.path, target]));
     return output.results.flatMap((result) => byPath.get(result.path) ?? []);
   }
@@ -130,7 +135,7 @@
     const link = (event.target as HTMLElement).closest<HTMLElement>("a[data-doc-link], a[data-wiki-link]");
     if (!link) return;
     event.preventDefault();
-    void documentLink.open(project, hit.path, link.dataset.wikiLink ?? link.dataset.docLink ?? "", link.dataset.wikiLink !== undefined);
+    void documentLink.open(view.project, hit.path, link.dataset.wikiLink ?? link.dataset.docLink ?? "", link.dataset.wikiLink !== undefined);
   }
   /** Закрывает свою вкладку тем же крестиком, что и мышь: проверка правок и список переполнения Dockview работают как обычно. */
   function closeTab() {
@@ -163,12 +168,13 @@
   $effect(() => { void source; void hit.first_line; void doc; void tick().then(() => scroll(hit.first_line)); });
 </script>
 
-<section class="document" bind:this={section} aria-label={hit.title} data-document-path={hit.path} data-menu-kind="file" data-menu-place="render">
-  <header data-document-path={hit.path} data-menu-kind="file" data-menu-place="header"><div><b>{doc?.title ?? hit.title}</b><small>{hit.path}</small></div>
+<section class="document" bind:this={section} aria-label={hit.title} data-document-path={hit.path} data-menu-kind={view.wt ? undefined : "file"} data-menu-place={view.wt ? undefined : "render"}>
+  <header data-document-path={hit.path} data-menu-kind={view.wt ? undefined : "file"} data-menu-place={view.wt ? undefined : "header"}><div><b>{doc?.title ?? hit.title}</b>{#if view.wt}<span class="wt-tag" data-testid="worktree-tag">worktree · {view.wt}</span>{/if}<small>{hit.path}</small></div>
     {#if status}<span class="status" role="status" data-status={buffer?.status}>{status}</span>{/if}
     {#if source && buffer && buffer.status !== "readonly"}<button class="tool-toggle" title="Панель разметки" aria-label="Панель разметки" aria-pressed={toolbar} onclick={toggleToolbar}>Aa</button>{/if}
     <button title={source ? "Показать рендер" : "Показать исходник"} aria-label="Исходник / рендер" aria-pressed={source} onclick={() => { source = !source; void buffer?.save(); }}><Icon name="eye" size={15} /></button>
   </header>
+  {#if view.wt}<p class="banner wt-note" role="note">Документ открыт из worktree «{view.wt}»: сохраняется в файл этой копии.</p>{/if}
   {#if error}<p role="alert">Не удалось прочитать документ: {error}</p>
   {:else if !doc}<p role="status">Чтение…</p>
   {:else if doc.missing}<p role="alert">Файл не найден, возможно, его удалили.</p>
@@ -195,7 +201,7 @@
       </div>
       {#if cheat}<div class="cheat" role="note"><code># Заголовок</code> · <code>**жирный**</code> · <code>*курсив*</code> · <code>`код`</code> · <code>- пункт</code> · <code>1. пункт</code> · <code>- [ ] задача</code> · <code>&gt; цитата</code> · <code>[текст](путь.md)</code> · <code>| а | б |</code> — таблица; <code>Tab</code> переходит по ячейкам, <code>Enter</code> продолжает список.</div>{/if}
     {/if}
-    <div class="body" class:editing={source} bind:this={body} data-document-path={hit.path} data-menu-kind={source ? "editor" : "file"} data-menu-place={source ? "editor" : "render"}>
+    <div class="body" class:editing={source} bind:this={body} data-document-path={hit.path} data-menu-kind={view.wt ? (source ? "editor" : undefined) : source ? "editor" : "file"} data-menu-place={view.wt ? (source ? "editor" : undefined) : source ? "editor" : "render"}>
       {#if source}<Editor bind:this={editor} text={text} historyVersion={buffer?.historyVersion ?? 0} links={() => linkTargets(app.tree, app.docsRoot)} semantic={semanticLinks} readonly={!buffer || buffer.status === "readonly" || buffer.status === "loading"} hit={range} oninput={(value) => { found = null; buffer?.edit(value); }} />
       {:else}<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions --><div class="md" onclick={followLink}>{@html html}</div>{/if}
     </div>
@@ -258,4 +264,6 @@
   .bl-note { margin: 2px; font-size: 11.5px; color: var(--muted); }
   .outline { position: absolute; right: 10px; top: 62px; width: 150px; max-height: 36%; overflow: auto; padding: 5px; border: 1px solid var(--line); border-radius: 6px; background: color-mix(in srgb, var(--panel) 90%, transparent); box-shadow: var(--shadow); }
   .outline button { display: block; width: 100%; text-align: left; font-size: 11px; padding: 2px 4px; } .outline .close { width: auto; margin-left: auto; } .outline-open { position: absolute; right: 10px; top: 62px; background: var(--panel-2); }
+  .wt-tag { display: inline-block; margin-left: 8px; padding: 0 6px; border: 1px solid var(--accent); border-radius: 999px; background: var(--accent-soft); color: var(--accent-text); font-size: 11px; line-height: 18px; vertical-align: middle; }
+  .wt-note { margin: 6px 8px; padding: 6px 8px; border: 1px solid var(--line-2); border-radius: 8px; color: var(--muted); font-size: 12px; }
 </style>

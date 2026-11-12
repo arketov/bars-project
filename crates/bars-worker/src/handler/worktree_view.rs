@@ -154,6 +154,28 @@ pub(super) fn with_note(result: Result<Value, RpcError>, note: Option<String>) -
     }
 }
 
+/// Документы базы индекса (владельца или дельты) для дерева окна: путь, модуль, заголовок и число
+/// чанков.
+pub(super) fn tree_documents(
+    db: &Path,
+) -> Result<Vec<bars_protocol::TreeDocument>, StorageError> {
+    let index = Index::open_read_only(db)?;
+    let mut statement = index.conn().prepare(
+        "SELECT d.path, d.module, d.title, \
+                (SELECT count(*) FROM chunks c WHERE c.document_id = d.id) \
+         FROM documents d ORDER BY d.path",
+    )?;
+    let rows = statement.query_map([], |row| {
+        Ok(bars_protocol::TreeDocument {
+            path: row.get(0)?,
+            module: row.get(1)?,
+            title: row.get(2)?,
+            chunks: row.get(3)?,
+        })
+    })?;
+    rows.collect::<Result<Vec<_>, _>>().map_err(StorageError::from)
+}
+
 /// Корень вида: корень проекта или корень worktree.
 pub(super) fn view_root(project: &Path, view: &ViewSelector) -> PathBuf {
     match view {

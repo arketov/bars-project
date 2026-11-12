@@ -1,8 +1,9 @@
 // Состояние окна: проекты, дерево, поиск, просмотр документа, ход индексации.
 // Всё, что знает воркер, спрашивается у него; окно хранит только выбор пользователя.
 
-import { call, documentWindowOpen, joinPath, openInMainWindow, openPath, pickFolder, projectRootPrepare, projectRootSuggest, type RootChoice, type RootSuggestion } from "./api";
+import { call, documentWindowOpen, joinPath, openInMainWindow, openPath, pickFolder, projectRootPrepare, projectRootSuggest, treeRead, worktreeObserve, type RootChoice, type RootSuggestion } from "./api";
 import type { DiskTreeOutput } from "./api";
+import { viewKey } from "./view-key";
 import { ProjectUpdates, type Snapshot } from "./window-updates";
 import { editors } from './editors.svelte';
 import { confirmProjectLeave } from './unsaved.svelte';
@@ -28,6 +29,7 @@ import {
   type SettingsOutput,
   type StatusOutput,
   type TreeOutput,
+  type WorktreeStatus,
 } from "./types";
 
 export type View = "main" | "settings" | "indexing" | "graph";
@@ -40,7 +42,7 @@ export interface ViewedDocument {
   missing: boolean;
 }
 
-export type DocumentReference = Pick<SearchHit, "path" | "title" | "first_line" | "last_line"> & { column?: number; length?: number; expectedRevision?: string; /** Открыт из выдачи или «В тексте»: только такой вкладке уместно «Обновить выдачу». */ fromSearch?: boolean; /** Слова и фразы запроса: «Открыть раздел» подсвечивает их в тексте раздела. */ terms?: { words: string[]; phrases: string[] } };
+export type DocumentReference = Pick<SearchHit, "path" | "title" | "first_line" | "last_line"> & { /** Документ вида worktree: имя worktree; без него — основной checkout. */ wt?: string; column?: number; length?: number; expectedRevision?: string; /** Открыт из выдачи или «В тексте»: только такой вкладке уместно «Обновить выдачу». */ fromSearch?: boolean; /** Слова и фразы запроса: «Открыть раздел» подсвечивает их в тексте раздела. */ terms?: { words: string[]; phrases: string[] } };
 
 const PROJECT_KEY = "bars-project";
 const SCORES_KEY = "bars-search-scores";
@@ -80,6 +82,10 @@ class App {
       const result = await call<{ snapshot_observed?: boolean }>("project_observe", { window: this.#windowId, project: this.windowVisible ? project : null });
       if (result.snapshot_observed === false && project === this.current && this.windowVisible && this.#watchTimer) void this.#updates.reconnect();
     }).catch(() => {});
+    // Аренда слежения за рабочей копией worktree живёт 30 секунд: окно повторяет её вместе с наблюдением за проектом.
+    if (!this.documentWindow) {
+      try { void worktreeObserve(this.windowVisible ? project : null, this.windowVisible ? this.focusWt : null)?.catch(() => {}); } catch { /* аренда повторится через 10 секунд */ }
+    }
   };
   #releaseWatch = (): void => { void this.#updates.lease(async () => { await call("project_observe", { window: this.#windowId, project: null }); }).catch(() => {}); };
   private currentView = $state<View>("main");
@@ -108,7 +114,19 @@ class App {
 
   docsRoot = $state("docs");
   tree = $state.raw<TreeNode[]>([]);
+  /** Выбор области поиска хранится вместе с видом: `selectionView` — имя worktree, `null` — основной checkout. */
   selected = $state.raw<ReadonlySet<string>>(new Set());
+  selectionView = $state<string | null>(null);
+  /** Подсказка после смены вида выбора: «поиск идёт по одному виду». */
+  selectionHint = $state<string | null>(null);
+  /** Живые worktree проекта-владельца с состоянием дельты (часть WORKTREES `status`). */
+  worktrees = $state.raw<WorktreeStatus[]>([]);
+  /** Деревья раскрытых worktree по имени (по диску W, сведения индекса — владельца и дельты). */
+  wtTrees = $state.raw<Record<string, TreeNode[]>>({});
+  /** Worktree, который окно сейчас показывает (дерево раскрыто, документ открыт): под него держится аренда слежения. */
+  focusWt = $state<string | null>(null);
+  #wtOpened = new Set<string>();
+  #wtSignature = "";
   filter = $state("");
 
   query = $state("");
@@ -260,8 +278,18 @@ class App {
     return this.projects.find((project) => project.path === this.current) ?? null;
   }
 
+  /** Дерево вида, в котором стоит выбор: основной checkout или раскрытый worktree. */
+  get selectionTree(): TreeNode[] {
+    return this.selectionView === null ? this.tree : (this.wtTrees[this.selectionView] ?? []);
+  }
+
   get scope(): SearchScope {
-    return searchScope(this.tree, this.selected);
+    return searchScope(this.selectionTree, this.selected);
+  }
+
+  /** Состояние worktree по имени; пока список не пришёл — `undefined`. */
+  worktreeOf(name: string): WorktreeStatus | undefined {
+    return this.worktrees.find((item) => item.name === name);
   }
 
   /** Умолчание «Результатов» с rerank или без него (Т-18); до чтения настроек — 5. */
@@ -396,6 +424,7 @@ class App {
       if (hidden) return;
       if (force || changed || this.#tick % PROJECTS_EVERY === 0) await this.loadProjects();
       if (force && this.current) await this.#updates.request(this.current, this.documentWindow, true);
+      await this.loadWorktrees();
       this.syncTopics(force);
     } catch (error) {
       if (epoch !== this.#epoch) return;
@@ -464,7 +493,10 @@ class App {
     const { disk: diskPart, index: indexPart, status: statusPart } = snapshot.parts;
     if (diskPart && !diskPart.unchanged && diskPart.value) this.#disk = diskPart.value as DiskTreeOutput;
     if (indexPart && !indexPart.unchanged && indexPart.value) this.#index = indexPart.value as TreeOutput;
-    if (statusPart && !statusPart.unchanged && statusPart.value) this.status = statusPart.value as StatusOutput;
+    if (statusPart && !statusPart.unchanged && statusPart.value) {
+      this.status = statusPart.value as StatusOutput;
+      this.applyWorktrees(this.status.worktrees ?? []);
+    }
     const errors = Object.values(snapshot.parts).flatMap(part => part.error ? [{ path: "", reason: `Сохранён последний снимок: ${part.error}` }] : []);
     const disk = this.#disk, output = this.#index;
     this.treeProblems = [...(disk?.problems ?? []), ...errors];
@@ -508,6 +540,13 @@ class App {
       // Выбор не запомнится — окно откроется на первом проекте.
     }
     this.selected = new Set();
+    this.selectionView = null;
+    this.selectionHint = null;
+    this.worktrees = [];
+    this.wtTrees = {};
+    this.#wtOpened = new Set();
+    this.#wtSignature = "";
+    this.focusWt = null;
     this.tree = [];
     this.filter = "";
     this.results = null;
@@ -526,12 +565,86 @@ class App {
     await this.#updates.bind(path, this.documentWindow);
   }
 
-  toggleNode(path: string, checked: boolean): void {
-    this.selected = toggle(this.tree, this.selected, path, checked);
+  /**
+   * Галочка в дереве вида `wt` (`null` — основной checkout). Поиск идёт по одному виду: выбор в другом виде
+   * снимает прежний и показывает короткую подсказку (worktrees.md, «Окно», «Галочки»).
+   */
+  toggleNode(path: string, checked: boolean, wt: string | null = null): void {
+    const tree = wt === null ? this.tree : (this.wtTrees[wt] ?? []);
+    if (wt !== this.selectionView) {
+      if (this.selected.size > 0) {
+        const was = this.selectionView === null ? "основном checkout" : `worktree «${this.selectionView}»`;
+        this.selectionHint = `Поиск идёт по одному виду: выбор в ${was} снят`;
+      }
+      this.selected = new Set();
+      this.selectionView = wt;
+    }
+    this.selected = toggle(tree, this.selected, path, checked);
+    if (this.selected.size === 0) this.selectionHint = null;
+    else if (this.selectionView !== null) this.selectionHint ??= "Поиск идёт по одному виду";
   }
 
   clearSelection(): void {
     this.selected = new Set();
+    this.selectionView = null;
+    this.selectionHint = null;
+  }
+
+  /** Список worktree пришёл: выбор в исчезнувшем worktree снимается, а деревья раскрытых перечитываются при смене дельты. */
+  private applyWorktrees(list: WorktreeStatus[]): void {
+    this.worktrees = list;
+    const names = new Set(list.map((item) => item.name));
+    if (this.selectionView !== null && !names.has(this.selectionView)) this.clearSelection();
+    if (this.focusWt !== null && !names.has(this.focusWt)) this.focusWt = null;
+    for (const name of [...this.#wtOpened]) if (!names.has(name)) this.closeWorktree(name);
+    const signature = list.filter((item) => this.#wtOpened.has(item.name)).map((item) => `${item.name}:${item.delta.state}:${item.delta.documents}:${item.delta.done ?? ""}:${item.delta.pending}`).join("|");
+    if (signature !== this.#wtSignature) {
+      this.#wtSignature = signature;
+      for (const name of this.#wtOpened) void this.loadWorktreeTree(name);
+    }
+  }
+
+  /** Раскрытие папки worktree — первое обращение: дельта строится, пока идёт построение дерево доступно по диску. */
+  async openWorktree(name: string): Promise<void> {
+    this.#wtOpened.add(name);
+    this.focusWt = name;
+    await this.loadWorktreeTree(name);
+    if (this.#watchTimer) this.#watch();
+  }
+
+  closeWorktree(name: string): void {
+    this.#wtOpened.delete(name);
+    if (this.focusWt === name) this.focusWt = this.#wtOpened.values().next().value ?? null;
+    const { [name]: _gone, ...rest } = this.wtTrees;
+    this.wtTrees = rest;
+    if (this.selectionView === name) this.clearSelection();
+  }
+
+  /** Дерево worktree: документы индекса владельца и дельты (`tree` с `wt`) и диск W (`tree_read` с `wt`). */
+  async loadWorktreeTree(name: string): Promise<void> {
+    const project = this.current;
+    if (!project) return;
+    try {
+      const [index, disk] = await Promise.all([
+        call<TreeOutput>("tree", { cwd: project, project, wt: name }),
+        treeRead(viewKey(project, name)),
+      ]);
+      if (this.current !== project || !this.#wtOpened.has(name)) return;
+      const docsRoot = disk?.docs_root ?? index.docs_root;
+      this.wtTrees = { ...this.wtTrees, [name]: buildTree(index.documents, docsRoot, disk ? { files: disk.files.map((file) => file.path), dirs: disk.dirs } : undefined) };
+    } catch (error) {
+      if (this.current === project) this.flash(error instanceof Error ? error.message : String(error), true);
+    }
+  }
+
+  /** Состояние worktree обновляется раз в тик, пока раскрыт хотя бы один: ход построения и число отличающихся документов. */
+  private async loadWorktrees(): Promise<void> {
+    const project = this.current;
+    if (!project || this.#wtOpened.size === 0) return;
+    try {
+      const status = await call<StatusOutput>("status", { cwd: project, project });
+      if (this.current === project) this.applyWorktrees(status.worktrees ?? []);
+    } catch { /* остаётся прежний список */ }
   }
 
   openSearchUnsaved(path: string): void {
@@ -550,6 +663,7 @@ class App {
     const searchId = ++this.#searchId;
     const requestId = newRequestId();
     const scope = this.scope;
+    const view = this.selectionView;
     const limit = this.count;
     this.searching = true;
     this.waitingModel = false;
@@ -575,6 +689,8 @@ class App {
       const output = await call<SearchOutput>("search", {
         cwd: project.path,
         project: project.path,
+        // Поиск идёт по одному виду: wt — вид, в котором стоит выбор; без выбора — основной checkout.
+        ...(view ? { wt: view } : {}),
         query,
         modules,
         files,
@@ -729,7 +845,7 @@ class App {
     this.topicsOpen = false;
     try {
       // Путь индекса уже от корня проекта: исключаем docs/docs/x.md при совпадении имён.
-      const output = await call<ReadOutput>("read", { cwd: project.path, project: project.path, path: `./${hit.path}` });
+      const output = await call<ReadOutput>("read", { cwd: project.path, project: project.path, ...(hit.wt ? { wt: hit.wt } : {}), path: `./${hit.path}` });
       if (reading !== this.#reading || this.current !== project.path) return;
       if (hit.expectedRevision && hit.expectedRevision !== output.revision) {
         this.flash("Документ изменился после построения графа");
@@ -737,7 +853,9 @@ class App {
       }
       this.view = "main";
       this.viewer = { hit, title: output.title, text: output.text, missing: false };
-      this.activeDocument = hit.path;
+      // Мини-граф есть только у основного checkout: документ worktree центром графа не становится.
+      this.activeDocument = hit.wt ? null : hit.path;
+      if (hit.wt) this.focusWt = hit.wt;
     } catch (error) {
       if (reading !== this.#reading || this.current !== project.path) return;
       if (error instanceof BarsError && error.kind === "file_not_found") {

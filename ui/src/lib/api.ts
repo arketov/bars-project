@@ -3,6 +3,7 @@
 // в браузере) вызовы отвечает заглушка из `mock.ts`.
 
 import { BarsError } from "./types";
+import { splitView } from "./view-key";
 import type { McpStatistic } from "./mcp-statistics";
 import type { HistoryFilter, HistoryPage, HistoryDiagnostics, HistoryOptions } from "./mcp-history";
 
@@ -132,6 +133,13 @@ export async function copyText(text: string): Promise<void> {
   await navigator.clipboard.writeText(text);
 }
 
+const viewTarget = (key: string): { project: string; wt: string | null } => splitView(key);
+
+/** Окно показывает worktree: дельта строится, слежение за рабочей копией держится арендой окна. `wt: null` — ушло. */
+export async function worktreeObserve(project: string | null, wt: string | null): Promise<void> {
+  await shell("worktree_observe", { project, wt });
+}
+
 /** Ожидаемый отказ команд документа: `kind` — `invalid_path`, `outside_root`, `read_only`, `locked` и др. */
 export interface DocumentFailure { status: "error"; kind: string; message: string }
 export type DocumentReadOnly = "not_utf8" | "too_large" | "file";
@@ -152,18 +160,18 @@ export type DocumentWrite =
 
 /** Чтение документа для редактора; вне Tauri — `null`: окно в браузере правит текст из мока. */
 export async function documentRead(project: string, path: string): Promise<DocumentRead | DocumentFailure | null> {
-  return shell<DocumentRead | DocumentFailure>("document_read", { project, path });
+  return shell<DocumentRead | DocumentFailure>("document_read", { ...viewTarget(project), path });
 }
 
 /** Запись документа, если на диске ещё `baseRevision` (`null` — файла быть не должно). */
 export async function documentWrite(project: string, path: string, text: string, baseRevision: string | null, eol: "lf" | "crlf", bom: boolean): Promise<DocumentWrite> {
   if (!inTauri()) return { status: "saved", revision: `browser-${text.length}-${Date.now()}` };
-  return (await shell<DocumentWrite>("document_write", { project, path, text, baseRevision, eol, bom }))!;
+  return (await shell<DocumentWrite>("document_write", { ...viewTarget(project), path, text, baseRevision, eol, bom }))!;
 }
 
 /** Ревизия документа на диске без текста; `revision: null` — файла нет. */
 export async function documentRevision(project: string, path: string): Promise<{ status: "ok"; revision: string | null } | DocumentFailure | null> {
-  return shell<{ status: "ok"; revision: string | null } | DocumentFailure>("document_revision", { project, path });
+  return shell<{ status: "ok"; revision: string | null } | DocumentFailure>("document_revision", { ...viewTarget(project), path });
 }
 
 /** Цвета и иконки проекта (Т-38): файл `.bars/appearance.toml`. */
@@ -211,7 +219,7 @@ export interface DiskTreeOutput {
   files: { path: string; size: number; modified: number }[];
   problems: { path: string; reason: string }[];
   /** Вложенные проекты, исключённые из индекса этого проекта (Т-7). */
-  nested?: { name: string; path: string; dir: string; area: string; documents: number }[];
+  nested?: { name: string; path: string; dir: string; area: string; documents: number; kind?: "worktree" }[];
 }
 
 /** Ответ операции с файлом или папкой: `partial` — папка создана, а её `index.md` нет. */
@@ -220,16 +228,16 @@ export type EntryResult =
   | { status: "partial"; path: string; index_path?: string; kind?: string; message?: string; updated?: string[]; failed?: {path: string; reason: string}[] }
   | DocumentFailure;
 
-export interface MovePreview { status: "ok"; path: string; token: string; documents: {path: string; edits: number}[]; warnings: {path: string; line: number}[] }
+export interface MovePreview { status: "ok"; path: string; token: string; /** `false` — в виде worktree ссылки не обновляются. */ links_updated?: boolean; documents: {path: string; edits: number}[]; warnings: {path: string; line: number}[] }
 export async function entryPlanMove(project: string, from: string, toParent: string, name: string): Promise<MovePreview | DocumentFailure> {
   if (!inTauri()) return { status: "ok", path: `${toParent}/${name}`, token: "mock", documents: [], warnings: [] };
-  return (await shell<MovePreview | DocumentFailure>("entry_plan_move", {project, from, toParent, name}))!;
+  return (await shell<MovePreview | DocumentFailure>("entry_plan_move", { ...viewTarget(project), from, toParent, name}))!;
 }
 
 /** Дерево с диска; `null` только у тестового мока. Ошибка диска показывается в дереве. */
 export async function treeRead(project: string): Promise<DiskTreeOutput | null> {
-  if (!inTauri()) return (await import("./mock-disk")).mockTreeRead(project);
-  const out = await shell<DiskTreeOutput | DocumentFailure>("tree_read", { project });
+  if (!inTauri()) return (await import("./mock-disk")).mockTreeRead(splitView(project).project);
+  const out = await shell<DiskTreeOutput | DocumentFailure>("tree_read", { ...viewTarget(project) });
   if (!out) throw new Error("Не удалось прочитать дерево документации");
   if (out.status === "error") throw new Error(out.message);
   return out;
@@ -237,24 +245,24 @@ export async function treeRead(project: string): Promise<DiskTreeOutput | null> 
 
 export async function entryCreateDoc(project: string, parent: string, name: string): Promise<EntryResult> {
   if (!inTauri()) return (await import("./mock-disk")).mockEntry("create_doc", project, { parent, name });
-  return (await shell<EntryResult>("entry_create_doc", { project, parent, name }))!;
+  return (await shell<EntryResult>("entry_create_doc", { ...viewTarget(project), parent, name }))!;
 }
 
 export async function entryCreateDir(project: string, parent: string, name: string): Promise<EntryResult> {
   if (!inTauri()) return (await import("./mock-disk")).mockEntry("create_dir", project, { parent, name });
-  return (await shell<EntryResult>("entry_create_dir", { project, parent, name }))!;
+  return (await shell<EntryResult>("entry_create_dir", { ...viewTarget(project), parent, name }))!;
 }
 
 /** Переименование и перемещение: `toParent` — папка назначения, `name` — имя на новом месте. */
 export async function entryMove(project: string, from: string, toParent: string, name: string, token: string): Promise<EntryResult> {
   if (!inTauri()) return (await import("./mock-disk")).mockEntry("move", project, { from, toParent, name });
-  return (await shell<EntryResult>("entry_move", { project, from, toParent, name, token }))!;
+  return (await shell<EntryResult>("entry_move", { ...viewTarget(project), from, toParent, name, token }))!;
 }
 
 /** Отправляет файл или папку в корзину ОС; без корзины — отказ. */
 export async function entryTrash(project: string, path: string): Promise<EntryResult> {
   if (!inTauri()) return (await import("./mock-disk")).mockEntry("trash", project, { path });
-  return (await shell<EntryResult>("entry_trash", { project, path }))!;
+  return (await shell<EntryResult>("entry_trash", { ...viewTarget(project), path }))!;
 }
 
 /** Что видит подтверждение удаления: документы узла и входящие ссылки на них из документов, которые останутся. */
@@ -271,7 +279,7 @@ export interface DeletePlan {
 /** Считает входящие ссылки до удаления; ничего не меняет. */
 export async function entryPlanDelete(project: string, path: string): Promise<DeletePlan | DocumentFailure> {
   if (!inTauri()) return (await import("./mock-disk")).mockPlanDelete(project, path);
-  return (await shell<DeletePlan | DocumentFailure>("entry_plan_delete", { project, path }))!;
+  return (await shell<DeletePlan | DocumentFailure>("entry_plan_delete", { ...viewTarget(project), path }))!;
 }
 
 export interface DocumentEditor { id: string; label: string }
@@ -296,7 +304,7 @@ export async function documentAction(project: string, path: string, action: "pat
     if (action !== "path") throw new Error("Действие ОС/очереди доступно в приложении bars; браузер показывает макет");
     return joinPath(project, path);
   }
-  return (await shell<string>("document_action", { project, path, action, editor: editor ?? null }))!;
+  return (await shell<string>("document_action", { ...viewTarget(project), path, action, editor: editor ?? null }))!;
 }
 
 /** Абсолютный путь файла проекта для «В редакторе». */

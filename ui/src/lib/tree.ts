@@ -23,7 +23,8 @@ export interface TreeNode {
   /** Документ есть на диске, но ещё не в индексе (Т-33): число чанков неизвестно. */
   indexed?: false;
   /** Папка вложенного проекта или его области (Т-7): без галочки, с пометкой и действием «Открыть проект». */
-  nested?: { name: string; path: string };
+  /** `kind: "worktree"` — папка git worktree внутри проекта: серая пометка «worktree», без «Открыть проект». */
+  nested?: { name: string; path: string; kind?: "worktree" };
 }
 
 /** Вложенный зарегистрированный проект, область которого исключена из индекса внешнего. */
@@ -35,6 +36,8 @@ export interface NestedProject {
   dir: string;
   /** Его исключённая область от корня внешнего проекта. */
   area: string;
+  /** Папка worktree, а не вложенный проект; `name` — имя worktree, `path` — его корень. */
+  kind?: "worktree";
 }
 
 /** Дерево с диска (`tree_read`): пути от корня проекта; пустые папки видны, документы без индекса тоже. */
@@ -146,10 +149,11 @@ export function buildTree(documents: TreeDocument[], docsRoot: string, disk?: Di
   }
   // Вложенные проекты (Т-7): папка проекта и папка его области — пометка вместо галочки.
   if (disk?.nested?.length) {
-    const marks = new Map<string, { name: string; path: string }>();
+    const marks = new Map<string, { name: string; path: string; kind?: "worktree" }>();
     for (const item of disk.nested) {
-      marks.set(item.dir, { name: item.name, path: item.path });
-      marks.set(item.area, { name: item.name, path: item.path });
+      const mark = { name: item.name, path: item.path, ...(item.kind ? { kind: item.kind } : {}) };
+      marks.set(item.dir, mark);
+      marks.set(item.area, mark);
     }
     const mark = (nodes: TreeNode[]) => {
       for (const node of nodes) {

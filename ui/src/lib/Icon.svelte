@@ -3,9 +3,10 @@
   type Name =
     | "chevron-down" | "chevron-right" | "plus" | "search" | "moon" | "gear" | "arrow-right"
     | "external" | "close" | "doc" | "copy" | "back" | "folder" | "warn" | "info" | "error"
-    | "pause" | "play" | "stop" | "check" | "refresh" | "bell" | "new-topics" | "more" | "eye" | "minus" | "fit" | "layout";
+    | "pause" | "play" | "stop" | "check" | "refresh" | "bell" | "new-topics" | "more" | "eye" | "minus" | "fit" | "layout" | "branch";
 
   const PATHS: Record<Name, string> = {
+    branch: "M6 3v12M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 9a9 9 0 0 1-9 9",
     minus: "M5 12h14",
     fit: "M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5",
     layout: "M5 4h4v4H5zM15 5h4v4h-4zM9 16h4v4H9zM9 6l6 1M7 8l4 8M17 9l-6 7",

@@ -1467,35 +1467,23 @@ impl WorkerHandler {
     }
 
     /// Документы проекта из индекса. Индекс читается без модели, поэтому дерево видно и в
-    /// состоянии `reindex_required` (Т-25).
+    /// состоянии `reindex_required` (Т-25). Для вида worktree — документы владельца, поверх них
+    /// документы готовой дельты (заголовки и чанки вида); первое обращение ставит построение
+    /// дельты. Дерево по диску W окно читает само (`tree_read` с `wt`).
     async fn tree(&self, params: TreeParams) -> Result<TreeOutput, RpcError> {
-        let project = self.usable(&params.target)?;
+        let (project, view) = self.usable_view(&params.target)?;
         let docs_root = self.settings(&project)?.docs_root;
-        let documents = if index_path(&project).exists() {
+        let mut documents = if index_path(&project).exists() {
             let gate = self
                 .worker
                 .gate(&project)
                 .map_err(worker_error)?
                 .read_owned()
                 .await;
+            let db = index_path(&project);
             tokio::task::spawn_blocking(move || {
                 let _gate = gate;
-                let index = Index::open_read_only(&index_path(&project))?;
-                let mut statement = index.conn().prepare(
-                    "SELECT d.path, d.module, d.title, \
-                            (SELECT count(*) FROM chunks c WHERE c.document_id = d.id) \
-                     FROM documents d ORDER BY d.path",
-                )?;
-                let rows = statement.query_map([], |row| {
-                    Ok(TreeDocument {
-                        path: row.get(0)?,
-                        module: row.get(1)?,
-                        title: row.get(2)?,
-                        chunks: row.get(3)?,
-                    })
-                })?;
-                rows.collect::<Result<Vec<_>, _>>()
-                    .map_err(bars_core::storage::StorageError::from)
+                worktree_view::tree_documents(&db)
             })
             .await
             .map_err(internal)?
@@ -1503,6 +1491,26 @@ impl WorkerHandler {
         } else {
             Vec::new()
         };
+        if let ViewSelector::Worktree(item) = &view {
+            self.worker.ensure_worktree_delta(&project, &item.name);
+            let state = self.worker.worktree_delta_status(&project, &item.name).state;
+            if state == bars_protocol::DeltaState::Ready {
+                let db = bars_core::indexing::worktree_delta::delta_path(&project, &item.name);
+                // Дельта производная: недоступная (ещё не открылась, удаляется) — дерево по владельцу.
+                if let Ok(Ok(own)) =
+                    tokio::task::spawn_blocking(move || worktree_view::tree_documents(&db)).await
+                {
+                    let mut merged: std::collections::BTreeMap<String, TreeDocument> = documents
+                        .into_iter()
+                        .map(|document| (document.path.clone(), document))
+                        .collect();
+                    for document in own {
+                        merged.insert(document.path.clone(), document);
+                    }
+                    documents = merged.into_values().collect();
+                }
+            }
+        }
         Ok(TreeOutput {
             docs_root,
             documents,

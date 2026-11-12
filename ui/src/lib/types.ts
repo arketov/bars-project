@@ -51,6 +51,33 @@ export interface StatusOutput {
   model: { index: string | null; settings: string };
   last_error: string | null;
   watching: boolean;
+  /** Живые worktree проекта-владельца (часть WORKTREES, worktrees.md). */
+  worktrees?: WorktreeStatus[];
+}
+
+/** Дельта индекса worktree: `none` — к worktree ещё не обращались. */
+export type DeltaState = "none" | "building" | "ready" | "error";
+
+export interface WorktreeStatus {
+  /** Имя записи `.git/worktrees/<имя>`: значение `wt`. */
+  name: string;
+  /** Корень рабочей копии. */
+  path: string;
+  /** `null` — `detached`. */
+  branch: string | null;
+  locked: string | null;
+  delta: { state: DeltaState; documents: number; done?: number; total?: number; pending: number; error?: string };
+  current?: boolean;
+}
+
+/** Вид worktree, по которому шёл поиск (`applied.scope.worktree`). */
+export interface SearchWorktree {
+  name: string;
+  branch?: string | null;
+  state: DeltaState;
+  delta_documents: number;
+  pending: number;
+  note?: string;
 }
 
 export interface SearchHit {
@@ -103,6 +130,8 @@ export interface AppliedParams {
   weights?: ScoreWeights;
   /** Какие сигналы посчитаны в этом поиске. */
   signals?: string[];
+  /** Вид worktree, по которому искали; без него — основной checkout. */
+  scope?: { worktree?: SearchWorktree };
 }
 
 export interface SearchOutput {

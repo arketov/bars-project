@@ -238,6 +238,9 @@
               <button class="ghost sm" onclick={() => app.search()}>Повторить оценку моделью</button>
             </Banner>
           {/if}
+          {#if results.applied.scope?.worktree?.note}
+            <p class="faint" role="status" data-testid="worktree-note">{results.applied.scope.worktree.note}</p>
+          {/if}
           {#if cards.length}
             <div class="summary">
               <b>{cards.length} {docsWord(cards.length)}, {sectionCount} {sectionsWord(sectionCount)}</b>

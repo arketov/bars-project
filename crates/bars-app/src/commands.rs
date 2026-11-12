@@ -95,7 +95,10 @@ pub async fn bars_call(
     let context = bars_worker::new_topics::SearchContext::take_from(&mut params);
     let request = Request::new(Id::Number(0), &method, params);
     let call = Call::from_request(&request)?;
-    let tree_binding = if let Call::Tree(params) = &call {
+    // Дерево вида worktree в кэш папок проекта не попадает: оно не дерево владельца.
+    let tree_binding = if let Call::Tree(params) = &call
+        && params.target.wt().is_none()
+    {
         handler
             .worker()
             .resolve(
@@ -242,18 +245,17 @@ pub async fn document_action(
     path: String,
     action: String,
     editor: Option<String>,
+    wt: Option<String>,
 ) -> Result<String, String> {
     let handler = state.get().ok_or("воркер ещё запускается")?;
-    let root = handler
-        .worker()
-        .resolve(&project)
-        .map_err(|e| e.to_string())?;
+    let view = view_roots(&state, &project, wt.as_deref())?;
+    let root = view.root.clone();
     let tree = handler
         .dispatch(Call::Tree(bars_protocol::TreeParams {
             target: bars_protocol::Target {
                 cwd: project.clone(),
                 project: Some(project),
-                wt: None,
+                wt: view.wt.clone(),
             },
         }))
         .await
@@ -265,10 +267,15 @@ pub async fn document_action(
     }
     let absolute = crate::documents::indexed_path(&root, &path)?;
     if action == "check" {
-        handler
-            .worker()
-            .check_files(&root, vec![absolute.clone()])
-            .map_err(|e| e.to_string())?;
+        match &view.wt {
+            Some(name) => handler
+                .worker()
+                .edit_worktree_files(&view.owner, name, vec![absolute.clone()]),
+            None => handler
+                .worker()
+                .check_files(&root, vec![absolute.clone()])
+                .map_err(|e| e.to_string())?,
+        }
     } else {
         let file = absolute.clone();
         tauri::async_runtime::spawn_blocking(move || match action.as_str() {
@@ -281,6 +288,36 @@ pub async fn document_action(
         .map_err(|e| e.to_string())??;
     }
     Ok(absolute.display().to_string())
+}
+
+/// Окно показывает worktree (дерево, документ, поиск): первое обращение ставит построение дельты,
+/// аренда окна держит слежение за W (30 секунд, окно повторяет вызов вместе с наблюдением за
+/// проектом). `wt: null` или основной checkout — окно ушло с worktree, аренда снимается.
+#[tauri::command]
+pub fn worktree_observe(
+    window: tauri::WebviewWindow,
+    state: State<'_, Shared>,
+    project: Option<String>,
+    wt: Option<String>,
+) -> Result<(), String> {
+    let handler = state.get().ok_or("воркер ещё запускается")?;
+    let shown = match project {
+        Some(project)
+            if window.is_visible().unwrap_or(false) && !window.is_minimized().unwrap_or(false) =>
+        {
+            let view = view_roots(&state, &project, wt.as_deref())?;
+            view.wt.map(|name| (view.owner, name))
+        }
+        _ => None,
+    };
+    if let Some((owner, name)) = &shown {
+        handler.worker().ensure_worktree_delta(owner, name);
+    }
+    handler.worker().observe_worktree_window(
+        window.label(),
+        shown.as_ref().map(|(owner, name)| (owner.as_path(), name.as_str())),
+    );
+    Ok(())
 }
 
 /// Корень проекта и корень документации для путей редактора.
@@ -297,6 +334,53 @@ fn document_roots(state: &Shared, project: &str) -> Result<(std::path::PathBuf, 
     Ok((root, docs_root))
 }
 
+/// Вид проекта в окне: корень вида (корень проекта или worktree), корень документации владельца и,
+/// для worktree, владелец с именем (`docs/features/projects/worktrees.md`, «Окно»). Допуск путей
+/// документов и операций дерева считается от корня вида.
+pub struct ViewRoots {
+    pub root: std::path::PathBuf,
+    pub docs_root: String,
+    /// Зарегистрированный проект-владелец.
+    pub owner: std::path::PathBuf,
+    /// Имя worktree; `None` — основной checkout.
+    pub wt: Option<String>,
+}
+
+/// Разрешает `wt` команды окна: пусто или `.` — основной checkout; иначе имя worktree проекта.
+/// Нет такого worktree — отказ с текстом; вид без папки на диске даёт отказ чтения позже.
+pub fn view_roots(state: &Shared, project: &str, wt: Option<&str>) -> Result<ViewRoots, String> {
+    let (owner, docs_root) = document_roots(state, project)?;
+    let wanted = wt.map(str::trim).filter(|value| !value.is_empty() && *value != ".");
+    let Some(wanted) = wanted else {
+        return Ok(ViewRoots {
+            root: owner.clone(),
+            docs_root,
+            owner,
+            wt: None,
+        });
+    };
+    let handler = state.get().ok_or("воркер ещё запускается")?;
+    let found = handler
+        .worker()
+        .find_worktree(&owner, bars_worker::worker::WtSelector::parse(wanted))
+        .map_err(|available| {
+            format!(
+                "у проекта нет worktree «{wanted}»; есть: {}",
+                available
+                    .iter()
+                    .map(|item| item.name.as_str())
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            )
+        })?;
+    Ok(ViewRoots {
+        root: found.view_root,
+        docs_root,
+        owner,
+        wt: Some(found.name),
+    })
+}
+
 fn document_failure(error: &crate::document_io::DocError) -> Value {
     serde_json::json!({ "status": "error", "kind": error.kind(), "message": error.message() })
 }
@@ -307,9 +391,11 @@ pub async fn document_read(
     state: State<'_, Shared>,
     project: String,
     path: String,
+    wt: Option<String>,
 ) -> Result<Value, String> {
     use crate::document_io::{DocError, read, resolve};
-    let (root, docs_root) = document_roots(&state, &project)?;
+    let view = view_roots(&state, &project, wt.as_deref())?;
+    let (root, docs_root) = (view.root, view.docs_root);
     tauri::async_runtime::spawn_blocking(move || {
         let file = match resolve(&root, &docs_root, &path) {
             Ok(file) => file,
@@ -342,9 +428,11 @@ pub async fn document_write(
     base_revision: Option<String>,
     eol: String,
     bom: bool,
+    wt: Option<String>,
 ) -> Result<Value, String> {
     use crate::document_io::{Eol, WriteOutcome, resolve, write};
-    let (root, docs_root) = document_roots(&state, &project)?;
+    let view = view_roots(&state, &project, wt.as_deref())?;
+    let (root, docs_root) = (view.root.clone(), view.docs_root.clone());
     let worker = state.get().map(|handler| handler.worker().clone());
     tauri::async_runtime::spawn_blocking(move || {
         let file = match resolve(&root, &docs_root, &path) {
@@ -361,8 +449,16 @@ pub async fn document_write(
             Ok(WriteOutcome::Saved { revision }) => {
                 // Правка из окна ждёт паузы Т-41 и идёт в очередь с приоритетом правки (Т-42);
                 // воркер, который не ответил, не мешает записи: файл всё равно увидит слежение.
+                // В виде worktree правка идёт в очередь дельты: пересверка пути после паузы.
                 if let Some(worker) = worker {
-                    let _ = worker.documents_edited(&root, vec![root.join(&path)]);
+                    match &view.wt {
+                        Some(name) => {
+                            worker.edit_worktree_files(&view.owner, name, vec![root.join(&path)]);
+                        }
+                        None => {
+                            let _ = worker.documents_edited(&root, vec![root.join(&path)]);
+                        }
+                    }
                 }
                 serde_json::json!({ "status": "saved", "revision": revision })
             }
@@ -382,9 +478,11 @@ pub async fn document_revision(
     state: State<'_, Shared>,
     project: String,
     path: String,
+    wt: Option<String>,
 ) -> Result<Value, String> {
     use crate::document_io::{resolve, revision};
-    let (root, docs_root) = document_roots(&state, &project)?;
+    let view = view_roots(&state, &project, wt.as_deref())?;
+    let (root, docs_root) = (view.root, view.docs_root);
     tauri::async_runtime::spawn_blocking(move || {
         let file = match resolve(&root, &docs_root, &path) {
             Ok(file) => file,
@@ -414,18 +512,50 @@ pub fn nested_json(nested: &[bars_protocol::NestedProjectInfo]) -> Value {
     )
 }
 
+/// Вложенные проекты и папки worktree внутри проекта для дерева окна: у worktree `kind: "worktree"`,
+/// `name` — имя worktree, `path` — его корень W (серая пометка без галочек, `worktrees.md`).
+pub fn tree_nested_json(worker: &bars_worker::worker::Worker, root: &std::path::Path) -> Value {
+    let mut items = match nested_json(&worker.nested_projects(root, false)) {
+        Value::Array(items) => items,
+        _ => Vec::new(),
+    };
+    for area in bars_core::indexing::nested::areas(root) {
+        if let Some(wt) = &area.worktree {
+            items.push(serde_json::json!({
+                "kind": "worktree", "name": wt.name, "path": area.project.display().to_string(),
+                "dir": area.project_dir, "area": area.dir, "documents": 0,
+            }));
+        }
+    }
+    Value::Array(items)
+}
+
 fn tree_failure(error: &crate::tree_io::TreeError) -> Value {
     serde_json::json!({ "status": "error", "kind": error.kind(), "message": error.message() })
 }
 
 /// Дерево документации по диску (Т-33): файлы, как их видит индексатор, и папки, включая пустые.
+/// С `wt` — дерево корня вида worktree по диску W: вложенных проектов и папок worktree в нём нет, а
+/// первое обращение ставит построение дельты и аренду окна (`worktrees.md`, «Окно», «Открытие»).
 #[tauri::command]
-pub async fn tree_read(state: State<'_, Shared>, project: String) -> Result<Value, String> {
-    let (root, docs_root) = document_roots(&state, &project)?;
-    let nested = state
-        .get()
-        .map(|handler| nested_json(&handler.worker().nested_projects(&root, false)))
-        .unwrap_or_else(|| serde_json::json!([]));
+pub async fn tree_read(
+    window: tauri::WebviewWindow,
+    state: State<'_, Shared>,
+    project: String,
+    wt: Option<String>,
+) -> Result<Value, String> {
+    let view = view_roots(&state, &project, wt.as_deref())?;
+    let nested = match (&view.wt, state.get()) {
+        (None, Some(handler)) => tree_nested_json(handler.worker(), &view.root),
+        _ => serde_json::json!([]),
+    };
+    if let (Some(name), Some(handler)) = (&view.wt, state.get()) {
+        handler.worker().ensure_worktree_delta(&view.owner, name);
+        handler
+            .worker()
+            .observe_worktree_window(window.label(), Some((view.owner.as_path(), name.as_str())));
+    }
+    let (root, docs_root) = (view.root, view.docs_root);
     tauri::async_runtime::spawn_blocking(move || {
         match crate::tree_io::read_tree(&root, &docs_root) {
             Ok(tree) => serde_json::json!({
@@ -455,14 +585,21 @@ pub async fn entry_create_doc(
     project: String,
     parent: String,
     name: String,
+    wt: Option<String>,
 ) -> Result<Value, String> {
-    let (root, docs_root) = document_roots(&state, &project)?;
-    let _publication = state.get().map(|handler| {
-        handler
-            .worker()
-            .window_updates()
-            .after(&root, bars_worker::worker::updates::DISK)
-    });
+    let view = view_roots(&state, &project, wt.as_deref())?;
+    let (root, docs_root) = (view.root.clone(), view.docs_root.clone());
+    // Дерево вида окно читает само; публикация по подписке относится к проекту-владельцу.
+    let _publication = if view.wt.is_none() {
+        state.get().map(|handler| {
+            handler
+                .worker()
+                .window_updates()
+                .after(&root, bars_worker::worker::updates::DISK)
+        })
+    } else {
+        None
+    };
     tauri::async_runtime::spawn_blocking(move || {
         match crate::tree_io::create_doc(&root, &docs_root, &parent, &name) {
             Ok(path) => serde_json::json!({ "status": "ok", "path": path }),
@@ -480,14 +617,21 @@ pub async fn entry_create_dir(
     project: String,
     parent: String,
     name: String,
+    wt: Option<String>,
 ) -> Result<Value, String> {
-    let (root, docs_root) = document_roots(&state, &project)?;
-    let _publication = state.get().map(|handler| {
-        handler
-            .worker()
-            .window_updates()
-            .after(&root, bars_worker::worker::updates::DISK)
-    });
+    let view = view_roots(&state, &project, wt.as_deref())?;
+    let (root, docs_root) = (view.root.clone(), view.docs_root.clone());
+    // Дерево вида окно читает само; публикация по подписке относится к проекту-владельцу.
+    let _publication = if view.wt.is_none() {
+        state.get().map(|handler| {
+            handler
+                .worker()
+                .window_updates()
+                .after(&root, bars_worker::worker::updates::DISK)
+        })
+    } else {
+        None
+    };
     tauri::async_runtime::spawn_blocking(move || {
         match crate::tree_io::create_dir(&root, &docs_root, &parent, &name) {
             Ok(created) => match created.index_error {
@@ -515,6 +659,7 @@ pub async fn entry_plan_move(
     from: String,
     to_parent: String,
     name: String,
+    wt: Option<String>,
 ) -> Result<Value, String> {
     let _operation = MOVE_OPERATION.lock().await;
     if !crate::flush::request_clean(&app, &project).await {
@@ -522,10 +667,19 @@ pub async fn entry_plan_move(
             serde_json::json!({"status":"error","kind":"unsaved","message":"Не все окна подтвердили запись документов. Проверьте несохранённые правки."}),
         );
     }
-    let (root, docs_root) = document_roots(&state, &project)?;
+    let view = view_roots(&state, &project, wt.as_deref())?;
+    let (root, docs_root) = (view.root, view.docs_root);
+    let in_view = view.wt.is_some();
     tauri::async_runtime::spawn_blocking(move || {
-        match crate::tree_io::plan_move(&root, &docs_root, &from, &to_parent, &name) {
+        // В виде worktree индекса ссылок нет: перенос без обновления ссылок, план говорит об этом.
+        let planned = if in_view {
+            crate::tree_io::plan_move_without_links(&root, &docs_root, &from, &to_parent, &name)
+        } else {
+            crate::tree_io::plan_move(&root, &docs_root, &from, &to_parent, &name)
+        };
+        match planned {
             Ok(plan) => serde_json::json!({ "status": "ok", "path": plan.path, "token": plan.token,
+                "links_updated": !in_view,
                 "documents": plan.updates.iter().map(|u| serde_json::json!({"path":u.path,"edits":u.edits.len()})).collect::<Vec<_>>(),
                 "warnings": plan.warnings.iter().map(|(path,line)| serde_json::json!({"path":path,"line":line})).collect::<Vec<_>>() }),
             Err(error) => tree_failure(&error),
@@ -542,6 +696,7 @@ pub async fn entry_move(
     to_parent: String,
     name: String,
     token: String,
+    wt: Option<String>,
 ) -> Result<Value, String> {
     let _operation = MOVE_OPERATION.lock().await;
     if !crate::flush::request_clean(&app, &project).await {
@@ -549,18 +704,42 @@ pub async fn entry_move(
             serde_json::json!({"status":"error","kind":"unsaved","message":"Не все окна подтвердили запись документов. Проверьте несохранённые правки."}),
         );
     }
-    let (root, docs_root) = document_roots(&state, &project)?;
-    let _publication = state.get().map(|handler| {
-        handler
-            .worker()
-            .window_updates()
-            .after(&root, bars_worker::worker::updates::DISK)
-    });
+    let view = view_roots(&state, &project, wt.as_deref())?;
+    let (root, docs_root) = (view.root.clone(), view.docs_root.clone());
+    let _publication = if view.wt.is_none() {
+        state.get().map(|handler| {
+            handler
+                .worker()
+                .window_updates()
+                .after(&root, bars_worker::worker::updates::DISK)
+        })
+    } else {
+        None
+    };
     tauri::async_runtime::spawn_blocking(move || {
-        match crate::tree_io::move_with_links(&root, &docs_root, &from, &to_parent, &name, &token) {
+        // В виде worktree индекса ссылок нет: файл переносится, ссылки не обновляются.
+        let moved = if view.wt.is_some() {
+            crate::tree_io::move_without_links(&root, &docs_root, &from, &to_parent, &name, &token)
+        } else {
+            crate::tree_io::move_with_links(&root, &docs_root, &from, &to_parent, &name, &token)
+        };
+        match moved {
             Ok(mut result) => {
                 use tauri::Emitter;
                 use tauri::Manager;
+                if let Some(worktree) = &view.wt {
+                    // Пути затронутых документов вида — в очередь дельты; цвета и иконки у вида нет.
+                    if let Some(handler) = app.state::<Shared>().get() {
+                        let mut paths = Vec::new();
+                        if let Ok(tree) = crate::tree_io::read_tree(&root, &docs_root) {
+                            paths.extend(tree.files.into_iter().filter(|f| f.path == result.path || f.path.starts_with(&format!("{}/", result.path))).map(|f| root.join(f.path)));
+                        }
+                        paths.push(root.join(&result.from));
+                        handler.worker().edit_worktree_files(&view.owner, worktree, paths);
+                    }
+                    let _ = app.emit("bars://entry-moved", serde_json::json!({ "project":project,"wt":worktree,"from":result.from,"to":result.path }));
+                    return serde_json::json!({ "status": "ok", "path": result.path, "updated": result.updated, "failed": [] });
+                }
                 for (label, path) in app.state::<Shared>().documents.move_paths(&project, &result.from, &result.path) {
                     if let Some(window) = app.get_webview_window(&label) { let _ = window.set_title(&format!("{} — bars",path.rsplit('/').next().unwrap_or(&path))); }
                 }
@@ -593,14 +772,21 @@ pub async fn entry_trash(
     state: State<'_, Shared>,
     project: String,
     path: String,
+    wt: Option<String>,
 ) -> Result<Value, String> {
-    let (root, docs_root) = document_roots(&state, &project)?;
-    let _publication = state.get().map(|handler| {
-        handler
-            .worker()
-            .window_updates()
-            .after(&root, bars_worker::worker::updates::DISK)
-    });
+    let view = view_roots(&state, &project, wt.as_deref())?;
+    let (root, docs_root) = (view.root.clone(), view.docs_root.clone());
+    // Дерево вида окно читает само; публикация по подписке относится к проекту-владельцу.
+    let _publication = if view.wt.is_none() {
+        state.get().map(|handler| {
+            handler
+                .worker()
+                .window_updates()
+                .after(&root, bars_worker::worker::updates::DISK)
+        })
+    } else {
+        None
+    };
     tauri::async_runtime::spawn_blocking(move || {
         match crate::tree_io::trash_entry(&root, &docs_root, &path) {
             Ok(()) => serde_json::json!({ "status": "ok" }),
@@ -618,8 +804,10 @@ pub async fn entry_plan_delete(
     state: State<'_, Shared>,
     project: String,
     path: String,
+    wt: Option<String>,
 ) -> Result<Value, String> {
-    let (root, docs_root) = document_roots(&state, &project)?;
+    let view = view_roots(&state, &project, wt.as_deref())?;
+    let (root, docs_root) = (view.root.clone(), view.docs_root.clone());
     let plan = {
         let (root, docs_root, path) = (root.clone(), docs_root.clone(), path.clone());
         tauri::async_runtime::spawn_blocking(move || {
@@ -633,15 +821,20 @@ pub async fn entry_plan_delete(
         Err(error) => return Ok(tree_failure(&error)),
     };
     let handler = state.get().ok_or("воркер ещё запускается")?;
-    let call = Call::LinksInto(bars_protocol::LinksIntoParams {
-        project: root.display().to_string(),
-        paths: plan.documents.clone(),
-    });
-    let sources = match handler.dispatch(call).await {
-        Ok(value) => serde_json::from_value::<bars_protocol::LinksIntoOutput>(value)
-            .ok()
-            .map(|out| out.sources),
-        Err(_) => None,
+    // У вида worktree индекса ссылок нет: входящие ссылки не считаются (`links_checked: false`).
+    let sources = if view.wt.is_some() {
+        None
+    } else {
+        let call = Call::LinksInto(bars_protocol::LinksIntoParams {
+            project: root.display().to_string(),
+            paths: plan.documents.clone(),
+        });
+        match handler.dispatch(call).await {
+            Ok(value) => serde_json::from_value::<bars_protocol::LinksIntoOutput>(value)
+                .ok()
+                .map(|out| out.sources),
+            Err(_) => None,
+        }
     };
     let mut result = serde_json::json!({
         "status": "ok",

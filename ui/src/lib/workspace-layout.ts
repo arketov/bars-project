@@ -1,5 +1,6 @@
 import type { DockviewApi, DockviewGroupPanel, SerializedDockview } from "dockview-core";
 import type { DocumentReference } from "./app.svelte";
+import { splitView } from "./view-key";
 
 // Навигация с мини-графом — постоянная колонка вне Dockview (OQ-117), поэтому её здесь нет.
 export const panelTitles = { search: "Поиск", graph: "Граф", settings: "Настройки", logs: "Логи", mcp: "Анализ MCP", indexing: "Индексация", topics: "Новые темы", audits: "Аудиты" } as const;
@@ -223,7 +224,10 @@ export function decodeLayout(text: string, project: string | null): StoredLayout
     if (panel.contentComponent !== "workspace" || !p || seen.has(panel.id)) throw new Error("Неизвестная панель");
     seen.add(panel.id);
     if (p.kind === "document") {
-      if (p.project !== project || !p.hit || typeof p.hit.path !== "string" || typeof p.hit.title !== "string" || panel.id !== documentId(p.hit.path) || !Number.isInteger(p.hit.first_line) || !Number.isInteger(p.hit.last_line)) throw new Error("Неверная ссылка на документ");
+      // Вкладка документа worktree: `project` — ключ вида (проект и имя worktree), id с суффиксом `:wt:имя`.
+      const own = typeof p.project === "string" && splitView(p.project).project === project;
+      const idOk = !!p.hit && typeof p.hit.path === "string" && (panel.id === documentId(p.hit.path) || (splitView(p.project ?? "").wt !== null && panel.id.startsWith(`${documentId(p.hit.path)}:wt:`)));
+      if (!own || !p.hit || typeof p.hit.path !== "string" || typeof p.hit.title !== "string" || !idOk || !Number.isInteger(p.hit.first_line) || !Number.isInteger(p.hit.last_line)) throw new Error("Неверная ссылка на документ");
     } else if (!Object.hasOwn(panelTitles, p.kind) || panel.id !== p.kind) throw new Error("Неизвестный вид панели");
   }
   const zones: ZoneState = value.version === 2 ? inferredZones(value.layout) : value.zones;

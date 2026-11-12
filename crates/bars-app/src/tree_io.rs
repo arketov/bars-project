@@ -737,6 +737,57 @@ pub fn move_with_links(
     Ok(result)
 }
 
+/// План переноса в виде worktree: индекса ссылок у вида нет (`worktrees.md`, «Окно»), поэтому
+/// ссылки не обновляются, а `updates` и `warnings` пусты. Токен связывает план с исходом и
+/// назначением.
+pub fn plan_move_without_links(
+    project: &Path,
+    docs_root: &str,
+    from: &str,
+    to_parent: &str,
+    name: &str,
+) -> Result<MovePlan, TreeError> {
+    let (roots, source, dest) = move_target(project, docs_root, from, to_parent, name)?;
+    let from = roots.project_path(&source);
+    let to = roots.project_path(&dest);
+    let mut hash = blake3::Hasher::new();
+    for value in [&from, &to] {
+        hash.update(value.as_bytes());
+        hash.update(b"\0");
+    }
+    Ok(MovePlan {
+        from,
+        path: to,
+        token: hash.finalize().to_hex().to_string(),
+        updates: Vec::new(),
+        warnings: Vec::new(),
+    })
+}
+
+/// Перенос в виде worktree без обновления ссылок (см. `plan_move_without_links`).
+pub fn move_without_links(
+    project: &Path,
+    docs_root: &str,
+    from: &str,
+    to_parent: &str,
+    name: &str,
+    token: &str,
+) -> Result<MoveResult, TreeError> {
+    let plan = plan_move_without_links(project, docs_root, from, to_parent, name)?;
+    if plan.token != token {
+        return Err(TreeError::InvalidMove(
+            "перенос изменился; проверьте новый план".into(),
+        ));
+    }
+    let path = move_entry(project, docs_root, from, to_parent, name)?;
+    Ok(MoveResult {
+        from: plan.from,
+        path,
+        updated: Vec::new(),
+        failed: Vec::new(),
+    })
+}
+
 /// Отправляет файл или папку в корзину ОС. Недоступная корзина — отказ, безвозвратного пути нет.
 pub fn trash_entry(project: &Path, docs_root: &str, path: &str) -> Result<(), TreeError> {
     let roots = roots(project, docs_root)?;
