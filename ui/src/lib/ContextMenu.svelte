@@ -131,7 +131,7 @@
     if (path && app.projects.some(p => p.path === path)) {
       project = path;
       openedCurrent = app.current;
-      found.unshift(...projectItems());
+      found.unshift(...projectItems(app.projects.find(p => p.path === path)?.discovered === true));
     }
     const file = !folder && !project && !textField(event.target) && nearest?.hasAttribute('data-document-path') && documentAt(nearest);
     if (file && app.current) {

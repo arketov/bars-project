@@ -7,6 +7,7 @@ import { ProjectUpdates, type Snapshot } from "./window-updates";
 import { editors } from './editors.svelte';
 import { confirmProjectLeave } from './unsaved.svelte';
 import { documentsIn } from "./format";
+import { topLevelProjects } from "./projects";
 import { AuditsStore } from "./audits.svelte";
 import { NewTopicsStore } from "./new-topics.svelte";
 import { newRequestId } from "./new-topics";
@@ -425,7 +426,8 @@ class App {
     this.projects = projects;
     this.projectsLoaded = true;
     if (!projects.some((project) => project.path === this.current)) {
-      const next = projects[0]?.path ?? null;
+      // Автовыбор — первый проект верхнего уровня: найденный подпроект открывается только человеком (первое обращение).
+      const next = topLevelProjects(projects)[0]?.path ?? null;
       if (next !== this.current) await this.select(next);
     }
   }

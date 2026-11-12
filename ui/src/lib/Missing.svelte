@@ -19,7 +19,7 @@
     <div class="acts">
       <button class="btn" disabled={app.checking} onclick={() => app.recheck()}>{app.checking ? "Проверяем…" : "Проверить сейчас"}</button>
       <button class="ghost" onclick={() => app.relocateProject(project)}>Добавить проект на новом месте…</button>
-      <button class="ghost danger" onclick={() => app.removeProject(project.path)}>Убрать из bars</button>
+      {#if !project.discovered}<button class="ghost danger" onclick={() => app.removeProject(project.path)}>Убрать из bars</button>{/if}
     </div>
     <p class="faint note-line">
       «Убрать» только снимает проект с регистрации; папка <span class="mono">.bars/</span> и файлы проекта остаются.

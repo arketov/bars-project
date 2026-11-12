@@ -28,10 +28,11 @@ export function projectAt(target: EventTarget | null): string | null {
   return element?.dataset.projectPath || null;
 }
 
-export function projectItems(): MenuItem[] {
+/** Найденный автопоиском подпроект не переименовывается: его имя — путь (subprojects.md). */
+export function projectItems(discovered = false): MenuItem[] {
   return [
     { action: "deleteProject", label: "Удалить проект" },
-    { action: "renameProject", label: "Переименовать…" },
+    ...(discovered ? [] : [{ action: "renameProject" as const, label: "Переименовать…" }]),
     { action: "checkProject", label: uiLabel("action", "checkProject").text },
   ];
 }

@@ -2,7 +2,8 @@
   import { tick } from "svelte";
   import { app } from "./app.svelte";
   import { projectDot } from "./format";
-  import { matchProject } from "./projects";
+  import { buildSwitcher, pathKey, topLevelProjects, type SwitcherRow } from "./projects";
+  import type { ProjectInfo } from "./types";
   import Icon from "./Icon.svelte";
   import { entries } from "./entries.svelte";
   import { badgeText } from "./new-topics";
@@ -21,7 +22,23 @@
   let projButton: HTMLButtonElement | undefined = $state();
   let menuEl: HTMLDivElement | undefined = $state();
   let filterInput: HTMLInputElement | undefined = $state();
-  const visibleProjects = $derived(app.projects.filter((project) => matchProject(project, filterText)));
+  // Раскрытие подпроектов — в памяти окна, по пути проекта; при активном фильтре — отдельная карта, она сбрасывается вместе с текстом.
+  let userOverrides = $state<Map<string, boolean>>(new Map());
+  let filterOverrides = $state<Map<string, boolean>>(new Map());
+  const filterActive = $derived(filterText.trim() !== "");
+  const switcherRows = $derived(buildSwitcher(app.projects, { filter: filterText, current: app.current, overrides: filterActive ? filterOverrides : userOverrides }));
+  const anyChevron = $derived(switcherRows.some((row) => row.hasChildren));
+  $effect(() => {
+    void filterText;
+    filterOverrides = new Map();
+  });
+
+  function setExpanded(row: SwitcherRow<ProjectInfo>, open: boolean) {
+    const next = new Map(filterActive ? filterOverrides : userOverrides);
+    next.set(pathKey(row.project.path), open);
+    if (filterActive) filterOverrides = next; else userOverrides = next;
+  }
+  const rowOf = (element: HTMLElement) => switcherRows.find((row) => row.key === element.dataset.rowKey);
 
   function measureMenu() {
     if (projButton) menuTop = projButton.getBoundingClientRect().bottom + 6;
@@ -70,13 +87,32 @@
         if (inField) return;
         go(items[items.length - 1]);
         break;
+      case "ArrowRight":
+      case "ArrowLeft": {
+        if (inField) return;
+        const row = rowOf(target);
+        if (!row) return;
+        if (event.key === "ArrowRight") {
+          if (!row.hasChildren) return;
+          if (!row.expanded) setExpanded(row, true);
+          else {
+            const child = switcherRows[switcherRows.indexOf(row) + 1];
+            go(items.find((item) => item.dataset.rowKey === child?.key));
+          }
+        } else if (row.hasChildren && row.expanded) {
+          setExpanded(row, false);
+        } else if (row.parentKey) {
+          go(items.find((item) => item.dataset.rowKey === row.parentKey));
+        } else return;
+        break;
+      }
       case "Enter":
       case " ": {
         if (inField) {
           if (event.key === " ") return;
-          const first = visibleProjects[0];
+          const first = switcherRows[0];
           if (!first) break;
-          void pick(first.path);
+          void pick(first.project.path);
         } else if (target.classList.contains("pitem") && target.dataset.projectPath) {
           void pick(target.dataset.projectPath);
         } else return; // кнопка «Добавить проект…» сработает сама
@@ -121,7 +157,7 @@
     >
       {#if app.project && dot}
         <span class="dot {dot.cls}"></span>
-        <span class="pn"><b>{app.project.name}</b><small>{app.project.path}{app.project.docs_root === "." ? "" : `\\${app.project.docs_root}`}</small></span>
+        <span class="pn"><b>{app.project.qualified_name ?? app.project.name}</b><small>{app.project.path}{app.project.docs_root === "." ? "" : `\\${app.project.docs_root}`}</small></span>
       {:else}
         <span class="dot off"></span>
         <span class="pn"><b>Нет проектов</b><small>добавьте первый проект</small></span>
@@ -143,23 +179,42 @@
           <input bind:this={filterInput} bind:value={filterText} placeholder="Фильтр проектов" aria-label="Фильтр проектов" autocomplete="off" />
         </label>
         <div class="pscroll">
-          {#each visibleProjects as project (project.path)}
+          {#each switcherRows as row (row.key)}
+            {@const project = row.project}
             {@const d = projectDot(project, app.progressOf(project.path), app.waitingOf(project.path), app.activity?.problems.find(p => p.project === project.path))}
             <!-- Клавиши строк обрабатывает меню целиком (onMenuKey) -->
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <div
               class="pitem"
               data-project-path={project.path}
+              data-row-key={row.key}
+              data-depth={row.depth}
               class:on={project.path === app.current}
+              class:ctx={row.context}
               role="menuitem"
               tabindex="-1"
+              title={project.qualified_name || undefined}
+              style="padding-left: {8 + row.depth * 18}px"
               onclick={() => pick(project.path)}
             >
+              {#if row.hasChildren}
+                <button
+                  class="chev"
+                  class:open={row.expanded}
+                  tabindex="-1"
+                  aria-expanded={row.expanded}
+                  aria-label={row.expanded ? "Свернуть подпроекты" : "Раскрыть подпроекты"}
+                  onmousedown={(event) => event.preventDefault()}
+                  onclick={(event) => { event.stopPropagation(); setExpanded(row, !row.expanded); }}
+                ><Icon name="chevron-right" size={10} width={3} /></button>
+              {:else if anyChevron}
+                <span class="chev none" aria-hidden="true"></span>
+              {/if}
               <span class="dot {d.cls}"></span>
-              <span class="pn"><b>{project.name}</b><small>{d.text}</small></span>
+              <span class="pn"><b>{row.label}</b><small>{d.text}</small></span>
             </div>
           {/each}
-          {#if app.projects.length && visibleProjects.length === 0}<p class="none" role="status">Ничего не найдено</p>{/if}
+          {#if app.projects.length && switcherRows.length === 0}<p class="none" role="status">Ничего не найдено</p>{/if}
         </div>
         <div class="pmenu-sep"></div>
         <button
@@ -223,7 +278,7 @@
   {:else}
     <div class="plist">
       <div class="plabel">Проекты</div>
-      {#each app.projects as project (project.path)}
+      {#each topLevelProjects(app.projects) as project (project.path)}
         {@const d = projectDot(project, app.progressOf(project.path), app.waitingOf(project.path), app.activity?.problems.find(p => p.project === project.path))}
         <div
           class="litem"
@@ -277,6 +332,11 @@
   .pitem .pn b { font-size: 13px; }
   .pitem .pn small { white-space: normal; }
   .pitem.on .pn b { color: var(--accent-text); }
+  .pitem.ctx .pn b, .pitem.ctx .pn small { color: var(--faint); font-weight: 500; }
+  .chev { flex: none; width: 16px; height: 16px; display: grid; place-items: center; border: 0; background: none; padding: 0; color: var(--muted); border-radius: 4px; transition: transform .12s; }
+  .chev:hover { background: var(--line); }
+  .chev.open { transform: rotate(90deg); }
+  .chev.none { visibility: hidden; }
   .pmenu-sep { flex: none; height: 1px; background: var(--line); margin: 6px 4px; }
   .padd { flex: none; display: flex; align-items: center; gap: 8px; width: 100%; border: 0; background: none; padding: 7px 8px; border-radius: 8px; color: var(--accent-text); font-weight: 600; font-size: 13px; }
   .padd:hover { background: var(--panel-2); }

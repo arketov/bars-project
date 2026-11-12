@@ -22,7 +22,7 @@
     <div class="acts">
       <button class="btn" onclick={() => app.chooseDocsRoot(project)}>Выбрать другую папку документации…</button>
       <button class="ghost" onclick={() => openPath(project.path)}>Открыть папку проекта</button>
-      <button class="ghost danger" onclick={() => app.removeProject(project.path)}>Убрать из bars</button>
+      {#if !project.discovered}<button class="ghost danger" onclick={() => app.removeProject(project.path)}>Убрать из bars</button>{/if}
     </div>
     <p class="faint note-line">
       Другая папка сохраняется в <span class="mono">.bars/config.toml</span> проекта (ключ корня документации);
