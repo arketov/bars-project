@@ -364,11 +364,36 @@ fn project(info: &ProjectInfo) -> String {
     for module in &info.modules {
         let _ = write!(text, " {} ({})", module.name, module.documents);
     }
+    if let Some(parent) = &info.parent_name {
+        let origin = if info.discovered {
+            "найден автоматически"
+        } else {
+            "зарегистрирован"
+        };
+        let _ = write!(text, "\n  подпроект: {parent} ({origin})");
+    }
+    if !info.subprojects.is_empty() {
+        let items = info
+            .subprojects
+            .iter()
+            .map(|sub| format!("{} ({})", sub.name, state_name(sub.state)))
+            .collect::<Vec<_>>()
+            .join(", ");
+        let _ = write!(text, "\n  подпроекты: {items}");
+    }
     text
 }
 
-pub fn projects(output: &ProjectsOutput) -> String {
+/// Список проектов; `filter` — текст, по которому воркер отобрал записи (пустой результат с ним
+/// называет размер реестра).
+pub fn projects_matching(output: &ProjectsOutput, filter: Option<&str>) -> String {
     if output.projects.is_empty() {
+        if let Some(text) = filter {
+            return format!(
+                "Нет проектов, подходящих под «{text}»; в реестре проектов: {} (bars-cli projects без --filter — весь список)",
+                output.registry_total.unwrap_or(0)
+            );
+        }
         return "Проектов нет. Зарегистрируйте папку: bars-cli register <путь>".to_string();
     }
     output

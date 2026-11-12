@@ -1062,3 +1062,42 @@ fn merged_sections_list_glued_headings_only() {
     assert!(super::merged_sections("текст без заголовков").is_empty());
     assert!(super::merged_sections("other headers:\n## Б").is_empty());
 }
+
+#[tokio::test]
+async fn projects_filter_selects_registry_entries_and_refuses_target() {
+    let harness = Harness::start("projects-filter", FakeProvider::new("m1")).await;
+    let mut cli = harness.client(ClientKind::Cli).await;
+    let root = ready_project(&harness, &mut cli).await;
+    let all = cli.call(&ProjectsParams::default()).await.unwrap();
+    assert_eq!(all.registry_total, None);
+    let name = all.projects[0].name.clone();
+    let by = |text: &str| ProjectsParams {
+        target: None,
+        filter: Some(text.to_string()),
+    };
+    // Регистр и пробелы вокруг не важны; в ответе — размер реестра.
+    let found = cli
+        .call(&by(&format!("  {}  ", name.to_uppercase())))
+        .await
+        .unwrap();
+    assert_eq!(found.projects.len(), 1);
+    assert_eq!(found.registry_total, Some(1));
+    let slashes = root.display().to_string().replace('/', "\\");
+    assert_eq!(cli.call(&by(&slashes)).await.unwrap().projects.len(), 1);
+    // Пустой и пробельный filter — весь реестр без размера в ответе.
+    let blank = cli.call(&by("   ")).await.unwrap();
+    assert_eq!(blank.projects.len(), 1);
+    assert_eq!(blank.registry_total, None);
+    let none = cli.call(&by("no-such-project-zz")).await.unwrap();
+    assert!(none.projects.is_empty());
+    assert_eq!(none.registry_total, Some(1));
+    // filter и target вместе — invalid_params.
+    let both = rpc(cli
+        .call(&ProjectsParams {
+            target: Some(target(&root)),
+            filter: Some(name),
+        })
+        .await);
+    assert_eq!(both.kind(), Some(ErrorKind::InvalidParams));
+    assert!(both.message.contains("drop project"), "{}", both.message);
+}

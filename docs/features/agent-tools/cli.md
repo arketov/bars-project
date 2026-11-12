@@ -27,7 +27,7 @@ GraphRAG: `relations`, `paths`, `impact`, `context`, `explore`, `graph show/stat
 | `bars-cli duplicates [--module M]… [--limit N]` | аудит дублей проекта: точные, близкие, частичные и смысловые повторы | `bars_audit` (`kind=duplicates`) |
 | `bars-cli outline <путь> [--levels 2,3] [--under "A/B" \| --under-line N]` | структура документа | `bars_read` (`view=outline`, Т-26) |
 | `bars-cli read <путь> [--lines 98-104 \| --under "A/B"]` | документ целиком или часть с исходными номерами строк | `bars_read` |
-| `bars-cli projects [--filter <текст>]` | проекты и модули; `--filter` — подстрока без учёта регистра по имени, составному имени и пути (Т-50, проект, реализации нет), несовместим с `--project` | `bars_status` (`filter`) |
+| `bars-cli projects [--filter <текст>]` | проекты и модули; `--filter` — подстрока без учёта регистра по имени, составному имени и пути (Т-50, написано без проверки сборкой), несовместим с `--project` (ошибка разбора аргументов) | `bars_status` (`filter`) |
 | `bars-cli status` | состояние индекса | `bars_status` |
 | `bars-cli reindex [--full] [--accept-model-change]` | переиндексация; `--accept-model-change` — согласие пользователя после смены модели (Т-25, [architecture/protocol.md](../../architecture/protocol.md)) | у MCP нет: `refresh=true` у `bars_status`; у окна и CLI — `bars-cli reindex` |
 | `bars-cli register [путь] [--root docs\|all]` | регистрация проекта (Т-6); `--root` выбирает корень документации нового проекта — `docs` или `all` (вся папка), без флага `docs/`, если она есть, иначе вся папка ([features/projects/projects.md](../projects/projects.md), Т-7) | пункт «Добавить проект» в окне |

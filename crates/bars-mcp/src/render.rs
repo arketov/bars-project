@@ -602,6 +602,22 @@ fn project_block(text: &mut String, index: usize, total: usize, info: &ProjectIn
         "name: {}",
         info.qualified_name.as_deref().unwrap_or(&info.name)
     );
+    // Подпроект (Т-49): предок, происхождение и, у самостоятельного, собственное имя. Предок
+    // в выдаче с фильтром может отсутствовать — строка всё равно называет его.
+    if info.parent.is_some() {
+        if !info.discovered && info.qualified_name.as_deref() != Some(info.name.as_str()) {
+            let _ = writeln!(text, "also_named: {}", info.name);
+        }
+        if let Some(parent) = &info.parent_name {
+            let _ = writeln!(text, "subproject_of: {parent}");
+        }
+        let origin = if info.discovered {
+            "discovered"
+        } else {
+            "registered"
+        };
+        let _ = writeln!(text, "origin: {origin}");
+    }
     let _ = writeln!(text, "docs_root: {}", info.docs_root);
     let _ = writeln!(text, "state: {}", state_name(info.state));
     let modules = info
@@ -616,10 +632,31 @@ fn project_block(text: &mut String, index: usize, total: usize, info: &ProjectIn
         })
         .collect::<Vec<_>>()
         .join(", ");
-    let _ = writeln!(text, "modules: {modules}");
+    if modules.is_empty() && info.state == ProjectState::Lazy {
+        let _ = writeln!(text, "modules: none (not indexed yet)");
+    } else {
+        let _ = writeln!(text, "modules: {modules}");
+    }
+    if !info.subprojects.is_empty() {
+        let items = info
+            .subprojects
+            .iter()
+            .map(|sub| {
+                let mut notes = state_name(sub.state).to_string();
+                if sub.excluded {
+                    notes.push_str(", excluded from this index");
+                }
+                format!("{} ({notes})", sub.name)
+            })
+            .collect::<Vec<_>>()
+            .join(", ");
+        let _ = writeln!(text, "subprojects: {items}");
+    }
     if let Some(line) = bars_protocol::excluded_projects_line(&info.nested) {
         let _ = writeln!(text, "{line}");
     }
+    // Worktree проекта и пометка `matched_by: worktree` — шаги 6.3.x (`worktrees.md`): строки
+    // добавляются здесь, после списка подпроектов.
     let _ = writeln!(text, "=== END PROJECT {index} ===");
 }
 
@@ -634,6 +671,18 @@ pub fn projects(output: &ProjectsOutput) -> String {
     }
     text.push_str("=== END PROJECTS ===");
     text
+}
+
+/// Часть PROJECT сводки с `filter`: совпавшие записи; пустой результат — подсказка с размером
+/// реестра (Т-50).
+pub fn projects_matching(output: &ProjectsOutput, filter: &str) -> String {
+    if !output.projects.is_empty() {
+        return projects(output);
+    }
+    format!(
+        "=== PROJECTS: 0 ===\nno project matches `{filter}`; the registry has {} projects (bars_status(all=true) lists them)\n=== END PROJECTS ===",
+        output.registry_total.unwrap_or(0)
+    )
 }
 
 /// Часть INDEX сводки `bars_status`.
@@ -1505,11 +1554,79 @@ mod tests {
             ),
             "=== OUTLINE документ.md: headings 1 ===\n1 # Заголовок\n=== END OUTLINE ==="
         );
-        assert!(projects(&ProjectsOutput { projects: vec![] }).is_ascii());
+        assert!(
+            projects(&ProjectsOutput {
+                projects: vec![],
+                registry_total: None,
+            })
+            .is_ascii()
+        );
         for accepted in [true, false] {
             assert!(refresh(&AcceptedOutput { accepted }).is_ascii());
         }
         assert!(versions("0.1.0", "abc", None).is_ascii());
+    }
+
+    fn info(name: &str, path: &str) -> ProjectInfo {
+        ProjectInfo {
+            path: path.into(),
+            name: name.into(),
+            docs_root: "docs".into(),
+            state: ProjectState::Ready,
+            modules: vec![],
+            nested: vec![],
+            parent: None,
+            parent_name: None,
+            qualified_name: None,
+            discovered: false,
+            subprojects: vec![],
+            discovery_truncated: false,
+        }
+    }
+
+    #[test]
+    fn subproject_block_names_parent_origin_and_own_name() {
+        let mut found = info("api", "C:/repos/main/backend/api");
+        found.parent = Some("C:/repos/main".into());
+        found.parent_name = Some("main".into());
+        found.qualified_name = Some("main/backend/api".into());
+        found.discovered = true;
+        found.state = ProjectState::Lazy;
+        let mut own = info("web-angular", "C:/repos/main/web");
+        own.parent = Some("C:/repos/main".into());
+        own.parent_name = Some("main".into());
+        own.qualified_name = Some("main/web".into());
+        let mut main = info("main", "C:/repos/main");
+        main.subprojects = vec![bars_protocol::SubprojectInfo {
+            name: "main/backend/api".into(),
+            path: "C:/repos/main/backend/api".into(),
+            state: ProjectState::Lazy,
+            discovered: true,
+            excluded: true,
+        }];
+        let text = projects(&ProjectsOutput {
+            projects: vec![main, found, own],
+            registry_total: None,
+        });
+        assert!(text.contains("name: main/backend/api\nsubproject_of: main\norigin: discovered\n"), "{text}");
+        assert!(text.contains("modules: none (not indexed yet)"), "{text}");
+        assert!(text.contains("name: main/web\nalso_named: web-angular\nsubproject_of: main\norigin: registered\n"), "{text}");
+        assert!(
+            text.contains("subprojects: main/backend/api (lazy, excluded from this index)"),
+            "{text}"
+        );
+    }
+
+    #[test]
+    fn empty_filter_result_names_the_registry_size() {
+        let empty = ProjectsOutput {
+            projects: vec![],
+            registry_total: Some(9),
+        };
+        assert_eq!(
+            projects_matching(&empty, "zz"),
+            "=== PROJECTS: 0 ===\nno project matches `zz`; the registry has 9 projects (bars_status(all=true) lists them)\n=== END PROJECTS ==="
+        );
     }
 
     #[test]

@@ -25,7 +25,8 @@ pub fn worker_error(error: WorkerError) -> RpcError {
         WorkerError::Resolve(ResolveError::NotFound(_)) => RpcError::bars(
             ErrorKind::ProjectNotFound,
             format!(
-                "{text}: bars-cli register <папка проекта>; список — bars_status(all=true)"
+                "{text}: bars-cli register <папка проекта>; список — bars_status(all=true), \
+                 по части имени — bars_status(filter=\"...\")"
             ),
         ),
         WorkerError::Resolve(ResolveError::UnknownSubproject { .. }) => {

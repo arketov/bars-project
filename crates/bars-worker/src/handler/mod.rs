@@ -11,6 +11,7 @@ mod graph;
 pub(crate) mod graph_cache;
 mod history;
 mod links;
+mod project_filter;
 mod query_slice;
 mod session_info;
 mod text_search;
@@ -846,6 +847,13 @@ impl WorkerHandler {
         &self,
         params: bars_protocol::ProjectsParams,
     ) -> Result<ProjectsOutput, RpcError> {
+        let filter = bars_protocol::filter_text(params.filter.as_deref()).map(str::to_string);
+        if filter.is_some() && params.target.is_some() {
+            return Err(RpcError::bars(
+                ErrorKind::InvalidParams,
+                "filter searches the whole registry; drop project",
+            ));
+        }
         let selected = params
             .target
             .as_ref()
@@ -884,13 +892,22 @@ impl WorkerHandler {
             let nested = self.worker.nested_projects(&path, false);
             return Ok(ProjectsOutput {
                 projects: vec![self.assemble_info(snapshot, &all, state, modules, nested)],
+                registry_total: None,
             });
         }
-        let mut projects = Vec::new();
-        for snapshot in &all {
-            projects.push(self.project_info(snapshot, &all).await);
+        // Весь реестр или только совпавшие с фильтром записи; предок идёт раньше подпроектов.
+        let order = match &filter {
+            Some(text) => project_filter::matching(&all, text),
+            None => project_filter::parents_first(&all),
+        };
+        let mut projects = Vec::with_capacity(order.len());
+        for index in order {
+            projects.push(self.project_info(&all[index], &all).await);
         }
-        Ok(ProjectsOutput { projects })
+        Ok(ProjectsOutput {
+            projects,
+            registry_total: filter.is_some().then(|| all.len() as u32),
+        })
     }
 
     async fn project_info(
@@ -947,6 +964,16 @@ impl WorkerHandler {
                 .parent
                 .as_ref()
                 .map(|parent| parent.display().to_string()),
+            parent_name: snapshot.parent.as_ref().and_then(|parent| {
+                all.iter()
+                    .find(|candidate| &candidate.path == parent)
+                    .map(|candidate| {
+                        candidate
+                            .qualified_name
+                            .clone()
+                            .unwrap_or_else(|| candidate.name.clone())
+                    })
+            }),
             qualified_name: snapshot.qualified_name.clone(),
             discovered: snapshot.discovered,
             subprojects,

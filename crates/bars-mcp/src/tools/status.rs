@@ -15,6 +15,11 @@ pub struct StatusArgs {
     /// without full). Progress shows in the INDEX part.
     #[serde(default)]
     pub refresh: bool,
+    /// Case-insensitive substring of a project name, qualified name (main/path) or path.
+    /// Searches the whole registry and returns only matching projects, subprojects and
+    /// worktrees; cannot be combined with project.
+    #[serde(default)]
+    pub filter: Option<String>,
 }
 
 pub(super) fn router() -> ToolRouter<BarsMcp> {
@@ -27,6 +32,21 @@ impl BarsMcp {
             return CallToolResult::error(vec![ContentBlock::text(
                 "invalid_params: all=true cannot be combined with project",
             )]);
+        }
+        // Пустой и пробельный filter — как без filter.
+        let filter = bars_protocol::filter_text(args.filter.as_deref()).map(str::to_string);
+        if let Some(text) = &filter {
+            if args.project.is_some() {
+                return CallToolResult::error(vec![ContentBlock::text(
+                    "invalid_params: filter cannot be combined with project",
+                )]);
+            }
+            if args.refresh {
+                return CallToolResult::error(vec![ContentBlock::text(
+                    "invalid_params: refresh=true applies to one project; drop filter or refresh",
+                )]);
+            }
+            return self.status_filtered(text, &original).await;
         }
         let target = self.target(args.project.clone());
         let mut body = String::new();
@@ -47,6 +67,7 @@ impl BarsMcp {
         // проект — ошибка вызова: остальные части всё равно были бы про тот же проект.
         let projects_params = bars_protocol::ProjectsParams {
             target: (!args.all).then(|| target.clone()),
+            filter: None,
         };
         let mut lazy = false;
         let project_path = match self.call_observed(&projects_params, Some(&original)).await {
@@ -132,6 +153,30 @@ impl BarsMcp {
     }
 }
 
+impl BarsMcp {
+    /// `bars_status(filter=…)`: часть PROJECT — совпавшие записи реестра; части одного проекта
+    /// (INDEX, AUDITS, NEW TOPICS, GRAPH) не выводятся, VERSIONS остаётся.
+    async fn status_filtered(&self, needle: &str, original: &Value) -> CallToolResult {
+        let params = bars_protocol::ProjectsParams {
+            target: None,
+            filter: Some(needle.to_string()),
+        };
+        let mut body = match self.call_observed(&params, Some(original)).await {
+            Ok(output) => render::projects_matching(&output, needle),
+            Err(error) => return failure(&error),
+        };
+        body.push_str(
+            "\nper-project parts need one project: repeat with project=<name from this list>\n",
+        );
+        body.push_str(&render::versions(
+            env!("CARGO_PKG_VERSION"),
+            bars_protocol::BUILD_ID,
+            self.worker_build().await,
+        ));
+        text(body)
+    }
+}
+
 #[tool_router(router = status_tool_router)]
 impl BarsMcp {
     #[tool(
@@ -143,7 +188,9 @@ impl BarsMcp {
                        when they differ), AUDITS (kind, state, date, finding counts), NEW TOPICS, \
                        GRAPH. An error in one part is printed in that part and does not cancel \
                        the rest. refresh=true starts an index freshness check first. \
-                       all=true lists all registered projects. When the index needs reindexing \
+                       all=true lists all registered projects. \
+                       filter=text lists only registry projects whose name or path contains the \
+                       text (subprojects and worktrees included). When the index needs reindexing \
                        only the user can start it: tell the user, do not retry."
     )]
     async fn bars_status(

@@ -373,6 +373,27 @@ async fn register_search_outline_read_scenario() {
     let projects_json = json(&bars(&env, &["--json", "projects"]).await);
     assert_eq!(projects_json["projects"][0]["name"], "proj");
 
+    // `--filter`: подстрока без учёта регистра; пустой результат называет размер реестра;
+    // с `--project` флаг несовместим (ошибка разбора аргументов, воркер не вызывается).
+    let found = bars(&env, &["projects", "--filter", "PRO"]).await;
+    assert_eq!(found.code, 0, "stderr: {}", found.err);
+    assert!(found.out.contains("(proj)"), "{}", found.out);
+    let found_json = json(&bars(&env, &["--json", "projects", "--filter", "proj"]).await);
+    assert_eq!(found_json["projects"][0]["name"], "proj");
+    let none = bars(&env, &["projects", "--filter", "no-such-project-zz"]).await;
+    assert_eq!(none.code, 0, "stderr: {}", none.err);
+    assert!(
+        none.out.contains("no-such-project-zz") && none.out.contains("в реестре проектов: 1"),
+        "{}",
+        none.out
+    );
+    assert!(
+        Cli::try_parse_from([
+            "bars-cli", "--project", "proj", "projects", "--filter", "proj"
+        ])
+        .is_err()
+    );
+
     // A watcher follow-up may overlap the status request after the initial indexing.
     let deadline = Instant::now() + Duration::from_secs(10);
     let status = loop {

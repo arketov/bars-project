@@ -88,7 +88,13 @@ pub enum Command {
         cursor: Option<String>,
     },
     /// Зарегистрированные проекты и их модули.
-    Projects,
+    Projects {
+        /// Только записи реестра, в имени, составном имени (главный/путь) или пути которых есть
+        /// этот текст (без учёта регистра, `\` равен `/`); подпроекты и worktree входят.
+        /// Несовместим с `--project`.
+        #[arg(long, value_name = "ТЕКСТ", conflicts_with = "project")]
+        filter: Option<String>,
+    },
     /// Состояние индекса проекта.
     Status,
     /// Переиндексация проекта.
@@ -600,12 +606,17 @@ async fn execute(
             };
             emit(out, json, &call(&mut client, &params).await?, render::read)
         }
-        Command::Projects => emit(
-            out,
-            json,
-            &call(&mut client, &ProjectsParams::default()).await?,
-            render::projects,
-        ),
+        Command::Projects { filter } => {
+            let params = ProjectsParams {
+                target: None,
+                filter: filter.clone(),
+            };
+            let reply = call(&mut client, &params).await?;
+            let needle = bars_protocol::filter_text(filter.as_deref()).map(str::to_string);
+            emit(out, json, &reply, |output| {
+                render::projects_matching(output, needle.as_deref())
+            })
+        }
         Command::Status => {
             let params = StatusParams { target };
             emit(

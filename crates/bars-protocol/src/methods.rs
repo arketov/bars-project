@@ -597,6 +597,10 @@ pub struct ProjectsParams {
     /// Без target — весь реестр (контракт CLI); MCP передаёт проект сессии явно.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub target: Option<Target>,
+    /// Подстрока имени, составного имени или пути: только совпавшие записи реестра (Т-50).
+    /// Несовместим с `target`; пустой после обрезки пробелов считается отсутствующим.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub filter: Option<String>,
 }
 
 /// Состояние проекта в воркере.
@@ -635,6 +639,10 @@ pub struct ProjectInfo {
     /// Абсолютный путь ближайшего зарегистрированного предка (Т-49).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parent: Option<String>,
+    /// Составное имя (или имя, если предок сам главный) ближайшего предка: подпись `subproject_of`
+    /// в выдаче с фильтром, где сам предок может отсутствовать.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_name: Option<String>,
     /// Составное имя `главный/путь` — только у проекта с предком; им выбирается проект.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub qualified_name: Option<String>,
@@ -666,6 +674,10 @@ pub struct SubprojectInfo {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProjectsOutput {
     pub projects: Vec<ProjectInfo>,
+    /// Сколько проектов в реестре всего: нужно пустому ответу с `filter` («реестр содержит N»).
+    /// Пишется только при `filter`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub registry_total: Option<u32>,
 }
 
 /// Лёгкие метаданные проекта сессии для initialize; модели и индексация не нужны.

@@ -101,7 +101,10 @@ mod tests {
     impl Handler for Fake {
         async fn handle(&self, _client: ClientKind, call: Call) -> Result<Value, RpcError> {
             match call {
-                Call::Projects(_) => Ok(output_value(&ProjectsOutput { projects: vec![] })),
+                Call::Projects(_) => Ok(output_value(&ProjectsOutput {
+                    projects: vec![],
+                    registry_total: None,
+                })),
                 other => Err(RpcError::bars(
                     ErrorKind::ProjectNotFound,
                     format!("заглушка не знает {}", other.method()),
