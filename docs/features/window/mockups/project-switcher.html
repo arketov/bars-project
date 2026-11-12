@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>bars — переключатель проектов</title>
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="states.css">
+<style>
+  body { overflow: auto; padding: 24px 32px 60px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 14px; margin: 26px 0 8px; }
+  .lead { color: var(--muted); max-width: 760px; margin: 0 0 8px; }
+  .scenes { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+  .mode { padding: 14px; border-radius: 14px; background: var(--bg); border: 1px solid var(--line); color: var(--text); }
+  .mode > .cap { font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--faint); margin: 0 0 8px; }
+  /* «окно»: рамка заданной высоты — меню не выходит за её нижний край (max-height от --projmenu-top) */
+  .win { position: relative; width: 300px; height: 440px; background: var(--panel); border: 1px solid var(--line-2); border-radius: 10px; overflow: hidden; }
+  .projwrap { position: relative; margin: 8px 10px; }
+  .proj { width: 100%; display: flex; align-items: center; gap: 10px; text-align: left; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-2); }
+  .pn { flex: 1; min-width: 0; }
+  .pn b { display: block; font-size: 13px; font-weight: 600; }
+  .pn small { display: block; color: var(--muted); font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .projmenu { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 2; display: flex; flex-direction: column;
+    max-height: calc(440px - 60px - 16px); /* в коде: calc(100vh - var(--projmenu-top) - 16px) */
+    background: var(--panel); border: 1px solid var(--line-2); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.16); padding: 6px; }
+  .pfilter { flex: none; position: relative; margin: 0 2px 6px; }
+  .pfilter input { width: 100%; height: 28px; padding: 2px 8px 2px 26px; font-size: 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel-2); outline: none; }
+  .pfilter input:focus { border-color: var(--accent); background: var(--panel); }
+  .pfilter svg { position: absolute; left: 8px; top: 8px; color: var(--faint); }
+  .pscroll { flex: 1; min-height: 0; overflow-y: auto; }
+  .row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; cursor: pointer; }
+  .row:hover { background: var(--panel-2); }
+  .row.on { background: var(--accent-soft); }
+  .row.on .pn b { color: var(--accent-text); }
+  .row.focus { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .row.ctx { cursor: default; }
+  .row.ctx .pn b, .row.ctx .pn small { color: var(--faint); font-weight: 500; }
+  .row.sub { padding-left: 26px; }
+  .row.sub2 { padding-left: 44px; }
+  .chev { flex: none; width: 16px; height: 16px; display: grid; place-items: center; border: 0; background: none; padding: 0; color: var(--muted); border-radius: 4px; transition: transform .12s; }
+  .chev:hover { background: var(--line); }
+  .chev.open { transform: rotate(90deg); }
+  .chev.none { visibility: hidden; }
+  .pmenu-sep { flex: none; height: 1px; background: var(--line); margin: 6px 2px; }
+  .padd { flex: none; display: flex; align-items: center; gap: 8px; width: 100%; border: 0; background: none; padding: 7px 8px; border-radius: 8px; color: var(--accent-text); font-weight: 600; font-size: 13px; }
+  .padd:hover { background: var(--panel-2); }
+  .padd.focus { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .none { color: var(--muted); font-size: 12.5px; padding: 8px 10px; margin: 0; }
+  .note { max-width: 300px; color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+  .slot { color: var(--faint); font-size: 11px; }
+</style>
+<h1>Переключатель проектов · шаг 6.1.1</h1>
+<p class="lead">Меню проекта — колонка из трёх частей: поле «Фильтр проектов» (закреплено вверху), список (прокручивается), «Добавить проект…» (закреплено внизу). Высота меню ограничена нижним краем окна; рамка сцены — «окно» высотой 440 px. Каждая сцена показана в обеих темах. Группировка подпроектов (шеврон, отступы, точка «ждёт первого обращения») — отдельный шаг 6.2.4: на сценах 2–3 показано место под неё, код шага 6.1.1 не группирует (дочерние строки появятся с данными <code>parent</code>).</p>
+
+<h2>1. Сорок проектов: список прокручивается, фильтр и «Добавить проект…» всегда видны; выбранный проект в видимой части</h2>
+<div class="scenes" id="s1"></div>
+
+<h2>2. Фильтр «web»: совпавшие строки; предок без совпадения — приглушённая контекстная строка, выбираемая (слот 6.2.4)</h2>
+<div class="scenes" id="s2"></div>
+
+<h2>3. Клавиатура: фокус на строке (видимый контур), стрелка вправо раскрывает проект с подпроектами; «Ничего не найдено» оставляет «Добавить проект…»</h2>
+<div class="scenes" id="s3"></div>
+
+<p class="note" style="max-width:760px">Клавиши: ↓/↑ — по видимым строкам и «Добавить проект…»; Home/End — первая/последняя; Enter/пробел — выбрать; из поля фильтра ↓ — в список; Enter в поле — первая выбираемая строка; Esc очищает поле, второй Esc закрывает меню и возвращает фокус на кнопку проекта; → раскрыть, ← свернуть или к родителю (6.2.4).</p>
+
+<script src="theme.js"></script>
+<script>
+(() => {
+  const searchIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
+  const plusIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+  const chevIcon = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
+  const chevDown = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--faint)"><path d="m6 9 6 6 6-6"/></svg>';
+
+  const row = (name, sub, { dot = "ok", cls = "", chev = null, query = "" } = {}) =>
+    `<div class="row ${cls}" role="menuitem" tabindex="0">` +
+    (chev === null ? "" : `<button class="chev ${chev === "open" ? "open" : chev === "none" ? "none" : ""}" aria-label="Раскрыть">${chevIcon}</button>`) +
+    `<span class="dot ${dot}"></span><span class="pn"><b>${name}</b><small>${sub}</small></span></div>`;
+
+  const menu = (current, body, { value = "", footFocus = false } = {}) =>
+    `<div class="win"><div class="projwrap"><button class="proj"><span class="dot ok"></span><span class="pn"><b>${current[0]}</b><small>${current[1]}</small></span>${chevDown}</button>
+    <div class="projmenu" role="menu">
+      <label class="pfilter">${searchIcon}<input placeholder="Фильтр проектов" aria-label="Фильтр проектов" value="${value}"></label>
+      <div class="pscroll">${body}</div>
+      <div class="pmenu-sep"></div>
+      <button class="padd ${footFocus ? "focus" : ""}">${plusIcon}Добавить проект…</button>
+    </div></div></div>`;
+
+  const scene = (id, html, note) => {
+    for (const mode of ["light", "dark"]) {
+      document.getElementById(id).insertAdjacentHTML("beforeend",
+        `<div class="mode" data-mode="${mode}"><p class="cap">${mode === "light" ? "Светлая тема" : "Тёмная тема"}</p>${html}${note ? `<p class="note">${note}</p>` : ""}</div>`);
+    }
+  };
+
+  // Сцена 1: 40 проектов, выбран 27-й (прокручен в видимую часть)
+  let list = "";
+  for (let i = 1; i <= 40; i++) {
+    const on = i === 27;
+    list += row(`project-${String(i).padStart(2, "0")}`, i % 7 === 0 ? "индексация · 42 %" : "актуален · 120 документов", { dot: i % 7 === 0 ? "busy" : i % 11 === 0 ? "warn" : "ok", cls: on ? "on" : "" });
+  }
+  scene("s1", menu(["project-27", "C:\\Projects\\project-27\\docs"], list), "Список прокручивается колесом, касанием и стрелками; полоса прокрутки — у списка, а не у меню. Нижний край меню — на 16 px выше края окна.");
+
+  // Сцена 2: фильтр web; предок tmc-opovechenie не совпал — контекстная строка (слот группировки)
+  const s2 =
+    row("web-portal", "актуален · 88 документов", { dot: "ok" }) +
+    row("tmc-opovechenie", "контекст · не совпал с фильтром", { dot: "ok", cls: "ctx", chev: "open" }) +
+    row("frontend/web-angular", "tmc-opovechenie/frontend/web-angular", { dot: "ok", cls: "sub", chev: "none" }) +
+    row("frontend/web-design", "tmc-opovechenie/frontend/web-design", { dot: "off", cls: "sub", chev: "none" }) +
+    row("webhooks-docs", "актуален · 12 документов", { dot: "ok" });
+  scene("s2", menu(["web-portal", "C:\\Projects\\web-portal\\docs"], s2, { value: "web" }),
+    "Совпадение — подстрока без учёта регистра по имени, составному имени и пути (то же правило, что у <code>bars_status</code>). Строки подпроектов — заглушка под шаг 6.2.4.");
+
+  // Сцена 3: клавиатура — фокус на строке, развёрнутый проект; и пустой результат
+  const s3 =
+    row("bars-project", "актуален · 214 документов", { dot: "ok", cls: "on", chev: "none" }) +
+    row("tmc-opovechenie", "актуален · 640 документов", { dot: "ok", cls: "focus", chev: "open" }) +
+    row("backend/api", "tmc-opovechenie/backend/api", { dot: "idle off", cls: "sub", chev: "none" }) +
+    row("backend/worker", "ждёт первого обращения", { dot: "off", cls: "sub", chev: "none" }) +
+    row("tmc-region", "индексация · 42 %", { dot: "busy", chev: "none" });
+  scene("s3", menu(["bars-project", "C:\\Projects\\bars-project"], s3), "Фокус виден всегда (контур). Шевроны и подпроекты — 6.2.4.");
+  scene("s3", menu(["bars-project", "C:\\Projects\\bars-project"], `<p class="none" role="status">Ничего не найдено</p>`, { value: "xyz", footFocus: true }), "Пустой результат: «Добавить проект…» остаётся и достижим с клавиатуры.");
+})();
+</script>
+</html>

@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { tick } from "svelte";
   import { app } from "./app.svelte";
   import { projectDot } from "./format";
+  import { matchProject } from "./projects";
   import Icon from "./Icon.svelte";
   import { entries } from "./entries.svelte";
   import { badgeText } from "./new-topics";
@@ -12,6 +14,80 @@
   $effect(() => {
     if (app.projectsMenuRequest !== seenMenuRequest) { seenMenuRequest = app.projectsMenuRequest; menuOpen = true; }
   });
+
+  // Меню проектов: фильтр — локальное состояние (app.filter фильтрует документы дерева), сбрасывается при закрытии.
+  let filterText = $state("");
+  let menuTop = $state(0);
+  let projButton: HTMLButtonElement | undefined = $state();
+  let menuEl: HTMLDivElement | undefined = $state();
+  let filterInput: HTMLInputElement | undefined = $state();
+  const visibleProjects = $derived(app.projects.filter((project) => matchProject(project, filterText)));
+
+  function measureMenu() {
+    if (projButton) menuTop = projButton.getBoundingClientRect().bottom + 6;
+  }
+  $effect(() => {
+    if (!menuOpen) { filterText = ""; return; }
+    void tick().then(() => {
+      measureMenu();
+      filterInput?.focus();
+      const selected = [...(menuEl?.querySelectorAll<HTMLElement>(".pitem") ?? [])].find((row) => row.dataset.projectPath === app.current);
+      selected?.scrollIntoView?.({ block: "nearest" });
+    });
+  });
+
+  function closeMenu(returnFocus: boolean) {
+    menuOpen = false;
+    if (returnFocus) projButton?.focus();
+  }
+
+  function menuItems(): HTMLElement[] {
+    return [...(menuEl?.querySelectorAll<HTMLElement>('[role="menuitem"], .padd') ?? [])];
+  }
+
+  function onMenuKey(event: KeyboardEvent) {
+    const target = event.target as HTMLElement;
+    const inField = target === filterInput;
+    const items = menuItems();
+    const at = items.indexOf(target);
+    const go = (item: HTMLElement | undefined) => { if (item) { item.focus(); item.scrollIntoView?.({ block: "nearest" }); } };
+    switch (event.key) {
+      case "Escape":
+        if (filterText !== "") filterText = ""; else closeMenu(true);
+        break;
+      case "ArrowDown":
+        go(inField ? items[0] : items[Math.min(at + 1, items.length - 1)]);
+        break;
+      case "ArrowUp":
+        if (inField) return;
+        go(at <= 0 ? items[0] : items[at - 1]);
+        break;
+      case "Home":
+        if (inField) return;
+        go(items[0]);
+        break;
+      case "End":
+        if (inField) return;
+        go(items[items.length - 1]);
+        break;
+      case "Enter":
+      case " ": {
+        if (inField) {
+          if (event.key === " ") return;
+          const first = visibleProjects[0];
+          if (!first) break;
+          void pick(first.path);
+        } else if (target.classList.contains("pitem") && target.dataset.projectPath) {
+          void pick(target.dataset.projectPath);
+        } else return; // кнопка «Добавить проект…» сработает сама
+        break;
+      }
+      default:
+        return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+  }
 
   const shown = $derived(filterTree(app.tree, app.filter));
   const touched = $derived(touchedModules(app.tree, app.selected));
@@ -30,12 +106,13 @@
 
 </script>
 
-<svelte:window onclick={() => (menuOpen = false)} />
+<svelte:window onclick={() => (menuOpen = false)} onresize={() => menuOpen && measureMenu()} />
 
 <aside>
   <div class="projwrap" class:open={menuOpen}>
     <button
       class="proj"
+      bind:this={projButton}
       data-project-path={app.project?.path}
       onclick={(event) => {
         event.stopPropagation();
@@ -52,23 +129,39 @@
       <Icon name="chevron-down" size={14} />
     </button>
     {#if menuOpen}
-      <div class="projmenu" role="menu" tabindex="-1" onclick={(event) => event.stopPropagation()} onkeydown={() => {}}>
-        {#each app.projects as project (project.path)}
-          {@const d = projectDot(project, app.progressOf(project.path), app.waitingOf(project.path), app.activity?.problems.find(p => p.project === project.path))}
-          <div
-            class="pitem"
-            data-project-path={project.path}
-            class:on={project.path === app.current}
-            role="menuitem"
-            tabindex="0"
-            onclick={() => pick(project.path)}
-            onkeydown={(event) => event.key === "Enter" && pick(project.path)}
-          >
-            <span class="dot {d.cls}"></span>
-            <span class="pn"><b>{project.name}</b><small>{d.text}</small></span>
-          </div>
-        {/each}
-        {#if app.projects.length}<div class="pmenu-sep"></div>{/if}
+      <div
+        class="projmenu"
+        role="menu"
+        tabindex="-1"
+        bind:this={menuEl}
+        style="--projmenu-top: {menuTop}px; max-height: calc(100vh - var(--projmenu-top) - 16px)"
+        onclick={(event) => event.stopPropagation()}
+        onkeydown={onMenuKey}
+      >
+        <label class="pfilter">
+          <Icon name="search" size={14} width={2.4} />
+          <input bind:this={filterInput} bind:value={filterText} placeholder="Фильтр проектов" aria-label="Фильтр проектов" autocomplete="off" />
+        </label>
+        <div class="pscroll">
+          {#each visibleProjects as project (project.path)}
+            {@const d = projectDot(project, app.progressOf(project.path), app.waitingOf(project.path), app.activity?.problems.find(p => p.project === project.path))}
+            <!-- Клавиши строк обрабатывает меню целиком (onMenuKey) -->
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <div
+              class="pitem"
+              data-project-path={project.path}
+              class:on={project.path === app.current}
+              role="menuitem"
+              tabindex="-1"
+              onclick={() => pick(project.path)}
+            >
+              <span class="dot {d.cls}"></span>
+              <span class="pn"><b>{project.name}</b><small>{d.text}</small></span>
+            </div>
+          {/each}
+          {#if app.projects.length && visibleProjects.length === 0}<p class="none" role="status">Ничего не найдено</p>{/if}
+        </div>
+        <div class="pmenu-sep"></div>
         <button
           class="padd"
           onclick={() => {
@@ -171,15 +264,21 @@
   .pn b { display: block; font-size: 13.5px; font-weight: 600; }
   .pn small { display: block; color: var(--muted); font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .proj :global(svg) { color: var(--faint); flex: none; }
-  .projmenu { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 20; background: var(--panel); border: 1px solid var(--line-2); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.16); padding: 6px; }
+  .projmenu { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 20; display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line-2); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.16); padding: 6px; }
+  .pfilter { flex: none; position: relative; display: block; margin: 0 2px 6px; }
+  .pfilter input { width: 100%; height: 28px; padding: 2px 8px 2px 26px; font-size: 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel-2); outline: none; }
+  .pfilter input:focus { border-color: var(--accent); background: var(--panel); }
+  .pfilter :global(svg) { position: absolute; left: 8px; top: 7px; color: var(--faint); }
+  .pscroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+  .pitem:focus-visible, .padd:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
   .pitem { display: flex; align-items: center; gap: 10px; padding: 7px 8px; border-radius: 8px; cursor: pointer; }
   .pitem:hover { background: var(--panel-2); }
   .pitem.on { background: var(--accent-soft); }
   .pitem .pn b { font-size: 13px; }
   .pitem .pn small { white-space: normal; }
   .pitem.on .pn b { color: var(--accent-text); }
-  .pmenu-sep { height: 1px; background: var(--line); margin: 6px 4px; }
-  .padd { display: flex; align-items: center; gap: 8px; width: 100%; border: 0; background: none; padding: 7px 8px; border-radius: 8px; color: var(--accent-text); font-weight: 600; font-size: 13px; }
+  .pmenu-sep { flex: none; height: 1px; background: var(--line); margin: 6px 4px; }
+  .padd { flex: none; display: flex; align-items: center; gap: 8px; width: 100%; border: 0; background: none; padding: 7px 8px; border-radius: 8px; color: var(--accent-text); font-weight: 600; font-size: 13px; }
   .padd:hover { background: var(--panel-2); }
   .filter-row { display: flex; align-items: center; gap: 4px; margin: 0 10px 5px; }
   .filter { position: relative; display: block; flex: 1; min-width: 0; }

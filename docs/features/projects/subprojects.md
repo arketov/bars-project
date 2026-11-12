@@ -275,7 +275,7 @@ CLI: `bars-cli projects [--filter <текст>]` [новое] печатает �
 
 ## Окно: переключатель проектов
 
-Устройство строки и состояний переключателя — [выбор проекта](../window/main-window.md); контекстное меню проекта — [меню проекта](../window/project-menu.md). Реализация: `ui/src/lib/Sidebar.svelte` (`.projmenu`, `.pitem`, `.padd`), `ui/src/lib/app.svelte.ts` (`projects`, `loadProjects`, `select`), `ui/src/lib/format.ts` (`stateDot`, `projectDot`), типы — `ui/src/lib/types.ts`. Макет [новое]: `docs/features/window/mockups/project-switcher.html` по оформлению `theme.css`/`states.css` соседних макетов, обе темы; перечисляется в `mockups/Index.md`, макет согласуется до кода (сначала документ, потом код).
+Устройство строки и состояний переключателя — [выбор проекта](../window/main-window.md); контекстное меню проекта — [меню проекта](../window/project-menu.md). Реализация: `ui/src/lib/Sidebar.svelte` (`.projmenu`, `.pitem`, `.padd`), `ui/src/lib/app.svelte.ts` (`projects`, `loadProjects`, `select`), `ui/src/lib/format.ts` (`stateDot`, `projectDot`), типы — `ui/src/lib/types.ts`. Макет `docs/features/window/mockups/project-switcher.html` (согласован 12-11-2026, шаг 6.1.1; группировка в нём — заглушка до шага 6.2.4) по оформлению `theme.css`/`states.css` соседних макетов, обе темы; перечисляется в `mockups/Index.md`, макет согласуется до кода (сначала документ, потом код).
 
 ### Прокрутка и закрепление
 
