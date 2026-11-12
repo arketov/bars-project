@@ -55,7 +55,7 @@ pub use search_scope::{excluded_projects_line, search_scope_text};
 pub use search_signals::{applied_signal_lines, hit_parts_line, hit_signals_line};
 pub use server::{Handler, serve_connection};
 pub use session::Session;
-pub use text::{count_lines, number_lines, read_text, split_other_headers};
+pub use text::{count_lines, folder_text, is_folder_path, number_lines, read_text, split_other_headers};
 pub use text_search::*;
 
 /// Версия протокола. Клиент и воркер сверяют её в `hello`; любое несовместимое изменение методов

@@ -47,6 +47,8 @@ async fn mcp_request_starts_observation_while_cli_status_does_not() {
         lines: None,
         under: None,
         max_lines: None,
+        order: None,
+        cursor: None,
         target: target(&root),
         path: "guide.md".into(),
     })
@@ -86,6 +88,8 @@ async fn mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion() {
         lines: None,
         under: None,
         max_lines: None,
+        order: None,
+        cursor: None,
         target: target(&root),
         path: "guide.md".into(),
     })
@@ -99,6 +103,8 @@ async fn mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion() {
         lines: None,
         under: None,
         max_lines: None,
+        order: None,
+        cursor: None,
         target: explicit.clone(),
         path: "absent.md".into(),
     })
@@ -118,6 +124,8 @@ async fn mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion() {
         lines: None,
         under: None,
         max_lines: None,
+        order: None,
+        cursor: None,
         target: explicit,
         path: "guide.md".into(),
     })
@@ -346,6 +354,8 @@ async fn cli_works_with_a_project_end_to_end() {
             lines: None,
             under: None,
             max_lines: None,
+            order: None,
+            cursor: None,
             target: target(&cwd),
             path: "guide.md".into(),
         })
@@ -505,6 +515,8 @@ async fn explicit_project_by_name_and_wrong_calls() {
         lines: None,
         under: None,
         max_lines: None,
+        order: None,
+        cursor: None,
         target: Target {
             cwd: elsewhere.display().to_string(),
             project: Some("proj".into()),
@@ -536,6 +548,8 @@ async fn explicit_project_by_name_and_wrong_calls() {
             lines: None,
             under: None,
             max_lines: None,
+            order: None,
+            cursor: None,
             target: Target {
                 cwd: elsewhere.display().to_string(),
                 project: Some("нет-такого".into()),

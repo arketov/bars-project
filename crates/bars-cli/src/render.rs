@@ -332,6 +332,9 @@ pub fn outline(output: &OutlineOutput) -> String {
 }
 
 pub fn read(output: &ReadOutput) -> String {
+    if let Some(folder) = &output.folder {
+        return bars_protocol::folder_text(folder);
+    }
     format!("{}\n\n{}", output.title, bars_protocol::read_text(output))
 }
 

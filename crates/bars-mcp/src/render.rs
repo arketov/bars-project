@@ -567,6 +567,9 @@ pub fn outline(path: &str, output: &OutlineOutput) -> String {
 }
 
 pub fn read(path: &str, output: &ReadOutput) -> String {
+    if let Some(folder) = &output.folder {
+        return bars_protocol::folder_text(folder);
+    }
     if let Some(headings) = &output.headings {
         // Автоматический режим: документ длиннее max_lines отдан структурой с подсказкой.
         let lines = headings

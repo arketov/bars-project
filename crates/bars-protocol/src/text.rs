@@ -96,6 +96,43 @@ pub fn read_text(output: &crate::ReadOutput) -> String {
     text.trim_end_matches('\n').to_owned()
 }
 
+/// Путь без расширения `.md` — путь папки, а не документа: `bars_read` показывает её содержимое
+/// (OQ-320). Пустой путь и `.` — корень документации.
+pub fn is_folder_path(path: &str) -> bool {
+    let path = path.trim();
+    !path
+        .get(path.len().saturating_sub(3)..)
+        .is_some_and(|ext| ext.eq_ignore_ascii_case(".md"))
+}
+
+/// Просмотр папки текстом для агента и CLI: шапка с числом подпапок и документов, строка на
+/// подпапку или документ, очередь индексации и продолжение (OQ-320).
+pub fn folder_text(listing: &crate::FolderListing) -> String {
+    use std::fmt::Write;
+    let mut text = format!(
+        "=== FOLDER {} ===\nfolders: {} · documents: {}\n",
+        listing.path, listing.folders, listing.documents
+    );
+    for entry in &listing.entries {
+        text.push_str(&entry.name);
+        if entry.is_folder {
+            let _ = write!(text, " · {} documents", entry.documents);
+        }
+        if !entry.title.is_empty() {
+            let _ = write!(text, " · {}", entry.title);
+        }
+        text.push('\n');
+    }
+    if listing.pending > 0 {
+        let _ = writeln!(text, "pending: {} documents in queue", listing.pending);
+    }
+    if let Some(cursor) = &listing.next_cursor {
+        let _ = writeln!(text, "more: repeat with cursor {cursor}");
+    }
+    text.push_str("=== END FOLDER ===");
+    text
+}
+
 #[cfg(test)]
 mod tests {
     use super::number_lines;

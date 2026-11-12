@@ -238,6 +238,8 @@ mod tests {
             lines: None,
             under: None,
             max_lines: None,
+            order: None,
+            cursor: None,
             target: crate::Target {
                 cwd: "/p".into(),
                 project: None,

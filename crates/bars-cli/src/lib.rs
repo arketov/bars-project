@@ -80,6 +80,12 @@ pub enum Command {
         /// Полная цепочка заголовков; раздел с вложенными и все повторы.
         #[arg(long, conflicts_with = "lines")]
         under: Option<String>,
+        /// Для пути папки: `desc` — обратный порядок по имени.
+        #[arg(long, conflicts_with_all = ["lines", "under"])]
+        order: Option<String>,
+        /// Для пути папки: продолжение списка с предыдущей страницы.
+        #[arg(long, conflicts_with_all = ["lines", "under"])]
+        cursor: Option<String>,
     },
     /// Зарегистрированные проекты и их модули.
     Projects,
@@ -571,13 +577,21 @@ async fn execute(
                 render::outline,
             )
         }
-        Command::Read { path, lines, under } => {
+        Command::Read {
+            path,
+            lines,
+            under,
+            order,
+            cursor,
+        } => {
             let params = ReadParams {
                 target,
                 path,
                 lines,
                 under,
                 max_lines: None,
+                order,
+                cursor,
             };
             emit(out, json, &call(&mut client, &params).await?, render::read)
         }

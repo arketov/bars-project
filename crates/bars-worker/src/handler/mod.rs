@@ -6,6 +6,7 @@
 mod audits;
 mod disk_read;
 mod errors;
+mod folder;
 mod graph;
 pub(crate) mod graph_cache;
 mod history;
@@ -1579,6 +1580,9 @@ impl WorkerHandler {
             Call::Like(params) => self.like(params).await.map(|out| output_value(&out)),
             Call::Duplicates(params) => self.duplicates(params).await.map(|out| output_value(&out)),
             Call::Outline(params) => self.outline(params).map(|out| output_value(&out)),
+            Call::Read(params) if bars_protocol::is_folder_path(&params.path) => {
+                self.read_folder(params).await.map(|out| output_value(&out))
+            }
             Call::Read(params) => self.read(params).map(|out| output_value(&out)),
             Call::Projects(params) => self.projects(params).await.map(|out| output_value(&out)),
             Call::SessionInfo(params) => self

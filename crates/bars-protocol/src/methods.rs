@@ -516,6 +516,12 @@ pub struct ReadParams {
     /// строк возвращается не текстом, а структурой (`headings`) с подсказкой прочитать часть.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub max_lines: Option<usize>,
+    /// Только для пути папки: `desc` — обратный порядок по имени (OQ-320).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order: Option<String>,
+    /// Только для пути папки: продолжение списка с предыдущей страницы.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cursor: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -535,6 +541,39 @@ pub struct ReadOutput {
     /// автоматический режим `bars_read`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub headings: Option<Vec<Heading>>,
+    /// Путь папки вместо документа: один уровень её содержимого из индекса (OQ-320).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub folder: Option<FolderListing>,
+}
+
+/// Одна строка просмотра папки: подпапка или документ.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct FolderEntry {
+    /// Имя без пути; у подпапки — с `/` на конце.
+    pub name: String,
+    pub is_folder: bool,
+    /// У подпапки — число документов во всём поддереве; у документа 0.
+    #[serde(default)]
+    pub documents: u32,
+    /// `title` документа или `Index.md` подпапки; пусто, если `Index.md` нет.
+    #[serde(default)]
+    pub title: String,
+}
+
+/// Содержимое папки одним уровнем, страница до 100 строк.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct FolderListing {
+    /// Путь папки от корня документации (вне его — `./путь`); корень документации — `.`.
+    pub path: String,
+    /// Всего подпапок и документов самой папки, не только на странице.
+    pub folders: u32,
+    pub documents: u32,
+    pub entries: Vec<FolderEntry>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub next_cursor: Option<String>,
+    /// Сколько документов ждёт индексации.
+    #[serde(default)]
+    pub pending: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1594,6 +1633,8 @@ mod tests {
             lines: None,
             under: None,
             max_lines: None,
+            order: None,
+            cursor: None,
             target: target(),
             path: "a.md".into(),
         });

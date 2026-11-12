@@ -15,6 +15,8 @@ async fn mcp_history_ui_real_ipc_record_has_readable_input_and_result() {
                 lines: None,
                 under: None,
                 max_lines: None,
+                order: None,
+                cursor: None,
                 target: target(&root),
                 path: "guide.md".into(),
             },
@@ -49,6 +51,8 @@ async fn mcp_history_ui_real_ipc_record_has_readable_input_and_result() {
             lines: Some("2-4".into()),
             under: None,
             max_lines: None,
+            order: None,
+            cursor: None,
         },
         Some(&partial_input),
     )

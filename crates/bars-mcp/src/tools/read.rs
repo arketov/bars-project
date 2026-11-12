@@ -27,6 +27,9 @@ pub struct ReadArgs {
     pub direction: Option<String>,
     /// Opaque continuation of a links page from the previous answer.
     pub cursor: Option<String>,
+    /// For a folder path only: asc (default) or desc by name; desc lists session folders named
+    /// by date newest first.
+    pub order: Option<String>,
     pub project: Option<String>,
 }
 
@@ -36,6 +39,38 @@ pub(super) fn router() -> ToolRouter<BarsMcp> {
 
 impl BarsMcp {
     async fn read_impl(&self, args: ReadArgs, original: Value) -> CallToolResult {
+        if bars_protocol::is_folder_path(&args.path) {
+            // Путь папки: список одного уровня из индекса (OQ-320).
+            if args.lines.is_some()
+                || args.under.is_some()
+                || args.view.is_some()
+                || args.direction.is_some()
+            {
+                return CallToolResult::error(vec![ContentBlock::text(
+                    "invalid_params: lines, under, view and direction apply to a document; \
+                     the path is a folder (a document path ends with .md)",
+                )]);
+            }
+            let params = bars_protocol::ReadParams {
+                target: self.target(args.project),
+                path: args.path.clone(),
+                lines: None,
+                under: None,
+                max_lines: None,
+                order: args.order,
+                cursor: args.cursor,
+            };
+            let path = params.path.clone();
+            return present(
+                self.call_observed(&params, Some(&original)).await,
+                |output| render::read(&path, output),
+            );
+        }
+        if args.order.is_some() {
+            return CallToolResult::error(vec![ContentBlock::text(
+                "invalid_params: order applies to a folder path only",
+            )]);
+        }
         let view = match args.view.as_deref() {
             None => None,
             Some("text") => Some("text"),
@@ -90,6 +125,8 @@ impl BarsMcp {
             lines: args.lines,
             under: args.under,
             max_lines: auto.then_some(AUTO_MAX_LINES),
+            order: None,
+            cursor: None,
         };
         let path = params.path.clone();
         present(
@@ -104,7 +141,11 @@ impl BarsMcp {
     #[tool(
         name = "bars_read",
         annotations(read_only_hint = true),
-        description = "Read a known .md document: text, structure or links. path — from the \
+        description = "Read a known .md document: text, structure or links; or list a folder \
+                       (a path without .md, like ls): its subfolders with document counts, then \
+                       its documents, with titles from the index, one level, 100 lines a page \
+                       (continue with cursor; order=desc reverses the names, so date-named \
+                       session folders come newest first). path — from the \
                        documentation root or the project root, as printed in search results. \
                        Without view, lines and under a document of up to 400 lines comes back \
                        whole; a longer one comes back as an outline — read a part with lines \
