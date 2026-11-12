@@ -17,6 +17,7 @@ mod operations;
 mod queue;
 mod registry;
 mod scan;
+mod subprojects;
 mod summary;
 mod timefmt;
 pub mod updates;
@@ -260,6 +261,8 @@ pub struct ProjectSnapshot {
     pub discovered: bool,
     /// Индекса ещё не требовали (`state` — `Lazy`).
     pub lazy: bool,
+    /// Обход автопоиска этого проекта оборван пределом (Т-49).
+    pub discovery_truncated: bool,
 }
 
 /// Итог регистрации.
@@ -302,6 +305,13 @@ struct Runtime {
 }
 
 impl Runtime {
+    /// Ленивая запись реестра: проект зарегистрирован, но ещё не проверялся (`Lazy`).
+    fn new_lazy() -> Self {
+        let mut runtime = Self::new();
+        runtime.status.state = ProjectState::Lazy;
+        runtime
+    }
+
     fn new() -> Self {
         Self {
             generation: operations::generation(),
@@ -363,6 +373,8 @@ struct Inner {
     graph_passes: std::sync::atomic::AtomicUsize,
     graph_cache: Arc<crate::handler::graph_cache::GraphCache>,
     scans: Mutex<HashMap<PathBuf, scan::ScanJob>>,
+    /// Автопоиск подпроектов: один проход на процесс и очередь запросов (`subprojects.rs`).
+    discovery: subprojects::Gate,
 }
 
 struct DownloadCleanup {
@@ -450,6 +462,7 @@ impl Worker {
             graph_passes: std::sync::atomic::AtomicUsize::new(0),
             graph_cache: Default::default(),
             scans: Mutex::new(HashMap::new()),
+            discovery: Default::default(),
         });
         // Очередь ещё не идёт: никто не держит файлы индекса, восстановление безопасно.
         for path in &paths {
@@ -466,6 +479,8 @@ impl Worker {
         for path in paths {
             inner.activate(&path, Priority::Periodic);
         }
+        // После проверок файлов и без ожидания канала: обход подпроектов идёт в фоне.
+        inner.schedule_discovery_all();
         Ok(Self { inner })
     }
 
@@ -552,7 +567,8 @@ impl Worker {
 
     /// Регистрирует папку как проект: ровно ту, что указана (Т-6). Создаёт `.bars/config.toml`,
     /// если его нет, запускает слежение и ставит проект на проверку. Повторная регистрация
-    /// ставит на проверку ещё раз.
+    /// ставит на проверку ещё раз. Найденный автопоиском подпроект становится самостоятельным:
+    /// запись одна, индекс один (Т-49).
     pub fn register(&self, path: &Path) -> Result<Registered, WorkerError> {
         let _request =
             self.inner.requests.try_read().map_err(|_| {
@@ -571,11 +587,18 @@ impl Worker {
             let canonical = registry
                 .find(&path)
                 .map_or_else(|| path.clone(), |entry| entry.path.clone());
+            if !added {
+                registry.set_standalone(&canonical)?;
+            }
             (canonical, added)
         };
         // Новый вложенный проект уходит из индекса внешнего, внешний новый — исключает вложенные.
         self.inner.refresh_nested();
+        // У нового самостоятельного проекта лениво хранится только то, что нашёл автопоиск: после
+        // `set_standalone` состояние `Lazy` в `Runtime` снимает `activate`.
         self.inner.activate(&canonical, Priority::Explicit);
+        // Новый главный сразу получает свои подпроекты.
+        self.inner.schedule_discovery(&canonical, false);
         Ok(Registered {
             path: canonical,
             already: !added,
@@ -590,27 +613,49 @@ impl Worker {
         Ok(())
     }
 
-    /// Снимает проект с регистрации, сохраняя `.bars/` и документы (Т-5).
+    /// Снимает проект с регистрации, сохраняя `.bars/` и документы (Т-5). Найденные записи без
+    /// предка убираются; бывший предок обходится заново: подпроект, отвечающий правилу, вернётся
+    /// найденным ленивым (Т-49).
     pub fn unregister(&self, selector: &str) -> Result<PathBuf, WorkerError> {
         let _request = self.inner.requests.try_read().map_err(|_| {
             io::Error::other("идёт удаление проекта; повторите снятие регистрации позже")
         })?;
-        let path = self.resolve(selector)?;
-        let _publication = self.inner.updates.after(&path, updates::ALL);
-        lock(&self.inner.registry).remove(&path)?;
-        let runtime = lock(&self.inner.projects).remove(&path);
-        self.inner.graph_cache.remove(&path);
-        self.inner.cancel_queued(&path);
-        self.inner.cancel_scan(&path);
-        // Слежение останавливается вне блокировок: поток `notify` может ждать их.
-        drop(runtime);
+        let path = self.resolve_known(selector)?;
+        let former_parent = lock(&self.inner.registry)
+            .parent_of(&path)
+            .map(|parent| parent.path.clone());
+        self.inner.remove_entry(&path)?;
+        self.inner.remove_orphans();
         // Снятый вложенный проект возвращается во внешний: тот получает проверку.
         self.inner.refresh_nested();
+        if let Some(parent) = former_parent {
+            self.inner.schedule_discovery(&parent, false);
+        }
         Ok(path)
     }
 
-    /// Проект по пути или по имени папки; одинаковое имя у нескольких проектов — ошибка.
+    /// Проект по пути, имени или составному имени `главный/путь`; одинаковое имя у нескольких
+    /// проектов — ошибка. Неизвестный подпроект, который отвечает правилу автопоиска, регистрируется
+    /// сразу найденным ленивым: одна проверка путей без обхода дерева (Т-49).
     pub fn resolve(&self, selector: &str) -> Result<PathBuf, WorkerError> {
+        let error = match self.resolve_known(selector) {
+            Ok(path) => return Ok(path),
+            Err(WorkerError::Resolve(error)) => error,
+            Err(other) => return Err(other),
+        };
+        if matches!(
+            error,
+            ResolveError::NotFound(_) | ResolveError::UnknownSubproject { .. }
+        ) && self.register_for_selector(selector).is_some()
+            && let Ok(path) = self.resolve_known(selector)
+        {
+            return Ok(path);
+        }
+        Err(self.not_a_subproject(selector, error).into())
+    }
+
+    /// То же, что [`Worker::resolve`], но реестр не пополняется: для снятия и удаления.
+    pub(crate) fn resolve_known(&self, selector: &str) -> Result<PathBuf, WorkerError> {
         Ok(lock(&self.inner.registry).resolve(selector)?.path.clone())
     }
 
@@ -751,6 +796,7 @@ impl Worker {
                     qualified_name,
                     discovered: entry.discovered,
                     lazy: entry.lazy,
+                    discovery_truncated: self.inner.discovery_truncated(&entry.path),
                     path: entry.path,
                 }
             })
@@ -762,6 +808,9 @@ impl Worker {
     /// документации для регистрации нет: реестр не засоряется.
     pub fn session_start(&self, cwd: &Path) -> Result<Option<PathBuf>, WorkerError> {
         let cwd = normalize(cwd)?;
+        // Точечная проверка папок от `cwd` вверх до проекта: подпроект, о котором реестр ещё не
+        // знает, регистрируется найденным ленивым, и проектом сессии становится он (Т-49).
+        self.register_for_cwd(&cwd);
         let discovered = lock(&self.inner.registry).discover_root(&cwd);
         if discovered.registered {
             self.observe_mcp(&discovered.root)?;
@@ -848,6 +897,8 @@ impl Worker {
         accept_model_change: bool,
     ) -> Result<(u64, bool, JobKind), WorkerError> {
         let path = self.registered(path)?;
+        // Явная проверка — обращение к проекту, в том числе из CLI: ленивый проект просыпается.
+        self.inner.wake_lazy(&path);
         let _publication = self.inner.updates.after(&path, updates::STATUS);
         let key = self.inner.operation_settings_key(&path);
         let projects = lock(&self.inner.projects);
@@ -1053,6 +1104,8 @@ impl Worker {
         self.inner.enqueue(&path, Job::check(Priority::Explicit));
         // Новая область вложенного проекта меняет исключения внешних.
         self.inner.refresh_nested();
+        // Смена корня документации меняет «вне корня документации»: подпроекты ищутся заново.
+        self.inner.schedule_discovery(&path, false);
         Ok(())
     }
 
@@ -1305,18 +1358,31 @@ impl Inner {
 
     /// Проверяет папку и запускает проверку; слежение — только при активности проекта.
     /// Папки нет — проект `unavailable`; регистрация сразу ставит начальное обновление.
+    /// Ленивый найденный подпроект на старте и в часовой проверке остаётся ленивым; любое другое
+    /// обращение — первое: `lazy` снимается и проект идёт обычным путём (Т-49).
     fn activate(self: &Arc<Self>, path: &Path, priority: Priority) {
-        let registry = lock(&self.registry);
-        if !registry.contains(path) {
-            return;
+        if priority != Priority::Periodic {
+            self.wake_lazy(path);
         }
+        let registry = lock(&self.registry);
+        let Some(entry) = registry.find(path) else {
+            return;
+        };
         if lock(&self.projects)
             .get(path)
             .is_some_and(|runtime| runtime.deleting)
         {
             return;
         }
+        if entry.lazy {
+            // Ни проверки, ни слежения, ни задания: ПК не нагружается (НФТ-7).
+            lock(&self.projects)
+                .entry(path.to_path_buf())
+                .or_insert_with(Runtime::new_lazy);
+            return;
+        }
         if !path.is_dir() {
+            drop(registry);
             self.mark_unavailable(path);
             return;
         }
@@ -1325,7 +1391,10 @@ impl Inner {
             let runtime = projects
                 .entry(path.to_path_buf())
                 .or_insert_with(Runtime::new);
-            if runtime.status.state == ProjectState::Unavailable {
+            if matches!(
+                runtime.status.state,
+                ProjectState::Unavailable | ProjectState::Lazy
+            ) {
                 runtime.status.state = ProjectState::Ready;
             }
         }
@@ -1360,6 +1429,10 @@ impl Inner {
             })
             .collect();
         for project in bars_core::indexing::nested::publish(&projects) {
+            // Ленивый проект не индексируется: новые исключения учтёт его первая проверка.
+            if self.is_lazy(&project) {
+                continue;
+            }
             self.enqueue(&project, Job::check(Priority::Explicit));
         }
     }
@@ -1776,6 +1849,9 @@ impl Inner {
             if self.stop.load(Ordering::SeqCst) {
                 break;
             }
+            // Сначала автопоиск подпроектов, затем проверка файлов (ленивые в ней пропускаются).
+            let inner = Arc::clone(&self);
+            let _ = tokio::task::spawn_blocking(move || inner.discover_all()).await;
             self.check_all();
         }
     }

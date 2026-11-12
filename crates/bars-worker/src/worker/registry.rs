@@ -570,7 +570,7 @@ fn selector_key(selector: &str) -> String {
 }
 
 /// Ключ сравнения путей: на Windows регистр букв не различается.
-fn path_key(path: &Path) -> Vec<String> {
+pub(super) fn path_key(path: &Path) -> Vec<String> {
     path.components()
         .map(|component| {
             let part = component.as_os_str().to_string_lossy();

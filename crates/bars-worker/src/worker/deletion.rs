@@ -20,7 +20,7 @@ impl Worker {
     }
 
     async fn delete_project_inner(&self, selector: &str) -> Result<PathBuf, WorkerError> {
-        let path = self.resolve(selector)?;
+        let path = self.resolve_known(selector)?;
         // Runtime остаётся до конца: таймер, события и очередь видят запрет новых заданий.
         let (job_gate, gate, watcher) = {
             let mut projects = lock(&self.inner.projects);
@@ -64,6 +64,8 @@ impl Worker {
             Ok(_) => {
                 lock(&self.inner.projects).remove(&path);
                 self.inner.cancel_queued(&path);
+                // Найденные подпроекты удалённого предка уходят с ним (Т-49).
+                self.inner.remove_orphans();
                 // Удалённый вложенный проект больше не исключается из внешнего.
                 self.inner.refresh_nested();
                 Ok(path)

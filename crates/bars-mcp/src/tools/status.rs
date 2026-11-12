@@ -48,9 +48,16 @@ impl BarsMcp {
         let projects_params = bars_protocol::ProjectsParams {
             target: (!args.all).then(|| target.clone()),
         };
+        let mut lazy = false;
         let project_path = match self.call_observed(&projects_params, Some(&original)).await {
             Ok(output) => {
                 let path = output.projects.first().map(|project| project.path.clone());
+                // Подпроект, которого ещё не требовали: индекса нет, остальные части не зовутся.
+                lazy = !args.all
+                    && output
+                        .projects
+                        .first()
+                        .is_some_and(|project| project.state == bars_protocol::ProjectState::Lazy);
                 body.push_str(&render::projects(&output));
                 path
             }
@@ -71,6 +78,13 @@ impl BarsMcp {
             bars_protocol::BUILD_ID,
             self.worker_build().await,
         ));
+        if lazy {
+            // Аудиты, новые темы и граф лениво не вызываются: пассивный вызов не должен будить проект.
+            body.push_str(
+                "\nnot indexed yet: any search, read or refresh=true in this project starts the first index",
+            );
+            return text(body);
+        }
         // Аудиты и новые темы: явный project (имя или путь) или путь из части PROJECT.
         // При all=true часть PROJECT — реестр проектов: аудиты и темы за одним проектом
         // под ней были бы произвольным выбором, поэтому не выводятся.

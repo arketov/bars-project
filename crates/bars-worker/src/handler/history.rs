@@ -66,8 +66,14 @@ impl WorkerHandler {
             .and_then(|t| self.resolve(t).ok())
             .or_else(|| explicit_project.and_then(|p| self.worker.resolve(&p).ok()));
         if let Some(project) = &project {
+            // Пассивные вызовы не будят ленивый подпроект: первое обращение — любой другой
+            // вызов в нём (Т-49, `subprojects.md`, «Что считается первым обращением»).
+            let passive = matches!(
+                &call,
+                Call::Status(_) | Call::Projects(_) | Call::AuditList(_) | Call::NewTopicsList(_)
+            );
             self.worker
-                .observe_mcp(project)
+                .observe_mcp_with(project, passive)
                 .map_err(super::worker_error)?;
         }
         let path = project

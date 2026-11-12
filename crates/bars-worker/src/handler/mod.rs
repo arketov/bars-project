@@ -950,8 +950,7 @@ impl WorkerHandler {
             qualified_name: snapshot.qualified_name.clone(),
             discovered: snapshot.discovered,
             subprojects,
-            // Обход автопоиска ещё не пишет предел: поле заполнит шаг автопоиска.
-            discovery_truncated: false,
+            discovery_truncated: snapshot.discovery_truncated,
         }
     }
 

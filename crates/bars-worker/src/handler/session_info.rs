@@ -8,6 +8,9 @@ impl WorkerHandler {
     ) -> Result<SessionInfoOutput, RpcError> {
         let worker = self.worker.clone();
         let metadata = tokio::task::spawn_blocking(move || {
+            // Точечная проверка папок от `cwd` вверх: найденный подпроект регистрируется ленивым,
+            // индекс не строится — первое обращение сделает первый вызов инструмента (Т-49).
+            worker.register_for_cwd(Path::new(&params.cwd));
             let path = worker.project_for_cwd(Path::new(&params.cwd))?;
             let (name, docs_root) = worker.project_metadata(&path)?;
             Some((path, name, docs_root))

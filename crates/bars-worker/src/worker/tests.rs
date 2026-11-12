@@ -21,6 +21,7 @@ mod folders;
 mod graph;
 mod operations;
 mod shutdown;
+mod subprojects;
 
 struct Env {
     home: TempDir,

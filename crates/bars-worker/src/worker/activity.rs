@@ -12,8 +12,25 @@ impl Runtime {
 }
 
 impl Worker {
+    /// Агент работает с проектом: аренда слежения, инструкция и проверка. Для ленивого найденного
+    /// подпроекта это первое обращение (Т-49).
     pub fn observe_mcp(&self, project: &Path) -> Result<(), WorkerError> {
+        self.observe_mcp_with(project, false)
+    }
+
+    /// То же с признаком пассивного вызова (`projects`, `status` без refresh, списки аудитов и
+    /// новых тем): ленивый проект такой вызов не продлевает и не будит, у остальных проектов
+    /// поведение прежнее.
+    pub fn observe_mcp_with(&self, project: &Path, passive: bool) -> Result<(), WorkerError> {
         let project = self.registered(project)?;
+        if passive {
+            if self.inner.is_lazy(&project) {
+                return Ok(());
+            }
+        } else {
+            // Первое обращение до аренды: слежение поднимается только у разбуженного проекта.
+            self.inner.wake_lazy(&project);
+        }
         let now = Instant::now();
         let first = {
             let mut projects = lock(&self.inner.projects);
@@ -34,9 +51,14 @@ impl Worker {
         Ok(())
     }
 
-    /// Каждое окно продлевает свою аренду; закрытие/смена проекта снимает только её.
+    /// Каждое окно продлевает свою аренду; закрытие/смена проекта снимает только её. Открытие
+    /// ленивого подпроекта в окне — первое обращение; первая аренда проекта окном ставит обход
+    /// автопоиска (Т-49).
     pub fn observe_window(&self, window: &str, project: Option<&Path>) -> Result<(), WorkerError> {
         let project = project.map(|p| self.registered(p)).transpose()?;
+        if let Some(project) = &project {
+            self.inner.wake_lazy(project);
+        }
         let now = Instant::now();
         let mut first = false;
         {
@@ -60,6 +82,7 @@ impl Worker {
             self.inner.ensure_watching(&project);
             if first {
                 self.inner.activate(&project, Priority::Watch);
+                self.inner.schedule_discovery(&project, true);
             }
         }
         Ok(())
