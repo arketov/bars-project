@@ -68,8 +68,10 @@ impl WorkerHandler {
         }
         // Агенту — только одна конкретная строка; широкий шаблон уходит в смысловой поиск bars_search (ISS-109).
         crate::text_search::breadth::check(&p.query, p.regex)?;
-        let project = self.resolve(&p.target)?;
-        let docs = self.worker.docs_root(&project).map_err(worker_error)?;
+        // По виду worktree точный поиск идёт по диску W: обход корня вида без списка областей.
+        let (owner, view) = self.resolve_view(&p.target)?;
+        let docs = self.worker.docs_root(&owner).map_err(worker_error)?;
+        let project = super::worktree_view::view_root(&owner, &view);
         let continued = p
             .path
             .as_deref()

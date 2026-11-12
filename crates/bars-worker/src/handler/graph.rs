@@ -77,6 +77,7 @@ impl WorkerHandler {
                 files: params.search.files.clone(),
                 paths: params.search.paths.clone(),
                 excluded_projects: Vec::new(),
+                worktree: None,
             };
             let status = self
                 .worker

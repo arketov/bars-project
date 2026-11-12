@@ -8,12 +8,16 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 use rusqlite::params_from_iter;
 use rusqlite::types::Value;
 
-use super::fulltext::{BM25, ExactProbe, FtsQuery, f_signal, fts_plan_for, p_signal};
+use super::fulltext::{BM25, ExactProbe, FtsQuery, fts_plan_for};
 use super::operators::{OperatorFilter, ParsedQuery};
 use super::params::{AppliedParams, ScoreKind, ScoreWeights, SearchRequest, SearchSettings};
 use super::vector_top::VectorTop;
 use crate::models::{EmbedError, Embedder, RerankError, Reranker};
 use crate::storage::{Compatibility, Index, StorageError};
+
+mod view;
+use view::Catalog;
+pub use view::{DELTA_ID_OFFSET, IndexView};
 
 /// Во сколько раз полный перебор векторов берёт больше кандидатов, когда в запросе есть фразы или
 /// исключения: часть векторных кандидатов отсеют операторы.
@@ -188,12 +192,48 @@ pub fn search_with_links(
     semantic: bool,
     links: Option<&mut LinkedDocuments<'_>>,
 ) -> Result<SearchResponse, SearchError> {
+    search_in_view(
+        &IndexView::single(index),
+        embedder,
+        reranker,
+        settings,
+        request,
+        expansion,
+        semantic,
+        links,
+    )
+}
+
+/// То же по виду: один источник (обычный поиск) или индекс владельца с дельтой worktree. По виду
+/// из двух источников кандидаты сливаются до rerank, `f` нормируется внутри базы, `l` и
+/// расширение связями не считаются (индекса ссылок и графа у вида нет).
+#[allow(clippy::too_many_arguments)]
+pub fn search_in_view(
+    view: &IndexView<'_>,
+    embedder: &mut dyn Embedder,
+    reranker: Option<&mut dyn Reranker>,
+    settings: &SearchSettings,
+    request: &SearchRequest,
+    expansion: Option<&mut CandidateExpansion<'_>>,
+    semantic: bool,
+    links: Option<&mut LinkedDocuments<'_>>,
+) -> Result<SearchResponse, SearchError> {
+    let index = view.owner();
+    let (expansion, links) = if view.is_merged() {
+        (None, None)
+    } else {
+        (expansion, links)
+    };
     // FTS открывает служебные таблицы лениво: смена схемы между чтениями ломает xConnect.
     // Сохраняем транзакцию вызывающего кода, если поиск уже работает в его снимке.
     let _snapshot = if index.conn().is_autocommit() {
         Some(index.conn().unchecked_transaction()?)
     } else {
         None
+    };
+    let _delta_snapshot = match view.delta() {
+        Some(delta) if delta.conn().is_autocommit() => Some(delta.conn().unchecked_transaction()?),
+        _ => None,
     };
     if matches!(
         index.compatibility(embedder.fingerprint())?,
@@ -207,10 +247,10 @@ pub fn search_with_links(
         return Err(SearchError::FtsRebuilding);
     }
     let plan = QueryPlan::build(index, &request.query)?;
-    let scope = Scope::build_with_paths(index, request, &plan.parsed.paths)?;
+    let scope = Scope::build_with_paths(view, request, &plan.parsed.paths)?;
 
     let planned = settings.resolve(request, reranker.is_some());
-    if scope.chunk_count(index)? == 0 {
+    if view.chunk_count(&scope)? == 0 {
         return Ok(SearchResponse {
             hits: Vec::new(),
             weak: Vec::new(),
@@ -239,7 +279,7 @@ pub fn search_with_links(
     };
 
     let gathered = gather(
-        index,
+        view,
         &scope,
         &plan,
         query_vector.as_deref(),
@@ -247,13 +287,13 @@ pub fn search_with_links(
         &planned.weights,
         expansion,
     )?;
-    let candidate_modules = count_candidate_modules(index, &gathered.ids())?;
+    let candidate_modules = view.count_candidate_modules(&gathered.ids())?;
 
     let mut rerank_error = None;
     let mut rerank_scores = None;
     if let Some(reranker) = reranker {
         match rerank_scores_of(
-            index,
+            view,
             reranker,
             &plan.parsed.text,
             &gathered,
@@ -282,7 +322,7 @@ pub fn search_with_links(
     }
 
     let mut ranked = rank(&gathered, rerank_scores.as_ref(), &applied);
-    load_documents(index, &mut ranked)?;
+    load_documents(view, &mut ranked)?;
     let linked = match links {
         Some(links) if applied.weights.links > 0.0 => {
             apply_links(&mut ranked, applied.weights.links, links)
@@ -290,12 +330,12 @@ pub fn search_with_links(
         _ => false,
     };
     applied.signals = used_signals(&applied, query_vector.is_some(), linked);
-    let hits = fold_sections(index, ranked, &applied)?;
+    let hits = fold_sections(view, ranked, &applied)?;
     // «Слабые совпадения» — только когда порог отрезал всё: агент видит, что было рядом.
     // Ниже порога считаем лениво, чтобы обычная выдача не платила за проход по пулу.
     let weak = if hits.is_empty() {
         let mut below = below_threshold(&gathered, rerank_scores.as_ref(), &applied);
-        fold_weak(index, &mut below)?
+        fold_weak(view, &mut below)?
     } else {
         Vec::new()
     };
@@ -390,7 +430,7 @@ impl Gathered {
 /// Собирает пул: первые `candidates` по составному `bm25`, первые `candidates` по косинусу и
 /// слова-идентификаторы; операторы отсекают лишнее; считает `f` и `p`; упорядочивает по `S0`.
 fn gather(
-    index: &Index,
+    view: &IndexView<'_>,
     scope: &Scope,
     plan: &QueryPlan,
     query_vector: Option<&[f32]>,
@@ -398,13 +438,12 @@ fn gather(
     weights: &ScoreWeights,
     mut expansion: Option<&mut CandidateExpansion<'_>>,
 ) -> Result<Gathered, SearchError> {
-    let conn = index.conn();
     let text_scored =
-        scope.text_scored(index, &plan.filter.apply(&plan.match_query.all), candidates)?;
+        view.text_scored(scope, &plan.filter.apply(&plan.match_query.all), candidates)?;
     let text_ids: Vec<i64> = text_scored.iter().map(|(id, _)| *id).collect();
     let exact_ids = match &plan.match_query.identifiers {
         Some(identifiers) => {
-            scope.text_candidates(index, &plan.filter.apply(identifiers), candidates)?
+            view.text_candidates(scope, &plan.filter.apply(identifiers), candidates)?
         }
         None => Vec::new(),
     };
@@ -414,11 +453,11 @@ fn gather(
         candidates * OPERATOR_OVERFETCH
     };
     let mut cosines = match query_vector {
-        Some(vector) => scope.cosines(index, vector, overfetch, &text_ids, &exact_ids)?,
+        Some(vector) => view.cosines(scope, vector, overfetch, &text_ids, &exact_ids)?,
         None => HashMap::new(),
     };
     let mut vector_ids = top_by_score(&cosines, overfetch);
-    plan.filter.retain(conn, &mut vector_ids)?;
+    view.retain(&plan.filter, &mut vector_ids)?;
     vector_ids.truncate(candidates);
 
     let mut pool: Vec<i64> = Vec::new();
@@ -432,14 +471,14 @@ fn gather(
         expansion.as_mut().filter(|_| !pool.is_empty()),
         query_vector,
     ) {
-        let mut additional: Vec<i64> = expansion(index, &pool, candidates)?
+        let mut additional: Vec<i64> = expansion(view.owner(), &pool, candidates)?
             .into_iter()
             .take(candidates)
             .collect();
         // Косинус добавленных кандидатов считается принудительно, исходная область сохраняется.
-        let scores = scope.cosines(index, query_vector, 0, &additional, &[])?;
+        let scores = view.cosines(scope, query_vector, 0, &additional, &[])?;
         additional.retain(|id| scores.contains_key(id));
-        plan.filter.retain(conn, &mut additional)?;
+        view.retain(&plan.filter, &mut additional)?;
         cosines.extend(scores);
         for id in additional {
             if seen.insert(id) {
@@ -448,8 +487,8 @@ fn gather(
         }
     }
 
-    let fulltext = f_signal(conn, &plan.match_query.all, &text_scored, &pool)?;
-    let exact = p_signal(conn, &plan.probe, &pool)?;
+    let fulltext = view.f_signal(&plan.match_query.all, &text_scored, &pool)?;
+    let exact = view.p_signal(&plan.probe, &pool)?;
     let mut candidates: Vec<Candidate> = pool
         .into_iter()
         .map(|id| Candidate {
@@ -475,7 +514,7 @@ fn gather(
 /// Оценки rerank первых `rerank_candidates` кандидатов пула (по `S0`), по id чанка. Ей уходят путь,
 /// цепочка заголовков и текст; модель читает первые 512 токенов вместе с запросом.
 fn rerank_scores_of(
-    index: &Index,
+    view: &IndexView<'_>,
     reranker: &mut dyn Reranker,
     query: &str,
     gathered: &Gathered,
@@ -487,7 +526,9 @@ fn rerank_scores_of(
         .take(rerank_candidates)
         .map(|candidate| candidate.id)
         .collect();
-    let hits = load_hits(index, &ids).map_err(|error| RerankError::Rerank(error.to_string()))?;
+    let hits = view
+        .load_hits(&ids)
+        .map_err(|error| RerankError::Rerank(error.to_string()))?;
     if hits.is_empty() {
         return Ok(HashMap::new());
     }
@@ -623,11 +664,11 @@ fn below_threshold(
 const WEAK_LIMIT: usize = 3;
 
 /// Сворачивает кандидатов ниже порога в разделы и берёт лучшие по опоре — без загрузки текстов.
-fn fold_weak(index: &Index, below: &mut [Ranked]) -> Result<Vec<WeakHit>, SearchError> {
+fn fold_weak(view: &IndexView<'_>, below: &mut [Ranked]) -> Result<Vec<WeakHit>, SearchError> {
     if below.is_empty() {
         return Ok(Vec::new());
     }
-    load_documents(index, below)?;
+    load_documents(view, below)?;
     below.sort_by(|a, b| {
         anchor_of(b)
             .unwrap_or(0.0)
@@ -645,12 +686,8 @@ fn fold_weak(index: &Index, below: &mut [Ranked]) -> Result<Vec<WeakHit>, Search
         if !seen.insert((item.document_id, item.heading_chain.as_str())) {
             continue;
         }
-        let (first_line, last_line): (i64, i64) = index.conn().query_row(
-            "SELECT min(first_line), max(last_line) FROM chunks
-             WHERE document_id = ?1 AND heading_chain = ?2",
-            rusqlite::params![item.document_id, item.heading_chain],
-            |row| Ok((row.get(0)?, row.get(1)?)),
-        )?;
+        let (_, first_line, last_line) =
+            view.section_span(item.document_id, &item.heading_chain)?;
         weak.push(WeakHit {
             path: item.path.clone(),
             heading_chain: item.heading_chain.clone(),
@@ -668,21 +705,10 @@ fn anchor_of(item: &Ranked) -> Option<f32> {
 }
 
 /// Дописывает кускам документ, цепочку заголовков и номер: по ним идут свёртка и сигнал `l`.
-fn load_documents(index: &Index, ranked: &mut [Ranked]) -> Result<(), SearchError> {
-    let mut statement = index.conn().prepare_cached(
-        "SELECT c.document_id, d.path, c.heading_chain, c.ordinal
-         FROM chunks c JOIN documents d ON d.id = c.document_id WHERE c.id = ?1",
-    )?;
+/// Номер документа — номер вида (документы дельты со смещением).
+fn load_documents(view: &IndexView<'_>, ranked: &mut [Ranked]) -> Result<(), SearchError> {
     for item in ranked {
-        let (document_id, path, heading_chain, ordinal) =
-            statement.query_row([item.id], |row| {
-                Ok((
-                    row.get::<_, i64>(0)?,
-                    row.get::<_, String>(1)?,
-                    row.get::<_, String>(2)?,
-                    row.get::<_, i64>(3)?,
-                ))
-            })?;
+        let (document_id, path, heading_chain, ordinal) = view.chunk_document(item.id)?;
         item.document_id = document_id;
         item.path = path;
         item.heading_chain = heading_chain;
@@ -743,7 +769,7 @@ fn apply_links(ranked: &mut [Ranked], weight: f32, links: &mut LinkedDocuments<'
 /// кускам; результатов — `applied.results` разделов. Равные `S` — по `f`, пути документа и номеру
 /// куска.
 fn fold_sections(
-    index: &Index,
+    view: &IndexView<'_>,
     mut ranked: Vec<Ranked>,
     applied: &AppliedParams,
 ) -> Result<Vec<SearchHit>, SearchError> {
@@ -786,15 +812,12 @@ fn fold_sections(
     let mut hits = Vec::with_capacity(folded.len());
     for (score, best, found) in folded {
         let item = &ranked[best];
-        let mut hit = load_hits(index, &[item.id])?
+        let mut hit = view
+            .load_hits(&[item.id])?
             .pop()
             .ok_or_else(|| SearchError::ChunkNotFound(item.id.to_string()))?;
-        let (parts, first_line, last_line): (i64, i64, i64) = index.conn().query_row(
-            "SELECT count(*), min(first_line), max(last_line) FROM chunks
-             WHERE document_id = ?1 AND heading_chain = ?2",
-            rusqlite::params![item.document_id, item.heading_chain],
-            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
-        )?;
+        let (parts, first_line, last_line) =
+            view.section_span(item.document_id, &item.heading_chain)?;
         hit.first_line = first_line as usize;
         hit.last_line = last_line as usize;
         hit.score = score.min(1.0);
@@ -807,24 +830,6 @@ fn fold_sections(
     Ok(hits)
 }
 
-fn count_candidate_modules(
-    index: &Index,
-    ids: &[i64],
-) -> Result<BTreeMap<String, usize>, SearchError> {
-    if ids.is_empty() {
-        return Ok(BTreeMap::new());
-    }
-    let placeholders = vec!["?"; ids.len()].join(",");
-    let mut statement = index.conn().prepare(&format!(
-        "SELECT d.module, count(*) FROM chunks c JOIN documents d ON d.id = c.document_id \
-         WHERE c.id IN ({placeholders}) GROUP BY d.module"
-    ))?;
-    let rows = statement.query_map(params_from_iter(ids), |row| {
-        Ok((row.get(0)?, row.get::<_, i64>(1)? as usize))
-    })?;
-    Ok(rows.collect::<Result<_, _>>()?)
-}
-
 /// Диагностика первого этапа для бенча IDEA-06: полнотекстовый список, векторный, пул по `S0`.
 /// Использует те же операции, что `search`, до rerank, порога и свёртки.
 #[doc(hidden)]
@@ -834,13 +839,14 @@ pub fn candidate_trace(
     request: &SearchRequest,
     candidates: usize,
 ) -> Result<[Vec<SearchHit>; 3], SearchError> {
+    let view = IndexView::single(index);
     let plan = QueryPlan::build(index, &request.query)?;
-    let scope = Scope::build_with_paths(index, request, &plan.parsed.paths)?;
+    let scope = Scope::build_with_paths(&view, request, &plan.parsed.paths)?;
     let mut vector = query_vector.to_vec();
     normalize(&mut vector);
     let weights = ScoreWeights::default();
     let gathered = gather(
-        index,
+        &view,
         &scope,
         &plan,
         Some(&vector),
@@ -922,10 +928,11 @@ pub fn scored_pool(
     if index.stem_outdated()? {
         return Err(SearchError::FtsRebuilding);
     }
+    let view = IndexView::single(index);
     let plan = QueryPlan::build(index, &request.query)?;
-    let scope = Scope::build_with_paths(index, request, &plan.parsed.paths)?;
+    let scope = Scope::build_with_paths(&view, request, &plan.parsed.paths)?;
     let planned = settings.resolve(request, reranker.is_some());
-    if scope.chunk_count(index)? == 0 {
+    if view.chunk_count(&scope)? == 0 {
         return Ok(PoolDump {
             candidates: Vec::new(),
             rerank_error: None,
@@ -943,7 +950,7 @@ pub fn scored_pool(
     }
     normalize(&mut vector);
     let gathered = gather(
-        index,
+        &view,
         &scope,
         &plan,
         Some(&vector),
@@ -955,7 +962,7 @@ pub fn scored_pool(
     let mut rerank_scores = HashMap::new();
     if let Some(reranker) = reranker {
         match rerank_scores_of(
-            index,
+            &view,
             reranker,
             &plan.parsed.text,
             &gathered,
@@ -1017,14 +1024,22 @@ pub(super) fn top_by_score(scores: &HashMap<i64, f32>, limit: usize) -> Vec<i64>
 
 /// Чанки с документами; порядок — как в `ids`. Оценку проставляет вызывающий.
 pub(super) fn load_hits(index: &Index, ids: &[i64]) -> Result<Vec<SearchHit>, SearchError> {
+    load_hits_numbered(index, ids.iter().map(|&id| (id, id)))
+}
+
+/// То же по парам `(локальный номер, номер в ответе)`: у чанка дельты в ответе номер со смещением.
+fn load_hits_numbered(
+    index: &Index,
+    ids: impl IntoIterator<Item = (i64, i64)>,
+) -> Result<Vec<SearchHit>, SearchError> {
     let mut statement = index.conn().prepare_cached(
         "SELECT d.path, d.module, d.title, c.heading_chain, c.first_line, c.last_line, c.text,
                 d.hash, c.ordinal, c.embed_hash
          FROM chunks c JOIN documents d ON d.id = c.document_id WHERE c.id = ?1",
     )?;
-    let mut hits = Vec::with_capacity(ids.len());
-    for &id in ids {
-        let hit = statement.query_row([id], |row| {
+    let mut hits = Vec::new();
+    for (local, id) in ids {
+        let hit = statement.query_row([local], |row| {
             let path: String = row.get(0)?;
             let document_hash: String = row.get(7)?;
             let ordinal: i64 = row.get(8)?;
@@ -1059,17 +1074,9 @@ pub(super) fn load_hits(index: &Index, ids: &[i64]) -> Result<Vec<SearchHit>, Se
 }
 
 /// Текст ошибки неизвестного модуля со списком существующих (OQ-169).
-fn unknown_module(index: &Index, module: &str) -> Result<String, SearchError> {
-    let docs_root = index
-        .stored_layout()?
-        .map(|layout| layout.docs_root)
-        .unwrap_or_default();
-    let mut statement = index.conn().prepare("SELECT module, path FROM documents")?;
-    let docs = statement
-        .query_map([], |row| {
-            Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
-        })?
-        .collect::<Result<Vec<_>, _>>()?;
+fn unknown_module(catalog: &dyn Catalog, module: &str) -> Result<String, SearchError> {
+    let docs_root = catalog.docs_root()?;
+    let docs = catalog.documents()?;
     Ok(crate::doc_path::unknown_module_message(
         &docs_root, module, &docs,
     ))
@@ -1087,6 +1094,18 @@ impl Scope {
         Self::build_with_paths(index, request, &[])
     }
 
+    /// Область для запросов к индексу владельца вида: без путей, которых в виде нет или чью версию
+    /// даёт дельта (временная таблица `temp.wt_excluded`, `IndexView::worktree`).
+    fn excluding_wt(&self) -> Self {
+        Self {
+            clause: format!(
+                "({}) AND d.path NOT IN (SELECT path FROM temp.wt_excluded)",
+                self.clause
+            ),
+            params: self.params.clone(),
+        }
+    }
+
     /// Исключает из области документ по пути (от корня проекта) — агентский `like` без разделов
     /// исходного документа (ISS-26).
     pub(super) fn exclude_path(&mut self, path: &str) {
@@ -1098,7 +1117,7 @@ impl Scope {
     /// объединяются; пустой отбор — весь проект. Префиксы `path:` из запроса **сужают** этот отбор
     /// (пересечение, а не объединение): документ должен лежать под одним из префиксов.
     pub(super) fn build_with_paths(
-        index: &Index,
+        catalog: &dyn Catalog,
         request: &SearchRequest,
         paths: &[String],
     ) -> Result<Self, SearchError> {
@@ -1106,12 +1125,8 @@ impl Scope {
         let mut params = Vec::new();
 
         for module in &request.modules {
-            let known = index
-                .conn()
-                .prepare_cached("SELECT EXISTS(SELECT 1 FROM documents WHERE module = ?1)")?
-                .query_row([module], |row| row.get::<_, bool>(0))?;
-            if !known {
-                return Err(SearchError::InvalidParams(unknown_module(index, module)?));
+            if !catalog.has_module(module)? {
+                return Err(SearchError::InvalidParams(unknown_module(catalog, module)?));
             }
             params.push(Value::from(module.clone()));
         }
@@ -1125,28 +1140,22 @@ impl Scope {
         if !request.files.is_empty() {
             // Файл задаётся от корня документации или от корня проекта (OQ-169); в индексе путь —
             // от корня проекта.
-            let docs_root = index
-                .stored_layout()?
-                .map(|layout| layout.docs_root)
-                .unwrap_or_default();
+            let docs_root = catalog.docs_root()?;
             let mut stored_paths = Vec::new();
             for file in &request.files {
                 let mut found = None;
                 for candidate in crate::doc_path::stored_candidates(&docs_root, file) {
-                    let known = index
-                        .conn()
-                        .prepare_cached("SELECT EXISTS(SELECT 1 FROM documents WHERE path = ?1)")?
-                        .query_row([&candidate], |row| row.get::<_, bool>(0))?;
-                    if known {
+                    if catalog.has_path(&candidate)? {
                         found = Some(candidate);
                         break;
                     }
                 }
                 let Some(stored) = found else {
-                    let mut statement = index.conn().prepare("SELECT path FROM documents")?;
-                    let known = statement
-                        .query_map([], |row| row.get::<_, String>(0))?
-                        .collect::<Result<Vec<_>, _>>()?;
+                    let known: Vec<String> = catalog
+                        .documents()?
+                        .into_iter()
+                        .map(|(_, path)| path)
+                        .collect();
                     return Err(SearchError::InvalidParams(
                         crate::doc_path::unknown_file_message(
                             &docs_root,
@@ -1163,7 +1172,7 @@ impl Scope {
 
         if !request.paths.is_empty() {
             // Агентская область `in`: префиксы папок и файлов любой глубины, объединены между собой.
-            let stored = path_prefixes(index, &request.paths)?;
+            let stored = path_prefixes(catalog, &request.paths)?;
             let conditions =
                 vec!["(d.path = ? OR d.path LIKE ? ESCAPE '\\')"; stored.len()].join(" OR ");
             parts.push(format!("({conditions})"));
@@ -1179,7 +1188,7 @@ impl Scope {
             format!("({})", parts.join(" OR "))
         };
         if !paths.is_empty() {
-            let stored = path_prefixes(index, paths)?;
+            let stored = path_prefixes(catalog, paths)?;
             let conditions =
                 vec!["(d.path = ? OR d.path LIKE ? ESCAPE '\\')"; stored.len()].join(" OR ");
             clause = format!("{clause} AND ({conditions})");
@@ -1201,21 +1210,8 @@ impl Scope {
             .query_row(&sql, params_from_iter(&self.params), |row| row.get(0))?)
     }
 
-    /// Первые `limit` чанков по составному `bm25`. Слова запроса и текст чанков прошли один разбор.
-    fn text_candidates(
-        &self,
-        index: &Index,
-        match_query: &str,
-        limit: usize,
-    ) -> Result<Vec<i64>, SearchError> {
-        Ok(self
-            .text_scored(index, match_query, limit)?
-            .into_iter()
-            .map(|(id, _)| id)
-            .collect())
-    }
-
-    /// То же с сырым баллом `-bm25` (больше — лучше), по убыванию: вход сигнала `f`
+    /// Первые `limit` чанков по составному `bm25` с сырым баллом `-bm25` (больше — лучше), по
+    /// убыванию: вход сигнала `f`
     /// (`fulltext::f_signal`).
     pub(super) fn text_scored(
         &self,
@@ -1318,35 +1314,23 @@ fn escape_like(prefix: &str) -> String {
 /// Префиксы `path:` в виде путей индекса (от корня проекта). Префикс задаётся от корня документации
 /// или проекта, как у `files`; подходит тот вариант, под которым в индексе есть документ (сам файл
 /// или папка с документами). Путь, под которым документов нет, — `invalid_params` с подсказкой.
-fn path_prefixes(index: &Index, paths: &[String]) -> Result<Vec<String>, SearchError> {
-    let docs_root = index
-        .stored_layout()?
-        .map(|layout| layout.docs_root)
-        .unwrap_or_default();
+fn path_prefixes(catalog: &dyn Catalog, paths: &[String]) -> Result<Vec<String>, SearchError> {
+    let docs_root = catalog.docs_root()?;
     let mut found = Vec::new();
     for path in paths {
         let mut chosen = None;
         for candidate in crate::doc_path::stored_candidates(&docs_root, path) {
-            let known = index
-                .conn()
-                .prepare_cached(
-                    "SELECT EXISTS(SELECT 1 FROM documents
-                     WHERE path = ?1 OR path LIKE ?2 ESCAPE '\\')",
-                )?
-                .query_row(
-                    [candidate.clone(), format!("{}/%", escape_like(&candidate))],
-                    |row| row.get::<_, bool>(0),
-                )?;
-            if known {
+            if catalog.has_under(&candidate)? {
                 chosen = Some(candidate);
                 break;
             }
         }
         let Some(stored) = chosen else {
-            let mut statement = index.conn().prepare("SELECT path FROM documents")?;
-            let known = statement
-                .query_map([], |row| row.get::<_, String>(0))?
-                .collect::<Result<Vec<_>, _>>()?;
+            let known: Vec<String> = catalog
+                .documents()?
+                .into_iter()
+                .map(|(_, path)| path)
+                .collect();
             return Err(SearchError::InvalidParams(format!(
                 "path:{path} — в индексе нет документов под этим путём. {}",
                 crate::doc_path::unknown_file_message(

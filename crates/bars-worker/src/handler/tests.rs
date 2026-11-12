@@ -1053,6 +1053,7 @@ mod links;
 mod model_wait;
 mod new_topics;
 mod window;
+mod worktree_search;
 mod worktrees;
 
 /// ISS-28: заголовки приклеенных разделов видны в результате, а список `other headers:` и

@@ -46,8 +46,22 @@ impl WorkerHandler {
                 )
             })?,
         };
-        let project = self.usable(&params.target)?;
+        let (project, view) = self.usable_view(&params.target)?;
         let docs_root = self.settings(&project)?.docs_root;
+        // По виду worktree папка перечисляется по диску W: индекс и дельта не нужны.
+        if let super::ViewSelector::Worktree(item) = &view {
+            let (root, disk_root) = (item.view_root.clone(), docs_root.clone());
+            let docs = tokio::task::spawn_blocking(move || {
+                super::worktree_view::disk_documents(&root, &disk_root)
+            })
+            .await
+            .map_err(internal)??;
+            let listing = list_folder(&docs, &docs_root, &params.path, descending, offset)?;
+            return Ok(ReadOutput {
+                folder: Some(listing),
+                ..ReadOutput::default()
+            });
+        }
         let pending = self.worker.status(&project).map_err(worker_error)?.pending;
         let docs = if index_path(&project).exists() {
             let gate = self

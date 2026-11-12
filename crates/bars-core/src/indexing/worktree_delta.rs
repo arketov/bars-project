@@ -732,5 +732,57 @@ pub fn stored_sync(delta: &Index) -> Result<(Option<String>, Option<u64>), Stora
     ))
 }
 
+/// Пути владельца, которых поиск по виду не использует (`worktrees.md`, «Допустимые документы
+/// владельца»).
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct ExcludedPaths {
+    /// Документы владельца, которых в виде нет, чью версию вида даёт дельта или где владелец успел
+    /// измениться, а дельта ещё не пересчитана; по возрастанию пути.
+    pub paths: Vec<String>,
+    /// Документы, версия которых в виде сейчас не видна или устарела: идёт пересчёт дельты.
+    pub pending: usize,
+    /// Документов в дельте.
+    pub delta_documents: usize,
+}
+
+/// Исключённые пути из трёх таблиц: `documents` владельца, `wt_files` и `documents` дельты.
+/// Документ владельца допустим в виде, если его `path` есть в `wt_files`, `hash` равен хешу вида и
+/// `path` отсутствует в `documents` дельты.
+pub fn excluded_paths(owner: &Index, delta: &Index) -> Result<ExcludedPaths, StorageError> {
+    let view: HashMap<String, String> = view_files(delta)?
+        .into_iter()
+        .map(|document| (document.path, document.hash))
+        .collect();
+    let in_delta: HashMap<String, String> = delta
+        .documents()?
+        .into_iter()
+        .map(|document| (document.path, document.hash))
+        .collect();
+    let mut excluded = ExcludedPaths {
+        delta_documents: in_delta.len(),
+        ..ExcludedPaths::default()
+    };
+    for document in owner.documents()? {
+        let seen = view.get(&document.path);
+        let admitted = seen == Some(&document.hash) && !in_delta.contains_key(&document.path);
+        if admitted {
+            continue;
+        }
+        // Версии вида владелец не отдаёт и дельта ещё не записала: документ временно не виден.
+        if seen.is_some_and(|hash| *hash != document.hash) && !in_delta.contains_key(&document.path)
+        {
+            excluded.pending += 1;
+        }
+        excluded.paths.push(document.path);
+    }
+    // Дельта хранит прежнюю версию документа: вид уже изменился, пересчёт не закончен.
+    excluded.pending += in_delta
+        .iter()
+        .filter(|(path, hash)| view.get(*path) != Some(*hash))
+        .count();
+    excluded.paths.sort_unstable();
+    Ok(excluded)
+}
+
 #[cfg(test)]
 mod tests;

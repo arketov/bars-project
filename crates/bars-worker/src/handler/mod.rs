@@ -16,6 +16,7 @@ mod query_slice;
 mod session_info;
 mod text_search;
 mod topics;
+mod worktree_view;
 
 #[cfg(test)]
 mod tests;
@@ -28,7 +29,8 @@ use bars_core::indexing::walk::read_utf8_path;
 use bars_core::models::Reranker;
 use bars_core::outline::{OutlineQuery, Under, outline};
 use bars_core::search::{
-    DuplicatesRequest, SearchRequest, SimilarRequest, duplicates, search_with_signals, similar,
+    DuplicatesRequest, IndexView, SearchRequest, SimilarRequest, duplicates, search_in_view,
+    similar,
 };
 use bars_core::settings::Settings;
 use bars_core::storage::{Index, index_path};
@@ -92,6 +94,8 @@ pub struct WorkerHandler {
     physical_similarity: PhysicalSimilarityCache,
     document_representations: query_slice::RepresentationCache,
     graph_cache: std::sync::Arc<graph_cache::GraphCache>,
+    /// Исключённые пути поиска по worktree: пересчитываются, когда изменился владелец или дельта.
+    wt_excluded: worktree_view::ExcludedCache,
 }
 
 type PhysicalSimilarityCache = std::sync::Arc<
@@ -122,6 +126,7 @@ impl WorkerHandler {
             physical_similarity: Default::default(),
             document_representations: Default::default(),
             graph_cache,
+            wt_excluded: Default::default(),
         }
     }
 
@@ -225,15 +230,7 @@ impl WorkerHandler {
 
     /// Проект вызова, папка которого на месте.
     fn usable(&self, target: &Target) -> Result<PathBuf, RpcError> {
-        let path = self.resolve(target)?;
-        let status = self.worker.status(&path).map_err(worker_error)?;
-        if status.state == ProjectState::Unavailable {
-            return Err(RpcError::bars(
-                ErrorKind::ProjectUnavailable,
-                format!("папки проекта {} нет на диске", path.display()),
-            ));
-        }
-        Ok(path)
+        self.usable_view(target).map(|(path, _)| path)
     }
 
     fn settings(&self, project: &Path) -> Result<Settings, RpcError> {
@@ -244,7 +241,10 @@ impl WorkerHandler {
 
     /// Чанки, близкие к чанку из выдачи поиска, по готовым векторам: модели не нужны.
     async fn similar(&self, params: SimilarParams) -> Result<SimilarOutput, RpcError> {
-        let project = self.usable(&params.target)?;
+        let (project, view) = self.usable_view(&params.target)?;
+        if let ViewSelector::Worktree(item) = &view {
+            return Err(worktree_view::worktree_unsupported(&item.name, "similar"));
+        }
         let status = self.worker.status(&project).map_err(worker_error)?;
         if status.state == ProjectState::ReindexRequired {
             return Err(errors::reindex_required());
@@ -284,7 +284,10 @@ impl WorkerHandler {
         &self,
         params: bars_protocol::LikeParams,
     ) -> Result<bars_protocol::LikeOutput, RpcError> {
-        let project = self.usable(&params.target)?;
+        let (project, view) = self.usable_view(&params.target)?;
+        if let ViewSelector::Worktree(item) = &view {
+            return Err(worktree_view::worktree_unsupported(&item.name, "like"));
+        }
         let status = self.worker.status(&project).map_err(worker_error)?;
         if status.state == ProjectState::ReindexRequired {
             return Err(errors::reindex_required());
@@ -361,7 +364,13 @@ impl WorkerHandler {
 
     /// Повторы в области проекта по готовым текстам и векторам индекса: модели не нужны.
     async fn duplicates(&self, params: DuplicatesParams) -> Result<DuplicatesOutput, RpcError> {
-        let project = self.usable(&params.target)?;
+        let (project, view) = self.usable_view(&params.target)?;
+        if let ViewSelector::Worktree(item) = &view {
+            return Err(worktree_view::worktree_unsupported(
+                &item.name,
+                "duplicates",
+            ));
+        }
         let status = self.worker.status(&project).map_err(worker_error)?;
         if status.state == ProjectState::ReindexRequired {
             return Err(errors::reindex_required());
@@ -424,16 +433,21 @@ impl WorkerHandler {
         ),
         RpcError,
     > {
-        let project = self.usable(&params.target)?;
+        let (project, view) = self.usable_view(&params.target)?;
         let status = self.worker.status(&project).map_err(worker_error)?;
         if status.state == ProjectState::ReindexRequired {
             return Err(errors::reindex_required());
         }
         // Поиск с `wt` или из cwd в worktree — первое обращение к виду: дельта строится лениво.
-        // Сам поиск по виду — шаг 6.3.3, до него ответ идёт по основному checkout.
-        if let Ok((owner, ViewSelector::Worktree(item))) = self.resolve_view(&params.target) {
-            self.worker.ensure_worktree_delta(&owner, &item.name);
-        }
+        // Дельта готова — владелец и дельта в одном поиске; строится или упала — ответ по владельцу
+        // с пометкой (`worktrees.md`, «Поиск по worktree»).
+        let wt_plan = match &view {
+            ViewSelector::Worktree(item) => Some(self.plan_worktree_search(&project, item)),
+            ViewSelector::Main => None,
+        };
+        let wt_merge = wt_plan.as_ref().filter(|plan| plan.merge).map(|plan| plan.info.name.clone());
+        // Графа у вида нет: связанные источники по слиянию не добавляются.
+        let graph_budgets = graph_budgets.filter(|_| wt_merge.is_none());
         let mut settings = self.settings(&project)?;
         // Проверка знаний требует rerank независимо от переключателя обычного поиска.
         if require_rerank {
@@ -507,6 +521,7 @@ impl WorkerHandler {
             files: request.files.clone(),
             paths: request.paths.clone(),
             excluded_projects: self.worker.nested_projects(&project, false),
+            worktree: None,
         };
         // Rerank-модель, пока она скачивается, поиск не ждёт: выдача идёт без неё. Ожидание идёт
         // до замка проекта, чтобы не держать его и не задерживать подмену индекса.
@@ -547,7 +562,9 @@ impl WorkerHandler {
         // «Новые темы»: допуск и область определяются до поиска, чтобы очистка списка во время
         // поиска отклонила запоздавшее наблюдение. Диагностика и CLI спроса не создают.
         let context = crate::new_topics::current_context();
+        // Поиск по worktree спрос не записывает: выдача по виду неполна по определению.
         let collecting = !params.diagnostic
+            && wt_plan.is_none()
             && context.purpose == crate::new_topics::Purpose::Request
             && matches!(
                 context.origin,
@@ -579,9 +596,45 @@ impl WorkerHandler {
         let gate = project_gate.clone().read_owned().await;
         let graph_requested = graph_budgets.is_some();
         let datasets = self.graph_cache.clone();
+        let excluded_cache = self.wt_excluded.clone();
         let response = tokio::task::spawn_blocking(move || {
             let _gate = gate;
             let index = Index::open_read_only(&index_path(&project))?;
+            // Вид worktree: индекс владельца без исключённых путей и дельта. Не открылась дельта —
+            // ответ по владельцу с пометкой об ошибке.
+            let mut wt_open_error = None;
+            let delta = wt_merge.as_deref().and_then(|name| {
+                match Index::open_read_only(&bars_core::indexing::worktree_delta::delta_path(
+                    &project, name,
+                )) {
+                    Ok(delta) => Some(delta),
+                    Err(error) => {
+                        wt_open_error = Some(error.to_string());
+                        None
+                    }
+                }
+            });
+            let mut wt_stats = None;
+            let view = match (&delta, wt_merge.as_deref()) {
+                (Some(delta), Some(name)) => {
+                    match worktree_view::excluded_for(&excluded_cache, &project, name, &index, delta)
+                        .map_err(bars_core::search::SearchError::from)
+                        .and_then(|excluded| {
+                            IndexView::worktree(&index, delta, &excluded.paths)
+                                .map(|view| (view, (excluded.pending, excluded.delta_documents)))
+                        }) {
+                        Ok((view, stats)) => {
+                            wt_stats = Some(stats);
+                            view
+                        }
+                        Err(error) => {
+                            wt_open_error = Some(error.to_string());
+                            IndexView::single(&index)
+                        }
+                    }
+                }
+                _ => IndexView::single(&index),
+            };
             // Нет rerank-модели или она не отработала: выдача идёт без неё, причина — в ответе.
             let reranker = reranker.as_mut().map(|model| model as &mut dyn Reranker);
             let mut related = None;
@@ -644,26 +697,28 @@ impl WorkerHandler {
                                 Err(error) => Err(error),
                             }
                         };
-                        search_with_signals(
-                            &index,
+                        search_in_view(
+                            &view,
                             &mut embedder,
                             reranker,
                             &settings.search,
                             &request,
                             Some(&mut expand),
                             true,
+                            None,
                         )
                     }
                     Err(error) => {
                         fallback = Some(error.to_string());
-                        search_with_signals(
-                            &index,
+                        search_in_view(
+                            &view,
                             &mut embedder,
                             reranker,
                             &settings.search,
                             &request,
                             None,
                             true,
+                            None,
                         )
                     }
                 }
@@ -674,22 +729,23 @@ impl WorkerHandler {
                             .into(),
                     );
                 }
-                search_with_signals(
-                    &index,
+                search_in_view(
+                    &view,
                     &mut embedder,
                     reranker,
                     &settings.search,
                     &request,
                     None,
                     semantic,
+                    None,
                 )
             };
-            result.map(|result| (result, related, fallback))
+            result.map(|result| (result, related, fallback, wt_stats, wt_open_error))
         })
         .await
         .map_err(internal)?
         .map_err(search_error)?;
-        let (mut response, related, fallback) = response;
+        let (mut response, related, fallback, wt_stats, wt_open_error) = response;
         if response.rerank_error.is_some() {
             history::applied_field(
                 "rerank_fallback_reason",
@@ -711,6 +767,7 @@ impl WorkerHandler {
         }
         let mut applied = applied(response.applied);
         applied.scope = scope;
+        applied.scope.worktree = wt_plan.map(|plan| plan.finish(wt_stats, wt_open_error));
         // Слова запроса нужны прокси для отрывков и сортировки «other headers» в ступенчатой выдаче.
         let query_words: Vec<String> = response
             .understood
@@ -782,9 +839,11 @@ impl WorkerHandler {
 
     /// Документ по пути из вызова: текст и корень проекта для заголовка.
     fn document(&self, target: &Target, path: &str) -> Result<(String, Settings), RpcError> {
-        let project = self.usable(target)?;
+        let (project, view) = self.usable_view(target)?;
         let settings = self.settings(&project)?;
-        let file = resolve_doc_path(&project, Path::new(&settings.docs_root), path)
+        // По виду worktree документ читается с диска W: допуск путей — от корня вида.
+        let root = worktree_view::view_root(&project, &view);
+        let file = resolve_doc_path(&root, Path::new(&settings.docs_root), path)
             .map_err(doc_path_error)?;
         history::applied_field("path", serde_json::json!(file.display().to_string()));
         history::applied_field("range", serde_json::json!("whole_document"));
@@ -1663,7 +1722,15 @@ impl WorkerHandler {
         }
         // Удаление ждёт запросы, уже открывшие индекс или настройки; новые ждут очистки.
         let _request = self.worker.request_guard().await;
-        match call {
+        // Граф и ссылки по worktree отвечают по основному checkout: в ответе строка пометки.
+        let owner_only_note = match &call {
+            Call::GraphSearch(params) => self.owner_only_note_for(&params.search.target),
+            Call::GraphQuery(params) => self.owner_only_note_for(&params.target),
+            Call::GraphStatus(params) => self.owner_only_note_for(&params.target),
+            Call::DiskLinks(params) => self.owner_only_note_for(&params.target),
+            _ => None,
+        };
+        let result = match call {
             Call::GraphSearch(params) => self
                 .graph_search(params)
                 .await
@@ -1876,7 +1943,8 @@ impl WorkerHandler {
                 self.autostart_get().map(|out| output_value(&out))
             }
             Call::AutostartSet(params) => self.autostart_set(params).map(|out| output_value(&out)),
-        }
+        };
+        worktree_view::with_note(result, owner_only_note)
     }
 }
 

@@ -234,6 +234,33 @@ pub struct SearchScope {
     /// Вложенные проекты, чья область исключена из индекса этого проекта (Т-7, Т-15, OQ-256).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub excluded_projects: Vec<NestedProjectInfo>,
+    /// Вид worktree, по которому искали (`docs/features/projects/worktrees.md`, «Поиск по
+    /// worktree»); нет — искали по основному checkout.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub worktree: Option<SearchWorktree>,
+}
+
+/// Вид worktree в `applied.scope` поиска.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SearchWorktree {
+    /// Имя записи `.git/worktrees/<имя>`.
+    pub name: String,
+    /// `None` — `detached`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub branch: Option<String>,
+    /// Состояние дельты на момент ответа: `ready` — слияние владельца и дельты; `building` и
+    /// `error` — ответ по основному checkout с пометкой в `note`.
+    pub state: DeltaState,
+    /// Сколько документов в дельте.
+    #[serde(default)]
+    pub delta_documents: u32,
+    /// Сколько документов вида пересчитывается и сейчас не видны поиску.
+    #[serde(default)]
+    pub pending: u32,
+    /// Строка пометки над результатами («индекс строится…», «ошибка…», «N документов
+    /// пересчитываются»).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub note: Option<String>,
 }
 
 /// Вложенный зарегистрированный проект, область которого исключена из индекса внешнего.
@@ -2034,6 +2061,7 @@ mod tests {
                     files: vec![],
                     paths: vec![],
                     excluded_projects: vec![],
+                    worktree: None,
                 },
                 weights: ScoreWeights {
                     cosine: 0.0,

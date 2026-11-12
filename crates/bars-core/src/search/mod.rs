@@ -15,9 +15,9 @@ pub use duplicates::{
     duplicates_from_snapshot, duplicates_snapshot,
 };
 pub use hybrid::{
-    HitSignals, LinkedDocuments, PoolCandidate, PoolDump, SearchError, SearchHit, SearchResponse,
-    WeakHit, candidate_trace, scored_pool, search, search_expanded, search_with_links,
-    search_with_signals,
+    DELTA_ID_OFFSET, HitSignals, IndexView, LinkedDocuments, PoolCandidate, PoolDump, SearchError,
+    SearchHit, SearchResponse, WeakHit, candidate_trace, scored_pool, search, search_expanded,
+    search_in_view, search_with_links, search_with_signals,
 };
 pub use operators::ParsedQuery;
 pub use params::{AppliedParams, ScoreKind, ScoreWeights, SearchRequest, SearchSettings};
