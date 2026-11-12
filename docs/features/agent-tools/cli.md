@@ -12,7 +12,8 @@ title: Команды bars-cli
 
 GraphRAG: `relations`, `paths`, `impact`, `context`, `explore`, `graph show/status/build/cancel`; чтение использует общий DTO, `--input` — GraphRequest JSON с переопределением явными флагами. Примеры: `paths --from Т-1 --to Т-3`, `context "устройство индекса" --task-profile investigation`, `explore --whole-scope`. `graph build` не переиндексирует embeddings; accepted/job ID не означает завершения, отмена подтверждается статусом. Search: `--mode hybrid|mix|graph`, в mix — `--no-related` и `--related-budget N`. Без mode прежний поиск/ответ. Точные поля/открытая приёмка — [GraphRAG v1](../graphrag/tools.md#фактический-контракт-v1).
 
-- Проект по умолчанию — ближайшая к текущей папке зарегистрированная папка; `--project <путь>` задаёт его явно.
+- Проект по умолчанию — ближайшая к текущей папке зарегистрированная папка; `--project <путь, имя или главный/путь>` задаёт его явно ([подпроекты](../projects/subprojects.md)).
+- `--wt <имя|путь|.>` есть у каждой команды, у которой есть `--project` (`search`, `read`, `outline`, `status`, `reindex`, команды графа и аудитов): git worktree проекта, `.` — основной checkout, по умолчанию — worktree текущей папки; `reindex --full --wt` не принимается ([git worktree как вид проекта](../projects/worktrees.md); проект, реализации нет).
 - Вывод по умолчанию — для человека; `--json` — тот же ответ, что у MCP-инструмента.
 - Граф и поиск с `--mode`: общий с MCP текстовый рендер, факты с путём и строками основания, цитаты до 300 знаков, ответ до 16 000 знаков. При ограничении — `truncated:` и продолжение курсором либо совет сузить область; в `mix` основные блоки `RESULT` отделены от `RELATED`. `--json` сохраняет полный DTO в прежних байтовых пределах.
 - Код выхода: `0` — успех, `1` — ошибка в запросе, `2` — воркер недоступен, `3` — нужна переиндексация (Т-25). Соответствие ошибкам канала — [architecture/protocol.md](../../architecture/protocol.md).
@@ -26,7 +27,7 @@ GraphRAG: `relations`, `paths`, `impact`, `context`, `explore`, `graph show/stat
 | `bars-cli duplicates [--module M]… [--limit N]` | аудит дублей проекта: точные, близкие, частичные и смысловые повторы | `bars_audit` (`kind=duplicates`) |
 | `bars-cli outline <путь> [--levels 2,3] [--under "A/B" \| --under-line N]` | структура документа | `bars_read` (`view=outline`, Т-26) |
 | `bars-cli read <путь> [--lines 98-104 \| --under "A/B"]` | документ целиком или часть с исходными номерами строк | `bars_read` |
-| `bars-cli projects` | проекты и модули | `bars_status` |
+| `bars-cli projects [--filter <текст>]` | проекты и модули; `--filter` — подстрока без учёта регистра по имени, составному имени и пути (Т-50, проект, реализации нет), несовместим с `--project` | `bars_status` (`filter`) |
 | `bars-cli status` | состояние индекса | `bars_status` |
 | `bars-cli reindex [--full] [--accept-model-change]` | переиндексация; `--accept-model-change` — согласие пользователя после смены модели (Т-25, [architecture/protocol.md](../../architecture/protocol.md)) | у MCP нет: `refresh=true` у `bars_status`; у окна и CLI — `bars-cli reindex` |
 | `bars-cli register [путь] [--root docs\|all]` | регистрация проекта (Т-6); `--root` выбирает корень документации нового проекта — `docs` или `all` (вся папка), без флага `docs/`, если она есть, иначе вся папка ([features/projects/projects.md](../projects/projects.md), Т-7) | пункт «Добавить проект» в окне |
