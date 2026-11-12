@@ -38,6 +38,18 @@ pub struct Target {
     /// Абсолютный путь к корню проекта или однозначное имя.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub project: Option<String>,
+    /// Вид проекта: `"."` — основной checkout, имя `.git/worktrees/<имя>` или абсолютный путь
+    /// worktree; пустая строка равна отсутствию. Без значения вид берётся из `cwd`
+    /// (`docs/features/projects/worktrees.md`, «Параметр wt»).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wt: Option<String>,
+}
+
+impl Target {
+    /// Значение `wt` без пустой строки.
+    pub fn wt(&self) -> Option<&str> {
+        self.wt.as_deref().map(str::trim).filter(|v| !v.is_empty())
+    }
 }
 
 // --- hello ---
@@ -655,6 +667,19 @@ pub struct ProjectInfo {
     /// Обход автопоиска этого проекта оборван пределом.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub discovery_truncated: bool,
+    /// Worktree проекта, совпавшие с `filter` (Т-50, `matched_by: worktree`); без фильтра пусто.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub matched_worktrees: Vec<WorktreeMatch>,
+}
+
+/// Worktree, по которому фильтр нашёл проект-владельца.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct WorktreeMatch {
+    pub name: String,
+    pub path: String,
+    /// `None` — `detached`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub branch: Option<String>,
 }
 
 /// Прямой подпроект в ответе `projects` (Т-49).
@@ -733,6 +758,65 @@ pub struct StatusOutput {
     pub watching: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub graph: Option<crate::GraphStatus>,
+    /// Живые worktree проекта-владельца (часть WORKTREES, `docs/features/projects/worktrees.md`).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub worktrees: Vec<WorktreeStatus>,
+}
+
+/// Состояние дельты worktree.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DeltaState {
+    /// Дельты нет: к worktree не обращались.
+    None,
+    Building,
+    Ready,
+    Error,
+}
+
+/// Дельта индекса worktree в ответе `status`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct WorktreeDeltaStatus {
+    pub state: DeltaState,
+    /// Сколько документов в дельте (отличающихся от владельца).
+    #[serde(default)]
+    pub documents: u32,
+    /// Ход первого построения: `done` из `total`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub done: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total: Option<u32>,
+    /// Сколько путей пересчитывается.
+    #[serde(default)]
+    pub pending: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+}
+
+/// Живой worktree проекта-владельца (структура `WorktreeStatus` спецификации).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct WorktreeStatus {
+    /// Имя записи `.git/worktrees/<имя>`: то, что агент пишет в `wt`.
+    pub name: String,
+    /// Корень рабочей копии W.
+    pub path: String,
+    /// `None` — `detached`.
+    pub branch: Option<String>,
+    /// Причина блокировки git (может быть пустой); `None` — не заблокирован.
+    pub locked: Option<String>,
+    pub delta: WorktreeDeltaStatus,
+    /// Это worktree сессии вызова.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub current: bool,
+}
+
+/// Данные для ошибки `worktree_not_found`: один worktree проекта.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct WorktreeBrief {
+    pub name: String,
+    pub path: String,
+    pub branch: Option<String>,
+    pub locked: Option<String>,
 }
 
 // --- reindex ---
@@ -1573,6 +1657,7 @@ mod tests {
         assert!(call.window_only());
         assert!(!call.allowed_for(ClientKind::Cli));
         assert!(!call.allowed_for(ClientKind::Mcp));
+        wt: None,
         let missing = Request::new(
             Id::Number(2),
             "project_delete",
@@ -1644,6 +1729,7 @@ mod tests {
         AutostartGet(AutostartGetParams),
         AutostartSet(AutostartSetParams)
     );
+    wt: None,
 
     #[test]
     fn every_method_roundtrips_through_a_request() {

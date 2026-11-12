@@ -98,6 +98,7 @@ async fn mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion() {
     let explicit = Target {
         cwd: "unrelated".into(),
         project: Some(root.display().to_string()),
+        wt: None,
     };
     a.call(&ReadParams {
         lines: None,
@@ -114,6 +115,7 @@ async fn mcp_statistics_real_ipc_sessions_projects_errors_and_cli_exclusion() {
         target: Target {
             cwd: "unrelated".into(),
             project: None,
+            wt: None,
         },
     })
     .await
@@ -212,6 +214,7 @@ fn target(cwd: &Path) -> Target {
     Target {
         cwd: cwd.display().to_string(),
         project: None,
+        wt: None,
     }
 }
 
@@ -520,6 +523,7 @@ async fn explicit_project_by_name_and_wrong_calls() {
         target: Target {
             cwd: elsewhere.display().to_string(),
             project: Some("proj".into()),
+            wt: None,
         },
         path: path.into(),
     };
@@ -553,6 +557,7 @@ async fn explicit_project_by_name_and_wrong_calls() {
             target: Target {
                 cwd: elsewhere.display().to_string(),
                 project: Some("нет-такого".into()),
+                wt: None,
             },
             path: "guide.md".into(),
         })
@@ -1048,6 +1053,7 @@ mod links;
 mod model_wait;
 mod new_topics;
 mod window;
+mod worktrees;
 
 /// ISS-28: заголовки приклеенных разделов видны в результате, а список `other headers:` и
 /// строки в блоках кода в них не попадают.

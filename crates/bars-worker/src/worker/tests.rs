@@ -22,6 +22,7 @@ mod graph;
 mod operations;
 mod shutdown;
 mod subprojects;
+mod worktrees;
 
 struct Env {
     home: TempDir,

@@ -46,14 +46,17 @@ use bars_protocol::{
     RpcError, RunningJob, SavedOutput, ScoreKind, SearchHit, SearchOutput, SearchParams,
     SecretOutput, SecretSetParams, SecretStatusParams, SessionStartParams, SetDocsRootParams,
     SettingsOutput, SettingsSaveParams, SimilarOutput, SimilarParams, StatusOutput, StatusParams,
-    Target, TreeDocument, TreeOutput, TreeParams, UninstallOutput, UninstallParams,
-    UnregisterOutput, UnregisterParams, output_value,
+    DeltaState, Target, TreeDocument, TreeOutput, TreeParams, UninstallOutput, UninstallParams,
+    UnregisterOutput, UnregisterParams, WorktreeDeltaStatus, WorktreeStatus, output_value,
 };
 use serde_json::Value;
 
 use crate::clients::{self, InstallEnv};
 use crate::settings_io::{self, SaveError};
-use crate::worker::{JobKind, Priority, ProjectSnapshot, Readiness, Worker, index_token, rfc3339};
+use crate::worker::{
+    JobKind, Priority, ProjectSnapshot, Readiness, ViewSelector, Worker, WtSelector, WtSource,
+    index_token, rfc3339,
+};
 use errors::{doc_path_error, outline_error, read_error, search_error, worker_error};
 
 /// Сколько поиск ждёт загрузки обеих встроенных моделей в память вместе (ISS-105). Замер: bge-m3
@@ -143,22 +146,69 @@ impl WorkerHandler {
         &self.worker
     }
 
-    /// Проект вызова: явный `project` или ближайший к `cwd` зарегистрированный (Т-15).
+    /// Проект вызова: явный `project` или ближайший к `cwd` зарегистрированный (Т-15). Вид
+    /// (`wt`) здесь проверяется, но не возвращается: поиск и чтение по виду — шаги 6.3.x.
     fn resolve(&self, target: &Target) -> Result<PathBuf, RpcError> {
+        self.resolve_view(target).map(|(path, _)| path)
+    }
+
+    /// Проект и вид вызова (`docs/features/projects/worktrees.md`, «Разрешение цели вызова»):
+    /// `wt="."` — основной checkout; `wt` — имя или путь worktree проекта (нет такого —
+    /// `worktree_not_found` со списком); без `wt` и при `cwd` в живом worktree владельца-проекта —
+    /// этот worktree. Явный `project`, не равный владельцу копии, неявного вида не даёт.
+    fn resolve_view(&self, target: &Target) -> Result<(PathBuf, ViewSelector), RpcError> {
+        let wanted = target.wt();
+        let cwd_hit = (target.project.is_none() || wanted.is_none())
+            .then(|| self.worker.resolve_cwd(Path::new(&target.cwd)))
+            .flatten();
         let path = if let Some(selector) = &target.project {
             self.worker.resolve(selector).map_err(worker_error)?
         } else {
-            self.worker
-            .project_for_cwd(Path::new(&target.cwd))
-            .ok_or_else(|| {
-                RpcError::bars(
-                    ErrorKind::ProjectNotFound,
-                    format!(
-                        "для папки {} нет зарегистрированного проекта: bars-cli register <папка проекта>",
-                        target.cwd
-                    ),
-                )
-            })?
+            cwd_hit
+                .as_ref()
+                .map(|(path, _)| path.clone())
+                .ok_or_else(|| {
+                    RpcError::bars(
+                        ErrorKind::ProjectNotFound,
+                        format!(
+                            "для папки {} нет зарегистрированного проекта: bars-cli register <папка проекта>",
+                            target.cwd
+                        ),
+                    )
+                })?
+        };
+        let (view, source) = match wanted {
+            Some(".") => (ViewSelector::Main, WtSource::Param),
+            Some(value) => {
+                let found = self
+                    .worker
+                    .find_worktree(&path, WtSelector::parse(value))
+                    .map_err(|available| {
+                        let name = self
+                            .worker
+                            .project_metadata(&path)
+                            .map_or_else(|| path.display().to_string(), |(name, _)| name);
+                        errors::worktree_not_found(&name, value, &available)
+                    })?;
+                (ViewSelector::Worktree(found), WtSource::Param)
+            }
+            None => match cwd_hit.filter(|(owner, _)| *owner == path) {
+                Some((_, Some(reference))) => {
+                    let found = self
+                        .worker
+                        .find_worktree(&path, WtSelector::Name(&reference.name))
+                        .unwrap_or_else(|_| bars_core::worktree::LinkedWorktree {
+                            name: reference.name.clone(),
+                            admin_dir: reference.admin_dir.clone(),
+                            path: reference.path.clone(),
+                            view_root: reference.view_root.clone(),
+                            branch: None,
+                            locked: None,
+                        });
+                    (ViewSelector::Worktree(found), WtSource::Cwd)
+                }
+                _ => (ViewSelector::Main, WtSource::Main),
+            },
         };
         history::applied_field(
             "resolved_project",
@@ -168,7 +218,9 @@ impl WorkerHandler {
             "resolved_project_name",
             serde_json::json!(self.worker.project_metadata(&path).map(|(name, _)| name)),
         );
-        Ok(path)
+        history::applied_field("resolved_wt", serde_json::json!(view.label()));
+        history::applied_field("wt_source", serde_json::json!(source.name()));
+        Ok((path, view))
     }
 
     /// Проект вызова, папка которого на месте.
@@ -902,7 +954,11 @@ impl WorkerHandler {
         };
         let mut projects = Vec::with_capacity(order.len());
         for index in order {
-            projects.push(self.project_info(&all[index], &all).await);
+            let mut info = self.project_info(&all[index], &all).await;
+            if let Some(text) = &filter {
+                info.matched_worktrees = project_filter::worktree_matches(&all[index], text);
+            }
+            projects.push(info);
         }
         Ok(ProjectsOutput {
             projects,
@@ -978,6 +1034,7 @@ impl WorkerHandler {
             discovered: snapshot.discovered,
             subprojects,
             discovery_truncated: snapshot.discovery_truncated,
+            matched_worktrees: Vec::new(),
         }
     }
 
@@ -1028,8 +1085,44 @@ impl WorkerHandler {
     }
 
     fn status(&self, params: StatusParams) -> Result<StatusOutput, RpcError> {
-        let project = self.resolve(&params.target)?;
+        let (project, view) = self.resolve_view(&params.target)?;
         let status = self.worker.status(&project).map_err(worker_error)?;
+        // Worktree сессии: `cwd` внутри живого worktree этого проекта.
+        let session = self
+            .worker
+            .resolve_cwd(Path::new(&params.target.cwd))
+            .filter(|(owner, _)| *owner == project)
+            .and_then(|(_, reference)| reference)
+            .map(|reference| reference.name);
+        // С явным `wt` — только этот worktree; без него и с `wt="."` — все живые.
+        let only = match (&view, params.target.wt()) {
+            (ViewSelector::Worktree(item), Some(value)) if value != "." => {
+                Some(item.name.clone())
+            }
+            _ => None,
+        };
+        let worktrees = self
+            .worker
+            .linked_worktrees(&project)
+            .into_iter()
+            .filter(|item| only.as_ref().is_none_or(|name| *name == item.name))
+            .map(|item| WorktreeStatus {
+                current: session.as_deref() == Some(item.name.as_str()),
+                name: item.name,
+                path: item.path.display().to_string(),
+                branch: item.branch,
+                locked: item.locked,
+                // Дельта — шаг 6.3.2: до него у всех worktree «дельты нет».
+                delta: WorktreeDeltaStatus {
+                    state: DeltaState::None,
+                    documents: 0,
+                    done: None,
+                    total: None,
+                    pending: 0,
+                    error: None,
+                },
+            })
+            .collect();
         Ok(StatusOutput {
             path: project.display().to_string(),
             state: status.state,
@@ -1042,6 +1135,7 @@ impl WorkerHandler {
             last_error: status.last_error,
             watching: status.watching,
             graph: None,
+            worktrees,
         })
     }
 

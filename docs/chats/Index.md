@@ -6,6 +6,7 @@ title: Журнал сессий bars
 
 | Папка | Когда читать |
 |---|---|
+| `2026-11-12-6-3-1-worktree-discovery/` | Шаг 6.3.1: обнаружение worktree и разрешение цели — `bars_core::worktree`, `resolve_cwd`, `Target.wt`, `worktree_not_found`, исключение папок, хук без регистрации, WORKTREES в `status`; без проверки сборкой |
 | `2026-11-12-6-2-3-projects-filter/` | Шаг 6.2.3: фильтр проектов — `filter` в `projects`, `bars_status`, `bars-cli projects --filter`, строки подпроектов в выдаче; без проверки сборкой |
 | `2026-11-12-6-2-2-subprojects-discovery/` | Шаг 6.2.2: автопоиск подпроектов — обход, точечная проверка, ленивая регистрация и первое обращение, пассивные вызовы, уборка ушедших и сирот, замер на `tmc-opovechenie`; без проверки сборкой |
 | `2026-11-12-6-2-1-subprojects-registry/` | Шаг 6.2.1: подпроекты в реестре и протоколе — `discovered`/`lazy`, имя `главный/путь`, `ProjectState::Lazy`, поля `ProjectInfo`, `project_arg` в MCP и CLI; без проверки сборкой |

@@ -9,6 +9,7 @@ use std::io;
 use std::path::{Component, Path, PathBuf};
 use std::time::SystemTime;
 
+use bars_core::worktree;
 use serde::{Deserialize, Serialize};
 
 use super::timefmt::rfc3339;
@@ -391,56 +392,86 @@ impl Registry {
             > 1
     }
 
-    pub fn project_for_cwd(&self, cwd: &Path) -> Option<&ProjectEntry> {
+    /// Куда указывает `cwd`: проект и, если `cwd` лежит в корне вида живого worktree, этот
+    /// worktree. Порядок (`docs/features/projects/worktrees.md`, «Изменения в реестре воркера»):
+    /// (1) ближайшая вверх папка с файлом `.git` — рабочая копия W, если запись по её `gitdir:`
+    /// живая; (2) владелец — зарегистрированный проект X, для которого основной checkout R — его
+    /// репозиторий и `cwd` лежит в корне вида `W/<смещение X>` (при нескольких побеждает ближайший
+    /// к `cwd`); (3) нет владельца или запись мертва — ближайший зарегистрированный проект вверх.
+    pub fn resolve_cwd(&self, cwd: &Path) -> Option<CwdTarget<'_>> {
+        if let Some(location) = worktree::locate(cwd)
+            && let Some(found) = self.owner_in_view(&location, cwd)
+        {
+            return Some(found);
+        }
         cwd.ancestors()
             .find_map(|dir| self.find(dir))
-            .or_else(|| self.project_of_worktree(cwd))
+            .map(|project| CwdTarget {
+                project,
+                worktree: None,
+            })
     }
 
-    /// Проект основного checkout для `cwd` внутри git worktree вне проекта: корень рабочей копии
-    /// — ближайшая вверх папка с файлом `.git`, основной checkout — по его `gitdir:` (OQ-289).
-    fn project_of_worktree(&self, cwd: &Path) -> Option<&ProjectEntry> {
-        let main = main_checkout_of_worktree(cwd)?;
-        main.ancestors().find_map(|dir| self.find(dir))
+    /// Владелец рабочей копии `location`, чей корень вида содержит `cwd`.
+    fn owner_in_view(&self, location: &worktree::Location, cwd: &Path) -> Option<CwdTarget<'_>> {
+        self.projects
+            .iter()
+            .filter(|entry| worktree::is_within(&entry.path, &location.repo))
+            .filter_map(|entry| {
+                let repository = worktree::repository_of(&entry.path)?;
+                if !worktree::same_path(&repository.root, &location.repo) {
+                    return None;
+                }
+                let view_root = location.work.join(&repository.offset);
+                worktree::is_within(cwd, &view_root).then_some((entry, view_root))
+            })
+            .max_by_key(|(_, view_root)| view_root.components().count())
+            .map(|(entry, view_root)| CwdTarget {
+                project: entry,
+                worktree: Some(WorktreeRef {
+                    name: location.name.clone(),
+                    admin_dir: location.admin_dir.clone(),
+                    path: location.work.clone(),
+                    view_root,
+                    repo: location.repo.clone(),
+                }),
+            })
     }
 
-    pub fn discover_root(&self, cwd: &Path) -> Discovered {
-        for dir in cwd.ancestors() {
-            if self.contains(dir) {
-                return Discovered {
-                    root: dir.to_path_buf(),
-                    registered: true,
-                };
-            }
-            if has_project_bars(dir) {
-                // Git worktree вне проекта не регистрируется отдельно, если основной checkout
-                // уже в реестре (OQ-289, OQ-291).
-                return self.project_of_worktree(cwd).map_or_else(
-                    || Discovered {
-                        root: dir.to_path_buf(),
-                        registered: false,
-                    },
-                    |found| Discovered {
-                        root: found.path.clone(),
-                        registered: true,
-                    },
-                );
-            }
-        }
-        if let Some(found) = self.project_of_worktree(cwd) {
-            return Discovered {
-                root: found.path.clone(),
+    /// Проект `cwd` без сведений о worktree: оболочка над [`Registry::resolve_cwd`].
+    pub fn project_for_cwd(&self, cwd: &Path) -> Option<&ProjectEntry> {
+        self.resolve_cwd(cwd).map(|target| target.project)
+    }
+
+    /// Корень для хука начала сессии. Рабочая копия живого worktree даёт владельца как
+    /// зарегистрированный проект с признаком worktree; хук не регистрирует ни копию, ни основной
+    /// checkout, если тот не в реестре (OQ-307): тогда `None` и реестр не меняется.
+    pub fn discover_root(&self, cwd: &Path) -> Option<Discovered> {
+        if let Some(target) = self.resolve_cwd(cwd) {
+            return Some(Discovered {
+                root: target.project.path.clone(),
                 registered: true,
-            };
+                worktree: target.worktree,
+            });
         }
-        let root = cwd
-            .ancestors()
-            .find(|dir| dir.join(".git").exists())
-            .unwrap_or(cwd);
-        Discovered {
-            root: root.to_path_buf(),
-            registered: false,
+        if worktree::locate(cwd).is_some() {
+            return None;
         }
+        let found = |root: &Path| {
+            Some(Discovered {
+                root: root.to_path_buf(),
+                registered: false,
+                worktree: None,
+            })
+        };
+        if let Some(dir) = cwd.ancestors().find(|dir| has_project_bars(dir)) {
+            return found(dir);
+        }
+        found(
+            cwd.ancestors()
+                .find(|dir| dir.join(".git").exists())
+                .unwrap_or(cwd),
+        )
     }
 
     fn save(&self) -> Result<(), RegistryError> {
@@ -473,6 +504,29 @@ pub struct Discovered {
     pub root: PathBuf,
     /// Папка уже в реестре. Иначе хук регистрирует её, если в ней есть документация.
     pub registered: bool,
+    /// `cwd` лежит в корне вида живого worktree этого проекта.
+    pub worktree: Option<WorktreeRef>,
+}
+
+/// Живой worktree, в котором лежит `cwd` (`docs/features/projects/worktrees.md`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct WorktreeRef {
+    /// Имя записи `.git/worktrees/<имя>`.
+    pub name: String,
+    pub admin_dir: PathBuf,
+    /// Корень рабочей копии W.
+    pub path: PathBuf,
+    /// `W/<смещение владельца>`.
+    pub view_root: PathBuf,
+    /// Основной checkout (корень репозитория R).
+    pub repo: PathBuf,
+}
+
+/// Результат [`Registry::resolve_cwd`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CwdTarget<'a> {
+    pub project: &'a ProjectEntry,
+    pub worktree: Option<WorktreeRef>,
 }
 
 /// Имя проекта — имя папки корня (у корня диска — весь путь).
@@ -488,34 +542,6 @@ pub fn project_name(path: &Path) -> String {
 fn has_project_bars(dir: &Path) -> bool {
     let bars = dir.join(".bars");
     bars.join("config.toml").is_file() || bars.join("index.sqlite").is_file()
-}
-
-/// Основной checkout для `cwd` в git worktree: ближайшая вверх папка с файлом `.git` (не папкой)
-/// с `gitdir: <путь>`, а путь ведёт в `<репозиторий>/.git/worktrees/<имя>`. Относительный `gitdir`
-/// считается от корня рабочей копии; `commondir` уточняет общий каталог git. Подмодуль, bare-репозиторий
-/// и битый файл дают `None`.
-fn main_checkout_of_worktree(cwd: &Path) -> Option<PathBuf> {
-    let work = cwd.ancestors().find(|dir| dir.join(".git").is_file())?;
-    let text = fs::read_to_string(work.join(".git")).ok()?;
-    let target = text
-        .lines()
-        .find_map(|line| line.trim().strip_prefix("gitdir:"))?
-        .trim();
-    if target.is_empty() {
-        return None;
-    }
-    let gitdir = normalize(&work.join(target)).ok()?;
-    if gitdir.parent()?.file_name()? != "worktrees" {
-        return None;
-    }
-    let common = match fs::read_to_string(gitdir.join("commondir")) {
-        Ok(text) => normalize(&gitdir.join(text.trim())).ok()?,
-        Err(_) => gitdir.parent()?.parent()?.to_path_buf(),
-    };
-    if common.file_name()? != ".git" {
-        return None;
-    }
-    Some(common.parent()?.to_path_buf())
 }
 
 /// Есть ли под корнем документации хоть один `.md`: без него хук проект не регистрирует.
@@ -758,18 +784,29 @@ mod tests {
         assert!(registry.project_for_cwd(home.path()).is_none());
     }
 
-    /// Основной checkout с `.git/worktrees/<имя>` и рабочая копия вне него.
-    fn linked_worktree(home: &TempDir, main: &str, outside: &str, relative: bool) -> PathBuf {
-        let admin = dir(home, &format!("{main}/.git/worktrees/wt"));
+    /// Запись `.git/worktrees/<name>` репозитория `repo` и рабочая копия `outside` с `.git`-файлом.
+    fn attach(home: &TempDir, repo: &str, name: &str, outside: &str, relative: bool) -> PathBuf {
+        let admin = dir(home, &format!("{repo}/.git/worktrees/{name}"));
         let work = dir(home, outside);
         let target = if relative {
-            "../main/.git/worktrees/wt".to_string()
+            format!("../{repo}/.git/worktrees/{name}")
         } else {
             admin.to_string_lossy().replace('\\', "/")
         };
         fs::write(work.join(".git"), format!("gitdir: {target}\n")).unwrap();
         fs::write(admin.join("commondir"), "../..\n").unwrap();
+        fs::write(admin.join("HEAD"), "ref: refs/heads/feat\n").unwrap();
+        fs::write(
+            admin.join("gitdir"),
+            work.join(".git").to_string_lossy().replace('\\', "/"),
+        )
+        .unwrap();
         work
+    }
+
+    /// Основной checkout `main` с одной записью `wt` и рабочая копия `outside`.
+    fn linked_worktree(home: &TempDir, main: &str, outside: &str, relative: bool) -> PathBuf {
+        attach(home, main, "wt", outside, relative)
     }
 
     #[test]
@@ -784,13 +821,16 @@ mod tests {
         registry.add(&main).unwrap();
         assert_eq!(registry.project_for_cwd(&work).unwrap().path, main);
         assert_eq!(registry.project_for_cwd(&cwd).unwrap().path, main);
-        assert_eq!(
-            registry.discover_root(&cwd),
-            Discovered {
-                root: main,
-                registered: true
-            }
-        );
+        let target = registry.resolve_cwd(&cwd).unwrap();
+        assert_eq!(target.project.path, main);
+        let view = target.worktree.unwrap();
+        assert_eq!(view.name, "wt");
+        assert!(worktree::same_path(&view.path, &work));
+        assert!(worktree::same_path(&view.view_root, &work));
+        let found = registry.discover_root(&cwd).unwrap();
+        assert!(found.registered);
+        assert_eq!(found.root, main);
+        assert_eq!(found.worktree.unwrap().name, "wt");
     }
 
     #[test]
@@ -802,22 +842,23 @@ mod tests {
         registry.add(&main).unwrap();
 
         assert_eq!(registry.project_for_cwd(&work).unwrap().path, main);
+        assert!(registry.resolve_cwd(&work).unwrap().worktree.is_some());
     }
 
     #[test]
-    fn worktree_of_unregistered_main_checkout_keeps_old_rules() {
+    fn hook_does_not_register_worktree_or_unregistered_main() {
         let home = TempDir::new().unwrap();
         let work = linked_worktree(&home, "main", "runs/wt", false);
+        fs::create_dir_all(work.join(".bars")).unwrap();
+        fs::write(work.join(".bars/config.toml"), "").unwrap();
         let registry = Registry::load(home.path()).unwrap();
 
         assert!(registry.project_for_cwd(&work).is_none());
-        assert_eq!(
-            registry.discover_root(&work),
-            Discovered {
-                root: work,
-                registered: false
-            }
+        assert!(
+            registry.discover_root(&work).is_none(),
+            "ни копия (даже со своим `.bars`), ни основной checkout не регистрируются"
         );
+        assert!(registry.entries().is_empty());
     }
 
     #[test]
@@ -830,13 +871,9 @@ mod tests {
         let mut registry = Registry::load(home.path()).unwrap();
         registry.add(&main).unwrap();
 
-        assert_eq!(
-            registry.discover_root(&work),
-            Discovered {
-                root: main,
-                registered: true
-            }
-        );
+        let found = registry.discover_root(&work).unwrap();
+        assert_eq!(found.root, main);
+        assert!(found.registered && found.worktree.is_some());
     }
 
     #[test]
@@ -853,6 +890,94 @@ mod tests {
 
         assert!(registry.project_for_cwd(&garbage).is_none());
         assert!(registry.project_for_cwd(&submodule).is_none());
+        assert!(registry.resolve_cwd(&submodule).is_none());
+    }
+
+    #[test]
+    fn dead_record_gives_the_plain_nearest_project_without_a_view() {
+        let home = TempDir::new().unwrap();
+        // Рабочая копия внутри проекта, а запись указывает на другой `.git`.
+        let work = linked_worktree(&home, "main", "main/.worktree/gone", false);
+        let admin = home.path().join("main/.git/worktrees/wt");
+        fs::write(admin.join("gitdir"), "/elsewhere/.git\n").unwrap();
+        let main = home.path().join("main");
+        let mut registry = Registry::load(home.path()).unwrap();
+        registry.add(&main).unwrap();
+
+        let target = registry.resolve_cwd(&work).unwrap();
+        assert_eq!(target.project.path, main);
+        assert!(target.worktree.is_none(), "мёртвая запись — не worktree");
+    }
+
+    #[test]
+    fn cwd_in_worktree_resolves_owner_and_view() {
+        let home = TempDir::new().unwrap();
+        let main = home.path().join("main");
+        let inside = attach(&home, "main", "a", "main/.worktree/a", false);
+        let claude = attach(&home, "main", "b", "main/.claude/worktrees/b", false);
+        let outside = attach(&home, "main", "c", "iterion/runs/c", false);
+        let mut registry = Registry::load(home.path()).unwrap();
+        registry.add(&main).unwrap();
+
+        for (work, name) in [(&inside, "a"), (&claude, "b"), (&outside, "c")] {
+            let cwd = work.join("docs");
+            fs::create_dir_all(&cwd).unwrap();
+            let target = registry.resolve_cwd(&cwd).unwrap();
+            assert_eq!(target.project.path, main, "{name}");
+            assert_eq!(target.worktree.as_ref().unwrap().name, name);
+        }
+        // Основной checkout — обычный проект без вида.
+        let plain = registry.resolve_cwd(&main).unwrap();
+        assert!(plain.worktree.is_none());
+    }
+
+    #[test]
+    fn worktree_of_subproject_belongs_to_it() {
+        let home = TempDir::new().unwrap();
+        let outer = dir(&home, "tmc");
+        fs::create_dir_all(outer.join(".git")).unwrap();
+        let worker = dir(&home, "tmc/backend/worker");
+        let work = attach(
+            &home,
+            "tmc/backend/worker",
+            "worker-wt-quorum",
+            "tmc/backend/worker-wt-quorum",
+            false,
+        );
+        let mut registry = Registry::load(home.path()).unwrap();
+        registry.add(&outer).unwrap();
+        registry.add_discovered(&worker).unwrap();
+
+        let cwd = dir(&home, "tmc/backend/worker-wt-quorum/src");
+        let target = registry.resolve_cwd(&cwd).unwrap();
+        assert_eq!(
+            target.project.path, worker,
+            "владелец — подпроект с `.git`-каталогом"
+        );
+        assert!(worktree::same_path(&target.worktree.unwrap().path, &work));
+    }
+
+    #[test]
+    fn owner_with_an_offset_needs_its_folder_in_the_view() {
+        let home = TempDir::new().unwrap();
+        let repo = dir(&home, "mono");
+        fs::create_dir_all(repo.join(".git")).unwrap();
+        let service = dir(&home, "mono/services/api");
+        let work = attach(&home, "mono", "wt", "runs/mono-wt", false);
+        let mut registry = Registry::load(home.path()).unwrap();
+        registry.add(&service).unwrap();
+
+        // В ветке worktree папки проекта нет: `cwd` в W вне корня вида — не вид.
+        let cwd = dir(&home, "runs/mono-wt/other");
+        assert!(registry.resolve_cwd(&cwd).is_none());
+        // Появилась папка проекта: вид есть, корень вида — `W/services/api`.
+        let inner = dir(&home, "runs/mono-wt/services/api/docs");
+        let target = registry.resolve_cwd(&inner).unwrap();
+        assert_eq!(target.project.path, service);
+        assert!(worktree::same_path(
+            &target.worktree.unwrap().view_root,
+            &work.join("services/api")
+        ));
     }
 
     #[test]
@@ -863,53 +988,34 @@ mod tests {
         let registered = dir(&home, "reg");
         registry.add(&registered).unwrap();
         let cwd = dir(&home, "reg/a/b");
-        assert_eq!(
-            registry.discover_root(&cwd),
-            Discovered {
-                root: registered,
-                registered: true
-            }
-        );
+        let found = registry.discover_root(&cwd).unwrap();
+        assert_eq!((found.root, found.registered), (registered, true));
+        assert!(found.worktree.is_none());
 
         let with_bars = dir(&home, "bars-only");
         fs::create_dir_all(with_bars.join(".bars")).unwrap();
         fs::write(with_bars.join(".bars/config.toml"), "").unwrap();
         let cwd = dir(&home, "bars-only/x");
-        assert_eq!(
-            registry.discover_root(&cwd),
-            Discovered {
-                root: with_bars,
-                registered: false
-            }
-        );
+        let found = registry.discover_root(&cwd).unwrap();
+        assert_eq!((found.root, found.registered), (with_bars, false));
 
         // Домашняя `.bars` пользователя папку проектом не делает.
         let user_home = dir(&home, "userhome");
         fs::create_dir_all(user_home.join(".bars/models")).unwrap();
         fs::write(user_home.join(".bars/settings.toml"), "").unwrap();
         let cwd = dir(&home, "userhome/work");
-        assert_eq!(registry.discover_root(&cwd).root, cwd);
+        assert_eq!(registry.discover_root(&cwd).unwrap().root, cwd);
 
         // В worktree `.git` — файл.
         let repo = dir(&home, "repo");
         fs::write(repo.join(".git"), "gitdir: elsewhere").unwrap();
         let cwd = dir(&home, "repo/src");
-        assert_eq!(
-            registry.discover_root(&cwd),
-            Discovered {
-                root: repo,
-                registered: false
-            }
-        );
+        let found = registry.discover_root(&cwd).unwrap();
+        assert_eq!((found.root, found.registered), (repo, false));
 
         let lone = dir(&home, "lone/work");
-        assert_eq!(
-            registry.discover_root(&lone),
-            Discovered {
-                root: lone,
-                registered: false
-            }
-        );
+        let found = registry.discover_root(&lone).unwrap();
+        assert_eq!((found.root, found.registered), (lone, false));
     }
 
     #[test]

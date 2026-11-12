@@ -439,6 +439,7 @@ async fn execute(
             .project
             .as_deref()
             .map(|value| project_arg(value, &env.cwd)),
+        wt: None,
     };
     let mut client = connect(env).await?;
     if let Some(warning) = client.build_warning() {

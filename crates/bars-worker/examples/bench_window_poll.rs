@@ -48,6 +48,7 @@ impl Ctx {
         Target {
             cwd: self.root.clone(),
             project: Some(self.root.clone()),
+            wt: None,
         }
     }
     fn call_of(&self, name: &str) -> Call {

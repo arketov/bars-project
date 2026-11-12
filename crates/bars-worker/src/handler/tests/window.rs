@@ -80,6 +80,7 @@ async fn physical_graph_slice_is_window_only_and_expands_chunks_on_the_same_snap
     let target = Target {
         cwd: root.display().to_string(),
         project: Some(root.display().to_string()),
+        wt: None,
     };
     let params = |request: PhysicalRequest| {
         Call::GraphPhysical(GraphPhysicalParams {

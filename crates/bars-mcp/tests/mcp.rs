@@ -566,6 +566,7 @@ async fn wait_status(
                 target: Target {
                     cwd: cwd.display().to_string(),
                     project: None,
+                    wt: None,
                 },
             })
             .await;
@@ -1495,6 +1496,7 @@ async fn agent_cannot_consent_to_reindex_after_model_change() {
             target: bars_protocol::Target {
                 cwd: root.display().to_string(),
                 project: None,
+                wt: None,
             },
             full: false,
             accept_model_change: false,
@@ -1514,6 +1516,7 @@ async fn agent_cannot_consent_to_reindex_after_model_change() {
             target: bars_protocol::Target {
                 cwd: root.display().to_string(),
                 project: None,
+                wt: None,
             },
             full: true,
             accept_model_change: false,

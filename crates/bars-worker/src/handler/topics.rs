@@ -282,6 +282,7 @@ impl WorkerHandler {
                 target: Target {
                     cwd: project.display().to_string(),
                     project: Some(project.display().to_string()),
+                    wt: None,
                 },
                 query: variant.text.clone(),
                 modules,

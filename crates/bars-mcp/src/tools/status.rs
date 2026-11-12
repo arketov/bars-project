@@ -87,13 +87,21 @@ impl BarsMcp {
         let index = bars_protocol::StatusParams {
             target: target.clone(),
         };
+        let mut worktrees = None;
         let part = match self.call_observed(&index, Some(&original)).await {
-            Ok(output) => render::status(&output),
+            Ok(output) => {
+                worktrees = render::worktrees_part(&output.worktrees);
+                render::status(&output)
+            }
             Err(error) => render::error_part("INDEX", &error),
         };
         body.push('\n');
         body.push_str(&part);
         body.push('\n');
+        if let Some(part) = worktrees {
+            body.push_str(&part);
+            body.push('\n');
+        }
         body.push_str(&render::versions(
             env!("CARGO_PKG_VERSION"),
             bars_protocol::BUILD_ID,

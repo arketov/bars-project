@@ -655,8 +655,15 @@ fn project_block(text: &mut String, index: usize, total: usize, info: &ProjectIn
     if let Some(line) = bars_protocol::excluded_projects_line(&info.nested) {
         let _ = writeln!(text, "{line}");
     }
-    // Worktree проекта и пометка `matched_by: worktree` — шаги 6.3.x (`worktrees.md`): строки
-    // добавляются здесь, после списка подпроектов.
+    // Владелец, найденный по worktree (`bars_status(filter=…)`, Т-50).
+    for item in &info.matched_worktrees {
+        let branch = item.branch.as_deref().unwrap_or("detached");
+        let _ = writeln!(
+            text,
+            "matched_by: worktree {} (branch {branch}) at {}",
+            item.name, item.path
+        );
+    }
     let _ = writeln!(text, "=== END PROJECT {index} ===");
 }
 
@@ -721,6 +728,57 @@ pub fn status(output: &StatusOutput) -> String {
     }
     text.push_str("=== END INDEX ===");
     text
+}
+
+/// Часть WORKTREES сводки `bars_status`: живые worktree проекта-владельца. Пусто — части нет.
+pub fn worktrees_part(items: &[bars_protocol::WorktreeStatus]) -> Option<String> {
+    if items.is_empty() {
+        return None;
+    }
+    let mut text = format!("=== WORKTREES ({}) ===\n", items.len());
+    for item in items {
+        let branch = match &item.branch {
+            Some(branch) => format!("branch {branch}"),
+            None => "detached".to_string(),
+        };
+        let mut line = format!("- {} · {branch} · {}", item.name, item.path);
+        if let Some(reason) = &item.locked {
+            if reason.is_empty() {
+                line.push_str(" · locked");
+            } else {
+                let _ = write!(line, " · locked: \"{reason}\"");
+            }
+        }
+        let delta = &item.delta;
+        let state = match delta.state {
+            bars_protocol::DeltaState::None => {
+                "delta: none (built on first use)".to_string()
+            }
+            bars_protocol::DeltaState::Building => match (delta.done, delta.total) {
+                (Some(done), Some(total)) => format!("delta: building {done} of {total}"),
+                _ => "delta: building".to_string(),
+            },
+            bars_protocol::DeltaState::Ready => {
+                format!("delta: ready, {} documents differ", delta.documents)
+            }
+            bars_protocol::DeltaState::Error => format!(
+                "delta: error{}",
+                delta
+                    .error
+                    .as_deref()
+                    .map(|error| format!(" ({error})"))
+                    .unwrap_or_default()
+            ),
+        };
+        let _ = write!(line, " · {state}");
+        if item.current {
+            line.push_str(" [session]");
+        }
+        text.push_str(&line);
+        text.push('\n');
+    }
+    text.push_str("=== END WORKTREES ===");
+    Some(text)
 }
 
 /// Часть GRAPH сводки `bars_status` и блок графа внутри части INDEX.
@@ -1581,6 +1639,7 @@ mod tests {
             discovered: false,
             subprojects: vec![],
             discovery_truncated: false,
+            matched_worktrees: vec![],
         }
     }
 
@@ -1634,5 +1693,58 @@ mod tests {
         assert_eq!(date_of_unix(1_762_656_000), "2025-11-09");
         assert_eq!(date_of_unix(0), "1970-01-01");
         assert_eq!(date_of_rfc("2026-11-09T12:00:00Z"), "2026-11-09");
+    }
+
+    fn worktree(name: &str, branch: Option<&str>, state: bars_protocol::DeltaState) -> bars_protocol::WorktreeStatus {
+        bars_protocol::WorktreeStatus {
+            name: name.into(),
+            path: format!("C:/runs/{name}"),
+            branch: branch.map(str::to_string),
+            locked: None,
+            delta: bars_protocol::WorktreeDeltaStatus {
+                state,
+                documents: 2,
+                done: None,
+                total: None,
+                pending: 0,
+                error: None,
+            },
+            current: false,
+        }
+    }
+
+    #[test]
+    fn worktrees_part_lists_branch_lock_delta_and_session() {
+        assert_eq!(worktrees_part(&[]), None);
+        let mut first = worktree("quorum", Some("feat/quorum"), bars_protocol::DeltaState::Ready);
+        first.current = true;
+        let mut second = worktree("api-avatar", None, bars_protocol::DeltaState::None);
+        second.locked = Some("на флешке".into());
+        let text = worktrees_part(&[first, second]).unwrap();
+        assert_eq!(
+            text,
+            "=== WORKTREES (2) ===\n\
+             - quorum · branch feat/quorum · C:/runs/quorum · delta: ready, 2 documents differ [session]\n\
+             - api-avatar · detached · C:/runs/api-avatar · locked: \"на флешке\" · delta: none (built on first use)\n\
+             === END WORKTREES ==="
+        );
+    }
+
+    #[test]
+    fn project_block_names_the_worktree_that_matched_the_filter() {
+        let mut found = info("main", "C:/repos/main");
+        found.matched_worktrees = vec![bars_protocol::WorktreeMatch {
+            name: "quorum".into(),
+            path: "C:/runs/quorum".into(),
+            branch: Some("feat/quorum".into()),
+        }];
+        let text = projects(&ProjectsOutput {
+            projects: vec![found],
+            registry_total: Some(3),
+        });
+        assert!(
+            text.contains("matched_by: worktree quorum (branch feat/quorum) at C:/runs/quorum\n=== END PROJECT 1 ==="),
+            "{text}"
+        );
     }
 }

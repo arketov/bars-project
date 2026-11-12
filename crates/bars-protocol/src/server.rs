@@ -243,6 +243,7 @@ mod tests {
             target: crate::Target {
                 cwd: "/p".into(),
                 project: None,
+                wt: None,
             },
             path: "a.md".into(),
         };

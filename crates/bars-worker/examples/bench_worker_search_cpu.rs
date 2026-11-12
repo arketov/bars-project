@@ -124,6 +124,7 @@ mod bench {
             target: Target {
                 cwd: project.into(),
                 project: Some(project.into()),
+                wt: None,
             },
             query: query.into(),
             modules: vec![],

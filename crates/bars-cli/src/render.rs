@@ -381,6 +381,14 @@ fn project(info: &ProjectInfo) -> String {
             .join(", ");
         let _ = write!(text, "\n  подпроекты: {items}");
     }
+    for item in &info.matched_worktrees {
+        let branch = item.branch.as_deref().unwrap_or("detached");
+        let _ = write!(
+            text,
+            "\n  найден по worktree: {} ({branch}), {}",
+            item.name, item.path
+        );
+    }
     text
 }
 
@@ -448,6 +456,30 @@ pub fn status(output: &StatusOutput) -> String {
             graph.source_count,
             graph.active_job.as_deref().unwrap_or("нет")
         );
+    }
+    if !output.worktrees.is_empty() {
+        let _ = write!(text, "\nWorktree ({}):", output.worktrees.len());
+        for item in &output.worktrees {
+            let branch = item.branch.as_deref().unwrap_or("detached");
+            let delta = match item.delta.state {
+                bars_protocol::DeltaState::None => "дельты нет".to_string(),
+                bars_protocol::DeltaState::Building => match (item.delta.done, item.delta.total) {
+                    (Some(done), Some(total)) => format!("строится {done} из {total}"),
+                    _ => "строится".to_string(),
+                },
+                bars_protocol::DeltaState::Ready => {
+                    format!("готова, отличается документов: {}", item.delta.documents)
+                }
+                bars_protocol::DeltaState::Error => "ошибка".to_string(),
+            };
+            let _ = write!(text, "\n  {} · {branch} · {} · {delta}", item.name, item.path);
+            if let Some(reason) = &item.locked {
+                let _ = write!(text, " · заблокирован: {reason}");
+            }
+            if item.current {
+                text.push_str(" [сессия]");
+            }
+        }
     }
     text
 }

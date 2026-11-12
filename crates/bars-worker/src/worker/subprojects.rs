@@ -600,6 +600,7 @@ impl Inner {
         let removed = lock(&self.registry).remove(path)?;
         let runtime = lock(&self.projects).remove(path);
         self.graph_cache.remove(path);
+        self.forget_worktrees(path);
         self.cancel_queued(path);
         self.cancel_scan(path);
         // Слежение останавливается вне блокировок: поток `notify` может ждать их.
@@ -619,6 +620,10 @@ impl Inner {
             }
         }
         self.refresh_nested();
+        // Новые подпроекты — тоже владельцы worktree; ленивым дельта не ставится.
+        if !added.is_empty() {
+            self.discover_worktrees(Some(added));
+        }
         for parent in parents {
             self.updates.changed(parent, updates::STATUS, false);
         }

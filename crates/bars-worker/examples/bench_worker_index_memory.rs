@@ -172,6 +172,7 @@ async fn exercise(
             target: Target {
                 cwd: root.display().to_string(),
                 project: None,
+                wt: None,
             },
             query: (*query).into(),
             modules: vec![],

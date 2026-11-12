@@ -253,6 +253,7 @@ pub async fn document_action(
             target: bars_protocol::Target {
                 cwd: project.clone(),
                 project: Some(project),
+                wt: None,
             },
         }))
         .await
@@ -764,6 +765,7 @@ pub(crate) async fn prepare_folder(
             target: bars_protocol::Target {
                 cwd: project.clone(),
                 project: Some(project),
+                wt: None,
             },
         }))
         .await

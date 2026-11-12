@@ -117,3 +117,47 @@ pub fn read_error(error: ReadError) -> RpcError {
 pub fn outline_error(error: OutlineError) -> RpcError {
     RpcError::bars(ErrorKind::InvalidParams, error.to_string())
 }
+
+/// `wt` не назвал worktree проекта: текст перечисляет worktree с ветками (агент чаще всего
+/// передаёт имя ветки), в `data.worktrees` — `{name, path, branch, locked}`
+/// (`docs/features/projects/worktrees.md`, «Ошибка неизвестного wt»).
+pub fn worktree_not_found(
+    project: &str,
+    wanted: &str,
+    available: &[bars_core::worktree::LinkedWorktree],
+) -> RpcError {
+    let message = if available.is_empty() {
+        format!("У проекта «{project}» нет worktree; основной checkout — wt=\".\"")
+    } else {
+        let list = available
+            .iter()
+            .map(|item| {
+                let branch = item
+                    .branch
+                    .as_deref()
+                    .map_or_else(|| "detached".to_string(), |branch| format!("ветка {branch}"));
+                format!("«{}» ({branch}, {})", item.name, item.path.display())
+            })
+            .collect::<Vec<_>>()
+            .join(", ");
+        format!(
+            "У проекта «{project}» нет worktree «{wanted}». Есть: {list}. \
+             Основной checkout — wt=\".\""
+        )
+    };
+    let items: Vec<bars_protocol::WorktreeBrief> = available
+        .iter()
+        .map(|item| bars_protocol::WorktreeBrief {
+            name: item.name.clone(),
+            path: item.path.display().to_string(),
+            branch: item.branch.clone(),
+            locked: item.locked.clone(),
+        })
+        .collect();
+    let mut extra = serde_json::Map::new();
+    extra.insert(
+        "worktrees".to_string(),
+        serde_json::to_value(items).unwrap_or_default(),
+    );
+    RpcError::bars_with(ErrorKind::WorktreeNotFound, message, extra)
+}

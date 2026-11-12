@@ -83,6 +83,8 @@ impl Worker {
             if first {
                 self.inner.activate(&project, Priority::Watch);
                 self.inner.schedule_discovery(&project, true);
+                // Открытие проекта в окне: worktree владельца и вложенных проектов.
+                self.rediscover_worktrees(&project);
             }
         }
         Ok(())

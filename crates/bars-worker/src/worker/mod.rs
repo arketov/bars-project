@@ -22,6 +22,7 @@ mod summary;
 mod timefmt;
 pub mod updates;
 mod watcher;
+mod worktrees;
 
 #[cfg(test)]
 mod tests;
@@ -51,7 +52,10 @@ pub use models::{
     RerankSlot, SharedEmbedder, SharedReranker,
 };
 pub use queue::Priority;
-pub use registry::{Discovered, ProjectEntry, Registry, RegistryError, ResolveError};
+pub use registry::{
+    CwdTarget, Discovered, ProjectEntry, Registry, RegistryError, ResolveError, WorktreeRef,
+};
+pub use worktrees::{ViewSelector, WtSelector, WtSource};
 pub use summary::{Health, Line, Summary};
 pub use timefmt::{index_token, rfc3339};
 
@@ -263,6 +267,8 @@ pub struct ProjectSnapshot {
     pub lazy: bool,
     /// Обход автопоиска этого проекта оборван пределом (Т-49).
     pub discovery_truncated: bool,
+    /// Живые worktree проекта-владельца (`worktrees.md`).
+    pub worktrees: Vec<bars_core::worktree::LinkedWorktree>,
 }
 
 /// Итог регистрации.
@@ -375,6 +381,8 @@ struct Inner {
     scans: Mutex<HashMap<PathBuf, scan::ScanJob>>,
     /// Автопоиск подпроектов: один проход на процесс и очередь запросов (`subprojects.rs`).
     discovery: subprojects::Gate,
+    /// Живые worktree владельцев (`worktrees.rs`): только память, на диск попадает дельта.
+    worktrees: Mutex<HashMap<PathBuf, Vec<bars_core::worktree::LinkedWorktree>>>,
 }
 
 struct DownloadCleanup {
@@ -463,12 +471,14 @@ impl Worker {
             graph_cache: Default::default(),
             scans: Mutex::new(HashMap::new()),
             discovery: Default::default(),
+            worktrees: Mutex::new(HashMap::new()),
         });
         // Очередь ещё не идёт: никто не держит файлы индекса, восстановление безопасно.
         for path in &paths {
             recover_project_index(path);
         }
-        // До первой проверки: внешние проекты исключают области вложенных.
+        // До первой проверки: внешние проекты исключают области вложенных и папки worktree.
+        inner.discover_worktrees(None);
         inner.refresh_nested();
         let queue_task = tokio::spawn(Arc::clone(&inner).run_queue());
         let timer_task = tokio::spawn(Arc::clone(&inner).run_timer());
@@ -594,6 +604,8 @@ impl Worker {
         };
         // Новый вложенный проект уходит из индекса внешнего, внешний новый — исключает вложенные.
         self.inner.refresh_nested();
+        // Worktree нового проекта — до первой проверки: их папки не должны попасть в индекс.
+        self.rediscover_worktrees(&canonical);
         // У нового самостоятельного проекта лениво хранится только то, что нашёл автопоиск: после
         // `set_standalone` состояние `Lazy` в `Runtime` снимает `activate`.
         self.inner.activate(&canonical, Priority::Explicit);
@@ -659,11 +671,18 @@ impl Worker {
         Ok(lock(&self.inner.registry).resolve(selector)?.path.clone())
     }
 
-    /// Ближайший зарегистрированный проект от `cwd` вверх по дереву (Т-15).
+    /// Ближайший зарегистрированный проект от `cwd` вверх по дереву (Т-15); для `cwd` в живом
+    /// worktree — его владелец.
     pub fn project_for_cwd(&self, cwd: &Path) -> Option<PathBuf> {
+        self.resolve_cwd(cwd).map(|(path, _)| path)
+    }
+
+    /// Проект `cwd` и, если `cwd` лежит в корне вида живого worktree, этот worktree
+    /// ([`Registry::resolve_cwd`]).
+    pub fn resolve_cwd(&self, cwd: &Path) -> Option<(PathBuf, Option<WorktreeRef>)> {
         lock(&self.inner.registry)
-            .project_for_cwd(cwd)
-            .map(|entry| entry.path.clone())
+            .resolve_cwd(cwd)
+            .map(|target| (target.project.path.clone(), target.worktree))
     }
 
     /// Привязка меню папки: новая регистрация или смена docs_root инвалидирует цель.
@@ -712,6 +731,8 @@ impl Worker {
     ) -> Vec<bars_protocol::NestedProjectInfo> {
         bars_core::indexing::nested::areas(project)
             .into_iter()
+            // Папки worktree — не вложенные проекты: поиск по ним идёт параметром `wt`.
+            .filter(|area| area.worktree.is_none())
             .map(|area| {
                 // Вложенный проект — подпроект: агент выбирает его составным именем (Т-49).
                 let registry = lock(&self.inner.registry);
@@ -797,6 +818,7 @@ impl Worker {
                     discovered: entry.discovered,
                     lazy: entry.lazy,
                     discovery_truncated: self.inner.discovery_truncated(&entry.path),
+                    worktrees: self.inner.linked_of(&entry.path),
                     path: entry.path,
                 }
             })
@@ -811,10 +833,17 @@ impl Worker {
         // Точечная проверка папок от `cwd` вверх до проекта: подпроект, о котором реестр ещё не
         // знает, регистрируется найденным ленивым, и проектом сессии становится он (Т-49).
         self.register_for_cwd(&cwd);
-        let discovered = lock(&self.inner.registry).discover_root(&cwd);
+        // Рабочая копия живого worktree без зарегистрированного владельца — `None`: хук не
+        // регистрирует ни копию, ни основной checkout (OQ-307).
+        let Some(discovered) = lock(&self.inner.registry).discover_root(&cwd) else {
+            return Ok(None);
+        };
         if discovered.registered {
             self.observe_mcp(&discovered.root)?;
             let _ = self.scan_receipt(&discovered.root);
+            // Worktree владельца и вложенных проектов перечитываются: только что созданный
+            // `git worktree add` виден сразу (первое обращение к виду — шаг 6.3.2).
+            self.rediscover_worktrees(&discovered.root);
             self.sync_project_gates(Some(&discovered.root));
             return Ok(Some(discovered.root));
         }
@@ -1851,7 +1880,12 @@ impl Inner {
             }
             // Сначала автопоиск подпроектов, затем проверка файлов (ленивые в ней пропускаются).
             let inner = Arc::clone(&self);
-            let _ = tokio::task::spawn_blocking(move || inner.discover_all()).await;
+            let _ = tokio::task::spawn_blocking(move || {
+                inner.discover_all();
+                // Затем worktree всех владельцев, ленивых тоже; пропавшие уходят из списка.
+                inner.discover_worktrees(None);
+            })
+            .await;
             self.check_all();
         }
     }

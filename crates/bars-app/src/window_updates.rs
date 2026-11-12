@@ -642,6 +642,7 @@ async fn read_part(
     let target = Target {
         cwd: path.display().to_string(),
         project: Some(path.display().to_string()),
+        wt: None,
     };
     match part {
         0 => {

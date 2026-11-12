@@ -251,6 +251,7 @@ impl BarsMcp {
         bars_protocol::Target {
             cwd: self.env.cwd.display().to_string(),
             project: project.map(|value| project_arg(&value, &self.env.cwd)),
+            wt: None,
         }
     }
 

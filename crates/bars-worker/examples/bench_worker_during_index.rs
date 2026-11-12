@@ -60,6 +60,7 @@ async fn main() {
     let target = Target {
         cwd: root.display().to_string(),
         project: None,
+        wt: None,
     };
     let query = SearchParams {
         diagnostic: true,

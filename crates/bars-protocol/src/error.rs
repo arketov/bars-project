@@ -38,10 +38,12 @@ pub enum ErrorKind {
     StaleRevision,
     StaleCursor,
     GraphTimeout,
+    /// `wt` не назвал worktree проекта (`docs/features/projects/worktrees.md`).
+    WorktreeNotFound,
 }
 
 impl ErrorKind {
-    pub const ALL: [ErrorKind; 19] = [
+    pub const ALL: [ErrorKind; 20] = [
         ErrorKind::ProtocolMismatch,
         ErrorKind::ProjectNotFound,
         ErrorKind::ProjectUnavailable,
@@ -61,6 +63,7 @@ impl ErrorKind {
         ErrorKind::StaleRevision,
         ErrorKind::StaleCursor,
         ErrorKind::GraphTimeout,
+        ErrorKind::WorktreeNotFound,
     ];
 
     pub fn code(self) -> i32 {
@@ -84,6 +87,7 @@ impl ErrorKind {
             ErrorKind::StaleRevision => -32017,
             ErrorKind::StaleCursor => -32018,
             ErrorKind::GraphTimeout => -32019,
+            ErrorKind::WorktreeNotFound => -32020,
         }
     }
 
@@ -109,6 +113,7 @@ impl ErrorKind {
             ErrorKind::StaleRevision => "stale_revision",
             ErrorKind::StaleCursor => "stale_cursor",
             ErrorKind::GraphTimeout => "graph_timeout",
+            ErrorKind::WorktreeNotFound => "worktree_not_found",
         }
     }
 
@@ -203,6 +208,7 @@ mod tests {
             (-32017, "stale_revision"),
             (-32018, "stale_cursor"),
             (-32019, "graph_timeout"),
+            (-32020, "worktree_not_found"),
         ];
         assert_eq!(expected.len(), ErrorKind::ALL.len());
         for (kind, (code, name)) in ErrorKind::ALL.into_iter().zip(expected) {

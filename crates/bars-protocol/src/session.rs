@@ -87,6 +87,7 @@ mod tests {
             target: Target {
                 cwd: "c".into(),
                 project: None,
+                wt: None,
             },
             full: false,
             accept_model_change: accept,

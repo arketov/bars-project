@@ -19,6 +19,7 @@ pub mod search;
 pub mod secrets;
 pub mod settings;
 pub mod storage;
+pub mod worktree;
 
 use fastembed::EmbeddingModel;
 

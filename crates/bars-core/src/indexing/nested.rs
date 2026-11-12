@@ -20,15 +20,69 @@ pub struct Area {
     /// Область вложенного (его `docs_root`) от корня внешнего через `/`; для корня `.` совпадает
     /// с `project_dir`.
     pub dir: String,
+    /// Область — папка git worktree, а не вложенный проект; тогда `project` — корень рабочей
+    /// копии W.
+    pub worktree: Option<WorktreeArea>,
+}
+
+/// Чья это папка worktree.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct WorktreeArea {
+    /// Имя worktree: папка записи `.git/worktrees/<имя>`.
+    pub name: String,
+    /// Корень проекта-владельца.
+    pub owner: PathBuf,
+}
+
+/// Папка живого worktree, которую воркер нашёл при обнаружении (`docs/features/projects/worktrees.md`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct WorktreeDir {
+    pub name: String,
+    pub owner: PathBuf,
+    /// Корень рабочей копии W (вся папка с файлом `.git`).
+    pub path: PathBuf,
 }
 
 static AREAS: LazyLock<RwLock<HashMap<String, Vec<Area>>>> = LazyLock::new(Default::default);
+
+static WORKTREE_DIRS: LazyLock<RwLock<Vec<WorktreeDir>>> = LazyLock::new(Default::default);
+
+/// Публикует папки живых worktree всех владельцев: следующий [`publish`] исключает их из каждого
+/// проекта, чей корень документации их охватывает. `owners` — владельцы, чей список заменяется
+/// целиком (папки остальных владельцев не трогаются: хранилище одно на процесс); `dirs` — новые
+/// папки этих владельцев.
+pub fn publish_worktrees(owners: &[PathBuf], dirs: Vec<WorktreeDir>) {
+    let keys: Vec<String> = owners.iter().map(|owner| key(owner)).collect();
+    let mut stored = WORKTREE_DIRS
+        .write()
+        .unwrap_or_else(PoisonError::into_inner);
+    stored.retain(|dir| !keys.contains(&key(&dir.owner)));
+    stored.extend(dirs);
+}
+
+/// Опубликованные папки worktree.
+pub fn worktree_dirs() -> Vec<WorktreeDir> {
+    WORKTREE_DIRS
+        .read()
+        .unwrap_or_else(PoisonError::into_inner)
+        .clone()
+}
 
 /// Области вложенных проектов, которые исключаются из внешнего `outer` с корнем документации
 /// `outer_docs_root`. `projects` — все проекты реестра: корень и `docs_root` каждого.
 /// Вложенными считаются все потомки любой глубины. Область, не пересекающаяся с корнем документации
 /// внешнего, в список не входит: она ему не мешает.
 pub fn areas_of(outer: &Path, outer_docs_root: &str, projects: &[(PathBuf, String)]) -> Vec<Area> {
+    areas_with(outer, outer_docs_root, projects, &[])
+}
+
+/// То же, что [`areas_of`], плюс папки worktree внутри корня документации `outer`.
+pub fn areas_with(
+    outer: &Path,
+    outer_docs_root: &str,
+    projects: &[(PathBuf, String)],
+    worktrees: &[WorktreeDir],
+) -> Vec<Area> {
     let Some(docs) = join_relative(Path::new(""), outer_docs_root) else {
         return Vec::new();
     };
@@ -45,9 +99,27 @@ pub fn areas_of(outer: &Path, outer_docs_root: &str, projects: &[(PathBuf, Strin
                 project: root.clone(),
                 project_dir: slashed(&project_rel),
                 dir: slashed(&area_rel),
+                worktree: None,
             })
         })
         .collect();
+    found.extend(worktrees.iter().filter_map(|worktree| {
+        let rel = inside(outer, &worktree.path).filter(|rel| !rel.as_os_str().is_empty())?;
+        // Папка вне корня документации проекта ему не мешает; папка, охватывающая корень
+        // документации (проект лежит внутри worktree), сюда не попадает: `rel` пуст или `None`.
+        if !starts_with_folded(&rel, &docs) {
+            return None;
+        }
+        Some(Area {
+            project: worktree.path.clone(),
+            project_dir: slashed(&rel),
+            dir: slashed(&rel),
+            worktree: Some(WorktreeArea {
+                name: worktree.name.clone(),
+                owner: worktree.owner.clone(),
+            }),
+        })
+    }));
     found.sort_by(|a, b| a.dir.cmp(&b.dir));
     found
 }
@@ -68,12 +140,14 @@ pub fn is_excluded(path: &str, excluded: &[String]) -> bool {
 }
 
 /// Публикует области всех проектов реестра (`projects`: корень и `docs_root`). Возвращает корни
-/// проектов реестра, у которых список областей изменился: им нужна проверка.
+/// проектов реестра, у которых список областей изменился: им нужна проверка. Папки worktree берутся
+/// из последнего [`publish_worktrees`].
 pub fn publish(projects: &[(PathBuf, String)]) -> Vec<PathBuf> {
+    let worktrees = worktree_dirs();
     let mut stored = AREAS.write().unwrap_or_else(PoisonError::into_inner);
     let mut changed = Vec::new();
     for (root, docs_root) in projects {
-        let after = areas_of(root, docs_root, projects);
+        let after = areas_with(root, docs_root, projects, &worktrees);
         let before = stored.get(&key(root)).map_or(&[][..], Vec::as_slice);
         if before != after.as_slice() {
             changed.push(root.clone());
@@ -218,6 +292,71 @@ mod tests {
         assert_eq!(excluded(&outer), ["b/docs"]);
 
         all.pop();
+        assert_eq!(publish(&all), std::slice::from_ref(&outer));
+        assert!(excluded(&outer).is_empty());
+    }
+
+    fn worktree(name: &str, owner: &str, path: &str) -> WorktreeDir {
+        WorktreeDir {
+            name: name.into(),
+            owner: PathBuf::from(owner),
+            path: PathBuf::from(path),
+        }
+    }
+
+    #[test]
+    fn worktree_dirs_are_excluded_from_every_enclosing_project() {
+        let all = registry(&[
+            ("/wt-areas/a", "."),
+            ("/wt-areas/a/backend/worker", "docs"),
+            ("/wt-areas/solo", "docs"),
+        ]);
+        let dirs = [
+            // Папка без точки рядом с подпроектом: исключается из внешнего, не только у владельца.
+            worktree("worker-wt", "/wt-areas/a/backend/worker", "/wt-areas/a/backend/worker-wt"),
+            worktree("wt-foo", "/wt-areas/a", "/wt-areas/a/wt-foo"),
+            // Папка вне проекта ему не мешает.
+            worktree("away", "/wt-areas/solo", "/wt-areas/elsewhere/away"),
+        ];
+        let areas = areas_with(Path::new("/wt-areas/a"), ".", &all, &dirs);
+        let mut found: Vec<(&str, Option<&str>)> = areas
+            .iter()
+            .map(|area| {
+                (
+                    area.dir.as_str(),
+                    area.worktree.as_ref().map(|item| item.name.as_str()),
+                )
+            })
+            .collect();
+        found.sort_unstable();
+        assert_eq!(
+            found,
+            [
+                ("backend/worker-wt", Some("worker-wt")),
+                ("backend/worker/docs", None),
+                ("wt-foo", Some("wt-foo")),
+            ]
+        );
+        assert!(is_excluded("wt-foo/x.md", &prefixes(&areas)));
+        assert!(areas_with(Path::new("/wt-areas/solo"), "docs", &all, &dirs).is_empty());
+    }
+
+    #[test]
+    fn published_worktree_dirs_are_excluded_and_return_when_removed() {
+        let outer = PathBuf::from("/wt-pub/a");
+        let all = registry(&[("/wt-pub/a", ".")]);
+        assert!(publish(&all).is_empty());
+
+        publish_worktrees(
+            std::slice::from_ref(&outer),
+            vec![worktree("wt-foo", "/wt-pub/a", "/wt-pub/a/wt-foo")],
+        );
+        assert_eq!(publish(&all), std::slice::from_ref(&outer));
+        assert_eq!(excluded(&outer), ["wt-foo"]);
+        assert!(publish(&all).is_empty(), "список не менялся");
+
+        // Запись пропала: папка возвращается проекту при ближайшей проверке.
+        publish_worktrees(std::slice::from_ref(&outer), Vec::new());
         assert_eq!(publish(&all), std::slice::from_ref(&outer));
         assert!(excluded(&outer).is_empty());
     }
