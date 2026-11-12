@@ -16,6 +16,7 @@ use super::*;
 
 mod activity;
 mod deletion;
+mod delta;
 mod doc_queue;
 mod folders;
 mod graph;

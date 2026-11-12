@@ -37,6 +37,11 @@ impl Worker {
         };
         self.inner.cancel_queued(&path);
         self.inner.cancel_scan(&path);
+        // Дельты worktree: задания отменены, идущая сверка закрывает файл до удаления `.bars`.
+        self.inner.cancel_deltas(&path);
+        while self.inner.delta_running_for(&path) {
+            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+        }
         if let Some(cell) = lock(&self.inner.current)
             .as_ref()
             .filter(|cell| cell.project == path)
@@ -135,6 +140,14 @@ fn remove_working_files(project: &Path, home: &Path) -> io::Result<()> {
             files.push(directory.join(format!("index.sqlite{suffix}{sidecar}")));
         }
     }
+    // Дельты worktree: `worktrees/<имя>/index.sqlite` с sidecar-файлами (`worktrees.md`).
+    let deltas = directory.join("worktrees");
+    let delta_dirs = delta_directories(&deltas)?;
+    for folder in &delta_dirs {
+        for sidecar in ["", "-wal", "-shm", "-journal"] {
+            files.push(folder.join(format!("index.sqlite{sidecar}")));
+        }
+    }
     // Проверяем все пути до первой записи; под известным именем может лежать папка пользователя.
     for file in &files {
         match fs::symlink_metadata(file) {
@@ -156,8 +169,50 @@ fn remove_working_files(project: &Path, home: &Path) -> io::Result<()> {
             Err(error) => return Err(error),
         }
     }
+    // Папки дельт убираются, только если в них не осталось чужих файлов.
+    for folder in delta_dirs {
+        remove_empty_dir(&folder)?;
+    }
+    remove_empty_dir(&deltas)?;
     if fs::read_dir(&directory)?.next().is_none() {
         fs::remove_dir(&directory)?;
     }
     Ok(())
+}
+
+/// Папки дельт `.bars/worktrees/<имя>`; перенаправленная папка или папка-ссылка отменяет удаление.
+fn delta_directories(deltas: &Path) -> io::Result<Vec<PathBuf>> {
+    let metadata = match fs::symlink_metadata(deltas) {
+        Ok(metadata) => metadata,
+        Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(Vec::new()),
+        Err(error) => return Err(error),
+    };
+    if !metadata.is_dir() || redirected(&metadata) {
+        return Err(io::Error::other(format!(
+            "небезопасная папка дельт: {}",
+            deltas.display()
+        )));
+    }
+    let mut folders = Vec::new();
+    for entry in fs::read_dir(deltas)? {
+        let path = entry?.path();
+        let metadata = fs::symlink_metadata(&path)?;
+        if !metadata.is_dir() || redirected(&metadata) {
+            return Err(io::Error::other(format!(
+                "небезопасная папка дельты: {}",
+                path.display()
+            )));
+        }
+        folders.push(path);
+    }
+    Ok(folders)
+}
+
+fn remove_empty_dir(folder: &Path) -> io::Result<()> {
+    match fs::read_dir(folder) {
+        Ok(mut entries) if entries.next().is_none() => fs::remove_dir(folder),
+        Ok(_) => Ok(()),
+        Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(()),
+        Err(error) => Err(error),
+    }
 }

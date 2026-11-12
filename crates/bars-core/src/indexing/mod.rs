@@ -4,3 +4,4 @@ pub mod chunking;
 pub mod indexer;
 pub mod nested;
 pub mod walk;
+pub mod worktree_delta;

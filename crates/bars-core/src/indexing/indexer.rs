@@ -26,7 +26,7 @@ pub struct IndexSettings {
 }
 
 impl IndexSettings {
-    fn layout(&self) -> Layout {
+    pub(crate) fn layout(&self) -> Layout {
         Layout {
             chunking: self.chunking,
             docs_root: self.docs_root.clone(),
@@ -449,7 +449,7 @@ fn run_update(
     }
 }
 
-fn in_update_scope(paths: &HashSet<String>, mut path: &str) -> bool {
+pub(crate) fn in_update_scope(paths: &HashSet<String>, mut path: &str) -> bool {
     loop {
         if paths.contains(path) {
             return true;
@@ -506,7 +506,7 @@ fn process_file(
         }
     };
 
-    let hash = blake3::hash(text.as_bytes()).to_hex().to_string();
+    let hash = content_hash(&text);
     if let Some(document) = known
         && !report.full_check
         && document.hash == hash
@@ -626,7 +626,7 @@ fn index_document(
     Ok(())
 }
 
-fn embed_with_retries(
+pub(crate) fn embed_with_retries(
     embedder: &mut dyn Embedder,
     texts: &[&str],
     observer: &dyn IndexObserver,
@@ -656,7 +656,7 @@ fn embed_with_retries(
 
 /// Размерность внешней модели узнаётся из ответа провайдера и могла смениться при той же модели:
 /// вектор другого размера в индексе портит косинусы.
-fn check_stored_dim(index: &Index, dim: usize) -> Result<(), IndexingError> {
+pub(crate) fn check_stored_dim(index: &Index, dim: usize) -> Result<(), IndexingError> {
     match index.stored_fingerprint()? {
         Some(stored) if stored.dim != 0 && dim != 0 && stored.dim != dim => {
             Err(EmbedError::Dimension {
@@ -669,7 +669,11 @@ fn check_stored_dim(index: &Index, dim: usize) -> Result<(), IndexingError> {
     }
 }
 
-fn check_vectors(vectors: &[Vec<f32>], expected: usize, dim: usize) -> Result<(), EmbedError> {
+pub(crate) fn check_vectors(
+    vectors: &[Vec<f32>],
+    expected: usize,
+    dim: usize,
+) -> Result<(), EmbedError> {
     if vectors.len() != expected {
         return Err(EmbedError::Count {
             expected,
@@ -701,7 +705,13 @@ fn same_stat(document: &StoredDocument, file: &DocFile) -> bool {
         && document.modified_ns == modified_ns(file)
 }
 
-fn modified_ns(file: &DocFile) -> Option<i64> {
+/// Хеш документа: blake3 по UTF-8-тексту файла, шестнадцатеричный. Тем же хешем пользуются индексатор
+/// и сверка дельты worktree (`worktree_delta`): другой способ дал бы «различия» там, где их нет.
+pub fn content_hash(text: &str) -> String {
+    blake3::hash(text.as_bytes()).to_hex().to_string()
+}
+
+pub(crate) fn modified_ns(file: &DocFile) -> Option<i64> {
     let elapsed = file.modified?.duration_since(UNIX_EPOCH).ok()?;
     i64::try_from(elapsed.as_nanos()).ok()
 }

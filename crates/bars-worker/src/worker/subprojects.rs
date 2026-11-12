@@ -601,6 +601,7 @@ impl Inner {
         let runtime = lock(&self.projects).remove(path);
         self.graph_cache.remove(path);
         self.forget_worktrees(path);
+        self.cancel_deltas(path);
         self.cancel_queued(path);
         self.cancel_scan(path);
         // Слежение останавливается вне блокировок: поток `notify` может ждать их.

@@ -8,6 +8,7 @@
 mod activity;
 mod control;
 mod deletion;
+mod delta;
 mod doc_queue;
 mod graph;
 mod job;
@@ -383,6 +384,12 @@ struct Inner {
     discovery: subprojects::Gate,
     /// Живые worktree владельцев (`worktrees.rs`): только память, на диск попадает дельта.
     worktrees: Mutex<HashMap<PathBuf, Vec<bars_core::worktree::LinkedWorktree>>>,
+    /// Состояния и очередь дельт worktree (`delta.rs`).
+    deltas: Mutex<delta::Deltas>,
+    /// В очереди дельт появилось задание или освободилась очередь проектов.
+    delta_wake: Notify,
+    /// Сверка дельты идёт: очередь проектов ждёт (индексация идёт по одному заданию).
+    delta_busy: AtomicBool,
 }
 
 struct DownloadCleanup {
@@ -472,6 +479,9 @@ impl Worker {
             scans: Mutex::new(HashMap::new()),
             discovery: Default::default(),
             worktrees: Mutex::new(HashMap::new()),
+            deltas: Mutex::new(delta::Deltas::default()),
+            delta_wake: Notify::new(),
+            delta_busy: AtomicBool::new(false),
         });
         // Очередь ещё не идёт: никто не держит файлы индекса, восстановление безопасно.
         for path in &paths {
@@ -485,12 +495,22 @@ impl Worker {
         let doc_task = tokio::spawn(Arc::clone(&inner).run_doc_timer());
         let activity_task = tokio::spawn(Arc::clone(&inner).run_activity_timer());
         let model_task = tokio::spawn(Arc::clone(&inner).run_model_maintenance());
-        lock(&inner.tasks).extend([queue_task, timer_task, doc_task, model_task, activity_task]);
+        lock(&inner.tasks).extend([
+            queue_task,
+            timer_task,
+            doc_task,
+            model_task,
+            activity_task,
+        ]);
         for path in paths {
             inner.activate(&path, Priority::Periodic);
         }
         // После проверок файлов и без ожидания канала: обход подпроектов идёт в фоне.
         inner.schedule_discovery_all();
+        // Очередь дельт worktree — после активации проектов: проверка старта видит их состояния.
+        // Последней в списке: `shutdown` прерывает таймеры по номеру задания.
+        let delta_task = tokio::spawn(Arc::clone(&inner).run_delta_queue());
+        lock(&inner.tasks).push(delta_task);
         Ok(Self { inner })
     }
 
@@ -547,6 +567,7 @@ impl Worker {
         self.inner.cancel_current();
         self.inner.pause.set(false);
         self.inner.wake.notify_one();
+        self.inner.delta_wake.notify_one();
         let tasks: Vec<_> = lock(&self.inner.tasks).drain(..).collect();
         // Первая — очередь: она дописывает текущий документ. Вторая — таймер, он ждёт часами;
         // третья — таймер пауз документов, он тоже не нужен после остановки.
@@ -844,6 +865,10 @@ impl Worker {
             // Worktree владельца и вложенных проектов перечитываются: только что созданный
             // `git worktree add` виден сразу (первое обращение к виду — шаг 6.3.2).
             self.rediscover_worktrees(&discovered.root);
+            // Сессия в W — первое обращение к виду: дельта строится лениво (Explicit).
+            if let Some((owner, Some(reference))) = self.resolve_cwd(&cwd) {
+                self.ensure_worktree_delta(&owner, &reference.name);
+            }
             self.sync_project_gates(Some(&discovered.root));
             return Ok(Some(discovered.root));
         }
@@ -1259,6 +1284,7 @@ impl Worker {
             && !lock(&self.inner.docs).has_pending()
             && !self.inner.busy.load(Ordering::SeqCst)
             && lock(&self.inner.scans).is_empty()
+            && lock(&self.inner.deltas).idle()
             && lock(&self.inner.graph_jobs)
                 .values()
                 .all(graph::GraphJob::idle)
@@ -1835,6 +1861,14 @@ impl Inner {
                 self.wake.notified().await;
                 continue;
             }
+            if self.delta_busy.load(Ordering::SeqCst) {
+                // Сверка дельты worktree идёт: индексация по одному заданию, проекты ждут её конца.
+                tokio::select! {
+                    () = self.wake.notified() => {},
+                    () = tokio::time::sleep(Duration::from_millis(50)) => {},
+                }
+                continue;
+            }
             let next = {
                 let projects = lock(&self.projects);
                 let mut queue = lock(&self.queue);
@@ -1853,6 +1887,8 @@ impl Inner {
                 Some((path, job, (job_gate, guard))) => {
                     self.process(path, job, job_gate, guard).await;
                     self.busy.store(false, Ordering::SeqCst);
+                    // Очередь проектов свободна: дельты worktree могут идти.
+                    self.delta_wake.notify_one();
                 }
                 None => {
                     // Чужой держатель gate может не сигналить очередь; проверяем только готовность.
@@ -1884,6 +1920,8 @@ impl Inner {
                 inner.discover_all();
                 // Затем worktree всех владельцев, ленивых тоже; пропавшие уходят из списка.
                 inner.discover_worktrees(None);
+                // Дельты: уборка пропавших и несовместимых, актуальность живых.
+                inner.check_deltas();
             })
             .await;
             self.check_all();

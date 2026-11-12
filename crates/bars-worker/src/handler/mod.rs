@@ -46,8 +46,8 @@ use bars_protocol::{
     RpcError, RunningJob, SavedOutput, ScoreKind, SearchHit, SearchOutput, SearchParams,
     SecretOutput, SecretSetParams, SecretStatusParams, SessionStartParams, SetDocsRootParams,
     SettingsOutput, SettingsSaveParams, SimilarOutput, SimilarParams, StatusOutput, StatusParams,
-    DeltaState, Target, TreeDocument, TreeOutput, TreeParams, UninstallOutput, UninstallParams,
-    UnregisterOutput, UnregisterParams, WorktreeDeltaStatus, WorktreeStatus, output_value,
+    Target, TreeDocument, TreeOutput, TreeParams, UninstallOutput, UninstallParams,
+    UnregisterOutput, UnregisterParams, WorktreeStatus, output_value,
 };
 use serde_json::Value;
 
@@ -428,6 +428,11 @@ impl WorkerHandler {
         let status = self.worker.status(&project).map_err(worker_error)?;
         if status.state == ProjectState::ReindexRequired {
             return Err(errors::reindex_required());
+        }
+        // Поиск с `wt` или из cwd в worktree — первое обращение к виду: дельта строится лениво.
+        // Сам поиск по виду — шаг 6.3.3, до него ответ идёт по основному checkout.
+        if let Ok((owner, ViewSelector::Worktree(item))) = self.resolve_view(&params.target) {
+            self.worker.ensure_worktree_delta(&owner, &item.name);
         }
         let mut settings = self.settings(&project)?;
         // Проверка знаний требует rerank независимо от переключателя обычного поиска.
@@ -1106,21 +1111,16 @@ impl WorkerHandler {
             .linked_worktrees(&project)
             .into_iter()
             .filter(|item| only.as_ref().is_none_or(|name| *name == item.name))
-            .map(|item| WorktreeStatus {
-                current: session.as_deref() == Some(item.name.as_str()),
-                name: item.name,
-                path: item.path.display().to_string(),
-                branch: item.branch,
-                locked: item.locked,
-                // Дельта — шаг 6.3.2: до него у всех worktree «дельты нет».
-                delta: WorktreeDeltaStatus {
-                    state: DeltaState::None,
-                    documents: 0,
-                    done: None,
-                    total: None,
-                    pending: 0,
-                    error: None,
-                },
+            .map(|item| {
+                let delta = self.worker.worktree_delta_status(&project, &item.name);
+                WorktreeStatus {
+                    current: session.as_deref() == Some(item.name.as_str()),
+                    name: item.name,
+                    path: item.path.display().to_string(),
+                    branch: item.branch,
+                    locked: item.locked,
+                    delta,
+                }
             })
             .collect();
         Ok(StatusOutput {

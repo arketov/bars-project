@@ -210,3 +210,32 @@ async fn projects_filter_finds_the_owner_by_worktree_name_path_and_branch() {
         .unwrap();
     assert!(none.projects.is_empty());
 }
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn search_from_a_worktree_requests_the_delta() {
+    let home = TempDir::new().unwrap();
+    let projects = TempDir::new().unwrap();
+    let (main, work) = repo_with_worktree(projects.path());
+    let handler = handler(&home);
+    let worker = handler.worker();
+    worker.register(&main).unwrap();
+    let deadline = Instant::now() + Duration::from_secs(20);
+    while !worker.is_idle() {
+        assert!(Instant::now() < deadline, "очередь не опустела");
+        tokio::time::sleep(Duration::from_millis(25)).await;
+    }
+    let state = |worker: &Worker| worker.worktree_delta_status(&main, "feat-x").state;
+    assert_eq!(state(worker), bars_protocol::DeltaState::None);
+
+    // Поиск из cwd в worktree — первое обращение к виду: дельта строится лениво. Сам поиск по
+    // виду — шаг 6.3.3, здесь важен только запрос на построение.
+    let _ = handler.search(search(&work.join("docs"), "руководство")).await;
+    while state(worker) != bars_protocol::DeltaState::Ready || !worker.is_idle() {
+        assert!(Instant::now() < deadline, "дельта не построена");
+        tokio::time::sleep(Duration::from_millis(25)).await;
+    }
+    assert!(
+        bars_core::indexing::worktree_delta::delta_path(&main, "feat-x").is_file(),
+        "дельта лежит в .bars/worktrees/<имя>"
+    );
+}
