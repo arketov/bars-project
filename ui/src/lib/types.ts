@@ -1,6 +1,6 @@
 // Типы ответов воркера: зеркало `crates/bars-protocol/src/methods.rs` (docs/architecture/protocol.md).
 
-export type ProjectState = "ready" | "indexing" | "reindex_required" | "unavailable";
+export type ProjectState = "ready" | "indexing" | "reindex_required" | "unavailable" | "lazy";
 /** `none` — опоры нет (ни rerank, ни embed): порядок по словам, оценка не рисуется. */
 export type ScoreKind = "rerank" | "cosine" | "none";
 export type JobKind = "rebuild" | "check" | "files";
@@ -17,6 +17,26 @@ export interface ProjectInfo {
   docs_root: string;
   state: ProjectState;
   modules: ModuleInfo[];
+  /** Абсолютный путь ближайшего предка; нет у проекта без предка (Т-49). */
+  parent?: string;
+  /** Составное имя `главный/путь` — только у проекта с предком. */
+  qualified_name?: string;
+  /** Найден автопоиском и не зарегистрирован человеком. */
+  discovered?: boolean;
+  /** Прямые подпроекты. */
+  subprojects?: SubprojectInfo[];
+  /** Обход автопоиска оборван пределом. */
+  discovery_truncated?: boolean;
+}
+
+export interface SubprojectInfo {
+  /** Составное имя. */
+  name: string;
+  path: string;
+  state: ProjectState;
+  discovered?: boolean;
+  /** Область подпроекта исключена из индекса предка. */
+  excluded?: boolean;
 }
 
 export interface ProjectsOutput {

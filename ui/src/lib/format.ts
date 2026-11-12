@@ -84,7 +84,7 @@ export function jobReason(kind: JobKind, priority: JobPriority, files: number): 
 }
 
 export interface DotInfo {
-  cls: "ok" | "busy" | "warn" | "off";
+  cls: "ok" | "busy" | "warn" | "off" | "idle";
   text: string;
 }
 
@@ -125,6 +125,9 @@ export function stateDot(
       return { cls: "warn", text: "нужна переиндексация: сменилась модель" };
     case "unavailable":
       return { cls: "off", text: "папка не найдена" };
+    case "lazy":
+      // Найденный подпроект: папка на месте, индекс ещё не требовали (не `off`).
+      return { cls: "idle", text: "ждёт первого обращения" };
   }
 }
 

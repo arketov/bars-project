@@ -227,7 +227,8 @@ pub struct SearchScope {
 /// Вложенный зарегистрированный проект, область которого исключена из индекса внешнего.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct NestedProjectInfo {
-    /// Отображаемое имя: им выбирается проект параметром `project`.
+    /// Составное имя `главный/путь` (вложенный проект — подпроект); им выбирается проект
+    /// параметром `project`. Без предка в реестре — отображаемое имя.
     pub name: String,
     /// Корень вложенного проекта.
     pub path: String,
@@ -606,6 +607,9 @@ pub enum ProjectState {
     Indexing,
     ReindexRequired,
     Unavailable,
+    /// Найденный подпроект, которого ещё не касались: индекс не строится и не проверяется
+    /// (Т-49, `docs/features/projects/subprojects.md`, «Ленивый индекс»). Не ошибка.
+    Lazy,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -628,6 +632,35 @@ pub struct ProjectInfo {
     /// Исключённые вложенные проекты (Т-7, Т-15): ответ называет их, чтобы агент выбрал `project`.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub nested: Vec<NestedProjectInfo>,
+    /// Абсолютный путь ближайшего зарегистрированного предка (Т-49).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent: Option<String>,
+    /// Составное имя `главный/путь` — только у проекта с предком; им выбирается проект.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub qualified_name: Option<String>,
+    /// Подпроект найден автопоиском и не зарегистрирован человеком.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub discovered: bool,
+    /// Прямые подпроекты (ближайший предок — этот проект).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub subprojects: Vec<SubprojectInfo>,
+    /// Обход автопоиска этого проекта оборван пределом.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub discovery_truncated: bool,
+}
+
+/// Прямой подпроект в ответе `projects` (Т-49).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SubprojectInfo {
+    /// Составное имя `главный/путь`.
+    pub name: String,
+    pub path: String,
+    pub state: ProjectState,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub discovered: bool,
+    /// Область подпроекта исключена из индекса этого проекта.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub excluded: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

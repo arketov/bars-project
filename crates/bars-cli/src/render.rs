@@ -344,14 +344,17 @@ fn state_name(state: ProjectState) -> &'static str {
         ProjectState::Indexing => "идёт индексация",
         ProjectState::ReindexRequired => "нужна переиндексация",
         ProjectState::Unavailable => "папка недоступна",
+        ProjectState::Lazy => "ждёт первого обращения",
     }
 }
 
 fn project(info: &ProjectInfo) -> String {
+    // Составное имя — то, что передаётся в `--project` (Т-49).
+    let name = info.qualified_name.as_deref().unwrap_or(&info.name);
     let mut text = format!(
         "{} ({})\n  состояние: {}\n  корень документации: {}\n  модули:",
         info.path,
-        info.name,
+        name,
         state_name(info.state),
         info.docs_root
     );

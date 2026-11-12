@@ -22,15 +22,24 @@ pub fn reindex_required() -> RpcError {
 pub fn worker_error(error: WorkerError) -> RpcError {
     let text = error.to_string();
     match error {
-        WorkerError::Resolve(ResolveError::NotFound(_)) | WorkerError::NotRegistered(_) => {
-            RpcError::bars(
-                ErrorKind::ProjectNotFound,
-                format!("{text}: bars-cli register <папка проекта>"),
-            )
+        WorkerError::Resolve(ResolveError::NotFound(_)) => RpcError::bars(
+            ErrorKind::ProjectNotFound,
+            format!(
+                "{text}: bars-cli register <папка проекта>; список — bars_status(all=true)"
+            ),
+        ),
+        WorkerError::Resolve(ResolveError::UnknownSubproject { .. }) => {
+            RpcError::bars(ErrorKind::ProjectNotFound, text)
         }
+        WorkerError::NotRegistered(_) => RpcError::bars(
+            ErrorKind::ProjectNotFound,
+            format!("{text}: bars-cli register <папка проекта>"),
+        ),
         WorkerError::Resolve(ResolveError::Ambiguous { .. })
         | WorkerError::NotADirectory(_)
-        | WorkerError::Registry(RegistryError::NotAbsolute(_)) => {
+        | WorkerError::Registry(
+            RegistryError::NotAbsolute(_) | RegistryError::DiscoveredRename,
+        ) => {
             RpcError::bars(ErrorKind::InvalidParams, text)
         }
         WorkerError::Unavailable(_) => RpcError::bars(ErrorKind::ProjectUnavailable, text),

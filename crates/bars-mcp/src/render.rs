@@ -20,6 +20,7 @@ fn state_name(state: ProjectState) -> &'static str {
         ProjectState::Indexing => "indexing",
         ProjectState::ReindexRequired => "reindex_required",
         ProjectState::Unavailable => "unavailable",
+        ProjectState::Lazy => "lazy",
     }
 }
 
@@ -595,7 +596,12 @@ pub fn read(path: &str, output: &ReadOutput) -> String {
 fn project_block(text: &mut String, index: usize, total: usize, info: &ProjectInfo) {
     let _ = writeln!(text, "=== PROJECT {index} of {total} ===");
     let _ = writeln!(text, "path: {}", info.path);
-    let _ = writeln!(text, "name: {}", info.name);
+    // Составное имя `главный/путь` — то, что передаётся в `project` (Т-49).
+    let _ = writeln!(
+        text,
+        "name: {}",
+        info.qualified_name.as_deref().unwrap_or(&info.name)
+    );
     let _ = writeln!(text, "docs_root: {}", info.docs_root);
     let _ = writeln!(text, "state: {}", state_name(info.state));
     let modules = info

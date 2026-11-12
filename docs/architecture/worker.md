@@ -182,7 +182,7 @@ title: Воркер bars — запуск, задачи внутри проце�
 
 | Поле | Значение |
 |---|---|
-| `state` | `ready` · `indexing` · `reindex_required` (Т-25) · `unavailable` (папки нет, [projects.md](../features/projects/projects.md)) · `lazy` (подпроект найден автоматически, индекс ещё не требовали; проект, реализации нет, [подпроекты](../features/projects/subprojects.md)) |
+| `state` | `ready` · `indexing` · `reindex_required` (Т-25) · `unavailable` (папки нет, [projects.md](../features/projects/projects.md)) · `lazy` (подпроект найден автоматически, индекс ещё не требовали; значение и поле реестра есть, записи создаёт автопоиск — проект, [подпроекты](../features/projects/subprojects.md)) |
 | `updated_at` | время последней завершённой проверки |
 | `pending` | сколько документов ждёт индексации |
 | `model` | отпечаток модели индекса и отпечаток модели в настройках |

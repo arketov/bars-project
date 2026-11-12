@@ -252,6 +252,14 @@ pub struct ProjectSnapshot {
     pub registered_at: String,
     pub docs_root: String,
     pub state: ProjectState,
+    /// Ближайший зарегистрированный предок (Т-49).
+    pub parent: Option<PathBuf>,
+    /// Составное имя `главный/путь`; только у проекта с предком.
+    pub qualified_name: Option<String>,
+    /// Найден автопоиском и не зарегистрирован человеком.
+    pub discovered: bool,
+    /// Индекса ещё не требовали (`state` — `Lazy`).
+    pub lazy: bool,
 }
 
 /// Итог регистрации.
@@ -660,18 +668,19 @@ impl Worker {
         bars_core::indexing::nested::areas(project)
             .into_iter()
             .map(|area| {
-                let name = lock(&self.inner.registry)
-                    .entries()
-                    .iter()
-                    .find(|entry| entry.path == area.project)
-                    .map_or_else(
-                        || {
-                            area.project
-                                .file_name()
-                                .map_or_else(String::new, |n| n.to_string_lossy().into_owned())
-                        },
-                        ProjectEntry::display_name,
-                    );
+                // Вложенный проект — подпроект: агент выбирает его составным именем (Т-49).
+                let registry = lock(&self.inner.registry);
+                let known = registry.qualified_name(&area.project).or_else(|| {
+                    registry
+                        .find(&area.project)
+                        .map(ProjectEntry::display_name)
+                });
+                drop(registry);
+                let name = known.unwrap_or_else(|| {
+                    area.project
+                        .file_name()
+                        .map_or_else(String::new, |n| n.to_string_lossy().into_owned())
+                });
                 let documents = if count {
                     let docs_root = self.inner.docs_root_of(&area.project);
                     bars_core::indexing::walk::walk_docs(&area.project, Path::new(&docs_root))
@@ -694,35 +703,54 @@ impl Worker {
 
     /// Все проекты реестра с состоянием, в порядке регистрации.
     pub fn projects(&self) -> Vec<ProjectSnapshot> {
-        let entries: Vec<(ProjectEntry, bool)> = {
+        // Предок и составное имя считаются по всему реестру под одной блокировкой.
+        let entries: Vec<(ProjectEntry, bool, Option<PathBuf>, Option<String>)> = {
             let registry = lock(&self.inner.registry);
             registry
                 .entries()
                 .iter()
-                .map(|entry| (entry.clone(), registry.has_duplicate_name(&entry.path)))
+                .map(|entry| {
+                    (
+                        entry.clone(),
+                        registry.has_duplicate_name(&entry.path),
+                        registry
+                            .parent_of(&entry.path)
+                            .map(|parent| parent.path.clone()),
+                        registry.qualified_name(&entry.path),
+                    )
+                })
                 .collect()
         };
         entries
             .into_iter()
-            .map(|(entry, duplicate_name)| {
-                let state = lock(&self.inner.projects).get(&entry.path).map_or(
-                    ProjectState::Unavailable,
-                    |runtime| {
-                        if runtime.status.state == ProjectState::Ready
-                            && lock(&self.inner.scans).contains_key(&entry.path)
-                        {
-                            ProjectState::Indexing
-                        } else {
-                            runtime.status.state
-                        }
-                    },
-                );
+            .map(|(entry, duplicate_name, parent, qualified_name)| {
+                // Ленивая запись ещё не проверялась: состояние берётся из реестра, не из `Runtime`.
+                let state = if entry.lazy {
+                    ProjectState::Lazy
+                } else {
+                    lock(&self.inner.projects).get(&entry.path).map_or(
+                        ProjectState::Unavailable,
+                        |runtime| {
+                            if runtime.status.state == ProjectState::Ready
+                                && lock(&self.inner.scans).contains_key(&entry.path)
+                            {
+                                ProjectState::Indexing
+                            } else {
+                                runtime.status.state
+                            }
+                        },
+                    )
+                };
                 ProjectSnapshot {
                     name: entry.display_name(),
                     duplicate_name,
                     docs_root: self.inner.docs_root_of(&entry.path),
                     registered_at: entry.registered_at,
                     state,
+                    parent,
+                    qualified_name,
+                    discovered: entry.discovered,
+                    lazy: entry.lazy,
                     path: entry.path,
                 }
             })

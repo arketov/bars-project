@@ -26,6 +26,12 @@ pub enum RegistryError {
     Parse { file: PathBuf, message: String },
     #[error("не удалось записать {file}: {source}")]
     Write { file: PathBuf, source: io::Error },
+    /// Найденный подпроект не переименовывается: его имя — путь от главного (Т-49).
+    #[error(
+        "подпроект найден автоматически: его имя — путь от главного проекта; чтобы дать своё имя, \
+         зарегистрируйте его отдельным проектом"
+    )]
+    DiscoveredRename,
 }
 
 /// Запись реестра.
@@ -36,6 +42,13 @@ pub struct ProjectEntry {
     pub name: Option<String>,
     /// RFC 3339, UTC.
     pub registered_at: String,
+    /// Запись создал автопоиск подпроектов, человек проект не регистрировал (Т-49).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub discovered: bool,
+    /// Индекса ещё не требовали: проект не проверяется и не индексируется. Только вместе с
+    /// `discovered`; при загрузке `lazy` без `discovered` сбрасывается.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub lazy: bool,
 }
 
 impl ProjectEntry {
@@ -60,6 +73,32 @@ pub enum ResolveError {
     /// Имя совпало у нескольких проектов: нужен путь (`docs/architecture/projects.md`).
     #[error("имя `{name}` носят несколько проектов: укажите путь")]
     Ambiguous { name: String, paths: Vec<PathBuf> },
+    /// Имя не найдено, но его первый сегмент — главный проект: ответ называет его подпроекты
+    /// (`docs/features/projects/subprojects.md`, «Ошибки»).
+    #[error("{message}")]
+    UnknownSubproject {
+        name: String,
+        /// Готовый текст: имя, главный проект и до [`HINT_SUBPROJECTS`] его подпроектов.
+        message: String,
+    },
+}
+
+/// Сколько подпроектов главного перечисляет подсказка об ошибке имени.
+pub const HINT_SUBPROJECTS: usize = 10;
+
+fn unknown_subproject_text(name: &str, main: &str, subprojects: &[String], total: usize) -> String {
+    if subprojects.is_empty() {
+        return format!("проект `{name}` не зарегистрирован; у проекта `{main}` нет подпроектов");
+    }
+    let mut text = format!(
+        "проект `{name}` не зарегистрирован; подпроекты `{main}`: {}",
+        subprojects.join(", ")
+    );
+    if total > subprojects.len() {
+        let rest = total - subprojects.len();
+        text = format!("{text} и ещё {rest} (остальные — bars_status(filter=\"{main}/\"))");
+    }
+    text
 }
 
 #[derive(Debug)]
@@ -85,6 +124,17 @@ impl Registry {
             Err(error) if error.kind() == io::ErrorKind::NotFound => Vec::new(),
             Err(source) => return Err(RegistryError::Read { file, source }),
         };
+        let mut projects = projects;
+        for entry in &mut projects {
+            // `lazy` бывает только у найденного подпроекта: запись человека проверяют сразу.
+            if entry.lazy && !entry.discovered {
+                log::warn!(
+                    "В реестре проект {} помечен lazy без discovered: lazy сброшен",
+                    entry.path.display()
+                );
+                entry.lazy = false;
+            }
+        }
         Ok(Self { file, projects })
     }
 
@@ -112,6 +162,16 @@ impl Registry {
 
     /// Добавляет проект и записывает файл. `Ok(false)` — проект уже был, реестр не менялся.
     pub fn add(&mut self, path: &Path) -> Result<bool, RegistryError> {
+        self.push(path, false)
+    }
+
+    /// Добавляет найденный автопоиском подпроект: `discovered` и `lazy`, файл записывается как у
+    /// [`Registry::add`]. `Ok(false)` — путь уже в реестре, запись не меняется (Т-49).
+    pub fn add_discovered(&mut self, path: &Path) -> Result<bool, RegistryError> {
+        self.push(path, true)
+    }
+
+    fn push(&mut self, path: &Path, discovered: bool) -> Result<bool, RegistryError> {
         let path = normalize(path)?;
         if self.contains(&path) {
             return Ok(false);
@@ -120,9 +180,58 @@ impl Registry {
             path,
             name: None,
             registered_at: rfc3339(SystemTime::now()),
+            discovered,
+            lazy: discovered,
         });
         if let Err(error) = self.save() {
             self.projects.pop();
+            return Err(error);
+        }
+        Ok(true)
+    }
+
+    /// Снимает `lazy` (первое обращение). `Ok(false)` — записи нет или она уже не ленивая:
+    /// файл не переписывается.
+    pub fn clear_lazy(&mut self, path: &Path) -> Result<bool, RegistryError> {
+        self.update(path, |entry| {
+            let changed = entry.lazy;
+            entry.lazy = false;
+            changed
+        })
+    }
+
+    /// Делает запись самостоятельной: человек зарегистрировал найденный подпроект (`discovered` и
+    /// `lazy` сняты). `Ok(false)` — записи нет или она уже самостоятельная.
+    pub fn set_standalone(&mut self, path: &Path) -> Result<bool, RegistryError> {
+        self.update(path, |entry| {
+            let changed = entry.discovered || entry.lazy;
+            entry.discovered = false;
+            entry.lazy = false;
+            changed
+        })
+    }
+
+    /// Меняет запись; `change` возвращает, изменилось ли что-то. Сбой записи откатывает запись в
+    /// памяти.
+    fn update(
+        &mut self,
+        path: &Path,
+        change: impl FnOnce(&mut ProjectEntry) -> bool,
+    ) -> Result<bool, RegistryError> {
+        let key = path_key(path);
+        let Some(position) = self
+            .projects
+            .iter()
+            .position(|entry| path_key(&entry.path) == key)
+        else {
+            return Ok(false);
+        };
+        let previous = self.projects[position].clone();
+        if !change(&mut self.projects[position]) {
+            return Ok(false);
+        }
+        if let Err(error) = self.save() {
+            self.projects[position] = previous;
             return Err(error);
         }
         Ok(true)
@@ -159,6 +268,9 @@ impl Registry {
                 message: "проект не зарегистрирован".into(),
             });
         };
+        if self.projects[position].discovered {
+            return Err(RegistryError::DiscoveredRename);
+        }
         let previous = self.projects[position].name.replace(name);
         if let Err(error) = self.save() {
             self.projects[position].name = previous;
@@ -167,7 +279,46 @@ impl Registry {
         Ok(())
     }
 
-    /// Проект по пути или отображаемому имени. Путь точнее имени и выигрывает.
+    /// Ближайший зарегистрированный предок: папка строго выше корня проекта (Т-49). Путь
+    /// сравнивается как в [`path_key`].
+    pub fn parent_of(&self, path: &Path) -> Option<&ProjectEntry> {
+        path.ancestors().skip(1).find_map(|dir| self.find(dir))
+    }
+
+    /// Главный проект: самый внешний зарегистрированный предок; у проекта без предка — он сам.
+    /// `None` — ни пути, ни предка в реестре нет.
+    pub fn main_of(&self, path: &Path) -> Option<&ProjectEntry> {
+        path.ancestors()
+            .skip(1)
+            .filter_map(|dir| self.find(dir))
+            .last()
+            .or_else(|| self.find(path))
+    }
+
+    /// Составное имя `<имя главного>/<путь от корня главного>`; `None` у проекта без предка.
+    pub fn qualified_name(&self, path: &Path) -> Option<String> {
+        self.parent_of(path)?;
+        let main = self.main_of(path)?;
+        let skip = main.path.components().count();
+        let rest: Vec<String> = path
+            .components()
+            .skip(skip)
+            .filter_map(|component| match component {
+                Component::Normal(part) => Some(part.to_string_lossy().into_owned()),
+                _ => None,
+            })
+            .collect();
+        Some(format!("{}/{}", main.display_name(), rest.join("/")))
+    }
+
+    /// У проекта есть своё имя-селектор: проект без предка или самостоятельный подпроект. Найденный
+    /// подпроект выбирается только составным именем.
+    fn has_selector_name(&self, entry: &ProjectEntry) -> bool {
+        !entry.discovered || self.parent_of(&entry.path).is_none()
+    }
+
+    /// Проект по пути, составному имени `главный/путь` или отображаемому имени. Путь точнее имени
+    /// и выигрывает. В составном имени `\` равен `/`, хвостовой `/` отбрасывается.
     pub fn resolve(&self, selector: &str) -> Result<&ProjectEntry, ResolveError> {
         let as_path = Path::new(selector);
         if as_path.is_absolute()
@@ -175,13 +326,19 @@ impl Registry {
         {
             return Ok(entry);
         }
+        let key = selector_key(selector);
         let named: Vec<&ProjectEntry> = self
             .projects
             .iter()
-            .filter(|entry| entry.display_name() == selector)
+            .filter(|entry| {
+                (self.has_selector_name(entry) && entry.display_name() == selector)
+                    || self.qualified_name(&entry.path).is_some_and(|name| name == key)
+            })
             .collect();
         match named.as_slice() {
-            [] => Err(ResolveError::NotFound(selector.to_string())),
+            [] => Err(self
+                .unknown_subproject(&key)
+                .unwrap_or_else(|| ResolveError::NotFound(selector.to_string()))),
             [entry] => Ok(entry),
             _ => Err(ResolveError::Ambiguous {
                 name: selector.to_string(),
@@ -190,15 +347,46 @@ impl Registry {
         }
     }
 
-    /// Имя носят несколько проектов: окно и `projects` показывают такие с путём.
+    /// Первый сегмент имени — главный проект: ошибка с перечнем его подпроектов.
+    fn unknown_subproject(&self, key: &str) -> Option<ResolveError> {
+        let (first, _) = key.split_once('/')?;
+        let main = self
+            .projects
+            .iter()
+            .find(|entry| self.parent_of(&entry.path).is_none() && entry.display_name() == first)?;
+        let prefix = format!("{}/", main.display_name());
+        let mut all: Vec<String> = self
+            .projects
+            .iter()
+            .filter(|entry| {
+                self.main_of(&entry.path)
+                    .is_some_and(|found| path_key(&found.path) == path_key(&main.path))
+            })
+            .filter_map(|entry| self.qualified_name(&entry.path))
+            .filter(|name| name.starts_with(&prefix))
+            .collect();
+        all.sort();
+        let total = all.len();
+        all.truncate(HINT_SUBPROJECTS);
+        Some(ResolveError::UnknownSubproject {
+            name: key.to_string(),
+            message: unknown_subproject_text(key, &main.display_name(), &all, total),
+        })
+    }
+
+    /// Имя-селектор носят несколько проектов: окно и `projects` показывают такие с путём.
+    /// Повторы считаются только среди имён-селекторов (Т-49).
     pub fn has_duplicate_name(&self, path: &Path) -> bool {
         let Some(entry) = self.find(path) else {
             return false;
         };
+        if !self.has_selector_name(entry) {
+            return false;
+        }
         let name = entry.display_name();
         self.projects
             .iter()
-            .filter(|entry| entry.display_name() == name)
+            .filter(|other| self.has_selector_name(other) && other.display_name() == name)
             .count()
             > 1
     }
@@ -374,6 +562,11 @@ pub fn normalize(path: &Path) -> Result<PathBuf, RegistryError> {
         }
     }
     Ok(result)
+}
+
+/// Селектор как составное имя: `\` равен `/`, хвостовые `/` отбрасываются.
+fn selector_key(selector: &str) -> String {
+    selector.replace('\\', "/").trim_end_matches('/').to_string()
 }
 
 /// Ключ сравнения путей: на Windows регистр букв не различается.
@@ -733,5 +926,251 @@ mod tests {
         fs::create_dir_all(project.join("docs/guide")).unwrap();
         fs::write(project.join("docs/guide/Intro.MD"), "x").unwrap();
         assert!(has_markdown(&project, "docs"));
+    }
+
+    /// Реестр по образцу `tmc-opovechenie`: главный, найденный подпроект и самостоятельный.
+    fn tree(home: &TempDir) -> (Registry, PathBuf, PathBuf, PathBuf) {
+        let main = dir(home, "tmc-opovechenie");
+        let api = dir(home, "tmc-opovechenie/backend/api");
+        let web = dir(home, "tmc-opovechenie/frontend/web-angular");
+        let mut registry = Registry::load(home.path()).unwrap();
+        registry.add(&main).unwrap();
+        registry.add_discovered(&api).unwrap();
+        registry.add(&web).unwrap();
+        (registry, main, api, web)
+    }
+
+    #[test]
+    fn old_file_without_new_fields_reads_as_registered_by_a_human() {
+        let home = TempDir::new().unwrap();
+        let project = dir(&home, "alpha");
+        let text = format!(
+            "[[project]]\npath = {:?}\nregistered_at = \"2026-11-01T00:00:00Z\"\n",
+            project.to_string_lossy()
+        );
+        fs::write(home.path().join(REGISTRY_FILE), text).unwrap();
+        let registry = Registry::load(home.path()).unwrap();
+        let entry = &registry.entries()[0];
+        assert!(!entry.discovered && !entry.lazy);
+    }
+
+    #[test]
+    fn discovered_and_lazy_roundtrip_and_false_is_not_written() {
+        let home = TempDir::new().unwrap();
+        let (_, main, api, _) = tree(&home);
+        let text = fs::read_to_string(home.path().join(REGISTRY_FILE)).unwrap();
+        assert_eq!(text.matches("discovered = true").count(), 1);
+        assert_eq!(text.matches("lazy = true").count(), 1);
+        assert!(!text.contains("false"), "{text}");
+
+        let reloaded = Registry::load(home.path()).unwrap();
+        let entry = reloaded.find(&api).unwrap();
+        assert!(entry.discovered && entry.lazy);
+        assert!(!reloaded.find(&main).unwrap().discovered);
+    }
+
+    #[test]
+    fn lazy_without_discovered_is_normalized_on_load() {
+        let home = TempDir::new().unwrap();
+        let project = dir(&home, "alpha");
+        let text = format!(
+            "[[project]]\npath = {:?}\nregistered_at = \"2026-11-01T00:00:00Z\"\nlazy = true\n",
+            project.to_string_lossy()
+        );
+        fs::write(home.path().join(REGISTRY_FILE), text).unwrap();
+        let registry = Registry::load(home.path()).unwrap();
+        assert!(!registry.entries()[0].lazy);
+    }
+
+    #[test]
+    fn parent_main_and_qualified_name_of_any_depth() {
+        let home = TempDir::new().unwrap();
+        let (mut registry, main, api, web) = tree(&home);
+        let deep = dir(&home, "tmc-opovechenie/backend/api/vendor/x");
+        registry.add_discovered(&deep).unwrap();
+
+        assert!(registry.parent_of(&main).is_none());
+        assert_eq!(registry.parent_of(&api).unwrap().path, main);
+        assert_eq!(registry.parent_of(&deep).unwrap().path, api);
+        // Главный — самый внешний, а не ближайший предок.
+        assert_eq!(registry.main_of(&deep).unwrap().path, main);
+        assert_eq!(registry.main_of(&main).unwrap().path, main);
+        assert_eq!(
+            registry.qualified_name(&deep).unwrap(),
+            "tmc-opovechenie/backend/api/vendor/x"
+        );
+        assert_eq!(
+            registry.qualified_name(&web).unwrap(),
+            "tmc-opovechenie/frontend/web-angular"
+        );
+        assert!(registry.qualified_name(&main).is_none());
+    }
+
+    #[test]
+    fn qualified_name_follows_a_renamed_main() {
+        let home = TempDir::new().unwrap();
+        let (mut registry, main, api, _) = tree(&home);
+        registry.rename(&main, "Оповещение".into()).unwrap();
+        assert_eq!(
+            registry.qualified_name(&api).unwrap(),
+            "Оповещение/backend/api"
+        );
+        assert_eq!(
+            registry.resolve("Оповещение/backend/api").unwrap().path,
+            api
+        );
+        assert!(registry.resolve("tmc-opovechenie/backend/api").is_err());
+    }
+
+    #[test]
+    fn resolve_accepts_backslashes_and_trailing_slash_in_a_qualified_name() {
+        let home = TempDir::new().unwrap();
+        let (registry, _, api, _) = tree(&home);
+        for selector in [
+            "tmc-opovechenie/backend/api",
+            "tmc-opovechenie\\backend\\api",
+            "tmc-opovechenie/backend/api/",
+            "tmc-opovechenie\\backend\\api\\",
+        ] {
+            assert_eq!(registry.resolve(selector).unwrap().path, api, "{selector}");
+        }
+    }
+
+    #[test]
+    fn standalone_subproject_answers_to_both_names_discovered_only_to_the_qualified() {
+        let home = TempDir::new().unwrap();
+        let (registry, _, api, web) = tree(&home);
+        assert_eq!(registry.resolve("web-angular").unwrap().path, web);
+        assert_eq!(
+            registry
+                .resolve("tmc-opovechenie/frontend/web-angular")
+                .unwrap()
+                .path,
+            web
+        );
+        // У найденного своего имени-селектора нет.
+        assert!(matches!(
+            registry.resolve("api"),
+            Err(ResolveError::NotFound(_))
+        ));
+        assert_eq!(registry.resolve(&api.to_string_lossy()).unwrap().path, api);
+    }
+
+    #[test]
+    fn two_discovered_api_in_different_mains_do_not_clash() {
+        let home = TempDir::new().unwrap();
+        let first = dir(&home, "one");
+        let second = dir(&home, "two");
+        let first_api = dir(&home, "one/api");
+        let second_api = dir(&home, "two/api");
+        let mut registry = Registry::load(home.path()).unwrap();
+        registry.add(&first).unwrap();
+        registry.add(&second).unwrap();
+        registry.add_discovered(&first_api).unwrap();
+        registry.add_discovered(&second_api).unwrap();
+
+        assert_eq!(registry.resolve("one/api").unwrap().path, first_api);
+        assert_eq!(registry.resolve("two/api").unwrap().path, second_api);
+        assert!(!registry.has_duplicate_name(&first_api));
+        assert!(!registry.has_duplicate_name(&second_api));
+    }
+
+    #[test]
+    fn duplicate_names_count_selector_names_only() {
+        let home = TempDir::new().unwrap();
+        let main = dir(&home, "main");
+        let found = dir(&home, "main/web");
+        let top = dir(&home, "other/web");
+        let mut registry = Registry::load(home.path()).unwrap();
+        registry.add(&main).unwrap();
+        registry.add_discovered(&found).unwrap();
+        registry.add(&top).unwrap();
+        // Найденный `web` имени-селектора не имеет: самостоятельный `web` не дубликат.
+        assert!(!registry.has_duplicate_name(&top));
+        assert!(!registry.has_duplicate_name(&found));
+        assert_eq!(registry.resolve("web").unwrap().path, top);
+    }
+
+    #[test]
+    fn rename_of_a_discovered_subproject_is_refused() {
+        let home = TempDir::new().unwrap();
+        let (mut registry, _, api, web) = tree(&home);
+        assert!(matches!(
+            registry.rename(&api, "x".into()),
+            Err(RegistryError::DiscoveredRename)
+        ));
+        assert!(registry.find(&api).unwrap().name.is_none());
+        registry.rename(&web, "web".into()).unwrap();
+        assert_eq!(registry.resolve("web").unwrap().path, web);
+    }
+
+    #[test]
+    fn human_name_with_a_slash_colliding_with_a_qualified_name_is_ambiguous() {
+        let home = TempDir::new().unwrap();
+        let (mut registry, _, api, _) = tree(&home);
+        let other = dir(&home, "elsewhere/x");
+        registry.add(&other).unwrap();
+        registry
+            .rename(&other, "tmc-opovechenie/backend/api".into())
+            .unwrap();
+        match registry.resolve("tmc-opovechenie/backend/api") {
+            Err(ResolveError::Ambiguous { paths, .. }) => {
+                assert_eq!(paths.len(), 2);
+                assert!(paths.contains(&api) && paths.contains(&other));
+            }
+            outcome => panic!("ожидалась неоднозначность, получено {outcome:?}"),
+        }
+    }
+
+    #[test]
+    fn unknown_name_under_a_main_lists_its_subprojects() {
+        let home = TempDir::new().unwrap();
+        let (registry, _, _, _) = tree(&home);
+        let error = registry.resolve("tmc-opovechenie/backend/nope").unwrap_err();
+        let text = error.to_string();
+        assert!(matches!(error, ResolveError::UnknownSubproject { .. }));
+        assert!(text.contains("tmc-opovechenie/backend/api"), "{text}");
+        assert!(text.contains("tmc-opovechenie/frontend/web-angular"), "{text}");
+        // Префикса нет среди главных: прежняя ошибка.
+        assert!(matches!(
+            registry.resolve("nobody/backend/api"),
+            Err(ResolveError::NotFound(_))
+        ));
+    }
+
+    #[test]
+    fn subproject_hint_is_capped() {
+        let home = TempDir::new().unwrap();
+        let main = dir(&home, "main");
+        let mut registry = Registry::load(home.path()).unwrap();
+        registry.add(&main).unwrap();
+        for index in 0..12 {
+            registry
+                .add_discovered(&dir(&home, &format!("main/s{index:02}")))
+                .unwrap();
+        }
+        let text = registry.resolve("main/zzz").unwrap_err().to_string();
+        assert!(text.contains("main/s09") && !text.contains("main/s10"), "{text}");
+        assert!(text.contains("и ещё 2"), "{text}");
+    }
+
+    #[test]
+    fn clear_lazy_and_set_standalone_change_only_what_they_name() {
+        let home = TempDir::new().unwrap();
+        let (mut registry, _, api, web) = tree(&home);
+        assert!(registry.clear_lazy(&api).unwrap());
+        assert!(!registry.clear_lazy(&api).unwrap(), "повтор не пишет файл");
+        assert!(!registry.find(&api).unwrap().lazy);
+        assert!(registry.find(&api).unwrap().discovered);
+        assert!(!registry.clear_lazy(&home.path().join("none")).unwrap());
+
+        assert!(registry.set_standalone(&api).unwrap());
+        assert!(!registry.set_standalone(&api).unwrap());
+        assert!(!registry.set_standalone(&web).unwrap());
+        let reloaded = Registry::load(home.path()).unwrap();
+        let entry = reloaded.find(&api).unwrap();
+        assert!(!entry.discovered && !entry.lazy);
+        // Самостоятельным подпроект получает своё имя-селектор.
+        assert_eq!(reloaded.resolve("api").unwrap().path, api);
     }
 }

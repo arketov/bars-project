@@ -351,11 +351,16 @@ async fn connect(env: &Env) -> Result<Client, ClientError> {
     .await
 }
 
-/// Значение `--project`: путь (с разделителем или точкой в начале) приводится к абсолютному
-/// от рабочей папки, остальное — имя проекта, его разберёт воркер.
 fn project_arg(value: &str, cwd: &Path) -> String {
-    if value.starts_with('.') || value.contains(['/', '\\']) {
-        absolute(Path::new(value), cwd)
+    // Путь — абсолютное значение, значение с точки или значение с разделителем, чей `cwd/значение` —
+    // существующая папка. Остальное (в том числе составное имя `главный/путь`, которого нет в `cwd`)
+    // уходит воркеру как есть и разбирается как имя (Т-49).
+    let path = Path::new(value);
+    if path.is_absolute()
+        || value.starts_with('.')
+        || (value.contains(['/', '\\']) && cwd.join(path).is_dir())
+    {
+        absolute(path, cwd)
     } else {
         value.to_string()
     }
@@ -720,5 +725,52 @@ mod tests {
         let mut out = Vec::new();
         emit(&mut out, false, &reply, |n| format!("n={n}")).unwrap_or_else(|_| panic!("запись"));
         assert_eq!(String::from_utf8(out).unwrap(), "n=7\n");
+    }
+}
+
+/// Разбор `project`: путь или имя (Т-49). Набор случаев один для `bars-mcp` и `bars-cli`.
+#[cfg(test)]
+mod project_arg_tests {
+    use super::project_arg;
+    use std::fs;
+    use std::path::Path;
+
+    #[test]
+    fn qualified_name_without_a_folder_in_cwd_stays_a_name() {
+        let cwd = tempfile::tempdir().unwrap();
+        assert_eq!(
+            project_arg("tmc-opovechenie/backend/api", cwd.path()),
+            "tmc-opovechenie/backend/api"
+        );
+        assert_eq!(
+            project_arg("tmc-opovechenie\backend\api", cwd.path()),
+            "tmc-opovechenie\backend\api"
+        );
+        assert_eq!(project_arg("plain-name", cwd.path()), "plain-name");
+    }
+
+    #[test]
+    fn existing_relative_folder_is_a_path() {
+        let cwd = tempfile::tempdir().unwrap();
+        fs::create_dir_all(cwd.path().join("backend/api")).unwrap();
+        let got = project_arg("backend/api", cwd.path());
+        assert_eq!(Path::new(&got), cwd.path().join("backend/api"));
+    }
+
+    #[test]
+    fn dot_prefixed_value_is_a_path_even_if_missing() {
+        let cwd = tempfile::tempdir().unwrap();
+        let got = project_arg("./x", cwd.path());
+        assert_eq!(Path::new(&got), cwd.path().join("x"));
+        let dot = project_arg(".", cwd.path());
+        assert_eq!(Path::new(&dot), cwd.path());
+    }
+
+    #[test]
+    fn absolute_path_stays_absolute() {
+        let cwd = tempfile::tempdir().unwrap();
+        let other = tempfile::tempdir().unwrap();
+        let got = project_arg(&other.path().display().to_string(), cwd.path());
+        assert_eq!(Path::new(&got), other.path());
     }
 }

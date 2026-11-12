@@ -859,39 +859,45 @@ impl WorkerHandler {
                 }
                 error
             })?;
-        let mut projects = Vec::new();
+        let all = self.worker.projects();
         if let Some(path) = selected {
-            let (name, docs_root) = self.worker.project_metadata(&path).ok_or_else(|| {
-                RpcError::bars(
-                    ErrorKind::ProjectNotFound,
-                    "проект удалён из реестра; повторите выбор проекта",
-                )
-            })?;
-            let state = self.worker.status(&path).map_err(worker_error)?.state;
+            let snapshot = all
+                .iter()
+                .find(|snapshot| snapshot.path == path)
+                .ok_or_else(|| {
+                    RpcError::bars(
+                        ErrorKind::ProjectNotFound,
+                        "проект удалён из реестра; повторите выбор проекта",
+                    )
+                })?;
+            // Ленивое состояние берётся из реестра: проверок у такого проекта ещё не было.
+            let state = if snapshot.lazy {
+                ProjectState::Lazy
+            } else {
+                self.worker.status(&path).map_err(worker_error)?.state
+            };
             let modules = if state == ProjectState::Unavailable {
                 Vec::new()
             } else {
-                self.modules(&path, &docs_root).await?
+                self.modules(&path, &snapshot.docs_root).await?
             };
             let nested = self.worker.nested_projects(&path, false);
             return Ok(ProjectsOutput {
-                projects: vec![ProjectInfo {
-                    path: path.display().to_string(),
-                    name,
-                    docs_root,
-                    state,
-                    modules,
-                    nested,
-                }],
+                projects: vec![self.assemble_info(snapshot, &all, state, modules, nested)],
             });
         }
-        for snapshot in self.worker.projects() {
-            projects.push(self.project_info(snapshot).await);
+        let mut projects = Vec::new();
+        for snapshot in &all {
+            projects.push(self.project_info(snapshot, &all).await);
         }
         Ok(ProjectsOutput { projects })
     }
 
-    async fn project_info(&self, snapshot: ProjectSnapshot) -> ProjectInfo {
+    async fn project_info(
+        &self,
+        snapshot: &ProjectSnapshot,
+        all: &[ProjectSnapshot],
+    ) -> ProjectInfo {
         let modules = if snapshot.state == ProjectState::Unavailable {
             Vec::new()
         } else {
@@ -899,13 +905,53 @@ impl WorkerHandler {
                 .await
                 .unwrap_or_default()
         };
+        let nested = self.worker.nested_projects(&snapshot.path, false);
+        self.assemble_info(snapshot, all, snapshot.state, modules, nested)
+    }
+
+    /// Строка `projects`: собственные поля проекта и его место среди подпроектов (Т-49).
+    fn assemble_info(
+        &self,
+        snapshot: &ProjectSnapshot,
+        all: &[ProjectSnapshot],
+        state: ProjectState,
+        modules: Vec<ModuleInfo>,
+        nested: Vec<bars_protocol::NestedProjectInfo>,
+    ) -> ProjectInfo {
+        // Прямые подпроекты: ближайший предок — этот проект; порядок реестра.
+        let subprojects = all
+            .iter()
+            .filter(|child| child.parent.as_deref() == Some(snapshot.path.as_path()))
+            .map(|child| {
+                let path = child.path.display().to_string();
+                bars_protocol::SubprojectInfo {
+                    name: child
+                        .qualified_name
+                        .clone()
+                        .unwrap_or_else(|| child.name.clone()),
+                    excluded: nested.iter().any(|area| area.path == path),
+                    path,
+                    state: child.state,
+                    discovered: child.discovered,
+                }
+            })
+            .collect();
         ProjectInfo {
             path: snapshot.path.display().to_string(),
-            name: snapshot.name,
-            docs_root: snapshot.docs_root,
-            state: snapshot.state,
+            name: snapshot.name.clone(),
+            docs_root: snapshot.docs_root.clone(),
+            state,
             modules,
-            nested: self.worker.nested_projects(&snapshot.path, false),
+            nested,
+            parent: snapshot
+                .parent
+                .as_ref()
+                .map(|parent| parent.display().to_string()),
+            qualified_name: snapshot.qualified_name.clone(),
+            discovered: snapshot.discovered,
+            subprojects,
+            // Обход автопоиска ещё не пишет предел: поле заполнит шаг автопоиска.
+            discovery_truncated: false,
         }
     }
 
@@ -1006,10 +1052,9 @@ impl WorkerHandler {
             .worker
             .register(Path::new(&params.path))
             .map_err(worker_error)?;
-        let snapshot = self
-            .worker
-            .projects()
-            .into_iter()
+        let all = self.worker.projects();
+        let snapshot = all
+            .iter()
             .find(|snapshot| snapshot.path == registered.path)
             .ok_or_else(|| {
                 RpcError::standard(
@@ -1018,7 +1063,7 @@ impl WorkerHandler {
                 )
             })?;
         Ok(RegisterOutput {
-            project: self.project_info(snapshot).await,
+            project: self.project_info(snapshot, &all).await,
         })
     }
 
