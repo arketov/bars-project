@@ -2,7 +2,9 @@
 
 use rusqlite::OptionalExtension;
 
-use super::hybrid::{Scope, SearchError, SearchHit, load_hits, top_by_score};
+use super::hybrid::{
+    Catalog, DELTA_ID_OFFSET, IndexView, Scope, SearchError, SearchHit, top_by_score,
+};
 use super::params::{ScoreKind, SearchRequest, SearchSettings};
 use crate::storage::Index;
 
@@ -79,22 +81,31 @@ pub fn chunk_public_at_line(
     path: &str,
     line: i64,
 ) -> Result<String, SearchError> {
+    chunk_public_at_line_in_view(&IndexView::single(index), docs_root, path, line)
+}
+
+/// То же по виду проекта: путь проверяется по каталогу вида, документ из дельты worktree читается
+/// из дельты (у владельца его версия исключена), остальные — у владельца. ID чанка дельты несёт
+/// номер со смещением `DELTA_ID_OFFSET`, как в выдаче поиска по виду.
+pub fn chunk_public_at_line_in_view(
+    view: &IndexView,
+    docs_root: &str,
+    path: &str,
+    line: i64,
+) -> Result<String, SearchError> {
     let mut stored = None;
     for candidate in crate::doc_path::stored_candidates(docs_root, path) {
-        let known = index
-            .conn()
-            .prepare_cached("SELECT EXISTS(SELECT 1 FROM documents WHERE path = ?1)")?
-            .query_row([&candidate], |row| row.get::<_, bool>(0))?;
-        if known {
+        if view.has_path(&candidate)? {
             stored = Some(candidate);
             break;
         }
     }
     let Some(stored) = stored else {
-        let mut statement = index.conn().prepare("SELECT path FROM documents")?;
-        let known = statement
-            .query_map([], |row| row.get::<_, String>(0))?
-            .collect::<Result<Vec<_>, _>>()?;
+        let known: Vec<String> = view
+            .documents()?
+            .into_iter()
+            .map(|(_, known_path)| known_path)
+            .collect();
         return Err(SearchError::InvalidParams(
             crate::doc_path::unknown_file_message(
                 docs_root,
@@ -102,6 +113,10 @@ pub fn chunk_public_at_line(
                 path,
             ),
         ));
+    };
+    let (index, offset) = match view.delta() {
+        Some(delta) if delta.has_path(&stored)? => (delta, DELTA_ID_OFFSET),
+        _ => (view.owner(), 0),
     };
     let row = index
         .conn()
@@ -133,7 +148,7 @@ pub fn chunk_public_at_line(
             "в документе {path} нет строки {line}: в нём {last} строк"
         )));
     };
-    Ok(public_id(id, &hash, &path, ordinal, &embed_hash))
+    Ok(public_id(id + offset, &hash, &path, ordinal, &embed_hash))
 }
 
 /// Самые близкие по косинусу к чанку `request.id` чанки выбранной области, без самого чанка.
@@ -143,39 +158,52 @@ pub fn similar(
     settings: &SearchSettings,
     request: &SimilarRequest,
 ) -> Result<SimilarResponse, SearchError> {
+    similar_in_view(&IndexView::single(index), settings, request)
+}
+
+/// То же по виду проекта: чанк источника и кандидаты берутся из владельца (без исключённых
+/// путей) и дельты worktree, номера чанков дельты — со смещением `DELTA_ID_OFFSET`. Косинус
+/// абсолютный и от базы не зависит, поэтому слияние баз точное.
+pub fn similar_in_view(
+    view: &IndexView,
+    settings: &SearchSettings,
+    request: &SimilarRequest,
+) -> Result<SimilarResponse, SearchError> {
     let number = parse(&request.id).ok_or_else(|| {
         SearchError::InvalidParams(format!(
             "неверный ID чанка `{}`: ожидается `<номер>-<8 знаков>` из выдачи поиска",
             request.id
         ))
     })?;
-    let embed_hash: Option<String> = index
+    let (source_index, local) = view.source(number);
+    let embed_hash: Option<String> = source_index
         .conn()
         .query_row(
             "SELECT embed_hash FROM chunks WHERE id = ?1",
-            [number],
+            [local],
             |row| row.get(0),
         )
         .optional()?;
     let Some(embed_hash) = embed_hash else {
         return Err(SearchError::ChunkNotFound(request.id.clone()));
     };
-    let mut source = load_hits(index, &[number])?.remove(0);
+    let mut source = view.load_hits(&[number])?.remove(0);
     if source.public_id != request.id {
         return Err(SearchError::ChunkNotFound(request.id.clone()));
     }
     source.score = 1.0;
-    let vector = index
+    let vector = source_index
         .vector(&embed_hash)?
         .ok_or_else(|| SearchError::MissingVector(request.id.clone()))?;
 
-    let mut scope = Scope::build(
-        index,
+    let mut scope = Scope::build_with_paths(
+        view,
         &SearchRequest {
             modules: request.modules.clone(),
             paths: request.paths.clone(),
             ..SearchRequest::default()
         },
+        &[],
     )?;
     if request.exclude_document {
         scope.exclude_path(&source.path);
@@ -186,13 +214,13 @@ pub fn similar(
         .map_or(settings.results.clamp(1, max), |value| value.clamp(1, max));
     let clamped = request.results.is_some_and(|value| value != results);
     // Исходный чанк сам входит в область с косинусом 1: берём на один больше.
-    let cosines = scope.cosines(index, &vector, results + 1, &[], &[])?;
+    let cosines = view.cosines(&scope, &vector, results + 1, &[], &[])?;
     let ids: Vec<i64> = top_by_score(&cosines, results + 1)
         .into_iter()
         .filter(|id| *id != number)
         .take(results)
         .collect();
-    let mut hits = load_hits(index, &ids)?;
+    let mut hits = view.load_hits(&ids)?;
     for hit in &mut hits {
         hit.score = cosines
             .get(&hit.chunk_id)

@@ -12,6 +12,9 @@ use std::sync::{Arc, Mutex};
 use bars_core::indexing::chunking::document_title;
 use bars_core::indexing::walk::{read_utf8_path, walk_docs_bounded};
 use bars_core::indexing::worktree_delta::{self, ExcludedPaths};
+use bars_core::search::{
+    IndexView, SimilarRequest, SimilarResponse, chunk_public_at_line_in_view, similar_in_view,
+};
 use bars_core::storage::{Index, StorageError, index_path};
 use bars_core::worktree::LinkedWorktree;
 use bars_protocol::{DeltaState, ErrorKind, RpcError, SearchWorktree};
@@ -267,6 +270,134 @@ impl WorkerHandler {
                 note,
             },
         }
+    }
+
+    /// Агентский `like` по виду worktree (`worktrees.md`, «Чего в worktree нет»): источник и
+    /// похожие разделы — по владельцу и дельте (`IndexView`), пока дельта строится или упала — по
+    /// владельцу с пометкой. Входящие ссылки — у владельца: у документа, которого там нет, их нет.
+    pub(super) async fn like_in_worktree(
+        &self,
+        project: PathBuf,
+        item: &LinkedWorktree,
+        params: bars_protocol::LikeParams,
+    ) -> Result<bars_protocol::LikeOutput, RpcError> {
+        let status = self
+            .worker
+            .status(&project)
+            .map_err(super::errors::worker_error)?;
+        if status.state == bars_protocol::ProjectState::ReindexRequired {
+            return Err(super::errors::reindex_required());
+        }
+        let plan = self.plan_worktree_search(&project, item);
+        let settings = self.settings(&project)?;
+        let docs_root = settings.docs_root.clone();
+        let search_settings = settings.search.clone();
+        let merge = plan.merge.then(|| item.name.clone());
+        let source = params.source.trim().to_string();
+        let target = params.target.clone();
+        let request_paths = params.paths;
+        let limit = params.limit;
+        let cache = self.wt_excluded.clone();
+        let gate = self
+            .worker
+            .gate(&project)
+            .map_err(super::errors::worker_error)?
+            .read_owned()
+            .await;
+        let task_project = project.clone();
+        let (outcome, stats, open_error) = tokio::task::spawn_blocking(move || {
+            let _gate = gate;
+            let project = task_project;
+            let index = Index::open_read_only(&index_path(&project))?;
+            // Как у поиска: дельта не открылась или список исключённых путей не собрался — ответ по
+            // владельцу, причина в пометке.
+            let mut open_error = None;
+            let delta = merge.as_deref().and_then(|name| {
+                match Index::open_read_only(&worktree_delta::delta_path(&project, name)) {
+                    Ok(delta) => Some(delta),
+                    Err(error) => {
+                        open_error = Some(error.to_string());
+                        None
+                    }
+                }
+            });
+            let mut stats = None;
+            let view = match (&delta, merge.as_deref()) {
+                (Some(delta), Some(name)) => {
+                    match excluded_for(&cache, &project, name, &index, delta)
+                        .map_err(bars_core::search::SearchError::from)
+                        .and_then(|excluded| {
+                            IndexView::worktree(&index, delta, &excluded.paths)
+                                .map(|view| (view, (excluded.pending, excluded.delta_documents)))
+                        }) {
+                        Ok((view, counts)) => {
+                            stats = Some(counts);
+                            view
+                        }
+                        Err(error) => {
+                            open_error = Some(error.to_string());
+                            IndexView::single(&index)
+                        }
+                    }
+                }
+                _ => IndexView::single(&index),
+            };
+            let outcome = (|| -> Result<SimilarResponse, bars_core::search::SearchError> {
+                let chunk_id = match super::like_path_line(&source) {
+                    Some((path, line)) => {
+                        chunk_public_at_line_in_view(&view, &docs_root, &path, line)?
+                    }
+                    None => source,
+                };
+                similar_in_view(
+                    &view,
+                    &search_settings,
+                    &SimilarRequest {
+                        id: chunk_id,
+                        modules: Vec::new(),
+                        paths: request_paths,
+                        exclude_document: true,
+                        results: limit.map(|value| value as usize),
+                    },
+                )
+            })();
+            Ok::<_, bars_core::search::SearchError>((outcome, stats, open_error))
+        })
+        .await
+        .map_err(super::internal)?
+        .map_err(super::errors::search_error)?;
+        let info = plan.finish(stats, open_error);
+        let response = match outcome {
+            Ok(response) => response,
+            Err(error) => {
+                // Документ worktree при ответе по владельцу неизвестен: пометка объясняет почему.
+                let mut error = super::errors::search_error(error);
+                if let Some(note) = &info.note {
+                    error.message = format!("{}\n{note}", error.message);
+                }
+                return Err(error);
+            }
+        };
+        // Индекса ссылок у вида нет: входящие ссылки — по основному checkout.
+        let linked_from = self.linked_from(&target, &response.source.path).await?;
+        let links_note = format!(
+            "worktree `{}`: входящие ссылки есть только у основного checkout",
+            info.name
+        );
+        let worktree_note = Some(match info.note {
+            Some(note) => format!("{note}\n{links_note}"),
+            None => links_note,
+        });
+        Ok(bars_protocol::LikeOutput {
+            source: super::similar_hit(response.source),
+            results: response.hits.into_iter().map(super::similar_hit).collect(),
+            limit: super::to_u32(response.results),
+            clamped: response.clamped,
+            linked_from,
+            indexing: status.state == bars_protocol::ProjectState::Indexing || status.queued,
+            pending: super::to_u32(status.pending),
+            worktree_note,
+        })
     }
 
     /// Папка проекта должна быть на месте (`project_unavailable` иначе).

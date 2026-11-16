@@ -331,7 +331,7 @@ async fn graph_audit_links_answer_from_owner_with_note() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-async fn like_with_worktree_is_unsupported() {
+async fn similar_duplicates_with_worktree_are_unsupported() {
     let home = TempDir::new().unwrap();
     let projects = TempDir::new().unwrap();
     let (main, work) = repo_with_worktree(projects.path());
@@ -340,25 +340,11 @@ async fn like_with_worktree_is_unsupported() {
     worker.register(&main).unwrap();
     wait_idle(worker).await;
 
-    let like = |target: Target| LikeParams {
-        target,
-        source: "docs/guide.md:1".into(),
-        paths: vec![],
-        limit: None,
-    };
     for target in [
         target_wt(&main, Some("feat-x")),
         // Умолчание из cwd в worktree даёт тот же вид.
         target_wt(&work.join("docs"), None),
     ] {
-        let error = handler.like(like(target.clone())).await.unwrap_err();
-        assert_eq!(error.kind(), Some(ErrorKind::InvalidParams));
-        assert_eq!(
-            error.data.as_ref().unwrap()["kind"],
-            "worktree_unsupported",
-            "{error:?}"
-        );
-        assert!(error.message.contains("wt=\".\""), "{}", error.message);
         let error = handler
             .similar(SimilarParams {
                 target: target.clone(),
@@ -370,7 +356,9 @@ async fn like_with_worktree_is_unsupported() {
             })
             .await
             .unwrap_err();
+        assert_eq!(error.kind(), Some(ErrorKind::InvalidParams));
         assert_eq!(error.data.as_ref().unwrap()["kind"], "worktree_unsupported");
+        assert!(error.message.contains("wt=\".\""), "{}", error.message);
         let error = handler
             .duplicates(DuplicatesParams {
                 target,
@@ -381,25 +369,126 @@ async fn like_with_worktree_is_unsupported() {
             .unwrap_err();
         assert_eq!(error.data.as_ref().unwrap()["kind"], "worktree_unsupported");
     }
-    // Основной checkout работает как раньше: ошибка другая (источника нет), но не worktree.
-    let error = handler
-        .like(like(target_wt(&main, Some("."))))
+}
+
+fn like_params(target: Target, source: &str) -> LikeParams {
+    LikeParams {
+        target,
+        source: source.into(),
+        paths: vec![],
+        limit: None,
+    }
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn like_in_worktree_finds_source_in_delta_and_marks_links() {
+    let home = TempDir::new().unwrap();
+    let projects = TempDir::new().unwrap();
+    let (main, work) = repo_with_worktree(projects.path());
+    let handler = handler(&home);
+    let worker = handler.worker();
+    worker.register(&main).unwrap();
+    wait_idle(worker).await;
+    // Первое обращение к виду строит дельту.
+    let mut first = search(&main, "руководство");
+    first.target = target_wt(&main, Some("feat-x"));
+    let _ = handler.search(first).await;
+    wait_delta(worker, &main).await;
+
+    let wt = target_wt(&main, Some("feat-x"));
+    // Строки 5 у владельца нет (там три строки): источник — чанк дельты.
+    let output = handler
+        .like(like_params(wt.clone(), "docs/guide.md:5"))
         .await
-        .map(|_| ())
-        .unwrap_err_or_default();
+        .unwrap();
+    assert_eq!(output.source.path, "docs/guide.md");
+    assert!(
+        output.source.text.contains("Текст worktree"),
+        "{}",
+        output.source.text
+    );
+    assert!(output.results.iter().all(|hit| hit.path != "docs/guide.md"));
+    let note = output.worktree_note.as_deref().expect("пометка про ссылки");
+    assert!(
+        note.contains("feat-x") && note.contains("входящие ссылки"),
+        "{note}"
+    );
+    // Документ, созданный только в worktree, тоже источник.
+    let only = handler
+        .like(like_params(wt.clone(), "docs/only-wt.md:1"))
+        .await
+        .unwrap();
+    assert_eq!(only.source.path, "docs/only-wt.md");
+    // ID чанка из выдачи по виду принимается как есть.
+    let by_id = handler
+        .like(like_params(wt, &output.source.chunk_id))
+        .await
+        .unwrap();
+    assert_eq!(by_id.source.chunk_id, output.source.chunk_id);
+    // Умолчание из cwd в worktree даёт тот же вид.
+    let from_cwd = handler
+        .like(like_params(
+            target_wt(&work.join("docs"), None),
+            "docs/guide.md:5",
+        ))
+        .await
+        .unwrap();
+    assert_eq!(from_cwd.source.chunk_id, output.source.chunk_id);
+    // Основной checkout: версия владельца и без пометки.
+    let missing = handler
+        .like(like_params(target_wt(&main, Some(".")), "docs/guide.md:5"))
+        .await
+        .unwrap_err();
     assert_ne!(
-        error.data.as_ref().and_then(|data| data["kind"].as_str()),
+        missing.data.as_ref().and_then(|data| data["kind"].as_str()),
         Some("worktree_unsupported")
     );
+    let plain = handler
+        .like(like_params(target_wt(&main, Some(".")), "docs/guide.md:3"))
+        .await
+        .unwrap();
+    assert!(plain.worktree_note.is_none());
+    assert!(plain.source.text.contains("Текст основного"));
 }
 
-/// `Result<(), RpcError>` без паники для основного checkout: успех — пустая ошибка.
-trait UnwrapErrOrDefault {
-    fn unwrap_err_or_default(self) -> RpcError;
-}
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn like_while_delta_builds_answers_from_owner_with_note() {
+    let home = TempDir::new().unwrap();
+    let projects = TempDir::new().unwrap();
+    let (main, _work) = repo_with_worktree(projects.path());
+    let handler = handler(&home);
+    let worker = handler.worker();
+    worker.register(&main).unwrap();
+    wait_idle(worker).await;
 
-impl UnwrapErrOrDefault for Result<(), RpcError> {
-    fn unwrap_err_or_default(self) -> RpcError {
-        self.err().unwrap_or_else(|| RpcError::standard(0, "успех"))
-    }
+    // Пауза очереди замораживает и сверку: дельта не успевает достроиться.
+    handler.index_pause();
+    let wt = target_wt(&main, Some("feat-x"));
+    let output = handler
+        .like(like_params(wt.clone(), "docs/guide.md:3"))
+        .await
+        .unwrap();
+    assert!(
+        output.source.text.contains("Текст основного"),
+        "ответ идёт по владельцу: {}",
+        output.source.text
+    );
+    let note = output.worktree_note.as_deref().expect("пометка");
+    assert!(
+        note.contains("основному checkout") && note.contains("входящие ссылки"),
+        "{note}"
+    );
+    // Документа worktree у владельца нет: ошибка называет причину.
+    let error = handler
+        .like(like_params(wt, "docs/only-wt.md:1"))
+        .await
+        .unwrap_err();
+    assert_eq!(error.kind(), Some(ErrorKind::InvalidParams));
+    assert!(
+        error.message.contains("основному checkout"),
+        "{}",
+        error.message
+    );
+    handler.index_resume();
+    wait_delta(worker, &main).await;
 }

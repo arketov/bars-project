@@ -169,7 +169,7 @@ impl<'a> IndexView<'a> {
 
     /// Косинусы области: по каждой базе — первые `candidates` и заданные `text`/`exact`; карта
     /// общая, номера дельты со смещением. Косинус абсолютный, слияние точное.
-    pub(super) fn cosines(
+    pub(in crate::search) fn cosines(
         &self,
         scope: &Scope,
         query_vector: &[f32],
@@ -272,7 +272,7 @@ impl<'a> IndexView<'a> {
     }
 
     /// Чанки с документами в порядке `ids`; `chunk_id` результата — номер вида.
-    pub(super) fn load_hits(&self, ids: &[i64]) -> Result<Vec<SearchHit>, SearchError> {
+    pub(in crate::search) fn load_hits(&self, ids: &[i64]) -> Result<Vec<SearchHit>, SearchError> {
         if self.delta.is_none() {
             return load_hits_numbered(self.owner, ids.iter().map(|&id| (id, id)));
         }

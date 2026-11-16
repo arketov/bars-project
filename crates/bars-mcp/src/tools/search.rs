@@ -106,8 +106,9 @@ impl BarsMcp {
                 paths,
                 limit: args.limit,
             };
-            return present(
-                self.call_observed(&params, Some(&original)).await,
+            // Пометка worktree (`worktree_note`) стоит строкой над ответом, как у ссылок.
+            return present_noted(
+                self.call_noted(&params, Some(&original)).await,
                 render::like,
             );
         }

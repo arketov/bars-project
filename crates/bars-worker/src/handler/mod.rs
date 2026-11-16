@@ -285,8 +285,9 @@ impl WorkerHandler {
         params: bars_protocol::LikeParams,
     ) -> Result<bars_protocol::LikeOutput, RpcError> {
         let (project, view) = self.usable_view(&params.target)?;
+        // Worktree: `like` идёт по виду (дельта и владелец), ссылки — у владельца с пометкой.
         if let ViewSelector::Worktree(item) = &view {
-            return Err(worktree_view::worktree_unsupported(&item.name, "like"));
+            return self.like_in_worktree(project, item, params).await;
         }
         let status = self.worker.status(&project).map_err(worker_error)?;
         if status.state == ProjectState::ReindexRequired {
@@ -334,6 +335,7 @@ impl WorkerHandler {
             linked_from,
             indexing: similar.indexing,
             pending: similar.pending,
+            worktree_note: None,
         })
     }
 

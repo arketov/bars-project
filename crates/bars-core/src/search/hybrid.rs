@@ -16,7 +16,7 @@ use crate::models::{EmbedError, Embedder, RerankError, Reranker};
 use crate::storage::{Compatibility, Index, StorageError};
 
 mod view;
-use view::Catalog;
+pub(in crate::search) use view::Catalog;
 pub use view::{DELTA_ID_OFFSET, IndexView};
 
 /// Во сколько раз полный перебор векторов берёт больше кандидатов, когда в запросе есть фразы или

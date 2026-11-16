@@ -21,4 +21,7 @@ pub use hybrid::{
 };
 pub use operators::ParsedQuery;
 pub use params::{AppliedParams, ScoreKind, ScoreWeights, SearchRequest, SearchSettings};
-pub use similar::{SimilarRequest, SimilarResponse, chunk_public_at_line, similar};
+pub use similar::{
+    SimilarRequest, SimilarResponse, chunk_public_at_line, chunk_public_at_line_in_view, similar,
+    similar_in_view,
+};

@@ -395,6 +395,10 @@ pub struct LikeOutput {
     pub linked_from: Vec<String>,
     pub indexing: bool,
     pub pending: u32,
+    /// Пометка по виду worktree: входящие ссылки есть только у основного checkout; дельта строится
+    /// или не открылась, и ответ идёт по владельцу. Прокси читает её из ответа как `worktree_note`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub worktree_note: Option<String>,
 }
 
 // --- duplicates ---
