@@ -70,7 +70,8 @@ it("worktree_folder_in_tree_and_isolated_selection: папка «worktree», в�
   expect(app.selectionView).toBe("quorum");
   expect(app.selected.size).toBe(1);
   expect(app.scope.modules).toHaveLength(1);
-  const mainBoxes = () => Array.from(document.querySelectorAll<HTMLInputElement>('.tree > .node input[type=checkbox]'));
+  // Галочки модулей основного checkout: те, что лежат внутри папок worktree, сюда не входят.
+  const mainBoxes = () => Array.from(document.querySelectorAll<HTMLInputElement>('.tree > .node input[type=checkbox]')).filter((box) => !items().some((item) => item.contains(box)));
   expect(mainBoxes().every((box) => !box.checked)).toBe(true);
   expect(document.querySelector('[data-testid="selection-hint"]')!.textContent).toBe("Поиск идёт по одному виду");
 

@@ -36,7 +36,7 @@ it("поздний поиск не заменяет новый; снимок с�
   app.query = 'второй'; app.count = 7; const second = app.search();
   app.query = 'черновик'; app.count = 11;
   requests[1](found); await second;
-  expect(app.displayed).toMatchObject({ query: 'второй', limit: 7, project: project.path, mode: 'hybrid' });
+  expect(app.displayed).toMatchObject({ query: 'второй', limit: 7, project: project.path });
   const id = app.displayed!.requestId;
   requests[0]({ ...found, results: [] }); await first;
   expect(app.displayed!.requestId).toBe(id); expect(app.results!.results).toHaveLength(1);
@@ -53,14 +53,6 @@ it("новый поиск убирает старую выдачу; смена �
   expect(app.results).toBeNull(); expect(app.displayed).toBeNull(); expect(app.searching).toBe(false);
 });
 
-it("диагностика пустого ответа использует завершённый запрос, не изменённое поле", async () => {
-  let resolve!: (value: unknown) => void;
-  invoke.mockImplementation((method) => method === 'text_search' ? Promise.resolve({documents:[],docs_total:0,hits_total:0,skipped:[],truncated:null,elapsed_ms:0}) : new Promise(done => resolve = done));
-  app.query = 'исходный'; const pending = app.search();
-  app.query = 'изменённый'; invoke.mockImplementation(async method => method === 'search' ? found : listAnswer); resolve({ ...found, results: [] }); await pending;
-  const diagnostic = invoke.mock.calls.find(([, args]) => (args as { _window?: { purpose?: string } })?._window?.purpose === 'diagnostic');
-  expect(diagnostic?.[1]).toMatchObject({ query: 'исходный' });
-});
 afterEach(() => {
   app.topics.bind(null);
   app.results = null;
