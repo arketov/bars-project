@@ -37,7 +37,7 @@ pub struct SearchArgs {
     pub project: Option<String>,
     /// Worktree of the project: a name from `.git/worktrees/<name>` or an absolute path; "." —
     /// the main checkout. Default: the worktree of the session's cwd. Searches that worktree's
-    /// files; like is not available there.
+    /// files; like works there too (incoming links come from the main checkout).
     pub wt: Option<String>,
 }
 

@@ -467,6 +467,20 @@ fn reject_unsupported_wt(command: &Command, target: &Target) -> Result<(), Clien
     )))
 }
 
+/// `projects --filter` отбирает записи реестра, а `--project` выбирает один проект: вместе они
+/// бессмысленны, и воркер молча проигнорировал бы `--project`. clap конфликт с глобальным
+/// флагом не ловит, поэтому проверка — здесь, до обращения к воркеру.
+fn reject_filter_with_project(command: &Command, target: &Target) -> Result<(), ClientError> {
+    if matches!(command, Command::Projects { filter: Some(_) }) && target.project.is_some() {
+        return Err(ClientError::Rpc(bars_protocol::RpcError::bars(
+            bars_protocol::ErrorKind::InvalidParams,
+            "--filter не сочетается с --project: фильтр отбирает записи реестра проектов"
+                .to_string(),
+        )));
+    }
+    Ok(())
+}
+
 async fn execute(
     cli: Cli,
     env: &Env,
@@ -483,6 +497,7 @@ async fn execute(
         wt: bars_protocol::wt_value(cli.wt.as_deref()).map(str::to_string),
     };
     reject_unsupported_wt(&cli.command, &target)?;
+    reject_filter_with_project(&cli.command, &target)?;
     let mut client = connect(env).await?;
     if let Some(warning) = client.build_warning() {
         let _ = writeln!(err, "bars-cli: предупреждение: {warning}");

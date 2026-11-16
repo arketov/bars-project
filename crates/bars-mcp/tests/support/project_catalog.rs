@@ -111,11 +111,13 @@ async fn status_filter_lists_only_matching_registry_projects() {
     let harness = Harness::new("project-filter");
     let root = harness.project("current");
     let other = harness.project("other");
+    // Воркер стартует первым вызовом MCP: до него регистрировать проекты некуда.
+    let mut mcp = harness.connect(harness.env(&root));
+    mcp.initialize().await;
+    mcp.tool("bars_status", json!({"all":true})).await;
     harness.register(&root).await;
     harness.register(&other).await;
     wait_status(&harness, &root, "индекс каталога", indexed).await;
-    let mut mcp = harness.connect(harness.env(&root));
-    mcp.initialize().await;
     // Регистр и `\` не важны; совпавшая запись одна, части одного проекта не выводятся.
     let (error, text) = mcp.tool("bars_status", json!({"filter":" OTHER "})).await;
     assert!(!error, "{text}");

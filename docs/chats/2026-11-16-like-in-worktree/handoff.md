@@ -27,6 +27,18 @@ title: Сессия 16-11-2026 — like по worktree работает по ви
 - `similar` и `duplicates` по worktree остались ошибкой.
 - Тест MCP на `like` по worktree не добавлен (`bars-mcp/tests`): пометка проверена только на уровне воркера.
 
+## Починка красного после проверки (16-11-2026, по «Да, чинить»)
+
+Полный `check.ps1 -Jobs 2`: fmt, clippy, build, `cargo test` — зелёные (bars-mcp 36 из 36, bars-worker 495). Исправлено:
+
+- clippy: `then_some`, `is_multiple_of` (4 места), лишние заимствования в тестах `doc_queue.rs`, лишний `clone` в `subprojects.rs`, псевдоним `SeenTarget` в тесте `bars-mcp`; `document_write` и `entry_move` (8 аргументов) без `#[allow]`: `format = {eol, bom}` и `destination = {parent, name}` — структуры, `ui/src/lib/api.ts` и документы (`editor-design.md`, `link-index.md`) обновлены, у `bars-app` добавлен `serde`.
+- `bars-cli`: `projects --filter` вместе с `--project` отклоняется до обращения к воркеру (`reject_filter_with_project`): clap конфликт с глобальным флагом не ловит; тест проверяет код выхода и сообщение.
+- `bars-mcp`: ответ, который не разобрался в тип, снова повторяется один раз как `BadReply` (разбор перенесён внутрь `call_once`, сломано в 6.3.5); `bars_audit` с неразрешимым `project` без `wt` — ошибка в частях ответа, а не сбой вызова; описание `wt` у `bars_search` больше не говорит «like is not available»; `wt` у графовых инструментов короче, предел схем шести инструментов 15 КБ вместо 14 (`graphrag/tools.md`).
+- Тесты `bars-mcp`: `status_filter…` регистрировал проект до старта воркера; `diagnostic_mcp_searches…` и `agent_answers_are_text` ловили проверку, которую ставит первый вызов MCP к проекту (Т-8): добавлен первый вызов и ожидание.
+- `ui`: `SettingsPage.svelte` держал два старых порога (`min_score_rerank`, `min_score_vector`), тип `SearchDoc` знает один `min_score` (ADR-0007): лишние поля убраны, `svelte-check` зелёный; тест чипов `SearchPane` игнорирует класс Svelte.
+
+Остались красными четыре теста vitest (`npm test`: 767 из 772, пятый починен): `search-results` («слова подсвечиваются по основе» — основа «возвр» цепляет «возвращаются»), два в `new-topics-search`, `worktree-view` (галочки основного checkout после выбора в worktree). Первые три — код 05-11-2026 «без проверки сборкой», последний — 6.3.6; чья сторона права (тест или код), не выяснялось.
+
 ## Сложности
 
 - `Scope::build_with_paths`, `IndexView::cosines` и `load_hits` были видны только внутри `hybrid`; пришлось расширить видимость до `crate::search`, не открывая наружу.

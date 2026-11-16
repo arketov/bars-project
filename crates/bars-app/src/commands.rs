@@ -424,6 +424,13 @@ pub async fn document_read(
     .map_err(|e| e.to_string())
 }
 
+/// Формат записи документа: конец строки (`lf` или `crlf`) и BOM.
+#[derive(serde::Deserialize)]
+pub struct WriteFormat {
+    pub eol: String,
+    pub bom: bool,
+}
+
 /// Записывает документ, если на диске ещё ревизия `base_revision` (`null` — файла быть не должно).
 #[tauri::command]
 pub async fn document_write(
@@ -432,11 +439,11 @@ pub async fn document_write(
     path: String,
     text: String,
     base_revision: Option<String>,
-    eol: String,
-    bom: bool,
+    format: WriteFormat,
     wt: Option<String>,
 ) -> Result<Value, String> {
     use crate::document_io::{Eol, WriteOutcome, resolve, write};
+    let WriteFormat { eol, bom } = format;
     let view = view_roots(&state, &project, wt.as_deref())?;
     let (root, docs_root) = (view.root.clone(), view.docs_root.clone());
     let worker = state.get().map(|handler| handler.worker().clone());
@@ -693,17 +700,27 @@ pub async fn entry_plan_move(
     }).await.map_err(|e| e.to_string())
 }
 
+/// Место назначения переноса: папка и имя на новом месте.
+#[derive(serde::Deserialize)]
+pub struct MoveDestination {
+    pub parent: String,
+    pub name: String,
+}
+
 #[tauri::command]
 pub async fn entry_move(
     app: AppHandle,
     state: State<'_, Shared>,
     project: String,
     from: String,
-    to_parent: String,
-    name: String,
+    destination: MoveDestination,
     token: String,
     wt: Option<String>,
 ) -> Result<Value, String> {
+    let MoveDestination {
+        parent: to_parent,
+        name,
+    } = destination;
     let _operation = MOVE_OPERATION.lock().await;
     if !crate::flush::request_clean(&app, &project).await {
         return Ok(

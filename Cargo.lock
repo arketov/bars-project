@@ -397,6 +397,7 @@ dependencies = [
  "bars-worker",
  "blake3",
  "log",
+ "serde",
  "serde_json",
  "tauri",
  "tauri-build",

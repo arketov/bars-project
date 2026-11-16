@@ -166,7 +166,7 @@ export async function documentRead(project: string, path: string): Promise<Docum
 /** Запись документа, если на диске ещё `baseRevision` (`null` — файла быть не должно). */
 export async function documentWrite(project: string, path: string, text: string, baseRevision: string | null, eol: "lf" | "crlf", bom: boolean): Promise<DocumentWrite> {
   if (!inTauri()) return { status: "saved", revision: `browser-${text.length}-${Date.now()}` };
-  return (await shell<DocumentWrite>("document_write", { ...viewTarget(project), path, text, baseRevision, eol, bom }))!;
+  return (await shell<DocumentWrite>("document_write", { ...viewTarget(project), path, text, baseRevision, format: { eol, bom } }))!;
 }
 
 /** Ревизия документа на диске без текста; `revision: null` — файла нет. */
@@ -256,7 +256,7 @@ export async function entryCreateDir(project: string, parent: string, name: stri
 /** Переименование и перемещение: `toParent` — папка назначения, `name` — имя на новом месте. */
 export async function entryMove(project: string, from: string, toParent: string, name: string, token: string): Promise<EntryResult> {
   if (!inTauri()) return (await import("./mock-disk")).mockEntry("move", project, { from, toParent, name });
-  return (await shell<EntryResult>("entry_move", { ...viewTarget(project), from, toParent, name, token }))!;
+  return (await shell<EntryResult>("entry_move", { ...viewTarget(project), from, destination: { parent: toParent, name }, token }))!;
 }
 
 /** Отправляет файл или папку в корзину ОС; без корзины — отказ. */

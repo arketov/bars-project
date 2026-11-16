@@ -688,7 +688,12 @@ mod tests {
     #[test]
     fn finds_exactly_the_four_repositories_of_the_sample_tree() {
         let (_temp, main) = opovechenie();
-        let result = discover(&main, "docs", &[main.clone()], Limits::default());
+        let result = discover(
+            &main,
+            "docs",
+            std::slice::from_ref(&main),
+            Limits::default(),
+        );
         assert_eq!(
             relative(&main, &result.found),
             [
@@ -759,7 +764,7 @@ mod tests {
         let (_temp, main) = opovechenie();
         let api = main.join("backend/api");
         repo(&api, "vendor/x", true);
-        let result = relative(&main, &found(&main, "docs", &[api.clone()]));
+        let result = relative(&main, &found(&main, "docs", std::slice::from_ref(&api)));
         assert_eq!(
             result,
             [

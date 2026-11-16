@@ -7,10 +7,13 @@ use super::*;
 use bars_protocol::{Call, ErrorKind, Handler, RpcError, SessionInfoParams};
 use std::sync::Mutex;
 
-/// Что воркер увидел: `(метод, project, wt)` и параметры `session_info`.
+/// Один вызов, который увидел воркер: `(метод, project, wt)`.
+type SeenTarget = (String, Option<String>, Option<String>);
+
+/// Что воркер увидел: цели вызовов и параметры `session_info`.
 #[derive(Default)]
 struct Recorder {
-    targets: Mutex<Vec<(String, Option<String>, Option<String>)>>,
+    targets: Mutex<Vec<SeenTarget>>,
     sessions: Mutex<Vec<SessionInfoParams>>,
 }
 

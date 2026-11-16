@@ -19,7 +19,7 @@ title: Редактор документа bars — устройство чте�
 | Команда | Вход | Выход |
 |---|---|---|
 | `document_read` | `project`, `path` | `text` (UTF-8, перевод строк приведён к `\n`), `revision`, `eol` (`lf`/`crlf`), `bom`, `size`, `read_only` (`null`, `not_utf8`, `too_large`, `file`); файла нет — пустой документ с `revision = null`; ошибки `invalid_path`, `outside_root`, `parent_missing`, `too_large` |
-| `document_write` | `project`, `path`, `text`, `base_revision` (`null` — файла не должно быть), `eol`, `bom` | `revision` записанного; `status: conflict` (с текущей `revision` на диске, `null` — файла нет), ошибки `parent_missing`, `read_only`, `locked`, `invalid_path`, `outside_root`, `io` |
+| `document_write` | `project`, `path`, `text`, `base_revision` (`null` — файла не должно быть), `format` = `{eol, bom}`, `wt` | `revision` записанного; `status: conflict` (с текущей `revision` на диске, `null` — файла нет), ошибки `parent_missing`, `read_only`, `locked`, `invalid_path`, `outside_root`, `io` |
 | `document_revision` | `project`, `path` | текущая `revision` или `null`; проверка без передачи текста в окно (файл всё равно читается и хешируется) |
 
 Правила пути: расширение `.md` (регистр не важен); файл внутри корня документации после канонизации; существующий файл не может быть папкой; новый файл создаётся, только если родительская папка существует (папки создаёт 3.3). Документ не обязан быть в индексе (OQ-123, принято). `index.md` папки (Т-32): если файла нет, окно открывает пустой документ с `revision = absent`, на диске файл появляется при первой правке — это запись с `base_revision = null`.

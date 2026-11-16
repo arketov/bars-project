@@ -110,8 +110,7 @@ macro_rules! graph_args {
         pub struct $name {
             /// Проект; иначе проект сессии.
             pub project: Option<String>,
-            /// Worktree: `.git/worktrees/<name>`, an absolute path or "." (main checkout); the
-            /// graph is the main checkout's.
+            /// Worktree name, path or "." (main checkout); the graph is the main checkout's.
             pub wt: Option<String>,
             #[schemars(schema_with = "format_schema")]
             pub format: Option<Format>,

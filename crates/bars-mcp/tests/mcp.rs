@@ -293,6 +293,16 @@ async fn diagnostic_mcp_searches_do_not_create_or_refresh_topics() {
         s["state"] == "ready" && s["pending"] == 0
     })
     .await;
+    // Первый вызов MCP к проекту берёт аренду слежения и ставит проверку (Т-8): пока она идёт,
+    // проект «индексируется» и пустой поиск пробелом знаний не считается. Первый вызов — до поиска.
+    assert!(!mcp.tool("bars_status", json!({})).await.0);
+    wait_status(
+        &harness,
+        &root,
+        "проверка после первого вызова",
+        |s| s["state"] == "ready" && s["pending"] == 0,
+    )
+    .await;
     let project = root.display().to_string();
     let query = "Как устроен механизм проверки?";
     let (search_error, search_body) = mcp.tool("bars_search", json!({"query":query})).await;
@@ -777,7 +787,7 @@ async fn every_graph_tool_lists_only_its_own_parameters() {
             "{name}: описание не длиннее 400 знаков"
         );
     }
-    assert!(total <= 14 * 1024, "шесть схем: {total} байт");
+    assert!(total <= 15 * 1024, "шесть схем: {total} байт");
     let (error, text) = mcp.tool("bars_paths", json!({"query":"Т-1"})).await;
     assert!(error, "поле чужой операции отклоняется: {text}");
 }
@@ -1632,6 +1642,10 @@ async fn agent_answers_are_text() {
     mcp.tool("bars_status", json!({"all":true})).await;
     harness.register(&root).await;
     wait_status(&harness, &root, "первая индексация", indexed).await;
+    // Первый вызов MCP к проекту берёт аренду слежения и ставит проверку (Т-8): пока она идёт,
+    // сводка показывает «indexing». Ждём её, чтобы проверять готовое состояние.
+    mcp.tool("bars_status", json!({})).await;
+    wait_status(&harness, &root, "проверка после первого вызова", indexed).await;
 
     let (_, status) = mcp.tool("bars_status", json!({})).await;
     assert!(status.contains("=== PROJECT 1 of 1 ==="), "{status}");

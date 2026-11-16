@@ -37,7 +37,7 @@ it("операторы: «Понято как» с чипами, «×» убир
   app.query = '"возврат без чека" -скидка папка:инструкции'; flushSync();
   const meta = document.querySelector(".qmeta")!;
   expect(meta.textContent).toContain("Понято как");
-  expect([...meta.querySelectorAll(".chip")].map(c => c.className.replace("chip ", ""))).toEqual(["phrase", "exclude", "path"]);
+  expect([...meta.querySelectorAll(".chip")].map(c => c.className.replace("chip ", "").replace(/\s*svelte-\w+/g, ""))).toEqual(["phrase", "exclude", "path"]);
   meta.querySelectorAll<HTMLButtonElement>(".chip button")[1].click(); flushSync();
   expect(app.query).toBe('"возврат без чека" папка:инструкции'); expect(search).toHaveBeenCalled();
   app.query = "возврат"; flushSync();

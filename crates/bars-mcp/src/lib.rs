@@ -292,6 +292,13 @@ impl BarsMcp {
                 } else {
                     lease.client = None;
                 }
+                // Неразрешимый проект без явного `wt` — не сбой вызова: ошибку покажут части
+                // ответа аудитов, а пометки у такого вызова нет.
+                if wt.is_none()
+                    && matches!(&error, ClientError::Rpc(rpc) if rpc.kind() == Some(ErrorKind::ProjectNotFound))
+                {
+                    return Ok(None);
+                }
                 return Err(error);
             }
         };
@@ -373,25 +380,27 @@ impl BarsMcp {
         params: &M,
         context: Option<&Value>,
     ) -> Result<(M::Output, Option<String>), ClientError> {
-        let value = wait_for_model(self.env.model_wait, MODEL_POLL, |attempt| async move {
-            let context = context.map(|context| with_attempt(context, attempt));
-            self.call_once(params, context.as_ref()).await
-        })
-        .await?;
+        let (output, value) =
+            wait_for_model(self.env.model_wait, MODEL_POLL, |attempt| async move {
+                let context = context.map(|context| with_attempt(context, attempt));
+                self.call_once(params, context.as_ref()).await
+            })
+            .await?;
         let note = value
             .get("worktree_note")
             .and_then(Value::as_str)
             .map(str::to_string);
-        let output = serde_json::from_value(value)
-            .map_err(|error| ClientError::BadReply(error.to_string()))?;
         Ok((output, note))
     }
 
+    /// Один вызов с повтором по обрыву канала. Разбор ответа в тип — внутри попытки: ответ, который
+    /// не разобрался, — тот же `BadReply`, что и порча канала, и чтение повторяется один раз.
+    /// Возвращает разобранный ответ и сам JSON (из него читается `worktree_note`).
     async fn call_once<M: Method>(
         &self,
         params: &M,
         context: Option<&Value>,
-    ) -> Result<Value, ClientError> {
+    ) -> Result<(M::Output, Value), ClientError> {
         let mut lease = self.pool.acquire().await;
         for attempt in 0..2 {
             if lease.client.is_none() {
@@ -409,7 +418,12 @@ impl BarsMcp {
                 lease.client = Some(client);
             }
             let client = lease.client.as_mut().expect("соединение открыто выше");
-            match client.call_value(params, context).await {
+            let reply = client.call_value(params, context).await.and_then(|value| {
+                <M::Output as serde::Deserialize>::deserialize(&value)
+                    .map(|typed| (typed, value))
+                    .map_err(|error| ClientError::BadReply(error.to_string()))
+            });
+            match reply {
                 Ok(output) => {
                     lease.recycle();
                     return Ok(output);

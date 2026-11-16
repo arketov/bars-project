@@ -947,9 +947,9 @@ mod tests {
         let now = Instant::now();
         let mut queue = DocQueue::new();
         queue.touch(&project(), "a.md", DocSource::Watch, PAUSE, now);
-        queue.touch(&worktree(), "a.md", DocSource::Watch, PAUSE, now);
+        queue.touch(worktree(), "a.md", DocSource::Watch, PAUSE, now);
         queue.touch(
-            &DocTarget::worktree(&project(), "other"),
+            DocTarget::worktree(&project(), "other"),
             "a.md",
             DocSource::Watch,
             PAUSE,
@@ -961,7 +961,7 @@ mod tests {
             1,
             "сводка проекта не считает worktree"
         );
-        assert_eq!(queue.counts(&worktree()).waiting, 1);
+        assert_eq!(queue.counts(worktree()).waiting, 1);
     }
 
     #[test]
@@ -970,14 +970,14 @@ mod tests {
         let mut queue = DocQueue::new();
         for second in [0, 3, 6] {
             queue.touch(
-                &worktree(),
+                worktree(),
                 "a.md",
                 DocSource::Watch,
                 PAUSE,
                 at(base, second),
             );
         }
-        queue.touch(&worktree(), "a.md", DocSource::Edit, PAUSE, at(base, 7));
+        queue.touch(worktree(), "a.md", DocSource::Edit, PAUSE, at(base, 7));
         assert_eq!(queue.len(), 1);
         assert_eq!(queue.next_due(), Some(at(base, 37)));
         assert!(queue.promote_due(at(base, 36)).is_empty());
@@ -992,8 +992,8 @@ mod tests {
         let base = Instant::now();
         let mut queue = DocQueue::new();
         queue.touch(&project(), "a.md", DocSource::Watch, PAUSE, base);
-        queue.touch(&worktree(), "b.md", DocSource::Watch, PAUSE, base);
-        queue.touch(&worktree(), "c.md", DocSource::Edit, PAUSE, base);
+        queue.touch(worktree(), "b.md", DocSource::Watch, PAUSE, base);
+        queue.touch(worktree(), "c.md", DocSource::Edit, PAUSE, base);
         let ready = queue.promote_due(at(base, 30));
         assert_eq!(ready.len(), 2);
         let of_worktree = ready.iter().find(|item| item.target == worktree()).unwrap();
@@ -1008,13 +1008,13 @@ mod tests {
         let base = Instant::now();
         let mut queue = DocQueue::new();
         queue.touch(
-            &worktree(),
+            worktree(),
             "ready.md",
             DocSource::Watch,
             Duration::ZERO,
             base,
         );
-        queue.touch(&worktree(), "waits.md", DocSource::Watch, PAUSE, base);
+        queue.touch(worktree(), "waits.md", DocSource::Watch, PAUSE, base);
         queue.touch(
             &project(),
             "ready.md",
@@ -1022,12 +1022,12 @@ mod tests {
             Duration::ZERO,
             base,
         );
-        let taken = queue.take_ready(&worktree()).unwrap();
+        let taken = queue.take_ready(worktree()).unwrap();
         assert_eq!(taken.paths, BTreeSet::from(["ready.md".into()]));
         assert_eq!(queue.len(), 2, "ждущая запись и запись проекта на месте");
-        assert!(queue.is_waiting(&worktree(), "waits.md"));
+        assert!(queue.is_waiting(worktree(), "waits.md"));
         assert_eq!(queue.counts(&project()).queued, 1);
-        assert!(queue.take_ready(&worktree()).is_none());
+        assert!(queue.take_ready(worktree()).is_none());
     }
 
     #[test]
@@ -1035,9 +1035,9 @@ mod tests {
         let now = Instant::now();
         let mut queue = DocQueue::new();
         queue.touch(&project(), "a.md", DocSource::Watch, PAUSE, now);
-        queue.touch(&worktree(), "a.md", DocSource::Watch, PAUSE, now);
+        queue.touch(worktree(), "a.md", DocSource::Watch, PAUSE, now);
         queue.touch(
-            &DocTarget::worktree(Path::new("other"), "feat-x"),
+            DocTarget::worktree(Path::new("other"), "feat-x"),
             "a.md",
             DocSource::Watch,
             PAUSE,

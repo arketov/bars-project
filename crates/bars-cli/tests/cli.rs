@@ -387,16 +387,13 @@ async fn register_search_outline_read_scenario() {
         "{}",
         none.out
     );
+    // `--filter` и `--project` вместе — отказ до обращения к воркеру.
+    let both = bars(&env, &["--project", "proj", "projects", "--filter", "proj"]).await;
+    assert_ne!(both.code, 0, "stdout: {}", both.out);
     assert!(
-        Cli::try_parse_from([
-            "bars-cli",
-            "--project",
-            "proj",
-            "projects",
-            "--filter",
-            "proj"
-        ])
-        .is_err()
+        both.err.contains("--filter") && both.err.contains("--project"),
+        "{}",
+        both.err
     );
 
     // A watcher follow-up may overlap the status request after the initial indexing.
