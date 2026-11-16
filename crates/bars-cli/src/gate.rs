@@ -69,7 +69,7 @@ pub fn decide(input: &GateInput, docs_root: &str, dir: &Path) -> Option<String> 
     state.count += 1;
     let reason = if is_broad(tool, args, &docs) {
         Some(broad_message(state.count))
-    } else if state.count % SWEEP_LIMIT == 0 {
+    } else if state.count.is_multiple_of(SWEEP_LIMIT) {
         Some(counter_message(state.count))
     } else {
         None

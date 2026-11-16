@@ -1031,7 +1031,7 @@ impl WorkerHandler {
         }
         Ok(ProjectsOutput {
             projects,
-            registry_total: filter.is_some().then(|| all.len() as u32),
+            registry_total: filter.is_some().then_some(all.len() as u32),
         })
     }
 

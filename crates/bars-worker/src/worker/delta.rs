@@ -183,7 +183,7 @@ impl IndexObserver for Observer {
 
     fn progress(&self, documents_done: usize, _: usize) {
         let publish = self.building(|done, _| *done = documents_done);
-        if publish && documents_done % 25 == 0 {
+        if publish && documents_done.is_multiple_of(25) {
             self.inner
                 .updates
                 .changed(&self.key.0, updates::STATUS, false);

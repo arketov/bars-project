@@ -22,7 +22,7 @@ title: Сессия 16-11-2026 — like по worktree работает по ви
 
 ## Не сделано
 
-- Ничего не собиралось и не запускалось: возможны ошибки компиляции, `clippy`, падения новых тестов (особенно `like_while_delta_builds…`: поведение паузы очереди скопировано с `search_while_building…`).
+- Проверка после коммита (по прямой просьбе автора 16-11-2026): `cargo fmt --check` чист; `cargo build --workspace` зелёный; `cargo test --workspace --lib --tests --bins`: `bars-worker` 495 прошли, 0 упало (в том числе три теста `like`/`similar` по worktree), `bars-core`, `bars-graph`, `bars-protocol` зелёные; установщик `build-installer.ps1` собран (`dist-installer/bars_0.1.0_x64-setup.exe`, 21,7 МБ). Не зелёное, не из этой правки: `cargo clippy` (замечания в `doc_queue.rs`, `subprojects.rs`, `bars-app/commands.rs` — 8 аргументов, тест `bars-mcp` — сложный тип); тесты `bars-mcp` `mcp` (`every_graph_tool_lists_only_its_own_parameters`, `status_filter_lists_only_matching_registry_projects`, `maintenance_tools_…`, `diagnostic_mcp_searches_…`, `pool_bad_read_…`) и `bars-cli` `register_search_outline_read_scenario` — код блока 6. Три замечания clippy (`then_some`, `is_multiple_of` в `mod.rs`, `delta.rs`, `gate.rs`) исправлены. Тесты `bars-mcp` на `like` по worktree нет.
 - Промпты бота (`main.bot` в iterion) не менялись и не должны: после фикса `wt="."` им не нужен, а с ним бот потерял бы собственные правки.
 - `similar` и `duplicates` по worktree остались ошибкой.
 - Тест MCP на `like` по worktree не добавлен (`bars-mcp/tests`): пометка проверена только на уровне воркера.
