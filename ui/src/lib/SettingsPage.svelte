@@ -54,6 +54,7 @@
     "kimi-code": ["Ki", "Kimi Code"],
     ouroboros: ["Oo", "Ouroboros"],
     iterion: ["It", "iterion"],
+    opencode: ["OC", "OpenCode"],
   };
 
   const draft = $derived(settings.draft);
@@ -374,6 +375,9 @@
               {/if}
               {#if client.client === "iterion"}
                 <div class="note"><span>Плагин iterion (~/.iterion/plugins/bars): MCP и skill bars-docs, без хука. Работает только для запусков без песочницы. Проекты добавляются в окне bars или через CLI.</span></div>
+              {/if}
+              {#if client.client === "opencode"}
+                <div class="note"><span>OpenCode: MCP в ~/.config/opencode/opencode.json и skills в ~/.config/opencode/skills/, без хука. Проекты добавляются в окне bars или через CLI.</span></div>
               {/if}
               {#if client.stale}
                 <div class="note warn"><Icon name="warn" size={16} /><span>Записи указывают на старое расположение bars (приложение переехало или обновилось). Нажмите «Переустановить».</span></div>

@@ -54,6 +54,19 @@ bars положит в папку `plugins/bars/` в `~/.iterion` (или в `IT
 
 Формат — в [контракте подключения клиентов](../features/clients/clients.md).
 
+## Подключение OpenCode
+
+Клиент `opencode` подключает bars к [OpenCode](https://opencode.ai/) — AI-агенту для терминала. «Настройки» → «Клиенты» → opencode → «Установить» или `bars-cli install --client opencode` (удаление — `bars-cli uninstall --client opencode`).
+
+bars пропишет MCP-сервер `bars` в `~/.config/opencode/opencode.json` (или `opencode.jsonc`, если `.json` нет) и положит три skills (`bars-docs`, `bars-session-log`, `bars-end`) в `~/.config/opencode/skills/`. Хук начала сессии нет (в OpenCode их нет — только плагины TS/JS), поэтому проект добавьте в окне bars или `bars-cli register <папка>`.
+
+Нюансы:
+
+- **Хука нет.** Проект добавьте в окне bars или `bars-cli register <папка>`.
+- Переменная `XDG_CONFIG_HOME` поддерживается: конфиг ищется в `$XDG_CONFIG_HOME/opencode/opencode.json(c)` или `~/.config/opencode/opencode.json(c)`.
+
+Формат — в [контракте подключения клиентов](../features/clients/clients.md).
+
 ## Одобрение хука в Codex
 
 Codex не запускает новый или изменённый хук, пока вы его не одобрите. После установки выполните в Codex команду `/hooks` и одобрите хук `bars`. Пока хук не одобрен, поиск у агента работает, но проекты надо добавлять самому — окном или `bars-cli register`.
@@ -69,6 +82,7 @@ bars напомнит про `/hooks` только когда хук дейст�
 | Kimi Code | `~/.kimi-code/mcp.json` | `~/.kimi-code/config.toml` | `~/.kimi-code/skills/` |
 | Ouroboros | `~/Ouroboros/data/settings.json` | Не устанавливается | Не устанавливаются |
 | iterion (проект) | `~/.iterion/plugins/bars/plugin.yaml` (или в `ITERION_HOME`) | Не устанавливается | Только `bars-docs`, в `plugins/bars/` |
+| OpenCode | `~/.config/opencode/opencode.json` (или `.jsonc`) | Не устанавливается | `~/.config/opencode/skills/` (три skills) |
 
 bars аккуратен с чужими файлами:
 
@@ -81,7 +95,7 @@ bars аккуратен с чужими файлами:
 
 ## Как убрать bars из клиента
 
-«Настройки» → «Клиенты» → «Удалить» или `bars-cli uninstall --client claude-code` (или `codex`, `kimi-code`, `ouroboros`; `iterion` — когда клиент будет реализован). Уберутся только записи и установленные skills bars. При удалении самой программы bars это делается автоматически.
+«Настройки» → «Клиенты» → «Удалить» или `bars-cli uninstall --client claude-code` (или `codex`, `kimi-code`, `ouroboros`, `iterion`, `opencode`). Уберутся только записи и установленные skills bars. При удалении самой программы bars это делается автоматически.
 
 ## Как подключить bars к другому MCP-клиенту
 

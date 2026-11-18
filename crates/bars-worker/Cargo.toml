@@ -27,6 +27,7 @@ serde.workspace = true
 rusqlite.workspace = true
 toml.workspace = true
 toml_edit.workspace = true
+jsonc-parser = "0.34"
 widestring.workspace = true
 dirs.workspace = true
 

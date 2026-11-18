@@ -1,4 +1,4 @@
-//! Установка bars в Claude Code, Codex, Kimi Code и Ouroboros и удаление оттуда (Т-21, Т-28,
+//! Установка bars в Claude Code, Codex, Kimi Code, Ouroboros, iterion и OpenCode и удаление оттуда (Т-21, Т-28,
 //! `docs/features/clients/clients.md`).
 //!
 //! Прописываются MCP-сервер bars, а у поддерживающих их клиентов — хук и skills. Чужие конфиги
@@ -11,6 +11,7 @@ mod fsx;
 mod iterion;
 mod json;
 mod kimi_toml;
+mod opencode;
 mod ouroboros;
 mod project_gate;
 mod refresh;
@@ -170,6 +171,12 @@ fn layout(env: &InstallEnv, client: InstallClient) -> Layout {
             hooks: iterion::manifest_file(env),
             skills: iterion::plugin_dir(env).join("skills"),
         },
+        // MCP в `~/.config/opencode/opencode.json` (или `.jsonc`), skills в `~/.config/opencode/skills/`, хука нет.
+        InstallClient::Opencode => Layout {
+            mcp: opencode::opencode_config(env),
+            hooks: PathBuf::new(), // не используется
+            skills: opencode::opencode_skills_dir(env),
+        },
     }
 }
 
@@ -206,6 +213,7 @@ fn install_locked(env: &InstallEnv, client: InstallClient, activate: bool) -> Re
             InstallClient::Ouroboros => ouroboros::validate_mcp(&layout.mcp)?,
             // Манифест bars перезаписывается целиком: разбирать нечего.
             InstallClient::Iterion => {}
+            InstallClient::Opencode => {}
         }
         match client {
             InstallClient::ClaudeCode | InstallClient::Codex => {
@@ -214,7 +222,7 @@ fn install_locked(env: &InstallEnv, client: InstallClient, activate: bool) -> Re
             InstallClient::KimiCode => {
                 kimi_toml::validate_hook(&layout.hooks, &env.hook_command())?
             }
-            InstallClient::Ouroboros | InstallClient::Iterion => {}
+            InstallClient::Ouroboros | InstallClient::Iterion | InstallClient::Opencode => {}
         }
         let mcp_changed = match client {
             InstallClient::ClaudeCode | InstallClient::KimiCode => {
@@ -225,6 +233,7 @@ fn install_locked(env: &InstallEnv, client: InstallClient, activate: bool) -> Re
                 ouroboros::install_mcp(&layout.mcp, &env.mcp_exe, activate)?
             }
             InstallClient::Iterion => iterion::install_mcp(&layout.mcp, &env.mcp_exe)?,
+            InstallClient::Opencode => opencode::install_mcp(&layout.mcp, &env.mcp_exe)?,
         };
         if mcp_changed {
             done.changed_files.push(layout.mcp.clone());
@@ -234,7 +243,7 @@ fn install_locked(env: &InstallEnv, client: InstallClient, activate: bool) -> Re
                 json::install_hook(&layout.hooks, &env.hook_command())?
             }
             InstallClient::KimiCode => kimi_toml::install_hook(&layout.hooks, &env.hook_command())?,
-            InstallClient::Ouroboros | InstallClient::Iterion => false,
+            InstallClient::Ouroboros | InstallClient::Iterion | InstallClient::Opencode => false,
         };
         done.needs_hook_approval = client == InstallClient::Codex && done.hook_changed;
         if done.hook_changed {
@@ -266,6 +275,7 @@ fn is_stale(env: &InstallEnv, client: InstallClient) -> Result<bool> {
         InstallClient::Codex => codex_toml::mcp_command(&layout.mcp)?,
         InstallClient::Ouroboros => ouroboros::mcp_command(&layout.mcp)?,
         InstallClient::Iterion => iterion::mcp_command(&layout.mcp)?,
+        InstallClient::Opencode => opencode::mcp_command(&layout.mcp)?,
     };
     let mcp_stale = mcp.is_some_and(|command| command != env.mcp_exe.display().to_string());
     let hook = env.hook_command();
@@ -280,7 +290,7 @@ fn hook_commands(client: InstallClient, file: &Path) -> Result<Vec<String>> {
     match client {
         InstallClient::ClaudeCode | InstallClient::Codex => json::hook_commands(file),
         InstallClient::KimiCode => kimi_toml::hook_commands(file),
-        InstallClient::Ouroboros | InstallClient::Iterion => Ok(Vec::new()),
+        InstallClient::Ouroboros | InstallClient::Iterion | InstallClient::Opencode => Ok(Vec::new()),
     }
 }
 
@@ -304,11 +314,13 @@ pub fn state(env: &InstallEnv, client: InstallClient) -> ClientState {
         InstallClient::Codex => codex_toml::mcp_command(&layout.mcp),
         InstallClient::Ouroboros => ouroboros::mcp_command(&layout.mcp),
         InstallClient::Iterion => iterion::mcp_command(&layout.mcp),
+        InstallClient::Opencode => opencode::mcp_command(&layout.mcp),
     };
     ClientState {
         installed: match client {
             InstallClient::Ouroboros => ouroboros::has_mcp(&layout.mcp).unwrap_or(false),
             InstallClient::Iterion => iterion::has_mcp(&layout.mcp).unwrap_or(false),
+            InstallClient::Opencode => opencode::has_mcp(&layout.mcp).unwrap_or(false),
             _ => matches!(mcp, Ok(Some(_))),
         },
         stale: is_stale(env, client).unwrap_or(false),
@@ -316,6 +328,8 @@ pub fn state(env: &InstallEnv, client: InstallClient) -> ClientState {
             vec![layout.mcp]
         } else if client == InstallClient::Iterion {
             vec![iterion::plugin_dir(env)]
+        } else if client == InstallClient::Opencode {
+            vec![layout.mcp, layout.skills]
         } else {
             vec![layout.mcp, layout.hooks, layout.skills]
         },
@@ -350,6 +364,9 @@ fn uninstall_locked(env: &InstallEnv, client: InstallClient) -> Result<Vec<PathB
             InstallClient::Iterion => {
                 iterion::has_mcp(&layout.mcp)?;
             }
+            InstallClient::Opencode => {
+                opencode::has_mcp(&layout.mcp)?;
+            }
         }
         hook_commands(client, &layout.hooks)?;
         let mcp_changed = match client {
@@ -365,6 +382,7 @@ fn uninstall_locked(env: &InstallEnv, client: InstallClient) -> Result<Vec<PathB
                 }
                 false
             }
+            InstallClient::Opencode => opencode::uninstall_mcp(&layout.mcp)?,
         };
         if mcp_changed {
             done.changed_files.push(layout.mcp.clone());
@@ -374,7 +392,7 @@ fn uninstall_locked(env: &InstallEnv, client: InstallClient) -> Result<Vec<PathB
                 json::uninstall_hook(&layout.hooks)?
             }
             InstallClient::KimiCode => kimi_toml::uninstall_hook(&layout.hooks)?,
-            InstallClient::Ouroboros | InstallClient::Iterion => false,
+            InstallClient::Ouroboros | InstallClient::Iterion | InstallClient::Opencode => false,
         };
         if hook_removed {
             done.changed_files.push(layout.hooks.clone());

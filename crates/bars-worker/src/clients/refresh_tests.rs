@@ -343,3 +343,37 @@ fn iterion_refresh_needs_existing_manifest_and_repairs_it() {
     refresh(&env);
     assert_eq!(snapshot(home.path()), before);
 }
+
+#[test]
+fn opencode_refresh_updates_stale_mcp_and_skills() {
+    let home = TempDir::new().unwrap();
+    let env = env(&home);
+    let config = home.path().join(".config/opencode/opencode.json");
+    let skills = home.path().join(".config/opencode/skills");
+
+    // Уже есть конфиг со старым путём
+    write(&config, r#"{"mcp":{"servers":{"bars":{"type":"local","command":["/old/bars-mcp"],"args":[]}}}}"#);
+    fs::create_dir_all(&skills.join("bars-docs")).unwrap();
+    fs::write(&skills.join("bars-docs/SKILL.md"), "old").unwrap();
+
+    let results = refresh(&env);
+    let opencode = results
+        .iter()
+        .find(|r| r.client == InstallClient::Opencode)
+        .unwrap();
+    assert!(matches!(&opencode.result, Ok(Some(done)) if !done.changed_files.is_empty()));
+    assert!(
+        fs::read_to_string(&config)
+            .unwrap()
+            .contains("command: [\"/current/bars-mcp\"]")
+    );
+    assert_ne!(
+        fs::read_to_string(&skills.join("bars-docs/SKILL.md")).unwrap(),
+        "old"
+    );
+
+    // Повторный проход ничего не пишет.
+    let before = snapshot(home.path());
+    refresh(&env);
+    assert_eq!(snapshot(home.path()), before);
+}

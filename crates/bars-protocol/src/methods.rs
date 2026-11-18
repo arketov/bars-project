@@ -978,6 +978,8 @@ pub enum InstallClient {
     Ouroboros,
     #[serde(rename = "iterion")]
     Iterion,
+    #[serde(rename = "opencode")]
+    Opencode,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

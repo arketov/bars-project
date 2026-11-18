@@ -73,6 +73,19 @@ Codex не запускает новый или изменённый хук, п�
 
 **Признак установки и обновление.** Клиент установлен, если есть `plugins/bars/plugin.yaml`; одна папка `plugins/`, чужие плагины или одни skills установку не запускают. Фоновый проход Claude Code → Codex → Kimi Code → Ouroboros → iterion при существующем манифесте перезаписывает его и `bars-docs` по текущему `bars-mcp` (устаревший `command` помечает `stale`); уже правильные файлы не переписываются, копии `.bars-backup` нет: папка плагина принадлежит bars целиком. Манифест пишется только известными строгому разбору iterion полями: `schema_version`, `name`, `version`, `description`, `default_enabled`, `contributes` (`mcp_servers`, `skills`). Окно показывает папку плагина как файл клиента, подпись объясняет ограничение «только без песочницы».
 
+## OpenCode
+
+Клиент `opencode` подключает bars к [OpenCode](https://opencode.ai/) — AI-агенту для терминала (решение автора 17-11-2026, OQ-323…OQ-326). Статус: реализован MCP, skills, окно, CLI, автообновление и удаление.
+
+| Запись | Файл |
+|---|---|
+| MCP-сервер | `~/.config/opencode/opencode.json` (или `opencode.jsonc`), раздел `mcp.servers.bars` |
+| Skills | `~/.config/opencode/skills/<имя>/SKILL.md` (три skills: `bars-docs`, `bars-session-log`, `bars-end`) |
+
+OpenCode использует глобальный конфиг `~/.config/opencode/opencode.json(c)` (при заданном `XDG_CONFIG_HOME` — от него). MCP-сервер прописывается как `type: "local"`, `command: ["<bars-mcp>"]`. Хука начала сессии нет (в OpenCode их нет — только плагины TS/JS), поэтому проект регистрируется в окне bars или командой `bars-cli register`. Skills кладутся в `~/.config/opencode/skills/` — OpenCode их подхватывает автоматически. Удаление убирает запись `mcp.servers.bars` и папки skills bars. Повторная установка обновляет путь к `bars-mcp`, если он изменился.
+
+Фоновый проход автообновления: Claude Code → Codex → Kimi Code → Ouroboros → iterion → OpenCode.
+
 ## Ручное подключение других клиентов
 
 Любой клиент, который умеет запускать stdio-MCP (например, чат Claude Desktop через `claude_desktop_config.json`), подключает `bars-mcp` вручную по текстовой инструкции. Хука у таких клиентов нет: проект регистрируется в окне или через CLI, а актуальность держит воркер (Т-10).

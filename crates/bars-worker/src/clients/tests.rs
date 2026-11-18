@@ -518,3 +518,97 @@ fn iterion_uses_iterion_home_and_uninstall_removes_only_plugin_dir() {
     assert!(!super::state(&env, InstallClient::Iterion).installed);
     assert!(uninstall(&env, InstallClient::Iterion).unwrap().is_empty());
 }
+
+#[test]
+fn opencode_install_writes_mcp_and_skills() {
+    let home = TempDir::new().unwrap();
+    let env = env(&home);
+    let config = home.path().join(".config/opencode/opencode.json");
+
+    let done = install(&env, InstallClient::Opencode).unwrap();
+
+    assert!(!done.hook_changed && !done.needs_hook_approval);
+    assert_eq!(done.changed_files.len(), 4); // mcp + 3 skills
+
+    let value = read_json(&config);
+    let bars = &value["mcp"]["servers"]["bars"];
+    assert_eq!(bars["type"], "local");
+    assert_eq!(bars["command"], json!(["/opt/bars/bars-mcp"]));
+    assert_eq!(bars["args"], json!([]));
+
+    for name in ["bars-docs", "bars-session-log", "bars-end"] {
+        let skill = home
+            .path()
+            .join(".config/opencode/skills")
+            .join(name)
+            .join("SKILL.md");
+        assert!(
+            fs::read_to_string(skill)
+                .unwrap()
+                .contains(&format!("name: {name}"))
+        );
+    }
+}
+
+#[test]
+fn opencode_install_is_idempotent_and_updates_moved_path() {
+    let home = TempDir::new().unwrap();
+    let env = env(&home);
+    let config = home.path().join(".config/opencode/opencode.json");
+    install(&env, InstallClient::Opencode).unwrap();
+
+    let again = install(&env, InstallClient::Opencode).unwrap();
+    assert!(again.changed_files.is_empty());
+    assert!(!super::state(&env, InstallClient::Opencode).stale);
+
+    let mut moved = env.clone();
+    moved.mcp_exe = PathBuf::from("/new/bars-mcp");
+    assert!(super::state(&moved, InstallClient::Opencode).stale);
+    let done = install(&moved, InstallClient::Opencode).unwrap();
+    assert_eq!(done.changed_files, vec![config.clone()]);
+    assert!(
+        fs::read_to_string(&config)
+            .unwrap()
+            .contains("command: [\"/new/bars-mcp\"]")
+    );
+}
+
+#[test]
+fn opencode_uninstall_removes_mcp_and_skills() {
+    let home = TempDir::new().unwrap();
+    let env = env(&home);
+    let config = home.path().join(".config/opencode/opencode.json");
+    let skills_dir = home.path().join(".config/opencode/skills");
+
+    install(&env, InstallClient::Opencode).unwrap();
+    assert!(super::state(&env, InstallClient::Opencode).installed);
+
+    let removed = uninstall(&env, InstallClient::Opencode).unwrap();
+    // mcp file + 3 skill directories
+    assert_eq!(removed.len(), 4);
+    assert!(removed.contains(&config));
+    assert!(!skills_dir.join("bars-docs").exists());
+    assert!(!skills_dir.join("bars-session-log").exists());
+    assert!(!skills_dir.join("bars-end").exists());
+    assert!(!super::state(&env, InstallClient::Opencode).installed);
+    assert!(uninstall(&env, InstallClient::Opencode).unwrap().is_empty());
+}
+
+#[test]
+fn opencode_uses_xdg_config_home() {
+    let home = TempDir::new().unwrap();
+    let mut env = env(&home);
+    env.iterion_home = None; // not used
+    let xdg = home.path().join("xdg");
+    // Set XDG_CONFIG_HOME for this test
+    std::env::set_var("XDG_CONFIG_HOME", &xdg);
+
+    let config = xdg.join("opencode/opencode.json");
+    install(&env, InstallClient::Opencode).unwrap();
+
+    assert!(config.exists());
+    assert!(!home.path().join(".config/opencode/opencode.json").exists());
+
+    // Clean up
+    std::env::remove_var("XDG_CONFIG_HOME");
+}

@@ -25,6 +25,7 @@ pub fn refresh(env: &InstallEnv) -> Vec<RefreshResult> {
         InstallClient::KimiCode,
         InstallClient::Ouroboros,
         InstallClient::Iterion,
+        InstallClient::Opencode,
     ]
     .into_iter()
     .map(|client| {
@@ -50,6 +51,7 @@ fn present(env: &InstallEnv, client: InstallClient) -> Result<bool> {
         InstallClient::Codex => codex_toml::has_mcp(&paths.mcp)?,
         InstallClient::Ouroboros => ouroboros::has_mcp(&paths.mcp)?,
         InstallClient::Iterion => iterion::has_mcp(&paths.mcp)?,
+        InstallClient::Opencode => opencode::has_mcp(&paths.mcp)?,
     };
     let hook = !super::hook_commands(client, &paths.hooks)?.is_empty();
     Ok(mcp || hook)
@@ -75,6 +77,7 @@ pub(crate) fn report(client: InstallClient, action: &str, result: &Result<Option
         InstallClient::KimiCode => "Kimi Code",
         InstallClient::Ouroboros => "Ouroboros",
         InstallClient::Iterion => "iterion",
+        InstallClient::Opencode => "OpenCode",
     };
     let done = match result {
         Ok(Some(done)) => Some(done),

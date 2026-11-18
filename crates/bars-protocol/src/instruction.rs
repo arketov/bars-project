@@ -18,6 +18,9 @@ pub fn agent_install_text(cli: &str, mcp: &str) -> String {
          \x20  \"{cli}\" install --client iterion\n\
          \x20  iterion: a plugin (~/.iterion/plugins/bars) with the MCP server and the bars-docs\n\
          \x20  skill, no hook; works only for runs without a sandbox.\n\
+         \x20  \"{cli}\" install --client opencode\n\
+         \x20  opencode: MCP in ~/.config/opencode/opencode.json and skills in ~/.config/opencode/skills/,\n\
+         \x20  no hook; register a project in bars or with bars-cli register.\n\
          \x20  Other listed clients also receive the session-start hook and bars skills; before\n\
          \x20  editing other configs it makes a copy named `<file>.bars-backup`.\n\
          2. If the client is Codex, tell the user to run /hooks in Codex and approve the bars hook:\n\

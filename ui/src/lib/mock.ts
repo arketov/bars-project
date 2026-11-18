@@ -545,6 +545,7 @@ export async function mockCall(method: string, params: Record<string, unknown>):
           { client: "kimi-code", installed: true, stale: false, files: ["~/.kimi-code/mcp.json", "~/.kimi-code/config.toml"], needs_hook_approval: false },
           { client: "ouroboros", installed: false, stale: false, files: ["~/Ouroboros/data/settings.json"], needs_hook_approval: false },
           { client: "iterion", installed: false, stale: false, files: ["~/.iterion/plugins/bars"], needs_hook_approval: false },
+          { client: "opencode", installed: false, stale: false, files: ["~/.config/opencode/opencode.json", "~/.config/opencode/skills"], needs_hook_approval: false },
         ],
       };
     case "instruction":
