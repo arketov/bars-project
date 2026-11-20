@@ -33,6 +33,17 @@ pub enum RegistryError {
          зарегистрируйте его отдельным проектом"
     )]
     DiscoveredRename,
+    /// Папка лежит внутри живого worktree зарегистрированного проекта: её документы уже входят в
+    /// вид этого worktree (`docs/features/projects/worktrees.md`).
+    #[error(
+        "папка {path} лежит внутри worktree `{worktree}` проекта {owner}: она уже входит в его \
+         вид (папка «worktree» в окне, параметр wt) и отдельным проектом не регистрируется"
+    )]
+    InsideWorktree {
+        path: PathBuf,
+        owner: PathBuf,
+        worktree: String,
+    },
 }
 
 /// Запись реестра.
@@ -161,9 +172,39 @@ impl Registry {
             .find(|entry| path_key(&entry.path) == key)
     }
 
-    /// Добавляет проект и записывает файл. `Ok(false)` — проект уже был, реестр не менялся.
+    /// Добавляет проект и записывает файл. `Ok(false)` — проект уже был, реестр не менялся. Папка
+    /// внутри живого worktree зарегистрированного проекта не добавляется
+    /// ([`Registry::ensure_registrable`]).
     pub fn add(&mut self, path: &Path) -> Result<bool, RegistryError> {
+        self.ensure_registrable(path)?;
         self.push(path, false)
+    }
+
+    /// Отказывает, если папка лежит внутри живого worktree зарегистрированного проекта: она тень
+    /// вида владельца, а не проект (`docs/features/projects/worktrees.md`).
+    pub fn ensure_registrable(&self, path: &Path) -> Result<(), RegistryError> {
+        let path = normalize(path)?;
+        match self.worktree_shadow(&path) {
+            None => Ok(()),
+            Some(target) => Err(RegistryError::InsideWorktree {
+                owner: target.project.path.clone(),
+                worktree: target.worktree.map(|view| view.name).unwrap_or_default(),
+                path,
+            }),
+        }
+    }
+
+    /// Тень вида: папка `path` лежит внутри живого worktree зарегистрированного проекта, и
+    /// владелец — не она сама. Читает только файлы git, как [`Registry::resolve_cwd`].
+    pub fn worktree_shadow(&self, path: &Path) -> Option<CwdTarget<'_>> {
+        let target = self.resolve_cwd(path)?;
+        target.worktree.as_ref()?;
+        (path_key(&target.project.path) != path_key(path)).then_some(target)
+    }
+
+    /// Запись реестра — тень вида worktree: в списке проектов её нет и индекс она не получает.
+    pub fn is_shadow(&self, path: &Path) -> bool {
+        self.worktree_shadow(path).is_some()
     }
 
     /// Добавляет найденный автопоиском подпроект: `discovered` и `lazy`, файл записывается как у
@@ -934,6 +975,64 @@ mod tests {
         // Основной checkout — обычный проект без вида.
         let plain = registry.resolve_cwd(&main).unwrap();
         assert!(plain.worktree.is_none());
+    }
+
+    #[test]
+    fn folder_inside_a_live_worktree_is_a_shadow_and_is_not_registered() {
+        let home = TempDir::new().unwrap();
+        let main = home.path().join("main");
+        let inside = attach(&home, "main", "a", "main/.worktree/a", false);
+        let outside = attach(&home, "main", "c", "iterion/runs/c", false);
+        let mut registry = Registry::load(home.path()).unwrap();
+        registry.add(&main).unwrap();
+
+        for (work, name) in [(&inside, "a"), (&outside, "c")] {
+            let feature = work.join("docs/features/x");
+            fs::create_dir_all(&feature).unwrap();
+            match registry.add(&feature) {
+                Err(RegistryError::InsideWorktree {
+                    owner, worktree, ..
+                }) => {
+                    assert_eq!(owner, main, "{name}");
+                    assert_eq!(worktree, name);
+                }
+                other => panic!("{name}: ожидался отказ, получено {other:?}"),
+            }
+            assert!(!registry.contains(&feature), "{name}");
+        }
+        // Основной checkout и обычная вложенная папка — проекты.
+        assert!(registry.worktree_shadow(&main).is_none());
+        let plain = dir(&home, "main/docs/features/y");
+        assert!(registry.add(&plain).unwrap());
+        assert!(!registry.is_shadow(&plain));
+    }
+
+    #[test]
+    fn entry_added_before_the_check_is_hidden_while_the_worktree_lives() {
+        let home = TempDir::new().unwrap();
+        let main = home.path().join("main");
+        let work = attach(&home, "main", "a", "main/.worktree/a", false);
+        let feature = work.join("docs/features/x");
+        fs::create_dir_all(&feature).unwrap();
+        // Запись из прежних версий: в реестр папку добавил человек, проверки ещё не было.
+        fs::write(
+            home.path().join(REGISTRY_FILE),
+            format!(
+                "[[project]]\npath = '{}'\nregistered_at = \"2026-11-16T06:43:06Z\"\n\n\
+                 [[project]]\npath = '{}'\nregistered_at = \"2026-11-16T06:44:00Z\"\n",
+                main.display(),
+                feature.display()
+            ),
+        )
+        .unwrap();
+        let registry = Registry::load(home.path()).unwrap();
+        assert!(registry.contains(&feature), "запись из файла не теряется");
+        assert!(registry.is_shadow(&feature));
+        assert!(!registry.is_shadow(&main));
+
+        // Запись git удалена (worktree исчез, папка осталась): снова обычный проект.
+        fs::remove_dir_all(main.join(".git/worktrees/a")).unwrap();
+        assert!(!registry.is_shadow(&feature));
     }
 
     #[test]

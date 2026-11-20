@@ -608,6 +608,8 @@ impl Worker {
         if !path.is_dir() {
             return Err(WorkerError::NotADirectory(path));
         }
+        // Папка внутри живого worktree — вид владельца, не проект: отказ до записи `config.toml`.
+        lock(&self.inner.registry).ensure_registrable(&path)?;
         // Корень документации нового проекта: умолчание Т-7, если клиент ничего не записал.
         bars_protocol::prepare_project(&path, None)?;
         let (canonical, added) = {
@@ -792,6 +794,8 @@ impl Worker {
             registry
                 .entries()
                 .iter()
+                // Тень вида worktree: её документы — в виде владельца, строки у неё нет.
+                .filter(|entry| !registry.is_shadow(&entry.path))
                 .map(|entry| {
                     (
                         entry.clone(),
@@ -1422,6 +1426,10 @@ impl Inner {
         let Some(entry) = registry.find(path) else {
             return;
         };
+        // Тень вида worktree: ни проверки, ни индекса, ни слежения; документы — в виде владельца.
+        if registry.is_shadow(path) {
+            return;
+        }
         if lock(&self.projects)
             .get(path)
             .is_some_and(|runtime| runtime.deleting)

@@ -38,9 +38,11 @@ pub fn worker_error(error: WorkerError) -> RpcError {
         ),
         WorkerError::Resolve(ResolveError::Ambiguous { .. })
         | WorkerError::NotADirectory(_)
-        | WorkerError::Registry(RegistryError::NotAbsolute(_) | RegistryError::DiscoveredRename) => {
-            RpcError::bars(ErrorKind::InvalidParams, text)
-        }
+        | WorkerError::Registry(
+            RegistryError::NotAbsolute(_)
+            | RegistryError::DiscoveredRename
+            | RegistryError::InsideWorktree { .. },
+        ) => RpcError::bars(ErrorKind::InvalidParams, text),
         WorkerError::Unavailable(_) => RpcError::bars(ErrorKind::ProjectUnavailable, text),
         WorkerError::ConsentRequired(_) => RpcError::bars(
             ErrorKind::ReindexNeedsConsent,
